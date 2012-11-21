@@ -5988,10 +5988,12 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
 static void cleanupParamsAndActRec(VM::Stack& stack,
                                    ActRec* ar,
                                    ExtraArgs* extraArgs) {
-  for (int i = ar->numArgs(); i--; ) {
+  ASSERT(stack.top() + (extraArgs ?
+                        ar->m_func->numParams() :
+                        ar->numArgs()) == (void*)ar);
+  while (stack.top() != (void*)ar) {
     stack.popTV();
   }
-  ASSERT(stack.top() == (void*)ar);
   stack.popAR();
   if (extraArgs) {
     const int numExtra = ar->numArgs() - ar->m_func->numParams();

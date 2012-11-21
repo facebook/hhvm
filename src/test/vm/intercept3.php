@@ -1,6 +1,6 @@
 <?php
 
-function bar() {}
+function bar() { return count(func_get_args()); }
 function baz() {}
 
 function test($f, $x) {

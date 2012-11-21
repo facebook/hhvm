@@ -129,7 +129,7 @@ static const PhysReg unsafe_rsp = rsp;
 #define PREP_VAL(useRVal, pr)                                  \
   LazyScratchReg rVal(m_regMap);                               \
   if (useRVal) {                                               \
-    rVal.alloc(pr);                                            \
+    rVal.alloc(m_regMap.regIsFree(pr) ? pr : InvalidReg);      \
     PhysReg r;                                                 \
     int disp;                                                  \
     locToRegDisp(val.location, &r, &disp);                     \

@@ -578,7 +578,9 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
   /* --------------------------------------------------------------------- */ \
                                                                               \
   /* Identity optimization */                                                 \
-  if (src1 == src2 || chaseIncRefs(src1) == chaseIncRefs(src2)) {             \
+  if ((src1 == src2 || chaseIncRefs(src1) == chaseIncRefs(src2)) &&           \
+      src1->getType() != Type::Dbl) {                                         \
+    /* (val1 == val1) does not simplify to true when val1 is a NaN */         \
     return genDefBool(0 OP 0);                                                \
   }                                                                           \
                                                                               \
@@ -601,7 +603,7 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
       }                                                                       \
     }                                                                         \
                                                                               \
-    /* src1 and arc2 are now known to have the same type */                   \
+    /* src1 and src2 are same type, treating Str and StaticStr as the same */ \
                                                                               \
     /* OpSame and OpNSame have special rules for string and object */         \
     /* Other types may simplify to OpEq and OpNeq, respectively */            \

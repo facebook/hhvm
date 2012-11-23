@@ -72,9 +72,7 @@ void ArrayIter::objInit(ObjectData *obj, bool rewind /* = true */) {
   }
   if (!obj->isCollection()) {
     ASSERT(obj->o_instanceof(s_Iterator));
-    if (obj->o_instanceof(s_Continuation)) {
-      obj->o_invoke(s_next, Array());
-    } else if (rewind) {
+    if (rewind) {
       obj->o_invoke(s_rewind, Array());
     }
     // If it is from IteratorAggregate, there is no need to rewind.

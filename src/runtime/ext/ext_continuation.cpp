@@ -205,12 +205,7 @@ void c_Continuation::t_next() {
 static StaticString s_next("next");
 void c_Continuation::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::rewind);
-  if (m_index < 0LL) {
-    this->o_invoke(s_next, Array());
-  } else {
-    throw_exception(Object(SystemLib::AllocExceptionObject(
-      "Cannot rewind on a Continuation object")));
-  }
+  this->o_invoke(s_next, Array());
 }
 
 bool c_Continuation::t_valid() {

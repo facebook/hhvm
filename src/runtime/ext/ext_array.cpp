@@ -825,7 +825,6 @@ int64 f_count(CVarRef var, bool recursive /* = false */) {
 static StaticString s_Iterator("Iterator");
 static StaticString s_IteratorAggregate("IteratorAggregate");
 static StaticString s_getIterator("getIterator");
-static StaticString s_next("next");
 
 static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   if (iterable.isArray()) {

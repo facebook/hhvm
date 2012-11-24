@@ -138,10 +138,8 @@ void HphpArray::postSort(bool resetKeys) {
 }
 
 ArrayData* HphpArray::escalateForSort() {
-  if (getCount() > 1) {
-    return copyImpl();
-  }
-  return this;
+  // task #1910931 only do this for refCount() > 1
+  return copyImpl();
 }
 
 #define SORT_CASE(flag, cmp_type, acc_type) \

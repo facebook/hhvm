@@ -1241,6 +1241,24 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   }
 }
 
+class ArraySortTmp {
+ public:
+  ArraySortTmp(Array& arr) : m_arr(arr) {
+    m_ad = arr.get()->escalateForSort();
+    m_ad->incRefCount();
+  }
+  ~ArraySortTmp() {
+    if (m_ad != m_arr.get()) {
+      m_arr = m_ad;
+      m_ad->decRefCount();
+    }
+  }
+  ArrayData* operator->() { return m_ad; }
+ private:
+  Array& m_arr;
+  ArrayData* m_ad;
+};
+
 static bool
 php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
   if (array.isArray()) {
@@ -1253,9 +1271,8 @@ php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
                              coll, &errcode);
       }
     }
-    ArrayData* ad;
-    arr_array = ad = arr_array->escalateForSort();
-    ad->sort(sort_flags, ascending);
+    ArraySortTmp ast(arr_array);
+    ast->sort(sort_flags, ascending);
     return true;
   }
   if (array.isObject()) {
@@ -1282,9 +1299,8 @@ php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
                               coll, &errcode);
       }
     }
-    ArrayData* ad;
-    arr_array = ad = arr_array->escalateForSort();
-    ad->asort(sort_flags, ascending);
+    ArraySortTmp ast(arr_array);
+    ast->asort(sort_flags, ascending);
     return true;
   }
   if (array.isObject()) {
@@ -1303,9 +1319,8 @@ static bool
 php_ksort(VRefParam array, int sort_flags, bool ascending) {
   if (array.isArray()) {
     Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
-    ArrayData* ad;
-    arr_array = ad = arr_array->escalateForSort();
-    ad->ksort(sort_flags, ascending);
+    ArraySortTmp ast(arr_array);
+    ast->ksort(sort_flags, ascending);
     return true;
   }
   if (array.isObject()) {
@@ -1363,9 +1378,8 @@ Variant f_natcasesort(VRefParam array) {
 bool f_usort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
-    ArrayData* ad;
-    arr_array = ad = arr_array->escalateForSort();
-    ad->usort(cmp_function);
+    ArraySortTmp ast(arr_array);
+    ast->usort(cmp_function);
     return true;
   }
   if (array.isObject()) {
@@ -1383,9 +1397,8 @@ bool f_usort(VRefParam array, CVarRef cmp_function) {
 bool f_uasort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
-    ArrayData* ad;
-    arr_array = ad = arr_array->escalateForSort();
-    ad->uasort(cmp_function);
+    ArraySortTmp ast(arr_array);
+    ast->uasort(cmp_function);
     return true;
   }
   if (array.isObject()) {
@@ -1403,9 +1416,8 @@ bool f_uasort(VRefParam array, CVarRef cmp_function) {
 bool f_uksort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
-    ArrayData* ad;
-    arr_array = ad = arr_array->escalateForSort();
-    ad->uksort(cmp_function);
+    ArraySortTmp ast(arr_array);
+    ast->uksort(cmp_function);
     return true;
   }
   if (array.isObject()) {

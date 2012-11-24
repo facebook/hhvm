@@ -2060,12 +2060,13 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
   const DynLocation& val = *ni.inputs[0];
   ASSERT(generateMVal(t, ni, mii));
   m_regMap.cleanSmashLoc(val.location);
+  cleanOutLocal(ni);
   ASSERT(!forceMValIncDec(t, ni, mii));
   ASSERT(val.isVariant());
   typedef void (*OpFunc)(TypedValue*, TypedValue*, RefData*, MInstrState*);
   BUILD_OPTAB(getKeyTypeIS(key), key.isVariant());
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(key), A(val.location), R(mis_rsp));
-  ASSERT(!ni.outLocal);
+  invalidateOutLocal(ni);
 }
 #undef HELPER_TABLE
 
@@ -2113,6 +2114,7 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
   ASSERT(val.isVariant());
   ASSERT(generateMVal(t, ni, mii));
   const DynLocation& key = *ni.inputs[iInd];
+  cleanOutLocal(ni);
   PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   ASSERT(!forceMValIncDec(t, ni, mii));
@@ -2121,7 +2123,7 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
   BUILD_OPTAB(getKeyTypeS(key), key.isVariant(), m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc,
              CTX(), R(*rBase), SML(key), A(val.location), R(mis_rsp));
-  ASSERT(!ni.outLocal);
+  invalidateOutLocal(ni);
 }
 #undef HELPER_TABLE
 

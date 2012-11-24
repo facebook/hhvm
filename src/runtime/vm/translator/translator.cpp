@@ -1058,7 +1058,7 @@ static const struct {
   { OpBindN,       {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
   { OpBindG,       {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
   { OpBindS,       {StackTop3,        Stack1,       OutSameAsInput,   -2 }},
-  { OpBindM,       {MVector|Stack1,   Stack1,       OutSameAsInput,    0 }},
+  { OpBindM,       {MVector|Stack1,   Stack1|Local, OutSameAsInput,    0 }},
   { OpUnsetL,      {Local,            Local,        OutNone,           0 }},
   { OpUnsetN,      {Stack1,           Local,        OutNone,          -1 }},
   { OpUnsetG,      {Stack1,           Local,        OutNone,          -1 }},
@@ -2155,6 +2155,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         }
         ASSERT_NOT_IMPLEMENTED(op == OpSetOpL ||
                                op == OpSetM || op == OpSetOpM ||
+                               op == OpBindM ||
                                op == OpIncDecL || op == OpIncDecG ||
                                op == OpUnsetG || op == OpBindG ||
                                op == OpSetG || op == OpSetOpG ||
@@ -2198,7 +2199,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                           KindOfInvalid);
           continue;
         }
-        if (op == OpSetM || op == OpSetOpM || op == OpVGetM) {
+        if (op == OpSetM || op == OpSetOpM || op == OpVGetM || op == OpBindM) {
           // TODO(#1069330): This code assumes that the location is
           // LH. We need to figure out how to handle cases where the
           // location is LN or LG or LR. Also, this code is also
@@ -2207,8 +2208,10 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           // be P, which promotes Null to Object.
           // XXX: analogous garbage needed for OpSetOpM.
           if (ni->immVec.locationCode() == LL) {
-            const int kVecStart = (op == OpSetM || op == OpSetOpM)
-              ? 1 : 0; // 0 is rhs for SetM/SetOpM
+            const int kVecStart = (op == OpSetM ||
+                                   op == OpSetOpM ||
+                                   op == OpBindM) ?
+              1 : 0; // 0 is rhs for SetM/SetOpM
             DynLocation* inLoc = ni->inputs[kVecStart];
             ASSERT(inLoc->location.isLocal());
             Location locLoc = inLoc->location;

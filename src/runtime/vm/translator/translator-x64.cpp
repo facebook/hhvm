@@ -5811,19 +5811,26 @@ TranslatorX64::translateBitNot(const Tracelet& t,
   a.   not_reg64(srcdest);
 }
 
-void
-TranslatorX64::analyzeCastInt(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = nativePlan(i.inputs[0]->isInt());
+#define TRIVIAL_CAST(Type) \
+void \
+TranslatorX64::analyzeCast## Type(Tracelet& t, NormalizedInstruction& i) { \
+  i.m_txFlags = nativePlan(i.inputs[0]->is## Type()); \
+} \
+ \
+void \
+TranslatorX64::translateCast## Type(const Tracelet& t, \
+                                    const NormalizedInstruction& i) { \
+  ASSERT(i.inputs.size() == 1); \
+  ASSERT(i.outStack && !i.outLocal); \
+  ASSERT(i.inputs[0]->is## Type()); \
+ \
+  /* nop */ \
 }
 
-void
-TranslatorX64::translateCastInt(const Tracelet& t,
-                                const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(i.outStack && !i.outLocal);
-
-  /* nop */
-}
+TRIVIAL_CAST(Int)
+TRIVIAL_CAST(Array)
+TRIVIAL_CAST(Object)
+#undef TRIVIAL_CAST
 
 void
 TranslatorX64::analyzeCastString(Tracelet& t, NormalizedInstruction& i) {

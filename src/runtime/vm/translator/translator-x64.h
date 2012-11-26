@@ -511,6 +511,8 @@ MINSTRS
   CASE(CastInt) \
   CASE(CastString) \
   CASE(CastDouble) \
+  CASE(CastArray) \
+  CASE(CastObject) \
   CASE(Print) \
   CASE(Jmp) \
   CASE(Switch) \

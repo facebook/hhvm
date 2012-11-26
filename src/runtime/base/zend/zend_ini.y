@@ -22,7 +22,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/ini_setting.h>
 #include <runtime/base/externals.h>
-
+#include <runtime/ext/ext_misc.h>
 using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,8 +57,8 @@ static void zend_ini_do_op(char type, String &result,
 }
 
 static void zend_ini_get_constant(String &result, CStrRef name) {
-  if (name.find(':') < 0) {
-    result = get_constant(name, false).toString();
+  if (f_defined(name)) {
+    result = f_constant(name);
   } else {
     result = name;
   }

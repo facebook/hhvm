@@ -6001,6 +6001,20 @@ static Ret makeNativeCall(const Func* f, TypedValue* args, size_t numArgs) {
   not_reached();
 }
 
+static int makeNativeRefCall(const Func* f, TypedValue* ret,
+                             TypedValue* args, size_t numArgs) {
+  switch (numArgs) {
+  case 0: return NativeFuncCaller<int64_t,0,0>::call(f, args, ret);
+  case 1: return NativeFuncCaller<int64_t,1,0>::call(f, args, ret);
+  case 2: return NativeFuncCaller<int64_t,2,0>::call(f, args, ret);
+  case 3: return NativeFuncCaller<int64_t,3,0>::call(f, args, ret);
+  case 4: return NativeFuncCaller<int64_t,4,0>::call(f, args, ret);
+  case 5: return NativeFuncCaller<int64_t,5,0>::call(f, args, ret);
+  default: ASSERT(false);
+  }
+  not_reached();
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   NEXT();
   DECODE_IVA(numArgs);
@@ -6035,24 +6049,38 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   }
 #undef CASE
 
-  int64_t result;
+  TypedValue ret;
+  ret.m_type = func->returnType();
   switch (func->returnType()) {
   case KindOfBoolean:
-    result = makeNativeCall<bool>(func, args, numArgs);
+    ret.m_data.num = makeNativeCall<bool>(func, args, numArgs);
     break;
+  case KindOfNull:  /* void return type */
   case KindOfInt64:
-    result = makeNativeCall<int64_t>(func, args, numArgs);
+    ret.m_data.num = makeNativeCall<int64_t>(func, args, numArgs);
+    break;
+  case KindOfString:
+  case KindOfArray:
+  case KindOfObject:
+    makeNativeRefCall(func, &ret, args, numArgs);
+    if (ret.m_data.num == 0) {
+      ret.m_type = KindOfNull;
+    }
+    break;
+  case KindOfUnknown:
+    makeNativeRefCall(func, &ret, args, numArgs);
+    if (ret.m_type == KindOfUninit) {
+      ret.m_type = KindOfNull;
+    }
     break;
   default:
-    ASSERT(false);
     not_reached();
   }
 
   frame_free_args(args, numArgs);
   m_stack.ndiscard(numArgs - 1);
 
-  m_stack.top()->m_data.num = result;
-  m_stack.top()->m_type = func->returnType();
+  memcpy(m_stack.top(), &ret, sizeof(TypedValue));
 }
 
 bool VMExecutionContext::prepareArrayArgs(ActRec* ar,

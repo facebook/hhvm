@@ -636,6 +636,15 @@ DataType Type::getDataType() const {
   }
 }
 
+// This is similar to getDataType() except that it returns
+// HPHP::KindOfNull for KindOfVoid;
+DataType Type::getHhvmDataType() const {
+  switch (m_kindOf) {
+    case KindOfVoid:        return HPHP::KindOfNull;
+    default:                return getDataType();
+  }
+}
+
 void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) {
   cg_print(getCPPDecl(ar, scope, &cg).c_str());

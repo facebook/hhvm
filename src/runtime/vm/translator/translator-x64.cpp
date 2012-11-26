@@ -9723,6 +9723,14 @@ void TranslatorX64::translateFCallArray(const Tracelet& t,
   }
 }
 
+// This is used to check that return types of builtins are not simple
+// types. This is different from IS_REFCOUNTED_TYPE because builtins
+// can return Variants, and we use KindOfUnknown to denote these
+// return types.
+static bool isCppByRef(DataType t) {
+  return t != KindOfBoolean && t != KindOfInt64 && t != KindOfNull;
+}
+
 void TranslatorX64::analyzeFCallBuiltin(Tracelet& t,
                                         NormalizedInstruction& i) {
   Id funcId = i.imm[1].u_SA;
@@ -9767,7 +9775,7 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
       CSE(Boolean)
       case KindOfInt64 : {
         if (!rtt.isInt()) {
-          EMIT_CALL(a, tvCastToInt64InPlace, A(in));
+          EMIT_CALL(a, tvCastToInt64InPlace, A(in), IMM(10));
           recordCall(ni);
         }
       } break;
@@ -9786,6 +9794,15 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   }
 #undef CSE
 
+  int refReturn = 0;
+  PhysReg returnBase = rsp;
+  int returnOffset = offsetof(MInstrState, tvBuiltinReturn);
+
+  if (isCppByRef(func->returnType())) {
+    emitLea(a, returnBase, returnOffset, argNumToRegName[0]);
+    refReturn = 1;
+  }
+
   // Load args into registers
   for (int i = 0; i < numArgs; i++) {
     const Func::ParamInfo& pi = func->params()[i];
@@ -9793,12 +9810,12 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64: {
-        a.   load_reg64_disp_reg64(base, disp + TVOFF(m_data.num),
-                                          argNumToRegName[i]);
+        a.   loadq  (base[disp + TVOFF(m_data.num)],
+                       argNumToRegName[i + refReturn]);
       } break;
       case KindOfDouble:  ASSERT(false);
       default: {
-        emitLea(a, base, disp, argNumToRegName[i]);
+        emitLea(a, base, disp, argNumToRegName[i + refReturn]);
       }
     }
   }
@@ -9818,17 +9835,50 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
     if (pi.builtinType() == KindOfUnknown) {
       emitDecRefGeneric(ni, base, disp);
     } else if (IS_REFCOUNTED_TYPE(pi.builtinType())) {
-      a.  load_reg64_disp_reg64(base, disp, rScratch);
+      a.  loadq  (base[disp], rScratch);
       emitDecRef(ni, rScratch, pi.builtinType());
     }
   }
 
-  // For bool return value, get the %al byte
-  if (func->returnType() == KindOfBoolean) {
-    a.  and_imm64_reg64(0xff, rax);
-  }
+  // copy return value
   locToRegDisp(ni.outStack->location, &base, &disp);
-  emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
+
+  switch (func->returnType()) {
+    // For bool return value, get the %al byte
+    case KindOfBoolean:
+      a.  movzbl (al, eax);
+    case KindOfNull:  /* void return type */
+    case KindOfInt64:
+      emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
+      break;
+    case BitwiseKindOfString:
+    case KindOfArray:
+    case KindOfObject:
+      a.   loadq  (returnBase[returnOffset], rax);
+      a.   testq  (rax, rax);
+      {
+        IfElseBlock<CC_Z> ifNotZero(a);
+        emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
+
+        ifNotZero.Else();
+        a.   storel  (KindOfNull, base[disp + TVOFF(m_type)]);
+      }
+      break;
+    case KindOfUnknown:
+      emitLea(a, returnBase, returnOffset, rax);
+      a.   loadq  (rax[TVOFF(m_type)], rScratch);
+      a.   cmpl   (KindOfUninit, r32(rScratch));
+      {
+        IfElseBlock<CC_Z> ifNotUninit(a);
+        emitCopyToAligned(a, rax, 0, base, disp);
+
+        ifNotUninit.Else();
+        a.   storel  (KindOfNull, base[disp + TVOFF(m_type)]);
+      }
+      break;
+    default:
+      not_reached();
+  }
 }
 
 template <bool UseTC>

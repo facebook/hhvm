@@ -232,6 +232,7 @@ public:
                          BlockScopeRawPtr scope,
                          CodeGenerator *cg = 0);
   DataType getDataType() const;
+  DataType getHhvmDataType() const;
 
   void outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                      BlockScopeRawPtr scope);

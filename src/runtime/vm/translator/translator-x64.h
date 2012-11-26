@@ -353,7 +353,14 @@ private:
     // the return address pushed by the call.
     uintptr_t returnAddress;
     uintptr_t padding; // keep the following TV's SSE friendly.
-    TypedValue tvScratch;
+    union {
+      // This space is used for both vector instructions and
+      // the return value of builtin functions that return by reference.
+      // Since we don't ever use the two at the same time, it is
+      // OK to use a union.
+      TypedValue tvScratch;
+      TypedValue tvBuiltinReturn;
+    };
     TypedValue tvRef;
     TypedValue tvRef2;
     TypedValue tvResult;

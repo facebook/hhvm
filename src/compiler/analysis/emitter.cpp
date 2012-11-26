@@ -5641,14 +5641,6 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
   return true;
 }
 
-static inline bool isCppRefType(DataType t) {
-  switch (t) {
-    case KindOfBoolean:
-    case KindOfInt64:   return false;
-    default:            return true;
-  }
-}
-
 bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
                                         const std::string& name,
                                         int numParams) {
@@ -5672,12 +5664,12 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
       return false;
     }
     TypePtr t = func->getReturnType();
-    if (!t || isCppRefType(t->getDataType())) {
+    if (!t || t->getHhvmDataType() == KindOfDouble) {
       return false;
     }
     for (int i = 0; i < func->getMaxParamCount(); i++) {
       t = func->getParamType(i);
-      if (!t || t->getDataType() == KindOfDouble) {
+      if (!t || t->getHhvmDataType() == KindOfDouble) {
         return false;
       }
     }

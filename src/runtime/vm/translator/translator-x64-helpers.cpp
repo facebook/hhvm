@@ -156,7 +156,24 @@ asm (
 TCA funcBodyHelper(ActRec* fp) {
   g_vmContext->m_fp = fp;
   g_vmContext->m_stack.top() = sp;
-  g_vmContext->m_pc = fp->m_func->unit()->at(fp->m_func->base());
+  int nargs = fp->numArgs();
+  int nparams = fp->m_func->numParams();
+  Offset firstDVInitializer = InvalidAbsoluteOffset;
+  if (nargs < nparams) {
+    const Func::ParamInfoVec& paramInfo = fp->m_func->params();
+    for (int i = nargs; i < nparams; ++i) {
+      Offset dvInitializer = paramInfo[i].funcletOff();
+      if (dvInitializer != InvalidAbsoluteOffset) {
+        firstDVInitializer = dvInitializer;
+        break;
+      }
+    }
+  }
+  if (firstDVInitializer != InvalidAbsoluteOffset) {
+    g_vmContext->m_pc = fp->m_func->unit()->entry() + firstDVInitializer;
+  } else {
+    g_vmContext->m_pc = fp->m_func->getEntry();
+  }
   tl_regState = REGSTATE_CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);
   SrcKey sk(func, func->base());

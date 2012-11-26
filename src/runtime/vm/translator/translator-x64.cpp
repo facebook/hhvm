@@ -5622,8 +5622,8 @@ TranslatorX64::analyzeConcat(Tracelet& t, NormalizedInstruction& i) {
   const RuntimeType& l = i.inputs[1]->rtt;
   // The concat translation isn't reentrant; objects that override
   // __toString() can cause reentry.
-  i.m_txFlags = simplePlan(r.valueType() != KindOfObject &&
-                           l.valueType() != KindOfObject);
+  i.m_txFlags = supportedPlan(r.valueType() != KindOfObject &&
+                              l.valueType() != KindOfObject);
 }
 
 void
@@ -5653,9 +5653,7 @@ TranslatorX64::translateConcat(const Tracelet& t,
 
     // The concat helper will decRef the inputs and incRef the output
     // for us if appropriate
-    EMIT_CALL(a, fptr,
-               V(l.location),
-               V(r.location));
+    EMIT_RCALL(a, i, fptr, V(l.location), V(r.location));
     ASSERT(i.outStack->rtt.isString());
     m_regMap.bind(rax, i.outStack->location, i.outStack->outerType(),
                   RegInfo::DIRTY);
@@ -5670,7 +5668,7 @@ TranslatorX64::translateConcat(const Tracelet& t,
     }
     // concat will decRef the two inputs and incRef the output
     // for us if appropriate
-    EMIT_CALL(a, concat,
+    EMIT_RCALL(a, i, concat,
                IMM(l.valueType()), V(l.location),
                IMM(r.valueType()), V(r.location));
     ASSERT(i.outStack->isString());

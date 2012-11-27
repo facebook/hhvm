@@ -79,7 +79,7 @@ void Instance::destructHard(const Func* meth) {
   static ArrayData* args =
     ArrayData::GetScalarArray(HphpArray::GetStaticEmptyArray());
   TypedValue retval;
-  TV_WRITE_NULL(&retval);
+  tvWriteNull(&retval);
   try {
     // Call the destructor method
     g_vmContext->invokeFunc(&retval, meth, CArrRef(args), this);

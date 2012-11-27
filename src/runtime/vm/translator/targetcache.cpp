@@ -578,7 +578,7 @@ GlobalCache::lookupImpl(StringData *name, bool allowCreate) {
       retval = 0;
       goto miss;
     } else {
-      TV_WRITE_NULL(retval);
+      tvWriteNull(retval);
     }
   }
   if (isBoxed && retval->m_type != KindOfRef) {

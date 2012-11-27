@@ -40,7 +40,7 @@ struct Func {
   struct ParamInfo { // Parameter default value info.
     // construct a dummy ParamInfo
     ParamInfo() : m_funcletOff(InvalidAbsoluteOffset), m_phpCode(NULL) {
-      TV_WRITE_UNINIT(&m_defVal);
+      tvWriteUninit(&m_defVal);
     }
 
     template<class SerDe>

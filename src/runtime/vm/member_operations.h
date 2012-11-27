@@ -1206,7 +1206,7 @@ static inline void UnsetElem(TypedValue* base, TypedValue* member) {
 
 template <bool warn>
 static inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
-  TV_WRITE_NULL(&tvScratch);
+  tvWriteNull(&tvScratch);
   result = &tvScratch;
   if (warn) {
     raise_warning("Cannot access property on non-object");

@@ -1411,7 +1411,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
   as.in.skipWhitespace();
 
   TypedValue tvInit;
-  TV_WRITE_NULL(&tvInit); // Don't confuse Variant with uninit data
+  tvWriteNull(&tvInit); // Don't confuse Variant with uninit data
 
   int what = as.in.getc();
   if (what == '=') {
@@ -1424,7 +1424,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
                  "const/property initializer");
       }
       as.in.expectWs(';');
-      TV_WRITE_UNINIT(&tvInit);
+      tvWriteUninit(&tvInit);
       return tvInit;
     }
 

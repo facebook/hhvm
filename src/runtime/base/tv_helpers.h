@@ -178,15 +178,15 @@ inline void tvDup(const TypedValue* fr, TypedValue* to) {
 }
 
 // Assumes 'tv' is dead
-// NOTE: this helper will initialize tv->_count to 0
+// NOTE: this helper does not modify tv->_count
 inline void tvWriteNull(TypedValue* tv) {
-  TV_WRITE_NULL(tv);
+  tv->m_type = KindOfNull;
 }
 
 // Assumes 'tv' is dead
-// NOTE: this helper will initialize tv->_count to 0
+// NOTE: this helper does not modify tv->_count
 inline void tvWriteUninit(TypedValue* tv) {
-  TV_WRITE_UNINIT(tv);
+  tv->m_type = KindOfUninit;
 }
 
 // conditionally unbox tv
@@ -230,7 +230,7 @@ inline void tvBind(TypedValue * fr, TypedValue * to) {
 // Assumes 'to' is live
 inline void tvUnset(TypedValue * to) {
   tvRefcountedDecRef(to);
-  TV_WRITE_UNINIT(to);
+  tvWriteUninit(to);
 }
 
 // Assumes `fr' is dead and binds it using KindOfIndirect to `to'.

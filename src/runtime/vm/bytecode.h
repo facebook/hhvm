@@ -652,13 +652,13 @@ public:
   inline void ALWAYS_INLINE pushUninit() {
     ASSERT(m_top != m_elms);
     m_top--;
-    TV_WRITE_UNINIT(m_top);
+    tvWriteUninit(m_top);
   }
 
   inline void ALWAYS_INLINE pushNull() {
     ASSERT(m_top != m_elms);
     m_top--;
-    TV_WRITE_NULL(m_top);
+    tvWriteNull(m_top);
   }
 
   #define PUSH_METHOD(name, type, field, value)                               \

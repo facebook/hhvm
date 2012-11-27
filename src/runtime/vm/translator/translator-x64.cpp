@@ -5869,7 +5869,7 @@ uint64_t TranslatorX64::toStringHelper(ObjectData *obj) {
     // the unwinder will restore rVmSp to
     // &ar->m_r, so we'd better make sure its
     // got a valid TypedValue there.
-    TV_WRITE_UNINIT(&ar->m_r);
+    tvWriteUninit(&ar->m_r);
     std::string msg = cls->preClass()->name()->data();
     msg += "::__toString() was not defined";
     throw BadTypeConversionException(msg.c_str());
@@ -6256,7 +6256,7 @@ void TranslatorX64::emitReturnVal(
 
   if (!i.grouped) return;
   TypedValue tv;
-  TV_WRITE_UNINIT(&tv);
+  tvWriteUninit(&tv);
   tv.m_data.num = 0; // to keep the compiler happy
 
   /*

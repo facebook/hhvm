@@ -113,7 +113,7 @@ ArrayData* NameValueTableWrapper::lval(StringData* k, Variant*& ret,
   TypedValue* tv = m_tab->lookup(k);
   if (!tv) {
     TypedValue nulVal;
-    TV_WRITE_NULL(&nulVal);
+    tvWriteNull(&nulVal);
     tv = m_tab->set(k, &nulVal);
   }
   ret = &tvAsVariant(tv);

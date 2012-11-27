@@ -114,7 +114,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
       // to call a __destruct method. Null out the local before
       // calling the destructor so that stacktrace logic doesn't
       // choke.
-      TV_WRITE_UNINIT(loc);
+      tvWriteUninit(loc);
       tvDecRefHelper(t, datum);
     }
   }
@@ -153,7 +153,7 @@ frame_free_args(TypedValue* args, int count) {
       // to call a __destruct method. Null out the local before
       // calling the destructor so that stacktrace logic doesn't
       // choke.
-      TV_WRITE_UNINIT(loc);
+      tvWriteUninit(loc);
       tvDecRefHelper(t, datum);
     }
   }

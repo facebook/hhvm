@@ -286,7 +286,7 @@ Unit::Unit()
       m_mergeState(UnitMergeStateUnmerged),
       m_cacheMask(0),
       m_pseudoMainCache(NULL) {
-  TV_WRITE_UNINIT(&m_mainReturn);
+  tvWriteUninit(&m_mainReturn);
   m_mainReturn._count = 0; // flag for whether or not the unit is mergeable
 }
 
@@ -1903,7 +1903,7 @@ UnitEmitter::UnitEmitter(const MD5& md5)
     m_bclen(0), m_bc_meta(NULL), m_bc_meta_len(0), m_filepath(NULL),
     m_md5(md5), m_nextFuncSn(0),
     m_allClassesHoistable(true), m_returnSeen(false) {
-  TV_WRITE_UNINIT(&m_mainReturn);
+  tvWriteUninit(&m_mainReturn);
   m_mainReturn._count = 0;
 }
 

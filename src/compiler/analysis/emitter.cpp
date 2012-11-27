@@ -1557,7 +1557,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
         case Statement::KindOfReturnStatement:
           if (mainReturn.m_type != KindOfInvalid) break;
           if (notMergeOnly) {
-            TV_WRITE_UNINIT(&mainReturn);
+            tvWriteUninit(&mainReturn);
             m_ue.returnSeen();
             goto fail;
           } else {
@@ -1565,7 +1565,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
             Variant v(Variant::nullInit);
             if (r->getRetExp() &&
                 !r->getRetExp()->getScalarValue(v)) {
-              TV_WRITE_UNINIT(&mainReturn);
+              tvWriteUninit(&mainReturn);
               goto fail;
             }
             if (v.isString()) {
@@ -1644,7 +1644,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
       }
     }
     if (mainReturn.m_type == KindOfInvalid) {
-      TV_WRITE_UNINIT(&mainReturn);
+      tvWriteUninit(&mainReturn);
       tvAsVariant(&mainReturn) = 1;
     }
     // Use _count as a flag for VMExecutionContext::evalUnit
@@ -2499,7 +2499,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           int tuple_cap;
           if (u->isScalar()) {
             TypedValue tv;
-            TV_WRITE_UNINIT(&tv);
+            tvWriteUninit(&tv);
             initScalar(tv, u);
             if (m_staticArrays.size() == 0) {
               e.Array(tv.m_data.parr);
@@ -3640,7 +3640,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // Instance variables.
         TypedValue uninit;
-        TV_WRITE_UNINIT(&uninit);
+        tvWriteUninit(&uninit);
         for (int i = 0; i < useCount; ++i) {
           pce->addProperty(useVars[i].first, AttrPrivate, NULL, &uninit);
         }
@@ -5847,7 +5847,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             if (vNode->isScalar()) {
               initScalar(tvVal, vNode);
             } else {
-              TV_WRITE_UNINIT(&tvVal);
+              tvWriteUninit(&tvVal);
               if (!(attrs & AttrStatic)) {
                 if (nonScalarPinitVec == NULL) {
                   nonScalarPinitVec = new NonScalarVec();
@@ -5861,7 +5861,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
               }
             }
           } else {
-            TV_WRITE_NULL(&tvVal);
+            tvWriteNull(&tvVal);
           }
           bool added UNUSED =
             pce->addProperty(propName, attrs, propDoc, &tvVal);
@@ -5886,7 +5886,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
           } else if (vNode->isScalar()) {
             initScalar(tvVal, vNode);
           } else {
-            TV_WRITE_UNINIT(&tvVal);
+            tvWriteUninit(&tvVal);
             if (nonScalarConstVec == NULL) {
               nonScalarConstVec = new NonScalarVec();
             }

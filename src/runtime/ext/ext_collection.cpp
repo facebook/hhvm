@@ -323,7 +323,7 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
   for (int64 i = startPos; i < endPos; ++i) {
     uint64_t datum = m_data[i].m_data.num;
     DataType t = m_data[i].m_type;
-    TV_WRITE_NULL(&m_data[i]);
+    tvWriteNull(&m_data[i]);
     tvRefcountedDecRefHelper(t, datum);
   }
   // Move elements that came after the deleted elements (if there are any)
@@ -2021,7 +2021,7 @@ bool c_StableMap::update(int64 h, TypedValue* data) {
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
     p->data.m_data.num = data->m_data.num;
-    p->data.m_type = data->m_type; 
+    p->data.m_type = data->m_type;
     return true;
   }
   ++m_versionNumber;
@@ -2044,7 +2044,7 @@ bool c_StableMap::update(StringData *key, TypedValue* data) {
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
     p->data.m_data.num = data->m_data.num;
-    p->data.m_type = data->m_type; 
+    p->data.m_type = data->m_type;
     return true;
   }
   ++m_versionNumber;
@@ -2222,7 +2222,7 @@ void c_StableMap::postSort(Bucket** buffer) {
     b->pListNext = bNext;
     bNext->pListLast = b;
     b = bNext;
-  } 
+  }
   m_pListTail = b;
   b->pListNext = NULL;
 }

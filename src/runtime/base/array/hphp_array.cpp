@@ -970,7 +970,7 @@ void HphpArray::nextInsertWithRef(CVarRef data) {
 
   // Allocate a new element.
   Elm* e = allocElm(ei);
-  TV_WRITE_NULL(&e->data);
+  tvWriteNull(&e->data);
   tvAsVariant(&e->data).setWithRef(data);
   // Set key.
   e->setIntKey(ki);
@@ -986,7 +986,7 @@ void HphpArray::addLvalImpl(int64 ki, Variant** pDest) {
     return;
   }
   Elm* e = newElm(ei, ki);
-  TV_WRITE_NULL(&e->data);
+  tvWriteNull(&e->data);
   e->setIntKey(ki);
   *pDest = &(tvAsVariant(&e->data));
   if (ki >= m_nextKI && m_nextKI >= 0) {
@@ -1007,7 +1007,7 @@ void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
   Elm* e = newElm(ei, h);
   // Initialize element to null and store the address of the element into
   // *pDest.
-  TV_WRITE_NULL(&e->data);
+  tvWriteNull(&e->data);
   // Set key.
   e->setStrKey(key, h);
   e->key->incRefCount();
@@ -1046,7 +1046,7 @@ inline void HphpArray::addValWithRef(int64 ki, CVarRef data) {
     return;
   }
   Elm* e = allocElm(ei);
-  TV_WRITE_NULL(&e->data);
+  tvWriteNull(&e->data);
   tvAsVariant(&e->data).setWithRef(data);
   e->setIntKey(ki);
   if (ki >= m_nextKI) {
@@ -1062,7 +1062,7 @@ inline void HphpArray::addValWithRef(StringData* key, CVarRef data) {
     return;
   }
   Elm* e = allocElm(ei);
-  TV_WRITE_NULL(&e->data);
+  tvWriteNull(&e->data);
   tvAsVariant(&e->data).setWithRef(data);
   e->setStrKey(key, h);
   e->key->incRefCount();

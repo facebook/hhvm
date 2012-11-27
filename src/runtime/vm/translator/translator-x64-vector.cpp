@@ -467,7 +467,7 @@ static inline TypedValue* baseNImpl(TypedValue* key,
           raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
         }
         TypedValue tv;
-        TV_WRITE_NULL(&tv);
+        tvWriteNull(&tv);
         fp->m_varEnv->set(name, &tv);
         base = fp->m_varEnv->lookup(name);
       }
@@ -476,7 +476,7 @@ static inline TypedValue* baseNImpl(TypedValue* key,
         if (warn) {
           raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
         }
-        TV_WRITE_NULL(&mis->tvScratch);
+        tvWriteNull(&mis->tvScratch);
         base = &mis->tvScratch;
       }
     }
@@ -543,11 +543,11 @@ static inline TypedValue* baseGImpl(TypedValue* key,
     }
     if (define) {
       TypedValue tv;
-      TV_WRITE_NULL(&tv);
+      tvWriteNull(&tv);
       varEnv->set(name, &tv);
       base = varEnv->lookup(name);
     } else {
-      TV_WRITE_NULL(&mis->tvScratch);
+      tvWriteNull(&mis->tvScratch);
       base = &mis->tvScratch;
     }
   }

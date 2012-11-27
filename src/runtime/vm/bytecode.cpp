@@ -1527,7 +1527,7 @@ TypedValue* VMExecutionContext::getCns(StringData* cns,
         }
       }
       TypedValue tv;
-      TV_WRITE_UNINIT(&tv);
+      tvWriteUninit(&tv);
       tvAsVariant(&tv) = ci->getValue();
       m_constants.nvSet(cns, &tv, false);
       tvRefcountedDecRef(&tv);
@@ -2993,7 +2993,7 @@ static inline void lookupd_var(ActRec* fp,
     val = fp->m_varEnv->lookup(name);
     if (val == NULL) {
       TypedValue tv;
-      TV_WRITE_NULL(&tv);
+      tvWriteNull(&tv);
       fp->m_varEnv->set(name, &tv);
       val = fp->m_varEnv->lookup(name);
     }
@@ -3019,7 +3019,7 @@ static inline void lookupd_gbl(ActRec* fp,
   val = varEnv->lookup(name);
   if (val == NULL) {
     TypedValue tv;
-    TV_WRITE_NULL(&tv);
+    tvWriteNull(&tv);
     varEnv->set(name, &tv);
     val = varEnv->lookup(name);
   }
@@ -3183,7 +3183,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      TV_WRITE_NULL(&dummy);
+      tvWriteNull(&dummy);
       loc = &dummy;
     } else {
       loc = fr;
@@ -3204,7 +3204,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      TV_WRITE_NULL(&dummy);
+      tvWriteNull(&dummy);
       loc = &dummy;
     } else {
       loc = fr;
@@ -3399,7 +3399,7 @@ VMExecutionContext::getElem(TypedValue* base, TypedValue* key,
   ASSERT(base->m_type != KindOfArray);
   bool baseStrOff = false;
   VMRegAnchor _;
-  TV_WRITE_UNINIT(dest);
+  tvWriteUninit(dest);
   TypedValue* result = Elem<true>(*dest, *dest, base, baseStrOff, key);
   if (result != dest) {
     tvDup(result, dest);
@@ -3486,7 +3486,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      TV_WRITE_NULL(&dummy);
+      tvWriteNull(&dummy);
       loc = &dummy;
     } else {
       loc = fr;
@@ -3511,7 +3511,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      TV_WRITE_NULL(&dummy);
+      tvWriteNull(&dummy);
       loc = &dummy;
     } else {
       loc = fr;
@@ -4548,9 +4548,9 @@ static inline void cgetl_body(ActRec* fp,
                               TypedValue* to,
                               Id pind) {
   if (fr->m_type == KindOfUninit) {
-    // `to' is uninitialized here, so we need to TV_WRITE_NULL before
+    // `to' is uninitialized here, so we need to tvWriteNull before
     // possibly causing stack unwinding.
-    TV_WRITE_NULL(to);
+    tvWriteNull(to);
     raise_undefined_local(fp, pind);
   } else {
     cgetl_inner_body(fr, to);
@@ -4597,7 +4597,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetN(PC& pc) {
   if (fr == NULL || fr->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvRefcountedDecRefCell(to);
-    TV_WRITE_NULL(to);
+    tvWriteNull(to);
   } else {
     tvRefcountedDecRefCell(to);
     cgetl_inner_body(fr, to);
@@ -4616,11 +4616,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
     tvRefcountedDecRefCell(to);
-    TV_WRITE_NULL(to);
+    tvWriteNull(to);
   } else if (fr->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvRefcountedDecRefCell(to);
-    TV_WRITE_NULL(to);
+    tvWriteNull(to);
   } else {
     tvRefcountedDecRefCell(to);
     cgetl_inner_body(fr, to);
@@ -5328,7 +5328,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetL(PC& pc) {
   ASSERT(local < m_fp->m_func->numLocals());
   TypedValue* tv = frame_local(m_fp, local);
   tvRefcountedDecRef(tv);
-  TV_WRITE_UNINIT(tv);
+  tvWriteUninit(tv);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopUnsetN(PC& pc) {
@@ -5340,7 +5340,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetN(PC& pc) {
   ASSERT(!m_fp->hasInvName());
   if (tv != NULL) {
     tvRefcountedDecRef(tv);
-    TV_WRITE_UNINIT(tv);
+    tvWriteUninit(tv);
   }
   m_stack.popC();
   LITSTR_DECREF(name);
@@ -6317,7 +6317,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterValueC(PC& pc) {
     // is at the end before IterValueC is executed. However, even if
     // the iterator is at the end, it is safe to call second().
     Cell* c1 = m_stack.allocC();
-    TV_WRITE_NULL(c1);
+    tvWriteNull(c1);
     tvCellAsVariant(c1) = it->arr().second();
     break;
   }
@@ -6350,7 +6350,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterValueV(PC& pc) {
     // is at the end before IterValueV is executed. However, even if
     // the iterator is at the end, it is safe to call secondRef().
     TypedValue* tv = m_stack.allocTV();
-    TV_WRITE_NULL(tv);
+    tvWriteNull(tv);
     tvAsVariant(tv) = ref(it->arr().secondRef());
     break;
   }
@@ -6382,7 +6382,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterKey(PC& pc) {
     // because that may call into user code, which has PHP-visible effects and
     // is incorrect.
     Cell* c1 = m_stack.allocC();
-    TV_WRITE_NULL(c1);
+    tvWriteNull(c1);
     tvCellAsVariant(c1) = it->arr().first();
     break;
   }
@@ -6603,7 +6603,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInitThisLoc(PC& pc) {
     thisLoc->m_type = KindOfObject;
     tvIncRef(thisLoc);
   } else {
-    TV_WRITE_UNINIT(thisLoc);
+    tvWriteUninit(thisLoc);
   }
 }
 
@@ -6619,7 +6619,7 @@ lookupStatic(StringData* name,
   val = map->nvGet(name);
   if (val == NULL) {
     TypedValue tv;
-    TV_WRITE_UNINIT(&tv);
+    tvWriteUninit(&tv);
     map->nvSet(name, &tv, false);
     val = map->nvGet(name);
     inited = false;
@@ -6987,7 +6987,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
   Variant val = cont->t_receive();
 
   TypedValue* tv = m_stack.allocTV();
-  TV_WRITE_UNINIT(tv);
+  tvWriteUninit(tv);
   tvAsVariant(tv) = val;
 }
 
@@ -7034,7 +7034,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContRaise(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {
   NEXT();
   TypedValue* tv = m_stack.allocTV();
-  TV_WRITE_UNINIT(tv);
+  tvWriteUninit(tv);
   tvAsVariant(tv) = !this_continuation(m_fp)->m_done;
 }
 
@@ -7044,7 +7044,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContCurrent(PC& pc) {
   cont->startedCheck();
 
   TypedValue* tv = m_stack.allocTV();
-  TV_WRITE_UNINIT(tv);
+  tvWriteUninit(tv);
   tvAsVariant(tv) = cont->m_value;
 }
 

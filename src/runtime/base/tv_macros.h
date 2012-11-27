@@ -110,12 +110,4 @@
   TV_DUP_NC((fr), (to)) \
 }
 
-// Assumes 'tv' is dead
-#define TV_WRITE_NULL(tv) \
-  (tv)->m_type = KindOfNull
-
-// Assumes 'tv' is dead
-#define TV_WRITE_UNINIT(tv) \
-  (tv)->m_type = KindOfUninit
-
 #endif

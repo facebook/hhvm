@@ -1821,7 +1821,7 @@ void Class::setProperties() {
       sProp.m_attrs = parentProp.m_attrs;
       sProp.m_docComment = parentProp.m_docComment;
       sProp.m_class = parentProp.m_class;
-      TV_WRITE_UNINIT(&sProp.m_val);
+      tvWriteUninit(&sProp.m_val);
       curSPropMap.add(sProp.m_name, sProp);
     }
   }

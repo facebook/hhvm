@@ -2205,10 +2205,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         if (op == OpSetM || op == OpSetOpM || op == OpVGetM || op == OpBindM) {
           // TODO(#1069330): This code assumes that the location is
           // LH. We need to figure out how to handle cases where the
-          // location is LN or LG or LR. Also, this code is also
-          // assuming that the first member is always E or W, which
-          // promotes Null to Array. However, the first member could
-          // be P, which promotes Null to Object.
+          // location is LN or LG or LR.
           // XXX: analogous garbage needed for OpSetOpM.
           if (ni->immVec.locationCode() == LL) {
             const int kVecStart = (op == OpSetM ||
@@ -2228,7 +2225,9 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
               ni->outLocal = baseLoc;
             } else if (inLoc->rtt.valueType() == KindOfUninit ||
                        inLoc->rtt.valueType() == KindOfNull) {
-              RuntimeType newLhsRtt = inLoc->rtt.setValueType(KindOfArray);
+              RuntimeType newLhsRtt = inLoc->rtt.setValueType(
+                mcodeMaybePropName(ni->immVecM[0]) ?
+                KindOfObject : KindOfArray);
               SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
                       locLoc.spaceName(), locLoc.offset, newLhsRtt.valueType());
               DynLocation* baseLoc = t.newDynLocation(locLoc, newLhsRtt);

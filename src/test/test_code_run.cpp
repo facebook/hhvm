@@ -20543,8 +20543,9 @@ bool TestCodeRun::TestExtArray() {
 
   MVCR("<?php "
        "function xsort(&$a) {"
-       "  $b = false;"
+       "  $b = null;"
        "  $b->foo =& $a;"
+       "  var_dump(is_object($b));"
        "  $b = false;"
        "  $b[0] =& $a;"
        "  uksort($a, function ($i, $j) use(&$b) {"

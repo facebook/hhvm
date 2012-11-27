@@ -118,6 +118,8 @@ protected:
 
   bool handleUpdate(CStrRef key, SharedVariant* svar);
   bool handlePromoteObj(CStrRef key, SharedVariant* svar, CVarRef valye);
+private:
+  SharedVariant* unserialize(CStrRef key, const StoreValue* sval);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

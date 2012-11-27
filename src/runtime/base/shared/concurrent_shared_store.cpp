@@ -239,6 +239,27 @@ static string std_apc_cas = "apc.cas";
 static string std_apc_update = "apc.update";
 static string std_apc_new = "apc.new";
 
+SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
+                                                       const StoreValue* sval) {
+  try {
+    VariableUnserializer::Type sType =
+      RuntimeOption::EnableApcSerialize ?
+      VariableUnserializer::APCSerialize :
+      VariableUnserializer::Serialize;
+
+    VariableUnserializer vu(sval->sAddr, sval->getSerializedSize(), sType);
+    Variant v;
+    v.unserialize(&vu);
+    sval->var = SharedVariant::Create(v, sval->isSerializedObj());
+    stats_on_add(key.get(), sval, 0, true, true); // delayed prime
+    return sval->var;
+  } catch (Exception &e) {
+    raise_notice("APC Primed fetch failed: key %s (%s).",
+                 key.c_str(), e.getMessage().c_str());
+    return NULL;
+  }
+}
+
 bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   const StoreValue *sval;
   SharedVariant *svar = NULL;
@@ -262,11 +283,8 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
           std::lock_guard<SmallLock> sval_lock(sval->lock);
 
           if (!sval->inMem()) {
-              String s(sval->sAddr, sval->getSerializedSize(), AttachLiteral);
-              Variant v = apc_unserialize(s);
-              svar = SharedVariant::Create(v, sval->isSerializedObj());
-              sval->var = svar;
-              stats_on_add(key.get(), sval, 0, true, true); // delayed prime
+            svar = unserialize(key, sval);
+            if (!svar) return false;
           } else {
             svar = sval->var;
           }

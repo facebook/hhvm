@@ -1303,10 +1303,10 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
   bool mayHaveThis = (curFunc->isPseudoMain() ||
                       (curFunc->isMethod() && !curFunc->isStatic()));
 
-  if (freeInline) {
-    // If surprise flags are set, exit trace and handle surprise
-    m_tb.genExitWhenSurprised(exitTrace);
+  // If surprise flags are set, exit trace and handle surprise
+  m_tb.genExitWhenSurprised(exitTrace);
 
+  if (freeInline) {
     if (mayUseVV) {
       // Emit code to bail to an exit if frame has VarEnv
       // Note: this has to be the first thing, because we cannot bail after

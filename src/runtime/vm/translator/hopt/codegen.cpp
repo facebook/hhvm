@@ -3928,20 +3928,9 @@ Address CodeGenerator::cgExitWhenSurprised(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   LabelInstruction* label = inst->getLabel();
 
-  CT_ASSERT(sizeof(RequestInjectionData::conditionFlags) == 8);
-
-#if 0
-  // ALIA:TODO
-  m_as.test_imm64_disp_reg64(-1,
-                             TargetCache::kConditionFlagsOff,
-                             LinearScan::rTlPtr);
+  CT_ASSERT(LinearScan::rTlPtr == rVmTl);
+  m_tx64->emitTestSurpriseFlags(m_as);
   emitFwdJcc(CC_NZ, label);
-#else
-  m_as.cmp_imm64_disp_reg64(0,
-                            TargetCache::kConditionFlagsOff,
-                            LinearScan::rTlPtr);
-  emitFwdJcc(CC_NE, label);
-#endif
   return start;
 }
 

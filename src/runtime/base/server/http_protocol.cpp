@@ -227,6 +227,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       if (server.asArrRef().exists(key)) {
         if (!(++bad_request_count % RuntimeOption::LogHeaderMangle)) {
           Logger::Warning(
+            "HeaderMangle warning: "
             "The header %s overwrote another header which mapped to the same "
             "key. This happens because PHP normalises - to _, ie AN_EXAMPLE "
             "and AN-EXAMPLE are equivalent.  You should treat this as "

@@ -141,7 +141,8 @@ void annotate(NormalizedInstruction* i) {
         funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
         className = cls->name();
       } else if (i->op() == OpFPushClsMethodF) {
-        if (i->inputs[1]->rtt.valueString() == NULL ||
+        if (!i->inputs[1]->isString() ||
+            i->inputs[1]->rtt.valueString() == NULL ||
             i->inputs[0]->valueType() != KindOfClass) {
           break;
         }

@@ -8579,6 +8579,7 @@ TranslatorX64::analyzeFPushClsMethodF(Tracelet& t,
                                       NormalizedInstruction& i) {
   ASSERT(i.inputs[0]->valueType() == KindOfClass);
   i.m_txFlags = supportedPlan(
+    i.inputs[1]->isString() &&
     i.inputs[1]->rtt.valueString() != NULL && // We know the method name
     i.inputs[0]->valueType() == KindOfClass &&
     i.inputs[0]->rtt.valueClass() != NULL // We know the class name

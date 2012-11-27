@@ -6659,8 +6659,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLocInit(PC& pc) {
   ASSERT(fr != NULL);
   if (!inited) {
     Cell* initVal = m_stack.topC();
-    // don't set _count field as the static var resides in an HphpArray
-    TV_DUP_NC(initVal, fr);
+    tvDup(initVal, fr);
   }
   if (fr->m_type != KindOfRef) {
     ASSERT(!inited);

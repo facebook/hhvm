@@ -921,9 +921,9 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
 }
 
-#define ELEMENT_CONSTRUCT(fr, to) \
-  if (fr->m_type == KindOfRef) fr = fr->m_data.pref->tv(); \
-  TV_DUP_CELL_NC(fr, to); \
+static inline void elemConstruct(const TypedValue* fr, TypedValue* to) {
+  tvDupCell(tvToCell(fr), to);
+}
 
 bool HphpArray::nextInsert(CVarRef data) {
   if (UNLIKELY(m_nextKI < 0)) {
@@ -1019,7 +1019,7 @@ inline void HphpArray::addVal(int64 ki, CVarRef data) {
   Elm* e = newElm(ei, ki);
   TypedValue* fr = (TypedValue*)(&data);
   TypedValue* to = (TypedValue*)(&e->data);
-  ELEMENT_CONSTRUCT(fr, to);
+  elemConstruct(fr, to);
   e->setIntKey(ki);
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
@@ -1033,7 +1033,7 @@ inline void HphpArray::addVal(StringData* key, CVarRef data) {
   // Set the element
   TypedValue* to = (TypedValue*)(&e->data);
   TypedValue* fr = (TypedValue*)(&data);
-  ELEMENT_CONSTRUCT(fr, to);
+  elemConstruct(fr, to);
   // Set the key after data is written
   e->setStrKey(key, h);
   e->key->incRefCount();
@@ -1724,7 +1724,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
 
   TypedValue* fr = (TypedValue*)(&v);
   TypedValue* to = (TypedValue*)(&e->data);
-  ELEMENT_CONSTRUCT(fr, to);
+  elemConstruct(fr, to);
 
   e->setIntKey(0);
   ++a->m_size;

@@ -634,7 +634,7 @@ public:
     Cell* fr = (Cell*)m_top;
     m_top--;
     Cell* to = (Cell*)m_top;
-    TV_DUP_CELL(fr, to);
+    tvDupCell(fr, to);
   }
 
   inline void ALWAYS_INLINE box() {

@@ -241,7 +241,7 @@ static NEVER_INLINE
 void iter_value_cell_cold(Iter* iter, TypedValue* out) {
   ArrayIter& arr = iter->arr();
   TypedValue* cur = tvToCell(arr.nvSecond());
-  TV_DUP_CELL_NC(cur, out);
+  tvDupCell(cur, out);
   return;
 }
 
@@ -266,12 +266,12 @@ static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
     ssize_t pos = arrIter.getPos();
     const HphpArray* arr = (HphpArray*)ad;
     TypedValue* cur = tvToCell(&arr->getElm(pos)->data);
-    TV_DUP_CELL_NC(cur, out);
+    tvDupCell(cur, out);
     return;
   }
   Variant val = arrIter.second();
   ASSERT(val.getRawType() != KindOfRef);
-  TV_DUP_CELL_NC((TypedValue*)&val, out);
+  tvDupCell((TypedValue*)&val, out);
 }
 
 HOT_FUNC
@@ -318,7 +318,7 @@ static inline void iter_key_cell_impl(Iter* iter, TypedValue* out) {
   }
   Variant key = arr.first();
   ASSERT(key.getRawType() == KindOfInt64 || IS_STRING_TYPE(key.getRawType()));
-  TV_DUP_CELL_NC((TypedValue*)&key, out);
+  tvDupCell((TypedValue*)&key, out);
 }
 
 HOT_FUNC

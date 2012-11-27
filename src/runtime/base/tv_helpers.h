@@ -141,6 +141,14 @@ inline void tvRefcountedIncRef(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
+// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
+// Assumes 'tv' is not shared (ie KindOfRef or KindOfObject)
+inline void tvIncRefNotShared(TypedValue* tv) {
+  ASSERT(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
+  tv->m_data.pobj->incRefCount();
+}
+
+// Assumes 'tv' is live
 // Assumes 'tv.m_type == KindOfRef'
 inline void tvUnbox(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
@@ -156,25 +164,33 @@ inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
 
 // Assumes 'fr' is live and 'to' is dead
 // Assumes 'fr->m_type != KindOfRef'
-// NOTE: this helper will initialize to->_count to 0
+// NOTE: this helper will not modify to->_count
 inline void tvDupCell(const TypedValue* fr, TypedValue* to) {
   ASSERT(tvIsPlausible(fr));
-  TV_DUP_CELL(fr, to);
+  ASSERT(fr->m_type != KindOfRef);
+  to->m_data.num = fr->m_data.num;
+  to->m_type = fr->m_type;
+  tvRefcountedIncRef(to);
 }
 
 // Assumes 'fr' is live and 'to' is dead
 // Assumes 'fr->m_type == KindOfRef'
-// NOTE: this helper will initialize to->_count to 0
+// NOTE: this helper will not modify to->_count
 inline void tvDupVar(const TypedValue* fr, TypedValue* to) {
   ASSERT(tvIsPlausible(fr));
-  TV_DUP_VAR(fr,to);
+  ASSERT(fr->m_type == KindOfRef);
+  to->m_data.num = fr->m_data.num;
+  to->m_type = KindOfRef;
+  tvIncRefNotShared(to);
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// NOTE: this helper will initialize to->_count to 0
+// NOTE: this helper does not modify to->_count
 inline void tvDup(const TypedValue* fr, TypedValue* to) {
   ASSERT(tvIsPlausible(fr));
-  TV_DUP(fr,to);
+  to->m_data.num = fr->m_data.num;
+  to->m_type = fr->m_type;
+  tvRefcountedIncRef(to);
 }
 
 // Assumes 'tv' is dead
@@ -194,13 +210,18 @@ inline TypedValue* tvToCell(TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
 
+// conditionally unbox tv, preserve constness.
+inline const TypedValue* tvToCell(const TypedValue* tv) {
+  return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
+}
+
 template <bool respectRef>
 inline void tvSetImpl(const TypedValue* fr, TypedValue* to) {
   ASSERT(fr->m_type != KindOfRef);
   if (respectRef) to = tvToCell(to);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
-  TV_DUP_CELL_NC(fr, to);
+  tvDupCell(fr, to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
@@ -223,7 +244,7 @@ inline void tvBind(TypedValue * fr, TypedValue * to) {
   ASSERT(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
-  TV_DUP_VAR_NC(fr, to);
+  tvDupVar(fr, to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
@@ -324,13 +345,13 @@ inline bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
 inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
                              const ArrayData* container) {
   if (LIKELY(fr->m_type != KindOfRef)) {
-    TV_DUP_CELL_NC(fr, to);
+    tvDupCell(fr, to);
   } else if (fr->m_data.pref->_count <= 1 &&
              (!container || fr->m_data.pref->tv()->m_data.parr != container)) {
     fr = fr->m_data.pref->tv();
-    TV_DUP_CELL_NC(fr, to);
+    tvDupCell(fr, to);
   } else {
-    TV_DUP_VAR_NC(fr, to);
+    tvDupVar(fr, to);
   }
 }
 

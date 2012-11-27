@@ -524,7 +524,6 @@ predictOutputs(NormalizedInstruction* ni) {
     while (true) {
       dt = get_random() % (KindOfRef + 1);
       switch (dt) {
-        case KindOfUninit:
         case KindOfNull:
         case KindOfBoolean:
         case KindOfInt64:
@@ -532,8 +531,11 @@ predictOutputs(NormalizedInstruction* ni) {
         case KindOfString:
         case KindOfArray:
         case KindOfObject:
-        case KindOfRef:
           break;
+        // KindOfRef and KindOfUninit can't happen for lots of predicted
+        // types.
+        case KindOfRef:
+        case KindOfUninit:
         default:
           continue;
       }
@@ -598,6 +600,7 @@ predictOutputs(NormalizedInstruction* ni) {
   if (pred.second >= kAccept) {
     ni->outputPredicted = true;
     TRACE(1, "accepting prediction of type %d\n", pred.first);
+    ASSERT(pred.first != KindOfRef && pred.first != KindOfUninit);
     return pred.first;
   }
   return KindOfInvalid;

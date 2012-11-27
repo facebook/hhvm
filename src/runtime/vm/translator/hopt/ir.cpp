@@ -907,8 +907,17 @@ void printInstructions(xed_uint8_t* codeStartAddr,
     }
 
     if (printAddr) printf("0x%08llx: ", ip);
-    printf("%s\n", codeStr);
     uint32 instrLen = xed_decoded_inst_get_length(&xedd);
+    if (false) { // print encoding, like in objdump
+      unsigned posi = 0;
+      for (; posi < instrLen; ++posi) {
+        printf("%02x ", (uint8_t)frontier[posi]);
+      }
+      for (; posi < 16; ++posi) {
+        printf("   ");
+      }
+    }
+    printf("%s\n", codeStr);
     frontier += instrLen;
     ip       += instrLen;
 

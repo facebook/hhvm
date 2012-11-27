@@ -389,8 +389,9 @@ const X64Instr instr_or  =     { { 0x09,0x0B,0x81,0x01,0x0D,0xF1 }, 0x0810 };
 const X64Instr instr_xor =     { { 0x31,0x33,0x81,0x06,0x35,0xF1 }, 0x0810 };
 const X64Instr instr_movb =    { { 0x88,0x8A,0xC6,0x00,0xF1,0xB0 }, 0x0610 };
 const X64Instr instr_mov =     { { 0x89,0x8B,0xC7,0x00,0xF1,0xB8 }, 0x0600 };
-const X64Instr instr_testb =   { { 0x84,0x84,0xF6,0x00,0xA8,0xF1 }, 0x0810 };
+const X64Instr instr_testb =   { { 0x84,0x84,0xF6,0x00,0xA8,0xF1 }, 0x2810 };
 const X64Instr instr_test =    { { 0x85,0x85,0xF7,0x00,0xA9,0xF1 }, 0x0800 };
+const X64Instr instr_cmpb =    { { 0x38,0x3A,0x80,0x07,0x3C,0xF1 }, 0x2810 };
 const X64Instr instr_cmp =     { { 0x39,0x3B,0x81,0x07,0x3D,0xF1 }, 0x0810 };
 const X64Instr instr_sbb =     { { 0x19,0x1B,0x81,0x03,0x1D,0xF1 }, 0x0810 };
 const X64Instr instr_adc =     { { 0x11,0x13,0x81,0x02,0x15,0xF1 }, 0x0810 };
@@ -696,6 +697,10 @@ public:
     if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
     if (r1 & 8) rex |= (reverse ? 1 : 4);
     if (r2 & 8) rex |= (reverse ? 4 : 1);
+    if (opSz == sz::byte && ((r1 >= int(reg::rsp) && r1 <= int(reg::rdi))
+                          || (r2 >= int(reg::rsp) && r2 <= int(reg::rdi)))) {
+      rex |= 0x40;
+    }
     if (rex) byte(0x40 | rex);
     // For two byte opcodes
     if ((op.flags & (IF_TWOBYTEOP | IF_IMUL)) != 0) byte(0x0F);
@@ -771,7 +776,8 @@ public:
       // don't emit immediate
       return;
     }
-    int opcode = (immSize != sz::byte) ? op.table[2] : (op.table[2] | 2);
+    int opcode = (immSize != sz::byte || op.flags & IF_BYTEREG) ?
+                 op.table[2] : (op.table[2] | 2);
     byte(opcode);
     emitModrm(3, rval, r);
     emitImmediate(op, imm, immSize);
@@ -805,7 +811,8 @@ public:
     // Use 2-byte opcode for cmovcc, setcc, movsx, movzx, movsx8, movzx8
     // instructions
     if ((op.flags & IF_TWOBYTEOP) != 0) byte(0x0F);
-    int opcode = (immSize != sz::byte) ? op.table[2] : (op.table[2] | 2);
+    int opcode = (immSize != sz::byte || op.flags & IF_BYTEREG) ?
+                 op.table[2] : (op.table[2] | 2);
     byte(opcode);
     if (reverse) {
       emitModrm(3, r2, r1);
@@ -833,7 +840,7 @@ public:
         byte(jcond | 0x70);
       }
     } else {
-      int opcode = (immSize != sz::byte) ?
+      int opcode = (immSize != sz::byte) || op.flags & IF_BYTEREG ?
         op.table[2] : (op.table[2] | 2);
       byte(jcond | opcode);
     }
@@ -952,7 +959,7 @@ public:
     // Emit the opcode
     if (immSize != sz::nosize) {
       if (twoByteOpcode) byte(0x0F);
-      if (immSize == sz::byte) {
+      if (immSize == sz::byte || op.flags & IF_BYTEREG) {
         byte(op.table[2] | 2 | jcond);
       } else {
         byte(op.table[2] | jcond);
@@ -1467,6 +1474,20 @@ public:
 
   inline void test_imm8_reg8(int64_t imm, register_name_t rdest) {
     emitIR(instr_testb, rdest, safe_cast<int8_t>(imm), sz::byte);
+  }
+
+  inline void test_reg8_reg8(register_name_t rsrc,
+                             register_name_t rdest) {
+    emitRR(instr_testb, rsrc, rdest, sz::byte);
+  }
+
+  inline void cmp_imm8_reg8(int64_t imm, register_name_t rdest) {
+    emitIR(instr_cmpb, rdest, safe_cast<int8_t>(imm), sz::byte);
+  }
+
+  inline void cmp_reg8_reg8(register_name_t rsrc,
+                            register_name_t rdest) {
+    emitRR(instr_cmpb, rsrc, rdest, sz::byte);
   }
 
 #define SIMPLE_OP(name)                                                 \

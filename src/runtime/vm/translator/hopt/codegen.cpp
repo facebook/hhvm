@@ -519,7 +519,11 @@ Address CodeGenerator::cgJcc(IRInstruction* inst) {
   } else {
     // Note the reverse syntax in the assembler.
     // This cmp will compute srcReg1 - srcReg2
-    m_as.cmp_reg64_reg64(srcReg2, srcReg1);
+    if (src1Type == Type::Bool) {
+      m_as.cmp_reg8_reg8(srcReg2, srcReg1);
+    } else {
+      m_as.cmp_reg64_reg64(srcReg2, srcReg1);
+    }
   }
   SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive ?
                                       inst->getDst() : NULL;
@@ -766,6 +770,10 @@ Address CodeGenerator::cgMov(IRInstruction* inst) {
   register_name_t dstReg = dst->getAssignedLoc();                       \
   register_name_t srcReg = src->getAssignedLoc();                       \
   ASSERT(dstReg != reg::noreg);                                         \
+  /* Integer operations require 64-bit representations */               \
+  if (src->getType() == Type::Bool && !src->isConst()) {                \
+    m_as.and_imm64_reg64(0xff, srcReg);                                 \
+  }                                                                     \
   /* const source */                                                    \
   if (src->isConst()) {                                                 \
     m_as.mov_imm64_reg(OPER src->getConstValAsRawInt(), dstReg);        \
@@ -809,6 +817,13 @@ Address CodeGenerator::cgNegate(IRInstruction* inst) {
   register_name_t dstReg  = dst->getAssignedLoc();                          \
   register_name_t src1Reg = src1->getAssignedLoc();                         \
   register_name_t src2Reg = src2->getAssignedLoc();                         \
+  /* Integer operations require 64-bit representations */                   \
+  if (src1->getType() == Type::Bool && !src1->isConst()) {                  \
+    m_as.and_imm64_reg64(0xff, src1Reg);                                    \
+  }                                                                         \
+  if (src2->getType() == Type::Bool && !src2->isConst()) {                  \
+    m_as.and_imm64_reg64(0xff, src2Reg);                                    \
+  }                                                                         \
   /* 2 consts */                                                            \
   if (src1->isConst() && src2->isConst()) {                                 \
     int64 src1Const = src1->getConstValAsRawInt();                          \
@@ -852,6 +867,13 @@ Address CodeGenerator::cgNegate(IRInstruction* inst) {
   register_name_t dstReg  = dst->getAssignedLoc();                        \
   register_name_t src1Reg = src1->getAssignedLoc();                       \
   register_name_t src2Reg = src2->getAssignedLoc();                       \
+  /* Integer operations require 64-bit representations */                 \
+  if (src1->getType() == Type::Bool && !src1->isConst()) {                \
+    m_as.and_imm64_reg64(0xff, src1Reg);                                  \
+  }                                                                       \
+  if (src2->getType() == Type::Bool && !src2->isConst()) {                \
+    m_as.and_imm64_reg64(0xff, src2Reg);                                  \
+  }                                                                       \
   /* 2 consts */                                                          \
   if (src1->isConst() && src2->isConst()) {                               \
     int64 src1Const = src1->getConstValAsRawInt();                        \
@@ -1123,18 +1145,11 @@ Address CodeGenerator::cgOpCmpHelper(
   // SIMPLIFY_CMP has converted all args to bool
   else if (type1 == Type::Bool && type2 == Type::Bool) {
     if (src2->isConst()) {
-      m_as.cmp_imm64_reg64(src2->getConstValAsBool(), src1Reg);
+      m_as.cmp_imm8_reg8(src2->getConstValAsBool(), src1Reg);
     } else {
-      m_as.cmp_reg64_reg64(src2Reg, src1Reg);
+      m_as.cmp_reg8_reg8(src2Reg, src1Reg);
     }
     (m_as.*setter)(dstReg);
-
-    // until bools are bytes, we need to mask the top bits
-    bool dstIsAlreadyBool = dstReg == src1Reg ||
-                           (dstReg == src2Reg && !src2->isConst());
-    if (!dstIsAlreadyBool) {
-      m_as.and_imm64_reg64(0xff, dstReg);
-    }
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1151,9 +1166,6 @@ Address CodeGenerator::cgOpCmpHelper(
         m_as.cmp_reg64_reg64(src2Reg, src1Reg);
       }
       (m_as.*setter)(dstReg);
-
-      // until bools are bytes, we need to mask the top bits
-      m_as.and_imm64_reg64(0xff, dstReg);
     }
 
     // doubles be damned!
@@ -1293,7 +1305,10 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
           m_as.mov_imm64_reg(1, dstReg);
         }
       } else if (srcReg != dstReg) {
-        m_as.mov_reg64_reg64(srcReg, dstReg);
+        m_as.mov_reg8_reg64_unsigned(srcReg, dstReg);
+      } else {
+        // srcReg == dstReg
+        m_as.and_imm64_reg64(0xff, dstReg);
       }
       return start;
     }
@@ -1338,7 +1353,6 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       } else if (dstReg == srcReg) {
         m_as.test_reg64_reg64(dstReg, dstReg);
         m_as.setne(dstReg);
-        m_as.and_imm64_reg64(0xff, dstReg);
       } else {
         m_as.xor_reg64_reg64(dstReg, dstReg);
         m_as.test_reg64_reg64(srcReg, srcReg);
@@ -1378,7 +1392,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       cgCallHelper(m_as, (TCA)intToStringHelper, dst, false, args);
     } else if (fromType == Type::Bool) {
       // Bool -> Str
-      m_as.test_reg64_reg64(srcReg, srcReg);
+      m_as.test_reg8_reg8(srcReg, srcReg);
       m_as.mov_imm64_reg((uint64)StringData::GetStaticString(""),
                          dstReg);
       m_as.mov_imm64_reg((uint64)StringData::GetStaticString("1"),
@@ -1599,6 +1613,10 @@ Address CodeGenerator::cgRetVal(IRInstruction* inst) {
         m_as.store_imm64_disp_reg64(intVal,  AROFF(m_r) + TVOFF(m_data), fpReg);
       } else {
         register_name_t valReg = val->getAssignedLoc();
+        if (val->getType() == Type::Bool) {
+          // BOOL BYTE
+          m_as.and_imm64_reg64(0xff, valReg);  
+        }
         m_as.store_reg64_disp_reg64(valReg,  AROFF(m_r) + TVOFF(m_data), fpReg);
       }
     }
@@ -1804,6 +1822,7 @@ Address CodeGenerator::cgSpill(IRInstruction* inst) {
   ASSERT(dst->getNumAssignedLocs() == src->getNumAssignedLocs());
   for (uint32 locIndex = 0; locIndex < src->getNumAssignedLocs(); ++locIndex) {
     register_name_t srcReg = src->getAssignedLoc(locIndex);
+    // We do not need to mask booleans, since the IR will reload the spill
     if (dst->isAssignedMmxReg(locIndex)) {
       m_as.mov_reg64_mmx(srcReg, dst->getMmxReg(locIndex));
     } else {
@@ -3347,6 +3366,10 @@ Address CodeGenerator::cgStore(register_name_t base,
                                   base);
     }
   } else {
+    if (type == Type::Bool) {
+      // BOOL BYTE
+      m_as.and_imm64_reg64(0xff, src->getAssignedLoc());
+    }
     if (type != Type::Null && type != Type::Uninit) {
       // no need to store any value for null or uninit
       m_as.store_reg64_disp_reg64(src->getAssignedLoc(),
@@ -3879,7 +3902,7 @@ Address CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
     return start;
   }
   if (src->getType() == Type::Bool) {
-    m_as.test_reg32_reg32(srcReg, srcReg);
+    m_as.test_reg8_reg8(srcReg, srcReg);
   } else {
     m_as.test_reg64_reg64(srcReg, srcReg);
   }

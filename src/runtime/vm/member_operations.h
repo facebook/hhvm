@@ -19,7 +19,6 @@
 
 #include "runtime/base/types.h"
 #include "runtime/base/strings.h"
-#include "runtime/base/tv_macros.h"
 #include "system/lib/systemlib.h"
 #include "runtime/base/builtin_functions.h"
 #include "runtime/vm/core_types.h"

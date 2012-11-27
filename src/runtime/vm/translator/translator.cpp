@@ -26,7 +26,6 @@
 
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/types.h>
-#include <runtime/base/tv_macros.h>
 #include <runtime/ext/ext_continuation.h>
 #include <util/trace.h>
 #include <util/biased_coin.h>

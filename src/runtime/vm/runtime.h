@@ -19,7 +19,6 @@
 #include <runtime/vm/event_hook.h>
 #include <runtime/vm/func.h>
 #include <runtime/vm/funcdict.h>
-#include <runtime/base/tv_macros.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/vm/translator/translator-inline.h>
 

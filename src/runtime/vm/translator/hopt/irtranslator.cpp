@@ -47,7 +47,6 @@ typedef __sighandler_t *sighandler_t;
 #include <util/rank.h>
 #include <util/timer.h>
 
-#include <runtime/base/tv_macros.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/php_debug.h>
 #include <runtime/vm/runtime.h>

@@ -22,7 +22,6 @@
 #include <algorithm>
 
 #include "runtime/base/base_includes.h"
-#include "runtime/base/tv_macros.h"
 #include "util/util.h"
 #include "util/debug.h"
 #include "runtime/vm/core_types.h"

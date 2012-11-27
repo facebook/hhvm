@@ -48,7 +48,6 @@ typedef __sighandler_t *sighandler_t;
 #include <util/timer.h>
 #include <util/maphuge.h>
 
-#include <runtime/base/tv_macros.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/php_debug.h>
 #include <runtime/vm/runtime.h>
@@ -5388,7 +5387,7 @@ static void undefCns(const StringData* nm) {
     g_vmContext->getStack().pushStringNoRc(const_cast<StringData*>(nm));
   } else {
     Cell* c1 = g_vmContext->getStack().allocC();
-    TV_READ_CELL(cns, c1);
+    tvReadCell(cns, c1);
   }
 }
 

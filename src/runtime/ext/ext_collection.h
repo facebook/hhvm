@@ -139,9 +139,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
       throw e;
       return;
     }
-    if (IS_REFCOUNTED_TYPE(val->m_type)) {
-      TV_INCREF(val);
-    }
+    tvRefcountedIncRef(val);
     TypedValue* tv = &m_data[key];
     tvRefcountedDecRef(tv);
     tv->m_data.num = val->m_data.num;
@@ -153,9 +151,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     if (m_capacity <= m_size) {
       grow();
     }
-    if (IS_REFCOUNTED_TYPE(val->m_type)) {
-      TV_INCREF(val);
-    }
+    tvRefcountedIncRef(val);
     TypedValue* tv = &m_data[m_size];
     tv->m_data.num = val->m_data.num;
     tv->m_type = val->m_type;
@@ -767,7 +763,7 @@ public:
   private:
   template <typename AccessorT>
   SortFlavor preSort(Bucket** buffer, const AccessorT& acc, bool checkTypes);
-  
+
   private: void postSort(Bucket** buffer);
 
   public: void asort(int sort_flags, bool ascending);

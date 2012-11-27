@@ -26,15 +26,6 @@
 
 #include "runtime/ext/bcmath/bcmath.h" // for MAX(a,b)
 
-// We want to use the TypedValue macros inside this header file, but we don't
-// want to pollute the environment of files that include this header file.
-// Thus, we record whether they were already defined here. That way, we know
-// whether we need to undefine the macros at the end of this header file.
-#ifndef __HPHP_TV_MACROS__
-#include "runtime/base/tv_macros.h"
-#define __VM_BYTECODE_H_SHOULD_UNDEF_TV__
-#endif
-
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/class.h"
 #include "runtime/vm/instance.h"
@@ -645,8 +636,7 @@ public:
 
   inline void ALWAYS_INLINE unbox() {
     ASSERT(m_top != m_base);
-    ASSERT(m_top->m_type == KindOfRef);
-    TV_UNBOX(m_top);
+    tvUnbox(m_top);
   }
 
   inline void ALWAYS_INLINE pushUninit() {
@@ -803,11 +793,5 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-
-// Undefine the TypedValue macros if appropriate
-#ifdef __VM_BYTECODE_H_SHOULD_UNDEF_TV__
-#undef __VM_BYTECODE_H_SHOULD_UNDEF_TV__
-#include <runtime/base/undef_tv_macros.h>
-#endif
 
 #endif // __VM_BYTECODE_H__

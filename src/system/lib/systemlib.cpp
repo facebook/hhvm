@@ -19,7 +19,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/vm/unit.h>
 #include <runtime/vm/class.h>
-#include <runtime/base/tv_macros.h>
 #include <runtime/vm/instance.h>
 #include <system/gen/php/classes/exception.h>
 #include <system/gen/php/classes/stdclass.h>

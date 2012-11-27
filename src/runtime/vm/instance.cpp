@@ -16,7 +16,6 @@
 
 #include "runtime/base/base_includes.h"
 #include "runtime/base/variable_serializer.h"
-#include "runtime/base/tv_macros.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/member_operations.h"
 #include "runtime/vm/hhbc.h"

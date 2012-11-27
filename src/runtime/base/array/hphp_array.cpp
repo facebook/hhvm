@@ -29,7 +29,6 @@
 #include <util/alloc.h>
 #include <util/trace.h>
 #include <util/util.h>
-#include <runtime/base/tv_macros.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/vm/stats.h>
 

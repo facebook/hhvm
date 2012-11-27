@@ -26,7 +26,6 @@
 #include "runtime/vm/runtime.h"
 #include <runtime/base/runtime_option.h>
 #include "runtime/base/string_data.h"
-#include "runtime/base/tv_macros.h"
 #include "runtime/base/array/hphp_array.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/translator.h"

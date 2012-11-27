@@ -44,7 +44,6 @@
 #include <util/debug.h>
 #include <util/stat_cache.h>
 
-#include <runtime/base/tv_macros.h>
 #include <runtime/vm/instrumentation_hook.h>
 #include <runtime/vm/php_debug.h>
 #include <runtime/vm/debugger_hook.h>
@@ -3871,7 +3870,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {
   TypedValue* cns = getCns(s);
   if (cns != NULL) {
     Cell* c1 = m_stack.allocC();
-    TV_READ_CELL(cns, c1);
+    tvReadCell(cns, c1);
   } else {
     raise_notice(Strings::UNDEFINED_CONSTANT,
                  s->data(), s->data());
@@ -3899,7 +3898,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCns(PC& pc) {
     raise_error("Couldn't find constant %s::%s",
                 class_->name()->data(), clsCnsName->data());
   }
-  TV_READ_CELL(clsCns, tv);
+  tvReadCell(clsCns, tv);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopClsCnsD(PC& pc) {
@@ -3913,7 +3912,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCnsD(PC& pc) {
                                     classNamedEntity.first, clsCnsName);
   ASSERT(clsCns != NULL);
   Cell* c1 = m_stack.allocC();
-  TV_READ_CELL(clsCns, c1);
+  tvReadCell(clsCns, c1);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {

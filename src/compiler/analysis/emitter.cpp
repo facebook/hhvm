@@ -18,7 +18,6 @@
 #include <util/util.h>
 #include <util/job_queue.h>
 #include <util/parser/hphp.tab.hpp>
-#include <runtime/base/tv_macros.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/peephole.h>
 #include <runtime/vm/repo.h>

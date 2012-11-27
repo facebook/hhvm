@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "runtime/base/execution_context.h"
-#include "runtime/base/tv_macros.h"
 #include "runtime/base/complex_types.h"
 #include "runtime/base/zend/zend_string.h"
 #include "runtime/base/array/hphp_array.h"

@@ -23,7 +23,6 @@
 #define __HPHP_TV_HELPERS_H__
 
 #include <runtime/base/types.h>
-#include <runtime/base/tv_macros.h>
 
 namespace HPHP {
 namespace VM {
@@ -130,7 +129,8 @@ inline void tvBox(TypedValue* tv) {
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 inline void tvIncRef(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
-  TV_INCREF(tv);
+  ASSERT(IS_REFCOUNTED_TYPE(tv->m_type));
+  tv->m_data.pstr->incRefCount();
 }
 
 inline void tvRefcountedIncRef(TypedValue* tv) {
@@ -152,14 +152,28 @@ inline void tvIncRefNotShared(TypedValue* tv) {
 // Assumes 'tv.m_type == KindOfRef'
 inline void tvUnbox(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
-  TV_UNBOX(tv);
+  ASSERT(tv->m_type == KindOfRef);
+  RefData* r = tv->m_data.pref;
+  TypedValue* innerCell = r->tv();
+  tv->m_data.num = innerCell->m_data.num;
+  tv->m_type = innerCell->m_type;
+  tvRefcountedIncRef(tv);
+  tvDecRefRefInternal(r);
   ASSERT(tvIsPlausible(tv));
 }
 
 // Assumes 'fr' is live and 'to' is dead
 inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
   ASSERT(tvIsPlausible(fr));
-  TV_READ_CELL(fr, to);
+  if (fr->m_type != KindOfRef) {
+    memcpy(to, fr, sizeof(TypedValue));
+    tvRefcountedIncRef(to);
+  } else {
+    TypedValue* fr2 = fr->m_data.pref->tv();
+    to->m_data.num = fr2->m_data.num;
+    to->m_type = fr2->m_type;
+    tvRefcountedIncRef(to);
+  }
 }
 
 // Assumes 'fr' is live and 'to' is dead

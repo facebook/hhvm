@@ -125,7 +125,7 @@ void ZendArray::postSort(Bucket** buffer, bool resetKeys) {
       CONNECT_TO_BUCKET_LIST(b, m_arBuckets[nIndex]);
       SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, b);
       b = bNext;
-    } 
+    }
     if (b->hasStrKey() && b->skey->decRefCount() == 0) {
       DELETE(StringData)(b->skey);
     }
@@ -140,7 +140,7 @@ void ZendArray::postSort(Bucket** buffer, bool resetKeys) {
       b->pListNext = bNext;
       bNext->pListLast = b;
       b = bNext;
-    } 
+    }
   }
   b->pListNext = NULL;
 }
@@ -247,6 +247,7 @@ void ZendArray::asort(int sort_flags, bool ascending) {
       /* sure we don't leak the buffer */ \
       postSort(buffer, resetKeys); \
       smart_free(buffer); \
+      throw; \
     } \
     postSort(buffer, resetKeys); \
     /* Free the buffer */ \

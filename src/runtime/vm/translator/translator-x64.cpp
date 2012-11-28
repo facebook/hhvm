@@ -2283,13 +2283,12 @@ TranslatorX64::emitBindCall(const Tracelet& t,
 
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
   emitLea(a, rVmSp, cellsToBytes(numArgs), rStashedAR);
-  emitBindCallHelper(rStashedAR, ni.source, ni.funcd, numArgs, (bool)ni.funcd);
+  emitBindCallHelper(ni.source, ni.funcd, numArgs, (bool)ni.funcd);
   return 0;
 }
 
 void
-TranslatorX64::emitBindCallHelper(RegNumber stashedAR,
-                                  SrcKey srcKey,
+TranslatorX64::emitBindCallHelper(SrcKey srcKey,
                                   const Func* funcd,
                                   int numArgs,
                                   bool isImmutable) {

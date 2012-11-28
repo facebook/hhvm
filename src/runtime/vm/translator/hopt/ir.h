@@ -27,6 +27,8 @@
 #include <stack>
 #include <list>
 #include <assert.h>
+#include "runtime/ext/ext_continuation.h"
+#include "runtime/vm/translator/abi-x64.h"
 #include "runtime/vm/translator/asm-x64.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/runtime-type.h"
@@ -41,8 +43,7 @@ class StringData;
 namespace VM {
 namespace JIT {
 
-using HPHP::VM::Transl::TCA;
-using HPHP::VM::Transl::RegNumber;
+using namespace HPHP::VM::Transl;
 
 class FailedIRGen : public std::exception {
  public:
@@ -361,7 +362,7 @@ public:
     IRT(Uninit,          "Unin")  \
     IRT(Null,            "Null")  \
     IRT(Bool,            "Bool")  \
-    IRT(Int,             "Int")   /* HPHP::DataType::KindOfInt64 */ \
+    IRT(Int,             "Int") /* HPHP::DataType::KindOfInt64 */      \
     IRT(Dbl,             "Dbl")   \
     IRT(Placeholder,     "ERROR") /* Nothing in VM types enum at this position */ \
     IRT(StaticStr,       "Sstr")  \
@@ -522,6 +523,70 @@ public:
            !Type::isStaticallyKnown(ty);
   }
 }; // class Type
+
+class RawMemSlot {
+ public:
+
+  enum Kind {
+    ContLabel, ContDone, ContShouldThrow, ContRunning,
+    StrLen, FuncNumParams, FuncRefBitVec,
+    MaxKind
+  };
+
+  static RawMemSlot& Get(Kind k) {
+    switch (k) {
+      case ContLabel:       return GetContLabel();
+      case ContDone:        return GetContDone();
+      case ContShouldThrow: return GetContShouldThrow();
+      case ContRunning:     return GetContRunning();
+      case StrLen:          return GetStrLen();
+      case FuncNumParams:   return GetFuncNumParams();
+      case FuncRefBitVec:   return GetFuncRefBitVec();
+      default: not_reached();
+    }
+  }
+
+  int64 getOffset()   { return m_offset; }
+  int32 getSize()     { return m_size; }
+  Type::Tag getType() { return m_type; }
+
+ private:
+  RawMemSlot(int64 offset, int32 size, Type::Tag type)
+    : m_offset(offset), m_size(size), m_type(type) { }
+
+  static RawMemSlot& GetContLabel() {
+    static RawMemSlot m(CONTOFF(m_label), sz::qword, Type::Int);
+    return m;
+  }
+  static RawMemSlot& GetContDone() {
+    static RawMemSlot m(CONTOFF(m_done), sz::byte, Type::Bool);
+    return m;
+  }
+  static RawMemSlot& GetContShouldThrow() {
+    static RawMemSlot m(CONTOFF(m_should_throw), sz::byte, Type::Bool);
+    return m;
+  }
+  static RawMemSlot& GetContRunning() {
+    static RawMemSlot m(CONTOFF(m_running), sz::byte, Type::Bool);
+    return m;
+  }
+  static RawMemSlot& GetStrLen() {
+    static RawMemSlot m(StringData::sizeOffset(), sz::dword, Type::Int);
+    return m;
+  }
+  static RawMemSlot& GetFuncNumParams() {
+    static RawMemSlot m(Func::numParamsOff(), sz::qword, Type::Int);
+    return m;
+  }
+  static RawMemSlot& GetFuncRefBitVec() {
+    static RawMemSlot m(Func::refBitVecOff(), sz::qword, Type::Int);
+    return m;
+  }
+
+  int64 m_offset;
+  int32 m_size;
+  Type::Tag m_type;
+};
 
 // Must be arena-allocatable.  (Destructor is not called.)
 class Local {
@@ -869,6 +934,7 @@ public:
  protected:
   friend class IRFactory;
   friend class TraceBuilder;
+  friend class LinearScan;
   ConstInstruction(Opcode opc, Type::Tag type, int64 val) :
       IRInstruction(opc, type) {
     ASSERT(opc == DefConst || opc == LdConst);

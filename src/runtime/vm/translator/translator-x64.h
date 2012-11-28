@@ -324,7 +324,7 @@ private:
   void binaryMixedArith(const NormalizedInstruction &i,
                          Opcode op, PhysReg srcReg, PhysReg srcDestReg);
   void binaryArithCell(const NormalizedInstruction &i,
-                       Opcode op, 
+                       Opcode op,
                        const DynLocation& in1,
                        const DynLocation& inout);
   void binaryArithLocal(const NormalizedInstruction &i,
@@ -935,8 +935,7 @@ private:
   void emitBindJcc(Asm& a, ConditionCode cc, const SrcKey& dest,
                    ServiceRequest req = REQ_BIND_JCC);
   void emitBindJmp(const SrcKey& dest);
-  void emitBindCallHelper(RegNumber stashedAR,
-                          SrcKey srcKey,
+  void emitBindCallHelper(SrcKey srcKey,
                           const Func* funcd,
                           int numArgs,
                           bool isImmutable);

@@ -1017,7 +1017,7 @@ struct X64Assembler {
   void ret()          { emit(instr_ret); }
   void ret(Immed i)   { emitI(instr_ret, i.w(), sz::word); }
   void nop()          { emit(instr_nop); }
-  void int3()         { emit(instr_nop); }
+  void int3()         { emit(instr_int3); }
   void ud2()          { byte(0x0f); byte(0x0b); }
   void pushf()        { byte(0x9c); }
   void popf()         { byte(0x9d); }

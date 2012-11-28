@@ -479,7 +479,7 @@ void ConstInstruction::printConst(std::ostream& ostream) {
       ostream << "None:" << m_intVal;
       break;
     default:
-      ASSERT(0);
+      not_reached();
   }
 }
 

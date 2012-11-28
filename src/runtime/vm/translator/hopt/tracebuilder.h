@@ -60,8 +60,8 @@ public:
   SSATmp* genLdThis(Trace* trace);
   SSATmp* genLdVarEnv();
   SSATmp* genLdRetAddr();
-  SSATmp* genLdRaw(SSATmp* baseAddr, SSATmp* offset, Type::Tag type);
-  void    genStRaw(SSATmp* base, int64 offset, SSATmp* value);
+  SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type::Tag type);
+  void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
 
   SSATmp* genLdLoc(uint32 id);
   SSATmp* genLdLoc(uint32 id, Type::Tag type, Trace* exitTrace);
@@ -264,6 +264,9 @@ public:
   SSATmp* getSp() { return m_spValue; }
 private:
   friend class Simplifier;
+  LabelInstruction* getLabel(Trace* trace) {
+    return trace ? trace->getLabel() : NULL;
+  }
   SSATmp* genInstruction(Opcode,
                          Type::Tag,
                          SSATmp* src1,

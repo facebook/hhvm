@@ -64,7 +64,6 @@ LinearScan::CallerSavedRegs[LinearScan::NumCallerSavedRegs] = {
 
 LinearScan::LinearScan(IRFactory* irFactory, TraceBuilder* traceBuilder) {
   m_irFactory = irFactory;
-  m_tb = traceBuilder;
   for (int i = 0; i < NumRegs; i++) {
     m_regs[i].m_ssaTmp = NULL;
     m_regs[i].m_regNo = i;
@@ -822,6 +821,7 @@ void LinearScan::allocRegsToTraceAux(Trace* trace) {
 void LinearScan::rematerialize(Trace* trace) {
   rematerializeAux(trace,
                    NULL,
+                   NULL,
                    std::vector<SSATmp*>(m_irFactory->getNumLocals()));
   numberInstructions(trace);
 
@@ -833,6 +833,7 @@ void LinearScan::rematerialize(Trace* trace) {
 
 void LinearScan::rematerializeAux(Trace* trace,
                                   SSATmp* curSp,
+                                  SSATmp* curFp,
                                   std::vector<SSATmp*> localValues) {
   IRInstruction::List& instList = trace->getInstructionList();
   for (IRInstruction::Iterator it = instList.begin();
@@ -841,6 +842,10 @@ void LinearScan::rematerializeAux(Trace* trace,
     IRInstruction* inst = *it;
     Opcode opc = inst->getOpcode();
     SSATmp* dst = inst->getDst();
+    if (opc == DefFP || opc == FreeActRec) {
+      curFp = dst;
+      ASSERT(dst && dst->getAssignedLoc() == rVmFP);
+    }
     if (opc == Reload) {
       // s = Spill t0
       // t = Reload s
@@ -866,7 +871,12 @@ void LinearScan::rematerializeAux(Trace* trace,
         // Search for a local that stores the value of <spilledTmp>.
         if (pos != localValues.end()) {
           size_t locId = pos - localValues.begin();
-          newInst = m_irFactory->ldLoc(m_tb->genLdHome(locId),
+          ASSERT(curFp != NULL);
+          Local* local = m_irFactory->getLocal(uint32(locId));
+          ConstInstruction constInst(curFp, local);
+          IRInstruction* ldHomeInst =
+            m_irFactory->cloneInstruction(&constInst);
+          newInst = m_irFactory->ldLoc(m_irFactory->getSSATmp(ldHomeInst),
                                        dst->getType(),
                                        NULL);
         }
@@ -895,7 +905,7 @@ void LinearScan::rematerializeAux(Trace* trace,
     if (inst->isControlFlowInstruction()) {
       LabelInstruction* label = inst->getLabel();
       if (label != NULL && label->getId() == inst->getId() + 1) {
-        rematerializeAux(label->getTrace(), curSp, localValues);
+        rematerializeAux(label->getTrace(), curSp, curFp, localValues);
       }
     }
   }

@@ -595,9 +595,7 @@ void HhbcTranslator::emitUnpackCont() {
     m_tb.genStMem(locals, contOffset, uninit, true);
     m_tb.genInitLoc(nCopy - i, val);
   }
-
-  SSATmp* offset = m_tb.genDefConst<int64>(CONTOFF(m_label));
-  push(m_tb.genLdRaw(cont, offset, Type::Int));
+  push(m_tb.genLdRaw(cont, RawMemSlot::ContLabel, Type::Int));
 }
 
 void HhbcTranslator::emitPackCont(int32 labelId) {
@@ -625,7 +623,7 @@ void HhbcTranslator::emitPackCont(int32 labelId) {
   }
 
   m_tb.genSetPropCell(cont, CONTOFF(m_value), popC());
-  m_tb.genStRaw(cont, CONTOFF(m_label), m_tb.genDefConst<int64>(labelId));
+  m_tb.genStRaw(cont, RawMemSlot::ContLabel, m_tb.genDefConst<int64>(labelId));
 }
 
 void HhbcTranslator::emitContReceive() {
@@ -645,7 +643,7 @@ void HhbcTranslator::emitContRaised() {
 
 void HhbcTranslator::emitContDone() {
   SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
-  m_tb.genStRaw(cont, CONTOFF(m_done), m_tb.genDefConst<bool>(true));
+  m_tb.genStRaw(cont, RawMemSlot::ContDone, m_tb.genDefConst<bool>(true));
   m_tb.genSetPropCell(cont, CONTOFF(m_value), m_tb.genDefNull());
 }
 
@@ -664,7 +662,7 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   value = m_tb.genIncRef(value);
   m_tb.genSetPropCell(cont, CONTOFF(m_received), value);
   if (raise) {
-    m_tb.genStRaw(cont, CONTOFF(m_should_throw), m_tb.genDefConst<bool>(true));
+    m_tb.genStRaw(cont, RawMemSlot::ContShouldThrow, m_tb.genDefConst<bool>(true));
   }
 }
 
@@ -678,8 +676,7 @@ void HhbcTranslator::emitContRaise() {
 
 void HhbcTranslator::emitContValid() {
   SSATmp* cont = m_tb.genLdThis(NULL);
-  SSATmp* done =
-    m_tb.genLdRaw(cont, m_tb.genDefConst<int64>(CONTOFF(m_done)), Type::Bool);
+  SSATmp* done = m_tb.genLdRaw(cont, RawMemSlot::ContDone, Type::Bool);
   push(m_tb.genNot(done));
 }
 
@@ -694,7 +691,7 @@ void HhbcTranslator::emitContCurrent() {
 
 void HhbcTranslator::emitContStopped() {
   SSATmp* cont = m_tb.genLdThis(NULL);
-  m_tb.genStRaw(cont, CONTOFF(m_running), m_tb.genDefConst<bool>(false));
+  m_tb.genStRaw(cont, RawMemSlot::ContRunning, m_tb.genDefConst<bool>(false));
 }
 
 void HhbcTranslator::emitContHandle() {
@@ -709,12 +706,15 @@ void HhbcTranslator::emitStrlen() {
 
   if (Type::isString(inType)) {
     SSATmp* input = popC();
-    SSATmp* offset = m_tb.genDefConst<int64>(StringData::sizeOffset());
-    SSATmp* ans = m_tb.genLdRaw(input, offset, Type::Int);
-    m_tb.genDecRef(input);
-    // XXX We need a LdRaw that loads 32 bits, but what's the right way?
-    push(m_tb.genAnd(ans, m_tb.genDefConst<int64>(0xffffffff)));
+    if (input->isConst()) {
+      // static string; fold its strlen operation
+      push(m_tb.genDefConst<int64>(input->getConstValAsStr()->size()));
+    } else {
+      push(m_tb.genLdRaw(input, RawMemSlot::StrLen, Type::Int));
+      m_tb.genDecRef(input);
+    }
   } else if (Type::isNull(inType)) {
+    popC();
     push(m_tb.genDefConst<int64>(0));
   } else if (inType == Type::Bool) {
     // strlen(true) == 1, strlen(false) == 0.
@@ -1430,12 +1430,10 @@ Trace* HhbcTranslator::guardRefs(int64               entryArDelta,
   int32_t actRecOff = cellsToBytes(entryArDelta);
   SSATmp* funcPtr = m_tb.genLdARFuncPtr(m_tb.getSp(),
                                         m_tb.genDefConst<int64>(actRecOff));
-  SSATmp* nParams =
-    m_tb.genLdRaw(funcPtr, m_tb.genDefConst<int64>(Func::numParamsOff()),
-                  Type::Int);
-  SSATmp* bitsPtr =
-    m_tb.genLdRaw(funcPtr, m_tb.genDefConst<int64>(Func::refBitVecOff()),
-                  Type::Int);
+  SSATmp* nParams = m_tb.genLdRaw(funcPtr, RawMemSlot::FuncNumParams,
+                                  Type::Int);
+  SSATmp* bitsPtr = m_tb.genLdRaw(funcPtr, RawMemSlot::FuncRefBitVec,
+                                  Type::Int);
 
   for (unsigned i = 0; i < mask.size(); i += 64) {
     ASSERT(i < vals.size());

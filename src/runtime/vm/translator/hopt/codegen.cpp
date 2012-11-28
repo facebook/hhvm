@@ -490,7 +490,7 @@ Address CodeGenerator::cgJcc(IRInstruction* inst) {
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or an int, and we can't mix the two types because
   // -1 == true in PHP, but not in HHIR binary representation
-  if (!((src1Type == Type::Int && src2Type == Type::Int  ) ||
+  if (!((src1Type == Type::Int && src2Type == Type::Int) ||
         (src1Type == Type::Bool && src2Type == Type::Bool) ||
         (src1Type == Type::ClassRef && src2Type == Type::ClassRef))) {
     CG_PUNT(cgJcc);
@@ -2954,9 +2954,6 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
   for (uint32 i = 0; i < numArgs; i++) {
     cgStore(spReg, -(i+1) * sizeof(Cell), args[i]);
   }
-  // store the return IP into the outgoing actrec; this is patched below
-  StoreImmPatcher retIp(m_as, (uint64_t)m_as.code.frontier, reg::rScratch,
-                        AROFF(m_savedRip), spReg);
   // store the return bytecode offset into the outgoing actrec
   uint64 returnBc = returnBcOffset->getConstValAsInt();
   m_as.store_imm32_disp_reg(returnBc, AROFF(m_soff), spReg);
@@ -2980,11 +2977,8 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_lastMarker->getFunc(), m_lastMarker->getLabelId());
   bool isImmutable = (func->isConst() && func->getType() != Type::Null);
   const Func* funcd = isImmutable ? func->getConstValAsFunc() : NULL;
-  m_tx64->emitBindCallHelper(LinearScan::rStashedAR, srcKey,
-                             funcd, numArgs, isImmutable);
+  m_tx64->emitBindCallHelper(srcKey, funcd, numArgs, isImmutable);
 
-  // Patch the immediate in the code which defines the return address
-  retIp.patch((uint64)m_as.code.frontier);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitCheckStack(m_as, inst->getDst(), 1, false);
   }
@@ -3185,23 +3179,32 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
   SSATmp* addr   = inst->getSrc(0);
   SSATmp* offset = inst->getSrc(1);
 
-  ASSERT(!(addr->isConst()));
   ASSERT(!(dest->isConst()));
 
   RegNumber addrReg = addr->getAssignedLoc();
   RegNumber destReg = dest->getAssignedLoc();
 
-  int ldSize = getNativeTypeSize(dest->getType());
+  if (addr->isConst()) {
+    addrReg = LinearScan::rScratch;
+    m_as.mov_imm64_reg(addr->getConstValAsRawInt(), addrReg);
+  }
+
   if (offset->isConst()) {
     ASSERT(offset->getType() == Type::Int);
+    int64 kind = offset->getConstValAsInt();
+    RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+    int ldSize = slot.getSize();
+    int64 off = slot.getOffset();
     if (ldSize == sz::qword) {
-      m_as.load_reg64_disp_reg64(addrReg, offset->getConstValAsInt(), destReg);
+      m_as.load_reg64_disp_reg64(addrReg, off, destReg);
+    } else if (ldSize == sz::dword) {
+      m_as.load_reg64_disp_reg32(addrReg, off, destReg);
     } else {
       ASSERT(ldSize == sz::byte);
-      m_as.loadzxb_reg64_disp_reg64(addrReg, offset->getConstValAsInt(),
-                                    destReg);
+      m_as.loadzxb_reg64_disp_reg64(addrReg, off, destReg);
     }
   } else {
+    int ldSize = getNativeTypeSize(dest->getType());
     RegNumber offsetReg = offset->getAssignedLoc();
     if (ldSize == sz::qword) {
       m_as.load_reg64_disp_index_reg64(addrReg, 0, offsetReg, destReg);
@@ -3218,25 +3221,37 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
 Address CodeGenerator::cgStRaw(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   RegNumber baseReg = inst->getSrc(0)->getAssignedLoc();
-  int64 offset = inst->getSrc(1)->getConstValAsInt();
+  int64 kind = inst->getSrc(1)->getConstValAsInt();
   SSATmp* value = inst->getSrc(2);
 
-  int stSize = getNativeTypeSize(value->getType());
+  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+  int stSize = slot.getSize();
+  int64 off = slot.getOffset();
   if (value->isConst()) {
+
     if (stSize == sz::qword) {
       m_as.store_imm64_disp_reg64(value->getConstValAsInt(),
-                                  offset,
+                                  off,
+                                  baseReg);
+    } else if (stSize == sz::dword) {
+      m_as.store_imm32_disp_reg(value->getConstValAsInt(),
+                                  off,
                                   baseReg);
     } else {
       ASSERT(stSize == sz::byte);
       m_as.store_imm8_disp_reg(value->getConstValAsBool(),
-                               offset,
+                               off,
                                baseReg);
     }
   } else {
+
     if (stSize == sz::qword) {
       m_as.store_reg64_disp_reg64(value->getAssignedLoc(),
-                                  offset,
+                                  off,
+                                  baseReg);
+    } else if (stSize == sz::dword) {
+      m_as.store_reg32_disp_reg64(value->getAssignedLoc(),
+                                  off,
                                   baseReg);
     } else {
       // not supported by our assembler yet
@@ -3514,6 +3529,7 @@ Address CodeGenerator::cgLdLoc(IRInstruction* inst) {
   RegNumber fpReg;
   int64 offset;
   getLocalRegOffset(inst->getSrc(0), fpReg, offset);
+  ASSERT(fpReg == HPHP::VM::Transl::reg::rbp);
   cgLoad(type, dst, fpReg, offset, label, inst);
   return start;
 }

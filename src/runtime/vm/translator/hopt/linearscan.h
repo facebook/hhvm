@@ -163,6 +163,7 @@ private:
   void rematerialize(Trace* trace);
   void rematerializeAux(Trace* trace,
                         SSATmp* curSp,
+                        SSATmp* curFp,
                         std::vector<SSATmp*> localValues);
   void removeUnusedSpills(Trace* trace);
   void removeUnusedSpillsAux(Trace* trace);
@@ -183,7 +184,6 @@ private:
 
   // Register allocation may generate Spill/Reload.
   IRFactory* m_irFactory;
-  TraceBuilder* m_tb;
   RegState   m_regs[NumRegs];
   std::list<RegState*> m_freeCallerSaved;
   std::list<RegState*> m_freeCalleeSaved;

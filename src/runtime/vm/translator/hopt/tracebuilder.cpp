@@ -258,15 +258,16 @@ SSATmp* TraceBuilder::genLdRetAddr() {
   return genInstruction(LdRetAddr, Type::TCA, m_fpValue);
 }
 
-SSATmp* TraceBuilder::genLdRaw(SSATmp* baseAddr, SSATmp* offset,
+SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,
                                Type::Tag type) {
   ASSERT(type == Type::Int || type == Type::Bool || type == Type::FuncRef);
-  return genInstruction(LdRaw, type, baseAddr, offset);
+  return genInstruction(LdRaw, type, base, genDefConst(int64(kind)));
 }
 
-void TraceBuilder::genStRaw(SSATmp* base, int64 offset, SSATmp* value) {
+void TraceBuilder::genStRaw(SSATmp* base, RawMemSlot::Kind kind,
+                            SSATmp* value) {
   ASSERT(value->getType() == Type::Int || value->getType() == Type::Bool);
-  genInstruction(StRaw, Type::None, base, genDefConst(offset), value);
+  genInstruction(StRaw, Type::None, base, genDefConst(int64(kind)), value);
 }
 
 void TraceBuilder::genTraceEnd(uint32 nextPc,
@@ -349,9 +350,8 @@ SSATmp* TraceBuilder::genInstruction(Opcode opc,
                                      SSATmp* src2,
                                      SSATmp* src3,
                                      Trace* exit /* = NULL */) {
-  LabelInstruction* label = exit ? exit->getLabel() : NULL;
   ExtendedInstruction inst(m_irFactory, opc, type, src1, src2, src3,
-                           0, NULL, label);
+                           0, NULL, getLabel(exit));
   return optimizeInst(&inst);
 }
 
@@ -361,9 +361,8 @@ SSATmp* TraceBuilder::genInstruction(Opcode opc, Type::Tag type,
                                      uint32 nOpnds,
                                      SSATmp** opnds,
                                      Trace* exit /* = NULL*/) {
-  LabelInstruction* label = exit ? exit->getLabel() : NULL;
   ExtendedInstruction inst(m_irFactory, opc, type, src1, src2,
-                           nOpnds, opnds, label);
+                           nOpnds, opnds, getLabel(exit));
   return optimizeInst(&inst);
 }
 
@@ -372,8 +371,7 @@ SSATmp* TraceBuilder::genInstruction(Opcode opc,
                                      SSATmp* src1,
                                      SSATmp* src2,
                                      Trace* exit /* = NULL */) {
-  LabelInstruction* label = exit ? exit->getLabel() : NULL;
-  IRInstruction inst(opc, type, src1, src2, label);
+  IRInstruction inst(opc, type, src1, src2, getLabel(exit));
   return optimizeInst(&inst);
 }
 
@@ -381,16 +379,14 @@ SSATmp* TraceBuilder::genInstruction(Opcode opc,
                                      Type::Tag type,
                                      SSATmp* src,
                                      Trace* exit /* = NULL */) {
-  LabelInstruction* label = exit ? exit->getLabel() : NULL;
-  IRInstruction inst(opc, type, src, label);
+  IRInstruction inst(opc, type, src, getLabel(exit));
   return optimizeInst(&inst);
 }
 
 SSATmp* TraceBuilder::genInstruction(Opcode opc,
                                      Type::Tag type,
                                      Trace* exit /* = NULL */) {
-  LabelInstruction* label = exit ? exit->getLabel() : NULL;
-  IRInstruction inst(opc, type, label);
+  IRInstruction inst(opc, type, getLabel(exit));
   return optimizeInst(&inst);
 }
 
@@ -702,6 +698,8 @@ void TraceBuilder::genGuardRefs(SSATmp* funcPtr,
 
 SSATmp* TraceBuilder::genLdHome(uint32 id) {
   ConstInstruction inst(m_fpValue, getLocal(id));
+  ASSERT(m_fpValue &&
+         m_fpValue->getInstruction()->getOpcode() == DefFP);
   return optimizeInst(&inst);
 }
 
@@ -771,13 +769,12 @@ SSATmp* TraceBuilder::genLdClsMethod(SSATmp* className,
                                      SSATmp* methodName,
                                      SSATmp* baseClass,
                                      Trace*  exit) {
-  LabelInstruction* label = exit ? exit->getLabel() : NULL;
   ExtendedInstruction inst(m_irFactory,
                            LdClsMethod,
                            Type::FuncClassRef,
                            className,
                            methodName,
-                           baseClass, 0, NULL, label);
+                           baseClass, 0, NULL, getLabel(exit));
   return optimizeInst(&inst);
 }
 

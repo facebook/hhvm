@@ -42,7 +42,7 @@ CVarRef GlobalArrayWrapper::getValueRef(ssize_t pos) const {
 bool GlobalArrayWrapper::noCopyOnWrite() const { return true; }
 
 bool GlobalArrayWrapper::exists(int64   k) const {
-  return exists(Variant(k));
+  return exists(String(k));
 }
 
 bool GlobalArrayWrapper::exists(const StringData* k) const {
@@ -50,7 +50,7 @@ bool GlobalArrayWrapper::exists(const StringData* k) const {
 }
 
 CVarRef GlobalArrayWrapper::get(int64   k, bool error /* = false */) const {
-  return get(Variant(k));
+  return get(String(k));
 }
 
 CVarRef GlobalArrayWrapper::get(const StringData* k,
@@ -72,7 +72,7 @@ ssize_t GlobalArrayWrapper::getIndex(const StringData* k) const {
 
 ArrayData *GlobalArrayWrapper::lval(int64   k, Variant *&ret, bool copy,
     bool checkExist /* = false */) {
-  return lval(Variant(k), ret, copy);
+  return lval(String(k), ret, copy);
 }
 
 ArrayData *GlobalArrayWrapper::lval(StringData* k, Variant *&ret,
@@ -107,7 +107,7 @@ ArrayData *GlobalArrayWrapper::setRef(StringData* k, CVarRef v,
 }
 
 ArrayData *GlobalArrayWrapper::remove(int64   k, bool copy) {
-  return remove(Variant(k), copy);
+  return remove(String(k), copy);
 }
 
 ArrayData *GlobalArrayWrapper::remove(const StringData* k, bool copy) {

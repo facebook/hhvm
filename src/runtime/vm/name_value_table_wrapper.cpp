@@ -37,7 +37,7 @@ ssize_t NameValueTableWrapper::vsize() const {
 
 Variant NameValueTableWrapper::getKey(ssize_t pos) const {
   NameValueTable::Iterator iter(m_tab, pos);
-  return iter.valid() ? Variant(StrNR(iter.curKey())) : null_variant;
+  return iter.valid() ? Variant(StrNR(iter.curKey())) : null;
 }
 
 Variant NameValueTableWrapper::getValue(ssize_t pos) const {
@@ -57,7 +57,7 @@ bool NameValueTableWrapper::noCopyOnWrite() const {
 }
 
 bool NameValueTableWrapper::exists(int64 k) const {
-  return exists(Variant(k));
+  return exists(String(k));
 }
 
 bool NameValueTableWrapper::exists(const StringData* k) const {
@@ -69,7 +69,7 @@ bool NameValueTableWrapper::idxExists(ssize_t idx) const {
 }
 
 CVarRef NameValueTableWrapper::get(int64 k, bool error) const {
-  return get(Variant(k), error);
+  return get(String(k), error);
 }
 
 CVarRef NameValueTableWrapper::get(const StringData* k, bool error) const {
@@ -90,12 +90,11 @@ TypedValue* NameValueTableWrapper::nvGet(const StringData* k) const {
 }
 
 TypedValue* NameValueTableWrapper::nvGet(int64 k) const {
-  Variant k2(k);
-  return m_tab->lookup(k2.toString().get());
+  return m_tab->lookup(String(k).get());
 }
 
 ssize_t NameValueTableWrapper::getIndex(int64 k) const {
-  return getIndex(Variant(k));
+  return getIndex(String(k));
 }
 
 ssize_t NameValueTableWrapper::getIndex(const StringData* k) const {
@@ -105,7 +104,7 @@ ssize_t NameValueTableWrapper::getIndex(const StringData* k) const {
 
 ArrayData* NameValueTableWrapper::lval(int64 k, Variant*& ret, bool copy,
                                        bool checkExist) {
-  return lval(Variant(k), ret, copy, checkExist);
+  return lval(String(k), ret, copy, checkExist);
 }
 
 ArrayData* NameValueTableWrapper::lval(StringData* k, Variant*& ret,
@@ -126,7 +125,7 @@ ArrayData* NameValueTableWrapper::lvalNew(Variant*& ret, bool copy) {
 }
 
 ArrayData* NameValueTableWrapper::set(int64 k, CVarRef v, bool copy) {
-  return set(Variant(k), v, copy);
+  return set(String(k), v, copy);
 }
 
 ArrayData* NameValueTableWrapper::set(StringData* k, CVarRef v,
@@ -136,7 +135,7 @@ ArrayData* NameValueTableWrapper::set(StringData* k, CVarRef v,
 }
 
 ArrayData* NameValueTableWrapper::setRef(int64 k, CVarRef v, bool copy) {
-  return setRef(Variant(k), v, copy);
+  return setRef(String(k), v, copy);
 }
 
 ArrayData* NameValueTableWrapper::setRef(StringData* k, CVarRef v, bool copy) {
@@ -145,7 +144,7 @@ ArrayData* NameValueTableWrapper::setRef(StringData* k, CVarRef v, bool copy) {
 }
 
 ArrayData* NameValueTableWrapper::remove(int64 k, bool copy) {
-  return remove(Variant(k), copy);
+  return remove(String(k), copy);
 }
 
 ArrayData* NameValueTableWrapper::remove(const StringData* k, bool copy) {

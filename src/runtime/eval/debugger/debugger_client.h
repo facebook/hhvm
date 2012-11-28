@@ -420,7 +420,7 @@ private:
 
   ClientState m_clientState;
   std::string m_sourceRoot;
-  StringBuffer* m_outputBuf;
+  std::string m_outputBuf;
 
   // helpers
   void runImpl();

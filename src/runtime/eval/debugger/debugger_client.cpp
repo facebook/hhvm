@@ -379,7 +379,7 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
       m_signum(CmdSignal::SignalNone), m_sigTime(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
-      m_clientState(StateUninit), m_outputBuf(NULL), m_inApiUse(false),
+      m_clientState(StateUninit), m_inApiUse(false),
       m_nameForApi(name), m_usageLogFP(NULL) {
   initUsageLogging();
 }
@@ -387,10 +387,6 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
 DebuggerClient::~DebuggerClient() {
   m_stopped = true;
   m_mainThread.waitForEnd();
-  if (m_outputBuf) {
-    delete m_outputBuf;
-    m_outputBuf = NULL;
-  }
   FILE *f = getLogFileHandler();
   if (f != NULL) {
     fclose(f);
@@ -593,7 +589,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
   if (options.apiMode) {
     UseColor = false;
     NoPrompt = true;
-    m_outputBuf = new StringBuffer();
+    m_outputBuf.clear();
   }
 
   if (!NoPrompt) {
@@ -1092,11 +1088,9 @@ bool DebuggerClient::console() {
 // output functions
 
 String DebuggerClient::getPrintString() {
-  int size = m_outputBuf->size();
-  if (size) {
-    return m_outputBuf->detach();
-  }
-  return "";
+  String s(m_outputBuf); // makes a copy;
+  m_outputBuf.clear();
+  return s;
 }
 
 Array DebuggerClient::getOutputArray() {
@@ -1236,8 +1230,7 @@ char DebuggerClient::ask(const char *fmt, ...) {
 #define FWRITE(ptr, size, nmemb, stream)                                \
 do {                                                                    \
   if (isApiMode()) {                                                    \
-    ASSERT(m_outputBuf);                                                \
-    m_outputBuf->append(ptr, size * nmemb);                             \
+    m_outputBuf.append(ptr, size * nmemb);                             \
   }                                                                     \
                                                                         \
   /* LogFile debugger setting */                                        \

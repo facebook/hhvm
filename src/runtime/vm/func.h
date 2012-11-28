@@ -39,7 +39,9 @@ struct Func {
 
   struct ParamInfo { // Parameter default value info.
     // construct a dummy ParamInfo
-    ParamInfo() : m_funcletOff(InvalidAbsoluteOffset), m_phpCode(NULL) {
+    ParamInfo()
+      : m_builtinType(KindOfInvalid), m_funcletOff(InvalidAbsoluteOffset),
+        m_phpCode(NULL) {
       tvWriteUninit(&m_defVal);
     }
 

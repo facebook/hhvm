@@ -590,7 +590,7 @@ of each slot on the evaluation stack must be compatible with the instruction's
 inputs' flavor descriptors.
 
 3) The evaluation stack must be empty at the beginning and end of each
-try region.  The evaluation stack must also be empty at any offset
+try region. The evaluation stack must also be empty at any offset
 listed as a catch entry point.
 
 4) If a given instruction is not the target of a forward branch and it follows
@@ -3769,11 +3769,15 @@ The $this expression has different effects depending on whether or not $this is
 the direct base of a property expression (such as "$this->x") or a method call
 expression (such as "$this->foo()"). When the $this expression is the direct
 base of a property expression or a method call expression, the This instruction
-is used. Otherwise, the local variable instructions are used to access a local
-variable named "this". Instance methods will initialize a local variable named
-"this" at the beginning of the method using the InitThisLoc instruction if and
-only if the method contains an occurrence of the $this expression which is not
-the direct base of a property expression or method expression.
+is used.
+
+A bare $this expression within an instance method is handled one of two ways:
+general or BareThis-optimized (optional). The general solution accesses a
+local variable named "this", which is initialized at the beginning of the
+method using the InitThisLoc instruction. The BareThis optimization applies to
+bare $this access as long as $this is not passed by reference and there are no
+dynamic method variables. In such cases, the BareThis instruction can be used
+to directly access $this, and the InitThisLoc instruction is not needed.
 
 
 Warning and errors at parse time

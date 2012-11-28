@@ -950,7 +950,7 @@ void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   std::stringstream ssCreate;
   ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Func")
            << "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER,"
-              " name TEXT, top INTEGER, "
+              " name TEXT, top INTEGER,"
               " extraData BLOB,"
               " PRIMARY KEY (unitSn, funcSn));";
   txn.exec(ssCreate.str());

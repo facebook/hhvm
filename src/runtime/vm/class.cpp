@@ -416,8 +416,8 @@ void PreClassRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClass")
-             << "(unitSn INTEGER, preClassId INTEGER, name TEXT, "
-                " hoistable INTEGER, extraData BLOB, "
+             << "(unitSn INTEGER, preClassId INTEGER, name TEXT,"
+                " hoistable INTEGER, extraData BLOB,"
                 " PRIMARY KEY (unitSn, preClassId));";
     txn.exec(ssCreate.str());
   }

@@ -140,6 +140,7 @@ int process(const ProgramOptions &po);
 int lintTarget(const ProgramOptions &po);
 int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar);
 int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar);
+void hhbcTargetInit(const ProgramOptions &po, AnalysisResultPtr ar);
 int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
                AsyncFileCacheSaver &fcThread);
 int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
@@ -508,7 +509,6 @@ cout << "Compiler: " << COMPILER_ID << "\n";
 
   if (hhvm && (po.target == "hhbc" || po.target == "run")) {
     Option::OutputHHBC = true;
-    RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
     Option::AnalyzePerfectVirtuals = false;
   }
 
@@ -603,6 +603,10 @@ int process(const ProgramOptions &po) {
   Package package(po.inputDir.c_str());
   ar = package.getAnalysisResult();
 
+  if (hhvm && (po.target == "hhbc" || po.target == "run")) {
+    hhbcTargetInit(po, ar);
+  }
+
   std::string errs;
   if (!AliasManager::parseOptimizations(po.optimizations, errs)) {
     Logger::Error("%s\n", errs.c_str());
@@ -615,10 +619,17 @@ int process(const ProgramOptions &po) {
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
-    if (!BuiltinSymbols::Load(ar, po.target == "cpp" && po.format == "sys")) {
+    if (!BuiltinSymbols::Load(ar,
+                              (po.target == "cpp" && po.format == "sys")
+                              || (po.target == "hhbc" && !Option::WholeProgram)
+                              )) {
       return false;
     }
-    ar->loadBuiltins();
+    if (po.target == "hhbc" && !Option::WholeProgram) {
+      BuiltinSymbols::NoSuperGlobals = false;
+    } else {
+      ar->loadBuiltins();
+    }
   }
 
   {
@@ -664,7 +675,9 @@ int process(const ProgramOptions &po) {
       if (!package.parse(!po.force)) {
         return 1;
       }
-      ar->analyzeProgram();
+      if (Option::WholeProgram || po.target == "analyze") {
+        ar->analyzeProgram();
+      }
     }
   }
 
@@ -861,10 +874,7 @@ int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
-               AsyncFileCacheSaver &fcThread) {
-  int ret = 0;
-
+void hhbcTargetInit(const ProgramOptions &po, AnalysisResultPtr ar) {
   if (po.syncDir.empty()) {
     ar->setOutputPath(po.outputDir);
   } else {
@@ -875,7 +885,13 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
   RuntimeOption::RepoLocalMode = "rw";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
+  RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
+  RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
+}
 
+int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
+               AsyncFileCacheSaver &fcThread) {
+  int ret = 0;
   int formatCount = 0;
   const char *type = 0;
   if (po.format.find("text") != string::npos) {

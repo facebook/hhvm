@@ -10,14 +10,16 @@ hhvm.hhbc:
 This dumps the SQLite database schema, but the repo schema is a slightly
 different concept, in that one repo can support multiple repo schemas
 simultaneously. To make this possible, every SQLite table name is suffixed with
-the repo schema version number. For example, repo schema version 0 contains a
-table called "magic0":
+the repo schema version, which is normally based on the source code and
+relevant options used to compile the runtime. For example, repo schema
+77fae842fab099b2eb4771f620e15a4bbf3883aa contains a table called
+"magic_77fae842fab099b2eb4771f620e15a4bbf3883aa":
 
-  $ sqlite3 hhvm.hhbc '.dump magic0'
+  $ sqlite3 hhvm.hhbc '.dump magic_77fae842fab099b2eb4771f620e15a4bbf3883aa'
   PRAGMA foreign_keys=OFF;
   BEGIN TRANSACTION;
-  CREATE TABLE magic0(product TEXT);
-  INSERT INTO "magic0"
+  CREATE TABLE magic_77fae842fab099b2eb4771f620e15a4bbf3883aa(product TEXT);
+  INSERT INTO "magic_77fae842fab099b2eb4771f620e15a4bbf3883aa"
     VALUES('facebook.com HipHop Virtual Machine bytecode repository');
   COMMIT;
 
@@ -26,21 +28,24 @@ support the schema.
 
 hhvm utilizes SQLite transactions to ensure that the repo is always in a
 consistent state. For example, the repo schema is either fully in place or fully
-absent. The same is true for compilation units; if an entry exists in the Unit0
-table, then all the associated data exists in the other tables.
+absent. The same is true for compilation units; if an entry exists in the
+Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa table, then all the associated
+data exists in the other tables.
 
-  $ sqlite3 hhvm.hhbc '.dump Unit0'
+  $ sqlite3 hhvm.hhbc '.dump Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa'
   PRAGMA foreign_keys=OFF;
   BEGIN TRANSACTION;
-  CREATE TABLE Unit0(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, lines BLOB,
-                     UNIQUE (md5));
+  CREATE TABLE Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa(
+    unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, bc_meta BLOB,
+    mainReturn BLOB, mergeable INTEGER,lines BLOB, UNIQUE (md5));
   COMMIT;
 
 Rather than use the bulky md5 blob as a unique identifier throughout the repo,
 unitSn is used. Incidentally, here is how to find out how many compilation units
 are stored:
 
-  $ sqlite3 hhvm.hhbc 'SELECT COUNT(*) FROM Unit0;'
+  $ sqlite3 hhvm.hhbc 'SELECT COUNT(*)
+                       FROM Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa;'
   19452
 
 hhvm uses one or two repos, depending on configuration. The 'central' repo must
@@ -72,7 +77,7 @@ can be used to control repo behavior:
 * Repo.Journal: delete(*) or memory
   delete: Delete the on-disk SQLite journal upon each successful transaction
           commit.
-  memory: Store the SQLite journal in memory.  The hphp compiler uses this mode
+  memory: Store the SQLite journal in memory. The hphp compiler uses this mode
           when compiling because it is faster than delete mode (and safe under
           such conditions), but it is unsafe to use under normal operating
           conditions.
@@ -86,4 +91,5 @@ can be used to control repo behavior:
   not consult filesystem to check for existence of file or parse it.
   Otherwise, fall back to parsing file from filesystem if unit
   is not found in Repo.
-* The environment variable $HHVM_REPO_SCHEMA will override the schema id.
+* The environment variable $HHVM_RUNTIME_REPO_SCHEMA will override the schema
+  id.

@@ -7031,6 +7031,18 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 static void emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   MD5 md5 = fsp->getMd5();
 
+  if (!Option::WholeProgram) {
+    // The passed-in ar is only useful in whole-program mode, so create a
+    // distinct ar to be used only for emission of this unit, and perform
+    // unit-level (non-global) optimization.
+    ar = AnalysisResultPtr(new AnalysisResult());
+    fsp->setOuterScope(ar);
+
+    ar->loadBuiltins();
+    ar->setPhase(AnalysisResult::AnalyzeAll);
+    fsp->analyzeProgram(ar);
+  }
+
   HPHP::VM::Unit* unit = emitHHBCUnit(ar, fsp, md5, UnitOriginFile,
                                       Option::GenerateBinaryHHBC);
   if (unit == NULL) {

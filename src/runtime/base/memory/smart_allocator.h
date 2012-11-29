@@ -147,9 +147,19 @@ class SmartAllocatorImpl : boost::noncopyable {
 public:
   enum Name {
     TestAllocator = -1,
-#define SMART_ALLOCATOR_ENTRY(x) x,
-#include "runtime/base/memory/smart_allocator.inc_gen"
-#undef SMART_ALLOCATOR_ENTRY
+    RefData,
+    StringData,
+    SharedMap,
+    VectorArray,
+    Variant,
+    Bucket,
+    ZendArray,
+    HphpArray,
+    ObjectData,
+    GlobalVariables,
+    TaintTraceNode,
+    TaintTraceData,
+    TestGlobals
   };
 
   struct Iterator;

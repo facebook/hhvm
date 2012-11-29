@@ -1041,8 +1041,6 @@ struct X64Assembler {
   void lddqu (MemoryRef m, RegXMM x)        { instrMR(instr_lddqu, m, x); }
   void lddqu (IndexedMemoryRef m, RegXMM x) { instrMR(instr_lddqu, m, x); }
 
-  // TODO(#1919678): there are special encodings for shifting by 1,
-  // which are our current use cases.
   void shlq  (Immed i, Reg64 r) { instrIR(instr_shl, i.b(), r); }
   void shrq  (Immed i, Reg64 r) { instrIR(instr_shr, i.b(), r); }
 
@@ -1870,10 +1868,6 @@ public:
 
   inline void store_imm32_disp_reg(int imm, int off, RegNumber rdest) {
     emitIM32(instr_mov, rdest, reg::noreg, sz::byte, off, imm);
-  }
-
-  inline void shl_reg64(int imm, RegNumber rsrc) {
-    emitIR(instr_shl, rsrc, imm, sz::dword);
   }
 
   inline void mov_reg64_reg64(RegNumber rsrc, RegNumber rdest) {

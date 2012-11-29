@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __UTIL_H__
-#define __UTIL_H__
+#ifndef incl_HPHP_UTIL_H_
+#define incl_HPHP_UTIL_H_
 
 #include <vector>
 #include <string>
@@ -330,4 +330,4 @@ static T& getDataRef(void* base, unsigned offset) {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __UTIL_H__
+#endif

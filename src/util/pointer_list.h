@@ -18,6 +18,7 @@
 #define __POINTERLIST_H__
 
 #include <stdlib.h>
+#include "util/assert.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

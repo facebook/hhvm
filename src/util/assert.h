@@ -13,16 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_ASSERT_H_
-#define incl_ASSERT_H_
+#ifndef incl_HPHP_ASSERT_H_
+#define incl_HPHP_ASSERT_H_
 
 #include <cassert>
 #include <stdio.h>
 
 //////////////////////////////////////////////////////////////////////
-
-// might hide problems
-#undef ASSERT
 
 #ifndef DEBUG
 #  ifndef ALWAYS_ASSERT

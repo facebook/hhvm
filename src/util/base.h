@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BASE_H__
-#define __BASE_H__
+#ifndef incl_HPHP_BASE_H_
+#define incl_HPHP_BASE_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -599,4 +599,4 @@ namespace HPHP {
   using boost::static_pointer_cast;
 }
 
-#endif // __BASE_H__
+#endif

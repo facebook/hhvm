@@ -15,7 +15,6 @@
 */
 
 #include "parser.h"
-#include <runtime/base/macros.h>
 #include <util/hash.h>
 
 namespace HPHP {

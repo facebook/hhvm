@@ -19,6 +19,7 @@
 #define __HPHP_ZEND_STRING_H__
 
 #include <util/base.h>
+#include <util/zend/zend_string.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/util/string_buffer.h>
 
@@ -43,18 +44,6 @@ namespace HPHP {
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
 int string_copy(char *dst, const char *src, int siz);
-
-/**
- * Duplicate a binary string. Note that NULL termination is needed even for
- * a binary string, because String class only wraps such a "safe" one that can
- * work with any functions that takes a C-string.
- */
-inline char *string_duplicate(const char *s, int len) {
-  char *ret = (char *)malloc(len + 1);
-  memcpy(ret, s, len);
-  ret[len] = '\0';
-  return ret;
-}
 
 /**
  * Compare two binary strings.
@@ -225,7 +214,6 @@ std::string string_cplus_escape(const char *s, int len);
 inline bool string_validate_base(int base) {
   return (2 <= base && base <= 36);
 }
-char *string_bin2hex(const char *input, int &len);
 char *string_hex2bin(const char *input, int &len);
 Variant string_base_to_numeric(const char *s, int len, int base);
 char *string_long_to_base(unsigned long value, int base);
@@ -237,15 +225,6 @@ char *string_numeric_to_base(CVarRef value, int base);
  */
 void string_translate(char *str, int len, const char *str_from,
                       const char *str_to, int trlen);
-
-/**
- * Hashing a string.
- */
-char *string_rot13(const char *input, int len);
-int   string_crc32(const char *p, int len);
-char *string_crypt(const char *key, const char *salt);
-char *string_md5(const char *arg, int arg_len, bool raw, int &out_len);
-char *string_sha1(const char *arg, int arg_len, bool raw, int &out_len);
 
 /**
  * Formatting.

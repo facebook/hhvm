@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "scanner.h"
-#include <util/util.h>
-#include <util/preprocess.h>
-#include <util/logger.h>
-#include <runtime/base/zend/zend_string.h>
+#include "util/parser/scanner.h"
+#include "util/util.h"
+#include "util/preprocess.h"
+#include "util/logger.h"
+#include "util/zend/zend_string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

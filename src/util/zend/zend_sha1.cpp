@@ -15,7 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_string.h>
+#include "util/zend/zend_string.h"
+
+#include <cinttypes>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,33 +43,33 @@ static unsigned char PADDING[64] = {
 
 // FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
 #define FF(a, b, c, d, e, w) {                                  \
-    (e) += F ((b), (c), (d)) + (w) + (uint32)(0x5A827999);  \
+    (e) += F ((b), (c), (d)) + (w) + (uint32_t)(0x5A827999);  \
     (e) += ROTATE_LEFT ((a), 5);                                \
     (b) = ROTATE_LEFT((b), 30);                                 \
   }
 #define GG(a, b, c, d, e, w) {                                  \
-    (e) += G ((b), (c), (d)) + (w) + (uint32)(0x6ED9EBA1);  \
+    (e) += G ((b), (c), (d)) + (w) + (uint32_t)(0x6ED9EBA1);  \
     (e) += ROTATE_LEFT ((a), 5);                                \
     (b) = ROTATE_LEFT((b), 30);                                 \
   }
 #define HH(a, b, c, d, e, w) {                                  \
-    (e) += H ((b), (c), (d)) + (w) + (uint32)(0x8F1BBCDC);  \
+    (e) += H ((b), (c), (d)) + (w) + (uint32_t)(0x8F1BBCDC);  \
     (e) += ROTATE_LEFT ((a), 5);                                \
     (b) = ROTATE_LEFT((b), 30);                                 \
   }
 #define II(a, b, c, d, e, w) {                                  \
-    (e) += I ((b), (c), (d)) + (w) + (uint32)(0xCA62C1D6);  \
+    (e) += I ((b), (c), (d)) + (w) + (uint32_t)(0xCA62C1D6);  \
     (e) += ROTATE_LEFT ((a), 5);                                \
     (b) = ROTATE_LEFT((b), 30);                                 \
   }
 
-static void SHA1Transform(uint32 state[5], const unsigned char block[64]);
+static void SHA1Transform(uint32_t state[5], const unsigned char block[64]);
 
 /**
- * Encodes input (uint32) into output (unsigned char). Assumes len is
+ * Encodes input (uint32_t) into output (unsigned char). Assumes len is
  * a multiple of 4.
  */
-static void SHA1Encode(unsigned char *output, uint32 *input,
+static void SHA1Encode(unsigned char *output, uint32_t *input,
                        unsigned int len) {
   unsigned int i, j;
 
@@ -80,23 +82,23 @@ static void SHA1Encode(unsigned char *output, uint32 *input,
 }
 
 /**
- * Decodes input (unsigned char) into output (uint32). Assumes len is
+ * Decodes input (unsigned char) into output (uint32_t). Assumes len is
  * a multiple of 4.
  */
-static void SHA1Decode(uint32 *output, const unsigned char *input,
+static void SHA1Decode(uint32_t *output, const unsigned char *input,
                        unsigned int len) {
   unsigned int i, j;
 
   for (i = 0, j = 0; j < len; i++, j += 4) {
-    output[i] = ((uint32) input[j + 3]) | (((uint32) input[j + 2]) << 8) |
-      (((uint32) input[j + 1]) << 16) | (((uint32) input[j]) << 24);
+    output[i] = ((uint32_t) input[j + 3]) | (((uint32_t) input[j + 2]) << 8) |
+      (((uint32_t) input[j + 1]) << 16) | (((uint32_t) input[j]) << 24);
   }
 }
 
 /* SHA1 context. */
 typedef struct {
-  uint32 state[5];          /* state (ABCD) */
-  uint32 count[2];          /* number of bits, modulo 2^64 (lsb first) */
+  uint32_t state[5];          /* state (ABCD) */
+  uint32_t count[2];          /* number of bits, modulo 2^64 (lsb first) */
   unsigned char buffer[64]; /* input buffer */
 } PHP_SHA1_CTX;
 
@@ -125,11 +127,11 @@ void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
   index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
   /* Update number of bits */
-  if ((context->count[0] += ((uint32) inputLen << 3))
-      < ((uint32) inputLen << 3)) {
+  if ((context->count[0] += ((uint32_t) inputLen << 3))
+      < ((uint32_t) inputLen << 3)) {
     context->count[1]++;
   }
-  context->count[1] += ((uint32) inputLen >> 29);
+  context->count[1] += ((uint32_t) inputLen >> 29);
 
   partLen = 64 - index;
 
@@ -188,9 +190,9 @@ void PHP_SHA1Final(unsigned char digest[20], PHP_SHA1_CTX * context) {
 /**
  * SHA1 basic transformation. Transforms state based on block.
  */
-static void SHA1Transform(uint32 state[5], const unsigned char block[64]) {
-  uint32 a = state[0], b = state[1], c = state[2];
-  uint32 d = state[3], e = state[4], x[16], tmp;
+static void SHA1Transform(uint32_t state[5], const unsigned char block[64]) {
+  uint32_t a = state[0], b = state[1], c = state[2];
+  uint32_t d = state[3], e = state[4], x[16], tmp;
 
   SHA1Decode(x, block, 64);
 

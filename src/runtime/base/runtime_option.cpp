@@ -39,6 +39,7 @@
 #include <runtime/base/preg.h>
 #include <util/parser/scanner.h>
 #include <runtime/base/server/access_log.h>
+#include "runtime/base/crash_reporter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -261,6 +262,12 @@ bool RuntimeOption::ClearInputOnSuccess = true;
 std::string RuntimeOption::ProfilerOutputDir;
 std::string RuntimeOption::CoreDumpEmail;
 bool RuntimeOption::CoreDumpReport = true;
+std::string RuntimeOption::CoreDumpReportDirectory
+#if defined(HPHP_OSS)
+  ("/tmp");
+#else
+  ("/var/tmp/cores");
+#endif
 bool RuntimeOption::LocalMemcache = false;
 bool RuntimeOption::MemcacheReadOnly = false;
 
@@ -1052,17 +1059,11 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     ClearInputOnSuccess = debug["ClearInputOnSuccess"].getBool(true);
     ProfilerOutputDir = debug["ProfilerOutputDir"].getString("/tmp");
     CoreDumpEmail = debug["CoreDumpEmail"].getString();
-    if (!CoreDumpEmail.empty()) {
-      StackTrace::ReportEmail = CoreDumpEmail;
-    }
     CoreDumpReport = debug["CoreDumpReport"].getBool(true);
     if (CoreDumpReport) {
-      StackTrace::InstallReportOnErrors();
+      install_crash_reporter();
     }
-    std::string reportDirectory = debug["CoreDumpReportDirectory"].getString();
-    if (!reportDirectory.empty()) {
-      StackTraceBase::ReportDirectory = reportDirectory;
-    }
+    CoreDumpReportDirectory = debug["CoreDumpReportDirectory"].getString();
     LocalMemcache = debug["LocalMemcache"].getBool();
     MemcacheReadOnly = debug["MemcacheReadOnly"].getBool();
 

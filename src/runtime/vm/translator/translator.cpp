@@ -1972,9 +1972,8 @@ void Translator::getInputs(Tracelet& t,
   }
 
   const bool wantInlineReturn = [&] {
-    int localCount = curFunc()->numLocals() -
-                     int(ni->nonRefCountedLocals.count());
-    ni->nonRefCountedLocals.resize(curFunc()->numLocals());
+    const int localCount = curFunc()->numLocals();
+    ni->nonRefCountedLocals.resize(localCount);
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {
       auto curType = tas.currentType(Location(Location::Local, i));

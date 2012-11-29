@@ -20,6 +20,7 @@
 #include <runtime/base/server/server.h>
 #include <runtime/base/server/libevent_transport.h>
 #include <runtime/base/timeout_thread.h>
+#include <runtime/base/server/job_queue_vm_stack.h>
 #include <util/job_queue.h>
 #include <util/process.h>
 
@@ -49,8 +50,9 @@ private:
  * with one HTTP request after another. All this class does is to delegate
  * the request to an HttpRequestHandler.
  */
-class LibEventWorker : public JobQueueWorker<LibEventJobPtr, true> {
-public:
+struct LibEventWorker
+  : JobQueueWorker<LibEventJobPtr,true,false,JobQueueDropVMStack>
+{
   LibEventWorker();
   virtual ~LibEventWorker();
 

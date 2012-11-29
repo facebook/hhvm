@@ -481,7 +481,6 @@ public:
   void unprotect();
   void requestInit();
   void requestExit();
-  static void flush();
 private:
   void toStringFrag(std::ostream& os, const ActRec* fp,
                     const TypedValue* top) const;

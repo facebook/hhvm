@@ -19,6 +19,7 @@
 #include <runtime/base/server/rpc_request_handler.h>
 #include <runtime/base/server/satellite_server.h>
 #include <runtime/base/util/libevent_http_client.h>
+#include <runtime/base/server/job_queue_vm_stack.h>
 #include <runtime/ext/ext_json.h>
 #include <util/job_queue.h>
 #include <util/lock.h>
@@ -156,8 +157,9 @@ static IMPLEMENT_THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 static IMPLEMENT_THREAD_LOCAL(string, s_xbox_prev_req_init_doc);
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxWorker : public JobQueueWorker<XboxTransport*, true> {
-public:
+struct XboxWorker
+  : JobQueueWorker<XboxTransport*,true,false,JobQueueDropVMStack>
+{
   virtual void doJob(XboxTransport *job) {
     try {
       // If this job or the previous job that ran on this thread have

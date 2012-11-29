@@ -647,8 +647,7 @@ Stack::requestExit() {
   }
 }
 
-void
-Stack::flush() {
+void flush_evaluation_stack() {
   if (!t_se.isNull()) {
     t_se->flush();
   }

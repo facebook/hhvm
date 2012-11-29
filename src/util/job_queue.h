@@ -14,18 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONCURRENCY_JOB_QUEUE_H__
-#define __CONCURRENCY_JOB_QUEUE_H__
+#ifndef incl_HPHP_UTIL_JOB_QUEUE_H_
+#define incl_HPHP_UTIL_JOB_QUEUE_H_
 
-#include "async_func.h"
 #include <vector>
 #include <set>
-#include "synchronizable_multi.h"
-#include "lock.h"
-#include "atomic.h"
-#include "alloc.h"
-#include "exception.h"
-#include "runtime/vm/bytecode.h"
+#include "util/async_func.h"
+#include "util/synchronizable_multi.h"
+#include "util/lock.h"
+#include "util/atomic.h"
+#include "util/alloc.h"
+#include "util/exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,13 +67,19 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace detail {
+  struct NoDropCachePolicy { static void dropCache() {} };
+}
+
 /**
  * A job queue that's suitable for multiple threads to work on.
  */
-template<typename TJob, bool waitable = false>
+template<typename TJob,
+         bool waitable = false,
+         class DropCachePolicy = detail::NoDropCachePolicy>
 class JobQueue : public SynchronizableMulti {
 public:
-  // trial class for signaling queue stop
+  // trivial class for signaling queue stop
   class StopSignal {};
 
 public:
@@ -121,9 +126,7 @@ public:
           if (m_dropStack && Util::s_stackLimit) {
             Util::flush_thread_stack();
           }
-          if (hhvm) {
-            VM::Stack::flush();
-          }
+          DropCachePolicy::dropCache();
           flushed = true;
         }
       }
@@ -182,13 +185,15 @@ public:
   bool m_lifo;
 };
 
-template<typename TJob>
-class JobQueue<TJob,true> : public JobQueue<TJob,false> {
-public:
+template<class TJob, class Policy>
+struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
            bool dropStack, bool lifo) :
-    JobQueue<TJob,false>(threadCount, threadRoundRobin, dropCacheTimeout,
-                         dropStack, lifo) {
+    JobQueue<TJob,false,Policy>(threadCount,
+                                threadRoundRobin,
+                                dropCacheTimeout,
+                                dropStack,
+                                lifo) {
     pthread_cond_init(&m_cond, NULL);
   }
   ~JobQueue() {
@@ -211,11 +216,20 @@ private:
 
 /**
  * Base class for a customized worker.
+ *
+ * DropCachePolicy is an extra callback for specific actions to take
+ * when we decide to drop stack/caches.
  */
-template<typename TJob, bool countActive = false, bool waitable = false>
+template<typename TJob,
+         bool countActive = false,
+         bool waitable = false,
+         class Policy = detail::NoDropCachePolicy>
 class JobQueueWorker {
 public:
   typedef TJob JobType;
+  typedef JobQueue<TJob,waitable,Policy> QueueType;
+  typedef Policy DropCachePolicy;
+
   static const bool Waitable = waitable;
   static const bool CountActive = countActive;
   /**
@@ -232,8 +246,7 @@ public:
    * Two-phase object creation for easier derivation and for JobQueueDispatcher
    * to easily create a vector of workers.
    */
-  void create(int id, JobQueue<TJob,waitable> *queue,
-              void *func, void *opaque) {
+  void create(int id, QueueType* queue, void *func, void *opaque) {
     ASSERT(queue);
     m_id = id;
     m_queue = queue;
@@ -267,7 +280,7 @@ public:
             }
           }
         }
-      } catch (typename JobQueue<TJob,waitable>::StopSignal) {
+      } catch (typename QueueType::StopSignal) {
         m_stopped = true; // queue is empty and stopped, so we are done
       }
     }
@@ -288,8 +301,7 @@ protected:
   bool m_stopped;
 
 private:
-
-  JobQueue<TJob, waitable> *m_queue;
+  QueueType* m_queue;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -297,7 +309,7 @@ private:
 /**
  * Driver class to push through the whole thing.
  */
-template<typename TJob, class TWorker>
+template<class TJob, class TWorker>
 class JobQueueDispatcher {
 public:
   /**
@@ -448,7 +460,9 @@ private:
   int m_id;
   void *m_opaque;
   int m_maxThreadCount;
-  JobQueue<TJob, TWorker::Waitable> m_queue;
+  JobQueue<TJob,
+           TWorker::Waitable,
+           typename TWorker::DropCachePolicy> m_queue;
 
   Mutex m_mutex;
   std::set<TWorker*> m_workers;
@@ -470,4 +484,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __CONCURRENCY_JOB_QUEUE_H__
+#endif

@@ -18,6 +18,7 @@
 #include <runtime/base/server/transport.h>
 #include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/upload.h>
+#include <runtime/base/server/job_queue_vm_stack.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/resource_data.h>
@@ -218,8 +219,9 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PageletWorker : public JobQueueWorker<PageletTransport*> {
-public:
+struct PageletWorker
+  : JobQueueWorker<PageletTransport*,false,false,JobQueueDropVMStack>
+{
   virtual void doJob(PageletTransport *job) {
     try {
       job->onRequestStart(job->getStartTimer());

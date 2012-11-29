@@ -241,7 +241,7 @@ bool IniSetting::Get(CStrRef name, String &value) {
   }
   if (name == "upload_max_filesize") {
     int uploadMaxFilesize = VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-    value = String(uploadMaxFilesize);
+    value = String(uploadMaxFilesize) + "M";
     return true;
   }
   if (name == "post_max_size") {

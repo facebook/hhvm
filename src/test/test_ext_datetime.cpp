@@ -183,7 +183,7 @@ bool TestExtDatetime::test_date_interval_create_from_date_string() {
 bool TestExtDatetime::test_date_interval_format() {
   // Covered by test_date_interval_create_from_string, above
   return Count(true);
-} 
+}
 
 bool TestExtDatetime::test_date_isodate_set() {
   Object dt = f_date_create("2008-08-08 00:00:00");
@@ -510,6 +510,7 @@ bool TestExtDatetime::test_mktime() {
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 98)),     "Jan-01-1998");
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 1900)),   "Jan-01-1900");
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 2100)),   "Jan-01-2100");
+  VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 110)),    "Jan-01-0110");
 
   VS(f_mktime(), time(NULL));
 

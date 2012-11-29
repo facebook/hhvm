@@ -336,7 +336,7 @@ void DateTime::set(int hou, int min, int sec, int mon, int day, int yea) {
   if (yea != INT_MAX) {
     if (yea < 70) {
       yea += 2000;
-    } else if (yea >= 70 && yea <= 110) {
+    } else if (yea >= 70 && yea <= 100) {
       yea += 1900;
     }
     m_time->y = yea;

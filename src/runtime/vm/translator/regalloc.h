@@ -50,19 +50,19 @@ static const int kMaxRegs = 64;
  * can be implicitly converted to and from a Reg64.  If you want to
  * use it as a 32 bit register call r32(physReg).
  *
- * The implicit conversion to register_name_t is historical: it exists
+ * The implicit conversion to RegNumber is historical: it exists
  * for backward-compatability with the old-style asm-x64.h api
  * (e.g. store_reg##_disp_reg##).
  */
 struct PhysReg {
   explicit constexpr PhysReg(int n = -1) : n(n) {}
   /* implicit */ constexpr PhysReg(Reg64 r) : n(int(r)) {}
-  explicit constexpr PhysReg(Reg32 r) : n(int(register_name_t(r))) {}
+  explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
 
-  explicit constexpr PhysReg(register_name_t r) : n(int(r)) {}
+  explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
 
   constexpr operator Reg64() const { return Reg64(n); }
-  constexpr operator register_name_t() const { return register_name_t(n); }
+  constexpr operator RegNumber() const { return RegNumber(n); }
 
   explicit constexpr operator int() const { return n; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }

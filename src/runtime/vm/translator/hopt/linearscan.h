@@ -29,7 +29,7 @@ namespace JIT {
 class LinearScan {
 public:
   // TODO: remove these in favor of using the abi-x64.h constants.
-  const static register_name_t noReg;
+  const static RegNumber noReg;
   const static Reg64 rVmSP;
   const static Reg64 rSP;
   const static Reg64 rVmFP;
@@ -52,7 +52,7 @@ public:
                 "LinearScan");
 
   // HHIR:TODO ideally wouldn't need to use ints, but very helpful for bit ops
-  static int regNameAsInt(register_name_t r) { return (int)r; }
+  static int regNameAsInt(RegNumber r) { return (int)r; }
 
   template<class T>
   static inline uint REG_MASK(T regNo) { return 1 << uint(regNo); }
@@ -60,22 +60,22 @@ public:
   const static int CallerSavedRegMask;
 
   const static int NumCallerSavedRegs = 9;
-  static inline register_name_t getCallerSavedReg(int i) {
+  static inline RegNumber getCallerSavedReg(int i) {
     ASSERT(i < NumCallerSavedRegs);
     return CallerSavedRegs[i];
   }
 
-  static inline bool isCallerSavedReg(register_name_t regNo) {
+  static inline bool isCallerSavedReg(RegNumber regNo) {
     return CallerSavedRegMask & REG_MASK(LinearScan::regNameAsInt(regNo));
   }
 
-  // HHIR:TODO:MERGE remove this int version just use register_name_t
+  // HHIR:TODO:MERGE remove this int version just use RegNumber
   static inline int getRegMask(int regNo) {
     ASSERT(regNo < NumRegs && regNo >= 0);
     return REG_MASK(regNo);
   }
 
-  static inline int getRegMask(register_name_t regNo) {
+  static inline int getRegMask(RegNumber regNo) {
     ASSERT(LinearScan::regNameAsInt(regNo) < NumRegs &&
            LinearScan::regNameAsInt(regNo) >= 0);
     return REG_MASK(LinearScan::regNameAsInt(regNo));
@@ -123,7 +123,7 @@ public:
   public:
     PreColoringHint() { clear(); }
     bool preColorsTmp(RegState* reg) const;
-    register_name_t getPreColoringReg(SSATmp* tmp, uint32 index) const;
+    RegNumber getPreColoringReg(SSATmp* tmp, uint32 index) const;
     void clear();
     void add(SSATmp* tmp, uint32 index, int argNum);
   private:
@@ -172,7 +172,7 @@ private:
   IRInstruction* getNextNative() const;
   uint32 getNextNativeId() const;
 
-  static const register_name_t CallerSavedRegs[];
+  static const RegNumber CallerSavedRegs[];
   static const char* RegNames[NumRegs];
 
   void pushFreeReg(RegState* reg);

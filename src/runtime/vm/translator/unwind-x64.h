@@ -56,7 +56,7 @@ struct UnwindRegInfo {
 
   explicit UnwindRegInfo();
 
-  void add(register_name_t reg, DataType type, Location loc);
+  void add(RegNumber reg, DataType type, Location loc);
   void clear();
   bool empty() const;
 

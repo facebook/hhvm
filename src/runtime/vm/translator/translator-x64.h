@@ -278,7 +278,7 @@ private:
   void emitStringToClass(const NormalizedInstruction& i);
   void emitKnownClassCheck(const NormalizedInstruction& i,
                            const StringData* clssName,
-                           register_name_t reg);
+                           RegNumber reg);
   void emitStringToKnownClass(const NormalizedInstruction& i,
                               const StringData* clssName);
   void emitObjToClass(const NormalizedInstruction& i);
@@ -934,7 +934,7 @@ private:
   void emitBindJcc(Asm& a, ConditionCode cc, const SrcKey& dest,
                    ServiceRequest req = REQ_BIND_JCC);
   void emitBindJmp(const SrcKey& dest);
-  void emitBindCallHelper(register_name_t stashedAR,
+  void emitBindCallHelper(RegNumber stashedAR,
                           SrcKey srcKey,
                           const Func* funcd,
                           int numArgs,

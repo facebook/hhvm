@@ -582,8 +582,8 @@ bool SSATmp::isAssignedSpillLoc(uint32 index) const {
   return LinearScan::regNameAsInt(m_assignedLoc[index]) >= LinearScan::FirstSpill;
 }
 
-register_name_t SSATmp::getAssignedLoc(uint32 index) {
-  register_name_t reg = m_assignedLoc[index];
+RegNumber SSATmp::getAssignedLoc(uint32 index) {
+  RegNumber reg = m_assignedLoc[index];
   return reg;
 }
 
@@ -599,18 +599,18 @@ uint32 SSATmp::getSpillLoc(uint32 index) const {
 }
 
 void SSATmp::setSpillLoc(uint32 spillLoc, uint32 index) {
-  m_assignedLoc[index] = (register_name_t)(spillLoc + LinearScan::FirstSpill);
+  m_assignedLoc[index] = (RegNumber)(spillLoc + LinearScan::FirstSpill);
 }
 
-register_name_t SSATmp::getMmxReg(uint32 index) const {
+RegNumber SSATmp::getMmxReg(uint32 index) const {
   ASSERT(isAssignedMmxReg(index));
-  return (register_name_t)(LinearScan::regNameAsInt(m_assignedLoc[index]) -
+  return (RegNumber)(LinearScan::regNameAsInt(m_assignedLoc[index]) -
                            LinearScan::FirstMmxReg);
 }
 
-void SSATmp::setMmxReg(register_name_t mmxReg, uint32 index) {
+void SSATmp::setMmxReg(RegNumber mmxReg, uint32 index) {
   ASSERT(LinearScan::regNameAsInt(mmxReg) < (int32)LinearScan::NumMmxRegs);
-  m_assignedLoc[index] = (register_name_t)(LinearScan::regNameAsInt(mmxReg) +
+  m_assignedLoc[index] = (RegNumber)(LinearScan::regNameAsInt(mmxReg) +
                                            LinearScan::FirstMmxReg);
 }
 

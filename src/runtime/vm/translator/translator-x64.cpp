@@ -2288,7 +2288,7 @@ TranslatorX64::emitBindCall(const Tracelet& t,
 }
 
 void
-TranslatorX64::emitBindCallHelper(register_name_t stashedAR,
+TranslatorX64::emitBindCallHelper(RegNumber stashedAR,
                                   SrcKey srcKey,
                                   const Func* funcd,
                                   int numArgs,
@@ -6713,7 +6713,7 @@ const int kEmitClsLocalIdx = 0;
 void
 TranslatorX64::emitKnownClassCheck(const NormalizedInstruction& i,
                                    const StringData* clsName,
-                                   register_name_t reg) {
+                                   RegNumber reg) {
   using namespace TargetCache;
   ASSERT(clsName);
   Class* klass = Unit::lookupClass(clsName);

@@ -184,7 +184,7 @@ bool UnwindRegInfo::empty() const {
   return !m_regs[0].dirty;
 }
 
-void UnwindRegInfo::add(register_name_t reg,
+void UnwindRegInfo::add(RegNumber reg,
                         DataType type,
                         Location loc) {
   ASSERT(type >= -32 && type <= 31 &&

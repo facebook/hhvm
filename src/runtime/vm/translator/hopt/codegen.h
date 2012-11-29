@@ -50,7 +50,7 @@ struct ArgGroup;
 
 class CodeGenerator {
 public:
-  static const register_name_t argNumToRegName[];
+  static const RegNumber argNumToRegName[];
 
   // typedef copied from TranslatorX64 class
   typedef Transl::X64Assembler Asm;
@@ -77,7 +77,7 @@ public:
   // helper functions for code generation
   Address cgCallHelper(Asm& a,
                        TCA addr,
-                       register_name_t dstReg,
+                       RegNumber dstReg,
                        bool doRecordSyncPoint,
                        ArgGroup& args);
   Address cgCallHelper(Asm&,
@@ -86,15 +86,15 @@ public:
                        bool doRecordSyncPoint,
                        ArgGroup& args);
 
-  Address cgStore(register_name_t base,
+  Address cgStore(RegNumber base,
                   int64_t off,
                   SSATmp* src,
                   bool genStoreType = true);
-  Address cgStoreCell(register_name_t base, int64_t off, SSATmp* src);
+  Address cgStoreCell(RegNumber base, int64_t off, SSATmp* src);
 
   Address cgLoad(Type::Tag type,
                  SSATmp* dst,
-                 register_name_t base,
+                 RegNumber base,
                  int64_t off,
                  LabelInstruction* label,
                  IRInstruction* inst = NULL);
@@ -126,7 +126,7 @@ public:
                          SSATmp* magicName);
   Address cgLoadCell(Type::Tag type,
                      SSATmp* dst,
-                     register_name_t base,
+                     RegNumber base,
                      int64_t off,
                      LabelInstruction* label);
 
@@ -147,7 +147,7 @@ public:
 
 private:
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
-  void emitTraceRet(CodeGenerator::Asm& as, register_name_t retAddrReg);
+  void emitTraceRet(CodeGenerator::Asm& as, RegNumber retAddrReg);
   Address emitCheckStack(CodeGenerator::Asm& as, SSATmp* sp, uint32 numElems,
                          bool allocActRec);
   Address emitCheckCell(CodeGenerator::Asm& as,
@@ -155,27 +155,27 @@ private:
                         uint32 index);
   uint32 cgTrace(Trace*, uint32 liveRegs);
   Address cgCheckStaticBit(Type::Tag type,
-                           register_name_t reg,
+                           RegNumber reg,
                            bool regIsCount);
   Address cgCheckStaticBitAndDecRef(Type::Tag type,
-                                    register_name_t dataReg,
+                                    RegNumber dataReg,
                                     LabelInstruction* exit);
-  Address cgCheckRefCountedType(register_name_t typeReg);
-  Address cgCheckRefCountedType(register_name_t baseReg,
+  Address cgCheckRefCountedType(RegNumber typeReg);
+  Address cgCheckRefCountedType(RegNumber baseReg,
                                 int64 offset);
   Address cgDecRefStaticType(Type::Tag type,
-                             register_name_t dataReg,
+                             RegNumber dataReg,
                              LabelInstruction* exit,
                              bool genZeroCheck);
-  Address cgDecRefDynamicType(register_name_t typeReg,
-                              register_name_t dataReg,
+  Address cgDecRefDynamicType(RegNumber typeReg,
+                              RegNumber dataReg,
                               LabelInstruction* exit,
                               bool genZeroCheck);
-  Address cgDecRefDynamicTypeMem(register_name_t baseReg,
+  Address cgDecRefDynamicTypeMem(RegNumber baseReg,
                                  int64 offset,
                                  LabelInstruction* exit);
   Address cgDecRefMem(Type::Tag type,
-                      register_name_t baseReg,
+                      RegNumber baseReg,
                       int64 offset,
                       LabelInstruction* exit);
 
@@ -188,7 +188,7 @@ private:
                               SSATmp* toSmash);
   Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
                               SSATmp* toSmash);
-  int getLiveOutRegsToSave(register_name_t dstReg);
+  int getLiveOutRegsToSave(RegNumber dstReg);
   const Func* getCurrFunc();
   void recordSyncPoint(Asm& as);
   Address getDtor(DataType type);
@@ -212,17 +212,17 @@ class ArgDesc {
 public:
   enum Kind { Reg, Imm, Addr };
 
-  register_name_t getDstReg() const { return m_dstReg; }
-  register_name_t getSrcReg() const { return m_srcReg; }
+  RegNumber getDstReg() const { return m_dstReg; }
+  RegNumber getSrcReg() const { return m_srcReg; }
   Kind getKind() const { return m_kind; }
-  void setDstReg(register_name_t reg) { m_dstReg = reg; }
+  void setDstReg(RegNumber reg) { m_dstReg = reg; }
   Address genCode(CodeGenerator::Asm& as) const;
   uintptr_t getImm() const { return m_imm; }
 
 private: // These should be created using ArgGroup.
   friend struct ArgGroup;
 
-  explicit ArgDesc(Kind kind, register_name_t srcReg, uintptr_t immVal)
+  explicit ArgDesc(Kind kind, RegNumber srcReg, uintptr_t immVal)
     : m_kind(kind)
     , m_srcReg(srcReg)
     , m_dstReg(reg::noreg)
@@ -233,8 +233,8 @@ private: // These should be created using ArgGroup.
 
 private:
   Kind m_kind;
-  register_name_t m_srcReg;
-  register_name_t m_dstReg;
+  RegNumber m_srcReg;
+  RegNumber m_dstReg;
   uintptr_t m_imm;
 };
 
@@ -267,7 +267,7 @@ struct ArgGroup {
     return imm(uintptr_t(ptr));
   }
 
-  ArgGroup& reg(register_name_t reg) {
+  ArgGroup& reg(RegNumber reg) {
     m_args.push_back(ArgDesc(ArgDesc::Reg, reg, -1));
     return *this;
   }
@@ -277,7 +277,7 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& addr(register_name_t base, uintptr_t off) {
+  ArgGroup& addr(RegNumber base, uintptr_t off) {
     m_args.push_back(ArgDesc(ArgDesc::Addr, base, off));
     return *this;
   }

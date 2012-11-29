@@ -103,8 +103,8 @@ void X64Assembler::init(CodeAddress start, size_t sz) {
 }
 
 StoreImmPatcher::StoreImmPatcher(X64Assembler& as, uint64_t initial,
-                                 register_name_t reg,
-                                 int32_t offset, register_name_t base) {
+                                 RegNumber reg,
+                                 int32_t offset, RegNumber base) {
   m_is32 = deltaFits(initial, sz::dword);
   if (m_is32) {
     as.store_imm64_disp_reg64(initial, offset, base);

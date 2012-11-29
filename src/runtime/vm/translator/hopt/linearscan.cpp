@@ -22,7 +22,7 @@ namespace JIT{
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::tx64;
 
-const register_name_t LinearScan::noReg = reg::noreg;
+const RegNumber LinearScan::noReg = reg::noreg;
 const Reg64 LinearScan::rVmSP = reg::rbx;
 const Reg64 LinearScan::rSP = reg::rsp;
 const Reg64 LinearScan::rVmFP = reg::rbp;
@@ -56,7 +56,7 @@ const char* LinearScan::RegNames[LinearScan::NumRegs] = {
   "r15" // rStashedAR
 };
 
-const register_name_t
+const RegNumber
 LinearScan::CallerSavedRegs[LinearScan::NumCallerSavedRegs] = {
   reg::rax, reg::rcx, reg::rdx, reg::rsi, reg::rdi,
   reg::r8,  reg::r9,  reg::r10, reg::r11
@@ -181,7 +181,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       for (uint32 locIndex = 0;
            locIndex < tmp->getNumAssignedLocs();
            ++locIndex) {
-        register_name_t srcReg = tmp->getAssignedLoc(locIndex);
+        RegNumber srcReg = tmp->getAssignedLoc(locIndex);
         m_regs[LinearScan::regNameAsInt(srcReg)].m_pinned = true;
       }
     }
@@ -297,7 +297,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
     // Pre-colors ssaTmp if it's used as an argument of next native.
     // Search for the original tmp instead of <ssaTmp> itself, because
     // the pre-coloring hint is not aware of reloaded tmps.
-    register_name_t targetRegNo =
+    RegNumber targetRegNo =
       m_preColoringHint.getPreColoringReg(getOrigTmp(ssaTmp), index);
     if (targetRegNo != reg::noreg) {
       reg = getReg(&m_regs[LinearScan::regNameAsInt(targetRegNo)]);
@@ -337,7 +337,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
 void LinearScan::allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
   reg->m_ssaTmp = ssaTmp;
   // mark inst as using this register
-  ssaTmp->setAssignedLoc((register_name_t)reg->m_regNo, index);
+  ssaTmp->setAssignedLoc((RegNumber)reg->m_regNo, index);
   uint32_t lastUseId = ssaTmp->getLastUseId();
   if (reg->isReserved()) {
     return;
@@ -385,7 +385,7 @@ uint32 LinearScan::assignSpillLocAux(Trace* trace,
             nextMmxReg < (uint32)NumMmxRegs) {
           // The live range of the spill slot doesn't span native calls,
           // and we still have free MMX registers.
-          dst->setMmxReg((register_name_t)nextMmxReg, locIndex);
+          dst->setMmxReg((RegNumber)nextMmxReg, locIndex);
           ++nextMmxReg;
           TRACE(3, "[counter] 1 spill to mmx\n");
         } else {
@@ -1155,12 +1155,12 @@ bool LinearScan::PreColoringHint::preColorsTmp(RegState* reg) const {
 // Get the pre-coloring register of (<tmp>, <index>).
 // A native call has at most six arguments, so the time complexity is
 // not a big problem.
-register_name_t LinearScan::PreColoringHint::getPreColoringReg(
+RegNumber LinearScan::PreColoringHint::getPreColoringReg(
     SSATmp* tmp, uint32 index) const {
   for (int regNo = 0; regNo < LinearScan::NumRegs; ++regNo) {
     if (m_preColoredTmps[regNo].first == tmp &&
         m_preColoredTmps[regNo].second == index) {
-      return (register_name_t)regNo;
+      return (RegNumber)regNo;
     }
   }
   return reg::noreg;

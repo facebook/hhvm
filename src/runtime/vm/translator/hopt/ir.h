@@ -42,7 +42,7 @@ namespace VM {
 namespace JIT {
 
 using HPHP::VM::Transl::TCA;
-using HPHP::VM::Transl::register_name_t;
+using HPHP::VM::Transl::RegNumber;
 
 class FailedIRGen : public std::exception {
  public:
@@ -1017,15 +1017,15 @@ public:
   bool              isAssignedReg(uint32 index) const;
   bool              isAssignedMmxReg(uint32 index) const;
   bool              isAssignedSpillLoc(uint32 index) const;
-  register_name_t   getAssignedLoc() { return m_assignedLoc[0]; }
-  register_name_t   getAssignedLoc(uint32 index);
-  void              setAssignedLoc(register_name_t loc, uint32 index) {
+  RegNumber   getAssignedLoc() { return m_assignedLoc[0]; }
+  RegNumber   getAssignedLoc(uint32 index);
+  void              setAssignedLoc(RegNumber loc, uint32 index) {
     m_assignedLoc[index] = loc;
   }
   uint32            getSpillLoc(uint32 index) const;
   void              setSpillLoc(uint32 spillLoc, uint32 index);
-  register_name_t   getMmxReg(uint32 index) const;
-  void              setMmxReg(register_name_t mmxReg, uint32 index);
+  RegNumber   getMmxReg(uint32 index) const;
+  void              setMmxReg(RegNumber mmxReg, uint32 index);
   bool              isConst() const { return m_inst->isConstInstruction(); }
   bool              getConstValAsBool();
   int64             getConstValAsInt();
@@ -1075,7 +1075,7 @@ private:
   // loc < LinearScan::NumRegs: general purpose registers
   // LinearScan::NumRegs <= loc < LinearScan::FirstSpill: MMX registers
   // LinearScan::FistSpill <= loc: spill location
-  register_name_t   m_assignedLoc[MaxNumAssignedLoc]; // register allocation
+  RegNumber   m_assignedLoc[MaxNumAssignedLoc]; // register allocation
 };
 
 class IRFactory {

@@ -94,7 +94,6 @@ class ObjectData : public CountableNF {
              VM::Class* type = NULL)
       : o_attribute(0)
 #ifdef HHVM
-        , m_propsOffset(0)
         , m_cls(type)
 #else
         , o_callbacks(cb)
@@ -378,23 +377,14 @@ public:
                                        const ObjectStaticCallbacks *osc);
  public:
   static const bool IsResourceClass = false;
- protected:
-  int           o_id;            // a numeric identifier of this object
+
+  // this will be hopefully packed together with _count from parent class
  private:
   mutable int16 o_attribute;     // various flags
-
-  // All of the fields that would ordinarily reside in HPHP::VM::Instance must
-  // reside here, so that it is possible to dynamically compute the offset of
-  // the property vector that follows an "Instance", regardless of whether the
-  // Instance is actually an extension class that derives from ObjectData.
-
-#ifdef HHVM
-  int16         m_propsOffset;   // used for accessing declared properties
-                                 // under the VM
-#endif
  protected:
-  ArrNR         o_properties;    // dynamic properties (VM and hphpc)
+  int16         o_subclassData;  // field that can be reused by subclasses
 
+ protected:
 #ifdef HHVM
   HPHP::VM::Class* m_cls;
 #else
@@ -405,6 +395,10 @@ public:
     HPHP::VM::Class* m_cls;
   };
 #endif
+
+ protected:
+  ArrNR         o_properties;    // dynamic properties (VM and hphpc)
+  int           o_id;            // a numeric identifier of this object
 
  protected:
   void          cloneDynamic(ObjectData *orig);

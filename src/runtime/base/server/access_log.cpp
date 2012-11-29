@@ -25,7 +25,7 @@
 #include <util/atomic.h>
 #include <util/compatibility.h>
 #include <util/util.h>
-#include <util/hardware_counter.h>
+#include <runtime/base/hardware_counter.h>
 
 using std::endl;
 
@@ -391,7 +391,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     break;
   case 'Y':
     {
-      int64 now = Util::HardwareCounter::GetInstructionCount();
+      int64 now = HardwareCounter::GetInstructionCount();
       out << now - transport->getInstructions();
     }
     break;

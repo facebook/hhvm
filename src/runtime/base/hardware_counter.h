@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_HARDWARE_COUNTER_H__
-#define __HPHP_UTIL_HARDWARE_COUNTER_H__
+#ifndef incl_HPHP_UTIL_HARDWARE_COUNTER_H_
+#define incl_HPHP_UTIL_HARDWARE_COUNTER_H_
 
 #include <util/thread_local.h>
 #include <runtime/base/complex_types.h>
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef NO_HARDWARE_COUNTERS
@@ -123,6 +123,6 @@ public:
 #endif // NO_HARDWARE_COUNTERS
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
-#endif // __HPHP_UTIL_HARDWARE_COUNTER_H__
+#endif

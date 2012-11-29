@@ -29,7 +29,7 @@
 #include <util/util.h>
 #include <util/logger.h>
 #include <util/compatibility.h>
-#include <util/hardware_counter.h>
+#include <runtime/base/hardware_counter.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,8 +70,8 @@ void Transport::onRequestStart(const timespec &queueTime) {
    * The hardware counter is only 48 bits, so reset this at the beginning
    * of every request to make sure we don't overflow.
    */
-  Util::HardwareCounter::Reset();
-  m_instructions = Util::HardwareCounter::GetInstructionCount();
+  HardwareCounter::Reset();
+  m_instructions = HardwareCounter::GetInstructionCount();
 }
 
 const char *Transport::getMethodName() {

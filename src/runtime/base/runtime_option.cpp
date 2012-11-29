@@ -35,7 +35,7 @@
 #include <util/stack_trace.h>
 #include <util/process.h>
 #include <util/file_cache.h>
-#include <util/hardware_counter.h>
+#include <runtime/base/hardware_counter.h>
 #include <runtime/base/preg.h>
 #include <util/parser/scanner.h>
 #include <runtime/base/server/access_log.h>

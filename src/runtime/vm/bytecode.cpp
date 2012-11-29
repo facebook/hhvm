@@ -42,7 +42,7 @@
 #include <util/util.h>
 #include <util/trace.h>
 #include <util/debug.h>
-#include <util/stat_cache.h>
+#include <runtime/base/stat_cache.h>
 
 #include <runtime/vm/instrumentation_hook.h>
 #include <runtime/vm/php_debug.h>

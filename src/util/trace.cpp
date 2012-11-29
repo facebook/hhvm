@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <cinttypes>
 #include <string>
 
 /*
@@ -27,52 +28,12 @@
 #ifndef USE_TRACE
 #  define USE_TRACE 1
 #endif
-#include "runtime/base/complex_types.h"
-#include "runtime/vm/core_types.h"
-#include "trace.h"
-#include "ringbuffer.h"
+#include "util/trace.h"
+#include "util/ringbuffer.h"
 
 namespace HPHP {
 
 static const Trace::Module TRACEMOD = Trace::tprefix;
-
-using std::string;
-using namespace HPHP::VM;
-string tname(DataType t) {
-  switch(t) {
-#define CS(name) \
-    case KindOf ## name: return string(#name);
-    CS(Uninit)
-    CS(Null)
-    CS(Boolean)
-    CS(Int64)
-    CS(Double)
-    CS(StaticString)
-    CS(String)
-    CS(Array)
-    CS(Object)
-    CS(Ref)
-    CS(Class)
-    CS(Any)
-    CS(Uncounted)
-    CS(UncountedInit)
-
-#undef CS
-    case KindOfInvalid: return string("Invalid");
-
-    default: {
-      char buf[128];
-      sprintf(buf, "Unknown:%d", t);
-      return string(buf);
-    }
-  }
-}
-
-string TypedValue::pretty() const  {
-  char buf[20];
-  sprintf(buf, "0x%lx", long(m_data.num));
-  return Trace::prettyNode(tname(m_type).c_str(), string(buf));
-}
 
 namespace Trace {
 
@@ -152,7 +113,8 @@ void vtrace(const char *fmt, va_list ap) {
     vtraceRingbuffer(fmt, ap);
   } else {
     ONTRACE(1, pthread_mutex_lock(&mtx));
-    ONTRACE(1, fprintf(out, "t%#08x: ", int((int64)pthread_self() & 0xFFFFFFFF)));
+    ONTRACE(1, fprintf(out, "t%#08x: ",
+      int((int64_t)pthread_self() & 0xFFFFFFFF)));
     vfprintf(out, fmt, ap);
     ONTRACE(1, pthread_mutex_unlock(&mtx));
     flush();

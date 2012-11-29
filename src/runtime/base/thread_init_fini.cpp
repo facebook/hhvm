@@ -24,7 +24,7 @@
 #include <runtime/base/zend/zend_math.h>
 #include <util/async_func.h>
 #include <util/alloc.h>
-#include <util/hardware_counter.h>
+#include <runtime/base/hardware_counter.h>
 #include <runtime/ext/ext_icu.h>
 #include <runtime/base/intercept.h>
 
@@ -57,7 +57,7 @@ void init_thread_locals(void *arg /* = NULL */) {
   g_context.getCheck();
   icu_get_checks();
   s_hasRenamedFunction.getCheck();
-  Util::HardwareCounter::s_counter.getCheck();
+  HardwareCounter::s_counter.getCheck();
   for (InitFiniNode *in = extra_init; in; in = in->next) {
     in->func();
   }

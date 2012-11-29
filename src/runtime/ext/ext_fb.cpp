@@ -20,7 +20,7 @@
 #include <runtime/ext/ext_mysql.h>
 #include <util/db_conn.h>
 #include <util/logger.h>
-#include <util/stat_cache.h>
+#include <runtime/base/stat_cache.h>
 #include <netinet/in.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/string_util.h>

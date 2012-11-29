@@ -15,7 +15,7 @@
 */
 
 #define _GNU_SOURCE 1
-#include <util/hardware_counter.h>
+#include <runtime/base/hardware_counter.h>
 #include <util/logger.h>
 
 #include <stdio.h>
@@ -35,7 +35,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/vm/translator/translator-x64.h>
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(HardwareCounter,
@@ -406,4 +406,4 @@ void HardwareCounter::GetPerfEvents(Array& ret) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

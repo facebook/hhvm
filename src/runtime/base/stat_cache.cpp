@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/base/stat_cache.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -22,7 +23,6 @@
 
 #include "util/trace.h"
 #include "util/logger.h"
-#include "util/stat_cache.h"
 #include "runtime/base/runtime_option.h"
 #include "runtime/vm/translator/hooks.h"
 

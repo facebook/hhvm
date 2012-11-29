@@ -40,7 +40,7 @@
 #include <util/timer.h>
 #include <util/stack_trace.h>
 #include <util/light_process.h>
-#include <util/stat_cache.h>
+#include <runtime/base/stat_cache.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/rtti_info.h>
 #include <runtime/base/frame_injection.h>

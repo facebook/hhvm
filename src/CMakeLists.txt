@@ -52,7 +52,7 @@ endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 # Disable hardware counters off of Linux
 if(NOT LINUX)
 	add_definitions(-DNO_HARDWARE_COUNTERS)
-	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/util/hardware_counter.cpp)
+	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/base/hardware_counter.cpp)
 endif()
 
 # remove ext_hhvm

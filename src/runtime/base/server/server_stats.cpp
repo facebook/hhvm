@@ -25,7 +25,7 @@
 #include <runtime/base/compiler_id.h>
 #include <util/json.h>
 #include <util/compatibility.h>
-#include <util/hardware_counter.h>
+#include <runtime/base/hardware_counter.h>
 
 using std::list;
 using std::set;
@@ -1235,7 +1235,7 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
     gettime(CLOCK_MONOTONIC, &m_wallStart);
     gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
     if (m_track & TRACK_HWINST) {
-      m_instStart = Util::HardwareCounter::GetInstructionCount();
+      m_instStart = HardwareCounter::GetInstructionCount();
     }
   }
 }
@@ -1256,7 +1256,7 @@ ServerStatsHelper::~ServerStatsHelper() {
     }
 
     if (m_track & TRACK_HWINST) {
-      int64 instEnd = Util::HardwareCounter::GetInstructionCount();
+      int64 instEnd = HardwareCounter::GetInstructionCount();
       logTime("page.inst.", m_instStart, instEnd);
     }
   }

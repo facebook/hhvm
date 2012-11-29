@@ -76,10 +76,11 @@
  *    } ...
  *    PathPt("done renormalizing flibberts");
  */
-#ifndef _PATHTRACK_H_
-#define _PATHTRACK_H_
+#ifndef incl_HPHP_UTIL_PATHTRACK_H_
+#define incl_HPHP_UTIL_PATHTRACK_H_
 
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

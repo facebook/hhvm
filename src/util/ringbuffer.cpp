@@ -14,9 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/translator/asm-x64.h"
+#include "util/ringbuffer.h"
 #include "util/pathtrack.h"
-#include "ringbuffer.h"
+#include "util/util.h"
+#include "util/atomic.h"
+#include "util/assert.h"
+
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
 
 namespace HPHP {
 namespace Trace {
@@ -95,7 +101,7 @@ allocEntry(RingBufferType t) {
   } while (!atomic_cas(&g_ringIdx, oldRingPos, newRingPos));
   rb->m_ts = uint32_t(_rdtsc());
   rb->m_type = t;
-  rb->m_threadId = (uint32_t)((int64)pthread_self() & 0xFFFFFFFF);
+  rb->m_threadId = (uint32_t)((int64_t)pthread_self() & 0xFFFFFFFF);
   return rb;
 }
 
@@ -106,7 +112,7 @@ initEntry(RingBufferType t) {
 }
 
 static inline RingBufferEntry*
-initEntry(RingBufferType t, uint64 funcId, int offset) {
+initEntry(RingBufferType t, uint64_t funcId, int offset) {
   RingBufferEntry* rb = allocEntry(t);
   rb->m_funcId = funcId;
   rb->m_offset = offset;

@@ -20,7 +20,7 @@
 #include <util/process.h>
 #include <util/atomic.h>
 #include <util/trace.h>
-#include <util/stat_cache.h>
+#include <runtime/base/stat_cache.h>
 #include <runtime/base/server/source_root_info.h>
 
 #include <runtime/vm/translator/targetcache.h>

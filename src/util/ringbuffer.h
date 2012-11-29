@@ -13,8 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _RINGBUFFER_H_
-#define _RINGBUFFER_H_
+#ifndef incl_HPHP_RINGBUFFER_H_
+#define incl_HPHP_RINGBUFFER_H_
+
+#include <cstdlib>
+#include <cstdarg>
+#include <cinttypes>
 
 namespace HPHP {
 namespace Trace {
@@ -41,5 +45,5 @@ void ringbufferEntry(RingBufferType t, uint64_t funcId, int offset);
 
 }
 }
- 
+
 #endif

@@ -14,9 +14,49 @@
    +----------------------------------------------------------------------+
 */
 
-#include "util/pathtrack.h"
+#include "runtime/base/complex_types.h"
+#include "util/trace.h"
 
-__thread PathSample pathSamples[MAX_PATH_PTS];
-__thread int npathSamples;
-__thread int inPath;
+namespace HPHP {
 
+//////////////////////////////////////////////////////////////////////
+
+std::string tname(DataType t) {
+  switch(t) {
+#define CS(name) \
+    case KindOf ## name: return std::string(#name);
+    CS(Uninit)
+    CS(Null)
+    CS(Boolean)
+    CS(Int64)
+    CS(Double)
+    CS(StaticString)
+    CS(String)
+    CS(Array)
+    CS(Object)
+    CS(Ref)
+    CS(Class)
+    CS(Any)
+    CS(Uncounted)
+    CS(UncountedInit)
+
+#undef CS
+    case KindOfInvalid: return std::string("Invalid");
+
+    default: {
+      char buf[128];
+      sprintf(buf, "Unknown:%d", t);
+      return std::string(buf);
+    }
+  }
+}
+
+std::string TypedValue::pretty() const  {
+  char buf[20];
+  sprintf(buf, "0x%lx", long(m_data.num));
+  return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}

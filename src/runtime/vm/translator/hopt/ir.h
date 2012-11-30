@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _IR_H_
-#define _IR_H_
+#ifndef incl_HPHP_VM_IR_H_
+#define incl_HPHP_VM_IR_H_
 
 #include <boost/noncopyable.hpp>
 #include <algorithm>
@@ -27,15 +27,15 @@
 #include <stack>
 #include <list>
 #include <assert.h>
+#include "util/asm-x64.h"
+#include "util/arena.h"
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/translator/abi-x64.h"
-#include "runtime/vm/translator/asm-x64.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/runtime-type.h"
 #include "runtime/base/types.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/class.h"
-#include "util/arena.h"
 
 namespace HPHP {
 // forward declaration

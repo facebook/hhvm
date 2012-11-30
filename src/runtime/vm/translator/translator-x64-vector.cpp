@@ -15,7 +15,7 @@
 */
 
 #include <runtime/base/complex_types.h>
-#include <runtime/vm/translator/asm-x64.h>
+#include <util/asm-x64.h>
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/translator/translator-x64.h>

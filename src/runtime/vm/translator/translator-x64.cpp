@@ -64,7 +64,7 @@ typedef __sighandler_t *sighandler_t;
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/translator/asm-x64.h>
+#include <util/asm-x64.h>
 #include <runtime/vm/translator/srcdb.h>
 #include <runtime/vm/translator/x64-util.h>
 #include <runtime/vm/translator/unwind-x64.h>

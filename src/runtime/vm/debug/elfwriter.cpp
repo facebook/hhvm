@@ -24,9 +24,9 @@
 #include <stdlib.h>
 
 #include <util/trace.h>
+#include <util/asm-x64.h>
 
 #include <runtime/base/runtime_option.h>
-#include <runtime/vm/translator/asm-x64.h>
 #include <runtime/vm/translator/translator-x64.h>
 
 using namespace HPHP::VM::Transl;

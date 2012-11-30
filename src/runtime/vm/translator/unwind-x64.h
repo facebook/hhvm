@@ -27,7 +27,7 @@
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/tread_hash_map.h"
 #include "runtime/vm/translator/types.h"
-#include "runtime/vm/translator/asm-x64.h"
+#include "util/asm-x64.h"
 #include "runtime/vm/translator/runtime-type.h"
 
 namespace HPHP { namespace VM { namespace Transl {

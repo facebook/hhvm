@@ -13,15 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_RUNTIME_VM_ASM_X64_H_
-#define incl_RUNTIME_VM_ASM_X64_H_
+#ifndef incl_UTIL_ASM_X64_H_
+#define incl_UTIL_ASM_X64_H_
 
 #include <type_traits>
 
-#include <assert.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 #include "util/util.h"
 #include "util/base.h"
 #include "util/atomic.h"

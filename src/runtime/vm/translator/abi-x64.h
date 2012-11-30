@@ -26,7 +26,7 @@
 #ifndef incl_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 #define incl_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 
-#include "runtime/vm/translator/asm-x64.h"
+#include "util/asm-x64.h"
 #include "runtime/vm/translator/regalloc.h"
 
 namespace HPHP { namespace VM { namespace Transl {

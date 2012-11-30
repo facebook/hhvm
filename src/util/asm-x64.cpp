@@ -23,14 +23,12 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 
-#include "assert.h"
-#include "asm-x64.h"
+#include "util/assert.h"
+#include "util/asm-x64.h"
 #include "util/maphuge.h"
 #include "runtime/base/runtime_option.h"
 
-namespace HPHP {
-namespace VM {
-namespace Transl {
+namespace HPHP { namespace VM { namespace Transl {
 
 static void panic(const char *fmt, ...) {
   va_list ap;

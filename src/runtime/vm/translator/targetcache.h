@@ -19,7 +19,7 @@
 #include <runtime/vm/func.h>
 #include <util/util.h>
 #include <runtime/vm/translator/types.h>
-#include <runtime/vm/translator/asm-x64.h>
+#include <util/asm-x64.h>
 #include <boost/static_assert.hpp>
 
 namespace HPHP {

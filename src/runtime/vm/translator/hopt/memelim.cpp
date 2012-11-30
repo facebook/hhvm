@@ -15,7 +15,7 @@
 */
 
 #include <util/trace.h>
-#include <runtime/vm/translator/asm-x64.h>
+#include <util/asm-x64.h>
 #include "ir.h"
 #include "dce.h"
 #include "ir.h"

@@ -16,7 +16,7 @@
 #ifndef _X64_UTIL_H_
 #define _X64_UTIL_H_
 
-#include <runtime/vm/translator/asm-x64.h>
+#include <util/asm-x64.h>
 #include <runtime/vm/translator/translator-inline.h>
 
 namespace HPHP {

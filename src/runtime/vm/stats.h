@@ -17,7 +17,7 @@
 #define _STATS_H_
 
 #include <runtime/vm/hhbc.h>
-#include <runtime/vm/translator/asm-x64.h>
+#include <util/asm-x64.h>
 #include <util/trace.h>
 
 namespace HPHP {

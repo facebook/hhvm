@@ -21,7 +21,7 @@
 
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/asm-x64.h>
+#include <util/asm-x64.h>
 #include <runtime/vm/translator/srcdb.h>
 #include <runtime/vm/translator/unwind-x64.h>
 #include <runtime/vm/translator/regalloc.h>

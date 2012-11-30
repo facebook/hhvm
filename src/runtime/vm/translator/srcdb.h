@@ -18,7 +18,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "asm-x64.h"
+#include "util/asm-x64.h"
 #include "util/trace.h"
 #include "util/mutex.h"
 #include "translator.h"

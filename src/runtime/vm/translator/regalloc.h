@@ -20,8 +20,8 @@
 
 #include "util/trace.h"
 #include "util/bitops.h"
-#include "translator.h"
-#include "asm-x64.h"
+#include "util/asm-x64.h"
+#include "runtime/vm/translator/translator.h"
 
 namespace HPHP { namespace VM { namespace Transl {
 

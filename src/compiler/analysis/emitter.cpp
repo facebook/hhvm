@@ -25,6 +25,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/type_conversions.h>
+#include <runtime/base/builtin_functions.h>
 #include <runtime/eval/runtime/file_repository.h>
 
 #include <compiler/builtin_symbols.h>
@@ -4141,6 +4142,46 @@ void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
   return;
 }
 
+void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
+                                           DataType t, int paramId) {
+  switch (v.getType()) {
+    case KindOfString:
+    case KindOfStaticString: {
+      StringData *nValue = StringData::GetStaticString(v.getStringData());
+      e.String(nValue);
+      break;
+    }
+    case KindOfInt64:
+      e.Int(v.getInt64());
+      break;
+    case KindOfBoolean:
+      if (v.getBoolean()) {
+        e.True();
+      } else {
+        e.False();
+      }
+      break;
+    case KindOfNull:
+      switch (t) {
+        case KindOfString:
+        case KindOfStaticString:
+        case KindOfObject:
+        case KindOfArray:
+          e.Int(0);
+          break;
+        case KindOfUnknown:
+          e.NullUninit();
+          break;
+        default:
+          not_reached();
+      }
+      break;
+    default:
+      not_reached();
+  }
+  m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+  e.BPassC(paramId);
+}
 
 void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      ExpressionPtr exp,
@@ -5654,11 +5695,12 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
     }
   }
   FunctionScopePtr func = fn->getFuncScope();
-  if (!func || numParams > kMaxBuiltinArgs) {
+  if (!func || func->getMaxParamCount() > kMaxBuiltinArgs) {
     return false;
   }
   if (!func->isUserFunction() && !func->needsActRec()
-      && func->getMaxParamCount() == (uint)numParams) {
+      && (uint)numParams >= func->getMinParamCount()
+      && (uint)numParams <= func->getMaxParamCount()) {
     if (func->isVariableArgument() || func->isReferenceVariableArgument()
                 || func->isMixedVariableArgument()) {
       return false;
@@ -5670,6 +5712,11 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
     for (int i = 0; i < func->getMaxParamCount(); i++) {
       t = func->getParamType(i);
       if (!t || t->getHhvmDataType() == KindOfDouble) {
+        return false;
+      }
+      // unserializable default values such as TimeStamp::Current()
+      // are serialized as kUnserializableString ("\x01")
+      if (i >= numParams && func->getParamDefault(i) == kUnserializableString) {
         return false;
       }
     }
@@ -5776,14 +5823,21 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   if (isBuiltinCall) {
     FunctionScopePtr func = node->getFuncScope();
     ASSERT(func);
-    ASSERT(numParams == func->getMaxParamCount());
-    for (int i = 0; i < numParams; i++) {
+    ASSERT(numParams <= func->getMaxParamCount()
+           && numParams >= func->getMinParamCount());
+    int i = 0;
+    for (; i < numParams; i++) {
       // for builtin calls, since we don't push the ActRec, we
       // must determine the reffiness statically
       bool byRef = func->isRefParam(i);
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
-    e.FCallBuiltin(numParams, nLiteral);
+    for (; i < func->getMaxParamCount(); i++) {
+      Variant v = f_unserialize(func->getParamDefault(i));
+      TypePtr t = func->getParamType(i);
+      emitBuiltinDefaultArg(e, v, t->getDataType(), i);
+    }
+    e.FCallBuiltin(func->getMaxParamCount(), numParams, nLiteral);
   } else {
     {
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);

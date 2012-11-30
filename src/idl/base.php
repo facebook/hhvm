@@ -463,10 +463,12 @@ function generateFuncCPPInclude($func, $f, $newline = true) {
     fprintType($f, $arg['type']);
     fprintf($f, ', ');
     if (isset($arg['default'])) {
-      fprintf($f, '"%s", ', escape_cpp($arg['defaultSerialized']));
+      $serialized = escape_cpp($arg['defaultSerialized']);
+      fprintf($f, '"%s", S(%d), ',
+              $serialized, strlen($arg['defaultSerialized']));
       fprintf($f, '"%s", ', escape_cpp($arg['defaultText']));
     } else {
-      fprintf($f, 'NULL, NULL, ');
+      fprintf($f, 'NULL, S(0), NULL, ');
     }
     fprintf($f, 'S(%d), ', idx($arg, 'ref') ? 1 : 0);
   }

@@ -753,11 +753,17 @@ void FunctionScope::setParamName(int index, const std::string &name) {
   m_paramNames[index] = name;
 }
 
-void FunctionScope::setParamDefault(int index, const std::string &value,
+void FunctionScope::setParamDefault(int index, const char* value, int64_t len,
                                     const std::string &text) {
   ASSERT(index >= 0 && index < (int)m_paramNames.size());
-  m_paramDefaults[index] = value;
+  StringData* sd = new StringData(value, len, AttachLiteral);
+  sd->setStatic();
+  m_paramDefaults[index] = String(sd);
   m_paramDefaultTexts[index] = text;
+}
+
+CStrRef FunctionScope::getParamDefault(int index) {
+  return m_paramDefaults[index];
 }
 
 void FunctionScope::addModifier(int mod) {

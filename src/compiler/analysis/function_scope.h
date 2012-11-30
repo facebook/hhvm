@@ -82,8 +82,9 @@ public:
   void setParamCounts(AnalysisResultConstPtr ar, int minParam, int maxParam);
   void setParamSpecs(AnalysisResultPtr ar);
   void setParamName(int index, const std::string &name);
-  void setParamDefault(int index, const std::string &value,
+  void setParamDefault(int index, const char* value, int64_t len,
                        const std::string &text);
+  CStrRef getParamDefault(int index);
   void setRefParam(int index);
   bool hasRefParam(int max) const;
 
@@ -528,7 +529,7 @@ private:
   std::vector<std::string> m_paramNames;
   TypePtrVec m_paramTypes;
   TypePtrVec m_paramTypeSpecs;
-  std::vector<std::string> m_paramDefaults;
+  std::vector<String> m_paramDefaults;
   std::vector<std::string> m_paramDefaultTexts;
   std::vector<bool> m_refs;
   TypePtr m_returnType;

@@ -352,6 +352,7 @@ enum SetOpOp {
   O(BoxR,            NA,               ONE(RV),         ONE(VV),    NF) \
   O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
+  O(NullUninit,      NA,               NOV,             ONE(CV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
   O(False,           NA,               NOV,             ONE(CV),    NF) \
   O(Int,             ONE(I64A),        NOV,             ONE(CV),    NF) \
@@ -505,7 +506,7 @@ enum SetOpOp {
   O(FPassM,          TWO(IVA,MA),      LMANY(),         ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    TWO(IVA, SA),     FMANY,           ONE(RV),    CF) \
+  O(FCallBuiltin,    THREE(IA, IA, SA),FMANY,           ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,HA),  ONE(CV),         NOV,        CF) \

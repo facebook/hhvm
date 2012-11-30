@@ -826,6 +826,10 @@ False    []  ->  [C:Bool]
   Push constant. Null pushes null onto the stack, True pushes true onto
   the stack, and False pushes false onto the stack.
 
+NullUninit                      []  ->  [C:Uninit]
+
+   Push Uninit Null Cell onto stack.
+
 Int <signed 64-bit integer value>    []  ->  [C:Int]
 Double <double value>                []  ->  [C:Dbl]
 String <litstr id>                   []  ->  [C:Str]
@@ -1767,15 +1771,16 @@ BPassV <param id>    [V]  ->  [F]
   parameter %1 is pass by reference, this instruction will push $1 onto the
   stack as a var.
 
-FCallBuiltin  <num params> <litstr id> [F..F]  -> [R]
+FCallBuiltin  <total params> <passed params> <litstr id> [F..F]  -> [R]
 
   Optimized builtin call without an ActRec. This instruction attempts to
-  lookup a builtin function named %2. If no function named %2 is defined,
+  lookup a builtin function named %3. If no function named %3 is defined,
   this instruction throws a fatal error. Otherwise, this function gets
-  address of the builtin function named %2, transfers the top %1 values
+  address of the builtin function named %3, transfers the top %1 values
   from the stack to the callee as parameters, and then invokes the dispatcher
-  to call the callee. When the callee returns, it will transfer the return
-  value onto the caller's evaluation stack using the R flavor.
+  to call the callee. %2 denotes the number of non-default parameters pushed
+  onto stack by user level code. When the callee returns, it will transfer
+  the return value onto the caller's evaluation stack using the R flavor.
 
 9. Member operations
 --------------------

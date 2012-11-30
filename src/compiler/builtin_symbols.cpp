@@ -260,6 +260,7 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
     /* name */ arg++;
     ParseType(arg);
     const char *argDefault = *arg++;
+    /* const char *argDefaultLen = */ arg++;
     /* const char *argDefaultText = */ arg++;
     /* bool argReference = */ arg++;
     if (argDefault && minParam < 0) {
@@ -280,13 +281,16 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   while ((paramName = *p++ /* argName */)) {
     TypePtr argType = ParseType(p);
     const char *argDefault = *p++;
+    const char *argDefaultLen = *p++;
     const char *argDefaultText = *p++;
     bool argReference = *p++;
 
     f->setParamName(index, paramName);
     if (argReference) f->setRefParam(index);
     f->setParamType(ar, index, argType);
-    if (argDefault) f->setParamDefault(index, argDefault, argDefaultText);
+    if (argDefault) f->setParamDefault(index, argDefault,
+                                       (int64_t)argDefaultLen,
+                                       argDefaultText);
 
     index++;
   }

@@ -342,6 +342,7 @@ Translator::tvToLocation(const TypedValue* tv, const TypedValue* frame) {
 /* Opcode type-table. */
 enum OutTypeConstraints {
   OutNull,
+  OutNullUninit,
   OutString,
   OutStringImm,         // String w/ precisely known immediate.
   OutDouble,
@@ -711,6 +712,11 @@ getDynLocType(const vector<DynLocation*>& inputs,
       return RuntimeType(KindOfInvalid);
     }
 
+    case OutNullUninit: {
+      ASSERT(ni->op() == OpNullUninit);
+      return RuntimeType(KindOfUninit);
+    }
+
     case OutStringImm: {
       ASSERT(ni->op() == OpString);
       StringData *sd = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
@@ -911,6 +917,7 @@ static const struct {
   /*** 2. Literal and constant instructions ***/
 
   { OpNull,        {None,             Stack1,       OutNull,           1 }},
+  { OpNullUninit,  {None,             Stack1,       OutNullUninit,     1 }},
   { OpTrue,        {None,             Stack1,       OutBooleanImm,     1 }},
   { OpFalse,       {None,             Stack1,       OutBooleanImm,     1 }},
   { OpInt,         {None,             Stack1,       OutInt64,          1 }},
@@ -2027,6 +2034,7 @@ void Translator::getInputs(Tracelet& t,
 bool outputDependsOnInput(const Opcode instr) {
   switch (instrInfo[instr].type) {
     case OutNull:
+    case OutNullUninit:
     case OutString:
     case OutStringImm:
     case OutDouble:
@@ -3073,7 +3081,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       t.m_arState.pop();
     }
     if (ni->op() == OpFCallBuiltin && !doVarEnvTaint) {
-      StringData* funcName = curUnit()->lookupLitstrId(ni->imm[1].u_SA);
+      StringData* funcName = curUnit()->lookupLitstrId(ni->imm[2].u_SA);
       doVarEnvTaint = checkTaintFuncs(funcName);
     }
     if (doVarEnvTaint) {
@@ -3192,6 +3200,7 @@ breakBB:
       // stack, and the next tracelet will have to guard
       // on the type.
       case OpNull:
+      case OpNullUninit:
       case OpTrue:
       case OpFalse:
       case OpInt:

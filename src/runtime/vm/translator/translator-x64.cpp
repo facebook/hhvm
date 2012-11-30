@@ -5116,6 +5116,19 @@ TranslatorX64::translateNull(const Tracelet& t,
 }
 
 void
+TranslatorX64::translateNullUninit(const Tracelet& t,
+                             const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 0);
+  ASSERT(!i.outLocal);
+  if (i.outStack) {
+    ASSERT(i.outStack->outerType() == KindOfUninit);
+    // We have to mark the output register as dirty to ensure that
+    // the type gets spilled at the end of the tracelet
+    m_regMap.allocOutputRegs(i);
+  }
+}
+
+void
 TranslatorX64::translateTrue(const Tracelet& t,
                              const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 0);
@@ -9733,7 +9746,7 @@ static bool isCppByRef(DataType t) {
 
 void TranslatorX64::analyzeFCallBuiltin(Tracelet& t,
                                         NormalizedInstruction& i) {
-  Id funcId = i.imm[1].u_SA;
+  Id funcId = i.imm[2].u_SA;
   const NamedEntityPair nep = curUnit()->lookupNamedEntityPairId(funcId);
   const Func* func = Unit::lookupFunc(nep.second, nep.first);
   i.m_txFlags = supportedPlan(func != NULL);
@@ -9742,7 +9755,8 @@ void TranslatorX64::analyzeFCallBuiltin(Tracelet& t,
 void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
                                           const NormalizedInstruction& ni) {
   int numArgs = ni.imm[0].u_IVA;
-  Id funcId = ni.imm[1].u_SA;
+  int numNonDefault = ni.imm[1].u_IA;
+  Id funcId = ni.imm[2].u_SA;
   const NamedEntityPair& nep = curUnit()->lookupNamedEntityPairId(funcId);
   const StringData* name = nep.first;
   const Func* func = Unit::lookupFunc(nep.second, name);
@@ -9759,7 +9773,7 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   m_regMap.cleanAll();
 
   // Emit typecasts if needed
-  for (int i = 0; i < numArgs; i++) {
+  for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = func->params()[i];
     const Location& in = ni.inputs[numArgs - i - 1]->location;
     RuntimeType& rtt = ni.inputs[numArgs - i - 1]->rtt;
@@ -9829,7 +9843,7 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   ScratchReg ret(m_regMap, rax);
 
   // Decref and free arguments
-  for (int i = 0; i < numArgs; i++) {
+  for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = func->params()[i];
     locToRegDisp(ni.inputs[numArgs - i - 1]->location, &base, &disp);
     if (pi.builtinType() == KindOfUnknown) {
@@ -12021,6 +12035,7 @@ bool TranslatorX64::dumpTCData() {
    * Translations with no callouts to C++ whatsoever.
    */ \
   NATIVE_OP(Null) \
+  NATIVE_OP(NullUninit) \
   NATIVE_OP(True) \
   NATIVE_OP(False) \
   NATIVE_OP(Int) \

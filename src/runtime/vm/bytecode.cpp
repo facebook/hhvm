@@ -1484,7 +1484,7 @@ Array VMExecutionContext::getCallerInfo() {
     }
   }
 
-  Offset pc;
+  Offset pc = 0;
   ar = getPrevVMState(ar, &pc);
   while (ar != NULL) {
     if (!ar->m_func->name()->isame(s_call_user_func.get())
@@ -2283,7 +2283,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
   }
   // Get the fp and pc of the top frame (possibly skipping one frame)
   ActRec* fp;
-  Offset pc;
+  Offset pc = 0;
   if (skip) {
     fp = getPrevVMState(getFP(), &pc);
     if (!fp) {
@@ -3748,6 +3748,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnboxR(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopNull(PC& pc) {
   NEXT();
   m_stack.pushNull();
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopNullUninit(PC& pc) {
+  NEXT();
+  m_stack.pushNullUninit();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopTrue(PC& pc) {
@@ -6017,7 +6022,8 @@ static int makeNativeRefCall(const Func* f, TypedValue* ret,
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   NEXT();
-  DECODE_IVA(numArgs);
+  DECODE_IA(numArgs);
+  DECODE_IA(numNonDefault);
   DECODE(Id, id);
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::lookupFunc(nep.second, nep.first);
@@ -6027,7 +6033,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   }
   TypedValue* args = m_stack.indTV(numArgs-1);
   ASSERT(numArgs == func->numParams());
-  for (int i = 0; i < numArgs; i++) {
+  for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = func->params()[i];
 
 #define CASE(kind) case KindOf ## kind : do { \
@@ -6077,7 +6083,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
     not_reached();
   }
 
-  frame_free_args(args, numArgs);
+  frame_free_args(args, numNonDefault);
   m_stack.ndiscard(numArgs - 1);
 
   memcpy(m_stack.top(), &ret, sizeof(TypedValue));

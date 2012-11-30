@@ -496,6 +496,7 @@ MINSTRS
   CASE(PopR) \
   CASE(UnboxR) \
   CASE(Null) \
+  CASE(NullUninit) \
   CASE(True) \
   CASE(False) \
   CASE(Int) \

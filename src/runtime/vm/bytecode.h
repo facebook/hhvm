@@ -637,6 +637,14 @@ public:
     tvWriteNull(m_top);
   }
 
+  inline void ALWAYS_INLINE pushNullUninit() {
+    ASSERT(m_top != m_elms);
+    m_top--;
+    m_top->m_data.num = 0;
+    m_top->_count = 0;
+    m_top->m_type = KindOfUninit;
+  }
+
   #define PUSH_METHOD(name, type, field, value)                               \
   inline void ALWAYS_INLINE push##name() {                                    \
     ASSERT(m_top != m_elms);                                                  \

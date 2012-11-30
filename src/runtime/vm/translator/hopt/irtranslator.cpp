@@ -377,6 +377,12 @@ TranslatorX64::irTranslateNull(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateNullUninit(const Tracelet& t,
+                               const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(NullUninit);
+}
+
+void
 TranslatorX64::irTranslateTrue(const Tracelet& t,
                                const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 0);

@@ -1610,7 +1610,7 @@ Address CodeGenerator::cgRetVal(IRInstruction* inst) {
         RegNumber valReg = val->getAssignedLoc();
         if (val->getType() == Type::Bool) {
           // BOOL BYTE
-          m_as.and_imm64_reg64(0xff, valReg);  
+          m_as.and_imm64_reg64(0xff, valReg);
         }
         m_as.store_reg64_disp_reg64(valReg,  AROFF(m_r) + TVOFF(m_data), fpReg);
       }
@@ -1763,7 +1763,9 @@ Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
     m_as.mov_reg64_reg64(fp->getAssignedLoc(), LinearScan::rVmFP);
   }
 
-  emitTraceRet(m_as, retAddrReg);
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitTraceRet(m_as, retAddrReg);
+  }
   // Return control to caller
   m_as.jmp(r64(retAddrReg));
   m_as.ud2();
@@ -4398,7 +4400,7 @@ void CodeGenerator::cgTrace(Trace* trace) {
   m_curTrace = trace;
   trace->setFirstAsmAddress(m_as.code.frontier);
   trace->setFirstAstubsAddress(m_astubs.code.frontier);
-  if (trace->isMain()) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
     emitTraceCall(m_as, trace->getBcOff());
   }
   IRInstruction::Iterator it;

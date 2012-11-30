@@ -45,6 +45,7 @@ DebuggerProxyPtr Debugger::StartClient(const DebuggerClientOptions &options) {
 }
 
 void Debugger::Stop() {
+  s_debugger.m_proxyMap.clear();
   DebuggerServer::Stop();
   if (s_clientStarted) {
     DebuggerClient::Stop();

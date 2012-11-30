@@ -415,6 +415,32 @@ namespace reg {
   constexpr RegXMM xmm13(13);
   constexpr RegXMM xmm14(14);
   constexpr RegXMM xmm15(15);
+
+#define X(x) if (r == x) return "%"#x
+  inline const char* regname(Reg64 r) {
+    X(rax); X(rbx); X(rcx); X(rdx); X(rsp); X(rbp); X(rsi); X(rdi);
+    X(r8); X(r9); X(r10); X(r11); X(r12); X(r13); X(r14); X(r15);
+    return nullptr;
+  }
+  inline const char* regname(Reg32 r) {
+    X(eax); X(ecx); X(edx); X(ebx); X(esp); X(ebp); X(esi); X(edi);
+    X(r8d); X(r9d); X(r10d); X(r11d); X(r12d); X(r13d); X(r14d); X(r15d);
+    return nullptr;
+  }
+  inline const char* regname(Reg8 r) {
+    X(al); X(cl); X(dl); X(bl); X(spl); X(bpl); X(sil); X(dil);
+    X(r8b); X(r9b); X(r10b); X(r11b); X(r12b); X(r13b); X(r14b); X(r15b);
+    X(ah); X(ch); X(dh); X(bh);
+    return nullptr;
+  }
+  inline const char* regname(RegXMM r) {
+    X(xmm0); X(xmm1); X(xmm2); X(xmm3); X(xmm4); X(xmm5); X(xmm6);
+    X(xmm7); X(xmm8); X(xmm9); X(xmm10); X(xmm11); X(xmm12); X(xmm13);
+    X(xmm14); X(xmm15);
+    return nullptr;
+  }
+#undef X
+
 }
 
 //////////////////////////////////////////////////////////////////////

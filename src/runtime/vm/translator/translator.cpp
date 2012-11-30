@@ -599,7 +599,7 @@ predictOutputs(NormalizedInstruction* ni) {
   if (pred.second >= kAccept) {
     ni->outputPredicted = true;
     TRACE(1, "accepting prediction of type %d\n", pred.first);
-    ASSERT(pred.first != KindOfRef && pred.first != KindOfUninit);
+    ASSERT(pred.first != KindOfUninit);
     return pred.first;
   }
   return KindOfInvalid;

@@ -139,7 +139,7 @@ int64 new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
   if (!arr->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
-    (void) new (&dest->arr()) ArrayIter(arr, 0);
+    (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noInc);
     dest->m_itype = Iter::TypeArray;
     iter_value_cell_local_impl<true>(dest, valOut);
     if (keyOut) {
@@ -186,7 +186,7 @@ int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       }
       // We are transferring ownership of the array to the iterator, therefore
       // we do not need to adjust the refcount.
-      (void) new (&dest->arr()) ArrayIter(arr);
+      (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
       dest->m_itype = Iter::TypeArray;
       HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
       getHphpArrayElm(elm, valOut, NULL);
@@ -227,7 +227,7 @@ int64 new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
       }
       // We are transferring ownership of the array to the iterator, therefore
       // we do not need to adjust the refcount.
-      (void) new (&dest->arr()) ArrayIter(arr);
+      (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
       dest->m_itype = Iter::TypeArray;
       HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
       getHphpArrayElm(elm, valOut, keyOut);

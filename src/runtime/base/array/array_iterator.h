@@ -49,9 +49,10 @@ public:
   ArrayIter();
   ArrayIter(const ArrayData* data);
 
+  enum NoInc { noInc = 0 };
 // Special constructor used by the VM. This constructor does not
 // increment the refcount of the specified array.
-  ArrayIter(const ArrayData* data, int) {
+  ArrayIter(const ArrayData* data, NoInc) {
     setArrayData(data);
     if (data) {
       m_pos = data->iter_begin();
@@ -62,13 +63,18 @@ public:
   // This is also a special constructor used by the VM. This
   // constructor doesn't increment the array's refcount and assumes
   // that the array is not empty.
-  ArrayIter(const HphpArray* data) {
+  enum NoIncNonNull { noIncNonNull = 0 };
+  ArrayIter(const HphpArray* data, NoIncNonNull) {
     ASSERT(data);
     setArrayData(data);
     m_pos = data->getIterBegin();
   }
   ArrayIter(CArrRef array);
 private:
+  // not defined.
+  // Either use ArrayIter(const ArrayData*) or
+  //            ArrayIter(const HphpArray*, NoIncNonNull)
+  ArrayIter(const HphpArray*);
   template <bool incRef>
   void objInit(ObjectData* obj, bool rewind = true);
 public:

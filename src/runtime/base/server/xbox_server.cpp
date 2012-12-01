@@ -78,8 +78,7 @@ public:
     // do nothing
   }
   virtual void sendImpl(const void *data, int size, int code,
-                        bool compressed) {
-    ASSERT(!compressed);
+                        bool chunked) {
     m_response.append((const char*)data, size);
     if (code) {
       m_code = code;
@@ -395,7 +394,7 @@ Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
   bool xboxEnabled = (RuntimeOption::XboxServerThreadCount > 0);
   if (!xboxEnabled || !Available()) {
     const char* errMsg = (xboxEnabled ?
-      "Cannot create new Xbox task because the Xbox queue has " 
+      "Cannot create new Xbox task because the Xbox queue has "
       "reached maximum capacity" :
       "Cannot create new Xbox task because the Xbox is not enabled");
     Object e = SystemLib::AllocExceptionObject(errMsg);

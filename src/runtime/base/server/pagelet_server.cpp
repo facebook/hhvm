@@ -114,8 +114,7 @@ public:
     m_responseHeaders.erase(name);
   }
   virtual void sendImpl(const void *data, int size, int code,
-                        bool compressed) {
-    ASSERT(!compressed);
+                        bool chunked) {
     m_response.append((const char*)data, size);
     if (code) {
       m_code = code;

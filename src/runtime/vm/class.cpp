@@ -804,6 +804,14 @@ Class::PropInitVec* Class::initPropsImpl() const {
 
   // During property initialization, we provide access to the
   // properties by name via this NameValueTable.
+
+  // Note that constructing these on the stack is slightly
+  // risky; we're relying on nobody getting hold of references
+  // to them. Also note that the ASSERT on the refCount below
+  // is quite inadequate; the only way for these to leak is if
+  // an error occurs - but in that case, we wont reach the ASSERT
+  // However, since we dont /want/ these to leak into the backtrace,
+  // we prevent it by setting AttrNoInjection (see Func::init)
   NameValueTable propNvt(numDeclProperties());
   NameValueTableWrapper propArr(&propNvt);
   propArr.incRefCount();
@@ -998,29 +1006,38 @@ TypedValue* Class::initSPropsImpl() const {
 
   // Invoke 86sinit's if necessary, to handle non-scalar initializers.
   if (hasNonscalarInit) {
+    // See note in initPropsImpl for why its ok to allocate
+    // this on the stack.
     NameValueTableWrapper nvtWrapper(&*nvt);
     nvtWrapper.incRefCount();
 
     HphpArray* args = NEW(HphpArray)(1);
     args->incRefCount();
-    {
-      TypedValue tv;
-      tv.m_data.parr = &nvtWrapper;
-      tv._count = 0;
-      tv.m_type = KindOfArray;
-      args->nvAppend(&tv, false);
+    try {
+      {
+        TypedValue tv;
+        tv.m_data.parr = &nvtWrapper;
+        tv._count = 0;
+        tv.m_type = KindOfArray;
+        args->nvAppend(&tv, false);
+      }
+      for (unsigned i = 0; i < m_sinitVec.size(); i++) {
+        TypedValue retval;
+        g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, NULL,
+                                const_cast<Class*>(this));
+        ASSERT(!IS_REFCOUNTED_TYPE(retval.m_type));
+      }
+      // Release the args array.  nvtWrapper is on the stack, so it
+      // better have a single reference.
+      ASSERT(args->getCount() == 1);
+      args->release();
+      ASSERT(nvtWrapper.getCount() == 1);
+    } catch (...) {
+      ASSERT(args->getCount() == 1);
+      args->release();
+      ASSERT(nvtWrapper.getCount() == 1);
+      throw;
     }
-    for (unsigned i = 0; i < m_sinitVec.size(); i++) {
-      TypedValue retval;
-      g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, NULL,
-                              const_cast<Class*>(this));
-      ASSERT(!IS_REFCOUNTED_TYPE(retval.m_type));
-    }
-    // Release the args array.  nvtWrapper is on the stack, so it
-    // better have a single reference.
-    ASSERT(args->getCount() == 1);
-    args->release();
-    ASSERT(nvtWrapper.getCount() == 1);
   }
 
   return spropTable;
@@ -1256,7 +1273,7 @@ void Class::setSpecial() {
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, sd86ctor);
   ASSERT(m_ctor && "class had no user-defined constructor or 86ctor");
-  ASSERT(m_ctor->attrs() == AttrPublic);
+  ASSERT(m_ctor->attrs() == (AttrPublic|AttrNoInjection));
 }
 
 void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule) {

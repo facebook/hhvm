@@ -1813,15 +1813,6 @@ void setmDecRef(int64 i) { /* nop */ }
 void setmDecRef(TypedValue* tv) { tvRefcountedDecRef(tv); }
 void setmDecRef(StringData* sd) { if (sd->decRefCount() == 0) sd->release(); }
 
-static inline HphpArray*
-array_mutate_pre(ArrayData* ad) {
-  ASSERT(ad);
-  return (HphpArray*)ad;
-}
-
-VarNR toVar(int64 i)        { return VarNR(i); }
-Variant &toVar(TypedValue* tv) { return tvCellAsVariant(tv); }
-
 static inline ArrayData*
 array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
   if (NULL == retval) {
@@ -1848,16 +1839,6 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
            ad->nvSet(key, value, copy);
   if (DecRefKey) setmDecRef(key);
   if (DecRefValue) setmDecRef(value);
-  return array_mutate_post(cell, ad, retval);
-}
-
-template<typename Value, bool DecRefValue>
-ArrayData*
-array_append(TypedValue* cell, ArrayData* ad, Value v) {
-  HphpArray* ha = array_mutate_pre(ad);
-  bool copy = ha->getCount() > 1;
-  ArrayData* retval = ha->nvAppend(v, copy);
-  if (DecRefValue) setmDecRef(v);
   return array_mutate_post(cell, ad, retval);
 }
 
@@ -1949,19 +1930,17 @@ ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
 /**
  * Append.
  *
- *   array_setm_wk1_v --
- *      $a[] = <polymorphic value>
  *   array_setm_wk1_v0 --
+ *      $a[] = <polymorphic value>
  *      ... but don't count the reference to the new value.
  */
-ArrayData* array_setm_wk1_v(TypedValue* cell, ArrayData* ad,
-                            TypedValue* value) {
-  return array_append<TypedValue*, false>(cell, ad, value);
-}
-
 ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
                              TypedValue* value) {
-  return array_append<TypedValue*, true>(cell, ad, value);
+  ASSERT(ad && IsHphpArray(ad));
+  HphpArray* ha = (HphpArray*)ad;
+  ArrayData* retval = ha->nvAppend(value, ha->getCount() > 1);
+  setmDecRef(value);
+  return array_mutate_post(cell, ad, retval);
 }
 
 /**

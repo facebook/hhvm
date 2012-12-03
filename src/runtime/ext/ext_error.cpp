@@ -54,7 +54,7 @@ Array f_debug_backtrace(bool provide_object /* = true */) {
 Array f_hphp_debug_caller_info() {
   if (RuntimeOption::InjectedStackTrace) {
     return hhvm
-           ? g_vmContext->getCallerInfo(true)
+           ? g_vmContext->getCallerInfo()
            : FrameInjection::GetCallerInfo(true);
   }
   return Array::Create();

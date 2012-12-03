@@ -181,7 +181,7 @@ DefineFunction(
   array(
     'name'   => "get_class_vars",
     'desc'   => "Get the default properties of the given class.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an associative array of declared properties visible from the current scope, with their default value. The resulting array elements are in the form of varname => value.",
@@ -219,7 +219,7 @@ DefineFunction(
   array(
     'name'   => "get_class",
     'desc'   => "Gets the name of the class of the given object.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the name of the class of which object is an instance. Returns FALSE if object is not an object.\n\nIf object is omitted when inside a class, the name of that class is returned.",
@@ -239,7 +239,7 @@ DefineFunction(
   array(
     'name'   => "get_parent_class",
     'desc'   => "Retrieves the parent class name for object or class.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the name of the parent class of the class of which object is an instance or the name.\n\nIf the object does not have a parent FALSE will be returned.\n\nIf called without parameter outside object, this function returns FALSE.",

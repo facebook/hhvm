@@ -837,7 +837,7 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   }
   if (iterable.isObject()) {
     CStrRef context = hhvm
-                      ? g_vmContext->getContextClassName(true)
+                      ? g_vmContext->getContextClassName()
                       : FrameInjection::GetClassName(true);
 
     ObjectData *obj = iterable.getObjectData();

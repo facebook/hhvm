@@ -5671,6 +5671,12 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
         return false;
       }
     }
+    // Special handling for func_get_args and friends inside a generator.
+    if (m_curFunc->isGenerator() &&
+        (name == "func_get_args" || name == "func_num_args"
+         || name == "func_get_arg")) {
+      return false;
+    }
     return true;
   }
   return false;

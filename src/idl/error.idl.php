@@ -53,7 +53,7 @@ DefineFunction(
   array(
     'name'   => "debug_backtrace",
     'desc'   => "debug_backtrace() generates a PHP backtrace.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NeedsActRec,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an associative array. The possible returned elements are as follows:\n\nPossible returned elements from debug_backtrace() Name Type Description function string The current function name. See also __FUNCTION__. line integer The current line number. See also __LINE__. file string The current file name. See also __FILE__. class string The current class name. See also __CLASS__ object object The current object. type string The current call type. If a method call, \"->\" is returned. If a static method call, \"::\" is returned. If a function call, nothing is returned. args array If inside a function, this lists the functions arguments. If inside an included file, this lists the included file name(s).",
@@ -73,7 +73,7 @@ DefineFunction(
   array(
     'name'   => "debug_print_backtrace",
     'desc'   => "debug_print_backtrace() prints a PHP backtrace. It prints the function calls, included/required files and eval()ed stuff.\nThis function has no parameters.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NeedsActRec,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",

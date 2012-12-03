@@ -495,7 +495,7 @@ Variant f_parse_ini_file(CStrRef filename, bool process_sections /* = false */,
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
       String cfd = hhvm
-                   ? g_vmContext->getContainingFileName(true)
+                   ? g_vmContext->getContainingFileName()
                    : FrameInjection::GetContainingFileName(true);
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');

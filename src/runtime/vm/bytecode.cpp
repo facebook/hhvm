@@ -104,6 +104,11 @@ struct VMPrepareUnwind : std::exception {
 
 }
 
+bool
+ActRec::skipFrame() const {
+  return m_func && m_func->isBuiltin();
+}
+
 template <>
 Class* arGetContextClassImpl<false>(const ActRec* ar) {
   if (ar == NULL) {
@@ -1385,10 +1390,10 @@ ActRec* VMExecutionContext::getStackFrame() {
   return getFP();
 }
 
-ObjectData* VMExecutionContext::getThis(bool skipFrame /* = false */) {
+ObjectData* VMExecutionContext::getThis() {
   VMRegAnchor _;
   ActRec* fp = getFP();
-  if (skipFrame) {
+  if (fp->skipFrame()) {
     fp = getPrevVMState(fp);
     if (!fp) return NULL;
   }
@@ -1398,11 +1403,11 @@ ObjectData* VMExecutionContext::getThis(bool skipFrame /* = false */) {
   return NULL;
 }
 
-CStrRef VMExecutionContext::getContextClassName(bool skipFrame /* = false */) {
+CStrRef VMExecutionContext::getContextClassName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   ASSERT(ar != NULL);
-  if (skipFrame) {
+  if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
     if (!ar) return empty_string;
   }
@@ -1415,11 +1420,11 @@ CStrRef VMExecutionContext::getContextClassName(bool skipFrame /* = false */) {
   }
 }
 
-CStrRef VMExecutionContext::getParentContextClassName(bool skip /* = false */) {
+CStrRef VMExecutionContext::getParentContextClassName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   ASSERT(ar != NULL);
-  if (skip) {
+  if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
     if (!ar) return empty_string;
   }
@@ -1440,12 +1445,11 @@ CStrRef VMExecutionContext::getParentContextClassName(bool skip /* = false */) {
   }
 }
 
-CStrRef VMExecutionContext::getContainingFileName(
-  bool skipFrame /* = false */) {
+CStrRef VMExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   if (ar == NULL) return empty_string;
-  if (skipFrame) {
+  if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
     if (ar == NULL) return empty_string;
   }
@@ -1453,24 +1457,24 @@ CStrRef VMExecutionContext::getContainingFileName(
   return unit->filepathRef();
 }
 
-int VMExecutionContext::getLine(bool skipFrame /* = false */) {
+int VMExecutionContext::getLine() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   Unit* unit = ar ? ar->m_func->unit() : NULL;
   Offset pc = unit ? pcOff() : 0;
   if (ar == NULL) return -1;
-  if (skipFrame) {
+  if (ar->skipFrame()) {
     ar = getPrevVMState(ar, &pc);
   }
   if (ar == NULL || (unit = ar->m_func->unit()) == NULL) return -1;
   return unit->getLineNumber(pc);
 }
 
-Array VMExecutionContext::getCallerInfo(bool skipFrame /* = false */) {
+Array VMExecutionContext::getCallerInfo() {
   VMRegAnchor _;
   Array result = Array::Create();
   ActRec* ar = getFP();
-  if (skipFrame) {
+  if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
   }
   while (ar->m_func->name()->isame(s_call_user_func.get())
@@ -1580,12 +1584,12 @@ void VMExecutionContext::addRenameableFunctions(ArrayData* arr) {
   m_renamedFuncs.addRenameableFunctions(arr);
 }
 
-VarEnv* VMExecutionContext::getVarEnv(bool skipBuiltin) {
+VarEnv* VMExecutionContext::getVarEnv() {
   Transl::VMRegAnchor _;
 
   HPHP::VM::VarEnv* builtinVarEnv = NULL;
   HPHP::VM::ActRec* fp = getFP();
-  if (skipBuiltin) {
+  if (fp->skipFrame()) {
     if (fp->hasVarEnv()) {
       builtinVarEnv = fp->getVarEnv();
     }
@@ -1615,8 +1619,11 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
   Transl::VMRegAnchor _;
   // setVar() should only be called after getVarEnv() has been called
   // to create a varEnv
-  ActRec *fp = getPrevVMState(getFP());
+  ActRec *fp = getFP();
   if (!fp) return;
+  if (fp->skipFrame()) {
+    fp = getPrevVMState(fp);
+  }
   ASSERT(!fp->hasInvName());
   ASSERT(!fp->hasExtraArgs());
   ASSERT(fp->m_varEnv != NULL);

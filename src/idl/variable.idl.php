@@ -625,7 +625,7 @@ DefineFunction(
   array(
     'name'   => "extract",
     'desc'   => "Import variables from an array into the current symbol table.\n\nChecks each key to see whether it has a valid variable name. It also checks for collisions with existing variables in the symbol table.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the number of variables successfully imported into the symbol table.",

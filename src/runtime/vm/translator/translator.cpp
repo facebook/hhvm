@@ -2809,6 +2809,14 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
   }
 }
 
+static bool checkTaintFuncs(StringData* name) {
+  static const StringData* s_extract =
+    StringData::GetStaticString("extract");
+  static const StringData* s_hphp_unpack_continuation =
+    StringData::GetStaticString("hphp_unpack_continuation");
+  return name->isame(s_extract) ||
+            name->isame(s_hphp_unpack_continuation);
+}
 
 /*
  * analyze --
@@ -2999,15 +3007,14 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
         } else if (*fpushPc == OpFPushFuncD) {
           StringData *funcName =
             curUnit()->lookupLitstrId(getImm(fpushPc, 1).u_SA);
-          static const StringData* s_extract =
-            StringData::GetStaticString("extract");
-          static const StringData* s_hphp_unpack_continuation =
-            StringData::GetStaticString("hphp_unpack_continuation");
-          doVarEnvTaint = funcName->isame(s_extract) ||
-            funcName->isame(s_hphp_unpack_continuation);
+          doVarEnvTaint = checkTaintFuncs(funcName);
         }
       }
       t.m_arState.pop();
+    }
+    if (ni->op() == OpFCallBuiltin && !doVarEnvTaint) {
+      StringData* funcName = curUnit()->lookupLitstrId(ni->imm[1].u_SA);
+      doVarEnvTaint = checkTaintFuncs(funcName);
     }
     if (doVarEnvTaint) {
       tas.varEnvTaint();

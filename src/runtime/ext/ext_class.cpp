@@ -38,7 +38,7 @@ static String get_classname(CVarRef class_or_object) {
 
 static inline CStrRef ctxClassName() {
   return hhvm ?
-    g_vmContext->getContextClassName(true) :
+    g_vmContext->getContextClassName() :
     FrameInjection::GetClassName(true);
 }
 

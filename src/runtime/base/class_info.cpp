@@ -605,14 +605,14 @@ bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
   if (!methodInfo) return false;
   if (methodInfo->attribute & ClassInfo::IsPublic) return true;
   CStrRef ctxName = hhvm
-                    ? g_vmContext->getContextClassName(true)
+                    ? g_vmContext->getContextClassName()
                     : FrameInjection::GetClassName(true);
   if (ctxName->size() == 0) {
     return false;
   }
   const ClassInfo *ctxClass = ClassInfo::FindClass(ctxName);
   bool hasObject = hasCallObject ||
-    (hhvm ? g_vmContext->getThis(true) : FrameInjection::GetThis(true));
+    (hhvm ? g_vmContext->getThis() : FrameInjection::GetThis(true));
   if (ctxClass) {
     return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);
   }

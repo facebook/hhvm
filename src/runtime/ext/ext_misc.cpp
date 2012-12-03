@@ -62,7 +62,7 @@ Variant f_constant(CStrRef name) {
     // translate "self" or "parent"
     if (className == "self") {
       String this_class = hhvm
-                          ? g_vmContext->getContextClassName(true)
+                          ? g_vmContext->getContextClassName()
                           : FrameInjection::GetClassName(true);
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
@@ -72,7 +72,7 @@ Variant f_constant(CStrRef name) {
       }
     } else if (className == "parent") {
       String parent_class = hhvm
-                            ? g_vmContext->getParentContextClassName(true)
+                            ? g_vmContext->getParentContextClassName()
                             : FrameInjection::GetParentClassName(true);
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
@@ -124,7 +124,7 @@ bool f_defined(CStrRef name) {
     // translate "self" or "parent"
     if (className == "self") {
       String this_class = hhvm
-                          ? g_vmContext->getContextClassName(true)
+                          ? g_vmContext->getContextClassName()
                           : FrameInjection::GetClassName(true);
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
@@ -134,7 +134,7 @@ bool f_defined(CStrRef name) {
       }
     } else if (className == "parent") {
       String parent_class = hhvm
-                            ? g_vmContext->getParentContextClassName(true)
+                            ? g_vmContext->getParentContextClassName()
                             : FrameInjection::GetParentClassName(true);
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");

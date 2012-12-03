@@ -477,7 +477,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
     if (!m_valid) mi.~MIterCtx();
   } else if (rtv->m_type == KindOfObject) {
     CStrRef ctxStr = hhvm
-                     ? g_vmContext->getContextClassName(true)
+                     ? g_vmContext->getContextClassName()
                      : FrameInjection::GetClassName(true);
     if (rtv->m_data.pobj->isCollection()) {
       raise_error("Collection elements cannot be taken by reference");

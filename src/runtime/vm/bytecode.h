@@ -266,6 +266,9 @@ struct ActRec {
     };
   };
 
+  // skip this frame if it is for a builtin function
+  bool skipFrame() const;
+
   /**
    * Accessors for the packed m_numArgsAndCtorFlag field. We track
    * whether ActRecs came from FPushCtor* so that during unwinding we

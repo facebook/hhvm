@@ -111,7 +111,7 @@ InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
   VM::ActRec *fp = context->getFP();
   bail_on(!fp);
   VM::Offset offset;
-  if (hardBreakPoint) {
+  if (hardBreakPoint && fp->skipFrame()) {
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
     fp = context->getPrevVMState(fp, &offset);

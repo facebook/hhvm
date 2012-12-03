@@ -123,7 +123,7 @@ String f_spl_object_hash(CObjRef obj) {
 
 Variant f_hphp_get_this() {
   if (hhvm) {
-    return g_vmContext->getThis(true);
+    return g_vmContext->getThis();
   } else {
     return FrameInjection::GetThis();
   }

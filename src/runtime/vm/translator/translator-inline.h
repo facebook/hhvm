@@ -113,14 +113,19 @@ struct VMRegAnchor : private boost::noncopyable {
 // a common need for extensions.
 struct CallerFrame : public VMRegAnchor {
   ActRec* operator()() {
-    // In builtins, m_fp points to the builtin's frame.
-    // getPrevVMState() gets the caller's frame.
+    // In builtins, m_fp points to the caller's frame if called
+    // through FCallBuiltin, else it points to the builtin's frame,
+    // in which case, getPrevVMState() gets the caller's frame.
     VMExecutionContext* context = g_vmContext;
     ActRec* cur = context->getFP();
     if (!cur) return NULL;
-    ActRec* prev = context->getPrevVMState(cur);
-    if (prev == cur) return NULL;
-    return prev;
+    if (cur->skipFrame()) {
+      ActRec* prev = context->getPrevVMState(cur);
+      if (prev == cur) return NULL;
+      return prev;
+    } else {
+      return cur;
+    }
   }
 };
 

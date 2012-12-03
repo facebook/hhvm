@@ -86,7 +86,7 @@ DefineFunction(
   array(
     'name'   => "is_callable",
     'desc'   => "Verify that the contents of a variable can be called as a function. This can check that a simple variable contains the name of a valid function, or that an array contains a properly encoded object and function name.",
-    'flags'  =>  HasDocComment | HasOptFunction | ContextSensitive | NeedsActRec,
+    'flags'  =>  HasDocComment | HasOptFunction | ContextSensitive,
     'opt'    => "hphp_opt_is_callable",
     'return' => array(
       'type'   => Boolean,
@@ -407,7 +407,7 @@ DefineFunction(
   array(
     'name'   => "get_called_class",
     'desc'   => "Gets the name of the class the static method is called in.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the class name. Returns FALSE if called from outside a class.",
@@ -443,7 +443,7 @@ DefineFunction(
   array(
     'name'   => "func_get_arg",
     'desc'   => "Gets the specified argument from a user-defined function's argument list.\n\nThis function may be used in conjunction with func_get_args() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the specified argument, or FALSE on error.",
@@ -462,7 +462,7 @@ DefineFunction(
   array(
     'name'   => "func_get_args",
     'desc'   => "Gets an array of the function's argument list.\n\nThis function may be used in conjunction with func_get_arg() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
       'desc'   => "Returns an array in which each element is a copy of the corresponding member of the current user-defined function's argument list.",
@@ -474,7 +474,7 @@ DefineFunction(
   array(
     'name'   => "func_num_args",
     'desc'   => "Gets the number of arguments passed to the function.\n\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
-    'flags'  =>  HasDocComment | NeedsActRec,
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the number of arguments passed into the current user-defined function.",

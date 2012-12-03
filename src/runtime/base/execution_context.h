@@ -602,12 +602,12 @@ public:
   std::vector<HPHP::VM::Fault> m_faults;
 
   HPHP::VM::ActRec* getStackFrame();
-  ObjectData* getThis(bool skipFrame = false);
-  CStrRef getContextClassName(bool skipFrame = false);
-  CStrRef getParentContextClassName(bool skipFrame = false);
-  CStrRef getContainingFileName(bool skipFrame = false);
-  int getLine(bool skipFrame = false);
-  Array getCallerInfo(bool skipFrame = false);
+  ObjectData* getThis();
+  CStrRef getContextClassName();
+  CStrRef getParentContextClassName();
+  CStrRef getContainingFileName();
+  int getLine();
+  Array getCallerInfo();
   bool defined(CStrRef name);
   TypedValue* getCns(StringData* cns, bool system=true, bool dynamic=true);
   bool setCns(StringData* cns, CVarRef val, bool dynamic = false);
@@ -660,7 +660,7 @@ public:
                        bool withThis = false,
                        VMParserFrame* parserFrame = NULL);
   int handleUnwind(VM::UnwindStatus unwindType);
-  HPHP::VM::VarEnv* getVarEnv(bool skipBuiltin = true);
+  HPHP::VM::VarEnv* getVarEnv();
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
   HPHP::VM::InjectionTables* m_injTables;

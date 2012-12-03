@@ -1531,6 +1531,8 @@ void Translator::preInputApplyMetaData(Unit::MetaHandle metaHand,
   while (metaHand.nextArg(info)) {
     switch (info.m_kind) {
     case Unit::MetaInfo::NonRefCounted:
+      // XXX disabled for now: t1933128
+      break;
       ni->nonRefCountedLocals.resize(curFunc()->numLocals());
       ni->nonRefCountedLocals[info.m_data] = 1;
       break;

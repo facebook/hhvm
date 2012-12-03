@@ -406,7 +406,11 @@ FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
     // Miss. Does it actually exist?
     func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
-      undefinedError("Undefined function: %s", sd->data());
+      VMRegAnchor _;
+      func = Unit::loadFunc(sd);
+      if (!func) {
+        undefinedError("Undefined function: %s", sd->data());
+      }
     }
     func->validate();
     pair->m_key = func->name(); // use a static name
@@ -422,8 +426,13 @@ FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
 //=============================================================================
 // FixedFuncCache
 
-void FixedFuncCache::lookupFailed(StringData* name) {
-  undefinedError("Undefined function: %s", name->data());
+const Func* FixedFuncCache::lookupUnknownFunc(StringData* name) {
+  VMRegAnchor _;
+  Func* func = Unit::loadFunc(name);
+  if (UNLIKELY(!func)) {
+    undefinedError("Undefined function: %s", name->data());
+  }
+  return func;
 }
 
 //=============================================================================

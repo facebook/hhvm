@@ -374,6 +374,7 @@ TypedValue* fg_fb_stubout_intercept_handler(VM::ActRec *ar);
 TypedValue* fg_fb_rpc_intercept_handler(VM::ActRec *ar);
 TypedValue* fg_fb_renamed_functions(VM::ActRec *ar);
 TypedValue* fg_fb_rename_function(VM::ActRec *ar);
+TypedValue* fg_fb_autoload_map(VM::ActRec *ar);
 TypedValue* fg_fb_utf8ize(VM::ActRec *ar);
 TypedValue* fg_fb_utf8_strlen_deprecated(VM::ActRec *ar);
 TypedValue* fg_fb_utf8_strlen(VM::ActRec *ar);
@@ -2941,7 +2942,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2191;
+const long long hhbc_ext_funcs_count = 2192;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3294,6 +3295,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "fb_rpc_intercept_handler", fg_fb_rpc_intercept_handler, (void *)&fh_fb_rpc_intercept_handler },
   { "fb_renamed_functions", fg_fb_renamed_functions, (void *)&fh_fb_renamed_functions },
   { "fb_rename_function", fg_fb_rename_function, (void *)&fh_fb_rename_function },
+  { "fb_autoload_map", fg_fb_autoload_map, (void *)&fh_fb_autoload_map },
   { "fb_utf8ize", fg_fb_utf8ize, (void *)&fh_fb_utf8ize },
   { "fb_utf8_strlen_deprecated", fg_fb_utf8_strlen_deprecated, (void *)&fh_fb_utf8_strlen_deprecated },
   { "fb_utf8_strlen", fg_fb_utf8_strlen, (void *)&fh_fb_utf8_strlen },

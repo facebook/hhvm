@@ -152,6 +152,16 @@ void AnalysisResult::parseOnDemand(const std::string &name) const {
   }
 }
 
+void AnalysisResult::parseOnDemandBy(const string &name,
+                                     const map<string,string> &amap) const {
+  if (m_package) {
+    auto it = amap.find(name);
+    if (it != amap.end()) {
+      parseOnDemand(Option::AutoloadRoot + it->second);
+    }
+  }
+}
+
 FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
   StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
   if (iter != m_files.end()) {

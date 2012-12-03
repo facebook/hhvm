@@ -795,7 +795,8 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
-      (RuntimeOption::EvalJitEnableRenameFunction ||
+      ((RuntimeOption::EvalJitEnableRenameFunction &&
+        !isdigit(m_name->data()[0])) ||
        (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
     attrs = Attr(attrs & ~AttrPersistent);
   }

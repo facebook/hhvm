@@ -3703,11 +3703,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         const static StringData* parentName =
           StringData::GetStaticString("closure");
         const Location* sLoc = ce->getLocation().get();
-        PreClassEmitter* pce = m_ue.newPreClassEmitter(className,
-                                                       PreClass::NotHoistable);
+        PreClassEmitter* pce = m_ue.newPreClassEmitter(
+          className, PreClass::AlwaysHoistable);
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
                   AttrUnique | AttrPersistent, parentName, NULL);
-        e.DefCls(pce->id());
 
         // We're still at the closure definition site. Emit code to instantiate
         // the new anonymous class, with the use variables as arguments.
@@ -5041,19 +5040,18 @@ void EmitterVisitor::emitPostponedMeths() {
     ASSERT(m_actualStackHighWater == 0);
     ASSERT(m_fdescHighWater == 0);
     PostponedMeth& p = m_postponedMeths.front();
+    FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
     FuncEmitter* fe = p.m_fe;
     if (!fe) {
       ASSERT(p.m_top);
       const StringData* methName =
         StringData::GetStaticString(p.m_meth->getOriginalName());
       fe = new FuncEmitter(m_ue, -1, -1, methName);
-      fe->setIsGenerator(p.m_meth->getFunctionScope()->isGenerator());
-      fe->setIsGeneratorFromClosure(
-        p.m_meth->getFunctionScope()->isGeneratorFromClosure());
+      fe->setIsGenerator(funcScope->isGenerator());
+      fe->setIsGeneratorFromClosure(funcScope->isGeneratorFromClosure());
       p.m_fe = fe;
       top_fes.push_back(fe);
     }
-    FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
     const FunctionScope::UserAttributeMap& userAttrs =
       funcScope->userAttributes();
     for (FunctionScope::UserAttributeMap::const_iterator it = userAttrs.begin();
@@ -5147,14 +5145,17 @@ void EmitterVisitor::emitPostponedMeths() {
     ModifierExpressionPtr mod(p.m_meth->getModifiers());
     Attr attrs = buildAttrs(mod, p.m_meth->isRef());
 
-    if (p.m_meth->getFunctionScope()->mayUseVV()) {
+    if (funcScope->mayUseVV()) {
       attrs = attrs | AttrMayUseVV;
     }
 
     if (Option::WholeProgram) {
       if (!funcScope->isRedeclaring()) {
         attrs = attrs | AttrUnique;
-        if (!funcScope->isVolatile() || funcScope->isPersistent()) {
+        if (p.m_top &&
+            (!funcScope->isVolatile() ||
+             funcScope->isPersistent() ||
+             funcScope->isGenerator())) {
           attrs = attrs | AttrPersistent;
         }
       }
@@ -5171,7 +5172,7 @@ void EmitterVisitor::emitPostponedMeths() {
           */
           attrs = attrs | AttrTrait;
         }
-        if (!p.m_meth->getFunctionScope()->hasOverride()) {
+        if (!funcScope->hasOverride()) {
           attrs = attrs | AttrNoOverride;
         }
       }
@@ -6634,7 +6635,7 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
 
 static Unit* emitHHBCUnit(AnalysisResultPtr ar, FileScopePtr fsp,
                           const MD5& md5, UnitOrigin unitOrigin, bool commit) {
-  if (fsp->getPseudoMain()) {
+  if (fsp->getPseudoMain() && !Option::WholeProgram) {
     ar->setPhase(AnalysisResult::FirstPreOptimize);
     doOptimize(fsp->getPseudoMain()->getStmt(), ar);
   }

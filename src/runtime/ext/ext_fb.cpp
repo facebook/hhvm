@@ -1449,6 +1449,32 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   return true;
 }
 
+/*
+  fb_autoload_map($map, $root) specifies a mapping
+  from classes, functions and constants to the files
+  that define them. The map has the form:
+
+    array('class'    => array('cls' => 'cls_file.php', ...),
+          'function' => array('fun' => 'fun_file.php', ...),
+          'constant' => array('con' => 'con_file.php', ...),
+          'failure' => callable);
+
+    If the 'failure' element exists, it will be called if the
+    lookup in the map fails, or the file cant be included. It
+    takes a kind ('class', 'function' or 'constant') and the
+    name of the entity we're trying to autoload.
+
+  If $root is non empty, it is prepended to every filename
+  (so will typically need to end with '/').
+*/
+
+bool f_fb_autoload_map(CVarRef map, CStrRef root) {
+  if (map.isArray()) {
+    return AutoloadHandler::s_instance->setMap(map.toCArrRef(), root);
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // call_user_func extensions
 

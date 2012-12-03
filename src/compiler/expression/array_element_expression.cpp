@@ -134,17 +134,21 @@ void ArrayElementExpression::clearContext(Context context) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-bool ArrayElementExpression::appendClass(ExpressionPtr cls) {
+bool ArrayElementExpression::appendClass(ExpressionPtr cls,
+                                         AnalysisResultConstPtr ar,
+                                         FileScopePtr file) {
   if (m_variable->is(Expression::KindOfArrayElementExpression)) {
     return dynamic_pointer_cast<ArrayElementExpression>(m_variable)
-      ->appendClass(cls);
+      ->appendClass(cls, ar, file);
   }
   if (m_variable->is(Expression::KindOfSimpleVariable) ||
       m_variable->is(Expression::KindOfDynamicVariable)) {
-    m_variable = StaticMemberExpressionPtr
-      (new StaticMemberExpression(
+    StaticMemberExpressionPtr sme(
+      new StaticMemberExpression(
         m_variable->getScope(), m_variable->getLocation(),
         cls, m_variable));
+    sme->onParse(ar, file);
+    m_variable = sme;
     m_global = m_dynamicGlobal = false;
     m_globalName.clear();
     return true;

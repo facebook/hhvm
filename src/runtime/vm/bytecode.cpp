@@ -2433,7 +2433,7 @@ const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
   StringIMap<AtomicSmartPtr<MethodInfoVM> >::iterator it =
     m_functionInfos.find(name);
   if (it == m_functionInfos.end()) {
-    Func* func = Unit::lookupFunc(name.get());
+    Func* func = Unit::loadFunc(name.get());
     if (func == NULL || func->builtinFuncPtr()) {
       // Fall back to the logic in ClassInfo::FindFunction() logic to deal
       // with builtin functions
@@ -2606,10 +2606,14 @@ Unit* VMExecutionContext::evalInclude(StringData* path,
                                       const StringData* curUnitFilePath,
                                       bool* initial) {
   namespace fs = boost::filesystem;
-  fs::path currentUnit(curUnitFilePath->data());
-  fs::path currentDir(currentUnit.branch_path());
-  HPHP::Eval::PhpFile* efile =
-    lookupPhpFile(path, currentDir.string().c_str(), initial);
+  HPHP::Eval::PhpFile* efile = NULL;
+  if (curUnitFilePath) {
+    fs::path currentUnit(curUnitFilePath->data());
+    fs::path currentDir(currentUnit.branch_path());
+    efile = lookupPhpFile(path, currentDir.string().c_str(), initial);
+  } else {
+    efile = lookupPhpFile(path, "", initial);
+  }
   if (efile) {
     return efile->unit();
   }
@@ -3881,14 +3885,19 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {
   NEXT();
   DECODE_LITSTR(s);
   TypedValue* cns = getCns(s);
-  if (cns != NULL) {
-    Cell* c1 = m_stack.allocC();
-    tvReadCell(cns, c1);
-  } else {
-    raise_notice(Strings::UNDEFINED_CONSTANT,
-                 s->data(), s->data());
-    m_stack.pushStaticString(s);
+  if (cns == NULL) {
+    if (AutoloadHandler::s_instance->autoloadConstant(StrNR(s))) {
+      cns = g_vmContext->getCns(const_cast<StringData*>(s));
+    }
+    if (!cns) {
+      raise_notice(Strings::UNDEFINED_CONSTANT,
+                   s->data(), s->data());
+      m_stack.pushStaticString(s);
+      return;
+    }
   }
+  Cell* c1 = m_stack.allocC();
+  tvReadCell(cns, c1);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopDefCns(PC& pc) {
@@ -5428,7 +5437,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
   StringData* origSd = NULL;
   if (IS_STRING_TYPE(c1->m_type)) {
     origSd = c1->m_data.pstr;
-    func = Unit::lookupFunc(origSd);
+    func = Unit::loadFunc(origSd);
   } else if (c1->m_type == KindOfObject) {
     static StringData* invokeName = StringData::GetStaticString("__invoke");
     origObj = c1->m_data.pobj;
@@ -5474,7 +5483,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
   DECODE_IVA(numArgs);
   DECODE(Id, id);
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
-  Func* func = Unit::lookupFunc(nep.second, nep.first);
+  Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == NULL) {
     raise_error("Undefined function: %s",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());

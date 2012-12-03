@@ -5401,12 +5401,17 @@ static void undefCns(const StringData* nm) {
   VMRegAnchor _;
   TypedValue *cns = g_vmContext->getCns(const_cast<StringData*>(nm));
   if (!cns) {
-    raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
-    g_vmContext->getStack().pushStringNoRc(const_cast<StringData*>(nm));
-  } else {
-    Cell* c1 = g_vmContext->getStack().allocC();
-    tvReadCell(cns, c1);
+    if (AutoloadHandler::s_instance->autoloadConstant(StrNR(nm))) {
+      cns = g_vmContext->getCns(const_cast<StringData*>(nm));
+    }
+    if (!cns) {
+      raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
+      g_vmContext->getStack().pushStringNoRc(const_cast<StringData*>(nm));
+      return;
+    }
   }
+  Cell* c1 = g_vmContext->getStack().allocC();
+  tvReadCell(cns, c1);
 }
 
 void TranslatorX64::emitSideExit(Asm& a, const NormalizedInstruction& i,
@@ -5440,7 +5445,7 @@ TranslatorX64::translateCns(const Tracelet& t,
   ASSERT(i.outStack && !i.outLocal);
 
   // OK to burn "name" into TC: it was merged into the static string
-  // table, so as long as this code is reachable, so shoud the string
+  // table, so as long as this code is reachable, so should the string
   // be.
   DataType outType = i.outStack->valueType();
   StringData* name = curUnit()->lookupLitstrId(i.imm[0].u_SA);
@@ -5463,6 +5468,7 @@ TranslatorX64::translateCns(const Tracelet& t,
   using namespace TargetCache;
   if (tv && tvIsStatic(tv)) {
     m_regMap.allocOutputRegs(i);
+    boost::scoped_ptr<DiamondReturn> astubsRet;
     if (checkDefined) {
       size_t bit = allocCnsBit(name);
       uint8 mask;
@@ -5473,6 +5479,7 @@ TranslatorX64::translateCns(const Tracelet& t,
       // the mask to 64 bits to make the assembler happy.
       int64_t imm = (int64_t)(int8)mask;
       a.testb(imm, rVmTl[ch]);
+      if (!i.next) astubsRet.reset(new DiamondReturn);
       {
         // If we get to the optimistic translation and the constant
         // isn't defined, our tracelet is ruined because the type may
@@ -5480,9 +5487,15 @@ TranslatorX64::translateCns(const Tracelet& t,
         // could theoretically keep going here since that's the type
         // of an undefined constant expression, but it should be rare
         // enough that it's not worth the complexity.
-        UnlikelyIfBlock ifZero(CC_Z, a, astubs);
+        UnlikelyIfBlock ifZero(CC_Z, a, astubs, astubsRet.get());
         Stats::emitInc(astubs, Stats::Tx64_CnsFast, -1);
-        emitSideExit(astubs, i, false);
+        EMIT_CALL(astubs, undefCns, IMM((uintptr_t)name));
+        recordReentrantStubCall(i);
+        if (i.next) {
+          emitSideExit(astubs, i, true);
+        } else {
+          m_regMap.invalidate(i.outStack->location);
+        }
       }
     }
     // Its type and value are known at compile-time.
@@ -8592,8 +8605,6 @@ TranslatorX64::translateFPushFunc(const Tracelet& t,
   int startOfActRec = int(sizeof(Cell)) - int(sizeof(ActRec));
   size_t funcOff = AROFF(m_func) + startOfActRec;
   size_t thisOff = AROFF(m_this) + startOfActRec;
-  emitVStackStoreImm(a, i, 0, thisOff, sz::qword, &m_regMap);
-  emitPushAR(i, NULL, sizeof(Cell) /* bytesPopped */);
   if (false) { // typecheck
     StringData sd("foo");
     const UNUSED Func* f = FuncCache::lookup(ch, &sd);
@@ -8602,6 +8613,8 @@ TranslatorX64::translateFPushFunc(const Tracelet& t,
   EMIT_CALL(a, FuncCache::lookup, IMM(ch), V(inLoc));
   recordCall(i);
   emitVStackStore(a, i, rax, funcOff, sz::qword);
+  emitVStackStoreImm(a, i, 0, thisOff, sz::qword, &m_regMap);
+  emitPushAR(i, NULL, sizeof(Cell) /* bytesPopped */);
 }
 
 void
@@ -9322,8 +9335,6 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
 
   size_t thisOff = AROFF(m_this) - sizeof(ActRec);
   bool funcCanChange = !func->isNameBindingImmutable(curUnit());
-  emitVStackStoreImm(a, i, 0, thisOff, sz::qword, &m_regMap);
-  emitPushAR(i, funcCanChange ? NULL : func, 0, false, false);
   if (funcCanChange) {
     // Look it up in a FuncCache.
     using namespace TargetCache;
@@ -9342,16 +9353,20 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
 
       if (false) { // typecheck
         StringData sd("foo");
-        FixedFuncCache::lookupFailed(&sd);
+        FixedFuncCache::lookupUnknownFunc(&sd);
       }
 
-      EMIT_CALL(astubs, TCA(FixedFuncCache::lookupFailed),
+      EMIT_CALL(astubs, TCA(FixedFuncCache::lookupUnknownFunc),
                         IMM(uintptr_t(name)));
       recordReentrantStubCall(i);
       emitMovRegReg(astubs, rax, r(scratch));
     }
     emitVStackStore(a, i, r(scratch), funcOff, sz::qword);
   }
+  // delay writing the ActRec until after calling lookupUnknownFunc
+  // since it can re-enter and overwrite anything we had written...
+  emitVStackStoreImm(a, i, 0, thisOff, sz::qword, &m_regMap);
+  emitPushAR(i, funcCanChange ? NULL : func, 0, false, false);
 }
 
 const Func*
@@ -9506,8 +9521,17 @@ int64 checkClass(TargetCache::CacheHandle ch, StringData* clsName,
   return false;
 }
 
-static void warnMissingFunc(StringData* name) {
-  throw_invalid_argument("function: method '%s' not found", name->data());
+static const Func* autoloadMissingFunc(const Func* func) {
+  VMRegAnchor _;
+  AutoloadHandler::s_instance->autoloadFunc(func->name()->data());
+  Func* toCall = *(Func**)TargetCache::handleToPtr(func->getCachedOffset());
+  /* toCall could be a different function due to renaming */
+  if (toCall) {
+    return toCall;
+  }
+  throw_invalid_argument("function: method '%s' not found",
+                         func->name()->data());
+  return SystemLib::GetNullFunction();
 }
 
 void
@@ -9570,13 +9594,14 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       a.          test_reg64_reg64(r(funcReg), r(funcReg));
       {
         UnlikelyIfBlock ifNull(CC_Z, a, astubs);
-        emitVStackStoreImm(astubs, ni,
-                           uintptr_t(SystemLib::GetNullFunction()), funcOff);
         if (safe) {
+          emitVStackStoreImm(astubs, ni,
+                             uintptr_t(SystemLib::GetNullFunction()), funcOff);
           emitImmReg(astubs, false, r(flag));
         } else {
-          EMIT_CALL(astubs, TCA(warnMissingFunc), IMM(uintptr_t(func->name())));
+          EMIT_CALL(astubs, TCA(autoloadMissingFunc), IMM(uintptr_t(func)));
           recordReentrantStubCall(ni, true);
+          emitVStackStore(astubs, ni, rax, funcOff);
         }
       }
     }

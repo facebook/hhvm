@@ -52,6 +52,9 @@ void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
   }
   vector<string> usedTraits;
   getUsedTraitNames(usedTraits);
+  for (auto &t : usedTraits) {
+    ar->parseOnDemandByClass(Util::toLower(t));
+  }
   scope->addUsedTraits(usedTraits);
 }
 

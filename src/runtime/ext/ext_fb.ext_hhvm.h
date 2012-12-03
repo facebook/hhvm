@@ -161,6 +161,17 @@ new_func_name => rsi
 bool fh_fb_rename_function(Value* orig_func_name, Value* new_func_name) asm("_ZN4HPHP20f_fb_rename_functionERKNS_6StringES2_");
 
 /*
+bool HPHP::f_fb_autoload_map(HPHP::Variant const&, HPHP::String const&)
+_ZN4HPHP17f_fb_autoload_mapERKNS_7VariantERKNS_6StringE
+
+(return value) => rax
+map => rdi
+root => rsi
+*/
+
+bool fh_fb_autoload_map(TypedValue* map, Value* root) asm("_ZN4HPHP17f_fb_autoload_mapERKNS_7VariantERKNS_6StringE");
+
+/*
 bool HPHP::f_fb_utf8ize(HPHP::VRefParamValue const&)
 _ZN4HPHP12f_fb_utf8izeERKNS_14VRefParamValueE
 

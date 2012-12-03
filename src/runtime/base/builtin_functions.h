@@ -418,6 +418,7 @@ Variant invoke_failed(const char *func, CArrRef params,
                       bool fatal = true);
 Variant invoke_failed(CVarRef func, CArrRef params,
                       bool fatal = true);
+const CallInfo *invoke_check(CStrRef func, const CallInfo**hci, bool safe);
 
 Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
@@ -596,6 +597,13 @@ bool function_exists(CStrRef function_name);
 class Globals;
 
 class AutoloadHandler : public RequestEventHandler {
+  enum Result {
+    Failure,
+    Success,
+    StopAutoloading,
+    ContinueAutoloading
+  };
+
 public:
   virtual void requestInit();
   virtual void requestShutdown();
@@ -608,12 +616,19 @@ public:
 
   bool invokeHandler(CStrRef className, const bool *declared = NULL,
                      bool forceSplStack = false);
-
+  bool autoloadFunc(CStrRef name);
+  bool autoloadConstant(CStrRef name);
+  bool setMap(CArrRef map, CStrRef root);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
 private:
+  template <class T>
+  Result loadFromMap(CStrRef name, CStrRef kind, bool toLower,
+                     const T &checkExists);
   static String getSignature(CVarRef handler);
 
+  Array m_map;
+  String m_map_root;
   Array m_handlers;
   bool m_running;
 };
@@ -636,6 +651,7 @@ bool autoloadClassThrow(CStrRef name, bool *declared);
 bool autoloadClassNoThrow(CStrRef name, bool *declared);
 bool autoloadInterfaceThrow(CStrRef name, bool *declared);
 bool autoloadInterfaceNoThrow(CStrRef name, bool *declared);
+bool autoloadFunctionNoThrow(CStrRef name, bool *declared);
 
 inline ALWAYS_INLINE bool checkClassExistsThrow(CStrRef name,
                                                 bool *declared) {
@@ -663,6 +679,13 @@ inline ALWAYS_INLINE bool checkInterfaceExistsNoThrow(CStrRef name,
   ASSERT(declared);
   if (LIKELY(*declared)) return true;
   return autoloadInterfaceNoThrow(name, declared);
+}
+
+inline ALWAYS_INLINE bool checkFunctionExistsNoThrow(CStrRef name,
+                                                     bool *declared) {
+  ASSERT(declared);
+  if (LIKELY(*declared)) return true;
+  return autoloadFunctionNoThrow(name, declared);
 }
 
 class CallInfo;

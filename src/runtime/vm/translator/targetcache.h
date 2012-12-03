@@ -201,7 +201,7 @@ struct FixedFuncCache {
     thiz->m_func = NULL;
   }
 
-  static void lookupFailed(StringData* name);
+  static const Func* lookupUnknownFunc(StringData* name);
 };
 
 struct StaticMethodCache {

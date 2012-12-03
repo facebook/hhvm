@@ -78,6 +78,10 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   }
   if (m_base) m_base->getOriginalStrings(bases);
 
+  for (auto &b : bases) {
+    ar->parseOnDemandByClass(Util::toLower(b));
+  }
+
   vector<UserAttributePtr> attrs;
   if (m_attrList) {
     for (int i = 0; i < m_attrList->getCount(); ++i) {
@@ -194,7 +198,7 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
           (cls->isTrait())) {
         Compiler::Error(Compiler::InvalidDerivation,
                         shared_from_this(),
-                        "You are extending " + cls->getOriginalName() + 
+                        "You are extending " + cls->getOriginalName() +
                           " which is an interface or a trait");
       }
       if (cls->isUserClass()) {

@@ -39,6 +39,7 @@
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/unit.h>
+#include <runtime/vm/event_hook.h>
 #include <system/lib/systemlib.h>
 
 #include <limits>
@@ -59,6 +60,10 @@ static StaticString s_previous("previous");
 StaticString s_self("self");
 StaticString s_parent("parent");
 StaticString s_static("static");
+StaticString s_class("class");
+StaticString s_function("function");
+StaticString s_constant("constant");
+StaticString s_failure("failure");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -79,6 +84,10 @@ String get_static_class_name(CVarRef objOrClassName) {
 
 Variant getDynamicConstant(CVarRef v, CStrRef name) {
   if (isInitialized(v)) return v;
+  if (AutoloadHandler::s_instance->autoloadConstant(name) &&
+      isInitialized(v)) {
+    return v;
+  }
   raise_notice(Strings::UNDEFINED_CONSTANT,
                name.c_str(), name.c_str());
   return name;
@@ -255,7 +264,7 @@ vm_decode_function(CVarRef function,
       }
     }
     if (!cls) {
-      HPHP::VM::Func* f = HPHP::VM::Unit::lookupFunc(name.get());
+      HPHP::VM::Func* f = HPHP::VM::Unit::loadFunc(name.get());
       if (!f) {
         if (warn) {
           throw_invalid_argument("function: method '%s' not found",
@@ -740,7 +749,7 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   if (hhvm) {
     StringData funcName(function);
-    VM::Func* func = VM::Unit::lookupFunc(&funcName);
+    VM::Func* func = VM::Unit::loadFunc(&funcName);
     if (func) {
       Variant ret;
       g_vmContext->invokeFunc((TypedValue*)&ret, func, params);
@@ -805,6 +814,13 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
       return null;
     }
   }
+}
+
+const CallInfo *invoke_check(CStrRef func, const CallInfo**hci, bool safe) {
+  AutoloadHandler::s_instance->autoloadFunc(func);
+  if (safe || *hci) return *hci;
+  invoke_failed(func.c_str(), null_array);
+  return NULL;
 }
 
 Variant invoke_failed(CVarRef func, CArrRef params,
@@ -1059,7 +1075,11 @@ bool get_call_info(const CallInfo *&ci, void *&extra, CVarRef func) {
   }
   if (LIKELY(Variant::IsString(tv_func))) {
     StringData *sd = Variant::GetStringData(tv_func);
-    return get_call_info(ci, extra, sd->data(), sd->hash());
+    do {
+      if (LIKELY(get_call_info(ci, extra, sd->data(), sd->hash()))) {
+        return true;
+      }
+    } while (AutoloadHandler::s_instance->autoloadFunc(StrNR(sd)));
   }
   return false;
 }
@@ -1804,10 +1824,118 @@ IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 void AutoloadHandler::requestInit() {
   m_running = false;
   m_handlers.reset();
+  m_map.reset();
+  m_map_root.reset();
 }
 
 void AutoloadHandler::requestShutdown() {
   m_handlers.reset();
+  m_map.reset();
+  m_map_root.reset();
+}
+
+bool AutoloadHandler::setMap(CArrRef map, CStrRef root) {
+  this->m_map = map;
+  this->m_map_root = root;
+  return true;
+}
+
+class ClassExistsChecker {
+ public:
+  ClassExistsChecker(const bool *declared) : m_declared(declared) {}
+  bool operator()(CStrRef name) const {
+    if (m_declared) {
+      return *m_declared;
+    } else if (hhvm) {
+      return VM::Unit::lookupClass(name.get()) != NULL;
+    } else {
+      return ClassInfo::FindClassInterfaceOrTrait(name) != NULL;
+    }
+  }
+ private:
+  const bool* m_declared;
+};
+
+class ConstantExistsChecker {
+ public:
+  bool operator()(CStrRef name) const {
+    if (ClassInfo::FindConstant(name)) return true;
+    if (hhvm) {
+      return g_vmContext->defined(name);
+    } else {
+      return ((Globals*)get_global_variables())->defined(name);
+    }
+  }
+};
+
+template <class T>
+AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
+                                                     CStrRef kind,
+                                                     bool toLower,
+                                                     const T &checkExists) {
+  ASSERT(!m_map.isNull());
+  while (true) {
+    CVarRef &type_map = m_map.get()->get(kind);
+    Variant::TypedValueAccessor tva = type_map.getTypedAccessor();
+    if (Variant::GetAccessorType(tva) != KindOfArray) return Failure;
+    String canonicalName = toLower ? StringUtil::ToLower(name) : name;
+    CVarRef &file = Variant::GetArrayData(tva)->get(canonicalName);
+    bool ok = false;
+    if (file.isString()) {
+      String fName = file.toCStrRef().get();
+      if (fName.get()->data()[0] != '/') {
+        if (!m_map_root.empty()) {
+          fName = m_map_root + fName;
+        }
+      }
+      try {
+        if (hhvm) {
+          VM::Transl::VMRegAnchor _;
+          bool initial;
+          VMExecutionContext* ec = g_vmContext;
+          VM::Unit* u = ec->evalInclude(fName.get(), NULL, &initial);
+          if (u) {
+            if (initial) {
+              TypedValue retval;
+              ec->invokeFunc(&retval, u->getMain(), Array(),
+                             NULL, NULL, NULL, NULL, u);
+              tvRefcountedDecRef(&retval);
+            }
+            ok = true;
+          }
+        } else {
+          ok = include(fName, true,
+                       lvar_ptr(LVariableTable()), NULL, false);
+        }
+      } catch (...) {}
+    }
+    if (ok && checkExists(name)) {
+      return Success;
+    }
+    CVarRef &func = m_map.get()->get(s_failure);
+    if (!isset(func)) return Failure;
+    // can throw, otherwise
+    //  - true means the map was updated. try again
+    //  - false means we should stop applying autoloaders (only affects classes)
+    //  - anything else means keep going
+    Variant action = f_call_user_func_array(func, CREATE_VECTOR2(kind, name));
+    tva = action.getTypedAccessor();
+    if (Variant::GetAccessorType(tva) == KindOfBoolean) {
+      if (Variant::GetBoolean(tva)) continue;
+      return StopAutoloading;
+    }
+    return ContinueAutoloading;
+  }
+}
+
+bool AutoloadHandler::autoloadFunc(CStrRef name) {
+  return !m_map.isNull() &&
+    loadFromMap(name, s_function, true, function_exists) != Failure;
+}
+
+bool AutoloadHandler::autoloadConstant(CStrRef name) {
+  return !m_map.isNull() &&
+    loadFromMap(name, s_constant, false, ConstantExistsChecker()) != Failure;
 }
 
 /**
@@ -1818,6 +1946,15 @@ void AutoloadHandler::requestShutdown() {
 bool AutoloadHandler::invokeHandler(CStrRef className,
                                     const bool *declared /* = NULL */,
                                     bool forceSplStack /* = false */) {
+  if (!m_map.isNull()) {
+    ClassExistsChecker ce(declared);
+    Result res = loadFromMap(className, s_class, true, ce);
+    if (res == ContinueAutoloading) {
+      if (ce(className)) return true;
+    } else {
+      if (res != Failure) return res == Success;
+    }
+  }
   Array params(ArrayInit(1, ArrayInit::vectorInit).set(className).create());
   bool l_running = m_running;
   m_running = true;
@@ -1954,6 +2091,11 @@ bool autoloadInterfaceThrow(CStrRef name, bool *declared) {
 bool autoloadInterfaceNoThrow(CStrRef name, bool *declared) {
   AutoloadHandler::s_instance->invokeHandler(name, declared);
   return declared && *declared;
+}
+
+bool autoloadFunctionNoThrow(CStrRef name, bool *declared) {
+  AutoloadHandler::s_instance->autoloadFunc(name);
+  return *declared;
 }
 
 Variant &get_static_property_lval(CStrRef s, const char *prop) {

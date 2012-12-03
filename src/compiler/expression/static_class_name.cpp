@@ -43,6 +43,12 @@ StaticClassName::StaticClassName(ExpressionPtr classExp)
   }
 }
 
+void StaticClassName::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  if (!m_self && !m_parent && !m_static && !m_className.empty()) {
+    ar->parseOnDemandByClass(m_className);
+  }
+}
+
 void StaticClassName::updateClassName() {
   if (m_class && m_class->is(Expression::KindOfScalarExpression) &&
       !m_static) {

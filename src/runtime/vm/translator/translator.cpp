@@ -2160,7 +2160,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         if (op == OpFPushFuncD) {
           const Unit& cu = *ni->unit();
           Id funcId = ni->imm[1].u_SA;
-          const NamedEntityPair nep = cu.lookupNamedEntityPairId(funcId);
+          const NamedEntityPair &nep = cu.lookupNamedEntityPairId(funcId);
           const Func* f = Unit::lookupFunc(nep.second, nep.first);
           if (f && f->isNameBindingImmutable(&cu)) {
             t.m_arState.pushFuncD(f);

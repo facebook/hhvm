@@ -475,8 +475,9 @@ struct Unit {
   }
 
   static Func *lookupFunc(const NamedEntity *ne, const StringData* name);
-
   static Func *lookupFunc(const StringData *funcName);
+  static Func *loadFunc(const NamedEntity *ne, const StringData* name);
+  static Func *loadFunc(const StringData* name);
 
   static Class* defClass(const HPHP::VM::PreClass* preClass,
                          bool failIsFatal = true);

@@ -37,6 +37,7 @@ Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done);
 void f_fb_renamed_functions(CArrRef names);
 bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name);
+bool f_fb_autoload_map(CVarRef map, CStrRef root);
 bool f_fb_utf8ize(VRefParam input);
 int64 f_fb_utf8_strlen_deprecated(CStrRef input);
 int64 f_fb_utf8_strlen(CStrRef input);

@@ -1357,15 +1357,29 @@ void Unit::enableIntercepts() {
   }
 }
 
-Func *Unit::lookupFunc(const NamedEntity *ne, const StringData* name) {
-  Func *func = ne->getCachedFunc();
+Func* Unit::lookupFunc(const NamedEntity* ne, const StringData* name) {
+  Func* func = ne->getCachedFunc();
   return func;
 }
 
-Func *Unit::lookupFunc(const StringData *funcName) {
-  const NamedEntity *ne = GetNamedEntity(funcName);
-  Func *func = ne->getCachedFunc();
+Func* Unit::lookupFunc(const StringData* funcName) {
+  const NamedEntity* ne = GetNamedEntity(funcName);
+  Func* func = ne->getCachedFunc();
   return func;
+}
+
+Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {
+  Func* func = ne->getCachedFunc();
+  if (UNLIKELY(!func)) {
+    if (AutoloadHandler::s_instance->autoloadFunc(StrNR(funcName))) {
+      func = ne->getCachedFunc();
+    }
+  }
+  return func;
+}
+
+Func* Unit::loadFunc(const StringData* funcName) {
+  return loadFunc(GetNamedEntity(funcName), funcName);
 }
 
 //=============================================================================

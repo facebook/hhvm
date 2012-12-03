@@ -512,6 +512,30 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_autoload_map",
+    'desc'   => "Specify a map containing an array with four optional elements. 'class', 'function', 'constant', and 'failure'. The first three entries are maps from names to the file where that entity is defined. An attempt to access an undefined class/function/constant will look it up in the appropriate map, and if found, include that file. If the entity is still not defined, it will call the 'failure' entry.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "map",
+        'type'   => Variant,
+        'desc'   => "The autoload map.",
+      ),
+      array(
+        'name'   => "root",
+        'type'   => String,
+        'desc'   => "Root to be prepended to all paths in the map.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fb_utf8ize",
     'desc'   => "Sanitize a string to make sure it's legal UTF-8 by stripping off any characters that are not properly encoded.",
     'flags'  =>  HasDocComment | HipHopSpecific,

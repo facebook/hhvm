@@ -26,13 +26,14 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ConstantExpression);
 
-class ConstantExpression : public Expression {
+class ConstantExpression : public Expression, IParseHandler {
 public:
   ConstantExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                      const std::string &name,
                      const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
   virtual bool isTemporary() const {
     return isNull() || isBoolean();

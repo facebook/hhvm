@@ -333,10 +333,13 @@ void Parser::onIndirectRef(Token &out, Token &refCount, Token &var) {
 void Parser::onStaticMember(Token &out, Token &cls, Token &name) {
   if (name->exp->is(Expression::KindOfArrayElementExpression) &&
       dynamic_pointer_cast<ArrayElementExpression>(name->exp)->
-      appendClass(cls->exp)) {
+      appendClass(cls->exp, m_ar, m_file)) {
     out->exp = name->exp;
   } else {
-    out->exp = NEW_EXP(StaticMemberExpression, cls->exp, name->exp);
+    StaticMemberExpressionPtr sme = NEW_EXP(StaticMemberExpression,
+                                            cls->exp, name->exp);
+    sme->onParse(m_ar, m_file);
+    out->exp = sme;
   }
 }
 
@@ -511,7 +514,9 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
 // expressions
 
 void Parser::onConstantValue(Token &out, Token &constant) {
-  out->exp = NEW_EXP(ConstantExpression, constant->text());
+  ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text());
+  con->onParse(m_ar, m_file);
+  out->exp = con;
 }
 
 void Parser::onScalar(Token &out, int type, Token &scalar) {
@@ -620,8 +625,11 @@ void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
 }
 
 void Parser::onNewObject(Token &out, Token &name, Token &args) {
-  out->exp = NEW_EXP(NewObjectExpression, name->exp,
-                     dynamic_pointer_cast<ExpressionList>(args->exp));
+  NewObjectExpressionPtr new_obj =
+    NEW_EXP(NewObjectExpression, name->exp,
+            dynamic_pointer_cast<ExpressionList>(args->exp));
+  new_obj->onParse(m_ar, m_file);
+  out->exp = new_obj;
 }
 
 void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
@@ -712,7 +720,10 @@ void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
   if (!cls->exp) {
     cls->exp = NEW_EXP(ScalarExpression, T_STRING, cls->text());
   }
-  out->exp = NEW_EXP(ClassConstantExpression, cls->exp, name->text());
+  ClassConstantExpressionPtr con =
+    NEW_EXP(ClassConstantExpression, cls->exp, name->text());
+  con->onParse(m_ar, m_file);
+  out->exp = con;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -41,7 +41,10 @@ Array f_get_defined_functions() {
 }
 
 bool f_function_exists(CStrRef function_name) {
-  return function_exists(function_name);
+  return
+    function_exists(function_name) ||
+    (AutoloadHandler::s_instance->autoloadFunc(function_name) &&
+     function_exists(function_name));
 }
 
 bool f_is_callable(CVarRef v, bool syntax /* = false */,

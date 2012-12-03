@@ -79,6 +79,10 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
   vector<string> bases;
   if (m_base) m_base->getOriginalStrings(bases);
 
+  for (auto &b : bases) {
+    ar->parseOnDemandByClass(Util::toLower(b));
+  }
+
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
 
   vector<UserAttributePtr> attrs;

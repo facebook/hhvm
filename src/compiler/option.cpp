@@ -73,6 +73,10 @@ vector<string> Option::DynamicClassPrefixes;
 vector<string> Option::DynamicClassPostfixes;
 set<string> Option::DynamicInvokeFunctions;
 set<string> Option::VolatileClasses;
+map<string,string> Option::AutoloadClassMap;
+map<string,string> Option::AutoloadFuncMap;
+map<string,string> Option::AutoloadConstMap;
+string Option::AutoloadRoot;
 
 map<string, string> Option::FunctionSections;
 
@@ -396,6 +400,14 @@ void Option::Load(Hdf &config) {
       RepoCentralPath = repoCentral["Path"].getString();
     }
     RepoDebugInfo = repo["DebugInfo"].getBool(false);
+  }
+
+  {
+    Hdf autoloadMap = config["AutoloadMap"];
+    autoloadMap["class"].get(AutoloadClassMap);
+    autoloadMap["function"].get(AutoloadFuncMap);
+    autoloadMap["constant"].get(AutoloadConstMap);
+    AutoloadRoot = autoloadMap["root"].getString();
   }
 
   ScalarArrayFileCount = config["ScalarArrayFileCount"].getByte(1);

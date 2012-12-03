@@ -239,6 +239,17 @@ public:
    * Parser creates a FileScope upon parsing a new file.
    */
   void parseOnDemand(const std::string &name) const;
+  void parseOnDemandByClass(const std::string &name) const {
+    parseOnDemandBy(name, Option::AutoloadClassMap);
+  }
+  void parseOnDemandByFunction(const std::string &name) const {
+    parseOnDemandBy(name, Option::AutoloadFuncMap);
+  }
+  void parseOnDemandByConstant(const std::string &name) const {
+    parseOnDemandBy(name, Option::AutoloadConstMap);
+  }
+  void parseOnDemandBy(const std::string &name,
+                       const std::map<std::string,std::string>& amap) const;
   FileScopePtr findFileScope(const std::string &name) const;
   const StringToFileScopePtrMap &getAllFiles() { return m_files;}
   const std::vector<FileScopePtr> &getAllFilesVector() {

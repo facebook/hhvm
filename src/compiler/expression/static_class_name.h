@@ -22,9 +22,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StaticClassName {
+class StaticClassName : public IParseHandler {
 public:
   StaticClassName(ExpressionPtr classExp);
+
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 
   bool isSelf() const { return m_self; }
   bool isParent() const { return m_parent; }
@@ -56,7 +58,6 @@ protected:
   void updateClassName();
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
-  virtual void dummyForDynamicCast() {}
   unsigned m_self : 1;
   unsigned m_parent : 1;
   unsigned m_static : 1;

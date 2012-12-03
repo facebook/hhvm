@@ -130,6 +130,7 @@ void SimpleFunctionCall::deepCopy(SimpleFunctionCallPtr exp) {
 // parser functions
 
 void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
+  StaticClassName::onParse(ar, fs);
   ConstructPtr self = shared_from_this();
   switch (m_type) {
     case DefineFunction:
@@ -216,6 +217,11 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       fs->setAttribute(FileScope::ContainsDynamicVariable);
       fs->setAttribute(FileScope::ContainsGetDefinedVars);
       fs->setAttribute(FileScope::ContainsCompact);
+      break;
+    case UnknownType:
+      if (!m_class && m_className.empty()) {
+        ar->parseOnDemandByFunction(m_name);
+      }
       break;
     default:
       break;
@@ -1435,9 +1441,10 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     } else if (!m_funcScope || m_funcScope->isVolatile()) {
       cg_indentBegin("if (");
-      cg_printf("%s->FVF(%s)",
-          cg.getGlobals(ar),
-          CodeGenerator::FormatLabel(m_name).c_str());
+      cg_printf("checkFunctionExistsNoThrow(");
+      cg_printString(m_origName, ar, shared_from_this());
+      cg_printf(", &%s->FVF(%s))",
+                cg.getGlobals(ar), CodeGenerator::FormatLabel(m_name).c_str());
       safeCheck = true;
     }
   }
@@ -1447,12 +1454,16 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (!m_class && m_className.empty()) {
     if (m_redeclared && !m_dynamicInvoke) {
       needHash = false;
-      cg_printf("cit%d = &%s->GCI(%s)->ci;\n", m_ciTemp, cg.getGlobals(ar),
+      cg_printf("RedeclaredCallInfoConst **rcit%d = &%s->GCI(%s);\n",
+                m_ciTemp, cg.getGlobals(ar),
                 CodeGenerator::FormatLabel(m_name).c_str());
+      cg_printf("cit%d = (CallInfo*)*rcit%d;\n", m_ciTemp, m_ciTemp);
       if (!safeCheck) {
-        // If m_safe, check cit later, if null then yield null or safeDef
-        cg_printf("if (!cit%d) invoke_failed(\"%s\", null_array, -1);\n",
-                  m_ciTemp, escapedName.c_str());
+        // No need to do this again if safeCheck is set
+        cg_printf("if (!cit%d) cit%d = invoke_check(", m_ciTemp, m_ciTemp);
+        cg_printString(m_name, ar, shared_from_this());
+        cg_printf(", (const CallInfo**)rcit%d, %s);\n",
+                  m_ciTemp, m_safe ? "true" : "false");
       }
     } else {
       cg_printf("get_call_info_or_fail(cit%d, vt%d, ", m_ciTemp, m_ciTemp);
@@ -1650,7 +1661,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
     } else if (!m_funcScope || m_funcScope->isVolatile()) {
       if (m_valid) {
-        cg_printf("(%s->FVF(%s)",
+        cg_printf("(checkFunctionExistsNoThrow(");
+        cg_printString(m_origName, ar, shared_from_this());
+        cg_printf(", &%s->FVF(%s))",
                   cg.getGlobals(ar),
                   CodeGenerator::FormatLabel(m_name).c_str());
       }
@@ -2248,7 +2261,9 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 FunctionScopePtr func = ar->findFunction(lname);
                 if (func) {
                   if (func->isVolatile()) {
-                    cg_printf("%s->FVF(%s)",
+                    cg_printf("checkFunctionExistsNoThrow(");
+                    cg_printString(symbol, ar, shared_from_this());
+                    cg_printf(", &%s->FVF(%s))",
                               cg.getGlobals(ar),
                               CodeGenerator::FormatLabel(lname).c_str());
                     break;

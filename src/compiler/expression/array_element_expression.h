@@ -53,7 +53,8 @@ public:
    * This is purely for resolving a nasty case of intepreting
    * self::$a[1][2] correctly.
    */
-  bool appendClass(ExpressionPtr cls);
+  bool appendClass(ExpressionPtr cls,
+                   AnalysisResultConstPtr ar, FileScopePtr file);
 
   virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
                                   int op);

@@ -206,6 +206,17 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
 
     const string& lClassName = cls->getId();
     bool skipCreate = cls->canSkipCreateMethod(ar);
+    if (skipCreate && m_params && m_params->getCount()) {
+      cg_printf("(");
+      for (int i = 0; i < m_params->getCount(); i++) {
+        ExpressionPtr e = (*m_params)[i];
+        if (!e->isScalar() && !e->hasCPPTemp()) {
+          cg_printf("id(");
+          e->outputCPP(cg, ar);
+          cg_printf("), ");
+        }
+      }
+    }
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
         cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
@@ -244,6 +255,9 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       if (!isUnused()) {
         cg_printf(", %s", m_receiverTemp.c_str());
       }
+      cg_printf(")");
+    }
+    if (skipCreate && m_params && m_params->getCount()) {
       cg_printf(")");
     }
   } else {

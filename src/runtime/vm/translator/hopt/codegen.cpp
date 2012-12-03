@@ -1411,9 +1411,9 @@ Address CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   m_as.test_reg64_reg64(dstReg, dstReg);
   // jz off to the helper call in astubs
   m_as.jcc(CC_E, m_astubs.code.frontier);
-  // this helper simply raises an error
-  cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupFailed, dst, kSyncPoint,
-               ArgGroup().immPtr(name));
+  // this helper tries the autoload map, and fatals on failure
+  cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupUnknownFunc,
+               dst, kSyncPoint, ArgGroup().immPtr(name));
   m_astubs.jmp(m_as.code.frontier);
   // save func ptr in actrec
   m_as.store_reg64_disp_reg64(dstReg, AROFF(m_func), actRecReg);

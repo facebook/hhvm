@@ -158,12 +158,17 @@ bool f_defined(CStrRef name) {
       return false;
     }
   } else {
-    // system/uniquely defined scalar constant
-    if (ClassInfo::FindConstant(name)) return true;
-    // dynamic/redeclared constant
-    return ((Globals*)get_global_variables())->defined(name)
-            || (hhvm && g_vmContext->defined(name));
-
+    for (int i = 0; i < 2; i++) {
+      // system/uniquely defined scalar constant
+      if (ClassInfo::FindConstant(name)) return true;
+      // dynamic/redeclared constant
+      if (((Globals*)get_global_variables())->defined(name) ||
+          (hhvm && g_vmContext->defined(name))) {
+        return true;
+      }
+      if (!AutoloadHandler::s_instance->autoloadConstant(name)) break;
+    }
+    return false;
   }
 }
 

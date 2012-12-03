@@ -858,7 +858,7 @@ Array f_hphp_get_class_info(CVarRef name) {
 Array f_hphp_get_function_info(CStrRef name) {
   Array ret;
   if (hhvm) {
-    const VM::Func* func = VM::Unit::lookupFunc(name.get());
+    const VM::Func* func = VM::Unit::loadFunc(name.get());
     if (!func) return ret;
     ret.set(s_name,       VarNR(func->name()));
     ret.set(s_closure,    empty_string);
@@ -872,7 +872,10 @@ Array f_hphp_get_function_info(CStrRef name) {
 
   const ClassInfo::MethodInfo *info = ClassInfo::FindFunction(name.data());
   if (info == NULL) {
-    return ret;
+    if (!AutoloadHandler::s_instance->autoloadFunc(name) ||
+        !(info = ClassInfo::FindFunction(name.data()))) {
+      return ret;
+    }
   }
 
   ret.set(s_name,       info->name);

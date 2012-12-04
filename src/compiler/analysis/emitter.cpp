@@ -3006,6 +3006,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         SimpleFunctionCallPtr call(
           static_pointer_cast<SimpleFunctionCall>(node));
         ExpressionListPtr params = call->getParams();
+        auto inputIsAnObject = [&](int inputIndex) {
+          m_metaInfo.addKnownDataType(KindOfObject, /* predicted */ false,
+                                      m_ue.bcPos(), false, inputIndex);
+        };
+
         if (call->isFatalFunction()) {
           if (params && params->getCount() == 1) {
             ExpressionPtr p = (*params)[0];
@@ -3058,6 +3063,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         } else if (call->isCompilerCallToFunction("hphp_unpack_continuation")) {
           ASSERT(params && params->getCount() == 1);
+          inputIsAnObject(0);
           e.UnpackCont();
           return true;
         } else if (call->isCompilerCallToFunction("hphp_pack_continuation")) {
@@ -3069,6 +3075,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
           visit((*params)[2]);
           emitConvertToCell(e);
+          inputIsAnObject(1);
           e.PackCont(lVar.asInt64Val());
           return false;
         } else if (call->isCompilerCallToFunction("hphp_create_continuation")) {
@@ -3084,13 +3091,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.CreateCont(callGetArgs, nameStr);
           return true;
         } else if (call->isCompilerCallToFunction("hphp_continuation_raised")) {
+          inputIsAnObject(0);
           e.ContRaised();
           return false;
         } else if (
             call->isCompilerCallToFunction("hphp_continuation_receive")) {
+          inputIsAnObject(0);
           e.ContReceive();
           return true;
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
+          inputIsAnObject(0);
           e.ContDone();
           return false;
         } else if ((call->isCallToFunction("class_exists") ||

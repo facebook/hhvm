@@ -266,6 +266,9 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     Token type;    type.setText("Continuation");
     Token var;     var.setText(CONTINUATION_OBJECT_NAME);
     params.reset();
+    if (HPHP::hhvm) {
+      type.reset();
+    }
     _p->onParam(params, NULL, type, var, false, NULL, NULL);
   }
 }

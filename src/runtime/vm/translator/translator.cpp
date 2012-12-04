@@ -1175,8 +1175,8 @@ static const struct {
   { OpCreateCont,  {None,             Stack1,       OutObject,         1 }},
   { OpContEnter,   {None,             None,         OutNone,           0 }},
   { OpContExit,    {None,             None,         OutNone,           0 }},
-  { OpUnpackCont,  {Local,            Stack1|Local, OutInt64,          1 }},
-  { OpPackCont,    {Local|Stack1,     Local,        OutNone,          -1 }},
+  { OpUnpackCont,  {Local,            Stack1,       OutInt64,          1 }},
+  { OpPackCont,    {Local|Stack1,     None,         OutNone,          -1 }},
   { OpContRaised,  {Local,            None,         OutNone,           0 }},
   { OpContReceive, {Local,            Stack1,       OutUnknown,        1 }},
   { OpContDone,    {Local,            None,         OutNone,           0 }},
@@ -2150,8 +2150,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
 
       case Local: {
         if (op == OpSetN || op == OpSetOpN || op == OpIncDecN ||
-            op == OpBindN || op == OpUnsetN || op == OpUnpackCont ||
-            op == OpPackCont) {
+            op == OpBindN || op == OpUnsetN) {
           varEnvTaint = true;
           continue;
         }

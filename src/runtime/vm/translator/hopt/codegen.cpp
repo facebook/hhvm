@@ -4405,7 +4405,8 @@ void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff) {
   m_tx64->emitCall(as, (TCA)traceCallback);
 }
 
-void CodeGenerator::cgTrace(Trace* trace) {
+void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
+  bool firstMarkerSeen = false;
   m_curTrace = trace;
   trace->setFirstAsmAddress(m_as.code.frontier);
   trace->setFirstAstubsAddress(m_astubs.code.frontier);
@@ -4419,7 +4420,20 @@ void CodeGenerator::cgTrace(Trace* trace) {
        it++) {
     IRInstruction* inst = *it;
     if (inst->getOpcode() == Marker) {
+      if (!firstMarkerSeen) {
+        firstMarkerSeen = true;
+        // This will be generated right after the tracelet guards
+        if (RuntimeOption::EvalJitTransCounters && m_tx64 &&
+            trace->isMain()) {
+          m_tx64->emitTransCounterInc(m_as);
+        }
+      }
       m_lastMarker = (LabelInstruction*)inst;
+      if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
+        bcMap->push_back((TransBCMapping){m_lastMarker->getLabelId(),
+              m_as.code.frontier,
+              m_astubs.code.frontier});
+      }
     }
     m_curInst = inst;
     inst->genCode(this);
@@ -4444,28 +4458,18 @@ void genCodeForTrace(Trace* trace,
                      CodeGenerator::Asm& as,
                      CodeGenerator::Asm& astubs,
                      IRFactory* irFactory,
-                     Transl::TranslatorX64* tx64 /* =NULL */) {
+                     vector<TransBCMapping>* bcMap,
+                     Transl::TranslatorX64* tx64) {
   // select instructions for the trace and its exits
   CodeGenerator cgMain(as, astubs, tx64);
-  cgMain.cgTrace(trace);
+  cgMain.cgTrace(trace, bcMap);
   CodeGenerator cgExits(astubs, astubs, tx64);
   Trace::List& exitTraces = trace->getExitTraces();
   for (Trace::Iterator it = exitTraces.begin();
        it != exitTraces.end();
        it++) {
-    cgExits.cgTrace(*it);
+    cgExits.cgTrace(*it, NULL);
   }
-}
-
-void genCodeForTrace(Trace* trace, IRFactory* irFactory) {
-  static const size_t aSize = 512 << 20;
-  static const size_t astubsSize = 512 << 20;
-  uint8_t *base = allocSlab(aSize + astubsSize);
-  CodeGenerator::Asm as;
-  CodeGenerator::Asm astubs;
-  as.init(base, aSize);
-  astubs.init(base + aSize, astubsSize);
-  genCodeForTrace(trace, as, astubs, irFactory, NULL);
 }
 
 }}}

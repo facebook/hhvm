@@ -59,7 +59,7 @@ public:
       m_curInst(NULL), m_lastMarker(NULL), m_curTrace(NULL) {
   }
 
-  void cgTrace(Trace*);
+  void cgTrace(Trace* trace, vector<TransBCMapping>* bcMap);
 
   Address cgBreakpoint(X64Assembler &a);
 
@@ -153,7 +153,6 @@ private:
   Address emitCheckCell(CodeGenerator::Asm& as,
                         SSATmp* sp,
                         uint32 index);
-  uint32 cgTrace(Trace*, uint32 liveRegs);
   Address cgCheckStaticBit(Type::Tag type,
                            RegNumber reg,
                            bool regIsCount);
@@ -297,12 +296,12 @@ private:
   std::vector<ArgDesc> m_args;
 };
 
-void genCodeForTrace(Trace*, IRFactory* irFactory);
-void genCodeForTrace(Trace* trace,
-                     CodeGenerator::Asm& a,
-                     CodeGenerator::Asm& astubs,
-                     IRFactory* irFactory,
-                     TranslatorX64* tx64 = NULL);
+void genCodeForTrace(Trace*                  trace,
+                     CodeGenerator::Asm&     a,
+                     CodeGenerator::Asm&     astubs,
+                     IRFactory*              irFactory,
+                     vector<TransBCMapping>* bcMap,
+                     TranslatorX64*          tx64);
 
 class TraceBuilder;
 void assignRegsForTrace(Trace* trace,

@@ -3322,7 +3322,8 @@ void Translator::setTransCounter(TransID transId, uint64 value) {
 }
 
 static const char *transKindStr[] = {
-  "Normal",
+  "Normal_Tx64",
+  "Normal_HHIR",
   "Anchor",
   "Prologue",
 };

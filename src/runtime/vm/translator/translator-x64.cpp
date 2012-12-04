@@ -11123,11 +11123,13 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   uint8                   counterLen = 0;
   SrcRec&                 srcRec = *getSrcRec(sk);
   vector<TransBCMapping>  bcMapping;
+  TransKind               transKind;
 
   if (m_useHHIR) {
-    if (irTranslateTracelet(t, start, stubStart)) {
+    if (irTranslateTracelet(t, start, stubStart, &bcMapping)) {
       m_irAUsage += (a.code.frontier - start);
       m_irAstubsUsage += (astubs.code.frontier - stubStart);
+      transKind = TransNormalIR;
     } else {
       // If irTranslateTracelet failed we want to reanalyze the
       // tracelet with more optimizations turned on, so bail out of here
@@ -11136,6 +11138,8 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   } else {
     ASSERT(m_pendingFixups.size() == 0);
     ASSERT(srcRec.inProgressTailJumps().size() == 0);
+    bcMapping.clear();
+    transKind = TransNormal;
     try {
       if (t.m_analysisFailed || checkTranslationLimit(t.m_sk, srcRec)) {
         punt();
@@ -11200,7 +11204,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   }
   m_pendingFixups.clear();
 
-  addTranslation(TransRec(t.m_sk, curUnit()->md5(), t, start,
+  addTranslation(TransRec(t.m_sk, curUnit()->md5(), transKind, t, start,
                           a.code.frontier - start, stubStart,
                           astubs.code.frontier - stubStart,
                           counterStart, counterLen,

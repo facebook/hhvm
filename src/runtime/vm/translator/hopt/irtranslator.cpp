@@ -1554,15 +1554,15 @@ void TranslatorX64::irEmitResolvedDeps(const ChangeMap& resolvedDeps) {
 }
 
 bool
-TranslatorX64::irTranslateTracelet(const Tracelet& t,
-                                   const TCA       start,
-                                   const TCA       stubStart) {
+TranslatorX64::irTranslateTracelet(const Tracelet&         t,
+                                   const TCA               start,
+                                   const TCA               stubStart,
+                                   vector<TransBCMapping>* bcMap) {
   bool hhirSucceeded = false;
   ASSERT(m_useHHIR);
 
   const SrcKey &sk = t.m_sk;
-  SrcRec&                 srcRec = *getSrcRec(sk);
-  vector<TransBCMapping>  bcMapping;
+  SrcRec& srcRec = *getSrcRec(sk);
   ASSERT(srcRec.inProgressTailJumps().size() == 0);
   try {
     // Don't translate if we have already reached the maximum # of
@@ -1583,12 +1583,6 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
     // Translate each instruction in the tracelet
     for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
          ni = ni->next) {
-      if (isTransDBEnabled()) {
-        bcMapping.push_back((TransBCMapping){ni->offset(),
-                                             a.code.frontier,
-                                             astubs.code.frontier});
-      }
-
       irTranslateInstr(t, *ni);
       ASSERT(ni->source.offset() >= curFunc()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
@@ -1597,7 +1591,7 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
     }
 
     hhirTraceEnd(t.m_nextSk.offset());
-    hhirTraceCodeGen();
+    hhirTraceCodeGen(bcMap);
 
     hhirSucceeded = true;
     TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n",
@@ -1658,7 +1652,7 @@ void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
   m_hhbcTrans->end(bcSuccOffset);
 }
 
-void TranslatorX64::hhirTraceCodeGen() {
+void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   ASSERT(m_useHHIR);
 
   m_traceBuilder->finalizeTrace();
@@ -1686,7 +1680,7 @@ void TranslatorX64::hhirTraceCodeGen() {
     std::cout << "----------------------------------------\n";
   }
 
-  JIT::genCodeForTrace(trace, a, astubs, m_irFactory, this);
+  JIT::genCodeForTrace(trace, a, astubs, m_irFactory, bcMap, this);
 
   if (RuntimeOption::EvalDumpIR) {
     std::cout << "--------- HHIR after code gen ---------\n";

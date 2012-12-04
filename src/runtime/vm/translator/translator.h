@@ -700,9 +700,10 @@ struct TraceletContext {
 };
 
 enum TransKind {
-  TransNormal = 0,
-  TransAnchor = 1,
-  TransProlog = 2,
+  TransNormal   = 0,
+  TransNormalIR = 1,
+  TransAnchor   = 2,
+  TransProlog   = 3,
 };
 
 const char* getTransKindName(TransKind kind);
@@ -752,6 +753,7 @@ struct TransRec {
 
   TransRec(SrcKey                   s,
            MD5                      _md5,
+           TransKind                _kind,
            const Tracelet&          t,
            TCA                      _aStart = 0,
            uint32                   _aLen = 0,
@@ -760,7 +762,7 @@ struct TransRec {
            TCA                      _counterStart = 0,
            uint8                    _counterLen = 0,
            vector<TransBCMapping>   _bcMapping = vector<TransBCMapping>()) :
-      id(0), kind(TransNormal), src(s), md5(_md5),
+      id(0), kind(_kind), src(s), md5(_md5),
       bcStopOffset(t.m_nextSk.offset()), aStart(_aStart), aLen(_aLen),
       astubsStart(_astubsStart), astubsLen(_astubsLen),
       counterStart(_counterStart), counterLen(_counterLen),

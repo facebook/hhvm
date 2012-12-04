@@ -145,7 +145,7 @@ class TranslatorX64 : public Translator
   IRTranslator*          m_irTrans;
 
   void hhirTraceStart(Offset bcStartOffset);
-  void hhirTraceCodeGen();
+  void hhirTraceCodeGen(vector<TransBCMapping>* bcMap);
   void hhirTraceEnd(Offset bcSuccOffset);
   void hhirTraceFree();
 
@@ -788,9 +788,10 @@ private:
                                const NormalizedInstruction& i);
   bool checkTranslationLimit(const SrcKey&, const SrcRec&) const;
   bool translateTracelet(const Tracelet& t);
-  bool irTranslateTracelet(const Tracelet& t,
-                           const TCA       start,
-                           const TCA       stubStart);
+  bool irTranslateTracelet(const Tracelet&         t,
+                           const TCA               start,
+                           const TCA               stubStart,
+                           vector<TransBCMapping>* bcMap);
   void emitStringCheck(Asm& _a, PhysReg base, int offset);
   void emitTypeCheck(Asm& _a, DataType dt,
                      PhysReg base, int offset,

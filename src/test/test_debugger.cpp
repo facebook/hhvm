@@ -215,8 +215,6 @@ bool TestDebugger::recvFromTests(char& flag) {
 
 bool TestDebugger::TestWebRequest() {
   bool ret = false;
-  // XXX Fix this test: t1817146
-  return CountSkip();
 
   // If we can't get sandbox host format right, fail early
   string sandboxHost = getSandboxHostFormat();
@@ -247,13 +245,11 @@ bool TestDebugger::TestWebRequest() {
   // wait for "web_request.php" to connect and wait
   if (!recvFromTests(flag) || flag != '1') {
     printf("failed to receive from test\n");
-    return Count(ret);
-  }
-
-  if (!getResponse("web_request_t.php", result, -1, sandboxHost) ||
+  } else if (!getResponse("web_request_t.php", result, -1, sandboxHost) ||
       result != "request done") {
     printf("failed on web_request_t.php\n");
-    return Count(ret);
+  } else {
+    ret = true;
   }
 
   func.waitForEnd();
@@ -261,7 +257,7 @@ bool TestDebugger::TestWebRequest() {
   unlink(m_fname.c_str());
 
   // testWebRequestHelper() should flag m_tempResult to true if succeed
-  ret = m_tempResult;
+  ret = ret && m_tempResult;
   return Count(ret);
 }
 

@@ -440,7 +440,7 @@ void CmdBreak::setClientOutput(DebuggerClient *client) {
     }
     breakpoint.set("url", bpi->m_url);
     breakpoint.set("use_regex", bpi->m_regex);
-    breakpoint.set("cluase_type", bpi->m_check ? "if" : "&&");
+    breakpoint.set("clause_type", bpi->m_check ? "if" : "&&");
     breakpoint.set("clause", bpi->m_clause);
     breakpoint.set("desc", bpi->desc());
     values.append(breakpoint);

@@ -3205,12 +3205,12 @@ breakBB:
   }
   // Peephole optimizations may leave the bytecode stream in a state that is
   // inconsistent and troubles HHIR emission, so don't do it if HHIR is in use
-  if (!RuntimeOption::EvalJitUseIR) {
+  if (!m_useHHIR) {
     analyzeSecondPass(t);
   }
 
   // TODO: Add support for relaxed dependencies to HHIR
-  if (!RuntimeOption::EvalJitUseIR) {
+  if (!m_useHHIR) {
     relaxDeps(t, tas);
   }
 

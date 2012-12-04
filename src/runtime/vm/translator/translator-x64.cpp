@@ -1377,15 +1377,23 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
     ASSERT(m_useHHIR == false);
   }
 
-  Tracelet tlet;
-  analyze(sk, tlet);
+  std::unique_ptr<Tracelet> tlet(new Tracelet());
+  analyze(sk, *tlet);
 
   if (align) {
     moveToAlign(a, kNonFallthroughAlign);
   }
 
   TCA start = a.code.frontier;
-  translateTracelet(tlet);
+  if (!translateTracelet(*tlet)) {
+    // If translating with the IR failed, reanalyze.
+    ASSERT(!m_useHHIR);
+    tlet.reset(new Tracelet());
+    analyze(sk, *tlet);
+    UNUSED bool success = translateTracelet(*tlet);
+    ASSERT(success);
+  }
+
   SKTRACE(1, *sk, "translate moved head from %p to %p\n",
           getTopTranslation(*sk), start);
   if (Trace::moduleEnabledRelease(tcdump, 1)) {
@@ -11099,7 +11107,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   }
 }
 
-void
+bool
 TranslatorX64::translateTracelet(const Tracelet& t) {
   const SrcKey &sk = t.m_sk;
 
@@ -11116,12 +11124,16 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   SrcRec&                 srcRec = *getSrcRec(sk);
   vector<TransBCMapping>  bcMapping;
 
-  bool hhirSucceeded = irTranslateTracelet(t, start, stubStart);
-  if (hhirSucceeded) {
-    m_irAUsage += (a.code.frontier - start);
-    m_irAstubsUsage += (astubs.code.frontier - stubStart);
-  }
-  if (!hhirSucceeded) {
+  if (m_useHHIR) {
+    if (irTranslateTracelet(t, start, stubStart)) {
+      m_irAUsage += (a.code.frontier - start);
+      m_irAstubsUsage += (astubs.code.frontier - stubStart);
+    } else {
+      // If irTranslateTracelet failed we want to reanalyze the
+      // tracelet with more optimizations turned on, so bail out of here
+      return false;
+    }
+  } else {
     ASSERT(m_pendingFixups.size() == 0);
     ASSERT(srcRec.inProgressTailJumps().size() == 0);
     try {
@@ -11168,7 +11180,8 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
       // Discard any pending fixups.
       m_pendingFixups.clear();
       srcRec.clearInProgressTailJumps();
-      TRACE(1, "emitting %d-instr interp request for failed translation @%s:%d\n",
+      TRACE(1,
+            "emitting %d-instr interp request for failed translation @%s:%d\n",
             int(t.m_numOpcodes), tfe.m_file, tfe.m_line);
       // Add a counter for the translation if requested
       if (RuntimeOption::EvalJitTransCounters) {
@@ -11178,7 +11191,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
                                uint64_t(t.m_numOpcodes)));
       // Fall through.
     }
-  } // if (!hhirSucceeded)
+  }
 
   for (uint i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
@@ -11208,6 +11221,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease(getUsage().c_str());
   }
+  return true;
 }
 
 /*

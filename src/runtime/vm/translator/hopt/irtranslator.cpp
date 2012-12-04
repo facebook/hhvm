@@ -1558,9 +1558,7 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
                                    const TCA       start,
                                    const TCA       stubStart) {
   bool hhirSucceeded = false;
-  if (!m_useHHIR) {
-    return hhirSucceeded;
-  }
+  ASSERT(m_useHHIR);
 
   const SrcKey &sk = t.m_sk;
   SrcRec&                 srcRec = *getSrcRec(sk);

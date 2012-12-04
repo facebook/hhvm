@@ -787,7 +787,7 @@ private:
   void irTranslateInstrDefault(const Tracelet& t,
                                const NormalizedInstruction& i);
   bool checkTranslationLimit(const SrcKey&, const SrcRec&) const;
-  void translateTracelet(const Tracelet& t);
+  bool translateTracelet(const Tracelet& t);
   bool irTranslateTracelet(const Tracelet& t,
                            const TCA       start,
                            const TCA       stubStart);

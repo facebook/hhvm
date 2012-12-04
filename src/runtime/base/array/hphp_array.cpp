@@ -1743,29 +1743,18 @@ CVarRef HphpArray::endRef() {
 namespace VM {
 
 // Helpers for array_setm.
-template<typename Value>
-inline ArrayData* nv_set_with_integer_check(ArrayData* a, StringData* key,
-                                            Value value, bool copy) {
-  int64 lval;
-  if (UNLIKELY(key->isStrictlyInteger(lval))) {
-    return a->nvSet(lval, value, copy);
-  } else {
-    return a->nvSet(key, value, copy);
-  }
+ArrayData* nvCheckedSet(ArrayData* a, StringData* key, TypedValue* value,
+           bool copy) {
+  int64 i;
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvSet(i, value, copy) :
+         a->nvSet(key, value, copy);
 }
 
-template<typename Value>
-ArrayData* nvCheckedSet(ArrayData* a, StringData* sd, Value value, bool copy) {
-  return nv_set_with_integer_check<Value>(a, sd, value, copy);
-}
-
-template<typename Value>
-ArrayData* nvCheckedSet(ArrayData* a, int64 key, Value value, bool copy) {
+ArrayData* nvCheckedSet(ArrayData* a, int64 key, TypedValue* value, bool copy) {
   return a->nvSet(key, value, copy);
 }
 
 void setmDecRef(int64 i) { /* nop */ }
-void setmDecRef(TypedValue* tv) { tvRefcountedDecRef(tv); }
 void setmDecRef(StringData* sd) { if (sd->decRefCount() == 0) sd->release(); }
 
 static inline ArrayData*
@@ -1781,11 +1770,10 @@ array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
   return retval;
 }
 
-template<typename Key, typename Value,
-         bool DecRefValue, bool CheckInt, bool DecRefKey>
+template<typename Key, bool DecRefValue, bool CheckInt, bool DecRefKey>
 static inline
 ArrayData*
-array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
+array_setm(TypedValue* cell, ArrayData* ad, Key key, TypedValue* value) {
   ArrayData* retval;
   bool copy = ad->getCount() > 1;
   // nvSet will decRef any old value that may have been overwritten
@@ -1793,7 +1781,7 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
   retval = CheckInt ? nvCheckedSet(ad, key, value, copy) :
            ad->nvSet(key, value, copy);
   if (DecRefKey) setmDecRef(key);
-  if (DecRefValue) setmDecRef(value);
+  if (DecRefValue) tvRefcountedDecRef(value);
   return array_mutate_post(cell, ad, retval);
 }
 
@@ -1805,18 +1793,14 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
  *    array_setm_ik1_v0 --
  *       Don't count the array's reference to the polymorphic value.
  */
-ArrayData*
-array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
-                 TypedValue* value) {
-  return
-    array_setm<int64, TypedValue*, false, false, false>(cell, ad, key, value);
+ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
+                            TypedValue* value) {
+  return array_setm<int64, false, false, false>(cell, ad, key, value);
 }
 
-ArrayData*
-array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
-                  TypedValue* value) {
-  return
-    array_setm<int64, TypedValue*, true, false, false>(cell, ad, key, value);
+ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
+                             TypedValue* value) {
+  return array_setm<int64, true, false, false>(cell, ad, key, value);
 }
 
 /**
@@ -1839,38 +1823,32 @@ array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
  */
 ArrayData* array_setm_sk1_v(TypedValue* cell, ArrayData* ad, StringData* key,
                             TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, false, true, true>(
-    cell, ad, key, value);
+  return array_setm<StringData*, false, true, true>(cell, ad, key, value);
 }
 
 ArrayData* array_setm_sk1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
                              TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, true, true, true>(
-    cell, ad, key, value);
+  return array_setm<StringData*, true, true, true>(cell, ad, key, value);
 }
 
 ArrayData* array_setm_s0k1_v(TypedValue* cell, ArrayData* ad, StringData* key,
                              TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, false, true, false>(
-    cell, ad, key, value);
+  return array_setm<StringData*, false, true, false>(cell, ad, key, value);
 }
 
 ArrayData* array_setm_s0k1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
                               TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, true, true, false>(
-    cell, ad, key, value);
+  return array_setm<StringData*, true, true, false>(cell, ad, key, value);
 }
 
 ArrayData* array_setm_s0k1nc_v(TypedValue* cell, ArrayData* ad, StringData* key,
                                TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, false, false, false>(
-    cell, ad, key, value);
+  return array_setm<StringData*, false, false, false>(cell, ad, key, value);
 }
 
 ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
                                 StringData* key, TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, true, false, false>(
-    cell, ad, key, value);
+  return array_setm<StringData*, true, false, false>(cell, ad, key, value);
 }
 
 /**
@@ -1884,7 +1862,7 @@ ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
                              TypedValue* value) {
   ASSERT(ad);
   ArrayData* retval = ad->append(tvAsCVarRef(value), ad->getCount() > 1);
-  setmDecRef(value);
+  tvRefcountedDecRef(value);
   return array_mutate_post(cell, ad, retval);
 }
 

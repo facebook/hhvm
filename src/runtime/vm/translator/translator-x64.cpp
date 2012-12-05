@@ -2646,10 +2646,11 @@ TranslatorX64::emitCheckUnboxedCounted(X64Assembler& a,
 void
 TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
                              PhysReg base, int offset,
-                             SrcRec* fail) {
+                             SrcRec* fail /* = NULL */) {
   offset += TVOFF(m_type);
   switch (dt) {
     case KindOfAny:
+    case KindOfClass:
       break;
     case KindOfUnboxedUncounted:
       ASSERT(fail);

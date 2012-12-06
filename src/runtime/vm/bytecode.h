@@ -37,12 +37,6 @@ namespace HPHP {
 
 namespace VM {
 
-#define LITSTR_DECREF(s) do {                                                 \
-  if ((s)->decRefCount() == 0) {                                              \
-    (s)->release();                                                           \
-  }                                                                           \
-} while (0)
-
 // SETOP_BODY() would ideally be an inline function, but the header
 // dependencies for concat_assign() make this unfeasible.
 #define SETOP_BODY(lhs, op, rhs) do {                                         \
@@ -582,12 +576,7 @@ public:
         this_->release();
       }
     }
-    if (ar->hasInvName()) {
-      StringData* invName = ar->getInvName();
-      if (invName->decRefCount() == 0) {
-        invName->release();
-      }
-    }
+    if (ar->hasInvName()) decRefStr(ar->getInvName());
 
     // This should only be used on a pre-live ActRec.
     ASSERT(!ar->hasVarEnv());

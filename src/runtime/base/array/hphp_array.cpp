@@ -164,11 +164,7 @@ HphpArray::~HphpArray() {
     if (e->data.m_type == KindOfTombstone) {
       continue;
     }
-    if (e->hasStrKey()) {
-      if (e->key->decRefCount() == 0) {
-        e->key->release();
-      }
-    }
+    if (e->hasStrKey()) decRefStr(e->key);
     TypedValue* tv = &e->data;
     if (IS_REFCOUNTED_TYPE(tv->m_type)) {
       tvDecRef(tv);
@@ -1334,9 +1330,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   // when encountering tombstones, even though checking for KindOfTombstone is
   // the last validation step during search.
   if (e->hasStrKey()) {
-    if (e->key->decRefCount() == 0) {
-      e->key->release();
-    }
+    decRefStr(e->key);
     e->setIntKey(0);
   } else {
     // Match PHP 5.3.1 semantics
@@ -1755,7 +1749,7 @@ ArrayData* nvCheckedSet(ArrayData* a, int64 key, TypedValue* value, bool copy) {
 }
 
 void setmDecRef(int64 i) { /* nop */ }
-void setmDecRef(StringData* sd) { if (sd->decRefCount() == 0) sd->release(); }
+void setmDecRef(StringData* sd) { decRefStr(sd); }
 
 static inline ArrayData*
 array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
@@ -1898,7 +1892,7 @@ ArrayData* array_getm_s(ArrayData* ad, StringData* sd, TypedValue* out,
                     ad->nvGetCell(ikey) :
                     ad->nvGetCell(sd);
   tvDup((ret), (out));
-  if (drKey && sd->decRefCount() == 0) sd->release();
+  if (drKey) decRefStr(sd);
   TRACE(2, "%s: (%p) <- %p[\"%s\"@sd%p]\n", __FUNCTION__,
         out, ad, sd->data(), sd);
   return ad;
@@ -1981,7 +1975,7 @@ issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {
   TRACE(2, "issetMUnary: %p[\"%s\"@sd%p] -> %d\n",
         dptr, sd->data(), sd, retval);
 
-  if (decRefKey && sd->decRefCount() == 0) sd->release();
+  if (decRefKey) decRefStr(sd);
   return retval;
 }
 

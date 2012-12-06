@@ -481,7 +481,7 @@ static inline TypedValue* baseNImpl(TypedValue* key,
       }
     }
   }
-  LITSTR_DECREF(name);
+  decRefStr(name);
   if (base->m_type == KindOfRef) {
     base = base->m_data.pref->tv();
   }
@@ -551,7 +551,7 @@ static inline TypedValue* baseGImpl(TypedValue* key,
       base = &mis->tvScratch;
     }
   }
-  LITSTR_DECREF(name);
+  decRefStr(name);
   if (base->m_type == KindOfRef) {
     base = base->m_data.pref->tv();
   }
@@ -605,7 +605,7 @@ static TypedValue* baseS(Class* ctx, TypedValue* key, const Class* cls,
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());
   }
-  LITSTR_DECREF(name);
+  decRefStr(name);
   if (base->m_type == KindOfRef) {
     base = base->m_data.pref->tv();
   }

@@ -298,9 +298,7 @@ struct PropNameKey {
   }
 
   void destroy() {
-    if (name && name->decRefCount() == 0) {
-      name->release();
-    }
+    if (name) decRefStr(name);
   }
 };
 

@@ -138,7 +138,7 @@ VMExecutionContext::~VMExecutionContext() {
     Eval::PhpFile* efile = current->second;
     efile->decRefAndDelete();
     m_evaledFiles.erase(current);
-    LITSTR_DECREF(sd);
+    decRefStr(sd);
   }
   // Discard all units that were created via create_function().
   for (EvaledUnitsVec::iterator it = m_createdFuncs.begin();
@@ -155,7 +155,7 @@ VMExecutionContext::~VMExecutionContext() {
     VM::Transl::unmergePreConsts(m_preConsts, this);
     for (VM::PreConstVec::iterator i = m_preConsts.begin();
          i != m_preConsts.end(); ++i) {
-      LITSTR_DECREF(const_cast<StringData*>(i->name));
+      decRefStr(const_cast<StringData*>(i->name));
     }
   }
 

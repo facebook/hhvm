@@ -4016,9 +4016,8 @@ TranslatorX64::emitInterpOne(const Tracelet& t,
 // could be static but used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm) {
   raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
-  // FIXME: do we need to decref the string if an exception is
-  // propagating?
-  if (nm->decRefCount() == 0) { nm->release(); }
+  // FIXME: do we need to decref the string if an exception is propagating?
+  decRefStr(nm);
 }
 
 // This intentionally excludes Int/Int, which is handled separately
@@ -4842,7 +4841,7 @@ static TypedValue* lookupAddBoxedGlobal(StringData* name) {
   if (r->m_type != KindOfRef) {
     tvBox(r);
   }
-  LITSTR_DECREF(name);
+  decRefStr(name);
   return r;
 }
 
@@ -6108,9 +6107,7 @@ static int64 switchStringHelper(StringData* s, int64 base, int64 nTargets) {
     default:
       not_reached();
   }
-  if (s->decRefCount() == 0) {
-    s->release();
-  }
+  decRefStr(s);
   return ival;
 }
 
@@ -7787,7 +7784,7 @@ static TypedValue* lookupGlobal(StringData* name) {
   // If the global didn't exist, we need to leave name un-decref'd for
   // the caller to raise warnings.
   if (r) {
-    LITSTR_DECREF(name);
+    decRefStr(name);
     if (r->m_type == KindOfRef) r = r->m_data.pref->tv();
   }
   return r;
@@ -7797,7 +7794,7 @@ static TypedValue* lookupAddGlobal(StringData* name) {
   VarEnv* ve = g_vmContext->m_globalVarEnv;
   TypedValue* r = ve->lookupAdd(name);
   if (r->m_type == KindOfRef) r = r->m_data.pref->tv();
-  LITSTR_DECREF(name);
+  decRefStr(name);
   return r;
 }
 
@@ -8077,9 +8074,7 @@ static int64 ak_exist_string(StringData* key, ArrayData* arr) {
   if (arr->decRefCount() == 0) {
     arr->release();
   }
-  if (key->decRefCount() == 0) {
-    key->release();
-  }
+  decRefStr(key);
   return res;
 }
 

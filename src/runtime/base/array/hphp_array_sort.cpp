@@ -120,9 +120,7 @@ void HphpArray::postSort(bool resetKeys) {
   if (resetKeys) {
     for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
       Elm* e = &m_data[pos];
-      if (e->hasStrKey() && e->key->decRefCount() == 0) {
-        e->key->release();
-      }
+      if (e->hasStrKey()) decRefStr(e->key);
       e->setIntKey(pos);
       m_hash[pos] = pos;
     }

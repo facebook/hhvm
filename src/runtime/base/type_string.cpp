@@ -306,9 +306,7 @@ char String::charAt(int pos) const {
 // assignments
 
 String &String::operator=(litstr s) {
-  if (m_px && m_px->decRefCount() == 0) {
-    m_px->release();
-  }
+  if (m_px) decRefStr(m_px);
   if (s) {
     m_px = NEW(StringData)(s, AttachLiteral);
     m_px->setRefCount(1);
@@ -324,9 +322,7 @@ String &String::operator=(StringData *data) {
 }
 
 String &String::operator=(const std::string & s) {
-  if (m_px && m_px->decRefCount() == 0) {
-    m_px->release();
-  }
+  if (m_px) decRefStr(m_px);
   m_px = NEW(StringData)(s.c_str(), s.size(), CopyString);
   m_px->setRefCount(1);
   return *this;
@@ -355,7 +351,7 @@ String &String::operator+=(litstr s) {
     } else {
       StringData* px = NEW(StringData)(m_px, s);
       px->setRefCount(1);
-      if (m_px->decRefCount() == 0) m_px->release();
+      decRefStr(m_px);
       m_px = px;
     }
   }
@@ -370,7 +366,7 @@ String &String::operator+=(CStrRef str) {
       m_px->append(str.slice());
     } else {
       StringData* px = NEW(StringData)(m_px, str.slice());
-      if (m_px->decRefCount() == 0) m_px->release();
+      decRefStr(m_px);
       px->setRefCount(1);
       m_px = px;
     }
@@ -425,9 +421,7 @@ String &String::operator|=(CStrRef v) {
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len2; i++) copy[i] |= s2[i];
   }
-  if (m_px && m_px->decRefCount() == 0) {
-    m_px->release();
-  }
+  if (m_px) decRefStr(m_px);
   m_px = NEW(StringData)(copy, len, AttachString);
   m_px->setRefCount(1);
   return *this;
@@ -449,9 +443,7 @@ String &String::operator&=(CStrRef v) {
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len1; i++) copy[i] &= s2[i];
   }
-  if (m_px && m_px->decRefCount() == 0) {
-    m_px->release();
-  }
+  if (m_px) decRefStr(m_px);
   m_px = NEW(StringData)(copy, len, AttachString);
   m_px->setRefCount(1);
   return *this;
@@ -473,9 +465,7 @@ String &String::operator^=(CStrRef v) {
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len1; i++) copy[i] ^= s2[i];
   }
-  if (m_px && m_px->decRefCount() == 0) {
-    m_px->release();
-  }
+  if (m_px) decRefStr(m_px);
   m_px = NEW(StringData)(copy, len, AttachString);
   m_px->setRefCount(1);
   return *this;
@@ -689,9 +679,7 @@ void String::unserialize(VariableUnserializer *uns,
   ASSERT(size <= buf.len);
   uns->read(buf.ptr, size);
   px->setSize(size);
-  if (m_px && m_px->decRefCount() == 0) {
-    m_px->release();
-  }
+  if (m_px) decRefStr(m_px);
   m_px = px;
   px->setRefCount(1);
 

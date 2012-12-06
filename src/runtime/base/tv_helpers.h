@@ -56,9 +56,7 @@ inline void tvRefcountedDecRefCell(TypedValue* tv) {
 
 inline void tvDecRefStr(TypedValue* tv) {
   ASSERT(tv->m_type == KindOfString);
-  if (tv->m_data.pstr->decRefCount() == 0) {
-    tv->m_data.pstr->release();
-  }
+  decRefStr(tv->m_data.pstr);
 }
 
 inline void tvDecRefArr(TypedValue* tv) {

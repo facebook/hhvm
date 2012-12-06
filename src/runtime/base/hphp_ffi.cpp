@@ -36,9 +36,7 @@ void hphp_ffi_ArrayData_decRef(ArrayData *p) {
   }
 }
 void hphp_ffi_StringData_decRef(StringData *p) {
-  if (!p->decRefCount()) {
-    p->release();
-  }
+  decRefStr(p);
 }
 void hphp_ffi_ObjectData_decRef(ObjectData *p) {
   if (!p->decRefCount()) {

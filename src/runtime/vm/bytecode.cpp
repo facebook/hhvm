@@ -3193,7 +3193,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     } else {
       loc = fr;
     }
-    LITSTR_DECREF(name);
+    decRefStr(name);
     break;
 
   case LGL:
@@ -3214,7 +3214,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     } else {
       loc = fr;
     }
-    LITSTR_DECREF(name);
+    decRefStr(name);
     break;
 
   case LSC:
@@ -3237,7 +3237,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
                   class_->name()->data(),
                   name->data());
     }
-    LITSTR_DECREF(name);
+    decRefStr(name);
     break;
   }
 
@@ -3496,7 +3496,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     } else {
       loc = fr;
     }
-    LITSTR_DECREF(name);
+    decRefStr(name);
     break;
 
   case LGL:
@@ -3521,7 +3521,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     } else {
       loc = fr;
     }
-    LITSTR_DECREF(name);
+    decRefStr(name);
     break;
 
   case LSC:
@@ -3544,7 +3544,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
                   class_->name()->data(),
                   name->data());
     }
-    LITSTR_DECREF(name);
+    decRefStr(name);
     break;
   }
 
@@ -4634,7 +4634,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetN(PC& pc) {
     tvRefcountedDecRefCell(to);
     cgetl_inner_body(fr, to);
   }
-  LITSTR_DECREF(name); // TODO(#1146727): leaks during exceptions
+  decRefStr(name); // TODO(#1146727): leaks during exceptions
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
@@ -4657,7 +4657,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
     tvRefcountedDecRefCell(to);
     cgetl_inner_body(fr, to);
   }
-  LITSTR_DECREF(name); // TODO(#1146727): leaks during exceptions
+  decRefStr(name); // TODO(#1146727): leaks during exceptions
 }
 
 #define SPROP_OP_PRELUDE                                  \
@@ -4672,7 +4672,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
                accessible);
 
 #define SPROP_OP_POSTLUDE                     \
-  LITSTR_DECREF(name);
+  decRefStr(name);
 
 #define GETS(box) do {                                    \
   SPROP_OP_PRELUDE                                        \
@@ -4740,7 +4740,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetN(PC& pc) {
   ASSERT(fr != NULL);
   tvRefcountedDecRefCell(to);
   vgetl_body(fr, to);
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetG(PC& pc) {
@@ -4752,7 +4752,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetG(PC& pc) {
   ASSERT(fr != NULL);
   tvRefcountedDecRefCell(to);
   vgetl_body(fr, to);
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetS(PC& pc) {
@@ -4793,7 +4793,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetN(PC& pc) {
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
   tv1->m_type = KindOfBoolean;
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
@@ -4811,7 +4811,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
   tv1->m_type = KindOfBoolean;
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
@@ -4922,7 +4922,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyN(PC& pc) {
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
   tv1->m_type = KindOfBoolean;
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
@@ -4940,7 +4940,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
   tv1->m_type = KindOfBoolean;
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
@@ -5018,7 +5018,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetN(PC& pc) {
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetG(PC& pc) {
@@ -5032,7 +5032,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetG(PC& pc) {
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetS(PC& pc) {
@@ -5054,7 +5054,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetS(PC& pc) {
   tvRefcountedDecRefCell(propn);
   memcpy(output, tv1, sizeof(TypedValue));
   m_stack.ndiscard(2);
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
@@ -5114,7 +5114,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpN(PC& pc) {
   tvRefcountedDecRef(tv2);
   tvReadCell(to, tv2);
   m_stack.discard();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetOpG(PC& pc) {
@@ -5132,7 +5132,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpG(PC& pc) {
   tvRefcountedDecRef(tv2);
   tvReadCell(to, tv2);
   m_stack.discard();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetOpS(PC& pc) {
@@ -5156,7 +5156,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpS(PC& pc) {
   tvRefcountedDecRef(fr);
   tvReadCell(val, output);
   m_stack.ndiscard(2);
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
@@ -5220,7 +5220,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecN(PC& pc) {
   lookupd_var(m_fp, name, nameCell, local);
   ASSERT(local != NULL);
   IncDecBody<true>(op, local, nameCell);
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
@@ -5233,7 +5233,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
   lookupd_gbl(m_fp, name, nameCell, gbl);
   ASSERT(gbl != NULL);
   IncDecBody<true>(op, gbl, nameCell);
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIncDecS(PC& pc) {
@@ -5303,7 +5303,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindN(PC& pc) {
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopBindG(PC& pc) {
@@ -5317,7 +5317,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindG(PC& pc) {
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopBindS(PC& pc) {
@@ -5339,7 +5339,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindS(PC& pc) {
   tvRefcountedDecRefCell(propn);
   memcpy(output, fr, sizeof(TypedValue));
   m_stack.ndiscard(2);
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopBindM(PC& pc) {
@@ -5375,7 +5375,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetN(PC& pc) {
     tvWriteUninit(tv);
   }
   m_stack.popC();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopUnsetG(PC& pc) {
@@ -5386,7 +5386,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetG(PC& pc) {
   ASSERT(varEnv != NULL);
   varEnv->unset(name);
   m_stack.popC();
-  LITSTR_DECREF(name);
+  decRefStr(name);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopUnsetM(PC& pc) {
@@ -5460,9 +5460,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
     }
   } else {
     ar->setThis(NULL);
-    if (origSd->decRefCount() == 0) {
-      origSd->release();
-    }
+    decRefStr(origSd);
   }
   ar->initNumArgs(numArgs);
   ar->setVarEnv(NULL);
@@ -5507,7 +5505,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
     ar->setInvName(name); \
   } else { \
     ar->setVarEnv(NULL); \
-    LITSTR_DECREF(name); \
+    decRefStr(name); \
   } \
 } while (0)
 
@@ -5588,7 +5586,7 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
     ar->setInvName(name);
   } else {
     ar->setVarEnv(NULL);
-    LITSTR_DECREF(const_cast<StringData*>(name));
+    decRefStr(const_cast<StringData*>(name));
   }
 }
 

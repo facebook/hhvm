@@ -412,11 +412,8 @@ FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
     pair->m_key = func->name(); // use a static name
     pair->m_value = func;
   }
-  // DecRef the string here; more compact than doing so in
-  // callers.
-  if (sd->decRefCount() == 0) {
-    sd->release();
-  }
+  // DecRef the string here; more compact than doing so in callers.
+  decRefStr(sd);
   ASSERT(stringMatches(pair->m_key, pair->m_value->name()));
   pair->m_value->validate();
   return pair->m_value;
@@ -593,7 +590,7 @@ miss:
   // decRef the name if we consumed it.  If we didn't get a global, we
   // need to leave the name for the caller to use before decrefing (to
   // emit warnings).
-  if (retval && name->decRefCount() == 0) { name->release(); }
+  if (retval) decRefStr(name);
   TRACE(5, "%sGlobalCache::lookup(\"%s\") tv@%p %p -> (%s) %p t%d\n",
         isBoxed ? "Boxed" : "",
         name->data(),
@@ -747,10 +744,7 @@ ClassCache::lookup(Handle handle, StringData *name,
         undefinedError(Strings::UNKNOWN_CLASS, name->data());
       }
     }
-    if (pair->m_key &&
-        pair->m_key->decRefCount() == 0) {
-      pair->m_key->release();
-    }
+    if (pair->m_key) decRefStr(pair->m_key);
     pair->m_key = name;
     name->incRefCount();
     pair->m_value = c;

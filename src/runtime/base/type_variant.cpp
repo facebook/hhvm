@@ -3525,7 +3525,7 @@ void Variant::setEvalScalar() const {
     StringData *pstr = m_data.pstr;
     if (!pstr->isStatic()) {
       StringData *sd = StringData::GetStaticString(pstr);
-      if (pstr->decRefCount() == 0) pstr->release();
+      decRefStr(pstr);
       m_data.pstr = sd;
       ASSERT(m_data.pstr->isStatic());
       m_type = KindOfStaticString;

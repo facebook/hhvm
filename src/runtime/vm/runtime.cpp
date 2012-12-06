@@ -42,8 +42,7 @@ void print_string(StringData* s) {
   g_context->write(s->data(), s->size());
   TRACE(1, "t-x64 output(str): (%p) %43s\n", s->data(),
         Util::escapeStringForCPP(s->data(), s->size()).data());
-  // decRef the string
-  if (s->decRefCount() == 0) s->release();
+  decRefStr(s);
 }
 
 void print_int(int64 i) {
@@ -477,14 +476,14 @@ concat_ss(StringData* v1, StringData* v2) {
   if (v1->getCount() > 1) {
     StringData* ret = NEW(StringData)(v1, v2);
     ret->setRefCount(1);
-    if (v2->decRefCount() == 0) v2->release();
+    decRefStr(v2);
     // Because v1->getCount() is greater than 1, we know we will never
     // have to release the string here
     v1->decRefCount();
     return ret;
   } else {
     v1->append(v2->slice());
-    if (v2->decRefCount() == 0) v2->release();
+    decRefStr(v2);
     return v1;
   }
 }
@@ -507,7 +506,7 @@ concat_is(int64 v1, StringData* v2) {
   StringSlice s2 = v2->slice();
   StringData* ret = NEW(StringData)(s1, s2);
   ret->incRefCount();
-  if (v2->decRefCount() == 0) v2->release();
+  decRefStr(v2);
   return ret;
 }
 
@@ -529,7 +528,7 @@ concat_si(StringData* v1, int64 v2) {
   StringSlice s2(intstart, len2);
   StringData* ret = NEW(StringData)(s1, s2);
   ret->incRefCount();
-  if (v1->decRefCount() == 0) v1->release();
+  decRefStr(v1);
   return ret;
 }
 
@@ -560,8 +559,7 @@ concat(DataType t1, uint64 v1, DataType t2, uint64 v2) {
 
 int64 eq_null_str(StringData* v1) {
   int64 retval = v1->empty();
-  // decRef the string
-  if (v1->decRefCount() == 0) v1->release();
+  decRefStr(v1);
   return retval;
 }
 
@@ -578,16 +576,14 @@ int64 eq_bool_str(int64 v1, StringData* v2) {
   ASSERT(v1  == 0ll || v1  == 1ll);
   int64 retval = (v2i ^ v1) ^ 1;
   ASSERT(retval == 0ll || retval == 1ll);
-  // decRef the string
-  if (v2->decRefCount() == 0) v2->release();
+  decRefStr(v2);
   return retval;
 }
 
 int64 eq_int_str(int64 v1, StringData* v2) {
   int64 lval; double dval;
   DataType ret = is_numeric_string(v2->data(), v2->size(), &lval, &dval, 1);
-  // decRef the string
-  if (v2->decRefCount() == 0) v2->release();
+  decRefStr(v2);
   if (ret == KindOfInt64) {
     return v1 == lval;
   } else if (ret == KindOfDouble) {
@@ -599,15 +595,15 @@ int64 eq_int_str(int64 v1, StringData* v2) {
 
 int64 eq_str_str(StringData* v1, StringData* v2) {
   int64 retval = v1->equal(v2);
-  if (v2->decRefCount() == 0) v2->release();
-  if (v1->decRefCount() == 0) v1->release();
+  decRefStr(v2);
+  decRefStr(v1);
   return retval;
 }
 
 int64 same_str_str(StringData* v1, StringData* v2) {
   int64 retval = v1 == v2 || v1->same(v2);
-  if (v2->decRefCount() == 0) v2->release();
-  if (v1->decRefCount() == 0) v1->release();
+  decRefStr(v2);
+  decRefStr(v1);
   return retval;
 }
 
@@ -618,7 +614,7 @@ int64 str0_to_bool(StringData* sd) {
 
 int64 str_to_bool(StringData* sd) {
   int64 retval = str0_to_bool(sd);
-  if (sd->decRefCount() == 0) sd->release();
+  decRefStr(sd);
   return retval;
 }
 

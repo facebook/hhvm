@@ -59,7 +59,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
         ret = false;
       }
       if (invName != NULL) {
-        LITSTR_DECREF(invName);
+        decRefStr(invName);
       }
     } else {
       MethodCallPackage mcp;

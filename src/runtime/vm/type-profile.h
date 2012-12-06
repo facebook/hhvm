@@ -48,8 +48,6 @@ static inline bool shouldProfile() {
   return profileOn;
 }
 
-const static bool typeProfileCGetM = false; // Not ready for primetime.
-
 } }
 
 #endif // _TYPE_PROFILE_H_

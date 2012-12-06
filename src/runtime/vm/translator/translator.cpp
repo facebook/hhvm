@@ -504,13 +504,17 @@ static uint32 get_random()
     return (m_z << 16) + m_w;  /* 32-bit result */
 }
 
+static const int kTooPolyPred = 2;
+static const int kTooPolyRet = 6;
+
 /*
  * predictOutputs --
  *
  *   Provide a best guess for the output type of this instruction.
  */
 static DataType
-predictOutputs(NormalizedInstruction* ni) {
+predictOutputs(const Tracelet& t,
+               NormalizedInstruction* ni) {
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     ni->outputPredicted = true;
@@ -567,21 +571,26 @@ predictOutputs(NormalizedInstruction* ni) {
     }
   }
 
+  static const double kAccept = 1.0;
   std::pair<DataType, double> pred = std::make_pair(KindOfInvalid, 0.0);
-  if (hasImmVector(ni->op()) && typeProfileCGetM) {
+  // Type predictions grow tracelets, and can have a side effect of making
+  // them combinatorially explode if they bring in precondtions that vary a
+  // lot. Get more conservative as evidence mounts that this is a
+  // polymorphic tracelet.
+  if (tx64->numTranslations(t.m_sk) >= kTooPolyPred) return KindOfInvalid;
+  if (hasImmVector(ni->op())) {
     const ImmVector& immVec = ni->immVec;
     StringData* name;
     MemberCode mc;
     if (immVec.decodeLastMember(curUnit(), name, mc)) {
       pred = predictType(TypeProfileKey(mc, name));
-      TRACE(0, "prediction for %s named %s: %d, %f\n",
+      TRACE(1, "prediction for CGetM %s named %s: %d, %f\n",
             mc == MET ? "elt" : "prop",
             name->data(),
             pred.first,
             pred.second);
     }
   }
-  static const double kAccept = 1.00;
   if (debug && pred.second < kAccept) {
     if (const StringData* invName = fcallToFuncName(ni)) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
@@ -661,7 +670,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
     CS(OutArray,       KindOfArray);
     CS(OutObject,      KindOfObject);
 #undef CS
-    case OutPred: return RuntimeType(predictOutputs(ni));
+    case OutPred: return RuntimeType(predictOutputs(t, ni));
 
     case OutClassRef: {
       Op op = Op(ni->op());
@@ -1970,6 +1979,14 @@ void Translator::getInputs(Tracelet& t,
 
   const bool wantInlineReturn = [&] {
     const int localCount = curFunc()->numLocals();
+    // Inline return causes us to guard this tracelet more precisely. If
+    // we're already chaining to get here, just do a generic return in the
+    // hopes of avoiding further specialization. The localCount constraint
+    // is an unfortunate consequence of the current generic machinery not
+    // working for 0 locals.
+    if (tx64->numTranslations(t.m_sk) >= kTooPolyRet && localCount > 0) {
+      return false;
+    }
     ni->nonRefCountedLocals.resize(localCount);
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {

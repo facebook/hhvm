@@ -1298,6 +1298,14 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align,
   return createTranslation(sk, align, forceNoHHIR);
 }
 
+int
+TranslatorX64::numTranslations(SrcKey sk) const {
+  if (const SrcRec* sr = m_srcDB.find(sk)) {
+    return sr->translations().size();
+  }
+  return 0;
+}
+
 TCA
 TranslatorX64::createTranslation(const SrcKey* sk, bool align,
                                  bool forceNoHHIR /* = false */) {
@@ -6564,9 +6572,9 @@ void TranslatorX64::emitGenericReturn(bool noThis, int retvalSrcDisp) {
 
   // Custom calling convention: the argument is in rVmSp.
   int numLocals = curFunc()->numLocals();
-  ASSERT(numLocals >= 1);
-  a.sub_imm32_reg64(0x8, rsp); // For parity.  Callee will do retq $0x8.
-  a.lea_reg64_disp_reg64(rVmFp, -numLocals * sizeof(TypedValue), rVmSp);
+  ASSERT(numLocals > 0);
+  a.    subq(0x8, rsp); // For parity.  Callee will do retq $0x8.
+  a.    lea(rVmFp[-numLocals * sizeof(TypedValue)], rVmSp);
   if (numLocals > kNumFreeLocalsHelpers) {
     emitCall(a, m_freeManyLocalsHelper);
   } else {
@@ -10671,7 +10679,7 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
       } else {
         Stats::emitInc(a, Stats::Tx64_OneGuardLong);
         semiLikelyIfBlock(cc, a, [&]{
-            emitSideExit(a, i, false /*next*/);
+          emitSideExit(a, i, false /*next*/);
         });
       }
     } else {

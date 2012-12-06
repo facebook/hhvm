@@ -1024,6 +1024,7 @@ public:
   void protectCode();
   void unprotectCode();
 
+  int numTranslations(SrcKey sk) const;
 private:
   virtual bool addDbgGuards(const Unit* unit);
   virtual bool addDbgGuard(const Func* func, Offset offset);

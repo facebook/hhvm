@@ -4704,14 +4704,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
   }
-  if (typeProfileCGetM) {
-    ASSERT(hasImmVector(*oldPC));
-    const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
-    StringData* name;
-    MemberCode mc;
-    if (immVec.decodeLastMember(curUnit(), name, mc)) {
-      recordType(TypeProfileKey(mc, name), m_stack.top()->m_type);
-    }
+  ASSERT(hasImmVector(*oldPC));
+  const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
+  StringData* name;
+  MemberCode mc;
+  if (immVec.decodeLastMember(curUnit(), name, mc)) {
+    recordType(TypeProfileKey(mc, name), m_stack.top()->m_type);
   }
 }
 

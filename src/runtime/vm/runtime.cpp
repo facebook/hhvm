@@ -720,7 +720,7 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
   HphpArray* argArray = NEW(HphpArray)(nargs);
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv = (TypedValue*)(ar) - (i+1);
-    argArray->nvAppendWithRef(tv);
+    argArray->HphpArray::appendWithRef(tvAsCVarRef(tv), false);
   }
   if (!ar->hasInvName()) {
     // If this is not a magic call, we're done

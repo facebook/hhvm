@@ -211,9 +211,6 @@ public:
   void nvAppend(const TypedValue* v) {
     nextInsert(tvAsCVarRef(v));
   }
-  void nvAppendWithRef(const TypedValue* v) {
-    nextInsertWithRef(tvAsCVarRef(v));
-  }
   ArrayData* nvNew(TypedValue*& v, bool copy);
   TypedValue* nvGetValueRef(ssize_t pos);
   void nvGetKey(TypedValue* out, ssize_t pos);

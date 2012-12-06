@@ -894,6 +894,45 @@ std::vector<std::string> read_jmpvector(AsmState& as) {
   return ret;
 }
 
+typedef std::vector<std::pair<Id, std::string>> SSwitchJmpVector;
+
+SSwitchJmpVector read_sswitch_jmpvector(AsmState& as) {
+  SSwitchJmpVector ret;
+
+  as.in.skipSpaceTab();
+  as.in.expect('<');
+
+  std::string defLabel;
+  do {
+    std::string caseStr;
+    if (!as.in.readQuotedStr(caseStr)) {
+      as.error("expected quoted string literal");
+    }
+
+    as.in.expect(':');
+
+    as.in.readword(defLabel);
+
+    ret.push_back(std::make_pair(
+      as.ue->mergeLitstr(StringData::GetStaticString(caseStr)),
+      defLabel
+    ));
+
+    as.in.skipWhitespace();
+  } while (as.in.peek() != '-');
+
+  as.in.expect('-');
+  as.in.expect(':');
+  as.in.readword(defLabel);
+
+  // -1 stand for default case.
+  ret.push_back(std::make_pair(-1, defLabel));
+
+  as.in.expect('>');
+
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 typedef std::map<std::string,ParserFunc> OpcodeParserMap;
@@ -946,8 +985,16 @@ OpcodeParserMap opcode_parsers;
   }                                                     \
 } while (0)
 
-// TODO: #1918751
-#define IMM_SLA not_implemented()
+#define IMM_SLA do {                                       \
+  SSwitchJmpVector vecImm = read_sswitch_jmpvector(as);    \
+  as.ue->emitInt32(vecImm.size());                         \
+  for (auto const& pair : vecImm) {                        \
+    as.ue->emitInt32(pair.first);                          \
+    labelJumps.push_back(                                  \
+      std::make_pair(pair.second, as.ue->bcPos()));        \
+    as.ue->emitInt32(0); /* to be patched */               \
+  }                                                        \
+} while(0)
 
 #define IMM_BA do {                                                 \
   labelJumps.push_back(std::make_pair(                              \

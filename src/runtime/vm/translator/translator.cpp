@@ -2959,7 +2959,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       getInputs(t, ni, stackFrameOffset, inputInfos, tas);
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
       if (noOp) {
-        if (RuntimeOption::EvalJitUseIR) {
+        if (m_useHHIR) {
           t.m_instrStream.append(ni);
           ++t.m_numOpcodes;
         }

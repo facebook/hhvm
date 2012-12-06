@@ -4719,6 +4719,16 @@ bool TestCodeRun::TestArrayForEach() {
        "test();"
        "var_dump('exit');");
 
+  MVCR("<?php\n"
+       "function main() {\n"
+       "  echo \"Entering main\\n\";\n"
+       "  foreach (array(1 => 1) as $k => $v) {\n"
+       "    break;\n"
+       "  }\n"
+       "  echo \"Leaving main\\n\";\n"
+       "}\n"
+       "main();\n");
+
   return true;
 }
 

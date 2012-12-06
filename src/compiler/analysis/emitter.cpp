@@ -6173,11 +6173,17 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
       name = StringData::GetStaticString(svKey->getName());
       keyTempLocal = m_curFunc->lookupVarId(name);
       visit(key);
+      // Meta info on the key local will confuse the translator (and
+      // wouldn't be useful anyway)
+      m_evalStack.cleanTopMeta();
     } else {
       // Make gcc happy
       keyTempLocal = -1;
     }
     visit(val);
+    // Meta info on the value local will confuse the translator (and
+    // wouldn't be useful anyway)
+    m_evalStack.cleanTopMeta();
     visit(ae);
     if (strong) {
       emitConvertToVar(e);
@@ -6270,8 +6276,14 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   }
   if (key) {
     emitVirtualLocal(keyTempLocal);
+    // Meta info on the key local will confuse the translator (and
+    // wouldn't be useful anyway)
+    m_evalStack.cleanTopMeta();
   }
   emitVirtualLocal(valTempLocal);
+  // Meta info on the value local will confuse the translator (and
+  // wouldn't be useful anyway)
+  m_evalStack.cleanTopMeta();
   if (strong) {
     if (key) {
       e.IterNextMK(itId, start, valTempLocal, keyTempLocal);

@@ -1434,16 +1434,6 @@ TypedValue* HphpArray::nvGet(const StringData* k) const {
   return NULL;
 }
 
-ArrayData* HphpArray::nvAppend(const TypedValue* v, bool copy) {
-  HphpArray* a = this;
-  ArrayData* retval = NULL;
-  if (copy) {
-    retval = a = copyImpl();
-  }
-  a->nextInsert(tvAsCVarRef(v));
-  return retval;
-}
-
 ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
@@ -1892,9 +1882,8 @@ ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
  */
 ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
                              TypedValue* value) {
-  ASSERT(ad && IsHphpArray(ad));
-  HphpArray* ha = (HphpArray*)ad;
-  ArrayData* retval = ha->nvAppend(value, ha->getCount() > 1);
+  ASSERT(ad);
+  ArrayData* retval = ad->append(tvAsCVarRef(value), ad->getCount() > 1);
   setmDecRef(value);
   return array_mutate_post(cell, ad, retval);
 }

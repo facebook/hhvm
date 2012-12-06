@@ -1580,7 +1580,7 @@ TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv =
       (TypedValue*)(uintptr_t(ar) - (i+1) * sizeof(TypedValue));
-    argArray->nvAppend(tv, false);
+    argArray->nvAppend(tv);
     tvRefcountedDecRef(tv);
   }
   // Put invName in the slot for first argument

@@ -208,7 +208,9 @@ public:
   void nvBind(StringData* k, const TypedValue* v) {
     updateRef(k, tvAsCVarRef(v));
   }
-  ArrayData* nvAppend(const TypedValue* v, bool copy);
+  void nvAppend(const TypedValue* v) {
+    nextInsert(tvAsCVarRef(v));
+  }
   void nvAppendWithRef(const TypedValue* v) {
     nextInsertWithRef(tvAsCVarRef(v));
   }

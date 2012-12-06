@@ -827,7 +827,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
     tv.m_data.parr = &propArr;
     tv._count = 0;
     tv.m_type = KindOfArray;
-    args->nvAppend(&tv, false);
+    args->nvAppend(&tv);
     propArr.decRefCount();
   }
   {
@@ -835,7 +835,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
     tv.m_data.pobj = sentinel;
     tv._count = 0;
     tv.m_type = KindOfObject;
-    args->nvAppend(&tv, false);
+    args->nvAppend(&tv);
     sentinel->decRefCount();
   }
   TypedValue* tvSentinel = args->nvGetValueRef(1);
@@ -1019,7 +1019,7 @@ TypedValue* Class::initSPropsImpl() const {
         tv.m_data.parr = &nvtWrapper;
         tv._count = 0;
         tv.m_type = KindOfArray;
-        args->nvAppend(&tv, false);
+        args->nvAppend(&tv);
       }
       for (unsigned i = 0; i < m_sinitVec.size(); i++) {
         TypedValue retval;

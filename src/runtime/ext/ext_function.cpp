@@ -368,11 +368,11 @@ Array hhvm_get_frame_args(const ActRec* ar) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
-      retval->nvAppend(local, false);
+      retval->nvAppend(local);
       --local;
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
-      retval->nvAppend(ar->getExtraArg(i - numParams), false);
+      retval->nvAppend(ar->getExtraArg(i - numParams));
     }
   }
 

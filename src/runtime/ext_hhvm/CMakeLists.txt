@@ -12,17 +12,9 @@ get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
 set(RECURSIVE_SOURCE_SUBDIRS "${PARENT_DIR}/base" "${PARENT_DIR}/ext" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
-
-	message(${dir})
-
         auto_sources(files "*ext_hhvm*.cpp" "RECURSE" "${dir}")
         list(APPEND CXX_SOURCES ${files})
-
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
-
-foreach (file ${CXX_SOURCES})
-	message("Adding ${file} for hhvm compilation")
-endforeach(file ${files})
 
 ADD_LIBRARY(ext_hhvm_static STATIC ${CXX_SOURCES}) 
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES OUTPUT_NAME "ext_hhvm")

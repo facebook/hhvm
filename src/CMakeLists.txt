@@ -58,16 +58,14 @@ endif()
 # remove ext_hhvm
 foreach (file ${CXX_SOURCES})
        	if (${file} MATCHES "ext_hhvm")
-               	message("Removing hhvm file ${file}")
-                       list(REMOVE_ITEM CXX_SOURCES ${file})
-                endif()
+		list(REMOVE_ITEM CXX_SOURCES ${file})
+	endif()
 endforeach(file ${CXX_SOURCES})
 
 # remove ext/sep for hhvm
 if (USE_HHVM)
 	foreach (file ${CXX_SOURCES})
 		if (${file} MATCHES "ext/sep")
-			message("Removing ${file}")
 			list(REMOVE_ITEM CXX_SOURCES ${file})
 		endif()
 	endforeach(file ${CXX_SOURCES})

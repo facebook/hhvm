@@ -149,7 +149,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
   std::vector<bool> needsReloading(inst->getNumSrcs(), true);
   for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
     SSATmp* tmp = inst->getSrc(i);
-    int32 slotId = tmp->getAnalysisValue();
+    int32 slotId = tmp->getSpillSlot();
     if (slotId == -1) {
       needsReloading[i] = false;
     } else if (tmp = m_slots[slotId].m_latestTmp) {
@@ -167,7 +167,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
   }
   for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
     SSATmp* tmp = inst->getSrc(i);
-    int32 slotId = tmp->getAnalysisValue();
+    int32 slotId = tmp->getSpillSlot();
     if (needsReloading[i]) {
       // <tmp> is spilled, and not reloaded.
       // Therefore, We need to reload the value into a new SSATmp.
@@ -183,7 +183,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       // Replace <tmp> with <newTmp> in <inst>.
       SSATmp* newTmp = m_irFactory->getSSATmp(reload);
       newTmp->setLastUseId(slotTmp->getLastUseId());
-      newTmp->setAnalysisValue(slotId);
+      newTmp->setSpillSlot(slotId);
       inst->setSrc(i, newTmp);
       // newTmp and tmp share the same type.
       for (uint32 locIndex = 0;
@@ -304,7 +304,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
     // Setting the last use ID to the next native is conservative.
     // Setting it to the last use before the next native would be more precise,
     // but that would be more expensive to compute.
-    if (ssaTmp->getAnalysisValue() == -1) {
+    if (ssaTmp->getSpillSlot() == -1) {
       createSpillSlot(ssaTmp);
     }
     ssaTmp->setLastUseId(getNextNativeId());
@@ -769,7 +769,7 @@ void LinearScan::allocRegsToTraceAux(Trace* trace) {
     if (inst->getOpcode() != Reload) {
       // Reloaded SSATmps needn't be spilled again.
       if (SSATmp* dst = inst->getDst()) {
-        int32 slotId = dst->getAnalysisValue();
+        int32 slotId = dst->getSpillSlot();
         if (slotId != -1) {
           // If this instruction is marked to be spilled,
           // add a spill right afterwards.
@@ -988,7 +988,7 @@ void LinearScan::freeReg(RegState* reg) {
   pushFreeReg(reg);
   // The <tmp> shouldn't be reused any more.
   SSATmp* tmp = reg->m_ssaTmp;
-  int32 slotId = tmp->getAnalysisValue();
+  int32 slotId = tmp->getSpillSlot();
   if (slotId != -1) {
     m_slots[slotId].m_latestTmp = NULL;
   }
@@ -1043,7 +1043,7 @@ void LinearScan::spill(SSATmp* tmp) {
     it = next;
   }
 
-  if (tmp->getAnalysisValue() == -1) {
+  if (tmp->getSpillSlot() == -1) {
     // <tmp> hasn't been spilled before.
     // We need to create a new spill slot for it.
     uint32 slotId = createSpillSlot(tmp);
@@ -1057,7 +1057,7 @@ void LinearScan::spill(SSATmp* tmp) {
 // Create a spill slot for <tmp>.
 uint32 LinearScan::createSpillSlot(SSATmp* tmp) {
   uint32 slotId = m_slots.size();
-  tmp->setAnalysisValue(slotId);
+  tmp->setSpillSlot(slotId);
   IRInstruction* spillInst = m_irFactory->spill(tmp);
   SlotInfo si;
   si.m_slotTmp = m_irFactory->getSSATmp(spillInst);

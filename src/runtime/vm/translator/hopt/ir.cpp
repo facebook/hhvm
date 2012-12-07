@@ -1039,10 +1039,11 @@ void resetIdsAux(Trace* trace) {
     if (dst) {
       dst->setLastUseId(0);
       dst->setUseCount(0);
-      dst->setAnalysisValue(-1);
+      dst->setSpillSlot(-1);
     }
   }
 }
+
 /*
  * Clears the IRInstructions' ids, and the SSATmps' use count and last use id
  * for the given trace and all its exit traces.
@@ -1063,7 +1064,7 @@ uint32 numberInstructions(Trace* trace,
   for (auto* inst : trace->getInstructionList()) {
     if (SSATmp* dst = inst->getDst()) {
       // Initialize this value for register spilling.
-      dst->setAnalysisValue(-1);
+      dst->setSpillSlot(-1);
     }
     if (inst->getOpcode() == Marker) {
       continue; // don't number markers
@@ -1096,7 +1097,7 @@ uint32 numberInstructions(Trace* trace,
  * Returns true if a label is unreachable -- that is, if a label's id is 0
  * because numbering never visited it.
  */
-bool labelIsUnreachable(const Trace* trace) {
+static bool labelIsUnreachable(const Trace* trace) {
   return trace->getLabel()->getId() == 0;
 }
 

@@ -1074,8 +1074,6 @@ public:
   void              setUseCount(uint32 count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32            decUseCount() { return --m_useCount; }
-  int32             getAnalysisValue() { return m_analysis; }
-  void              setAnalysisValue(int val) { m_analysis = val; }
   uint32            getNumRegs() const;
   bool              isAssignedReg(uint32 index) const;
   bool              isAssignedMmxReg(uint32 index) const;
@@ -1107,6 +1105,14 @@ public:
   void              setTCA(TCA tca);
   TCA               getTCA();
 
+  /*
+   * During register allocation, this is used to mark spill locations
+   * that are assigned to specific SSATmps.  A value of -1 is used to
+   * indicate no spill slot has been assigned.
+   */
+  int32_t           getSpillSlot() { return m_spillSlot; }
+  void              setSpillSlot(int32_t val) { m_spillSlot = val; }
+
 private:
   friend class IRFactory;
   friend class TraceBuilder;
@@ -1114,12 +1120,14 @@ private:
 
   // May only be created via IRFactory.  Note that this class is never
   // destructed, so don't add complex members.
-  SSATmp(uint32 opndId, IRInstruction* i) : m_inst(i),
-                                            m_id(opndId),
-                                            m_lastUseId(0),
-                                            m_useCount(0) {
+  SSATmp(uint32 opndId, IRInstruction* i)
+    : m_inst(i)
+    , m_id(opndId)
+    , m_lastUseId(0)
+    , m_useCount(0)
+    , m_spillSlot(-1)
+  {
     m_regs[0] = m_regs[1] = Transl::reg::noreg;
-    m_analysis = -1;
   }
   SSATmp(const SSATmp&);
   SSATmp& operator=(const SSATmp&);
@@ -1128,12 +1136,7 @@ private:
   const uint32    m_id;
   uint32          m_lastUseId;
   uint16          m_useCount;
-  // m_analysis is a scratch field that various analysis & optimization
-  // passes (e.g., the register allocator) can use
-  // for register spilling:
-  //   -1: not spilled
-  //   otherwise: spilled slot
-  int32           m_analysis;
+  int32_t         m_spillSlot;
 
   /*
    * m_regs[0] is always the value of this SSATmp.

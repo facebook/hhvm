@@ -1076,14 +1076,14 @@ public:
   uint32            decUseCount() { return --m_useCount; }
   int32             getAnalysisValue() { return m_analysis; }
   void              setAnalysisValue(int val) { m_analysis = val; }
-  uint32            getNumAssignedLocs() const;
+  uint32            getNumRegs() const;
   bool              isAssignedReg(uint32 index) const;
   bool              isAssignedMmxReg(uint32 index) const;
   bool              isAssignedSpillLoc(uint32 index) const;
-  RegNumber         getAssignedLoc() { return m_assignedLoc[0]; }
-  RegNumber         getAssignedLoc(uint32 index);
-  void              setAssignedLoc(RegNumber loc, uint32 index) {
-    m_assignedLoc[index] = loc;
+  RegNumber         getReg() { return m_regs[0]; }
+  RegNumber         getReg(uint32 i) { return m_regs[i]; }
+  void              setReg(RegNumber reg, uint32 index) {
+    m_regs[index] = reg;
   }
   uint32            getSpillLoc(uint32 index) const;
   void              setSpillLoc(uint32 spillLoc, uint32 index);
@@ -1102,7 +1102,6 @@ public:
   uintptr_t         getConstValAsBits();
   void              print(std::ostream& ostream, bool printLastUse = false);
   void              print();
-  static const uint32 MaxNumAssignedLoc = 2;
 
   // Used for Jcc to Jmp elimination
   void              setTCA(TCA tca);
@@ -1119,7 +1118,7 @@ private:
                                             m_id(opndId),
                                             m_lastUseId(0),
                                             m_useCount(0) {
-    m_assignedLoc[0] = m_assignedLoc[1] = Transl::reg::noreg;
+    m_regs[0] = m_regs[1] = Transl::reg::noreg;
     m_analysis = -1;
   }
   SSATmp(const SSATmp&);
@@ -1135,12 +1134,19 @@ private:
   //   -1: not spilled
   //   otherwise: spilled slot
   int32           m_analysis;
-  // assignedLoc[0] is always the value of this tmp and for
-  // Cell or Gen types, assignedLoc[1] is the runtime type
-  // loc < LinearScan::NumRegs: general purpose registers
-  // LinearScan::NumRegs <= loc < LinearScan::FirstSpill: MMX registers
-  // LinearScan::FistSpill <= loc: spill location
-  RegNumber   m_assignedLoc[MaxNumAssignedLoc]; // register allocation
+
+  /*
+   * m_regs[0] is always the value of this SSATmp.
+   *
+   * Cell or Gen types use two registers: m_regs[1] is the runtime
+   * type.
+   *
+   * loc < LinearScan::NumRegs: general purpose registers
+   * LinearScan::NumRegs <= loc < LinearScan::FirstSpill: MMX regs
+   * LinearScan::FistSpill <= loc: spill location
+   */
+  static const uint32_t kMaxNumRegs = 2;
+  RegNumber   m_regs[kMaxNumRegs]; // register allocation
 };
 
 class IRFactory {

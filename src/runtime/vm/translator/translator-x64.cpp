@@ -1105,9 +1105,9 @@ void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
  *     - scratch is destoyed.
  */
 
-static void lookupDestructor(X64Assembler& a,
-                             PhysReg typeReg,
-                             PhysReg scratch) {
+static IndexedMemoryRef lookupDestructor(X64Assembler& a,
+                                         PhysReg typeReg,
+                                         PhysReg scratch) {
   ASSERT(typeReg != r32(argNumToRegName[0]));
   ASSERT(scratch != argNumToRegName[0]);
 
@@ -1119,21 +1119,19 @@ static void lookupDestructor(X64Assembler& a,
 
   a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
   a.    movq   (&g_destructors, scratch);
-  a.    loadq  (scratch[typeReg*8], scratch);
+  return scratch[typeReg*8];
 }
 
 static void callDestructor(X64Assembler& a,
                            PhysReg typeReg,
                            PhysReg scratch) {
-  lookupDestructor(a, typeReg, scratch);
-  a.    call  (scratch);
+  a.    call   (lookupDestructor(a, typeReg, scratch));
 }
 
 static void jumpDestructor(X64Assembler& a,
                            PhysReg typeReg,
                            PhysReg scratch) {
-  lookupDestructor(a, typeReg, scratch);
-  a.    jmp   (scratch);
+  a.    jmp    (lookupDestructor(a, typeReg, scratch));
 }
 
 void TranslatorX64::emitGenericDecRefHelpers() {
@@ -11271,7 +11269,6 @@ asm_label(a, doRelease);
   a.    storel (0, rIter[TVOFF(m_type)]);
   jumpDestructor(a, PhysReg(rType), rax);
 
-  a.    nop    (); // makes loopHead jump-target aligned.
   m_freeManyLocalsHelper = a.code.frontier;
   a.    lea    (rVmFp + kNumFreeLocalsHelpers * -int(sizeof(TypedValue)),
                 rFinished);

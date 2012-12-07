@@ -570,10 +570,6 @@ ArrayData* array_getm_s(ArrayData* a, StringData* key, TypedValue* out,
                         int flags);
 void       non_array_getm_i(TypedValue* base, int64 key, TypedValue* out);
 void       non_array_getm_s(TypedValue* base, StringData* key, TypedValue* out);
-void       array_getm_is(ArrayData* ad, int64 ik, StringData* sd,
-			 TypedValue* out) FLATTEN;
-void       array_getm_is0(ArrayData* ad, int64 ik, StringData* sd,
-			  TypedValue* out) FLATTEN;
 uint64 array_issetm_s(const void* hphpArray, StringData* sd)
   FLATTEN;
 uint64 array_issetm_s0(const void* hphpArray, StringData* sd)

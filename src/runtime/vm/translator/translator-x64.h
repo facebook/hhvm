@@ -642,7 +642,6 @@ PSEUDOINSTRS
   void fuseBranchAfterHelper(const Tracelet& t,
                              const NormalizedInstruction& i);
   void translateSetMArray(const Tracelet &t, const NormalizedInstruction& i);
-  void translateCGetM_LEE(const Tracelet &t, const NormalizedInstruction& i);
   void translateCGetM_GE(const Tracelet &t, const NormalizedInstruction& i);
   void emitGetGlobal(const NormalizedInstruction& i, int nameIdx,
                      bool allowCreate);
@@ -1048,7 +1047,6 @@ PSEUDOINSTRS
   // Helper functions not covered by macros above
   void irTranslateSetMProp(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateCGetMProp(const Tracelet &t, const NormalizedInstruction& i);
-  void irTranslateCGetM_LEE(const Tracelet &t, const NormalizedInstruction& i);
   void irTranslateCGetM_GE(const Tracelet &t, const NormalizedInstruction& i);
   void irTranslateReqLit(const Tracelet& t,
                          const NormalizedInstruction& i,
@@ -1115,7 +1113,6 @@ int getNormalPropertyOffset(const NormalizedInstruction& i,
                             int propInput, int objInput);
 bool mInstrHasUnknownOffsets(const NormalizedInstruction& i);
 bool isSupportedCGetM_LE(const NormalizedInstruction& i);
-bool isSupportedCGetM_LEE(const NormalizedInstruction& i);
 bool isSupportedCGetM_RE(const NormalizedInstruction& i);
 bool isSupportedCGetM_GE(const NormalizedInstruction& i);
 bool isSupportedCGetM(const NormalizedInstruction& i);

@@ -1923,39 +1923,6 @@ non_array_getm_s(TypedValue* base, StringData* key, TypedValue* out) {
   non_array_getm<KindOfString, true>(base, (intptr_t)key, out);
 }
 
-void
-array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
-                   bool decRefKey) NEVER_INLINE;
-void
-array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
-                   bool decRefKey) {
-  TypedValue* base2 = ad->nvGetCell(ik);
-  if (UNLIKELY(base2->m_type != KindOfArray)) {
-    non_array_getm<KindOfString, false>(base2, (int64)sd, out);
-  } else {
-    ad = base2->m_data.parr;
-    array_getm_s(ad, sd, out, CheckInts | (decRefKey ? DecRefKey : 0));
-  }
-}
-
-/**
- * array_getm_is will increment the refcount of the return value if
- * appropriate and it will decrement the refcount of the string key
- */
-void
-array_getm_is(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
-  array_getm_is_impl(ad, ik, sd, out, /*decRefKey=*/ true);
-}
-
-/**
- * array_getm_is0 will increment the refcount of the return value if
- * appropriate
- */
-void
-array_getm_is0(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
-  array_getm_is_impl(ad, ik, sd, out, /*decRefKey=*/false);
-}
-
 // issetm's DNA.
 static bool
 issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {

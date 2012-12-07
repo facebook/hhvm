@@ -2761,23 +2761,6 @@ isSupportedCGetM_LE(const NormalizedInstruction& i) {
 }
 
 bool
-isSupportedCGetM_LEE(const NormalizedInstruction& i) {
-  if (i.inputs.size() > 3) return false;
-
-  // Return true iff this is a CGetM <L E E> instruction where the
-  // base is an array, the first key is a int and the second key is a
-  // string.
-  return
-    i.immVec.locationCode() == LL &&
-    i.immVecM.size() == 2 &&
-    mcodeMaybeArrayIntKey(i.immVecM[0]) &&
-    mcodeMaybeArrayStringKey(i.immVecM[1]) &&
-    i.inputs[0]->valueType() == KindOfArray &&
-    i.inputs[1]->isInt() && // first key
-    i.inputs[2]->isString(); // second key
-}
-
-bool
 isSupportedCGetM_RE(const NormalizedInstruction& i) {
   if (i.inputs.size() > 2) return false;
   return
@@ -2803,8 +2786,7 @@ isSupportedCGetM_GE(const NormalizedInstruction& i) {
 void
 TranslatorX64::analyzeCGetM(Tracelet& t, NormalizedInstruction& ni) {
   if (!RuntimeOption::EvalJitMGeneric) {
-    ni.m_txFlags = supportedPlan(isSupportedCGetM_LEE(ni) ||
-                                 isSupportedCGetM_GE(ni) ||
+    ni.m_txFlags = supportedPlan(isSupportedCGetM_GE(ni) ||
                                  isSupportedCGetM_LE(ni) ||
                                  isSupportedCGetM_RE(ni));
     return;
@@ -2879,48 +2861,6 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
   }
 }
 
-void
-TranslatorX64::translateCGetM_LEE(const Tracelet& t,
-                                  const NormalizedInstruction& i) {
-  ASSERT(isSupportedCGetM_LEE(i));
-
-  const DynLocation& array = *i.inputs[0];
-  const DynLocation& key1  = *i.inputs[1];
-  const DynLocation& key2  = *i.inputs[2];
-  const Location& outLoc    = i.outStack->location;
-  ASSERT(key1.isInt() && key2.isString());
-
-  TRACE(1, "nvGet2 outLoc: (%s, %lld)\n", outLoc.spaceName(), outLoc.offset);
-  if (false) { // typeCheck
-    ArrayData *a = NULL;
-    TypedValue tv;
-    StringData *sd = NULL;
-    array_getm_is(a, 666, sd, &tv);
-    array_getm_is0(a, 666, sd, &tv);
-  }
-  void* fptr;
-  // array_getm_is incRefs the return value if appropriate and
-  // it decRefs the string key for us. We don't need to decRef
-  // the array because it was passed via a local.
-  bool decRefStrKey =
-    key2.isStack() && key2.rtt.valueString() == NULL;
-  fptr = decRefStrKey ? ((void*)array_getm_is) : ((void*)array_getm_is0);
-
-  int args[3];
-  args[0] = array.isVariant() ? ArgAnyReg : 0;
-  args[1] = 1;
-  args[2] = 2;
-  allocInputsForCall(i, args);
-
-  EMIT_CALL(a, fptr,
-            array.isVariant() ? DEREF(array.location) : V(array.location),
-            V(key1.location),
-            V(key2.location),
-            A(outLoc));
-  recordReentrantCall(i);
-  m_regMap.invalidate(outLoc);
-}
-
 void TranslatorX64::translateCGetM_GE(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   const int nameIdx = 0;
@@ -2977,11 +2917,6 @@ TranslatorX64::translateCGetM(const Tracelet& t,
   ASSERT(i.inputs.size() >= 2);
   ASSERT(i.outStack);
 
-  if (isSupportedCGetM_LEE(i)) {
-    Stats::emitInc(a, Stats::Tx64_CGetMLEE);
-    translateCGetM_LEE(t, i);
-    return;
-  }
   if (isSupportedCGetM_GE(i)) {
     Stats::emitInc(a, Stats::Tx64_CGetMGE);
     translateCGetM_GE(t, i);

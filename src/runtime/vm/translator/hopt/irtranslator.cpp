@@ -787,18 +787,6 @@ TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
   }
 }
 
-void
-TranslatorX64::irTranslateCGetM_LEE(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
-  ASSERT(isSupportedCGetM_LEE(i));
-
-  const DEBUG_ONLY DynLocation& key1  = *i.inputs[1];
-  const DEBUG_ONLY DynLocation& key2  = *i.inputs[2];
-  ASSERT(key1.isInt() && key2.isString());
-
-  HHIR_UNIMPLEMENTED(CGetM_LEE);
-}
-
 void TranslatorX64::irTranslateCGetM_GE(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   HHIR_UNIMPLEMENTED(CGetM_GE);
@@ -823,11 +811,6 @@ TranslatorX64::irTranslateCGetM(const Tracelet& t,
 
   if (isSupportedCGetMProp(i)) {
     irTranslateCGetMProp(t, i);
-    return;
-  }
-  if (isSupportedCGetM_LEE(i)) {
-    HHIR_UNIMPLEMENTED(CGetM_LEE);
-    irTranslateCGetM_LEE(t, i);
     return;
   }
   if (isSupportedCGetM_GE(i)) {

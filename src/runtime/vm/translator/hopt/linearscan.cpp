@@ -569,16 +569,6 @@ void LinearScan::computePreColoringHint() {
       m_preColoringHint.add(nextNative->getSrc(2), 0, 2);
       m_preColoringHint.add(nextNative->getSrc(3), 0, 3);
       break;
-    case UnpackCont:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
-      break;
-    case PackCont:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, 2);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, 3);
-      break;
     case OpEq:
     case OpNeq:
     case OpSame:

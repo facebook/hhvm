@@ -189,16 +189,11 @@ public:
 
   void    genNativeImpl();
 
-  SSATmp* genLdContThisOrCls(SSATmp* cont);
   SSATmp* genCreateCont(bool getArgs, const Func* origFunc,
                         const Func* genFunc);
   void    genFillContLocals(const Func* origFunc, const Func* genFunc,
                             SSATmp* cont);
   void    genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset);
-  SSATmp* genUnpackCont(SSATmp* cont, SSATmp* locals);
-  Trace*  genExitOnContVars(SSATmp* cont, Trace* target);
-  void    genPackCont(SSATmp* cont, SSATmp* value, int32 label,
-                      const Func* func);
   Trace*  genContRaiseCheck(SSATmp* cont, Trace* target);
   Trace*  genContPreNext(SSATmp* cont, Trace* target);
   Trace*  genContStartedCheck(SSATmp* cont, Trace* target);

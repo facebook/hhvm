@@ -4269,10 +4269,6 @@ Address CodeGenerator::cgDefFunc(IRInstruction* inst) {
   return start;
 }
 
-Address CodeGenerator::cgLdContThisOrCls(IRInstruction* inst) {
-  not_reached();
-}
-
 Address CodeGenerator::cgCreateCont(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   auto helper = curFunc()->isNonClosureMethod() ?
@@ -4318,18 +4314,6 @@ Address CodeGenerator::cgFillContThis(IRInstruction* inst) {
   m_as.patchJcc8(jmp, m_as.code.frontier);
 
   return start;
-}
-
-Address CodeGenerator::cgUnpackCont(IRInstruction* inst) {
-  not_reached();
-}
-
-Address CodeGenerator::cgExitOnContVars(IRInstruction* inst) {
-  not_reached();
-}
-
-Address CodeGenerator::cgPackCont(IRInstruction* inst) {
-  not_reached();
 }
 
 Address CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {

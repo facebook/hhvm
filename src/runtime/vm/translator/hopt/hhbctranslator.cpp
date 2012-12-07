@@ -572,60 +572,6 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   push(cont);
 }
 
-void HhbcTranslator::emitUnpackCont() {
-  int nCopy = curFunc()->numNamedLocals() - 1;
-  if (nCopy > TranslatorX64::kMaxInlineContLocals) {
-    SSATmp* locals = m_tb.genLdLocAddr(nCopy);
-    spillStack();
-    push(m_tb.genUnpackCont(m_tb.genLdLoc(0), locals));
-    for (int i = 0; debug && i < nCopy; ++i) {
-      ASSERT(m_tb.getLocalValue(nCopy - i) == NULL);
-    }
-    return;
-  }
-
-  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
-  m_tb.genExitOnContVars(cont, getExitSlowTrace());
-
-  SSATmp* locals = getContLocals(cont);
-  SSATmp* uninit = m_tb.genDefUninit();
-  for (int i = 0; i < nCopy; ++i) {
-    int contOffset = cellsToBytes(i);
-    SSATmp* val = m_tb.genLdMem(locals, contOffset, Type::Gen, NULL);
-    m_tb.genStMem(locals, contOffset, uninit, true);
-    m_tb.genInitLoc(nCopy - i, val);
-  }
-  push(m_tb.genLdRaw(cont, RawMemSlot::ContLabel, Type::Int));
-}
-
-void HhbcTranslator::emitPackCont(int32 labelId) {
-  int nCopy = curFunc()->numNamedLocals() - 1;
-  if (nCopy > TranslatorX64::kMaxInlineContLocals) {
-    spillStack();
-    m_tb.genPackCont(m_tb.genLdLoc(0, Type::Obj, NULL),
-                     loadStackAddr(0),
-                     labelId,
-                     curFunc());
-    popC();
-    return;
-  }
-
-  m_tb.genExitOnVarEnv(getExitSlowTrace());
-
-  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
-  SSATmp* uninit = m_tb.genDefUninit();
-  SSATmp* locals = getContLocals(cont);
-  for (int i = 0; i < nCopy; ++i) {
-    int locId = nCopy - i;
-    SSATmp* local = m_tb.genLdLoc(locId, Type::Gen, NULL);
-    m_tb.genInitLoc(locId, uninit);
-    m_tb.genStMem(locals, cellsToBytes(i), local, true);
-  }
-
-  m_tb.genSetPropCell(cont, CONTOFF(m_value), popC());
-  m_tb.genStRaw(cont, RawMemSlot::ContLabel, m_tb.genDefConst<int64>(labelId));
-}
-
 void HhbcTranslator::emitContReceive() {
   SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
   m_tb.genContRaiseCheck(cont, getExitSlowTrace());

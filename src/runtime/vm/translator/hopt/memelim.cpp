@@ -165,21 +165,6 @@ void MemMap::processInstruction(IRInstruction* inst) {
       }
       break;
     }
-    case PackCont: {
-      // PackCont calls a C++ helper that reads every local from
-      // memory, so reflect that in the map here
-      uint32 limit = inst->getSrc(4)->getConstValAsFunc()->numNamedLocals();
-      for (auto i = locs.begin(); i != locs.end(); ++i) {
-        ConstInstruction* home = dynamic_cast<ConstInstruction*>(
-          i->first->getInstruction());
-        ASSERT(home && home->getOpcode() == LdHome);
-        uint32 id = home->getLocal()->getId();
-        if (id >= 1 && id < limit) {
-          i->second->update(inst);
-        }
-      }
-      break;
-    }
     case LdRefNR: {
       SSATmp* ref = inst->getSrc(0);
 

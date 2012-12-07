@@ -1423,10 +1423,6 @@ SSATmp* TraceBuilder::genLdStack(int32 stackOff,
   return tmp;
 }
 
-SSATmp* TraceBuilder::genLdContThisOrCls(SSATmp* cont) {
-  return genInstruction(LdContThisOrCls, Type::Obj, cont);
-}
-
 SSATmp* TraceBuilder::genCreateCont(bool getArgs,
                                     const Func* origFunc,
                                     const Func* genFunc) {
@@ -1450,23 +1446,6 @@ void TraceBuilder::genFillContLocals(const Func* origFunc,
 void TraceBuilder::genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset) {
   genInstruction(FillContThis, Type::None,
                  cont, locals, genDefConst(offset));
-}
-
-SSATmp* TraceBuilder::genUnpackCont(SSATmp* cont, SSATmp* locals) {
-  return genInstruction(UnpackCont, Type::Int, cont, locals);
-}
-
-Trace* TraceBuilder::genExitOnContVars(SSATmp* cont, Trace* target) {
-  ASSERT(target);
-  genInstruction(ExitOnContVars, Type::None, cont, target);
-  return target;
-}
-
-void TraceBuilder::genPackCont(SSATmp* cont, SSATmp* value, int32 label,
-                               const Func* func) {
-  genInstruction(PackCont, Type::None,
-                 cont, m_fpValue, value, genDefConst<int64>(label),
-                 genDefConst(func));
 }
 
 Trace* TraceBuilder::genContRaiseCheck(SSATmp* cont, Trace* target) {

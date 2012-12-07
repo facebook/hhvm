@@ -31,7 +31,6 @@ void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
     it++;
     SSATmp* dst = inst->getDst();
     if (dst &&
-        inst->getOpcode() != LdContThisOrCls &&
         Type::isStaticallyKnown(dst->getType()) &&
         Type::isRefCounted(dst->getType())) {
       IRInstruction assertInst(AssertRefCount, Type::None, dst);

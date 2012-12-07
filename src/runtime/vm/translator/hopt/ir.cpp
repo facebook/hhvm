@@ -900,6 +900,9 @@ static void error(std::string msg) {
 #define MAX_INSTR_ASM_LEN 128
 xed_state_t xed_state;
 
+static const xed_syntax_enum_t s_xed_syntax =
+  getenv("HHVM_ATT_DISAS") ? XED_SYNTAX_ATT : XED_SYNTAX_INTEL;
+
 void printInstructions(xed_uint8_t* codeStartAddr,
                        xed_uint8_t* codeEndAddr,
                        bool printAddr) {
@@ -918,8 +921,8 @@ void printInstructions(xed_uint8_t* codeStartAddr,
     if (xed_error != XED_ERROR_NONE) error("disasm error: xed_decode failed");
 
     // Get disassembled instruction in codeStr
-    if (!xed_format_context(XED_SYNTAX_INTEL, &xedd, codeStr, MAX_INSTR_ASM_LEN,
-                            ip, NULL)) {
+    if (!xed_format_context(s_xed_syntax, &xedd, codeStr,
+                            MAX_INSTR_ASM_LEN, ip, NULL)) {
       error("disasm error: xed_format_context failed");
     }
 

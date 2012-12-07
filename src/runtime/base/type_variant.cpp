@@ -3966,29 +3966,6 @@ SharedVariant *Variant::getSharedVariant() const {
   return NULL;
 }
 
-const char *Variant::getTypeString(DataType type) {
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull:    return "KindOfNull";
-  case KindOfBoolean: return "KindOfBoolean";
-  case KindOfInt64:   return "KindOfInt64";
-  case KindOfDouble:  return "KindOfDouble";
-  case KindOfStaticString:  return "KindOfStaticString";
-  case KindOfString:  return "KindOfString";
-  case KindOfArray:   return "KindOfArray";
-  case KindOfObject:  return "KindOfObject";
-  case KindOfRef: return "KindOfRef";
-  case KindOfInvalid: return "KindOfInvalid";
-  default: not_reached();
-  }
-}
-
-std::string Variant::getDebugDump() const {
-  char buf[1024];
-  snprintf(buf, sizeof(buf), "[%s: %p]", getTypeString(m_type), m_data.pstr);
-  return buf;
-}
-
 void Variant::dump() const {
   VariableSerializer vs(VariableSerializer::VarDump);
   String ret(vs.serialize(*this, true));

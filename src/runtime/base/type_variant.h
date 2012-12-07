@@ -751,12 +751,6 @@ public:
   SharedVariant *getSharedVariant() const;
 
   /**
-   * Debugging functions.
-   */
-  static const char *getTypeString(DataType type);
-  std::string getDebugDump() const;
-
-  /**
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION(Variant);

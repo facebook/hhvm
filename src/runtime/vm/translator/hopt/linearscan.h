@@ -19,6 +19,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "runtime/vm/translator/physreg.h"
 #include "runtime/vm/translator/abi-x64.h"
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
@@ -59,33 +60,6 @@ struct LinearScan : private boost::noncopyable {
   // HHIR:TODO ideally wouldn't need to use ints, but very helpful for bit ops
   static int regNameAsInt(RegNumber r) { return (int)r; }
 
-  template<class T>
-  static inline uint REG_MASK(T regNo) { return 1 << uint(regNo); }
-
-  const static int CallerSavedRegMask;
-
-  const static int NumCallerSavedRegs = 9;
-  static inline RegNumber getCallerSavedReg(int i) {
-    ASSERT(i < NumCallerSavedRegs);
-    return CallerSavedRegs[i];
-  }
-
-  static inline bool isCallerSavedReg(RegNumber regNo) {
-    return CallerSavedRegMask & REG_MASK(LinearScan::regNameAsInt(regNo));
-  }
-
-  // HHIR:TODO:MERGE remove this int version just use RegNumber
-  static inline int getRegMask(int regNo) {
-    ASSERT(regNo < NumRegs && regNo >= 0);
-    return REG_MASK(regNo);
-  }
-
-  static inline int getRegMask(RegNumber regNo) {
-    ASSERT(LinearScan::regNameAsInt(regNo) < NumRegs &&
-           LinearScan::regNameAsInt(regNo) >= 0);
-    return REG_MASK(LinearScan::regNameAsInt(regNo));
-  }
-
 private:
   class RegState {
     friend class LinearScan;
@@ -93,7 +67,7 @@ private:
   public:
     bool isReserved() const { return m_reserved; }
     bool isCallerSaved() const {
-      return CallerSavedRegMask & (1 << m_regNo);
+      return kCallerSaved.contains(PhysReg(m_regNo));
     }
     bool isCalleeSaved() const { return !isCallerSaved(); }
     bool isAllocated() const { return m_ssaTmp != NULL; }
@@ -144,8 +118,8 @@ private:
   void allocRegToTmp(SSATmp* ssaTmp, uint32_t index);
   void freeRegsAtId(uint32_t id);
   void spill(SSATmp* tmp);
-  static uint32 computeLiveOutRegs(Trace* trace, uint32 liveOutRegs);
-  static uint32 computeLiveOutRegs(IRInstruction* inst, uint32 liveRegs);
+  static RegSet computeLiveOutRegs(Trace* trace, RegSet = RegSet());
+  static RegSet computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs);
 
   void initFreeList();
   void coalesce(Trace* trace);
@@ -183,7 +157,6 @@ private:
   RegState* getReg(RegState* reg);
 
 private:
-  static const RegNumber CallerSavedRegs[];
   static const char* RegNames[NumRegs];
 
   // Register allocation may generate Spill/Reload.

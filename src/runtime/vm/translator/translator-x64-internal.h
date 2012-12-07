@@ -45,46 +45,6 @@ static const DataType BitwiseKindOfString = KindOfString;
 
 // RAII aids to machine code.
 
-template<int StackParity>
-class PhysRegSaverParity {
-protected:
-  X64Assembler& a;
-  RegSet s;
-  int numElts;
-public:
-  PhysRegSaverParity(X64Assembler& a_, RegSet s_) : a(a_), s(s_) {
-    RegSet sCopy = s;
-    numElts = 0;
-    PhysReg reg;
-    while (sCopy.findFirst(reg)) {
-      a.    push (reg);
-      sCopy.remove(reg);
-      numElts++;
-    }
-    if ((numElts & 1) == StackParity) {
-      // Maintain stack evenness for SIMD compatibility.
-      a.    subq (8, rsp);
-    }
-  }
-
-  ~PhysRegSaverParity() {
-    if ((numElts & 1) == StackParity) {
-      // See above; stack parity.
-      a.    addq (8, rsp);
-    }
-    RegSet sCopy = s;
-    PhysReg reg;
-    while (sCopy.findLast(reg)) {
-      a.    pop  (reg);
-      sCopy.remove(reg);
-    }
-  }
-
-  int rspAdjustment() const {
-    return numElts + ((numElts & 1) == StackParity);
-  }
-};
-
 // In shared stubs, we've already made the stack odd by calling
 // from a to astubs. Calls from a are on an even rsp.
 typedef PhysRegSaverParity<0> PhysRegSaverStub;

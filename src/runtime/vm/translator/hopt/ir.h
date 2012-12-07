@@ -30,6 +30,7 @@
 #include "util/asm-x64.h"
 #include "util/arena.h"
 #include "runtime/ext/ext_continuation.h"
+#include "runtime/vm/translator/physreg.h"
 #include "runtime/vm/translator/abi-x64.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/runtime-type.h"
@@ -631,8 +632,8 @@ public:
   void       setId(uint32 newId)       { m_id = newId; }
   void       setAsmAddr(void* addr)    { m_asmAddr = addr; }
   void*      getAsmAddr()              { return m_asmAddr; }
-  uint16     getLiveOutRegs() const    { return m_liveOutRegs; }
-  void       setLiveOutRegs(uint16 s)  { m_liveOutRegs = s; }
+  RegSet     getLiveOutRegs() const    { return m_liveOutRegs; }
+  void       setLiveOutRegs(RegSet s)  { m_liveOutRegs = s; }
   bool       isDefConst() const {
     return (m_op == DefConst || m_op == LdHome);
   }
@@ -713,7 +714,7 @@ protected:
  public:
   IRInstruction(Opcode o, Type::Tag t, LabelInstruction *l = NULL)
       : m_op(o), m_type(t), m_id(0), m_numSrcs(0),
-        m_liveOutRegs(0), m_dst(NULL), m_asmAddr(NULL), m_label(l),
+        m_dst(NULL), m_asmAddr(NULL), m_label(l),
         m_parent(NULL), m_tca(NULL)
   {
     m_srcs[0] = m_srcs[1] = NULL;
@@ -721,7 +722,7 @@ protected:
 
   IRInstruction(Opcode o, Type::Tag t, SSATmp* src, LabelInstruction *l = NULL)
       : m_op(o), m_type(t), m_id(0),  m_numSrcs(1),
-        m_liveOutRegs(0), m_dst(NULL), m_asmAddr(NULL), m_label(l),
+        m_dst(NULL), m_asmAddr(NULL), m_label(l),
         m_parent(NULL), m_tca(NULL)
   {
     m_srcs[0] = src; m_srcs[1] = NULL;
@@ -733,7 +734,7 @@ protected:
                 SSATmp* src1,
                 LabelInstruction *l = NULL)
       : m_op(o), m_type(t), m_id(0), m_numSrcs(2),
-        m_liveOutRegs(0), m_dst(NULL), m_asmAddr(NULL), m_label(l),
+        m_dst(NULL), m_asmAddr(NULL), m_label(l),
         m_parent(NULL), m_tca(NULL)
   {
     m_srcs[0] = src0; m_srcs[1] = src1;
@@ -744,7 +745,6 @@ protected:
         m_type(inst->m_type),
         m_id(0),
         m_numSrcs(inst->m_numSrcs),
-        m_liveOutRegs(0),
         m_dst(NULL),
         m_asmAddr(NULL),
         m_label(inst->m_label),
@@ -762,7 +762,7 @@ protected:
   Type::Tag         m_type;
   uint32            m_id;
   uint16            m_numSrcs;
-  uint16            m_liveOutRegs;
+  RegSet            m_liveOutRegs;
   SSATmp*           m_srcs[NUM_FIXED_SRCS];
   SSATmp*           m_dst;
   void*             m_asmAddr;

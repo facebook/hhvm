@@ -19,9 +19,9 @@
 #include <boost/noncopyable.hpp>
 
 #include "util/trace.h"
-#include "util/bitops.h"
 #include "util/asm-x64.h"
 #include "runtime/vm/translator/translator.h"
+#include "runtime/vm/translator/physreg.h"
 
 namespace HPHP { namespace VM { namespace Transl {
 
@@ -41,133 +41,6 @@ static const int kMaxRegs = 64;
  * overheads per register, and a guarantee that any runnable code will
  * actually be able to allocate registers.
  */
-
-/*
- * PhysReg represents a physical machine register.  (Currently it only
- * knows how to do GPRs.)
- *
- * To make it possible to use it with the assembler conveniently, it
- * can be implicitly converted to and from a Reg64.  If you want to
- * use it as a 32 bit register call r32(physReg).
- *
- * The implicit conversion to RegNumber is historical: it exists
- * for backward-compatability with the old-style asm-x64.h api
- * (e.g. store_reg##_disp_reg##).
- */
-struct PhysReg {
-  explicit constexpr PhysReg(int n = -1) : n(n) {}
-  /* implicit */ constexpr PhysReg(Reg64 r) : n(int(r)) {}
-  explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
-
-  explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
-
-  constexpr operator Reg64() const { return Reg64(n); }
-  constexpr operator RegNumber() const { return RegNumber(n); }
-
-  explicit constexpr operator int() const { return n; }
-  constexpr bool operator==(PhysReg r) const { return n == r.n; }
-  constexpr bool operator!=(PhysReg r) const { return n != r.n; }
-  constexpr bool operator==(Reg64 r) const { return Reg64(n) == r; }
-  constexpr bool operator!=(Reg64 r) const { return Reg64(n) != r; }
-  constexpr bool operator==(Reg32 r) const { return Reg32(n) == r; }
-  constexpr bool operator!=(Reg32 r) const { return Reg32(n) != r; }
-
-  MemoryRef operator[](intptr_t p) const { return *(*this + p); }
-  IndexedMemoryRef operator[](ScaledIndex s) const { return *(*this + s); }
-
-private:
-  int n;
-};
-
-static const PhysReg InvalidReg;
-
-class RegSet {
-  uint64_t m_bits;
-
- public:
-  RegSet() : m_bits(0) { }
-  explicit RegSet(PhysReg pr) : m_bits(1 << int(pr)) { }
-
-  // union
-  RegSet operator|(const RegSet& rhs) const {
-    RegSet retval;
-    retval.m_bits = m_bits | rhs.m_bits;
-    return retval;
-  }
-
-  RegSet& operator|=(const RegSet& rhs) {
-    m_bits |= rhs.m_bits;
-    return *this;
-  }
-
-  // Equality
-  bool operator==(const RegSet& rhs) const {
-    return m_bits == rhs.m_bits;
-  }
-
-  bool operator!=(const RegSet& rhs) const {
-    return !(*this == rhs);
-  }
-
-  // Difference
-  RegSet operator-(const RegSet& rhs) const {
-    RegSet retval;
-    retval.m_bits = m_bits & ~rhs.m_bits;
-    return retval;
-  }
-
-  RegSet& operator-=(const RegSet& rhs) {
-    *this = *this - rhs;
-    return *this;
-  }
-
-  void clear() {
-    m_bits = 0;
-  }
-
-  int size() const {
-    return __builtin_popcount(m_bits);
-  }
-
-  RegSet& add(PhysReg pr) {
-    *this |= RegSet(pr);
-    return *this;
-  }
-
-  RegSet& remove(PhysReg pr) {
-    m_bits = m_bits & ~(1 << int(pr));
-    return *this;
-  }
-
-  bool contains(PhysReg pr) const {
-    return bool(m_bits & (1 << int(pr)));
-  }
-
-  bool empty() const {
-    return m_bits == 0;
-  }
-
-  // For iterating over present registers, e.g.:
-  //   while (regSet.findFirst(reg)) {
-  //     regSet.remove(reg);
-  //     foo(reg);
-  //   }
-  bool findFirst(PhysReg& reg) {
-    uint64_t out;
-    bool retval = ffs64(m_bits, out);
-    reg = PhysReg(out);
-    ASSERT(!retval || (int(reg) >= 0 && int(reg) < 64));
-    return retval;
-  }
-
-  bool findLast(PhysReg& reg) {
-    uint64_t out;
-    bool retval = fls64(m_bits, out);
-    reg = PhysReg(out);
-    ASSERT(!retval || (int(reg) >= 0 && int(reg) < 64));
-    return retval;
-  }
-};
 
 struct RegContent {
   enum Kind {

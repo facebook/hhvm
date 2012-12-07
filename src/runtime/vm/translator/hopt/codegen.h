@@ -185,7 +185,6 @@ private:
                               SSATmp* toSmash);
   Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
                               SSATmp* toSmash);
-  int getLiveOutRegsToSave(RegNumber dstReg);
   const Func* getCurrFunc();
   void recordSyncPoint(Asm& as);
   Address getDtor(DataType type);
@@ -209,17 +208,17 @@ class ArgDesc {
 public:
   enum Kind { Reg, Imm, Addr };
 
-  RegNumber getDstReg() const { return m_dstReg; }
-  RegNumber getSrcReg() const { return m_srcReg; }
+  PhysReg getDstReg() const { return m_dstReg; }
+  PhysReg getSrcReg() const { return m_srcReg; }
   Kind getKind() const { return m_kind; }
-  void setDstReg(RegNumber reg) { m_dstReg = reg; }
+  void setDstReg(PhysReg reg) { m_dstReg = reg; }
   Address genCode(CodeGenerator::Asm& as) const;
-  uintptr_t getImm() const { return m_imm; }
+  Immed getImm() const { return m_imm; }
 
 private: // These should be created using ArgGroup.
   friend struct ArgGroup;
 
-  explicit ArgDesc(Kind kind, RegNumber srcReg, uintptr_t immVal)
+  explicit ArgDesc(Kind kind, PhysReg srcReg, Immed immVal)
     : m_kind(kind)
     , m_srcReg(srcReg)
     , m_dstReg(reg::noreg)
@@ -230,9 +229,9 @@ private: // These should be created using ArgGroup.
 
 private:
   Kind m_kind;
-  RegNumber m_srcReg;
-  RegNumber m_dstReg;
-  uintptr_t m_imm;
+  PhysReg m_srcReg;
+  PhysReg m_dstReg;
+  Immed m_imm;
 };
 
 /*
@@ -256,7 +255,7 @@ struct ArgGroup {
   }
 
   ArgGroup& imm(uintptr_t imm) {
-    m_args.push_back(ArgDesc(ArgDesc::Imm, reg::noreg, imm));
+    m_args.push_back(ArgDesc(ArgDesc::Imm, InvalidReg, imm));
     return *this;
   }
 
@@ -265,17 +264,18 @@ struct ArgGroup {
   }
 
   ArgGroup& reg(RegNumber reg) {
-    m_args.push_back(ArgDesc(ArgDesc::Reg, reg, -1));
+    m_args.push_back(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
     return *this;
   }
 
   ArgGroup& type(Type::Tag tag) {
-    m_args.push_back(ArgDesc(ArgDesc::Imm, reg::noreg, Type::toDataType(tag)));
+    m_args.push_back(ArgDesc(ArgDesc::Imm, InvalidReg,
+                             Type::toDataType(tag)));
     return *this;
   }
 
   ArgGroup& addr(RegNumber base, uintptr_t off) {
-    m_args.push_back(ArgDesc(ArgDesc::Addr, base, off));
+    m_args.push_back(ArgDesc(ArgDesc::Addr, PhysReg(base), off));
     return *this;
   }
 

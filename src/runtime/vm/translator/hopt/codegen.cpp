@@ -89,20 +89,20 @@ struct MoveInfo {
   enum Kind { Move, Xchg };
 
   MoveInfo(Kind kind, RegNumber reg1, RegNumber reg2):
-      m_kind(kind), m_reg1(reg1), m_reg2(reg2) {}
+      m_kind(kind), m_reg1(int(reg1)), m_reg2(int(reg2)) {}
 
   MoveInfo(Kind kind, int reg1, int reg2):
       m_kind(kind),
-      m_reg1((RegNumber)reg1),
-      m_reg2((RegNumber)reg2) {}
+      m_reg1(reg1),
+      m_reg2(reg2) {}
 
   Kind m_kind;
-  RegNumber m_reg1, m_reg2;
+  PhysReg m_reg1, m_reg2;
 };
 
 template <int N>
-void doRegMoves(int moves[N], int rTmp,
-                std::vector<MoveInfo> &howTo) {
+void doRegMoves(int (&moves)[N], int rTmp,
+                std::vector<MoveInfo>& howTo) {
   ASSERT(howTo.empty());
   int outDegree[N];
   CycleInfo cycles[N];
@@ -112,7 +112,7 @@ void doRegMoves(int moves[N], int rTmp,
     int index[N];
     for (int node = 0; node < N; ++node) {
       // If a node's source is itself, its a nop
-      if (moves[node] == node) moves[node] = LinearScan::regNameAsInt(reg::noreg);
+      if (moves[node] == node) moves[node] = int(reg::noreg);
       if (node == rTmp && moves[node] >= 0) {
         // ERROR: rTmp cannot be referenced in moves[].
         ASSERT(false);
@@ -200,9 +200,9 @@ pathloop:
   }
 }
 
-ArgDesc::ArgDesc(SSATmp* tmp, bool val) {
+ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
   if (tmp->getInstruction()->isDefConst()) {
-    m_srcReg = reg::noreg;
+    m_srcReg = InvalidReg;
     if (val) {
       m_imm = tmp->getConstValAsBits();
     } else {
@@ -212,7 +212,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) {
     return;
   }
   if (tmp->getType() == Type::Null || tmp->getType() == Type::Uninit) {
-    m_srcReg = reg::noreg;
+    m_srcReg = InvalidReg;
     if (val) {
       m_imm = 0;
     } else {
@@ -226,26 +226,26 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) {
     ASSERT(reg != reg::noreg);
     m_imm = 0;
     m_kind = Reg;
-    m_srcReg = reg;
+    m_srcReg = PhysReg(reg);
     return;
   }
-  m_srcReg = reg::noreg;
+  m_srcReg = InvalidReg;
   m_imm = Type::toDataType(tmp->getType());
   m_kind = Imm;
 }
 
-Address ArgDesc::genCode(CodeGenerator::Asm& as) const {
-  Address start = as.code.frontier;
+Address ArgDesc::genCode(CodeGenerator::Asm& a) const {
+  Address start = a.code.frontier;
   switch (m_kind) {
     case Reg:
-      as.mov_reg64_reg64(m_srcReg, m_dstReg);
+      a.    movq   (m_srcReg, m_dstReg);
       TRACE(3, "[counter] 1 reg move in ArgDesc::genCode\n");
       break;
     case Imm:
-      emitImmReg(as, m_imm, r64(m_dstReg));
+      emitImmReg(a, m_imm, m_dstReg);
       break;
     case Addr:
-      as.lea_reg64_disp_reg64(m_srcReg, m_imm, m_dstReg);
+      a.    lea    (m_srcReg + m_imm.l(), m_dstReg);
       break;
   }
   return start;
@@ -552,104 +552,20 @@ Address CodeGenerator::cgJmpNSame(IRInstruction* inst) {
   return cgJcc(inst);
 }
 
-void saveLiveOutRegs(CodeGenerator::Asm& as, int regSaveMask) {
-  if (!regSaveMask) {
-    return; // nothing to save
-  }
-  // save all live registers on the native stack
-  for (int i = 0; i < LinearScan::NumCallerSavedRegs; i++) {
-    RegNumber j = LinearScan::getCallerSavedReg(i);
-    if (regSaveMask & LinearScan::getRegMask(j)) {
-      as.push(r64(j));
-    }
-  }
-  return;
-}
-
-/*
- * return true if we pushed an extra reg to maintain 16byte stack alignment
- */
-static
-bool saveLiveOutRegsAligned(CodeGenerator::Asm& as, int regSaveMask) {
-  if (!regSaveMask) {
-    return 0; // nothing to save
-  }
-  // save all live registers on the native stack
-  int count = 0;
-  RegNumber lastSaved = reg::noreg;
-  for (int i = 0; i < LinearScan::NumCallerSavedRegs; i++) {
-    RegNumber j = LinearScan::getCallerSavedReg(i);
-    if (regSaveMask & LinearScan::getRegMask(j)) {
-      as.push(r64(j));
-      ++count; lastSaved = j;
-    }
-  }
-  bool extraPush = count & 0x1;
-  if (extraPush) {
-    as.push(r64(lastSaved));
-  }
-  return extraPush;
-}
-
-void restoreLiveOutRegs(CodeGenerator::Asm& as, int regSaveMask) {
-  if (!regSaveMask) {
-    return; // nothing to restore
-  }
-  // restore live caller-saved registers from native stack
-  for (int i = LinearScan::NumCallerSavedRegs-1; i >= 0; i--) {
-    RegNumber j = LinearScan::getCallerSavedReg(i);
-    if (regSaveMask & LinearScan::getRegMask(j)) {
-      as.pop(r64(j));
-    }
-  }
-}
-
-void restoreLiveOutRegsAligned(CodeGenerator::Asm& as,
-                               int regSaveMask,
-                               bool extraPop) {
-  if (!regSaveMask) {
-    return; // nothing to restore
-  }
-  // restore live caller-saved registers from native stack
-  for (int i = LinearScan::NumCallerSavedRegs-1; i >= 0; i--) {
-    RegNumber j = LinearScan::getCallerSavedReg(i);
-    if (regSaveMask & LinearScan::getRegMask(j)) {
-      if (extraPop) {
-        as.pop(r64(j));
-        extraPop = false;
-      }
-      as.pop(r64(j));
-    }
-  }
-}
-
-int CodeGenerator::getLiveOutRegsToSave(RegNumber dstReg) {
-  int regSaveMask =
-    LinearScan::CallerSavedRegMask & m_curInst->getLiveOutRegs();
-  // Don't include the dst register defined by this instruction
-  // when saving the caller-saved registers
-  if (dstReg != reg::noreg) {
-    regSaveMask &= ~LinearScan::getRegMask(dstReg); // subtract out dstReg
-  }
-  return regSaveMask;
-}
-
 Address CodeGenerator::cgCallHelper(Asm& a,
                                     TCA addr,
                                     RegNumber dstReg,
                                     bool doRecordSyncPoint,
                                     ArgGroup& args) {
-
-  ASSERT(int(args.size()) <= LinearScan::NumCallerSavedRegs);
+  ASSERT(int(args.size()) <= kNumRegisterArgs);
   Address start = a.code.frontier;
-  int regSaveMask = getLiveOutRegsToSave(dstReg);
-  bool extraPop = saveLiveOutRegsAligned(a, regSaveMask);
-  if (m_curInst->isNative()) {
-    int nPushes = __builtin_popcount(regSaveMask) + extraPop;
-    if (nPushes > 0) {
-      TRACE(3, "[counter] %d pushes inserted before a native\n", nPushes);
-    }
-  }
+
+  // We don't want to include the dst register defined by this
+  // instruction when saving the caller-saved registers.
+  auto const regsToSave = (m_curInst->getLiveOutRegs() & kCallerSaved)
+      .remove(PhysReg(dstReg));
+  PhysRegSaverParity<1> regSaver(a, regsToSave);
+
   // Assign registers to the arguments
   for (size_t i = 0; i < args.size(); i++) {
     args[i].setDstReg(argNumToRegName[i]);
@@ -666,18 +582,16 @@ Address CodeGenerator::cgCallHelper(Asm& a,
   memset(moves, -1, sizeof moves);
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i].getKind() == ArgDesc::Reg) {
-      moves[LinearScan::regNameAsInt(args[i].getDstReg())] =
-        LinearScan::regNameAsInt(args[i].getSrcReg());
+      moves[int(args[i].getDstReg())] = int(args[i].getSrcReg());
     }
   }
   std::vector<MoveInfo> howTo;
-  doRegMoves<LinearScan::NumRegs>(moves, LinearScan::regNameAsInt(reg::rScratch),
-                                  howTo);
+  doRegMoves(moves, int(reg::rScratch), howTo);
   for (size_t i = 0; i < howTo.size(); ++i) {
     if (howTo[i].m_kind == MoveInfo::Move) {
-      a.mov_reg64_reg64(howTo[i].m_reg1, howTo[i].m_reg2);
+      a.    movq   (howTo[i].m_reg1, howTo[i].m_reg2);
     } else {
-      a.xchg_reg64_reg64(howTo[i].m_reg1, howTo[i].m_reg2);
+      a.    xchgq  (howTo[i].m_reg1, howTo[i].m_reg2);
     }
     if (m_curTrace->isMain()) {
       if (m_curInst->isNative()) {
@@ -688,8 +602,8 @@ Address CodeGenerator::cgCallHelper(Asm& a,
   if (m_curInst->isNative()) {
     int numBetweenCaller = 0;
     for (size_t i = 0; i < howTo.size(); ++i) {
-      if (LinearScan::isCallerSavedReg(howTo[i].m_reg1) &&
-          LinearScan::isCallerSavedReg(howTo[i].m_reg2)) {
+      if (kCallerSaved.contains(howTo[i].m_reg1) &&
+          kCallerSaved.contains(howTo[i].m_reg2)) {
         ++numBetweenCaller;
       }
     }
@@ -701,7 +615,7 @@ Address CodeGenerator::cgCallHelper(Asm& a,
   // Handle const-to-register moves.
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i].getKind() == ArgDesc::Imm) {
-      a.mov_imm64_reg((int64_t)args[i].getImm(), args[i].getDstReg());
+      a.    movq   (args[i].getImm(), args[i].getDstReg());
     }
   }
 
@@ -723,7 +637,6 @@ Address CodeGenerator::cgCallHelper(Asm& a,
       }
     }
   }
-  restoreLiveOutRegsAligned(a, regSaveMask, extraPop);
   return start;
 }
 
@@ -741,7 +654,7 @@ Address CodeGenerator::cgMov(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
-  RegNumber dstReg  = dst->getAssignedLoc();
+  RegNumber dstReg = dst->getAssignedLoc();
   RegNumber srcReg = src->getAssignedLoc();
   if (dstReg != srcReg) {
     m_as.mov_reg64_reg64(srcReg, dstReg);

@@ -30,18 +30,6 @@ const Reg64 LinearScan::rScratch = reg::rScratch;
 const Reg64 LinearScan::rTlPtr = reg::r12;
 const Reg64 LinearScan::rStashedAR = reg::r15;
 
-const int LinearScan::CallerSavedRegMask  =
-                          REG_MASK(reg::rax) |
-                          REG_MASK(reg::rcx) |
-                          REG_MASK(reg::rdx) |
-                          REG_MASK(reg::rsi) |
-                          REG_MASK(reg::rdi) |
-                          REG_MASK(reg::r8)  |
-                          REG_MASK(reg::r9)  |
-                          REG_MASK(reg::r10) | // XXX:callee saved?
-                          REG_MASK(reg::r11);
-
-
 const char* LinearScan::RegNames[LinearScan::NumRegs] = {
   "rax", "rcx", "rdx",
   "rbx", // 3: rVmSP
@@ -54,12 +42,6 @@ const char* LinearScan::RegNames[LinearScan::NumRegs] = {
   "r12", // 12: TC pointer
   "r13", "r14",
   "r15" // rStashedAR
-};
-
-const RegNumber
-LinearScan::CallerSavedRegs[LinearScan::NumCallerSavedRegs] = {
-  reg::rax, reg::rcx, reg::rdx, reg::rsi, reg::rdi,
-  reg::r8,  reg::r9,  reg::r10, reg::r11
 };
 
 LinearScan::LinearScan(IRFactory* irFactory, TraceBuilder* traceBuilder) {
@@ -91,7 +73,7 @@ LinearScan::LinearScan(IRFactory* irFactory, TraceBuilder* traceBuilder) {
   }
 }
 
-uint32 LinearScan::computeLiveOutRegs(IRInstruction* inst, uint32 liveRegs) {
+RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
   uint32 instId = inst->getId();
   for (uint32 i = 0; i < inst->getNumSrcs(); i++) {
     SSATmp* src = inst->getSrc(i);
@@ -102,7 +84,8 @@ uint32 LinearScan::computeLiveOutRegs(IRInstruction* inst, uint32 liveRegs) {
         if (src->isAssignedReg(locIndex)) {
           // inst is the last use of the register assigned to this SSATmp
           // remove src reg from live regs set
-          liveRegs &= ~REG_MASK(src->getAssignedLoc(locIndex));
+          RegNumber rn = src->getAssignedLoc();
+          liveRegs.remove(PhysReg(rn));
         }
       }
     }
@@ -114,11 +97,13 @@ uint32 LinearScan::computeLiveOutRegs(IRInstruction* inst, uint32 liveRegs) {
          locIndex < dst->getNumAssignedLocs();
          locIndex++) {
       if (dst->isAssignedReg(locIndex)) {
-        liveRegs |= REG_MASK(dst->getAssignedLoc(locIndex));
+        RegNumber rn = dst->getAssignedLoc(locIndex);
+        liveRegs.add(PhysReg(rn));
       }
     }
   }
-  inst->setLiveOutRegs((uint16)liveRegs);
+
+  inst->setLiveOutRegs(liveRegs);
   return liveRegs;
 }
 
@@ -132,7 +117,7 @@ uint32 LinearScan::computeLiveOutRegs(IRInstruction* inst, uint32 liveRegs) {
  * important that this function iterates over the instruction in
  * the same order that linear scan orders the instructions.
  */
-uint32 LinearScan::computeLiveOutRegs(Trace* trace, uint32 liveOutRegs) {
+RegSet LinearScan::computeLiveOutRegs(Trace* trace, RegSet liveOutRegs) {
   for (auto* inst : trace->getInstructionList()) {
     liveOutRegs = LinearScan::computeLiveOutRegs(inst, liveOutRegs);
     if (inst->isControlFlowInstruction()) {
@@ -748,7 +733,7 @@ void LinearScan::assignRegs(Trace* trace) {
   numberInstructions(trace);
 
   // record the live out register set at each instruction
-  LinearScan::computeLiveOutRegs(trace, 0);
+  LinearScan::computeLiveOutRegs(trace);
 }
 
 void LinearScan::allocRegsToTraceAux(Trace* trace) {

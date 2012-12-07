@@ -71,12 +71,6 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::tx64;
 using Transl::rVmSp;
 using Transl::rVmFp;
 
-// from traslator-x64.h
-// The x64 C ABI.
-const RegNumber CodeGenerator::argNumToRegName[] = {
-  reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
-};
-
 void cgPunt(const char* _file, int _line, const char* _func) {
   if (RuntimeOption::EvalDumpIR) {
     std::cout << "--------- CG_PUNT " << _file <<

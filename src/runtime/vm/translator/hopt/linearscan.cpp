@@ -1186,7 +1186,7 @@ void LinearScan::PreColoringHint::clear() {
 // Provide a hint that (<tmp>, <index>) is used as the <argNum>-th arg
 // in next native.
 void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32 index, int argNum) {
-  int reg = LinearScan::regNameAsInt(CodeGenerator::argNumToRegName[argNum]);
+  int reg = LinearScan::regNameAsInt(argNumToRegName[argNum]);
   ASSERT(reg >= 0 && reg < NumRegs);
   m_preColoredTmps[reg].first = tmp;
   m_preColoredTmps[reg].second = index;

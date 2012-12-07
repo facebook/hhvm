@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _CG_H_
-#define _CG_H_
+#ifndef incl_HPHP_VM_CG_H_
+#define incl_HPHP_VM_CG_H_
 
 #include <vector>
-#include "ir.h"
+#include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/targetcache.h"
 #include <runtime/vm/translator/translator-x64.h>
 
@@ -50,8 +50,6 @@ struct ArgGroup;
 
 class CodeGenerator {
 public:
-  static const RegNumber argNumToRegName[];
-
   // typedef copied from TranslatorX64 class
   typedef Transl::X64Assembler Asm;
   CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64) :
@@ -308,6 +306,6 @@ void assignRegsForTrace(Trace* trace,
                         IRFactory* irFactory,
                         TraceBuilder* tracebuilder);
 
-}}} // HPHP::VM::JIT
+}}}
 
-#endif // _CG_H_
+#endif

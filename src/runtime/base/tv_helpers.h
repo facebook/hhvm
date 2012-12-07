@@ -61,9 +61,7 @@ inline void tvDecRefStr(TypedValue* tv) {
 
 inline void tvDecRefArr(TypedValue* tv) {
   ASSERT(tv->m_type == KindOfArray);
-  if (tv->m_data.parr->decRefCount() == 0) {
-    tv->m_data.parr->release();
-  }
+  decRefArr(tv->m_data.parr);
 }
 
 inline void tvDecRefObj(TypedValue* tv) {

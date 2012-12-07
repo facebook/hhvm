@@ -31,9 +31,7 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 void hphp_ffi_ArrayData_decRef(ArrayData *p) {
-  if (!p->decRefCount()) {
-    p->release();
-  }
+  decRefArr(p);
 }
 void hphp_ffi_StringData_decRef(StringData *p) {
   decRefStr(p);

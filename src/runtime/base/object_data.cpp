@@ -53,10 +53,7 @@ static StaticString s_serialize("serialize");
 // constructor/destructor
 
 ObjectData::~ObjectData() {
-  if (o_properties.get() && o_properties.get()->decRefCount() == 0) {
-    o_properties.get()->release();
-  }
-
+  if (ArrayData* a = o_properties.get()) decRefArr(a);
   int &pmax = *os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;

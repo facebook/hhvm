@@ -459,6 +459,11 @@ class ArrayData : public Countable {
   }
 };
 
+ALWAYS_INLINE inline
+void decRefArr(ArrayData* arr) {
+  if (arr->decRefCount() == 0) arr->release();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

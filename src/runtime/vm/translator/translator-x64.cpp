@@ -8071,18 +8071,14 @@ static inline int64 ak_exist_string_helper(StringData* key, ArrayData* arr) {
 
 static int64 ak_exist_string(StringData* key, ArrayData* arr) {
   int64 res = ak_exist_string_helper(key, arr);
-  if (arr->decRefCount() == 0) {
-    arr->release();
-  }
+  decRefArr(arr);
   decRefStr(key);
   return res;
 }
 
 static int64 ak_exist_int(int64 key, ArrayData* arr) {
   bool res = arr->exists(key);
-  if (arr->decRefCount() == 0) {
-    arr->release();
-  }
+  decRefArr(arr);
   return res;
 }
 
@@ -8092,9 +8088,7 @@ static int64 ak_exist_string_obj(StringData* key, ObjectData* obj) {
   if (obj->decRefCount() == 0) {
     obj->release();
   }
-  if (key->decRefCount() == 0) {
-    key->release();
-  }
+  decRefStr(key);
   return res;
 }
 

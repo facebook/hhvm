@@ -1759,7 +1759,7 @@ array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
   retval->incRefCount();
   // TODO: It would be great if there were nvSet() methods that didn't
   // bump up the refcount so that we didn't have to decrement it here
-  if (old->decRefCount() == 0) old->release();
+  decRefArr(old);
   if (cell) cell->m_data.parr = retval;
   return retval;
 }
@@ -1998,7 +1998,7 @@ uint64 array_issetm_i(const void* dptr, int64_t key) {
 ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
   if (!a2->empty()) {
     if (a1->empty()) {
-      if (a1->decRefCount() == 0) a1->release();
+      decRefArr(a1);
       return a2;
     }
     if (a1 != a2) {
@@ -2006,13 +2006,13 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
                                         a1->getCount() > 1);
       if (escalated) {
         escalated->incRefCount();
-        if (a2->decRefCount() == 0) a2->release();
-        if (a1->decRefCount() == 0) a1->release();
+        decRefArr(a2);
+        decRefArr(a1);
         return escalated;
       }
     }
   }
-  if (a2->decRefCount() == 0) a2->release();
+  decRefArr(a2);
   return a1;
 }
 

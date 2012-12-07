@@ -111,9 +111,7 @@ HOT_FUNC
 ArrayIter::~ArrayIter() {
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
-    if (ad && ad->decRefCount() == 0) {
-      const_cast<ArrayData*>(ad)->release();
-    }
+    if (ad) decRefArr(const_cast<ArrayData*>(ad));
     return;
   }
   ObjectData* obj = getRawObject();
@@ -303,9 +301,7 @@ MutableArrayIter::~MutableArrayIter() {
     ASSERT(m_fp.container == NULL);
   }
   // unprotect the data
-  if (m_data && m_data->decRefCount() == 0) {
-    m_data->release();
-  }
+  if (m_data) decRefArr(m_data);
 }
 
 bool MutableArrayIter::advance() {
@@ -357,9 +353,7 @@ void MutableArrayIter::escalateCheck() {
     ArrayData* esc = data->escalate(true);
     if (data != esc) {
       esc->incRefCount();
-      if (data->decRefCount() == 0) {
-        data->release();
-      }
+      decRefArr(data);
       m_data = esc;
     }
   }
@@ -379,9 +373,7 @@ ArrayData* MutableArrayIter::cowCheck() {
     if (data->getCount() > 1 && !data->noCopyOnWrite()) {
       ArrayData* copied = data->copyWithStrongIterators();
       copied->incRefCount();
-      if (data->decRefCount() == 0) {
-        data->release();
-      }
+      decRefArr(data);
       m_data = data = copied;
     }
   }

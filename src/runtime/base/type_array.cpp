@@ -77,9 +77,7 @@ Array &Array::operator=(CVarRef var) {
 HOT_FUNC
 Array &Array::operator=(const StaticArray &arr) {
   if (m_px != arr.m_px) {
-    if (m_px && m_px->decRefCount() == 0) {
-      m_px->release();
-    }
+    if (m_px) decRefArr(m_px);
     m_px = arr.m_px;
   }
   return *this;

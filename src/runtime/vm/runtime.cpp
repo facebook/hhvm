@@ -148,7 +148,7 @@ int64 new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
   }
   // We did not transfer ownership of the array to an iterator, so we need
   // to decRef the array.
-  if (arr->decRefCount() == 0) arr->release();
+  decRefArr(arr);
   return 0LL;
 }
 
@@ -625,7 +625,7 @@ int64 arr0_to_bool(ArrayData* ad) {
 int64 arr_to_bool(ArrayData* ad) {
   ASSERT(Transl::tx64->stateIsDirty());
   int64 retval = arr0_to_bool(ad);
-  if (ad->decRefCount() == 0) ad->release();
+  decRefArr(ad);
   return retval;
 }
 

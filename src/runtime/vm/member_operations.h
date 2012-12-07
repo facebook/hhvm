@@ -564,9 +564,7 @@ static inline void SetElemArray(TypedValue* base, TypedValue* key,
 
   if (newData != NULL && newData != a) {
     newData->incRefCount();
-    if (a->decRefCount() == 0) {
-      a->release();
-    }
+    decRefArr(a);
     base->m_data.parr = newData;
   }
 }

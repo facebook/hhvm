@@ -3536,7 +3536,7 @@ void Variant::setEvalScalar() const {
     ArrayData *parr = m_data.parr;
     if (!parr->isStatic()) {
       ArrayData *ad = ArrayData::GetScalarArray(parr);
-      if (parr->decRefCount() == 0) parr->release();
+      decRefArr(parr);
       m_data.parr = ad;
       ASSERT(m_data.parr->isStatic());
     }

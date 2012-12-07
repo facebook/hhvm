@@ -47,16 +47,19 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
         ConditionCode cc) {
   bool havecc = cc != CC_None;
   uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
+
   TCA jcc = NULL;
   if (havecc) {
     jcc = a.code.frontier;
-    a.  jcc8(ccNegate(cc), jcc);
+    a.  jcc8  (ccNegate(cc), jcc);
   }
-  a.    pushf();
-  emitImmReg(a, virtualAddress, reg::rScratch);
+  a.    pushf ();
+  a.    push  (reg::rScratch);
+  a.    movq  (virtualAddress, reg::rScratch);
   a.    fs();
-  a.    add_imm64_disp_reg64(n, 0, reg::rScratch);
-  a.    popf();
+  a.    addq  (n, *reg::rScratch);
+  a.    pop   (reg::rScratch);
+  a.    popf  ();
   if (havecc) {
     a.  patchJcc8(jcc, a.code.frontier);
   }

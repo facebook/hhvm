@@ -47,6 +47,7 @@ typedef __sighandler_t *sighandler_t;
 #include <util/rank.h>
 #include <util/timer.h>
 #include <util/maphuge.h>
+#include <util/asm-x64.h>
 
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/php_debug.h>
@@ -64,7 +65,6 @@ typedef __sighandler_t *sighandler_t;
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/translator/translator-x64.h>
-#include <util/asm-x64.h>
 #include <runtime/vm/translator/srcdb.h>
 #include <runtime/vm/translator/x64-util.h>
 #include <runtime/vm/translator/unwind-x64.h>
@@ -1064,17 +1064,18 @@ void TranslatorX64::emitDecRefGeneric(const NormalizedInstruction& i,
 void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
   SpaceRecorder sr("_DecRefGeneric", a);
 
+  ASSERT(rData != rScratch && rType != rScratch);
+
   auto body = [&](X64Assembler& a){
-    // Calling convention: m_data in rdi, m_type in r10.  (See
-    // emitGenericDecRefHelpers.)
-    ASSERT(rData != rScratch && rType != rScratch);
+    // Calling convention: m_data in rdi, m_type in r10 (rScratch).
+    // (See emitGenericDecRefHelpers.)
     ASSERT(!kAllRegs.contains(rScratch));
-    a.    mov_reg32_reg32(rType, rScratch);
+    a.    movl   (r32(rType), r32(rScratch));
     callUnaryReentrantStub(a, *m_curNI, m_dtorGenericStubRegs, rData);
   };
 
   Op op = m_curNI->op();
-  a.   cmp_imm32_reg32(KindOfRefCountThreshold, rType);
+  a.    cmpl   (KindOfRefCountThreshold, r32(rType));
   if (op == OpSetM || op == OpContSend || op == OpSetG) {
     // Semi-likely cases
     semiLikelyIfBlock(CC_A, a, std::bind(body, std::ref(a)));
@@ -1116,9 +1117,9 @@ static void lookupDestructor(X64Assembler& a,
                 (KindOfRef           >> kShiftDataTypeToDestrIndex == 3),
                 "lookup of destructors depends on KindOf* values");
 
-  a.    shrl(kShiftDataTypeToDestrIndex, r32(typeReg));
-  a.    movq(&g_destructors, scratch);
-  a.    loadq(scratch[typeReg*8], scratch);
+  a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
+  a.    movq   (&g_destructors, scratch);
+  a.    loadq  (scratch[typeReg*8], scratch);
 }
 
 static void callDestructor(X64Assembler& a,
@@ -1142,8 +1143,8 @@ void TranslatorX64::emitGenericDecRefHelpers() {
   // m_dtorGenericStub just takes a pointer to the TypedValue in rdi.
   moveToAlign(a, kNonFallthroughAlign);
   m_dtorGenericStub = a.code.frontier;
-  a.    load_reg64_disp_reg32(rdi, TVOFF(m_type), rScratch);
-  a.    load_reg64_disp_reg64(rdi, TVOFF(m_data), rdi);
+  a.    loadl  (rdi[TVOFF(m_type)], r32(rScratch));
+  a.    loadq  (rdi[TVOFF(m_data)], rdi);
   // Fall through to the regs stub.
 
   /*
@@ -1154,12 +1155,12 @@ void TranslatorX64::emitGenericDecRefHelpers() {
    * possible to share the code for both decref helpers.
    */
   m_dtorGenericStubRegs = a.code.frontier;
-  a.    cmp_imm32_disp_reg32(RefCountStaticValue, TVOFF(_count), rdi);
+  a.    cmpl   (RefCountStaticValue, rdi[TVOFF(_count)]);
   jccBlock<CC_Z>(a, [&] {
-    a.  sub_imm32_disp_reg32(1, TVOFF(_count), rdi);
+    a.  subl   (1, rdi[TVOFF(_count)]);
     release.jcc8(a, CC_Z);
   });
-  a.    ret();
+  a.    ret    ();
 
 asm_label(a, release);
   {
@@ -1167,7 +1168,7 @@ asm_label(a, release);
     callDestructor(a, rScratch, rax);
     recordIndirectFixup(a.code.frontier, prs.rspAdjustment());
   }
-  a.    ret();
+  a.    ret    ();
 
   TRACE(1, "STUB total dtor generic stubs %zu bytes\n",
         size_t(a.code.frontier - m_dtorGenericStub));
@@ -8447,7 +8448,9 @@ TranslatorX64::translateReqSrc(const Tracelet& t,
 
 TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
-  if (!atrampolines.code.canEmit(m_trampolineSize)) {
+  auto& a = atrampolines;
+
+  if (!a.code.canEmit(m_trampolineSize)) {
     // not enough space to emit a trampoline, so just return the
     // helper address and emitCall will the emit the right sequence
     // to call it indirectly
@@ -8456,9 +8459,9 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
     return helperAddr;
   }
   uint32_t index = m_numNativeTrampolines++;
-  TCA trampAddr = atrampolines.code.frontier;
+  TCA trampAddr = a.code.frontier;
   if (Stats::enabled()) {
-    Stats::emitInc(atrampolines, &Stats::tl_helper_counters[0], index);
+    Stats::emitInc(a, &Stats::tl_helper_counters[0], index);
     char* name = Util::getNativeFunctionName(helperAddr);
     const size_t limit = 50;
     if (strlen(name) > limit) {
@@ -8466,15 +8469,27 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
     }
     Stats::helperNames[index] = name;
   }
-  atrampolines.mov_imm64_reg((int64_t)helperAddr, rScratch);
-  atrampolines.jmp(rScratch);
-  atrampolines.ud2();
+
+  /*
+   * For stubs that take arguments in rScratch, we need to make sure
+   * we're not damaging its contents here.  (If !jmpDeltaFits, the jmp
+   * opcode will need to movabs the address into rScratch before
+   * jumping.)
+   */
+  auto UNUSED stubUsingRScratch = [&](TCA tca) {
+    return tca == m_dtorGenericStubRegs;
+  };
+
+  ASSERT(IMPLIES(stubUsingRScratch(helperAddr), a.jmpDeltaFits(helperAddr)));
+  a.    jmp    (helperAddr);
+  a.    ud2    ();
+
   trampolineMap[helperAddr] = trampAddr;
   if (m_trampolineSize == 0) {
-    m_trampolineSize = atrampolines.code.frontier - trampAddr;
+    m_trampolineSize = a.code.frontier - trampAddr;
     ASSERT(m_trampolineSize >= kMinPerTrampolineSize);
   }
-  recordBCInstr(OpNativeTrampoline, atrampolines, trampAddr);
+  recordBCInstr(OpNativeTrampoline, a, trampAddr);
   return trampAddr;
 }
 
@@ -8489,6 +8504,7 @@ TranslatorX64::getNativeTrampoline(TCA helperAddr) {
   }
   return emitNativeTrampoline(helperAddr);
 }
+
 void TranslatorX64::analyzeDefCls(Tracelet& t,
                                   NormalizedInstruction& i) {
   i.m_txFlags = Supported;

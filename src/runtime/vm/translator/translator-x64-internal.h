@@ -130,8 +130,7 @@ struct Call {
       a.    call (TCA(m_fptr));
     } else {
       a.    loadq  (*rdi, scratch);
-      a.    loadq  (scratch[m_offset], scratch);
-      a.    call   (scratch);
+      a.    call   (scratch[m_offset]);
     }
   }
 };

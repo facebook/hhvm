@@ -190,6 +190,7 @@ private:
                               SSATmp* toSmash);
   Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
                               SSATmp* toSmash);
+  Address emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurrFunc();
   void recordSyncPoint(Asm& as);
   Address getDtor(DataType type);

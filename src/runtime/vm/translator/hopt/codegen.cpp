@@ -1641,7 +1641,9 @@ void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a,
                                  PhysReg retAddrReg) {
   a.    push   (retAddrReg);
   // call to a trace function
-  a.    movq   (retAddrReg, rdx);
+  if (retAddrReg != rdx) {
+    a.  movq   (retAddrReg, rdx);
+  }
   a.    movq   (rVmFp, rdi);
   a.    movq   (rVmSp, rsi);
   // do the call; may use a trampoline
@@ -4227,6 +4229,34 @@ Address CodeGenerator::cgFillContThis(IRInstruction* inst) {
   m_as.patchJcc8(jmp, m_as.code.frontier);
 
   return start;
+}
+
+Address CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
+  Address start = m_as.code.frontier;
+  auto scratch = rScratch;
+
+  m_as.  loadq (fp->getReg()[AROFF(m_varEnv)], scratch);
+  m_as.  testq (scratch, scratch);
+  m_as.  jnz   (m_astubs.code.frontier);
+  {
+    cgCallHelper(m_astubs, helper, InvalidReg, kNoSyncPoint,
+                 ArgGroup().ssa(fp));
+    m_astubs.jmp(m_as.code.frontier);
+  }
+
+  return start;
+}
+
+Address CodeGenerator::cgUnlinkContVarEnv(IRInstruction* inst) {
+  return emitContVarEnvHelperCall(
+    inst->getSrc(0),
+    (TCA)VMExecutionContext::packContVarEnvLinkage);
+}
+
+Address CodeGenerator::cgLinkContVarEnv(IRInstruction* inst) {
+  return emitContVarEnvHelperCall(
+    inst->getSrc(0),
+    (TCA)VMExecutionContext::unpackContVarEnvLinkage);
 }
 
 Address CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {

@@ -650,17 +650,17 @@ void TranslatorX64::irTranslateContEnter(const Tracelet& t,
 
 void TranslatorX64::irTranslateContExit(const Tracelet& t,
                                         const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(ContExit);
+  HHIR_EMIT(ContExit);
 }
 
 void TranslatorX64::irTranslateUnpackCont(const Tracelet& t,
                                           const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(UnpackCont);
+  HHIR_EMIT(UnpackCont);
 }
 
 void TranslatorX64::irTranslatePackCont(const Tracelet& t,
                                         const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(PackCont);
+  HHIR_EMIT(PackCont, i.imm[0].u_IVA);
 }
 
 void TranslatorX64::irTranslateContReceive(const Tracelet& t,

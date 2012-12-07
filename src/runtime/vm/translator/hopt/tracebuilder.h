@@ -195,6 +195,8 @@ public:
   void    genFillContLocals(const Func* origFunc, const Func* genFunc,
                             SSATmp* cont);
   void    genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset);
+  void    genUnlinkContVarEnv();
+  void    genLinkContVarEnv();
   Trace*  genContRaiseCheck(SSATmp* cont, Trace* target);
   Trace*  genContPreNext(SSATmp* cont, Trace* target);
   Trace*  genContStartedCheck(SSATmp* cont, Trace* target);

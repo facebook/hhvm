@@ -1452,6 +1452,14 @@ void TraceBuilder::genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset) {
                  cont, locals, genDefConst(offset));
 }
 
+void TraceBuilder::genUnlinkContVarEnv() {
+  genInstruction(UnlinkContVarEnv, Type::None, m_fpValue, (Trace*)NULL);
+}
+
+void TraceBuilder::genLinkContVarEnv() {
+  genInstruction(LinkContVarEnv, Type::None, m_fpValue, (Trace*)NULL);
+}
+
 Trace* TraceBuilder::genContRaiseCheck(SSATmp* cont, Trace* target) {
   ASSERT(target);
   genInstruction(ContRaiseCheck, Type::None, cont, target);

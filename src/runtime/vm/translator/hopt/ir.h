@@ -282,6 +282,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   OPC(CreateCont,        1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
   OPC(FillContLocals,    0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
   OPC(FillContThis,      0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
+  OPC(UnlinkContVarEnv,  0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
+  OPC(LinkContVarEnv,    0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
   OPC(ContRaiseCheck,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ContPreNext,       0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(ContStartedCheck,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \

@@ -273,8 +273,9 @@ public:
   // continuations
   SSATmp* getContLocals(SSATmp* cont);
   void emitCreateCont(bool getArgs, Id funNameStrId);
+  void emitContExit();
   void emitUnpackCont();
-  void emitPackCont(int32 labelId);
+  void emitPackCont(int64 labelId);
   void emitContReceive();
   void emitContRaised();
   void emitContDone();

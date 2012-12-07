@@ -576,6 +576,31 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   push(cont);
 }
 
+void HhbcTranslator::emitContExit() {
+  SSATmp* retAddr = m_tb.genLdRetAddr();
+  // Despite the name, this doesn't actually free the AR; it updates the
+  // hardware fp and returns the old one
+  SSATmp* fp = m_tb.genFreeActRec();
+  // Adjust the hardware sp before leaving
+  SSATmp* sp = m_tb.genLdStackAddr(m_stackDeficit);
+  m_tb.genRetCtrl(sp, fp, retAddr);
+
+  m_hasRet = true;
+}
+
+void HhbcTranslator::emitUnpackCont() {
+  m_tb.genLinkContVarEnv();
+  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
+  push(m_tb.genLdRaw(cont, RawMemSlot::ContLabel, Type::Int));
+}
+
+void HhbcTranslator::emitPackCont(int64 labelId) {
+  m_tb.genUnlinkContVarEnv();
+  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
+  m_tb.genSetPropCell(cont, CONTOFF(m_value), popC());
+  m_tb.genStRaw(cont, RawMemSlot::ContLabel, m_tb.genDefConst<int64>(labelId));
+}
+
 void HhbcTranslator::emitContReceive() {
   SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
   m_tb.genContRaiseCheck(cont, getExitSlowTrace());

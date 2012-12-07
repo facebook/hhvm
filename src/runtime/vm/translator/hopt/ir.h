@@ -1122,6 +1122,8 @@ private:
     m_assignedLoc[0] = m_assignedLoc[1] = Transl::reg::noreg;
     m_analysis = -1;
   }
+  SSATmp(const SSATmp&);
+  SSATmp& operator=(const SSATmp&);
 
   IRInstruction*  m_inst;
   const uint32    m_id;

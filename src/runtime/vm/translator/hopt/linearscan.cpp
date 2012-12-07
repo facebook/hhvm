@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "linearscan.h"
+#include "runtime/vm/translator/hopt/linearscan.h"
 
 namespace HPHP {
 namespace VM {
@@ -701,7 +701,7 @@ void LinearScan::preAllocSpillLocAux(Trace* trace, uint32 numSpillLocs) {
   }
 }
 
-void LinearScan::allocRegsToTrace(Trace* trace) {
+void LinearScan::assignRegs(Trace* trace) {
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
     coalesce(trace);
@@ -960,18 +960,17 @@ LinearScan::RegState* LinearScan::getReg(RegState* reg) {
   return reg;
 }
 
-static bool isUnpinned(LinearScan::RegState* reg) { return !reg->isPinned(); }
-
 LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
   if (m_freeCallerSaved.empty() && m_freeCalleeSaved.empty()) {
     // no free registers --> free the first register in the allocatedRegs
     // list; this register is the one whose last use is the most distant
     ASSERT(!m_allocatedRegs.empty());
+
     // Pick the first register in <m_allocatedRegs> that is not used
     // for any source operand in the current instruction.
-    std::list<RegState*>::iterator pos = std::find_if(m_allocatedRegs.begin(),
-                                                      m_allocatedRegs.end(),
-                                                      isUnpinned);
+    auto isUnpinned = [&] (RegState* reg) { return !reg->isPinned(); };
+    auto pos = std::find_if(m_allocatedRegs.begin(), m_allocatedRegs.end(),
+                            isUnpinned);
     if (pos == m_allocatedRegs.end()) {
       PUNT(RegSpill);
     }
@@ -1172,5 +1171,14 @@ void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32 index, int argNum) {
   m_preColoredTmps[reg].first = tmp;
   m_preColoredTmps[reg].second = index;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+void assignRegsForTrace(Trace* trace,
+                        IRFactory* irFactory,
+                        TraceBuilder* traceBuilder) {
+  LinearScan(irFactory, traceBuilder).assignRegs(trace);
+}
+
 
 }}} // HPHP::VM::JIT

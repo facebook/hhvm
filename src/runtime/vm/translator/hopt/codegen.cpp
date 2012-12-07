@@ -4435,13 +4435,6 @@ void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
   }
 }
 
-void assignRegsForTrace(Trace* trace,
-                        IRFactory* irFactory,
-                        TraceBuilder* traceBuilder) {
-  LinearScan ls(irFactory, traceBuilder);
-  ls.allocRegsToTrace(trace);
-}
-
 void genCodeForTrace(Trace* trace,
                      CodeGenerator::Asm& as,
                      CodeGenerator::Asm& astubs,

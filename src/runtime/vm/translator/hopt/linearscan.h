@@ -14,20 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _LINEAR_SCAN_H_
-#define _LINEAR_SCAN_H_
+#ifndef incl_HPHP_VM_LINEAR_SCAN_H_
+#define incl_HPHP_VM_LINEAR_SCAN_H_
+
+#include <boost/noncopyable.hpp>
 
 #include "runtime/vm/translator/abi-x64.h"
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 #include "runtime/vm/translator/hopt/codegen.h"
 
-namespace HPHP {
-namespace VM {
-namespace JIT {
+namespace HPHP { namespace VM { namespace JIT {
 
-class LinearScan {
-public:
+struct LinearScan : private boost::noncopyable {
   // TODO: remove these in favor of using the abi-x64.h constants.
   const static RegNumber noReg;
   const static Reg64 rVmSP;
@@ -50,6 +49,12 @@ public:
   static_assert(kReservedRSPScratchSpace == NumPreAllocatedSpillLocs * 8,
                 "kReservedRSPScratchSpace changes require updates in "
                 "LinearScan");
+
+
+  LinearScan(IRFactory* irFactory, TraceBuilder* traceBuilder);
+  void assignRegs(Trace*);
+
+  static void printLoc(std::ostream& os, int loc); // XXX
 
   // HHIR:TODO ideally wouldn't need to use ints, but very helpful for bit ops
   static int regNameAsInt(RegNumber r) { return (int)r; }
@@ -81,6 +86,7 @@ public:
     return REG_MASK(LinearScan::regNameAsInt(regNo));
   }
 
+private:
   class RegState {
     friend class LinearScan;
 
@@ -131,19 +137,16 @@ public:
     std::pair<SSATmp*, uint32> m_preColoredTmps[LinearScan::NumRegs];
   };
 
-  LinearScan(IRFactory *irFactory, TraceBuilder* traceBuilder);
-  void allocRegsToTrace(Trace* trace);
+private:
   void allocRegToInstruction(Trace* trace,
                              IRInstruction::Iterator it);
   void allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index);
   void allocRegToTmp(SSATmp* ssaTmp, uint32_t index);
   void freeRegsAtId(uint32_t id);
   void spill(SSATmp* tmp);
-  static void printLoc(std::ostream& os, int loc);
   static uint32 computeLiveOutRegs(Trace* trace, uint32 liveOutRegs);
   static uint32 computeLiveOutRegs(IRInstruction* inst, uint32 liveRegs);
 
-private:
   void initFreeList();
   void coalesce(Trace* trace);
   void coalesceAux(Trace* trace);
@@ -173,14 +176,15 @@ private:
   IRInstruction* getNextNative() const;
   uint32 getNextNativeId() const;
 
-  static const RegNumber CallerSavedRegs[];
-  static const char* RegNames[NumRegs];
-
   void pushFreeReg(RegState* reg);
   RegState* popFreeReg(std::list<RegState*>& freeList);
   void freeReg(RegState* reg);
   RegState* getFreeReg(bool preferCallerSaved);
   RegState* getReg(RegState* reg);
+
+private:
+  static const RegNumber CallerSavedRegs[];
+  static const char* RegNames[NumRegs];
 
   // Register allocation may generate Spill/Reload.
   IRFactory* m_irFactory;
@@ -197,6 +201,15 @@ private:
   PreColoringHint m_preColoringHint;
 };
 
-}}} // HPHP::VM::JIT
+/*
+ * The main entry point for register allocation.  Called prior to code
+ * generation.
+ */
+void assignRegsForTrace(Trace* trace,
+                        IRFactory* irFactory,
+                        TraceBuilder* tracebuilder);
 
-#endif // _LINEAR_SCAN_H_
+
+}}}
+
+#endif

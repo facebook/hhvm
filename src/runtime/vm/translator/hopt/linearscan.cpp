@@ -133,12 +133,7 @@ uint32 LinearScan::computeLiveOutRegs(IRInstruction* inst, uint32 liveRegs) {
  * the same order that linear scan orders the instructions.
  */
 uint32 LinearScan::computeLiveOutRegs(Trace* trace, uint32 liveOutRegs) {
-  IRInstruction::Iterator it;
-  IRInstruction::List& instructionList = trace->getInstructionList();
-  for (it = instructionList.begin();
-       it != instructionList.end();
-       it++) {
-    IRInstruction* inst = *it;
+  for (auto* inst : trace->getInstructionList()) {
     liveOutRegs = LinearScan::computeLiveOutRegs(inst, liveOutRegs);
     if (inst->isControlFlowInstruction()) {
       // follow control flow edges to the exit blocks in the same order
@@ -659,11 +654,7 @@ void LinearScan::coalesce(Trace* trace) {
 }
 
 void LinearScan::coalesceAux(Trace* trace) {
-  IRInstruction::List& instList = trace->getInstructionList();
-  for (IRInstruction::Iterator it = instList.begin();
-       it != instList.end();
-       ++it) {
-    IRInstruction* inst = *it;
+  for (auto* inst : trace->getInstructionList()) {
     for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
       SSATmp* src = inst->getSrc(i);
       SSATmp* origSrc = canonicalize(src);
@@ -722,7 +713,7 @@ void LinearScan::preAllocSpillLocAux(Trace* trace, uint32 numSpillLocs) {
 
 void LinearScan::allocRegsToTrace(Trace* trace) {
   if (RuntimeOption::EvalHHIREnableCoalescing) {
-    // <coalesc> doesn't need instruction numbering.
+    // <coalesce> doesn't need instruction numbering.
     coalesce(trace);
   }
 

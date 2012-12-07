@@ -1083,14 +1083,14 @@ public:
   bool              isAssignedReg(uint32 index) const;
   bool              isAssignedMmxReg(uint32 index) const;
   bool              isAssignedSpillLoc(uint32 index) const;
-  RegNumber   getAssignedLoc() { return m_assignedLoc[0]; }
-  RegNumber   getAssignedLoc(uint32 index);
+  RegNumber         getAssignedLoc() { return m_assignedLoc[0]; }
+  RegNumber         getAssignedLoc(uint32 index);
   void              setAssignedLoc(RegNumber loc, uint32 index) {
     m_assignedLoc[index] = loc;
   }
   uint32            getSpillLoc(uint32 index) const;
   void              setSpillLoc(uint32 spillLoc, uint32 index);
-  RegNumber   getMmxReg(uint32 index) const;
+  RegNumber         getMmxReg(uint32 index) const;
   void              setMmxReg(RegNumber mmxReg, uint32 index);
   bool              isConst() const { return m_inst->isConstInstruction(); }
   bool              getConstValAsBool();

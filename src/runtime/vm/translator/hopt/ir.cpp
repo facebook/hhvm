@@ -1062,12 +1062,7 @@ void resetIds(Trace* trace) {
 uint32 numberInstructions(Trace* trace,
                           uint32 nextId,
                           bool followControlFlow) {
-  IRInstruction::Iterator it;
-  IRInstruction::List instructionList = trace->getInstructionList();
-  for (it = instructionList.begin();
-       it != instructionList.end();
-       it++) {
-    IRInstruction* inst = *it;
+  for (auto* inst : trace->getInstructionList()) {
     if (SSATmp* dst = inst->getDst()) {
       // Initialize this value for register spilling.
       dst->setAnalysisValue(-1);
@@ -1104,7 +1099,7 @@ uint32 numberInstructions(Trace* trace,
  * because numbering never visited it.
  */
 bool labelIsUnreachable(const Trace* trace) {
-    return trace->getLabel()->getId() == 0;
+  return trace->getLabel()->getId() == 0;
 }
 
 /*

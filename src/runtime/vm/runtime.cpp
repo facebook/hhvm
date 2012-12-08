@@ -282,7 +282,7 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
     }
     // We did not transfer ownership of the object to an iterator, so we need
     // to decRef the object.
-    if (obj->decRefCount() == 0) obj->release();
+    decRefObj(obj);
   }
   if (!dest->arr().end()) {
     dest->m_itype = itType;

@@ -873,11 +873,8 @@ Class::PropInitVec* Class::initPropsImpl() const {
   // Free the args array.  propArr is allocated on the stack so it
   // better be only referenced from args.
   ASSERT(propArr.getCount() == 1);
-  if (args->decRefCount() == 0) {
-    args->release();
-  } else {
-    ASSERT(false);
-  }
+  ASSERT(args->getCount() == 1);
+  decRefArr(args);
   return propVec;
 }
 

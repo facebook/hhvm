@@ -639,6 +639,10 @@ private:
   ObjectData *m_o;
 };
 
+ALWAYS_INLINE inline void decRefObj(ObjectData* obj) {
+  if (obj->decRefCount() == 0) obj->release();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

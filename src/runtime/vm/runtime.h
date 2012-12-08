@@ -126,9 +126,7 @@ frame_free_locals_inl(ActRec* fp, int numLocals) {
     // the m_this field from the ActRec, so we need to zero it to
     // ensure they can't access a free'd object.
     fp->setThis(NULL);
-    if (UNLIKELY(this_->decRefCount() == 0)) {
-      this_->release();
-    }
+    decRefObj(this_);
   }
   frame_free_locals_helper_inl(fp, numLocals);
   EventHook::FunctionExit(fp);

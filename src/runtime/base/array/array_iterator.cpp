@@ -116,9 +116,7 @@ ArrayIter::~ArrayIter() {
   }
   ObjectData* obj = getRawObject();
   ASSERT(obj);
-  if (obj->decRefCount() == 0) {
-    const_cast<ObjectData*>(obj)->release();
-  }
+  decRefObj(obj);
 }
 
 bool ArrayIter::endHelper() {
@@ -393,9 +391,7 @@ MIterCtx::~MIterCtx() {
   smart_free(m_mArray);
   tvRefcountedDecRef(&m_key);
   tvRefcountedDecRef(&m_val);
-  if (m_ref && m_ref->decRefCount() == 0) {
-    const_cast<RefData*>(m_ref)->release();
-  }
+  if (m_ref) decRefRef(const_cast<RefData*>(m_ref));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

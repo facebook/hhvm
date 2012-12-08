@@ -6120,9 +6120,7 @@ static int64 switchStringHelper(StringData* s, int64 base, int64 nTargets) {
 
 static int64 switchObjHelper(ObjectData* o, int64 base, int64 nTargets) {
   int64 ival = o->o_toInt64();
-  if (o->decRefCount() == 0) {
-    o->release();
-  }
+  decRefObj(o);
   return switchBoundsCheck(ival, base, nTargets);
 }
 
@@ -7526,9 +7524,7 @@ static int64 classExistsSlow(const StringData* name, bool autoload,
                              Attr typeAttr) {
   bool ret = Unit::classExists(name, autoload, typeAttr);
   // XXX: do we need to decref this during an exception?
-  if (name->decRefCount() == 0) {
-    const_cast<StringData*>(name)->release();
-  }
+  decRefStr(const_cast<StringData*>(name));
   return ret;
 }
 
@@ -8092,9 +8088,7 @@ static int64 ak_exist_int(int64 key, ArrayData* arr) {
 static int64 ak_exist_string_obj(StringData* key, ObjectData* obj) {
   CArrRef arr = obj->o_toArray();
   int64 res = ak_exist_string_helper(key, arr.get());
-  if (obj->decRefCount() == 0) {
-    obj->release();
-  }
+  decRefObj(obj);
   decRefStr(key);
   return res;
 }
@@ -8102,9 +8096,7 @@ static int64 ak_exist_string_obj(StringData* key, ObjectData* obj) {
 static int64 ak_exist_int_obj(int64 key, ObjectData* obj) {
   CArrRef arr = obj->o_toArray();
   bool res = arr.get()->exists(key);
-  if (obj->decRefCount() == 0) {
-    obj->release();
-  }
+  decRefObj(obj);
   return res;
 }
 

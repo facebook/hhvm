@@ -498,10 +498,7 @@ static void methodCacheSlowPath(MethodCache::Pair* mce,
   ar->m_func = func;
 
   if (UNLIKELY(isStatic)) {
-    auto* obj = ar->getThis();
-    if (obj->decRefCount() == 0) {
-      obj->release();
-    }
+    decRefObj(ar->getThis());
     if (debug) ar->setThis(NULL); // suppress ASSERT in setClass
     ar->setClass(cls);
   }
@@ -921,8 +918,8 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
   if (decRefBase) {
     if (refToFree) {
       tvDecRefRefInternal(refToFree);
-    } else if (base->decRefCount() == 0) {
-      base->release();
+    } else {
+      decRefObj(base);
     }
   }
 }
@@ -969,9 +966,7 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
     }
   }
 
-  if (decRefBase && base->decRefCount() == 0) {
-    base->release();
-  }
+  if (decRefBase) decRefObj(base);
 }
 
 /*

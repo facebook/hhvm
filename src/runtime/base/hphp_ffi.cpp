@@ -37,9 +37,7 @@ void hphp_ffi_StringData_decRef(StringData *p) {
   decRefStr(p);
 }
 void hphp_ffi_ObjectData_decRef(ObjectData *p) {
-  if (!p->decRefCount()) {
-    p->release();
-  }
+  decRefObj(p);
 }
 int hphp_ffi_exportVariant(CVarRef v, void** result) {
   switch (v.getType()) {

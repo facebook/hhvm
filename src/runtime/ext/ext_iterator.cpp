@@ -68,12 +68,6 @@ get_directoryiterator(CObjRef obj) {
   return rsrc.getTyped<DirectoryIterator>();
 }
 
-static void decRefObj(ObjectData* obj) {
-  if (obj->decRefCount() == 0) {
-    obj->release();
-  }
-}
-
 DirectoryIterator::DirectoryIterator(CStrRef path) :
   m_path(path), m_index(0) {
   Variant dir = f_opendir(m_path);

@@ -6541,9 +6541,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
         tvVal.m_data.parr = va;
         tvVal.m_type = KindOfArray;
 
-        if (a->decRefCount() == 0) {
-          a->release();
-        }
+        decRefArr(a);
         break;
       }
       // Fall through

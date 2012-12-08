@@ -5449,9 +5449,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
   if (origObj) {
     if (func->attrs() & AttrStatic) {
       ar->setClass(origObj->getVMClass());
-      if (origObj->decRefCount() == 0) {
-        origObj->release();
-      }
+      decRefObj(origObj);
     } else {
       ar->setThis(origObj);
       // Teleport the reference from the destroyed stack cell to the
@@ -5492,7 +5490,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
   arSetSfp(ar, m_fp); \
   ar->m_func = f; \
   if (res == MethodFoundNoThis) { \
-    if (obj->decRefCount() == 0) obj->release(); \
+    decRefObj(obj); \
     ar->setClass(cls); \
   } else { \
     ASSERT(res == MethodFoundWithThis || res == MagicCallFound); \

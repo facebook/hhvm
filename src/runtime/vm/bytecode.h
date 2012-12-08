@@ -570,12 +570,7 @@ public:
   inline void ALWAYS_INLINE popAR() {
     ASSERT(m_top != m_base);
     ActRec* ar = (ActRec*)m_top;
-    if (ar->hasThis()) {
-      ObjectData* this_ = ar->getThis();
-      if (this_->decRefCount() == 0) {
-        this_->release();
-      }
-    }
+    if (ar->hasThis()) decRefObj(ar->getThis());
     if (ar->hasInvName()) decRefStr(ar->getInvName());
 
     // This should only be used on a pre-live ActRec.

@@ -69,6 +69,10 @@ private:
   };
 };
 
+ALWAYS_INLINE inline void decRefRef(RefData* ref) {
+  if (ref->decRefCount() == 0) ref->release();
+}
+
 } // namespace HPHP
 
 #endif //__HPHP_REF_DATA_H

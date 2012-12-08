@@ -66,9 +66,7 @@ inline void tvDecRefArr(TypedValue* tv) {
 
 inline void tvDecRefObj(TypedValue* tv) {
   ASSERT(tv->m_type == KindOfObject);
-  if (tv->m_data.pobj->decRefCount() == 0) {
-    tv->m_data.pobj->release();
-  }
+  decRefObj(tv->m_data.pobj);
 }
 
 // Assumes 'r' is live and points to a RefData
@@ -76,9 +74,7 @@ inline void tvDecRefRefInternal(RefData* r) {
   ASSERT(tvIsPlausible(r->tv()));
   ASSERT(r->tv()->m_type != KindOfRef);
   ASSERT(r->_count > 0);
-  if (r->decRefCount() == 0) {
-    r->release();
-  }
+  decRefRef(r);
 }
 
 // Assumes 'tv' is live

@@ -11304,12 +11304,6 @@ asm_label(a, loopHead);
            size_t(a.code.frontier - m_freeManyLocalsHelper));
 }
 
-static const size_t kASize = 512 << 20;
-static const size_t kAStubsSize = 512 << 20;
-static const size_t kGDataSize = kASize / 4;
-static const size_t kTotalSize = kASize + kAStubsSize +
-                                         kTrampolinesBlockSize + kGDataSize;
-
 TranslatorX64::TranslatorX64()
 : Translator(),
   m_numNativeTrampolines(0),
@@ -11335,12 +11329,27 @@ TranslatorX64::TranslatorX64()
   m_curFunc(NULL),
   m_vecState(NULL)
 {
+  const size_t kASize = RuntimeOption::VMTranslASize;
+  const size_t kAStubsSize = RuntimeOption::VMTranslAStubsSize;
+  const size_t kGDataSize = RuntimeOption::VMTranslGDataSize;
+  m_totalSize = kASize + kAStubsSize + kTrampolinesBlockSize + kGDataSize;
+
   TRACE(1, "TranslatorX64@%p startup\n", this);
   tx64 = this;
 
-  static_assert(kTotalSize < (2ul << 30),
-                "Combined size of all code/data blocks in TranslatorX64 "
-                "must be < 2GiB to support 32-bit relative addresses");
+  if ((kASize < (10 << 20)) ||
+      (kAStubsSize < (10 << 20)) ||
+      (kGDataSize < (2 << 20))) {
+    fprintf(stderr, "Allocation sizes ASize, AStubsSize, and GlobalDataSize "
+                    "are too small.\n");
+    exit(1);
+  }
+
+  if (m_totalSize > (2ul << 30)) {
+    fprintf(stderr,"Combined size of ASize, AStubSize, and GlobalDataSize "
+                   "must be < 2GiB to support 32-bit relative addresses\n");
+    exit(1);
+  }
 
   static bool profileUp = false;
   if (!profileUp) {
@@ -11357,7 +11366,7 @@ TranslatorX64::TranslatorX64()
   // the need for trampolines, and get to use shorter
   // instructions for tc addresses.
   static const size_t kRoundUp = 2 << 20;
-  const size_t allocationSize = kTotalSize + kRoundUp - 1;
+  const size_t allocationSize = m_totalSize + kRoundUp - 1;
   uint8_t *base = (uint8_t*)sbrk(allocationSize);
   if (base == (uint8_t*)-1) {
     base = (uint8_t*)low_malloc(allocationSize);
@@ -11373,14 +11382,14 @@ TranslatorX64::TranslatorX64()
   ASSERT(base);
   base += -(uint64_t)base & (kRoundUp - 1);
   if (RuntimeOption::EvalMapTCHuge) {
-    hintHuge(base, kTotalSize);
+    hintHuge(base, m_totalSize);
   }
   TRACE(1, "init atrampolines @%p\n", base);
   atrampolines.init(base, kTrampolinesBlockSize);
   base += kTrampolinesBlockSize;
   TRACE(1, "init a @%p\n", base);
   a.init(base, kASize);
-  m_unwindRegistrar = register_unwind_region(base, kTotalSize);
+  m_unwindRegistrar = register_unwind_region(base, m_totalSize);
   base += kASize;
   TRACE(1, "init astubs @%p\n", base);
   astubs.init(base, kAStubsSize);
@@ -11711,7 +11720,7 @@ TranslatorX64::getPerfCounters(Array& ret) {
 }
 
 TranslatorX64::~TranslatorX64() {
-  freeSlab(atrampolines.code.base, kTotalSize);
+  freeSlab(atrampolines.code.base, m_totalSize);
 }
 
 static Debug::TCRange rangeFrom(const X64Assembler& a, const TCA addr,

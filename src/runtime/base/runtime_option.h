@@ -439,6 +439,11 @@ public:
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
 
+  // TranslatorX64 allocation options
+  static size_t VMTranslASize;
+  static size_t VMTranslAStubsSize;
+  static size_t VMTranslGDataSize;
+
   // Repo (hhvm bytecode repository) options
   static std::string RepoLocalMode;
   static std::string RepoLocalPath;

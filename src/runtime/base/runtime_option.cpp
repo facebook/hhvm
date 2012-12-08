@@ -436,6 +436,9 @@ bool RuntimeOption::EvalMapTCHuge = true;
 uint32 RuntimeOption::EvalConstEstimate = 10000;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
+size_t RuntimeOption::VMTranslASize = 512 << 20;
+size_t RuntimeOption::VMTranslAStubsSize = 512 << 20;
+size_t RuntimeOption::VMTranslGDataSize = RuntimeOption::VMTranslASize >> 2;
 
 std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
@@ -1224,6 +1227,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     }
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
+    VMTranslASize = eval["JitASize"].getUInt64(VMTranslASize);
+    VMTranslAStubsSize = eval["JitAStubsSize"].getUInt64(VMTranslAStubsSize);
+    VMTranslGDataSize = eval["JitGlobalDataSize"].getUInt64(VMTranslGDataSize);
     {
       Hdf debugger = eval["Debugger"];
       EnableDebugger = debugger["EnableDebugger"].getBool();

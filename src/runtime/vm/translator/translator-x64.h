@@ -1054,6 +1054,10 @@ PSEUDOINSTRS
   void irTranslateReqLit(const Tracelet& t,
                          const NormalizedInstruction& i,
                          InclOpFlags flags);
+
+private:
+  // asize + astubssize + gdatasize + trampolinesblocksize
+  size_t m_totalSize;
 };
 
 

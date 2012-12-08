@@ -19413,9 +19413,8 @@ bool TestCodeRun::TestFile() {
        "echo 'test';"
        "ob_start();");
   MVCR("<?php "
-       "var_dump(parse_ini_file('foo=BAR'));"
        "define('BAR','Some Value');"
-       "var_dump(parse_ini_file('foo=BAR'));"
+       "var_dump(parse_ini_string('foo=BAR'));"
       );
   return true;
 }

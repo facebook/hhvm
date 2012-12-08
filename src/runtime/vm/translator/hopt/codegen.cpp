@@ -245,7 +245,7 @@ Address ArgDesc::genCode(CodeGenerator::Asm& a) const {
       emitImmReg(a, m_imm, m_dstReg);
       break;
     case Addr:
-      a.    lea    (m_srcReg + m_imm.l(), m_dstReg);
+      a.    lea    (m_srcReg[m_imm.l()], m_dstReg);
       break;
   }
   return start;

@@ -1018,9 +1018,9 @@ struct X64Assembler {
   // 64-bit immediates work with mov to a register.
   void movq(Immed imm, Reg64 r) { instrIR(instr_mov, imm, r); }
 
-  void lea(IndexedDispReg p, Reg64 reg) { instrMR(instr_lea, *p, reg); }
-  void lea(DispReg p, Reg64 reg)        { instrMR(instr_lea, *p, reg); }
-  void lea(DispRIP p, Reg64 reg)        { instrMR(instr_lea, *p, reg); }
+  void lea(IndexedMemoryRef p, Reg64 reg) { instrMR(instr_lea, p, reg); }
+  void lea(MemoryRef p, Reg64 reg)        { instrMR(instr_lea, p, reg); }
+  void lea(RIPRelativeRef p, Reg64 reg)   { instrMR(instr_lea, p, reg); }
 
   void xchgq(Reg64 r1, Reg64 r2) { instrRR(instr_xchg, r1, r2); }
   void xchgl(Reg32 r1, Reg32 r2) { instrRR(instr_xchg, r1, r2); }

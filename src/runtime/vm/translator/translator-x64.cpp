@@ -405,7 +405,7 @@ emitLea(X64Assembler& a, PhysReg base, int disp, PhysReg dest) {
     emitMovRegReg(a, base, dest);
     return;
   }
-  a.   lea  (base + disp, dest);
+  a.   lea  (base[disp], dest);
 }
 
 /*
@@ -1679,8 +1679,8 @@ TranslatorX64::getInterceptHelper() {
   if (!m_interceptHelper) {
     m_interceptHelper = TCA(astubs.code.frontier);
     astubs.    loadq  (rStashedAR[AROFF(m_func)], rax);
-    astubs.    lea    (rax + Func::fullNameOff(), argNumToRegName[0]);
-    astubs.    lea    (rax + Func::maybeInterceptedOff(), argNumToRegName[1]);
+    astubs.    lea    (rax[Func::fullNameOff()], argNumToRegName[0]);
+    astubs.    lea    (rax[Func::maybeInterceptedOff()], argNumToRegName[1]);
 
     astubs.    sub_imm32_reg64(8, rsp); // Stack parity {
     astubs.    call(TCA(get_intercept_handler));
@@ -2894,7 +2894,7 @@ TranslatorX64::emitRetFromInterpretedFrame() {
   moveToAlign(astubs);
   TCA stub = astubs.code.frontier;
   // Marshall our own args by hand here.
-  astubs.   lea  (rVmSp - arBase, serviceReqArgRegs[0]);
+  astubs.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   astubs.   movq (rVmFp, serviceReqArgRegs[1]);
   (void) emitServiceReq(SRFlags(SRInline | SRJmpInsteadOfRet),
                         REQ_POST_INTERP_RET, 0ull);
@@ -6202,7 +6202,7 @@ TranslatorX64::translateSwitch(const Tracelet& t,
   TCA afterLea = a.code.frontier + kLeaRipLen;
   ptrdiff_t diff = (TCA)jmptab - afterLea;
   ASSERT(deltaFits(diff, sz::dword));
-  a.  lea  (rip + diff, rScratch);
+  a.  lea  (rip[diff], rScratch);
   ASSERT(a.code.frontier == afterLea);
   a.  jmp  (rScratch[valReg*8]);
 
@@ -11250,8 +11250,7 @@ asm_label(a, doRelease);
   jumpDestructor(a, PhysReg(rType), rax);
 
   m_freeManyLocalsHelper = a.code.frontier;
-  a.    lea    (rVmFp + kNumFreeLocalsHelpers * -int(sizeof(TypedValue)),
-                rFinished);
+  a.    lea    (rVmFp[-cellsToBytes(kNumFreeLocalsHelpers)], rFinished);
 
   auto emitDecLocal = [&] {
     Label skipDecRef;

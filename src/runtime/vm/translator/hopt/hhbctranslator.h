@@ -107,7 +107,7 @@ public:
   void emitCheckThis();
   void emitInitThisLoc(int32 id);
   void emitArray(int arrayId);
-  void emitNewArray();
+  void emitNewArray(int capacity);
   void emitNewTuple(int n);
 
   void emitArrayAdd();

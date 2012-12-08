@@ -444,6 +444,14 @@ cold:
   return iter_next_cold(iter, valOut, keyOut);
 }
 
+HOT_FUNC_VM
+ArrayData* new_array(int capacity) {
+  ArrayData *a = NEW(HphpArray)(capacity);
+  a->incRefCount();
+  TRACE(2, "newArrayHelper: capacity %d\n", capacity);
+  return a;
+}
+
 static inline void
 tvPairToCString(DataType t, uint64_t v,
                 const char** outStr,

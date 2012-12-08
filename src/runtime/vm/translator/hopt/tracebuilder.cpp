@@ -1098,6 +1098,10 @@ SSATmp* TraceBuilder::genNewObj(int32 numParams,
   return newSpValue;
 }
 
+SSATmp* TraceBuilder::genNewArray(int32 capacity) {
+  return genInstruction(NewArray, Type::Arr, genDefConst<int64>(capacity));
+}
+
 SSATmp* TraceBuilder::genAllocActRec(SSATmp* func,
                                      SSATmp* objOrCls,
                                      int32 numParams,

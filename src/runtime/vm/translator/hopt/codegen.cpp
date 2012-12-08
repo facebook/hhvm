@@ -2929,6 +2929,16 @@ Address CodeGenerator::cgNewObj(IRInstruction* inst) {
   return start;
 }
 
+Address CodeGenerator::cgNewArray(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  SSATmp* dst   = inst->getDst();
+  SSATmp* cap   = inst->getSrc(0);
+  ArgGroup args;
+  args.ssa(cap);
+  cgCallHelper(m_as, (TCA)new_array, dst, false, args);
+  return start;
+}
+
 Address CodeGenerator::cgCall(IRInstruction* inst) {
 
   Address start   = m_as.code.frontier;

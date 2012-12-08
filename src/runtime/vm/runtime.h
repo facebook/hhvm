@@ -34,6 +34,8 @@ int64 new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx,
 int64 iter_next(HPHP::VM::Iter* dest, TypedValue* val);
 int64 iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
 
+ArrayData* new_array(int capacity);
+
 StringData* concat_is(int64 v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64 v2);
 StringData* concat_ss(StringData* v1, StringData* v2);

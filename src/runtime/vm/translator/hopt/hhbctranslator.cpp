@@ -202,10 +202,14 @@ void HhbcTranslator::emitArray(int arrayId) {
   push(m_tb.genDefConst<const ArrayData*>(ad));
 }
 
-void HhbcTranslator::emitNewArray() {
-  TRACE(3, "%u: NewArray\n", m_bcOff);
-  ArrayData* ad = HphpArray::GetStaticEmptyArray();
-  push(m_tb.genDefConst<const ArrayData*>(ad));
+void HhbcTranslator::emitNewArray(int capacity) {
+  TRACE(3, "%u: NewArray %d\n", m_bcOff, capacity);
+  if (capacity == 0) {
+    ArrayData* ad = HphpArray::GetStaticEmptyArray();
+    push(m_tb.genDefConst<const ArrayData*>(ad));
+  } else {
+    push(m_tb.genNewArray(capacity));
+  }
 }
 
 void HhbcTranslator::emitNewTuple(int numArgs) {

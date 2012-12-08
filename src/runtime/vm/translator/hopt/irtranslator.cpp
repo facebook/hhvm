@@ -430,7 +430,7 @@ TranslatorX64::irTranslateArray(const Tracelet& t,
 void
 TranslatorX64::irTranslateNewArray(const Tracelet& t,
                                    const NormalizedInstruction& i) {
-  HHIR_EMIT(NewArray);
+  HHIR_EMIT(NewArray, i.imm[0].u_IVA);
 }
 
 void

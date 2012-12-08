@@ -214,6 +214,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   OPC(LdARFuncPtr,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdFuncCls,         1,  1,  0,  0,  0,  0,  0,  0,  0,  1) \
   OPC(NewObj,            1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
+  OPC(NewArray,          1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
   OPC(LdRaw,             1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(AllocActRec,       1,  0,  0,  1,  0,  1,  0,  0,  0,  0) \
   OPC(FreeActRec,        1,  0,  0,  1,  0,  0,  0,  0,  0,  0) \

@@ -5173,15 +5173,6 @@ TranslatorX64::translateArray(const Tracelet& t,
   }
 }
 
-ArrayData*
-HOT_FUNC_VM
-newArrayHelper(int capacity) {
-  ArrayData *a = NEW(HphpArray)(capacity);
-  a->incRefCount();
-  TRACE(2, "newArrayHelper: capacity %d\n", capacity);
-  return a;
-}
-
 void
 TranslatorX64::translateNewArray(const Tracelet& t,
                                  const NormalizedInstruction& i) {
@@ -5199,10 +5190,10 @@ TranslatorX64::translateNewArray(const Tracelet& t,
   } else {
     // create an empty array with a nonzero capacity
     if (false) {
-      ArrayData* a = newArrayHelper(42);
+      ArrayData* a = new_array(42);
       printf("%p", a); // use ret
     }
-    EMIT_CALL(a, newArrayHelper, IMM(capacity));
+    EMIT_CALL(a, new_array, IMM(capacity));
     m_regMap.bind(rax, i.outStack->location, KindOfArray, RegInfo::DIRTY);
   }
 }

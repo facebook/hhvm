@@ -324,20 +324,20 @@ void emitJmpProfile(X64Assembler& a, ConditionCode cc) {
   RegSet allRegs = kAllX64Regs;
   allRegs.remove(rsi);
 
-  a.pushf();
-  a.push(rsi);
-  a.setcc(cc, sil);
-  a.mov_reg8_reg64_unsigned(rsi, rsi);
+  a.  pushf  ();
+  a.  push   (rsi);
+  a.  setcc  (cc, sil);
+  a.  movzbl (sil, esi);
   {
     PhysRegSaver regs(a, allRegs);
     a.emitImmReg((intptr_t)data, rdi);
     if (false) {
       recordJmpProfile<mod>("", 0);
     }
-    a.call((TCA)recordJmpProfile<mod>);
+    a.call   ((TCA)recordJmpProfile<mod>);
   }
-  a.pop(rsi);
-  a.popf();
+  a.  pop    (rsi);
+  a.  popf   ();
 }
 
 inline void initJmpProfile() {

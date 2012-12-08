@@ -1209,7 +1209,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
           m_as.mov_imm64_reg(1, dstReg);
         }
       } else if (srcReg != dstReg) {
-        m_as.mov_reg8_reg64_unsigned(srcReg, dstReg);
+        m_as.movzbl (rbyte(srcReg), r32(dstReg));
       } else {
         // srcReg == dstReg
         m_as.and_imm64_reg64(0xff, dstReg);
@@ -3105,12 +3105,12 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
 
   ASSERT(!(dest->isConst()));
 
-  auto addrReg = addr->getReg();
-  auto destReg = dest->getReg();
+  Reg64 addrReg = addr->getReg();
+  PhysReg destReg = dest->getReg();
 
   if (addr->isConst()) {
     addrReg = rScratch;
-    m_as.mov_imm64_reg(addr->getConstValAsRawInt(), addrReg);
+    m_as.movq (addr->getConstValAsRawInt(), addrReg);
   }
 
   if (offset->isConst()) {
@@ -3120,18 +3120,18 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
     int ldSize = slot.getSize();
     int64 off = slot.getOffset();
     if (ldSize == sz::qword) {
-      m_as.load_reg64_disp_reg64(addrReg, off, destReg);
+      m_as.loadq (addrReg[off], destReg);
     } else if (ldSize == sz::dword) {
-      m_as.load_reg64_disp_reg32(addrReg, off, destReg);
+      m_as.loadl (addrReg[off], r32(destReg));
     } else {
       ASSERT(ldSize == sz::byte);
-      m_as.loadzxb_reg64_disp_reg64(addrReg, off, destReg);
+      m_as.loadzbl (addrReg[off], r32(destReg));
     }
   } else {
     int ldSize = getNativeTypeSize(dest->getType());
-    auto offsetReg = offset->getReg();
+    Reg64 offsetReg = r64(offset->getReg());
     if (ldSize == sz::qword) {
-      m_as.load_reg64_disp_index_reg64(addrReg, 0, offsetReg, destReg);
+      m_as.loadq (addrReg[offsetReg], destReg);
     } else {
       // Not yet supported by our assembler
       ASSERT(ldSize == sz::byte);

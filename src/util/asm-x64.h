@@ -111,9 +111,10 @@ private:
 #define SIMPLE_REGTYPE(What)                                        \
   struct What {                                                     \
     explicit constexpr What(int rn) : rn(rn) {}                     \
-    explicit constexpr operator RegNumber() const {           \
-      return RegNumber(rn);                                   \
+    explicit constexpr operator RegNumber() const {                 \
+      return RegNumber(rn);                                         \
     }                                                               \
+    explicit constexpr operator int() const { return rn; }          \
     constexpr bool operator==(What o) const { return rn == o.rn; }  \
     constexpr bool operator!=(What o) const { return rn != o.rn; }  \
   private:                                                          \
@@ -134,6 +135,7 @@ struct RegRIP {
 // size.
 
 inline Reg8 rbyte(RegNumber r) { return Reg8(int(r)); }
+inline Reg8 rbyte(Reg32 r)     { return Reg8(int(r)); }
 inline Reg32 r32(RegNumber r)  { return Reg32(int(r)); }
 inline Reg64 r64(RegNumber r)  { return Reg64(int(r)); }
 
@@ -721,10 +723,10 @@ const X64Instr instr_ret =     { { 0xF1,0xF1,0xC2,0x00,0xF1,0xC3 }, 0x0540 };
 const X64Instr instr_jcc =     { { 0xF1,0xF1,0x80,0x00,0xF1,0xF1 }, 0x0114 };
 const X64Instr instr_cmovcc =  { { 0x40,0x40,0xF1,0x00,0xF1,0xF1 }, 0x0003 };
 const X64Instr instr_setcc =   { { 0x90,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x0102 };
-const X64Instr instr_movswq =  { { 0xBF,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x0003 };
-const X64Instr instr_movzwq =  { { 0xB7,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x0003 };
-const X64Instr instr_movsbq =  { { 0xBE,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x2003 };
-const X64Instr instr_movzbq =  { { 0xB6,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x2003 };
+const X64Instr instr_movswx =  { { 0xBF,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x0003 };
+const X64Instr instr_movsbx =  { { 0xBE,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x2003 };
+const X64Instr instr_movzwx =  { { 0xB7,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x0003 };
+const X64Instr instr_movzbx =  { { 0xB6,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x2003 };
 const X64Instr instr_cwde =    { { 0xF1,0xF1,0xF1,0x00,0xF1,0x98 }, 0x0400 };
 const X64Instr instr_rol =     { { 0xD3,0xF1,0xC1,0x00,0xF1,0xF1 }, 0x0020 };
 const X64Instr instr_ror =     { { 0xD3,0xF1,0xC1,0x01,0xF1,0xF1 }, 0x0020 };
@@ -1017,6 +1019,15 @@ struct X64Assembler {
 
   // 64-bit immediates work with mov to a register.
   void movq(Immed imm, Reg64 r) { instrIR(instr_mov, imm, r); }
+
+  // movzbx is a special snowflake. We don't have movzbq because it behaves
+  // exactly the same as movzbl but takes an extra byte.
+  void loadzbl(MemoryRef m, Reg32 r)        { instrMR(instr_movzbx,
+                                                      m, rbyte(r)); }
+  void loadzbl(IndexedMemoryRef m, Reg32 r) { instrMR(instr_movzbx,
+                                                      m, rbyte(r)); }
+  void movzbl(Reg8 src, Reg32 dest)         { emitRR32(instr_movzbx,
+                                                       rn(src), rn(dest)); }
 
   void lea(IndexedMemoryRef p, Reg64 reg) { instrMR(instr_lea, p, reg); }
   void lea(MemoryRef p, Reg64 reg)        { instrMR(instr_lea, p, reg); }
@@ -1349,8 +1360,10 @@ struct X64Assembler {
     unsigned char rex = 0;
     if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
     bool highByteReg = false;
-    if (opSz == sz::byte) {
-      if (byteRegNeedsRex(r1) || byteRegNeedsRex(r2)) {
+    // movzbx's first operand is a bytereg regardless of operand size
+    if (opSz == sz::byte || (op.flags & IF_BYTEREG)) {
+      if (byteRegNeedsRex(r1) ||
+          (!(op.flags & IF_BYTEREG) && byteRegNeedsRex(r2))) {
         rex |= 0x40;
       }
       r1 = byteRegEncodeNumber(r1, highByteReg);
@@ -1617,14 +1630,12 @@ struct X64Assembler {
     // The wily rex byte, a multipurpose extension to the opcode space for x64
     unsigned char rex = 0;
     if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
-    // movzbq and movsbq are special because they read from a byte register
-    if (reverse == false && rName != reg::noreg &&
-        (op.flags & IF_BYTEREG) != 0 && r >= 4 && r <= 7) {
-      rex |= 0x40;
-    }
 
     bool highByteReg = false;
-    if (opSz == sz::byte && rName != reg::noreg) {
+    // XXX: This IF_BYTEREG check is a special case for movzbl: we currently
+    // encode it using an opSz of sz::byte but it doesn't actually have a
+    // byte-sized operand like other instructions can.
+    if (!(op.flags & IF_BYTEREG) && opSz == sz::byte && rName != reg::noreg) {
       if (byteRegNeedsRex(r)) {
         rex |= 0x40;
       }
@@ -1851,11 +1862,6 @@ public:
     emitMR8(instr_movb, rsrc, reg::noreg, sz::byte, off, rdest);
   }
 
-  inline void loadzxb_reg64_disp_reg64(RegNumber rsrc, int off,
-                                       RegNumber rdest) {
-    emitMR8(instr_movzbq, rsrc, reg::noreg, sz::byte, off, rdest);
-  }
-
   inline void load_reg64_disp_reg32(RegNumber rsrc, int off,
                                     RegNumber rdest) {
     emitMR32(instr_mov, rsrc, reg::noreg, sz::byte, off, rdest);
@@ -1940,11 +1946,6 @@ public:
   inline void cmov_reg64_reg64(ConditionCode cc, RegNumber rsrc,
                                RegNumber rdest) {
     emitCRR(instr_cmovcc, cc, rsrc, rdest);
-  }
-
-  inline void mov_reg8_reg64_unsigned(RegNumber rsrc,
-                                      RegNumber rdest) {
-    emitRR(instr_movzbq, rsrc, rdest);
   }
 
   // lea disp(%rsrc), %rdest

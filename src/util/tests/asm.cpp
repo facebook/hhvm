@@ -160,7 +160,7 @@ template<> struct Gen<Reg8> {
       };
       return v;
     }
-    static const std::vector<Reg8> v = { al, r8b };
+    static const std::vector<Reg8> v = { al, r8b, sil };
     return v;
   }
 };
@@ -281,12 +281,11 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg)) {
 }
 
 template<class Arg1, class Arg2>
-void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2)) {
+void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2),
+            const std::vector<Arg1>& args1, const std::vector<Arg2>& args2) {
   std::vector<std::string> expecteds;
 
-  auto& args1 = Gen<Arg1>::gen();
   for (auto& ar1 : args1) {
-    auto& args2 = Gen<Arg2>::gen();
     for (auto& ar2 : args2) {
       expecteds.push_back(str(
         boost::format("%s,%s") % expected_str(ar1)
@@ -302,6 +301,12 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2)) {
   a.code.frontier = a.code.base;
 }
 
+template<class Arg1, class Arg2>
+void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2)) {
+  dotest(opName, a, memFn, Gen<Arg1>::gen(), Gen<Arg2>::gen());
+
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Wrappers for generating test cases for various addressing modes.
@@ -311,6 +316,7 @@ typedef void (Asm::*OpR32)(Reg32);
 typedef void (Asm::*OpRR64)(Reg64, Reg64);
 typedef void (Asm::*OpRR32)(Reg32, Reg32);
 typedef void (Asm::*OpRR8)(Reg8, Reg8);
+typedef void (Asm::*OpR8R32)(Reg8, Reg32);
 typedef void (Asm::*OpMR64)(MemoryRef, Reg64);
 typedef void (Asm::*OpMR32)(MemoryRef, Reg32);
 typedef void (Asm::*OpMR8)(MemoryRef, Reg8);
@@ -403,6 +409,10 @@ TEST(Asm, General) {
   dotest("mov", a, OpRSM32(&Asm::storel));
   dotest("mov", a, OpRSM64(&Asm::storeq));
 
+  dotest("movzbl", a, OpMR32(&Asm::loadzbl));
+  dotest("movzbl", a, OpSMR32(&Asm::loadzbl));
+  dotest("movzbl", a, OpR8R32(&Asm::movzbl));
+
   FULL_OP(add);
   FULL_OP(xor);
   FULL_OP(sub);
@@ -425,6 +435,12 @@ TEST(Asm, General) {
 TEST(Asm, HighByteReg) {
   Asm a;
   a.init(10 << 24);
+
+  // Test movzbl with high byte regs, avoiding destination registers
+  // that need a rex prefix
+  std::vector<Reg8> hiregs = {ah, bh, ch, dh};
+  std::vector<Reg32> reg32s = {eax, ecx, esi, ebp};
+  dotest("movzbl", a, OpR8R32(&Asm::movzbl), hiregs, reg32s);
 
   a.    movb   (al, ah);
   a.    testb  (0x1, ah);

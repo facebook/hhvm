@@ -4171,7 +4171,7 @@ TranslatorX64::translateSameOp(const Tracelet& t,
   } else {
     a.  setne(rbyte(srcdest));
   }
-  a.    mov_reg8_reg64_unsigned(srcdest, srcdest);
+  a.    movzbl (rbyte(srcdest), r32(srcdest));
 }
 
 static bool
@@ -4189,7 +4189,7 @@ emitConvertToBool(X64Assembler &a, PhysReg src, PhysReg dest, bool instrNeg) {
   } else {
     a.  setnz(rbyte(dest));
   }
-  a.    mov_reg8_reg64_unsigned(dest, dest);
+  a.    movzbl (rbyte(dest), r32(dest));
 }
 
 void
@@ -4338,7 +4338,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
   } else {
     a.   setz           (rbyte(srcdest));
   }
-  a.     mov_reg8_reg64_unsigned(srcdest, srcdest);
+  a.     movzbl (rbyte(srcdest), r32(srcdest));
 }
 
 void
@@ -4404,7 +4404,7 @@ TranslatorX64::translateLtGtOp(const Tracelet& t,
     return;
   }
   a.       setcc(cc, rbyte(srcdest));
-  a.       mov_reg8_reg64_unsigned(srcdest, srcdest);
+  a.       movzbl (rbyte(srcdest), r32(srcdest));
 }
 
 static TXFlags
@@ -5742,7 +5742,7 @@ emitIntToCCBool(X64Assembler &a, PhysReg srcdest, PhysReg scratch,
    */
   a.   test_reg64_reg64(srcdest, srcdest);
   a.   setcc           (CC, rbyte(scratch));
-  a.   mov_reg8_reg64_unsigned(scratch, srcdest);
+  a.   movzbl (rbyte(scratch), r32(srcdest));
 }
 
 static inline void
@@ -7391,13 +7391,13 @@ void TranslatorX64::translateContRaise(const Tracelet& t,
 void TranslatorX64::translateContValid(const Tracelet& t,
                                        const NormalizedInstruction& i) {
   ScratchReg rCont(m_regMap);
-  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), r(rCont));
+  a.    loadq (rVmFp[AROFF(m_this)], r64(rCont));
 
   m_regMap.allocOutputRegs(i);
   PhysReg validReg = getReg(i.outStack->location);
   // !m_done
-  a.    loadzxb_reg64_disp_reg64(r(rCont), CONTOFF(m_done), validReg);
-  a.    xor_imm32_reg64(0x1, validReg);
+  a.    loadzbl (r(rCont)[CONTOFF(m_done)], r32(validReg));
+  a.    xorl (0x1, r32(validReg));
 }
 
 void TranslatorX64::translateContCurrent(const Tracelet& t,
@@ -7597,7 +7597,7 @@ void TranslatorX64::translateClassExistsImpl(const Tracelet& t,
       fuseBranchAfterBool(t, i, cc);
     } else {
       a.  setcc(cc, rbyte(scratch));
-      a.  mov_reg8_reg64_unsigned(r(scratch), r(scratch));
+      a.  movzbl(rbyte(scratch), r32(scratch));
       m_regMap.bindScratch(scratch, i.outStack->location, KindOfBoolean,
                            RegInfo::DIRTY);
     }
@@ -8025,7 +8025,7 @@ TranslatorX64::translateCheckTypeOp(const Tracelet& t,
           EMIT_CALL(astubs, warnNullThis);
           recordReentrantStubCall(ni);
         }
-        a.   mov_reg8_reg64_unsigned(res, res);
+        a.   movzbl (rbyte(res), r32(res));
       }
       return;
     }

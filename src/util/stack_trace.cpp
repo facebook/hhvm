@@ -31,8 +31,6 @@
 #include <util/compatibility.h>
 #include <util/hash.h>
 
-#include <runtime/base/compiler_id.h>
-
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -230,7 +228,7 @@ void StackTraceNoHeap::ClearAllExtraLogging() {
 }
 
 void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
-                           const char *pid) const {
+                           const char *pid, const char *buildId) const {
   int fd = ::open(tracefn, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
   if (fd < 0) return;
 
@@ -241,13 +239,11 @@ void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
   dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
   dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");
   dprintf(fd, "Runtime: %s\n", hhvm ? "hhvm" : "hphp");
-  dprintf(fd, "Version: %s\n", COMPILER_ID);
+  dprintf(fd, "Version: %s\n", buildId);
   dprintf(fd, "\n");
 
-  hphp_string_map<std::string> &extra = StackTraceLog::s_logData->data;
-  for (hphp_string_map<std::string>::const_iterator iter = extra.begin();
-       iter != extra.end(); ++iter) {
-    dprintf(fd, "%s: %s\n", iter->first.c_str(), iter->second.c_str());
+  for (auto const& pair : StackTraceLog::s_logData->data) {
+    dprintf(fd, "%s: %s\n", pair.first.c_str(), pair.second.c_str());
   }
   dprintf(fd, "\n");
 

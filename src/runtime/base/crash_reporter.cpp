@@ -18,6 +18,7 @@
 #include "util/light_process.h"
 #include "util/logger.h"
 
+#include "runtime/base/compiler_id.h"
 #include "runtime/base/execution_context.h"
 #include "runtime/ext/ext_error.h"
 
@@ -50,7 +51,7 @@ static void bt_handler(int sig) {
   sprintf(tracefn, "%s/stacktrace.%s.log",
           RuntimeOption::CoreDumpReportDirectory.c_str(), pid);
 
-  st.log(strsignal(sig), tracefn, pid);
+  st.log(strsignal(sig), tracefn, pid, COMPILER_ID);
 
   int fd = ::open(tracefn, O_APPEND|O_WRONLY, S_IRUSR|S_IWUSR);
   if (fd >= 0) {

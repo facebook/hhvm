@@ -145,7 +145,8 @@ public:
    * also store translated stack trace into the variable.
    * Returns the name of the generated file.
    */
-  void log(const char *errorType, const char * fname, const char *pid) const;
+  void log(const char *errorType, const char * fname, const char *pid,
+           const char *buildId) const;
 
   /**
    * Add extra information to log together with a crash stacktrace log.

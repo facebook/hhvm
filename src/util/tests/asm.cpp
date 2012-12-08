@@ -224,11 +224,7 @@ const char* expected_str(Reg8 r)  { return regname(r); }
 #undef X
 
 void expected_disp_str(intptr_t disp, std::ostream& out) {
-  if (disp < 0) {
-    out << "-0x" << std::hex << -disp;
-  } else {
-    out << "0x" << std::hex << disp;
-  }
+  out << "0x" << std::hex << (uintptr_t)disp;
 }
 
 std::string expected_str(MemoryRef mr) {

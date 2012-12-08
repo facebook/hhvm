@@ -1063,10 +1063,38 @@ protected:
   };
 };
 
+struct SpillInfo {
+  enum Type { MMX, Memory };
+
+  explicit SpillInfo(RegNumber r) : m_type(MMX), m_val(int(r)) {}
+  explicit SpillInfo(uint32_t v)  : m_type(Memory), m_val(v) {}
+
+  Type      type() const { return m_type; }
+  RegNumber mmx()  const { return RegNumber(m_val); }
+  uint32_t  mem()  const { return m_val; }
+
+private:
+  Type     m_type : 1;
+  uint32_t m_val : 31;
+};
+
+inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
+  switch (si.type()) {
+  case SpillInfo::MMX:
+    os << "mmx" << reg::regname(RegXMM(int(si.mmx())));
+    break;
+  case SpillInfo::Memory:
+    os << "spill[" << si.mem() << "]";
+    break;
+  }
+  return os;
+}
+
 class SSATmp {
 public:
   uint32            getId() const { return m_id; }
   IRInstruction*    getInstruction() const { return m_inst; }
+  void              setInstruction(IRInstruction* i) { m_inst = i; }
   Type::Tag         getType() const { return m_inst->getType(); }
   uint32            getLastUseId() { return m_lastUseId; }
   void              setLastUseId(uint32 newId) { m_lastUseId = newId; }
@@ -1074,19 +1102,6 @@ public:
   void              setUseCount(uint32 count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32            decUseCount() { return --m_useCount; }
-  uint32            getNumRegs() const;
-  bool              isAssignedReg(uint32 index) const;
-  bool              isAssignedMmxReg(uint32 index) const;
-  bool              isAssignedSpillLoc(uint32 index) const;
-  RegNumber         getReg() { return m_regs[0]; }
-  RegNumber         getReg(uint32 i) { return m_regs[i]; }
-  void              setReg(RegNumber reg, uint32 index) {
-    m_regs[index] = reg;
-  }
-  uint32            getSpillLoc(uint32 index) const;
-  void              setSpillLoc(uint32 spillLoc, uint32 index);
-  RegNumber         getMmxReg(uint32 index) const;
-  void              setMmxReg(RegNumber mmxReg, uint32 index);
   bool              isConst() const { return m_inst->isConstInstruction(); }
   bool              getConstValAsBool();
   int64             getConstValAsInt();
@@ -1103,20 +1118,70 @@ public:
 
   // Used for Jcc to Jmp elimination
   void              setTCA(TCA tca);
-  TCA               getTCA();
+  TCA               getTCA() const;
 
   /*
-   * During register allocation, this is used to mark spill locations
+   * Returns whether or not a given register index is allocated to a
+   * register, or returns false if it is spilled.
+   *
+   * Right now, we only spill both at the same time and only Spill and
+   * Reload instructions need to deal with SSATmps that are spilled.
+   */
+  bool              hasReg(uint32 i) const { return !m_isSpilled &&
+                                                m_regs[i] != reg::noreg; }
+
+  /*
+   * The maximum number of registers this SSATmp may need allocated.
+   * This is based on the type of the temporary (some types never have
+   * regs, some have two, etc).
+   */
+  int               numNeededRegs() const;
+
+  /*
+   * The number of regs actually allocated to this SSATmp.  This might
+   * end up fewer than numNeededRegs if the SSATmp isn't really
+   * being used.
+   */
+  int               numAllocatedRegs() const;
+
+  /*
+   * Access to allocated registers.
+   *
+   * Returns noreg for slots that aren't allocated.
+   */
+  RegNumber     getReg() { ASSERT(!m_isSpilled); return m_regs[0]; }
+  RegNumber     getReg(uint32 i) { ASSERT(!m_isSpilled); return m_regs[i]; }
+  void          setReg(RegNumber reg, uint32 i) { m_regs[i] = reg; }
+
+  /*
+   * Returns information about how to spill/fill a SSATmp.
+   *
+   * These functions are only valid if this SSATmp is being spilled or
+   * filled.  In all normal instructions (i.e. other than Spill and
+   * Reload), SSATmps are assigned registers instead of spill
+   * locations.
+   */
+  void        setSpillInfo(int idx, SpillInfo si) { m_spillInfo[idx] = si;
+                                                    m_isSpilled = true; }
+  SpillInfo   getSpillInfo(int idx) const { ASSERT(m_isSpilled);
+                                            return m_spillInfo[idx]; }
+
+  /*
+   * During register allocation, this is used to track spill locations
    * that are assigned to specific SSATmps.  A value of -1 is used to
    * indicate no spill slot has been assigned.
+   *
+   * After register allocation, use getSpillInfo to access information
+   * about where we've decided to spill/fill a given SSATmp from.
+   * This value doesn't have any meaning outside of the linearscan
+   * pass.
    */
-  int32_t           getSpillSlot() { return m_spillSlot; }
+  int32_t           getSpillSlot() const { return m_spillSlot; }
   void              setSpillSlot(int32_t val) { m_spillSlot = val; }
 
 private:
   friend class IRFactory;
   friend class TraceBuilder;
-  friend class LinearScan;
 
   // May only be created via IRFactory.  Note that this class is never
   // destructed, so don't add complex members.
@@ -1125,6 +1190,7 @@ private:
     , m_id(opndId)
     , m_lastUseId(0)
     , m_useCount(0)
+    , m_isSpilled(false)
     , m_spillSlot(-1)
   {
     m_regs[0] = m_regs[1] = Transl::reg::noreg;
@@ -1136,20 +1202,20 @@ private:
   const uint32    m_id;
   uint32          m_lastUseId;
   uint16          m_useCount;
-  int32_t         m_spillSlot;
+  bool            m_isSpilled : 1;
+  int32_t         m_spillSlot : 31;
 
   /*
    * m_regs[0] is always the value of this SSATmp.
    *
    * Cell or Gen types use two registers: m_regs[1] is the runtime
    * type.
-   *
-   * loc < LinearScan::NumRegs: general purpose registers
-   * LinearScan::NumRegs <= loc < LinearScan::FirstSpill: MMX regs
-   * LinearScan::FistSpill <= loc: spill location
    */
-  static const uint32_t kMaxNumRegs = 2;
-  RegNumber   m_regs[kMaxNumRegs]; // register allocation
+  static const int kMaxNumRegs = 2;
+  union {
+    RegNumber m_regs[kMaxNumRegs];
+    SpillInfo m_spillInfo[kMaxNumRegs];
+  };
 };
 
 class IRFactory {

@@ -28,37 +28,10 @@
 namespace HPHP { namespace VM { namespace JIT {
 
 struct LinearScan : private boost::noncopyable {
-  // TODO: remove these in favor of using the abi-x64.h constants.
-  const static RegNumber noReg;
-  const static Reg64 rVmSP;
-  const static Reg64 rSP;
-  const static Reg64 rVmFP;
-  const static Reg64 rScratch;
-  const static Reg64 rTlPtr;
-  const static Reg64 rStashedAR;
-
   static const int NumRegs = 16;
-  static const int NumMmxRegs = 8;
-  // See the comments for SSATmp::m_assignedLoc in ir.h
-  // to find out how we use FirstSpill and FirstMmxReg.
-  static const int FirstMmxReg = NumRegs;
-  static const int FirstSpill = FirstMmxReg + NumMmxRegs;
-  // This value must be consistent with the number of pre-allocated bytes
-  // for spill locations in __enterTCHelper in translator-x64.cpp.
-  // Be very careful when changing this value.
-  static const int NumPreAllocatedSpillLocs = 16;
-  static_assert(kReservedRSPScratchSpace == NumPreAllocatedSpillLocs * 8,
-                "kReservedRSPScratchSpace changes require updates in "
-                "LinearScan");
 
-
-  LinearScan(IRFactory* irFactory, TraceBuilder* traceBuilder);
-  void assignRegs(Trace*);
-
-  static void printLoc(std::ostream& os, int loc); // XXX
-
-  // HHIR:TODO ideally wouldn't need to use ints, but very helpful for bit ops
-  static int regNameAsInt(RegNumber r) { return (int)r; }
+  LinearScan(IRFactory*, TraceBuilder*);
+  void allocRegs(Trace*);
 
 private:
   class RegState {
@@ -157,8 +130,6 @@ private:
   RegState* getReg(RegState* reg);
 
 private:
-  static const char* RegNames[NumRegs];
-
   // Register allocation may generate Spill/Reload.
   IRFactory* m_irFactory;
   RegState   m_regs[NumRegs];
@@ -178,10 +149,7 @@ private:
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
-void assignRegsForTrace(Trace* trace,
-                        IRFactory* irFactory,
-                        TraceBuilder* tracebuilder);
-
+void allocRegsForTrace(Trace*, IRFactory*, TraceBuilder*);
 
 }}}
 

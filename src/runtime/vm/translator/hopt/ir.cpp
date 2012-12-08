@@ -568,46 +568,35 @@ void TypeInstruction::print(std::ostream& ostream) {
   printSrcs(ostream);
 }
 
-bool SSATmp::isAssignedReg(uint32 index) const {
-  return LinearScan::regNameAsInt(m_regs[index]) < LinearScan::NumRegs;
+int SSATmp::numNeededRegs() const {
+  auto type = getType();
+  return
+    // These types don't get a register because their values are static
+    (type == Type::Null || type == Type::Uninit || type == Type::None) ? 0 :
+    // Need 2 registers for these types, for type and value, or 1 for
+    // Func* and 1 for Class*.
+    (type == Type::Cell || type == Type::Gen ||
+     type == Type::FuncClassRef) ? 2
+    // Everything else just has 1.
+    : 1;
 }
 
-bool SSATmp::isAssignedMmxReg(uint32 index) const {
-  int loc = LinearScan::regNameAsInt(m_regs[index]);
-  return loc >= LinearScan::FirstMmxReg &&
-         loc < LinearScan::FirstMmxReg + LinearScan::NumMmxRegs;
-}
+int SSATmp::numAllocatedRegs() const {
+  // If an SSATmp is spilled, it must've actually had a full set of
+  // registers allocated to it.
+  if (m_isSpilled) return numNeededRegs();
 
-bool SSATmp::isAssignedSpillLoc(uint32 index) const {
-  return LinearScan::regNameAsInt(m_regs[index]) >= LinearScan::FirstSpill;
-}
-
-uint32 SSATmp::getNumRegs() const {
-  uint32 i;
-  for (i = 0; i < kMaxNumRegs && m_regs[i] != reg::noreg; ++i);
+  // Return the number of register slots that actually have an
+  // allocated register.  We may not have allocated a full
+  // numNeededRegs() worth of registers in some cases (if the value
+  // of this tmp wasn't used, etc).
+  int i = 0;
+  while (i < kMaxNumRegs && m_regs[i] != reg::noreg) {
+    ++i;
+  }
   return i;
 }
 
-uint32 SSATmp::getSpillLoc(uint32 index) const {
-  ASSERT(isAssignedSpillLoc(index));
-  return LinearScan::regNameAsInt(m_regs[index]) - LinearScan::FirstSpill;
-}
-
-void SSATmp::setSpillLoc(uint32 spillLoc, uint32 index) {
-  m_regs[index] = (RegNumber)(spillLoc + LinearScan::FirstSpill);
-}
-
-RegNumber SSATmp::getMmxReg(uint32 index) const {
-  ASSERT(isAssignedMmxReg(index));
-  return (RegNumber)(LinearScan::regNameAsInt(m_regs[index]) -
-                           LinearScan::FirstMmxReg);
-}
-
-void SSATmp::setMmxReg(RegNumber mmxReg, uint32 index) {
-  ASSERT(LinearScan::regNameAsInt(mmxReg) < (int32)LinearScan::NumMmxRegs);
-  m_regs[index] = (RegNumber)(LinearScan::regNameAsInt(mmxReg) +
-                                           LinearScan::FirstMmxReg);
-}
 
 bool SSATmp::getConstValAsBool()   {
   ASSERT(isConst());
@@ -653,29 +642,35 @@ uintptr_t SSATmp::getConstValAsBits() {
 void SSATmp::setTCA(TCA tca) {
   getInstruction()->setTCA(tca);
 }
-TCA SSATmp::getTCA() {
+TCA SSATmp::getTCA() const {
   return getInstruction()->getTCA();
 }
 
-void SSATmp::print(std::ostream& ostream, bool printLastUse) {
+void SSATmp::print(std::ostream& os, bool printLastUse) {
   if (m_inst->isDefConst()) {
-    ((ConstInstruction*)m_inst)->printConst(ostream);
+    ((ConstInstruction*)m_inst)->printConst(os);
     return;
   }
-  ostream << "t" << m_id;
+  os << "t" << m_id;
   if (printLastUse && m_lastUseId != 0) {
-    ostream << "@" << m_lastUseId << "#" << m_useCount;
+    os << "@" << m_lastUseId << "#" << m_useCount;
   }
-  if (m_regs[0] != reg::noreg) {
-    ostream << "(";
-    LinearScan::printLoc(ostream, LinearScan::regNameAsInt(m_regs[0]));
-    if (m_regs[1] != reg::noreg) {
-      ostream << ", ";
-      LinearScan::printLoc(ostream, LinearScan::regNameAsInt(m_regs[1]));
+  if (m_isSpilled || numAllocatedRegs() > 0) {
+    os << '(';
+    if (!m_isSpilled) {
+      for (int i = 0, sz = numAllocatedRegs(); i < sz; ++i) {
+        if (i != 0) os << ", ";
+        os << reg::regname(Reg64(int(m_regs[i])));
+      }
+    } else {
+      for (int i = 0, sz = numNeededRegs(); i < sz; ++i) {
+        if (i != 0) os << ", ";
+        os << m_spillInfo[i];
+      }
     }
-    ostream << ")";
+    os << ')';
   }
-  ostream << ":" << Type::Strings[m_inst->getType()];
+  os << ":" << Type::Strings[m_inst->getType()];
 }
 
 void SSATmp::print() {

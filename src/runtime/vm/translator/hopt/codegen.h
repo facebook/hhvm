@@ -306,11 +306,6 @@ void genCodeForTrace(Trace*                  trace,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64);
 
-class TraceBuilder;
-void assignRegsForTrace(Trace* trace,
-                        IRFactory* irFactory,
-                        TraceBuilder* tracebuilder);
-
 }}}
 
 #endif

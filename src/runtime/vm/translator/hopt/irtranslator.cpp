@@ -1672,7 +1672,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
     std::cout << "----------------------------------------\n";
   }
 
-  JIT::assignRegsForTrace(trace, m_irFactory, m_traceBuilder);
+  JIT::allocRegsForTrace(trace, m_irFactory, m_traceBuilder);
 
   if (RuntimeOption::EvalDumpIR) {
     std::cout << "--------- HHIR after reg alloc ---------\n";

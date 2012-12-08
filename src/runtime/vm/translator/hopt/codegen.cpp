@@ -66,6 +66,8 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
+using namespace Transl::reg;
+
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::tx64;
 
 using Transl::rVmSp;
@@ -221,7 +223,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     m_kind = Imm;
     return;
   }
-  if (val || tmp->getNumRegs() > 1) {
+  if (val || tmp->numNeededRegs() > 1) {
     RegNumber reg = tmp->getReg(val ? 0 : 1);
     ASSERT(reg != reg::noreg);
     m_imm = 0;
@@ -500,7 +502,7 @@ Address CodeGenerator::cgJcc(IRInstruction* inst) {
   if (src1->isConst()) {
     // TODO: use compare with immediate or make sure simplifier
     // canonicalizes this so that constant is src2
-    srcReg1 = LinearScan::rScratch;
+    srcReg1 = rScratch;
     m_as.mov_imm64_reg(src1->getConstValAsRawInt(), srcReg1);
   }
   if (src2->isConst()) {
@@ -1298,8 +1300,8 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       m_as.mov_imm64_reg((uint64)StringData::GetStaticString(""),
                          dstReg);
       m_as.mov_imm64_reg((uint64)StringData::GetStaticString("1"),
-                         LinearScan::rScratch);
-      m_as.cmov_reg64_reg64(CC_NZ, LinearScan::rScratch, dstReg);
+                         rScratch);
+      m_as.cmov_reg64_reg64(CC_NZ, rScratch, dstReg);
     } else {
       CG_PUNT(Conv_toString);
     }
@@ -1394,8 +1396,8 @@ Address CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   ASSERT(methodName->isConst() && methodName->getType() == Type::StaticStr);
   RegNumber dstReg = dst->getReg();
   if (dstReg == reg::noreg) {
-    // happens if LdFixedFunc and FCAll not in same trace
-    dstReg = LinearScan::rScratch;
+    // happens if LdFixedFunc and FCall not in same trace
+    dstReg = rScratch;
     dst->setReg(dstReg, 0);
   }
   RegNumber actRecReg = actRec->getReg();
@@ -1404,7 +1406,7 @@ Address CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   const StringData* name = methodName->getConstValAsStr();
   CacheHandle ch = allocFixedFunction(name);
   size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
-  m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, funcCacheOff, dstReg);
+  m_as.load_reg64_disp_reg64(rVmTl, funcCacheOff, dstReg);
   m_as.test_reg64_reg64(dstReg, dstReg);
   // jz off to the helper call in astubs
   m_as.jcc(CC_E, m_astubs.code.frontier);
@@ -1430,7 +1432,7 @@ Address CodeGenerator::cgLdFunc(IRInstruction* inst) {
   if (dstReg == reg::noreg) {
     // this happens if LdFixedFunc and FCAll are not in the same trace
     // TODO: try to get rax instead to avoid a move after the call
-    dstReg = LinearScan::rScratch;
+    dstReg = rScratch;
   }
   // raises an error if function not found
   cgCallHelper(m_as, (TCA)FuncCache::lookup, dstReg, kSyncPoint,
@@ -1483,7 +1485,7 @@ Address CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
   const StringData* classNameString = className->getConstValAsStr();
   TargetCache::allocKnownClass(classNameString);
   TargetCache::CacheHandle ch = TargetCache::allocKnownClass(classNameString);
-  m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, ch, dstReg);
+  m_as.load_reg64_disp_reg64(rVmTl, ch, dstReg);
 
   return start;
 }
@@ -1657,17 +1659,17 @@ Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   RegNumber retAddrReg = retAddr->getReg();
 
   // Make sure rVmFp and rVmSp are set appropriately
-  if (sp->getReg() != LinearScan::rVmSP) {
+  if (sp->getReg() != rVmSp) {
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgRetCtrl\n");
     }
-    m_as.mov_reg64_reg64(sp->getReg(), LinearScan::rVmSP);
+    m_as.mov_reg64_reg64(sp->getReg(), rVmSp);
   }
-  if (fp->getReg() != LinearScan::rVmFP) {
+  if (fp->getReg() != rVmFp) {
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgRetCtrl\n");
     }
-    m_as.mov_reg64_reg64(fp->getReg(), LinearScan::rVmFP);
+    m_as.mov_reg64_reg64(fp->getReg(), rVmFp);
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -1723,16 +1725,21 @@ Address CodeGenerator::cgSpill(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
 
-  ASSERT(dst->getNumRegs() == src->getNumRegs());
-  for (uint32 locIndex = 0; locIndex < src->getNumRegs(); ++locIndex) {
+  ASSERT(dst->numNeededRegs() == src->numNeededRegs());
+  for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
     RegNumber srcReg = src->getReg(locIndex);
+
     // We do not need to mask booleans, since the IR will reload the spill
-    if (dst->isAssignedMmxReg(locIndex)) {
-      m_as.mov_reg64_mmx(srcReg, dst->getMmxReg(locIndex));
-    } else {
-      m_as.store_reg64_disp_reg64(srcReg,
-                                  sizeof(uint64) * dst->getSpillLoc(locIndex),
-                                  reg::rsp);
+    auto sinfo = dst->getSpillInfo(locIndex);
+    switch (sinfo.type()) {
+    case SpillInfo::MMX:
+      m_as.    mov_reg64_mmx(srcReg, sinfo.mmx());
+      break;
+    case SpillInfo::Memory:
+      m_as.    store_reg64_disp_reg64(srcReg,
+                                      sizeof(uint64) * sinfo.mem(),
+                                      reg::rsp);
+      break;
     }
   }
   return start;
@@ -1743,15 +1750,20 @@ Address CodeGenerator::cgReload(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
 
-  ASSERT(dst->getNumRegs() == src->getNumRegs());
-  for (uint32 locIndex = 0; locIndex < src->getNumRegs(); ++locIndex) {
+  ASSERT(dst->numNeededRegs() == src->numNeededRegs());
+  for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
     RegNumber dstReg = dst->getReg(locIndex);
-    if (src->isAssignedMmxReg(locIndex)) {
-      m_as.mov_mmx_reg64(src->getMmxReg(locIndex), dstReg);
-    } else {
-      m_as.load_reg64_disp_reg64(reg::rsp,
-                                 sizeof(uint64) * src->getSpillLoc(locIndex),
-                                 dstReg);
+
+    auto sinfo = src->getSpillInfo(locIndex);
+    switch (sinfo.type()) {
+    case SpillInfo::MMX:
+      m_as.    mov_mmx_reg64(sinfo.mmx(), dstReg);
+      break;
+    case SpillInfo::Memory:
+      m_as.    load_reg64_disp_reg64(reg::rsp,
+                                     sizeof(uint64) * sinfo.mem(),
+                                     dstReg);
+      break;
     }
   }
   return start;
@@ -1867,17 +1879,17 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
   // unless exit trace was moved to end of main trace
 
   Address start = outputAsm.code.frontier;
-  if (sp->getReg() != LinearScan::rVmSP) {
+  if (sp->getReg() != rVmSp) {
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgExitTrace\n");
     }
-    outputAsm.mov_reg64_reg64(sp->getReg(), LinearScan::rVmSP);
+    outputAsm.mov_reg64_reg64(sp->getReg(), rVmSp);
   }
-  if (fp->getReg() != LinearScan::rVmFP) {
+  if (fp->getReg() != rVmFp) {
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgExitTrace\n");
     }
-    outputAsm.mov_reg64_reg64(fp->getReg(), LinearScan::rVmFP);
+    outputAsm.mov_reg64_reg64(fp->getReg(), rVmFp);
   }
 
   // Get the SrcKey for the dest
@@ -2045,11 +2057,11 @@ Address CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
       if (dstValueReg != reg::noreg && base != dstValueReg) {
         if (srcTypeReg == dstValueReg) {
           // use the scratch reg to avoid clobbering srcTypeReg
-          m_as.mov_reg64_reg64(srcTypeReg, LinearScan::rScratch);
+          m_as.mov_reg64_reg64(srcTypeReg, rScratch);
           if (m_curTrace->isMain()) {
             TRACE(3, "[counter] 1 reg move in cgIncRefWork\n");
           }
-          srcTypeReg = LinearScan::rScratch;
+          srcTypeReg = rScratch;
         }
         m_as.mov_reg64_reg64(base, dstValueReg);
         if (m_curTrace->isMain()) {
@@ -2098,7 +2110,7 @@ Address CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   SSATmp* fp    = inst->getSrc(0);
   LabelInstruction* exit = inst->getLabel();
   RegNumber fpReg = fp->getReg();
-  RegNumber scratchReg = LinearScan::rScratch;
+  RegNumber scratchReg = rScratch;
 
   // Load AR->m_this into rScratch
   m_as.load_reg64_disp_reg64(fpReg, AROFF(m_this), scratchReg);
@@ -2261,7 +2273,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
   ASSERT(Type::isRefCounted(type));
 
   Address patchStaticCheck = NULL;
-  const RegNumber scratchReg = LinearScan::rScratch;
+  const RegNumber scratchReg = rScratch;
 
   bool canUseScratch = dataReg != scratchReg;
 
@@ -2476,7 +2488,7 @@ Address CodeGenerator::cgDecRefDynamicTypeMem(RegNumber baseReg,
                                               int64 offset,
                                               LabelInstruction* exit) {
   Address start = m_as.code.frontier;
-  RegNumber scratchReg = LinearScan::rScratch;
+  RegNumber scratchReg = rScratch;
 
   ASSERT(baseReg != scratchReg);
 
@@ -2526,7 +2538,7 @@ Address CodeGenerator::cgDecRefMem(Type::Tag type,
                                    int64 offset,
                                    LabelInstruction* exit) {
   Address start = m_as.code.frontier;
-  RegNumber scratchReg = LinearScan::rScratch;
+  RegNumber scratchReg = rScratch;
   ASSERT(baseReg != scratchReg);
 
   if (Type::isStaticallyKnown(type)) {
@@ -2661,8 +2673,8 @@ Address CodeGenerator::cgAllocActRec6(SSATmp* dst,
   } else if (func->isConst()) {
     // TODO: have register allocator materialize constants
     const Func* f = func->getConstValAsFunc();
-    m_as. mov_imm64_reg((uint64)f, LinearScan::rScratch);
-    m_as.store_reg64_disp_reg64(LinearScan::rScratch,
+    m_as. mov_imm64_reg((uint64)f, rScratch);
+    m_as.store_reg64_disp_reg64(rScratch,
                                 actRecAdjustment + AROFF(m_func),
                                 spReg);
     if (func->getType() == Type::FuncClassRef) {
@@ -2880,14 +2892,12 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
 
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
   if (numArgs == 0) {
-    m_as.mov_reg64_reg64(LinearScan::rVmSP, LinearScan::rStashedAR);
+    m_as.mov_reg64_reg64(rVmSp, rStashedAR);
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgCall\n");
     }
   } else {
-    m_as.lea_reg64_disp_reg64(LinearScan::rVmSP,
-                            cellsToBytes(numArgs),
-                            LinearScan::rStashedAR);
+    m_as.lea_reg64_disp_reg64(rVmSp, cellsToBytes(numArgs), rStashedAR);
   }
 
   // HHIR:TODO SrcKey(func->getConstValAsFunc(), bcOff /*pc*/);
@@ -3102,7 +3112,7 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
   RegNumber destReg = dest->getReg();
 
   if (addr->isConst()) {
-    addrReg = LinearScan::rScratch;
+    addrReg = rScratch;
     m_as.mov_imm64_reg(addr->getConstValAsRawInt(), addrReg);
   }
 
@@ -3558,7 +3568,7 @@ Address CodeGenerator::cgGuardRefs(IRInstruction* inst) {
 
   // Actually generate code
 
-  RegNumber bitsValReg = LinearScan::rScratch;
+  RegNumber bitsValReg = rScratch;
   TCA patchEndOuterIf = NULL;
   TCA patchEndInnerIf = NULL;
 
@@ -3680,10 +3690,10 @@ Address CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
 
 
   // Attempt to retrieve the func* and class* from cache
-  m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, ch, funcDestReg);
+  m_as.load_reg64_disp_reg64(rVmTl, ch, funcDestReg);
   m_as.test_reg64_reg64(funcDestReg, funcDestReg);
   // May have retrieved a NULL from the cache
-  m_as.load_reg64_disp_reg64(LinearScan::rTlPtr,
+  m_as.load_reg64_disp_reg64(rVmTl,
                              ch + offsetof(TargetCache::StaticMethodCache,
                                            m_cls),
                              classDestReg);
@@ -3706,7 +3716,7 @@ Address CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
     );
     // recordInstrCall is done in cgCallHelper
     m_astubs.test_reg64_reg64(funcDestReg, funcDestReg);
-    m_astubs.load_reg64_disp_reg64(LinearScan::rTlPtr,
+    m_astubs.load_reg64_disp_reg64(rVmTl,
                                    ch + offsetof(TargetCache::StaticMethodCache,
                                                  m_cls),
                                    classDestReg);
@@ -3738,9 +3748,8 @@ Address CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
     StringData sd(sds.c_str(), sds.size(), AttachLiteral);
     CacheHandle ch = SPropCache::alloc(&sd);
 
-    RegNumber tmpReg = dstReg == srcReg ? LinearScan::rScratch
-                                              : dstReg;
-    m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, ch, tmpReg);
+    RegNumber tmpReg = dstReg == srcReg ? rScratch : dstReg;
+    m_as.load_reg64_disp_reg64(rVmTl, ch, tmpReg);
     m_as.test_reg64_reg64(tmpReg, tmpReg);
     // jz off to the helper call in astubs
     m_as.jcc(CC_E, m_astubs.code.frontier);
@@ -3771,12 +3780,12 @@ Address CodeGenerator::cgLdCls(IRInstruction* inst) {
   RegNumber dstReg = dst->getReg();
   const StringData* classNameString = className->getConstValAsStr();
   TargetCache::CacheHandle ch = TargetCache::allocKnownClass(classNameString);
-  m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, ch, dstReg);
+  m_as.load_reg64_disp_reg64(rVmTl, ch, dstReg);
   m_as.test_reg64_reg64(dstReg, dstReg);
   // jz off to the helper call in astubs
   m_as.jcc(CC_E, m_astubs.code.frontier);
   {
-    m_astubs.lea_reg64_disp_reg64(LinearScan::rTlPtr, ch, dstReg);
+    m_astubs.lea_reg64_disp_reg64(rVmTl, ch, dstReg);
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
     ArgGroup args;
@@ -3813,7 +3822,7 @@ Address CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   // note that we bail from the trace if the target cache entry is empty
   // for this class constant or if the type assertion fails.
   // TODO: handle the slow case helper call.
-  cgLoad(type, dst, LinearScan::rTlPtr, ch,
+  cgLoad(type, dst, rVmTl, ch,
          // no need to worry about boxed types if loading a cell
          type == Type::Cell ? NULL : label);
   // The following checks that the target cache entry is valid (not Uninit).
@@ -4154,7 +4163,7 @@ Address CodeGenerator::cgInterpOne(IRInstruction* inst) {
 
   RegNumber dstReg = reg::noreg;
   if (label) {
-    dstReg = LinearScan::rScratch;
+    dstReg = rScratch;
   }
   cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, kSyncPoint,
                ArgGroup().ssa(fp).ssa(sp).imm(pcOff));
@@ -4222,7 +4231,7 @@ Address CodeGenerator::cgFillContThis(IRInstruction* inst) {
   SSATmp* cont = inst->getSrc(0);
   RegNumber baseReg = inst->getSrc(1)->getReg();
   int64 offset = inst->getSrc(2)->getConstValAsInt();
-  RegNumber scratch = LinearScan::rScratch;
+  RegNumber scratch = rScratch;
 
   m_as.load_reg64_disp_reg64(cont->getReg(), CONTOFF(m_obj), scratch);
   m_as.test_reg64_reg64(scratch, scratch);

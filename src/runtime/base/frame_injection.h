@@ -273,7 +273,11 @@ public:
   }
   ~FrameInjectionObjectMethod() {
     if (m_object->decRefCount() == 0) {
-      m_object->release();
+      // NULL out m_object before freeing it, so that debug_backtrace()
+      // does not see freed object on stack.
+      ObjectData* obj = m_object;
+      m_object = NULL;
+      obj->release();
     }
     hotProfilerFini();
   }
@@ -292,6 +296,12 @@ public:
    */
   ObjectData *getThisForArrow();
 
+  /**
+   * This function is similar to getThis() except that it is called only
+   * from debug_backtrace(). It does an additional NULL check to make sure
+   * freed objects are not returned in the backtrace.
+   */
+  ObjectData *getThisForBacktrace() const;
 private:
   ObjectData *m_object;
 };

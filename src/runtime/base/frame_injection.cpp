@@ -367,7 +367,7 @@ ObjectData *FrameInjection::GetObjectV(
     if (LIKELY(fi->isObjectMethodFrame())) {
       const FrameInjectionObjectMethod* ofi =
         static_cast<const FrameInjectionObjectMethod*>(fi);
-      return ofi->getThis();
+      return ofi->getThisForBacktrace();
     }
 
     if (!(fi->m_flags & (PseudoMain | BuiltinFunction)) || !fi->m_prev) {
@@ -495,6 +495,13 @@ ObjectData *FrameInjectionObjectMethod::getThis() const {
   }
   return m_object;
 }
+
+ObjectData *FrameInjectionObjectMethod::getThisForBacktrace() const {
+  if (m_object && !m_object->o_getId()) {
+    return NULL;
+  }
+  return m_object;
+};
 
 ObjectData *FrameInjectionObjectMethod::getThisForArrow() {
   if (m_object->o_getId()) {

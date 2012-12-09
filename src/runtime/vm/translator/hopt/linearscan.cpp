@@ -34,6 +34,25 @@ static_assert(kReservedRSPScratchSpace == NumPreAllocatedSpillLocs * 8,
               "kReservedRSPScratchSpace changes require updates in "
               "LinearScan");
 
+// The dst of IncRef, Mov, StRef, and StRefNT has the same value
+// as the src. For analysis purpose, we put them in one equivalence class.
+// This canonicalize function returns the representative of <tmp>'s
+// equivalence class. The function computes the representative by
+// following the dst-src chain.
+static SSATmp* canonicalize(SSATmp* tmp) {
+  while (true) {
+    IRInstruction* inst = tmp->getInstruction();
+    Opcode opc = inst->getOpcode();
+    // The dst of IncRef, Mov, StRef, and StRefNT has the same value
+    // as the src.
+    // We follow these instructions to canonicalize an SSATmp.
+    if (opc != IncRef && opc != Mov && opc != StRef && opc != StRefNT) {
+      return tmp;
+    }
+    tmp = inst->getSrc(0);
+  }
+}
+
 LinearScan::LinearScan(IRFactory* irFactory, TraceBuilder* traceBuilder) {
   m_irFactory = irFactory;
   for (int i = 0; i < NumRegs; i++) {
@@ -776,7 +795,7 @@ void LinearScan::rematerialize(Trace* trace) {
   rematerializeAux(trace,
                    NULL,
                    NULL,
-                   std::vector<SSATmp*>(m_irFactory->getNumLocals()));
+                   std::vector<SSATmp*>());
   numberInstructions(trace);
 
   // We only replaced Reloads in <rematerializeAux>.
@@ -807,8 +826,8 @@ void LinearScan::rematerializeAux(Trace* trace,
       IRInstruction* spilledInst = spilledTmp->getInstruction();
       IRInstruction* newInst = NULL;
       if (spilledInst->isRematerializable() ||
-          spilledInst->getOpcode() == LdStack &&
-          spilledInst->getSrc(0) == curSp) {
+          (spilledInst->getOpcode() == LdStack &&
+           spilledInst->getSrc(0) == curSp)) {
         // XXX: could change <newInst> to the non-check version.
         // Rematerialize those rematerializable instructions (i.e.,
         // isRematerializable returns true) and LdStack.
@@ -826,8 +845,7 @@ void LinearScan::rematerializeAux(Trace* trace,
         if (pos != localValues.end()) {
           size_t locId = pos - localValues.begin();
           ASSERT(curFp != NULL);
-          Local* local = m_irFactory->getLocal(uint32(locId));
-          ConstInstruction constInst(curFp, local);
+          ConstInstruction constInst(curFp, Local(locId));
           IRInstruction* ldHomeInst =
             m_irFactory->cloneInstruction(&constInst);
           newInst = m_irFactory->ldLoc(m_irFactory->getSSATmp(ldHomeInst),
@@ -853,6 +871,9 @@ void LinearScan::rematerializeAux(Trace* trace,
       // StLoc/StLocNT home, src
       int locId = getLocalIdFromHomeOpnd(inst->getSrc(0));
       SSATmp* localValue = (opc == LdLoc ? dst : inst->getSrc(1));
+      if (int(localValues.size()) < locId + 1) {
+        localValues.resize(locId + 1);
+      }
       localValues[locId] = canonicalize(localValue);
     }
 
@@ -1063,25 +1084,6 @@ IRInstruction* LinearScan::getNextNative() const {
 uint32 LinearScan::getNextNativeId() const {
   IRInstruction* nextNative = getNextNative();
   return (nextNative ? nextNative->getId() : -1);
-}
-
-// The dst of IncRef, Mov, StRef, and StRefNT has the same value
-// as the src. For analysis purpose, we put them in one equivalence class.
-// This canonicalize function returns the representative of <tmp>'s
-// equivalence class. The function computes the representative by
-// following the dst-src chain.
-SSATmp* LinearScan::canonicalize(SSATmp* tmp) {
-  while (true) {
-    IRInstruction* inst = tmp->getInstruction();
-    Opcode opc = inst->getOpcode();
-    // The dst of IncRef, Mov, StRef, and StRefNT has the same value
-    // as the src.
-    // We follow these instructions to canonicalize an SSATmp.
-    if (opc != IncRef && opc != Mov && opc != StRef && opc != StRefNT) {
-      return tmp;
-    }
-    tmp = inst->getSrc(0);
-  }
 }
 
 SSATmp* LinearScan::getSpilledTmp(SSATmp* tmp) {

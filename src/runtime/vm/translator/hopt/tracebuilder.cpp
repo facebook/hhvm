@@ -697,7 +697,7 @@ void TraceBuilder::genGuardRefs(SSATmp* funcPtr,
 
 
 SSATmp* TraceBuilder::genLdHome(uint32 id) {
-  ConstInstruction inst(m_fpValue, getLocal(id));
+  ConstInstruction inst(m_fpValue, Local(id));
   ASSERT(m_fpValue &&
          m_fpValue->getInstruction()->getOpcode() == DefFP);
   return optimizeInst(&inst);
@@ -811,7 +811,7 @@ SSATmp* TraceBuilder::genInstanceOfD(SSATmp* src, SSATmp* className) {
   return genInstruction(InstanceOfD, Type::Bool, src, className);
 }
 
-Local* getLocalFromHomeOpnd(SSATmp* srcHome) {
+Local getLocalFromHomeOpnd(SSATmp* srcHome) {
   // Invariant: only LdHome instructions generate home values
   IRInstruction* ldHomeInstruction = srcHome->getInstruction();
   ASSERT(ldHomeInstruction->getOpcode() == LdHome);
@@ -825,7 +825,7 @@ int getLocalIdFromHomeOpnd(SSATmp* srcHome) {
   if (ldHomeInstruction->getOpcode() == LdStack) {
     return -1;
   }
-  return getLocalFromHomeOpnd(srcHome)->getId();
+  return getLocalFromHomeOpnd(srcHome).getId();
 }
 
 SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
@@ -1553,10 +1553,6 @@ SSATmp* TraceBuilder::cse(IRInstruction* inst) {
 
 void TraceBuilder::killCse() {
   m_cseHash.clear();
-}
-
-Local* TraceBuilder::getLocal(uint32 id) {
-  return m_irFactory.getLocal(id);
 }
 
 SSATmp* TraceBuilder::getLocalValue(int id) {

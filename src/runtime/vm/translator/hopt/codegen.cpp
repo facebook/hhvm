@@ -1838,7 +1838,7 @@ Address CodeGenerator::cgStLocWork(IRInstruction* inst, bool genStoreType) {
   ASSERT(addrInst->getOpcode() == LdHome);
   ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
   auto baseReg = homeInstr->getSrc(0)->getReg();
-  int64_t index = homeInstr->getLocal()->getId();
+  int64_t index = homeInstr->getLocal().getId();
   cgStore(baseReg, -((index + 1) * sizeof(Cell)), src, genStoreType);
   return start;
 }
@@ -2148,7 +2148,7 @@ Address CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 
   ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
   auto fpReg = homeInstr->getSrc(0)->getReg();
-  int64_t index = homeInstr->getLocal()->getId();
+  int64_t index = homeInstr->getLocal().getId();
 
   return cgDecRefMem(type, fpReg, -((index + 1) * sizeof(Cell)), exit);
 }
@@ -3269,7 +3269,7 @@ Address CodeGenerator::cgStore(PhysReg base,
       // do an lea of the home
       ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
       auto baseReg = homeInstr->getSrc(0)->getReg();
-      int64_t index = homeInstr->getLocal()->getId();
+      int64_t index = homeInstr->getLocal().getId();
       auto tmpReg = reg::rScratch;
       m_as.lea_reg64_disp_reg64(baseReg, -((index + 1)*sizeof(Cell)), tmpReg);
       m_as.store_reg64_disp_reg64(tmpReg, off + TVOFF(m_data), base);
@@ -3425,7 +3425,7 @@ Address CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* home  = inst->getSrc(0);
   ConstInstruction* homeInst = (ConstInstruction*)home->getInstruction();
-  int64_t index = homeInst->getLocal()->getId();
+  int64_t index = homeInst->getLocal().getId();
   const StringData* name = getCurrFunc()->localVarName(index);
   cgCallHelper(m_as,
                (TCA)HPHP::VM::Transl::raiseUndefVariable,
@@ -3440,7 +3440,7 @@ static void getLocalRegOffset(SSATmp* src, PhysReg& reg, int64& off) {
     dynamic_cast<ConstInstruction*>(src->getInstruction());
   ASSERT(homeInstr && homeInstr->getOpcode() == LdHome);
   reg = homeInstr->getSrc(0)->getReg();
-  int64 index = homeInstr->getLocal()->getId();
+  int64 index = homeInstr->getLocal().getId();
   off = -cellsToBytes(index + 1);
 }
 

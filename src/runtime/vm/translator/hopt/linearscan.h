@@ -99,7 +99,6 @@ private:
   void coalesceAux(Trace* trace);
   void allocRegsToTraceAux(Trace* trace);
   uint32 createSpillSlot(SSATmp* tmp);
-  static SSATmp* canonicalize(SSATmp* tmp);
   static SSATmp* getSpilledTmp(SSATmp* tmp);
   static SSATmp* getOrigTmp(SSATmp* tmp);
   void preAllocSpillLoc(Trace* trace, uint32 numSpillLocs);

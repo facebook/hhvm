@@ -586,16 +586,14 @@ class RawMemSlot {
   Type::Tag m_type;
 };
 
-// Must be arena-allocatable.  (Destructor is not called.)
-class Local {
-public:
-  Local(uint32 i) : m_id(i) {}
-  uint32 getId() {return m_id;}
-  void print(std::ostream& os) {
+struct Local {
+  explicit Local(uint32_t id) : m_id(id) {}
+  uint32_t getId() const { return m_id; }
+  void print(std::ostream& os) const {
     os << "h" << m_id;
   }
 private:
-  const uint32 m_id;
+  const uint32_t m_id;
 };
 
 class SSATmp;
@@ -880,55 +878,55 @@ protected:
 
 class ConstInstruction : public IRInstruction {
 public:
-  bool getValAsBool() {
+  bool getValAsBool() const {
     ASSERT(m_type == Type::Bool);
     return m_boolVal;
   }
-  int64 getValAsInt() {
+  int64 getValAsInt() const {
     ASSERT(m_type == Type::Int);
     return m_intVal;
   }
-  int64 getValAsRawInt() {
+  int64 getValAsRawInt() const {
     return m_intVal;
   }
-  double getValAsDbl() {
+  double getValAsDbl() const {
     ASSERT(m_type == Type::Dbl);
     return m_dblVal;
   }
-  const StringData* getValAsStr() {
+  const StringData* getValAsStr() const {
     ASSERT(m_type == Type::StaticStr);
     return m_strVal;
   }
-  const ArrayData* getValAsArr() {
+  const ArrayData* getValAsArr() const {
     ASSERT(m_type == Type::Arr);
     return m_arrVal;
   }
-  const Func* getValAsFunc() {
+  const Func* getValAsFunc() const {
     ASSERT(m_type == Type::FuncRef);
     return m_func;
   }
-  const Class* getValAsClass() {
+  const Class* getValAsClass() const {
     ASSERT(m_type == Type::ClassRef);
     return m_clss;
   }
-  const VarEnv* getValAsVarEnv() {
+  const VarEnv* getValAsVarEnv() const {
     ASSERT(m_type == Type::VarEnvRef);
     return m_varEnv;
   }
-  const TCA getValAsTCA() {
+  TCA getValAsTCA() const {
     ASSERT(m_type == Type::TCA);
     return m_tca;
   }
-  const bool isEmptyArray() {
+  bool isEmptyArray() const {
     return m_arrVal == HphpArray::GetStaticEmptyArray();
   }
-  Local* getLocal() {
+  Local getLocal() const {
     ASSERT(m_type == Type::Home);
     return m_local;
   }
-  uintptr_t getValAsBits() { return m_bits; }
+  uintptr_t getValAsBits() const { return m_bits; }
 
-  void printConst(std::ostream& ostream);
+  void printConst(std::ostream& ostream) const;
   virtual bool isConstInstruction() const {return true;}
   virtual void print(std::ostream& ostream);
   virtual void genCode(CodeGenerator* cg);
@@ -972,9 +970,9 @@ public:
     m_intVal = 0;
     m_boolVal = val;
   }
-  ConstInstruction(SSATmp* src, Local* l)
+  ConstInstruction(SSATmp* src, Local l)
       : IRInstruction(LdHome, Type::Home, src) {
-    m_local = l;
+    new (&m_local) Local(l);
   }
   ConstInstruction(Opcode opc, const Func* f)
       : IRInstruction(opc, Type::FuncRef) {
@@ -997,7 +995,7 @@ private:
     double            m_dblVal;
     const StringData* m_strVal;
     const ArrayData*  m_arrVal;
-    Local*            m_local; // for LdHome opcode
+    Local             m_local; // for LdHome opcode
     const Func*       m_func;
     const Class*      m_clss;
     const VarEnv*     m_varEnv;
@@ -1110,16 +1108,15 @@ public:
   void              incUseCount() { m_useCount++; }
   uint32            decUseCount() { return --m_useCount; }
   bool              isConst() const { return m_inst->isConstInstruction(); }
-  bool              getConstValAsBool();
-  int64             getConstValAsInt();
-  int64             getConstValAsRawInt();
-  double            getConstValAsDbl();
-  const StringData* getConstValAsStr();
-  const ArrayData*  getConstValAsArr();
-  const Func*       getConstValAsFunc();
-  const Class*      getConstValAsClass();
-  const Local*      getConstValAsLocal();
-  uintptr_t         getConstValAsBits();
+  bool              getConstValAsBool() const;
+  int64             getConstValAsInt() const;
+  int64             getConstValAsRawInt() const;
+  double            getConstValAsDbl() const;
+  const StringData* getConstValAsStr() const;
+  const ArrayData*  getConstValAsArr() const;
+  const Func*       getConstValAsFunc() const;
+  const Class*      getConstValAsClass() const;
+  uintptr_t         getConstValAsBits() const;
   void              print(std::ostream& ostream, bool printLastUse = false);
   void              print();
 
@@ -1227,7 +1224,10 @@ private:
 
 class IRFactory {
 public:
-  IRFactory() : m_nextLabelId(0), m_nextOpndId(0) {}
+  IRFactory()
+    : m_nextLabelId(0)
+    , m_nextOpndId(0)
+  {}
 
   IRInstruction* cloneInstruction(IRInstruction* inst);
   ExtendedInstruction* cloneInstruction(ExtendedInstruction* inst);
@@ -1303,34 +1303,20 @@ public:
   IRInstruction* allocSpill(SSATmp* numSlots);
   IRInstruction* freeSpill(SSATmp* numSlots);
 
-  Local* getLocal(uint32 id) {
-    if (id >= m_locals.size()) {
-      m_locals.resize(id+1);
-    }
-    Local* opnd = m_locals[id];
-    if (opnd == NULL) {
-      m_locals[id] = opnd = new (m_arena) Local(id);
-    }
-    return opnd;
-  }
-
   SSATmp* getSSATmp(IRInstruction* inst) {
     SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);
     inst->setDst(tmp);
     return tmp;
   }
 
-  uint32 getNumLocals() { return m_locals.size(); }
   uint32 getNumSSATmps() { return m_nextOpndId; }
-
   Arena& arena() { return m_arena; }
 
 private:
   uint32 m_nextLabelId;
   uint32 m_nextOpndId;
-  std::vector<Local*> m_locals;
 
-  // SSATmp, IRInstruction, and Local objects are allocated here.
+  // SSATmp and IRInstruction objects are allocated here.
   Arena m_arena;
 };
 

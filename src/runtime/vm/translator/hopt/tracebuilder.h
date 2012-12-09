@@ -228,7 +228,7 @@ public:
   void killCse();
   void killLocals();
   void updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
-  Local* getLocal(uint32 id);
+  Local getLocal(uint32 id);
   IRInstruction* appendInstruction(IRInstruction* inst);
   SSATmp* getLocalValue(int id);
   Type::Tag getLocalType(int id);

@@ -378,7 +378,7 @@ void ExtendedInstruction::appendExtendedSrc(IRFactory& irFactory,
   m_numSrcs++;
 }
 
-void ConstInstruction::printConst(std::ostream& ostream) {
+void ConstInstruction::printConst(std::ostream& ostream) const {
   switch (m_type) {
     case Type::Int:
       ostream << m_intVal;
@@ -403,7 +403,7 @@ void ConstInstruction::printConst(std::ostream& ostream) {
       break;
     }
     case Type::Home:
-      m_local->print(ostream);
+      m_local.print(ostream);
       break;
     case Type::Null:
       ostream << "Null";
@@ -452,7 +452,7 @@ uint32 ConstInstruction::hash() {
                              (void*)m_strVal);
   } else if (m_type == Type::Home) {
     return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
-                             (void*)m_local);
+                             m_local.getId());
   } else if (m_type == Type::FuncRef) {
     return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
                              (void*)m_func);
@@ -543,43 +543,39 @@ int SSATmp::numAllocatedRegs() const {
 }
 
 
-bool SSATmp::getConstValAsBool()   {
+bool SSATmp::getConstValAsBool() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBool();
 }
-int64 SSATmp::getConstValAsInt() {
+int64 SSATmp::getConstValAsInt() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsInt();
 }
-int64 SSATmp::getConstValAsRawInt() {
+int64 SSATmp::getConstValAsRawInt() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsRawInt();
 }
-double SSATmp::getConstValAsDbl() {
+double SSATmp::getConstValAsDbl() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsDbl();
 }
-const StringData* SSATmp::getConstValAsStr() {
+const StringData* SSATmp::getConstValAsStr() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsStr();
 }
-const ArrayData* SSATmp::getConstValAsArr() {
+const ArrayData* SSATmp::getConstValAsArr() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsArr();
 }
-const Func* SSATmp::getConstValAsFunc() {
+const Func* SSATmp::getConstValAsFunc() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsFunc();
 }
-const Class* SSATmp::getConstValAsClass() {
+const Class* SSATmp::getConstValAsClass() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsClass();
 }
-const Local* SSATmp::getConstValAsLocal() {
-  ASSERT(isConst());
-  return ((ConstInstruction*)m_inst)->getLocal();
-}
-uintptr_t SSATmp::getConstValAsBits() {
+uintptr_t SSATmp::getConstValAsBits() const {
   ASSERT(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBits();
 }

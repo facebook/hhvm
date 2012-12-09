@@ -81,10 +81,6 @@ util/ is at very bottom of the ladder. It may not depend on anything other
 than external libraries. Therefore, if it includes anything runtime/, it's
 wrong.
 
-Since it doesn't depend on any other libraries, includes can use double-quotes:
-
-  #include "thread_local.h"  // including a local file
-
 (2) Core Runtime Library
 
 runtime/base and runtime/eval depend on util/. Since there may be file name conflicts,

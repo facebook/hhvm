@@ -1147,11 +1147,11 @@ public:
   /*
    * Access to allocated registers.
    *
-   * Returns noreg for slots that aren't allocated.
+   * Returns InvalidReg for slots that aren't allocated.
    */
-  RegNumber     getReg() { ASSERT(!m_isSpilled); return m_regs[0]; }
-  RegNumber     getReg(uint32 i) { ASSERT(!m_isSpilled); return m_regs[i]; }
-  void          setReg(RegNumber reg, uint32 i) { m_regs[i] = reg; }
+  PhysReg     getReg() { ASSERT(!m_isSpilled); return m_regs[0]; }
+  PhysReg     getReg(uint32 i) { ASSERT(!m_isSpilled); return m_regs[i]; }
+  void        setReg(PhysReg reg, uint32 i) { m_regs[i] = reg; }
 
   /*
    * Returns information about how to spill/fill a SSATmp.
@@ -1193,7 +1193,7 @@ private:
     , m_isSpilled(false)
     , m_spillSlot(-1)
   {
-    m_regs[0] = m_regs[1] = Transl::reg::noreg;
+    m_regs[0] = m_regs[1] = InvalidReg;
   }
   SSATmp(const SSATmp&);
   SSATmp& operator=(const SSATmp&);
@@ -1213,7 +1213,7 @@ private:
    */
   static const int kMaxNumRegs = 2;
   union {
-    RegNumber m_regs[kMaxNumRegs];
+    PhysReg m_regs[kMaxNumRegs];
     SpillInfo m_spillInfo[kMaxNumRegs];
   };
 };

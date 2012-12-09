@@ -80,7 +80,7 @@ public:
   // helper functions for code generation
   Address cgCallHelper(Asm& a,
                        TCA addr,
-                       RegNumber dstReg,
+                       PhysReg dstReg,
                        SyncOptions sync,
                        ArgGroup& args);
   Address cgCallHelper(Asm&,
@@ -89,15 +89,15 @@ public:
                        SyncOptions sync,
                        ArgGroup& args);
 
-  Address cgStore(RegNumber base,
+  Address cgStore(PhysReg base,
                   int64_t off,
                   SSATmp* src,
                   bool genStoreType = true);
-  Address cgStoreCell(RegNumber base, int64_t off, SSATmp* src);
+  Address cgStoreCell(PhysReg base, int64_t off, SSATmp* src);
 
   Address cgLoad(Type::Tag type,
                  SSATmp* dst,
-                 RegNumber base,
+                 PhysReg base,
                  int64_t off,
                  LabelInstruction* label,
                  IRInstruction* inst = NULL);
@@ -129,7 +129,7 @@ public:
                          SSATmp* magicName);
   Address cgLoadCell(Type::Tag type,
                      SSATmp* dst,
-                     RegNumber base,
+                     PhysReg base,
                      int64_t off,
                      LabelInstruction* label);
 
@@ -150,34 +150,34 @@ public:
 
 private:
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
-  void emitTraceRet(CodeGenerator::Asm& as, RegNumber retAddrReg);
+  void emitTraceRet(CodeGenerator::Asm& as, PhysReg retAddrReg);
   Address emitCheckStack(CodeGenerator::Asm& as, SSATmp* sp, uint32 numElems,
                          bool allocActRec);
   Address emitCheckCell(CodeGenerator::Asm& as,
                         SSATmp* sp,
                         uint32 index);
   Address cgCheckStaticBit(Type::Tag type,
-                           RegNumber reg,
+                           PhysReg reg,
                            bool regIsCount);
   Address cgCheckStaticBitAndDecRef(Type::Tag type,
-                                    RegNumber dataReg,
+                                    PhysReg dataReg,
                                     LabelInstruction* exit);
-  Address cgCheckRefCountedType(RegNumber typeReg);
-  Address cgCheckRefCountedType(RegNumber baseReg,
+  Address cgCheckRefCountedType(PhysReg typeReg);
+  Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64 offset);
   Address cgDecRefStaticType(Type::Tag type,
-                             RegNumber dataReg,
+                             PhysReg dataReg,
                              LabelInstruction* exit,
                              bool genZeroCheck);
-  Address cgDecRefDynamicType(RegNumber typeReg,
-                              RegNumber dataReg,
+  Address cgDecRefDynamicType(PhysReg typeReg,
+                              PhysReg dataReg,
                               LabelInstruction* exit,
                               bool genZeroCheck);
-  Address cgDecRefDynamicTypeMem(RegNumber baseReg,
+  Address cgDecRefDynamicTypeMem(PhysReg baseReg,
                                  int64 offset,
                                  LabelInstruction* exit);
   Address cgDecRefMem(Type::Tag type,
-                      RegNumber baseReg,
+                      PhysReg baseReg,
                       int64 offset,
                       LabelInstruction* exit);
 
@@ -268,7 +268,7 @@ struct ArgGroup {
     return imm(uintptr_t(ptr));
   }
 
-  ArgGroup& reg(RegNumber reg) {
+  ArgGroup& reg(PhysReg reg) {
     m_args.push_back(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
     return *this;
   }
@@ -279,7 +279,7 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& addr(RegNumber base, uintptr_t off) {
+  ArgGroup& addr(PhysReg base, uintptr_t off) {
     m_args.push_back(ArgDesc(ArgDesc::Addr, PhysReg(base), off));
     return *this;
   }

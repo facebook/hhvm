@@ -74,8 +74,7 @@ RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
         if (src->hasReg(locIndex)) {
           // inst is the last use of the register assigned to this SSATmp
           // remove src reg from live regs set
-          RegNumber rn = src->getReg();
-          liveRegs.remove(PhysReg(rn));
+          liveRegs.remove(src->getReg());
         }
       }
     }
@@ -87,8 +86,7 @@ RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
          locIndex < dst->numAllocatedRegs();
          locIndex++) {
       if (dst->hasReg(locIndex)) {
-        RegNumber rn = dst->getReg(locIndex);
-        liveRegs.add(PhysReg(rn));
+        liveRegs.add(dst->getReg(locIndex));
       }
     }
   }
@@ -150,7 +148,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       for (int locIndex = 0;
            locIndex < tmp->numAllocatedRegs();
            ++locIndex) {
-        RegNumber srcReg = tmp->getReg(locIndex);
+        auto srcReg = tmp->getReg(locIndex);
         m_regs[int(srcReg)].m_pinned = true;
       }
     }
@@ -302,7 +300,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
 void LinearScan::allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
   reg->m_ssaTmp = ssaTmp;
   // mark inst as using this register
-  ssaTmp->setReg((RegNumber)reg->m_regNo, index);
+  ssaTmp->setReg(PhysReg(reg->m_regNo), index);
   uint32_t lastUseId = ssaTmp->getLastUseId();
   if (reg->isReserved()) {
     return;
@@ -892,7 +890,7 @@ void LinearScan::removeUnusedSpillsAux(Trace* trace) {
           for (int locIndex = 0;
                locIndex < src->numNeededRegs();
                ++locIndex) {
-            src->setReg(reg::noreg, locIndex);
+            src->setReg(InvalidReg, locIndex);
           }
         }
       }

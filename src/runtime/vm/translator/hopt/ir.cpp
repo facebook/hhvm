@@ -591,7 +591,7 @@ int SSATmp::numAllocatedRegs() const {
   // numNeededRegs() worth of registers in some cases (if the value
   // of this tmp wasn't used, etc).
   int i = 0;
-  while (i < kMaxNumRegs && m_regs[i] != reg::noreg) {
+  while (i < kMaxNumRegs && m_regs[i] != InvalidReg) {
     ++i;
   }
   return i;

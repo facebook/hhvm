@@ -90,8 +90,8 @@ struct CycleInfo {
 struct MoveInfo {
   enum Kind { Move, Xchg };
 
-  MoveInfo(Kind kind, RegNumber reg1, RegNumber reg2):
-      m_kind(kind), m_reg1(int(reg1)), m_reg2(int(reg2)) {}
+  MoveInfo(Kind kind, PhysReg reg1, PhysReg reg2):
+      m_kind(kind), m_reg1(reg1), m_reg2(reg2) {}
 
   MoveInfo(Kind kind, int reg1, int reg2):
       m_kind(kind),
@@ -114,7 +114,7 @@ void doRegMoves(int (&moves)[N], int rTmp,
     int index[N];
     for (int node = 0; node < N; ++node) {
       // If a node's source is itself, its a nop
-      if (moves[node] == node) moves[node] = int(reg::noreg);
+      if (moves[node] == node) moves[node] = -1;
       if (node == rTmp && moves[node] >= 0) {
         // ERROR: rTmp cannot be referenced in moves[].
         ASSERT(false);
@@ -224,11 +224,11 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     return;
   }
   if (val || tmp->numNeededRegs() > 1) {
-    RegNumber reg = tmp->getReg(val ? 0 : 1);
-    ASSERT(reg != reg::noreg);
+    auto reg = tmp->getReg(val ? 0 : 1);
+    ASSERT(reg != InvalidReg);
     m_imm = 0;
     m_kind = Reg;
-    m_srcReg = PhysReg(reg);
+    m_srcReg = reg;
     return;
   }
   m_srcReg = InvalidReg;
@@ -494,8 +494,8 @@ Address CodeGenerator::cgJcc(IRInstruction* inst) {
   if (src1Type == Type::ClassRef && src2Type == Type::ClassRef) {
     ASSERT(opc == JmpSame || opc == JmpNSame);
   }
-  RegNumber srcReg1 = src1->getReg();
-  RegNumber srcReg2 = src2->getReg();
+  auto srcReg1 = src1->getReg();
+  auto srcReg2 = src2->getReg();
 
   // Note: when both src1 and src2 are constants, we should transform the
   // branch into an unconditional jump earlier in the IR.
@@ -556,7 +556,7 @@ Address CodeGenerator::cgJmpNSame(IRInstruction* inst) {
 
 Address CodeGenerator::cgCallHelper(Asm& a,
                                     TCA addr,
-                                    RegNumber dstReg,
+                                    PhysReg dstReg,
                                     SyncOptions sync,
                                     ArgGroup& args) {
   ASSERT(int(args.size()) <= kNumRegisterArgs);
@@ -631,7 +631,7 @@ Address CodeGenerator::cgCallHelper(Asm& a,
     recordSyncPoint(a);
   }
   // grab the return value if any
-  if (dstReg != reg::noreg && dstReg != reg::rax) {
+  if (dstReg != InvalidReg && dstReg != reg::rax) {
     a.mov_reg64_reg64(reg::rax, dstReg);
     if (m_curTrace->isMain()) {
       if (m_curInst->isNative()) {
@@ -647,7 +647,7 @@ Address CodeGenerator::cgCallHelper(Asm& a,
                                     SSATmp* dst,
                                     SyncOptions sync,
                                     ArgGroup& args) {
-  RegNumber dstReg = dst == NULL ? reg::noreg : dst->getReg();
+  auto dstReg = dst == NULL ? InvalidReg : dst->getReg();
   return cgCallHelper(a, addr, dstReg, sync, args);
 }
 
@@ -656,8 +656,8 @@ Address CodeGenerator::cgMov(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
-  RegNumber dstReg = dst->getReg();
-  RegNumber srcReg = src->getReg();
+  auto dstReg = dst->getReg();
+  auto srcReg = src->getReg();
   if (dstReg != srcReg) {
     m_as.mov_reg64_reg64(srcReg, dstReg);
     if (m_curTrace->isMain()) {
@@ -667,30 +667,30 @@ Address CodeGenerator::cgMov(IRInstruction* inst) {
   return start;
 }
 
-#define GEN_UNARY_INT_OP(INSTR, OPER) do {                              \
-  if (src->getType() != Type::Int && src->getType() != Type::Bool) {    \
-    ASSERT(0); CG_PUNT(INSTR);                                          \
-  }                                                                     \
-  RegNumber dstReg = dst->getReg();                       \
-  RegNumber srcReg = src->getReg();                       \
-  ASSERT(dstReg != reg::noreg);                                         \
-  /* Integer operations require 64-bit representations */               \
-  if (src->getType() == Type::Bool && !src->isConst()) {                \
-    m_as.and_imm64_reg64(0xff, srcReg);                                 \
-  }                                                                     \
-  /* const source */                                                    \
-  if (src->isConst()) {                                                 \
-    m_as.mov_imm64_reg(OPER src->getConstValAsRawInt(), dstReg);        \
-    break;                                                              \
-  }                                                                     \
-  ASSERT(srcReg != reg::noreg);                                         \
-  if (dstReg != srcReg) {                                               \
-    m_as.mov_reg64_reg64(srcReg, dstReg);                               \
-    if (m_curTrace->isMain()) {                                         \
-      TRACE(3, "[counter] 1 reg move in UNARY_INT_OP\n");               \
-    }                                                                   \
-  }                                                                     \
-  m_as. INSTR (r64(dstReg));                                            \
+#define GEN_UNARY_INT_OP(INSTR, OPER) do {                            \
+  if (src->getType() != Type::Int && src->getType() != Type::Bool) {  \
+    ASSERT(0); CG_PUNT(INSTR);                                        \
+  }                                                                   \
+  auto dstReg = dst->getReg();                                        \
+  auto srcReg = src->getReg();                                        \
+  ASSERT(dstReg != InvalidReg);                                       \
+  /* Integer operations require 64-bit representations */             \
+  if (src->getType() == Type::Bool && !src->isConst()) {              \
+    m_as.and_imm64_reg64(0xff, srcReg);                               \
+  }                                                                   \
+  /* const source */                                                  \
+  if (src->isConst()) {                                               \
+    m_as.mov_imm64_reg(OPER src->getConstValAsRawInt(), dstReg);      \
+    break;                                                            \
+  }                                                                   \
+  ASSERT(srcReg != InvalidReg);                                       \
+  if (dstReg != srcReg) {                                             \
+    m_as.mov_reg64_reg64(srcReg, dstReg);                             \
+    if (m_curTrace->isMain()) {                                       \
+      TRACE(3, "[counter] 1 reg move in UNARY_INT_OP\n");             \
+    }                                                                 \
+  }                                                                   \
+  m_as. INSTR (r64(dstReg));                                          \
 } while (0)
 
 Address CodeGenerator::cgNotWork(SSATmp* dst, SSATmp* src) {
@@ -713,124 +713,124 @@ Address CodeGenerator::cgNegate(IRInstruction* inst) {
   return cgNegateWork(inst->getDst(), inst->getSrc(0));
 }
 
-#define GEN_COMMUTATIVE_INT_OP(INSTR, OPER) do {                            \
-  if (!(src1->getType() == Type::Int || src1->getType() == Type::Bool) ||   \
-      !(src2->getType() == Type::Int || src2->getType() == Type::Bool)) {   \
-    CG_PUNT(INSTR);                                                         \
-  }                                                                         \
-  RegNumber dstReg  = dst->getReg();                          \
-  RegNumber src1Reg = src1->getReg();                         \
-  RegNumber src2Reg = src2->getReg();                         \
-  /* Integer operations require 64-bit representations */                   \
-  if (src1->getType() == Type::Bool && !src1->isConst()) {                  \
-    m_as.and_imm64_reg64(0xff, src1Reg);                                    \
-  }                                                                         \
-  if (src2->getType() == Type::Bool && !src2->isConst()) {                  \
-    m_as.and_imm64_reg64(0xff, src2Reg);                                    \
-  }                                                                         \
-  /* 2 consts */                                                            \
-  if (src1->isConst() && src2->isConst()) {                                 \
-    int64 src1Const = src1->getConstValAsRawInt();                          \
-    int64 src2Const = src2->getConstValAsRawInt();                          \
-    m_as.mov_imm64_reg(src1Const OPER src2Const, dstReg);                   \
-  /* 1 const, 1 reg */                                                      \
-  } else if (src1->isConst() || src2->isConst()) {                          \
-    int64 srcConst = (src1->isConst() ? src1 : src2)->getConstValAsRawInt();\
-    RegNumber srcReg = (src1->isConst() ? src2Reg : src1Reg);         \
-    if (srcReg == dstReg) {                                                 \
-      m_as. INSTR ## _imm64_reg64(srcConst, dstReg);                        \
-    } else {                                                                \
-    /* TODO: use lea when possible */                                       \
-      m_as.mov_imm64_reg(srcConst, dstReg);                                 \
-      m_as. INSTR ##_reg64_reg64(srcReg, dstReg);                           \
-    }                                                                       \
-  /* both src1 and src2 are regs */                                         \
-  } else {                                                                  \
-    if (dstReg != src1Reg && dstReg != src2Reg) {                           \
-      m_as.mov_reg64_reg64(src1Reg, dstReg);                                \
-      if (m_curTrace->isMain()) {                                           \
-        TRACE(3, "[counter] 1 reg move in COMMUTATIVE_INT_OP\n");           \
-      }                                                                     \
-      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                         \
-    } else {                                                                \
-      if (dstReg == src1Reg) {                                              \
-        m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                       \
-      } else {                                                              \
-        ASSERT(dstReg == src2Reg);                                          \
-        m_as. INSTR ## _reg64_reg64(src1Reg, dstReg);                       \
-      }                                                                     \
-    }                                                                       \
-  }                                                                         \
-  } while (0)
-
-#define GEN_NON_COMMUTATIVE_INT_OP(INSTR, OPER) do {                      \
+#define GEN_COMMUTATIVE_INT_OP(INSTR, OPER) do {                        \
   if (!(src1->getType() == Type::Int || src1->getType() == Type::Bool) || \
       !(src2->getType() == Type::Int || src2->getType() == Type::Bool)) { \
-    CG_PUNT(INSTR);                                                       \
-  }                                                                       \
-  RegNumber dstReg  = dst->getReg();                        \
-  RegNumber src1Reg = src1->getReg();                       \
-  RegNumber src2Reg = src2->getReg();                       \
-  /* Integer operations require 64-bit representations */                 \
-  if (src1->getType() == Type::Bool && !src1->isConst()) {                \
-    m_as.and_imm64_reg64(0xff, src1Reg);                                  \
-  }                                                                       \
-  if (src2->getType() == Type::Bool && !src2->isConst()) {                \
-    m_as.and_imm64_reg64(0xff, src2Reg);                                  \
-  }                                                                       \
-  /* 2 consts */                                                          \
-  if (src1->isConst() && src2->isConst()) {                               \
-    int64 src1Const = src1->getConstValAsRawInt();                        \
-    int64 src2Const = src2->getConstValAsRawInt();                        \
-    m_as.mov_imm64_reg(src1Const OPER src2Const, dstReg);                 \
-  /* 1 const, 1 reg */                                                    \
-  } else if (src2->isConst()) {                                           \
-    int64 src2Const = src2->getConstValAsRawInt();                        \
-    if (src1Reg != dstReg) {                                              \
-      m_as.mov_reg64_reg64(src1Reg, dstReg);                              \
-      if (m_curTrace->isMain()) {                                         \
-        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");     \
-      }                                                                   \
-    }                                                                     \
-    m_as. INSTR ## _imm64_reg64(src2Const, dstReg);                       \
-  } else if (src1->isConst()) {                                           \
-    int64 src1Const = src1->getConstValAsRawInt();                        \
-    if (dstReg != src2Reg) {                                              \
-      m_as.mov_imm64_reg(src1Const, dstReg);                              \
-      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                       \
-    } else {                                                              \
-      m_as.mov_imm64_reg(src1Const, reg::rScratch);                       \
-      m_as. INSTR ## _reg64_reg64(src2Reg, reg::rScratch);                \
-      m_as.mov_reg64_reg64(reg::rScratch, dstReg);                        \
-      if (m_curTrace->isMain()) {                                         \
-        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");     \
-      }                                                                   \
-    }                                                                     \
-  /* both src1 and src2 are regs */                                       \
-  } else {                                                                \
-    if (dstReg != src1Reg && dstReg != src2Reg) {                         \
-      m_as.mov_reg64_reg64(src1Reg, dstReg);                              \
-      if (m_curTrace->isMain()) {                                         \
-        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");     \
-      }                                                                   \
-      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                       \
-    } else {                                                              \
-      if (dstReg == src1Reg) {                                            \
-        m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                     \
-      } else {                                                            \
-        ASSERT(dstReg == src2Reg);                                        \
-        m_as.mov_reg64_reg64(src1Reg, reg::rScratch);                     \
-        if (m_curTrace->isMain()) {                                       \
-          TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
-        }                                                                 \
-        m_as. INSTR ## _reg64_reg64(src2Reg, reg::rScratch);              \
-        m_as.mov_reg64_reg64(reg::rScratch, dstReg);                      \
-        if (m_curTrace->isMain()) {                                       \
-          TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
-        }                                                                 \
-      }                                                                   \
-    }                                                                     \
-  }                                                                       \
+    CG_PUNT(INSTR);                                                     \
+  }                                                                     \
+  auto dstReg  = dst->getReg();                                         \
+  auto src1Reg = src1->getReg();                                        \
+  auto src2Reg = src2->getReg();                                        \
+  /* Integer operations require 64-bit representations */               \
+  if (src1->getType() == Type::Bool && !src1->isConst()) {              \
+    m_as.and_imm64_reg64(0xff, src1Reg);                                \
+  }                                                                     \
+  if (src2->getType() == Type::Bool && !src2->isConst()) {              \
+    m_as.and_imm64_reg64(0xff, src2Reg);                                \
+  }                                                                     \
+  /* 2 consts */                                                        \
+  if (src1->isConst() && src2->isConst()) {                             \
+    int64 src1Const = src1->getConstValAsRawInt();                      \
+    int64 src2Const = src2->getConstValAsRawInt();                      \
+    m_as.mov_imm64_reg(src1Const OPER src2Const, dstReg);               \
+  /* 1 const, 1 reg */                                                  \
+  } else if (src1->isConst() || src2->isConst()) {                      \
+    int64 srcConst = (src1->isConst() ? src1 : src2)->getConstValAsRawInt(); \
+    auto srcReg = (src1->isConst() ? src2Reg : src1Reg);                \
+    if (srcReg == dstReg) {                                             \
+      m_as. INSTR ## _imm64_reg64(srcConst, dstReg);                    \
+    } else {                                                            \
+    /* TODO: use lea when possible */                                   \
+      m_as.mov_imm64_reg(srcConst, dstReg);                             \
+      m_as. INSTR ##_reg64_reg64(srcReg, dstReg);                       \
+    }                                                                   \
+  /* both src1 and src2 are regs */                                     \
+  } else {                                                              \
+    if (dstReg != src1Reg && dstReg != src2Reg) {                       \
+      m_as.mov_reg64_reg64(src1Reg, dstReg);                            \
+      if (m_curTrace->isMain()) {                                       \
+        TRACE(3, "[counter] 1 reg move in COMMUTATIVE_INT_OP\n");       \
+      }                                                                 \
+      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                     \
+    } else {                                                            \
+      if (dstReg == src1Reg) {                                          \
+        m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                   \
+      } else {                                                          \
+        ASSERT(dstReg == src2Reg);                                      \
+        m_as. INSTR ## _reg64_reg64(src1Reg, dstReg);                   \
+      }                                                                 \
+    }                                                                   \
+  }                                                                     \
+  } while (0)
+
+#define GEN_NON_COMMUTATIVE_INT_OP(INSTR, OPER) do {                    \
+  if (!(src1->getType() == Type::Int || src1->getType() == Type::Bool) || \
+      !(src2->getType() == Type::Int || src2->getType() == Type::Bool)) { \
+    CG_PUNT(INSTR);                                                     \
+  }                                                                     \
+  auto dstReg  = dst->getReg();                                         \
+  auto src1Reg = src1->getReg();                                        \
+  auto src2Reg = src2->getReg();                                        \
+  /* Integer operations require 64-bit representations */               \
+  if (src1->getType() == Type::Bool && !src1->isConst()) {              \
+    m_as.and_imm64_reg64(0xff, src1Reg);                                \
+  }                                                                     \
+  if (src2->getType() == Type::Bool && !src2->isConst()) {              \
+    m_as.and_imm64_reg64(0xff, src2Reg);                                \
+  }                                                                     \
+  /* 2 consts */                                                        \
+  if (src1->isConst() && src2->isConst()) {                             \
+    int64 src1Const = src1->getConstValAsRawInt();                      \
+    int64 src2Const = src2->getConstValAsRawInt();                      \
+    m_as.mov_imm64_reg(src1Const OPER src2Const, dstReg);               \
+  /* 1 const, 1 reg */                                                  \
+  } else if (src2->isConst()) {                                         \
+    int64 src2Const = src2->getConstValAsRawInt();                      \
+    if (src1Reg != dstReg) {                                            \
+      m_as.mov_reg64_reg64(src1Reg, dstReg);                            \
+      if (m_curTrace->isMain()) {                                       \
+        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
+      }                                                                 \
+    }                                                                   \
+    m_as. INSTR ## _imm64_reg64(src2Const, dstReg);                     \
+  } else if (src1->isConst()) {                                         \
+    int64 src1Const = src1->getConstValAsRawInt();                      \
+    if (dstReg != src2Reg) {                                            \
+      m_as.mov_imm64_reg(src1Const, dstReg);                            \
+      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                     \
+    } else {                                                            \
+      m_as.mov_imm64_reg(src1Const, reg::rScratch);                     \
+      m_as. INSTR ## _reg64_reg64(src2Reg, reg::rScratch);              \
+      m_as.mov_reg64_reg64(reg::rScratch, dstReg);                      \
+      if (m_curTrace->isMain()) {                                       \
+        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
+      }                                                                 \
+    }                                                                   \
+  /* both src1 and src2 are regs */                                     \
+  } else {                                                              \
+    if (dstReg != src1Reg && dstReg != src2Reg) {                       \
+      m_as.mov_reg64_reg64(src1Reg, dstReg);                            \
+      if (m_curTrace->isMain()) {                                       \
+        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
+      }                                                                 \
+      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                     \
+    } else {                                                            \
+      if (dstReg == src1Reg) {                                          \
+        m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                   \
+      } else {                                                          \
+        ASSERT(dstReg == src2Reg);                                      \
+        m_as.mov_reg64_reg64(src1Reg, reg::rScratch);                   \
+        if (m_curTrace->isMain()) {                                     \
+          TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n"); \
+        }                                                               \
+        m_as. INSTR ## _reg64_reg64(src2Reg, reg::rScratch);            \
+        m_as.mov_reg64_reg64(reg::rScratch, dstReg);                    \
+        if (m_curTrace->isMain()) {                                     \
+          TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n"); \
+        }                                                               \
+      }                                                                 \
+    }                                                                   \
+  }                                                                     \
   } while (0)
 
 Address CodeGenerator::cgOpAdd(IRInstruction* inst) {
@@ -1021,9 +1021,9 @@ Address CodeGenerator::cgOpCmpHelper(
   Type::Tag type1 = src1->getType();
   Type::Tag type2 = src2->getType();
 
-  RegNumber src1Reg = src1->getReg();
-  RegNumber src2Reg = src2->getReg();
-  RegNumber dstReg  = dst ->getReg();
+  auto src1Reg = src1->getReg();
+  auto src2Reg = src2->getReg();
+  auto dstReg  = dst ->getReg();
 
   // It is possible that some pass has been done after simplification; if such
   //  a pass invalidates out invatiants, then just punt.
@@ -1193,8 +1193,8 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
   SSATmp* src = inst->getSrc(0);
   Address start = m_as.code.frontier;
 
-  RegNumber dstReg = dst->getReg();
-  RegNumber srcReg = src->getReg();
+  auto dstReg = dst->getReg();
+  auto srcReg = src->getReg();
 
   bool srcIsConst = src->isConst();
 
@@ -1329,11 +1329,11 @@ Address CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
 
-  RegNumber srcReg = src->getReg();
-  RegNumber dstReg = dst->getReg();
+  auto srcReg = src->getReg();
+  auto dstReg = dst->getReg();
 
-  ASSERT(srcReg != reg::noreg);
-  ASSERT(dstReg != reg::noreg);
+  ASSERT(srcReg != InvalidReg);
+  ASSERT(dstReg != InvalidReg);
 
   if (srcReg != dstReg) {
     m_as.mov_reg64_reg64(srcReg, dstReg);
@@ -1361,8 +1361,8 @@ Address CodeGenerator::cgUnbox(IRInstruction* inst) {
   if (dstType == Type::Cell) {
     CG_PUNT(Unbox);
   }
-  RegNumber srcReg = src->getReg();
-  RegNumber dstReg = dst->getReg();
+  auto srcReg = src->getReg();
+  auto dstReg = dst->getReg();
   if (Type::isBoxed(srcType)) {
     emitDeref(m_as, PhysReg(srcReg), PhysReg(dstReg));
   } else if (srcType == Type::Gen) {
@@ -1378,7 +1378,7 @@ Address CodeGenerator::cgUnbox(IRInstruction* inst) {
     CG_PUNT(Unbox);
   }
   if (genIncRef && Type::isRefCounted(dstType) &&
-      dst->getReg() != reg::noreg) {
+      dst->getReg() != InvalidReg) {
     cgIncRefWork(dstType, dst, dst);
   }
   return start;
@@ -1394,14 +1394,14 @@ Address CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   SSATmp* actRec     = inst->getSrc(1);
 
   ASSERT(methodName->isConst() && methodName->getType() == Type::StaticStr);
-  RegNumber dstReg = dst->getReg();
-  if (dstReg == reg::noreg) {
+  auto dstReg = dst->getReg();
+  if (dstReg == InvalidReg) {
     // happens if LdFixedFunc and FCall not in same trace
     dstReg = rScratch;
     dst->setReg(dstReg, 0);
   }
-  RegNumber actRecReg = actRec->getReg();
-  ASSERT(actRecReg != reg::noreg);
+  auto actRecReg = actRec->getReg();
+  ASSERT(actRecReg != InvalidReg);
   using namespace TargetCache;
   const StringData* name = methodName->getConstValAsStr();
   CacheHandle ch = allocFixedFunction(name);
@@ -1425,11 +1425,11 @@ Address CodeGenerator::cgLdFunc(IRInstruction* inst) {
   SSATmp* methodName = inst->getSrc(0);
   SSATmp* actRec     = inst->getSrc(1);
 
-  RegNumber actRecReg = actRec->getReg();
-  ASSERT(actRecReg != reg::noreg);
+  auto actRecReg = actRec->getReg();
+  ASSERT(actRecReg != InvalidReg);
   TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
-  RegNumber dstReg = dst->getReg();
-  if (dstReg == reg::noreg) {
+  auto dstReg = dst->getReg();
+  if (dstReg == InvalidReg) {
     // this happens if LdFixedFunc and FCAll are not in the same trace
     // TODO: try to get rax instead to avoid a move after the call
     dstReg = rScratch;
@@ -1468,8 +1468,8 @@ Address CodeGenerator::cgLdObjClass(IRInstruction* inst) {
 
   // TODO:MP assert copied from translatorx64. Update and make it work
   // ASSERT(obj->getType() == Type::Obj);
-  RegNumber dstReg = dst->getReg();
-  RegNumber objReg = obj->getReg();
+  auto dstReg = dst->getReg();
+  auto objReg = obj->getReg();
   m_as.load_reg64_disp_reg64(objReg, ObjectData::getVMClassOffset(), dstReg);
 
   return start;
@@ -1481,7 +1481,7 @@ Address CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
   SSATmp* className = inst->getSrc(0);
   ASSERT(className->isConst() && className->getType() == Type::StaticStr);
 
-  RegNumber dstReg = dst->getReg();
+  auto dstReg = dst->getReg();
   const StringData* classNameString = className->getConstValAsStr();
   TargetCache::allocKnownClass(classNameString);
   TargetCache::CacheHandle ch = TargetCache::allocKnownClass(classNameString);
@@ -1496,8 +1496,8 @@ Address CodeGenerator::cgRetVal(IRInstruction* inst) {
   SSATmp* fp    = inst->getSrc(0);
   SSATmp* val   = inst->getNumSrcs() > 1 ? inst->getSrc(1) : NULL;
 
-  RegNumber dstSpReg = dstSp->getReg();
-  RegNumber fpReg    =    fp->getReg();
+  auto dstSpReg = dstSp->getReg();
+  auto fpReg    =    fp->getReg();
 
   if (val) {
     // Store return value at the top of the caller's eval stack
@@ -1506,7 +1506,7 @@ Address CodeGenerator::cgRetVal(IRInstruction* inst) {
       DataType valDataType = Type::toDataType(val->getType());
       m_as.store_imm32_disp_reg(valDataType, AROFF(m_r) + TVOFF(m_type), fpReg);
     } else {
-      RegNumber typeReg = val->getReg(1);
+      auto typeReg = val->getReg(1);
       m_as.store_reg32_disp_reg64(typeReg, AROFF(m_r) + TVOFF(m_type), fpReg);
     }
 
@@ -1516,7 +1516,7 @@ Address CodeGenerator::cgRetVal(IRInstruction* inst) {
         int64 intVal = val->getConstValAsRawInt();
         m_as.store_imm64_disp_reg64(intVal,  AROFF(m_r) + TVOFF(m_data), fpReg);
       } else {
-        RegNumber valReg = val->getReg();
+        auto valReg = val->getReg();
         if (val->getType() == Type::Bool) {
           // BOOL BYTE
           m_as.and_imm64_reg64(0xff, valReg);
@@ -1536,11 +1536,11 @@ Address CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   SSATmp* retAddr = inst->getDst();
   SSATmp* fp    = inst->getSrc(0);
 
-  RegNumber retAddrReg = retAddr->getReg(0);
-  ASSERT(retAddrReg != reg::noreg);
+  auto retAddrReg = retAddr->getReg(0);
+  ASSERT(retAddrReg != InvalidReg);
 
-  RegNumber fpReg = fp->getReg(0);
-  ASSERT(fpReg != reg::noreg);
+  auto fpReg = fp->getReg(0);
+  ASSERT(fpReg != InvalidReg);
 
   m_as.load_reg64_disp_reg64(fpReg, AROFF(m_savedRip), retAddrReg);
 
@@ -1568,10 +1568,10 @@ Address CodeGenerator::emitCheckStack(CodeGenerator::Asm& as,
                                       uint32 numElems,
                                       bool allocActRec) {
   if (allocActRec) {
-    return cgCallHelper(as, (TCA)checkStackAR, reg::noreg, kNoSyncPoint,
+    return cgCallHelper(as, (TCA)checkStackAR, InvalidReg, kNoSyncPoint,
                         ArgGroup().ssa(sp).imm(numElems));
   } else {
-    return cgCallHelper(as, (TCA)checkStack, reg::noreg, kNoSyncPoint,
+    return cgCallHelper(as, (TCA)checkStack, InvalidReg, kNoSyncPoint,
                         ArgGroup().ssa(sp).imm(numElems));
   }
 }
@@ -1588,7 +1588,7 @@ void checkCell(Cell* base, uint32 index) {
 Address CodeGenerator::emitCheckCell(CodeGenerator::Asm& as,
                                      SSATmp* sp,
                                      uint32 index) {
-  return cgCallHelper(as, (TCA)checkCell, reg::noreg, kNoSyncPoint,
+  return cgCallHelper(as, (TCA)checkCell, InvalidReg, kNoSyncPoint,
                       ArgGroup().ssa(sp).imm(index));
 }
 
@@ -1637,16 +1637,16 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   checkStack(sp, 1); // check return value
 }
 
-void CodeGenerator::emitTraceRet(CodeGenerator::Asm& as,
-                                 RegNumber retAddrReg) {
-  as.push(r64(retAddrReg));
+void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a,
+                                 PhysReg retAddrReg) {
+  a.    push   (retAddrReg);
   // call to a trace function
-  as.mov_reg64_reg64(retAddrReg, reg::rdx);
-  as.mov_reg64_reg64(rVmFp, reg::rdi);
-  as.mov_reg64_reg64(rVmSp, reg::rsi);
+  a.    movq   (retAddrReg, rdx);
+  a.    movq   (rVmFp, rdi);
+  a.    movq   (rVmSp, rsi);
   // do the call; may use a trampoline
-  m_tx64->emitCall(as, (TCA)traceRet);
-  as.pop(r64(retAddrReg));
+  m_tx64->emitCall(a, TCA(traceRet));
+  a.    pop    (retAddrReg);
 }
 
 Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
@@ -1655,8 +1655,7 @@ Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   SSATmp* fp    = inst->getSrc(1);
   SSATmp* retAddr = inst->getSrc(2);
 
-
-  RegNumber retAddrReg = retAddr->getReg();
+  auto retAddrReg = retAddr->getReg();
 
   // Make sure rVmFp and rVmSp are set appropriately
   if (sp->getReg() != rVmSp) {
@@ -1686,8 +1685,8 @@ Address CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   SSATmp* outFp = inst->getDst();
   SSATmp* inFp  = inst->getSrc(0);
 
-  RegNumber  inFpReg =  inFp->getReg();
-  RegNumber outFpReg = outFp->getReg();
+  auto  inFpReg =  inFp->getReg();
+  auto outFpReg = outFp->getReg();
 
   m_as.load_reg64_disp_reg64(inFpReg, AROFF(m_savedRbp), outFpReg);
 
@@ -1727,7 +1726,7 @@ Address CodeGenerator::cgSpill(IRInstruction* inst) {
 
   ASSERT(dst->numNeededRegs() == src->numNeededRegs());
   for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
-    RegNumber srcReg = src->getReg(locIndex);
+    auto srcReg = src->getReg(locIndex);
 
     // We do not need to mask booleans, since the IR will reload the spill
     auto sinfo = dst->getSpillInfo(locIndex);
@@ -1752,7 +1751,7 @@ Address CodeGenerator::cgReload(IRInstruction* inst) {
 
   ASSERT(dst->numNeededRegs() == src->numNeededRegs());
   for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
-    RegNumber dstReg = dst->getReg(locIndex);
+    auto dstReg = dst->getReg(locIndex);
 
     auto sinfo = src->getSpillInfo(locIndex);
     switch (sinfo.type()) {
@@ -1775,7 +1774,7 @@ Address CodeGenerator::cgStPropWork(IRInstruction* inst, bool genTypeStore) {
   SSATmp* prop  = inst->getSrc(1);
   SSATmp* src   = inst->getSrc(2);
 
-  RegNumber objReg = obj->getReg();
+  auto objReg = obj->getReg();
   if (prop->isConst()) {
     int64 offset = prop->getConstValAsInt();
     cgStore(objReg, offset, src, genTypeStore);
@@ -1812,10 +1811,10 @@ Address CodeGenerator::cgStRefWork(IRInstruction* inst, bool genStoreType) {
 
   Address start = cgStore(addr->getReg(), 0, src, genStoreType);
 
-  RegNumber destReg = dest->getReg();
-  RegNumber addrReg = addr->getReg();
+  auto destReg = dest->getReg();
+  auto addrReg = addr->getReg();
 
-  if (destReg != reg::noreg && destReg != addrReg) {
+  if (destReg != InvalidReg && destReg != addrReg) {
     m_as.mov_reg64_reg64(addrReg, destReg);
     TRACE(3, "[counter] 1 reg move in cgStRefWork\n");
   }
@@ -1838,7 +1837,7 @@ Address CodeGenerator::cgStLocWork(IRInstruction* inst, bool genStoreType) {
   IRInstruction* addrInst = addr->getInstruction();
   ASSERT(addrInst->getOpcode() == LdHome);
   ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
-  RegNumber baseReg = homeInstr->getSrc(0)->getReg();
+  auto baseReg = homeInstr->getSrc(0)->getReg();
   int64_t index = homeInstr->getLocal()->getId();
   cgStore(baseReg, -((index + 1) * sizeof(Cell)), src, genStoreType);
   return start;
@@ -1981,8 +1980,7 @@ static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
   as.patchJcc8(patch, as.code.frontier);
 }
 
-static
-void emitAssertRefCount(CodeGenerator::Asm& as, RegNumber base) {
+static void emitAssertRefCount(CodeGenerator::Asm& as, PhysReg base) {
   as.cmp_imm32_disp_reg32(HPHP::RefCountStaticValue,
                           TVOFF(_count),
                           base);
@@ -1992,8 +1990,7 @@ void emitAssertRefCount(CodeGenerator::Asm& as, RegNumber base) {
   as.patchJcc8(patch, as.code.frontier);
 }
 
-static
-void emitIncRef(CodeGenerator::Asm& as, RegNumber base) {
+static void emitIncRef(CodeGenerator::Asm& as, PhysReg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(as, base);
   }
@@ -2007,12 +2004,12 @@ void emitIncRef(CodeGenerator::Asm& as, RegNumber base) {
 
 Address CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
   ASSERT(Type::isRefCounted(type));
-  RegNumber base = src->getReg(0);
+  auto base = src->getReg(0);
   Address start = m_as.code.frontier;
   if (type == Type::Obj || Type::isBoxed(type)) {
     emitIncRef(m_as, base);
-    RegNumber dstReg = dst->getReg(0);
-    if (dstReg != reg::noreg && dstReg != base) {
+    auto dstReg = dst->getReg(0);
+    if (dstReg != InvalidReg && dstReg != base) {
       m_as.mov_reg64_reg64(base, dstReg);
       if (m_curTrace->isMain()) {
         TRACE(3, "[counter] 1 reg move in cgIncRefWork\n");
@@ -2031,7 +2028,7 @@ Address CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
       m_as.jcc8(CC_LE, patch1);
     }
     if (type == Type::Cell) {
-      RegNumber typ = src->getReg(1);
+      auto typ = src->getReg(1);
       m_as.cmp_imm32_reg32(KindOfRefCountThreshold, typ);
       patch1 = m_as.code.frontier;
       m_as.jcc8(CC_LE, patch1);
@@ -2046,15 +2043,15 @@ Address CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
       m_as.patchJcc8(patch1, m_as.code.frontier);
     }
     m_as.patchJcc8(patch2, m_as.code.frontier);
-    RegNumber dstValueReg = dst->getReg(0);
+    auto dstValueReg = dst->getReg(0);
     if (type == Type::Cell) {
-      RegNumber srcTypeReg = src->getReg(1);
-      RegNumber dstTypeReg = dst->getReg(1);
+      auto srcTypeReg = src->getReg(1);
+      auto dstTypeReg = dst->getReg(1);
       // Be careful here. We need to move values from one pair
       // of registers to another.
       // dstValueReg = base
       // dstTypeReg = srcTypeReg
-      if (dstValueReg != reg::noreg && base != dstValueReg) {
+      if (dstValueReg != InvalidReg && base != dstValueReg) {
         if (srcTypeReg == dstValueReg) {
           // use the scratch reg to avoid clobbering srcTypeReg
           m_as.mov_reg64_reg64(srcTypeReg, rScratch);
@@ -2068,14 +2065,14 @@ Address CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
           TRACE(3, "[counter] 1 reg move in cgIncRefWork\n");
         }
       }
-      if (dstTypeReg != reg::noreg && srcTypeReg != dstTypeReg) {
+      if (dstTypeReg != InvalidReg && srcTypeReg != dstTypeReg) {
         m_as.mov_reg64_reg64(srcTypeReg, dstTypeReg);
         if (m_curTrace->isMain()) {
           TRACE(3, "[counter] 1 reg move in cgIncRefWork\n");
         }
       }
     } else {
-      if (dstValueReg != reg::noreg && dstValueReg != base) {
+      if (dstValueReg != InvalidReg && dstValueReg != base) {
         m_as.mov_reg64_reg64(base, dstValueReg);
         if (m_curTrace->isMain()) {
           TRACE(3, "[counter] 1 reg move in cgIncRefWork\n");
@@ -2109,8 +2106,8 @@ Address CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* fp    = inst->getSrc(0);
   LabelInstruction* exit = inst->getLabel();
-  RegNumber fpReg = fp->getReg();
-  RegNumber scratchReg = rScratch;
+  auto fpReg = fp->getReg();
+  auto scratchReg = rScratch;
 
   // Load AR->m_this into rScratch
   m_as.load_reg64_disp_reg64(fpReg, AROFF(m_this), scratchReg);
@@ -2150,7 +2147,7 @@ Address CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
   ASSERT (addrInst->getOpcode() == LdHome);
 
   ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
-  RegNumber fpReg = homeInstr->getSrc(0)->getReg();
+  auto fpReg = homeInstr->getSrc(0)->getReg();
   int64_t index = homeInstr->getLocal()->getId();
 
   return cgDecRefMem(type, fpReg, -((index + 1) * sizeof(Cell)), exit);
@@ -2188,7 +2185,7 @@ Address CodeGenerator::cgDecRefLocals(IRInstruction* inst) {
   SSATmp* fp = inst->getSrc(0);
   SSATmp* numLocals = inst->getSrc(1);
 
-  return cgCallHelper(m_as, (TCA)frame_free_locals_no_this, reg::noreg,
+  return cgCallHelper(m_as, (TCA)frame_free_locals_no_this, InvalidReg,
                       kSyncPoint, ArgGroup().ssa(fp).ssa(numLocals));
 }
 
@@ -2196,7 +2193,7 @@ Address CodeGenerator::cgDecRefLocalsThis(IRInstruction* inst) {
   SSATmp* fp = inst->getSrc(0);
   SSATmp* numLocals = inst->getSrc(1);
 
-  return cgCallHelper(m_as, (TCA)frame_free_locals, reg::noreg, kSyncPoint,
+  return cgCallHelper(m_as, (TCA)frame_free_locals, InvalidReg, kSyncPoint,
                       ArgGroup().ssa(fp).ssa(numLocals));
 }
 
@@ -2240,7 +2237,7 @@ Address CodeGenerator::getDtorTyped() {
 // Return value: the address to be patched with the address to jump to in case
 // the static bit is set. If the check is unnecessary, this method retuns NULL.
 Address CodeGenerator::cgCheckStaticBit(Type::Tag type,
-                                        RegNumber reg,
+                                        PhysReg reg,
                                         bool regIsCount) {
   if (!Type::needsStaticBitCheck(type)) return NULL;
 
@@ -2268,12 +2265,12 @@ Address CodeGenerator::cgCheckStaticBit(Type::Tag type,
 //               emitted; NULL otherwise.
 //
 Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
-                                                 RegNumber dataReg,
+                                                 PhysReg dataReg,
                                                  LabelInstruction* exit) {
   ASSERT(Type::isRefCounted(type));
 
   Address patchStaticCheck = NULL;
-  const RegNumber scratchReg = rScratch;
+  const auto scratchReg = rScratch;
 
   bool canUseScratch = dataReg != scratchReg;
 
@@ -2360,7 +2357,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
 // Returns the address to be patched with the address to jump to in case
 // the type is not ref-counted.
 //
-Address CodeGenerator::cgCheckRefCountedType(RegNumber typeReg) {
+Address CodeGenerator::cgCheckRefCountedType(PhysReg typeReg) {
 
   m_as.cmp_imm32_reg32(KindOfRefCountThreshold, typeReg);
 
@@ -2370,7 +2367,7 @@ Address CodeGenerator::cgCheckRefCountedType(RegNumber typeReg) {
   return addrToPatch;
 }
 
-Address CodeGenerator::cgCheckRefCountedType(RegNumber baseReg,
+Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg,
                                              int64 offset) {
 
   m_as.cmp_imm32_disp_reg32(KindOfRefCountThreshold,
@@ -2388,7 +2385,7 @@ Address CodeGenerator::cgCheckRefCountedType(RegNumber baseReg,
 // Generates dec-ref of a typed value with statically known type.
 //
 Address CodeGenerator::cgDecRefStaticType(Type::Tag type,
-                                          RegNumber dataReg,
+                                          PhysReg dataReg,
                                           LabelInstruction* exit,
                                           bool genZeroCheck) {
   ASSERT(type != Type::Cell && type != Type::Gen);
@@ -2420,7 +2417,7 @@ Address CodeGenerator::cgDecRefStaticType(Type::Tag type,
     m_as.jcc(cc, m_astubs.code.frontier);
     // Emit the call to release in m_astubs
     cgCallHelper(m_astubs, getDtor(Type::toDataType(type)),
-                 reg::noreg, kSyncPoint,
+                 InvalidReg, kSyncPoint,
                  ArgGroup().reg(dataReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
@@ -2439,8 +2436,8 @@ Address CodeGenerator::cgDecRefStaticType(Type::Tag type,
 // Generates dec-ref of a typed value with dynamic (statically unknown) type,
 // when the type is stored in typeReg.
 //
-Address CodeGenerator::cgDecRefDynamicType(RegNumber typeReg,
-                                           RegNumber dataReg,
+Address CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
+                                           PhysReg dataReg,
                                            LabelInstruction* exit,
                                            bool genZeroCheck) {
   Address start = m_as.code.frontier;
@@ -2463,7 +2460,7 @@ Address CodeGenerator::cgDecRefDynamicType(RegNumber typeReg,
     ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
     m_as.jcc(cc, m_astubs.code.frontier);
     // Emit call to release in m_astubs
-    cgCallHelper(m_astubs, getDtorTyped(), reg::noreg, kSyncPoint,
+    cgCallHelper(m_astubs, getDtorTyped(), InvalidReg, kSyncPoint,
                  ArgGroup().reg(dataReg).reg(typeReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
@@ -2484,11 +2481,11 @@ Address CodeGenerator::cgDecRefDynamicType(RegNumber typeReg,
 // the typed value. This method assumes that baseReg is not the
 // scratch register.
 //
-Address CodeGenerator::cgDecRefDynamicTypeMem(RegNumber baseReg,
+Address CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
                                               int64 offset,
                                               LabelInstruction* exit) {
   Address start = m_as.code.frontier;
-  RegNumber scratchReg = rScratch;
+  auto scratchReg = rScratch;
 
   ASSERT(baseReg != scratchReg);
 
@@ -2513,7 +2510,7 @@ Address CodeGenerator::cgDecRefDynamicTypeMem(RegNumber baseReg,
     m_astubs.lea_reg64_disp_reg64(baseReg, offset, scratchReg);
 
     // Emit call to release in m_astubs
-    cgCallHelper(m_astubs, getDtorGeneric(), reg::noreg, kSyncPoint,
+    cgCallHelper(m_astubs, getDtorGeneric(), InvalidReg, kSyncPoint,
                  ArgGroup().reg(scratchReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
@@ -2534,11 +2531,11 @@ Address CodeGenerator::cgDecRefDynamicTypeMem(RegNumber baseReg,
 // This handles cases where type is either static or dynamic.
 //
 Address CodeGenerator::cgDecRefMem(Type::Tag type,
-                                   RegNumber baseReg,
+                                   PhysReg baseReg,
                                    int64 offset,
                                    LabelInstruction* exit) {
   Address start = m_as.code.frontier;
-  RegNumber scratchReg = rScratch;
+  auto scratchReg = rScratch;
   ASSERT(baseReg != scratchReg);
 
   if (Type::isStaticallyKnown(type)) {
@@ -2610,8 +2607,8 @@ Address CodeGenerator::cgAllocActRec1(IRInstruction* inst) {
   SSATmp* sp    = inst->getSrc(0);
 
   int actRecAdjustment = -(int)sizeof(ActRec);
-  RegNumber spReg = sp->getReg();
-  RegNumber dstReg = dst->getReg();
+  auto spReg = sp->getReg();
+  auto dstReg = dst->getReg();
   if (spReg != dstReg) {
     m_as.lea_reg64_disp_reg64(spReg, actRecAdjustment, dstReg);
   } else {
@@ -2631,7 +2628,7 @@ Address CodeGenerator::cgAllocActRec6(SSATmp* dst,
   DEBUG_ONLY bool setThis  = true;
 
   int actRecAdjustment = -(int)sizeof(ActRec);
-  RegNumber spReg = sp->getReg();
+  auto spReg = sp->getReg();
   // actRec->m_this
   if (objOrCls->getType() == Type::ClassRef) {
     // store class
@@ -2707,7 +2704,7 @@ Address CodeGenerator::cgAllocActRec6(SSATmp* dst,
                             actRecAdjustment + AROFF(m_numArgsAndCtorFlag),
                             spReg);
 
-  RegNumber dstReg = dst->getReg();
+  auto dstReg = dst->getReg();
   if (spReg != dstReg) {
     m_as.lea_reg64_disp_reg64(spReg, actRecAdjustment, dstReg);
   } else {
@@ -2740,8 +2737,8 @@ Address CodeGenerator::cgAllocActRec5(SSATmp* dst,
                             sp->getReg());
 
   // XXX TODO: store the this or late bound class
-  RegNumber dstReg = dst->getReg();
-  RegNumber spReg = sp->getReg();
+  auto dstReg = dst->getReg();
+  auto spReg = sp->getReg();
   if (spReg != dstReg) {
     m_as.lea_reg64_disp_reg64(spReg, actRecAdjustment, dstReg);
   } else {
@@ -2877,7 +2874,7 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
   // skip over func
   args++;  numArgs--;
 
-  RegNumber spReg = actRec->getReg();
+  auto spReg = actRec->getReg();
   // put all outgoing arguments onto the VM stack
   int64 adjustment = (-(int64)numArgs) * sizeof(Cell);
   for (uint32 i = 0; i < numArgs; i++) {
@@ -2920,8 +2917,8 @@ Address CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
   uint32   numSpill  = inst->getNumExtendedSrcs();
   SSATmp** spillSrcs = ((ExtendedInstruction*)inst)->getExtendedSrcs();
 
-  RegNumber dstReg = dst->getReg();
-  RegNumber spReg = sp->getReg();
+  auto dstReg = dst->getReg();
+  auto spReg = sp->getReg();
   int64 adjustment =
     (spAdjustment->getConstValAsInt() - numSpill) * sizeof(Cell);
   for (uint32 i = 0; i < numSpill; i++) {
@@ -2969,7 +2966,7 @@ Address CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   ASSERT(func->isConst());
   ASSERT(func->getType() == Type::FuncRef);
   BuiltinFunction builtinFuncPtr = func->getConstValAsFunc()->builtinFuncPtr();
-  RegNumber fpReg = fp->getReg();
+  auto fpReg = fp->getReg();
   if (fpReg != argNumToRegName[0]) {
     m_as.mov_reg64_reg64(fpReg, argNumToRegName[0]);
     if (m_curTrace->isMain()) {
@@ -2987,14 +2984,14 @@ Address CodeGenerator::cgLdThis(IRInstruction* inst) {
   SSATmp* src   = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
   // mov dst, [fp + 0x20]
-  RegNumber dstReg = dst->getReg();
+  auto dstReg = dst->getReg();
 
   // the destination of LdThis could be dead but
   // the instruction itself still useful because
   // of the checks that it does (if it has a label).
   // So we need to make sure there is a dstReg for this
   // instruction.
-  if (dstReg != reg::noreg) {
+  if (dstReg != InvalidReg) {
     // instruction's result is not dead
     m_as.load_reg64_disp_reg64(src->getReg(),
                                AROFF(m_this),
@@ -3007,7 +3004,7 @@ Address CodeGenerator::cgLdThis(IRInstruction* inst) {
       // test dst, dst
       // jz label
 
-      if (dstReg == reg::noreg) {
+      if (dstReg == InvalidReg) {
         dstReg = reg::rScratch;
         m_as.load_reg64_disp_reg64(src->getReg(),
                                    AROFF(m_this),
@@ -3018,7 +3015,7 @@ Address CodeGenerator::cgLdThis(IRInstruction* inst) {
     }
     // test dst, 0x01
     // jnz label
-    if (dstReg == reg::noreg) {
+    if (dstReg == InvalidReg) {
       // TODO: Could also use a 32-bit test here
       m_as.test_imm64_disp_reg64(1, AROFF(m_this), src->getReg());
       emitFwdJcc(CC_NZ, label);
@@ -3042,8 +3039,8 @@ Address CodeGenerator::cgLdConst(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   int64 constVal= ((ConstInstruction*)inst)->getValAsInt();
 
-  RegNumber dstReg = dst->getReg();
-  ASSERT(dstReg != reg::noreg);
+  auto dstReg = dst->getReg();
+  ASSERT(dstReg != InvalidReg);
 
   if (constVal == 0) {
     m_as.xor_reg64_reg64(dstReg, dstReg);
@@ -3062,8 +3059,8 @@ Address CodeGenerator::cgLdVarEnv(IRInstruction* inst) {
   ASSERT(!(src->isConst()));
   ASSERT(!(dst->isConst()));
 
-  RegNumber srcReg = src->getReg();
-  RegNumber dstReg = dst->getReg();
+  auto srcReg = src->getReg();
+  auto dstReg = dst->getReg();
 
   m_as.load_reg64_disp_reg64(srcReg, AROFF(m_varEnv), dstReg);
 
@@ -3076,8 +3073,8 @@ Address CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   SSATmp* baseAddr = inst->getSrc(0);
   SSATmp* offset   = inst->getSrc(1);
 
-  RegNumber dstReg  = dst->getReg();
-  RegNumber baseReg = baseAddr->getReg();
+  auto dstReg  = dst->getReg();
+  auto baseReg = baseAddr->getReg();
 
   ASSERT(offset->isConst());
 
@@ -3108,8 +3105,8 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
 
   ASSERT(!(dest->isConst()));
 
-  RegNumber addrReg = addr->getReg();
-  RegNumber destReg = dest->getReg();
+  auto addrReg = addr->getReg();
+  auto destReg = dest->getReg();
 
   if (addr->isConst()) {
     addrReg = rScratch;
@@ -3132,7 +3129,7 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
     }
   } else {
     int ldSize = getNativeTypeSize(dest->getType());
-    RegNumber offsetReg = offset->getReg();
+    auto offsetReg = offset->getReg();
     if (ldSize == sz::qword) {
       m_as.load_reg64_disp_index_reg64(addrReg, 0, offsetReg, destReg);
     } else {
@@ -3147,7 +3144,7 @@ Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
 
 Address CodeGenerator::cgStRaw(IRInstruction* inst) {
   Address start = m_as.code.frontier;
-  RegNumber baseReg = inst->getSrc(0)->getReg();
+  auto baseReg = inst->getSrc(0)->getReg();
   int64 kind = inst->getSrc(1)->getConstValAsInt();
   SSATmp* value = inst->getSrc(2);
 
@@ -3194,16 +3191,16 @@ Address CodeGenerator::cgStRaw(IRInstruction* inst) {
 // a check that bails to the label if the loaded type is boxed.
 Address CodeGenerator::cgLoadCell(Type::Tag type,
                                   SSATmp* dst,
-                                  RegNumber base,
+                                  PhysReg base,
                                   int64_t off,
                                   LabelInstruction* label) {
   ASSERT(dst->getType() == Type::Cell || dst->getType() == Type::Gen);
   Address start = m_as.code.frontier;
-  RegNumber valueDstReg = dst->getReg(0);
-  RegNumber typeDstReg = dst->getReg(1);
-  if (valueDstReg == reg::noreg) {
+  auto valueDstReg = dst->getReg(0);
+  auto typeDstReg = dst->getReg(1);
+  if (valueDstReg == InvalidReg) {
     // a dead load
-    ASSERT(typeDstReg == reg::noreg);
+    ASSERT(typeDstReg == InvalidReg);
     return start;
   }
   if (base == typeDstReg) {
@@ -3231,7 +3228,7 @@ Address CodeGenerator::cgLoadCell(Type::Tag type,
 }
 
 
-Address CodeGenerator::cgStoreCell(RegNumber base,
+Address CodeGenerator::cgStoreCell(PhysReg base,
                                    int64_t off,
                                    SSATmp* src) {
   Address start = m_as.code.frontier;
@@ -3248,7 +3245,7 @@ Address CodeGenerator::cgStoreCell(RegNumber base,
 
 // checkNotVar: If true, also emit check that loaded type is not Variant
 // checkNotUninit: If true, also emit check that loaded type is not Uninit
-Address CodeGenerator::cgStore(RegNumber base,
+Address CodeGenerator::cgStore(PhysReg base,
                                int64_t off,
                                SSATmp* src,
                                bool genStoreType) {
@@ -3271,9 +3268,9 @@ Address CodeGenerator::cgStore(RegNumber base,
     if (addrInst->getOpcode() == LdHome) {
       // do an lea of the home
       ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
-      RegNumber baseReg = homeInstr->getSrc(0)->getReg();
+      auto baseReg = homeInstr->getSrc(0)->getReg();
       int64_t index = homeInstr->getLocal()->getId();
-      RegNumber tmpReg = reg::rScratch;
+      auto tmpReg = reg::rScratch;
       m_as.lea_reg64_disp_reg64(baseReg, -((index + 1)*sizeof(Cell)), tmpReg);
       m_as.store_reg64_disp_reg64(tmpReg, off + TVOFF(m_data), base);
     } else {
@@ -3327,7 +3324,7 @@ Address CodeGenerator::cgStore(RegNumber base,
 
 Address CodeGenerator::cgLoad(Type::Tag type,
                               SSATmp* dst,
-                              RegNumber base,
+                              PhysReg base,
                               int64_t off,
                               LabelInstruction* label,
                               IRInstruction* inst) {
@@ -3363,9 +3360,9 @@ Address CodeGenerator::cgLoad(Type::Tag type,
   if (type == Type::Uninit || type == Type::Null) {
     return start; // these are constants
   }
-  RegNumber dstReg = dst->getReg();
-  if (dstReg != reg::noreg) {
-    // if dstReg == reg::noreg then the value of this load is dead
+  auto dstReg = dst->getReg();
+  if (dstReg != InvalidReg) {
+    // if dstReg == InvalidReg then the value of this load is dead
     if (type == Type::Bool) {
       m_as.load_reg64_disp_reg32(base, off + TVOFF(m_data),  dstReg);
     } else {
@@ -3383,7 +3380,7 @@ Address CodeGenerator::cgLdPropNR(IRInstruction* inst) {
   SSATmp*   prop  = inst->getSrc(1);
   LabelInstruction* label = inst->getLabel();
 
-  RegNumber objReg = obj->getReg();
+  PhysReg objReg = obj->getReg();
   if (prop->isConst()) {
     int64 offset = prop->getConstValAsInt();
     cgLoad(type, dst, objReg, offset, label);
@@ -3438,7 +3435,7 @@ Address CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
   return start;
 }
 
-static void getLocalRegOffset(SSATmp* src, RegNumber& reg, int64& off) {
+static void getLocalRegOffset(SSATmp* src, PhysReg& reg, int64& off) {
   ConstInstruction* homeInstr =
     dynamic_cast<ConstInstruction*>(src->getInstruction());
   ASSERT(homeInstr && homeInstr->getOpcode() == LdHome);
@@ -3453,7 +3450,7 @@ Address CodeGenerator::cgLdLoc(IRInstruction* inst) {
   SSATmp*           dst  = inst->getDst();
   LabelInstruction* label     = inst->getLabel();
 
-  RegNumber fpReg;
+  PhysReg fpReg;
   int64 offset;
   getLocalRegOffset(inst->getSrc(0), fpReg, offset);
   ASSERT(fpReg == HPHP::VM::Transl::reg::rbp);
@@ -3463,7 +3460,7 @@ Address CodeGenerator::cgLdLoc(IRInstruction* inst) {
 
 Address CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
   Address start = m_as.code.frontier;
-  RegNumber fpReg;
+  PhysReg fpReg;
   int64 offset;
   getLocalRegOffset(inst->getSrc(0), fpReg, offset);
   m_as.lea_reg64_disp_reg64(fpReg, offset,
@@ -3502,10 +3499,10 @@ Address CodeGenerator::cgGuardType(IRInstruction* inst) {
   SSATmp*   dst   = inst->getDst();
   SSATmp*   src   = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
-  RegNumber dstReg = dst->getReg(0);
-  RegNumber srcValueReg = src->getReg(0);
-  RegNumber srcTypeReg = src->getReg(1);
-  ASSERT(srcTypeReg != reg::noreg);
+  auto dstReg = dst->getReg(0);
+  auto srcValueReg = src->getReg(0);
+  auto srcTypeReg = src->getReg(1);
+  ASSERT(srcTypeReg != InvalidReg);
 
   // compare srcTypeReg with type
   DataType dataType = Type::toDataType(type);
@@ -3539,36 +3536,36 @@ Address CodeGenerator::cgGuardRefs(IRInstruction* inst) {
 
   // Get values in place
   ASSERT(funcPtrTmp->getType() == Type::FuncRef);
-  RegNumber funcPtrReg = funcPtrTmp->getReg();
-  ASSERT(funcPtrReg != reg::noreg);
+  auto funcPtrReg = funcPtrTmp->getReg();
+  ASSERT(funcPtrReg != InvalidReg);
 
   ASSERT(nParamsTmp->getType() == Type::Int);
-  RegNumber nParamsReg = nParamsTmp->getReg();
-  ASSERT(nParamsReg != reg::noreg);
+  auto nParamsReg = nParamsTmp->getReg();
+  ASSERT(nParamsReg != InvalidReg);
 
   ASSERT(bitsPtrTmp->getType() == Type::Int);
-  RegNumber bitsPtrReg = bitsPtrTmp->getReg();
-  ASSERT(bitsPtrReg != reg::noreg);
+  auto bitsPtrReg = bitsPtrTmp->getReg();
+  ASSERT(bitsPtrReg != InvalidReg);
 
   ASSERT(firstBitNumTmp->isConst() && firstBitNumTmp->getType() == Type::Int);
   uint32 firstBitNum = (uint32)(firstBitNumTmp->getConstValAsInt());
 
   ASSERT(mask64Tmp->getType() == Type::Int);
   ASSERT(mask64Tmp->getInstruction()->getOpcode() == LdConst);
-  RegNumber mask64Reg = mask64Tmp->getReg();
-  ASSERT(mask64Reg != reg::noreg);
+  auto mask64Reg = mask64Tmp->getReg();
+  ASSERT(mask64Reg != InvalidReg);
   int64 mask64 = mask64Tmp->getConstValAsInt();
 
   ASSERT(vals64Tmp->getType() == Type::Int);
   ASSERT(vals64Tmp->getInstruction()->getOpcode() == LdConst);
-  RegNumber vals64Reg = vals64Tmp->getReg();
-  ASSERT(vals64Reg != reg::noreg);
+  auto vals64Reg = vals64Tmp->getReg();
+  ASSERT(vals64Reg != InvalidReg);
   int64 vals64 = vals64Tmp->getConstValAsInt();
 
 
   // Actually generate code
 
-  RegNumber bitsValReg = rScratch;
+  auto bitsValReg = rScratch;
   TCA patchEndOuterIf = NULL;
   TCA patchEndInnerIf = NULL;
 
@@ -3650,11 +3647,11 @@ Address CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
 
   ASSERT(prop->isConst() && prop->getType() == Type::Int);
 
-  RegNumber dstReg = dst->getReg();
-  RegNumber objReg = obj->getReg();
+  auto dstReg = dst->getReg();
+  auto objReg = obj->getReg();
 
-  ASSERT(objReg != reg::noreg);
-  ASSERT(dstReg != reg::noreg);
+  ASSERT(objReg != InvalidReg);
+  ASSERT(dstReg != InvalidReg);
 
   int64 offset = prop->getConstValAsInt();
   m_as.lea_reg64_disp_reg64(objReg, offset, dstReg);
@@ -3685,8 +3682,8 @@ Address CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   const NamedEntity* ne     = (NamedEntity*)baseClass->getConstValAsRawInt();
   TargetCache::CacheHandle ch =
     TargetCache::StaticMethodCache::alloc(cls, method, getContextName());
-  RegNumber funcDestReg  = dst->getReg(0);
-  RegNumber classDestReg = dst->getReg(1);
+  auto funcDestReg  = dst->getReg(0);
+  auto classDestReg = dst->getReg(1);
 
 
   // Attempt to retrieve the func* and class* from cache
@@ -3740,15 +3737,15 @@ Address CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
       cls->getType() == Type::ClassRef) {
 
     const StringData* propName = prop->getConstValAsStr();
-    RegNumber dstReg = dst->getReg();
-    RegNumber srcReg = cls->getReg();
+    auto dstReg = dst->getReg();
+    auto srcReg = cls->getReg();
     const StringData* clsNameString = clsName->getConstValAsStr();
     string sds(Util::toLower(clsNameString->data()) + ":" +
                string(propName->data(), propName->size()));
     StringData sd(sds.c_str(), sds.size(), AttachLiteral);
     CacheHandle ch = SPropCache::alloc(&sd);
 
-    RegNumber tmpReg = dstReg == srcReg ? rScratch : dstReg;
+    auto tmpReg = dstReg == srcReg ? PhysReg(rScratch) : dstReg;
     m_as.load_reg64_disp_reg64(rVmTl, ch, tmpReg);
     m_as.test_reg64_reg64(tmpReg, tmpReg);
     // jz off to the helper call in astubs
@@ -3777,7 +3774,7 @@ Address CodeGenerator::cgLdCls(IRInstruction* inst) {
   SSATmp* className = inst->getSrc(0);
 
   ASSERT(className->isConst() && className->getType() == Type::StaticStr);
-  RegNumber dstReg = dst->getReg();
+  auto dstReg = dst->getReg();
   const StringData* classNameString = className->getConstValAsStr();
   TargetCache::CacheHandle ch = TargetCache::allocKnownClass(classNameString);
   m_as.load_reg64_disp_reg64(rVmTl, ch, dstReg);
@@ -3841,7 +3838,7 @@ Address CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
   SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive ?
                                       inst->getDst() : NULL;
 
-  RegNumber srcReg = src->getReg();
+  auto srcReg = src->getReg();
   if (src->isConst()) {
     bool valIsZero = src->getConstValAsRawInt() == 0;
     if ((cc == CC_Z  && valIsZero) ||
@@ -3882,10 +3879,10 @@ Address CodeGenerator::cgJmp_(IRInstruction* inst) {
 
 Address CodeGenerator::cgCheckUninit(SSATmp* src, LabelInstruction* label) {
   Address start = m_as.code.frontier;
-  RegNumber typeReg = src->getReg(1);
+  auto typeReg = src->getReg(1);
 
   ASSERT(label);
-  ASSERT(typeReg != reg::noreg);
+  ASSERT(typeReg != InvalidReg);
 
   if (HPHP::KindOfUninit == 0) {
     m_as.test_reg32_reg32(typeReg, typeReg);
@@ -3915,7 +3912,7 @@ Address CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
 
   ASSERT(!(fp->isConst()));
 
-  RegNumber fpReg = fp->getReg();
+  auto fpReg = fp->getReg();
   m_as.cmp_imm64_disp_reg64(0, AROFF(m_varEnv), fpReg);
   emitFwdJcc(CC_NE, label);
   return start;
@@ -3962,7 +3959,7 @@ Address CodeGenerator::cgPrint(IRInstruction* inst) {
 //      CG_PUNT(cgPrint);
       return start;
   }
-  return cgCallHelper(m_as, (TCA)fptr, reg::noreg, kNoSyncPoint,
+  return cgCallHelper(m_as, (TCA)fptr, InvalidReg, kNoSyncPoint,
                       ArgGroup().ssa(arg));
 }
 
@@ -4161,7 +4158,7 @@ Address CodeGenerator::cgInterpOne(IRInstruction* inst) {
   void* interpOneHelper =
     interpOneEntryPoints[*(getCurrFunc()->unit()->at(pcOff))];
 
-  RegNumber dstReg = reg::noreg;
+  auto dstReg = InvalidReg;
   if (label) {
     dstReg = rScratch;
   }
@@ -4179,8 +4176,8 @@ Address CodeGenerator::cgInterpOne(IRInstruction* inst) {
                               dstReg);
 //    emitFwdJcc(CC_E, label);
   }
-  RegNumber newSpReg = inst->getDst()->getReg();
-  DEBUG_ONLY RegNumber spReg = sp->getReg();
+  auto newSpReg = inst->getDst()->getReg();
+  DEBUG_ONLY auto spReg = sp->getReg();
   int64 spAdjustment = spAdjustmentTmp->getConstValAsInt();
   Type::Tag resultType = (Type::Tag)resultTypeTmp->getConstValAsInt();
   int64 adjustment =
@@ -4218,7 +4215,7 @@ Address CodeGenerator::cgCreateCont(IRInstruction* inst) {
 Address CodeGenerator::cgFillContLocals(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   cgCallHelper(m_as, (TCA)VMExecutionContext::fillContinuationVars,
-               reg::noreg, kNoSyncPoint,
+               InvalidReg, kNoSyncPoint,
                ArgGroup().ssa(inst->getSrc(0))
                          .ssa(inst->getSrc(1))
                          .ssa(inst->getSrc(2))
@@ -4229,9 +4226,9 @@ Address CodeGenerator::cgFillContLocals(IRInstruction* inst) {
 Address CodeGenerator::cgFillContThis(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* cont = inst->getSrc(0);
-  RegNumber baseReg = inst->getSrc(1)->getReg();
+  auto baseReg = inst->getSrc(1)->getReg();
   int64 offset = inst->getSrc(2)->getConstValAsInt();
-  RegNumber scratch = rScratch;
+  auto scratch = rScratch;
 
   m_as.load_reg64_disp_reg64(cont->getReg(), CONTOFF(m_obj), scratch);
   m_as.test_reg64_reg64(scratch, scratch);
@@ -4259,7 +4256,7 @@ Address CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {
 
 Address CodeGenerator::cgContPreNext(IRInstruction* inst) {
   Address start = m_as.code.frontier;
-  RegNumber contReg = inst->getSrc(0)->getReg();
+  auto contReg = inst->getSrc(0)->getReg();
 
   const Offset doneOffset = CONTOFF(m_done);
   CT_ASSERT((doneOffset + 1) == CONTOFF(m_running));
@@ -4285,7 +4282,7 @@ Address CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
 Address CodeGenerator::cgAssertRefCount(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* src = inst->getSrc(0);
-  RegNumber srcReg = src->getReg();
+  auto srcReg = src->getReg();
   emitAssertRefCount(m_as, srcReg);
   return start;
 }

@@ -555,7 +555,7 @@ Address CodeGenerator::cgJmpNSame(IRInstruction* inst) {
 Address CodeGenerator::cgCallHelper(Asm& a,
                                     TCA addr,
                                     RegNumber dstReg,
-                                    bool doRecordSyncPoint,
+                                    SyncOptions sync,
                                     ArgGroup& args) {
   ASSERT(int(args.size()) <= kNumRegisterArgs);
   Address start = a.code.frontier;
@@ -625,7 +625,7 @@ Address CodeGenerator::cgCallHelper(Asm& a,
   // HHIR:TODO this only does required part of TranslatorX64::recordCallImpl()
   // Better to have improved SKTRACE'n by calling recordStubCall,
   // recordReentrantCall, or recordReentrantStubCall as appropriate
-  if (doRecordSyncPoint) {
+  if (sync == kSyncPoint) {
     recordSyncPoint(a);
   }
   // grab the return value if any
@@ -643,10 +643,10 @@ Address CodeGenerator::cgCallHelper(Asm& a,
 Address CodeGenerator::cgCallHelper(Asm& a,
                                     TCA addr,
                                     SSATmp* dst,
-                                    bool doRecordSyncPoint,
+                                    SyncOptions sync,
                                     ArgGroup& args) {
   RegNumber dstReg = dst == NULL ? reg::noreg : dst->getReg();
-  return cgCallHelper(a, addr, dstReg, doRecordSyncPoint, args);
+  return cgCallHelper(a, addr, dstReg, sync, args);
 }
 
 
@@ -1039,7 +1039,7 @@ Address CodeGenerator::cgOpCmpHelper(
   if (Type::isString(type1) && Type::isString(type2)) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);
-    cgCallHelper(m_as, (TCA)str_cmp_str,  dst, true, args);
+    cgCallHelper(m_as, (TCA)str_cmp_str,  dst, kSyncPoint, args);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1083,11 +1083,11 @@ Address CodeGenerator::cgOpCmpHelper(
       if (type2 == Type::Int) {
         ArgGroup args;
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)str_cmp_int,  dst, true, args);
+        cgCallHelper(m_as, (TCA)str_cmp_int,  dst, kSyncPoint, args);
       } else if (type2 == Type::Obj) {
         ArgGroup args;
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)str_cmp_obj,  dst, true, args);
+        cgCallHelper(m_as, (TCA)str_cmp_obj,  dst, kSyncPoint, args);
       } else {
         CG_PUNT(cgOpCmpHelper_sx);
       }
@@ -1101,11 +1101,11 @@ Address CodeGenerator::cgOpCmpHelper(
       if (type2 == Type::Obj) {
         ArgGroup args;
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)obj_cmp_obj,  dst, true, args);
+        cgCallHelper(m_as, (TCA)obj_cmp_obj,  dst, kSyncPoint, args);
       } else if (type2 == Type::Int) {
         ArgGroup args;
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)obj_cmp_int,  dst, true, args);
+        cgCallHelper(m_as, (TCA)obj_cmp_int,  dst, kSyncPoint, args);
       } else {
         CG_PUNT(cgOpCmpHelper_ox);
       }
@@ -1122,7 +1122,7 @@ Address CodeGenerator::cgOpCmpHelper(
   else if (type1 == Type::Arr && type2 == Type::Arr) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);
-    cgCallHelper(m_as, (TCA)arr_cmp_arr,  dst, true, args);
+    cgCallHelper(m_as, (TCA)arr_cmp_arr,  dst, kSyncPoint, args);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1221,7 +1221,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       } else {
         ArgGroup args;
         args.ssa(src);
-        cgCallHelper(m_as, (TCA)strToIntHelper, dst, false, args);
+        cgCallHelper(m_as, (TCA)strToIntHelper, dst, kNoSyncPoint, args);
       }
       return start;
     }
@@ -1281,7 +1281,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
         CG_PUNT(Conv);
       }
       args.ssa(src);
-      cgCallHelper(m_as, helper, dst, false, args);
+      cgCallHelper(m_as, helper, dst, kNoSyncPoint, args);
     }
     return start;
   }
@@ -1291,7 +1291,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       // Int -> Str
       ArgGroup args;
       args.ssa(src);
-      cgCallHelper(m_as, (TCA)intToStringHelper, dst, false, args);
+      cgCallHelper(m_as, (TCA)intToStringHelper, dst, kNoSyncPoint, args);
     } else if (fromType == Type::Bool) {
       // Bool -> Str
       m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
@@ -1409,7 +1409,7 @@ Address CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   // jz off to the helper call in astubs
   m_as.jcc(CC_E, m_astubs.code.frontier);
   // this helper simply raises an error
-  cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupFailed, dst, true,
+  cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupFailed, dst, kSyncPoint,
                ArgGroup().immPtr(name));
   m_astubs.jmp(m_as.code.frontier);
   // save func ptr in actrec
@@ -1433,7 +1433,7 @@ Address CodeGenerator::cgLdFunc(IRInstruction* inst) {
     dstReg = LinearScan::rScratch;
   }
   // raises an error if function not found
-  cgCallHelper(m_as, (TCA)FuncCache::lookup, dstReg, true,
+  cgCallHelper(m_as, (TCA)FuncCache::lookup, dstReg, kSyncPoint,
                ArgGroup().imm(ch)
                          .ssa(methodName));
   m_as.store_reg64_disp_reg64(dstReg, AROFF(m_func), actRecReg);
@@ -1450,7 +1450,7 @@ Address CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   Address start = cgCallHelper(m_as,
                                (TCA)MethodCache::lookup,
                                dst,
-                               true,
+                               kSyncPoint,
                                ArgGroup().imm(ch)
                                          .ssa(actRec)
                                          .ssa(methodName));
@@ -1566,10 +1566,10 @@ Address CodeGenerator::emitCheckStack(CodeGenerator::Asm& as,
                                       uint32 numElems,
                                       bool allocActRec) {
   if (allocActRec) {
-    return cgCallHelper(as, (TCA)checkStackAR, reg::noreg, false,
+    return cgCallHelper(as, (TCA)checkStackAR, reg::noreg, kNoSyncPoint,
                         ArgGroup().ssa(sp).imm(numElems));
   } else {
-    return cgCallHelper(as, (TCA)checkStack, reg::noreg, false,
+    return cgCallHelper(as, (TCA)checkStack, reg::noreg, kNoSyncPoint,
                         ArgGroup().ssa(sp).imm(numElems));
   }
 }
@@ -1586,7 +1586,7 @@ void checkCell(Cell* base, uint32 index) {
 Address CodeGenerator::emitCheckCell(CodeGenerator::Asm& as,
                                      SSATmp* sp,
                                      uint32 index) {
-  return cgCallHelper(as, (TCA)checkCell, reg::noreg, false,
+  return cgCallHelper(as, (TCA)checkCell, reg::noreg, kNoSyncPoint,
                       ArgGroup().ssa(sp).imm(index));
 }
 
@@ -2176,15 +2176,15 @@ Address CodeGenerator::cgDecRefLocals(IRInstruction* inst) {
   SSATmp* fp = inst->getSrc(0);
   SSATmp* numLocals = inst->getSrc(1);
 
-  return cgCallHelper(m_as, (TCA)frame_free_locals_no_this, reg::noreg, true,
-                      ArgGroup().ssa(fp).ssa(numLocals));
+  return cgCallHelper(m_as, (TCA)frame_free_locals_no_this, reg::noreg,
+                      kSyncPoint, ArgGroup().ssa(fp).ssa(numLocals));
 }
 
 Address CodeGenerator::cgDecRefLocalsThis(IRInstruction* inst) {
   SSATmp* fp = inst->getSrc(0);
   SSATmp* numLocals = inst->getSrc(1);
 
-  return cgCallHelper(m_as, (TCA)frame_free_locals, reg::noreg, true,
+  return cgCallHelper(m_as, (TCA)frame_free_locals, reg::noreg, kSyncPoint,
                       ArgGroup().ssa(fp).ssa(numLocals));
 }
 
@@ -2408,7 +2408,7 @@ Address CodeGenerator::cgDecRefStaticType(Type::Tag type,
     m_as.jcc(cc, m_astubs.code.frontier);
     // Emit the call to release in m_astubs
     cgCallHelper(m_astubs, getDtor(Type::toDataType(type)),
-                 reg::noreg, true,
+                 reg::noreg, kSyncPoint,
                  ArgGroup().reg(dataReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
@@ -2451,7 +2451,7 @@ Address CodeGenerator::cgDecRefDynamicType(RegNumber typeReg,
     ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
     m_as.jcc(cc, m_astubs.code.frontier);
     // Emit call to release in m_astubs
-    cgCallHelper(m_astubs, getDtorTyped(), reg::noreg, true,
+    cgCallHelper(m_astubs, getDtorTyped(), reg::noreg, kSyncPoint,
                  ArgGroup().reg(dataReg).reg(typeReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
@@ -2501,7 +2501,7 @@ Address CodeGenerator::cgDecRefDynamicTypeMem(RegNumber baseReg,
     m_astubs.lea_reg64_disp_reg64(baseReg, offset, scratchReg);
 
     // Emit call to release in m_astubs
-    cgCallHelper(m_astubs, getDtorGeneric(), reg::noreg, true,
+    cgCallHelper(m_astubs, getDtorGeneric(), reg::noreg, kSyncPoint,
                  ArgGroup().reg(scratchReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
@@ -2833,11 +2833,11 @@ Address CodeGenerator::cgNewObj(IRInstruction* inst) {
       .ssa(numParams)
       .ssa(sp)
       .ssa(fp);
-    cgCallHelper(m_as, (TCA)cgNewInstanceHelperCached, dst, true, args);
+    cgCallHelper(m_as, (TCA)cgNewInstanceHelperCached, dst, kSyncPoint, args);
   } else {
     ArgGroup args;
     args.ssa(clsName).ssa(numParams).ssa(sp).ssa(fp);
-    cgCallHelper(m_as, (TCA)cgNewInstanceHelper, dst, true, args);
+    cgCallHelper(m_as, (TCA)cgNewInstanceHelper, dst, kSyncPoint, args);
   }
   return start;
 }
@@ -2848,7 +2848,7 @@ Address CodeGenerator::cgNewArray(IRInstruction* inst) {
   SSATmp* cap   = inst->getSrc(0);
   ArgGroup args;
   args.ssa(cap);
-  cgCallHelper(m_as, (TCA)new_array, dst, false, args);
+  cgCallHelper(m_as, (TCA)new_array, dst, kNoSyncPoint, args);
   return start;
 }
 
@@ -3423,7 +3423,7 @@ Address CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
   cgCallHelper(m_as,
                (TCA)HPHP::VM::Transl::raiseUndefVariable,
                (SSATmp*)NULL,
-               true,
+               kSyncPoint,
                ArgGroup().immPtr(name));
   return start;
 }
@@ -3698,7 +3698,7 @@ Address CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
     cgCallHelper(m_astubs,
                  (TCA)StaticMethodCache::lookupIR,
                  funcDestReg,
-                 true,
+                 kSyncPoint,
                  ArgGroup().imm(ch)            // Handle ch
                            .immPtr(ne)         // NamedEntity* np.second
                            .immPtr(cls)        // className
@@ -3748,7 +3748,7 @@ Address CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
       m_as.mov_reg64_reg64(tmpReg, dstReg);
     }
     // this helper can raise an invalid property access error
-    cgCallHelper(m_astubs, (TCA)SPropCache::lookup, dstReg, true,
+    cgCallHelper(m_astubs, (TCA)SPropCache::lookup, dstReg, kSyncPoint,
                  ArgGroup().imm(ch).ssa(cls).ssa(prop));
     // TODO make the lookup helper return null on an error, and bail out
     // of the trace if it returns null
@@ -3786,7 +3786,7 @@ Address CodeGenerator::cgLdCls(IRInstruction* inst) {
     cgCallHelper(m_astubs,
                  (TCA)TargetCache::lookupKnownClass<false>,
                  dst,
-                 true,
+                 kSyncPoint,
                  args);
     m_astubs.jmp(m_as.code.frontier);
   }
@@ -3918,11 +3918,11 @@ Address CodeGenerator::cgBox(IRInstruction* inst) {
   SSATmp* src   = inst->getSrc(0);
   Type::Tag type = src->getType();
   if (type == Type::Cell) {
-    cgCallHelper(m_as, (TCA)tvBoxHelper, dst, false,
+    cgCallHelper(m_as, (TCA)tvBoxHelper, dst, kNoSyncPoint,
                  ArgGroup().type(src)
                            .ssa(src));
   } else if (type < Type::Cell) {
-    cgCallHelper(m_as, (TCA)tvBoxHelper, dst, false,
+    cgCallHelper(m_as, (TCA)tvBoxHelper, dst, kNoSyncPoint,
                  ArgGroup().imm(Type::toDataType(src->getType()))
                            .ssa(src));
   } else {
@@ -3953,7 +3953,7 @@ Address CodeGenerator::cgPrint(IRInstruction* inst) {
 //      CG_PUNT(cgPrint);
       return start;
   }
-  return cgCallHelper(m_as, (TCA)fptr, reg::noreg, false,
+  return cgCallHelper(m_as, (TCA)fptr, reg::noreg, kNoSyncPoint,
                       ArgGroup().ssa(arg));
 }
 
@@ -3995,14 +3995,14 @@ Address CodeGenerator::cgAddElem(IRInstruction* inst) {
   // TODO: Double check that these helpers don't re-enter
   if (keyType == Type::Int) {
     // decrefs the value but not the key
-    cgCallHelper(m_as, (TCA)addElemIntKeyHelper, dst, false,
+    cgCallHelper(m_as, (TCA)addElemIntKeyHelper, dst, kNoSyncPoint,
                  ArgGroup().ssa(arr)
                            .ssa(key)
                            .ssa(val)
                            .type(val));
   } else if (keyType == Type::Str || keyType == Type::StaticStr) {
     // decrefs the value but not the key
-    cgCallHelper(m_as, (TCA)addElemStringKeyHelper, dst, false,
+    cgCallHelper(m_as, (TCA)addElemStringKeyHelper, dst, kNoSyncPoint,
                  ArgGroup().ssa(arr)
                            .ssa(key)
                            .ssa(val)
@@ -4030,7 +4030,7 @@ Address CodeGenerator::cgAddNewElem(IRInstruction* inst) {
   UNUSED SSATmp* val   = inst->getSrc(1);
 
   // decrefs value
-  cgCallHelper(m_as, (TCA)addNewElemHelper, dst, false,
+  cgCallHelper(m_as, (TCA)addNewElemHelper, dst, kNoSyncPoint,
                ArgGroup().ssa(arr)
                          .ssa(val)
                          .type(val));
@@ -4081,14 +4081,14 @@ Address CodeGenerator::cgConcat(IRInstruction* inst) {
     fptr = (void*)concat_is;
   }
   if (fptr) {
-    cgCallHelper(m_as, (TCA)fptr, dst, false,
+    cgCallHelper(m_as, (TCA)fptr, dst, kNoSyncPoint,
                  ArgGroup().ssa(tl)
                            .ssa(tr));
   } else {
     if (lType >= Type::Obj || rType >= Type::Obj) {
       CG_PUNT(cgConcat);
     }
-    cgCallHelper(m_as, (TCA)concat, dst, false,
+    cgCallHelper(m_as, (TCA)concat, dst, kNoSyncPoint,
                  ArgGroup().type(lType)
                            .ssa(tl)
                            .type(rType)
@@ -4103,7 +4103,7 @@ Address CodeGenerator::cgArrayAdd(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
   // TODO: Double check that array_add is not re-entrant
-  return cgCallHelper(m_as, (TCA)array_add, dst, false,
+  return cgCallHelper(m_as, (TCA)array_add, dst, kNoSyncPoint,
                       ArgGroup().ssa(src1)
                                 .ssa(src2));
 }
@@ -4156,7 +4156,7 @@ Address CodeGenerator::cgInterpOne(IRInstruction* inst) {
   if (label) {
     dstReg = LinearScan::rScratch;
   }
-  cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, true,
+  cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, kSyncPoint,
                ArgGroup().ssa(fp).ssa(sp).imm(pcOff));
   if (label) {
     // compare the pc in the returned execution context with the
@@ -4187,7 +4187,7 @@ Address CodeGenerator::cgDefFunc(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* dst   = inst->getDst();
   SSATmp* func  = inst->getSrc(0);
-  cgCallHelper(m_as, (TCA)defFuncHelper, dst, true,
+  cgCallHelper(m_as, (TCA)defFuncHelper, dst, kSyncPoint,
                ArgGroup().ssa(func));
   return start;
 }
@@ -4198,7 +4198,7 @@ Address CodeGenerator::cgCreateCont(IRInstruction* inst) {
     VMExecutionContext::createContinuation<true> :
     VMExecutionContext::createContinuation<false>;
   cgCallHelper(m_as, (TCA)helper,
-               inst->getDst(), false,
+               inst->getDst(), kNoSyncPoint,
                ArgGroup().ssa(inst->getSrc(0))
                          .ssa(inst->getSrc(1))
                          .ssa(inst->getSrc(2))
@@ -4209,7 +4209,7 @@ Address CodeGenerator::cgCreateCont(IRInstruction* inst) {
 Address CodeGenerator::cgFillContLocals(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   cgCallHelper(m_as, (TCA)VMExecutionContext::fillContinuationVars,
-               reg::noreg, false,
+               reg::noreg, kNoSyncPoint,
                ArgGroup().ssa(inst->getSrc(0))
                          .ssa(inst->getSrc(1))
                          .ssa(inst->getSrc(2))

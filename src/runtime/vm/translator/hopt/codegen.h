@@ -48,6 +48,11 @@ void cgPunt(const char* _file, int _line, const char* _func);
 
 struct ArgGroup;
 
+enum SyncOptions {
+  kNoSyncPoint,
+  kSyncPoint
+};
+
 class CodeGenerator {
 public:
   // typedef copied from TranslatorX64 class
@@ -76,12 +81,12 @@ public:
   Address cgCallHelper(Asm& a,
                        TCA addr,
                        RegNumber dstReg,
-                       bool doRecordSyncPoint,
+                       SyncOptions sync,
                        ArgGroup& args);
   Address cgCallHelper(Asm&,
                        TCA addr,
                        SSATmp* dst,
-                       bool doRecordSyncPoint,
+                       SyncOptions sync,
                        ArgGroup& args);
 
   Address cgStore(RegNumber base,

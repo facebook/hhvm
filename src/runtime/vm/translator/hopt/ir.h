@@ -716,7 +716,6 @@ protected:
   friend class IRFactory;
   friend class TraceBuilder;
   friend class HhbcTranslator;
-  friend class MemMap;
 
  public:
   IRInstruction(Opcode o, Type::Tag t, LabelInstruction *l = NULL)

@@ -231,6 +231,7 @@ enum ServiceRequest {
 // Set of all the x64 registers.
 const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
                          | kSpecialCrossTraceRegs;
+const int kNumX64Regs = 16;
 
 /*
  * Some data structures are accessed often enough from translated code

@@ -580,7 +580,7 @@ Address CodeGenerator::cgCallHelper(Asm& a,
            args[i].getKind() == ArgDesc::Imm);
   }
   // Handle register-to-register moves.
-  int moves[LinearScan::NumRegs];
+  int moves[kNumX64Regs];
   memset(moves, -1, sizeof moves);
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i].getKind() == ArgDesc::Reg) {

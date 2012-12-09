@@ -348,7 +348,7 @@ enum ExitType {
 extern TraceExitType::ExitType getExitType(Opcode opc);
 extern Opcode getExitOpcode(TraceExitType::ExitType);
 
-extern const char* OpcodeStrings[];
+const char* opcodeName(Opcode opcode);
 
 class Type {
 public:
@@ -655,50 +655,57 @@ public:
   typedef std::list<IRInstruction*> List;
   typedef std::list<IRInstruction*>::iterator Iterator;
   typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
-  static  bool canCSE(Opcode opc);
-  virtual bool canCSE() const { return IRInstruction::canCSE(getOpcode()); }
-  static  bool hasDst(Opcode opc);
-  virtual bool hasDst() const { return IRInstruction::hasDst(getOpcode()); }
-  static  bool isRematerializable(Opcode opc);
-  virtual bool isRematerializable() const {
-    return IRInstruction::isRematerializable(getOpcode());
-  }
-  static  bool hasMemEffects(Opcode opc);
-  virtual bool hasMemEffects() const {
-    return IRInstruction::hasMemEffects(getOpcode());
-  }
-  static  bool isNative(Opcode opc);
-  virtual bool isNative()  const {
-    return IRInstruction::isNative(getOpcode());
-  }
-  static  bool consumesReferences(Opcode opc);
-  virtual bool consumesReferences() const {
-    return IRInstruction::consumesReferences(getOpcode());
-  }
+
+  /*
+   * Returns whether we can CSE this instruction, often not true for
+   * instructions that have side-effects such as modifying heap
+   * memory.
+   */
+  bool canCSE() const;
+
+  /*
+   * hasDst indicates the instruction produces an SSATmp that is
+   * generally the resulting value, but occassionally a heap reference
+   * to help order operations, e.g., AddElem
+   */
+  bool hasDst() const;
+
+  /*
+   * hasMemEffects indicates the instruction has side effects on
+   * memory.
+   */
+  bool hasMemEffects() const;
+
+  /*
+   * Returns whether the destination of this instruction is a
+   * candidate for rematerialization.
+   */
+  bool isRematerializable() const;
+
+  /*
+   * Indicates this instruction calls a native helper.
+   */
+  bool isNative() const;
+
+  /*
+   * consumesReferences() indicates the instruction decrefs a source
+   * operand.
+   */
+  bool consumesReferences() const;
   bool consumesReference(int srcNo) const;
-  static  bool producesReference(Opcode opc);
-  virtual bool producesReference()  const {
-    return IRInstruction::producesReference(getOpcode());
-  }
-  static  bool mayModifyRefs(Opcode opc);
-  virtual bool mayModifyRefs()  const {
-    Opcode opc = getOpcode();
-    // DecRefNZ does not have side effects other than decrementing the ref
-    // count. Therefore, its MayModifyRefs should be false.
-    if (opc == DecRef) {
-      if (this->isControlFlowInstruction() || Type::isString(m_type)) {
-        // If the decref has a target label, then it exits if the destructor
-        // has to be called, so it does not have any side effects on the main
-        // trace.
-        return false;
-      }
-      if (Type::isBoxed(m_type)) {
-        Type::Tag innerType = Type::getInnerType(m_type);
-        return (innerType == Type::Obj || innerType == Type::Arr);
-      }
-    }
-    return IRInstruction::mayModifyRefs(opc);
-  }
+
+  /*
+   * producesReference indicates the instruction has incref'ed its
+   * destination
+   */
+  bool producesReference() const;
+
+  /*
+   * If true, this instruction may have side effects that modify
+   * KindOfRef inner cells (either by reentering the VM, or somehow
+   * else).
+   */
+  bool mayModifyRefs() const;
 
   void printDst(std::ostream& ostream);
   void printSrc(std::ostream& ostream, uint32 srcIndex);

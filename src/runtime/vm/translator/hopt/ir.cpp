@@ -30,92 +30,56 @@ namespace HPHP {
 namespace VM {
 namespace JIT{
 
-const char* OpcodeStrings[] = {
+struct {
+  const char* name;
+  bool hasDst;
+  bool canCSE;
+  bool essential;
+  bool hasMemEffects;
+  bool native;
+  bool consumesRefs;
+  bool producesRef;
+  bool mayModifyRefs;
+  bool rematerializable;
+  bool mayRaiseError;
+} OpInfo[] = {
 #define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
             prodRef, mayModRefs, rematerializable, error)               \
-  #name,
+  { #name, hasDst, canCSE, essential, effects, native, consRef,         \
+     prodRef, mayModRefs, rematerializable, error },
   IR_OPCODES
-  #undef OPC
+#undef OPC
+  { 0 }
 };
 
-/*
- * Has Dest indicates the instruction produces an SSATmp
- * which is generally the resulting value, but occassionally
- * a heap reference to help order operations, e.g., AddElem
- */
-const int HasDst[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
-            prodRef, mayModRefs, rematerializable, error)               \
-  hasDst,
-  IR_OPCODES
-  #undef OPC
-};
-bool IRInstruction::hasDst(Opcode opc) {
-  return HasDst[opc];
+const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
+bool IRInstruction::hasDst() const { return OpInfo[getOpcode()].hasDst; }
+bool IRInstruction::isNative() const { return OpInfo[getOpcode()].native; }
+
+bool IRInstruction::producesReference() const {
+  return OpInfo[getOpcode()].producesRef;
 }
 
-/*
- * Can CSE this instruction, often not true for instructions
- * which have side-effects such as modifying heap memory.
- */
-const int CanCSE[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef, \
-            prodRef, mayModRefs, rematerializable, error)              \
-  canCSE,
-  IR_OPCODES
-  #undef OPC
-};
+bool IRInstruction::isRematerializable() const {
+  return OpInfo[getOpcode()].rematerializable;
+}
 
-bool IRInstruction::canCSE(Opcode opc) {
-  // make sure that instructions that are CSE'able can't produce a
+bool IRInstruction::hasMemEffects() const {
+  return OpInfo[getOpcode()].hasMemEffects;
+}
+
+bool IRInstruction::canCSE() const {
+  // Make sure that instructions that are CSE'able can't produce a
   // reference count or consume reference counts.
-  ASSERT(!CanCSE[opc] || !producesReference(opc));
-  ASSERT(!CanCSE[opc] || !consumesReferences(opc));
-  return CanCSE[opc];
+  ASSERT(!OpInfo[getOpcode()].canCSE || !producesReference());
+  ASSERT(!OpInfo[getOpcode()].canCSE || !consumesReferences());
+  return OpInfo[getOpcode()].canCSE;
 }
 
-/*
- * HasMemEffects indicates the instruction has side effects on memory.
- */
-const int HasMemEffects[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef, \
-            prodRef, mayModRefs, rematerializable, error)              \
-  effects,
-  IR_OPCODES
-  #undef OPC
-};
-bool IRInstruction::hasMemEffects(Opcode opc) {
-  return HasMemEffects[opc];
+bool IRInstruction::consumesReferences() const {
+  return OpInfo[getOpcode()].consumesRefs;
 }
 
-/*
- * HasMemEffects indicates the instruction has side effects on memory.
- */
-const int IsNative[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef, \
-            prodRef, mayModRefs, rematerializable, error)              \
-  native,
-  IR_OPCODES
-  #undef OPC
-};
-bool IRInstruction::isNative(Opcode opc) {
-  return IsNative[opc];
-}
-
-/*
- * ConsumesReferences indicates the instruction decrefs its source operands.
- */
-const int ConsumesReferences[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
-            prodRef, mayModRefs, rematerializable, error)               \
-  consRef,
-  IR_OPCODES
-  #undef OPC
-};
-bool IRInstruction::consumesReferences(Opcode opc) {
-  return ConsumesReferences[opc];
-}
-// Returns whether the instruction decrefs Operand <srcNo>.
 bool IRInstruction::consumesReference(int srcNo) const {
   if (!consumesReferences()) {
     return false;
@@ -133,42 +97,23 @@ bool IRInstruction::consumesReference(int srcNo) const {
   return true;
 }
 
-/*
- * ProducesReference indicates the instruction has incref'ed its destination
- */
-const int ProducesReference[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef, \
-            prodRef, mayModRefs, rematerializable, error)              \
-  prodRef,
-  IR_OPCODES
-  #undef OPC
-};
-bool IRInstruction::producesReference(Opcode opc) {
-  return ProducesReference[opc];
-}
-
-const int MayModifyRefs[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef, \
-            prodRef, mayModRefs, rematerializable, error)              \
-  mayModRefs,
-  IR_OPCODES
-  #undef OPC
-};
-
-bool IRInstruction::mayModifyRefs(Opcode opc) {
-  return MayModifyRefs[opc];
-}
-
-const int Rematerializable[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef, \
-            prodRef, mayModRefs, rematerializable, error)              \
-  rematerializable,
-  IR_OPCODES
-  #undef OPC
-};
-
-bool IRInstruction::isRematerializable(Opcode opc) {
-  return Rematerializable[opc];
+bool IRInstruction::mayModifyRefs() const {
+  Opcode opc = getOpcode();
+  // DecRefNZ does not have side effects other than decrementing the ref
+  // count. Therefore, its MayModifyRefs should be false.
+  if (opc == DecRef) {
+    if (isControlFlowInstruction() || Type::isString(m_type)) {
+      // If the decref has a target label, then it exits if the destructor
+      // has to be called, so it does not have any side effects on the main
+      // trace.
+      return false;
+    }
+    if (Type::isBoxed(m_type)) {
+      Type::Tag innerType = Type::getInnerType(m_type);
+      return innerType == Type::Obj || innerType == Type::Arr;
+    }
+  }
+  return OpInfo[opc].mayModifyRefs;
 }
 
 Opcode queryNegateTable[] = {
@@ -288,7 +233,7 @@ void IRInstruction::setExtendedSrc(uint32 i, SSATmp* newSrc) {
 }
 
 void IRInstruction::printOpcode(std::ostream& ostream) {
-  ostream << OpcodeStrings[m_op];
+  ostream << opcodeName(m_op);
 }
 
 void IRInstruction::printDst(std::ostream& ostream) {
@@ -332,7 +277,7 @@ void IRInstruction::print(std::ostream& ostream) {
   bool isLdMem = m_op == LdMemNR || m_op == LdRaw;
   if (isStMem || m_op == StLoc || isLdMem) {
     if (isLdMem) {
-      ostream << OpcodeStrings[m_op] << " ";
+      ostream << opcodeName(m_op) << " ";
     }
     ostream << "[";
     printSrc(ostream, 0);
@@ -346,7 +291,7 @@ void IRInstruction::print(std::ostream& ostream) {
     ostream << "]:" << Type::Strings[type];
     if (!isLdMem) {
       ASSERT(getNumSrcs() > 1);
-      ostream << " = " <<  OpcodeStrings[m_op] << " ";
+      ostream << " = " << opcodeName(m_op) << " ";
       printSrc(ostream, isStMem ? 2 : 1);
     }
   } else {

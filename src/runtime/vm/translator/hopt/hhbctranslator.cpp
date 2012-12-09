@@ -970,7 +970,7 @@ Trace* HhbcTranslator::emitJmpNZ(int32 offset) {
 }
 
 void HhbcTranslator::emitCmp(Opcode opc) {
-  TRACE(3, "%u: Cmp %s\n", m_bcOff, OpcodeStrings[opc]);
+  TRACE(3, "%u: Cmp %s\n", m_bcOff, opcodeName(opc));
   SSATmp* src1 = popC();
   SSATmp* src2 = popC();
   // src2 opc src1

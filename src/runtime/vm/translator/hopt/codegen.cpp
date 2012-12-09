@@ -387,7 +387,7 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 
     default:
       std::cerr << "CodeGenerator: unimplemented support for opcode " <<
-        OpcodeStrings[opc] << std::endl;
+        opcodeName(opc) << '\n';
       ASSERT(0);
       return NULL;
   }

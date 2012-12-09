@@ -3263,24 +3263,8 @@ Address CodeGenerator::cgStore(PhysReg base,
     }
     return start;
   }
-  if (type == Type::Home) {
-    IRInstruction* addrInst = src->getInstruction();
-    if (addrInst->getOpcode() == LdHome) {
-      // do an lea of the home
-      ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
-      auto baseReg = homeInstr->getSrc(0)->getReg();
-      int64_t index = homeInstr->getLocal().getId();
-      auto tmpReg = reg::rScratch;
-      m_as.lea_reg64_disp_reg64(baseReg, -((index + 1)*sizeof(Cell)), tmpReg);
-      m_as.store_reg64_disp_reg64(tmpReg, off + TVOFF(m_data), base);
-    } else {
-      // deal with the general case of addrInst being ldStack
-      ASSERT(addrInst->getOpcode() == LdStack);
-      m_as.store_reg64_disp_reg64(src->getReg(),
-                                  off + TVOFF(m_data),
-                                  base);
-    }
-  } else if (src->isConst()) {
+  ASSERT(type != Type::Home);
+  if (src->isConst()) {
     if (type == Type::Bool) {
       m_as.store_imm64_disp_reg64((int64)src->getConstValAsBool(),
                                   off + TVOFF(m_data),

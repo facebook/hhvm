@@ -21,6 +21,7 @@ find_path (DWARF_INCLUDE_DIR
       dwarf.h
     PATHS
       /usr/include
+      /usr/include/libdwarf
       /usr/local/include
       /opt/local/include
       /sw/include

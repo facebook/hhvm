@@ -31,11 +31,28 @@ class Func;
 
 class TypeConstraint {
 protected:
-  DataType m_baseType;
+  enum MetaType {
+    Precise,
+    Self,
+    Parent
+  };
+
+  struct Type {
+    DataType m_dt;
+    MetaType m_metatype;
+    constexpr bool isParent() const {
+      return m_metatype == Parent;
+    }
+    constexpr bool isSelf() const {
+      return m_metatype == Self;
+    }
+  };
+
+  Type m_type;
   bool m_nullable;
   const StringData* m_typeName;
   const NamedEntity* m_namedEntity;
-  typedef hphp_hash_map<const StringData*, DataType,
+  typedef hphp_hash_map<const StringData*, Type,
                         string_data_hash, string_data_isame> TypeMap;
   static TypeMap s_typeNamesToTypes;
 
@@ -51,16 +68,17 @@ public:
   bool nullable() const { return m_nullable; }
 
   bool isSelf() const {
-    return m_baseType == KindOfSelf;
+    return m_type.isSelf();
   }
 
   bool isParent() const {
-    return m_baseType == KindOfParent;
+    return m_type.isParent();
   }
 
   bool isObject() const {
-    return m_baseType == KindOfObject ||
-           m_baseType == KindOfSelf || m_baseType == KindOfParent;
+    ASSERT(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
+    ASSERT(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
+    return m_type.m_dt == KindOfObject;
   }
 
   bool compat(const TypeConstraint& other) const {
@@ -84,43 +102,7 @@ public:
       (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
   }
 
-  bool check(const TypedValue* tv, const Func* func) const {
-    ASSERT(exists());
-
-    // This is part of the interpreter runtime; perf matters.
-    if (tv->m_type == KindOfRef) {
-      tv = tv->m_data.pref->tv();
-    }
-    if (m_nullable && IS_NULL_TYPE(tv->m_type)) return true;
-
-    if (tv->m_type == KindOfObject) {
-      if (!isObject()) return false;
-      // Perfect match seems common enough to be worth skipping the hash
-      // table lookup.
-      if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
-        if (shouldProfile()) Class::profileInstanceOf(m_typeName);
-        return true;
-      }
-      const Class *c = NULL;
-      if (isSelf() || isParent()) {
-        if (isSelf()) {
-          selfToClass(func, &c);
-        } else if (isParent()) {
-          parentToClass(func, &c);
-        }
-      } else {
-        // We can't save the Class* since it moves around from request
-        // to request.
-        ASSERT(m_namedEntity);
-        c = Unit::lookupClass(m_namedEntity);
-      }
-      if (shouldProfile() && c) {
-        Class::profileInstanceOf(c->preClass()->name());
-      }
-      return c && tv->m_data.pobj->instanceof(c);
-    }
-    return equivDataTypes(m_baseType, tv->m_type);
-  }
+  bool check(const TypedValue* tv, const Func* func) const;
 
   // NB: will throw if the check fails.
   void verify(const TypedValue* tv,

@@ -125,11 +125,6 @@ class VariableUnserializer;
  */
 
 enum DataType {
-  // Self and Parent are defined here for use by class TypeConstraint.
-  // KindOfSelf/Parent are not used by TypedValue
-  KindOfSelf             = -15,
-  KindOfParent           = -14,
-
   MinDataType            = -13,
 
   KindOfClass            = -13,

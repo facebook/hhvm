@@ -915,8 +915,7 @@ private:
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);
   void emitTestSurpriseFlags(Asm& a);
-  void emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
-                                   Offset stackOff);
+  void emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup f);
   TCA  emitTransCounterInc(Asm& a);
 
   static void trimExtraArgs(ActRec* ar);

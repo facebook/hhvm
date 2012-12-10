@@ -1,0 +1,8 @@
+one
+HipHop Warning:  Missing argument 2 to two() in src/test/vm/not-enough-args.php on line 4
+two
+HipHop Warning:  Missing argument 2 to three() in src/test/vm/not-enough-args.php on line 5
+HipHop Warning:  Missing argument 3 to three() in src/test/vm/not-enough-args.php on line 5
+three
+one
+HipHop Fatal error: Uncaught exception 'Exception' with message '2, Missing argument 2 to two()' in src/test/vm/not-enough-args.php:8\nStack trace:\n#0 src/test/vm/not-enough-args.php(4): error_handler()\n#1 src/test/vm/not-enough-args.php(17): two()\n#2 src/test/vm/not-enough-args.php(20): main()\n#3 {main}

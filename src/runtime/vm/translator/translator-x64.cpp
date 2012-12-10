@@ -1523,8 +1523,7 @@ TranslatorX64::emitTestSurpriseFlags(Asm& a) {
 }
 
 void
-TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
-                                           Offset stackOff) {
+TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup) {
   emitTestSurpriseFlags(a);
   {
     UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
@@ -1537,12 +1536,12 @@ TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
     astubs.xor_reg32_reg32(argNumToRegName[1], argNumToRegName[1]);
     emitCall(astubs, (TCA)&EventHook::FunctionEnter);
     if (inTracelet) {
-      recordSyncPoint(astubs, pcOff, stackOff);
+      recordSyncPoint(astubs, fixup.m_pcOffset, fixup.m_spOffset);
     } else {
       // If we're being called while generating a func prologue, we
       // have to record the fixup directly in the fixup map instead of
       // going through m_pendingFixups like normal.
-      m_fixupMap.recordFixup(astubs.code.frontier, Fixup(pcOff, stackOff));
+      m_fixupMap.recordFixup(astubs.code.frontier, fixup);
     }
   }
 }
@@ -2148,10 +2147,15 @@ TranslatorX64::interceptPrologues(Func* func) {
   }
 }
 
+static void raiseMissingArgument(int idx, const char* name) {
+  raise_warning(Strings::MISSING_ARGUMENT, idx, name);
+}
+
 SrcKey
 TranslatorX64::emitPrologue(Func* func, int nPassed) {
   ASSERT(!func->isGenerator());
   int numParams = func->numParams();
+  const Func::ParamInfoVec& paramInfo = func->params();
   ASSERT(IMPLIES(func->maybeIntercepted() == -1,
                  m_interceptsEnabled));
   if (m_interceptsEnabled &&
@@ -2175,7 +2179,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   } else if (nPassed < numParams) {
     // Figure out which, if any, default value initializer to go to
     for (int i = nPassed; i < numParams; ++i) {
-      const Func::ParamInfo& pi = func->params()[i];
+      const Func::ParamInfo& pi = paramInfo[i];
       if (pi.hasDefaultValue()) {
         dvInitializer = pi.funcletOff();
         break;
@@ -2190,7 +2194,6 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     TCA loopTop = a.code.frontier;
     a.  sub_imm32_reg64(sizeof(Cell), rVmSp);
     a.  add_imm32_reg32(1, rax);
-    // XXX "missing argument" warnings need to go here
     emitStoreUninitNull(a, 0, rVmSp);
     a.  cmp_imm32_reg32(numParams, rax);
     a.  jcc8(CC_L, loopTop);
@@ -2255,11 +2258,24 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   }
   SrcKey funcBody(func, destPC);
 
+  Fixup fixup(funcBody.m_offset - func->base(), frameCells);
+
+  // Emit warnings for any missing arguments
+  if (!func->isBuiltin()) {
+    for (int i = nPassed; i < numParams; ++i) {
+      if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
+        emitImmReg(a, i + 1, argNumToRegName[0]);
+        emitImmReg(a, (intptr_t)func->name()->data(), argNumToRegName[1]);
+        emitCall(a, (TCA)raiseMissingArgument);
+        m_fixupMap.recordFixup(a.code.frontier, fixup);
+      }
+    }
+  }
+
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(false, funcBody.m_offset - func->base(),
-                              frameCells);
+  emitCheckSurpriseFlagsEnter(false, fixup);
 
   emitBindJmp(funcBody);
   return funcBody;
@@ -2283,7 +2299,7 @@ TranslatorX64::emitBindCall(const Tracelet& t,
     ASSERT(ni.funcd->numLocals() == ni.funcd->numParams());
     ASSERT(ni.funcd->numIterators() == 0);
     emitLea(a, rVmSp, cellsToBytes(numArgs), rVmFp);
-    emitCheckSurpriseFlagsEnter(true, 0, numArgs);
+    emitCheckSurpriseFlagsEnter(true, Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.
     return emitNativeImpl(ni.funcd, false /* don't jump to return */);

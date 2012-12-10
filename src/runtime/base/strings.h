@@ -50,6 +50,8 @@ const char* const FUNCTION_NAME_MUST_BE_STRING =
   "Function name must be a string";
 const char* const METHOD_NAME_MUST_BE_STRING =
   "Method name must be a string";
+const char* const MISSING_ARGUMENT =
+  "Missing argument %d to %s()";
 
 } // namespace Strings
 } // namespace HPHP

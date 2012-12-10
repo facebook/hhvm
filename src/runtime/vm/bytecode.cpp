@@ -1809,8 +1809,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
     for (int i = nargs; i < nparams; ++i) {
       Offset dvInitializer = paramInfo[i].funcletOff();
       if (dvInitializer == InvalidAbsoluteOffset) {
-        raise_warning("Missing argument %d to %s()",
-                      i + 1, func->name()->data());
+        raise_warning(Strings::MISSING_ARGUMENT, i + 1, func->name()->data());
       }
     }
   }

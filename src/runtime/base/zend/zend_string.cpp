@@ -1073,7 +1073,7 @@ char *string_wordwrap(const char *text, int &textlen, int linelength,
   long current = 0, laststart = 0, lastspace = 0;
 
   if (textlen == 0) {
-    return "";
+    return strdup("");
   }
 
   if (breakcharlen == 0) {

@@ -161,7 +161,7 @@ PERIODICITY  determine_periodicity(char *);
 PERIODICITY   parse_timespec(char *optarg, int *p_period_multiple);
 time_t    start_of_next_period(time_t, PERIODICITY, int);
 time_t    start_of_this_period(time_t, PERIODICITY, int);
-void    print_debug_msg(char *msg, ...);
+void    print_debug_msg(const char *msg, ...);
 time_t    parse_time(char *time_str, int);
 char     *timestamp(time_t thetime);
 
@@ -169,7 +169,7 @@ char     *timestamp(time_t thetime);
 /* Global variables */
 
 extern FILE  *debug_file;
-extern char  *periods[];
+extern const char  *periods[];
 extern int  period_seconds[];
 
 

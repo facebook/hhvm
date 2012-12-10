@@ -110,7 +110,7 @@ int	weeks_start_on_mondays = 0;
 
 /* periods[] is an array of the names of the periods.
  */
-char	*periods[] =
+const char	*periods[] =
 {
     "second",
     "minute",
@@ -647,7 +647,7 @@ check_end(const char *p)
    instead of just one (it works that way on all the systems I've
    tested it on). */
 
-static char *european_date_formats[] =
+static const char *european_date_formats[] =
 {
     "%d %b %Y %T",       	/* dd mmm yyyy HH:MM:SS */
     "%d %b %Y %H:%M",       	/* dd mmm yyyy HH:MM    */
@@ -662,7 +662,7 @@ static char *european_date_formats[] =
     NULL
 };
 
-static char *american_date_formats[] =
+static const char *american_date_formats[] =
 {
     "%b %d %Y %T",       	/* dd mmm yyyy HH:MM:SS */
     "%b %d %Y %H:%M",       	/* dd mmm yyyy HH:MM    */
@@ -682,7 +682,7 @@ time_t
 parse_time(char *time_str, int use_american_date_formats)
 {
    struct tm    tm;
-   char		**date_formats;
+   const char		**date_formats;
 
    memset(&tm, 0, sizeof (tm));
    tm.tm_isdst = -1;
@@ -706,7 +706,7 @@ parse_time(char *time_str, int use_american_date_formats)
 /* Simple debugging print function.
  */
 void
-print_debug_msg(char *msg, ...)
+print_debug_msg(const char *msg, ...)
 {
     va_list	ap;
 

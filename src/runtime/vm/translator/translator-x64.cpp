@@ -2221,29 +2221,31 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
       // rVmFp + rcx points to the count/type fields of the TypedValue we're
       // about to write to.
       int loopStart = -func->numLocals() * sizeof(TypedValue)
-        + TVOFF(_count);
+        + TVOFF(m_type);
       int loopEnd = -numParams * sizeof(TypedValue)
-        + TVOFF(_count);
+        + TVOFF(m_type);
 
       emitImmReg(a, loopStart, loopReg);
       emitImmReg(a, 0, rdx);
 
       TCA topOfLoop = a.code.frontier;
       // do {
-      //   rVmFp[rcx].m_type = KindOfUninit;
-      // } while(++rcx != loopEnd);
+      //   rVmFp[loopReg].m_type = KindOfUninit;
+      // } while(++loopReg != loopEnd);
 
-      //  mov %rdx, 0x0(%rVmFp, %rcx, 1)
-      a.  emitRM(instr_mov, rVmFp, loopReg, 1, 0, rdx);
-      a.  add_imm32_reg64(sizeof(Cell), loopReg);
-      a.  cmp_imm32_reg64(loopEnd, loopReg);
-      a.  jcc8(CC_NE, topOfLoop);
+      a.  storel (edx, rVmFp[loopReg]);
+      a.  addq   (sizeof(Cell), loopReg);
+      a.  cmpq   (loopEnd, loopReg);
+      a.  jcc8   (CC_NE, topOfLoop);
     } else {
       PhysReg base;
       int disp, k;
+      if (numParams < func->numLocals()) {
+        a.xorl (eax, eax);
+      }
       for (k = numParams; k < func->numLocals(); ++k) {
         locToRegDisp(Location(Location::Local, k), &base, &disp);
-        emitStoreUninitNull(a, disp, base);
+        a.storel (eax, base[disp + TVOFF(m_type)]);
       }
     }
   }

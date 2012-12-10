@@ -2864,6 +2864,17 @@ Address CodeGenerator::cgNewArray(IRInstruction* inst) {
   return start;
 }
 
+Address CodeGenerator::cgNewTuple(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  SSATmp* dst = inst->getDst();
+  SSATmp* numArgs = inst->getSrc(0);
+  SSATmp* sp = inst->getSrc(1);
+  ArgGroup args;
+  args.ssa(numArgs).ssa(sp);
+  cgCallHelper(m_as, (TCA) new_tuple, dst, kNoSyncPoint, args);
+  return start;
+}
+
 Address CodeGenerator::cgCall(IRInstruction* inst) {
 
   Address start   = m_as.code.frontier;

@@ -452,6 +452,13 @@ ArrayData* new_array(int capacity) {
   return a;
 }
 
+ArrayData* new_tuple(int n, const TypedValue* values) {
+  HphpArray* a = NEW(HphpArray)(n, values);
+  a->incRefCount();
+  TRACE(2, "newTupleHelper: size %d\n", n);
+  return a;
+}
+
 static inline void
 tvPairToCString(DataType t, uint64_t v,
                 const char** outStr,

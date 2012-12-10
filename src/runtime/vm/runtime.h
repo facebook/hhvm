@@ -35,6 +35,7 @@ int64 iter_next(HPHP::VM::Iter* dest, TypedValue* val);
 int64 iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
 
 ArrayData* new_array(int capacity);
+ArrayData* new_tuple(int numArgs, const TypedValue* args);
 
 StringData* concat_is(int64 v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64 v2);

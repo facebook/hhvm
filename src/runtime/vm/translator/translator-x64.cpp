@@ -5229,13 +5229,6 @@ void TranslatorX64::analyzeNewTuple(Tracelet& t, NormalizedInstruction& i) {
   i.manuallyAllocInputs = true; // all values passed via stack.
 }
 
-ArrayData* newTupleHelper(int n, TypedValue* values) {
-  HphpArray* a = NEW(HphpArray)(n, values);
-  a->incRefCount();
-  TRACE(2, "newTupleHelper: size %d\n", n);
-  return a;
-}
-
 void TranslatorX64::translateNewTuple(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   int arity = i.imm[0].u_IVA;
@@ -5252,10 +5245,10 @@ void TranslatorX64::translateNewTuple(const Tracelet& t,
   }
   if (false) {
     TypedValue* rhs = 0;
-    ArrayData* ret = newTupleHelper(arity, rhs);
+    ArrayData* ret = new_tuple(arity, rhs);
     printf("%p", ret); // use ret
   }
-  EMIT_CALL(a, newTupleHelper, IMM(arity), A(i.inputs[0]->location));
+  EMIT_CALL(a, new_tuple, IMM(arity), A(i.inputs[0]->location));
   // newTupleHelper returns the up-to-date array pointer in rax.
   // Therefore, we can bind rax to the result location and mark it as dirty.
   m_regMap.bind(rax, i.inputs[arity-1]->location, KindOfArray, RegInfo::DIRTY);

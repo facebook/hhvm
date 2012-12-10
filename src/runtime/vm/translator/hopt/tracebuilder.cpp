@@ -1119,6 +1119,11 @@ SSATmp* TraceBuilder::genNewArray(int32 capacity) {
   return genInstruction(NewArray, Type::Arr, genDefConst<int64>(capacity));
 }
 
+SSATmp* TraceBuilder::genNewTuple(int32 numArgs, SSATmp* sp) {
+  ASSERT(numArgs >= 0);
+  return genInstruction(NewTuple, Type::Arr, genDefConst<int64>(numArgs), sp);
+}
+
 SSATmp* TraceBuilder::genAllocActRec(SSATmp* func,
                                      SSATmp* objOrCls,
                                      int32 numParams,

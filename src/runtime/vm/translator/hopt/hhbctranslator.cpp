@@ -214,9 +214,15 @@ void HhbcTranslator::emitNewArray(int capacity) {
 }
 
 void HhbcTranslator::emitNewTuple(int numArgs) {
-  spillStack();
+  // The new_tuple helper function needs array values passed to it
+  // via the stack.  We use spillStack() to flush the eval stack and
+  // obtain a pointer to the topmost item; if over-flushing becomes
+  // a problem then we should refactor the NewTuple opcode to take
+  // its values directly as SSA operands.
+  TRACE(3, "%u: NewTuple %d\n", m_bcOff, numArgs);
+  SSATmp* sp = spillStack(false);
   for (int i = 0; i < numArgs; i++) popC();
-  emitInterpOneOrPunt(Type::Arr);
+  push(m_tb.genNewTuple(numArgs, sp));
 }
 
 void HhbcTranslator::emitArrayAdd() {

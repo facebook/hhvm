@@ -98,6 +98,7 @@ public:
   SSATmp* genNewObj(int32 numParams, const StringData* clsName);
   SSATmp* genNewObj(int32 numParams, SSATmp* cls);
   SSATmp* genNewArray(int32 capacity);
+  SSATmp* genNewTuple(int32 numArgs, SSATmp* sp);
   // The first three genAllocActRecs delegate to the forth one
   SSATmp* genAllocActRec(const Func* func,
                          SSATmp* objOrCls,

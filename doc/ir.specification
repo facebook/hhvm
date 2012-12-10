@@ -1,0 +1,246 @@
+
+****************************
+* HipHop JIT IR revision 1 *
+****************************
+
+
+Introduction
+------------
+
+The HipHop Intermediate Representation (IR) is a typed, in-memory,
+static-single-assignment, intermediate-level representation of HHBC
+programs used for just in time compilation.
+
+TODO: design goals.
+
+
+Concepts
+--------
+
+Trace: owns all the instructions for one tracelet
+
+Instructions (IRInstruction)
+
+Values (SSATmp)
+
+Types
+
+Instruction Attributes
+----------------------
+
+todo: describe these for compiler-writer audience.
+focus on semantics over implementation details
+
+Has Dest
+
+Can CSE
+
+Is Eessential
+
+hasMemEffects
+
+isNativeHelper
+
+consumesRefCount
+
+producesRefCount
+
+MayModifyRefs
+
+Rematerializable
+
+May Raise Error
+
+
+Instruction set
+---------------
+
+1.  Checks
+
+GuardType
+GuardRefs
+
+2. Arithmetic
+
+OpAdd
+OpSub
+OpAnd
+OpOr
+OpXor
+OpMul
+
+3. Type conversions
+
+Conv
+
+4. Boolean predicates
+
+OpGt
+OpGte
+OpLt
+OpLte
+OpEq
+OpNeq
+OpSame
+OpNSame
+InstanceOfD
+NInstanceOfD
+IsSet
+IsType
+IsNSet
+IsNType
+
+5. Branches
+
+There is a conditional branch instruction for each predicate above,
+to enable generating efficient compare-and-branch instruction sequences.
+
+JmpGt
+JmpGte
+JmpLt
+JmpLte
+JmpEq
+JmpNeq
+JmpZero
+JmpNZero
+JmpSame
+JmpNSame
+JmpInstanceOfD
+JmpNInstanceOfD
+JmpIsSet
+JmpIsType
+JmpIsNSet
+JmpIsNType
+Jmp_
+ExitWhenSurprised
+ExitOnVarEnv
+CheckUninit
+
+6. Reference manipulation
+
+Unbox
+Box
+UnboxPtr
+
+7. Loads
+
+LdStack
+LdLoc
+LdStackAddr
+LdLocAddr
+LdMemNR
+LdPropNR
+LdRefNR
+LdThis
+LdThisNc
+LdVarEnv
+LdRetAddr
+LdHome
+LdConst
+DefConst
+LdCls
+LdClsCns
+LdClsMethodCache
+LdClsMethod
+LdPropAddr
+LdClsPropAddr
+LdObjMethod
+LdObjClass
+LdCachedClass
+LdFunc
+LdFixedFunc
+LdCurFuncPtr
+LdARFuncPtr
+LdFuncCls
+LdRaw
+
+8. Allocation
+NewObj
+NewArray
+NewTuple
+
+9. Call & Return
+
+AllocActRec
+FreeActRec
+Call
+NativeImpl
+RetCtrl
+RetVal
+
+10. Stores
+
+StMem
+StMemNT
+StProp
+StPropNT
+StLoc
+StLocNT
+StRef
+StRefNT
+StRaw
+SpillStack
+SpillStackAllocAR
+
+11. Trace exits
+
+ExitTrace
+ExitTraceCc
+ExitSlow
+ExitSlowNoProgress
+ExitGuardFailure
+
+12. Refcounting and copies
+
+Mov
+IncRef
+DecRefLoc
+DecRefStack
+DecRefThis
+DecRefLocals
+DecRefLocalsThis
+DecRef
+DecRefNZ
+DefLabel
+
+13. Misc
+
+Marker
+DefFP
+DefSP
+
+14. Runtime helpers
+
+RaiseUninitWarning
+Print
+AddElem
+AddNewElem
+DefCns
+Concat
+ArrayAdd
+DefCls
+DefFunc
+InterpOne
+
+15. Register allocation
+
+Spill
+Reload
+AllocSpill
+FreeSpill
+
+16. Continuations
+
+CreateCont
+FillContLocals
+FillContThis
+UnlinkContVarEnv
+LinkContVarEnv
+ContRaiseCheck
+ContPreNext
+ContStartedCheck
+
+17. Debugging and instrumentation
+IncStat
+AssertRefCount
+

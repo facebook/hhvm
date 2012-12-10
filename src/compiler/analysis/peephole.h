@@ -31,30 +31,28 @@
  *   JmpNZ. We likewise convert Not + JmpNZ to JmpZ.
  */
 
-#ifndef __VM_PEEPHOLE_H__
-#define __VM_PEEPHOLE_H__
+#ifndef incl_HPHP_COMPILER_ANALYSIS_PEEPHOLE_H_
+#define incl_HPHP_COMPILER_ANALYSIS_PEEPHOLE_H_
 
-#include <runtime/vm/bytecode.h>
-#include <compiler/analysis/emitter.h>
+#include "runtime/vm/unit.h"
+#include "runtime/vm/func.h"
 
-namespace HPHP {
-namespace VM {
+namespace HPHP { namespace Compiler {
+
+class MetaInfoBuilder;
 
 class Peephole {
 public:
-  Peephole(UnitEmitter& ue, Compiler::MetaInfoBuilder& metaInfo);
+  Peephole(VM::UnitEmitter& ue, MetaInfoBuilder& metaInfo);
 
 private:
-  void buildFuncTargets(FuncEmitter* fe);
+  void buildFuncTargets(VM::FuncEmitter* fe);
   void buildJumpTargets();
 
-  UnitEmitter &m_ue;
-
-  hphp_hash_set<Offset> m_jumpTargets;
+  VM::UnitEmitter& m_ue;
+  hphp_hash_set<VM::Offset> m_jumpTargets;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-}
-}
+}}
 
-#endif // __VM_PEEPHOLE_H__
+#endif

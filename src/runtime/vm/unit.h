@@ -31,6 +31,7 @@
 #include "util/tiny_vector.h"
 
 namespace HPHP {
+namespace Compiler { class Peephole; }
 namespace VM {
 
 // Forward declarations.
@@ -646,8 +647,8 @@ private:
 };
 
 class UnitEmitter {
-  friend class Peephole;
   friend class UnitRepoProxy;
+  friend class ::HPHP::Compiler::Peephole;
  public:
   UnitEmitter(const MD5& md5);
   ~UnitEmitter();

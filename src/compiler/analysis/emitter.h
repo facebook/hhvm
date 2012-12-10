@@ -58,6 +58,7 @@ using namespace VM;
 class Label;
 class EmitterVisitor;
 
+// Helper for creating unit MetaInfo.
 struct MetaInfoBuilder {
   void add(int pos, Unit::MetaInfo::Kind kind,
            bool mVector, int arg, Id data);

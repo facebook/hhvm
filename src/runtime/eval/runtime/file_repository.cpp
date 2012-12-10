@@ -26,7 +26,6 @@
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/bytecode.h>
-#include <runtime/vm/peephole.h>
 #include <runtime/vm/pendq.h>
 #include <runtime/vm/repo.h>
 #include <runtime/vm/runtime.h>

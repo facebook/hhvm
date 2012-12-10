@@ -14,11 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/vm/func.h>
-#include <runtime/vm/peephole.h>
+#include "compiler/analysis/peephole.h"
+#include "compiler/analysis/emitter.h"
 
-namespace HPHP {
-namespace VM {
+namespace HPHP { namespace Compiler {
+
+using VM::FuncEmitter;
+using VM::UnitEmitter;
+using VM::Offset;
 
 static void collapseJmp(Offset* offsetPtr, Opcode* instr, Opcode* start) {
   if (offsetPtr) {
@@ -30,7 +33,7 @@ static void collapseJmp(Offset* offsetPtr, Opcode* instr, Opcode* start) {
   }
 }
 
-Peephole::Peephole(UnitEmitter &ue, Compiler::MetaInfoBuilder& metaInfo)
+Peephole::Peephole(UnitEmitter &ue, MetaInfoBuilder& metaInfo)
     : m_ue(ue) {
   // be careful about an empty input
   if (ue.m_bclen == 0) {
@@ -177,5 +180,4 @@ void Peephole::buildJumpTargets() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
-}
+}}

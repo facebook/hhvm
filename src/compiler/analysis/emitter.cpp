@@ -19,7 +19,6 @@
 #include <util/job_queue.h>
 #include <util/parser/hphp.tab.hpp>
 #include <runtime/vm/bytecode.h>
-#include <runtime/vm/peephole.h>
 #include <runtime/vm/repo.h>
 #include <runtime/vm/as.h>
 #include <runtime/vm/stats.h>
@@ -33,6 +32,7 @@
 #include <compiler/analysis/emitter.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/function_scope.h>
+#include <compiler/analysis/peephole.h>
 
 #include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/array_pair_expression.h>

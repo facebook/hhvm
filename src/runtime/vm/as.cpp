@@ -90,7 +90,6 @@
 #include "runtime/vm/unit.h"
 #include "runtime/vm/hhbc.h"
 #include "runtime/base/builtin_functions.h"
-#include "compiler/analysis/emitter.h"
 
 TRACE_SET_MOD(hhas);
 

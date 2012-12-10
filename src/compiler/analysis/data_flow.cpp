@@ -320,8 +320,8 @@ void DataFlowWalker::processAccessChainLA(ListAssignmentPtr la) {
 }
 
 void DataFlowWalker::process(ExpressionPtr e, bool doAccessChains) {
-  if (e->getContext() & (Expression::AssignmentLHS|Expression::OprLValue) ||
-      !doAccessChains && e->hasContext(Expression::AccessContext)) {
+  if ((e->getContext() & (Expression::AssignmentLHS|Expression::OprLValue)) ||
+      (!doAccessChains && e->hasContext(Expression::AccessContext))) {
     return;
   }
 

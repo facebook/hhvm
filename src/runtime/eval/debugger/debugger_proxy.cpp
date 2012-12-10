@@ -602,7 +602,7 @@ bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
         over = false;
       } else {
         FrameInjection *prev;
-        while (prev = frame->getPrev()) {
+        while ((prev = frame->getPrev())) {
           if (last == prev) {
             over = false;
             m_flow->setNegativeFrame(frame); // to avoid re-calculation

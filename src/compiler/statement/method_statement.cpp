@@ -1716,7 +1716,7 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
   }
 
   if (cg.getContext() == CodeGenerator::JavaFFIInterface
-   || inClass && m_modifiers->isAbstract()) {
+   || (inClass && m_modifiers->isAbstract())) {
     // skip all the abstract methods, because php overriding is not very
     // compatible with Java
     return;
@@ -1728,7 +1728,7 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
   // argument as a 64-bit integer, and then calls the native version.
   bool exposeNative = false;
   int ac = funcScope->getMaxParamCount();
-  if (ac > 0 || varArgs || !isStatic || !ret && inClass
+  if (ac > 0 || varArgs || !isStatic || (!ret && inClass)
    || cg.getContext() == CodeGenerator::JavaFFIInterface) {
     // make methods always return something, so that they can override
     // each other
@@ -1820,7 +1820,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
   bool isStatic = !inClass || m_modifiers->isStatic();
   string fname = funcScope->getId();
   int ac = funcScope->getMaxParamCount();
-  bool exposeNative = !(ac > 0 || varArgs || !isStatic || !ret && inClass);
+  bool exposeNative = !(ac > 0 || varArgs || !isStatic || (!ret && inClass));
 
   if (inClass && m_modifiers->isAbstract()) {
     // skip all the abstract methods, because hphp doesn't generate code

@@ -1808,8 +1808,8 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     if (sym->isOverride() || sym->isHidden()) continue;
     if (!stat && isInherited(name)) continue;
     if (!stat &&
-        (sym->isPrivate() && privateVar == NonPrivate ||
-         !sym->isPrivate() && privateVar == Private)) continue;
+        ((sym->isPrivate() && privateVar == NonPrivate) ||
+         (!sym->isPrivate() && privateVar == Private))) continue;
 
     if ((!variantOnly || Type::SameType(sym->getFinalType(), Type::Variant)) &&
         (staticVar & (stat ? Static : NonStatic))) {

@@ -739,7 +739,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                    getOriginalName().c_str());
 
       FunctionScopePtr cons = classScope->findConstructor(ar, true);
-      if (cons && !cons->isAbstract() || m_type != T_ABSTRACT) {
+      if ((cons && !cons->isAbstract()) || m_type != T_ABSTRACT) {
         // if not an abstract class and not having an explicit constructor,
         // adds a default constructor
         outputJavaFFIConstructor(cgCls, ar, cons);
@@ -758,7 +758,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       if (m_stmt) m_stmt->outputCPP(cg, ar);
       FunctionScopePtr cons = classScope->findConstructor(ar, true);
-      if (cons && !cons->isAbstract() || m_type != T_ABSTRACT) {
+      if ((cons && !cons->isAbstract()) || m_type != T_ABSTRACT) {
         outputJavaFFICPPCreator(cg, ar, cons);
       }
     }

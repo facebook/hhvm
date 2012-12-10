@@ -246,7 +246,7 @@ bool Unit::MetaHandle::findMeta(const Unit* unit, Offset offset) {
     int hi = *index1 + 2;
     int lo = 1;
     while (hi - lo > 1) {
-      int mid = hi + lo >> 1;
+      int mid = (hi + lo) >> 1;
       if (offset >= index1[mid]) {
         lo = mid;
       } else {

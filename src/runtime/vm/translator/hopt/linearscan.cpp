@@ -159,7 +159,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
     int32 slotId = tmp->getSpillSlot();
     if (slotId == -1) {
       needsReloading[i] = false;
-    } else if (tmp = m_slots[slotId].m_latestTmp) {
+    } else if ((tmp = m_slots[slotId].m_latestTmp)) {
       needsReloading[i] = false;
       inst->setSrc(i, tmp);
     }
@@ -531,9 +531,9 @@ void LinearScan::computePreColoringHint() {
       {
         Type::Tag lType = nextNative->getSrc(0)->getType();
         Type::Tag rType = nextNative->getSrc(1)->getType();
-        if (Type::isString(lType) && Type::isString(rType) ||
-            Type::isString(lType) && rType == Type::Int ||
-            lType == Type::Int && Type::isString(rType)) {
+        if ((Type::isString(lType) && Type::isString(rType)) ||
+            (Type::isString(lType) && rType == Type::Int) ||
+            (lType == Type::Int && Type::isString(rType))) {
           m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
           m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
         } else {

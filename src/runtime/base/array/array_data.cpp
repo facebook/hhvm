@@ -71,7 +71,7 @@ bool ArrayData::IsValidKey(CStrRef k) {
 
 bool ArrayData::IsValidKey(CVarRef k) {
   return k.isInteger() ||
-         k.isString() && IsValidKey(k.getStringData());
+         (k.isString() && IsValidKey(k.getStringData()));
 }
 
 // constructors/destructors

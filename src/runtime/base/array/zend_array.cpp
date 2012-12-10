@@ -311,9 +311,9 @@ static bool hit_string_key(const ZendArray::Bucket *p, const char *k, int len,
                            int32_t hash) {
   if (!p->hasStrKey()) return false;
   const char *data = p->skey->data();
-  return data == k || p->hash() == hash
-                      && p->skey->size() == len &&
-                      memcmp(data, k, len) == 0;
+  return data == k || (p->hash() == hash &&
+                       p->skey->size() == len &&
+                       memcmp(data, k, len) == 0);
 }
 
 ZendArray::Bucket *ZendArray::find(int64 h) const {

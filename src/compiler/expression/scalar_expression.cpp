@@ -309,7 +309,7 @@ bool ScalarExpression::isLiteralString() const {
   case T_NUM_STRING:
     {
       char ch = m_value[0];
-      if (!(ch == '0' && m_value.size() == 1 || ('1' <= ch && ch <= '9'))) {
+      if (!((ch == '0' && m_value.size() == 1) || ('1' <= ch && ch <= '9'))) {
         // Offset must be treated as a string
         return true;
       }

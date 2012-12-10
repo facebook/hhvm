@@ -410,7 +410,7 @@ bool FunctionScope::hasImpl() const {
 bool FunctionScope::isConstructor(ClassScopePtr cls) const {
   return m_stmt && cls
     && (getName() == "__construct"
-     || cls->classNameCtor() && getName() == cls->getName());
+     || (cls->classNameCtor() && getName() == cls->getName()));
 }
 
 bool FunctionScope::isMagic() const {

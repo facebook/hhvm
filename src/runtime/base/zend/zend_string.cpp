@@ -62,7 +62,7 @@ bool string_substr_check(int len, int &f, int &l, bool strict /* = true */) {
       return false;
     }
   }
-  if (f > len || f == len && strict) {
+  if (f > len || (f == len && strict)) {
     return false;
   }
 

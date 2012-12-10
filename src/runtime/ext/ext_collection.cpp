@@ -1966,9 +1966,9 @@ bool sm_hit_string_key(const c_StableMap::Bucket* p,
                        const char* k, int len, int32 hash) {
   if (p->hasIntKey()) return false;
   const char* data = p->skey->data();
-  return data == k || p->hash() == hash
-                      && p->skey->size() == len &&
-                      memcmp(data, k, len) == 0;
+  return data == k || (p->hash() == hash &&
+                       p->skey->size() == len &&
+                       memcmp(data, k, len) == 0);
 }
 
 c_StableMap::Bucket* c_StableMap::find(int64 h) const {

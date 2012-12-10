@@ -695,7 +695,7 @@ static inline TypedValue* unbox(TypedValue* k) {
       ASSERT(k->m_type != KindOfRef);
     } else {
       ASSERT(k->m_type == keyDataType(kt) ||
-             IS_STRING_TYPE(k->m_type) && IS_STRING_TYPE(keyDataType(kt)));
+             (IS_STRING_TYPE(k->m_type) && IS_STRING_TYPE(keyDataType(kt))));
       return reinterpret_cast<TypedValue*>(k->m_data.num);
     }
   } else if (kt == AnyKey) {

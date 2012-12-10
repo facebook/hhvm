@@ -308,7 +308,7 @@ bool c_XMLWriter::t_openmemory() {
     raise_warning("Unable to create output buffer");
     return false;
   }
-  return m_ptr = xmlNewTextWriterMemory(m_output, 0);
+  return (m_ptr = xmlNewTextWriterMemory(m_output, 0));
 }
 
 bool c_XMLWriter::t_openuri(CStrRef uri) {

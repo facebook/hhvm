@@ -491,7 +491,7 @@ static bool hitIntKey(const HphpArray::Elm* e, int64 ki) {
     probeIndex = (probeIndex + i) & tableMask; \
     ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
     pos = m_hash[probeIndex]; \
-    if (validElmInd(pos) && hit || pos == ssize_t(ElmIndEmpty)) { \
+    if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
       return pos; \
     } \
   }

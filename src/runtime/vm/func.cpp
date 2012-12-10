@@ -365,9 +365,9 @@ bool Func::mustBeRef(int32 arg) const {
   // return true if the argument is required to be a reference
   // (and thus should be an lvalue)
   if (arg >= m_numParams && isBuiltin() &&
-      (info()->attribute & (ClassInfo::RefVariableArguments |
-                            ClassInfo::MixedVariableArguments) ==
-                            ClassInfo::RefVariableArguments)) {
+      ((info()->attribute & (ClassInfo::RefVariableArguments |
+                             ClassInfo::MixedVariableArguments)) ==
+                               ClassInfo::RefVariableArguments)) {
     return true;
   }
   int qword = arg / kBitsPerQword;

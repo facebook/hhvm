@@ -1047,7 +1047,7 @@ int runTarget(const ProgramOptions &po) {
 
   // If there are more than one input files, we need one extra arg to run.
   // If it's missing, we will stop right here, with compiled code.
-  if (po.inputs.size() != 1 && po.programArgs.empty() ||
+  if ((po.inputs.size() != 1 && po.programArgs.empty()) ||
       !po.inputList.empty()) {
     return 0;
   }

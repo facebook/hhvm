@@ -899,8 +899,8 @@ bool DebuggerClient::initializeMachine() {
     if (!m_machine->m_sandboxAttached) {
       const char *user = m_options.user.empty() ?
                          NULL : m_options.user.c_str();
-      m_machine->m_sandboxAttached = waitForgSandbox =
-        CmdMachine::AttachSandbox(this, user, m_options.sandbox.c_str());
+      m_machine->m_sandboxAttached = (waitForgSandbox =
+        CmdMachine::AttachSandbox(this, user, m_options.sandbox.c_str()));
       if (!m_machine->m_sandboxAttached) {
         Logger::Error("Unable to communicate with default sandbox.");
       }

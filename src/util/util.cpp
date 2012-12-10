@@ -767,7 +767,7 @@ void Util::find(std::vector<std::string> &out,
   }
 
   dirent *e;
-  while (e = readdir(dir)) {
+  while ((e = readdir(dir))) {
     char *ename = e->d_name;
 
     // skipping .  .. hidden files

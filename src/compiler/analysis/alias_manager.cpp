@@ -1555,7 +1555,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 ExpressionPtr orig;
                 int i = findInterf(rhs, true, orig);
                 if (i == SameAccess &&
-                    (sameExpr(cur, orig) || next && sameExpr(next, orig))) {
+                    (sameExpr(cur, orig) || (next && sameExpr(next, orig)))) {
                   e->recomputeEffects();
                   return e->replaceValue(canonicalizeRecurNonNull(rhs));
                 }

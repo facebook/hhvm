@@ -117,7 +117,7 @@ void StaticContentCache::load() {
 bool StaticContentCache::find(const std::string &name, const char *&data,
                               int &len, bool &compressed) const {
   if (TheFileCache) {
-    return data = TheFileCache->read(name.c_str(), len, compressed);
+    return (data = TheFileCache->read(name.c_str(), len, compressed));
   }
 
   StringToResourceFilePtrMap::const_iterator iter = m_files.find(name);

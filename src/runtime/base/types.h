@@ -280,7 +280,7 @@ BOOST_STATIC_ASSERT(KindOfString       == 0x14);
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
 
 #define IS_REAL_TYPE(t) \
-  ((t) >= KindOfUninit && (t) < MaxNumDataTypes || (t) == KindOfClass)
+  (((t) >= KindOfUninit && (t) < MaxNumDataTypes) || (t) == KindOfClass)
 
 namespace Collection {
 enum Type {

@@ -422,7 +422,7 @@ class ArrayData : public Countable {
     m_flags = (m_flags & ~kSiPastEnd) | (b ? kSiPastEnd : 0);
   }
   void setStrongIterators(FullPos* p) {
-    m_flags = uintptr_t(p) | m_flags & kSiPastEnd;
+    m_flags = uintptr_t(p) | (m_flags & kSiPastEnd);
   }
   // error-handling helpers
   static CVarRef getNotFound(int64 k);

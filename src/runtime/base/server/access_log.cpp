@@ -152,7 +152,7 @@ int AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
                         FILE *outFile, const char *format) {
    char c;
    std::ostringstream out;
-   while (c = *format++) {
+   while ((c = *format++)) {
      if (c != '%') {
        out << c;
        continue;

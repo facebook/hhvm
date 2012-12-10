@@ -1612,7 +1612,7 @@ void Class::setMethods() {
       Func* f = m_parent->m_methods[i];
       ASSERT(f);
       if ((f->attrs() & AttrClone) ||
-          !(f->attrs() & AttrPrivate) && f->hasStaticLocals()) {
+          (!(f->attrs() & AttrPrivate) && f->hasStaticLocals())) {
         // When copying down an entry for a non-private method that has
         // static locals, we want to make a copy of the Func so that it
         // gets a distinct set of static locals variables. We defer making

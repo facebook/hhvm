@@ -1015,7 +1015,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf admin = config["AdminServer"];
-    AdminServerPort = admin["Port"].getInt16(8088);
+    AdminServerPort = admin["Port"].getInt16(0);
     AdminThreadCount = admin["ThreadCount"].getInt32(1);
     AdminPassword = admin["Password"].getString();
     admin["Passwords"].get(AdminPasswords);

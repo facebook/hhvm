@@ -1786,7 +1786,9 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   }
   // Return control to caller
   m_as.ret();
-  m_as.ud2();
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    m_as.ud2();
+  }
 }
 
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {

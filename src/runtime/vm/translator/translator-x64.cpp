@@ -39,9 +39,12 @@ typedef __sighandler_t *sighandler_t;
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include "folly/Format.h"
+
 #include "util/asm-x64.h"
 #include "util/bitops.h"
 #include "util/debug.h"
+#include "util/disasm.h"
 #include "util/maphuge.h"
 #include "util/pathtrack.h"
 #include "util/rank.h"
@@ -4002,6 +4005,7 @@ void TranslatorX64::fixupWork(VMExecutionContext* ec,
   do {
     auto* prevRbp = rbp;
     rbp = nextRbp;
+    assert(rbp && "Missing fixup for native call");
     nextRbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
@@ -11283,7 +11287,8 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 }
 
 void
-TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/) {
+TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
+                                bool dryRun /*= false */) {
   std::unique_ptr<Tracelet> tp = analyze(sk);
   const Tracelet& t = *tp;
   m_curTrace = &t;
@@ -11385,6 +11390,15 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/) {
     }
   }
 
+  m_regMap.reset();
+
+  if (dryRun) {
+    m_pendingFixups.clear();
+    bcMapping.clear();
+    srcRec.clearInProgressTailJumps();
+    return;
+  }
+
   for (uint i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
     assert(isValidCodeAddress(tca));
@@ -11408,10 +11422,56 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/) {
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n", start, sk.m_funcId,
         sk.m_offset);
   srcRec.newTranslation(a, astubs, start);
-  m_regMap.reset();
   TRACE(1, "tx64: %zd-byte tracelet\n", a.code.frontier - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease(getUsage().c_str());
+  }
+
+
+  if (transKind == TransNormalIR && RuntimeOption::EvalJitCompareHHIR) {
+    m_useHHIR = false;
+    Disasm disasm;
+    TCA irEnd = a.code.frontier;
+    TCA irStubsEnd = astubs.code.frontier;
+    TCA tx64Start = a.code.frontier;
+    translateTracelet(sk, false, true);
+    TCA tx64End = a.code.frontier;
+    size_t irSize = irEnd - start;
+    size_t tx64Size = tx64End - tx64Start;
+
+    if (irSize > tx64Size) {
+      std::ostringstream irOut, tx64Out, out;
+      out << folly::format("{:-^80}\n",
+                           folly::format(" New translation - hhir/tx64 = {}% ",
+                                         100 * irSize / tx64Size));
+      t.print(out);
+      out << '\n';
+      out << folly::format("{:<50}    {:<50}\n",
+                           folly::format("Translation from hhir ({} bytes)",
+                                         irSize),
+                           folly::format("Translation from tx64 ({} bytes)",
+                                         tx64Size));
+
+      disasm.disasm(irOut, start, irEnd);
+      disasm.disasm(tx64Out, tx64Start, tx64End);
+      std::string irStr = irOut.str(), tx64Str = tx64Out.str();
+      std::istringstream irIn(irStr), tx64In(tx64Str);
+      std::string irLine, tx64Line;
+
+      // || without short-circuiting
+      auto or = [](bool a, bool b) { return a || b; };
+      while (or(std::getline(irIn, irLine), std::getline(tx64In, tx64Line))) {
+        out << folly::format("    {:<50}{:<50}\n", irLine, tx64Line);
+        irLine.clear();
+        tx64Line.clear();
+      }
+      out << '\n';
+
+      Trace::traceRelease("%s", out.str().c_str());
+    }
+
+    a.code.frontier = irEnd;
+    astubs.code.frontier = irStubsEnd;
   }
 }
 

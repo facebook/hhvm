@@ -33,7 +33,7 @@ class Disasm : private boost::noncopyable {
   /* Create a Disasm object. indentLevel spaces will be put at the beginning of
    * each line of disassembly. If printEncoding is true, the raw hex bytes of
    * the instructions will also be in the output. */
-  explicit Disasm(int indentLevel, bool printEncoding = false);
+  explicit Disasm(int indentLevel = 0, bool printEncoding = false);
 
   /* Disassemble instructions. start should be the first byte of the region to
    * disassemble and end should be the first byte past the region to

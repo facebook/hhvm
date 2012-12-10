@@ -25,7 +25,7 @@
 
 namespace HPHP {
 
-Disasm::Disasm(int indentLevel, bool printEncoding /* = false */)
+Disasm::Disasm(int indentLevel /* = 0 */, bool printEncoding /* = false */)
     : m_indent(indentLevel)
     , m_printEncoding(printEncoding)
 {

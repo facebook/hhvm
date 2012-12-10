@@ -148,17 +148,17 @@ DynLocation* Tracelet::newDynLocation() {
   return dl;
 }
 
-void Tracelet::print() const {
+void Tracelet::print(std::ostream& out) const {
   const NormalizedInstruction* i = m_instrStream.first;
   if (i == NULL) {
-    std::cerr << "<empty>\n";
+    out << "<empty>\n";
     return;
   }
 
-  std::cerr << i->unit()->filepath()->data() << ':'
+  out << i->unit()->filepath()->data() << ':'
             << i->unit()->getLineNumber(i->offset()) << std::endl;
   for (; i; i = i->next) {
-    std::cerr << "  " << i->offset() << ": " << i->toString() << std::endl;
+    out << "  " << i->offset() << ": " << i->toString() << std::endl;
   }
 }
 

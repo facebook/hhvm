@@ -413,6 +413,7 @@ public:
   F(bool, JitTransCounters,            true) \
   F(bool, JitMGeneric,                 true) \
   F(bool, JitUseIR,                    false) \
+  F(bool, JitCompareHHIR,              false) \
   F(bool, IRPuntDontInterp,            false) \
   F(bool, HHIRGenericDtorHelper,       true) \
   F(bool, HHIRCse,                     true) \

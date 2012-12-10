@@ -793,7 +793,8 @@ private:
   void irTranslateInstrDefault(const Tracelet& t,
                                const NormalizedInstruction& i);
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
-  void translateTracelet(SrcKey sk, bool considerHHIR=true);
+  void translateTracelet(SrcKey sk, bool considerHHIR=true,
+                         bool dryRun = false);
   bool irTranslateTracelet(const Tracelet&         t,
                            const TCA               start,
                            const TCA               stubStart,

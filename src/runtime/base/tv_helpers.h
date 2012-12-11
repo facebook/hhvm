@@ -46,6 +46,11 @@ inline bool tvIsPlausible(const TypedValue* tv) {
   return tvIsPlausibleType(tv->m_type);
 }
 
+inline bool tvWillBeReleased(TypedValue* tv) {
+  return IS_REFCOUNTED_TYPE(tv->m_type) &&
+         tv->m_data.pind->_count <= 1;
+}
+
 // Assumes 'tv' is live
 inline void tvRefcountedDecRefCell(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
@@ -97,9 +102,17 @@ inline void tvDecRef(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-inline void tvRefcountedDecRef(TypedValue* tv) {
+ALWAYS_INLINE inline void tvRefcountedDecRef(TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tvDecRef(tv);
+  }
+}
+
+// decref when the count is known not to reach zero
+ALWAYS_INLINE inline void tvDecRefOnly(TypedValue* tv) {
+  ASSERT(!tvWillBeReleased(tv));
+  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+    tv->m_data.pstr->decRefCount();
   }
 }
 
@@ -125,7 +138,7 @@ inline void tvIncRef(TypedValue* tv) {
   tv->m_data.pstr->incRefCount();
 }
 
-inline void tvRefcountedIncRef(TypedValue* tv) {
+ALWAYS_INLINE inline void tvRefcountedIncRef(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tvIncRef(tv);

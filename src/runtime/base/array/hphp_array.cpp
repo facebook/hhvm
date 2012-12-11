@@ -161,14 +161,9 @@ HphpArray::~HphpArray() {
   ssize_t lastE = (ssize_t)m_lastE;
   for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
     Elm* e = &elms[pos];
-    if (e->data.m_type == KindOfTombstone) {
-      continue;
-    }
+    if (e->data.m_type == KindOfTombstone) continue;
     if (e->hasStrKey()) decRefStr(e->key);
-    TypedValue* tv = &e->data;
-    if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-      tvDecRef(tv);
-    }
+    tvRefcountedDecRef(&e->data);
   }
   if (m_allocMode == kSmart) {
     smart_free(m_data);

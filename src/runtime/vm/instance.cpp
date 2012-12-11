@@ -325,9 +325,7 @@ bool Instance::propEmpty(Class* ctx, const StringData* key) {
   if (getAttribute(UseGet)) {
     invokeGet(&tv, key);
     bool emptyResult = empty(tvAsCVarRef(&tv));
-    if (IS_REFCOUNTED_TYPE(tv.m_type)) {
-      tvDecRef(&tv);
-    }
+    tvRefcountedDecRef(&tv);
     return emptyResult;
   }
   return false;

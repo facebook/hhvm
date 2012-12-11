@@ -555,9 +555,7 @@ static inline void SetElemArray(TypedValue* base, TypedValue* key,
     // XXX This does not match bytecode.specification, but it does
     // roughly match Zend behavior.
     if (setResult) {
-      if (IS_REFCOUNTED_TYPE(value->m_type)) {
-        tvDecRef(value);
-      }
+      tvRefcountedDecRef(value);
       tvWriteNull(value);
     }
   }

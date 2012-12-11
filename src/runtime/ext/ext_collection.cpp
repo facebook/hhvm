@@ -772,9 +772,7 @@ ObjectData* c_Map::clone() {
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (p.validValue()) {
-      if (IS_REFCOUNTED_TYPE(p.data.m_type)) {
-        tvIncRef(&p.data);
-      }
+      tvRefcountedIncRef(&p.data);
       if (p.hasStrKey()) {
         p.skey->incRefCount();
       }

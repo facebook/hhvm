@@ -166,12 +166,6 @@ static inline void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
   }
 }
 
-static inline bool willBeReleased(TypedValue* tv) {
-  if (!IS_REFCOUNTED_TYPE(tv->m_type)) return false;
-  if (tv->m_data.pind->_count > 1) return false;
-  return true;
-}
-
 HOT_FUNC
 int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
@@ -182,12 +176,10 @@ int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   {
     HphpArray* arr = (HphpArray*)ad;
     if (LIKELY(arr->getSize() != 0)) {
-      if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-        if (UNLIKELY(valOut->m_data.pind->_count == 1)) {
-          goto cold;
-        }
-        valOut->m_data.pstr->decRefCount();
+      if (UNLIKELY(tvWillBeReleased(valOut))) {
+        goto cold;
       }
+      tvDecRefOnly(valOut);
       // We are transferring ownership of the array to the iterator, therefore
       // we do not need to adjust the refcount.
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
@@ -220,15 +212,12 @@ int64 new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
   {
     HphpArray* arr = (HphpArray*)ad;
     if (LIKELY(arr->getSize() != 0)) {
-      if (UNLIKELY(willBeReleased(valOut)) || willBeReleased(keyOut)) {
+      if (UNLIKELY(tvWillBeReleased(valOut)) ||
+          UNLIKELY(tvWillBeReleased(keyOut))) {
         goto cold;
       }
-      if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-        valOut->m_data.pstr->decRefCount();
-      }
-      if (IS_REFCOUNTED_TYPE(keyOut->m_type)) {
-        keyOut->m_data.pstr->decRefCount();
-      }
+      tvDecRefOnly(valOut);
+      tvDecRefOnly(keyOut);
       // We are transferring ownership of the array to the iterator, therefore
       // we do not need to adjust the refcount.
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
@@ -413,12 +402,10 @@ int64 iter_next(Iter* iter, TypedValue* valOut) {
     if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
       goto cold;
     }
-    if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-      if (UNLIKELY(valOut->m_data.pind->_count == 1)) {
-        goto cold;
-      }
-      valOut->m_data.pstr->decRefCount();
+    if (UNLIKELY(tvWillBeReleased(valOut))) {
+      goto cold;
     }
+    tvDecRefOnly(valOut);
     arrIter->setPos(pos);
     getHphpArrayElm(elm, valOut, NULL);
     return 1;
@@ -458,21 +445,14 @@ int64 iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
       goto cold;
     }
-    if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-      if (UNLIKELY(valOut->m_data.pind->_count == 1)) {
-        goto cold;
-      }
-      valOut->m_data.pstr->decRefCount();
+    if (UNLIKELY(tvWillBeReleased(valOut))) {
+      goto cold;
     }
-    if (IS_REFCOUNTED_TYPE(keyOut->m_type)) {
-      if (UNLIKELY(keyOut->m_data.pind->_count == 1)) {
-        if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-          valOut->m_data.pstr->incRefCount();
-        }
-        goto cold;
-      }
-      keyOut->m_data.pstr->decRefCount();
+    if (UNLIKELY(tvWillBeReleased(keyOut))) {
+      goto cold;
     }
+    tvDecRefOnly(valOut);
+    tvDecRefOnly(keyOut);
     arrIter->setPos(pos);
     getHphpArrayElm(elm, valOut, keyOut);
     return 1;

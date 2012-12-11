@@ -137,8 +137,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   /* XXX validate that we don't call helpers with side effects */   \
   /* and ref count consumption/production for any of these query */ \
   /* operations and their corresponding conditional branches */     \
-  OPC(OpSame,            1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpNSame,           1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(OpSame,            1,  1,  0,  0,  1,  0,  0,  0,  0,  0) \
+  OPC(OpNSame,           1,  1,  0,  0,  1,  0,  0,  0,  0,  0) \
                                                             \
   /* XXX TODO check instanceof's hasEffects, isNative, RefCount, MayReenter */\
   OPC(InstanceOfD,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0)               \

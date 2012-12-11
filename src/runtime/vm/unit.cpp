@@ -1024,8 +1024,20 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
             if (UNLIKELY(!unit->isMergeOnly())) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
+              VarEnv* ve = NULL;
+              if (k == UnitMergeKindReqDoc) {
+                ActRec* fp = g_vmContext->m_fp;
+                if (!fp) {
+                  ve = g_vmContext->m_globalVarEnv;
+                } else {
+                  if (!fp->hasVarEnv()) {
+                    fp->m_varEnv = VarEnv::createLazyAttach(fp);
+                  }
+                  ve = fp->m_varEnv;
+                }
+              }
               g_vmContext->invokeFunc(&ret, unit->getMain(), Array(),
-                                      NULL, NULL, NULL, NULL, NULL);
+                                      NULL, NULL, ve, NULL, NULL);
               tvRefcountedDecRef(&ret);
             } else {
               Stats::inc(Stats::PseudoMain_SkipDeep);

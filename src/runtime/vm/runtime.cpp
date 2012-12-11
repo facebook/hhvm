@@ -19,6 +19,7 @@
 #include "runtime/base/array/hphp_array.h"
 #include "runtime/base/builtin_functions.h"
 #include "runtime/ext/ext_continuation.h"
+#include "runtime/ext/ext_collection.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/repo.h"
@@ -463,6 +464,24 @@ ArrayData* new_tuple(int n, const TypedValue* values) {
   return a;
 }
 
+#define NEW_COLLECTION_HELPER(name) \
+  ObjectData* \
+  new##name##Helper(int nElems) { \
+    ObjectData *obj = NEWOBJ(c_##name)(); \
+    obj->incRefCount(); \
+    if (nElems) { \
+      collectionReserve(obj, nElems); \
+    } \
+    TRACE(2, "new" #name "Helper: capacity %d\n", nElems); \
+    return obj; \
+  }
+
+NEW_COLLECTION_HELPER(Vector)
+NEW_COLLECTION_HELPER(Map)
+NEW_COLLECTION_HELPER(StableMap)
+
+#undef NEW_COLLECTION_HELPER
+
 static inline void
 tvPairToCString(DataType t, uint64_t v,
                 const char** outStr,
@@ -796,6 +815,52 @@ HphpArray* get_static_locals(const ActRec* ar) {
   } else {
     return ar->m_func->getStaticLocals();
   }
+}
+
+void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
+  ASSERT(obj);
+  collectionAppend(obj, value);
+  // TODO Task #1970153: It would be great if we had a version of
+  // collectionAppend() that didn't incRef the value so that we
+  // wouldn't have to decRef it here
+  tvRefcountedDecRef(value);
+}
+  
+void collection_setm_ik1_v0(ObjectData* obj, int64 key, TypedValue* value) {
+  ASSERT(obj);
+  int ct = obj->getCollectionType();
+  if (ct == Collection::VectorType) {
+    c_Vector* vec = static_cast<c_Vector*>(obj);
+    vec->put(key, value);
+  } else if (ct == Collection::MapType) {
+    c_Map* mp = static_cast<c_Map*>(obj);
+    mp->put(key, value);
+  } else if (ct == Collection::StableMapType) {
+    c_StableMap* smp = static_cast<c_StableMap*>(obj);
+    smp->put(key, value);
+  } else {
+    ASSERT(false);
+  }
+  tvRefcountedDecRef(value);
+}
+
+void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
+                            TypedValue* value) {
+  int ct = obj->getCollectionType();
+  if (ct == Collection::VectorType) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Only integer keys may be used with Vectors"));
+    throw e;
+  } else if (ct == Collection::MapType) {
+    c_Map* mp = static_cast<c_Map*>(obj);
+    mp->put(key, value);
+  } else if (ct == Collection::StableMapType) {
+    c_StableMap* smp = static_cast<c_StableMap*>(obj);
+    smp->put(key, value);
+  } else {
+    ASSERT(false);
+  }
+  tvRefcountedDecRef(value);
 }
 
 } } // HPHP::VM

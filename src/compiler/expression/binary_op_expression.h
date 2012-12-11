@@ -36,6 +36,7 @@ public:
   virtual int getLocalEffects() const;
   virtual bool isLiteralString() const;
   virtual std::string getLiteralString() const;
+  virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
 
   virtual bool isRefable(bool checkError = false) const;
   bool isShortCircuitOperator() const;

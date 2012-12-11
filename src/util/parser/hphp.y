@@ -1054,6 +1054,8 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_TYPELIST_GT
 %token T_UNRESOLVED_LT
 
+%token T_COLLECTION
+
 %%
 
 start:
@@ -1841,10 +1843,18 @@ expr_no_variable:
                                          _p->popLabelInfo();}
   | xhp_tag                            { $$ = $1;}
   | dim_expr                           { $$ = $1;}
+  | collection_literal                 { $$ = $1;}
 ;
 
 array_literal:
     T_ARRAY '(' array_pair_list ')'    { _p->onArray($$,$3,T_ARRAY);}
+;
+
+collection_literal:
+    fully_qualified_class_name
+    '{' collection_init '}'            { Token t;
+                                         _p->onName(t,$1,Parser::StringName);
+                                         BEXP($$,t,$3,T_COLLECTION);}
 ;
 
 dim_expr:
@@ -2343,6 +2353,19 @@ non_empty_array_pair_list:
     '&' variable                       { _p->onArrayPair($$,&$1,  0,$4,1);}
   | expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,$4,1);}
   | '&' variable                       { _p->onArrayPair($$,  0,  0,$2,1);}
+;
+
+collection_init:
+    non_empty_collection_init
+    possible_comma                     { $$ = $1;}
+  |                                    { _p->onEmptyCollection($$);}
+;
+non_empty_collection_init:
+    non_empty_collection_init
+    ',' expr T_DOUBLE_ARROW expr       { _p->onCollectionPair($$,&$1,&$3,$5);}
+  | non_empty_collection_init ',' expr { _p->onCollectionPair($$,&$1,  0,$3);}
+  | expr T_DOUBLE_ARROW expr           { _p->onCollectionPair($$,  0,&$1,$3);}
+  | expr                               { _p->onCollectionPair($$,  0,  0,$1);}
 ;
 
 encaps_list:

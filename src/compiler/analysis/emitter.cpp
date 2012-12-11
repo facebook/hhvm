@@ -2829,6 +2829,65 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           return true;
         }
 
+        if (op == T_COLLECTION) {
+          ScalarExpressionPtr cls =
+            static_pointer_cast<ScalarExpression>(b->getExp1());
+          const std::string* clsName = NULL;
+          cls->getString(clsName);
+          int cType = 0;
+          if (!strcasecmp(clsName->c_str(), "vector")) {
+            cType = Collection::VectorType;
+          } else if (!strcasecmp(clsName->c_str(), "map")) {
+            cType = Collection::MapType;
+          } else if (!strcasecmp(clsName->c_str(), "stablemap")) {
+            cType = Collection::StableMapType;
+          } else {
+            throw IncludeTimeFatalException(b,
+              "Cannot use collection initialization for "
+              "non-collection class");
+          }
+          bool kvPairs = (cType == Collection::MapType ||
+                          cType == Collection::StableMapType);
+          int nElems = 0;
+          ExpressionListPtr el;
+          if (b->getExp2()) {
+            el = static_pointer_cast<ExpressionList>(b->getExp2());
+            nElems = el->getCount();
+          }
+          e.NewCol(cType, nElems);
+          if (kvPairs) {
+            for (int i = 0; i < nElems; i++) {
+              ArrayPairExpressionPtr ap(
+                static_pointer_cast<ArrayPairExpression>((*el)[i]));
+              ExpressionPtr key = ap->getName();
+              if (!key) {
+                throw IncludeTimeFatalException(ap,
+                  "Keys must be specified for Map and StableMap "
+                  "initialization");
+              }
+              visit(key);
+              emitConvertToCell(e);
+              visit(ap->getValue());
+              emitConvertToCell(e);
+              e.ColAddElemC();
+            }
+          } else {
+            for (int i = 0; i < nElems; i++) {
+              ArrayPairExpressionPtr ap(
+                static_pointer_cast<ArrayPairExpression>((*el)[i]));
+              ExpressionPtr key = ap->getName();
+              if ((bool)key) {
+                throw IncludeTimeFatalException(ap,
+                  "Keys may not be specified for Vector initialization");
+              }
+              visit(ap->getValue());
+              emitConvertToCell(e);
+              e.ColAddNewElemC();
+            }
+          }
+          return true;
+        }
+
         visit(b->getExp1());
         emitConvertToCellOrLoc(e);
         visit(b->getExp2());

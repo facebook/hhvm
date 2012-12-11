@@ -3848,7 +3848,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddElemV(PC& pc) {
   Cell* c2 = m_stack.indC(1);
   Cell* c3 = m_stack.indC(2);
   if (c3->m_type != KindOfArray) {
-    raise_error("AddElemC: $3 must be an array");
+    raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
     tvCellAsVariant(c3).asArrRef().set(c2->m_data.num, ref(tvAsCVarRef(v1)));
@@ -3875,10 +3875,57 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddNewElemV(PC& pc) {
   Var* v1 = m_stack.topV();
   Cell* c2 = m_stack.indC(1);
   if (c2->m_type != KindOfArray) {
-    raise_error("AddNewElemC: $2 must be an array");
+    raise_error("AddNewElemV: $2 must be an array");
   }
   tvCellAsVariant(c2).asArrRef().append(ref(tvAsCVarRef(v1)));
   m_stack.popV();
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopNewCol(PC& pc) {
+  NEXT();
+  DECODE_IVA(cType);
+  DECODE_IVA(nElems);
+  ObjectData* obj;
+  switch (cType) {
+    case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
+    case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
+    case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
+    default:
+      obj = NULL;
+      raise_error("NewCol: Invalid collection type");
+      break;
+  }
+  // Reserve enough room for nElems elements in advance
+  if (nElems) {
+    collectionReserve(obj, nElems);
+  }
+  m_stack.pushObject(obj);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopColAddNewElemC(PC& pc) {
+  NEXT();
+  Cell* c1 = m_stack.topC();
+  Cell* c2 = m_stack.indC(1);
+  if (c2->m_type == KindOfObject && c2->m_data.pobj->isCollection()) {
+    collectionAppend(c2->m_data.pobj, c1);
+  } else {
+    raise_error("ColAddNewElemC: $2 must be a collection");
+  }
+  m_stack.popC();
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopColAddElemC(PC& pc) {
+  NEXT();
+  Cell* c1 = m_stack.topC();
+  Cell* c2 = m_stack.indC(1);
+  Cell* c3 = m_stack.indC(2);
+  if (c3->m_type == KindOfObject && c3->m_data.pobj->isCollection()) {
+    collectionSet(c3->m_data.pobj, c2, c1);
+  } else {
+    raise_error("ColAddElemC: $3 must be a collection");
+  }
+  m_stack.popC();
+  m_stack.popC();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {

@@ -73,6 +73,8 @@ public:
   void markParam(int p, bool noRefWrapper);
   void markParams(bool noRefWrapper);
 
+  void setCollectionType(int cType);
+
   /**
    * When a function call has too many arguments, we only want to output
    * max number of arguments, by limiting output count of subexpressions.
@@ -114,6 +116,7 @@ private:
   ExpressionPtrVec m_exps;
   int m_outputCount;
   bool m_arrayElements;
+  int m_collectionType;
   ListKind m_kind;
 };
 

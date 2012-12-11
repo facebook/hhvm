@@ -37,6 +37,10 @@ int64 iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
 ArrayData* new_array(int capacity);
 ArrayData* new_tuple(int numArgs, const TypedValue* args);
 
+ObjectData* newVectorHelper(int nElems);
+ObjectData* newMapHelper(int nElems);
+ObjectData* newStableMapHelper(int nElems);
+
 StringData* concat_is(int64 v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64 v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
@@ -279,6 +283,11 @@ typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
 extern CompileStringFn g_hphp_compiler_parse;
 extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
 extern BuildNativeClassUnitFn g_hphp_build_native_class_unit;
+
+void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value);
+void collection_setm_ik1_v0(ObjectData* obj, int64 key, TypedValue* value);
+void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
+                            TypedValue* value);
 
 } }
 #endif

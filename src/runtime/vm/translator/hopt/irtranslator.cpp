@@ -1282,6 +1282,24 @@ TranslatorX64::irTranslateNewTuple(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateNewCol(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(NewCol);
+}
+
+void
+TranslatorX64::irTranslateColAddNewElemC(const Tracelet& t,
+                                         const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(ColAddNewElemC);
+}
+
+void
+TranslatorX64::irTranslateColAddElemC(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(ColAddElemC);
+}
+
+void
 TranslatorX64::irTranslateStaticLocInit(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);

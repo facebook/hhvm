@@ -704,6 +704,26 @@ void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
   out->exp = expList;
 }
 
+void Parser::onEmptyCollection(Token &out) {
+  out->exp = NEW_EXP0(ExpressionList);
+}
+
+void
+Parser::onCollectionPair(Token &out, Token *pairs, Token *name, Token &value) {
+  if (!value->exp) return;
+
+  ExpressionPtr expList;
+  if (pairs && pairs->exp) {
+    expList = pairs->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  ExpressionPtr nameExp = name ? name->exp : ExpressionPtr();
+  expList->addElement(NEW_EXP(ArrayPairExpression, nameExp, value->exp, false,
+                              true));
+  out->exp = expList;
+}
+
 void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
                              Token &value) {
   ExpressionPtr expList;

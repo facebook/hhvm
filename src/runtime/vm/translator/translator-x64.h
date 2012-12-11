@@ -505,9 +505,12 @@ MINSTRS
   CASE(Array) \
   CASE(NewArray) \
   CASE(NewTuple) \
+  CASE(NewCol) \
   CASE(Nop) \
   CASE(AddElemC) \
   CASE(AddNewElemC) \
+  CASE(ColAddElemC) \
+  CASE(ColAddNewElemC) \
   CASE(Cns) \
   CASE(DefCns) \
   CASE(ClsCnsD) \

@@ -5274,6 +5274,30 @@ void TranslatorX64::translateNewTuple(const Tracelet& t,
 }
 
 void
+TranslatorX64::translateNewCol(const Tracelet& t,
+                               const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 0);
+  ASSERT(i.outStack && !i.outLocal);
+  ASSERT(i.outStack->outerType() == KindOfObject);
+  int cType = i.imm[0].u_IVA;
+  int nElems = i.imm[1].u_IVA;
+  void* fptr = NULL;
+  switch (cType) {
+    case Collection::VectorType: fptr = (void*)newVectorHelper; break;
+    case Collection::MapType: fptr = (void*)newMapHelper; break;
+    case Collection::StableMapType: fptr = (void*)newStableMapHelper; break;
+    default: ASSERT(false); break;
+  }
+  if (false) {
+    ObjectData* obj1 UNUSED = newVectorHelper(42);
+    ObjectData* obj2 UNUSED = newMapHelper(42);
+    ObjectData* obj3 UNUSED = newStableMapHelper(42);
+  }
+  EMIT_CALL(a, fptr, IMM(nElems));
+  m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);
+}
+
+void
 TranslatorX64::analyzeNop(Tracelet& t, NormalizedInstruction& i) {
   i.m_txFlags = Native;
 }
@@ -5356,7 +5380,7 @@ TranslatorX64::analyzeAddNewElemC(Tracelet& t, NormalizedInstruction& i) {
 
 void
 TranslatorX64::translateAddNewElemC(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
+                                    const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 2);
   ASSERT(i.outStack && !i.outLocal);
   ASSERT(i.inputs[0]->outerType() != KindOfRef);
@@ -5395,6 +5419,75 @@ TranslatorX64::translateAddNewElemC(const Tracelet& t,
   // The array_setm helper returns the up-to-date array pointer in rax.
   // Therefore, we can bind rax to arrLoc and mark it as dirty.
   m_regMap.bind(rax, arrLoc, KindOfArray, RegInfo::DIRTY);
+}
+
+void
+TranslatorX64::analyzeColAddNewElemC(Tracelet& t, NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 2);
+  i.m_txFlags = supportedPlan(i.inputs[1]->outerType() == KindOfObject);
+}
+
+void
+TranslatorX64::translateColAddNewElemC(const Tracelet& t,
+                                       const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 2);
+  ASSERT(i.outStack && !i.outLocal);
+  ASSERT(i.inputs[0]->outerType() != KindOfRef);
+  ASSERT(i.inputs[1]->outerType() != KindOfRef);
+  ASSERT(i.inputs[0]->isStack());
+  ASSERT(i.inputs[1]->isStack());
+  Location collLoc = i.inputs[1]->location;
+  Location valLoc = i.inputs[0]->location;
+  m_regMap.cleanLoc(valLoc);
+  if (false) { // type-check
+    TypedValue* rhs = NULL;
+    ObjectData* coll = NULL;
+    collection_setm_wk1_v0(coll, rhs);
+  }
+  EMIT_RCALL(a, i, collection_setm_wk1_v0,
+             V(collLoc),
+             A(valLoc));
+}
+
+void
+TranslatorX64::analyzeColAddElemC(Tracelet& t, NormalizedInstruction& i) {
+  i.m_txFlags = supportedPlan(i.inputs[2]->outerType() == KindOfObject &&
+                              (i.inputs[1]->isInt() ||
+                               i.inputs[1]->isString()));
+}
+
+void
+TranslatorX64::translateColAddElemC(const Tracelet& t,
+                                    const NormalizedInstruction& i) {
+  ASSERT(i.outStack && !i.outLocal);
+  ASSERT(i.inputs.size() >= 3);
+  const DynLocation& coll = *i.inputs[2];
+  const DynLocation& key = *i.inputs[1];
+  const DynLocation& val = *i.inputs[0];
+  ASSERT(!coll.isVariant()); // not handling variants.
+  ASSERT(!key.isVariant());
+  ASSERT(!val.isVariant());
+  const Location& collLoc = coll.location;
+  const Location& keyLoc = key.location;
+  const Location& valLoc = val.location;
+  ASSERT(collLoc.isStack());
+  ASSERT(keyLoc.isStack());
+  ASSERT(collLoc.isStack());
+  m_regMap.cleanLoc(valLoc);
+  ASSERT(key.rtt.isInt() || key.rtt.isString());
+  if (false) { // type-check
+    TypedValue* rhs = NULL;
+    StringData* strkey = NULL;
+    ObjectData* coll = NULL;
+    collection_setm_ik1_v0(coll, 12, rhs);
+    collection_setm_sk1_v0(coll, strkey, rhs);
+  }
+  void* fptr = key.rtt.isString() ? (void*)collection_setm_sk1_v0 :
+               (void*)collection_setm_ik1_v0;
+  EMIT_RCALL(a, i, fptr,
+             V(collLoc),
+             V(keyLoc),
+             A(valLoc));
 }
 
 static void undefCns(const StringData* nm) {
@@ -12043,6 +12136,7 @@ bool TranslatorX64::dumpTCData() {
   SIMPLE_OP(Jmp) \
   SIMPLE_OP(UnpackCont) \
   SIMPLE_OP(CreateCont) \
+  SIMPLE_OP(NewCol) \
   SIMPLE_OP(FCall) \
   /*
    * Translations with a reentrant helper.

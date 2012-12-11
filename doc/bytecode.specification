@@ -38,9 +38,9 @@ Each HipHop source file is compiled into a separate "compilation unit", or
 
 A unit's bytecode is an array of bytes encoding a sequence of HHBC
 instructions, where each instruction is encoded using one or more bytes. This
-specification defines each the mnemonic and behavior of each HHBC instruction,
-but the exact byte values used to encode HHBC instructions is currently
-unspecified.
+specification defines an instruction set and defines the behavior of each HHBC
+instruction, but the exact byte values used to encode HHBC instructions is
+currently unspecified.
 
 A unit's metadata is a set of structures that provide essential information
 that is needed at run time by the execution engine. This specification will
@@ -127,12 +127,13 @@ Functions
 ---------
 
 A unit's bytecode is organized into functions. Each function has its own
-metadata that provdes essential information about the function, such as how
-many local variables it has, how many iterator variables it has, how many
-formal parameters it has, the names of the local variables, the names of the
-formal parameters, how each parameter should be passed (pass by value vs. pass
-by reference), whether each parameter has a default value, and an upper bound
-for the maximum depth the evaluation stack can reach at run time.
+metadata that provdes essential information about the function, such as the
+name of the function, how many local variables it has, how many iterator
+variables it has, how many formal parameters it has, the names of the local
+variables, the names of the formal parameters, how each parameter should be
+passed (pass by value vs. pass by reference), whether each parameter has a
+default value, and an upper bound for the maximum depth the evaluation stack
+can reach at run time.
 
 Each local variable and iterator variable has an id, and HHBC instructions can
 reference these variables using these ids. The id space for local variables is
@@ -319,30 +320,31 @@ function (the callee), transfers the parameters from the evaluation stack to
 the callee, pops the current FPI off of the FPI stack, and then invokes the
 dispatcher to call the function.
 
-Calls to buitin functions may be optimized to avoid pusing an ActRec on the
-FPI stack, if it is known that the builtin function does not need access
-to the call stack. In this case, the arguments to the builtin are passed
-with the BPass* instructions, and the builtin can be invoked with the
-FCallBuiltin instruction. Unless otherwise noted, subsequent references
-to FCall* instructions should be meant to refer to non-optimized FCall
-instructions, i.e. all FCall instructions other than FCallBuiltin.
+Calls to buitin functions may be optimized to avoid pusing an entry on the FPI
+stack if it is known that the builtin function does not need access to the call
+stack. In this case, the arguments to the builtin are passed with the BPass*
+instructions, and the builtin can be invoked with the FCallBuiltin instruction.
+Unless otherwise noted, subsequent references to FCall* instructions should be
+meant to refer to non-optimized FCall instructions, i.e. all FCall instructions
+other than FCallBuiltin.
+
 
 Calling convention
 ------------------
 
-The caller may pass any number of parameters to the callee by executing the
-FPass* instructions zero or more times prior to executing an FCall*
-instruction. The caller must pass the parameters in forward order, i.e. the
-first use of FPass* passes the first parameter, the second use of FPass* passes
-the second parameter, and so forth.
+The caller may pass any number of parameters to the callee by executing FPass*
+instructions zero or more times prior to executing an FCall* instruction. The
+caller must pass the parameters in forward order, i.e. the first use of FPass*
+passes the first parameter, the second use of FPass* passes the second
+parameter, and so forth.
 
 The FPush*/FPass*/FCall* instructions can be used to call a standard function, a
 method on an object, or a method from a class. The caller is responsible for
 evaluating all of the parameters in forward order. When the caller executes an
-FCall* instruction, the dispatcher creates a new frame and binds the parameters
+FCall* instruction, the dispatcher creates a new frame and moves the parameters
 prepared by the caller into the callee's variable environment. The dispatcher
-then transfers control to the appropriate entry point (either the main entry
-point or a DV entry point) based on the number of parameters passed.
+then transfers control to the appropriate entry point of the callee (either the
+main entry point or a DV entry point) based on the number of parameters passed.
 
 When the callee executes the Ret* instruction, the dispatcher pushes the return
 value onto the caller's evaluation stack. Then the dispatcher destroys the
@@ -365,42 +367,41 @@ context, a property may be visible and accessible, visible but inaccessible, or
 invisible and inaccessible.
 
 If a property P is declared with the "public" qualifier in the definition of
-class C, for instances of class C and instances of descendent classes of C the
-property P will be visible and accessible in all contexts. If C has an ancestor
-that declares a public property with the same name as P, C is said to
-"redeclare" property P, and the declaration of P in class C is considered to
-refer to the same property as the declaration in the ancestor class.
+class C, for instances of class C and descendent classes the property P will be
+visible and accessible in all contexts. If C has an ancestor that declares a
+public property with the same name as P, C is said to "redeclare" property P,
+and the declaration of P in class C is considered to refer to the same property
+as the declaration in the ancestor class.
 
 If a property P is declared as "protected" in the definition of class C, for
 instances of class C the property P will be visible in all contexts, but only
-accessible in the context of class C, an ancestor class of C, or descendent
-class of C. When class C is loaded at run time, a semantic check must be
-performed to ensure that all ancestor classes of C do not declare a property as
-"public" with the same name as P. If C has an ancestor that declares a public
-property with the same name as P, the execution engine must throw a fatal error
-when class C is loaded. If C has an ancestor that declares a protected property
-with the same name as P, C is said to "redeclare" property P, and the
-declaration of P in class C is considered to refer to the same property as the
-declaration in the ancestor class. Note that there may exist a class D that is
-a descendent of C and declares a property as "public" with the same name as P.
-In such cases the new "public" declaration in D is considered to refer to the
-same property as the original "protected" declaration in C, and the "protected"
-qualifier from the original declaration is effectively overriden by the
-"public" qualifier from the new declaration. Class D is said to "redeclare"
-property P with the "public" qualifier. Thus, for instances of class D and
-descendent classes of D, property P will be visible and accessible in all
-contexts. Finally, if a class E that is descendent of C does not redeclare P as
-public and it does not have an ancestor class that redeclares P as public, for
-instances of class E the property P will be visibile in all contexts, but only
-accessible in the context of class E, an ancestor class of E, or a descendent
-class of E.
+accessible in the context of class C, an ancestor class, or descendent class.
+When class C is loaded at run time, a semantic check must be performed to
+ensure that all ancestor classes of C do not declare a property as "public"
+with the same name as P. If C has an ancestor that declares a public property
+with the same name as P, the execution engine must throw a fatal error when
+class C is loaded. If C has an ancestor that declares a protected property with
+the same name as P, C is said to "redeclare" property P, and the declaration of
+P in class C is considered to refer to the same property as the declaration in
+the ancestor class. Note that there may exist a class D that is a descendent of
+C and declares a property as "public" with the same name as P. In such cases
+the new "public" declaration in D is considered to refer to the same property
+as the original "protected" declaration in C, and the "protected" qualifier
+from the original declaration is effectively overriden by the "public"
+qualifier from the new declaration. Class D is said to "redeclare" property P
+with the "public" qualifier. Thus, for instances of class D and descendent
+classes of D, property P will be visible and accessible in all contexts.
+Finally, if a class E that is descendent of C does not redeclare P as public
+and does not have an ancestor class that redeclares P as public, for instances
+of class E the property P will be visibile in all contexts, but only accessible
+in the context of class E, an ancestor class of E, or a descendent class of E.
 
 If a property P is declared with the "private" qualifier in the definition of
 class C, for instances of class C the property P will be visible in all
 contexts, but only accessible in the context of class C. For instances of
 descendent classes of C, the property P will be visible and accessible in the
-context of the class C, and in all other contexts it will be invisible and
-inaccessible. When class C is loaded at run time, a semantic check must be
+context of the class C, and in all other contexts property P will be invisible
+and inaccessible. When class C is loaded at run time, a semantic check must be
 performed to ensure that all ancestor classes of C do not declare a property as
 "public" or "protected" with the same as P. If C has an ancestor that declares
 a public or protected property with the same name as P, the execution engine
@@ -408,31 +409,30 @@ must throw a fatal error when class C is loaded. Note that descendent classes
 of C may declare another property with the same name as P. The declaration of
 property P as "private" in class C is considered to define a separate property
 that is distinct from all other properties of the same name declared in
-descendent classes of C.
+ancestor classes and descendent classes of C.
 
 An instruction that accesses a property specifies the property by a name N via
-a litstr id or a cell consumed from the evaluation stack. As noted above, it is
-possible for a class to have multiple distinct properties named N. In cases
-where there are multiple distinct properties named N, the visibility
-rules are used to determine which property is retrieved. If there is a visible
-private property P named N, then property P is retrieved. Otherwise, if there
-is a visible non-private property Q named N, then property Q is retrieved. If
-there is no visible property named N, the behavior is determined by the
-specific instruction. The semantic checks and the visibility rules ensure that
-for any context there cannot be two or more visible private properties, and
-there cannot be two or more visible non-private properties.
+a litstr id, a local variable id, or a cell consumed from the evaluation stack.
+As noted above, it is possible for a class to have multiple distinct properties
+named N. In cases where there are multiple distinct properties named N, the
+visibility rules are used to determine which property is retrieved. If there is
+a visible private property P named N, then property P is retrieved. Otherwise,
+if there is a visible non-private property Q named N, then property Q is
+retrieved. If there is no visible property named N, the behavior is determined
+by the specific instruction. The semantic checks and the visibility rules
+ensure that for any context there cannot be more than one visible private
+property, and there cannot be more than one visible non-private property.
 
-Some instructions can create a new property at run time with name that is
+Some instructions can create a new property at run time with a name that is
 different than the names of all declared properties that are visible in the
 current context. Such properties are called "non-declared properties" or
 "dynamic properties". Dynamic properties are considered to be visible and
 accessible in all contexts.
 
-If a declared property is unset, and then re-accessed/re-created,
-then it is treated the same way as an invisible property with the
-same attributes as the original declared property. Specifically, if
-the property gets created again, it must have the same access attributes
-as the original declared property.
+If a declared property is unset, and then re-accessed/re-created, then it is
+treated the same way as an invisible property with the same attributes as the
+original declared property. Specifically, if the property gets created again,
+it must have the same access attributes as the original declared property.
 
 
 Magic property access methods
@@ -843,10 +843,9 @@ NewArray    []  ->  [C:Arr]
 
 NewTuple <num elems>    [C..C]  ->  [C]
 
-  New array. Creates a new array from the top %1 cells on the stack,
-  pops those cells, then pushes the new array onto the stack.  Elements
-  are implicitly numbered from 0 to num elems - 1; $1 is at index 0,
-  $2 is at 1, and so on.
+  New array. Creates a new array from the top %1 cells on the stack, pops those
+  cells, then pushes the new array onto the stack. Elements are implicitly
+  numbered from 0 to num elems - 1; $1 is at index 0, $2 is at 1, and so on.
 
 AddElemC    [C C C]  ->  [C:Arr]
 
@@ -875,6 +874,26 @@ AddNewElemV    [C V]  ->  [C:Arr]
   then pushes $2 onto the stack.
 
   If $2 is not an array, this instruction throws a fatal error.
+
+NewCol <coll type> <num elems>    []  ->  [C:Obj]
+
+  New collection. Creates a new collection of type %1 with an initial capacity
+  sufficient to hold the number of elements specified by %2, and pushes the
+  collection onto the stack.
+
+ColAddElemC    [C C C]  ->  [C:Obj]
+
+  Collection add key/value pair. If $3 is a collection object, this instruction
+  executes $3[$2] = $1 and then pushes $3 onto the stack.
+
+  If $3 is not a collection object, this instruction throws a fatal error.
+
+ColAddNewElemC    [C C]  ->  [C:Obj]
+
+  Collection add value. If $2 is a collection object, this instruction executes
+  $2[] = $1 and then pushes $2 onto the stack.
+
+  If $2 is not a collection object, this instruction throws a fatal error.
 
 Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str]
 
@@ -1037,9 +1056,9 @@ CastDouble    [C]  ->  [C:Dbl]
 
 CastString    [C]  ->  [C:Str]
 
-  Cast to string ((string)). Pushes (string)$1 onto the stack. If $1 is an
-  object that implements the __tostring method, the string cast returns
-  $1->__tostring(). If $1 is an object that does not implement __tostring
+  Cast to string ((string),(binary)). Pushes (string)$1 onto the stack. If $1
+  is an object that implements the __toString method, the string cast returns
+  $1->__toString(). If $1 is an object that does not implement __toString
   method, the string cast throws a fatal error.
 
 CastArray    [C]  ->  [C:Arr]
@@ -1119,7 +1138,7 @@ JmpNZ <relative offset>    [C]  ->  []
   Jump if not zero. Conditionally transfers control to the location specified
   by %1 if (bool)$1 != (bool)0.
 
-Switch  <offset vector> <base> <bounded>    [C]  ->  []
+Switch <offset vector> <base> <bounded>    [C]  ->  []
 
   Switch over integer case values. If bounded == 0, the implementation will
   assume that $1 is an integer in the range [0, length(vector)) and
@@ -1137,7 +1156,7 @@ Switch  <offset vector> <base> <bounded>    [C]  ->  []
   control will be transferred to the location specified by
   vector[length(vector) - 1].
 
-SSwitch  <litstr id/offset vector>    [C]  ->  []
+SSwitch <litstr id/offset vector>    [C]  ->  []
 
   Switch over string case values. This instruction will search the
   string/offset vector from the beginning until it finds a string that is equal
@@ -1673,12 +1692,14 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
 
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []
+
   FPI push call user function. These instructions lookup $1 as a
   callable, and push a new entry onto the FPI stack. If $1 is not callable,
   they issue a warning, and push an entry representing a function which
   does nothing, takes no argument, and returns null.
 
 FPushCufSafe <num params> [C C] ->  [C C]
+
   FPI push call user function. This instruction pops $1 and $2, then pushes
   $1 back onto the stack. It then looks up $2 as a callable, and pushes a
   new entry onto the FPI stack. If $2 is not callable, it pushes an entry
@@ -1687,10 +1708,12 @@ FPushCufSafe <num params> [C C] ->  [C C]
   otherwise it pushes true onto the evaluation stack.
 
 CufSafeArray   [C C R] -> [C]
+
   Pops 3 elements from the stack, and pushes array($2, $1), preserving
   references.
 
 CufSafeReturn  [C C R] -> [R]
+
   Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving
   references.
 
@@ -1781,6 +1804,7 @@ FCallBuiltin  <total params> <passed params> <litstr id> [F..F]  -> [R]
   to call the callee. %2 denotes the number of non-default parameters pushed
   onto stack by user level code. When the callee returns, it will transfer
   the return value onto the caller's evaluation stack using the R flavor.
+
 
 9. Member operations
 --------------------
@@ -4328,7 +4352,7 @@ FCall 0
 PopR
 RetC
 
-class B extends A { public static function f() { return parent::x; }}
+class B extends A { public static function f() { return parent::x; } }
 
 ClsCnsD "x" "A"
 RetC

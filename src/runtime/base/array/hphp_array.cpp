@@ -1757,8 +1757,9 @@ array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
     return old;
   }
   retval->incRefCount();
-  // TODO: It would be great if there were nvSet() methods that didn't
-  // bump up the refcount so that we didn't have to decrement it here
+  // TODO Task #1970153: It would be great if there were nvSet()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
   decRefArr(old);
   if (cell) cell->m_data.parr = retval;
   return retval;

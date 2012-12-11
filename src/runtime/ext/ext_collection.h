@@ -1188,6 +1188,73 @@ void collectionUnserialize(ObjectData* obj,
                            int64 sz,
                            char type);
 
+class CollectionInit {
+public:
+  CollectionInit(int cType, ssize_t nElems);
+  ~CollectionInit() {
+    // In case an exception interrupts the initialization.
+    if (m_data) m_data->release();
+  }
+  CollectionInit &set(CVarRef v) {
+    collectionOffsetAppend(m_data, v);
+    return *this;
+  }
+  CollectionInit &set(RefResult v) {
+    collectionOffsetAppend(m_data, variant(v));
+    return *this;
+  }
+  CollectionInit &set(CVarWithRefBind v) {
+    collectionOffsetAppend(m_data, variant(v));
+    return *this;
+  }
+  CollectionInit &set(int64 name, CVarRef v) {
+    collectionOffsetSet(m_data, name, v);
+    return *this;
+  }
+  CollectionInit &set(litstr name, CVarRef v) {
+    collectionOffsetSet(m_data, name, v);
+    return *this;
+  }
+  CollectionInit &set(CStrRef name, CVarRef v) {
+    collectionOffsetSet(m_data, name, v);
+    return *this;
+  }
+  CollectionInit &set(CVarRef name, CVarRef v) {
+    collectionOffsetSet(m_data, name, v);
+    return *this;
+  }
+  template<typename T>
+  CollectionInit &set(const T &name, CVarRef v) {
+    collectionOffsetSet(m_data, name, variant(v));
+    return *this;
+  }
+  CollectionInit &set(litstr name, RefResult v) {
+    collectionOffsetSet(m_data, name, variant(v));
+    return *this;
+  }
+  CollectionInit &set(CStrRef name, RefResult v) {
+    collectionOffsetSet(m_data, name, variant(v));
+    return *this;
+  }
+  CollectionInit &set(CVarRef name, RefResult v) {
+    collectionOffsetSet(m_data, name, variant(v));
+    return *this;
+  }
+  template<typename T>
+  CollectionInit &set(const T &name, RefResult v) {
+    collectionOffsetSet(m_data, name, variant(v));
+    return *this;
+  }
+  ObjectData *create() {
+    ObjectData *ret = m_data;
+    m_data = NULL;
+    return ret;
+  }
+  operator ObjectData *() { return create(); }
+private:
+  ObjectData *m_data;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -2565,5 +2565,20 @@ void collectionUnserialize(ObjectData* obj,
   }
 }
 
+CollectionInit::CollectionInit(int cType, ssize_t nElems) {
+  switch (cType) {
+    case Collection::VectorType: m_data = NEWOBJ(c_Vector)(); break;
+    case Collection::MapType: m_data = NEWOBJ(c_Map)(); break;
+    case Collection::StableMapType: m_data = NEWOBJ(c_StableMap)(); break;
+    default:
+      ASSERT(false);
+      break;
+  }
+  // Reserve enough room for nElems elements in advance
+  if (nElems) {
+    collectionReserve(m_data, nElems);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

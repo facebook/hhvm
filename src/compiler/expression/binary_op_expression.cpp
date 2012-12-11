@@ -62,9 +62,20 @@ BinaryOpExpression::BinaryOpExpression
       m_exp1->setContext(Expression::NoLValueWrapper);
     }
     break;
-  case T_INSTANCEOF:
-    //m_exp1->setContext(Expression::ObjectContext);
-    // Fall through
+  case T_COLLECTION: {
+    std::string s = m_exp1->getLiteralString();
+    int cType = 0;
+    if (strcasecmp(s.c_str(), "vector") == 0) {
+      cType = Collection::VectorType;
+    } else if (strcasecmp(s.c_str(), "map") == 0) {
+      cType = Collection::MapType;
+    } else if (strcasecmp(s.c_str(), "stablemap") == 0) {
+      cType = Collection::StableMapType;
+    }
+    ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
+    el->setCollectionType(cType);
+    break;
+  }
   default:
     break;
   }
@@ -91,6 +102,7 @@ bool BinaryOpExpression::isTemporary() const {
   case T_LOGICAL_OR:
   case T_LOGICAL_AND:
   case T_INSTANCEOF:
+  case T_COLLECTION:
     return true;
   }
   return false;
@@ -112,6 +124,16 @@ std::string BinaryOpExpression::getLiteralString() const {
     return m_exp1->getLiteralString() + m_exp2->getLiteralString();
   }
   return "";
+}
+
+bool BinaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
+  switch (m_op) {
+  case T_COLLECTION:
+    return m_exp2->containsDynamicConstant(ar);
+  default:
+    break;
+  }
+  return false;
 }
 
 bool BinaryOpExpression::isShortCircuitOperator() const {
@@ -708,11 +730,15 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     et2 = Type::Some;
     rt = Type::Boolean;
     break;
-
   case T_INSTANCEOF:
     et1 = Type::Any;
     et2 = Type::String;
     rt = Type::Boolean;
+    break;
+  case T_COLLECTION:
+    et1 = Type::Any;
+    et2 = Type::Any;
+    rt = Type::Object;
     break;
   default:
     ASSERT(false);
@@ -864,6 +890,17 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case '>':                   cg_printf(" > ");          break;
   case T_IS_GREATER_OR_EQUAL: cg_printf(" >= ");         break;
   case T_INSTANCEOF:          cg_printf(" instanceof "); break;
+  case T_COLLECTION: {
+    ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
+    if (el->getCount() == 0) {
+      cg_printf(" {}");
+    } else {
+      cg_printf(" { ");
+      el->outputPHP(cg, ar);
+      cg_printf(" }");
+    }
+    return;
+  }
   default:
     ASSERT(false);
   }
@@ -1305,6 +1342,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case '/':                   cg_printf("divide");        break;
   case '%':                   cg_printf("modulo");        break;
   case T_INSTANCEOF:          cg_printf("instanceOf");    break;
+  case T_COLLECTION:          cg_printf("Object");        break;
   default:
     wrapped = !isUnused();
     break;
@@ -1336,6 +1374,9 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     ASSERT(first->getType()->is(Type::KindOfInt64));
     first->outputCPP(cg, ar);
     break;
+  case T_COLLECTION:
+    /* do nothing */
+    break;
   default:
     first->outputCPP(cg, ar);
     break;
@@ -1356,6 +1397,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case T_BOOLEAN_AND:         cg_printf(" && ");   break;
   case T_LOGICAL_OR:          cg_printf(" || ");   break;
   case T_LOGICAL_AND:         cg_printf(" && ");   break;
+  case T_COLLECTION:          /* print nothing */  break;
   default:
     switch (m_op) {
     case '+':                   cg_printf(" + ");    break;

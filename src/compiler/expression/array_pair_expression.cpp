@@ -26,9 +26,10 @@ using namespace HPHP;
 
 ArrayPairExpression::ArrayPairExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr name, ExpressionPtr value, bool ref)
+ ExpressionPtr name, ExpressionPtr value, bool ref,
+ bool collection /* = false */)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayPairExpression)),
-    m_name(name), m_value(value), m_ref(ref) {
+    m_name(name), m_value(value), m_ref(ref), m_collection(collection) {
   if (m_ref) {
     m_value->setContext(Expression::RefValue);
   }
@@ -149,8 +150,8 @@ void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
     cg_printf(", ");
   }
   m_value->outputCPP(cg, ar);
-  if (m_name) {
-    if (keyConverted) cg_printf(", true");
+  if (m_name && keyConverted && !m_collection) {
+    cg_printf(", true");
   }
 }
 

@@ -27,7 +27,8 @@ DECLARE_BOOST_TYPES(ArrayPairExpression);
 class ArrayPairExpression : public Expression {
 public:
   ArrayPairExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                      ExpressionPtr name, ExpressionPtr value, bool ref);
+                      ExpressionPtr name, ExpressionPtr value, bool ref,
+                      bool collection = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
@@ -49,6 +50,7 @@ private:
   ExpressionPtr m_name;
   ExpressionPtr m_value;
   bool m_ref;
+  bool m_collection;
 
   bool outputCPPName(CodeGenerator &cg, AnalysisResultPtr ar);
 };

@@ -115,6 +115,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
+  transport->addHeader("Content-Type", "text/plain");
   string cmd = transport->getCommand();
 
   do {

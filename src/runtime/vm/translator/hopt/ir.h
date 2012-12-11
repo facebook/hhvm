@@ -66,8 +66,9 @@ static const TCA kIRDirectJccActive = (TCA)0x02;
 static const TCA kIRDirectGuardActive = (TCA)0x03;
 
 #define PUNT(instr) do {                             \
-  throw FailedIRGen(__FILE__, __LINE__, __func__);   \
+  throw FailedIRGen(__FILE__, __LINE__, #instr);     \
   } while(0)
+
 
 // XXX TODO: define another namespace for opcodes
 // TODO: Make sure the MayModRefs column is correct... (MayRaiseError too...)
@@ -289,7 +290,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   OPC(ContPreNext,       0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(ContStartedCheck,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   \
-  OPC(IncStat,           0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(IncStat,           0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(AssertRefCount,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
 
 enum Opcode {

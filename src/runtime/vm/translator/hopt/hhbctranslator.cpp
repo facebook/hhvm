@@ -22,11 +22,6 @@
 #include "runtime/vm/unit.h"
 #include "runtime/vm/runtime.h"
 
-#define HHIR_UNIMPLEMENTED(op)                          \
-  do {                                                  \
-    throw FailedIRGen(__FILE__, __LINE__, #op);         \
-  } while (0)
-
 using namespace HPHP::VM::Transl;
 
 namespace HPHP {
@@ -195,6 +190,17 @@ void HhbcTranslator::emitThis() {
 void HhbcTranslator::emitCheckThis() {
   TRACE(3, "%u: CheckThis\n", m_bcOff);
   m_tb.genLdThis(getExitSlowTrace());
+}
+
+void HhbcTranslator::emitBareThis(int notice) {
+  TRACE(3, "%u: BareThis %d\n", m_bcOff, notice);
+  // We just exit the trace in the case $this is null. Before exiting
+  // the trace, we could also push null onto the stack and raise a
+  // notice if the notice argument is set. By exiting the trace when
+  // $this is null, we can be sure in the rest of the trace that we
+  // have the this object on top of the stack, and we can eliminate
+  // further null checks of this.
+  pushIncRef(m_tb.genLdThis(getExitSlowTrace()));
 }
 
 void HhbcTranslator::emitArray(int arrayId) {
@@ -467,10 +473,31 @@ void HhbcTranslator::emitIncDecMem(bool pre,
   m_tb.genStMem(propAddr, res, false);
 }
 
+static bool isSupportedBinaryArith(Type::Tag type1, Type::Tag type2) {
+  return ((type1 == Type::Int || type1 == Type::Bool) &&
+          (type2 == Type::Int || type2 == Type::Bool));
+
+}
+
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
-  spillStack();
-  popC();
-  emitInterpOneOrPunt(Type::Cell);
+  TRACE(3, "%u: SetOpL %d\n", m_bcOff, id);
+  Trace* exitTrace = getExitSlowTrace();
+  SSATmp* loc = emitLdLocWarn(id, Type::Cell, exitTrace);
+  SSATmp* val = popC();
+  SSATmp* result;
+  if (subOpc == Concat) {
+    // The concat helpers decref their args, so don't decref pop'ed values
+    // and don't decref the old value held in the local. The concat helpers
+    // also incref their results, which will be consumed by the stloc. We
+    // need an extra incref for the push onto the stack.
+    result = m_tb.genConcat(loc, val);
+    pushIncRef(m_tb.genStLoc(id, result, false, true, exitTrace));
+  } else if (isSupportedBinaryArith(loc->getType(), val->getType())) {
+    result = m_tb.genIntegerOp(subOpc, loc, val);
+    push(m_tb.genStLoc(id, result, true, true, exitTrace));
+  } else {
+    PUNT(SetOpL);
+  }
 }
 
 void HhbcTranslator::emitClassExists(const StringData* clsName) {
@@ -713,6 +740,7 @@ void HhbcTranslator::emitStrlen() {
 }
 
 void HhbcTranslator::emitIncStat(int32 counter, int32 value) {
+  TRACE(3, "%u: IncStat %d %d\n", m_bcOff, counter, value);
   if (Stats::enabled()) {
     m_tb.genIncStat(m_tb.genDefConst<int64>(counter),
                     m_tb.genDefConst<int64>(value));
@@ -728,8 +756,11 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
     prop = m_tb.genDefConst<const StringData*>(propName);
   }
   // TODO: fallback to interpone if we decide to punt
-  if (!cls || curFunc()->cls() != cls) {
+  if (!cls) {
     PUNT(ClsPropAddr_noCls);
+  }
+  if (curFunc()->cls() != cls) {
+    PUNT(ClsPropAddr_clsNE);
   }
   if (!prop->isConst() || prop->getType() != Type::StaticStr) {
     PUNT(ClsPropAddr_noProp);
@@ -1054,7 +1085,6 @@ void HhbcTranslator::emitNativeImpl() {
 
 void HhbcTranslator::emitFPushCtor(int32 numParams) {
   TRACE(3, "%u: FPushFuncCtor %d\n", m_bcOff, numParams);
-//  PUNT(FPushCtor);
   SSATmp* cls = popA();
   spillStack();
   SSATmp* newObj = m_tb.genNewObj(numParams, cls);
@@ -1181,7 +1211,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
       // might be a non-static call
       // generate code that tests at runtime whether to use
       // this pointer or class
-      PUNT(MightNotBeStatic);
+      PUNT(FPushClsMethodD_MightNotBeStatic);
 #if 0
       // XXX TODO: Need to represent this in the IR
       ScratchReg rClsScratch(m_regMap);
@@ -1525,10 +1555,10 @@ void HhbcTranslator::emitCastString() {
   SSATmp* src = popC();
   Type::Tag fromType = src->getType();
   if (fromType == Type::Cell) {
-    PUNT(CastString);
+    PUNT(CastString_Cell);
   } else if (fromType == Type::Obj) {
     // call the toString helper on object
-    PUNT(CastString);
+    PUNT(CastString_Obj);
   } else {
     // for int to string conversion, this calls a helper that returns
     // a string with ref count of 0.
@@ -1676,15 +1706,15 @@ void HhbcTranslator::emitSetS(const Class* cls, const StringData* propName) {
   decRefPropAddr(propAddrToDecRef);
 }
 
-void HhbcTranslator::emitBinaryArith(Opcode opc, bool isBitOp /* = false */) {
+void HhbcTranslator::emitBinaryArith(Opcode opc) {
+  bool isBitOp = (opc == OpAnd || opc == OpOr || opc == OpXor);
   Type::Tag type1 = topC(0)->getType();
   Type::Tag type2 = topC(1)->getType();
-  if ((type1 == Type::Int || type1 == Type::Bool) &&
-      (type2 == Type::Int || type2 == Type::Bool)) {
+  if (isSupportedBinaryArith(type1, type2)) {
     SSATmp* tr = popC();
     SSATmp* tl = popC();
     push(m_tb.genIntegerOp(opc, tl, tr));
-  } else if (isBitOp && (type1 == Type::Obj || type1 == Type::Obj)) {
+  } else if (isBitOp && (type1 == Type::Obj || type2 == Type::Obj)) {
     // raise fatal
     spillStack();
     popC();
@@ -1763,15 +1793,15 @@ void HhbcTranslator::emitBitNot() {
 }
 void HhbcTranslator::emitBitAnd() {
   TRACE(3, "%u: BitAnd\n", m_bcOff);
-  emitBinaryArith(OpAnd, true);
+  emitBinaryArith(OpAnd);
 }
 void HhbcTranslator::emitBitOr() {
   TRACE(3, "%u: BitOr\n", m_bcOff);
-  emitBinaryArith(OpOr, true);
+  emitBinaryArith(OpOr);
 }
 void HhbcTranslator::emitBitXor() {
   TRACE(3, "%u: BitXor\n", m_bcOff);
-  emitBinaryArith(OpXor, true);
+  emitBinaryArith(OpXor);
 }
 void HhbcTranslator::emitXor() {
   TRACE(3, "%u: Xor\n", m_bcOff);

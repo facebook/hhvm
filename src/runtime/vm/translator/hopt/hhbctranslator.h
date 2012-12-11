@@ -105,6 +105,7 @@ public:
   void emitPrint();
   void emitThis();
   void emitCheckThis();
+  void emitBareThis(int notice);
   void emitInitThisLoc(int32 id);
   void emitArray(int arrayId);
   void emitNewArray(int capacity);
@@ -342,7 +343,7 @@ private:
   SSATmp* emitLdLocWarn(uint32 id, Type::Tag type, Trace* target);
   void emitInterpOne(Type::Tag type, Trace* target = NULL);
   void emitInterpOneOrPunt(Type::Tag type, Trace* target = NULL);
-  void emitBinaryArith(Opcode, bool isBitOp = false);
+  void emitBinaryArith(Opcode);
   void checkTypeStackAux(uint32 stackIndex, Type::Tag type, Trace* nextTrace);
 
   /*

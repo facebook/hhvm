@@ -985,7 +985,9 @@ void TraceBuilder::genDecRefLoc(int id) {
 /*
  * Stores a ref (boxed value) to a local. Also handles unsetting a local.
  */
-void TraceBuilder::genBindLoc(uint32 id, SSATmp* newValue) {
+void TraceBuilder::genBindLoc(uint32 id,
+                              SSATmp* newValue,
+                              bool doRefCount /* = true */) {
   /*
    * prevValue = LdLoc [home]
    * StLoc [home] = newValue
@@ -996,19 +998,21 @@ void TraceBuilder::genBindLoc(uint32 id, SSATmp* newValue) {
   Type::Tag trackedType = getLocalType(id);
   SSATmp* prevValue;
   if (trackedType == Type::None) {
-    prevValue = genInstruction(LdLoc, Type::Gen, home);
+    if (doRefCount) {
+      prevValue = genInstruction(LdLoc, Type::Gen, home);
+    }
   } else {
     prevValue = getLocalValue(id);
     ASSERT(prevValue == NULL || prevValue->getType() == trackedType);
     if (prevValue == newValue) {
       // Silent store: home already contains value being stored
       // NewValue needs to be decref'ed
-      if (Type::isRefCounted(trackedType)) {
+      if (Type::isRefCounted(trackedType) && doRefCount) {
         genDecRef(prevValue);
       }
       return;
     }
-    if (Type::isRefCounted(trackedType) && !prevValue) {
+    if (Type::isRefCounted(trackedType) && !prevValue && doRefCount) {
       prevValue = genInstruction(LdLoc, trackedType, home);
     }
   }
@@ -1019,7 +1023,7 @@ void TraceBuilder::genBindLoc(uint32 id, SSATmp* newValue) {
     genStoreType = false;
   }
   genStLocAux(id, newValue, genStoreType);
-  if (Type::isRefCounted(trackedType)) {
+  if (Type::isRefCounted(trackedType) && doRefCount) {
     genDecRef(prevValue);
   }
 }
@@ -1049,7 +1053,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   ASSERT (trackedType != Type::None);
   if (Type::isUnboxed(trackedType)) {
     SSATmp* retVal = doRefCount ? genIncRef(newValue) : newValue;
-    genBindLoc(id, newValue);
+    genBindLoc(id, newValue, doRefCount);
     return retVal;
   }
   ASSERT(Type::isBoxed(trackedType));
@@ -1390,6 +1394,11 @@ void TraceBuilder::genDecRefLocalsThis(uint32 numLocals) {
 void TraceBuilder::genDecRefLocals(uint32 numLocals) {
     SSATmp* numLocalsTmp = genDefConst<int64>(numLocals);
     appendInstruction(m_irFactory.decRefLocals(m_fpValue, numLocalsTmp));
+}
+
+void TraceBuilder::genIncStat(int32 counter, int32 value) {
+  genInstruction(IncStat, Type::Int, genLdConst<int64>(counter),
+                 genLdConst<int64>(value));
 }
 
 SSATmp* TraceBuilder::genIncRef(SSATmp* src) {

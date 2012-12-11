@@ -965,13 +965,29 @@ TranslatorX64::irTranslateSetM(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateSetOpL(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(SetOpL);
+                                 const NormalizedInstruction& i) {
+  JIT::Opcode opc;
+  switch (i.imm[1].u_OA) {
+    case SetOpPlusEqual:   opc = JIT::OpAdd;    break;
+    case SetOpMinusEqual:  opc = JIT::OpSub;    break;
+    case SetOpMulEqual:    opc = JIT::OpMul;    break;
+    case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
+    case SetOpConcatEqual: opc = JIT::Concat;   break;
+    case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
+    case SetOpAndEqual:    opc = JIT::OpAnd; break;
+    case SetOpOrEqual:     opc = JIT::OpOr;  break;
+    case SetOpXorEqual:    opc = JIT::OpXor; break;
+    case SetOpSlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
+    case SetOpSrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
+    default: not_reached();
+  }
+  const int localIdx = 1;
+  HHIR_EMIT(SetOpL, opc, i.inputs[localIdx]->location.offset);
 }
 
 void
 TranslatorX64::irTranslateIncDecM(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+                                  const NormalizedInstruction& i) {
   if (isNormalPropertyAccess(i, 1, 0) && !curFunc()->isPseudoMain()) {
     int offset = getNormalPropertyOffset(i, getMInstrInfo(OpIncDecM), 1, 0);
     if (offset != -1 && i.immVec.locationCode() == LC) {
@@ -1161,7 +1177,7 @@ TranslatorX64::irTranslateBareThis(const Tracelet &t,
   ASSERT(i.outStack && !i.outLocal);
   ASSERT(curFunc()->isPseudoMain() || curFunc()->cls());
 
-  HHIR_UNIMPLEMENTED(BareThis);
+  HHIR_EMIT(BareThis, (i.imm[0].u_OA));
 }
 
 void

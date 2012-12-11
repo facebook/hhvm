@@ -80,7 +80,7 @@ public:
   void    genSetPropCell(SSATmp* base, int64 offset, SSATmp* value);
 
   SSATmp* genBoxLoc(uint32 id);
-  void    genBindLoc(uint32 id, SSATmp* ref);
+  void    genBindLoc(uint32 id, SSATmp* ref, bool doRefCount = true);
   void    genInitLoc(uint32 id, SSATmp* t);
   void    killLocalValue(int id);
   bool    anyLocalHasValue(SSATmp* tmp) const;
@@ -178,6 +178,7 @@ public:
   void genDecRefThis();
   void genDecRefLocalsThis(uint32 numLocals);
   void genDecRefLocals(uint32 numLocals);
+  void genIncStat(int32 counter, int32 value);
   SSATmp* genIncRef(SSATmp* src);
   SSATmp* genSpillStack(uint32 stackAdjustment,
                         uint32 numOpnds,

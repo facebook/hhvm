@@ -165,6 +165,28 @@ TraceBuilder::genUnbox(SSATmp* src, Type::Tag type, Trace* exit) {
   return genInstruction(Unbox, type, src, exit);
 }
 
+
+/**
+ * Checks is the given SSATmp, or any of its aliases, is available in
+ * any VM location, including locals and the This pointer.
+ */
+bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
+  while (true) {
+    if (anyLocalHasValue(tmp)) return true;
+
+    IRInstruction* srcInstr = tmp->getInstruction();
+    Opcode srcOpcode = srcInstr->getOpcode();
+
+    if (srcOpcode == LdThis) return true;
+
+    if (srcOpcode == IncRef || srcOpcode == Mov) {
+      tmp = srcInstr->getSrc(0);
+    } else {
+      return false;
+    }
+  }
+}
+
 void TraceBuilder::genDecRef(SSATmp* tmp) {
   if (!isRefCounted(tmp)) {
     return;
@@ -185,15 +207,10 @@ void TraceBuilder::genDecRef(SSATmp* tmp) {
   // We could do more accurate availability analysis. For now, we handle
   // simple cases:
   // 1) LdThis is always available.
-  // 2) LdLoc is always available if the home is not overwritten.
+  // 2) A value stored in a local is always available.
   IRInstruction* incRefInst = tmp->getInstruction();
   if (incRefInst->getOpcode() == IncRef) {
-    SSATmp* t0 = incRefInst->getSrc(0);
-    IRInstruction* ldInst = t0->getInstruction();
-    Opcode opc = ldInst->getOpcode();
-    if (opc == LdThis ||
-        (opc == LdLoc &&
-         getLocalValue(getLocalIdFromHomeOpnd(ldInst->getSrc(0))) == t0)) {
+    if (isValueAvailable(incRefInst->getSrc(0))) {
       genInstruction(DecRefNZ, type, tmp);
       return;
     }
@@ -1605,6 +1622,15 @@ void TraceBuilder::killLocalValue(int id) {
   }
   m_localValues[id] = NULL;
   m_localTypes[id] = Type::None;
+}
+
+bool TraceBuilder::anyLocalHasValue(SSATmp* tmp) const {
+  for (size_t id = 0; id < m_localValues.size(); id++) {
+    if (m_localValues[id] == tmp) {
+      return true;
+    }
+  }
+  return false;
 }
 
 //

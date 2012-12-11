@@ -83,6 +83,9 @@ public:
   void    genBindLoc(uint32 id, SSATmp* ref);
   void    genInitLoc(uint32 id, SSATmp* t);
   void    killLocalValue(int id);
+  bool    anyLocalHasValue(SSATmp* tmp) const;
+  bool    isValueAvailable(SSATmp* tmp) const;
+
   SSATmp* genLdHome(uint32 id);
   SSATmp* genLdCachedClass(SSATmp* classNameOpnd);
   SSATmp* genLdCls(SSATmp* classNameOpnd);

@@ -204,6 +204,8 @@ public:
   Trace*  genContPreNext(SSATmp* cont, Trace* target);
   Trace*  genContStartedCheck(SSATmp* cont, Trace* target);
 
+  void    genIncStat(SSATmp* counter, SSATmp* value);
+
   SSATmp* genInterpOne(uint32 pcOff, uint32 stackAdjustment,
                        Type::Tag resultType, Trace* target);
   Trace* getExitSlowTrace(uint32 bcOff,

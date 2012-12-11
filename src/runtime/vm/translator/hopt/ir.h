@@ -287,6 +287,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   OPC(ContRaiseCheck,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ContPreNext,       0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(ContStartedCheck,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  \
+  OPC(IncStat,           0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(AssertRefCount,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
 
 enum Opcode {

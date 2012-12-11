@@ -720,7 +720,7 @@ void TranslatorX64::irTranslateStrlen(const Tracelet& t,
 
 void TranslatorX64::irTranslateIncStat(const Tracelet& t,
                                        const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(IncStat);
+  HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
 void TranslatorX64::irTranslateClassExists(const Tracelet& t,

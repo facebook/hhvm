@@ -18,6 +18,7 @@
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include <util/trace.h>
+#include "runtime/vm/stats.h"
 #include "runtime/vm/unit.h"
 #include "runtime/vm/runtime.h"
 
@@ -702,6 +703,13 @@ void HhbcTranslator::emitStrlen() {
     spillStack();
     popC();
     emitInterpOneOrPunt(Type::Int);
+  }
+}
+
+void HhbcTranslator::emitIncStat(int32 counter, int32 value) {
+  if (Stats::enabled()) {
+    m_tb.genIncStat(m_tb.genDefConst<int64>(counter),
+                    m_tb.genDefConst<int64>(value));
   }
 }
 

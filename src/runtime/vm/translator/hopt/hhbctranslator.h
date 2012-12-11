@@ -289,6 +289,7 @@ public:
   void emitContHandle();
 
   void emitStrlen();
+  void emitIncStat(int32 counter, int32 value);
 
   // tracelet guards
   Trace* guardTypeStack(uint32 stackIndex,

@@ -27,6 +27,7 @@
 #include <runtime/base/runtime_option.h>
 #include "runtime/base/string_data.h"
 #include "runtime/base/array/hphp_array.h"
+#include "runtime/vm/stats.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/translator/translator-x64.h"
@@ -4290,6 +4291,13 @@ Address CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   m_as.cmp_imm64_disp_reg64(0, CONTOFF(m_index),
                             inst->getSrc(0)->getReg());
   emitFwdJcc(CC_L, inst->getLabel());
+  return start;
+}
+
+Address CodeGenerator::cgIncStat(IRInstruction *inst) {
+  Address start = m_as.code.frontier;
+  Stats::emitInc(m_as, Stats::StatCounter(inst->getSrc(0)->getConstValAsInt()),
+                 inst->getSrc(1)->getConstValAsInt());
   return start;
 }
 

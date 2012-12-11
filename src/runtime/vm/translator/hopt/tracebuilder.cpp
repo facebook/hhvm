@@ -1495,6 +1495,10 @@ Trace* TraceBuilder::genContStartedCheck(SSATmp* cont, Trace* target) {
   return target;
 }
 
+void TraceBuilder::genIncStat(SSATmp* counter, SSATmp* value) {
+  genInstruction(IncStat, Type::None, counter, value);
+}
+
 SSATmp* TraceBuilder::getSSATmp(IRInstruction* inst) {
   SSATmp* opnd = m_irFactory.getSSATmp(inst);
   if (!inst->isDefConst()) {

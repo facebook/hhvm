@@ -777,17 +777,23 @@ SSATmp* TraceBuilder::genLdFixedFunc(const StringData* funcName,
                         actRec);
 }
 
-
-SSATmp* TraceBuilder::genLdClsMethod(SSATmp* methodName, SSATmp* classRef) {
-  return genInstruction(LdClsMethod, Type::FuncClassRef, methodName, classRef);
+SSATmp* TraceBuilder::genLdClsMethod(SSATmp* cls, uint32 methodSlot) {
+  return genInstruction(LdClsMethod, Type::FuncRef, cls,
+                        genDefConst<int64>(methodSlot));
 }
 
-SSATmp* TraceBuilder::genLdClsMethod(SSATmp* className,
-                                     SSATmp* methodName,
-                                     SSATmp* baseClass,
-                                     Trace*  exit) {
+SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* methodName,
+                                          SSATmp* classRef) {
+  return genInstruction(LdClsMethodCache, Type::FuncClassRef,
+                        methodName, classRef);
+}
+
+SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
+                                          SSATmp* methodName,
+                                          SSATmp* baseClass,
+                                          Trace*  exit) {
   ExtendedInstruction inst(m_irFactory,
-                           LdClsMethod,
+                           LdClsMethodCache,
                            Type::FuncClassRef,
                            className,
                            methodName,
@@ -802,6 +808,7 @@ SSATmp* TraceBuilder::genLdObjMethod(const StringData* methodName,
                         genDefConst<const StringData*>(methodName),
                         actRec);
 }
+
 SSATmp* TraceBuilder::genQueryOp(Opcode queryOpc, SSATmp* addr) {
   ASSERT(isQueryOp(queryOpc));
   return genInstruction(queryOpc, Type::Bool, addr);

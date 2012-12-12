@@ -152,11 +152,12 @@ public:
   SSATmp* genConvToObj(SSATmp* src);
   SSATmp* genLdPropAddr(SSATmp* obj, SSATmp* prop);
   SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
-  SSATmp* genLdClsMethod(SSATmp* methodName, SSATmp* classOpnd);
-  SSATmp* genLdClsMethod(SSATmp* className,
-                         SSATmp* methodName,
-                         SSATmp* baseClass,
-                         Trace* slowPathExit);
+  SSATmp* genLdClsMethod(SSATmp* cls, uint32 methodSlot);
+  SSATmp* genLdClsMethodCache(SSATmp* methodName, SSATmp* classOpnd);
+  SSATmp* genLdClsMethodCache(SSATmp* className,
+                              SSATmp* methodName,
+                              SSATmp* baseClass,
+                              Trace* slowPathExit);
   SSATmp* genLdObjMethod(const StringData* methodName, SSATmp* obj);
   SSATmp* genLdObjClass(SSATmp* obj);
   SSATmp* genLdFunc(SSATmp* funcName, SSATmp* actRec);

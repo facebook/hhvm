@@ -1150,13 +1150,47 @@ void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
         methodName->data(),
         numParams);
   bool magicCall = false;
+  SSATmp* funcTmp = NULL;
   const Func* func = HPHP::VM::Transl::lookupImmutableMethod(baseClass,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
                                                              false);
   SSATmp* objOrCls = popC();
-  if (func) {
+
+  if (!func) {
+    if (baseClass && !(baseClass->attrs() & AttrInterface)) {
+      MethodLookup::LookupResult res =
+        g_vmContext->lookupObjMethod(func, baseClass, methodName, false);
+      if ((res == MethodLookup::MethodFoundWithThis ||
+           res == MethodLookup::MethodFoundNoThis) &&
+          !func->isAbstract()) {
+        /*
+         * If we found the func in baseClass, then either:
+         *  a) its private, and this is always going to be the
+         *     called function. This case is handled further down.
+         * OR
+         *  b) any derived class must have a func that matches in staticness
+         *     and is at least as accessible (and in particular, you can't
+         *     override a public/protected method with a private method).
+         *     In this case, we emit code to dynamically lookup the method
+         *     given the Object and the method slot, which is the same as func's.
+         */
+        if (!(func->attrs() & AttrPrivate)) {
+          SSATmp* clsTmp = m_tb.genLdObjClass(objOrCls);
+          funcTmp = m_tb.genLdClsMethod(clsTmp, func->methodSlot());
+          if (res == MethodLookup::MethodFoundNoThis) {
+            m_tb.genDecRef(objOrCls);
+            objOrCls = clsTmp;
+          }
+        }
+      } else {
+        func = NULL; // force lookup
+      }
+    }
+  }
+
+  if (func != NULL && funcTmp == NULL) {
     if (func->attrs() & AttrStatic) {
       ASSERT(baseClass);  // This assert may be too strong, but be aggressive
       // static function: store base class into this slot instead of obj
@@ -1168,10 +1202,18 @@ void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
     }
   }
   spillStack();
-  SSATmp* actRec = m_tb.genAllocActRec(func,
-                                       objOrCls,
-                                       numParams,
-                                       (func && magicCall ? methodName : NULL));
+  SSATmp* actRec = NULL;
+  if (funcTmp) {
+    actRec = m_tb.genAllocActRec(funcTmp,
+                                 objOrCls,
+                                 numParams);
+  } else {
+    actRec = m_tb.genAllocActRec(func,
+                                 objOrCls,
+                                 numParams,
+                                 (func && magicCall ? methodName : NULL));
+  }
+
   if (!func) {
     // lookup the function
     SSATmp* meth = m_tb.genLdObjMethod(methodName, actRec);
@@ -1233,7 +1275,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
     // lookup static method & class in the target cache
     Trace* exitTrace = getExitSlowTrace();
     const StringData* className = np.first;
-    SSATmp* funcClassTmp = m_tb.genLdClsMethod(
+    SSATmp* funcClassTmp = m_tb.genLdClsMethodCache(
                               m_tb.genDefConst<const StringData*>(className),
                               m_tb.genDefConst<const StringData*>(methodName),
     /*TODO: NamedEntity* */   m_tb.genDefConst<int64>((uintptr_t)np.second),

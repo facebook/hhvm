@@ -169,7 +169,8 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
                                    extendedSrcs[1]);
       }
       return NULL;
-    case LdClsMethod: // simplify: fall-through and return NULL
+    case LdClsMethodCache: // simplify: fall-through and return NULL
+    case LdClsMethod:
     case Call:
     case SpillStack:
     case SpillStackAllocAR:

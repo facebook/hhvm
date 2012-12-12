@@ -2635,9 +2635,16 @@ Address CodeGenerator::cgAllocActRec6(SSATmp* dst,
   // actRec->m_this
   if (objOrCls->getType() == Type::ClassRef) {
     // store class
-    m_as.store_imm64_disp_reg64(uintptr_t(objOrCls->getConstValAsClass()) | 1,
-                                actRecAdjustment + AROFF(m_this),
-                                spReg);
+    if (objOrCls->isConst()) {
+      m_as.store_imm64_disp_reg64(uintptr_t(objOrCls->getConstValAsClass()) | 1,
+                                  actRecAdjustment + AROFF(m_this),
+                                  spReg);
+    } else {
+      Reg64 clsPtrReg = objOrCls->getReg();
+      m_as.movq  (clsPtrReg, rScratch);
+      m_as.orq   (1, rScratch);
+      m_as.storeq(rScratch, spReg[actRecAdjustment + AROFF(m_this)]);
+    }
   } else if (objOrCls->getType() == Type::Obj) {
     // store this pointer
     m_as.store_reg64_disp_reg64(objOrCls->getReg(),
@@ -3664,8 +3671,40 @@ static const char* getContextName() {
 }
 
 Address CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
-  if (inst->getNumSrcs() < 3) {
+  Address start = m_as.code.frontier;
+  SSATmp* dst   = inst->getDst();
+  SSATmp* cls   = inst->getSrc(0);
+  SSATmp* mSlot = inst->getSrc(1);
+
+  ASSERT(cls->getType() == Type::ClassRef);
+  ASSERT(mSlot->isConst() && mSlot->getType() == Type::Int);
+  uint64 mSlotInt64 = mSlot->getConstValAsRawInt();
+  // We're going to multiply mSlotVal by sizeof(Func*) and use
+  // it as a 32-bit offset (methOff) below.
+  if (mSlotInt64 > (std::numeric_limits<uint32_t>::max() / sizeof(Func*))) {
+    CG_PUNT(cgLdClsMethod_large_offset);
+  }
+  int32 mSlotVal = (uint32) mSlotInt64;
+
+  Reg64 dstReg = dst->getReg();
+  ASSERT(dstReg != InvalidReg);
+
+  Reg64 clsReg = cls->getReg();
+  if (clsReg == InvalidReg) {
     CG_PUNT(LdClsMethod);
+  }
+
+  Offset vecOff  = Class::getMethodsOffset() + Class::MethodMap::vecOff();
+  int32  methOff = mSlotVal * sizeof(Func*);
+  m_as.loadq(clsReg[vecOff],  dstReg);
+  m_as.loadq(dstReg[methOff], dstReg);
+
+  return start;
+}
+
+Address CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
+  if (inst->getNumSrcs() < 3) {
+    CG_PUNT(LdClsMethodCache);
   }
   Address start = m_as.code.frontier;
   SSATmp* dst   = inst->getDst();

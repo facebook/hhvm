@@ -200,7 +200,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   OPC(LdCls,             1,  1,  0,  0,  0,  0,  0,  1,  1,  1) \
   /* XXX cg doesn't support the version without a label*/   \
   OPC(LdClsCns,          1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdClsMethod,       1,  1,  0,  0,  0,  0,  0,  0,  1,  1) \
+  OPC(LdClsMethodCache,  1,  1,  0,  0,  0,  0,  0,  0,  1,  1) \
+  OPC(LdClsMethod,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   /* XXX TODO Create version of LdClsPropAddr that doesn't check */ \
   OPC(LdPropAddr,        1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdClsPropAddr,     1,  1,  1,  0,  0,  0,  0,  0,  1,  1) \

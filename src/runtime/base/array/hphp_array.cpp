@@ -517,6 +517,12 @@ ssize_t /*ElmInd*/ HphpArray::find(const StringData* s,
 }
 #undef FIND_BODY
 
+NEVER_INLINE
+HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
+  raise_error("Array is too unbalanced (%lu)", n);
+  return ei;
+}
+
 #define FIND_FOR_INSERT_BODY(h0, hit) \
   ElmInd* ret = NULL; \
   size_t tableMask = m_tableMask; \
@@ -541,11 +547,13 @@ ssize_t /*ElmInd*/ HphpArray::find(const StringData* s,
         return ei; \
       } \
     } else { \
+      if (!ret) ret = ei; \
       if (pos == ElmIndEmpty) { \
         assert(m_hLoad <= computeMaxElms(tableMask)); \
-        return ret ? ret : ei; \
+        return LIKELY(i <= 100) || \
+               LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ? \
+                 ret : warnUnbalanced(i, ret);\
       } \
-      if (!ret) ret = ei; \
     } \
   }
 

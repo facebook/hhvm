@@ -848,6 +848,12 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     CheckMemory = server["CheckMemory"].getBool();
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     UseHphpArray = server["UseHphpArray"].getBool(hhvm);
+    if (hhvm && MaxArrayChain != INT_MAX) {
+      // Give HHVM a higher threshold to avoid false-positives.
+      // UseHphpArray would be a more precise guard but it's ignored
+      // in non-hhvm builds, even if set to true.
+      MaxArrayChain *= 2;
+    }
 
     UseVectorArray = server["UseVectorArray"].getBool(true);
     StrictCollections = server["StrictCollections"].getBool(true);

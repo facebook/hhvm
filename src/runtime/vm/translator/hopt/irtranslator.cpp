@@ -613,7 +613,11 @@ void TranslatorX64::irTranslateCreateCont(const Tracelet& t,
 
 void TranslatorX64::irTranslateContEnter(const Tracelet& t,
                                          const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(ContEnter);
+  int after = nextSrcKey(t, i).offset();
+  const Func* srcFunc = curFunc();
+  int32 callOffsetInUnit = after - srcFunc->base();
+
+  HHIR_EMIT(ContEnter, callOffsetInUnit);
 }
 
 void TranslatorX64::irTranslateContExit(const Tracelet& t,

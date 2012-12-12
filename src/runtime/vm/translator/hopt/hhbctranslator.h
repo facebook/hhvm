@@ -307,6 +307,7 @@ struct HhbcTranslator {
   // continuations
   SSATmp* getContLocals(SSATmp* cont);
   void emitCreateCont(bool getArgs, Id funNameStrId);
+  void emitContEnter(int32 returnBcOffset);
   void emitContExit();
   void emitUnpackCont();
   void emitPackCont(int64 labelId);

@@ -281,7 +281,8 @@ SSATmp* TraceBuilder::genLdRetAddr() {
 
 SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,
                                Type::Tag type) {
-  ASSERT(type == Type::Int || type == Type::Bool || type == Type::FuncPtr);
+  ASSERT(type == Type::Int || type == Type::Bool ||
+         type == Type::StkPtr || type == Type::TCA);
   return genInstruction(LdRaw, type, base, genDefConst(int64(kind)));
 }
 
@@ -778,7 +779,6 @@ SSATmp* TraceBuilder::genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset) {
 SSATmp* TraceBuilder::genLdFuncCls(SSATmp* func) {
   return genInstruction(LdFuncCls, Type::ClassPtr, func);
 }
-
 
 SSATmp* TraceBuilder::genLdPropAddr(SSATmp* obj, SSATmp* prop) {
   ASSERT(obj->getType() == Type::Obj);
@@ -1502,6 +1502,14 @@ void TraceBuilder::genFillContLocals(const Func* origFunc,
 void TraceBuilder::genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset) {
   genInstruction(FillContThis, Type::None,
                  cont, locals, genDefConst(offset));
+}
+
+void TraceBuilder::genContEnter(SSATmp* contAR, SSATmp* addr,
+                                int64 returnBcOffset) {
+  genInstruction(ContEnter, Type::None, contAR, addr,
+                 genDefConst(returnBcOffset));
+  killCse();
+  killLocals();
 }
 
 void TraceBuilder::genUnlinkContVarEnv() {

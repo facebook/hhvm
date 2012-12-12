@@ -612,15 +612,36 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   push(cont);
 }
 
+void HhbcTranslator::emitContEnter(int32 returnBcOffset) {
+  spillStack();
+
+  SSATmp* cont = m_tb->genLdThis(NULL);
+  SSATmp* contAR = m_tb->genLdRaw(cont, RawMemSlot::ContARPtr, Type::StkPtr);
+
+  SSATmp* func = m_tb->genLdARFuncPtr(contAR, m_tb->genDefConst<int64>(0));
+  SSATmp* funcBody = m_tb->genLdRaw(func, RawMemSlot::FuncBody, Type::TCA);
+
+  m_tb->genContEnter(contAR, funcBody, returnBcOffset);
+
+  // We shouldn't need to change vmsp here
+  ASSERT(m_stackDeficit == 0);
+}
+
 void HhbcTranslator::emitContExit() {
   SSATmp* retAddr = m_tb->genLdRetAddr();
   // Despite the name, this doesn't actually free the AR; it updates the
   // hardware fp and returns the old one
   SSATmp* fp = m_tb->genFreeActRec();
-  // Adjust the hardware sp before leaving
-  SSATmp* sp = m_tb->genLdStackAddr(m_stackDeficit);
-  m_tb->genRetCtrl(sp, fp, retAddr);
 
+  SSATmp* sp;
+  if (m_stackDeficit) {
+    // Adjust the hardware sp before leaving.
+    sp = m_tb->genLdStackAddr(m_stackDeficit);
+  } else {
+    sp = m_tb->genDefSP();
+  }
+
+  m_tb->genRetCtrl(sp, fp, retAddr);
   m_hasRet = true;
 }
 
@@ -1947,7 +1968,7 @@ Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff) {
                            notTakenBcOff);
 }
 
-SSATmp* HhbcTranslator::spillStack(bool allocActRec) {
+SSATmp* HhbcTranslator::spillStack(bool allocActRec /* = false */) {
   uint32 numStackElems = m_evalStack.numElems();
   SSATmp* stackValues[numStackElems];
   for (uint32 i = 0; i < numStackElems; i++) {

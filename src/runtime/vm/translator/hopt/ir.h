@@ -303,6 +303,7 @@ enum OpcodeFlag : uint64_t {
                           CallsNative|ProducesRC))                      \
   OPC(FillContLocals,    (Essential|MemEffects|CallsNative))            \
   OPC(FillContThis,      (Essential|MemEffects))                        \
+  OPC(ContEnter,         (Essential|MemEffects))                        \
   OPC(UnlinkContVarEnv,  (Essential|MemEffects|CallsNative))            \
   OPC(LinkContVarEnv,    (Essential|MemEffects|CallsNative))            \
   OPC(ContRaiseCheck,    (Essential))                                   \
@@ -606,8 +607,8 @@ class RawMemSlot {
  public:
 
   enum Kind {
-    ContLabel, ContDone, ContShouldThrow, ContRunning,
-    StrLen, FuncNumParams, FuncRefBitVec,
+    ContLabel, ContDone, ContShouldThrow, ContRunning, ContARPtr,
+    StrLen, FuncNumParams, FuncRefBitVec, FuncBody,
     MaxKind
   };
 
@@ -617,9 +618,11 @@ class RawMemSlot {
       case ContDone:        return GetContDone();
       case ContShouldThrow: return GetContShouldThrow();
       case ContRunning:     return GetContRunning();
+      case ContARPtr:       return GetContARPtr();
       case StrLen:          return GetStrLen();
       case FuncNumParams:   return GetFuncNumParams();
       case FuncRefBitVec:   return GetFuncRefBitVec();
+      case FuncBody:        return GetFuncBody();
       default: not_reached();
     }
   }
@@ -648,6 +651,10 @@ class RawMemSlot {
     static RawMemSlot m(CONTOFF(m_running), sz::byte, Type::Bool);
     return m;
   }
+  static RawMemSlot& GetContARPtr() {
+    static RawMemSlot m(CONTOFF(m_arPtr), sz::qword, Type::StkPtr);
+    return m;
+  }
   static RawMemSlot& GetStrLen() {
     static RawMemSlot m(StringData::sizeOffset(), sz::dword, Type::Int);
     return m;
@@ -658,6 +665,10 @@ class RawMemSlot {
   }
   static RawMemSlot& GetFuncRefBitVec() {
     static RawMemSlot m(Func::refBitVecOff(), sz::qword, Type::Int);
+    return m;
+  }
+  static RawMemSlot& GetFuncBody() {
+    static RawMemSlot m(Func::funcBodyOff(), sz::qword, Type::TCA);
     return m;
   }
 

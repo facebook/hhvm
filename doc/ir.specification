@@ -398,10 +398,19 @@ LdCachedClass
 LdFunc
 LdFixedFunc
 LdCurFuncPtr
-LdARFuncPtr
-LdFuncCls
-LdRaw
 
+d:Func& = LdARFuncPtr s0:Ptr s1:ConstInt
+
+  Loads the m_func member of an ActRec. s0 is the base address, and s1 is an
+  offset, such that s0 + s1 points to the base of the ActRec.
+
+LdFuncCls
+
+d:T = LdRaw s0:Ptr s1:ConstInt
+
+  "Raw" load from memory. s0 is the base address, and is an untyped pointer.
+  s1 is a constant from the RawMemSlot::Kind enum, which describes the offset
+  from the base, and the size. The value in d is assumed to be of type T.
 
 8. Allocation
 
@@ -568,6 +577,13 @@ FreeSpill s0:ConstInt
 CreateCont
 FillContLocals
 FillContThis
+
+ContEnter s0:StkP s1:TCA s2:ConstInt
+
+  Enters a generator body. s0 is the ActRec embedded in the Continuation
+  object. s1 is the address to jump to. s2 is the bytecode offset in the
+  caller to return to when the generator body yields.
+
 UnlinkContVarEnv
 LinkContVarEnv
 ContRaiseCheck

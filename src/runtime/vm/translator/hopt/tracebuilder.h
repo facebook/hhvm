@@ -202,6 +202,7 @@ public:
   void    genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset);
   void    genUnlinkContVarEnv();
   void    genLinkContVarEnv();
+  void    genContEnter(SSATmp* contAR, SSATmp* addr, int64 returnBcOffset);
   Trace*  genContRaiseCheck(SSATmp* cont, Trace* target);
   Trace*  genContPreNext(SSATmp* cont, Trace* target);
   Trace*  genContStartedCheck(SSATmp* cont, Trace* target);

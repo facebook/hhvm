@@ -364,7 +364,11 @@ void LinearScan::allocRegToInstruction(Trace* trace,
     return;
   }
 
-  ASSERT(type != Type::StkPtr);
+  // LdRaw, loading a generator's embedded AR, is the only time we have a
+  // pointer to an AR that is not in rVmFp or rVmSp.
+  ASSERT(type != Type::StkPtr ||
+         (opc == LdRaw &&
+          inst->getSrc(1)->getConstValAsInt() == RawMemSlot::ContARPtr));
 
   if (ssaTmp->getLastUseId() == 0) {
     // This instruction's destination is not used

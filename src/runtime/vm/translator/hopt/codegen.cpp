@@ -3771,25 +3771,16 @@ void CodeGenerator::cgAddElem(IRInstruction* inst) {
   }
 }
 
-ArrayData* addNewElemHelper(ArrayData* ad, uintptr_t data, DataType type) {
-  TypedValue tv;
-  tv.m_type = type;
-  tv._count = 1;
-  tv.m_data.num = data;
-  // this does not re-enter
-  return array_setm_wk1_v0(NULL, ad, &tv);
-}
-
 void CodeGenerator::cgAddNewElem(IRInstruction* inst) {
   UNUSED SSATmp* dst   = inst->getDst();
   UNUSED SSATmp* arr   = inst->getSrc(0);
   UNUSED SSATmp* val   = inst->getSrc(1);
 
   // decrefs value
-  cgCallHelper(m_as, (TCA)addNewElemHelper, dst, kNoSyncPoint,
+  cgCallHelper(m_as, (TCA)&HphpArray::AddNewElemC, dst, kNoSyncPoint,
                ArgGroup().ssa(arr)
-                         .ssa(val)
-                         .type(val));
+                         .type(val)
+                         .ssa(val));
 }
 
 void CodeGenerator::cgDefCns(IRInstruction* inst) {

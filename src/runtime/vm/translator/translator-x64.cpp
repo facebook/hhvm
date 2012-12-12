@@ -5404,24 +5404,19 @@ TranslatorX64::translateAddNewElemC(const Tracelet& t,
   // We pass the rhs by address, so we need to sync it back to memory
   m_regMap.cleanLoc(valLoc);
 
-  // The array_setm helpers will decRef any old value that is
-  // overwritten if appropriate. If copy-on-write occurs, it will also
-  // incRef the new array and decRef the old array for us. Finally,
-  // some of the array_setm helpers will decRef the key if it is a
-  // string (for cases where the key is not a local), while others do
-  // not (for cases where the key is a local).
+  // The array_setm_wki_v0 helper will decRef the value if it cannot
+  // be stored; otherwise the value is moved (neither incref'd or decref'd).
+  // Copy-on-write is expected not to occur since AddNewElemC is used
+  // for array initialization.
   if (false) { // type-check
-    TypedValue* cell = NULL;
     TypedValue* rhs = NULL;
     ArrayData* arr = NULL;
     ArrayData* ret;
-    ret = array_setm_wk1_v0(cell, arr, rhs);
+    ret = array_setm_wk1_v0(arr, rhs);
     printf("%p", ret); // use ret
   }
   EMIT_CALL(a, array_setm_wk1_v0,
-             IMM(0),
-             V(arrLoc),
-             A(valLoc));
+            V(arrLoc), A(valLoc));
   recordReentrantCall(i);
   // The array value may have changed, so we need to invalidate any
   // register we have associated with arrLoc

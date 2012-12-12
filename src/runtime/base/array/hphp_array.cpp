@@ -623,7 +623,7 @@ inline ALWAYS_INLINE bool HphpArray::isFull() const {
   return uint32(m_lastE) + 1 == maxElms || m_hLoad == maxElms;
 }
 
-inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
+inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
   ASSERT(!validElmInd(*ei) && !isFull());
   ASSERT(m_size != 0 || m_lastE == ElmIndEmpty);
 #ifdef PEDANTIC
@@ -636,8 +636,12 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   m_hLoad += (*ei == ElmIndEmpty);
   ElmInd i = ++m_lastE;
   (*ei) = i;
-  if (m_pos == ArrayData::invalid_index) m_pos = ssize_t(i);
-  Elm* e = &m_data[i];
+  return &m_data[i];
+}
+
+inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
+  Elm* e = allocElmFast(ei);
+  if (m_pos == ArrayData::invalid_index) m_pos = ssize_t(*ei);
   return LIKELY(!siPastEnd()) ? e : allocElmExtra(e, ei);
 }
 
@@ -1534,6 +1538,48 @@ ArrayData* HphpArray::append(CVarRef v, bool copy) {
   return t;
 }
 
+/*
+ * Cold path helper for AddNewElemC delegates to the ArrayData::append
+ * virtual method.
+ */
+static NEVER_INLINE
+ArrayData* genericAddNewElemC(ArrayData* a, DataType type, intptr_t data) {
+  ASSERT(a->getCount() <= 1);
+  TypedValue value = tv(type, data);
+  ArrayData* UNUSED r = a->append(tvAsCVarRef(&value), false);
+  tvRefcountedDecRef(value);
+  ASSERT(!r);
+  return a;
+}
+
+/*
+ * The pass-by-value and move semantics of this helper are slightly different
+ * than other array helpers, but tuned for the opcode.  See doc comment in
+ * hphp_array.h.
+ */
+ArrayData* HphpArray::AddNewElemC(ArrayData* a, DataType type, intptr_t data) {
+  ASSERT(a->getCount() <= 1 && type != KindOfRef);
+  HphpArray* h;
+  ElmInd* ei;
+  int64 k;
+  if (LIKELY(IsHphpArray(a)) &&
+      ((h = (HphpArray*)a), LIKELY(h->m_pos >= 0)) &&
+      LIKELY(!h->siPastEnd()) &&
+      LIKELY(!h->isFull()) &&
+      ((k = h->m_nextKI), LIKELY(k >= 0)) &&
+      ((ei = &h->m_hash[k & h->m_tableMask]), LIKELY(!validElmInd(*ei)))) {
+    // Fast path is a streamlined copy of Variant.constructValHelper()
+    // with no incref+decref because we're moving (data,type) to this array.
+    Elm* e = h->allocElmFast(ei);
+    e->data.m_type = type != KindOfUninit ? type : KindOfNull;
+    e->data.m_data.num = data;
+    e->setIntKey(k);
+    h->m_nextKI = k + 1;
+    return a;
+  }
+  return genericAddNewElemC(a, type, data);
+}
+
 ArrayData* HphpArray::appendRef(CVarRef v, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
@@ -1848,12 +1894,8 @@ ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
  *      $a[] = <polymorphic value>
  *      ... but don't count the reference to the new value.
  */
-ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
-                             TypedValue* value) {
-  ASSERT(ad);
-  ArrayData* retval = ad->append(tvAsCVarRef(value), ad->getCount() > 1);
-  tvRefcountedDecRef(value);
-  return array_mutate_post(cell, ad, retval);
+ArrayData* array_setm_wk1_v0(ArrayData* ad, TypedValue* value) {
+  return HphpArray::AddNewElemC(ad, value->m_type, value->m_data.num);
 }
 
 /**

@@ -216,6 +216,15 @@ public:
   void nvGetKey(TypedValue* out, ssize_t pos);
   bool nvInsert(StringData* k, TypedValue *v);
 
+  /**
+   * Main helper for AddNewElemC.  The semantics are slightly different from
+   * other helpers, but tuned for the opcode.  The value to set is passed by
+   * value; the caller has incref'd it if necessary, and this call *moves* it
+   * to its location in the array (caller must not decref).  If the value cannot
+   * be stored in the array, this helper decref's it.
+   */
+  static ArrayData* AddNewElemC(ArrayData* a, DataType type, intptr_t data);
+
 private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
@@ -456,6 +465,7 @@ private:
   Elm* newElm(ElmInd* e, size_t h0);
   Elm* newElmGrow(size_t h0);
   Elm* allocElm(ElmInd* ei);
+  Elm* allocElmFast(ElmInd* ei);
   Elm* allocElmExtra(Elm* e, ElmInd* ei);
   void initElmInt(Elm* e, int64_t ki, CVarRef data, bool byRef=false);
   void initElmStr(Elm* e, strhash_t h, StringData* key, CVarRef data,
@@ -562,8 +572,7 @@ ArrayData* array_setm_s0k1nc_v(TypedValue* cell, ArrayData* ad, StringData* key,
                                TypedValue* value);
 ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
                                 StringData* key, TypedValue* value);
-ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
-                             TypedValue* value);
+ArrayData* array_setm_wk1_v0(ArrayData* ad, TypedValue* value);
 ArrayData* array_getm_i(void* hphpArray, int64 key, TypedValue* out);
 
 ArrayData* array_getm_s(ArrayData* a, StringData* key, TypedValue* out,

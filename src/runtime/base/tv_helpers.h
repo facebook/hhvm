@@ -34,6 +34,13 @@ class Stack;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+inline TypedValue tv(DataType type, intptr_t data) {
+  TypedValue v;
+  v.m_data.num = data;
+  v.m_type = type;
+  return v;
+}
+
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 void tvDecRefHelper(DataType type, uint64_t datum);
@@ -93,6 +100,10 @@ inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
   if (IS_REFCOUNTED_TYPE(type)) {
     tvDecRefHelper(type, datum);
   }
+}
+
+inline void tvRefcountedDecRef(TypedValue v) {
+  return tvRefcountedDecRefHelper(v.m_type, v.m_data.num);
 }
 
 // Assumes 'tv' is live

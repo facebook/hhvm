@@ -1281,7 +1281,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
         helper = (TCA)objToBoolHelper;
       } else {
         // Dbl -> Bool
-        CG_PUNT(Conv);
+        CG_PUNT(Conv_Dbl_Bool);
       }
       args.ssa(src);
       cgCallHelper(m_as, helper, dst, kNoSyncPoint, args);
@@ -1360,14 +1360,14 @@ Address CodeGenerator::cgUnbox(IRInstruction* inst) {
   ASSERT(!Type::isUnboxed(srcType));
   ASSERT(Type::isUnboxed(dstType));
   if (dstType == Type::Cell) {
-    CG_PUNT(Unbox);
+    CG_PUNT(Unbox_Cell);
   }
   auto srcReg = src->getReg();
   auto dstReg = dst->getReg();
   if (Type::isBoxed(srcType)) {
     emitDeref(m_as, PhysReg(srcReg), PhysReg(dstReg));
   } else if (srcType == Type::Gen) {
-    CG_PUNT(Unbox);
+    CG_PUNT(Unbox_Gen);
     // XXX The following is wrong becuase it over-writes srcReg
     emitDerefIfVariant(m_as, PhysReg(srcReg));
     m_as.mov_reg64_reg64(srcReg, dstReg);
@@ -2024,7 +2024,7 @@ Address CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
     TCA patch1 = NULL;
     // TODO: Should be able to merge Gen case with Cell
     if (type == Type::Gen) {
-      CG_PUNT(cgIncRef); // for now
+      CG_PUNT(cgIncRef_Gen); // for now
       // may be variant or cell
       m_as.cmp_imm32_disp_reg32(KindOfRefCountThreshold, TVOFF(m_type), base);
       patch1 = m_as.code.frontier;
@@ -3295,7 +3295,7 @@ Address CodeGenerator::cgStore(PhysReg base,
                                   off + TVOFF(m_data),
                                   base);
     } else if (type == Type::Dbl) {
-      CG_PUNT(cgStore); // not handled yet!
+      CG_PUNT(cgStore_Dbl); // not handled yet!
     } else if (type == Type::Arr) {
       m_as.store_imm64_disp_reg64((int64)src->getConstValAsArr(),
                                   off + TVOFF(m_data),

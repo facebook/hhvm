@@ -79,7 +79,7 @@ std::vector<const char *> &CodeErrors::getErrorTexts() {
   if (ErrorTexts.empty()) {
     ErrorTexts.resize(ErrorCount);
 #define CODE_ERROR_ENTRY(x) ErrorTexts[x] = #x;
-#include "compiler/analysis/code_error.inc"
+#include "compiler/analysis/core_code_error.inc"
 #undef CODE_ERROR_ENTRY
   }
   return ErrorTexts;

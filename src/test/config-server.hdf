@@ -37,3 +37,7 @@ Xbox {
 PageletServer {
   ThreadCount = 5
 }
+
+AdminServer {
+  Port = 8088
+}

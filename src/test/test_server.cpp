@@ -167,8 +167,12 @@ void TestServer::StopServer() {
 bool TestServer::RunTests(const std::string &which) {
   bool ret = true;
 
-  // This needs to be the 1st, so to find a good server port.
-  RUN_TEST(TestLibeventServer);
+  {
+    // TestLibeventServer finds a good port to listen on, so it must
+    // always run.
+    std::string which = "TestLibeventServer";
+    RUN_TEST(TestLibeventServer);
+  }
 
   RUN_TEST(TestInheritFdServer);
   RUN_TEST(TestSanity);

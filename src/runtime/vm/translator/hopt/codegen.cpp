@@ -1503,7 +1503,7 @@ Address CodeGenerator::cgRetVal(IRInstruction* inst) {
   if (val) {
     // Store return value at the top of the caller's eval stack
     // (a) Store the type
-    if (val->getType() != Type::Gen && val->getType() != Type::Cell) {
+    if (Type::isStaticallyKnown(val->getType())) {
       DataType valDataType = Type::toDataType(val->getType());
       m_as.store_imm32_disp_reg(valDataType, AROFF(m_r) + TVOFF(m_type), fpReg);
     } else {
@@ -3214,52 +3214,82 @@ Address CodeGenerator::cgStRaw(IRInstruction* inst) {
   return start;
 }
 
-// if label is set and type is Cell, then cgLoadCell will generate
-// a check that bails to the label if the loaded type is boxed.
-Address CodeGenerator::cgLoadCell(Type::Tag type,
-                                  SSATmp* dst,
-                                  PhysReg base,
-                                  int64_t off,
-                                  LabelInstruction* label) {
-  ASSERT(dst->getType() == Type::Cell || dst->getType() == Type::Gen);
+// If label is set and type is not Gen, this method generates a check
+// that bails to the label if the loaded typed value doesn't match type.
+Address CodeGenerator::cgLoadTypedValue(Type::Tag type,
+                                        SSATmp* dst,
+                                        PhysReg base,
+                                        int64_t off,
+                                        LabelInstruction* label,
+                                        IRInstruction* inst) {
+  ASSERT(type == dst->getType());
+  ASSERT(!Type::isStaticallyKnown(type));
   Address start = m_as.code.frontier;
   auto valueDstReg = dst->getReg(0);
   auto typeDstReg = dst->getReg(1);
-  if (valueDstReg == InvalidReg) {
+  if (valueDstReg == InvalidReg && typeDstReg == InvalidReg &&
+      (label == NULL || type == Type::Gen)) {
     // a dead load
     ASSERT(typeDstReg == InvalidReg);
     return start;
   }
-  if (base == typeDstReg) {
+  bool useScratchReg = (base == typeDstReg && valueDstReg != reg::noreg);
+  if (useScratchReg) {
     // Save base to rScratch, because base will be overwritten.
     m_as.mov_reg64_reg64(base, reg::rScratch);
     if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgLoadCell\n");
+      TRACE(3, "[counter] 1 reg move in cgLoadTypedValue\n");
     }
   }
-  m_as.load_reg64_disp_reg32(base, off + TVOFF(m_type), typeDstReg);
-  // Do not use rScratch any more before loading the value.
-  if (label && type == Type::Cell) {
-    // if we have a label and the type is Cell, then generate a guard
-    // that bails if the local's value is a ref
-    ASSERT(label);
-    m_as.cmp_imm32_reg32(HPHP::KindOfRef, typeDstReg);
-    emitFwdJcc(CC_GE, label);
+
+  // Check type if needed
+  if (label && type != Type::Gen) {
+    ConditionCode cc;
+    switch (type) {
+      case Type::Cell : {
+        m_as.cmp_imm32_disp_reg32(HPHP::KindOfRef, off + TVOFF(m_type), base);
+        cc = CC_GE;
+        break;
+      }
+      case Type::Uncounted : {
+        m_as.cmp_imm32_disp_reg32(HPHP::KindOfStaticString,
+                                  off + TVOFF(m_type), base);
+        cc = CC_G;
+        break;
+      }
+      case Type::UncountedInit : {
+        m_as.test_imm32_disp_reg32(HPHP::KindOfUncountedInitBit,
+                                   off + TVOFF(m_type), base);
+        cc = CC_Z;
+        break;
+      }
+      default : not_reached();
+    }
+    emitGuardOrFwdJcc(inst, cc, label);
   }
-  if (base == typeDstReg) {
-    m_as.load_reg64_disp_reg64(reg::rScratch, off + TVOFF(m_data), valueDstReg);
-  } else {
-    m_as.load_reg64_disp_reg64(base, off + TVOFF(m_data), valueDstReg);
+
+  // Load type if it's not dead
+  if (typeDstReg != reg::noreg) {
+    m_as.load_reg64_disp_reg32(base, off + TVOFF(m_type), typeDstReg);
+  }
+
+  // Load value if it's not dead
+  if (valueDstReg != reg::noreg) {
+    if (useScratchReg) {
+      m_as.load_reg64_disp_reg64(reg::rScratch, off + TVOFF(m_data), valueDstReg);
+    } else {
+      m_as.load_reg64_disp_reg64(base, off + TVOFF(m_data), valueDstReg);
+    }
   }
   return start;
 }
 
 
-Address CodeGenerator::cgStoreCell(PhysReg base,
-                                   int64_t off,
-                                   SSATmp* src) {
+Address CodeGenerator::cgStoreTypedValue(PhysReg base,
+                                         int64_t off,
+                                         SSATmp* src) {
   Address start = m_as.code.frontier;
-  ASSERT(src->getType() == Type::Cell || src->getType() == Type::Gen);
+  ASSERT(!Type::isStaticallyKnown(src->getType()));
   m_as.store_reg64_disp_reg64(src->getReg(0),
                               off + TVOFF(m_data),
                               base);
@@ -3278,8 +3308,8 @@ Address CodeGenerator::cgStore(PhysReg base,
                                bool genStoreType) {
   Type::Tag type = src->getType();
   Address start = m_as.code.frontier;
-  if (type == Type::Cell || type == Type::Gen) {
-    return cgStoreCell(base, off, src);
+  if (!Type::isStaticallyKnown(type)) {
+    return cgStoreTypedValue(base, off, src);
   }
   if (type == Type::Uninit || type == Type::Null) {
     // no need to store a value for null or uninit
@@ -3333,6 +3363,23 @@ Address CodeGenerator::cgStore(PhysReg base,
   return start;
 }
 
+void CodeGenerator::emitGuardOrFwdJcc(IRInstruction*    inst,
+                                      ConditionCode     cc,
+                                      LabelInstruction* label) {
+  if (inst && inst->getTCA() == kIRDirectGuardActive) {
+    if (RuntimeOption::EvalDumpIR) {
+      m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
+      inst->setTCA(m_as.code.frontier);
+    }
+    // Get the SrcKey for the dest
+    SrcKey  destSK(getCurrFunc(), m_curTrace->getBcOff());
+    SrcRec* destSR = m_tx64->getSrcRec(destSK);
+    m_tx64->emitFallbackCondJmp(m_as, *destSR, cc);
+  } else {
+    emitFwdJcc(cc, label);
+  }
+}
+
 Address CodeGenerator::cgLoad(Type::Tag type,
                               SSATmp* dst,
                               PhysReg base,
@@ -3340,8 +3387,8 @@ Address CodeGenerator::cgLoad(Type::Tag type,
                               LabelInstruction* label,
                               IRInstruction* inst) {
   Address start = m_as.code.frontier;
-  if (type == Type::Cell || type == Type::Gen) {
-    return cgLoadCell(type, dst, base, off, label);
+  if (!Type::isStaticallyKnown(type)) {
+    return cgLoadTypedValue(type, dst, base, off, label, inst);
   }
   if (label != NULL && type != Type::Home) {
     // generate a guard for the type
@@ -3355,18 +3402,7 @@ Address CodeGenerator::cgLoad(Type::Tag type,
       m_as.cmp_imm32_disp_reg32(dataType, off + TVOFF(m_type), base);
       cc = CC_NE;
     }
-    if (inst && inst->getTCA() == kIRDirectGuardActive) {
-      if (RuntimeOption::EvalDumpIR) {
-        m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
-        inst->setTCA(m_as.code.frontier);
-      }
-      // Get the SrcKey for the dest
-      SrcKey  destSK(getCurrFunc(), m_curTrace->getBcOff());
-      SrcRec* destSR = m_tx64->getSrcRec(destSK);
-      m_tx64->emitFallbackCondJmp(m_as, *destSR, cc);
-    } else {
-      emitFwdJcc(cc, label);
-    }
+    emitGuardOrFwdJcc(inst, cc, label);
   }
   if (type == Type::Uninit || type == Type::Null) {
     return start; // these are constants

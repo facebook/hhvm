@@ -2637,6 +2637,42 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
   }
 }
 
+NormalizedInstruction::OutputUse
+NormalizedInstruction::getOutputUsage(DynLocation* output,
+                                      bool ignorePops /* =false */) const {
+  for (NormalizedInstruction* succ = next;
+       succ; succ = succ->next) {
+    if (ignorePops &&
+        (succ->op() == OpPopC ||
+         succ->op() == OpPopV ||
+         succ->op() == OpPopR)) {
+      continue;
+    }
+    for (size_t i = 0; i < succ->inputs.size(); ++i) {
+      if (succ->inputs[i] == output) {
+        if (succ->inputWasInferred(i)) {
+          return OutputInferred;
+        }
+        if (Translator::Get()->dontGuardAnyInputs(succ->op())) {
+          /* the consumer doesnt care about its inputs
+             but we may still have inferred something about
+             its outputs that a later instruction may depend on
+          */
+          if (!outputDependsOnInput(succ->op()) ||
+              !(succ->outStack && !succ->outStack->rtt.isVagueValue() &&
+                succ->getOutputUsage(succ->outStack) != OutputUsed) ||
+              !(succ->outLocal && !succ->outLocal->rtt.isVagueValue() &&
+                succ->getOutputUsage(succ->outLocal)) != OutputUsed) {
+            return OutputDoesntCare;
+          }
+        }
+        return OutputUsed;
+      }
+    }
+  }
+  return OutputUnused;
+}
+
 GuardType::GuardType(DataType outer, DataType inner)
   : outerType(outer), innerType(inner) {
 }
@@ -2744,15 +2780,18 @@ GuardType GuardType::getCountnessInit() const {
 }
 
 
-DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
-                                              size_t opndIdx) {
+DataTypeCategory
+Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
+                                         size_t opndIdx) {
+  static const NormalizedInstruction::OutputUse kOutputUsed =
+    NormalizedInstruction::OutputUsed;
   switch (instr->op()) {
     case OpSetL : {
       ASSERT(opndIdx < 2);
       if (opndIdx == 0) { // stack value
-        if (instr->outStack ||
-            (instr->outputIsUsed(instr->outLocal) ==
-             NormalizedInstruction::OutputUsed)) {
+        auto stackValUsage = instr->getOutputUsage(instr->outStack, true);
+        if ((instr->outStack && (!m_useHHIR || stackValUsage == kOutputUsed)) ||
+            (instr->getOutputUsage(instr->outLocal) == kOutputUsed)) {
           return DataTypeSpecific;
         }
         return DataTypeGeneric;
@@ -2761,7 +2800,7 @@ DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
       }
     }
     case OpCGetL : {
-      if (!instr->outStack || (instr->outputIsUsed(instr->outStack) ==
+      if (!instr->outStack || (instr->getOutputUsage(instr->outStack, true) ==
                                NormalizedInstruction::OutputUsed)) {
         return DataTypeSpecific;
       }
@@ -2776,9 +2815,9 @@ DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
 }
 
 
-GuardType getOperandConstraintType(NormalizedInstruction* instr,
-                                   size_t                 opndIdx,
-                                   const GuardType&       specType) {
+GuardType Translator::getOperandConstraintType(NormalizedInstruction* instr,
+                                               size_t                 opndIdx,
+                                               const GuardType&       specType) {
   DataTypeCategory dtCategory = getOperandConstraintCategory(instr, opndIdx);
   switch (dtCategory) {
     case DataTypeGeneric:       return GuardType(KindOfAny);
@@ -2789,17 +2828,18 @@ GuardType getOperandConstraintType(NormalizedInstruction* instr,
   }
 }
 
-void constrainOperandType(GuardType&             relxType,
-                          NormalizedInstruction* instr,
-                          size_t                 opndIdx,
-                          const GuardType&       specType) {
+void Translator::constrainOperandType(GuardType&             relxType,
+                                      NormalizedInstruction* instr,
+                                      size_t                 opndIdx,
+                                      const GuardType&       specType) {
   if (relxType.isSpecific()) return; // Can't constrain any further
 
   switch (instr->op()) {
-    case OpRetC :
-    case OpRetV :
+    case OpRetC  :
+    case OpRetV  :
     case OpCGetL :
-    case OpSetL : {
+    case OpSetL  :
+    {
       GuardType consType = getOperandConstraintType(instr, opndIdx, specType);
       if (consType.isMoreRefinedThan(relxType)) {
         relxType = consType;
@@ -3234,10 +3274,7 @@ breakBB:
     analyzeSecondPass(t);
   }
 
-  // TODO: Add support for relaxed dependencies to HHIR
-  if (!m_useHHIR) {
-    relaxDeps(t, tas);
-  }
+  relaxDeps(t, tas);
 
   // Mark the last instruction appropriately
   ASSERT(t.m_instrStream.last);

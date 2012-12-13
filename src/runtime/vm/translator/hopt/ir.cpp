@@ -514,16 +514,21 @@ void TypeInstruction::print(std::ostream& ostream) {
 }
 
 int SSATmp::numNeededRegs() const {
-  auto type = getType();
-  return
-    // These types don't get a register because their values are static
-    (type == Type::Null || type == Type::Uninit || type == Type::None) ? 0 :
-    // Need 2 registers for these types, for type and value, or 1 for
-    // Func* and 1 for Class*.
-    (type == Type::Cell || type == Type::Gen ||
-     type == Type::FuncClassRef) ? 2
-    // Everything else just has 1.
-    : 1;
+  Type::Tag type = getType();
+
+  // These types don't get a register because their values are static
+  if (type == Type::Null || type == Type::Uninit || type == Type::None) {
+    return 0;
+  }
+
+  // Need 2 registers for these types, for type and value, or 1 for
+  // Func* and 1 for Class*.
+  if (!Type::isStaticallyKnown(type) || type == Type::FuncClassRef) {
+    return 2;
+  }
+
+  // Everything else just has 1.
+  return 1;
 }
 
 int SSATmp::numAllocatedRegs() const {

@@ -137,11 +137,12 @@ tx64LocPhysicalOffset(const Location& l, const Func *f = NULL) {
 
 
 bool isInferredType(const NormalizedInstruction& i) {
-  return (i.outputIsUsed(i.outStack) == NormalizedInstruction::OutputInferred);
+  return (i.getOutputUsage(i.outStack) ==
+          NormalizedInstruction::OutputInferred);
 }
 
 JIT::Type::Tag getInferredOrPredictedType(const NormalizedInstruction& i) {
-  NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
+  NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
   if (u == NormalizedInstruction::OutputInferred ||
       (u == NormalizedInstruction::OutputUsed && i.outputPredicted)) {
     return JIT::Type::fromRuntimeType(i.outStack->rtt);
@@ -234,7 +235,7 @@ TranslatorX64::irTranslateEqOp(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateLtGtOp(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+                                 const NormalizedInstruction& i) {
   const Opcode op = i.op();
   ASSERT(op == OpLt || op == OpLte || op == OpGt || op == OpGte);
   ASSERT(i.inputs.size() == 2);
@@ -254,7 +255,7 @@ TranslatorX64::irTranslateLtGtOp(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateUnaryBooleanOp(const Tracelet& t,
-                                       const NormalizedInstruction& i) {
+                                         const NormalizedInstruction& i) {
   const Opcode op = i.op();
   ASSERT(op == OpCastBool || op == OpEmptyL);
   if (op == OpCastBool) {
@@ -266,7 +267,7 @@ TranslatorX64::irTranslateUnaryBooleanOp(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateBranchOp(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+                                   const NormalizedInstruction& i) {
   const Opcode op = i.op();
   ASSERT(op == OpJmpZ || op == OpJmpNZ);
   if (op == OpJmpZ) {
@@ -278,7 +279,7 @@ TranslatorX64::irTranslateBranchOp(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateCGetL(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+                                const NormalizedInstruction& i) {
   const DEBUG_ONLY Opcode op = i.op();
   ASSERT(op == OpFPassL || OpCGetL);
   const vector<DynLocation*>& inputs = i.inputs;
@@ -290,7 +291,7 @@ TranslatorX64::irTranslateCGetL(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateCGetL2(const Tracelet& t,
-                               const NormalizedInstruction& ni) {
+                                 const NormalizedInstruction& ni) {
   const int locIdx   = 1;
 
   HHIR_EMIT(CGetL2, ni.inputs[locIdx]->location.offset);
@@ -298,13 +299,13 @@ TranslatorX64::irTranslateCGetL2(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateVGetL(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+                                const NormalizedInstruction& i) {
   HHIR_EMIT(VGetL, i.inputs[0]->location.offset);
 }
 
 void
 TranslatorX64::irTranslateAssignToLocalOp(const Tracelet& t,
-                                        const NormalizedInstruction& ni) {
+                                          const NormalizedInstruction& ni) {
   DEBUG_ONLY const int rhsIdx  = 0;
   const int locIdx  = 1;
   const Opcode op = ni.op();
@@ -1450,7 +1451,7 @@ TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
 
   if (!i.outStack || i.breaksTracelet) return;
 
-  NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
+  NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
 
   if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted) ||
       (u == NormalizedInstruction::OutputInferred)) {

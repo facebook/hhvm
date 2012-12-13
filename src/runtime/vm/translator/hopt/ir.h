@@ -371,6 +371,8 @@ public:
     IRT(Dbl,             "Dbl")   \
     IRT(Placeholder,     "ERROR") /* Nothing in VM types enum at this position */ \
     IRT(StaticStr,       "Sstr")  \
+    IRT(UncountedInit,   "UncountedInit") /* One of {Null,Bool,Int,Dbl,SStr} */\
+    IRT(Uncounted,       "Uncounted") /* 1 of: {Unin,Null,Bool,Int,Dbl,SStr} */\
     IRT(Str,             "Str")   \
     IRT(Arr,             "Arr")   \
     IRT(Obj,             "Obj")   \
@@ -406,6 +408,8 @@ public:
     TAG_ENUM_COUNT
   };
 
+  static const Tag RefCountThreshold = Uncounted;
+
   static inline bool isBoxed(Tag t) {
     return (t > Cell && t < Gen);
   }
@@ -415,45 +419,74 @@ public:
   }
 
   static inline bool isRefCounted(Tag t) {
-    return t >= Type::Str && t <= Type::Gen;
+    return (t > RefCountThreshold && t <= Gen);
   }
 
   static inline bool isStaticallyKnown(Tag t) {
-    return t != Type::Cell && t != Type::Gen && t != Type::None;
+    return (t != Cell       &&
+            t != Gen        &&
+            t != Uncounted  &&
+            t != UncountedInit);
   }
 
   static inline bool isStaticallyKnownUnboxed(Tag t) {
-    return isUnboxed(t) && t != Type::Cell;
+    return isStaticallyKnown(t) && isUnboxed(t);
   }
 
   static inline bool needsStaticBitCheck(Tag t) {
-    return (t == Type::Cell || t == Type::Gen ||
-            t == Type::Str  || t == Type::Arr);
+    return (t == Cell ||
+            t == Gen  ||
+            t == Str  ||
+            t == Arr);
   }
 
+  // returns true if definitely not uninitialized
   static inline bool isInit(Tag t) {
-    // returns true if definitely not uninitialized
-    return ((t > Type::Uninit && t < Type::Cell) || isBoxed(t));
+    return ((t != Uninit && isStaticallyKnown(t)) ||
+            isBoxed(t));
   }
+
+  static inline bool mayBeUninit(Tag t) {
+    return (t == Uninit    ||
+            t == Uncounted ||
+            t == Cell      ||
+            t == Gen);
+  }
+
   // returns true if t1 is a more refined that t2
   static inline bool isMoreRefined(Tag t1, Tag t2) {
-    return ((t2 == Gen && t1 < Gen) ||
-            (t2 == Cell && t1 < Cell) ||
-            (t2 == BoxedCell && t1 < BoxedCell && t1 > Cell) ||
-            (t2 == Str && t1 == StaticStr) ||
-            (t2 == BoxedStr && t1 == BoxedStaticStr));
+    return ((t2 == Gen           && t1 < Gen)                    ||
+            (t2 == Cell          && t1 < Cell)                   ||
+            (t2 == BoxedCell     && t1 < BoxedCell && t1 > Cell) ||
+            (t2 == Str           && t1 == StaticStr)             ||
+            (t2 == BoxedStr      && t1 == BoxedStaticStr)        ||
+            (t2 == Uncounted     && t1 < Uncounted)              ||
+            (t2 == UncountedInit && t1 < UncountedInit && t1 > Uninit));
   }
+
   static inline bool isString(Tag t) {
-    return t == Type::Str || t == Type::StaticStr;
+    return (t == Str || t == StaticStr);
   }
+
   static inline bool isNull(Tag t) {
-    return t == Type::Null || t == Type::Uninit;
+    return (t == Null || t == Uninit);
   }
+
   static inline Tag getInnerType(Tag t) {
-    if (!isBoxed(t)) {
-      return None;
+    ASSERT(isBoxed(t));
+    switch (t) {
+      case BoxedUninit    : return Uninit;
+      case BoxedNull      : return Null;
+      case BoxedBool      : return Bool;
+      case BoxedInt       : return Int;
+      case BoxedDbl       : return Dbl;
+      case BoxedStaticStr : return StaticStr;
+      case BoxedStr       : return Str;
+      case BoxedArr       : return Arr;
+      case BoxedObj       : return Obj;
+      case BoxedCell      : return Cell;
+      default             : not_reached();
     }
-    return (Tag)(t - BoxedUninit + Uninit);
   }
 
   static inline Tag getBoxedType(Tag t) {
@@ -466,7 +499,19 @@ public:
       return BoxedNull;
     }
     ASSERT(isUnboxed(t));
-    return (Tag)(BoxedUninit + (t - Uninit));
+    switch (t) {
+      case Uninit     : return BoxedUninit;
+      case Null       : return BoxedNull;
+      case Bool       : return BoxedBool;
+      case Int        : return BoxedInt;
+      case Dbl        : return BoxedDbl;
+      case StaticStr  : return BoxedStaticStr;
+      case Str        : return BoxedStr;
+      case Arr        : return BoxedArr;
+      case Obj        : return BoxedObj;
+      case Cell       : return BoxedCell;
+      default         : not_reached();
+    }
   }
 
   static inline Tag getValueType(Tag t) {
@@ -481,17 +526,20 @@ public:
   // translates a compiler Type::Type to a HPHP::DataType
   static inline DataType toDataType(Tag type) {
     switch (type) {
-      case Type::None      : return KindOfInvalid;
-      case Type::Uninit    : return KindOfUninit;
-      case Type::Null      : return KindOfNull;
-      case Type::Bool      : return KindOfBoolean;
-      case Type::Int       : return KindOfInt64;
-      case Type::Dbl       : return KindOfDouble;
-      case Type::StaticStr : return KindOfStaticString;
-      case Type::Str       : return KindOfString;
-      case Type::Arr       : return KindOfArray;
-      case Type::Obj       : return KindOfObject;
-      case Type::ClassRef  : return KindOfClass;
+      case None          : return KindOfInvalid;
+      case Uninit        : return KindOfUninit;
+      case Null          : return KindOfNull;
+      case Bool          : return KindOfBoolean;
+      case Int           : return KindOfInt64;
+      case Dbl           : return KindOfDouble;
+      case StaticStr     : return KindOfStaticString;
+      case Str           : return KindOfString;
+      case Arr           : return KindOfArray;
+      case Obj           : return KindOfObject;
+      case ClassRef      : return KindOfClass;
+      case UncountedInit : return KindOfUncountedInit;;
+      case Uncounted     : return KindOfUncounted;;
+      case Gen           : return KindOfAny;
       default: {
         ASSERT(isBoxed(type));
         return KindOfRef;
@@ -501,20 +549,23 @@ public:
 
   static inline Tag fromDataType(DataType outerType, DataType innerType) {
     switch (outerType) {
-      case KindOfInvalid      : return Type::None;
-      case KindOfUninit       : return Type::Uninit;
-      case KindOfNull         : return Type::Null;
-      case KindOfBoolean      : return Type::Bool;
-      case KindOfInt64        : return Type::Int;
-      case KindOfDouble       : return Type::Dbl;
-      case KindOfStaticString : return Type::StaticStr;
-      case KindOfString       : return Type::Str;
-      case KindOfArray        : return Type::Arr;
-      case KindOfObject       : return Type::Obj;
-      case KindOfClass        : return Type::ClassRef;
-      case KindOfRef          :
+      case KindOfInvalid       : return None;
+      case KindOfUninit        : return Uninit;
+      case KindOfNull          : return Null;
+      case KindOfBoolean       : return Bool;
+      case KindOfInt64         : return Int;
+      case KindOfDouble        : return Dbl;
+      case KindOfStaticString  : return StaticStr;
+      case KindOfString        : return Str;
+      case KindOfArray         : return Arr;
+      case KindOfObject        : return Obj;
+      case KindOfClass         : return ClassRef;
+      case KindOfUncountedInit : return UncountedInit;
+      case KindOfUncounted     : return Uncounted;
+      case KindOfAny           : return Gen;
+      case KindOfRef           :
         return getBoxedType(fromDataType(innerType, KindOfInvalid));
-      default                 : not_reached();
+      default                  : not_reached();
     }
   }
 
@@ -522,10 +573,14 @@ public:
     return fromDataType(rtt.outerType(), rtt.innerType());
   }
 
-  static inline bool canRunDtor(Type::Tag ty) {
-    return ty == Type::Obj || ty == Type::BoxedObj ||
-           ty == Type::Arr || ty == Type::BoxedArr ||
-           !Type::isStaticallyKnown(ty);
+  static inline bool canRunDtor(Type::Tag t) {
+    return (t == Obj       ||
+            t == BoxedObj  ||
+            t == Arr       ||
+            t == BoxedArr  ||
+            t == Cell      ||
+            t == BoxedCell ||
+            t == Gen);
   }
 }; // class Type
 

@@ -10823,39 +10823,10 @@ TranslatorX64::emitVariantGuards(const Tracelet& t,
   }
 }
 
-NormalizedInstruction::OutputUse
-NormalizedInstruction::outputIsUsed(DynLocation* output) const {
-  for (NormalizedInstruction* succ = next;
-       succ; succ = succ->next) {
-    for (size_t i = 0; i < succ->inputs.size(); ++i) {
-      if (succ->inputs[i] == output) {
-        if (succ->inputWasInferred(i)) {
-          return OutputInferred;
-        }
-        if (Translator::Get()->dontGuardAnyInputs(succ->op())) {
-          /* the consumer doesnt care about its inputs
-             but we may still have inferred something about
-             its outputs that a later instruction may depend on
-          */
-          if (!outputDependsOnInput(succ->op()) ||
-              !(succ->outStack && !succ->outStack->rtt.isVagueValue() &&
-                succ->outputIsUsed(succ->outStack) != OutputUsed) ||
-              !(succ->outLocal && !succ->outLocal->rtt.isVagueValue() &&
-                succ->outputIsUsed(succ->outLocal)) != OutputUsed) {
-            return OutputDoesntCare;
-          }
-        }
-        return OutputUsed;
-      }
-    }
-  }
-  return OutputUnused;
-}
-
 void
 TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   if (!i.outputPredicted || i.breaksTracelet) return;
-  NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
+  NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
 
   switch (u) {
     case NormalizedInstruction::OutputUsed:

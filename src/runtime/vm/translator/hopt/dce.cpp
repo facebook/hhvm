@@ -445,7 +445,8 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
         }
         break;
       }
-      if (opc == Marker || opc == DefLabel || opc == DefSP || opc == DefFP) {
+      if (opc == Marker || opc == DefLabel || opc == DefSP || opc == DefFP ||
+          opc == LdStack) {
         continue;
       }
       break;

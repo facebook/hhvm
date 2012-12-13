@@ -93,7 +93,7 @@ public:
                   int64_t off,
                   SSATmp* src,
                   bool genStoreType = true);
-  Address cgStoreCell(PhysReg base, int64_t off, SSATmp* src);
+  Address cgStoreTypedValue(PhysReg base, int64_t off, SSATmp* src);
 
   Address cgLoad(Type::Tag type,
                  SSATmp* dst,
@@ -127,11 +127,12 @@ public:
                          SSATmp* objOrCls,
                          SSATmp* nArgs,
                          SSATmp* magicName);
-  Address cgLoadCell(Type::Tag type,
-                     SSATmp* dst,
-                     PhysReg base,
-                     int64_t off,
-                     LabelInstruction* label);
+  Address cgLoadTypedValue(Type::Tag type,
+                           SSATmp* dst,
+                           PhysReg base,
+                           int64_t off,
+                           LabelInstruction* label,
+                           IRInstruction* inst);
 
   Address cgNegate(IRInstruction* inst); // helper
   Address cgJcc(IRInstruction* inst); // helper
@@ -190,6 +191,9 @@ private:
                               SSATmp* toSmash);
   Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
                               SSATmp* toSmash);
+  void emitGuardOrFwdJcc(IRInstruction*    inst,
+                         ConditionCode     cc,
+                         LabelInstruction* label);
   Address emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurrFunc();
   void recordSyncPoint(Asm& as);

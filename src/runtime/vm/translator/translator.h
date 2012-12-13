@@ -436,7 +436,7 @@ class NormalizedInstruction {
     OutputInferred,
     OutputDoesntCare
   };
-  OutputUse outputIsUsed(DynLocation* output) const;
+  OutputUse getOutputUsage(DynLocation* output, bool ignorePops = false) const;
 
   std::string toString() const;
 };
@@ -811,6 +811,17 @@ private:
                   bool& varEnvTaint);
   void relaxDeps(Tracelet& tclet, TraceletContext& tctxt);
   void reanalizeConsumers(Tracelet& tclet, DynLocation* depDynLoc);
+  DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
+                                                size_t opndIdx);
+  GuardType getOperandConstraintType(NormalizedInstruction* instr,
+                                     size_t                 opndIdx,
+                                     const GuardType&       specType);
+
+  void constrainOperandType(GuardType&             relxType,
+                            NormalizedInstruction* instr,
+                            size_t                 opndIdx,
+                            const GuardType&       specType);
+
 
   static RuntimeType liveType(Location l, const Unit &u);
   static RuntimeType liveType(const Cell* outer, const Location& l);

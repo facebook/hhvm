@@ -1924,9 +1924,8 @@ TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
     a.    cmp_imm32_disp_reg32(uint64_t(func), AROFF(m_func), rStashedAR);
   }
 
-  if (!m_funcPrologueRedispatch) {
-    m_funcPrologueRedispatch = emitPrologueRedispatch(astubs);
-  }
+  ASSERT(m_funcPrologueRedispatch);
+
   a.    jnz(m_funcPrologueRedispatch);
   ASSERT(funcPrologToGuard(a.code.frontier, func) == aStart);
   ASSERT(funcPrologHasGuard(a.code.frontier, func));
@@ -11450,6 +11449,8 @@ TranslatorX64::TranslatorX64()
 
   emitGenericDecRefHelpers();
   emitFreeLocalsHelpers();
+
+  m_funcPrologueRedispatch = emitPrologueRedispatch(a);
 
   if (trustSigSegv) {
     // Install SIGSEGV handler for timeout exceptions

@@ -2893,7 +2893,7 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
     "}\n"
     "\n"
     "static int ATTRIBUTE_UNUSED initIntegers = precompute_integers();\n";
-  cg_printf(text);
+  cg_print(text);
 
   cg.namespaceEnd();
 }
@@ -3137,11 +3137,11 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   }
   cg_printf(text2, tableSize - 1, tableSize - 1);
   outputCPPInvokeFileHeader(cg);
-  cg_printf(text3);
+  cg_print(text3);
   if (needEvalHook) outputCPPEvalHook(cg);
   if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
   cg_indentEnd();
-  cg_printf(text4);
+  cg_print(text4);
 
   cg_printf("bool hphp_could_invoke_file(CStrRef s, void*) {\n"
             "  return findFile(s.c_str(), s->hash());\n"
@@ -3353,7 +3353,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     }
   }
   cg_printf(text2, tableSize - 1, tableSize - 1);
-  if (system) cg_printf(text3);
+  if (system) cg_print(text3);
 }
 
 void AnalysisResult::outputCPPDynamicConstantTable(
@@ -3411,8 +3411,8 @@ void AnalysisResult::outputCPPDynamicConstantTable(
     "}\n"
   };
   const char text2[] = {
-    "if (error) raise_notice(\"Use of undefined constant %%s - "
-    "assumed '%%s'\", s, s);\n"
+    "if (error) raise_notice(\"Use of undefined constant %s - "
+    "assumed '%s'\", s, s);\n"
     "return name;\n"
   };
   bool useHashTable = (constMap.size() > 0);
@@ -3433,7 +3433,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
     cg_printf("const hashNodeCon *p = findCon(name.data(), name->hash());\n");
     if (system) {
       cg_indentBegin("if (!p) {\n");
-      cg_printf(text2);
+      cg_print(text2);
       cg_indentEnd("}\n");
     } else {
       cg_printf("if (!p) return get_builtin_constant(name, error);\n");
@@ -3452,7 +3452,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
 
   if (!useHashTable) {
     if (system) {
-      cg_printf(text2);
+      cg_print(text2);
     } else {
       cg_printf("return get_builtin_constant(name, error);\n");
     }

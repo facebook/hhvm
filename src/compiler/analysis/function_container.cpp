@@ -356,7 +356,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
   int numEntries = funcs.size();
   if (!noEval && numEntries > 0) {
     JumpTable jt(cg, funcs, true, true, true, true);
-    cg_printf(text1);
+    cg_print(text1);
 
     vector<int> offsets;
     int prev = -1;
@@ -412,7 +412,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
                           false);
   cg_indentEnd();
   if (numEntries > 0) {
-    cg_printf(system ? text4s : text4);
+    cg_print(system ? text4s : text4);
   }
   cg_indentBegin("  ");
   outputGetCallInfoTail(cg, system);

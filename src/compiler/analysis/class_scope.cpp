@@ -1508,7 +1508,7 @@ void ClassScope::outputCPPHashTableClasses
       "}\n";
 
     JumpTable jt(cg, classes, true, true, true, true);
-    cg_printf(text1);
+    cg_print(text1);
     if (!system) {
       cg_printf(text2, Option::ClassStaticsCallbackPrefix);
     }

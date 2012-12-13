@@ -217,7 +217,7 @@ static void php_dom_throw_error(dom_exception_code error_code,
     Object e(SystemLib::AllocDOMExceptionObject(error_message, 0));
     throw e;
   }
-  raise_warning(error_message);
+  raise_warning(string(error_message));
 }
 
 static bool dom_has_feature(const char *feature, const char *version) {

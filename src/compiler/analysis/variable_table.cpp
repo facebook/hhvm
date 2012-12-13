@@ -1322,7 +1322,7 @@ void VariableTable::outputCPPGVHashTableGetImpl(CodeGenerator &cg,
               i);
   }
   cg_printf(text2, tableSize - 1, tableSize - 1, tableSize - 1);
-  cg_printf(text3);
+  cg_print(text3);
   cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
 }
 
@@ -1335,15 +1335,14 @@ void VariableTable::outputCPPGVHashTableExists(CodeGenerator &cg,
                                                AnalysisResultPtr ar) {
   ASSERT(cg.getCurrentIndentation() == 0);
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
-  const char text[] =
+  cg_printf(
     "HOT_FUNC_HPHP\n"
     "bool GlobalVariables::exists(CStrRef s) const {\n"
     "  const hashNodeGV *p = findGV(s.data(), s.size(), s->hash());\n"
     "  if (p) return isInitialized(*(Variant *)((char *)this + p->off));\n"
     "  if (!LVariableTable::exists(s)) return false;\n"
     "  return isInitialized(const_cast<GlobalVariables*>(this)->get(s));\n"
-    "}\n";
-  cg_printf(text);
+    "}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_EXISTS");
 }
 
@@ -1424,7 +1423,7 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
     }
     cg_printf("g->");
     if (cg.getOutput() != CodeGenerator::SystemCPP) {
-      cg_printf(getGlobalVariableName(ar, name).c_str());
+      cg_print(getGlobalVariableName(ar, name).c_str());
     } else {
       cg_printf("GV(%s)", name.c_str());
     }

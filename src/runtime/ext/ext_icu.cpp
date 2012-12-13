@@ -147,7 +147,7 @@ public:
       Transliterator::createInstance(basicIDAccent, UTRANS_FORWARD, status);
 
     if (U_FAILURE(status)) {
-      raise_warning(u_errorName(status));
+      raise_warning(string(u_errorName(status)));
       //m_tl should be NULL if createInstance fails but better safe than sorry.
       m_tl = NULL;
       m_tl_accent = NULL;

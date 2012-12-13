@@ -963,9 +963,9 @@ void throw_collection_property_exception() {
 }
 
 void throw_collection_compare_exception() {
-  const char* msg =
+  const string msg(
     "Cannot use comparison operators (==, !=, <>, <, <=, >, >=) to compare "
-    "a collection with an integer, double, string, array, or object";
+    "a collection with an integer, double, string, array, or object");
   if (RuntimeOption::StrictCollections) {
     Object e(SystemLib::AllocRuntimeExceptionObject(msg));
     throw e;

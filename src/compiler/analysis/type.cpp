@@ -638,7 +638,7 @@ DataType Type::getDataType() const {
 
 void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) {
-  cg_printf(getCPPDecl(ar, scope, &cg).c_str());
+  cg_print(getCPPDecl(ar, scope, &cg).c_str());
 }
 
 void Type::outputCPPFastObjectCast(CodeGenerator &cg,

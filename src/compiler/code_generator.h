@@ -345,8 +345,10 @@ private:
   bool m_scalarVariant;
   bool m_initListFirstElem;
 
+  public: void print(const char *msg, bool indent = true);
+
+ private:
   void print(const char *fmt, va_list ap);
-  void print(const char *msg, bool indent = true);
   void printSubstring(const char *start, int length);
   void printIndent();
   std::string getFormattedName(const std::string &file);
@@ -359,6 +361,8 @@ private:
                void()), stream.func
 #define cg_printf FLANN(cg,printf,"")
 #define m_cg_printf FLANN(m_cg,printf,"")
+#define cg_print FLANN(cg,print,"")
+#define m_cg_print FLANN(m_cg,print,"")
 #define cg_indentBegin FLANN(cg,indentBegin,"")
 #define m_cg_indentBegin FLANN(m_cg,indentBegin,"")
 #define cg_indentEnd FLANN(cg,indentEnd,"")

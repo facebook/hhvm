@@ -727,7 +727,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             else {
               cgCls.printf(", ");
             }
-            cgCls.printf(intfClassScope->getOriginalName().c_str());
+            cgCls.print(intfClassScope->getOriginalName().c_str());
           }
         }
       }

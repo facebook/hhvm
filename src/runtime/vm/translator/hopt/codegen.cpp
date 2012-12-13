@@ -1534,17 +1534,9 @@ Address CodeGenerator::cgRetVal(IRInstruction* inst) {
 
 Address CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   Address start = m_as.code.frontier;
-  SSATmp* retAddr = inst->getDst();
-  SSATmp* fp    = inst->getSrc(0);
-
-  auto retAddrReg = retAddr->getReg(0);
-  ASSERT(retAddrReg != InvalidReg);
-
-  auto fpReg = fp->getReg(0);
+  auto fpReg = inst->getSrc(0)->getReg(0);
   ASSERT(fpReg != InvalidReg);
-
-  m_as.load_reg64_disp_reg64(fpReg, AROFF(m_savedRip), retAddrReg);
-
+  m_as.push(fpReg[AROFF(m_savedRip)]);
   return start;
 }
 
@@ -1638,27 +1630,20 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   checkStack(sp, 1); // check return value
 }
 
-void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a,
-                                 PhysReg retAddrReg) {
-  a.    push   (retAddrReg);
+void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
   // call to a trace function
-  if (retAddrReg != rdx) {
-    a.  movq   (retAddrReg, rdx);
-  }
-  a.    movq   (rVmFp, rdi);
-  a.    movq   (rVmSp, rsi);
+  // ld return ip from native stack into rdx
+  a.    loadq(MemoryRef(DispReg(rsp)), rdx);
+  a.    movq (rVmFp, rdi);
+  a.    movq (rVmSp, rsi);
   // do the call; may use a trampoline
   m_tx64->emitCall(a, TCA(traceRet));
-  a.    pop    (retAddrReg);
 }
 
 Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* sp    = inst->getSrc(0);
   SSATmp* fp    = inst->getSrc(1);
-  SSATmp* retAddr = inst->getSrc(2);
-
-  auto retAddrReg = retAddr->getReg();
 
   // Make sure rVmFp and rVmSp are set appropriately
   if (sp->getReg() != rVmSp) {
@@ -1675,10 +1660,10 @@ Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitTraceRet(m_as, retAddrReg);
+    emitTraceRet(m_as);
   }
   // Return control to caller
-  m_as.jmp(r64(retAddrReg));
+  m_as.ret();
   m_as.ud2();
   return start;
 }

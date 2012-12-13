@@ -272,7 +272,7 @@ SSATmp* TraceBuilder::genLdVarEnv() {
 }
 
 SSATmp* TraceBuilder::genLdRetAddr() {
-  return genInstruction(LdRetAddr, Type::TCA, m_fpValue);
+  return genInstruction(LdRetAddr, Type::None, m_fpValue);
 }
 
 SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,

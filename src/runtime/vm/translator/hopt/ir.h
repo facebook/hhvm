@@ -193,7 +193,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   /* LdThisNc avoids check */                               \
   OPC(LdThisNc,          1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
   OPC(LdVarEnv,          1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdRetAddr,         1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(LdRetAddr,         1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdHome,            1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdConst,           1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
   OPC(DefConst,          1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \

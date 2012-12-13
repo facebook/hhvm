@@ -150,7 +150,7 @@ public:
 
 private:
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
-  void emitTraceRet(CodeGenerator::Asm& as, PhysReg retAddrReg);
+  void emitTraceRet(CodeGenerator::Asm& as);
   Address emitCheckStack(CodeGenerator::Asm& as, SSATmp* sp, uint32 numElems,
                          bool allocActRec);
   Address emitCheckCell(CodeGenerator::Asm& as,

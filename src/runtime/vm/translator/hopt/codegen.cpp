@@ -2872,7 +2872,7 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
   Address start   = m_as.code.frontier;
   SSATmp* actRec  = inst->getSrc(0);
   SSATmp* returnBcOffset = inst->getSrc(1);
-  uint32  numArgs = inst->getNumExtendedSrcs();
+  int32  numArgs = inst->getNumExtendedSrcs();
   ASSERT(numArgs > 0);
   SSATmp** args   = ((ExtendedInstruction*)inst)->getExtendedSrcs();
 
@@ -2883,7 +2883,7 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
   auto spReg = actRec->getReg();
   // put all outgoing arguments onto the VM stack
   int64 adjustment = (-(int64)numArgs) * sizeof(Cell);
-  for (uint32 i = 0; i < numArgs; i++) {
+  for (int32 i = 0; i < numArgs; i++) {
     cgStore(spReg, -(i+1) * sizeof(Cell), args[i]);
   }
   // store the return bytecode offset into the outgoing actrec
@@ -2907,7 +2907,10 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_lastMarker->getFunc(), m_lastMarker->getLabelId());
   bool isImmutable = (func->isConst() && func->getType() != Type::Null);
   const Func* funcd = isImmutable ? func->getConstValAsFunc() : NULL;
-  m_tx64->emitBindCallHelper(srcKey, funcd, numArgs, isImmutable);
+  int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
+  if (adjust) {
+    m_as.addq (adjust, rVmSp);
+  }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitCheckStack(m_as, inst->getDst(), 1, false);

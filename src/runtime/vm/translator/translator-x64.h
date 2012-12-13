@@ -897,8 +897,7 @@ private:
   void emitPopRetIntoActRec(Asm& a);
   void emitBox(DataType t, PhysReg rToBox);
   void emitUnboxTopOfStack(const NormalizedInstruction& ni);
-  int32_t emitBindCall(const Tracelet& t, const NormalizedInstruction &ni,
-                       Offset atCall, Offset after);
+  int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
   void emitCondJmp(const SrcKey &skTrue, const SrcKey &skFalse,
                    ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
@@ -935,8 +934,7 @@ private:
   void emitBindJmp(const SrcKey& dest);
   void emitBindCallHelper(SrcKey srcKey,
                           const Func* funcd,
-                          int numArgs,
-                          bool isImmutable);
+                          int numArgs);
   void emitIncCounter(TCA start, int cntOfs);
 
   void analyzeReqLit(Tracelet& t, NormalizedInstruction& i,

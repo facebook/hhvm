@@ -2291,40 +2291,43 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 }
 
 static bool
-isNativeImplCall(const NormalizedInstruction& ni) {
-  ASSERT(ni.op() == OpFCall);
-  int numArgs = ni.imm[0].u_IVA;
-  return ni.funcd && ni.funcd->isBuiltin() && numArgs == ni.funcd->numParams();
+isNativeImplCall(const Func* funcd, int numArgs) {
+  return funcd && funcd->isBuiltin() && numArgs == funcd->numParams();
 }
 
 int32_t // returns the amount by which rVmSp should be adjusted
-TranslatorX64::emitBindCall(const Tracelet& t,
-                            const NormalizedInstruction &ni,
-                            Offset atCall, Offset afterCall) {
-  int numArgs = ni.imm[0].u_IVA;
+TranslatorX64::emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs) {
   // If this is a call to a builtin and we don't need any argument
   // munging, we can skip the prologue system and do it inline.
-  if (isNativeImplCall(ni)) {
-    ASSERT(ni.funcd->numLocals() == ni.funcd->numParams());
-    ASSERT(ni.funcd->numIterators() == 0);
+  if (isNativeImplCall(funcd, numArgs)) {
+    StoreImmPatcher patchIP(a, (uint64_t)a.code.frontier, reg::rax,
+                            cellsToBytes(numArgs) + AROFF(m_savedRip),
+                            rVmSp);
+    ASSERT(funcd->numLocals() == funcd->numParams());
+    ASSERT(funcd->numIterators() == 0);
     emitLea(a, rVmSp, cellsToBytes(numArgs), rVmFp);
     emitCheckSurpriseFlagsEnter(true, Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.
-    return emitNativeImpl(ni.funcd, false /* don't jump to return */);
+    auto retval = emitNativeImpl(funcd, false /* don't jump to return */);
+    patchIP.patch(uint64(a.code.frontier));
+    return retval;
   }
-
+  if (debug) {
+    a. store_imm64_disp_reg64(0xba5eba11acc01ade,
+                              cellsToBytes(numArgs) + AROFF(m_savedRip),
+                              rVmSp);
+  }
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
   emitLea(a, rVmSp, cellsToBytes(numArgs), rStashedAR);
-  emitBindCallHelper(ni.source, ni.funcd, numArgs, (bool)ni.funcd);
+  emitBindCallHelper(srcKey, funcd, numArgs);
   return 0;
 }
 
 void
 TranslatorX64::emitBindCallHelper(SrcKey srcKey,
                                   const Func* funcd,
-                                  int numArgs,
-                                  bool isImmutable) {
+                                  int numArgs) {
   // Whatever prologue we're branching to will check at runtime that we
   // went to the right Func*, correcting if necessary. We treat the first
   // Func we encounter as a decent prediction. Make space to burn in a
@@ -2343,7 +2346,7 @@ TranslatorX64::emitBindCallHelper(SrcKey srcKey,
   req->m_toSmash = toSmash;
   req->m_nArgs = numArgs;
   req->m_sourceInstr = srcKey;
-  req->m_isImmutable = isImmutable;
+  req->m_isImmutable = (bool)funcd;
 
   return;
 }
@@ -9632,7 +9635,6 @@ void
 TranslatorX64::translateFCall(const Tracelet& t,
                               const NormalizedInstruction& i) {
   int numArgs = i.imm[0].u_IVA;
-  const Opcode* atCall = i.pc();
   const Opcode* after = curUnit()->at(nextSrcKey(t, i).offset());
   const Func* srcFunc = curFunc();
 
@@ -9651,28 +9653,14 @@ TranslatorX64::translateFCall(const Tracelet& t,
   // offset.
   ASSERT(sizeof(Cell) == 1 << 4);
 
-  boost::optional<StoreImmPatcher> maybeStoreImm;
-  if (isNativeImplCall(i)) {
-    maybeStoreImm = StoreImmPatcher(a, (uint64_t)a.code.frontier, reg::rax,
-                                    cellsToBytes(numArgs) + AROFF(m_savedRip),
-                                    rVmSp);
-  } else if (debug) {
-    a. store_imm64_disp_reg64(0xba5eba11acc01ade,
-                              cellsToBytes(numArgs) + AROFF(m_savedRip),
-                              rVmSp);
-  }
   // The kooky offset here a) gets us to the current ActRec,
   // and b) accesses m_soff.
   int32 callOffsetInUnit = srcFunc->unit()->offsetOf(after - srcFunc->base());
   a.    storel  (callOffsetInUnit,
                  rVmSp[cellsToBytes(numArgs) + AROFF(m_soff)]);
 
-  int32_t adjust = emitBindCall(t, i,
-                                curUnit()->offsetOf(atCall),
-                                curUnit()->offsetOf(after));
-  if (isNativeImplCall(i)) {
-    maybeStoreImm->patch(uint64(a.code.frontier));
-  }
+  int32_t adjust = emitBindCall(i.source, i.funcd, numArgs);
+
   if (i.breaksTracelet) {
     if (adjust) {
       a.    addq (adjust, rVmSp);

@@ -113,7 +113,9 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 //     error (has an implicit exit edge)
 #define IR_OPCODES                         \
   /* checks */                             \
-  OPC(GuardType,         1,  1,  1,  0,  0,  0,  0,  0,  0,  0)               \
+  OPC(GuardType,         1,  1,  1,  0,  0,  0,  0,  0,  0,  0)         \
+  OPC(GuardLoc,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0)         \
+  OPC(GuardStk,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0)         \
   OPC(GuardRefs,         0,  1,  1,  0,  0,  0,  0,  0,  0,  0)/* XXX validate */  \
                                            \
   /* arith ops (integer) */                \

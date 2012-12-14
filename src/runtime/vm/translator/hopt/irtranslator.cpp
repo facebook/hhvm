@@ -179,6 +179,12 @@ TranslatorX64::irCheckType(X64Assembler& a,
   return;
 }
 
+void
+TranslatorX64::irEmitLoadDeps() {
+  ASSERT(m_useHHIR);
+  m_hhbcTrans->emitLoadDeps();
+}
+
 
 void
 TranslatorX64::irTranslateBinaryArithOp(const Tracelet& t,

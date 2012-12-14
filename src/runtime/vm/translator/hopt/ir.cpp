@@ -235,6 +235,9 @@ void IRInstruction::setExtendedSrc(uint32 i, SSATmp* newSrc) {
 
 void IRInstruction::printOpcode(std::ostream& ostream) {
   ostream << opcodeName(m_op);
+  if (m_op == GuardLoc || m_op == GuardStk) {
+    ostream << "<" << Type::Strings[m_type] << ">";
+  }
 }
 
 void IRInstruction::printDst(std::ostream& ostream) {

@@ -409,15 +409,19 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     }
   }
 
-  // If main trace starts with guards, have them generate a patchable jump to the anchor trace
+  // If main trace starts with guards, have them generate a patchable jump
+  // to the anchor trace
   if (RuntimeOption::EvalHHIRDirectExit) {
     LabelInstruction* guardLabel = NULL;
     IRInstruction::List& instList = trace->getInstructionList();
     // Check the beginning of the trace for guards
-    for (IRInstruction::Iterator it = instList.begin(); it != instList.end(); ++it) {
+    for (IRInstruction::Iterator it = instList.begin(); it != instList.end();
+         ++it) {
       IRInstruction* inst = *it;
       Opcode opc = inst->getOpcode();
-      if ((opc == LdLoc || opc == LdStack) && inst->getLabel()) {
+      if (inst->getLabel() &&
+          (opc == LdLoc    || opc == LdStack ||
+           opc == GuardLoc || opc == GuardStk)) {
         LabelInstruction* exitLabel = inst->getLabel();
         // Find the GuardFailure's label and confirm this branches there
         if (guardLabel == NULL) {

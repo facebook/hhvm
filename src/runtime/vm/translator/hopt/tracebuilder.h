@@ -112,6 +112,8 @@ public:
                          const StringData* magicName);
   SSATmp* genAllocActRec(); // creates an uninitialized actrec
   SSATmp* genFreeActRec();
+  void    genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace);
+  void    genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace);
   SSATmp* genGuardType(SSATmp* src, Type::Tag type, Trace* nextTrace);
   void    genGuardRefs(SSATmp* funcPtr,
                        SSATmp* nParams,
@@ -243,6 +245,8 @@ public:
   SSATmp* getLocalValue(int id);
   Type::Tag getLocalType(int id);
   void setLocalValue(int id, SSATmp* value);
+  void setLocalType(int id, Type::Tag type);
+
   void finalizeTrace();
 
   template<Type::Tag T>

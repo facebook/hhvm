@@ -809,6 +809,8 @@ private:
     SrcRec& fail);
   void irCheckType(Asm&, const Location& l, const RuntimeType& rtt,
                    SrcRec& fail);
+  void irEmitLoadDeps();
+
   void checkRefs(Asm&, const SrcKey&, const RefDeps&, SrcRec&);
 
   void emitDecRefThis(const ScratchReg& tmpReg);

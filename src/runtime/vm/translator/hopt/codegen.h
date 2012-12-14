@@ -102,6 +102,12 @@ public:
                  LabelInstruction* label,
                  IRInstruction* inst = NULL);
 
+  Address cgGuardType(Type::Tag         type,
+                      PhysReg           baseReg,
+                      int64_t           offset,
+                      LabelInstruction* label,
+                      IRInstruction*    instr);
+
   Address cgStMemWork(IRInstruction* inst, bool genStoreType);
   Address cgStRefWork(IRInstruction* inst, bool genStoreType);
   Address cgStLocWork(IRInstruction* inst, bool genStoreType);

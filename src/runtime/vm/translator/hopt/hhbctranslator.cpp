@@ -1425,7 +1425,8 @@ Trace* HhbcTranslator::guardTypeLocal(uint32 localIndex,
   if (nextTrace == NULL) {
     nextTrace = getGuardExit();
   }
-  m_tb.genLdLoc(localIndex, type, nextTrace);
+  m_tb.genGuardLoc(localIndex, type, nextTrace);
+  m_typeGuards.push_back(TypeGuard(TypeGuard::Local, localIndex, type));
   return nextTrace;
 }
 
@@ -1438,6 +1439,8 @@ void HhbcTranslator::checkTypeLocal(uint32 localIndex, Type::Tag type) {
 }
 
 void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type::Tag type) {
+  // Type assertions are currently implemented as loads. If the value doesn't
+  // get used, DCE gets rid of it.
   m_tb.genLdLoc(localIndex, type, NULL);
 }
 
@@ -1462,7 +1465,9 @@ Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
   if (nextTrace == NULL) {
     nextTrace = getGuardExit();
   }
-  checkTypeStackAux(stackIndex, type, nextTrace);
+  m_tb.genGuardStk(stackIndex, type, nextTrace);
+  m_typeGuards.push_back(TypeGuard(TypeGuard::Stack, stackIndex, type));
+
   return nextTrace;
 }
 
@@ -1474,10 +1479,29 @@ void HhbcTranslator::checkTypeStack(uint32 stackIndex,
 }
 
 void HhbcTranslator::assertTypeStack(uint32 stackIndex, Type::Tag type) {
+  // Type assertions are currently implemented as loads. If the value doesn't
+  // get used, DCE gets rid of it.
+  loadStack(stackIndex, type);
+}
+
+void HhbcTranslator::loadStack(uint32 stackIndex, Type::Tag type) {
   ASSERT(stackIndex != (uint32)-1);
   // top() generates the LdStack if necessary, and sets 'type' accordingly
   SSATmp* tmp = top(type, stackIndex);
   replace(stackIndex, tmp);
+}
+
+void HhbcTranslator::emitLoadDeps() {
+  for (auto guard : m_typeGuards) {
+    uint32   index = guard.getIndex();
+    Type::Tag type = guard.getType();
+
+    if (guard.getKind() == TypeGuard::Local) {
+      m_tb.genLdLoc(index, type, NULL);
+    } else {
+      loadStack(index, type);
+    }
+  }
 }
 
 Trace* HhbcTranslator::guardRefs(int64               entryArDelta,

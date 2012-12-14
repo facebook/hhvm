@@ -3223,29 +3223,8 @@ Address CodeGenerator::cgLoadTypedValue(Type::Tag type,
   }
 
   // Check type if needed
-  if (label && type != Type::Gen) {
-    ConditionCode cc;
-    switch (type) {
-      case Type::Cell : {
-        m_as.cmp_imm32_disp_reg32(HPHP::KindOfRef, off + TVOFF(m_type), base);
-        cc = CC_GE;
-        break;
-      }
-      case Type::Uncounted : {
-        m_as.cmp_imm32_disp_reg32(HPHP::KindOfStaticString,
-                                  off + TVOFF(m_type), base);
-        cc = CC_G;
-        break;
-      }
-      case Type::UncountedInit : {
-        m_as.test_imm32_disp_reg32(HPHP::KindOfUncountedInitBit,
-                                   off + TVOFF(m_type), base);
-        cc = CC_Z;
-        break;
-      }
-      default : not_reached();
-    }
-    emitGuardOrFwdJcc(inst, cc, label);
+  if (label) {
+    cgGuardType(type, base, off, label, inst);
   }
 
   // Load type if it's not dead
@@ -3371,18 +3350,7 @@ Address CodeGenerator::cgLoad(Type::Tag type,
     return cgLoadTypedValue(type, dst, base, off, label, inst);
   }
   if (label != NULL && type != Type::Home) {
-    // generate a guard for the type
-    // see Translator.cpp checkType
-    DataType dataType = Type::toDataType(type);
-    ConditionCode cc;
-    if (IS_STRING_TYPE(dataType)) {
-      m_as.test_imm32_disp_reg32(KindOfStringBit, off + TVOFF(m_type), base);
-      cc = CC_Z;
-    } else {
-      m_as.cmp_imm32_disp_reg32(dataType, off + TVOFF(m_type), base);
-      cc = CC_NE;
-    }
-    emitGuardOrFwdJcc(inst, cc, label);
+    cgGuardType(type, base, off, label, inst);
   }
   if (type == Type::Uninit || type == Type::Null) {
     return start; // these are constants
@@ -3473,9 +3441,9 @@ static void getLocalRegOffset(SSATmp* src, PhysReg& reg, int64& off) {
 
 Address CodeGenerator::cgLdLoc(IRInstruction* inst) {
   Address start = m_as.code.frontier;
-  Type::Tag         type = inst->getType();
-  SSATmp*           dst  = inst->getDst();
-  LabelInstruction* label     = inst->getLabel();
+  Type::Tag         type  = inst->getType();
+  SSATmp*           dst   = inst->getDst();
+  LabelInstruction* label = inst->getLabel();
 
   PhysReg fpReg;
   int64 offset;
@@ -3519,6 +3487,83 @@ Address CodeGenerator::cgLdStack(IRInstruction* inst) {
                 type == Type::Cell ? NULL : label,
                 inst);
 }
+
+Address CodeGenerator::cgGuardType(Type::Tag         type,
+                                   PhysReg           baseReg,
+                                   int64_t           offset,
+                                   LabelInstruction* label,
+                                   IRInstruction*    inst) {
+  ASSERT(label);
+  Address start = m_as.code.frontier;
+  int64_t typeOffset = offset + TVOFF(m_type);
+  ConditionCode cc;
+
+  switch (type) {
+    case Type::StaticStr     :
+    case Type::Str           : {
+      m_as.test_imm32_disp_reg32(KindOfStringBit,        typeOffset, baseReg);
+      cc = CC_Z;
+      break;
+    }
+    case Type::UncountedInit : {
+      m_as.test_imm32_disp_reg32(KindOfUncountedInitBit, typeOffset, baseReg);
+      cc = CC_Z;
+      break;
+    }
+    case Type::Uncounted     : {
+      m_as.cmp_imm32_disp_reg32(KindOfRefCountThreshold, typeOffset, baseReg);
+      cc = CC_G;
+      break;
+    }
+    case Type::Cell          : {
+      m_as.cmp_imm32_disp_reg32(KindOfRef,               typeOffset, baseReg);
+      cc = CC_GE;
+      break;
+    }
+    case Type::Gen : {
+      return start; // nothing to check
+    }
+    default: {
+      DataType dataType = Type::toDataType(type);
+      ASSERT(dataType >= KindOfUninit);
+      m_as.cmp_imm32_disp_reg32(dataType,                typeOffset, baseReg);
+      cc = CC_NZ;
+      break;
+    }
+  }
+
+  emitGuardOrFwdJcc(inst, cc, label);
+
+  return start;
+}
+
+Address CodeGenerator::cgGuardStk(IRInstruction* inst) {
+  Type::Tag          type = inst->getType();
+  SSATmp*              sp = inst->getSrc(0);
+  SSATmp*           index = inst->getSrc(1);
+  LabelInstruction* label = inst->getLabel();
+
+  ASSERT(index->isConst());
+
+  return cgGuardType(type,
+                     sp->getReg(0),
+                     index->getConstValAsInt() * sizeof(Cell),
+                     label,
+                     inst);
+}
+
+Address CodeGenerator::cgGuardLoc(IRInstruction* inst) {
+  Type::Tag          type = inst->getType();
+  SSATmp*           index = inst->getSrc(0);
+  LabelInstruction* label = inst->getLabel();
+  PhysReg fpReg;
+  int64 offset;
+  getLocalRegOffset(index, fpReg, offset);
+  ASSERT(fpReg == HPHP::VM::Transl::reg::rbp);
+
+  return cgGuardType(type, fpReg, offset, label, inst);
+}
+
 
 Address CodeGenerator::cgGuardType(IRInstruction* inst) {
   Address   start = m_as.code.frontier;

@@ -207,6 +207,8 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
     case DecRef:
     case DecRefNZ:
     case GuardType:
+    case GuardLoc:
+    case GuardStk:
     case LdThis:
     case LdLoc:
     case LdMemNR:

@@ -655,6 +655,16 @@ Trace* TraceBuilder::genExitOnVarEnv(Trace* targetTrace) {
   return targetTrace;
 }
 
+void TraceBuilder::genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace) {
+  genInstruction(GuardLoc, type, genLdHome(id), exitTrace);
+  setLocalType(id, type);
+}
+
+void TraceBuilder::genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace) {
+  genInstruction(GuardStk, type, m_spValue, genDefConst<int64>(id), exitTrace);
+}
+
+
 SSATmp* TraceBuilder::genGuardType(SSATmp* src,
                                    Type::Tag type,
                                    Trace* target) {
@@ -1638,6 +1648,18 @@ void TraceBuilder::setLocalValue(int id, SSATmp* value) {
   }
   m_localValues[id] = value;
   m_localTypes[id] = value->getType();
+}
+
+void TraceBuilder::setLocalType(int id, Type::Tag type) {
+  if (id == -1) {
+    return;
+  }
+  if (id >= (int)m_localValues.size()) {
+    m_localValues.resize(id + 1);
+    m_localTypes.resize(id + 1, Type::None);
+  }
+  m_localValues[id] = NULL;
+  m_localTypes[id] = type;
 }
 
 // Needs to be called if a local escapes as a by-ref

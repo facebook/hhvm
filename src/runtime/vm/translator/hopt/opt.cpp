@@ -34,7 +34,9 @@ void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
         Type::isStaticallyKnown(dst->getType()) &&
         Type::isRefCounted(dst->getType())) {
       IRInstruction assertInst(AssertRefCount, Type::None, dst);
-      instructions.insert(it, assertInst.clone(factory));
+      auto toInsert = assertInst.clone(factory);
+      toInsert->setParent(trace);
+      instructions.insert(it, toInsert);
     }
   }
 }

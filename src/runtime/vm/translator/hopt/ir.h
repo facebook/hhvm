@@ -1397,7 +1397,6 @@ private:
 };
 
 void optimizeTrace(Trace*, IRFactory* irFactory);
-void eliminateDeadCode(Trace*);
 void numberInstructions(Trace*);
 uint32 numberInstructions(Trace* trace,
                           uint32 nextId,

@@ -476,18 +476,17 @@ private:
                 unsigned& iInd, LazyScratchReg& rBase);
   void emitMPost(const Tracelet& t, const NormalizedInstruction& ni,
                  const MInstrInfo& mii);
+  void translateMInstr(Op op);
+  void emitFinalMOp(const Tracelet& t, const NormalizedInstruction& ni,
+                    const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                    LazyScratchReg& rBase);
 #define MII(instr, attrs, bS, iS, vC, fN) \
   void emit##instr##Elem(const Tracelet& t, const NormalizedInstruction& ni, \
                          const MInstrInfo& mii, unsigned mInd, unsigned iInd, \
                          PhysReg rBase); \
   void emit##instr##Prop(const Tracelet& t, const NormalizedInstruction& ni, \
                          const MInstrInfo& mii, unsigned mInd, \
-                         unsigned iInd, LazyScratchReg& rBase); \
-  void emitFinal##instr##MOp(const Tracelet& t, \
-                             const NormalizedInstruction& ni, \
-                             const MInstrInfo& mii, \
-                             unsigned mInd, unsigned iInd, \
-                             LazyScratchReg& rBase);
+                         unsigned iInd, LazyScratchReg& rBase);
 MINSTRS
 #undef MII
 

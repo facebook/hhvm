@@ -232,6 +232,7 @@ struct MInstrInfo {
   unsigned   m_valCount;
   bool       m_newElem;
   bool       m_finalGet;
+  const char* m_name;
 
   MInstr instr() const {
     return m_instr;
@@ -258,6 +259,10 @@ struct MInstrInfo {
   bool finalGet() const {
     return m_finalGet;
   }
+
+  const char* name() const {
+    return m_name;
+  }
 };
 
 static const MInstrInfo mInstrInfo[] = {
@@ -275,7 +280,8 @@ static const MInstrInfo mInstrInfo[] = {
     MInstrAttr((attrs) & MIA_intermediate), \
     MInstrAttr((attrs) & MIA_intermediate), \
     MInstrAttr((attrs) & MIA_final)}, \
-   unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get)},
+   unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get), \
+   #instr},
   MINSTRS
 #undef MII
 };

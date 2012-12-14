@@ -140,19 +140,6 @@ static const PhysReg unsafe_rsp = rsp;
      R(rVal),         \
      A(val.location))
 
-#define TRANSLATE_MINSTR_GENERIC(instr, t, ni) do {                   \
-  ASSERT(RuntimeOption::EvalJitMGeneric);                             \
-  SKTRACE(2, ni.source, "%s\n", __func__);                            \
-  m_vecState = new MVecTransState();                                  \
-  Deleter<MVecTransState> stateDeleter(&m_vecState);                  \
-  const MInstrInfo& mii = getMInstrInfo(Op##instr##M);                \
-  unsigned mInd, iInd;                                                \
-  LazyScratchReg rBase(m_regMap);                                     \
-  emitMPre((t), (ni), mii, mInd, iInd, rBase);              \
-  emitFinal##instr##MOp((t), (ni), mii, mInd, iInd, rBase); \
-  emitMPost((t), (ni), mii);                                          \
-} while (0)
-
 static const MInstrAttr Warn = MIA_warn;
 static const MInstrAttr Unset = MIA_unset;
 static const MInstrAttr Reffy = MIA_reffy;
@@ -2440,31 +2427,52 @@ void TranslatorX64::emitNotSuppNewElem(const Tracelet& t,
   not_reached();
 }
 
-#define MII(instr, attrs, bS, iS, vC, fN) \
-void TranslatorX64::emitFinal##instr##MOp(const Tracelet& t, \
-                                          const NormalizedInstruction& ni, \
-                                          const MInstrInfo& mii, \
-                                          unsigned mInd, \
-                                          unsigned iInd, \
-                                          LazyScratchReg& rBase) { \
-  switch (ni.immVecM[mInd]) { \
-  case MEC: case MEL: case MET: case MEI: \
-    ASSERT(!m_vecState->isKnown()); \
-    emit##instr##Elem(t, ni, mii, mInd, iInd, r(rBase)); \
-    break; \
-  case MPC: case MPL: case MPT: \
-    emit##instr##Prop(t, ni, mii, mInd, iInd, rBase); \
-    break; \
-  case MW: \
-    ASSERT(!m_vecState->isKnown()); \
-    ASSERT((attrs) & MIA_final); \
-    emit##fN(t, ni, mii, mInd, iInd, r(rBase)); \
-    break; \
-  default: not_reached(); \
-  } \
+void TranslatorX64::emitFinalMOp(const Tracelet& t,
+                                 const NormalizedInstruction& ni,
+                                 const MInstrInfo& mii,
+                                 unsigned mInd,
+                                 unsigned iInd,
+                                 LazyScratchReg& rBase) {
+  typedef void (TranslatorX64::*RegOp)(const Tracelet&,
+                                       const NormalizedInstruction&,
+                                       const MInstrInfo&, unsigned, unsigned,
+                                       PhysReg rBase);
+  typedef void (TranslatorX64::*ScratchOp)(const Tracelet&,
+                                           const NormalizedInstruction&,
+                                           const MInstrInfo&, unsigned,
+                                           unsigned, LazyScratchReg& rBase);
+
+  switch (ni.immVecM[mInd]) {
+  case MEC: case MEL: case MET: case MEI:
+    ASSERT(!m_vecState->isKnown());
+    static RegOp elemOps[] = {
+#   define MII(instr, ...) &TranslatorX64::emit##instr##Elem,
+    MINSTRS
+#   undef MII
+    };
+    (this->*elemOps[mii.instr()])(t, ni, mii, mInd, iInd, r(rBase));
+    break;
+  case MPC: case MPL: case MPT:
+    static ScratchOp propOps[] = {
+#   define MII(instr, ...) &TranslatorX64::emit##instr##Prop,
+    MINSTRS
+#   undef MII
+    };
+    (this->*propOps[mii.instr()])(t, ni, mii, mInd, iInd, rBase);
+    break;
+  case MW:
+    ASSERT(!m_vecState->isKnown());
+    ASSERT(mii.getAttr(MW) & MIA_final);
+    static RegOp newOp[] = {
+#   define MII(instr, attrs, bS, iS, vC, fN) &TranslatorX64::emit##fN,
+    MINSTRS
+#   undef MII
+    };
+    (this->*newOp[mii.instr()])(t, ni, mii, mInd, iInd, r(rBase));
+    break;
+  default: not_reached();
+  }
 }
-MINSTRS
-#undef MII
 
 bool TranslatorX64::needMInstrCtx(const Tracelet& t,
                                   const NormalizedInstruction& ni) const {
@@ -2942,7 +2950,7 @@ TranslatorX64::translateCGetM(const Tracelet& t,
     return;
   }
   Stats::emitInc(a, Stats::Tx64_CGetMGeneric);
-  TRANSLATE_MINSTR_GENERIC(CGet, t, i);
+  translateMInstr(OpCGetM);
 }
 
 void TranslatorX64::analyzeVGetM(Tracelet& t, NormalizedInstruction& ni) {
@@ -2956,7 +2964,7 @@ void TranslatorX64::analyzeVGetM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateVGetM(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
-  TRANSLATE_MINSTR_GENERIC(VGet, t, ni);
+  translateMInstr(OpVGetM);
 }
 
 static bool isSupportedIssetMFast(const NormalizedInstruction& ni) {
@@ -3029,7 +3037,7 @@ void TranslatorX64::translateIssetM(const Tracelet& t,
     translateIssetMFast(t, ni);
   } else {
     ASSERT(ni.isSupported());
-    TRANSLATE_MINSTR_GENERIC(Isset, t, ni);
+    translateMInstr(OpIssetM);
   }
 }
 
@@ -3044,7 +3052,7 @@ void TranslatorX64::analyzeEmptyM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateEmptyM(const Tracelet& t,
                                     const NormalizedInstruction& ni) {
-  TRANSLATE_MINSTR_GENERIC(Empty, t, ni);
+  translateMInstr(OpEmptyM);
 }
 
 /*
@@ -3242,6 +3250,22 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   }
 }
 
+void TranslatorX64::translateMInstr(Op op) {
+  ASSERT(RuntimeOption::EvalJitMGeneric);
+  const MInstrInfo& mii = getMInstrInfo(op);
+  const Tracelet& t = *m_curTrace;
+  const NormalizedInstruction& ni = *m_curNI;
+
+  SKTRACE(2, ni.source, "translate%sM\n", mii.name());
+  m_vecState = new MVecTransState();
+  Deleter<MVecTransState> stateDeleter(&m_vecState);
+  unsigned mInd, iInd;
+  LazyScratchReg rBase(m_regMap);
+  emitMPre(t, ni, mii, mInd, iInd, rBase);
+  emitFinalMOp(t, ni, mii, mInd, iInd, rBase);
+  emitMPost(t, ni, mii);
+}
+
 void
 TranslatorX64::translateSetM(const Tracelet& t,
                              const NormalizedInstruction& i) {
@@ -3249,7 +3273,7 @@ TranslatorX64::translateSetM(const Tracelet& t,
     translateSetMArray(t, i);
     return;
   }
-  TRANSLATE_MINSTR_GENERIC(Set, t, i);
+  translateMInstr(OpSetM);
 }
 
 void TranslatorX64::analyzeSetOpM(Tracelet& t, NormalizedInstruction& ni) {
@@ -3263,7 +3287,7 @@ void TranslatorX64::analyzeSetOpM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateSetOpM(const Tracelet& t,
                                     const NormalizedInstruction& ni) {
-  TRANSLATE_MINSTR_GENERIC(SetOp, t, ni);
+  translateMInstr(OpSetOpM);
 }
 
 void TranslatorX64::analyzeIncDecM(Tracelet& t, NormalizedInstruction& ni) {
@@ -3277,7 +3301,7 @@ void TranslatorX64::analyzeIncDecM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateIncDecM(const Tracelet& t,
                                      const NormalizedInstruction& ni) {
-  TRANSLATE_MINSTR_GENERIC(IncDec, t, ni);
+  translateMInstr(OpIncDecM);
 }
 
 void
@@ -3293,7 +3317,7 @@ TranslatorX64::analyzeUnsetM(Tracelet& t, NormalizedInstruction& ni) {
 void
 TranslatorX64::translateUnsetM(const Tracelet& t,
                                const NormalizedInstruction& ni) {
-  TRANSLATE_MINSTR_GENERIC(Unset, t, ni);
+  translateMInstr(OpUnsetM);
 }
 
 void TranslatorX64::analyzeBindM(Tracelet& t, NormalizedInstruction& ni) {
@@ -3307,7 +3331,7 @@ void TranslatorX64::analyzeBindM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateBindM(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
-  TRANSLATE_MINSTR_GENERIC(Bind, t, ni);
+  translateMInstr(OpBindM);
 }
 
 void

@@ -3624,12 +3624,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           bool hasKey = (bool)key;
           if (hasKey) {
             visit(key);
-            emitConvertToCell(e);
+            emitConvertToCellOrLoc(e);
           }
           visit(ap->getValue());
           if (ap->isRef()) {
             emitConvertToVar(e);
             if (hasKey) {
+              emitConvertSecondToCell(e);
               e.AddElemV();
             } else {
               e.AddNewElemV();
@@ -3637,6 +3638,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           } else {
             emitConvertToCell(e);
             if (hasKey) {
+              emitConvertSecondToCell(e);
               e.AddElemC();
             } else {
               e.AddNewElemC();

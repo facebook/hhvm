@@ -16003,6 +16003,14 @@ bool TestCodeRun::TestEvalOrder() {
        "$a = 'a'; $r = $a++ . $a++; var_dump($r);"
        "$a = 'a'; $b = 'b'; $r = $a . foo() . $b; var_dump($r);"
        "$a = 'a'; $b = 'b'; $r = $a . (foo() . $b); var_dump($r);");
+
+  MVCR("<?php "
+       "function test($x) {"
+       "  $a = array($a => $x[$a = 'foo']);"
+       "  return $a;"
+       "}"
+       "var_dump(test(array('foo' => 5)));");
+
   return true;
 }
 

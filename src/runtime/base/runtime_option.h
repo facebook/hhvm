@@ -418,6 +418,7 @@ public:
   static bool EvalJitMGeneric;
   static bool EvalJitUseIR;
   static bool EvalIRPuntDontInterp;
+  static bool EvalHHIRGenericDtorHelper;
   static bool EvalHHIRMemOpt;
   static uint32 EvalHHIRNumFreeRegs;
   static bool EvalHHIREnableRematerialization;

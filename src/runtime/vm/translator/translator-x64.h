@@ -121,6 +121,7 @@ class TranslatorX64 : public Translator
   TCA                    m_retHelper;
   TCA                    m_genRetHelper;
   TCA                    m_stackOverflowHelper;
+  TCA                    m_irPopRHelper;
   TCA                    m_dtorGenericStub;
   TCA                    m_dtorGenericStubRegs;
   TCA                    m_dtorStubs[kDestrTableSize];

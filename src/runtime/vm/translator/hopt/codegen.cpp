@@ -2479,7 +2479,28 @@ Address CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 
   // Emit check for ref-counted type
   Address patchTypeCheck = cgCheckRefCountedType(baseReg, offset);
-
+  if (exit == NULL && RuntimeOption::EvalHHIRGenericDtorHelper) {
+    {
+      // This PhysRegSaverParity saves rdi redundantly if
+      // !m_curInst->getLiveOutRegs().contains(rdi), but its
+      // necessary to maintain stack alignment. We can do better
+      // by making the helpers adjust the stack for us in the cold
+      // path, which calls the destructor.
+      PhysRegSaverParity<0> regSaver(m_as, RegSet(rdi));
+      if (offset == 0 && baseReg == rVmSp) {
+        // Decref'ing top of vm stack, very likely a popR
+        m_tx64->emitCall(m_as, m_tx64->m_irPopRHelper);
+      } else {
+        m_as.lea(baseReg[offset], rdi);
+        m_tx64->emitCall(m_as, m_tx64->m_dtorGenericStub);
+      }
+      recordSyncPoint(m_as);
+    }
+    if (patchTypeCheck) {
+      m_as.patchJcc8(patchTypeCheck, m_as.code.frontier);
+    }
+    return start;
+  }
   // Load m_data into the scratch reg
   m_as.load_reg64_disp_reg64(baseReg, offset + TVOFF(m_data), scratchReg);
 
@@ -2539,7 +2560,6 @@ Address CodeGenerator::cgDecRefMem(Type::Tag type,
 
   return start;
 }
-
 
 Address patchLabel(LabelInstruction* label, Address labelAddr) {
   void* list = label->getPatchAddr();
@@ -2707,8 +2727,6 @@ Address CodeGenerator::cgAllocActRec6(SSATmp* dst,
   }
   return start;
 }
-
-
 
 Address CodeGenerator::cgAllocActRec5(SSATmp* dst,
                                       SSATmp* sp,

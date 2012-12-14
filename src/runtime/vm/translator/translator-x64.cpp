@@ -1140,6 +1140,10 @@ void TranslatorX64::emitGenericDecRefHelpers() {
 
   // m_dtorGenericStub just takes a pointer to the TypedValue in rdi.
   moveToAlign(a, kNonFallthroughAlign);
+  m_irPopRHelper = a.code.frontier;
+  // popR: Move top-of-stack pointer to rdi
+  emitMovRegReg(a, rVmSp, rdi);
+  // fall through
   m_dtorGenericStub = a.code.frontier;
   a.    loadl  (rdi[TVOFF(m_type)], r32(rScratch));
   a.    loadq  (rdi[TVOFF(m_data)], rdi);

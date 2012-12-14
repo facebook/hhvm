@@ -33539,6 +33539,9 @@ bool TestCodeRun::TestStrictMode() {
   // Silent type hint
   MVCRO("<?hh\nfunction foo(@int $x){ echo 1; } foo('hi');", "1");
 
+  // Combination of optional + generic
+  MVCRO("<?hh\nfunction foo(): Map<int, ?Vector<int>> {}", "");
+
   // Kitchen sink
   MVCRO("<?hh\n"
         "function vidx<X>(blarg<X> $list, int $idx):X {\n"

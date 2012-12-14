@@ -128,3 +128,4 @@ ENDIF()
 
 include_directories(${HPHP_HOME}/src)
 include_directories(${HPHP_HOME}/src/lib/system/gen)
+include_directories(${HPHP_HOME})

@@ -17,7 +17,7 @@
 #include <test/test_ext_mysql.h>
 #include <runtime/ext/ext_mysql.h>
 #include <runtime/base/runtime_option.h>
-#include <test/test_mysql_info.inc>
+#include <src/test/test_mysql_info.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

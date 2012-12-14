@@ -152,16 +152,17 @@ int generateSepExtCpp(const ProgramOptions &po, AnalysisResultPtr ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+extern "C" void compiler_hook_initialize();
+
 int main(int argc, char **argv) {
   try {
     Hdf empty;
     RuntimeOption::Load(empty);
 
     ProgramOptions po;
-    void (*compiler_hook_initialize)();
-    compiler_hook_initialize =
-      (void (*)())dlsym(NULL, "compiler_hook_initialize");
-    if (compiler_hook_initialize) compiler_hook_initialize();
+#ifdef FACEBOOK
+    compiler_hook_initialize();
+#endif
 
     int ret = prepareOptions(po, argc, argv);
     if (ret == 1) return 0; // --help

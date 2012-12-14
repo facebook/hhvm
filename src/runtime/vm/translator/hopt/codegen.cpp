@@ -4454,7 +4454,7 @@ void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
       }
       m_lastMarker = (LabelInstruction*)inst;
       if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
-        bcMap->push_back((TransBCMapping){m_lastMarker->getLabelId(),
+        bcMap->push_back((TransBCMapping){Offset(m_lastMarker->getLabelId()),
               m_as.code.frontier,
               m_astubs.code.frontier});
       }

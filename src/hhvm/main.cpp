@@ -17,9 +17,6 @@ namespace HPHP {
   extern int execute_program(int argc, char** argv);
   extern void (*g_vmProcessInit)();
   namespace VM { extern void ProcessInit(); }
-
-  // exported globally.
-  bool has_eval_support = true;
 }
 
 //////////////////////////////////////////////////////////////////////

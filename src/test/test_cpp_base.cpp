@@ -26,7 +26,7 @@
 #include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/ip_block_map.h>
-#include <test/test_mysql_info.inc>
+#include <src/test/test_mysql_info.h>
 #include <system/lib/systemlib.h>
 
 ///////////////////////////////////////////////////////////////////////////////

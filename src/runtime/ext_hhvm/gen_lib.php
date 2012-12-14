@@ -2,9 +2,12 @@
 
 // $scriptPath should be initialized by the script that includes this file
 global $scriptPath, $ext_hhvm_path;
+global $idl_path;
 
-require_once $ext_hhvm_path . "/xconstants.php";
-require_once $scriptPath . '/../../idl/base.php';
+# TODO(#1967102): clean up stuff relating to this
+#require_once $ext_hhvm_path . "/xconstants.php";
+
+require_once $idl_path . 'base.php';
 
 function generateMangleMap() {
   global $scriptPath, $extension_lib_path, $extensions;
@@ -23,8 +26,13 @@ function generateMangleMap() {
   // Build the mangle map, using c++filt to demangle the mangled names
   $mlist = '';
   global $current_object_file;
-  $mangled = explode("\n",
-    `readelf -s -W $current_object_file | grep FUNC.*GLOBAL`);
+  if (!file_exists($current_object_file)) {
+    echo "Object file doesn't exist! ($current_object_file)\n";
+    exit(1);
+  }
+  $raw_read_elf = shell_exec(
+    "readelf -s -W $current_object_file | grep FUNC.*GLOBAL");
+  $mangled = explode("\n", $raw_read_elf);
   for ($i = 0; $i < count($mangled); $i++) {
     $m = trim($mangled[$i]);
     if ($m == '') continue;
@@ -434,4 +442,10 @@ function emit_all_includes($out, $sepExtHeaders) {
     emit_include($out, $header);
   }
   fwrite($out, "\n");
+}
+
+function install_file($src, $dst) {
+  $dir = dirname($dst);
+  `mkdir -p $dir`;
+  `mv -f $src $dst`;
 }

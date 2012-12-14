@@ -19,7 +19,7 @@
 #include <runtime/ext/ext_pdo.h>
 #include <runtime/ext/ext_sqlite3.h>
 #include <runtime/ext/ext_file.h>
-#include <test/test_mysql_info.inc>
+#include <src/test/test_mysql_info.h>
 
 IMPLEMENT_SEP_EXTENSION_TEST(Pdo);
 ///////////////////////////////////////////////////////////////////////////////

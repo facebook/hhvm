@@ -25,7 +25,7 @@
 #include <compiler/option.h>
 #include <runtime/base/runtime_option.h>
 #include <pcre.h>
-#include <test/test_mysql_info.inc>
+#include <src/test/test_mysql_info.h>
 #include <runtime/ext/ext_file.h>
 
 using std::istringstream;

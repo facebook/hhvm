@@ -15,7 +15,7 @@
 */
 
 #include <test/test.h>
-#include <test/test_suite.inc>
+#include <test/test_base_suite.inc>
 #include <compiler/option.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,7 +83,7 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
 
   // fast unit tests
   if (set != "TestExt") {
-#include <test/test_fast.inc>
+#include <test/test_base_fast.inc>
   }
   if (set == "QuickTests") {
     return;

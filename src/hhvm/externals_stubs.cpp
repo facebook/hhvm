@@ -125,6 +125,8 @@ const char *g_paramrtti_map[] = {};
 const char *g_source_root = "";
 const char *g_source_info[] = {};
 
+bool has_eval_support = true;
+
 //////////////////////////////////////////////////////////////////////
 
 }

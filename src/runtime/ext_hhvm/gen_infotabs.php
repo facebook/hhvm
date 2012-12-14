@@ -9,14 +9,19 @@ global $scriptPath, $outputPath, $extension_src_path;
 global $extension_lib_path, $extensions, $lib_dir;
 global $extra_idl;
 $scriptPath = dirname(__FILE__);
+if (getenv("PROJECT_ROOT")) {
+  $idl_path = getenv("PROJECT_ROOT") . "/src/idl/";
+} else {
+  $idl_path = $scriptPath . "../../idl/";
+}
 $output_file = $argv[1];
 $ext_hhvm_path = $argv[2];
-$lib_dir = $argv[3];
+$lib_dir = $argv[3]; ## XXX UNUSED
 $extension_src_path = $argv[4];
 $extension_lib_path = $argv[5];
 $extensions = array();
 $extra_idl = array();
-foreach (array_slice($argv, 6) as $a) {
+foreach (array_slice($argv, 7) as $a) {
   if (preg_match('/\.idl.php$/', $a)) {
     $extra_idl[] = $a;
   } else {
@@ -29,13 +34,13 @@ require_once "gen_lib.php";
 function main() {
   global $scriptPath, $output_file, $extension_src_path;
   global $extension_lib_path, $extensions;
+  global $idl_path;
 
   $ext_func_info = array();
   $ext_class_info = array();
   $mangleMap = array();
-  parseIDLForFunctions($ext_func_info, $mangleMap,
-                       $scriptPath . '/../../idl/');
-  parseIDLForMethods($ext_class_info, $mangleMap, $scriptPath . '/../../idl/');
+  parseIDLForFunctions($ext_func_info, $mangleMap, $idl_path);
+  parseIDLForMethods($ext_class_info, $mangleMap, $idl_path);
   $sepExtDirs = getSepExtDirs($extension_src_path, $extensions);
   $sepExtHeaders = getSepExtHeaders($extension_src_path, $extensions);
   foreach ($sepExtDirs as $dir) {
@@ -125,7 +130,7 @@ function main() {
 
     fclose($outfile);
     $outfile = null;
-    `mv -f $outfile_tempnam $output_file`;
+    install_file($outfile_tempnam, $output_file);
   } catch (Exception $e) {
     if ($outfile) fclose($outfile);
     if ($outfile_tempnam) `rm -rf $outfile_tempnam`;

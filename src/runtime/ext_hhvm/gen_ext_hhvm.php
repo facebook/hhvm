@@ -12,9 +12,14 @@ global $scriptPath, $outputPath, $extension_src_path;
 global $extension_lib_path, $extensions, $lib_dir;
 global $extra_idl;
 $scriptPath = dirname(__FILE__);
+if (getenv("PROJECT_ROOT")) {
+  $idl_path = getenv("PROJECT_ROOT") . "/src/idl/";
+} else {
+  $idl_path = $scriptPath . "../../idl/";
+}
 $output_file = $argv[1];
 $ext_hhvm_path = $argv[2];
-$lib_dir = $argv[3];
+$lib_dir = $argv[3]; ## XXX unused
 $extension_src_path = $argv[4];
 $extension_lib_path = $argv[5];
 $current_object_file = $argv[6];
@@ -685,13 +690,14 @@ function emit_ctor_helper($out, $cname) {
 function phase2() {
   global $scriptPath, $output_file, $extension_src_path;
   global $extension_lib_path, $extensions;
+  global $idl_path;
 
   $ext_func_info = array();
   $ext_class_info = array();
   $mangleMap = generateMangleMap();
   parseIDLForFunctions($ext_func_info, $mangleMap,
-                       $scriptPath . '/../../idl/', 0);
-  parseIDLForMethods($ext_class_info, $mangleMap, $scriptPath . '/../../idl/');
+                       $idl_path, 0);
+  parseIDLForMethods($ext_class_info, $mangleMap, $idl_path);
   $sepExtDirs = getSepExtDirs($extension_src_path, $extensions);
   $sepExtHeaders = getSepExtHeaders($extension_src_path, $extensions);
   foreach ($sepExtDirs as $dir) {
@@ -958,12 +964,12 @@ function phase2() {
 
     fclose($ext_hhvm_cpp);
     $ext_hhvm_cpp = null;
-    `mv -f $ext_hhvm_cpp_tempnam $output_file`;
+    install_file($ext_hhvm_cpp_tempnam, $output_file);
 
     fwrite($ext_hhvm_header, "\n} // !HPHP\n\n");
     fclose($ext_hhvm_header);
     $ext_hhvm_header = null;
-    `mv -f $ext_hhvm_header_tempnam $output_file_header`;
+    install_file($ext_hhvm_header_tempnam, $output_file_header);
   } catch (Exception $e) {
     if ($ext_hhvm_cpp) fclose($ext_hhvm_cpp);
     if ($ext_hhvm_cpp_tempnam) `rm -rf $ext_hhvm_cpp_tempnam`;

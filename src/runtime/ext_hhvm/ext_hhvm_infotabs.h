@@ -90,6 +90,7 @@
 #include "../ext/icu/ICUMatcher.ext_hhvm.h"
 #include "../ext/icu/ICUTransliterator.ext_hhvm.h"
 #include "../ext/icu/LifeEventTokenizer.ext_hhvm.h"
+#include "../ext/ext_icu_ucnv.ext_hhvm.h"
 #include "../ext/ext_posix.ext_hhvm.h"
 #include "../ext/ext_spl.ext_hhvm.h"
 #include "../ext/ext_server.ext_hhvm.h"

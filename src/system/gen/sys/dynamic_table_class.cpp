@@ -10071,6 +10071,315 @@ const ObjectStaticCallbacks cw_DOMNotation = {
   0,&ci_DOMNotation$$__construct,0,&cw_DOMNode,0x0,
   &c_DOMNotation::s_cls
 };
+ObjectData *coo_UConverter() {
+  return NEWOBJ(c_UConverter)();
+}
+IMPLEMENT_CLASS(UConverter)
+extern const InstanceOfInfo cw_UConverter$$instanceof_table[] = {
+  {0x61FB5809,1,"UConverter",&cw_UConverter},
+};
+const int cw_UConverter$$instanceof_index[] = {
+  1,
+  -1,0,
+};
+extern const CallInfo ci_UConverter$$getstandards = { (void*)&c_UConverter::i_getstandards, (void*)&c_UConverter::ifa_getstandards, 0, 12, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$__construct = { (void*)&c_UConverter::i___construct, (void*)&c_UConverter::ifa___construct, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$getaliases = { (void*)&c_UConverter::i_getaliases, (void*)&c_UConverter::ifa_getaliases, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$setdestinationencoding = { (void*)&c_UConverter::i_setdestinationencoding, (void*)&c_UConverter::ifa_setdestinationencoding, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$getsourcetype = { (void*)&c_UConverter::i_getsourcetype, (void*)&c_UConverter::ifa_getsourcetype, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$getavailable = { (void*)&c_UConverter::i_getavailable, (void*)&c_UConverter::ifa_getavailable, 0, 12, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$geterrormessage = { (void*)&c_UConverter::i_geterrormessage, (void*)&c_UConverter::ifa_geterrormessage, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$setsubstchars = { (void*)&c_UConverter::i_setsubstchars, (void*)&c_UConverter::ifa_setsubstchars, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$getdestinationtype = { (void*)&c_UConverter::i_getdestinationtype, (void*)&c_UConverter::ifa_getdestinationtype, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$getsourceencoding = { (void*)&c_UConverter::i_getsourceencoding, (void*)&c_UConverter::ifa_getsourceencoding, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$convert = { (void*)&c_UConverter::i_convert, (void*)&c_UConverter::ifa_convert, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$geterrorcode = { (void*)&c_UConverter::i_geterrorcode, (void*)&c_UConverter::ifa_geterrorcode, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$setsourceencoding = { (void*)&c_UConverter::i_setsourceencoding, (void*)&c_UConverter::ifa_setsourceencoding, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$toucallback = { (void*)&c_UConverter::i_toucallback, (void*)&c_UConverter::ifa_toucallback, 4, 4, 0x0000000000000008LL};
+extern const CallInfo ci_UConverter$$fromucallback = { (void*)&c_UConverter::i_fromucallback, (void*)&c_UConverter::ifa_fromucallback, 4, 4, 0x0000000000000008LL};
+extern const CallInfo ci_UConverter$$getsubstchars = { (void*)&c_UConverter::i_getsubstchars, (void*)&c_UConverter::ifa_getsubstchars, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$reasontext = { (void*)&c_UConverter::i_reasontext, (void*)&c_UConverter::ifa_reasontext, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$transcode = { (void*)&c_UConverter::i_transcode, (void*)&c_UConverter::ifa_transcode, 4, 12, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$__destruct = { (void*)&c_UConverter::i___destruct, (void*)&c_UConverter::ifa___destruct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$getdestinationencoding = { (void*)&c_UConverter::i_getdestinationencoding, (void*)&c_UConverter::ifa_getdestinationencoding, 0, 4, 0x0000000000000000LL};
+Variant c_UConverter::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
+}
+Variant c_UConverter::i___destruct(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
+}
+Variant c_UConverter::i_getsourceencoding(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getsourceencoding);
+}
+Variant c_UConverter::i_setsourceencoding(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_setsourceencoding);
+}
+Variant c_UConverter::i_getdestinationencoding(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getdestinationencoding);
+}
+Variant c_UConverter::i_setdestinationencoding(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_setdestinationencoding);
+}
+Variant c_UConverter::i_getsourcetype(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getsourcetype);
+}
+Variant c_UConverter::i_getdestinationtype(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getdestinationtype);
+}
+Variant c_UConverter::i_getsubstchars(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getsubstchars);
+}
+Variant c_UConverter::i_setsubstchars(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_setsubstchars);
+}
+Variant c_UConverter::i_fromucallback(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_fromucallback);
+}
+Variant c_UConverter::i_toucallback(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_toucallback);
+}
+Variant c_UConverter::i_convert(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_convert);
+}
+Variant c_UConverter::i_transcode(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_transcode);
+}
+Variant c_UConverter::i_geterrorcode(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_geterrorcode);
+}
+Variant c_UConverter::i_geterrormessage(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_geterrormessage);
+}
+Variant c_UConverter::i_reasontext(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_reasontext);
+}
+Variant c_UConverter::i_getavailable(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getavailable);
+}
+Variant c_UConverter::i_getaliases(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getaliases);
+}
+Variant c_UConverter::i_getstandards(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getstandards);
+}
+Variant NEVER_INLINE c_UConverter::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 2)) return throw_toomany_arguments("__construct", 2, 1);
+  if (count <= 0) return (self->t___construct(), null);
+  CVarRef arg0(a0);
+  if (count <= 1) return (self->t___construct(arg0), null);
+  CVarRef arg1(a1);
+  return (self->t___construct(arg0, arg1), null);
+}
+Variant NEVER_INLINE c_UConverter::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant NEVER_INLINE c_UConverter::ifa_getsourceencoding(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getsourceencoding, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getsourceencoding", 0, 1);
+  return (self->t_getsourceencoding());
+}
+Variant NEVER_INLINE c_UConverter::ifa_setsourceencoding(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setsourceencoding, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("setsourceencoding", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_setsourceencoding(arg0), null);
+}
+Variant NEVER_INLINE c_UConverter::ifa_getdestinationencoding(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdestinationencoding, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getdestinationencoding", 0, 1);
+  return (self->t_getdestinationencoding());
+}
+Variant NEVER_INLINE c_UConverter::ifa_setdestinationencoding(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setdestinationencoding, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("setdestinationencoding", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_setdestinationencoding(arg0), null);
+}
+Variant NEVER_INLINE c_UConverter::ifa_getsourcetype(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getsourcetype, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getsourcetype", 0, 1);
+  return (self->t_getsourcetype());
+}
+Variant NEVER_INLINE c_UConverter::ifa_getdestinationtype(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdestinationtype, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getdestinationtype", 0, 1);
+  return (self->t_getdestinationtype());
+}
+Variant NEVER_INLINE c_UConverter::ifa_getsubstchars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getsubstchars, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getsubstchars", 0, 1);
+  return (self->t_getsubstchars());
+}
+Variant NEVER_INLINE c_UConverter::ifa_setsubstchars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setsubstchars, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("setsubstchars", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_setsubstchars(arg0));
+}
+Variant NEVER_INLINE c_UConverter::ifa_fromucallback(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_fromucallback, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count != 4)) return throw_wrong_arguments("fromucallback", count, 4, 4, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  VRefParam arg3(vref(a3));
+  return (self->t_fromucallback(arg0, arg1, arg2, arg3));
+}
+Variant NEVER_INLINE c_UConverter::ifa_toucallback(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_toucallback, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count != 4)) return throw_wrong_arguments("toucallback", count, 4, 4, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  VRefParam arg3(vref(a3));
+  return (self->t_toucallback(arg0, arg1, arg2, arg3));
+}
+Variant NEVER_INLINE c_UConverter::ifa_convert(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_convert, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("convert", count, 1, 2, 1);
+  CVarRef arg0(a0);
+  if (count <= 1) return (self->t_convert(arg0));
+  CVarRef arg1(a1);
+  return (self->t_convert(arg0, arg1));
+}
+Variant NEVER_INLINE c_UConverter::ifa_transcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 3 || count > 4)) return throw_wrong_arguments("transcode", count, 3, 4, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  if (count <= 3) return (c_UConverter::t_transcode(arg0, arg1, arg2));
+  CVarRef arg3(a3);
+  return (c_UConverter::t_transcode(arg0, arg1, arg2, arg3));
+}
+Variant NEVER_INLINE c_UConverter::ifa_geterrorcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_geterrorcode, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("geterrorcode", 0, 1);
+  return (self->t_geterrorcode());
+}
+Variant NEVER_INLINE c_UConverter::ifa_geterrormessage(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_geterrormessage, coo_UConverter);
+  }
+  c_UConverter *self ATTRIBUTE_UNUSED (static_cast<c_UConverter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("geterrormessage", 0, 1);
+  return (self->t_geterrormessage());
+}
+Variant NEVER_INLINE c_UConverter::ifa_reasontext(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("reasontext", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (c_UConverter::t_reasontext(arg0));
+}
+Variant NEVER_INLINE c_UConverter::ifa_getavailable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getavailable", 0, 1);
+  return (c_UConverter::t_getavailable());
+}
+Variant NEVER_INLINE c_UConverter::ifa_getaliases(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("getaliases", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (c_UConverter::t_getaliases(arg0));
+}
+Variant NEVER_INLINE c_UConverter::ifa_getstandards(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getstandards", 0, 1);
+  return (c_UConverter::t_getstandards());
+}
+extern const MethodCallInfoTable cw_UConverter$$call_info_table[] = {
+  { 0x207CDD45, 1, 17, "getSourceEncoding", &ci_UConverter$$getsourceencoding },
+  { 0x0FD09AC6, 1, 22, "getDestinationEncoding", &ci_UConverter$$getdestinationencoding },
+  { 0x3CBA5549, 1, 17, "setSourceEncoding", &ci_UConverter$$setsourceencoding },
+  { 0x6A4856D1, 1, 13, "getSourceType", &ci_UConverter$$getsourcetype },
+  { 0x6E3CF855, 1, 15, "getErrorMessage", &ci_UConverter$$geterrormessage },
+  { 0x1D442DD8, 1, 7, "convert", &ci_UConverter$$convert },
+  { 0x710490DB, 1, 12, "getStandards", &ci_UConverter$$getstandards },
+  { 0x530CB89D, 1, 11, "toUCallback", &ci_UConverter$$toucallback },
+  { 0x7199029F, 1, 12, "getErrorCode", &ci_UConverter$$geterrorcode },
+  { 0x7AFAC4E0, 1, 13, "getSubstChars", &ci_UConverter$$getsubstchars },
+  { 0x50DD3DA2, 0, 10, "__destruct", &ci_UConverter$$__destruct },
+  { 0x21288AA2, 0, 22, "setDestinationEncoding", &ci_UConverter$$setdestinationencoding },
+  { 0x69D78722, 1, 18, "getDestinationType", &ci_UConverter$$getdestinationtype },
+  { 0x3EAAD6E7, 1, 9, "transcode", &ci_UConverter$$transcode },
+  { 0x0E768E2A, 1, 10, "getAliases", &ci_UConverter$$getaliases },
+  { 0x3A40C6ED, 1, 11, "__construct", &ci_UConverter$$__construct },
+  { 0x2838E7BA, 1, 12, "getAvailable", &ci_UConverter$$getavailable },
+  { 0x7BD85FBB, 1, 10, "reasonText", &ci_UConverter$$reasontext },
+  { 0x33142DBD, 0, 13, "setSubstChars", &ci_UConverter$$setsubstchars },
+  { 0x732C30FD, 1, 13, "fromUCallback", &ci_UConverter$$fromucallback },
+};
+extern const int cw_UConverter$$call_info_index[] = {
+  63,
+  -1,-1,-1,-1,-1,0,1,-1,
+  -1,2,-1,-1,-1,-1,-1,-1,
+  -1,3,-1,-1,-1,4,-1,-1,
+  5,-1,-1,6,-1,7,-1,8,
+  9,-1,10,-1,-1,-1,-1,13,
+  -1,-1,14,-1,-1,15,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,16,17,-1,18,-1,-1,
+
+};
+c_UConverter *c_UConverter::create(String a0, String a1) {
+  CountableHelper h(this);
+  init();
+  t___construct(a0, a1);
+  clearNoDestruct();
+  return this;
+}
+extern const MethodCallInfoTable cw_UConverter$$call_info_table[];
+extern const int cw_UConverter$$call_info_index[];
+extern const InstanceOfInfo cw_UConverter$$instanceof_table[];
+extern const int cw_UConverter$$instanceof_index[];
+const ObjectStaticCallbacks cw_UConverter = {
+  (ObjectData*(*)(ObjectData*))coo_UConverter,
+  cw_UConverter$$call_info_table,cw_UConverter$$call_info_index,
+  cw_UConverter$$instanceof_table,cw_UConverter$$instanceof_index,
+  &c_UConverter::s_class_name,
+  &c_UConverter::os_prop_table,&ci_UConverter$$__construct,0,0,0x0,
+  &c_UConverter::s_cls
+};
 ObjectData *coo_XMLReader() {
   return NEWOBJ(c_XMLReader)();
 }
@@ -12010,7 +12319,8 @@ struct hashNodeCTD {
 static const hashNodeCTD ctdBuckets[] = {
   {0x5D130102,1,0,"stdClass",(int64)&cw_stdClass },
   {0x1C8FA305,1,0,"Exception",(int64)&cw_Exception },
-  {0x2046E809,1,0,"SQLite3",(int64)&cw_SQLite3 },
+  {0x2046E809,0,0,"SQLite3",(int64)&cw_SQLite3 },
+  {0x61FB5809,1,0,"UConverter",(int64)&cw_UConverter },
   {0x5716BD0A,1,0,"XMLReader",(int64)&cw_XMLReader },
   {0x19737A0B,0,0,"ErrorException",(int64)&cw_ErrorException },
   {0x4315C10B,1,0,"BadMethodCallException",(int64)&cw_BadMethodCallException },
@@ -12114,37 +12424,37 @@ static const hashNodeCTD ctdBuckets[] = {
 };
 static const int ctdMapTable[] = {
   -1,-1,0,-1,-1,1,-1,-1,
-  -1,2,3,4,-1,-1,-1,6,
-  -1,-1,-1,-1,8,9,-1,10,
-  -1,-1,-1,11,-1,13,-1,-1,
-  -1,-1,-1,-1,-1,14,-1,15,
-  -1,-1,16,17,-1,18,-1,-1,
-  -1,19,-1,-1,20,21,-1,-1,
-  22,-1,23,25,26,-1,27,28,
-  -1,29,-1,30,32,33,-1,35,
-  -1,-1,36,-1,-1,-1,-1,-1,
-  -1,-1,-1,38,-1,39,-1,40,
-  -1,41,-1,42,-1,43,45,47,
-  -1,-1,48,-1,-1,49,-1,-1,
-  50,52,53,54,-1,55,-1,-1,
-  -1,-1,56,-1,-1,57,-1,-1,
-  59,-1,60,-1,61,62,-1,-1,
-  -1,-1,-1,-1,64,65,-1,-1,
-  -1,-1,-1,-1,-1,66,-1,-1,
-  67,69,-1,70,71,-1,-1,72,
-  -1,-1,-1,73,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,74,-1,
-  75,-1,76,77,-1,-1,78,-1,
-  -1,-1,-1,-1,-1,-1,-1,80,
-  -1,-1,-1,-1,-1,81,-1,-1,
-  82,-1,-1,83,-1,-1,-1,-1,
-  84,85,86,87,-1,-1,88,-1,
-  -1,-1,-1,-1,89,-1,90,-1,
-  -1,91,-1,92,-1,-1,-1,-1,
-  -1,-1,93,-1,-1,-1,-1,-1,
-  -1,-1,-1,94,95,-1,-1,96,
-  -1,-1,98,-1,-1,-1,99,100,
-  -1,-1,-1,-1,-1,102,-1,-1,
+  -1,2,4,5,-1,-1,-1,7,
+  -1,-1,-1,-1,9,10,-1,11,
+  -1,-1,-1,12,-1,14,-1,-1,
+  -1,-1,-1,-1,-1,15,-1,16,
+  -1,-1,17,18,-1,19,-1,-1,
+  -1,20,-1,-1,21,22,-1,-1,
+  23,-1,24,26,27,-1,28,29,
+  -1,30,-1,31,33,34,-1,36,
+  -1,-1,37,-1,-1,-1,-1,-1,
+  -1,-1,-1,39,-1,40,-1,41,
+  -1,42,-1,43,-1,44,46,48,
+  -1,-1,49,-1,-1,50,-1,-1,
+  51,53,54,55,-1,56,-1,-1,
+  -1,-1,57,-1,-1,58,-1,-1,
+  60,-1,61,-1,62,63,-1,-1,
+  -1,-1,-1,-1,65,66,-1,-1,
+  -1,-1,-1,-1,-1,67,-1,-1,
+  68,70,-1,71,72,-1,-1,73,
+  -1,-1,-1,74,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,75,-1,
+  76,-1,77,78,-1,-1,79,-1,
+  -1,-1,-1,-1,-1,-1,-1,81,
+  -1,-1,-1,-1,-1,82,-1,-1,
+  83,-1,-1,84,-1,-1,-1,-1,
+  85,86,87,88,-1,-1,89,-1,
+  -1,-1,-1,-1,90,-1,91,-1,
+  -1,92,-1,93,-1,-1,-1,-1,
+  -1,-1,94,-1,-1,-1,-1,-1,
+  -1,-1,-1,95,96,-1,-1,97,
+  -1,-1,99,-1,-1,-1,100,101,
+  -1,-1,-1,-1,-1,103,-1,-1,
 
 };
 
@@ -12622,50 +12932,132 @@ static const int64 cpt_static_inits[] = {
   0x000001b4000000a7,
   (int64)&q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE,
   0x000001b6000000a7,
-  (int64)&q_XMLReader$$END_ELEMENT,
+  (int64)&q_UConverter$$EBCDIC_STATEFUL,
   0x000001b8000000a7,
-  (int64)&q_XMLReader$$DOC_FRAGMENT,
+  (int64)&q_UConverter$$LMBCS_11,
   0x000001ba000000a7,
-  (int64)&q_XMLReader$$VALIDATE,
+  (int64)&q_UConverter$$UTF7,
   0x000001bc000000a7,
-  (int64)&q_XMLReader$$END_ENTITY,
+  (int64)&q_UConverter$$REASON_RESET,
   0x000001be000000a7,
-  (int64)&q_XMLReader$$NONE,
+  (int64)&q_UConverter$$UTF32,
   0x000001c0000000a7,
-  (int64)&q_XMLReader$$SIGNIFICANT_WHITESPACE,
+  (int64)&q_UConverter$$CESU8,
   0x000001c2000000a7,
-  (int64)&q_XMLReader$$TEXT,
+  (int64)&q_UConverter$$UTF8,
   0x000001c4000000a7,
-  (int64)&q_XMLReader$$PI,
+  (int64)&q_UConverter$$REASON_CLOSE,
   0x000001c6000000a7,
-  (int64)&q_XMLReader$$CDATA,
+  (int64)&q_UConverter$$UTF16,
   0x000001c8000000a7,
-  (int64)&q_XMLReader$$ENTITY,
+  (int64)&q_UConverter$$LMBCS_6,
   0x000001ca000000a7,
-  (int64)&q_XMLReader$$ENTITY_REF,
+  (int64)&q_UConverter$$LMBCS_2,
   0x000001cc000000a7,
-  (int64)&q_XMLReader$$NOTATION,
+  (int64)&q_UConverter$$DBCS,
   0x000001ce000000a7,
-  (int64)&q_XMLReader$$SUBST_ENTITIES,
+  (int64)&q_UConverter$$REASON_ILLEGAL,
   0x000001d0000000a7,
-  (int64)&q_XMLReader$$WHITESPACE,
+  (int64)&q_UConverter$$UTF16_BigEndian,
   0x000001d2000000a7,
-  (int64)&q_XMLReader$$ATTRIBUTE,
+  (int64)&q_UConverter$$LMBCS_18,
   0x000001d4000000a7,
-  (int64)&q_XMLReader$$LOADDTD,
+  (int64)&q_UConverter$$REASON_CLONE,
   0x000001d6000000a7,
-  (int64)&q_XMLReader$$DOC,
+  (int64)&q_UConverter$$UTF32_LittleEndian,
   0x000001d8000000a7,
-  (int64)&q_XMLReader$$XML_DECLARATION,
+  (int64)&q_UConverter$$LMBCS_4,
   0x000001da000000a7,
-  (int64)&q_XMLReader$$COMMENT,
+  (int64)&q_UConverter$$LMBCS_16,
   0x000001dc000000a7,
-  (int64)&q_XMLReader$$DOC_TYPE,
+  (int64)&q_UConverter$$LMBCS_19,
   0x000001de000000a7,
-  (int64)&q_XMLReader$$ELEMENT,
+  (int64)&q_UConverter$$ISCII,
   0x000001e0000000a7,
-  (int64)&q_XMLReader$$DEFAULTATTRS,
+  (int64)&q_UConverter$$LMBCS_3,
   0x000001e2000000a7,
+  (int64)&q_UConverter$$UTF32_BigEndian,
+  0x000001e4000000a7,
+  (int64)&q_UConverter$$ISO_2022,
+  0x000001e6000000a7,
+  (int64)&q_UConverter$$BOCU1,
+  0x000001e8000000a7,
+  (int64)&q_UConverter$$UTF16_LittleEndian,
+  0x000001ea000000a7,
+  (int64)&q_UConverter$$LATIN_1,
+  0x000001ec000000a7,
+  (int64)&q_UConverter$$LMBCS_17,
+  0x000001ee000000a7,
+  (int64)&q_UConverter$$SCSU,
+  0x000001f0000000a7,
+  (int64)&q_UConverter$$LMBCS_8,
+  0x000001f2000000a7,
+  (int64)&q_UConverter$$REASON_IRREGULAR,
+  0x000001f4000000a7,
+  (int64)&q_UConverter$$US_ASCII,
+  0x000001f6000000a7,
+  (int64)&q_UConverter$$IMAP_MAILBOX,
+  0x000001f8000000a7,
+  (int64)&q_UConverter$$LMBCS_1,
+  0x000001fa000000a7,
+  (int64)&q_UConverter$$UNSUPPORTED_CONVERTER,
+  0x000001fc000000a7,
+  (int64)&q_UConverter$$HZ,
+  0x000001fe000000a7,
+  (int64)&q_UConverter$$SBCS,
+  0x00000200000000a7,
+  (int64)&q_UConverter$$REASON_UNASSIGNED,
+  0x00000202000000a7,
+  (int64)&q_UConverter$$MBCS,
+  0x00000204000000a7,
+  (int64)&q_UConverter$$LMBCS_LAST,
+  0x00000206000000a7,
+  (int64)&q_UConverter$$LMBCS_5,
+  0x00000208000000a7,
+  (int64)&q_XMLReader$$END_ELEMENT,
+  0x0000020a000000a7,
+  (int64)&q_XMLReader$$DOC_FRAGMENT,
+  0x0000020c000000a7,
+  (int64)&q_XMLReader$$VALIDATE,
+  0x0000020e000000a7,
+  (int64)&q_XMLReader$$END_ENTITY,
+  0x00000210000000a7,
+  (int64)&q_XMLReader$$NONE,
+  0x00000212000000a7,
+  (int64)&q_XMLReader$$SIGNIFICANT_WHITESPACE,
+  0x00000214000000a7,
+  (int64)&q_XMLReader$$TEXT,
+  0x00000216000000a7,
+  (int64)&q_XMLReader$$PI,
+  0x00000218000000a7,
+  (int64)&q_XMLReader$$CDATA,
+  0x0000021a000000a7,
+  (int64)&q_XMLReader$$ENTITY,
+  0x0000021c000000a7,
+  (int64)&q_XMLReader$$ENTITY_REF,
+  0x0000021e000000a7,
+  (int64)&q_XMLReader$$NOTATION,
+  0x00000220000000a7,
+  (int64)&q_XMLReader$$SUBST_ENTITIES,
+  0x00000222000000a7,
+  (int64)&q_XMLReader$$WHITESPACE,
+  0x00000224000000a7,
+  (int64)&q_XMLReader$$ATTRIBUTE,
+  0x00000226000000a7,
+  (int64)&q_XMLReader$$LOADDTD,
+  0x00000228000000a7,
+  (int64)&q_XMLReader$$DOC,
+  0x0000022a000000a7,
+  (int64)&q_XMLReader$$XML_DECLARATION,
+  0x0000022c000000a7,
+  (int64)&q_XMLReader$$COMMENT,
+  0x0000022e000000a7,
+  (int64)&q_XMLReader$$DOC_TYPE,
+  0x00000230000000a7,
+  (int64)&q_XMLReader$$ELEMENT,
+  0x00000232000000a7,
+  (int64)&q_XMLReader$$DEFAULTATTRS,
+  0x00000234000000a7,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x06FF2801,19,1,0,100,10,0,&NAMSTR(s_sys_ss06ff2801, "DEFAULT_STRENGTH") },
@@ -12898,28 +13290,70 @@ static const ClassPropTableEntry cpt_table_entries[] = {
   {0x02C4D92D,-5,437,0,100,10,0,&NAMSTR(s_sys_ss02c4d92d, "WHOLE_SCRIPT_CONFUSABLE") },
   {0x3B278E8F,-2,439,0,100,10,0,&NAMSTR(s_sys_ss3b278e8f, "SINGLE_SCRIPT_CONFUSABLE") },
 
-  {0x7B9E85C2,3,441,0,100,10,0,&NAMSTR(s_sys_ss7b9e85c2, "END_ELEMENT") },
-  {0x6C5D4944,10,443,0,100,10,0,&NAMSTR(s_sys_ss6c5d4944, "DOC_FRAGMENT") },
-  {0x56C75E05,10,445,0,100,10,0,&NAMSTR(s_sys_ss56c75e05, "VALIDATE") },
-  {0x1E053487,14,447,0,100,10,0,&NAMSTR(s_sys_ss1e053487, "END_ENTITY") },
-  {0x2AC79A08,16,449,0,36,10,0,&NAMSTR(s_sys_ss2ac79a08, "NONE") },
-  {0x2BC9A7C8,-5,451,0,100,10,0,&NAMSTR(s_sys_ss2bc9a7c8, "SIGNIFICANT_WHITESPACE") },
-  {0x0D6BC4CB,2,453,0,36,10,0,&NAMSTR(s_sys_ss0d6bc4cb, "TEXT") },
-  {0x7E4477CB,11,455,0,100,10,0,&NAMSTR(s_sys_ss7e4477cb, "PI") },
-  {0x1FF986CE,2,457,0,36,10,0,&NAMSTR(s_sys_ss1ff986ce, "CDATA") },
-  {0x1388570E,-2,459,0,100,10,0,&NAMSTR(s_sys_ss1388570e, "ENTITY") },
-  {0x02353856,-1,461,0,100,10,0,&NAMSTR(s_sys_ss02353856, "ENTITY_REF") },
-  {0x4CEE6BD7,2,463,0,100,10,0,&NAMSTR(s_sys_ss4cee6bd7, "NOTATION") },
-  {0x625F85D8,0,465,0,100,10,0,&NAMSTR(s_sys_ss625f85d8, "SUBST_ENTITIES") },
-  {0x70BFC959,-8,467,0,100,10,0,&NAMSTR(s_sys_ss70bfc959, "WHITESPACE") },
-  {0x7E2C985E,-8,469,0,100,10,0,&NAMSTR(s_sys_ss7e2c985e, "ATTRIBUTE") },
-  {0x36D21FEE,6,471,0,100,10,0,&NAMSTR(s_sys_ss36d21fee, "LOADDTD") },
-  {0x3340D870,3,473,0,100,10,0,&NAMSTR(s_sys_ss3340d870, "DOC") },
-  {0x4F6CCDB1,-2,475,0,100,10,0,&NAMSTR(s_sys_ss4f6ccdb1, "XML_DECLARATION") },
-  {0x71B286B3,-2,477,0,100,10,0,&NAMSTR(s_sys_ss71b286b3, "COMMENT") },
-  {0x4DA2BCF4,-18,479,0,100,10,0,&NAMSTR(s_sys_ss4da2bcf4, "DOC_TYPE") },
-  {0x00B67236,-6,481,0,36,10,0,&NAMSTR(s_sys_ss00b67236, "ELEMENT") },
-  {0x12B4C476,-19,483,0,100,10,0,&NAMSTR(s_sys_ss12b4c476, "DEFAULTATTRS") },
+  {0x1C0F0F02,23,441,0,36,10,0,&NAMSTR(s_sys_ss1c0f0f02, "EBCDIC_STATEFUL") },
+  {0x44380A82,17,443,0,36,10,0,&NAMSTR(s_sys_ss6ca17b5e, "LMBCS_11") },
+  {0x1C1ADC82,22,445,0,100,10,0,&NAMSTR(s_sys_ss78dedd7d, "UTF7") },
+  {0x03C02C83,4,447,0,100,10,0,&NAMSTR(s_sys_ss03c02c83, "REASON_RESET") },
+  {0x0A012806,1,449,0,100,10,0,&NAMSTR(s_sys_ss5a7d1007, "UTF32") },
+  {0x1926D890,27,451,0,100,10,0,&NAMSTR(s_sys_ss51b459c5, "CESU8") },
+  {0x33CE6596,7,453,0,100,10,0,&NAMSTR(s_sys_ss1a54630f, "UTF8") },
+  {0x42535497,8,455,0,100,10,0,&NAMSTR(s_sys_ss42535497, "REASON_CLOSE") },
+  {0x10BF829C,-4,457,0,100,10,0,&NAMSTR(s_sys_ss5bf3a48a, "UTF16") },
+  {0x0ED3431D,20,459,0,100,10,0,&NAMSTR(s_sys_ss1973359d, "LMBCS_6") },
+  {0x254EBCA3,11,461,0,100,10,0,&NAMSTR(s_sys_ss13ec50bc, "LMBCS_2") },
+  {0x66553826,27,463,0,100,10,0,&NAMSTR(s_sys_ss66553826, "DBCS") },
+  {0x12C6C42B,18,465,0,36,10,0,&NAMSTR(s_sys_ss12c6c42b, "REASON_ILLEGAL") },
+  {0x75A94FAB,12,467,0,100,10,0,&NAMSTR(s_sys_ss332aac3f, "UTF16_BigEndian") },
+  {0x630D6FAD,5,469,0,100,10,0,&NAMSTR(s_sys_ss33633256, "LMBCS_18") },
+  {0x5D6390B2,19,471,0,100,10,0,&NAMSTR(s_sys_ss5d6390b2, "REASON_CLONE") },
+  {0x66CAE034,-16,473,0,100,10,0,&NAMSTR(s_sys_ss589432fe, "UTF32_LittleEndian") },
+  {0x06ACF736,23,475,0,36,10,0,&NAMSTR(s_sys_ss74356452, "LMBCS_4") },
+  {0x4E3D4AB6,9,477,0,100,10,0,&NAMSTR(s_sys_ss650e1df3, "LMBCS_16") },
+  {0x4E0586BD,20,479,0,100,10,0,&NAMSTR(s_sys_ss1204f36d, "LMBCS_19") },
+  {0x6D13CB3F,11,481,0,100,10,0,&NAMSTR(s_sys_ss6d13cb3f, "ISCII") },
+  {0x3CF47841,-4,483,0,100,10,0,&NAMSTR(s_sys_ss12b154ba, "LMBCS_3") },
+  {0x107A04C5,-6,485,0,100,10,0,&NAMSTR(s_sys_ss144af473, "UTF32_BigEndian") },
+  {0x0826C4C8,10,487,0,100,10,0,&NAMSTR(s_sys_ss05591c16, "ISO_2022") },
+  {0x2C40F9CA,-16,489,0,100,10,0,&NAMSTR(s_sys_ss7c310537, "BOCU1") },
+  {0x41B16B4C,-3,491,0,100,10,0,&NAMSTR(s_sys_ss09f1d1bc, "UTF16_LittleEndian") },
+  {0x32BD02CE,-20,493,0,100,10,0,&NAMSTR(s_sys_ss7e658e6e, "LATIN_1") },
+  {0x2984CDCF,-13,495,0,100,10,0,&NAMSTR(s_sys_ss3c456030, "LMBCS_17") },
+  {0x46B9E154,-8,497,0,100,10,0,&NAMSTR(s_sys_ss46b9e154, "SCSU") },
+  {0x53B3DD57,-28,499,0,100,10,0,&NAMSTR(s_sys_ss2549021c, "LMBCS_8") },
+  {0x3BE9C458,-27,501,0,36,10,0,&NAMSTR(s_sys_ss3be9c458, "REASON_IRREGULAR") },
+  {0x36B92658,-29,503,0,100,10,0,&NAMSTR(s_sys_ss36b92658, "US_ASCII") },
+  {0x193600E1,0,505,0,100,10,0,&NAMSTR(s_sys_ss193600e1, "IMAP_MAILBOX") },
+  {0x6A0F8EF3,-23,507,0,100,10,0,&NAMSTR(s_sys_ss41f785ec, "LMBCS_1") },
+  {0x317B2FF4,2,509,0,100,10,0,&NAMSTR(s_sys_ss317b2ff4, "UNSUPPORTED_CONVERTER") },
+  {0x5D9D9F76,-7,511,0,100,10,0,&NAMSTR(s_sys_ss5d9d9f76, "HZ") },
+  {0x5FCE21F7,-25,513,0,100,10,0,&NAMSTR(s_sys_ss5fce21f7, "SBCS") },
+  {0x1664037A,-25,515,0,100,10,0,&NAMSTR(s_sys_ss1664037a, "REASON_UNASSIGNED") },
+  {0x785279FC,-12,517,0,36,10,0,&NAMSTR(s_sys_ss785279fc, "MBCS") },
+  {0x3E9FC47C,-4,519,0,100,10,0,&NAMSTR(s_sys_ss3e9fc47c, "LMBCS_LAST") },
+  {0x11EC977D,-31,521,0,100,10,0,&NAMSTR(s_sys_ss62087717, "LMBCS_5") },
+
+  {0x7B9E85C2,3,523,0,100,10,0,&NAMSTR(s_sys_ss7b9e85c2, "END_ELEMENT") },
+  {0x6C5D4944,10,525,0,100,10,0,&NAMSTR(s_sys_ss6c5d4944, "DOC_FRAGMENT") },
+  {0x56C75E05,10,527,0,100,10,0,&NAMSTR(s_sys_ss56c75e05, "VALIDATE") },
+  {0x1E053487,14,529,0,100,10,0,&NAMSTR(s_sys_ss1e053487, "END_ENTITY") },
+  {0x2AC79A08,16,531,0,36,10,0,&NAMSTR(s_sys_ss2ac79a08, "NONE") },
+  {0x2BC9A7C8,-5,533,0,100,10,0,&NAMSTR(s_sys_ss2bc9a7c8, "SIGNIFICANT_WHITESPACE") },
+  {0x0D6BC4CB,2,535,0,36,10,0,&NAMSTR(s_sys_ss0d6bc4cb, "TEXT") },
+  {0x7E4477CB,11,537,0,100,10,0,&NAMSTR(s_sys_ss7e4477cb, "PI") },
+  {0x1FF986CE,2,539,0,36,10,0,&NAMSTR(s_sys_ss1ff986ce, "CDATA") },
+  {0x1388570E,-2,541,0,100,10,0,&NAMSTR(s_sys_ss1388570e, "ENTITY") },
+  {0x02353856,-1,543,0,100,10,0,&NAMSTR(s_sys_ss02353856, "ENTITY_REF") },
+  {0x4CEE6BD7,2,545,0,100,10,0,&NAMSTR(s_sys_ss4cee6bd7, "NOTATION") },
+  {0x625F85D8,0,547,0,100,10,0,&NAMSTR(s_sys_ss625f85d8, "SUBST_ENTITIES") },
+  {0x70BFC959,-8,549,0,100,10,0,&NAMSTR(s_sys_ss70bfc959, "WHITESPACE") },
+  {0x7E2C985E,-8,551,0,100,10,0,&NAMSTR(s_sys_ss7e2c985e, "ATTRIBUTE") },
+  {0x36D21FEE,6,553,0,100,10,0,&NAMSTR(s_sys_ss36d21fee, "LOADDTD") },
+  {0x3340D870,3,555,0,100,10,0,&NAMSTR(s_sys_ss3340d870, "DOC") },
+  {0x4F6CCDB1,-2,557,0,100,10,0,&NAMSTR(s_sys_ss4f6ccdb1, "XML_DECLARATION") },
+  {0x71B286B3,-2,559,0,100,10,0,&NAMSTR(s_sys_ss71b286b3, "COMMENT") },
+  {0x4DA2BCF4,-18,561,0,100,10,0,&NAMSTR(s_sys_ss4da2bcf4, "DOC_TYPE") },
+  {0x00B67236,-6,563,0,36,10,0,&NAMSTR(s_sys_ss00b67236, "ELEMENT") },
+  {0x12B4C476,-19,565,0,100,10,0,&NAMSTR(s_sys_ss12b4c476, "DEFAULTATTRS") },
 
 };
 static const int cpt_hash_entries[] = {
@@ -12983,6 +13417,12 @@ static const int cpt_hash_entries[] = {
   -1,
   -1,
   -1,
+  // UConverter hash
+  -1,-1,40,38,-1,37,-1,-1,36,35,-1,34,33,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,32,-1,-1,-1,-1,-1,-1,-1,-1,30,29,-1,-1,28,-1,-1,-1,-1,27,26,-1,25,-1,24,-1,23,-1,-1,22,-1,-1,-1,21,-1,20,-1,19,-1,-1,-1,-1,-1,-1,17,-1,16,-1,15,-1,-1,-1,-1,14,-1,12,-1,-1,-1,-1,11,-1,-1,10,-1,-1,-1,-1,-1,9,8,-1,-1,-1,-1,7,6,-1,-1,-1,-1,-1,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,4,-1,-1,3,0,-1,-1,
+  // UConverter lists
+  -1,
+  -1,
+  -1,
   // XMLReader hash
   -1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,19,18,-1,17,16,-1,15,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,-1,-1,-1,-1,13,12,11,10,-1,-1,-1,-1,-1,-1,-1,8,-1,-1,6,-1,-1,4,3,-1,2,1,-1,0,-1,-1,
   // XMLReader lists
@@ -13030,9 +13470,13 @@ const ClassPropTable c_SpoofChecker::os_prop_table = {
   -1,-1,-1,-1,15,6,1,0,
   cpt_hash_entries+643,0,cpt_table_entries+213,cpt_static_inits
 };
+const ClassPropTable c_UConverter::os_prop_table = {
+  -1,-1,-1,-1,127,37,1,0,
+  cpt_hash_entries+774,0,cpt_table_entries+220,cpt_static_inits
+};
 const ClassPropTable c_XMLReader::os_prop_table = {
   -1,-1,-1,-1,63,4,1,0,
-  cpt_hash_entries+710,0,cpt_table_entries+220,cpt_static_inits
+  cpt_hash_entries+841,0,cpt_table_entries+261,cpt_static_inits
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -605,6 +605,9 @@ bool TestCodeRun::RunTests(const std::string &which) {
   // PHP 5.4 features
   GEN_TEST(TestTraits);
 
+  // PHP 5.5 features
+  GEN_TEST(TestUConverter);
+
   // HipHop features
   GEN_TEST(TestYield);
   GEN_TEST(TestHint);
@@ -33332,6 +33335,186 @@ bool TestCodeRun::TestTraits() {
         "  fstatic\n"
         "}\n"
         );
+
+  return true;
+}
+
+bool TestCodeRun::TestUConverter() {
+  // ext/intl/tests/uconverter_enum.phpt
+  MVCRO("<?php "
+        "$avail = UConverter::getAvailable();"
+        "var_dump(count($avail) > 100);"
+        "var_dump(in_array('UTF-7', $avail));"
+        "var_dump(in_array('CESU-8', $avail));"
+        "var_dump(in_array('ISO-8859-1', $avail));"
+        "$latin1 = UConverter::getAliases('latin1');"
+        "var_dump(in_array('ISO-8859-1', $latin1));"
+       ,
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+       );
+
+  // ext/intl/tests/uconverter_func_basic.phpt
+  MVCRO("<?php "
+        "var_dump(UConverter::transcode(\"This is an ascii string\", 'utf-8', 'latin1'));"
+        "var_dump(urlencode(UConverter::transcode(\"Espa\\xF1ol\", 'utf-8', 'latin1')));"
+        "var_dump(urlencode(UConverter::transcode(\"Stra\\xDFa\",  'utf-8', 'latin1')));"
+        "var_dump(bin2hex(UConverter::transcode(\"\\xE4\", 'utf-8', 'koi8-r')));"
+       ,
+        "string(23) \"This is an ascii string\"\n"
+        "string(12) \"Espa%C3%B1ol\"\n"
+        "string(11) \"Stra%C3%9Fa\"\n"
+        "string(4) \"d094\"\n"
+       );
+
+  // ext/intl/tests/uconverter_func_subst.phpt
+  MVCRO("<?php "
+        "foreach(array('?','','?" /* this is not a trigraph */ "?') as $subst) {"
+        "  $opts = array('to_subst' => $subst);"
+        "  $ret = UConverter::transcode(\"This is an ascii string\", 'ascii', 'utf-8', $opts);"
+        "  if ($ret === NULL) {"
+        "    echo \"Error: \", intl_get_error_message(), \"\\n\";"
+        "  } else {"
+        "    var_dump($ret);"
+        "  }"
+        "  $ret = UConverter::transcode(\"Snowman: (\\xE2\\x98\\x83)\", 'ascii', 'utf-8', $opts);"
+        "  if ($ret === NULL) {"
+        "    echo \"Error: \", intl_get_error_message(), \"\\n\";"
+        "  } else {"
+        "    var_dump($ret);"
+        "  }"
+        "}"
+       ,
+        "string(23) \"This is an ascii string\"\n"
+        "string(12) \"Snowman: (?)\"\n"
+        "Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR\n"
+        "Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR\n"
+        "Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR\n"
+        "Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR\n"
+       );
+
+  // ext/intl/tests/uconverter_oop_algo.phpt
+  MVCRO("<?php "
+        "$c = new UConverter('utf-8', 'latin1');"
+        "var_dump(UConverter::LATIN_1 === $c->getSourceType());"
+        "var_dump(UConverter::UTF8    === $c->getDestinationType());"
+        "$c = new UConverter('koi8-r', 'utf-32be');"
+        "var_dump(UConverter::UTF32_BigEndian === $c->getSourceType());"
+        "var_dump(UConverter::SBCS            === $c->getDestinationType());"
+       ,
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+       );
+
+  // ext/intl/tests/uconverter_oop_basic.phpt
+  MVCRO("<?php "
+        "$c = new UConverter('utf-8', 'latin1');"
+        "var_dump($c->convert(\"This is an ascii string\"));"
+        "var_dump(urlencode($c->convert(\"Espa\\xF1ol\")));"
+        "var_dump(urlencode($c->convert(\"Stra\\xDFa\")));"
+        "var_dump(urlencode($c->convert(\"Stra\\xC3\\x9Fa\", true)));"
+        "$k = new UConverter('utf-8', 'koi8-r');"
+        "var_dump(bin2hex($k->convert(\"\\xE4\")));"
+       ,
+        "string(23) \"This is an ascii string\"\n"
+        "string(12) \"Espa%C3%B1ol\"\n"
+        "string(11) \"Stra%C3%9Fa\"\n"
+        "string(8) \"Stra%DFa\"\n"
+        "string(4) \"d094\"\n"
+       );
+
+  // ext/intl/tests/uconverter_oop_callback.phpt
+  MVCRO("<?php "
+        "class MyConverter extends UConverter {"
+        "  public function toUCallback($reason, $source, $codeUnits, &$error) {"
+        "    echo \"toUCallback(\", UConverter::reasonText($reason), \", ...)\\n\";"
+        "    return parent::toUCallback($reason, $source, $codeUnits, $error);"
+        "  }"
+        "  public function fromUCallback($reason, $source, $codePoint, &$error) {"
+        "    echo \"fromUCallback(\", UConverter::reasonText($reason), \", ...)\\n\";"
+        "    return parent::fromUCallback($reason, $source, $codePoint, $error);"
+        "  }"
+        "}"
+        "$c = new MyConverter('ascii', 'utf-8');"
+        "foreach(array(\"regular\", \"irregul\\xC1\\xA1r\", \"\\xC2\\xA1unsupported!\") as $word) {"
+        "  $c->convert($word);"
+        "}"
+        "unset($c);"
+       ,
+        "toUCallback(REASON_RESET, ...)\n"
+        "toUCallback(REASON_RESET, ...)\n"
+        "fromUCallback(REASON_RESET, ...)\n"
+        "fromUCallback(REASON_RESET, ...)\n"
+        "toUCallback(REASON_RESET, ...)\n"
+        "toUCallback(REASON_ILLEGAL, ...)\n"
+        "toUCallback(REASON_RESET, ...)\n"
+        "toUCallback(REASON_ILLEGAL, ...)\n"
+        "fromUCallback(REASON_RESET, ...)\n"
+        "fromUCallback(REASON_RESET, ...)\n"
+        "toUCallback(REASON_RESET, ...)\n"
+        "toUCallback(REASON_RESET, ...)\n"
+        "fromUCallback(REASON_RESET, ...)\n"
+        "fromUCallback(REASON_UNASSIGNED, ...)\n"
+        "fromUCallback(REASON_RESET, ...)\n"
+        "fromUCallback(REASON_UNASSIGNED, ...)\n"
+        "toUCallback(REASON_CLOSE, ...)\n"
+        "fromUCallback(REASON_CLOSE, ...)\n"
+        "toUCallback(REASON_CLOSE, ...)\n"
+        "fromUCallback(REASON_CLOSE, ...)\n"
+       );
+
+  // ext/intl/tests/uconverter_oop_callback_return.phpt
+  MVCRO("<?php "
+        "class MyConverter extends UConverter {"
+        "  public function toUCallback($reason, $source, $codeUnits, &$error) {"
+        "    $error = U_ZERO_ERROR;"
+        "    switch ($codeUnits) {"
+        "      case \"\\x80\": return NULL;"
+        "      case \"\\x81\": return 'a';"
+        "      case \"\\x82\": return ord('b');"
+        "      case \"\\x83\": return array('c');"
+        "    }"
+        "  }"
+        "  public function fromUCallback($reason, $source, $codePoint, &$error) {"
+        "    $error = U_ZERO_ERROR;"
+        "    switch ($codePoint) {"
+        "      case 0x00F1: return \"A\";"
+        "      case 0x00F2: return ord(\"B\");"
+        "      case 0x00F3: return array(\"C\");"
+        "      case 0x00F4: return NULL;"
+        "    }"
+        "  }"
+        "}"
+        "$c = new MyConverter('ascii', 'utf-8');"
+        "var_dump($c->convert(\"\\x80\\x81\\x82\\x83\"));"
+        "var_dump($c->convert(\"\\xC3\\xB1\\xC3\\xB2\\xC3\\xB3\\xC3\\xB4\"));"
+       ,
+        "string(3) \"abc\"\n"
+        "string(3) \"ABC\"\n"
+       );
+
+  // ext/intl/tests/uconverter_oop_subst.phpt
+  MVCRO("<?php "
+        "$c = new UConverter('ascii', 'utf-8');"
+        "foreach(array('?','','<unknown>') as $subst) {"
+        "  if (!$c->setSubstChars($subst)) {"
+        "    echo \"**Disallowed\\n\";"
+        "    continue;"
+        "  }"
+        "  var_dump($c->convert(\"This is an ascii string\"));"
+        "  var_dump($c->convert(\"Snowman: (\\xE2\\x98\\x83)\"));"
+        "}"
+       ,
+        "string(23) \"This is an ascii string\"\n"
+        "string(12) \"Snowman: (?)\"\n"
+        "**Disallowed\n"
+        "**Disallowed\n"
+       );
 
   return true;
 }

@@ -2584,6 +2584,27 @@ TypedValue* tg_8DOMXPath_registerPHPFunctions(VM::ActRec *ar);
 TypedValue* tg_8DOMXPath___get(VM::ActRec *ar);
 TypedValue* tg_8DOMXPath___set(VM::ActRec *ar);
 TypedValue* tg_8DOMXPath___isset(VM::ActRec *ar);
+VM::Instance* new_UConverter_Instance(VM::Class*);
+TypedValue* tg_10UConverter___construct(VM::ActRec *ar);
+TypedValue* tg_10UConverter___destruct(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getSourceEncoding(VM::ActRec *ar);
+TypedValue* tg_10UConverter_setSourceEncoding(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getDestinationEncoding(VM::ActRec *ar);
+TypedValue* tg_10UConverter_setDestinationEncoding(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getSourceType(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getDestinationType(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getSubstChars(VM::ActRec *ar);
+TypedValue* tg_10UConverter_setSubstChars(VM::ActRec *ar);
+TypedValue* tg_10UConverter_fromUCallback(VM::ActRec *ar);
+TypedValue* tg_10UConverter_toUCallback(VM::ActRec *ar);
+TypedValue* tg_10UConverter_convert(VM::ActRec *ar);
+TypedValue* tg_10UConverter_transcode(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getErrorCode(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getErrorMessage(VM::ActRec *ar);
+TypedValue* tg_10UConverter_reasonText(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getAvailable(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getAliases(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getStandards(VM::ActRec *ar);
 VM::Instance* new_EncodingDetector_Instance(VM::Class*);
 TypedValue* tg_16EncodingDetector___construct(VM::ActRec *ar);
 TypedValue* tg_16EncodingDetector_setText(VM::ActRec *ar);
@@ -5587,6 +5608,30 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMXPath[] = {
   { "__isset", tg_8DOMXPath___isset }
 };
 
+static const long long hhbc_ext_method_count_UConverter = 20;
+static const HhbcExtMethodInfo hhbc_ext_methods_UConverter[] = {
+  { "__construct", tg_10UConverter___construct },
+  { "__destruct", tg_10UConverter___destruct },
+  { "getSourceEncoding", tg_10UConverter_getSourceEncoding },
+  { "setSourceEncoding", tg_10UConverter_setSourceEncoding },
+  { "getDestinationEncoding", tg_10UConverter_getDestinationEncoding },
+  { "setDestinationEncoding", tg_10UConverter_setDestinationEncoding },
+  { "getSourceType", tg_10UConverter_getSourceType },
+  { "getDestinationType", tg_10UConverter_getDestinationType },
+  { "getSubstChars", tg_10UConverter_getSubstChars },
+  { "setSubstChars", tg_10UConverter_setSubstChars },
+  { "fromUCallback", tg_10UConverter_fromUCallback },
+  { "toUCallback", tg_10UConverter_toUCallback },
+  { "convert", tg_10UConverter_convert },
+  { "transcode", tg_10UConverter_transcode },
+  { "getErrorCode", tg_10UConverter_getErrorCode },
+  { "getErrorMessage", tg_10UConverter_getErrorMessage },
+  { "reasonText", tg_10UConverter_reasonText },
+  { "getAvailable", tg_10UConverter_getAvailable },
+  { "getAliases", tg_10UConverter_getAliases },
+  { "getStandards", tg_10UConverter_getStandards }
+};
+
 static const long long hhbc_ext_method_count_EncodingDetector = 5;
 static const HhbcExtMethodInfo hhbc_ext_methods_EncodingDetector[] = {
   { "__construct", tg_16EncodingDetector___construct },
@@ -5997,7 +6042,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "outputMemory", tg_9XMLWriter_outputMemory }
 };
 
-const long long hhbc_ext_class_count = 59;
+const long long hhbc_ext_class_count = 60;
 const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "DummyClosure", new_DummyClosure_Instance, sizeof(c_DummyClosure), hhbc_ext_method_count_DummyClosure, hhbc_ext_methods_DummyClosure },
   { "Vector", new_Vector_Instance, sizeof(c_Vector), hhbc_ext_method_count_Vector, hhbc_ext_methods_Vector },
@@ -6033,6 +6078,7 @@ const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "DOMNodeList", new_DOMNodeList_Instance, sizeof(c_DOMNodeList), hhbc_ext_method_count_DOMNodeList, hhbc_ext_methods_DOMNodeList },
   { "DOMImplementation", new_DOMImplementation_Instance, sizeof(c_DOMImplementation), hhbc_ext_method_count_DOMImplementation, hhbc_ext_methods_DOMImplementation },
   { "DOMXPath", new_DOMXPath_Instance, sizeof(c_DOMXPath), hhbc_ext_method_count_DOMXPath, hhbc_ext_methods_DOMXPath },
+  { "UConverter", new_UConverter_Instance, sizeof(c_UConverter), hhbc_ext_method_count_UConverter, hhbc_ext_methods_UConverter },
   { "EncodingDetector", new_EncodingDetector_Instance, sizeof(c_EncodingDetector), hhbc_ext_method_count_EncodingDetector, hhbc_ext_methods_EncodingDetector },
   { "EncodingMatch", new_EncodingMatch_Instance, sizeof(c_EncodingMatch), hhbc_ext_method_count_EncodingMatch, hhbc_ext_methods_EncodingMatch },
   { "SpoofChecker", new_SpoofChecker_Instance, sizeof(c_SpoofChecker), hhbc_ext_method_count_SpoofChecker, hhbc_ext_methods_SpoofChecker },

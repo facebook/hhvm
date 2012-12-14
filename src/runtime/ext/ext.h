@@ -40,6 +40,7 @@
 #include <runtime/ext/profile/extprofile_hash.h>
 #include <runtime/ext/profile/extprofile_iconv.h>
 #include <runtime/ext/profile/extprofile_icu.h>
+#include <runtime/ext/profile/extprofile_icu_ucnv.h>
 #include <runtime/ext/profile/extprofile_icu_ucsdet.h>
 #include <runtime/ext/profile/extprofile_icu_uspoof.h>
 #include <runtime/ext/profile/extprofile_image.h>

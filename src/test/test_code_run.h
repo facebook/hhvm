@@ -200,6 +200,9 @@ class TestCodeRun : public TestBase {
   // PHP 5.4
   bool TestTraits();
 
+  // PHP 5.5
+  bool TestUConverter();
+
   // HipHop specific
   bool TestYield();
   bool TestHint();

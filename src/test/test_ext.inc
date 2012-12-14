@@ -23,6 +23,7 @@ RUN_TESTSUITE(TestExtFunction);
 RUN_TESTSUITE(TestExtHash);
 RUN_TESTSUITE(TestExtIconv);
 RUN_TESTSUITE(TestExtIcu);
+RUN_TESTSUITE(TestExtIcu_ucnv);
 RUN_TESTSUITE(TestExtIcu_ucsdet);
 RUN_TESTSUITE(TestExtIcu_uspoof);
 RUN_TESTSUITE(TestExtImage);

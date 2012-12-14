@@ -556,7 +556,10 @@ class StackElms {
     return m_elms;
   }
   void flush() {
-    if (m_elms != NULL) {
+    // For RPCRequestHandler threads, the ExecutionContext can stay alive
+    // across requests, and hold references to the VM stack. Make
+    // sure we don't free the stack from under the ExecutionContext
+    if (m_elms != NULL && g_context.isNull()) {
       free(m_elms);
       m_elms = NULL;
     }

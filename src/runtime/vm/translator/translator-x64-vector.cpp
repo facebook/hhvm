@@ -2779,23 +2779,10 @@ isSupportedCGetM_RE(const NormalizedInstruction& i) {
     (i.inputs[1]->isInt() || i.inputs[1]->isString()); // key;
 }
 
-bool
-isSupportedCGetM_GE(const NormalizedInstruction& i) {
-  if (i.inputs.size() > 2) return false;
-  const LocationCode lcode = i.immVec.locationCode();
-  return
-    (lcode == LGC || lcode == LGL) &&
-    i.immVecM.size() == 1 &&
-    mcodeMaybeArrayKey(i.immVecM[0]) &&
-    i.inputs[0]->isString() && // name input
-    (i.inputs[1]->isInt() || i.inputs[1]->isString()); // key input
-}
-
 void
 TranslatorX64::analyzeCGetM(Tracelet& t, NormalizedInstruction& ni) {
   if (!RuntimeOption::EvalJitMGeneric) {
-    ni.m_txFlags = supportedPlan(isSupportedCGetM_GE(ni) ||
-                                 isSupportedCGetM_LE(ni) ||
+    ni.m_txFlags = supportedPlan(isSupportedCGetM_LE(ni) ||
                                  isSupportedCGetM_RE(ni));
     return;
   }
@@ -2818,9 +2805,7 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
   if (decRefBase) {
     // We'll need to decref the base after the call. Make sure we hold
     // on to the value if it's a variant or from a global.
-    if (isSupportedCGetM_GE(i)) {
-      decRefReg = baseReg;
-    } else if (baseInput->isVariant()) {
+    if (baseInput->isVariant()) {
       decRefReg = getReg(baseInput->location);
     }
     if (decRefReg != noreg && kCallerSaved.contains(decRefReg)) {
@@ -2869,67 +2854,12 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
   }
 }
 
-void TranslatorX64::translateCGetM_GE(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
-  const int nameIdx = 0;
-  const int keyIdx = 1;
-  const DynLocation& name = *i.inputs[nameIdx];
-  const DynLocation& key  = *i.inputs[keyIdx];
-  const Location& outLoc  = i.outStack->location;
-
-  emitGetGlobal(i, nameIdx, false /* allowCreate */);
-  ScratchReg holdRax(m_regMap, rax);
-
-  a.  test_reg64_reg64(rax, rax);
-  DiamondReturn noGlobalRet;
-  {
-    UnlikelyIfBlock ifNoGlobal(CC_Z, a, astubs, &noGlobalRet);
-    if (const StringData* name = i.inputs[nameIdx]->rtt.valueString()) {
-      EMIT_CALL(astubs, raiseUndefVariable, IMM((uint64_t)name));
-    } else {
-      m_regMap.allocInputReg(i, nameIdx);
-      PhysReg nameReg = getReg(i.inputs[nameIdx]->location);
-      EMIT_CALL(astubs, raiseUndefVariable, R(nameReg));
-    }
-    recordReentrantStubCall(i);
-
-    emitStoreNull(astubs, outLoc);
-    m_regMap.invalidate(outLoc);
-    // The DiamondReturn patches the jump here to return to the code
-    // after this whole function.
-  }
-
-  emitIncRefGeneric(rax, 0);
-  m_regMap.allocInputReg(i, keyIdx, argNumToRegName[1]);
-  // We're going to be making a function call in both branches so
-  // let's only emit the spilling code once.
-  emitCallSaveRegs();
-  a.    cmp_imm32_disp_reg32(KindOfArray, TVOFF(m_type), rax);
-  DiamondReturn notArrayRet;
-  {
-    UnlikelyIfBlock ifNotArray(CC_NZ, a, astubs, &notArrayRet);
-    ASSERT(key.isString() || key.isInt());
-    void* fptr =
-      key.isString() ? (void*)non_array_getm_s : (void*)non_array_getm_i;
-    EMIT_CALL(astubs, (TCA)fptr, R(rax), V(key.location), A(outLoc));
-    recordReentrantStubCall(i);
-  }
-  a.load_reg64_disp_reg64(rax, TVOFF(m_data), rax);
-  emitArrayElem(i, &name /* XXX unused in emitArrayElem for GE */,
-                rax, &key, outLoc);
-}
-
 void
 TranslatorX64::translateCGetM(const Tracelet& t,
                               const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() >= 2);
   ASSERT(i.outStack);
 
-  if (isSupportedCGetM_GE(i)) {
-    Stats::emitInc(a, Stats::Tx64_CGetMGE);
-    translateCGetM_GE(t, i);
-    return;
-  }
   if (isSupportedCGetM_LE(i) || isSupportedCGetM_RE(i)) {
     const DynLocation& base = *i.inputs[0];
     const DynLocation& key  = *i.inputs[1];

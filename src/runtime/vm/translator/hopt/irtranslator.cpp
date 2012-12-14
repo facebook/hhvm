@@ -793,11 +793,6 @@ TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
   }
 }
 
-void TranslatorX64::irTranslateCGetM_GE(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(CGetM_GE);
-}
-
 static bool
 isSupportedCGetMProp(const NormalizedInstruction& i) {
   if (i.inputs.size() != 2) return false;
@@ -817,11 +812,6 @@ TranslatorX64::irTranslateCGetM(const Tracelet& t,
 
   if (isSupportedCGetMProp(i)) {
     irTranslateCGetMProp(t, i);
-    return;
-  }
-  if (isSupportedCGetM_GE(i)) {
-    HHIR_UNIMPLEMENTED(CGetM_GE);
-    irTranslateCGetM_GE(t, i);
     return;
   }
   HHIR_UNIMPLEMENTED(CGetM);

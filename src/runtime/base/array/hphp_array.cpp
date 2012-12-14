@@ -1913,16 +1913,6 @@ inline void non_array_getm(TypedValue* base, int64 key, TypedValue* out) {
   }
 }
 
-void
-non_array_getm_i(TypedValue* base, int64 key, TypedValue* out) {
-  non_array_getm<KindOfInt64, true>(base, key, out);
-}
-
-void
-non_array_getm_s(TypedValue* base, StringData* key, TypedValue* out) {
-  non_array_getm<KindOfString, true>(base, (intptr_t)key, out);
-}
-
 // issetm's DNA.
 static bool
 issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {

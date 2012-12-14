@@ -178,6 +178,7 @@ struct HhbcTranslator {
   void emitCGetL2(int32 id);
   void emitCGetS(const Class* cls, const StringData* propName,
                  Type::Tag resultType, bool isInferedType);
+  void emitMInstr(const NormalizedInstruction& ni);
   void emitCGetProp(LocationCode locCode,
                     int propOffset,
                     bool isPropOnStack,
@@ -362,6 +363,71 @@ struct HhbcTranslator {
   void emitLoadDeps();
 
 private:
+  /*
+   * VectorTranslator is responsible for translating one of the vector
+   * instructions (CGetM, SetM, IssetM, etc..) into hhir.
+   */
+  class VectorTranslator {
+   public:
+    VectorTranslator(const Transl::NormalizedInstruction& ni,
+                     HhbcTranslator& ht);
+    void emit();
+
+   private:
+    void emitMPre();
+    void emitFinalMOp();
+    void emitMPost();
+
+    // Bases
+    void emitBaseOp();
+    void emitBaseLCR();
+    void emitBaseH();
+    void emitBaseG();
+    void emitBaseN();
+    void emitBaseS();
+
+    // Intermediate Operations
+    void emitIntermediateOp();
+    void emitProp();
+    void emitPropGeneric();
+    void emitElem();
+    void emitNewElem();
+    void emitRatchetRefs();
+
+    // Final Operations
+#   define MII(instr, ...)                      \
+    void emit##instr##Elem();                   \
+    void emit##instr##Prop();
+    MINSTRS
+#   undef MII
+
+    // Misc Helpers
+    void numberStackInputs();
+    void setNoMIState() { m_needMIS = false; }
+    SSATmp* genMisPtr();
+    SSATmp* getInput(unsigned i);
+
+    bool generateMVal() const;
+    bool needFirstRatchet() const;
+    bool needFinalRatchet() const;
+    unsigned nLogicalRatchets() const;
+    int ratchetInd() const;
+
+    const Transl::NormalizedInstruction& m_ni;
+    HhbcTranslator& m_ht;
+    TraceBuilder& m_tb;
+    const MInstrInfo& m_mii;
+    hphp_hash_map<unsigned, unsigned> m_stackInputs;
+
+    unsigned m_mInd;
+    unsigned m_iInd;
+
+    bool m_needMIS;
+
+    SSATmp* m_misBase;
+    SSATmp* m_base;
+    SSATmp* m_result;
+  };
 
   /*
    * Emit helpers.
@@ -412,6 +478,7 @@ private:
   SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb->genIncRef(tmp)); }
   SSATmp* pop(Type::Tag type);
   void    popDecRef(Type::Tag type);
+  void    discard(unsigned n);
   SSATmp* popC() { return pop(Type::Cell);      }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }

@@ -17,6 +17,7 @@
 
 #include "util/trace.h"
 #include "runtime/ext/ext_continuation.h"
+#include "runtime/vm/translator/hopt/hhbctranslator.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/stats.h"
 #include "runtime/vm/unit.h"
@@ -29,7 +30,7 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
+TRACE_SET_MOD(hhir);
 
 ArrayData* HhbcTranslator::lookupArrayId(int arrId) {
   return getCurUnit()->lookupArrayId(arrId);
@@ -101,6 +102,12 @@ SSATmp* HhbcTranslator::pop(Type::Tag type) {
   // didn't know the type of the intermediate values yet (see below).
   refineType(opnd, type);
   return opnd;
+}
+
+void HhbcTranslator::discard(unsigned n) {
+  for (unsigned i = 0; i < n; ++i) {
+    pop(Type::Gen);
+  }
 }
 
 // type is the type expected on the stack.
@@ -668,7 +675,7 @@ void HhbcTranslator::emitPackCont(int64 labelId) {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   m_tb->genSetPropCell(cont, CONTOFF(m_value), popC());
   m_tb->genStRaw(cont, RawMemSlot::ContLabel,
-                 m_tb->genDefConst<int64>(labelId));
+                 m_tb->genDefConst<int64>(labelId), 0);
 }
 
 void HhbcTranslator::emitContReceive() {
@@ -687,7 +694,7 @@ void HhbcTranslator::emitContRaised() {
 
 void HhbcTranslator::emitContDone() {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
-  m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst<bool>(true));
+  m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst<bool>(true), 0);
   m_tb->genSetPropCell(cont, CONTOFF(m_value), m_tb->genDefNull());
 }
 
@@ -707,7 +714,7 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   m_tb->genSetPropCell(cont, CONTOFF(m_received), value);
   if (raise) {
     m_tb->genStRaw(cont, RawMemSlot::ContShouldThrow,
-                   m_tb->genDefConst<bool>(true));
+                   m_tb->genDefConst<bool>(true), 0);
   }
 }
 
@@ -736,7 +743,8 @@ void HhbcTranslator::emitContCurrent() {
 
 void HhbcTranslator::emitContStopped() {
   SSATmp* cont = m_tb->genLdThis(NULL);
-  m_tb->genStRaw(cont, RawMemSlot::ContRunning, m_tb->genDefConst<bool>(false));
+  m_tb->genStRaw(cont, RawMemSlot::ContRunning, m_tb->genDefConst<bool>(false),
+                 0);
 }
 
 void HhbcTranslator::emitContHandle() {
@@ -868,6 +876,10 @@ void HhbcTranslator::emitSetProp(int offset, bool isPropOnStack) {
   pushIncRef(src);
   m_tb->genDecRef(prevValue);
   m_tb->genDecRef(obj);
+}
+
+void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
+  VectorTranslator(ni, *this).emit();
 }
 
 void HhbcTranslator::emitCGetProp(LocationCode locCode,

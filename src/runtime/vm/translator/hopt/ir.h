@@ -34,6 +34,7 @@
 #include "runtime/vm/translator/abi-x64.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/runtime-type.h"
+#include "runtime/vm/translator/translator-runtime.h"
 #include "runtime/base/types.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/class.h"
@@ -75,7 +76,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 // TODO: Make sure the MayModRefs column is correct... (MayRaiseError too...)
 
 /*
- * Flags on opcodes.  See ir.specification for details on the meaning
+ * Flags on opcodes.  See doc/ir.specification for details on the meaning
  * of these flags.
  *
  * Note that the flags in the opcodes table below are not
@@ -176,7 +177,7 @@ enum OpcodeFlag : uint64_t {
   OPC(UnboxPtr,          (HasDest))                                     \
                                                                         \
   /* loads */                                                           \
-  OPC(LdStack,           (HasDest|ProducesRC))                          \
+  OPC(LdStack,           (HasDest))                                     \
   OPC(LdLoc,             (HasDest))                                     \
   OPC(LdStackAddr,       (HasDest|CanCSE))                              \
   OPC(LdLocAddr,         (HasDest|CanCSE))                              \
@@ -253,6 +254,7 @@ enum OpcodeFlag : uint64_t {
   OPC(ExitGuardFailure,  (Essential))                                   \
   /* */                                                                 \
   OPC(Mov,               (HasDest|CanCSE))                              \
+  OPC(LdAddr,            (HasDest|CanCSE))                              \
   OPC(IncRef,            (HasDest|MemEffects|ProducesRC))               \
   OPC(DecRefLoc,         (Essential|MemEffects|MayModifyRefs))          \
   OPC(DecRefStack,       (Essential|MemEffects|MayModifyRefs))          \
@@ -260,6 +262,8 @@ enum OpcodeFlag : uint64_t {
   OPC(GenericRetDecRefs, (HasDest|Essential|MemEffects|CallsNative|     \
                           MayModifyRefs))                               \
   OPC(DecRef,            (Essential|MemEffects|ConsumesRC|              \
+                          MayModifyRefs))                               \
+  OPC(DecRefMem,         (Essential|MemEffects|ConsumesRC|              \
                           MayModifyRefs))                               \
   /* DecRefNZ only decrements the ref count, and doesn't modify Refs. */ \
   /* DecRefNZ also doesn't run dtor, so we don't mark it essential. */  \
@@ -314,6 +318,15 @@ enum OpcodeFlag : uint64_t {
                           ConsumesRC))                                  \
   OPC(IterNext,          (HasDest|CallsNative|MemEffects|MayModifyRefs))\
   OPC(IterNextK,         (HasDest|CallsNative|MemEffects|MayModifyRefs))\
+                                                                        \
+  /* vector instruction helpers */                                      \
+  OPC(DefMIStateBase,    (HasDest))                                     \
+  OPC(PropX,             (HasDest|Essential|MemEffects|CallsNative|     \
+                          MayModifyRefs|MayRaiseError))                 \
+  OPC(CGetProp,          (HasDest|Essential|MemEffects|CallsNative|     \
+                          MayModifyRefs|MayRaiseError))                 \
+  OPC(CGetElem,          (HasDest|Essential|MemEffects|CallsNative|     \
+                          MayModifyRefs|MayRaiseError))                 \
                                                                         \
   /* misc */                                                            \
   OPC(IncStat,           (Essential|MemEffects))                        \
@@ -453,6 +466,10 @@ public:
     return (t <= Type::Cell && t != Type::None);
   }
 
+  static bool isPtr(Tag t) {
+    return t == Type::PtrToCell || t == Type::PtrToGen;
+  }
+
   static bool isRefCounted(Tag t) {
     return (t > RefCountThreshold && t <= Gen);
   }
@@ -579,6 +596,14 @@ public:
     return t;
   }
 
+  static Tag derefPtr(Tag t) {
+    switch (t) {
+      case PtrToCell  : return Cell;
+      case PtrToGen   : return Gen;
+      default         : not_reached();
+    }
+  }
+
   static const char* Strings[];
 
   // translates a compiler Type::Type to a HPHP::DataType
@@ -605,7 +630,8 @@ public:
     }
   }
 
-  static Tag fromDataType(DataType outerType, DataType innerType) {
+  static Tag fromDataType(DataType outerType,
+                          DataType innerType = KindOfInvalid) {
     switch (outerType) {
       case KindOfInvalid       : return None;
       case KindOfUninit        : return Uninit;
@@ -649,7 +675,7 @@ class RawMemSlot {
 
   enum Kind {
     ContLabel, ContDone, ContShouldThrow, ContRunning, ContARPtr,
-    StrLen, FuncNumParams, FuncRefBitVec, FuncBody,
+    StrLen, FuncNumParams, FuncRefBitVec, FuncBody, MisBaseStrOff,
     MaxKind
   };
 
@@ -664,17 +690,19 @@ class RawMemSlot {
       case FuncNumParams:   return GetFuncNumParams();
       case FuncRefBitVec:   return GetFuncRefBitVec();
       case FuncBody:        return GetFuncBody();
+      case MisBaseStrOff:   return GetMisBaseStrOff();
       default: not_reached();
     }
   }
 
-  int64 getOffset()   { return m_offset; }
-  int32 getSize()     { return m_size; }
-  Type::Tag getType() { return m_type; }
+  int64 getOffset()   const { return m_offset; }
+  int32 getSize()     const { return m_size; }
+  Type::Tag getType() const { return m_type; }
+  bool allowExtra()   const { return m_allowExtra; }
 
  private:
-  RawMemSlot(int64 offset, int32 size, Type::Tag type)
-    : m_offset(offset), m_size(size), m_type(type) { }
+  RawMemSlot(int64 offset, int32 size, Type::Tag type, bool allowExtra = false)
+    : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
     static RawMemSlot m(CONTOFF(m_label), sz::qword, Type::Int);
@@ -712,10 +740,16 @@ class RawMemSlot {
     static RawMemSlot m(Func::funcBodyOff(), sz::qword, Type::TCA);
     return m;
   }
+  static RawMemSlot& GetMisBaseStrOff() {
+    static RawMemSlot m(MISOFF(baseStrOff), sz::byte, Type::Bool, true);
+    return m;
+  }
 
   int64 m_offset;
   int32 m_size;
   Type::Tag m_type;
+  bool m_allowExtra; // Used as a flag to ensure that extra offets are
+                     // only used with RawMemSlots that support it
 };
 
 struct Local {
@@ -939,6 +973,11 @@ public:
     setTypeParam(Type::ClassPtr);
     m_clss = f;
   }
+  ConstInstruction(Opcode opc, TCA tca) : IRInstruction(opc) {
+    assert(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::TCA);
+    m_tca = tca;
+  }
   explicit ConstInstruction(IRFactory& factory,
                             const ConstInstruction* inst)
     : IRInstruction(factory, inst)
@@ -1012,7 +1051,7 @@ private:
     const Func*       m_func;
     const Class*      m_clss;
     const VarEnv*     m_varEnv;
-    const TCA         m_tca;
+    TCA               m_tca;
   };
 };
 
@@ -1134,6 +1173,8 @@ public:
   void              incUseCount() { m_useCount++; }
   uint32            decUseCount() { return --m_useCount; }
   bool              isConst() const { return m_inst->isConstInstruction(); }
+  bool              isBoxed() const { return Type::isBoxed(getType()); }
+  bool              isString() const { return isA(Type::Str); }
   bool              getConstValAsBool() const;
   int64             getConstValAsInt() const;
   int64             getConstValAsRawInt() const;
@@ -1143,6 +1184,7 @@ public:
   const Func*       getConstValAsFunc() const;
   const Class*      getConstValAsClass() const;
   uintptr_t         getConstValAsBits() const;
+  TCA               getConstValAsTCA() const;
   void              print(std::ostream& ostream,
                           bool printLastUse = false) const;
   void              print() const;

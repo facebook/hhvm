@@ -18,6 +18,7 @@
 #include <util/asm-x64.h>
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/translator/translator-inline.h>
+#include <runtime/vm/translator/translator-runtime.h>
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/member_operations.h>
 #include <runtime/vm/stats.h>
@@ -67,6 +68,8 @@ static inline T misAssertHelper(T value, bool condition) {
   assert(condition);
   return value;
 }
+
+#undef MISOFF
 #define MISOFF(memb) \
   misAssertHelper(offsetof(MInstrState, memb), m_vecState->needsMIState())
 static const PhysReg unsafe_rsp = rsp;
@@ -105,14 +108,9 @@ static const PhysReg unsafe_rsp = rsp;
   LITML(dl, VALML(dl, dl.valueType() == KindOfInt64 ||                  \
                   IS_STRING_TYPE(dl.valueType())))
 
-#define PREP_CTX(pr)                                                   \
-  Class* ctx = NULL;                                                   \
-  LazyScratchReg rCtx(m_regMap);                                       \
-  ctx = arGetContextClass(curFrame());
-#define CTX()             \
-  IE(true,                \
-     IMM(uintptr_t(ctx)), \
-     R(rCtx))
+#define PREP_CTX(pr) Class* ctx = arGetContextClass(curFrame());
+
+#define CTX() IMM(uintptr_t(ctx))
 
 #define PREP_RESULT(useTvR)                                                   \
   if (!useTvR) {                                                              \
@@ -236,9 +234,6 @@ inline static KeyType getKeyType(const DynLocation& dl) {
 }
 inline static KeyType getKeyTypeS(const DynLocation& dl) {
   return getKeyType(dl, true, false);
-}
-inline static KeyType getKeyTypeI(const DynLocation& dl) {
-  return getKeyType(dl, false, true);
 }
 inline static KeyType getKeyTypeIS(const DynLocation& dl) {
   return getKeyType(dl, true, true);
@@ -434,7 +429,7 @@ void TranslatorX64::emitBaseH(unsigned iInd, LazyScratchReg& rBase) {
 
 template <bool warn, bool define>
 static inline TypedValue* baseNImpl(TypedValue* key,
-                                    TranslatorX64::MInstrState* mis,
+                                    MInstrState* mis,
                                     ActRec* fp) {
   TypedValue* base;
   StringData* name = prepareKey(key);
@@ -475,22 +470,22 @@ static inline TypedValue* baseNImpl(TypedValue* key,
   return base;
 }
 
-static TypedValue* baseN(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseN(TypedValue* key, MInstrState* mis) {
   register ActRec* rbp asm("rbp");
   return baseNImpl<false, false>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
 
-static TypedValue* baseNW(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseNW(TypedValue* key, MInstrState* mis) {
   register ActRec* rbp asm("rbp");
   return baseNImpl<true, false>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
 
-static TypedValue* baseND(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseND(TypedValue* key, MInstrState* mis) {
   register ActRec* rbp asm("rbp");
   return baseNImpl<false, true>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
 
-static TypedValue* baseNWD(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseNWD(TypedValue* key, MInstrState* mis) {
   register ActRec* rbp asm("rbp");
   return baseNImpl<true, true>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
@@ -504,7 +499,7 @@ void TranslatorX64::emitBaseN(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx %s%s\n",
           __func__, long(a.code.frontier),
           (mia & MIA_warn) ? "W" : "", (mia & MIA_define) ? "D" : "");
-  typedef TypedValue* (*BaseNOp)(TypedValue*, TranslatorX64::MInstrState*);
+  typedef TypedValue* (*BaseNOp)(TypedValue*, MInstrState*);
   static_assert(MIA_warn == 0x1 && MIA_define == 0x2,
                 "MIA_* bitmask values were not as expected");
   static const BaseNOp baseNOps[] = {baseN, baseNW, baseND, baseNWD};
@@ -518,7 +513,7 @@ void TranslatorX64::emitBaseN(const Tracelet& t,
 
 template <bool warn, bool define>
 static inline TypedValue* baseGImpl(TypedValue* key,
-                                    TranslatorX64::MInstrState* mis) {
+                                    MInstrState* mis) {
   TypedValue* base;
   StringData* name = prepareKey(key);
   VarEnv* varEnv = g_vmContext->m_globalVarEnv;
@@ -545,19 +540,19 @@ static inline TypedValue* baseGImpl(TypedValue* key,
   return base;
 }
 
-static TypedValue* baseG(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseG(TypedValue* key, MInstrState* mis) {
   return baseGImpl<false, false>(key, mis);
 }
 
-static TypedValue* baseGW(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseGW(TypedValue* key, MInstrState* mis) {
   return baseGImpl<true, false>(key, mis);
 }
 
-static TypedValue* baseGD(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseGD(TypedValue* key, MInstrState* mis) {
   return baseGImpl<false, true>(key, mis);
 }
 
-static TypedValue* baseGWD(TypedValue* key, TranslatorX64::MInstrState* mis) {
+static TypedValue* baseGWD(TypedValue* key, MInstrState* mis) {
   return baseGImpl<true, true>(key, mis);
 }
 
@@ -569,7 +564,7 @@ void TranslatorX64::emitBaseG(const Tracelet& t,
   const MInstrAttr& mia = mii.getAttr(lCode);
   SKTRACE(2, ni.source, "%s %#lx %s%s\n", __func__, long(a.code.frontier),
           (mia & MIA_warn) ? "W" : "", (mia & MIA_define) ? "D" : "");
-  typedef TypedValue* (*BaseGOp)(TypedValue*, TranslatorX64::MInstrState*);
+  typedef TypedValue* (*BaseGOp)(TypedValue*, MInstrState*);
   static_assert(MIA_warn == 0x1 && MIA_define == 0x2,
                 "MIA_* bitmask values were not as expected");
   static const BaseGOp baseGOps[] = {baseG, baseGW, baseGD, baseGWD};
@@ -583,7 +578,7 @@ void TranslatorX64::emitBaseG(const Tracelet& t,
 
 HOT_FUNC_VM
 static TypedValue* baseS(Class* ctx, TypedValue* key, const Class* cls,
-                         TranslatorX64::MInstrState* mis) {
+                         MInstrState* mis) {
   TypedValue* base;
   StringData* name = prepareKey(key);
   bool visible, accessible;
@@ -602,7 +597,7 @@ static TypedValue* baseS(Class* ctx, TypedValue* key, const Class* cls,
 HOT_FUNC_VM
 static TypedValue* baseSClsRef(Class* ctx, TypedValue* key,
                                TypedValue* clsRef,
-                               TranslatorX64::MInstrState* mis) {
+                               MInstrState* mis) {
   assert(clsRef->m_type == KindOfClass);
   const Class* cls = clsRef->m_data.pcls;
   return baseS(ctx, key, cls, mis);
@@ -702,7 +697,7 @@ static inline FuncType helperFromKey(const DynLocation& keyDl,
 template <KeyType keyType, bool unboxKey, bool warn, bool define, bool reffy,
           bool unset>
 static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
-                                   TranslatorX64::MInstrState* mis) {
+                                   MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   if (unset) {
     return ElemU<keyType>(mis->tvScratch, mis->tvRef, base, key);
@@ -762,7 +757,7 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
 #define ELEM(nm, hot, keyType, unboxKey, attrs)                         \
 hot                                                                     \
 static TypedValue* nm(TypedValue* base, TypedValue* key,                \
-                              TranslatorX64::MInstrState* mis) {        \
+                              MInstrState* mis) {        \
   return elemImpl<keyType, unboxKey, WDRU(attrs)>(base, key, mis);      \
 }
 HELPER_TABLE(ELEM)
@@ -779,7 +774,7 @@ void TranslatorX64::emitElem(const Tracelet& t,
   const DynLocation& memb = *ni.inputs[iInd];
 
   typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue*,
-                                TranslatorX64::MInstrState*);
+                                MInstrState*);
   BUILD_OPTABH(getKeyTypeIS(memb), memb.isVariant(), mia);
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(memb), R(mis_rsp));
   rBase.realloc(rax);
@@ -789,7 +784,7 @@ void TranslatorX64::emitElem(const Tracelet& t,
 template <KeyType keyType, bool unboxKey, MInstrAttr attrs, bool isObj>
 static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
                                    TypedValue* key,
-                                   TranslatorX64::MInstrState* mis) {
+                                   MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   return Prop<WDU(attrs), isObj, keyType>(
     mis->tvScratch, mis->tvRef, ctx, base, key);
@@ -840,7 +835,7 @@ static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
 
 #define PROP(nm, ...)                                                   \
 static TypedValue* nm(Class* ctx, TypedValue* base, TypedValue* key,    \
-                              TranslatorX64::MInstrState* mis) {        \
+                              MInstrState* mis) {        \
   return propImpl<__VA_ARGS__>(ctx, base, key, mis);                    \
 }
 HELPER_TABLE(PROP)
@@ -860,7 +855,7 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
   // Emit the appropriate helper call.
   Stats::emitInc(a, Stats::PropAsm_Generic);
   typedef TypedValue* (*OpFunc)(Class*, TypedValue*, TypedValue*,
-                                TranslatorX64::MInstrState*);
+                                MInstrState*);
   BUILD_OPTAB(getKeyTypeS(memb), memb.isVariant(), mia, m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc, CTX(),
                     R(rBase),
@@ -871,10 +866,10 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
 }
 #undef HELPER_TABLE
 
-static int getPropertyOffset(const NormalizedInstruction& ni,
-                             const Class*& baseClass,
-                             const MInstrInfo& mii,
-                             unsigned mInd, unsigned iInd) {
+int getPropertyOffset(const NormalizedInstruction& ni,
+                      const Class*& baseClass,
+                      const MInstrInfo& mii,
+                      unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
     baseClass = ni.inputs[baseIndex]->rtt.isObject()
@@ -1055,7 +1050,7 @@ void TranslatorX64::emitProp(const MInstrInfo& mii,
   }
 }
 
-static TypedValue* newElem(TypedValue* base, TranslatorX64::MInstrState* mis) {
+static TypedValue* newElem(TypedValue* base, MInstrState* mis) {
   return NewElem(mis->tvScratch, mis->tvRef, base);
 }
 
@@ -1210,7 +1205,7 @@ void TranslatorX64::emitRatchetRefs(const Tracelet& t,
 template <KeyType keyType, bool unboxKey, bool isObj>
 static inline void cGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 TypedValue* result,
-                                TranslatorX64::MInstrState* mis) {
+                                MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = Prop<true, false, false, isObj, keyType>(
     *result, mis->tvRef, ctx, base, key);
@@ -1238,7 +1233,7 @@ static inline void cGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
 hot                                                                     \
 static void nm(Class* ctx, TypedValue* base, TypedValue* key,           \
                            TypedValue* result,                          \
-                           TranslatorX64::MInstrState* mis) {           \
+                           MInstrState* mis) {           \
   cGetPropImpl<__VA_ARGS__>(ctx, base, key, result, mis);               \
 }
 HELPER_TABLE(PROP)
@@ -1299,7 +1294,7 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
 template <KeyType keyType, bool unboxKey>
 static inline void vGetElemImpl(TypedValue* base, TypedValue* key,
                                 TypedValue* result,
-                                TranslatorX64::MInstrState* mis) {
+                                MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = ElemD<false, true, keyType>(mis->tvScratch, mis->tvRef, base, key);
   if (base == &mis->tvScratch && base->m_type == KindOfUninit) {
@@ -1326,7 +1321,7 @@ static inline void vGetElemImpl(TypedValue* base, TypedValue* key,
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \
 static void nm(TypedValue* base, TypedValue* key, TypedValue* result,   \
-               TranslatorX64::MInstrState* mis) {                       \
+               MInstrState* mis) {                       \
   vGetElemImpl<__VA_ARGS__>(base, key, result, mis);                    \
 }
 HELPER_TABLE(ELEM)
@@ -1354,7 +1349,7 @@ void TranslatorX64::emitVGetElem(const Tracelet& t,
 template <KeyType keyType, bool unboxKey, bool isObj>
 static inline void vGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 TypedValue* result,
-                                TranslatorX64::MInstrState* mis) {
+                                MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = Prop<false, true, false, isObj, keyType>(mis->tvScratch, mis->tvRef,
                                                   ctx, base, key);
@@ -1385,7 +1380,7 @@ static inline void vGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
 hot                                                                     \
 static void nm(Class* ctx, TypedValue* base, TypedValue* key,           \
                TypedValue* result,                                      \
-               TranslatorX64::MInstrState* mis) {                       \
+               MInstrState* mis) {                       \
   vGetPropImpl<__VA_ARGS__>(ctx, base, key, result, mis);               \
 }
 HELPER_TABLE(PROP)
@@ -1417,7 +1412,7 @@ void TranslatorX64::emitVGetProp(const Tracelet& t,
 
 template <KeyType keyType, bool unboxKey, bool useEmpty>
 static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue* key,
-                                      TranslatorX64::MInstrState* mis) {
+                                      MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   return IssetEmptyElem<useEmpty, false, keyType>(mis->tvScratch, mis->tvRef,
                                                   base, mis->baseStrOff, key);
@@ -1441,7 +1436,7 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue* key,
 #define ISSET(nm, hot, ...)                                     \
 hot                                                             \
 static bool nm(TypedValue* base, TypedValue* key,               \
-               TranslatorX64::MInstrState* mis) {               \
+               MInstrState* mis) {               \
   return issetEmptyElemImpl<__VA_ARGS__>(base, key, mis);       \
 }
 HELPER_TABLE(ISSET)
@@ -1490,7 +1485,7 @@ void TranslatorX64::emitEmptyElem(const Tracelet& t,
 template <KeyType keyType, bool unboxKey, bool useEmpty, bool isObj>
 static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
                                       TypedValue* key,
-                                      TranslatorX64::MInstrState* mis) {
+                                      MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   return IssetEmptyProp<useEmpty, isObj, keyType>(ctx, base, key);
 }
@@ -1517,7 +1512,7 @@ static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
 #define ISSET(nm, hot, ...)                                             \
 hot                                                                     \
 static bool nm(Class* ctx, TypedValue* base, TypedValue* key,           \
-               TranslatorX64::MInstrState* mis) {                       \
+               MInstrState* mis) {                       \
   return issetEmptyPropImpl<__VA_ARGS__>(ctx, base, key, mis);          \
 }
 HELPER_TABLE(ISSET)
@@ -1715,7 +1710,7 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
 
 template <KeyType keyType, bool unboxKey, SetOpOp op, bool setResult>
 static inline void setOpElemImpl(TypedValue* base, TypedValue* key, Cell* val,
-                                 TranslatorX64::MInstrState* mis,
+                                 MInstrState* mis,
                                  TypedValue* tvRes=NULL) {
   key = unbox<keyType, unboxKey>(key);
   TypedValue* result = SetOpElem<keyType>(mis->tvScratch, mis->tvRef, op, base,
@@ -1746,7 +1741,7 @@ static inline void setOpElemImpl(TypedValue* base, TypedValue* key, Cell* val,
 #define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOp##op)
 #define SETOP(nm, ...)                                                  \
 static void nm(TypedValue* base, TypedValue* key, Cell* val,            \
-               TranslatorX64::MInstrState* mis,                         \
+               MInstrState* mis,                         \
                TypedValue* tvRes) {                                     \
   setOpElemImpl<__VA_ARGS__>(base, key, val, mis, tvRes);               \
 }
@@ -1806,7 +1801,7 @@ void TranslatorX64::emitSetOpElem(const Tracelet& t,
 template <KeyType keyType, bool unboxKey, SetOpOp op, bool setResult,
           bool isObj>
 static inline void setOpPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
-                                 Cell* val, TranslatorX64::MInstrState* mis,
+                                 Cell* val, MInstrState* mis,
                                  TypedValue* tvRes=NULL) {
   key = unbox<keyType, unboxKey>(key);
   TypedValue* result = SetOpProp<isObj, keyType>(mis->tvScratch, mis->tvRef,
@@ -1841,7 +1836,7 @@ static inline void setOpPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
 #define HELPER_TABLE(m, op) OPPROP_TABLE(m, setOp, SetOp##op)
 #define SETOP(nm, ...)                                                  \
 static void nm(Class* ctx, TypedValue* base, TypedValue* key,           \
-               Cell* val, TranslatorX64::MInstrState* mis,              \
+               Cell* val, MInstrState* mis,              \
                TypedValue* tvRes) {                                     \
   setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, mis, tvRes);          \
 }
@@ -1898,7 +1893,7 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
 
 template <KeyType keyType, bool unboxKey, IncDecOp op, bool setResult>
 static inline void incDecElemImpl(TypedValue* base, TypedValue* key,
-                                  TranslatorX64::MInstrState* mis,
+                                  MInstrState* mis,
                                   TypedValue* tvRes) {
   key = unbox<keyType, unboxKey>(key);
   IncDecElem<setResult, keyType>(mis->tvScratch, mis->tvRef, op, base, key,
@@ -1908,7 +1903,7 @@ static inline void incDecElemImpl(TypedValue* base, TypedValue* key,
 #define HELPER_TABLE(m, op) OPELEM_TABLE(m, incDec, op)
 #define INCDEC(nm, ...)                                           \
 static void nm(TypedValue* base, TypedValue* key,                 \
-               TranslatorX64::MInstrState* mis,                   \
+               MInstrState* mis,                   \
                TypedValue* tvRes) {                               \
   incDecElemImpl<__VA_ARGS__>(base, key, mis, tvRes);             \
 }
@@ -1950,7 +1945,7 @@ void TranslatorX64::emitIncDecElem(const Tracelet& t,
 template <KeyType keyType, bool unboxKey, IncDecOp op, bool setResult,
           bool isObj>
 static inline void incDecPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
-                                  TranslatorX64::MInstrState* mis,
+                                  MInstrState* mis,
                                   TypedValue* tvRes) {
   key = unbox<keyType, unboxKey>(key);
   IncDecProp<setResult, isObj, keyType>(mis->tvScratch, mis->tvRef, ctx, op,
@@ -1961,7 +1956,7 @@ static inline void incDecPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
 #define HELPER_TABLE(m, op) OPPROP_TABLE(m, incDec, op)
 #define INCDEC(nm, ...)                                                 \
 static void nm(Class* ctx, TypedValue* base, TypedValue* key,           \
-               TranslatorX64::MInstrState* mis, TypedValue* tvRes) {    \
+               MInstrState* mis, TypedValue* tvRes) {    \
   incDecPropImpl<__VA_ARGS__>(ctx, base, key, mis, tvRes);              \
 }
 #define INCDEC_OP(op) HELPER_TABLE(INCDEC, op)
@@ -2012,7 +2007,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
 
 template <KeyType keyType, bool unboxKey>
 static inline void bindElemImpl(TypedValue* base, TypedValue* key, RefData* val,
-                                TranslatorX64::MInstrState* mis) {
+                                MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = ElemD<false, true, keyType>(mis->tvScratch, mis->tvRef, base, key);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
@@ -2031,7 +2026,7 @@ static inline void bindElemImpl(TypedValue* base, TypedValue* key, RefData* val,
 
 #define ELEM(nm, ...)                                                   \
 static void nm(TypedValue* base, TypedValue* key, RefData* val,         \
-               TranslatorX64::MInstrState* mis) {                       \
+               MInstrState* mis) {                       \
   bindElemImpl<__VA_ARGS__>(base, key, val, mis);                       \
 }
 HELPER_TABLE(ELEM)
@@ -2059,7 +2054,7 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
 
 template <KeyType keyType, bool unboxKey, bool isObj>
 static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
-                                RefData* val, TranslatorX64::MInstrState* mis) {
+                                RefData* val, MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = Prop<false, true, false, isObj, keyType>(mis->tvScratch, mis->tvRef,
                                                   ctx, base, key);
@@ -2082,7 +2077,7 @@ static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
 #define PROP(nm, ...)                                                   \
 static inline void nm(Class* ctx, TypedValue* base, TypedValue* key,    \
                                 RefData* val,                           \
-                                TranslatorX64::MInstrState* mis) {      \
+                                MInstrState* mis) {      \
   bindPropImpl<__VA_ARGS__>(ctx, base, key, val, mis);                  \
 }
 HELPER_TABLE(PROP)
@@ -2200,7 +2195,7 @@ void TranslatorX64::emitUnsetProp(const Tracelet& t,
 #undef HELPER_TABLE
 
 static inline void vGetNewElem(TypedValue* base, TypedValue* result,
-                               TranslatorX64::MInstrState* mis) {
+                               MInstrState* mis) {
   base = NewElem(mis->tvScratch, mis->tvRef, base);
   if (base == &mis->tvScratch && base->m_type == KindOfUninit) {
     // Error (no result was set).
@@ -2262,7 +2257,7 @@ void TranslatorX64::emitSetNewElem(const Tracelet& t,
 
 template <unsigned char op, bool setResult>
 static inline void setOpNewElemImpl(TypedValue* base, Cell* val,
-                                    TranslatorX64::MInstrState* mis,
+                                    MInstrState* mis,
                                     TypedValue* tvRes=NULL) {
   TypedValue* result = SetOpNewElem(mis->tvScratch, mis->tvRef, op, base, val);
   if (setResult) {
@@ -2275,12 +2270,12 @@ static inline void setOpNewElemImpl(TypedValue* base, Cell* val,
 
 #define SETOP_OP(op, bcOp) \
 static void setOp##op##NewElemR(TypedValue* base, Cell* val, \
-                                TranslatorX64::MInstrState* mis, \
+                                MInstrState* mis, \
                                 TypedValue* tvRes) { \
   setOpNewElemImpl<SetOp##op, true>(base, val, mis, tvRes); \
 } \
 static void setOp##op##NewElem(TypedValue* base, Cell* val, \
-                               TranslatorX64::MInstrState* mis) { \
+                               MInstrState* mis) { \
   setOpNewElemImpl<SetOp##op, false>(base, val, mis); \
 }
 SETOP_OPS
@@ -2336,19 +2331,19 @@ void TranslatorX64::emitSetOpNewElem(const Tracelet& t,
 
 template <unsigned char op, bool setResult>
 static inline void incDecNewElemImpl(TypedValue* base,
-                                     TranslatorX64::MInstrState* mis,
+                                     MInstrState* mis,
                                      TypedValue* tvRes) {
   IncDecNewElem<setResult>(mis->tvScratch, mis->tvRef, op, base, *tvRes);
 }
 
 #define INCDEC_OP(op) \
 static void incDec##op##NewElemR(TypedValue* base, \
-                                 TranslatorX64::MInstrState* mis, \
+                                 MInstrState* mis, \
                                  TypedValue* tvRes) { \
   incDecNewElemImpl<op, true>(base, mis, tvRes); \
 } \
 static void incDec##op##NewElem(TypedValue* base, \
-                                TranslatorX64::MInstrState* mis) { \
+                                MInstrState* mis) { \
   TypedValue tvRes; /* Not used; no need to initialize. */ \
   incDecNewElemImpl<op, false>(base, mis, &tvRes); \
 }
@@ -2396,7 +2391,7 @@ void TranslatorX64::emitIncDecNewElem(const Tracelet& t,
 }
 
 static inline void bindNewElem(TypedValue* base, RefData* val,
-                               TranslatorX64::MInstrState* mis) {
+                               MInstrState* mis) {
   base = NewElem(mis->tvScratch, mis->tvRef, base);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBind(val->tv(), base);
@@ -2662,7 +2657,7 @@ void TranslatorX64::emitMPost(const Tracelet& t,
 template <KeyType keyType, bool unboxKey>
 static inline void cGetElemImpl(TypedValue* base, TypedValue* key,
                                 TypedValue* result,
-                                TranslatorX64::MInstrState* mis) {
+                                MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = Elem<true, keyType>(*result, mis->tvRef, base, mis->baseStrOff, key);
   if (base != result) {
@@ -2687,7 +2682,7 @@ static inline void cGetElemImpl(TypedValue* base, TypedValue* key,
 hot                                                                     \
 static void nm(TypedValue* base, TypedValue* key,                       \
                          TypedValue* result,                            \
-                         TranslatorX64::MInstrState* mis) {             \
+                         MInstrState* mis) {             \
   cGetElemImpl<__VA_ARGS__>(base, key, result, mis);                    \
 }
 HELPER_TABLE(ELEM)

@@ -237,6 +237,7 @@ public:
     TypeReg, // Type register. Might need arch-specific mangling before call
     Imm,     // Immediate
     Addr,    // Address
+    None,    // Nothing: register will contain garbage
   };
 
   PhysReg getDstReg() const { return m_dstReg; }
@@ -331,7 +332,29 @@ struct ArgGroup {
     return ssa(tmp).type(tmp);
   }
 
+  ArgGroup& none() {
+    m_args.push_back(ArgDesc(ArgDesc::None, InvalidReg, -1));
+    return *this;
+  }
+
+  ArgGroup& vectorKeyIS(SSATmp* key) {
+    return vectorKeyImpl(key, true);
+  }
+
+  ArgGroup& vectorKeyS(SSATmp* key) {
+    return vectorKeyImpl(key, false);
+  }
+
 private:
+  ArgGroup& vectorKeyImpl(SSATmp* key, bool allowInt) {
+    if (Type::isString(key->getType()) || (allowInt && key->isA(Type::Int))) {
+      ssa(key).none();
+    } else {
+      valueType(key);
+    }
+    return *this;
+  }
+
   std::vector<ArgDesc> m_args;
 };
 

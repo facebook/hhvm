@@ -83,8 +83,12 @@ using Transl::rVmSp;
 using Transl::rVmFp;
 
 const int64_t kTypeShiftBits = sizeof(int32_t) * CHAR_BIT;
-int64 toDataTypeForCall(Type::Tag type) {
+int64_t toDataTypeForCall(Type::Tag type) {
   return (int64)Type::toDataType(type) << (sizeof(int32_t) * CHAR_BIT);
+}
+
+int64_t spillSlotsToSize(int n) {
+  return n * sizeof(int64_t);
 }
 
 void cgPunt(const char* _file, int _line, const char* _func) {
@@ -222,6 +226,11 @@ pathloop:
 //////////////////////////////////////////////////////////////////////
 
 ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
+  if (tmp->getType() == Type::None) {
+    assert(val);
+    m_kind = None;
+    return;
+  }
   if (tmp->getInstruction()->isDefConst()) {
     m_srcReg = InvalidReg;
     if (val) {
@@ -560,7 +569,8 @@ void CodeGenerator::cgCallHelper(Asm& a,
     assert(args[i].getKind() == ArgDesc::Reg ||
            args[i].getKind() == ArgDesc::TypeReg ||
            args[i].getKind() == ArgDesc::Imm ||
-           args[i].getKind() == ArgDesc::Addr);
+           args[i].getKind() == ArgDesc::Addr ||
+           args[i].getKind() == ArgDesc::None);
   }
   // Handle register-to-register moves.
   int moves[kNumX64Regs];
@@ -595,10 +605,11 @@ void CodeGenerator::cgCallHelper(Asm& a,
   for (size_t i = 0; i < howTo.size(); ++i) {
     if (howTo[i].m_kind == MoveInfo::Move) {
       ArgDesc* argDesc = argDescs[int(howTo[i].m_reg2)];
-      if (argDesc->getKind() == ArgDesc::Reg) {
+      if (argDesc->getKind() == ArgDesc::Reg ||
+          argDesc->getKind() == ArgDesc::TypeReg) {
         a.    movq   (howTo[i].m_reg1, howTo[i].m_reg2);
       } else {
-        // argDesc->getKind() == Addr
+        assert(argDesc->getKind() == ArgDesc::Addr);
         a.    lea    (howTo[i].m_reg1[argDesc->getImm().q()],
                       howTo[i].m_reg2);
       }
@@ -632,10 +643,15 @@ void CodeGenerator::cgCallHelper(Asm& a,
             numBetweenCaller);
     }
   }
-  // Handle const-to-register moves.
+  // Handle const-to-register moves and type shifting
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i].getKind() == ArgDesc::Imm) {
       a.    movq   (args[i].getImm(), args[i].getDstReg());
+    } else if (args[i].getKind() == ArgDesc::TypeReg) {
+      a.    shlq   (kTypeShiftBits, args[i].getDstReg());
+    } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
+               args[i].getKind() == ArgDesc::None) {
+      a.    movq   (0xbadbadbadbadbad, args[i].getDstReg());
     }
   }
 
@@ -1631,7 +1647,7 @@ void CodeGenerator::cgAllocSpill(IRInstruction* inst) {
   int64 n = numSlots->getConstValAsInt();
   assert(n >= 0 && n % 2 == 0);
   if (n > 0) {
-    m_as.sub_imm32_reg64(sizeof(uint64) * n, reg::rsp);
+    m_as.sub_imm32_reg64(spillSlotsToSize(n), reg::rsp);
   }
 }
 
@@ -1642,7 +1658,7 @@ void CodeGenerator::cgFreeSpill(IRInstruction* inst) {
   int64 n = numSlots->getConstValAsInt();
   assert(n >= 0 && n % 2 == 0);
   if (n > 0) {
-    m_as.add_imm32_reg64(sizeof(uint64) * n, reg::rsp);
+    m_as.add_imm32_reg64(spillSlotsToSize(n), reg::rsp);
   }
 }
 
@@ -1963,15 +1979,7 @@ void CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
 
   // Type::Cell, Type::Gen, Type::String, or Type::Arr
   TCA patch1 = NULL;
-  // TODO: Should be able to merge Gen case with Cell
-  if (type == Type::Gen) {
-    CG_PUNT(cgIncRef_Gen); // for now
-    // may be variant or cell
-    m_as.cmp_imm32_disp_reg32(KindOfRefCountThreshold, TVOFF(m_type), base);
-    patch1 = m_as.code.frontier;
-    m_as.jcc8(CC_LE, patch1);
-  }
-  if (type == Type::Cell) {
+  if (!Type::isStaticallyKnown(type)) {
     auto typ = src->getReg(1);
     m_as.cmp_imm32_reg32(KindOfRefCountThreshold, typ);
     patch1 = m_as.code.frontier;
@@ -2460,6 +2468,11 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
         // Decref'ing top of vm stack, very likely a popR
         m_tx64->emitCall(m_as, m_tx64->m_irPopRHelper);
       } else {
+        if (baseReg == rsp) {
+          // Because we just pushed %rdi, %rsp is 8 bytes below where
+          // offset is expecting it to be.
+          offset += sizeof(int64_t);
+        }
         m_as.lea(baseReg[offset], rdi);
         m_tx64->emitCall(m_as, m_tx64->m_dtorGenericStub);
       }
@@ -2523,6 +2536,14 @@ void CodeGenerator::cgDecRefMem(Type::Tag type,
     // to load the type and the data.
     cgDecRefDynamicTypeMem(baseReg, offset, exit);
   }
+}
+
+void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
+  assert(Type::isPtr(inst->getSrc(0)->getType()));
+  cgDecRefMem(inst->getTypeParam(),
+              inst->getSrc(0)->getReg(),
+              inst->getSrc(1)->getConstValAsInt(),
+              inst->getLabel());
 }
 
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
@@ -2975,12 +2996,14 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
   auto baseReg = inst->getSrc(0)->getReg();
   int64 kind = inst->getSrc(1)->getConstValAsInt();
   SSATmp* value = inst->getSrc(2);
+  int64 extraOff = inst->getSrc(3)->getConstValAsInt();
 
   RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+  always_assert(IMPLIES(extraOff != 0, slot.allowExtra()));
   int stSize = slot.getSize();
-  int64 off = slot.getOffset();
-  if (value->isConst()) {
+  int64 off = slot.getOffset() + extraOff;
 
+  if (value->isConst()) {
     if (stSize == sz::qword) {
       m_as.store_imm64_disp_reg64(value->getConstValAsInt(),
                                   off,
@@ -2996,7 +3019,6 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
                                baseReg);
     }
   } else {
-
     if (stSize == sz::qword) {
       m_as.store_reg64_disp_reg64(value->getReg(),
                                   off,
@@ -3191,7 +3213,9 @@ void CodeGenerator::cgLdMem(IRInstruction * inst) {
   SSATmp*           dst   = inst->getDst();
   SSATmp*           addr  = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
-  cgLoad(type, dst, addr->getReg(), 0, label);
+  int64_t           offset= inst->getSrc(1)->getConstValAsInt();
+
+  cgLoad(type, dst, addr->getReg(), offset, label);
 }
 
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
@@ -3221,6 +3245,13 @@ void CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
                (SSATmp*)NULL,
                kSyncPoint,
                ArgGroup().immPtr(name));
+}
+
+void CodeGenerator::cgLdAddr(IRInstruction* inst) {
+  auto base = inst->getSrc(0)->getReg();
+  int64 offset = inst->getSrc(1)->getConstValAsInt();
+  auto dest = inst->getDst()->getReg();
+  m_as.lea (base[offset], dest);
 }
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
@@ -3339,6 +3370,43 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
   getLocalRegOffset(index, fpReg, offset);
   assert(fpReg == rVmFp);
   cgGuardTypeCell(type, fpReg, offset, label, inst);
+}
+
+void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
+  assert(inst->getDst()->getType() == Type::PtrToCell);
+  assert(inst->getDst()->getReg() == rsp);
+}
+
+void CodeGenerator::cgPropX(IRInstruction* inst) {
+  cgCallHelper(m_as,
+               inst->getSrc(0)->getConstValAsTCA(),
+               inst->getDst(),
+               kSyncPoint,
+               ArgGroup().ssa(inst->getSrc(1))
+                         .ssa(inst->getSrc(2))
+                         .vectorKeyS(inst->getSrc(3))
+                         .ssa(inst->getSrc(4)));
+}
+
+void CodeGenerator::cgCGetProp(IRInstruction* inst) {
+  cgCallHelper(m_as,
+               inst->getSrc(0)->getConstValAsTCA(),
+               inst->getDst(),
+               kSyncPoint,
+               ArgGroup().ssa(inst->getSrc(1))
+                         .ssa(inst->getSrc(2))
+                         .vectorKeyS(inst->getSrc(3))
+                         .ssa(inst->getSrc(4)));
+}
+
+void CodeGenerator::cgCGetElem(IRInstruction* inst) {
+  cgCallHelper(m_as,
+               inst->getSrc(0)->getConstValAsTCA(),
+               inst->getDst(),
+               kSyncPoint,
+               ArgGroup().ssa(inst->getSrc(1))
+                         .vectorKeyIS(inst->getSrc(2))
+                         .ssa(inst->getSrc(3)));
 }
 
 void CodeGenerator::cgGuardType(IRInstruction* inst) {

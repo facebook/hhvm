@@ -148,8 +148,8 @@ private:
 // bytes for spill locations in __enterTCHelper in translator-x64.cpp.
 // Be careful when changing this value.
 static const int NumPreAllocatedSpillLocs = 16;
-static_assert(kReservedRSPScratchSpace == NumPreAllocatedSpillLocs * 8,
-              "kReservedRSPScratchSpace changes require updates in "
+static_assert(kReservedRSPSpillSpace == NumPreAllocatedSpillLocs * sizeof(void*),
+              "kReservedRSPSpillSpace changes require updates in "
               "LinearScan");
 
 // The dst of IncRef, Mov, StRef, and StRefNT has the same value
@@ -362,6 +362,11 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       opc == GuardStk || opc == AssertStk) {
     assert(type == Type::StkPtr);
     allocRegToTmp(&m_regs[int(rVmSp)], ssaTmp, 0);
+    return;
+  }
+  if (opc == DefMIStateBase) {
+    assert(type == Type::PtrToCell);
+    allocRegToTmp(&m_regs[int(rsp)], ssaTmp, 0);
     return;
   }
 
@@ -592,7 +597,7 @@ void LinearScan::collectNativesAux(Trace* trace) {
     }
     if (inst->isControlFlowInstruction()) {
       LabelInstruction* label = inst->getLabel();
-      if (label != NULL && label->getId() == inst->getId() + 1) {
+      if (label->getId() == inst->getId() + 1) {
         collectNativesAux(label->getParent());
       }
     }
@@ -608,6 +613,10 @@ void LinearScan::computePreColoringHint() {
   if (nextNative == NULL) {
     return;
   }
+
+  // For instructions that want to hint a continuous increasing range
+  // of sources to a continuous increasing range of argument
+  // registers.
   auto normalHint = [&](int count, int srcBase = 0, int argBase = 0) {
     for (int i = 0; i < count; ++i) {
       m_preColoringHint.add(nextNative->getSrc(i + srcBase), 0,
@@ -729,6 +738,35 @@ void LinearScan::computePreColoringHint() {
       } else if (Type::isString(fromType) && toType == Type::Int) {
         m_preColoringHint.add(src, 0, 0);
       }
+      break;
+    }
+    case PropX: {
+      unsigned arg = 0;
+      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
+      m_preColoringHint.add(nextNative->getSrc(4), 0, arg++);
+      assert(arg == 5);
+      break;
+    }
+    case CGetProp: {
+      unsigned arg = 0;
+      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
+      m_preColoringHint.add(nextNative->getSrc(4), 0, arg++);
+      assert(arg == 5);
+      break;
+    }
+    case CGetElem: {
+      unsigned arg = 0;
+      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(2), 1, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
+      assert(arg == 4);
       break;
     }
     default:
@@ -930,6 +968,12 @@ void LinearScan::rematerializeAux(Trace* trace,
                                   SSATmp* curSp,
                                   SSATmp* curFp,
                                   std::vector<SSATmp*> localValues) {
+  auto killLocal = [&](int loc) {
+    if (localValues.size() > loc) {
+      localValues[loc] = nullptr;
+    }
+  };
+
   IRInstruction::List& instList = trace->getInstructionList();
   for (IRInstruction::Iterator it = instList.begin();
        it != instList.end();
@@ -991,6 +1035,7 @@ void LinearScan::rematerializeAux(Trace* trace,
       // <inst> modifies the stack pointer.
       curSp = dst;
     }
+
     if (opc == LdLoc || opc == StLoc || opc == StLocNT) {
       // dst = LdLoc home
       // StLoc/StLocNT home, src
@@ -1007,17 +1052,17 @@ void LinearScan::rematerializeAux(Trace* trace,
     // kill the local variable values.
     else if (opc == IterInit) {
       int valLocId = inst->getSrc(3)->getConstValAsInt();
-      localValues[valLocId] = NULL;
+      killLocal(valLocId);
       if (inst->getNumSrcs() == 5) {
         int keyLocId = inst->getSrc(4)->getConstValAsInt();
-        localValues[keyLocId] = NULL;
+        killLocal(keyLocId);
       }
     } else if (opc == IterNext) {
       int valLocId = inst->getSrc(2)->getConstValAsInt();
-      localValues[valLocId] = NULL;
+      killLocal(valLocId);
       if (inst->getNumSrcs() == 4) {
         int keyLocId = inst->getSrc(3)->getConstValAsInt();
-        localValues[keyLocId] = NULL;
+        killLocal(keyLocId);
       }
     }
 

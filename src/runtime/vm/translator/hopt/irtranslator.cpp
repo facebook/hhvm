@@ -18,6 +18,7 @@
 
 #include "folly/Format.h"
 #include "util/trace.h"
+#include "util/util.h"
 
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/runtime.h"
@@ -90,7 +91,6 @@ tx64LocPhysicalOffset(const Location& l, const Func *f = NULL) {
     m_hhbcTrans->emit ## op(__VA_ARGS__);       \
     return;                                     \
   } while (0)
-
 
 bool isInferredType(const NormalizedInstruction& i) {
   return (i.getOutputUsage(i.outStack) ==
@@ -750,9 +750,10 @@ TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
     // irPassPredictedAndInferredTypes
     HHIR_EMIT(CGetProp, locCode, propOffset, propLoc.isStack(),
               getInferredOrPredictedType(i), isInferredType(i));
-  } else {
-    HHIR_UNIMPLEMENTED(CGetMSlow);
+    return;
   }
+
+  m_hhbcTrans->emitMInstr(i);
 }
 
 static bool
@@ -768,7 +769,7 @@ isSupportedCGetMProp(const NormalizedInstruction& i) {
 
 void
 TranslatorX64::irTranslateCGetM(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+                                const NormalizedInstruction& i) {
   assert(i.inputs.size() >= 2);
   assert(i.outStack);
 
@@ -776,9 +777,8 @@ TranslatorX64::irTranslateCGetM(const Tracelet& t,
     irTranslateCGetMProp(t, i);
     return;
   }
-  HHIR_UNIMPLEMENTED(CGetM);
-  // Even when basic CGetM is implemented, following may not be
-  HHIR_UNIMPLEMENTED_WHEN(!(isSupportedCGetM_LE(i) || isSupportedCGetM_RE(i)), CGetM);
+
+  m_hhbcTrans->emitMInstr(i);
 }
 
 void
@@ -791,9 +791,7 @@ TranslatorX64::irTranslateVGetG(const Tracelet& t,
 void
 TranslatorX64::irTranslateVGetM(const Tracelet& t,
                                 const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(VGetM);
-
-  NOT_REACHED();
+  m_hhbcTrans->emitMInstr(i);
 }
 
 void
@@ -834,13 +832,12 @@ void TranslatorX64::irTranslateFPassG(const Tracelet& t,
 void
 TranslatorX64::irTranslateIssetM(const Tracelet& t,
                                  const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(IssetM);
+  m_hhbcTrans->emitMInstr(i);
 }
 
 void TranslatorX64::irTranslateEmptyM(const Tracelet& t,
                                       const NormalizedInstruction& ni) {
-  HHIR_UNIMPLEMENTED(EmptyM);
-  // irTranslateEmptyMGeneric(t, ni); // HHIR:TODO:MERGE new translation
+  m_hhbcTrans->emitMInstr(ni);
 }
 
 void
@@ -912,13 +909,13 @@ static bool isSupportedSetMProp(const NormalizedInstruction& i) {
 
 void
 TranslatorX64::irTranslateSetM(const Tracelet& t,
-                             const NormalizedInstruction& i) {
+                               const NormalizedInstruction& i) {
   if (isSupportedSetMProp(i)) {
     irTranslateSetMProp(t, i);
     return;
   }
 
-  HHIR_UNIMPLEMENTED(SetM);
+  m_hhbcTrans->emitMInstr(i);
 }
 
 void
@@ -958,17 +955,15 @@ TranslatorX64::irTranslateIncDecM(const Tracelet& t,
       const DynLocation& prop = *i.inputs[1];
       const Location& propLoc = prop.location;
       HHIR_EMIT(IncDecProp, pre, inc, offset, propLoc.isStack());
-    } else {
-      HHIR_UNIMPLEMENTED(IncDecMPropSlow);
     }
   }
-  HHIR_UNIMPLEMENTED(IncDecM);
+
+  m_hhbcTrans->emitMInstr(i);
 }
 
 void TranslatorX64::irTranslateSetOpM(const Tracelet& t,
                                       const NormalizedInstruction& ni) {
-  HHIR_UNIMPLEMENTED(SetOpM);
-  // translateSetOpMGeneric(t, ni); // HHIR:TODO:MERGE new translation
+  m_hhbcTrans->emitMInstr(ni);
 }
 
 void
@@ -991,19 +986,19 @@ TranslatorX64::irTranslateIncDecL(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateUnsetL(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+                                 const NormalizedInstruction& i) {
   HHIR_EMIT(UnsetL, i.inputs[0]->location.offset);
 }
 
 void
 TranslatorX64::irTranslateUnsetM(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(UnsetM);
+                                 const NormalizedInstruction& i) {
+  m_hhbcTrans->emitMInstr(i);
 }
 
 void TranslatorX64::irTranslateBindM(const Tracelet& t,
                                      const NormalizedInstruction& ni) {
-  HHIR_UNIMPLEMENTED(BindM);
+  m_hhbcTrans->emitMInstr(ni);
 }
 
 void
@@ -1173,12 +1168,15 @@ TranslatorX64::irTranslateFPassCOp(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateFPassM(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-
+                                 const NormalizedInstruction& i) {
   assert(i.inputs.size() >= 1);
   assert(i.outStack && !i.outLocal);
-  HHIR_UNIMPLEMENTED_WHEN((i.preppedByRef), FPassM);
-  irTranslateCGetM(t, i);
+
+  if (i.preppedByRef) {
+    irTranslateVGetM(t, i);
+  } else {
+    irTranslateCGetM(t, i);
+  }
 }
 
 void
@@ -1570,6 +1568,8 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     // Translate each instruction in the tracelet
     for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
          ni = ni->next) {
+      m_curNI = ni;
+      Nuller<NormalizedInstruction> niNuller(&m_curNI);
       irTranslateInstr(t, *ni);
       assert(ni->source.offset() >= curFunc()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid

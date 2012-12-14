@@ -39,15 +39,16 @@ typedef __sighandler_t *sighandler_t;
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "util/pathtrack.h"
-#include "util/trace.h"
+#include "util/asm-x64.h"
 #include "util/bitops.h"
 #include "util/debug.h"
-#include "util/ringbuffer.h"
-#include "util/rank.h"
-#include "util/timer.h"
 #include "util/maphuge.h"
-#include "util/asm-x64.h"
+#include "util/pathtrack.h"
+#include "util/rank.h"
+#include "util/ringbuffer.h"
+#include "util/timer.h"
+#include "util/trace.h"
+#include "util/util.h"
 
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/php_debug.h"
@@ -3059,7 +3060,7 @@ static_assert(rVmSp == rbx &&
               rVmTl == r12 &&
               rStashedAR == r15,
   "__enterTCHelper needs to be modified to use the correct ABI");
-static_assert(kReservedRSPScratchSpace == 0x80,
+static_assert(kReservedRSPScratchSpace == 0x100,
               "enterTCHelper needs to be updated for changes to "
               "kReservedRSPScratchSpace");
 static_assert(REQ_BIND_CALL == 0x1,
@@ -3097,7 +3098,7 @@ asm (
    * 16-byte aligned.
    */
 
-  "sub $0x80, %rsp\n" // kReservedRSPScratchSpace
+  "sub $0x100, %rsp\n" // kReservedRSPScratchSpace
 
   /*
    * If returning from a BIND_CALL request, push the return IP saved
@@ -3115,7 +3116,7 @@ asm (
   "call *%rdx\n"
 ".LenterTCHelper$serviceReqLabel:\n"
 
-  "add $0x80, %rsp\n"
+  "add $0x100, %rsp\n" // kReservedRSPScratchSpace
   // Restore infoPtr into %rbx
   "pop %rbx\n"
   ".cfi_adjust_cfa_offset -8\n"

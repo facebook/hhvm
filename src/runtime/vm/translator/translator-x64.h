@@ -374,36 +374,6 @@ private:
   void allocInputsForCall(const NormalizedInstruction& i,
                           const int* args);
 
- public:
-  struct MInstrState {
-    // Room for this structure is allocated on the stack before we
-    // make a call into the tc, so this first element is padding for
-    // the return address pushed by the call.
-    uintptr_t returnAddress;
-    uintptr_t padding; // keep the following TV's SSE friendly.
-    union {
-      // This space is used for both vector instructions and
-      // the return value of builtin functions that return by reference.
-      // Since we don't ever use the two at the same time, it is
-      // OK to use a union.
-      TypedValue tvScratch;
-      TypedValue tvBuiltinReturn;
-    };
-    TypedValue tvRef;
-    TypedValue tvRef2;
-    TypedValue tvResult;
-    TypedValue tvVal;
-    bool baseStrOff;
-    Class* ctx;
-  } __attribute__((aligned(16)));
-  static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
-                "MInstrState members require 16-byte alignment for SSE");
-  static_assert(sizeof(TranslatorX64::MInstrState)
-                    - sizeof(uintptr_t) // return address
-                  < kReservedRSPScratchSpace,
-                "MInstrState is too large for the rsp scratch space "
-                "in enterTCHelper");
-
  private:
 
   MVecTransState* m_vecState;
@@ -1150,6 +1120,10 @@ int getNormalPropertyOffset(const NormalizedInstruction& i,
                             const MInstrInfo&,
                             int propInput, int objInput);
 bool mInstrHasUnknownOffsets(const NormalizedInstruction& i);
+int getPropertyOffset(const NormalizedInstruction& ni,
+                      const Class*& baseClass,
+                      const MInstrInfo& mii,
+                      unsigned mInd, unsigned iInd);
 bool isSupportedCGetM_LE(const NormalizedInstruction& i);
 bool isSupportedCGetM_RE(const NormalizedInstruction& i);
 bool isSupportedCGetM(const NormalizedInstruction& i);

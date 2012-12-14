@@ -73,7 +73,8 @@ public:
   SSATmp* genLdThis(Trace* trace);
   SSATmp* genLdRetAddr();
   SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type::Tag type);
-  void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
+  void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value,
+                   int64 extraOff);
 
   SSATmp* genLdLoc(uint32 id);
 
@@ -101,11 +102,20 @@ public:
                    bool genStoreType,
                    Trace* exit);
   SSATmp* genLdMem(SSATmp* addr, Type::Tag type, Trace* target);
+  SSATmp* genLdMem(SSATmp* addr, int64_t offset,
+                   Type::Tag type, Trace* target);
   void    genStMem(SSATmp* addr, SSATmp* src, bool genStoreType);
   void    genStMem(SSATmp* addr, int64 offset, SSATmp* src, bool stType);
   SSATmp* genLdProp(SSATmp* obj, SSATmp* prop, Type::Tag type, Trace* exit);
   void    genStProp(SSATmp* obj, SSATmp* prop, SSATmp* src, bool genStoreType);
   void    genSetPropCell(SSATmp* base, int64 offset, SSATmp* value);
+
+  SSATmp* genDefMIStateBase();
+  SSATmp* genPropX(TCA func, Class* ctx,
+                   SSATmp* base, SSATmp* key, SSATmp* mis);
+  SSATmp* genCGetProp(TCA func, Class* ctx, SSATmp* base, SSATmp* key,
+                      SSATmp* mis);
+  SSATmp* genCGetElem(TCA func, SSATmp* base, SSATmp* key, SSATmp* mis);
 
   SSATmp* genBoxLoc(uint32 id);
   void    genBindLoc(uint32 id, SSATmp* ref, bool doRefCount = true);
@@ -147,6 +157,7 @@ public:
   SSATmp* genLdRef(SSATmp* ref, Type::Tag type, Trace* exit);
   SSATmp* genAdd(SSATmp* src1, SSATmp* src2);
   void    genRaiseUninitWarning(uint32 id);
+  SSATmp* genLdAddr(SSATmp* base, int64 offset);
 
   SSATmp* genSub(SSATmp* src1, SSATmp* src2);
   SSATmp* genMul(SSATmp* src1, SSATmp* src2);
@@ -190,6 +201,7 @@ public:
   SSATmp* genRetAdjustStack();
   void    genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
   void    genDecRef(SSATmp* tmp);
+  void    genDecRefMem(SSATmp* base, int64 offset, Type::Tag type);
   void    genDecRefStack(Type::Tag type, uint32 stackOff);
   void    genDecRefLoc(int id);
   void    genDecRefThis();
@@ -281,7 +293,10 @@ public:
     ConstInstruction inst(DefConst, val);
     return optimizeInst(&inst);
   }
-
+  SSATmp* genDefVoid() {
+    ConstInstruction inst(DefConst, Type::None);
+    return optimizeInst(&inst);
+  }
   template<typename T>
   SSATmp* genLdConst(T val) {
     ConstInstruction inst(LdConst, val);

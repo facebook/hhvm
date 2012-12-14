@@ -240,6 +240,7 @@ const int kNumX64Regs = 16;
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)
 #define CONTOFF(nm) offsetof(c_Continuation, nm)
+#define MISOFF(nm) offsetof(Transl::MInstrState, nm)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -247,9 +248,10 @@ const int kNumX64Regs = 16;
  * This much space (in bytes) at 8(%rsp) is allocated on entry to the
  * TC and made available for scratch purposes (right above the return
  * address).  It is used as spill locations by HHIR (see LinearScan),
- * and for MInstrState in translator-x64-vector.cpp.
+ * and for MInstrState in both HHIR and translator-x64-vector.cpp.
  */
-const size_t kReservedRSPScratchSpace = 0x80;
+const size_t kReservedRSPScratchSpace = 0x100;
+const size_t kReservedRSPSpillSpace = 0x80;
 
 //////////////////////////////////////////////////////////////////////
 

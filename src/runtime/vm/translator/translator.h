@@ -209,6 +209,9 @@ struct DynLocation {
   DataType valueType() const {
     return rtt.valueType();
   }
+  DataType innerType() const {
+    return rtt.innerType();
+  }
   DataType outerType() const {
     return rtt.outerType();
   }

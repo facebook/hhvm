@@ -615,6 +615,11 @@ ExitGuardFailure
 12. Refcounting and copies
 
 Mov
+
+D:PtrTo* = LdAddr S0:PtrTo* S1:ConstInt
+
+  Load address. Returns a pointer to (S0 + S1) with the same type as S0.
+
 IncRef
 DecRefLoc
 
@@ -628,6 +633,11 @@ DecRef S0:Gen
 
   Decrease the reference count of S0 by one, and call a destructor for
   types that require it if it goes to zero.
+
+DecRefMem S0:PtrToGen
+
+  Decref the value pointed to by S0, calling any appropriate destructor if the
+  refcount goes to zero.
 
 DecRefNZ S0:Gen
 
@@ -758,3 +768,25 @@ D:Bool = IterNextK S0:StkP S1:ConstInt S2:ConstInt S3:ConstInt
   the iterator's next value (and key) into the local variable S3 (and
   S4, respectively).
 
+19. Vector instruction support
+
+D:PtrToCell = DefMIStateBase
+
+  Declares a base register for MInstrState. Currently this is always %rsp
+
+D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:PtrToGen S3:Gen S4:PtrToCell
+
+  Lookup intermediate property. Calls the helper specified by S0, passing the
+  Class context (S1), pointer to the current base (S2), key (S3), and pointer
+  to MInstrState (S4).
+
+D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:PtrToGen S3:Gen S4:PtrToCell
+
+  Get property as cell. Calls the helper specified by S0, passing the Class
+  context (S1), pointer to the current base (S2), key (S3), and pointer to
+  MInstrState (S4).
+
+D:Cell = CGetElem S0:ConstTCA S1:PtrToCell S2:Gen S3:PtrToCell
+
+  Get element as cell. Calls the helper specified by S0, passing a base (S1),
+  key (S2), and pointer to MInstrState.

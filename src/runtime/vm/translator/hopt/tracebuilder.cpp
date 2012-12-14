@@ -130,12 +130,39 @@ void TraceBuilder::genSetPropCell(SSATmp* base, int64 offset, SSATmp* value) {
   genDecRef(oldVal);
 }
 
+SSATmp* TraceBuilder::genDefMIStateBase() {
+  return gen(DefMIStateBase);
+}
+
+SSATmp* TraceBuilder::genPropX(TCA func, Class* ctx,
+                               SSATmp* base, SSATmp* key, SSATmp* mis) {
+  return gen(PropX, genDefConst(func), genDefConst(ctx), base, key, mis);
+}
+
+SSATmp* TraceBuilder::genCGetProp(TCA func, Class* ctx, SSATmp* base,
+                                  SSATmp* key, SSATmp* mis) {
+  return gen(CGetProp, genDefConst(func), genDefConst(ctx), base, key, mis);
+}
+
+SSATmp* TraceBuilder::genCGetElem(TCA func, SSATmp* base, SSATmp* key,
+                                  SSATmp* mis) {
+  return gen(CGetElem, genDefConst(func), base, key, mis);
+}
+
 SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
+                               int64_t offset,
                                Type::Tag type,
                                Trace* target) {
   assert(addr->getType() == Type::PtrToCell ||
          addr->getType() == Type::PtrToGen);
-  return gen(LdMem, type, getLabel(target), addr);
+  return gen(LdMem, type, getLabel(target), addr,
+             genDefConst<int64>(offset));
+}
+
+SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
+                               Type::Tag type,
+                               Trace* target) {
+  return genLdMem(addr, 0, type, target);
 }
 
 SSATmp* TraceBuilder::genLdRef(SSATmp* ref, Type::Tag type, Trace* exit) {
@@ -205,6 +232,10 @@ void TraceBuilder::genDecRef(SSATmp* tmp) {
   gen(DecRef, tmp);
 }
 
+void TraceBuilder::genDecRefMem(SSATmp* base, int64 offset, Type::Tag type) {
+  gen(DecRefMem, type, base, genDefConst<int64>(offset));
+}
+
 /*
  * Code generation support for side exits.
  * There are 3 types of side exits as defined by the ExitType enum:
@@ -259,8 +290,10 @@ SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,
 }
 
 void TraceBuilder::genStRaw(SSATmp* base, RawMemSlot::Kind kind,
-                            SSATmp* value) {
-  gen(StRaw, base, genDefConst(int64(kind)), value);
+                            SSATmp* value, int64 extraOff) {
+  assert(value->getType() == Type::Int || value->getType() == Type::Bool);
+  gen(StRaw, base, genDefConst(int64(kind)), value,
+      genDefConst<int64>(extraOff));
 }
 
 void TraceBuilder::genTraceEnd(uint32 nextPc,
@@ -698,6 +731,10 @@ SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
 
 void TraceBuilder::genRaiseUninitWarning(uint32 id) {
   gen(RaiseUninitWarning, genLdHome(id));
+}
+
+SSATmp* TraceBuilder::genLdAddr(SSATmp* base, int64 offset) {
+  return gen(LdAddr, base, genDefConst<int64>(offset));
 }
 
 /**

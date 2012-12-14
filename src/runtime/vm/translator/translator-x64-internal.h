@@ -961,13 +961,6 @@ static inline const char* getContextName() {
 }
 
 template<class T>
-struct Nuller : private boost::noncopyable {
-  explicit Nuller(const T** p) : p(p) {}
-  ~Nuller() { *p = 0; }
-  T const** const p;
-};
-
-template<class T>
 struct Deleter : private boost::noncopyable {
   explicit Deleter(T** p) : p(p) {}
   ~Deleter() {

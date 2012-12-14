@@ -349,7 +349,14 @@ void IRInstruction::print(std::ostream& ostream) const {
     ostream << opcodeName(m_op) << " [";
     printSrc(ostream, 0);
     SSATmp* offset = getSrc(1);
-    if ((isStMem || isLdMem) &&
+    if (m_op == StRaw) {
+      RawMemSlot& s =
+        RawMemSlot::Get(RawMemSlot::Kind(offset->getConstValAsInt()));
+      int64 offset = s.getOffset() + getSrc(3)->getConstValAsInt();
+      if (offset) {
+        ostream << " + " << offset;
+      }
+    } else if ((isStMem || isLdMem) &&
         (!offset->isConst() || offset->getConstValAsInt() != 0)) {
       ostream << " + ";
       printSrc(ostream, 1);
@@ -443,6 +450,9 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
       break;
     case Type::FuncClassPtr:
       assert(false /* ConstInstruction does not hold both func* and class* */);
+      break;
+    case Type::TCA:
+      ostream << folly::format("TCA: 0x{:x}", m_intVal);
       break;
     case Type::None:
       ostream << "None:" << m_intVal;
@@ -583,6 +593,10 @@ const Class* SSATmp::getConstValAsClass() const {
 uintptr_t SSATmp::getConstValAsBits() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBits();
+}
+TCA SSATmp::getConstValAsTCA() const {
+  assert(isConst());
+  return ((ConstInstruction*)m_inst)->getValAsTCA();
 }
 
 void SSATmp::setTCA(TCA tca) {

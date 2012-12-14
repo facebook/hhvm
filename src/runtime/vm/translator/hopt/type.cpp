@@ -82,6 +82,12 @@ Type::Tag outputType(const IRInstruction* inst) {
   case SpillStack:         return Type::StkPtr;
   case UnboxPtr:           return Type::PtrToCell;
 
+  // Vector translator opcodes
+  case DefMIStateBase:     return Type::PtrToCell;
+  case PropX:              return Type::PtrToGen;
+  case CGetProp:
+  case CGetElem:           return Type::Cell;
+
   case OpAdd:
   case OpSub:
   case OpAnd:
@@ -125,11 +131,12 @@ Type::Tag outputType(const IRInstruction* inst) {
   case Jmp_:
     return Type::None;
 
-  // Output type is the same as the single input type.
+  // Output type is the same as the first input's type.
   case Mov:
   case IncRef:
   case Spill:
   case Reload:
+  case LdAddr:
     return inst->getSrc(0)->getType();
 
   // Output type is given by a type paramter to the instruction.

@@ -238,6 +238,16 @@ static inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
   return StatCounter(Instr_TranslLowInvalid + STATS_PER_OPCODE * opc);
 }
 
+static inline StatCounter opcodeToIRPreStatCounter(Opcode opc) {
+  ASSERT(OpLowInvalid == 0);
+  return StatCounter(Instr_TranslIRPreLowInvalid + STATS_PER_OPCODE * opc);
+}
+
+static inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
+  ASSERT(OpLowInvalid == 0);
+  return StatCounter(Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE * opc);
+}
+
 // Both emitIncs use r10.
 extern void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
                     Transl::ConditionCode cc = Transl::CC_None);

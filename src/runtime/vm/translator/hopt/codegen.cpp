@@ -254,25 +254,7 @@ Address ArgDesc::genCode(CodeGenerator::Asm& a) const {
   return start;
 }
 
-
 void IRInstruction::genCode(CodeGenerator* codeGenerator) {
-  m_asmAddr = codeGenerator->cgInst(this);
-}
-
-void TypeInstruction::genCode(CodeGenerator* codeGenerator) {
-  m_asmAddr = codeGenerator->cgInst(this);
-}
-
-void ConstInstruction::genCode(CodeGenerator* codeGenerator) {
-  ASSERT(m_op == LdConst);
-  m_asmAddr = codeGenerator->cgLdConst(this);
-}
-
-void LabelInstruction::genCode(CodeGenerator* codeGenerator) {
-  m_asmAddr = codeGenerator->cgLabel((Opcode)m_op, this);
-}
-
-void ExtendedInstruction::genCode(CodeGenerator* codeGenerator) {
   m_asmAddr = codeGenerator->cgInst(this);
 }
 
@@ -303,11 +285,26 @@ Address CodeGenerator::cgDefSP(IRInstruction* inst) {
 }
 
 Address CodeGenerator::cgDefLabel(IRInstruction* inst) {
-  return m_as.code.frontier;
+  LabelInstruction* label = (LabelInstruction*)inst;
+  Address labelAddr = m_as.code.frontier;
+  void* list = label->getPatchAddr();
+  while (list != NULL) {
+    int* toPatch   = (int*)list;
+    int diffToNext = *toPatch;
+    ssize_t diff = labelAddr - ((Address)list + 4);
+    ASSERT(deltaFits(diff, sz::dword));
+    *toPatch = (int)diff; // patch the jump address
+    if (diffToNext == 0) {
+      break;
+    }
+    void* next = (TCA)list - diffToNext;
+    list = next;
+  }
+  return labelAddr;
 }
 
 Address CodeGenerator::cgMarker(IRInstruction* inst) {
-  return m_as.code.frontier;
+  return cgDefLabel(inst);
 }
 
 Address CodeGenerator::cgJmpInstanceOfD(IRInstruction* inst) {
@@ -2561,23 +2558,6 @@ Address CodeGenerator::cgDecRefMem(Type::Tag type,
   return start;
 }
 
-Address patchLabel(LabelInstruction* label, Address labelAddr) {
-  void* list = label->getPatchAddr();
-  while (list != NULL) {
-    int* toPatch   = (int*)list;
-    int diffToNext = *toPatch;
-    ssize_t diff = labelAddr - ((Address)list + 4);
-    ASSERT(deltaFits(diff, sz::dword));
-    *toPatch = (int)diff; // patch the jump address
-    if (diffToNext == 0) {
-      break;
-    }
-    void* next = (TCA)list - diffToNext;
-    list = next;
-  }
-  return labelAddr;
-}
-
 Address CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   Address start = m_as.code.frontier;
   SSATmp* src   = inst->getSrc(0);
@@ -4399,10 +4379,6 @@ Address CodeGenerator::cgAssertRefCount(IRInstruction* inst) {
   auto srcReg = src->getReg();
   emitAssertRefCount(m_as, srcReg);
   return start;
-}
-
-Address CodeGenerator::cgLabel(Opcode opc, LabelInstruction* label) {
-  return patchLabel(label, m_as.code.frontier);
 }
 
 void traceCallback(ActRec* fp, Cell* sp, int64 pcOff, void* rip) {

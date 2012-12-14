@@ -1404,8 +1404,8 @@ void TraceBuilder::genDecRefLocals(uint32 numLocals) {
 }
 
 void TraceBuilder::genIncStat(int32 counter, int32 value) {
-  genInstruction(IncStat, Type::Int, genLdConst<int64>(counter),
-                 genLdConst<int64>(value));
+  genIncStat(genLdConst<int64>(counter),
+             genLdConst<int64>(value));
 }
 
 SSATmp* TraceBuilder::genIncRef(SSATmp* src) {

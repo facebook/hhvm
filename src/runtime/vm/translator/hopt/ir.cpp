@@ -21,6 +21,7 @@
 #include <string.h>
 #include <runtime/base/string_data.h>
 #include <runtime/vm/runtime.h>
+#include <runtime/vm/stats.h>
 #include "runtime/vm/translator/targetcache.h"
 #include <util/trace.h>
 
@@ -257,6 +258,11 @@ void IRInstruction::printSrc(std::ostream& ostream, uint32 i) {
 
 void IRInstruction::printSrcs(std::ostream& ostream) {
   bool first = true;
+  if (getOpcode() == IncStat) {
+    ostream << " " << Stats::g_counterNames[getSrc(0)->getConstValAsInt()] <<
+               ", " << getSrc(1)->getConstValAsInt();
+    return;
+  }
   for (uint32 i = 0; i < m_numSrcs; i++) {
     if (!first) {
       ostream << ", ";

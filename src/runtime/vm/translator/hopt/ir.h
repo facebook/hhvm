@@ -710,7 +710,7 @@ public:
   virtual SSATmp* simplify(Simplifier*);
   virtual void print(std::ostream& ostream);
   void print();
-  virtual void genCode(CodeGenerator* cg);
+  void genCode(CodeGenerator* cg);
   virtual IRInstruction* clone(IRFactory* factory);
   typedef std::list<IRInstruction*> List;
   typedef std::list<IRInstruction*>::iterator Iterator;
@@ -841,7 +841,6 @@ class ExtendedInstruction : public IRInstruction {
 public:
   virtual SSATmp* simplify(Simplifier*);
   virtual IRInstruction* clone(IRFactory* factory);
-  virtual void genCode(CodeGenerator* cg);
 
   virtual SSATmp* getExtendedSrc(uint32 i) const;
   virtual void    setExtendedSrc(uint32 i, SSATmp* newSrc);
@@ -918,7 +917,6 @@ class TypeInstruction : public IRInstruction {
 public:
   Type::Tag   getSrcType() { return m_srcType; }
   virtual void print(std::ostream& ostream);
-  virtual void genCode(CodeGenerator* cg);
   virtual bool equals(IRInstruction* inst) const;
   virtual uint32 hash();
   virtual SSATmp* simplify(Simplifier*);
@@ -990,7 +988,6 @@ public:
   void printConst(std::ostream& ostream) const;
   virtual bool isConstInstruction() const {return true;}
   virtual void print(std::ostream& ostream);
-  virtual void genCode(CodeGenerator* cg);
   virtual bool equals(IRInstruction* inst) const;
   virtual uint32 hash();
   virtual IRInstruction* clone(IRFactory* factory);
@@ -1076,7 +1073,6 @@ public:
   int32       getStackOff() const { return m_stackOff; }
   const Func* getFunc() const     { return m_func; }
 
-  virtual void genCode(CodeGenerator* cg);
   virtual void print(std::ostream& ostream);
   virtual bool equals(IRInstruction* inst) const;
   virtual uint32 hash();

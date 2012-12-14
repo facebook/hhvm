@@ -136,7 +136,6 @@ public:
 
   Address cgNegate(IRInstruction* inst); // helper
   Address cgJcc(IRInstruction* inst); // helper
-  Address cgLabel(Opcode opc, LabelInstruction* label);
   Address cgOpCmpHelper(
             IRInstruction* inst,
             void (Asm::*setter)(Reg8),

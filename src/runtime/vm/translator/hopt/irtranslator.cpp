@@ -1499,7 +1499,6 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
   };
   SpaceRecorder sr(opNames[i.op()], a);
   SKTRACE(1, i.source, "translate %#lx\n", long(a.code.frontier));
-  const Opcode op = i.op();
 
   m_hhbcTrans->setBcOff(i.source.offset(), i.breaksTracelet);
 
@@ -1516,10 +1515,13 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
     m_hhbcTrans->setThisAvailable();
   }
 
-  // Actually translate the instruction's body.
-  Stats::emitIncTranslOp(a, op);
-
+  if (moduleEnabled(HPHP::Trace::stats, 2)) {
+    m_hhbcTrans->emitIncStat(Stats::opcodeToIRPreStatCounter(i.op()), 1);
+  }
   irTranslateInstrWork(t, i);
+  if (moduleEnabled(HPHP::Trace::stats, 3)) {
+    m_hhbcTrans->emitIncStat(Stats::opcodeToIRPostStatCounter(i.op()), 1);
+  }
 
   irPassPredictedAndInferredTypes(i);
 }

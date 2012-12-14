@@ -264,5 +264,21 @@ newInstance(Class* cls) {
 
 HphpArray* get_static_locals(const ActRec* ar);
 
+/*
+ * A few functions are exposed by libhphp_analysis and used in
+ * VM-specific parts of the runtime.
+ *
+ * Currently we handle this by using these global pointers, which must
+ * be set up before you use those parts of the runtime.
+ */
+
+typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
+typedef Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
+typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
+
+extern CompileStringFn g_hphp_compiler_parse;
+extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
+extern BuildNativeClassUnitFn g_hphp_build_native_class_unit;
+
 } }
 #endif

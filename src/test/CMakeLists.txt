@@ -9,6 +9,7 @@ endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/genCmpTest.cpp")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process_init.cpp")
 
 add_definitions(-DHPHPI_PATH="hphpi/hphpi")
 

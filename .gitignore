@@ -102,6 +102,7 @@ cmake_install.cmake
 /src/runtime/ext_hhvm/Makefile
 /src/test/Makefile
 /src/hphp/Makefile
+/src/hhvm/Makefile
 /src/compiler/Makefile
 /src/Makefile
 /Makefile

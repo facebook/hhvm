@@ -35,6 +35,10 @@ namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::runtime;
 
+CompileStringFn g_hphp_compiler_parse;
+BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
+BuildNativeClassUnitFn g_hphp_build_native_class_unit;
+
 /**
  * print_string will decRef the string
  */
@@ -691,28 +695,17 @@ tv_release_ref(RefData* datum) {
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname) {
-  static CompileStringFn compileString =
-    (CompileStringFn)dlsym(NULL, "hphp_compiler_parse");
-  Unit* retval = compileString(s, sz, md5, fname);
-  return retval;
+  return g_hphp_compiler_parse(s, sz, md5, fname);
 }
 
 Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                              ssize_t numBuiltinFuncs) {
-  static Unit*(*func)(const HhbcExtFuncInfo*, ssize_t) =
-    (Unit*(*)(const HhbcExtFuncInfo*, ssize_t))
-      dlsym(NULL, "hphp_build_native_func_unit");
-  Unit* u = func(builtinFuncs, numBuiltinFuncs);
-  return u;
+  return g_hphp_build_native_func_unit(builtinFuncs, numBuiltinFuncs);
 }
 
 Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                               ssize_t numBuiltinClasses) {
-  static Unit*(*func)(const HhbcExtClassInfo*, ssize_t) =
-    (Unit*(*)(const HhbcExtClassInfo*, ssize_t))
-      dlsym(NULL, "hphp_build_native_class_unit");
-  Unit* u = func(builtinClasses, numBuiltinClasses);
-  return u;
+  return g_hphp_build_native_class_unit(builtinClasses, numBuiltinClasses);
 }
 
 Unit* compile_string(const char* s, size_t sz) {
@@ -724,10 +717,7 @@ Unit* compile_string(const char* s, size_t sz) {
   if (u != NULL) {
     return u;
   }
-  static CompileStringFn compileString =
-    (CompileStringFn)dlsym(NULL, "hphp_compiler_parse");
-  u = compileString(s, sz, md5, NULL);
-  return u;
+  return g_hphp_compiler_parse(s, sz, md5, NULL);
 }
 
 // Returned array has refcount zero! Caller must refcount.

@@ -1023,11 +1023,5 @@ public:
   Class* popFront();
 };
 
-/*
- * hphp_compiler_parse() is defined in the compiler, but we must use
- * dlsym() to get at it. CompileStringFn matches its signature.
- */
-typedef Unit*(*CompileStringFn)(const char*, int, const MD5&, const char*);
-
 } } // HPHP::VM
 #endif

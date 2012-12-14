@@ -6721,6 +6721,8 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     BuiltinFunction bif = (BuiltinFunction)info->m_builtinFunc;
     BuiltinFunction nif = (BuiltinFunction)info->m_nativeFunc;
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
+    ASSERT(mi &&
+      "MethodInfo not found; probably need to rebuild src/system");
     FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);

@@ -29,7 +29,6 @@
 #include <runtime/vm/repo.h>
 #include <runtime/vm/blob_helper.h>
 #include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/vm.h>
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/translator/translator-x64.h>

@@ -71,7 +71,7 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
 }
 
 Variant f_hphp_output_global_state(bool serialize /* = true */) {
-  Array r(get_global_state());
+  Array r = hhvm ? Array() : get_global_state();
   if (serialize) {
     return f_serialize(r);
   } else {

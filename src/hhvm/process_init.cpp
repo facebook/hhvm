@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include <compiler/analysis/emitter.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/ext/ext.h>
-#include <runtime/vm/vm.h>
 #include <runtime/vm/unit.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/funcdict.h>
@@ -111,6 +111,12 @@ public:
 static VMClassInfoHook vm_class_info_hook;
 
 void ProcessInit() {
+  g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
+  g_hphp_build_native_func_unit = &HPHP::Compiler::
+    hphp_build_native_func_unit;
+  g_hphp_build_native_class_unit = &HPHP::Compiler::
+    hphp_build_native_class_unit;
+
   // Initialize compiler state
   VM::compile_file(0, 0, MD5(), 0);
 
@@ -274,7 +280,7 @@ void ProcessInit() {
     Class* cls = Unit::lookupClass(ne);
     ASSERT(cls);
     const ObjectStaticCallbacks* osc =
-      get_object_static_callbacks(info->m_name);
+      get_builtin_object_static_callbacks(info->m_name);
     ASSERT(osc != NULL);
     *(osc->os_cls_ptr) = cls;
   }

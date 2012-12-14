@@ -13,19 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#ifndef incl_VM_H_
-#define incl_VM_H_
-
 namespace HPHP {
-namespace VM {
-///////////////////////////////////////////////////////////////////////////////
+  extern int execute_program(int argc, char** argv);
+  extern void (*g_vmProcessInit)();
+  namespace VM { extern void ProcessInit(); }
 
-void ProcessInit();
-
-///////////////////////////////////////////////////////////////////////////////
+  // exported globally.
+  bool has_eval_support = true;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+int main(int argc, char** argv) {
+  HPHP::g_vmProcessInit = HPHP::VM::ProcessInit;
+  return HPHP::execute_program(argc, argv);
 }
-
-#endif
-

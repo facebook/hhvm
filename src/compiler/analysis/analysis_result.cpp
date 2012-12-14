@@ -2429,7 +2429,7 @@ public:                                                             \
 DECLARE_JOB(DynamicTable, outputCPPDynamicTables(m_output));
 DECLARE_JOB(System,       outputCPPSystem());
 DECLARE_JOB(SepExtMake,   outputCPPSepExtensionMake());
-DECLARE_JOB(ClassMap,     outputCPPClassMapFile());
+DECLARE_JOB(ClassMap,     outputCPPClassMapFile(m_output));
 DECLARE_JOB(NameMaps,     outputCPPNameMaps());
 DECLARE_JOB(SourceInfos,  outputCPPSourceInfos());
 DECLARE_JOB(RTTIMeta,     outputRTTIMetaData(Option::RTTIOutputFile.c_str()));
@@ -2560,8 +2560,8 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     } else if (Option::GenerateCPPMain) {
       SCHEDULE_JOB(SepExtMake);
     }
+    SCHEDULE_JOB(ClassMap); // TODO(#1960978): eventually don't need this
     if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
-      SCHEDULE_JOB(ClassMap);
       SCHEDULE_JOB(NameMaps);
       SCHEDULE_JOB(SourceInfos);
     }
@@ -2664,7 +2664,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
     ar->getExtensionClasses(), true);
 }
 
-void AnalysisResult::outputCPPClassMapFile() {
+void AnalysisResult::outputCPPClassMapFile(CodeGenerator::Output output) {
   string filename = m_outputPath + "/" + Option::SystemFilePrefix +
     "class_map.cpp";
   Util::mkdir(filename);
@@ -2672,15 +2672,17 @@ void AnalysisResult::outputCPPClassMapFile() {
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
-  cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  if (Option::GenArrayCreate) {
-    cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+  if (output != CodeGenerator::SystemCPP) {
+    cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+    if (Option::GenArrayCreate) {
+      cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+    }
   }
   cg_printf("\n");
 
   cg.printImplStarter();
   cg.namespaceBegin();
-  outputCPPClassMap(cg);
+  outputCPPClassMap(cg, output);
   cg.namespaceEnd();
   f.close();
 }
@@ -4380,7 +4382,8 @@ void AnalysisResult::outputCPPMain() {
   fMain.close();
 }
 
-void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
+void AnalysisResult::outputCPPClassMap(CodeGenerator &cg,
+                                       CodeGenerator::Output cgOutput) {
   AnalysisResultPtr ar = shared_from_this();
 
   if (!Option::GenerateCPPMetaInfo) return;
@@ -4409,7 +4412,11 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
     }
   }
 
-  cg_indentBegin("const char *g_class_map[] = {\n");
+  if (cgOutput == CodeGenerator::SystemCPP) {
+    cg_indentBegin("const char* g_system_class_map[] = {\n");
+  } else {
+    cg_indentBegin("const char *g_class_map[] = {\n");
+  }
 
   // system functions
   cg_printf("(const char *)ClassInfo::IsSystem, NULL, \"\","
@@ -4436,6 +4443,19 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   output = SymbolTable::getEscapedText(null, len);
   cg_printf("\"null\", (const char *)%d, \"%s\",\n",
             len, output.c_str());
+  if (cgOutput == CodeGenerator::SystemCPP) {
+    /*
+     * We need system constants to show up in the g_system_class_map
+     * for use in the hhvm build, even though they aren't necessarily
+     * loaded in our m_constants.
+     *
+     * Use an empty AnalysisResult so that all constants get output
+     * regardless of the ar->isConstantRedeclared check.
+     */
+    AnalysisResultPtr emptyAr(new AnalysisResult());
+    BuiltinSymbols::LoadSystemConstants()->
+      outputCPPClassMap(cg, emptyAr, false /* last */);
+  }
   m_constants->outputCPPClassMap(cg, ar);
 
   cg_printf("NULL,\n"); // attributes

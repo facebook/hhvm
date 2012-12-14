@@ -21,9 +21,18 @@
 
 using namespace HPHP;
 
+namespace HPHP {
+  extern void (*g_vmProcessInit)();
+  namespace VM { extern void ProcessInit(); }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
+#ifdef HHVM
+  HPHP::g_vmProcessInit = &HPHP::VM::ProcessInit;
+#endif
+
   std::string suite, which, set;
   void (*compiler_hook_initialize)();
   compiler_hook_initialize =

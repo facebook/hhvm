@@ -63,7 +63,6 @@
 
 #include <runtime/eval/runtime/file_repository.h>
 
-#include <runtime/vm/vm.h>
 #include <runtime/vm/runtime.h>
 #include <runtime/vm/repo.h>
 #include <runtime/vm/translator/translator.h>
@@ -78,6 +77,13 @@ extern char **environ;
 namespace HPHP {
 
 namespace VM { void initialize_repo(); }
+
+/*
+ * XXX: VM process initialization is handled through a function
+ * pointer so libhphp_runtime.a can be linked into programs that don't
+ * actually initialize the VM.
+ */
+void (*g_vmProcessInit)();
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -1175,10 +1181,13 @@ void hphp_process_init() {
   ClassInfo::Load();
   Process::InitProcessStatics();
   init_static_variables();
-  init_literal_varstrings();
 
   if (hhvm) {
-    HPHP::VM::ProcessInit();
+    extern void sys_init_literal_varstrings();
+    sys_init_literal_varstrings();
+    g_vmProcessInit();
+  } else {
+    init_literal_varstrings();
   }
 
   PageletServer::Restart();

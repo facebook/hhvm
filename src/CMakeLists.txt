@@ -178,11 +178,11 @@ SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 hphp_link(hphp_runtime_static)
 
 add_subdirectory(compiler)
+add_subdirectory(hphp)
 
 if (USE_HHVM)
-        add_subdirectory(runtime/ext_hhvm)
-endif(USE_HHVM)
-
-add_subdirectory(hphp)
+	add_subdirectory(runtime/ext_hhvm)
+	add_subdirectory(hhvm)
+endif()
 
 add_subdirectory(test)

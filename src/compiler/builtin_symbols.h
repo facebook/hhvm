@@ -46,6 +46,11 @@ public:
   static void LoadConstants(AnalysisResultPtr ar,
                             ConstantTablePtr constants);
 
+  /*
+   * Load system/globals/constants.php.
+   */
+  static ConstantTablePtr LoadSystemConstants();
+
   /**
    * Testing whether a variable is a PHP superglobal.
    */

@@ -2099,8 +2099,13 @@ bool autoloadFunctionNoThrow(CStrRef name, bool *declared) {
 }
 
 Variant &get_static_property_lval(CStrRef s, const char *prop) {
-  Variant *ret = get_static_property_lv(s, prop);
-  if (ret) return *ret;
+  if (hhvm) {
+    auto *cbs = get_builtin_object_static_callbacks(s);
+    if (cbs) return cbs->os_lval(prop);
+  } else {
+    Variant *ret = get_static_property_lv(s, prop);
+    if (ret) return *ret;
+  }
   return Variant::lvalBlackHole();
 }
 

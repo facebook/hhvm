@@ -433,11 +433,11 @@ public:
   };
 
   void outputCPPDynamicTables(CodeGenerator::Output output);
-  void outputCPPClassMapFile();
+  void outputCPPClassMapFile(CodeGenerator::Output output);
   void outputCPPSourceInfos();
   void outputCPPNameMaps();
   void outputRTTIMetaData(const char *filename);
-  void outputCPPClassMap(CodeGenerator &cg);
+  void outputCPPClassMap(CodeGenerator &cg, CodeGenerator::Output);
   void outputCPPSystem();
   void outputCPPSepExtensionMake();
   void outputFFI(std::vector<std::string> &additionalCPPs);

@@ -1028,9 +1028,19 @@ void ClassInfoRedeclared::postInit() {
   }
 }
 
+#ifdef HHVM
+extern const char* g_system_class_map[];
+#endif
+
 void ClassInfo::Load() {
   ASSERT(!s_loaded);
-  const char **p = g_class_map;
+  const char **p =
+#ifdef HHVM
+    // In hhvm, only system classes are registered in the class map.
+    g_system_class_map;
+#else
+    g_class_map;
+#endif
   while (*p) {
     Attribute attribute = (Attribute)(int64)*p;
     ClassInfo *info = (attribute & IsRedeclared) ?

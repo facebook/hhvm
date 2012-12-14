@@ -437,8 +437,8 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
     if (!fileScopes.empty()) {
       s_constants = fileScopes[0]->getConstants();
     } else {
-      ar2 = AnalysisResultPtr(new AnalysisResult());
-      s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
+      Logger::Error("Couldn't load constants.php");
+      return false;
     }
     NoSuperGlobals = false;
   } else {
@@ -536,6 +536,15 @@ void BuiltinSymbols::LoadConstants(AnalysisResultPtr ar,
   if (s_constants) {
     constants->import(s_constants);
   }
+}
+
+ConstantTablePtr BuiltinSymbols::LoadSystemConstants() {
+  AnalysisResultPtr ar = LoadGlobalSymbols("constants.php");
+  const auto &fileScopes = ar->getAllFilesVector();
+  if (!fileScopes.empty()) {
+    return fileScopes[0]->getConstants();
+  }
+  throw std::runtime_error("LoadSystemConstants failed");
 }
 
 void BuiltinSymbols::LoadSuperGlobals() {

@@ -16011,6 +16011,44 @@ bool TestCodeRun::TestEvalOrder() {
        "}"
        "var_dump(test(array('foo' => 5)));");
 
+  MVCR("<?php "
+       "interface I {}"
+       "function __autoload($c) {"
+       "  var_dump($c);"
+       "  class A implements I {}"
+       "}"
+       "var_dump(class_implements(\"A\", false));"
+       "var_dump(class_implements(\"A\"));"
+       "var_dump(class_exists(\"A\"));");
+
+  MVCR("<?php "
+       "class B {}"
+       "function __autoload($c) {"
+       "  var_dump($c);"
+       "  class A extends B {}"
+       "}"
+       "var_dump(class_parents(\"A\", false));"
+       "var_dump(class_parents(\"A\"));"
+       "var_dump(class_exists(\"A\"));");
+
+  MVCRO("<?php "
+        "trait T {}"
+        "function __autoload($c) {"
+        "  var_dump($c);"
+        "  class A { use T; }"
+        "}"
+        "var_dump(class_uses(\"A\", false));"
+        "var_dump(class_uses(\"A\"));"
+        "var_dump(class_exists(\"A\"));"
+        ,
+        "bool(false)\n"
+        "string(1) \"A\"\n"
+        "array(1) {\n"
+        "  [\"T\"]=>\n"
+        "  string(1) \"T\"\n"
+        "}\n"
+        "bool(true)\n"
+        );
   return true;
 }
 

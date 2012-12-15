@@ -141,7 +141,9 @@ Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
 
   const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
   if (info == NULL) {
-    return false;
+    if (!autoload) return false;
+    AutoloadHandler::s_instance->invokeHandler(clsname);
+    return f_class_implements(clsname, false);
   }
 
   Array ret(Array::Create());
@@ -166,7 +168,9 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
 
   const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
   if (info == NULL) {
-    return false;
+    if (!autoload) return false;
+    AutoloadHandler::s_instance->invokeHandler(clsname);
+    return f_class_parents(clsname, false);
   }
 
   Array ret(Array::Create());
@@ -191,7 +195,9 @@ Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
 
   const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
   if (!info) {
-    return false;
+    if (!autoload) return false;
+    AutoloadHandler::s_instance->invokeHandler(clsname);
+    return f_class_uses(clsname, false);
   }
 
   Array ret(Array::Create());

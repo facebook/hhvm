@@ -2495,7 +2495,7 @@ str => rsi
 Value* fh_bin2hex(Value* _rv, Value* str) asm("_ZN4HPHP11fni_bin2hexERKNS_6StringE");
 
 /*
-HPHP::String HPHP::fni_hex2bin(HPHP::String const&)
+HPHP::Variant HPHP::fni_hex2bin(HPHP::String const&)
 _ZN4HPHP11fni_hex2binERKNS_6StringE
 
 (return value) => rax
@@ -2503,7 +2503,7 @@ _rv => rdi
 str => rsi
 */
 
-Value* fh_hex2bin(Value* _rv, Value* str) asm("_ZN4HPHP11fni_hex2binERKNS_6StringE");
+TypedValue* fh_hex2bin(TypedValue* _rv, Value* str) asm("_ZN4HPHP11fni_hex2binERKNS_6StringE");
 
 /*
 HPHP::String HPHP::fni_nl2br(HPHP::String const&)

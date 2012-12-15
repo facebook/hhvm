@@ -170,8 +170,9 @@ DefineFunction(
     'desc'   => "Returns an ASCII string containing the binary representation of hexidecimal str.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => String,
-      'desc'   => "Returns the binary representation of the given hexidecimal string.",
+      'type'   => Variant,
+      'hint'   => String,
+      'desc'   => "Returns the binary representation of the given hexidecimal string or FALSE on failure.",
     ),
     'args'   => array(
       array(

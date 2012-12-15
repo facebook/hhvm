@@ -76,8 +76,6 @@
 
 #elif EXT_TYPE == 2
 
-#elif EXT_TYPE == 3
-
 #elif EXT_TYPE == 4
 extern ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg, AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int mode);
 

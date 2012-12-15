@@ -1520,6 +1520,9 @@ char *string_quoted_printable_decode(const char *input, int &len, bool is_q) {
 }
 
 char *string_hex2bin(const char *input, int &len) {
+  if (len % 2 != 0) {
+    throw InvalidArgumentException("hex2bin: odd length input");
+  }
   len >>= 1;
   char *str = (char *)malloc(len + 1);
   int i, j;

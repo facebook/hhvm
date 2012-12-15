@@ -62,6 +62,4 @@
 
 #elif EXT_TYPE == 2
 
-#elif EXT_TYPE == 3
-
 #endif

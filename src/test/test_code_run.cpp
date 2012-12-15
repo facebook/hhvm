@@ -12762,6 +12762,14 @@ bool TestCodeRun::TestExtMisc() {
        "test();"
        "var_dump(class_exists('C'));");
 
+  MVCRO("<?php "
+        "var_dump(hex2bin(\";lwekn\"));"
+        "var_dump(hex2bin(\"68656c6c6f\"));"
+        "var_dump(hex2bin(\"68656c6c6f6\"));"
+        ,
+        "bool(false)\n"
+        "string(5) \"hello\"\n"
+        "bool(false)\n");
   return true;
 }
 

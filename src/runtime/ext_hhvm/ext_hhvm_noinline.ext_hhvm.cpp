@@ -11712,7 +11712,7 @@ TypedValue* fg_bin2hex(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::String HPHP::fni_hex2bin(HPHP::String const&)
+HPHP::Variant HPHP::fni_hex2bin(HPHP::String const&)
 _ZN4HPHP11fni_hex2binERKNS_6StringE
 
 (return value) => rax
@@ -11720,16 +11720,14 @@ _rv => rdi
 str => rsi
 */
 
-Value* fh_hex2bin(Value* _rv, Value* str) asm("_ZN4HPHP11fni_hex2binERKNS_6StringE");
+TypedValue* fh_hex2bin(TypedValue* _rv, Value* str) asm("_ZN4HPHP11fni_hex2binERKNS_6StringE");
 
 TypedValue * fg1_hex2bin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_hex2bin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
-  rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_hex2bin((Value*)(rv), (Value*)(args-0));
-  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  fh_hex2bin((rv), (Value*)(args-0));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
@@ -11739,10 +11737,8 @@ TypedValue* fg_hex2bin(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
-        rv.m_type = KindOfString;
-        fh_hex2bin((Value*)(&(rv)), (Value*)(args-0));
-        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        fh_hex2bin((&(rv)), (Value*)(args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;

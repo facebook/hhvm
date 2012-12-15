@@ -969,7 +969,7 @@ String fni_bin2hex(String const& str) {
   return f_bin2hex(str);
 }
 
-String fni_hex2bin(String const& str) {
+Variant fni_hex2bin(String const& str) {
   return f_hex2bin(str);
 }
 

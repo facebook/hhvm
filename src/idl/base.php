@@ -271,6 +271,7 @@ function DefineFunction($func) {
   }
   if (!isset($func['return'])) $func['return'] = array();
   $func['ret_desc'] = idx($func['return'], 'desc');
+  $func['ret_hint'] = idx($func['return'], 'hint');
   $func['return'] = idx($func['return'], 'type');
   if ($func['return'] & Reference) {
     $func['ref'] = true;

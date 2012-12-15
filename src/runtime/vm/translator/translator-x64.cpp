@@ -10857,23 +10857,6 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   if (!i.outputPredicted || i.breaksTracelet) return;
   NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
 
-  if (m_useHHIR) {
-    if (u == NormalizedInstruction::OutputUsed ||
-        u == NormalizedInstruction::OutputInferred) {
-      JIT::Type::Tag jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
-      if (u == NormalizedInstruction::OutputInferred) {
-        TRACE(1, "HHIR: emitPredictionGuards: output inferred to be %s\n",
-              JIT::Type::Strings[jitType]);
-        m_hhbcTrans->assertTypeStack(0, jitType);
-      } else {
-        TRACE(1, "HHIR: emitPredictionGuards: output predicted to be %s\n",
-              JIT::Type::Strings[jitType]);
-        m_hhbcTrans->checkTypeStack(0, jitType, i.next->offset());
-      }
-    }
-    return;
-  }
-
   switch (u) {
     case NormalizedInstruction::OutputUsed:
       break;

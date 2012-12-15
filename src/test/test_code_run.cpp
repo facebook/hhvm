@@ -28518,6 +28518,14 @@ bool TestCodeRun::TestTypeAssertions() {
        "$d1->d1prop = 3;\n"
        "$d1->doStuff();\n");
 
+  MVCR("<?php\n"
+       "    function foo() {\n"
+       "    }\n"
+       "    function main() {\n"
+       "      var_dump(is_null(foo()));\n"
+       "    }\n"
+       "    main();\n");
+
   return true;
 }
 

@@ -1445,6 +1445,29 @@ TranslatorX64::irTranslateInstrWork(const Tracelet& t,
 }
 
 void
+TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
+  ASSERT(m_useHHIR);
+
+  if (!i.outStack || i.breaksTracelet) return;
+
+  NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
+
+  if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted) ||
+      (u == NormalizedInstruction::OutputInferred)) {
+    JIT::Type::Tag jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
+    if (u == NormalizedInstruction::OutputInferred) {
+      TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output inferred as %s\n",
+            JIT::Type::Strings[jitType]);
+      m_hhbcTrans->assertTypeStack(0, jitType);
+    } else {
+      TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output predicted as %s\n",
+            JIT::Type::Strings[jitType]);
+      m_hhbcTrans->checkTypeStack(0, jitType, i.next->offset());
+    }
+  }
+}
+
+void
 TranslatorX64::irTranslateInstr(const Tracelet& t,
                                 const NormalizedInstruction& i) {
   /**
@@ -1497,7 +1520,7 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
 
   irTranslateInstrWork(t, i);
 
-  emitPredictionGuards(i);
+  irPassPredictedAndInferredTypes(i);
 }
 
 void TranslatorX64::irAssertType(const Location& l,

@@ -798,6 +798,8 @@ private:
                            const TCA               start,
                            const TCA               stubStart,
                            vector<TransBCMapping>* bcMap);
+  void irPassPredictedAndInferredTypes(const NormalizedInstruction& i);
+
   void emitStringCheck(Asm& _a, PhysReg base, int offset);
   void emitTypeCheck(Asm& _a, DataType dt,
                      PhysReg base, int offset,

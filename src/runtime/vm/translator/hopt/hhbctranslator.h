@@ -181,7 +181,7 @@ public:
   void emitUnboxR();
   Trace* emitJmpZ(int32 offset);
   Trace* emitJmpNZ(int32 offset);
-  Trace* emitJmp(int32 offset);
+  Trace* emitJmp(int32 offset, bool breakTracelet);
   void emitGt()    { emitCmp(OpGt);    }
   void emitGte()   { emitCmp(OpGte);   }
   void emitLt()    { emitCmp(OpLt);    }

@@ -553,25 +553,25 @@ TranslatorX64::irTranslateCastDouble(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateCastString(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
+                                     const NormalizedInstruction& i) {
   HHIR_EMIT(CastString);
 }
 
 void
 TranslatorX64::irTranslatePrint(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+                                const NormalizedInstruction& i) {
   HHIR_EMIT(Print);
 }
 
 void
 TranslatorX64::irTranslateJmp(const Tracelet& t,
-                            const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA);
+                              const NormalizedInstruction& i) {
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet);
 }
 
 void
 TranslatorX64::irTranslateSwitch(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+                                 const NormalizedInstruction& i) {
   HHIR_UNIMPLEMENTED(Switch);
 }
 

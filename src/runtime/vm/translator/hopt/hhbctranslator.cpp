@@ -999,7 +999,7 @@ void HhbcTranslator::emitDup() {
   pushIncRef(topC());
 }
 
-Trace* HhbcTranslator::emitJmp(int32 offset) {
+Trace* HhbcTranslator::emitJmp(int32 offset, bool breakTracelet) {
   TRACE(3, "%u: Jmp %d\n", m_bcOff, offset);
   spillStack(); //  spill early since every path will need it
   // If surprise flags are set, exit trace and handle surprise
@@ -1008,7 +1008,7 @@ Trace* HhbcTranslator::emitJmp(int32 offset) {
     Trace* exit = getExitSlowTrace();
     m_tb.genExitWhenSurprised(exit);
   }
-
+  if (!breakTracelet) return NULL;
   Trace* target = getExitTrace(offset);
   return m_tb.genJmp(target);
 }

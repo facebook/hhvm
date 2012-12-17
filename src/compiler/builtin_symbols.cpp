@@ -76,13 +76,6 @@ const char *BuiltinSymbols::ExtensionClasses[] = {
 };
 #undef EXT_TYPE
 
-const char *BuiltinSymbols::ExtensionDeclaredDynamic[] = {
-#define EXT_TYPE 3
-#include <system/ext.inc>
-  NULL,
-};
-#undef EXT_TYPE
-
 const char *BuiltinSymbols::HelperFunctions[] = {
 #include <system/helper.inc>
   NULL,
@@ -112,7 +105,6 @@ StringToClassScopePtrMap BuiltinSymbols::s_classes;
 VariableTablePtr BuiltinSymbols::s_variables;
 ConstantTablePtr BuiltinSymbols::s_constants;
 StringToTypePtrMap BuiltinSymbols::s_superGlobals;
-std::set<std::string> BuiltinSymbols::s_declaredDynamic;
 void *BuiltinSymbols::s_handle_main = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -236,14 +228,6 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
       cl->setSepExtension();
     }
     s_classes[cl->getName()] = cl;
-  }
-}
-
-void BuiltinSymbols::ParseExtDynamics(AnalysisResultPtr ar, const char **p,
-                                      bool sep) {
-  while (*p) {
-    s_declaredDynamic.insert(Util::toLower(string(*p)));
-    p++;
   }
 }
 
@@ -376,7 +360,6 @@ bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
   ParseExtFunctions(ar, symbols[0], true);
   ParseExtConsts   (ar, symbols[1], true);
   ParseExtClasses  (ar, symbols[2], true);
-  ParseExtDynamics (ar, symbols[3], true);
 
   if (handle) {
     /*
@@ -469,7 +452,6 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   // load extension constants, classes and dynamics
   ParseExtConsts(ar, ExtensionConsts, false);
   ParseExtClasses(ar, ExtensionClasses, false);
-  ParseExtDynamics(ar, ExtensionDeclaredDynamic, false);
   for (unsigned int i = 0; i < Option::SepExtensions.size(); i++) {
     Option::SepExtensionOptions &options = Option::SepExtensions[i];
     string soname = options.soname;
@@ -581,8 +563,4 @@ TypePtr BuiltinSymbols::GetSuperGlobalType(const std::string &name) {
     return iter->second;
   }
   return TypePtr();
-}
-
-bool BuiltinSymbols::IsDeclaredDynamic(const std::string& name) {
-  return s_declaredDynamic.find(name) != s_declaredDynamic.end();
 }

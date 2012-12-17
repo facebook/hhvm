@@ -655,7 +655,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
         funcScope, BlockScope::UseKindClosure);
     }
     if (funcScope->isSepExtension() ||
-        BuiltinSymbols::IsDeclaredDynamic(m_name) ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }

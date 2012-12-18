@@ -44,6 +44,11 @@ IMPLEMENT_DEFAULT_EXTENSION(dom);
 #define PHP_LIBXML_CTX_ERROR 1
 #define PHP_LIBXML_CTX_WARNING 2
 
+#ifndef LIBXML2_NEW_BUFFER
+# define xmlOutputBufferGetSize(buf)    ((buf)->buffer->use)
+# define xmlOutputBufferGetContent(buf) ((buf)->buffer->content)
+#endif
+
 // defined in ext_simplexml.cpp
 extern bool libxml_use_internal_error();
 extern void libxml_add_error(const std::string &msg);
@@ -414,9 +419,9 @@ static Variant dom_canonicalization(xmlNodePtr nodep, CStrRef file,
     retval = false;
   } else {
     if (mode == 0) {
-      ret = buf->buffer->use;
+      ret = xmlOutputBufferGetSize(buf);
       if (ret > 0) {
-        retval = String((char *)buf->buffer->content, ret, CopyString);
+        retval = String((char *)xmlOutputBufferGetContent(buf), ret, CopyString);
       } else {
         retval = String();
       }
@@ -3739,7 +3744,8 @@ static Variant dom_documenttype_internal_subset_read(CObjRef obj) {
     if (buff != NULL) {
       xmlNodeDumpOutput (buff, NULL, (xmlNodePtr) intsubset, 0, 0, NULL);
       xmlOutputBufferFlush(buff);
-      strintsubset = xmlStrndup(buff->buffer->content, buff->buffer->use);
+      strintsubset = xmlStrndup(xmlOutputBufferGetContent(buff),
+                                xmlOutputBufferGetSize(buff));
       (void)xmlOutputBufferClose(buff);
       return String((char *)strintsubset, CopyString);
     }

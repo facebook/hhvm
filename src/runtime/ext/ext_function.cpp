@@ -40,10 +40,11 @@ Array f_get_defined_functions() {
   return ret;
 }
 
-bool f_function_exists(CStrRef function_name) {
+bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
   return
     function_exists(function_name) ||
-    (AutoloadHandler::s_instance->autoloadFunc(function_name) &&
+    (autoload &&
+     AutoloadHandler::s_instance->autoloadFunc(function_name) &&
      function_exists(function_name));
 }
 

@@ -50,9 +50,9 @@ inline bool x_define(CStrRef name, CVarRef value, bool case_insensitive = false)
   return f_define(name, value, case_insensitive);
 }
 
-inline bool x_defined(CStrRef name) {
+inline bool x_defined(CStrRef name, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(defined);
-  return f_defined(name);
+  return f_defined(name, autoload);
 }
 
 inline Variant x_die(CVarRef status = null_variant) {

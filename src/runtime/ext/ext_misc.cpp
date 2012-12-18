@@ -111,7 +111,7 @@ bool f_define(CStrRef name, CVarRef value,
   }
 }
 
-bool f_defined(CStrRef name) {
+bool f_defined(CStrRef name, bool autoload /* = true */) {
   const char *data = name.data();
   int len = name.length();
   char *colon;
@@ -166,7 +166,9 @@ bool f_defined(CStrRef name) {
           (hhvm && g_vmContext->defined(name))) {
         return true;
       }
+      if (!autoload) break;
       if (!AutoloadHandler::s_instance->autoloadConstant(name)) break;
+      autoload = false;
     }
     return false;
   }

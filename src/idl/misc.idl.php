@@ -160,6 +160,12 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The constant name.",
       ),
+      array(
+        'name'   => "autoload",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "Whether to try to autoload.",
+      ),
     ),
     'taint_observer' => false,
   ));

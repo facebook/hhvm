@@ -11359,6 +11359,36 @@ bool TestCodeRun::TestVolatile() {
         "int(2)\n"
        );
 
+  MVCRO("<?php "
+        "var_dump(fb_autoload_map("
+        "           array('function' => array(),"
+        "                 'constant' => array(),"
+        "                 'failure' => 'failure'),"
+        "           ''));"
+        "function failure($kind, $name) {"
+        "  var_dump($kind, $name);"
+        "}"
+        "var_dump(function_exists('foo'));"
+        "var_dump(function_exists('bar', false));"
+        "var_dump(defined('foo'));"
+        "var_dump(defined('bar', false));"
+        "if (0) {"
+        "  function foo() {}"
+        "  function foo() {}"
+        "  define('foo', 0);"
+        "  define('bar', 0);"
+        "}",
+        "bool(true)\n"
+        "string(8) \"function\"\n"
+        "string(3) \"foo\"\n"
+        "bool(false)\n"
+        "bool(false)\n"
+        "string(8) \"constant\"\n"
+        "string(3) \"foo\"\n"
+        "bool(false)\n"
+        "bool(false)\n");
+
+
   return true;
 }
 

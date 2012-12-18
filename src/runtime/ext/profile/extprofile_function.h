@@ -30,9 +30,9 @@ inline Array x_get_defined_functions() {
   return f_get_defined_functions();
 }
 
-inline bool x_function_exists(CStrRef function_name) {
+inline bool x_function_exists(CStrRef function_name, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(function_exists);
-  return f_function_exists(function_name);
+  return f_function_exists(function_name, autoload);
 }
 
 inline bool x_is_callable(CVarRef v, bool syntax = false, VRefParam name = null) {

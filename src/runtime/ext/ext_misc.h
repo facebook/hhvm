@@ -30,7 +30,7 @@ int64 f_connection_status();
 int64 f_connection_timeout();
 Variant f_constant(CStrRef name);
 bool f_define(CStrRef name, CVarRef value, bool case_insensitive = false);
-bool f_defined(CStrRef name);
+bool f_defined(CStrRef name, bool autoload = true);
 Variant f_die(CVarRef status = null_variant);
 Variant f_exit(CVarRef status = null_variant);
 Variant f_eval(CStrRef code_str);

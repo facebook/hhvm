@@ -67,14 +67,15 @@ case_insensitive => rdx
 bool fh_define(Value* name, TypedValue* value, bool case_insensitive) asm("_ZN4HPHP8f_defineERKNS_6StringERKNS_7VariantEb");
 
 /*
-bool HPHP::f_defined(HPHP::String const&)
-_ZN4HPHP9f_definedERKNS_6StringE
+bool HPHP::f_defined(HPHP::String const&, bool)
+_ZN4HPHP9f_definedERKNS_6StringEb
 
 (return value) => rax
 name => rdi
+autoload => rsi
 */
 
-bool fh_defined(Value* name) asm("_ZN4HPHP9f_definedERKNS_6StringE");
+bool fh_defined(Value* name, bool autoload) asm("_ZN4HPHP9f_definedERKNS_6StringEb");
 
 /*
 HPHP::Variant HPHP::f_die(HPHP::Variant const&)

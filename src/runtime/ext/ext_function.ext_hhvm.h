@@ -27,14 +27,15 @@ _rv => rdi
 Value* fh_get_defined_functions(Value* _rv) asm("_ZN4HPHP23f_get_defined_functionsEv");
 
 /*
-bool HPHP::f_function_exists(HPHP::String const&)
-_ZN4HPHP17f_function_existsERKNS_6StringE
+bool HPHP::f_function_exists(HPHP::String const&, bool)
+_ZN4HPHP17f_function_existsERKNS_6StringEb
 
 (return value) => rax
 function_name => rdi
+autoload => rsi
 */
 
-bool fh_function_exists(Value* function_name) asm("_ZN4HPHP17f_function_existsERKNS_6StringE");
+bool fh_function_exists(Value* function_name, bool autoload) asm("_ZN4HPHP17f_function_existsERKNS_6StringEb");
 
 /*
 bool HPHP::f_is_callable(HPHP::Variant const&, bool, HPHP::VRefParamValue const&)

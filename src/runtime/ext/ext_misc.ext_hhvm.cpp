@@ -242,22 +242,33 @@ TypedValue* fg_define(HPHP::VM::ActRec *ar) {
 
 
 /*
-bool HPHP::f_defined(HPHP::String const&)
-_ZN4HPHP9f_definedERKNS_6StringE
+bool HPHP::f_defined(HPHP::String const&, bool)
+_ZN4HPHP9f_definedERKNS_6StringEb
 
 (return value) => rax
 name => rdi
+autoload => rsi
 */
 
-bool fh_defined(Value* name) asm("_ZN4HPHP9f_definedERKNS_6StringE");
+bool fh_defined(Value* name, bool autoload) asm("_ZN4HPHP9f_definedERKNS_6StringEb");
 
 TypedValue * fg1_defined(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_defined(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
-  tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_defined((Value*)(args-0))) ? 1LL : 0LL;
+  switch (count) {
+  default: // count >= 2
+    if ((args-1)->m_type != KindOfBoolean) {
+      tvCastToBooleanInPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  rv->m_data.num = (fh_defined((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -265,27 +276,27 @@ TypedValue* fg_defined(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if (IS_STRING_TYPE((args-0)->m_type)) {
+    if (count >= 1LL && count <= 2LL) {
+      if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv._count = 0;
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_defined((Value*)(args-0))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
+        rv.m_data.num = (fh_defined((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_defined(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
+        frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("defined", count, 1, 1, 1);
+      throw_wrong_arguments_nr("defined", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
+    frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

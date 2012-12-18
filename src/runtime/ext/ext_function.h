@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_get_defined_functions();
-bool f_function_exists(CStrRef function_name);
+bool f_function_exists(CStrRef function_name, bool autoload = true);
 bool f_is_callable(CVarRef v, bool syntax = false,
                    VRefParam name = null);
 Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array);

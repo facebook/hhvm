@@ -6621,9 +6621,11 @@ Variant i_php_strip_whitespace(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_php_strip_whitespace);
 }
 Variant ifa_defined(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("defined", count, 1, 1, 1);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("defined", count, 1, 2, 1);
   CVarRef arg0(a0);
-  return (x_defined(arg0));
+  if (count <= 1) return (x_defined(arg0));
+  CVarRef arg1(a1);
+  return (x_defined(arg0, arg1));
 }
 Variant i_defined(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_defined);
@@ -7342,9 +7344,11 @@ Variant i_eval(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_eval);
 }
 Variant ifa_function_exists(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("function_exists", count, 1, 1, 1);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("function_exists", count, 1, 2, 1);
   CVarRef arg0(a0);
-  return (x_function_exists(arg0));
+  if (count <= 1) return (x_function_exists(arg0));
+  CVarRef arg1(a1);
+  return (x_function_exists(arg0, arg1));
 }
 Variant i_function_exists(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_function_exists);
@@ -22479,7 +22483,7 @@ extern const CallInfo ci_imap_reopen = {(void*)&i_imap_reopen, (void*)&ifa_imap_
 extern const CallInfo ci_array_keys = {(void*)&i_array_keys, (void*)&ifa_array_keys, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_connection_timeout = {(void*)&i_connection_timeout, (void*)&ifa_connection_timeout, 0, 0, 0x0000000000000000LL};
 extern const CallInfo ci_php_strip_whitespace = {(void*)&i_php_strip_whitespace, (void*)&ifa_php_strip_whitespace, 1, 0, 0x0000000000000000LL};
-extern const CallInfo ci_defined = {(void*)&i_defined, (void*)&ifa_defined, 1, 0, 0x0000000000000000LL};
+extern const CallInfo ci_defined = {(void*)&i_defined, (void*)&ifa_defined, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_apc_compile_file = {(void*)&i_apc_compile_file, (void*)&ifa_apc_compile_file, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_imap_scanmailbox = {(void*)&i_imap_scanmailbox, (void*)&ifa_imap_scanmailbox, 4, 0, 0x0000000000000000LL};
 extern const CallInfo ci_gethostname = {(void*)&i_gethostname, (void*)&ifa_gethostname, 0, 0, 0x0000000000000000LL};
@@ -22552,7 +22556,7 @@ extern const CallInfo ci_dom_document_savexml = {(void*)&i_dom_document_savexml,
 extern const CallInfo ci_hphp_get_timers = {(void*)&i_hphp_get_timers, (void*)&ifa_hphp_get_timers, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_str_word_count = {(void*)&i_str_word_count, (void*)&ifa_str_word_count, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_eval = {(void*)&i_eval, (void*)&ifa_eval, 1, 0, 0x0000000000000000LL};
-extern const CallInfo ci_function_exists = {(void*)&i_function_exists, (void*)&ifa_function_exists, 1, 0, 0x0000000000000000LL};
+extern const CallInfo ci_function_exists = {(void*)&i_function_exists, (void*)&ifa_function_exists, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_quoted_printable_decode = {(void*)&i_quoted_printable_decode, (void*)&ifa_quoted_printable_decode, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_is_writable = {(void*)&i_is_writable, (void*)&ifa_is_writable, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_imap_lsub = {(void*)&i_imap_lsub, (void*)&ifa_imap_lsub, 3, 0, 0x0000000000000000LL};

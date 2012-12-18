@@ -78,6 +78,12 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The function name, as a string.",
       ),
+      array(
+        'name'   => "autoload",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "Whether to try to autoload.",
+      ),
     ),
     'taint_observer' => false,
   ));

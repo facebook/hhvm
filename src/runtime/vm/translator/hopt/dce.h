@@ -13,31 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __HHIR_DCE_H__
-#define __HHIR_DCE_H__
-
-
-#include "opt.h"
-
+#ifndef incl_RUNTIME_VM_HHIR_DCE_H_
+#define incl_RUNTIME_VM_HHIR_DCE_H_
 
 namespace HPHP {
 namespace VM {
 namespace JIT {
 
-
 class Trace;
 class IRFactory;
 
-#define DEAD 0
-#define LIVE 1
-// An IncRef is marked as REFCOUNT_CONSUMED[_OFF_TRACE], if it is consumed by
-// an instruction other than DecRefNZ that decrements the ref count.
-// * REFCOUNT_CONSUMED: consumed by such an instruction in the main trace
-// * REFCOUNT_CONSUMED_OFF_TRACE: consumed by such an instruction only
-//   in exit traces.
-#define REFCOUNT_CONSUMED 2
-#define REFCOUNT_CONSUMED_OFF_TRACE 3
-
+const unsigned DEAD = 0;
+const unsigned LIVE = 1;
 void eliminateDeadCode(Trace* trace, IRFactory* factory);
 
 void removeDeadInstructions(Trace* trace);
@@ -45,4 +32,4 @@ void removeDeadInstructions(Trace* trace);
 } } }
 
 
-#endif // __HHIR_DCE_H__
+#endif

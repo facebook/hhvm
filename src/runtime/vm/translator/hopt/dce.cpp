@@ -23,6 +23,13 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
+// An IncRef is marked as REFCOUNT_CONSUMED[_OFF_TRACE], if it is consumed by
+// an instruction other than DecRefNZ that decrements the ref count.
+// * REFCOUNT_CONSUMED: consumed by such an instruction in the main trace
+// * REFCOUNT_CONSUMED_OFF_TRACE: consumed by such an instruction only
+//   in exit traces.
+const unsigned REFCOUNT_CONSUMED = 2;
+const unsigned REFCOUNT_CONSUMED_OFF_TRACE = 3;
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 

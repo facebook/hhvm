@@ -55,10 +55,12 @@ May Raise Error
 Instruction set
 ---------------
 
+
 1.  Checks
 
 GuardType
 GuardRefs
+
 
 2. Arithmetic
 
@@ -69,9 +71,11 @@ OpOr
 OpXor
 OpMul
 
+
 3. Type conversions
 
 Conv
+
 
 4. Boolean predicates
 
@@ -89,6 +93,7 @@ IsSet
 IsType
 IsNSet
 IsNType
+
 
 5. Branches
 
@@ -116,16 +121,30 @@ ExitWhenSurprised
 ExitOnVarEnv
 CheckUninit
 
+
 6. Reference manipulation
 
 Unbox
 Box
 UnboxPtr
 
+
 7. Loads
 
-LdStack
-LdLoc
+d:T = LdStack s0:StkP s1:ConstInt [l:Label]
+
+  Loads from s0 at offset s1, and puts the value in d.  If the
+  optional label l is specified and the loaded value's type does not
+  match T, this instruction does not load into d and transfers control
+  to l.
+
+d:T = LdLoc s0:Home [l:Label]
+
+  Loads from the StkP in s0 at the offset in s0.  Used to load locals.
+  If the optional label l is supplied and the loaded value's type does
+  not match T, this instruction does not load into d and transfers
+  control to l.
+
 LdStackAddr
 LdLocAddr
 LdMemNR
@@ -135,7 +154,12 @@ LdThis
 LdThisNc
 LdVarEnv
 LdRetAddr
-LdHome
+
+d:Home = LdHome s0:StkP s1:ConstInt
+
+  Logically packages the location of a pointer into the VM stack and
+  an offset.  s0 will usually be the output of a DefFP.
+
 LdConst
 DefConst
 LdCls
@@ -154,10 +178,13 @@ LdARFuncPtr
 LdFuncCls
 LdRaw
 
+
 8. Allocation
+
 NewObj
 NewArray
 NewTuple
+
 
 9. Call & Return
 
@@ -167,6 +194,7 @@ Call
 NativeImpl
 RetCtrl
 RetVal
+
 
 10. Stores
 
@@ -182,6 +210,7 @@ StRaw
 SpillStack
 SpillStackAllocAR
 
+
 11. Trace exits
 
 ExitTrace
@@ -189,6 +218,7 @@ ExitTraceCc
 ExitSlow
 ExitSlowNoProgress
 ExitGuardFailure
+
 
 12. Refcounting and copies
 
@@ -203,11 +233,19 @@ DecRef
 DecRefNZ
 DefLabel
 
+
 13. Misc
 
 Marker
-DefFP
-DefSP
+
+d:StkP = DefFP
+
+  Creates a temporary d representing the current vm frame pointer.
+
+d:StkP = DefSP
+
+  Creates a temporary d representing the current vm stack pointer.
+
 
 14. Runtime helpers
 
@@ -222,12 +260,26 @@ DefCls
 DefFunc
 InterpOne
 
+
 15. Register allocation
 
-Spill
-Reload
-AllocSpill
-FreeSpill
+d:T = Spill s0:T
+
+  Stores s0 to a spill location specified by the destination.  The
+  destination temporary will not have registers allocated to it.
+
+d:T = Reload s0:T
+
+  Loads from a spilled temporary s0, and stores the result in d.
+
+AllocSpill s0:ConstInt
+
+  Allocates s0 slots of additional spill space on the stack.
+  Generated when the preallocated spill space is exhausted.
+
+FreeSpill s0:ConstInt
+
+  Deallocates s0 slots of spill space on the stack.
 
 16. Continuations
 
@@ -240,7 +292,9 @@ ContRaiseCheck
 ContPreNext
 ContStartedCheck
 
+
 17. Debugging and instrumentation
+
 IncStat
 AssertRefCount
 

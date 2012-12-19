@@ -600,8 +600,13 @@ void LinearScan::computePreColoringHint() {
   if (nextNative == NULL) {
     return;
   }
-  Opcode opc = nextNative->getOpcode();
-  switch (opc) {
+  auto normalHint = [&](int count, int srcBase = 0, int argBase = 0) {
+    for (int i = 0; i < count; ++i) {
+      m_preColoringHint.add(nextNative->getSrc(i + srcBase), 0,
+                            i + argBase);
+    }
+  };
+  switch (nextNative->getOpcode()) {
     case Box:
       if (nextNative->getSrc(0)->getType() == Type::Cell) {
         m_preColoringHint.add(nextNative->getSrc(0), 1, 0);
@@ -620,8 +625,7 @@ void LinearScan::computePreColoringHint() {
       break;
     case DecRefLocals:
     case DecRefLocalsThis:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
+      normalHint(2);
       break;
     case Print:
       m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
@@ -629,9 +633,7 @@ void LinearScan::computePreColoringHint() {
     case AddElem:
       if (nextNative->getSrc(1)->getType() == Type::Int &&
           nextNative->getSrc(2)->getType() == Type::Int) {
-        m_preColoringHint.add(nextNative->getSrc(0), 0, 1);
-        m_preColoringHint.add(nextNative->getSrc(1), 0, 2);
-        m_preColoringHint.add(nextNative->getSrc(2), 0, 3);
+        normalHint(3, 0, 1);
       } else {
         m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
         m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
@@ -660,23 +662,16 @@ void LinearScan::computePreColoringHint() {
       }
       break;
     case ArrayAdd:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
+      normalHint(2);
       break;
     case DefFunc:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
+      normalHint(1);
       break;
     case CreateCont:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, 2);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, 3);
+      normalHint(4);
       break;
     case FillContLocals:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, 2);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, 3);
+      normalHint(4);
       break;
     case OpEq:
     case OpNeq:

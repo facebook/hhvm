@@ -4309,10 +4309,7 @@ Address CodeGenerator::cgCreateCont(IRInstruction* inst) {
     VMExecutionContext::createContinuation<false>;
   cgCallHelper(m_as, (TCA)helper,
                inst->getDst(), kNoSyncPoint,
-               ArgGroup().ssa(inst->getSrc(0))
-                         .ssa(inst->getSrc(1))
-                         .ssa(inst->getSrc(2))
-                         .ssa(inst->getSrc(3)));
+               ArgGroup().ssas(inst, 0, 4));
   return start;
 }
 
@@ -4320,10 +4317,7 @@ Address CodeGenerator::cgFillContLocals(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   cgCallHelper(m_as, (TCA)VMExecutionContext::fillContinuationVars,
                InvalidReg, kNoSyncPoint,
-               ArgGroup().ssa(inst->getSrc(0))
-                         .ssa(inst->getSrc(1))
-                         .ssa(inst->getSrc(2))
-                         .ssa(inst->getSrc(3)));
+               ArgGroup().ssas(inst, 0, 4));
   return start;
 }
 

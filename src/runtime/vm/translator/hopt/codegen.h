@@ -299,6 +299,13 @@ struct ArgGroup {
     return *this;
   }
 
+  ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count) {
+    for (unsigned i = begin; i < (begin + count); ++i) {
+      m_args.push_back(ArgDesc(inst->getSrc(i)));
+    }
+    return *this;
+  }
+
   /* loads the type of tmp into an arg register */
   ArgGroup& type(SSATmp* tmp) {
     m_args.push_back(ArgDesc(tmp, false));

@@ -531,7 +531,8 @@ int SSATmp::numNeededRegs() const {
   Type::Tag type = getType();
 
   // These types don't get a register because their values are static
-  if (type == Type::Null || type == Type::Uninit || type == Type::None) {
+  if (type == Type::Null || type == Type::Uninit || type == Type::None ||
+      type == Type::RetAddr) {
     return 0;
   }
 
@@ -713,15 +714,6 @@ IRInstruction* IRFactory::decRefThis(SSATmp* fp, LabelInstruction* exit) {
   return new (m_arena) IRInstruction(DecRefThis, Type::None, fp, exit);
 }
 
-IRInstruction* IRFactory::decRefLocalsThis(SSATmp* fp, SSATmp* numLocals) {
-  return new (m_arena) IRInstruction(DecRefLocalsThis, Type::None, fp,
-                                     numLocals);
-}
-
-IRInstruction* IRFactory::decRefLocals(SSATmp* fp, SSATmp* numLocals) {
-  return new (m_arena) IRInstruction(DecRefLocals, Type::None, fp, numLocals);
-}
-
 IRInstruction* IRFactory::decRef(SSATmp* tmp, LabelInstruction* exit) {
   return new (m_arena) IRInstruction(DecRef, tmp->getType(), tmp, exit);
 }
@@ -802,21 +794,6 @@ IRInstruction* IRFactory::exitTrace(TraceExitType::ExitType exitType,
                                            pc,
                                            (sizeof(args) / sizeof(SSATmp*)),
                                            args);
-}
-
-IRInstruction* IRFactory::retVal(SSATmp* fp, SSATmp* val) {
-  return new (m_arena) IRInstruction(RetVal, Type::SP, fp, val);
-}
-
-IRInstruction* IRFactory::retVal(SSATmp* fp) {
-  return new (m_arena) IRInstruction(RetVal, Type::SP, fp);
-}
-
-IRInstruction* IRFactory::retCtrl(SSATmp* sp,
-                                  SSATmp* fp,
-                                  SSATmp* retAddr) {
-  return new (m_arena) ExtendedInstruction(*this, RetCtrl, Type::None,
-                                           sp, fp, 1, &retAddr);
 }
 
 IRInstruction* IRFactory::spill(SSATmp* src) {

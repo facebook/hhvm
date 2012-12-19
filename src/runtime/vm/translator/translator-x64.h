@@ -80,6 +80,8 @@ struct Call;
 struct TReqInfo;
 struct Label;
 
+static const int kNumFreeLocalsHelpers = 9;
+
 class TranslatorX64 : public Translator
                     , SpillFill
                     , boost::noncopyable {
@@ -133,7 +135,6 @@ class TranslatorX64 : public Translator
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
 
-  static const int kNumFreeLocalsHelpers = 9;
   TCA                    m_freeManyLocalsHelper;
   TCA                    m_freeLocalsHelpers[kNumFreeLocalsHelpers];
 

@@ -2321,9 +2321,8 @@ TranslatorX64::emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs) {
     return retval;
   }
   if (debug) {
-    a. store_imm64_disp_reg64(0xba5eba11acc01ade,
-                              cellsToBytes(numArgs) + AROFF(m_savedRip),
-                              rVmSp);
+    a.    storeq (kUninitializedRIP,
+                  rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
   }
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
   emitLea(a, rVmSp, cellsToBytes(numArgs), rStashedAR);
@@ -11354,13 +11353,18 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
 }
 
 /*
- * Defines functions called by emitGenericReturn.
+ * Defines functions called by emitGenericReturn, and
+ * cgGenericRetDecRefs.
  */
 void TranslatorX64::emitFreeLocalsHelpers() {
   Label doRelease;
   Label release;
   Label loopHead;
 
+  /*
+   * Note: the IR currently requires that we preserve r14/r15 across
+   * calls to these free locals helpers.
+   */
   static_assert(rVmSp == rbx, "");
   auto const rIter     = rbx;
   auto const rFinished = r13;
@@ -11373,7 +11377,7 @@ asm_label(a, release);
   a.    cmpl   (RefCountStaticValue, rData[TVOFF(_count)]);
   jccBlock<CC_Z>(a, [&] {
     a.  subl   (1, rData[TVOFF(_count)]);
-    doRelease.jcc8(a, CC_Z);
+    a.  jz8    (doRelease);
   });
   a.    ret    ();
 asm_label(a, doRelease);
@@ -11388,8 +11392,8 @@ asm_label(a, doRelease);
 
     a.  loadl  (rIter[TVOFF(m_type)], rType);
     a.  cmpl   (KindOfRefCountThreshold, rType);
-    skipDecRef.jcc8(a, CC_LE);
-    release.call(a);
+    a.  jle8   (skipDecRef);
+    a.  call   (release);
     recordIndirectFixup(a.code.frontier, 0);
   asm_label(a, skipDecRef);
   };
@@ -11400,7 +11404,7 @@ asm_label(a, loopHead);
   emitDecLocal();
   a.    addq   (sizeof(TypedValue), rIter);
   a.    cmpq   (rIter, rFinished);
-  loopHead.jcc8(a, CC_NZ);
+  a.    jnz8   (loopHead);
 
   for (int i = 0; i < kNumFreeLocalsHelpers; ++i) {
     m_freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.code.frontier;

@@ -183,6 +183,7 @@ private:
 
   void cgCheckUninit(SSATmp* src, LabelInstruction* label);
   Address emitFwdJcc(ConditionCode cc, LabelInstruction* label);
+  Address emitFwdJcc(Asm& a, ConditionCode cc, LabelInstruction* label);
   Address emitFwdJmp(Asm& as, LabelInstruction* label);
   Address emitFwdJmp(LabelInstruction* label);
   Address emitSmashableFwdJmp(LabelInstruction* label, SSATmp* toSmash);
@@ -200,6 +201,7 @@ private:
   Address getDtorGeneric();
   Address getDtorTyped();
 
+private:
   /*
    * Fields
    */

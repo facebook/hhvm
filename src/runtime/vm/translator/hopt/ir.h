@@ -87,7 +87,7 @@ enum OpcodeFlag : uint64_t {
   ProducesRC       = 0x0040,
   MayModifyRefs    = 0x0080,
   Rematerializable = 0x0100, // TODO: implies HasDest
-  MayRaiseError    = 0x0200, // TODO: should it imply CallsNative?
+  MayRaiseError    = 0x0200,
 };
 
 #define IR_OPCODES                                                      \
@@ -156,6 +156,7 @@ enum OpcodeFlag : uint64_t {
   OPC(Jmp_,              (HasDest|Essential))                           \
   OPC(ExitWhenSurprised, (Essential))                                   \
   OPC(ExitOnVarEnv,      (Essential))                                   \
+  OPC(ReleaseVVOrExit,   (Essential))                                   \
   OPC(CheckUninit,       (Essential))                                   \
                                                                         \
   OPC(Unbox,             (HasDest|ProducesRC))                          \
@@ -176,7 +177,6 @@ enum OpcodeFlag : uint64_t {
                           Rematerializable))                            \
   /* LdThisNc avoids check */                                           \
   OPC(LdThisNc,          (HasDest|CanCSE|Rematerializable))             \
-  OPC(LdVarEnv,          (HasDest|CanCSE))                              \
   OPC(LdRetAddr,         (HasDest))                                     \
   OPC(LdHome,            (HasDest|CanCSE))                              \
   OPC(LdConst,           (HasDest|CanCSE|Rematerializable))             \
@@ -221,10 +221,9 @@ enum OpcodeFlag : uint64_t {
                           ConsumesRC|MayModifyRefs))                    \
   OPC(NativeImpl,        (Essential|MemEffects|CallsNative|             \
                           MayModifyRefs))                               \
-  /* return control to caller */                                        \
   OPC(RetCtrl,           (Essential|MemEffects))                        \
-  /* transfer return value from callee to caller; update sp */          \
-  OPC(RetVal,            (HasDest|MemEffects|ConsumesRC))               \
+  OPC(RetVal,            (Essential|MemEffects|ConsumesRC))             \
+  OPC(RetAdjustStack,    (HasDest|Essential))                           \
   /* stores */                                                          \
   OPC(StMem,             (Essential|MemEffects|ConsumesRC|              \
                           MayModifyRefs))                               \
@@ -255,9 +254,7 @@ enum OpcodeFlag : uint64_t {
   OPC(DecRefLoc,         (Essential|MemEffects|MayModifyRefs))          \
   OPC(DecRefStack,       (Essential|MemEffects|MayModifyRefs))          \
   OPC(DecRefThis,        (Essential|MemEffects|MayModifyRefs))          \
-  OPC(DecRefLocals,      (Essential|MemEffects|CallsNative|             \
-                          MayModifyRefs))                               \
-  OPC(DecRefLocalsThis,  (Essential|MemEffects|CallsNative|             \
+  OPC(GenericRetDecRefs, (HasDest|Essential|MemEffects|CallsNative|     \
                           MayModifyRefs))                               \
   OPC(DecRef,            (Essential|MemEffects|ConsumesRC|              \
                           MayModifyRefs))                               \
@@ -285,13 +282,12 @@ enum OpcodeFlag : uint64_t {
                           ConsumesRC|ProducesRC|MayModifyRefs))         \
   OPC(ArrayAdd,          (HasDest|MemEffects|CallsNative|               \
                           ConsumesRC|ProducesRC))                       \
-                         /* XXX: shouldn't DefCls/DefFunc MayRaiseError? */ \
   OPC(DefCls,            (CanCSE|Essential|CallsNative))                \
   OPC(DefFunc,           (CanCSE|Essential|CallsNative))                \
-                                                                        \
   OPC(InterpOne,         (HasDest|Essential|MemEffects|                 \
                           CallsNative|MayModifyRefs|                    \
                           MayRaiseError))                               \
+                                                                        \
   /* for register allocation */                                         \
   OPC(Spill,             (HasDest|MemEffects))                          \
   OPC(Reload,            (HasDest|MemEffects))                          \
@@ -413,6 +409,7 @@ public:
     IRT(FuncRef,         "Func&") \
     IRT(VarEnvRef,       "VarEnv&")\
     IRT(FuncClassRef,    "FuncClass&") /* this has both a Func& and a Class& */\
+    IRT(RetAddr,         "RetAddr") /* Return address */ \
     IRT(SP,              "StkP")  /* any pointer into VM stack: VmSP or VmFP */\
     IRT(TCA,             "TCA")                                         \
 
@@ -1325,12 +1322,7 @@ public:
                              SSATmp* index,
                              LabelInstruction* exit);
   IRInstruction* decRefThis(SSATmp* fp, LabelInstruction* exit);
-  IRInstruction* decRefLocalsThis(SSATmp* fp, SSATmp* numLocals);
-  IRInstruction* decRefLocals(SSATmp* fp, SSATmp* numLocals);
 
-  IRInstruction* retVal(SSATmp* fp, SSATmp* val);
-  IRInstruction* retVal(SSATmp* fp);
-  IRInstruction* retCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
   template<Type::Tag T> TypeInstruction* isType(SSATmp* src) {
     return new TypeInstruction(IsType, T, Type::Bool, src);
   }

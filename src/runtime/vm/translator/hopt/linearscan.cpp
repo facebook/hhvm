@@ -355,7 +355,8 @@ void LinearScan::allocRegToInstruction(Trace* trace,
   }
   if (opc == DefSP || opc == Call || opc == SpillStack ||
       opc == AllocActRec || opc == SpillStackAllocAR ||
-      opc == RetVal || opc ==  NewObj || opc == InterpOne) {
+      opc == RetAdjustStack || opc ==  NewObj || opc == InterpOne ||
+      opc == GenericRetDecRefs) {
     ASSERT(type == Type::SP);
     allocRegToTmp(&m_regs[int(rVmSp)], ssaTmp, 0);
     return;
@@ -622,10 +623,6 @@ void LinearScan::computePreColoringHint() {
       break;
     case NativeImpl:
       m_preColoringHint.add(nextNative->getSrc(1), 0, 0);
-      break;
-    case DecRefLocals:
-    case DecRefLocalsThis:
-      normalHint(2);
       break;
     case Print:
       m_preColoringHint.add(nextNative->getSrc(0), 0, 0);

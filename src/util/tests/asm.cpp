@@ -497,4 +497,41 @@ retq
 )");
 }
 
+TEST(Asm, SimpleLabelTest) {
+  Asm a;
+  a.init(10 << 24);
+
+  Label loop;
+
+  auto loopCallee = [] (int* counter) { ++*counter; };
+
+  // Function that calls loopCallee N times.
+  auto function = reinterpret_cast<int (*)(int, int*)>(a.code.frontier);
+  a.    push   (rbp);
+  a.    movq   (rsp, rbp);
+
+  a.    movl   (edi, r11d);
+  a.    movq   (rsi, r15);
+  a.    movl   (0, ebx);
+
+asm_label(a, loop);
+  a.    movq   (r15, rdi);
+  a.    call   (CodeAddress(static_cast<void (*)(int*)>(loopCallee)));
+  a.    incl   (ebx);
+  a.    cmpl   (ebx, r11d);
+  a.    jne    (loop);
+
+  a.    pop    (rbp);
+  a.    ret    ();
+
+  auto test_case = [&] (int n) {
+    int counter = 0;
+    function(n, &counter);
+    EXPECT_EQ(n, counter);
+  };
+  for (int i = 1; i < 15; ++i) test_case(i);
+  test_case(51);
+  test_case(127);
+}
+
 }}}

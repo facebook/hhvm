@@ -341,20 +341,30 @@ static ConditionCode cmpOpToCC[JmpNSame - JmpGt + 1] = {
   CC_NE  // OpNSame
 };
 
-Address CodeGenerator::emitFwdJcc(ConditionCode cc, LabelInstruction* label) {
-  Address start = m_as.code.frontier;
-  m_as.jcc(cc, m_as.code.frontier);
-  TCA immPtr = m_as.code.frontier - 4;
+Address CodeGenerator::emitFwdJcc(Asm& a,
+                                  ConditionCode cc,
+                                  LabelInstruction* label) {
+  Address start = a.code.frontier;
+  a.jcc(cc, a.code.frontier);
+  TCA immPtr = a.code.frontier - 4;
   label->prependPatchAddr(immPtr);
   return start;
 }
 
-Address CodeGenerator::emitFwdJmp(Asm& as, LabelInstruction* label) {
-  Address start = as.code.frontier;
-  as.jmp(as.code.frontier);
-  TCA immPtr = as.code.frontier - 4;
+Address CodeGenerator::emitFwdJmp(Asm& a, LabelInstruction* label) {
+  Address start = a.code.frontier;
+  a.jmp(a.code.frontier);
+  TCA immPtr = a.code.frontier - 4;
   label->prependPatchAddr(immPtr);
   return start;
+}
+
+Address CodeGenerator::emitFwdJcc(ConditionCode cc, LabelInstruction* label) {
+  return emitFwdJcc(m_as, cc, label);
+}
+
+Address CodeGenerator::emitFwdJmp(LabelInstruction* label) {
+  return emitFwdJmp(m_as, label);
 }
 
 // Patch with service request EMIT_BIND_JMP
@@ -399,14 +409,6 @@ Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc,
   m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
   Address tcaJcc = emitFwdJcc(cc, label);
   toSmash->setTCA(tcaJcc);
-  return start;
-}
-
-Address CodeGenerator::emitFwdJmp(LabelInstruction* label) {
-  Address start = m_as.code.frontier;
-  m_as.jmp(m_as.code.frontier);
-  TCA immPtr = m_as.code.frontier - 4;
-  label->prependPatchAddr(immPtr);
   return start;
 }
 
@@ -1325,46 +1327,43 @@ void CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgRetVal(IRInstruction* inst) {
-  SSATmp* dstSp = inst->getDst();
-  SSATmp* fp    = inst->getSrc(0);
-  SSATmp* val   = inst->getNumSrcs() > 1 ? inst->getSrc(1) : NULL;
+  auto const rFp    = inst->getSrc(0)->getReg();
+  auto* const val   = inst->getSrc(1);
+  auto& a = m_as;
 
-  auto dstSpReg = dstSp->getReg();
-  auto fpReg    =    fp->getReg();
-
-  if (val) {
-    // Store return value at the top of the caller's eval stack
-    // (a) Store the type
-    if (Type::isStaticallyKnown(val->getType())) {
-      DataType valDataType = Type::toDataType(val->getType());
-      m_as.store_imm32_disp_reg(valDataType, AROFF(m_r) + TVOFF(m_type), fpReg);
-    } else {
-      auto typeReg = val->getReg(1);
-      m_as.store_reg32_disp_reg64(typeReg, AROFF(m_r) + TVOFF(m_type), fpReg);
-    }
-
-    // (b) Store the actual value (not necessary when storing Null)
-    if (val->getType() != Type::Null) {
-      if (val->getInstruction()->isDefConst()) {
-        int64 intVal = val->getConstValAsRawInt();
-        m_as.store_imm64_disp_reg64(intVal,  AROFF(m_r) + TVOFF(m_data), fpReg);
-      } else {
-        auto valReg = val->getReg();
-        if (val->getType() == Type::Bool) {
-          // BOOL BYTE
-          m_as.and_imm64_reg64(0xff, valReg);
-        }
-        m_as.store_reg64_disp_reg64(valReg,  AROFF(m_r) + TVOFF(m_data), fpReg);
-      }
-    }
+  // Store return value at the top of the caller's eval stack
+  // (a) Store the type
+  if (Type::isStaticallyKnown(val->getType())) {
+    a.    storel (Type::toDataType(val->getType()),
+                  rFp[AROFF(m_r) + TVOFF(m_type)]);
+  } else {
+    a.    storel (r32(val->getReg(1)), rFp[AROFF(m_r) + TVOFF(m_type)]);
   }
-  // Adjust Stack Pointer
-  m_as.lea_reg64_disp_reg64 (fpReg, AROFF(m_r), dstSpReg);
+
+  // (b) Store the actual value (not necessary when storing Null)
+  if (val->getType() == Type::Null) return;
+  if (val->getInstruction()->isDefConst()) {
+    a.    storeq (val->getConstValAsRawInt(),
+                  rFp[AROFF(m_r) + TVOFF(m_data)]);
+  } else {
+    if (val->getType() == Type::Bool) {
+      a.  movzbl (rbyte(val->getReg()), r32(val->getReg()));
+    }
+    a.    storeq (val->getReg(), rFp[AROFF(m_r) + TVOFF(m_data)]);
+  }
+}
+
+void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
+  auto const rFp   = inst->getSrc(0)->getReg();
+  auto const dstSp = inst->getDst()->getReg();
+  auto& a = m_as;
+  a.    lea   (rFp[AROFF(m_r)], dstSp);
 }
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = inst->getSrc(0)->getReg(0);
   ASSERT(fpReg != InvalidReg);
+  ASSERT(inst->getDst() && !inst->getDst()->hasReg(0));
   m_as.push(fpReg[AROFF(m_savedRip)]);
 }
 
@@ -1461,9 +1460,9 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
 void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
   // call to a trace function
   // ld return ip from native stack into rdx
-  a.    loadq(MemoryRef(DispReg(rsp)), rdx);
-  a.    movq (rVmFp, rdi);
-  a.    movq (rVmSp, rsi);
+  a.    loadq (*rsp, rdx);
+  a.    movq  (rVmFp, rdi);
+  a.    movq  (rVmSp, rsi);
   // do the call; may use a trampoline
   m_tx64->emitCall(a, TCA(traceRet));
 }
@@ -1944,48 +1943,94 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
   cgDecRefMem(type, fpReg, -((index + 1) * sizeof(Cell)), exit);
 }
 
-static void
-frame_free_locals(ActRec* fp, int numLocals) {
-  ASSERT(Transl::tx64->stateIsDirty());
-  using namespace Transl;
-#ifdef DEBUG
-  VMRegAnchor _;
-  ASSERT(vmfp() == (Cell*)fp);
-#endif
-  // At return-time, we know that the eval stack is empty except
-  // for the return value.
-  TRACE(1, "frame_free_locals: updated fp to %p\n", fp);
-  frame_free_locals_inl(fp, numLocals);
-}
+void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
+  auto const rFp       = inst->getSrc(0)->getReg();
+  auto const retVal    = inst->getSrc(1);
+  auto const numLocals = inst->getSrc(2)->getConstValAsInt();
+  auto const rDest     = inst->getDst()->getReg();
+  auto& a = m_as;
 
-static void
-frame_free_locals_no_this(ActRec* fp, int numLocals) {
-  ASSERT(Transl::tx64->stateIsDirty());
-  using namespace Transl;
-#ifdef DEBUG
-  VMRegAnchor _;
-  ASSERT(vmfp() == (Cell*)fp);
-#endif
-  // At return-time, we know that the eval stack is empty except
-  // for the return value.
-  TRACE(1, "frame_free_locals_no_this: updated fp to %p\n", fp);
-  frame_free_locals_no_this_inl(fp, numLocals);
-}
+  RegSet retvalRegs;
+  for (int i = 0; i < retVal->numAllocatedRegs(); ++i) {
+    retvalRegs.add(retVal->getReg(i));
+  }
+  ASSERT(retvalRegs.size() <= 2);
 
-void CodeGenerator::cgDecRefLocals(IRInstruction* inst) {
-  SSATmp* fp = inst->getSrc(0);
-  SSATmp* numLocals = inst->getSrc(1);
+  /*
+   * The generic decref helpers preserve these two registers.
+   *
+   * XXX/TODO: we ideally shouldn't be moving the return value into
+   * these regs and then back; it'd be better to precolor allocation
+   * this way, or failing that remap the return value SSATmp with a
+   * separate instruction.  This scheme also won't work for us once we
+   * want hackIR to support handling surprise flags, because
+   * setprofile will look on the VM stack for the return value.
+   */
+  auto spillRegs = RegSet(r14).add(r15);
 
-  cgCallHelper(m_as, (TCA)frame_free_locals_no_this, InvalidReg,
-               kSyncPoint, ArgGroup().ssa(fp).ssa(numLocals));
-}
+  /*
+   * Since we're making a call using a custom ABI to the generic
+   * decref helper, it's important that our src and dest registers are
+   * allocated to the registers we expect, and that no other SSATmp's
+   * are still allocated to registers at this time.
+   */
+  const auto UNUSED expectedLiveRegs = RegSet(rFp).add(rDest) | retvalRegs;
+  ASSERT((m_curInst->getLiveOutRegs() - expectedLiveRegs).empty());
+  ASSERT(rFp == rVmFp &&
+         "free locals helper assumes the frame pointer is rVmFp");
+  ASSERT(rDest == rVmSp &&
+         "free locals helper adjusts rVmSp, which must be our dst reg");
 
-void CodeGenerator::cgDecRefLocalsThis(IRInstruction* inst) {
-  SSATmp* fp = inst->getSrc(0);
-  SSATmp* numLocals = inst->getSrc(1);
+  if (!numLocals) {
+    a.  lea   (rFp[AROFF(m_r)], rDest);
+    return;
+  }
 
-  cgCallHelper(m_as, (TCA)frame_free_locals, InvalidReg, kSyncPoint,
-               ArgGroup().ssa(fp).ssa(numLocals));
+  // Remove overlap so we don't move registers that are already in the
+  // saved set.
+  auto intersectedRegs = spillRegs & retvalRegs;
+  spillRegs -= intersectedRegs;
+  retvalRegs -= intersectedRegs;
+
+  auto grabPair = [&] (std::pair<PhysReg,PhysReg>& out) {
+    ASSERT(!retvalRegs.empty() && !spillRegs.empty());
+    retvalRegs.findFirst(out.first);
+    spillRegs.findFirst(out.second);
+    retvalRegs.remove(out.first);
+    spillRegs.remove(out.second);
+  };
+
+  auto savePairA = std::make_pair(InvalidReg, InvalidReg);
+  auto savePairB = std::make_pair(InvalidReg, InvalidReg);
+  if (!retvalRegs.empty()) {
+    grabPair(savePairA);
+    if (!retvalRegs.empty()) {
+      grabPair(savePairB);
+    }
+  }
+
+  if (savePairA.first != InvalidReg) {
+    a.  movq   (savePairA.first, savePairA.second);
+    if (savePairB.first != InvalidReg) {
+      a.movq   (savePairB.first, savePairB.second);
+    }
+  }
+
+  auto const target = numLocals > kNumFreeLocalsHelpers
+    ? m_tx64->m_freeManyLocalsHelper
+    : m_tx64->m_freeLocalsHelpers[numLocals - 1];
+
+  a.    subq   (0x8, rsp);  // For parity; callee does retq $0x8.
+  a.    lea    (rFp[-numLocals * sizeof(TypedValue)], rVmSp);
+  a.    call   (target);
+  recordSyncPoint(a);
+
+  if (savePairA.first != InvalidReg) {
+    a.  movq   (savePairA.second, savePairA.first);
+    if (savePairB.first != InvalidReg) {
+      a.movq   (savePairB.second, savePairB.first);
+    }
+  }
 }
 
 Address CodeGenerator::getDtor(DataType type) {
@@ -2807,18 +2852,6 @@ void CodeGenerator::cgLdConst(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgLdVarEnv(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
-
-  ASSERT(!(src->isConst()));
-  ASSERT(!(dst->isConst()));
-
-  auto srcReg = src->getReg();
-  auto dstReg = dst->getReg();
-
-  m_as.load_reg64_disp_reg64(srcReg, AROFF(m_varEnv), dstReg);
-}
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
@@ -3691,8 +3724,39 @@ void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
   ASSERT(!(fp->isConst()));
 
   auto fpReg = fp->getReg();
-  m_as.cmp_imm64_disp_reg64(0, AROFF(m_varEnv), fpReg);
+  m_as.    cmpq   (0, fpReg[AROFF(m_varEnv)]);
   emitFwdJcc(CC_NE, label);
+}
+
+void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
+  auto* const label = inst->getLabel();
+  auto const rFp = inst->getSrc(0)->getReg();
+
+  Label finished;
+  Label hasVV;
+
+  {
+    auto& a = m_as;
+    a.    cmpq   (0, rFp[AROFF(m_varEnv)]);
+    a.    jnz    (hasVV);
+  asm_label(a, finished);
+  }
+
+  {
+    auto& a = m_astubs;
+  asm_label(a, hasVV);
+    a.    testl  (ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]);
+    emitFwdJcc(a, CC_Z, label);
+    cgCallHelper(
+      a,
+      TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
+      nullptr,
+      kSyncPoint,
+      ArgGroup()
+        .reg(rFp)
+    );
+    a.    jmp    (finished);
+  }
 }
 
 void CodeGenerator::cgBox(IRInstruction* inst) {

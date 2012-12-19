@@ -844,7 +844,8 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// License for Andrew J. Paroski's x86 machine code emitter
+
+struct Label;
 
 /**
  * Copyright (c) 2009, Andrew J. Paroski
@@ -1080,8 +1081,9 @@ struct X64Assembler {
   void shrl  (Immed i, Reg32 r) { instrIR(instr_shr, i.b(), r); }
 
   /*
-   * Control-flow directives. The labeling/patching facilities
-   * available are primitive.
+   * Control-flow directives.  Primitive labeling/patching facilities
+   * are available, as well as slightly higher-level ones via the
+   * Label class.
    */
 
   bool jmpDeltaFits(CodeAddress dest) {
@@ -1126,6 +1128,12 @@ struct X64Assembler {
     emitCJ8(instr_jcc, cond, (ssize_t)dest);
   }
 
+  void call(Label&);
+  void jmp(Label&);
+  void jmp8(Label&);
+  void jcc(ConditionCode, Label&);
+  void jcc8(ConditionCode, Label&);
+
 #define CCS \
   CC(o,   CC_O)         \
   CC(no,  CC_NO)        \
@@ -1151,9 +1159,11 @@ struct X64Assembler {
   CC(le,  CC_LE)        \
   CC(nle, CC_NLE)
 
-#define CC(_nm, _code) \
-  void j ## _nm(CodeAddress dest)      { jcc(_code, dest); } \
-  void j ## _nm ## 8(CodeAddress dest) { jcc8(_code, dest); }
+#define CC(_nm, _code)                                        \
+  void j ## _nm(CodeAddress dest)      { jcc(_code, dest); }  \
+  void j ## _nm ## 8(CodeAddress dest) { jcc8(_code, dest); } \
+  void j ## _nm(Label&);                                      \
+  void j ## _nm ## 8(Label&);
   CCS
 #undef CC
 
@@ -2329,6 +2339,123 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+struct Label : private boost::noncopyable {
+  explicit Label()
+    : m_a(nullptr)
+    , m_address(nullptr)
+  {}
+
+  ~Label() {
+    if (!m_toPatch.empty()) {
+      ASSERT(m_a && m_address && "Label had jumps but was never set");
+    }
+    for (auto& ji : m_toPatch) {
+      switch (ji.type) {
+      case Branch::Jmp:   ji.a->patchJmp(ji.addr, m_address);  break;
+      case Branch::Jmp8:  ji.a->patchJmp8(ji.addr, m_address); break;
+      case Branch::Jcc:   ji.a->patchJcc(ji.addr, m_address);  break;
+      case Branch::Jcc8:  ji.a->patchJcc8(ji.addr, m_address); break;
+      case Branch::Call:  ji.a->patchCall(ji.addr, m_address); break;
+      }
+    }
+  }
+
+  void jmp(X64Assembler& a) {
+    addJump(&a, Branch::Jmp);
+    a.jmp(m_address ? m_address : a.code.frontier);
+  }
+
+  void jmp8(X64Assembler& a) {
+    addJump(&a, Branch::Jmp8);
+    a.jmp8(m_address ? m_address : a.code.frontier);
+  }
+
+  void jcc(X64Assembler& a, ConditionCode cc) {
+    addJump(&a, Branch::Jcc);
+    a.jcc(cc, m_address ? m_address : a.code.frontier);
+  }
+
+  void jcc8(X64Assembler& a, ConditionCode cc) {
+    addJump(&a, Branch::Jcc8);
+    a.jcc8(cc, m_address ? m_address : a.code.frontier);
+  }
+
+  void call(X64Assembler& a) {
+    addJump(&a, Branch::Call);
+    a.call(m_address ? m_address : a.code.frontier);
+  }
+
+  void jmpAuto(X64Assembler& a) {
+    ASSERT(m_address);
+    auto delta = m_address - (a.code.frontier + 2);
+    if (deltaFits(delta, sz::byte)) {
+      jmp8(a);
+    } else {
+      jmp(a);
+    }
+  }
+
+  void jccAuto(X64Assembler& a, ConditionCode cc) {
+    ASSERT(m_address);
+    auto delta = m_address - (a.code.frontier + 2);
+    if (deltaFits(delta, sz::byte)) {
+      jcc8(a, cc);
+    } else {
+      jcc(a, cc);
+    }
+  }
+
+  friend void asm_label(X64Assembler& a, Label& l) {
+    ASSERT(!l.m_address && !l.m_a && "Label was already set");
+    l.m_a = &a;
+    l.m_address = a.code.frontier;
+  }
+
+private:
+  enum class Branch {
+    Jcc,
+    Jcc8,
+    Jmp,
+    Jmp8,
+    Call
+  };
+
+  struct JumpInfo {
+    Branch type;
+    X64Assembler* a;
+    CodeAddress addr;
+  };
+
+private:
+  void addJump(X64Assembler* a, Branch type) {
+    if (m_address) return;
+    JumpInfo info;
+    info.type = type;
+    info.a = a;
+    info.addr = a->code.frontier;
+    m_toPatch.push_back(info);
+  }
+
+private:
+  X64Assembler* m_a;
+  CodeAddress m_address;
+  std::vector<JumpInfo> m_toPatch;
+};
+
+inline void X64Assembler::jmp(Label& l) { l.jmp(*this); }
+inline void X64Assembler::jmp8(Label& l) { l.jmp8(*this); }
+inline void X64Assembler::jcc(ConditionCode c, Label& l) { l.jcc(*this, c); }
+inline void X64Assembler::jcc8(ConditionCode c, Label& l) { l.jcc8(*this, c); }
+inline void X64Assembler::call(Label& l) { l.call(*this); }
+
+#define CC(nm, code)                                                    \
+  inline void X64Assembler::j##nm(Label& l) { l.jcc(*this, code); }     \
+  inline void X64Assembler::j##nm##8(Label& l) { l.jcc8(*this, code); }
+  CCS
+#undef CC
+
+//////////////////////////////////////////////////////////////////////
+
 inline void emitImmReg(X64Assembler& a, Immed imm, Reg64 dest) {
   a.emitImmReg(imm, dest);
 }
@@ -2366,6 +2493,7 @@ X64Assembler& asmChoose(CodeAddress addr, X64Assembler& a, Asm&... as) {
 
 #undef TRACEMOD
 #undef logical_const
+#undef CCS
 
 }}}
 

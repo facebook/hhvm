@@ -55,9 +55,13 @@ Essential
 
 MemEffects
 
-  Indicates that the instruction has side effects on memory.
+  Indicates that the instruction has side effects on memory that
+  cannot be rolled back.  If this bit isn't set, it means it is ok to
+  redo whatever work the instruction did without changing observable
+  program behavior.
 
-  This flag is currently unused.
+  This flag is currently unused, but may be used later to share exit
+  traces.
 
 CallsNative
 
@@ -160,8 +164,17 @@ JmpIsType
 JmpIsNSet
 JmpIsNType
 Jmp_
-ExitWhenSurprised
-ExitOnVarEnv
+
+ExitWhenSurprised l:Label
+
+  Tests the surprise flags and if they are set, jumps to the
+  exit-trace label l.
+
+ExitOnVarEnv s0:StkP l:Label
+
+  Loads the VarEnv slot off the ActRec pointed to by s0.  If it is
+  non-zero, jumps to the exit-trace label l.
+
 CheckUninit
 
 
@@ -195,8 +208,6 @@ LdPropNR
 LdRefNR
 LdThis
 LdThisNc
-LdVarEnv
-LdRetAddr
 
 d:Home = LdHome s0:StkP s1:ConstInt
 
@@ -231,12 +242,61 @@ NewTuple
 
 9. Call & Return
 
-AllocActRec
-FreeActRec
+d:StkP = AllocActRec s0:StkP
+
+  Allocate an activation record from the stack pointed to by s0 and
+  return the result.
+
+d:StkP = FreeActRec s0:StkP
+
+  Load the saved frame pointer from the activation record pointed to
+  by s0 into d.
+
 Call
 NativeImpl
-RetCtrl
-RetVal
+
+d:RetAddr = LdRetAddr s0:StkP
+
+  Load the return address off the activation record pointed to by s0
+  in preparation for a RetCtrl.
+
+RetCtrl s0:StkP s1:StkP s2:RetAddr
+
+  Ensure that s0 is stored in rVmSp and s1 is stored in rVmFp and then
+  execute a hardware procedure-return using the return address
+  specified by s2.
+
+RetVal s0:StkP s1:T
+
+  Writes the value in s1 to the return value slot on the activation
+  record pointed to by s0.
+
+d:StkP = RetAdjustStack s0:StkP
+
+  Loads the new VM stack pointer into the destination.  s0 is a
+  pointer to the current activation record.
+
+ReleaseVVOrExit s0:StkP l:Label
+
+  Loads the VarEnv slot off the ActRec pointed to by s0.  If it is
+  null, does nothing.  If it is an ExtraArgs, deallocates the
+  ExtraArgs structure.  Otherwise jumps to the exit-trace label l.
+
+d:StkP = GenericRetDecRefs s0:StkP s1:T s2:ConstInt
+
+  Does decrefs of all the current function's locals, where s0 is a
+  pointer to the relevant activation record, and s2 is the number of
+  locals in the current function.
+
+  s1 is the return value for the function, which GenericRetDecRefs
+  needs access to currently only to ensure it isn't clobbered.
+
+  Returns the adjusted VM stack pointer (pointing at the return value
+  location).
+
+  Semantically similar to a series of DecRefLoc followed by
+  RetAdjustStack.  Note that this does not store the return value even
+  though it takes it as a source.
 
 
 10. Stores
@@ -270,8 +330,6 @@ IncRef
 DecRefLoc
 DecRefStack
 DecRefThis
-DecRefLocals
-DecRefLocalsThis
 DecRef
 DecRefNZ
 DefLabel

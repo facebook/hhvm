@@ -267,10 +267,6 @@ Trace* TraceBuilder::getExitSlowTrace(uint32 bcOff,
 
 }
 
-SSATmp* TraceBuilder::genLdVarEnv() {
-  return genInstruction(LdVarEnv, Type::VarEnvRef, m_fpValue);
-}
-
 SSATmp* TraceBuilder::genLdRetAddr() {
   return genInstruction(LdRetAddr, Type::None, m_fpValue);
 }
@@ -653,6 +649,10 @@ Trace* TraceBuilder::genExitOnVarEnv(Trace* targetTrace) {
   ASSERT(targetTrace);
   genInstruction(ExitOnVarEnv, Type::None, m_fpValue, targetTrace);
   return targetTrace;
+}
+
+void TraceBuilder::genReleaseVVOrExit(Trace* exit) {
+  genInstruction(ReleaseVVOrExit, Type::None, m_fpValue, exit);
 }
 
 void TraceBuilder::genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace) {
@@ -1344,20 +1344,16 @@ SSATmp* TraceBuilder::genCall(SSATmp* actRec,
   return newSpValue;
 }
 
-SSATmp* TraceBuilder::genRetVal(SSATmp* val) {
-  m_spValue = getSSATmp(m_irFactory.retVal(m_fpValue, val));
-  return m_spValue;
+void TraceBuilder::genRetVal(SSATmp* val) {
+  genInstruction(RetVal, Type::None, m_fpValue, val);
 }
 
-SSATmp* TraceBuilder::genRetVal() {
-  m_spValue = getSSATmp(m_irFactory.retVal(m_fpValue));
-  return m_spValue;
+SSATmp* TraceBuilder::genRetAdjustStack() {
+  return genInstruction(RetAdjustStack, Type::SP, m_fpValue);
 }
 
-IRInstruction* TraceBuilder::genRetCtrl(SSATmp* sp,
-                                        SSATmp* fp,
-                                        SSATmp* retAddr) {
-  return appendInstruction(m_irFactory.retCtrl(sp, fp, retAddr));
+void TraceBuilder::genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retVal) {
+  genInstruction(RetCtrl, Type::None, sp, fp, retVal);
 }
 
 IRInstruction* TraceBuilder::genMarker(uint32 bcOff, int32 spOff) {
@@ -1398,14 +1394,9 @@ void TraceBuilder::genDecRefThis() {
   }
 }
 
-void TraceBuilder::genDecRefLocalsThis(uint32 numLocals) {
-    SSATmp* numLocalsTmp = genDefConst<int64>(numLocals);
-    appendInstruction(m_irFactory.decRefLocalsThis(m_fpValue, numLocalsTmp));
-}
-
-void TraceBuilder::genDecRefLocals(uint32 numLocals) {
-    SSATmp* numLocalsTmp = genDefConst<int64>(numLocals);
-    appendInstruction(m_irFactory.decRefLocals(m_fpValue, numLocalsTmp));
+SSATmp* TraceBuilder::genGenericRetDecRefs(SSATmp* retVal, int numLocals) {
+  return genInstruction(GenericRetDecRefs, Type::SP,
+    m_fpValue, retVal, genDefConst<int64>(numLocals));
 }
 
 void TraceBuilder::genIncStat(int32 counter, int32 value) {

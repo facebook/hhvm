@@ -367,7 +367,8 @@ struct ActRec {
   UNION_FIELD_ACCESSORS3(VarEnv, VarEnv*, m_varEnv, InvName, StringData*,
                          m_invName, ExtraArgs, ExtraArgs*, m_extraArgs)
 
-#undef UNION_FIELD_ACCESSORS
+#undef UNION_FIELD_ACCESSORS2
+#undef UNION_FIELD_ACCESSORS3
 
   // Accessors for extra arg queries.
   TypedValue* getExtraArg(unsigned ind) const {

@@ -1071,12 +1071,12 @@ void HhbcTranslator::emitNativeImpl() {
   TRACE(3, "%u: NativeImpl\n", m_bcOff);
   m_tb.genNativeImpl();
   SSATmp* retAddr = m_tb.genLdRetAddr();
-  SSATmp* sp = m_tb.genRetVal();        // updates sp
+  SSATmp* sp = m_tb.genRetAdjustStack();
   SSATmp* fp = m_tb.genFreeActRec();    // updates fp
   m_tb.genRetCtrl(sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction so no ExitTrace is needed
-  this->m_hasRet = true;
+  m_hasRet = true;
 }
 
 void HhbcTranslator::emitFPushCtor(int32 numParams) {
@@ -1341,16 +1341,6 @@ void HhbcTranslator::emitFCallD(uint32 numParams,
   emitFCallAux(numParams, returnBcOffset, callee);
 }
 
-// Bytecode instructions RetC/RetV get broken into the IR instructions:
-//    ExitWhenSurprised
-//    ExitOnVarEnv
-//    DecRef(loc), for each loc in curFunc
-//    DecRef(this), if curFunc is a non-static method
-//    retAddr = LdRetAddr
-//    sp = RetVal
-//    fp = FreeActRec
-//    RetCtrl retAddr
-
 void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
                              bool freeInline) {
   const Func* curFunc = getCurFunc();
@@ -1358,47 +1348,44 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
   bool mayHaveThis = (curFunc->isPseudoMain() ||
                       (curFunc->isMethod() && !curFunc->isStatic()));
 
-  // If surprise flags are set, exit trace and handle surprise
   m_tb.genExitWhenSurprised(exitTrace);
-
-  if (freeInline) {
-    if (mayUseVV) {
-      // Emit code to bail to an exit if frame has VarEnv
-      // Note: this has to be the first thing, because we cannot bail after
-      //       we start decRefing locs because then there'll be no corresponding
-      //       bytecode boundaries until the end of RetC
-      m_tb.genExitOnVarEnv(exitTrace);
-    }
-
-    // decref $this
-    if (mayHaveThis) {
-      // TODO: tx64 breaks apart the cases of (isMethod && !isStatic)
-      // and isPseudoMain.
-      m_tb.genDecRefThis();
-    }
-
-    // decref refcounted locals
-    for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
-      m_tb.genDecRefLoc(id);
-    }
-  } else {
-    // Emit call to frame_free_locals / frame_free_locals_no_this helper
-    // to free locals and This (if needed)
-    if (mayHaveThis) {
-      m_tb.genDecRefLocalsThis(curFunc->numLocals());
-    } else {
-      m_tb.genDecRefLocals(curFunc->numLocals());
-    }
+  if (mayUseVV) {
+    // Note: this has to be the first thing, because we cannot bail after
+    //       we start decRefing locs because then there'll be no corresponding
+    //       bytecode boundaries until the end of RetC
+    m_tb.genReleaseVVOrExit(exitTrace);
+  }
+  if (mayHaveThis) {
+    // TODO: tx64 breaks apart the cases of (isMethod && !isStatic)
+    // and isPseudoMain.
+    m_tb.genDecRefThis();
   }
 
-  // Pass the return value to caller, free ActRec, and return control to caller
-  SSATmp* retAddr = m_tb.genLdRetAddr();
-  SSATmp* sp = m_tb.genRetVal(retVal);  // updates sp
-  SSATmp* fp = m_tb.genFreeActRec();    // updates fp
+  SSATmp* sp;
+  SSATmp* retAddr;
+  if (freeInline) {
+    for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
+      /*
+       * TODO(#1980291): this doesn't correctly handle
+       * debug_backtrace.
+       */
+      m_tb.genDecRefLoc(id);
+    }
+    retAddr = m_tb.genLdRetAddr();
+    m_tb.genRetVal(retVal);
+    sp = m_tb.genRetAdjustStack();
+  } else {
+    sp = m_tb.genGenericRetDecRefs(retVal, curFunc->numLocals());
+    retAddr = m_tb.genLdRetAddr();
+    m_tb.genRetVal(retVal);
+  }
+
+  // Free ActRec, and return control to caller.
+  SSATmp* fp = m_tb.genFreeActRec();
   m_tb.genRetCtrl(sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
-  this->m_hasRet = true;
+  m_hasRet = true;
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {

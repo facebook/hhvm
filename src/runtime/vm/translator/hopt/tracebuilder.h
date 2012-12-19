@@ -58,7 +58,6 @@ public:
   void    genDefFunc(Func*);
 
   SSATmp* genLdThis(Trace* trace);
-  SSATmp* genLdVarEnv();
   SSATmp* genLdRetAddr();
   SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type::Tag type);
   void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
@@ -170,17 +169,17 @@ public:
                   uint32 numParams,
                   SSATmp** params);
   IRInstruction* genMarker(uint32 bcOff, int spOff);
-  SSATmp* genRetVal(SSATmp* val);
-  SSATmp* genRetVal(); // for native impl
-  IRInstruction* genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
+  void    genReleaseVVOrExit(Trace* exit);
+  SSATmp* genGenericRetDecRefs(SSATmp* retVal, int numLocals);
+  void    genRetVal(SSATmp* val);
+  SSATmp* genRetAdjustStack();
+  void genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
   void genDecRef(SSATmp* tmp);
   void genDecRefStack(Type::Tag type,
                       uint32 stackOff,
                       Trace* exit);
   void genDecRefLoc(int id);
   void genDecRefThis();
-  void genDecRefLocalsThis(uint32 numLocals);
-  void genDecRefLocals(uint32 numLocals);
   void genIncStat(int32 counter, int32 value);
   SSATmp* genIncRef(SSATmp* src);
   SSATmp* genSpillStack(uint32 stackAdjustment,

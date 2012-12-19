@@ -139,7 +139,6 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
     case DefSP:
     case LdFunc:
     case LdFixedFunc:
-    case LdVarEnv:
     case Box:
       return NULL;
     default:

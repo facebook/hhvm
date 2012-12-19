@@ -4,9 +4,6 @@
 global $scriptPath, $ext_hhvm_path;
 global $idl_path;
 
-# TODO(#1967102): clean up stuff relating to this
-#require_once $ext_hhvm_path . "/xconstants.php";
-
 require_once $idl_path . 'base.php';
 
 function generateMangleMap() {

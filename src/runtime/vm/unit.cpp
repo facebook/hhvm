@@ -2155,10 +2155,11 @@ void UnitEmitter::recordFunction(FuncEmitter* fe) {
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1,
                            int line2, Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
-                           const StringData* docComment, int numParams) {
+                           const StringData* docComment, int numParams,
+                           bool isGenerator) {
   Func* f = new (Func::allocFuncMem(name, numParams))
     Func(unit, id, line1, line2, base, past, name, attrs,
-         top, docComment, numParams);
+         top, docComment, numParams, isGenerator);
   m_fMap[fe] = f;
   return f;
 }
@@ -2167,10 +2168,11 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            PreClass* preClass, int line1, int line2,
                            Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
-                           const StringData* docComment, int numParams) {
+                           const StringData* docComment, int numParams,
+                           bool isGenerator) {
   Func* f = new (Func::allocFuncMem(name, numParams))
     Func(unit, preClass, line1, line2, base, past, name,
-         attrs, top, docComment, numParams);
+         attrs, top, docComment, numParams, isGenerator);
   m_fMap[fe] = f;
   return f;
 }

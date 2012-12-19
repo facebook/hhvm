@@ -2164,13 +2164,13 @@ static void raiseMissingArgument(int idx, const char* name) {
 
 SrcKey
 TranslatorX64::emitPrologue(Func* func, int nPassed) {
-  ASSERT(!func->isGenerator());
   int numParams = func->numParams();
   const Func::ParamInfoVec& paramInfo = func->params();
   ASSERT(IMPLIES(func->maybeIntercepted() == -1,
                  m_interceptsEnabled));
   if (m_interceptsEnabled &&
       !func->isPseudoMain() &&
+      !func->isGenerator() &&
       (RuntimeOption::EvalJitEnableRenameFunction ||
        func->attrs() & AttrDynamicInvoke)) {
     emitInterceptPrologue(func);
@@ -2178,6 +2178,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 
   Offset dvInitializer = InvalidAbsoluteOffset;
 
+  ASSERT(IMPLIES(func->isGenerator(), nPassed == numParams));
   if (nPassed > numParams) {
     // Too many args; a weird case, so just callout. Stash ar
     // somewhere callee-saved.
@@ -2221,7 +2222,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   // them alone here.
   int numUninitLocals = func->numLocals() - numParams;
   ASSERT(numUninitLocals >= 0);
-  if (numUninitLocals > 0) {
+  if (numUninitLocals > 0 && !func->isGenerator()) {
     SpaceRecorder sr("_InitializeLocals", a);
 
     // If there are too many locals, then emitting a loop to initialize locals
@@ -2263,7 +2264,10 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 
   // Move rVmSp to the right place: just past all locals
   int frameCells = func->numSlotsInFrame();
-  emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
+  if (!func->isGenerator()) {
+    emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
+  }
+
   const Opcode* destPC = func->unit()->entry() + func->base();
   if (dvInitializer != InvalidAbsoluteOffset) {
     // dispatch to funclet.
@@ -3157,6 +3161,7 @@ TranslatorX64::enterTC(SrcKey sk) {
     enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
                   tl_targetCaches);
     asm volatile("" : : : "rbx","r12","r13","r14","r15");
+    ASSERT(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
 
     tl_regState = REGSTATE_CLEAN; // Careful: pc isn't sync'ed yet.
     TRACE(1, "enterTC: %p fp%p sp%p } return\n", start,
@@ -7387,40 +7392,28 @@ void TranslatorX64::translateContEnter(const Tracelet& t,
   // We're about to execute the generator body, which uses regs
   syncOutputs(i);
 
-  ScratchReg scratch(m_regMap);
-  ScratchReg retIP(m_regMap);
-
-  a.    loadq  (rVmFp[AROFF(m_this)], r(scratch));
-  a.    loadq  (r(scratch)[CONTOFF(m_arPtr)], r(scratch));
-  // rScratch == cont->actRec()
+  a.    loadq  (rVmFp[AROFF(m_this)], rStashedAR);
+  a.    loadq  (rStashedAR[CONTOFF(m_arPtr)], rStashedAR);
 
   // Frame linkage.
   int32_t returnOffset = nextSrcKey(t, i).offset() - curFunc()->base();
-  a.    storel (returnOffset, r(scratch)[AROFF(m_soff)]);
-  StoreImmPatcher patchIP(a, (uint64_t)a.code.frontier, r(retIP),
-                          AROFF(m_savedRip), r(scratch));
-  a.    storeq (rVmFp, r(scratch)[AROFF(m_savedRbp)]);
+  a.    storel (returnOffset, rStashedAR[AROFF(m_soff)]);
+  a.    storeq (rVmFp, rStashedAR[AROFF(m_savedRbp)]);
 
-  a.    movq   (r(scratch), rVmFp);
+  // We're between tracelets; hardcode the register
+  a.    loadq  (rStashedAR[AROFF(m_func)], rax);
+  a.    loadq  (rax[Func::funcBodyOff()], rax);
 
-  // Load func and get its body
-  a.    loadq  (rVmFp[AROFF(m_func)], r(scratch));
-  a.    loadq  (r(scratch)[offsetof(Func, m_funcBody)], r(scratch));
-  a.    jmp    (r(scratch));
-
-  patchIP.patch(uint64(a.code.frontier));
+  a.    call   (rax);
 }
 
 void TranslatorX64::translateContExit(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   syncOutputs(i);
 
-  RegSet scratchRegs = kScratchCrossTraceRegs;
-  DumbScratchReg rRetAddr(scratchRegs);
-  a.    loadq (rVmFp[AROFF(m_savedRip)], r64(rRetAddr));
+  a.    push  (rVmFp[AROFF(m_savedRip)]);
   a.    loadq (rVmFp[AROFF(m_savedRbp)], rVmFp);
-  a.    jmp   (r64(rRetAddr));
-  a.    ud2   ();
+  a.    ret   ();
 }
 
 void TranslatorX64::translateContDone(const Tracelet& t,

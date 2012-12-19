@@ -1106,6 +1106,7 @@ const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
 
 void fcallHelperThunk() asm ("__fcallHelperThunk");
 void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");
+void contEnterHelperThunk() asm ("__contEnterHelperThunk");
 
 // These could be static but are used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm);

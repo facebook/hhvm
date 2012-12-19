@@ -93,6 +93,7 @@ struct VMRegAnchor : private boost::noncopyable {
 
     const Func* prevF = ((ActRec*)(ar->m_savedRbp))->m_func;
     vmsp() = (TypedValue*)ar - numArgs;
+    ASSERT(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
     vmpc() = prevF->unit()->at(prevF->base() + ar->m_soff);
     if (atFCall) {
       // VMExecutionContext::doFCall expects vmfp to be the caller's

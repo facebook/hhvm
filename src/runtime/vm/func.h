@@ -123,12 +123,12 @@ struct Func {
   static const FuncId InvalidId = -1LL;
 
   Func(Unit& unit, Id id, int line1, int line2, Offset base,
-      Offset past, const StringData* name, Attr attrs, bool top,
-      const StringData* docComment, int numParams);
+       Offset past, const StringData* name, Attr attrs, bool top,
+       const StringData* docComment, int numParams, bool isGenerator);
   Func(Unit& unit, PreClass* preClass, int line1,
-      int line2, Offset base, Offset past,
-      const StringData* name, Attr attrs, bool top,
-      const StringData* docComment, int numParams);
+       int line2, Offset base, Offset past,
+       const StringData* name, Attr attrs, bool top,
+       const StringData* docComment, int numParams, bool isGenerator);
   ~Func();
   static void destroy(Func* func);
 
@@ -347,7 +347,7 @@ struct Func {
   void resetPrologues() {
     // Useful when killing code; forget what we've learned about the contents
     // of the translation cache.
-    initPrologues(m_numParams);
+    initPrologues(m_numParams, isGenerator());
   }
 
   const NamedEntity* getNamedEntity() const {
@@ -378,6 +378,7 @@ public: // Offset accessors for the translator.
   X(prologueTable);
   X(maybeIntercepted);
   X(maxStackCells);
+  X(funcBody);
 #undef X
 
 private:
@@ -423,8 +424,8 @@ private:
 
 private:
   void setFullName();
-  void init(int numParams);
-  void initPrologues(int numParams);
+  void init(int numParams, bool isGenerator);
+  void initPrologues(int numParams, bool isGenerator);
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void allocVarId(const StringData* name);
@@ -464,9 +465,7 @@ private:
                                  // method
   // TODO(#1114385) intercept should work via invalidation.
   mutable char m_maybeIntercepted; // -1, 0, or 1.  Accessed atomically.
-public:
   unsigned char* volatile m_funcBody;  // Accessed from assembly.
-private:
   // This must be the last field declared in this structure
   // and the Func class should not be inherited from.
   unsigned char* volatile m_prologueTable[kNumFixedPrologues];

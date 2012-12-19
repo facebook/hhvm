@@ -46,7 +46,7 @@ void* FixupMapUnitTest::reader(void* that) {
   const StringData* sd = StringData::GetStaticString("test");
   // ar2: a mock actrec, requires a Func, which can't be builtin.
   Unit u;
-  Func f(u, 1, 1, 1, 0, 0, sd, AttrNone, true, NULL, 0);
+  Func f(u, 1, 1, 1, 0, 0, sd, AttrNone, true, NULL, 0, false);
   ActRec ar2;
   ar2.m_savedRip = 0xdeadbeef;
   ar2.m_savedRbp = 0;

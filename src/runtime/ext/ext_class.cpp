@@ -154,7 +154,7 @@ Array f_get_class_methods(CVarRef class_or_object) {
 }
 
 Array vm_get_class_constants(CStrRef className) {
-  HPHP::VM::Class* cls = HPHP::VM::Unit::lookupClass(className.get());
+  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(className.get());
   if (cls == NULL) {
     return NEW(HphpArray)(0);
   }
@@ -180,6 +180,10 @@ Array f_get_class_constants(CStrRef class_name) {
     return vm_get_class_constants(class_name.get());
   }
   const ClassInfo *cls = ClassInfo::FindClass(class_name);
+  if (!cls) {
+    AutoloadHandler::s_instance->invokeHandler(class_name);
+    cls = ClassInfo::FindClass(class_name);
+  }
   Array ret = Array::Create();
   if (cls) {
     const ClassInfo::ConstantVec &constants = cls->getConstantsVec();

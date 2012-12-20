@@ -3934,7 +3934,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {
   TypedValue* cns = getCns(s);
   if (cns == NULL) {
     if (AutoloadHandler::s_instance->autoloadConstant(StrNR(s))) {
-      cns = g_vmContext->getCns(const_cast<StringData*>(s));
+      cns = getCns(s);
     }
     if (!cns) {
       raise_notice(Strings::UNDEFINED_CONSTANT,

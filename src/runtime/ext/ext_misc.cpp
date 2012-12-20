@@ -50,6 +50,7 @@ int64 f_connection_timeout() {
 }
 
 Variant f_constant(CStrRef name) {
+  if (!name.get()) return null;
   const char *data = name.data();
   int len = name.length();
   char *colon;
@@ -62,18 +63,18 @@ Variant f_constant(CStrRef name) {
     // translate "self" or "parent"
     if (className == "self") {
       String this_class = hhvm
-                          ? g_vmContext->getContextClassName()
-                          : FrameInjection::GetClassName(true);
+        ? g_vmContext->getContextClassName()
+        : FrameInjection::GetClassName(true);
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
-          "when no class scope is active");
+                                  "when no class scope is active");
       } else {
         className = this_class;
       }
     } else if (className == "parent") {
       String parent_class = hhvm
-                            ? g_vmContext->getParentContextClassName()
-                            : FrameInjection::GetParentClassName(true);
+        ? g_vmContext->getParentContextClassName()
+        : FrameInjection::GetParentClassName(true);
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {
@@ -87,11 +88,25 @@ Variant f_constant(CStrRef name) {
       return null;
     }
   } else {
-    const ClassInfo::ConstantInfo *cinfo = ClassInfo::FindConstant(name);
-    // system/uniquely defined scalar constant (must be valid)
-    if (cinfo) return cinfo->getValue();
-    // dynamic/redeclared constant
-    return ((Globals*)get_global_variables())->getConstant(name.data());
+    if (hhvm) {
+      TypedValue* cns = g_vmContext->getCns(name.get());
+      if (cns == NULL) {
+        if (AutoloadHandler::s_instance->autoloadConstant(name)) {
+          cns = g_vmContext->getCns(name.get());
+        }
+      }
+      if (cns) return tvAsVariant(cns);
+      return null;
+    } else {
+      const ClassInfo::ConstantInfo *cinfo = ClassInfo::FindConstant(name);
+      // system/uniquely defined scalar constant (must be valid)
+      if (cinfo) return cinfo->getValue();
+      if (!((Globals*)get_global_variables())->defined(name)) {
+        AutoloadHandler::s_instance->autoloadConstant(name);
+      }
+      // dynamic/redeclared constant
+      return ((Globals*)get_global_variables())->getConstant(name.data());
+    }
   }
 }
 
@@ -112,6 +127,7 @@ bool f_define(CStrRef name, CVarRef value,
 }
 
 bool f_defined(CStrRef name, bool autoload /* = true */) {
+  if (!name.get()) return false;
   const char *data = name.data();
   int len = name.length();
   char *colon;
@@ -158,19 +174,19 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
       return false;
     }
   } else {
-    for (int i = 0; i < 2; i++) {
-      // system/uniquely defined scalar constant
-      if (ClassInfo::FindConstant(name)) return true;
-      // dynamic/redeclared constant
-      if (((Globals*)get_global_variables())->defined(name) ||
-          (hhvm && g_vmContext->defined(name))) {
-        return true;
-      }
-      if (!autoload) break;
-      if (!AutoloadHandler::s_instance->autoloadConstant(name)) break;
-      autoload = false;
+    // system/uniquely defined scalar constant
+    if (ClassInfo::FindConstant(name)) return true;
+    if (hhvm ?
+        g_vmContext->defined(name) :
+        ((Globals*)get_global_variables())->defined(name)) {
+      return true;
     }
-    return false;
+    if (!autoload || !AutoloadHandler::s_instance->autoloadConstant(name)) {
+      return false;
+    }
+    if (hhvm) return g_vmContext->defined(name);
+    if (ClassInfo::FindConstant(name)) return true;
+    return ((Globals*)get_global_variables())->defined(name);
   }
 }
 

@@ -2891,17 +2891,6 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
     m_as.add_imm32_reg64(adjustment, spReg);
   }
 
-  // Stash callee's rVmFp into rStashedAR for the callee's prologue
-  if (numArgs == 0) {
-    m_as.mov_reg64_reg64(rVmSp, rStashedAR);
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgCall\n");
-    }
-  } else {
-    m_as.lea_reg64_disp_reg64(rVmSp, cellsToBytes(numArgs), rStashedAR);
-  }
-
-  // HHIR:TODO SrcKey(func->getConstValAsFunc(), bcOff /*pc*/);
   SrcKey srcKey = SrcKey(m_lastMarker->getFunc(), m_lastMarker->getLabelId());
   bool isImmutable = (func->isConst() && func->getType() != Type::Null);
   const Func* funcd = isImmutable ? func->getConstValAsFunc() : NULL;

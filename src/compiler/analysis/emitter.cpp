@@ -4820,7 +4820,7 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
         isNonZero = n;
       } else {
         assert(t == KindOfString);
-        n = m_ue.mergeLitstr(cval.asStrRef().stringData());
+        n = m_ue.mergeLitstr(cval.asStrRef().get());
         isNonZero = false; // not used for string switches
       }
       if (!mapContains(caseMap, n)) {

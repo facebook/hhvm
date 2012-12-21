@@ -701,29 +701,6 @@ tv_to_bool(TypedValue* tv) {
   return int64(retval);
 }
 
-void
-tv_release_str(StringData* datum) {
-  datum->release();
-}
-
-void
-tv_release_arr(ArrayData* datum) {
-  ASSERT(Transl::tx64->stateIsDirty());
-  datum->release();
-}
-
-void
-tv_release_obj(ObjectData* datum) {
-  ASSERT(Transl::tx64->stateIsDirty());
-  datum->release();
-}
-
-void
-tv_release_ref(RefData* datum) {
-  ASSERT(Transl::tx64->stateIsDirty());
-  datum->release();
-}
-
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);

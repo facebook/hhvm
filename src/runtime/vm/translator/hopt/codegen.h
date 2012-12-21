@@ -83,6 +83,12 @@ public:
                     SyncOptions sync,
                     ArgGroup& args);
 
+  void cgCallHelper(Asm& a,
+                    const Transl::Call& call,
+                    PhysReg dstReg,
+                    SyncOptions sync,
+                    ArgGroup& args);
+
   void cgStore(PhysReg base,
                int64_t off,
                SSATmp* src,
@@ -183,7 +189,6 @@ private:
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurrFunc();
   void recordSyncPoint(Asm& as);
-  Address getDtor(DataType type);
   Address getDtorGeneric();
   Address getDtorTyped();
 

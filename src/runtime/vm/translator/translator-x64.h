@@ -69,6 +69,25 @@ struct FreeStubList {
   void push(TCA stub);
 };
 
+struct Call {
+  explicit Call(void *p) : m_kind(Direct), m_fptr(p) {}
+  explicit Call(int off) : m_kind(Virtual), m_offset(off) {}
+  Call(Call const&) = default;
+
+  bool isDirect()  const { return m_kind == Direct;  }
+  bool isVirtual() const { return m_kind == Virtual; }
+
+  void* getAddress() const { return m_fptr; }
+  int   getOffset()  const { return m_offset; }
+
+ private:
+  enum { Direct, Virtual } m_kind;
+  union {
+    void* m_fptr;
+    int   m_offset;
+  };
+};
+
 class TranslatorX64;
 extern __thread TranslatorX64* tx64;
 
@@ -76,7 +95,6 @@ extern void* interpOneEntryPoints[];
 
 extern "C" TCA funcBodyHelper(ActRec* fp);
 
-struct Call;
 struct TReqInfo;
 struct Label;
 
@@ -217,6 +235,7 @@ private:
                          int disp = 0);
   void emitDecRefGenericReg(PhysReg rData, PhysReg rType);
   void emitDecRefInput(Asm& a, const NormalizedInstruction& i, int input);
+  static Call getDtorCall(DataType type);
   void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
   void emitCopyToStack(Asm& a,
                        const NormalizedInstruction& ni,
@@ -245,6 +264,7 @@ private:
                                ScratchReg& output,
                                ptrdiff_t ch);
   void emitCall(Asm& a, TCA dest, bool killRegs=false);
+  void emitCall(Asm& a, Call call, bool killRegs=false);
 
   /* Continuation-related helpers */
   static bool mapContParams(ContParamMap& map, const Func* origFunc,

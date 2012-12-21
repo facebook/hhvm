@@ -717,6 +717,21 @@ TranslatorX64::emitCall(X64Assembler& a, TCA dest, bool killRegs) {
 }
 
 void
+TranslatorX64::emitCall(X64Assembler& a, Call call, bool killRegs) {
+  if (call.isDirect()) {
+    return emitCall(a, (TCA)call.getAddress(), killRegs);
+  }
+  // Virtual call.
+  // Load method's address from proper offset off of object in rdi,
+  // using rax as scratch.
+  a.loadq(*rdi, rax);
+  a.call(rax[call.getOffset()]);
+  if (killRegs) {
+    m_regMap.smashRegs(kCallerSaved);
+  }
+}
+
+void
 TranslatorX64::recordSyncPoint(X64Assembler& a, Offset pcOff, Offset spOff) {
   m_pendingFixups.push_back(PendingFixup(a.code.frontier,
                                          Fixup(pcOff, spOff)));
@@ -913,7 +928,7 @@ emitEagerVMRegSave(X64Assembler& a,
   return start;
 }
 
-static Call getDtorCall(DataType type) {
+Call TranslatorX64::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
     return Call(getMethodHardwarePtr(&StringData::release));
@@ -992,10 +1007,9 @@ void TranslatorX64::emitDecRef(Asm& a,
         m_regMap.getRegsLike(RegInfo::SCRATCH).add(rDatum));
       m_regMap.smashRegs(savedSet - RegSet(rDatum));
 
-      ScratchReg scratch(m_regMap);
       ASSERT(rDatum != rsp && rDatum != rbx);
       emitMovRegReg(astubs, rDatum, argNumToRegName[0]);
-      getDtorCall(type).emit(astubs, r(scratch));
+      emitCall(astubs, getDtorCall(type));
       if (typeReentersOnRelease(type)) {
         recordReentrantStubCall(*m_curNI);
       } else {
@@ -11680,7 +11694,7 @@ TCA TranslatorX64::emitNAryStub(X64Assembler& a, Call c) {
   {
     RegSet s = kCallerSaved - alreadySaved;
     PhysRegSaverParity<Parity> rs(a, s);
-    c.emit(a, rax);
+    emitCall(a, c);
   }
   a.    pop  (rbp);  // }
   a.    ret  ();

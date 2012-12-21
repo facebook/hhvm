@@ -277,6 +277,13 @@ BOOST_STATIC_ASSERT(KindOfString       == 0x14);
 #define IS_REAL_TYPE(t) \
   (((t) >= KindOfUninit && (t) < MaxNumDataTypes) || (t) == KindOfClass)
 
+// typeReentersOnRelease --
+//   Returns whether the release helper for a given type can
+//   reenter.
+static inline bool typeReentersOnRelease(DataType type) {
+  return IS_REFCOUNTED_TYPE(type) && type != KindOfString;
+}
+
 namespace Collection {
 enum Type {
   InvalidType = 0,

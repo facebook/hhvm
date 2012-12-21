@@ -64,11 +64,6 @@ void print_string(StringData* s);
 void print_int(int64 i);
 void print_boolean(int64 val);
 
-void tv_release_str(StringData* datum);
-void tv_release_arr(ArrayData* datum);
-void tv_release_obj(ObjectData* datum);
-void tv_release_ref(RefData* datum);
-
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
   return (Iter*)(uintptr_t(fp)

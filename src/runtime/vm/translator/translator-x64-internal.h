@@ -74,27 +74,6 @@ public:
   }
 };
 
-struct Call {
-  enum { Direct, Virtual } m_kind;
-  union {
-    void* m_fptr;
-    int   m_offset;
-  };
-
-  explicit Call(void *p) : m_kind(Direct), m_fptr(p) {}
-  explicit Call(int off) : m_kind(Virtual), m_offset(off) {}
-  Call(Call const&) = default;
-
-  void emit(X64Assembler& a, PhysReg scratch) const {
-    if (m_kind == Direct) {
-      a.    call (TCA(m_fptr));
-    } else {
-      a.    loadq  (*rdi, scratch);
-      a.    call   (scratch[m_offset]);
-    }
-  }
-};
-
 // DiamondGuard is a scoped way to protect register allocator state around
 // control flow. When we enter some optional code that may affect the state
 // of the register file, we copy the register file's state, and redirect any
@@ -958,13 +937,6 @@ static inline void voidFunc() {}
 #define EMIT_RCALL(a, ni, dest, ...) \
   EMIT_CALL(a, dest, __VA_ARGS__);   \
   recordReentrantCall(a, ni);
-
-// typeReentersOnRelease --
-//   Returns whether the release helper for a given type can
-//   reenter.
-static bool typeReentersOnRelease(DataType type) {
-  return IS_REFCOUNTED_TYPE(type) && type != BitwiseKindOfString;
-}
 
 // supportedPlan --
 // nativePlan --

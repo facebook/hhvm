@@ -473,6 +473,14 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  PhysReg dstReg,
                                  SyncOptions sync,
                                  ArgGroup& args) {
+  cgCallHelper(a, Transl::Call(addr), dstReg, sync, args);
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 const Transl::Call& call,
+                                 PhysReg dstReg,
+                                 SyncOptions sync,
+                                 ArgGroup& args) {
   ASSERT(int(args.size()) <= kNumRegisterArgs);
 
   // We don't want to include the dst register defined by this
@@ -535,7 +543,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
   }
 
   // do the call; may use a trampoline
-  m_tx64->emitCall(a, addr);
+  m_tx64->emitCall(a, call);
 
   // HHIR:TODO this only does required part of TranslatorX64::recordCallImpl()
   // Better to have improved SKTRACE'n by calling recordStubCall,
@@ -2033,16 +2041,6 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   }
 }
 
-Address CodeGenerator::getDtor(DataType type) {
-  switch (type) {
-    case KindOfString  : return (Address)tv_release_str;
-    case KindOfArray   : return (Address)tv_release_arr;
-    case KindOfObject  : return (Address)tv_release_obj;
-    case KindOfRef     : return (Address)tv_release_ref;
-    default: not_reached();
-  }
-}
-
 static void
 tv_release_generic(TypedValue* tv) {
   ASSERT(VM::Transl::tx64->stateIsDirty());
@@ -2248,7 +2246,7 @@ void CodeGenerator::cgDecRefStaticType(Type::Tag type,
     ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
     m_as.jcc(cc, m_astubs.code.frontier);
     // Emit the call to release in m_astubs
-    cgCallHelper(m_astubs, getDtor(Type::toDataType(type)),
+    cgCallHelper(m_astubs, m_tx64->getDtorCall(Type::toDataType(type)),
                  InvalidReg, kSyncPoint,
                  ArgGroup().reg(dataReg));
     if (&m_as == &m_astubs) {

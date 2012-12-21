@@ -212,6 +212,7 @@ enum OpcodeFlag : uint64_t {
   OPC(LdCurFuncPtr,      (HasDest|CanCSE|Rematerializable))             \
   OPC(LdARFuncPtr,       (HasDest|CanCSE))                              \
   OPC(LdFuncCls,         (HasDest|CanCSE|Rematerializable))             \
+  OPC(LdContLocalsPtr,   (HasDest|CanCSE|Rematerializable))             \
   OPC(NewObj,            (HasDest|Essential|MemEffects|                 \
                           CallsNative|ProducesRC))                      \
   OPC(NewArray,          (HasDest|Essential|MemEffects|                 \

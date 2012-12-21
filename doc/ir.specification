@@ -406,6 +406,11 @@ d:Func& = LdARFuncPtr s0:Ptr s1:ConstInt
 
 LdFuncCls
 
+d:PtrToCell = LdContLocalsPtr s0:Obj
+
+  Loads a pointer to the embedded local variables of s0 (a Continuation
+  object) into d.
+
 d:T = LdRaw s0:Ptr s1:ConstInt
 
   "Raw" load from memory. s0 is the base address, and is an untyped pointer.

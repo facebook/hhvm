@@ -92,6 +92,7 @@ public:
   SSATmp* genLdCurFuncPtr();
   SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
   SSATmp* genLdFuncCls(SSATmp* func);
+  SSATmp* genLdContLocalsPtr(SSATmp* cont);
   SSATmp* genNewObj(int32 numParams, const StringData* clsName);
   SSATmp* genNewObj(int32 numParams, SSATmp* cls);
   SSATmp* genNewArray(int32 capacity);

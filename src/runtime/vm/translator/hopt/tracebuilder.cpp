@@ -780,6 +780,10 @@ SSATmp* TraceBuilder::genLdFuncCls(SSATmp* func) {
   return genInstruction(LdFuncCls, Type::ClassPtr, func);
 }
 
+SSATmp* TraceBuilder::genLdContLocalsPtr(SSATmp* cont) {
+  return genInstruction(LdContLocalsPtr, Type::PtrToCell, cont);
+}
+
 SSATmp* TraceBuilder::genLdPropAddr(SSATmp* obj, SSATmp* prop) {
   ASSERT(obj->getType() == Type::Obj);
   ASSERT(prop->getType() == Type::Int);

@@ -2783,6 +2783,13 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
                            dstReg);
 }
 
+void CodeGenerator::cgLdContLocalsPtr(IRInstruction* inst) {
+  auto rCont = inst->getSrc(0)->getReg();
+  auto rLocals = inst->getDst()->getReg();
+  m_as.  loadl  (rCont[CONTOFF(m_localsOffset)], r32(rLocals));
+  m_as.  addq   (rCont, rLocals);
+}
+
 static int getNativeTypeSize(Type::Tag type) {
   switch (type) {
     case Type::Int:

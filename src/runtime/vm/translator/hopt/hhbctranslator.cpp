@@ -567,14 +567,6 @@ void HhbcTranslator::emitIterNextK(uint32 iterVarId, int offset) {
   PUNT(IterNextK);
 }
 
-// continuations
-SSATmp* HhbcTranslator::getContLocals(SSATmp* cont) {
-  /* Using this before iterating over each of the locals allows us to save code
-   * space: even with only one local the net effect is 3 bytes saved, with up
-   * to 6 more bytes save for each additional local. */
-  not_reached();
-}
-
 void HhbcTranslator::emitCreateCont(bool getArgs,
                                     Id funNameStrId) {
   /* Runtime-determined slow path punts to TranslatorX64 for now */
@@ -596,7 +588,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
     bool fillThis = origFunc->isNonClosureMethod() && !origFunc->isStatic() &&
       ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
       (origFunc->lookupVarId(thisStr) == kInvalidId);
-    SSATmp* locals = getContLocals(cont);
+    SSATmp* locals = m_tb->genLdContLocalsPtr(cont);
     for (int i = 0; i < origLocals; ++i) {
       SSATmp* loc = m_tb->genIncRef(m_tb->genLdLoc(i, Type::Gen, NULL));
       m_tb->genStMem(locals, cellsToBytes(genLocals - params[i] - 1), loc, true);

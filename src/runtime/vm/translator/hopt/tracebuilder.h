@@ -189,7 +189,7 @@ public:
                         bool allocActRec = false);
   SSATmp* genLdStack(int32 stackOff, Type::Tag type, Trace* target);
   SSATmp* genDefFP();
-  SSATmp* genDefSP(SSATmp* fpOpnd, uint32 offsetFromFp);
+  SSATmp* genDefSP();
   SSATmp* genLdStackAddr(int64 offset);
   SSATmp* genQueryOp(Opcode queryOpc, SSATmp* addr);
   Trace*  genVerifyParamType(SSATmp* objClass, SSATmp* className,

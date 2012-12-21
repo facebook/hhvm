@@ -27,7 +27,7 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 void TraceBuilder::start(uint32 initialBcOffset, uint32 initialSpOffsetFromFp) {
   m_initialBcOff = initialBcOffset;
   m_fpValue = genDefFP();
-  m_spValue = genDefSP(m_fpValue, initialSpOffsetFromFp);
+  m_spValue = genDefSP();
   m_spOffset = initialSpOffsetFromFp;
   ASSERT(m_spOffset >= 0);
   genExitGuardFailure(initialBcOffset);
@@ -1287,13 +1287,8 @@ SSATmp* TraceBuilder::genDefFP() {
   return genInstruction(DefFP, Type::SP);
 }
 
-SSATmp* TraceBuilder::genDefSP(SSATmp* fpOpnd, uint32 offsetFromFp) {
-  m_spOffset = offsetFromFp;
-  ASSERT(m_spOffset >= 0);
-  return genInstruction(DefSP,
-                        Type::SP,
-                        fpOpnd,
-                        genDefConst<int64>(offsetFromFp));
+SSATmp* TraceBuilder::genDefSP() {
+  return genInstruction(DefSP, Type::SP);
 }
 
 SSATmp* TraceBuilder::genLdStackAddr(int64 index) {

@@ -706,7 +706,7 @@ public:
   uint32     getId()       const       { return m_id; }
   void       setId(uint32 newId)       { m_id = newId; }
   void       setAsmAddr(void* addr)    { m_asmAddr = addr; }
-  void*      getAsmAddr()              { return m_asmAddr; }
+  void*      getAsmAddr() const        { return m_asmAddr; }
   RegSet     getLiveOutRegs() const    { return m_liveOutRegs; }
   void       setLiveOutRegs(RegSet s)  { m_liveOutRegs = s; }
   bool       isDefConst() const {
@@ -725,7 +725,6 @@ public:
   virtual SSATmp* simplify(Simplifier*);
   virtual void print(std::ostream& ostream);
   void print();
-  void genCode(CodeGenerator* cg);
   virtual IRInstruction* clone(IRFactory* factory);
   typedef std::list<IRInstruction*> List;
   typedef std::list<IRInstruction*>::iterator Iterator;

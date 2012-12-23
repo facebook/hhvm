@@ -210,7 +210,7 @@ RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
         if (src->hasReg(locIndex)) {
           // inst is the last use of the register assigned to this SSATmp
           // remove src reg from live regs set
-          liveRegs.remove(src->getReg());
+          liveRegs.remove(src->getReg(locIndex));
         }
       }
     }

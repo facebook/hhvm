@@ -69,13 +69,9 @@ public:
   Address cgInst(IRInstruction* inst);
 
   // Autogenerate function declarations for each IR instruction in ir.h
-
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
-            prodRef, mayModRefs, rematerializable, error)               \
-  Address cg ## name (IRInstruction* inst);
+#define OPC(name, flags) Address cg##name(IRInstruction* inst);
   IR_OPCODES
-  #undef OPC
-
+#undef OPC
 
   // helper functions for code generation
   Address cgCallHelper(Asm& a,

@@ -33,15 +33,6 @@ const unsigned REFCOUNT_CONSUMED_OFF_TRACE = 3;
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
-static const int Essential[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
-            prodRef, mayModRefs, rematerializable, error)               \
-  essential,
-  IR_OPCODES
-  #undef OPC
-};
-
-
 /*
  * Dead code elimination
  */
@@ -59,7 +50,7 @@ bool isEssential(IRInstruction* inst) {
   if (inst->isControlFlowInstruction() && inst->getOpcode() != LdCls) {
     return true;
   }
-  return Essential[inst->getOpcode()];
+  return opcodeHasFlags(inst->getOpcode(), Essential);
 }
 
 bool instructionIsMarkedDead(const IRInstruction* inst) {

@@ -33,52 +33,51 @@ namespace JIT{
 
 struct {
   const char* name;
-  bool hasDst;
-  bool canCSE;
-  bool essential;
-  bool hasMemEffects;
-  bool native;
-  bool consumesRefs;
-  bool producesRef;
-  bool mayModifyRefs;
-  bool rematerializable;
-  bool mayRaiseError;
+  uint64_t flags;
 } OpInfo[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
-            prodRef, mayModRefs, rematerializable, error)               \
-  { #name, hasDst, canCSE, essential, effects, native, consRef,         \
-     prodRef, mayModRefs, rematerializable, error },
+#define OPC(name, flags) { #name, flags },
   IR_OPCODES
 #undef OPC
   { 0 }
 };
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
-bool IRInstruction::hasDst() const { return OpInfo[getOpcode()].hasDst; }
-bool IRInstruction::isNative() const { return OpInfo[getOpcode()].native; }
+
+bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
+  return OpInfo[opcode].flags & flags;
+}
+
+bool IRInstruction::hasDst() const {
+  return opcodeHasFlags(getOpcode(), HasDest);
+}
+
+bool IRInstruction::isNative() const {
+  return opcodeHasFlags(getOpcode(), CallsNative);
+}
 
 bool IRInstruction::producesReference() const {
-  return OpInfo[getOpcode()].producesRef;
+  return opcodeHasFlags(getOpcode(), ProducesRC);
 }
 
 bool IRInstruction::isRematerializable() const {
-  return OpInfo[getOpcode()].rematerializable;
+  return opcodeHasFlags(getOpcode(), Rematerializable);
 }
 
 bool IRInstruction::hasMemEffects() const {
-  return OpInfo[getOpcode()].hasMemEffects;
+  return opcodeHasFlags(getOpcode(), MemEffects);
 }
 
 bool IRInstruction::canCSE() const {
+  auto canCSE = opcodeHasFlags(getOpcode(), CanCSE);
   // Make sure that instructions that are CSE'able can't produce a
   // reference count or consume reference counts.
-  ASSERT(!OpInfo[getOpcode()].canCSE || !producesReference());
-  ASSERT(!OpInfo[getOpcode()].canCSE || !consumesReferences());
-  return OpInfo[getOpcode()].canCSE;
+  ASSERT(!canCSE || !producesReference());
+  ASSERT(!canCSE || !consumesReferences());
+  return canCSE;
 }
 
 bool IRInstruction::consumesReferences() const {
-  return OpInfo[getOpcode()].consumesRefs;
+  return opcodeHasFlags(getOpcode(), ConsumesRC);
 }
 
 bool IRInstruction::consumesReference(int srcNo) const {
@@ -114,7 +113,7 @@ bool IRInstruction::mayModifyRefs() const {
       return innerType == Type::Obj || innerType == Type::Arr;
     }
   }
-  return OpInfo[opc].mayModifyRefs;
+  return opcodeHasFlags(opc, MayModifyRefs);
 }
 
 Opcode queryNegateTable[] = {

@@ -377,11 +377,10 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   switch (opc) {
   // Autogenerate dispatch for each IR instruction in ir.h
 
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
-            prodRef, mayModRefs, rematerializable, error)               \
+#define OPC(name, flags)                        \
   case name : return cg ## name (inst);
   IR_OPCODES
-  #undef OPC
+#undef OPC
 
     default:
       std::cerr << "CodeGenerator: unimplemented support for opcode " <<

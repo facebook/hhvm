@@ -31,14 +31,6 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 namespace {
 
-static const int Error[] = {
-#define OPC(name, hasDst, canCSE, essential, effects, native, consRef,  \
-            prodRef, mayModRefs, rematerializable, error)               \
-  error,
-  IR_OPCODES
-  #undef OPC
-};
-
 class MemMap {
  public:
   MemMap(IRFactory* factory) : factory(factory) {
@@ -650,7 +642,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
       // start tracking the current store
       tracking.push_back(std::make_pair(inst, std::vector<IRInstruction*>()));
-    } else if (Error[op]) {
+    } else if (opcodeHasFlags(op, MayRaiseError)) {
       // if the function has an exit edge that we don't know anything about
       // (raising an error), then all stores we're currently tracking need to
       // be erased. all stores already declared dead are untouched

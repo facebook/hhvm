@@ -4,6 +4,7 @@
 ****************************
 
 
+
 Introduction
 ------------
 
@@ -12,6 +13,7 @@ static-single-assignment, intermediate-level representation of HHBC
 programs used for just in time compilation.
 
 TODO: design goals.
+
 
 
 Concepts
@@ -25,31 +27,72 @@ Values (SSATmp)
 
 Types
 
-Instruction Attributes
-----------------------
 
-todo: describe these for compiler-writer audience.
-focus on semantics over implementation details
 
-Has Dest
+Instruction Flags
+-----------------
 
-Can CSE
+HasDest
 
-Is Eessential
+  The instruction produces a result (destination) value.
 
-hasMemEffects
+  Note that an instruction's destination value may sometimes be the
+  same as one of the input values.  (For example, AddElem returns the
+  array it took as an input.)
 
-isNativeHelper
+CanCSE
 
-consumesRefCount
+  The instruction is safe to elide through common subexpression
+  elimination.
 
-producesRefCount
+Essential
+
+  Whether the instruction is essential indicates whether it can be
+  elided through certain types of optimizations.
+
+  Currently this is just used to flag whether we are allowed to do
+  dead code elimination on it.
+
+MemEffects
+
+  Indicates that the instruction has side effects on memory.
+
+  This flag is currently unused.
+
+CallsNative
+
+  Indicates that the instruction will call a native helper.
+
+  The register allocator uses this to optimize register spills around
+  native calls and to bias register allocation toward arguments and
+  return values.
+
+ConsumesRC
+
+  The instruction decrefs its sources.
+
+  TODO: explain better
+
+ProducesRC
+
+  The instruction produces an incref'd value.
+
+  This flag is currently unused.
 
 MayModifyRefs
 
+  The instruction may modify inner cells on KindOfRef values.
+
 Rematerializable
 
-May Raise Error
+  The instruction is a candidate for rematerialization if the the
+  register allocator needs to spill its destination.
+
+MayRaiseError
+
+  The instruction may raise an error, and therefore has an implicit
+  exit edge.
+
 
 
 Instruction set

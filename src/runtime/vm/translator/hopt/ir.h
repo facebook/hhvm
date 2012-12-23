@@ -17,16 +17,16 @@
 #ifndef incl_HPHP_VM_IR_H_
 #define incl_HPHP_VM_IR_H_
 
-#include <boost/noncopyable.hpp>
 #include <algorithm>
-#include <boost/checked_delete.hpp>
-#include <stdarg.h>
-#include <stdint.h>
+#include <cstdarg>
+#include <cinttypes>
 #include <iostream>
 #include <vector>
 #include <stack>
 #include <list>
-#include <assert.h>
+#include <cassert>
+#include <boost/noncopyable.hpp>
+#include <boost/checked_delete.hpp>
 #include "util/asm-x64.h"
 #include "util/arena.h"
 #include "runtime/ext/ext_continuation.h"
@@ -67,243 +67,255 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 
 #define PUNT(instr) do {                             \
   throw FailedIRGen(__FILE__, __LINE__, #instr);     \
-  } while(0)
+} while(0)
 
 
 // XXX TODO: define another namespace for opcodes
 // TODO: Make sure the MayModRefs column is correct... (MayRaiseError too...)
-//
-// (A) Opcode Name
-//
-// (B) Has Dest: whether or not the instruction produces a result.
-//     This is sometimes the same value as their input, for example AddElem
-//     to array, which returns the array which it took as an input.
-//
-// (C) Can CSE: whether or not the instruction is safe to elide through
-//     common subexpression elimination.
-//
-// (D) Is Essential: whether or not the instruction is essential. Non-essential
-//     instructions may be eliminated by optimizations.
-//
-// (E) hasMemEffects: if true, then this instruction cannot be rolled
-//     back because it has side effects on memory. Use for setting
-//     lastExitSlowInvalid in trace builder.
-//
-// (F) isNativeHelper: This instruction calls out to a native helper.
-//     The register allocator uses this to optimize register spills
-//     around native calls and to bias register assignment for arguments
-//     and return values.
-//
-// (G) consumesRefCount: if true, then this instruction decrefs its
-//     sources. Some native helpers do this. When generating this
-//     instruction, we need to incref its source operands before
-//     passing them to this instruction.
-//
-// (H) producesRefCount: if true, then this instruction produces an
-//     incref'ed value. Some native helpers do this. We need to decref
-//     the value produces by this instruction after its last use.
-//
-// (I) MayModifyRefs: if true, this instruction may modify references/variants,
-//     either directly or indirectly by reentering the VM.
-//     This requires the JIT to be pessimistic about live references.
-//
-// (J) Is Rematerializable: if true, this instruction is rematerializable.
-//
-// (K) May Raise Error: whether this instruction has a helper than can raise an
-//     error (has an implicit exit edge)
-#define IR_OPCODES                         \
-  /* checks */                             \
-  OPC(GuardType,         1,  1,  1,  0,  0,  0,  0,  0,  0,  0)         \
-  OPC(GuardLoc,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0)         \
-  OPC(GuardStk,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0)         \
-  OPC(GuardRefs,         0,  1,  1,  0,  0,  0,  0,  0,  0,  0)/* XXX validate */  \
-                                           \
-  /* arith ops (integer) */                \
-  OPC(OpAdd,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpSub,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpAnd,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpOr,              1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpXor,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpMul,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-                                           \
-  /* convert from src operand's type to destination type */ \
-  OPC(Conv,              1,  1,  0,  0,  1,  0,  0,  0,  0,  0) \
-                                           \
-  /* query operators returning bool */     \
-  /* comparisons (binary) */               \
-  OPC(OpGt,              1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpGte,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpLt,              1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpLte,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpEq,              1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(OpNeq,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  /* XXX validate that we don't call helpers with side effects */   \
-  /* and ref count consumption/production for any of these query */ \
-  /* operations and their corresponding conditional branches */     \
-  OPC(OpSame,            1,  1,  0,  0,  1,  0,  0,  0,  0,  0) \
-  OPC(OpNSame,           1,  1,  0,  0,  1,  0,  0,  0,  0,  0) \
-                                                            \
-  /* XXX TODO check instanceof's hasEffects, isNative, RefCount, MayReenter */\
-  OPC(InstanceOfD,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0)               \
-  OPC(NInstanceOfD,      1,  1,  0,  0,  0,  0,  0,  0,  0,  0)               \
-                                                            \
-  /* isset, empty, and istype queries (unary) */            \
-  OPC(IsSet,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(IsType,            1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(IsNSet,            1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(IsNType,           1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-                                                            \
-  /* conditional branches & jump */                         \
-  /* there is a conditional branch for each of the above query */        \
-  /* operators to enable generating efficieng comparison-and-branch */   \
-  /* instruction sequences */                               \
-  OPC(JmpGt,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpGte,            1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpLt,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpLte,            1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpEq,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNeq,            1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpZero,           1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNZero,          1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpSame,           1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNSame,          1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-    /* keep preceeding conditional branches contiguous */       \
-  OPC(JmpInstanceOfD,    1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNInstanceOfD,   1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsSet,          1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsType,         1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsNSet,         1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsNType,        1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(Jmp_,              1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(ExitWhenSurprised, 0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(ExitOnVarEnv,      0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(CheckUninit,       0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-                                           \
-  OPC(Unbox,             1,  0,  0,  0,  0,  0,  1,  0,  0,  0) \
-  OPC(Box,               1,  0,  1,  1,  1,  1,  1,  0,  0,  0) \
-  OPC(UnboxPtr,          1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
-                                            \
-  /* loads */                               \
-  OPC(LdStack,           1,  0,  0,  0,  0,  0,  1,  0,  0,  0) \
-  OPC(LdLoc,             1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdStackAddr,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdLocAddr,         1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdMemNR,           1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdPropNR,          1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdRefNR,           1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdThis,            1,  1,  1,  0,  0,  0,  0,  0,  1,  0) \
-  /* LdThisNc avoids check */                               \
-  OPC(LdThisNc,          1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
-  OPC(LdVarEnv,          1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdRetAddr,         1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdHome,            1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdConst,           1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
-  OPC(DefConst,          1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdCls,             1,  1,  0,  0,  0,  0,  0,  1,  1,  1) \
-  /* XXX cg doesn't support the version without a label*/   \
-  OPC(LdClsCns,          1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdClsMethodCache,  1,  1,  0,  0,  0,  0,  0,  0,  1,  1) \
-  OPC(LdClsMethod,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  /* XXX TODO Create version of LdClsPropAddr that doesn't check */ \
-  OPC(LdPropAddr,        1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdClsPropAddr,     1,  1,  1,  0,  0,  0,  0,  0,  1,  1) \
-  /* helper call to MethodCache::Lookup */                  \
-  OPC(LdObjMethod,       1,  1,  1,  0,  1,  0,  0,  1,  0,  1) \
-  OPC(LdObjClass,        1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdCachedClass,     1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
-  /* helper call to FuncCache::lookup */                    \
-  OPC(LdFunc,            1,  0,  1,  0,  1,  1,  0,  0,  0,  1) \
-  /* helper call for FPushFuncD(FixedFuncCache::lookup) */  \
-  OPC(LdFixedFunc,       1,  1,  1,  0,  0,  0,  0,  0,  0,  1) \
-  OPC(LdCurFuncPtr,      1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
-  OPC(LdARFuncPtr,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(LdFuncCls,         1,  1,  0,  0,  0,  0,  0,  0,  0,  1) \
-  OPC(NewObj,            1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
-  OPC(NewArray,          1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
-  OPC(NewTuple,          1,  0,  1,  1,  1,  1,  1,  0,  0,  0) \
-  OPC(LdRaw,             1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(AllocActRec,       1,  0,  0,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(FreeActRec,        1,  0,  0,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(Call,              1,  0,  1,  1,  0,  1,  0,  1,  0,  0) \
-  OPC(NativeImpl,        0,  0,  1,  1,  1,  0,  0,  1,  0,  0) \
-  /* return control to caller */                            \
-  OPC(RetCtrl,           0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
-  /* transfer return value from callee to caller; update sp */ \
-  OPC(RetVal,            1,  0,  0,  1,  0,  1,  0,  0,  0,  0) \
-  /* stores */                              \
-  OPC(StMem,             0,  0,  1,  1,  0,  1,  0,  1,  0,  0) \
-  OPC(StMemNT,           0,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(StProp,            0,  0,  1,  1,  0,  1,  0,  1,  0,  0) \
-  OPC(StPropNT,          0,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(StLoc,             0,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(StLocNT,           0,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(StRef,             1,  0,  1,  1,  0,  1,  0,  1,  0,  0) \
-  OPC(StRefNT,           1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(StRaw,             0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(SpillStack,        1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(SpillStackAllocAR, 1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
-  /* Update ExitTrace entries in sync with ExitType below */    \
-  OPC(ExitTrace,         0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(ExitTraceCc,       0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(ExitSlow,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(ExitSlowNoProgress,0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(ExitGuardFailure,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  /* */                                                     \
-  OPC(Mov,               1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(IncRef,            1,  0,  0,  1,  0,  0,  1,  0,  0,  0) \
-  OPC(DecRefLoc,         0,  0,  1,  1,  0,  0,  0,  1,  0,  0) \
-  OPC(DecRefStack,       0,  0,  1,  1,  0,  0,  0,  1,  0,  0) \
-  OPC(DecRefThis,        0,  0,  1,  1,  0,  0,  0,  1,  0,  0) \
-  OPC(DecRefLocals,      0,  0,  1,  1,  1,  0,  0,  1,  0,  0) \
-  OPC(DecRefLocalsThis,  0,  0,  1,  1,  1,  0,  0,  1,  0,  0) \
-  OPC(DecRef,            0,  0,  1,  1,  0,  1,  0,  1,  0,  0) \
+
+/*
+ * Flags on opcodes.  See ir.specification for details on the meaning
+ * of these flags.
+ */
+enum OpcodeFlag : uint64_t {
+  HasDest          = 0x0001,
+  CanCSE           = 0x0002,
+  Essential        = 0x0004,
+  MemEffects       = 0x0008,
+  CallsNative      = 0x0010,
+  ConsumesRC       = 0x0020,
+  ProducesRC       = 0x0040,
+  MayModifyRefs    = 0x0080,
+  Rematerializable = 0x0100, // TODO: implies HasDest
+  MayRaiseError    = 0x0200, // TODO: should it imply CallsNative?
+};
+
+#define IR_OPCODES                                                      \
+  /* checks */                                                          \
+  OPC(GuardType,         (HasDest|CanCSE|Essential))                    \
+  OPC(GuardLoc,          (Essential))                                   \
+  OPC(GuardStk,          (Essential))                                   \
+  OPC(GuardRefs,         (CanCSE|Essential))                            \
+                                                                        \
+  /* arith ops (integer) */                                             \
+  OPC(OpAdd,             (HasDest|CanCSE))                              \
+  OPC(OpSub,             (HasDest|CanCSE))                              \
+  OPC(OpAnd,             (HasDest|CanCSE))                              \
+  OPC(OpOr,              (HasDest|CanCSE))                              \
+  OPC(OpXor,             (HasDest|CanCSE))                              \
+  OPC(OpMul,             (HasDest|CanCSE))                              \
+                                                                        \
+  /* convert from src operand's type to destination type */             \
+  OPC(Conv,              (HasDest|CanCSE|CallsNative))                  \
+                                                                        \
+  /* query operators returning bool */                                  \
+  /* comparisons (binary) */                                            \
+  OPC(OpGt,              (HasDest|CanCSE))                              \
+  OPC(OpGte,             (HasDest|CanCSE))                              \
+  OPC(OpLt,              (HasDest|CanCSE))                              \
+  OPC(OpLte,             (HasDest|CanCSE))                              \
+  OPC(OpEq,              (HasDest|CanCSE))                              \
+  OPC(OpNeq,             (HasDest|CanCSE))                              \
+  /* XXX validate that we don't call helpers with side effects */       \
+  /* and ref count consumption/production for any of these query */     \
+  /* operations and their corresponding conditional branches */         \
+  OPC(OpSame,            (HasDest|CanCSE|CallsNative))                  \
+  OPC(OpNSame,           (HasDest|CanCSE|CallsNative))                  \
+                                                                        \
+  /* XXX TODO check instanceof's hasEffects, isNative, RefCount, MayReenter */ \
+  OPC(InstanceOfD,       (HasDest|CanCSE))                              \
+  OPC(NInstanceOfD,      (HasDest|CanCSE))                              \
+                                                                        \
+  /* isset, empty, and istype queries (unary) */                        \
+  OPC(IsSet,             (HasDest|CanCSE))                              \
+  OPC(IsType,            (HasDest|CanCSE))                              \
+  OPC(IsNSet,            (HasDest|CanCSE))                              \
+  OPC(IsNType,           (HasDest|CanCSE))                              \
+                                                                        \
+  /* conditional branches & jump */                                     \
+  /* there is a conditional branch for each of the above query */       \
+  /* operators to enable generating efficieng comparison-and-branch */  \
+  /* instruction sequences */                                           \
+  OPC(JmpGt,             (HasDest|Essential))                           \
+  OPC(JmpGte,            (HasDest|Essential))                           \
+  OPC(JmpLt,             (HasDest|Essential))                           \
+  OPC(JmpLte,            (HasDest|Essential))                           \
+  OPC(JmpEq,             (HasDest|Essential))                           \
+  OPC(JmpNeq,            (HasDest|Essential))                           \
+  OPC(JmpZero,           (HasDest|Essential))                           \
+  OPC(JmpNZero,          (HasDest|Essential))                           \
+  OPC(JmpSame,           (HasDest|Essential))                           \
+  OPC(JmpNSame,          (HasDest|Essential))                           \
+    /* keep preceeding conditional branches contiguous */               \
+  OPC(JmpInstanceOfD,    (HasDest|Essential))                           \
+  OPC(JmpNInstanceOfD,   (HasDest|Essential))                           \
+  OPC(JmpIsSet,          (HasDest|Essential))                           \
+  OPC(JmpIsType,         (HasDest|Essential))                           \
+  OPC(JmpIsNSet,         (HasDest|Essential))                           \
+  OPC(JmpIsNType,        (HasDest|Essential))                           \
+  OPC(Jmp_,              (HasDest|Essential))                           \
+  OPC(ExitWhenSurprised, (Essential))                                   \
+  OPC(ExitOnVarEnv,      (Essential))                                   \
+  OPC(CheckUninit,       (Essential))                                   \
+                                                                        \
+  OPC(Unbox,             (HasDest|ProducesRC))                          \
+  OPC(Box,               (HasDest|Essential|MemEffects|                 \
+                          CallsNative|ConsumesRC|                       \
+                          ProducesRC))                                  \
+  OPC(UnboxPtr,          (HasDest))                                     \
+                                                                        \
+  /* loads */                                                           \
+  OPC(LdStack,           (HasDest|ProducesRC))                          \
+  OPC(LdLoc,             (HasDest))                                     \
+  OPC(LdStackAddr,       (HasDest|CanCSE))                              \
+  OPC(LdLocAddr,         (HasDest|CanCSE))                              \
+  OPC(LdMemNR,           (HasDest))                                     \
+  OPC(LdPropNR,          (HasDest))                                     \
+  OPC(LdRefNR,           (HasDest))                                     \
+  OPC(LdThis,            (HasDest|CanCSE|Essential|                     \
+                          Rematerializable))                            \
+  /* LdThisNc avoids check */                                           \
+  OPC(LdThisNc,          (HasDest|CanCSE|Rematerializable))             \
+  OPC(LdVarEnv,          (HasDest|CanCSE))                              \
+  OPC(LdRetAddr,         (HasDest))                                     \
+  OPC(LdHome,            (HasDest|CanCSE))                              \
+  OPC(LdConst,           (HasDest|CanCSE|Rematerializable))             \
+  OPC(DefConst,          (HasDest|CanCSE))                              \
+  OPC(LdCls,             (HasDest|CanCSE|MayModifyRefs|                 \
+                          Rematerializable|MayRaiseError))              \
+  /* XXX cg doesn't support the version without a label*/               \
+  OPC(LdClsCns,          (HasDest|CanCSE))                              \
+  OPC(LdClsMethodCache,  (HasDest|CanCSE|                               \
+                          Rematerializable|MayRaiseError))              \
+  OPC(LdClsMethod,       (HasDest|CanCSE))                              \
+  /* XXX TODO Create version of LdClsPropAddr that doesn't check */     \
+  OPC(LdPropAddr,        (HasDest|CanCSE))                              \
+  OPC(LdClsPropAddr,     (HasDest|CanCSE|Essential|                     \
+                          Rematerializable|MayRaiseError))              \
+  /* helper call to MethodCache::Lookup */                              \
+  OPC(LdObjMethod,       (HasDest|CanCSE|Essential|                     \
+                          CallsNative|MayModifyRefs|                    \
+                          MayRaiseError))                               \
+  OPC(LdObjClass,        (HasDest|CanCSE))                              \
+  OPC(LdCachedClass,     (HasDest|CanCSE|Rematerializable))             \
+  /* helper call to FuncCache::lookup */                                \
+  OPC(LdFunc,            (HasDest|Essential|CallsNative|                \
+                          ConsumesRC|MayRaiseError))                    \
+  /* helper call for FPushFuncD(FixedFuncCache::lookup) */              \
+  OPC(LdFixedFunc,       (HasDest|CanCSE|Essential|                     \
+                          MayRaiseError))                               \
+  OPC(LdCurFuncPtr,      (HasDest|CanCSE|Rematerializable))             \
+  OPC(LdARFuncPtr,       (HasDest|CanCSE))                              \
+  OPC(LdFuncCls,         (HasDest|CanCSE|Rematerializable))             \
+  OPC(NewObj,            (HasDest|Essential|MemEffects|                 \
+                          CallsNative|ProducesRC))                      \
+  OPC(NewArray,          (HasDest|Essential|MemEffects|                 \
+                          CallsNative|ProducesRC))                      \
+  OPC(NewTuple,          (HasDest|Essential|MemEffects|                 \
+                          CallsNative|ConsumesRC|ProducesRC))           \
+  OPC(LdRaw,             (HasDest))                                     \
+                          /* XXX: why does AllocActRec consume rc? */   \
+  OPC(AllocActRec,       (HasDest|MemEffects|ConsumesRC))               \
+  OPC(FreeActRec,        (HasDest|MemEffects))                          \
+  OPC(Call,              (HasDest|Essential|MemEffects|                 \
+                          ConsumesRC|MayModifyRefs))                    \
+  OPC(NativeImpl,        (Essential|MemEffects|CallsNative|             \
+                          MayModifyRefs))                               \
+  /* return control to caller */                                        \
+  OPC(RetCtrl,           (Essential|MemEffects))                        \
+  /* transfer return value from callee to caller; update sp */          \
+  OPC(RetVal,            (HasDest|MemEffects|ConsumesRC))               \
+  /* stores */                                                          \
+  OPC(StMem,             (Essential|MemEffects|ConsumesRC|              \
+                          MayModifyRefs))                               \
+  OPC(StMemNT,           (Essential|MemEffects|ConsumesRC))             \
+  OPC(StProp,            (Essential|MemEffects|ConsumesRC|              \
+                          MayModifyRefs))                               \
+  OPC(StPropNT,          (Essential|MemEffects|ConsumesRC))             \
+  OPC(StLoc,             (Essential|MemEffects|ConsumesRC))             \
+  OPC(StLocNT,           (Essential|MemEffects|ConsumesRC))             \
+  OPC(StRef,             (HasDest|Essential|MemEffects|                 \
+                          ConsumesRC|MayModifyRefs))                    \
+  OPC(StRefNT,           (HasDest|Essential|MemEffects|                 \
+                          ConsumesRC))                                  \
+  OPC(StRaw,             (Essential|MemEffects))                        \
+  OPC(SpillStack,        (HasDest|Essential|MemEffects|                 \
+                          ConsumesRC))                                  \
+  OPC(SpillStackAllocAR, (HasDest|Essential|MemEffects|                 \
+                          ConsumesRC))                                  \
+  /* Update ExitTrace entries in sync with ExitType below */            \
+  OPC(ExitTrace,         (Essential))                                   \
+  OPC(ExitTraceCc,       (Essential))                                   \
+  OPC(ExitSlow,          (Essential))                                   \
+  OPC(ExitSlowNoProgress,(Essential))                                   \
+  OPC(ExitGuardFailure,  (Essential))                                   \
+  /* */                                                                 \
+  OPC(Mov,               (HasDest|CanCSE))                              \
+  OPC(IncRef,            (HasDest|MemEffects|ProducesRC))               \
+  OPC(DecRefLoc,         (Essential|MemEffects|MayModifyRefs))          \
+  OPC(DecRefStack,       (Essential|MemEffects|MayModifyRefs))          \
+  OPC(DecRefThis,        (Essential|MemEffects|MayModifyRefs))          \
+  OPC(DecRefLocals,      (Essential|MemEffects|CallsNative|             \
+                          MayModifyRefs))                               \
+  OPC(DecRefLocalsThis,  (Essential|MemEffects|CallsNative|             \
+                          MayModifyRefs))                               \
+  OPC(DecRef,            (Essential|MemEffects|ConsumesRC|              \
+                          MayModifyRefs))                               \
   /* DecRefNZ only decrements the ref count, and doesn't modify Refs. */ \
-  /* DecRefNZ also doesn't run dtor, so we mark it as non-essential. */ \
-  OPC(DecRefNZ,          0,  0,  0,  1,  0,  1,  0,  0,  0,  0) \
-  OPC(DefLabel,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(Marker,            0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(DefFP,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(DefSP,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-                                            \
-  /* runtime helpers */                     \
- /* XXX check consume ref count */ \
-  OPC(RaiseUninitWarning,0,  0,  1,  1,  1,  0,  0,  1,  0,  1) \
-  OPC(Print,             0,  0,  1,  1,  1,  1,  0,  0,  0,  0) \
-  OPC(AddElem,           1,  0,  0,  1,  1,  1,  1,  1,  0,  0) \
-  OPC(AddNewElem,        1,  0,  0,  1,  1,  1,  1,  0,  0,  0) \
-  OPC(DefCns,            1,  1,  1,  1,  1,  0,  0,  0,  0,  0) \
-  OPC(Concat,            1,  0,  0,  1,  1,  1,  1,  1,  0,  0) \
-  OPC(ArrayAdd,          1,  0,  0,  1,  1,  1,  1,  0,  0,  0) \
-  OPC(DefCls,            0,  1,  1,  0,  1,  0,  0,  0,  0,  0) \
-  OPC(DefFunc,           0,  1,  1,  0,  1,  0,  0,  0,  0,  0) \
-                                                        \
-  OPC(InterpOne,         1,  0,  1,  1,  1,  0,  0,  1,  0,  1) \
-  /* for register allocation */                         \
-  OPC(Spill,             1,  0,  0,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(Reload,            1,  0,  0,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(AllocSpill,        0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(FreeSpill,         0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
-  /* continuation support */                                    \
-  OPC(CreateCont,        1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
-  OPC(FillContLocals,    0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
-  OPC(FillContThis,      0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(UnlinkContVarEnv,  0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
-  OPC(LinkContVarEnv,    0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
-  OPC(ContRaiseCheck,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(ContPreNext,       0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(ContStartedCheck,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  \
-  OPC(IncStat,           0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
-  OPC(AssertRefCount,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  /* DecRefNZ also doesn't run dtor, so we don't mark it essential. */  \
+  OPC(DecRefNZ,          (MemEffects|ConsumesRC))                       \
+  OPC(DefLabel,          (Essential))                                   \
+  OPC(Marker,            (Essential))                                   \
+  OPC(DefFP,             (HasDest|Essential))                           \
+  OPC(DefSP,             (HasDest|Essential))                           \
+                                                                        \
+  /* runtime helpers */                                                 \
+ /* XXX check consume ref count */                                      \
+  OPC(RaiseUninitWarning,(Essential|MemEffects|CallsNative|             \
+                          MayModifyRefs|MayRaiseError))                 \
+  OPC(Print,             (Essential|MemEffects|CallsNative|             \
+                          ConsumesRC))                                  \
+  OPC(AddElem,           (HasDest|MemEffects|CallsNative|               \
+                          ConsumesRC|ProducesRC|MayModifyRefs))         \
+  OPC(AddNewElem,        (HasDest|MemEffects|CallsNative|               \
+                          ConsumesRC|ProducesRC))                       \
+  OPC(DefCns,            (HasDest|CanCSE|Essential|                     \
+                          MemEffects|CallsNative))                      \
+  OPC(Concat,            (HasDest|MemEffects|CallsNative|               \
+                          ConsumesRC|ProducesRC|MayModifyRefs))         \
+  OPC(ArrayAdd,          (HasDest|MemEffects|CallsNative|               \
+                          ConsumesRC|ProducesRC))                       \
+                         /* XXX: shouldn't DefCls/DefFunc MayRaiseError? */ \
+  OPC(DefCls,            (CanCSE|Essential|CallsNative))                \
+  OPC(DefFunc,           (CanCSE|Essential|CallsNative))                \
+                                                                        \
+  OPC(InterpOne,         (HasDest|Essential|MemEffects|                 \
+                          CallsNative|MayModifyRefs|                    \
+                          MayRaiseError))                               \
+  /* for register allocation */                                         \
+  OPC(Spill,             (HasDest|MemEffects))                          \
+  OPC(Reload,            (HasDest|MemEffects))                          \
+  OPC(AllocSpill,        (Essential|MemEffects))                        \
+  OPC(FreeSpill,         (Essential|MemEffects))                        \
+  /* continuation support */                                            \
+  OPC(CreateCont,        (HasDest|Essential|MemEffects|                 \
+                          CallsNative|ProducesRC))                      \
+  OPC(FillContLocals,    (Essential|MemEffects|CallsNative))            \
+  OPC(FillContThis,      (Essential|MemEffects))                        \
+  OPC(UnlinkContVarEnv,  (Essential|MemEffects|CallsNative))            \
+  OPC(LinkContVarEnv,    (Essential|MemEffects|CallsNative))            \
+  OPC(ContRaiseCheck,    (Essential))                                   \
+  OPC(ContPreNext,       (Essential|MemEffects))                        \
+  OPC(ContStartedCheck,  (Essential))                                   \
+                                                                        \
+  OPC(IncStat,           (Essential|MemEffects))                        \
+  OPC(AssertRefCount,    (Essential))                                   \
+  /* */
 
 enum Opcode {
-#define OPC(name, hasDst, canCSE, essential, hasMemEffects, isNative, \
-            consumesRefCount, producesRefCount, mayModRefs, rematerializable, \
-            error) \
-  name,
+#define OPC(name, flags) name,
   IR_OPCODES
-  #undef OPC
-  /* */
+#undef OPC
   IR_NUM_OPCODES
 };
 
@@ -358,6 +370,7 @@ extern TraceExitType::ExitType getExitType(Opcode opc);
 extern Opcode getExitOpcode(TraceExitType::ExitType);
 
 const char* opcodeName(Opcode opcode);
+bool opcodeHasFlags(Opcode opcode, uint64_t flag);
 
 class Type {
 public:
@@ -719,54 +732,19 @@ public:
   typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
 
   /*
-   * Returns whether we can CSE this instruction, often not true for
-   * instructions that have side-effects such as modifying heap
-   * memory.
+   * Helper accessors for the OpcodeFlag bits for this instruction.
+   *
+   * Note that these wrappers may have additional logic beyond just
+   * checking the corresponding flags bit.
    */
   bool canCSE() const;
-
-  /*
-   * hasDst indicates the instruction produces an SSATmp that is
-   * generally the resulting value, but occassionally a heap reference
-   * to help order operations, e.g., AddElem
-   */
   bool hasDst() const;
-
-  /*
-   * hasMemEffects indicates the instruction has side effects on
-   * memory.
-   */
   bool hasMemEffects() const;
-
-  /*
-   * Returns whether the destination of this instruction is a
-   * candidate for rematerialization.
-   */
   bool isRematerializable() const;
-
-  /*
-   * Indicates this instruction calls a native helper.
-   */
   bool isNative() const;
-
-  /*
-   * consumesReferences() indicates the instruction decrefs a source
-   * operand.
-   */
   bool consumesReferences() const;
   bool consumesReference(int srcNo) const;
-
-  /*
-   * producesReference indicates the instruction has incref'ed its
-   * destination
-   */
   bool producesReference() const;
-
-  /*
-   * If true, this instruction may have side effects that modify
-   * KindOfRef inner cells (either by reentering the VM, or somehow
-   * else).
-   */
   bool mayModifyRefs() const;
 
   void printDst(std::ostream& ostream);

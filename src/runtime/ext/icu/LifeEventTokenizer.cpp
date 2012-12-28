@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "LifeEventTokenizer.h"
+#include "util/atomic.h"
 
 using namespace U_ICU_NAMESPACE;
 
@@ -138,18 +139,28 @@ $dictionary $dictionary;\n\
 
 // Master copy of the tokenizer object. Uses the rules above.
 
-UParseError parseError;
-UErrorCode errorCode = U_ZERO_ERROR;
-const BreakIteratorPtr kMaster(new icu::RuleBasedBreakIterator(
-                          icu::UnicodeString(strRules),
-                          parseError,
-                          errorCode));
+const BreakIterator* kMaster = NULL;
 
-
+const BreakIterator* getMaster() {
+  // Unlocked read of kMaster is safe (though a stale NULL is possible).
+  if (kMaster != NULL) { return kMaster; }
+  UParseError parseError;
+  UErrorCode errorCode = U_ZERO_ERROR;
+  const BreakIterator* bi
+    = new icu::RuleBasedBreakIterator(icu::UnicodeString(strRules),
+                                      parseError,
+                                      errorCode);
+  // Atomically swap in bi, but delete it if this this thread loses the
+  // initialization race.
+  if (!atomic_cas(&kMaster, static_cast<const BreakIterator*>(NULL), bi)) {
+    delete bi;
+  }
+  return kMaster;
+}
 
 void tokenizeString(
   std::vector<Token>& tokenVectorOut,
-  const BreakIteratorPtr& ptrBreakIterator,
+  const BreakIterator* ptrBreakIterator,
   const icu::UnicodeString& ustr) {
 
   if(strRules == NULL) return;

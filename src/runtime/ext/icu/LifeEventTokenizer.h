@@ -30,12 +30,12 @@
 
 namespace HPHP {
 
-typedef boost::scoped_ptr<icu::RuleBasedBreakIterator> BreakIteratorPtr;
+typedef icu::RuleBasedBreakIterator BreakIterator;
 
 // Master copy of the ICU object we use for tokenization. Creation is expensive,
 // but cloning is fast and thread-safe, so we clone a copy (in tokenizeString)
 // for each tokenization. Do NOT use it directly!
-extern const BreakIteratorPtr kMaster;
+extern const BreakIterator* kMaster;
 
 // Most status values come from ICU's ubrk.h.  The following
 // are Facebook custom.
@@ -56,10 +56,11 @@ struct Token {
   int32_t status;
 };
 
+const BreakIterator* getMaster();
 
 void tokenizeString(
   std::vector<Token>& tokenVectorOut,
-  const BreakIteratorPtr& ptrBreakIterator,
+  const BreakIterator* ptrBreakIterator,
   const icu::UnicodeString& ustr);
 
 }

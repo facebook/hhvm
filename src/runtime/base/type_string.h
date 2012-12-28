@@ -57,9 +57,9 @@ public:
   typedef hphp_hash_map<int64, const StringData *, int64_hash>
     IntegerStringDataMap;
   static const int MinPrecomputedInteger = SCHAR_MIN;
-  static const int MaxPrecomputedInteger = 65535;
-  static StringData *converted_integers_raw;
-  static StringData *converted_integers;
+  static const int MaxPrecomputedInteger = 4095 + SCHAR_MIN;
+  static StringData const **converted_integers_raw;
+  static StringData const **converted_integers;
   static IntegerStringDataMap integer_string_data_map;
 
   static bool HasConverted(int64 n) {
@@ -75,9 +75,13 @@ public:
     return StringData::GetStaticString(ch);
   }
 
+  static const StringData *ConvertInteger(int64 n) ATTRIBUTE_COLD;
   static const StringData *GetIntegerStringData(int64 n) {
     if (HasConverted(n)) {
-      const StringData *sd = converted_integers + n;
+      const StringData *sd = *(converted_integers + n);
+      if (UNLIKELY(sd == NULL)) {
+        return ConvertInteger(n);
+      }
       return sd;
     }
     IntegerStringDataMap::const_iterator it =

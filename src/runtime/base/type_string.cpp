@@ -38,12 +38,12 @@ const StaticString empty_string("");
 #define NUM_CONVERTED_INTEGERS \
   (String::MaxPrecomputedInteger - String::MinPrecomputedInteger + 1)
 
-StringData *String::converted_integers_raw;
-StringData *String::converted_integers;
+StringData const **String::converted_integers_raw;
+StringData const **String::converted_integers;
 
 String::IntegerStringDataMap String::integer_string_data_map;
 
-const StringData *convert_integer_helper(int64 n, StringData *sd) {
+static const StringData *convert_integer_helper(int64 n) {
   char tmpbuf[21];
   char *p;
   int is_negative;
@@ -51,33 +51,36 @@ const StringData *convert_integer_helper(int64 n, StringData *sd) {
 
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  if (sd) {
-    new (sd) StringData(p, len, CopyMalloc);
-  } else {
-    sd = new StringData(p, len, CopyMalloc);
-  }
-  sd->setStatic();
-  if (!String(sd).checkStatic()) {
-    StaticString::TheStaticStringSet().insert(sd);
-  }
-  return sd;
+  return StringData::GetStaticString(p);
 }
 
 void String::PreConvertInteger(int64 n) {
   IntegerStringDataMap::const_iterator it =
     integer_string_data_map.find(n);
   if (it != integer_string_data_map.end()) return;
-  integer_string_data_map[n] = convert_integer_helper(n, NULL);
+  integer_string_data_map[n] = convert_integer_helper(n);
+}
+
+const StringData *String::ConvertInteger(int64 n) {
+  StringData const **psd = converted_integers + n;
+  const StringData *sd = convert_integer_helper(n);
+  *psd = sd;
+  return sd;
 }
 
 static int precompute_integers() ATTRIBUTE_COLD;
 static int precompute_integers() {
   String::converted_integers_raw =
-    (StringData *)malloc(NUM_CONVERTED_INTEGERS * sizeof(StringData));
-  String::converted_integers = String::converted_integers_raw - SCHAR_MIN;
-  for (int n = SCHAR_MIN; n < 65536; n++) {
-    StringData *sd = String::converted_integers + n;
-    convert_integer_helper(n, sd);
+    (StringData const **)calloc(NUM_CONVERTED_INTEGERS, sizeof(StringData*));
+  String::converted_integers = String::converted_integers_raw
+    - String::MinPrecomputedInteger;
+  if (RuntimeOption::serverExecutionMode()) {
+    // Proactively populate, in order to increase cache locality for sequential
+    // access patterns.
+    for (int n = String::MinPrecomputedInteger;
+         n <= String::MaxPrecomputedInteger; n++) {
+      String::ConvertInteger(n);
+    }
   }
   return NUM_CONVERTED_INTEGERS;
 }

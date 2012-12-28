@@ -237,9 +237,7 @@ Variant f_fgetss(CObjRef handle, int64 length /* = 0 */,
 
 Variant f_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
-  StringBuffer str;
-  str.read(f);
-  return f_sscanf(_argc, str.detach(), format, _argv);
+  return f_sscanf(_argc, f->readLine(), format, _argv);
 }
 
 Variant f_fpassthru(CObjRef handle) {

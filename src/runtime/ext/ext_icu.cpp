@@ -240,17 +240,9 @@ public:
 
 
 // Thread-local globals.
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(SpaceMatcher, s_spaceMatcher);
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(NumMatcher, s_numMatcher);
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(LowerCaseTransliterator, s_lctranslit);
-
-// This is used to preload the thread-locals to avoid checks each time
-// thread-local storage is fetched.
-void icu_get_checks() {
-  s_spaceMatcher.getCheck();
-  s_numMatcher.getCheck();
-  s_lctranslit.getCheck();
-}
+IMPLEMENT_THREAD_LOCAL(SpaceMatcher, s_spaceMatcher);
+IMPLEMENT_THREAD_LOCAL(NumMatcher, s_numMatcher);
+IMPLEMENT_THREAD_LOCAL(LowerCaseTransliterator, s_lctranslit);
 
 
 /* Normalize a unicode string depending on its type.

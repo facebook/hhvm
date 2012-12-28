@@ -41,8 +41,6 @@ extern const int64 k_UREGEX_MULTILINE;
 extern const int64 k_UREGEX_UWORD;
 extern const int64 k_UREGEX_OFFSET_CAPTURE;
 
-void icu_get_checks();
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

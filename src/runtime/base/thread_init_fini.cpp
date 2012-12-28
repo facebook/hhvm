@@ -55,7 +55,6 @@ void init_thread_locals(void *arg /* = NULL */) {
   get_global_variables_check();
   ThreadInfo::s_threadInfo.getCheck();
   g_context.getCheck();
-  icu_get_checks();
   s_hasRenamedFunction.getCheck();
   HardwareCounter::s_counter.getCheck();
   for (InitFiniNode *in = extra_init; in; in = in->next) {

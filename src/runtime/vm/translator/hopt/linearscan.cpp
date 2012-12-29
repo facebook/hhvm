@@ -29,7 +29,7 @@ const int NumMmxRegs = 8;
 struct LinearScan : private boost::noncopyable {
   static const int NumRegs = 16;
 
-  LinearScan(IRFactory*, TraceBuilder*);
+  explicit LinearScan(IRFactory*);
   void allocRegs(Trace*);
 
 private:
@@ -129,7 +129,7 @@ private:
 
 private:
   // Register allocation may generate Spill/Reload.
-  IRFactory* m_irFactory;
+  IRFactory* const m_irFactory;
   RegState   m_regs[NumRegs];
   std::list<RegState*> m_freeCallerSaved;
   std::list<RegState*> m_freeCalleeSaved;
@@ -170,8 +170,9 @@ static SSATmp* canonicalize(SSATmp* tmp) {
   }
 }
 
-LinearScan::LinearScan(IRFactory* irFactory, TraceBuilder* traceBuilder) {
-  m_irFactory = irFactory;
+LinearScan::LinearScan(IRFactory* irFactory)
+  : m_irFactory(irFactory)
+{
   for (int i = 0; i < kNumX64Regs; i++) {
     m_regs[i].m_ssaTmp = NULL;
     m_regs[i].m_regNo = i;
@@ -1246,10 +1247,8 @@ void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32 index, int argNum) {
 
 //////////////////////////////////////////////////////////////////////
 
-void allocRegsForTrace(Trace* trace,
-                       IRFactory* irFactory,
-                       TraceBuilder* traceBuilder) {
-  LinearScan(irFactory, traceBuilder).allocRegs(trace);
+void allocRegsForTrace(Trace* trace, IRFactory* irFactory) {
+  LinearScan(irFactory).allocRegs(trace);
 }
 
 }}} // HPHP::VM::JIT

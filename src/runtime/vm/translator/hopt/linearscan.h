@@ -31,7 +31,7 @@ namespace HPHP { namespace VM { namespace JIT {
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
-void allocRegsForTrace(Trace*, IRFactory*, TraceBuilder*);
+void allocRegsForTrace(Trace*, IRFactory*);
 
 }}}
 

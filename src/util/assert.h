@@ -57,8 +57,11 @@
     assert(false);                                                   \
   } while (true)
 #else
-#define not_reached() /* gcc-4.5 supports __builtin_unreachable() */ \
-  assert(false)
+#define not_reached() /* gcc-4.5 supports __builtin_unreachable() */  \
+  do {                                                                \
+    assert(false);                                                    \
+    __builtin_unreachable();                                          \
+  } while (true)
 #endif
 
 #define NOT_REACHED not_reached

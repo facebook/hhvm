@@ -2187,7 +2187,7 @@ Address CodeGenerator::getDtor(DataType type) {
     case KindOfArray   : return (Address)tv_release_arr;
     case KindOfObject  : return (Address)tv_release_obj;
     case KindOfRef     : return (Address)tv_release_ref;
-    default: assert(0);
+    default: not_reached();
   }
 }
 

@@ -22,7 +22,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-#include "util/assert.h"
+#include "util/assertions.h"
 #include "runtime/base/types.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/tread_hash_map.h"

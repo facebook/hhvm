@@ -65,7 +65,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 
 #include "util/hash.h"
-#include "util/assert.h"
+#include "util/assertions.h"
 
 #ifdef __INTEL_COMPILER
 #define va_copy __builtin_va_copy

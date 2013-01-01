@@ -21,7 +21,7 @@
 #include <vector>
 #include <stdint.h>
 #include <boost/iterator/iterator_traits.hpp>
-#include "util/assert.h"
+#include "util/assertions.h"
 #include "util/arena.h"
 
 namespace HPHP {

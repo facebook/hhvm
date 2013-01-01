@@ -17,7 +17,7 @@
 
 #include "util/zend/zend_string.h"
 #include <cinttypes>
-#include "util/assert.h"
+#include "util/assertions.h"
 #include "util/mutex.h"
 #include "util/lock.h"
 

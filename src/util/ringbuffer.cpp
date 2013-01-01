@@ -18,7 +18,7 @@
 #include "util/pathtrack.h"
 #include "util/util.h"
 #include "util/atomic.h"
-#include "util/assert.h"
+#include "util/assertions.h"
 
 #include <algorithm>
 #include <cstdio>

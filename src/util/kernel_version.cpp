@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 #include <util/util.h>
-#include <util/assert.h>
+#include <util/assertions.h>
 #include <util/kernel_version.h>
 
 namespace HPHP {

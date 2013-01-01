@@ -17,7 +17,7 @@
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
 
-#include <util/assert.h>
+#include <util/assertions.h>
 #include <util/util.h>
 #include <pthread.h>
 #include <time.h>

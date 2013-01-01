@@ -22,7 +22,7 @@
 #ifndef __HPHP_STRING_H__
 #define __HPHP_STRING_H__
 
-#include <util/assert.h>
+#include <util/assertions.h>
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/string_data.h>
 #include <runtime/base/string_offset.h>

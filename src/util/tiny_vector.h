@@ -25,7 +25,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <algorithm>
 #include "util/alloc.h"
-#include "util/assert.h"
+#include "util/assertions.h"
 #include "util/compact_sized_ptr.h"
 
 namespace HPHP {

@@ -27,7 +27,7 @@
 #include <bits/atomicity.h>
 #endif
 
-#include "util/assert.h"
+#include "util/assertions.h"
 #include "util/util.h"
 
 namespace HPHP {

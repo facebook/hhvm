@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 #include <stdexcept>
-#include <util/assert.h>
+#include <util/assertions.h>
 #include <util/compact_sized_ptr.h>
 
 namespace HPHP {

@@ -15,7 +15,7 @@
 */
 #include "util/arena.h"
 #include "util/util.h"
-#include "util/assert.h"
+#include "util/assertions.h"
 #include "util/malloc_size_class.h"
 
 namespace HPHP {

@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include "util/alloc.h"
 #include "util/util.h"
-#include "util/assert.h"
+#include "util/assertions.h"
 
 namespace HPHP {
 

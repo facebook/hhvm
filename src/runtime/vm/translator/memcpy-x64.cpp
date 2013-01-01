@@ -17,7 +17,7 @@
 #include <stdint.h>
 
 #include <util/util.h>
-#include <util/assert.h>
+#include <util/assertions.h>
 
 extern "C" {
 

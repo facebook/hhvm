@@ -17,7 +17,7 @@
 #ifndef __HPHP_MACROS_H__
 #define __HPHP_MACROS_H__
 
-#include "util/assert.h"
+#include "util/assertions.h"
 
 namespace HPHP {
 

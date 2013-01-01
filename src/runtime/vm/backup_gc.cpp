@@ -21,7 +21,7 @@
 #include <boost/noncopyable.hpp>
 #include <map>
 
-#include "util/assert.h"
+#include "util/assertions.h"
 #include "util/timer.h"
 #include "util/trace.h"
 #include "runtime/base/execution_context.h"

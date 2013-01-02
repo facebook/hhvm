@@ -54,7 +54,7 @@ PhpFile::PhpFile(const string &fileName, const string &srcRoot,
 }
 
 PhpFile::~PhpFile() {
-  assert(m_refCount == 0);
+  always_assert(m_refCount == 0);
   if (m_unit != NULL) {
     // Deleting a Unit can grab a low-ranked lock and we're probably
     // at a high rank right now

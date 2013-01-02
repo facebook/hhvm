@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BIT_SET_VEC_H__
-#define __BIT_SET_VEC_H__
+#ifndef incl_HPHP_BIT_SET_VEC_H_
+#define incl_HPHP_BIT_SET_VEC_H_
 
 #include <limits.h>
 #include <stddef.h>
-#include <assert.h>
+#include "util/assertions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ class BitSetVec {
   BitSetBlock getBlock(int block);
   size_t width() const { return m_width; }
   size_t rowOffset(int row) const {
-    assert((unsigned)row < (unsigned)m_maxId);
+    always_assert((unsigned)row < (unsigned)m_maxId);
     size_t offset = m_idOffsets[row];
     return offset - 1;
   }

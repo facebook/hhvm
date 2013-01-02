@@ -1653,7 +1653,7 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           x.file, x.line, x.func);
   } catch (TranslationFailedExc& tfe) {
-    assert(0);
+    always_assert(0);
   }
 
   if (!hhirSucceeded) {

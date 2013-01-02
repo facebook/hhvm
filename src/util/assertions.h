@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include <stdio.h>
+#include <cstdlib>
 
 //////////////////////////////////////////////////////////////////////
 
@@ -80,6 +81,37 @@
 
 #define ASSERT_NOT_IMPLEMENTED assert_not_implemented
 #define NOT_IMPLEMENTED        not_implemented
+
+/*
+ * Assertion-like checks that should remain on even in a production
+ * build.
+ */
+
+namespace HPHP {
+
+void assert_fail(const char*, const char*,
+                 unsigned int, const char*) __attribute__((noreturn));
+inline void assert_fail(const char* e,
+                        const char* file,
+                        unsigned int line,
+                        const char* func) {
+#ifndef NDEBUG
+  __assert_fail(e, file, line, func);
+#else
+  extern void impl_assert_fail(const char*,
+                               const char*,
+                               unsigned int,
+                               const char*) __attribute__((noreturn));
+  impl_assert_fail(e, file, line, func);
+#endif
+}
+
+}
+
+#define always_assert(e)                                                \
+  ((e) ? static_cast<void>(0)                                           \
+       : (::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__), \
+          static_cast<void>(0)))
 
 //////////////////////////////////////////////////////////////////////
 

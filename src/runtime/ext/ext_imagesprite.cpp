@@ -54,7 +54,7 @@ static const char php_sig_png[8] =
 static const char php_sig_gd2[3] = {'g', 'd', '2'};
 
 void ev_req_complete(struct evhttp_request *req, void *obj) {
-  assert(obj);
+  always_assert(obj);
   ((ImageFromHTTP*)obj)->completed();
 }
 
@@ -140,11 +140,11 @@ void ResourceGroupEv::setTimeout(int milliseconds) {
 }
 
 void Image::loadDims(bool block /* = false */) {
-  assert(!m_error);
+  always_assert(!m_error);
   if (m_width <= 0 || m_height <= 0) {
     loadImage(block);
     if (block && !m_error) {
-      assert(m_image != NULL);
+      always_assert(m_image != NULL);
       m_width = m_image->sx;
       m_height = m_image->sy;
     }
@@ -171,9 +171,9 @@ void Image::setError(String err) {
 }
 
 void Image::load_data_to_gd(int size, const void* data) {
-  assert(data);
-  assert(!m_error);
-  assert(m_image == NULL);
+  always_assert(data);
+  always_assert(!m_error);
+  always_assert(m_image == NULL);
   if (size < 8) {
     setError("Invalid image file");
     return;
@@ -297,7 +297,7 @@ void Image::setOptions(Array options) {
 }
 
 void ImageFromFile::loadImage(bool block /* = false */) {
-  assert(!m_error);
+  always_assert(!m_error);
   if (m_image != NULL) {
     return;
   }
@@ -314,7 +314,7 @@ void ImageFromFile::loadImage(bool block /* = false */) {
 }
 
 void ImageFromString::loadImage(bool block /* = false */) {
-  assert(!m_error);
+  always_assert(!m_error);
   if (m_image != NULL) {
     return;
   }
@@ -375,7 +375,7 @@ ImageFromHTTP::ImageFromHTTP(String path, c_ImageSprite* sprite, int timeout)
 }
 
 void ImageFromHTTP::loadImage(bool block /* = false */) {
-  assert(!m_error);
+  always_assert(!m_error);
   if (m_image != NULL) {
     return;
   }
@@ -421,10 +421,10 @@ void ImageFromHTTP::reset() {
 }
 
 void ImageFromHTTP::completed() {
-  assert(m_request);
-  assert(m_request->input_buffer);
-  assert(m_image == NULL);
-  assert(!m_error);
+  always_assert(m_request);
+  always_assert(m_request->input_buffer);
+  always_assert(m_image == NULL);
+  always_assert(!m_error);
 
   int code = m_request->response_code;
   if (code >= 200 && code <= 300) {

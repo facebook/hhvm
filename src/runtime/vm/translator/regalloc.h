@@ -263,7 +263,7 @@ class RegAlloc {
   void assertRegIsFree(PhysReg pr) const {
     if (debug && !regIsFree(pr)) {
       std::cerr << getInfo(pr)->pretty() << std::endl;
-      assert(false && "Expected register to be free");
+      always_assert(false && "Expected register to be free");
     }
   }
   DataType regType(PhysReg pr) const {

@@ -444,7 +444,7 @@ public:
           LabelStatementRawPtr label_stmt(
             static_pointer_cast<LabelStatement>(s));
           LabelInfo &li = labelMap[label_stmt->label()];
-          assert(!li.trys.size());
+          always_assert(!li.trys.size());
           li.trys = trys;
         }
         break;
@@ -1226,7 +1226,7 @@ void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {
             // an interface
             continue;
           }
-          assert(!parent.empty());
+          always_assert(!parent.empty());
           if (seenOther) {
             ClassScopePtr pcls = ar->findClass(parent);
             if (pcls) {
@@ -1354,7 +1354,7 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
     cg_printf("num_args, ");
   }
 
-  assert(m_params);
+  always_assert(m_params);
 
   for (int i = 0; i < m_params->getCount(); i++) {
     ParameterExpressionPtr param =

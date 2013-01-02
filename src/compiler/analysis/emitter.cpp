@@ -4741,17 +4741,17 @@ Label* EmitterVisitor::getContinuationGotoLabel(StatementPtr s) {
     StatementPtr s((*stmts)[i]);
     if (s->is(Statement::KindOfFunctionStatement)) {
       FunctionStatementPtr f(static_pointer_cast<FunctionStatement>(s));
-      assert(f->getFunctionScope()->isGenerator());
+      always_assert(f->getFunctionScope()->isGenerator());
       visit(f);
     } else if (s->is(Statement::KindOfGotoStatement)) {
       GotoStatementPtr g(static_pointer_cast<GotoStatement>(s));
-      assert(label == NULL);
+      always_assert(label == NULL);
       label = &m_gotoLabels[StringData::GetStaticString(g->label())];
     } else {
       not_implemented();
     }
   }
-  assert(label);
+  always_assert(label);
   return label;
 }
 
@@ -4819,7 +4819,7 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
         n = cval.asInt64Val();
         isNonZero = n;
       } else {
-        assert(t == KindOfString);
+        always_assert(t == KindOfString);
         n = m_ue.mergeLitstr(cval.asStrRef().get());
         isNonZero = false; // not used for string switches
       }

@@ -50,7 +50,7 @@ public:
    * to allow it to do any necessary work
    */
   virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
-    assert(0);
+    always_assert(0);
   }
   /**
    * onParseRecur is called by a parent construct (ultimately a class or
@@ -60,7 +60,7 @@ public:
    * is called for the class, and it calls onParseRecur for its children.
    */
   virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope) {
-    assert(0);
+    always_assert(0);
   }
 };
 

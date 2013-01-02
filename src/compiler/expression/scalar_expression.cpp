@@ -476,7 +476,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
     bool constant =
       (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
       (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
-    assert(!constant);
+    always_assert(!constant);
     OutputCPPString(m_value, cg, ar, getScope(), false);
     break;
   }
@@ -492,7 +492,7 @@ void ScalarExpression::outputCPPNamedInteger(CodeGenerator &cg,
   int index = -1;
   int64 val = v.toInt64();
   int intId = ar->checkScalarVarInteger(val, index);
-  assert(index != -1);
+  always_assert(index != -1);
   string name = ar->getScalarVarIntegerName(intId, index);
   cg_printf("NAMVAR(%s, %lldLL)", name.c_str(), val);
 
@@ -523,7 +523,7 @@ void ScalarExpression::outputCPPNamedDouble(CodeGenerator &cg,
   if (finite(dval)) {
     int index = -1;
     int dblId = ar->checkScalarVarDouble(dval, index);
-    assert(index != -1);
+    always_assert(index != -1);
     string name = ar->getScalarVarDoubleName(dblId, index);
     cg_printf("NAMVAR(%s, ", name.c_str());
     ar->outputCPPFiniteDouble(cg, dval);
@@ -581,7 +581,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   case T_NUM_STRING: {
-    assert(!cg.hasScalarVariant());
+    always_assert(!cg.hasScalarVariant());
     const char *s = m_value.c_str();
 
     if ((*s == '0' && m_value.size() == 1) || ('1' <= *s && *s <= '9')) {

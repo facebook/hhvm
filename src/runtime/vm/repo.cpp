@@ -219,8 +219,8 @@ void Repo::begin() {
   }
   if (debug) {
     // Verify start state.
-    assert(m_txDepth == 0);
-    assert(!m_rollback);
+    always_assert(m_txDepth == 0);
+    always_assert(!m_rollback);
     if (true) {
       // Bypass RepoQuery, in order to avoid triggering exceptions.
       int rc = sqlite3_step(m_rollbackStmt.get());
@@ -239,7 +239,7 @@ void Repo::begin() {
       } catch (RepoExc& re) {
         rollbackFailed = true;
       }
-      assert(rollbackFailed);
+      always_assert(rollbackFailed);
     }
   }
   RepoQuery query(m_beginStmt);

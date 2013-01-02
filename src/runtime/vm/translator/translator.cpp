@@ -3084,7 +3084,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       // break the BB on the *previous* instruction. We know that a
       // previous instruction exists, because the KindOfInvalid must
       // have come from somewhere.
-      assert(t.m_instrStream.last);
+      always_assert(t.m_instrStream.last);
       SKTRACE(2, sk, "Consumed unknown input (%s:%d); breaking BB at "
         "predecessor\n", uie.m_file, uie.m_line);
       goto breakBB;

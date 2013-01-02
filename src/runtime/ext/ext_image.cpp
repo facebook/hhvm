@@ -2832,7 +2832,7 @@ static Variant php_imagettftext_common(int mode, int extended,
 #endif
 
 #if !HAVE_GD_STRINGFTEX
-  assert(!extended);
+  always_assert(!extended);
 #endif
 
   if (mode == TTFTEXT_BBOX) {

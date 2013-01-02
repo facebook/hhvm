@@ -426,7 +426,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
                             true));
   f->setBlockScope(pseudoMain);
   FunctionScopePtr &fs = m_functions[pseudoMainName()];
-  assert(!fs);
+  always_assert(!fs);
   fs = pseudoMain;
   m_pseudoMain = pseudoMain;
   return pseudoMain;
@@ -606,7 +606,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const string &str, m_usedLiteralStringsHeader) {
     int index = -1;
     int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
-    assert(index != -1);
+    always_assert(index != -1);
     string lisnam = ar->getLiteralStringName(stringId, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
@@ -626,7 +626,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const int64 &val, m_usedScalarVarIntegersHeader) {
     int index = -1;
     int hash = ar->checkScalarVarInteger(val, index);
-    assert(index != -1);
+    always_assert(index != -1);
     string name = ar->getScalarVarIntegerName(hash, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
@@ -637,7 +637,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const double &val, m_usedScalarVarDoublesHeader) {
     int index = -1;
     int hash = ar->checkScalarVarDouble(val, index);
-    assert(index != -1);
+    always_assert(index != -1);
     string name = ar->getScalarVarDoubleName(hash, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
@@ -648,7 +648,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const string &str, m_usedLitVarStringsHeader) {
     int index = -1;
     int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
-    assert(index != -1);
+    always_assert(index != -1);
     string lisnam = ar->getLitVarStringName(stringId, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
@@ -668,7 +668,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const string &str, m_usedDefaultValueScalarArrays) {
     int index = -1;
     int hash = ar->checkScalarArray(str, index);
-    assert(hash != -1 && index != -1);
+    always_assert(hash != -1 && index != -1);
     string name = ar->getScalarArrayName(hash, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
@@ -679,7 +679,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const string &str, m_usedDefaultValueScalarVarArrays) {
     int index = -1;
     int hash = ar->checkScalarArray(str, index);
-    assert(hash != -1 && index != -1);
+    always_assert(hash != -1 && index != -1);
     string name = ar->getScalarVarArrayName(hash, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
@@ -689,7 +689,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   first = true;
   BOOST_FOREACH(const string &str, m_usedConstsHeader) {
     BlockScopeConstPtr block = ar->findConstantDeclarer(str);
-    assert(block);
+    always_assert(block);
     ConstantTableConstPtr constants = block->getConstants();
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
@@ -787,7 +787,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
     }
     int index = -1;
     int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
-    assert(index != -1);
+    always_assert(index != -1);
     string lisnam = ar->getLiteralStringName(stringId, index);
     if (Option::UseStaticStringProxy) {
       string proxyNam = ar->getLiteralStringName(stringId, index, true);
@@ -809,7 +809,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
     }
     int index = -1;
     int hash = ar->checkScalarArray(str, index);
-    assert(hash != -1 && index != -1);
+    always_assert(hash != -1 && index != -1);
     string name = ar->getScalarArrayName(hash, index);
     cg_printf("extern StaticArray %s;\n", name.c_str());
   }
@@ -824,7 +824,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
       }
       int index = -1;
       int hash = ar->checkScalarVarInteger(val, index);
-      assert(index != -1);
+      always_assert(index != -1);
       string name = ar->getScalarVarIntegerName(hash, index);
       cg_printf("extern const VarNR &%s;\n", name.c_str());
     }
@@ -837,7 +837,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
       }
       int index = -1;
       int hash = ar->checkScalarVarDouble(dval, index);
-      assert(index != -1);
+      always_assert(index != -1);
       string name = ar->getScalarVarDoubleName(hash, index);
       cg_printf("extern const VarNR &%s;\n", name.c_str());
     }
@@ -849,7 +849,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
       }
       int index = -1;
       int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
-      assert(index != -1);
+      always_assert(index != -1);
       string lisnam = ar->getLitVarStringName(stringId, index);
       if (Option::UseStaticStringProxy) {
         string proxyName = ar->getLitVarStringName(stringId, index, true);
@@ -870,7 +870,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
       }
       int index = -1;
       int hash = ar->checkScalarArray(str, index);
-      assert(hash != -1 && index != -1);
+      always_assert(hash != -1 && index != -1);
       string name = ar->getScalarVarArrayName(hash, index);
       cg_printf("extern VarNR %s;\n", name.c_str());
     }

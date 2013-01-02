@@ -526,7 +526,7 @@ Trace* TraceBuilder::genJmpCond(Opcode opc,
       case JmpNSame:
       case JmpNeq: cond = val1 != val2; break;
       default:
-        assert(0);
+        always_assert(0);
     }
   }
   if (canResolve) {

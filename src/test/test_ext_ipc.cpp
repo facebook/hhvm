@@ -65,11 +65,11 @@ bool TestExtIpc::test_message_queue() {
   int pid = fork();
   if (pid == 0) {
     Object q = f_msg_get_queue(token);
-    assert(q.get());
-    assert(f_msg_send(q, 2, "start"));
+    always_assert(q.get());
+    always_assert(f_msg_send(q, 2, "start"));
     Variant type, msg;
-    assert(f_msg_receive(q, 1, ref(type), 100, ref(msg)));
-    assert(f_msg_send(q, 2, msg)); // echo
+    always_assert(f_msg_receive(q, 1, ref(type), 100, ref(msg)));
+    always_assert(f_msg_send(q, 2, msg)); // echo
     _exit(-1);
   }
 
@@ -111,18 +111,18 @@ bool TestExtIpc::test_semaphore() {
   int pid = fork();
   if (pid == 0) {
     Variant ret = f_sem_get(0xDEADBEEF);
-    assert(!same(ret, false));
+    always_assert(!same(ret, false));
     Object sem = ret.toObject();
 
-    assert(f_sem_acquire(sem));
+    always_assert(f_sem_acquire(sem));
 
     // This isn't a sure test, but may be false if f_sem_acquire() didn't work
     time_t then = time(0);
-    assert(then - now > 1);
+    always_assert(then - now > 1);
     (void)then;
     (void)now;
 
-    assert(f_sem_release(sem));
+    always_assert(f_sem_release(sem));
     VERIFY(f_sem_remove(sem));
     _exit(-1);
   }
@@ -152,14 +152,14 @@ bool TestExtIpc::test_shared_memory() {
   int pid = fork();
   if (pid == 0) {
     Variant ret = f_shm_attach(index);
-    assert(!same(ret, false));
+    always_assert(!same(ret, false));
     Object mem = ret.toObject();
 
     ret = f_shm_get_var(index, 1234);
-    assert(same(ret, "test"));
+    always_assert(same(ret, "test"));
 
-    assert(f_shm_remove_var(index, 1234));
-    assert(f_shm_detach(index));
+    always_assert(f_shm_remove_var(index, 1234));
+    always_assert(f_shm_detach(index));
     _exit(-1);
   }
 

@@ -101,9 +101,9 @@ private:
 
   void addEdge(ConstructRawPtr cp_from, ConstructLocation l_from,
                ConstructRawPtr cp_to, ConstructLocation l_to) {
-    assert(cp_from);
-    assert(cp_to);
-    assert(l_from < 2);
+    always_assert(cp_from);
+    always_assert(cp_to);
+    always_assert(l_from < 2);
 
     ControlFlowInfo &from(cfi(cp_from));
     ControlFlowInfo &to(cfi(cp_to));
@@ -117,9 +117,9 @@ private:
 
   void setEdge(ConstructRawPtr cp_from, ConstructLocation l_from,
                ConstructRawPtr cp_to, ConstructLocation l_to) {
-    assert(cp_from);
-    assert(cp_to);
-    assert(l_from < 2);
+    always_assert(cp_from);
+    always_assert(cp_to);
+    always_assert(l_from < 2);
 
     ControlFlowInfo &from(cfi(cp_from));
     from.m_targets[l_from].clear();
@@ -138,7 +138,7 @@ private:
   size_t                depth() const { return m_state.size(); }
   ConstructRawPtr       top(size_t n = 0) {
     size_t ix = m_state.size();
-    assert(ix > n);
+    always_assert(ix > n);
     ix -= n + 1;
     return m_state[ix].cp;
   }
@@ -449,9 +449,9 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
                         kid = l->getNthKid(DoStatement::CondExpr);
                         break;
                       default:
-                        assert(0);
+                        always_assert(0);
                     }
-                    assert(kid);
+                    always_assert(kid);
                     addEdge(s, AfterConstruct, kid, BeforeConstruct);
                   }
                 }
@@ -533,7 +533,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
         }
       }
       ControlBlock *bb = m_ccbpMap[BeforeConstruct][cp];
-      assert(bb);
+      always_assert(bb);
       if (bb != m_cur) {
         if (m_cur) {
           addCFEdge(m_cur, bb);
@@ -544,7 +544,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
         ConstructPtrLocMap &beforeTargets =
           c->m_targets[BeforeConstruct];
         if (beforeTargets.size()) {
-          assert(hb);
+          always_assert(hb);
           addCFEdge(hb, bb);
           ConstructPtrLocMap::iterator it =
             beforeTargets.begin(), end = beforeTargets.end();
@@ -724,7 +724,7 @@ void ControlFlowBuilder::addCFEdge(ControlBlock *b1, ControlBlock *b2) {
 void ControlFlowBuilder::addCFEdge(ControlBlock *b1,
                                    ConstructRawPtr c2, ConstructLocation l2) {
   ControlBlock *b2 = m_ccbpMap[l2][c2];
-  assert(b2);
+  always_assert(b2);
   if (l2 == AfterConstruct) b2 = b2->next();
   addCFEdge(b1, b2);
 }
@@ -747,7 +747,7 @@ int ControlFlowBuilder::after(ConstructRawPtr cp) {
   }
   if (m_pass == 2) {
     ControlBlock *ab = m_ccbpMap[AfterConstruct][cp];
-    assert(ab);
+    always_assert(ab);
     if (ab != m_cur) {
       if (m_cur) {
         addCFEdge(m_cur, ab);

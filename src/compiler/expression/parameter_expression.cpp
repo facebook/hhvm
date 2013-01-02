@@ -135,7 +135,7 @@ TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
   if (!ret) {
     ret = Type::CreateObjectType(m_type);
   }
-  assert(ret);
+  always_assert(ret);
   return ret;
 }
 
@@ -291,7 +291,7 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
   FunctionScopePtr func = getFunctionScope();
   VariableTablePtr variables = func->getVariables();
   Symbol *sym = variables->getSymbol(m_name);
-  assert(sym && sym->isParameter());
+  always_assert(sym && sym->isParameter());
 
   bool inHeader = cg.isFileOrClassHeader();
   cg.setFileOrClassHeader(true);

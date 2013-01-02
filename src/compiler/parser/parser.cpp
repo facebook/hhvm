@@ -244,7 +244,7 @@ void Parser::newScope() {
 }
 
 void Parser::completeScope(BlockScopePtr inner) {
-  assert(inner);
+  always_assert(inner);
   BlockScopePtrVec &sv = m_scopes.back();
   for (int i = 0, n = sv.size(); i < n; i++) {
     BlockScopePtr scope = sv[i];

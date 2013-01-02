@@ -669,7 +669,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
       if (!func->hasImpl() && needAbstractMethodImpl) {
         FunctionScopePtr tmpFunc =
           cls->findFunction(ar, func->getName(), true, true);
-        assert(!tmpFunc || !tmpFunc->hasImpl());
+        always_assert(!tmpFunc || !tmpFunc->hasImpl());
         Compiler::Error(Compiler::MissingAbstractMethodImpl,
                         func->getStmt(), cls->getStmt());
       }
@@ -928,7 +928,7 @@ public:
       {
         Lock ldep(BlockScope::s_depsMutex);
         Lock lstate(BlockScope::s_jobStateMutex);
-        assert(scope->getMark() == BlockScope::MarkReady);
+        always_assert(scope->getMark() == BlockScope::MarkReady);
         if (scope->getNumDepsToWaitFor()) {
           scope->setMark(BlockScope::MarkWaiting);
           return;
@@ -1021,13 +1021,13 @@ public:
                 atomic_inc(AnalysisResult::s_NumReactivateUseKinds);
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 bool ready = visitor->activateScope(pf->first);
-                assert(!ready);
+                always_assert(!ready);
                 m = BlockScope::MarkWaiting;
               }
 
               if (m == BlockScope::MarkWaiting || m == BlockScope::MarkReady) {
                 int nd = pf->first->getNumDepsToWaitFor();
-                assert(nd >= 1);
+                always_assert(nd >= 1);
                 if (!pf->first->decNumDepsToWaitFor() &&
                     m == BlockScope::MarkWaiting) {
                   pf->first->setMark(BlockScope::MarkReady);
@@ -1044,7 +1044,7 @@ public:
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
                 atomic_inc(AnalysisResult::s_NumForceRerunUseKinds);
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
-                assert(pf->first->getNumDepsToWaitFor() == 0);
+                always_assert(pf->first->getNumDepsToWaitFor() == 0);
                 pf->first->setForceRerun(true);
               }
             }
@@ -1062,7 +1062,7 @@ public:
               if (*p.second & GetPhaseInterestMask<When>()) {
                 if (p.first->getMark() == BlockScope::MarkProcessing) {
                   bool ready = visitor->activateScope(BlockScopeRawPtr(scope));
-                  assert(!ready);
+                  always_assert(!ready);
                   break;
                 }
               }
@@ -1347,7 +1347,7 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
         }
       } else {
         StatementPtr rep = this->visitStmtRecur(stmt);
-        assert(!rep);
+        always_assert(!rep);
       }
       updates = scope->getUpdated();
       all_updates |= updates;
@@ -1362,7 +1362,7 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
   do {
     scope->clearUpdated();
     StatementPtr rep = this->visitStmtRecur(stmt);
-    assert(!rep);
+    always_assert(!rep);
     updates = scope->getUpdated();
     all_updates |= updates;
   } while (updates);
@@ -1580,7 +1580,7 @@ int DepthFirstVisitor<Post, OptVisitor>::visit(BlockScopeRawPtr scope) {
 
   if (!done) {
     StatementPtr rep = this->visitStmtRecur(stmt);
-    assert(!rep);
+    always_assert(!rep);
   }
 
   return scope->getUpdated();
@@ -1692,7 +1692,7 @@ int AnalysisResult::registerScalarArray(bool insideScalarArray,
       if (strings[i] == text) break;
     }
     if (i == strings.size()) {
-      assert(!found);
+      always_assert(!found);
       strings.push_back(text);
     }
     index = i;
@@ -1704,14 +1704,14 @@ int AnalysisResult::registerScalarArray(bool insideScalarArray,
 int AnalysisResult::checkScalarArray(const string &text, int &index) {
   Lock lock(m_namedScalarArraysMutex);
 
-  assert(Option::ScalarArrayOptimization && Option::UseNamedScalarArray);
+  always_assert(Option::ScalarArrayOptimization && Option::UseNamedScalarArray);
   int hash = hash_string_cs(text.data(), text.size());
   vector<string> &strings = m_namedScalarArrays[hash];
   unsigned int i = 0;
   for (; i < strings.size(); i++) {
     if (strings[i] == text) break;
   }
-  assert(i < strings.size());
+  always_assert(i < strings.size());
   index = i;
   return hash;
 }
@@ -1720,7 +1720,7 @@ int AnalysisResult::getScalarArrayId(const string &text) {
   Lock lock(m_namedScalarArraysMutex);
 
   std::map<std::string, int>::const_iterator iter = m_scalarArrays.find(text);
-  assert(iter != m_scalarArrays.end());
+  always_assert(iter != m_scalarArrays.end());
   return iter->second;
 }
 
@@ -1805,7 +1805,7 @@ void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
   }
   cg_printf("\n");
   cg.namespaceBegin();
-  assert((sizeof(VarNR) % sizeof(int64) == 0));
+  always_assert((sizeof(VarNR) % sizeof(int64) == 0));
   int multiple = (sizeof(VarNR) / sizeof(int64));
   cg_indentBegin("static const uint64 ivalues[] = {\n");
   for (map<int, vector<string> >::const_iterator it =
@@ -1872,8 +1872,8 @@ void AnalysisResult::outputCPPNamedScalarVarDoubles(const std::string &file) {
   }
   cg_printf("\n");
   cg.namespaceBegin();
-  assert((sizeof(int64) == sizeof(double)));
-  assert((sizeof(VarNR) % sizeof(double) == 0));
+  always_assert((sizeof(int64) == sizeof(double)));
+  always_assert((sizeof(VarNR) % sizeof(double) == 0));
   int multiple = (sizeof(VarNR) / sizeof(double));
   cg_indentBegin("static const uint64 dvalues[] = {\n");
   for (map<int, vector<string> >::const_iterator it =
@@ -1920,7 +1920,7 @@ void AnalysisResult::addInteger(int64 n) {
 int AnalysisResult::checkScalarVarInteger(int64 val, int &index) {
   Lock lock(m_namedScalarVarIntegersMutex);
 
-  assert(Option::UseScalarVariant);
+  always_assert(Option::UseScalarVariant);
   int hash = hash_int64(val);
   vector<string> &integers = m_namedScalarVarIntegers[hash];
   unsigned int i = 0;
@@ -1941,7 +1941,7 @@ string AnalysisResult::getScalarVarIntegerName(int hash, int index) {
 int AnalysisResult::checkScalarVarDouble(double dval, int &index) {
   Lock lock(m_namedScalarVarDoublesMutex);
 
-  assert(Option::UseScalarVariant);
+  always_assert(Option::UseScalarVariant);
   int64 ival = *(int64*)(&dval);
   int hash = hash_int64(ival);
   vector<string> &integers = m_namedScalarVarDoubles[hash];
@@ -3347,7 +3347,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
         cg_printf("(const char *)&%s,\n", varName.c_str());
         break;
       case Type::KindOfObject:
-        assert(system);
+        always_assert(system);
         if (strcmp(name, "STDERR") == 0) {
           cg_printf("(const char *)&BuiltinFiles::GetSTDERR,\n");
         } else if (strcmp(name, "STDIN") == 0) {
@@ -3398,7 +3398,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
       if (ct->isSystem(sym) && !system) continue;
       ClassScopePtr defClass;
       if (!ct->getDeclarationRecur(ar, sym, defClass)) {
-        assert(!defClass);
+        always_assert(!defClass);
         continue;
       }
       constMap[sym] = ct->getSymbol(sym)->getFinalType();
@@ -3831,7 +3831,7 @@ void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
 string AnalysisResult::getHashedName(int64 hash, int index,
                                      const char *prefix,
                                      bool longName /* = false */) {
-  assert(index >= 0);
+  always_assert(index >= 0);
   string name(Option::ScalarPrefix);
   if (Option::SystemGen) name += Option::SysPrefix;
   name += prefix;
@@ -5384,6 +5384,6 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
   cg.namespaceEnd();
   fTable.close();
   outputCPPNamedLiteralStrings(true, litstrFile);
-  assert(m_scalarArrays.size() == 0);
+  always_assert(m_scalarArrays.size() == 0);
 }
 

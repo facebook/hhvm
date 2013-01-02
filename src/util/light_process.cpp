@@ -582,8 +582,8 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
                               const char *cwd, const vector<string> &env) {
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
-  assert(Available());
-  assert(created.size() == desired.size());
+  always_assert(Available());
+  always_assert(created.size() == desired.size());
 
   if (fprintf(g_procs[id].m_fout, "proc_open\n%s\n%s\n", cmd, cwd) <= 0) {
     Logger::Error("Failed to send command proc_open");

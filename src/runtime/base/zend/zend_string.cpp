@@ -2490,7 +2490,7 @@ char *string_metaphone(const char *input, int word_len, long max_phonemes,
 
   /* Empty/null string is meaningless */
   /* Overly paranoid */
-  /* assert(word != NULL && word[0] != '\0'); */
+  /* always_assert(word != NULL && word[0] != '\0'); */
 
   if (word == NULL)
     return NULL;

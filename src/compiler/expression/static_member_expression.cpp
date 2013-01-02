@@ -45,7 +45,7 @@ StaticMemberExpression::StaticMemberExpression
                             T_STRING, s->getName(), true));
 
   } else {
-    assert(exp->is(KindOfDynamicVariable));
+    always_assert(exp->is(KindOfDynamicVariable));
     m_exp = dynamic_pointer_cast<DynamicVariable>(exp)->getSubExpression();
   }
 }

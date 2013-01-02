@@ -60,12 +60,12 @@ FileCache::~FileCache() {
         free(buffer.cdata);
       }
     } else {
-      assert(buffer.data == NULL || buffer.cdata == NULL);
+      always_assert(buffer.data == NULL || buffer.cdata == NULL);
     }
   }
   if (m_fd != -1) {
-    assert(m_addr != NULL);
-    assert(m_size > 0);
+    always_assert(m_addr != NULL);
+    always_assert(m_size > 0);
     munmap(m_addr, m_size);
     close(m_fd);
   }
@@ -279,7 +279,7 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
         if (!read_bytes(f, buffer.data, len + 1)) {
           throw Exception("Bad data in archive %s", filename);
         }
-        assert(buffer.data[len] == '\0');
+        always_assert(buffer.data[len] == '\0');
       } else {
         if (!read_bytes(f, buffer.data, len)) {
           throw Exception("Bad data in archive %s", filename);
@@ -319,7 +319,7 @@ void FileCache::adviseOutMemory() {
 
 void FileCache::loadMmap(const char *filename, short version) {
   ASSERT(filename && *filename);
-  assert(version > 0);
+  always_assert(version > 0);
 
   struct stat sbuf;
   if (stat(filename, &sbuf) == -1) {
@@ -382,7 +382,7 @@ void FileCache::loadMmap(const char *filename, short version) {
       }
       buffer.data = p;
       p += len;
-      assert(*p == '\0');
+      always_assert(*p == '\0');
       p++;
       if (c) {
         buffer.clen = buffer.len;

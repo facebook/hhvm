@@ -80,26 +80,26 @@ BitSetBlock BitSetVec::getBlock(int block) {
 
 BitOps::Bits *BitSetVec::getTempBits(int id) const {
   size_t offset = id * m_rowSize;
-  assert(offset < m_blockSize);
+  always_assert(offset < m_blockSize);
 
   return add(m_bits, offset);
 }
 
 BitOps::Bits *BitSetBlock::getRow(int row) const {
   size_t offset = m_owner->rowOffset(row);
-  assert(offset != (size_t)-1);
+  always_assert(offset != (size_t)-1);
   return BitSetVec::add(m_bits, offset);
 }
 
 void BitSetBlock::setBit(int row, int id, bool v) {
   BitOps::Bits *bits = getRow(row);
-  assert((unsigned)id < m_owner->width());
+  always_assert((unsigned)id < m_owner->width());
   BitOps::set_bit(id, bits, v);
 }
 
 bool BitSetBlock::getBit(int row, int id) const {
   BitOps::Bits *bits = getRow(row);
-  assert((unsigned)id < m_owner->width());
+  always_assert((unsigned)id < m_owner->width());
   return BitOps::get_bit(id, bits);
 }
 

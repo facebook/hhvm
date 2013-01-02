@@ -756,7 +756,7 @@ static void close_server_log_file(int kind) {
   } else if (kind == 2) {
     pclose(Logger::Output);
   } else {
-    assert(!Logger::Output);
+    always_assert(!Logger::Output);
   }
 }
 
@@ -772,7 +772,7 @@ static void set_execution_mode(string mode) {
     RuntimeOption::ExecutionMode = "";
   } else {
     // Undefined mode
-    assert(false);
+    always_assert(false);
   }
 }
 

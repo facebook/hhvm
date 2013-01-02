@@ -626,7 +626,7 @@ void StringUtil::InitLiteralStrings(StaticString literalStrings[],
 }
 
 int StringUtil::InitLiteralStrings(const char *input[], int nls, int nbs) {
-  assert(sizeof(StaticStringProxy) == sizeof(StaticString));
+  always_assert(sizeof(StaticStringProxy) == sizeof(StaticString));
   for (int i = 0; i < nls; i++) {
     StaticString *ss = (StaticString *)input[2 * i];
     const char *str = input[2 * i + 1];
@@ -643,7 +643,7 @@ int StringUtil::InitLiteralStrings(const char *input[], int nls, int nbs) {
 }
 
 int StringUtil::InitLiteralVarStrings(const char *input[], int count) {
-  assert(sizeof(VariantProxy) == sizeof(Variant));
+  always_assert(sizeof(VariantProxy) == sizeof(Variant));
   for (int i = 0; i < count; i++) {
     Variant *v = (Variant *)input[2 * i];
     StaticString *s = (StaticString *)input[2 * i + 1];

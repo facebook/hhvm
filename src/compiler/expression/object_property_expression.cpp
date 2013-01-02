@@ -266,7 +266,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
         parent = cls;
       }
       m_symOwner = parent;
-      assert(m_propSym->isPresent());
+      always_assert(m_propSym->isPresent());
       m_propSymValid =
         (!m_propSym->isPrivate() || getOriginalClass() == parent) &&
         !m_propSym->isStatic();
@@ -282,7 +282,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   TypePtr ret;
   if (m_propSymValid && (!cls->derivesFromRedeclaring() ||
                          m_propSym->isPrivate())) {
-    assert(m_symOwner);
+    always_assert(m_symOwner);
     TypePtr t(m_propSym->getType());
     if (t && t->is(Type::KindOfVariant)) {
       // only check property if we could possibly do some work
@@ -297,7 +297,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
       GET_LOCK(m_symOwner);
       ret = m_symOwner->checkProperty(getScope(), m_propSym, type, coerce, ar);
     }
-    assert(m_object->getActualType() &&
+    always_assert(m_object->getActualType() &&
            m_object->getActualType()->isSpecificObject());
     m_valid = true;
     return ret;
@@ -415,7 +415,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       }
     } else if (m_context & (LValue | RefValue | DeepReference | UnsetContext)) {
       if (m_context & UnsetContext) {
-        assert(!(m_context & LValue)); // handled by doUnset
+        always_assert(!(m_context & LValue)); // handled by doUnset
         func += "unsetLval";
       } else {
         func += "lval";
@@ -441,7 +441,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                        DeepOprLValue | DeepAssignmentLHS |
                                        AssignmentLHS) && !doUnset;
     cg_printf(", LIKELY(obj_tmp != 0) %s ", write_context ? "||" : "?");
-    assert(m_property->is(KindOfScalarExpression));
+    always_assert(m_property->is(KindOfScalarExpression));
     ScalarExpressionPtr name =
       static_pointer_cast<ScalarExpression>(m_property);
     if (doExist || doUnset) {
@@ -479,7 +479,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     if (doExist) cg_printf(", %s", doExist > 0 ? "false" : "true");
     cg_printf(")");
   } else if (m_valid) {
-    assert(m_object->getActualType() &&
+    always_assert(m_object->getActualType() &&
            m_object->getActualType()->isSpecificObject());
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);

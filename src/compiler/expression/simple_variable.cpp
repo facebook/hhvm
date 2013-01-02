@@ -84,7 +84,7 @@ void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
 
 bool SimpleVariable::couldBeAliased() const {
   if (m_globals || m_superGlobal) return true;
-  assert(m_sym);
+  always_assert(m_sym);
   if (m_sym->isGlobal() || m_sym->isStatic()) return true;
   if (getScope()->inPseudoMain() && !m_sym->isHidden()) return true;
   if (isReferencedValid()) return isReferenced();
@@ -96,8 +96,8 @@ bool SimpleVariable::isHidden() const {
 }
 
 void SimpleVariable::coalesce(SimpleVariablePtr other) {
-  assert(m_sym);
-  assert(other->m_sym);
+  always_assert(m_sym);
+  always_assert(other->m_sym);
   if (!m_originalSym) m_originalSym = m_sym;
   m_sym->clearUsed();
   m_sym->clearNeeded();
@@ -121,7 +121,7 @@ string SimpleVariable::getNamePrefix() const {
 */
 bool SimpleVariable::canKill(bool isref) const {
   if (m_globals || m_superGlobal) return false;
-  assert(m_sym);
+  always_assert(m_sym);
   if (m_sym->isGlobal() || m_sym->isStatic()) {
     return isref && !getScope()->inPseudoMain();
   }

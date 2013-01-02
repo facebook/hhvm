@@ -93,7 +93,7 @@ void LiveDict::updateParams() {
   BitOps::set(width, dieout, 0);
   for (int i = size(); i--; ) {
     if (ExpressionPtr e = get(i)) {
-      assert(e->is(Expression::KindOfSimpleVariable));
+      always_assert(e->is(Expression::KindOfSimpleVariable));
       Symbol *sym = static_pointer_cast<SimpleVariable>(e)->getSymbol();
       if (sym) {
         if (sym->isParameter() || sym->isClosureVar() || e->isThis()) {
@@ -121,7 +121,7 @@ void LiveDict::beginBlock(ControlBlock *b) {
   m_refs.reset();
   for (int i = size(); i--; ) {
     if (ExpressionPtr e = get(i)) {
-      assert(e->is(Expression::KindOfSimpleVariable));
+      always_assert(e->is(Expression::KindOfSimpleVariable));
       SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
       if (m_am.hasWildRefs() || sv->couldBeAliased()) {
         sv->setCanonPtr(m_refs);
@@ -352,7 +352,7 @@ struct Colorizer {
     if (ix) {
       std::pair<std::set<int>::iterator, bool> ret =
         ni.conflicts.insert(ix-1);
-      assert(ret.second);
+      always_assert(ret.second);
       ni.size++;
     }
   }
@@ -405,7 +405,7 @@ struct Colorizer {
         NodeInfo &node = nodes[sorted[i]];
         int bucket = node.size;
         for (int j = 0; j <= bucket; j++) {
-          assert(buckets[j] == i);
+          always_assert(buckets[j] == i);
           buckets[j]++;
         }
         for (std::set<int>::iterator it = node.conflicts.begin(),
@@ -416,7 +416,7 @@ struct Colorizer {
             NodeInfo &n = nodes[ix];
             int &bi = buckets[n.size];
             if (si != bi) {
-              assert(si > bi);
+              always_assert(si > bi);
               sorted[si] = sorted[bi];
               sorted[bi] = ix;
               isorted[sorted[si]] = si;
@@ -441,7 +441,7 @@ struct Colorizer {
       int j = 0;
       while (BitOps::get_bit(j, tmp)) {
         j++;
-        assert(j < size);
+        always_assert(j < size);
       }
       n.color = j;
     }
@@ -596,7 +596,7 @@ public:
       }
       break;
     }
-    assert(sz >= 0);
+    always_assert(sz >= 0);
   }
 
   void execute() {
@@ -607,20 +607,20 @@ public:
       if (!re.second) break;
       const AstWalkerState &s = re.first[re.first.size() - 1];
       StatementPtr sp(dynamic_pointer_cast<Statement>(s.cp));
-      assert(sp);
+      always_assert(sp);
       StatementListPtr sl;
       int ix;
       if (sp->is(Statement::KindOfStatementList)) {
         sl = static_pointer_cast<StatementList>(sp);
         ix = (s.index - 1) / 2;
       } else {
-        assert(sp->is(Statement::KindOfBlockStatement));
+        always_assert(sp->is(Statement::KindOfBlockStatement));
         sl = static_pointer_cast<BlockStatement>(sp)->getStmts();
         if (!sl) continue;
         ix = 0;
       }
       ExpressionPtr e = m_dict.get(re.second);
-      assert(e && e->is(Expression::KindOfSimpleVariable));
+      always_assert(e && e->is(Expression::KindOfSimpleVariable));
       SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
       Symbol *sym = sv->getSymbol();
       bool inGen = sv->getFunctionScope()->isGenerator();

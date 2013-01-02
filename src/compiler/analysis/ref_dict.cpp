@@ -93,7 +93,7 @@ void RefDict::beginBlock(ControlBlock *b) {
   m_obj        = b->getRow(DataFlow::Object);
   m_noobj      = b->getRow(DataFlow::NotObject);
 
-  assert(
+  always_assert(
     m_am.graph()->rowExists(DataFlow::Referenced) &&
     m_am.graph()->rowExists(DataFlow::Killed) &&
     m_am.graph()->rowExists(DataFlow::PRefIn) &&
@@ -121,8 +121,8 @@ void RefDict::updateParams() {
 
   for (int i = size(); i--; ) {
     if (ExpressionPtr e = get(i)) {
-      assert(e->is(Expression::KindOfSimpleVariable));
-      assert(((unsigned int)i) == e->getCanonID());
+      always_assert(e->is(Expression::KindOfSimpleVariable));
+      always_assert(((unsigned int)i) == e->getCanonID());
       Symbol *sym = static_pointer_cast<SimpleVariable>(e)->getSymbol();
       if (sym && (sym->isParameter() || sym->isClosureVar())) {
         TypePtr paramType;
@@ -159,7 +159,7 @@ void RefDict::updateParams() {
 }
 
 void RefDict::updateAccess(ExpressionPtr e) {
-  assert(!e->getScope()->inPseudoMain());
+  always_assert(!e->getScope()->inPseudoMain());
   
   int eid     = e->getCanonID();
   int context = e->getContext();
@@ -339,7 +339,7 @@ void RefDict::updateAccess(ExpressionPtr e) {
 
     if (context & Expression::LValue &&
         context & Expression::UnsetContext) {
-      assert(!isRefd);
+      always_assert(!isRefd);
       // unset($x);
       BitOps::set_bit(eid, m_obj, false);
       BitOps::set_bit(eid, m_noobj, true);
@@ -360,8 +360,8 @@ void RefDict::updateAccess(ExpressionPtr e) {
     // containing an object (in the bit vector)
     for (int i = size(); i--; ) {
       if (ExpressionPtr e = get(i)) {
-        assert(e->is(Expression::KindOfSimpleVariable));
-        assert(((unsigned int)i) == e->getCanonID());
+        always_assert(e->is(Expression::KindOfSimpleVariable));
+        always_assert(((unsigned int)i) == e->getCanonID());
         if (BitOps::get_bit(i, m_referenced)) {
           BitOps::set_bit(i, m_obj, true);
           BitOps::set_bit(i, m_noobj, false);
@@ -380,13 +380,13 @@ int RefDictWalker::after(ConstructRawPtr cp) {
           s->setReferenced();
         }
         s->setReferencedValid();
-        assert(s->isReferencedValid());
+        always_assert(s->isReferencedValid());
       } else {
         if (s->isAvailable() && m_block->getBit(DataFlow::PObjIn, id)) {
           s->setNeeded();
         }
         s->setNeededValid();
-        assert(s->isNeededValid());
+        always_assert(s->isNeededValid());
       }
     }
   }

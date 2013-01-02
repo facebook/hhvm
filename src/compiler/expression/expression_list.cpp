@@ -419,7 +419,7 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
         if (isGlobal < 0) {
           isGlobal = global;
         } else {
-          assert(isGlobal == global);
+          always_assert(isGlobal == global);
         }
         if (isGlobal && e->isScalar()) {
           removeElement(i);
@@ -675,10 +675,10 @@ void ExpressionList::outputCPPUniqLitKeyArrayInit(
   if (arrayElements) ASSERT(m_arrayElements && !m_collectionType);
   unsigned int n =  m_exps.size();
   cg_printf("array_createv%c(%lld, ", litstrKeys ? 's' : 'i', num);
-  assert(n - start == num);
+  always_assert(n - start == num);
   for (unsigned int i = start; i < n; i++) {
     ExpressionPtr exp = m_exps[i];
-    assert(exp);
+    always_assert(exp);
     ExpressionPtr name;
     ExpressionPtr value = exp;
     if (arrayElements) {
@@ -688,14 +688,14 @@ void ExpressionList::outputCPPUniqLitKeyArrayInit(
       value = ap->getValue();
     }
     if (name) {
-      assert(litstrKeys);
+      always_assert(litstrKeys);
       cg_printf("toSPOD(");
       name->outputCPP(cg, ar);
       cg_printf("), ");
     }
     cg_printf("toVPOD(");
     if (value->isScalar()) {
-      assert(!cg.hasScalarVariant());
+      always_assert(!cg.hasScalarVariant());
       cg.setScalarVariant();
       if (!Option::UseScalarVariant) cg_printf("VarNR(");
       value->outputCPP(cg, ar);

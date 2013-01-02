@@ -206,7 +206,7 @@ void CodeGenerator::printSeparator() {
 }
 
 void CodeGenerator::namespaceBegin() {
-  assert(!m_inNamespace);
+  always_assert(!m_inNamespace);
   m_inNamespace = true;
   printf("\n");
   printf("namespace HPHP {\n");
@@ -215,7 +215,7 @@ void CodeGenerator::namespaceBegin() {
 }
 
 void CodeGenerator::namespaceEnd() {
-  assert(m_inNamespace);
+  always_assert(m_inNamespace);
   m_inNamespace = false;
   printf("\n");
   printSeparator();
@@ -225,7 +225,7 @@ void CodeGenerator::namespaceEnd() {
 std::string CodeGenerator::getFormattedName(const std::string &file) {
   char *fn = strdup(file.c_str());
   int len = strlen(fn);
-  assert(len == (int)file.size());
+  always_assert(len == (int)file.size());
   for (int i = 0; i < len; i++) {
     if (!isalnum(fn[i])) fn[i] = '_';
   }
@@ -555,7 +555,7 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
 int CodeGenerator::checkLiteralString(const std::string &str, int &index,
                                       AnalysisResultPtr ar, BlockScopePtr bs,
                                       bool scalarVariant /* = false */) {
-  assert(getContext() != CodeGenerator::CppConstantsDecl &&
+  always_assert(getContext() != CodeGenerator::CppConstantsDecl &&
          getContext() != CodeGenerator::CppClassConstantsImpl);
   int stringId = ar->getLiteralStringId(str, index);
   if (m_literalScope) {
@@ -588,7 +588,7 @@ string CodeGenerator::printNamedString(const string &str,
   int index = -1;
   bool scalarVariant = !print;
   int stringId = checkLiteralString(str, index, ar, bs, scalarVariant);
-  assert(index >= 0);
+  always_assert(index >= 0);
   string lisnam = ar->getLiteralStringName(stringId, index);
   if (print) {
     printf("NAMSTR(%s, \"%s\")", lisnam.c_str(), escaped.c_str());

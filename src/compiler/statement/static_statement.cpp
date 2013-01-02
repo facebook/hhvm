@@ -67,7 +67,7 @@ void StaticStatement::analyzeProgram(AnalysisResultPtr ar) {
                                     false));
         (*m_exp)[i] = exp;
       }
-      assert(exp->is(Expression::KindOfAssignmentExpression));
+      always_assert(exp->is(Expression::KindOfAssignmentExpression));
       AssignmentExpressionPtr assignment_exp =
         dynamic_pointer_cast<AssignmentExpression>(exp);
       variable = assignment_exp->getVariable();
@@ -226,7 +226,7 @@ void StaticStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         dynamic_pointer_cast<AssignmentExpression>(exp);
       ExpressionPtr variable = assignment_exp->getVariable();
       SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-      assert(var->hasContext(Expression::Declaration));
+      always_assert(var->hasContext(Expression::Declaration));
       const std::string &name = var->getName();
 
       if (variables->needLocalCopy(name)) {

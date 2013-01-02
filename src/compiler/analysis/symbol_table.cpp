@@ -237,7 +237,7 @@ void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
 
 bool Symbol::checkDefined() {
   if (isSystem()) return true;
-  assert(m_flags.m_declaration_set);
+  always_assert(m_flags.m_declaration_set);
   if (!m_declaration) return false;
   if (!m_declaration.unique()) return true;
   if (!m_flags.m_replaced) {

@@ -80,7 +80,7 @@ void ImmStack::pushLitstr(Id value) {
 }
 
 ImmStack::StackItem &ImmStack::get(int above) {
-  assert(above >= 0 && (size_t)above < m_stack.size());
+  always_assert(above >= 0 && (size_t)above < m_stack.size());
 
   return m_stack[m_stack.size() - above - 1];
 }

@@ -83,7 +83,7 @@ StackTraceBase::StackTraceBase() {
 }
 
 StackTrace::StackTrace(const StackTrace &bt) {
-  assert(this != &bt);
+  ASSERT(this != &bt);
 
   m_bt_pointers = bt.m_bt_pointers;
   m_bt = bt.m_bt;
@@ -508,7 +508,7 @@ extern "C" {
 }
 
 std::string StackTrace::Demangle(const char *mangled) {
-  assert(mangled);
+  ASSERT(mangled);
   if (!mangled || !*mangled) {
     return "";
   }
@@ -528,7 +528,7 @@ std::string StackTrace::Demangle(const char *mangled) {
 }
 
 void StackTraceNoHeap::Demangle(int fd, const char *mangled) {
-  assert(mangled);
+  ASSERT(mangled);
   if (!mangled || !*mangled) {
     dprintf(fd, "??");
     return ;

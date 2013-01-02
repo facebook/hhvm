@@ -209,7 +209,7 @@ inline unsigned buildBitmask(T c, Args... args) {
   }                                                                     \
   unsigned idx = buildBitmask(__VA_ARGS__);                             \
   OpFunc opFunc = optab[idx];                                           \
-  assert(opFunc);
+  always_assert(opFunc);
 
 // The getKeyType family of functions determine the KeyType to be used as a
 // template argument to helper functions. S, IS, or I at the end of the

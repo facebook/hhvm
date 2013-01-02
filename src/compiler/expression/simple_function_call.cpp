@@ -407,7 +407,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         vector<string> strs;
         for (int i = 0; i < m_params->getCount(); i++) {
           ExpressionPtr e = (*m_params)[i];
-          assert(e->isLiteralString());
+          always_assert(e->isLiteralString());
           string name = e->getLiteralString();
 
           // no need to record duplicate names
@@ -560,7 +560,7 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
     string varName = name->getIdentifier();
     if (varName.empty()) return false;
     if (ar->isSystemConstant(varName)) {
-      assert(!m_extra);
+      always_assert(!m_extra);
       return true;
     }
     ExpressionPtr value = (*m_params)[1];
@@ -647,7 +647,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
             for (i = j = k = 0; i < n; i++) {
               ArrayPairExpressionPtr ap(
                 dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]));
-              assert(ap);
+              always_assert(ap);
               String name;
               Variant voff;
               if (!ap->getName()) {
@@ -808,7 +808,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             if (!block) break;
             constants = block->getConstants();
             const Symbol *sym = constants->getSymbol(symbol);
-            assert(sym);
+            always_assert(sym);
             m_extra = (void *)sym;
             Lock lock(BlockScope::s_constMutex);
             if (!sym->isDynamic()) {
@@ -1067,7 +1067,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                 ASSERT(!sym || !sym->declarationSet());
                 constants->add(varName, varType, value, ar, self);
                 sym = constants->getSymbol(varName);
-                assert(sym);
+                always_assert(sym);
                 m_extra = (void *)sym;
               } else {
                 constants->setType(ar, varName, varType, true);
@@ -1076,7 +1076,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
             // in case the old 'value' has been optimized
             constants->setValue(ar, varName, value);
           } else {
-            assert(!newlyDeclared);
+            always_assert(!newlyDeclared);
           }
           m_valid = true;
           return checkTypesImpl(ar, type, Type::Boolean, coerce);
@@ -1140,7 +1140,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       if (func && func->isRedeclaring()) {
         FunctionScope::FunctionInfoPtr info =
           FunctionScope::GetFunctionInfo(m_name);
-        assert(info);
+        always_assert(info);
         for (int i = m_params->getCount(); i--; ) {
           if (!Option::WholeProgram || info->isRefParam(i)) {
             m_params->markParam(i, canInvokeFewArgs());
@@ -1333,7 +1333,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("ArrayInit compact%d(%d);\n",
               m_ciTemp, m_params->getCount() / 2);
     for (int i = 0; i < m_params->getCount(); i += 2) {
-      assert((*m_params)[i]->isLiteralString());
+      always_assert((*m_params)[i]->isLiteralString());
       string p = (*m_params)[i]->getLiteralString();
       ExpressionPtr e = (*m_params)[i + 1];
       if (e->is(KindOfSimpleVariable)
@@ -1617,7 +1617,7 @@ string SimpleFunctionCall::getThisString(bool withArrow) {
   if (m_localThis.empty() || getOriginalClass() == getClassScope()) {
     return withArrow ? "" : "this";
   }
-  assert(!m_localThis.empty());
+  always_assert(!m_localThis.empty());
   if (withArrow) return m_localThis + "->";
   return m_localThis;
 }
@@ -1707,7 +1707,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
 
   if (m_valid && m_ciTemp < 0 && !m_arrayParams) {
     if (!m_className.empty()) {
-      assert(cls);
+      always_assert(cls);
       if (!m_funcScope->isStatic()) {
         if (m_localThis.empty() && getOriginalClass()->isRedeclaring() &&
             getOriginalClass() != getClassScope()) {
@@ -1771,7 +1771,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     bool outputExtraArgs = true;
     if (!m_class && m_className.empty()) {
       if (m_valid) {
-        assert(m_arrayParams && m_ciTemp < 0);
+        always_assert(m_arrayParams && m_ciTemp < 0);
         if (getClassScope() && m_funcScope->isUserFunction()) {
           cg_printf("HPHP::");
         }
@@ -1943,7 +1943,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           if (value->isScalar() &&
               value->getScalarValue(scalarValue)) {
             // If this isn't true, m_dynamicConstant should have been true
-            assert(scalarValue.isAllowedAsConstantValue());
+            always_assert(scalarValue.isAllowedAsConstantValue());
           }
           if (needAssignment) {
             cg_printf("%s%s = ", Option::ConstantPrefix, varName.c_str());

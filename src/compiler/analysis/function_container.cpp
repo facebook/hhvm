@@ -42,7 +42,7 @@ void FunctionContainer::countReturnTypes(
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     FunctionScopePtr f = iter->second;
     if (f->isLocalRedeclaring()) {
-      assert(redec);
+      always_assert(redec);
       BOOST_FOREACH(f, redec->find(iter->first)->second) {
         TypePtr type = f->getReturnType();
         if (type) {
@@ -375,7 +375,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       ASSERT(iterFuncs != functions->end());
       // We have assumptions that function names do not contain ".."
       // (e.g., call_user_func0 ~ call_user_func6)
-      assert(!strstr(name, ".."));
+      always_assert(!strstr(name, ".."));
       FunctionScopePtr func = iterFuncs->second;
       cg_printf(" {" STRHASH_FMT ",%d,%d,\"%s\",",
                 hash_string_i(name),
@@ -383,7 +383,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
                 CodeGenerator::EscapeLabel(name).c_str());
 
       if (func->isRedeclaring()) {
-        assert(!system);
+        always_assert(!system);
         string lname(CodeGenerator::FormatLabel(name));
         cg_printf("(const void *)(offsetof(GlobalVariables, GCI(%s)))",
                   lname.c_str());

@@ -1567,10 +1567,10 @@ Address CodeGenerator::emitCheckStack(CodeGenerator::Asm& as,
 
 void checkCell(Cell* base, uint32 index) {
   TypedValue* tv = (TypedValue*)(base + index);
-  assert(tvIsPlausible(tv));
+  always_assert(tvIsPlausible(tv));
   DataType t = tv->m_type;
   if (IS_REFCOUNTED_TYPE(t)) {
-    assert(tv->m_data.pstr->getCount() > 0);
+    always_assert(tv->m_data.pstr->getCount() > 0);
   }
 }
 

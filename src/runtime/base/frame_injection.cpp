@@ -214,7 +214,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   }
   int remaining = remainingFrames.size();
   int omitted = remaining - half;
-  assert(omitted >= 0);
+  always_assert(omitted >= 0);
   if (omitted > 0) {
     std::string tmp("(...) ");
     tmp += boost::lexical_cast<std::string>(omitted) +

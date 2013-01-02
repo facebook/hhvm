@@ -156,7 +156,7 @@ void EncapsListExpression::outputCPPImpl(CodeGenerator &cg,
 
   if (m_exps) {
     int n = m_exps->getCount();
-    assert(n > 0);
+    always_assert(n > 0);
     if (n == 1) {
       ExpressionPtr exp = (*m_exps)[0];
       outputListElement(exp, cg, ar);

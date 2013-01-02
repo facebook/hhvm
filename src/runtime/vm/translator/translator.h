@@ -915,7 +915,7 @@ public:
   const TransRec* getTransRec(TransID transId) const {
     if (!isTransDBEnabled()) return NULL;
 
-    assert(transId < m_translations.size());
+    always_assert(transId < m_translations.size());
     return &m_translations[transId];
   }
 

@@ -1306,7 +1306,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         cg_printf("concat");
         break;
       }
-      assert(!hasVoid);
+      always_assert(!hasVoid);
       if (num <= MAX_CONCAT_ARGS) {
         if (num == 2) {
           cg_printf("concat(");

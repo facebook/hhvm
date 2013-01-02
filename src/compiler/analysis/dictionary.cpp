@@ -66,7 +66,7 @@ void Dictionary::record(ExpressionPtr e) {
 
 void Dictionary::beginBlock(ControlBlock *b) {
   ControlFlowGraph *g = m_am.graph();
-  assert(g);
+  always_assert(g);
 
   m_width = g->bitWidth();
   m_altered = b->getRow(DataFlow::Altered);

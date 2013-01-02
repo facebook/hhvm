@@ -170,7 +170,7 @@ public:
       BlockScopeRawPtr scope = *it;
       if (!first) {
         if (scope->getMark() != BlockScope::MarkWaiting) {
-          assert(scope->getMark() == BlockScope::MarkProcessed);
+          always_assert(scope->getMark() == BlockScope::MarkProcessed);
           continue;
         }
       } else {

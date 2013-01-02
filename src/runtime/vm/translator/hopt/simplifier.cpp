@@ -750,7 +750,7 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
     /* Optimize comparison between int and const bool */                      \
     if (src1->getType() == Type::Int && src2->isConst()) {                    \
       /* Based on the const bool optimization (above) NAME should be OpEq */  \
-      assert(NAME == OpEq);                                                   \
+      always_assert(NAME == OpEq);                                                   \
                                                                               \
       if (src2->getConstValAsBool()) {                                        \
         return m_tb->genCmp(OpNeq, src1, m_tb->genDefConst<int64>(0));        \

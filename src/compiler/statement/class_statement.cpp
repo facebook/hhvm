@@ -440,7 +440,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         bool redec = classScope->isRedeclaring();
 
         if (!parCls && !m_parent.empty()) {
-          assert(dyn);
+          always_assert(dyn);
         }
 
         if (!classScope->derivesFromRedeclaring()) {

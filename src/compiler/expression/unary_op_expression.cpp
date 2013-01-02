@@ -82,7 +82,7 @@ inline void UnaryOpExpression::ctorInit() {
 }
 
 void UnaryOpExpression::setDefinedScope(BlockScopeRawPtr scope) {
-  assert(m_op == T_CLASS || m_op == T_FUNCTION);
+  always_assert(m_op == T_CLASS || m_op == T_FUNCTION);
   m_definedScope = scope;
 }
 

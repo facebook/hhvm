@@ -69,7 +69,7 @@ static BlockScopeRawPtr originalScope(StaticClassName *scn) {
 }
 
 void StaticClassName::resolveStatic(const string &name) {
-  assert(isStatic());
+  always_assert(isStatic());
   m_static = m_self = m_parent = false;
   m_present = false;
   m_class.reset();

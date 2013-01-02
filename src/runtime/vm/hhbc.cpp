@@ -51,7 +51,7 @@ int numImmediates(Opcode opcode) {
 ArgType immType(const Opcode opcode, int idx) {
   ASSERT(isValidOpcode(opcode));
   ASSERT(idx >= 0 && idx < numImmediates(opcode));
-  assert(idx < 4); // No opcodes have more than four immediates
+  always_assert(idx < 4); // No opcodes have more than four immediates
   static const int8_t arg0Types[] = {
 #define NA -1,
 #define ONE(a) a,
@@ -119,7 +119,7 @@ ArgType immType(const Opcode opcode, int idx) {
 
 int immSize(const Opcode* opcode, int idx) {
   ASSERT(idx >= 0 && idx < numImmediates(*opcode));
-  assert(idx < 4); // No opcodes have more than four immediates
+  always_assert(idx < 4); // No opcodes have more than four immediates
   static const int8_t argTypeToSizes[] = {
 #define ARGTYPE(nm, type) sizeof(type),
 #define ARGTYPEVEC(nm, type) 0,
@@ -186,14 +186,14 @@ ArgUnion getImm(const Opcode* opcode, int idx) {
     // Advance over this immediate.
     p += immSize(opcode, cursor);
   }
-  assert(cursor == idx);
+  always_assert(cursor == idx);
   ArgType type = immType(*opcode, idx);
   if (type == IVA || type == HA || type == IA) {
     retval.u_IVA = decodeVariableSizeImm(&p);
   } else if (!immIsVector(*opcode, cursor)) {
     memcpy(&retval.bytes, p, immSize(opcode, idx));
   }
-  assert(numImmediates(*opcode) > idx);
+  always_assert(numImmediates(*opcode) > idx);
   return retval;
 }
 

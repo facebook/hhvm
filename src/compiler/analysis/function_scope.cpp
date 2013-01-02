@@ -1325,7 +1325,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
     if (i > 0) cg_printf(extra && !callUserFuncFewArgs ? "." : ", ");
     if (!extra && (i == iMax || extraArg < 0)) {
       if (extraArgArrayId != -1) {
-        assert(extraArgArrayHash != -1 && extraArgArrayIndex != -1);
+        always_assert(extraArgArrayHash != -1 && extraArgArrayIndex != -1);
         ar->outputCPPScalarArrayId(cg, extraArgArrayId, extraArgArrayHash,
                                    extraArgArrayIndex);
         break;
@@ -1336,7 +1336,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
         if (Option::GenArrayCreate &&
             cg.getOutput() != CodeGenerator::SystemCPP) {
           if (!params->hasNonArrayCreateValue(false, i)) {
-            assert(!callUserFuncFewArgs);
+            always_assert(!callUserFuncFewArgs);
             if (ar->m_arrayIntegerKeyMaxSize < paramCount - i) {
               ar->m_arrayIntegerKeyMaxSize  = paramCount - i;
             }
@@ -1588,7 +1588,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         Variant tmp;
         MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
         ExpressionListPtr params = m->getParams();
-        assert(params && params->getCount() > i);
+        always_assert(params && params->getCount() > i);
         ParameterExpressionPtr p(
           dynamic_pointer_cast<ParameterExpression>((*params)[i]));
         ExpressionPtr defVal = p->defaultValue();
@@ -1622,7 +1622,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         } else {
           MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
           ExpressionListPtr params = m->getParams();
-          assert(params && params->getCount() > i);
+          always_assert(params && params->getCount() > i);
           ParameterExpressionPtr p(
             dynamic_pointer_cast<ParameterExpression>((*params)[i]));
 
@@ -1980,10 +1980,10 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       dynamic_pointer_cast<MethodStatement>(getStmt());
     if (m) {
       ExpressionListPtr params = m->getParams();
-      assert(i < params->getCount());
+      always_assert(i < params->getCount());
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-      assert(param);
+      always_assert(param);
       cg_printf("\"%s\", ", param->hasTypeHint() ?
                             param->getOriginalTypeHint().c_str() : "");
       if (attribute & ClassInfo::IsSystem) {
@@ -2559,7 +2559,7 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
         cg_printf("return ");
       }
 
-      assert(!isStatic());
+      always_assert(!isStatic());
       cg_printf("%sinvoke(\"%s\", params, -1);\n",
                 Option::ObjectPrefix, m_name.c_str());
     }

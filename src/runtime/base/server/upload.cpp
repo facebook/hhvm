@@ -213,12 +213,12 @@ typedef struct {
 typedef std::list<std::pair<std::string, std::string> > header_list;
 
 static int read_post(multipart_buffer *self, char *buf, int bytes_to_read) {
-  assert(bytes_to_read > 0);
-  assert(self->post_data);
-  assert(self->cursor >= self->post_data);
+  always_assert(bytes_to_read > 0);
+  always_assert(self->post_data);
+  always_assert(self->cursor >= self->post_data);
   int bytes_remaining = (self->post_size - self->throw_size) -
                         (self->cursor - self->post_data);
-  assert(bytes_remaining >= 0);
+  always_assert(bytes_remaining >= 0);
   if (bytes_to_read <= bytes_remaining) {
     memcpy(buf, self->cursor, bytes_to_read);
     self->cursor += bytes_to_read;
@@ -228,7 +228,7 @@ static int read_post(multipart_buffer *self, char *buf, int bytes_to_read) {
   int bytes_read = bytes_remaining;
   memcpy(buf, self->cursor, bytes_remaining);
   bytes_to_read -= bytes_remaining;
-  assert(self->cursor = (char *)self->post_data +
+  always_assert(self->cursor = (char *)self->post_data +
                         (self->post_size - self->throw_size));
   while (bytes_to_read > 0 && self->transport->hasMorePostData()) {
     int extra_byte_read = 0;
@@ -276,8 +276,8 @@ static int fill_buffer(multipart_buffer *self) {
 
   /* calculate the free space in the buffer */
   bytes_to_read = self->bufsize - self->bytes_in_buffer;
-  assert(self->bufsize > 0);
-  assert(self->bytes_in_buffer >= 0);
+  always_assert(self->bufsize > 0);
+  always_assert(self->bytes_in_buffer >= 0);
   /* read the required number of bytes */
   while (bytes_to_read > 0) {
 
@@ -287,7 +287,7 @@ static int fill_buffer(multipart_buffer *self) {
 
     /* update the buffer length */
     if (actual_read > 0) {
-      assert(bytes_to_read >= actual_read);
+      always_assert(bytes_to_read >= actual_read);
       self->bytes_in_buffer += actual_read;
       self->read_post_bytes += actual_read;
       total_read += actual_read;

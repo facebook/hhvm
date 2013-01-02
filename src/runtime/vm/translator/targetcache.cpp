@@ -246,7 +246,7 @@ static Handle allocLocked(bool persistent, int numBytes, int align) {
   frontier &= ~(align - 1);
   frontier += numBytes;
 
-  assert(frontier < (persistent ?
+  always_assert(frontier < (persistent ?
                      RuntimeOption::EvalJitTargetCacheSize :
                      s_persistent_start));
 
@@ -313,7 +313,7 @@ void initPersistentCache() {
   if (s_tc_fd) return;
   char tmpName[] = "/tmp/tcXXXXXX";
   s_tc_fd = mkstemp(tmpName);
-  assert(s_tc_fd != -1);
+  always_assert(s_tc_fd != -1);
   unlink(tmpName);
   s_persistent_start = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
   s_persistent_start -= s_persistent_start & (4 * 1024 - 1);
@@ -329,7 +329,7 @@ void threadInit() {
 
   tl_targetCaches = mmap(NULL, RuntimeOption::EvalJitTargetCacheSize,
                          PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-  assert(tl_targetCaches != MAP_FAILED);
+  always_assert(tl_targetCaches != MAP_FAILED);
   hintHuge(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
 
   void *shared_base = (char*)tl_targetCaches + s_persistent_start;
@@ -341,7 +341,7 @@ void threadInit() {
   void *mem = mmap(shared_base,
                    RuntimeOption::EvalJitTargetCacheSize - s_persistent_start,
                    PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, s_tc_fd, 0);
-  assert(mem == shared_base);
+  always_assert(mem == shared_base);
 }
 
 void threadExit() {

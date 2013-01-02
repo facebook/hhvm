@@ -130,7 +130,7 @@ bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   CmdInfoPtr cmd = client->xend<CmdInfo>(cmdInfo.get());
   Array info = cmd->getInfo();
   if (info.empty()) return false;
-  assert(info.size() == 1);
+  always_assert(info.size() == 1);
   ArrayIter iter(info);
   Array funcInfo = iter.second();
   if (!subsymbol.empty()) {

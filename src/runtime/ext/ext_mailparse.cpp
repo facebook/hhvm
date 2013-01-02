@@ -58,7 +58,7 @@ static String php_trim(CStrRef str) {
 bool php_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef headers,
               CStrRef extra_cmd) {
   // assumes we always have sendmail installed
-  assert(!RuntimeOption::SendmailPath.empty());
+  always_assert(!RuntimeOption::SendmailPath.empty());
 
   std::ostringstream os;
   os << RuntimeOption::SendmailPath;

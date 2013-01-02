@@ -27,7 +27,7 @@
 #define DEBUGGER()    kill(getpid(), SIGTRAP)
 
 /*
- * DEBUGGER_IF: use like assert(), i.e., do not rely on side effects
+ * DEBUGGER_IF: use like always_assert(), i.e., do not rely on side effects
  * of pred, as it will be compiled out of debug builds.
  */
 #define DEBUGGER_IF(pred) do { \

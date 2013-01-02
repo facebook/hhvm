@@ -418,7 +418,7 @@ void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
 
 bool Expression::CheckNeededRHS(ExpressionPtr value) {
   bool needed = true;
-  assert(value);
+  always_assert(value);
   while (value->is(KindOfAssignmentExpression)) {
     value = dynamic_pointer_cast<AssignmentExpression>(value)->getValue();
   }

@@ -401,7 +401,7 @@ TypePtr ExprDict::reduceToSingleAssertion(const TypePtrIdxPairVec &types)
 
 void ExprDict::beforePropagate(ControlBlock *b) {
   ControlFlowGraph *g = m_am.graph();
-  assert(g);
+  always_assert(g);
 
   m_width = size();
   m_available = g->rowExists(DataFlow::AvailIn) ?
@@ -411,7 +411,7 @@ void ExprDict::beforePropagate(ControlBlock *b) {
 
   vector<ExpressionRawPtr>(size()).swap(m_avlExpr);
   vector<TypePtr>(size()).swap(m_avlTypes);
-  assert(m_available && m_anticipated);
+  always_assert(m_available && m_anticipated);
   if (b->getDfn()) {
     for (size_t i = 1; i < m_width; i++) {
       if (!BitOps::get_bit(i, m_available)) continue;

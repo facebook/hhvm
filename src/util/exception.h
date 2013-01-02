@@ -67,7 +67,7 @@ public:
   };
 
   EXCEPTION_COMMON_IMPL(Exception);
-  
+
   /**
    * Error message without stacktrace.
    */
@@ -88,10 +88,8 @@ public:
   FileOpenException(const char *filename)
       : Exception("Unable to open file %s", filename) {
   }
-  virtual FileOpenException *clone() {
-    return new FileOpenException(*this);
-  }
-  virtual void throwException() { throw *this; }
+
+  EXCEPTION_COMMON_IMPL(FileOpenException);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,6 +101,8 @@ public:
   VMSwitchModeException(bool m_unwindBuiltin)
     : m_unwindBuiltin(m_unwindBuiltin) {}
   bool unwindBuiltin() const { return m_unwindBuiltin; }
+
+  EXCEPTION_COMMON_IMPL(VMSwitchModeException);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

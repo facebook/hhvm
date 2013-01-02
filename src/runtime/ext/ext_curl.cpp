@@ -90,7 +90,9 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
-  CurlResource(CStrRef url) : m_emptyPost(true) {
+  CurlResource(CStrRef url) : m_exception(NULL),
+                              m_phpException(false),
+                              m_emptyPost(true) {
     m_cp = curl_easy_init();
     m_url = url;
 
@@ -135,8 +137,10 @@ public:
     }
   }
 
-  CurlResource(CurlResource *src) {
+  CurlResource(CurlResource *src) : m_exception(NULL), m_phpException(false) {
     ASSERT(src && src != this);
+    ASSERT(!src->m_exception);
+
     m_cp = curl_easy_duphandle(src->get());
     m_url = src->m_url;
 
@@ -170,6 +174,7 @@ public:
   }
 
   void closeForSweep() {
+    ASSERT(!m_exception);
     if (m_cp) {
       curl_easy_cleanup(m_cp);
       m_cp = NULL;
@@ -183,6 +188,7 @@ public:
   }
 
   Variant execute() {
+    ASSERT(!m_exception);
     if (m_cp == NULL) {
       return false;
     }
@@ -200,6 +206,18 @@ public:
       IOStatusHelper io("curl_easy_perform", m_url.data());
       SYNC_VM_REGS_SCOPED();
       m_error_no = curl_easy_perform(m_cp);
+      if (m_exception) {
+        if (m_phpException) {
+          Object e((ObjectData*)m_exception);
+          m_exception = NULL;
+          e.get()->decRefCount();
+          throw e;
+        } else {
+          Exception *e = (Exception*)m_exception;
+          m_exception = NULL;
+          e->throwException();
+        }
+      }
     }
     set_curl_statuses(m_cp, m_url.data());
 
@@ -545,6 +563,22 @@ public:
     return 0;
   }
 
+  Variant do_callback(CVarRef cb, CArrRef args) {
+    ASSERT(!m_exception);
+    try {
+      return f_call_user_func_array(cb, args);
+    } catch (Object &e) {
+      ObjectData *od = e.get();
+      od->incRefCount();
+      m_exception = od;
+      m_phpException = true;
+    } catch (Exception &e) {
+      m_exception = e.clone();
+      m_phpException = false;
+    }
+    return null;
+  }
+
   static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx) {
     CurlResource *ch = (CurlResource *)ctx;
     ReadHandler *t  = &ch->m_read;
@@ -564,8 +598,8 @@ public:
     case PHP_CURL_USER:
       {
         int data_size = size * nmemb;
-        Variant ret = f_call_user_func_array
-          (t->callback, CREATE_VECTOR3(Object(ch), t->fp->fd(), data_size));
+        Variant ret = ch->do_callback(
+          t->callback, CREATE_VECTOR3(Object(ch), t->fp->fd(), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -595,9 +629,9 @@ public:
       break;
     case PHP_CURL_USER:
       {
-        Variant ret = f_call_user_func_array
-          (t->callback,
-           CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
+        Variant ret = ch->do_callback(
+          t->callback,
+          CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -625,9 +659,9 @@ public:
       return t->fp->write(String(data, length, AttachLiteral), length);
     case PHP_CURL_USER:
       {
-        Variant ret = f_call_user_func_array
-          (t->callback,
-           CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
+        Variant ret = ch->do_callback(
+          t->callback,
+          CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -657,6 +691,7 @@ public:
 
 private:
   CURL *m_cp;
+  void *m_exception;
 
   char m_error_str[CURL_ERROR_SIZE + 1];
   CURLcode m_error_no;
@@ -671,6 +706,7 @@ private:
   WriteHandler m_write_header;
   ReadHandler  m_read;
 
+  bool m_phpException;
   bool m_emptyPost;
 };
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);

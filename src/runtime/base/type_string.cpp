@@ -803,9 +803,6 @@ StringDataSet &StaticString::TheStaticStringSet() {
 }
 
 void StaticString::FinishInit() {
-  if (has_eval_support) {
-    ASSERT(s_stringSet->size() == NUM_CONVERTED_INTEGERS);
-  }
   // release the memory
   StringDataSet empty;
   s_stringSet->swap(empty);

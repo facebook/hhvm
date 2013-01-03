@@ -1104,9 +1104,9 @@ void c_Map::throwOOB() {
 
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
 
-bool hitStringKey(const c_Map::Bucket* p, const char* k,
-                  int len, int32_t hash) ALWAYS_INLINE;
-bool hitStringKey(const c_Map::Bucket* p, const char* k,
+bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
+                         int len, int32_t hash) ALWAYS_INLINE;
+bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
                   int len, int32_t hash) {
   ASSERT(p->validValue());
   if (p->hasIntKey()) return false;
@@ -1116,8 +1116,8 @@ bool hitStringKey(const c_Map::Bucket* p, const char* k,
                        memcmp(data, k, len) == 0);
 }
 
-bool hitIntKey(const c_Map::Bucket* p, int64 ki) ALWAYS_INLINE;
-bool hitIntKey(const c_Map::Bucket* p, int64 ki) {
+bool inline hitIntKey(const c_Map::Bucket* p, int64 ki) ALWAYS_INLINE;
+bool inline hitIntKey(const c_Map::Bucket* p, int64 ki) {
   ASSERT(p->validValue());
   return p->ikey == ki && p->hasIntKey();
 }
@@ -1959,11 +1959,10 @@ Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
   return ret;
 }
 
-bool sm_hit_string_key(const c_StableMap::Bucket* p,
-                       const char* k, int len, int32 hash)
-                       ALWAYS_INLINE;
-bool sm_hit_string_key(const c_StableMap::Bucket* p,
-                       const char* k, int len, int32 hash) {
+bool inline sm_hit_string_key(const c_StableMap::Bucket* p,
+                              const char* k, int len, int32 hash) ALWAYS_INLINE;
+bool inline sm_hit_string_key(const c_StableMap::Bucket* p,
+                              const char* k, int len, int32 hash) {
   if (p->hasIntKey()) return false;
   const char* data = p->skey->data();
   return data == k || (p->hash() == hash &&

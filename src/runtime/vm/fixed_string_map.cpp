@@ -67,7 +67,6 @@ void FixedStringMap<V, case_sensitive>::add(const StringData* sd, const V& v) {
 }
 
 template <typename V, bool case_sensitive>
-HOT_FUNC_VM
 V* FixedStringMap<V, case_sensitive>::find(const StringData* sd) const {
   Elm* elm = &m_table[sd->hash() & m_mask];
   UNUSED unsigned numProbes = 0;

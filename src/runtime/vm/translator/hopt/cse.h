@@ -25,6 +25,7 @@ namespace JIT {
 
 class CSEHash {
 public:
+  virtual ~CSEHash() {}
   virtual SSATmp* lookup(IRInstruction* inst) {
     MapType::iterator it = map.find(inst);
     if (it == map.end()) {

@@ -66,7 +66,7 @@ namespace HPHP { namespace Util {
  * file
  */
 #define KEEP_SECTION \
-  __attribute__((section(".text.keep")))
+  __attribute__((externally_visible))
 
 /**
  * Split a string into a list of tokens by character delimiter.

@@ -1717,7 +1717,6 @@ void f_fb_gc_detect_cycles(CStrRef filename) {
 
 static Array const_data;
 
-KEEP_SECTION
 Variant f_fb_const_fetch(CVarRef key) {
   String k = key.toString();
   Variant *ret = const_data.lvalPtr(k, false, false);

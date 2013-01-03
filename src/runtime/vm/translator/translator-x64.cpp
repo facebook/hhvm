@@ -3019,6 +3019,7 @@ asm (
   ".byte 0\n"
   ".align 16\n"
   ".section .text\n"
+  ".globl __enterTCHelper\n"
 "__enterTCHelper:\n"
   // Prologue
   ".cfi_startproc\n"

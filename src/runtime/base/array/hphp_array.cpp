@@ -1899,21 +1899,6 @@ ArrayData* array_getm_s(ArrayData* ad, StringData* sd, TypedValue* out,
   return ad;
 }
 
-template<DataType keyType, bool decRefBase>
-inline void non_array_getm(TypedValue* base, int64 key, TypedValue* out) {
-  ASSERT(base->m_type != KindOfRef);
-  TypedValue keyTV;
-  keyTV.m_type = keyType;
-  keyTV.m_data.num = key;
-  VMExecutionContext::getElem(base, &keyTV, out);
-  if (decRefBase) {
-    tvRefcountedDecRef(base);
-  }
-  if (IS_REFCOUNTED_TYPE(keyType)) {
-    tvDecRef(&keyTV);
-  }
-}
-
 // issetm's DNA.
 static bool
 issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {

@@ -249,11 +249,22 @@ cold:
   return new_iter_array_cold(dest, ad, valOut, keyOut);
 }
 
+class FreeObj {
+ public:
+  FreeObj() : m_obj(0) {}
+  void operator=(ObjectData* obj) { m_obj = obj; }
+  ~FreeObj() { if (UNLIKELY(m_obj != NULL)) decRefObj(m_obj); }
+ private:
+  ObjectData* m_obj;
+};
+
 /**
  * new_iter_object creates an iterator for the specified object if the object
  * is iterable and it is non-empty (has properties). If new_iter_object creates
  * an iterator, it does not increment the refcount of the specified object. If
  * new_iter_object does not create an iterator, it decRefs the object.
+ *
+ * If exceptions are thrown, new_iter_object takes care of decRefing the object.
  */
 HOT_FUNC
 int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
@@ -263,51 +274,72 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
     keyOut = tvToCell(keyOut);
   }
   Iter::Type itType;
-  if (obj->isCollection() || obj->implementsIterator()) {
-    TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
-             __func__, dest, obj, ctx);
-    (void) new (&dest->arr()) ArrayIter(obj, 0);
-    itType = Iter::TypeIterator;
-  } else {
-    bool isIteratorAggregate;
-    Object itObj = obj->iterableObject(isIteratorAggregate, false);
-    if (isIteratorAggregate) {
-      TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
-               __func__, dest, obj, ctx);
-      (void) new (&dest->arr()) ArrayIter(itObj.get());
+  {
+    FreeObj fo;
+    if (obj->isCollection() || obj->implementsIterator()) {
+      TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
+            __func__, dest, obj, ctx);
+      try {
+        (void) new (&dest->arr()) ArrayIter(obj, ArrayIter::noInc);
+      } catch (...) {
+        decRefObj(obj);
+        throw;
+      }
       itType = Iter::TypeIterator;
     } else {
-      TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
-               __func__, dest, obj, ctx);
-      CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
-      Array iterArray(itObj->o_toIterArray(ctxStr));
-      ArrayData* ad = iterArray.getArrayData();
-      (void) new (&dest->arr()) ArrayIter(ad);
-      itType = Iter::TypeArray;
-    }
-    // We did not transfer ownership of the object to an iterator, so we need
-    // to decRef the object.
-    decRefObj(obj);
-  }
-  if (!dest->arr().end()) {
-    dest->m_itype = itType;
-    if (itType == Iter::TypeIterator) {
-      iter_value_cell_local_impl<false>(dest, valOut);
-      if (keyOut) {
-        iter_key_cell_local_impl<false>(dest, keyOut);
+      bool isIteratorAggregate;
+      /*
+       * We are not going to transfer ownership of obj to the iterator,
+       * so arrange to decRef it later. The actual decRef has to happen
+       * after the call to arr().end() below, because both can have visible side
+       * effects (calls to __destruct() and valid()). Similarly it has to
+       * happen before the iter_*_cell_local_impl calls below, because they call
+       * current() and key() (hence the explicit scope around FreeObj fo;)
+       */
+      fo = obj;
+
+      Object itObj = obj->iterableObject(isIteratorAggregate, false);
+      if (isIteratorAggregate) {
+        TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
+              __func__, dest, obj, ctx);
+        (void) new (&dest->arr()) ArrayIter(itObj, ArrayIter::transferOwner);
+        itType = Iter::TypeIterator;
+      } else {
+        TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
+              __func__, dest, obj, ctx);
+        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+        Array iterArray(itObj->o_toIterArray(ctxStr));
+        ArrayData* ad = iterArray.getArrayData();
+        (void) new (&dest->arr()) ArrayIter(ad);
+        itType = Iter::TypeArray;
       }
-    } else {
-      iter_value_cell_local_impl<true>(dest, valOut);
-      if (keyOut) {
-        iter_key_cell_local_impl<true>(dest, keyOut);
-      }
     }
-    return 1LL;
+    try {
+      if (dest->arr().end()) {
+        // Iterator was empty; call the destructor on the iterator we just
+        // constructed.
+        dest->arr().~ArrayIter();
+        return 0LL;
+      }
+    } catch (...) {
+      dest->arr().~ArrayIter();
+      throw;
+    }
   }
-  // Iterator was empty; call the destructor on the iterator we just
-  // constructed.
-  dest->arr().~ArrayIter();
-  return 0LL;
+
+  dest->m_itype = itType;
+  if (itType == Iter::TypeIterator) {
+    iter_value_cell_local_impl<false>(dest, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<false>(dest, keyOut);
+    }
+  } else {
+    iter_value_cell_local_impl<true>(dest, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<true>(dest, keyOut);
+    }
+  }
+  return 1LL;
 }
 
 /**
@@ -825,7 +857,7 @@ void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
   // wouldn't have to decRef it here
   tvRefcountedDecRef(value);
 }
-  
+
 void collection_setm_ik1_v0(ObjectData* obj, int64 key, TypedValue* value) {
   ASSERT(obj);
   int ct = obj->getCollectionType();

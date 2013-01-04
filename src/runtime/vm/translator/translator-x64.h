@@ -263,9 +263,10 @@ private:
   void recordIndirectFixup(CTCA addr, int dwordsPushed);
   template <bool reentrant>
   void recordCallImpl(Asm& a, const NormalizedInstruction& i,
-                      bool advance = false);
-  void recordReentrantCall(Asm& a, const NormalizedInstruction& i) {
-    recordCallImpl<true>(a, i);
+                      bool advance = false, int adjust = 0);
+  void recordReentrantCall(Asm& a, const NormalizedInstruction& i,
+                           bool advance = false, int adjust = 0) {
+    recordCallImpl<true>(a, i, advance, adjust);
   }
   void recordReentrantCall(const NormalizedInstruction& i) {
     recordCallImpl<true>(a, i);

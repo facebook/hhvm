@@ -742,7 +742,8 @@ template <bool reentrant>
 void
 TranslatorX64::recordCallImpl(X64Assembler& a,
                               const NormalizedInstruction& i,
-                              bool advance /* = false */) {
+                              bool advance /* = false */,
+                              int adjust /* = 0 */) {
   SrcKey sk = i.source;
   Offset stackOff = i.stackOff + (vmfp() - vmsp());
   if (UNLIKELY(curFunc()->isGenerator())) {
@@ -760,6 +761,7 @@ TranslatorX64::recordCallImpl(X64Assembler& a,
     sk.advance(curUnit());
     stackOff += getStackDelta(i);
   }
+  stackOff += adjust;
   ASSERT(i.checkedInputs ||
          (reentrant && !i.isSimple()) ||
          (!reentrant && !i.isNative()));
@@ -10612,14 +10614,12 @@ void TranslatorX64::translateBasicIterInit(const Tracelet& t,
       new_iter_object(dest, obj, ctx, val, key);
     }
     Class* ctx = arGetContextClass(curFrame());
-    if (ni.outLocal2) {
-      EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src),
-                 IMM((uintptr_t)ctx),
-                 A(ni.outLocal->location), A(ni.outLocal2->location));
-    } else {
-      EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src),
-                 IMM((uintptr_t)ctx), A(ni.outLocal->location), IMM(0));
-    }
+    m_regMap.scrubLoc(in->location);
+    EMIT_CALL(a, new_iter_object, A(iterLoc), R(src),
+              IMM((uintptr_t)ctx),
+              A(ni.outLocal->location),
+              ni.outLocal2 ? A(ni.outLocal2->location) : IMM(0));
+    recordReentrantCall(a, ni, false, -1);
     break;
   }
   default: not_reached();

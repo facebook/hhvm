@@ -70,16 +70,22 @@ public:
     m_pos = data->getIterBegin();
   }
   ArrayIter(CArrRef array);
+  void begin(CVarRef map, CStrRef);
+  void begin(CArrRef map, CStrRef);
+  void reset();
 private:
   // not defined.
   // Either use ArrayIter(const ArrayData*) or
   //            ArrayIter(const HphpArray*, NoIncNonNull)
   ArrayIter(const HphpArray*);
   template <bool incRef>
-  void objInit(ObjectData* obj, bool rewind = true);
+  void objInit(ObjectData* obj);
 public:
-  ArrayIter(ObjectData* obj, bool rewind = true);
-  ArrayIter(ObjectData* obj, int);
+  ArrayIter(ObjectData* obj);
+  ArrayIter(ObjectData* obj, NoInc);
+  enum TransferOwner { transferOwner };
+  ArrayIter(Object& obj, TransferOwner);
+
   ~ArrayIter();
 
   operator bool() { return !end(); }
@@ -253,17 +259,19 @@ private:
  */
 class MutableArrayIter {
 public:
+  MutableArrayIter() : m_data(NULL) {}
   MutableArrayIter(const Variant* var, Variant* key, Variant& val);
   MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
   ~MutableArrayIter();
+  void begin(Variant& map, Variant* key, Variant& val, CStrRef context);
+  void reset();
   void release() { delete this; }
   bool advance();
-
 private:
   const Variant* m_var;
   ArrayData* m_data;
   Variant* m_key;
-  Variant& m_val;
+  Variant* m_valp;
   FullPos m_fp;
   int size();
   ArrayData* getData();

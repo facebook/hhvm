@@ -709,7 +709,7 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
   }
   Object iterable = iterableObject(isIterable);
   if (isIterable) {
-    return ArrayIter(iterable.get());
+    return ArrayIter(iterable, ArrayIter::transferOwner);
   } else {
     return ArrayIter(iterable->o_toIterArray(context));
   }

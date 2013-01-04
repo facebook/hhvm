@@ -63,8 +63,39 @@ ArrayIter::ArrayIter(CArrRef array) : m_pos(0) {
   }
 }
 
+void ArrayIter::reset() {
+  if (hasArrayData()) {
+    const ArrayData* ad = getArrayData();
+    m_data = NULL;
+    if (ad) decRefArr(const_cast<ArrayData*>(ad));
+    return;
+  }
+  ObjectData* obj = getRawObject();
+  m_data = NULL;
+  ASSERT(obj);
+  decRefObj(obj);
+}
+
+void ArrayIter::begin(CVarRef map, CStrRef context) {
+  try {
+    new (this) ArrayIter(map.begin(context));
+  } catch (...) {
+    m_data = NULL;
+    throw;
+  }
+}
+
+void ArrayIter::begin(CArrRef map, CStrRef context) {
+  try {
+    new (this) ArrayIter(map.get());
+  } catch (...) {
+    m_data = NULL;
+    throw;
+  }
+}
+
 template <bool incRef>
-void ArrayIter::objInit(ObjectData *obj, bool rewind /* = true */) {
+void ArrayIter::objInit(ObjectData *obj) {
   ASSERT(obj);
   setObject(obj);
   if (incRef) {
@@ -72,10 +103,7 @@ void ArrayIter::objInit(ObjectData *obj, bool rewind /* = true */) {
   }
   if (!obj->isCollection()) {
     ASSERT(obj->o_instanceof(s_Iterator));
-    if (rewind) {
-      obj->o_invoke(s_rewind, Array());
-    }
-    // If it is from IteratorAggregate, there is no need to rewind.
+    obj->o_invoke(s_rewind, Array());
   } else {
     if (hasVector()) {
       c_Vector* vec = getVector();
@@ -95,16 +123,22 @@ void ArrayIter::objInit(ObjectData *obj, bool rewind /* = true */) {
   }
 }
 
-ArrayIter::ArrayIter(ObjectData *obj, bool rewind /* = true */)
+ArrayIter::ArrayIter(ObjectData *obj)
   : m_pos(ArrayData::invalid_index) {
-  objInit<true>(obj, rewind);
+  objInit<true>(obj);
+}
+
+ArrayIter::ArrayIter(Object &obj, TransferOwner)
+  : m_pos(ArrayData::invalid_index) {
+  objInit<false>(obj.get());
+  (void) obj.detach();
 }
 
 // Special constructor used by the VM. This constructor does not increment the
 // refcount of the specified object.
-ArrayIter::ArrayIter(ObjectData *obj, int)
+ArrayIter::ArrayIter(ObjectData *obj, NoInc)
   : m_pos(ArrayData::invalid_index) {
-  objInit<false>(obj, true);
+  objInit<false>(obj);
 }
 
 HOT_FUNC
@@ -269,7 +303,7 @@ CVarRef ArrayIter::secondRef() {
 
 MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
                                    Variant &val)
-  : m_var(var), m_data(NULL), m_key(key), m_val(val), m_fp() {
+  : m_var(var), m_data(NULL), m_key(key), m_valp(&val), m_fp() {
   ASSERT(m_var);
   escalateCheck();
   ArrayData* data = cowCheck();
@@ -282,7 +316,7 @@ MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
 
 MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
                                    Variant &val)
-  : m_var(NULL), m_data(data), m_key(key), m_val(val), m_fp() {
+  : m_var(NULL), m_data(data), m_key(key), m_valp(&val), m_fp() {
   if (data) {
     escalateCheck();
     data = cowCheck();
@@ -300,6 +334,29 @@ MutableArrayIter::~MutableArrayIter() {
   }
   // unprotect the data
   if (m_data) decRefArr(m_data);
+}
+
+void MutableArrayIter::reset() {
+  if (m_fp.container != NULL) {
+    m_fp.container->freeFullPos(m_fp);
+    ASSERT(m_fp.container == NULL);
+  }
+  // unprotect the data
+  if (m_data) {
+    decRefArr(m_data);
+    m_data = NULL;
+  }
+}
+
+void MutableArrayIter::begin(Variant& map, Variant* key, Variant& val,
+                             CStrRef context) {
+  try {
+    new (this) MutableArrayIter(map.begin(key, val, context));
+  } catch (...) {
+    m_fp.container = NULL;
+    m_data = NULL;
+    throw;
+  }
 }
 
 bool MutableArrayIter::advance() {
@@ -329,7 +386,7 @@ bool MutableArrayIter::advance() {
   ASSERT(m_fp.container == data);
   if (!data->setFullPos(m_fp)) return false;
   CVarRef curr = data->currentRef();
-  m_val.assignRef(curr);
+  m_valp->assignRef(curr);
   if (m_key) m_key->assignVal(data->key());
   data->next();
   data->getFullPos(m_fp);

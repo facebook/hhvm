@@ -22,6 +22,7 @@
 #include <compiler/option.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/function_scope.h>
 #include <util/util.h>
 
 using namespace HPHP;
@@ -177,19 +178,27 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool passTemp = true;
   bool nameSimple = !m_name || m_name->is(Expression::KindOfSimpleVariable);
   bool valueSimple = m_value->is(Expression::KindOfSimpleVariable);
+  int iterId = cg.createNewLocalId(shared_from_this());
+
+  cppDeclareBufs(cg, ar);
+  cg_printf("%sArrayIter %s%d;\n",
+            m_ref ? "Mutable" : "",
+            Option::IterPrefix, iterId);
+  if (m_ref) {
+    if (!nameSimple) {
+      cg_printf("Variant %s%d_n;\n", Option::MapPrefix, mapId);
+    }
+    if (!valueSimple) {
+      cg_printf("Variant %s%d_v;\n", Option::MapPrefix, mapId);
+    }
+  } else {
+    cg_indentBegin("{\n");
+  }
 
   if (m_ref ||
       !m_array->is(Expression::KindOfSimpleVariable) ||
       m_array->isThis()) {
 
-    if (m_ref) {
-      if (!nameSimple) {
-        cg_printf("Variant %s%d_n;\n", Option::MapPrefix, mapId);
-      }
-      if (!valueSimple) {
-        cg_printf("Variant %s%d_v;\n", Option::MapPrefix, mapId);
-      }
-    }
     cg_printf("Variant %s%d", Option::MapPrefix, mapId);
     TypePtr expectedType = m_array->getExpectedType();
     // Clear m_expectedType to avoid type cast (toArray).
@@ -229,12 +238,10 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool orderName = m_name && m_name->preOutputCPP(cg, ar, 0);
   bool orderValue = m_value->preOutputCPP(cg, ar, 0);
 
-  cppDeclareBufs(cg, ar);
-  int iterId = cg.createNewLocalId(shared_from_this());
-  cg_printf("for (");
+  cg_printf("%s%d.begin(", Option::IterPrefix, iterId);
+
   if (m_ref) {
-    cg_printf("MutableArrayIter %s%d = %s%d.begin(",
-              Option::IterPrefix, iterId, Option::MapPrefix, mapId);
+    cg_printf("%s%d, ", Option::MapPrefix, mapId);
     if (!nameSimple) {
       cg_printf("&%s%d_n", Option::MapPrefix, mapId);
     } else if (m_name) {
@@ -249,48 +256,51 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else {
       m_value->outputCPP(cg, ar);
     }
-    ClassScopePtr cls = getClassScope();
-    if (cls) {
-      cg_printf(", %sclass_name", Option::StaticPropertyPrefix);
-    } else {
-      cg_printf(", null_string");
-    }
-    cg_printf("); %s%d.advance();", Option::IterPrefix, iterId);
+    cg_printf(", ");
   } else {
     if (passTemp) {
-      cg_printf("ArrayIter %s%d = %s%d.begin(",
-                Option::IterPrefix, iterId,
-                Option::MapPrefix, mapId);
-      ClassScopePtr cls = getClassScope();
-      if (cls) {
-        cg_printf("%sclass_name", Option::StaticPropertyPrefix);
-      } else {
-        cg_printf("null_string");
-      }
-      cg_printf("); ");
-      cg_printf("!%s%d.end(); %s%d.next()",
-                Option::IterPrefix, iterId,
-                Option::IterPrefix, iterId);
+      cg_printf("%s%d, ", Option::MapPrefix, mapId);
     } else {
-      cg_printf("ArrayIter %s%d = ", Option::IterPrefix, iterId);
       TypePtr expectedType = m_array->getExpectedType();
       // Clear m_expectedType to avoid type cast (toArray).
       m_array->setExpectedType(TypePtr());
       m_array->outputCPP(cg, ar);
       m_array->setExpectedType(expectedType);
-      cg_printf(".begin(");
-      ClassScopePtr cls = getClassScope();
-      if (cls) {
-        cg_printf("%sclass_name", Option::StaticPropertyPrefix);
-      } else {
-        cg_printf("null_string");
-      }
-      cg_printf("); ");
-      cg_printf("!%s%d.end(); ", Option::IterPrefix, iterId);
-      cg_printf("++%s%d", Option::IterPrefix, iterId);
+      cg_printf(", ");
     }
   }
-  cg_indentBegin(") {\n");
+  ClassScopePtr cls = getClassScope();
+  if (cls) {
+    cg_printf("%sclass_name", Option::StaticPropertyPrefix);
+  } else {
+    cg_printf(getFunctionScope()->inPseudoMain() ?
+              "null_string" : "empty_string");
+  }
+  cg_printf(");\n");
+
+  if (passTemp) cg_indentBegin("try {\n");
+
+  if (m_ref) {
+    cg_printf("if (!%s%d.advance())", Option::IterPrefix, iterId);
+  } else {
+    cg_printf("if (%s%d.end())", Option::IterPrefix, iterId);
+  }
+
+  cg_printf(" goto break%d;\n", labelId);
+  cg.addLabelId("break", labelId);
+  if (passTemp) {
+    cg_indentEnd("} catch (...)");
+    cg_indentBegin(" {\n");
+    // if end throws, we have to destroy the iterator before
+    // the map object, to ensure order of evaluation is
+    // correct.
+    cg_printf("%s%d.reset();\n", Option::IterPrefix, iterId);
+    cg_printf("throw;\n");
+    cg_indentEnd("}\n");
+  }
+  if (!m_ref) cg_indentEnd("}\n");
+
+  cg_indentBegin("do {\n");
   cg_printf("LOOP_COUNTER_CHECK(%d);\n", labelId);
 
   /*
@@ -365,9 +375,9 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       m_name->outputCPPBegin(cg, ar);
     }
     if (!AssignmentExpression::SpecialAssignment(
-          cg, ar, m_name, ExpressionPtr(), nameStr.c_str(), m_ref)) {
+          cg, ar, m_name, ExpressionPtr(), nameStr.c_str(), false)) {
       m_name->outputCPP(cg, ar);
-      cg_printf(".assign%s(%s)", m_ref ? "Ref" : "Val", nameStr.c_str());
+      cg_printf(".assignVal(%s)", nameStr.c_str());
     }
     cg_printf(";\n");
   }
@@ -382,7 +392,18 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (cg.findLabelId("continue", labelId)) {
     cg_printf("continue%d:;\n", labelId);
   }
-  cg_indentEnd("}\n");
+  cg_indentEnd("} while(");
+  if (!m_ref) {
+    if (passTemp) {
+      cg_printf("%s%d.next(), ", Option::IterPrefix, iterId);
+    } else {
+      cg_printf("++%s%d, ", Option::IterPrefix, iterId);
+    }
+    cg_printf("!%s%d.end()", Option::IterPrefix, iterId);
+  } else {
+    cg_printf("%s%d.advance()", Option::IterPrefix, iterId);
+  }
+  cg_printf(");\n");
   if (cg.findLabelId("break", labelId)) {
     cg_printf("break%d:;\n", labelId);
   }

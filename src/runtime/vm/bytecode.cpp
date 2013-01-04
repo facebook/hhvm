@@ -6335,7 +6335,7 @@ inline bool VMExecutionContext::initIterator(PC& pc, PC& origPc, Iter* it,
     } else {
       Object obj = c1->m_data.pobj->iterableObject(isIterator);
       if (isIterator) {
-        (void) new (&it->arr()) ArrayIter(obj.get());
+        (void) new (&it->arr()) ArrayIter(obj, ArrayIter::transferOwner);
       } else {
         Class* ctx = arGetContextClass(m_fp);
         CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
@@ -6344,14 +6344,19 @@ inline bool VMExecutionContext::initIterator(PC& pc, PC& origPc, Iter* it,
         (void) new (&it->arr()) ArrayIter(ad);
       }
     }
-    if (it->arr().end()) {
-      // Iterator was empty; call the destructor on the iterator we
-      // just constructed and branch to done case
+    try {
+      if (it->arr().end()) {
+        // Iterator was empty; call the destructor on the iterator we
+        // just constructed and branch to done case
+        it->arr().~ArrayIter();
+        ITER_SKIP(offset);
+        hasElems = false;
+      } else {
+        it->m_itype = (isIterator ? Iter::TypeIterator : Iter::TypeArray);
+      }
+    } catch (...) {
       it->arr().~ArrayIter();
-      ITER_SKIP(offset);
-      hasElems = false;
-    } else {
-      it->m_itype = (isIterator ? Iter::TypeIterator : Iter::TypeArray);
+      throw;
     }
   } else {
     raise_warning("Invalid argument supplied for foreach()");

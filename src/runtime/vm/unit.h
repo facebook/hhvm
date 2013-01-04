@@ -609,11 +609,31 @@ public:
 public:
   static Mutex s_classesMutex;
 
+  struct PrintOpts {
+    PrintOpts()
+      : startOffset(kInvalidOffset)
+      , stopOffset(kInvalidOffset)
+      , showLines(true)
+    {}
+
+    PrintOpts& range(Offset start, Offset stop) {
+      startOffset = start;
+      stopOffset = stop;
+      return *this;
+    }
+
+    PrintOpts& noLineNumbers() {
+      showLines = false;
+      return *this;
+    }
+
+    Offset startOffset;
+    Offset stopOffset;
+    bool showLines;
+  };
+
+  void prettyPrint(std::ostream&, PrintOpts = PrintOpts()) const;
   std::string toString() const;
-  static void dumpUnit(Unit* unit);
-  void prettyPrint(std::ostream &out) const;
-  void prettyPrint(std::ostream &out, size_t startOffset, size_t stopOffset)
-    const;
 
 public: // Translator field access
   static size_t bcOff() { return offsetof(Unit, m_bc); }

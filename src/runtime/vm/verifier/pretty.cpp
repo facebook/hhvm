@@ -104,8 +104,9 @@ void printGml(const Unit* unit) {
     for (LinearBlocks j = linearBlocks(g); !j.empty();) {
       const Block* b = j.popFront();
       std::stringstream strbuf;
-      unit->prettyPrint(strbuf, unit->offsetOf(b->start),
-                        unit->offsetOf(b->end));
+      unit->prettyPrint(strbuf,
+                        Unit::PrintOpts().range(unit->offsetOf(b->start),
+                                                unit->offsetOf(b->end)));
       std::string code = strbuf.str();
       for (int i = 0, n = code.size(); i < n; ++i) {
         if (code[i] == '"') code[i] = '\'';

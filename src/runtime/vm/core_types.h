@@ -17,7 +17,9 @@
 #ifndef incl_VM_CORE_TYPES_H_
 #define incl_VM_CORE_TYPES_H_
 
-#include <runtime/base/complex_types.h>
+#include <limits>
+
+#include "runtime/base/complex_types.h"
 
 namespace HPHP {
 namespace VM {
@@ -49,6 +51,7 @@ const Id kInvalidId = Id(-1);
 // Bytecode offsets.  Used for both absolute offsets and relative
 // offsets.
 typedef int32_t Offset;
+constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
 
 /*
  * Various fields in the VM's runtime have indexes that are addressed

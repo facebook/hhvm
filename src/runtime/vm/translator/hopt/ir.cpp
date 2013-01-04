@@ -15,15 +15,19 @@
 */
 
 #include "ir.h"
-#include "linearscan.h"
-#include "cse.h"
-#include "simplifier.h"
+
 #include <string.h>
-#include <runtime/base/string_data.h>
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/stats.h>
+
+#include "folly/Format.h"
+
+#include "util/trace.h"
+#include "runtime/base/string_data.h"
+#include "runtime/vm/runtime.h"
+#include "runtime/vm/stats.h"
 #include "runtime/vm/translator/targetcache.h"
-#include <util/trace.h>
+#include "runtime/vm/translator/hopt/linearscan.h"
+#include "runtime/vm/translator/hopt/cse.h"
+#include "runtime/vm/translator/hopt/simplifier.h"
 
 using namespace HPHP::VM::Transl::TargetCache;
 
@@ -241,7 +245,7 @@ void IRInstruction::printOpcode(std::ostream& ostream) {
 
 void IRInstruction::printDst(std::ostream& ostream) {
   if (m_dst) {
-    m_dst->SSATmp::print(ostream, true);
+    m_dst->print(ostream, true);
     ostream << " = ";
   }
 }
@@ -277,9 +281,7 @@ void IRInstruction::printSrcs(std::ostream& ostream) {
 }
 
 void IRInstruction::print(std::ostream& ostream) {
-  if (m_id != 0) {
-    ostream << m_id << ": ";
-  }
+  ostream << folly::format("({:02d}) ", m_id);
   printDst(ostream);
   bool isStMem = m_op == StMem || m_op == StMemNT || m_op == StRaw;
   bool isLdMem = m_op == LdMemNR || m_op == LdRaw;
@@ -399,7 +401,9 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
       break;
     case Type::Str:
     case Type::StaticStr:
-      ostream << "\"" << m_strVal->data() << "\"";
+      ostream << "\""
+              << Util::escapeStringForCPP(m_strVal->data(), m_strVal->size())
+              << "\"";
       break;
     case Type::Arr:
     {
@@ -508,9 +512,11 @@ void LabelInstruction::print(std::ostream& ostream) {
   } else if (m_op == Marker) {
     ostream << "--- bc";
   }
-  ostream << m_labelId << ":";
+  ostream << m_labelId;
   if (m_op == Marker) {
     ostream << ", spOff: " << m_stackOff;
+  } else {
+    ostream << ":";
   }
 }
 
@@ -849,7 +855,8 @@ static const xed_syntax_enum_t s_xed_syntax =
 
 void printInstructions(xed_uint8_t* codeStartAddr,
                        xed_uint8_t* codeEndAddr,
-                       bool printAddr) {
+                       bool printAddr,
+                       int indentLevel) {
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
   xed_decoded_inst_t xedd;
@@ -870,6 +877,7 @@ void printInstructions(xed_uint8_t* codeStartAddr,
       error("disasm error: xed_format_context failed");
     }
 
+    for (int i = 0; i < indentLevel; ++i) fputc(' ', stdout);
     if (printAddr) printf("0x%08llx: ", ip);
     uint32 instrLen = xed_decoded_inst_get_length(&xedd);
     if (false) { // print encoding, like in objdump
@@ -890,7 +898,7 @@ void printInstructions(xed_uint8_t* codeStartAddr,
 }
 #endif
 
-void Trace::print(std::ostream& ostream, bool printAsm,
+void Trace::print(std::ostream& os, bool printAsm,
                   bool isExit /* = false */) {
 #ifdef DEBUG
   xed_state_init(&xed_state, XED_MACHINE_MODE_LONG_64,
@@ -898,27 +906,38 @@ void Trace::print(std::ostream& ostream, bool printAsm,
   xed_tables_init();
 #endif
 
-  IRInstruction::Iterator it;
-  for (it = m_instructionList.begin();
-       it != m_instructionList.end();
-       ) {
-    IRInstruction* inst = *it;
-    it++;
+  // printInstructions doesn't know how to print to other streams yet
+  ASSERT(&os == &std::cout);
+
+  auto it = begin(m_instructionList);
+  while (it != end(m_instructionList)) {
+    auto* inst = *it;
+    ++it;
     if (inst->getOpcode() == Marker) {
-      inst->print(std::cout);
-      std::cout << std::endl;
-      if (isExit) continue; // don't print bytecode
       LabelInstruction* markerInst = (LabelInstruction*)inst;
+      if (isExit) {
+        // Don't print bytecode, but print the label.
+        os << std::string(6, ' ');
+        inst->print(os);
+        os << '\n';
+        continue;
+      }
       uint32 bcOffset = markerInst->getLabelId();
-      const Func* func = markerInst->getFunc();
-      if (func != NULL) {
-        Unit* unit = func->unit();
-        unit->prettyPrint(std::cout, bcOffset, bcOffset+1);
+      if (const auto* func = markerInst->getFunc()) {
+        func->unit()->prettyPrint(
+          os, Unit::PrintOpts()
+                .range(bcOffset, bcOffset+1)
+                .noLineNumbers());
         continue;
       }
     }
-    inst->print(std::cout);
-    std::cout << std::endl;
+    if (inst->getOpcode() == DefLabel) {
+      os << std::string(6, ' ');
+    } else {
+      os << std::string(8, ' ');
+    }
+    inst->print(os);
+    os << '\n';
     if (!printAsm) {
       continue;
     }
@@ -940,10 +959,10 @@ void Trace::print(std::ostream& ostream, bool printAsm,
     }
     if (asmAddr != endAsm) {
       // print out the assembly
-      std::cout << std::endl;
+      os << '\n';
 #ifdef DEBUG
-      printInstructions(asmAddr, endAsm, true);
-      std::cout << std::endl;
+      printInstructions(asmAddr, endAsm, true, 14);
+      os << '\n';
 #endif
     }
   }
@@ -958,17 +977,18 @@ void Trace::print(std::ostream& ostream, bool printAsm,
       // print out any extra code in astubs
       if (m_firstAstubsAddress < exitTrace->m_firstAsmAddress) {
 #ifdef DEBUG
-        std::cout << "AStubs: " << std::endl;
+        os << std::string(8, ' ') << "AStubs:\n";
         printInstructions(m_firstAstubsAddress,
                           exitTrace->m_firstAsmAddress,
-                          true);
+                          true,
+                          14);
 #endif
-        std::cout << std::endl;
+        os << '\n';
       }
 
     }
-    std::cout << "\n-------  Exit Trace  -------\n";
-    exitTrace->print(std::cout, printAsm, true);
+    os << "\n      -------  Exit Trace  -------\n";
+    exitTrace->print(os, printAsm, true);
   }
 }
 

@@ -1175,8 +1175,12 @@ const Func* Unit::getFunc(Offset pc) const {
   return NULL;
 }
 
-void Unit::prettyPrint(std::ostream &out, size_t startOffset,
-                       size_t stopOffset) const {
+void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
+  auto startOffset = opts.startOffset != kInvalidOffset
+    ? opts.startOffset : 0;
+  auto stopOffset = opts.stopOffset != kInvalidOffset
+    ? opts.stopOffset : m_bclen;
+
   std::map<Offset,const Func*> funcMap;
   for (FuncRange fr(funcs()); !fr.empty();) {
     const Func* f = fr.popFront();
@@ -1205,10 +1209,12 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
       ++funcIt;
     }
 
-    int lineNum = getLineNumber(offsetOf(it));
-    if (lineNum != prevLineNum) {
-      out << "  // line " << lineNum << std::endl;
-      prevLineNum = lineNum;
+    if (opts.showLines) {
+      int lineNum = getLineNumber(offsetOf(it));
+      if (lineNum != prevLineNum) {
+        out << "  // line " << lineNum << std::endl;
+        prevLineNum = lineNum;
+      }
     }
 
     out << "  " << std::setw(4) << (it - m_bc) << ": ";
@@ -1275,25 +1281,16 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
   }
 }
 
-void Unit::prettyPrint(std::ostream &out) const {
-  prettyPrint(out, 0, m_bclen);
-}
-
 std::string Unit::toString() const {
   std::ostringstream ss;
   prettyPrint(ss);
-  for (PreClassPtrVec::const_iterator it = m_preClasses.begin();
-      it != m_preClasses.end(); ++it) {
-    (*it).get()->prettyPrint(ss);
+  for (auto& pc : m_preClasses) {
+    pc->prettyPrint(ss);
   }
   for (FuncRange fr(funcs()); !fr.empty();) {
     fr.popFront()->prettyPrint(ss);
   }
   return ss.str();
-}
-
-void Unit::dumpUnit(Unit* u) {
-  std::cerr << u->toString();
 }
 
 void Unit::enableIntercepts() {

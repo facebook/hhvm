@@ -1067,7 +1067,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     if (CoreDumpReport) {
       install_crash_reporter();
     }
-    CoreDumpReportDirectory = debug["CoreDumpReportDirectory"].getString();
+    CoreDumpReportDirectory =
+      debug["CoreDumpReportDirectory"].getString(CoreDumpReportDirectory);
     LocalMemcache = debug["LocalMemcache"].getBool();
     MemcacheReadOnly = debug["MemcacheReadOnly"].getBool();
 

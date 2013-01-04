@@ -89,9 +89,8 @@ public:
   SSATmp* genLdHome(uint32 id);
   SSATmp* genLdCachedClass(SSATmp* classNameOpnd);
   SSATmp* genLdCls(SSATmp* classNameOpnd);
-  SSATmp* genLdClsCns(SSATmp* cnsName,
-                      SSATmp* cls, /* Str or Cls */
-                      Trace* exitTrace);
+  SSATmp* genLdClsCns(SSATmp* cnsName, SSATmp* cls);
+  void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
   SSATmp* genLdCurFuncPtr();
   SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
   SSATmp* genLdFuncCls(SSATmp* func);

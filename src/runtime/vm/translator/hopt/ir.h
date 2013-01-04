@@ -182,8 +182,8 @@ enum OpcodeFlag : uint64_t {
   OPC(DefConst,          (HasDest|CanCSE))                              \
   OPC(LdCls,             (HasDest|CanCSE|MayModifyRefs|                 \
                           Rematerializable|MayRaiseError))              \
-  /* XXX cg doesn't support the version without a label*/               \
   OPC(LdClsCns,          (HasDest|CanCSE))                              \
+  OPC(CheckClsCnsDefined,(Essential|MayModifyRefs|MayRaiseError))       \
   OPC(LdClsMethodCache,  (HasDest|CanCSE|                               \
                           Rematerializable|MayRaiseError))              \
   OPC(LdClsMethod,       (HasDest|CanCSE))                              \

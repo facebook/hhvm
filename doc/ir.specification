@@ -372,7 +372,22 @@ d:Home = LdHome s0:StkPtr s1:ConstInt
 LdConst
 DefConst
 LdCls
-LdClsCns
+
+d:Cell = LdClsCns s0:ConstStr s1:ConstStr
+
+  Loads the class constant named s0 from a class named s1, via target
+  cache.  The result may be uninitialized if the class is not defined.
+  This instruction should generally be followed by CheckClsCnsDefined,
+  unless we know the class is already loaded.
+
+  Note that no decref is necessary because class constants will always
+  be static.
+
+CheckClsCnsDefined s0:Cell l:Label
+
+  Checks that the result of a LdClsCns is defined, and if not jumps to
+  the exit trace label l.
+
 LdClsMethodCache
 LdClsMethod
 LdPropAddr

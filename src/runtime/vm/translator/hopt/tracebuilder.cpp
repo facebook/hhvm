@@ -749,13 +749,15 @@ SSATmp* TraceBuilder::genLdCls(SSATmp* className) {
   return genInstruction(LdCls, Type::ClassPtr, className);
 }
 
-SSATmp* TraceBuilder::genLdClsCns(SSATmp* cnsName,
-                                  SSATmp* cls,
-                                  Trace* exitTrace) {
+SSATmp* TraceBuilder::genLdClsCns(SSATmp* cnsName, SSATmp* cls) {
   ASSERT(cnsName->isConst() && cnsName->getType() == Type::StaticStr);
   // TODO: Weaken this second assert once we support ClassPtr for cls
   ASSERT(cls->isConst() && cls->getType() == Type::StaticStr);
-  return genInstruction(LdClsCns, Type::Cell, cnsName, cls, exitTrace);
+  return genInstruction(LdClsCns, Type::Cell, cnsName, cls);
+}
+
+void TraceBuilder::genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace) {
+  genInstruction(CheckClsCnsDefined, Type::None, cns, exitTrace);
 }
 
 SSATmp* TraceBuilder::genLdCurFuncPtr() {

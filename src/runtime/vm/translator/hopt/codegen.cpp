@@ -3539,12 +3539,10 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
-  Type::Tag type  = inst->getType();
-  SSATmp*   dst   = inst->getDst();
   SSATmp*   cnsName = inst->getSrc(0);
-  SSATmp*   cls   = inst->getSrc(1); /* May be a string or classref */
-  LabelInstruction* label = inst->getLabel();
+  SSATmp*   cls     = inst->getSrc(1);
 
+  ASSERT(inst->getType() == Type::Cell);
   ASSERT(cnsName->isConst() && cnsName->getType() == Type::StaticStr);
   ASSERT(cls->isConst() && cls->getType() == Type::StaticStr);
 
@@ -3556,14 +3554,14 @@ void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   // note that we bail from the trace if the target cache entry is empty
   // for this class constant or if the type assertion fails.
   // TODO: handle the slow case helper call.
-  cgLoad(type, dst, rVmTl, ch,
-         // no need to worry about boxed types if loading a cell
-         type == Type::Cell ? NULL : label);
-  // The following checks that the target cache entry is valid (not Uninit).
-  // If type is known, the cgLoad above already exits if the entry is invalid.
-  if (type == Type::Cell) {
-    cgCheckUninit(dst, label); // slow path helper call
-  }
+  cgLoad(inst->getType(), inst->getDst(), rVmTl, ch, nullptr);
+}
+
+void CodeGenerator::cgCheckClsCnsDefined(IRInstruction* inst) {
+  auto const label = inst->getLabel();
+  auto const cns   = inst->getSrc(0);
+  // TODO: real slow path support
+  cgCheckUninit(cns, label);
 }
 
 void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
@@ -3622,6 +3620,7 @@ void CodeGenerator::cgCheckUninit(SSATmp* src, LabelInstruction* label) {
   }
   emitFwdJcc(CC_Z, label);
 }
+
 void CodeGenerator::cgCheckUninit(IRInstruction* inst) {
   cgCheckUninit(inst->getSrc(0), inst->getLabel());
 }

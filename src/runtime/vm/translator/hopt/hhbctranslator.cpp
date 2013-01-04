@@ -69,9 +69,9 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
     } else {
       // at this point, we have no business refining the type of any
       // instructions other than the following
-      ASSERT (opc == LdLoc   || opc == LdStack  ||
-              opc == LdMemNR || opc == LdPropNR ||
-              opc == LdRefNR || opc == LdClsCns);
+      ASSERT(opc == LdLoc   || opc == LdStack  ||
+             opc == LdMemNR || opc == LdPropNR ||
+             opc == LdRefNR);
     }
   }
 }
@@ -1057,7 +1057,9 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
   Trace* exitTrace = getExitSlowTrace();
   SSATmp* cnsNameTmp = m_tb.genDefConst<const StringData*>(cnsNameStr);
   SSATmp* clsNameTmp = m_tb.genDefConst<const StringData*>(clsNameStr);
-  push(m_tb.genLdClsCns(cnsNameTmp, clsNameTmp, exitTrace));
+  SSATmp* cns = m_tb.genLdClsCns(cnsNameTmp, clsNameTmp);
+  m_tb.genCheckClsCnsDefined(cns, exitTrace);
+  push(cns);
 }
 
 void HhbcTranslator::emitFPassR() {

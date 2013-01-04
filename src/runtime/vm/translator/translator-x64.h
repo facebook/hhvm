@@ -28,15 +28,19 @@
 #include <tbb/concurrent_hash_map.h>
 #include <util/ringbuffer.h>
 #include <runtime/vm/debug/debug.h>
-#include <runtime/vm/translator/hopt/hhbctranslator.h>
 #include "runtime/vm/translator/abi-x64.h"
 
-namespace HPHP {
+namespace HPHP { class ExecutionContext; }
 
-class ExecutionContext;
+namespace HPHP { namespace VM { namespace JIT {
+class HhbcTranslator;
+class IRFactory;
+class CSEHash;
+class TraceBuilder;
+class CodeGenerator;
+}}}
 
-namespace VM {
-namespace Transl {
+namespace HPHP { namespace VM { namespace Transl {
 
 class IRTranslator;
 class MVecTransState;
@@ -1159,6 +1163,6 @@ struct SpaceRecorder {
 
 typedef const int COff; // Const offsets
 
-} } }
+}}}
 
 #endif

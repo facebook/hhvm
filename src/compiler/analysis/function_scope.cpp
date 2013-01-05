@@ -304,6 +304,10 @@ bool FunctionScope::isVariableArgument() const {
   return res;
 }
 
+bool FunctionScope::ignoreRedefinition() const {
+  return m_attribute & FileScope::IgnoreRedefinition;
+}
+
 bool FunctionScope::isReferenceVariableArgument() const {
   bool res = (m_attribute & FileScope::ReferenceVariableArgument) &&
              !m_overriding;
@@ -364,6 +368,10 @@ void FunctionScope::setVariableArgument(int reference) {
       m_attribute |= FileScope::MixedVariableArgument;
     }
   }
+}
+
+void FunctionScope::setIgnoreRedefinition() {
+  m_attribute |= FileScope::IgnoreRedefinition;
 }
 
 bool FunctionScope::hasEffect() const {

@@ -308,6 +308,9 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   if (flags & ClassInfo::NeedsActRec) {
     f->setNeedsActRec();
   }
+  if ((flags & ClassInfo::IgnoreRedefinition) && !method) {
+    f->setIgnoreRedefinition();
+  }
   return f;
 }
 

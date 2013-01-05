@@ -216,6 +216,12 @@ public:
   bool needsActRec() const;
   void setNeedsActRec();
 
+  /*
+   * If this is a builtin and can be redefined
+   */
+  bool ignoreRedefinition() const;
+  void setIgnoreRedefinition();
+
   /**
    * Whether this function is a runtime helper function
    */

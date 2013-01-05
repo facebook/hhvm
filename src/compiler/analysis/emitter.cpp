@@ -5798,6 +5798,10 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
          || name == "func_get_arg")) {
       return false;
     }
+    // in sandbox mode, don't emit FCallBuiltin for redefinable functions
+    if (func->ignoreRedefinition() && !Option::WholeProgram) {
+      return false;
+    }
     return true;
   }
   return false;

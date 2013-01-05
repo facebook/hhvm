@@ -59,6 +59,7 @@ public:
     MixedVariableArgument     = 0x800, // variable args, may or may not be ref'd
     IsFoldable                = 0x1000,// function can be constant folded
     NeedsActRec               = 0x2000,// builtin function needs ActRec
+    IgnoreRedefinition        = 0x4000,// ignore redefinition of builtin function
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;

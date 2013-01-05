@@ -147,7 +147,9 @@ void CmdVariable::setClientOutput(DebuggerClient *client) {
 }
 
 Array CmdVariable::GetGlobalVariables() {
-  Array ret = get_globals()->getDefinedVars();
+  Array ret = hhvm
+    ? g_vmContext->m_globalVarEnv->getDefinedVariables()
+    : get_globals()->getDefinedVars();
   ret.remove("GLOBALS");
   return ret;
 }

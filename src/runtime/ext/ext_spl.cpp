@@ -332,11 +332,11 @@ void f_spl_autoload(CStrRef class_name,
               ? s_extension_list->extensions
               : StringUtil::Explode(file_extensions, ",").toArray();
   String lClass = StringUtil::ToLower(class_name);
-  Globals *g = get_globals();
+  Globals *variables = hhvm ? nullptr : get_globals();
   bool found = false;
   for (ArrayIter iter(ext); iter; ++iter) {
     String fileName = lClass + iter.second();
-    include(fileName, true, g, "", false);
+    include(fileName, true, variables, "", false);
     if (f_class_exists(class_name, false)) {
       found = true;
       break;

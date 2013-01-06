@@ -21,24 +21,25 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-
+#include <memory>
 #include <map>
 #include <vector>
 #include <set>
-#include <boost/dynamic_bitset.hpp>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <util/hash.h>
-#include <util/timer.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/translator/immstack.h>
-#include <runtime/vm/translator/runtime-type.h>
-#include <runtime/vm/translator/fixup.h>
-#include <runtime/vm/translator/writelease.h>
-#include <runtime/vm/translator/trans-data.h>
-#include <runtime/vm/debugger_hook.h>
-#include <runtime/base/md5.h>
+
+#include "util/hash.h"
+#include "util/timer.h"
+#include "runtime/base/execution_context.h"
+#include "runtime/vm/bytecode.h"
+#include "runtime/vm/translator/immstack.h"
+#include "runtime/vm/translator/runtime-type.h"
+#include "runtime/vm/translator/fixup.h"
+#include "runtime/vm/translator/writelease.h"
+#include "runtime/vm/translator/trans-data.h"
+#include "runtime/vm/debugger_hook.h"
+#include "runtime/base/md5.h"
 
 /* Translator front-end. */
 namespace HPHP {
@@ -792,8 +793,6 @@ public:
 private:
   friend struct TraceletContext;
 
-  int stackFrameOffset; // sp at current instr; used to normalize
-
   void analyzeSecondPass(Tracelet& t);
   void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
   bool applyInputMetaData(Unit::MetaHandle&,
@@ -958,9 +957,8 @@ public:
   }
 
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
-                   int& currentStackOffset, Tracelet& t,
-                   TraceletContext& tas);
-  void analyze(const SrcKey* sk, Tracelet& out);
+                   Tracelet& t, TraceletContext& tas);
+  std::unique_ptr<Tracelet> analyze(SrcKey sk);
   void advance(Opcode const **instrs);
   static int locPhysicalOffset(Location l, const Func* f = NULL);
   static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);

@@ -24,21 +24,22 @@
 #include <vector>
 #include <string>
 
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/types.h>
-#include <runtime/ext/ext_continuation.h>
-#include <util/trace.h>
-#include <util/biased_coin.h>
-#include <runtime/vm/hhbc.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/translator/annotation.h>
-#include <runtime/vm/type-profile.h>
-#include <runtime/vm/runtime.h>
+#include "util/trace.h"
+#include "util/biased_coin.h"
+
+#include "runtime/base/runtime_option.h"
+#include "runtime/base/types.h"
+#include "runtime/ext/ext_continuation.h"
+#include "runtime/vm/hhbc.h"
+#include "runtime/vm/bytecode.h"
+#include "runtime/vm/translator/targetcache.h"
+#include "runtime/vm/translator/translator.h"
+#include "runtime/vm/translator/translator-deps.h"
+#include "runtime/vm/translator/translator-inline.h"
+#include "runtime/vm/translator/translator-x64.h"
+#include "runtime/vm/translator/annotation.h"
+#include "runtime/vm/type-profile.h"
+#include "runtime/vm/runtime.h"
 
 namespace HPHP {
 namespace VM {
@@ -2625,8 +2626,7 @@ std::string NormalizedInstruction::toString() const {
 }
 
 void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
-                             int& currentStackOffset, Tracelet& t,
-                             TraceletContext& tas) {
+                             Tracelet& t, TraceletContext& tas) {
   if (ni->op() == OpBareThis &&
       ni->outStack->rtt.isVagueValue()) {
     SrcKey src = sk;
@@ -2933,9 +2933,45 @@ static bool checkTaintFuncs(StringData* name) {
  * analyze --
  *
  *   Given a sequence of bytecodes, return our tracelet IR.
+ *
+ * The purposes of this analysis is to determine:
+ *
+ *  1. Pre-conditions: What locations get read before they get written to:
+ *     we will need typechecks for these and we will want to load them into
+ *     registers. (m_dependencies)
+ *
+ *  2. Post-conditions: the locations that have been written to and are
+ *     still live at the end of the tracelet. We need to allocate registers
+ *     of these and we need to spill them at the end of the tracelet.
+ *     (m_changes)
+ *
+ *  3. Determine the runtime types for each instruction's input locations
+ *     and output locations.
+ *
+ * The main analysis works by doing a single pass over the instructions. It
+ * effectively simulates the execution of each instruction, updating its
+ * knowledge about types as it goes.
+ *
+ * The TraceletContext class is used to keep track of the current state of
+ * the world. Initially it is empty, and when the inputs for the first
+ * instruction are analyzed we call recordRead(). The recordRead() function
+ * in turn inspects the live types of the inputs and adds them to the type
+ * map. This serves two purposes: (1) it figures out what typechecks this
+ * tracelet needs; and (2) it guarantees that the code we generate will
+ * satisfy the live types that are about to be passed in.
+ *
+ * Over time the TraceletContext's type map will change. However, we need to
+ * record what the types _were_ right before and right after a given
+ * instruction executes. This is where the NormalizedInstruction class comes
+ * in. We store the RuntimeTypes from the TraceletContext right before an
+ * instruction executes into the NormalizedInstruction's 'inputs' field, and
+ * we store the RuntimeTypes from the TraceletContext right after the
+ * instruction executes into the various output fields.
  */
-void Translator::analyze(const SrcKey *csk, Tracelet& t) {
-  t.m_sk = *csk;
+std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
+  std::unique_ptr<Tracelet> retval(new Tracelet());
+  auto& t = *retval;
+  t.m_sk = sk;
 
   TRACE(3, "Translator::analyze %s:%d %s\n",
            curUnit()->filepath()->data(),
@@ -2943,7 +2979,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
            curFunc()->fullName()->data());
   TraceletContext tas(&t);
   ImmStack immStack;
-  stackFrameOffset = 0;
+  int stackFrameOffset = 0;
   int oldStackFrameOffset = 0;
 
   // numOpcodes counts the original number of opcodes in a tracelet
@@ -2951,40 +2987,6 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
   t.m_numOpcodes = 0;
   Unit::MetaHandle metaHand;
 
-  /**
-   * The purposes of this analysis is to determine:
-   *  1. Pre-conditions: What locations get read before they get written to:
-   *     we will need typechecks for these and we will want to load them into
-   *     registers. (m_dependencies)
-   *  2. Post-conditions: the locations that have been written to and are
-   *     still live at the end of the tracelet. We need to allocate registers
-   *     of these and we need to spill them at the end of the tracelet.
-   *     (m_changes)
-   *  3. Determine the runtime types for each instruction's input locations
-   *     and output locations.
-   *
-   * The analysis works by doing a single pass over the instructions. It
-   * effectively simulates the execution of each instruction, updating its
-   * knowledge about types as it goes.
-   *
-   * The TraceletContext class is used to keep track of the current state of
-   * the world. Initially it is empty, and when the inputs for the first
-   * instruction are analyzed we call recordRead(). The recordRead() function
-   * in turn inspects the live types of the inputs and adds them to the type
-   * map. This serves two purposes: (1) it figures out what typechecks this
-   * tracelet needs; and (2) it guarantees that the code we generate will
-   * satisfy the live types that are about to be passed in.
-   *
-   * Over time the TraceletContext's type map will change. However, we need to
-   * record what the types _were_ right before and right after a given
-   * instruction executes. This is where the NormalizedInstruction class comes
-   * in. We store the RuntimeTypes from the TraceletContext right before an
-   * instruction executes into the NormalizedInstruction's 'inputs' field, and
-   * we store the RuntimeTypes from the TraceletContext right after the
-   * instruction executes into the 'outputs' field.
-   */
-
-  SrcKey sk = *csk; // copy for local use
   const Unit *unit = curUnit();
   for (;; sk.advance(unit)) {
   head:
@@ -3232,7 +3234,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       sk.advance(unit);
       goto breakBB;
     }
-    postAnalyze(ni, sk, stackFrameOffset, t, tas);
+    postAnalyze(ni, sk, t, tas);
   }
 breakBB:
   NormalizedInstruction* ni = t.m_instrStream.last;
@@ -3295,6 +3297,7 @@ breakBB:
   t.constructLiveRanges();
 
   TRACE(1, "Tracelet done: stack delta %d\n", t.m_stackChange);
+  return retval;
 }
 
 Translator::Translator() :

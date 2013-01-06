@@ -1387,8 +1387,7 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
     ASSERT(m_useHHIR == false);
   }
 
-  std::unique_ptr<Tracelet> tlet(new Tracelet());
-  analyze(sk, *tlet);
+  std::unique_ptr<Tracelet> tlet = analyze(*sk);
 
   if (align) {
     moveToAlign(a, kNonFallthroughAlign);
@@ -1398,8 +1397,7 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
   if (!translateTracelet(*tlet)) {
     // If translating with the IR failed, reanalyze.
     ASSERT(!m_useHHIR);
-    tlet.reset(new Tracelet());
-    analyze(sk, *tlet);
+    tlet = analyze(*sk);
     UNUSED bool success = translateTracelet(*tlet);
     ASSERT(success);
   }

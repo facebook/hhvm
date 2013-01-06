@@ -1908,7 +1908,7 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 
   // In pseudo-mains, emit check for presence of m_this
   TCA patch1 = NULL;
-  if (curFunc()->isPseudoMain()) {
+  if (getCurrFunc()->isPseudoMain()) {
     m_as.test_reg64_reg64(scratchReg, scratchReg);
     patch1 = m_as.code.frontier;
     m_as.jcc8(CC_Z, patch1);
@@ -2805,7 +2805,7 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
 
   if (label != NULL) {
     // we need to perform its checks
-    if (curFunc()->cls() == NULL) {
+    if (getCurrFunc()->cls() == NULL) {
       // test dst, dst
       // jz label
 
@@ -4017,7 +4017,7 @@ void CodeGenerator::cgDefFunc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCreateCont(IRInstruction* inst) {
-  auto helper = curFunc()->isNonClosureMethod() ?
+  auto helper = getCurrFunc()->isNonClosureMethod() ?
     VMExecutionContext::createContinuation<true> :
     VMExecutionContext::createContinuation<false>;
   cgCallHelper(m_as, (TCA)helper,

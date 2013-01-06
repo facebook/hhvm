@@ -17,7 +17,8 @@
 #ifndef incl_BIASED_COIN_H_
 #define incl_BIASED_COIN_H_
 
-#include <util/trace.h>
+#include "util/assertions.h"
+#include "util/trace.h"
 
 namespace HPHP {
 

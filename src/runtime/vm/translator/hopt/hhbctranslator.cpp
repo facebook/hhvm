@@ -579,7 +579,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   m_tb.genExitOnVarEnv(getExitSlowTrace());
 
   const StringData* genName = lookupStringId(funNameStrId);
-  const Func* origFunc = curFunc();
+  const Func* origFunc = getCurFunc();
   const Func* genFunc = origFunc->getGeneratorBody(genName);
   int origLocals = origFunc->numLocals();
   int genLocals = genFunc->numLocals();
@@ -755,7 +755,7 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
   if (!cls) {
     PUNT(ClsPropAddr_noCls);
   }
-  if (curFunc()->cls() != cls) {
+  if (getCurFunc()->cls() != cls) {
     PUNT(ClsPropAddr_clsNE);
   }
   if (!prop->isConst() || prop->getType() != Type::StaticStr) {
@@ -1558,7 +1558,7 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
       return;
     }
   } else {
-    if (!tc.check(frame_local(curFrame(), paramId), curFunc())) {
+    if (!tc.check(frame_local(curFrame(), paramId), getCurFunc())) {
       spillStack();
       emitInterpOne(Type::None);
       return;

@@ -24,7 +24,7 @@
 bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
   const char* YYMARKER = NULL;
   char* heredoc_marker = NULL;
-  size_t heredoc_marker_len = NULL;
+  size_t heredoc_marker_len = 0;
   bool result = false;
   enum {
     HTML,

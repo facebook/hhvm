@@ -281,13 +281,11 @@ void IRInstruction::printSrcs(std::ostream& ostream) {
 void IRInstruction::print(std::ostream& ostream) {
   ostream << folly::format("({:02d}) ", m_id);
   printDst(ostream);
+
   bool isStMem = m_op == StMem || m_op == StMemNT || m_op == StRaw;
   bool isLdMem = m_op == LdMemNR || m_op == LdRaw;
   if (isStMem || m_op == StLoc || isLdMem) {
-    if (isLdMem) {
-      ostream << opcodeName(m_op) << " ";
-    }
-    ostream << "[";
+    ostream << opcodeName(m_op) << " [";
     printSrc(ostream, 0);
     SSATmp* offset = getSrc(1);
     if ((isStMem || isLdMem) &&
@@ -299,13 +297,14 @@ void IRInstruction::print(std::ostream& ostream) {
     ostream << "]:" << Type::Strings[type];
     if (!isLdMem) {
       ASSERT(getNumSrcs() > 1);
-      ostream << " = " << opcodeName(m_op) << " ";
+      ostream << ", ";
       printSrc(ostream, isStMem ? 2 : 1);
     }
   } else {
     printOpcode(ostream);
     printSrcs(ostream);
   }
+
   if (m_label) {
     ostream << ", ";
     m_label->print(ostream);

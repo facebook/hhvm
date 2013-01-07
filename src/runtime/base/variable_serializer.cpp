@@ -129,6 +129,7 @@ void VariableSerializer::write(bool v) {
     if (v) m_buf->append(1);
     break;
   case VarExport:
+  case PHPOutput:
   case JSON:
   case DebuggerDump:
     m_buf->append(v ? "true" : "false");
@@ -155,6 +156,7 @@ void VariableSerializer::write(int64 v) {
   switch (m_type) {
   case PrintR:
   case VarExport:
+  case PHPOutput:
   case JSON:
   case DebuggerDump:
     m_buf->append(v);
@@ -202,12 +204,14 @@ void VariableSerializer::write(double v) {
     }
     break;
   case VarExport:
+  case PHPOutput:
   case PrintR:
   case DebuggerDump:
     {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
-      vspprintf(&buf, 0, m_type == VarExport ? "%.*H" : "%.*G", 14, v);
+      bool isExport = m_type == VarExport || m_type == PHPOutput;
+      vspprintf(&buf, 0, isExport ? "%.*H" : "%.*G", 14, v);
       m_buf->append(buf);
       free(buf);
     }
@@ -251,15 +255,16 @@ void VariableSerializer::write(double v) {
 
 void VariableSerializer::write(const char *v, int len /* = -1 */,
                                bool isArrayKey /* = false */) {
+  if (v == NULL) v = "";
+  if (len < 0) len = strlen(v);
+
   switch (m_type) {
   case PrintR: {
-    if (len < 0) len = strlen(v);
     m_buf->append(v, len);
     break;
   }
   case DebuggerDump:
   case VarExport: {
-    if (len < 0) len = strlen(v);
     m_buf->append('\'');
     const char *p = v;
     for (int i = 0; i < len; i++, p++) {
@@ -278,8 +283,6 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   }
   case VarDump:
   case DebugDump: {
-    if (v == NULL) v = "";
-    if (len < 0) len = strlen(v);
     indent();
     m_buf->append("string(");
     m_buf->append(len);
@@ -293,34 +296,57 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   case Serialize:
   case APCSerialize:
   case DebuggerSerialize:
-    if (len < 0) len = strlen(v);
     m_buf->append("s:");
     m_buf->append(len);
     m_buf->append(":\"");
     m_buf->append(v, len);
     m_buf->append("\";");
     break;
-  case JSON:
-    {
-      if (len < 0) len = strlen(v);
+  case JSON: {
+    if (m_option & k_JSON_NUMERIC_CHECK) {
+      int64 lval; double dval;
+      switch (is_numeric_string(v, len, &lval, &dval, 0)) {
+        case KindOfInt64:
+          write(lval);
+          return;
+        case KindOfDouble:
+          write(dval);
+          return;
+        default:
+          break;
+      }
+    }
 
-      if (m_option & k_JSON_NUMERIC_CHECK) {
-        int64 lval; double dval;
-        switch (is_numeric_string(v, len, &lval, &dval, 0)) {
-          case KindOfInt64:
-            write(lval);
-            return;
-          case KindOfDouble:
-            write(dval);
-            return;
-          default:
-            break;
+    m_buf->appendJsonEscape(v, len, m_option);
+    break;
+  }
+  case PHPOutput: {
+    m_buf->append('"');
+    for (int i = 0; i < len; ++i) {
+      const unsigned char c = v[i];
+      switch (c) {
+        case '\n': m_buf->append("\\n"); break;
+        case '\r': m_buf->append("\\r"); break;
+        case '\t': m_buf->append("\\t"); break;
+        case '\\': m_buf->append("\\\\"); break;
+        case '$':  m_buf->append("\\$"); break;
+        case '"':  m_buf->append("\\\""); break;
+        default: {
+          if (c >= ' ' && c <= '~') {
+            // The range [' ', '~'] contains only printable characters
+            // and we've already handled special cases above
+            m_buf->append(c);
+          } else {
+            char buf[5];
+            snprintf(buf, sizeof(buf), "\\%03o", c);
+            m_buf->append(buf);
+          }
         }
       }
-
-      m_buf->appendJsonEscape(v, len, m_option);
     }
+    m_buf->append('"');
     break;
+  }
   default:
     ASSERT(false);
     break;
@@ -389,6 +415,7 @@ void VariableSerializer::writeNull() {
     // do nothing
     break;
   case VarExport:
+  case PHPOutput:
     m_buf->append("NULL");
     break;
   case VarDump:
@@ -427,6 +454,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     m_buf->append(" *RECURSION*");
     break;
   case VarExport:
+  case PHPOutput:
     throw NestingLevelTooDeepException();
   case VarDump:
   case DebugDump:
@@ -506,6 +534,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     m_indent += (info.indent_delta = 4);
     break;
   case VarExport:
+  case PHPOutput:
     if (m_indent > 0) {
       m_buf->append('\n');
       indent();
@@ -652,6 +681,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
     break;
   }
   case VarExport:
+  case PHPOutput:
     indent();
     write(key, true);
     m_buf->append(" => ");
@@ -731,6 +761,7 @@ void VariableSerializer::writeArrayValue(CVarRef value) {
     m_buf->append('\n');
     break;
   case VarExport:
+  case PHPOutput:
     m_buf->append(",\n");
     break;
   default:
@@ -756,6 +787,7 @@ void VariableSerializer::writeArrayFooter() {
     }
     break;
   case VarExport:
+  case PHPOutput:
     indent();
     if (info.is_object) {
       m_buf->append("))");
@@ -824,6 +856,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
                                         bool isObject /* = false */) {
   switch (m_type) {
   case VarExport:
+  case PHPOutput:
   case PrintR:
   case VarDump:
   case DebugDump:

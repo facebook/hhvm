@@ -81,7 +81,7 @@ array(4) {
       ["default"]=>
       NULL
       ["defaultText"]=>
-      string(4) "null"
+      string(4) "NULL"
       ["attributes"]=>
       array(0) {
       }

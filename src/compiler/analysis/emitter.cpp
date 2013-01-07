@@ -26,6 +26,7 @@
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/variable_serializer.h>
 #include <runtime/eval/runtime/file_repository.h>
 
 #include <compiler/builtin_symbols.h>
@@ -5156,17 +5157,26 @@ void EmitterVisitor::emitPostponedMeths() {
       }
       // Store info about the default value if there is one.
       if (par->isOptional()) {
-        std::ostringstream os;
-        CodeGenerator cg(&os, CodeGenerator::PickledPHP);
-        AnalysisResultPtr ar(new AnalysisResult());
-        par->defaultValue()->outputPHP(cg, ar);
-        pi.setPhpCode(StringData::GetStaticString(os.str()));
+        const StringData* phpCode;
         ExpressionPtr vNode = par->defaultValue();
         if (vNode->isScalar()) {
           TypedValue dv;
           initScalar(dv, vNode);
           pi.setDefaultValue(dv);
+
+          // Simple case: it's a scalar value so we just serialize it
+          VariableSerializer vs(VariableSerializer::PHPOutput);
+          String result = vs.serialize(tvAsCVarRef(&dv), true);
+          phpCode = StringData::GetStaticString(result.data());
+        } else {
+          // Non-scalar, so we have to output PHP from the AST node
+          std::ostringstream os;
+          CodeGenerator cg(&os, CodeGenerator::PickledPHP);
+          AnalysisResultPtr ar(new AnalysisResult());
+          vNode->outputPHP(cg, ar);
+          phpCode = StringData::GetStaticString(os.str());
         }
+        pi.setPhpCode(phpCode);
       }
       ExpressionListPtr paramUserAttrs =
         dynamic_pointer_cast<ExpressionList>(par->userAttributeList());

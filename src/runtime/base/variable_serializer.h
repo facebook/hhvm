@@ -47,6 +47,7 @@ public:
     JSON,
     APCSerialize,
     DebuggerSerialize,
+    PHPOutput,
   };
 
   /**

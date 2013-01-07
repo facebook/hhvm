@@ -352,7 +352,6 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
   }
 }
 
-
 void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
   outputCPPObject(cg, ar);
@@ -363,7 +362,8 @@ void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
   }
 
   if (m_bindClass && m_classScope) {
-    cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
+    cg_printf("bindThis(fi.getThreadInfo()), %s%s::",
+              Option::ClassPrefix, m_classScope->getId().c_str());
   }
 }
 
@@ -464,6 +464,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     ClassScopePtr cls(m_object->getType()->getClass(ar, getScope()));
     if (cls) getFileScope()->addUsedClassFullHeader(cls);
 
+    if (m_bindClass && m_classScope) cg_printf("(");
     outputCPPObjectCall(cg, ar);
     cg_printf("%s%s(", m_funcScope ?
               m_funcScope->getPrefix(ar, m_params) : Option::MethodPrefix,
@@ -474,6 +475,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                       m_argArrayId, m_argArrayHash,
                                       m_argArrayIndex);
     cg_printf(")");
+    if (m_bindClass && m_classScope) cg_printf(")");
   } else {
     bool maybeStatic = true;
     if (Option::WholeProgram && !ar->isSystem() && !m_name.empty()) {

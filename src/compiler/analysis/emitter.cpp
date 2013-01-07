@@ -5771,8 +5771,8 @@ bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
     return false;
   }
   if (!func->isUserFunction() && !func->needsActRec()
-      && (uint)numParams >= func->getMinParamCount()
-      && (uint)numParams <= func->getMaxParamCount()) {
+      && numParams >= func->getMinParamCount()
+      && numParams <= func->getMaxParamCount()) {
     if (func->isVariableArgument() || func->isReferenceVariableArgument()
                 || func->isMixedVariableArgument()) {
       return false;

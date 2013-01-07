@@ -295,15 +295,22 @@ void apc_load(int thread) {
     static uint64_t keep_entry_points_around_under_lto;
     if (++keep_entry_points_around_under_lto == UINT64_MAX) {
       // this had better never happen...
+
+      // Fill out a cache_info to prevent g++ from optimizing out
+      // the calls to const_load_impl*
+      cache_info info;
+      info.a_name = "dummy";
+      info.use_const = true;
+
       const_load();
-      const_load_impl(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-      const_load_impl_compressed(NULL,
+      const_load_impl(&info, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+      const_load_impl_compressed(&info,
                                  NULL, NULL, NULL,
                                  NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL);
-      apc_load_impl(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-      apc_load_impl_compressed(NULL,
+      apc_load_impl(&info, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+      apc_load_impl_compressed(&info,
                                NULL, NULL, NULL,
                                NULL, NULL, NULL,
                                NULL, NULL, NULL, NULL,

@@ -381,7 +381,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
       Variant &v = arr1.lvalAt(key, AccessFlags::Key);
       if (v.isArray()) {
         Array subarr1 = v.toArray();
-        CArrRef arr_value = value.toArrNR();
+        const ArrNR& arr_value = value.toArrNR();
         php_array_replace_recursive(seen, v.isReferenced(), subarr1,
                                     arr_value);
         v = subarr1;
@@ -716,8 +716,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
 
 static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
   if (var.isArray()) {
-    CArrRef vars = var.toArrNR();
-    for (ArrayIter iter(vars); iter; ++iter) {
+    for (ArrayIter iter(var.getArrayData()); iter; ++iter) {
       compact(v, ret, iter.second());
     }
   } else {

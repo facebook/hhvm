@@ -10137,7 +10137,7 @@ emitClassToReg(X64Assembler& a, const StringData* name, PhysReg r) {
     emitImmReg(a, int64(cls), r);
   } else {
     TargetCache::CacheHandle ch = TargetCache::allocKnownClass(name);
-    a.  load_reg64_disp_reg64(rVmTl, ch, r);;
+    a.  load_reg64_disp_reg64(rVmTl, ch, r);
   }
 }
 

@@ -55,7 +55,7 @@ function Energy(&$bodies) {
 }
 
 function NewBody($x, $y, $z, $vx, $vy, $vz, $mass){
-  $b = array();;
+  $b = array();
   $b['x'] = $x;
   $b['y'] = $y;
   $b['z'] = $z;

@@ -552,8 +552,8 @@ public:
       case Arr           : return KindOfArray;
       case Obj           : return KindOfObject;
       case ClassRef      : return KindOfClass;
-      case UncountedInit : return KindOfUncountedInit;;
-      case Uncounted     : return KindOfUncounted;;
+      case UncountedInit : return KindOfUncountedInit;
+      case Uncounted     : return KindOfUncounted;
       case Gen           : return KindOfAny;
       default: {
         ASSERT(isBoxed(type));

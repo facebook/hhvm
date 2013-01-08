@@ -6057,7 +6057,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo,
 
 #if EXIF_USE_MBSTRING
   char  *decode;
-  size_t len;;
+  size_t len;
 #endif
 
   *pszEncoding = NULL;

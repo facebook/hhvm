@@ -54,7 +54,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
     return null;
   }
 
-  int64 json_options = options.toInt64();;
+  int64 json_options = options.toInt64();
   if (options.isBoolean() && options.toBooleanVal()) {
     json_options = k_JSON_FB_LOOSE;
   }

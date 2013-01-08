@@ -389,7 +389,7 @@ bool get_call_info_static_method(MethodCallPackage &mcp) {
 }
 
 const ObjectStaticCallbacks * get_object_static_callbacks(CStrRef s) {
-  return get_builtin_object_static_callbacks(s);;
+  return get_builtin_object_static_callbacks(s);
 }
 
 Array get_global_state() { return Array(); }

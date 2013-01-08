@@ -682,11 +682,6 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   // NOTE: Comparisons with bools get juggled to bool.
   // ---------------------------------------------------------------------
 
-  // Canonicalize constant bools to the right
-  if (src1->getType() == Type::Bool && src1->isConst()) {
-    return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
-  }
-
   // Perform constant-bool optimizations
   if (src2->getType() == Type::Bool && src2->isConst()) {
     bool b = src2->getConstValAsBool();

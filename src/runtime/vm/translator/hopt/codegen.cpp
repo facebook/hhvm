@@ -1023,18 +1023,19 @@ Address CodeGenerator::cgOpCmpHelper(
   auto dstReg  = dst ->getReg();
 
   // It is possible that some pass has been done after simplification; if such
-  //  a pass invalidates out invatiants, then just punt.
+  // a pass invalidates our invariants, then just punt.
 
-  // SIMPLIFY_CMP has done const-const optimization
-  // if the types are the same and there is only one constant,
-  //  SIMPLIFY_CMP has moved it to the right
+  // simplifyCmp has done const-const optimization
+  //
+  // If the types are the same and there is only one constant,
+  // simplifyCmp has moved it to the right.
   if (src1->isConst()) {
     CG_PUNT(cgOpCmpHelper_const);
   }
 
   /////////////////////////////////////////////////////////////////////////////
   // case 1: null/string cmp string
-  // SIMPLIFY_CMP has converted the null to ""
+  // simplifyCmp has converted the null to ""
   if (Type::isString(type1) && Type::isString(type2)) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);
@@ -1043,7 +1044,7 @@ Address CodeGenerator::cgOpCmpHelper(
 
   /////////////////////////////////////////////////////////////////////////////
   // case 2: bool/null cmp anything
-  // SIMPLIFY_CMP has converted all args to bool
+  // simplifyCmp has converted all args to bool
   else if (type1 == Type::Bool && type2 == Type::Bool) {
     if (src2->isConst()) {
       m_as.    cmpb (src2->getConstValAsBool(), Reg8(int(src1Reg)));
@@ -1069,12 +1070,10 @@ Address CodeGenerator::cgOpCmpHelper(
       (m_as.*setter)(rbyte(dstReg));
     }
 
-    // doubles be damned!
     else if (type1 == Type::Dbl || type2 == Type::Dbl) {
       CG_PUNT(cgOpCmpHelper_Dbl);
     }
 
-    // string
     else if (Type::isString(type1)) {
       // string cmp string is dealy with in case 1
       // string cmp double is punted above
@@ -1092,7 +1091,6 @@ Address CodeGenerator::cgOpCmpHelper(
       }
     }
 
-    // object
     else if (type1 == Type::Obj) {
       // string cmp object/resource is dealt with above
       // object cmp double is punted above
@@ -1126,7 +1124,7 @@ Address CodeGenerator::cgOpCmpHelper(
 
   /////////////////////////////////////////////////////////////////////////////
   // case 6: array cmp anything
-  // SIMPLIfY_CMP has already dealt with this case.
+  // simplifyCmp has already dealt with this case.
 
   /////////////////////////////////////////////////////////////////////////////
   else {

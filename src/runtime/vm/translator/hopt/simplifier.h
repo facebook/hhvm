@@ -79,6 +79,7 @@ private:
   SSATmp* genDefInt(int64 val);
   SSATmp* genDefBool(bool val);
   SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
+  SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
   TraceBuilder* m_tb;
 
 };

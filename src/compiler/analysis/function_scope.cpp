@@ -37,6 +37,7 @@
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <util/parser/hphp.tab.hpp>
+#include <runtime/base/variable_serializer.h>
 #include <runtime/base/zend/zend_string.h>
 
 using namespace HPHP;
@@ -1999,9 +2000,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       ExpressionPtr def = param->defaultValue();
       if (def) {
-        std::string sdef = def->getText();
-        std::string esdef = string_cplus_escape(sdef.data(), sdef.size());
-        ASSERT(!esdef.empty());
+        std::string text, value;
         if (!def->isScalar() || !def->getScalarValue(defArg)) {
           /**
            * Special value runtime/ext/ext_reflection.cpp can check and throw.
@@ -2009,12 +2008,16 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
            * work better for reflections, we will have to implement
            * getScalarValue() to greater extent under compiler/expressions.
            */
-          cg_printf("\"\x01\", \"%s\",\n", esdef.c_str());
+          value = "\x01";
+          text = def->getText();
         } else {
           String str = f_serialize(defArg);
-          std::string s = string_cplus_escape(str.data(), str.size());
-          cg_printf("\"%s\", \"%s\",\n", s.c_str(), esdef.c_str());
+          value = string_cplus_escape(str.data(), str.size());
+          text = VariableSerializer(VariableSerializer::PHPOutput).serialize(
+            defArg, true).data();
         }
+        cg_printf("\"%s\", \"%s\",\n", value.c_str(),
+                  string_cplus_escape(text.data(), text.size()).c_str());
       } else {
         cg_printf("\"\", \"\",\n");
       }

@@ -45,7 +45,7 @@ struct {
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
 
-bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
+static bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
   return OpInfo[opcode].flags & flags;
 }
 
@@ -66,7 +66,7 @@ bool IRInstruction::isRematerializable() const {
 }
 
 bool IRInstruction::hasMemEffects() const {
-  return opcodeHasFlags(getOpcode(), MemEffects);
+  return opcodeHasFlags(getOpcode(), MemEffects) || mayReenterHelper();
 }
 
 bool IRInstruction::canCSE() const {
@@ -75,7 +75,7 @@ bool IRInstruction::canCSE() const {
   // reference count or consume reference counts.
   ASSERT(!canCSE || !producesReference());
   ASSERT(!canCSE || !consumesReferences());
-  return canCSE;
+  return canCSE && !mayReenterHelper();
 }
 
 bool IRInstruction::consumesReferences() const {
@@ -115,7 +115,40 @@ bool IRInstruction::mayModifyRefs() const {
       return innerType == Type::Obj || innerType == Type::Arr;
     }
   }
-  return opcodeHasFlags(opc, MayModifyRefs);
+  return opcodeHasFlags(opc, MayModifyRefs) || mayReenterHelper();
+}
+
+bool IRInstruction::mayRaiseError() const {
+  return opcodeHasFlags(getOpcode(), MayRaiseError) || mayReenterHelper();
+}
+
+bool IRInstruction::isEssential() const {
+  Opcode opc = getOpcode();
+  if (opc == DecRefNZ) {
+    // If the source of a DecRefNZ is not an IncRef, mark it as essential
+    // because we won't remove its source as well as itself.
+    // If the ref count optimization is turned off, mark all DecRefNZ as
+    // essential.
+    if (!RuntimeOption::EvalHHIREnableRefCountOpt ||
+        getSrc(0)->getInstruction()->getOpcode() != IncRef) {
+      return true;
+    }
+  }
+  if (isControlFlowInstruction() && opc != LdCls) {
+    return true;
+  }
+  return opcodeHasFlags(opc, Essential) || mayReenterHelper();
+}
+
+bool IRInstruction::mayReenterHelper() const {
+  if (isCmpOp(getOpcode())) {
+    return cmpOpTypesMayReenter(getOpcode(),
+                                getSrc(0)->getType(),
+                                getSrc(1)->getType());
+  }
+  // Not necessarily actually false; this is just a helper for other
+  // bits.
+  return false;
 }
 
 Opcode queryNegateTable[] = {
@@ -151,6 +184,16 @@ const char* Type::Strings[(int)Type::TAG_ENUM_COUNT] = {
     IR_TYPES
     #undef IRT
 };
+
+// Objects compared with strings may involve calling a user-defined
+// __toString function.
+bool cmpOpTypesMayReenter(Opcode op, Type::Tag t0, Type::Tag t1) {
+  if (op == OpNSame || op == OpSame) return false;
+  ASSERT(t0 != Type::Gen && t1 != Type::Gen);
+  return (t0 == Type::Cell || t1 == Type::Cell) ||
+    ((t0 == Type::Obj || t1 == Type::Obj) &&
+     (Type::isString(t0) || Type::isString(t1)));
+}
 
 TraceExitType::ExitType getExitType(Opcode opc) {
   ASSERT(opc >= ExitTrace && opc <= ExitGuardFailure);

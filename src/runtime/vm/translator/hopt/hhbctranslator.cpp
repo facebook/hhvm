@@ -1039,9 +1039,13 @@ Trace* HhbcTranslator::emitJmpNZ(int32 offset) {
 
 void HhbcTranslator::emitCmp(Opcode opc) {
   TRACE(3, "%u: Cmp %s\n", m_bcOff, opcodeName(opc));
+
+  if (cmpOpTypesMayReenter(opc, topC(0)->getType(), topC(1)->getType())) {
+    spillStack();
+  }
+  // src2 opc src1
   SSATmp* src1 = popC();
   SSATmp* src2 = popC();
-  // src2 opc src1
   push(m_tb.genCmp(opc, src2, src1));
   m_tb.genDecRef(src2);
   m_tb.genDecRef(src1);

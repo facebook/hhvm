@@ -75,6 +75,12 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 /*
  * Flags on opcodes.  See ir.specification for details on the meaning
  * of these flags.
+ *
+ * Note that the flags in the opcodes table below are not
+ * authoritative---just useful defaults for each opcode.  Exceptions
+ * are made in some cases based on operand types in the IRInstruction
+ * wrappers that access each flag, so most uses of these flags should
+ * go through there.
  */
 enum OpcodeFlag : uint64_t {
   HasDest          = 0x0001,
@@ -365,7 +371,6 @@ extern TraceExitType::ExitType getExitType(Opcode opc);
 extern Opcode getExitOpcode(TraceExitType::ExitType);
 
 const char* opcodeName(Opcode opcode);
-bool opcodeHasFlags(Opcode opcode, uint64_t flag);
 
 class Type {
 public:
@@ -595,6 +600,8 @@ public:
   }
 }; // class Type
 
+bool cmpOpTypesMayReenter(Opcode, Type::Tag t0, Type::Tag t1);
+
 class RawMemSlot {
  public:
 
@@ -810,8 +817,10 @@ public:
   /*
    * Helper accessors for the OpcodeFlag bits for this instruction.
    *
-   * Note that these wrappers may have additional logic beyond just
-   * checking the corresponding flags bit.
+   * Note that these wrappers have additional logic beyond just
+   * checking the corresponding flags bit---you should generally use
+   * these when you have an actual IRInstruction instead of just an
+   * Opcode enum value.
    */
   bool canCSE() const;
   bool hasDst() const;
@@ -822,11 +831,16 @@ public:
   bool consumesReference(int srcNo) const;
   bool producesReference() const;
   bool mayModifyRefs() const;
+  bool mayRaiseError() const;
+  bool isEssential() const;
 
   void printDst(std::ostream& ostream);
   void printSrc(std::ostream& ostream, uint32 srcIndex);
   void printOpcode(std::ostream& ostream);
   void printSrcs(std::ostream& ostream);
+
+private:
+  bool mayReenterHelper() const;
 
 private:
   Opcode            m_op;

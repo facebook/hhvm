@@ -34,26 +34,6 @@ const unsigned REFCOUNT_CONSUMED_OFF_TRACE = 3;
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
-/*
- * Dead code elimination
- */
-bool isEssential(IRInstruction* inst) {
-  if (inst->getOpcode() == DecRefNZ) {
-    // If the source of a DecRefNZ is not an IncRef, mark it as essential
-    // because we won't remove its source as well as itself.
-    // If the ref count optimization is turned off, mark all DecRefNZ as
-    // essential.
-    if (!RuntimeOption::EvalHHIREnableRefCountOpt ||
-        inst->getSrc(0)->getInstruction()->getOpcode() != IncRef) {
-      return true;
-    }
-  }
-  if (inst->isControlFlowInstruction() && inst->getOpcode() != LdCls) {
-    return true;
-  }
-  return opcodeHasFlags(inst->getOpcode(), Essential);
-}
-
 bool instructionIsMarkedDead(const IRInstruction* inst) {
   return inst->getId() == DEAD;
 }
@@ -102,7 +82,7 @@ void initInstructions(Trace* trace, IRInstruction::List& wl) {
       // is marked reachable
       inst->getLabel()->setId(LIVE);
     }
-    if (!unreachable && isEssential(inst)) {
+    if (!unreachable && inst->isEssential()) {
       inst->setId(LIVE);
       wl.push_back(inst);
     } else {

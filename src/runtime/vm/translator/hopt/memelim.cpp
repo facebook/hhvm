@@ -643,7 +643,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
       // start tracking the current store
       tracking.push_back(std::make_pair(inst, std::vector<IRInstruction*>()));
-    } else if (opcodeHasFlags(op, MayRaiseError)) {
+    } else if (inst->mayRaiseError()) {
       // if the function has an exit edge that we don't know anything about
       // (raising an error), then all stores we're currently tracking need to
       // be erased. all stores already declared dead are untouched

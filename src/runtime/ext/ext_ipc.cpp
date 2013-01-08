@@ -21,6 +21,8 @@
 #include <util/lock.h>
 #include <util/alloc.h>
 
+#include <memory>
+
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -595,20 +597,18 @@ Variant f_shm_attach(int64 shm_key, int64 shm_size /* = 10000 */,
     return false;
   }
 
-  sysvshm_shm *shm_list_ptr = new sysvshm_shm();
+  std::unique_ptr<sysvshm_shm> shm_list_ptr(new sysvshm_shm());
 
   /* get the id from a specified key or create new shared memory */
   if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
     if (shm_size < (int)sizeof(sysvshm_chunk_head)) {
       raise_warning("failed for key 0x%llx: memorysize too small", shm_key);
-      free(shm_list_ptr);
       return false;
     }
     if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL))
         < 0) {
       raise_warning("failed for key 0x%llx: %s", shm_key,
                       Util::safe_strerror(errno).c_str());
-      free(shm_list_ptr);
       return false;
     }
   }
@@ -616,7 +616,6 @@ Variant f_shm_attach(int64 shm_key, int64 shm_size /* = 10000 */,
   if ((shm_ptr = (char*)shmat(shm_id, NULL, 0)) == (char *)-1) {
     raise_warning("failed for key 0x%llx: %s", shm_key,
                     Util::safe_strerror(errno).c_str());
-    free(shm_list_ptr);
     return false;
   }
 
@@ -634,8 +633,9 @@ Variant f_shm_attach(int64 shm_key, int64 shm_size /* = 10000 */,
   shm_list_ptr->id = shm_id;
   shm_list_ptr->ptr = chunk_ptr;
   Lock lock(g_shm_mutex);
-  g_shms.insert(shm_list_ptr);
-  return (int64)shm_list_ptr;
+  int64 ret = (int64)shm_list_ptr.get();
+  g_shms.insert(shm_list_ptr.release());
+  return ret;
 }
 
 bool f_shm_detach(int64 shm_identifier) {

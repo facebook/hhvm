@@ -886,7 +886,7 @@ char* Util::getNativeFunctionName(void* codeAddr) {
         int status;
         char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
         if (status == 0) {
-          free(functionName);
+          delete []functionName;
           functionName = demangledName;
         }
       }

@@ -176,7 +176,7 @@ struct DwarfInfo {
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
   DwarfChunk* addTracelet(TCRange range, const char* name,
-			  const Unit *unit, const Opcode *instr,
+			  const Func* func, const Opcode *instr,
 			  bool exit, bool inPrologue);
   void syncChunks();
 };

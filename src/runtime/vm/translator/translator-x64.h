@@ -923,7 +923,7 @@ private:
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
-  void recordGdbTranslation(const SrcKey& sk, const Unit* u,
+  void recordGdbTranslation(const SrcKey& sk, const Func* f,
                             const Asm& a,
                             const TCA start,
                             bool exit, bool inPrologue);

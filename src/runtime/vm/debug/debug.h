@@ -33,7 +33,7 @@ class DebugInfo {
   ~DebugInfo();
 
   void recordTracelet(TCRange range, 
-                      const Unit *unit,
+                      const Func* func,
                       const Opcode *instr, bool exit,
                       bool inPrologue);
   void recordStub(TCRange range,
@@ -63,7 +63,7 @@ class DebugInfo {
 /*
  * Gets the fake symbol name we want to use for a php function.
  */
-std::string lookupFunction(const Unit *unit,
+std::string lookupFunction(const Func* func,
                            const Opcode *instr,
                            bool exit,
                            bool inPrologue,

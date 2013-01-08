@@ -222,13 +222,14 @@ void DwarfInfo::compactChunks() {
 static Mutex s_lock(RankLeaf);
 
 DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
-  const Unit *unit, const Opcode *instr, bool exit, bool inPrologue) {
+  const Func *func, const Opcode *instr, bool exit, bool inPrologue) {
   DwarfChunk* chunk = NULL;
   FunctionInfo* f = new FunctionInfo(range, exit);
+  const Unit* unit = func ? func->unit(): NULL;
   if (name) {
     f->name = std::string(name);
   } else {
-    f->name = lookupFunction(unit, instr, exit, inPrologue, true);
+    f->name = lookupFunction(func, instr, exit, inPrologue, true);
   }
   f->file = lookupFile(unit);
 

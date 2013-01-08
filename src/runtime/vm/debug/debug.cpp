@@ -116,12 +116,12 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
   }
 }
 
-void DebugInfo::recordTracelet(TCRange range, const Unit *unit,
+void DebugInfo::recordTracelet(TCRange range, const Func* func,
     const Opcode *instr, bool exit, bool inPrologue) {
   if (range.isAstubs()) {
-    m_astubsDwarfInfo.addTracelet(range, NULL, unit, instr, exit, inPrologue);
+    m_astubsDwarfInfo.addTracelet(range, NULL, func, instr, exit, inPrologue);
   } else {
-    m_aDwarfInfo.addTracelet(range, NULL, unit, instr, exit, inPrologue);
+    m_aDwarfInfo.addTracelet(range, NULL, func, instr, exit, inPrologue);
   }
 }
 
@@ -130,18 +130,18 @@ void DebugInfo::debugSync() {
   m_astubsDwarfInfo.syncChunks();
 }
 
-std::string lookupFunction(const Unit *unit,
+std::string lookupFunction(const Func* f,
                            const Opcode *instr,
                            bool exit,
                            bool inPrologue,
                            bool pseudoWithFileName) {
   // TODO: mangle the namespace and name?
   std::string fname("PHP::");
+  const Unit* unit = f->unit();
   if (unit == NULL || instr == NULL) {
     fname += "#anonFunc";
     return fname;
   }
-  const Func *f = unit->getFunc(unit->offsetOf(instr));
   if (f != NULL) {
     if (pseudoWithFileName) {
       fname += f->unit()->filepath()->data();
@@ -155,7 +155,7 @@ std::string lookupFunction(const Unit *unit,
       }
       return fname;
     }
-    fname += f->name()->data();
+    fname += f->fullName()->data();
     if (inPrologue)
       fname += "$prologue";
     return fname;

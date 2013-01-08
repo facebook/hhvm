@@ -2092,7 +2092,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
                           TransProlog, aStart, a.code.frontier - aStart,
                           stubStart, astubs.code.frontier - stubStart));
 
-  recordGdbTranslation(skFuncBody, func->unit(),
+  recordGdbTranslation(skFuncBody, func,
                        a, aStart,
                        false, true);
   recordBCInstr(OpFuncPrologue, a, start);
@@ -11334,9 +11334,9 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
                           counterStart, counterLen,
                           bcMapping));
 
-  recordGdbTranslation(sk, curUnit(), a, start,
+  recordGdbTranslation(sk, curFunc(), a, start,
                        false, false);
-  recordGdbTranslation(sk, curUnit(), astubs, stubStart,
+  recordGdbTranslation(sk, curFunc(), astubs, stubStart,
                        false, false);
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
@@ -11860,7 +11860,7 @@ void TranslatorX64::recordBCInstr(uint32_t op,
 }
 
 void TranslatorX64::recordGdbTranslation(const SrcKey& sk,
-                                         const Unit* srcUnit,
+                                         const Func* srcFunc,
                                          const X64Assembler& a,
                                          const TCA start,
                                          bool exit,
@@ -11869,8 +11869,9 @@ void TranslatorX64::recordGdbTranslation(const SrcKey& sk,
     ASSERT(s_writeLease.amOwner());
     m_debugInfo.recordTracelet(rangeFrom(a, start,
                                          &a == &astubs ? true : false),
-                               srcUnit,
-                               srcUnit->at(sk.offset()),
+                               srcFunc,
+                               srcFunc->unit() ?
+                                 srcFunc->unit()->at(sk.offset()) : NULL,
                                exit, inPrologue);
   }
 }

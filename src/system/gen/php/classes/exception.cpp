@@ -575,10 +575,20 @@ String c_Exception::t_gettraceasstring() {
   v_s = NAMSTR(s_sys_ss00000000, "");
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_gettrace();
     {
       StringBuffer tmp_sbuf_v_s(512);
-      for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+      ArrayIter iter3;
+      {
+        Variant map2 = t_gettrace();
+        iter3.begin(map2, s_class_name);
+        try {
+          if (iter3.end()) goto break1;
+        } catch (...) {
+          iter3.reset();
+          throw;
+        }
+      }
+      do {
         LOOP_COUNTER_CHECK(1);
         iter3.second(v_frame);
         {
@@ -608,7 +618,8 @@ String c_Exception::t_gettraceasstring() {
           }
           v_i++;
         }
-      }
+      } while(iter3.next(), !iter3.end());
+      break1:;
       concat_assign(v_s, tmp_sbuf_v_s.detachWithTaint());
     }
   }

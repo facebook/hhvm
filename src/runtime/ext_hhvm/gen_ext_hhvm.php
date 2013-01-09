@@ -15,7 +15,7 @@ $scriptPath = dirname(__FILE__);
 if (getenv("PROJECT_ROOT")) {
   $idl_path = getenv("PROJECT_ROOT") . "/src/idl/";
 } else {
-  $idl_path = $scriptPath . "../../idl/";
+  $idl_path = $scriptPath . "/../../idl/";
 }
 $output_file = $argv[1];
 $ext_hhvm_path = $argv[2];

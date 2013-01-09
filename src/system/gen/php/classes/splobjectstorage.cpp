@@ -246,8 +246,18 @@ bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
     {
       {
         LOOP_COUNTER(1);
-        Variant map2 = m_storage;
-        for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+        ArrayIter iter3;
+        {
+          Variant map2 = m_storage;
+          iter3.begin(map2, s_class_name);
+          try {
+            if (iter3.end()) goto break1;
+          } catch (...) {
+            iter3.reset();
+            throw;
+          }
+        }
+        do {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v_object);
           {
@@ -257,7 +267,8 @@ bool c_SplObjectStorage::t_contains(CVarRef v_obj) {
               }
             }
           }
-        }
+        } while(iter3.next(), !iter3.end());
+        break1:;
       }
     }
   }
@@ -286,8 +297,18 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
     {
       {
         LOOP_COUNTER(1);
-        Variant map2 = m_storage;
-        for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+        ArrayIter iter3;
+        {
+          Variant map2 = m_storage;
+          iter3.begin(map2, s_class_name);
+          try {
+            if (iter3.end()) goto break1;
+          } catch (...) {
+            iter3.reset();
+            throw;
+          }
+        }
+        do {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v_object);
           v_idx.assignVal(iter3.first());
@@ -305,7 +326,8 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
               }
             }
           }
-        }
+        } while(iter3.next(), !iter3.end());
+        break1:;
       }
     }
   }

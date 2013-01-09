@@ -665,8 +665,18 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss72728681, "params"), AccessFlags::Error_Key);
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss72728681, "params"), AccessFlags::Error_Key);
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_info);
       v_name.assignVal(iter3.first());
@@ -680,7 +690,8 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
         }
         v_ret.append((VarNR(v_param)));
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -710,7 +721,12 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   }
   {
     LOOP_COUNTER(1);
-    for (ArrayIter iter3 = v_params.begin(s_class_name); !iter3.end(); ++iter3) {
+    ArrayIter iter3;
+    {
+      iter3.begin(v_params, s_class_name);
+      if (iter3.end()) goto break1;
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_param);
       v_name.assignVal(iter3.first());
@@ -732,7 +748,8 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
         }
         v_count++;
       }
-    }
+    } while(++iter3, !iter3.end());
+    break1:;
   }
   return v_count;
 }
@@ -2304,8 +2321,18 @@ Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
   v_abstract = (isset(v_info, NAMSTR(s_sys_ss24ca9df6, "abstract"), true) || isset(v_info, NAMSTR(s_sys_ss72a97b31, "interface"), true));
   {
     LOOP_COUNTER(1);
-    Variant map2 = v_info.rvalAt(NAMSTR(s_sys_ss41087d44, "interfaces"), AccessFlags::Error_Key);
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = v_info.rvalAt(NAMSTR(s_sys_ss41087d44, "interfaces"), AccessFlags::Error_Key);
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_interface.assignVal(iter3.first());
@@ -2329,7 +2356,8 @@ Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
           lval(v_info.lvalAt(NAMSTR(s_sys_ss41087d44, "interfaces"), AccessFlags::Key)) += tmp0;
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   {
     const Variant &tmp0((v_info.rvalAt(NAMSTR(s_sys_ss0aa0c3e6, "parent"), AccessFlags::Error_Key)));
@@ -2633,7 +2661,12 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi583
   }
   {
     LOOP_COUNTER(1);
-    for (ArrayIter iter3 = v_methods.begin(s_class_name); !iter3.end(); ++iter3) {
+    ArrayIter iter3;
+    {
+      iter3.begin(v_methods, s_class_name);
+      if (iter3.end()) goto break1;
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -2648,7 +2681,8 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi583
           }
         }
       }
-    }
+    } while(++iter3, !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -2713,8 +2747,18 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs6786d7be, "properties"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs6786d7be, "properties"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -2729,7 +2773,8 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -2783,8 +2828,18 @@ Array c_ReflectionClass::t_getinterfaces() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -2803,7 +2858,8 @@ Array c_ReflectionClass::t_getinterfaces() {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -2819,8 +2875,18 @@ Array c_ReflectionClass::t_gettraits() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs127c53d9, "traits"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs127c53d9, "traits"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -2839,7 +2905,8 @@ Array c_ReflectionClass::t_gettraits() {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -2855,8 +2922,18 @@ Array c_ReflectionClass::t_getinterfacenames() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -2875,7 +2952,8 @@ Array c_ReflectionClass::t_getinterfacenames() {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -2891,8 +2969,18 @@ Array c_ReflectionClass::t_gettraitnames() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs127c53d9, "traits"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs127c53d9, "traits"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -2911,7 +2999,8 @@ Array c_ReflectionClass::t_gettraitnames() {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -2926,15 +3015,26 @@ Array c_ReflectionClass::t_gettraitaliases() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs0514b8b1, "trait_aliases"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs0514b8b1, "trait_aliases"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_new_name);
       v_old_name.assignVal(iter3.first());
       {
         v_ret.set(v_old_name, (v_new_name));
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -3037,8 +3137,18 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   }
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3056,7 +3166,8 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   {
     const Variant &tmp0((t_fetch(NAMVAR(s_sys_svs0aa0c3e6, "parent"))));
@@ -3097,8 +3208,18 @@ Array c_ReflectionClass::t_getstaticproperties() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_getproperties();
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_getproperties();
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_prop);
       {
@@ -3121,7 +3242,8 @@ Array c_ReflectionClass::t_getstaticproperties() {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -3166,8 +3288,18 @@ Array c_ReflectionClass::t_getdefaultproperties() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_getproperties();
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_getproperties();
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_prop);
       {
@@ -3190,7 +3322,8 @@ Array c_ReflectionClass::t_getdefaultproperties() {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }
@@ -3225,8 +3358,18 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   }
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = t_fetch(NAMVAR(s_sys_svs41087d44, "interfaces"));
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3244,7 +3387,8 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
           }
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return false;
 }
@@ -3599,8 +3743,18 @@ Array c_ReflectionExtension::t_getclassnames() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss026be696, "classes"), AccessFlags::Error_Key);
-    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
+    ArrayIter iter3;
+    {
+      Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss026be696, "classes"), AccessFlags::Error_Key);
+      iter3.begin(map2, s_class_name);
+      try {
+        if (iter3.end()) goto break1;
+      } catch (...) {
+        iter3.reset();
+        throw;
+      }
+    }
+    do {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_cls);
       {
@@ -3613,7 +3767,8 @@ Array c_ReflectionExtension::t_getclassnames() {
           v_ret.append((tmp1));
         }
       }
-    }
+    } while(iter3.next(), !iter3.end());
+    break1:;
   }
   return v_ret;
 }

@@ -99,6 +99,7 @@ cmake_install.cmake
 
 # Generated makefiles
 /src/third_party/lz4/Makefile
+/src/third_party/double-conversion/Makefile
 /src/runtime/ext_hhvm/Makefile
 /src/test/Makefile
 /src/hphp/Makefile

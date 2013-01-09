@@ -139,6 +139,7 @@ add_subdirectory(third_party/libmbfl)
 add_subdirectory(third_party/libsqlite3)
 add_subdirectory(third_party/timelib)
 add_subdirectory(third_party/lz4)
+add_subdirectory(third_party/double-conversion)
 
 foreach (CXX_FILE ${CXX_SOURCES})
 	if(${CXX_FILE} MATCHES ".no.cpp$")

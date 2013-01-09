@@ -2368,6 +2368,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
                              fp->m_func->unit()->filepath())));
         frame.set(String(s_args), args, true);
       }
+    } else if (RuntimeOption::RepoAuthoritative) {
+      // Provide an empty 'args' array to be consistent with hphpc
+      frame.set(String(s_args), args, true);
     } else {
       int nparams = fp->m_func->numParams();
       int nargs = fp->numArgs();

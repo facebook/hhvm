@@ -17,11 +17,12 @@
 #ifndef _HHBCTRANSLATOR_H_
 #define _HHBCTRANSLATOR_H_
 
-#include <assert.h>
 #include <vector>
+#include <memory>
 #include <stack>
-#include "tracebuilder.h"
+#include "util/assertions.h"
 #include "runtime/vm/translator/runtime-type.h"
+#include "runtime/vm/translator/hopt/tracebuilder.h"
 
 using namespace HPHP::VM::Transl;
 
@@ -104,26 +105,35 @@ class TypeGuard {
   Type::Tag m_type;
 };
 
-class HhbcTranslator {
-public:
-  HhbcTranslator(TraceBuilder& builder, const Func* func)
-      : m_tb(builder),
-        m_curFunc(func),
-        m_bcOff(0xffffffff),
-        m_firstBcOff(true),
-        m_lastBcOff(false),
-        m_hasRet(false),
-        m_unboxPtrs(true),
-        m_stackDeficit(0) {
-  }
+struct HhbcTranslator {
+  HhbcTranslator(IRFactory& irFactory,
+                 Offset bcStartOffset,
+                 uint32_t initialSpOffsetFromFp,
+                 const Func* func)
+    : m_irFactory(irFactory)
+    , m_constantsHash(new CSEHash())
+    , m_tb(new TraceBuilder(bcStartOffset,
+                            initialSpOffsetFromFp,
+                            m_irFactory,
+                            *m_constantsHash,
+                            func))
+    , m_curFunc(func)
+    , m_bcOff(0xffffffff)
+    , m_firstBcOff(true)
+    , m_lastBcOff(false)
+    , m_hasRet(false)
+    , m_unboxPtrs(true)
+    , m_stackDeficit(0)
+    , m_exitGuardFailureTrace(m_tb->genExitGuardFailure(bcStartOffset))
+  {}
+
   void end(int nextBcOff);
-  void start(uint32 initialBcOffset, uint32 initialSpOffsetFromFp) {
-    m_tb.start(initialBcOffset, initialSpOffsetFromFp);
-  }
+  Trace* getTrace() const { return m_tb->getTrace(); }
 
   void setBcOff(uint32 newOff, bool lastBcOff);
   void setBcOffNextTrace(uint32 bcOff) { m_bcOffNextTrace = bcOff; }
   uint32 getBcOffNextTrace() { return m_bcOffNextTrace; }
+
   void emitUninitLoc(uint32 id);
   void emitPrint();
   void emitThis();
@@ -393,7 +403,7 @@ private:
    * Eval stack helpers
    */
   SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb.genIncRef(tmp)); }
+  SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb->genIncRef(tmp)); }
   SSATmp* pop(Type::Tag type, Trace* exitTrace);
   void    popDecRef(Type::Tag type, Trace* exitTrace);
   SSATmp* pop()  { return pop(Type::Gen, NULL);       }
@@ -411,10 +421,13 @@ private:
                       Trace* exitTrace = NULL);
   void    replace(uint32 index, SSATmp* tmp);
   void    refineType(SSATmp* tmp, Type::Tag type);
-  /*
-   * Fields
-   */
-  TraceBuilder&     m_tb;
+
+private:
+  IRFactory&        m_irFactory;
+  std::unique_ptr<CSEHash>
+                    m_constantsHash;
+  std::unique_ptr<TraceBuilder>
+                    m_tb;
   const Func*       m_curFunc;
   uint32            m_bcOff;
   uint32            m_bcOffNextTrace;
@@ -429,6 +442,7 @@ private:
   EvalStack         m_evalStack;
   FpiStack          m_fpiStack;
   vector<TypeGuard> m_typeGuards;
+  Trace* const      m_exitGuardFailureTrace;
 };
 
 }}} // namespace HPHP::VM::JIT

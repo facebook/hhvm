@@ -17,6 +17,7 @@
 #define incl_RUNTIME_VM_TRANSLATOR_X64_H_
 
 #include <signal.h>
+#include <memory>
 #include <boost/noncopyable.hpp>
 
 #include <runtime/vm/bytecode.h>
@@ -162,11 +163,10 @@ class TranslatorX64 : public Translator
 
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
-  JIT::IRFactory*        m_irFactory;
-  JIT::CSEHash*          m_constTable;
-  JIT::TraceBuilder*     m_traceBuilder;
-  JIT::HhbcTranslator*   m_hhbcTrans;
-  IRTranslator*          m_irTrans;
+  std::unique_ptr<JIT::IRFactory>
+                         m_irFactory;
+  std::unique_ptr<JIT::HhbcTranslator>
+                         m_hhbcTrans;
 
   void hhirTraceStart(Offset bcStartOffset);
   void hhirTraceCodeGen(vector<TransBCMapping>* bcMap);

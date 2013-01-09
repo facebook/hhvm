@@ -11432,8 +11432,7 @@ asm_label(a, loopHead);
 }
 
 TranslatorX64::TranslatorX64()
-: Translator(),
-  m_numNativeTrampolines(0),
+: m_numNativeTrampolines(0),
   m_trampolineSize(0),
   m_spillFillCode(&a),
   m_interceptHelper(0),
@@ -11442,10 +11441,6 @@ TranslatorX64::TranslatorX64()
   m_irAUsage(0),
   m_irAstubsUsage(0),
   m_numHHIRTrans(0),
-  m_irFactory(NULL),
-  m_constTable(NULL),
-  m_traceBuilder(NULL),
-  m_hhbcTrans(NULL),
   m_regMap(kCallerSaved, kCalleeSaved, this),
   m_interceptsEnabled(false),
   m_unwindRegMap(128),

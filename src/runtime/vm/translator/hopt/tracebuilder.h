@@ -30,10 +30,11 @@ namespace JIT {
 
 class TraceBuilder {
 public:
-  TraceBuilder(uint32 initialBcOffset,
-               IRFactory& irFactory_,
+  TraceBuilder(Offset initialBcOffset,
+               uint32_t initialSpOffsetFromFp,
+               IRFactory&,
                CSEHash& constants,
-               const Func* func=NULL);
+               const Func* func = nullptr);
 
   Trace* makeExitTrace(uint32 bcOff) {
     return m_trace->addExitTrace(makeTrace(bcOff, false));
@@ -45,10 +46,7 @@ public:
     m_thisIsAvailable = true;
   }
 
-  void start(uint32 initialBcOffset, uint32 initialSpOffsetFromFp);
   void genPrint(SSATmp*);
-
-  uint32 getInitialBcOffset() {return m_initialBcOff;}
 
   SSATmp* genAddElem(SSATmp* arr, SSATmp* key, SSATmp* val);
   SSATmp* genAddNewElem(SSATmp* arr, SSATmp* val);
@@ -217,8 +215,13 @@ public:
                           uint32 numOpnds,
                           SSATmp** opnds);
 
-  // generates a trace exit that can be the target of a conditional
-  // or unconditional control flow instruction from the main trace
+  /*
+   * Generates a trace exit that can be the target of a conditional
+   * or unconditional control flow instruction from the main trace.
+   *
+   * Lifetime of the returned pointer is managed by the trace this
+   * TraceBuilder is generating.
+   */
   Trace* genExitTrace(uint32 bcOff,
                       int32  stackDeficit,
                       uint32 numOpnds,
@@ -226,7 +229,14 @@ public:
                       TraceExitType::ExitType,
                       uint32 notTakenBcOff = 0);
 
-  void genExitGuardFailure(uint32 off);
+  /*
+   * Generates a target exit trace for GuardFailure exits.
+   *
+   * Lifetime of the returned pointer is managed by the trace this
+   * TraceBuilder is generating.
+   */
+  Trace* genExitGuardFailure(uint32 off);
+
   // generates the ExitTrace instruction at the end of a trace
   void genTraceEnd(uint32 nextPc,
                    TraceExitType::ExitType exitType = TraceExitType::Normal);
@@ -244,8 +254,6 @@ public:
   Type::Tag getLocalType(int id);
   void setLocalValue(int id, SSATmp* value);
   void setLocalType(int id, Type::Tag type);
-
-  void finalizeTrace();
 
   template<Type::Tag T>
   SSATmp* genIsType(SSATmp* src) {
@@ -265,8 +273,7 @@ public:
     return optimizeInst(&inst);
   }
 
-  Trace* getTrace() { return m_trace.get(); }
-  Trace* getExitGuardFailureTrace() { return m_exitGuardFailureTrace; }
+  Trace* getTrace() const { return m_trace.get(); }
   IRFactory* getIrFactory() { return &m_irFactory; }
   int32 getSpOffset() { return m_spOffset; }
   SSATmp* getSp() { return m_spValue; }
@@ -317,6 +324,7 @@ private:
     return new Trace(m_irFactory.defLabel(), bcOff, isMain);
   }
   void genStLocAux(uint32 id, SSATmp* t0, bool genStoreType);
+
   /*
    * Fields
    */
@@ -330,11 +338,8 @@ private:
   // Pointer to function being compiled.
   SSATmp*    m_curFunc;
 
-  // Trace pointers; lifetime is owned by m_trace.
-  Trace*     m_exitGuardFailureTrace;
-
-  bool       m_thisIsAvailable;
-  uint32     m_initialBcOff;
+  bool         m_thisIsAvailable;
+  Offset const m_initialBcOff;
   boost::scoped_ptr<Trace> const m_trace;
 
   std::vector<SSATmp*>   m_localValues;

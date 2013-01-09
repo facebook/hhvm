@@ -26,33 +26,10 @@
 #include <zlib.h>
 #include <unwind.h>
 
-#ifdef __FreeBSD__
-# include <ucontext.h>
-typedef __sighandler_t *sighandler_t;
-# define RIP_REGISTER(v) (v).mc_rip
-#else
-# define RIP_REGISTER(v) (v).gregs[REG_RIP]
-#endif
-
-#include <boost/bind.hpp>
-#include <boost/optional.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
-#include <boost/scoped_ptr.hpp>
-
 #include "folly/Format.h"
 #include "folly/ScopeGuard.h"
 
-#include "util/pathtrack.h"
-#include "util/trace.h"
-#include "util/bitops.h"
-#include "util/debug.h"
-#include "util/ringbuffer.h"
-#include "util/rank.h"
-#include "util/timer.h"
-#include "util/asm-x64.h"
-
 #include "runtime/vm/bytecode.h"
-#include "runtime/vm/php_debug.h"
 #include "runtime/vm/runtime.h"
 #include "runtime/base/complex_types.h"
 #include "runtime/base/execution_context.h"
@@ -60,24 +37,9 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/base/zend/zend_string.h"
 #include "runtime/base/runtime_option.h"
 #include "runtime/base/server/source_root_info.h"
-#include "runtime/ext/ext_continuation.h"
-#include "runtime/vm/debug/debug.h"
-#include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/log.h"
-#include "runtime/vm/translator/translator-deps.h"
-#include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/translator/srcdb.h"
-#include "runtime/vm/translator/x64-util.h"
-#include "runtime/vm/translator/unwind-x64.h"
-#include "runtime/vm/pendq.h"
-#include "runtime/vm/treadmill.h"
 #include "runtime/vm/stats.h"
-#include "runtime/vm/pendq.h"
-#include "runtime/vm/treadmill.h"
-#include "runtime/vm/repo.h"
-#include "runtime/vm/type-profile.h"
-#include "runtime/eval/runtime/file_repository.h"
+
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/hopt/codegen.h"
@@ -1499,23 +1461,6 @@ TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
 void
 TranslatorX64::irTranslateInstr(const Tracelet& t,
                                 const NormalizedInstruction& i) {
-  /**
-   * irTranslateInstr() translates an individual instruction in a tracelet,
-   * either by directly emitting machine code for that instruction or by
-   * emitting a call to the interpreter. (emitInterpOne not yet supported)
-   *
-   * If the instruction ends the current tracelet, we must emit machine code
-   * to transfer control to some target that will continue to make forward
-   * progress. This target may be the beginning of another tracelet, or it may
-   * be a translator service request. Before transferring control, a tracelet
-   * must ensure the following invariants hold:
-   *   1) The machine registers rVmFp and rVmSp are in sync with vmfp()
-   *      and vmsp().
-   *   2) All "dirty" values are synced in memory. This includes the
-   *      evaluation stack, locals, globals, statics, and any other program
-   *      accessible locations. This also means that all refcounts must be
-   *      up to date.
-   */
   ASSERT(m_useHHIR);
   ASSERT(!i.outStack || i.outStack->isStack());
   ASSERT(!i.outLocal || i.outLocal->isLocal());
@@ -1678,21 +1623,18 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
 
 void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
   ASSERT(!m_irFactory);
-  m_useHHIR      = true;
-  m_irFactory    = new JIT::IRFactory();
-  m_constTable   = new JIT::CSEHash();
-  m_traceBuilder = new JIT::TraceBuilder(bcStartOffset,
-                                         *m_irFactory,
-                                         *m_constTable,
-                                         curFunc());
-  m_hhbcTrans    = new JIT::HhbcTranslator(*m_traceBuilder, curFunc());
+
   Cell* fp = vmfp();
   if (curFunc()->isGenerator()) {
     fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
   }
   TRACE(1, "hhirTraceStart: bcStartOffset %d   vmfp() - vmsp() = %ld\n",
         bcStartOffset, fp - vmsp());
-  m_hhbcTrans->start(bcStartOffset, (fp - vmsp()));
+
+  m_useHHIR      = true;
+  m_irFactory.reset(new JIT::IRFactory());
+  m_hhbcTrans.reset(new JIT::HhbcTranslator(
+    *m_irFactory, bcStartOffset, fp - vmsp(), curFunc()));
 }
 
 void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
@@ -1703,9 +1645,7 @@ void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   ASSERT(m_useHHIR);
 
-  m_traceBuilder->finalizeTrace();
-
-  JIT::Trace* trace = m_traceBuilder->getTrace();
+  JIT::Trace* trace = m_hhbcTrans->getTrace();
 
   auto banner = [&] (const char* s) {
     std::cout << folly::format("{:-^40}\n", s);
@@ -1717,7 +1657,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
     banner("");
   }
 
-  JIT::optimizeTrace(trace, m_irFactory);
+  JIT::optimizeTrace(trace, m_irFactory.get());
 
   if (RuntimeOption::EvalDumpIR > 1) {
     banner(" HHIR after optimizing ");
@@ -1725,7 +1665,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
     banner("");
   }
 
-  JIT::allocRegsForTrace(trace, m_irFactory);
+  JIT::allocRegsForTrace(trace, m_irFactory.get());
 
   if (RuntimeOption::EvalDumpIR) {
     banner(" HHIR after reg alloc ");
@@ -1733,7 +1673,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
     banner("");
   }
 
-  JIT::genCodeForTrace(trace, a, astubs, m_irFactory, bcMap, this);
+  JIT::genCodeForTrace(trace, a, astubs, m_irFactory.get(), bcMap, this);
 
   if (RuntimeOption::EvalDumpIR) {
     banner(" HHIR after code gen ");
@@ -1746,18 +1686,10 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 }
 
 void TranslatorX64::hhirTraceFree() {
-  // Free data structures
   m_useHHIR = false;
-  delete m_irFactory;    m_irFactory = NULL;
-  delete m_constTable;   m_constTable = NULL;
-  delete m_traceBuilder; m_traceBuilder = NULL;
-  delete m_hhbcTrans;    m_hhbcTrans = NULL;
+  m_hhbcTrans.reset();
+  m_irFactory.reset();
 }
 
 
-} // HPHP::VM::Transl
-
-static const Trace::Module TRACEMOD = Trace::tx64;
-
-
-} } // HPHP::VM
+}}}

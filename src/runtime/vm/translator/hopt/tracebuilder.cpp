@@ -25,13 +25,24 @@ namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
-void TraceBuilder::start(uint32 initialBcOffset, uint32 initialSpOffsetFromFp) {
-  m_initialBcOff = initialBcOffset;
+TraceBuilder::TraceBuilder(Offset initialBcOffset,
+                           uint32_t initialSpOffsetFromFp,
+                           IRFactory& irFactory,
+                           CSEHash& constants,
+                           const Func* func)
+  : m_irFactory(irFactory)
+  , m_constTable(constants)
+  , m_simplifier(this)
+  , m_spOffset(initialSpOffsetFromFp)
+  , m_thisIsAvailable(false)
+  , m_initialBcOff(initialBcOffset)
+  , m_trace(makeTrace(initialBcOffset, true))
+{
+  // put a function marker at the start of trace
+  m_curFunc = genDefConst<const Func*>(func);
   m_fpValue = genDefFP();
   m_spValue = genDefSP();
-  m_spOffset = initialSpOffsetFromFp;
   ASSERT(m_spOffset >= 0);
-  genExitGuardFailure(initialBcOffset);
 }
 
 void TraceBuilder::genPrint(SSATmp* arg) {
@@ -232,25 +243,21 @@ void TraceBuilder::genDecRef(SSATmp* tmp) {
  *     of a trace.
  */
 
-/*
- * genExitGuardFailure generates a target exit trace for GuardFailure
- * exits. TraceBuilder::start calls this once at the start of trace
- * code generation.
- */
-void TraceBuilder::genExitGuardFailure(uint32 bcOff) {
-  m_exitGuardFailureTrace = makeExitTrace(bcOff);
+Trace* TraceBuilder::genExitGuardFailure(uint32 bcOff) {
+  Trace* trace = makeExitTrace(bcOff);
   LabelInstruction* markerInst =
     m_irFactory.marker(bcOff, m_curFunc->getConstValAsFunc(), m_spOffset);
-  m_exitGuardFailureTrace->appendInstruction(markerInst);
+  trace->appendInstruction(markerInst);
   SSATmp* pc = genDefConst<int64>((int64)bcOff);
   // TODO change exit trace to a control flow instruction that
   // takes sp, fp, and a Marker as the target label instruction
-  m_exitGuardFailureTrace->appendInstruction(
+  trace->appendInstruction(
     m_irFactory.exitTrace(TraceExitType::GuardFailure,
                           m_curFunc,
                           pc,
                           m_spValue,
                           m_fpValue));
+  return trace;
 }
 
 /*
@@ -1708,28 +1715,6 @@ void TraceBuilder::killLocals() {
     ASSERT(!t->isConst());
     m_localValues[i] = NULL;
   }
-}
-
-TraceBuilder::TraceBuilder(uint32 initialBcOffset,
-                           IRFactory& irFactory_,
-                           CSEHash& constants,
-                           const Func* func) :
-    m_irFactory(irFactory_),
-    m_constTable(constants),
-    m_simplifier(this),
-    m_spValue(NULL),
-    m_fpValue(NULL),
-    m_spOffset(0),
-    m_exitGuardFailureTrace(NULL),
-    m_thisIsAvailable(false),
-    m_initialBcOff(-1),
-    m_trace(makeTrace(initialBcOffset, true))
-{
-  // put a function marker at the start of trace
-  m_curFunc = genDefConst<const Func*>(func);
-}
-
-void TraceBuilder::finalizeTrace() {
 }
 
 }}} // namespace HPHP::VM::JIT

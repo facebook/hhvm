@@ -131,36 +131,26 @@ void DebugInfo::debugSync() {
 }
 
 std::string lookupFunction(const Func* f,
-                           const Opcode *instr,
                            bool exit,
                            bool inPrologue,
                            bool pseudoWithFileName) {
   // TODO: mangle the namespace and name?
   std::string fname("PHP::");
-  const Unit* unit = f->unit();
-  if (unit == NULL || instr == NULL) {
-    fname += "#anonFunc";
+  if (pseudoWithFileName) {
+    fname += f->unit()->filepath()->data();
+    fname += "::";
+  }
+  if (!strcmp(f->name()->data(), "")) {
+    if (!exit) {
+      fname += "__pseudoMain";
+    } else {
+      fname += "__exit";
+    }
     return fname;
   }
-  if (f != NULL) {
-    if (pseudoWithFileName) {
-      fname += f->unit()->filepath()->data();
-      fname += "::";
-    }
-    if (!strcmp(f->name()->data(), "")) {
-      if (!exit) {
-        fname += "__pseudoMain";
-      } else {
-        fname += "__exit";
-      }
-      return fname;
-    }
-    fname += f->fullName()->data();
-    if (inPrologue)
-      fname += "$prologue";
-    return fname;
-  }
-  fname += "#anonFunc";
+  fname += f->fullName()->data();
+  if (inPrologue)
+    fname += "$prologue";
   return fname;
 }
 

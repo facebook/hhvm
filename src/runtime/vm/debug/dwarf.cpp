@@ -229,7 +229,8 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
   if (name) {
     f->name = std::string(name);
   } else {
-    f->name = lookupFunction(func, instr, exit, inPrologue, true);
+    ASSERT(func != NULL);
+    f->name = lookupFunction(func, exit, inPrologue, true);
   }
   f->file = lookupFile(unit);
 

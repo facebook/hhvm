@@ -64,7 +64,6 @@ class DebugInfo {
  * Gets the fake symbol name we want to use for a php function.
  */
 std::string lookupFunction(const Func* func,
-                           const Opcode *instr,
                            bool exit,
                            bool inPrologue,
                            bool pseudoWithFileName);

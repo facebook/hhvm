@@ -141,7 +141,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdStack:
   case LdPropAddr:
   case LdClsCns:
-  case AllocActRec:
   case LdCls:
   case LdObjMethod:
   case RetVal:
@@ -926,6 +925,7 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
 
   assert(typeFailLabel);
   assert(Type::isUnboxed(type));
+
   Type::Tag srcType = src->getType();
   if (Type::isUnboxed(srcType)) {
     // TODO: generate a guardType if this assertion fails

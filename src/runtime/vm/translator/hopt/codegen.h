@@ -184,6 +184,9 @@ private:
                    PhysReg baseReg,
                    int64 offset,
                    LabelInstruction* exit);
+  void emitSpillActRec(SSATmp* sp,
+                       int64_t spOffset,
+                       SSATmp* defAR);
 
   void cgCheckUninit(SSATmp* src, LabelInstruction* label);
   void cgIterNextCommon(IRInstruction* inst, bool isNextK);

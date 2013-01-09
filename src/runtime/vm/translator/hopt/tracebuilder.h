@@ -127,18 +127,8 @@ public:
   SSATmp* genNewObj(int32 numParams, SSATmp* cls);
   SSATmp* genNewArray(int32 capacity);
   SSATmp* genNewTuple(int32 numArgs, SSATmp* sp);
-  // The first three genAllocActRecs delegate to the forth one
-  SSATmp* genAllocActRec(const Func* func,
-                         SSATmp* objOrCls,
-                         int32 numParams,
-                         const StringData* magicName);
-  SSATmp* genAllocActRec(SSATmp* func, int32 numParams);
-  SSATmp* genAllocActRec(SSATmp* func, SSATmp* obj, int32 numParams);
-  SSATmp* genAllocActRec(SSATmp* func,
-                         SSATmp* objOrCls,
-                         int32   numParams,
-                         const StringData* magicName);
-  SSATmp* genAllocActRec(); // creates an uninitialized actrec
+  SSATmp* genDefActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
+                       const StringData* invName);
   SSATmp* genFreeActRec();
   void    genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace);
   void    genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace);

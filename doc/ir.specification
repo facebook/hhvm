@@ -477,21 +477,20 @@ NewTuple
 
 9. Call & Return
 
-D:StkPtr = AllocActRec S0:StkPtr S1:StkPtr S2:Func& S3:[Obj|Cls&|Null]
-                       S4:ConstInt S5:[String|Null]
+D:ActRec = DefActRec S0:StkPtr S1:Func& S2:[Obj|Cls&|Null] S3:ConstInt
+                     S4:[String|Null]
 
   Operands:
 
-     S0 - current stack pointer
-     S1 - current frame pointer
-     S2 - callee Func
-     S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
+     S0 - callee frame pointer
+     S1 - callee Func
+     S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
           null (for FPushFunc*).
-     S4 - number of arguments
-     S5 - invName field for magic calls
+     S3 - number of arguments
+     S4 - invName field for magic calls, or null
 
-  Allocates an activation record from the stack pointed to by S0 and
-  return the result.
+  Defines the fields for an activation record.  May be passed to a
+  SpillStack to store the fields to the stack.
 
 D:StkPtr = FreeActRec S0:StkPtr
 
@@ -556,9 +555,29 @@ StLocNT
 StRef
 StRefNT
 StRaw
-SpillStack
-SpillStackAllocAR
 
+d:StkP = SpillStack         s0:StkP, s1:StkP, s2:ConstInt, s3...sN
+d:StkP = SpillStackAllocAR  s0:StkP, s1:StkP, s2:ConstInt, s3...sN
+
+  SpillStack synchronizes the virtual execution stack with the
+  physical stack by storing a variadic list of SSATmps to the physical
+  stack.
+
+  Operands:
+
+     s0      - current frame pointer
+     s1      - current stack pointer
+
+     s2      - stack deficit; indicates the number of elements that
+               need to be logically popped before the variadic list
+               is pushed
+
+     s3...sN - variadic list of elements to spill, with values
+               representing cells or ActRecs.  Each temp of type
+               ActRec is followed by kSpillStackActRecExtraArgs for
+               the contents of the ActRec.
+
+  TODO: explain SpillStackAllocAR.
 
 11. Trace exits
 

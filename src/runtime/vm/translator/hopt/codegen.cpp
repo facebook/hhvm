@@ -298,6 +298,7 @@ NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(Marker)
 NOOP_OPCODE(AssertLoc)
+NOOP_OPCODE(DefActRec)
 
 PUNT_OPCODE(JmpInstanceOfD)
 PUNT_OPCODE(JmpNInstanceOfD)
@@ -1299,7 +1300,7 @@ void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   // Note: We may not need 2 opcodes for LdFixedFunc versus
   // LdFunc. We can look whether methodName is a string constant
   // and generate different code here.
-  SSATmp* dst   = inst->getDst();
+  SSATmp* dst        = inst->getDst();
   SSATmp* methodName = inst->getSrc(0);
 
   assert(methodName->isConst() && methodName->getType() == Type::StaticStr);
@@ -2473,41 +2474,41 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   cgDecRefWork(inst, false);
 }
 
-void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
-  SSATmp* const dst       = inst->getDst();
-  SSATmp* const sp        = inst->getSrc(0);
-  SSATmp* const fp        = inst->getSrc(1);
-  SSATmp* const func      = inst->getSrc(2);
-  SSATmp* const objOrCls  = inst->getSrc(3);
-  SSATmp* const nArgs     = inst->getSrc(4);
-  SSATmp* const magicName = inst->getSrc(5);
+void CodeGenerator::emitSpillActRec(SSATmp* sp,
+                                    int64_t spOffset,
+                                    SSATmp* defAR) {
+  auto* defInst     = defAR->getInstruction();
+  SSATmp* fp        = defInst->getSrc(0);
+  SSATmp* func      = defInst->getSrc(1);
+  SSATmp* objOrCls  = defInst->getSrc(2);
+  SSATmp* nArgs     = defInst->getSrc(3);
+  SSATmp* magicName = defInst->getSrc(4);
 
   DEBUG_ONLY bool setThis = true;
 
-  int actRecAdjustment = -(int)sizeof(ActRec);
   auto spReg = sp->getReg();
   // actRec->m_this
   if (objOrCls->getType() == Type::ClassPtr) {
     // store class
     if (objOrCls->isConst()) {
       m_as.store_imm64_disp_reg64(uintptr_t(objOrCls->getConstValAsClass()) | 1,
-                                  actRecAdjustment + AROFF(m_this),
+                                  spOffset + AROFF(m_this),
                                   spReg);
     } else {
       Reg64 clsPtrReg = objOrCls->getReg();
       m_as.movq  (clsPtrReg, rScratch);
       m_as.orq   (1, rScratch);
-      m_as.storeq(rScratch, spReg[actRecAdjustment + AROFF(m_this)]);
+      m_as.storeq(rScratch, spReg[spOffset + AROFF(m_this)]);
     }
   } else if (objOrCls->getType() == Type::Obj) {
     // store this pointer
     m_as.store_reg64_disp_reg64(objOrCls->getReg(),
-                                actRecAdjustment + AROFF(m_this),
+                                spOffset + AROFF(m_this),
                                 spReg);
   } else {
     assert(objOrCls->getType() == Type::Null);
     // no obj or class; this happens in FPushFunc
-    int offset_m_this = actRecAdjustment + AROFF(m_this);
+    int offset_m_this = spOffset + AROFF(m_this);
     // When func is Type::FuncClassPtr, m_this/m_cls will be initialized below
     if (!func->isConst() && func->getType() == Type::FuncClassPtr) {
       // m_this is unioned with m_cls and will be initialized below
@@ -2525,7 +2526,7 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
       ? 0
       : (uintptr_t(magicName->getConstValAsStr()) | ActRec::kInvNameBit));
   m_as.store_imm64_disp_reg64(invName,
-                              actRecAdjustment + AROFF(m_invName),
+                              spOffset + AROFF(m_invName),
                               spReg);
   // actRec->m_func  and possibly actRec->m_cls
   // Note m_cls is unioned with m_this and may overwrite previous value
@@ -2536,7 +2537,7 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
     const Func* f = func->getConstValAsFunc();
     m_as. mov_imm64_reg((uint64)f, rScratch);
     m_as.store_reg64_disp_reg64(rScratch,
-                                actRecAdjustment + AROFF(m_func),
+                                spOffset + AROFF(m_func),
                                 spReg);
     if (func->getType() == Type::FuncClassPtr) {
       // Fill in m_cls if provided with both func* and class*
@@ -2544,12 +2545,12 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
       CG_PUNT(cgAllocActRec);
     }
   } else {
-    int offset_m_func = actRecAdjustment + AROFF(m_func);
+    int offset_m_func = spOffset + AROFF(m_func);
     m_as.store_reg64_disp_reg64(func->getReg(0),
                                 offset_m_func,
                                 spReg);
     if (func->getType() == Type::FuncClassPtr) {
-      int offset_m_cls = actRecAdjustment + AROFF(m_cls);
+      int offset_m_cls = spOffset + AROFF(m_cls);
       m_as.store_reg64_disp_reg64(func->getReg(1),
                                   offset_m_cls,
                                   spReg);
@@ -2559,21 +2560,14 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
   assert(setThis);
   // actRec->m_savedRbp
   m_as.store_reg64_disp_reg64(fp->getReg(),
-                              actRecAdjustment + AROFF(m_savedRbp),
+                              spOffset + AROFF(m_savedRbp),
                               spReg);
 
   // actRec->m_numArgsAndCtorFlag
   assert(nArgs->isConst());
   m_as.store_imm32_disp_reg(nArgs->getConstValAsInt(),
-                            actRecAdjustment + AROFF(m_numArgsAndCtorFlag),
+                            spOffset + AROFF(m_numArgsAndCtorFlag),
                             spReg);
-
-  auto dstReg = dst->getReg();
-  if (spReg != dstReg) {
-    m_as.lea_reg64_disp_reg64(spReg, actRecAdjustment, dstReg);
-  } else {
-    m_as.add_imm32_reg64(actRecAdjustment, dstReg);
-  }
 }
 
 static ActRec*
@@ -2687,21 +2681,29 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* sp    = inst->getSrc(0);
-  SSATmp* spAdjustment = inst->getSrc(1);
-  SSARange spillVals = inst->getSrcs().subpiece(2);
-  uint32 numSpill = spillVals.size();
+  SSATmp* dst             = inst->getDst();
+  SSATmp* sp              = inst->getSrc(0);
+  SSATmp* spAdjustment    = inst->getSrc(1);
+  auto const spillVals    = inst->getSrcs().subpiece(2);
+  auto const numSpillSrcs = spillVals.size();
+  auto const dstReg       = dst->getReg();
+  auto const spReg        = sp->getReg();
+  auto const spillCells   = spillValueCells(inst);
 
-  auto dstReg = dst->getReg();
-  auto spReg = sp->getReg();
   int64 adjustment =
-    (spAdjustment->getConstValAsInt() - numSpill) * sizeof(Cell);
-  for (uint32 i = 0; i < numSpill; i++) {
-    cgStore(spReg, (i * sizeof(Cell)) + adjustment, spillVals[i]);
+    (spAdjustment->getConstValAsInt() - spillCells) * sizeof(Cell);
+  for (uint32 i = 0, offset = 0; i < numSpillSrcs; ++i) {
+    if (spillVals[i]->getType() == Type::ActRec) {
+      emitSpillActRec(sp, offset * sizeof(Cell) + adjustment, spillVals[i]);
+      offset += kNumActRecCells;
+      i += kSpillStackActRecExtraArgs;
+    } else {
+      cgStore(spReg, offset * sizeof(Cell) + adjustment, spillVals[i]);
+      ++offset;
+    }
   }
   if (allocActRec) {
-    adjustment -= (3 * sizeof(Cell)); // XXX replace with symbolic constant
+    adjustment -= kNumActRecCells * sizeof(Cell);
   }
   if (adjustment != 0) {
     if (dstReg != spReg) {
@@ -2715,13 +2717,17 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
       TRACE(3, "[counter] 1 reg move in cgSpillStackWork\n");
     }
   }
-  if (false) {
-    emitCheckStack(m_as, dst, numSpill, allocActRec);
-  }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    for (uint32 i = 0; i < numSpill; i++) {
-      if (spillVals[i]->getType() != Type::Gen) {
-        emitCheckCell(m_as, dst, i + (allocActRec ? 3 : 0));
+    for (uint32 i = 0, offset = 0; i < numSpillSrcs; i++) {
+      auto t = spillVals[i]->getType();
+      if (t == Type::ActRec) {
+        offset += kNumActRecCells;
+        i += kSpillStackActRecExtraArgs;
+      } else {
+        if (t != Type::Gen) {
+          emitCheckCell(m_as, dst, offset + (allocActRec ? 3 : 0));
+        }
+        ++offset;
       }
     }
   }

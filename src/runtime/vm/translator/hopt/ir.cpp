@@ -510,8 +510,9 @@ int SSATmp::numNeededRegs() const {
   Type::Tag type = getType();
 
   // These types don't get a register because their values are static
+  // or not used.
   if (type == Type::Null || type == Type::Uninit || type == Type::None ||
-      type == Type::RetAddr) {
+      type == Type::RetAddr || type == Type::ActRec) {
     return 0;
   }
 
@@ -791,15 +792,25 @@ void resetIdsAux(Trace* trace) {
   }
 }
 
-/*
- * Clears the IRInstructions' ids, and the SSATmps' use count and last use id
- * for the given trace and all its exit traces.
- */
 void resetIds(Trace* trace) {
   resetIdsAux(trace);
   for (Trace* exit : trace->getExitTraces()) {
     resetIdsAux(exit);
   }
+}
+
+int32_t spillValueCells(IRInstruction* spillStack) {
+  int32_t numSrcs = spillStack->getNumSrcs();
+  int32_t ret = 0;
+  for (int i = 2; i < numSrcs; ++i) {
+    if (spillStack->getSrc(i)->getType() == Type::ActRec) {
+      ret += kNumActRecCells;
+      i += kSpillStackActRecExtraArgs;
+    } else {
+      ++ret;
+    }
+  }
+  return ret;
 }
 
 uint32 numberInstructions(Trace* trace,

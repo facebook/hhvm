@@ -143,15 +143,14 @@ SSATmp* HhbcTranslator::top(Type::Tag type, uint32 index) {
 }
 
 void HhbcTranslator::replace(uint32 index, SSATmp* tmp) {
-  assert(index < m_evalStack.numElems());
   m_evalStack.replace(index, tmp);
 }
 
 void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   if (newOff != m_bcOff || m_bcOff == m_startBcOff) {
     m_bcOff = newOff;
-    int32 spOff = m_tb->getSpOffset() + m_evalStack.numElems() - m_stackDeficit;
-    m_tb->genMarker(m_bcOff, spOff);
+    m_tb->genMarker(m_bcOff,
+      m_tb->getSpOffset() + m_evalStack.numCells() - m_stackDeficit);
   }
   m_lastBcOff = lastBcOff;
 }
@@ -1152,21 +1151,22 @@ void HhbcTranslator::emitFPushFuncD(int32 numParams, int32 funcId) {
     PUNT(FPushFuncDNull);
   }
   func->validate();
-  spillStack();
-  if (func->isNameBindingImmutable(getCurUnit())) {
-    // func can't change
-    m_fpiStack.push(m_tb->genAllocActRec(func,
-                                         m_tb->genDefNull(),
-                                         numParams,
-                                         NULL));
-  } else {
-    SSATmp* lookedUpFunc = m_tb->gen(LdFixedFunc, m_tb->genDefConst(name));
-    m_fpiStack.push(lookedUpFunc);
-    m_tb->genAllocActRec(lookedUpFunc,
-                         m_tb->genDefNull(),
-                         numParams,
-                         NULL);
+
+  const bool immutable = func->isNameBindingImmutable(getCurUnit());
+
+  if (immutable) {
+    spillStack();  // LdFixedFunc can reenter
   }
+  SSATmp* ssaFunc = immutable ? m_tb->genDefConst<const Func*>(func)
+                              : m_tb->gen(LdFixedFunc,
+                                          m_tb->genDefConst(name));
+  SSATmp* actRec  = m_tb->genDefActRec(ssaFunc,
+                                       m_tb->genDefNull(),
+                                       numParams,
+                                       nullptr);
+  m_evalStack.push(actRec);
+  spillStack(); // TODO(#2036900)
+  m_fpiStack.push(immutable ? actRec : ssaFunc);
 }
 
 void HhbcTranslator::emitFPushFunc(int32 numParams) {
@@ -1177,13 +1177,15 @@ void HhbcTranslator::emitFPushFunc(int32 numParams) {
   if (!Type::isString(funcName->getType())) {
     PUNT(FPushFunc_not_Str);
   }
-  spillStack();
+
+  spillStack(); // LdFunc can reenter
   SSATmp* func = m_tb->gen(LdFunc, funcName);
   m_fpiStack.push(func);
-  m_tb->genAllocActRec(func,
-                       m_tb->genDefNull(),
-                       numParams,
-                       NULL);
+  m_evalStack.push(m_tb->genDefActRec(func,
+                                      m_tb->genDefNull(),
+                                      numParams,
+                                      nullptr));
+  spillStack(); // TODO(#2036900)
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
@@ -1246,22 +1248,24 @@ void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
       objOrCls = m_tb->genDefConst<const Class*>(baseClass);
     }
   }
-  spillStack();
-  SSATmp* actRec = NULL;
-  if (funcTmp) {
-    actRec = m_tb->genAllocActRec(funcTmp,
-                                 objOrCls,
-                                 numParams);
-  } else {
-    actRec = m_tb->genAllocActRec(func,
-                                 objOrCls,
-                                 numParams,
-                                 (func && magicCall ? methodName : NULL));
-  }
 
+  const StringData* invName = nullptr;
+  if (!funcTmp) {
+    funcTmp = func ? m_tb->genDefConst<const Func*>(func)
+                   : m_tb->genDefNull();
+    if (func && magicCall) {
+      invName = methodName;
+    }
+  }
+  SSATmp* actRec = m_tb->genDefActRec(funcTmp,
+                                      objOrCls,
+                                      numParams,
+                                      invName);
+  m_evalStack.push(actRec);
+  spillStack(); // TODO(#2036900)
   if (!func) {
-    // lookup the function
-    SSATmp* meth = m_tb->genLdObjMethod(methodName, actRec);
+    SSATmp* sp = spillStack();
+    SSATmp* meth = m_tb->genLdObjMethod(methodName, sp);
     m_fpiStack.push(meth);
   } else {
     m_fpiStack.push(actRec);
@@ -1325,15 +1329,23 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
                               m_tb->genDefConst<const StringData*>(methodName),
     /*TODO: NamedEntity* */   m_tb->genDefConst<int64>((uintptr_t)np.second),
                               exitTrace);
-    SSATmp* actRec = m_tb->genAllocActRec(funcClassTmp, numParams);
+    SSATmp* actRec = m_tb->genDefActRec(funcClassTmp,
+                                        m_tb->genDefNull(),
+                                        numParams,
+                                        nullptr);
+    m_evalStack.push(actRec);
+    spillStack(); // TODO(#2036900)
     m_fpiStack.push(actRec);
     return;
   }
-  SSATmp* tmp = m_tb->genAllocActRec(func,
-                                    objOrCls,
-                                    numParams,
-                                    (func && magicCall ? methodName : NULL));
-  m_fpiStack.push(tmp);
+  SSATmp* actRec = m_tb->genDefActRec(
+    m_tb->genDefConst<const Func*>(func),
+    objOrCls,
+    numParams,
+    func && magicCall ? methodName : nullptr);
+  m_evalStack.push(actRec);
+  spillStack(); // TODO(#2036900)
+  m_fpiStack.push(actRec);
 }
 
 void HhbcTranslator::emitFCallAux(uint32 numParams,
@@ -1347,33 +1359,30 @@ void HhbcTranslator::emitFCallAux(uint32 numParams,
     params[numParams - i - 1] = popF();
   }
   SSATmp* func = callee ? m_tb->genDefConst<const Func*>(callee) : NULL;
-  bool allocActRec;
+  SSATmp* actRec = nullptr;
   if (actRecOrFunc == NULL) {
     // this fcall and its FPush are in seperate traces; pop and throw
     // away the cells corresponding to the act rec on the stack
-    allocActRec = true;
     uint32 numActRecCells = (sizeof(ActRec) / sizeof(Cell));
     for (uint32 i = 0; i < numActRecCells; i++) {
       pop();
     }
+    actRec = spillStack(true /* allocActRec */);
   } else {
-    allocActRec = false;
     if (!func && actRecOrFunc->getType() == Type::FuncPtr) {
       // we had a func on the FPI stack
       func = actRecOrFunc;
     }
-    // there may have been another call between the allocActRec
-    // and this call, so we need to spill stack below
+    actRec = spillStack(false /* allocActRec */);
   }
   if (!func) {
     func = m_tb->genDefNull();
   }
-  SSATmp* actRec = spillStack(allocActRec);
   m_tb->genCall(actRec,
-               returnBcOffset,
-               func,
-               numParams,
-               params);
+                returnBcOffset,
+                func,
+                numParams,
+                params);
 
 }
 
@@ -1927,8 +1936,38 @@ void HhbcTranslator::emitInterpOneOrPunt(Type::Tag type,
 Trace* HhbcTranslator::getGuardExit() {
   assert(m_bcOff == -1 || m_bcOff == m_startBcOff);
   // stack better be empty since we're at the start of the trace
-  assert((m_evalStack.numElems() - m_stackDeficit) == 0);
+  assert((m_evalStack.numCells() - m_stackDeficit) == 0);
   return m_exitGuardFailureTrace;
+}
+
+/*
+ * Get SSATmps representing all the information on the virtual eval
+ * stack in preparation for a spill or exit trace.
+ *
+ * Doesn't actually remove these values from the eval stack.
+ */
+std::vector<SSATmp*> HhbcTranslator::getSpillValues() const {
+  std::vector<SSATmp*> ret;
+  ret.reserve(m_evalStack.size());
+  for (int i = 0; i < m_evalStack.size(); ++i) {
+    SSATmp* elem = m_evalStack.top(i);
+
+    ret.push_back(elem);
+    if (elem->getType() == Type::ActRec) {
+      /*
+       * For register allocation purposes, the SpillStack instruction
+       * should count as a use of each of the SSATmps coming into the
+       * a DefActRec.
+       */
+      auto* inst = elem->getInstruction();
+      assert(inst->getNumSrcs() == 5);
+      ret.push_back(inst->getSrc(1)); // func
+      ret.push_back(inst->getSrc(2)); // objOrCls
+      ret.push_back(inst->getSrc(3)); // numArgs
+      ret.push_back(inst->getSrc(4)); // invName
+    }
+  }
+  return ret;
 }
 
 /*
@@ -1938,15 +1977,11 @@ Trace* HhbcTranslator::getGuardExit() {
  * slow paths.
  */
 Trace* HhbcTranslator::getExitSlowTrace(Offset nextByteCode /* = -1 */) {
-  uint32 numStackElems = m_evalStack.numElems();
-  SSATmp* stackValues[numStackElems];
-  for (uint32 i = 0; i < numStackElems; i++) {
-    stackValues[i] = m_evalStack.top(i);
-  }
+  std::vector<SSATmp*> stackValues = getSpillValues();
   return m_tb->getExitSlowTrace(nextByteCode == -1 ? m_bcOff : nextByteCode,
                                m_stackDeficit,
-                               numStackElems,
-                               numStackElems ? stackValues : 0);
+                               stackValues.size(),
+                               stackValues.size() ? &stackValues[0] : 0);
 }
 
 /*
@@ -1964,16 +1999,12 @@ Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
   if (targetBcOff == m_startBcOff) {
     return m_exitGuardFailureTrace;
   }
-  uint32 numStackElems = m_evalStack.numElems();
-  SSATmp* stackValues[numStackElems];
-  for (uint32 i = 0; i < numStackElems; i++) {
-    stackValues[i] = m_evalStack.top(i);
-  }
+
+  std::vector<SSATmp*> stackValues = getSpillValues();
   return m_tb->genExitTrace(targetBcOff,
                            m_stackDeficit,
-                           numStackElems,
-                           numStackElems ? stackValues :
-                                           (SSATmp**) NULL,
+                           stackValues.size(),
+                           stackValues.size() ? &stackValues[0] : nullptr,
                            TraceExitType::Normal);
 }
 
@@ -1982,32 +2013,24 @@ Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
  * control flow instruction at the current bytecode offset.
  */
 Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff) {
-  uint32 numStackElems = m_evalStack.numElems();
-  SSATmp* stackValues[numStackElems];
-  for (uint32 i = 0; i < numStackElems; i++) {
-    stackValues[i] = m_evalStack.top(i);
-  }
+  std::vector<SSATmp*> stackValues = getSpillValues();
   return m_tb->genExitTrace(targetBcOff,
                            m_stackDeficit,
-                           numStackElems,
-                           numStackElems ? stackValues :
-                                           (SSATmp**) NULL,
+                           stackValues.size(),
+                           stackValues.size() ? &stackValues[0] : nullptr,
                            TraceExitType::NormalCc,
                            notTakenBcOff);
 }
 
 SSATmp* HhbcTranslator::spillStack(bool allocActRec /* = false */) {
-  uint32 numStackElems = m_evalStack.numElems();
-  SSATmp* stackValues[numStackElems];
-  for (uint32 i = 0; i < numStackElems; i++) {
-    stackValues[i] = m_evalStack.pop();
-  }
-  SSATmp* curSp = m_tb->getSp();
+  std::vector<SSATmp*> stackValues = getSpillValues();
+  m_evalStack.clear();
 
-  // remove spilled values that are already on the stack
-  // at the right offset
+  // TODO(#2013938) remove spilled values that are already on the
+  // stack at the right offset
   if (false) {
-    for (int32 i = numStackElems - 1; i >= 0; i--) {
+    SSATmp* curSp = m_tb->getSp();
+    for (int32 i = stackValues.size() - 1; i >= 0; i--) {
       IRInstruction* inst = stackValues[i]->getInstruction();
       if (inst->getOpcode() != LdStack) {
         break;
@@ -2036,15 +2059,15 @@ SSATmp* HhbcTranslator::spillStack(bool allocActRec /* = false */) {
       // increfs.
 
       // remove the operand by decrementing the number of operands
-      numStackElems--;
+      stackValues.erase(stackValues.begin() + i);
       m_stackDeficit--; // compensate
     }
   }
 
   SSATmp* sp = m_tb->genSpillStack(m_stackDeficit,
-                                  numStackElems,
-                                  numStackElems ? stackValues : 0,
-                                  allocActRec);
+                                   stackValues.size(),
+                                   stackValues.size() ? &stackValues[0] : 0,
+                                   allocActRec);
   m_stackDeficit = 0;
   return sp;
 }
@@ -2052,8 +2075,9 @@ SSATmp* HhbcTranslator::spillStack(bool allocActRec /* = false */) {
 SSATmp* HhbcTranslator::loadStackAddr(int32 offset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_evalStack.
-  assert(offset >= (int32)m_evalStack.numElems());
-  return m_tb->genLdStackAddr(offset + m_stackDeficit - m_evalStack.numElems());
+  assert(offset >= (int32)m_evalStack.numCells());
+  return m_tb->genLdStackAddr(
+    offset + m_stackDeficit - m_evalStack.numCells());
 }
 
 //

@@ -357,9 +357,8 @@ void LinearScan::allocRegToInstruction(Trace* trace,
     return;
   }
   if (opc == DefSP || opc == Call || opc == SpillStack ||
-      opc == AllocActRec || opc == SpillStackAllocAR ||
-      opc == RetAdjustStack || opc ==  NewObj || opc == InterpOne ||
-      opc == GenericRetDecRefs) {
+      opc == SpillStackAllocAR || opc == RetAdjustStack ||
+      opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs) {
     assert(type == Type::StkPtr);
     allocRegToTmp(&m_regs[int(rVmSp)], ssaTmp, 0);
     return;

@@ -218,8 +218,7 @@ enum OpcodeFlag : uint64_t {
   OPC(NewTuple,          (HasDest|Essential|MemEffects|                 \
                           CallsNative|ConsumesRC|ProducesRC))           \
   OPC(LdRaw,             (HasDest))                                     \
-                          /* XXX: why does AllocActRec consume rc? */   \
-  OPC(AllocActRec,       (HasDest|MemEffects|ConsumesRC))               \
+  OPC(DefActRec,         (HasDest|MemEffects))                          \
   OPC(FreeActRec,        (HasDest|MemEffects))                          \
   OPC(Call,              (HasDest|Essential|MemEffects|                 \
                           ConsumesRC|MayModifyRefs))                    \
@@ -421,7 +420,9 @@ public:
     IRT(FuncClassPtr,    "FuncClass*") /* this has both a Func* and a Class* */\
     IRT(RetAddr,         "RetAddr") /* Return address */ \
     IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP */\
-    IRT(TCA,             "TCA")
+    IRT(TCA,             "TCA") \
+    IRT(ActRec,          "ActRec") \
+    /*  */
 
   enum Tag : uint16_t {
 #define IRT(type, name)  type,
@@ -1270,10 +1271,25 @@ uint32 numberInstructions(Trace* trace,
 void removeDeadInstructions(Trace* trace);
 
 /*
- * Clears the IRInstructions' ids, and the SSATmps' use count and last use id.
+ * Clears the IRInstructions' ids, and the SSATmps' use count and last use id
+ * for the given trace and all its exit traces.
  */
 void resetIds(Trace* trace);
+
 int getLocalIdFromHomeOpnd(SSATmp* srcHome);
+
+/*
+ * Counts the number of cells a SpillStack will logically push.  (Not
+ * including the number it pops.)  That is, for each SSATmp in the
+ * spill sources, this totals up whether it is an ActRec or a cell.
+ */
+int32_t spillValueCells(IRInstruction* spillStack);
+
+/*
+ * When SpillStack takes an ActRec, it has this many extra
+ * dependencies in the spill vector for the values in the ActRec.
+ */
+constexpr int kSpillStackActRecExtraArgs = 4;
 
 static inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
   if (!(instr->getOpcode() == Conv &&

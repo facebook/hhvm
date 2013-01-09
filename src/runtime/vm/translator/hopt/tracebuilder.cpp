@@ -1023,45 +1023,17 @@ SSATmp* TraceBuilder::genNewTuple(int32 numArgs, SSATmp* sp) {
   return gen(NewTuple, genDefConst<int64>(numArgs), sp);
 }
 
-SSATmp* TraceBuilder::genAllocActRec(SSATmp* func,
-                                     SSATmp* objOrCls,
-                                     int32 numParams,
-                                     const StringData* magicName) {
-  // This value will be decref'ed by the callee when it pops the act rec
-  if (!objOrCls) {
-    objOrCls = genDefNull();
-  }
-  SSATmp* magicNameTmp = magicName ? genDefConst<const StringData*>(magicName)
-                                   : genDefNull();
-  SSATmp* newSpValue = gen(AllocActRec,
-                           m_spValue,
-                           m_fpValue,
-                           func,
-                           objOrCls,
-                           genDefConst<int64>(numParams),
-                           magicNameTmp);
-  m_spValue = newSpValue;
-  m_spOffset += (sizeof(ActRec) / sizeof(Cell));
-  assert(m_spOffset >= 0);
-  return newSpValue;
-}
-
-SSATmp* TraceBuilder::genAllocActRec(const Func* func,
-                                     SSATmp* objOrCls,
-                                     int32 numParams,
-                                     const StringData* magicName) {
-  SSATmp* funcTmp = func ? genDefConst<const Func*>(func) : genDefNull();
-  return genAllocActRec(funcTmp, objOrCls, numParams, magicName);
-}
-
-SSATmp* TraceBuilder::genAllocActRec(SSATmp* func,
-                                     SSATmp* obj,
-                                     int32 numParams) {
-  return genAllocActRec(func, obj, numParams, NULL/*magicName*/);
-}
-
-SSATmp* TraceBuilder::genAllocActRec(SSATmp* func, int32 numParams) {
-  return genAllocActRec(func, NULL/*objOrCls*/, numParams, NULL/*magicName*/);
+SSATmp* TraceBuilder::genDefActRec(SSATmp* func,
+                                   SSATmp* objOrClass,
+                                   int32_t numArgs,
+                                   const StringData* invName) {
+  return gen(DefActRec,
+             m_fpValue,
+             func,
+             objOrClass,
+             genDefConst<int64>(numArgs),
+             invName ?
+               genDefConst<const StringData*>(invName) : genDefNull());
 }
 
 SSATmp* TraceBuilder::genFreeActRec() {
@@ -1076,10 +1048,10 @@ SSATmp* TraceBuilder::genFreeActRec() {
  * instruction that has the spilled location, or a call that returns
  * the value.
  */
-SSATmp* getStackValue(SSATmp* sp,
-                      uint32 index,
-                      bool& spansCall,
-                      Type::Tag& type) {
+static SSATmp* getStackValue(SSATmp* sp,
+                             uint32 index,
+                             bool& spansCall,
+                             Type::Tag& type) {
   IRInstruction* inst = sp->getInstruction();
   Opcode opc = inst->getOpcode();
   if (opc == DefSP) {
@@ -1094,39 +1066,44 @@ SSATmp* getStackValue(SSATmp* sp,
     spansCall = true;
     // search recursively on the actrec argument
     return getStackValue(inst->getSrc(0), // sp = actrec argument to call
-                         index-1, // call pushes a value; -1 pops it
-                         spansCall,
-                         type);
-  }
-  if (opc == AllocActRec) {
-    // sp = allocActRec(stackptr, frameptr, func, ...)
-    // search recursively on the stackptr argument
-    return getStackValue(inst->getSrc(0),
-                         index,
+                         // XXX: this should be call pops an ActRec and then pushes a value
+                         index - 1,//(kNumActRecCells + 1),
                          spansCall,
                          type);
   }
   if (opc == SpillStack || opc == SpillStackAllocAR) {
     // sp = spillstack(stkptr, stkAdjustment, spilledtmp0, spilledtmp1, ...)
-    int64 numPushed = inst->getNumSrcs() - 2;
-    if (numPushed > index) {
-      SSATmp* tmp = inst->getSrc(index + 2);
-      if (tmp->getInstruction()->getOpcode() == IncRef) {
-        tmp = tmp->getInstruction()->getSrc(0);
+    int64_t numPushed    = 0;
+    int32_t numSpillSrcs = inst->getNumSrcs() - 2;
+
+    for (int i = 0; i < numSpillSrcs; ++i) {
+      SSATmp* tmp = inst->getSrc(i + 2);
+      if (tmp->getType() == Type::ActRec) {
+        // XXX: we should consider actrecs part of the stack?
+        //numPushed += kNumActRecCells;
+        i += kSpillStackActRecExtraArgs;
+        continue;
       }
-      type = tmp->getType();
-      return tmp;
-    } else {
-      // this is not one of the values pushed onto the stack by this
-      // spillstack instruction, so continue searching
-      SSATmp* prevSp = inst->getSrc(0);
-      int64 numPopped = inst->getSrc(1)->getConstValAsInt();
-      return getStackValue(prevSp,
-                           // pop values pushed by spillstack:
-                           index - (numPushed - numPopped),
-                           spansCall,
-                           type);
+
+      if (index == numPushed) {
+        if (tmp->getInstruction()->getOpcode() == IncRef) {
+          tmp = tmp->getInstruction()->getSrc(0);
+        }
+        type = tmp->getType();
+        return tmp;
+      }
+      ++numPushed;
     }
+
+    // this is not one of the values pushed onto the stack by this
+    // spillstack instruction, so continue searching
+    SSATmp* prevSp = inst->getSrc(0);
+    int64_t numPopped = inst->getSrc(1)->getConstValAsInt();
+    return getStackValue(prevSp,
+                         // pop values pushed by spillstack
+                         index - (numPushed - numPopped),
+                         spansCall,
+                         type);
   }
   if (opc == InterpOne) {
     // sp = InterpOne(fp, sp, bcOff, stackAdjustment, resultType)
@@ -1306,8 +1283,9 @@ SSATmp* TraceBuilder::genSpillStack(uint32 stackAdjustment,
     srcs);
 
   m_spValue = newSpValue;
-  // push the spilled values but adjust for the popped values
-  m_spOffset += (numOpnds - stackAdjustment);
+  // Push the spilled values but adjust for the popped values
+  m_spOffset -= stackAdjustment;
+  m_spOffset += spillValueCells(newSpValue->getInstruction());
   if (allocActRec) {
     m_spOffset += (sizeof(ActRec) / sizeof(Cell));
   }

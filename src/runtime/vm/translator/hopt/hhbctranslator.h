@@ -14,55 +14,66 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _HHBCTRANSLATOR_H_
-#define _HHBCTRANSLATOR_H_
+#ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_HHBCTRANSLATOR_H_
+#define incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_HHBCTRANSLATOR_H_
 
 #include <vector>
 #include <memory>
 #include <stack>
+
 #include "util/assertions.h"
+#include "runtime/vm/bytecode.h"
 #include "runtime/vm/translator/runtime-type.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 
 using namespace HPHP::VM::Transl;
 
 namespace HPHP {
-// forward declaration
 class StringData;
 namespace VM {
 namespace JIT {
 
-class EvalStack {
-public:
-  EvalStack() : vector() {}
+struct EvalStack {
   void push(SSATmp* tmp) {
-    vector.push_back(tmp);
+    m_vector.push_back(tmp);
   }
+
   SSATmp* pop() {
-    if (vector.size() == 0) {
+    if (m_vector.size() == 0) {
       return NULL;
     }
-    SSATmp* tmp = vector.back();
-    vector.pop_back();
+    SSATmp* tmp = m_vector.back();
+    m_vector.pop_back();
     return tmp;
   }
-  SSATmp* top(uint32 offset=0) {
-    if (offset >= vector.size()) {
+
+  SSATmp* top(uint32 offset=0) const {
+    if (offset >= m_vector.size()) {
       return NULL;
     }
-    uint32 index = vector.size() - 1 - offset;
-    return vector[index];
+    uint32 index = m_vector.size() - 1 - offset;
+    return m_vector[index];
   }
+
   void replace(uint32 offset, SSATmp* tmp) {
-    assert(offset < vector.size());
-    uint32 index = vector.size() - 1 - offset;
-    vector[index] = tmp;
+    assert(offset < m_vector.size());
+    uint32 index = m_vector.size() - 1 - offset;
+    m_vector[index] = tmp;
   }
-  uint32 numElems() {
-    return vector.size();
+
+  uint32_t numCells() const {
+    uint32_t ret = 0;
+    for (auto& t : m_vector) {
+      ret += t->getType() == Type::ActRec ? kNumActRecCells : 1;
+    }
+    return ret;
   }
+
+  int size() const { return m_vector.size(); }
+  void clear()     { m_vector.clear(); }
+
 private:
-  std::vector<SSATmp*> vector;
+  std::vector<SSATmp*> m_vector;
 };
 
 class FpiStack {
@@ -419,6 +430,7 @@ private:
   SSATmp* popA() { return pop(Type::ClassPtr, NULL);  }
   SSATmp* popF() { return pop(Type::Gen, NULL);       }
   SSATmp* topC(uint32 i = 0) { return top(Type::Cell, i); }
+  std::vector<SSATmp*> getSpillValues() const;
   SSATmp* spillStack(bool allocActRec = false);
   SSATmp* loadStackAddr(int32 offset);
   SSATmp* top(Type::Tag type, uint32 index = 0);
@@ -444,13 +456,28 @@ private:
   // and Set bytecodes). Otherwise, memory accesses will bail the trace
   // on an access to a boxed value.
   bool              m_unboxPtrs;
-  uint32            m_stackDeficit; // offset of virtual sp from physical sp
+
+  /*
+   * Tracking of the state of the virtual execution stack:
+   *
+   *   During HhbcTranslator's run over the bytecode, these stacks
+   *   contain SSATmp values representing the execution stack state
+   *   since the last SpillStack.  The EvalStack contains cells and
+   *   ActRecs that need to be spilled before exiting the trace.  The
+   *   FpiStack tracks calls between FPush* and FCall, and contains
+   *   either functions or ActRecs.
+   *
+   *   m_stackDeficit represents the number of cells we've popped off
+   *   the virtual stack since the last sync.
+   */
+  uint32_t          m_stackDeficit;
   EvalStack         m_evalStack;
   FpiStack          m_fpiStack;
+
   vector<TypeGuard> m_typeGuards;
   Trace* const      m_exitGuardFailureTrace;
 };
 
 }}} // namespace HPHP::VM::JIT
 
-#endif // _HHBCTRANSLATOR_H_
+#endif

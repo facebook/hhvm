@@ -36,11 +36,11 @@ Type::Tag outputType(const IRInstruction* inst) {
 
   case AddElem:            return Type::Arr;
   case AddNewElem:         return Type::Arr;
-  case AllocActRec:        return Type::StkPtr;
   case ArrayAdd:           return Type::Arr;
   case Call:               return Type::StkPtr;
   case Concat:             return Type::Str;
   case CreateCont:         return Type::Obj;
+  case DefActRec:          return Type::ActRec;
   case DefCns:             return Type::Bool;
   case DefFP:              return Type::StkPtr;
   case DefFunc:            return Type::FuncPtr;

@@ -2420,28 +2420,16 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   cgDecRefWork(inst, false);
 }
 
-void CodeGenerator::cgAllocActRec1(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* sp    = inst->getSrc(0);
+void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
+  SSATmp* const dst       = inst->getDst();
+  SSATmp* const sp        = inst->getSrc(0);
+  SSATmp* const fp        = inst->getSrc(1);
+  SSATmp* const func      = inst->getSrc(2);
+  SSATmp* const objOrCls  = inst->getSrc(3);
+  SSATmp* const nArgs     = inst->getSrc(4);
+  SSATmp* const magicName = inst->getSrc(5);
 
-  int actRecAdjustment = -(int)sizeof(ActRec);
-  auto spReg = sp->getReg();
-  auto dstReg = dst->getReg();
-  if (spReg != dstReg) {
-    m_as.lea_reg64_disp_reg64(spReg, actRecAdjustment, dstReg);
-  } else {
-    m_as.add_imm32_reg64(actRecAdjustment, dstReg);
-  }
-}
-
-void CodeGenerator::cgAllocActRec6(SSATmp* dst,
-                                   SSATmp* sp,
-                                   SSATmp* fp,
-                                   SSATmp* func,
-                                   SSATmp* objOrCls,
-                                   SSATmp* nArgs,
-                                   SSATmp* magicName)  {
-  DEBUG_ONLY bool setThis  = true;
+  DEBUG_ONLY bool setThis = true;
 
   int actRecAdjustment = -(int)sizeof(ActRec);
   auto spReg = sp->getReg();
@@ -2500,7 +2488,7 @@ void CodeGenerator::cgAllocActRec6(SSATmp* dst,
     if (func->getType() == Type::FuncClassRef) {
       // Fill in m_cls if provided with both func* and class*
       fprintf(stderr, "cgAllocActRec: const func->isFuncClassRef()\n");
-      CG_PUNT(cgAllocActRec6);
+      CG_PUNT(cgAllocActRec);
     }
   } else {
     int offset_m_func = actRecAdjustment + AROFF(m_func);
@@ -2535,78 +2523,7 @@ void CodeGenerator::cgAllocActRec6(SSATmp* dst,
   }
 }
 
-void CodeGenerator::cgAllocActRec5(SSATmp* dst,
-                                   SSATmp* sp,
-                                   SSATmp* fp,
-                                   SSATmp* func,
-                                   SSATmp* objOrCls,
-                                   SSATmp* nArgs)  {
-  int actRecAdjustment = -(int)sizeof(ActRec);
-  m_as.store_reg64_disp_reg64(func->getReg(),
-                              actRecAdjustment + AROFF(m_func),
-                              sp->getReg());
-  m_as.store_reg64_disp_reg64(fp->getReg(),
-                              actRecAdjustment + AROFF(m_savedRbp),
-                              sp->getReg());
-
-  ASSERT(nArgs->isConst());
-  m_as.store_imm32_disp_reg(nArgs->getConstValAsInt(),
-                            actRecAdjustment + AROFF(m_numArgsAndCtorFlag),
-                            sp->getReg());
-
-  // XXX TODO: store the this or late bound class
-  auto dstReg = dst->getReg();
-  auto spReg = sp->getReg();
-  if (spReg != dstReg) {
-    m_as.lea_reg64_disp_reg64(spReg, actRecAdjustment, dstReg);
-  } else {
-    m_as.add_imm32_reg64(actRecAdjustment, dstReg);
-  }
-  // XXX TODO: This and varenv
-}
-
-void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
-  uint32 numSrcs = inst->getNumSrcs();
-  uint32 numExtendedSrcs = inst->getNumExtendedSrcs();
-
-  if (numSrcs == 1) {
-    return cgAllocActRec1(inst);
-  } else {
-    SSATmp* dst   = inst->getDst();
-    SSATmp* src1  = inst->getSrc(0);
-    SSATmp* src2  = inst->getSrc(1);
-    SSATmp* src3  = inst->getSrc(2);
-    SSATmp* src4  = inst->getSrc(3);
-
-    if (numExtendedSrcs == 4) {
-      return cgAllocActRec6(dst,
-                            src1,             // sp
-                            src2,             // fp
-                            src3,             // func
-                            src4,             // objOrCls
-                            inst->getSrc(4),  // numParams
-                            inst->getSrc(5)); // magicName
-    } else if (numExtendedSrcs == 3) {
-      return cgAllocActRec5(dst,
-                            src1,
-                            src2,
-                            src3,
-                            src4,
-                            inst->getSrc(4));
-    } else {
-      ASSERT(numExtendedSrcs == 2);
-      return cgAllocActRec5(dst,
-                            src1,
-                            src2,
-                            src3, /* extendedSrcs[0] */
-                            NULL,
-                            src4 /* extendedSrcs[1] */);
-    }
-  }
-  ASSERT(false);
-}
-
-ActRec*
+static ActRec*
 cgNewInstanceHelper(Class* cls,
                     int numArgs,
                     Cell* sp,
@@ -2621,7 +2538,7 @@ cgNewInstanceHelper(Class* cls,
   return ar;
 }
 
-ActRec*
+static ActRec*
 cgNewInstanceHelperCached(CacheHandle cacheHandle,
                           const StringData* clsName,
                           int numArgs,

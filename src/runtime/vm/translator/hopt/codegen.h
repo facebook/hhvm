@@ -113,20 +113,6 @@ public:
 
 
   void cgSpillStackWork(IRInstruction* inst, bool allocActRec);
-  void cgAllocActRec1(IRInstruction* inst); // One source, sp
-  void cgAllocActRec5(SSATmp* dst,
-                      SSATmp* sp,
-                      SSATmp* fp,
-                      SSATmp* func,
-                      SSATmp* objOrCls,
-                      SSATmp* nArgs);
-  void cgAllocActRec6(SSATmp* dst,
-                      SSATmp* sp,
-                      SSATmp* fp,
-                      SSATmp* func,
-                      SSATmp* objOrCls,
-                      SSATmp* nArgs,
-                      SSATmp* magicName);
   void cgLoadTypedValue(Type::Tag type,
                         SSATmp* dst,
                         PhysReg base,

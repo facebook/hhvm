@@ -242,9 +242,20 @@ NewTuple
 
 9. Call & Return
 
-d:StkP = AllocActRec s0:StkP
+d:StkP = AllocActRec s0:StkP s1:StkP s2:Func& s3:[Obj|Cls&|Null]
+                     s4:ConstInt s5:[String|Null]
 
-  Allocate an activation record from the stack pointed to by s0 and
+  Operands:
+
+     s0 - current stack pointer
+     s1 - current frame pointer
+     s2 - callee Func
+     s3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
+          null (for FPushFunc*).
+     s4 - number of arguments
+     s5 - invName field for magic calls
+
+  Allocates an activation record from the stack pointed to by s0 and
   return the result.
 
 d:StkP = FreeActRec s0:StkP

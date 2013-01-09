@@ -140,6 +140,7 @@ add_subdirectory(third_party/libsqlite3)
 add_subdirectory(third_party/timelib)
 add_subdirectory(third_party/lz4)
 add_subdirectory(third_party/double-conversion)
+add_subdirectory(third_party/folly)
 
 foreach (CXX_FILE ${CXX_SOURCES})
 	if(${CXX_FILE} MATCHES ".no.cpp$")

@@ -30,6 +30,7 @@ The latest information is available on the [wiki](http://wiki.github.com/faceboo
 * libpcre
 * libexpat
 * libmemcached
+* google-glog (http://code.google.com/p/google-glog/)
 
 The following packages have had slight modifications added to them. Patches are provided and should be made against the current source copies.
 

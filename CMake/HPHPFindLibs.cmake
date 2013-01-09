@@ -28,6 +28,16 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
+# features.h
+FIND_PATH(FEATURES_HEADER features.h)
+if (FEATURES_HEADER)
+	add_definitions("-DHAVE_FEATURES_H=1")
+endif()
+
+# google-glog
+find_package(Glog REQUIRED)
+include_directories(${LIBGLOG_INCLUDE_DIR})
+
 # inotify checks
 find_package(Libinotify)
 if (LIBINOTIFY_INCLUDE_DIR)
@@ -126,6 +136,7 @@ include_directories("${HPHP_HOME}/src/third_party/libmbfl/mbfl")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl/filter")
 include_directories("${HPHP_HOME}/src/third_party/lz4")
 include_directories("${HPHP_HOME}/src/third_party/double-conversion/src")
+include_directories("${HPHP_HOME}/src/third_party/folly")
 
 FIND_LIBRARY(XHP_LIB xhp)
 FIND_PATH(XHP_INCLUDE_DIR xhp_preprocess.hpp)
@@ -359,6 +370,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${ICU_LIBRARIES} ${ICU_I18N_LIBRARIES})
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
+	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
 
 if (LIBINOTIFY_LIBRARY)
 	target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})
@@ -413,6 +425,7 @@ endif()
 	target_link_libraries(${target} sqlite3)
 	target_link_libraries(${target} lz4)
 	target_link_libraries(${target} double-conversion)
+	target_link_libraries(${target} folly)
 
 	if (SKIP_BUNDLED_XHP)
 		target_link_libraries(${target} ${XHP_LIB})

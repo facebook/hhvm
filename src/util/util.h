@@ -26,6 +26,8 @@
 #include <stdarg.h>
 #include <arpa/inet.h> // For htonl().
 
+#include "folly/Likely.h"
+
 /**
  * Simple utility functions.
  */
@@ -35,8 +37,6 @@ namespace HPHP { namespace Util {
 #define ALWAYS_INLINE  __attribute__((always_inline))
 #define NEVER_INLINE  __attribute__((noinline))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
-#define LIKELY(pred)   __builtin_expect((pred), true)
-#define UNLIKELY(pred) __builtin_expect((pred), false)
 #define UNUSED         __attribute__((unused))
 #define FLATTEN        __attribute__((flatten))
 #define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))

@@ -14,9 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "tracebuilder.h"
+#include "runtime/vm/translator/hopt/tracebuilder.h"
 
-#include <util/trace.h>
+#include "util/trace.h"
+#include "runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {
 namespace VM {

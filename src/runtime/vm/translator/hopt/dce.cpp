@@ -13,11 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "dce.h"
-#include "ir.h"
-#include "simplifier.h"
-#include <util/trace.h>
+#include "runtime/vm/translator/hopt/dce.h"
 
+#include "util/trace.h"
+#include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/irfactory.h"
+#include "runtime/vm/translator/hopt/simplifier.h"
 
 namespace HPHP {
 namespace VM {

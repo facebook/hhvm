@@ -19,9 +19,10 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "ir.h"
-#include "cse.h"
-#include "simplifier.h"
+#include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/irfactory.h"
+#include "runtime/vm/translator/hopt/cse.h"
+#include "runtime/vm/translator/hopt/simplifier.h"
 
 namespace HPHP {
 namespace VM {

@@ -15,6 +15,7 @@
 */
 
 #include "runtime/vm/translator/hopt/linearscan.h"
+#include "runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {
 namespace VM {

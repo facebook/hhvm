@@ -4654,9 +4654,10 @@ TranslatorX64::translateBranchOp(const Tracelet& t,
    */
   if (rtt.isString() || inputType == KindOfArray) {
     // str_to_bool and arr_to_bool will decRef for us
-    void* fptr = IS_STRING_TYPE(inputType) ? (void*)str_to_bool :
-                                               (void*)arr_to_bool;
+    bool inStr = rtt.isString();
+    void* fptr = inStr ? (void*)str_to_bool : (void*)arr_to_bool;
     EMIT_CALL(a, fptr, V(inLoc));
+    if (!inStr) recordReentrantCall(i);
     src = rax;
     ScratchReg sr(m_regMap, rax);
     syncOutputs(t);

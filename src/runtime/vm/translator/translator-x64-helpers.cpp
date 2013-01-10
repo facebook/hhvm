@@ -146,6 +146,12 @@ asm (
   ".globl __funcBodyHelperThunk\n"
 "__funcBodyHelperThunk:\n"
 #ifdef HHVM
+  /*
+   * when this helper is called, its as if by a jmp
+   * direct from the tc (its actually called by smashing
+   * the return address of fCallArrayHelper). So we dont
+   * need to worry about stack parity
+   */
   "mov %rbp, %rdi\n"
   "call funcBodyHelper\n"
   "jmp *%rax\n"
@@ -162,9 +168,13 @@ asm (
   // The generator body's AR is in rStashedAR. rVmFp still points to the frame
   // above the generator. The prologue is responsible for setting rVmFp. Even
   // if we can't get a prologue, funcBodyHelper syncs the new FP, and the
-  // "resume helper" sets the hardward FP from that.
+  // "resume helper" sets the hardware FP from that.
+  // This helper is called from the tc - so we need to maintain stack parity,
+  // hence the pop/push
+  "pop 0x8(%r15)\n"
   "mov %r15, %rdi\n"
   "call funcBodyHelper\n"
+  "push 0x8(%r15)\n"
   "jmp *%rax\n"
 #endif
   "ud2\n"

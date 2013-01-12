@@ -146,6 +146,32 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
     if (!strcasecmp(filename.c_str(), "php://stderr")) {
       return Object(NEWOBJ(PlainFile)(dup(STDERR_FILENO), true));
     }
+    if (!strncasecmp(filename.c_str(), "php://fd/",
+                                sizeof("php://fd/") - 1)) {
+      if (!RuntimeOption::clientExecutionMode()) {
+        raise_warning("Direct access to file descriptors "
+                      "is only available from command-line");
+        return Object();
+      }
+
+      const char *sFD = filename.c_str() + sizeof("php://fd/") - 1;
+      char *end = NULL;
+      long nFD = strtol(sFD, &end, 10);
+      if ((sFD == end) || (*end != '\0')) {
+        raise_warning("php://fd/ stream must be specified in the form "
+                      "php://fd/<orig fd>");
+        return Object();
+      }
+
+      long dtablesize = getdtablesize();
+      if ((nFD < 0) || (nFD >= dtablesize)) {
+        raise_warning("The file descriptors must be non-negative numbers "
+                      "smaller than %ld", dtablesize);
+        return Object();
+      }
+
+      return Object(NEWOBJ(PlainFile)(dup(nFD), true));
+    }
 
     if (!strncasecmp(filename.c_str(), "php://temp", 10) ||
         !strcasecmp(filename.c_str(), "php://memory")) {

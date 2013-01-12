@@ -1537,10 +1537,8 @@ CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
   return &m_cseHash;
 }
 
-SSATmp* TraceBuilder::cseInsert(IRInstruction* inst, bool clone) {
-  if (clone) {
-    inst = inst->clone(&m_irFactory);
-  }
+SSATmp* TraceBuilder::cseInsert(IRInstruction* inst) {
+  inst = inst->clone(&m_irFactory);
   SSATmp* tmp = getSSATmp(inst);
   getCSEHashTable(inst)->insert(tmp);
   return tmp;
@@ -1576,7 +1574,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
     return result;
   }
   if (inst->canCSE()) {
-    result = cseInsert(inst, true);
+    result = cseInsert(inst);
   } else {
     inst = inst->clone(&m_irFactory);
     if (inst->hasDst()) {
@@ -1587,15 +1585,6 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
     }
   }
   return result;
-}
-
-SSATmp* TraceBuilder::cse(IRInstruction* inst) {
-  SSATmp* tmp = cseLookup(inst);
-  if (tmp) {
-    return tmp;
-  }
-  cseInsert(inst, false);
-  return tmp;
 }
 
 void TraceBuilder::killCse() {

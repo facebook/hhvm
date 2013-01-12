@@ -43,7 +43,6 @@ public:
                            SSATmp* vals64,
                            LabelInstruction* exitLabel = NULL);
 
-  IRInstruction* ldLoc(SSATmp* home);
   IRInstruction* ldLoc(SSATmp* home,
                        Type::Tag type,
                        LabelInstruction*);
@@ -90,9 +89,6 @@ public:
                              LabelInstruction* exit);
   IRInstruction* decRefThis(SSATmp* fp, LabelInstruction* exit);
 
-  template<Type::Tag T> TypeInstruction* isType(SSATmp* src) {
-    return new TypeInstruction(IsType, T, Type::Bool, src);
-  }
   IRInstruction* spill(SSATmp* src);
   IRInstruction* reload(SSATmp* slot);
   IRInstruction* allocSpill(SSATmp* numSlots);

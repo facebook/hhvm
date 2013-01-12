@@ -53,11 +53,6 @@ IRInstruction* IRFactory::guardRefs(SSATmp*           funcPtr,
                                            args, exitLabel);
 }
 
-IRInstruction* IRFactory::ldLoc(SSATmp* home) {
-  ASSERT(home->getType() == Type::Home);
-  return new (m_arena) IRInstruction(LdLoc, Type::Cell, home);
-}
-
 IRInstruction* IRFactory::ldLoc(SSATmp*           home,
                                 Type::Tag         type,
                                 LabelInstruction* typeFailLabel) {
@@ -90,10 +85,6 @@ IRInstruction* IRFactory::decRefStack(Type::Tag type,
 
 IRInstruction* IRFactory::decRefThis(SSATmp* fp, LabelInstruction* exit) {
   return new (m_arena) IRInstruction(DecRefThis, Type::None, fp, exit);
-}
-
-IRInstruction* IRFactory::decRef(SSATmp* tmp, LabelInstruction* exit) {
-  return new (m_arena) IRInstruction(DecRef, tmp->getType(), tmp, exit);
 }
 
 IRInstruction* IRFactory::incRef(SSATmp* obj) {

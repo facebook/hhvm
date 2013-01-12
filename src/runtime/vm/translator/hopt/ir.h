@@ -828,25 +828,6 @@ protected:
   ExtendedInstruction(IRFactory& irFactory,
                       Opcode o,
                       Type::Tag t,
-                      uint32   nOpnds,
-                      SSATmp** opnds,
-                      LabelInstruction* l = NULL)
-      : IRInstruction(o, t, l) {
-    initExtendedSrcs(irFactory, nOpnds, opnds);
-  }
-  ExtendedInstruction(IRFactory& irFactory,
-                      Opcode o,
-                      Type::Tag t,
-                      SSATmp* src,
-                      uint32 nOpnds,
-                      SSATmp** opnds,
-                      LabelInstruction* l = NULL)
-      : IRInstruction(o, t, src, l) {
-    initExtendedSrcs(irFactory, nOpnds, opnds);
-  }
-  ExtendedInstruction(IRFactory& irFactory,
-                      Opcode o,
-                      Type::Tag t,
                       SSATmp* src1,
                       SSATmp* src2,
                       uint32 nOpnds,
@@ -970,12 +951,6 @@ public:
   friend class IRFactory;
   friend class TraceBuilder;
   friend class LinearScan;
-  ConstInstruction(Opcode opc, Type::Tag type, int64 val) :
-      IRInstruction(opc, type) {
-    ASSERT(opc == DefConst || opc == LdConst);
-    ASSERT(type <= Type::StaticStr);
-    m_intVal = val;
-  }
   ConstInstruction(Opcode opc, Type::Tag t) : IRInstruction(opc, t) {
     ASSERT(opc == DefConst || opc == LdConst);
     m_intVal = 0;
@@ -1035,9 +1010,6 @@ private:
     const TCA         m_tca;
   };
   friend class CodeGenerator;
-  void setValAsRawInt(int64 intVal) {
-    m_intVal = intVal;
-  }
 };
 
 class LabelInstruction : public IRInstruction {

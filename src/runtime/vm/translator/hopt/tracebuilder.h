@@ -233,9 +233,8 @@ public:
                    TraceExitType::ExitType exitType = TraceExitType::Normal);
   SSATmp* getSSATmp(IRInstruction* inst);
   SSATmp* optimizeInst(IRInstruction* inst);
-  SSATmp* cse(IRInstruction* inst);
   SSATmp* cseLookup(IRInstruction* inst);
-  SSATmp* cseInsert(IRInstruction* inst, bool clone);
+  SSATmp* cseInsert(IRInstruction* inst);
   CSEHash* getCSEHashTable(IRInstruction* inst);
   void killCse();
   void killLocals();

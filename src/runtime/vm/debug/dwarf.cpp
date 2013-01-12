@@ -236,32 +236,31 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
 
   TCA start = range.begin();
   const TCA end = range.end();
-  {
-    Lock lock(s_lock);
-    FuncDB::iterator it = m_functions.lower_bound(range.begin());
-    FunctionInfo* fi = it->second;
-    if (it != m_functions.end() && fi->name == f->name &&
-        fi->file == f->file &&
-        start > fi->range.begin() &&
-        end > fi->range.end()) {
-      // XXX: verify that overlapping address come from jmp fixups
-      start = fi->range.end();
-      fi->range.extend(end);
-      m_functions[end] = fi;
-      m_functions.erase(it);
-      delete(f);
-      f = m_functions[end];
-      ASSERT(f->m_chunk != NULL);
-      f->m_chunk->clearSynced();
-      f->clearPerfSynced();
-    } else {
-      m_functions[end] = f;
-    }
+
+  Lock lock(s_lock);
+  FuncDB::iterator it = m_functions.lower_bound(range.begin());
+  FunctionInfo* fi = it->second;
+  if (it != m_functions.end() && fi->name == f->name &&
+      fi->file == f->file &&
+      start > fi->range.begin() &&
+      end > fi->range.end()) {
+    // XXX: verify that overlapping address come from jmp fixups
+    start = fi->range.end();
+    fi->range.extend(end);
+    m_functions[end] = fi;
+    m_functions.erase(it);
+    delete(f);
+    f = m_functions[end];
+    ASSERT(f->m_chunk != NULL);
+    f->m_chunk->clearSynced();
+    f->clearPerfSynced();
+  } else {
+    m_functions[end] = f;
   }
 
   addLineEntries(TCRange(start, end, range.isAstubs()), unit, instr, f);
+
   if (f->m_chunk == NULL) {
-    Lock lock(s_lock);
     if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == NULL) {
       // new chunk of base size
       chunk = new DwarfChunk();
@@ -281,7 +280,6 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
   }
 
   if (f->m_chunk->m_functions.size() >= RuntimeOption::EvalGdbSyncChunks) {
-    Lock lock(s_lock);
     ElfWriter e = ElfWriter(f->m_chunk);
   }
 

@@ -60,6 +60,7 @@
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <libgen.h>
+#include <oniguruma.h>
 
 #include <runtime/eval/runtime/file_repository.h>
 
@@ -1181,6 +1182,11 @@ void hphp_process_init() {
   ClassInfo::Load();
   Process::InitProcessStatics();
   init_static_variables();
+
+  // the liboniguruma docs say this isnt needed,
+  // but the implementation of init is not
+  // thread safe due to bugs
+  onig_init();
 
   if (hhvm) {
     extern void sys_init_literal_varstrings();

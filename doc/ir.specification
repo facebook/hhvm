@@ -1,7 +1,7 @@
 
-****************************
-* HipHop JIT IR revision 1 *
-****************************
+*******************************************
+* HipHop Intermediate Representation (HHIR)
+*******************************************
 
 
 
@@ -10,27 +10,181 @@ Introduction
 
 The HipHop Intermediate Representation (IR) is a typed, in-memory,
 static-single-assignment, intermediate-level representation of HHBC
-programs used for just in time compilation.
+programs used for just in time compilation, with these goals:
 
-TODO: design goals.
+  1. Complete.  The IR represents a program or program fragment
+     entirely, without reference to HHBC or other upstream forms of
+     the program.
+
+  2. Type-Safe.  Since the IR deals directly with refined types and
+     internal VM types, all operations are typesafe.  All instruction
+     parameters have a parameter type P, and all variables have a type
+     S.  Given an instruction with source parameter type P and variable
+     type S, S must be equal to or more refined than P (S == P or S <: P).
+
+  3. Machine Independent.  Since this IR is intended to be used in a JIT
+     compiler, it will always be used in a machine specific context.
+     Nevertheless, we rely on machine independence in order to separate
+     concerns and increase portability of the VM.  Passes which manipulate
+     IR based on PHP or HHBC semantics should be portable.  Passes which deal
+     with machine specifics (such as register allocation) should be self
+     contained.  For example, register allocation may insert machine-specific
+     loads, stores, or swaps, according to a specific cpu model.  But those
+     instructions are still well behaved Instruction classes.  Types are
+     machine independent.
+
+The unit of compilation is the Trace, which is an ordered collection of
+Instructions that produce and consume Variables.  Instructions may be
+annotated with Type which modifies the instruction's behavior.  Each
+Variable has a Type which describes the set of values it may hold at
+the point it is defined.  Instructions may have side effects, which occur
+in the order they appear in the Trace.
+
+The static single assignment form guarantees the following two invariants
+for a well-formed Trace:
+
+  1. Each Variable is assigned to by exactly one Instruction.
+
+  2. Definitions dominate uses.  Every path to an Instruction using a Variable
+     first executes the Instruction defining the Variable.
+
+Any pass that generates or manipulates IR must preserve these invariants,
+however it is possible and expected for the invariants to be temporarily
+broken during trace creation or during an optimizer pass.
 
 
+Control Flow
+------------
 
-Concepts
---------
+Traces have one entry point and one or more exits, as well as branch
+and label instructions, forming a restricted control flow graph.
+This control flow may contain join points (two or more branches exiting
+at the same point), but they may not form loops, nor do join points define
+Variables which depend on the path reaching them (there are no SSA Phi
+instructions).  There are no Variables defined at the start of a Trace.
 
-Trace: owns all the instructions for one tracelet
+Implementation note: The JIT's compilation unit ("Trace" in this spec) actually
+consists of one or more instances of the Trace class.  There is exactly one
+main trace, and zero or more exit traces which handle side exits.
+Instructions in exit traces may use Variables defined on the main trace,
+so these exits are not separate compilation units.
 
-Instructions (IRInstruction)
-
-Values (SSATmp)
 
 Types
+-----
+
+Types in the IR are used in several contexts.  In all cases, a Type represents
+a set of runtime values, however, a Type's meaning depends on the context
+in which it appears.  A type which annotates an instruction (like IsType)
+modifies its behavior, extending its opcode.  The type of each source
+parameter restricts the type of any variable used by that parameter.
+A variable's type describes the set of values it may hold at the point it is
+defined.
+
+Since types represent sets of values, we define relations on types in terms of
+the sets of values they represent.  Two types S and T are equal (S == T) if they
+represent equal sets of values.  S is more refined than T (S <: T), or a
+subtype of T, if the set of values represented by S is a subset of the set of
+values represented by T.  S and T are not related if neither value set is
+a subtype of the other: (S <: T) and (T <: S) are both false.  A type U
+is a union of S and T (U = {S|T}) if it represents the union of S and T's
+value sets.  In that case, S and T are both subtypes of U (S <: U, T <: U),
+even if S and T are not related.
+
+Variables in the IR contain a mix of PHP-visible types and internal types,
+described below.
+
+  Type            HHVM representation
+  ----            -------------------
+  None            No value, {}, KindOfInvalid
+  Unin            KindOfUninit
+  Null            KindOfNull
+  Bool            false=0,true=1 (actual bit width varies)
+  Int             int64_t (64-bit twos compliment binary integer)
+  Dbl             double (IEEE 754 64-bit binary floating point)
+  Sstr            StringData* where isStatic() == true
+  UncountedInit   TypedValue {Null|Bool|Int|Dbl|Sstr}
+  Uncounted       TypedValue {Unin|Null|Bool|Int|Dbl|Sstr}
+  Str             StringData*
+  Arr             ArrayData*
+  Obj             ObjectData*
+  Cell            TypedValue {Unin|Null|Bool|Int|Dbl|Sstr|Str|Arr|Obj}
+
+A PHP reference is implemented as a container object (RefData) which contains
+one value.  The types with & in their name denote a reference and the set of
+contained values.  Specifically, T& is represented by a pointer to a RefData
+that contains a value of type T.
+
+  Type            HHVM representation
+  ----            -------------------
+  Unin&           RefData* to Unin
+  Null&           RefData* to Null
+  Bool&           RefData* to Bool
+  Int&            RefData* to Int
+  Dbl&            RefData* to Dbl
+  Sstr&           RefData* to Sstr
+  Str&            RefData* to Str
+  Arr&            RefData* to Arr
+  Obj&            RefData* to Obj
+  Cell&           RefData* to Cell, equivalently {Unin&|..|Obj&}
+  Gen             TypedValue {Cell,Cell&}
+
+The VM also manipulates values of various internal types, which are
+never visible at the PHP semantic level, and do not have any type
+relation with the above PHP-facing types.
+
+  Type            HHVM representation
+  ----            -------------------
+  Cell*           TypedValue* (cannot be KindOfRef)
+  Gen*            TypedValue*
+  Home            Location of a local variable
+  Cls*            Class*
+  Func*           Func*
+  VarEnv*         VarEnv*
+  FuncClass*      Tuple of (Func*,Class*)
+  StkPtr          Pointer into VM execution stack
+  TCA             Machine code address
 
 
+Variables
+---------
 
-Instruction Flags
------------------
+A Variable represents a storage location which takes on various concrete values
+at runtime.  Since HHIR uses SSA, a variable may only be assigned to by one
+instruction.  A variable's type represents the set of values it may hold at
+the point it is defined.  The type is invariant over the lifetime of the
+variable (from the definition point to the last use).
+
+Implementation note: this the proposed semantics. The current implementation
+is not this strict; during IR generation, we overload instruction type
+(IRInstruction::m_type), variable type (SSATmp::getType returns instr->type),
+and types known at points *after* definition, due to guards.  e.g.  after
+a guard, we change src->instr->type to the refined type, then propagate this
+backwards through copies.  This effectively uses IRInstruction::m_type as
+a scratch variable, which is only valid at certian times during construction).
+This is probably unsound in later passes; after such a refinement,
+instructions using the variable before the guard see the refined type.
+
+
+Instructions
+------------
+
+An instruction is an executable operation with zero or more inputs (sources),
+zero or one result (destination), and possible side effects such as accessing
+memory, doing I/O, and which may branch or throw an exception.  Some
+instructions have a Type parameter which modifies its behavior.
+
+Each instruction has a signature which describes its effect, parameter types,
+and return type, for example:
+
+  r:Bool = IsType<T> s:Gen
+
+By convention we use infix; destinations on the left, = represents assignment,
+then the opcode name, and source parameters.  Types are to the right of the
+entities they modify, separated by : for results, sources, and variables,
+or delimited by <> for instruction modifiers.
+
+Instruction flags further describe their behavior:
 
 HasDest
 
@@ -38,7 +192,8 @@ HasDest
 
   Note that an instruction's destination value may sometimes be the
   same as one of the input values.  (For example, AddElem returns the
-  array it took as an input.)
+  array it took as an input.)  In these cases the instruction copies
+  the input value; SSA form dictates results always be new variables.
 
 CanCSE
 
@@ -170,7 +325,7 @@ ExitWhenSurprised l:Label
   Tests the surprise flags and if they are set, jumps to the
   exit-trace label l.
 
-ExitOnVarEnv s0:StkP l:Label
+ExitOnVarEnv s0:StkPtr l:Label
 
   Loads the VarEnv slot off the ActRec pointed to by s0.  If it is
   non-zero, jumps to the exit-trace label l.
@@ -187,7 +342,7 @@ UnboxPtr
 
 7. Loads
 
-d:T = LdStack s0:StkP s1:ConstInt [l:Label]
+d:T = LdStack s0:StkPtr s1:ConstInt [l:Label]
 
   Loads from s0 at offset s1, and puts the value in d.  If the
   optional label l is specified and the loaded value's type does not
@@ -196,7 +351,7 @@ d:T = LdStack s0:StkP s1:ConstInt [l:Label]
 
 d:T = LdLoc s0:Home [l:Label]
 
-  Loads from the StkP in s0 at the offset in s0.  Used to load locals.
+  Loads from the StkPtr in s0 at the offset in s0.  Used to load locals.
   If the optional label l is supplied and the loaded value's type does
   not match T, this instruction does not load into d and transfers
   control to l.
@@ -209,7 +364,7 @@ LdRefNR
 LdThis
 LdThisNc
 
-d:Home = LdHome s0:StkP s1:ConstInt
+d:Home = LdHome s0:StkPtr s1:ConstInt
 
   Logically packages the location of a pointer into the VM stack and
   an offset.  s0 will usually be the output of a DefFP.
@@ -242,8 +397,8 @@ NewTuple
 
 9. Call & Return
 
-d:StkP = AllocActRec s0:StkP s1:StkP s2:Func& s3:[Obj|Cls&|Null]
-                     s4:ConstInt s5:[String|Null]
+d:StkPtr = AllocActRec s0:StkPtr s1:StkPtr s2:Func& s3:[Obj|Cls&|Null]
+                       s4:ConstInt s5:[String|Null]
 
   Operands:
 
@@ -258,7 +413,7 @@ d:StkP = AllocActRec s0:StkP s1:StkP s2:Func& s3:[Obj|Cls&|Null]
   Allocates an activation record from the stack pointed to by s0 and
   return the result.
 
-d:StkP = FreeActRec s0:StkP
+d:StkPtr = FreeActRec s0:StkPtr
 
   Load the saved frame pointer from the activation record pointed to
   by s0 into d.
@@ -266,34 +421,34 @@ d:StkP = FreeActRec s0:StkP
 Call
 NativeImpl
 
-d:RetAddr = LdRetAddr s0:StkP
+d:RetAddr = LdRetAddr s0:StkPtr
 
   Load the return address off the activation record pointed to by s0
   in preparation for a RetCtrl.
 
-RetCtrl s0:StkP s1:StkP s2:RetAddr
+RetCtrl s0:StkPtr s1:StkPtr s2:RetAddr
 
   Ensure that s0 is stored in rVmSp and s1 is stored in rVmFp and then
   execute a hardware procedure-return using the return address
   specified by s2.
 
-RetVal s0:StkP s1:T
+RetVal s0:StkPtr s1:T
 
   Writes the value in s1 to the return value slot on the activation
   record pointed to by s0.
 
-d:StkP = RetAdjustStack s0:StkP
+d:StkPtr = RetAdjustStack s0:StkPtr
 
   Loads the new VM stack pointer into the destination.  s0 is a
   pointer to the current activation record.
 
-ReleaseVVOrExit s0:StkP l:Label
+ReleaseVVOrExit s0:StkPtr l:Label
 
   Loads the VarEnv slot off the ActRec pointed to by s0.  If it is
   null, does nothing.  If it is an ExtraArgs, deallocates the
   ExtraArgs structure.  Otherwise jumps to the exit-trace label l.
 
-d:StkP = GenericRetDecRefs s0:StkP s1:T s2:ConstInt
+d:StkPtr = GenericRetDecRefs s0:StkPtr s1:T s2:ConstInt
 
   Does decrefs of all the current function's locals, where s0 is a
   pointer to the relevant activation record, and s2 is the number of
@@ -350,11 +505,11 @@ DefLabel
 
 Marker
 
-d:StkP = DefFP
+d:StkPtr = DefFP
 
   Creates a temporary d representing the current vm frame pointer.
 
-d:StkP = DefSP
+d:StkPtr = DefSP
 
   Creates a temporary d representing the current vm stack pointer.
 

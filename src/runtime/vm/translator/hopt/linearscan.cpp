@@ -359,12 +359,12 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       opc == AllocActRec || opc == SpillStackAllocAR ||
       opc == RetAdjustStack || opc ==  NewObj || opc == InterpOne ||
       opc == GenericRetDecRefs) {
-    ASSERT(type == Type::SP);
+    ASSERT(type == Type::StkPtr);
     allocRegToTmp(&m_regs[int(rVmSp)], ssaTmp, 0);
     return;
   }
 
-  ASSERT(type != Type::SP);
+  ASSERT(type != Type::StkPtr);
 
   if (ssaTmp->getLastUseId() == 0) {
     // This instruction's destination is not used

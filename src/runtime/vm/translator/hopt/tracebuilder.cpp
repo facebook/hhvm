@@ -69,7 +69,7 @@ void TraceBuilder::genDefCls(PreClass* clss, const HPHP::VM::Opcode* after) {
 }
 
 void TraceBuilder::genDefFunc(Func* func) {
-  genInstruction(DefFunc, Type::FuncRef, genDefConst<const Func*>(func));
+  genInstruction(DefFunc, Type::FuncPtr, genDefConst<const Func*>(func));
 }
 
 SSATmp* TraceBuilder::genLdThis(Trace* exitTrace) {
@@ -274,7 +274,7 @@ SSATmp* TraceBuilder::genLdRetAddr() {
 
 SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,
                                Type::Tag type) {
-  ASSERT(type == Type::Int || type == Type::Bool || type == Type::FuncRef);
+  ASSERT(type == Type::Int || type == Type::Bool || type == Type::FuncPtr);
   return genInstruction(LdRaw, type, base, genDefConst(int64(kind)));
 }
 
@@ -733,33 +733,33 @@ SSATmp* TraceBuilder::genLdHome(uint32 id) {
 
 // Helper to lookup class* by name, only using thread's cache
 SSATmp* TraceBuilder::genLdCachedClass(SSATmp* className) {
-  return genInstruction(LdCachedClass, Type::ClassRef, className);
+  return genInstruction(LdCachedClass, Type::ClassPtr, className);
 }
 
 SSATmp* TraceBuilder::genLdCls(SSATmp* className) {
   ASSERT(className->isConst() && className->getType() == Type::StaticStr);
-  return genInstruction(LdCls, Type::ClassRef, className);
+  return genInstruction(LdCls, Type::ClassPtr, className);
 }
 
 SSATmp* TraceBuilder::genLdClsCns(SSATmp* cnsName,
                                   SSATmp* cls,
                                   Trace* exitTrace) {
   ASSERT(cnsName->isConst() && cnsName->getType() == Type::StaticStr);
-  // TODO: Weaken this second assert once we support ClassRef for cls
+  // TODO: Weaken this second assert once we support ClassPtr for cls
   ASSERT(cls->isConst() && cls->getType() == Type::StaticStr);
   return genInstruction(LdClsCns, Type::Cell, cnsName, cls, exitTrace);
 }
 
 SSATmp* TraceBuilder::genLdCurFuncPtr() {
-  return genInstruction(LdCurFuncPtr, Type::FuncRef);
+  return genInstruction(LdCurFuncPtr, Type::FuncPtr);
 }
 
 SSATmp* TraceBuilder::genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset) {
-  return genInstruction(LdARFuncPtr, Type::FuncRef, baseAddr, offset);
+  return genInstruction(LdARFuncPtr, Type::FuncPtr, baseAddr, offset);
 }
 
 SSATmp* TraceBuilder::genLdFuncCls(SSATmp* func) {
-  return genInstruction(LdFuncCls, Type::ClassRef, func);
+  return genInstruction(LdFuncCls, Type::ClassPtr, func);
 }
 
 
@@ -777,25 +777,25 @@ SSATmp* TraceBuilder::genLdClsPropAddr(SSATmp* cls,
 }
 
 SSATmp* TraceBuilder::genLdFunc(SSATmp* funcName, SSATmp* actRec) {
-  return genInstruction(LdFunc, Type::FuncRef, funcName, actRec);
+  return genInstruction(LdFunc, Type::FuncPtr, funcName, actRec);
 }
 
 SSATmp* TraceBuilder::genLdFixedFunc(const StringData* funcName,
                                      SSATmp* actRec) {
   return genInstruction(LdFixedFunc,
-                        Type::FuncRef,
+                        Type::FuncPtr,
                         genDefConst<const StringData*>(funcName),
                         actRec);
 }
 
 SSATmp* TraceBuilder::genLdClsMethod(SSATmp* cls, uint32 methodSlot) {
-  return genInstruction(LdClsMethod, Type::FuncRef, cls,
+  return genInstruction(LdClsMethod, Type::FuncPtr, cls,
                         genDefConst<int64>(methodSlot));
 }
 
 SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* methodName,
                                           SSATmp* classRef) {
-  return genInstruction(LdClsMethodCache, Type::FuncClassRef,
+  return genInstruction(LdClsMethodCache, Type::FuncClassPtr,
                         methodName, classRef);
 }
 
@@ -805,7 +805,7 @@ SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
                                           Trace*  exit) {
   ExtendedInstruction inst(m_irFactory,
                            LdClsMethodCache,
-                           Type::FuncClassRef,
+                           Type::FuncClassPtr,
                            className,
                            methodName,
                            baseClass, 0, NULL, getLabel(exit));
@@ -815,7 +815,7 @@ SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
 SSATmp* TraceBuilder::genLdObjMethod(const StringData* methodName,
                                      SSATmp* actRec) {
   return genInstruction(LdObjMethod,
-                        Type::FuncRef,
+                        Type::FuncPtr,
                         genDefConst<const StringData*>(methodName),
                         actRec);
 }
@@ -827,7 +827,7 @@ SSATmp* TraceBuilder::genQueryOp(Opcode queryOpc, SSATmp* addr) {
 
 SSATmp* TraceBuilder::genLdObjClass(SSATmp* obj) {
   ASSERT(obj->getType() == Type::Obj);
-  return genInstruction(LdObjClass, Type::ClassRef, obj);
+  return genInstruction(LdObjClass, Type::ClassPtr, obj);
 }
 
 Trace* TraceBuilder::genVerifyParamType(SSATmp* objClass,
@@ -1110,7 +1110,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
 
 SSATmp* TraceBuilder::genNewObj(int32 numParams, SSATmp* cls) {
   SSATmp* newSpValue = genInstruction(NewObj,
-                                      Type::SP,
+                                      Type::StkPtr,
                                       genDefConst<int64>(numParams),
                                       cls,
                                       m_spValue,
@@ -1125,7 +1125,7 @@ SSATmp* TraceBuilder::genNewObj(int32 numParams, SSATmp* cls) {
 SSATmp* TraceBuilder::genNewObj(int32 numParams,
                                 const StringData* className) {
   SSATmp* newSpValue = genInstruction(NewObj,
-                                      Type::SP,
+                                      Type::StkPtr,
                                       genDefConst<int64>(numParams),
                                       genDefConst<const StringData*>(className),
                                       m_spValue,
@@ -1285,11 +1285,11 @@ SSATmp* getStackValue(SSATmp* sp,
 }
 
 SSATmp* TraceBuilder::genDefFP() {
-  return genInstruction(DefFP, Type::SP);
+  return genInstruction(DefFP, Type::StkPtr);
 }
 
 SSATmp* TraceBuilder::genDefSP() {
-  return genInstruction(DefSP, Type::SP);
+  return genInstruction(DefSP, Type::StkPtr);
 }
 
 SSATmp* TraceBuilder::genLdStackAddr(int64 index) {
@@ -1312,7 +1312,7 @@ SSATmp* TraceBuilder::genInterpOne(uint32 pcOff,
     genDefConst<int64>(stackAdjustment),
     genDefConst<int64>((int64)resultType) };
 
-  SSATmp* spVal = genInstruction(InterpOne, Type::SP,
+  SSATmp* spVal = genInstruction(InterpOne, Type::StkPtr,
                                  m_fpValue, m_spValue,
                                  3, opnds, target);
   m_spValue = spVal;
@@ -1350,7 +1350,7 @@ void TraceBuilder::genRetVal(SSATmp* val) {
 }
 
 SSATmp* TraceBuilder::genRetAdjustStack() {
-  return genInstruction(RetAdjustStack, Type::SP, m_fpValue);
+  return genInstruction(RetAdjustStack, Type::StkPtr, m_fpValue);
 }
 
 void TraceBuilder::genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retVal) {
@@ -1396,7 +1396,7 @@ void TraceBuilder::genDecRefThis() {
 }
 
 SSATmp* TraceBuilder::genGenericRetDecRefs(SSATmp* retVal, int numLocals) {
-  return genInstruction(GenericRetDecRefs, Type::SP,
+  return genInstruction(GenericRetDecRefs, Type::StkPtr,
     m_fpValue, retVal, genDefConst<int64>(numLocals));
 }
 

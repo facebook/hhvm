@@ -420,13 +420,13 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
     case Type::Uninit:
       ostream << "Unin";
       break;
-    case Type::FuncRef:
+    case Type::FuncPtr:
       ostream << "Func(" << (m_func ? m_func->fullName()->data() : "0") << ")";
       break;
-    case Type::ClassRef:
+    case Type::ClassPtr:
       ostream << "Class(" << (m_clss ? m_clss->name()->data() : "0") << ")";
       break;
-    case Type::FuncClassRef:
+    case Type::FuncClassPtr:
       ASSERT(false /* ConstInstruction does not hold both func* and class* */);
       break;
     case Type::None:
@@ -462,13 +462,13 @@ uint32 ConstInstruction::hash() {
   } else if (m_type == Type::Home) {
     return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
                              m_local.getId());
-  } else if (m_type == Type::FuncRef) {
+  } else if (m_type == Type::FuncPtr) {
     return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
                              (void*)m_func);
-  } else if (m_type == Type::ClassRef) {
+  } else if (m_type == Type::ClassPtr) {
     return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
                              (void*)m_clss);
-  } else if (m_type == Type::FuncClassRef) {
+  } else if (m_type == Type::FuncClassPtr) {
     ASSERT(false /* ConstInstruction does not hold both func* and class* */);
     return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1], (void*)m_func);
   }
@@ -535,7 +535,7 @@ int SSATmp::numNeededRegs() const {
 
   // Need 2 registers for these types, for type and value, or 1 for
   // Func* and 1 for Class*.
-  if (!Type::isStaticallyKnown(type) || type == Type::FuncClassRef) {
+  if (!Type::isStaticallyKnown(type) || type == Type::FuncClassPtr) {
     return 2;
   }
 

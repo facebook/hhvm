@@ -426,10 +426,10 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
   // -1 == true in PHP, but not in HHIR binary representation
   if (!((src1Type == Type::Int && src2Type == Type::Int) ||
         (src1Type == Type::Bool && src2Type == Type::Bool) ||
-        (src1Type == Type::ClassRef && src2Type == Type::ClassRef))) {
+        (src1Type == Type::ClassPtr && src2Type == Type::ClassPtr))) {
     CG_PUNT(cgJcc);
   }
-  if (src1Type == Type::ClassRef && src2Type == Type::ClassRef) {
+  if (src1Type == Type::ClassPtr && src2Type == Type::ClassPtr) {
     ASSERT(opc == JmpSame || opc == JmpNSame);
   }
   auto srcReg1 = src1->getReg();
@@ -2434,7 +2434,7 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
   int actRecAdjustment = -(int)sizeof(ActRec);
   auto spReg = sp->getReg();
   // actRec->m_this
-  if (objOrCls->getType() == Type::ClassRef) {
+  if (objOrCls->getType() == Type::ClassPtr) {
     // store class
     if (objOrCls->isConst()) {
       m_as.store_imm64_disp_reg64(uintptr_t(objOrCls->getConstValAsClass()) | 1,
@@ -2455,8 +2455,8 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
     ASSERT(objOrCls->getType() == Type::Null);
     // no obj or class; this happens in FPushFunc
     int offset_m_this = actRecAdjustment + AROFF(m_this);
-    // When func is Type::FuncClassRef, m_this/m_cls will be initialized below
-    if (!func->isConst() && func->getType() == Type::FuncClassRef) {
+    // When func is Type::FuncClassPtr, m_this/m_cls will be initialized below
+    if (!func->isConst() && func->getType() == Type::FuncClassPtr) {
       // m_this is unioned with m_cls and will be initialized below
       setThis = false;
     } else {
@@ -2485,9 +2485,9 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
     m_as.store_reg64_disp_reg64(rScratch,
                                 actRecAdjustment + AROFF(m_func),
                                 spReg);
-    if (func->getType() == Type::FuncClassRef) {
+    if (func->getType() == Type::FuncClassPtr) {
       // Fill in m_cls if provided with both func* and class*
-      fprintf(stderr, "cgAllocActRec: const func->isFuncClassRef()\n");
+      fprintf(stderr, "cgAllocActRec: const func->isFuncClassPtr()\n");
       CG_PUNT(cgAllocActRec);
     }
   } else {
@@ -2495,7 +2495,7 @@ void CodeGenerator::cgAllocActRec(IRInstruction* inst) {
     m_as.store_reg64_disp_reg64(func->getReg(0),
                                 offset_m_func,
                                 spReg);
-    if (func->getType() == Type::FuncClassRef) {
+    if (func->getType() == Type::FuncClassPtr) {
       int offset_m_cls = actRecAdjustment + AROFF(m_cls);
       m_as.store_reg64_disp_reg64(func->getReg(1),
                                   offset_m_cls,
@@ -2688,7 +2688,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   SSATmp* func  = inst->getSrc(0);
   SSATmp* fp    = inst->getSrc(1);
   ASSERT(func->isConst());
-  ASSERT(func->getType() == Type::FuncRef);
+  ASSERT(func->getType() == Type::FuncPtr);
   BuiltinFunction builtinFuncPtr = func->getConstValAsFunc()->builtinFuncPtr();
   auto fpReg = fp->getReg();
   if (fpReg != argNumToRegName[0]) {
@@ -2788,7 +2788,7 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
 static int getNativeTypeSize(Type::Tag type) {
   switch (type) {
     case Type::Int:
-    case Type::FuncRef:
+    case Type::FuncPtr:
       return sz::qword;
     case Type::Bool:
       return sz::byte;
@@ -3222,7 +3222,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardType(IRInstruction* inst) {
-  UNUSED Type::Tag type = inst->getType();
+  Type::Tag type  = inst->getType();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   src   = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
@@ -3259,7 +3259,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   LabelInstruction* exitLabel = inst->getLabel();
 
   // Get values in place
-  ASSERT(funcPtrTmp->getType() == Type::FuncRef);
+  ASSERT(funcPtrTmp->getType() == Type::FuncPtr);
   auto funcPtrReg = funcPtrTmp->getReg();
   ASSERT(funcPtrReg != InvalidReg);
 
@@ -3389,7 +3389,7 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   SSATmp* cls   = inst->getSrc(0);
   SSATmp* mSlot = inst->getSrc(1);
 
-  ASSERT(cls->getType() == Type::ClassRef);
+  ASSERT(cls->getType() == Type::ClassPtr);
   ASSERT(mSlot->isConst() && mSlot->getType() == Type::Int);
   uint64 mSlotInt64 = mSlot->getConstValAsRawInt();
   // We're going to multiply mSlotVal by sizeof(Func*) and use
@@ -3479,7 +3479,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
 
   if (clsName->isConst() && clsName->getType() == Type::StaticStr  &&
       prop->isConst() && prop->getType() == Type::StaticStr &&
-      cls->getType() == Type::ClassRef) {
+      cls->getType() == Type::ClassPtr) {
 
     const StringData* propName = prop->getConstValAsStr();
     auto dstReg = dst->getReg();
@@ -3879,8 +3879,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   ASSERT(pcOffTmp->isConst());
   ASSERT(spAdjustmentTmp->isConst());
   ASSERT(resultTypeTmp->isConst());
-  ASSERT(fp->getType() == Type::SP);
-  ASSERT(sp->getType() == Type::SP);
+  ASSERT(fp->getType() == Type::StkPtr);
+  ASSERT(sp->getType() == Type::StkPtr);
 
   int64 pcOff = pcOffTmp->getConstValAsInt();
 

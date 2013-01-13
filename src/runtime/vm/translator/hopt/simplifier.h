@@ -29,7 +29,6 @@ class TraceBuilder;
 class Simplifier {
 public:
   Simplifier(TraceBuilder* t);
-  SSATmp* simplifyInst(IRInstruction* inst);
   SSATmp* simplifyInst(Opcode opc, Type::Tag type,
                        SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyInst(Opcode opc, Type::Tag type,

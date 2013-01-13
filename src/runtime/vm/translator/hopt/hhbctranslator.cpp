@@ -1310,7 +1310,7 @@ void HhbcTranslator::emitFCallAux(uint32 numParams,
     }
   } else {
     allocActRec = false;
-    if (!func && actRecOrFunc->getType() == Type::FuncRef) {
+    if (!func && actRecOrFunc->getType() == Type::FuncPtr) {
       // we had a func on the FPI stack
       func = actRecOrFunc;
     }
@@ -1661,7 +1661,7 @@ void HhbcTranslator::emitAGetC(const StringData* clsName) {
   } else {
     spillStack();
     popC();
-    emitInterpOne(Type::ClassRef);
+    emitInterpOne(Type::ClassPtr);
   }
 }
 
@@ -1675,7 +1675,7 @@ void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
     emitAGet(src);
   } else {
     spillStack();
-    emitInterpOne(Type::ClassRef);
+    emitInterpOne(Type::ClassPtr);
   }
 }
 

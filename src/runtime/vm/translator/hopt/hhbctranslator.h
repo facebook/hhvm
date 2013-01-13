@@ -400,7 +400,7 @@ private:
   SSATmp* popC() { return pop(Type::Cell, NULL);      }
   SSATmp* popV() { return pop(Type::BoxedCell, NULL); }
   SSATmp* popR() { return pop(Type::Gen, NULL);       }
-  SSATmp* popA() { return pop(Type::ClassRef, NULL);  }
+  SSATmp* popA() { return pop(Type::ClassPtr, NULL);  }
   SSATmp* popF() { return pop(Type::Gen, NULL);       }
   SSATmp* topC(uint32 i = 0) { return top(Type::Cell, i); }
   SSATmp* spillStack(bool allocActRec = false);

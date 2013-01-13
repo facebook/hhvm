@@ -373,7 +373,7 @@ public:
   // not the same as DataType. See typeToDataType below.
   //    type name,    debug string
   #define IR_TYPES \
-    IRT(None,            "Void")  /* Corresponds to HPHP::TypeOfInvalid */ \
+    IRT(None,            "None")  /* Corresponds to HPHP::TypeOfInvalid */ \
     IRT(Uninit,          "Unin")  \
     IRT(Null,            "Null")  \
     IRT(Bool,            "Bool")  \
@@ -404,12 +404,12 @@ public:
     IRT(PtrToGen,        "Gen*")  \
     IRT(Home,            "Home")  /* HPHP::DataType defines this as -2 */ \
     /* runtime metadata */        \
-    IRT(ClassRef,        "Cls&")   \
-    IRT(FuncRef,         "Func&") \
-    IRT(VarEnvRef,       "VarEnv&")\
-    IRT(FuncClassRef,    "FuncClass&") /* this has both a Func& and a Class& */\
+    IRT(ClassPtr,        "Cls*")   \
+    IRT(FuncPtr,         "Func*") \
+    IRT(VarEnvPtr,       "VarEnv*")\
+    IRT(FuncClassPtr,    "FuncClass*") /* this has both a Func* and a Class* */\
     IRT(RetAddr,         "RetAddr") /* Return address */ \
-    IRT(SP,              "StkP")  /* any pointer into VM stack: VmSP or VmFP */\
+    IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP */\
     IRT(TCA,             "TCA")                                         \
 
   enum Tag {
@@ -547,7 +547,7 @@ public:
       case Str           : return KindOfString;
       case Arr           : return KindOfArray;
       case Obj           : return KindOfObject;
-      case ClassRef      : return KindOfClass;
+      case ClassPtr      : return KindOfClass;
       case UncountedInit : return KindOfUncountedInit;
       case Uncounted     : return KindOfUncounted;
       case Gen           : return KindOfAny;
@@ -570,7 +570,7 @@ public:
       case KindOfString        : return Str;
       case KindOfArray         : return Arr;
       case KindOfObject        : return Obj;
-      case KindOfClass         : return ClassRef;
+      case KindOfClass         : return ClassPtr;
       case KindOfUncountedInit : return UncountedInit;
       case KindOfUncounted     : return Uncounted;
       case KindOfAny           : return Gen;
@@ -685,9 +685,9 @@ class LabelInstruction;
 // (Destructors are not called.)
 class IRInstruction {
 public:
-  Opcode     getOpcode()   const       { return (Opcode)m_op; }
+  Opcode     getOpcode()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
-  Type::Tag  getType()     const       { return (Type::Tag)m_type; }
+  Type::Tag  getType()     const       { return m_type; }
   void       setType(Type::Tag t)      { m_type = t; }
   uint32     getNumSrcs()  const       { return m_numSrcs; }
   uint32     getNumExtendedSrcs() const{
@@ -917,15 +917,15 @@ public:
     return m_arrVal;
   }
   const Func* getValAsFunc() const {
-    ASSERT(m_type == Type::FuncRef);
+    ASSERT(m_type == Type::FuncPtr);
     return m_func;
   }
   const Class* getValAsClass() const {
-    ASSERT(m_type == Type::ClassRef);
+    ASSERT(m_type == Type::ClassPtr);
     return m_clss;
   }
   const VarEnv* getValAsVarEnv() const {
-    ASSERT(m_type == Type::VarEnvRef);
+    ASSERT(m_type == Type::VarEnvPtr);
     return m_varEnv;
   }
   TCA getValAsTCA() const {
@@ -983,12 +983,12 @@ public:
     new (&m_local) Local(l);
   }
   ConstInstruction(Opcode opc, const Func* f)
-      : IRInstruction(opc, Type::FuncRef) {
+      : IRInstruction(opc, Type::FuncPtr) {
     ASSERT(opc == DefConst || opc == LdConst);
     m_func = f;
   }
   ConstInstruction(Opcode opc, const Class* f)
-    : IRInstruction(opc, Type::ClassRef) {
+    : IRInstruction(opc, Type::ClassPtr) {
     ASSERT(opc == DefConst || opc == LdConst);
     m_clss = f;
   }
@@ -1039,20 +1039,13 @@ protected:
                                 m_patchAddr(0),
                                 m_trace(NULL) {
   }
-  LabelInstruction(Opcode opc, uint32 id) : IRInstruction(opc,Type::None),
-                                            m_labelId(id),
-                                            m_stackOff(0),
-                                            m_patchAddr(0),
-                                            m_trace(NULL) {
-  }
 
   LabelInstruction(Opcode opc, uint32 bcOff, const Func* f, int32 spOff)
       : IRInstruction(opc,Type::None),
         m_labelId(bcOff),
         m_stackOff(spOff),
         m_patchAddr(0),
-        m_func(f)
-  {
+        m_func(f) {
   }
 
   LabelInstruction(LabelInstruction* inst)
@@ -1060,8 +1053,7 @@ protected:
         m_labelId(inst->m_labelId),
         m_stackOff(inst->m_stackOff),
         m_patchAddr(0),
-        m_trace(inst->m_trace) // copies func also
-  {
+        m_trace(inst->m_trace) { // copies func also
   }
   uint32 m_labelId;  // for Marker instructions: the bytecode offset in unit
   int32  m_stackOff; // for Marker instructions: stack off from start of trace
@@ -1315,10 +1307,10 @@ static inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
 
   switch (instr->getSrc(0)->getType()) {
     case Type::Int          :
-    case Type::FuncRef      :
-    case Type::ClassRef     :
-    case Type::FuncClassRef :
-    case Type::VarEnvRef    :
+    case Type::FuncPtr      :
+    case Type::ClassPtr     :
+    case Type::FuncClassPtr :
+    case Type::VarEnvPtr    :
     case Type::TCA          :
       return true;
     default:

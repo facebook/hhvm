@@ -99,14 +99,14 @@ IRInstruction* IRFactory::allocActRec(SSATmp* stackPtr,
                                       SSATmp* magicName) {
   SSATmp* args[4] = { func, objOrCls, numArgs, magicName };
   return new (m_arena) ExtendedInstruction(*this, AllocActRec,
-                                           Type::SP, stackPtr, framePtr,
+                                           Type::StkPtr, stackPtr, framePtr,
                                            (sizeof(args) / sizeof(SSATmp*)),
                                            args);
 
 }
 
 IRInstruction* IRFactory::freeActRec(SSATmp* framePtr) {
-  return new (m_arena) IRInstruction(FreeActRec, Type::SP, framePtr);
+  return new (m_arena) IRInstruction(FreeActRec, Type::StkPtr, framePtr);
 }
 
 IRInstruction* IRFactory::call(SSATmp* actRec,
@@ -114,7 +114,7 @@ IRInstruction* IRFactory::call(SSATmp* actRec,
                                SSATmp* func,
                                uint32 numArgs,
                                SSATmp** args) {
-  return new (m_arena) ExtendedInstruction(*this, Call, Type::SP, actRec,
+  return new (m_arena) ExtendedInstruction(*this, Call, Type::StkPtr, actRec,
                                            returnBcOffset, func,
                                            numArgs, args);
 }
@@ -127,7 +127,7 @@ IRInstruction* IRFactory::spillStack(SSATmp* sp,
   Opcode opc = allocActRec ? SpillStackAllocAR : SpillStack;
   return new (m_arena) ExtendedInstruction(*this,
                                            opc,
-                                           Type::SP,
+                                           Type::StkPtr,
                                            sp,
                                            stackAdjustment,
                                            numTmps,

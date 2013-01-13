@@ -30,23 +30,23 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 SSATmp* IRInstruction::simplify(Simplifier* simplifier) {
   if (isControlFlowInstruction()) {
-    return simplifier->simplifyInst((Opcode)m_op, (Type::Tag)m_type,
+    return simplifier->simplifyInst(m_op, m_type,
                                     m_srcs[0], m_srcs[1], m_label);
   } else {
-    return simplifier->simplifyInst((Opcode)m_op, (Type::Tag)m_type,
+    return simplifier->simplifyInst(m_op, m_type,
                                     m_srcs[0], m_srcs[1]);
   }
 }
 
 SSATmp* ExtendedInstruction::simplify(Simplifier* simplifier) {
-  return simplifier->simplifyInst((Opcode)m_op, (Type::Tag)m_type,
+  return simplifier->simplifyInst(m_op, m_type,
                                   m_srcs[0], m_srcs[1],
                                   m_numSrcs - NUM_FIXED_SRCS,
                                   m_extendedSrcs);
 }
 
 SSATmp* TypeInstruction::simplify(Simplifier* simplifier) {
-  return simplifier->simplifyInst((Opcode)m_op, (Type::Tag)m_type,
+  return simplifier->simplifyInst(m_op, m_type,
                                   m_srcs[0], m_srcType);
 }
 
@@ -245,10 +245,6 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
       unimplementedSimplify(opc);
       return NULL;
   }
-}
-
-SSATmp* Simplifier::simplifyInst(IRInstruction* inst) {
-  return inst->simplify(this);
 }
 
 SSATmp* Simplifier::simplifyMov(SSATmp* src) {

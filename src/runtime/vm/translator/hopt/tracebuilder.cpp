@@ -685,11 +685,18 @@ SSATmp* TraceBuilder::genGuardType(SSATmp* src,
   IRInstruction* srcInst = src->getInstruction();
   Opcode opc = srcInst->getOpcode();
   // if srcInst is an incref or move, then Chase down its src
+  // TODO: fixme: the refined type is only valid after the guard;
+  // we should leave previous def'n types alone but change the state
+  // vector to use the result of the guard for later code dominated
+  // by this guard.
+  SSATmp* orig_src = src;
   while (opc == Mov || opc == IncRef) {
-    srcInst->setType(type);
-    srcInst = srcInst->getSrc(0)->getInstruction();
+    srcInst->getDst()->setType(type);
+    srcInst->setType(type); // TODO: don't change instr type
+    orig_src = srcInst->getSrc(0);
+    srcType = orig_src->getType();
+    srcInst = orig_src->getInstruction();
     opc = srcInst->getOpcode();
-    srcType = srcInst->getType();
   }
   if (srcInst->getLabel() &&
       (opc == LdLoc   || opc == LdStack  ||
@@ -697,7 +704,10 @@ SSATmp* TraceBuilder::genGuardType(SSATmp* src,
        opc == LdRefNR || opc == LdClsCns)) {
     if (srcType == Type::Gen ||
         (srcType == Type::Cell && !Type::isBoxed(type))) {
-      srcInst->setType(type);
+      // TODO: was the original instruction a kind of guard, so we're refining
+      // the type without a new guard?
+      orig_src->setType(type);
+      srcInst->setType(type); // TODO: don't change instr type
       return src;
     }
   }

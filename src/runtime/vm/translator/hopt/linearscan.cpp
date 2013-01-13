@@ -965,8 +965,10 @@ void LinearScan::rematerializeAux(Trace* trace,
         }
       }
       if (newInst) {
+        UNUSED Type::Tag oldInstrType = dst->getInstruction()->getType();
         newInst->setDst(dst);
-        newInst->getDst()->setInstruction(newInst);
+        dst->setInstruction(newInst);
+        ASSERT(newInst->getType() == oldInstrType);
         *it = newInst;
         newInst->setParent(trace);
       }

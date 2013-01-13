@@ -59,8 +59,9 @@ SSATmp* HhbcTranslator::push(SSATmp* tmp) {
 void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
   // If type is more refined that tmp's type, reset tmp's type to type
   IRInstruction* inst = tmp->getInstruction();
-  if (Type::isMoreRefined(type, inst->getType())) {
-    inst->setType(type);
+  if (Type::isMoreRefined(type, tmp->getType())) {
+    tmp->setType(type);
+    inst->setType(type);// TODO: remove this mirror
     // If tmp is incref or move, then chase down its src
     Opcode opc = inst->getOpcode();
     if (opc == Mov || opc == IncRef) {

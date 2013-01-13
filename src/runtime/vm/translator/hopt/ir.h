@@ -1120,7 +1120,11 @@ public:
   uint32            getId() const { return m_id; }
   IRInstruction*    getInstruction() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
-  Type::Tag         getType() const { return m_inst->getType(); }
+  Type::Tag         getType() const {
+    ASSERT(m_inst->getType() == m_type); // until we decouple them.
+    return m_type;
+  }
+  void              setType(Type::Tag t) { m_type = t; }
   uint32            getLastUseId() { return m_lastUseId; }
   void              setLastUseId(uint32 newId) { m_lastUseId = newId; }
   uint32            getUseCount() { return m_useCount; }
@@ -1212,6 +1216,7 @@ private:
   SSATmp(uint32 opndId, IRInstruction* i)
     : m_inst(i)
     , m_id(opndId)
+    , m_type(i->getType())
     , m_lastUseId(0)
     , m_useCount(0)
     , m_isSpilled(false)
@@ -1224,6 +1229,7 @@ private:
 
   IRInstruction*  m_inst;
   const uint32    m_id;
+  Type::Tag       m_type; // type when defined
   uint32          m_lastUseId;
   uint16          m_useCount;
   bool            m_isSpilled : 1;

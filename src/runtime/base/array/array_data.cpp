@@ -497,14 +497,8 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
         return true;
       }
       vars.insert(pobj);
-      if (pobj->o_instanceof("Serializable")) {
-        if (ds) {
-          // We want to detect Serializable object as well
-          return true;
-        } else {
-          // Serializable object does not have internal reference issue
-          return false;
-        }
+      if (ds && pobj->o_instanceof("Serializable")) {
+        return true;
       }
       if (pobj->hasInternalReference(vars, ds)) {
         return true;

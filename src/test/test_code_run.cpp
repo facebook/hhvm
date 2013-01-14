@@ -22302,7 +22302,49 @@ bool TestCodeRun::TestAPC() {
         "  }\n"
         "}\n");
 
- return true;
+  MVCRO("<?php "
+        "class X implements Serializable {"
+        "  public function serialize() {"
+        "    return 'true';"
+        "  }"
+        "  public function unserialize($serialized ) {"
+        "  }"
+        "}"
+        "function test() {"
+        "  $a[] = $x = new X;"
+        "  $a[] = $x;"
+        "  $a[] = $x;"
+        "  apc_store('foo', $a);"
+        "  $a = apc_fetch('foo');"
+        "  var_dump($a);"
+        "  $a = apc_fetch('foo');"
+        "  var_dump($a);"
+        "}"
+        "test();",
+        "array(3) {\n"
+        "  [0]=>\n"
+        "  object(X)#2 (0) {\n"
+        "  }\n"
+        "  [1]=>\n"
+        "  object(X)#2 (0) {\n"
+        "  }\n"
+        "  [2]=>\n"
+        "  object(X)#2 (0) {\n"
+        "  }\n"
+        "}\n"
+        "array(3) {\n"
+        "  [0]=>\n"
+        "  object(X)#3 (0) {\n"
+        "  }\n"
+        "  [1]=>\n"
+        "  object(X)#3 (0) {\n"
+        "  }\n"
+        "  [2]=>\n"
+        "  object(X)#3 (0) {\n"
+        "  }\n"
+        "}\n");
+
+  return true;
 }
 
 bool TestCodeRun::TestInlining() {

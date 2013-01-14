@@ -35,14 +35,6 @@ extern __thread uint64_t tl_tcInstrs;
   OPCODES \
   STAT(TgtCache_SPropHit) \
   STAT(TgtCache_SPropMiss) \
-  STAT(TgtCache_PropGetFill) \
-  STAT(TgtCache_PropGetHit) \
-  STAT(TgtCache_PropGetFail) \
-  STAT(TgtCache_PropGetMiss) \
-  STAT(TgtCache_PropSetFill) \
-  STAT(TgtCache_PropSetHit) \
-  STAT(TgtCache_PropSetFail) \
-  STAT(TgtCache_PropSetMiss) \
   STAT(TgtCache_StaticHit) \
   STAT(TgtCache_StaticMiss) \
   STAT(TgtCache_ClsCnsHit) \
@@ -89,10 +81,6 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_InstanceOfDEqual) \
   STAT(Tx64_InstanceOfDFinalTrue) \
   STAT(Tx64_InstanceOfDFinalFalse) \
-  STAT(Tx64_PropCache) \
-  STAT(Tx64_PropNameCache) \
-  STAT(Tx64_PropCtxCache) \
-  STAT(Tx64_PropCtxNameCache) \
   STAT(Tx64_CGetMLEE) \
   STAT(Tx64_CGetMGE) \
   STAT(Tx64_CGetMArray) \

@@ -375,7 +375,7 @@ Address CodeGenerator::emitSmashableFwdJmp(LabelInstruction* label,
     m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen);
     Address tca = emitFwdJmp(label);
     toSmash->setTCA(tca);
-    ASSERT(false);  // TODO looks like this path is unused
+    //ASSERT(false);  // TODO(#2012072): this path is supposed to be unused
   } else {
     emitFwdJmp(label);
   }

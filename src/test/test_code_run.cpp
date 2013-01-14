@@ -254,26 +254,25 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   // run and verify output
   {
     string actual, err;
+    string dir = "runtime/tmp/";
+    if (subdir) dir = dir + subdir + "/";
+    string repoarg = "-vRepo.Central.Path=" + dir + "hhvm.hhbc";
+
     if (Option::EnableEval < Option::FullEval) {
       if (fastMode) {
-        string path = "runtime/tmp/";
-        if (subdir) path = path + subdir + "/";
-        path += "libtest.so";
+        string path = dir + "libtest.so";
         const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
-                              path.c_str(), NULL};
+                              repoarg.c_str(), path.c_str(), NULL};
         Process::Exec("runtime/tmp/run.sh", argv, NULL, actual, &err);
       } else {
         const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
-                              NULL};
-        string path = "runtime/tmp/";
-        if (subdir) path = path + subdir + "/";
-        path += "test";
+                              repoarg.c_str(), NULL};
+        string path = dir + "test";
         Process::Exec(path.c_str(), argv, NULL, actual, &err);
       }
     } else {
-      string filearg = "--file=runtime/tmp/";
-      if (subdir) filearg = filearg + subdir + "/";
-      filearg += "main.php";
+      string filearg = "--file=" + dir + "main.php";
+
       string jitarg = string("-vEval.Jit=") +
         (RuntimeOption::EvalJit ? "true" : "false");
       string jit_use_ir = string("-vEval.JitUseIR=") +
@@ -282,6 +281,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
         (RuntimeOption::EvalJit ? "true" : "false");
       const char *argv[] = {"", filearg.c_str(),
                             "--config=test/config.hdf",
+                            repoarg.c_str(),
                             jitarg.c_str(),
                             jit_use_ir.c_str(),
                             jit_rename.c_str(),
@@ -621,17 +621,18 @@ bool TestCodeRun::RunTests(const std::string &which) {
   GEN_TEST(TestAdHoc);
 
   {
-    int cpus = std::min(20, Process::GetCPUCount());
-    char* jobs = getenv("HPHP_SLOW_TESTS_JOBS");
-    int n;
-    if (jobs && (n = atoi(jobs)) > 0) {
-      cpus = n;
+    int cpus = Process::GetCPUCount();
+    int jobs = cpus * (hhvm ? 4 : 1);
+    char* hphp_slow_tests_jobs = getenv("HPHP_SLOW_TESTS_JOBS");
+    if (hphp_slow_tests_jobs) {
+      int n = atoi(hphp_slow_tests_jobs);
+      if (n > 0) jobs = n;
     }
     string cmd =
       "env -u MFLAGS -u MAKEFLAGS "
       "make -f runtime/tmp/test.mk --no-print-directory "
       "SUITE="+Test::s_suite +
-      " -j" + boost::lexical_cast<string>(cpus);
+      " -j" + boost::lexical_cast<string>(jobs);
 
     if (::system(cmd.c_str())) {
       printf("Failed to run testsuite: %s\n", Test::s_suite.c_str());

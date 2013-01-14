@@ -50,7 +50,7 @@ unexport SUB_OBJECTS
 
 OPTIONS = --config=test/config.hdf $(call GET_OPTIONS,test.opts)
 OPTIONS+= $(EXTRA_RUNTIME_OPTIONS)$(if $(VG), -vEval.VMStackElms=8192)
-STD_OPTIONS = $(OPTIONS) -f $*/main.php
+STD_OPTIONS = $(OPTIONS) -vRepo.Central.Path=$*/hhvm.hhbc -f $*/main.php
 RUNCMD = $(VG)$(if $(RUNCMD_$(TARGET)),$(RUNCMD_$(TARGET)),$(TARGET) $(STD_OPTIONS))
 
 ROOT := runtime/tmp/$(SUITE)
@@ -93,7 +93,7 @@ $(GROUP_RESULTS) : %/group.out : %/group.failures
 		cat $@; echo $(notdir $*) Failed; fi
 
 GENERATED_TEST_FILES = \
-	main test.exp test.build test.out test.err \
+	main hhvm.hhbc test.exp test.build test.out test.err \
 	test.diff "test.status*"
 
 clean-failed:

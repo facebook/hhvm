@@ -3576,17 +3576,25 @@ void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
     bool valIsZero = src->getConstValAsRawInt() == 0;
     if ((cc == CC_Z  && valIsZero) ||
         (cc == CC_NZ && !valIsZero)) {
-      emitSmashableFwdJmp(label, toSmash);
+      // assert(false) here after new simplifier pass, t2019643
+      // For now, materialize the test condition and use a Jcc
+      m_as.xor_reg64_reg64(rScratch, rScratch);
+      m_as.test_reg64_reg64(rScratch, rScratch);
+      cc = CC_Z;
+      // Update the instr opcode since cgExitTrace uses it
+      // to determine correct cc for service request.
+      inst->setOpcode(JmpZero);
     } else {
       // Fall through to next bytecode, disable DirectJmp
       inst->setTCA(kIRDirectJmpInactive);
+      return;
     }
-    return;
-  }
-  if (src->getType() == Type::Bool) {
-    m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
   } else {
-    m_as.test_reg64_reg64(srcReg, srcReg);
+    if (src->getType() == Type::Bool) {
+      m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
+    } else {
+      m_as.test_reg64_reg64(srcReg, srcReg);
+    }
   }
   emitSmashableFwdJccAtEnd(cc, label, toSmash);
 }

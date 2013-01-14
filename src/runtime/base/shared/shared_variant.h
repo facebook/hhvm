@@ -100,7 +100,7 @@ public:
 
   size_t arrSize() const {
     assert(is(KindOfArray));
-    if (getIsVector()) return m_data.vec->size;
+    if (getIsVector()) return m_data.vec->m_size;
     return m_data.map->size();
   }
   int getIndex(int64 key);
@@ -133,19 +133,27 @@ public:
 private:
   class VectorData {
   public:
-    size_t size;
-    SharedVariant **vals;
+    union {
+      size_t m_size;
+      SharedVariant* m_align_dummy;
+    };
 
-    VectorData(size_t s) : size(s) {
-      vals = new SharedVariant *[s];
-    }
+    VectorData() : m_size(0) {}
 
     ~VectorData() {
-      for (size_t i = 0; i < size; i++) {
-        vals[i]->decRef();
+      SharedVariant** v = vals();
+      for (size_t i = 0; i < m_size; i++) {
+        v[i]->decRef();
       }
-      delete [] vals;
     }
+    SharedVariant** vals() { return (SharedVariant**)(this + 1); }
+    void *operator new(size_t sz, int num) {
+      assert(sz == sizeof(VectorData));
+      return malloc(sizeof(VectorData) + num * sizeof(SharedVariant*));
+    }
+    void operator delete(void* ptr) { free(ptr); }
+    // just to keep the compiler happy; used if the constructor throws
+    void operator delete(void* ptr, int num) { free(ptr); }
   };
 
   /* This macro is to help making the object layout binary compatible with

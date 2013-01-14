@@ -77,27 +77,17 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
         }
       }
 
-      size_t size = arr->size();
       if (arr->isVectorData()) {
         setIsVector();
-        m_data.vec = new VectorData(size);
-        uint i = 0;
-        for (ArrayIter it(arr); !it.end(); it.next(), i++) {
+        m_data.vec = new (arr->size()) VectorData();
+        for (ArrayIter it(arr); !it.end(); it.next()) {
           SharedVariant* val = Create(it.secondRef(), false, true,
                                       unserializeObj);
           if (val->m_shouldCache) m_shouldCache = true;
-          m_data.vec->vals[i] = val;
+          m_data.vec->vals()[m_data.vec->m_size++] = val;
         }
       } else {
-        m_data.map = new ImmutableMap(size);
-        for (ArrayIter it(arr); !it.end(); it.next()) {
-          SharedVariant* key = Create(it.first(), false, true,
-                                      unserializeObj);
-          SharedVariant* val = Create(it.secondRef(), false, true,
-                                      unserializeObj);
-          if (val->m_shouldCache) m_shouldCache = true;
-          m_data.map->add(key, val);
-        }
+        m_data.map = ImmutableMap::Create(arr, unserializeObj, m_shouldCache);
       }
       break;
     }
@@ -237,7 +227,7 @@ SharedVariant::~SharedVariant() {
       if (getIsVector()) {
         delete m_data.vec;
       } else {
-        delete m_data.map;
+        ImmutableMap::Destroy(m_data.map);
       }
     }
     break;
@@ -258,7 +248,7 @@ int SharedVariant::getIndex(const StringData* key) {
 int SharedVariant::getIndex(int64 key) {
   assert(is(KindOfArray));
   if (getIsVector()) {
-    if (key < 0 || (size_t) key >= m_data.vec->size) return -1;
+    if (key < 0 || (size_t) key >= m_data.vec->m_size) return -1;
     return key;
   }
   return m_data.map->indexOf(key);
@@ -267,7 +257,7 @@ int SharedVariant::getIndex(int64 key) {
 Variant SharedVariant::getKey(ssize_t pos) const {
   assert(is(KindOfArray));
   if (getIsVector()) {
-    assert(pos < (ssize_t) m_data.vec->size);
+    assert(pos < (ssize_t) m_data.vec->m_size);
     return pos;
   }
   return m_data.map->getKeyIndex(pos)->toLocal();
@@ -277,8 +267,8 @@ HOT_FUNC
 SharedVariant* SharedVariant::getValue(ssize_t pos) const {
   assert(is(KindOfArray));
   if (getIsVector()) {
-    assert(pos < (ssize_t) m_data.vec->size);
-    return m_data.vec->vals[pos];
+    assert(pos < (ssize_t) m_data.vec->m_size);
+    return m_data.vec->vals()[pos];
   }
   return m_data.map->getValIndex(pos);
 }
@@ -372,9 +362,9 @@ int32 SharedVariant::getSpaceUsage() const {
       size += sizeof(StringData) + m_data.str->size();
     } else if (getIsVector()) {
       size += sizeof(VectorData) +
-              sizeof(SharedVariant*) * m_data.vec->size;
-      for (size_t i = 0; i < m_data.vec->size; i++) {
-        size += m_data.vec->vals[i]->getSpaceUsage();
+              sizeof(SharedVariant*) * m_data.vec->m_size;
+      for (size_t i = 0; i < m_data.vec->m_size; i++) {
+        size += m_data.vec->vals()[i]->getSpaceUsage();
       }
     } else {
       ImmutableMap *map = m_data.map;
@@ -426,9 +416,9 @@ void SharedVariant::getStats(SharedVariantStats *stats) const {
     }
     if (getIsVector()) {
       stats->dataTotalSize = sizeof(SharedVariant) + sizeof(VectorData);
-      stats->dataTotalSize += sizeof(SharedVariant*) * m_data.vec->size;
-      for (size_t i = 0; i < m_data.vec->size; i++) {
-        SharedVariant *v = m_data.vec->vals[i];
+      stats->dataTotalSize += sizeof(SharedVariant*) * m_data.vec->m_size;
+      for (size_t i = 0; i < m_data.vec->m_size; i++) {
+        SharedVariant *v = m_data.vec->vals()[i];
         SharedVariantStats childStats;
         v->getStats(&childStats);
         stats->addChildStats(&childStats);

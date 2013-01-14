@@ -34,36 +34,39 @@ class SharedVariant;
  */
 class ImmutableMap {
 public:
-  ImmutableMap(int num);
-  ~ImmutableMap();
-
-  void add(SharedVariant *key, SharedVariant *val);
-
   int indexOf(const StringData* key);
   int indexOf(int64 key);
 
   SharedVariant* getKeyIndex(int index) {
     assert(index < size());
-    return m_buckets[index].key;
+    return buckets()[index].key;
   }
 
   SharedVariant* getValIndex(int index) {
     assert(index < size());
-    return m_buckets[index].val;
+    return buckets()[index].val;
   }
 
   int size() {
-    return m_curPos;
+    return m.m_num;
   }
 
   size_t getStructSize() {
     size_t size = sizeof(ImmutableMap) +
-                  sizeof(Bucket) * (m_capacity_mask + 1) +
-                  sizeof(int) * (m_capacity_mask + 1);
+                  sizeof(Bucket) * m.m_num +
+                  sizeof(int) * (m.m_capacity_mask + 1);
     return size;
   }
 
+  static ImmutableMap* Create(ArrayData* arr,
+                              bool unserializeObj,
+                              bool& shouldCache);
+  static void Destroy(ImmutableMap* im);
 private:
+  ImmutableMap() {}
+  ~ImmutableMap() {}
+  void add(int pos, SharedVariant *key, SharedVariant *val);
+
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
@@ -72,11 +75,16 @@ private:
     SharedVariant *val;
   };
   /** index of the beginning of each hash chain */
-  int *m_hash;
+  int *hash() const { return (int*)(this + 1); }
   /** buckets, stored in index order */
-  Bucket* m_buckets;
-  int m_curPos;
-  unsigned int m_capacity_mask;
+  Bucket* buckets() const { return (Bucket*)(hash() + m.m_capacity_mask + 1); }
+  union {
+    struct {
+      unsigned int m_capacity_mask;
+      unsigned int m_num;
+    } m;
+    SharedVariant* align_dummy;
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

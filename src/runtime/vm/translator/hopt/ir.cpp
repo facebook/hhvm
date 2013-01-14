@@ -185,21 +185,18 @@ IRInstruction* ConstInstruction::clone(IRFactory* factory) {
   return factory->cloneInstruction(this);
 }
 
-IRInstruction* TypeInstruction::clone(IRFactory* factory) {
-  return factory->cloneInstruction(this);
-}
-
 IRInstruction* LabelInstruction::clone(IRFactory* factory) {
   return factory->cloneInstruction(this);
 }
 
 SSATmp* IRInstruction::getSrc(uint32 i) const {
-  ASSERT(i < getNumSrcs());
+  if (i >= getNumSrcs()) return nullptr;
   if (i < NUM_FIXED_SRCS) {
     return m_srcs[i];
   }
   return getExtendedSrc(i - NUM_FIXED_SRCS);
 }
+
 void IRInstruction::setSrc(uint32 i, SSATmp* newSrc) {
   ASSERT(i < getNumSrcs());
   if (i < NUM_FIXED_SRCS) {
@@ -208,9 +205,11 @@ void IRInstruction::setSrc(uint32 i, SSATmp* newSrc) {
   }
   setExtendedSrc(i - NUM_FIXED_SRCS, newSrc);
 }
+
 bool IRInstruction::equals(IRInstruction* inst) const {
   if (m_op != inst->m_op ||
       m_type != inst->m_type ||
+      m_typeParam != inst->m_typeParam ||
       m_numSrcs != inst->m_numSrcs) {
     return false;
   }
@@ -222,8 +221,9 @@ bool IRInstruction::equals(IRInstruction* inst) const {
   // TODO: check label for ControlFlowInstructions?
   return true;
 }
+
 uint32 IRInstruction::hash() {
-  return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1]);
+  return CSEHash::instHash(m_op, m_type, m_typeParam, m_srcs[0], m_srcs[1]);
 }
 
 SSATmp* IRInstruction::getExtendedSrc(uint32 i) const {
@@ -236,8 +236,11 @@ void IRInstruction::setExtendedSrc(uint32 i, SSATmp* newSrc) {
 
 void IRInstruction::printOpcode(std::ostream& ostream) {
   ostream << opcodeName(m_op);
-  if (m_op == GuardLoc || m_op == GuardStk) {
+  if (m_op == GuardLoc || m_op == GuardStk) { // XXX
     ostream << "<" << Type::Strings[m_type] << ">";
+  }
+  if (m_typeParam != Type::None) {
+    ostream << '<' << Type::Strings[m_typeParam] << '>';
   }
 }
 
@@ -386,7 +389,7 @@ void ExtendedInstruction::appendExtendedSrc(IRFactory& irFactory,
 }
 
 void ConstInstruction::printConst(std::ostream& ostream) const {
-  switch (m_type) {
+  switch (getType()) {
     case Type::Int:
       ostream << m_intVal;
       break;
@@ -437,42 +440,16 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
   }
 }
 
-bool TypeInstruction::equals(IRInstruction* inst) const {
-  if (!this->IRInstruction::equals(inst)) {
-    return false;
-  }
-  return m_srcType == ((TypeInstruction*)inst)->m_srcType;
-}
-
-uint32 TypeInstruction::hash() {
-  return
-    CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1], (int64)m_srcType);
-}
-
 bool ConstInstruction::equals(IRInstruction* inst) const {
   if (!this->IRInstruction::equals(inst)) {
     return false;
   }
   return m_intVal == ((ConstInstruction*)inst)->m_intVal;
 }
+
 uint32 ConstInstruction::hash() {
-  if (m_type == Type::Str) {
-    return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
-                             (void*)m_strVal);
-  } else if (m_type == Type::Home) {
-    return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
-                             m_local.getId());
-  } else if (m_type == Type::FuncPtr) {
-    return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
-                             (void*)m_func);
-  } else if (m_type == Type::ClassPtr) {
-    return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1],
-                             (void*)m_clss);
-  } else if (m_type == Type::FuncClassPtr) {
-    ASSERT(false /* ConstInstruction does not hold both func* and class* */);
-    return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1], (void*)m_func);
-  }
-  return CSEHash::instHash(m_op, m_type, m_srcs[0], m_srcs[1], m_intVal);
+  return CSEHash::instHash(getOpcode(), getType(), getSrc(0), getSrc(1),
+    m_intVal);
 }
 
 void ConstInstruction::print(std::ostream& ostream) {
@@ -504,24 +481,17 @@ void* LabelInstruction::getPatchAddr() {
 }
 
 void LabelInstruction::print(std::ostream& ostream) {
-  if (m_op == DefLabel) {
+  if (getOpcode() == DefLabel) {
     ostream << "L";
-  } else if (m_op == Marker) {
+  } else if (getOpcode() == Marker) {
     ostream << "--- bc";
   }
   ostream << m_labelId;
-  if (m_op == Marker) {
+  if (getOpcode() == Marker) {
     ostream << ", spOff: " << m_stackOff;
   } else {
     ostream << ":";
   }
-}
-
-void TypeInstruction::print(std::ostream& ostream) {
-  printDst(ostream);
-  printOpcode(ostream);
-  ostream << Type::Strings[getSrcType()];
-  printSrcs(ostream);
 }
 
 int SSATmp::numNeededRegs() const {

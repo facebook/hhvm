@@ -604,10 +604,8 @@ Trace* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
       if (negate) {
         srcOpcode = negateQueryOp(srcOpcode);
       }
-      TypeInstruction* isTypeInst = (TypeInstruction*)srcInst;
-      Type::Tag type = isTypeInst->getSrcType();
       return genJmpCond(queryToJmpOp(srcOpcode),
-                        type,
+                        srcInst->getTypeParam(),
                         srcInst->getSrc(0),
                         target);
     } else if (isQueryOp(srcOpcode)) {
@@ -1568,7 +1566,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
   // simplification
   // Note: simplifier's return value must be in the cse hash table
   // but if there is no simplification the result will be NULL
-  result = inst->simplify(&m_simplifier);
+  result = m_simplifier.simplify(inst);
   if (result) {
     ASSERT(result->getInstruction()->hasDst());
     return result;

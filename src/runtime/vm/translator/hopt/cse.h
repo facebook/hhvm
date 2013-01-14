@@ -14,19 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _CSE_H_
-#define _CSE_H_
+#ifndef incl_HHIR_CSE_H_
+#define incl_HHIR_CSE_H_
 
-#include <tr1/unordered_map>
+#include <unordered_map>
+
+#include "folly/Hash.h"
 
 namespace HPHP {
 namespace VM {
 namespace JIT {
 
-class CSEHash {
-public:
-  virtual ~CSEHash() {}
-  virtual SSATmp* lookup(IRInstruction* inst) {
+struct CSEHash {
+  SSATmp* lookup(IRInstruction* inst) {
     MapType::iterator it = map.find(inst);
     if (it == map.end()) {
       return NULL;
@@ -43,35 +43,11 @@ public:
     map.clear();
   }
 
-  // HHIR:TOOD switch to pointer_hash
-  static inline uintptr_t ptrHash(void* ptr) {
-    return ((uintptr_t)(ptr) >> 5);
+  template<class... Args>
+  static inline uint32_t instHash(Args&&... args) {
+    return folly::hash::hash_combine(std::forward<Args>(args)...);
   }
-  static inline
-  uint32 instHash(uint16 op, uint8 type) {
-    return ((uint32)op << 8) + (uint32)type;
-  }
-  static inline
-  uint32 instHash(uint16 op, uint8 type, void* src) {
-    return instHash(op, type) ^ ptrHash(src);
-  }
-  static inline
-  uint32 instHash(uint16 op, uint8 type, void* src1, void* src2) {
-    return instHash(op, type, src1) ^ ptrHash(src2);
-  }
-  static inline
-  uint32 instHash(uint16 op, uint8 type,
-                  void* src1, void* src2, void* src3) {
-    return instHash(op, type, src1, src2) ^ ptrHash(src3);
-  }
-  static inline
-  uint32 instHash(uint16 op, uint8 type, int64 val) {
-    return instHash(op, type) ^ val;
-  }
-  static inline
-  uint32 instHash(uint16 op, uint8 type, void* src1, void* src2, int64 val) {
-    return instHash(op, type, src1, src2) ^ val;
-  }
+
 private:
   struct EqualsOp {
     bool operator()(IRInstruction* i1, IRInstruction* i2) const {
@@ -87,31 +63,13 @@ private:
       return inst->hash();
     }
   };
-protected:
-  typedef std::tr1::unordered_map<IRInstruction*, SSATmp*,
-                                  HashOp, EqualsOp>  MapType;
+
+  typedef std::unordered_map<IRInstruction*, SSATmp*,
+                             HashOp, EqualsOp>  MapType;
   MapType map;
-
 };
 
-class ScopedCSEHash : public CSEHash {
-public:
-  ScopedCSEHash(CSEHash* p) : parent(p) {}
-  virtual SSATmp* lookup(IRInstruction* inst) {
-    SSATmp* opnd = map[inst];
-    if (opnd) {
-      return opnd;
-    }
-    if (parent) {
-      return parent->lookup(inst);
-    }
-    return NULL;
-  }
-private:
-  CSEHash* parent;
-};
+}}}
 
-}}} // namespace HPHP::VM::JIT
-
-#endif // _CSE_H_
+#endif
 

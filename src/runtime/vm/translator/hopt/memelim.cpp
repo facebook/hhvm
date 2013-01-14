@@ -696,7 +696,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
     if (!(Type::isString(valTy) && Type::isString(instTy)) &&
         Type::isStaticallyKnown(valTy) && Type::isStaticallyKnown(instTy)) {
       inst->setOpcode(Jmp_);
-      inst->m_numSrcs = 0;
+      inst->setNumSrcs(0);
       inst->setDst(NULL);
       return;
     }
@@ -708,7 +708,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   inst->setSrc(0, value);
   if (op == LdPropNR) {
     inst->setSrc(1, NULL);
-    inst->m_numSrcs = 1;
+    inst->setNumSrcs(1);
   } else {
     ASSERT(inst->getNumSrcs() == 1);
   }
@@ -746,7 +746,7 @@ void MemMap::sinkStores(StoreList& stores) {
     if (store->getOpcode() == StRef || store->getOpcode() == StRefNT) {
       store->setOpcode(Mov);
       store->setSrc(1, NULL);
-      store->m_numSrcs = 1;
+      store->setNumSrcs(1);
       store->setId(LIVE);
     }
   }

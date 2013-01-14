@@ -29,10 +29,6 @@ ConstInstruction* IRFactory::cloneInstruction(ConstInstruction* inst) {
   return new (m_arena) ConstInstruction(inst);
 }
 
-TypeInstruction* IRFactory::cloneInstruction(TypeInstruction* inst) {
-  return new (m_arena) TypeInstruction(inst);
-}
-
 LabelInstruction* IRFactory::cloneInstruction(LabelInstruction* inst) {
   return new (m_arena) LabelInstruction(inst);
 }

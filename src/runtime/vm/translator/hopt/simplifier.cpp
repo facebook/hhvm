@@ -26,33 +26,7 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
-
-SSATmp* IRInstruction::simplify(Simplifier* simplifier) {
-  if (isControlFlowInstruction()) {
-    return simplifier->simplifyInst(m_op, m_type,
-                                    m_srcs[0], m_srcs[1], m_label);
-  } else {
-    return simplifier->simplifyInst(m_op, m_type,
-                                    m_srcs[0], m_srcs[1]);
-  }
-}
-
-SSATmp* ExtendedInstruction::simplify(Simplifier* simplifier) {
-  return simplifier->simplifyInst(m_op, m_type,
-                                  m_srcs[0], m_srcs[1],
-                                  m_numSrcs - NUM_FIXED_SRCS,
-                                  m_extendedSrcs);
-}
-
-SSATmp* TypeInstruction::simplify(Simplifier* simplifier) {
-  return simplifier->simplifyInst(m_op, m_type,
-                                  m_srcs[0], m_srcType);
-}
-
-SSATmp* LabelInstruction::simplify(Simplifier* simplifier) {
-  return NULL;
-}
+TRACE_SET_MOD(hhir);
 
 void Simplifier::copyProp(IRInstruction* inst) {
   for (uint32 i = 0; i < inst->getNumSrcs(); i++) {
@@ -95,161 +69,112 @@ static bool isNotInst(SSATmp *tmp) {
   return isNotInst(inst->getSrc(0), inst->getSrc(1));
 }
 
-SSATmp* Simplifier::simplifyInst(Opcode opc,
-                                 Type::Tag type,
-                                 SSATmp* src1,
-                                 SSATmp* src2) {
-  switch (opc) {
-    case OpAdd:       return simplifyAdd(src1, src2);
-    case OpSub:       return simplifySub(src1, src2);
-    case OpMul:       return simplifyMul(src1, src2);
-    case OpAnd:       return simplifyAnd(src1, src2);
-    case OpOr:        return simplifyOr(src1, src2);
-    case OpXor:       return simplifyXor(src1, src2);
-    case OpGt:        return simplifyGt(src1, src2);
-    case OpGte:       return simplifyGte(src1, src2);
-    case OpLt:        return simplifyLt(src1, src2);
-    case OpLte:       return simplifyLte(src1, src2);
-    case OpEq:        return simplifyEq(src1, src2);
-    case OpNeq:       return simplifyNeq(src1, src2);
-    case OpSame:      return simplifySame(src1, src2);
-    case OpNSame:     return simplifyNSame(src1, src2);
-    case Concat:      return simplifyConcat(src1, src2);
-    case Conv:        return simplifyConv(type,  src1);
-    case InstanceOfD: return simplifyInstanceOfD(src1, src2, false);
-    case NInstanceOfD:return simplifyInstanceOfD(src1, src2, true);
-    case IsSet:       return simplifyIsSet(src1, false);
-    case IsNSet:      return simplifyIsSet(src1, true);
-    case Unbox:       return simplifyUnbox(type, src1);
-    case Mov:         return simplifyMov(src1);
-    case LdObjClass:  return simplifyLdObjClass(src1);
-    case LdCachedClass: return simplifyLdCachedClass(src1);
-    case LdCls:
-    case LdObjMethod:
-      return NULL;
-    case RetVal:
-    case FreeActRec:
+SSATmp* Simplifier::simplify(IRInstruction* inst) {
+  SSATmp* src1 = inst->getSrc(0);
+  SSATmp* src2 = inst->getSrc(1);
 
-  // stores
-    case StMem:
-    case StMemNT:
-    case StLoc:
-    case IncRef:
-    case DefFP:
-    case DefSP:
-    case LdFunc:
-    case LdFixedFunc:
-    case Box:
-      return NULL;
-    default:
-      unimplementedSimplify(opc);
-      return NULL;
-  }
-}
+  switch (inst->getOpcode()) {
+  case OpAdd:       return simplifyAdd(src1, src2);
+  case OpSub:       return simplifySub(src1, src2);
+  case OpMul:       return simplifyMul(src1, src2);
+  case OpAnd:       return simplifyAnd(src1, src2);
+  case OpOr:        return simplifyOr(src1, src2);
+  case OpXor:       return simplifyXor(src1, src2);
+  case OpGt:        return simplifyGt(src1, src2);
+  case OpGte:       return simplifyGte(src1, src2);
+  case OpLt:        return simplifyLt(src1, src2);
+  case OpLte:       return simplifyLte(src1, src2);
+  case OpEq:        return simplifyEq(src1, src2);
+  case OpNeq:       return simplifyNeq(src1, src2);
+  case OpSame:      return simplifySame(src1, src2);
+  case OpNSame:     return simplifyNSame(src1, src2);
+  case Concat:      return simplifyConcat(src1, src2);
+  case InstanceOfD: return simplifyInstanceOfD(src1, src2, false);
+  case NInstanceOfD:return simplifyInstanceOfD(src1, src2, true);
+  case Mov:         return simplifyMov(src1);
 
-SSATmp* Simplifier::simplifyInst(Opcode opc,
-                                 Type::Tag type,
-                                 SSATmp* src1,
-                                 SSATmp* src2,
-                                 uint32 numExtendedSrcs,
-                                 SSATmp** extendedSrcs) {
-  switch(opc) {
-    case LdClsPropAddr:
-      return simplifyLdClsPropAddr(src1, src2, extendedSrcs[0]);
-    case AllocActRec:
-      if (numExtendedSrcs == 3) {
-        return simplifyAllocActRec(src1,
-                                   src2,
-                                   extendedSrcs[0],
-                                   extendedSrcs[1],
-                                   extendedSrcs[2]);
-      } else if (numExtendedSrcs == 2) {
-        return simplifyAllocActRec(src1,
-                                   src2,
-                                   extendedSrcs[0],
-                                   NULL,
-                                   extendedSrcs[1]);
-      }
-      return NULL;
-    case LdClsMethodCache: // simplify: fall-through and return NULL
-    case LdClsMethod:
-    case Call:
-    case SpillStack:
-    case SpillStackAllocAR:
-    case ExitTrace:
-    case ExitSlow:
-    case ExitGuardFailure:
-      return NULL;
-    default:
-      unimplementedSimplify(opc);
-      return NULL;
-  }
-}
+  case LdClsPropAddr:
+    return simplifyLdClsPropAddr(src1, src2, inst->getSrc(2));
+  case Conv:
+    return simplifyConv(inst->getType(),  src1);
+  case Unbox:
+    return simplifyUnbox(inst->getType(), src1, inst->getLabel());
+  case IsType:
+    return simplifyIsType(inst->getTypeParam(), src1);
 
-SSATmp* Simplifier::simplifyInst(Opcode opc,
-                                 Type::Tag type,
-                                 SSATmp* src,
-                                 Type::Tag srcType) {
-  switch(opc) {
-    case IsType: return simplifyIsType(srcType, src);
-    default:
-      unimplementedSimplify(opc);
-      return NULL;
-  }
-}
+  case JmpGt:
+  case JmpGte:
+  case JmpLt:
+  case JmpLte:
+  case JmpEq:
+  case JmpNeq:
+  case JmpSame:
+  case JmpNSame:
+  case JmpZero:
+  case JmpNZero:
+  case Jmp_:
+  case JmpInstanceOfD:
+  case JmpNInstanceOfD:
+  case JmpIsSet:
+  case JmpIsType:
+  case JmpIsNSet:
+  case JmpIsNType:
+    return nullptr;
 
-SSATmp* Simplifier::simplifyInst(Opcode opc,
-                                 Type::Tag type,
-                                 SSATmp* src1,
-                                 SSATmp* src2,
-                                 LabelInstruction* label) {
-  switch (opc) {
-    case DecRefLoc:
-    case DecRefStack:
-    case DecRef:
-    case DecRefNZ:
-    case GuardType:
-    case GuardLoc:
-    case GuardStk:
-    case LdThis:
-    case LdLoc:
-    case LdMemNR:
-    case LdRefNR:
-    case LdStack:
-    case LdPropAddr:
-    case LdClsCns:
-      return NULL;
-    case Unbox:
-         return simplifyUnbox(type, src1, label);
-    case JmpGt:
-    case JmpGte:
-    case JmpLt:
-    case JmpLte:
-    case JmpEq:
-    case JmpNeq:
-    case JmpSame:
-    case JmpNSame:
-      return simplifyJcc(opc, type, src1, src2, label);
-    case JmpZero:  return simplifyJmpZ(src1, label);
-    case JmpNZero: return simplifyJmpNz(src1, label);
-    case Jmp_:
-      return NULL;
-    case JmpInstanceOfD:
-    case JmpNInstanceOfD:
-    case JmpIsSet:
-    case JmpIsType:
-    case JmpIsNSet:
-    case JmpIsNType:
-      return NULL;
-    default:
-      unimplementedSimplify(opc);
-      return NULL;
+  case IsSet:
+  case IsNSet:
+  case LdObjClass:
+  case LdCachedClass:
+  case DecRefLoc:
+  case DecRefStack:
+  case DecRef:
+  case DecRefNZ:
+  case GuardType:
+  case GuardLoc:
+  case GuardStk:
+  case LdThis:
+  case LdLoc:
+  case LdMemNR:
+  case LdRefNR:
+  case LdStack:
+  case LdPropAddr:
+  case LdClsCns:
+  case AllocActRec:
+  case LdCls:
+  case LdObjMethod:
+  case RetVal:
+  case FreeActRec:
+  case LdClsMethodCache:
+  case LdClsMethod:
+  case Call:
+  case SpillStack:
+  case SpillStackAllocAR:
+  case ExitTrace:
+  case ExitSlow:
+  case ExitGuardFailure:
+  case StMem:
+  case StMemNT:
+  case StLoc:
+  case IncRef:
+  case DefFP:
+  case DefSP:
+  case LdFunc:
+  case LdFixedFunc:
+  case Box:
+  case DefLabel:
+  case Marker:
+    return nullptr;
+
+  default:
+    unimplementedSimplify(inst->getOpcode());
+    return nullptr;
   }
 }
 
 SSATmp* Simplifier::simplifyMov(SSATmp* src) {
   return src;
 }
+
 SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   // const XORs are handled in simplifyXor()
   ASSERT(!src->isConst());
@@ -962,22 +887,13 @@ SSATmp* Simplifier::simplifyConv(Type::Tag toType, SSATmp* src) {
   }
   return NULL;
 }
-SSATmp* Simplifier::simplifyLdObjClass(SSATmp* obj) {
-  return NULL;
-}
-SSATmp* Simplifier::simplifyLdCachedClass(SSATmp* obj) {
-  return NULL;
-}
+
 SSATmp* Simplifier::simplifyInstanceOfD(SSATmp* src1,
                                         SSATmp* src2,
                                         bool negate) {
   if (src1->getType() != Type::Obj) {
     return genDefBool(false);
   }
-  return NULL;
-}
-
-SSATmp* Simplifier::simplifyIsSet(SSATmp* src, bool negate) {
   return NULL;
 }
 
@@ -992,12 +908,6 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls,
       return genLdClsPropAddr(cls, clsName, propName);
     }
   }
-  return NULL;
-}
-
-SSATmp* Simplifier::simplifyAllocActRec(SSATmp* src1, SSATmp* src2,
-                                        SSATmp* src3, SSATmp* src4,
-                                        SSATmp* src5) {
   return NULL;
 }
 
@@ -1016,8 +926,13 @@ SSATmp* Simplifier::simplifyUnbox(Type::Tag type, SSATmp* src) {
   }
   return NULL;
 }
+
 SSATmp* Simplifier::simplifyUnbox(Type::Tag type, SSATmp* src,
                                   LabelInstruction* typeFailLabel) {
+  if (!typeFailLabel) {
+    return simplifyUnbox(type, src);
+  }
+
   ASSERT(Type::isUnboxed(type));
   Type::Tag srcType = src->getType();
   if (Type::isUnboxed(srcType)) {
@@ -1033,20 +948,6 @@ SSATmp* Simplifier::simplifyUnbox(Type::Tag type, SSATmp* src,
     return m_tb->genLdRef(src, type, typeFailLabel->getTrace());
   }
   return NULL;
-}
-SSATmp* Simplifier::simplifyJcc(Opcode opc, Type::Tag type,
-                                SSATmp* src1, SSATmp* src2,
-                                LabelInstruction* label) {
-  return NULL;
-}
-SSATmp* Simplifier::simplifyJmpZ(SSATmp* src, LabelInstruction* label) {
-  return NULL;
-}
-SSATmp* Simplifier::simplifyJmpNz(SSATmp* src, LabelInstruction* label) {
-  return NULL;
-}
-
-Simplifier::Simplifier(TraceBuilder* t) : m_tb(t) {
 }
 
 SSATmp* Simplifier::genDefInt(int64 val) {

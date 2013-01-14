@@ -250,7 +250,7 @@ public:
 
   template<Type::Tag T>
   SSATmp* genIsType(SSATmp* src) {
-    TypeInstruction inst(IsType, T, Type::Bool, src);
+    auto inst = IRInstruction::makeTypeParamInst(IsType, T, Type::Bool, src);
     return optimizeInst(&inst);
   }
 

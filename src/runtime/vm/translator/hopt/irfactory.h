@@ -32,7 +32,6 @@ public:
   IRInstruction* cloneInstruction(IRInstruction* inst);
   ExtendedInstruction* cloneInstruction(ExtendedInstruction* inst);
   ConstInstruction* cloneInstruction(ConstInstruction* inst);
-  TypeInstruction* cloneInstruction(TypeInstruction* inst);
   LabelInstruction* cloneInstruction(LabelInstruction* inst);
 
   IRInstruction* guardRefs(SSATmp* funcPtr,

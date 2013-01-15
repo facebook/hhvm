@@ -5126,10 +5126,19 @@ void EmitterVisitor::emitPostponedMeths() {
     }
     Emitter e(p.m_meth, m_ue, *this);
     if (p.m_top) {
-      // Set label
       StringData* methName =
         StringData::GetStaticString(p.m_meth->getOriginalName());
-      m_methLabels[methName]->set(e);
+      auto entry = m_methLabels.find(methName);
+      if (entry != m_methLabels.end() && entry->second->isSet()) {
+        // According to Zend, this is include-time; Zend doesn't appear
+        // to execute the pseudomain that redeclares.
+        throw IncludeTimeFatalException(p.m_meth,
+                                        (string("Function already defined: ") +
+                                         string(methName->data())).c_str());
+      } else {
+        // Set label
+        m_methLabels[methName]->set(e);
+      }
     }
     typedef std::pair<Id, ConstructPtr> DVInitializer;
     std::vector<DVInitializer> dvInitializers;

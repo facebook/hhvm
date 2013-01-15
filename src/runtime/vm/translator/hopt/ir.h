@@ -311,6 +311,12 @@ enum OpcodeFlag : uint64_t {
   OPC(ContRaiseCheck,    (Essential))                                   \
   OPC(ContPreNext,       (Essential|MemEffects))                        \
   OPC(ContStartedCheck,  (Essential))                                   \
+  OPC(IterInit,          (HasDest|CallsNative|MemEffects|MayModifyRefs| \
+                          ConsumesRC))                                  \
+  OPC(IterInitK,         (HasDest|CallsNative|MemEffects|MayModifyRefs| \
+                          ConsumesRC))                                  \
+  OPC(IterNext,          (HasDest|CallsNative|MemEffects|MayModifyRefs))\
+  OPC(IterNextK,         (HasDest|CallsNative|MemEffects|MayModifyRefs))\
                                                                         \
   OPC(IncStat,           (Essential|MemEffects))                        \
   OPC(AssertRefCount,    (Essential))                                   \
@@ -953,19 +959,22 @@ private:
 
 class LabelInstruction : public IRInstruction {
 public:
-  explicit LabelInstruction(uint32 id)
+  explicit LabelInstruction(uint32 id, const Func* func)
     : IRInstruction(DefLabel)
     , m_labelId(id)
     , m_patchAddr(0)
+    , m_func(func)
   {}
 
   explicit LabelInstruction(IRFactory& factory, const LabelInstruction* inst)
     : IRInstruction(factory, inst)
     , m_labelId(inst->m_labelId)
     , m_patchAddr(0)
+    , m_func(inst->m_func)
   {}
 
   uint32      getLabelId() const  { return m_labelId; }
+  const Func* getFunc() const     { return m_func; }
 
   virtual void print(std::ostream& ostream);
   virtual bool equals(IRInstruction* inst) const;
@@ -978,6 +987,7 @@ public:
 private:
   uint32 m_labelId;
   void*  m_patchAddr; // Support patching forward jumps
+  const Func* m_func; // which func are we in
 };
 
 class MarkerInstruction : public IRInstruction {

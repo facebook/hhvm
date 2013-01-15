@@ -121,16 +121,15 @@ TranslatorX64::irCheckType(X64Assembler& a,
     // positive offsets for stack values, relative to rVmSp
     uint32 stackOffset = tx64LocPhysicalOffset(l);
     m_hhbcTrans->guardTypeStack(stackOffset, JIT::Type::fromRuntimeType(rtt));
-  } else {
-    if (l.space == Location::Invalid) {
-      HHIR_UNIMPLEMENTED(Invalid);
-    }
-    if (l.space == Location::Iter) {
-      HHIR_UNIMPLEMENTED(IterGuard);
-    }
+  } else if (l.space == Location::Local){
     // Convert negative offset to a positive offset for convenience
     m_hhbcTrans->guardTypeLocal(l.offset, JIT::Type::fromRuntimeType(rtt));
+  } else if (l.space == Location::Iter) {
+    assert(false); // should not happen
+  } else {
+    HHIR_UNIMPLEMENTED(Invalid_space);
   }
+
   return;
 }
 
@@ -1308,29 +1307,42 @@ TranslatorX64::irTranslateInstanceOfD(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateIterInit(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-
-  HHIR_EMIT(IterInit, i.imm[0].u_IVA, i.imm[1].u_BA);
+                                   const NormalizedInstruction& i) {
+  HHIR_EMIT(IterInit,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA);
 }
 
 void
 TranslatorX64::irTranslateIterInitK(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
-  HHIR_EMIT(IterInitK, i.imm[0].u_IVA, i.imm[1].u_BA);
+                                    const NormalizedInstruction& i) {
+  HHIR_EMIT(IterInitK,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA,
+            i.imm[3].u_IVA);
 }
 
 void
 TranslatorX64::irTranslateIterNext(const Tracelet& t,
                                  const NormalizedInstruction& i) {
 
-  HHIR_EMIT(IterNext, i.imm[0].u_IVA, i.imm[1].u_BA);
+  HHIR_EMIT(IterNext,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA);
 }
 
 void
 TranslatorX64::irTranslateIterNextK(const Tracelet& t,
                                  const NormalizedInstruction& i) {
 
-  HHIR_EMIT(IterNextK, i.imm[1].u_IVA, i.imm[1].u_BA);
+  HHIR_EMIT(IterNextK,
+            i.imm[0].u_IVA,
+            i.offset() + i.imm[1].u_BA,
+            i.imm[2].u_IVA,
+            i.imm[3].u_IVA);
 }
 
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
@@ -1510,19 +1522,19 @@ void TranslatorX64::irAssertType(const Location& l,
       break;
 
     case Location::Iter:              // Stack frame's iterators
-      HHIR_UNIMPLEMENTED(Iter);
+      HHIR_UNIMPLEMENTED(AssertType_Iter);
       break;
 
     case Location::Litstr:            // Literal string pseudo-location
-      HHIR_UNIMPLEMENTED(Litstr);
+      HHIR_UNIMPLEMENTED(AssertType_Litstr);
       break;
 
     case Location::Litint:            // Literal int pseudo-location
-      HHIR_UNIMPLEMENTED(Litint);
+      HHIR_UNIMPLEMENTED(AssertType_Litint);
       break;
 
     case Location::This:
-      HHIR_UNIMPLEMENTED(This);
+      HHIR_UNIMPLEMENTED(AssertType_This);
       break;
   }
 }

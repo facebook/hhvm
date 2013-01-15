@@ -131,7 +131,7 @@ public:
   MarkerInstruction* cloneInstruction(const MarkerInstruction*);
 
   ConstInstruction* defConst(int64 val);
-  LabelInstruction* defLabel();
+  LabelInstruction* defLabel(const Func*);
   MarkerInstruction* marker(uint32 bcOff, const Func* func, int32 spOff);
 
   SSATmp* getSSATmp(IRInstruction* inst) {

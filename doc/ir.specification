@@ -644,3 +644,38 @@ ContStartedCheck
 IncStat
 AssertRefCount
 
+18. Iterators
+
+d:Bool = IterInit s0:[Arr|Obj] s1:StkP s2:ConstInt s3:ConstInt
+d:Bool = IterInitK s0:[Arr|Obj] s1:StkP s2:ConstInt s3:ConstInt s4:ConstInt
+
+  Initializes the iterator variable whose index is given by s2. This
+  instruction creates the appropriate iterator for the array or object
+  that s0 references, and rewinds the new iterator to its start.  s3
+  and s4 are local variable indices. s0 points to the stack frame
+  containing the iterator and local variables s2, s3, and s4.
+
+  If the new iterator is at its end (i.e., has no elements to iterate
+  over), this instruction decrements the refcount of s0 and returns
+  false; otheriwse, it stores a reference to s0 in the new iterator
+  and returns true. If the iterator is not at its end, then this
+  instruction stores the iterator's first value (and key) into the
+  local variable s3 (and s4, respectively).
+
+  This instruction has the ConsumesRC property because it either
+  decrements the reference count of s0 or stores a reference to s0
+  into the new iterator.
+
+d:Bool = IterNext s0:StkP s1:ConstInt s2:ConstInt
+d:Bool = IterNextK s0:StkP s1:ConstInt s2:ConstInt s3:ConstInt
+
+  Advances the iterator variable whose index is given by s1. s2 and s3
+  are local variable indices. s0 points to the stack frame containing
+  the iterator and local variables s1, s2, and s3.
+
+  If the iterator has reached the end, this instruction frees the
+  iterator variable and returns false; otherwise, it returns true.  If
+  the iterator has not reached its end, then this instruction stores
+  the iterator's next value (and key) into the local variable s3 (and
+  s4, respectively).
+

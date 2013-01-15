@@ -86,7 +86,8 @@ class TypeGuard {
  public:
   enum Kind {
     Local,
-    Stack
+    Stack,
+    Iter
   };
 
   TypeGuard(Kind kind, uint32 index, Type::Tag type)
@@ -297,10 +298,16 @@ struct HhbcTranslator {
   void emitReqSrc(const StringData* name);
 
   // iterators
-  void emitIterInit(uint32 iterVarId, int targetOffset);
-  void emitIterInitK(uint32 iterVarId, int targetOffset);
-  void emitIterNext(uint32 iterVarId, int targetOffset);
-  void emitIterNextK(uint32 iterVarId, int targetOffset);
+  Trace* emitIterInit(uint32 iterId, int targetOffset, uint32 valLocalId);
+  Trace* emitIterInitK(uint32 iterId,
+                       int targetOffset,
+                       uint32 valLocalId,
+                       uint32 keyLocalId);
+  Trace* emitIterNext(uint32 iterId, int targetOffset, uint32 valLocalId);
+  Trace* emitIterNextK(uint32 iterId,
+                       int targetOffset,
+                       uint32 valLocalId,
+                       uint32 keyLocalId);
 
   void emitVerifyParamType(uint32 paramId);
 
@@ -365,7 +372,7 @@ private:
   template<Type::Tag T> void emitIsTypeC();
   template<Type::Tag T> void emitIsTypeL(int id);
   void emitCmp(Opcode opc);
-  Trace* emitJmpCondHelper(int32 offset, bool negate);
+  Trace* emitJmpCondHelper(int32 offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
@@ -381,7 +388,8 @@ private:
   void emitBinaryArith(Opcode);
   void checkTypeStackAux(uint32 stackIndex, Type::Tag type, Trace* nextTrace);
   void loadStack(uint32 stackIndex, Type::Tag type);
-
+  template<class Lambda>
+  Trace* emitIterInitCommon(int offset, Lambda genFunc);
 
   /*
    * Accessors for the current function being compiled and its

@@ -548,29 +548,48 @@ void HhbcTranslator::emitReqSrc(const StringData* name) {
   emitReqDoc(name);
 }
 
-void HhbcTranslator::emitIterInit(uint32 iterVarId, int offset) {
-  PUNT(IterInit);
-// Need to model control flow in interpone to make it work for IterInit
-//  spillStack();
-//  popC();
-//  emitInterpOne(getExitTrace(offset));
-//  spillStack();
-
+template<class Lambda>
+Trace* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
+  SSATmp* src = popC();
+  Type::Tag type = src->getType();
+  if (type != Type::Arr && type != Type::Obj) {
+    PUNT(IterInit);
+  }
+  spillStack();
+  SSATmp* res = genFunc(src);
+  return emitJmpCondHelper(offset, true, res);
 }
 
-void HhbcTranslator::emitIterInitK(uint32 iterVarId, int offset) {
-  PUNT(IterInitK);
+Trace* HhbcTranslator::emitIterInit(uint32 iterId,
+                                    int offset,
+                                    uint32 valLocalId) {
+  return emitIterInitCommon(offset, [=] (SSATmp* src) {
+    return m_tb->genIterInit(src, iterId, valLocalId);
+  });
 }
 
-void HhbcTranslator::emitIterNext(uint32 iterVarId, int offset) {
-  PUNT(IterNext);
-// Need to model control flow in interpone to make it work for IterNext
-//  spillStack();
-//  emitInterpOne(getExitTrace(offset));
+Trace* HhbcTranslator::emitIterInitK(uint32 iterId,
+                                     int offset,
+                                     uint32 valLocalId,
+                                     uint32 keyLocalId) {
+  return emitIterInitCommon(offset, [=] (SSATmp* src) {
+    return m_tb->genIterInitK(src, iterId, valLocalId, keyLocalId);
+  });
 }
 
-void HhbcTranslator::emitIterNextK(uint32 iterVarId, int offset) {
-  PUNT(IterNextK);
+Trace* HhbcTranslator::emitIterNext(uint32 iterId,
+                                    int offset,
+                                    uint32 valLocalId) {
+  SSATmp* res = m_tb->genIterNext(iterId, valLocalId);
+  return emitJmpCondHelper(offset, false, res);
+}
+
+Trace* HhbcTranslator::emitIterNextK(uint32 iterId,
+                                     int offset,
+                                     uint32 valLocalId,
+                                     uint32 keyLocalId) {
+  SSATmp* res = m_tb->genIterNextK(iterId, valLocalId, keyLocalId);
+  return emitJmpCondHelper(offset, false, res);
 }
 
 void HhbcTranslator::emitCreateCont(bool getArgs,
@@ -1030,14 +1049,14 @@ Trace* HhbcTranslator::emitJmp(int32 offset, bool breakTracelet) {
   return m_tb->genJmp(target);
 }
 
-Trace* HhbcTranslator::emitJmpCondHelper(int32 offset, bool negate) {
-  SSATmp* src = popC();
+Trace* HhbcTranslator::emitJmpCondHelper(int32 offset,
+                                         bool negate,
+                                         SSATmp* src) {
   Trace* target = NULL;
   if (m_lastBcOff) {
     // Spill everything on main trace if all paths will exit
     spillStack();
-    uint32 nextTrace = getBcOffNextTrace();
-    target = getExitTrace(offset, nextTrace);
+    target = getExitTrace(offset, getBcOffNextTrace());
   } else {
     target = getExitTrace(offset);
   }
@@ -1048,12 +1067,14 @@ Trace* HhbcTranslator::emitJmpCondHelper(int32 offset, bool negate) {
 
 Trace* HhbcTranslator::emitJmpZ(int32 offset) {
   TRACE(3, "%u: JmpZ %d\n", m_bcOff, offset);
-  return emitJmpCondHelper(offset, true);
+  SSATmp* src = popC();
+  return emitJmpCondHelper(offset, true, src);
 }
 
 Trace* HhbcTranslator::emitJmpNZ(int32 offset) {
   TRACE(3, "%u: JmpNZ %d\n", m_bcOff, offset);
-  return emitJmpCondHelper(offset, false);
+  SSATmp* src = popC();
+  return emitJmpCondHelper(offset, false, src);
 }
 
 void HhbcTranslator::emitCmp(Opcode opc) {
@@ -1510,8 +1531,10 @@ void HhbcTranslator::emitLoadDeps() {
 
     if (guard.getKind() == TypeGuard::Local) {
       m_tb->genLdLoc(index, type, NULL);
-    } else {
+    } else if (guard.getKind() == TypeGuard::Stack) {
       loadStack(index, type);
+    } else {
+      assert(false); // iterator guards should not happen
     }
   }
 }

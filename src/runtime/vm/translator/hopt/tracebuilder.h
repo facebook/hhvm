@@ -37,7 +37,8 @@ public:
                const Func* func = nullptr);
 
   Trace* makeExitTrace(uint32 bcOff) {
-    return m_trace->addExitTrace(makeTrace(bcOff, false));
+    return m_trace->addExitTrace(makeTrace(m_curFunc->getConstValAsFunc(),
+                                           bcOff, false));
   }
   bool isThisAvailable() const {
     return m_thisIsAvailable;
@@ -216,6 +217,14 @@ public:
   Trace*  genContPreNext(SSATmp* cont, Trace* target);
   Trace*  genContStartedCheck(SSATmp* cont, Trace* target);
 
+  SSATmp* genIterInit(SSATmp* src, uint32 iterId, uint32 valLocalId);
+  SSATmp* genIterInitK(SSATmp* src,
+                       uint32 iterId,
+                       uint32 valLocalId,
+                       uint32 keyLocalId);
+  SSATmp* genIterNext(uint32 iterId, uint32 valLocalId);
+  SSATmp* genIterNextK(uint32 iterId, uint32 valLocalId, uint32 keyLocalId);
+
   void    genIncStat(SSATmp* counter, SSATmp* value);
 
   SSATmp* genInterpOne(uint32 pcOff, uint32 stackAdjustment,
@@ -296,8 +305,8 @@ private:
   Trace*  genJmpCond(Opcode opc, SSATmp* src, Trace* target);
   Trace*  genJmpCond(Opcode opc, Type::Tag, SSATmp* src, Trace* target);
 
-  Trace* makeTrace(uint32 bcOff, bool isMain) {
-    return new Trace(m_irFactory.defLabel(), bcOff, isMain);
+  Trace* makeTrace(const Func* func, uint32 bcOff, bool isMain) {
+    return new Trace(m_irFactory.defLabel(func), bcOff, isMain);
   }
   void genStLocAux(uint32 id, SSATmp* t0, bool genStoreType);
 

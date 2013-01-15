@@ -36,7 +36,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_spOffset(initialSpOffsetFromFp)
   , m_thisIsAvailable(false)
   , m_initialBcOff(initialBcOffset)
-  , m_trace(makeTrace(initialBcOffset, true))
+  , m_trace(makeTrace(func, initialBcOffset, true))
 {
   // put a function marker at the start of trace
   m_curFunc = genDefConst<const Func*>(func);
@@ -1395,6 +1395,65 @@ Trace* TraceBuilder::genContStartedCheck(SSATmp* cont, Trace* target) {
   return target;
 }
 
+SSATmp* TraceBuilder::genIterNext(uint32 iterId, uint32 localId) {
+  assert(m_fpValue &&
+         m_fpValue->getInstruction()->getOpcode() == DefFP);
+  killLocalValue(localId);
+  // IterNext fpReg, iterId, localId
+  return gen(IterNext,
+             Type::Bool,
+             m_fpValue,
+             genDefConst<int64>(iterId),
+             genDefConst<int64>(localId));
+}
+
+SSATmp* TraceBuilder::genIterNextK(uint32 iterId,
+                                   uint32 valLocalId,
+                                   uint32 keyLocalId) {
+  assert(m_fpValue &&
+         m_fpValue->getInstruction()->getOpcode() == DefFP);
+  killLocalValue(valLocalId);
+  killLocalValue(keyLocalId);
+  // IterNextK fpReg, iterId, valLocalId, keyLocalId
+  return gen(IterNextK,
+             Type::Bool,
+             m_fpValue,
+             genDefConst<int64>(iterId),
+             genDefConst<int64>(valLocalId),
+             genDefConst<int64>(keyLocalId));
+}
+
+SSATmp* TraceBuilder::genIterInit(SSATmp* src,
+                                  uint32 iterId,
+                                  uint32 valLocalId) {
+  assert(m_fpValue && m_fpValue->getInstruction()->getOpcode() == DefFP);
+  killLocalValue(valLocalId);
+  // IterInit src, fpReg, iterId, valLocalId
+  return gen(IterInit,
+             Type::Bool,
+             src,
+             m_fpValue,
+             genDefConst<int64>(iterId),
+             genDefConst<int64>(valLocalId));
+}
+
+SSATmp* TraceBuilder::genIterInitK(SSATmp* src,
+                                   uint32 iterId,
+                                   uint32 valLocalId,
+                                   uint32 keyLocalId) {
+  assert(m_fpValue && m_fpValue->getInstruction()->getOpcode() == DefFP);
+  killLocalValue(valLocalId);
+  killLocalValue(keyLocalId);
+  // IterInitK src, fpReg, iterId, valLocalId, keyLocalId
+  return gen(IterInitK,
+             Type::Bool,
+             src,
+             m_fpValue,
+             genDefConst<int64>(iterId),
+             genDefConst<int64>(valLocalId),
+             genDefConst<int64>(keyLocalId));
+}
+
 void TraceBuilder::genIncStat(SSATmp* counter, SSATmp* value) {
   gen(IncStat, counter, value);
 }
@@ -1520,7 +1579,8 @@ void TraceBuilder::setLocalType(int id, Type::Tag type) {
   m_localTypes[id] = type;
 }
 
-// Needs to be called if a local escapes as a by-ref
+// Needs to be called if a local escapes as a by-ref or
+// otherwise set to an unknown value (e.g., by Iter[Init,Next][K])
 void TraceBuilder::killLocalValue(int id) {
   if (id == -1 || id >= (int)m_localValues.size()) {
     return;

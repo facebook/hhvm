@@ -2751,14 +2751,8 @@ TranslatorX64::checkType(X64Assembler& a,
   if (Trace::moduleEnabled(Trace::stats, 2)) {
     Stats::emitInc(a, Stats::TraceletGuard_branch);
   }
-  if (rtt.isIter()) {
-    a.   cmp_imm32_disp_reg32(rtt.typeCheckValue(),
-                              disp + rtt.typeCheckOffset(),
-                              base);
-    emitFallbackJmp(fail);
-  } else {
-    emitTypeCheck(a, rtt.typeCheckValue(), base, disp, &fail);
-  }
+  assert(!rtt.isIter());
+  emitTypeCheck(a, rtt.typeCheckValue(), base, disp, &fail);
 }
 
 void
@@ -9972,7 +9966,7 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   }
 
   // invalidate return value
-  m_regMap.invalidate(ni.outStack->location); 
+  m_regMap.invalidate(ni.outStack->location);
 
   // copy return value
   locToRegDisp(ni.outStack->location, &base, &disp);

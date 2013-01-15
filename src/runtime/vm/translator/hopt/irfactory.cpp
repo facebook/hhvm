@@ -37,8 +37,8 @@ ConstInstruction* IRFactory::defConst(int64 val) {
   return new (m_arena) ConstInstruction(DefConst, val);
 }
 
-LabelInstruction* IRFactory::defLabel() {
-  return new (m_arena) LabelInstruction(m_nextLabelId++);
+LabelInstruction* IRFactory::defLabel(const Func* f) {
+  return new (m_arena) LabelInstruction(m_nextLabelId++, f);
 }
 
 MarkerInstruction* IRFactory::marker(uint32 bcOff, const Func* f, int32 spOff) {

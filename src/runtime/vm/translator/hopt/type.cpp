@@ -97,6 +97,10 @@ Type::Tag outputType(const IRInstruction* inst) {
   case OpNeq:
   case OpSame:
   case OpNSame:
+  case IterNext:
+  case IterNextK:
+  case IterInit:
+  case IterInitK:
     return Type::Bool;
 
   // Jumps have dests just to allow finding the TCA to patch.  The

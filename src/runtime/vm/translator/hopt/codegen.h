@@ -50,7 +50,8 @@ struct ArgGroup;
 
 enum SyncOptions {
   kNoSyncPoint,
-  kSyncPoint
+  kSyncPoint,
+  kSyncPointAdjustOne,
 };
 
 class CodeGenerator {
@@ -113,6 +114,11 @@ public:
                    int64_t           offset,
                    LabelInstruction* label,
                    IRInstruction*    instr);
+  void cgGuardTypeCell(Type::Tag         type,
+                       PhysReg           baseReg,
+                       int64_t           offset,
+                       LabelInstruction* label,
+                       IRInstruction*    instr);
 
   void cgStMemWork(IRInstruction* inst, bool genStoreType);
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
@@ -180,6 +186,8 @@ private:
                    LabelInstruction* exit);
 
   void cgCheckUninit(SSATmp* src, LabelInstruction* label);
+  void cgIterNextCommon(IRInstruction* inst, bool isNextK);
+  void cgIterInitCommon(IRInstruction* inst, bool isInitK);
   Address emitFwdJcc(ConditionCode cc, LabelInstruction* label);
   Address emitFwdJcc(Asm& a, ConditionCode cc, LabelInstruction* label);
   Address emitFwdJmp(Asm& as, LabelInstruction* label);
@@ -193,10 +201,12 @@ private:
                          ConditionCode     cc,
                          LabelInstruction* label);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
-  const Func* getCurrFunc();
-  void recordSyncPoint(Asm& as);
+  const Func* getCurFunc();
+  Class*      getCurClass() { return getCurFunc()->cls(); }
+  void recordSyncPoint(Asm& as, SyncOptions sync = kSyncPoint);
   Address getDtorGeneric();
   Address getDtorTyped();
+  int getIterOffset(SSATmp* tmp);
 
 private:
   /*
@@ -287,7 +297,7 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& addr(PhysReg base, uintptr_t off) {
+  ArgGroup& addr(PhysReg base, intptr_t off) {
     m_args.push_back(ArgDesc(ArgDesc::Addr, PhysReg(base), off));
     return *this;
   }

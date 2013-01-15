@@ -250,7 +250,8 @@ RegSet LinearScan::computeLiveOutRegs(Trace* trace, RegSet liveOutRegs) {
       // that linear scan does
       LabelInstruction* label = inst->getLabel();
       if (label != NULL && label->getId() == inst->getId() + 1) {
-        liveOutRegs = LinearScan::computeLiveOutRegs(label->getParent(), liveOutRegs);
+        liveOutRegs = LinearScan::computeLiveOutRegs(label->getParent(),
+                                                     liveOutRegs);
       }
     }
   }
@@ -700,6 +701,11 @@ void LinearScan::computePreColoringHint() {
         }
       }
       break;
+    case IterInit:
+    {
+      m_preColoringHint.add(nextNative->getSrc(0), 0, 1);
+    }
+    break;
     case Conv:
     {
       SSATmp* src = nextNative->getSrc(0);
@@ -991,11 +997,30 @@ void LinearScan::rematerializeAux(Trace* trace,
       // dst = LdLoc home
       // StLoc/StLocNT home, src
       int locId = getLocalIdFromHomeOpnd(inst->getSrc(0));
+      // Note that when we implement inlining, we will need to deal
+      // with the new local id space of the inlined function.
       SSATmp* localValue = (opc == LdLoc ? dst : inst->getSrc(1));
       if (int(localValues.size()) < locId + 1) {
         localValues.resize(locId + 1);
       }
       localValues[locId] = canonicalize(localValue);
+    }
+    // Other instructions that may have side effects on locals must
+    // kill the local variable values.
+    else if (opc == IterInit) {
+      int valLocId = inst->getSrc(3)->getConstValAsInt();
+      localValues[valLocId] = NULL;
+      if (inst->getNumSrcs() == 5) {
+        int keyLocId = inst->getSrc(4)->getConstValAsInt();
+        localValues[keyLocId] = NULL;
+      }
+    } else if (opc == IterNext) {
+      int valLocId = inst->getSrc(2)->getConstValAsInt();
+      localValues[valLocId] = NULL;
+      if (inst->getNumSrcs() == 4) {
+        int keyLocId = inst->getSrc(3)->getConstValAsInt();
+        localValues[keyLocId] = NULL;
+      }
     }
 
     if (inst->isControlFlowInstruction()) {

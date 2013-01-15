@@ -205,6 +205,10 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
       pthread_cond_wait(&m_cond, &this->getMutex().getRaw());
     }
   }
+  bool pollEmpty() {
+    Lock lock(this);
+    return !(this->getActiveWorker() || this->getQueuedJobs());
+  }
   void signalEmpty() {
     pthread_cond_signal(&m_cond);
   }
@@ -411,6 +415,11 @@ public:
     if (m_stopped) return;
     m_queue.waitEmpty();
     if (stop) this->stop();
+  }
+
+  bool pollEmpty() {
+    if (m_stopped) return true;
+    return m_queue.pollEmpty();
   }
 
   /**

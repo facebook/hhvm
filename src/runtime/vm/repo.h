@@ -77,6 +77,7 @@ class Repo : public RepoProxy {
 
   Unit* loadUnit(const std::string& name, const MD5& md5);
   bool findFile(const char* path, const std::string& root, MD5& md5);
+  bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter *ue);
 
 #define RP_IOP(o) RP_OP(Insert##o, insert##o)
@@ -114,6 +115,8 @@ class Repo : public RepoProxy {
  public:
   void rollback(); // nothrow
   void commit();
+  bool insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
+                  RepoTxn& txn); // nothrow
   void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow
 
   // All database table names use the schema ID (md5 checksum based on the

@@ -2198,16 +2198,16 @@ static LineTable createLineTable(SourceLocTable& srcLoc, Offset bclen) {
   return lines;
 }
 
-void UnitEmitter::commit(UnitOrigin unitOrigin) {
+bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   Repo& repo = Repo::get();
   UnitRepoProxy& urp = repo.urp();
   int repoId = Repo::get().repoIdForNewUnit(unitOrigin);
   if (repoId == RepoIdInvalid) {
-    return;
+    return true;
   }
   m_repoId = repoId;
+
   try {
-    RepoTxn txn(repo);
     {
       LineTable lines = createLineTable(m_sourceLocTab, m_bclen);
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
@@ -2267,11 +2267,30 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
            .insert(txn, usn, endOff, e.line0, e.char0, e.line1, e.char1);
       }
     }
-    txn.commit();
+    return false;
   } catch (RepoExc& re) {
     TRACE(3, "Failed to commit '%s' (0x%016llx%016llx) to '%s': %s\n",
              m_filepath->data(), m_md5.q[0], m_md5.q[1],
              repo.repoName(repoId).c_str(), re.msg().c_str());
+    return true;
+  }
+}
+
+void UnitEmitter::commit(UnitOrigin unitOrigin) {
+  Repo& repo = Repo::get();
+  try {
+    RepoTxn txn(repo);
+    bool err = insert(unitOrigin, txn);
+    if (!err) {
+      txn.commit();
+    }
+  } catch (RepoExc& re) {
+    int repoId = repo.repoIdForNewUnit(unitOrigin);
+    if (repoId != RepoIdInvalid) {
+      TRACE(3, "Failed to commit '%s' (0x%016llx%016llx) to '%s': %s\n",
+               m_filepath->data(), m_md5.q[0], m_md5.q[1],
+               repo.repoName(repoId).c_str(), re.msg().c_str());
+    }
   }
 }
 

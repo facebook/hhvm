@@ -6715,8 +6715,8 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
   return ConstructPtr();
 }
 
-static Unit* emitHHBCUnit(AnalysisResultPtr ar, FileScopePtr fsp,
-                          const MD5& md5, UnitOrigin unitOrigin, bool commit) {
+static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
+                                        const MD5& md5) {
   if (fsp->getPseudoMain() && !Option::WholeProgram) {
     ar->setPhase(AnalysisResult::FirstPreOptimize);
     doOptimize(fsp->getPseudoMain()->getStmt(), ar);
@@ -6749,13 +6749,7 @@ static Unit* emitHHBCUnit(AnalysisResultPtr ar, FileScopePtr fsp,
     FuncFinisher ff(&fev, emitter, ue->getMain());
     fev.emitMakeUnitFatal(emitter, ex.getMessage());
   }
-
-  if (commit) {
-    HPHP::VM::Repo::get().commitUnit(ue, unitOrigin);
-  }
-  Unit* unit = ue->create();
-  delete ue;
-  return unit;
+  return ue;
 }
 
 struct Entry {
@@ -7037,7 +7031,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   return unit;
 }
 
-static void emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
+static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   MD5 md5 = fsp->getMd5();
 
   if (!Option::WholeProgram) {
@@ -7052,13 +7046,11 @@ static void emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
     fsp->analyzeProgram(ar);
   }
 
-  HPHP::VM::Unit* unit = emitHHBCUnit(ar, fsp, md5, UnitOriginFile,
-                                      Option::GenerateBinaryHHBC);
-  if (unit == NULL) {
-    return;
-  }
+  UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
+  assert(ue != NULL);
 
   if (Option::GenerateTextHHBC) {
+    std::unique_ptr<Unit> unit(ue->create());
     std::string fullPath = AnalysisResult::prepareFile(
       ar->getOutputPath().c_str(), Option::UserFilePrefix + fsp->getName(),
       true, false) + ".hhbc.txt";
@@ -7066,27 +7058,56 @@ static void emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
     std::ofstream f(fullPath.c_str());
     if (!f) {
       Logger::Error("Unable to open %s for write", fullPath.c_str());
-      delete unit;
-      return;
+    } else {
+      CodeGenerator cg(&f, CodeGenerator::TextHHBC);
+      cg.printf("Hash: %llx%016llx\n", md5.q[0], md5.q[1]);
+      cg.printRaw(unit->toString().c_str());
+      f.close();
     }
-
-    CodeGenerator cg(&f, CodeGenerator::TextHHBC);
-    cg.printf("Hash: %llx%016llx\n", md5.q[0], md5.q[1]);
-    cg.printRaw(unit->toString().c_str());
-    f.close();
   }
 
-  delete unit;
+  return ue;
 }
 
-class EmitterWorker :
-    public JobQueueWorker<FileScopeRawPtr, true, true> {
-public:
+class UEQ : public Synchronizable {
+ public:
+  void push(UnitEmitter* ue) {
+    assert(ue != NULL);
+    Lock lock(this);
+    m_ues.push_back(ue);
+    notify();
+  }
+  UnitEmitter* tryPop(long sec, long long nsec) {
+    Lock lock(this);
+    if (m_ues.empty()) {
+      // Check for empty() after wait(), in case of spurious wakeup.
+      if (!wait(sec, nsec) || m_ues.empty()) {
+        return NULL;
+      }
+    }
+    assert(m_ues.size() > 0);
+    UnitEmitter* ue = m_ues.front();
+    assert(ue != NULL);
+    m_ues.pop_front();
+    return ue;
+  }
+ private:
+  std::deque<UnitEmitter*> m_ues;
+};
+static UEQ s_ueq;
+
+class EmitterWorker : public JobQueueWorker<FileScopeRawPtr, true, true> {
+ public:
   EmitterWorker() : m_ret(true) {}
   virtual void doJob(JobType job) {
     try {
       AnalysisResultPtr ar = ((AnalysisResult*)m_opaque)->shared_from_this();
-      emitHHBCVisitor(ar, job);
+      UnitEmitter* ue = emitHHBCVisitor(ar, job);
+      if (Option::GenerateBinaryHHBC) {
+        s_ueq.push(ue);
+      } else {
+        delete ue;
+      }
     } catch (Exception &e) {
       Logger::Error("%s", e.getMessage().c_str());
       m_ret = false;
@@ -7095,6 +7116,7 @@ public:
       m_ret = false;
     }
   }
+ private:
   bool m_ret;
 };
 
@@ -7102,6 +7124,42 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
                              void *data) {
   ((JobQueueDispatcher<EmitterWorker::JobType,
     EmitterWorker>*)data)->enqueue(sp->getFileScope());
+}
+
+static void batchCommit(std::vector<UnitEmitter*>& ues) {
+  assert(Option::GenerateBinaryHHBC);
+  Repo& repo = Repo::get();
+
+  // Attempt batch commit.  This can legitimately fail due to multiple input
+  // files having identical contents.
+  bool err = false;
+  {
+    RepoTxn txn(repo);
+
+    for (std::vector<UnitEmitter*>::const_iterator it = ues.begin();
+         it != ues.end(); ++it) {
+      UnitEmitter* ue = *it;
+      if (repo.insertUnit(ue, UnitOriginFile, txn)) {
+        err = true;
+        break;
+      }
+    }
+    if (!err) {
+      txn.commit();
+    }
+  }
+
+  // Clean up.
+  for (std::vector<UnitEmitter*>::const_iterator it = ues.begin();
+       it != ues.end(); ++it) {
+      UnitEmitter* ue = *it;
+      // Commit units individually if an error occurred during batch commit.
+      if (err) {
+        repo.commitUnit(ue, UnitOriginFile);
+      }
+      delete ue;
+  }
+  ues.clear();
 }
 
 /**
@@ -7126,9 +7184,42 @@ void emitAllHHBC(AnalysisResultPtr ar) {
 
   dispatcher.start();
   ar->visitFiles(addEmitterWorker, &dispatcher);
-  dispatcher.waitEmpty();
-}
 
+  if (Option::GenerateBinaryHHBC) {
+    // kBatchSize needs to strike a balance between reducing transaction commit
+    // overhead (bigger batches are better), and limiting the cost incurred by
+    // failed commits due to identical units that require rollback and retry
+    // (smaller batches have less to lose).  Empirical results indicate that a
+    // value in the 2-10 range is reasonable.
+    static const unsigned kBatchSize = 8;
+    std::vector<UnitEmitter*> ues;
+
+    // Gather up units created by the worker threads and commit them in
+    // batches.
+    bool didPop;
+    bool inShutdown = false;
+    while (true) {
+      // Poll, but with a 100ms timeout so that this thread doesn't spin wildly
+      // if it gets ahead of the workers.
+      UnitEmitter* ue = s_ueq.tryPop(0, 100 * 1000 * 1000);
+      if ((didPop = (ue != NULL))) {
+        ues.push_back(ue);
+      }
+      if (ues.size() == kBatchSize
+          || (!didPop && inShutdown && ues.size() > 0)) {
+        batchCommit(ues);
+      }
+      if (!inShutdown) {
+        inShutdown = dispatcher.pollEmpty();
+      } else if (!didPop) {
+        assert(ues.size() == 0);
+        break;
+      }
+    }
+  } else {
+    dispatcher.waitEmpty();
+  }
+}
 
 /**
  * This is the entry point from the runtime; i.e. online bytecode generation.
@@ -7194,7 +7285,13 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     ar->setPhase(AnalysisResult::AnalyzeAll);
     fsp->analyzeProgram(ar);
 
-    return emitHHBCUnit(ar, fsp, md5, unitOrigin, RuntimeOption::RepoCommit);
+    UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
+    if (RuntimeOption::RepoCommit) {
+      Repo::get().commitUnit(ue, unitOrigin);
+    }
+    Unit* unit = ue->create();
+    delete ue;
+    return unit;
   } catch (const std::exception&) {
     // extern "C" function should not be throwing exceptions...
     return NULL;

@@ -2447,6 +2447,7 @@ FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;
 static Mutex s_refParamInfoLock;
 
 void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
+  if (!Option::WholeProgram) return; // Only needed in WholeProgram mode.
   Lock lock(s_refParamInfoLock);
   FunctionInfoPtr &info = s_refParamInfo[fname];
   if (!info) {
@@ -2470,6 +2471,7 @@ void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
 }
 
 FunctionScope::FunctionInfoPtr FunctionScope::GetFunctionInfo(string fname) {
+  assert(Option::WholeProgram);
   StringToFunctionInfoPtrMap::iterator it = s_refParamInfo.find(fname);
   if (it == s_refParamInfo.end()) {
     return FunctionInfoPtr();

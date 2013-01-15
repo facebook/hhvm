@@ -749,6 +749,7 @@ class UnitEmitter {
   }
   void emitInt64(int64 n, int64 pos = -1) { emitImpl(n, pos); }
   void emitDouble(double n, int64 pos = -1) { emitImpl(n, pos); }
+  bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
   void commit(UnitOrigin unitOrigin);
   Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1, int line2,
                 Offset base, Offset past,

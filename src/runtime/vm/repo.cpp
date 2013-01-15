@@ -182,20 +182,37 @@ bool Repo::findFile(const char *path, const string &root, MD5& md5) {
   return false;
 }
 
-void Repo::commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue) {
+bool Repo::insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn) {
   const StringData* path = ue->getFilepath();
   const MD5& md5 = ue->md5();
   int repoId = repoIdForNewUnit(unitOrigin);
   if (repoId == RepoIdInvalid) {
-    return;
+    return true;
   }
   try {
-    RepoTxn txn(*this);
     insertFileHash(repoId).insert(txn, path, md5);
-    txn.commit();
+    return false;
   } catch(RepoExc& re) {
     TRACE(3, "Failed to commit md5 for '%s' to '%s': %s\n",
               path->data(), repoName(repoId).c_str(), re.msg().c_str());
+    return true;
+  }
+}
+
+void Repo::commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue) {
+  try {
+    RepoTxn txn(*this);
+    bool err = insertMd5(unitOrigin, ue, txn);
+    if (!err) {
+      txn.commit();
+    }
+  } catch(RepoExc& re) {
+    int repoId = repoIdForNewUnit(unitOrigin);
+    if (repoId != RepoIdInvalid) {
+      TRACE(3, "Failed to commit md5 for '%s' to '%s': %s\n",
+               ue->getFilepath()->data(), repoName(repoId).c_str(),
+               re.msg().c_str());
+    }
   }
 }
 
@@ -287,6 +304,19 @@ void Repo::rollback() {
 
 void Repo::commit() {
   txPop();
+}
+
+bool Repo::insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin, RepoTxn& txn) {
+  try {
+    if (insertMd5(unitOrigin, ue, txn)) return true;
+    if (ue->insert(unitOrigin, txn)) return true;
+  } catch (const std::exception& e) {
+    TRACE(0, "unexpected exception in insertUnit: %s\n",
+             e.what());
+    assert(false);
+    return true;
+  }
+  return false;
 }
 
 void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {

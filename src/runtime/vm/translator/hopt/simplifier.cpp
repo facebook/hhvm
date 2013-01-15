@@ -69,7 +69,7 @@ void Simplifier::copyProp(IRInstruction* inst) {
 
 static void unimplementedSimplify(Opcode opc) {
   // Do not ASSERT(false), it is fine to not simplify as the default
-  TRACE(1, "HHIR Simplifier: unimplemented support for opcode %s\n",
+  TRACE(3, "HHIR Simplifier: unimplemented support for opcode %s\n",
         opcodeName(opc));
   return;
 }

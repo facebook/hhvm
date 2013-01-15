@@ -21,6 +21,8 @@
 #include <vector>
 #include <stdarg.h>
 
+#include "folly/Format.h"
+
 /*
  * Runtime-selectable trace facility. A trace statement has both a module and a
  * level associated with it;  Enable tracing a module by setting the TRACE
@@ -179,8 +181,14 @@ static const bool enabled = true;
 #define ONTRACE(n, x) ONTRACE_MOD(TRACEMOD, n, x)
 
 #define TRACE(n, ...) ONTRACE(n, HPHP::Trace::trace(__VA_ARGS__))
+#define FTRACE(n, ...)                                        \
+  ONTRACE(n, HPHP::Trace::trace("%s",                         \
+             folly::format(__VA_ARGS__).str().c_str()))
 #define TRACE_MOD(mod, level, ...) \
   ONTRACE_MOD(mod, level, HPHP::Trace::trace(__VA_ARGS__))
+#define FTRACE_MOD(mod, level, ...)                     \
+  ONTRACE_MOD(mod, level, HPHP::Trace::trace("%s",      \
+             folly::format(__VA_ARGS__).str().c_str()))
 #define TRACE_SET_MOD(name)  \
   static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
@@ -198,9 +206,11 @@ extern void dumpRingbuffer();
  * Compile everything out of release builds. gcc is smart enough to
  * kill code hiding behind if (false) { ... }.
  */
-#define ONTRACE(...)   do { } while(0)
-#define TRACE(...)     do { } while(0)
-#define TRACE_MOD(...) do { } while(0)
+#define ONTRACE(...)    do { } while (0)
+#define TRACE(...)      do { } while (0)
+#define FTRACE(...)     do { } while (0)
+#define TRACE_MOD(...)  do { } while (0)
+#define FTRACE_MOD(...) do { } while (0)
 #define TRACE_SET_MOD(...) /* nil */
 static const bool enabled = false;
 

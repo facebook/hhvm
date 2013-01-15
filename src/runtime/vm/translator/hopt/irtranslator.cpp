@@ -39,6 +39,9 @@ typedef __sighandler_t *sighandler_t;
 #include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include "folly/Format.h"
+#include "folly/ScopeGuard.h"
+
 #include "util/pathtrack.h"
 #include "util/trace.h"
 #include "util/bitops.h"
@@ -1516,14 +1519,7 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
   ASSERT(m_useHHIR);
   ASSERT(!i.outStack || i.outStack->isStack());
   ASSERT(!i.outLocal || i.outLocal->isLocal());
-  const char *opNames[] = {
-#define O(name, imm, push, pop, flags) \
-#name,
-  OPCODES
-#undef O
-  };
-  SpaceRecorder sr(opNames[i.op()], a);
-  SKTRACE(1, i.source, "translate %#lx\n", long(a.code.frontier));
+  FTRACE_MOD(Trace::hhir, 1, "translating: {}\n", opcodeToName(i.op()));
 
   m_hhbcTrans->setBcOff(i.source.offset(), i.breaksTracelet);
 
@@ -1625,14 +1621,21 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     recordBCInstr(OpTraceletGuard, a, start);
     m_hhbcTrans->setBcOffNextTrace(t.m_nextSk.offset());
 
-    // Translate each instruction in the tracelet
-    for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
-         ni = ni->next) {
-      irTranslateInstr(t, *ni);
-      ASSERT(ni->source.offset() >= curFunc()->base());
-      // We sometimes leave the tail of a truncated tracelet in place to aid
-      // analysis, but breaksTracelet is authoritative.
-      if (ni->breaksTracelet) break;
+    {
+      FTRACE_MOD(Trace::hhir, 1, "{:-^40}\n", " HHIR during translation ");
+      SCOPE_EXIT {
+        FTRACE_MOD(Trace::hhir, 1, "{:-^40}\n", "");
+      };
+
+      // Translate each instruction in the tracelet
+      for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
+           ni = ni->next) {
+        irTranslateInstr(t, *ni);
+        ASSERT(ni->source.offset() >= curFunc()->base());
+        // We sometimes leave the tail of a truncated tracelet in place to aid
+        // analysis, but breaksTracelet is authoritative.
+        if (ni->breaksTracelet) break;
+      }
     }
 
     hhirTraceEnd(t.m_nextSk.offset());
@@ -1701,36 +1704,41 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   ASSERT(m_useHHIR);
 
   m_traceBuilder->finalizeTrace();
+
   JIT::Trace* trace = m_traceBuilder->getTrace();
 
+  auto banner = [&] (const char* s) {
+    std::cout << folly::format("{:-^40}\n", s);
+  };
+
   if (RuntimeOption::EvalDumpIR) {
-    std::cout << "--------- HHIR before code gen ---------\n";
+    banner(" HHIR before code gen ");
     trace->print(std::cout, false);
-    std::cout << "----------------------------------------\n";
+    banner("");
   }
 
   JIT::optimizeTrace(trace, m_irFactory);
 
   if (RuntimeOption::EvalDumpIR > 1) {
-    std::cout << "--------- HHIR after optimizing ---------\n";
+    banner(" HHIR after optimizing ");
     trace->print(std::cout, false);
-    std::cout << "----------------------------------------\n";
+    banner("");
   }
 
   JIT::allocRegsForTrace(trace, m_irFactory);
 
   if (RuntimeOption::EvalDumpIR) {
-    std::cout << "--------- HHIR after reg alloc ---------\n";
+    banner(" HHIR after reg alloc ");
     trace->print(std::cout, false);
-    std::cout << "----------------------------------------\n";
+    banner("");
   }
 
   JIT::genCodeForTrace(trace, a, astubs, m_irFactory, bcMap, this);
 
   if (RuntimeOption::EvalDumpIR) {
-    std::cout << "--------- HHIR after code gen ---------\n";
+    banner(" HHIR after code gen ");
     trace->print(std::cout, true);
-    std::cout << "---------------------------------------\n";
+    banner("");
   }
 
   m_numHHIRTrans++;

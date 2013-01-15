@@ -187,4 +187,6 @@ if (USE_HHVM)
 	add_subdirectory(hhvm)
 endif()
 
-add_subdirectory(test)
+if (NOT "$ENV{HPHP_NOTEST}" STREQUAL "1")
+	add_subdirectory(test)
+endif ()

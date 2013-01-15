@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "dce.h"
-#include "opt.h"
-#include "memelim.h"
+#include "runtime/vm/translator/hopt/opt.h"
+
+#include "runtime/vm/translator/hopt/dce.h"
+#include "runtime/vm/translator/hopt/memelim.h"
+#include "runtime/vm/translator/hopt/irfactory.h"
 #include <util/trace.h>
 
 
@@ -33,10 +35,9 @@ void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
     if (dst &&
         Type::isStaticallyKnown(dst->getType()) &&
         Type::isRefCounted(dst->getType())) {
-      IRInstruction assertInst(AssertRefCount, Type::None, dst);
-      auto toInsert = assertInst.clone(factory);
-      toInsert->setParent(trace);
-      instructions.insert(it, toInsert);
+      auto* assertInst = factory->gen(AssertRefCount, dst);
+      assertInst->setParent(trace);
+      instructions.insert(it, assertInst);
     }
   }
 }

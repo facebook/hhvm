@@ -50,12 +50,12 @@ private:
   SSATmp* simplifyNeq(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifySame(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyNSame(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyIsType(Type::Tag type, SSATmp* src);
+  SSATmp* simplifyIsType(IRInstruction*);
   SSATmp* simplifyConcat(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyConv(Type::Tag toType, SSATmp* src);
+  SSATmp* simplifyConv(IRInstruction*);
   SSATmp* simplifyInstanceOfD(SSATmp* src1, SSATmp* src2, bool negate);
-  SSATmp* simplifyUnbox(Type::Tag, SSATmp* src);
-  SSATmp* simplifyUnbox(Type::Tag, SSATmp* src, LabelInstruction* failLabel);
+  SSATmp* simplifyUnbox(IRInstruction*);
+  SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* simplifyAllocActRec(SSATmp* src1, SSATmp* src2, SSATmp* src3,
                               SSATmp* src4, SSATmp* src5);

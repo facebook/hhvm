@@ -33,6 +33,21 @@ namespace HPHP {
 namespace VM {
 namespace JIT{
 
+IRInstruction::IRInstruction(IRFactory& factory, const IRInstruction* inst)
+  : m_op(inst->m_op)
+  , m_id(0)
+  , m_numSrcs(inst->m_numSrcs)
+  , m_typeParam(inst->m_typeParam)
+  , m_srcs(m_numSrcs ? new (factory.arena()) SSATmp*[m_numSrcs] : nullptr)
+  , m_dst(NULL)
+  , m_asmAddr(NULL)
+  , m_label(inst->m_label)
+  , m_parent(NULL)
+  , m_tca(NULL)
+{
+  std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
+}
+
 struct {
   const char* name;
   uint64_t flags;
@@ -104,14 +119,15 @@ bool IRInstruction::mayModifyRefs() const {
   // DecRefNZ does not have side effects other than decrementing the ref
   // count. Therefore, its MayModifyRefs should be false.
   if (opc == DecRef) {
-    if (isControlFlowInstruction() || Type::isString(m_type)) {
+    auto type = getSrc(0)->getType();
+    if (isControlFlowInstruction() || Type::isString(type)) {
       // If the decref has a target label, then it exits if the destructor
       // has to be called, so it does not have any side effects on the main
       // trace.
       return false;
     }
-    if (Type::isBoxed(m_type)) {
-      Type::Tag innerType = Type::getInnerType(m_type);
+    if (Type::isBoxed(type)) {
+      Type::Tag innerType = Type::getInnerType(type);
       return innerType == Type::Obj || innerType == Type::Arr;
     }
   }
@@ -216,42 +232,38 @@ bool isRefCounted(SSATmp* tmp) {
   return true;
 }
 
-IRInstruction* IRInstruction::clone(IRFactory* factory) {
+IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
-IRInstruction* ExtendedInstruction::clone(IRFactory* factory) {
+IRInstruction* ConstInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
-IRInstruction* ConstInstruction::clone(IRFactory* factory) {
-  return factory->cloneInstruction(this);
-}
-
-IRInstruction* LabelInstruction::clone(IRFactory* factory) {
+IRInstruction* LabelInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
 SSATmp* IRInstruction::getSrc(uint32 i) const {
   if (i >= getNumSrcs()) return nullptr;
-  if (i < NUM_FIXED_SRCS) {
-    return m_srcs[i];
-  }
-  return getExtendedSrc(i - NUM_FIXED_SRCS);
+  return m_srcs[i];
 }
 
 void IRInstruction::setSrc(uint32 i, SSATmp* newSrc) {
   ASSERT(i < getNumSrcs());
-  if (i < NUM_FIXED_SRCS) {
-    m_srcs[i] = newSrc;
-    return;
-  }
-  setExtendedSrc(i - NUM_FIXED_SRCS, newSrc);
+  m_srcs[i] = newSrc;
+}
+
+void IRInstruction::appendSrc(IRFactory& factory, SSATmp* newSrc) {
+  auto newSrcs = new (factory.arena()) SSATmp*[getNumSrcs() + 1];
+  std::copy(m_srcs, m_srcs + getNumSrcs(), newSrcs);
+  newSrcs[getNumSrcs()] = newSrc;
+  ++m_numSrcs;
+  m_srcs = newSrcs;
 }
 
 bool IRInstruction::equals(IRInstruction* inst) const {
   if (m_op != inst->m_op ||
-      m_type != inst->m_type ||
       m_typeParam != inst->m_typeParam ||
       m_numSrcs != inst->m_numSrcs) {
     return false;
@@ -265,23 +277,16 @@ bool IRInstruction::equals(IRInstruction* inst) const {
   return true;
 }
 
-uint32 IRInstruction::hash() {
-  return CSEHash::instHash(m_op, m_type, m_typeParam, m_srcs[0], m_srcs[1]);
-}
-
-SSATmp* IRInstruction::getExtendedSrc(uint32 i) const {
-  ASSERT(0);
-  return NULL;
-}
-void IRInstruction::setExtendedSrc(uint32 i, SSATmp* newSrc) {
-  ASSERT(0);
+size_t IRInstruction::hash() const {
+  size_t srcHash = 0;
+  for (unsigned i = 0; i < getNumSrcs(); ++i) {
+    srcHash = CSEHash::hashCombine(srcHash, getSrc(i));
+  }
+  return CSEHash::hashCombine(srcHash, m_op, m_typeParam);
 }
 
 void IRInstruction::printOpcode(std::ostream& ostream) {
   ostream << opcodeName(m_op);
-  if (m_op == GuardLoc || m_op == GuardStk) { // XXX
-    ostream << "<" << Type::Strings[m_type] << ">";
-  }
   if (m_typeParam != Type::None) {
     ostream << '<' << Type::Strings[m_typeParam] << '>';
   }
@@ -339,7 +344,7 @@ void IRInstruction::print(std::ostream& ostream) {
       ostream << " + ";
       printSrc(ostream, 1);
     }
-    Type::Tag type = isStMem ? getSrc(2)->getType() : m_type;
+    Type::Tag type = isStMem ? getSrc(2)->getType() : m_typeParam;
     ostream << "]:" << Type::Strings[type];
     if (!isLdMem) {
       ASSERT(getNumSrcs() > 1);
@@ -379,60 +384,8 @@ void IRInstruction::print() {
   std::cerr << std::endl;
 }
 
-void ExtendedInstruction::initExtendedSrcs(IRFactory& irFactory,
-                                           uint32 nOpnds,
-                                           SSATmp** opnds) {
-  uint32 offset = m_numSrcs;
-  m_numSrcs += nOpnds;
-  if (m_numSrcs > NUM_FIXED_SRCS) {
-    m_extendedSrcs =
-      new (irFactory.arena()) SSATmp*[m_numSrcs - NUM_FIXED_SRCS];
-  }
-  for (uint32 i = offset; i < m_numSrcs; i++) {
-    setSrc(i, opnds[i - offset]);
-  }
-}
-
-void ExtendedInstruction::initExtendedSrcs(IRFactory& irFactory,
-                                           SSATmp* src,
-                                           uint32 nOpnds,
-                                           SSATmp** opnds) {
-  uint32 offset = m_numSrcs;
-  m_numSrcs += nOpnds + 1;
-  if (m_numSrcs > NUM_FIXED_SRCS) {
-    m_extendedSrcs =
-      new (irFactory.arena()) SSATmp*[m_numSrcs - NUM_FIXED_SRCS];
-  }
-  setSrc(offset, src);
-  for (uint32 i = offset + 1; i < m_numSrcs; i++) {
-    setSrc(i, opnds[i - (offset + 1)]);
-  }
-}
-
-SSATmp* ExtendedInstruction::getExtendedSrc(uint32 i) const {
-  return m_extendedSrcs[i];
-}
-
-void ExtendedInstruction::setExtendedSrc(uint32 i, SSATmp* newSrc) {
-  m_extendedSrcs[i] = newSrc;
-}
-
-void ExtendedInstruction::appendExtendedSrc(IRFactory& irFactory,
-                                            SSATmp* src) {
-  // create larger array and add input
-  int i = 0;
-  SSATmp** extendedSrcs = m_extendedSrcs;
-  m_extendedSrcs =
-    new (irFactory.arena()) SSATmp*[m_numSrcs + 1 - NUM_FIXED_SRCS];
-  for (i = 0; i < (int)m_numSrcs - (int)NUM_FIXED_SRCS; i++) {
-    m_extendedSrcs[i] = extendedSrcs[i];
-  }
-  m_extendedSrcs[i] = src;
-  m_numSrcs++;
-}
-
 void ConstInstruction::printConst(std::ostream& ostream) const {
-  switch (getType()) {
+  switch (getTypeParam()) {
     case Type::Int:
       ostream << m_intVal;
       break;
@@ -490,9 +443,8 @@ bool ConstInstruction::equals(IRInstruction* inst) const {
   return m_intVal == ((ConstInstruction*)inst)->m_intVal;
 }
 
-uint32 ConstInstruction::hash() {
-  return CSEHash::instHash(getOpcode(), getType(), getSrc(0), getSrc(1),
-    m_intVal);
+size_t ConstInstruction::hash() const {
+  return CSEHash::hashCombine(IRInstruction::hash(), m_intVal);
 }
 
 void ConstInstruction::print(std::ostream& ostream) {
@@ -506,7 +458,7 @@ bool LabelInstruction::equals(IRInstruction* inst) const {
   return false;
 }
 
-uint32 LabelInstruction::hash() {
+size_t LabelInstruction::hash() const {
   ASSERT(0);
   return 0;
 }
@@ -641,7 +593,7 @@ void SSATmp::print(std::ostream& os, bool printLastUse) {
     }
     os << ')';
   }
-  os << ":" << Type::Strings[m_inst->getType()];
+  os << ":" << Type::Strings[getType()];
 }
 
 void SSATmp::print() {

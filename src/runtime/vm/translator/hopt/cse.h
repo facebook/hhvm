@@ -44,8 +44,14 @@ struct CSEHash {
   }
 
   template<class... Args>
-  static inline uint32_t instHash(Args&&... args) {
+  static size_t instHash(Args&&... args) {
     return folly::hash::hash_combine(std::forward<Args>(args)...);
+  }
+
+  template<class... Args>
+  static size_t hashCombine(size_t base, Args&&... args) {
+    return folly::hash::hash_128_to_64(base,
+      instHash(std::forward<Args>(args)...));
   }
 
 private:

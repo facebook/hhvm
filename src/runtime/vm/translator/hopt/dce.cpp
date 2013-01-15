@@ -44,7 +44,9 @@ void removeDeadInstructions(Trace* trace) {
 
 bool isUnguardedLoad(IRInstruction* inst) {
   Opcode opc = inst->getOpcode();
-  Type::Tag type = inst->getType();
+  SSATmp* dst = inst->getDst();
+  if (!dst) return false;
+  Type::Tag type = dst->getType();
   return (opc == LdStack && (type == Type::Gen || type == Type::Cell))
           || (opc == LdLoc && type == Type::Gen)
           || (opc == LdRefNR && type == Type::Cell)
@@ -151,7 +153,7 @@ void sinkIncRefs(Trace* trace,
          ++j) {
       // prependInstruction inserts an instruction to the beginning. Therefore,
       // we iterate through toSink in the reversed order.
-      IRInstruction* sunkInst = irFactory->incRef((*j)->getSrc(0));
+      IRInstruction* sunkInst = irFactory->gen(IncRef, (*j)->getSrc(0));
       sunkInst->setId(LIVE);
       trace->prependInstruction(sunkInst);
 
@@ -373,15 +375,11 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
         }
       }
 
-      if (exitInst && exitCcInst &&
-          exitCcInst->getNumSrcs() > NUM_FIXED_SRCS &&
-          exitInst->getNumSrcs() > NUM_FIXED_SRCS) {
+      if (exitInst && exitCcInst) {
         // Found both exits, link them to Jcc for codegen
         ASSERT(dst);
-        ExtendedInstruction* exCcInst = (ExtendedInstruction*)exitCcInst;
-        exCcInst->appendExtendedSrc(*irFactory, dst);
-        ExtendedInstruction* exInst = (ExtendedInstruction*)exitInst;
-        exInst->appendExtendedSrc(*irFactory, dst);
+        exitCcInst->appendSrc(*irFactory, dst);
+        exitInst->appendSrc(*irFactory, dst);
         // Set flag so Jcc and exits know this is active
         dst->setTCA(kIRDirectJccJmpActive);
       }

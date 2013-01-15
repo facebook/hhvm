@@ -11219,8 +11219,8 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
     TRACE(3, "    %-5s\n", i->second->pretty().c_str());
   }
   for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
-    string s = instrToString(ni->pc());
-    TRACE(3, "  %6d: %s\n", ni->source.offset(), s.c_str());
+    TRACE(3, "  %6d: %s\n", ni->source.offset(),
+      instrToString(ni->pc()).c_str());
   }
   TRACE(3, "----------------------------------------------\n");
   if (Trace::moduleEnabled(Trace::tx64, 5)) {

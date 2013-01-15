@@ -228,10 +228,11 @@ void MemMap::killRefInfo(IRInstruction* save) {
     // if 'save' is a load, then don't kill access info of refs that have a
     // different type than 'save'
     if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMemNR)) {
+      auto saveType = save->getDst()->getType();
       if (it->second->value != NULL &&
-          it->second->value->getType() != save->getType() &&
+          it->second->value->getType() != saveType &&
           Type::isStaticallyKnown(it->second->value->getType()) &&
-          Type::isStaticallyKnown(save->getType())) {
+          Type::isStaticallyKnown(saveType)) {
         continue;
       }
     }
@@ -284,9 +285,9 @@ void MemMap::killPropInfo(IRInstruction* save) {
         // have a different type than 'save'
         if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMemNR) &&
             copy->value != NULL &&
-            copy->value->getType() != save->getType() &&
+            copy->value->getType() != save->getDst()->getType() &&
             Type::isStaticallyKnown(copy->value->getType()) &&
-            Type::isStaticallyKnown(save->getType())) {
+            Type::isStaticallyKnown(save->getDst()->getType())) {
           continue;
         }
         // TODO consider doing the same with the type of the base ref pointer
@@ -496,17 +497,7 @@ void MemMap::processInstruction(IRInstruction* inst) {
     case DecRef:
     case DecRefNZ: {
       SSATmp* ref = inst->getSrc(0);
-
-      // DecRefs default to types of Cell& for boxed types, update them if we
-      // have their type information
-      if (Type::isBoxed(ref->getType())) {
-        SSATmp* val = getValue(ref);
-        if (val != NULL) {
-          inst->setType(val->getType());
-        }
-      }
-
-      Type::Tag ty = inst->getType();
+      Type::Tag ty = inst->getSrc(0)->getType();
 
       // decref of a string has no side effects
       if (Type::isString(ty)) {
@@ -688,7 +679,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
     return;
   }
 
-  Type::Tag instTy = inst->getType();
+  Type::Tag instTy = inst->getDst()->getType();
   Type::Tag valTy = value->getType();
 
   // check for loads that have a guard and will fail it

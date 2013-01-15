@@ -17,11 +17,92 @@
 #ifndef incl_HPHP_VM_IRFACTORY_H_
 #define incl_HPHP_VM_IRFACTORY_H_
 
+#include <type_traits>
+
 #include "util/arena.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
 namespace HPHP { namespace VM { namespace JIT {
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * ReturnValue makeInstruction(IRFactory, Lambda, Args...) --
+ *
+ *   Create an IRInstruction on the stack using Args, and call Lambda
+ *   with a pointer to it, returning the result.
+ *
+ *   Normally IRInstruction creation should go through either
+ *   IRFactory::gen or TraceBuilder::gen.  This utility is used to
+ *   implement those.
+ */
+
+namespace detail {
+
+template<class Ret, class Func>
+struct InstructionBuilder {
+  explicit InstructionBuilder(const Func& func, IRFactory& factory)
+    : factory(factory)
+    , func(func)
+  {}
+
+  template<class... Args>
+  Ret go(Opcode op, Args... args) {
+    return go2(op, Type::None, nullptr, args...);
+  }
+
+  template<class... Args>
+  Ret go(Opcode op, Type::Tag t, Args... args) {
+    return go2(op, t, nullptr, args...);
+  }
+
+  template<class... Args>
+  Ret go(Opcode op, LabelInstruction* l, Args... args) {
+    return go2(op, Type::None, l, args...);
+  }
+
+  template<class... Args>
+  Ret go(Opcode op, Type::Tag t, LabelInstruction* l, Args... args) {
+    return go2(op, t, l, args...);
+  }
+
+private:
+  template<class Int>
+  Ret go2(Opcode op, Type::Tag t, LabelInstruction* l, Int numArgs,
+      SSATmp** tmps) {
+    IRInstruction inst(op, numArgs, tmps);
+    inst.setTypeParam(t);
+    inst.setLabel(l);
+    if (debug) assertOperandTypes(&inst);
+    return func(&inst);
+  }
+
+  template<class... SSATmps>
+  Ret go2(Opcode op, Type::Tag t, LabelInstruction* l, SSATmps... args) {
+    SSATmp* tmps[] = { args... };
+    return go2(op, t, l, sizeof...(args), tmps);
+  }
+
+private:
+  IRFactory& factory;
+  const Func& func;
+};
+
+}
+
+template<class Func, class... Args>
+typename std::result_of<Func (IRInstruction*)>::type
+makeInstruction(IRFactory& factory, Func func, Args... args) {
+  typedef typename std::result_of<Func (IRInstruction*)>::type Ret;
+  return detail::InstructionBuilder<Ret,Func>(func, factory).go(args...);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * IRFactory is used for allocating and controlling the lifetime of IR
+ * objects.
+ */
 class IRFactory {
 public:
   IRFactory()
@@ -29,69 +110,33 @@ public:
     , m_nextOpndId(0)
   {}
 
-  IRInstruction* cloneInstruction(IRInstruction* inst);
-  ExtendedInstruction* cloneInstruction(ExtendedInstruction* inst);
-  ConstInstruction* cloneInstruction(ConstInstruction* inst);
-  LabelInstruction* cloneInstruction(LabelInstruction* inst);
+  /*
+   * Create an IRInstruction with lifetime equivalent to this IRFactory.
+   *
+   * Arguments are passed in the following format:
+   *
+   *   gen(Opcode, [type param], [exit label], [srcs ...]);
+   *
+   * All arguments are optional except the opcode.  `srcs' may be
+   * specified either as a list of SSATmp*'s, or as a integer size and
+   * a SSATmp**.
+   */
+  template<class... Args>
+  IRInstruction* gen(Args... args) {
+    return makeInstruction(
+      *this,
+      [this] (IRInstruction* inst) { return inst->clone(this); },
+      args...
+    );
+  }
 
-  IRInstruction* guardRefs(SSATmp* funcPtr,
-                           SSATmp* nParams,
-                           SSATmp* bitsPtr,
-                           SSATmp* firstBitNum,
-                           SSATmp* mask64,
-                           SSATmp* vals64,
-                           LabelInstruction* exitLabel = NULL);
+  IRInstruction*    cloneInstruction(const IRInstruction*);
+  ConstInstruction* cloneInstruction(const ConstInstruction*);
+  LabelInstruction* cloneInstruction(const LabelInstruction*);
 
-  IRInstruction* ldLoc(SSATmp* home,
-                       Type::Tag type,
-                       LabelInstruction*);
   ConstInstruction* defConst(int64 val);
-  IRInstruction* verifyParamType(SSATmp* src,
-                                 SSATmp* tc, SSATmp* constraint,
-                                 LabelInstruction*);
-  IRInstruction* spillStack(SSATmp* sp,
-                            SSATmp* stackAdjustment,
-                            uint32 numOpnds,
-                            SSATmp** opnds,
-                            bool allocActRec = false);
-  IRInstruction* exitTrace(TraceExitType::ExitType,
-                           SSATmp* func,
-                           SSATmp* pc,
-                           SSATmp* sp,
-                           SSATmp* fp);
-  IRInstruction* exitTrace(TraceExitType::ExitType,
-                           SSATmp* func,
-                           SSATmp* pc,
-                           SSATmp* sp,
-                           SSATmp* fp,
-                           SSATmp* notTakenPC);
-  IRInstruction* allocActRec(SSATmp* stkPtr,
-                             SSATmp* framePtr,
-                             SSATmp* func,
-                             SSATmp* objOrCls,
-                             SSATmp* numArgs,
-                             SSATmp* magicName);
-  IRInstruction* freeActRec(SSATmp* framePtr);
-  IRInstruction* call(SSATmp* actRec,
-                      SSATmp* returnBcOffset,
-                      SSATmp* func,
-                      uint32 numArgs,
-                      SSATmp** args);
-  IRInstruction* incRef(SSATmp* obj);
-  IRInstruction* decRef(SSATmp* obj, LabelInstruction* dtorLabel);
   LabelInstruction* defLabel();
   LabelInstruction* marker(uint32 bcOff, const Func* func, int32 spOff);
-  IRInstruction* decRefLoc(SSATmp* home, LabelInstruction* exit);
-  IRInstruction* decRefStack(Type::Tag type,
-                             SSATmp* sp,
-                             SSATmp* index,
-                             LabelInstruction* exit);
-  IRInstruction* decRefThis(SSATmp* fp, LabelInstruction* exit);
-
-  IRInstruction* spill(SSATmp* src);
-  IRInstruction* reload(SSATmp* slot);
-  IRInstruction* allocSpill(SSATmp* numSlots);
-  IRInstruction* freeSpill(SSATmp* numSlots);
 
   SSATmp* getSSATmp(IRInstruction* inst) {
     SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);
@@ -99,16 +144,17 @@ public:
     return tmp;
   }
 
-  uint32 getNumSSATmps() { return m_nextOpndId; }
-  Arena& arena() { return m_arena; }
+  Arena&   arena()               { return m_arena; }
 
 private:
-  uint32 m_nextLabelId;
-  uint32 m_nextOpndId;
+  uint32_t m_nextLabelId;
+  uint32_t m_nextOpndId;
 
   // SSATmp and IRInstruction objects are allocated here.
   Arena m_arena;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 }}}
 

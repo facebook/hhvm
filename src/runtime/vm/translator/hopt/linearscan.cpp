@@ -300,7 +300,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
 
       // Insert the Reload instruction.
       SSATmp* slotTmp = m_slots[slotId].m_slotTmp;
-      IRInstruction* reload = m_irFactory->reload(slotTmp);
+      IRInstruction* reload = m_irFactory->gen(Reload, slotTmp);
       trace->getInstructionList().insert(it, reload);
       reload->setParent(trace);
 
@@ -349,7 +349,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
   }
 
   Opcode opc = inst->getOpcode();
-  UNUSED Type::Tag type = inst->getType();
+  UNUSED Type::Tag type = ssaTmp->getType();
 
   if (opc == DefFP || opc == FreeActRec) {
     allocRegToTmp(&m_regs[int(rVmFp)], ssaTmp, 0);
@@ -550,8 +550,8 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
     Opcode opc = inst->getOpcode();
     if (opc == Call) {
       // Insert FreeSpill and AllocSpill around each Call.
-      IRInstruction* allocSpill = m_irFactory->allocSpill(tmp);
-      IRInstruction* freeSpill = m_irFactory->freeSpill(tmp);
+      IRInstruction* allocSpill = m_irFactory->gen(AllocSpill, tmp);
+      IRInstruction* freeSpill = m_irFactory->gen(FreeSpill, tmp);
       instList.insert(it, freeSpill);
       freeSpill->setParent(trace);
       instList.insert(next, allocSpill);
@@ -560,7 +560,7 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
                opc == ExitSlowNoProgress || opc == ExitGuardFailure ||
                opc == RetCtrl) {
       // Insert FreeSpill at trace exits.
-      IRInstruction* freeSpill = m_irFactory->freeSpill(tmp);
+      IRInstruction* freeSpill = m_irFactory->gen(FreeSpill, tmp);
       instList.insert(it, freeSpill);
       freeSpill->setParent(trace);
     }
@@ -569,8 +569,8 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
 
   // Insert AllocSpill at the start of the main trace.
   if (trace->isMain()) {
-    IRInstruction* allocSpill = m_irFactory->allocSpill(tmp);
-    trace->prependInstruction(allocSpill);
+    trace->prependInstruction(
+      m_irFactory->gen(AllocSpill, tmp));
   }
 }
 
@@ -699,7 +699,7 @@ void LinearScan::computePreColoringHint() {
     case Conv:
     {
       SSATmp* src = nextNative->getSrc(0);
-      Type::Tag toType = nextNative->getType();
+      Type::Tag toType = nextNative->getTypeParam();
       Type::Tag fromType = src->getType();
       if (toType == Type::Bool) {
         switch (fromType) {
@@ -963,16 +963,16 @@ void LinearScan::rematerializeAux(Trace* trace,
           ConstInstruction constInst(curFp, Local(locId));
           IRInstruction* ldHomeInst =
             m_irFactory->cloneInstruction(&constInst);
-          newInst = m_irFactory->ldLoc(m_irFactory->getSSATmp(ldHomeInst),
-                                       dst->getType(),
-                                       NULL);
+          newInst = m_irFactory->gen(LdLoc,
+                                     dst->getType(),
+                                     m_irFactory->getSSATmp(ldHomeInst));
         }
       }
       if (newInst) {
-        UNUSED Type::Tag oldInstrType = dst->getInstruction()->getType();
+        UNUSED Type::Tag oldType = dst->getType();
         newInst->setDst(dst);
         dst->setInstruction(newInst);
-        ASSERT(newInst->getType() == oldInstrType);
+        ASSERT(outputType(newInst) == oldType);
         *it = newInst;
         newInst->setParent(trace);
       }
@@ -1184,7 +1184,7 @@ void LinearScan::spill(SSATmp* tmp) {
 uint32 LinearScan::createSpillSlot(SSATmp* tmp) {
   uint32 slotId = m_slots.size();
   tmp->setSpillSlot(slotId);
-  IRInstruction* spillInst = m_irFactory->spill(tmp);
+  IRInstruction* spillInst = m_irFactory->gen(Spill, tmp);
   SlotInfo si;
   si.m_slotTmp = m_irFactory->getSSATmp(spillInst);
   si.m_latestTmp = tmp;

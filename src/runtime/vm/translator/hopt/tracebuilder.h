@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _TRACEBUILDER_H_
-#define _TRACEBUILDER_H_
+#ifndef incl_HHVM_HHIR_TRACEBUILDER_H_
+#define incl_HHVM_HHIR_TRACEBUILDER_H_
 
 #include <boost/scoped_ptr.hpp>
 
@@ -47,6 +47,20 @@ public:
   }
 
   void genPrint(SSATmp*);
+
+  /*
+   * Create an IRInstruction attached to this Trace, and allocate a
+   * destination SSATmp for it.  Uses the same argument list format as
+   * IRFactory::gen.
+   */
+  template<class... Args>
+  SSATmp* gen(Args... args) {
+    return makeInstruction(
+      m_irFactory,
+      [this] (IRInstruction* inst) { return optimizeInst(inst); },
+      args...
+    );
+  }
 
   SSATmp* genAddElem(SSATmp* arr, SSATmp* key, SSATmp* val);
   SSATmp* genAddNewElem(SSATmp* arr, SSATmp* val);
@@ -92,7 +106,6 @@ public:
   SSATmp* genLdCurFuncPtr();
   SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
   SSATmp* genLdFuncCls(SSATmp* func);
-  SSATmp* genLdContLocalsPtr(SSATmp* cont);
   SSATmp* genNewObj(int32 numParams, const StringData* clsName);
   SSATmp* genNewObj(int32 numParams, SSATmp* cls);
   SSATmp* genNewArray(int32 capacity);
@@ -121,11 +134,9 @@ public:
                        SSATmp* vals64,
                        Trace*  exitTrace);
 
-  SSATmp* genUnbox(SSATmp* src, Type::Tag type, Trace* exit);
+  SSATmp* genUnbox(SSATmp* src, Trace* exit);
   SSATmp* genUnboxPtr(SSATmp* ptr);
   SSATmp* genLdRef(SSATmp* ref, Type::Tag type, Trace* exit);
-  SSATmp* genIntegerOp(Opcode opc, SSATmp* src1, SSATmp* src2);
-  SSATmp* genIntegerOp(Opcode opc, SSATmp* src);
   SSATmp* genAdd(SSATmp* src1, SSATmp* src2);
   void    genRaiseUninitWarning(uint32 id);
 
@@ -138,8 +149,8 @@ public:
 
   SSATmp* genDefUninit();
   SSATmp* genDefNull();
-  Trace*  genJmpCond(SSATmp* src, Trace* target, bool negate);
   Trace*  genJmp(Trace* target);
+  Trace*  genJmpCond(SSATmp* src, Trace* target, bool negate);
   Trace*  genExitWhenSurprised(Trace* target);
   Trace*  genExitOnVarEnv(Trace* target);
   Trace*  genCheckUninit(SSATmp* src, Trace* target);
@@ -259,8 +270,7 @@ public:
 
   template<Type::Tag T>
   SSATmp* genIsType(SSATmp* src) {
-    auto inst = IRInstruction::makeTypeParamInst(IsType, T, Type::Bool, src);
-    return optimizeInst(&inst);
+    return gen(IsType, T, src);
   }
 
   template<typename T>
@@ -279,49 +289,16 @@ public:
   IRFactory* getIrFactory() { return &m_irFactory; }
   int32 getSpOffset() { return m_spOffset; }
   SSATmp* getSp() { return m_spValue; }
+
 private:
-  friend class Simplifier;
   LabelInstruction* getLabel(Trace* trace) {
     return trace ? trace->getLabel() : NULL;
   }
-  SSATmp* genInstruction(Opcode,
-                         Type::Tag,
-                         SSATmp* src1,
-                         SSATmp* src2,
-                         SSATmp* src3,
-                         Trace* exit = NULL);
-  SSATmp* genInstruction(Opcode,
-                         Type::Tag,
-                         SSATmp* src1,
-                         SSATmp* src2,
-                         SSATmp* src3,
-                         SSATmp* src4);
-  SSATmp* genInstruction(Opcode,
-                         Type::Tag,
-                         SSATmp* src1,
-                         SSATmp* src2,
-                         SSATmp* src3,
-                         SSATmp* src4,
-                         SSATmp* src5);
-  SSATmp* genInstruction(Opcode, Type::Tag, Trace* exit = NULL);
-  SSATmp* genInstruction(Opcode, Type::Tag,
-                         SSATmp* src,
-                         Trace* exit = NULL);
-  SSATmp* genInstruction(Opcode, Type::Tag,
-                         SSATmp* src1,
-                         SSATmp* src2,
-                         Trace* exit = NULL);
-  SSATmp* genInstruction(Opcode, Type::Tag,
-                         SSATmp* src1,
-                         SSATmp* src2,
-                         uint32 nOpnds,
-                         SSATmp** opnds,
-                         Trace* exit = NULL);
+
   Trace*  genJmpCond(Opcode opc, SSATmp* src1, SSATmp* src2, Trace* target);
   Trace*  genJmpCond(Opcode opc, SSATmp* src, Trace* target);
   Trace*  genJmpCond(Opcode opc, Type::Tag, SSATmp* src, Trace* target);
 
-  SSATmp* genLogicalOp(Opcode opc, SSATmp* src1, SSATmp* src2);
   Trace* makeTrace(uint32 bcOff, bool isMain) {
     return new Trace(m_irFactory.defLabel(), bcOff, isMain);
   }
@@ -348,6 +325,6 @@ private:
   std::vector<Type::Tag> m_localTypes;
 };
 
-}}} // namespace HPHP::VM::JIT
+}}}
 
-#endif //  _TRACEBUILDER_H_
+#endif

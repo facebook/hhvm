@@ -96,11 +96,13 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdClsPropAddr:
     return simplifyLdClsPropAddr(src1, src2, inst->getSrc(2));
   case Conv:
-    return simplifyConv(inst->getType(),  src1);
+    return simplifyConv(inst);
   case Unbox:
-    return simplifyUnbox(inst->getType(), src1, inst->getLabel());
+    return simplifyUnbox(inst);
+  case UnboxPtr:
+    return simplifyUnboxPtr(inst);
   case IsType:
-    return simplifyIsType(inst->getTypeParam(), src1);
+    return simplifyIsType(inst);
 
   case JmpGt:
   case JmpGte:
@@ -768,7 +770,10 @@ DEF_SIMPLIFY_CMP(NSame)
 
 #undef DEF_SIMPLIFY_CMP
 
-SSATmp* Simplifier::simplifyIsType(Type::Tag type, SSATmp* src) {
+SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
+  auto type = inst->getTypeParam();
+  auto src  = inst->getSrc(0);
+
   ASSERT(Type::isUnboxed(type));
   ASSERT(type != Type::Cell);
   if (type != Type::Obj) {
@@ -798,8 +803,11 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
   }
   return NULL;
 }
-SSATmp* Simplifier::simplifyConv(Type::Tag toType, SSATmp* src) {
-  Type::Tag type = src->getType();
+
+SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
+  SSATmp* src      = inst->getSrc(0);
+  Type::Tag type   = src->getType();
+  Type::Tag toType = inst->getTypeParam();
   if (toType == type) {
     return src;
   }
@@ -911,28 +919,12 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls,
   return NULL;
 }
 
-// TODO: Remove this if unused
-SSATmp* Simplifier::simplifyUnbox(Type::Tag type, SSATmp* src) {
-  Type::Tag srcType = src->getType();
-  if (Type::isUnboxed(srcType)) {
-    return src;
-  }
-  if (Type::isBoxed(srcType)) {
-    srcType = Type::getInnerType(srcType);
-    if (Type::isMoreRefined(srcType, type)) {
-      type = srcType;
-    }
-    return m_tb->genLdRef(src, type, NULL);
-  }
-  return NULL;
-}
+SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
+  auto* src           = inst->getSrc(0);
+  auto* typeFailLabel = inst->getLabel();
+  auto type           = outputType(inst);
 
-SSATmp* Simplifier::simplifyUnbox(Type::Tag type, SSATmp* src,
-                                  LabelInstruction* typeFailLabel) {
-  if (!typeFailLabel) {
-    return simplifyUnbox(type, src);
-  }
-
+  ASSERT(typeFailLabel);
   ASSERT(Type::isUnboxed(type));
   Type::Tag srcType = src->getType();
   if (Type::isUnboxed(srcType)) {
@@ -948,6 +940,13 @@ SSATmp* Simplifier::simplifyUnbox(Type::Tag type, SSATmp* src,
     return m_tb->genLdRef(src, type, typeFailLabel->getParent());
   }
   return NULL;
+}
+
+SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
+  if (inst->getSrc(0)->getType() == Type::PtrToCell) {
+    return inst->getSrc(0);
+  }
+  return nullptr;
 }
 
 SSATmp* Simplifier::genDefInt(int64 val) {

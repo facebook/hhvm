@@ -1060,7 +1060,7 @@ void CodeGenerator::cgOpGte(IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgConv(IRInstruction* inst) {
-  Type::Tag toType   = inst->getType();
+  Type::Tag toType   = inst->getTypeParam();
   Type::Tag fromType = inst->getSrc(0)->getType();
   SSATmp* dst = inst->getDst();
   SSATmp* src = inst->getSrc(0);
@@ -1668,7 +1668,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
     toSmash    = inst->getSrc(4);
     ASSERT(toSmash);
   } else if (exitType == TraceExitType::NormalCc) {
-    // Exit at trace end  which is the target of a conditional branch
+    // Exit at trace end which is the target of a conditional branch
     notTakenPC = inst->getSrc(4);
     ASSERT(notTakenPC->isConst());
     if (inst->getNumSrcs() == 6) {
@@ -1883,9 +1883,9 @@ void CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
   }
 }
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  Type::Tag type = inst->getType();
   SSATmp* dst    = inst->getDst();
   SSATmp* src    = inst->getSrc(0);
+  Type::Tag type = src->getType();
 
   if (m_curTrace->isMain()) {
     TRACE(3, "[counter] 1 IncRef in main traces\n");
@@ -1894,7 +1894,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
-  Type::Tag type = inst->getType();
+  Type::Tag type = inst->getTypeParam();
   SSATmp* sp = inst->getSrc(0);
   SSATmp* index= inst->getSrc(1);
   LabelInstruction* exit = inst->getLabel();
@@ -1936,7 +1936,7 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
-  Type::Tag type = inst->getType();
+  Type::Tag type = inst->getTypeParam();
   SSATmp*   addr = inst->getSrc(0);
   LabelInstruction* exit = inst->getLabel(); // Can be NULL
 
@@ -2598,21 +2598,17 @@ void CodeGenerator::cgNewTuple(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  SSATmp* actRec  = inst->getSrc(0);
+  SSATmp* actRec         = inst->getSrc(0);
   SSATmp* returnBcOffset = inst->getSrc(1);
-  int32  numArgs = inst->getNumExtendedSrcs();
-  ASSERT(numArgs > 0);
-  SSATmp** args   = ((ExtendedInstruction*)inst)->getExtendedSrcs();
-
-  SSATmp* func = args[0];
-  // skip over func
-  args++;  numArgs--;
+  SSATmp* func           = inst->getSrc(2);
+  int32  numArgs         = inst->getNumSrcs() - 3;
+  auto arg               = [&] (int i) { return inst->getSrc(i + 3); };
 
   auto spReg = actRec->getReg();
   // put all outgoing arguments onto the VM stack
   int64 adjustment = (-(int64)numArgs) * sizeof(Cell);
   for (int32 i = 0; i < numArgs; i++) {
-    cgStore(spReg, -(i+1) * sizeof(Cell), args[i]);
+    cgStore(spReg, -(i+1) * sizeof(Cell), arg(i));
   }
   // store the return bytecode offset into the outgoing actrec
   uint64 returnBc = returnBcOffset->getConstValAsInt();
@@ -2638,15 +2634,15 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
   SSATmp* dst   = inst->getDst();
   SSATmp* sp    = inst->getSrc(0);
   SSATmp* spAdjustment = inst->getSrc(1);
-  uint32   numSpill  = inst->getNumExtendedSrcs();
-  SSATmp** spillSrcs = ((ExtendedInstruction*)inst)->getExtendedSrcs();
+  uint32   numSpill  = inst->getNumSrcs() - 2;
+  auto spillVal = [&] (int i) { return inst->getSrc(i + 2); };
 
   auto dstReg = dst->getReg();
   auto spReg = sp->getReg();
   int64 adjustment =
     (spAdjustment->getConstValAsInt() - numSpill) * sizeof(Cell);
   for (uint32 i = 0; i < numSpill; i++) {
-    cgStore(spReg, (i * sizeof(Cell)) + adjustment, spillSrcs[i]);
+    cgStore(spReg, (i * sizeof(Cell)) + adjustment, spillVal(i));
   }
   if (allocActRec) {
     adjustment -= (3 * sizeof(Cell)); // XXX replace with symbolic constant
@@ -2668,7 +2664,7 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
   }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     for (uint32 i = 0; i < numSpill; i++) {
-      if (spillSrcs[i]->getType() != Type::Gen) {
+      if (spillVal(i)->getType() != Type::Gen) {
         emitCheckCell(m_as, dst, i + (allocActRec ? 3 : 0));
       }
     }
@@ -3051,7 +3047,7 @@ void CodeGenerator::cgLoad(Type::Tag type,
 }
 
 void CodeGenerator::cgLdPropNR(IRInstruction* inst) {
-  Type::Tag type  = inst->getType();
+  Type::Tag type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   obj   = inst->getSrc(0);
   SSATmp*   prop  = inst->getSrc(1);
@@ -3067,7 +3063,7 @@ void CodeGenerator::cgLdPropNR(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdMemNR(IRInstruction * inst) {
-  Type::Tag type  = inst->getType();
+  Type::Tag type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   addr  = inst->getSrc(0);
   int64 offset    = inst->getSrc(1)->getConstValAsInt();
@@ -3076,7 +3072,7 @@ void CodeGenerator::cgLdMemNR(IRInstruction * inst) {
 }
 
 void CodeGenerator::cgLdRefNR(IRInstruction* inst) {
-  Type::Tag type  = inst->getType();
+  Type::Tag type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   addr  = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
@@ -3112,7 +3108,7 @@ static void getLocalRegOffset(SSATmp* src, PhysReg& reg, int64& off) {
 }
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
-  Type::Tag         type  = inst->getType();
+  Type::Tag         type  = inst->getTypeParam();
   SSATmp*           dst   = inst->getDst();
   LabelInstruction* label = inst->getLabel();
 
@@ -3138,7 +3134,7 @@ void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
-  Type::Tag type = inst->getType();
+  Type::Tag type = inst->getTypeParam();
   SSATmp* dst    = inst->getDst();
   SSATmp* sp     = inst->getSrc(0);
   SSATmp* index  = inst->getSrc(1);
@@ -3201,7 +3197,7 @@ void CodeGenerator::cgGuardType(Type::Tag         type,
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
-  Type::Tag          type = inst->getType();
+  Type::Tag          type = inst->getTypeParam();
   SSATmp*              sp = inst->getSrc(0);
   SSATmp*           index = inst->getSrc(1);
   LabelInstruction* label = inst->getLabel();
@@ -3216,7 +3212,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
-  Type::Tag          type = inst->getType();
+  Type::Tag          type = inst->getTypeParam();
   SSATmp*           index = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
   PhysReg fpReg;
@@ -3227,7 +3223,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardType(IRInstruction* inst) {
-  Type::Tag type  = inst->getType();
+  Type::Tag type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   src   = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
@@ -3254,7 +3250,8 @@ void CodeGenerator::cgGuardType(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  ASSERT(inst->getNumExtendedSrcs() == 4);
+  ASSERT(inst->getNumSrcs() == 6);
+
   SSATmp* funcPtrTmp = inst->getSrc(0);
   SSATmp* nParamsTmp = inst->getSrc(1);
   SSATmp* bitsPtrTmp = inst->getSrc(2);
@@ -3549,7 +3546,7 @@ void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   SSATmp*   cnsName = inst->getSrc(0);
   SSATmp*   cls     = inst->getSrc(1);
 
-  ASSERT(inst->getType() == Type::Cell);
+  ASSERT(inst->getTypeParam() == Type::Cell);
   ASSERT(cnsName->isConst() && cnsName->getType() == Type::StaticStr);
   ASSERT(cls->isConst() && cls->getType() == Type::StaticStr);
 
@@ -3561,7 +3558,7 @@ void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   // note that we bail from the trace if the target cache entry is empty
   // for this class constant or if the type assertion fails.
   // TODO: handle the slow case helper call.
-  cgLoad(inst->getType(), inst->getDst(), rVmTl, ch, nullptr);
+  cgLoad(inst->getTypeParam(), inst->getDst(), rVmTl, ch, nullptr);
 }
 
 void CodeGenerator::cgCheckClsCnsDefined(IRInstruction* inst) {

@@ -57,21 +57,27 @@ SSATmp* HhbcTranslator::push(SSATmp* tmp) {
 }
 
 void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
-  // If type is more refined that tmp's type, reset tmp's type to type
+  // If type is more refined than tmp's type, reset tmp's type to type
   IRInstruction* inst = tmp->getInstruction();
   if (Type::isMoreRefined(type, tmp->getType())) {
-    tmp->setType(type);
-    inst->setType(type);// TODO: remove this mirror
     // If tmp is incref or move, then chase down its src
     Opcode opc = inst->getOpcode();
     if (opc == Mov || opc == IncRef) {
       refineType(inst->getSrc(0), type);
+      tmp->setType(outputType(inst));
     } else {
-      // at this point, we have no business refining the type of any
-      // instructions other than the following
-      ASSERT(opc == LdLoc   || opc == LdStack  ||
-             opc == LdMemNR || opc == LdPropNR ||
-             opc == LdRefNR);
+      // At this point, we have no business refining the type of any
+      // instructions other than the following, which all control
+      // their destination type via a type parameter.
+      //
+      // FIXME: I think most of these shouldn't be possible still
+      // (except LdStack?).
+      ASSERT (opc == LdLoc   || opc == LdStack  ||
+              opc == LdMemNR || opc == LdPropNR ||
+              opc == LdRefNR);
+      inst->setTypeParam(type);
+      tmp->setType(type);
+      ASSERT(outputType(inst) == type);
     }
   }
 }
@@ -175,7 +181,7 @@ void HhbcTranslator::emitUnboxRAux() {
   }
   Trace* exitTrace = getExitSlowTrace();
   SSATmp* tmp = popR();
-  pushIncRef(m_tb->genUnbox(tmp, Type::Cell, exitTrace));
+  pushIncRef(m_tb->genUnbox(tmp, exitTrace));
   m_tb->genDecRef(tmp);
 }
 
@@ -495,7 +501,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
     result = m_tb->genConcat(loc, val);
     pushIncRef(m_tb->genStLoc(id, result, false, true, exitTrace));
   } else if (isSupportedBinaryArith(loc->getType(), val->getType())) {
-    result = m_tb->genIntegerOp(subOpc, loc, val);
+    result = m_tb->gen(subOpc, loc, val);
     push(m_tb->genStLoc(id, result, true, true, exitTrace));
   } else {
     PUNT(SetOpL);
@@ -588,7 +594,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
     bool fillThis = origFunc->isNonClosureMethod() && !origFunc->isStatic() &&
       ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
       (origFunc->lookupVarId(thisStr) == kInvalidId);
-    SSATmp* locals = m_tb->genLdContLocalsPtr(cont);
+    SSATmp* locals = m_tb->gen(LdContLocalsPtr, cont);
     for (int i = 0; i < origLocals; ++i) {
       SSATmp* loc = m_tb->genIncRef(m_tb->genLdLoc(i, Type::Gen, NULL));
       m_tb->genStMem(locals, cellsToBytes(genLocals - params[i] - 1), loc, true);
@@ -1783,7 +1789,7 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
   if (isSupportedBinaryArith(type1, type2)) {
     SSATmp* tr = popC();
     SSATmp* tl = popC();
-    push(m_tb->genIntegerOp(opc, tl, tr));
+    push(m_tb->gen(opc, tl, tr));
   } else if (isBitOp && (type1 == Type::Obj || type2 == Type::Obj)) {
     // raise fatal
     spillStack();

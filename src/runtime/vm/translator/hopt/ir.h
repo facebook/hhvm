@@ -100,7 +100,7 @@ enum OpcodeFlag : uint64_t {
   OPC(GuardType,         (HasDest|CanCSE|Essential))                    \
   OPC(GuardLoc,          (Essential))                                   \
   OPC(GuardStk,          (Essential))                                   \
-  OPC(GuardRefs,         (CanCSE|Essential))                            \
+  OPC(GuardRefs,         (Essential))                                   \
                                                                         \
   /* arith ops (integer) */                                             \
   OPC(OpAdd,             (HasDest|CanCSE))                              \
@@ -139,7 +139,7 @@ enum OpcodeFlag : uint64_t {
                                                                         \
   /* conditional branches & jump */                                     \
   /* there is a conditional branch for each of the above query */       \
-  /* operators to enable generating efficieng comparison-and-branch */  \
+  /* operators to enable generating efficient comparison-and-branch */  \
   /* instruction sequences */                                           \
   OPC(JmpGt,             (HasDest|Essential))                           \
   OPC(JmpGte,            (HasDest|Essential))                           \
@@ -417,7 +417,7 @@ public:
     IRT(FuncClassPtr,    "FuncClass*") /* this has both a Func* and a Class* */\
     IRT(RetAddr,         "RetAddr") /* Return address */ \
     IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP */\
-    IRT(TCA,             "TCA")                                         \
+    IRT(TCA,             "TCA")
 
   enum Tag : uint16_t {
 #define IRT(type, name)  type,
@@ -507,7 +507,7 @@ public:
     }
   }
 
-  static inline Tag getBoxedType(Tag t) {
+  static inline Tag box(Tag t) {
     if (t == None) {
       // translator-x64 sometimes gives us an inner type of KindOfInvalid and
       // an outer type of KindOfRef
@@ -532,10 +532,12 @@ public:
     }
   }
 
-  static inline Tag getValueType(Tag t) {
+  static Tag unbox(Tag t) {
+    assert(t == Gen || isMoreRefined(t, Gen));
     if (isBoxed(t)) {
       return getInnerType(t);
     }
+    if (t == Gen) return Cell;
     return t;
   }
 
@@ -582,7 +584,7 @@ public:
       case KindOfUncounted     : return Uncounted;
       case KindOfAny           : return Gen;
       case KindOfRef           :
-        return getBoxedType(fromDataType(innerType, KindOfInvalid));
+        return box(fromDataType(innerType, KindOfInvalid));
       default                  : not_reached();
     }
   }
@@ -696,109 +698,58 @@ class Simplifier;
 
 bool isRefCounted(SSATmp* opnd);
 
-const unsigned NUM_FIXED_SRCS = 2;
-
 class LabelInstruction;
 
-// All IRInstruction subclasses must be arena-allocatable.
-// (Destructors are not called.)
-class IRInstruction {
-public:
-  IRInstruction(Opcode o, Type::Tag t, LabelInstruction *l = NULL)
-    : m_op(o)
-    , m_type(t)
+/*
+ * All IRInstruction subclasses must be arena-allocatable.
+ * (Destructors are not called when they come from IRFactory.)
+ */
+struct IRInstruction : private boost::noncopyable {
+  typedef std::list<IRInstruction*> List;
+  typedef std::list<IRInstruction*>::iterator Iterator;
+  typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
+
+  explicit IRInstruction(Opcode op,
+                         uint32_t numSrcs = 0,
+                         SSATmp** srcs = nullptr)
+    : m_op(op)
+    , m_id(0)
+    , m_numSrcs(numSrcs)
     , m_typeParam(Type::None)
-    , m_id(0)
-    , m_numSrcs(0)
-    , m_dst(NULL)
-    , m_asmAddr(NULL)
-    , m_label(l)
-    , m_parent(NULL)
-    , m_tca(NULL)
-  {
-    m_srcs[0] = m_srcs[1] = NULL;
-  }
+    , m_srcs(srcs)
+    , m_dst(nullptr)
+    , m_asmAddr(nullptr)
+    , m_label(nullptr)
+    , m_parent(nullptr)
+    , m_tca(nullptr)
+  {}
 
-  IRInstruction(Opcode o, Type::Tag t, SSATmp* src, LabelInstruction *l = NULL)
-    : m_op(o)
-    , m_type(t)
-    , m_typeParam(Type::None)
-    , m_id(0)
-    , m_numSrcs(1)
-    , m_dst(NULL)
-    , m_asmAddr(NULL)
-    , m_label(l)
-    , m_parent(NULL)
-    , m_tca(NULL)
-  {
-    m_srcs[0] = src; m_srcs[1] = NULL;
-  }
-
-  IRInstruction(Opcode o,
-                Type::Tag t,
-                SSATmp* src0,
-                SSATmp* src1,
-                LabelInstruction *l = NULL)
-    : m_op(o)
-    , m_type(t)
-    , m_typeParam(Type::None)
-    , m_id(0)
-    , m_numSrcs(2)
-    , m_dst(NULL)
-    , m_asmAddr(NULL)
-    , m_label(l)
-    , m_parent(NULL)
-    , m_tca(NULL)
-  {
-    m_srcs[0] = src0; m_srcs[1] = src1;
-  }
-
-  explicit IRInstruction(IRInstruction* inst)
-    : m_op(inst->m_op)
-    , m_type(inst->m_type)
-    , m_typeParam(inst->m_typeParam)
-    , m_id(0)
-    , m_numSrcs(inst->m_numSrcs)
-    , m_dst(NULL)
-    , m_asmAddr(NULL)
-    , m_label(inst->m_label)
-    , m_parent(NULL)
-    , m_tca(NULL)
-  {
-    m_srcs[0] = inst->m_srcs[0];
-    m_srcs[1] = inst->m_srcs[1];
-  }
-
-  static IRInstruction makeTypeParamInst(Opcode op,
-                                         Type::Tag typeParam,
-                                         Type::Tag dstType,
-                                         SSATmp* src) {
-    IRInstruction ret(op, dstType, src);
-    ret.m_typeParam = typeParam;
-    return ret;
-  }
+  explicit IRInstruction(IRFactory& factory, const IRInstruction* inst);
 
   Opcode     getOpcode()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
-  Type::Tag  getType()     const       { return m_type; }
-  void       setType(Type::Tag t)      { m_type = t; }
   Type::Tag  getTypeParam() const      { return m_typeParam; }
+  void       setTypeParam(Type::Tag t) { m_typeParam = t; }
   uint32_t   getNumSrcs()  const       { return m_numSrcs; }
   void       setNumSrcs(uint32_t i)    {
     ASSERT(i <= m_numSrcs);
     m_numSrcs = i;
   }
-  uint32     getNumExtendedSrcs() const{
-    return (m_numSrcs <= NUM_FIXED_SRCS ? 0 : m_numSrcs - NUM_FIXED_SRCS);
-  }
   SSATmp*    getSrc(uint32 i) const;
   void       setSrc(uint32 i, SSATmp* newSrc);
+  void       appendSrc(IRFactory&, SSATmp*);
   SSATmp*    getDst()      const       { return m_dst; }
   void       setDst(SSATmp* newDst)    { m_dst = newDst; }
   TCA        getTCA()      const       { return m_tca; }
   void       setTCA(TCA    newTCA)     { m_tca = newTCA; }
+
+  /*
+   * An instruction's 'id' has different meanings depending on the
+   * compilation phase.
+   */
   uint32     getId()       const       { return m_id; }
   void       setId(uint32 newId)       { m_id = newId; }
+
   void       setAsmAddr(void* addr)    { m_asmAddr = addr; }
   void*      getAsmAddr() const        { return m_asmAddr; }
   RegSet     getLiveOutRegs() const    { return m_liveOutRegs; }
@@ -815,16 +766,10 @@ public:
 
   virtual bool isConstInstruction() const { return false; }
   virtual bool equals(IRInstruction* inst) const;
-  virtual uint32 hash();
+  virtual size_t hash() const;
+  virtual IRInstruction* clone(IRFactory* factory) const;
   virtual void print(std::ostream& ostream);
   void print();
-  virtual IRInstruction* clone(IRFactory* factory);
-  typedef std::list<IRInstruction*> List;
-  typedef std::list<IRInstruction*>::iterator Iterator;
-  typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
-
-  virtual SSATmp* getExtendedSrc(uint32 i) const;
-  virtual void    setExtendedSrc(uint32 i, SSATmp* newSrc);
 
   /*
    * Helper accessors for the OpcodeFlag bits for this instruction.
@@ -856,30 +801,11 @@ private:
 
 private:
   Opcode            m_op;
-  Type::Tag         m_type;    // destination type; TODO: move to SSATmp
-
-  /*
-   * XXX: right now types of the dst SSATmp are in m_type above--we
-   * want to move them to be a property of the SSATmp.
-   *
-   * In the case of IsType instructions, we need some storage for an
-   * extra type, because m_type is set to Type::Bool for the dst.
-   * TODO: other type-parameterized instructions (Guard, etc) should
-   * use m_typeParam.
-   */
-  Type::Tag         m_typeParam;
-
-  /*
-   * An instruction's 'id' has different meanings depending on the
-   * compilation phase.
-   */
   uint32            m_id;
-
-protected: // XXX: For ExtendedInstruction
   uint16            m_numSrcs;
-private:
+  Type::Tag         m_typeParam;
+  SSATmp**          m_srcs;
   RegSet            m_liveOutRegs;
-  SSATmp*           m_srcs[NUM_FIXED_SRCS];
   SSATmp*           m_dst;
   void*             m_asmAddr;
   LabelInstruction* m_label;
@@ -887,154 +813,105 @@ private:
   TCA               m_tca;
 };
 
-class ExtendedInstruction : public IRInstruction {
-public:
-  ExtendedInstruction(IRFactory& irFactory,
-                      Opcode o,
-                      Type::Tag t,
-                      SSATmp* src1,
-                      SSATmp* src2,
-                      uint32 nOpnds,
-                      SSATmp** opnds,
-                      LabelInstruction* l = NULL)
-      : IRInstruction(o, t, src1, src2, l) {
-    initExtendedSrcs(irFactory, nOpnds, opnds);
-  }
-
-  ExtendedInstruction(IRFactory& irFactory,
-                      Opcode o,
-                      Type::Tag t,
-                      SSATmp* src1,
-                      SSATmp* src2,
-                      SSATmp* src3,
-                      uint32 nOpnds,
-                      SSATmp** opnds,
-                      LabelInstruction* l = NULL)
-      : IRInstruction(o, t, src1, src2, l) {
-    initExtendedSrcs(irFactory, src3, nOpnds, opnds);
-  }
-
-  ExtendedInstruction(IRFactory& irFactory,
-                      ExtendedInstruction* inst)
-    : IRInstruction(inst)
-  {
-    if (m_numSrcs < NUM_FIXED_SRCS) {
-      return;
-    }
-    uint32 nOpnds = m_numSrcs - NUM_FIXED_SRCS;
-    m_numSrcs = NUM_FIXED_SRCS; // will be incremented in initExtendedSrcs
-    // Only operands after NUM_FIXED_SRCS are kept in inst->extendedSrcs
-    initExtendedSrcs(irFactory, nOpnds, inst->m_extendedSrcs);
-  }
-
-  virtual IRInstruction* clone(IRFactory* factory);
-
-  virtual SSATmp* getExtendedSrc(uint32 i) const;
-  virtual void    setExtendedSrc(uint32 i, SSATmp* newSrc);
-  void appendExtendedSrc(IRFactory& irFactory, SSATmp* src);
-
-  virtual SSATmp** getExtendedSrcs() { return m_extendedSrcs; }
-
-private:
-  void initExtendedSrcs(IRFactory&, uint32 nOpnds, SSATmp** opnds);
-  void initExtendedSrcs(IRFactory&, SSATmp* src, uint32 nOpnds,
-                        SSATmp** opnds);
-
-
-  SSATmp** m_extendedSrcs;
-};
-
 class ConstInstruction : public IRInstruction {
 public:
-  ConstInstruction(Opcode opc, Type::Tag t) : IRInstruction(opc, t) {
+  ConstInstruction(Opcode opc, Type::Tag t) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(t);
     m_intVal = 0;
   }
-  ConstInstruction(Opcode opc, int64 val) : IRInstruction(opc, Type::Int) {
+  ConstInstruction(Opcode opc, int64 val) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::Int);
     m_intVal = val;
   }
-  ConstInstruction(Opcode opc, double val) : IRInstruction(opc, Type::Dbl) {
+  ConstInstruction(Opcode opc, double val) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::Dbl);
     m_dblVal = val;
   }
-  ConstInstruction(Opcode opc, const StringData* val)
-      : IRInstruction(opc, Type::StaticStr) {
+  ConstInstruction(Opcode opc, const StringData* val) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::StaticStr);
     m_strVal = val;
   }
-  ConstInstruction(Opcode opc, const ArrayData* val)
-      : IRInstruction(opc, Type::Arr) {
+  ConstInstruction(Opcode opc, const ArrayData* val) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::Arr);
     m_arrVal = val;
   }
-  ConstInstruction(Opcode opc, bool val) : IRInstruction(opc, Type::Bool) {
+  ConstInstruction(Opcode opc, bool val) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::Bool);
     m_intVal = 0;
     m_boolVal = val;
   }
   ConstInstruction(SSATmp* src, Local l)
-      : IRInstruction(LdHome, Type::Home, src) {
+    : IRInstruction(LdHome, 1, &src)
+  {
+    setTypeParam(Type::Home);
     new (&m_local) Local(l);
   }
-  ConstInstruction(Opcode opc, const Func* f)
-      : IRInstruction(opc, Type::FuncPtr) {
+  ConstInstruction(Opcode opc, const Func* f) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::FuncPtr);
     m_func = f;
   }
-  ConstInstruction(Opcode opc, const Class* f)
-    : IRInstruction(opc, Type::ClassPtr) {
+  ConstInstruction(Opcode opc, const Class* f) : IRInstruction(opc) {
     ASSERT(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::ClassPtr);
     m_clss = f;
   }
-  explicit ConstInstruction(ConstInstruction* inst)
-      : IRInstruction(inst), m_strVal(inst->m_strVal) {
-  }
+  explicit ConstInstruction(IRFactory& factory,
+                            const ConstInstruction* inst)
+    : IRInstruction(factory, inst)
+    , m_strVal(inst->m_strVal)
+  {}
 
   bool getValAsBool() const {
-    ASSERT(getType() == Type::Bool);
+    ASSERT(getTypeParam() == Type::Bool);
     return m_boolVal;
   }
   int64 getValAsInt() const {
-    ASSERT(getType() == Type::Int);
+    ASSERT(getTypeParam() == Type::Int);
     return m_intVal;
   }
   int64 getValAsRawInt() const {
     return m_intVal;
   }
   double getValAsDbl() const {
-    ASSERT(getType() == Type::Dbl);
+    ASSERT(getTypeParam() == Type::Dbl);
     return m_dblVal;
   }
   const StringData* getValAsStr() const {
-    ASSERT(getType() == Type::StaticStr);
+    ASSERT(getTypeParam() == Type::StaticStr);
     return m_strVal;
   }
   const ArrayData* getValAsArr() const {
-    ASSERT(getType() == Type::Arr);
+    ASSERT(getTypeParam() == Type::Arr);
     return m_arrVal;
   }
   const Func* getValAsFunc() const {
-    ASSERT(getType() == Type::FuncPtr);
+    ASSERT(getTypeParam() == Type::FuncPtr);
     return m_func;
   }
   const Class* getValAsClass() const {
-    ASSERT(getType() == Type::ClassPtr);
+    ASSERT(getTypeParam() == Type::ClassPtr);
     return m_clss;
   }
   const VarEnv* getValAsVarEnv() const {
-    ASSERT(getType() == Type::VarEnvPtr);
+    ASSERT(getTypeParam() == Type::VarEnvPtr);
     return m_varEnv;
   }
   TCA getValAsTCA() const {
-    ASSERT(getType() == Type::TCA);
+    ASSERT(getTypeParam() == Type::TCA);
     return m_tca;
   }
   bool isEmptyArray() const {
     return m_arrVal == HphpArray::GetStaticEmptyArray();
   }
   Local getLocal() const {
-    ASSERT(getType() == Type::Home);
+    ASSERT(getTypeParam() == Type::Home);
     return m_local;
   }
   uintptr_t getValAsBits() const { return m_bits; }
@@ -1043,8 +920,8 @@ public:
   virtual bool isConstInstruction() const {return true;}
   virtual void print(std::ostream& ostream);
   virtual bool equals(IRInstruction* inst) const;
-  virtual uint32 hash();
-  virtual IRInstruction* clone(IRFactory* factory);
+  virtual size_t hash() const;
+  virtual IRInstruction* clone(IRFactory* factory) const;
 
 private:
   union {
@@ -1065,7 +942,7 @@ private:
 class LabelInstruction : public IRInstruction {
 public:
   explicit LabelInstruction(uint32 id)
-    : IRInstruction(DefLabel, Type::None)
+    : IRInstruction(DefLabel)
     , m_labelId(id)
     , m_stackOff(0)
     , m_patchAddr(0)
@@ -1073,20 +950,20 @@ public:
   {}
 
   LabelInstruction(Opcode opc, uint32 bcOff, const Func* f, int32 spOff)
-      : IRInstruction(opc,Type::None),
-        m_labelId(bcOff),
-        m_stackOff(spOff),
-        m_patchAddr(0),
-        m_func(f) {
-  }
+    : IRInstruction(opc)
+    , m_labelId(bcOff)
+    , m_stackOff(spOff)
+    , m_patchAddr(0)
+    , m_func(f)
+  {}
 
-  explicit LabelInstruction(LabelInstruction* inst)
-      : IRInstruction(inst),
-        m_labelId(inst->m_labelId),
-        m_stackOff(inst->m_stackOff),
-        m_patchAddr(0),
-        m_func(inst->m_func) { // copies func also
-  }
+  explicit LabelInstruction(IRFactory& factory, const LabelInstruction* inst)
+    : IRInstruction(factory, inst)
+    , m_labelId(inst->m_labelId)
+    , m_stackOff(inst->m_stackOff)
+    , m_patchAddr(0)
+    , m_func(inst->m_func)
+  {}
 
   uint32      getLabelId() const  { return m_labelId; }
   int32       getStackOff() const { return m_stackOff; }
@@ -1094,8 +971,8 @@ public:
 
   virtual void print(std::ostream& ostream);
   virtual bool equals(IRInstruction* inst) const;
-  virtual uint32 hash();
-  virtual IRInstruction* clone(IRFactory* factory);
+  virtual size_t hash() const;
+  virtual IRInstruction* clone(IRFactory* factory) const;
 
   void    prependPatchAddr(TCA addr);
   void*   getPatchAddr();
@@ -1108,6 +985,19 @@ private:
   void*  m_patchAddr; // Support patching forward jumps
   const  Func* m_func; // for Marker instructions
 };
+
+/*
+ * Return the output type from a given IRInstruction.
+ *
+ * The destination type is always predictable from the types of the
+ * inputs and any type parameters to the instruction.
+ */
+Type::Tag outputType(const IRInstruction*);
+
+/*
+ * Assert that an instruction has operands of allowed types.
+ */
+void assertOperandTypes(const IRInstruction*);
 
 struct SpillInfo {
   enum Type { MMX, Memory };
@@ -1141,10 +1031,7 @@ public:
   uint32            getId() const { return m_id; }
   IRInstruction*    getInstruction() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
-  Type::Tag         getType() const {
-    ASSERT(m_inst->getType() == m_type); // until we decouple them.
-    return m_type;
-  }
+  Type::Tag         getType() const { return m_type; }
   void              setType(Type::Tag t) { m_type = t; }
   uint32            getLastUseId() { return m_lastUseId; }
   void              setLastUseId(uint32 newId) { m_lastUseId = newId; }
@@ -1237,7 +1124,7 @@ private:
   SSATmp(uint32 opndId, IRInstruction* i)
     : m_inst(i)
     , m_id(opndId)
-    , m_type(i->getType())
+    , m_type(outputType(i))
     , m_lastUseId(0)
     , m_useCount(0)
     , m_isSpilled(false)
@@ -1351,7 +1238,7 @@ int getLocalIdFromHomeOpnd(SSATmp* srcHome);
 
 static inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
   if (!(instr->getOpcode() == Conv &&
-        instr->getType() == Type::Bool)) {
+        instr->getTypeParam() == Type::Bool)) {
     return false;
   }
 

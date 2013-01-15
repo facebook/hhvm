@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __HHIR_OPT_H__
-#define __HHIR_OPT_H__
+#ifndef incl_HHIR_OPT_H__
+#define incl_HHIR_OPT_H__
 
 
 namespace HPHP {
@@ -33,4 +33,4 @@ void insertRefCountAsserts(Trace* trace, IRFactory* factory);
 } } }
 
 
-#endif // __HHIR_OPT_H__
+#endif

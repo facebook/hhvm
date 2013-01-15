@@ -945,7 +945,7 @@ SSATmp* Simplifier::simplifyUnbox(Type::Tag type, SSATmp* src,
     if (Type::isMoreRefined(srcType, type)) {
       type = srcType;
     }
-    return m_tb->genLdRef(src, type, typeFailLabel->getTrace());
+    return m_tb->genLdRef(src, type, typeFailLabel->getParent());
   }
   return NULL;
 }

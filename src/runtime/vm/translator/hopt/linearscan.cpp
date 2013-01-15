@@ -251,7 +251,7 @@ RegSet LinearScan::computeLiveOutRegs(Trace* trace, RegSet liveOutRegs) {
       // that linear scan does
       LabelInstruction* label = inst->getLabel();
       if (label != NULL && label->getId() == inst->getId() + 1) {
-        liveOutRegs = LinearScan::computeLiveOutRegs(label->getTrace(), liveOutRegs);
+        liveOutRegs = LinearScan::computeLiveOutRegs(label->getParent(), liveOutRegs);
       }
     }
   }
@@ -516,7 +516,7 @@ uint32 LinearScan::assignSpillLocAux(Trace* trace,
     if (inst->isControlFlowInstruction()) {
       LabelInstruction* label = inst->getLabel();
       if (label != NULL && label->getId() == inst->getId() + 1) {
-        nextSpillLoc = assignSpillLocAux(label->getTrace(),
+        nextSpillLoc = assignSpillLocAux(label->getParent(),
                                          nextSpillLoc,
                                          nextMmxReg);
       }
@@ -588,7 +588,7 @@ void LinearScan::collectNativesAux(Trace* trace) {
     if (inst->isControlFlowInstruction()) {
       LabelInstruction* label = inst->getLabel();
       if (label != NULL && label->getId() == inst->getId() + 1) {
-        collectNativesAux(label->getTrace());
+        collectNativesAux(label->getParent());
       }
     }
   }
@@ -874,7 +874,7 @@ void LinearScan::allocRegsToTraceAux(Trace* trace) {
       // trace, effectively linearizing the target trace after inst.
       LabelInstruction* label = inst->getLabel();
       if (label != NULL && label->getId() == inst->getId() + 1) {
-        allocRegsToTraceAux(label->getTrace());
+        allocRegsToTraceAux(label->getParent());
       }
     }
   }
@@ -993,7 +993,7 @@ void LinearScan::rematerializeAux(Trace* trace,
     if (inst->isControlFlowInstruction()) {
       LabelInstruction* label = inst->getLabel();
       if (label != NULL && label->getId() == inst->getId() + 1) {
-        rematerializeAux(label->getTrace(), curSp, curFp, localValues);
+        rematerializeAux(label->getParent(), curSp, curFp, localValues);
       }
     }
   }

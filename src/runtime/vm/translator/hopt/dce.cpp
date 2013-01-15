@@ -211,7 +211,7 @@ void sinkIncRefs(Trace* trace,
         }
       }
       if (LabelInstruction* label = inst->getLabel()) {
-        Trace* exitTrace = label->getTrace();
+        Trace* exitTrace = label->getParent();
         if (!pushedTo.count(exitTrace)) {
           pushedTo.insert(exitTrace);
           sinkIncRefs(exitTrace, irFactory, toSink);
@@ -326,7 +326,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   lastInst--; // go back to the last instruction
   IRInstruction* jmpInst = *lastInst;
   if (jmpInst->getOpcode() == Jmp_) {
-    Trace* targetTrace = jmpInst->getLabel()->getTrace();
+    Trace* targetTrace = jmpInst->getLabel()->getParent();
     IRInstruction::List& targetInstList = targetTrace->getInstructionList();
     IRInstruction::Iterator instIter = targetInstList.begin();
     instIter++; // skip over label
@@ -370,7 +370,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     }
     if (jccCanBeDirectExit(opc)) {
       SSATmp* dst = jccInst->getDst();
-      Trace* targetTrace = jccInst->getLabel()->getTrace();
+      Trace* targetTrace = jccInst->getLabel()->getParent();
       IRInstruction::List& targetInstList = targetTrace->getInstructionList();
       IRInstruction::Iterator targetInstIter = targetInstList.begin();
       targetInstIter++; // skip over label
@@ -424,7 +424,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
         LabelInstruction* exitLabel = inst->getLabel();
         // Find the GuardFailure's label and confirm this branches there
         if (guardLabel == NULL) {
-          Trace* exitTrace = exitLabel->getTrace();
+          Trace* exitTrace = exitLabel->getParent();
           IRInstruction::List& xList = exitTrace->getInstructionList();
           IRInstruction::Iterator instIter = xList.begin();
           instIter++; // skip over label

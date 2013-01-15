@@ -738,7 +738,7 @@ void MemMap::sinkStores(StoreList& stores) {
         factory->getSSATmp(clone);
       }
 
-      guard->getLabel()->getTrace()->prependInstruction(clone);
+      guard->getLabel()->getParent()->prependInstruction(clone);
     }
 
     // StRefs cannot just be removed, they have to be converted into Movs

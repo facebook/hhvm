@@ -1043,7 +1043,7 @@ public:
     , m_labelId(id)
     , m_stackOff(0)
     , m_patchAddr(0)
-    , m_trace(NULL)
+    , m_func(NULL)
   {}
 
   LabelInstruction(Opcode opc, uint32 bcOff, const Func* f, int32 spOff)
@@ -1059,11 +1059,9 @@ public:
         m_labelId(inst->m_labelId),
         m_stackOff(inst->m_stackOff),
         m_patchAddr(0),
-        m_trace(inst->m_trace) { // copies func also
+        m_func(inst->m_func) { // copies func also
   }
 
-  Trace*      getTrace() const    { return m_trace; }
-  void        setTrace(Trace* t)  { m_trace = t; }
   uint32      getLabelId() const  { return m_labelId; }
   int32       getStackOff() const { return m_stackOff; }
   const Func* getFunc() const     { return m_func; }
@@ -1082,10 +1080,7 @@ private:
   uint32 m_labelId;  // for Marker instructions: the bytecode offset in unit
   int32  m_stackOff; // for Marker instructions: stack off from start of trace
   void*  m_patchAddr; // Support patching forward jumps
-  union {
-    Trace* m_trace;     // for DefLabel instructions
-    const Func* m_func; // for Marker instructions
-  };
+  const  Func* m_func; // for Marker instructions
 };
 
 struct SpillInfo {
@@ -1252,7 +1247,6 @@ class Trace : boost::noncopyable {
 public:
   explicit Trace(LabelInstruction* label, uint32 bcOff, bool isMain) {
     appendInstruction(label);
-    label->setTrace(this);
     m_bcOff = bcOff;
     m_lastAsmAddress = NULL;
     m_firstAsmAddress = NULL;

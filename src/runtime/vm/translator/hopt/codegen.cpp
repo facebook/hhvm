@@ -3901,7 +3901,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   if (label) {
     // compare the pc in the returned execution context with the
     // bytecode offset of the label
-    Trace* targetTrace = label->getTrace();
+    Trace* targetTrace = label->getParent();
     ASSERT(targetTrace);
     uint32 targetBcOff = targetTrace->getBcOff();
     // compare the pc with the target bc offset

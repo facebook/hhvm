@@ -826,7 +826,7 @@ uint32 numberInstructions(Trace* trace,
     if (followControlFlow && inst->isControlFlowInstruction()) {
       LabelInstruction* label = inst->getLabel();
       if (label) {
-        nextId = numberInstructions(label->getTrace(), nextId);
+        nextId = numberInstructions(label->getParent(), nextId);
       }
     }
   }

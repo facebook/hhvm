@@ -15,12 +15,6 @@
 */
 
 #include <runtime/base/file/file.h>
-#include <runtime/base/file/plain_file.h>
-#include <runtime/base/file/temp_file.h>
-#include <runtime/base/file/output_file.h>
-#include <runtime/base/file/zip_file.h>
-#include <runtime/base/file/mem_file.h>
-#include <runtime/base/file/url_file.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/type_conversions.h>
@@ -36,8 +30,8 @@
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/util/exceptions.h>
 #include <sys/file.h>
-#include <runtime/base/string_util.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/file/stream_wrapper_registry.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,170 +115,13 @@ bool File::IsPlainFilePath(CStrRef filename) {
 
 Variant File::Open(CStrRef filename, CStrRef mode,
                    CArrRef options /* = null_array */) {
-  Object ret = OpenImpl(filename, mode, options);
-  if (!ret.isNull()) {
-    File *file = ret.getTyped<File>();
+  File *file = Stream::open(filename, mode, options);
+  if (file != NULL) {
     file->m_name = filename.data();
     file->m_mode = mode.data();
-    return ret;
+    return Object(file);
   }
   return false;
-}
-
-Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
-  static const char http_prefix[] = "http://";
-  static const char https_prefix[] = "https://";
-  static const char zlib_prefix[] = "compress.zlib://";
-
-  if (!strncasecmp(filename.c_str(), "php://", 6)) {
-    if (!strcasecmp(filename.c_str(), "php://stdin")) {
-      return Object(NEWOBJ(PlainFile)(dup(STDIN_FILENO), true));
-    }
-    if (!strcasecmp(filename.c_str(), "php://stdout")) {
-      return Object(NEWOBJ(PlainFile)(dup(STDOUT_FILENO), true));
-    }
-    if (!strcasecmp(filename.c_str(), "php://stderr")) {
-      return Object(NEWOBJ(PlainFile)(dup(STDERR_FILENO), true));
-    }
-    if (!strncasecmp(filename.c_str(), "php://fd/",
-                                sizeof("php://fd/") - 1)) {
-      if (!RuntimeOption::clientExecutionMode()) {
-        raise_warning("Direct access to file descriptors "
-                      "is only available from command-line");
-        return Object();
-      }
-
-      const char *sFD = filename.c_str() + sizeof("php://fd/") - 1;
-      char *end = NULL;
-      long nFD = strtol(sFD, &end, 10);
-      if ((sFD == end) || (*end != '\0')) {
-        raise_warning("php://fd/ stream must be specified in the form "
-                      "php://fd/<orig fd>");
-        return Object();
-      }
-
-      long dtablesize = getdtablesize();
-      if ((nFD < 0) || (nFD >= dtablesize)) {
-        raise_warning("The file descriptors must be non-negative numbers "
-                      "smaller than %ld", dtablesize);
-        return Object();
-      }
-
-      return Object(NEWOBJ(PlainFile)(dup(nFD), true));
-    }
-
-    if (!strncasecmp(filename.c_str(), "php://temp", 10) ||
-        !strcasecmp(filename.c_str(), "php://memory")) {
-      TempFile *file = NEWOBJ(TempFile)();
-      if (!file->valid()) {
-        raise_warning("Unable to create temporary file");
-        return Object();
-      }
-      return Object(file);
-    }
-
-    if (!strcasecmp(filename.c_str(), "php://input")) {
-      Transport *transport = g_context->getTransport();
-      if (transport) {
-        int size = 0;
-        const void *data = transport->getPostData(size);
-        if (data && size) {
-          return Object(NEWOBJ(MemFile)((const char *)data, size));
-        }
-      }
-      return Object(NEWOBJ(MemFile)(NULL, 0));
-    }
-
-    if (!strcasecmp(filename.c_str(), "php://output")) {
-      return Object(NEWOBJ(OutputFile)(filename));
-    }
-
-    raise_warning("Unable to open file %s", filename.c_str());
-    return Object();
-  }
-
-  if (!RuntimeOption::ServerHttpSafeMode) {
-    if (!strncmp(filename.data(), http_prefix, sizeof(http_prefix) - 1) ||
-        !strncmp(filename.data(), https_prefix, sizeof(https_prefix) - 1)) {
-      UrlFile *file;
-      if (options.isNull()) {
-        file = NEWOBJ(UrlFile)();
-      } else {
-        Array opts = options["http"];
-        String method = "GET";
-        if (opts.exists("method")) {
-          method = opts["method"].toString();
-        }
-        Array headers;
-        if (opts.exists("header")) {
-          Array lines = StringUtil::Explode(opts["header"].toString(), "\r\n");
-          for (ArrayIter it(lines); it; ++it) {
-            Array parts = StringUtil::Explode(it.second().toString(), ": ");
-            headers.set(parts.rvalAt(0), parts.rvalAt(1));
-          }
-          if (opts.exists("user_agent") && !headers.exists("User-Agent")) {
-            headers.set("User_Agent", opts["user_agent"]);
-          }
-        }
-        int max_redirs = 20;
-        if (opts.exists("max_redirects")) max_redirs = opts["max_redirects"];
-        int timeout = -1;
-        if (opts.exists("timeout")) timeout = opts["timeout"];
-        file = NEWOBJ(UrlFile)(method.data(), headers,
-                               opts["content"].toString(), max_redirs, timeout);
-      }
-      Object obj(file);
-      bool ret = file->open(filename, mode);
-      if (!ret) {
-        raise_warning("Failed to open %s (%s)", filename.data(),
-                      file->getLastError().c_str());
-        return Object();
-      }
-      return obj;
-    }
-  }
-
-  bool gzipped = false;
-  String name = filename;
-  if (!strncmp(filename.data(), zlib_prefix, sizeof(zlib_prefix) - 1)) {
-    name = filename.substr(sizeof(zlib_prefix) - 1);
-    gzipped = true;
-  }
-
-  // try to read from the file cache first
-  if (StaticContentCache::TheFileCache) {
-    string relative =
-      FileCache::GetRelativePath(File::TranslatePath(name).c_str());
-    MemFile *file = NEWOBJ(MemFile)();
-    Object obj(file);
-    bool ret = file->open(relative, mode);
-    if (ret) {
-      if (gzipped) {
-        file->unzip();
-      }
-      return obj;
-    }
-  }
-
-  if (gzipped) {
-    ZipFile *file = NEWOBJ(ZipFile)();
-    Object obj(file);
-    bool ret = file->open(File::TranslatePath(name), mode);
-    if (!ret) {
-      raise_warning("%s", file->getLastError().c_str());
-      return Object();
-    }
-    return obj;
-  }
-
-  PlainFile *file = NEWOBJ(PlainFile)();
-  Object obj(file);
-  bool ret = file->open(File::TranslatePath(name), mode);
-  if (!ret) {
-    raise_warning("%s", file->getLastError().c_str());
-    return Object();
-  }
-  return obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

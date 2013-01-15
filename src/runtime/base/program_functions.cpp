@@ -54,6 +54,7 @@
 #include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/base/util/simple_counter.h>
 #include <runtime/base/util/extended_logger.h>
+#include <runtime/base/file/stream_wrapper_registry.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -1198,6 +1199,7 @@ void hphp_process_init() {
 
   PageletServer::Restart();
   XboxServer::Restart();
+  Stream::RegisterCoreWrappers();
   Extension::InitModules();
   int64 save = RuntimeOption::SerializationSizeLimit;
   RuntimeOption::SerializationSizeLimit = StringData::MaxSize;

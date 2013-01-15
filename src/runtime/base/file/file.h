@@ -168,7 +168,6 @@ protected:
   std::string m_name;
   std::string m_mode;
 
-  static Object OpenImpl(CStrRef filename, CStrRef mode, CArrRef options);
   void closeImpl();
 
 private:

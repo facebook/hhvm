@@ -16,7 +16,12 @@
 */
 
 #include <runtime/ext/ext_zlib.h>
+#include <runtime/base/file/file.h>
+#include <runtime/base/file/mem_file.h>
 #include <runtime/base/file/zip_file.h>
+#include <runtime/base/file/stream_wrapper.h>
+#include <runtime/base/file/stream_wrapper_registry.h>
+#include <runtime/base/file/file_stream_wrapper.h>
 #include <util/compression.h>
 #include <util/logger.h>
 #ifdef HAVE_SNAPPY
@@ -24,11 +29,61 @@
 #endif
 #include <lz4.h>
 #include <lz4hc.h>
+#include <memory>
 
 #define PHP_ZLIB_MODIFIER 1000
 
+using namespace HPHP;
+
+namespace {
+
+///////////////////////////////////////////////////////////////////////////////
+// compress.zlib:// stream wrapper
+
+static class ZlibStreamWrapper : public Stream::Wrapper {
+ public:
+  virtual File* open(CStrRef filename, CStrRef mode, CArrRef options) {
+    String fname;
+    static const char cz[] = "compress.zlib://";
+
+    if (!strncmp(filename.data(), "zlib:", sizeof("zlib:") - 1)) {
+      fname = filename.substr(sizeof("zlib:") - 1);
+    } else if (!strncmp(filename.data(), cz, sizeof(cz) - 1)) {
+      fname = filename.substr(sizeof(cz) - 1);
+    } else {
+      return NULL;
+    }
+
+    if (MemFile* file = FileStreamWrapper::openFromCache(fname, mode)) {
+      file->unzip();
+      return file;
+    }
+
+    std::unique_ptr<ZipFile> file(NEWOBJ(ZipFile)());
+    bool ret = file->open(File::TranslatePath(fname), mode);
+    if (!ret) {
+      raise_warning("%s", file->getLastError().c_str());
+      return NULL;
+    }
+    return file.release();
+  }
+} s_zlib_stream_wrapper;
+
+///////////////////////////////////////////////////////////////////////////////
+// Extension entry point
+
+static class ZlibExtension : Extension {
+ public:
+  ZlibExtension() : Extension("zlib") {}
+  virtual void moduleLoad(Hdf hdf) {
+    s_zlib_stream_wrapper.registerAs("compress.zlib");
+  }
+} s_zlib_extension;
+
+} // nil namespace
+
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(zlib);
+
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions
 

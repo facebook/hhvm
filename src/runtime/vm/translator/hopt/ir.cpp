@@ -670,7 +670,8 @@ static const xed_syntax_enum_t s_xed_syntax =
 void printInstructions(xed_uint8_t* codeStartAddr,
                        xed_uint8_t* codeEndAddr,
                        bool printAddr,
-                       int indentLevel) {
+                       int indentLevel,
+                       std::ostream& os) {
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
   xed_decoded_inst_t xedd;
@@ -691,19 +692,24 @@ void printInstructions(xed_uint8_t* codeStartAddr,
       error("disasm error: xed_format_context failed");
     }
 
-    for (int i = 0; i < indentLevel; ++i) fputc(' ', stdout);
-    if (printAddr) printf("0x%08llx: ", ip);
+    for (int i = 0; i < indentLevel; ++i) {
+      os << ' ';
+    }
+    if (printAddr) {
+      os << folly::format("{:#10x}: ", ip);
+    }
     uint32 instrLen = xed_decoded_inst_get_length(&xedd);
-    if (false) { // print encoding, like in objdump
+    if (RuntimeOption::EvalDumpIR > 5) {
+      // print encoding, like in objdump
       unsigned posi = 0;
       for (; posi < instrLen; ++posi) {
-        printf("%02x ", (uint8_t)frontier[posi]);
+        os << folly::format("{:02x} ", (uint8_t)frontier[posi]);
       }
       for (; posi < 16; ++posi) {
-        printf("   ");
+        os << "   ";
       }
     }
-    printf("%s\n", codeStr);
+    os << codeStr << "\n";;
     frontier += instrLen;
     ip       += instrLen;
 
@@ -719,9 +725,6 @@ void Trace::print(std::ostream& os, bool printAsm,
                  XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
   xed_tables_init();
 #endif
-
-  // printInstructions doesn't know how to print to other streams yet
-  ASSERT(&os == &std::cout);
 
   auto it = begin(m_instructionList);
   while (it != end(m_instructionList)) {
@@ -775,7 +778,7 @@ void Trace::print(std::ostream& os, bool printAsm,
       // print out the assembly
       os << '\n';
 #ifdef DEBUG
-      printInstructions(asmAddr, endAsm, true, 14);
+      printInstructions(asmAddr, endAsm, true, 14, os);
       os << '\n';
 #endif
     }
@@ -795,7 +798,8 @@ void Trace::print(std::ostream& os, bool printAsm,
         printInstructions(m_firstAstubsAddress,
                           exitTrace->m_firstAsmAddress,
                           true,
-                          14);
+                          14,
+                          os);
 #endif
         os << '\n';
       }

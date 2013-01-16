@@ -1646,14 +1646,15 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   ASSERT(m_useHHIR);
 
   JIT::Trace* trace = m_hhbcTrans->getTrace();
+  std::ostream& os = std::cout;
 
   auto banner = [&] (const char* s) {
-    std::cout << folly::format("{:-^40}\n", s);
+    os << folly::format("{:-^40}\n", s);
   };
 
   if (RuntimeOption::EvalDumpIR) {
     banner(" HHIR before code gen ");
-    trace->print(std::cout, false);
+    trace->print(os, false);
     banner("");
   }
 
@@ -1661,7 +1662,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 
   if (RuntimeOption::EvalDumpIR > 1) {
     banner(" HHIR after optimizing ");
-    trace->print(std::cout, false);
+    trace->print(os, false);
     banner("");
   }
 
@@ -1669,7 +1670,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 
   if (RuntimeOption::EvalDumpIR) {
     banner(" HHIR after reg alloc ");
-    trace->print(std::cout, false);
+    trace->print(os, false);
     banner("");
   }
 
@@ -1677,7 +1678,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 
   if (RuntimeOption::EvalDumpIR) {
     banner(" HHIR after code gen ");
-    trace->print(std::cout, true);
+    trace->print(os, true);
     banner("");
   }
 

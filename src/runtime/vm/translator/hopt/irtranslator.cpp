@@ -14,29 +14,18 @@
    +----------------------------------------------------------------------+
 */
 #include <stdint.h>
-#include <assert.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <strstream>
-#include <stdio.h>
-#include <stdarg.h>
 #include <strings.h>
-#include <string>
-#include <queue>
-#include <zlib.h>
-#include <unwind.h>
 
 #include "folly/Format.h"
-#include "folly/ScopeGuard.h"
+#include "util/trace.h"
 
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/runtime.h"
 #include "runtime/base/complex_types.h"
-#include "runtime/base/execution_context.h"
-#include "runtime/base/strings.h"
-#include "runtime/base/zend/zend_string.h"
 #include "runtime/base/runtime_option.h"
-#include "runtime/base/server/source_root_info.h"
+#include "runtime/vm/translator/targetcache.h"
+#include "runtime/vm/translator/translator-deps.h"
+#include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/stats.h"
 

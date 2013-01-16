@@ -23,7 +23,6 @@
 #include <strings.h>
 #include <string>
 #include <queue>
-#include <zlib.h>
 #include <unwind.h>
 
 #ifdef __FreeBSD__
@@ -61,15 +60,12 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/debug/debug.h"
 #include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/log.h"
 #include "runtime/vm/translator/translator-deps.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/translator/srcdb.h"
 #include "runtime/vm/translator/x64-util.h"
 #include "runtime/vm/translator/unwind-x64.h"
-#include "runtime/vm/pendq.h"
-#include "runtime/vm/treadmill.h"
 #include "runtime/vm/stats.h"
 #include "runtime/vm/pendq.h"
 #include "runtime/vm/treadmill.h"

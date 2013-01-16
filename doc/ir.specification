@@ -406,8 +406,17 @@ LdClsPropAddr
 LdObjMethod
 LdObjClass
 LdCachedClass
-LdFunc
-LdFixedFunc
+
+d:FuncPtr = LdFunc s0:Str
+
+  Loads the Func* whose name is s0. Fatal if the named function is not defined,
+  and the function autoloader fails to define it.
+
+d:FuncPtr = LdFixedFunc s0:ConstStr
+
+  Loads the Func* whose name is s0. Fatal if the named function is not defined,
+  and the function autoloader fails to define it.
+
 LdCurFuncPtr
 
 d:Func& = LdARFuncPtr s0:Ptr s1:ConstInt

@@ -171,8 +171,6 @@ public:
                               Trace* slowPathExit);
   SSATmp* genLdObjMethod(const StringData* methodName, SSATmp* obj);
   SSATmp* genLdObjClass(SSATmp* obj);
-  SSATmp* genLdFunc(SSATmp* funcName, SSATmp* actRec);
-  SSATmp* genLdFixedFunc(const StringData* funcName, SSATmp* actRec);
   SSATmp* genCall(SSATmp* actRec,
                   uint32 returnBcOffset,
                   SSATmp* func,

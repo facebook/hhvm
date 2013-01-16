@@ -1136,15 +1136,16 @@ void HhbcTranslator::emitFPushFuncD(int32 numParams, int32 funcId) {
   if (func->isNameBindingImmutable(getCurUnit())) {
     // func can't change
     m_fpiStack.push(m_tb->genAllocActRec(func,
-                                        m_tb->genDefNull(),
-                                        numParams,
-                                        NULL));
-  } else {
-    SSATmp* actRec = m_tb->genAllocActRec(m_tb->genDefNull(),
                                          m_tb->genDefNull(),
                                          numParams,
-                                         NULL);
-    m_fpiStack.push(m_tb->genLdFixedFunc(name, actRec));
+                                         NULL));
+  } else {
+    SSATmp* lookedUpFunc = m_tb->gen(LdFixedFunc, m_tb->genDefConst(name));
+    m_fpiStack.push(lookedUpFunc);
+    m_tb->genAllocActRec(lookedUpFunc,
+                         m_tb->genDefNull(),
+                         numParams,
+                         NULL);
   }
 }
 
@@ -1157,11 +1158,12 @@ void HhbcTranslator::emitFPushFunc(int32 numParams) {
     PUNT(FPushFunc_not_Str);
   }
   spillStack();
-  SSATmp* actRec = m_tb->genAllocActRec(m_tb->genDefNull(),
-                                       m_tb->genDefNull(),
-                                       numParams,
-                                       NULL);
-  m_fpiStack.push(m_tb->genLdFunc(funcName, actRec));
+  SSATmp* func = m_tb->gen(LdFunc, funcName);
+  m_fpiStack.push(func);
+  SSATmp* actRec = m_tb->genAllocActRec(func,
+                                        m_tb->genDefNull(),
+                                        numParams,
+                                        NULL);
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32 numParams,

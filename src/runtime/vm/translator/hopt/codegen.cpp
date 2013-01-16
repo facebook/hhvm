@@ -1245,7 +1245,6 @@ void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   // and generate different code here.
   SSATmp* dst   = inst->getDst();
   SSATmp* methodName = inst->getSrc(0);
-  SSATmp* actRec     = inst->getSrc(1);
 
   assert(methodName->isConst() && methodName->getType() == Type::StaticStr);
   auto dstReg = dst->getReg();
@@ -1254,8 +1253,6 @@ void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
     dstReg = rScratch;
     dst->setReg(dstReg, 0);
   }
-  auto actRecReg = actRec->getReg();
-  assert(actRecReg != InvalidReg);
   using namespace TargetCache;
   const StringData* name = methodName->getConstValAsStr();
   CacheHandle ch = allocFixedFunction(name);
@@ -1268,17 +1265,12 @@ void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupUnknownFunc,
                dst, kSyncPoint, ArgGroup().immPtr(name));
   m_astubs.jmp(m_as.code.frontier);
-  // save func ptr in actrec
-  m_as.store_reg64_disp_reg64(dstReg, AROFF(m_func), actRecReg);
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* methodName = inst->getSrc(0);
-  SSATmp* actRec     = inst->getSrc(1);
 
-  auto actRecReg = actRec->getReg();
-  assert(actRecReg != InvalidReg);
   TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
   auto dstReg = dst->getReg();
   if (dstReg == InvalidReg) {
@@ -1290,7 +1282,6 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   cgCallHelper(m_as, (TCA)FuncCache::lookup, dstReg, kSyncPoint,
                ArgGroup().imm(ch)
                          .ssa(methodName));
-  m_as.store_reg64_disp_reg64(dstReg, AROFF(m_func), actRecReg);
 }
 
 void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {

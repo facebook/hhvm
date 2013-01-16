@@ -679,16 +679,6 @@ SSATmp* TraceBuilder::genLdClsPropAddr(SSATmp* cls,
   return gen(LdClsPropAddr, cls, clsName, propName);
 }
 
-SSATmp* TraceBuilder::genLdFunc(SSATmp* funcName, SSATmp* actRec) {
-  return gen(LdFunc, funcName, actRec);
-}
-
-SSATmp* TraceBuilder::genLdFixedFunc(const StringData* funcName,
-                                     SSATmp* actRec) {
-  return gen(LdFixedFunc, genDefConst<const StringData*>(funcName),
-    actRec);
-}
-
 SSATmp* TraceBuilder::genLdClsMethod(SSATmp* cls, uint32 methodSlot) {
   return gen(LdClsMethod, cls, genDefConst<int64>(methodSlot));
 }

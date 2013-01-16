@@ -12610,6 +12610,7 @@ bool TestCodeRun::TestReflectionClasses() {
       "  var_dump($func->getName()); "
       "  var_dump($func->isInternal()); "
       "  var_dump($func->isUserDefined()); "
+      "  var_dump($func->isClosure()); "
       "  $vars = $func->getStaticVariables(); "
       "  var_dump(count($vars));"
       "  var_dump(isset($vars['a']));"

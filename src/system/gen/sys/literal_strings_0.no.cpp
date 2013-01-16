@@ -2059,6 +2059,10 @@ StaticStringProxy s_sys_ssp3aeddfcb;
 #ifndef s_sys_ss3aeddfcb
 #define s_sys_ss3aeddfcb (*(StaticString *)(&s_sys_ssp3aeddfcb))
 #endif
+StaticStringProxy s_sys_ssp3b04461b;
+#ifndef s_sys_ss3b04461b
+#define s_sys_ss3b04461b (*(StaticString *)(&s_sys_ssp3b04461b))
+#endif
 StaticStringProxy s_sys_ssp3b11235d;
 #ifndef s_sys_ss3b11235d
 #define s_sys_ss3b11235d (*(StaticString *)(&s_sys_ssp3b11235d))
@@ -2442,6 +2446,10 @@ StaticStringProxy s_sys_ssp4354761d;
 StaticStringProxy s_sys_ssp4363eb15;
 #ifndef s_sys_ss4363eb15
 #define s_sys_ss4363eb15 (*(StaticString *)(&s_sys_ssp4363eb15))
+#endif
+StaticStringProxy s_sys_ssp437c487a;
+#ifndef s_sys_ss437c487a
+#define s_sys_ss437c487a (*(StaticString *)(&s_sys_ssp437c487a))
 #endif
 StaticStringProxy s_sys_ssp43943996;
 #ifndef s_sys_ss43943996
@@ -4896,6 +4904,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp3ad6fa40, (const char *)"__getlastrequestheaders",
   (const char *)&s_sys_ssp3addc2d3, (const char *)"replaceChild",
   (const char *)&s_sys_ssp3aeddfcb, (const char *)"iterator",
+  (const char *)&s_sys_ssp3b04461b, (const char *)"is_closure",
   (const char *)&s_sys_ssp3b11235d, (const char *)"string",
   (const char *)&s_sys_ssp3b278e8f, (const char *)"SINGLE_SCRIPT_CONFUSABLE",
   (const char *)&s_sys_ssp3b7ed0be, (const char *)"__destruct",
@@ -4987,6 +4996,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp4326e23a, (const char *)"code",
   (const char *)&s_sys_ssp4354761d, (const char *)"writeElementNS",
   (const char *)&s_sys_ssp4363eb15, (const char *)"connect",
+  (const char *)&s_sys_ssp437c487a, (const char *)"isClosure",
   (const char *)&s_sys_ssp43943996, (const char *)"getOption",
   (const char *)&s_sys_ssp43c6fac8, (const char *)"headerfault",
   (const char *)&s_sys_ssp43d178ad, (const char *)"uasort",
@@ -5482,7 +5492,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp6fd67d3d, (const char *)"\000*\000file", (const char *)7LL,
   (const char *)&s_sys_ssp7c4bb61c, (const char *)"\000SplObjectStorage\000storage", (const char *)25LL,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1047, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1049, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0514b8b1, (const char *)&s_sys_ss0514b8b1,

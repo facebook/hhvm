@@ -45,6 +45,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   public: Variant t_getname();
   public: bool t_isinternal();
   public: Variant t_getclosure();
+  public: bool t_isclosure();
   public: bool t_isuserdefined();
   public: Variant t_getfilename();
   public: Variant t_getstartline();
@@ -58,6 +59,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getname);
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
   DECLARE_METHOD_INVOKE_HELPERS(getclosure);
+  DECLARE_METHOD_INVOKE_HELPERS(isclosure);
   DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
   DECLARE_METHOD_INVOKE_HELPERS(getfilename);
   DECLARE_METHOD_INVOKE_HELPERS(getstartline);

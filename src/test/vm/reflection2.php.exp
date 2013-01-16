@@ -6,7 +6,7 @@ array(6) {
     ["class"]=>
     string "my_child"
     ["info"]=>
-    array(11) {
+    array(12) {
       ["name"]=>
       string "my_other_override"
       ["access"]=>
@@ -26,6 +26,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_closure"]=>
+      bool(false)
       ["file"]=>
       string "src/test/vm/reflection2.php"
       ["line1"]=>
@@ -41,7 +43,7 @@ array(6) {
     ["class"]=>
     string "my_child"
     ["info"]=>
-    array(11) {
+    array(12) {
       ["name"]=>
       string "my_child_method"
       ["access"]=>
@@ -61,6 +63,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_closure"]=>
+      bool(false)
       ["file"]=>
       string "src/test/vm/reflection2.php"
       ["line1"]=>
@@ -76,7 +80,7 @@ array(6) {
     ["class"]=>
     string "my_class"
     ["info"]=>
-    array(11) {
+    array(12) {
       ["name"]=>
       string "my_method"
       ["access"]=>
@@ -96,6 +100,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_closure"]=>
+      bool(false)
       ["file"]=>
       string "src/test/vm/reflection2.php"
       ["line1"]=>
@@ -111,7 +117,7 @@ array(6) {
     ["class"]=>
     string "my_class"
     ["info"]=>
-    array(11) {
+    array(12) {
       ["name"]=>
       string "my_override_method"
       ["access"]=>
@@ -131,6 +137,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_closure"]=>
+      bool(false)
       ["file"]=>
       string "src/test/vm/reflection2.php"
       ["line1"]=>
@@ -146,7 +154,7 @@ array(6) {
     ["class"]=>
     string "my_class"
     ["info"]=>
-    array(11) {
+    array(12) {
       ["name"]=>
       string "my_trait_method"
       ["access"]=>
@@ -166,6 +174,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_closure"]=>
+      bool(false)
       ["file"]=>
       string "src/test/vm/reflection2.php"
       ["line1"]=>
@@ -181,7 +191,7 @@ array(6) {
     ["class"]=>
     string "my_base"
     ["info"]=>
-    array(11) {
+    array(12) {
       ["name"]=>
       string "my_base_method"
       ["access"]=>
@@ -201,6 +211,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_closure"]=>
+      bool(false)
       ["file"]=>
       string "src/test/vm/reflection2.php"
       ["line1"]=>

@@ -62,6 +62,7 @@ static StaticString s_params("params");
 static StaticString s_final("final");
 static StaticString s_abstract("abstract");
 static StaticString s_internal("internal");
+static StaticString s_is_closure("is_closure");
 static StaticString s_hphp("hphp");
 static StaticString s_static_variables("static_variables");
 static StaticString s_extension("extension");
@@ -388,6 +389,9 @@ static void set_function_info(Array &ret, const VM::Func* func) {
     }
     ret.set(s_attributes, VarNR(arr));
   }
+
+  // closure info
+  ret.set(s_is_closure, func->isClosureBody());
 }
 
 static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,

@@ -297,6 +297,7 @@ NOOP_OPCODE(LdHome)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(Marker)
+NOOP_OPCODE(AssertLoc)
 
 PUNT_OPCODE(JmpInstanceOfD)
 PUNT_OPCODE(JmpNInstanceOfD)
@@ -308,7 +309,6 @@ PUNT_OPCODE(NInstanceOfD)
 PUNT_OPCODE(IsSet)
 PUNT_OPCODE(IsNSet)
 PUNT_OPCODE(IsNType)
-PUNT_OPCODE(LdThisNc)
 PUNT_OPCODE(LdCurFuncPtr)
 PUNT_OPCODE(LdFuncCls)
 PUNT_OPCODE(IsType)
@@ -3159,13 +3159,11 @@ void CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
   Type::Tag         type  = inst->getTypeParam();
   SSATmp*           dst   = inst->getDst();
-  LabelInstruction* label = inst->getLabel();
-
   PhysReg fpReg;
   int64 offset;
   getLocalRegOffset(inst->getSrc(0), fpReg, offset);
   assert(fpReg == HPHP::VM::Transl::reg::rbp);
-  cgLoad(type, dst, fpReg, offset, label, inst);
+  cgLoad(type, dst, fpReg, offset, nullptr, inst);
 }
 
 void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {

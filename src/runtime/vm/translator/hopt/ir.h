@@ -102,6 +102,7 @@ enum OpcodeFlag : uint64_t {
   OPC(GuardLoc,          (Essential))                                   \
   OPC(GuardStk,          (Essential))                                   \
   OPC(GuardRefs,         (Essential))                                   \
+  OPC(AssertLoc,         (Essential))                                   \
                                                                         \
   /* arith ops (integer) */                                             \
   OPC(OpAdd,             (HasDest|CanCSE))                              \
@@ -179,10 +180,7 @@ enum OpcodeFlag : uint64_t {
   OPC(LdMemNR,           (HasDest))                                     \
   OPC(LdPropNR,          (HasDest))                                     \
   OPC(LdRefNR,           (HasDest))                                     \
-  OPC(LdThis,            (HasDest|CanCSE|Essential|                     \
-                          Rematerializable))                            \
-  /* LdThisNc avoids check */                                           \
-  OPC(LdThisNc,          (HasDest|CanCSE|Rematerializable))             \
+  OPC(LdThis,            (HasDest|CanCSE|Rematerializable))             \
   OPC(LdRetAddr,         (HasDest))                                     \
   OPC(LdHome,            (HasDest|CanCSE))                              \
   OPC(LdConst,           (HasDest|CanCSE|Rematerializable))             \

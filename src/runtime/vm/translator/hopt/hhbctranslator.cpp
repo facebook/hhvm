@@ -147,15 +147,11 @@ void HhbcTranslator::replace(uint32 index, SSATmp* tmp) {
   m_evalStack.replace(index, tmp);
 }
 
-void HhbcTranslator::setBcOff(uint32 newOff, bool lastBcOff) {
-  if (newOff != m_bcOff || m_firstBcOff) {
-    if (m_bcOff != 0xffffffff) {
-      m_firstBcOff = false;
-    }
+void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
+  if (newOff != m_bcOff || m_bcOff == m_startBcOff) {
     m_bcOff = newOff;
-    m_tb->genMarker(m_bcOff,
-                   m_tb->getSpOffset() + m_evalStack.numElems() - m_stackDeficit
-                  );
+    int32 spOff = m_tb->getSpOffset() + m_evalStack.numElems() - m_stackDeficit;
+    m_tb->genMarker(m_bcOff, spOff);
   }
   m_lastBcOff = lastBcOff;
 }
@@ -179,7 +175,7 @@ void HhbcTranslator::emitUnboxRAux() {
   if (Type::isUnboxed(top(Type::Gen)->getType())) {
     return; // top of stack already unboxed, nothing to do
   }
-  Trace* exitTrace = getExitSlowTrace();
+  Trace* exitTrace = getExitTrace();
   SSATmp* tmp = popR();
   pushIncRef(m_tb->genUnbox(tmp, exitTrace));
   m_tb->genDecRef(tmp);
@@ -379,15 +375,15 @@ void HhbcTranslator::emitInitThisLoc(int32 id) {
 
 void HhbcTranslator::emitCGetL(int32 id) {
   TRACE(3, "%u: CGetL %d\n", m_bcOff, id);
-  Trace* exitTrace = getExitSlowTrace();
-  pushIncRef(emitLdLocWarn(id, Type::Cell, exitTrace));
+  Trace* exitTrace = getExitTrace();
+  pushIncRef(emitLdLocWarn(id, exitTrace));
 }
 
 void HhbcTranslator::emitCGetL2(int32 id) {
   TRACE(3, "%u: CGetL2 %d\n", m_bcOff, id);
-  Trace* exitTrace = getExitSlowTrace();
+  Trace* exitTrace = getExitTrace();
   SSATmp* oldTop = popC();
-  pushIncRef(emitLdLocWarn(id, Type::Cell, exitTrace));
+  pushIncRef(emitLdLocWarn(id, exitTrace));
   push(oldTop);
 }
 
@@ -442,7 +438,7 @@ void HhbcTranslator::emitBindL(int32 id) {
 
 void HhbcTranslator::emitSetL(int32 id) {
   TRACE(3, "%u: SetL %d\n", m_bcOff, id);
-  Trace* exitTrace = getExitSlowTrace();
+  Trace* exitTrace = getExitTrace();
   SSATmp* src = popC();
   // Note we can't use the same trick as emitBindL in which we
   // move the incref to after the store because the stored location
@@ -452,9 +448,10 @@ void HhbcTranslator::emitSetL(int32 id) {
 }
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32 id) {
-  Trace* exitTrace = getExitSlowTrace();
   // Handle only integer inc/dec for now
-  SSATmp* src = emitLdLocWarn(id, Type::Int, exitTrace);
+  Trace* exitTrace = getExitSlowTrace();
+  m_tb->genGuardLoc(id, Type::Int, exitTrace);
+  SSATmp* src = m_tb->genLdLoc(id);
   SSATmp* res = emitIncDec(pre, inc, src);
   m_tb->genStLoc(id, res, false, false, NULL);
 }
@@ -489,8 +486,8 @@ static bool isSupportedBinaryArith(Type::Tag type1, Type::Tag type2) {
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
   TRACE(3, "%u: SetOpL %d\n", m_bcOff, id);
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* loc = emitLdLocWarn(id, Type::Cell, exitTrace);
+  Trace* exitTrace = getExitTrace();
+  SSATmp* loc = emitLdLocWarn(id, exitTrace);
   SSATmp* val = popC();
   SSATmp* result;
   if (subOpc == Concat) {
@@ -615,8 +612,9 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
       (origFunc->lookupVarId(thisStr) == kInvalidId);
     SSATmp* locals = m_tb->gen(LdContLocalsPtr, cont);
     for (int i = 0; i < origLocals; ++i) {
-      SSATmp* loc = m_tb->genIncRef(m_tb->genLdLoc(i, Type::Gen, NULL));
-      m_tb->genStMem(locals, cellsToBytes(genLocals - params[i] - 1), loc, true);
+      SSATmp* loc = m_tb->genIncRef(m_tb->genLdLoc(i));
+      m_tb->genStMem(locals, cellsToBytes(genLocals - params[i] - 1), loc,
+                     true);
     }
     if (fillThis) {
       assert(thisId != kInvalidId);
@@ -664,21 +662,21 @@ void HhbcTranslator::emitContExit() {
 
 void HhbcTranslator::emitUnpackCont() {
   m_tb->genLinkContVarEnv();
-  SSATmp* cont = m_tb->genLdLoc(0, Type::Obj, NULL);
+  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   push(m_tb->genLdRaw(cont, RawMemSlot::ContLabel, Type::Int));
 }
 
 void HhbcTranslator::emitPackCont(int64 labelId) {
   m_tb->genUnlinkContVarEnv();
-  SSATmp* cont = m_tb->genLdLoc(0, Type::Obj, NULL);
+  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   m_tb->genSetPropCell(cont, CONTOFF(m_value), popC());
-  m_tb->genStRaw(cont, RawMemSlot::ContLabel, m_tb->genDefConst<int64>(labelId));
+  m_tb->genStRaw(cont, RawMemSlot::ContLabel,
+                 m_tb->genDefConst<int64>(labelId));
 }
 
 void HhbcTranslator::emitContReceive() {
-  SSATmp* cont = m_tb->genLdLoc(0, Type::Obj, NULL);
-  m_tb->genContRaiseCheck(cont, getExitSlowTrace());
-
+  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
+  m_tb->genContRaiseCheck(cont, getExitTrace());
   SSATmp* valOffset = m_tb->genDefConst<int64>(CONTOFF(m_received));
   SSATmp* value = m_tb->genLdProp(cont, valOffset, Type::Cell, NULL);
   value = m_tb->genIncRef(value);
@@ -686,32 +684,33 @@ void HhbcTranslator::emitContReceive() {
 }
 
 void HhbcTranslator::emitContRaised() {
-  SSATmp* cont = m_tb->genLdLoc(0, Type::Obj, NULL);
-  m_tb->genContRaiseCheck(cont, getExitSlowTrace());
+  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
+  m_tb->genContRaiseCheck(cont, getExitTrace());
 }
 
 void HhbcTranslator::emitContDone() {
-  SSATmp* cont = m_tb->genLdLoc(0, Type::Obj, NULL);
+  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst<bool>(true));
   m_tb->genSetPropCell(cont, CONTOFF(m_value), m_tb->genDefNull());
 }
 
 void HhbcTranslator::emitContNext() {
   SSATmp* cont = m_tb->genLdThis(NULL);
-  m_tb->genContPreNext(cont, getExitSlowTrace());
+  m_tb->genContPreNext(cont, getExitTrace());
   m_tb->genSetPropCell(cont, CONTOFF(m_received), m_tb->genDefUninit());
 }
 
 void HhbcTranslator::emitContSendImpl(bool raise) {
   SSATmp* cont = m_tb->genLdThis(NULL);
-  m_tb->genContStartedCheck(cont, getExitSlowTrace());
-  m_tb->genContPreNext(cont, getExitSlowTrace());
+  m_tb->genContStartedCheck(cont, getExitTrace());
+  m_tb->genContPreNext(cont, getExitTrace());
 
-  SSATmp* value = m_tb->genLdLoc(0, Type::Cell, NULL);
+  SSATmp* value = m_tb->genLdAssertedLoc(0, Type::Cell);
   value = m_tb->genIncRef(value);
   m_tb->genSetPropCell(cont, CONTOFF(m_received), value);
   if (raise) {
-    m_tb->genStRaw(cont, RawMemSlot::ContShouldThrow, m_tb->genDefConst<bool>(true));
+    m_tb->genStRaw(cont, RawMemSlot::ContShouldThrow,
+                   m_tb->genDefConst<bool>(true));
   }
 }
 
@@ -731,7 +730,7 @@ void HhbcTranslator::emitContValid() {
 
 void HhbcTranslator::emitContCurrent() {
   SSATmp* cont = m_tb->genLdThis(NULL);
-  m_tb->genContStartedCheck(cont, getExitSlowTrace());
+  m_tb->genContStartedCheck(cont, getExitTrace());
   SSATmp* offset = m_tb->genDefConst<int64>(CONTOFF(m_value));
   SSATmp* value = m_tb->genLdProp(cont, offset, Type::Cell, NULL);
   value = m_tb->genIncRef(value);
@@ -946,8 +945,8 @@ void HhbcTranslator::emitIssetL(int32 id) {
   if (trackedType == Type::Uninit) {
     push(m_tb->genDefConst<bool>(false));
   } else {
-    Trace* exitTrace = getExitSlowTrace();
-    SSATmp* ld = m_tb->genLdLoc(id, Type::Cell, exitTrace);
+    Trace* exitTrace = getExitTrace();
+    SSATmp* ld = m_tb->genLdLocAsCell(id, exitTrace);
     push(m_tb->genNot(m_tb->genIsType<Type::Null>(ld)));
   }
 }
@@ -970,8 +969,8 @@ void HhbcTranslator::emitEmptyL(int32 id) {
   if (trackedType == Type::Uninit) {
     push(m_tb->genDefConst<bool>(true));
   } else {
-    Trace* exitTrace = getExitSlowTrace();
-    SSATmp* ld = m_tb->genLdLoc(id, Type::Cell, exitTrace);
+    Trace* exitTrace = getExitTrace();
+    SSATmp* ld = m_tb->genLdLocAsCell(id, exitTrace);
     push(m_tb->genNot(m_tb->genConvToBool(ld)));
   }
 }
@@ -996,8 +995,8 @@ void HhbcTranslator::emitIsTypeC() {
 template<Type::Tag T>
 void HhbcTranslator::emitIsTypeL(int id) {
   TRACE(3, "%u: Is%sH\n", m_bcOff, Type::Strings[T]);
-  Trace* exitTrace = getExitSlowTrace();
-  push(m_tb->genIsType<T>(emitLdLocWarn(id, Type::Cell, exitTrace)));
+  Trace* exitTrace = getExitTrace();
+  push(m_tb->genIsType<T>(emitLdLocWarn(id, exitTrace)));
 }
 
 void HhbcTranslator::emitIsNullL(int id)   { emitIsTypeL<Type::Null>(id);}
@@ -1452,29 +1451,17 @@ void HhbcTranslator::setThisAvailable() {
   m_tb->setThisAvailable();
 }
 
-Trace* HhbcTranslator::guardTypeLocal(uint32 localIndex,
-                                      Type::Tag type,
-                                      Trace* nextTrace) {
-  if (nextTrace == NULL) {
-    nextTrace = getGuardExit();
-  }
-  m_tb->genGuardLoc(localIndex, type, nextTrace);
-  m_typeGuards.push_back(TypeGuard(TypeGuard::Local, localIndex, type));
-  return nextTrace;
+void HhbcTranslator::guardTypeLocal(uint32 locId, Type::Tag type) {
+  checkTypeLocal(locId, type);
+  m_typeGuards.push_back(TypeGuard(TypeGuard::Local, locId, type));
 }
 
-// Similar to guardTypeLocal, but this takes a exit instead of
-// a guard exit.
-void HhbcTranslator::checkTypeLocal(uint32 localIndex, Type::Tag type) {
-  Trace* exitTrace = getExitTrace(m_bcOff);
-  m_tb->killLocalValue(localIndex);
-  m_tb->genLdLoc(localIndex, type, exitTrace);
+void HhbcTranslator::checkTypeLocal(uint32 locId, Type::Tag type) {
+  m_tb->genGuardLoc(locId, type, getExitTrace());
 }
 
 void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type::Tag type) {
-  // Type assertions are currently implemented as loads. If the value doesn't
-  // get used, DCE gets rid of it.
-  m_tb->genLdLoc(localIndex, type, NULL);
+  m_tb->genAssertLoc(localIndex, type);
 }
 
 void HhbcTranslator::checkTypeStackAux(uint32 stackIndex,
@@ -1530,7 +1517,7 @@ void HhbcTranslator::emitLoadDeps() {
     Type::Tag type = guard.getType();
 
     if (guard.getKind() == TypeGuard::Local) {
-      m_tb->genLdLoc(index, type, NULL);
+      m_tb->genLdLoc(index);
     } else if (guard.getKind() == TypeGuard::Stack) {
       loadStack(index, type);
     } else {
@@ -1593,10 +1580,9 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
 
   // VerifyParamType does not remove the parameter from the stack
   TRACE(3, "%u: VerifyParamType %s\n", m_bcOff, tcTypeName->data());
-  Trace* exitTrace1 = getExitSlowTrace();
   Trace* exitTrace2 = getExitSlowTrace();
   // XXX Should verify param type unbox?
-  SSATmp* param = m_tb->genLdLoc(paramId, Type::Gen, exitTrace1);
+  SSATmp* param = m_tb->genLdAssertedLoc(paramId, Type::Gen);
   if (param->getType() != Type::Obj) {
     PUNT(VerifyParamType_nonobj);
   }
@@ -1717,8 +1703,8 @@ void HhbcTranslator::emitAGetC(const StringData* clsName) {
 }
 
 void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* src = m_tb->genLdLoc(id, Type::Cell, exitTrace);
+  Trace* exitTrace = getExitTrace();
+  SSATmp* src = m_tb->genLdLocAsCell(id, exitTrace);
   if (isSupportedAGet(src, clsName)) {
     if (clsName != NULL) {
       src = m_tb->genDefConst<const StringData*>(clsName);
@@ -1749,6 +1735,8 @@ void HhbcTranslator::emitCGetS(const Class* cls,
     } else {
       assert(Type::isStaticallyKnownUnboxed(resultType));
     }
+    // Type is predicted, so take slow exit if check fails to avoid repeating
+    // this situation.
     // This code is currently correct, but once we enable type
     // prediction for CGetS, we should exit normally to a trace that
     // executes the CGetS as cell type (including the incref of the
@@ -1937,15 +1925,18 @@ void HhbcTranslator::emitInterpOneOrPunt(Type::Tag type,
 }
 
 Trace* HhbcTranslator::getGuardExit() {
-  if (!m_firstBcOff) {
-    // we're in the middle of a trace, so just return a trace exit
-    return getExitTrace(m_bcOff);
-  }
+  assert(m_bcOff == -1 || m_bcOff == m_startBcOff);
   // stack better be empty since we're at the start of the trace
   assert((m_evalStack.numElems() - m_stackDeficit) == 0);
   return m_exitGuardFailureTrace;
 }
 
+/*
+ * Generates an exit trace which will continue the VM execution at the given
+ * nextByteCode (defaults to the current m_bcOff) without using HHIR.
+ * This should be used in situations that HHIR cannot handle -- ideally only in
+ * slow paths.
+ */
 Trace* HhbcTranslator::getExitSlowTrace(Offset nextByteCode /* = -1 */) {
   uint32 numStackElems = m_evalStack.numElems();
   SSATmp* stackValues[numStackElems];
@@ -1958,9 +1949,21 @@ Trace* HhbcTranslator::getExitSlowTrace(Offset nextByteCode /* = -1 */) {
                                numStackElems ? stackValues : 0);
 }
 
-// generates a trace that can be a target of a control flow instruction
-// at the current bytecode offset
-Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff) {
+/*
+ * Generates an exit trace for the given targetBcOff
+ * (defaults to the current offset).
+ * The exit trace returned will be linked to a translation starting at
+ * targetBcOff, which will be a retranslation of the same tracelet if this
+ * exit is taken before executing any bytecode instruction of the current
+ * tracelet.
+ */
+Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
+  if (targetBcOff == -1) {
+    targetBcOff = m_bcOff != -1 ? m_bcOff : m_startBcOff;
+  }
+  if (targetBcOff == m_startBcOff) {
+    return m_exitGuardFailureTrace;
+  }
   uint32 numStackElems = m_evalStack.numElems();
   SSATmp* stackValues[numStackElems];
   for (uint32 i = 0; i < numStackElems; i++) {
@@ -1974,8 +1977,10 @@ Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff) {
                            TraceExitType::Normal);
 }
 
-// generates a trace exit that can be the target of a conditional
-// control flow instruction at the current bytecode offset
+/*
+ * Generates a trace exit that can be the target of a conditional
+ * control flow instruction at the current bytecode offset.
+ */
 Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff) {
   uint32 numStackElems = m_evalStack.numElems();
   SSATmp* stackValues[numStackElems];
@@ -2056,9 +2061,8 @@ SSATmp* HhbcTranslator::loadStackAddr(int32 offset) {
 // RaiseUninitWarning if the local is uninitialized
 //
 SSATmp* HhbcTranslator::emitLdLocWarn(uint32 id,
-                                      Type::Tag type,
                                       Trace* target) {
-  SSATmp* locVal = m_tb->genLdLoc(id, type, target);
+  SSATmp* locVal = m_tb->genLdLocAsCell(id, target);
 
   if (locVal->getType() == Type::Uninit) {
     spillStack();

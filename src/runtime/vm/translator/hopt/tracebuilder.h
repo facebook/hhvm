@@ -76,7 +76,24 @@ public:
   void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
 
   SSATmp* genLdLoc(uint32 id);
-  SSATmp* genLdLoc(uint32 id, Type::Tag type, Trace* exitTrace);
+
+  /*
+   * Returns an SSATmp containing the (inner) value of the given local.
+   * If the local is a boxed value, this returns its inner value.
+   *
+   * Note: For boxed values, this will generate a LdRef instruction which
+   *       takes the given exit trace in case the inner type doesn't match
+   *       the tracked type for this local.  This check may be optimized away
+   *       if we can determine that the inner type must match the tracked type.
+   */
+  SSATmp* genLdLocAsCell(uint32 id, Trace* exitTrace);
+
+  /*
+   * Asserts that local 'id' has type 'type' and loads it into the
+   * returned SSATmp.
+   */
+  SSATmp* genLdAssertedLoc(uint32 id, Type::Tag type);
+
   SSATmp* genLdLocAddr(uint32 id);
   SSATmp* genStLoc(uint32 id,
                    SSATmp* src,
@@ -133,6 +150,7 @@ public:
                        SSATmp* mask64,
                        SSATmp* vals64,
                        Trace*  exitTrace);
+  void    genAssertLoc(uint32 id, Type::Tag type);
 
   SSATmp* genUnbox(SSATmp* src, Trace* exit);
   SSATmp* genUnboxPtr(SSATmp* ptr);

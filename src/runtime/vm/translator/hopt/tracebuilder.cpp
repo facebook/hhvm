@@ -560,8 +560,34 @@ void TraceBuilder::genReleaseVVOrExit(Trace* exit) {
 }
 
 void TraceBuilder::genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace) {
-  gen(GuardLoc, type, getLabel(exitTrace), genLdHome(id));
-  setLocalType(id, type);
+  SSATmp* prevValue = getLocalValue(id);
+  if (prevValue) {
+    genGuardType(prevValue, type, exitTrace);
+    return;
+  }
+  Type::Tag prevType = getLocalType(id);
+  if (prevType == Type::None) {
+    gen(GuardLoc, type, getLabel(exitTrace), genLdHome(id));
+    setLocalType(id, type);
+  } else {
+    // It doesn't make sense to be guarding on something that's deemed to fail
+    assert(prevType == type);
+  }
+}
+
+void TraceBuilder::genAssertLoc(uint32 id, Type::Tag type) {
+  Type::Tag prevType = getLocalType(id);
+  if (prevType == Type::None || Type::isMoreRefined(type, prevType)) {
+    gen(AssertLoc, type, genLdHome(id));
+    setLocalType(id, type);
+  } else {
+    assert(prevType == type || Type::isMoreRefined(prevType, type));
+  }
+}
+
+SSATmp* TraceBuilder::genLdAssertedLoc(uint32 id, Type::Tag type) {
+  genAssertLoc(id, type);
+  return genLdLoc(id);
 }
 
 void TraceBuilder::genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace) {
@@ -775,56 +801,39 @@ void TraceBuilder::genRaiseUninitWarning(uint32 id) {
   gen(RaiseUninitWarning, genLdHome(id));
 }
 
+/**
+ * Returns an SSATmp containing the current value of the given local.
+ * This generates a LdLoc instruction if needed.
+ *
+ * Note: the type of the local must be known already (due to type guards
+ *       or assertions).
+ */
 SSATmp* TraceBuilder::genLdLoc(uint32 id) {
-  SSATmp* opnd = getLocalValue(id);
-  if (opnd == NULL) {
-    opnd = gen(LdLoc, Type::Cell, genLdHome(id));
-    setLocalValue(id, opnd);
+  SSATmp* tmp = getLocalValue(id);
+  if (tmp) {
+    return tmp;
   }
-  return opnd;
+  // No prior value for this local is available, so actually generate a LdLoc.
+  Type::Tag type = getLocalType(id);
+  assert(type != Type::None);
+  switch (type) {
+    case Type::Uninit : tmp = genDefUninit(); break;
+    case Type::Null   : tmp = genDefNull();   break;
+    default           : tmp = gen(LdLoc, type, genLdHome(id));
+  }
+  setLocalValue(id, tmp);
+  return tmp;
 }
 
-SSATmp* TraceBuilder::genLdLoc(uint32 id,
-                               Type::Tag type,
-                               Trace* target) {
-  SSATmp* t1 = getLocalValue(id);
-  Type::Tag trackedType = getLocalType(id);
-  if (t1 == NULL) {
-    /*
-     * no prior value for this local is available at this point
-     * so generate a LdLoc instruction:
-     */
-    Type::Tag typeToUse = trackedType;
-    Trace* ldLocTarget = NULL;
-    if (trackedType == Type::None) {
-      /* no prior type available either, so this is either a guard or
-       * assert that's being generated. Make sure to use a exit target
-       * to branch to in case the guard/assert fails.
-       */
-      typeToUse = type;
-      ldLocTarget = target;
-    }
-    t1 = gen(LdLoc, typeToUse, getLabel(ldLocTarget), genLdHome(id));
-    if (t1->getType() == Type::Null) {
-      t1 = genDefNull();
-    } else if (t1->getType() == Type::Uninit) {
-      t1 = genDefUninit();
-    }
-    setLocalValue(id, t1);
+SSATmp* TraceBuilder::genLdLocAsCell(uint32 id, Trace* exitTrace) {
+  SSATmp*    tmp = genLdLoc(id);
+  Type::Tag type = getLocalType(id);
+  assert(type != Type::None);
+  if (!Type::isBoxed(type)) {
+    return tmp;
   }
-  if (Type::isBoxed(t1->getType())) {
-    if (Type::isUnboxed(type)) {
-      /*
-       * unbox t1 into a cell via a LdRef
-       */
-      Type::Tag unboxedType = Type::getInnerType(t1->getType());
-      assert(!Type::isMoreRefined(type, unboxedType));
-      return genLdRef(t1, unboxedType, target);
-    }
-    // boxed values can't be uninit, so skip the uninit check
-    return t1;
-  }
-  return t1;
+  // Unbox tmp into a cell via a LdRef
+  return genLdRef(tmp, Type::getInnerType(type), exitTrace);
 }
 
 SSATmp* TraceBuilder::genLdLocAddr(uint32 id) {

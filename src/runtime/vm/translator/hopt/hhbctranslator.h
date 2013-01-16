@@ -119,8 +119,8 @@ struct HhbcTranslator {
                             *m_constantsHash,
                             func))
     , m_curFunc(func)
-    , m_bcOff(0xffffffff)
-    , m_firstBcOff(true)
+    , m_bcOff(-1)
+    , m_startBcOff(bcStartOffset)
     , m_lastBcOff(false)
     , m_hasRet(false)
     , m_unboxPtrs(true)
@@ -131,8 +131,8 @@ struct HhbcTranslator {
   void end(int nextBcOff);
   Trace* getTrace() const { return m_tb->getTrace(); }
 
-  void setBcOff(uint32 newOff, bool lastBcOff);
-  void setBcOffNextTrace(uint32 bcOff) { m_bcOffNextTrace = bcOff; }
+  void setBcOff(Offset newOff, bool lastBcOff);
+  void setBcOffNextTrace(Offset bcOff) { m_bcOffNextTrace = bcOff; }
   uint32 getBcOffNextTrace() { return m_bcOffNextTrace; }
 
   void emitUninitLoc(uint32 id);
@@ -337,9 +337,7 @@ struct HhbcTranslator {
                         Type::Tag type,
                         Trace* nextTrace = NULL);
 
-  Trace* guardTypeLocal(uint32 localIndex,
-                        Type::Tag type,
-                        Trace* nextTrace = NULL);
+  void guardTypeLocal(uint32 locId, Type::Tag type);
 
   Trace* guardRefs(int64               entryArDelta,
                    const vector<bool>& mask,
@@ -378,11 +376,11 @@ private:
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
   SSATmp* getClsPropAddr(const Class* cls, const StringData* propName = NULL);
   void   decRefPropAddr(SSATmp* propAddr);
-  Trace* getExitTrace(uint32 targetBcOff);
+  Trace* getExitTrace(Offset targetBcOff = -1);
   Trace* getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff);
   Trace* getExitSlowTrace(Offset nextByteCode = -1);
   Trace* getGuardExit();
-  SSATmp* emitLdLocWarn(uint32 id, Type::Tag type, Trace* target);
+  SSATmp* emitLdLocWarn(uint32 id, Trace* target);
   void emitInterpOne(Type::Tag type, Trace* target = NULL);
   void emitInterpOneOrPunt(Type::Tag type, Trace* target = NULL);
   void emitBinaryArith(Opcode);
@@ -437,9 +435,9 @@ private:
   std::unique_ptr<TraceBuilder>
                     m_tb;
   const Func*       m_curFunc;
-  uint32            m_bcOff;
-  uint32            m_bcOffNextTrace;
-  bool              m_firstBcOff;
+  Offset            m_bcOff;
+  Offset            m_startBcOff;
+  Offset            m_bcOffNextTrace;
   bool              m_lastBcOff;
   bool              m_hasRet;
   // if set, then generate unbox instructions for memory accesses (Get

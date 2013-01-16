@@ -258,24 +258,41 @@ Instruction set
 ---------------
 
 
-1.  Checks
+1. Checks and Asserts
 
-d:T = GuardType<T> s0:Gen l:Label
+D:T = GuardType<T> S0:Gen L:Label
 
-  Check that the type of the src s0 is T, and if so copy it to d.  If
-  s0 is not type T, branch to the exit trace label l.
+  Check that the type of the src S0 is T, and if so copy it to D.  If
+  S0 is not type T, branch to the exit trace label L.
 
-GuardLoc<T> s0:Home l:Label
+GuardLoc<T> S0:Home L:Label
 
-  Check that type of the local specified by s0 is T; if not, branch to
-  the exit trace label l.
+  Check that type of the local specified by S0 is T; if not, branch to
+  the exit trace label L.
 
-GuardStk<T> s0:StkPtr s1:ConstInt l:Label
+GuardStk<T> S0:StkPtr S1:ConstInt L:Label
 
-  Check that the type of the cell on the stack pointed to by s0 at
-  offset s1 is T; if not, branch to the exit trace label l.
+  Check that the type of the cell on the stack pointed to by S0 at
+  offset S1 is T; if not, branch to the exit trace label L.
 
 GuardRefs
+
+GuardStk<T> S0:StkPtr S1:ConstInt L:Label
+
+  Checks if stack location S1 off of S0 contains a value of type T, and
+  branches to L if that's not the case.
+
+GuardLoc<T> S0:Home L:Label
+
+  Checks if local S0 has type T, and branches to L if that's not the case.
+
+AssertLoc<T> S0:Home
+
+  Asserts that type of local S0 is T.
+
+CheckUninit S0:T L:Label
+
+  If S0's type T is Uninit, branch to label L.
 
 
 2. Arithmetic
@@ -290,9 +307,9 @@ OpMul
 
 3. Type conversions
 
-d:T = Conv<T> s0:Gen
+D:T = Conv<T> S0:Gen
 
-  Convert s0 from its current type to type T, according to the php
+  Convert S0 from its current type to type T, according to the PHP
   semantics of such a conversion.
 
 
@@ -337,17 +354,15 @@ JmpIsNSet
 JmpIsNType
 Jmp_
 
-ExitWhenSurprised l:Label
+ExitWhenSurprised L:Label
 
   Tests the surprise flags and if they are set, jumps to the
-  exit-trace label l.
+  exit-trace label L.
 
-ExitOnVarEnv s0:StkPtr l:Label
+ExitOnVarEnv S0:StkPtr L:Label
 
-  Loads the VarEnv slot off the ActRec pointed to by s0.  If it is
-  non-zero, jumps to the exit-trace label l.
-
-CheckUninit
+  Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
+  non-zero, jumps to the exit-trace label L.
 
 DefLabel
 
@@ -366,46 +381,42 @@ UnboxPtr
 
 7. Loads
 
-d:T = LdStack<T> s0:StkPtr s1:ConstInt [l:Label]
+D:T = LdStack<T> S0:StkPtr S1:ConstInt [L:Label]
 
-  Loads from s0 at offset s1, and puts the value in d.  If the
-  optional label l is specified and the loaded value's type does not
-  match T, this instruction does not load into d and transfers control
-  to l.
+  Loads from S0 at offset S1, and puts the value in D.  If the
+  optional label L is specified and the loaded value's type does not
+  match T, this instruction does not load into D and transfers control
+  to L.
 
-d:T = LdLoc<T> s0:Home [l:Label]
+D:T = LdLoc<T> S0:Home
 
-  Loads from the StkPtr in s0 at the offset in s0.  Used to load locals.
-  If the optional label l is supplied and the loaded value's type does
-  not match T, this instruction does not load into d and transfers
-  control to l.
+  Loads from the StkPtr in S0 at the offset in S0.  Used to load locals.
 
 LdStackAddr
 LdLocAddr
 LdMemNR
 
-d:T = LdPropNR<T> s0:Obj s1:Int l:Label
+D:T = LdPropNR<T> S0:Obj S1:Int L:Label
 
   TODO
 
 LdRefNR
 LdThis
-LdThisNc
 
-d:Home = LdHome s0:StkPtr s1:ConstInt
+D:Home = LdHome S0:StkPtr S1:ConstInt
 
   Logically packages the location of a pointer into the VM stack and
-  an offset.  s0 will usually be the output of a DefFP.
+  an offset.  S0 will usually be the output of a DefFP.
 
-d:T = LdConst<T>
+D:T = LdConst<T>
 
-d:ConstT = DefConst<T>
+D:ConstT = DefConst<T>
 
 LdCls
 
-d:T = LdClsCns<T> s0:ConstSstr s1:ConstSstr
+D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr
 
-  Loads the class constant named s0 from a class named s1, via target
+  Loads the class constant named S0 from a class named S1, via target
   cache.  The result may be uninitialized if the class is not defined.
   This instruction should generally be followed by CheckClsCnsDefined,
   unless we know the class is already loaded.
@@ -413,10 +424,10 @@ d:T = LdClsCns<T> s0:ConstSstr s1:ConstSstr
   Note that no decref is necessary because class constants will always
   be static.
 
-CheckClsCnsDefined s0:Cell l:Label
+CheckClsCnsDefined S0:Cell L:Label
 
   Checks that the result of a LdClsCns is defined, and if not jumps to
-  the exit trace label l.
+  the exit trace label L.
 
 LdClsMethodCache
 LdClsMethod
@@ -426,35 +437,35 @@ LdObjMethod
 LdObjClass
 LdCachedClass
 
-d:FuncPtr = LdFunc s0:Str
+D:FuncPtr = LdFunc S0:Str
 
-  Loads the Func* whose name is s0. Fatal if the named function is not defined,
+  Loads the Func* whose name is S0. Fatal if the named function is not defined,
   and the function autoloader fails to define it.
 
-d:FuncPtr = LdFixedFunc s0:ConstStr
+D:FuncPtr = LdFixedFunc S0:ConstStr
 
-  Loads the Func* whose name is s0. Fatal if the named function is not defined,
+  Loads the Func* whose name is S0. Fatal if the named function is not defined,
   and the function autoloader fails to define it.
 
 LdCurFuncPtr
 
-d:Func& = LdARFuncPtr s0:Ptr s1:ConstInt
+D:Func& = LdARFuncPtr S0:Ptr S1:ConstInt
 
-  Loads the m_func member of an ActRec.  s0 is the base address, and
-  s1 is an offset, such that s0 + s1 points to the base of the ActRec.
+  Loads the m_func member of an ActRec.  S0 is the base address, and
+  S1 is an offset, such that S0 + S1 points to the base of the ActRec.
 
 LdFuncCls
 
-d:PtrToCell = LdContLocalsPtr s0:Obj
+D:PtrToCell = LdContLocalsPtr S0:Obj
 
-  Loads a pointer to the embedded local variables of s0 (a Continuation
-  object) into d.
+  Loads a pointer to the embedded local variables of S0 (a Continuation
+  object) into D.
 
-d:T = LdRaw<T> s0:Ptr s1:ConstInt
+D:T = LdRaw<T> S0:Ptr S1:ConstInt
 
-  "Raw" load from memory.  s0 is the base address, and is an untyped
-  pointer.  s1 is a constant from the RawMemSlot::Kind enum, which
-  describes the offset from the base, and the size.  The value in d is
+  "Raw" load from memory.  S0 is the base address, and is an untyped
+  pointer.  S1 is a constant from the RawMemSlot::Kind enum, which
+  describes the offset from the base, and the size.  The value in D is
   assumed to be of type T.
 
 8. Allocation
@@ -466,64 +477,64 @@ NewTuple
 
 9. Call & Return
 
-d:StkPtr = AllocActRec s0:StkPtr s1:StkPtr s2:Func& s3:[Obj|Cls&|Null]
-                       s4:ConstInt s5:[String|Null]
+D:StkPtr = AllocActRec S0:StkPtr S1:StkPtr S2:Func& S3:[Obj|Cls&|Null]
+                       S4:ConstInt S5:[String|Null]
 
   Operands:
 
-     s0 - current stack pointer
-     s1 - current frame pointer
-     s2 - callee Func
-     s3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
+     S0 - current stack pointer
+     S1 - current frame pointer
+     S2 - callee Func
+     S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
           null (for FPushFunc*).
-     s4 - number of arguments
-     s5 - invName field for magic calls
+     S4 - number of arguments
+     S5 - invName field for magic calls
 
-  Allocates an activation record from the stack pointed to by s0 and
+  Allocates an activation record from the stack pointed to by S0 and
   return the result.
 
-d:StkPtr = FreeActRec s0:StkPtr
+D:StkPtr = FreeActRec S0:StkPtr
 
   Load the saved frame pointer from the activation record pointed to
-  by s0 into d.
+  by S0 into D.
 
 Call
 NativeImpl
 
-d:RetAddr = LdRetAddr s0:StkPtr
+D:RetAddr = LdRetAddr S0:StkPtr
 
-  Load the return address off the activation record pointed to by s0
+  Load the return address off the activation record pointed to by S0
   in preparation for a RetCtrl.
 
-RetCtrl s0:StkPtr s1:StkPtr s2:RetAddr
+RetCtrl S0:StkPtr S1:StkPtr S2:RetAddr
 
-  Ensure that s0 is stored in rVmSp and s1 is stored in rVmFp and then
+  Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then
   execute a hardware procedure-return using the return address
-  specified by s2.
+  specified by S2.
 
-RetVal s0:StkPtr s1:T
+RetVal S0:StkPtr S1:T
 
-  Writes the value in s1 to the return value slot on the activation
-  record pointed to by s0.
+  Writes the value in S1 to the return value slot on the activation
+  record pointed to by S0.
 
-d:StkPtr = RetAdjustStack s0:StkPtr
+D:StkPtr = RetAdjustStack S0:StkPtr
 
-  Loads the new VM stack pointer into the destination.  s0 is a
+  Loads the new VM stack pointer into the destination.  S0 is a
   pointer to the current activation record.
 
-ReleaseVVOrExit s0:StkPtr l:Label
+ReleaseVVOrExit S0:StkPtr L:Label
 
-  Loads the VarEnv slot off the ActRec pointed to by s0.  If it is
+  Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   null, does nothing.  If it is an ExtraArgs, deallocates the
-  ExtraArgs structure.  Otherwise jumps to the exit-trace label l.
+  ExtraArgs structure.  Otherwise jumps to the exit-trace label L.
 
-d:StkPtr = GenericRetDecRefs s0:StkPtr s1:T s2:ConstInt
+D:StkPtr = GenericRetDecRefs S0:StkPtr S1:T S2:ConstInt
 
-  Does decrefs of all the current function's locals, where s0 is a
-  pointer to the relevant activation record, and s2 is the number of
+  Does decrefs of all the current function's locals, where S0 is a
+  pointer to the relevant activation record, and S2 is the number of
   locals in the current function.
 
-  s1 is the return value for the function, which GenericRetDecRefs
+  S1 is the return value for the function, which GenericRetDecRefs
   needs access to currently only to ensure it isn't clobbered.
 
   Returns the adjusted VM stack pointer (pointing at the return value
@@ -577,13 +588,13 @@ Marker
   instruction stream.  This just carries metadata; Marker has no
   executable semantics.
 
-d:StkPtr = DefFP
+D:StkPtr = DefFP
 
-  Creates a temporary d representing the current vm frame pointer.
+  Creates a temporary D representing the current vm frame pointer.
 
-d:StkPtr = DefSP
+D:StkPtr = DefSP
 
-  Creates a temporary d representing the current vm stack pointer.
+  Creates a temporary D representing the current vm stack pointer.
 
 
 14. Runtime helpers
@@ -602,23 +613,23 @@ InterpOne
 
 15. Register allocation
 
-d:T = Spill s0:T
+D:T = Spill S0:T
 
-  Stores s0 to a spill location specified by the destination.  The
+  Stores S0 to a spill location specified by the destination.  The
   destination temporary will not have registers allocated to it.
 
-d:T = Reload s0:T
+D:T = Reload S0:T
 
-  Loads from a spilled temporary s0, and stores the result in d.
+  Loads from a spilled temporary S0, and stores the result in D.
 
-AllocSpill s0:ConstInt
+AllocSpill S0:ConstInt
 
-  Allocates s0 slots of additional spill space on the stack.
+  Allocates S0 slots of additional spill space on the stack.
   Generated when the preallocated spill space is exhausted.
 
-FreeSpill s0:ConstInt
+FreeSpill S0:ConstInt
 
-  Deallocates s0 slots of spill space on the stack.
+  Deallocates S0 slots of spill space on the stack.
 
 16. Continuations
 
@@ -626,10 +637,10 @@ CreateCont
 FillContLocals
 FillContThis
 
-ContEnter s0:StkP s1:TCA s2:ConstInt
+ContEnter S0:StkP S1:TCA S2:ConstInt
 
-  Enters a generator body. s0 is the ActRec embedded in the Continuation
-  object. s1 is the address to jump to. s2 is the bytecode offset in the
+  Enters a generator body. S0 is the ActRec embedded in the Continuation
+  object. S1 is the address to jump to. S2 is the bytecode offset in the
   caller to return to when the generator body yields.
 
 UnlinkContVarEnv
@@ -646,36 +657,36 @@ AssertRefCount
 
 18. Iterators
 
-d:Bool = IterInit s0:[Arr|Obj] s1:StkP s2:ConstInt s3:ConstInt
-d:Bool = IterInitK s0:[Arr|Obj] s1:StkP s2:ConstInt s3:ConstInt s4:ConstInt
+D:Bool = IterInit S0:[Arr|Obj] S1:StkP S2:ConstInt S3:ConstInt
+D:Bool = IterInitK S0:[Arr|Obj] S1:StkP S2:ConstInt S3:ConstInt S4:ConstInt
 
-  Initializes the iterator variable whose index is given by s2. This
+  Initializes the iterator variable whose index is given by S2. This
   instruction creates the appropriate iterator for the array or object
-  that s0 references, and rewinds the new iterator to its start.  s3
-  and s4 are local variable indices. s0 points to the stack frame
-  containing the iterator and local variables s2, s3, and s4.
+  that S0 references, and rewinds the new iterator to its start.  S3
+  and S4 are local variable indices. S0 points to the stack frame
+  containing the iterator and local variables S2, S3, and S4.
 
   If the new iterator is at its end (i.e., has no elements to iterate
-  over), this instruction decrements the refcount of s0 and returns
-  false; otheriwse, it stores a reference to s0 in the new iterator
+  over), this instruction decrements the refcount of S0 and returns
+  false; otheriwse, it stores a reference to S0 in the new iterator
   and returns true. If the iterator is not at its end, then this
   instruction stores the iterator's first value (and key) into the
-  local variable s3 (and s4, respectively).
+  local variable S3 (and S4, respectively).
 
   This instruction has the ConsumesRC property because it either
-  decrements the reference count of s0 or stores a reference to s0
+  decrements the reference count of s0 or stores a reference to S0
   into the new iterator.
 
-d:Bool = IterNext s0:StkP s1:ConstInt s2:ConstInt
-d:Bool = IterNextK s0:StkP s1:ConstInt s2:ConstInt s3:ConstInt
+D:Bool = IterNext S0:StkP S1:ConstInt S2:ConstInt
+D:Bool = IterNextK S0:StkP S1:ConstInt S2:ConstInt S3:ConstInt
 
-  Advances the iterator variable whose index is given by s1. s2 and s3
-  are local variable indices. s0 points to the stack frame containing
-  the iterator and local variables s1, s2, and s3.
+  Advances the iterator variable whose index is given by S1. S2 and S3
+  are local variable indices. S0 points to the stack frame containing
+  the iterator and local variables S1, S2, and S3.
 
   If the iterator has reached the end, this instruction frees the
   iterator variable and returns false; otherwise, it returns true.  If
   the iterator has not reached its end, then this instruction stores
-  the iterator's next value (and key) into the local variable s3 (and
-  s4, respectively).
+  the iterator's next value (and key) into the local variable S3 (and
+  S4, respectively).
 

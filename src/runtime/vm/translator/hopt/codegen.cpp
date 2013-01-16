@@ -213,7 +213,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     if (val) {
       m_imm = tmp->getConstValAsBits();
     } else {
-      m_imm = Type::toDataType(tmp->getType());
+      m_imm = CodeGenerator::toDataTypeForCall(tmp->getType());
     }
     m_kind = Imm;
     return;
@@ -223,7 +223,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     if (val) {
       m_imm = 0;
     } else {
-      m_imm = Type::toDataType(tmp->getType());
+      m_imm = CodeGenerator::toDataTypeForCall(tmp->getType());
     }
     m_kind = Imm;
     return;
@@ -232,21 +232,29 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     auto reg = tmp->getReg(val ? 0 : 1);
     assert(reg != InvalidReg);
     m_imm = 0;
-    m_kind = Reg;
+
+    // If val is false then we're passing tmp's type. TypeReg lets
+    // CodeGenerator know that the value might require some massaging
+    // to be in the right format for the call.
+    m_kind = val ? Reg : TypeReg;
     m_srcReg = reg;
     return;
   }
   m_srcReg = InvalidReg;
-  m_imm = Type::toDataType(tmp->getType());
+  m_imm = CodeGenerator::toDataTypeForCall(tmp->getType());
   m_kind = Imm;
 }
 
 Address ArgDesc::genCode(CodeGenerator::Asm& a) const {
   Address start = a.code.frontier;
   switch (m_kind) {
+    case TypeReg:
     case Reg:
       a.    movq   (m_srcReg, m_dstReg);
       TRACE(3, "[counter] 1 reg move in ArgDesc::genCode\n");
+      if (m_kind == TypeReg) {
+        a.  shlq   (CodeGenerator::kTypeShiftBits, m_dstReg);
+      }
       break;
     case Imm:
       emitImmReg(a, m_imm, m_dstReg);
@@ -469,15 +477,30 @@ void CodeGenerator::cgJmpNSame(IRInstruction* inst) { cgJcc(inst); }
 
 void CodeGenerator::cgCallHelper(Asm& a,
                                  TCA addr,
+                                 SSATmp* dst,
+                                 SyncOptions sync,
+                                 ArgGroup& args) {
+  PhysReg dstReg0 = InvalidReg;
+  PhysReg dstReg1 = InvalidReg;
+  if (dst) {
+    dstReg0 = dst->getReg(0);
+    dstReg1 = dst->getReg(1);
+  }
+  return cgCallHelper(a, Transl::Call(addr), dstReg0, dstReg1, sync, args);
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 TCA addr,
                                  PhysReg dstReg,
                                  SyncOptions sync,
                                  ArgGroup& args) {
-  cgCallHelper(a, Transl::Call(addr), dstReg, sync, args);
+  cgCallHelper(a, Transl::Call(addr), dstReg, InvalidReg, sync, args);
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
                                  const Transl::Call& call,
-                                 PhysReg dstReg,
+                                 PhysReg dstReg0,
+                                 PhysReg dstReg1,
                                  SyncOptions sync,
                                  ArgGroup& args) {
   assert(int(args.size()) <= kNumRegisterArgs);
@@ -485,7 +508,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
   // We don't want to include the dst register defined by this
   // instruction when saving the caller-saved registers.
   auto const regsToSave = (m_curInst->getLiveOutRegs() & kCallerSaved)
-      .remove(PhysReg(dstReg));
+      .remove(dstReg0).remove(dstReg1);
   PhysRegSaverParity<1> regSaver(a, regsToSave);
 
   // Assign registers to the arguments
@@ -497,13 +520,15 @@ void CodeGenerator::cgCallHelper(Asm& a,
   for (size_t i = 0; i < args.size(); ++i) {
     // We don't support memory-to-register moves currently.
     assert(args[i].getKind() == ArgDesc::Reg ||
+           args[i].getKind() == ArgDesc::TypeReg ||
            args[i].getKind() == ArgDesc::Imm);
   }
   // Handle register-to-register moves.
   int moves[kNumX64Regs];
   memset(moves, -1, sizeof moves);
   for (size_t i = 0; i < args.size(); ++i) {
-    if (args[i].getKind() == ArgDesc::Reg) {
+    if (args[i].getKind() == ArgDesc::Reg ||
+        args[i].getKind() == ArgDesc::TypeReg) {
       moves[int(args[i].getDstReg())] = int(args[i].getSrcReg());
     }
   }
@@ -551,23 +576,22 @@ void CodeGenerator::cgCallHelper(Asm& a,
     recordSyncPoint(a);
   }
   // grab the return value if any
-  if (dstReg != InvalidReg && dstReg != reg::rax) {
-    a.mov_reg64_reg64(reg::rax, dstReg);
+  if (dstReg0 != InvalidReg && dstReg0 != reg::rax) {
+    a.    movq (reg::rax, dstReg0);
     if (m_curTrace->isMain()) {
       if (m_curInst->isNative()) {
         TRACE(3, "[counter] 1 reg move in cgCallHelper\n");
       }
     }
   }
-}
-
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 TCA addr,
-                                 SSATmp* dst,
-                                 SyncOptions sync,
-                                 ArgGroup& args) {
-  auto dstReg = dst == NULL ? InvalidReg : dst->getReg();
-  return cgCallHelper(a, addr, dstReg, sync, args);
+  if (dstReg1 != InvalidReg) {
+    if (dstReg1 != reg::rdx) {
+      a.  movq (reg::rdx, dstReg1);
+    }
+    // dstReg1 contains m_type and _count but we're expecting just the
+    // type in the lower 32 bits, so shift right.
+    a.    shrq (kTypeShiftBits, dstReg1);
+  }
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
@@ -813,21 +837,21 @@ int64 objToBoolHelper(const ObjectData *o) {
   return o->o_toBoolean();
 }
 
-int64 cellToBoolHelper(DataType kind, Value value) {
-  if (IS_NULL_TYPE(kind)) {
+int64 cellToBoolHelper(TypedValue tv) {
+  if (IS_NULL_TYPE(tv.m_type)) {
     return 0;
   }
 
-  if (kind <= KindOfInt64) {
-    return value.m_data.num ? 1 : 0;
+  if (tv.m_type <= KindOfInt64) {
+    return tv.m_data.num ? 1 : 0;
   }
 
-  switch (kind) {
-    case KindOfDouble:  return value.m_data.dbl != 0;
+  switch (tv.m_type) {
+    case KindOfDouble:  return tv.m_data.dbl != 0;
     case KindOfStaticString:
-    case KindOfString:  return value.m_data.pstr->toBoolean();
-    case KindOfArray:   return value.m_data.parr->size() != 0;
-    case KindOfObject:  return value.m_data.pobj->o_toBoolean();
+    case KindOfString:  return tv.m_data.pstr->toBoolean();
+    case KindOfArray:   return tv.m_data.parr->size() != 0;
+    case KindOfObject:  return tv.m_data.pobj->o_toBoolean();
     default:
       assert(false);
       break;
@@ -1136,6 +1160,7 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
     } else {
       TCA helper = NULL;
       ArgGroup args;
+      args.ssa(src);
       if (fromType == Type::Cell) {
         // Cell -> Bool
         args.type(src);
@@ -1153,7 +1178,6 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
         // Dbl -> Bool
         CG_PUNT(Conv_Dbl_Bool);
       }
-      args.ssa(src);
       cgCallHelper(m_as, helper, dst, kNoSyncPoint, args);
     }
     return;
@@ -2237,8 +2261,7 @@ void CodeGenerator::cgDecRefStaticType(Type::Tag type,
     m_as.jcc(cc, m_astubs.code.frontier);
     // Emit the call to release in m_astubs
     cgCallHelper(m_astubs, m_tx64->getDtorCall(Type::toDataType(type)),
-                 InvalidReg, kSyncPoint,
-                 ArgGroup().reg(dataReg));
+                 InvalidReg, InvalidReg, kSyncPoint, ArgGroup().reg(dataReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
     } else {
@@ -3675,18 +3698,18 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   }
 }
 
+// TODO: Kill this #2031980
+static RefData* box_value(TypedValue tv) {
+  return tvBoxHelper(tv.m_type, tv.m_data.num);
+}
+
 void CodeGenerator::cgBox(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
   Type::Tag type = src->getType();
-  if (type == Type::Cell) {
-    cgCallHelper(m_as, (TCA)tvBoxHelper, dst, kNoSyncPoint,
-                 ArgGroup().type(src)
-                           .ssa(src));
-  } else if (type < Type::Cell) {
-    cgCallHelper(m_as, (TCA)tvBoxHelper, dst, kNoSyncPoint,
-                 ArgGroup().imm(Type::toDataType(src->getType()))
-                           .ssa(src));
+  if (Type::isUnboxed(type)) {
+    cgCallHelper(m_as, (TCA)box_value, dst, kNoSyncPoint,
+                 ArgGroup().valueType(src));
   } else {
     assert(0); // can't have any other type!
   }
@@ -3718,29 +3741,19 @@ void CodeGenerator::cgPrint(IRInstruction* inst) {
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64 key,
-                               uintptr_t value,
-                               DataType valueType) {
-  TypedValue tv;
-  tv.m_type = valueType;
-  tv._count = 1;
-  tv.m_data.num = value;
+                               TypedValue value) {
   // this does not re-enter
   // change to array_setm_ik1_v0, which decrefs the value
-  return array_setm_ik1_v0(0, ad, key, &tv);
+  return array_setm_ik1_v0(0, ad, key, &value);
 }
 
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
-                                  uintptr_t value,
-                                  DataType valueType) {
-  TypedValue tv;
-  tv.m_type = valueType;
-  tv._count = 1;
-  tv.m_data.num = value;
+                                  TypedValue value) {
   // this does not re-enter
   // change to array_setm_s0k1_v0, which decrefs both the key & value
 //  return array_setm_sk1_v(0, ad, key, &tv);
-  return array_setm_s0k1_v0(0, ad, key, &tv);
+  return array_setm_s0k1_v0(0, ad, key, &value);
 }
 
 void CodeGenerator::cgAddElem(IRInstruction* inst) {
@@ -3756,15 +3769,13 @@ void CodeGenerator::cgAddElem(IRInstruction* inst) {
     cgCallHelper(m_as, (TCA)addElemIntKeyHelper, dst, kNoSyncPoint,
                  ArgGroup().ssa(arr)
                            .ssa(key)
-                           .ssa(val)
-                           .type(val));
+                           .valueType(val));
   } else if (keyType == Type::Str || keyType == Type::StaticStr) {
     // decrefs the value but not the key
     cgCallHelper(m_as, (TCA)addElemStringKeyHelper, dst, kNoSyncPoint,
                  ArgGroup().ssa(arr)
                            .ssa(key)
-                           .ssa(val)
-                           .type(val));
+                           .valueType(val));
   } else {
     CG_PUNT(AddElem);
   }
@@ -3778,8 +3789,7 @@ void CodeGenerator::cgAddNewElem(IRInstruction* inst) {
   // decrefs value
   cgCallHelper(m_as, (TCA)&HphpArray::AddNewElemC, dst, kNoSyncPoint,
                ArgGroup().ssa(arr)
-                         .type(val)
-                         .ssa(val));
+                         .valueType(val));
 }
 
 void CodeGenerator::cgDefCns(IRInstruction* inst) {
@@ -3802,6 +3812,11 @@ void CodeGenerator::cgDefCns(IRInstruction* inst) {
 #endif
 
   CG_PUNT(DefCns);
+}
+
+// TODO: Kill this #2031980
+static StringData* concat_value(TypedValue tv1, TypedValue tv2) {
+  return concat(tv1.m_type, tv1.m_data.num, tv2.m_type, tv2.m_data.num);
 }
 
 void CodeGenerator::cgConcat(IRInstruction* inst) {
@@ -3829,11 +3844,9 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
     if (lType >= Type::Obj || rType >= Type::Obj) {
       CG_PUNT(cgConcat);
     }
-    cgCallHelper(m_as, (TCA)concat, dst, kNoSyncPoint,
-                 ArgGroup().type(lType)
-                           .ssa(tl)
-                           .type(rType)
-                           .ssa(tr));
+    cgCallHelper(m_as, (TCA)concat_value, dst, kNoSyncPoint,
+                 ArgGroup().valueType(tl)
+                           .valueType(tr));
   }
 }
 

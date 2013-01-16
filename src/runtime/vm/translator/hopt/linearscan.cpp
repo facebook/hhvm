@@ -413,8 +413,13 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       RuntimeOption::EvalHHIREnablePreColoring &&
       ssaTmp->getInstruction()->isNative()) {
     // Pre-colors ssaTmp if it's the return value of a native.
-    assert(index == 0);
-    reg = getReg(&m_regs[int(rax)]);
+    if (index == 0) {
+      reg = getReg(&m_regs[int(rax)]);
+    } else if (index == 1) {
+      reg = getReg(&m_regs[int(rdx)]);
+    } else {
+      not_reached();
+    }
   }
   if (reg == NULL) {
     // No pre-coloring for this tmp.

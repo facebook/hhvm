@@ -136,12 +136,16 @@ struct RegSet {
   }
 
   RegSet& add(PhysReg pr) {
-    *this |= RegSet(pr);
+    if (pr != InvalidReg) {
+      *this |= RegSet(pr);
+    }
     return *this;
   }
 
   RegSet& remove(PhysReg pr) {
-    m_bits = m_bits & ~(1 << int(pr));
+    if (pr != InvalidReg) {
+      m_bits = m_bits & ~(1 << int(pr));
+    }
     return *this;
   }
 

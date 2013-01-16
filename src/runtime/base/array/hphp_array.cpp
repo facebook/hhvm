@@ -1543,9 +1543,8 @@ ArrayData* HphpArray::append(CVarRef v, bool copy) {
  * virtual method.
  */
 static NEVER_INLINE
-ArrayData* genericAddNewElemC(ArrayData* a, DataType type, intptr_t data) {
+ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
   assert(a->getCount() <= 1);
-  TypedValue value = tv(type, data);
   ArrayData* UNUSED r = a->append(tvAsCVarRef(&value), false);
   tvRefcountedDecRef(value);
   assert(!r);
@@ -1557,8 +1556,8 @@ ArrayData* genericAddNewElemC(ArrayData* a, DataType type, intptr_t data) {
  * than other array helpers, but tuned for the opcode.  See doc comment in
  * hphp_array.h.
  */
-ArrayData* HphpArray::AddNewElemC(ArrayData* a, DataType type, intptr_t data) {
-  assert(a->getCount() <= 1 && type != KindOfRef);
+ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
+  assert(a->getCount() <= 1 && value.m_type != KindOfRef);
   HphpArray* h;
   ElmInd* ei;
   int64 k;
@@ -1571,13 +1570,13 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* a, DataType type, intptr_t data) {
     // Fast path is a streamlined copy of Variant.constructValHelper()
     // with no incref+decref because we're moving (data,type) to this array.
     Elm* e = h->allocElmFast(ei);
-    e->data.m_type = type != KindOfUninit ? type : KindOfNull;
-    e->data.m_data.num = data;
+    e->data.m_type = typeInitNull(value.m_type);
+    e->data.m_data.num = value.m_data.num;
     e->setIntKey(k);
     h->m_nextKI = k + 1;
     return a;
   }
-  return genericAddNewElemC(a, type, data);
+  return genericAddNewElemC(a, value);
 }
 
 ArrayData* HphpArray::appendRef(CVarRef v, bool copy) {
@@ -1895,7 +1894,7 @@ ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
  *      ... but don't count the reference to the new value.
  */
 ArrayData* array_setm_wk1_v0(ArrayData* ad, TypedValue* value) {
-  return HphpArray::AddNewElemC(ad, value->m_type, value->m_data.num);
+  return HphpArray::AddNewElemC(ad, *value);
 }
 
 /**

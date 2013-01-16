@@ -284,6 +284,10 @@ static inline bool typeReentersOnRelease(DataType type) {
   return IS_REFCOUNTED_TYPE(type) && type != KindOfString;
 }
 
+static inline DataType typeInitNull(DataType t) {
+  return t == KindOfUninit ? KindOfNull : t;
+}
+
 namespace Collection {
 enum Type {
   InvalidType = 0,

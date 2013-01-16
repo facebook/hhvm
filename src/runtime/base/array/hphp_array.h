@@ -223,7 +223,7 @@ public:
    * to its location in the array (caller must not decref).  If the value cannot
    * be stored in the array, this helper decref's it.
    */
-  static ArrayData* AddNewElemC(ArrayData* a, DataType type, intptr_t data);
+  static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
 
 private:
   template <typename AccessorT>

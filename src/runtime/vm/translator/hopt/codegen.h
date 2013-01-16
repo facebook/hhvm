@@ -62,6 +62,11 @@ public:
       m_curInst(NULL), m_lastMarker(NULL), m_curTrace(NULL) {
   }
 
+  static const int64_t kTypeShiftBits = sizeof(int32_t) * CHAR_BIT;
+  static inline int64 toDataTypeForCall(Type::Tag type) {
+    return (int64)Type::toDataType(type) << (sizeof(int32_t) * CHAR_BIT);
+  }
+
   void cgTrace(Trace* trace, vector<TransBCMapping>* bcMap);
 
   Address cgInst(IRInstruction* inst);
@@ -72,20 +77,21 @@ public:
 #undef OPC
 
   // helper functions for code generation
-  void cgCallHelper(Asm& a,
-                    TCA addr,
-                    PhysReg dstReg,
-                    SyncOptions sync,
-                    ArgGroup& args);
   void cgCallHelper(Asm&,
                     TCA addr,
                     SSATmp* dst,
                     SyncOptions sync,
                     ArgGroup& args);
+  void cgCallHelper(Asm& a,
+                    TCA addr,
+                    PhysReg dstReg,
+                    SyncOptions sync,
+                    ArgGroup& args);
 
   void cgCallHelper(Asm& a,
                     const Transl::Call& call,
-                    PhysReg dstReg,
+                    PhysReg dstReg0,
+                    PhysReg dstReg1,
                     SyncOptions sync,
                     ArgGroup& args);
 
@@ -208,7 +214,12 @@ private:
 
 class ArgDesc {
 public:
-  enum Kind { Reg, Imm, Addr };
+  enum Kind {
+    Reg,     // Normal register
+    TypeReg, // Type register. Might need arch-specific mangling before call
+    Imm,     // Immediate
+    Addr,    // Address
+  };
 
   PhysReg getDstReg() const { return m_dstReg; }
   PhysReg getSrcReg() const { return m_srcReg; }
@@ -297,6 +308,10 @@ struct ArgGroup {
   ArgGroup& type(SSATmp* tmp) {
     m_args.push_back(ArgDesc(tmp, false));
     return *this;
+  }
+
+  ArgGroup& valueType(SSATmp* tmp) {
+    return ssa(tmp).type(tmp);
   }
 
 private:

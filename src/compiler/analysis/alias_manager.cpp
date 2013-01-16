@@ -547,7 +547,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
           return DisjointAccess;
         }
         // mustnt get here (we would loop forever).
-        ASSERT(false);
+        assert(false);
       }
     case Expression::KindOfSimpleFunctionCall:
     case Expression::KindOfIncludeExpression:
@@ -1020,7 +1020,7 @@ int AliasManager::findInterf0(
   }
 
   if (hasStash) {
-    ASSERT(allowLval);
+    assert(allowLval);
     return findInterf0(
         rv, isLoad, rep,
         stash, end, flags, allowLval, true,
@@ -1062,8 +1062,8 @@ static bool sameExpr(ExpressionPtr e1, ExpressionPtr e2) {
 void AliasManager::setCanonPtrForArrayCSE(
     ExpressionPtr e,
     ExpressionPtr rep) {
-  ASSERT(e);
-  ASSERT(rep);
+  assert(e);
+  assert(rep);
   if (e->is(Expression::KindOfArrayElementExpression)) {
     // e is an array access in rvalue context,
     // need to switch on rep
@@ -1080,7 +1080,7 @@ void AliasManager::setCanonPtrForArrayCSE(
       break;
     case Expression::KindOfListAssignment:
       // TODO: IMPLEMENT
-      ASSERT(false);
+      assert(false);
       break;
     default:
       rep0 = rep;
@@ -1766,7 +1766,7 @@ void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
     if (sp) {
       endInExpression(sp);
       ExpressionPtr kid0(dpc(Expression, c->getNthKid(i)));
-      ASSERT(kid0);
+      assert(kid0);
       kid0->computeLocalExprAltered();
     }
   }
@@ -1867,7 +1867,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
   ExpressionPtr aBack;
   if (pushStack) {
     aBack = m_accessList.back();
-    ASSERT(aBack);
+    assert(aBack);
   }
 
   int n = e->getKidCount();
@@ -2446,7 +2446,7 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   if (ExpressionListPtr useVars = func->getClosureVars()) {
     for (int i = 0; i < useVars->getCount(); i++) {
       ParameterExpressionPtr p = dpc(ParameterExpression, (*useVars)[i]);
-      ASSERT(p);
+      assert(p);
       if (Symbol *sym = m_variables->getSymbol(p->getName())) {
         if (p->isRef()) {
           sym->setReferenced();
@@ -2552,9 +2552,9 @@ private:
 
   void replaceExpression(
       ConstructPtr parent, ExpressionPtr rep, ExpressionPtr old, int kid) {
-    ASSERT(parent);
-    ASSERT(parent->getKidCount() > kid);
-    ASSERT(parent->getNthKid(kid) == old);
+    assert(parent);
+    assert(parent->getKidCount() > kid);
+    assert(parent->getNthKid(kid) == old);
 
     if (!rep) return;
 
@@ -2574,15 +2574,15 @@ private:
   // returns the rep node for target, after the insertion
   ExpressionPtr insertTypeAssertion(ExpressionPtr assertion,
                                     ExpressionPtr target) {
-    ASSERT(assertion);
-    ASSERT(target);
-    ASSERT(assertion->is(Expression::KindOfSimpleVariable) ||
+    assert(assertion);
+    assert(target);
+    assert(assertion->is(Expression::KindOfSimpleVariable) ||
            assertion->is(Expression::KindOfExpressionList));
-    ASSERT(assertion->isNoRemove());
+    assert(assertion->isNoRemove());
 
     if (ExpressionListPtr el = dpc(ExpressionList, target)) {
       if (el->getListKind() == ExpressionList::ListKindComma) {
-        ASSERT(assertion->is(Expression::KindOfSimpleVariable));
+        assert(assertion->is(Expression::KindOfSimpleVariable));
         el->insertElement(assertion, el->getCount() - 1);
         return ExpressionPtr();
       }
@@ -2608,7 +2608,7 @@ private:
   }
 
   ExpressionPtr newTypeAssertion(ExpressionPtr base, TypePtr t) {
-    ASSERT(base->is(Expression::KindOfSimpleVariable));
+    assert(base->is(Expression::KindOfSimpleVariable));
     ExpressionPtr assertion(base->clone());
     assertion->setAssertedType(t);
     assertion->setNoRemove();
@@ -2649,7 +2649,7 @@ private:
   }
 
   SimpleVariablePtr extractAssertableVariable(ExpressionPtr e) {
-    ASSERT(e);
+    assert(e);
     switch (e->getKindOf()) {
     case Expression::KindOfSimpleVariable:
       return spc(SimpleVariable, e);
@@ -2667,9 +2667,9 @@ private:
   ExpressionPtr orAssertions(
       SimpleVariablePtr lhs,
       SimpleVariablePtr rhs) {
-    ASSERT(lhs && lhs->isNoRemove() && lhs->getAssertedType());
-    ASSERT(rhs && rhs->isNoRemove() && rhs->getAssertedType());
-    ASSERT(lhs->getName() == rhs->getName());
+    assert(lhs && lhs->isNoRemove() && lhs->getAssertedType());
+    assert(rhs && rhs->isNoRemove() && rhs->getAssertedType());
+    assert(lhs->getName() == rhs->getName());
     TypePtr u(
         Type::Union(m_ar, lhs->getAssertedType(), rhs->getAssertedType()));
     ExpressionPtr lhs0(lhs->clone());
@@ -2680,9 +2680,9 @@ private:
   ExpressionPtr andAssertions(
       SimpleVariablePtr lhs,
       SimpleVariablePtr rhs) {
-    ASSERT(lhs && lhs->isNoRemove() && lhs->getAssertedType());
-    ASSERT(rhs && rhs->isNoRemove() && rhs->getAssertedType());
-    ASSERT(lhs->getName() == rhs->getName());
+    assert(lhs && lhs->isNoRemove() && lhs->getAssertedType());
+    assert(rhs && rhs->isNoRemove() && rhs->getAssertedType());
+    assert(lhs->getName() == rhs->getName());
     TypePtr i(
         Type::Intersection(
           m_ar, lhs->getAssertedType(), rhs->getAssertedType()));
@@ -2694,9 +2694,9 @@ private:
   ExpressionPtr orAssertions(ExpressionPtr lhs, ExpressionPtr rhs) {
     if (!lhs || !rhs) return ExpressionPtr();
 
-    ASSERT(lhs->is(Expression::KindOfSimpleVariable) ||
+    assert(lhs->is(Expression::KindOfSimpleVariable) ||
            lhs->is(Expression::KindOfExpressionList));
-    ASSERT(rhs->is(Expression::KindOfSimpleVariable) ||
+    assert(rhs->is(Expression::KindOfSimpleVariable) ||
            rhs->is(Expression::KindOfExpressionList));
 
     if (lhs->is(Expression::KindOfSimpleVariable) &&
@@ -2712,7 +2712,7 @@ private:
   }
 
   bool isAllScalar(ExpressionListPtr ep, int startIdx) {
-    ASSERT(ep && ep->getListKind() == ExpressionList::ListKindParam);
+    assert(ep && ep->getListKind() == ExpressionList::ListKindParam);
     for (int i = startIdx; i < ep->getCount(); i++) {
       ExpressionPtr c((*ep)[i]);
       if (c && !c->isScalar()) return false;
@@ -2986,7 +2986,7 @@ private:
           for (int i = 0; i < branches->getCount(); i++) {
             IfBranchStatementPtr branch(
                 dpc(IfBranchStatement, (*branches)[i]));
-            ASSERT(branch);
+            assert(branch);
             if (branch->getCondition()) {
               bool passStmt;
               bool negate;
@@ -3006,7 +3006,7 @@ private:
                   if (i < branches->getCount() - 1) {
                     IfBranchStatementPtr nextBranch(
                         dpc(IfBranchStatement, (*branches)[i + 1]));
-                    ASSERT(nextBranch);
+                    assert(nextBranch);
                     if (nextBranch->getCondition()) {
                       ExpressionPtr old(nextBranch->getCondition());
                       replaceExpression(
@@ -3016,7 +3016,7 @@ private:
                           0);
                     } else {
                       // next branch must be the last branch
-                      ASSERT(i + 1 == branches->getCount() - 1);
+                      assert(i + 1 == branches->getCount() - 1);
                       insertTypeAssertion(after, nextBranch->getStmt());
                     }
                   } else {
@@ -3040,7 +3040,7 @@ private:
           for (int i = 0; i < branches->getCount(); i++) {
             IfBranchStatementPtr branch(
                 dpc(IfBranchStatement, (*branches)[i]));
-            ASSERT(branch);
+            assert(branch);
             if (branch->getStmt()) {
               createTypeAssertions(branch->getStmt());
             }
@@ -3064,8 +3064,8 @@ private:
 
 loop_stmt:
       {
-        ASSERT(loopCondIdx >= 0);
-        ASSERT(loopBodyIdx >= 0);
+        assert(loopCondIdx >= 0);
+        assert(loopBodyIdx >= 0);
         if (e->getNthKid(loopCondIdx)) {
           bool passStmt;
           bool negate;
@@ -3127,7 +3127,7 @@ loop_stmt:
         bool negate;
         createTypeAssertions(e, passStmt, negate);
       } else {
-        ASSERT(false);
+        assert(false);
       }
     }
     return ExpressionPtr();
@@ -3208,7 +3208,7 @@ private:
     } else if (ExpressionPtr e = dpc(Expression, from)) {
       return removeTypeAssertions(e);
     } else {
-      ASSERT(false);
+      assert(false);
       return ConstructPtr();
     }
   }
@@ -3489,7 +3489,7 @@ public:
             }
           } else {
             if (!maybeRef) {
-              ASSERT(m_block->getBit(DataFlow::Killed, id));
+              assert(m_block->getBit(DataFlow::Killed, id));
               m_block->setBit(DataFlow::Referenced, id, false);
             }
             if (set && !sv->hasAnyContext(Expression::ExistContext|
@@ -3719,13 +3719,13 @@ int AliasManager::copyProp(MethodStatementPtr m) {
 }
 
 void AliasManager::deleteCFG() {
-  ASSERT(m_graph != NULL);
+  assert(m_graph != NULL);
   delete m_graph;
   m_graph = NULL;
 }
 
 void AliasManager::createCFG(MethodStatementPtr m) {
-  ASSERT(m_graph == NULL);
+  assert(m_graph == NULL);
   m_graph = ControlFlowGraph::buildControlFlow(m);
 }
 
@@ -3819,7 +3819,7 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
         SimpleVariablePtr sv = it->second;
         const Symbol *sym = sv->getSymbol();
         int &id = m_gidMap["v:"+sym->getName()];
-        ASSERT(!id);
+        assert(!id);
         id = m_gidMap.size();
       }
     }
@@ -3924,11 +3924,11 @@ void AliasManager::invalidateChainRoots(StatementPtr s) {
 }
 
 void AliasManager::nullSafeDisableCSE(StatementPtr parent, int kid) {
-  ASSERT(parent);
+  assert(parent);
   ConstructPtr c(parent->getNthKid(kid));
   if (!c) return;
   ExpressionPtr e(dpc(Expression, c));
-  ASSERT(e);
+  assert(e);
   e->disableCSE();
 }
 
@@ -4181,9 +4181,9 @@ void AliasManager::stringOptsRecur(StatementPtr s) {
 }
 
 void AliasManager::beginInExpression(StatementPtr parent, ExpressionPtr kid) {
-  ASSERT(parent);
+  assert(parent);
   if (m_exprIdx == -1) {
-    ASSERT(!m_exprParent);
+    assert(!m_exprParent);
     m_exprIdx    = m_accessList.size();
     m_exprParent = parent;
     m_expr       = kid;
@@ -4191,9 +4191,9 @@ void AliasManager::beginInExpression(StatementPtr parent, ExpressionPtr kid) {
 }
 
 void AliasManager::endInExpression(StatementPtr requestor) {
-  ASSERT(requestor);
+  assert(requestor);
   if (m_exprIdx != -1) {
-    ASSERT(m_exprIdx >= 0 && m_exprParent);
+    assert(m_exprIdx >= 0 && m_exprParent);
     if (requestor == m_exprParent) {
       m_exprIdx = -1;
       m_exprParent.reset();
@@ -4204,8 +4204,8 @@ void AliasManager::endInExpression(StatementPtr requestor) {
 
 void AliasManager::markAllLocalExprAltered(ExpressionPtr e) {
   if (!m_postOpt) return;
-  ASSERT(isInExpression());
-  ASSERT(m_exprIdx <= (int)m_accessList.size());
+  assert(isInExpression());
+  assert(m_exprIdx <= (int)m_accessList.size());
   e->setLocalExprAltered();
   ExpressionPtrList::reverse_iterator it(m_accessList.rbegin());
   int curIdx = m_accessList.size() - 1;

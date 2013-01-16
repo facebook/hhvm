@@ -298,7 +298,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         outputCPPStmt(cg, ar);
         if (funcScope->needsRefTemp()) cg.clearRefereceTemp();
         cg_indentEnd("}\n");
-        ASSERT(startLineImplementation >= 0);
+        assert(startLineImplementation >= 0);
         m_cppLength = cg.getLineNo(CodeGenerator::PrimaryStream)
                       - startLineImplementation;
         if (needsWrapper) {
@@ -314,7 +314,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     }
     break;
     default:
-      ASSERT(false);
+      assert(false);
   }
 }
 

@@ -105,7 +105,7 @@ public:
   }
   void appendHelper(char c);
   void append(unsigned char c) { append((char)c);}
-  void append(litstr  s) { ASSERT(s); append(s, strlen(s));}
+  void append(litstr  s) { assert(s); append(s, strlen(s));}
   void append(CStrRef s);
   void appendWithTaint(CStrRef s) {
     TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
@@ -115,7 +115,7 @@ public:
   void append(const StringData *s) { append(s->data(), s->size()); }
   void append(const char *s, int len) {
     TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
-    ASSERT(len >= 0);
+    assert(len >= 0);
     if (m_buffer && len <= m_cap - m_len) {
       memcpy(m_buffer + m_len, s, len);
       m_len += len;
@@ -173,8 +173,11 @@ public:
 
 private:
   // disabling copy constructor and assignment
-  StringBuffer(const StringBuffer &sb) { ASSERT(false);}
-  StringBuffer &operator=(const StringBuffer &sb) {ASSERT(false);return *this;}
+  StringBuffer(const StringBuffer &sb) { assert(false); }
+  StringBuffer &operator=(const StringBuffer &sb) {
+    assert(false);
+    return *this;
+  }
 
   StringData* m_str;
   char *m_buffer;
@@ -219,7 +222,7 @@ class CstrBuffer {
 };
 
 inline const char* CstrBuffer::data() const {
-  ASSERT(m_len <= m_cap);
+  assert(m_len <= m_cap);
   TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
   m_buffer[m_len] = 0;
   return m_buffer;

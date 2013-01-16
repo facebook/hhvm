@@ -57,7 +57,7 @@ ConstructPtr EncapsListExpression::getNthKid(int n) const {
     case 0:
       return m_exps;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -73,7 +73,7 @@ void EncapsListExpression::setNthKid(int n, ConstructPtr cp) {
       m_exps = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

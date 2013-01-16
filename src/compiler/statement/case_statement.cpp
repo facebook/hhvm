@@ -59,14 +59,14 @@ bool CaseStatement::isLiteralString() const {
 }
 
 int64 CaseStatement::getLiteralInteger() const {
-  ASSERT(m_condition->is(Expression::KindOfScalarExpression));
+  assert(m_condition->is(Expression::KindOfScalarExpression));
   ScalarExpressionPtr exp =
     dynamic_pointer_cast<ScalarExpression>(m_condition);
   return exp->getLiteralInteger();
 }
 
 string CaseStatement::getLiteralString() const {
-  ASSERT(m_condition->is(Expression::KindOfScalarExpression));
+  assert(m_condition->is(Expression::KindOfScalarExpression));
   ScalarExpressionPtr exp =
     dynamic_pointer_cast<ScalarExpression>(m_condition);
   return exp->getLiteralString();
@@ -84,7 +84,7 @@ ConstructPtr CaseStatement::getNthKid(int n) const {
     case 1:
       return m_stmt;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -103,13 +103,13 @@ void CaseStatement::setNthKid(int n, ConstructPtr cp) {
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
 
 void CaseStatement::inferTypes(AnalysisResultPtr ar) {
-  ASSERT(false);
+  assert(false);
 }
 
 void CaseStatement::inferAndCheck(AnalysisResultPtr ar, TypePtr type,

@@ -221,7 +221,7 @@ string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
           // skip trailing /
           const char *data = m_path.data();
           int n = m_path.size() - 1;
-          ASSERT(data[n] == '/');
+          assert(data[n] == '/');
           res.write(data, n);
           break;
         }

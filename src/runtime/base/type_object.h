@@ -140,7 +140,7 @@ class Object : protected ObjectBase {
       }
 
       // Assert that casting does not adjust the 'this' pointer
-      ASSERT((void*)px == (void*)cur);
+      assert((void*)px == (void*)cur);
       return px;
     }
   }

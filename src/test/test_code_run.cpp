@@ -93,7 +93,7 @@ static bool GenerateMainPHP(const std::string &fullPath,
 
 bool TestCodeRun::GenerateFiles(const char *input,
                                 const char *subdir) {
-  ASSERT(subdir && subdir[0]);
+  assert(subdir && subdir[0]);
 
   // generate main.php early, so if we fail, we have a PHP file to debug with
   string fullPath = "runtime/tmp";
@@ -415,7 +415,7 @@ bool TestCodeRun::MultiVerifyCodeRun() {
 
   bool ret = true;
   for (unsigned i = 0; i < m_infos.size(); i++) {
-    ASSERT(m_infos[i].input);
+    assert(m_infos[i].input);
     ostringstream os;
     os << "Test" << i;
     if (!Count(verify_result(m_infos[i].input, m_infos[i].output, m_perfMode,
@@ -434,7 +434,7 @@ bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
                                 int line /* = 0 */,
                                 bool nowarnings /* = false */,
                                 bool fileoutput /* = false */) {
-  ASSERT(input);
+  assert(input);
   if (!CleanUp()) return false;
   if (Option::EnableEval < Option::FullEval) {
     if (!GenerateFiles(input, "Test0") || !CompileFiles()) {

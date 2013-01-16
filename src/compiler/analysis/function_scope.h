@@ -122,7 +122,7 @@ public:
   bool needsCheckMem() const { return m_needsCheckMem; }
   void setClosureGenerator() { m_closureGenerator = true; }
   bool isClosureGenerator() const {
-    ASSERT(!m_closureGenerator || isClosure());
+    assert(!m_closureGenerator || isClosure());
     return m_closureGenerator;
   }
   bool needsClassParam();

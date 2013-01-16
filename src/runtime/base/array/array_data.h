@@ -372,7 +372,7 @@ class ArrayData : public Countable {
    */
   virtual void renumber() {}
 
-  virtual void onSetEvalScalar() { ASSERT(false);}
+  virtual void onSetEvalScalar() { assert(false);}
 
   /**
    * Serialize this array. We could have made this virtual function to ask

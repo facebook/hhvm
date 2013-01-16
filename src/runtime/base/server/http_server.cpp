@@ -83,7 +83,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   }
 
   if (RuntimeOption::EnableSSL && m_sslCTX) {
-    ASSERT(SSLInit::IsInited());
+    assert(SSLInit::IsInited());
     m_pageServer->enableSSL(m_sslCTX, RuntimeOption::SSLPort);
   }
 
@@ -196,7 +196,7 @@ void HttpServer::onServerShutdown() {
 }
 
 void HttpServer::takeoverShutdown(LibEventServerWithTakeover* server) {
-  ASSERT(server == m_pageServer.get());
+  assert(server == m_pageServer.get());
   // We want to synchronously shut down our satellite servers to free up ports,
   // then asynchronously shut down everything else.
   onServerShutdown();

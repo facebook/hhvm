@@ -54,7 +54,7 @@ void* ArenaImpl<kChunkBytes>::allocSlow(size_t nbytes) {
   if (UNLIKELY(nbytes >= kChunkBytes)) {
     char* ptr = static_cast<char*>(malloc(nbytes));
     m_externalPtrs.push(ptr);
-    ASSERT((intptr_t(ptr) & (kMinBytes - 1)) == 0);
+    assert((intptr_t(ptr) & (kMinBytes - 1)) == 0);
     return ptr;
   }
   createSlab();
@@ -71,7 +71,7 @@ void ArenaImpl<kChunkBytes>::createSlab() {
     m_current = static_cast<char*>(malloc(kChunkBytes));
     m_ptrs.push_back(m_current);
   }
-  ASSERT((intptr_t(m_current) & (kMinBytes - 1)) == 0);
+  assert((intptr_t(m_current) & (kMinBytes - 1)) == 0);
 }
 
 //////////////////////////////////////////////////////////////////////

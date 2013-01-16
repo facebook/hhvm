@@ -110,8 +110,8 @@ struct Fixup {
 
   Fixup(int32_t pcOff, int32_t spOff) : m_pcOffset(pcOff), m_spOffset(spOff)
   {
-    ASSERT(m_pcOffset >= 0);
-    ASSERT(m_spOffset >= 0);
+    assert(m_pcOffset >= 0);
+    assert(m_spOffset >= 0);
   }
   Fixup() : m_pcOffset(-1), m_spOffset(-1) { }
 };
@@ -167,11 +167,11 @@ public:
       // Note: if indirect fixups happen frequently enough, we could
       // just compare savedRip to be less than some threshold where
       // stubs in a.code stop.
-      ASSERT(prevAr);
+      assert(prevAr);
       auto pRealRip = ent->indirect.returnIpDisp +
         uintptr_t(prevAr->m_savedRbp);
       ent = m_fixups.find(*reinterpret_cast<CTCA*>(pRealRip));
-      ASSERT(ent && !ent->isIndirect());
+      assert(ent && !ent->isIndirect());
     }
     regsFromActRec(tca, ar, ent->fixup, outVMRegs);
     return true;
@@ -190,17 +190,17 @@ private:
   };
 
   const Opcode* pc(const ActRec* ar, const Func* f, const Fixup& fixup) const {
-    ASSERT(f);
+    assert(f);
     return f->getEntry() + fixup.m_pcOffset;
   }
 
   void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
                       VMRegs* outRegs) const {
     const Func* f = ar->m_func;
-    ASSERT(f);
+    assert(f);
     TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
           (void*)tca, fixup.m_pcOffset, fixup.m_spOffset);
-    ASSERT(fixup.m_spOffset >= 0);
+    assert(fixup.m_spOffset >= 0);
     outRegs->m_pc = pc(ar, f, fixup);
     outRegs->m_fp = ar;
 

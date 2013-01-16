@@ -150,9 +150,9 @@ struct NameValueTable : private boost::noncopyable {
    */
   void resettle(const StringData* name, TypedValue* origLoc) {
     Elm* e = findElm(name);
-    ASSERT(e);
+    assert(e);
     TypedValue* tv = e->m_tv;
-    ASSERT(tv->m_type == KindOfIndirect);
+    assert(tv->m_type == KindOfIndirect);
     if (!origLoc) {
       *tv = *tv->m_data.pind;
     } else {
@@ -210,7 +210,7 @@ struct NameValueTable : private boost::noncopyable {
   TypedValue* lookupRawPointer(const StringData* name) {
     Elm* elm = findElm(name);
     if (!elm) return 0;
-    ASSERT(elm->m_tv);
+    assert(elm->m_tv);
     return elm->m_tv;
   }
 
@@ -273,9 +273,9 @@ private:
   }
 
   void allocate(const size_t newCapac) {
-    ASSERT(Util::isPowerOfTwo(newCapac));
+    assert(Util::isPowerOfTwo(newCapac));
     const size_t newMask = newCapac - 1;
-    ASSERT(newMask <= std::numeric_limits<uint32_t>::max());
+    assert(newMask <= std::numeric_limits<uint32_t>::max());
     Elm* newTab = static_cast<Elm*>(calloc(sizeof(Elm), newCapac));
     if (m_table) {
       rehash(newTab, newMask);
@@ -295,7 +295,7 @@ private:
     Elm* elm = &table[name->hash() & tabMask];
     UNUSED size_t numProbes = 0;
     for (;;) {
-      ASSERT(numProbes++ < tabMask + 1);
+      assert(numProbes++ < tabMask + 1);
       if (0 == elm->m_name) {
         elm->m_name = name;
         return elm;
@@ -362,7 +362,7 @@ private:
     Elm* elm = &m_table[name->hash() & m_tabMask];
     UNUSED size_t numProbes = 0;
     for (;;) {
-      ASSERT(numProbes++ < m_tabMask + 1);
+      assert(numProbes++ < m_tabMask + 1);
       if (UNLIKELY(0 == elm->m_name)) {
         return 0;
       }
@@ -374,7 +374,7 @@ private:
   }
 
   void addStorage(Elm* elm) {
-    ASSERT(!elm->m_tv);
+    assert(!elm->m_tv);
     elm->m_tv = static_cast<TypedValue*>(
       m_storage.alloc(sizeof(TypedValue)));
   }
@@ -422,7 +422,7 @@ struct NameValueTable::Iterator {
     : m_tab(tab)
     , m_idx(pos)
   {
-    ASSERT(pos >= 0);
+    assert(pos >= 0);
     if (!valid()) next();
   }
 
@@ -443,17 +443,17 @@ struct NameValueTable::Iterator {
   }
 
   const StringData* curKey() const {
-    ASSERT(valid());
+    assert(valid());
     return m_tab->m_table[m_idx].m_name;
   }
 
   const TypedValue* curVal() const {
-    ASSERT(valid());
+    assert(valid());
     return tvDerefIndirect(m_tab->m_table[m_idx].m_tv);
   }
 
   const TypedValue* curValRaw() const {
-    ASSERT(valid());
+    assert(valid());
     return m_tab->m_table[m_idx].m_tv;
   }
 

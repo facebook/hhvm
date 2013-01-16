@@ -139,7 +139,7 @@ int Logger::GetSyslogLevel(LogLevelType level) {
 void Logger::log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
                  bool escape /* = true */, bool escapeMore /* = false */) {
-  ASSERT(!escapeMore || escape);
+  assert(!escapeMore || escape);
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {

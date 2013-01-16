@@ -39,7 +39,7 @@ namespace HPHP {
 string VariableTable::StaticGlobalInfo::GetId
 (ClassScopePtr cls, FunctionScopePtr func,
  const string &name) {
-  ASSERT(cls || func);
+  assert(cls || func);
 
   // format: <class>$$<func>$$name
   string id;
@@ -81,7 +81,7 @@ void VariableTable::getLocalVariableNames(vector<string> &syms) const {
   }
 
   if (fs->needsLocalThis()) {
-    ASSERT(dollarThisIsSpecial);
+    assert(dollarThisIsSpecial);
     // We only need a local variable named "this" if the current function
     // contains an occurrence of "$this" that is not part of a property
     // expression or object method call expression
@@ -398,14 +398,14 @@ void VariableTable::cleanupForError(AnalysisResultConstPtr ar) {
 
 bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
   Symbol *sym = getSymbol(name);
-  ASSERT(sym && sym->isPresent());
+  assert(sym && sym->isPresent());
   bool ret = false;
   if (!sym->isStatic() ||
       (sym->isPublic() && !sym->getClassInitVal())) {
     Symbol *s2;
     ClassScopePtr parent = findParent(ar, name, s2);
     if (parent) {
-      ASSERT(s2 && s2->isPresent());
+      assert(s2 && s2->isPresent());
       if (!s2->isPrivate()) {
         if (!sym->isStatic() || s2->isProtected()) {
           if (sym->isPrivate() || sym->isStatic()) {
@@ -449,7 +449,7 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
       lock->getVariables()->add(sym->getName(), type, implicit,
                                 ar, construct, modifiers);
     }
-    ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
+    assert(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
     TypePtr varType = ar->getVariables()->getFinalType(sym->getName());
     if (varType) {
       type = varType;
@@ -521,11 +521,11 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
                                     AnalysisResultConstPtr ar) {
   Symbol *sym = getSymbol(name);
   if (sym) {
-    ASSERT(sym->declarationSet());
+    assert(sym->declarationSet());
     if (!sym->isOverride()) {
       return sym;
     }
-    ASSERT(!sym->isStatic());
+    assert(!sym->isStatic());
     sym = NULL;
   }
 
@@ -549,9 +549,9 @@ TypePtr VariableTable::checkProperty(BlockScopeRawPtr context,
   if (sym->isOverride()) {
     Symbol *base;
     ClassScopePtr parent = findParent(ar, sym->getName(), base);
-    ASSERT(parent);
-    ASSERT(parent.get() != &m_blockScope);
-    ASSERT(base && !base->isPrivate());
+    assert(parent);
+    assert(parent.get() != &m_blockScope);
+    assert(base && !base->isPrivate());
     if (context->is(BlockScope::FunctionScope)) {
       GET_LOCK(parent);
       type = parent->getVariables()->setType(ar, base, type, coerce);
@@ -567,7 +567,7 @@ bool VariableTable::checkRedeclared(const string &name,
                                     Statement::KindOf kindOf)
 {
   Symbol *sym = getSymbol(name);
-  ASSERT(kindOf == Statement::KindOfStaticStatement ||
+  assert(kindOf == Statement::KindOfStaticStatement ||
          kindOf == Statement::KindOfGlobalStatement);
   if (kindOf == Statement::KindOfStaticStatement && sym->isPresent()) {
     if (sym->isStatic()) {
@@ -702,7 +702,7 @@ TypePtr VariableTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
   if (coerce) {
     if (sym->isParameter()) {
       FunctionScope *func = dynamic_cast<FunctionScope *>(&m_blockScope);
-      ASSERT(func);
+      assert(func);
       TypePtr paramType = func->setParamType(ar,
                                              sym->getParameterIndex(), type);
       if (!Type::SameType(paramType, type)) {
@@ -737,7 +737,7 @@ ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
        parent && !parent->isRedeclaring();
        parent = parent->getParentScope(ar)) {
     sym = parent->getVariables()->getSymbol(name);
-    ASSERT(!sym || sym->isPresent());
+    assert(!sym || sym->isPresent());
     if (sym) return parent;
   }
   return ClassScopePtr();
@@ -808,7 +808,7 @@ static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
 }
 
 void VariableTable::canonicalizeStaticGlobals() {
-  ASSERT(m_staticGlobals.empty());
+  assert(m_staticGlobals.empty());
 
   sort(m_staticGlobalsVec.begin(), m_staticGlobalsVec.end(), by_location);
 
@@ -817,7 +817,7 @@ void VariableTable::canonicalizeStaticGlobals() {
     if (!sgi->sym->getDeclaration()) continue;
     string id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                         sgi->sym->getName());
-    ASSERT(m_staticGlobals.find(id) == m_staticGlobals.end());
+    assert(m_staticGlobals.find(id) == m_staticGlobals.end());
     m_staticGlobals[id] = sgi;
   }
 }
@@ -851,14 +851,14 @@ void VariableTable::checkSystemGVOrder(SymbolSet &variants,
 
 void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
-  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
+  assert(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   cg.printSection("Class Forward Declarations\n");
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     if (!sgi->func) {
-      ASSERT(!sgi->sym->isOverride());
+      assert(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
         cg_printf("FORWARD_DECLARE_CLASS(%s);\n",
@@ -948,7 +948,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
     if (!sgi->func) {
-      ASSERT(!sgi->sym->isOverride());
+      assert(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
       string s = varType->getCPPDecl(ar, sgi->cls);
       string var = Option::StaticPropertyPrefix + id;
@@ -1057,8 +1057,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
 void VariableTable::collectCPPGlobalSymbols(StringPairSetVec &symbols,
                                             CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
-  ASSERT(symbols.size() == AnalysisResult::GlobalSymbolTypeCount);
-  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
+  assert(symbols.size() == AnalysisResult::GlobalSymbolTypeCount);
+  assert(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   // static global variables
   StringPairSet *names = &symbols[AnalysisResult::KindOfStaticGlobalVariable];
@@ -1091,7 +1091,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairSetVec &symbols,
     const string &id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
                                                sgi->sym->getName());
     if (!sgi->func) {
-      ASSERT(!sgi->sym->isOverride());
+      assert(!sgi->sym->isOverride());
       string name = Option::StaticPropertyPrefix + id;
       names->insert(StringPair(name, name));
     }
@@ -1103,7 +1103,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairSetVec &symbols,
 void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
   bool system = (cg.getOutput() == CodeGenerator::SystemCPP);
-  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
+  assert(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   if (!system) {
     cg_printf("IMPLEMENT_SMART_ALLOCATION(GlobalVariables)\n");
@@ -1149,7 +1149,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       "#if defined(USE_GCC_FAST_TLS)\n"
       "static __thread GlobalVariables *g_variables;\n"
       "GlobalVariables *get_global_variables() {\n"
-      "  ASSERT(g_variables);\n"
+      "  assert(g_variables);\n"
       "  return g_variables;\n"
       "}\n"
       "GlobalVariables *get_global_variables_check() {\n"
@@ -1170,7 +1170,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       "static ThreadLocal<GlobalVariables *> g_variables;\n"
       "GlobalVariables *get_global_variables() {\n"
       "  GlobalVariables *g = *(g_variables.getNoCheck());\n"
-      "  ASSERT(g);\n"
+      "  assert(g);\n"
       "  return g;\n"
       "}\n"
       "GlobalVariables *get_global_variables_check() {\n"
@@ -1206,18 +1206,18 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
                                                          AnalysisResultPtr ar) {
-  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
+  assert(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   std::set<string> dtorIncludes;
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     if (!sgi->func) {
-      ASSERT(!sgi->sym->isOverride());
+      assert(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
         ClassScopePtr cls = varType->getClass(ar, sgi->cls);
-        ASSERT(cls);
+        assert(cls);
         if (cls->isUserClass()) {
           const string fileBase = cls->getContainingFile()->outputFilebase();
           if (dtorIncludes.find(fileBase) == dtorIncludes.end()) {
@@ -1236,7 +1236,7 @@ void VariableTable::outputCPPGlobalVariablesDtor(CodeGenerator &cg) {
 
 void VariableTable::outputCPPGVHashTableGetImpl(CodeGenerator &cg,
                                                 AnalysisResultPtr ar) {
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(cg.getCurrentIndentation() == 0);
   const char text1[] =
     "class hashNodeGV {\n"
     "public:\n"
@@ -1333,7 +1333,7 @@ void VariableTable::outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
 
 void VariableTable::outputCPPGVHashTableExists(CodeGenerator &cg,
                                                AnalysisResultPtr ar) {
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(cg.getCurrentIndentation() == 0);
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
   cg_printf(
     "HOT_FUNC_HPHP\n"
@@ -1353,7 +1353,7 @@ void VariableTable::outputCPPGlobalVariablesExists(CodeGenerator &cg,
 
 void VariableTable::outputCPPGVHashTableGetIndex(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(cg.getCurrentIndentation() == 0);
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
   const char text[] =
     "ssize_t GlobalVariables::getIndex(const char* s, strhash_t hash) const {\n"
@@ -1391,7 +1391,7 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
   }
 
   checkSystemGVOrder(variants, maxSysIdx);
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(cg.getCurrentIndentation() == 0);
   const char text[] =
     "\n"
     "CVarRef GlobalVariables::getRefByIdx(ssize_t idx, Variant &k) {\n"
@@ -1433,7 +1433,7 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
 void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool inPseudoMain = isPseudoMainTable();
   if (inPseudoMain) {
-    ASSERT(m_forcedVariants);
+    assert(m_forcedVariants);
     cg_printf("LVariableTable *gVariables ATTRIBUTE_UNUSED = "
               "(LVariableTable *)g;\n");
   }
@@ -1877,7 +1877,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       }
       case VariableTable::JumpIndex: {
         hphp_const_char_map<ssize_t>::const_iterator it = varIdx.find(name);
-        ASSERT(it != varIdx.end());
+        assert(it != varIdx.end());
         ssize_t idx = it->second;
         cg_printf("HASH_INDEX(" STRHASH_FMT ", \"%s\", %ld);\n",
                   hash_string(name),
@@ -1955,9 +1955,9 @@ void VariableTable::outputCPPStaticLocals(CodeGenerator &cg,
   for (SymbolVec::const_iterator it = m_staticLocalsVec.begin();
        it != m_staticLocalsVec.end(); ++it) {
     const Symbol *sym = *it;
-    ASSERT(sym->getDeclaration());
+    assert(sym->getDeclaration());
     FunctionScopeRawPtr func = m_blockScope.getContainingFunction();
-    ASSERT(func && (func->isClosure() || func->isGeneratorFromClosure()));
+    assert(func && (func->isClosure() || func->isGeneratorFromClosure()));
     const string &id = StaticGlobalInfo::GetId(ClassScopePtr(),
                                                func, sym->getName());
     TypePtr varType(sym->getFinalType());

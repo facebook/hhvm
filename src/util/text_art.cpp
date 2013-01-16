@@ -45,7 +45,7 @@ const char *get_box_drawing_char(BoxDrawing name) {
       case LightUpAndLeft:        return "+";
     }
   }
-  ASSERT(false);
+  assert(false);
   return "";
 }
 

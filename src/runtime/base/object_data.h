@@ -99,7 +99,7 @@ class ObjectData : public CountableNF {
         , o_callbacks(cb)
 #endif
         {
-    ASSERT(!hhvm || uintptr_t(this) % sizeof(TypedValue) == 0);
+    assert(!hhvm || uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
       o_id = ++(*os_max_id);
     }
@@ -362,7 +362,7 @@ public:
   CArrRef getProperties() const { return o_properties; }
   void initProperties(int nProp);
  private:
-  ObjectData(const ObjectData &) { ASSERT(false);}
+  ObjectData(const ObjectData &) { assert(false);}
   inline Variant o_getImpl(CStrRef propName, int flags,
                            bool error = true, CStrRef context = null_string);
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
@@ -410,7 +410,7 @@ public:
 
  public:
   void release() {
-    ASSERT(getCount() == 0);
+    assert(getCount() == 0);
     destruct();
     if (UNLIKELY(getCount() != 0)) {
       // Object was resurrected.

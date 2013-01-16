@@ -46,8 +46,8 @@ bool TestParser::SameCode(std::string code1, std::string code2) {
 bool TestParser::VerifyParser(const char *input, const char *output,
                               const char *file /* = "" */, int line /* = 0 */,
                               const char *output2 /* = NULL */) {
-  ASSERT(input);
-  ASSERT(output);
+  assert(input);
+  assert(output);
   if (output2 == NULL) output2 = output;
 
   string oldTab = Option::Tab;

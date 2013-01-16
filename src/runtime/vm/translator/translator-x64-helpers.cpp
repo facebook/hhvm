@@ -212,7 +212,7 @@ TCA funcBodyHelper(ActRec* fp) {
 
   TCA tca;
   if (func->isGenerator()) {
-    ASSERT(nargs == 1);
+    assert(nargs == 1);
     tca = tx64->funcPrologue(func, nargs);
   } else {
     tca = tx64->getCallArrayProlog(func);

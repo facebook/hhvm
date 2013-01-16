@@ -311,7 +311,7 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
     } catch (StringBufferLimitException &e) {
       value = "Serialization limit reached";
     } catch (...) {
-      ASSERT(false);
+      assert(false);
       throw;
     }
   } else {
@@ -412,7 +412,7 @@ bool DebuggerClient::isLocal() {
 }
 
 bool DebuggerClient::connect(const std::string &host, int port) {
-  ASSERT(isApiMode() ||
+  assert(isApiMode() ||
          (!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
   for (unsigned int i = 1; i < m_machines.size(); i++) {
     if (f_gethostbyname(m_machines[i]->m_name) ==
@@ -425,9 +425,9 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 }
 
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
-  ASSERT(!m_machines.empty());
+  assert(!m_machines.empty());
   DMachineInfoPtr local = m_machines[0];
-  ASSERT(local->m_name == LocalPrompt);
+  assert(local->m_name == LocalPrompt);
   local->m_rpcHost = host;
   local->m_rpcPort = port;
   switchMachine(local);
@@ -436,9 +436,9 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
 }
 
 bool DebuggerClient::disconnect() {
-  ASSERT(!m_machines.empty());
+  assert(!m_machines.empty());
   DMachineInfoPtr local = m_machines[0];
-  ASSERT(local->m_name == LocalPrompt);
+  assert(local->m_name == LocalPrompt);
   local->m_rpcHost.clear();
   local->m_rpcPort = 0;
   switchMachine(local);
@@ -478,7 +478,7 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
   machine->m_thrift.create(socket1);
-  ASSERT(m_machines.empty());
+  assert(m_machines.empty());
   m_machines.push_back(machine);
   switchMachine(machine);
   return socket2;
@@ -510,7 +510,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
 }
 
 bool DebuggerClient::reconnect() {
-  ASSERT(m_machine);
+  assert(m_machine);
   string &host = m_machine->m_name;
   int port = m_machine->m_port;
   if (port) {
@@ -614,7 +614,7 @@ void DebuggerClient::stop() {
 
 void DebuggerClient::run() {
   // Make sure we don't run the interface thread for API mode
-  ASSERT(!isApiMode());
+  assert(!isApiMode());
 
   ReadlineApp app;
   playMacro("startup");
@@ -840,7 +840,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
         }
       }
     } else {
-      ASSERT(m_inputState == TakingCode);
+      assert(m_inputState == TakingCode);
       if (!*rl_line_buffer) {
         addCompletion("?>"); // so we tab, we're done
       } else {
@@ -857,7 +857,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
     } else if ((int64)list >= 0 && (int64)list < AutoCompleteCount) {
       if (m_acLiveListsDirty) {
         updateLiveLists();
-        ASSERT(!m_acLiveListsDirty);
+        assert(!m_acLiveListsDirty);
       }
       char *p = getCompletion((*m_acLiveLists)[(int64)list], text);
       if (p) return p;
@@ -1214,7 +1214,7 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
 }
 
 char DebuggerClient::ask(const char *fmt, ...) {
-  ASSERT(!isApiMode());
+  assert(!isApiMode());
   string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -1663,7 +1663,7 @@ bool DebuggerClient::parse(const char *line) {
 }
 
 bool DebuggerClient::match(const char *cmd) {
-  ASSERT(cmd && *cmd);
+  assert(cmd && *cmd);
   return !strncasecmp(m_command.c_str(), cmd, m_command.size());
 }
 
@@ -1672,15 +1672,15 @@ bool DebuggerClient::Match(const char *input, const char *cmd) {
 }
 
 bool DebuggerClient::arg(int index, const char *s) {
-  ASSERT(s && *s);
-  ASSERT(index > 0);
+  assert(s && *s);
+  assert(index > 0);
   --index;
   return (int)m_args.size() > index &&
     !strncasecmp(m_args[index].c_str(), s, m_args[index].size());
 }
 
 std::string DebuggerClient::argValue(int index) {
-  ASSERT(index > 0);
+  assert(index > 0);
   --index;
   if (index >= 0 && index < (int)m_args.size()) {
     return m_args[index];
@@ -1689,7 +1689,7 @@ std::string DebuggerClient::argValue(int index) {
 }
 
 std::string DebuggerClient::lineRest(int index) {
-  ASSERT(index > 0);
+  assert(index > 0);
   return m_line.substr(m_argIdx[index - 1] + 1);
 }
 
@@ -1781,7 +1781,7 @@ int DebuggerClient::checkEvalEnd() {
 }
 
 bool DebuggerClient::processTakeCode() {
-  ASSERT(m_inputState == TakingCommand);
+  assert(m_inputState == TakingCommand);
 
   char first = m_line[0];
   if (first == '@') {
@@ -1826,7 +1826,7 @@ bool DebuggerClient::processEval() {
 }
 
 void DebuggerClient::swapHelp() {
-  ASSERT(m_args.size() > 0);
+  assert(m_args.size() > 0);
   m_command = m_args[0];
   m_args[0] = "help";
 }
@@ -2074,7 +2074,7 @@ bool DebuggerClient::deleteMacro(int index) {
 }
 
 void DebuggerClient::record(const char *line) {
-  ASSERT(line);
+  assert(line);
   if (m_macroRecording && line[0] != '&') {
     m_macroRecording->m_cmds.push_back(line);
   }

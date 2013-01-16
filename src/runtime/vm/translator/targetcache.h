@@ -106,7 +106,7 @@ TCA fcallHelper(ActRec* ar);
 
 static inline void*
 handleToPtr(CacheHandle h) {
-  ASSERT(h < RuntimeOption::EvalJitTargetCacheSize);
+  assert(h < RuntimeOption::EvalJitTargetCacheSize);
   return (char*)tl_targetCaches + h;
 }
 
@@ -156,7 +156,7 @@ public:
     if (kNumLines == 1) {
       return &m_pairs[0];
     }
-    ASSERT(HPHP::Util::isPowerOfTwo(kNumLines));
+    assert(HPHP::Util::isPowerOfTwo(kNumLines));
     return m_pairs + (hashKey(k) & (kNumLines - 1));
   }
 
@@ -262,7 +262,7 @@ public:
   }
 
   static CacheHandle alloc(const StringData* sd) {
-    ASSERT(sd);
+    assert(sd);
     return namedAlloc<NSGlobal>(sd, sizeof(GlobalCache), sizeof(GlobalCache));
   }
 

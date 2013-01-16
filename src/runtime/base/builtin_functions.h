@@ -655,35 +655,35 @@ bool autoloadFunctionNoThrow(CStrRef name, bool *declared);
 
 inline ALWAYS_INLINE bool checkClassExistsThrow(CStrRef name,
                                                 bool *declared) {
-  ASSERT(declared);
+  assert(declared);
   if (LIKELY(*declared)) return true;
   return autoloadClassThrow(name, declared);
 }
 
 inline ALWAYS_INLINE bool checkClassExistsNoThrow(CStrRef name,
                                                   bool *declared) {
-  ASSERT(declared);
+  assert(declared);
   if (LIKELY(*declared)) return true;
   return autoloadClassNoThrow(name, declared);
 }
 
 inline ALWAYS_INLINE bool checkInterfaceExistsThrow(CStrRef name,
                                                     bool *declared) {
-  ASSERT(declared);
+  assert(declared);
   if (LIKELY(*declared)) return true;
   return autoloadInterfaceThrow(name, declared);
 }
 
 inline ALWAYS_INLINE bool checkInterfaceExistsNoThrow(CStrRef name,
                                                       bool *declared) {
-  ASSERT(declared);
+  assert(declared);
   if (LIKELY(*declared)) return true;
   return autoloadInterfaceNoThrow(name, declared);
 }
 
 inline ALWAYS_INLINE bool checkFunctionExistsNoThrow(CStrRef name,
                                                      bool *declared) {
-  ASSERT(declared);
+  assert(declared);
   if (LIKELY(*declared)) return true;
   return autoloadFunctionNoThrow(name, declared);
 }
@@ -771,7 +771,7 @@ public:
   // isRef() returns true if parameter n should be passed by reference.
   bool isRef(int n) const {
     // The RefVarArgs and MixedVarArgs flags cannot both be set
-    ASSERT(!(m_flags & RefVarArgs) || !(m_flags & MixedVarArgs));
+    assert(!(m_flags & RefVarArgs) || !(m_flags & MixedVarArgs));
     bool res = (n < m_argCount ? (m_refFlags & (1 << n)) :
                                  (m_flags & (RefVarArgs | MixedVarArgs)));
     return res;
@@ -781,12 +781,12 @@ public:
   // then a fatal error should be raised.
   bool mustBeRef(int n) const {
     // The RefVarArgs and MixedVarArgs flags cannot both be set
-    ASSERT(!(m_flags & RefVarArgs) || !(m_flags & MixedVarArgs));
+    assert(!(m_flags & RefVarArgs) || !(m_flags & MixedVarArgs));
     bool res = (n < m_argCount ? (m_refFlags & (1 << n)) :
                                  (m_flags & RefVarArgs));
     // If this function returns true for a given parameter, than isRef() must
     // also return true for this parameter.
-    ASSERT(!res || isRef(n));
+    assert(!res || isRef(n));
     return res;
   }
   typedef Variant (*FuncInvoker)(void*, CArrRef);

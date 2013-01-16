@@ -134,7 +134,7 @@ static inline void releaseKey(StringData* keySD) {
   if (keyType == AnyKey) {
     decRefStr(keySD);
   } else {
-    ASSERT(keyType == StrKey);
+    assert(keyType == StrKey);
   }
 }
 
@@ -231,7 +231,7 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
       tvScratch.m_type = KindOfString;
     } else {
       tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
-      ASSERT(tvScratch.m_data.pstr->isStatic());
+      assert(tvScratch.m_data.pstr->isStatic());
       tvScratch.m_type = KindOfStaticString;
     }
     result = &tvScratch;
@@ -253,7 +253,7 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    ASSERT(false);
+    assert(false);
     result = NULL;
   }
   }
@@ -370,7 +370,7 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    ASSERT(false);
+    assert(false);
     result = NULL; // Silence compiler warning.
   }
   }
@@ -430,7 +430,7 @@ static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    ASSERT(false);
+    assert(false);
     result = NULL;
   }
   }
@@ -750,7 +750,7 @@ static inline void SetNewElem(TypedValue* base, Cell* value) {
     }
     break;
   }
-  default: ASSERT(false);
+  default: assert(false);
   }
 }
 
@@ -828,7 +828,7 @@ static inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    ASSERT(false);
+    assert(false);
     result = NULL; // Silence compiler warning.
   }
   }
@@ -898,7 +898,7 @@ static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    ASSERT(false);
+    assert(false);
     result = NULL; // Silence compiler warning.
   }
   }
@@ -938,7 +938,7 @@ static inline void IncDecBody(unsigned char op, TypedValue* fr,
       --(fr->m_data.num);
       break;
     }
-    default: ASSERT(false);
+    default: assert(false);
     }
     return;
   }
@@ -983,7 +983,7 @@ static inline void IncDecBody(unsigned char op, TypedValue* fr,
     --(tvAsVariant(fr));
     break;
   }
-  default: ASSERT(false);
+  default: assert(false);
   }
 }
 
@@ -1059,7 +1059,7 @@ static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     IncDecBody<setResult>(op, result, &dest);
     break;
   }
-  default: ASSERT(false);
+  default: assert(false);
   }
 }
 
@@ -1127,7 +1127,7 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     }
     break;
   }
-  default: ASSERT(false);
+  default: assert(false);
   }
 }
 
@@ -1279,7 +1279,7 @@ template <bool warn, bool define, bool unset, bool baseIsObj = false,
 static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
                                Class* ctx, TypedValue* base, TypedValue* key) {
   static_assert(keyType != IntKey, "Integer property keys are not supported");
-  ASSERT(!warn || !unset);
+  assert(!warn || !unset);
   TypedValue* result = NULL;
   StringData* keySD = NULL;
   Instance* instance;
@@ -1290,7 +1290,7 @@ static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
     if (t == KindOfNull) {
       return result;
     }
-    ASSERT(t == KindOfObject);
+    assert(t == KindOfObject);
     instance = instanceFromTv(base);
   }
 
@@ -1357,7 +1357,7 @@ static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
       return true;
     }
     tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
-    ASSERT(tvScratch.m_data.pstr->isStatic());
+    assert(tvScratch.m_data.pstr->isStatic());
     tvScratch.m_type = KindOfStaticString;
     result = &tvScratch;
     break;
@@ -1414,7 +1414,7 @@ static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
   if (t == KindOfObject) {
     return IssetEmptyPropObj<useEmpty, keyType>(ctx, instanceFromTv(base), key);
   } else {
-    ASSERT(t == KindOfArray);
+    assert(t == KindOfArray);
     return useEmpty;
   }
 }
@@ -1617,9 +1617,9 @@ static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
     tvWriteUninit(&tDest);
     IncDecBody<true>(op, (&tv), &tDest);
     obj->setProp(NULL, keySD, &tDest);
-    ASSERT(!IS_REFCOUNTED_TYPE(tDest.m_type));
+    assert(!IS_REFCOUNTED_TYPE(tDest.m_type));
   }
-  ASSERT(!IS_REFCOUNTED_TYPE(tv.m_type));
+  assert(!IS_REFCOUNTED_TYPE(tv.m_type));
   decRefStr(keySD);
 }
 

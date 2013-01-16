@@ -88,8 +88,8 @@ bool IRInstruction::canCSE() const {
   auto canCSE = opcodeHasFlags(getOpcode(), CanCSE);
   // Make sure that instructions that are CSE'able can't produce a
   // reference count or consume reference counts.
-  ASSERT(!canCSE || !producesReference());
-  ASSERT(!canCSE || !consumesReferences());
+  assert(!canCSE || !producesReference());
+  assert(!canCSE || !consumesReferences());
   return canCSE && !mayReenterHelper();
 }
 
@@ -205,14 +205,14 @@ const char* Type::Strings[(int)Type::TAG_ENUM_COUNT] = {
 // __toString function.
 bool cmpOpTypesMayReenter(Opcode op, Type::Tag t0, Type::Tag t1) {
   if (op == OpNSame || op == OpSame) return false;
-  ASSERT(t0 != Type::Gen && t1 != Type::Gen);
+  assert(t0 != Type::Gen && t1 != Type::Gen);
   return (t0 == Type::Cell || t1 == Type::Cell) ||
     ((t0 == Type::Obj || t1 == Type::Obj) &&
      (Type::isString(t0) || Type::isString(t1)));
 }
 
 TraceExitType::ExitType getExitType(Opcode opc) {
-  ASSERT(opc >= ExitTrace && opc <= ExitGuardFailure);
+  assert(opc >= ExitTrace && opc <= ExitGuardFailure);
   return (TraceExitType::ExitType)(opc - ExitTrace);
 }
 
@@ -250,7 +250,7 @@ SSATmp* IRInstruction::getSrc(uint32 i) const {
 }
 
 void IRInstruction::setSrc(uint32 i, SSATmp* newSrc) {
-  ASSERT(i < getNumSrcs());
+  assert(i < getNumSrcs());
   m_srcs[i] = newSrc;
 }
 
@@ -347,7 +347,7 @@ void IRInstruction::print(std::ostream& ostream) {
     Type::Tag type = isStMem ? getSrc(2)->getType() : m_typeParam;
     ostream << "]:" << Type::Strings[type];
     if (!isLdMem) {
-      ASSERT(getNumSrcs() > 1);
+      assert(getNumSrcs() > 1);
       ostream << ", ";
       printSrc(ostream, isStMem ? 2 : 1);
     }
@@ -426,7 +426,7 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
       ostream << "Class(" << (m_clss ? m_clss->name()->data() : "0") << ")";
       break;
     case Type::FuncClassPtr:
-      ASSERT(false /* ConstInstruction does not hold both func* and class* */);
+      assert(false /* ConstInstruction does not hold both func* and class* */);
       break;
     case Type::None:
       ostream << "None:" << m_intVal;
@@ -454,19 +454,19 @@ void ConstInstruction::print(std::ostream& ostream) {
 }
 
 bool LabelInstruction::equals(IRInstruction* inst) const {
-  ASSERT(0);
+  assert(0);
   return false;
 }
 
 size_t LabelInstruction::hash() const {
-  ASSERT(0);
+  assert(0);
   return 0;
 }
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
 void LabelInstruction::prependPatchAddr(TCA patchAddr) {
   ssize_t diff = getPatchAddr() ? ((TCA)patchAddr - (TCA)getPatchAddr()) : 0;
-  ASSERT(deltaFits(diff, sz::dword));
+  assert(deltaFits(diff, sz::dword));
   *(int*)(patchAddr) = (int)diff;
   m_patchAddr = patchAddr;
 }
@@ -526,39 +526,39 @@ int SSATmp::numAllocatedRegs() const {
 
 
 bool SSATmp::getConstValAsBool() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBool();
 }
 int64 SSATmp::getConstValAsInt() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsInt();
 }
 int64 SSATmp::getConstValAsRawInt() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsRawInt();
 }
 double SSATmp::getConstValAsDbl() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsDbl();
 }
 const StringData* SSATmp::getConstValAsStr() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsStr();
 }
 const ArrayData* SSATmp::getConstValAsArr() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsArr();
 }
 const Func* SSATmp::getConstValAsFunc() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsFunc();
 }
 const Class* SSATmp::getConstValAsClass() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsClass();
 }
 uintptr_t SSATmp::getConstValAsBits() const {
-  ASSERT(isConst());
+  assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBits();
 }
 

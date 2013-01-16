@@ -30,7 +30,7 @@ const TypedValue* preConstVecHasUnique(const PreConstPtrVec& preConsts) {
     return NULL;
   }
 
-  ASSERT(preConsts.size() >= 1);
+  assert(preConsts.size() >= 1);
   const TypedValue* first = &preConsts.front()->value;
   if (first->m_type == KindOfUninit) {
     return NULL;
@@ -107,14 +107,14 @@ void unmergePreConsts(const PreConstVec& preConsts, void* owner) {
   ConstStringDataSet visitedNames;
   for (PreConstVec::const_iterator mi = preConsts.begin();
        mi != preConsts.end(); ++mi) {
-    ASSERT(mi->owner == owner);
+    assert(mi->owner == owner);
     if (visitedNames.find(mi->name) != visitedNames.end()) {
       continue;
     }
     visitedNames.insert(mi->name);
     PreConstDepMap::accessor acc;
     UNUSED bool found = gPreConsts.find(acc, mi->name);
-    ASSERT(found);
+    assert(found);
     UNUSED int erased = 0;
     PreConstPtrVec& pcPtrs = acc->second.preConsts;
     for (PreConstPtrVec::iterator vi = pcPtrs.begin(); vi != pcPtrs.end(); ) {
@@ -125,7 +125,7 @@ void unmergePreConsts(const PreConstVec& preConsts, void* owner) {
         ++vi;
       }
     }
-    ASSERT(erased > 0);
+    assert(erased > 0);
     TRACE(3, "%s: Erased %d preConsts for %s\n",
           __FUNCTION__, erased, mi->name->data());
     // We erased one or more of the pcPtrs registered for this

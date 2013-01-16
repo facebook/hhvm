@@ -342,7 +342,7 @@ Variant f_array_merge_recursive(int _argc, CVarRef array1,
   Array ret = Array::Create();
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
-  ASSERT(seen.empty());
+  assert(seen.empty());
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
@@ -351,7 +351,7 @@ Variant f_array_merge_recursive(int _argc, CVarRef array1,
     }
     CArrRef arr_v = v.asCArrRef();
     php_array_merge_recursive(seen, false, ret, arr_v);
-    ASSERT(seen.empty());
+    assert(seen.empty());
   }
   return ret;
 }
@@ -417,12 +417,12 @@ Variant f_array_replace_recursive(int _argc, CVarRef array1,
   Array ret = Array::Create();
   PointerSet seen;
   php_array_replace_recursive(seen, false, ret, arr_array1);
-  ASSERT(seen.empty());
+  assert(seen.empty());
   for (ArrayIter iter(_argv); iter; ++iter) {
     CVarRef v = iter.secondRef();
     getCheckedArray(v);
     php_array_replace_recursive(seen, false, ret, arr_v);
-    ASSERT(seen.empty());
+    assert(seen.empty());
   }
   return ret;
 }
@@ -1204,7 +1204,7 @@ public:
     m_locale = String(uloc_getDefault(), CopyString);
     m_errcode.clear();
     m_ucoll = ucol_open(m_locale.data(), &(m_errcode.code));
-    ASSERT(m_ucoll);
+    assert(m_ucoll);
   }
   virtual void requestShutdown() {
     m_locale.reset();

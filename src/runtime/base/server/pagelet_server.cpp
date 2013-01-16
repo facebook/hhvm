@@ -95,7 +95,7 @@ public:
     return m_get ? Transport::GET : Transport::POST;
   }
   virtual std::string getHeader(const char *name) {
-    ASSERT(name && *name);
+    assert(name && *name);
     HeaderMap::const_iterator iter = m_requestHeaders.find(name);
     if (iter != m_requestHeaders.end()) {
       return iter->second[0];
@@ -106,12 +106,12 @@ public:
     headers = m_requestHeaders;
   }
   virtual void addHeaderImpl(const char *name, const char *value) {
-    ASSERT(name && *name);
-    ASSERT(value);
+    assert(name && *name);
+    assert(value);
     m_responseHeaders[name].push_back(value);
   }
   virtual void removeHeaderImpl(const char *name) {
-    ASSERT(name && *name);
+    assert(name && *name);
     m_responseHeaders.erase(name);
   }
   virtual void sendImpl(const void *data, int size, int code,
@@ -204,7 +204,7 @@ public:
     atomic_inc(m_refCount);
   }
   void decRefCount() {
-    ASSERT(m_refCount);
+    assert(m_refCount);
     if (atomic_dec(m_refCount) == 0) {
       delete this;
     }
@@ -321,7 +321,7 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
   Object ret(task);
   PageletTransport *job = task->getJob();
   job->incRefCount(); // paired with worker's decRefCount()
-  ASSERT(s_dispatcher);
+  assert(s_dispatcher);
   s_dispatcher->enqueue(job);
 
   return ret;
@@ -346,10 +346,10 @@ String PageletServer::TaskResult(CObjRef task, Array &headers, int &code,
 }
 
 void PageletServer::AddToPipeline(const string &s) {
-  ASSERT(!s.empty());
+  assert(!s.empty());
   PageletTransport *job =
     dynamic_cast<PageletTransport *>(g_context->getTransport());
-  ASSERT(job);
+  assert(job);
   job->addToPipeline(s);
 }
 

@@ -327,7 +327,7 @@ static inline bool isCmpOp(Opcode opc) {
 }
 
 static inline Opcode cmpToJmpOp(Opcode opc) {
-  ASSERT(isCmpOp(opc));
+  assert(isCmpOp(opc));
   return (Opcode)(JmpGt + (opc - OpGt));
 }
 
@@ -340,21 +340,21 @@ static inline bool isTypeQueryOp(Opcode opc) {
 }
 
 static inline Opcode queryToJmpOp(Opcode opc) {
-  ASSERT(isQueryOp(opc));
+  assert(isQueryOp(opc));
   return (Opcode)(JmpGt + (opc - OpGt));
 }
 
 extern Opcode queryNegateTable[];
 
 static inline Opcode negateQueryOp(Opcode opc) {
-  ASSERT(isQueryOp(opc));
+  assert(isQueryOp(opc));
   return queryNegateTable[opc - OpGt];
 }
 
 extern Opcode queryCommuteTable[];
 
 static inline Opcode commuteQueryOp(Opcode opc) {
-  ASSERT(opc >= OpGt && opc <= OpNSame);
+  assert(opc >= OpGt && opc <= OpNSame);
   return queryCommuteTable[opc - OpGt];
 }
 
@@ -491,7 +491,7 @@ public:
   }
 
   static inline Tag getInnerType(Tag t) {
-    ASSERT(isBoxed(t));
+    assert(isBoxed(t));
     switch (t) {
       case BoxedUninit    : return Uninit;
       case BoxedNull      : return Null;
@@ -516,7 +516,7 @@ public:
     if (t == Uninit) {
       return BoxedNull;
     }
-    ASSERT(isUnboxed(t));
+    assert(isUnboxed(t));
     switch (t) {
       case Uninit     : return BoxedUninit;
       case Null       : return BoxedNull;
@@ -561,7 +561,7 @@ public:
       case Uncounted     : return KindOfUncounted;
       case Gen           : return KindOfAny;
       default: {
-        ASSERT(isBoxed(type));
+        assert(isBoxed(type));
         return KindOfRef;
       }
     }
@@ -732,7 +732,7 @@ struct IRInstruction : private boost::noncopyable {
   void       setTypeParam(Type::Tag t) { m_typeParam = t; }
   uint32_t   getNumSrcs()  const       { return m_numSrcs; }
   void       setNumSrcs(uint32_t i)    {
-    ASSERT(i <= m_numSrcs);
+    assert(i <= m_numSrcs);
     m_numSrcs = i;
   }
   SSATmp*    getSrc(uint32 i) const;
@@ -816,32 +816,32 @@ private:
 class ConstInstruction : public IRInstruction {
 public:
   ConstInstruction(Opcode opc, Type::Tag t) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(t);
     m_intVal = 0;
   }
   ConstInstruction(Opcode opc, int64 val) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::Int);
     m_intVal = val;
   }
   ConstInstruction(Opcode opc, double val) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::Dbl);
     m_dblVal = val;
   }
   ConstInstruction(Opcode opc, const StringData* val) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::StaticStr);
     m_strVal = val;
   }
   ConstInstruction(Opcode opc, const ArrayData* val) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::Arr);
     m_arrVal = val;
   }
   ConstInstruction(Opcode opc, bool val) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::Bool);
     m_intVal = 0;
     m_boolVal = val;
@@ -853,12 +853,12 @@ public:
     new (&m_local) Local(l);
   }
   ConstInstruction(Opcode opc, const Func* f) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::FuncPtr);
     m_func = f;
   }
   ConstInstruction(Opcode opc, const Class* f) : IRInstruction(opc) {
-    ASSERT(opc == DefConst || opc == LdConst);
+    assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::ClassPtr);
     m_clss = f;
   }
@@ -869,49 +869,49 @@ public:
   {}
 
   bool getValAsBool() const {
-    ASSERT(getTypeParam() == Type::Bool);
+    assert(getTypeParam() == Type::Bool);
     return m_boolVal;
   }
   int64 getValAsInt() const {
-    ASSERT(getTypeParam() == Type::Int);
+    assert(getTypeParam() == Type::Int);
     return m_intVal;
   }
   int64 getValAsRawInt() const {
     return m_intVal;
   }
   double getValAsDbl() const {
-    ASSERT(getTypeParam() == Type::Dbl);
+    assert(getTypeParam() == Type::Dbl);
     return m_dblVal;
   }
   const StringData* getValAsStr() const {
-    ASSERT(getTypeParam() == Type::StaticStr);
+    assert(getTypeParam() == Type::StaticStr);
     return m_strVal;
   }
   const ArrayData* getValAsArr() const {
-    ASSERT(getTypeParam() == Type::Arr);
+    assert(getTypeParam() == Type::Arr);
     return m_arrVal;
   }
   const Func* getValAsFunc() const {
-    ASSERT(getTypeParam() == Type::FuncPtr);
+    assert(getTypeParam() == Type::FuncPtr);
     return m_func;
   }
   const Class* getValAsClass() const {
-    ASSERT(getTypeParam() == Type::ClassPtr);
+    assert(getTypeParam() == Type::ClassPtr);
     return m_clss;
   }
   const VarEnv* getValAsVarEnv() const {
-    ASSERT(getTypeParam() == Type::VarEnvPtr);
+    assert(getTypeParam() == Type::VarEnvPtr);
     return m_varEnv;
   }
   TCA getValAsTCA() const {
-    ASSERT(getTypeParam() == Type::TCA);
+    assert(getTypeParam() == Type::TCA);
     return m_tca;
   }
   bool isEmptyArray() const {
     return m_arrVal == HphpArray::GetStaticEmptyArray();
   }
   Local getLocal() const {
-    ASSERT(getTypeParam() == Type::Home);
+    assert(getTypeParam() == Type::Home);
     return m_local;
   }
   uintptr_t getValAsBits() const { return m_bits; }
@@ -1085,8 +1085,8 @@ public:
    *
    * Returns InvalidReg for slots that aren't allocated.
    */
-  PhysReg     getReg() { ASSERT(!m_isSpilled); return m_regs[0]; }
-  PhysReg     getReg(uint32 i) { ASSERT(!m_isSpilled); return m_regs[i]; }
+  PhysReg     getReg() { assert(!m_isSpilled); return m_regs[0]; }
+  PhysReg     getReg(uint32 i) { assert(!m_isSpilled); return m_regs[i]; }
   void        setReg(PhysReg reg, uint32 i) { m_regs[i] = reg; }
 
   /*
@@ -1099,7 +1099,7 @@ public:
    */
   void        setSpillInfo(int idx, SpillInfo si) { m_spillInfo[idx] = si;
                                                     m_isSpilled = true; }
-  SpillInfo   getSpillInfo(int idx) const { ASSERT(m_isSpilled);
+  SpillInfo   getSpillInfo(int idx) const { assert(m_isSpilled);
                                             return m_spillInfo[idx]; }
 
   /*

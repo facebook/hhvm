@@ -394,7 +394,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
       break;
   }
 
-  ASSERT(size <= (size_t)data.size() + 400);
+  assert(size <= (size_t)data.size() + 400);
   return str.shrink(size);
 #endif
 }
@@ -448,7 +448,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
     }
   }
 
-  ASSERT(dsize == size);
+  assert(dsize == size);
   return s.setSize(dsize);
 #endif
 }

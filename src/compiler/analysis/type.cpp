@@ -51,7 +51,7 @@ TypePtr Type::Some        (new Type(Type::KindOfSome        ));
 Type::TypePtrMap Type::s_TypeHintTypes;
 
 void Type::InitTypeHintMap() {
-  ASSERT(s_TypeHintTypes.empty());
+  assert(s_TypeHintTypes.empty());
   s_TypeHintTypes["array"] = Type::Array;
   if (Option::EnableHipHopSyntax) {
     s_TypeHintTypes["bool"]    = Type::Boolean;
@@ -79,7 +79,7 @@ TypePtr Type::CreateObjectType(const std::string &classname) {
 
 TypePtr Type::GetType(KindOf kindOf,
                       const std::string &clsname /* = "" */) {
-  ASSERT(kindOf);
+  assert(kindOf);
   if (!clsname.empty()) return TypePtr(new Type(kindOf, clsname));
 
   switch (kindOf) {
@@ -426,7 +426,7 @@ string Type::GetFastCastMethod(
     break;
   default:
     type = ""; // make the compiler happy
-    ASSERT(false);
+    assert(false);
     break;
   }
 
@@ -496,7 +496,7 @@ Type::Type(KindOf kindOf, const std::string &name)
 
   // m_name must not be empty only when this type could
   // be an object
-  ASSERT(m_name.empty() || (m_kindOf & KindOfObject));
+  assert(m_name.empty() || (m_kindOf & KindOfObject));
 }
 
 bool Type::isInteger() const {
@@ -654,9 +654,9 @@ void Type::outputCPPFastObjectCast(CodeGenerator &cg,
     AnalysisResultConstPtr ar,
     BlockScopeRawPtr scope,
     bool isConst) {
-  ASSERT(isSpecificObject());
+  assert(isSpecificObject());
   ClassScopePtr cls(getClass(ar, scope));
-  ASSERT(cls);
+  assert(cls);
   const string &cppClsName = cls->getId();
   cg_printf("(%s%s%s&)",
             isConst ? "const " : "",
@@ -805,8 +805,8 @@ void Type::count(std::map<std::string, int> &counts) {
 TypePtr Type::InferredObject(AnalysisResultConstPtr ar,
                              TypePtr type1,
                              TypePtr type2) {
-  ASSERT(type1->m_kindOf == KindOfObject);
-  ASSERT(type2->m_kindOf == KindOfObject);
+  assert(type1->m_kindOf == KindOfObject);
+  assert(type2->m_kindOf == KindOfObject);
 
   TypePtr resultType = Type::Object;
   // if they're the same, or we don't know one's name, then use

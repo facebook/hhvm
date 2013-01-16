@@ -50,7 +50,7 @@ ResourceData::ResourceData()
 #undef RD_PARENT
 
 void ResourceData::o_setId(int id) {
-  ASSERT(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
+  assert(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
   int &pmax = *os_max_resource_id;
   if (o_id != id) {
     if (o_id == pmax) --pmax;

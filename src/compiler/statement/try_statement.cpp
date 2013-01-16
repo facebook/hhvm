@@ -94,7 +94,7 @@ ConstructPtr TryStatement::getNthKid(int n) const {
     case 2:
       return m_finallyStmt;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -115,7 +115,7 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
     case 2:
       m_finallyStmt = boost::dynamic_pointer_cast<Statement>(cp);
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -142,7 +142,7 @@ void TryStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int c_count = m_catches->getCount();
   bool has_finally = m_finallyStmt ? true : false;
   
-  ASSERT(c_count || has_finally);
+  assert(c_count || has_finally);
 
   if (has_finally) {
     cg_indentBegin("{\n");

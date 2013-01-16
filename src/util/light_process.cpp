@@ -624,7 +624,7 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
   }
   int64 pid = -1;
   sscanf(buf, "%lld", &pid);
-  ASSERT(pid);
+  assert(pid);
   return (pid_t)pid;
 }
 

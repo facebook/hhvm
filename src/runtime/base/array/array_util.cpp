@@ -461,7 +461,7 @@ Variant ArrayUtil::CountValues(CArrRef input) {
 }
 
 Array ArrayUtil::EnsureIntKeys(CArrRef input) {
-  ASSERT(!input.isNull());
+  assert(!input.isNull());
   if (!input.getArrayData()->isVectorData()) {
     return input.values();
   }
@@ -698,13 +698,13 @@ void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
                      const void *data, bool recursive /* = false */,
                      PointerSet *seen /* = NULL */,
                      CVarRef userdata /* = null_variant */) {
-  ASSERT(walk_function);
+  assert(walk_function);
 
   Variant k;
   Variant v;
   for (MutableArrayIter iter = input->begin(&k, v); iter.advance(); ) {
     if (recursive && v.is(KindOfArray)) {
-      ASSERT(seen);
+      assert(seen);
       ArrayData *arr = v.getArrayData();
 
       if (v.isReferenced()) {
@@ -807,9 +807,9 @@ void ArrayUtil::InitScalarArrays(Array arrs[], int nArrs,
   }
   String s = String(uncompressed, len, AttachString);
   Variant v(f_unserialize(s));
-  ASSERT(v.isArray());
+  assert(v.isArray());
   Array scalarArrays =  v;
-  ASSERT(scalarArrays.size() == nArrs);
+  assert(scalarArrays.size() == nArrs);
   for (int i = 0; i < nArrs; i++) {
     arrs[i] = scalarArrays[i];
     arrs[i].setEvalScalar();

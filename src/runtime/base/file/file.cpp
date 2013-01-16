@@ -80,7 +80,7 @@ String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
 
     // unresolvable paths are all considered as unsafe
     if (canonicalized.find("..") >= 0) {
-      ASSERT(canonicalized.find("..") == 0);
+      assert(canonicalized.find("..") == 0);
       return "";
     }
   }
@@ -238,7 +238,7 @@ bool File::seek(int64 offset, int whence /* = SEEK_SET */) {
   }
   if (offset > 0) {
     int64 avail = m_writepos - m_readpos;
-    ASSERT(avail >= 0);
+    assert(avail >= 0);
     if (avail >= offset) {
       m_readpos += offset;
       return true;
@@ -287,7 +287,7 @@ bool File::lock(int operation) {
 }
 
 bool File::lock(int operation, bool &wouldblock /* = false */) {
-  ASSERT(m_fd >= 0);
+  assert(m_fd >= 0);
 
   wouldblock = false;
   if (flock(m_fd, operation)) {
@@ -384,7 +384,7 @@ String File::readLine(int64 maxlen /* = 0 */) {
   }
 
   if (total_copied == 0) {
-    ASSERT(ret == NULL);
+    assert(ret == NULL);
     return String();
   }
 
@@ -406,7 +406,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
     m_buffer = (char *)malloc(CHUNK_SIZE * 3);
   }
   if (avail < maxlen && !eof()) {
-    ASSERT(m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
+    assert(m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
     m_writepos += readImpl(m_buffer + m_writepos, maxlen - avail);
     maxlen = m_writepos - m_readpos;
   }

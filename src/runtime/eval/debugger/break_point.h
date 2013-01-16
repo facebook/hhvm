@@ -85,7 +85,7 @@ public:
                   int char0 = 0, int line1 = 0, int char1 = 0)
       : InterruptSite(e) {
     m_frame = frame;
-    ASSERT(m_frame);
+    assert(m_frame);
     m_line0 = m_frame->getLine();
     m_char0 = char0;
     m_line1 = line1;

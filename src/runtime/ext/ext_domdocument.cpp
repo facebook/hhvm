@@ -80,7 +80,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
                      parser->input->filename, parser->input->line);
         break;
       default:
-        ASSERT(false);
+        assert(false);
         break;
       }
     } else {
@@ -94,7 +94,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
                      parser->input->line);
         break;
       default:
-        ASSERT(false);
+        assert(false);
         break;
       }
     }
@@ -107,7 +107,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
       raise_notice("%s", msg.c_str());
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
     }
   }
@@ -1138,14 +1138,14 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 
 static void appendOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   if (node) {
-    ASSERT(orphans.find(node) == orphans.end());
+    assert(orphans.find(node) == orphans.end());
     orphans.insert(node);
   }
 }
 
 static void removeOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   if (node) {
-    ASSERT(orphans.find(node) != orphans.end());
+    assert(orphans.find(node) != orphans.end());
     orphans.erase(node);
   }
 }
@@ -1175,7 +1175,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
   }
 
   if (doc.get() && doc->m_classmap.exists(clsname)) {
-    ASSERT(doc->m_classmap[clsname].isString()); // or const char * is not safe
+    assert(doc->m_classmap[clsname].isString()); // or const char * is not safe
     clsname = doc->m_classmap[clsname].toString().data();
   }
   Object wrapper = create_object_only(clsname);
@@ -5403,7 +5403,7 @@ void c_DOMNodeIterator::sweep() {
 }
 
 void c_DOMNodeIterator::reset_iterator() {
-  ASSERT(m_objmap);
+  assert(m_objmap);
   xmlNodePtr curnode = NULL;
   bool owner = false;
   if (m_objmap->m_nodetype != XML_ENTITY_NODE &&

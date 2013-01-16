@@ -54,7 +54,7 @@ bool CmdComplete::onClient(DebuggerClient *client) {
 }
 
 bool CmdComplete::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
+  assert(false); // this command is processed entirely locally
   return false;
 }
 

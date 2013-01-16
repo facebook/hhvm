@@ -331,7 +331,7 @@ bool PDOSqliteStatement::support(SupportedMethod method) {
 
 int PDOSqliteStatement::handleError(const char *file, int line) {
   PDOSqliteConnection *conn = dynamic_cast<PDOSqliteConnection*>(dbh.get());
-  ASSERT(conn);
+  assert(conn);
   return conn->handleError(file, line, this);
 }
 

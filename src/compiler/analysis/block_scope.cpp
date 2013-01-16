@@ -61,7 +61,7 @@ void BlockScope::incLoopNestedLevel() {
 }
 
 void BlockScope::decLoopNestedLevel() {
-  ASSERT(m_loopNestedLevel > 0);
+  assert(m_loopNestedLevel > 0);
   m_loopNestedLevel--;
 }
 
@@ -156,7 +156,7 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
       m_orderedUsers.push_back(&*val.first);
       user->m_orderedDeps.push_back(
           std::make_pair(BlockScopeRawPtr(this), &(val.first->second)));
-      ASSERT(user->getMark() != BlockScope::MarkReady &&
+      assert(user->getMark() != BlockScope::MarkReady &&
              user->getMark() != BlockScope::MarkWaiting);
     } else {
       val.first->second |= useKinds;
@@ -165,7 +165,7 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
 }
 
 void BlockScope::addUpdates(int f) {
-  ASSERT(f > 0);
+  assert(f > 0);
   if (inTypeInference()) {
     // we *must* have the mutex
     getInferTypesMutex().assertOwnedBySelf();
@@ -190,7 +190,7 @@ void BlockScope::addUpdates(int f) {
 }
 
 void BlockScope::announceUpdates(int f) {
-  ASSERT(f > 0);
+  assert(f > 0);
   if (inTypeInference()) {
     // If this scope is currently being processed by this thread, don't bother
     // adding it to the updated map. otherwise, add it

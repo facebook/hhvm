@@ -65,7 +65,7 @@ void Package::addAllFiles(bool force) {
 }
 
 void Package::addInputList(const char *listFileName) {
-  ASSERT(listFileName && *listFileName);
+  assert(listFileName && *listFileName);
   FILE *f = fopen(listFileName, "r");
   if (f == NULL) {
     throw Exception("Unable to open %s: %s", listFileName,
@@ -88,7 +88,7 @@ void Package::addInputList(const char *listFileName) {
 }
 
 void Package::addStaticFile(const char *fileName) {
-  ASSERT(fileName && *fileName);
+  assert(fileName && *fileName);
   m_extraStaticFiles.insert(fileName);
 }
 
@@ -117,13 +117,13 @@ void Package::addPHPDirectory(const char *path, bool force) {
   int rootSize = m_root.size();
   for (unsigned int i = 0; i < files.size(); i++) {
     const string &file = files[i];
-    ASSERT(file.substr(0, rootSize) == m_root);
+    assert(file.substr(0, rootSize) == m_root);
     m_filesToParse.insert(file.substr(rootSize));
   }
 }
 
 void Package::getFiles(std::vector<std::string> &files) const {
-  ASSERT(m_filesToParse.empty());
+  assert(m_filesToParse.empty());
 
   files.clear();
   files.reserve(m_files.size());
@@ -273,7 +273,7 @@ bool Package::parse(const char *fileName) {
 }
 
 bool Package::parseImpl(const char *fileName) {
-  ASSERT(fileName);
+  assert(fileName);
   if (fileName[0] == 0) return false;
 
   string fullPath;

@@ -21,7 +21,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 SynchronizableMulti::SynchronizableMulti(int size) : m_mutex(RankLeaf) {
-  ASSERT(size > 0);
+  assert(size > 0);
   m_conds.resize(size);
   for (unsigned int i = 0; i < m_conds.size(); i++) {
     pthread_cond_init(&m_conds[i], NULL);
@@ -52,7 +52,7 @@ bool SynchronizableMulti::wait(int id, bool front, long seconds,
 }
 
 bool SynchronizableMulti::waitImpl(int id, bool front, timespec *ts) {
-  ASSERT(id >= 0);
+  assert(id >= 0);
   int index = id % m_conds.size();
   pthread_cond_t *cond = &m_conds[index];
 
@@ -70,7 +70,7 @@ bool SynchronizableMulti::waitImpl(int id, bool front, timespec *ts) {
   } else {
     ret = pthread_cond_wait(cond, &m_mutex.getRaw());
   }
-  ASSERT(ret != EPERM); // did you lock the mutex?
+  assert(ret != EPERM); // did you lock the mutex?
 
   if (ret) {
     CondIterMap::iterator iter = m_cond_map.find(cond);

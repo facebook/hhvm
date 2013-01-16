@@ -35,11 +35,11 @@ Statement::Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS)
 // parser functions
 
 void Statement::addElement(StatementPtr stmt) {
-  ASSERT(false);
+  assert(false);
 }
 
 void Statement::insertElement(StatementPtr stmt, int index /* = 0 */) {
-  ASSERT(false);
+  assert(false);
 }
 
 void Statement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {

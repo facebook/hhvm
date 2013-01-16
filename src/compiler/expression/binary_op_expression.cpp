@@ -224,7 +224,7 @@ ConstructPtr BinaryOpExpression::getNthKid(int n) const {
     case 1:
       return m_exp2;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -243,7 +243,7 @@ void BinaryOpExpression::setNthKid(int n, ConstructPtr cp) {
     m_exp2 = boost::dynamic_pointer_cast<Expression>(cp);
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -741,7 +741,7 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     rt = Type::Object;
     break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 
   switch (m_op) {
@@ -902,7 +902,7 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     return;
   }
   default:
-    ASSERT(false);
+    assert(false);
   }
 
   m_exp2->outputPHP(cg, ar);
@@ -1371,7 +1371,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     break;
   case T_SL:
   case T_SR:
-    ASSERT(first->getType()->is(Type::KindOfInt64));
+    assert(first->getType()->is(Type::KindOfInt64));
     first->outputCPP(cg, ar);
     break;
   case T_COLLECTION:

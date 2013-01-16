@@ -142,7 +142,7 @@ namespace Compiler {
 StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
                                      const char *fileName /* = NULL */,
                                      bool lambdaMode /* = false */) {
-  ASSERT(!input.empty());
+  assert(!input.empty());
   if (!fileName || !*fileName) fileName = "string";
 
   int len = input.size();
@@ -404,7 +404,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     out->exp = NEW_EXP(DynamicFunctionCall, name->exp,
                        dynamic_pointer_cast<ExpressionList>(params->exp),
                        clsExp);
-    ASSERT(!fromCompiler);
+    assert(!fromCompiler);
   } else {
     const string &s = name.text();
     if (s == "func_num_args" || s == "func_get_args" || s == "func_get_arg") {
@@ -491,7 +491,7 @@ void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
     dim = NEW_EXP(SimpleVariable, offset->text());
     break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 
   ExpressionPtr arr = NEW_EXP(SimpleVariable, var->text());
@@ -554,7 +554,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
       exp = NEW_EXP(ScalarExpression, type, scalar->text(), true);
       break;
     default:
-      ASSERT(false);
+      assert(false);
   }
   out->exp = exp;
 }
@@ -846,7 +846,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     if (func->ignored()) {
       out->stmt = NEW_STMT0(StatementList);
     } else {
-      ASSERT(!m_prependingStatements.empty());
+      assert(!m_prependingStatements.empty());
       vector<StatementPtr> &prepending = m_prependingStatements.back();
       prepending.push_back(func);
 
@@ -864,7 +864,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       m_closureGenerator = false;
       MethodStatementPtr origStmt =
         boost::dynamic_pointer_cast<MethodStatement>(origGenFunc->stmt);
-      ASSERT(origStmt);
+      assert(origStmt);
       func->setOrigGeneratorFunc(origStmt);
       origStmt->setGeneratorFunc(func);
     }
@@ -1026,13 +1026,13 @@ void Parser::onTraitRule(Token &out, Token &stmtList, Token &newStmt) {
   } else {
     out->stmt = stmtList->stmt;
   }
-  ASSERT(newStmt->stmt);
+  assert(newStmt->stmt);
   out->stmt->addElement(newStmt->stmt);
 }
 
 void Parser::onTraitPrecRule(Token &out, Token &traitName, Token &methodName,
                              Token &otherTraits) {
-  ASSERT(otherTraits->exp);
+  assert(otherTraits->exp);
   ScalarExpressionPtr expTraitName = NEW_EXP(ScalarExpression, T_STRING,
                                              traitName->text());
   ScalarExpressionPtr expMethodName = NEW_EXP(ScalarExpression, T_STRING,
@@ -1063,7 +1063,7 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
   TraitAliasStatementPtr ruleStmt=
     dynamic_pointer_cast<TraitAliasStatement>(rule->stmt);
 
-  ASSERT(ruleStmt);
+  assert(ruleStmt);
 
   if (!newMethodName->text().empty()) {
     ScalarExpressionPtr expNewMethodName =
@@ -1159,7 +1159,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                      attr);
     MethodStatementPtr origStmt =
       boost::dynamic_pointer_cast<MethodStatement>(origGenFunc->stmt);
-    ASSERT(origStmt);
+    assert(origStmt);
     mth->setOrigGeneratorFunc(origStmt);
     origStmt->setGeneratorFunc(mth);
 
@@ -1226,10 +1226,10 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
     out->stmt = stmts->stmt;
   }
 
-  ASSERT(!m_prependingStatements.empty());
+  assert(!m_prependingStatements.empty());
   vector<StatementPtr> &prepending = m_prependingStatements.back();
   if (!prepending.empty()) {
-    ASSERT(prepending.size() == 1);
+    assert(prepending.size() == 1);
     for (unsigned i = 0; i < prepending.size(); i++) {
       out->stmt->addElement(prepending[i]);
     }
@@ -1450,7 +1450,7 @@ void Parser::onGlobalVar(Token &out, Token *exprs, Token &expr) {
     expList->addElement(createDynamicVariable(expr->exp));
     break;
   default:
-    ASSERT(false);
+    assert(false);
   }
   out->exp = expList;
 }
@@ -1600,13 +1600,13 @@ void Parser::onGoto(Token &out, Token &label, bool limited) {
 
 void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {
   GotoStatement *gs = (GotoStatement*) stmt;
-  ASSERT(gs);
+  assert(gs);
   gs->invalidate(error);
 }
 
 void Parser::invalidateLabel(TStatementPtr stmt) {
   LabelStatement *ls = (LabelStatement*) stmt;
-  ASSERT(ls);
+  assert(ls);
   ls->invalidate();
 }
 

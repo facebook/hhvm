@@ -48,7 +48,7 @@ ConstructPtr ThrowStatement::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -64,7 +64,7 @@ void ThrowStatement::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

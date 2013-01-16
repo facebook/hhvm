@@ -230,7 +230,7 @@ struct PtrMapNode {
 void PtrMapNode::clearImpl(unsigned short bits) {
   // clear all the sub levels and mark all slots NULL
   if (bits <= PTRMAP_LEVEL_BITS) {
-    ASSERT(bits == PTRMAP_LEVEL_BITS);
+    assert(bits == PTRMAP_LEVEL_BITS);
     // On bottom level, pointers are not PtrMapNode*
     memset(m_entries, 0, sizeof(void*) * PTRMAP_LEVEL_ENTRIES);
     return;
@@ -265,7 +265,7 @@ void* PtrMap::getPointer(void* ptr) {
     cursor -= PTRMAP_LEVEL_BITS;
     unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
                           >> cursor;
-    ASSERT(index < PTRMAP_LEVEL_ENTRIES);
+    assert(index < PTRMAP_LEVEL_ENTRIES);
     current = (PtrMapNode*)(current->m_entries[index]);
   }
   return (void*)current;
@@ -278,7 +278,7 @@ void PtrMap::setPointer(void* ptr, void* val) {
     cursor -= PTRMAP_LEVEL_BITS;
     unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
                           >> cursor;
-    ASSERT(index < PTRMAP_LEVEL_ENTRIES);
+    assert(index < PTRMAP_LEVEL_ENTRIES);
     if (!cursor) {
       current->m_entries[index] = val;
       break;

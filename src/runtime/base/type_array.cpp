@@ -149,9 +149,9 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
                       const void *key_data,
                       PFUNC_CMP value_cmp_function,
                       const void *value_data) const {
-  ASSERT(by_key || by_value);
-  ASSERT(by_key || key_cmp_function == NULL);
-  ASSERT(by_value || value_cmp_function == NULL);
+  assert(by_key || by_value);
+  assert(by_key || key_cmp_function == NULL);
+  assert(by_value || value_cmp_function == NULL);
   PFUNC_CMP value_cmp_as_string_function = value_cmp_function;
   if (!value_cmp_function) {
     value_cmp_function = SortStringAscending;
@@ -523,7 +523,7 @@ CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   case KindOfRef:
     return rvalAtRef(*(key.m_data.pref->var()), flags);
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return null_variant;
@@ -583,7 +583,7 @@ Variant &Array::lvalAt() {
   if (escalated) {
     ArrayBase::operator=(escalated);
   }
-  ASSERT(ret);
+  assert(ret);
   return *ret;
 }
 
@@ -923,7 +923,7 @@ Variant Array::appendOpEqual(int op, CVarRef v) {
   if (escalated) {
     ArrayBase::operator=(escalated);
   }
-  ASSERT(cv);
+  assert(cv);
   switch (op) {
   case T_CONCAT_EQUAL: return concat_assign((*cv), v);
   case T_PLUS_EQUAL:   return ((*cv) += v);
@@ -969,7 +969,7 @@ void Array::prepend(CVarRef v) {
   if (!m_px) {
     operator=(Create());
   }
-  ASSERT(m_px);
+  assert(m_px);
 
   ArrayData *newarr = m_px->prepend(v, (m_px->getCount() > 1));
   if (newarr) {
@@ -1078,7 +1078,7 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
 void Array::SortImpl(vector<int> &indices, CArrRef source,
                      Array::SortData &opaque, Array::PFUNC_CMP cmp_func,
                      bool by_key, const void *data /* = NULL */) {
-  ASSERT(cmp_func);
+  assert(cmp_func);
 
   int count = source.size();
   if (count == 0) {
@@ -1121,14 +1121,14 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
 }
 
 bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
-  ASSERT(!data.empty());
+  assert(!data.empty());
 
   int count = -1;
   for (unsigned int k = 0; k < data.size(); k++) {
     SortData &opaque = data[k];
 
-    ASSERT(opaque.array);
-    ASSERT(opaque.cmp_func);
+    assert(opaque.array);
+    assert(opaque.cmp_func);
     int size = opaque.array->size();
     if (count == -1) {
       count = size;

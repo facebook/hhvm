@@ -67,9 +67,9 @@ private:
   inline bool isCanonicalStructure(int i) const { return id(i) == i; }
 
   int id(int i) const {
-    ASSERT(i >= 0 && i < (int) m_canonIdMap.size());
+    assert(i >= 0 && i < (int) m_canonIdMap.size());
     int ret = m_canonIdMap[i];
-    ASSERT(ret != -1);
+    assert(ret != -1);
     return ret;
   }
 

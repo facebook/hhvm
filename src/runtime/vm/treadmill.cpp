@@ -88,7 +88,7 @@ void WorkItem::enqueue(WorkItem* gt) {
 
 void startRequest(int threadId) {
   GenCountGuard g;
-  ASSERT(*idToCount(threadId) == kIdleGenCount);
+  assert(*idToCount(threadId) == kIdleGenCount);
   TRACE(1, "tid %d start @gen %d\n", threadId, int(s_gen));
   *idToCount(threadId) = s_gen;
 }
@@ -98,7 +98,7 @@ void finishRequest(int threadId) {
   std::vector<WorkItem*> toFire;
   {
     GenCountGuard g;
-    ASSERT(*idToCount(threadId) != kIdleGenCount);
+    assert(*idToCount(threadId) != kIdleGenCount);
     *idToCount(threadId) = kIdleGenCount;
 
     // After finishing a request, check to see if we've allowed any triggers

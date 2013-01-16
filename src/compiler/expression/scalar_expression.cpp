@@ -80,7 +80,7 @@ ScalarExpression::ScalarExpression
     m_type = T_DNUMBER;
     break;
   default:
-    ASSERT(false);
+    assert(false);
   }
   CStrRef s = value.toString();
   m_value = string(s->data(), s->size());
@@ -101,7 +101,7 @@ void ScalarExpression::appendEncapString(const std::string &value) {
 }
 
 void ScalarExpression::toLower(bool funcCall /* = false */) {
-  ASSERT(funcCall || !m_quoted);
+  assert(funcCall || !m_quoted);
   m_value = Util::toLower(m_value);
 }
 
@@ -210,7 +210,7 @@ ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
 
 TypePtr ScalarExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                      bool coerce) {
-  ASSERT(false);
+  assert(false);
   return TypePtr();
 }
 
@@ -244,7 +244,7 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
     break;
 
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 
@@ -289,7 +289,7 @@ bool ScalarExpression::isLiteralInteger() const {
 }
 
 int64 ScalarExpression::getLiteralInteger() const {
-  ASSERT(isLiteralInteger());
+  assert(isLiteralInteger());
   return strtoll(m_value.c_str(), NULL, 0);
 }
 
@@ -299,7 +299,7 @@ bool ScalarExpression::isLiteralString() const {
     return m_quoted;
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
-    ASSERT(m_quoted); // fall through
+    assert(m_quoted); // fall through
   case T_TRAIT_C:
   case T_CLASS_C:
   case T_NS_C:
@@ -338,10 +338,10 @@ std::string ScalarExpression::getLiteralString() const {
   case T_CONSTANT_ENCAPSED_STRING:
     return m_value;
   case T_NUM_STRING:
-    ASSERT(isLiteralString());
+    assert(isLiteralString());
     return m_value;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return "";
@@ -361,7 +361,7 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
-    ASSERT(m_quoted); // fall through
+    assert(m_quoted); // fall through
   case T_STRING:
     if (m_quoted) {
       string output = Util::escapeStringForPHP(m_originalValue);
@@ -394,7 +394,7 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -419,7 +419,7 @@ std::string ScalarExpression::getCPPLiteralString(bool *binary /* = NULL */) {
     output += "\"";
     break;
   default:
-    ASSERT(false);
+    assert(false);
   }
   return output;
 }
@@ -435,10 +435,10 @@ void ScalarExpression::OutputCPPString(
   bool isBinary = false;
   string escaped = CodeGenerator::EscapeLabel(str, &isBinary);
   string fullName = cg.printNamedString(str, escaped, ar, scope, false);
-  ASSERT(!fullName.empty());
+  assert(!fullName.empty());
   string prefix(Option::ScalarPrefix);
   if (Option::SystemGen) prefix += Option::SysPrefix;
-  ASSERT(fullName.find(prefix) == 0);
+  assert(fullName.find(prefix) == 0);
   string name =
     fullName.substr(prefix.size() + strlen(Option::StaticStringPrefix));
   cg.printf("NAMVAR(%s%s%s, \"%s\")",
@@ -452,7 +452,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
-    ASSERT(m_quoted); // fall through
+    assert(m_quoted); // fall through
   case T_STRING: {
     if (m_quoted) {
       string output = getLiteralString();
@@ -481,14 +481,14 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
     break;
   }
   default:
-    ASSERT(false);
+    assert(false);
   }
 }
 
 void ScalarExpression::outputCPPNamedInteger(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
   Variant v = getVariant();
-  ASSERT(v.isInteger());
+  assert(v.isInteger());
   int index = -1;
   int64 val = v.toInt64();
   int intId = ar->checkScalarVarInteger(val, index);
@@ -509,7 +509,7 @@ void ScalarExpression::outputCPPNamedInteger(CodeGenerator &cg,
 void ScalarExpression::outputCPPInteger(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   Variant v = getVariant();
-  ASSERT(v.isInteger());
+  assert(v.isInteger());
   if (v.toInt64() == LONG_MIN) {
     cg_printf("(int64)0x%llxLL", (uint64)LONG_MIN);
   } else {
@@ -609,7 +609,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -658,7 +658,7 @@ Variant ScalarExpression::getVariant() const {
     case T_DNUMBER:
       return String(m_value).toDouble();
     default:
-      ASSERT(false);
+      assert(false);
   }
   return null;
 }
@@ -698,7 +698,7 @@ bool ScalarExpression::getInt(int64 &i) const {
 bool ScalarExpression::getDouble(double &d) const {
   if (m_type == T_DNUMBER) {
     Variant v = getVariant();
-    ASSERT(v.isDouble());
+    assert(v.isDouble());
     d = v.toDouble();
     return true;
   }

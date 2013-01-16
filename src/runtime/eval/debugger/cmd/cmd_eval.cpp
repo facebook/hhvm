@@ -41,7 +41,7 @@ bool CmdEval::onClient(DebuggerClient *client) {
   client->send(this);
   DebuggerCommandPtr res = client->recv(m_type);
   if (!res->is(m_type)) {
-    ASSERT(client->isApiMode());
+    assert(client->isApiMode());
     m_incomplete = true;
     res->setClientOutput(client);
   } else {

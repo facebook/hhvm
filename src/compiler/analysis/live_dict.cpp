@@ -467,7 +467,7 @@ bool LiveDict::color(TypePtr type) {
           // in the generator (sym->isParameter() will be false b/c we are in
           // the scope of the generator function)
           FunctionScopeRawPtr origScope(sv->getFunctionScope()->getOrigGenFS());
-          ASSERT(origScope);
+          assert(origScope);
           Symbol *origSym =
             origScope->getVariables()->getSymbol(sv->getName());
           if (origSym &&

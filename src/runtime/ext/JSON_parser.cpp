@@ -360,7 +360,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
   case KindOfInt64:
     {
       const char *p = buf.data();
-      ASSERT(p);
+      assert(p);
       if (p == NULL) {
         z = 0LL;
         return;
@@ -524,7 +524,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
     if (b == UTF8_ERROR) {
       return false;
     }
-    ASSERT(b >= 0);
+    assert(b >= 0);
 
     if ((b & 127) == b) {
       /*<fb>*/

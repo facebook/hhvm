@@ -207,12 +207,12 @@ private:
   }
 public:
   CStrRef setSize(int len) {
-    ASSERT(m_px);
+    assert(m_px);
     m_px->setSize(len);
     return *this;
   }
   CStrRef shrink(int len) {
-    ASSERT(m_px);
+    assert(m_px);
     m_px->shrink(len);
     return *this;
   }
@@ -499,14 +499,14 @@ struct string_data_hash {
 
 struct string_data_same {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    ASSERT(s1 && s2);
+    assert(s1 && s2);
     return s1->same(s2);
   }
 };
 
 struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    ASSERT(s1 && s2);
+    assert(s1 && s2);
     return s1->isame(s2);
   }
 };
@@ -550,22 +550,22 @@ struct hphp_string_isame {
 
 struct StringDataHashCompare {
   bool equal(const StringData *s1, const StringData *s2) const {
-    ASSERT(s1 && s2);
+    assert(s1 && s2);
     return s1->same(s2);
   }
   size_t hash(const StringData *s) const {
-    ASSERT(s);
+    assert(s);
     return s->hash();
   }
 };
 
 struct StringDataHashICompare {
   bool equal(const StringData *s1, const StringData *s2) const {
-    ASSERT(s1 && s2);
+    assert(s1 && s2);
     return s1->isame(s2);
   }
   size_t hash(const StringData *s) const {
-    ASSERT(s);
+    assert(s);
     return s->hash();
   }
 };

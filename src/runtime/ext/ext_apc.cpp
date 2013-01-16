@@ -638,7 +638,7 @@ void const_load_impl_compressed
         const_load_set(key, value);
         k += int_lens[i + 2] + 1;
       }
-      ASSERT((k - keys) == len);
+      assert((k - keys) == len);
     }
   }
   {
@@ -663,7 +663,7 @@ void const_load_impl_compressed
         const_load_set(key, value);
         k += char_lens[i + 2] + 1;
       }
-      ASSERT((k - keys) == len);
+      assert((k - keys) == len);
     }
   }
   {
@@ -681,7 +681,7 @@ void const_load_impl_compressed
         const_load_set(key, value);
         p += string_lens[i + i + 3] + 1;
       }
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
   // f_unserialize object is extreamly slow here;
@@ -701,7 +701,7 @@ void const_load_impl_compressed
         const_load_set(key, f_unserialize(value));
         p += object_lens[i + i + 3] + 1;
       }
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
   {
@@ -724,7 +724,7 @@ void const_load_impl_compressed
         const_load_set(key, v);
         p += thrift_lens[i + i + 3] + 1;
       }
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
   {//Would we use others[]?
@@ -746,7 +746,7 @@ void const_load_impl_compressed
         const_load_set(key, v);
         p += other_lens[i + i + 3] + 1;
       }
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
 }
@@ -782,7 +782,7 @@ void apc_load_impl_compressed
         k += int_lens[i + 2] + 1; // skip \0
       }
       s.prime(vars);
-      ASSERT((k - keys) == len);
+      assert((k - keys) == len);
     }
   }
   {
@@ -809,7 +809,7 @@ void apc_load_impl_compressed
         k += char_lens[i + 2] + 1; // skip \0
       }
       s.prime(vars);
-      ASSERT((k - keys) == len);
+      assert((k - keys) == len);
     }
   }
   {
@@ -833,7 +833,7 @@ void apc_load_impl_compressed
         p += string_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
   {
@@ -855,7 +855,7 @@ void apc_load_impl_compressed
         p += object_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
   {
@@ -882,7 +882,7 @@ void apc_load_impl_compressed
         p += thrift_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
   {
@@ -910,7 +910,7 @@ void apc_load_impl_compressed
         p += other_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
-      ASSERT((p - decoded) == len);
+      assert((p - decoded) == len);
     }
   }
 }
@@ -947,7 +947,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
     rfc1867ApcData->update_freq = RuntimeOption::Rfc1867Freq;
 
     if (rfc1867ApcData->update_freq < 0) {
-      ASSERT(false); // TODO: support percentage
+      assert(false); // TODO: support percentage
       // frequency is a percentage, not bytes
       rfc1867ApcData->update_freq =
         rfc1867ApcData->content_length * RuntimeOption::Rfc1867Freq / 100;
@@ -1146,7 +1146,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
     {
       String v;
       v.unserialize(uns);
-      ASSERT(!v.isNull());
+      assert(!v.isNull());
       if (v->isStatic()) {
         union {
           char pointer[8];

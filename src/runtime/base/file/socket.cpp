@@ -160,8 +160,8 @@ bool Socket::waitForData() {
 }
 
 int64 Socket::readImpl(char *buffer, int64 length) {
-  ASSERT(m_fd);
-  ASSERT(length > 0);
+  assert(m_fd);
+  assert(length > 0);
 
   IOStatusHelper io("socket::recv", m_address.c_str(), m_port);
 
@@ -185,8 +185,8 @@ int64 Socket::readImpl(char *buffer, int64 length) {
 }
 
 int64 Socket::writeImpl(const char *buffer, int64 length) {
-  ASSERT(m_fd);
-  ASSERT(length > 0);
+  assert(m_fd);
+  assert(length > 0);
   m_eof = false;
   IOStatusHelper io("socket::send", m_address.c_str(), m_port);
   int64 ret = send(m_fd, buffer, length, 0);

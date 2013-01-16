@@ -553,7 +553,7 @@ struct AsmState : private boost::noncopyable {
   }
 
   void endFpi() {
-    ASSERT(!fpiRegs.empty());
+    assert(!fpiRegs.empty());
 
     FPIEnt& ent = fe->addFPIEnt();
     FPIReg& reg = fpiRegs.back();
@@ -573,7 +573,7 @@ struct AsmState : private boost::noncopyable {
   }
 
   void finishClass() {
-    ASSERT(!fe);
+    assert(!fe);
     pce = 0;
   }
 
@@ -1545,7 +1545,7 @@ void parse_constant(AsmState& as) {
  * Creates an 86ctor stub for the class.
  */
 void parse_default_ctor(AsmState& as) {
-  ASSERT(!as.fe && as.pce);
+  assert(!as.fe && as.pce);
 
   as.fe = as.ue->newMethodEmitter(
     StringData::GetStaticString("86ctor"), as.pce);

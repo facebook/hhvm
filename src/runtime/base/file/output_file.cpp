@@ -70,7 +70,7 @@ int OutputFile::getc() {
 }
 
 int64 OutputFile::writeImpl(const char *buffer, int64 length) {
-  ASSERT(length > 0);
+  assert(length > 0);
   if (m_closed) return 0;
   g_context->write(buffer, length);
   return length;

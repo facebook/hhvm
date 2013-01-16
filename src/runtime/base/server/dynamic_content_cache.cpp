@@ -28,7 +28,7 @@ DynamicContentCache::DynamicContentCache() {
 
 bool DynamicContentCache::find(const std::string &name, const char *&data,
                                int &len, bool &compressed) {
-  ASSERT(!name.empty());
+  assert(!name.empty());
 
   ReadLock lock(m_mutex);
   StringToResourceFilePtrMap::const_iterator iter = m_files.find(name);
@@ -49,8 +49,8 @@ bool DynamicContentCache::find(const std::string &name, const char *&data,
 
 void DynamicContentCache::store(const std::string &name, const char *data,
                                 int size) {
-  ASSERT(!name.empty());
-  ASSERT(size > 0);
+  assert(!name.empty());
+  assert(size > 0);
 
   ResourceFilePtr f(new ResourceFile());
   CstrBufferPtr sb(new CstrBuffer(size));

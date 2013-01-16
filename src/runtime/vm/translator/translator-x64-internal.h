@@ -90,8 +90,8 @@ public:
       TranslatorX64::SavedRegState(this, tx64->m_regMap));
   }
   ~DiamondGuard() {
-    ASSERT(!tx64->m_savedRegMaps.empty());
-    ASSERT(tx64->m_savedRegMaps.top().saver == this);
+    assert(!tx64->m_savedRegMaps.empty());
+    assert(tx64->m_savedRegMaps.top().saver == this);
 
     // Bring the register state back to its state in the main body.
     //
@@ -121,7 +121,7 @@ private:
      * DiamondReturn must be used with branches going to different
      * code regions.
      */
-    ASSERT(branchA != mainA);
+    assert(branchA != mainA);
 
     m_branchA = branchA;
     m_mainA = mainA;
@@ -136,7 +136,7 @@ private:
     // If there's some reason to do something other than this we have
     // to change the way this class works.
     const int UNUSED kJumpSize = 5;
-    ASSERT(m_finishBranchFrontier == m_branchJmp + kJumpSize);
+    assert(m_finishBranchFrontier == m_branchJmp + kJumpSize);
 
     // We're done with the branch, so save the branch's state and
     // switch back to the main line's state.
@@ -146,14 +146,14 @@ private:
   bool finishedBranch() const { return m_branchJmp != 0; }
 
   void swapRegMaps() {
-    ASSERT(!tx64->m_savedRegMaps.empty());
-    ASSERT(tx64->m_savedRegMaps.top().saver == this);
+    assert(!tx64->m_savedRegMaps.empty());
+    assert(tx64->m_savedRegMaps.top().saver == this);
     std::swap(tx64->m_savedRegMaps.top().savedState, tx64->m_regMap);
   }
 
   void emitReconciliation() {
-    ASSERT(!tx64->m_savedRegMaps.empty());
-    ASSERT(tx64->m_savedRegMaps.top().saver == this);
+    assert(!tx64->m_savedRegMaps.empty());
+    assert(tx64->m_savedRegMaps.top().saver == this);
 
     RedirectSpillFill spfRedir(m_branchA);
 
@@ -180,7 +180,7 @@ public:
   }
 
   ~DiamondReturn() {
-    ASSERT(m_branchA &&
+    assert(m_branchA &&
       "DiamondReturn was created without being passed to UnlikelyIfBlock");
 
     if (!m_mainA) {
@@ -240,7 +240,7 @@ public:
         m_branchA->patchJmp(m_branchJmp, m_mainA->code.frontier);
       }
     } else {
-      ASSERT(spfStart == m_branchJmp);
+      assert(spfStart == m_branchJmp);
       m_branchA->jmp(m_mainA->code.frontier);
     }
   }
@@ -459,7 +459,7 @@ struct UnlikelyIfBlock {
    * for now that's an assert.
    */
   void reconcileEarly() {
-    ASSERT(!m_externalDiamond);
+    assert(!m_externalDiamond);
     delete m_returnDiamond;
     m_returnDiamond = 0;
     m_ice = boost::in_place<FreezeRegs>(boost::ref(tx64->m_regMap));
@@ -700,9 +700,9 @@ emitVStackStore(X64Assembler &a, const NormalizedInstruction &ni,
 
 static inline const StringData*
 local_name(const Location& l) {
-  ASSERT(l.isLocal());
+  assert(l.isLocal());
   const StringData* ret = curFunc()->localNames()[l.offset];
-  ASSERT(ret->isStatic());
+  assert(ret->isStatic());
   return ret;
 }
 
@@ -746,7 +746,7 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
     a.  store_imm32_disp_reg(type, disp + TVOFF(m_type), dest);
   }
   if (!IS_NULL_TYPE(type)) {
-    ASSERT(val != reg::noreg);
+    assert(val != reg::noreg);
     a.  store_reg64_disp_reg64(val, disp + TVOFF(m_data), dest);
   }
 }
@@ -789,7 +789,7 @@ emitCopyTo(X64Assembler& a,
            Reg64 dest,
            int destOff,
            PhysReg scratch) {
-  ASSERT(src != scratch);
+  assert(src != scratch);
   // This is roughly how gcc compiles this.
   // Blow off _count.
   auto s64 = r64(scratch);
@@ -859,13 +859,13 @@ public:
   void addLocAddr(const Location &loc) {
     TRACE(6, "ArgManager: push arg %zd addr:(%s, %lld)\n",
           m_args.size(), loc.spaceName(), loc.offset);
-    ASSERT(!loc.isLiteral());
+    assert(!loc.isLiteral());
     m_args.push_back(ArgContent(ArgContent::ArgLocAddr, loc));
   }
 
   void emitArguments() {
     size_t n = m_args.size();
-    ASSERT((int)n <= kNumRegisterArgs);
+    assert((int)n <= kNumRegisterArgs);
     cleanLocs();
     std::map<PhysReg, size_t> used;
     std::vector<PhysReg> actual(n, InvalidReg);

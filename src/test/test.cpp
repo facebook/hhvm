@@ -64,7 +64,7 @@ bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
   }
 
   if (allPassed) {
-    ASSERT(s_total == s_passed + s_skipped);
+    assert(s_total == s_passed + s_skipped);
     printf("%d/%d unit tests passed.\n", s_passed, s_total);
     return true;
   }

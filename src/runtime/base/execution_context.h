@@ -555,7 +555,7 @@ public:
     return it->second;
   }
   void setClsCnsData(const HPHP::VM::Class* class_, HphpArray* clsCnsData) {
-    ASSERT(getClsCnsData(class_) == NULL);
+    assert(getClsCnsData(class_) == NULL);
     m_clsCnsData[class_] = clsCnsData;
   }
 

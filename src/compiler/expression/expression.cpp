@@ -165,11 +165,11 @@ bool Expression::getEffectiveScalar(Variant &v) {
 }
 
 void Expression::addElement(ExpressionPtr exp) {
-  ASSERT(false);
+  assert(false);
 }
 
 void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
-  ASSERT(false);
+  assert(false);
 }
 
 ExpressionPtr Expression::unneededHelper() {
@@ -198,7 +198,7 @@ ExpressionPtr Expression::unneededHelper() {
   }
 
   int n = elist->getCount();
-  ASSERT(n);
+  assert(n);
   if (n == 1) {
     return elist->getNthExpr(0);
   } else {
@@ -333,7 +333,7 @@ void Expression::resetTypes() {
 TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
   IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
-  ASSERT(type);
+  assert(type);
   resetTypes();
   TypePtr actualType = inferTypes(ar, type, coerce);
   if (type->is(Type::KindOfSome) || type->is(Type::KindOfAny)) {
@@ -349,7 +349,7 @@ TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
                                    TypePtr actualType, bool coerce) {
   TypePtr ret;
   actualType = propagateTypes(ar, actualType);
-  ASSERT(actualType);
+  assert(actualType);
   if (coerce) {
     ret = Type::Coerce(ar, expectedType, actualType);
     setTypes(ar, actualType, expectedType);
@@ -357,14 +357,14 @@ TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
     ret = Type::Intersection(ar, actualType, expectedType);
     setTypes(ar, actualType, ret);
   }
-  ASSERT(ret);
+  assert(ret);
   return ret;
 }
 
 void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
                           TypePtr expectedType) {
-  ASSERT(actualType);
-  ASSERT(expectedType);
+  assert(actualType);
+  assert(expectedType);
 
   m_actualType = actualType;
   if (!expectedType->is(Type::KindOfAny) &&
@@ -469,14 +469,14 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                          bool coerce, ExpressionPtr variable,
                                          ExpressionPtr
                                          value /* =ExpressionPtr() */) {
-  ASSERT(type);
+  assert(type);
   TypePtr ret = type;
   if (value) {
     ret = value->inferAndCheck(ar, Type::Some, false);
     if (value->isLiteralNull()) {
       ret = Type::Null;
     }
-    ASSERT(ret);
+    assert(ret);
   }
 
   BlockScopePtr scope = getScope();
@@ -532,7 +532,7 @@ ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
       exp->m_actualType = Type::Variant;
     }
   } else {
-    ASSERT(false);
+    assert(false);
   }
   return exp;
 }
@@ -956,8 +956,8 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       t += "_lv";
     }
     if (fastCast) {
-      ASSERT(dstType0);
-      ASSERT(srcType == m_implementedType);
+      assert(dstType0);
+      assert(srcType == m_implementedType);
       dstType = dstType0;
 
       if (constRef && !dstType->isPrimitive()) {
@@ -1158,7 +1158,7 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
   bool hasCse = false;
   ExpressionPtr p(getCanonCsePtr());
   if (p && p->hasCPPCseTemp()) {
-    ASSERT(p->isChainRoot() && !isChainRoot());
+    assert(p->isChainRoot() && !isChainRoot());
     if (!isLocalExprAltered()) return false;
     hasCse = forceTemp = true;
   } else if (hasCPPCseTemp() && isChainRoot()) {
@@ -1238,7 +1238,7 @@ bool Expression::GetCseTempInfo(
     AnalysisResultPtr ar,
     ExpressionPtr p,
     TypePtr &t) {
-  ASSERT(p);
+  assert(p);
   switch (p->getKindOf()) {
   case Expression::KindOfArrayElementExpression:
     {
@@ -1310,7 +1310,7 @@ ExpressionPtr Expression::getNextCanonCsePtr() const {
     if (dKindOf != pKindOf) continue;
 
     if (dLval) {
-      ASSERT(dAccessCtx);
+      assert(dAccessCtx);
       bool pAccessCtx = p->hasContext(AccessContext);
       if (pLval && pAccessCtx) {
         // match found
@@ -1417,7 +1417,7 @@ bool Expression::needsFastCastTemp(AnalysisResultPtr ar) {
        is(KindOfArrayElementExpression))) {
     return false;
   }
-  ASSERT(m_actualType);
+  assert(m_actualType);
   return !m_actualType->isPrimitive();
 }
 
@@ -1504,7 +1504,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (needsCast) {
-    ASSERT(dstType);
+    assert(dstType);
     bool isSpecObj = m_actualType && m_actualType->isSpecificObject();
     if (!useFastCast ||
         !Type::SameType(m_actualType, dstType) ||
@@ -1587,7 +1587,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (useFastCast) {
-    ASSERT(srcType == m_implementedType);
+    assert(srcType == m_implementedType);
     string method;
     if (!Type::SameType(m_actualType, dstType)) {
       if (m_actualType->is(Type::KindOfObject)) {
@@ -1661,7 +1661,7 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   ExpressionPtr p(getCanonCsePtr());
   if (p && p->hasCPPCseTemp() && !hasCPPCseTemp()) {
-    ASSERT(p->isChainRoot() && !isChainRoot());
+    assert(p->isChainRoot() && !isChainRoot());
     m_cppCseTemp = p->m_cppCseTemp;
   }
 
@@ -1704,7 +1704,7 @@ void Expression::outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
   switch (op) {
   case T_ISSET:  cg_printf("isset("); break;
   case T_EMPTY:  cg_printf("empty("); break;
-  default: ASSERT(false);
+  default: assert(false);
   }
   outputCPP(cg, ar);
   cg_printf(")");

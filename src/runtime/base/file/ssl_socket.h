@@ -99,7 +99,7 @@ private:
 class Certificate : public SweepableResourceData {
 public:
   X509 *m_cert;
-  Certificate(X509 *cert) : m_cert(cert) { ASSERT(m_cert);}
+  Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
   ~Certificate() { if (m_cert) X509_free(m_cert);}
 
   static StaticString s_class_name;

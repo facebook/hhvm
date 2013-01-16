@@ -128,7 +128,7 @@ ConstructPtr StaticMemberExpression::getNthKid(int n) const {
     case 1:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -147,7 +147,7 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -196,7 +196,7 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultConstPtr ar) {
  */
 TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce) {
-  ASSERT(getScope()->is(BlockScope::FunctionScope));
+  assert(getScope()->is(BlockScope::FunctionScope));
   ConstructPtr self = shared_from_this();
 
   bool modified = m_context & (LValue | RefValue | UnsetContext | RefParameter);
@@ -268,7 +268,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       tp = Type::Variant;
       sym = NULL;
     } else if (sym) {
-      ASSERT(m_resolvedClass);
+      assert(m_resolvedClass);
       {
         GET_LOCK(m_resolvedClass);
         tp = m_resolvedClass->checkProperty(getScope(), sym, type, coerce, ar);
@@ -384,7 +384,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     }
 
     if (m_class->is(KindOfScalarExpression)) {
-      ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+      assert(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                         getString().c_str(), "static") == 0);
       cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())");
     } else {
@@ -432,7 +432,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
   if (m_exp->is(Expression::KindOfScalarExpression) && !isRedeclared() &&
       !m_dynamicClass) {
 
-    ASSERT(m_resolvedClass);
+    assert(m_resolvedClass);
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     string clsId = m_resolvedClass->getId();
     TypePtr type = getCPPType();

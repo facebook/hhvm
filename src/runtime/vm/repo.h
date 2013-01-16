@@ -46,7 +46,7 @@ class Repo : public RepoProxy {
   ~Repo();
 
   const char* dbName(int repoId) const {
-    ASSERT(repoId < RepoIdCount);
+    assert(repoId < RepoIdCount);
     return kDbs[repoId];
   }
   sqlite3* dbc() const { return m_dbc; }
@@ -57,7 +57,7 @@ class Repo : public RepoProxy {
     case UnitOriginEval:
       return m_evalRepoId;
     default:
-      ASSERT(false);
+      assert(false);
       return RepoIdInvalid;
     }
   }

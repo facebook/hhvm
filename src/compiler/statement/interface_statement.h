@@ -55,7 +55,7 @@ public:
                              std::vector<std::string> &names);
   ClassScopeRawPtr getClassScope() const {
     BlockScopeRawPtr b = getScope();
-    ASSERT(b->is(BlockScope::ClassScope));
+    assert(b->is(BlockScope::ClassScope));
     return ClassScopeRawPtr((ClassScope*)b.get());
   }
 

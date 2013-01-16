@@ -95,7 +95,7 @@ void CodeErrors::clear() {
 }
 
 void CodeErrors::record(ErrorInfoPtr errorInfo) {
-  ASSERT(errorInfo->m_error >= 0 && errorInfo->m_error < ErrorCount);
+  assert(errorInfo->m_error >= 0 && errorInfo->m_error < ErrorCount);
   Lock lock(m_mutex);
   m_errors[errorInfo->m_error][errorInfo->m_construct1] = errorInfo;
 }

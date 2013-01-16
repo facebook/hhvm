@@ -125,7 +125,7 @@ public:
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
   bool isParseOnDemand() const { return m_package && m_parseOnDemand;}
   void setParseOnDemandDirs(const std::vector<std::string> &dirs) {
-    ASSERT(m_package && !m_parseOnDemand);
+    assert(m_package && !m_parseOnDemand);
     m_parseOnDemandDirs = dirs;
   }
 
@@ -669,7 +669,7 @@ private:
 class SetCurrentScope {
 public:
   SetCurrentScope(BlockScopeRawPtr scope) {
-    ASSERT(!((*AnalysisResult::s_currentScopeThreadLocal).get()));
+    assert(!((*AnalysisResult::s_currentScopeThreadLocal).get()));
     *AnalysisResult::s_currentScopeThreadLocal = scope;
     scope->setInVisitScopes(true);
   }
@@ -681,8 +681,8 @@ public:
 
 #define IMPLEMENT_INFER_AND_CHECK_ASSERT(scope) \
   do { \
-    ASSERT(AnalysisResult::s_currentScopeThreadLocal->get()); \
-    ASSERT(AnalysisResult::s_currentScopeThreadLocal->get() == \
+    assert(AnalysisResult::s_currentScopeThreadLocal->get()); \
+    assert(AnalysisResult::s_currentScopeThreadLocal->get() == \
            (scope).get()); \
     (scope)->getInferTypesMutex().assertOwnedBySelf(); \
   } while (0)
@@ -692,13 +692,13 @@ typedef std::pair < const char *, int > LEntry;
 
 struct LEntryHasher {
   bool equal(const LEntry &l1, const LEntry &l2) const {
-    ASSERT(l1.first);
-    ASSERT(l2.first);
+    assert(l1.first);
+    assert(l2.first);
     return l1.second == l2.second &&
            strcmp(l1.first, l2.first) == 0;
   }
   size_t hash(const LEntry &l) const {
-    ASSERT(l.first);
+    assert(l.first);
     return hash_string(l.first) ^ l.second;
   }
 };
@@ -719,8 +719,8 @@ private:
     // A class scope can NEVER grab a lock on a function scope
     BlockScopeRawPtr current ATTRIBUTE_UNUSED =
       *(AnalysisResult::s_currentScopeThreadLocal.get());
-    ASSERT(current);
-    ASSERT(!current->is(BlockScope::ClassScope) ||
+    assert(current);
+    assert(!current->is(BlockScope::ClassScope) ||
            !scopeToLock->is(BlockScope::FunctionScope));
     return m_mutex.tryLock();
   }
@@ -748,7 +748,7 @@ private:
         // could not acquire lock, throw reschedule exception
         throw RescheduleException(scopeToLock);
       }
-      ASSERT(success);
+      assert(success);
       m_acquired = true;
       m_mutex.assertOwnedBySelf();
     }
@@ -766,7 +766,7 @@ private:
         // could not acquire lock, throw reschedule exception
         throw RescheduleException(scopeToLock);
       }
-      ASSERT(success);
+      assert(success);
       m_acquired = true;
       m_mutex.assertOwnedBySelf();
     }

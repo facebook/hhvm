@@ -407,7 +407,7 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
   }
 
   if (params.empty()) return derefArgs;
-  ASSERT(num_args > params.size());
+  assert(num_args > params.size());
   Array ret = Array(params).merge(derefArgs);
   return ret;
 }
@@ -422,7 +422,7 @@ int64 f_func_num_args() {
     return ar->numArgs();
   } else {
     // we shouldn't be here, since code generation will inline this function
-    ASSERT(false);
+    assert(false);
     return -1;
   }
 }

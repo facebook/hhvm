@@ -54,7 +54,7 @@ public:
     return vector[index];
   }
   void replace(uint32 offset, SSATmp* tmp) {
-    ASSERT(offset < vector.size());
+    assert(offset < vector.size());
     uint32 index = vector.size() - 1 - offset;
     vector[index] = tmp;
   }

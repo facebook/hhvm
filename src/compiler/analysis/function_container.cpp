@@ -305,7 +305,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
   CodeGenerator &cg, bool system, bool noEval,
   const StringToFunctionScopePtrMap *functions,
   const vector<const char *> &funcs) {
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(cg.getCurrentIndentation() == 0);
   const char text1[] =
     "\n"
     "struct hashNodeFunc {\n"
@@ -372,7 +372,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
 
       StringToFunctionScopePtrMap::const_iterator iterFuncs =
         functions->find(name);
-      ASSERT(iterFuncs != functions->end());
+      assert(iterFuncs != functions->end());
       // We have assumptions that function names do not contain ".."
       // (e.g., call_user_func0 ~ call_user_func6)
       always_assert(!strstr(name, ".."));
@@ -453,7 +453,7 @@ void FunctionContainer::outputCPPCodeInfoTable(
     const char *name = fit.key();
     StringToFunctionScopePtrMap::const_iterator iterFuncs =
       functions.find(name);
-    ASSERT(iterFuncs != functions.end());
+    assert(iterFuncs != functions.end());
     cg_indentBegin("HASH_GUARD(" STRHASH_FMT ", %s) {\n",
                    hash_string_i(name),
                    CodeGenerator::EscapeLabel(name).c_str());

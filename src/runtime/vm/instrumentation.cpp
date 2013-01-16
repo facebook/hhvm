@@ -26,7 +26,7 @@ namespace VM {
 
 void Injection::execute() const {
   if (m_builtin) {
-    ASSERT(m_callback);
+    assert(m_callback);
     // Execute function in runtime
     m_callback(m_arg);
     return;
@@ -277,7 +277,7 @@ void InstHelpers::InstCustomStringCallback(const StringData* hook,
                                            Injection::Callback callback,
                                            void *arg, const StringData* desc) {
   const Injection* inj = InjectionCache::GetInjection(callback, arg, desc);
-  ASSERT(inj);
+  assert(inj);
   const StringData* hookCached = InjectionCache::GetStringData(hook);
   if (!g_vmContext->m_injTables) {
     g_vmContext->m_injTables = new InjectionTables();

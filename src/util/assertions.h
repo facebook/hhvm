@@ -22,16 +22,6 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef DEBUG
-#  ifndef ALWAYS_ASSERT
-#    define ASSERT(x)
-#  else
-#    define ASSERT(x) assert(x)
-#  endif
-#else
-#  define ASSERT(x) assert(x)
-#endif
-
 #define IMPLIES(a, b) (!(a) || (b))
 
 // causes a division by zero error at compile time if the assertion fails

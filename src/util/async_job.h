@@ -147,7 +147,7 @@ class JobDispatcher {
   }
 
   TWorker *getWorker(unsigned int i) {
-    ASSERT(i < m_workers.size());
+    assert(i < m_workers.size());
     return m_workers[i]->getWorker();
   }
 

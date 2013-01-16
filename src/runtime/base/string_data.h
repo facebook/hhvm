@@ -218,13 +218,13 @@ public:
   StringData *copy(bool sharedMemory = false) const;
   MutableSlice reserve(int capacity);
   MutableSlice mutableSlice() {
-    ASSERT(!isImmutable());
+    assert(!isImmutable());
     return isSmall() ? MutableSlice(m_small, MaxSmallSize) :
                        MutableSlice(m_data, bigCap());
   }
   StringData* shrink(int len); // setSize and maybe realloc
   StringData* setSize(int len) {
-    ASSERT(len >= 0 && len <= capacity() && !isImmutable());
+    assert(len >= 0 && len <= capacity() && !isImmutable());
     m_data[len] = 0;
     m_len = len;
     return this;
@@ -237,14 +237,14 @@ public:
    */
   const char *data() const {
     // TODO: t1800106: re-enable this assert
-    //ASSERT(rawdata()[size()] == 0); // all strings must be null-terminated
+    //assert(rawdata()[size()] == 0); // all strings must be null-terminated
     TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return rawdata();
   }
   // This method should only be used internally by the String class.
   const char *dataIgnoreTaint() const {
     // TODO: t1800106: re-enable this assert
-    //ASSERT(rawdata()[size()] == 0); // all strings must be null-terminated
+    //assert(rawdata()[size()] == 0); // all strings must be null-terminated
     return rawdata();
   }
   int size() const { return m_len; }
@@ -317,7 +317,7 @@ public:
   DataType toNumeric(int64 &lval, double &dval) const;
 
   strhash_t getPrecomputedHash() const {
-    ASSERT(!isShared());
+    assert(!isShared());
     return m_hash & STRHASH_MASK;
   }
 
@@ -330,7 +330,7 @@ public:
    * Comparisons.
    */
   bool equal(const StringData *s) const {
-    ASSERT(s);
+    assert(s);
     if (s == this) return true;
     int ret;
 
@@ -346,13 +346,13 @@ public:
   }
 
   bool same(const StringData *s) const {
-    ASSERT(s);
+    assert(s);
     if (m_len != s->m_len) return false;
     return !memcmp(rawdata(), s->rawdata(), m_len);
   }
 
   bool isame(const StringData *s) const {
-    ASSERT(s);
+    assert(s);
     if (m_len != s->m_len) return false;
     return !bstrcasecmp(rawdata(), m_len, s->rawdata(), m_len);
   }
@@ -435,7 +435,7 @@ public:
     return Format(m_big.cap & IsMask);
   }
   int bigCap() const {
-    ASSERT(!isSmall());
+    assert(!isSmall());
     return m_big.cap & ~IsMask;
   }
 };

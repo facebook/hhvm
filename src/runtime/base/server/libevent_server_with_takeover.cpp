@@ -76,7 +76,7 @@ static int fd_transfer_request_handler(
   String req((const char*)request, request_length, CopyString);
   String resp;
   int fd = server->afdtRequest(req, &resp);
-  ASSERT(resp.size() <= (int)*response_length);
+  assert(resp.size() <= (int)*response_length);
   memcpy(response, resp.data(), resp.size());
   *response_length = resp.size();
   return fd;
@@ -124,7 +124,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
 
     // Close SSL server
     if (m_server_ssl) {
-      ASSERT(m_accept_sock_ssl > 0);
+      assert(m_accept_sock_ssl > 0);
       ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
       if (ret < 0) {
         Logger::Error("Unable to delete accept socket for SSL in evhttp");

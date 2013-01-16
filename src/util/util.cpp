@@ -36,7 +36,7 @@ static Mutex s_file_mutex;
 
 void Util::split(char delimiter, const char *s, vector<string> &out,
                  bool ignoreEmpty /* = false */) {
-  ASSERT(s);
+  assert(s);
 
   const char *start = s;
   const char *p = s;
@@ -54,8 +54,8 @@ void Util::split(char delimiter, const char *s, vector<string> &out,
 }
 
 void Util::replaceAll(string &s, const char *from, const char *to) {
-  ASSERT(from && *from);
-  ASSERT(to);
+  assert(from && *from);
+  assert(to);
 
   string::size_type lenFrom = strlen(from);
   string::size_type lenTo = strlen(to);

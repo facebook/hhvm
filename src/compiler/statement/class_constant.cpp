@@ -83,7 +83,7 @@ ConstructPtr ClassConstant::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -99,7 +99,7 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -210,7 +210,7 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       break;
     }
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 }

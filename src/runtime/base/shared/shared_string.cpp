@@ -26,7 +26,7 @@ SharedStringData::SharedStringData(const std::string &data) : m_data(data) {
 }
 
 int SharedStringData::decRefCount() const {
-  ASSERT(m_count > 0);
+  assert(m_count > 0);
   int cur = m_count.fetch_and_decrement() - 1;
   if (cur == 0) {
     // Only left in intern map. While this data is still in the
@@ -34,7 +34,7 @@ int SharedStringData::decRefCount() const {
     // overwrite the SharedStringData* in the slot and not use this one.
     InternMap::accessor acc;
     bool found = s_intern.find(acc, m_data);
-    ASSERT(m_count == 0);
+    assert(m_count == 0);
     // May not be found or may not be acc->second if other thread overwrote.
     // Safe to just delete self.
     if (found && acc->second == this) {

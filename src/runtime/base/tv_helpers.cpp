@@ -37,7 +37,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
   case KindOfString:  b = tv->m_data.pstr->toBoolean(); tvDecRefStr(tv); break;
   case KindOfArray:   b = (!tv->m_data.parr->empty()); tvDecRefArr(tv); break;
   case KindOfObject:  b = (tv->m_data.pobj != NULL); tvDecRefObj(tv); break;
-  default:            ASSERT(false); b = false; break;
+  default:            assert(false); b = false; break;
   }
   tv->m_data.num = b;
   tv->m_type = KindOfBoolean;
@@ -54,7 +54,7 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
     tv->m_data.num = 0LL;
     // Fall through
   case KindOfBoolean:
-    ASSERT(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+    assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
     tv->m_type = KindOfInt64;
     // Fall through
   case KindOfInt64:
@@ -79,7 +79,7 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
     tvDecRefObj(tv);
     break;
   }
-  default:            ASSERT(false); i = 0LL; break;
+  default:            assert(false); i = 0LL; break;
   }
   tv->m_data.num = i;
   tv->m_type = KindOfInt64;
@@ -93,7 +93,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
   switch (tv->m_type) {
   case KindOfUninit:
   case KindOfNull:    d = 0.0; break;
-  case KindOfBoolean: ASSERT(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+  case KindOfBoolean: assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
   case KindOfInt64:   d = (double)(tv->m_data.num); break;
   case KindOfDouble:  return;
   case KindOfStaticString: d = tv->m_data.pstr->toDouble(); break;
@@ -108,7 +108,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
     tvDecRefObj(tv);
     break;
   }
-  default:            ASSERT(false); d = 0.0; break;
+  default:            assert(false); d = 0.0; break;
   }
   tv->m_data.dbl = d;
   tv->m_type = KindOfDouble;
@@ -133,7 +133,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
     tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
     return;
   }
-  default:            ASSERT(false); s = buildStringData(""); break;
+  default:            assert(false); s = buildStringData(""); break;
   }
   tv->m_data.pstr = s;
   tv->m_type = KindOfString;
@@ -163,7 +163,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
     return;
   }
-  default:            ASSERT(false); a = ArrayData::Create(); break;
+  default:            assert(false); a = ArrayData::Create(); break;
   }
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
@@ -198,7 +198,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
     return;
   }
   case KindOfObject:  return;
-  default:            ASSERT(false); o = SystemLib::AllocStdClassObject(); break;
+  default:            assert(false); o = SystemLib::AllocStdClassObject(); break;
   }
   tv->m_data.pobj = o;
   tv->m_type = KindOfObject;

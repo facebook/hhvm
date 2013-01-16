@@ -123,7 +123,7 @@ void ParserBase::pushFuncLocation() {
 }
 
 LocationPtr ParserBase::popFuncLocation() {
-  ASSERT(!m_funcLocs.empty());
+  assert(!m_funcLocs.empty());
   LocationPtr loc = m_funcLocs.back();
   m_funcLocs.pop_back();
   return loc;
@@ -134,7 +134,7 @@ void ParserBase::pushClass(bool isXhpClass) {
 }
 
 bool ParserBase::peekClass() {
-  ASSERT(!m_classes.empty());
+  assert(!m_classes.empty());
   return m_classes.back();
 }
 
@@ -195,13 +195,13 @@ void ParserBase::pushLabelInfo() {
 }
 
 void ParserBase::pushLabelScope() {
-  ASSERT(!m_labelInfos.empty());
+  assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   info.scopes.push_back(++info.scopeId);
 }
 
 void ParserBase::popLabelScope() {
-  ASSERT(!m_labelInfos.empty());
+  assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   info.scopes.pop_back();
 }
@@ -209,7 +209,7 @@ void ParserBase::popLabelScope() {
 void ParserBase::addLabel(const std::string &label,
                           LocationPtr loc,
                           ScannerToken *stmt) {
-  ASSERT(!m_labelInfos.empty());
+  assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   if (info.labels.find(label) != info.labels.end()) {
     error("Label '%s' already defined: %s", label.c_str(),
@@ -217,7 +217,7 @@ void ParserBase::addLabel(const std::string &label,
     invalidateLabel(extractStatement(stmt));
     return;
   }
-  ASSERT(!info.scopes.empty());
+  assert(!info.scopes.empty());
   LabelStmtInfo labelInfo;
   labelInfo.scopeId         = info.scopes.back();
   labelInfo.stmt            = extractStatement(stmt);
@@ -228,7 +228,7 @@ void ParserBase::addLabel(const std::string &label,
 void ParserBase::addGoto(const std::string &label,
                          LocationPtr loc,
                          ScannerToken *stmt) {
-  ASSERT(!m_labelInfos.empty());
+  assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   GotoInfo gotoInfo;
   gotoInfo.label  = label;
@@ -239,7 +239,7 @@ void ParserBase::addGoto(const std::string &label,
 }
 
 void ParserBase::popLabelInfo() {
-  ASSERT(!m_labelInfos.empty());
+  assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   LabelMap labels = info.labels; // shallow copy
 

@@ -55,7 +55,7 @@ ConstructPtr DoStatement::getNthKid(int n) const {
     case CondExpr:
       return m_condition;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -74,7 +74,7 @@ void DoStatement::setNthKid(int n, ConstructPtr cp) {
       m_condition = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

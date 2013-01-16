@@ -376,7 +376,7 @@ static int php_getopt(int argc, char* const *argv, const opt_struct opts[],
     }
     return opts[php_optidx].opt_char;
   }
-  ASSERT(false);
+  assert(false);
   return(0);  /* never reached */
 }
 

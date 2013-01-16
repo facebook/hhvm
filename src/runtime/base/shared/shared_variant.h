@@ -59,9 +59,9 @@ public:
   DataType getType() const { return (DataType)m_type; }
   CVarRef asCVarRef() const {
     // Must be non-refcounted types
-    ASSERT(m_shouldCache == false);
-    ASSERT(m_flags == 0);
-    ASSERT(!IS_REFCOUNTED_TYPE(m_tv.m_type));
+    assert(m_shouldCache == false);
+    assert(m_flags == 0);
+    assert(!IS_REFCOUNTED_TYPE(m_tv.m_type));
     return tvAsCVarRef(&m_tv);
   }
 
@@ -70,7 +70,7 @@ public:
   }
 
   void decRef() {
-    ASSERT(m_count);
+    assert(m_count);
     if (atomic_dec(m_count) == 0) {
       delete this;
     }
@@ -79,27 +79,27 @@ public:
   Variant toLocal();
 
   int64 intData() const {
-    ASSERT(is(KindOfInt64));
+    assert(is(KindOfInt64));
     return m_data.num;
   }
 
   const char *stringData() const {
-    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    assert(is(KindOfString) || is(KindOfStaticString));
     return m_data.str->data();
   }
 
   size_t stringLength() const {
-    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    assert(is(KindOfString) || is(KindOfStaticString));
     return m_data.str->size();
   }
 
   strhash_t stringHash() const {
-    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    assert(is(KindOfString) || is(KindOfStaticString));
     return m_data.str->hash();
   }
 
   size_t arrSize() const {
-    ASSERT(is(KindOfArray));
+    assert(is(KindOfArray));
     if (getIsVector()) return m_data.vec->size;
     return m_data.map->size();
   }
@@ -120,7 +120,7 @@ public:
   int32 getSpaceUsage() const;
 
   StringData *getStringData() const {
-    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    assert(is(KindOfString) || is(KindOfStaticString));
     return m_data.str;
   }
 

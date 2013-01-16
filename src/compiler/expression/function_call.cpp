@@ -57,12 +57,12 @@ FunctionCall::FunctionCall
 
   if (m_nameExp &&
       m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
-    ASSERT(m_name.empty());
+    assert(m_name.empty());
     ScalarExpressionPtr c = dynamic_pointer_cast<ScalarExpression>(m_nameExp);
     m_origName = c->getString();
     c->toLower(true /* func call*/);
     m_name = c->getString();
-    ASSERT(!m_name.empty());
+    assert(!m_name.empty());
   } else {
     m_origName = name;
     m_name = Util::toLower(name);
@@ -108,7 +108,7 @@ ConstructPtr FunctionCall::getNthKid(int n) const {
     case 2:
       return m_params;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -130,7 +130,7 @@ void FunctionCall::setNthKid(int n, ConstructPtr cp) {
       m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -537,14 +537,14 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
                                            FunctionScopePtr func,
                                            bool arrayParams) {
 #ifdef HPHP_DETAILED_TYPE_INF_ASSERT
-  ASSERT(func->hasUser(getScope(), BlockScope::UseKindCaller));
+  assert(func->hasUser(getScope(), BlockScope::UseKindCaller));
 #endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
   ConstructPtr self = shared_from_this();
   TypePtr frt;
   {
     TRY_LOCK(func);
     func->getInferTypesMutex().assertOwnedBySelf();
-    ASSERT(!func->inVisitScopes() || getScope() == func);
+    assert(!func->inVisitScopes() || getScope() == func);
     frt = func->getReturnType();
   }
   if (!frt) {
@@ -567,7 +567,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     m_voidReturn = false;
     m_voidWrapper = false;
     type = checkTypesImpl(ar, type, frt, coerce);
-    ASSERT(m_actualType);
+    assert(m_actualType);
   }
   if (arrayParams) {
     m_extraArg = 0;
@@ -581,7 +581,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
   } else {
     m_implementedType = Type::Variant;
   }
-  ASSERT(type);
+  assert(type);
 
   return type;
 }
@@ -692,7 +692,7 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("%s%s::s_class_name, ",
                   Option::ClassPrefix, className.c_str());
       } else {
-        ASSERT(m_clsNameTemp >= 0);
+        assert(m_clsNameTemp >= 0);
         cg_printf("clsName%d, ", m_clsNameTemp);
       }
     } else {

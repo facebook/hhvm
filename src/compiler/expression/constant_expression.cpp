@@ -81,7 +81,7 @@ bool ConstantExpression::isDouble() const {
 
 bool ConstantExpression::getBooleanValue() const {
   string lower = Util::toLower(m_name);
-  ASSERT(lower == "true" || lower == "false");
+  assert(lower == "true" || lower == "false");
   return lower == "true";
 }
 
@@ -243,8 +243,8 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
         getFileScope()->declareConstant(ar, m_name);
       }
     }
-    ASSERT(scope);
-    ASSERT(scope->is(BlockScope::ProgramScope) ||
+    assert(scope);
+    assert(scope->is(BlockScope::ProgramScope) ||
            scope->is(BlockScope::FileScope));
     ConstantTablePtr constants = scope->getConstants();
 

@@ -420,7 +420,7 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
       num2 = collator_convert_string_to_number_if_possible(str2);
     }
     if (num1.same(false) || num2.same(false)) {
-      ASSERT(data);
+      assert(data);
       int ret = ucol_strcoll((const UCollator *)data,
                              (UChar*)(str1.toString().data()),
                              UCHARS(str1.toString().length()),
@@ -511,7 +511,7 @@ static int collator_numeric_compare_descending(CVarRef v1, CVarRef v2,
 static int collator_string_compare_function(CVarRef v1, CVarRef v2,
                                             const void *data,
                                             bool ascending) {
-  ASSERT(data);
+  assert(data);
   String str1;
   if (v1.isString()) {
     str1 = v1.toString();
@@ -556,7 +556,7 @@ static int collator_string_compare_descending(CVarRef v1, CVarRef v2,
 static bool collator_sort_internal(bool renumber, Variant &array,
                                    int sort_flags, bool ascending,
                                    UCollator *coll, intl_error * errcode) {
-  ASSERT(coll);
+  assert(coll);
   errcode->clear();
   s_intl_error->m_error.clear();
   Array temp = array.toArray();
@@ -608,7 +608,7 @@ static bool collator_sort_internal(bool renumber, Variant &array,
 
 bool collator_sort(Variant &array, int sort_flags, bool ascending,
                    UCollator *coll, intl_error *errcode) {
-  ASSERT(coll);
+  assert(coll);
   bool ret = collator_sort_internal(true, array, sort_flags, ascending, coll,
                                     errcode);
   return ret;
@@ -616,7 +616,7 @@ bool collator_sort(Variant &array, int sort_flags, bool ascending,
 
 bool collator_asort(Variant &array, int sort_flags, bool ascending,
                     UCollator *coll, intl_error *errcode) {
-  ASSERT(coll);
+  assert(coll);
   bool ret = collator_sort_internal(false, array, sort_flags, ascending, coll,
                                     errcode);
   return ret;

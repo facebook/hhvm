@@ -81,7 +81,7 @@ int hphp_ffi_exportVariant(CVarRef v, void** result) {
     return 7;
   }
   default:
-    ASSERT(false);
+    assert(false);
     return 0;
   }
 }
@@ -108,7 +108,7 @@ Variant *hphp_ffi_buildVariant(int t, void* v, int len) {
   case 8: return NEW(Variant)((ObjectData*)v);
   case 9: return NEW(Variant)(Array::Create());
   }
-  ASSERT(false);
+  assert(false);
   return NULL;
 }
 

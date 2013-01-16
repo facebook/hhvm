@@ -97,7 +97,7 @@ bool CmdExtension::processList(DebuggerProxy *proxy) {
   for (sorted_iset::const_iterator iter = names.begin();
        iter != names.end(); ++iter) {
     Extension *ext = Extension::GetExtension(*iter);
-    ASSERT(ext);
+    assert(ext);
     if (ext) {
       int support = ext->debuggerSupport();
       string line;

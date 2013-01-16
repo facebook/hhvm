@@ -249,7 +249,7 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
                               Variant (*ifa)(MethodCallPackage &mcp, int count,
                                              INVOKE_FEW_ARGS_IMPL_ARGS),
                               ObjectData *(*coo)(ObjectData*)) {
-  ASSERT(mcp.obj == NULL);
+  assert(mcp.obj == NULL);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
@@ -261,7 +261,7 @@ Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
                             Variant (*i)(MethodCallPackage &mcp,
                                          CArrRef params),
                             ObjectData *(*coo)(ObjectData*)) {
-  ASSERT(mcp.obj == NULL);
+  assert(mcp.obj == NULL);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = i(mcp, params);
@@ -274,7 +274,7 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
                               Variant (*ifa)(MethodCallPackage &mcp, int count,
                                              INVOKE_FEW_ARGS_IMPL_ARGS),
                               ObjectData *(*coo)()) {
-  ASSERT(mcp.obj == NULL);
+  assert(mcp.obj == NULL);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
@@ -286,7 +286,7 @@ Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
                             Variant (*i)(MethodCallPackage &mcp,
                                          CArrRef params),
                             ObjectData *(*coo)()) {
-  ASSERT(mcp.obj == NULL);
+  assert(mcp.obj == NULL);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = i(mcp, params);
@@ -358,7 +358,7 @@ static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
           case KindOfString:  *(String*)addr = init; break;
           case KindOfArray:   *(Array*)addr = init;  break;
           case KindOfObject:  *(Object*)addr = init; break;
-          default:            ASSERT(false);          break;
+          default:            assert(false);          break;
         }
       }
     }
@@ -522,8 +522,8 @@ Variant ObjectStaticCallbacks::os_constant(const char *s) const {
 
 GlobalVariables *ObjectStaticCallbacks::lazy_initializer(
   GlobalVariables *g) const {
-  ASSERT(cpt);
-  ASSERT(cpt->m_lazy_init_offset);
+  assert(cpt);
+  assert(cpt->m_lazy_init_offset);
   LazyInitializer(cpt, (const char*)g);
   return g;
 }
@@ -608,7 +608,7 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
     }
   } else {
     ObjectData *obj = FrameInjection::GetThis();
-    ASSERT(!mcp.isObj);
+    assert(!mcp.isObj);
     StrNR cls(mcp.rootCls);
     bool ok = false;
     if (!obj || !obj->o_instanceof(cls)) {
@@ -683,7 +683,7 @@ static StaticString s_getIterator("getIterator");
 
 Object ObjectData::iterableObject(bool& isIterable,
                                   bool mayImplementIterator /* = true */) {
-  ASSERT(mayImplementIterator || !implementsIterator());
+  assert(mayImplementIterator || !implementsIterator());
   if (mayImplementIterator && implementsIterator()) {
     isIterable = true;
     return Object(this);
@@ -791,7 +791,7 @@ void ObjectData::initProperties(int nProp) {
   if (hhvm) {
     if (!o_properties.get()) ((HPHP::VM::Instance*)this)->initDynProps(nProp);
   } else {
-    ASSERT(hhvm || (enable_hphp_array && RuntimeOption::UseHphpArray));
+    assert(hhvm || (enable_hphp_array && RuntimeOption::UseHphpArray));
     if (!o_properties.get()) {
       o_properties.asArray() = NEW(HphpArray)(nProp); // addref
     }
@@ -823,7 +823,7 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
     if (ret == NULL) {
       // Property is not declared, and not dynamically created yet.
       if (flags & RealPropCreate) {
-        ASSERT(!(flags & RealPropNoDynamic));
+        assert(!(flags & RealPropNoDynamic));
         if (o_properties.get() == NULL) {
           thiz->initDynProps();
         }
@@ -836,7 +836,7 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
     }
 
     // ret is non-NULL if we reach here
-    ASSERT(visible);
+    assert(visible);
     if ((accessible && !unset) ||
         (flags & (RealPropUnchecked|RealPropExist))) {
       return (Variant*)ret;
@@ -1261,7 +1261,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
     category = 1;
   } else {
     contextClassInfo = ClassInfo::FindClass(context);
-    ASSERT(contextClassInfo);
+    assert(contextClassInfo);
     if (object_class->isame(context.get())) {
       category = 3;
     } else if (classInfo->derivesFrom(context, false) ||
@@ -1309,7 +1309,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
       }
       break;
     default:
-      ASSERT(false);
+      assert(false);
     }
     if (visible && o_propForIteration(prop->name, context)) {
       if (getRef) {
@@ -1374,11 +1374,11 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
         return null;
       }
       // We found __call! Stash the original name into invName.
-      ASSERT(!(f->attrs() & HPHP::VM::AttrStatic));
+      assert(!(f->attrs() & HPHP::VM::AttrStatic));
       invName = s.get();
       invName->incRefCount();
     }
-    ASSERT(f);
+    assert(f);
     Variant ret;
     g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
                             NULL, invName);
@@ -1482,11 +1482,11 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
         return null;
       }
       // We found __call! Stash the original name into invName.
-      ASSERT(!(f->attrs() & HPHP::VM::AttrStatic));
+      assert(!(f->attrs() & HPHP::VM::AttrStatic));
       invName = s.get();
       invName->incRefCount();
     }
-    ASSERT(f);
+    assert(f);
     Variant ret;
     g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
                             NULL, invName);
@@ -1568,7 +1568,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   if (LIKELY(serializer->getType() == VariableSerializer::Serialize ||
              serializer->getType() == VariableSerializer::APCSerialize)) {
     if (o_instanceof("Serializable")) {
-      ASSERT(!isCollection());
+      assert(!isCollection());
       Variant ret =
         const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
       if (ret.isString()) {
@@ -1585,7 +1585,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::DebuggerSerialize)) {
     if (o_instanceof("Serializable")) {
-      ASSERT(!isCollection());
+      assert(!isCollection());
       try {
         Variant ret =
           const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
@@ -1615,7 +1615,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     }
   }
   if (UNLIKELY(handleSleep)) {
-    ASSERT(!isCollection());
+    assert(!isCollection());
     if (ret.isArray()) {
       const ClassInfo *cls = ClassInfo::FindClass(o_getClassName());
       Array wanted = Array::Create();
@@ -1919,7 +1919,7 @@ Variant ObjectData::callHandler(MethodCallPackage &info, CArrRef params) {
   }
   String clsname;
   if (!info.obj) {
-    ASSERT(!info.isObj);
+    assert(!info.isObj);
     clsname = info.rootCls;
   } else {
     clsname = info.obj->o_getClassName();

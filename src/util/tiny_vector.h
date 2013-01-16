@@ -83,7 +83,7 @@ struct TinyVector : private boost::noncopyable {
   const_iterator end()   const { return const_iterator(this); }
 
   T& operator[](size_t index) {
-    ASSERT(index < size());
+    assert(index < size());
     return *location(index);
   }
 
@@ -106,27 +106,27 @@ struct TinyVector : private boost::noncopyable {
   }
 
   void pop_back() {
-    ASSERT(!empty());
+    assert(!empty());
     m_data.set(size() - 1, m_data.ptr());
   }
 
   T& back() {
-    ASSERT(!empty());
+    assert(!empty());
     return (*this)[size() - 1];
   }
 
   const T& back() const {
-    ASSERT(!empty());
+    assert(!empty());
     return (*this)[size() - 1];
   }
 
   T& front() {
-    ASSERT(!empty());
+    assert(!empty());
     return m_vals[0];
   }
 
   const T& front() const {
-    ASSERT(!empty());
+    assert(!empty());
     return m_vals[0];
   }
 
@@ -197,7 +197,7 @@ private:
   }
 
   bool equal(const const_iterator& o) const {
-    ASSERT(m_p == o.m_p);
+    assert(m_p == o.m_p);
     return m_idx == o.m_idx;
   }
 

@@ -91,7 +91,7 @@ volatile int g_ringIdx;
 
 RingBufferEntry*
 allocEntry(RingBufferType t) {
-  ASSERT(Util::isPowerOfTwo(kMaxRBEntries));
+  assert(Util::isPowerOfTwo(kMaxRBEntries));
   RingBufferEntry* rb;
   int newRingPos, oldRingPos;
   do {
@@ -194,7 +194,7 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
   while (startIdx < 0) {
     startIdx += kMaxRBEntries;
   }
-  ASSERT(startIdx >= 0 && startIdx < kMaxRBEntries);
+  assert(startIdx >= 0 && startIdx < kMaxRBEntries);
   int numDumped = 0;
   for (int i = 0; i < kMaxRBEntries && numDumped < numEntries; i++) {
     RingBufferEntry* rb = &g_ring[(startIdx + i) % kMaxRBEntries];

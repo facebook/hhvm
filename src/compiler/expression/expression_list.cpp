@@ -75,7 +75,7 @@ void ExpressionList::addElement(ExpressionPtr exp) {
   if (ap) {
     m_arrayElements = true;
   } else {
-    ASSERT(!m_arrayElements);
+    assert(!m_arrayElements);
   }
   m_exps.push_back(exp);
 }
@@ -203,7 +203,7 @@ bool ExpressionList::getScalarValue(Variant &value) {
         if (!name) {
           Variant v;
           bool ret = val->getScalarValue(v);
-          if (!ret) ASSERT(false);
+          if (!ret) assert(false);
           init.set(v);
         } else {
           Variant n;
@@ -250,7 +250,7 @@ void ExpressionList::stripConcat() {
 }
 
 void ExpressionList::setOutputCount(int count) {
-  ASSERT(count >= 0 && count <= (int)m_exps.size());
+  assert(count >= 0 && count <= (int)m_exps.size());
   m_outputCount = count;
 }
 
@@ -295,7 +295,7 @@ void ExpressionList::setCollectionType(int cType) {
 // static analysis functions
 
 ExpressionPtr &ExpressionList::operator[](int index) {
-  ASSERT(index >= 0 && index < getCount());
+  assert(index >= 0 && index < getCount());
   return m_exps[index];
 }
 
@@ -333,7 +333,7 @@ int ExpressionList::getKidCount() const {
 void ExpressionList::setNthKid(int n, ConstructPtr cp) {
   int m = m_exps.size();
   if (n >= m) {
-    ASSERT(false);
+    assert(false);
   } else {
     m_exps[n] = boost::dynamic_pointer_cast<Expression>(cp);
   }
@@ -633,7 +633,7 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 unsigned int ExpressionList::checkLitstrKeys() const {
-  ASSERT(m_arrayElements && !m_collectionType);
+  assert(m_arrayElements && !m_collectionType);
   std::set<string> keys;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr ap =
@@ -661,7 +661,7 @@ bool ExpressionList::hasNonArrayCreateValue(
         dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
       value = ap->getValue();
     }
-    ASSERT(value);
+    assert(value);
     if (value->hasContext(RefValue)) {
       return true;
     }
@@ -672,7 +672,7 @@ bool ExpressionList::hasNonArrayCreateValue(
 void ExpressionList::outputCPPUniqLitKeyArrayInit(
   CodeGenerator &cg, AnalysisResultPtr ar, bool litstrKeys, int64 num,
   bool arrayElements /* = true */, unsigned int start /* = 0 */) {
-  if (arrayElements) ASSERT(m_arrayElements && !m_collectionType);
+  if (arrayElements) assert(m_arrayElements && !m_collectionType);
   unsigned int n =  m_exps.size();
   cg_printf("array_createv%c(%lld, ", litstrKeys ? 's' : 'i', num);
   always_assert(n - start == num);
@@ -720,7 +720,7 @@ bool ExpressionList::outputCPPArrayCreate(CodeGenerator &cg,
                                           AnalysisResultPtr ar,
                                           bool isVector,
                                           bool pre) {
-  ASSERT(pre == !m_cppTemp.empty());
+  assert(pre == !m_cppTemp.empty());
   if (!Option::GenArrayCreate || cg.getOutput() == CodeGenerator::SystemCPP) {
     return false;
   }

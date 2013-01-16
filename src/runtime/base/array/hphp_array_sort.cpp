@@ -34,7 +34,7 @@ struct KeyAccessor {
     if (isInt(elm)) {
       return getInt(elm);
     }
-    ASSERT(isStr(elm));
+    assert(isStr(elm));
     return getStr(elm);
   }
 };
@@ -58,7 +58,7 @@ struct ValAccessor {
 template <typename AccessorT>
 HphpArray::SortFlavor
 HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
-  ASSERT(m_size > 0);
+  assert(m_size > 0);
   if (!checkTypes && ssize_t(m_size) == ssize_t(m_lastE + 1)) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -99,7 +99,7 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
   }
 done:
   m_lastE = (start - m_data) - 1;
-  ASSERT(ssize_t(m_size) == ssize_t(m_lastE + 1));
+  assert(ssize_t(m_size) == ssize_t(m_lastE + 1));
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
   } else {
@@ -113,7 +113,7 @@ done:
  * renumber the keys 0 thru n-1.
  */
 void HphpArray::postSort(bool resetKeys) {
-  ASSERT(m_size > 0);
+  assert(m_size > 0);
   size_t tableSize = computeTableSize(m_tableMask);
   initHash(m_hash, tableSize);
   m_hLoad = 0;

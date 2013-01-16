@@ -142,7 +142,7 @@ profileInit() {
     if (!profiles) {
       TRACE(1, "profileInit: anonymous memory.\n");
       profiles = (ValueProfileLine*)calloc(sizeof(ValueProfileLine), kNumLines);
-      ASSERT(profiles);
+      assert(profiles);
     }
   }
 }
@@ -191,7 +191,7 @@ TypeProfileKey::hash() const {
 
 static inline ValueProfile*
 keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
-  ASSERT(profiles);
+  assert(profiles);
   uint64_t h = key.hash();
   // Use the low-order kLineSizeLog2 bits to as tag bits to distinguish
   // within the line, rather than to choose a line. Without the shift, all
@@ -213,7 +213,7 @@ keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
     }
   }
   if (mode == Write) {
-    ASSERT(replaceCandidate >= 0 && replaceCandidate < kLineSize);
+    assert(replaceCandidate >= 0 && replaceCandidate < kLineSize);
     ValueProfile& vp = l[replaceCandidate];
     Stats::inc(Stats::TypePred_Evict, vp.m_totalSamples != 0);
     Stats::inc(Stats::TypePred_Insert);
@@ -234,7 +234,7 @@ keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
 void recordType(const TypeProfileKey& key, DataType dt) {
   if (!profiles) return;
   if (!shouldProfile()) return;
-  ASSERT(dt != KindOfUninit);
+  assert(dt != KindOfUninit);
   // Normalize strings to KindOfString.
   if (dt == KindOfStaticString) dt = KindOfString;
   TRACE(1, "recordType lookup: %s -> %d\n", key.m_name->data(), dt);

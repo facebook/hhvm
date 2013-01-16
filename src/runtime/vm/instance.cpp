@@ -43,7 +43,7 @@ int HPHP::VM::Instance::ObjAllocatorSizeClassCount =
 TypedValue* Instance::propVec() {
   uintptr_t ret = (uintptr_t)this + sizeof(ObjectData) + builtinPropSize();
   // TODO(#1432007): some builtins still do not have TypedValue-aligned sizes.
-  ASSERT(ret % sizeof(TypedValue) == builtinPropSize() % sizeof(TypedValue));
+  assert(ret % sizeof(TypedValue) == builtinPropSize() % sizeof(TypedValue));
   return (TypedValue*) ret;
 }
 
@@ -62,7 +62,7 @@ Instance* Instance::callCustomInstanceInit() {
     incRefCount();
     g_vmContext->invokeFunc(&tv, init, Array::Create(), this);
     decRefCount();
-    ASSERT(!IS_REFCOUNTED_TYPE(tv.m_type));
+    assert(!IS_REFCOUNTED_TYPE(tv.m_type));
   }
   return this;
 }
@@ -90,7 +90,7 @@ void Instance::destructHard(const Func* meth) {
 }
 
 void Instance::forgetSweepable() {
-  ASSERT(RuntimeOption::EnableObjDestructCall);
+  assert(RuntimeOption::EnableObjDestructCall);
   g_vmContext->m_liveBCObjs.erase(this);
 }
 
@@ -100,7 +100,7 @@ void Instance::invokeUserMethod(TypedValue* retval, const Func* method,
 }
 
 Object Instance::FromArray(ArrayData *properties) {
-  ASSERT(hhvm);
+  assert(hhvm);
   Instance* retval = Instance::newInstance(SystemLib::s_stdclassClass);
   retval->initDynProps();
   HphpArray* props = static_cast<HphpArray*>(retval->o_properties.get());
@@ -112,7 +112,7 @@ Object Instance::FromArray(ArrayData *properties) {
     if (key.m_type == KindOfInt64) {
       props->nvSet(key.m_data.num, value, false);
     } else {
-      ASSERT(IS_STRING_TYPE(key.m_type));
+      assert(IS_STRING_TYPE(key.m_type));
       StringData* strKey = key.m_data.pstr;
       props->nvSet(strKey, value, false);
       decRefStr(strKey);
@@ -153,7 +153,7 @@ TypedValue* Instance::getPropImpl(Class* ctx, const StringData* key,
       unset = true;
     }
   } else {
-    ASSERT(!visible && !accessible);
+    assert(!visible && !accessible);
     // We could not find a visible property. We need to check for a
     // dynamic property with this name if declOnly = false.
     if (!declOnly && o_properties.get()) {
@@ -186,7 +186,7 @@ void Instance::invokeSet(TypedValue* retval, const StringData* key,
                          TypedValue* val) {
   AttributeClearer a(UseSet, this);
   const Func* meth = m_cls->lookupMethod(s___set.get());
-  ASSERT(meth);
+  assert(meth);
   invokeUserMethod(retval, meth,
                    CREATE_VECTOR2(CStrRef(key), tvAsVariant(val)));
 }
@@ -194,7 +194,7 @@ void Instance::invokeSet(TypedValue* retval, const StringData* key,
 #define MAGIC_PROP_BODY(name, attr) \
   AttributeClearer a((attr), this); \
   const Func* meth = m_cls->lookupMethod(name); \
-  ASSERT(meth); \
+  assert(meth); \
   invokeUserMethod(retval, meth, CREATE_VECTOR1(CStrRef(key))); \
 
 void Instance::invokeGet(TypedValue* retval, const StringData* key) {
@@ -337,7 +337,7 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
-    ASSERT(propVal);
+    assert(propVal);
     if (unset && getAttribute(UseSet)) {
       TypedValue ignored;
       invokeSet(&ignored, key, val);
@@ -352,9 +352,9 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
     // Return a pointer to the property if it's a declared property
     return declPropInd(propVal) != kInvalidSlot ? propVal : NULL;
   }
-  ASSERT(!accessible);
+  assert(!accessible);
   if (visible) {
-    ASSERT(propVal);
+    assert(propVal);
     if (!getAttribute(UseSet)) {
       raise_error("Cannot access protected property");
     }
@@ -379,8 +379,8 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
     }
     return NULL;
   }
-  ASSERT(!accessible);
-  ASSERT(getAttribute(UseSet));
+  assert(!accessible);
+  assert(getAttribute(UseSet));
   TypedValue ignored;
   invokeSet(&ignored, key, val);
   tvRefcountedDecRef(&ignored);
@@ -393,7 +393,7 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
-    ASSERT(propVal);
+    assert(propVal);
     if (unset && getAttribute(UseGet)) {
       TypedValue tvResult;
       tvWriteUninit(&tvResult);
@@ -412,9 +412,9 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
     }
     return propVal;
   }
-  ASSERT(!accessible);
+  assert(!accessible);
   if (visible) {
-    ASSERT(propVal);
+    assert(propVal);
     if (!getAttribute(UseGet) || !getAttribute(UseSet)) {
       raise_error("Cannot access protected property");
     }
@@ -448,8 +448,8 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
     propVal->m_type = tvResult.m_type;
     return propVal;
   }
-  ASSERT(!accessible);
-  ASSERT(getAttribute(UseGet) && getAttribute(UseSet));
+  assert(!accessible);
+  assert(getAttribute(UseGet) && getAttribute(UseSet));
   invokeGet(&tvRef, key);
   SETOP_BODY(&tvRef, op, val);
   TypedValue ignored;
@@ -466,7 +466,7 @@ void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
-    ASSERT(propVal);
+    assert(propVal);
     if (unset && getAttribute(UseGet)) {
       TypedValue tvResult;
       tvWriteUninit(&tvResult);
@@ -485,9 +485,9 @@ void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     }
     return;
   }
-  ASSERT(!accessible);
+  assert(!accessible);
   if (visible) {
-    ASSERT(propVal);
+    assert(propVal);
     if (!getAttribute(UseGet) || !getAttribute(UseSet)) {
       raise_error("Cannot access protected property");
     }
@@ -521,8 +521,8 @@ void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     propVal->m_type = tvResult.m_type;
     return;
   }
-  ASSERT(!accessible);
-  ASSERT(getAttribute(UseGet) && getAttribute(UseSet));
+  assert(!accessible);
+  assert(getAttribute(UseGet) && getAttribute(UseSet));
   invokeGet(&tvRef, key);
   IncDecBody<setResult>(op, &tvRef, &dest);
   TypedValue ignored;
@@ -557,13 +557,13 @@ void Instance::unsetProp(Class* ctx, const StringData* key) {
       tvSetIgnoreRef((TypedValue*)&null_variant, propVal);
     } else {
       // Dynamic property.
-      ASSERT(o_properties.get() != NULL);
+      assert(o_properties.get() != NULL);
       o_properties.get()->remove(CStrRef(key), false);
     }
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else {
-    ASSERT(!accessible);
+    assert(!accessible);
     if (getAttribute(UseUnset)) {
       TypedValue ignored;
       invokeUnset(&ignored, key);
@@ -624,7 +624,7 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
       // You can get this if you cast an array to object. These properties must
       // be dynamic because you can't declare a property with a non-string name.
       if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
-        ASSERT(key.m_type == KindOfInt64);
+        assert(key.m_type == KindOfInt64);
         TypedValue* val =
           static_cast<HphpArray*>(o_properties.get())->nvGet(key.m_data.num);
         if (getRef) {
@@ -694,7 +694,7 @@ void Instance::getProp(const Class* klass, bool pubOnly,
   }
 
   Slot propInd = klass->lookupDeclProp(prop->name());
-  ASSERT(propInd != kInvalidSlot);
+  assert(propInd != kInvalidSlot);
   const TypedValue* propVal = &propVec()[propInd];
 
   if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
@@ -844,7 +844,7 @@ Variant& Instance::___offsetget_lval(Variant key) {
     }
     static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
     const Func* method = m_cls->lookupMethod(sd__offsetGet);
-    ASSERT(method);
+    assert(method);
     if (method) {
       Variant *v = __lvalProxy.get();
       g_vmContext->invokeFunc((TypedValue*)v, method,
@@ -944,7 +944,7 @@ void Instance::cloneSet(ObjectData* clone) {
       auto props = static_cast<HphpArray*>(o_properties.get());
       TypedValue key;
       props->nvGetKey(&key, iter);
-      ASSERT(tvIsString(&key));
+      assert(tvIsString(&key));
       StringData* strKey = key.m_data.pstr;
       TypedValue *val = props->nvGet(strKey);
       TypedValue *retval;

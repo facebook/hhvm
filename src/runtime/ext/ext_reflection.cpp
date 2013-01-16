@@ -139,7 +139,7 @@ static void set_attrs(Array& ret, int modifiers) {
   } else if (modifiers & 0x400) {
     ret.set(s_access, VarNR(s_private));
   } else {
-    ASSERT(false);
+    assert(false);
   }
   ret.set(s_modifiers, VarNR(modifiers));
   if (modifiers & 0x1) {
@@ -278,7 +278,7 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
     Array arr = Array::Create();
     for (unsigned int i = 0; i < info->staticVariables.size(); i++) {
       const ClassInfo::ConstantInfo *p = info->staticVariables[i];
-      ASSERT(p->valueText && *p->valueText);
+      assert(p->valueText && *p->valueText);
       arr.set(p->name, p->valueText);
     }
     ret.set(s_static_variables, arr);
@@ -611,7 +611,7 @@ static Array get_class_info(const ClassInfo *cls) {
       Array info = Array::Create();
       set_property_info(info, prop, cls);
       if (prop->attribute & ClassInfo::IsPrivate) {
-        ASSERT(prop->owner == cls);
+        assert(prop->owner == cls);
         arrPriv.set(prop->name, info);
       } else {
         arr.set(prop->name, info);

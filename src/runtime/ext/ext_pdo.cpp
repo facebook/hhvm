@@ -1027,7 +1027,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
     }
   } else if (m_dbh.get()) {
     if (is_persistent) {
-      ASSERT(!shashkey.empty());
+      assert(!shashkey.empty());
       g_persistentObjects->set(PDOConnection::PersistentKey, shashkey.data(),
                                m_dbh.get());
       s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
@@ -1044,7 +1044,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
 Variant c_PDO::t_prepare(CStrRef statement,
                          CArrRef options /* = null_array */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::prepare);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
 
@@ -1072,7 +1072,7 @@ Variant c_PDO::t_prepare(CStrRef statement,
 
   if (m_dbh->preparer(statement, &pdostmt->m_stmt, options)) {
     PDOStatement *stmt = pdostmt->m_stmt.get();
-    ASSERT(stmt);
+    assert(stmt);
 
     /* unconditionally keep this for later reference */
     stmt->query_string = statement;
@@ -1104,7 +1104,7 @@ bool c_PDO::t_begintransaction() {
 
 bool c_PDO::t_commit() {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::commit);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   if (!m_dbh->in_txn) {
     throw_pdo_exception(null, null, "There is no active transaction");
   }
@@ -1118,7 +1118,7 @@ bool c_PDO::t_commit() {
 
 bool c_PDO::t_rollback() {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::rollback);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   if (!m_dbh->in_txn) {
     throw_pdo_exception(null, null, "There is no active transaction");
   }
@@ -1132,7 +1132,7 @@ bool c_PDO::t_rollback() {
 
 bool c_PDO::t_setattribute(int64 attribute, CVarRef value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::setattribute);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
 
 #define PDO_LONG_PARAM_CHECK                                           \
   if (!value.isInteger() && !value.isString() && !value.isBoolean()) { \
@@ -1248,7 +1248,7 @@ bool c_PDO::t_setattribute(int64 attribute, CVarRef value) {
 
 Variant c_PDO::t_getattribute(int64 attribute) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::getattribute);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
 
@@ -1308,7 +1308,7 @@ Variant c_PDO::t_exec(CStrRef query) {
     return false;
   }
 
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
 
@@ -1322,7 +1322,7 @@ Variant c_PDO::t_exec(CStrRef query) {
 
 Variant c_PDO::t_lastinsertid(CStrRef seqname /* = null_string */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::lastinsertid);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
 
@@ -1342,7 +1342,7 @@ Variant c_PDO::t_lastinsertid(CStrRef seqname /* = null_string */) {
 
 Variant c_PDO::t_errorcode() {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::errorcode);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   if (m_dbh->query_stmt) {
     return String(m_dbh->query_stmt->error_code, CopyString);
   }
@@ -1360,7 +1360,7 @@ Variant c_PDO::t_errorcode() {
 
 Array c_PDO::t_errorinfo() {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::errorinfo);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
 
   Array ret;
   if (m_dbh->query_stmt) {
@@ -1391,7 +1391,7 @@ Array c_PDO::t_errorinfo() {
 
 Variant c_PDO::t_query(CStrRef sql) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::query);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
 
@@ -1407,7 +1407,7 @@ Variant c_PDO::t_query(CStrRef sql) {
 
   if (m_dbh->preparer(sql, &pdostmt->m_stmt, Array())) {
     PDOStatement *stmt = pdostmt->m_stmt.get();
-    ASSERT(stmt);
+    assert(stmt);
 
     /* unconditionally keep this for later reference */
     stmt->query_string = sql;
@@ -1450,7 +1450,7 @@ Variant c_PDO::t_query(CStrRef sql) {
 
 Variant c_PDO::t_quote(CStrRef str, int64 paramtype /* = q_PDO$$PARAM_STR */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::quote);
-  ASSERT(m_dbh->driver);
+  assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
 
@@ -1864,7 +1864,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     break;
 
   default:
-    ASSERT(false);
+    assert(false);
     return false;
   }
 

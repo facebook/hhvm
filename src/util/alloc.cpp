@@ -60,9 +60,9 @@ static NEVER_INLINE uintptr_t get_stack_top() {
 void flush_thread_stack() {
   uintptr_t top = get_stack_top() & ~(PAGE_SIZE - 1);
   // s_stackLimit is already aligned
-  ASSERT(top >= s_stackLimit);
+  assert(top >= s_stackLimit);
   size_t len = top - s_stackLimit;
-  ASSERT((len & (PAGE_SIZE - 1)) == 0);
+  assert((len & (PAGE_SIZE - 1)) == 0);
   if (madvise((void*)s_stackLimit, len, MADV_DONTNEED) != 0 &&
       errno != EAGAIN) {
     fprintf(stderr, "%s failed to madvise with error %d\n", __func__, errno);
@@ -124,7 +124,7 @@ struct JEMallocInitializer {
     // is mapped huge. Burn whatever slack needed to align low memory.
     unsigned leftInPage = kHugePageSize - (uintptr_t(sbrk(0)) & kHugePageMask);
     (void) sbrk(leftInPage);
-    ASSERT((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
+    assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = sbrk(0);
     hintHuge((void*)uintptr_t(highest_lowmall_addr.load()), kHugePageSize);
   }

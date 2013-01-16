@@ -239,12 +239,12 @@ struct MInstrInfo {
   }
 
   const MInstrAttr& getAttr(LocationCode lc) const {
-    ASSERT(lc < NumLocationCodes);
+    assert(lc < NumLocationCodes);
     return m_baseOps[lc];
   }
 
   const MInstrAttr& getAttr(MemberCode mc) const {
-    ASSERT(mc < NumMemberCodes);
+    assert(mc < NumMemberCodes);
     return m_intermediateOps[mc];
   }
 
@@ -584,7 +584,7 @@ inline const MInstrInfo& getMInstrInfo(Op op) {
 #define MII(instr_, attrs, bS, iS, vC, fN) \
   case Op##instr_##M: { \
     const MInstrInfo& mii = mInstrInfo[MI_##instr_##M]; \
-    ASSERT(mii.instr() == MI_##instr_##M); \
+    assert(mii.instr() == MI_##instr_##M); \
     return mii; \
   }
   MINSTRS
@@ -797,7 +797,7 @@ inline bool isSwitch(Opcode op) {
 
 template<typename L>
 void foreachSwitchTarget(Opcode* op, L func) {
-  ASSERT(isSwitch(*op));
+  assert(isSwitch(*op));
   bool isStr = readData<Opcode>(op) == OpSSwitch;
   int32_t size = readData<int32_t>(op);
   for (int i = 0; i < size; ++i) {
@@ -808,7 +808,7 @@ void foreachSwitchTarget(Opcode* op, L func) {
 
 template<typename L>
 void foreachSwitchString(Opcode* op, L func) {
-  ASSERT(*op == OpSSwitch);
+  assert(*op == OpSSwitch);
   readData<Opcode>(op);
   int32_t size = readData<int32_t>(op) - 1; // the last item is the default
   for (int i = 0; i < size; ++i) {

@@ -68,7 +68,7 @@ public:
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
   ssize_t getIterBegin() const {
-    ASSERT(!empty());
+    assert(!empty());
     if (LIKELY((m_data[0].data.m_type < KindOfTombstone))) {
       return 0;
     }
@@ -343,7 +343,7 @@ public:
 
   ElmInd getLastE() const { return m_lastE; }
   Elm*   getElm(ssize_t pos)  const {
-    ASSERT(unsigned(pos) <= unsigned(m_lastE));
+    assert(unsigned(pos) <= unsigned(m_lastE));
     return &m_data[pos];
   }
   static void getElmKey(Elm* e, TypedValue* out) {
@@ -406,7 +406,7 @@ private:
   };
 
   ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const {
-    ASSERT(ei >= -1);
+    assert(ei >= -1);
     ssize_t lastE = m_lastE;
     while (ei < lastE) {
       ++ei;
@@ -520,7 +520,7 @@ private:
   static HphpArray s_theEmptyArray;
 
   static void initHash(HphpArray::ElmInd* hash, size_t tableSize) {
-    ASSERT(HphpArray::ElmIndEmpty == -1);
+    assert(HphpArray::ElmIndEmpty == -1);
     memset(hash, 0xffU, tableSize * sizeof(HphpArray::ElmInd));
   }
 

@@ -199,7 +199,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
     if (m_class) {
       if (m_class->is(KindOfScalarExpression)) {
-        ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+        assert(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                           getString().c_str(), "static") == 0);
         cg_printf("CStrRef cls%d = "
                   "FrameInjection::GetStaticClassName(fi.getThreadInfo())",

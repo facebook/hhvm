@@ -262,7 +262,7 @@ public:
   FileScopeRawPtr getUsedScalarScope(CodeGenerator& cg);
   bool getEffectiveScalar(Variant &value);
   virtual ExpressionPtr clone() {
-    ASSERT(false);
+    assert(false);
     return ExpressionPtr();
   }
   virtual bool isThis() const { return false;}

@@ -138,7 +138,7 @@ struct Func {
 
   void validate() const {
 #ifdef DEBUG
-    ASSERT(this && m_magic == kMagic);
+    assert(this && m_magic == kMagic);
 #endif
   }
 
@@ -168,7 +168,7 @@ struct Func {
   void setMaxStackCells(int cells) { m_maxStackCells = cells; }
   int maxStackCells() const {
     // All functions have to return something, which pushes at least 1 cell
-    ASSERT(m_maxStackCells > 0);
+    assert(m_maxStackCells > 0);
     return m_maxStackCells;
   }
 
@@ -230,12 +230,12 @@ struct Func {
   bool hasPrivateAncestor() const { return m_hasPrivateAncestor; }
   void setHasPrivateAncestor(bool b) { m_hasPrivateAncestor = b; }
   Id id() const {
-    ASSERT(preClass() == NULL);
+    assert(preClass() == NULL);
     return shared()->m_id;
   }
   Offset base() const { return shared()->m_base; }
   const inline Opcode* getEntry() const {
-    ASSERT(!isAbstract());
+    assert(!isAbstract());
     return m_unit->entry() + shared()->m_base;
   }
   Offset past() const { return shared()->m_past; }
@@ -244,11 +244,11 @@ struct Func {
   DataType returnType() const { return shared()->m_returnType; }
   const SVInfoVec& staticVars() const { return shared()->m_staticVars; }
   const StringData* name() const {
-    ASSERT(m_name != NULL);
+    assert(m_name != NULL);
     return m_name;
   }
   CStrRef nameRef() const {
-    ASSERT(m_name != NULL);
+    assert(m_name != NULL);
     return *(String*)(&m_name);
   }
   const StringData* fullName() const {
@@ -256,7 +256,7 @@ struct Func {
     return m_fullName;
   }
   CStrRef fullNameRef() const {
-    ASSERT(m_fullName != NULL);
+    assert(m_fullName != NULL);
     return *(String*)(&m_fullName);
   }
   // Assembly linkage.
@@ -288,7 +288,7 @@ struct Func {
   // Returns the name of a local variable, or null if this varid is an
   // unnamed local.
   const StringData* localVarName(Id id) const {
-    ASSERT(id >= 0);
+    assert(id >= 0);
     return id < numNamedLocals() ? shared()->m_localNames[id] : 0;
   }
 
@@ -353,15 +353,15 @@ struct Func {
   }
 
   const NamedEntity* getNamedEntity() const {
-    ASSERT(!m_shared->m_preClass);
+    assert(!m_shared->m_preClass);
     return m_namedEntity;
   }
   Slot methodSlot() const {
-    ASSERT(m_cls);
+    assert(m_cls);
     return m_methodSlot;
   }
   void setMethodSlot(Slot s) {
-    ASSERT(m_cls);
+    assert(m_cls);
     m_methodSlot = s;
   }
   Func** getCachedAddr();
@@ -540,7 +540,7 @@ public:
   }
   int sn() const { return m_sn; }
   Id id() const {
-    ASSERT(m_pce == NULL);
+    assert(m_pce == NULL);
     return m_id;
   }
   Offset base() const { return m_base; }

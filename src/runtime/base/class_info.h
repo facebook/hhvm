@@ -321,7 +321,7 @@ public:
   virtual ~ClassInfo() {}
 
   inline const ClassInfo *checkCurrent() const {
-    ASSERT(!(m_attribute & IsRedeclared));
+    assert(!(m_attribute & IsRedeclared));
     return this;
   }
 
@@ -581,7 +581,7 @@ struct ClassPropTableEntry {
       case KindOfObject:
         return *(Object*)addr;
       default:
-        ASSERT(false);
+        assert(false);
         return null;
     }
   }

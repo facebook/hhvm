@@ -26,7 +26,7 @@
 namespace HPHP {
 
 void taint_array_variant(Variant& v, const std::string s, bool iskey) {
-  ASSERT(!TaintObserver::IsActive());
+  assert(!TaintObserver::IsActive());
 
   if (v.isString()) {
     TaintData& td = v.asStrRef().get()->getTaintDataRef();
@@ -39,7 +39,7 @@ void taint_array_variant(Variant& v, const std::string s, bool iskey) {
     }
 
     td.setTaint(TAINT_BIT_ALL | TAINT_FLAG_ORIG);
-    ASSERT(!td.getTaintTrace().get());
+    assert(!td.getTaintTrace().get());
     // We don't call TaintTracer::Trace on these strings because they:
     //   (1) are likely to be unique and not to match function calls or
     //       filenames or other params; and
@@ -47,8 +47,8 @@ void taint_array_variant(Variant& v, const std::string s, bool iskey) {
     //       cleared from the trace set and cannot be reinserted because the
     //       neither a new request nor new trace set will have been init'd.
     td.setTaintTrace(NEW(TaintTraceData)(str));
-    ASSERT(!td.getTaintTrace()->getNext().get());
-    ASSERT(!td.getTaintTrace()->getChild().get());
+    assert(!td.getTaintTrace()->getNext().get());
+    assert(!td.getTaintTrace()->getChild().get());
   }
 
   if (v.isArray()) {

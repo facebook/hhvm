@@ -173,7 +173,7 @@ struct RegSet {
     uint64_t out;
     bool retval = ffs64(m_bits, out);
     reg = PhysReg(out);
-    ASSERT(!retval || (int(reg) >= 0 && int(reg) < 64));
+    assert(!retval || (int(reg) >= 0 && int(reg) < 64));
     return retval;
   }
 
@@ -181,7 +181,7 @@ struct RegSet {
     uint64_t out;
     bool retval = fls64(m_bits, out);
     reg = PhysReg(out);
-    ASSERT(!retval || (int(reg) >= 0 && int(reg) < 64));
+    assert(!retval || (int(reg) >= 0 && int(reg) < 64));
     return retval;
   }
 

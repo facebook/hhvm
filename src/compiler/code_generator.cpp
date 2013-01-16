@@ -36,9 +36,9 @@ using namespace HPHP;
 void CodeGenerator::BuildJumpTable(const std::vector<const char *> &strings,
                                    MapIntToStringVec &out, int tableSize,
                                    bool caseInsensitive) {
-  ASSERT(!strings.empty());
-  ASSERT(out.empty());
-  ASSERT(tableSize > 0);
+  assert(!strings.empty());
+  assert(out.empty());
+  assert(tableSize > 0);
 
   for (unsigned int i = 0; i < strings.size(); i++) {
     const char *s = strings[i];
@@ -84,7 +84,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
 }
 
 void CodeGenerator::useStream(Stream stream) {
-  ASSERT(stream >= NullStream && stream < StreamCount);
+  assert(stream >= NullStream && stream < StreamCount);
   m_curStream = stream;
   if (stream == NullStream) {
     m_out = NULL;
@@ -94,23 +94,23 @@ void CodeGenerator::useStream(Stream stream) {
 }
 
 bool CodeGenerator::usingStream(Stream stream) {
-  ASSERT(stream >= 0 && stream < StreamCount);
+  assert(stream >= 0 && stream < StreamCount);
   return m_out == m_streams[stream];
 }
 
 std::ostream *CodeGenerator::getStream(Stream stream) const {
-  ASSERT(stream >= 0 && stream < StreamCount);
+  assert(stream >= 0 && stream < StreamCount);
   return m_streams[stream];
 }
 
 void CodeGenerator::setStream(Stream stream, std::ostream *out) {
-  ASSERT(out);
-  ASSERT(stream >= 0 && stream < StreamCount);
+  assert(out);
+  assert(stream >= 0 && stream < StreamCount);
   m_streams[stream] = out;
 }
 
 int CodeGenerator::getLineNo(Stream stream) const {
-  ASSERT(stream >= 0 && stream < StreamCount);
+  assert(stream >= 0 && stream < StreamCount);
   return m_lineNo[stream];
 }
 
@@ -130,13 +130,13 @@ void CodeGenerator::indentBegin() {
 }
 
 void CodeGenerator::indentEnd(const char *fmt, ...) {
-  ASSERT(m_indentation[m_curStream]);
+  assert(m_indentation[m_curStream]);
   m_indentation[m_curStream]--;
   va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
 }
 
 void CodeGenerator::indentEnd() {
-  ASSERT(m_indentation[m_curStream]);
+  assert(m_indentation[m_curStream]);
   m_indentation[m_curStream]--;
 }
 
@@ -190,7 +190,7 @@ void CodeGenerator::startComments() {
 }
 
 void CodeGenerator::endComments() {
-  ASSERT(m_inComments[m_curStream] > 0);
+  assert(m_inComments[m_curStream] > 0);
   m_inComments[m_curStream]--;
   printf(" */");
 }
@@ -275,7 +275,7 @@ void CodeGenerator::ifdefEnd(const char *fmt, ...) {
 }
 
 void CodeGenerator::printInclude(const std::string &file) {
-  ASSERT(!file.empty());
+  assert(!file.empty());
 
   string formatted = file;
   if (file[0] != '"' && file[0] != '<') {
@@ -537,7 +537,7 @@ void CodeGenerator::addLabelId(const char *name, int labelId) {
   } else if (!strcmp(name, "continue")) {
     m_contLabelIds.insert(labelId);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -547,7 +547,7 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
   } else if (!strcmp(name, "continue")) {
     return m_contLabelIds.find(labelId) != m_contLabelIds.end();
   } else {
-    ASSERT(false);
+    assert(false);
   }
   return false;
 }

@@ -21,7 +21,7 @@ namespace HPHP { namespace VM { namespace JIT {
 //////////////////////////////////////////////////////////////////////
 
 Type::Tag outputType(const IRInstruction* inst) {
-  ASSERT(inst->hasDst() && "outputType requires inst->hasDst()");
+  assert(inst->hasDst() && "outputType requires inst->hasDst()");
 
   switch (inst->getOpcode()) {
   case Unbox:
@@ -155,11 +155,11 @@ void assertOperandTypes(const IRInstruction* inst) {
   auto const t1 = s1 ? s1->getType() : Type::None;
 
   auto constStaticStr = [] (SSATmp* ssa) {
-    ASSERT(ssa->isConst() && ssa->getType() == Type::StaticStr);
+    assert(ssa->isConst() && ssa->getType() == Type::StaticStr);
   };
 
   auto constInt = [] (SSATmp* ssa) {
-    ASSERT(ssa->isConst() && ssa->getType() == Type::Int);
+    assert(ssa->isConst() && ssa->getType() == Type::Int);
   };
 
   switch (inst->getOpcode()) {
@@ -169,17 +169,17 @@ void assertOperandTypes(const IRInstruction* inst) {
   case OpOr:
   case OpXor:
   case OpMul:
-    ASSERT(t0 == Type::Int || t0 == Type::Bool);
-    ASSERT(t1 == Type::Int || t1 == Type::Bool);
+    assert(t0 == Type::Int || t0 == Type::Bool);
+    assert(t1 == Type::Int || t1 == Type::Bool);
     break;
 
   case LdRaw:
-    ASSERT(tparam == Type::Int || tparam == Type::Bool ||
+    assert(tparam == Type::Int || tparam == Type::Bool ||
            tparam == Type::StkPtr || tparam == Type::TCA);
     break;
 
   case LdPropAddr:
-    ASSERT(t0 == Type::Obj);
+    assert(t0 == Type::Obj);
     constInt(s1);
     break;
 
@@ -193,17 +193,17 @@ void assertOperandTypes(const IRInstruction* inst) {
     break;
 
   case LdObjClass:
-    ASSERT(t0 == Type::Obj);
+    assert(t0 == Type::Obj);
     break;
 
   case StRaw: {
     auto valT = inst->getSrc(2)->getType();
-    ASSERT(valT == Type::Int || valT == Type::Bool);
+    assert(valT == Type::Int || valT == Type::Bool);
     break;
   }
 
   case StMem:
-    ASSERT(t0 == Type::PtrToCell || t0 == Type::PtrToGen);
+    assert(t0 == Type::PtrToCell || t0 == Type::PtrToGen);
     break;
 
   default:

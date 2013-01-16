@@ -22,7 +22,7 @@
 namespace HPHP {
 
 void TaintData::setTaintTrace(TaintTraceNodePtr trace) {
-  ASSERT(!TAINT_ISSET_ORIG(m_taint_bits));
+  assert(!TAINT_ISSET_ORIG(m_taint_bits));
 
   // Check if the new trace is just the old trace under a dummy node.
   bool is_retrace = m_taint_trace.get() &&
@@ -35,14 +35,14 @@ void TaintData::setTaintTrace(TaintTraceNodePtr trace) {
 }
 
 void TaintData::setTaintTrace(TaintTraceDataPtr data) {
-  ASSERT(!m_taint_trace.get());
+  assert(!m_taint_trace.get());
   if (data.get()) {
     m_taint_trace = NEW(TaintTraceNode)(NULL, data);
   }
 }
 
 void TaintData::attachTaintTrace(TaintTraceNodePtr trace) {
-  ASSERT(!TAINT_ISSET_ORIG(m_taint_bits));
+  assert(!TAINT_ISSET_ORIG(m_taint_bits));
 
   // Check if the trace we're attaching is ourselves or our child/sibling.
   bool is_retrace = m_taint_trace.get() &&
@@ -56,14 +56,14 @@ void TaintData::attachTaintTrace(TaintTraceNodePtr trace) {
 }
 
 void TaintData::attachTaintTrace(TaintTraceDataPtr data) {
-  ASSERT(!TAINT_ISSET_ORIG(m_taint_bits));
+  assert(!TAINT_ISSET_ORIG(m_taint_bits));
   if (data.get()) {
     m_taint_trace = NEW(TaintTraceNode)(m_taint_trace, data);
   }
 }
 
 void TaintData::dropTaintTrace() {
-  ASSERT(!TAINT_ISSET_ORIG(m_taint_bits));
+  assert(!TAINT_ISSET_ORIG(m_taint_bits));
   m_taint_trace.reset();
 }
 

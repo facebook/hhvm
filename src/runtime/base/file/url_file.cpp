@@ -89,13 +89,13 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
 }
 
 int64 UrlFile::writeImpl(const char *buffer, int64 length) {
-  ASSERT(m_len != -1);
+  assert(m_len != -1);
   throw FatalErrorException((string("cannot write a url stream: ") +
                              m_name).c_str());
 }
 
 bool UrlFile::flush() {
-  ASSERT(m_len != -1);
+  assert(m_len != -1);
   throw FatalErrorException((string("cannot flush a url stream: ") +
                              m_name).c_str());
 }

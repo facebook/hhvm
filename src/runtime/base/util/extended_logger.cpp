@@ -108,7 +108,7 @@ void ExtendedLogger::log(LogLevelType level, const std::string &msg,
 void ExtendedLogger::Log(LogLevelType level, CArrRef stackTrace,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
-  ASSERT(!escapeMore || escape);
+  assert(!escapeMore || escape);
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {

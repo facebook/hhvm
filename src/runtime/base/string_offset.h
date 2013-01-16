@@ -35,7 +35,7 @@ class StringOffset {
    */
   StringOffset(StringData *data, int offset)
     : m_data(data), m_offset(offset) {
-    ASSERT(m_data);
+    assert(m_data);
   }
 
   /**

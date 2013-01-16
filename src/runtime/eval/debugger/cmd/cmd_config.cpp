@@ -119,7 +119,7 @@ bool CmdConfig::onClient(DebuggerClient *client) {
     return true;
   }
   if (var == "ApiModeSerialize") {
-    ASSERT(client->isApiMode());
+    assert(client->isApiMode());
     if (value == "on") {
       client->setDebuggerClientApiModeSerialize(true);
     } else if (value == "off") {

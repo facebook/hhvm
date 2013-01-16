@@ -110,7 +110,7 @@ const char *Transport::getServerObject() {
 
 string Transport::getCommand() {
   const char *url = getServerObject();
-  ASSERT(url);
+  assert(url);
   if (!*url) {
     return "";
   }
@@ -130,7 +130,7 @@ string Transport::getCommand() {
 
 // copied and re-factored from clearsilver-0.10.5/cgi/cgi.c
 void Transport::urlUnescape(char *value) {
-  ASSERT(value && *value); // check before calling this function
+  assert(value && *value); // check before calling this function
 
   int i = 0, o = 0;
   unsigned char *s = (unsigned char *)value;
@@ -178,7 +178,7 @@ void Transport::parseQuery(char *query, ParamMap &params) {
 void Transport::parseGetParams() {
   if (m_url == NULL) {
     const char *url = getServerObject();
-    ASSERT(url);
+    assert(url);
 
     const char *p = strchr(url, '?');
     if (p) {
@@ -193,7 +193,7 @@ void Transport::parseGetParams() {
 
 void Transport::parsePostParams() {
   if (!m_postDataParsed) {
-    ASSERT(m_postData == NULL);
+    assert(m_postData == NULL);
     int size;
     const char *data = (const char *)getPostData(size);
     if (data && *data && size) {
@@ -207,7 +207,7 @@ void Transport::parsePostParams() {
 }
 
 bool Transport::paramExists(const char *name, Method method /* = GET */) {
-  ASSERT(name && *name);
+  assert(name && *name);
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
       parseGetParams();
@@ -230,7 +230,7 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
 }
 
 std::string Transport::getParam(const char *name,  Method method /* = GET */) {
-  ASSERT(name && *name);
+  assert(name && *name);
 
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
@@ -345,8 +345,8 @@ bool Transport::splitHeader(CStrRef header, String &name, const char *&value) {
 }
 
 void Transport::addHeaderNoLock(const char *name, const char *value) {
-  ASSERT(name && *name);
-  ASSERT(value);
+  assert(name && *name);
+  assert(value);
 
   if (!m_firstHeaderSet) {
     m_firstHeaderSet = true;
@@ -378,8 +378,8 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
 }
 
 void Transport::addHeader(const char *name, const char *value) {
-  ASSERT(name && *name);
-  ASSERT(value);
+  assert(name && *name);
+  assert(value);
   addHeaderNoLock(name, value);
 }
 
@@ -392,8 +392,8 @@ void Transport::addHeader(CStrRef header) {
 }
 
 void Transport::replaceHeader(const char *name, const char *value) {
-  ASSERT(name && *name);
-  ASSERT(value);
+  assert(name && *name);
+  assert(value);
   m_responseHeaders[name].clear();
   addHeaderNoLock(name, value);
 }
@@ -431,7 +431,7 @@ void Transport::getResponseHeaders(HeaderMap &headers) {
 }
 
 bool Transport::acceptEncoding(const char *encoding) {
-  ASSERT(encoding && *encoding);
+  assert(encoding && *encoding);
   string header = getHeader("Accept-Encoding");
 
   // This is testing a substring than a word match, but in practice, this
@@ -440,7 +440,7 @@ bool Transport::acceptEncoding(const char *encoding) {
 }
 
 bool Transport::cookieExists(const char *name) {
-  ASSERT(name && *name);
+  assert(name && *name);
   string header = getHeader("Cookie");
   int len = strlen(name);
   bool hasValue = (strchr(name, '=') != NULL);
@@ -459,7 +459,7 @@ bool Transport::cookieExists(const char *name) {
 }
 
 string Transport::getCookie(const string &name) {
-  ASSERT(!name.empty());
+  assert(!name.empty());
   string header = getHeader("Cookie");
   for (size_t pos = header.find(name); pos != string::npos;
        pos = header.find(name, pos + 1)) {
@@ -476,7 +476,7 @@ string Transport::getCookie(const string &name) {
 }
 
 bool Transport::decideCompression() {
-  ASSERT(m_compressionDecision == NotDecidedYet);
+  assert(m_compressionDecision == NotDecidedYet);
 
   if (!RuntimeOption::ForceCompressionURL.empty() &&
       getCommand() == RuntimeOption::ForceCompressionURL) {
@@ -650,7 +650,7 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     if (debug) {
       String decrypted =
         f_openssl_decrypt(encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv);
-      ASSERT(decrypted->same(ip.get()));
+      assert(decrypted->same(ip.get()));
     }
     addHeaderImpl("X-FB-Debug", output);
   }
@@ -670,7 +670,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   String response((const char *)data, size, AttachLiteral);
 
   // we don't use chunk encoding to send anything pre-compressed
-  ASSERT(!compressed || !m_chunkedEncoding);
+  assert(!compressed || !m_chunkedEncoding);
 
   if (m_compressionDecision == NotDecidedYet) {
     decideCompression();
@@ -727,10 +727,10 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
   }
   if (m_chunkedEncoding) {
     chunked = true;
-    ASSERT(!compressed);
+    assert(!compressed);
   } else if (chunked) {
     m_chunkedEncoding = true;
-    ASSERT(!compressed);
+    assert(!compressed);
   }
 
   // I don't think there is any need to send an empty chunk, other than sending

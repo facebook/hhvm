@@ -148,7 +148,7 @@ public:
   virtual bool hasRetExp() const { return false; }
 
   virtual StatementPtr clone() {
-    ASSERT(false);
+    assert(false);
     return StatementPtr();
   }
 

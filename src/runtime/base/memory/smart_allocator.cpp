@@ -53,7 +53,7 @@ void InitAllocatorThreadLocal() {
 
 SmartAllocatorImpl::SmartAllocatorImpl(Name name, int itemSize)
   : m_itemSize(itemSizeRoundup(itemSize)) , m_name(name) {
-  ASSERT(itemSize > 0);
+  assert(itemSize > 0);
   MemoryManager::TheMemoryManager()->add(this);
 }
 
@@ -73,8 +73,8 @@ static bool UNUSED is_iterable_type(SmartAllocatorImpl::Name type) {
 }
 
 SmartAllocatorImpl::Iterator::Iterator(const SmartAllocatorImpl* sa) {
-  ASSERT(hhvm);
-  ASSERT(is_iterable_type(sa->getAllocatorType()));
+  assert(hhvm);
+  assert(is_iterable_type(sa->getAllocatorType()));
   next();
 }
 

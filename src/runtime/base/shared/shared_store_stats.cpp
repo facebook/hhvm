@@ -205,7 +205,7 @@ void SharedValueProfile::calcInd(const StringData *key,
 }
 
 void SharedValueProfile::addToGroup(SharedValueProfile *ind) {
-  ASSERT(isGroup);
+  assert(isGroup);
   totalSize += ind->totalSize;
   keySize += ind->keySize;
   var.addChildStats(&ind->var);
@@ -219,7 +219,7 @@ void SharedValueProfile::addToGroup(SharedValueProfile *ind) {
 }
 
 void SharedValueProfile::removeFromGroup(SharedValueProfile *ind) {
-  ASSERT(isGroup);
+  assert(isGroup);
   totalSize -= ind->totalSize;
   keySize -= ind->keySize;
   var.removeChildStats(&ind->var);
@@ -298,7 +298,7 @@ string SharedStoreStats::report_keys() {
   ReadLock l(s_rwlock);
   StatsMap::iterator iter;
   for (iter = s_statsMap.begin(); iter != s_statsMap.end(); ++iter) {
-    ASSERT(iter->second->isGroup);
+    assert(iter->second->isGroup);
     out << "{";
     writeEntryStr(out, "GroupName", iter->first);
     writeEntryInt(out, "TotalSize", iter->second->totalSize);
@@ -326,7 +326,7 @@ bool SharedStoreStats::snapshot(const char *filename, std::string& keySample) {
   StatsMap::iterator iter;
   time_t now = time(NULL);
   for (iter = s_detailMap.begin(); iter != s_detailMap.end();  ++iter) {
-    ASSERT(!iter->second->isGroup);
+    assert(!iter->second->isGroup);
     if (keySample != "") {
       char nkey[MAX_KEY_LEN + 1];
       normalizeKey(iter->first, nkey, MAX_KEY_LEN);
@@ -438,7 +438,7 @@ void SharedStoreStats::onDelete(const StringData *key, const SharedVariant *var,
     StatsMap::const_accessor cacc;
     if (s_detailMap.find(cacc, (char*)key->data())) {
       SharedValueProfile *svp = cacc->second;
-      ASSERT(svp->isValid);
+      assert(svp->isValid);
       svp->isValid = false;
       svp->deleteCount++;
       svp->lastDeleteTime = time(NULL);

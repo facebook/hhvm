@@ -71,7 +71,7 @@ void SimpleCounter::Count(const string &name) {
   if (Enabled) {
     int count = ++s_counter->m_counters[name];
     if (SampleStackCount > 0) {
-      ASSERT(StackTrace::Enabled);
+      assert(StackTrace::Enabled);
       vector<string> &stackVec = s_counter->m_stacks[name];
       if ((int)stackVec.size() < SampleStackCount ||
           f_rand(0, count - 1) < SampleStackCount) {

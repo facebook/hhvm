@@ -104,7 +104,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
 }
 
 void Lease::drop(int64 hintExpireDelay) {
-  ASSERT(amOwner());
+  assert(amOwner());
   TRACE(4, "thr%lx: dropping lease, called by %p,%p\n",
         pthread_self(), __builtin_return_address(0),
         __builtin_return_address(1));
@@ -121,7 +121,7 @@ void Lease::drop(int64 hintExpireDelay) {
 LeaseHolderBase::LeaseHolderBase(Lease& l, LeaseAcquire acquire,
                                                 bool blocking)
   : m_lease(l), m_haveLock(false), m_acquired(false) {
-  ASSERT(IMPLIES(blocking, acquire == ACQUIRE));
+  assert(IMPLIES(blocking, acquire == ACQUIRE));
   if (!m_lease.amOwner() && acquire == ACQUIRE) {
     m_acquired = m_lease.acquire(blocking);
   }
@@ -135,8 +135,8 @@ LeaseHolderBase::~LeaseHolderBase() {
 }
 
 bool LeaseHolderBase::acquire() {
-  ASSERT(!m_acquired);
-  ASSERT(m_haveLock == m_lease.amOwner());
+  assert(!m_acquired);
+  assert(m_haveLock == m_lease.amOwner());
   if (m_haveLock) {
     return true;
   }

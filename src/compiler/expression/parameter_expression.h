@@ -48,11 +48,11 @@ public:
   TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
   bool hasTypeHint() const { return !m_type.empty(); }
   const std::string &getTypeHint() const {
-    ASSERT(hasTypeHint());
+    assert(hasTypeHint());
     return m_type;
   }
   const std::string &getOriginalTypeHint() const {
-    ASSERT(hasTypeHint());
+    assert(hasTypeHint());
     return m_originalType;
   }
   void parseHandler(ClassScopePtr cls);

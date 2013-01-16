@@ -245,7 +245,7 @@ MySQL::~MySQL() {
 }
 
 void MySQL::setLastError(const char *func) {
-  ASSERT(m_conn);
+  assert(m_conn);
   m_last_error_set = true;
   m_last_errno = mysql_errno(m_conn);
   const char *error = mysql_error(m_conn);

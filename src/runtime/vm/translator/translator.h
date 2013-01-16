@@ -398,7 +398,7 @@ class NormalizedInstruction {
   }
 
   bool isJmpNZ() const {
-    ASSERT(op() == OpJmpNZ || op() == OpJmpZ);
+    assert(op() == OpJmpNZ || op() == OpJmpZ);
     return (op() == OpJmpNZ) != invertCond;
   }
 
@@ -538,7 +538,7 @@ struct RefDeps {
     }
     Record& r = m_arMap[entryArDelta];
     if (argNum >= r.m_mask.size()) {
-      ASSERT(argNum >= r.m_vals.size());
+      assert(argNum >= r.m_vals.size());
       r.m_mask.resize(argNum + 1);
       r.m_vals.resize(argNum + 1);
     }

@@ -249,7 +249,7 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
     reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
   TypedValue* loc = frame_local(fp, 0);
   for (Id i = 0; i < numNames; ++i, --loc) {
-    ASSERT(func->lookupVarId(func->localVarName(i)) == (int)i);
+    assert(func->lookupVarId(func->localVarName(i)) == (int)i);
     origLocs[i] = m_nvTable->migrateSet(func->localVarName(i), loc);
   }
 }
@@ -258,7 +258,7 @@ VarEnv::~VarEnv() {
   TRACE(3, "Destroying VarEnv %p [%s]\n",
            this,
            isGlobalScope() ? "global scope" : "local scope");
-  ASSERT(m_restoreLocations.empty());
+  assert(m_restoreLocations.empty());
   if (g_vmContext->m_topVarEnv == this) {
     g_vmContext->m_topVarEnv = m_previous;
   }
@@ -316,8 +316,8 @@ VarEnv* VarEnv::createLazyAttach(ActRec* fp,
 }
 
 VarEnv* VarEnv::createGlobal() {
-  ASSERT(!g_vmContext->m_globalVarEnv);
-  ASSERT(!g_vmContext->m_topVarEnv);
+  assert(!g_vmContext->m_globalVarEnv);
+  assert(!g_vmContext->m_topVarEnv);
 
   VarEnv* ret = new (request_arena()) VarEnv();
   TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
@@ -336,7 +336,7 @@ void VarEnv::attach(ActRec* fp) {
            this,
            isGlobalScope() ? "global scope" : "local scope",
            int(fp->m_func->numNamedLocals()), fp);
-  ASSERT(m_depth == 0 || g_vmContext->arGetSfp(fp) == m_cfp ||
+  assert(m_depth == 0 || g_vmContext->arGetSfp(fp) == m_cfp ||
          (g_vmContext->arGetSfp(fp) == fp && g_vmContext->isNested()));
   m_cfp = fp;
   m_depth++;
@@ -356,7 +356,7 @@ void VarEnv::attach(ActRec* fp) {
     func->numNamedLocals()];
   TypedValue* loc = frame_local(fp, 0);
   for (Id i = 0; i < numNames; ++i, --loc) {
-    ASSERT(func->lookupVarId(func->localVarName(i)) == (int)i);
+    assert(func->lookupVarId(func->localVarName(i)) == (int)i);
     origLocs[i] = m_nvTable->migrate(func->localVarName(i), loc);
   }
   m_restoreLocations.push_back(origLocs);
@@ -367,8 +367,8 @@ void VarEnv::detach(ActRec* fp) {
            this,
            isGlobalScope() ? "global scope" : "local scope",
            fp);
-  ASSERT(fp == m_cfp);
-  ASSERT(m_depth > 0);
+  assert(fp == m_cfp);
+  assert(m_depth > 0);
 
   // Merge/remove fp's overlaid locals, if it had any.
   const Func* func = fp->m_func;
@@ -378,7 +378,7 @@ void VarEnv::detach(ActRec* fp) {
      * for the first (lazy) attach stored immediately following the
      * VarEnv in memory.  In this case m_restoreLocations will be empty.
      */
-    ASSERT((!isGlobalScope() && m_depth == 1) == m_restoreLocations.empty());
+    assert((!isGlobalScope() && m_depth == 1) == m_restoreLocations.empty());
     TypedValue** origLocs =
       !m_restoreLocations.empty()
         ? m_restoreLocations.back()
@@ -399,7 +399,7 @@ void VarEnv::detach(ActRec* fp) {
     m_cfp = NULL;
     // don't free global varEnv
     if (context->m_globalVarEnv != this) {
-      ASSERT(!isGlobalScope());
+      assert(!isGlobalScope());
       destroy(this);
     }
   }
@@ -511,7 +511,7 @@ ExtraArgs* ExtraArgs::allocateUninit(unsigned nargs) {
 }
 
 void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
-  ASSERT(nargs > 0);
+  assert(nargs > 0);
 
   for (unsigned i = 0; i < nargs; ++i) {
     tvRefcountedDecRef(ea->m_extraArgs + i);
@@ -612,7 +612,7 @@ Stack::requestInit() {
   if (trustSigSegv) {
     RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
     Lock l(data.surpriseLock);
-    ASSERT(data.surprisePage == NULL);
+    assert(data.surprisePage == NULL);
     data.surprisePage = m_elms;
   }
   // Burn one element of the stack, to satisfy the constraint that
@@ -625,8 +625,8 @@ Stack::requestInit() {
   // overflow.
   UNUSED size_t maxelms =
     RuntimeOption::EvalVMStackElms - sSurprisePageSize / sizeof(TypedValue);
-  ASSERT(!wouldOverflow(maxelms - 1));
-  ASSERT(wouldOverflow(maxelms));
+  assert(!wouldOverflow(maxelms - 1));
+  assert(wouldOverflow(maxelms));
 
   // Reset permissions on our stack's surprise page
   unprotect();
@@ -638,7 +638,7 @@ Stack::requestExit() {
     if (trustSigSegv) {
       RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
       Lock l(data.surpriseLock);
-      ASSERT(data.surprisePage == m_elms);
+      assert(data.surprisePage == m_elms);
       unprotect();
       data.surprisePage = NULL;
     }
@@ -659,7 +659,7 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     os << " ??? type " << tv->m_type << "\n";
     return;
   }
-  ASSERT(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
+  assert(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
   if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->_count <= 0) {
     // OK in the invoking frame when running a destructor.
     os << " ??? inner_count " << tv->m_data.pref->_count << " ";
@@ -670,7 +670,7 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     os << "V:(";
     os << "@" << tv->m_data.pref;
     tv = tv->m_data.pref->tv();  // Unbox so contents get printed below
-    ASSERT(tv->m_type != KindOfRef);
+    assert(tv->m_type != KindOfRef);
     toStringElm(os, tv, fp);
     os << ")";
     return;
@@ -704,7 +704,7 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
   }
   case KindOfStaticString:
   case KindOfString: {
-    ASSERT(tv->m_data.pstr->getCount() > 0);
+    assert(tv->m_data.pstr->getCount() > 0);
     int len = tv->m_data.pstr->size();
     bool truncated = false;
     if (len > 128) {
@@ -717,12 +717,12 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     break;
   }
   case KindOfArray: {
-    ASSERT(tv->m_data.parr->getCount() > 0);
+    assert(tv->m_data.parr->getCount() > 0);
     os << tv->m_data.parr << ":Array";
     break;
   }
   case KindOfObject: {
-    ASSERT(tv->m_data.pobj->getCount() > 0);
+    assert(tv->m_data.pobj->getCount() > 0);
     os << tv->m_data.pobj << ":Object("
        << tvAsVariant(tv).asObjRef().get()->o_getClassName().get()->data()
        << ")";
@@ -762,7 +762,7 @@ void Stack::toStringIter(std::ostream& os, Iter* it) const {
     break;
   }
   default: {
-    ASSERT(false);
+    assert(false);
     os << "I:?";
     break;
   }
@@ -836,7 +836,7 @@ void Stack::toStringFragAR(std::ostream& os, const ActRec* fp,
 void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
                           int offset, const TypedValue* ftop,
                           const string& prefix) const {
-  ASSERT(fp);
+  assert(fp);
 
   // Use depth-first recursion to output the most deeply nested stack frame
   // first.
@@ -851,7 +851,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
 
   os << prefix;
   const Func* func = fp->m_func;
-  ASSERT(func);
+  assert(func);
   func->validate();
   string funcName;
   if (func->isMethod()) {
@@ -879,7 +879,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
     os << ">";
   }
 
-  ASSERT(!func->isBuiltin() || func->numIterators() == 0);
+  assert(!func->isBuiltin() || func->numIterators() == 0);
   if (func->numIterators() > 0) {
     os << "|";
     Iter* it = &((Iter*)&tv[1])[-1];
@@ -924,14 +924,14 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
   bool unwindingGeneratorFrame = func->isGenerator();
   TypedValue* evalTop;
   if (UNLIKELY(unwindingGeneratorFrame)) {
-    ASSERT(!isValidAddress((uintptr_t)fp));
+    assert(!isValidAddress((uintptr_t)fp));
     evalTop = generatorStackBase(fp);
   } else {
-    ASSERT(isValidAddress((uintptr_t)fp));
+    assert(isValidAddress((uintptr_t)fp));
     evalTop = frameStackBase(fp);
   }
-  ASSERT(isValidAddress((uintptr_t)evalTop));
-  ASSERT(evalTop >= m_top);
+  assert(isValidAddress((uintptr_t)evalTop));
+  assert(evalTop >= m_top);
 
   while (m_top < evalTop) {
     popTV();
@@ -961,7 +961,7 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
   }
 
   if (fp->isFromFPushCtor()) {
-    ASSERT(fp->hasThis());
+    assert(fp->hasThis());
     fp->getThis()->setNoDestruct();
   }
 
@@ -998,11 +998,11 @@ void Stack::unwindAR(ActRec* fp, const FPIEnt* fe) {
         (ActRec*)(genStackBase + fp->m_func->numSlotsInFrame());
       ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
     }
-    ASSERT((TypedValue*)ar >= m_top);
+    assert((TypedValue*)ar >= m_top);
     unwindARFrag(ar);
 
     if (ar->isFromFPushCtor()) {
-      ASSERT(ar->hasThis());
+      assert(ar->hasThis());
       ar->getThis()->setNoDestruct();
     }
 
@@ -1048,7 +1048,7 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
     }
     // Keep the pc up to date while unwinding.
     const Func *prevF = prevFp->m_func;
-    ASSERT(isValidAddress((uintptr_t)prevFp) || prevF->isGenerator());
+    assert(isValidAddress((uintptr_t)prevFp) || prevF->isGenerator());
     pc = prevF->unit()->at(prevF->base() + fp->m_soff);
     fp = prevFp;
     offset = prevOff;
@@ -1072,7 +1072,7 @@ bool Stack::wouldOverflow(int numCells) const {
 
 TypedValue* Stack::frameStackBase(const ActRec* fp) {
   const Func* func = fp->m_func;
-  ASSERT(!func->isGenerator());
+  assert(!func->isGenerator());
   return (TypedValue*)((uintptr_t)fp
                        - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
                        - (uintptr_t)(func->numIterators() * sizeof(Iter)));
@@ -1082,7 +1082,7 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
   // We know generators are always called from a function with an empty stack.
   // So we find the caller's FP, compensate for its locals, and then we've found
   // the base of the generator's stack.
-  ASSERT(fp->m_func->isGenerator());
+  assert(fp->m_func->isGenerator());
   ActRec* callerFP = (ActRec*)fp->m_savedRbp;
   return (TypedValue*)callerFP - callerFP->m_func->numSlotsInFrame();
 }
@@ -1115,7 +1115,7 @@ ActRec* VMExecutionContext::arGetSfp(const ActRec* ar) {
   }
   int64* magicPtr = (int64*)(prevFrame + 1);
   if (*magicPtr == c_Continuation::kMagic) {
-    ASSERT(prevFrame->m_func->isGenerator());
+    assert(prevFrame->m_func->isGenerator());
     return prevFrame;
   }
   return const_cast<ActRec*>(ar);
@@ -1164,11 +1164,11 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                                                 bool raise /* = false */) {
   const Func* method;
   if (callType == CtorMethod) {
-    ASSERT(methodName == NULL);
+    assert(methodName == NULL);
     method = cls->getCtor();
   } else {
-    ASSERT(callType == ObjMethod || callType == ClsMethod);
-    ASSERT(methodName != NULL);
+    assert(callType == ObjMethod || callType == ClsMethod);
+    assert(methodName != NULL);
     method = cls->lookupMethod(methodName);
     while (!method) {
       static StringData* sd__construct
@@ -1189,14 +1189,14 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       return NULL;
     }
   }
-  ASSERT(method);
+  assert(method);
   bool accessible = true;
   // If we found a protected or private method, we need to do some
   // accessibility checks.
   if ((method->attrs() & (AttrProtected|AttrPrivate)) &&
       !g_vmContext->getDebuggerBypassCheck()) {
     Class* baseClass = method->baseCls();
-    ASSERT(baseClass);
+    assert(baseClass);
     // If the context class is the same as the class that first
     // declared this method, then we know we have the right method
     // and we can stop here.
@@ -1214,7 +1214,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       }
       return NULL;
     }
-    ASSERT(ctx);
+    assert(ctx);
     if (method->attrs() & AttrPrivate) {
       // The context class is not the same as the class that declared
       // this private method, so this private method is not accessible.
@@ -1249,7 +1249,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       // We now know this protected method is accessible, but we need to
       // keep going because the context class may define a private method
       // with this name.
-      ASSERT(accessible && baseClass->classof(ctx));
+      assert(accessible && baseClass->classof(ctx));
     }
   }
   // If this is an ObjMethod call ("$obj->foo()") AND there is an ancestor
@@ -1324,15 +1324,15 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
         return MethodNotFound;
       }
       f->validate();
-      ASSERT(f);
-      ASSERT(f->attrs() & AttrStatic);
+      assert(f);
+      assert(f->attrs() & AttrStatic);
       return MagicCallStaticFound;
     }
-    ASSERT(f);
-    ASSERT(obj);
+    assert(f);
+    assert(obj);
     // __call cannot be static, this should be enforced by semantic
     // checks defClass time or earlier
-    ASSERT(!(f->attrs() & AttrStatic));
+    assert(!(f->attrs() & AttrStatic));
     return MagicCallFound;
   }
   if (obj && !(f->attrs() & AttrStatic) && obj->instanceof(cls)) {
@@ -1351,7 +1351,7 @@ LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
     if (!f) {
       // If raise was true than lookupMethodCtx should have thrown,
       // so we should only be able to get here if raise was false
-      ASSERT(!raise);
+      assert(!raise);
       return MethodNotFound;
     }
   }
@@ -1404,7 +1404,7 @@ ObjectData* VMExecutionContext::getThis() {
 CStrRef VMExecutionContext::getContextClassName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
-  ASSERT(ar != NULL);
+  assert(ar != NULL);
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
     if (!ar) return empty_string;
@@ -1421,7 +1421,7 @@ CStrRef VMExecutionContext::getContextClassName() {
 CStrRef VMExecutionContext::getParentContextClassName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
-  ASSERT(ar != NULL);
+  assert(ar != NULL);
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
     if (!ar) return empty_string;
@@ -1491,7 +1491,7 @@ Array VMExecutionContext::getCallerInfo() {
       Unit* unit = ar->m_func->unit();
       int lineNumber;
       if ((lineNumber = unit->getLineNumber(pc)) != -1) {
-        ASSERT(!unit->filepath()->size() ||
+        assert(!unit->filepath()->size() ||
                unit->filepath()->data()[0] == '/');
         result.set(s_file, unit->filepath()->data(), true);
         result.set(s_line, lineNumber);
@@ -1523,7 +1523,7 @@ TypedValue* VMExecutionContext::getCns(StringData* cns,
         ConstInfoMap::const_iterator it = m_constInfo.find(cns);
         if (it != m_constInfo.end()) {
           // This is a dynamic constant, so don't report it.
-          ASSERT(ci == it->second);
+          assert(ci == it->second);
           return NULL;
         }
       }
@@ -1551,7 +1551,7 @@ bool VMExecutionContext::setCns(StringData* cns, CVarRef val, bool dynamic) {
   val.setEvalScalar();
   TypedValue* tv = val.getTypedAccessor();
   m_constants.nvSet(cns, tv, false);
-  ASSERT(m_constants.nvGet(cns) != NULL);
+  assert(m_constants.nvGet(cns) != NULL);
   if (RuntimeOption::EvalJit) {
     if (dynamic) {
       newPreConst(cns, *tv);
@@ -1594,13 +1594,13 @@ VarEnv* VMExecutionContext::getVarEnv() {
     fp = getPrevVMState(fp);
   }
   if (!fp) return NULL;
-  ASSERT(!fp->hasInvName());
+  assert(!fp->hasInvName());
   if (!fp->hasVarEnv()) {
     if (builtinVarEnv) {
       // If the builtin function has its own VarEnv, we temporarily
       // remove it from the list before making a VarEnv for the calling
-      // function to satisfy various ASSERTs
-      ASSERT(builtinVarEnv == m_topVarEnv);
+      // function to satisfy various asserts
+      assert(builtinVarEnv == m_topVarEnv);
       m_topVarEnv = m_topVarEnv->previous();
     }
     fp->m_varEnv = VarEnv::createLazyAttach(fp);
@@ -1622,9 +1622,9 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
   if (fp->skipFrame()) {
     fp = getPrevVMState(fp);
   }
-  ASSERT(!fp->hasInvName());
-  ASSERT(!fp->hasExtraArgs());
-  ASSERT(fp->m_varEnv != NULL);
+  assert(!fp->hasInvName());
+  assert(!fp->hasExtraArgs());
+  assert(fp->m_varEnv != NULL);
   if (ref) {
     fp->m_varEnv->bind(name, v);
   } else {
@@ -1642,7 +1642,7 @@ Array VMExecutionContext::getLocalDefinedVariables(int frame) {
   if (!fp) {
     return Array::Create();
   }
-  ASSERT(!fp->hasInvName());
+  assert(!fp->hasInvName());
   if (fp->hasVarEnv()) {
     return fp->m_varEnv->getDefinedVariables();
   }
@@ -1664,7 +1664,7 @@ void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   StringData* invName = ar->getInvName();
   int nargs = ar->numArgs();
   ar->setVarEnv(NULL);
-  ASSERT(!ar->hasVarEnv() && !ar->hasInvName());
+  assert(!ar->hasVarEnv() && !ar->hasInvName());
   // We need to make an array containing all the arguments passed by the
   // caller and put it where the second argument is
   HphpArray* argArray = pack_args_into_array(ar, nargs);
@@ -1715,7 +1715,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
     }
   }
   // It is now safe to access m_varEnv directly
-  ASSERT(!ar->hasInvName());
+  assert(!ar->hasInvName());
   int nargs = ar->numArgs();
   // Set pc below, once we know that DV dispatch is unnecessary.
   m_fp = ar;
@@ -1742,7 +1742,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
           firstDVInitializer = dvInitializer;
         }
       }
-      ASSERT(m_fp->m_func == func);
+      assert(m_fp->m_func == func);
     } else {
       // For the reenter case, extra arguments are handled below (with
       // the extraArgs vector passed to this function).  The below
@@ -1752,7 +1752,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
         if (func->attrs() & AttrMayUseVV) {
           // If there are extra parameters then we cannot be a pseudomain
           // inheriting a VarEnv
-          ASSERT(!m_fp->m_varEnv);
+          assert(!m_fp->m_varEnv);
           // Extra parameters must be moved off the stack.
           const int numExtras = nargs - nparams;
           m_fp->setExtraArgs(ExtraArgs::allocateCopy(
@@ -1783,7 +1783,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
     if (ar->hasVarEnv()) {
       // If this is a pseudomain inheriting a VarEnv from our caller,
       // there cannot be extra arguments
-      ASSERT(!extraArgs);
+      assert(!extraArgs);
       // Now that locals have been initialized, it is safe to attach
       // the VarEnv inherited from our caller to the current frame
       ar->m_varEnv->attach(ar);
@@ -1860,7 +1860,7 @@ static void pushFault(Fault::FaultType t, Exception* e, Object* o = NULL) {
   fault.m_faultType = t;
   if (t == Fault::KindOfUserException) {
     // User object.
-    ASSERT(o);
+    assert(o);
     fault.m_userException = o->get();
     fault.m_userException->incRefCount();
   } else {
@@ -1948,9 +1948,9 @@ short_jump:
     jumpCode = handleUnwind(unwindType);
     goto short_jump;
   } catch (...) {
-    ASSERT(tl_regState == REGSTATE_CLEAN);
+    assert(tl_regState == REGSTATE_CLEAN);
     jumpCode = exception_handler();
-    ASSERT(jumpCode != EXCEPTION_START);
+    assert(jumpCode != EXCEPTION_START);
     goto short_jump;
   }
 
@@ -1959,7 +1959,7 @@ short_jump:
   return;
 
 propagate:
-  ASSERT(m_faults.size() > 0);
+  assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
   m_faults.pop_back();
   switch (fault.m_faultType) {
@@ -1988,7 +1988,7 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
   VMState savedVM = { getPC(), getFP(), m_firstAR, savedSP };
   TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
   pushVMState(savedVM, ar);
-  ASSERT(m_nestedVMs.size() >= 1);
+  assert(m_nestedVMs.size() >= 1);
   try {
     enterVM(retval, ar, extraArgs);
     popVMState();
@@ -2018,20 +2018,20 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
                                     VarEnv* varEnv /* = NULL */,
                                     StringData* invName /* = NULL */,
                                     Unit* toMerge /* = NULL */) {
-  ASSERT(retval);
-  ASSERT(f);
+  assert(retval);
+  assert(f);
   // If this is a regular function, this_ and cls must be NULL
-  ASSERT(f->preClass() || f->isPseudoMain() || (!this_ && !cls));
+  assert(f->preClass() || f->isPseudoMain() || (!this_ && !cls));
   // If this is a method, either this_ or cls must be non-NULL
-  ASSERT(!f->preClass() || (this_ || cls));
+  assert(!f->preClass() || (this_ || cls));
   // If this is a static method, this_ must be NULL
-  ASSERT(!(f->attrs() & HPHP::VM::AttrStatic) || (!this_));
+  assert(!(f->attrs() & HPHP::VM::AttrStatic) || (!this_));
   // invName should only be non-NULL if we are calling __call or
   // __callStatic
-  ASSERT(!invName || f->name()->isame(s___call.get()) ||
+  assert(!invName || f->name()->isame(s___call.get()) ||
          f->name()->isame(s___callStatic.get()));
   // If a variable environment is being inherited then params must be empty
-  ASSERT(!varEnv || params.empty());
+  assert(!varEnv || params.empty());
 
   VMRegAnchor _;
 
@@ -2059,7 +2059,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   checkStack(m_stack, f);
 
   if (toMerge != NULL) {
-    ASSERT(f->unit() == toMerge && f->isPseudoMain());
+    assert(f->unit() == toMerge && f->isPseudoMain());
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
       *retval = *toMerge->getMainReturn();
@@ -2112,7 +2112,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
       // ArrayData::merge.
       hphpArrCopy.merge(params);
       arr = dynamic_cast<HphpArray*>(hphpArrCopy.get());
-      ASSERT(arr && IsHphpArray(arr));
+      assert(arr && IsHphpArray(arr));
     }
     if (arr) {
       const int numParams = f->numParams();
@@ -2132,11 +2132,11 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
           if (!(f->attrs() & AttrMayUseVV)) {
             // Discard extra arguments, since the function cannot
             // possibly use them.
-            ASSERT(extraArgs == NULL);
+            assert(extraArgs == NULL);
             ar->setNumArgs(numParams);
             break;
           }
-          ASSERT(extraArgs != NULL && numExtraArgs > 0);
+          assert(extraArgs != NULL && numExtraArgs > 0);
           // VarEnv expects the extra args to be in "reverse" order
           // (i.e. the last extra arg has the lowest address)
           to = extraArgs->getExtraArg(paramId - numParams);
@@ -2159,7 +2159,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   if (m_fp) {
     reenterVM(retval, ar, extraArgs, savedSP);
   } else {
-    ASSERT(m_nestedVMs.size() == 0);
+    assert(m_nestedVMs.size() == 0);
     enterVM(retval, ar, extraArgs);
   }
 }
@@ -2176,8 +2176,8 @@ void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
 void VMExecutionContext::unwindBuiltinFrame() {
   // Unwind the frame for a builtin. Currently only used for
   // hphpd_break and fb_enable_code_coverage
-  ASSERT(m_fp->m_func->isBuiltin());
-  ASSERT(m_fp->m_func->name()->isame(s_hphpd_break.get()) ||
+  assert(m_fp->m_func->isBuiltin());
+  assert(m_fp->m_func->name()->isame(s_hphpd_break.get()) ||
          m_fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
   // Free any values that may be on the eval stack
   TypedValue *evalTop = (TypedValue*)getFP();
@@ -2189,7 +2189,7 @@ void VMExecutionContext::unwindBuiltinFrame() {
   // Tear down the frame
   Offset pc = -1;
   ActRec* sfp = getPrevVMState(m_fp, &pc);
-  ASSERT(pc != -1);
+  assert(pc != -1);
   m_fp = sfp;
   m_pc = m_fp->m_func->unit()->at(pc);
   m_stack.discardAR();
@@ -2241,8 +2241,8 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   if (i == -1) return NULL;
   const VMState& vmstate = m_nestedVMs[i].m_savedState;
   prevFp = vmstate.fp;
-  ASSERT(prevFp);
-  ASSERT(prevFp->m_func->unit());
+  assert(prevFp);
+  assert(prevFp->m_func->unit());
   if (prevSp) *prevSp = vmstate.sp;
   if (prevPc) {
     *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
@@ -2291,7 +2291,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
   } else {
     fp = getFP();
     Unit *unit = getFP()->m_func->unit();
-    ASSERT(unit);
+    assert(unit);
     pc = unit->offsetOf(m_pc);
   }
   int depth = 0;
@@ -2300,9 +2300,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     // Builtins don't have a file and line number
     if (!fp->m_func->isBuiltin()) {
       Unit *unit = fp->m_func->unit();
-      ASSERT(unit);
+      assert(unit);
       const char* filename = unit->filepath()->data();
-      ASSERT(filename);
+      assert(filename);
       Offset off = pc;
       Array frame = Array::Create();
       frame.set(String(s_file), filename, true);
@@ -2326,9 +2326,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     // Builtins don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin()) {
       Unit* unit = prevFp->m_func->unit();
-      ASSERT(unit);
+      assert(unit);
       const char *filename = unit->filepath()->data();
-      ASSERT(filename);
+      assert(filename);
       frame.set(String(s_file), filename, true);
       frame.set(String(s_line),
                 prevFp->m_func->unit()->getLineNumber(pc), true);
@@ -2578,7 +2578,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   // This file hasn't been included yet, so we need to parse the file
   efile = HPHP::Eval::FileRepository::checkoutFile(
     hasRealpath ? rpath.get() : spath.get(), s);
-  ASSERT(!efile || efile->getRef() > 0);
+  assert(!efile || efile->getRef() > 0);
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldnt be recorded as a
     // per request fetch of the file.
@@ -2639,7 +2639,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
           path->data(),
           absPath->data());
   } else {
-    ASSERT(flags & InclOpDocRoot);
+    assert(flags & InclOpDocRoot);
     absPath = SourceRootInfo::GetCurrentPhpRoot();
     TRACE(2, "lookupIncludeRoot(%s): docRoot -> %s\n",
           path->data(),
@@ -2678,7 +2678,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
 
 
   ActRec* ar = m_stack.allocA();
-  ASSERT((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
+  assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
   VM::Class* cls = curClass();
   if (local) {
     cls = NULL;
@@ -2693,12 +2693,12 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
     ar->setThis(NULL);
   }
   Func* func = unit->getMain(cls);
-  ASSERT(!func->isBuiltin());
-  ASSERT(!func->isGenerator());
+  assert(!func->isBuiltin());
+  assert(!func->isGenerator());
   ar->m_func = func;
   ar->initNumArgs(0);
-  ASSERT(getFP());
-  ASSERT(!m_fp->hasInvName());
+  assert(getFP());
+  assert(!m_fp->hasInvName());
   arSetSfp(ar, m_fp);
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
@@ -2729,7 +2729,7 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val) {
   }
   String code = HPHP::concat3("<?php return ", key, ";");
   VM::Unit* unit = compileEvalString(code.get());
-  ASSERT(unit != NULL);
+  assert(unit != NULL);
   Variant v;
   // Default arg values are not currently allowed to depend on class context.
   g_vmContext->invokeFunc((TypedValue*)&v, unit->getMain(),
@@ -2824,7 +2824,7 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
 
 void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
                                          int frame) {
-  ASSERT(retval);
+  assert(retval);
   // The code has "<?php" prepended already
   Unit* unit = compileEvalString(code);
   if (unit == NULL) {
@@ -2845,7 +2845,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
         } else if (vit != fp->m_varEnv) {
           vit = vit->previous();
         }
-        ASSERT(vit == fp->m_varEnv);
+        assert(vit == fp->m_varEnv);
       }
       ActRec* prevFp = getPrevVMState(fp);
       if (!prevFp) {
@@ -2941,7 +2941,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   }
   VarEnv* varEnv = m_topVarEnv;
   if (!getFP()) {
-    ASSERT(m_stack.count() == 0);
+    assert(m_stack.count() == 0);
     ActRec* ar = m_stack.allocA();
     ar->m_func = s_debuggerDummy->getMain();
     ar->setThis(NULL);
@@ -2957,8 +2957,8 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
 }
 
 void VMExecutionContext::exitDebuggerDummyEnv() {
-  ASSERT(m_topVarEnv);
-  ASSERT(m_globalVarEnv == m_topVarEnv);
+  assert(m_topVarEnv);
+  assert(m_globalVarEnv == m_topVarEnv);
   m_globalVarEnv->detach(getFP());
 }
 
@@ -2976,7 +2976,7 @@ static inline void lookup_var(ActRec* fp,
   if (id != kInvalidId) {
     val = frame_local(fp, id);
   } else {
-    ASSERT(!fp->hasInvName());
+    assert(!fp->hasInvName());
     if (fp->hasVarEnv()) {
       val = fp->m_varEnv->lookup(name);
     } else {
@@ -2995,7 +2995,7 @@ static inline void lookupd_var(ActRec* fp,
   if (id != kInvalidId) {
     val = frame_local(fp, id);
   } else {
-    ASSERT(!fp->hasInvName());
+    assert(!fp->hasInvName());
     if (!fp->hasVarEnv()) {
       fp->m_varEnv = VarEnv::createLazyAttach(fp);
     }
@@ -3014,7 +3014,7 @@ static inline void lookup_gbl(ActRec* fp,
                               TypedValue* key,
                               TypedValue*& val) {
   name = lookup_name(key);
-  ASSERT(g_vmContext->m_globalVarEnv);
+  assert(g_vmContext->m_globalVarEnv);
   val = g_vmContext->m_globalVarEnv->lookup(name);
 }
 
@@ -3023,7 +3023,7 @@ static inline void lookupd_gbl(ActRec* fp,
                                TypedValue* key,
                                TypedValue*& val) {
   name = lookup_name(key);
-  ASSERT(g_vmContext->m_globalVarEnv);
+  assert(g_vmContext->m_globalVarEnv);
   VarEnv* varEnv = g_vmContext->m_globalVarEnv;
   val = varEnv->lookup(name);
   if (val == NULL) {
@@ -3041,7 +3041,7 @@ static inline void lookup_sprop(ActRec* fp,
                                 TypedValue*& val,
                                 bool& visible,
                                 bool& accessible) {
-  ASSERT(clsRef->m_type == KindOfClass);
+  assert(clsRef->m_type == KindOfClass);
   name = lookup_name(key);
   Class* ctx = arGetContextClass(fp);
   val = clsRef->m_data.pcls->getSProp(ctx, name, visible, accessible);
@@ -3104,7 +3104,7 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
     // unconditionally here because we maintain the invariant throughout that
     // either tvRef is KindOfUninit, or tvRef contains a valid object that
     // result points to.
-    ASSERT(result == &tvRef);
+    assert(result == &tvRef);
     result = &tvRef2;
   }
 }
@@ -3157,7 +3157,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
   // before calling getHelperPre().
   const ImmVector immVec = ImmVector::createFromStream(pc);
   const uint8_t* vec = immVec.vec();
-  ASSERT(immVec.size() > 0);
+  assert(immVec.size() > 0);
 
   // PC needs to be advanced before we do anything, otherwise if we
   // raise a notice in the middle of this we could resume at the wrong
@@ -3232,7 +3232,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
 
   lcodeSprop: {
     bool visible, accessible;
-    ASSERT(cref->m_type == KindOfClass);
+    assert(cref->m_type == KindOfClass);
     const Class* class_ = cref->m_data.pcls;
     StringData* name = lookup_name(pname);
     loc = class_->getSProp(ctx, name, visible, accessible);
@@ -3261,7 +3261,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     loc = m_stack.indTV(depth--);
     break;
   case LH:
-    ASSERT(m_fp->hasThis());
+    assert(m_fp->hasThis());
     tvScratch.m_type = KindOfObject;
     tvScratch.m_data.pobj = m_fp->getThis();
     loc = &tvScratch;
@@ -3283,13 +3283,13 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
       if (memberCodeImmIsString(mcode)) {
         tvAsVariant(&tvLiteral) =
           m_fp->m_func->unit()->lookupLitstrId(memberImm);
-        ASSERT(!IS_REFCOUNTED_TYPE(tvLiteral.m_type));
+        assert(!IS_REFCOUNTED_TYPE(tvLiteral.m_type));
         curMember = &tvLiteral;
       } else if (mcode == MEI) {
         tvAsVariant(&tvLiteral) = memberImm;
         curMember = &tvLiteral;
       } else {
-        ASSERT(memberCodeImmIsLoc(mcode));
+        assert(memberCodeImmIsLoc(mcode));
         curMember = frame_local_inner(m_fp, memberImm);
       }
     } else {
@@ -3298,7 +3298,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
 
     if (mleave == LeaveLast) {
       if (vec >= pc) {
-        ASSERT(vec == pc);
+        assert(vec == pc);
         break;
       }
     }
@@ -3322,21 +3322,21 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
       result = NULL;
       break;
     default:
-      ASSERT(false);
+      assert(false);
       result = NULL; // Silence compiler warning.
     }
-    ASSERT(result != NULL);
+    assert(result != NULL);
     ratchetRefs(result, tvRef, tvRef2);
     base = result;
   }
 
   if (mleave == ConsumeAll) {
-    ASSERT(vec == pc);
+    assert(vec == pc);
     if (debug) {
       if (lcode == LSC || lcode == LSL) {
-        ASSERT(depth == 0);
+        assert(depth == 0);
       } else {
-        ASSERT(depth == -1);
+        assert(depth == -1);
       }
     }
   }
@@ -3405,7 +3405,7 @@ VMExecutionContext::getHelper(PC& pc,
 void
 VMExecutionContext::getElem(TypedValue* base, TypedValue* key,
                             TypedValue* dest) {
-  ASSERT(base->m_type != KindOfArray);
+  assert(base->m_type != KindOfArray);
   bool baseStrOff = false;
   VMRegAnchor _;
   tvWriteUninit(dest);
@@ -3456,7 +3456,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
   // setHelperPre.
   const ImmVector immVec = ImmVector::createFromStream(pc);
   const uint8_t* vec = immVec.vec();
-  ASSERT(immVec.size() > 0);
+  assert(immVec.size() > 0);
 
   // PC needs to be advanced before we do anything, otherwise if we
   // raise a notice in the middle of this we could resume at the wrong
@@ -3539,7 +3539,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
 
   lcodeSprop: {
     bool visible, accessible;
-    ASSERT(cref->m_type == KindOfClass);
+    assert(cref->m_type == KindOfClass);
     const Class* class_ = cref->m_data.pcls;
     StringData* name = lookup_name(pname);
     loc = class_->getSProp(ctx, name, visible, accessible);
@@ -3568,7 +3568,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     loc = m_stack.indTV(depth--);
     break;
   case LH:
-    ASSERT(m_fp->hasThis());
+    assert(m_fp->hasThis());
     tvScratch.m_type = KindOfObject;
     tvScratch.m_data.pobj = m_fp->getThis();
     loc = &tvScratch;
@@ -3590,13 +3590,13 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
       if (memberCodeImmIsString(mcode)) {
         tvAsVariant(&tvLiteral) =
           m_fp->m_func->unit()->lookupLitstrId(memberImm);
-        ASSERT(!IS_REFCOUNTED_TYPE(tvLiteral.m_type));
+        assert(!IS_REFCOUNTED_TYPE(tvLiteral.m_type));
         curMember = &tvLiteral;
       } else if (mcode == MEI) {
         tvAsVariant(&tvLiteral) = memberImm;
         curMember = &tvLiteral;
       } else {
-        ASSERT(memberCodeImmIsLoc(mcode));
+        assert(memberCodeImmIsLoc(mcode));
         curMember = frame_local_inner(m_fp, memberImm);
       }
     } else {
@@ -3605,7 +3605,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
 
     if (mleave == LeaveLast) {
       if (vec >= pc) {
-        ASSERT(vec == pc);
+        assert(vec == pc);
         break;
       }
     }
@@ -3631,14 +3631,14 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
                                          curMember);
       break;
     case MW:
-      ASSERT(define);
+      assert(define);
       result = NewElem(tvScratch, tvRef, base);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       result = NULL; // Silence compiler warning.
     }
-    ASSERT(result != NULL);
+    assert(result != NULL);
     ratchetRefs(result, tvRef, tvRef2);
     // Check whether an error occurred (i.e. no result was set).
     if (result == &tvScratch && result->m_type == KindOfUninit) {
@@ -3648,12 +3648,12 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
   }
 
   if (mleave == ConsumeAll) {
-    ASSERT(vec == pc);
+    assert(vec == pc);
     if (debug) {
       if (lcode == LSC || lcode == LSL) {
-        ASSERT(depth == int(mdepth));
+        assert(depth == int(mdepth));
       } else {
-        ASSERT(depth == int(mdepth) - 1);
+        assert(depth == int(mdepth) - 1);
       }
     }
   }
@@ -3677,7 +3677,7 @@ inline void OPTBLD_INLINE VMExecutionContext::setHelperPost(
   // mdepth > 0.  They also always return the original top value of
   // the stack.
   if (mdepth > 0) {
-    ASSERT(mdepth == 1 &&
+    assert(mdepth == 1 &&
       "We don't really support mdepth > 1 in setHelperPost");
 
     TypedValue* retSrc = m_stack.topTV();
@@ -3957,9 +3957,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCns(PC& pc) {
   NEXT();
   DECODE_LITSTR(clsCnsName);
   TypedValue* tv = m_stack.topTV();
-  ASSERT(tv->m_type == KindOfClass);
+  assert(tv->m_type == KindOfClass);
   Class* class_ = tv->m_data.pcls;
-  ASSERT(class_ != NULL);
+  assert(class_ != NULL);
   TypedValue* clsCns = class_->clsCnsGet(clsCnsName);
   if (clsCns == NULL) {
     raise_error("Couldn't find constant %s::%s",
@@ -3977,7 +3977,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCnsD(PC& pc) {
 
   TypedValue* clsCns = lookupClsCns(classNamedEntity.second,
                                     classNamedEntity.first, clsCnsName);
-  ASSERT(clsCns != NULL);
+  assert(clsCns != NULL);
   Cell* c1 = m_stack.allocC();
   tvReadCell(clsCns, c1);
 }
@@ -3992,7 +3992,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
     tvCellAsVariant(c2) = concat(tvCellAsVariant(c2).toString(),
                                  tvCellAsCVarRef(c1).toString());
   }
-  ASSERT(c2->m_data.pstr->getCount() > 0);
+  assert(c2->m_data.pstr->getCount() > 0);
   m_stack.popC();
 }
 
@@ -4236,7 +4236,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCastObject(PC& pc) {
 
 inline bool OPTBLD_INLINE VMExecutionContext::cellInstanceOf(
   TypedValue* tv, const NamedEntity* ne) {
-  ASSERT(tv->m_type != KindOfRef);
+  assert(tv->m_type != KindOfRef);
   if (tv->m_type == KindOfObject) {
     Class* cls = Unit::lookupClass(ne);
     if (cls) return tv->m_data.pobj->instanceof(cls);
@@ -4315,7 +4315,7 @@ VMExecutionContext::handleUnwind(UnwindStatus unwindType) {
       m_pc = NULL;
     }
   } else {
-    ASSERT(unwindType == UnwindResumeVM);
+    assert(unwindType == UnwindResumeVM);
     longJumpType = EXCEPTION_RESUMEVM;
   }
   return longJumpType;
@@ -4419,7 +4419,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
   PC origPC = pc;
   NEXT();
   DECODE(int32_t, veclen);
-  ASSERT(veclen > 0);
+  assert(veclen > 0);
   Offset* jmptab = (Offset*)pc;
   pc += veclen * sizeof(*jmptab);
   DECODE(int64, base);
@@ -4427,11 +4427,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
 
   TypedValue* val = m_stack.topTV();
   if (!bounded) {
-    ASSERT(val->m_type == KindOfInt64);
+    assert(val->m_type == KindOfInt64);
     // Continuation switch: no bounds checking needed
     int64 label = val->m_data.num;
     m_stack.popX();
-    ASSERT(label >= 0 && label < veclen);
+    assert(label >= 0 && label < veclen);
     pc = origPC + jmptab[label];
   } else {
     // Generic integer switch
@@ -4522,7 +4522,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSSwitch(PC& pc) {
   PC origPC = pc;
   NEXT();
   DECODE(int32, veclen);
-  ASSERT(veclen > 1);
+  assert(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
   StrVecItem* jmptab = (StrVecItem*)pc;
   pc += veclen * sizeof(*jmptab);
@@ -4548,7 +4548,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSSwitch(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
   NEXT();
   uint soff = m_fp->m_soff;
-  ASSERT(!m_fp->m_func->isGenerator());
+  assert(!m_fp->m_func->isGenerator());
 
   // Call the runtime helpers to free the local variables and iterators
   frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
@@ -4621,13 +4621,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAGetL(PC& pc) {
 }
 
 static void raise_undefined_local(ActRec* fp, Id pind) {
-  ASSERT(pind < fp->m_func->numNamedLocals());
+  assert(pind < fp->m_func->numNamedLocals());
   raise_notice(Strings::UNDEFINED_VARIABLE,
                fp->m_func->localVarName(pind)->data());
 }
 
 static inline void cgetl_inner_body(TypedValue* fr, TypedValue* to) {
-  ASSERT(fr->m_type != KindOfUninit);
+  assert(fr->m_type != KindOfUninit);
   tvDup(fr, to);
   if (to->m_type == KindOfRef) {
     tvUnbox(to);
@@ -4764,7 +4764,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
   }
-  ASSERT(hasImmVector(*oldPC));
+  assert(hasImmVector(*oldPC));
   const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
   StringData* name;
   MemberCode mc;
@@ -4794,7 +4794,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetN(PC& pc) {
   TypedValue* to = m_stack.topTV();
   TypedValue* fr = NULL;
   lookupd_var(m_fp, name, to, fr);
-  ASSERT(fr != NULL);
+  assert(fr != NULL);
   tvRefcountedDecRefCell(to);
   vgetl_body(fr, to);
   decRefStr(name);
@@ -4806,7 +4806,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetG(PC& pc) {
   TypedValue* to = m_stack.topTV();
   TypedValue* fr = NULL;
   lookupd_gbl(m_fp, name, to, fr);
-  ASSERT(fr != NULL);
+  assert(fr != NULL);
   tvRefcountedDecRefCell(to);
   vgetl_body(fr, to);
   decRefStr(name);
@@ -4908,7 +4908,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
     issetResult = IssetEmptyProp<false>(ctx, base, curMember);
     break;
   }
-  default: ASSERT(false);
+  default: assert(false);
   }
   getHelperPost<false>(GETHELPERPOST_ARGS);
   tvRet->m_data.num = issetResult;
@@ -4933,7 +4933,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## L(PC& pc) { \
 inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## C(PC& pc) { \
   NEXT();                                                           \
   TypedValue* topTv = m_stack.topTV();                              \
-  ASSERT(topTv->m_type != KindOfRef);                           \
+  assert(topTv->m_type != KindOfRef);                           \
   bool ret = predicate(tvAsCVarRef(topTv));                         \
   tvRefcountedDecRefCell(topTv);                                    \
   topTv->m_data.num = ret;                                          \
@@ -5037,7 +5037,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
     emptyResult = IssetEmptyProp<true>(ctx, base, curMember);
     break;
   }
-  default: ASSERT(false);
+  default: assert(false);
   }
   getHelperPost<false>(GETHELPERPOST_ARGS);
   tvRet->m_data.num = emptyResult;
@@ -5058,7 +5058,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAKExists(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopSetL(PC& pc) {
   NEXT();
   DECODE_HA(local);
-  ASSERT(local < m_fp->m_func->numLocals());
+  assert(local < m_fp->m_func->numLocals());
   Cell* fr = m_stack.topC();
   TypedValue* to = frame_local(m_fp, local);
   tvSet(fr, to);
@@ -5071,7 +5071,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetN(PC& pc) {
   TypedValue* tv2 = m_stack.indTV(1);
   TypedValue* to = NULL;
   lookupd_var(m_fp, name, tv2, to);
-  ASSERT(to != NULL);
+  assert(to != NULL);
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5085,7 +5085,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetG(PC& pc) {
   TypedValue* tv2 = m_stack.indTV(1);
   TypedValue* to = NULL;
   lookupd_gbl(m_fp, name, tv2, to);
-  ASSERT(to != NULL);
+  assert(to != NULL);
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5138,7 +5138,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
         SetProp<true>(ctx, base, curMember, c1);
         break;
       }
-      default: ASSERT(false);
+      default: assert(false);
       }
     }
   }
@@ -5165,7 +5165,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpN(PC& pc) {
   TypedValue* to = NULL;
   // XXX We're probably not getting warnings totally correct here
   lookupd_var(m_fp, name, tv2, to);
-  ASSERT(to != NULL);
+  assert(to != NULL);
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
@@ -5183,7 +5183,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpG(PC& pc) {
   TypedValue* to = NULL;
   // XXX We're probably not getting warnings totally correct here
   lookupd_gbl(m_fp, name, tv2, to);
-  ASSERT(to != NULL);
+  assert(to != NULL);
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
@@ -5243,7 +5243,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
         break;
       }
       default:
-        ASSERT(false);
+        assert(false);
         result = NULL; // Silence compiler warning.
       }
     }
@@ -5275,7 +5275,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecN(PC& pc) {
   TypedValue* local = NULL;
   // XXX We're probably not getting warnings totally correct here
   lookupd_var(m_fp, name, nameCell, local);
-  ASSERT(local != NULL);
+  assert(local != NULL);
   IncDecBody<true>(op, local, nameCell);
   decRefStr(name);
 }
@@ -5288,7 +5288,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
   TypedValue* gbl = NULL;
   // XXX We're probably not getting warnings totally correct here
   lookupd_gbl(m_fp, name, nameCell, gbl);
-  ASSERT(gbl != NULL);
+  assert(gbl != NULL);
   IncDecBody<true>(op, gbl, nameCell);
   decRefStr(name);
 }
@@ -5332,7 +5332,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecM(PC& pc) {
         IncDecProp<true>(tvScratch, tvRef, ctx, op, base, curMember, to);
         break;
       }
-      default: ASSERT(false);
+      default: assert(false);
       }
     }
   }
@@ -5356,7 +5356,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindN(PC& pc) {
   TypedValue* nameTV = m_stack.indTV(1);
   TypedValue* to = NULL;
   lookupd_var(m_fp, name, nameTV, to);
-  ASSERT(to != NULL);
+  assert(to != NULL);
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5370,7 +5370,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindG(PC& pc) {
   TypedValue* nameTV = m_stack.indTV(1);
   TypedValue* to = NULL;
   lookupd_gbl(m_fp, name, nameTV, to);
-  ASSERT(to != NULL);
+  assert(to != NULL);
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5414,7 +5414,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindM(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopUnsetL(PC& pc) {
   NEXT();
   DECODE_HA(local);
-  ASSERT(local < m_fp->m_func->numLocals());
+  assert(local < m_fp->m_func->numLocals());
   TypedValue* tv = frame_local(m_fp, local);
   tvRefcountedDecRef(tv);
   tvWriteUninit(tv);
@@ -5426,7 +5426,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetN(PC& pc) {
   TypedValue* tv1 = m_stack.topTV();
   TypedValue* tv = NULL;
   lookup_var(m_fp, name, tv1, tv);
-  ASSERT(!m_fp->hasInvName());
+  assert(!m_fp->hasInvName());
   if (tv != NULL) {
     tvRefcountedDecRef(tv);
     tvWriteUninit(tv);
@@ -5440,7 +5440,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetG(PC& pc) {
   TypedValue* tv1 = m_stack.topTV();
   StringData* name = lookup_name(tv1);
   VarEnv* varEnv = m_globalVarEnv;
-  ASSERT(varEnv != NULL);
+  assert(varEnv != NULL);
   varEnv->unset(name);
   m_stack.popC();
   decRefStr(name);
@@ -5465,7 +5465,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetM(PC& pc) {
       UnsetProp(ctx, base, curMember);
       break;
     }
-    default: ASSERT(false);
+    default: assert(false);
     }
   }
   setHelperPost<0>(SETHELPERPOST_ARGS);
@@ -5495,8 +5495,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
   if (func == NULL) {
     raise_error("Undefined function: %s", c1->m_data.pstr->data());
   }
-  ASSERT(!origObj || !origSd);
-  ASSERT(origObj || origSd);
+  assert(!origObj || !origSd);
+  assert(origObj || origSd);
   // We've already saved origObj or origSd; we'll use them after
   // overwriting the pointer on the stack.  Don't refcount it now; defer
   // till after we're done with it.
@@ -5543,7 +5543,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
 #define OBJMETHOD_BODY(cls, name, obj) do { \
   const Func* f; \
   LookupResult res = lookupObjMethod(f, cls, name, true); \
-  ASSERT(f); \
+  assert(f); \
   ActRec* ar = m_stack.allocA(); \
   arSetSfp(ar, m_fp); \
   ar->m_func = f; \
@@ -5551,7 +5551,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
     decRefObj(obj); \
     ar->setClass(cls); \
   } else { \
-    ASSERT(res == MethodFoundWithThis || res == MagicCallFound); \
+    assert(res == MethodFoundWithThis || res == MagicCallFound); \
     /* Transfer ownership of obj to the ActRec*/ \
     ar->setThis(obj); \
   } \
@@ -5612,11 +5612,11 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
   if (res == MethodFoundNoThis || res == MagicCallStaticFound) {
     obj = NULL;
   } else {
-    ASSERT(obj);
-    ASSERT(res == MethodFoundWithThis || res == MagicCallFound);
+    assert(obj);
+    assert(res == MethodFoundWithThis || res == MagicCallFound);
     obj->incRefCount();
   }
-  ASSERT(f);
+  assert(f);
   ActRec* ar = m_stack.allocA();
   arSetSfp(ar, m_fp);
   ar->m_func = f;
@@ -5653,12 +5653,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethod(PC& pc) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   TypedValue* tv = m_stack.top();
-  ASSERT(tv->m_type == KindOfClass);
+  assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
   StringData* name = c1->m_data.pstr;
   // CLSMETHOD_BODY will take care of decReffing name
   m_stack.ndiscard(2);
-  ASSERT(cls && name);
+  assert(cls && name);
   ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : NULL;
   pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
@@ -5686,9 +5686,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodF(PC& pc) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   TypedValue* tv = m_stack.top();
-  ASSERT(tv->m_type == KindOfClass);
+  assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
-  ASSERT(cls);
+  assert(cls);
   StringData* name = c1->m_data.pstr;
   // CLSMETHOD_BODY will take care of decReffing name
   m_stack.ndiscard(2);
@@ -5702,13 +5702,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtor(PC& pc) {
   NEXT();
   DECODE_IVA(numArgs);
   TypedValue* tv = m_stack.topTV();
-  ASSERT(tv->m_type == KindOfClass);
+  assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
-  ASSERT(cls != NULL);
+  assert(cls != NULL);
   // Lookup the ctor
   const Func* f;
   LookupResult res UNUSED = lookupCtorMethod(f, cls, true);
-  ASSERT(res == MethodFoundWithThis);
+  assert(res == MethodFoundWithThis);
   // Replace input with uninitialized instance.
   ObjectData* this_ = newInstance(cls);
   TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
@@ -5741,7 +5741,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
   // Lookup the ctor
   const Func* f;
   LookupResult res UNUSED = lookupCtorMethod(f, cls, true);
-  ASSERT(res == MethodFoundWithThis);
+  assert(res == MethodFoundWithThis);
   // Push uninitialized instance.
   ObjectData* this_ = newInstance(cls);
   TRACE(2, "FPushCtorD: new'ed an instance of class %s: %p\n",
@@ -5838,7 +5838,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassC(PC& pc) {
   NEXT();
   DECODE_IVA(paramId);
 #ifdef DEBUG
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
 #endif
 }
 
@@ -5846,7 +5846,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassC(PC& pc) {
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);                       \
   NEXT();                                                                     \
   DECODE_IVA(paramId);                                                        \
-  ASSERT(paramId < ar->numArgs());                                            \
+  assert(paramId < ar->numArgs());                                            \
   const Func* func = ar->m_func;
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassCW(PC& pc) {
@@ -5877,7 +5877,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassV(PC& pc) {
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
   NEXT();
   DECODE_IVA(paramId);
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
   if (!func->byRef(paramId)) {
     m_stack.unbox();
@@ -5888,7 +5888,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassR(PC& pc) {
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
   NEXT();
   DECODE_IVA(paramId);
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
   if (func->byRef(paramId)) {
     TypedValue* tv = m_stack.topTV();
@@ -5907,7 +5907,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassL(PC& pc) {
   NEXT();
   DECODE_IVA(paramId);
   DECODE_HA(local);
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
   TypedValue* fr = frame_local(m_fp, local);
   TypedValue* to = m_stack.allocTV();
   if (!ar->m_func->byRef(paramId)) {
@@ -5922,7 +5922,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassN(PC& pc) {
   PC origPc = pc;
   NEXT();
   DECODE_IVA(paramId);
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     iopCGetN(origPc);
   } else {
@@ -5935,7 +5935,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassG(PC& pc) {
   PC origPc = pc;
   NEXT();
   DECODE_IVA(paramId);
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     iopCGetG(origPc);
   } else {
@@ -5948,7 +5948,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassS(PC& pc) {
   PC origPc = pc;
   NEXT();
   DECODE_IVA(paramId);
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     iopCGetS(origPc);
   } else {
@@ -5960,7 +5960,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
   NEXT();
   DECODE_IVA(paramId);
-  ASSERT(paramId < ar->numArgs());
+  assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     DECLARE_GETHELPER_ARGS
     getHelper(GETHELPER_ARGS);
@@ -5987,14 +5987,14 @@ void VMExecutionContext::iopFPassM(PC& pc) {
 
 template <bool handle_throw>
 void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
-  ASSERT(ar->m_savedRbp == (uint64_t)m_fp);
+  assert(ar->m_savedRbp == (uint64_t)m_fp);
   ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
         int(m_fp->m_func->base()));
   ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
-  ASSERT(pcOff() > m_fp->m_func->base());
+  assert(pcOff() > m_fp->m_func->base());
   prepareFuncEntry<false, handle_throw>(ar, pc, 0);
   SYNC();
   EventHook::FunctionEnter(ar, EventHook::NormalFunc);
@@ -6007,7 +6007,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
   NEXT();
   DECODE_IVA(numArgs);
-  ASSERT(numArgs == ar->numArgs());
+  assert(numArgs == ar->numArgs());
   checkStack(m_stack, ar->m_func);
   doFCall<false>(ar, pc);
 }
@@ -6056,7 +6056,7 @@ static Ret makeNativeCall(const Func* f, TypedValue* args, size_t numArgs) {
   case 3: return NativeFuncCaller<Ret,3,0>::call(f, args);
   case 4: return NativeFuncCaller<Ret,4,0>::call(f, args);
   case 5: return NativeFuncCaller<Ret,5,0>::call(f, args);
-  default: ASSERT(false);
+  default: assert(false);
   }
   not_reached();
 }
@@ -6070,7 +6070,7 @@ static int makeNativeRefCall(const Func* f, TypedValue* ret,
   case 3: return NativeFuncCaller<int64_t,3,0>::call(f, args, ret);
   case 4: return NativeFuncCaller<int64_t,4,0>::call(f, args, ret);
   case 5: return NativeFuncCaller<int64_t,5,0>::call(f, args, ret);
-  default: ASSERT(false);
+  default: assert(false);
   }
   not_reached();
 }
@@ -6087,7 +6087,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
   TypedValue* args = m_stack.indTV(numArgs-1);
-  ASSERT(numArgs == func->numParams());
+  assert(numArgs == func->numParams());
   for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = func->params()[i];
 
@@ -6215,7 +6215,7 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
 static void cleanupParamsAndActRec(VM::Stack& stack,
                                    ActRec* ar,
                                    ExtraArgs* extraArgs) {
-  ASSERT(stack.top() + (extraArgs ?
+  assert(stack.top() + (extraArgs ?
                         ar->m_func->numParams() :
                         ar->numArgs()) == (void*)ar);
   while (stack.top() != (void*)ar) {
@@ -6230,7 +6230,7 @@ static void cleanupParamsAndActRec(VM::Stack& stack,
 
 bool VMExecutionContext::doFCallArray(PC& pc) {
   ActRec* ar = (ActRec*)(m_stack.top() + 1);
-  ASSERT(ar->numArgs() == 1);
+  assert(ar->numArgs() == 1);
 
   Cell* c1 = m_stack.topC();
   if (false && UNLIKELY(c1->m_type != KindOfArray)) {
@@ -6252,15 +6252,15 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     m_stack.popTV();
     checkStack(m_stack, func);
 
-    ASSERT(ar->m_savedRbp == (uint64_t)m_fp);
-    ASSERT(!ar->m_func->isGenerator());
+    assert(ar->m_savedRbp == (uint64_t)m_fp);
+    assert(!ar->m_func->isGenerator());
     ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->m_func->unit()->entry(),
           int(m_fp->m_func->base()));
     ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
       - (uintptr_t)m_fp->m_func->base();
-    ASSERT(pcOff() > m_fp->m_func->base());
+    assert(pcOff() > m_fp->m_func->base());
 
     StringData* invName = ar->hasInvName() ? ar->getInvName() : NULL;
     if (UNLIKELY(!prepareArrayArgs(ar, args.get(), extraArgs))) return false;
@@ -6456,7 +6456,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
   DECODE(Offset, offset);
   DECODE_HA(val);
   Var* v1 = m_stack.topV();
-  ASSERT(v1->m_type == KindOfRef);
+  assert(v1->m_type == KindOfRef);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (initIteratorM(pc, origPc, it, offset, v1)) {
@@ -6472,7 +6472,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitMK(PC& pc) {
   DECODE_HA(val);
   DECODE_HA(key);
   Var* v1 = m_stack.topV();
-  ASSERT(v1->m_type == KindOfRef);
+  assert(v1->m_type == KindOfRef);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
@@ -6483,7 +6483,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitMK(PC& pc) {
 }
 
 inline void VMExecutionContext::storeIterValueC(Iter* it, TypedValue* tv1) {
-  ASSERT(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
+  assert(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
   // The emitter should never generate bytecode where the iterator
   // is at the end before IterValueC is executed. However, even if
   // the iterator is at the end, it is safe to call second().
@@ -6491,14 +6491,14 @@ inline void VMExecutionContext::storeIterValueC(Iter* it, TypedValue* tv1) {
 }
 
 inline void VMExecutionContext::storeIterValueV(Iter* it, TypedValue* tv1) {
-  ASSERT(it->m_itype == Iter::TypeMutableArray);
+  assert(it->m_itype == Iter::TypeMutableArray);
   // Dup value.
   tvAsVariant(tv1).assignRef(tvAsVariant(&it->marr().val()));
-  ASSERT(tv1->m_type == KindOfRef);
+  assert(tv1->m_type == KindOfRef);
 }
 
 inline void VMExecutionContext::storeIterKeyC(Iter* it, TypedValue* tv1) {
-  ASSERT(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
+  assert(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
   // The iterator should never be at the end here. We can't check for it,
   // because that may call into user code, which has PHP-visible effects and
   // is incorrect.
@@ -6506,13 +6506,13 @@ inline void VMExecutionContext::storeIterKeyC(Iter* it, TypedValue* tv1) {
 }
 
 inline void VMExecutionContext::storeIterKeyV(Iter* it, TypedValue* tv1) {
-  ASSERT(it->m_itype == Iter::TypeMutableArray);
+  assert(it->m_itype == Iter::TypeMutableArray);
   tvAsVariant(tv1) = tvAsVariant(&it->marr().key());
 }
 
 inline bool VMExecutionContext::iterNext(PC& pc, PC& origPc, Iter* it,
                                          Offset offset) {
-  ASSERT(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
+  assert(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
   // The emitter should never generate bytecode where the iterator
   // is at the end before IterNext is executed. However, even if
   // the iterator is at the end, it is safe to call next().
@@ -6563,7 +6563,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterNextK(PC& pc) {
 
 inline bool VMExecutionContext::iterNextM(PC& pc, PC& origPc, Iter* it,
                                           Offset offset) {
-  ASSERT(it->m_itype == Iter::TypeMutableArray);
+  assert(it->m_itype == Iter::TypeMutableArray);
   MIterCtx &mi = it->marr();
   if (!mi.mArray().advance()) {
     // If after advancing the iterator we have reached the end, free
@@ -6614,7 +6614,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterFree(PC& pc) {
   Iter* it = frame_iter(m_fp, itId);
   switch (it->m_itype) {
   case Iter::TypeUndefined: {
-    ASSERT(false);
+    assert(false);
     break;
   }
   case Iter::TypeArray:
@@ -6775,7 +6775,7 @@ lookupStatic(StringData* name,
              const ActRec* fp,
              TypedValue*&val, bool& inited) {
   HphpArray* map = get_static_locals(fp);
-  ASSERT(map != NULL);
+  assert(map != NULL);
   val = map->nvGet(name);
   if (val == NULL) {
     TypedValue tv;
@@ -6795,9 +6795,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLoc(PC& pc) {
   TypedValue* fr = NULL;
   bool inited;
   lookupStatic(var, m_fp, fr, inited);
-  ASSERT(fr != NULL);
+  assert(fr != NULL);
   if (fr->m_type != KindOfRef) {
-    ASSERT(!inited);
+    assert(!inited);
     tvBox(fr);
   }
   TypedValue* tvLocal = frame_local(m_fp, localId);
@@ -6816,13 +6816,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLocInit(PC& pc) {
   TypedValue* fr = NULL;
   bool inited;
   lookupStatic(var, m_fp, fr, inited);
-  ASSERT(fr != NULL);
+  assert(fr != NULL);
   if (!inited) {
     Cell* initVal = m_stack.topC();
     tvDup(initVal, fr);
   }
   if (fr->m_type != KindOfRef) {
-    ASSERT(!inited);
+    assert(!inited);
     tvBox(fr);
   }
   TypedValue* tvLocal = frame_local(m_fp, localId);
@@ -6832,9 +6832,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLocInit(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCatch(PC& pc) {
   NEXT();
-  ASSERT(m_faults.size() > 0);
+  assert(m_faults.size() > 0);
   Fault& fault = m_faults.back();
-  ASSERT(fault.m_faultType == Fault::KindOfUserException);
+  assert(fault.m_faultType == Fault::KindOfUserException);
   m_stack.pushObjectNoRc(fault.m_userException);
   m_faults.pop_back();
 }
@@ -6854,10 +6854,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVerifyParamType(PC& pc) {
 
   DECODE_IVA(param);
   const Func *func = m_fp->m_func;
-  ASSERT(param < func->numParams());
-  ASSERT(func->numParams() == int(func->params().size()));
+  assert(param < func->numParams());
+  assert(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param].typeConstraint();
-  ASSERT(tc.exists());
+  assert(tc.exists());
   const TypedValue *tv = frame_local(m_fp, param);
   tc.verify(tv, func, param);
 }
@@ -6866,7 +6866,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNativeImpl(PC& pc) {
   NEXT();
   uint soff = m_fp->m_soff;
   BuiltinFunction func = m_fp->m_func->builtinFuncPtr();
-  ASSERT(func);
+  assert(func);
   // Actually call the native implementation. This will handle freeing the
   // locals in the normal case. In the case of an exception, the VM unwinder
   // will take care of it.
@@ -7047,7 +7047,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
 
   const Func* origFunc = m_fp->m_func;
   const Func* genFunc = origFunc->getGeneratorBody(genName);
-  ASSERT(genFunc != NULL);
+  assert(genFunc != NULL);
 
   bool isMethod = origFunc->isNonClosureMethod();
   c_Continuation* cont = isMethod ?
@@ -7063,13 +7063,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
 
 static inline c_Continuation* frame_continuation(ActRec* fp) {
   ObjectData* obj = frame_local(fp, 0)->m_data.pobj;
-  ASSERT(dynamic_cast<c_Continuation*>(obj));
+  assert(dynamic_cast<c_Continuation*>(obj));
   return static_cast<c_Continuation*>(obj);
 }
 
 static inline c_Continuation* this_continuation(ActRec* fp) {
   ObjectData* obj = fp->getThis();
-  ASSERT(dynamic_cast<c_Continuation*>(obj));
+  assert(dynamic_cast<c_Continuation*>(obj));
   return static_cast<c_Continuation*>(obj);
 }
 
@@ -7077,10 +7077,10 @@ void VMExecutionContext::iopContEnter(PC& pc) {
   NEXT();
 
   // The stack must be empty! Or else generatorStackBase() won't work!
-  ASSERT(m_stack.top() == (TypedValue*)m_fp - m_fp->m_func->numSlotsInFrame());
+  assert(m_stack.top() == (TypedValue*)m_fp - m_fp->m_func->numSlotsInFrame());
 
   // Do linkage of the continuation's AR.
-  ASSERT(m_fp->hasThis());
+  assert(m_fp->hasThis());
   c_Continuation* cont = this_continuation(m_fp);
   ActRec* contAR = cont->actRec();
   arSetSfp(contAR, m_fp);
@@ -7219,7 +7219,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
 
   Variant exn = tvAsVariant(m_stack.topTV());
   m_stack.popC();
-  ASSERT(exn.asObjRef().instanceof("exception"));
+  assert(exn.asObjRef().instanceof("exception"));
   throw exn.asObjRef();
 }
 
@@ -7248,13 +7248,13 @@ void VMExecutionContext::classExistsImpl(PC& pc, Attr typeAttr) {
   NEXT();
   TypedValue* aloadTV = m_stack.topTV();
   tvCastToBooleanInPlace(aloadTV);
-  ASSERT(aloadTV->m_type == KindOfBoolean);
+  assert(aloadTV->m_type == KindOfBoolean);
   bool autoload = aloadTV->m_data.num;
   m_stack.popX();
 
   TypedValue* name = m_stack.topTV();
   tvCastToStringInPlace(name);
-  ASSERT(IS_STRING_TYPE(name->m_type));
+  assert(IS_STRING_TYPE(name->m_type));
 
   tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, typeAttr);
 }
@@ -7288,7 +7288,7 @@ VMExecutionContext::prettyStack(const string& prefix) const {
 }
 
 void VMExecutionContext::checkRegStateWork() const {
-  ASSERT(tl_regState == REGSTATE_CLEAN);
+  assert(tl_regState == REGSTATE_CLEAN);
 }
 
 void VMExecutionContext::DumpStack() {
@@ -7345,7 +7345,7 @@ void VMExecutionContext::op##name() {                                         \
   condStackTraceSep("op"#name" ");                                            \
   COND_STACKTRACE("op"#name" pre:  ");                                        \
   PC pc = m_pc;                                                               \
-  ASSERT(*pc == Op##name);                                                    \
+  assert(*pc == Op##name);                                                    \
   ONTRACE(1,                                                                  \
           int offset = m_fp->m_func->unit()->offsetOf(pc);                    \
           Trace::trace("op"#name" offset: %d\n", offset));                    \
@@ -7398,8 +7398,8 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
     OPCODES
 #undef O
   };
-  ASSERT(sizeof(optabDirect) / sizeof(const void *) == Op_count);
-  ASSERT(sizeof(optabDbg) / sizeof(const void *) == Op_count);
+  assert(sizeof(optabDirect) / sizeof(const void *) == Op_count);
+  assert(sizeof(optabDbg) / sizeof(const void *) == Op_count);
   const void **optab = optabDirect;
   InjectionTableInt64* injTable = g_vmContext->m_injTables ?
     g_vmContext->m_injTables->getInt64Table(InstHookTypeBCPC) : NULL;
@@ -7437,7 +7437,7 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
     COND_STACKTRACE("dispatch:                    ");                   \
     ONTRACE(1,                                                          \
             Trace::trace("dispatch: %d: %s\n", pcOff(), nametab[op]));  \
-    ASSERT(op < Op_count);                                              \
+    assert(op < Op_count);                                              \
     if (profile && (op == OpRetC || op == OpRetV)) {                    \
       profileReturnValue(m_stack.top()->m_type);                        \
     }                                                                   \
@@ -7520,20 +7520,20 @@ void VMExecutionContext::dispatchBB() {
 
 void VMExecutionContext::recordCodeCoverage(PC pc) {
   Unit* unit = getFP()->m_func->unit();
-  ASSERT(unit != NULL);
+  assert(unit != NULL);
   if (unit == SystemLib::s_nativeFuncUnit ||
       unit == SystemLib::s_nativeClassUnit) {
     return;
   }
   int line = unit->getLineNumber(pcOff());
-  ASSERT(line != -1);
+  assert(line != -1);
 
   if (unit != m_coverPrevUnit || line != m_coverPrevLine) {
     ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
     m_coverPrevUnit = unit;
     m_coverPrevLine = line;
     const StringData* filepath = unit->filepath();
-    ASSERT(filepath->isStatic());
+    assert(filepath->isStatic());
     info->m_coverage->Record(filepath->data(), line, line);
   }
 }
@@ -7563,14 +7563,14 @@ void VMExecutionContext::pushVMState(VMState &savedVM,
 }
 
 void VMExecutionContext::popVMState() {
-  ASSERT(m_nestedVMs.size() >= 1);
+  assert(m_nestedVMs.size() >= 1);
 
   VMState savedVM;
   memcpy(&savedVM, &m_nestedVMs.back(), sizeof(savedVM));
   m_pc = savedVM.pc;
   m_fp = savedVM.fp;
   m_firstAR = savedVM.firstAR;
-  ASSERT(m_stack.top() == savedVM.sp);
+  assert(m_stack.top() == savedVM.sp);
 
   if (debug) {
     const ReentryRecord& rr = m_nestedVMs.back();
@@ -7596,9 +7596,9 @@ void VMExecutionContext::popVMState() {
 void VMExecutionContext::requestInit() {
   const_assert(hhvm);
 
-  ASSERT(SystemLib::s_unit);
-  ASSERT(SystemLib::s_nativeFuncUnit);
-  ASSERT(SystemLib::s_nativeClassUnit);
+  assert(SystemLib::s_unit);
+  assert(SystemLib::s_nativeFuncUnit);
+  assert(SystemLib::s_nativeClassUnit);
 
   new (&s_requestArenaStorage) RequestArena();
   new (&s_varEnvArenaStorage) VarEnvArena();
@@ -7614,8 +7614,8 @@ void VMExecutionContext::requestInit() {
 
 #ifdef DEBUG
   Class *cls = *Unit::GetNamedEntity(s_stdclass.get())->clsList();
-  ASSERT(cls);
-  ASSERT(cls == SystemLib::s_stdclassClass);
+  assert(cls);
+  assert(cls == SystemLib::s_stdclassClass);
 #endif
 }
 
@@ -7631,7 +7631,7 @@ void VMExecutionContext::requestExit() {
   EventHook::Disable();
 
   if (m_globalVarEnv) {
-    ASSERT(m_topVarEnv = m_globalVarEnv);
+    assert(m_topVarEnv = m_globalVarEnv);
     VM::VarEnv::destroy(m_globalVarEnv);
     m_globalVarEnv = m_topVarEnv = 0;
   }

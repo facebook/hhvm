@@ -84,7 +84,7 @@ int64 Timer::measure() const {
   case SystemCPU: return to_usec(ru.ru_stime);
   case UserCPU:   return to_usec(ru.ru_utime);
   case TotalCPU:  return to_usec(ru.ru_stime) + to_usec(ru.ru_utime);
-  default: ASSERT(false);
+  default: assert(false);
   }
   return 0;
 }
@@ -95,7 +95,7 @@ const char *Timer::getName() const {
   case SystemCPU: return "system cpu";
   case UserCPU:   return "user cpu";
   case TotalCPU:  return "total cpu";
-  default: ASSERT(false);
+  default: assert(false);
   }
   return NULL;
 }

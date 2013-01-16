@@ -110,7 +110,7 @@ RuntimeType::RuntimeType(Iter::Type type) :
 }
 
 RuntimeType RuntimeType::box() const {
-  ASSERT(m_kind == VALUE);
+  assert(m_kind == VALUE);
   if (m_value.outerType == KindOfRef) {
     consistencyCheck();
     return *this;
@@ -123,7 +123,7 @@ RuntimeType RuntimeType::box() const {
 }
 
 RuntimeType RuntimeType::unbox() const {
-  ASSERT(m_kind == VALUE);
+  assert(m_kind == VALUE);
   if (m_value.outerType != KindOfRef) {
     consistencyCheck();
     return *this;
@@ -136,7 +136,7 @@ RuntimeType RuntimeType::unbox() const {
 }
 
 DataType RuntimeType::valueType() const {
-  ASSERT(m_kind != ITER);
+  assert(m_kind != ITER);
   if (outerType() == KindOfRef) {
     return m_value.innerType;
   }
@@ -146,16 +146,16 @@ DataType RuntimeType::valueType() const {
 const Class*
 RuntimeType::valueClass() const {
   consistencyCheck();
-  ASSERT(m_kind != ITER);
-  ASSERT(valueType() == KindOfObject || valueType() == KindOfClass);
+  assert(m_kind != ITER);
+  assert(valueType() == KindOfObject || valueType() == KindOfClass);
   return m_value.klass;
 }
 
 const StringData*
 RuntimeType::valueString() const {
   consistencyCheck();
-  ASSERT(m_kind != ITER);
-  ASSERT(isString());
+  assert(m_kind != ITER);
+  assert(isString());
   return m_value.string;
 }
 
@@ -168,8 +168,8 @@ RuntimeType::valueStringOrNull() const {
 const ArrayData*
 RuntimeType::valueArray() const {
   consistencyCheck();
-  ASSERT(m_kind != ITER);
-  ASSERT(isArray());
+  assert(m_kind != ITER);
+  assert(isArray());
   return m_value.array;
 }
 
@@ -177,16 +177,16 @@ RuntimeType::valueArray() const {
 int
 RuntimeType::valueBoolean() const {
   consistencyCheck();
-  ASSERT(m_kind != ITER);
-  ASSERT(isBoolean());
+  assert(m_kind != ITER);
+  assert(isBoolean());
   return m_value.boolValid ? m_value.boolean : -1;
 }
 
 int64
 RuntimeType::valueInt() const {
   consistencyCheck();
-  ASSERT(m_kind == VALUE);
-  ASSERT(isInt());
+  assert(m_kind == VALUE);
+  assert(isInt());
   return m_value.intval;
 }
 
@@ -194,13 +194,13 @@ RuntimeType::valueInt() const {
 int64
 RuntimeType::valueGeneric() const {
   consistencyCheck();
-  ASSERT(m_kind == VALUE);
+  assert(m_kind == VALUE);
   return m_value.intval;
 }
 
 RuntimeType
 RuntimeType::setValueType(DataType newInner) const {
-  ASSERT(m_kind == VALUE);
+  assert(m_kind == VALUE);
   RuntimeType rtt;
   rtt.m_kind = VALUE;
   rtt.m_value.outerType = outerType();
@@ -209,7 +209,7 @@ RuntimeType::setValueType(DataType newInner) const {
   } else {
     rtt.m_value.outerType = newInner;
   }
-  ASSERT(rtt.valueType() == newInner);
+  assert(rtt.valueType() == newInner);
   rtt.m_value.klass = NULL;
   rtt.consistencyCheck();
   return rtt;
@@ -218,13 +218,13 @@ RuntimeType::setValueType(DataType newInner) const {
 // Accessors
 DataType RuntimeType::outerType() const {
   consistencyCheck();
-  ASSERT(m_kind == VALUE);
+  assert(m_kind == VALUE);
   return m_value.outerType;
 }
 
 DataType RuntimeType::innerType() const {
   consistencyCheck();
-  ASSERT(m_kind == VALUE);
+  assert(m_kind == VALUE);
   return m_value.innerType;
 }
 
@@ -234,7 +234,7 @@ bool RuntimeType::isValue() const {
 }
 
 Iter::Type RuntimeType::iterType() const {
-  ASSERT(isIter());
+  assert(isIter());
   return m_iter.type;
 }
 
@@ -254,7 +254,7 @@ bool RuntimeType::isIter() const {
 }
 
 bool RuntimeType::isVariant() const {
-  ASSERT(m_kind == VALUE);
+  assert(m_kind == VALUE);
   return outerType() == KindOfRef;
 }
 
@@ -311,7 +311,7 @@ bool RuntimeType::operator==(const RuntimeType& r) const {
              r.m_value.outerType == m_value.outerType &&
              r.m_value.klass == m_value.klass;
     default:
-      ASSERT(false);
+      assert(false);
       return false;
   }
 }
@@ -323,7 +323,7 @@ RuntimeType& RuntimeType::operator=(const RuntimeType& r) {
   m_value.outerType = r.m_value.outerType;
   m_value.klass     = r.m_value.klass;
   consistencyCheck();
-  ASSERT(*this == r);
+  assert(*this == r);
   return *this;
 }
 

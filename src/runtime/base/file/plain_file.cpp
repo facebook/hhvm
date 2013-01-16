@@ -52,8 +52,8 @@ PlainFile::~PlainFile() {
 bool PlainFile::open(CStrRef filename, CStrRef mode) {
   int fd;
   FILE *f;
-  ASSERT(m_stream == NULL);
-  ASSERT(m_fd == -1);
+  assert(m_stream == NULL);
+  assert(m_fd == -1);
 
   // For these definded in php fopen but C stream have different modes
   switch (mode[0]) {
@@ -123,8 +123,8 @@ bool PlainFile::closeImpl() {
 // virtual functions
 
 int64 PlainFile::readImpl(char *buffer, int64 length) {
-  ASSERT(valid());
-  ASSERT(length > 0);
+  assert(valid());
+  assert(length > 0);
   // use read instead of fread to handle EOL in stdin
   size_t ret = ::read(m_fd, buffer, length);
   if (ret == 0
@@ -136,13 +136,13 @@ int64 PlainFile::readImpl(char *buffer, int64 length) {
 }
 
 int PlainFile::getc() {
-  ASSERT(valid());
+  assert(valid());
   return File::getc();
 }
 
 int64 PlainFile::writeImpl(const char *buffer, int64 length) {
-  ASSERT(valid());
-  ASSERT(length > 0);
+  assert(valid());
+  assert(length > 0);
 
   // use write instead of fwrite to be consistent with read
   // o.w., read-and-write files would not work
@@ -151,7 +151,7 @@ int64 PlainFile::writeImpl(const char *buffer, int64 length) {
 }
 
 bool PlainFile::seek(int64 offset, int whence /* = SEEK_SET */) {
-  ASSERT(valid());
+  assert(valid());
 
   if (whence == SEEK_CUR) {
     if (offset > 0 && offset < m_writepos - m_readpos) {
@@ -176,12 +176,12 @@ bool PlainFile::seek(int64 offset, int whence /* = SEEK_SET */) {
 }
 
 int64 PlainFile::tell() {
-  ASSERT(valid());
+  assert(valid());
   return m_position;
 }
 
 bool PlainFile::eof() {
-  ASSERT(valid());
+  assert(valid());
   int64 avail = m_writepos - m_readpos;
   if (avail > 0) {
     return false;
@@ -190,7 +190,7 @@ bool PlainFile::eof() {
 }
 
 bool PlainFile::rewind() {
-  ASSERT(valid());
+  assert(valid());
   seek(0);
   m_writepos = 0;
   m_readpos = 0;
@@ -202,13 +202,13 @@ bool PlainFile::flush() {
   if (m_stream) {
     return fflush(m_stream) == 0;
   }
-  ASSERT(valid());
+  assert(valid());
   // No need to flush a file descriptor.
   return true;
 }
 
 bool PlainFile::truncate(int64 size) {
-  ASSERT(valid());
+  assert(valid());
   return ftruncate(m_fd, size) == 0;
 }
 
@@ -249,7 +249,7 @@ CVarRef BuiltinFiles::GetSTDIN() {
     BuiltinFile *f = NEWOBJ(BuiltinFile)(stdin);
     g_builtin_files->m_stdin = f;
     f->o_setId(1);
-    ASSERT(f->o_getId() == 1);
+    assert(f->o_getId() == 1);
   }
   return g_builtin_files->m_stdin;
 }
@@ -259,7 +259,7 @@ CVarRef BuiltinFiles::GetSTDOUT() {
     BuiltinFile *f = NEWOBJ(BuiltinFile)(stdout);
     g_builtin_files->m_stdout = f;
     f->o_setId(2);
-    ASSERT(f->o_getId() == 2);
+    assert(f->o_getId() == 2);
   }
   return g_builtin_files->m_stdout;
 }
@@ -269,7 +269,7 @@ CVarRef BuiltinFiles::GetSTDERR() {
     BuiltinFile *f = NEWOBJ(BuiltinFile)(stderr);
     g_builtin_files->m_stderr = f;
     f->o_setId(3);
-    ASSERT(f->o_getId() == 3);
+    assert(f->o_getId() == 3);
   }
   return g_builtin_files->m_stderr;
 }

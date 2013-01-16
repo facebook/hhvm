@@ -81,7 +81,7 @@ ConstructPtr ArrayPairExpression::getNthKid(int n) const {
     case 1:
       return m_value;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -100,7 +100,7 @@ void ArrayPairExpression::setNthKid(int n, ConstructPtr cp) {
       m_value = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -157,7 +157,7 @@ void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
 
 bool ArrayPairExpression::outputCPPName(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  ASSERT(m_name);
+  assert(m_name);
   ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(m_name);
   if (sc) {
     if (sc->isLiteralString()) {

@@ -44,20 +44,20 @@ void FixedStringMap<V, case_sensitive>::init(int num) {
     capac *= 2;
   }
   TRACE(1, "FixedStringMap::init: %d -> %d\n", num, capac);
-  ASSERT(!m_table);
+  assert(!m_table);
   m_table = (Elm*)calloc(capac * sizeof(Elm), 1);
-  ASSERT(m_table);
+  assert(m_table);
   m_mask = capac - 1;
 }
 
 template <typename V, bool case_sensitive>
 void FixedStringMap<V, case_sensitive>::add(const StringData* sd, const V& v) {
-  ASSERT(sd->isStatic());
+  assert(sd->isStatic());
 
   Elm* elm = &m_table[sd->hash() & m_mask];
   UNUSED unsigned numProbes = 0;
   while (elm->sd) {
-    ASSERT(numProbes++ < m_mask + 1);
+    assert(numProbes++ < m_mask + 1);
     // Semantics for multiple insertion: new value wins.
     if (strEqual(case_sensitive, elm->sd, sd)) break;
     if (UNLIKELY(++elm == &m_table[m_mask + 1])) elm = m_table;
@@ -71,7 +71,7 @@ V* FixedStringMap<V, case_sensitive>::find(const StringData* sd) const {
   Elm* elm = &m_table[sd->hash() & m_mask];
   UNUSED unsigned numProbes = 0;
   for(;;) {
-    ASSERT(numProbes++ < m_mask + 1);
+    assert(numProbes++ < m_mask + 1);
     if (UNLIKELY(NULL == elm->sd)) return NULL;
     if (strEqual(case_sensitive, elm->sd, sd)) return &elm->data;
     if (UNLIKELY(++elm == &m_table[m_mask + 1])) elm = m_table;

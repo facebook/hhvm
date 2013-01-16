@@ -134,7 +134,7 @@ inline void ArenaImpl<kChunkBytes>::beginFrame() {
 
 template<size_t kChunkBytes>
 inline void ArenaImpl<kChunkBytes>::endFrame() {
-  ASSERT(m_frame.prev);
+  assert(m_frame.prev);
   m_frame = *m_frame.prev;
   m_current = m_ptrs[m_frame.index];
 }

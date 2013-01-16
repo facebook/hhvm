@@ -57,7 +57,7 @@ void Sweepable::SweepAll() {
     }
   }
   // copy persist list to t_sweep
-  ASSERT(t_sweep.next == &t_sweep && t_sweep.prev == &t_sweep);
+  assert(t_sweep.next == &t_sweep && t_sweep.prev == &t_sweep);
   t_sweep.enlist(persist); // stick t_sweep in persist list
   persist.delist(); // remove persist; now t_sweep is "head"
 }

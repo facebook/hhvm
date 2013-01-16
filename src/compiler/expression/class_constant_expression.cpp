@@ -95,7 +95,7 @@ ConstructPtr ClassConstantExpression::getNthKid(int n) const {
     case 0:
       return m_class;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -111,7 +111,7 @@ void ClassConstantExpression::setNthKid(int n, ConstructPtr cp) {
       m_class = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -231,7 +231,7 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
   if (m_class) {
     cg_printf("get_class_constant(");
     if (m_class->is(KindOfScalarExpression)) {
-      ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+      assert(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                         getString().c_str(), "static") == 0);
       cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())");
     } else {
@@ -247,10 +247,10 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
   if (m_valid) {
     string trueClassName;
 
-    ASSERT(m_defScope);
+    assert(m_defScope);
     ClassScope *cls = dynamic_cast<ClassScope*>(m_defScope);
     trueClassName = cls->getName();
-    ASSERT(!trueClassName.empty());
+    assert(!trueClassName.empty());
     if (outsideClass) {
       cls->outputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }

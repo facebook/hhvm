@@ -35,16 +35,16 @@ struct MD5 {
       return;
     }
     // We expect our input to be null-terminated output from PHP::md5().
-    ASSERT(strlen(str) == 32);
+    assert(strlen(str) == 32);
     const int kQWordAsciiLen = 16;
     char buf[kQWordAsciiLen + 1];
     buf[kQWordAsciiLen] = 0;
     memcpy(buf, str, kQWordAsciiLen);
-    ASSERT(strlen(buf) == 16);
+    assert(strlen(buf) == 16);
     q[0] = strtoull(buf, NULL, 16);
 
     memcpy(buf, str + kQWordAsciiLen, 16);
-    ASSERT(strlen(buf) == 16);
+    assert(strlen(buf) == 16);
     q[1] = strtoull(buf, NULL, 16);
   }
 

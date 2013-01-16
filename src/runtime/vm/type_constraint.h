@@ -76,8 +76,8 @@ public:
   }
 
   bool isObject() const {
-    ASSERT(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
-    ASSERT(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
+    assert(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
+    assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
     return m_type.m_dt == KindOfObject;
   }
 

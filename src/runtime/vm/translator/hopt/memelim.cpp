@@ -35,7 +35,7 @@ namespace {
 class MemMap {
  public:
   MemMap(IRFactory* factory) : factory(factory) {
-    ASSERT(factory != NULL);
+    assert(factory != NULL);
   }
 
   ~MemMap() {
@@ -76,7 +76,7 @@ private:
     }
 
     void update(IRInstruction* inst) {
-      ASSERT(inst != NULL);
+      assert(inst != NULL);
       access = inst;
       value = findValue(inst);
     }
@@ -91,8 +91,8 @@ private:
   struct PropInfo {
     PropInfo(IRInstruction* inst, int off)
       : access(inst), value(findValue(inst)), offset(off) {
-      ASSERT(inst != NULL);
-      ASSERT(off >= 0);
+      assert(inst != NULL);
+      assert(off >= 0);
     }
 
     IRInstruction* access;
@@ -107,7 +107,7 @@ private:
   // list has a unique offset
   struct PropInfoList : public Counted {
     void update(IRInstruction* inst) {
-      ASSERT(inst != NULL);
+      assert(inst != NULL);
 
       int offset = inst->getSrc(1)->getConstValAsInt();
 
@@ -186,7 +186,7 @@ private:
 
   // helper function to return the value of a memory instruction
   static SSATmp* findValue(IRInstruction* inst) {
-    ASSERT(inst != NULL);
+    assert(inst != NULL);
 
     Opcode op = inst->getOpcode();
     if (isLoad(op)) {
@@ -221,7 +221,7 @@ private:
 };
 
 void MemMap::killRefInfo(IRInstruction* save) {
-  ASSERT(save != NULL);
+  assert(save != NULL);
 
   RefMap::iterator it, end;
   for (it = unknown.begin(), end = unknown.end(); it != end; ++it) {
@@ -252,7 +252,7 @@ void MemMap::killRefInfo(IRInstruction* save) {
 }
 
 void MemMap::killPropInfo(IRInstruction* save) {
-  ASSERT(save != NULL);
+  assert(save != NULL);
 
   PropInfoList* propInfoList = NULL;
   PropMap::iterator find = props.find(save->getSrc(0));
@@ -306,7 +306,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
 
 void MemMap::escapeRef(SSATmp* ref) {
   RefMap::iterator i = unescaped.find(ref);
-  ASSERT(i != unescaped.end());
+  assert(i != unescaped.end());
 
   RefInfo* info = i->second;
 
@@ -324,7 +324,7 @@ void MemMap::escapeRef(SSATmp* ref) {
 }
 
 void MemMap::processInstruction(IRInstruction* inst) {
-  ASSERT(inst != NULL);
+  assert(inst != NULL);
 
   Opcode op = inst->getOpcode();
 
@@ -552,7 +552,7 @@ void MemMap::processInstruction(IRInstruction* inst) {
 }
 
 #define MEMMAP_GET(FIELD)                                                     \
-  ASSERT(offset >= -1);                                                       \
+  assert(offset >= -1);                                                       \
   /* check for property accesses */                                           \
   if (offset != -1) {                                                         \
     PropMap::iterator it = props.find(ref);                                   \
@@ -701,7 +701,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
     inst->setSrc(1, NULL);
     inst->setNumSrcs(1);
   } else {
-    ASSERT(inst->getNumSrcs() == 1);
+    assert(inst->getNumSrcs() == 1);
   }
   inst->setLabel(NULL);
 

@@ -256,7 +256,7 @@ const unsigned int kDestrTableSize = 4;
 #define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
 
 static inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
-  ASSERT(t >= KindOfString && t <= KindOfRef);
+  assert(t >= KindOfString && t <= KindOfRef);
   return TYPE_TO_DESTR_IDX(t);
 }
 
@@ -365,7 +365,7 @@ public:
 
   inline volatile ssize_t* getConditionFlags() {
     if (hhvm) {
-      ASSERT(cflagsPtr);
+      assert(cflagsPtr);
       return cflagsPtr;
     } else {
       return &conditionFlags;

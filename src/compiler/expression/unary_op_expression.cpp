@@ -250,7 +250,7 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
         result = isset(value); break;
       case T_INC:
       case T_DEC:
-        ASSERT(false);
+        assert(false);
       default:
         ret = false;
         break;
@@ -267,7 +267,7 @@ ConstructPtr UnaryOpExpression::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -283,7 +283,7 @@ void UnaryOpExpression::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -470,7 +470,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_DIR:
   case T_FILE:          et = rt = Type::String;                      break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 
   if (m_exp) {
@@ -591,7 +591,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_CLASS:         cg_printf("class ");        break;
     case T_FUNCTION:      cg_printf("function ");     break;
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 
@@ -613,7 +613,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_INC:           cg_printf("++"); break;
     case T_DEC:           cg_printf("--"); break;
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 }
@@ -820,7 +820,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
-  ASSERT(m_op != T_CLASS && m_op != T_FUNCTION);
+  assert(m_op != T_CLASS && m_op != T_FUNCTION);
 
   const char *cstr = 0;
   if (m_front) {
@@ -891,7 +891,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         cg_printf("get_source_filename(\"%s\", true)", getLocation()->file);
         break;
       default:
-        ASSERT(false);
+        assert(false);
     }
   }
 
@@ -961,7 +961,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_INC:           cg_printf("++"); break;
     case T_DEC:           cg_printf("--"); break;
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 }

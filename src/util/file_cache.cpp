@@ -88,7 +88,7 @@ void FileCache::writeDirectories(const char *name) {
 }
 
 std::string FileCache::GetRelativePath(const char *path) {
-  ASSERT(path);
+  assert(path);
 
   string relative = path;
   unsigned int len = SourceRoot.size();
@@ -103,8 +103,8 @@ std::string FileCache::GetRelativePath(const char *path) {
 }
 
 void FileCache::write(const char *name, bool addDirectories /* = true */) {
-  ASSERT(name && *name);
-  ASSERT(!exists(name));
+  assert(name && *name);
+  assert(!exists(name));
 
   Buffer &buffer = m_files[name];
   buffer.len = -1; // PHP file
@@ -118,9 +118,9 @@ void FileCache::write(const char *name, bool addDirectories /* = true */) {
 }
 
 void FileCache::write(const char *name, const char *fullpath) {
-  ASSERT(name && *name);
-  ASSERT(fullpath && *fullpath);
-  ASSERT(!exists(name));
+  assert(name && *name);
+  assert(fullpath && *fullpath);
+  assert(!exists(name));
 
   struct stat sb;
   if (stat(fullpath, &sb) != 0) {
@@ -166,7 +166,7 @@ void FileCache::write(const char *name, const char *fullpath) {
 #define CURRENT_FILE_CACHE_VERSION FILE_CACHE_VERSION_1
 
 void FileCache::save(const char *filename) {
-  ASSERT(filename && *filename);
+  assert(filename && *filename);
 
   FILE *f = fopen(filename, "w");
   if (f == NULL) {
@@ -183,7 +183,7 @@ void FileCache::save(const char *filename) {
        ++iter) {
     short name_len = iter->first.size();
     const char *name = iter->first.data();
-    ASSERT(name_len);
+    assert(name_len);
     fwrite(&name_len, sizeof(short), 1, f);
     fwrite(name, name_len, 1, f);
 
@@ -191,15 +191,15 @@ void FileCache::save(const char *filename) {
     char c = buffer.cdata ? 1 : 0;
     fwrite(&c, 1, 1, f);
     if (c) {
-      ASSERT(buffer.clen > 0);
+      assert(buffer.clen > 0);
       fwrite(&buffer.clen, sizeof(int), 1, f);
-      ASSERT(buffer.cdata);
+      assert(buffer.cdata);
       fwrite(buffer.cdata, buffer.clen, 1, f);
       fwrite("\0", 1, 1, f);
     } else {
       fwrite(&buffer.len, sizeof(int), 1, f);
       if (buffer.len > 0) {
-        ASSERT(buffer.data);
+        assert(buffer.data);
         fwrite(buffer.data, buffer.len, 1, f);
         fwrite("\0", 1, 1, f);
       }
@@ -210,7 +210,7 @@ void FileCache::save(const char *filename) {
 }
 
 short FileCache::getVersion(const char *filename) {
-  ASSERT(filename && *filename);
+  assert(filename && *filename);
 
   FILE *f = fopen(filename, "r");
   if (f == NULL) {
@@ -228,7 +228,7 @@ short FileCache::getVersion(const char *filename) {
 
 void FileCache::load(const char *filename, bool onDemandUncompress,
                      short version) {
-  ASSERT(filename && *filename);
+  assert(filename && *filename);
 
   FILE *f = fopen(filename, "r");
   if (f == NULL) {
@@ -318,7 +318,7 @@ void FileCache::adviseOutMemory() {
 }
 
 void FileCache::loadMmap(const char *filename, short version) {
-  ASSERT(filename && *filename);
+  assert(filename && *filename);
   always_assert(version > 0);
 
   struct stat sbuf;
@@ -441,20 +441,20 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
       const Buffer &buf = iter->second;
       if (compressed && buf.cdata) {
         len = buf.clen;
-        ASSERT(len > 0);
+        assert(len > 0);
         return buf.cdata;
       }
       if (!compressed && !buf.data && buf.cdata) {
         // only compressed data available, the client has to uncompress it
         compressed = true;
         len = buf.clen;
-        ASSERT(len > 0);
+        assert(len > 0);
         return buf.cdata;
       }
       compressed = false;
       len = buf.len;
       if (len == 0) {
-        ASSERT(buf.data == NULL);
+        assert(buf.data == NULL);
         return "";
       }
       return buf.data;

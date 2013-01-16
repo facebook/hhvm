@@ -61,7 +61,7 @@ void initInstructions(Trace* trace, IRInstruction::List& wl) {
   TRACE(5, "DCE:vvvvvvvvvvvvvvvvvvvv\n");
   for (it = instructions.begin(); it != instructions.end(); it++) {
     IRInstruction* inst = *it;
-    ASSERT(inst->getParent() == trace);
+    assert(inst->getParent() == trace);
     Simplifier::copyProp(inst);
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
@@ -157,8 +157,8 @@ void sinkIncRefs(Trace* trace,
       sunkInst->setId(LIVE);
       trace->prependInstruction(sunkInst);
 
-      ASSERT((*j)->getDst());
-      ASSERT(!sunkTmps.count((*j)->getDst()));
+      assert((*j)->getDst());
+      assert(!sunkTmps.count((*j)->getDst()));
       sunkTmps[(*j)->getDst()] = irFactory->getSSATmp(sunkInst);
     }
   }
@@ -173,7 +173,7 @@ void sinkIncRefs(Trace* trace,
       if (inst->getOpcode() == IncRef) {
         // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
         // otherwise, it should be already removed in optimizeRefCount.
-        ASSERT(inst->getId() == REFCOUNT_CONSUMED ||
+        assert(inst->getId() == REFCOUNT_CONSUMED ||
                inst->getId() == REFCOUNT_CONSUMED_OFF_TRACE);
         if (inst->getId() == REFCOUNT_CONSUMED_OFF_TRACE) {
           inst->setOpcode(Mov);
@@ -377,7 +377,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
       if (exitInst && exitCcInst) {
         // Found both exits, link them to Jcc for codegen
-        ASSERT(dst);
+        assert(dst);
         exitCcInst->appendSrc(*irFactory, dst);
         exitInst->appendSrc(*irFactory, dst);
         // Set flag so Jcc and exits know this is active

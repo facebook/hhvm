@@ -37,7 +37,7 @@ void DBDataSet::addResult(MYSQL *conn, MYSQL_RES *result) {
     if (m_colCount == 0) {
       m_colCount = fieldCount;
     } else {
-      ASSERT(m_colCount == fieldCount);
+      assert(m_colCount == fieldCount);
       if (m_colCount > fieldCount) {
         m_colCount = fieldCount; // in case we overflow m_row later
       }
@@ -56,7 +56,7 @@ void DBDataSet::addDataSet(DBDataSet &ds) {
   if (m_colCount == 0) {
     m_colCount = ds.m_colCount;
   } else {
-    ASSERT(m_colCount == ds.m_colCount);
+    assert(m_colCount == ds.m_colCount);
   }
 
   m_rowCount += ds.m_rowCount;
@@ -80,7 +80,7 @@ void DBDataSet::close() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int DBDataSet::getFieldIndex(const char *fieldName) {
-  ASSERT(fieldName && *fieldName);
+  assert(fieldName && *fieldName);
 
   // without any results, cannot really resolve field names
   if (m_results.empty()) return -1;
@@ -112,8 +112,8 @@ void DBDataSet::moveFirst() {
       mysql_data_seek(*m_iter, 0);
       m_row = mysql_fetch_row(*m_iter);
       m_lengths = mysql_fetch_lengths(*m_iter);
-      ASSERT(m_row);
-      ASSERT(m_lengths);
+      assert(m_row);
+      assert(m_lengths);
       return;
     }
   }
@@ -133,8 +133,8 @@ void DBDataSet::moveNext() {
         mysql_data_seek(*m_iter, 0);
         m_row = mysql_fetch_row(*m_iter);
         m_lengths = mysql_fetch_lengths(*m_iter);
-        ASSERT(m_row);
-        ASSERT(m_lengths);
+        assert(m_row);
+        assert(m_lengths);
         return;
       }
     }
@@ -144,8 +144,8 @@ void DBDataSet::moveNext() {
 }
 
 const char *DBDataSet::getField(int field) const {
-  ASSERT(field >= 0 && field < m_colCount);
-  ASSERT(m_row);
+  assert(field >= 0 && field < m_colCount);
+  assert(m_row);
   if (m_row && field >= 0 && field < m_colCount) {
     return m_row[field];
   }
@@ -153,8 +153,8 @@ const char *DBDataSet::getField(int field) const {
 }
 
 int DBDataSet::getFieldLength(int field) const {
-  ASSERT(field >= 0 && field < m_colCount);
-  ASSERT(m_lengths);
+  assert(field >= 0 && field < m_colCount);
+  assert(m_lengths);
   if (m_lengths && field >= 0 && field < m_colCount) {
     return m_lengths[field];
   }

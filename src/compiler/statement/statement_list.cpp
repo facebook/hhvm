@@ -63,7 +63,7 @@ void StatementList::addElement(StatementPtr stmt) {
 }
 
 void StatementList::insertElement(StatementPtr stmt, int index /* = 0 */) {
-  ASSERT(index >= 0 && index <= (int)m_stmts.size());
+  assert(index >= 0 && index <= (int)m_stmts.size());
   m_stmts.insert(m_stmts.begin() + index, stmt);
 }
 
@@ -72,8 +72,8 @@ void StatementList::removeElement(int index) {
 }
 
 void StatementList::shift(int from, int to) {
-  ASSERT(from >= 0 && from <= (int)m_stmts.size());
-  ASSERT(to >= 0 && to <= (int)m_stmts.size());
+  assert(from >= 0 && from <= (int)m_stmts.size());
+  assert(to >= 0 && to <= (int)m_stmts.size());
   StatementPtr stmt = m_stmts[from];
   for (int i = from; i < to; i++) {
     m_stmts[i] = m_stmts[i+1];
@@ -85,7 +85,7 @@ void StatementList::shift(int from, int to) {
 // static analysis functions
 
 StatementPtr StatementList::operator[](int index) {
-  ASSERT(index >= 0 && index < getCount());
+  assert(index >= 0 && index < getCount());
   return m_stmts[index];
 }
 
@@ -341,7 +341,7 @@ int StatementList::getKidCount() const {
 void StatementList::setNthKid(int n, ConstructPtr cp) {
   int s = m_stmts.size();
   if (n >= s) {
-    ASSERT(false);
+    assert(false);
   } else {
     m_stmts[n] = boost::dynamic_pointer_cast<Statement>(cp);
   }
@@ -493,7 +493,7 @@ void StatementList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       break;
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 }

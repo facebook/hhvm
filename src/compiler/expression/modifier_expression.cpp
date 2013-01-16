@@ -41,7 +41,7 @@ void ModifierExpression::add(int modifier) {
 }
 
 int ModifierExpression::operator[](int index) {
-  ASSERT(index >= 0 && index < getCount());
+  assert(index >= 0 && index < getCount());
   return m_modifiers[index];
 }
 
@@ -96,7 +96,7 @@ void ModifierExpression::analyzeProgram(AnalysisResultPtr ar) {
 
 TypePtr ModifierExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                        bool coerce) {
-  ASSERT(false);
+  assert(false);
   return TypePtr();
 }
 
@@ -130,7 +130,7 @@ void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_ABSTRACT:  cg_printf(" abstract");  break;
     case T_FINAL:     cg_printf(" final");     break;
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 }

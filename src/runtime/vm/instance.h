@@ -109,11 +109,11 @@ class Instance : public ObjectData {
     if (nProps > 0) {
       if (cls->pinitVec().size() > 0) {
         const Class::PropInitVec* propInitVec = m_cls->getPropData();
-        ASSERT(propInitVec != NULL);
-        ASSERT(nProps == propInitVec->size());
+        assert(propInitVec != NULL);
+        assert(nProps == propInitVec->size());
         memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {
-        ASSERT(nProps == cls->declPropInit().size());
+        assert(nProps == cls->declPropInit().size());
         memcpy(propVec(), &cls->declPropInit()[0], nProps * sizeof(TypedValue));
       }
     }
@@ -134,7 +134,7 @@ class Instance : public ObjectData {
     Class* cls = this_->getVMClass();
     size_t nProps = cls->numDeclProperties();
     // cppext classes have their own implementation of delete
-    ASSERT(this_->builtinPropSize() == 0);
+    assert(this_->builtinPropSize() == 0);
     TypedValue* propVec = (TypedValue *)((uintptr_t)this_ + sizeof(ObjectData));
     for (unsigned i = 0; i < nProps; ++i) {
       TypedValue* prop = &propVec[i];
@@ -203,7 +203,7 @@ class Instance : public ObjectData {
 
   static size_t sizeForNProps(Slot nProps) {
     size_t sz = sizeof(Instance) + (sizeof(TypedValue) * nProps);
-    ASSERT((sz & (sizeof(TypedValue) - 1)) == 0);
+    assert((sz & (sizeof(TypedValue) - 1)) == 0);
     return sz;
   }
 
@@ -272,7 +272,7 @@ class Instance : public ObjectData {
 };
 
 inline Instance* instanceFromTv(TypedValue* tv) {
-  ASSERT(dynamic_cast<Instance*>(tv->m_data.pobj));
+  assert(dynamic_cast<Instance*>(tv->m_data.pobj));
   return static_cast<Instance*>(tv->m_data.pobj);
 }
 

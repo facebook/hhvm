@@ -900,7 +900,7 @@ bool PDOMySqlStatement::support(SupportedMethod method) {
 
 int PDOMySqlStatement::handleError(const char *file, int line) {
   PDOMySqlConnection *conn = dynamic_cast<PDOMySqlConnection*>(dbh.get());
-  ASSERT(conn);
+  assert(conn);
   return conn->handleError(file, line, this);
 }
 

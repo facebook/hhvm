@@ -123,7 +123,7 @@ string MethodStatement::getOriginalFullNameForInjection() const {
 
 bool MethodStatement::isRef(int index /* = -1 */) const {
   if (index == -1) return m_ref;
-  ASSERT(index >= 0 && index < m_params->getCount());
+  assert(index >= 0 && index < m_params->getCount());
   ParameterExpressionPtr param =
     dynamic_pointer_cast<ParameterExpression>((*m_params)[index]);
   return param->isRef();
@@ -749,7 +749,7 @@ ConstructPtr MethodStatement::getNthKid(int n) const {
     case 2:
       return m_stmt;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -771,7 +771,7 @@ void MethodStatement::setNthKid(int n, ConstructPtr cp) {
       m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -817,7 +817,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   if (funcScope->isGenerator()) {
     // orig function params
     MethodStatementRawPtr m = getOrigGeneratorFunc();
-    ASSERT(m);
+    assert(m);
 
     VariableTablePtr variables = funcScope->getVariables();
     ExpressionListPtr params = m->getParams();
@@ -826,7 +826,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         const string &name = param->getName();
-        ASSERT(!param->isRef() || param->getType()->is(Type::KindOfVariant));
+        assert(!param->isRef() || param->getType()->is(Type::KindOfVariant));
         variables->addParamLike(name, param->getType(), ar, param,
                                 funcScope->isFirstPass());
       }
@@ -839,7 +839,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*useVars)[i]);
         const string &name = param->getName();
-        ASSERT(!param->isRef() || param->getType()->is(Type::KindOfVariant));
+        assert(!param->isRef() || param->getType()->is(Type::KindOfVariant));
         variables->addParamLike(name, param->getType(), ar, param,
                                 funcScope->isFirstPass());
       }
@@ -1076,7 +1076,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             if (funcScope->needsRefTemp()) cg.clearRefereceTemp();
           }
           cg_indentEnd("}\n");
-          ASSERT(startLineImplementation >= 0);
+          assert(startLineImplementation >= 0);
           m_cppLength = cg.getLineNo(CodeGenerator::PrimaryStream)
                         - startLineImplementation;
           if (Option::HardTypeHints && funcScope->needsTypeCheckWrapper()) {
@@ -1107,7 +1107,7 @@ bool MethodStatement::hasRefParam() {
 
 void MethodStatement::outputParamArrayCreate(CodeGenerator &cg, bool checkRef) {
   int n = m_params->getCount();
-  ASSERT(n > 0);
+  assert(n > 0);
   cg_printf("array_createvi(%d, ", n);
   VariableTablePtr variables = getFunctionScope()->getVariables();
   for (int i = 0; i < n; i++) {
@@ -1148,7 +1148,7 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
     }
     if (m_params) {
       int n = m_params->getCount();
-      ASSERT(n >= 0);
+      assert(n >= 0);
       if (Option::GenArrayCreate && !hasRefParam()) {
         if (ar->m_arrayIntegerKeyMaxSize < n) ar->m_arrayIntegerKeyMaxSize = n;
         outputParamArrayCreate(cg, true);
@@ -1313,7 +1313,7 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
     for (int i = 0; i < m_params->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-      ASSERT(param);
+      assert(param);
       cg_printf(", %s%s", Option::VariablePrefix, param->getName().c_str());
     }
   }
@@ -1359,7 +1359,7 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
   for (int i = 0; i < m_params->getCount(); i++) {
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-    ASSERT(param);
+    assert(param);
     ConstantExpressionPtr con =
       dynamic_pointer_cast<ConstantExpression>(param->defaultValue());
     bool needsNullGet = con && con->isNull();
@@ -1371,11 +1371,11 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
       if (Type::SameType(spec, funcScope->getParamType(i))) {
         if (spec->isSpecificObject() && !needsNullGet) {
           ClassScopePtr cls = ar->findClass(spec->getName());
-          ASSERT(cls && !cls->isRedeclaring());
+          assert(cls && !cls->isRedeclaring());
           spec->outputCPPFastObjectCast(cg, ar, getScope(), true);
         }
 
-        ASSERT(Type::HasFastCastMethod(spec));
+        assert(Type::HasFastCastMethod(spec));
 
         const char *nullGetMethod = NULL;
         switch (spec->getKindOf()) {
@@ -1386,21 +1386,21 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
           nullGetMethod = "getStringDataOrNull";
           break;
         case Type::KindOfObject:
-          ASSERT(spec->isSpecificObject());
+          assert(spec->isSpecificObject());
           nullGetMethod = "getObjectDataOrNull";
           break;
         default:
           break;
         }
 
-        ASSERT(!needsNullGet || nullGetMethod != NULL);
+        assert(!needsNullGet || nullGetMethod != NULL);
 
         cg_printf("%s", paramName.c_str());
         if (needsNullGet) {
           cg_printf(".%s()", nullGetMethod);
         } else {
           const string &fastCast = Type::GetFastCastMethod(spec, true, true);
-          ASSERT(!fastCast.empty());
+          assert(!fastCast.empty());
           cg_printf(".%s()", fastCast.c_str());
         }
       } else if (needsNullGet &&
@@ -1411,7 +1411,7 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
         // the passed in parameter cannot be null anyways
         // and we do not have to generate a special type
         // check in the wrapper
-        ASSERT(spec->isSpecificObject());
+        assert(spec->isSpecificObject());
         cg_printf("%s.getObjectDataOrNull()", paramName.c_str());
       } else {
         cg_printf("%s", paramName.c_str());

@@ -42,13 +42,13 @@ Extension::Extension(litstr name, const char *version /* = "" */)
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
   }
-  ASSERT(s_registered_extensions->find(name) ==
+  assert(s_registered_extensions->find(name) ==
          s_registered_extensions->end());
   (*s_registered_extensions)[name] = this;
 }
 
 void Extension::LoadModules(Hdf hdf) {
-  ASSERT(s_registered_extensions);
+  assert(s_registered_extensions);
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
     iter->second->moduleLoad(hdf["Extensions"][iter->second->m_name]);
@@ -56,7 +56,7 @@ void Extension::LoadModules(Hdf hdf) {
 }
 
 void Extension::InitModules() {
-  ASSERT(s_registered_extensions);
+  assert(s_registered_extensions);
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
     iter->second->moduleInit();
@@ -69,7 +69,7 @@ bool Extension::ModulesInitialised() {
 }
 
 void Extension::ShutdownModules() {
-  ASSERT(s_registered_extensions);
+  assert(s_registered_extensions);
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
     iter->second->moduleShutdown();
@@ -81,13 +81,13 @@ bool Extension::IsLoaded(CStrRef name) {
   if (name == "apc") {
     return RuntimeOption::EnableApc;
   }
-  ASSERT(s_registered_extensions);
+  assert(s_registered_extensions);
   return s_registered_extensions->find(name.data()) !=
     s_registered_extensions->end();
 }
 
 Extension *Extension::GetExtension(CStrRef name) {
-  ASSERT(s_registered_extensions);
+  assert(s_registered_extensions);
   ExtensionMap::iterator iter = s_registered_extensions->find(name.data());
   if (iter != s_registered_extensions->end()) {
     return iter->second;
@@ -96,7 +96,7 @@ Extension *Extension::GetExtension(CStrRef name) {
 }
 
 Array Extension::GetLoadedExtensions() {
-  ASSERT(s_registered_extensions);
+  assert(s_registered_extensions);
   Array ret = Array::Create();
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {

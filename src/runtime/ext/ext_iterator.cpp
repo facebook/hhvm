@@ -165,14 +165,14 @@ Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterato
 Object f_hphp_recursiveiteratoriterator_getinneriterator(CObjRef obj) {
   RecursiveIteratorIterator *rii = get_recursiveiteratoriterator(obj);
   unsigned int size = rii->m_iterators.size();
-  ASSERT(size > 0);
+  assert(size > 0);
   return size == 1 ? Object() : rii->m_iterators[size-1].first;
 }
 
 Variant f_hphp_recursiveiteratoriterator_current(CObjRef obj) {
   RecursiveIteratorIterator *rii = get_recursiveiteratoriterator(obj);
   unsigned int size = rii->m_iterators.size();
-  ASSERT(size > 0);
+  assert(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
     ObjectData* rdi = SystemLib::AllocRecursiveDirectoryIteratorObject();
     rdi->o_set("rsrc",
@@ -185,7 +185,7 @@ Variant f_hphp_recursiveiteratoriterator_current(CObjRef obj) {
 Variant f_hphp_recursiveiteratoriterator_key(CObjRef obj) {
   RecursiveIteratorIterator *rii = get_recursiveiteratoriterator(obj);
   unsigned int size = rii->m_iterators.size();
-  ASSERT(size > 0);
+  assert(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
     ObjectData* rdi = SystemLib::AllocRecursiveDirectoryIteratorObject();
     rdi->o_set("rsrc",
@@ -264,7 +264,7 @@ void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
     }
     RecursiveDirectoryIterator *rdi =
       ci.getTyped<RecursiveDirectoryIterator>();
-    ASSERT(rii->m_iterators[size-1].second == 0);
+    assert(rii->m_iterators[size-1].second == 0);
     rdi->next();
   }
 }
@@ -462,7 +462,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
   }
   Variant var(strongBind(array));
   TypedValue* tv = (TypedValue*)(&var);
-  ASSERT(tv->m_type == KindOfRef);
+  assert(tv->m_type == KindOfRef);
   TypedValue* rtv = tv->m_data.pref->tv();
   if (rtv->m_type == KindOfArray) {
     MIterCtx& mi = marr();

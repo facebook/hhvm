@@ -110,7 +110,7 @@ std::string CmdInterrupt::desc() const {
     case HardBreakPoint:
     case BreakPointReached:
     case ExceptionThrown: {
-      ASSERT(m_site);
+      assert(m_site);
       if (m_site) {
         return m_site->desc();
       }
@@ -118,7 +118,7 @@ std::string CmdInterrupt::desc() const {
     }
   }
 
-  ASSERT(false);
+  assert(false);
   return "";
 }
 
@@ -306,7 +306,7 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
       }
       return !m_matched.empty();
   }
-  ASSERT(false);
+  assert(false);
   return false;
 }
 

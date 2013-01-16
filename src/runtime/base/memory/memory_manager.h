@@ -277,7 +277,7 @@ public:
     if (stats.usage > stats.peakUsage) {
       // NOTE: the peak memory usage monotonically increases, so there cannot
       // be a second OOM exception in one request.
-      ASSERT(stats.maxBytes > 0);
+      assert(stats.maxBytes > 0);
       if (live && stats.peakUsage <= stats.maxBytes &&
           stats.usage > stats.maxBytes) {
         refreshStatsHelperExceeded();

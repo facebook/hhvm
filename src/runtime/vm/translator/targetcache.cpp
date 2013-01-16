@@ -135,7 +135,7 @@ static Mutex s_handleMutex(false /*recursive*/, RankLeaf);
 inline Handle
 ptrToHandle(const void* ptr) {
   ptrdiff_t retval = uintptr_t(ptr) - uintptr_t(tl_targetCaches);
-  ASSERT(retval < RuntimeOption::EvalJitTargetCacheSize);
+  assert(retval < RuntimeOption::EvalJitTargetCacheSize);
   return retval;
 }
 
@@ -214,7 +214,7 @@ bool testBit(size_t bit) {
 }
 
 bool testBit(Handle handle, uint32 mask) {
-  ASSERT(!(mask & (mask - 1)));
+  assert(!(mask & (mask - 1)));
   return *(uint32*)handleToPtr(handle) & mask;
 }
 
@@ -227,7 +227,7 @@ bool testAndSetBit(size_t bit) {
 }
 
 bool testAndSetBit(Handle handle, uint32 mask) {
-  ASSERT(!(mask & (mask - 1)));
+  assert(!(mask & (mask - 1)));
   bool ret = *(uint32*)handleToPtr(handle) & mask;
   *(uint32*)handleToPtr(handle) |= mask;
   return ret;
@@ -266,7 +266,7 @@ template<bool sensitive>
 Handle
 namedAlloc(PHPNameSpace where, const StringData* name,
            int numBytes, int align) {
-  ASSERT(!name || (where >= 0 && where < NumNameSpaces));
+  assert(!name || (where >= 0 && where < NumNameSpaces));
   typedef HandleInfo<sensitive> HI;
   typename HI::Map& map = HI::getHandleMap(where);
   typename HI::Map::const_accessor a;
@@ -299,7 +299,7 @@ Handle namedAlloc<false>(PHPNameSpace where, const StringData* name,
 
 void
 invalidateForRename(const StringData* name) {
-  ASSERT(name);
+  assert(name);
   Lock l(s_handleMutex);
 
   for (HandleVector::iterator i = funcCacheEntries.begin();
@@ -352,7 +352,7 @@ static const bool zeroViaMemset = true;
 
 void
 requestInit() {
-  ASSERT(tl_targetCaches);
+  assert(tl_targetCaches);
   TRACE(1, "TargetCache: @%p\n", tl_targetCaches);
   if (zeroViaMemset) {
     TRACE(1, "TargetCache: bzeroing %zd bytes: %p\n", s_frontier,
@@ -418,7 +418,7 @@ FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
   }
   // DecRef the string here; more compact than doing so in callers.
   decRefStr(sd);
-  ASSERT(stringMatches(pair->m_key, pair->m_value->name()));
+  assert(stringMatches(pair->m_key, pair->m_value->name()));
   pair->m_value->validate();
   return pair->m_value;
 }
@@ -457,9 +457,9 @@ static void methodCacheSlowPath(MethodCache::Pair* mce,
                                 ActRec* ar,
                                 StringData* name,
                                 Class* cls) {
-  ASSERT(ar->hasThis());
-  ASSERT(ar->getThis()->getVMClass() == cls);
-  ASSERT(IMPLIES(mce->m_key, mce->m_value));
+  assert(ar->hasThis());
+  assert(ar->getThis()->getVMClass() == cls);
+  assert(IMPLIES(mce->m_key, mce->m_value));
 
   bool isMagicCall = mce->m_key & 0x1u;
   bool isStatic;
@@ -502,20 +502,20 @@ static void methodCacheSlowPath(MethodCache::Pair* mce,
     mce->m_value = func;
   }
 
-  ASSERT(func);
+  assert(func);
   func->validate();
   ar->m_func = func;
 
   if (UNLIKELY(isStatic)) {
     decRefObj(ar->getThis());
-    if (debug) ar->setThis(NULL); // suppress ASSERT in setClass
+    if (debug) ar->setThis(NULL); // suppress assert in setClass
     ar->setClass(cls);
   }
 
-  ASSERT(!ar->hasVarEnv() && !ar->hasInvName());
+  assert(!ar->hasVarEnv() && !ar->hasInvName());
   if (UNLIKELY(isMagicCall)) {
     ar->setInvName(name);
-    ASSERT(name->isStatic()); // No incRef needed.
+    assert(name->isStatic()); // No incRef needed.
   }
 }
 
@@ -523,7 +523,7 @@ template<>
 HOT_FUNC_VM
 void
 MethodCache::lookup(Handle handle, ActRec* ar, const void* extraKey) {
-  ASSERT(ar->hasThis());
+  assert(ar->hasThis());
   auto* cls = ar->getThis()->getVMClass();
   auto* pair = MethodCache::cacheAtHandle(handle)->keyToPair(uintptr_t(cls));
 
@@ -560,7 +560,7 @@ GlobalCache::lookupImpl(StringData *name, bool allowCreate) {
     hit = false;
 
     VarEnv* ve = g_vmContext->m_globalVarEnv;
-    ASSERT(ve->isGlobalScope());
+    assert(ve->isGlobalScope());
     if (allowCreate) {
       m_tv = ve->lookupAddRawPointer(name);
     } else {
@@ -589,8 +589,8 @@ GlobalCache::lookupImpl(StringData *name, bool allowCreate) {
   if (!isBoxed && retval->m_type == KindOfRef) {
     retval = retval->m_data.pref->tv();
   }
-  ASSERT(!isBoxed || retval->m_type == KindOfRef);
-  ASSERT(!allowCreate || retval);
+  assert(!isBoxed || retval->m_type == KindOfRef);
+  assert(!allowCreate || retval);
 
 miss:
   // decRef the name if we consumed it.  If we didn't get a global, we
@@ -612,7 +612,7 @@ TypedValue*
 GlobalCache::lookup(Handle handle, StringData* name) {
   GlobalCache* thiz = (GlobalCache*)GlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<false>(name, false /* allowCreate */);
-  ASSERT(!retval || retval->m_type != KindOfRef);
+  assert(!retval || retval->m_type != KindOfRef);
   return retval;
 }
 
@@ -620,7 +620,7 @@ TypedValue*
 GlobalCache::lookupCreate(Handle handle, StringData* name) {
   GlobalCache* thiz = (GlobalCache*)GlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<false>(name, true /* allowCreate */);
-  ASSERT(retval->m_type != KindOfRef);
+  assert(retval->m_type != KindOfRef);
   return retval;
 }
 
@@ -628,7 +628,7 @@ TypedValue*
 GlobalCache::lookupCreateAddr(void* cacheAddr, StringData* name) {
   GlobalCache* thiz = (GlobalCache*)cacheAddr;
   TypedValue* retval = thiz->lookupImpl<false>(name, true /* allowCreate */);
-  ASSERT(retval->m_type != KindOfRef);
+  assert(retval->m_type != KindOfRef);
   return retval;
 }
 
@@ -637,7 +637,7 @@ BoxedGlobalCache::lookup(Handle handle, StringData* name) {
   BoxedGlobalCache* thiz = (BoxedGlobalCache*)
     BoxedGlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<true>(name, false /* allowCreate */);
-  ASSERT(!retval || retval->m_type == KindOfRef);
+  assert(!retval || retval->m_type == KindOfRef);
   return retval;
 }
 
@@ -646,7 +646,7 @@ BoxedGlobalCache::lookupCreate(Handle handle, StringData* name) {
   BoxedGlobalCache* thiz = (BoxedGlobalCache*)
     BoxedGlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<true>(name, true /* allowCreate */);
-  ASSERT(retval->m_type == KindOfRef);
+  assert(retval->m_type == KindOfRef);
   return retval;
 }
 
@@ -706,7 +706,7 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
   }
 
   Class* cls = *cache;
-  ASSERT(!cls); // the caller should already have checked
+  assert(!cls); // the caller should already have checked
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
@@ -777,11 +777,11 @@ CacheHandle allocStatic() {
 
 void
 fillConstant(StringData* name) {
-  ASSERT(name);
+  assert(name);
   Handle ch = allocConstant(name);
   testAndSetBit(allocCnsBit(name));
   TypedValue *val = g_vmContext->getCns(name);
-  ASSERT(val);
+  assert(val);
   *(TypedValue*)handleToPtr(ch) = *val;
 }
 
@@ -815,15 +815,15 @@ SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
   SPropCache* thiz = cacheAtHandle(handle);
   Stats::inc(Stats::TgtCache_SPropMiss);
   Stats::inc(Stats::TgtCache_SPropHit, -1);
-  ASSERT(cls && name);
-  ASSERT(!thiz->m_tv);
+  assert(cls && name);
+  assert(!thiz->m_tv);
   TRACE(3, "SPropCache miss: %s::$%s\n", cls->name()->data(),
         name->data());
   // This is valid only if the lookup comes from an in-class method
   Class *ctx = const_cast<Class*>(cls);
   if (debug) {
     VMRegAnchor _;
-    ASSERT(ctx == arGetContextClass((ActRec*)vmfp()));
+    assert(ctx == arGetContextClass((ActRec*)vmfp()));
   }
   bool visible, accessible;
   TypedValue* val;
@@ -836,7 +836,7 @@ SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
   }
   // We only cache in class references, thus we can always cache them
   // once the property is known to exist
-  ASSERT(accessible);
+  assert(accessible);
   thiz->m_tv = val;
   TRACE(3, "SPropCache::lookup(\"%s::$%s\") %p -> %p t%d\n",
         cls->name()->data(),
@@ -844,7 +844,7 @@ SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
         val,
         val->m_data.pref,
         val->m_type);
-  ASSERT(val->m_type >= MinDataType && val->m_type < MaxNumDataTypes);
+  assert(val->m_type >= MinDataType && val->m_type < MaxNumDataTypes);
   return val;
 }
 
@@ -922,10 +922,10 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
     ar->setClass(const_cast<Class*>(cls));
     return f;
   }
-  ASSERT(res != MethodFoundWithThis); // Not possible: no this supplied.
+  assert(res != MethodFoundWithThis); // Not possible: no this supplied.
   // We've already sync'ed regs; this is some hard case, we might as well
   // just let the interpreter handle this entirely.
-  ASSERT(*vmpc() == OpFPushClsMethodD);
+  assert(*vmpc() == OpFPushClsMethodD);
 
   // Indicate to the IR that it should take even slower path
   return NULL;
@@ -967,16 +967,16 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
     ar->setClass(const_cast<Class*>(cls));
     return f;
   }
-  ASSERT(res != MethodFoundWithThis); // Not possible: no this supplied.
+  assert(res != MethodFoundWithThis); // Not possible: no this supplied.
   // We've already sync'ed regs; this is some hard case, we might as well
   // just let the interpreter handle this entirely.
-  ASSERT(*vmpc() == OpFPushClsMethodD);
+  assert(*vmpc() == OpFPushClsMethodD);
   Stats::inc(Stats::Instr_InterpOneFPushClsMethodD);
   Stats::inc(Stats::Instr_TC, -1);
   ec->opFPushClsMethodD();
   // Return whatever func the instruction produced; if nothing was
   // possible we'll either have fataled or thrown.
-  ASSERT(ar->m_func);
+  assert(ar->m_func);
   ar->m_func->validate();
   // Don't update the cache; this case was too scary to memoize.
   TRACE(1, "unfillable miss %s :: %s -> %p\n", clsName->data(),
@@ -988,7 +988,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
 const Func*
 StaticMethodFCache::lookup(Handle handle, const Class* cls,
                            const StringData* methName) {
-  ASSERT(cls);
+  assert(cls);
   StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodFMiss);
@@ -1000,7 +1000,7 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
                                          NULL,
                                          false /*raise*/);
-  ASSERT(res != MethodFoundWithThis); // Not possible: no this supplied.
+  assert(res != MethodFoundWithThis); // Not possible: no this supplied.
   if (LIKELY(res == MethodFoundNoThis && !f->isAbstract())) {
     // We called lookupClsMethod with a NULL this and got back a
     // method that may or may not be static. This implies that
@@ -1023,7 +1023,7 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
 
   // We've already sync'ed regs; this is some hard case, we might as well
   // just let the interpreter handle this entirely.
-  ASSERT(*vmpc() == OpFPushClsMethodF);
+  assert(*vmpc() == OpFPushClsMethodF);
   Stats::inc(Stats::Instr_TC, -1);
   Stats::inc(Stats::Instr_InterpOneFPushClsMethodF);
   ec->opFPushClsMethodF();

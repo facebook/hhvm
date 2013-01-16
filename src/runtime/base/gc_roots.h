@@ -160,7 +160,7 @@ private:
     std::vector<void*>::const_reverse_iterator it = stack.rbegin();
     void* last = 0;
     for (; it != stack.rend(); ++it) {
-      ASSERT(*it > last);
+      assert(*it > last);
       last = *it;
     }
   }
@@ -185,9 +185,9 @@ private:
       }
     }
 
-    ASSERT(*it > this);
+    assert(*it > this);
     ++it;
-    ASSERT(it == stack.end() || *it < this);
+    assert(it == stack.end() || *it < this);
     stack.insert(it, this);
   }
 
@@ -252,13 +252,13 @@ struct GCRoot : private boost::noncopyable {
   static void clear() {
     // Nothing should be left at end of request time or this class is
     // being misused.
-    ASSERT(getStack().empty());
+    assert(getStack().empty());
   }
 
 #ifdef DEBUG
   explicit GCRoot(T* t) : m_debugSavedPtr(t) { getStack().push_back(t); }
   ~GCRoot() {
-    ASSERT(!getStack().empty() && getStack().back() == m_debugSavedPtr);
+    assert(!getStack().empty() && getStack().back() == m_debugSavedPtr);
     getStack().pop_back();
   }
 

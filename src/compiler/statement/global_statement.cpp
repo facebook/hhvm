@@ -73,7 +73,7 @@ ConstructPtr GlobalStatement::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -89,7 +89,7 @@ void GlobalStatement::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -133,7 +133,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
     } else {
       variables->forceVariants(ar, VariableTable::AnyVars);
       variables->setAttribute(VariableTable::ContainsLDynamicVariable);
-      ASSERT(exp->is(Expression::KindOfDynamicVariable));
+      assert(exp->is(Expression::KindOfDynamicVariable));
       exp->inferAndCheck(ar, Type::Any, true);
     }
   }
@@ -158,7 +158,7 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       const string &name = var->getName();
       VariableTablePtr variables = scope->getVariables();
       if (variables->needLocalCopy(name)) {
-        ASSERT(var->hasAssignableCPPVariable());
+        assert(var->hasAssignableCPPVariable());
         cg_printf("%s.assignRef(g->%s);\n",
                   var->getAssignableCPPVariable(ar).c_str(),
                   variables->getGlobalVariableName(ar, name).c_str());

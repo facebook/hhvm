@@ -108,7 +108,7 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
-  virtual void handleReply(DebuggerClient *client) { ASSERT(false); }
+  virtual void handleReply(DebuggerClient *client) { assert(false); }
 
   /**
    * A server command processing can set m_exitInterrupt to true to break

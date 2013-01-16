@@ -69,7 +69,7 @@ struct FixedVector {
       free(ptr);
       throw;
     }
-    ASSERT(i == neededSize);
+    assert(i == neededSize);
     m_sp.set(neededSize, ptr);
   }
 

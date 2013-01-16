@@ -77,7 +77,7 @@ ConstructPtr ForStatement::getNthKid(int n) const {
     case IncExpr:
       return m_exp3;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -102,7 +102,7 @@ void ForStatement::setNthKid(int n, ConstructPtr cp) {
       m_exp3 = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

@@ -53,7 +53,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
 
 void VariableSerializer::setObjectInfo(CStrRef objClass, int objId,
                                        char objCode) {
-  ASSERT(objCode == 'O' || objCode == 'V' || objCode == 'K');
+  assert(objCode == 'O' || objCode == 'V' || objCode == 'K');
   m_objClass = objClass;
   m_objId = objId;
   m_objCode = objCode;
@@ -102,7 +102,7 @@ String VariableSerializer::serializeValue(CVarRef v, bool limit) {
 String VariableSerializer::serializeWithLimit(CVarRef v, int limit) {
   if (m_type == Serialize || m_type == JSON || m_type == APCSerialize ||
       m_type == DebuggerSerialize) {
-    ASSERT(false);
+    assert(false);
     return null_string;
   }
   StringBuffer buf;
@@ -147,7 +147,7 @@ void VariableSerializer::write(bool v) {
     m_buf->append(v ? "b:1;" : "b:0;");
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -183,7 +183,7 @@ void VariableSerializer::write(int64 v) {
     m_buf->append(';');
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -248,7 +248,7 @@ void VariableSerializer::write(double v) {
     m_buf->append(';');
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -348,7 +348,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     break;
   }
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -372,7 +372,7 @@ void VariableSerializer::write(CObjRef v) {
   if (!v.isNull() && m_type == JSON) {
 
     if (v.instanceof(s_JsonSerializable)) {
-      ASSERT(!v->isCollection());
+      assert(!v->isCollection());
       Variant ret = v->o_invoke(s_jsonSerialize, null_array, -1);
       // for non objects or when $this is returned
       if (!ret.isObject() || (ret.isObject() && !ret.same(v))) {
@@ -435,7 +435,7 @@ void VariableSerializer::writeNull() {
     m_buf->append("null");
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -472,9 +472,9 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
   case Serialize:
   case APCSerialize:
     {
-      ASSERT(m_arrayIds);
+      assert(m_arrayIds);
       PointerCounterMap::const_iterator iter = m_arrayIds->find(ptr);
-      ASSERT(iter != m_arrayIds->end());
+      assert(iter != m_arrayIds->end());
       int id = iter->second;
       if (isObject) {
         m_buf->append("r:");
@@ -494,7 +494,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     m_buf->append("null");
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -620,7 +620,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
 
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 
@@ -639,7 +639,7 @@ void VariableSerializer::writePropertyKey(CStrRef prop) {
   if (!*key && kl) {
     const char *cls = key + 1;
     if (*cls == '*') {
-      ASSERT(key[2] == 0);
+      assert(key[2] == 0);
       m_buf->append(key + 3, kl - 3);
       const char prot[] = "\":protected";
       int o = m_type == PrintR ? 1 : 0;
@@ -704,7 +704,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
     m_buf->append("]=>\n");
     break;
   case APCSerialize:
-    ASSERT(!info.is_object);
+    assert(!info.is_object);
   case Serialize:
   case DebuggerSerialize:
     write(key);
@@ -741,7 +741,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
     }
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -820,7 +820,7 @@ void VariableSerializer::writeArrayFooter() {
     }
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 
@@ -871,7 +871,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
   case Serialize:
   case APCSerialize:
     {
-      ASSERT(m_arrayIds);
+      assert(m_arrayIds);
       int ct = ++m_counts[ptr];
       if (m_arrayIds->find(ptr) != m_arrayIds->end() &&
           (m_referenced || isObject)) {
@@ -883,7 +883,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
     }
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return false;

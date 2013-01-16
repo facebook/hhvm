@@ -234,8 +234,8 @@ void DBConn::escapeString(const char *s, std::string &out) {
 }
 
 void DBConn::escapeString(const char *s, int len, std::string &out) {
-  ASSERT(s);
-  ASSERT(isOpened());
+  assert(s);
+  assert(isOpened());
 
   if (len) {
     char *buffer = (char*)malloc(len * 2 + 1);
@@ -252,8 +252,8 @@ int DBConn::execute(const std::string &sql, DBDataSet *ds /* = NULL */,
 
 int DBConn::execute(const char *sql, DBDataSet *ds /* = NULL */,
                     bool retryQueryOnFail /* = true */) {
-  ASSERT(sql && *sql);
-  ASSERT(isOpened());
+  assert(sql && *sql);
+  assert(isOpened());
 
   {
     bool failure;
@@ -292,7 +292,7 @@ int DBConn::execute(const char *sql, DBDataSet *ds /* = NULL */,
 }
 
 int DBConn::getLastInsertId() {
-  ASSERT(isOpened());
+  assert(isOpened());
   return mysql_insert_id(m_conn);
 }
 
@@ -302,7 +302,7 @@ int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
                             int readTimeout,
                             int maxRetryOpenOnFail,
                             int maxRetryQueryOnFail) {
-  ASSERT(sql && *sql);
+  assert(sql && *sql);
 
   if (s_localDatabases.empty()) {
     return -1;
@@ -357,7 +357,7 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
                             int readTimeout,
                             int maxRetryOpenOnFail,
                             int maxRetryQueryOnFail) {
-  ASSERT(sqls.size() == dss.size());
+  assert(sqls.size() == dss.size());
 
   if (sqls.empty()) {
     return 0;

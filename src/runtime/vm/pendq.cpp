@@ -31,12 +31,12 @@ void PendQ::defer(DeferredWorkItem* i) {
 }
 
 void PendQ::drain() {
-  ASSERT(currentRank() == RankBase); // Call from base rank.
+  assert(currentRank() == RankBase); // Call from base rank.
   while (tl_q && !tl_q->empty()) {
     DeferredWorkItem* i = tl_q->front();
     tl_q->pop();
     (*i)();
-    ASSERT(currentRank() == RankBase); // Don't hold locks.
+    assert(currentRank() == RankBase); // Don't hold locks.
     delete i;
   }
 }

@@ -52,7 +52,7 @@ void Globals::initialize() {
             *(Variant*)addr = v;
             break;
           default:
-            ASSERT(false);
+            assert(false);
         }
         continue;
       }
@@ -77,7 +77,7 @@ void Globals::initialize() {
             *(Array*)addr = v;
             break;
           default:
-            ASSERT(false);
+            assert(false);
         }
       }
     }
@@ -123,7 +123,7 @@ CVarRef Globals::getRefByIdx(ssize_t pos, Variant& k) {
     k = arr->getKey(pos);
     return arr->getValueRef(pos);
   }
-  ASSERT(false);
+  assert(false);
   throw FatalErrorException("bad code generation");
 }
 ssize_t Globals::getIndex(const char* s, strhash_t prehash) const {
@@ -166,7 +166,7 @@ ssize_t Globals::iter_advance(ssize_t prev) const {
 ssize_t Globals::iter_rewind(ssize_t prev) const {
   if (prev < -1) {
     ArrayData *arr = Array::get();
-    ASSERT(arr);
+    assert(arr);
     ssize_t next = arr->iter_rewind(wrapIter(prev));
     if (next == ArrayData::invalid_index) {
       if (staticSize() > 0) {

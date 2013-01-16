@@ -309,7 +309,7 @@ public:
       boost::shared_ptr<S>();
   }
 
-  T *operator->() const { ASSERT(px); return px; }
+  T *operator->() const { assert(px); return px; }
   T *get() const { return px; }
   operator bool() const { return !expired(); }
   void reset() { px = 0; }
@@ -434,7 +434,7 @@ void
 mapInsertUnique(Map& m,
                 const typename Map::key_type& k,
                 const typename Map::mapped_type& d) {
-  ASSERT(!mapContains(m, k));
+  assert(!mapContains(m, k));
   mapInsert(m, k, d);
 }
 

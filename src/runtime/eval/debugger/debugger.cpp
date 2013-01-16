@@ -195,7 +195,7 @@ bool Debugger::InterruptException(CVarRef e) {
 void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
-  ASSERT(RuntimeOption::EnableDebugger);
+  assert(RuntimeOption::EnableDebugger);
 
   RequestInjectionData &rjdata = ThreadInfo::s_threadInfo->m_reqInjectionData;
   if (rjdata.debuggerIdle > 0 && type == BreakPointReached) {
@@ -343,7 +343,7 @@ void Debugger::unregisterSandbox(const StringData* sandboxId) {
     for (std::set<ThreadInfo*>::iterator iter = set.begin();           \
          iter != set.end(); ++iter) {                                  \
       ThreadInfo* ti = (*iter);                                        \
-      ASSERT(ThreadInfo::valid(ti));                                   \
+      assert(ThreadInfo::valid(ti));                                   \
 
 #define FOREACH_SANDBOX_THREAD_END()    } } }                          \
 
@@ -376,7 +376,7 @@ DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
   const StringData* sid =
     StringData::GetStaticString(proxy->getDummyInfo().id());
   {
-    ASSERT(sid);
+    assert(sid);
     ProxyMap::accessor acc;
     m_proxyMap.insert(acc, sid);
     acc->second = proxy;

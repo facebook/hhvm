@@ -82,7 +82,7 @@ template <bool typeArray>
 static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
-  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
+  assert((typeArray && iter->m_itype == Iter::TypeArray) ||
          (!typeArray && iter->m_itype == Iter::TypeIterator));
   ArrayIter& arrIter = iter->arr();
   if (typeArray) {
@@ -92,7 +92,7 @@ static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
     return;
   }
   Variant val = arrIter.second();
-  ASSERT(val.getRawType() != KindOfRef);
+  assert(val.getRawType() != KindOfRef);
   // Old value is decref'd in iter_value_cell_local_impl.
   tvDupCell((TypedValue*)&val, out);
 }
@@ -100,7 +100,7 @@ static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
 template <bool typeArray>
 static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
-  ASSERT(oldType != KindOfRef);
+  assert(oldType != KindOfRef);
   uint64_t oldDatum = out->m_data.num;
   iter_value_cell_impl<typeArray>(iter, out);
   tvRefcountedDecRefHelper(oldType, oldDatum);
@@ -109,7 +109,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
 template <bool typeArray>
 static inline void iter_key_cell_impl(Iter* iter, TypedValue* out) {
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
-  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
+  assert((typeArray && iter->m_itype == Iter::TypeArray) ||
          (!typeArray && iter->m_itype == Iter::TypeIterator));
   ArrayIter& arr = iter->arr();
   if (typeArray) {
@@ -124,7 +124,7 @@ static inline void iter_key_cell_impl(Iter* iter, TypedValue* out) {
 template <bool typeArray>
 static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
-  ASSERT(oldType != KindOfRef);
+  assert(oldType != KindOfRef);
   uint64_t oldDatum = out->m_data.num;
   iter_key_cell_impl<typeArray>(iter, out);
   tvRefcountedDecRefHelper(oldType, oldDatum);
@@ -348,7 +348,7 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 static NEVER_INLINE
 int64 iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_cold: I %p\n", iter);
-  ASSERT(iter->m_itype == Iter::TypeArray ||
+  assert(iter->m_itype == Iter::TypeArray ||
          iter->m_itype == Iter::TypeIterator);
   ArrayIter* ai = &iter->arr();
   ai->next();
@@ -375,7 +375,7 @@ int64 iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 HOT_FUNC
 int64 iter_next(Iter* iter, TypedValue* valOut) {
   TRACE(2, "iter_next: I %p\n", iter);
-  ASSERT(iter->m_itype == Iter::TypeArray ||
+  assert(iter->m_itype == Iter::TypeArray ||
          iter->m_itype == Iter::TypeIterator);
   ArrayIter* arrIter = &iter->arr();
   valOut = tvToCell(valOut);
@@ -417,7 +417,7 @@ cold:
 HOT_FUNC
 int64 iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next: I %p\n", iter);
-  ASSERT(iter->m_itype == Iter::TypeArray ||
+  assert(iter->m_itype == Iter::TypeArray ||
          iter->m_itype == Iter::TypeIterator);
   ArrayIter* arrIter = &iter->arr();
   valOut = tvToCell(valOut);
@@ -622,10 +622,10 @@ int64 eq_bool_str(int64 v1, StringData* v2) {
   //
   // which is nothing but nxor.
   int64 v2i = int64(v2->toBoolean());
-  ASSERT(v2i == 0ll || v2i == 1ll);
-  ASSERT(v1  == 0ll || v1  == 1ll);
+  assert(v2i == 0ll || v2i == 1ll);
+  assert(v1  == 0ll || v1  == 1ll);
   int64 retval = (v2i ^ v1) ^ 1;
-  ASSERT(retval == 0ll || retval == 1ll);
+  assert(retval == 0ll || retval == 1ll);
   decRefStr(v2);
   return retval;
 }
@@ -673,7 +673,7 @@ int64 arr0_to_bool(ArrayData* ad) {
 }
 
 int64 arr_to_bool(ArrayData* ad) {
-  ASSERT(Transl::tx64->stateIsDirty());
+  assert(Transl::tx64->stateIsDirty());
   int64 retval = arr0_to_bool(ad);
   decRefArr(ad);
   return retval;
@@ -753,8 +753,8 @@ bool run_intercept_handler_for_invokefunc(TypedValue* retval,
                                           StringData* invName,
                                           Variant* ihandler) {
   using namespace HPHP::VM::Transl;
-  ASSERT(ihandler);
-  ASSERT(retval);
+  assert(ihandler);
+  assert(retval);
   Variant doneFlag = true;
   Array args = params;
   if (invName) {
@@ -776,9 +776,9 @@ HphpArray* get_static_locals(const ActRec* ar) {
   if (ar->m_func->isClosureBody()) {
     static const StringData* s___static_locals =
       StringData::GetStaticString("__static_locals");
-    ASSERT(ar->hasThis());
+    assert(ar->hasThis());
     ObjectData* closureObj = ar->getThis();
-    ASSERT(closureObj);
+    assert(closureObj);
     TypedValue* prop;
     TypedValue ref;
     tvWriteUninit(&ref);
@@ -792,14 +792,14 @@ HphpArray* get_static_locals(const ActRec* ar) {
       prop->m_data.parr->incRefCount();
       prop->m_type = KindOfArray;
     }
-    ASSERT(prop->m_type == KindOfArray);
-    ASSERT(IsHphpArray(prop->m_data.parr));
-    ASSERT(ref.m_type == KindOfUninit);
+    assert(prop->m_type == KindOfArray);
+    assert(IsHphpArray(prop->m_data.parr));
+    assert(ref.m_type == KindOfUninit);
     return static_cast<HphpArray*>(prop->m_data.parr);
   } else if (ar->m_func->isGeneratorFromClosure()) {
     TypedValue* contLoc = frame_local(ar, 0);
     c_Continuation* cont = static_cast<c_Continuation*>(contLoc->m_data.pobj);
-    ASSERT(cont != NULL);
+    assert(cont != NULL);
     return cont->getStaticLocals();
   } else {
     return ar->m_func->getStaticLocals();
@@ -807,7 +807,7 @@ HphpArray* get_static_locals(const ActRec* ar) {
 }
 
 void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
-  ASSERT(obj);
+  assert(obj);
   collectionAppend(obj, value);
   // TODO Task #1970153: It would be great if we had a version of
   // collectionAppend() that didn't incRef the value so that we
@@ -816,7 +816,7 @@ void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
 }
 
 void collection_setm_ik1_v0(ObjectData* obj, int64 key, TypedValue* value) {
-  ASSERT(obj);
+  assert(obj);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     c_Vector* vec = static_cast<c_Vector*>(obj);
@@ -828,7 +828,7 @@ void collection_setm_ik1_v0(ObjectData* obj, int64 key, TypedValue* value) {
     c_StableMap* smp = static_cast<c_StableMap*>(obj);
     smp->put(key, value);
   } else {
-    ASSERT(false);
+    assert(false);
   }
   tvRefcountedDecRef(value);
 }
@@ -847,7 +847,7 @@ void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
     c_StableMap* smp = static_cast<c_StableMap*>(obj);
     smp->put(key, value);
   } else {
-    ASSERT(false);
+    assert(false);
   }
   tvRefcountedDecRef(value);
 }

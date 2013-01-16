@@ -43,7 +43,7 @@ inline void assert_address_is_atomically_accessible(T* address) {
     "Atomic operations only supported for built in integer, floating point "
     "and pointer types.");
 
-  ASSERT(((uintptr_t(address) + sizeof(T) - 1) & ~63ul) ==
+  assert(((uintptr_t(address) + sizeof(T) - 1) & ~63ul) ==
          ( uintptr_t(address)                  & ~63ul) &&
         "Atomically accessed addresses may not span cache lines");
 }

@@ -52,7 +52,7 @@ JumpTable::JumpTable(CodeGenerator &cg,
 }
 
 void JumpTable::next() {
-  ASSERT(ready());
+  assert(ready());
   m_subIter++;
   if (m_subIter >= m_iter->second.size()) {
     m_subIter = 0;
@@ -75,7 +75,7 @@ int JumpTable::current() const {
 }
 
 bool JumpTable::last() const {
-  ASSERT(ready());
+  assert(ready());
   return m_subIter + 1 == m_iter->second.size();
 }
 

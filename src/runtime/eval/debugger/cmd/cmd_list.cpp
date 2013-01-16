@@ -122,7 +122,7 @@ bool CmdList::listFileRange(DebuggerClient *client, int line,
 }
 
 bool CmdList::listFunctionOrClass(DebuggerClient *client) {
-  ASSERT(client->argCount() == 1);
+  assert(client->argCount() == 1);
   CmdInfoPtr cmdInfo(new CmdInfo());
   DebuggerCommandPtr deleter(cmdInfo);
   string subsymbol;

@@ -76,7 +76,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_userAttributes[attrs[i]->getName()] = attrs[i]->getExp();
   }
 
-  ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
+  assert(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }
 
 // System
@@ -108,7 +108,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
   setAttribute(Extension);
   setAttribute(System);
 
-  ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
+  assert(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }
 
 const std::string &ClassScope::getOriginalName() const {
@@ -261,7 +261,7 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
         m_stmt,
         "The class hierarchy contains a circular reference involving " + base);
       if (i == 0 && !m_parent.empty()) {
-        ASSERT(base == m_parent);
+        assert(base == m_parent);
         m_parent.clear();
       }
       m_bases.erase(m_bases.begin() + i);
@@ -651,7 +651,7 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
 
 void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
   ClassStatementPtr classStmt = dynamic_pointer_cast<ClassStatement>(getStmt());
-  ASSERT(classStmt);
+  assert(classStmt);
   StatementListPtr stmts = classStmt->getStmts();
   if (!stmts) return;
   for (int s = 0; s < stmts->getCount(); s++) {
@@ -671,7 +671,7 @@ void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
       } else {
         TraitAliasStatementPtr aliasStmt =
           dynamic_pointer_cast<TraitAliasStatement>(rule);
-        ASSERT(aliasStmt);
+        assert(aliasStmt);
         applyTraitAliasRule(ar, aliasStmt);
       }
     }
@@ -720,7 +720,7 @@ void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
 
 const string& ClassScope::getNewGeneratorName(
   FunctionScopePtr genFuncScope, GeneratorRenameMap &genRenameMap) {
-  ASSERT(genFuncScope->isGenerator());
+  assert(genFuncScope->isGenerator());
   const string& oldName = genFuncScope->getName();
   GeneratorRenameMap::iterator mapIt = genRenameMap.find(oldName);
   if (mapIt != genRenameMap.end()) {
@@ -741,7 +741,7 @@ ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
   if (funcCall && funcCall->getName() == "hphp_create_continuation") {
 
     ExpressionListPtr params = funcCall->getParams();
-    ASSERT(params->getCount() >= 2);
+    assert(params->getCount() >= 2);
     const string &oldClassName =
       dynamic_pointer_cast<ScalarExpression>((*params)[0])->getString();
     ClassScopePtr oldClassScope = ar->findClass(oldClassName);
@@ -751,7 +751,7 @@ ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
       dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
 
     MethodStatementPtr origGenStmt = importedMethods[oldGenName];
-    ASSERT(origGenStmt);
+    assert(origGenStmt);
 
     const string &newGenName = origGenStmt->getOriginalName();
     ExpressionPtr newGenExpr = funcCall->makeScalarExpression(ar, newGenName);
@@ -780,10 +780,10 @@ void ClassScope::relinkGeneratorMethods(
       // Get corresponding original generator method in the current class
       const string& origGenName = newMeth->getOrigGeneratorFunc()->getName();
       MethodStatementPtr origGenStmt = importedMethods[origGenName];
-      ASSERT(origGenStmt);
+      assert(origGenStmt);
       // It must be an orig gen func already, we're just updating to point
       // to the corresponding method cloned from the trait
-      ASSERT(origGenStmt->getGeneratorFunc());
+      assert(origGenStmt->getGeneratorFunc());
       newMeth->setOrigGeneratorFunc(origGenStmt);
       origGenStmt->setGeneratorFunc(newMeth);
     }
@@ -1008,11 +1008,11 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
                                           const std::string &name,
                                           bool recursive,
                                           bool exclIntfBase /* = false */) {
-  ASSERT(Util::toLower(name) == name);
+  assert(Util::toLower(name) == name);
   StringToFunctionScopePtrMap::const_iterator iter;
   iter = m_functions.find(name);
   if (iter != m_functions.end()) {
-    ASSERT(iter->second);
+    assert(iter->second);
     return iter->second;
   }
 
@@ -1055,7 +1055,7 @@ FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
   }
   iter = m_functions.find(name);
   if (iter != m_functions.end()) {
-    ASSERT(iter->second);
+    assert(iter->second);
     return iter->second;
   }
 
@@ -1213,7 +1213,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     ExpressionPtr expr = it->second;
     Variant v;
     bool isScalar UNUSED = expr->getScalarValue(v);
-    ASSERT(isScalar);
+    assert(isScalar);
     int valueLen = 0;
     string valueText = SymbolTable::getEscapedText(v, valueLen);
     cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
@@ -1225,7 +1225,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 bool ClassScope::hasConst(const string &name) const {
   const Symbol *sym = m_constants->getSymbol(name);
-  ASSERT(!sym || sym->isPresent());
+  assert(!sym || sym->isPresent());
   return sym;
 }
 
@@ -1464,7 +1464,7 @@ void ClassScope::outputCPPHashTableClasses
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   if (classes.size()) {
-    ASSERT(cg.getCurrentIndentation() == 0);
+    assert(cg.getCurrentIndentation() == 0);
     const char text1[] =
       "struct hashNodeCTD {\n"
       "  int64 hash;\n"
@@ -1538,7 +1538,7 @@ void ClassScope::outputCPPHashTableClasses
       }
       cg_printf(",\"%s\",", CodeGenerator::EscapeLabel(clsName).c_str());
       if (cls->isRedeclaring()) {
-        ASSERT(!system);
+        assert(!system);
         cg_printf("GET_CS_OFFSET(%s)+3",
                   CodeGenerator::FormatLabel(cls->getName()).c_str());
       } else {
@@ -1748,7 +1748,7 @@ static bool buildClassPropTableMap(
   for (StringToClassScopePtrVecMap::const_iterator iter = classScopes.begin();
        iter != classScopes.end(); ++iter) {
     const ClassScopePtrVec &classes = iter->second;
-    if (system) ASSERT(classes.size() == 1);
+    if (system) assert(classes.size() == 1);
     for (unsigned int i = 0; i < classes.size(); i++) {
       ClassScopePtr cls = classes[i];
       vector<const Symbol *> entries[3];
@@ -2307,7 +2307,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                   }
                   break;
                 case KindOfObject:
-                  ASSERT(cflags & ConstNull);
+                  assert(cflags & ConstNull);
                   needsInit = false;
                   break;
                 default:
@@ -2322,7 +2322,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
           if (sym->isProtected()) flags |= ClassPropTableEntry::Protected;
           if (sym->isConstant())  flags |= ClassPropTableEntry::Constant;
           if (sym->isPrivate()) {
-            ASSERT(!sym->isOverride());
+            assert(!sym->isOverride());
             flags |= ClassPropTableEntry::Private;
             if (!sym->isStatic()) {
               prop = '\0' + cls->getOriginalName() + '\0' + prop;
@@ -2333,14 +2333,14 @@ void ClassScope::outputCPPGetClassPropTableImpl(
             }
             if (sym->isOverride() ||
                 (!sym->isStatic() && cls->derivesFromRedeclaring())) {
-              ASSERT(!system);
+              assert(!system);
               flags |= ClassPropTableEntry::Override;
             }
           }
           if (k == sz - 1) flags |= ClassPropTableEntry::Last;
           curEntry++;
-          ASSERT(int16_t(next - cur) == int32_t(next - cur));
-          ASSERT(int16_t(off) == int32_t(off));
+          assert(int16_t(next - cur) == int32_t(next - cur));
+          assert(int16_t(off) == int32_t(off));
           cg_printf("{" STRHASH_FMT ",%d,%d,%d,%d,%d,",
                     hash_string(sym->getName().c_str(),
                                 sym->getName().size()),
@@ -2532,7 +2532,7 @@ void ClassScope::outputForwardDeclaration(CodeGenerator &cg) {
 
 bool ClassScope::hasProperty(const string &name) const {
   const Symbol *sym = m_variables->getSymbol(name);
-  ASSERT(!sym || sym->isPresent());
+  assert(!sym || sym->isPresent());
   return sym;
 }
 
@@ -2583,7 +2583,7 @@ void ClassScope::getRootParents(AnalysisResultConstPtr ar,
 
 string ClassScope::getBaseHeaderFilename() {
   FileScopePtr file = getContainingFile();
-  ASSERT(file);
+  assert(file);
   string fileBase = file->outputFilebase();
   string headerFile = Option::ClassHeaderPrefix;
   headerFile += getId();
@@ -2900,7 +2900,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       // closure function itself)
       if (strcasecmp(clsName, "closure")) {
         FunctionScopePtr func(findFunction(ar, "__invoke", false));
-        ASSERT(func);
+        assert(func);
         if (!func->isAbstract()) {
           outputCPPMethodInvokeBareObjectSupport(cg, ar, func, false);
           outputCPPMethodInvokeBareObjectSupport(cg, ar, func, true);
@@ -2920,7 +2920,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   // __invoke
   if (getAttribute(ClassScope::HasInvokeMethod)) {
     FunctionScopePtr func = findFunction(ar, "__invoke", false);
-    ASSERT(func);
+    assert(func);
     if (!func->isAbstract()) {
       // the closure class will generate its own version of
       // t___invokeCallInfoHelper, which will avoid a level
@@ -3141,7 +3141,7 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
   for (FunctionScopePtrVec::const_iterator iter =
          m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
     FunctionScopePtr func = *iter;
-    ASSERT(!func->isRedeclaring());
+    assert(!func->isRedeclaring());
     if (func->isAbstract() ||
         !(systemcpp || func->isDynamic() || func->isVirtual())) continue;
     const char *name = func->getName().c_str();
@@ -3156,7 +3156,7 @@ bool ClassScope::hasJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (FunctionScopePtrVec::const_iterator iter =
          m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
     FunctionScopePtr func = *iter;
-    ASSERT(!func->isRedeclaring());
+    assert(!func->isRedeclaring());
     if (func->isAbstract() ||
         !(systemcpp || func->isDynamic() || func->isVirtual())) continue;
     return true;
@@ -3216,7 +3216,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     string lname = CodeGenerator::FormatLabel(name);
     StringToFunctionScopePtrMap::const_iterator iterFuncs =
       funcScopes.find(name);
-    ASSERT(iterFuncs != funcScopes.end());
+    assert(iterFuncs != funcScopes.end());
     FunctionScopePtr func = iterFuncs->second;
 
     const char *extra = NULL;

@@ -81,7 +81,7 @@ const char *InterruptSiteFI::getFile() const {
 
 const char *InterruptSiteFI::getClass() const {
   if (m_class) return m_class;
-  ASSERT(m_frame);
+  assert(m_frame);
   return m_frame->getClassName();
 }
 
@@ -115,7 +115,7 @@ InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
     fp = context->getPrevVMState(fp, &offset);
-    ASSERT(fp);
+    assert(fp);
     bail_on(!fp->m_func);
     m_unit = fp->m_func->unit();
     bail_on(!m_unit);
@@ -190,7 +190,7 @@ const char *BreakPointInfo::GetInterruptName(InterruptType interrupt) {
     case RequestEnded:   return "end of request or start of psp";
     case PSPEnded:       return "end of psp";
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return NULL;
@@ -316,7 +316,7 @@ void BreakPointInfo::toggle() {
     case Once:     setState(Disabled); break;
     case Disabled: setState(Always);   break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -398,7 +398,7 @@ std::string BreakPointInfo::state(bool padding) const {
     case Once:     return padding ? "ONCE    " : "ONCE"    ;
     case Disabled: return padding ? "DISABLED" : "DISABLED";
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return "";
@@ -798,7 +798,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
 }
 
 bool BreakPointInfo::checkException(CVarRef e) {
-  ASSERT(!e.isNull());
+  assert(!e.isNull());
   if (e.isObject()) {
     if (m_regex) {
       return Match(m_class.c_str(), m_class.size(),
@@ -826,7 +826,7 @@ bool BreakPointInfo::checkUrl(std::string &url) {
 
 bool BreakPointInfo::checkLines(int line) {
   if (m_line1) {
-    ASSERT(m_line2 == -1 || m_line2 >= m_line1);
+    assert(m_line2 == -1 || m_line2 >= m_line1);
     return line >= m_line1 && (m_line2 == -1 || line <= m_line2);
   }
   return true;

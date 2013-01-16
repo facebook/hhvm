@@ -52,14 +52,14 @@ void checkRank(Rank r) {
       for (int i = tl_curRankDepth - 1; i >= 0; --i) {
         fprintf(stderr, "%10d\n", tl_rankStack[i]);
       }
-      ASSERT(false);
+      assert(false);
     }
   }
 }
 
 void pushRank(Rank r) {
   checkRank(r);
-  ASSERT(tl_curRankDepth < kMaxLockDepth);
+  assert(tl_curRankDepth < kMaxLockDepth);
   tl_rankStack[tl_curRankDepth++] = r;
 }
 
@@ -69,7 +69,7 @@ void pushRank(Rank r) {
  * successful trylock of a lock with rank r.
  */
 void insertRank(Rank r) {
-  ASSERT(r != RankUnranked);
+  assert(r != RankUnranked);
   if (currentRank() <= r) {
     pushRank(r);
     return;
@@ -91,7 +91,7 @@ void popRank(Rank rank) {
    * We may safely release locks out of order; this can't disturb the
    * global order.
    */
-  ASSERT(tl_curRankDepth >= 1);
+  assert(tl_curRankDepth >= 1);
   for (int i = tl_curRankDepth; i >= 0; i--) {
     if (tl_rankStack[i] == rank) {
       memmove(&tl_rankStack[i], &tl_rankStack[i + 1],

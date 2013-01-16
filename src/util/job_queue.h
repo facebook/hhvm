@@ -247,7 +247,7 @@ public:
    * to easily create a vector of workers.
    */
   void create(int id, QueueType* queue, void *func, void *opaque) {
-    ASSERT(queue);
+    assert(queue);
     m_id = id;
     m_queue = queue;
     m_func = func;
@@ -265,7 +265,7 @@ public:
    * Start this worker thread.
    */
   void start() {
-    ASSERT(m_queue);
+    assert(m_queue);
     onThreadEnter();
     while (!m_stopped) {
       try {
@@ -322,7 +322,7 @@ public:
         m_maxThreadCount(threadCount),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
                 lifo) {
-    ASSERT(threadCount >= 1);
+    assert(threadCount >= 1);
     if (!TWorker::CountActive) {
       // If TWorker does not support counting the number of
       // active workers, just start all of the workers eagerly

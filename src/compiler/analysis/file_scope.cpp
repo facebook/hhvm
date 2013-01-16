@@ -175,19 +175,19 @@ void FileScope::pushAttribute() {
 }
 
 void FileScope::setAttribute(Attribute attr) {
-  ASSERT(!m_attributes.empty());
+  assert(!m_attributes.empty());
   m_attributes.back() |= attr;
 }
 
 int FileScope::popAttribute() {
-  ASSERT(!m_attributes.empty());
+  assert(!m_attributes.empty());
   int ret = m_attributes.back();
   m_attributes.pop_back();
   return ret;
 }
 
 int FileScope::getGlobalAttribute() const {
-  ASSERT(m_attributes.size() == 1);
+  assert(m_attributes.size() == 1);
   return m_attributes.back();
 }
 
@@ -209,7 +209,7 @@ bool FileScope::canUseDummyPseudoMain(AnalysisResultConstPtr ar) const {
   if (!m_pseudoMain) {
     return false;
   }
-  ASSERT(!m_pseudoMain->isVolatile());
+  assert(!m_pseudoMain->isVolatile());
   if (!Option::GenerateDummyPseudoMain ||
       Option::KeepStatementsWithNoEffect) {
     return false;
@@ -530,7 +530,7 @@ void FileScope::outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ASSERT(cg.getContext() == CodeGenerator::CppImplementation);
+  assert(cg.getContext() == CodeGenerator::CppImplementation);
 
   cg.setContext(CodeGenerator::CppConstantsDecl);
   getConstants()->outputCPP(cg, ar);
@@ -588,7 +588,7 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void FileScope::outputCPPPseudoMain(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ASSERT(cg.getContext() == CodeGenerator::CppPseudoMain);
+  assert(cg.getContext() == CodeGenerator::CppPseudoMain);
   outputCPPHelper(cg, ar, false);
 }
 

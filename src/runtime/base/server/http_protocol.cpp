@@ -133,7 +133,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     int size = 0;
     const void *data = transport->getPostData(size);
     if (data && size) {
-      ASSERT(((char*)data)[size] == 0); // we need a NULL terminated string
+      assert(((char*)data)[size] == 0); // we need a NULL terminated string
       string boundary;
       int content_length = atoi(contentLength.c_str());
       bool rfc1867Post = IsRfc1867(contentType, boundary);
@@ -156,7 +156,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
           DecodeRfc1867(transport, g->GV(_POST), g->GV(_FILES),
                         content_length, data, size, boundary);
         }
-        ASSERT(!transport->getFiles(files));
+        assert(!transport->getFiles(files));
       } else {
         needDelete = read_all_post_data(transport, data, size);
 
@@ -467,7 +467,7 @@ void HttpProtocol::DecodeParameters(Variant &variables, const char *data,
 }
 
 void HttpProtocol::DecodeCookies(Variant &variables, char *data) {
-  ASSERT(data && *data);
+  assert(data && *data);
 
   char *strtok_buf = NULL;
   char *var = strtok_r(data, ";", &strtok_buf);
@@ -605,7 +605,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
                                 int &code, std::string &error,
                                 StringBuffer &response,
                                 HeaderMap *extraHeaders /* = NULL */) {
-  ASSERT(transport);
+  assert(transport);
   if (transport->headersSent()) {
     raise_warning("Cannot proxy request - headers already sent");
     return false;

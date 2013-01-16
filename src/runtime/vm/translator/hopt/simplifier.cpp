@@ -42,7 +42,7 @@ void Simplifier::copyProp(IRInstruction* inst) {
 }
 
 static void unimplementedSimplify(Opcode opc) {
-  // Do not ASSERT(false), it is fine to not simplify as the default
+  // Do not assert(false), it is fine to not simplify as the default
   TRACE(3, "HHIR Simplifier: unimplemented support for opcode %s\n",
         opcodeName(opc));
   return;
@@ -179,8 +179,8 @@ SSATmp* Simplifier::simplifyMov(SSATmp* src) {
 
 SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   // const XORs are handled in simplifyXor()
-  ASSERT(!src->isConst());
-  ASSERT(src->getType() == Type::Bool);
+  assert(!src->isConst());
+  assert(src->getType() == Type::Bool);
   IRInstruction* inst = src->getInstruction()->getSrc(0)->getInstruction();
   Opcode op = inst->getOpcode();
   // TODO: Add more algebraic simplification rules for NOT
@@ -774,8 +774,8 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   auto type = inst->getTypeParam();
   auto src  = inst->getSrc(0);
 
-  ASSERT(Type::isUnboxed(type));
-  ASSERT(type != Type::Cell);
+  assert(Type::isUnboxed(type));
+  assert(type != Type::Cell);
   if (type != Type::Obj) {
     if (src->getType() == type) {
       return genDefBool(true);
@@ -912,7 +912,7 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls,
     IRInstruction* clsInst = cls->getInstruction();
     if (clsInst->getOpcode() == LdCls) {
       SSATmp* clsName = clsInst->getSrc(0);
-      ASSERT(clsName->isConst() && clsName->getType() == Type::StaticStr);
+      assert(clsName->isConst() && clsName->getType() == Type::StaticStr);
       return genLdClsPropAddr(cls, clsName, propName);
     }
   }
@@ -924,12 +924,12 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   auto* typeFailLabel = inst->getLabel();
   auto type           = outputType(inst);
 
-  ASSERT(typeFailLabel);
-  ASSERT(Type::isUnboxed(type));
+  assert(typeFailLabel);
+  assert(Type::isUnboxed(type));
   Type::Tag srcType = src->getType();
   if (Type::isUnboxed(srcType)) {
     // TODO: generate a guardType if this assertion fails
-    ASSERT(!Type::isMoreRefined(type, srcType));
+    assert(!Type::isMoreRefined(type, srcType));
     return src;
   }
   if (Type::isBoxed(srcType)) {

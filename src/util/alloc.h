@@ -144,7 +144,7 @@ class ScopedMem {
   explicit ScopedMem(void* ptr) : m_ptr(ptr) {}
   ~ScopedMem() { free(m_ptr); }
   ScopedMem& operator=(void* ptr) {
-    ASSERT(!m_ptr);
+    assert(!m_ptr);
     m_ptr = ptr;
     return *this;
   }

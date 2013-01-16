@@ -271,7 +271,7 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   if (func && !func->isRedeclaring()) {
     if (m_funcScope != func) {
       m_funcScope = func;
-      ASSERT(ar->getPhase() != AnalysisResult::FirstInference);
+      assert(ar->getPhase() != AnalysisResult::FirstInference);
       Construct::recomputeEffects();
       m_funcScope->addCaller(getScope());
     }
@@ -379,7 +379,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
                 break;
               }
             default:
-              ASSERT(false);
+              assert(false);
           }
         }
       } else if ((m_type == InterfaceExistsFunction ||
@@ -936,7 +936,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             break;
           }
           default:
-            ASSERT(false);
+            assert(false);
         }
       }
     }
@@ -996,13 +996,13 @@ int SimpleFunctionCall::getLocalEffects() const {
 
 TypePtr SimpleFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                        bool coerce) {
-  ASSERT(false);
+  assert(false);
   return TypePtr();
 }
 
 TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                           bool coerce) {
-  ASSERT(type);
+  assert(type);
   IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
 
   resetTypes();
@@ -1049,7 +1049,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
             }
           }
 
-          ASSERT(block);
+          assert(block);
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
             TRY_LOCK(block);
@@ -1064,7 +1064,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
             } else {
               if (newlyDeclared) {
                 const Symbol *sym = constants->getSymbol(varName);
-                ASSERT(!sym || !sym->declarationSet());
+                assert(!sym || !sym->declarationSet());
                 constants->add(varName, varType, value, ar, self);
                 sym = constants->getSymbol(varName);
                 always_assert(sym);
@@ -1155,7 +1155,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   } else if (func != m_funcScope) {
-    ASSERT(!m_funcScope ||
+    assert(!m_funcScope ||
            !func->hasUser(getScope(), BlockScope::UseKindCaller));
     m_funcScope = func;
     m_funcScope->addCaller(getScope(), !type->is(Type::KindOfAny));
@@ -1200,7 +1200,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
   }
 
-  ASSERT(rtype);
+  assert(rtype);
   return rtype;
 }
 
@@ -1340,7 +1340,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
        && Type::SameType(e->getCPPType(), Type::Variant)) {
         SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(e);
         const string &cppName = sv->getAssignableCPPVariable(ar);
-        ASSERT(!cppName.empty());
+        assert(!cppName.empty());
         cg_printf("if (%s.isInitialized()) ", cppName.c_str());
       }
       e->preOutputCPP(cg, ar, 0);
@@ -1557,7 +1557,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         bool lsb = false;
         if (m_class->is(KindOfScalarExpression)) {
           cg_printf("mcp%d.staticMethodCall(", m_ciTemp);
-          ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+          assert(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                 getString().c_str(), "static") == 0);
           cg_printString("static", ar, shared_from_this());
           lsb = true;
@@ -2043,7 +2043,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         // method statement for the *original* function
         MethodStatementPtr m =
           dynamic_pointer_cast<MethodStatement>(getFunctionScope()->getStmt());
-        ASSERT(m);
+        assert(m);
 
         ExpressionListPtr params = m->getParams();
         if (params) {
@@ -2054,7 +2054,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
             Symbol *sym = variables->getSymbol(name);
             if (sym) {
               if (param->isRef()) {
-                ASSERT(sym->getFinalType()->is(Type::KindOfVariant));
+                assert(sym->getFinalType()->is(Type::KindOfVariant));
                 cg_printf("strongBind(%s%s), ",
                           variables->getVariablePrefix(sym),
                           CodeGenerator::FormatLabel(name).c_str());
@@ -2078,7 +2078,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 TypePtr t(sym->getFinalType());
                 // read the variables off the closure
                 if (param->isRef()) {
-                  ASSERT(sym->getFinalType()->is(Type::KindOfVariant));
+                  assert(sym->getFinalType()->is(Type::KindOfVariant));
                   cg_printf("strongBind(closure->%s%s), ",
                             variables->getVariablePrefix(sym),
                             CodeGenerator::FormatLabel(name).c_str());
@@ -2128,9 +2128,9 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
 
       // fetch the function scope for Continuation::update()
       ClassScopePtr cls = ar->findClass("continuation");
-      ASSERT(cls && !cls->isRedeclaring());
+      assert(cls && !cls->isRedeclaring());
       FunctionScopePtr func = cls->findFunction(ar, "update", false);
-      ASSERT(func);
+      assert(func);
 
       FunctionScope::OutputCPPArguments(m_params, func,
                                         cg, ar, 0, false);

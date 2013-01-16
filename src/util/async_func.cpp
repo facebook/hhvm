@@ -34,7 +34,7 @@ AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
 }
 
 AsyncFuncImpl::~AsyncFuncImpl() {
-  ASSERT(m_stopped || m_threadId == 0);
+  assert(m_stopped || m_threadId == 0);
 }
 
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
@@ -51,8 +51,8 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
   if (pthread_attr_getguardsize(attr, &guardsize) != 0)
     guardsize = 0;
 
-  ASSERT(stackaddr != NULL);
-  ASSERT(stacksize >= PTHREAD_STACK_MIN);
+  assert(stackaddr != NULL);
+  assert(stacksize >= PTHREAD_STACK_MIN);
   Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
   Util::s_stackSize = stacksize;
 
@@ -77,7 +77,7 @@ void AsyncFuncImpl::start() {
   }
 
   pthread_create(&m_threadId, &m_attr, ThreadFunc, (void*)this);
-  ASSERT(m_threadId);
+  assert(m_threadId);
 }
 
 bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {

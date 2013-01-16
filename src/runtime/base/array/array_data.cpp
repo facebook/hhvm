@@ -40,8 +40,8 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
   if (key == NULL) {
     key = StringData::GetStaticString(f_serialize(arr).get());
   } else {
-    ASSERT(key->isStatic());
-    ASSERT(key->same(f_serialize(arr).get()));
+    assert(key->isStatic());
+    assert(key->same(f_serialize(arr).get()));
   }
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
@@ -155,7 +155,7 @@ bool ArrayData::isVectorData() const {
 }
 
 int ArrayData::compare(const ArrayData *v2) const {
-  ASSERT(v2);
+  assert(v2);
 
   int count1 = size();
   int count2 = v2->size();
@@ -180,7 +180,7 @@ int ArrayData::compare(const ArrayData *v2) const {
 }
 
 bool ArrayData::equal(const ArrayData *v2, bool strict) const {
-  ASSERT(v2);
+  assert(v2);
 
   int count1 = size();
   int count2 = v2->size();
@@ -225,22 +225,22 @@ ArrayData *ArrayData::lvalPtr(int64 k, Variant *&ret, bool copy,
 }
 
 ArrayData *ArrayData::add(int64 k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
+  assert(!exists(k));
   return set(k, v, copy);
 }
 
 ArrayData *ArrayData::add(StringData* k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
+  assert(!exists(k));
   return set(k, v, copy);
 }
 
 ArrayData *ArrayData::addLval(int64 k, Variant *&ret, bool copy) {
-  ASSERT(!exists(k));
+  assert(!exists(k));
   return lval(k, ret, copy);
 }
 
 ArrayData *ArrayData::addLval(StringData* k, Variant *&ret, bool copy) {
-  ASSERT(!exists(k));
+  assert(!exists(k));
   return lval(k, ret, copy);
 }
 
@@ -280,7 +280,7 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 // MutableArrayIter related functions
 
 void ArrayData::newFullPos(FullPos &fp) {
-  ASSERT(fp.container == NULL);
+  assert(fp.container == NULL);
   fp.container = this;
   fp.next = strongIterators();
   setStrongIterators(&fp);
@@ -288,7 +288,7 @@ void ArrayData::newFullPos(FullPos &fp) {
 }
 
 void ArrayData::freeFullPos(FullPos &fp) {
-  ASSERT(strongIterators() != 0 && fp.container == (ArrayData*)this);
+  assert(strongIterators() != 0 && fp.container == (ArrayData*)this);
   // search for fp in our list, then remove it.  Usually its the first one.
   FullPos* p = strongIterators();
   if (p == &fp) {
@@ -305,16 +305,16 @@ void ArrayData::freeFullPos(FullPos &fp) {
   }
   // If the strong iterator list was empty or if fp could not be
   // found in the strong iterator list, then we are in a bad state
-  ASSERT(false);
+  assert(false);
 }
 
 void ArrayData::getFullPos(FullPos &fp) {
-  ASSERT(fp.container == (ArrayData*)this);
+  assert(fp.container == (ArrayData*)this);
   fp.pos = ArrayData::invalid_index;
 }
 
 bool ArrayData::setFullPos(const FullPos &fp) {
-  ASSERT(fp.container == (ArrayData*)this);
+  assert(fp.container == (ArrayData*)this);
   return false;
 }
 
@@ -433,14 +433,14 @@ ssize_t ArrayData::iter_end() const {
 }
 
 ssize_t ArrayData::iter_advance(ssize_t prev) const {
-  ASSERT(prev >= 0 && prev < size());
+  assert(prev >= 0 && prev < size());
   ssize_t next = prev + 1;
   if (next >= size()) return ArrayData::invalid_index;
   return next;
 }
 
 ssize_t ArrayData::iter_rewind(ssize_t prev) const {
-  ASSERT(prev >= 0 && prev < size());
+  assert(prev >= 0 && prev < size());
   ssize_t next = prev - 1;
   if (next < 0) return ArrayData::invalid_index;
   return next;

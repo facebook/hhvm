@@ -36,7 +36,7 @@ BZ2File::~BZ2File() {
 }
 
 bool BZ2File::open(CStrRef filename, CStrRef mode) {
-  ASSERT(m_bzFile == NULL);
+  assert(m_bzFile == NULL);
 
   return m_innerFile->open(filename, mode) &&
     (m_bzFile = BZ2_bzdopen(dup(m_innerFile->fd()), mode.data()));
@@ -47,20 +47,20 @@ bool BZ2File::close() {
 }
 
 int64 BZ2File::errnu() {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   int errnum = 0;
   BZ2_bzerror(m_bzFile, &errnum);
   return errnum;
 }
 
 String BZ2File::errstr() {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   int errnum;
   return BZ2_bzerror(m_bzFile, &errnum);
 }
 
 Variant BZ2File::error() {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   int errnum;
   const char * errstr;
   errstr = BZ2_bzerror(m_bzFile, &errnum);
@@ -68,12 +68,12 @@ Variant BZ2File::error() {
 }
 
 bool BZ2File::flush() {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   return BZ2_bzflush(m_bzFile);
 }
 
 int64 BZ2File::readImpl(char * buf, int64 length) {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   int len = BZ2_bzread(m_bzFile, buf, length);
   if (len < length)
     m_eof = true;
@@ -81,12 +81,12 @@ int64 BZ2File::readImpl(char * buf, int64 length) {
 }
 
 int64 BZ2File::writeImpl(const char * buf, int64 length) {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   return BZ2_bzwrite(m_bzFile, (char *)buf, length);
 }
 
 bool BZ2File::closeImpl() {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   bool ret = true;
   BZ2_bzclose(m_bzFile);
   m_bzFile = NULL;
@@ -97,7 +97,7 @@ bool BZ2File::closeImpl() {
 }
 
 bool BZ2File::eof() {
-  ASSERT(m_bzFile);
+  assert(m_bzFile);
   return m_eof;
 }
 

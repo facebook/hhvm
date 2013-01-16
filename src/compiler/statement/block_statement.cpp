@@ -68,7 +68,7 @@ ConstructPtr BlockStatement::getNthKid(int n) const {
     case 0:
       return m_stmts;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -84,7 +84,7 @@ void BlockStatement::setNthKid(int n, ConstructPtr cp) {
       m_stmts = boost::dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

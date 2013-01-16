@@ -36,7 +36,7 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
     m_workerId(workerId), m_sendStarted(false), m_sendEnded(false) {
   // HttpProtocol::PrepareSystemVariables needs this
   evbuffer *buf = m_request->input_buffer;
-  ASSERT(buf);
+  assert(buf);
   m_requestSize = EVBUFFER_LENGTH(buf);
   if (m_requestSize) {
     evbuffer_expand(buf, m_requestSize + 1); // allowing NULL termination
@@ -67,13 +67,13 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
     m_requestSize += 4;
     break;
   default:
-    ASSERT(false);
+    assert(false);
     m_method = Transport::UnknownMethod;
     break;
   }
   m_extended_method = m_request->ext_method;
 
-  ASSERT(m_request->input_headers);
+  assert(m_request->input_headers);
   for (evkeyval *p = ((m_evkeyvalq*)m_request->input_headers)->tqh_first; p;
        p = p->next.tqe_next) {
     if (p->key && p->value) {
@@ -108,7 +108,7 @@ const void *LibEventTransport::getPostData(int &size) {
   }
   evbuffer *buf = m_request->input_buffer;
 
-  ASSERT(buf);
+  assert(buf);
   size = EVBUFFER_LENGTH(buf);
   return EVBUFFER_DATA(buf);
 }
@@ -140,13 +140,13 @@ const void *LibEventTransport::getMorePostData(int &size) {
   }
 
   evbuffer *buf = m_request->input_buffer;
-  ASSERT(buf);
+  assert(buf);
   evbuffer_drain(buf, EVBUFFER_LENGTH(buf));
 
   if (evhttp_get_more_post_data(m_request, &m_eventBasePostData,
                                 &m_moreDataRead)) {
     buf = m_request->input_buffer;
-    ASSERT(buf);
+    assert(buf);
     size = EVBUFFER_LENGTH(buf);
     evbuffer_expand(buf, size + 1); // allowing NULL termination
     // EVBUFFER_DATA(buf) might change after evbuffer_expand
@@ -190,7 +190,7 @@ int LibEventTransport::getRequestSize() const {
 }
 
 std::string LibEventTransport::getHeader(const char *name) {
-  ASSERT(name && *name);
+  assert(name && *name);
 
   HeaderMap::const_iterator iter = m_requestHeaders.find(name);
   if (iter != m_requestHeaders.end()) {
@@ -206,9 +206,9 @@ void LibEventTransport::getHeaders(HeaderMap &headers) {
 }
 
 void LibEventTransport::addHeaderImpl(const char *name, const char *value) {
-  ASSERT(name && *name);
-  ASSERT(value);
-  ASSERT(m_request->output_headers);
+  assert(name && *name);
+  assert(value);
+  assert(m_request->output_headers);
 
   if (m_sendStarted) {
     Logger::Error("trying to add header '%s: %s' after 1st chunk",
@@ -223,8 +223,8 @@ void LibEventTransport::addHeaderImpl(const char *name, const char *value) {
 }
 
 void LibEventTransport::removeHeaderImpl(const char *name) {
-  ASSERT(name && *name);
-  ASSERT(m_request->output_headers);
+  assert(name && *name);
+  assert(m_request->output_headers);
 
   if (m_sendStarted) {
     Logger::Error("trying to remove header '%s' after 1st chunk", name);
@@ -236,9 +236,9 @@ void LibEventTransport::removeHeaderImpl(const char *name) {
 
 void LibEventTransport::addRequestHeaderImpl(const char *name,
                                              const char *value) {
-  ASSERT(name && *name);
-  ASSERT(value);
-  ASSERT(m_request->input_headers);
+  assert(name && *name);
+  assert(value);
+  assert(m_request->input_headers);
 
   int ret = evhttp_add_header(m_request->input_headers, name, value);
   if (ret < 0) {
@@ -249,8 +249,8 @@ void LibEventTransport::addRequestHeaderImpl(const char *name,
 }
 
 void LibEventTransport::removeRequestHeaderImpl(const char *name) {
-  ASSERT(name && *name);
-  ASSERT(m_request->input_headers);
+  assert(name && *name);
+  assert(m_request->input_headers);
   evhttp_remove_header(m_request->input_headers, name);
   m_requestHeaders.erase(name);
 }
@@ -261,12 +261,12 @@ bool LibEventTransport::isServerStopping() {
 
 void LibEventTransport::sendImpl(const void *data, int size, int code,
                                  bool chunked) {
-  ASSERT(data);
-  ASSERT(!m_sendEnded);
-  ASSERT(!m_sendStarted || chunked);
+  assert(data);
+  assert(!m_sendEnded);
+  assert(!m_sendStarted || chunked);
 
   if (chunked) {
-    ASSERT(m_method != HEAD);
+    assert(m_method != HEAD);
     evbuffer *chunk = evbuffer_new();
     evbuffer_add(chunk, data, size);
     /*
@@ -297,7 +297,7 @@ void LibEventTransport::onSendEndImpl() {
     m_server->onChunkedResponseEnd(m_workerId, m_request);
     m_sendEnded = true;
   } else {
-    ASSERT(m_sendEnded); // otherwise, we didn't call send for this request
+    assert(m_sendEnded); // otherwise, we didn't call send for this request
   }
 }
 

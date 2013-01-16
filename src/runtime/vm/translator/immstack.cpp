@@ -32,7 +32,7 @@ void ImmStack::processOpcode(const Opcode* opcode) {
   } else if (sti.kind == StackTransInfo::InsertMid) {
     insUnknown(sti.pos);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 

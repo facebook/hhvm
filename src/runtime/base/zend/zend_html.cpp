@@ -500,7 +500,7 @@ static void init_entity_table() {
 
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
                          bool encode_single_quote, bool utf8, bool nbsp) {
-  ASSERT(input);
+  assert(input);
   /**
    * Though seems to be wasting memory a lot, we have to realize most of the
    * time this function is called with small strings, or fragments of HTMLs.
@@ -578,7 +578,7 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
 char *string_html_encode_extra(const char *input, int &len,
                                StringHtmlEncoding flags,
                                const AsciiMap *asciiMap) {
-  ASSERT(input);
+  assert(input);
   /**
    * Though seems to be wasting memory a lot, we have to realize most of the
    * time this function is called with small strings, or fragments of HTMLs.
@@ -688,7 +688,7 @@ inline static bool decode_entity(char *entity, int *len,
                                  bool xhp = false) {
   // entity is 16 bytes, allocated statically below
   // default in PHP
-  ASSERT(entity && *entity);
+  assert(entity && *entity);
   if (entity[0] == '#') {
     int code;
     if (entity[1] == 'x' || entity[1] == 'X') {
@@ -794,7 +794,7 @@ char *string_html_decode(const char *input, int &len,
                          bool decode_double_quote, bool decode_single_quote,
                          const char *charset_hint, bool all,
                          bool xhp /* = false */) {
-  ASSERT(input);
+  assert(input);
 
   if (!EntityMapInited) {
     Lock lock(EntityMapMutex);

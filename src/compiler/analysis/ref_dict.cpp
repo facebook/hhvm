@@ -134,7 +134,7 @@ void RefDict::updateParams() {
           paramType = paramExprPtr->getType();
           isRef = m_method_stmt->isRef(sym->getParameterIndex());
         } else {
-          ASSERT(sym->isClosureVar());
+          assert(sym->isClosureVar());
           // can only assume it is a Variant for now
           paramType = Type::Variant;
           isRef = sym->isRefClosureVar();

@@ -56,11 +56,11 @@ public:
 class Name {
 public:
   Name(const char *name) {
-    ASSERT(name && *name);
+    assert(name && *name);
     m_name = name;
   }
   Name(const std::string &name) {
-    ASSERT(!name.empty());
+    assert(!name.empty());
     m_name = name;
   }
   const std::string &getName() const { return m_name; }

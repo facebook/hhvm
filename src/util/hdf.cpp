@@ -31,7 +31,7 @@ public:
     // ClearSilver is not thread-safe when calling hdf_init(), so guarding it.
     Lock lock(HdfMutex);
     Hdf::CheckNeoError(hdf_init(&m_hdf));
-    ASSERT(m_hdf);
+    assert(m_hdf);
   }
   ~HdfRaw() {
     if (m_hdf) {
@@ -43,7 +43,7 @@ public:
   int m_count;
 
   void inc() { m_count++;}
-  void dec() { ASSERT(m_count > 0); if (--m_count == 0) { delete this;}}
+  void dec() { assert(m_count > 0); if (--m_count == 0) { delete this;}}
 };
 
 Mutex HdfRaw::HdfMutex;
@@ -66,15 +66,15 @@ Hdf::Hdf(const std::string &filename) : m_hdf(NULL), m_dump(NULL) {
 }
 
 Hdf::Hdf(const Hdf *hdf, const char *name) : m_hdf(NULL), m_dump(NULL) {
-  ASSERT(hdf);
-  ASSERT(name && *name);
+  assert(hdf);
+  assert(name && *name);
   m_rawp = hdf->m_rawp;
   if (m_rawp) {
     m_rawp->inc();
     m_path = hdf->getFullPath();
     m_name = name;
   } else {
-    ASSERT(hdf->m_hdf);
+    assert(hdf->m_hdf);
     hdf_get_node(hdf->m_hdf, (char*)name, &m_hdf);
   }
 }
@@ -127,7 +127,7 @@ void Hdf::open(const char *filename) {
 }
 
 void Hdf::append(const char *filename) {
-  ASSERT(filename && *filename);
+  assert(filename && *filename);
   CheckNeoError(hdf_read_file(getRaw(), (char*)filename));
 }
 
@@ -146,7 +146,7 @@ void Hdf::close() {
 }
 
 static bool match(const std::string &name, const std::string &pattern) {
-  ASSERT(!name.empty() && !pattern.empty());
+  assert(!name.empty() && !pattern.empty());
 
   unsigned int len = pattern.size();
   char first = pattern[0];
@@ -582,7 +582,7 @@ void Hdf::remove(int name) const {
 }
 
 void Hdf::remove(const char *name) const {
-  ASSERT(name && *name);
+  assert(name && *name);
   CheckNeoError(hdf_remove_tree(getRaw(), name));
 }
 

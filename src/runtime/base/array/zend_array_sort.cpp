@@ -35,7 +35,7 @@ struct KeyAccessor {
     if (isInt(elm)) {
       return getInt(elm);
     }
-    ASSERT(isStr(elm));
+    assert(isStr(elm));
     return getStr(elm);
   }
 };
@@ -77,7 +77,7 @@ do {                                                                    \
 template <typename AccessorT>
 ZendArray::SortFlavor
 ZendArray::preSort(Bucket** buffer, const AccessorT& acc, bool checkTypes) {
-  ASSERT(m_size > 0);
+  assert(m_size > 0);
   bool allInts UNUSED = true;
   bool allStrs UNUSED = true;
   uint i = 0;

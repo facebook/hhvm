@@ -28,7 +28,7 @@ DBInNumberFilter::DBInNumberFilter() {
 }
 
 const char *DBInNumberFilter::getFirst(const std::string &where) {
-  ASSERT(!m_values.empty());
+  assert(!m_values.empty());
   m_iter = m_values.begin();
   return getFilter(where);
 }
@@ -52,7 +52,7 @@ const char *DBInNumberFilter::getFilter(const std::string &where) {
   }
 
   string::size_type pos = where.find("%s");
-  ASSERT(pos != string::npos);
+  assert(pos != string::npos);
 
   m_filter = where;
   m_filter.replace(pos, 2, values.c_str());
@@ -63,11 +63,11 @@ const char *DBInNumberFilter::getFilter(const std::string &where) {
 // DBInStringFilter
 
 DBInStringFilter::DBInStringFilter(DBConn *conn) : m_conn(conn) {
-  //ASSERT(m_conn);
+  //assert(m_conn);
 }
 
 const char *DBInStringFilter::getFirst(const std::string &where) {
-  ASSERT(!m_values.empty());
+  assert(!m_values.empty());
   m_iter = m_values.begin();
   return getFilter(where);
 }
@@ -97,7 +97,7 @@ const char *DBInStringFilter::getFilter(const std::string &where) {
   }
 
   string::size_type pos = where.find("%s");
-  ASSERT(pos != string::npos);
+  assert(pos != string::npos);
 
   m_filter = where;
   m_filter.replace(pos, 2, values.c_str());
@@ -111,7 +111,7 @@ DBOrStringFilter::DBOrStringFilter() {
 }
 
 const char *DBOrStringFilter::getFirst(const std::string &where) {
-  ASSERT(!m_values.empty());
+  assert(!m_values.empty());
   m_iter = m_values.begin();
   return getFilter(where);
 }
@@ -134,7 +134,7 @@ const char *DBOrStringFilter::getFilter(const std::string &where) {
   values += ")";
 
   string::size_type pos = where.find("%s");
-  ASSERT(pos != string::npos);
+  assert(pos != string::npos);
 
   m_filter = where;
   m_filter.replace(pos, 2, values.c_str());

@@ -62,7 +62,7 @@ ConstructPtr QOpExpression::getNthKid(int n) const {
     case 2:
       return m_expNo;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -84,7 +84,7 @@ void QOpExpression::setNthKid(int n, ConstructPtr cp) {
       m_expNo = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -180,7 +180,7 @@ void QOpExpression::wrapBoolean(CodeGenerator &cg,
                                 AnalysisResultPtr ar,
                                 ExpressionPtr exp) {
   TypePtr t(exp->getType());
-  ASSERT(t);
+  assert(t);
   bool wrap = false;
   if (!t->is(Type::KindOfBoolean)) {
     wrap = true;

@@ -115,9 +115,9 @@ void AnalysisResult::parseExtraCode(const string &key) {
 // general functions
 
 void AnalysisResult::addFileScope(FileScopePtr fileScope) {
-  ASSERT(fileScope);
+  assert(fileScope);
   FileScopePtr &res = m_files[fileScope->getName()];
-  ASSERT(!res);
+  assert(!res);
   res = fileScope;
   vertex_descriptor vertex = add_vertex(m_depGraph);
   fileScope->setVertex(vertex);
@@ -344,7 +344,7 @@ void AnalysisResult::countReturnTypes(std::map<std::string, int> &counts) {
 // static analysis functions
 
 bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
-  ASSERT(m_phase < AnalyzeAll);
+  assert(m_phase < AnalyzeAll);
 
   string fname = funcScope->getName();
   // System functions override
@@ -359,7 +359,7 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
 }
 
 bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
-  ASSERT(m_phase < AnalyzeAll);
+  assert(m_phase < AnalyzeAll);
 
   string cname = classScope->getName();
   // System classes override
@@ -469,7 +469,7 @@ bool AnalysisResult::addFunctionDependency(FileScopePtr usingFile,
 
 bool AnalysisResult::addIncludeDependency(FileScopePtr usingFile,
                                           const std::string &includeFilename) {
-  ASSERT(!includeFilename.empty());
+  assert(!includeFilename.empty());
   FileScopePtr fileScope = findFileScope(includeFilename);
   if (fileScope) {
     link(usingFile, fileScope);
@@ -571,7 +571,7 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
       FunctionScopePtrVec::const_iterator i = iter->second.begin();
       FunctionScopePtrVec::const_iterator e = iter->second.end();
       FunctionScopePtr &funcDec = m_functionDecs[iter->first];
-      ASSERT(funcDec); // because the first one was in funcs above
+      assert(funcDec); // because the first one was in funcs above
       FunctionScopePtrVec &funcVec = m_functionReDecs[iter->first];
       int sz = funcVec.size();
       if (!sz) {
@@ -942,14 +942,14 @@ public:
       // creates on demand
       AnalysisResult::s_changedScopesMapThreadLocal->clear();
       int useKinds = visitor->visitScope(BlockScopeRawPtr(scope));
-      ASSERT(useKinds >= 0);
+      assert(useKinds >= 0);
 
       {
         Lock l2(BlockScope::s_depsMutex);
         Lock l1(BlockScope::s_jobStateMutex);
 
-        ASSERT(scope->getMark() == BlockScope::MarkProcessing);
-        ASSERT(scope->getNumDepsToWaitFor() == 0);
+        assert(scope->getMark() == BlockScope::MarkProcessing);
+        assert(scope->getNumDepsToWaitFor() == 0);
         scope->assertNumDepsSanity();
 
         // re-enqueue changed scopes, regardless of rescheduling exception.
@@ -988,7 +988,7 @@ public:
                   visitor->enqueue(pf->first);
                 }
                 break;
-              default: ASSERT(false);
+              default: assert(false);
               }
             }
           }
@@ -1109,7 +1109,7 @@ typedef   OptWorker<Post>          PostOptWorker;
 
 #define IMPLEMENT_OPT_VISITOR_ENQUEUE(scope) \
   do { \
-    ASSERT((scope)->getMark() == BlockScope::MarkReady); \
+    assert((scope)->getMark() == BlockScope::MarkReady); \
     this->m_data.m_dispatcher->enqueue((scope).get()); \
   } while (0)
 
@@ -1177,7 +1177,7 @@ static inline int CountScopesWaiting(const BlockScopeRawPtrQueue &scopes) {
   for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin();
        it != scopes.end(); ++it) {
     int m = (*it)->getMark();
-    ASSERT(m == BlockScope::MarkWaiting ||
+    assert(m == BlockScope::MarkWaiting ||
            m == BlockScope::MarkProcessed);
     if (m == BlockScope::MarkWaiting) s++;
   }
@@ -1186,7 +1186,7 @@ static inline int CountScopesWaiting(const BlockScopeRawPtrQueue &scopes) {
 
 static inline void DumpScope(BlockScopeRawPtr scope, const char *prefix,
                              bool newline = true) {
-  ASSERT(scope->is(BlockScope::FunctionScope) ||
+  assert(scope->is(BlockScope::FunctionScope) ||
          scope->is(BlockScope::ClassScope));
   const char *type = scope->is(BlockScope::FunctionScope) ?
     "function" : "class";
@@ -1196,7 +1196,7 @@ static inline void DumpScope(BlockScopeRawPtr scope, const char *prefix,
 }
 
 static inline void DumpScopeWithDeps(BlockScopeRawPtr scope) {
-  ASSERT(scope->is(BlockScope::FunctionScope) ||
+  assert(scope->is(BlockScope::FunctionScope) ||
          scope->is(BlockScope::ClassScope));
   DumpScope(scope, "");
   const BlockScopeRawPtrFlagsVec &ordered = scope->getOrderedUsers();
@@ -1251,10 +1251,10 @@ AnalysisResult::processScopesParallel(const char *id,
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-    ASSERT(RescheduleException::s_NumReschedules          == 0);
-    ASSERT(RescheduleException::s_NumForceRerunSelfCaller == 0);
-    ASSERT(RescheduleException::s_NumRetTypesChanged      == 0);
-    ASSERT(BaseTryLock::s_LockProfileMap.empty());
+    assert(RescheduleException::s_NumReschedules          == 0);
+    assert(RescheduleException::s_NumForceRerunSelfCaller == 0);
+    assert(RescheduleException::s_NumRetTypesChanged      == 0);
+    assert(BaseTryLock::s_LockProfileMap.empty());
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 
     BlockScopeRawPtrQueue enqueued;
@@ -1278,8 +1278,8 @@ AnalysisResult::processScopesParallel(const char *id,
     dfv.data().wait();
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
 
-    ASSERT(!dfv.data().getQueuedJobs());
-    ASSERT(!dfv.data().getActiveWorker());
+    assert(!dfv.data().getQueuedJobs());
+    assert(!dfv.data().getActiveWorker());
 
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
     std::cout << "Number of doJob() calls: "
@@ -1321,10 +1321,10 @@ AnalysisResult::processScopesParallel(const char *id,
   for (BlockScopeRawPtrQueue::iterator
        it = scopes.begin(), end = scopes.end();
        it != end; ++it) {
-    ASSERT((*it)->getMark() == BlockScope::MarkProcessed);
-    ASSERT((*it)->getNumDepsToWaitFor() == 0);
-    ASSERT(!(*it)->needsReschedule());
-    ASSERT((*it)->rescheduleFlags() == 0);
+    assert((*it)->getMark() == BlockScope::MarkProcessed);
+    assert((*it)->getNumDepsToWaitFor() == 0);
+    assert(!(*it)->needsReschedule());
+    assert((*it)->rescheduleFlags() == 0);
   }
 }
 
@@ -1537,13 +1537,13 @@ void AnalysisResult::inferTypes() {
        it != end; ++it) {
     (*it)->setInTypeInference(true);
     (*it)->clearUpdated();
-    ASSERT((*it)->getNumDepsToWaitFor() == 0);
+    assert((*it)->getNumDepsToWaitFor() == 0);
   }
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-  ASSERT(RescheduleException::s_NumReschedules          == 0);
-  ASSERT(RescheduleException::s_NumForceRerunSelfCaller == 0);
-  ASSERT(BaseTryLock::s_LockProfileMap.empty());
+  assert(RescheduleException::s_NumReschedules          == 0);
+  assert(RescheduleException::s_NumForceRerunSelfCaller == 0);
+  assert(BaseTryLock::s_LockProfileMap.empty());
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 
   processScopesParallel<InferTypes>("InferTypes");
@@ -1553,8 +1553,8 @@ void AnalysisResult::inferTypes() {
        it != end; ++it) {
     (*it)->setInTypeInference(false);
     (*it)->clearUpdated();
-    ASSERT((*it)->getMark() == BlockScope::MarkProcessed);
-    ASSERT((*it)->getNumDepsToWaitFor() == 0);
+    assert((*it)->getMark() == BlockScope::MarkProcessed);
+    assert((*it)->getNumDepsToWaitFor() == 0);
   }
 }
 
@@ -1611,7 +1611,7 @@ public:
 template<>
 void AnalysisResult::preWaitCallback<Post>(
     bool first, const BlockScopeRawPtrQueue &scopes, void *opaque) {
-  ASSERT(!Option::ControlFlow || opaque != NULL);
+  assert(!Option::ControlFlow || opaque != NULL);
   if (first && Option::ControlFlow) {
     JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *dispatcher
       = (JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *) opaque;
@@ -1843,12 +1843,12 @@ void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
 }
 
 void AnalysisResult::outputCPPFiniteDouble(CodeGenerator &cg, double dval) {
-  ASSERT(finite(dval));
+  assert(finite(dval));
   char *buf = NULL;
   if (dval == 0.0) dval = 0.0; // so to avoid "-0" output
   // 17 to ensure lossless conversion
   vspprintf(&buf, 0, "%.*G", 17, dval);
-  ASSERT(buf);
+  assert(buf);
   cg_printf("%s", buf);
   if (round(dval) == dval && !strchr(buf, '.') && !strchr(buf, 'E')) {
     cg.printf(".0"); // for integer value, cg_printf would break 0.0 token
@@ -2065,7 +2065,7 @@ bool AnalysisResult::outputAllPHP(CodeGenerator::Output output) {
     }
     return true; // we are done
   default:
-    ASSERT(false);
+    assert(false);
   }
 
   return true;
@@ -2077,14 +2077,14 @@ void AnalysisResult::getTrueDeps(FileScopePtr f,
   for (tie(adj, adjEnd) = adjacent_vertices(f->vertex(), m_depGraph);
        adj != adjEnd; adj++) {
     VertexToFileScopePtrMap::const_iterator iter = m_fileVertMap.find(*adj);
-    ASSERT(iter != m_fileVertMap.end());
+    assert(iter != m_fileVertMap.end());
     trueDeps[iter->second->getName()] = iter->second;
   }
 }
 
 void AnalysisResult::clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
                                         int clusterCount) {
-  ASSERT(clusterCount > 0);
+  assert(clusterCount > 0);
 
   std::map<std::string, FileScopePtr> sortedFiles;
   long totalSize = 0;
@@ -2281,7 +2281,7 @@ void AnalysisResult::renameStaticNames(map<int, vector<string> > &names,
         for (j = 0; j < nstrings; j++) {
           if (sortedStrings[j] == s) break;
         }
-        ASSERT(j < nstrings);
+        assert(j < nstrings);
         // remap i to j
         int64 newHash = hash_string_cs(s.data(), s.size());
         string name = getHashedName(hash, i, prefix);
@@ -2809,11 +2809,11 @@ void AnalysisResult::outputCPPNameMaps() {
     char **params = (char **)calloc(m_paramRTTICounter, sizeof(char*));
     for (map<string, int>::const_iterator
          iter = m_paramRTTIs.begin(); iter != m_paramRTTIs.end(); ++iter) {
-      ASSERT(params[iter->second] == NULL);
+      assert(params[iter->second] == NULL);
       params[iter->second] = (char *)iter->first.c_str();
     }
     for (int i = 0; i < m_paramRTTICounter; i++) {
-      ASSERT(params[i]);
+      assert(params[i]);
       cg_printf("\"%s\", // %d\n", params[i], i);
     }
     free(params);
@@ -2826,7 +2826,7 @@ void AnalysisResult::outputCPPNameMaps() {
 }
 
 void AnalysisResult::outputRTTIMetaData(const char *filename) {
-  ASSERT(filename && *filename);
+  assert(filename && *filename);
   FILE *f = fopen(filename, "w");
   if (f == NULL) {
     throw Exception("Unable to open %s: %s", filename,
@@ -2920,7 +2920,7 @@ void AnalysisResult::outputArrayCreateDecl(CodeGenerator &cg) {
 }
 
 void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(cg.getCurrentIndentation() == 0);
   const char text1[] =
     "HOT_FUNC\n"
     "ArrayData *array_createvs(int64 n, ...) {\n"
@@ -3078,7 +3078,7 @@ void AnalysisResult::outputCPPDefaultInvokeFile(CodeGenerator &cg,
 
 void AnalysisResult::outputCPPHashTableInvokeFile(
   CodeGenerator &cg, const vector<const char*> &entries, bool needEvalHook) {
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(cg.getCurrentIndentation() == 0);
   const char text1[] =
     "static Variant dummy_pm(bool oncOnce, LVariableTable* variables, "
     "  Globals *globals) { return true; }\n"
@@ -3227,8 +3227,8 @@ void AnalysisResult::outputCPPHashTableGetConstant(
   bool system,
   const map<string, TypePtr> &constMap,
   const hphp_string_map<bool> &dyns) {
-  ASSERT(constMap.size() > 0);
-  ASSERT(cg.getCurrentIndentation() == 0);
+  assert(constMap.size() > 0);
+  assert(cg.getCurrentIndentation() == 0);
   const char text1[] =
     "class hashNodeCon {\n"
     "public:\n"
@@ -3502,7 +3502,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
           outputCPPJumpTableSupportMethod(cg, ar, func, Option::FunctionPrefix);
           func->outputCPPCallInfo(cg, ar);
           FunctionScopePtr &funcDec = m_functionDecs[iter->first];
-          ASSERT(!funcDec);
+          assert(!funcDec);
           funcDec = func;
         }
       }
@@ -3709,8 +3709,8 @@ string AnalysisResult::getScalarArrayCompressedText() {
     if (exp) {
       Variant value;
       bool ret = exp->getScalarValue(value);
-      if (!ret) ASSERT(false);
-      if (!value.isArray()) ASSERT(false);
+      if (!ret) assert(false);
+      if (!value.isArray()) assert(false);
       arrs.append(value);
     } else {
       arrs.append(StaticArray(ArrayData::Create()));
@@ -4006,7 +4006,7 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
     }
     if (m_scalarArrayIds.size() > 0) {
       if (Option::ScalarArrayCompression && !system) {
-        ASSERT(m_scalarArrayCompressedTextSize > 0);
+        assert(m_scalarArrayCompressedTextSize > 0);
         cg_printf("ArrayUtil::InitScalarArrays(%s, %lu, "
                   "reinterpret_cast<const char*>(sa_cdata), %d);\n",
                   prefix, m_scalarArrayIds.size(),
@@ -4022,7 +4022,7 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
   }
 
   if (part == 0) {
-    ASSERT(!(Option::ScalarArrayCompression && !system));
+    assert(!(Option::ScalarArrayCompression && !system));
     outputCPPScalarArrayImpl(cg);
     cg_printf("\n");
     cg_indentBegin("void %s::initialize() {\n", clsname);
@@ -4425,7 +4425,7 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg,
   for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     FunctionScopePtr func = iter->second;
-    ASSERT(!func->isUserFunction());
+    assert(!func->isUserFunction());
     func->outputCPPClassMap(cg, ar);
   }
 
@@ -4612,7 +4612,7 @@ void AnalysisResult::addPregeneratedCPP(const std::string &name,
 const string &AnalysisResult::getPregeneratedCPP(const string &name) {
   Lock lock(m_pregenMapMutex);
   StringMap::const_iterator iter = m_pregenMap.find(name);
-  ASSERT(iter != m_pregenMap.end());
+  assert(iter != m_pregenMap.end());
   return iter->second;
 }
 
@@ -4621,7 +4621,7 @@ void AnalysisResult::movePregeneratedSourceInfo(const std::string &source,
                                                 int offset) {
   Lock lock(m_sourceInfoMutex);
   SourceInfo::const_iterator iterPregen = m_sourceInfoPregen.find(source);
-  ASSERT(iterPregen != m_sourceInfoPregen.end());
+  assert(iterPregen != m_sourceInfoPregen.end());
 
   const SourceLocationMap &sourceLoc = iterPregen->second;
   SourceLocationMap &targetLoc = m_sourceInfos[target];
@@ -4634,7 +4634,7 @@ void AnalysisResult::movePregeneratedSourceInfo(const std::string &source,
 int AnalysisResult::getFileSize(FileScopePtr fs) {
   if (m_pregenerated) {
     StringMap::const_iterator iterPregen = m_pregenMap.find(fs->getName());
-    ASSERT(iterPregen != m_pregenMap.end());
+    assert(iterPregen != m_pregenMap.end());
     return iterPregen->second.size();
   } else {
     return fs->getSize();
@@ -4988,7 +4988,7 @@ void AnalysisResult::cloneRTTIFuncs(
          functions.begin(); iter != functions.end(); ++iter) {
     FunctionScopePtr func = iter->second;
     if (func->isRedeclaring()) {
-      ASSERT(redecFunctions);
+      assert(redecFunctions);
       BOOST_FOREACH(func, redecFunctions->find(iter->first)->second) {
         const string funcId = getFuncId(func->getContainingClass(), func);
         if (RTTIInfo::TheRTTIInfo.exists(funcId.c_str())) {

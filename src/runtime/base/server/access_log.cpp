@@ -72,13 +72,13 @@ void AccessLog::init(const string &format,
 }
 
 void AccessLog::openFiles(const string &username) {
-  ASSERT(m_output.empty() && m_cronOutput.empty());
+  assert(m_output.empty() && m_cronOutput.empty());
   if (m_files.empty()) return;
   for (vector<AccessLogFileData>::const_iterator it = m_files.begin();
        it != m_files.end(); ++it) {
     const string &file = it->file;
     const string &symLink = it->symLink;
-    ASSERT(!file.empty());
+    assert(!file.empty());
     FILE *fp = NULL;
     if (Logger::UseCronolog) {
       CronologPtr cl(new Cronolog);
@@ -107,7 +107,7 @@ void AccessLog::openFiles(const string &username) {
 }
 
 void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
-  ASSERT(transport);
+  assert(transport);
   if (!m_initialized) return;
 
   AccessLog::ThreadData *threadData = m_fGetThreadData();

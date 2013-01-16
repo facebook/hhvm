@@ -134,8 +134,8 @@ bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
       stats_on_delete(key.get(), &acc->second, expired);
       acc->second.var->decRef();
     } else {
-      ASSERT(acc->second.inFile());
-      ASSERT(acc->second.expiry == 0);
+      assert(acc->second.inFile());
+      assert(acc->second.expiry == 0);
     }
     if (expired && acc->second.inFile()) {
       // a primed key expired, do not erase the table entry
@@ -322,7 +322,7 @@ static int64 get_int64_value(StoreValue* sval) {
   if (sval->inMem()) {
     v = sval->var->toLocal();
   } else {
-    ASSERT(sval->inFile());
+    assert(sval->inFile());
     String s(sval->sAddr, sval->getSerializedSize(), AttachLiteral);
     v = apc_unserialize(s);
   }
@@ -596,7 +596,7 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
         if (sval->inMem()) {
           value = sval->var->toLocal();
         } else {
-          ASSERT(sval->inFile());
+          assert(sval->inFile());
           // we need unserialize and serialize again because the format was
           // APCSerialize
           String s(sval->sAddr, sval->getSerializedSize(), AttachLiteral);

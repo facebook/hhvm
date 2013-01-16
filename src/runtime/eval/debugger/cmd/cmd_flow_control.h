@@ -29,8 +29,8 @@ public:
       : DebuggerCommand(type), m_count(1), m_frame(NULL), m_nframe(NULL),
         m_stackDepth(0), m_vmDepth(0) { }
 
-  int decCount() { ASSERT(m_count > 0); return --m_count;}
-  int getCount() const { ASSERT(m_count > 0); return m_count;}
+  int decCount() { assert(m_count > 0); return --m_count;}
+  int getCount() const { assert(m_count > 0); return m_count;}
   void setFrame(FrameInjection *frame) { m_frame = frame;}
   FrameInjection *getFrame() const { return m_frame;}
   void setNegativeFrame(FrameInjection *frame) { m_nframe = frame;}

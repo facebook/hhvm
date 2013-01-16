@@ -635,7 +635,7 @@ public:
    * and doesn't actually perform the free.
    */
   void releaseFrame() {
-    ASSERT(m_stack);
+    assert(m_stack);
 
     Frame *p = m_stack;
     m_stack = p->m_parent;

@@ -108,7 +108,7 @@ StringData* buildStringData(int n) {
 String::String(int n) {
   const StringData *sd = GetIntegerStringData(n);
   if (sd) {
-    ASSERT(sd->isStatic());
+    assert(sd->isStatic());
     m_px = (StringData *)sd;
     return;
   }
@@ -133,7 +133,7 @@ HOT_FUNC
 String::String(int64 n) {
   const StringData *sd = GetIntegerStringData(n);
   if (sd) {
-    ASSERT(sd->isStatic());
+    assert(sd->isStatic());
     m_px = (StringData *)sd;
     return;
   }
@@ -191,7 +191,7 @@ int String::find(char ch, int pos /* = 0 */,
 
 int String::find(const char *s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
-  ASSERT(s);
+  assert(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
     return find(*s, pos, caseSensitive);
@@ -223,7 +223,7 @@ int String::rfind(char ch, int pos /* = 0 */,
 
 int String::rfind(const char *s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
-  ASSERT(s);
+  assert(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
     return rfind(*s, pos, caseSensitive);
@@ -299,7 +299,7 @@ StringOffset String::lvalAt(CVarRef key) {
 }
 
 char String::charAt(int pos) const {
-  ASSERT(pos >= 0 && pos <= size());
+  assert(pos >= 0 && pos <= size());
   const char *s = data();
   return s[pos];
 }
@@ -678,7 +678,7 @@ void String::unserialize(VariableUnserializer *uns,
   }
   StringData *px = NEW(StringData)(int(size));
   MutableSlice buf = px->mutableSlice();
-  ASSERT(size <= buf.len);
+  assert(size <= buf.len);
   uns->read(buf.ptr, size);
   px->setSize(size);
   if (m_px) decRefStr(m_px);
@@ -694,7 +694,7 @@ void String::unserialize(VariableUnserializer *uns,
 }
 
 bool String::checkStatic() {
-  ASSERT(m_px);
+  assert(m_px);
   StringDataSet &set = StaticString::TheStaticStringSet();
   if (!set.empty()) {
     // no need to upgrade when the initialization is done.
@@ -777,13 +777,13 @@ StaticString& StaticString::operator=(const StaticString &str) {
   // should never use a StaticString on the left-hand side of
   // assignment. A StaticString can only be initialized by a
   // StaticString constructor or StaticString::init().
-  ASSERT(false);
+  assert(false);
   return *this;
 }
 
 void StaticString::init(litstr s, int length) {
   new(&m_data) StringData(s, length, AttachLiteral);
-  ASSERT(!m_px);
+  assert(!m_px);
   String::operator=(&m_data);
   m_px->setStatic();
   if (has_eval_support) {

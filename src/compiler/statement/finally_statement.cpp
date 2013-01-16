@@ -67,7 +67,7 @@ ConstructPtr FinallyStatement::getNthKid(int n) const {
     case 0:
       return m_stmt;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -83,7 +83,7 @@ void FinallyStatement::setNthKid(int n, ConstructPtr cp) {
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

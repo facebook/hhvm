@@ -45,7 +45,7 @@ memcpy(void* vdest, const void* vsrc, size_t len) {
     len -= nBytes;
     dest += nBytes;
     src += nBytes;
-    ASSERT((len & 7) == 0);
+    assert((len & 7) == 0);
     unsigned nQwordBytes = len & 0x3f;
     auto qdest = (uint64_t*)dest;
     auto qsrc = (const uint64_t*)src;
@@ -66,7 +66,7 @@ memcpy(void* vdest, const void* vsrc, size_t len) {
   }
 
   // Do the bulk with fat loads/stores.
-  ASSERT((len & 0x3f) == 0);
+  assert((len & 0x3f) == 0);
   while (len) {
     auto dqdest = (__m128i*)dest;
     auto dqsrc = (__m128i*)src;

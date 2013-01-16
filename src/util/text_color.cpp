@@ -77,8 +77,8 @@ void get_supported_colors(std::vector<std::string> &names) {
 }
 
 std::string add_bgcolor(const char *color, const char *bgcolor) {
-  ASSERT(color && *color && color[strlen(color) - 1] == 'm');
-  ASSERT(bgcolor && *bgcolor);
+  assert(color && *color && color[strlen(color) - 1] == 'm');
+  assert(bgcolor && *bgcolor);
 
   string ret = color;
   return ret.substr(0, ret.length() - 1) + bgcolor;

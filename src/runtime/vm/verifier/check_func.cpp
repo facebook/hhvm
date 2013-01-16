@@ -142,7 +142,7 @@ typedef std::map<Offset,Offset> SectionMap;
  * ensure that off is at least within the entire func's bytecode region.
  */
 Offset findSection(SectionMap& sections, Offset off) {
-  ASSERT(!sections.empty());
+  assert(!sections.empty());
   SectionMap::iterator i = sections.upper_bound(off);
   --i;
   return i->first;
@@ -155,7 +155,7 @@ Offset findSection(SectionMap& sections, Offset off) {
  */
 bool FuncChecker::checkOffsets() {
   bool ok = true;
-  ASSERT(unit()->bclen() >= 0);
+  assert(unit()->bclen() >= 0);
   PC bc = unit()->entry();
   Offset base = m_func->base();
   Offset past = m_func->past();
@@ -322,7 +322,7 @@ class ImmVecRange {
   }
 
   MemberCode frontMember() const {
-    ASSERT(!empty());
+    assert(!empty());
     return MemberCode(*vecp);
   }
 
@@ -339,7 +339,7 @@ class ImmVecRange {
   }
 
   void popFront() {
-    ASSERT(!empty());
+    assert(!empty());
     vecp++;
     const MemberCode mc = MemberCode(vecp[-1]);
     if (memberCodeHasImm(mc)) {
@@ -391,7 +391,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
   for (int i = 0, n = numImmediates(*instr); i < n;
        pc += immSize(instr, i), i++) {
     switch (immType(*instr, i)) {
-    default: ASSERT(false && "Unexpected immType");
+    default: assert(false && "Unexpected immType");
     case MA: { // member vector
       ImmVecRange vr(instr);
       if (vr.size() < 2) {
@@ -486,14 +486,14 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
     }
     case BA: // bytecode address
       // we check branch offsets in checkSection(). ignore here.
-      ASSERT(instrJumpTarget(unit()->entry(), offset((PC)instr)) !=
+      assert(instrJumpTarget(unit()->entry(), offset((PC)instr)) !=
              InvalidAbsoluteOffset);
       break;
     case OA: { // secondary opcode
-      ASSERT(int(*pc) >= 0); // guaranteed because PC is unsigned char*
+      assert(int(*pc) >= 0); // guaranteed because PC is unsigned char*
       int op = int(*pc);
       switch (*instr) {
-      default: ASSERT(false && "Unexpected opcode with immType OA");
+      default: assert(false && "Unexpected opcode with immType OA");
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
         if (op >= IncDec_invalid) {
@@ -559,7 +559,7 @@ const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
   }
   if (vr.loc == LSC || vr.loc == LSL) m_tmp_sig[n++] = AV; // extra classref
   if (rhs_flavor != NOV) m_tmp_sig[n++] = rhs_flavor; // extra rhs value for Set
-  ASSERT(n == instrNumPops(pc));
+  assert(n == instrNumPops(pc));
   return m_tmp_sig;
 }
 
@@ -696,7 +696,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
 }
 
 bool FuncChecker::checkIter(State* cur, PC pc) {
-  ASSERT(isIter(pc));
+  assert(isIter(pc));
   int id = getImmIva(pc);
   bool ok = true;
   if (Op(*pc) == OpIterInit || Op(*pc) == OpIterInitM) {
@@ -830,7 +830,7 @@ void FuncChecker::initState(State* s) {
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
-  ASSERT(from->stk);
+  assert(from->stk);
   if (!to->stk) initState(to);
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
   memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
@@ -1027,7 +1027,7 @@ void FuncChecker::reportEscapeEdge(Block* b, Block* s) {
 bool FuncChecker::checkOffset(const char* name, Offset off,
                               const char* regionName, Offset base,
                               Offset past, bool check_instrs) {
-  ASSERT(past >= base);
+  assert(past >= base);
   if (off < base || off >= past) {
     verify_error("Offset %s %d is outside region %s %d:%d\n",
            name, off, regionName, base, past);
@@ -1048,7 +1048,7 @@ bool FuncChecker::checkOffset(const char* name, Offset off,
 bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
                                const char* regionName, Offset base,
                                Offset past, bool check_instrs) {
-  ASSERT(past >= base);
+  assert(past >= base);
   if (p < b) {
     verify_error("region %s %d:%d has negative length\n",
            name, b, p);

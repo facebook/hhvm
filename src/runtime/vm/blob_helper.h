@@ -205,7 +205,7 @@ struct BlobDecoder {
     boost::is_enum<T>::value
   >::type
   decode(T& t) {
-    ASSERT(m_p + sizeof(T) <= m_last);
+    assert(m_p + sizeof(T) <= m_last);
 
     void* vp = &t;
     unsigned char* pc = static_cast<unsigned char*>(vp);
@@ -229,7 +229,7 @@ struct BlobDecoder {
     tvWriteUninit(&tv);
 
     String s = decodeString();
-    ASSERT(!!s);
+    assert(!!s);
     if (s->empty()) return;
 
     tvAsVariant(&tv) = f_unserialize(s);
@@ -288,7 +288,7 @@ private:
 
     String s = String(sz, ReserveString);
     char* pch = s.mutableSlice().ptr;
-    ASSERT(m_last - m_p >= sz);
+    assert(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
     m_p += sz;
     return s.setSize(sz);

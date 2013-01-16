@@ -275,12 +275,12 @@ Variant NameValueTableWrapper::each() {
 }
 
 void NameValueTableWrapper::getFullPos(FullPos &fp) {
-  ASSERT(fp.container == this);
+  assert(fp.container == this);
   fp.pos = m_pos;
 }
 
 bool NameValueTableWrapper::setFullPos(const FullPos& fp) {
-  ASSERT(fp.container == this);
+  assert(fp.container == this);
   if (fp.pos != ArrayData::invalid_index) {
     NameValueTable::Iterator iter(m_tab, fp.pos);
     if (iter.valid()) {

@@ -31,7 +31,7 @@ Synchronizable::~Synchronizable() {
 
 void Synchronizable::wait() {
   UNUSED int ret = pthread_cond_wait(&m_cond, &m_mutex.getRaw());
-  ASSERT(ret != EPERM); // did you lock the mutex?
+  assert(ret != EPERM); // did you lock the mutex?
 }
 
 bool Synchronizable::wait(long seconds) {
@@ -45,7 +45,7 @@ bool Synchronizable::wait(long seconds, long long nanosecs) {
   ts.tv_nsec += nanosecs;
 
   int ret = pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(), &ts);
-  ASSERT(ret != EPERM); // did you lock the mutex?
+  assert(ret != EPERM); // did you lock the mutex?
 
   return ret != ETIMEDOUT;
 }

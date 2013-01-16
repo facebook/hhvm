@@ -73,7 +73,7 @@ int PhpFile::decRef(int n) {
   int ret = atomic_add(m_refCount, -n);
   TRACE(4, "PhpFile: %s decRef() %d -> %d %p called by %p\n",
         m_fileName.c_str(), ret, ret - n, this, __builtin_return_address(0));
-  ASSERT(ret >= n); // atomic_add returns the old value
+  assert(ret >= n); // atomic_add returns the old value
   return ret - n;
 }
 
@@ -121,7 +121,7 @@ bool FileRepository::fileDump(const char *filename) {
 }
 
 void FileRepository::onDelete(PhpFile *f) {
-  ASSERT(f->getRef() == 0);
+  assert(f->getRef() == 0);
   if (md5Enabled()) {
     WriteLock lock(s_md5Lock);
     s_md5Files.erase(f->getMd5());
@@ -168,7 +168,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   const StringData *n = StringData::GetStaticString(name.get());
   ParsedFilesMap::accessor acc;
   bool isNew = s_files.insert(acc, n);
-  ASSERT(isNew || acc->second); // We don't leave null entries around.
+  assert(isNew || acc->second); // We don't leave null entries around.
   bool isChanged = !isNew && acc->second->isChanged(s);
 
   if (isNew || isChanged) {
@@ -184,7 +184,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       // The file changed but had the same contents.
       if (debug && md5Enabled()) {
         ReadLock lock(s_md5Lock);
-        ASSERT(s_md5Files.find(ret->getMd5())->second == ret);
+        assert(s_md5Files.find(ret->getMd5())->second == ret);
       }
       ret->incRef();
       return ret;
@@ -212,7 +212,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       return NULL;
     }
   }
-  ASSERT(ret != NULL);
+  assert(ret != NULL);
 
   if (isNew) {
     acc->second = new PhpFileWrapper(s, ret);
@@ -336,7 +336,7 @@ void FileRepository::setFileInfo(const StringData *name,
     PhpFile *f = it->second;
     if (!fileInfo.m_relPath.empty() &&
         fileInfo.m_relPath == f->getRelPath()) {
-      ASSERT(fileInfo.m_md5 == f->getMd5());
+      assert(fileInfo.m_md5 == f->getMd5());
       fileInfo.m_phpFile = f;
     }
   }
@@ -463,7 +463,7 @@ struct ResolveIncludeContext {
 
 static bool findFileWrapper(CStrRef file, void* ctx) {
   ResolveIncludeContext* context = (ResolveIncludeContext*)ctx;
-  ASSERT(context->path.isNull());
+  assert(context->path.isNull());
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePath(file, false, true);

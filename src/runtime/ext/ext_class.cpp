@@ -213,8 +213,8 @@ Array vm_get_class_vars(CStrRef className) {
   const VM::Class::PropInitVec& declPropInitVec = cls->declPropInit();
   const VM::Class::PropInitVec* propVals = !cls->pinitVec().empty()
     ? cls->getPropData() : &declPropInitVec;
-  ASSERT(propVals != NULL);
-  ASSERT(propVals->size() == numDeclProps);
+  assert(propVals != NULL);
+  assert(propVals->size() == numDeclProps);
 
   // For visibility checks
   CallerFrame cf;
@@ -225,7 +225,7 @@ Array vm_get_class_vars(CStrRef className) {
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);
     // Empty names are used for invisible/private parent properties; skip them
-    ASSERT(name->size() != 0);
+    assert(name->size() != 0);
     if (VM::Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
       ret->nvSet(name, value, false);

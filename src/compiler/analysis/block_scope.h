@@ -137,7 +137,7 @@ public:
 
   static int GetNonStaticRefUseKind(unsigned int hash) {
     int res = ((int)UseKindNonStaticRef0) << (hash % 16);
-    ASSERT(res >= ((int)UseKindNonStaticRef0) &&
+    assert(res >= ((int)UseKindNonStaticRef0) &&
            res <= ((int)UseKindNonStaticRef15));
     return res;
   }
@@ -283,7 +283,7 @@ public:
   InferTypesMutex &getInferTypesMutex() { return m_inferTypesMutex; }
 
   void setNumDepsToWaitFor(int n) {
-    ASSERT(n >= 0);
+    assert(n >= 0);
     m_numDepsToWaitFor = n;
   }
   int getNumDepsToWaitFor() const {
@@ -293,7 +293,7 @@ public:
     return ++m_numDepsToWaitFor;
   }
   int decNumDepsToWaitFor() {
-    ASSERT(m_numDepsToWaitFor > 0);
+    assert(m_numDepsToWaitFor > 0);
     return --m_numDepsToWaitFor;
   }
 
@@ -310,11 +310,11 @@ public:
           m == MarkProcessing) {
         waiting++;
       } else {
-        ASSERT(m == MarkProcessed);
+        assert(m == MarkProcessed);
       }
     }
     // >= b/c of cycles
-    ASSERT(waiting >= getNumDepsToWaitFor());
+    assert(waiting >= getNumDepsToWaitFor());
 #endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
   }
 

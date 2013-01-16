@@ -67,7 +67,7 @@ static inline int cellsToBytes(int nCells) {
 }
 
 static inline size_t bytesToCells(int nBytes) {
-  ASSERT(nBytes % sizeof(Cell) == 0);
+  assert(nBytes % sizeof(Cell) == 0);
   return nBytes / sizeof(Cell);
 }
 
@@ -78,7 +78,7 @@ struct VMRegAnchor : private boost::noncopyable {
       uint64_t sp;
       asm volatile("movq %%rsp, %0" : "=r"(sp) ::);
       // rsp should be octoword-aligned.
-      ASSERT((sp & 0xf) == 0);
+      assert((sp & 0xf) == 0);
     }
     m_old = tl_regState;
     Translator::Get()->sync();
@@ -86,14 +86,14 @@ struct VMRegAnchor : private boost::noncopyable {
   VMRegAnchor(ActRec* ar, bool atFCall=false) {
     // Some C++ entry points have an ActRec prepared from after a call
     // instruction. This syncs us to right after the call instruction.
-    ASSERT(tl_regState == REGSTATE_DIRTY);
+    assert(tl_regState == REGSTATE_DIRTY);
     m_old = REGSTATE_DIRTY;
     tl_regState = REGSTATE_CLEAN;
     int numArgs = ar->numArgs();
 
     const Func* prevF = ((ActRec*)(ar->m_savedRbp))->m_func;
     vmsp() = (TypedValue*)ar - numArgs;
-    ASSERT(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
+    assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
     vmpc() = prevF->unit()->at(prevF->base() + ar->m_soff);
     if (atFCall) {
       // VMExecutionContext::doFCall expects vmfp to be the caller's

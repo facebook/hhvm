@@ -196,7 +196,7 @@ bool IpBlockMap::isBlocking(const std::string &command,
 
       if (!translated) {
         ReadIPv6Address(ip.c_str(), &address, bits);
-        ASSERT(bits == 128);
+        assert(bits == 128);
         translated = true;
       }
 

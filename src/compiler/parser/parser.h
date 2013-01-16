@@ -262,8 +262,8 @@ private:
     }
 
     void checkFinalAssertions() {
-      ASSERT(!isGenerator || !isNotGenerator);
-      ASSERT(foreachHasYield.empty());
+      assert(!isGenerator || !isNotGenerator);
+      assert(foreachHasYield.empty());
     }
 
     bool isNotGenerator;  // function determined to not be a generator

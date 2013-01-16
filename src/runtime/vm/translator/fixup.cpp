@@ -60,9 +60,9 @@ void* FixupMapUnitTest::reader(void* that) {
     while (!m->getFrameRegs(&ar1, 0, &vmr)) {
       // Has to succeed eventually.
     }
-    ASSERT(vmr.m_pc == u.entry() + i * kPcMul);
-    ASSERT(vmr.m_fp == &ar2);
-    ASSERT(vmr.m_sp == (TypedValue*)&ar2 - i * kSpMul);
+    assert(vmr.m_pc == u.entry() + i * kPcMul);
+    assert(vmr.m_fp == &ar2);
+    assert(vmr.m_sp == (TypedValue*)&ar2 - i * kSpMul);
   }
   return NULL;
 }
@@ -76,7 +76,7 @@ FixupMapUnitTest::FixupMapUnitTest() {
 
   // We set the 'RunningUnitTest' flag to true while we run
   // the unit test to disable the logic that frees old blocks
-  // and to disable some ASSERTs about the translator's write
+  // and to disable some asserts about the translator's write
   // lease.
 
   FixupMap::RunningUnitTest = true;

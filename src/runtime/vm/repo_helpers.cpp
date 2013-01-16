@@ -134,8 +134,8 @@ void RepoTxn::exec(RepoQuery& query) {
 }
 
 void RepoTxn::rollback() {
-  ASSERT(!m_error);
-  ASSERT(m_pending);
+  assert(!m_error);
+  assert(m_pending);
   m_error = true;
   m_pending = false;
   m_repo.rollback();
@@ -152,7 +152,7 @@ void RepoQuery::bindBlob(const char* paramName, const void* blob,
                       sqlite3_bind_parameter_index(stmt, paramName),
                       blob, int(size),
                       isStatic ? SQLITE_STATIC : SQLITE_TRANSIENT);
-  ASSERT(rc == SQLITE_OK);
+  assert(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindBlob(const char* paramName, const BlobEncoder& blob,
@@ -183,7 +183,7 @@ void RepoQuery::bindText(const char* paramName, const char* text,
                       sqlite3_bind_parameter_index(stmt, paramName),
                       text, int(size),
                       isStatic ? SQLITE_STATIC : SQLITE_TRANSIENT);
-  ASSERT(rc == SQLITE_OK);
+  assert(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindStaticString(const char* paramName, const StringData* sd) {
@@ -200,7 +200,7 @@ void RepoQuery::bindDouble(const char* paramName, double val) {
     sqlite3_bind_double(stmt,
                         sqlite3_bind_parameter_index(stmt, paramName),
                         val);
-  ASSERT(rc == SQLITE_OK);
+  assert(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindInt(const char* paramName, int val) {
@@ -209,7 +209,7 @@ void RepoQuery::bindInt(const char* paramName, int val) {
     sqlite3_bind_int(stmt,
                      sqlite3_bind_parameter_index(stmt, paramName),
                      val);
-  ASSERT(rc == SQLITE_OK);
+  assert(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindId(const char* paramName, Id id) {
@@ -234,7 +234,7 @@ void RepoQuery::bindInt64(const char* paramName, int64 val) {
     sqlite3_bind_int64(stmt,
                        sqlite3_bind_parameter_index(stmt, paramName),
                        val);
-  ASSERT(rc == SQLITE_OK);
+  assert(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindNull(const char* paramName) {
@@ -242,7 +242,7 @@ void RepoQuery::bindNull(const char* paramName) {
   int rc UNUSED =
     sqlite3_bind_null(stmt,
                       sqlite3_bind_parameter_index(stmt, paramName));
-  ASSERT(rc == SQLITE_OK);
+  assert(rc == SQLITE_OK);
 }
 
 void RepoQuery::step() {
@@ -353,7 +353,7 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
       v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
     } else {
       // Serialized variants and objects shouldn't ever make it into the repo.
-      ASSERT(!IS_REFCOUNTED_TYPE(v.getType()));
+      assert(!IS_REFCOUNTED_TYPE(v.getType()));
     }
     tvAsVariant(&tv) = v;
   }
@@ -440,12 +440,12 @@ void RepoQuery::getInt64(int iCol, int64& val) {
 // RepoTxnQuery.
 
 void RepoTxnQuery::step() {
-  ASSERT(!m_txn.error());
+  assert(!m_txn.error());
   m_txn.step(*this);
 }
 
 void RepoTxnQuery::exec() {
-  ASSERT(!m_txn.error());
+  assert(!m_txn.error());
   m_txn.exec(*this);
 }
 

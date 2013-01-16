@@ -60,7 +60,7 @@ bool TempFile::closeImpl() {
   bool ret = true;
   s_file_data->m_pcloseRet = 0;
   if (!m_closed) {
-    ASSERT(valid());
+    assert(valid());
     s_file_data->m_pcloseRet = ::close(m_fd);
     ret = (s_file_data->m_pcloseRet == 0);
     m_closed = true;

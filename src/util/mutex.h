@@ -44,15 +44,15 @@ private:
   inline void recordAcquisition() {
 #ifdef DEBUG
     if (enableAssertions) {
-      ASSERT(!m_hasOwner ||
+      assert(!m_hasOwner ||
              pthread_equal(m_owner, pthread_self()));
-      ASSERT(m_acquires == 0 ||
+      assert(m_acquires == 0 ||
              pthread_equal(m_owner, pthread_self()));
       pushRank(m_rank);
       m_hasOwner = true;
       m_owner    = pthread_self();
       m_acquires++;
-      ASSERT(m_recursive || m_acquires == 1);
+      assert(m_recursive || m_acquires == 1);
     }
 #endif
   }
@@ -69,7 +69,7 @@ private:
     if (enableAssertions) {
       popRank(m_rank);
       assertOwnedBySelf();
-      ASSERT(m_acquires > 0);
+      assert(m_acquires > 0);
       if (--m_acquires == 0) {
         m_hasOwner = false;
       }
@@ -80,17 +80,17 @@ public:
   inline void assertNotOwned() const {
 #ifdef DEBUG
     if (enableAssertions) {
-      ASSERT(!m_hasOwner);
-      ASSERT(m_acquires == 0);
+      assert(!m_hasOwner);
+      assert(m_acquires == 0);
     }
 #endif
   }
   inline void assertOwnedBySelf() const {
 #ifdef DEBUG
     if (enableAssertions) {
-      ASSERT(m_hasOwner);
-      ASSERT(pthread_equal(m_owner, pthread_self()));
-      ASSERT(m_acquires > 0);
+      assert(m_hasOwner);
+      assert(pthread_equal(m_owner, pthread_self()));
+      assert(m_acquires > 0);
     }
 #endif
   }
@@ -116,7 +116,7 @@ public:
   }
   ~BaseMutex() {
 #ifdef DEBUG
-    ASSERT(m_magic == kMagic);
+    assert(m_magic == kMagic);
 #endif
     assertNotOwned();
     pthread_mutex_destroy(&m_mutex);
@@ -128,7 +128,7 @@ public:
 
   bool tryLock() {
 #ifdef DEBUG
-    ASSERT(m_magic == kMagic);
+    assert(m_magic == kMagic);
 #endif
     bool success = !pthread_mutex_trylock(&m_mutex);
     if (success) {
@@ -140,7 +140,7 @@ public:
 
   bool tryLockWait(long long ns) {
 #ifdef DEBUG
-    ASSERT(m_magic == kMagic);
+    assert(m_magic == kMagic);
 #endif
     struct timespec delta;
     delta.tv_sec  = 0;
@@ -155,11 +155,11 @@ public:
 
   void lock() {
 #ifdef DEBUG
-    ASSERT(m_magic == kMagic);
+    assert(m_magic == kMagic);
     checkRank(m_rank);
 #endif
     UNUSED int ret = pthread_mutex_lock(&m_mutex);
-    ASSERT(ret == 0);
+    assert(ret == 0);
 
     recordAcquisition();
     assertOwnedBySelf();
@@ -167,11 +167,11 @@ public:
 
   void unlock() {
 #ifdef DEBUG
-    ASSERT(m_magic == kMagic);
+    assert(m_magic == kMagic);
 #endif
     recordRelease();
     UNUSED int ret = pthread_mutex_unlock(&m_mutex);
-    ASSERT(ret == 0);
+    assert(ret == 0);
   }
 
 private:
@@ -265,20 +265,20 @@ class ReadWriteMutex {
 
   void recordWriteAcquire() {
 #ifdef DEBUG
-    ASSERT(m_writeOwner == InvalidThread);
+    assert(m_writeOwner == InvalidThread);
     m_writeOwner = pthread_self();
 #endif
   }
 
   void assertNotWriteOwner() {
 #ifdef DEBUG
-    ASSERT(m_writeOwner != pthread_self());
+    assert(m_writeOwner != pthread_self());
 #endif
   }
 
   void assertNotWriteOwned() {
 #ifdef DEBUG
-    ASSERT(m_writeOwner == InvalidThread);
+    assert(m_writeOwner == InvalidThread);
 #endif
   }
 

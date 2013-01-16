@@ -201,7 +201,7 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, Socket *sock,
 
 static void sock_array_to_fd_set(CArrRef sockets, pollfd *fds, int &nfds,
                                  short flag) {
-  ASSERT(fds);
+  assert(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
     File *sock = iter.second().toObject().getTyped<File>();
     pollfd &fd = fds[nfds++];
@@ -213,12 +213,12 @@ static void sock_array_to_fd_set(CArrRef sockets, pollfd *fds, int &nfds,
 
 static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
                                    int &count, short flag) {
-  ASSERT(sockets.is(KindOfArray));
+  assert(sockets.is(KindOfArray));
   Array sock_array = sockets.toArray();
   Array ret;
   for (ArrayIter iter(sock_array); iter; ++iter) {
     pollfd &fd = fds[nfds++];
-    ASSERT(fd.fd == iter.second().toObject().getTyped<File>()->fd());
+    assert(fd.fd == iter.second().toObject().getTyped<File>()->fd());
     if (fd.revents & flag) {
       ret.append(iter.second());
       count++;
@@ -662,7 +662,7 @@ Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
   if (!create_new_socket(name, port, errnum, errstr, ret, sock)) {
     return false;
   }
-  ASSERT(ret.get() && sock);
+  assert(ret.get() && sock);
 
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
@@ -999,7 +999,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
   } else if (!create_new_socket(name, port, errnum, errstr, ret, sock)) {
     return false;
   }
-  ASSERT(ret.get() && sock);
+  assert(ret.get() && sock);
 
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
@@ -1072,7 +1072,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
   }
 
   if (persistent) {
-    ASSERT(!key.empty());
+    assert(!key.empty());
     g_persistentObjects->set("socket", key.c_str(), sock);
   }
 

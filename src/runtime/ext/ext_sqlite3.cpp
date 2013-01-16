@@ -51,7 +51,7 @@ struct php_sqlite3_agg_context {
 };
 
 static Variant get_column_value(sqlite3_stmt *stmt, int column) {
-  ASSERT(stmt);
+  assert(stmt);
   Variant data;
   switch (sqlite3_column_type(stmt, column)) {
   case SQLITE_INTEGER:

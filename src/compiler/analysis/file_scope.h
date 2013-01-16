@@ -71,7 +71,7 @@ public:
   int getSize() const { return m_size;}
 
   // implementing FunctionContainer
-  virtual std::string getParentName() const { ASSERT(false); return "";}
+  virtual std::string getParentName() const { assert(false); return "";}
 
   const std::string &getName() const { return m_fileName;}
   const MD5& getMd5() const { return m_md5; }

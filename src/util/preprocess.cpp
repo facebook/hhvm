@@ -54,7 +54,7 @@ istream *preprocessXHP(istream &input, std::iostream &output,
   } else if (res == XHPDidNothing) {
     is = &input;
   } else {
-    ASSERT(res == XHPErred);
+    assert(res == XHPErred);
     throw Exception("Unable to parse XHP file: %s:%d\n%s", fullPath.c_str(),
                     (int)errline, error.c_str());
   }

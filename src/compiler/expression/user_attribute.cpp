@@ -28,7 +28,7 @@ UserAttribute::UserAttribute
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(UserAttribute)),
     m_name(name), m_exp(exp) {
   if (m_exp) {
-    ASSERT(m_exp->isScalar());
+    assert(m_exp->isScalar());
   }
 }
 
@@ -47,7 +47,7 @@ void UserAttribute::analyzeProgram(AnalysisResultPtr ar) {
 
 TypePtr UserAttribute::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
-  ASSERT(false);
+  assert(false);
   return TypePtr();
 }
 

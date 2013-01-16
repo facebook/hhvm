@@ -80,7 +80,7 @@ ConstructPtr UseTraitStatement::getNthKid(int n) const {
     case 1:
       return m_stmt;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -99,7 +99,7 @@ void UseTraitStatement::setNthKid(int n, ConstructPtr cp) {
       m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

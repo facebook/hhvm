@@ -391,7 +391,7 @@ static bool hphp_chdir_file(const string filename) {
   String s = File::TranslatePath(filename);
   char *buf = strndup(s.data(), s.size());
   char *dir = dirname(buf);
-  ASSERT(dir);
+  assert(dir);
   if (dir) {
     if (File::IsVirtualDirectory(dir)) {
       g_context->setCwd(String(dir, CopyString));
@@ -1219,7 +1219,7 @@ void hphp_process_init() {
 static void handle_exception(bool& ret, ExecutionContext* context,
                              std::string& errorMsg, ContextOfException where,
                              bool& error, bool richErrorMsg) {
-  ASSERT(where == InvokeException || where == ReqInitException);
+  assert(where == InvokeException || where == ReqInitException);
   try {
     handle_exception_helper(ret, context, errorMsg, where, error, richErrorMsg);
   } catch (const ExitException &e) {

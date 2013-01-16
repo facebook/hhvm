@@ -64,7 +64,7 @@ public:
   c_Closure(const CallInfo *callInfo, const char *name,
             const ObjectStaticCallbacks *cb = &cw_Closure) :
       ExtObjectData(cb), m_callInfo(callInfo), m_name(name) {
-    ASSERT(callInfo);
+    assert(callInfo);
   }
 protected:
   virtual bool php_sleep(Variant &ret);

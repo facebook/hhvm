@@ -55,14 +55,14 @@ Lease Translator::s_writeLease;
 
 void InstrStream::append(NormalizedInstruction* ni) {
   if (last) {
-    ASSERT(first);
+    assert(first);
     last->next = ni;
     ni->prev = last;
     ni->next = NULL;
     last = ni;
     return;
   }
-  ASSERT(!first);
+  assert(!first);
   first = ni;
   last = ni;
   ni->prev = NULL;
@@ -113,7 +113,7 @@ void Tracelet::constructLiveRanges() {
 bool Tracelet::isLiveAfterInstr(Location l,
                                 const NormalizedInstruction& ni) const {
   const auto end = m_liveEnd.find(l);
-  ASSERT(end != m_liveEnd.end());
+  assert(end != m_liveEnd.end());
   return ni.sequenceNum < end->second;
 }
 
@@ -242,7 +242,7 @@ RuntimeType Translator::liveType(Location l, const Unit& u) {
       // Stack accesses must be to addresses pushed before
       // translation time; if they are to addresses pushed after,
       // they should be hitting in the changemap.
-      ASSERT(locPhysicalOffset(l) >= 0);
+      assert(locPhysicalOffset(l) >= 0);
       // fallthru
     case Location::Local: {
       Cell *base;
@@ -269,7 +269,7 @@ RuntimeType Translator::liveType(Location l, const Unit& u) {
       not_reached();
     }
   }
-  ASSERT(IS_REAL_TYPE(outer->m_type));
+  assert(IS_REAL_TYPE(outer->m_type));
   return liveType(outer, l);
 }
 
@@ -280,16 +280,16 @@ Translator::liveType(const Cell* outer, const Location& l) {
     return RuntimeType(KindOfRef, KindOfNull);
   }
   DataType outerType = (DataType)outer->m_type;
-  ASSERT(IS_REAL_TYPE(outerType));
+  assert(IS_REAL_TYPE(outerType));
   DataType valueType = outerType;
   const Cell* valCell = outer;
   if (outerType == KindOfRef) {
     // Variant. Pick up the inner type, too.
     valCell = outer->m_data.pref->tv();
     DataType innerType = valCell->m_type;
-    ASSERT(IS_REAL_TYPE(innerType));
+    assert(IS_REAL_TYPE(innerType));
     valueType = innerType;
-    ASSERT(innerType != KindOfRef);
+    assert(innerType != KindOfRef);
     TRACE(2, "liveType Var -> %d\n", innerType);
     return RuntimeType(KindOfRef, innerType);
   }
@@ -314,7 +314,7 @@ RuntimeType Translator::outThisObjectType() {
   const Class *ctx = curFunc()->isMethod() ?
     arGetContextClass(curFrame()) : NULL;
   if (ctx) {
-    ASSERT(!curFrame()->hasThis() ||
+    assert(!curFrame()->hasThis() ||
            curFrame()->getThis()->getVMClass()->classof(ctx));
     TRACE(2, "OutThisObject: derived from Class \"%s\"\n",
           ctx->name()->data());
@@ -334,8 +334,8 @@ Translator::tvToLocation(const TypedValue* tv, const TypedValue* frame) {
   // Physical stack offsets grow downwards from the frame pointer. See
   // locPhysicalOffset.
   int offset = -(tv - arg0);
-  ASSERT(offset >= 0);
-  ASSERT(offset < ((ActRec*)frame)->m_func->numLocals());
+  assert(offset >= 0);
+  assert(offset < ((ActRec*)frame)->m_func->numLocals());
   TRACE(2, "tvToLocation: %p -> L:%d\n", tv, offset);
   return Location(Location::Local, offset);
 }
@@ -605,7 +605,7 @@ predictOutputs(const Tracelet& t,
   if (pred.second >= kAccept) {
     ni->outputPredicted = true;
     TRACE(1, "accepting prediction of type %d\n", pred.first);
-    ASSERT(pred.first != KindOfUninit);
+    assert(pred.first != KindOfUninit);
     return pred.first;
   }
   return KindOfInvalid;
@@ -616,13 +616,13 @@ predictOutputs(const Tracelet& t,
  */
 static RuntimeType setOpOutputType(NormalizedInstruction* ni,
                                    const vector<DynLocation*>& inputs) {
-  ASSERT(inputs.size() == 2);
+  assert(inputs.size() == 2);
   const int kValIdx = 0;
   const int kLocIdx = 1;
   unsigned char op = ni->imm[1].u_OA;
   DynLocation locLocation(inputs[kLocIdx]->location,
                           inputs[kLocIdx]->rtt.unbox());
-  ASSERT(inputs[kLocIdx]->location.isLocal());
+  assert(inputs[kLocIdx]->location.isLocal());
   switch (op) {
     case SetOpPlusEqual:
     case SetOpMinusEqual:
@@ -642,7 +642,7 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
     case SetOpSlEqual:
     case SetOpSrEqual:     return RuntimeType(KindOfInt64);
     default:
-      ASSERT(false);
+      assert(false);
   }
   NOT_REACHED();
   return RuntimeType(KindOfInvalid);
@@ -656,7 +656,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
               Operands op,
               OutTypeConstraints constraint,
               DynLocation* outDynLoc) {
-  ASSERT(constraint != OutFInputL);
+  assert(constraint != OutFInputL);
 
   switch (constraint) {
 #define CS(OutXLike, KindOfX) \
@@ -699,7 +699,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
       // to accept prediction; use the translation-time value, or fall back
       // to the targetcache if none exists.
       StringData *sd = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
-      ASSERT(sd);
+      assert(sd);
       const TypedValue* tv = g_vmContext->getCns(sd, true, false);
       if (tv) {
         return RuntimeType(tv->m_type);
@@ -714,26 +714,26 @@ getDynLocType(const vector<DynLocation*>& inputs,
     }
 
     case OutNullUninit: {
-      ASSERT(ni->op() == OpNullUninit);
+      assert(ni->op() == OpNullUninit);
       return RuntimeType(KindOfUninit);
     }
 
     case OutStringImm: {
-      ASSERT(ni->op() == OpString);
+      assert(ni->op() == OpString);
       StringData *sd = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
-      ASSERT(sd);
+      assert(sd);
       return RuntimeType(sd);
     }
 
     case OutArrayImm: {
-      ASSERT(ni->op() == OpArray);
+      assert(ni->op() == OpArray);
       ArrayData *ad = curUnit()->lookupArrayId(ni->imm[0].u_AA);
-      ASSERT(ad);
+      assert(ad);
       return RuntimeType(ad);
     }
 
     case OutBooleanImm: {
-      ASSERT(ni->op() == OpTrue || ni->op() == OpFalse);
+      assert(ni->op() == OpTrue || ni->op() == OpFalse);
       return RuntimeType(ni->op() == OpTrue);
     }
 
@@ -755,7 +755,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
        * getInputs().  (Pushing top of stack first for multi-stack
        * consumers, stack elements before M-vectors and locals, etc.)
        */
-      ASSERT(inputs.size() >= 1);
+      assert(inputs.size() >= 1);
       Opcode op = ni->op();
       ASSERT_NOT_IMPLEMENTED(
         // Sets and binds that take multiple arguments have the rhs
@@ -814,10 +814,10 @@ getDynLocType(const vector<DynLocation*>& inputs,
         if (!inputs[idx]->rtt.isVagueValue()) {
           if (op == OpBindG || op == OpBindN || op == OpBindS ||
               op == OpBindM || op == OpBindL) {
-            ASSERT(inputs[idx]->rtt.isVariant() &&
+            assert(inputs[idx]->rtt.isVariant() &&
                    !inputs[idx]->isLocal());
           } else {
-            ASSERT(inputs[idx]->rtt.valueType() ==
+            assert(inputs[idx]->rtt.valueType() ==
                    inputs[idx]->rtt.outerType());
           }
         }
@@ -826,7 +826,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
     }
 
     case OutCInputL: {
-      ASSERT(inputs.size() >= 1);
+      assert(inputs.size() >= 1);
       const DynLocation* in = inputs[inputs.size() - 1];
       RuntimeType retval;
       if (in->rtt.outerType() == KindOfUninit) {
@@ -851,7 +851,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
     }
 
     case OutCInput: {
-      ASSERT(inputs.size() >= 1);
+      assert(inputs.size() >= 1);
       const DynLocation* in = inputs[inputs.size() - 1];
       if (in->rtt.outerType() == KindOfRef) {
         return in->rtt.unbox();
@@ -860,7 +860,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
     }
 
     case OutBitOp: {
-      ASSERT(inputs.size() == 2 ||
+      assert(inputs.size() == 2 ||
              (inputs.size() == 1 && opcode == OpBitNot));
       if (inputs.size() == 2) {
         return bitOpType(inputs[0], inputs[1]);
@@ -1225,7 +1225,7 @@ static void initInstrInfo() {
 }
 
 static int numHiddenStackInputs(const NormalizedInstruction& ni) {
-  ASSERT(ni.immVec.isValid());
+  assert(ni.immVec.isValid());
   return ni.immVec.numStackValues();
 }
 
@@ -1260,7 +1260,7 @@ int getStackDelta(const NormalizedInstruction& ni) {
  *   individual instructions.
  */
 void Translator::analyzeSecondPass(Tracelet& t) {
-  ASSERT(t.m_instrStream.last);
+  assert(t.m_instrStream.last);
   NormalizedInstruction* next;
   for (NormalizedInstruction* ni = t.m_instrStream.first; ni; ni = next) {
     const Opcode op = ni->op();
@@ -1306,7 +1306,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       if (prevOp == OpNot && (ni->m_txFlags & Supported)) {
         ni->invertCond = !ni->invertCond;
         ni->inputs[0] = prev->inputs[0];
-        ASSERT(!prev->deadLocs.size());
+        assert(!prev->deadLocs.size());
         t.m_instrStream.remove(prev);
         next = ni;
         continue;
@@ -1395,7 +1395,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
         if ((prevOp == OpSetM || prevOp == OpSetOpM || prevOp == OpIncDecM) &&
             prev->prev && prev->prev->op() == OpCGetL &&
             prev->prev->inputs[0]->outerType() != KindOfUninit) {
-          ASSERT(prev->prev->outStack);
+          assert(prev->prev->outStack);
           prev->prev->outStack = 0;
           prev->prev->manuallyAllocInputs = true;
           prev->prev->ignoreInnerType = true;
@@ -1424,7 +1424,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
           prev->invertCond = !prev->invertCond;
           prev->outStack = ni->outStack;
           SKTRACE(3, ni->source, "folding Not instruction in analysis\n");
-          ASSERT(!ni->deadLocs.size());
+          assert(!ni->deadLocs.size());
           t.m_instrStream.remove(ni);
           continue;
       }
@@ -1432,7 +1432,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
 
     if (op == OpInstanceOfD && prevOp == OpCGetL &&
         (ni->m_txFlags & Supported)) {
-      ASSERT(prev->outStack);
+      assert(prev->outStack);
       ni->inputs[0] = prev->inputs[0];
       /*
         the CGetL becomes a no-op (other
@@ -1482,7 +1482,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
          prevOp == OpArray ||
          prevOp == OpThis ||
          prevOp == OpBareThis)) {
-      ASSERT(!ni->outStack);
+      assert(!ni->outStack);
       ni->grouped = true;
       prev->outStack = NULL;
       pp = prev->prev;
@@ -1625,7 +1625,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::DataTypePredicted: {
         // If the original type was invalid or predicted, then use the
         // prediction in the meta-data.
-        ASSERT((unsigned) arg < inputInfos.size());
+        assert((unsigned) arg < inputInfos.size());
 
         SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
                 "newType = %d\n", arg, DataType(info.m_data));
@@ -1650,7 +1650,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
       case Unit::MetaInfo::DataTypeInferred: {
-        ASSERT((unsigned)arg < inputInfos.size());
+        assert((unsigned)arg < inputInfos.size());
         SKTRACE(1, ni->source, "MetaInfo DataTypeInferred for input %d; "
                    "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
@@ -1708,11 +1708,11 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
 
       case Unit::MetaInfo::String: {
         const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-        ASSERT((unsigned)arg < inputInfos.size());
+        assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
         DynLocation* dl = tas.recordRead(ii, m_useHHIR, KindOfString);
-        ASSERT(!dl->rtt.isString() || !dl->rtt.valueString() ||
+        assert(!dl->rtt.isString() || !dl->rtt.valueString() ||
                dl->rtt.valueString() == sd);
         SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
                 arg, dl->pretty().c_str());
@@ -1721,7 +1721,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       }
 
       case Unit::MetaInfo::Class: {
-        ASSERT((unsigned)arg < inputInfos.size());
+        assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         DynLocation* dl = tas.recordRead(ii, m_useHHIR);
         if (dl->rtt.valueType() != KindOfObject) {
@@ -1735,7 +1735,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         // as long as metaCls is more derived than rttCls.
         Class* metaCls = Unit::lookupClass(metaName);
         Class* rttCls = rttName ? Unit::lookupClass(rttName) : NULL;
-        ASSERT(IMPLIES(metaCls && rttCls && metaCls != rttCls,
+        assert(IMPLIES(metaCls && rttCls && metaCls != rttCls,
                        metaCls->classof(rttCls)));
         if (metaCls && metaCls != rttCls) {
           SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
@@ -1778,7 +1778,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
 static void addMVectorInputs(NormalizedInstruction& ni,
                              int& currentStackOffset,
                              std::vector<InputInfo>& inputs) {
-  ASSERT(ni.immVec.isValid());
+  assert(ni.immVec.isValid());
   ni.immVecM.reserve(ni.immVec.size());
 
   int UNUSED stackCount = 0;
@@ -1820,7 +1820,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     if (lcode == LH) {
       inputs.push_back(Location(Location::This));
     } else {
-      ASSERT(lcode == LL || lcode == LGL || lcode == LNL);
+      assert(lcode == LL || lcode == LGL || lcode == LNL);
       int numImms = numLocationCodeImms(lcode);
       for (int i = 0; i < numImms; ++i) {
         push_local(decodeVariableSizeImm(&vec));
@@ -1860,7 +1860,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
       } else if (memberCodeImmIsString(mcode)) {
         inputs.push_back(Location(Location::Litstr, imm));
       } else {
-        ASSERT(memberCodeImmIsInt(mcode));
+        assert(memberCodeImmIsInt(mcode));
         inputs.push_back(Location(Location::Litint, imm));
       }
     } else {
@@ -1875,8 +1875,8 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
   ni.immVecClasses.resize(ni.immVecM.size());
 
-  ASSERT(vec - ni.immVec.vec() == ni.immVec.size());
-  ASSERT(stackCount == ni.immVec.numStackValues());
+  assert(vec - ni.immVec.vec() == ni.immVec.size());
+  assert(stackCount == ni.immVec.numStackValues());
 
   SKTRACE(2, ni.source, "M-vector using %d hidden stack "
                         "inputs, %d locals\n", stackCount, localCount);
@@ -1904,11 +1904,11 @@ void Translator::getInputs(Tracelet& t,
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
 #endif
-  ASSERT(inputs.empty());
+  assert(inputs.empty());
   if (debug && !mapContains(instrInfo, ni->op())) {
     fprintf(stderr, "Translator does not understand "
       "instruction %s\n", opcodeToName(ni->op()));
-    ASSERT(false);
+    assert(false);
   }
   const InstrInfo& info = instrInfo[ni->op()];
   Operands input = info.in;
@@ -2003,7 +2003,7 @@ void Translator::getInputs(Tracelet& t,
     for (int i = 0; i < localCount; ++i) {
       auto curType = tas.currentType(Location(Location::Local, i));
       if (ni->nonRefCountedLocals[i]) {
-        ASSERT(!curType.isRefCounted() && "Static analysis was wrong");
+        assert(!curType.isRefCounted() && "Static analysis was wrong");
       }
       numRefCounted += curType.isRefCounted();
     }
@@ -2101,7 +2101,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
       typeInfo == OutVInputL) {
     // Variable number of outputs. If we box the loc we're reading,
     // we need to write out its boxed-ness.
-    ASSERT(inputs.size() >= 1);
+    assert(inputs.size() >= 1);
     const DynLocation* in = inputs[inputs.size() - 1];
     DynLocation* outDynLoc = t.newDynLocation(in->location, in->rtt);
     outDynLoc->location = Location(Location::Stack, currentStackOffset++);
@@ -2109,7 +2109,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
     if (typeInfo == OutVInputL) {
       isRef = true;
     } else {
-      ASSERT(typeInfo == OutFInputL || typeInfo == OutFInputR);
+      assert(typeInfo == OutFInputL || typeInfo == OutFInputR);
       isRef = ni->preppedByRef;
     }
     if (isRef) {
@@ -2131,7 +2131,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
       SKTRACE(1, ni->source, "unboxed type: %d\n",
               outDynLoc->rtt.outerType());
     }
-    ASSERT(outDynLoc->location.isStack());
+    assert(outDynLoc->location.isStack());
     ni->outStack = outDynLoc;
 
     if (isRef && in->rtt.outerType() != KindOfRef &&
@@ -2140,7 +2140,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
       // VGetH or FPassH boxing a local
       DynLocation* smashedLocal =
           t.newDynLocation(in->location, outDynLoc->rtt);
-      ASSERT(smashedLocal->location.isLocal());
+      assert(smashedLocal->location.isLocal());
       ni->outLocal = smashedLocal;
     }
     // Other things that might be getting boxed here include globals
@@ -2154,8 +2154,8 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
        outLocsCopy != (int)None;
        outLocsCopy &= ~opnd) {
     opnd = 1 << (ffs(outLocsCopy) - 1);
-    ASSERT(opnd != None && opnd != Stack3);  // no instr produces 3 values
-    ASSERT(opnd != FuncdRef);                // reffiness is immutable
+    assert(opnd != None && opnd != Stack3);  // no instr produces 3 values
+    assert(opnd != FuncdRef);                // reffiness is immutable
     Location loc;
     switch (opnd) {
       // Pseudo-outputs that affect translator state
@@ -2198,13 +2198,13 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpIterNext || op == OpIterNextK ||
                                op == OpIterNextM || op == OpIterNextMK);
         if (op == OpIncDecL) {
-          ASSERT(ni->inputs.size() == 1);
+          assert(ni->inputs.size() == 1);
           const RuntimeType &inRtt = ni->inputs[0]->rtt;
           RuntimeType rtt = IS_INT_TYPE(inRtt.valueType()) ? inRtt :
             RuntimeType(KindOfInvalid);
           DynLocation* incDecLoc =
             t.newDynLocation(ni->inputs[0]->location, rtt);
-          ASSERT(incDecLoc->location.isLocal());
+          assert(incDecLoc->location.isLocal());
           ni->outLocal = incDecLoc;
           continue; // Doesn't mutate a loc's types for int. Carry on.
         }
@@ -2214,16 +2214,16 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           continue;
         }
         if (op == OpUnsetL) {
-          ASSERT(ni->inputs.size() == 1);
+          assert(ni->inputs.size() == 1);
           DynLocation* inLoc = ni->inputs[0];
-          ASSERT(inLoc->location.isLocal());
+          assert(inLoc->location.isLocal());
           RuntimeType newLhsRtt = RuntimeType(KindOfUninit);
           Location locLocation = inLoc->location;
           SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
                   locLocation.spaceName(), locLocation.offset,
                   newLhsRtt.valueType());
           DynLocation* unsetLoc = t.newDynLocation(locLocation, newLhsRtt);
-          ASSERT(unsetLoc->location.isLocal());
+          assert(unsetLoc->location.isLocal());
           ni->outLocal = unsetLoc;
           continue;
         }
@@ -2244,7 +2244,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                    op == OpBindM) ?
               1 : 0; // 0 is rhs for SetM/SetOpM
             DynLocation* inLoc = ni->inputs[kVecStart];
-            ASSERT(inLoc->location.isLocal());
+            assert(inLoc->location.isLocal());
             Location locLoc = inLoc->location;
             if (inLoc->rtt.isString() ||
                 inLoc->rtt.valueType() == KindOfBoolean) {
@@ -2252,7 +2252,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
               // false upgrade to an array successfully, while other values
               // fail and leave the lhs unmodified.
               DynLocation* baseLoc = t.newDynLocation(locLoc, KindOfInvalid);
-              ASSERT(baseLoc->isLocal());
+              assert(baseLoc->isLocal());
               ni->outLocal = baseLoc;
             } else if (inLoc->rtt.valueType() == KindOfUninit ||
                        inLoc->rtt.valueType() == KindOfNull) {
@@ -2262,7 +2262,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
               SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
                       locLoc.spaceName(), locLoc.offset, newLhsRtt.valueType());
               DynLocation* baseLoc = t.newDynLocation(locLoc, newLhsRtt);
-              ASSERT(baseLoc->location.isLocal());
+              assert(baseLoc->location.isLocal());
               ni->outLocal = baseLoc;
             }
             // Note (if we start translating pseudo-mains):
@@ -2282,7 +2282,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         if (op == OpSetOpL) {
           const int kLocIdx = 1;
           DynLocation* inLoc = ni->inputs[kLocIdx];
-          ASSERT(inLoc->location.isLocal());
+          assert(inLoc->location.isLocal());
           DynLocation* dl = t.newDynLocation();
           dl->location = inLoc->location;
           dl->rtt = setOpOutputType(ni, ni->inputs);
@@ -2292,12 +2292,12 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
                   inLoc->location.spaceName(), inLoc->location.offset,
                   dl->rtt.valueType());
-          ASSERT(dl->location.isLocal());
+          assert(dl->location.isLocal());
           ni->outLocal = dl;
           continue;
         }
         if (op >= OpIterInit && op <= OpIterNextMK) {
-          ASSERT(op == OpIterInit || op == OpIterInitK ||
+          assert(op == OpIterInit || op == OpIterInitK ||
                  op == OpIterInitM || op == OpIterInitMK ||
                  op == OpIterNext || op == OpIterNextK ||
                  op == OpIterNextM || op == OpIterNextMK);
@@ -2328,32 +2328,32 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           }
           continue;
         }
-        ASSERT(ni->inputs.size() == 2);
+        assert(ni->inputs.size() == 2);
         const int kValIdx  = 0;
         const int kLocIdx = 1;
         DynLocation* inLoc = ni->inputs[kLocIdx];
         DynLocation* inVal  = ni->inputs[kValIdx];
         Location locLocation = inLoc->location;
         // Variant RHS possible only when binding.
-        ASSERT(inVal->rtt.isVagueValue() ||
+        assert(inVal->rtt.isVagueValue() ||
                (op == OpBindL) ==
                (inVal->rtt.outerType() == KindOfRef));
-        ASSERT(!inVal->location.isLocal());
-        ASSERT(inLoc->location.isLocal());
+        assert(!inVal->location.isLocal());
+        assert(inLoc->location.isLocal());
         RuntimeType newLhsRtt = inVal->rtt.isVagueValue() || op == OpBindL ?
           inVal->rtt :
           inLoc->rtt.setValueType(inVal->rtt.outerType());
         if (inLoc->rtt.outerType() == KindOfRef) {
-          ASSERT(newLhsRtt.outerType() == KindOfRef);
+          assert(newLhsRtt.outerType() == KindOfRef);
         } else {
-          ASSERT(op == OpBindL ||
+          assert(op == OpBindL ||
                  newLhsRtt.outerType() != KindOfRef);
         }
         SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
                 locLocation.spaceName(), locLocation.offset,
                 inVal->rtt.valueType());
         DynLocation* outLhsLoc = t.newDynLocation(locLocation, newLhsRtt);
-        ASSERT(outLhsLoc->location.isLocal());
+        assert(outLhsLoc->location.isLocal());
         ni->outLocal = outLhsLoc;
       } continue; // already pushed an output for the local
 
@@ -2369,7 +2369,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
 
         // The existing top is just being moved up a notch.  This one
         // always functions as if it were OutSameAsInput.
-        ASSERT(ni->inputs.size() >= 1);
+        assert(ni->inputs.size() >= 1);
         ni->outStack2 = t.newDynLocation(
           Location(Location::Stack, currentStackOffset++),
           ni->inputs[0]->rtt
@@ -2380,7 +2380,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         loc = Location(Location::Stack, currentStackOffset++);
 
         // Move the top two locations up a slot.
-        ASSERT(ni->inputs.size() >= 2);
+        assert(ni->inputs.size() >= 2);
         ni->outStack2 = t.newDynLocation(
           Location(Location::Stack, currentStackOffset++),
           ni->inputs[1]->rtt
@@ -2400,7 +2400,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
     SKTRACE(2, ni->source, "recording output t(%d->%d) #(%s, %d)\n",
             dl->rtt.outerType(), dl->rtt.innerType(),
             dl->location.spaceName(), dl->location.offset);
-    ASSERT(dl->location.isStack());
+    assert(dl->location.isStack());
     ni->outStack = dl;
   }
 }
@@ -2442,7 +2442,7 @@ Translator::findImmable(ImmStack &stack,
   case OpIssetM: {
     // If this is "<VecInstr>M <... EC>"
     const ImmVector& iv = ni->immVec;
-    ASSERT(iv.isValid());
+    assert(iv.isValid());
     MemberCode mc;
     StringData* str;
     int64_t strId;
@@ -2485,8 +2485,8 @@ bool DynLocation::canBeAliased() const {
 RuntimeType TraceletContext::currentType(const Location& l) const {
   DynLocation* dl;
   if (!mapGet(m_currentMap, l, &dl)) {
-    ASSERT(!mapContains(m_deletedSet, l));
-    ASSERT(!mapContains(m_changeSet, l));
+    assert(!mapContains(m_deletedSet, l));
+    assert(!mapContains(m_changeSet, l));
     return Translator::liveType(l, *curUnit());
   }
   return dl->rtt;
@@ -2499,12 +2499,12 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
   const Location& l = ii.loc;
   if (!mapGet(m_currentMap, l, &dl)) {
     // We should never try to read a location that has been deleted
-    ASSERT(!mapContains(m_deletedSet, l));
+    assert(!mapContains(m_deletedSet, l));
     // If the given location was not in m_currentMap, then it shouldn't
     // be in m_changeSet either
-    ASSERT(!mapContains(m_changeSet, l));
+    assert(!mapContains(m_changeSet, l));
     if (ii.dontGuard && !l.isLiteral()) {
-      ASSERT(!useHHIR || staticType != KindOfRef);
+      assert(!useHHIR || staticType != KindOfRef);
       dl = m_t->newDynLocation(l, RuntimeType(useHHIR ? staticType
                                                       : KindOfInvalid));
       if (useHHIR && staticType != KindOfInvalid) {
@@ -2512,7 +2512,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
       }
     } else {
       RuntimeType rtt = Translator::liveType(l, *curUnit());
-      ASSERT(rtt.isIter() || !rtt.isVagueValue());
+      assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
       // current map.
       dl = m_t->newDynLocation(l, rtt);
@@ -2592,7 +2592,7 @@ void TraceletContext::recordJmp() {
  */
 Op NormalizedInstruction::op() const {
   uchar op = *pc();
-  ASSERT(isValidOpcode(op));
+  assert(isValidOpcode(op));
   return (Op)op;
 }
 
@@ -2681,7 +2681,7 @@ GuardType::GuardType(DataType outer, DataType inner)
 }
 
 GuardType::GuardType(const RuntimeType& rtt) {
-  ASSERT(rtt.isValue());
+  assert(rtt.isValue());
   outerType = rtt.outerType();
   innerType = rtt.innerType();
 }
@@ -2760,7 +2760,7 @@ GuardType GuardType::getCountness() const {
   // Note that translations need to be able to handle KindOfString and
   // KindOfStaticString interchangeably.  This implies that KindOfStaticString
   // needs to be treated as KindOfString, i.e. as possibly counted.
-  ASSERT(isSpecific());
+  assert(isSpecific());
   switch (outerType) {
     case KindOfUninit:
     case KindOfNull:
@@ -2772,7 +2772,7 @@ GuardType GuardType::getCountness() const {
 }
 
 GuardType GuardType::getCountnessInit() const {
-  ASSERT(isSpecific());
+  assert(isSpecific());
   switch (outerType) {
     case KindOfNull:
     case KindOfBoolean:
@@ -2790,7 +2790,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     NormalizedInstruction::OutputUsed;
   switch (instr->op()) {
     case OpSetL : {
-      ASSERT(opndIdx < 2);
+      assert(opndIdx < 2);
       if (opndIdx == 0) { // stack value
         auto stackValUsage = instr->getOutputUsage(instr->outStack, true);
         if ((instr->outStack && (!m_useHHIR || stackValUsage == kOutputUsed)) ||
@@ -2911,8 +2911,8 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
             deps[loc->location]->rtt.pretty().c_str(),
             RuntimeType(relxType.getOuterType(),
                         relxType.getInnerType()).pretty().c_str());
-      ASSERT(deps[loc->location] == loc);
-      ASSERT(relxType.getOuterType() != KindOfInvalid);
+      assert(deps[loc->location] == loc);
+      assert(relxType.getOuterType() != KindOfInvalid);
       deps[loc->location]->rtt = RuntimeType(relxType.getOuterType(),
                                              relxType.getInnerType());
       reanalizeConsumers(tclet, loc);
@@ -3004,7 +3004,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
     ni->outputPredicted = false;
     ni->outputPredictionStatic = false;
 
-    ASSERT(!t.m_analysisFailed);
+    assert(!t.m_analysisFailed);
     oldStackFrameOffset = stackFrameOffset;
     for (int i = 0; i < numImmediates(ni->op()); i++) {
       ni->imm[i] = getImm(ni->pc(), i);
@@ -3112,7 +3112,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
     if (isFCallStar(ni->op())) {
       if (!doVarEnvTaint) {
         const FPIEnt *fpi = curFunc()->findFPI(ni->source.m_offset);
-        ASSERT(fpi);
+        assert(fpi);
         Offset fpushOff = fpi->m_fpushOff;
         PC fpushPc = curUnit()->at(fpushOff);
         if (*fpushPc == OpFPushFunc) {
@@ -3150,7 +3150,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
     // This assert failing means that your instruction has an
     // inconsistent row in the InstrInfo table; the stackDelta doesn't
     // agree with the inputs and outputs.
-    ASSERT(getStackDelta(*ni) == (stackFrameOffset - oldStackFrameOffset));
+    assert(getStackDelta(*ni) == (stackFrameOffset - oldStackFrameOffset));
     // If this instruction decreased the depth of the stack, mark the
     // appropriate stack locations as "dead"
     if (stackFrameOffset < oldStackFrameOffset) {
@@ -3186,7 +3186,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
               "pct %f, seed %d\n",
               dbgTranslateCoin->getPercent(), dbgTranslateCoin->getSeed());
       }
-      ASSERT(dbgTranslateCoin);
+      assert(dbgTranslateCoin);
       if (dbgTranslateCoin->flip()) {
         SKTRACE(3, ni->source, "stress interp\n");
         ni->m_txFlags = Interp;
@@ -3282,7 +3282,7 @@ breakBB:
   relaxDeps(t, tas);
 
   // Mark the last instruction appropriately
-  ASSERT(t.m_instrStream.last);
+  assert(t.m_instrStream.last);
   t.m_instrStream.last->breaksTracelet = true;
   t.m_nextSk = sk;
   // Populate t.m_changes, t.intermediates, t.m_dependencies
@@ -3361,7 +3361,7 @@ uint64* Translator::getTransCounterAddr() {
     bzero(chunk, size);
     m_transCounters.push_back(chunk);
   }
-  ASSERT(id / transCountersPerChunk < m_transCounters.size());
+  assert(id / transCountersPerChunk < m_transCounters.size());
   return &(m_transCounters[id / transCountersPerChunk]
            [id % transCountersPerChunk]);
 }
@@ -3369,7 +3369,7 @@ uint64* Translator::getTransCounterAddr() {
 
 uint64 Translator::getTransCounter(TransID transId) const {
   if (!isTransDBEnabled()) return -1ul;
-  ASSERT(transId < m_translations.size());
+  assert(transId < m_translations.size());
 
   uint64 counter;
 
@@ -3383,8 +3383,8 @@ uint64 Translator::getTransCounter(TransID transId) const {
 }
 
 void Translator::setTransCounter(TransID transId, uint64 value) {
-  ASSERT(transId < m_translations.size());
-  ASSERT(transId / transCountersPerChunk < m_transCounters.size());
+  assert(transId < m_translations.size());
+  assert(transId / transCountersPerChunk < m_transCounters.size());
 
   m_transCounters[transId / transCountersPerChunk]
                  [transId % transCountersPerChunk] = value;
@@ -3398,7 +3398,7 @@ static const char *transKindStr[] = {
 };
 
 const char *getTransKindName(TransKind kind) {
-  ASSERT(kind >= 0 && kind <= TransProlog);
+  assert(kind >= 0 && kind <= TransProlog);
   return transKindStr[kind];
 }
 
@@ -3476,7 +3476,7 @@ ActRecState::pop() {
  */
 bool
 ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
-  ASSERT(outRefDeps);
+  assert(outRefDeps);
   TRACE(2, "ActRecState: getting reffiness for arg %d\n", argNum);
   if (m_arStack.empty()) {
     // The ActRec in question was pushed before the beginning of the
@@ -3496,10 +3496,10 @@ ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
     throwUnknownInput();
     not_reached();
   }
-  ASSERT(r.m_topFunc);
+  assert(r.m_topFunc);
   bool retval = r.m_topFunc->byRef(argNum);
   if (r.m_state == GUESSABLE) {
-    ASSERT(r.m_entryArDelta != InvalidEntryArDelta);
+    assert(r.m_entryArDelta != InvalidEntryArDelta);
     TRACE(2, "ActRecState: guessing arg%d -> %d\n", argNum, retval);
     outRefDeps->addDep(r.m_entryArDelta, argNum, retval);
   }
@@ -3538,7 +3538,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   if (res == MethodLookup::MethodNotFound) return NULL;
 
-  ASSERT(res == MethodLookup::MethodFoundWithThis ||
+  assert(res == MethodLookup::MethodFoundWithThis ||
          res == MethodLookup::MethodFoundNoThis ||
          (staticLookup ?
           res == MethodLookup::MagicCallStaticFound :

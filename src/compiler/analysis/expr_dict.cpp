@@ -49,7 +49,7 @@ void ExprDict::build(MethodStatementPtr m) {
 }
 
 TypePtr ExprDict::extractTypeAssertion(ExpressionPtr e) const {
-  ASSERT(e);
+  assert(e);
   return e->isTypeAssertion() ? e->getAssertedType() : TypePtr();
 }
 
@@ -81,8 +81,8 @@ void ExprDict::getAllEntries(int id, TypePtrIdxPairVec &types) {
 
 template <class T>
 void ExprDict::getEntries(int id, TypePtrIdxPairVec &entries, T func) {
-  ASSERT(m_canonIdMap.size() == m_canonTypeMap.size());
-  ASSERT(id >= 0 && id < (int) m_canonTypeMap.size());
+  assert(m_canonIdMap.size() == m_canonTypeMap.size());
+  assert(id >= 0 && id < (int) m_canonTypeMap.size());
 
   TypePtrIdxPair cur = m_canonTypeMap[id];
   if (func(cur)) entries.push_back(TypePtrIdxPair(cur.first, id));
@@ -96,11 +96,11 @@ void ExprDict::getEntries(int id, TypePtrIdxPairVec &entries, T func) {
 bool ExprDict::containsAssertion(TypePtr assertion,
                                  const TypePtrIdxPairVec &types,
                                  TypePtrIdxPair &entry) const {
-  ASSERT(assertion);
+  assert(assertion);
   for (TypePtrIdxPairVec::const_iterator it = types.begin();
        it != types.end(); ++it) {
     const TypePtrIdxPair &cur = *it;
-    ASSERT(cur.first);
+    assert(cur.first);
     if (Type::SameType(cur.first, assertion)) {
       entry = cur;
       return true;
@@ -110,7 +110,7 @@ bool ExprDict::containsAssertion(TypePtr assertion,
 }
 
 void ExprDict::visit(ExpressionPtr e) {
-  ASSERT(m_canonIdMap.size() == m_canonTypeMap.size());
+  assert(m_canonIdMap.size() == m_canonTypeMap.size());
   if (m_am.insertForDict(e)) {
     // we've never seen e's structure before, so record it
     record(e);
@@ -123,7 +123,7 @@ void ExprDict::visit(ExpressionPtr e) {
     m_canonIdMap[e->getCanonID()] = e->getCanonID();
   } else if (e->isTypeAssertion()) {
     TypePtrIdxPairVec types;
-    ASSERT(isCanonicalStructure(e->getCanonID()));
+    assert(isCanonicalStructure(e->getCanonID()));
     getTypes(e->getCanonID(), types);
     TypePtrIdxPair entry;
     if (containsAssertion(e->getAssertedType(), types, entry)) {
@@ -131,7 +131,7 @@ void ExprDict::visit(ExpressionPtr e) {
     } else {
       // new type assertion seen, record it
       int oldId = e->getCanonID();
-      ASSERT(isCanonicalStructure(oldId));
+      assert(isCanonicalStructure(oldId));
       record(e);
       // insert it into the list
       if (e->getCanonID() >= m_canonTypeMap.size()) {
@@ -187,8 +187,8 @@ void ExprDict::endBlock(ControlBlock *b) {
       if (ExpressionPtr e = m_avlExpr[ix]) {
         if (e->isAvailable()) {
           int i = e->getKidCount();
-          ASSERT(((int)e->getCanonID()) == ix);
-          ASSERT(isCanonicalStructure(ix));
+          assert(((int)e->getCanonID()) == ix);
+          assert(isCanonicalStructure(ix));
           while (true) {
             if (!i--) {
               BitOps::set_bit(ix, m_available, true);
@@ -237,7 +237,7 @@ void ExprDict::endBlock(ControlBlock *b) {
 }
 
 void ExprDict::setStructureOps(int idx, BitOps::Bits *bits, bool flag) {
-  ASSERT(isCanonicalStructure(idx));
+  assert(isCanonicalStructure(idx));
   TypePtrIdxPairVec entries;
   getAllEntries(idx, entries);
   for (TypePtrIdxPairVec::const_iterator it = entries.begin();
@@ -308,7 +308,7 @@ void ExprDict::updateAccess(ExpressionPtr e) {
         if (m_am.checkAnyInterf(e, a, isLoad, depth, effects) !=
             AliasManager::DisjointAccess) {
           int aid = a->getCanonID();
-          ASSERT(isCanonicalStructure(aid));
+          assert(isCanonicalStructure(aid));
           if (eid != aid || cls == Expression::Load) {
             BitOps::set_bit(aid, m_altered, true);
           }
@@ -357,7 +357,7 @@ void ExprDict::updateAccess(ExpressionPtr e) {
     while (cur) {
       ExpressionPtr next = cur->getCanonLVal();
       int cid = cur->getCanonID();
-      ASSERT(isCanonicalStructure(cid));
+      assert(isCanonicalStructure(cid));
       if ((cid != eid || cls == Expression::Load) &&
           (BitOps::get_bit(cid, m_altered) ||
            m_am.checkAnyInterf(e, cur, isLoad, depth, effects) !=
@@ -378,11 +378,11 @@ void ExprDict::updateAccess(ExpressionPtr e) {
 
 TypePtr ExprDict::reduceToSingleAssertion(const TypePtrIdxPairVec &types)
   const {
-  ASSERT(m_available);
+  assert(m_available);
   TypePtr ret;
   for (TypePtrIdxPairVec::const_iterator it = types.begin();
        it != types.end(); ++it) {
-    ASSERT(it->first);
+    assert(it->first);
     if (!BitOps::get_bit(it->second, m_available)) continue;
     if (!ret) ret = it->first;
     else if (!Type::SameType(ret, it->first)) {
@@ -422,7 +422,7 @@ void ExprDict::beforePropagate(ControlBlock *b) {
           AssignmentExpressionPtr ae(
             static_pointer_cast<AssignmentExpression>(e));
           ExpressionPtr var(ae->getVariable());
-          ASSERT(isCanonicalStructure(var->getCanonID()));
+          assert(isCanonicalStructure(var->getCanonID()));
           if (BitOps::get_bit(var->getCanonID(), m_anticipated)) {
             ExpressionPtr val(ae->getValue());
             if (val->isScalar()) {

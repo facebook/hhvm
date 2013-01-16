@@ -251,13 +251,13 @@ class PreClass : public AtomicCountable {
 
   Func* lookupMethod(const StringData* methName) const {
     Func* f = m_methods.lookupDefault(methName, 0);
-    ASSERT(f != NULL);
+    assert(f != NULL);
     return f;
   }
 
   const Prop* lookupProp(const StringData* propName) const {
     Slot s = m_properties.findIndex(propName);
-    ASSERT(s != kInvalidSlot);
+    assert(s != kInvalidSlot);
     return &m_properties[s];
   }
 
@@ -520,9 +520,9 @@ public:
     typedef TypedValue* iterator;
     iterator begin() { return m_data; }
     iterator end() { return m_data + m_size; }
-    TypedValue& operator[](size_t i) { ASSERT(i < m_size); return m_data[i]; }
+    TypedValue& operator[](size_t i) { assert(i < m_size); return m_data[i]; }
     const TypedValue& operator[](size_t i) const {
-      ASSERT(i < m_size); return m_data[i];
+      assert(i < m_size); return m_data[i];
     }
     void push_back(const TypedValue& v);
     size_t size() const { return m_size; }
@@ -604,7 +604,7 @@ public:
   const Const* constants() const { return m_constants.accessList(); }
   size_t numConstants() const { return m_constants.size(); }
   Attr attrs() const {
-    ASSERT(Attr(m_attrCopy) == m_preClass->attrs());
+    assert(Attr(m_attrCopy) == m_preClass->attrs());
     return Attr(m_attrCopy);
   }
   bool verifyPersistent() const;
@@ -703,7 +703,7 @@ public:
   void getClassInfo(ClassInfoVM* ci);
 
   size_t declPropOffset(Slot index) const {
-    ASSERT(index >= 0);
+    assert(index >= 0);
     return sizeof(ObjectData) + m_builtinPropSize
       + index * sizeof(TypedValue);
   }
@@ -904,7 +904,7 @@ struct class_hash {
 
 struct class_same {
   bool operator()(const Class* c1, const Class* c2) const {
-    ASSERT(c1 && c2);
+    assert(c1 && c2);
     return (void*)c1 == (void*)c2;
   }
 };

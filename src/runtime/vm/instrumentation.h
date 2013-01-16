@@ -61,11 +61,11 @@ public:
 
 struct InjectionHashCompare {
   bool equal(const Injection *i1, const Injection *i2) const {
-    ASSERT(i1 && i2);
+    assert(i1 && i2);
     return memcmp(i1, i2, sizeof(Injection)) == 0;
   }
   size_t hash(const Injection *i) const {
-    ASSERT(i);
+    assert(i);
     return i->m_desc->hash() ^ hash_int64((int64)i->m_unit);
   }
 };
@@ -128,13 +128,13 @@ public:
   InjectionTables* clone();
 
   InjectionTableInt64* getInt64Table(int hookType) {
-    ASSERT(hookType < InstHookTypeInt64Count);
-    ASSERT(hookType < (int)m_int64Tables.size());
+    assert(hookType < InstHookTypeInt64Count);
+    assert(hookType < (int)m_int64Tables.size());
     return m_int64Tables[hookType];
   }
   InjectionTableSD* getSDTable(int hookType) {
-    ASSERT(hookType < InstHookTypeSDCount);
-    ASSERT(hookType < (int)m_sdTables.size());
+    assert(hookType < InstHookTypeSDCount);
+    assert(hookType < (int)m_sdTables.size());
     return m_sdTables[hookType];
   }
 

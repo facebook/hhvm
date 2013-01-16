@@ -284,7 +284,7 @@ void hash_haval::hash_init(void *context_) {
   case 4: context->Transform = PHP_4HAVALTransform; break;
   case 5: context->Transform = PHP_5HAVALTransform; break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -543,7 +543,7 @@ void hash_haval::hash_final(unsigned char *digest, void *context) {
   case 224: PHP_HAVAL224Final(digest, (PHP_HAVAL_CTX *)context); break;
   case 256: PHP_HAVAL256Final(digest, (PHP_HAVAL_CTX *)context); break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 }
 

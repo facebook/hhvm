@@ -82,7 +82,7 @@ public:
   static CStrRef GetStaticClassName(ThreadInfo *info);
   static const String *SetStaticClassName(ThreadInfo *info, CStrRef cls) {
     const_assert(!hhvm);
-    ASSERT(info);
+    assert(info);
     FrameInjection *t = info->m_top;
     if (t) {
       const String *old = t->m_staticClass;
@@ -93,7 +93,7 @@ public:
   }
   static void ResetStaticClassName(ThreadInfo *info) {
     const_assert(!hhvm);
-    ASSERT(info);
+    assert(info);
     FrameInjection *t = info->m_top;
     if (t) t->m_staticClass = NULL;
   }
@@ -104,8 +104,8 @@ public:
 
 private:
   inline void initCommon() {
-    ASSERT(m_name);
-    ASSERT(m_info);
+    assert(m_name);
+    assert(m_info);
 #ifdef INFINITE_RECURSION_DETECTION
     check_recursion(m_info);
 #endif
@@ -266,7 +266,7 @@ class FrameInjectionObjectMethod : public FrameInjection {
 public:
   FrameInjectionObjectMethod(const char *name, ObjectData *obj)
     : FrameInjection(name, ObjectMethod)   {
-    ASSERT(obj);
+    assert(obj);
     m_object = obj;
     obj->incRefCount();
     hotProfilerInit(name);

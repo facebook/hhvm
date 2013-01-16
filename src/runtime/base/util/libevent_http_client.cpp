@@ -30,12 +30,12 @@ struct evkeyvalq_ {
 // static handlers delegating work to instance ones
 
 static void on_request_completed(struct evhttp_request *req, void *obj) {
-  ASSERT(obj);
+  assert(obj);
   ((HPHP::LibEventHttpClient*)obj)->onRequestCompleted(req);
 }
 
 static void on_connection_closed(struct evhttp_connection *conn, void *obj) {
-  ASSERT(obj);
+  assert(obj);
   ((HPHP::LibEventHttpClient*)obj)->onConnectionClosed();
 }
 

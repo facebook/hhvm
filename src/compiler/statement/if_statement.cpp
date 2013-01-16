@@ -66,7 +66,7 @@ ConstructPtr IfStatement::getNthKid(int n) const {
     case 0:
       return m_stmts;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -82,7 +82,7 @@ void IfStatement::setNthKid(int n, ConstructPtr cp) {
       m_stmts = boost::dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -236,10 +236,10 @@ void IfStatement::preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
   if (m_hasCondCSE) {
-    ASSERT(m_stmts->getCount() > 0);
+    assert(m_stmts->getCount() > 0);
     IfBranchStatementPtr p(
         static_pointer_cast<IfBranchStatement>((*m_stmts)[0]));
-    ASSERT(p->getCondition());
+    assert(p->getCondition());
     p->getCondition()->preOutputCPPTemp(cg, ar, true);
   }
 }

@@ -66,10 +66,10 @@ void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
   Lock lock(this);
   std::stack<void *> &interrupts =
     ThreadInfo::s_threadInfo->m_reqInjectionData.interrupts;
-  ASSERT(!interrupts.empty());
+  assert(!interrupts.empty());
   if (!interrupts.empty()) {
     CmdInterrupt *tint = (CmdInterrupt*)interrupts.top();
-    ASSERT(tint);
+    assert(tint);
     if (tint) {
       threads.push_back(createThreadInfo(tint->desc()));
     }
@@ -223,7 +223,7 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
         switchThreadMode(Normal);
         throw;
       } catch (...) {
-        ASSERT(false); // no other exceptions should be seen here
+        assert(false); // no other exceptions should be seen here
         switchThreadMode(Normal);
         throw;
       }
@@ -581,7 +581,7 @@ void DebuggerProxy::processFlowControl(CmdInterrupt &cmd) {
       break;
     }
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -828,7 +828,7 @@ void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
       m_flow->setFileLine(cmd.getFileLine());
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

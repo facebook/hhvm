@@ -186,8 +186,8 @@ template<class Visitor>
 void traceImpl(const Visitor& visit, TypedValue* tv) {
   switch (tv->m_type) {
   case KindOfRef:
-    ASSERT(!is_static(tv->m_data.pref));
-    ASSERT(is_smart_allocated(tv->m_data.pref));
+    assert(!is_static(tv->m_data.pref));
+    assert(is_smart_allocated(tv->m_data.pref));
     visit(tv->m_data.pref);
     break;
   case KindOfObject:
@@ -205,7 +205,7 @@ void traceImpl(const Visitor& visit, TypedValue* tv) {
      * cycle leak, so this is semantically ok although it is a
      * resource leak).
      */
-    ASSERT(!is_static(tv->m_data.pref));
+    assert(!is_static(tv->m_data.pref));
     if (is_smart_allocated(tv->m_data.pobj)) {
       visit(tv->m_data.pobj);
     }
@@ -217,7 +217,7 @@ void traceImpl(const Visitor& visit, TypedValue* tv) {
     break;
   case KindOfString:
     if (!is_static(tv->m_data.pstr)) {
-      ASSERT(is_smart_allocated(tv->m_data.pstr));
+      assert(is_smart_allocated(tv->m_data.pstr));
       VisitStringHelper<Visitor::visits_strings,Visitor>::visit(
         visit,
         tv->m_data.pstr
@@ -246,7 +246,7 @@ void traceImpl(const Visitor& visit, ArrayData* ad) {
       if (key.isString()) {
         traceImpl(visit, key.asTypedValue());
       } else {
-        ASSERT(key.isInteger());
+        assert(key.isInteger());
       }
     }
 
@@ -302,7 +302,7 @@ struct RefDecrement {
   template<class T>
   void operator()(T* t) const {
     --*count_addr(t);
-    ASSERT(*count_addr(t) >= 0);
+    assert(*count_addr(t) >= 0);
   }
 };
 
@@ -311,7 +311,7 @@ struct RefIncrement {
 
   template<class T>
   void operator()(T* t) const {
-    ASSERT(*count_addr(t) >= 0);
+    assert(*count_addr(t) >= 0);
     ++*count_addr(t);
   }
 };
@@ -609,7 +609,7 @@ void gc_detect_cycles(const std::string& filename) {
       trace(p, static_cast<ArrayData*>(it->second));
       break;
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 

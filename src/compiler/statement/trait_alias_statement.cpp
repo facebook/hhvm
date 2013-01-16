@@ -70,7 +70,7 @@ ConstructPtr TraitAliasStatement::getNthKid(int n) const {
     case 3:
       return m_newMethodName;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -95,7 +95,7 @@ void TraitAliasStatement::setNthKid(int n, ConstructPtr cp) {
       m_newMethodName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

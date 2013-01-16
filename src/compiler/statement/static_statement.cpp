@@ -90,7 +90,7 @@ ConstructPtr StaticStatement::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -106,7 +106,7 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -137,10 +137,10 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
         AssignmentExpressionPtr assignment_exp =
           dynamic_pointer_cast<AssignmentExpression>(exp);
         ExpressionPtr variable = assignment_exp->getVariable();
-        ASSERT(variable->is(Expression::KindOfSimpleVariable));
+        assert(variable->is(Expression::KindOfSimpleVariable));
         SimpleVariablePtr var =
           dynamic_pointer_cast<SimpleVariable>(variable);
-        ASSERT(var->hasContext(Expression::Declaration));
+        assert(var->hasContext(Expression::Declaration));
         scope->getVariables()->forceVariant(ar, var->getName(),
                                             VariableTable::AnyStaticVars);
       } else {
@@ -159,9 +159,9 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
       AssignmentExpressionPtr assignment_exp =
         dynamic_pointer_cast<AssignmentExpression>(exp);
       ExpressionPtr variable = assignment_exp->getVariable();
-      ASSERT(variable->is(Expression::KindOfSimpleVariable));
+      assert(variable->is(Expression::KindOfSimpleVariable));
       SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-      ASSERT(var->hasContext(Expression::Declaration));
+      assert(var->hasContext(Expression::Declaration));
       const std::string &name = var->getName();
       /* If we have already seen this variable in the current scope and
          it is not a static variable, record this variable as "redeclared"
@@ -210,7 +210,7 @@ void StaticStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         exp->outputCPP(cg, ar);
         cg_printf(";\n");
       } else {
-        ASSERT(false);
+        assert(false);
       }
     }
     if (m_exp->getCount() > 1) cg_indentEnd("}\n");
@@ -230,7 +230,7 @@ void StaticStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       const std::string &name = var->getName();
 
       if (variables->needLocalCopy(name)) {
-        ASSERT(var->hasAssignableCPPVariable());
+        assert(var->hasAssignableCPPVariable());
         cg_printf("%s.assignRef(%s%s);\n",
                   var->getAssignableCPPVariable(ar).c_str(),
                   Option::StaticVariablePrefix, name.c_str());
@@ -244,7 +244,7 @@ void StaticStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 Option::StaticVariablePrefix, name.c_str());
       cg_indentEnd("}\n");
     } else {
-      ASSERT(false);
+      assert(false);
     }
   }
   if (m_exp->getCount() > 1) cg_indentEnd("}\n");

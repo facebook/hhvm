@@ -57,7 +57,7 @@ ConstructPtr BreakStatement::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -73,7 +73,7 @@ void BreakStatement::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -172,7 +172,7 @@ void BreakStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     return;
   }
 
-  ASSERT(depth >= 1);
+  assert(depth >= 1);
 
   if (depth > (int64)labelIds.size()) {
     cg_printf("throw_fatal(\"bad %s\");\n", m_name);

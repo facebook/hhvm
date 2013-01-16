@@ -1248,7 +1248,7 @@ bool f_chroot(CStrRef directory) {
 class Directory : public SweepableResourceData {
 public:
   Directory(DIR *handle) : dir(handle) {
-    ASSERT(handle);
+    assert(handle);
   }
 
   ~Directory() {

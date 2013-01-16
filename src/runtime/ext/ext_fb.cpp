@@ -246,7 +246,7 @@ static bool fb_serialize_into_buffer(CVarRef thing, char *buff, int *pos) {
   default:
     raise_warning("unserializable object unexpectedly passed through "
                   "fb_serialized_size");
-    ASSERT(false);
+    assert(false);
   }
   return true;
 }
@@ -422,7 +422,7 @@ Variant f_fb_thrift_serialize(CVarRef thing) {
   String s(len, ReserveString);
   int pos = 0;
   fb_serialize_into_buffer(thing, s.mutableSlice().ptr, &pos);
-  ASSERT(pos == len);
+  assert(pos == len);
   return s.setSize(len);
 }
 
@@ -580,7 +580,7 @@ const uint64_t kCodePrefix          = 0xf0;
 static void fb_compact_serialize_code(
   StringData* sd, FbCompactSerializeCode code) {
 
-  ASSERT(code == (code & kCodeMask));
+  assert(code == (code & kCodeMask));
   uint8_t v = (kCodePrefix | code);
   sd->append(reinterpret_cast<char*>(&v), 1);
 }
@@ -1284,8 +1284,8 @@ static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
 
-  ASSERT(firstCodePoint >= 0);  // Wrapper fixes up negative starting positions.
-  ASSERT(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
+  assert(firstCodePoint >= 0);  // Wrapper fixes up negative starting positions.
+  assert(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
   if (str.size() <= 0 ||
       str.size() > INT_MAX ||
       firstCodePoint >= srcLenBytes) {
@@ -1494,7 +1494,7 @@ static Variant fb_call_user_func_safe(CVarRef function, CArrRef params,
     if (doBind) {
       FrameInjection::StaticClassNameHelper scn(
         ThreadInfo::s_threadInfo.getNoCheck(), classname);
-      ASSERT(!mcp.m_isFunc);
+      assert(!mcp.m_isFunc);
       return mcp.ci->getMeth()(mcp, params);
     } else {
       if (mcp.m_isFunc) {
@@ -1580,7 +1580,7 @@ void f_fb_set_taint(VRefParam str, int taint) {
   }
 
   StringData *sd = str.getStringData();
-  ASSERT(sd);
+  assert(sd);
   if (sd->getCount() > 1) {
     // Pass taint to our copy.
     TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
@@ -1598,7 +1598,7 @@ void f_fb_unset_taint(VRefParam str, int taint) {
   }
 
   StringData *sd = str.getStringData();
-  ASSERT(sd);
+  assert(sd);
   if (sd->getCount() > 1) {
     // Pass taint to our copy.
     TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
@@ -1612,7 +1612,7 @@ void f_fb_unset_taint(VRefParam str, int taint) {
 bool f_fb_get_taint(CStrRef str, int taint) {
 #ifdef TAINTED
   StringData *string_data = str.get();
-  ASSERT(string_data);
+  assert(string_data);
   return string_data->getTaintDataRefConst().getTaint() & taint;
 #else
   return false;

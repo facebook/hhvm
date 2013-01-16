@@ -81,7 +81,7 @@ void RequestLocal<T>::create() {
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  ASSERT(m_node.m_p == NULL);
+  assert(m_node.m_p == NULL);
   m_node.m_p = new T();
 }
 

@@ -36,7 +36,7 @@ const char *StringBag::add(const char *s) {
 }
 
 const char *StringBag::at(unsigned int index) const {
-  ASSERT(index < m_strings.size());
+  assert(index < m_strings.size());
   return m_strings[index];
 }
 

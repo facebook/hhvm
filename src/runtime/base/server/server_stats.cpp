@@ -58,8 +58,8 @@ void ServerStats::Merge(PageStatsMap &dest, const PageStatsMap &src) {
       dest[key] = s;
     } else {
       PageStats &d = diter->second;
-      ASSERT(d.m_url == s.m_url);
-      ASSERT(d.m_code == s.m_code);
+      assert(d.m_url == s.m_url);
+      assert(d.m_code == s.m_code);
       d.m_hit += s.m_hit;
       Merge(d.m_values, s.m_values);
     }
@@ -129,7 +129,7 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
       map<string, int> rules;
       for (unsigned int i = 0; i < rules0.size(); i++) {
         string &rule = rules0[i];
-        ASSERT(!rule.empty());
+        assert(!rule.empty());
         int len = rule.length();
         string suffix;
         if (len > 4) {
@@ -755,7 +755,7 @@ void ServerStats::Report(string &output, Format format,
     } else if (format == HTML) {
       w = new HTMLWriter(out);
     } else {
-      ASSERT(format == JSON);
+      assert(format == JSON);
       w = new JSONWriter(out);
     }
 
@@ -837,7 +837,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   } else if (format == HTML) {
     w = new HTMLWriter(out);
   } else {
-    ASSERT(format == JSON);
+    assert(format == JSON);
     w = new JSONWriter(out);
   }
 
@@ -898,7 +898,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     case Processing:     mode = "process"; break;
     case Writing:        mode = "writing"; break;
     case PostProcessing: mode = "psp";     break;
-    default: ASSERT(false);
+    default: assert(false);
     }
 
     w->beginObject("thread");
@@ -1278,7 +1278,7 @@ IOStatusHelper::IOStatusHelper(const char *name,
                                const char *address /* = NULL */,
                                int port /* = 0 */)
     : m_exeProfiler(ThreadInfo::NetworkIO) {
-  ASSERT(name && *name);
+  assert(name && *name);
 
   if (ServerStats::s_profile_network ||
       (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats)) {

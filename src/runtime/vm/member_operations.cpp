@@ -31,7 +31,7 @@ StringData* prepareAnyKey(TypedValue* tv) {
 }
 
 void objArrayAccess(Instance* base) {
-  ASSERT(!base->isCollection());
+  assert(!base->isCollection());
   if (!instanceOf(base, "ArrayAccess")) {
     raise_error("Object does not implement ArrayAccess");
   }
@@ -43,10 +43,10 @@ TypedValue* objOffsetGet(TypedValue& tvRef, Instance* base,
     objArrayAccess(base);
   }
   TypedValue* result;
-  ASSERT(!base->isCollection());
+  assert(!base->isCollection());
   static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
   const Func* method = base->methodNamed(sd__offsetGet);
-  ASSERT(method != NULL);
+  assert(method != NULL);
   base->invokeUserMethod(&tvRef, method, CREATE_VECTOR1(offset));
   result = &tvRef;
   return result;
@@ -58,9 +58,9 @@ static bool objOffsetExists(Instance* base, CVarRef offset) {
   tvWriteUninit(&tvResult);
   static StringData* sd__offsetExists
     = StringData::GetStaticString("offsetExists");
-  ASSERT(!base->isCollection());
+  assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetExists);
-  ASSERT(method != NULL);
+  assert(method != NULL);
   base->invokeUserMethod(&tvResult, method, CREATE_VECTOR1(offset));
   tvCastToBooleanInPlace(&tvResult);
   return bool(tvResult.m_data.num);
@@ -77,13 +77,13 @@ bool objOffsetEmpty(TypedValue& tvRef, Instance* base, CVarRef offset,
     return true;
   }
   TypedValue* result = objOffsetGet(tvRef, base, offset, false);
-  ASSERT(result);
+  assert(result);
   return empty(tvAsCVarRef(result));
 }
 
 void objOffsetAppend(Instance* base, TypedValue* val,
                      bool validate /* = true */) {
-  ASSERT(!base->isCollection());
+  assert(!base->isCollection());
   if (validate) {
     objArrayAccess(base);
   }
@@ -96,9 +96,9 @@ void objOffsetSet(Instance* base, CVarRef offset, TypedValue* val,
     objArrayAccess(base);
   }
   static StringData* sd__offsetSet = StringData::GetStaticString("offsetSet");
-  ASSERT(!base->isCollection());
+  assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetSet);
-  ASSERT(method != NULL);
+  assert(method != NULL);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
   base->invokeUserMethod(&tvResult, method,
@@ -110,9 +110,9 @@ void objOffsetUnset(Instance* base, CVarRef offset) {
   objArrayAccess(base);
   static StringData* sd__offsetUnset
     = StringData::GetStaticString("offsetUnset");
-  ASSERT(!base->isCollection());
+  assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetUnset);
-  ASSERT(method != NULL);
+  assert(method != NULL);
   TypedValue tv;
   tvWriteUninit(&tv);
   base->invokeUserMethod(&tv, method, CREATE_VECTOR1(offset));

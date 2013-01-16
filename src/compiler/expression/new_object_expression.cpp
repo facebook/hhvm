@@ -233,7 +233,7 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
 
 
     if (skipCreate) {
-      ASSERT(!m_params || m_params->getOutputCount() == 0);
+      assert(!m_params || m_params->getOutputCount() == 0);
     } else {
       cg_printf("->create(");
       FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,

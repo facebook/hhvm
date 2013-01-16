@@ -188,7 +188,7 @@ public:
     ClassScopePtr parent = getParentScope(ar);
     return parent && !parent->isRedeclaring() && parent->hasAttribute(attr, ar);
   }
-  void setKnownBase(int i) { ASSERT(i < 32); m_knownBases |= 1u << i; }
+  void setKnownBase(int i) { assert(i < 32); m_knownBases |= 1u << i; }
   bool hasUnknownBases() const {
     int n = m_bases.size();
     if (!n) return false;

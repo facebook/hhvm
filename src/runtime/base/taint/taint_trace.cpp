@@ -46,7 +46,7 @@ TaintTraceDataPtr::TaintTraceDataPtr(const TaintTraceDataPtr& ttd)
  * TaintTracer methods
  */
 String TaintTracer::Trace(String str, bool copy, bool truncate) {
-  ASSERT(!TaintObserver::IsActive());
+  assert(!TaintObserver::IsActive());
 
   if (copy && !s_requestdata->find(str)) {
     int len = (truncate && RuntimeOption::TaintTraceMaxStrlen < str.size()) ?
@@ -144,7 +144,7 @@ void TaintTracer::ExtractInternal(const TaintTraceNodePtr& root,
 
   for (node = root; node.get(); node = node->getNext()) {
     if (node->getChild().get()) {
-      ASSERT(!node->getLeaf().get());
+      assert(!node->getLeaf().get());
       ExtractInternal(node->getChild(), sourceset, frameset);
     } else if ((ttd = node->getLeaf()).get()) {
       if (strncmp(ttd->getStr().c_str(), "    ", 4) != 0) {
@@ -158,7 +158,7 @@ void TaintTracer::ExtractInternal(const TaintTraceNodePtr& root,
         frameset.insert(buf);
       }
     } else {
-      ASSERT(false);
+      assert(false);
     }
   }
 }

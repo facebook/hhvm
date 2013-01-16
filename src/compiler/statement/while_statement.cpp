@@ -55,7 +55,7 @@ ConstructPtr WhileStatement::getNthKid(int n) const {
     case BodyStmt:
       return m_stmt;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -74,7 +74,7 @@ void WhileStatement::setNthKid(int n, ConstructPtr cp) {
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

@@ -59,7 +59,7 @@ const TypedValue* preConstVecHasUnique(const PreConstPtrVec& preConsts);
 
 template<typename Accessor>
 const TypedValue* findUniquePreConst(Accessor& acc, const StringData* name) {
-  ASSERT(!RuntimeOption::RepoAuthoritative);
+  assert(!RuntimeOption::RepoAuthoritative);
   TRACE_SET_MOD(txdeps);
   if (gPreConsts.find(acc, name)) {
     const PreConstDep& dep = acc->second;

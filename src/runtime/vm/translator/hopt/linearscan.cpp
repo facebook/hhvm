@@ -313,8 +313,8 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       inst->setSrc(i, newTmp);
       // newTmp and tmp share the same type.  Since it was spilled, it
       // must be using its entire needed-count of registers.
-      ASSERT(newTmp->getType() == tmp->getType());
-      ASSERT(tmp->numNeededRegs() == tmp->numAllocatedRegs());
+      assert(newTmp->getType() == tmp->getType());
+      assert(tmp->numNeededRegs() == tmp->numAllocatedRegs());
       for (int locIndex = 0;
            locIndex < tmp->numNeededRegs();
            ++locIndex) {
@@ -338,7 +338,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
   freeRegsAtId(inst->getId());
   // Update next native.
   if (getNextNative() == inst) {
-    ASSERT(!m_natives.empty());
+    assert(!m_natives.empty());
     m_natives.pop_front();
     computePreColoringHint();
   }
@@ -359,14 +359,14 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       opc == AllocActRec || opc == SpillStackAllocAR ||
       opc == RetAdjustStack || opc ==  NewObj || opc == InterpOne ||
       opc == GenericRetDecRefs) {
-    ASSERT(type == Type::StkPtr);
+    assert(type == Type::StkPtr);
     allocRegToTmp(&m_regs[int(rVmSp)], ssaTmp, 0);
     return;
   }
 
   // LdRaw, loading a generator's embedded AR, is the only time we have a
   // pointer to an AR that is not in rVmFp or rVmSp.
-  ASSERT(type != Type::StkPtr ||
+  assert(type != Type::StkPtr ||
          (opc == LdRaw &&
           inst->getSrc(1)->getConstValAsInt() == RawMemSlot::ContARPtr));
 
@@ -413,7 +413,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       RuntimeOption::EvalHHIREnablePreColoring &&
       ssaTmp->getInstruction()->isNative()) {
     // Pre-colors ssaTmp if it's the return value of a native.
-    ASSERT(index == 0);
+    assert(index == 0);
     reg = getReg(&m_regs[int(rax)]);
   }
   if (reg == NULL) {
@@ -422,7 +422,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
     reg = getFreeReg(true);
   }
 
-  ASSERT(reg);
+  assert(reg);
   if (!preferCallerSaved && reg->isCallerSaved()) {
     // ssaTmp spans native, but we failed to find a free callee-saved reg.
     // We eagerly add a spill ssaTmp, and update ssaTmp's live range
@@ -472,7 +472,7 @@ uint32 LinearScan::assignSpillLocAux(Trace* trace,
        ++it) {
     IRInstruction* inst = *it;
     if (getNextNative() == inst) {
-      ASSERT(!m_natives.empty());
+      assert(!m_natives.empty());
       m_natives.pop_front();
     }
     if (inst->getOpcode() == Spill) {
@@ -780,7 +780,7 @@ void LinearScan::preAllocSpillLocAux(Trace* trace, uint32 numSpillLocs) {
     if (inst->getOpcode() == Spill) {
       SSATmp* dst = inst->getDst();
       for (int index = 0; index < dst->numNeededRegs(); ++index) {
-        ASSERT(!dst->hasReg(index));
+        assert(!dst->hasReg(index));
         if (dst->getSpillInfo(index).type() == SpillInfo::Memory) {
           uint32 spillLoc = dst->getSpillInfo(index).mem();
           // Native stack layout:
@@ -841,7 +841,7 @@ void LinearScan::allocRegs(Trace* trace) {
   if (numSpillLocs % 2) {
     ++numSpillLocs;
   }
-  ASSERT(NumPreAllocatedSpillLocs % 2 == 0);
+  assert(NumPreAllocatedSpillLocs % 2 == 0);
   if (numSpillLocs > 0) {
     preAllocSpillLoc(trace, numSpillLocs);
     if (numSpillLocs > (uint32)NumPreAllocatedSpillLocs) {
@@ -932,7 +932,7 @@ void LinearScan::rematerializeAux(Trace* trace,
     SSATmp* dst = inst->getDst();
     if (opc == DefFP || opc == FreeActRec) {
       curFp = dst;
-      ASSERT(dst && dst->getReg() == rVmFp);
+      assert(dst && dst->getReg() == rVmFp);
     }
     if (opc == Reload) {
       // s = Spill t0
@@ -959,7 +959,7 @@ void LinearScan::rematerializeAux(Trace* trace,
         // Search for a local that stores the value of <spilledTmp>.
         if (pos != localValues.end()) {
           size_t locId = pos - localValues.begin();
-          ASSERT(curFp != NULL);
+          assert(curFp != NULL);
           ConstInstruction constInst(curFp, Local(locId));
           IRInstruction* ldHomeInst =
             m_irFactory->cloneInstruction(&constInst);
@@ -972,7 +972,7 @@ void LinearScan::rematerializeAux(Trace* trace,
         UNUSED Type::Tag oldType = dst->getType();
         newInst->setDst(dst);
         dst->setInstruction(newInst);
-        ASSERT(outputType(newInst) == oldType);
+        assert(outputType(newInst) == oldType);
         *it = newInst;
         newInst->setParent(trace);
       }
@@ -1046,7 +1046,7 @@ void LinearScan::freeRegsAtId(uint32_t id) {
        it != m_allocatedRegs.end(); ) {
     std::list<RegState*>::iterator next = it; ++next;
     RegState* reg = *it;
-    ASSERT(reg->m_ssaTmp);
+    assert(reg->m_ssaTmp);
     if (reg->m_ssaTmp->getLastUseId() <= id) {
       m_allocatedRegs.erase(it);
       freeReg(reg);
@@ -1075,7 +1075,7 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
   if (m_freeCallerSaved.empty() && m_freeCalleeSaved.empty()) {
     // no free registers --> free the first register in the allocatedRegs
     // list; this register is the one whose last use is the most distant
-    ASSERT(!m_allocatedRegs.empty());
+    assert(!m_allocatedRegs.empty());
 
     // Pick the first register in <m_allocatedRegs> that is not used
     // for any source operand in the current instruction.
@@ -1104,7 +1104,7 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
   } else {
     theFreeReg = popFreeReg(*other);
   }
-  ASSERT(theFreeReg);
+  assert(theFreeReg);
   // Pin it so that other operands in the same instruction will not reuse it.
   theFreeReg->m_pinned = true;
   return theFreeReg;
@@ -1153,8 +1153,8 @@ void LinearScan::spill(SSATmp* tmp) {
     std::cout << "\n";
   }
   // If we're spilling, we better actually have registers allocated.
-  ASSERT(tmp->numAllocatedRegs() > 0);
-  ASSERT(tmp->numAllocatedRegs() == tmp->numNeededRegs());
+  assert(tmp->numAllocatedRegs() > 0);
+  assert(tmp->numAllocatedRegs() == tmp->numNeededRegs());
 
   // Free the registers used by <tmp>.
   // Need call freeReg and modify <m_allocatedRegs>.
@@ -1204,9 +1204,9 @@ uint32 LinearScan::getNextNativeId() const {
 }
 
 SSATmp* LinearScan::getSpilledTmp(SSATmp* tmp) {
-  ASSERT(tmp->getInstruction()->getOpcode() == Reload);
+  assert(tmp->getInstruction()->getOpcode() == Reload);
   SSATmp* slot = tmp->getInstruction()->getSrc(0);
-  ASSERT(slot->getInstruction()->getOpcode() == Spill);
+  assert(slot->getInstruction()->getOpcode() == Spill);
   return slot->getInstruction()->getSrc(0);
 }
 
@@ -1247,7 +1247,7 @@ void LinearScan::PreColoringHint::clear() {
 // in next native.
 void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32 index, int argNum) {
   int reg = int(argNumToRegName[argNum]);
-  ASSERT(reg >= 0 && reg < kNumX64Regs);
+  assert(reg >= 0 && reg < kNumX64Regs);
   m_preColoredTmps[reg].first = tmp;
   m_preColoredTmps[reg].second = index;
 }

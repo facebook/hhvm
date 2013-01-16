@@ -142,7 +142,7 @@ public:
 
   void collectOrdering(BlockScopeRawPtrQueue &queue,
                        BlockScopeRawPtr      scope) {
-    ASSERT(scope->getMark() != BlockScope::MarkProcessingDeps);
+    assert(scope->getMark() != BlockScope::MarkProcessingDeps);
     scope->setMark(BlockScope::MarkProcessingDeps);
     const BlockScopeRawPtrFlagsPtrVec &deps = scope->getDeps();
     for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
@@ -174,7 +174,7 @@ public:
           continue;
         }
       } else {
-        ASSERT((*it)->getNumDepsToWaitFor() == 0);
+        assert((*it)->getNumDepsToWaitFor() == 0);
       }
       scope->setMark(BlockScope::MarkWaitingInQueue);
       numSetMarks++;
@@ -188,7 +188,7 @@ public:
         collectOrdering(buffer, *it);
       }
     }
-    ASSERT((int)buffer.size() == numSetMarks);
+    assert((int)buffer.size() == numSetMarks);
 
 #ifdef HPHP_DETAILED_TYPE_INF_ASSERT
     // verify:
@@ -197,7 +197,7 @@ public:
     for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin();
          it != scopes.end(); ++it) {
       int m = (*it)->getMark();
-      ASSERT(m == BlockScope::MarkProcessingDeps ||
+      assert(m == BlockScope::MarkProcessingDeps ||
              m == BlockScope::MarkProcessed);
     }
 #endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
@@ -215,7 +215,7 @@ public:
     }
 
     // assert that we will make some progress in this iteration
-    ASSERT(!ret || !enqueued.empty());
+    assert(!ret || !enqueued.empty());
     return ret;
   }
 

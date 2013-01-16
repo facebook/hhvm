@@ -355,7 +355,7 @@ struct Unit {
     static const int VectorArg = 1 << 7;
 
     MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {
-      ASSERT((int)m_arg == a);
+      assert((int)m_arg == a);
     }
     MetaInfo() : m_kind(None), m_arg(-1), m_data(0) {}
 
@@ -416,24 +416,24 @@ struct Unit {
   PC entry() const { return m_bc; }
   Offset bclen() const { return m_bclen; }
   PC at(const Offset off) const {
-    ASSERT(off >= 0 && off <= Offset(m_bclen));
+    assert(off >= 0 && off <= Offset(m_bclen));
     return m_bc + off;
   }
   Offset offsetOf(const Opcode* op) const {
-    ASSERT(op >= m_bc && op <= (m_bc + m_bclen));
+    assert(op >= m_bc && op <= (m_bc + m_bclen));
     return op - m_bc;
   }
 
   const StringData* filepath() const {
-    ASSERT(m_filepath);
+    assert(m_filepath);
     return m_filepath;
   }
   CStrRef filepathRef() const {
-    ASSERT(m_filepath);
+    assert(m_filepath);
     return *(String*)(&m_filepath);
   }
   const StringData* dirpath() const {
-    ASSERT(m_dirpath);
+    assert(m_dirpath);
     return m_dirpath;
   }
 
@@ -449,7 +449,7 @@ struct Unit {
     return m_namedInfo.size();
   }
   StringData* lookupLitstrId(Id id) const {
-    ASSERT(id >= 0 && id < Id(m_namedInfo.size()));
+    assert(id >= 0 && id < Id(m_namedInfo.size()));
     return const_cast<StringData*>(m_namedInfo[id].first);
   }
 
@@ -458,9 +458,9 @@ struct Unit {
   }
 
   const NamedEntityPair& lookupNamedEntityPairId(Id id) const {
-    ASSERT(id < Id(m_namedInfo.size()));
+    assert(id < Id(m_namedInfo.size()));
     const NamedEntityPair &ne = m_namedInfo[id];
-    ASSERT(ne.first);
+    assert(ne.first);
     if (UNLIKELY(!ne.second)) {
       const_cast<const NamedEntity*&>(ne.second) = GetNamedEntity(ne.first);
     }
@@ -529,7 +529,7 @@ struct Unit {
   }
 
   const PreConst* lookupPreConstId(Id id) const {
-    ASSERT(id < Id(m_preConsts.size()));
+    assert(id < Id(m_preConsts.size()));
     return &m_preConsts[id];
   }
 
@@ -553,8 +553,8 @@ public:
     return m_mergeInfo->hoistableFuncs();
   }
   Func* getLambda() const {
-    ASSERT(m_mergeInfo->m_firstHoistableFunc == 1);
-    ASSERT(m_mergeInfo->m_firstHoistablePreClass == 2);
+    assert(m_mergeInfo->m_firstHoistableFunc == 1);
+    assert(m_mergeInfo->m_firstHoistablePreClass == 2);
     return m_mergeInfo->funcBegin()[1];
   }
   void renameFunc(const StringData* oldName, const StringData* newName);
@@ -567,14 +567,14 @@ public:
     return m_mergeInfo->mutableFuncs();
   }
   Func* lookupFuncId(Id id) const {
-    ASSERT(id < Id(m_mergeInfo->m_firstHoistablePreClass));
+    assert(id < Id(m_mergeInfo->m_firstHoistablePreClass));
     return m_mergeInfo->funcBegin()[id];
   }
   size_t numPreClasses() const {
     return (size_t)m_preClasses.size();
   }
   PreClass* lookupPreClassId(Id id) const {
-    ASSERT(id < Id(m_preClasses.size()));
+    assert(id < Id(m_preClasses.size()));
     return m_preClasses[id].get();
   }
   typedef std::vector<PreClassPtr> PreClassPtrVec;
@@ -593,7 +593,7 @@ public:
   bool getOffsetRange(Offset pc, OffsetRange& range) const;
 
   Opcode getOpcode(size_t instrOffset) const {
-    ASSERT(instrOffset < m_bclen);
+    assert(instrOffset < m_bclen);
     return (Opcode)m_bc[instrOffset];
   }
 
@@ -727,7 +727,7 @@ class UnitEmitter {
       memcpy(&m_bc[m_bclen], c, sizeof(T));
       m_bclen += sizeof(T);
     } else {
-      ASSERT(pos + sizeof(T) <= m_bclen);
+      assert(pos + sizeof(T) <= m_bclen);
       for (uint i = 0; i < sizeof(T); ++i) {
         m_bc[pos + i] = c[i];
       }
@@ -743,7 +743,7 @@ class UnitEmitter {
     if (LIKELY((n & 0x7f) == n)) {
       emitByte((unsigned char)n << 1);
     } else {
-      ASSERT((n & 0x7fffffff) == n);
+      assert((n & 0x7fffffff) == n);
       emitInt32((n << 1) | 0x1);
     }
   }
@@ -998,21 +998,21 @@ class AllFuncsImpl {
   bool empty() const { return fr.empty() && mr.empty() && cr.empty(); }
   typedef typename GetMethods::Value FuncPtr;
   FuncPtr front() const {
-    ASSERT(!empty());
+    assert(!empty());
     if (!fr.empty()) return fr.front();
-    ASSERT(!mr.empty());
+    assert(!mr.empty());
     return mr.front();
   }
   FuncPtr popFront() {
     FuncPtr f = !fr.empty() ? fr.popFront() :
       !mr.empty() ? mr.popFront() : 0;
-    ASSERT(f);
+    assert(f);
     if (fr.empty() && mr.empty()) skip();
     return f;
   }
  private:
   void skip() {
-    ASSERT(fr.empty());
+    assert(fr.empty());
     while (!cr.empty() && mr.empty()) {
       PreClassPtr c = cr.popFront();
       mr = Unit::FuncRange(GetMethods::get(c),

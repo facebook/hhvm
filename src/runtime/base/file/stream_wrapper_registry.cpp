@@ -30,7 +30,7 @@ typedef std::map<std::string,Wrapper*> wrapper_map_t;
 static wrapper_map_t s_wrappers;
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
-  ASSERT(s_wrappers.find(scheme) == s_wrappers.end());
+  assert(s_wrappers.find(scheme) == s_wrappers.end());
   s_wrappers[scheme] = wrapper;
   return true;
 }
@@ -61,7 +61,7 @@ File* open(CStrRef uri, CStrRef mode, CArrRef options) {
   if (wrapper == NULL) {
     wrapper = getWrapper("file");
   }
-  ASSERT(wrapper);
+  assert(wrapper);
 
   return wrapper->open(uri, mode, options);
 }

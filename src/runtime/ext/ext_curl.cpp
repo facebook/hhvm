@@ -138,8 +138,8 @@ public:
   }
 
   CurlResource(CurlResource *src) : m_exception(NULL), m_phpException(false) {
-    ASSERT(src && src != this);
-    ASSERT(!src->m_exception);
+    assert(src && src != this);
+    assert(!src->m_exception);
 
     m_cp = curl_easy_duphandle(src->get());
     m_url = src->m_url;
@@ -174,7 +174,7 @@ public:
   }
 
   void closeForSweep() {
-    ASSERT(!m_exception);
+    assert(!m_exception);
     if (m_cp) {
       curl_easy_cleanup(m_cp);
       m_cp = NULL;
@@ -188,7 +188,7 @@ public:
   }
 
   Variant execute() {
-    ASSERT(!m_exception);
+    assert(!m_exception);
     if (m_cp == NULL) {
       return false;
     }
@@ -564,7 +564,7 @@ public:
   }
 
   Variant do_callback(CVarRef cb, CArrRef args) {
-    ASSERT(!m_exception);
+    assert(!m_exception);
     try {
       return f_call_user_func_array(cb, args);
     } catch (Object &e) {

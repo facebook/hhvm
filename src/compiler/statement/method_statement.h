@@ -86,7 +86,7 @@ public:
 
   FunctionScopeRawPtr getFunctionScope() const {
     BlockScopeRawPtr b = getScope();
-    ASSERT(b->is(BlockScope::FunctionScope));
+    assert(b->is(BlockScope::FunctionScope));
     return FunctionScopeRawPtr((FunctionScope*)b.get());
   }
 

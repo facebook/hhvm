@@ -97,8 +97,8 @@ struct SrcRec {
   }
 
   void setAnchorTranslation(TCA anc) {
-    ASSERT(!m_anchorTranslation);
-    ASSERT(m_tailFallbackJumps.empty());
+    assert(!m_anchorTranslation);
+    assert(m_tailFallbackJumps.empty());
     m_anchorTranslation = anc;
   }
 
@@ -158,11 +158,11 @@ struct GrowableVector {
     return m_size;
   }
   T& operator[](const size_t idx) {
-    ASSERT(idx < m_size);
+    assert(idx < m_size);
     return m_data[idx];
   }
   const T& operator[](const size_t idx) const {
-    ASSERT(idx < m_size);
+    assert(idx < m_size);
     return m_data[idx];
   }
   GrowableVector* push_back(const T& datum) {

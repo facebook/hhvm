@@ -28,14 +28,14 @@ int MySQLUtil::set_mysql_timeout(MYSQL *mysql, MySQLUtil::TimeoutType type, int 
    case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;
    case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT_MS; break;
    case MySQLUtil::WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT_MS; break;
-   default: ASSERT(false); break;
+   default: assert(false); break;
   }
 #else
   switch (type) {
     case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT; break;
     case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT; break;
     case MySQLUtil::WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT; break;
-    default: ASSERT(false); break;
+    default: assert(false); break;
   }
   ms = (ms + 999) / 1000;
 #endif

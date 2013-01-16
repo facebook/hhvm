@@ -43,12 +43,12 @@ public:
   int indexOf(int64 key);
 
   SharedVariant* getKeyIndex(int index) {
-    ASSERT(index < size());
+    assert(index < size());
     return m_buckets[index].key;
   }
 
   SharedVariant* getValIndex(int index) {
-    ASSERT(index < size());
+    assert(index < size());
     return m_buckets[index].val;
   }
 

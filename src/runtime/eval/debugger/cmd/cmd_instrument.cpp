@@ -25,7 +25,7 @@ void CmdInstrument::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_type);
   thrift.write(m_enabled);
-  ASSERT(m_instPoints);
+  assert(m_instPoints);
   InstPointInfo::SendImpl(*m_instPoints, thrift);
 }
 

@@ -132,7 +132,7 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
         frame.set(s_type, "::", true);
       }
     }
-    ASSERT(f);
+    assert(f);
     switch (f[0]) {
     case ParserBase::CharClosure:
       frame.set(s_function, s_closureBrackets, true);
@@ -193,7 +193,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   // The stack depth has exceeded the limit. Re-construct bt to include the
   // top and bottom frames. This is considered more useful in cases such as
   // infinite recursion.
-  ASSERT(bt.size() == RuntimeOption::InjectedStackTraceLimit);
+  assert(bt.size() == RuntimeOption::InjectedStackTraceLimit);
   int half = RuntimeOption::InjectedStackTraceLimit / 2;
 
   // start over, get the top half
@@ -258,13 +258,13 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
         // getFileName() returns a relative path under hphpc, so we
         // we convert it to an absolute path here.
         const string& srcRoot = SourceRootInfo::GetCurrentSourceRoot();
-        ASSERT(!file.size() || file[0] != '/');
-        ASSERT(srcRoot.size() && srcRoot[srcRoot.size()-1] == '/');
+        assert(!file.size() || file[0] != '/');
+        assert(srcRoot.size() && srcRoot[srcRoot.size()-1] == '/');
         file = srcRoot + file.data();
       } else {
         // If we are not under hphpc, then getFileName() should return
         // an absolute path.
-        ASSERT(!file.size() || file[0] == '/');
+        assert(!file.size() || file[0] == '/');
       }
       result.set(s_file, file, true);
       result.set(s_line, t->m_prev->m_line, true);
@@ -295,7 +295,7 @@ int FrameInjection::GetLine(bool skip /* = false */) {
 
 CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
   const_assert(!hhvm);
-  ASSERT(info);
+  assert(info);
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
     if (t != info->m_top) {
       if (t->m_staticClass) return *t->m_staticClass;

@@ -219,7 +219,7 @@ class AliasManager {
   void beginInExpression(StatementPtr parent, ExpressionPtr kid);
   void endInExpression(StatementPtr requestor);
   bool isInExpression() const {
-    ASSERT((m_exprIdx >=  0 && m_exprParent) ||
+    assert((m_exprIdx >=  0 && m_exprParent) ||
            (m_exprIdx == -1 && !m_exprParent));
     return m_exprIdx != -1;
   }

@@ -86,13 +86,13 @@ T* PointerList<T>::get(int index) const {
   if (m_val & uintptr_t(1U)) {
     // If the low bit is set, that means that this PointerList
     // contains exactly one pointer which is stored in m_val
-    ASSERT(index == 0);
+    assert(index == 0);
     // Clear the low bit before returning the value
     return (T*)(m_val & ~(uintptr_t(1U)));
   }
   // Index into the malloced block of memory
-  ASSERT(m_data);
-  ASSERT(index >= 0 && index < m_data->m_len);
+  assert(m_data);
+  assert(index >= 0 && index < m_data->m_len);
   return *((T**)(m_data+1) + index);
 }
 
@@ -101,7 +101,7 @@ void PointerList<T>::set(int index, T* val) {
   if (m_val & uintptr_t(1U)) {
     // If the low bit is set, that means that this PointerList
     // contains exactly one pointer which is stored in m_val.
-    ASSERT(index == 0);
+    assert(index == 0);
     if (!(uintptr_t(val) & uintptr_t(1U))) {
       // If the new value's lowest bit is zero, we can store
       // the new value directly into m_val, mark the low bit,
@@ -117,9 +117,9 @@ void PointerList<T>::set(int index, T* val) {
   }
   // If we reach this point, m_data should be non-NULL and it should
   // not have its low bit set.
-  ASSERT(!(m_val & uintptr_t(1U)));
-  ASSERT(m_data);
-  ASSERT(index >= 0 && index < m_data->m_len);
+  assert(!(m_val & uintptr_t(1U)));
+  assert(m_data);
+  assert(index >= 0 && index < m_data->m_len);
   // Index into the malloced block of memory
   *((T**)(m_data+1) + index) = val;
 }
@@ -219,7 +219,7 @@ void PointerList<T>::grow() {
   // that is aligned on a 2-byte boundary at the very least.
   // This is important because we steal the low bit of m_data
   // for our own nefarious purposes.
-  ASSERT(!(uintptr_t(m_data) & uintptr_t(1U)));
+  assert(!(uintptr_t(m_data) & uintptr_t(1U)));
 }
 
 template <typename T>

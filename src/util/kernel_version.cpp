@@ -28,13 +28,13 @@ void KernelVersion::parse(const char* s) {
                                     "%d.%d.%d-%d_fbk%d_",
                                     &m_major, &m_dot, &m_dotdot, &m_dash,
                                     &m_fbk);
-  ASSERT(numFields >= 3);
+  assert(numFields >= 3);
 }
 
 KernelVersion::KernelVersion() {
   struct utsname uts;
   DEBUG_ONLY int err = uname(&uts);
-  ASSERT(err == 0);
+  assert(err == 0);
   m_major = m_dot = m_dotdot = m_dash = m_fbk = -1;
   parse(uts.release);
 }

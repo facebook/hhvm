@@ -124,7 +124,7 @@ void SourceInfo::loadImpl(LocationMap &dest, const char **p) {
     loc->file = file;
     loc->line = line;
 
-    ASSERT(dest.find(source) == dest.end());
+    assert(dest.find(source) == dest.end());
     dest[source] = loc;
   }
 }

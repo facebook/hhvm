@@ -27,7 +27,7 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
                              bool inner /* = false */,
                              bool unserializeObj /* = false */)
   : m_count (1), m_shouldCache(false), m_flags(0){
-  ASSERT(!serialized || source.isString());
+  assert(!serialized || source.isString());
 
   m_type = source.getType();
 
@@ -108,7 +108,7 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
     }
   default:
     {
-      ASSERT(source.isObject());
+      assert(source.isObject());
       m_shouldCache = true;
       if (unserializeObj) {
         // This assumes hasInternalReference(seen, true) is false
@@ -162,7 +162,7 @@ Variant SharedVariant::toLocal() {
     }
   default:
     {
-      ASSERT(m_type == KindOfObject);
+      assert(m_type == KindOfObject);
       if (getIsObj()) {
         return m_data.obj->getObject();
       }
@@ -250,13 +250,13 @@ SharedVariant::~SharedVariant() {
 
 HOT_FUNC
 int SharedVariant::getIndex(const StringData* key) {
-  ASSERT(is(KindOfArray));
+  assert(is(KindOfArray));
   if (getIsVector()) return -1;
   return m_data.map->indexOf(key);
 }
 
 int SharedVariant::getIndex(int64 key) {
-  ASSERT(is(KindOfArray));
+  assert(is(KindOfArray));
   if (getIsVector()) {
     if (key < 0 || (size_t) key >= m_data.vec->size) return -1;
     return key;
@@ -265,9 +265,9 @@ int SharedVariant::getIndex(int64 key) {
 }
 
 Variant SharedVariant::getKey(ssize_t pos) const {
-  ASSERT(is(KindOfArray));
+  assert(is(KindOfArray));
   if (getIsVector()) {
-    ASSERT(pos < (ssize_t) m_data.vec->size);
+    assert(pos < (ssize_t) m_data.vec->size);
     return pos;
   }
   return m_data.map->getKeyIndex(pos)->toLocal();
@@ -275,9 +275,9 @@ Variant SharedVariant::getKey(ssize_t pos) const {
 
 HOT_FUNC
 SharedVariant* SharedVariant::getValue(ssize_t pos) const {
-  ASSERT(is(KindOfArray));
+  assert(is(KindOfArray));
   if (getIsVector()) {
-    ASSERT(pos < (ssize_t) m_data.vec->size);
+    assert(pos < (ssize_t) m_data.vec->size);
     return m_data.vec->vals[pos];
   }
   return m_data.map->getValIndex(pos);
@@ -287,7 +287,7 @@ void SharedVariant::loadElems(ArrayData *&elems,
                               const SharedMap &sharedMap,
                               bool keepRef /* = false */,
                               bool mapInit /* = false */) {
-  ASSERT(is(KindOfArray));
+  assert(is(KindOfArray));
   uint count = arrSize();
   bool isVector = getIsVector();
   ArrayInit ai = keepRef ? ArrayInit(count, true) :
@@ -367,7 +367,7 @@ int32 SharedVariant::getSpaceUsage() const {
     size += sizeof(StringData) + m_data.str->size();
     break;
   default:
-    ASSERT(is(KindOfArray));
+    assert(is(KindOfArray));
     if (getSerializedArray()) {
       size += sizeof(StringData) + m_data.str->size();
     } else if (getIsVector()) {
@@ -417,7 +417,7 @@ void SharedVariant::getStats(SharedVariantStats *stats) const {
                            stats->dataSize;
     break;
   default:
-    ASSERT(is(KindOfArray));
+    assert(is(KindOfArray));
     if (getSerializedArray()) {
       stats->dataSize = m_data.str->size();
       stats->dataTotalSize = sizeof(SharedVariant) + sizeof(StringData) +

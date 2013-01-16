@@ -94,7 +94,7 @@ ConstructPtr CatchStatement::getNthKid(int n) const {
     case 2:
       return m_finallyStmt;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -115,7 +115,7 @@ void CatchStatement::setNthKid(int n, ConstructPtr cp) {
     case 2:
       m_finallyStmt = boost::dynamic_pointer_cast<Statement>(cp);
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -151,7 +151,7 @@ void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printString(m_className, ar, shared_from_this());
     cg_indentBegin(")) {\n");
     VariableTablePtr variables = getScope()->getVariables();
-    ASSERT(m_variable->hasAssignableCPPVariable());
+    assert(m_variable->hasAssignableCPPVariable());
     const string &cppName =
       m_variable->getAssignableCPPVariable(ar);
     cg_printf("%s = e;\n", cppName.c_str());

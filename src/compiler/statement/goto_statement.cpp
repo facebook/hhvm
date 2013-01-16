@@ -47,7 +47,7 @@ void GotoStatement::invalidate(ParserBase::GotoError error) {
     Compiler::Error(Compiler::GotoInvalidBlock, shared_from_this());
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }
@@ -65,7 +65,7 @@ void GotoStatement::analyzeProgram(AnalysisResultPtr ar) {
 ConstructPtr GotoStatement::getNthKid(int n) const {
   switch (n) {
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -78,7 +78,7 @@ int GotoStatement::getKidCount() const {
 void GotoStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -107,7 +107,7 @@ void GotoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 "is disallowed\");\n");
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
     }
   }

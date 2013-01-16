@@ -51,7 +51,7 @@ ConstructPtr EchoStatement::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -67,7 +67,7 @@ void EchoStatement::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

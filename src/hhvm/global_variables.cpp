@@ -70,7 +70,7 @@ void init_global_variables() {
 }
 
 GlobalVariables* get_global_variables() {
-  ASSERT(g_variables);
+  assert(g_variables);
   return g_variables;
 }
 

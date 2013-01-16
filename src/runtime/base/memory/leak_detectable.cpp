@@ -46,12 +46,12 @@ LeakDetectable::~LeakDetectable() {
   TotalCount--;
 
   StackTraceMap::iterator iter = AllocStackTraces.find(this);
-  ASSERT(iter != AllocStackTraces.end());
+  assert(iter != AllocStackTraces.end());
   AllocStackTraces.erase(iter);
 }
 
 void LeakDetectable::markReachable() {
-  ASSERT(!m_reachable);
+  assert(!m_reachable);
   m_reachable = true;
 }
 

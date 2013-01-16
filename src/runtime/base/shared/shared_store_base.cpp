@@ -89,7 +89,7 @@ void SharedStores::create() {
         m_stores[i] = new ConcurrentTableSharedStore(i);
         break;
       default:
-        ASSERT(false);
+        assert(false);
     }
   }
 }
@@ -144,8 +144,8 @@ char *SharedStoreFileStorage::put(const char *data, int32 len) {
     m_state = StateFull;
     return NULL;
   }
-  ASSERT(m_current);
-  ASSERT(len + PaddingSize <= m_chunkRemain);
+  assert(m_current);
+  assert(len + PaddingSize <= m_chunkRemain);
   strhash_t h = hash_string_inline(data, len);
   *(strhash_t*)m_current = h;
   m_current += sizeof(h);
@@ -166,7 +166,7 @@ void SharedStoreFileStorage::seal() {
   if (m_state == StateSealed) {
     return;
   }
-  ASSERT(m_state == StateOpen || m_state == StateFull);
+  assert(m_state == StateOpen || m_state == StateFull);
   m_current = NULL;
   m_chunkRemain = 0;
   m_state = StateSealed;

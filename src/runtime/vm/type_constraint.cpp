@@ -83,14 +83,14 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
   } else {
     m_type = { KindOfObject, Precise };
   }
-  ASSERT(m_type.m_dt != KindOfStaticString);
-  ASSERT(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
-  ASSERT(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
+  assert(m_type.m_dt != KindOfStaticString);
+  assert(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
+  assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
 }
 
 bool
 TypeConstraint::check(const TypedValue* tv, const Func* func) const {
-  ASSERT(exists());
+  assert(exists());
 
   // This is part of the interpreter runtime; perf matters.
   if (tv->m_type == KindOfRef) {
@@ -116,7 +116,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     } else {
       // We can't save the Class* since it moves around from request
       // to request.
-      ASSERT(m_namedEntity);
+      assert(m_namedEntity);
       c = Unit::lookupClass(m_namedEntity);
     }
     if (shouldProfile() && c) {

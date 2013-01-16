@@ -147,15 +147,15 @@ public:
   }
 
   Val* insert(Key key, Val val) {
-    ASSERT(key != 0);
+    assert(key != 0);
     return insertImpl(acquireAndGrowIfNeeded(), key, val);
   }
 
   Val* find(Key key) const {
-    ASSERT(key != 0);
+    assert(key != 0);
 
     Table* tab = atomic_acquire_load(&m_table); // memory_order_consume
-    ASSERT(tab->capac > tab->size);
+    assert(tab->capac > tab->size);
     size_t idx = project(tab, key);
     for (;;) {
       Key currentProbe = atomic_acquire_load(&tab->entries[idx].first);
@@ -168,14 +168,14 @@ public:
 private:
   Val* insertImpl(Table* const tab, Key newKey, Val newValue) {
     value_type* probe = &tab->entries[project(tab, newKey)];
-    ASSERT(size_t(probe - tab->entries) < tab->capac);
+    assert(size_t(probe - tab->entries) < tab->capac);
 
     // Since we're the only thread allowed to write, we're allowed to
     // do a relaxed load here.  (No need for an acquire/release
     // handshake with ourselves.)
     while (Key currentProbe = probe->first) {
-      ASSERT(currentProbe != newKey); // insertions must be unique
-      ASSERT(probe <= (tab->entries + tab->capac));
+      assert(currentProbe != newKey); // insertions must be unique
+      assert(probe <= (tab->entries + tab->capac));
       // can't loop forever; acquireAndGrowIfNeeded ensures there's
       // some slack.
       (void)currentProbe;
@@ -212,15 +212,15 @@ private:
         insertImpl(newTable, ent->first, ent->second);
       }
     }
-    ASSERT(newTable->capac == old->capac * 2);
-    ASSERT(newTable->size == old->size); // only one writer thread
+    assert(newTable->capac == old->capac * 2);
+    assert(newTable->size == old->size); // only one writer thread
     atomic_release_store(&m_table, newTable); // publish
     Treadmill::deferredFree(old);
     return newTable;
   }
 
   size_t project(Table* tab, Key key) const {
-    ASSERT(Util::isPowerOfTwo(tab->capac));
+    assert(Util::isPowerOfTwo(tab->capac));
     return m_hash(key) & (tab->capac - 1);
   }
 

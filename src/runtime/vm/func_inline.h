@@ -21,12 +21,12 @@ namespace HPHP {
 namespace VM {
 
 inline ALWAYS_INLINE Func** getCachedFuncAddr(unsigned offset) {
-  ASSERT(offset != 0u);
+  assert(offset != 0u);
   return (Func**)Transl::TargetCache::handleToPtr(offset);
 }
 
 inline ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
-  ASSERT(!func->isMethod());
+  assert(!func->isMethod());
   Func** funcAddr = getCachedFuncAddr(func->getCachedOffset());
   if (UNLIKELY(*funcAddr != NULL)) {
     if (*funcAddr == func) return;

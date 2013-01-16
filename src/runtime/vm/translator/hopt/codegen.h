@@ -246,13 +246,13 @@ private:
  *       .reg(rax)
  *       .immPtr(StringData::GetStaticString("Yo"))
  *       ;
- *   ASSERT(args.size() == 3);
+ *   assert(args.size() == 3);
  */
 struct ArgGroup {
   size_t size() const { return m_args.size(); }
 
   ArgDesc& operator[](size_t i) {
-    ASSERT(i < size());
+    assert(i < size());
     return m_args[i];
   }
 

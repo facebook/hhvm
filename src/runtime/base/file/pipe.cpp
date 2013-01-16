@@ -33,8 +33,8 @@ Pipe::~Pipe() {
 }
 
 bool Pipe::open(CStrRef filename, CStrRef mode) {
-  ASSERT(m_stream == NULL);
-  ASSERT(m_fd == -1);
+  assert(m_stream == NULL);
+  assert(m_fd == -1);
 
   FILE *f = LightProcess::popen(filename.data(), mode.data());
   if (!f) {
@@ -53,7 +53,7 @@ bool Pipe::closeImpl() {
   bool ret = true;
   s_file_data->m_pcloseRet = 0;
   if (!m_closed) {
-    ASSERT(m_stream);
+    assert(m_stream);
     int pcloseRet = LightProcess::pclose(m_stream);
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
     s_file_data->m_pcloseRet = pcloseRet;

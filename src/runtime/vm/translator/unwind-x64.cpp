@@ -54,7 +54,7 @@ void append_vec(std::vector<char>& v,
 }
 
 void sync_regstate(_Unwind_Context* context) {
-  ASSERT(tl_regState == REGSTATE_DIRTY);
+  assert(tl_regState == REGSTATE_DIRTY);
 
   TRACE(1, "unwind: doing fixup sync\n");
 
@@ -125,7 +125,7 @@ tc_unwind_personality(int version,
                       uint64_t exceptionClass,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context) {
-  ASSERT(version == 1);
+  assert(version == 1);
 
   /*
    * We don't do anything during the search phase---before attempting
@@ -187,10 +187,10 @@ bool UnwindRegInfo::empty() const {
 void UnwindRegInfo::add(RegNumber reg,
                         DataType type,
                         Location loc) {
-  ASSERT(type >= -128 && type < 128 &&
+  assert(type >= -128 && type < 128 &&
          "UnwindRegInfo has only 8 bits for DataType");
-  ASSERT(loc.space == Location::Stack || loc.space == Location::Local);
-  ASSERT(loc.offset >= std::numeric_limits<int16_t>::min() &&
+  assert(loc.space == Location::Stack || loc.space == Location::Local);
+  assert(loc.offset >= std::numeric_limits<int16_t>::min() &&
          loc.offset <= std::numeric_limits<int16_t>::max() &&
          "UnwindRegInfo only has 16 bits for location offsets");
 
@@ -216,7 +216,7 @@ void UnwindRegInfo::add(RegNumber reg,
     }
   }
 
-  ASSERT(false && "Too many callee saved registers for UnwindRegInfo");
+  assert(false && "Too many callee saved registers for UnwindRegInfo");
 }
 
 UnwindInfoHandle

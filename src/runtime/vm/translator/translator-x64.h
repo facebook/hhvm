@@ -712,7 +712,7 @@ PSEUDOINSTRS
   template<typename T>
   void invalidateSrcKeys(const T& keys) {
     BlockingLeaseHolder writer(s_writeLease);
-    ASSERT(writer);
+    assert(writer);
     for (typename T::const_iterator i = keys.begin(); i != keys.end(); ++i) {
       invalidateSrcKey(*i);
     }
@@ -739,7 +739,7 @@ PSEUDOINSTRS
   SrcRec* getSrcRec(const SrcKey& sk) {
     // TODO: add a insert-or-find primitive to THM
     if (SrcRec* r = m_srcDB.find(sk)) return r;
-    ASSERT(s_writeLease.amOwner());
+    assert(s_writeLease.amOwner());
     return m_srcDB.insert(sk);
   }
 
@@ -1106,13 +1106,13 @@ class CodeCursor {
   public:
   CodeCursor(Asm& a, TCA newFrontier) :
     m_a(a), m_oldFrontier(a.code.frontier) {
-      ASSERT(TranslatorX64::canWrite());
+      assert(TranslatorX64::canWrite());
       m_a.code.frontier = newFrontier;
       TRACE_MOD(Trace::trans, 1, "RewindTo: %p (from %p)\n",
                 m_a.code.frontier, m_oldFrontier);
     }
   ~CodeCursor() {
-    ASSERT(TranslatorX64::canWrite());
+    assert(TranslatorX64::canWrite());
     m_a.code.frontier = m_oldFrontier;
     TRACE_MOD(Trace::trans, 1, "Restore: %p\n",
               m_a.code.frontier);

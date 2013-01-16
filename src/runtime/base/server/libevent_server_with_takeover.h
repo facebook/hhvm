@@ -38,7 +38,7 @@ public:
   // Set the name of the file to be used for a Unix domain socket
   // over which to transfer the accept socket.
   void setTransferFilename(const std::string &fname) {
-    ASSERT(m_transfer_fname.empty());
+    assert(m_transfer_fname.empty());
     m_transfer_fname = fname;
   }
 

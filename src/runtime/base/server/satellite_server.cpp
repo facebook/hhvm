@@ -220,7 +220,7 @@ SatelliteServerPtr SatelliteServer::Create(SatelliteServerInfoPtr info) {
       satellite = SatelliteServerPtr(new RPCServer(info));
       break;
     default:
-      ASSERT(false);
+      assert(false);
     }
     if (satellite) {
       satellite->setName(info->getName());

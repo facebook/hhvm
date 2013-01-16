@@ -21,7 +21,7 @@ namespace HPHP { namespace Eval {
 
 void CmdBreak::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
-  ASSERT(m_breakpoints);
+  assert(m_breakpoints);
   BreakPointInfo::SendImpl(*m_breakpoints, thrift);
 }
 
@@ -202,7 +202,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
           action = "updated";
           bp->setState(BreakPointInfo::Disabled);
         } else {
-          ASSERT(hasToggleArg(client));
+          assert(hasToggleArg(client));
           action = "updated";
           bp->toggle();
         }
@@ -237,7 +237,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
         bpi->setState(BreakPointInfo::Disabled);
       }
       else {
-        ASSERT(hasToggleArg(client));
+        assert(hasToggleArg(client));
         bpi->toggle();
       }
     }
@@ -288,7 +288,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
     client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   } else {
-    ASSERT(hasToggleArg(client));
+    assert(hasToggleArg(client));
     bpi->toggle();
     updateImpl(client);
     client->info("Breakpoint %d's state is changed to %s.", bpi->index(),

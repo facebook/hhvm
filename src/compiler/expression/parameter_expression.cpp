@@ -98,7 +98,7 @@ ConstructPtr ParameterExpression::getNthKid(int n) const {
     case 0:
       return m_defaultValue;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -174,7 +174,7 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
 
 TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
-  ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
+  assert(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
   TypePtr ret = getTypeSpec(ar, true);
 
   VariableTablePtr variables = getScope()->getVariables();
@@ -243,7 +243,7 @@ void ParameterExpression::compatibleDefault() {
     case KindOfNull:    compat = true; break;
     /* KindOfClass is an hhvm internal type, can not occur here */
     case KindOfObject:  /* fall through */
-    case KindOfRef: ASSERT(false /* likely parser bug */);
+    case KindOfRef: assert(false /* likely parser bug */);
     default:            compat = false; break;
     }
   } else {
@@ -370,12 +370,12 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
       }
       bool isScalar = m_defaultValue->isScalar();
       if (isCVarRef && isScalar) {
-        ASSERT(!cg.hasScalarVariant());
+        assert(!cg.hasScalarVariant());
         cg.setScalarVariant();
       }
       m_defaultValue->outputCPP(cg, ar);
       if (isCVarRef && isScalar) cg.clearScalarVariant();
-      ASSERT(!cg.hasScalarVariant());
+      assert(!cg.hasScalarVariant());
       cg.setContext(context);
     }
     if (comment) {

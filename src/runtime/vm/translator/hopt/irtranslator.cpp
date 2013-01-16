@@ -110,7 +110,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
                            const Location& l,
                            const RuntimeType& rtt,
                            SrcRec& fail) {
-  ASSERT(m_useHHIR);
+  assert(m_useHHIR);
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue()) return;
@@ -136,7 +136,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
 
 void
 TranslatorX64::irEmitLoadDeps() {
-  ASSERT(m_useHHIR);
+  assert(m_useHHIR);
   m_hhbcTrans->emitLoadDeps();
 }
 
@@ -166,7 +166,7 @@ void
 TranslatorX64::irTranslateSameOp(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   const Opcode op = i.op();
-  ASSERT(op == OpSame || op == OpNSame);
+  assert(op == OpSame || op == OpNSame);
   if (op == OpSame) {
     HHIR_EMIT(Same);
   } else {
@@ -186,7 +186,7 @@ TranslatorX64::irTranslateEqOp(const Tracelet& t,
       HHIR_UNIMPLEMENTED(Neq);
     }
   }
-  ASSERT(op == OpEq || op == OpNeq);
+  assert(op == OpEq || op == OpNeq);
   if (op == OpEq) {
     HHIR_EMIT(Eq);
   } else {
@@ -198,11 +198,11 @@ void
 TranslatorX64::irTranslateLtGtOp(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   const Opcode op = i.op();
-  ASSERT(op == OpLt || op == OpLte || op == OpGt || op == OpGte);
-  ASSERT(i.inputs.size() == 2);
-  ASSERT(i.outStack && !i.outLocal);
-  ASSERT(i.inputs[0]->outerType() != KindOfRef);
-  ASSERT(i.inputs[1]->outerType() != KindOfRef);
+  assert(op == OpLt || op == OpLte || op == OpGt || op == OpGte);
+  assert(i.inputs.size() == 2);
+  assert(i.outStack && !i.outLocal);
+  assert(i.inputs[0]->outerType() != KindOfRef);
+  assert(i.inputs[1]->outerType() != KindOfRef);
 
   HHIR_UNIMPLEMENTED_WHEN((!i.isNative()), LtGtOp);
   switch (op) {
@@ -218,7 +218,7 @@ void
 TranslatorX64::irTranslateUnaryBooleanOp(const Tracelet& t,
                                          const NormalizedInstruction& i) {
   const Opcode op = i.op();
-  ASSERT(op == OpCastBool || op == OpEmptyL);
+  assert(op == OpCastBool || op == OpEmptyL);
   if (op == OpCastBool) {
     HHIR_EMIT(CastBool);
   } else {
@@ -230,7 +230,7 @@ void
 TranslatorX64::irTranslateBranchOp(const Tracelet& t,
                                    const NormalizedInstruction& i) {
   const Opcode op = i.op();
-  ASSERT(op == OpJmpZ || op == OpJmpNZ);
+  assert(op == OpJmpZ || op == OpJmpNZ);
   if (op == OpJmpZ) {
     HHIR_EMIT(JmpZ,  i.offset() + i.imm[0].u_BA);
   } else {
@@ -242,10 +242,10 @@ void
 TranslatorX64::irTranslateCGetL(const Tracelet& t,
                                 const NormalizedInstruction& i) {
   const DEBUG_ONLY Opcode op = i.op();
-  ASSERT(op == OpFPassL || OpCGetL);
+  assert(op == OpFPassL || OpCGetL);
   const vector<DynLocation*>& inputs = i.inputs;
-  ASSERT(inputs.size() == 1);
-  ASSERT(inputs[0]->isLocal());
+  assert(inputs.size() == 1);
+  assert(inputs[0]->isLocal());
 
   HHIR_EMIT(CGetL, inputs[0]->location.offset);
 }
@@ -270,21 +270,21 @@ TranslatorX64::irTranslateAssignToLocalOp(const Tracelet& t,
   DEBUG_ONLY const int rhsIdx  = 0;
   const int locIdx  = 1;
   const Opcode op = ni.op();
-  ASSERT(op == OpSetL || op == OpBindL);
-  ASSERT(ni.inputs.size() == 2);
-  ASSERT((op == OpBindL) ==
+  assert(op == OpSetL || op == OpBindL);
+  assert(ni.inputs.size() == 2);
+  assert((op == OpBindL) ==
          (ni.inputs[rhsIdx]->outerType() == KindOfRef));
 
-  ASSERT(!ni.outStack || ni.inputs[locIdx]->location != ni.outStack->location);
-  ASSERT(ni.outLocal);
-  ASSERT(ni.inputs[locIdx]->location == ni.outLocal->location);
-  ASSERT(ni.inputs[rhsIdx]->isStack());
+  assert(!ni.outStack || ni.inputs[locIdx]->location != ni.outStack->location);
+  assert(ni.outLocal);
+  assert(ni.inputs[locIdx]->location == ni.outLocal->location);
+  assert(ni.inputs[rhsIdx]->isStack());
 
   if (op == OpSetL) {
-    ASSERT(ni.inputs[locIdx]->isLocal());
+    assert(ni.inputs[locIdx]->isLocal());
     HHIR_EMIT(SetL, ni.inputs[locIdx]->location.offset);
   } else {
-    ASSERT(op == OpBindL);
+    assert(op == OpBindL);
     HHIR_EMIT(BindL, ni.inputs[locIdx]->location.offset);
   }
 }
@@ -292,8 +292,8 @@ TranslatorX64::irTranslateAssignToLocalOp(const Tracelet& t,
 void
 TranslatorX64::irTranslatePopC(const Tracelet& t,
                              const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(!i.outStack && !i.outLocal);
+  assert(i.inputs.size() == 1);
+  assert(!i.outStack && !i.outLocal);
 
   if (i.inputs[0]->rtt.isVagueValue()) {
     HHIR_EMIT(PopR);
@@ -305,7 +305,7 @@ TranslatorX64::irTranslatePopC(const Tracelet& t,
 void
 TranslatorX64::irTranslatePopV(const Tracelet& t,
                                const NormalizedInstruction& i) {
-  ASSERT(i.inputs[0]->rtt.isVagueValue() ||
+  assert(i.inputs[0]->rtt.isVagueValue() ||
          i.inputs[0]->isVariant());
 
   HHIR_EMIT(PopV);
@@ -332,8 +332,8 @@ TranslatorX64::irTranslateUnboxR(const Tracelet& t,
 void
 TranslatorX64::irTranslateNull(const Tracelet& t,
                                const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 0);
-  ASSERT(!i.outLocal);
+  assert(i.inputs.size() == 0);
+  assert(!i.outLocal);
 
   HHIR_EMIT(Null);
 }
@@ -347,8 +347,8 @@ TranslatorX64::irTranslateNullUninit(const Tracelet& t,
 void
 TranslatorX64::irTranslateTrue(const Tracelet& t,
                                const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 0);
-  ASSERT(!i.outLocal);
+  assert(i.inputs.size() == 0);
+  assert(!i.outLocal);
 
   HHIR_EMIT(True);
 }
@@ -356,8 +356,8 @@ TranslatorX64::irTranslateTrue(const Tracelet& t,
 void
 TranslatorX64::irTranslateFalse(const Tracelet& t,
                                 const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 0);
-  ASSERT(!i.outLocal);
+  assert(i.inputs.size() == 0);
+  assert(!i.outLocal);
 
   HHIR_EMIT(False);
 }
@@ -365,8 +365,8 @@ TranslatorX64::irTranslateFalse(const Tracelet& t,
 void
 TranslatorX64::irTranslateInt(const Tracelet& t,
                               const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size()  == 0);
-  ASSERT(!i.outLocal);
+  assert(i.inputs.size()  == 0);
+  assert(!i.outLocal);
 
   HHIR_EMIT(Int, i.imm[0].u_I64A);
 }
@@ -380,8 +380,8 @@ TranslatorX64::irTranslateDouble(const Tracelet& t,
 void
 TranslatorX64::irTranslateString(const Tracelet& t,
                                  const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size()  == 0);
-  ASSERT(!i.outLocal);
+  assert(i.inputs.size()  == 0);
+  assert(!i.outLocal);
 
   HHIR_EMIT(String, (i.imm[0].u_SA));
 }
@@ -389,8 +389,8 @@ TranslatorX64::irTranslateString(const Tracelet& t,
 void
 TranslatorX64::irTranslateArray(const Tracelet& t,
                                 const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 0);
-  ASSERT(!i.outLocal);
+  assert(i.inputs.size() == 0);
+  assert(!i.outLocal);
 
   HHIR_EMIT(Array, i.imm[0].u_AA);
 }
@@ -416,12 +416,12 @@ TranslatorX64::irTranslateAddElemC(const Tracelet& t,
 void
 TranslatorX64::irTranslateAddNewElemC(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 2);
-  ASSERT(i.outStack && !i.outLocal);
-  ASSERT(i.inputs[0]->outerType() != KindOfRef);
-  ASSERT(i.inputs[1]->outerType() != KindOfRef);
-  ASSERT(i.inputs[0]->isStack());
-  ASSERT(i.inputs[1]->isStack());
+  assert(i.inputs.size() == 2);
+  assert(i.outStack && !i.outLocal);
+  assert(i.inputs[0]->outerType() != KindOfRef);
+  assert(i.inputs[1]->outerType() != KindOfRef);
+  assert(i.inputs[0]->isStack());
+  assert(i.inputs[1]->isStack());
 
   HHIR_EMIT(AddNewElemC);
 }
@@ -453,7 +453,7 @@ TranslatorX64::irTranslateConcat(const Tracelet& t,
 void
 TranslatorX64::irTranslateAdd(const Tracelet& t,
                               const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 2);
+  assert(i.inputs.size() == 2);
 
   if (planInstrAdd_Array(i)) {
     HHIR_EMIT(ArrayAdd);
@@ -461,7 +461,7 @@ TranslatorX64::irTranslateAdd(const Tracelet& t,
   }
 
   HHIR_UNIMPLEMENTED_WHEN(!planInstrAdd_Int(i), Add);
-  ASSERT(planInstrAdd_Int(i));
+  assert(planInstrAdd_Int(i));
   HHIR_EMIT(Add);
 }
 
@@ -480,7 +480,7 @@ TranslatorX64::irTranslateNot(const Tracelet& t,
 void
 TranslatorX64::irTranslateBitNot(const Tracelet& t,
                                  const NormalizedInstruction& i) {
-  ASSERT(i.outStack && !i.outLocal);
+  assert(i.outStack && !i.outLocal);
 
   HHIR_EMIT(BitNot);
 }
@@ -488,8 +488,8 @@ TranslatorX64::irTranslateBitNot(const Tracelet& t,
 void
 TranslatorX64::irTranslateCastInt(const Tracelet& t,
                                   const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(i.outStack && !i.outLocal);
+  assert(i.inputs.size() == 1);
+  assert(i.outStack && !i.outLocal);
 
   HHIR_EMIT(CastInt);
   /* nop */
@@ -585,7 +585,7 @@ void TranslatorX64::irTranslateAGetC(const Tracelet& t,
 
 void TranslatorX64::irTranslateAGetL(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  ASSERT(i.inputs[kEmitClsLocalIdx]->isLocal());
+  assert(i.inputs[kEmitClsLocalIdx]->isLocal());
   const DynLocation* dynLoc = i.inputs[kEmitClsLocalIdx];
   const StringData* clsName = dynLoc->rtt.valueStringOrNull();
   HHIR_EMIT(AGetL, dynLoc->location.offset, clsName);
@@ -743,7 +743,7 @@ void
 TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
                                     const NormalizedInstruction& i) {
   using namespace TargetCache;
-  ASSERT(i.inputs.size() == 2 && i.outStack);
+  assert(i.inputs.size() == 2 && i.outStack);
 
   const DynLocation& prop = *i.inputs[1];
   const Location& propLoc = prop.location;
@@ -773,8 +773,8 @@ isSupportedCGetMProp(const NormalizedInstruction& i) {
 void
 TranslatorX64::irTranslateCGetM(const Tracelet& t,
                               const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() >= 2);
-  ASSERT(i.outStack);
+  assert(i.inputs.size() >= 2);
+  assert(i.outStack);
 
   if (isSupportedCGetMProp(i)) {
     irTranslateCGetMProp(t, i);
@@ -820,7 +820,7 @@ void TranslatorX64::irTranslateFPassS(const Tracelet& t,
                                       const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
     HHIR_UNIMPLEMENTED(FPassS);
-    ASSERT(false);
+    assert(false);
   } else {
     irTranslateCGetS(t, ni);
   }
@@ -850,8 +850,8 @@ void TranslatorX64::irTranslateEmptyM(const Tracelet& t,
 void
 TranslatorX64::irTranslateCheckTypeOp(const Tracelet& t,
                                     const NormalizedInstruction& ni) {
-  ASSERT(ni.inputs.size() == 1);
-  ASSERT(ni.outStack);
+  assert(ni.inputs.size() == 1);
+  assert(ni.outStack);
 
   const Opcode op = ni.op();
   const int    off = ni.inputs[0]->location.offset;
@@ -887,7 +887,7 @@ void
 TranslatorX64::irTranslateSetMProp(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   using namespace TargetCache;
-  ASSERT(i.inputs.size() == 3);
+  assert(i.inputs.size() == 3);
 
   UNUSED const int kRhsIdx       = 0;
   const int kBaseIdx      = 1;
@@ -954,7 +954,7 @@ TranslatorX64::irTranslateIncDecM(const Tracelet& t,
     int offset = getNormalPropertyOffset(i, getMInstrInfo(OpIncDecM), 1, 0);
     if (offset != -1 && i.immVec.locationCode() == LC) {
       const IncDecOp oplet = (IncDecOp) *(i.pc() + 1);
-      ASSERT(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
+      assert(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
              oplet == PostDec);
       bool post = (oplet == PostInc || oplet == PostDec);
       bool pre  = !post;
@@ -979,11 +979,11 @@ void
 TranslatorX64::irTranslateIncDecL(const Tracelet& t,
                                 const NormalizedInstruction& i) {
   const vector<DynLocation*>& inputs = i.inputs;
-  ASSERT(inputs.size() == 1);
-  ASSERT(i.outLocal);
-  ASSERT(inputs[0]->isLocal());
+  assert(inputs.size() == 1);
+  assert(i.outLocal);
+  assert(inputs[0]->isLocal());
   const IncDecOp oplet = IncDecOp(i.imm[1].u_OA);
-  ASSERT(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
+  assert(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
          oplet == PostDec);
   bool post = (oplet == PostInc || oplet == PostDec);
   bool pre  = !post;
@@ -1063,9 +1063,9 @@ TranslatorX64::irTranslateFPushClsMethodD(const Tracelet& t,
   const StringData* meth = curUnit()->lookupLitstrId(i.imm[1].u_SA);
   const NamedEntityPair& np = curUnit()->lookupNamedEntityPairId(i.imm[2].u_SA);
   DEBUG_ONLY const StringData* cls = np.first;
-  ASSERT(meth && meth->isStatic() &&
+  assert(meth && meth->isStatic() &&
          cls && cls->isStatic());
-  ASSERT(i.inputs.size() == 0);
+  assert(i.inputs.size() == 0);
 
   const Class* baseClass = Unit::lookupClass(np.second);
   bool magicCall = false;
@@ -1097,10 +1097,10 @@ TranslatorX64::irTranslateFPushClsMethodF(const Tracelet& t,
 void
 TranslatorX64::irTranslateFPushObjMethodD(const Tracelet &t,
                                         const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
+  assert(i.inputs.size() == 1);
   HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfObject),
                           FPushObjMethod_nonObj);
-  ASSERT(i.inputs[0]->valueType() == KindOfObject);
+  assert(i.inputs[0]->valueType() == KindOfObject);
   int id = i.imm[1].u_IVA;
   UNUSED const StringData* name = curUnit()->lookupLitstrId(id);
   const Class* baseClass = i.inputs[0]->rtt.valueClass();
@@ -1127,8 +1127,8 @@ void TranslatorX64::irTranslateFPushCtorD(const Tracelet& t,
 void
 TranslatorX64::irTranslateThis(const Tracelet &t,
                              const NormalizedInstruction &i) {
-  ASSERT(i.outStack && !i.outLocal);
-  ASSERT(curFunc()->isPseudoMain() || curFunc()->cls());
+  assert(i.outStack && !i.outLocal);
+  assert(curFunc()->isPseudoMain() || curFunc()->cls());
 
   HHIR_EMIT(This);
 }
@@ -1136,8 +1136,8 @@ TranslatorX64::irTranslateThis(const Tracelet &t,
 void
 TranslatorX64::irTranslateBareThis(const Tracelet &t,
                                   const NormalizedInstruction &i) {
-  ASSERT(i.outStack && !i.outLocal);
-  ASSERT(curFunc()->isPseudoMain() || curFunc()->cls());
+  assert(i.outStack && !i.outLocal);
+  assert(curFunc()->isPseudoMain() || curFunc()->cls());
 
   HHIR_EMIT(BareThis, (i.imm[0].u_OA));
 }
@@ -1151,8 +1151,8 @@ TranslatorX64::irTranslateCheckThis(const Tracelet& t,
 void
 TranslatorX64::irTranslateInitThisLoc(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  ASSERT(i.outLocal && !i.outStack);
-  ASSERT(curFunc()->isPseudoMain() || curFunc()->cls());
+  assert(i.outLocal && !i.outStack);
+  assert(curFunc()->isPseudoMain() || curFunc()->cls());
 
   HHIR_EMIT(InitThisLoc, i.outLocal->location.offset);
 }
@@ -1179,8 +1179,8 @@ void
 TranslatorX64::irTranslateFPassM(const Tracelet& t,
                                const NormalizedInstruction& i) {
 
-  ASSERT(i.inputs.size() >= 1);
-  ASSERT(i.outStack && !i.outLocal);
+  assert(i.inputs.size() >= 1);
+  assert(i.outStack && !i.outLocal);
   HHIR_UNIMPLEMENTED_WHEN((i.preppedByRef), FPassM);
   irTranslateCGetM(t, i);
 }
@@ -1275,7 +1275,7 @@ TranslatorX64::irTranslateVerifyParamType(const Tracelet& t,
   // is compatible, but for objects we need to go one step further and
   // ensure that we're dealing with the right class.
   // NULL inputs only get traced when constraint is nullable.
-  ASSERT(i.inputs.size() == 1);
+  assert(i.inputs.size() == 1);
   if (!i.inputs[0]->isObject()) {
     HHIR_UNIMPLEMENTED_WHEN(i.m_txFlags == Interp, VerifyParamType);
     return; // nop.
@@ -1404,7 +1404,7 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
     default:
       // GO: if you hit this, check opNames[op] and add support for it
       HHIR_UNIMPLEMENTED_OP(opNames[op]);
-      ASSERT(false);
+      assert(false);
   }
 }
 
@@ -1430,7 +1430,7 @@ TranslatorX64::irTranslateInstrWork(const Tracelet& t,
 
 void
 TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
-  ASSERT(m_useHHIR);
+  assert(m_useHHIR);
 
   if (!i.outStack || i.breaksTracelet) return;
 
@@ -1454,9 +1454,9 @@ TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
 void
 TranslatorX64::irTranslateInstr(const Tracelet& t,
                                 const NormalizedInstruction& i) {
-  ASSERT(m_useHHIR);
-  ASSERT(!i.outStack || i.outStack->isStack());
-  ASSERT(!i.outLocal || i.outLocal->isLocal());
+  assert(m_useHHIR);
+  assert(!i.outStack || i.outStack->isStack());
+  assert(!i.outLocal || i.outLocal->isLocal());
   FTRACE_MOD(Trace::hhir, 1, "translating: {}\n", opcodeToName(i.op()));
 
   m_hhbcTrans->setBcOff(i.source.offset(), i.breaksTracelet);
@@ -1487,7 +1487,7 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
 
 void TranslatorX64::irAssertType(const Location& l,
                                  const RuntimeType& rtt) {
-  ASSERT(m_useHHIR);
+  assert(m_useHHIR);
   if (rtt.isVagueValue()) return;
 
   switch (l.space) {
@@ -1538,11 +1538,11 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
                                    const TCA               stubStart,
                                    vector<TransBCMapping>* bcMap) {
   bool hhirSucceeded = false;
-  ASSERT(m_useHHIR);
+  assert(m_useHHIR);
 
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
-  ASSERT(srcRec.inProgressTailJumps().size() == 0);
+  assert(srcRec.inProgressTailJumps().size() == 0);
   try {
     // Don't translate if we have already reached the maximum # of
     // translations for this tracelet
@@ -1569,7 +1569,7 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
       for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
            ni = ni->next) {
         irTranslateInstr(t, *ni);
-        ASSERT(ni->source.offset() >= curFunc()->base());
+        assert(ni->source.offset() >= curFunc()->base());
         // We sometimes leave the tail of a truncated tracelet in place to aid
         // analysis, but breaksTracelet is authoritative.
         if (ni->breaksTracelet) break;
@@ -1615,7 +1615,7 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
 }
 
 void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
-  ASSERT(!m_irFactory);
+  assert(!m_irFactory);
 
   Cell* fp = vmfp();
   if (curFunc()->isGenerator()) {
@@ -1631,12 +1631,12 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
 }
 
 void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
-  ASSERT(m_useHHIR);
+  assert(m_useHHIR);
   m_hhbcTrans->end(bcSuccOffset);
 }
 
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
-  ASSERT(m_useHHIR);
+  assert(m_useHHIR);
 
   JIT::Trace* trace = m_hhbcTrans->getTrace();
   std::ostream& os = std::cout;

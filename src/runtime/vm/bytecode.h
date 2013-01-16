@@ -55,7 +55,7 @@ namespace VM {
   case SetOpXorEqual: tvAsVariant(lhs) ^= tvCellAsCVarRef(rhs); break;        \
   case SetOpSlEqual: tvAsVariant(lhs) <<= tvCellAsCVarRef(rhs); break;        \
   case SetOpSrEqual: tvAsVariant(lhs) >>= tvCellAsCVarRef(rhs); break;        \
-  default: ASSERT(false);                                                     \
+  default: assert(false);                                                     \
   }                                                                           \
 } while (0)
 
@@ -280,7 +280,7 @@ struct ActRec {
 
   static inline uint32_t
   encodeNumArgs(uint32_t numArgs, bool isFPushCtor = false) {
-    ASSERT((numArgs & (1u << 31)) == 0);
+    assert((numArgs & (1u << 31)) == 0);
     return numArgs | (isFPushCtor << 31);
   }
 
@@ -314,11 +314,11 @@ struct ActRec {
     return bool(intptr_t(field2) & 1LL); \
   } \
   inline type1 get##name1() const { \
-    ASSERT(has##name1()); \
+    assert(has##name1()); \
     return field1; \
   } \
   inline type2 get##name2() const { \
-    ASSERT(has##name2()); \
+    assert(has##name2()); \
     return (type2)(intptr_t(field2) & ~1LL); \
   } \
   inline void set##name1(type1 val) { \
@@ -339,11 +339,11 @@ struct ActRec {
     return bool(intptr_t(field3) & 2LL); \
   } \
   inline type1 get##name1() const { \
-    ASSERT(has##name1()); \
+    assert(has##name1()); \
     return field1; \
   } \
   inline type2 get##name2() const { \
-    ASSERT(has##name2()); \
+    assert(has##name2()); \
     return (type2)(intptr_t(field2) & ~1LL); \
   } \
   inline type3 get##name3() const { \
@@ -372,7 +372,7 @@ struct ActRec {
 
   // Accessors for extra arg queries.
   TypedValue* getExtraArg(unsigned ind) const {
-    ASSERT(hasExtraArgs() || hasVarEnv());
+    assert(hasExtraArgs() || hasVarEnv());
     return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :
            hasVarEnv()    ? getVarEnv()->getExtraArg(ind) :
            static_cast<TypedValue*>(0);
@@ -537,30 +537,30 @@ public:
   // Same as discard(), but meant to replace popC() iff the interpreter knows
   // for certain that decrementing a refcount is unnecessary.
   inline void ALWAYS_INLINE popX() {
-    ASSERT(m_top != m_base);
-    ASSERT(!IS_REFCOUNTED_TYPE(m_top->m_type));
+    assert(m_top != m_base);
+    assert(!IS_REFCOUNTED_TYPE(m_top->m_type));
     m_top++;
   }
 
   inline void ALWAYS_INLINE popC() {
-    ASSERT(m_top != m_base);
-    ASSERT(tvIsPlausible(m_top));
-    ASSERT(m_top->m_type != KindOfRef);
+    assert(m_top != m_base);
+    assert(tvIsPlausible(m_top));
+    assert(m_top->m_type != KindOfRef);
     tvRefcountedDecRefCell(m_top);
     m_top++;
   }
 
   inline void ALWAYS_INLINE popV() {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top->m_type == KindOfRef);
-    ASSERT(m_top->m_data.pref != NULL);
+    assert(m_top != m_base);
+    assert(m_top->m_type == KindOfRef);
+    assert(m_top->m_data.pref != NULL);
     tvDecRefRef(m_top);
     m_top++;
   }
 
   inline void ALWAYS_INLINE popTV() {
-    ASSERT(m_top != m_base);
-    ASSERT(tvIsPlausible(m_top));
+    assert(m_top != m_base);
+    assert(tvIsPlausible(m_top));
     tvRefcountedDecRef(m_top);
     m_top++;
   }
@@ -569,46 +569,46 @@ public:
   // an ActRec is live, it should be torn down using frame_free_locals()
   // followed by discardAR() or ret().
   inline void ALWAYS_INLINE popAR() {
-    ASSERT(m_top != m_base);
+    assert(m_top != m_base);
     ActRec* ar = (ActRec*)m_top;
     if (ar->hasThis()) decRefObj(ar->getThis());
     if (ar->hasInvName()) decRefStr(ar->getInvName());
 
     // This should only be used on a pre-live ActRec.
-    ASSERT(!ar->hasVarEnv());
-    ASSERT(!ar->hasExtraArgs());
+    assert(!ar->hasVarEnv());
+    assert(!ar->hasExtraArgs());
 
     m_top += kNumActRecCells;
-    ASSERT((uintptr_t)m_top <= (uintptr_t)m_base);
+    assert((uintptr_t)m_top <= (uintptr_t)m_base);
   }
 
   inline void ALWAYS_INLINE discardAR() {
-    ASSERT(m_top != m_base);
+    assert(m_top != m_base);
     m_top += kNumActRecCells;
-    ASSERT((uintptr_t)m_top <= (uintptr_t)m_base);
+    assert((uintptr_t)m_top <= (uintptr_t)m_base);
   }
 
   inline void ALWAYS_INLINE ret() {
     // Leave part of the activation on the stack, since the return value now
     // resides there.
     m_top += kNumActRecCells - 1;
-    ASSERT((uintptr_t)m_top <= (uintptr_t)m_base);
+    assert((uintptr_t)m_top <= (uintptr_t)m_base);
   }
 
   inline void ALWAYS_INLINE discard() {
-    ASSERT(m_top != m_base);
+    assert(m_top != m_base);
     m_top++;
   }
 
   inline void ALWAYS_INLINE ndiscard(size_t n) {
-    ASSERT((uintptr_t)&m_top[n] <= (uintptr_t)m_base);
+    assert((uintptr_t)&m_top[n] <= (uintptr_t)m_base);
     m_top += n;
   }
 
   inline void ALWAYS_INLINE dup() {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top != m_elms);
-    ASSERT(m_top->m_type != KindOfRef);
+    assert(m_top != m_base);
+    assert(m_top != m_elms);
+    assert(m_top->m_type != KindOfRef);
     Cell* fr = (Cell*)m_top;
     m_top--;
     Cell* to = (Cell*)m_top;
@@ -616,30 +616,30 @@ public:
   }
 
   inline void ALWAYS_INLINE box() {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top->m_type != KindOfRef);
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
     tvBox(m_top);
   }
 
   inline void ALWAYS_INLINE unbox() {
-    ASSERT(m_top != m_base);
+    assert(m_top != m_base);
     tvUnbox(m_top);
   }
 
   inline void ALWAYS_INLINE pushUninit() {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     tvWriteUninit(m_top);
   }
 
   inline void ALWAYS_INLINE pushNull() {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     tvWriteNull(m_top);
   }
 
   inline void ALWAYS_INLINE pushNullUninit() {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     m_top->m_data.num = 0;
     m_top->_count = 0;
@@ -648,7 +648,7 @@ public:
 
   #define PUSH_METHOD(name, type, field, value)                               \
   inline void ALWAYS_INLINE push##name() {                                    \
-    ASSERT(m_top != m_elms);                                                  \
+    assert(m_top != m_elms);                                                  \
     m_top--;                                                                  \
     m_top->m_data.field = value;                                              \
     m_top->_count = 0;                                                        \
@@ -659,7 +659,7 @@ public:
 
   #define PUSH_METHOD_ARG(name, type, field, argtype, arg)                    \
   inline void ALWAYS_INLINE push##name(argtype arg) {                         \
-    ASSERT(m_top != m_elms);                                                  \
+    assert(m_top != m_elms);                                                  \
     m_top--;                                                                  \
     m_top->m_data.field = arg;                                                \
     m_top->_count = 0;                                                        \
@@ -671,7 +671,7 @@ public:
   // This should only be called directly when the caller has
   // already adjusted the refcount appropriately
   inline void ALWAYS_INLINE pushStringNoRc(StringData* s) {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pstr = s;
     m_top->_count = 0;
@@ -679,14 +679,14 @@ public:
   }
 
   inline void ALWAYS_INLINE pushStaticString(StringData* s) {
-    ASSERT(s->isStatic()); // No need to call s->incRefCount().
+    assert(s->isStatic()); // No need to call s->incRefCount().
     pushStringNoRc(s);
   }
 
   // This should only be called directly when the caller has
   // already adjusted the refcount appropriately
   inline void ALWAYS_INLINE pushArrayNoRc(ArrayData* a) {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     m_top->m_data.parr = a;
     m_top->_count = 0;
@@ -699,14 +699,14 @@ public:
   }
 
   inline void ALWAYS_INLINE pushStaticArray(ArrayData* a) {
-    ASSERT(a->isStatic()); // No need to call a->incRefCount().
+    assert(a->isStatic()); // No need to call a->incRefCount().
     pushArrayNoRc(a);
   }
 
   // This should only be called directly when the caller has
   // already adjusted the refcount appropriately
   inline void ALWAYS_INLINE pushObjectNoRc(ObjectData* o) {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pobj = o;
     m_top->_count = 0;
@@ -719,65 +719,65 @@ public:
   }
 
   inline Cell* ALWAYS_INLINE allocC() {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     return (Cell*)m_top;
   }
 
   inline Var* ALWAYS_INLINE allocV() {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     return (Var*)m_top;
   }
 
   inline TypedValue* ALWAYS_INLINE allocTV() {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     return m_top;
   }
 
   inline ActRec* ALWAYS_INLINE allocA() {
-    ASSERT((uintptr_t)&m_top[-kNumActRecCells] >= (uintptr_t)m_elms);
-    ASSERT(kNumActRecCells * sizeof(Cell) == sizeof(ActRec));
+    assert((uintptr_t)&m_top[-kNumActRecCells] >= (uintptr_t)m_elms);
+    assert(kNumActRecCells * sizeof(Cell) == sizeof(ActRec));
     m_top -= kNumActRecCells;
     return (ActRec*)m_top;
   }
 
   inline void ALWAYS_INLINE allocI() {
-    ASSERT(kNumIterCells * sizeof(Cell) == sizeof(Iter));
-    ASSERT((uintptr_t)&m_top[-kNumIterCells] >= (uintptr_t)m_elms);
+    assert(kNumIterCells * sizeof(Cell) == sizeof(Iter));
+    assert((uintptr_t)&m_top[-kNumIterCells] >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
   }
 
   inline Cell* ALWAYS_INLINE topC() {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top->m_type != KindOfRef);
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
     return (Cell*)m_top;
   }
 
   inline Var* ALWAYS_INLINE topV() {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top->m_type == KindOfRef);
+    assert(m_top != m_base);
+    assert(m_top->m_type == KindOfRef);
     return (Var*)m_top;
   }
 
   inline TypedValue* ALWAYS_INLINE topTV() {
-    ASSERT(m_top != m_base);
+    assert(m_top != m_base);
     return m_top;
   }
 
   inline Cell* ALWAYS_INLINE indC(size_t ind) {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top[ind].m_type != KindOfRef);
+    assert(m_top != m_base);
+    assert(m_top[ind].m_type != KindOfRef);
     return (Cell*)(&m_top[ind]);
   }
 
   inline TypedValue* ALWAYS_INLINE indTV(size_t ind) {
-    ASSERT(m_top != m_base);
+    assert(m_top != m_base);
     return &m_top[ind];
   }
   inline void ALWAYS_INLINE pushClass(Class* clss) {
-    ASSERT(m_top != m_elms);
+    assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pcls = clss;
     m_top->_count = 0;

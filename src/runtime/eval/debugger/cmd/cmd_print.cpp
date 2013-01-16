@@ -82,7 +82,7 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
       return sb.data();
     }
 
-    ASSERT(false);
+    assert(false);
   }
 
   String sret = DebuggerClient::FormatVariable(ret, -1);
@@ -115,7 +115,7 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
     return String(ts).data();
   }
 
-  ASSERT(false);
+  assert(false);
   return "";
 }
 
@@ -322,11 +322,11 @@ bool CmdPrint::onClient(DebuggerClient *client) {
   }
   m_bypassAccessCheck = client->getDebuggerBypassCheck();
   m_printLevel = client->getDebuggerPrintLevel();
-  ASSERT(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
+  assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client->getFrame();
   CmdPrintPtr res = client->xend<CmdPrint>(this);
   if (!res->is(m_type)) {
-    ASSERT(client->isApiMode());
+    assert(client->isApiMode());
     m_incomplete = true;
     res->setClientOutput(client);
   } else {

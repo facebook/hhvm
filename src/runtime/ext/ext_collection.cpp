@@ -66,9 +66,9 @@ void c_Vector::grow() {
 }
 
 void c_Vector::resize(int64 sz, TypedValue* val) {
-  ASSERT(val && val->m_type != KindOfRef);
+  assert(val && val->m_type != KindOfRef);
   ++m_versionNumber;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   if (m_capacity < sz) {
     m_capacity = sz;
     m_data =
@@ -250,14 +250,14 @@ void c_Vector::t_sort(CVarRef col /* = null */) {
     collator->t_sort(ref(arr));
   }
   if (!arr.isArray()) {
-    ASSERT(false);
+    assert(false);
     return;
   }
   ArrayData* ad = arr.getArrayData();
   int sz = ad->size();
   ssize_t pos = ad->iter_begin();
   for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
-    ASSERT(pos != ArrayData::invalid_index);
+    assert(pos != ArrayData::invalid_index);
     tvAsVariant(&m_data[i]) = ad->getValue(pos);
   }
 }
@@ -387,7 +387,7 @@ Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   vec->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
   for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
-    ASSERT(pos != ArrayData::invalid_index);
+    assert(pos != ArrayData::invalid_index);
     TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
     if (UNLIKELY(tv->m_type == KindOfRef)) {
       tv = tv->m_data.pref->tv();
@@ -480,7 +480,7 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
   } else {
     endPos = v->m_size;
   }
-  ASSERT(startPos < endPos);
+  assert(startPos < endPos);
   int64 sz = endPos - startPos;
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
@@ -509,7 +509,7 @@ struct VectorValAccessor {
  */
 template <typename AccessorT>
 c_Vector::SortFlavor c_Vector::preSort(const AccessorT& acc) {
-  ASSERT(m_size > 0);
+  assert(m_size > 0);
   int64 sz = m_size;
   bool allInts = true;
   bool allStrs = true;
@@ -578,7 +578,7 @@ void c_Vector::throwBadKeyType() {
 }
 
 TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Vector* vec = static_cast<c_Vector*>(obj);
   if (key->m_type == KindOfInt64) {
     return vec->at(key->m_data.num);
@@ -588,8 +588,8 @@ TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
 }
 
 void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  ASSERT(key->m_type != KindOfRef);
-  ASSERT(val->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
+  assert(val->m_type != KindOfRef);
   c_Vector* vec = static_cast<c_Vector*>(obj);
   if (key->m_type == KindOfInt64) {
     vec->put(key->m_data.num, val);
@@ -599,7 +599,7 @@ void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
 }
 
 bool c_Vector::OffsetIsset(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Vector* vec = static_cast<c_Vector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -612,7 +612,7 @@ bool c_Vector::OffsetIsset(ObjectData* obj, TypedValue* key) {
 }
 
 bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Vector* vec = static_cast<c_Vector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -625,7 +625,7 @@ bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
 }
 
 bool c_Vector::OffsetContains(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Vector* vec = static_cast<c_Vector*>(obj);
   if (key->m_type == KindOfInt64) {
     return vec->contains(key->m_data.num);
@@ -636,7 +636,7 @@ bool c_Vector::OffsetContains(ObjectData* obj, TypedValue* key) {
 }
 
 void c_Vector::OffsetAppend(ObjectData* obj, TypedValue* val) {
-  ASSERT(val->m_type != KindOfRef);
+  assert(val->m_type != KindOfRef);
   c_Vector* vec = static_cast<c_Vector*>(obj);
   vec->add(val);
 }
@@ -677,7 +677,7 @@ Variant c_VectorIterator::t_key() {
 }
 
 bool c_VectorIterator::t_valid() {
-  ASSERT(m_pos >= 0);
+  assert(m_pos >= 0);
   c_Vector* vec = m_obj.get();
   return vec && (m_pos < vec->m_size);
 }
@@ -762,7 +762,7 @@ ObjectData* c_Map::clone() {
 
   if (!m_size) return obj;
 
-  ASSERT(m_nLastSlot != 0);
+  assert(m_nLastSlot != 0);
   target->m_size = m_size;
   target->m_load = m_load;
   target->m_nLastSlot = m_nLastSlot;
@@ -949,7 +949,7 @@ Object c_Map::t_updatefromarray(CVarRef arr) {
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       update(k.getStringData(), tv);
     }
   }
@@ -987,7 +987,7 @@ Object c_Map::t_updatefromiterable(CVarRef it) {
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       update(k.getStringData(), tv);
     }
   }
@@ -1022,7 +1022,7 @@ Object c_Map::t_differencebykey(CVarRef it) {
     if (k.isInteger()) {
       target->remove(k.toInt64());
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       target->remove(k.getStringData());
     }
   }
@@ -1056,7 +1056,7 @@ Variant c_Map::ti_fromarray(const char* cls, CVarRef arr) {
     if (k.isInteger()) {
       mp->update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       mp->update(k.getStringData(), tv);
     }
   }
@@ -1087,7 +1087,7 @@ Variant c_Map::ti_fromiterable(const char* cls, CVarRef it) {
     if (k.isInteger()) {
       target->update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       target->update(k.getStringData(), tv);
     }
   }
@@ -1106,7 +1106,7 @@ bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
                          int len, int32_t hash) ALWAYS_INLINE;
 bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
                   int len, int32_t hash) {
-  ASSERT(p->validValue());
+  assert(p->validValue());
   if (p->hasIntKey()) return false;
   const char* data = p->skey->data();
   return data == k || (p->hash() == hash &&
@@ -1116,7 +1116,7 @@ bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
 
 bool inline hitIntKey(const c_Map::Bucket* p, int64 ki) ALWAYS_INLINE;
 bool inline hitIntKey(const c_Map::Bucket* p, int64 ki) {
-  ASSERT(p->validValue());
+  assert(p->validValue());
   return p->ikey == ki && p->hasIntKey();
 }
 
@@ -1131,9 +1131,9 @@ bool inline hitIntKey(const c_Map::Bucket* p, int64 ki) {
     return NULL; \
   } \
   for (size_t i = 1;; ++i) { \
-    ASSERT(i <= tableMask); \
+    assert(i <= tableMask); \
     probeIndex = (probeIndex + i) & tableMask; \
-    ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
+    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
     p = fetchBucket(probeIndex); \
     if (p->validValue() && (hit)) { \
       return p; \
@@ -1156,9 +1156,9 @@ bool inline hitIntKey(const c_Map::Bucket* p, int64 ki) {
     if (UNLIKELY(p->tombstone() && !ts)) { \
       ts = p; \
     } \
-    ASSERT(i <= tableMask); \
+    assert(i <= tableMask); \
     probeIndex = (probeIndex + i) & tableMask; \
-    ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
+    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
     p = fetchBucket(probeIndex); \
     if (LIKELY(p->validValue() && (hit))) { \
       return p; \
@@ -1197,9 +1197,9 @@ c_Map::Bucket* c_Map::findForNewInsert(size_t h0) const {
     return p;
   }
   for (size_t i = 1;; ++i) {
-    ASSERT(i <= tableMask);
+    assert(i <= tableMask);
     probeIndex = (probeIndex + i) & tableMask;
-    ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);
+    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);
     p = fetchBucket(probeIndex);
     if (LIKELY(p->empty())) {
       return p;
@@ -1212,9 +1212,9 @@ c_Map::Bucket* c_Map::findForNewInsert(size_t h0) const {
 #undef FIND_FOR_INSERT_BODY
 
 bool c_Map::update(int64 h, TypedValue* data) {
-  ASSERT(data->m_type != KindOfRef);
+  assert(data->m_type != KindOfRef);
   Bucket* p = findForInsert(h);
-  ASSERT(p);
+  assert(p);
   if (p->validValue()) {
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
@@ -1228,7 +1228,7 @@ bool c_Map::update(int64 h, TypedValue* data) {
     if (UNLIKELY(++m_load >= computeMaxLoad())) {
       resize();
       p = findForInsert(h);
-      ASSERT(p);
+      assert(p);
     }
   }
   tvRefcountedIncRef(data);
@@ -1241,7 +1241,7 @@ bool c_Map::update(int64 h, TypedValue* data) {
 bool c_Map::update(StringData *key, TypedValue* data) {
   strhash_t h = key->hash();
   Bucket* p = findForInsert(key->data(), key->size(), h);
-  ASSERT(p);
+  assert(p);
   if (p->validValue()) {
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
@@ -1255,7 +1255,7 @@ bool c_Map::update(StringData *key, TypedValue* data) {
     if (UNLIKELY(++m_load >= computeMaxLoad())) {
       resize();
       p = findForInsert(key->data(), key->size(), h);
-      ASSERT(p);
+      assert(p);
     }
   }
   tvRefcountedIncRef(data);
@@ -1293,7 +1293,7 @@ void c_Map::reserve(int64 sz) {
     sz = 2;
   }
   if (m_nLastSlot == 0) {
-    ASSERT(m_data == (Bucket*)emptyMapSlot);
+    assert(m_data == (Bucket*)emptyMapSlot);
     m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
     m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
     return;
@@ -1357,7 +1357,7 @@ ssize_t c_Map::iter_prev(ssize_t pos) const {
 }
 
 Variant c_Map::iter_key(ssize_t pos) const {
-  ASSERT(pos);
+  assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
   if (p->hasStrKey()) {
     return p->skey;
@@ -1366,7 +1366,7 @@ Variant c_Map::iter_key(ssize_t pos) const {
 }
 
 Variant c_Map::iter_value(ssize_t pos) const {
-  ASSERT(pos);
+  assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
   return tvAsCVarRef(&p->data);
 }
@@ -1390,7 +1390,7 @@ void c_Map::Bucket::dump() {
 }
 
 TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Map* mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     return mp->at(key->m_data.num);
@@ -1403,8 +1403,8 @@ TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
 }
 
 void c_Map::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  ASSERT(key->m_type != KindOfRef);
-  ASSERT(val->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
+  assert(val->m_type != KindOfRef);
   c_Map* mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     mp->put(key->m_data.num, val);
@@ -1418,7 +1418,7 @@ void c_Map::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
 }
 
 bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Map* mp = static_cast<c_Map*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -1433,7 +1433,7 @@ bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
 }
 
 bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Map* mp = static_cast<c_Map*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -1448,7 +1448,7 @@ bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
 }
 
 bool c_Map::OffsetContains(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Map* mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     return mp->contains(key->m_data.num);
@@ -1467,7 +1467,7 @@ void c_Map::OffsetAppend(ObjectData* obj, TypedValue* val) {
 }
 
 void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Map* mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     mp->remove(key->m_data.num);
@@ -1780,7 +1780,7 @@ Object c_StableMap::t_values() {
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   Bucket* p = m_pListHead;
   for (int64 i = 0; i < sz; ++i) {
-    ASSERT(p);
+    assert(p);
     tvDup(&p->data, &data[i]);
     p = p->pListNext;
   }
@@ -1814,7 +1814,7 @@ Object c_StableMap::t_updatefromarray(CVarRef arr) {
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       update(k.getStringData(), tv);
     }
   }
@@ -1851,7 +1851,7 @@ Object c_StableMap::t_updatefromiterable(CVarRef it) {
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       update(k.getStringData(), tv);
     }
   }
@@ -1884,7 +1884,7 @@ Object c_StableMap::t_differencebykey(CVarRef it) {
     if (k.isInteger()) {
       target->remove(k.toInt64());
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       target->remove(k.getStringData());
     }
   }
@@ -1919,7 +1919,7 @@ Variant c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
     if (k.isInteger()) {
       smp->update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       smp->update(k.getStringData(), tv);
     }
   }
@@ -1950,7 +1950,7 @@ Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
     if (k.isInteger()) {
       target->update(k.toInt64(), tv);
     } else {
-      ASSERT(k.isString());
+      assert(k.isString());
       target->update(k.getStringData(), tv);
     }
   }
@@ -2068,13 +2068,13 @@ void c_StableMap::erase(Bucket** prev) {
       p->pListLast->pListNext = p->pListNext;
     } else {
       /* Deleting the head of the list */
-      ASSERT(m_pListHead == p);
+      assert(m_pListHead == p);
       m_pListHead = p->pListNext;
     }
     if (p->pListNext) {
       p->pListNext->pListLast = p->pListLast;
     } else {
-      ASSERT(m_pListTail == p);
+      assert(m_pListTail == p);
       m_pListTail = p->pListLast;
     }
     m_size--;
@@ -2135,7 +2135,7 @@ ssize_t c_StableMap::iter_prev(ssize_t pos) const {
 }
 
 Variant c_StableMap::iter_key(ssize_t pos) const {
-  ASSERT(pos);
+  assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
   if (p->hasStrKey()) {
     return p->skey;
@@ -2144,7 +2144,7 @@ Variant c_StableMap::iter_key(ssize_t pos) const {
 }
 
 Variant c_StableMap::iter_value(ssize_t pos) const {
-  ASSERT(pos);
+  assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
   return tvAsCVarRef(&p->data);
 }
@@ -2159,7 +2159,7 @@ struct StableMapKeyAccessor {
     if (isInt(elm)) {
       return getInt(elm);
     }
-    ASSERT(isStr(elm));
+    assert(isStr(elm));
     return getStr(elm);
   }
 };
@@ -2184,7 +2184,7 @@ template <typename AccessorT>
 c_StableMap::SortFlavor c_StableMap::preSort(Bucket** buffer,
                                              const AccessorT& acc,
                                              bool checkTypes) {
-  ASSERT(m_size > 0);
+  assert(m_size > 0);
   bool allInts UNUSED = true;
   bool allStrs UNUSED = true;
   uint i = 0;
@@ -2337,7 +2337,7 @@ void c_StableMap::Bucket::dump() {
 }
 
 TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_StableMap* smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
     return smp->at(key->m_data.num);
@@ -2350,8 +2350,8 @@ TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
 }
 
 void c_StableMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  ASSERT(key->m_type != KindOfRef);
-  ASSERT(val->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
+  assert(val->m_type != KindOfRef);
   c_StableMap* smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
     smp->put(key->m_data.num, val);
@@ -2365,7 +2365,7 @@ void c_StableMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
 }
 
 bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_StableMap* smp = static_cast<c_StableMap*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -2380,7 +2380,7 @@ bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
 }
 
 bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_StableMap* smp = static_cast<c_StableMap*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -2395,7 +2395,7 @@ bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
 }
 
 bool c_StableMap::OffsetContains(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_Map* smp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     return smp->contains(key->m_data.num);
@@ -2414,7 +2414,7 @@ void c_StableMap::OffsetAppend(ObjectData* obj, TypedValue* val) {
 }
 
 void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   c_StableMap* smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
     smp->remove(key->m_data.num);
@@ -2505,7 +2505,7 @@ COLLECTION_MAGIC_METHODS(StableMap)
 #undef COLLECTION_MAGIC_METHODS
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
-  ASSERT(obj->isCollection());
+  assert(obj->isCollection());
   int64 sz = collectionSize(obj);
   if (obj->getCollectionType() == Collection::VectorType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
@@ -2526,7 +2526,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     }
     serializer->writeArrayFooter();
   } else {
-    ASSERT(obj->getCollectionType() == Collection::MapType ||
+    assert(obj->getCollectionType() == Collection::MapType ||
            obj->getCollectionType() == Collection::StableMapType);
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
     serializer->writeArrayHeader(sz, false);
@@ -2542,7 +2542,7 @@ void collectionUnserialize(ObjectData* obj,
                            VariableUnserializer* uns,
                            int64 sz,
                            char type) {
-  ASSERT(obj->isCollection());
+  assert(obj->isCollection());
   collectionReserve(obj, sz);
   if (type == 'V') {
     for (int64 i = 0; i < sz; ++i) {
@@ -2551,7 +2551,7 @@ void collectionUnserialize(ObjectData* obj,
       collectionOffsetAppend(obj, v);
     }
   } else {
-    ASSERT(type == 'K');
+    assert(type == 'K');
     for (int64 i = 0; i < sz; ++i) {
       Variant k;
       k.unserialize(uns);
@@ -2568,7 +2568,7 @@ CollectionInit::CollectionInit(int cType, ssize_t nElems) {
     case Collection::MapType: m_data = NEWOBJ(c_Map)(); break;
     case Collection::StableMapType: m_data = NEWOBJ(c_StableMap)(); break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   // Reserve enough room for nElems elements in advance

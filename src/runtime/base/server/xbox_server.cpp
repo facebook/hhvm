@@ -123,7 +123,7 @@ public:
     atomic_inc(m_refCount);
   }
   void decRefCount() {
-    ASSERT(m_refCount);
+    assert(m_refCount);
     if (atomic_dec(m_refCount) == 0) {
       delete this;
     }
@@ -254,7 +254,7 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
     XboxTransport *job = new XboxTransport(message);
     job->incRefCount(); // paired with worker's decRefCount()
     job->incRefCount(); // paired with decRefCount() at below
-    ASSERT(s_dispatcher);
+    assert(s_dispatcher);
     s_dispatcher->enqueue(job);
 
     if (timeout_ms <= 0) {
@@ -325,7 +325,7 @@ bool XboxServer::PostMessage(CStrRef message,
 
     XboxTransport *job = new XboxTransport(message);
     job->incRefCount(); // paired with worker's decRefCount()
-    ASSERT(s_dispatcher);
+    assert(s_dispatcher);
     s_dispatcher->enqueue(job);
     return true;
 
@@ -411,7 +411,7 @@ Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
   if (transport) {
     job->setHost(transport->getHeader("Host"));
   }
-  ASSERT(s_dispatcher);
+  assert(s_dispatcher);
   s_dispatcher->enqueue(job);
 
   return ret;

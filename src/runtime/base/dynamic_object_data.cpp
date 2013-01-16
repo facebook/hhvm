@@ -49,7 +49,7 @@ DynamicObjectData::~DynamicObjectData() {
    */
   if (!parent.isNull()) {
     ObjectData *p = parent.detach();
-    ASSERT(p->getCount() == 1);
+    assert(p->getCount() == 1);
     delete p;
   }
 }

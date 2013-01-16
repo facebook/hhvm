@@ -43,7 +43,7 @@ void ZipFile::sweep() {
 }
 
 bool ZipFile::open(CStrRef filename, CStrRef mode) {
-  ASSERT(m_gzFile == NULL);
+  assert(m_gzFile == NULL);
 
   if (strchr(mode, '+')) {
     raise_warning("cannot open a zlib stream for reading and writing "
@@ -78,40 +78,40 @@ bool ZipFile::closeImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64 ZipFile::readImpl(char *buffer, int64 length) {
-  ASSERT(m_gzFile);
+  assert(m_gzFile);
   int64 nread = gzread(m_gzFile, buffer, length);
   return (nread < 0) ? 0 : nread;
 }
 
 int64 ZipFile::writeImpl(const char *buffer, int64 length) {
-  ASSERT(m_gzFile);
+  assert(m_gzFile);
   return gzwrite(m_gzFile, buffer, length);
 }
 
 bool ZipFile::seek(int64 offset, int whence /* = SEEK_SET */) {
-  ASSERT(m_gzFile);
+  assert(m_gzFile);
   int64 newoffset = gzseek(m_gzFile, offset, whence);
   return (newoffset < 0) ? -1 : 0;
 }
 
 int64 ZipFile::tell() {
-  ASSERT(m_gzFile);
+  assert(m_gzFile);
   return gztell(m_gzFile);
 }
 
 bool ZipFile::eof() {
-  ASSERT(m_gzFile);
+  assert(m_gzFile);
   return gzeof(m_gzFile);
 }
 
 bool ZipFile::rewind() {
-  ASSERT(m_gzFile);
+  assert(m_gzFile);
   gzrewind(m_gzFile);
   return true;
 }
 
 bool ZipFile::flush() {
-  ASSERT(m_gzFile);
+  assert(m_gzFile);
   return gzflush(m_gzFile, Z_SYNC_FLUSH);
 }
 

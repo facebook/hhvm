@@ -91,7 +91,7 @@ class LVariableTable : public Array {
   Variant &get(CStrRef s) { return getImpl(s); }
   Variant &get(litstr  s) { return getImpl(s);}
   virtual Variant &getVar(CStrRef s, SuperGlobal sg) {
-    ASSERT(sg == SgNormal);
+    assert(sg == SgNormal);
     return getImpl(s);
   }
 

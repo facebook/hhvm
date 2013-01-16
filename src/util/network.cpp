@@ -93,7 +93,7 @@ std::string Util::GetPrimaryIP() {
 }
 
 bool Util::GetNetworkStats(const char *iface, int &in_bps, int &out_bps) {
-  ASSERT(iface && *iface);
+  assert(iface && *iface);
 
   const char *argv[] = {"", "1", "1", "-n", "DEV", NULL};
   string out;

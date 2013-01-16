@@ -246,7 +246,7 @@ void ProcessInit() {
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
     Class *cls = *Unit::GetNamedEntity(s_##cls.get())->clsList();       \
-    ASSERT(!hhbc_ext_class_count || cls);                               \
+    assert(!hhbc_ext_class_count || cls);                               \
     SystemLib::s_##cls##Class = cls;                                    \
   }
 
@@ -278,10 +278,10 @@ void ProcessInit() {
     const StringData* name = StringData::GetStaticString(info->m_name);
     const NamedEntity* ne = Unit::GetNamedEntity(name);
     Class* cls = Unit::lookupClass(ne);
-    ASSERT(cls);
+    assert(cls);
     const ObjectStaticCallbacks* osc =
       get_builtin_object_static_callbacks(info->m_name);
-    ASSERT(osc != NULL);
+    assert(osc != NULL);
     *(osc->os_cls_ptr) = cls;
   }
 

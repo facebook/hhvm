@@ -24,7 +24,7 @@ namespace HPHP {
 
 DBQuery::DBQuery(DBConn *conn, const char *sql, ...)
   : m_conn(conn), m_insert(false) {
-  ASSERT(sql && *sql);
+  assert(sql && *sql);
   va_list ap;
   va_start(ap, sql);
   Util::string_vsnprintf(m_base, sql, ap);
@@ -34,7 +34,7 @@ DBQuery::DBQuery(DBConn *conn, const char *sql, ...)
 ///////////////////////////////////////////////////////////////////////////////
 
 void DBQuery::filterBy(const char *fmt, Op op /* = And */) {
-  ASSERT(fmt && *fmt);
+  assert(fmt && *fmt);
 
   if (m_where.empty()) {
     m_where = " where ";
@@ -49,7 +49,7 @@ void DBQuery::filterBy(const char *fmt, Op op /* = And */) {
 }
 
 void DBQuery::filterBy(const char *fmt, const char *value, Op op /* = And */) {
-  ASSERT(m_conn);
+  assert(m_conn);
 
   string escaped;
   m_conn->escapeString(value, escaped);
@@ -80,8 +80,8 @@ void DBQuery::filterBy(const char *fmt, unsigned int value,
 
 void DBQuery::filterBy(const char *fmt, DBQueryFilterPtr filter,
                        Op op /* = And */) {
-  ASSERT(!filter->isEmpty());
-  ASSERT(!m_filter);
+  assert(!filter->isEmpty());
+  assert(!m_filter);
 
   m_filter = filter;
   filterBy(fmt, op);
@@ -129,7 +129,7 @@ void DBQuery::setField(const char *fmt, const std::string &value) {
 }
 
 void DBQuery::setField(const char *fmt, const char *binary, int len) {
-  ASSERT(m_conn);
+  assert(m_conn);
 
   string escaped;
   m_conn->escapeString(binary, len, escaped);
@@ -162,8 +162,8 @@ int DBQuery::execute(DBDataSet &ds) {
 }
 
 int DBQuery::execute(DBDataSet *ds) {
-  ASSERT(m_conn);
-  ASSERT(m_conn->isOpened());
+  assert(m_conn);
+  assert(m_conn->isOpened());
 
   int affected = 0;
   for (const char *sql = getFirstSql(); sql; sql = getNextSql()) {
@@ -197,7 +197,7 @@ int DBQuery::execute(unsigned int &result) {
 const char *DBQuery::getFirstSql() {
   if (m_filter) {
     const char *where = m_filter->getFirst(m_where);
-    ASSERT(where);
+    assert(where);
     return getSql(where);
   }
   return getSql(m_where.c_str());
@@ -264,7 +264,7 @@ const char *DBQuery::format(const char *fmt, va_list ap) {
     switch (m_format[pos+1]) {
     case 's':
       {
-        ASSERT(m_conn);
+        assert(m_conn);
         const char *value = va_arg(ap, const char *);
         string escaped;
         m_conn->escapeString(value, escaped);
@@ -296,7 +296,7 @@ const char *DBQuery::format(const char *fmt, va_list ap) {
       m_format.erase(pos, 1);
       break;
     default:
-      ASSERT(false);
+      assert(false);
     }
   }
 
@@ -304,7 +304,7 @@ const char *DBQuery::format(const char *fmt, va_list ap) {
 }
 
 std::string DBQuery::escapeFieldName(const char *fieldNameList) {
-  ASSERT(fieldNameList);
+  assert(fieldNameList);
   string ret = "`";
   ret += fieldNameList;
   ret += "`";

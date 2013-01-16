@@ -79,7 +79,7 @@ void ReturnStatement::analyzeProgram(AnalysisResultPtr ar) {
         } else {
           ArrayElementExpressionPtr aeExp =
             dynamic_pointer_cast<ArrayElementExpression>(tmp);
-          ASSERT(aeExp);
+          assert(aeExp);
           tmp = aeExp->getVariable();
         }
       }
@@ -108,7 +108,7 @@ ConstructPtr ReturnStatement::getNthKid(int n) const {
     case 0:
       return m_exp;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -124,13 +124,13 @@ void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
       m_exp = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
 
 void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
-  ASSERT(getFunctionScope().get() == getScope().get());
+  assert(getFunctionScope().get() == getScope().get());
   IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
 
   FunctionScopePtr funcScope = getFunctionScope();

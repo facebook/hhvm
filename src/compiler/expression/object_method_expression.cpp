@@ -124,7 +124,7 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
 
 TypePtr ObjectMethodExpression::inferTypes(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce) {
-  ASSERT(false);
+  assert(false);
   return TypePtr();
 }
 
@@ -174,7 +174,7 @@ ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
 
 TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
                                               TypePtr type, bool coerce) {
-  ASSERT(type);
+  assert(type);
   IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
   resetTypes();
   reset();
@@ -270,11 +270,11 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     if (!Option::AllDynamic) {
       func->setDynamic();
     }
-    ASSERT(m_actualType);
+    assert(m_actualType);
     return m_actualType;
   }
 
-  ASSERT(func);
+  assert(func);
   return checkParamsAndReturn(ar, type, coerce, func, false);
 }
 
@@ -308,8 +308,8 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
     bool close = false;
     bool checkedThis = getFunctionScope()->isStatic();
     if (thisImplType) {
-      ASSERT(thisActType);
-      ASSERT(!Type::SameType(thisActType, thisImplType));
+      assert(thisActType);
+      assert(!Type::SameType(thisActType, thisImplType));
       ClassScopePtr implCls(thisImplType->getClass(ar, getScope()));
       if (implCls &&
           !implCls->derivesFrom(ar, thisActType->getName(), true, false)) {
@@ -318,10 +318,10 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
         //   ... $this->meth() ...
         // }
         ClassScopePtr cls(thisActType->getClass(ar, getScope()));
-        ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
+        assert(cls && !cls->derivedByDynamic()); // since we don't do type
                                                  // assertions for these
         if (!cls->derivesFrom(ar, thisImplType->getName(), true, false)) {
-          ASSERT(cls->derivesFromRedeclaring() &&
+          assert(cls->derivesFromRedeclaring() &&
                  implCls->derivedByDynamic());
           checkedThis = true;
         }

@@ -302,7 +302,7 @@ void Construct::dumpNode(int spc) {
       type_info = "{" + type_info + "} ";
     }
   } else {
-    ASSERT(FALSE);
+    assert(FALSE);
   }
 
   int s = spc;

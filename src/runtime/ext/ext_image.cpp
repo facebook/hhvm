@@ -77,7 +77,7 @@ public:
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
 #endif
-    ASSERT(m_mallocSize == 0);
+    assert(m_mallocSize == 0);
     m_mallocSize = 0;
   }
   virtual void requestShutdown() {
@@ -85,7 +85,7 @@ public:
     void *ptrs[1000];
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
-    ASSERT(m_mallocSize == 0);
+    assert(m_mallocSize == 0);
 #endif
     m_mallocSize = 0;
   }
@@ -94,7 +94,7 @@ public:
 , int ln
 #endif
   ) {
-    ASSERT(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     if (m_mallocSize + size < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
       void *ptr = malloc(sizeof(ln) + sizeof(size) + size);
@@ -119,7 +119,7 @@ public:
 , int ln
 #endif
   ) {
-    ASSERT(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     size_t bytes = nmemb * size;
     if (m_mallocSize + bytes < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
@@ -154,11 +154,11 @@ public:
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     int count = m_alloced.erase((char*)sizePtr - sizeof(ln));
-    ASSERT(count == 1); // double free on failure
-    ASSERT(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assert(count == 1); // double free on failure
+    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     free(lnPtr);
 #else
-    ASSERT(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     free(sizePtr);
 #endif
   }
@@ -169,7 +169,7 @@ public:
 , int ln
 #endif
   ) {
-    ASSERT(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
 
 #ifdef IM_MEMORY_CHECK
     if (!ptr) return imMalloc(size, ln);
@@ -195,7 +195,7 @@ public:
     if (m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
         !(tmp = realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
       int count = m_alloced.erase(ptr);
-      ASSERT(count == 1); // double free on failure
+      assert(count == 1); // double free on failure
       free(lnPtr);
       return NULL;
     }
@@ -204,7 +204,7 @@ public:
     m_mallocSize += diff;
     if (tmp != lnPtr) {
       int count = m_alloced.erase(lnPtr);
-      ASSERT(count == 1);
+      assert(count == 1);
       m_alloced.insert(tmp);
     }
     return ((char *)tmp + sizeof(ln) + sizeof(size));
@@ -226,7 +226,7 @@ public:
     for (std::set<void*>::iterator iter = m_alloced.begin();
          iter != m_alloced.end(); ++i, ++iter) {
       void *p = *iter;
-      ASSERT(p);
+      assert(p);
       if (i < n) ptrs[i] = p;
       int ln;
       size_t size;
@@ -2289,7 +2289,7 @@ static gdImagePtr _php_image_create_from(CStrRef filename,
   }
   else {
     /* TODO: try and force the stream to be FILE* */
-    ASSERT(false);
+    assert(false);
   }
 
   if (!im && fp) {

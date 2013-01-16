@@ -210,7 +210,7 @@ StreamCompressor::~StreamCompressor() {
 
 char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
   // middle chunks should never be zero size
-  ASSERT(len || trailer);
+  assert(len || trailer);
 
   m_stream.next_in = (Bytef *)data;
   m_stream.avail_in = len;
@@ -345,7 +345,7 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
       (encoding_mode == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0);
     /* resize to buffer to the "right" size */
     s2 = (char *)realloc(s2, len + 1);
-    ASSERT(s2);
+    assert(s2);
     if (encoding_mode == CODING_GZIP) {
       char *trailer = s2 + (stream.total_out + GZIP_HEADER_LENGTH);
       uLong crc = crc32(0L, Z_NULL, 0);
@@ -422,7 +422,7 @@ char *gzdecode(const char *data, int &len) {
     // shrink the buffer down to what we really need since this can be 16
     // times greater than we actually need.
     s2 = (char *)realloc(s2, len + 1);
-    ASSERT(s2);
+    assert(s2);
     s2[len] = '\0';
     return s2;
   }

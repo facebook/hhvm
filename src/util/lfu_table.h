@@ -183,7 +183,7 @@ public:
       m_maturityThreshold(maturity), m_maximumCapacity(maxCap),
       m_updatePeriod(updatePeriod) {
         //Lfu table is currently buggy and at the moment not worth fixing
-        ASSERT(false);
+        assert(false);
       }
   ~LFUTable() {
     clear();
@@ -316,9 +316,9 @@ public:
       m_map.erase(cit);
       delete n;
     }
-    ASSERT(m_head == NULL);
-    ASSERT(m_tail == NULL);
-    ASSERT(m_heap.size() == 0);
+    assert(m_head == NULL);
+    assert(m_tail == NULL);
+    assert(m_heap.size() == 0);
   }
 
   bool check() {
@@ -332,19 +332,19 @@ public:
       if (m_map.find(n->key) == m_map.end()) {
         fail = true;
         Logger::Error("Value in queue not in map");
-        ASSERT(!fail);
+        assert(!fail);
       }
       if (n->prev != prev) {
         fail = true;
         Logger::Error("Queue list corrupted");
-        ASSERT(!fail);
+        assert(!fail);
       }
       prev = n;
       n = n->next;
       if (!n && prev != m_tail) {
         fail = true;
         Logger::Error("Queue tail incorrect");
-        ASSERT(!fail);
+        assert(!fail);
       }
     }
     uint hsize = m_heap.size();
@@ -353,19 +353,19 @@ public:
       if (m_map.find(n->key) == m_map.end()) {
         fail = true;
         Logger::Error("Value in queue not in heap");
-        ASSERT(!fail);
+        assert(!fail);
       }
       size_t child = (i+1) * 2;
       if (child <= hsize && n->frequency() > m_heap[child-1]->frequency()) {
         fail = true;
         Logger::Error("Heap property violated");
-        ASSERT(!fail);
+        assert(!fail);
       }
       child++;
       if (child <= hsize && n->frequency() > m_heap[child-1]->frequency()) {
         fail = true;
         Logger::Error("Heap property violated");
-        ASSERT(!fail);
+        assert(!fail);
       }
     }
     return !fail;
@@ -414,7 +414,7 @@ private:
     if (!m_maximumCapacity) return;
     while (size() - m_immortalCount >= m_maximumCapacity) {
       Node *m = popQueue();
-      ASSERT(m);
+      assert(m);
       m_map.erase(m->key);
       delete m;
     }

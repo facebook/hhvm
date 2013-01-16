@@ -262,7 +262,7 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
 const PreClassEmitter::Prop&
 PreClassEmitter::lookupProp(const StringData* propName) const {
   PropMap::Builder::const_iterator it = m_propMap.find(propName);
-  ASSERT(it != m_propMap.end());
+  assert(it != m_propMap.end());
   Slot idx = it->second;
   return m_propMap[idx];
 }
@@ -469,7 +469,7 @@ void PreClassRepoProxy::GetPreClassesStmt
       PreClassEmitter* pce = ue.newPreClassEmitter(
         name, (PreClass::Hoistable)hoistable);
       pce->serdeMetaData(extraBlob);
-      ASSERT(pce->id() == preClassId);
+      assert(pce->id() == preClassId);
     }
   } while (!query.done());
   txn.commit();
@@ -525,7 +525,7 @@ void Class::atomicRelease() {
       Lock l(Unit::s_classesMutex);
       Class *const*cls = pcls->namedEntity()->clsList();
       while (*cls != this) {
-        ASSERT(*cls);
+        assert(*cls);
         cls = &(*cls)->m_nextClass;
       }
       *const_cast<Class**>(cls) = m_nextClass;
@@ -576,7 +576,7 @@ bool Class::verifyPersistent() const {
  * write lease.
  */
 void Class::initInstanceBits() {
-  ASSERT(Transl::Translator::WriteLease().amOwner());
+  assert(Transl::Translator::WriteLease().amOwner());
   if (s_instanceBitsInit) return;
 
   // First, grab a write lock on s_instanceCounts and grab the current set of
@@ -648,7 +648,7 @@ void Class::initInstanceBits() {
 }
 
 void Class::profileInstanceOf(const StringData* name) {
-  ASSERT(name->isStatic());
+  assert(name->isStatic());
   unsigned inc = 1;
   Class* c = Unit::lookupClass(name);
   if (c && (c->attrs() & AttrInterface)) {
@@ -666,17 +666,17 @@ void Class::profileInstanceOf(const StringData* name) {
 }
 
 bool Class::haveInstanceBit(const StringData* name) {
-  ASSERT(s_instanceBitsInit);
+  assert(s_instanceBitsInit);
   return mapContains(s_instanceBits, name);
 }
 
 bool Class::getInstanceBitMask(const StringData* name,
                                int& offset, uint8& mask) {
-  ASSERT(s_instanceBitsInit);
+  assert(s_instanceBitsInit);
   const size_t bitWidth = sizeof(mask) * CHAR_BIT;
   unsigned bit;
   if (!mapGet(s_instanceBits, name, &bit)) return false;
-  ASSERT(bit >= 1 && bit < kInstanceBits);
+  assert(bit >= 1 && bit < kInstanceBits);
   offset = offsetof(Class, m_instanceBits) + bit / bitWidth * sizeof(mask);
   mask = 1u << (bit % bitWidth);
   return true;
@@ -791,8 +791,8 @@ void Class::initialize() const {
 }
 
 Class::PropInitVec* Class::initPropsImpl() const {
-  ASSERT(m_pinitVec.size() > 0);
-  ASSERT(getPropData() == NULL);
+  assert(m_pinitVec.size() > 0);
+  assert(getPropData() == NULL);
   // Copy initial values for properties to a new vector that can be used to
   // complete initialization for non-scalar properties via the iterative
   // 86pinit() calls below.  86pinit() takes a reference to an array that
@@ -807,9 +807,9 @@ Class::PropInitVec* Class::initPropsImpl() const {
 
   // Note that constructing these on the stack is slightly
   // risky; we're relying on nobody getting hold of references
-  // to them. Also note that the ASSERT on the refCount below
+  // to them. Also note that the assert on the refCount below
   // is quite inadequate; the only way for these to leak is if
-  // an error occurs - but in that case, we wont reach the ASSERT
+  // an error occurs - but in that case, we wont reach the assert
   // However, since we dont /want/ these to leak into the backtrace,
   // we prevent it by setting AttrNoInjection (see Func::init)
   NameValueTable propNvt(numDeclProperties());
@@ -858,7 +858,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
        it != m_pinitVec.rend(); ++it) {
     TypedValue retval;
     g_vmContext->invokeFunc(&retval, *it, args, NULL, const_cast<Class*>(this));
-    ASSERT(!IS_REFCOUNTED_TYPE(retval.m_type));
+    assert(!IS_REFCOUNTED_TYPE(retval.m_type));
   }
 
   // Promote non-static arrays/strings (that came from 86pinit) to
@@ -872,8 +872,8 @@ Class::PropInitVec* Class::initPropsImpl() const {
 
   // Free the args array.  propArr is allocated on the stack so it
   // better be only referenced from args.
-  ASSERT(propArr.getCount() == 1);
-  ASSERT(args->getCount() == 1);
+  assert(propArr.getCount() == 1);
+  assert(args->getCount() == 1);
   decRefArr(args);
   return propVec;
 }
@@ -888,7 +888,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
       // Fetch 'baseClass', which is the class in the inheritance
       // tree which first declared the property
       Class* baseClass = m_declProperties[propInd].m_class;
-      ASSERT(baseClass);
+      assert(baseClass);
       // If ctx == baseClass, we know we have the right property
       // and we can stop here.
       if (ctx == baseClass) {
@@ -901,7 +901,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
         accessible = false;
         return propInd;
       }
-      ASSERT(ctx);
+      assert(ctx);
       if (attrs & AttrPrivate) {
         // ctx != baseClass and the property is private, so it is not
         // accessible. We need to keep going because ctx may define a
@@ -928,7 +928,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
         // keep going because ctx may define a private property with the same
         // name.
         accessible = true;
-        ASSERT(baseClass->classof(ctx));
+        assert(baseClass->classof(ctx));
       }
     } else {
       // The property is public (or we're in the debugger and we are bypassing
@@ -963,8 +963,8 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
 }
 
 TypedValue* Class::initSPropsImpl() const {
-  ASSERT(numStaticProperties() > 0);
-  ASSERT(getSPropData() == NULL);
+  assert(numStaticProperties() > 0);
+  assert(getSPropData() == NULL);
   // Create an array that is initially large enough to hold all static
   // properties.
   TypedValue* const spropTable =
@@ -985,7 +985,7 @@ TypedValue* Class::initSPropsImpl() const {
     TypedValue* storage = 0;
     if (sProp.m_class == this) {
       // Embed static property value directly in array.
-      ASSERT(tvIsStatic(&sProp.m_val));
+      assert(tvIsStatic(&sProp.m_val));
       spropTable[slot] = sProp.m_val;
       storage = &spropTable[slot];
     } else {
@@ -1022,17 +1022,17 @@ TypedValue* Class::initSPropsImpl() const {
         TypedValue retval;
         g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, NULL,
                                 const_cast<Class*>(this));
-        ASSERT(!IS_REFCOUNTED_TYPE(retval.m_type));
+        assert(!IS_REFCOUNTED_TYPE(retval.m_type));
       }
       // Release the args array.  nvtWrapper is on the stack, so it
       // better have a single reference.
-      ASSERT(args->getCount() == 1);
+      assert(args->getCount() == 1);
       args->release();
-      ASSERT(nvtWrapper.getCount() == 1);
+      assert(nvtWrapper.getCount() == 1);
     } catch (...) {
-      ASSERT(args->getCount() == 1);
+      assert(args->getCount() == 1);
       args->release();
-      ASSERT(nvtWrapper.getCount() == 1);
+      assert(nvtWrapper.getCount() == 1);
       throw;
     }
   }
@@ -1083,9 +1083,9 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
     }
   }
 
-  ASSERT(sProps != NULL);
+  assert(sProps != NULL);
   TypedValue* sProp = tvDerefIndirect(&sProps[sPropInd]);
-  ASSERT(sProp->m_type != KindOfUninit &&
+  assert(sProp->m_type != KindOfUninit &&
          "static property initialization failed to initialize a property");
   return sProp;
 }
@@ -1101,7 +1101,7 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
 TypedValue Class::getStaticPropInitVal(const SProp& prop) {
   Class* declCls = prop.m_class;
   Slot s = declCls->m_staticProperties.findIndex(prop.m_name);
-  ASSERT(s != kInvalidSlot);
+  assert(s != kInvalidSlot);
   return declCls->m_staticProperties[s].m_val;
 }
 
@@ -1269,8 +1269,8 @@ void Class::setSpecial() {
 
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, sd86ctor);
-  ASSERT(m_ctor && "class had no user-defined constructor or 86ctor");
-  ASSERT(m_ctor->attrs() == (AttrPublic|AttrNoInjection));
+  assert(m_ctor && "class had no user-defined constructor or 86ctor");
+  assert(m_ctor->attrs() == (AttrPublic|AttrNoInjection));
 }
 
 void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule) {
@@ -1455,7 +1455,7 @@ void Class::importTraitMethod(const TraitMethod&  traitMethod,
 
     methodOverrideCheck(parentMethod, f);
 
-    ASSERT(!(f->attrs() & AttrPrivate) ||
+    assert(!(f->attrs() & AttrPrivate) ||
            (parentMethod->attrs() & AttrPrivate));
     if ((parentMethod->attrs() & AttrPrivate) || (f->attrs() & AttrPrivate)) {
       baseClass = this;
@@ -1607,7 +1607,7 @@ void Class::setMethods() {
     // Copy down the parent's method entries. These may be overridden below.
     for (Slot i = 0; i < m_parent->m_methods.size(); ++i) {
       Func* f = m_parent->m_methods[i];
-      ASSERT(f);
+      assert(f);
       if ((f->attrs() & AttrClone) ||
           (!(f->attrs() & AttrPrivate) && f->hasStaticLocals())) {
         // When copying down an entry for a non-private method that has
@@ -1617,12 +1617,12 @@ void Class::setMethods() {
         // overriden below.
         parentMethodsWithStaticLocals.push_back(i);
       }
-      ASSERT(builder.size() == i);
+      assert(builder.size() == i);
       builder.add(f->name(), f);
     }
   }
 
-  ASSERT(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
+  assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
   // Overlay/append this class's public/protected methods onto/to those of the
   // parent.
   for (size_t methI = 0; methI < m_preClass->numMethods(); ++methI) {
@@ -1642,14 +1642,14 @@ void Class::setMethods() {
     if (it2 != builder.end()) {
       Func* parentMethod = builder[it2->second];
       // We should never have null func pointers to deal with
-      ASSERT(parentMethod);
+      assert(parentMethod);
       methodOverrideCheck(parentMethod, method);
       // Overlay.
       Func* f = method->clone();
       f->setNewFuncId();
       f->setCls(this);
       Class* baseClass;
-      ASSERT(!(f->attrs() & AttrPrivate) ||
+      assert(!(f->attrs() & AttrPrivate) ||
              (parentMethod->attrs() & AttrPrivate));
       if ((parentMethod->attrs() & AttrPrivate) || (f->attrs() & AttrPrivate)) {
         baseClass = this;
@@ -1839,7 +1839,7 @@ void Class::setProperties() {
     }
   }
 
-  ASSERT(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
+  assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
   for (Slot slot = 0; slot < m_preClass->numProperties(); ++slot) {
     const PreClass::Prop* preProp = &m_preClass->properties()[slot];
 
@@ -1895,7 +1895,7 @@ void Class::setProperties() {
         // property.
         PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
         if (it2 != curPropMap.end()) {
-          ASSERT((curPropMap[it2->second].m_attrs
+          assert((curPropMap[it2->second].m_attrs
                  & (AttrPublic|AttrProtected|AttrPrivate)) == AttrProtected);
           m_declPropInit[it2->second] = m_preClass->lookupProp(preProp
                                         ->name())->val();
@@ -1946,7 +1946,7 @@ void Class::setProperties() {
                                  ->val());
         break;
       }
-      default: ASSERT(false);
+      default: assert(false);
       }
     } else { // Static property.
       // Prohibit non-static-->static redeclaration.
@@ -2261,7 +2261,7 @@ void Class::setUsedTraits() {
 
 void Class::setClassVec() {
   if (m_classVecLen > 1) {
-    ASSERT(m_parent.get() != NULL);
+    assert(m_parent.get() != NULL);
     memcpy(m_classVec, m_parent.get()->m_classVec,
            (m_classVecLen-1) * sizeof(Class*));
   }
@@ -2342,7 +2342,7 @@ bool Class::declaredMethod(const Func* method) {
 }
 
 void Class::getClassInfo(ClassInfoVM* ci) {
-  ASSERT(ci);
+  assert(ci);
 
   // Miscellaneous.
   Attr clsAttrs = attrs();
@@ -2403,14 +2403,14 @@ void Class::getClassInfo(ClassInfoVM* ci) {
     // Filter out special methods
     if (isdigit(name->data()[0])) continue;
     Func* func = lookupMethod(m_preClass->methods()[i]->name());
-    ASSERT(func);
-    ASSERT(declaredMethod(func));
+    assert(func);
+    assert(declaredMethod(func));
     SET_FUNCINFO_BODY;
   }
 
   for (Slot i = m_traitsBeginIdx; i < m_traitsEndIdx; ++i) {
     Func* func = m_methods[i];
-    ASSERT(func);
+    assert(func);
     if (!isdigit(func->name()->data()[0])) {
       SET_FUNCINFO_BODY;
     }
@@ -2491,20 +2491,20 @@ Class::PropInitVec::allocInRequestArena(const PropInitVec& src) {
 
 const Class::PropInitVec&
 Class::PropInitVec::operator=(const PropInitVec& piv) {
-  ASSERT(!m_smart);
+  assert(!m_smart);
   if (this != &piv) {
     unsigned sz = m_size = piv.size();
     if (sz) sz = Util::roundUpToPowerOfTwo(sz);
     free(m_data);
     m_data = (TypedValue*)malloc(sz * sizeof(*m_data));
-    ASSERT(m_data);
+    assert(m_data);
     memcpy(m_data, piv.m_data, piv.size() * sizeof(*m_data));
   }
   return *this;
 }
 
 void Class::PropInitVec::push_back(const TypedValue& v) {
-  ASSERT(!m_smart);
+  assert(!m_smart);
   /*
    * the allocated size is always the next power of two (or zero)
    * so we just need to reallocate when we hit a power of two
@@ -2512,7 +2512,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   if (!m_size || Util::isPowerOfTwo(m_size)) {
     unsigned size = m_size ? m_size * 2 : 1;
     m_data = (TypedValue*)realloc(m_data, size * sizeof(*m_data));
-    ASSERT(m_data);
+    assert(m_data);
   }
   tvDup(&v, &m_data[m_size++]);
 }
@@ -2536,7 +2536,7 @@ void Class::initProps() const {
 }
 
 void Class::setPropData(PropInitVec* propData) const {
-  ASSERT(getPropData() == NULL);
+  assert(getPropData() == NULL);
   initPropHandle();
   handleToRef<PropInitVec*>(m_propDataCache) = propData;
 }
@@ -2560,7 +2560,7 @@ TypedValue* Class::initSProps() const {
 }
 
 void Class::setSPropData(TypedValue* sPropData) const {
-  ASSERT(getSPropData() == NULL);
+  assert(getSPropData() == NULL);
   initSPropHandle();
   handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
 }

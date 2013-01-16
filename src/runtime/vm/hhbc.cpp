@@ -29,7 +29,7 @@ bool isValidOpcode(Opcode op) {
 }
 
 int numImmediates(Opcode opcode) {
-  ASSERT(isValidOpcode(opcode));
+  assert(isValidOpcode(opcode));
   static const int8_t values[] = {
 #define NA         0
 #define ONE(...)   1
@@ -49,8 +49,8 @@ int numImmediates(Opcode opcode) {
 }
 
 ArgType immType(const Opcode opcode, int idx) {
-  ASSERT(isValidOpcode(opcode));
-  ASSERT(idx >= 0 && idx < numImmediates(opcode));
+  assert(isValidOpcode(opcode));
+  assert(idx >= 0 && idx < numImmediates(opcode));
   always_assert(idx < 4); // No opcodes have more than four immediates
   static const int8_t arg0Types[] = {
 #define NA -1,
@@ -113,12 +113,12 @@ ArgType immType(const Opcode opcode, int idx) {
     case 1: return (ArgType)arg1Types[opcode];
     case 2: return (ArgType)arg2Types[opcode];
     case 3: return (ArgType)arg3Types[opcode];
-    default: ASSERT(false); return (ArgType)-1;
+    default: assert(false); return (ArgType)-1;
   }
 }
 
 int immSize(const Opcode* opcode, int idx) {
-  ASSERT(idx >= 0 && idx < numImmediates(*opcode));
+  assert(idx >= 0 && idx < numImmediates(*opcode));
   always_assert(idx < 4); // No opcodes have more than four immediates
   static const int8_t argTypeToSizes[] = {
 #define ARGTYPE(nm, type) sizeof(type),
@@ -151,7 +151,7 @@ int immSize(const Opcode* opcode, int idx) {
       prefixes = 1;
       vecElemSz = sizeof(Offset);
     } else {
-      ASSERT(itype == SLA);
+      assert(itype == SLA);
       prefixes = 1;
       vecElemSz = sizeof(StrVecItem);
     }
@@ -178,7 +178,7 @@ bool hasImmVector(Opcode opcode) {
 
 ArgUnion getImm(const Opcode* opcode, int idx) {
   const Opcode* p = opcode + 1;
-  ASSERT(idx >= 0 && idx < numImmediates(*opcode));
+  assert(idx >= 0 && idx < numImmediates(*opcode));
   ArgUnion retval;
   retval.u_NA = 0;
   int cursor = 0;
@@ -198,9 +198,9 @@ ArgUnion getImm(const Opcode* opcode, int idx) {
 }
 
 ArgUnion* getImmPtr(const Opcode* opcode, int idx) {
-  ASSERT(immType(*opcode, idx) != IVA);
-  ASSERT(immType(*opcode, idx) != HA);
-  ASSERT(immType(*opcode, idx) != IA);
+  assert(immType(*opcode, idx) != IVA);
+  assert(immType(*opcode, idx) != HA);
+  assert(immType(*opcode, idx) != IA);
   const Opcode* ptr = opcode + 1;
   for (int i = 0; i < idx; i++) {
     ptr += immSize(opcode, i);
@@ -239,7 +239,7 @@ size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
     *buf = static_cast<unsigned char>(n) << 1;
     return 1;
   }
-  ASSERT((n & 0x7fffffff) == n);
+  assert((n & 0x7fffffff) == n);
   *reinterpret_cast<uint32_t*>(buf) = (uint32_t(n) << 1) | 0x1;
   return 4;
 }
@@ -305,7 +305,7 @@ Offset* instrJumpOffset(Opcode* instr) {
 #undef O
   };
 
-  ASSERT(!isSwitch(*instr));
+  assert(!isSwitch(*instr));
   int mask = jumpMask[*instr];
   if (mask == 0) {
     return NULL;
@@ -317,7 +317,7 @@ Offset* instrJumpOffset(Opcode* instr) {
     case 2: immNum = 1; break;
     case 4: immNum = 2; break;
     case 8: immNum = 3; break;
-    default: ASSERT(false); return NULL;
+    default: assert(false); return NULL;
   }
 
   return &getImmPtr(instr, immNum)->u_BA;
@@ -391,7 +391,7 @@ int instrNumPops(const Opcode* opcode) {
   // For instructions with vector immediates, we have to scan the
   // contents of the vector immediate to determine how many values
   // are popped
-  ASSERT(n == -1 || n == -2);
+  assert(n == -1 || n == -2);
   ImmVector iv = getImmVector(opcode);
   // Count the number of values on the stack accounted for by the
   // ImmVector's location and members
@@ -511,7 +511,7 @@ static void staticArrayStreamer(ArrayData* ad, std::stringstream& out) {
             << "\"";
         break;
       }
-      default: ASSERT(false);
+      default: assert(false);
       }
       out << "=>";
       // Value.
@@ -546,7 +546,7 @@ static void staticArrayStreamer(ArrayData* ad, std::stringstream& out) {
         staticArrayStreamer(val.getArrayData(), out);
         break;
       }
-      default: ASSERT(false);
+      default: assert(false);
       }
     }
   }
@@ -581,7 +581,7 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
     staticArrayStreamer(tv->m_data.parr, out);
     break;
   }
-  default: ASSERT(false);
+  default: assert(false);
   }
 }
 
@@ -596,7 +596,7 @@ static_assert(locationNamesCount == NumLocationCodes,
               "Location code missing for locationCodeString");
 
 const char* locationCodeString(LocationCode lcode) {
-  ASSERT(lcode >= 0 && lcode < NumLocationCodes);
+  assert(lcode >= 0 && lcode < NumLocationCodes);
   return locationNames[lcode];
 }
 
@@ -628,7 +628,7 @@ static_assert(memberNamesCount == NumMemberCodes,
              "Member code missing for memberCodeString");
 
 const char* memberCodeString(MemberCode mcode) {
-  ASSERT(mcode >= 0 && mcode < NumMemberCodes);
+  assert(mcode >= 0 && mcode < NumMemberCodes);
   return memberNames[mcode];
 }
 
@@ -749,7 +749,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
         }                                                               \
       }                                                                 \
     }                                                                   \
-    ASSERT(reinterpret_cast<const uint8_t*>(it) - start == sz);         \
+    assert(reinterpret_cast<const uint8_t*>(it) - start == sz);         \
   }                                                                     \
   out << ">";                                                           \
 } while (false)
@@ -757,7 +757,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define READLITSTR(sep) do {                                      \
   Id id = readData<Id>(it);                                       \
   if (id < 0) {                                                   \
-    ASSERT(op == OpSSwitch);                                      \
+    assert(op == OpSSwitch);                                      \
     out << sep << "-";                                            \
   } else if (u) {                                                 \
     const StringData* sd = u->lookupLitstrId(id);                 \
@@ -840,7 +840,7 @@ OPCODES
 #undef H_OA
 #undef H_SA
 #undef H_AA
-    default: ASSERT(false);
+    default: assert(false);
   };
   return out.str();
 }
@@ -888,7 +888,7 @@ ImmVector getImmVector(const Opcode* opcode) {
 }
 
 const uint8_t* ImmVector::findLastMember() const {
-  ASSERT(m_length > 0);
+  assert(m_length > 0);
 
   // Loop that does basically the same as numStackValues(), except
   // stop at the last.
@@ -908,7 +908,7 @@ const uint8_t* ImmVector::findLastMember() const {
     if (vec - m_start == m_length) {
       return ret;
     }
-    ASSERT(vec - m_start < m_length);
+    assert(vec - m_start < m_length);
   }
 
   NOT_REACHED();
@@ -933,7 +933,7 @@ bool ImmVector::decodeLastMember(const Unit* u,
 int instrSpToArDelta(const Opcode* opcode) {
   // This function should only be called for instructions that read
   // the current FPI
-  ASSERT(instrReadsCurrentFpi(*opcode));
+  assert(instrReadsCurrentFpi(*opcode));
   // The delta from sp to ar is equal to the number of values on the stack
   // that will be consumed by this instruction (numPops) plus the number of
   // parameters pushed onto the stack so far that are not being consumed by

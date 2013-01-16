@@ -48,13 +48,13 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
 
   Symbol *sym = genSymbol(name, true);
   if (!sym->declarationSet()) {
-    ASSERT(!sym->valueSet());
+    assert(!sym->valueSet());
     setType(ar, sym, type, true);
     sym->setDeclaration(construct);
     sym->setValue(exp);
     return type;
   }
-  ASSERT(sym->declarationSet() && sym->valueSet());
+  assert(sym->declarationSet() && sym->valueSet());
 
   if (m_blockScope.isFirstPass()) {
     if (construct) {
@@ -96,14 +96,14 @@ void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
 void ConstantTable::setValue(AnalysisResultConstPtr ar, const std::string &name,
                              ExpressionPtr value) {
   Symbol *sym = getSymbol(name);
-  ASSERT(sym && sym->isPresent());
+  assert(sym && sym->isPresent());
   sym->setValue(value);
 }
 
 bool ConstantTable::isRecursivelyDeclared(AnalysisResultConstPtr ar,
                                           const std::string &name) const {
   if (const Symbol *sym ATTRIBUTE_UNUSED = getSymbol(name)) {
-    ASSERT(sym->isPresent() && sym->valueSet());
+    assert(sym->isPresent() && sym->valueSet());
     return true;
   }
   ClassScopePtr parent = findParent(ar, name);
@@ -117,7 +117,7 @@ ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstPtr ar,
                                           const std::string &name,
                                           ClassScopePtr &defClass) const {
   if (const Symbol *sym = getSymbol(name)) {
-    ASSERT(sym->isPresent() && sym->valueSet());
+    assert(sym->isPresent() && sym->valueSet());
     if (sym->getValue()) return sym->getValue();
   }
   ClassScopePtr parent = findParent(ar, name);
@@ -133,7 +133,7 @@ ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultConstPtr ar,
                                                 ClassScopePtr &defClass)
 const {
   if (const Symbol *sym = getSymbol(name)) {
-    ASSERT(sym->isPresent() && sym->valueSet());
+    assert(sym->isPresent() && sym->valueSet());
     if (sym->getDeclaration()) return sym->getDeclaration();
   }
   ClassScopePtr parent = findParent(ar, name);
@@ -162,7 +162,7 @@ TypePtr ConstantTable::check(BlockScopeRawPtr context,
                              ConstructPtr construct,
                              const std::vector<std::string> &bases,
                              BlockScope *&defScope) {
-  ASSERT(!m_blockScope.is(BlockScope::FunctionScope));
+  assert(!m_blockScope.is(BlockScope::FunctionScope));
   bool isClassScope = m_blockScope.is(BlockScope::ClassScope);
   TypePtr actualType;
   defScope = NULL;
@@ -187,9 +187,9 @@ TypePtr ConstantTable::check(BlockScopeRawPtr context,
           Type::Variant : Type::String;
       }
     } else {
-      ASSERT(sym->isPresent());
-      ASSERT(sym->getType());
-      ASSERT(sym->isConstant());
+      assert(sym->isPresent());
+      assert(sym->getType());
+      assert(sym->isConstant());
       defScope = &m_blockScope;
       if (isClassScope) {
         // if the current scope is a function scope, grab the lock.

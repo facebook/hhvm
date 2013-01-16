@@ -46,8 +46,8 @@ struct CompactSizedPtr {
   CompactSizedPtr() { set(0, 0); }
 
   void set(uint32_t size, T* ptr) {
-    ASSERT(size <= 0xffffu);
-    ASSERT(!(uintptr_t(ptr) >> 48));
+    assert(size <= 0xffffu);
+    assert(!(uintptr_t(ptr) >> 48));
     m_data = uintptr_t(ptr) | (size_t(size) << 48);
   }
 
@@ -71,7 +71,7 @@ struct CompactSizedPtr {
   CompactSizedPtr() { set(0, 0); }
 
   void set(uint32_t size, T* ptr) {
-    ASSERT(size <= 0xffffu);
+    assert(size <= 0xffffu);
     m_size = size;
     m_ptr = ptr;
   }

@@ -106,8 +106,8 @@ Repo::~Repo() {
 
 std::string Repo::s_cliFile;
 void Repo::setCliFile(const std::string& cliFile) {
-  ASSERT(s_cliFile.empty());
-  ASSERT(t_dh.isNull());
+  assert(s_cliFile.empty());
+  assert(t_dh.isNull());
   s_cliFile = cliFile;
 }
 
@@ -248,7 +248,7 @@ void Repo::begin() {
 }
 
 void Repo::txPop() {
-  ASSERT(m_txDepth > 0);
+  assert(m_txDepth > 0);
   if (m_txDepth > 1) {
     m_txDepth--;
     return;
@@ -296,7 +296,7 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
   } catch (const std::exception& e) {
     TRACE(0, "unexpected exception in commitUnit: %s\n",
              e.what());
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -308,7 +308,7 @@ void Repo::connect() {
   } else if (!RuntimeOption::RepoEvalMode.compare("central")) {
     m_evalRepoId = RepoIdCentral;
   } else {
-    ASSERT(!RuntimeOption::RepoEvalMode.compare("readonly"));
+    assert(!RuntimeOption::RepoEvalMode.compare("readonly"));
     m_evalRepoId = RepoIdInvalid;
   }
   TRACE(1, "Repo.Eval.Mode=%s\n",
@@ -332,7 +332,7 @@ void Repo::disconnect() {
 void Repo::initCentral() {
   std::vector<std::string> failPaths;
 
-  ASSERT(m_dbc == NULL);
+  assert(m_dbc == NULL);
 
   // Try Repo.Central.Path (or HHVM_REPO_CENTRAL_PATH).
   if (!RuntimeOption::RepoCentralPath.empty()) {
@@ -399,7 +399,7 @@ static int busyHandler(void* opaque, int nCalls) {
 }
 
 std::string Repo::insertSchema(const char* path) {
-  ASSERT(strstr(kSchemaId, kSchemaPlaceholder) == NULL);
+  assert(strstr(kSchemaId, kSchemaPlaceholder) == NULL);
   std::string result = path;
   size_t idx;
   if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
@@ -456,7 +456,7 @@ void Repo::initLocal() {
     if (!RuntimeOption::RepoLocalMode.compare("rw")) {
       isWritable = true;
     } else {
-      ASSERT(!RuntimeOption::RepoLocalMode.compare("r-"));
+      assert(!RuntimeOption::RepoLocalMode.compare("r-"));
       isWritable = false;
     }
 

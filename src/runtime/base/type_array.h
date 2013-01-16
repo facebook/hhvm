@@ -298,7 +298,7 @@ class Array : protected ArrayBase {
     if (escalated) {
       ArrayBase::operator=(escalated);
     }
-    ASSERT(ret);
+    assert(ret);
     return *ret;
   }
 
@@ -311,7 +311,7 @@ class Array : protected ArrayBase {
     if (escalated) {
       ArrayBase::operator=(escalated);
     }
-    ASSERT(ret);
+    assert(ret);
     return *ret;
   }
 
@@ -419,7 +419,7 @@ class Array : protected ArrayBase {
     if (escalated) {
       ArrayBase::operator=(escalated);
     }
-    ASSERT(ret);
+    assert(ret);
     return *ret;
   }
 
@@ -580,7 +580,7 @@ class Array : protected ArrayBase {
     if (escalated) {
       ArrayBase::operator=(escalated);
     }
-    ASSERT(ret);
+    assert(ret);
     return *ret;
   }
 

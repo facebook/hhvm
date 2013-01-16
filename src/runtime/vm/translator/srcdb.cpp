@@ -44,7 +44,7 @@ void SrcRec::setFuncInfo(const Func* f) {
  * translation (which just is a REQ_RETRANSLATE).
  */
 TCA SrcRec::getFallbackTranslation() const {
-  ASSERT(m_anchorTranslation);
+  assert(m_anchorTranslation);
   return m_anchorTranslation;
 }
 
@@ -65,7 +65,7 @@ void SrcRec::emitFallbackJump(Asm &a, TCA from, int cc /* = -1 */) {
   if (cc < 0) {
     a.jmp(a.code.frontier);
   } else {
-    ASSERT(incoming.m_type == IncomingBranch::JCC);
+    assert(incoming.m_type == IncomingBranch::JCC);
     a.jcc((ConditionCode)cc, a.code.frontier);
   }
 
@@ -79,7 +79,7 @@ void SrcRec::emitFallbackJump(Asm &a, TCA from, int cc /* = -1 */) {
 void SrcRec::newTranslation(Asm& a, Asm &astubs, TCA newStart) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
-  ASSERT(m_translations.size() <= kMaxTranslations);
+  assert(m_translations.size() <= kMaxTranslations);
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, newStart);
 
@@ -116,7 +116,7 @@ void SrcRec::newTranslation(Asm& a, Asm &astubs, TCA newStart) {
 
 void SrcRec::addDebuggerGuard(Asm& a, Asm &astubs, TCA dbgGuard,
                               TCA dbgBranchGuardSrc) {
-  ASSERT(!m_dbgBranchGuardSrc);
+  assert(!m_dbgBranchGuardSrc);
 
   TRACE(1, "SrcRec(%p)::addDebuggerGuard @%p, "
         "%zd incoming branches to rechain\n",
@@ -189,7 +189,7 @@ void SrcRec::patch(Asm* a, IncomingBranch branch, TCA dest) {
 
 void SrcDB::recordDependencyWork(const Eval::PhpFile* file, const SrcKey& sk) {
   if (RuntimeOption::RepoAuthoritative) return;
-  ASSERT(Translator::WriteLease().amOwner());
+  assert(Translator::WriteLease().amOwner());
   std::pair<FileDepMap::iterator, bool> insRet =
     m_deps.insert(FileDepMap::value_type(file, NULL));
   if (insRet.second) {
@@ -203,14 +203,14 @@ void SrcDB::recordDependencyWork(const Eval::PhpFile* file, const SrcKey& sk) {
  * Returns number of destroyed references to file.
  */
 size_t SrcDB::invalidateCode(const Eval::PhpFile* file) {
-  ASSERT(currentRank() == RankBase);
+  assert(currentRank() == RankBase);
   /*
    * Hold the write lease; otherwise some other thread may have started
    * translating this very file.
    */
   BlockingLeaseHolder writer(Translator::WriteLease());
 
-  ASSERT(!RuntimeOption::RepoAuthoritative);
+  assert(!RuntimeOption::RepoAuthoritative);
   unsigned i = 0;
   {
     TRACE(1, "SrcDB::invalidateCode: file %p\n", file);

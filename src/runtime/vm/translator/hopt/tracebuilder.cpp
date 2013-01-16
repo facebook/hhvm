@@ -42,7 +42,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   m_curFunc = genDefConst<const Func*>(func);
   m_fpValue = genDefFP();
   m_spValue = genDefSP();
-  ASSERT(m_spOffset >= 0);
+  assert(m_spOffset >= 0);
 }
 
 void TraceBuilder::genPrint(SSATmp* arg) {
@@ -94,9 +94,9 @@ SSATmp* TraceBuilder::genLdProp(SSATmp* obj,
                                 SSATmp* prop,
                                 Type::Tag type,
                                 Trace* exit) {
-  ASSERT(obj->getType() == Type::Obj);
-  ASSERT(prop->getType() == Type::Int);
-  ASSERT(prop->isConst());
+  assert(obj->getType() == Type::Obj);
+  assert(prop->getType() == Type::Int);
+  assert(prop->isConst());
   return gen(LdPropNR, type, getLabel(exit), obj, prop);
 }
 
@@ -138,14 +138,14 @@ SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
                                int64 offset,
                                Type::Tag type,
                                Trace* target) {
-  ASSERT(addr->getType() == Type::PtrToCell ||
+  assert(addr->getType() == Type::PtrToCell ||
          addr->getType() == Type::PtrToGen);
   return gen(LdMemNR, type, getLabel(target), addr, genDefConst(offset));
 }
 
 SSATmp* TraceBuilder::genLdRef(SSATmp* ref, Type::Tag type, Trace* exit) {
-  ASSERT(Type::isUnboxed(type));
-  ASSERT(Type::isBoxed(ref->getType()));
+  assert(Type::isUnboxed(type));
+  assert(Type::isBoxed(ref->getType()));
   return gen(LdRefNR, type, getLabel(exit), ref);
 }
 
@@ -303,7 +303,7 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
   SSATmp* pc = genDefConst<int64>(bcOff);
   IRInstruction* instr = NULL;
   if (exitType == TraceExitType::NormalCc) {
-    ASSERT(notTakenBcOff != 0);
+    assert(notTakenBcOff != 0);
     SSATmp* notTakenPC = genDefConst<int64>(notTakenBcOff);
     instr = m_irFactory.gen(getExitOpcode(exitType),
                             m_curFunc,
@@ -312,7 +312,7 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
                             m_fpValue,
                             notTakenPC);
   } else {
-    ASSERT(notTakenBcOff == 0);
+    assert(notTakenBcOff == 0);
     instr = m_irFactory.gen(getExitOpcode(exitType),
                             m_curFunc,
                             pc,
@@ -393,7 +393,7 @@ Trace* TraceBuilder::genJmpCond(Opcode opc,
                                 SSATmp* src1,
                                 SSATmp* src2,
                                 Trace* target) {
-  ASSERT(target);
+  assert(target);
   bool canResolve = false;
   bool cond = false; // make compiler happy
   // TODO move this to simplifier and use for comparison as well
@@ -449,7 +449,7 @@ Trace* TraceBuilder::genJmpCond(Opcode opc,
                                 Type::Tag type,
                                 SSATmp* src,
                                 Trace* target) {
-  ASSERT(target);
+  assert(target);
   gen(opc, type, getLabel(target), src);
   return target;
 }
@@ -458,20 +458,20 @@ Trace* TraceBuilder::genJmpCond(Opcode opc,
 Trace* TraceBuilder::genJmpCond(Opcode opc,
                                 SSATmp* src,
                                 Trace* target) {
-  ASSERT(target);
+  assert(target);
   gen(opc, getLabel(target), src);
   return target;
 }
 
 Trace* TraceBuilder::genJmp(Trace* targetTrace) {
-  ASSERT(targetTrace);
+  assert(targetTrace);
   gen(Jmp_, getLabel(targetTrace));
   return targetTrace;
 }
 
 Trace* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
-  ASSERT(target);
-  ASSERT(boolSrc->getType() == Type::Bool);
+  assert(target);
+  assert(boolSrc->getType() == Type::Bool);
   if (boolSrc->isConst()) {
     bool val = boolSrc->getConstValAsBool();
     if (negate) {
@@ -533,7 +533,7 @@ Trace* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
 }
 
 Trace* TraceBuilder::genCheckUninit(SSATmp* src, Trace* target) {
-  ASSERT(target);
+  assert(target);
   Type::Tag type = src->getType();
   // TODO: Add this to simplifier
   if (type == Type::Cell || type == Type::Gen) {
@@ -570,7 +570,7 @@ void TraceBuilder::genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace) {
 SSATmp* TraceBuilder::genGuardType(SSATmp* src,
                                    Type::Tag type,
                                    Trace* target) {
-  ASSERT(target);
+  assert(target);
   Type::Tag srcType = src->getType();
   if (srcType == type || Type::isMoreRefined(srcType, type)) {
     /*
@@ -608,7 +608,7 @@ SSATmp* TraceBuilder::genGuardType(SSATmp* src,
         (srcType == Type::Cell && !Type::isBoxed(type))) {
       origSrc->setType(type);
       srcInst->setTypeParam(type);
-      ASSERT(origSrc->getType() == outputType(srcInst));
+      assert(origSrc->getType() == outputType(srcInst));
       return src;
     }
   }
@@ -635,7 +635,7 @@ void TraceBuilder::genGuardRefs(SSATmp* funcPtr,
 
 SSATmp* TraceBuilder::genLdHome(uint32 id) {
   ConstInstruction inst(m_fpValue, Local(id));
-  ASSERT(m_fpValue &&
+  assert(m_fpValue &&
          m_fpValue->getInstruction()->getOpcode() == DefFP);
   return optimizeInst(&inst);
 }
@@ -713,7 +713,7 @@ SSATmp* TraceBuilder::genLdObjMethod(const StringData* methodName,
 }
 
 SSATmp* TraceBuilder::genQueryOp(Opcode queryOpc, SSATmp* addr) {
-  ASSERT(isQueryOp(queryOpc));
+  assert(isQueryOp(queryOpc));
   return gen(queryOpc, addr);
 }
 
@@ -740,9 +740,9 @@ SSATmp* TraceBuilder::genInstanceOfD(SSATmp* src, SSATmp* className) {
 Local getLocalFromHomeOpnd(SSATmp* srcHome) {
   // Invariant: only LdHome instructions generate home values
   IRInstruction* ldHomeInstruction = srcHome->getInstruction();
-  ASSERT(ldHomeInstruction->getOpcode() == LdHome);
-  ASSERT(ldHomeInstruction->isConstInstruction());
-  ASSERT(srcHome->getType() == Type::Home);
+  assert(ldHomeInstruction->getOpcode() == LdHome);
+  assert(ldHomeInstruction->isConstInstruction());
+  assert(srcHome->getType() == Type::Home);
   return ((ConstInstruction*)ldHomeInstruction)->getLocal();
 }
 
@@ -767,7 +767,7 @@ SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
     // generate prevValue = ldloc
     Type::Tag type = getLocalType(id);
     // guards should ensure we have type info at this point
-    ASSERT(type != Type::None);
+    assert(type != Type::None);
     prevValue = gen(LdLoc, type, home);
   }
   // Don't box if local's value already boxed
@@ -775,7 +775,7 @@ SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
   if (Type::isBoxed(prevType)) {
     return prevValue;
   }
-  ASSERT(Type::isUnboxed(prevType));
+  assert(Type::isUnboxed(prevType));
   // The Box helper requires us to incref the values its boxing, but in
   // this case we don't need to incref prevValue because we are simply
   // transfering its refcount from the local to the box.
@@ -831,7 +831,7 @@ SSATmp* TraceBuilder::genLdLoc(uint32 id,
        * unbox t1 into a cell via a LdRef
        */
       Type::Tag unboxedType = Type::getInnerType(t1->getType());
-      ASSERT(!Type::isMoreRefined(type, unboxedType));
+      assert(!Type::isMoreRefined(type, unboxedType));
       return genLdRef(t1, unboxedType, target);
     }
     // boxed values can't be uninit, so skip the uninit check
@@ -907,7 +907,7 @@ void TraceBuilder::genBindLoc(uint32 id,
     }
   } else {
     prevValue = getLocalValue(id);
-    ASSERT(prevValue == NULL || prevValue->getType() == trackedType);
+    assert(prevValue == NULL || prevValue->getType() == trackedType);
     if (prevValue == newValue) {
       // Silent store: home already contains value being stored
       // NewValue needs to be decref'ed
@@ -940,7 +940,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
                                bool doRefCount,
                                bool genStoreType,
                                Trace* exit) {
-  ASSERT(!Type::isBoxed(newValue->getType()));
+  assert(!Type::isBoxed(newValue->getType()));
   /*
    * If prior value of local is a cell, then  re-use genBindLoc.
    * Otherwise, if prior value of local is a ref:
@@ -954,15 +954,15 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   Type::Tag trackedType = getLocalType(id);
   // These asserts make sure we should have info on the local's type at
   // this point thanks to the tracelet guards
-  ASSERT (trackedType != Type::None);
+  assert(trackedType != Type::None);
   if (Type::isUnboxed(trackedType)) {
     SSATmp* retVal = doRefCount ? genIncRef(newValue) : newValue;
     genBindLoc(id, newValue, doRefCount);
     return retVal;
   }
-  ASSERT(Type::isBoxed(trackedType));
+  assert(Type::isBoxed(trackedType));
   SSATmp* prevRef = getLocalValue(id);
-  ASSERT(prevRef == NULL || prevRef->getType() == trackedType);
+  assert(prevRef == NULL || prevRef->getType() == trackedType);
 
   // prevRef is a ref
   if (prevRef == NULL) {
@@ -971,7 +971,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   }
   SSATmp* prevValue = NULL;
   if (doRefCount) {
-    ASSERT(exit);
+    assert(exit);
     Type::Tag innerType = Type::getInnerType(trackedType);
     prevValue = gen(LdRefNR, innerType, getLabel(exit), prevRef);
   }
@@ -1000,7 +1000,7 @@ SSATmp* TraceBuilder::genNewObj(int32 numParams, SSATmp* cls) {
   m_spValue = newSpValue;
   // new obj leaves the new object and an actrec on the stack
   m_spOffset += (sizeof(ActRec) / sizeof(Cell)) + 1;
-  ASSERT(m_spOffset >= 0);
+  assert(m_spOffset >= 0);
   return newSpValue;
 }
 
@@ -1014,7 +1014,7 @@ SSATmp* TraceBuilder::genNewObj(int32 numParams,
   m_spValue = newSpValue;
   // new obj leaves the new object and an actrec on the stack
   m_spOffset += (sizeof(ActRec) / sizeof(Cell)) + 1;
-  ASSERT(m_spOffset >= 0);
+  assert(m_spOffset >= 0);
   return newSpValue;
 }
 
@@ -1023,7 +1023,7 @@ SSATmp* TraceBuilder::genNewArray(int32 capacity) {
 }
 
 SSATmp* TraceBuilder::genNewTuple(int32 numArgs, SSATmp* sp) {
-  ASSERT(numArgs >= 0);
+  assert(numArgs >= 0);
   return gen(NewTuple, genDefConst<int64>(numArgs), sp);
 }
 
@@ -1046,7 +1046,7 @@ SSATmp* TraceBuilder::genAllocActRec(SSATmp* func,
                            magicNameTmp);
   m_spValue = newSpValue;
   m_spOffset += (sizeof(ActRec) / sizeof(Cell));
-  ASSERT(m_spOffset >= 0);
+  assert(m_spOffset >= 0);
   return newSpValue;
 }
 
@@ -1160,7 +1160,7 @@ SSATmp* getStackValue(SSATmp* sp,
     }
   }
   // Should not get here!
-  ASSERT(0);
+  assert(0);
   return NULL;
 }
 
@@ -1216,7 +1216,7 @@ SSATmp* TraceBuilder::genCall(SSATmp* actRec,
   // the result value
   m_spOffset -= (sizeof(ActRec) / sizeof(Cell)); // pop actrec
   m_spOffset += 1;// push result value
-  ASSERT(m_spOffset >= 0);
+  assert(m_spOffset >= 0);
   // kill all available expressions; we can't keep them in regs anyway
   killCse();
   killLocals();
@@ -1315,7 +1315,7 @@ SSATmp* TraceBuilder::genSpillStack(uint32 stackAdjustment,
   if (allocActRec) {
     m_spOffset += (sizeof(ActRec) / sizeof(Cell));
   }
-  ASSERT(m_spOffset >= 0);
+  assert(m_spOffset >= 0);
   return newSpValue;
 }
 
@@ -1388,19 +1388,19 @@ void TraceBuilder::genLinkContVarEnv() {
 }
 
 Trace* TraceBuilder::genContRaiseCheck(SSATmp* cont, Trace* target) {
-  ASSERT(target);
+  assert(target);
   gen(ContRaiseCheck, getLabel(target), cont);
   return target;
 }
 
 Trace* TraceBuilder::genContPreNext(SSATmp* cont, Trace* target) {
-  ASSERT(target);
+  assert(target);
   gen(ContPreNext, getLabel(target), cont);
   return target;
 }
 
 Trace* TraceBuilder::genContStartedCheck(SSATmp* cont, Trace* target) {
-  ASSERT(target);
+  assert(target);
   gen(ContStartedCheck, getLabel(target), cont);
   return target;
 }
@@ -1462,7 +1462,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
   // but if there is no simplification the result will be NULL
   result = m_simplifier.simplify(inst);
   if (result) {
-    ASSERT(result->getInstruction()->hasDst());
+    assert(result->getInstruction()->hasDst());
     return result;
   }
   if (inst->canCSE()) {
@@ -1554,8 +1554,8 @@ bool TraceBuilder::anyLocalHasValue(SSATmp* tmp) const {
 // This should only be called for ref/boxed types.
 //
 void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
-  ASSERT(Type::isBoxed(oldRef->getType()));
-  ASSERT(Type::isBoxed(newRef->getType()));
+  assert(Type::isBoxed(oldRef->getType()));
+  assert(Type::isBoxed(newRef->getType()));
 
   Type::Tag newRefType = newRef->getType();
   size_t nTrackedLocs = m_localValues.size();
@@ -1587,7 +1587,7 @@ void TraceBuilder::killLocals() {
       m_localValues[i] = clone->getDst();
       continue;
     }
-    ASSERT(!t->isConst());
+    assert(!t->isConst());
     m_localValues[i] = NULL;
   }
 }

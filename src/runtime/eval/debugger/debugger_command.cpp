@@ -119,14 +119,14 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfInstrument: cmd = DebuggerCommandPtr(new CmdInstrument()); break;
 
     case KindOfExtended: {
-      ASSERT(!clsname.empty());
+      assert(!clsname.empty());
       cmd = CmdExtended::CreateExtendedCommand(clsname);
-      ASSERT(cmd);
+      assert(cmd);
       break;
     }
 
     default:
-      ASSERT(false);
+      assert(false);
       Logger::Error("%s => DebuggerCommand::Receive(): bad cmd type: %d",
                     caller, type);
       return true;
@@ -144,7 +144,7 @@ void DebuggerCommand::list(DebuggerClient *client) {
 }
 
 bool DebuggerCommand::help(DebuggerClient *client) {
-  ASSERT(false);
+  assert(false);
   return true;
 }
 
@@ -174,7 +174,7 @@ bool DebuggerCommand::onClientD(DebuggerClient *client) {
 }
 
 bool DebuggerCommand::onServer(DebuggerProxy *proxy) {
-  ASSERT(false);
+  assert(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);
   return false;
 }

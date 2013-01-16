@@ -69,7 +69,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   case T_FINAL:     kindOf = ClassScope::KindOfFinalClass;    break;
   case T_TRAIT:     kindOf = ClassScope::KindOfTrait;         break;
   default:
-    ASSERT(false);
+    assert(false);
   }
 
   vector<string> bases;
@@ -153,7 +153,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
 }
 
 StatementPtr ClassStatement::addClone(StatementPtr origStmt) {
-  ASSERT(m_stmt);
+  assert(m_stmt);
   StatementPtr newStmt = Clone(origStmt);
   MethodStatementPtr newMethStmt =
     dynamic_pointer_cast<MethodStatement>(newStmt);
@@ -251,7 +251,7 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
       case T_ABSTRACT: cg_printf("abstract ");   break;
       case T_FINAL:    cg_printf("final ");      break;
       default:
-        ASSERT(false);
+        assert(false);
     }
     cg_printf("class %s", m_originalName.c_str());
   }
@@ -528,7 +528,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (needsCppCtor) {
           cg_printf(", ");
           cg.setContext(CodeGenerator::CppConstructor);
-          ASSERT(!cg.hasInitListFirstElem());
+          assert(!cg.hasInitListFirstElem());
           m_stmt->outputCPP(cg, ar);
           cg.clearInitListFirstElem();
           cg.setContext(CodeGenerator::CppDeclaration);
@@ -560,7 +560,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (needsCppCtor && !hasEmitCppCtor) {
         cg_printf("%s%s() : ", Option::ClassPrefix, clsName);
         cg.setContext(CodeGenerator::CppConstructor);
-        ASSERT(!cg.hasInitListFirstElem());
+        assert(!cg.hasInitListFirstElem());
         m_stmt->outputCPP(cg, ar);
         cg.clearInitListFirstElem();
         cg.setContext(CodeGenerator::CppDeclaration);
@@ -582,7 +582,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (classScope->getAttribute(ClassScope::HasInvokeMethod)) {
         FunctionScopePtr func =
           classScope->findFunction(ar, "__invoke", false);
-        ASSERT(func);
+        assert(func);
         if (!func->isAbstract()) {
           cg_printf("const CallInfo *"
                     "t___invokeCallInfoHelper(void *&extra);\n");
@@ -768,7 +768,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }

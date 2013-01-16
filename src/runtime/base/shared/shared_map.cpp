@@ -34,7 +34,7 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
     Variant *pv;
     ArrayData *escalated DEBUG_ONLY =
       m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
-    ASSERT(!escalated);
+    assert(!escalated);
     if (pv) return *pv;
   } else {
     m_localCache = NEW(ZendArray)();
@@ -44,7 +44,7 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
   Variant *r;
   ArrayData *escalated DEBUG_ONLY =
     m_localCache->ZendArray::addLval((int64)pos, r, false);
-  ASSERT(!escalated);
+  assert(!escalated);
   *r = v;
   return *r;
 }
@@ -230,7 +230,7 @@ ArrayData *SharedMap::prepend(CVarRef v, bool copy) {
 ArrayData *SharedMap::escalate(bool mutableIteration /* = false */) const {
   ArrayData *ret = NULL;
   m_arr->loadElems(ret, *this, mutableIteration);
-  ASSERT(!ret->isStatic());
+  assert(!ret->isStatic());
   return ret;
 }
 
@@ -276,7 +276,7 @@ ArrayData* SharedMap::escalateForSort() {
   bool keepRef = false;
   bool mapInit = true;
   m_arr->loadElems(ret, *this, keepRef, mapInit);
-  ASSERT(!ret->isStatic());
+  assert(!ret->isStatic());
   return ret;
 }
 

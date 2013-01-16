@@ -33,7 +33,7 @@ namespace HPHP {
 StringBuffer::StringBuffer(int initialSize /* = 63 */)
   : m_initialCap(initialSize), m_maxBytes(kDefaultOutputLimit),
     m_len(0) {
-  ASSERT(initialSize > 0);
+  assert(initialSize > 0);
   m_str = NEW(StringData)(initialSize);
   MutableSlice s = m_str->mutableSlice();
   m_buffer = s.ptr;
@@ -43,7 +43,7 @@ StringBuffer::StringBuffer(int initialSize /* = 63 */)
 
 StringBuffer::~StringBuffer() {
   if (m_str) {
-    ASSERT((m_str->setSize(0), true)); // appease StringData::checkSane()
+    assert((m_str->setSize(0), true)); // appease StringData::checkSane()
     DELETE(StringData)(m_str);
   }
 }
@@ -66,7 +66,7 @@ const char *StringBuffer::dataIgnoreTaint() const {
 }
 
 char StringBuffer::charAt(int pos) const {
-  ASSERT(pos >= 0 && pos < m_len);
+  assert(pos >= 0 && pos < m_len);
   if (m_buffer && pos >= 0 && pos < m_len) {
     return m_buffer[pos];
   }
@@ -80,7 +80,7 @@ String StringBuffer::detachImpl() {
 #endif
 
   if (m_buffer && m_len) {
-    ASSERT(m_str && m_str->getCount() == 0);
+    assert(m_str && m_str->getCount() == 0);
     m_buffer[m_len] = '\0'; // fixup
     StringData* str = m_str;
     str->setSize(m_len);
@@ -150,7 +150,7 @@ void StringBuffer::release() {
 }
 
 void StringBuffer::resize(int size) {
-  ASSERT(size >= 0 && size < m_cap);
+  assert(size >= 0 && size < m_cap);
   if (size >= 0 && size < m_cap) {
     m_len = size;
   }
@@ -229,8 +229,8 @@ void StringBuffer::append(CStrRef s) {
 void StringBuffer::appendHelper(const char *s, int len) {
   if (!m_buffer) reserve(len);
 
-  ASSERT(s);
-  ASSERT(len >= 0);
+  assert(s);
+  assert(len >= 0);
   if (len <= 0) return;
 
   if (len > m_cap - m_len) {
@@ -266,7 +266,7 @@ void StringBuffer::appendJsonEscape(const char *s, int len, int options) {
         append("null", 4);
         break;
       }
-      ASSERT(c >= 0);
+      assert(c >= 0);
       unsigned short us = (unsigned short)c;
       switch (us) {
       case '"':
@@ -371,8 +371,8 @@ void StringBuffer::printf(const char *format, ...) {
 }
 
 void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
-  ASSERT(in);
-  ASSERT(page_size > 0);
+  assert(in);
+  assert(page_size > 0);
 
   if (!m_buffer) reserve(page_size);
   while (true) {
@@ -388,8 +388,8 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
 }
 
 void StringBuffer::read(File* in, int page_size /* = 1024 */) {
-  ASSERT(in);
-  ASSERT(page_size > 0);
+  assert(in);
+  assert(page_size > 0);
 
   if (!m_buffer) reserve(page_size);
   while (true) {
@@ -399,7 +399,7 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
       buffer_size = m_cap - m_len;
     }
     int64 len = in->readImpl(m_buffer + m_len, buffer_size);
-    ASSERT(len >= 0);
+    assert(len >= 0);
     if (len == 0) break;
     m_len += len;
   }
@@ -437,7 +437,7 @@ void StringBuffer::growBy(int spaceRequired) {
 
 CstrBuffer::CstrBuffer(int cap)
   : m_buffer((char*)Util::safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
-  ASSERT(unsigned(cap) <= kMaxCap);
+  assert(unsigned(cap) <= kMaxCap);
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
@@ -471,7 +471,7 @@ CstrBuffer::CstrBuffer(const char *filename)
 
 CstrBuffer::CstrBuffer(char* data, int len)
   : m_buffer(data), m_len(len), m_cap(len) {
-  ASSERT(unsigned(len) < kMaxCap);
+  assert(unsigned(len) < kMaxCap);
 }
 
 CstrBuffer::~CstrBuffer() {
@@ -479,7 +479,7 @@ CstrBuffer::~CstrBuffer() {
 }
 
 void CstrBuffer::append(const char* data, int len) {
-  ASSERT(m_buffer && len >= 0);
+  assert(m_buffer && len >= 0);
   unsigned newlen = m_len + len;
   if (newlen + 1 > m_cap) {
     if (newlen + 1 > kMaxCap) {
@@ -488,14 +488,14 @@ void CstrBuffer::append(const char* data, int len) {
     unsigned newcap = Util::nextPower2(newlen + 1);
     m_buffer = (char*)Util::safe_realloc(m_buffer, newcap);
     m_cap = newcap - 1;
-    ASSERT(newlen + 1 <= m_cap);
+    assert(newlen + 1 <= m_cap);
   }
   memcpy(m_buffer + m_len, data, len);
   m_buffer[m_len = newlen] = 0;
 }
 
 String CstrBuffer::detach() {
-  ASSERT(m_len <= m_cap);
+  assert(m_len <= m_cap);
   TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
   m_buffer[m_len] = 0;
   String s(m_buffer, m_len, AttachString);

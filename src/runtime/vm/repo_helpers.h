@@ -86,7 +86,7 @@ class RepoQuery {
  public:
   RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
-    ASSERT(m_stmt.prepared());
+    assert(m_stmt.prepared());
   }
   ~RepoQuery() { m_stmt.reset(); }
 

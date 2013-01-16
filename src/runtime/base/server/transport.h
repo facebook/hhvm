@@ -287,7 +287,7 @@ public:
    * Sending back a response.
    */
   void setResponse(int code, const char *info) {
-    ASSERT (code != 500 || (info && *info)); // must have a reason for a 500
+    assert(code != 500 || (info && *info)); // must have a reason for a 500
     m_responseCode = code;
     m_responseCodeInfo = info ? info : "";
   }

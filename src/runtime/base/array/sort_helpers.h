@@ -80,7 +80,7 @@ struct IntElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0);
     }
-    ASSERT(false);
+    assert(false);
     return true;
   }
 };
@@ -124,7 +124,7 @@ struct StrElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0);
     }
-    ASSERT(false);
+    assert(false);
     return true;
   }
 };
@@ -229,7 +229,7 @@ struct ElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0);
     }
-    ASSERT(false);
+    assert(false);
     return true;
   }
 };

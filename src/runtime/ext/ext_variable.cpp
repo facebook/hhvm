@@ -36,7 +36,7 @@ String f_gettype(CVarRef v) {
   case KindOfArray:   return "array";
   case KindOfObject:  return "object";
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return "";

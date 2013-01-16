@@ -116,7 +116,7 @@ AllClasses::AllClasses()
 
 void AllClasses::skip() {
   if (!m_current) {
-    ASSERT(!empty());
+    assert(!empty());
     ++m_next;
     while (!empty()) {
       m_current = *m_next->second.clsList();
@@ -124,7 +124,7 @@ void AllClasses::skip() {
       ++m_next;
     }
   }
-  ASSERT(empty() || front());
+  assert(empty() || front());
 }
 
 void AllClasses::next() {
@@ -137,8 +137,8 @@ bool AllClasses::empty() const {
 }
 
 Class* AllClasses::front() const {
-  ASSERT(!empty());
-  ASSERT(m_current);
+  assert(!empty());
+  assert(m_current);
   return m_current;
 }
 
@@ -170,11 +170,11 @@ AllCachedClasses()
     return m_next == m_end;
   }
   Class* front() {
-    ASSERT(!empty());
+    assert(!empty());
     Class* c = *m_next->second.clsList();
-    ASSERT(c);
+    assert(c);
     c = c->getCached();
-    ASSERT(c);
+    assert(c);
     return c;
   }
   Class* popFront() {
@@ -232,13 +232,13 @@ Array Unit::getTraitsInfo() {
 
 bool Unit::MetaHandle::findMeta(const Unit* unit, Offset offset) {
   if (!unit->m_bc_meta_len) return false;
-  ASSERT(unit->m_bc_meta);
+  assert(unit->m_bc_meta);
   Offset* index1 = (Offset*)unit->m_bc_meta;
   Offset* index2 = index1 + *index1 + 1;
 
-  ASSERT(index1[*index1 + 1] == INT_MAX); // sentinel
-  ASSERT(offset >= 0 && (unsigned)offset < unit->m_bclen);
-  ASSERT(cur == 0 || index == index1);
+  assert(index1[*index1 + 1] == INT_MAX); // sentinel
+  assert(offset >= 0 && (unsigned)offset < unit->m_bclen);
+  assert(cur == 0 || index == index1);
   if (cur && offset >= index[cur]) {
     while (offset >= index[cur+1]) cur++;
   } else {
@@ -255,16 +255,16 @@ bool Unit::MetaHandle::findMeta(const Unit* unit, Offset offset) {
     index = index1;
     cur = lo;
   }
-  ASSERT(cur <= (unsigned)*index1);
-  ASSERT((unsigned)index2[cur] <= unit->m_bc_meta_len);
+  assert(cur <= (unsigned)*index1);
+  assert((unsigned)index2[cur] <= unit->m_bc_meta_len);
   ptr = unit->m_bc_meta + index2[cur];
   return index[cur] == offset;
 }
 
 bool Unit::MetaHandle::nextArg(MetaInfo& info) {
-  ASSERT(index && cur && ptr);
+  assert(index && cur && ptr);
   uint8* end = (uint8*)index + index[*index + cur + 2];
-  ASSERT(ptr <= end);
+  assert(ptr <= end);
   if (ptr == end) return false;
   info.m_kind = (Unit::MetaInfo::Kind)*ptr++;
   info.m_arg = *ptr++;
@@ -414,7 +414,7 @@ Class* Unit::defClass(const PreClass* preClass,
         }
         return NULL;
       }
-      ASSERT(avail == Class::AvailFalse);
+      assert(avail == Class::AvailFalse);
     }
 
     // Create a new class.
@@ -509,13 +509,13 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
   // func with a given name; in practice this is okay because the units created
   // by create_function() will always have the function being renamed at the
   // beginning
-  ASSERT(oldName && oldName->isStatic());
-  ASSERT(newName && newName->isStatic());
+  assert(oldName && oldName->isStatic());
+  assert(newName && newName->isStatic());
 
   for (MutableFuncRange fr(hoistableFuncs()); !fr.empty(); ) {
     Func* func = fr.popFront();
     const StringData* name = func->name();
-    ASSERT(name);
+    assert(name);
     if (name->same(oldName)) {
       func->rename(newName);
       break;
@@ -558,7 +558,7 @@ bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
 }
 
 void Unit::loadFunc(const Func *func) {
-  ASSERT(!func->isMethod());
+  assert(!func->isMethod());
   const NamedEntity *ne = func->getNamedEntity();
   if (UNLIKELY(!ne->m_cachedFuncOffset)) {
     Transl::TargetCache::allocFixedFunction(ne,
@@ -643,7 +643,7 @@ void Unit::initialMerge() {
                 StringData* s = (StringData*)((char*)obj - (int)k);
                 HPHP::Eval::PhpFile* efile =
                   g_vmContext->lookupIncludeRoot(s, flags, NULL, this);
-                ASSERT(efile);
+                assert(efile);
                 Unit* unit = efile->unit();
                 unit->initialMerge();
                 m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
@@ -751,11 +751,11 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
   end = in->m_firstMergeablePreClass;
   for (; ix < end; ++ix) {
     void* obj = in->mergeableObj(ix);
-    ASSERT((uintptr_t(obj) & 1) == 0);
+    assert((uintptr_t(obj) & 1) == 0);
     PreClass* pre = (PreClass*)obj;
     Class* cls = *pre->namedEntity()->clsList();
-    ASSERT(cls && !cls->m_nextClass);
-    ASSERT(cls->preClass() == pre);
+    assert(cls && !cls->m_nextClass);
+    assert(cls->preClass() == pre);
     if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
       delta++;
     } else if (out) {
@@ -775,8 +775,8 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
       case UnitMergeKindClass: {
         PreClass* pre = (PreClass*)obj;
         Class* cls = *pre->namedEntity()->clsList();
-        ASSERT(cls && !cls->m_nextClass);
-        ASSERT(cls->preClass() == pre);
+        assert(cls && !cls->m_nextClass);
+        assert(cls->preClass() == pre);
         if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
           delta++;
         } else if (out) {
@@ -842,7 +842,7 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
 
 template <bool debugger>
 void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
-  ASSERT(m_mergeState & UnitMergeStateMerged);
+  assert(m_mergeState & UnitMergeStateMerged);
 
   Func** it = mi->funcHoistableBegin();
   Func** fend = mi->funcEnd();
@@ -850,14 +850,14 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
     if (LIKELY((m_mergeState & UnitMergeStateUniqueFuncs) != 0)) {
       do {
         Func* func = *it;
-        ASSERT(func->top());
+        assert(func->top());
         getDataRef<Func*>(tcbase, func->getCachedOffset()) = func;
         if (debugger) phpDefFuncHook(func);
       } while (++it != fend);
     } else {
       do {
         Func* func = *it;
-        ASSERT(func->top());
+        assert(func->top());
         setCachedFunc(func, debugger);
       } while (++it != fend);
     }
@@ -974,7 +974,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           if (UNLIKELY(avail == Class::AvailFail)) {
             raise_error("unknown class %s", other->name()->data());
           }
-          ASSERT(avail == Class::AvailTrue);
+          assert(avail == Class::AvailTrue);
           getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
           if (debugger) phpDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
@@ -1050,7 +1050,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         continue;
       case UnitMergeKindDone:
         Stats::inc(Stats::UnitMerge_mergeable, -1);
-        ASSERT((unsigned)ix == mi->m_mergeablesSize);
+        assert((unsigned)ix == mi->m_mergeablesSize);
         if (UNLIKELY((m_mergeState & (UnitMergeStateUniqueClasses|
                                       UnitMergeStateUniqueDefinedClasses)) ==
                      UnitMergeStateUniqueClasses)) {
@@ -1088,7 +1088,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
             }
           }
           m_mergeState |= UnitMergeStateUniqueDefinedClasses;
-          ASSERT(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
+          assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
                  isMergeOnly());
         }
         return;
@@ -1121,7 +1121,7 @@ int Unit::getLineNumber(Offset pc) const {
   std::vector<LineEntry>::const_iterator it =
     upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
   if (it != m_lineTable.end()) {
-    ASSERT(pc < it->pastOffset());
+    assert(pc < it->pastOffset());
     return it->val();
   }
   return -1;
@@ -1135,7 +1135,7 @@ bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
 }
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
-  ASSERT(offsets.size() == 0);
+  assert(offsets.size() == 0);
   if (m_repoId == RepoIdInvalid) {
     return false;
   }
@@ -1169,7 +1169,7 @@ const Func* Unit::getFunc(Offset pc) const {
   FuncTable::const_iterator it =
     upper_bound(m_funcTable.begin(), m_funcTable.end(), key);
   if (it != m_funcTable.end()) {
-    ASSERT(pc < it->pastOffset());
+    assert(pc < it->pastOffset());
     return it->val();
   }
   return NULL;
@@ -1202,7 +1202,7 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
   int prevLineNum = -1;
   MetaHandle metaHand;
   while (it < &m_bc[stopOffset]) {
-    ASSERT(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
+    assert(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
     if (funcIt != funcMap.end() && funcIt->first == offsetOf(it)) {
       out.put('\n');
       funcIt->second->prettyPrint(out);
@@ -1271,7 +1271,7 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
             out << " :nrc=" << info.m_data;
             break;
           case Unit::MetaInfo::None:
-            ASSERT(false);
+            assert(false);
             break;
         }
       }
@@ -1584,7 +1584,7 @@ void UnitRepoProxy::GetUnitLitstrsStmt
       Id litstrId;        /**/ query.getId(0, litstrId);
       StringData* litstr; /**/ query.getStaticString(1, litstr);
       Id id UNUSED = ue.mergeLitstr(litstr);
-      ASSERT(id == litstrId);
+      assert(id == litstrId);
     }
   } while (!query.done());
   txn.commit();
@@ -1626,7 +1626,7 @@ void UnitRepoProxy::GetUnitArraysStmt
       String s(array);
       Variant v = f_unserialize(s);
       Id id UNUSED = ue.mergeArray(v.asArrRef().get(), array);
-      ASSERT(id == arrayId);
+      assert(id == arrayId);
     }
   } while (!query.done());
   txn.commit();
@@ -1668,7 +1668,7 @@ void UnitRepoProxy::GetUnitPreConstsStmt
       TypedValue value; /**/ query.getTypedValue(1, value);
       Id id;            /**/ query.getId(2, id);
       UNUSED Id addedId = ue.addPreConst(name, value);
-      ASSERT(id == addedId);
+      assert(id == addedId);
     }
   } while (!query.done());
   txn.commit();
@@ -1692,11 +1692,11 @@ void UnitRepoProxy::InsertUnitMergeableStmt
   query.bindInt("@mergeableKind", (int)kind);
   query.bindId("@mergeableId", id);
   if (value) {
-    ASSERT(kind == UnitMergeKindDefine ||
+    assert(kind == UnitMergeKindDefine ||
            kind == UnitMergeKindGlobal);
     query.bindTypedValue("@mergeableValue", *value);
   } else {
-    ASSERT(kind == UnitMergeKindReqMod ||
+    assert(kind == UnitMergeKindReqMod ||
            kind == UnitMergeKindReqSrc ||
            kind == UnitMergeKindReqDoc);
     query.bindNull("@mergeableValue");
@@ -1953,7 +1953,7 @@ void UnitEmitter::setBc(const uchar* bc, size_t bclen) {
 }
 
 void UnitEmitter::setBcMeta(const uchar* bc_meta, size_t bc_meta_len) {
-  ASSERT(m_bc_meta == NULL);
+  assert(m_bc_meta == NULL);
   if (bc_meta_len) {
     m_bc_meta = (uchar*)malloc(bc_meta_len);
     memcpy(m_bc_meta, bc_meta, bc_meta_len);
@@ -1974,13 +1974,13 @@ void UnitEmitter::setLines(const LineTable& lines) {
 }
 
 Id UnitEmitter::addPreConst(const StringData* name, const TypedValue& value) {
-  ASSERT(value.m_type != KindOfObject && value.m_type != KindOfArray);
+  assert(value.m_type != KindOfObject && value.m_type != KindOfArray);
   PreConst pc = { value, NULL, name };
   if (pc.value.m_type == KindOfString && !pc.value.m_data.pstr->isStatic()) {
     pc.value.m_data.pstr = StringData::GetStaticString(pc.value.m_data.pstr);
     pc.value.m_type = KindOfStaticString;
   }
-  ASSERT(!IS_REFCOUNTED_TYPE(pc.value.m_type));
+  assert(!IS_REFCOUNTED_TYPE(pc.value.m_type));
 
   Id id = m_preConsts.size();
   m_preConsts.push_back(pc);
@@ -2025,7 +2025,7 @@ FuncEmitter* UnitEmitter::getMain() {
 }
 
 void UnitEmitter::initMain(int line1, int line2) {
-  ASSERT(m_fes.size() == 0);
+  assert(m_fes.size() == 0);
   StringData* name = StringData::GetStaticString("");
   FuncEmitter* pseudomain = newFuncEmitter(name, false);
   Attr attrs = AttrMayUseVV;
@@ -2033,7 +2033,7 @@ void UnitEmitter::initMain(int line1, int line2) {
 }
 
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* n, bool top) {
-  ASSERT(m_fes.size() > 0 || !strcmp(n->data(), "")); // Pseudomain comes first.
+  assert(m_fes.size() > 0 || !strcmp(n->data(), "")); // Pseudomain comes first.
   FuncEmitter* fe = new FuncEmitter(*this, m_nextFuncSn++, m_fes.size(), n);
   m_fes.push_back(fe);
   if (top) {
@@ -2062,7 +2062,7 @@ void UnitEmitter::pushMergeableInclude(UnitMergeKind kind,
 }
 
 void UnitEmitter::insertMergeableInclude(int ix, UnitMergeKind kind, int id) {
-  ASSERT(size_t(ix) <= m_mergeableStmts.size());
+  assert(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, id));
   m_allClassesHoistable = false;
@@ -2078,7 +2078,7 @@ void UnitEmitter::pushMergeableDef(UnitMergeKind kind,
 
 void UnitEmitter::insertMergeableDef(int ix, UnitMergeKind kind,
                                      Id id, const TypedValue& tv) {
-  ASSERT(size_t(ix) <= m_mergeableStmts.size());
+  assert(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, m_mergeableValues.size()));
   m_mergeableValues.push_back(std::make_pair(id, tv));
@@ -2132,15 +2132,15 @@ void UnitEmitter::recordSourceLocation(const Location* sLoc, Offset start) {
   if (!m_sourceLocTab.empty()) {
     if (m_sourceLocTab.back().second == newLoc) {
       // Combine into the interval already at the back of the vector.
-      ASSERT(start >= m_sourceLocTab.back().first);
+      assert(start >= m_sourceLocTab.back().first);
       return;
     }
-    ASSERT(m_sourceLocTab.back().first < start &&
+    assert(m_sourceLocTab.back().first < start &&
            "source location offsets must be added to UnitEmitter in "
            "increasing order");
   } else {
     // First record added should be for bytecode offset zero.
-    ASSERT(start == 0);
+    assert(start == 0);
   }
   m_sourceLocTab.push_back(std::make_pair(start, newLoc));
 }
@@ -2327,16 +2327,16 @@ Unit* UnitEmitter::create() {
         mi->m_firstHoistableFunc = ix;
       }
     } else {
-      ASSERT(!mi->m_firstHoistableFunc);
+      assert(!mi->m_firstHoistableFunc);
     }
     mi->mergeableObj(ix++) = func;
   }
-  ASSERT(u->getMain()->isPseudoMain());
+  assert(u->getMain()->isPseudoMain());
   if (!mi->m_firstHoistableFunc) {
     mi->m_firstHoistableFunc =  ix;
   }
   mi->m_firstHoistablePreClass = ix;
-  ASSERT(m_fes.size());
+  assert(m_fes.size());
   for (IdVec::const_iterator it = m_hoistablePceIdVec.begin();
        it != m_hoistablePceIdVec.end(); ++it) {
     mi->mergeableObj(ix++) = u->m_preClasses[*it].get();
@@ -2352,20 +2352,20 @@ Unit* UnitEmitter::create() {
         case UnitMergeKindReqMod:
         case UnitMergeKindReqSrc:
         case UnitMergeKindReqDoc: {
-          ASSERT(RuntimeOption::RepoAuthoritative);
+          assert(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(it->second);
           mi->mergeableObj(ix++) = (char*)name + (int)it->first;
           break;
         }
         case UnitMergeKindDefine:
         case UnitMergeKindGlobal: {
-          ASSERT(RuntimeOption::RepoAuthoritative);
+          assert(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(m_mergeableValues[it->second].first);
           mi->mergeableObj(ix++) = (char*)name + (int)it->first;
           *(TypedValue*)mi->mergeableData(ix) =
             m_mergeableValues[it->second].second;
           ix += sizeof(TypedValue) / sizeof(void*);
-          ASSERT(sizeof(TypedValue) % sizeof(void*) == 0);
+          assert(sizeof(TypedValue) % sizeof(void*) == 0);
           break;
         }
         case UnitMergeKindDone:
@@ -2374,12 +2374,12 @@ Unit* UnitEmitter::create() {
       }
     }
   }
-  ASSERT(ix == mi->m_mergeablesSize);
+  assert(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)UnitMergeKindDone;
   u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
   for (size_t i = 0; i < m_feTab.size(); ++i) {
-    ASSERT(m_feTab[i].second->past() == m_feTab[i].first);
-    ASSERT(m_fMap.find(m_feTab[i].second) != m_fMap.end());
+    assert(m_feTab[i].second->past() == m_feTab[i].first);
+    assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());
     u->m_funcTable.push_back(
       FuncEntry(m_feTab[i].first, m_fMap.find(m_feTab[i].second)->second));
   }

@@ -78,7 +78,7 @@ c_Continuation::~c_Continuation() {
     // time (see createContinuation()). Overwrite its type to exempt it from
     // refcounting here.
     TypedValue* contLocal = frame_local(ar, 0);
-    ASSERT(contLocal->m_data.pobj == this);
+    assert(contLocal->m_data.pobj == this);
     contLocal->m_type = KindOfNull;
 
     if (ar->hasVarEnv()) {
@@ -95,19 +95,19 @@ void c_Continuation::t___construct(
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
   if (hhvm) {
     m_vmFunc       = (VM::Func*) extra;
-    ASSERT(m_vmFunc);
+    assert(m_vmFunc);
   } else {
     m_callInfo     = (const CallInfo*) func;
-    ASSERT(m_callInfo);
+    assert(m_callInfo);
   }
   m_isMethod     = isMethod;
   m_origFuncName = origFuncName;
 
   if (!obj.isNull()) {
     m_obj = obj.toObject();
-    ASSERT(!m_obj.isNull());
+    assert(!m_obj.isNull());
   } else {
-    ASSERT(m_obj.isNull());
+    assert(m_obj.isNull());
   }
   m_args = args;
 }
@@ -166,7 +166,7 @@ bool c_Continuation::php_sleep(Variant &ret) {
 template<typename FI>
 inline void c_Continuation::nextImpl(FI& fi) {
   const_assert(!hhvm);
-  ASSERT(m_running);
+  assert(m_running);
   try {
     if (m_isMethod) {
       MethodCallPackage mcp;

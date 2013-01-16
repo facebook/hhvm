@@ -45,7 +45,7 @@ ClosureExpression::ClosureExpression
     for (int i = vars->getCount() - 1; i >= 0; i--) {
       ParameterExpressionPtr param(
         dynamic_pointer_cast<ParameterExpression>((*vars)[i]));
-      ASSERT(param);
+      assert(param);
       if (seenBefore.find(param->getName().c_str()) == seenBefore.end()) {
         seenBefore.insert(param->getName().c_str());
         m_vars->insertElement(param);
@@ -68,7 +68,7 @@ ClosureExpression::ClosureExpression
         }
         m_values->addElement(var);
       }
-      ASSERT(m_vars->getCount() == m_values->getCount());
+      assert(m_vars->getCount() == m_values->getCount());
     }
   }
 }
@@ -91,7 +91,7 @@ ConstructPtr ClosureExpression::getNthKid(int n) const {
     case 0:
       return m_values;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -107,7 +107,7 @@ void ClosureExpression::setNthKid(int n, ConstructPtr cp) {
       m_values = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -174,7 +174,7 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
 TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
   if (m_vars) {
-    ASSERT(m_values && m_values->getCount() == m_vars->getCount());
+    assert(m_values && m_values->getCount() == m_vars->getCount());
 
     // containing function's variable table (not closure function's)
     VariableTablePtr variables = getScope()->getVariables();
@@ -200,8 +200,8 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       ExpressionPtr value = (*m_values)[i];
       ParameterExpressionPtr var =
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      ASSERT(!var->getExpectedType());
-      ASSERT(!var->getImplementedType());
+      assert(!var->getExpectedType());
+      assert(!var->getImplementedType());
       if (var->isRef()) {
         var->setActualType(Type::Variant);
       } else {

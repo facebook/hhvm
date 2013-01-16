@@ -30,7 +30,7 @@ namespace HPHP {
 ImmutableObj::ImmutableObj(ObjectData *obj) {
   // This function assumes the object and object/array down the tree have no
   // internal reference and does not implements serializable interface.
-  ASSERT(!obj->o_instanceof("Serializable"));
+  assert(!obj->o_instanceof("Serializable"));
   m_cls = obj->o_getClassName()->copy(true);
   Array props;
   ClassInfo::GetArray(obj, obj->o_getClassPropTable(), props,
@@ -42,9 +42,9 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
   m_props = (Prop*)malloc(sizeof(Prop) * props.size());
   m_propCount = 0;
   for (ArrayIter it(props); !it.end(); it.next()) {
-    ASSERT(m_propCount < props.size());
+    assert(m_propCount < props.size());
     Variant key(it.first());
-    ASSERT(key.isString());
+    assert(key.isString());
     CVarRef value = it.secondRef();
     SharedVariant *val = NULL;
     if (!value.isNull()) {

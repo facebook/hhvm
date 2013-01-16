@@ -86,18 +86,18 @@ void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
 
 static Func::FuncId s_nextFuncId = 0;
 void Func::setFuncId(FuncId id) {
-  ASSERT(m_funcId == InvalidId);
-  ASSERT(id != InvalidId);
+  assert(m_funcId == InvalidId);
+  assert(id != InvalidId);
   m_funcId = id;
 }
 
 void Func::setNewFuncId() {
-  ASSERT(m_funcId == InvalidId);
+  assert(m_funcId == InvalidId);
   m_funcId = __sync_fetch_and_add(&s_nextFuncId, 1);
 }
 
 void Func::setFullName() {
-  ASSERT(m_name->isStatic());
+  assert(m_name->isStatic());
   if (m_cls) {
     m_fullName = StringData::GetStaticString(
       std::string(m_cls->name()->data()) + "::" + m_name->data());
@@ -153,7 +153,7 @@ void Func::init(int numParams, bool isGenerator) {
 #ifdef DEBUG
   m_magic = kMagic;
 #endif
-  ASSERT(m_name);
+  assert(m_name);
   initPrologues(numParams, isGenerator);
 }
 
@@ -248,7 +248,7 @@ void Func::rename(const StringData* name) {
  */
 bool Func::checkIterScope(Offset o, Id iterId) const {
   const EHEntVec& ehtab = shared()->m_ehtab;
-  ASSERT(o >= base() && o < past());
+  assert(o >= base() && o < past());
   for (unsigned i = 0, n = ehtab.size(); i < n; i++) {
     const EHEnt* eh = &ehtab[i];
     if (eh->m_ehtype == EHEnt::EHType_Fault &&
@@ -261,7 +261,7 @@ bool Func::checkIterScope(Offset o, Id iterId) const {
 }
 
 const EHEnt* Func::findEH(Offset o) const {
-  ASSERT(o >= base() && o < past());
+  assert(o >= base() && o < past());
   const EHEnt* eh = NULL;
   unsigned int i;
 
@@ -275,7 +275,7 @@ const EHEnt* Func::findEH(Offset o) const {
 }
 
 Offset Func::findFaultPCFromEH(Offset o) const {
-  ASSERT(o >= base() && o < past());
+  assert(o >= base() && o < past());
   unsigned int i = 0;
   int max = -1;
 
@@ -290,12 +290,12 @@ Offset Func::findFaultPCFromEH(Offset o) const {
       max = i;
     }
   }
-  ASSERT(max != -1);
+  assert(max != -1);
   return ehtab[max].m_past;
 }
 
 const FPIEnt* Func::findFPI(Offset o) const {
-  ASSERT(o >= base() && o < past());
+  assert(o >= base() && o < past());
   const FPIEnt* fe = NULL;
   unsigned int i;
 
@@ -315,9 +315,9 @@ const FPIEnt* Func::findFPI(Offset o) const {
 }
 
 const FPIEnt* Func::findPrecedingFPI(Offset o) const {
-  ASSERT(o >= base() && o < past());
+  assert(o >= base() && o < past());
   const FPIEntVec& fpitab = shared()->m_fpitab;
-  ASSERT(fpitab.size());
+  assert(fpitab.size());
   const FPIEnt* fe = &fpitab[0];
   unsigned int i;
   for (i = 1; i < fpitab.size(); i++) {
@@ -327,7 +327,7 @@ const FPIEnt* Func::findPrecedingFPI(Offset o) const {
       fe = cur;
     }
   }
-  ASSERT(fe);
+  assert(fe);
   return fe;
 }
 
@@ -386,7 +386,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   int bit   = m_numParams % kBitsPerQword;
   // Grow args, if necessary.
   if ((m_numParams++ & (kBitsPerQword - 1)) == 0) {
-    ASSERT(shared()->m_refBitVec == m_refBitVec);
+    assert(shared()->m_refBitVec == m_refBitVec);
     shared()->m_refBitVec = m_refBitVec = (uint64_t*)
       realloc(shared()->m_refBitVec,
               // E.g., 65th m_numParams -> 2 qwords
@@ -398,7 +398,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
     shared()->m_refBitVec[m_numParams / kBitsPerQword] =
       (m_attrs & AttrVariadicByRef) ? -1ull : 0;
   }
-  ASSERT(!!(shared()->m_refBitVec[qword] & (uint64(1) << bit)) ==
+  assert(!!(shared()->m_refBitVec[qword] & (uint64(1) << bit)) ==
     !!(m_attrs & AttrVariadicByRef));
   shared()->m_refBitVec[qword] &= ~(1ull << bit);
   shared()->m_refBitVec[qword] |= uint64(ref) << bit;
@@ -406,7 +406,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
 }
 
 Id Func::lookupVarId(const StringData* name) const {
-  ASSERT(name != NULL);
+  assert(name != NULL);
   return shared()->m_localNames.findIndex(name);
 }
 
@@ -470,7 +470,7 @@ HphpArray* Func::getStaticLocals() const {
 }
 
 void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
-  ASSERT(mi);
+  assert(mi);
   if (info() != NULL) {
     // Very large operator=() invocation.
     *mi = *info();
@@ -549,7 +549,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
            it != fpi.userAttributes().end(); ++it) {
         // convert the typedvalue to a cvarref and push into pi.
         auto userAttr = new ClassInfo::UserAttributeInfo;
-        ASSERT(it->first->isStatic());
+        assert(it->first->isStatic());
         userAttr->name = const_cast<StringData*>(it->first);
         userAttr->setStaticValue(tvAsCVarRef(&it->second));
         pi->userAttrs.push_back(userAttr);
@@ -611,7 +611,7 @@ void Func::enableIntercept() {
 }
 
 Func** Func::getCachedAddr() {
-  ASSERT(!isMethod());
+  assert(!isMethod());
   return getCachedFuncAddr(m_cachedOffset);
 }
 
@@ -686,25 +686,25 @@ void FuncEmitter::appendParam(const StringData* name, const ParamInfo& info) {
 }
 
 void FuncEmitter::allocVarId(const StringData* name) {
-  ASSERT(name != NULL);
+  assert(name != NULL);
   // Unnamed locals are segregated (they all come after the named locals).
-  ASSERT(m_numUnnamedLocals == 0);
+  assert(m_numUnnamedLocals == 0);
   UNUSED Id id;
   if (m_localNames.find(name) == m_localNames.end()) {
     id = newLocal();
-    ASSERT(id == (int)m_localNames.size());
+    assert(id == (int)m_localNames.size());
     m_localNames.add(name, name);
   }
 }
 
 Id FuncEmitter::lookupVarId(const StringData* name) const {
-  ASSERT(name != NULL);
-  ASSERT(m_localNames.find(name) != m_localNames.end());
+  assert(name != NULL);
+  assert(m_localNames.find(name) != m_localNames.end());
   return m_localNames.find(name)->second;
 }
 
 Id FuncEmitter::allocIterator() {
-  ASSERT(m_numIterators >= m_nextFreeIterator);
+  assert(m_numIterators >= m_nextFreeIterator);
   Id id = m_nextFreeIterator++;
   if (m_numIterators < m_nextFreeIterator) {
     m_numIterators = m_nextFreeIterator;
@@ -714,11 +714,11 @@ Id FuncEmitter::allocIterator() {
 
 void FuncEmitter::freeIterator(Id id) {
   --m_nextFreeIterator;
-  ASSERT(id == m_nextFreeIterator);
+  assert(id == m_nextFreeIterator);
 }
 
 void FuncEmitter::setNumIterators(Id numIterators) {
-  ASSERT(m_numIterators == 0);
+  assert(m_numIterators == 0);
   m_numIterators = numIterators;
 }
 
@@ -732,12 +732,12 @@ Id FuncEmitter::allocUnnamedLocal() {
 }
 
 void FuncEmitter::freeUnnamedLocal(Id id) {
-  ASSERT(m_activeUnnamedLocals > 0);
+  assert(m_activeUnnamedLocals > 0);
   --m_activeUnnamedLocals;
 }
 
 void FuncEmitter::setNumLocals(Id numLocals) {
-  ASSERT(numLocals >= m_numLocals);
+  assert(numLocals >= m_numLocals);
   m_numLocals = numLocals;
 }
 
@@ -830,7 +830,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = m_maxStackCells;
-  ASSERT(m_maxStackCells > 0 && "You probably didn't set m_maxStackCells");
+  assert(m_maxStackCells > 0 && "You probably didn't set m_maxStackCells");
   f->shared()->m_staticVars = m_staticVars;
   f->shared()->m_ehtab = m_ehtab;
   f->shared()->m_fpitab = m_fpitab;
@@ -846,8 +846,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
                                  BuiltinFunction bif, BuiltinFunction nif,
                                  Offset base) {
-  ASSERT(info);
-  ASSERT(bif);
+  assert(info);
+  assert(bif);
   m_info = info;
   m_builtinFuncPtr = bif;
   m_nativeFuncPtr = nif;
@@ -1010,9 +1010,9 @@ void FuncRepoProxy::GetFuncsStmt
         PreClassEmitter* pce = ue.pce(preClassId);
         fe = ue.newMethodEmitter(name, pce);
         bool added UNUSED = pce->addMethod(fe);
-        ASSERT(added);
+        assert(added);
       }
-      ASSERT(fe->sn() == funcSn);
+      assert(fe->sn() == funcSn);
       fe->setTop(top);
       fe->serdeMetaData(extraBlob);
       fe->finish(fe->past(), true);

@@ -81,7 +81,7 @@ ObjectData* SystemLib::AllocPinitSentinel() {
   inst->invokeUserMethod(&sink, SystemLib::s_##clsname##Class->getCtor(),   \
                          params);                                           \
   inst->decRefCount();                                                      \
-  ASSERT(inst->getCount() == 0);                                            \
+  assert(inst->getCount() == 0);                                            \
   return inst;
 
 
@@ -162,7 +162,7 @@ SystemLib::AllocSoapFaultObject(CVarRef code,
 VM::Func*
 SystemLib::GetNullFunction() {
   VM::Func* f = s_nativeFuncUnit->firstHoistable();
-  ASSERT(!strcmp(f->name()->data(), "86null"));
+  assert(!strcmp(f->name()->data(), "86null"));
   return f;
 }
 

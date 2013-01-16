@@ -132,7 +132,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return &m_data[key];
   }
   public: void put(int64 key, TypedValue* val) {
-    ASSERT(val->m_type != KindOfRef);
+    assert(val->m_type != KindOfRef);
     if (UNLIKELY((unsigned long long)key >= (unsigned long long)m_size)) {
       Object e(SystemLib::AllocOutOfBoundsExceptionObject(
         "Key is out of bounds"));
@@ -146,7 +146,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     tv->m_type = val->m_type;
   }
   public: void add(TypedValue* val) {
-    ASSERT(val->m_type != KindOfRef);
+    assert(val->m_type != KindOfRef);
     ++m_versionNumber;
     if (m_capacity <= m_size) {
       grow();
@@ -342,11 +342,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     return NULL;
   }
   public: void put(int64 key, TypedValue* val) {
-    ASSERT(val->m_type != KindOfRef);
+    assert(val->m_type != KindOfRef);
     update(key, val);
   }
   public: void put(StringData* key, TypedValue* val) {
-    ASSERT(val->m_type != KindOfRef);
+    assert(val->m_type != KindOfRef);
     update(key, val);
   }
   public: void remove(int64 key) {
@@ -486,9 +486,9 @@ private:
   // We use this funny-looking helper to make g++ use lea and shl
   // instructions instead of imul when indexing into m_data
   Bucket* fetchBucket(Bucket* data, intptr_t slot) const {
-    ASSERT(sizeof(Bucket) == 24);
-    ASSERT(sizeof(int64) == 8);
-    ASSERT(slot >= 0 && slot <= m_nLastSlot);
+    assert(sizeof(Bucket) == 24);
+    assert(sizeof(int64) == 8);
+    assert(slot >= 0 && slot <= m_nLastSlot);
     intptr_t index = slot + (slot<<1);
     int64_t* ptr = (int64_t*)data;
     return (Bucket*)(&ptr[index]);
@@ -840,7 +840,7 @@ class c_StableMapIterator : public ExtObjectData {
 // Helpers for hhvm
 
 inline TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     return c_Vector::OffsetGet(obj, key);
@@ -849,15 +849,15 @@ inline TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
   } else if (ct == Collection::StableMapType) {
     return c_StableMap::OffsetGet(obj, key);
   } else {
-    ASSERT(false);
+    assert(false);
     return NULL;
   }
 }
 
 inline void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  ASSERT(key->m_type != KindOfRef);
-  ASSERT(val->m_type != KindOfRef);
-  ASSERT(val->m_type != KindOfUninit);
+  assert(key->m_type != KindOfRef);
+  assert(val->m_type != KindOfRef);
+  assert(val->m_type != KindOfUninit);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     c_Vector::OffsetSet(obj, key, val);
@@ -866,12 +866,12 @@ inline void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   } else if (ct == Collection::StableMapType) {
     c_StableMap::OffsetSet(obj, key, val);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
 inline bool collectionIsset(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     return c_Vector::OffsetIsset(obj, key);
@@ -880,13 +880,13 @@ inline bool collectionIsset(ObjectData* obj, TypedValue* key) {
   } else if (ct == Collection::StableMapType) {
     return c_StableMap::OffsetIsset(obj, key);
   } else {
-    ASSERT(false);
+    assert(false);
     return false;
   }
 }
 
 inline bool collectionEmpty(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     return c_Vector::OffsetEmpty(obj, key);
@@ -895,13 +895,13 @@ inline bool collectionEmpty(ObjectData* obj, TypedValue* key) {
   } else if (ct == Collection::StableMapType) {
     return c_StableMap::OffsetEmpty(obj, key);
   } else {
-    ASSERT(false);
+    assert(false);
     return true;
   }
 }
 
 inline void collectionUnset(ObjectData* obj, TypedValue* key) {
-  ASSERT(key->m_type != KindOfRef);
+  assert(key->m_type != KindOfRef);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     c_Vector::OffsetUnset(obj, key);
@@ -910,13 +910,13 @@ inline void collectionUnset(ObjectData* obj, TypedValue* key) {
   } else if (ct == Collection::StableMapType) {
     c_StableMap::OffsetUnset(obj, key);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
 inline void collectionAppend(ObjectData* obj, TypedValue* val) {
-  ASSERT(val->m_type != KindOfRef);
-  ASSERT(val->m_type != KindOfUninit);
+  assert(val->m_type != KindOfRef);
+  assert(val->m_type != KindOfUninit);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     c_Vector::OffsetAppend(obj, val);
@@ -925,7 +925,7 @@ inline void collectionAppend(ObjectData* obj, TypedValue* val) {
   } else if (ct == Collection::StableMapType) {
     c_StableMap::OffsetAppend(obj, val);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -943,7 +943,7 @@ inline Variant& collectionOffsetGet(ObjectData* obj, int64 offset) {
     c_StableMap* smp = static_cast<c_StableMap*>(obj);
     return *(Variant*)(smp->at(offset));
   } else {
-    ASSERT(false);
+    assert(false);
     return *(Variant*)(NULL);
   }
 }
@@ -963,7 +963,7 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
     c_StableMap* smp = static_cast<c_StableMap*>(obj);
     return *(Variant*)(smp->at(key));
   } else {
-    ASSERT(false);
+    assert(false);
     return *(Variant*)(NULL);
   }
 }
@@ -981,7 +981,7 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
   } else if (ct == Collection::StableMapType) {
     return *(Variant*)(c_StableMap::OffsetGet(obj, key));
   } else {
-    ASSERT(false);
+    assert(false);
     return *(Variant*)(NULL);
   }
 }
@@ -1017,7 +1017,7 @@ inline void collectionOffsetSet(ObjectData* obj, int64 offset, CVarRef val) {
     c_StableMap* smp = static_cast<c_StableMap*>(obj);
     smp->put(offset, tv);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -1042,7 +1042,7 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
     c_StableMap* smp = static_cast<c_StableMap*>(obj);
     smp->put(key, tv);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -1066,7 +1066,7 @@ inline void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
   } else if (ct == Collection::StableMapType) {
     c_StableMap::OffsetSet(obj, key, tv);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -1095,7 +1095,7 @@ inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
   } else if (ct == Collection::StableMapType) {
     return c_StableMap::OffsetContains(obj, key);
   } else {
-    ASSERT(false);
+    assert(false);
     return false;
   }
 }
@@ -1113,7 +1113,7 @@ inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
   } else if (ct == Collection::StableMapType) {
     return c_StableMap::OffsetIsset(obj, key);
   } else {
-    ASSERT(false);
+    assert(false);
     return false;
   }
 }
@@ -1131,7 +1131,7 @@ inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
   } else if (ct == Collection::StableMapType) {
     return c_StableMap::OffsetEmpty(obj, key);
   } else {
-    ASSERT(false);
+    assert(false);
     return true;
   }
 }
@@ -1164,7 +1164,7 @@ inline int64 collectionSize(ObjectData* obj) {
   } else if (ct == Collection::StableMapType) {
     return static_cast<c_StableMap*>(obj)->t_count();
   } else {
-    ASSERT(false);
+    assert(false);
     return 0;
   }
 }
@@ -1178,7 +1178,7 @@ inline void collectionReserve(ObjectData* obj, int64 sz) {
   } else if (ct == Collection::StableMapType) {
     static_cast<c_StableMap*>(obj)->reserve(sz);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 

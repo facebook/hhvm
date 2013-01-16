@@ -1477,7 +1477,7 @@ bool f_session_start() {
       /* fallthrough */
     }
   default:
-    ASSERT(PS(session_status) == Session::None);
+    assert(PS(session_status) == Session::None);
     PS(define_sid) = 1;
     PS(send_cookie) = 1;
   }

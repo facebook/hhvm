@@ -321,7 +321,7 @@ void BaseExecutionContext::obClean() {
 }
 
 bool BaseExecutionContext::obFlush() {
-  ASSERT(m_protectedLevel >= 0);
+  assert(m_protectedLevel >= 0);
   if ((int)m_buffers.size() > m_protectedLevel) {
     std::list<OutputBuffer*>::const_iterator iter = m_buffers.end();
     OutputBuffer *last = *(--iter);
@@ -368,7 +368,7 @@ void BaseExecutionContext::obFlushAll() {
 }
 
 bool BaseExecutionContext::obEnd() {
-  ASSERT(m_protectedLevel >= 0);
+  assert(m_protectedLevel >= 0);
   if ((int)m_buffers.size() > m_protectedLevel) {
     delete m_buffers.back();
     m_buffers.pop_back();
@@ -385,7 +385,7 @@ void BaseExecutionContext::obEndAll() {
 }
 
 int BaseExecutionContext::obGetLevel() {
-  ASSERT((int)m_buffers.size() >= m_protectedLevel);
+  assert((int)m_buffers.size() >= m_protectedLevel);
   return m_buffers.size() - m_protectedLevel;
 }
 
@@ -499,13 +499,13 @@ void BaseExecutionContext::popUserExceptionHandler() {
 
 void BaseExecutionContext::registerRequestEventHandler
 (RequestEventHandler *handler) {
-  ASSERT(handler);
+  assert(handler);
   if (m_requestEventHandlerSet.find(handler) ==
       m_requestEventHandlerSet.end()) {
     m_requestEventHandlerSet.insert(handler);
     m_requestEventHandlers.push_back(handler);
   } else {
-    ASSERT(false);
+    assert(false);
   }
 }
 
@@ -521,7 +521,7 @@ void BaseExecutionContext::onRequestShutdown() {
        requestEventHandlerPriorityComp);
   for (unsigned int i = 0; i < m_requestEventHandlers.size(); i++) {
     RequestEventHandler *handler = m_requestEventHandlers[i];
-    ASSERT(handler->getInited());
+    assert(handler->getInited());
     if (handler->getInited()) {
       handler->requestShutdown();
       handler->setInited(false);
@@ -759,7 +759,7 @@ bool BaseExecutionContext::onUnhandledException(Object e) {
       }
     }
   } else {
-    ASSERT(false);
+    assert(false);
   }
   m_lastError = err;
 
@@ -887,8 +887,8 @@ int PersistentObjectStore::size() const {
 
 void PersistentObjectStore::set(const char *type, const char *name,
                                 ResourceData *obj) {
-  ASSERT(type && *type);
-  ASSERT(name);
+  assert(type && *type);
+  assert(name);
   {
     ResourceMap &resources = m_objects[type];
     ResourceMap::iterator iter = resources.find(name);
@@ -911,8 +911,8 @@ void PersistentObjectStore::set(const char *type, const char *name,
 }
 
 ResourceData *PersistentObjectStore::get(const char *type, const char *name) {
-  ASSERT(type && *type);
-  ASSERT(name);
+  assert(type && *type);
+  assert(name);
   ResourceMap &resources = m_objects[type];
   ResourceMap::const_iterator iter = resources.find(name);
   if (iter == resources.end()) {
@@ -922,8 +922,8 @@ ResourceData *PersistentObjectStore::get(const char *type, const char *name) {
 }
 
 void PersistentObjectStore::remove(const char *type, const char *name) {
-  ASSERT(type && *type);
-  ASSERT(name);
+  assert(type && *type);
+  assert(name);
   ResourceMap &resources = m_objects[type];
   ResourceMap::iterator iter = resources.find(name);
   if (iter != resources.end()) {
@@ -933,7 +933,7 @@ void PersistentObjectStore::remove(const char *type, const char *name) {
 }
 
 const ResourceMap &PersistentObjectStore::getMap(const char *type) {
-  ASSERT(type && *type);
+  assert(type && *type);
   return m_objects[type];
 }
 

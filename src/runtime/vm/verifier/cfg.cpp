@@ -26,7 +26,7 @@ namespace Verifier {
  * Create all blocks and edges for one Func.
  */
 Graph* GraphBuilder::build() {
-  ASSERT(!funcInstrs(m_func).empty());
+  assert(!funcInstrs(m_func).empty());
   m_graph = new (m_arena) Graph();
   createBlocks();
   createExBlocks();
@@ -52,7 +52,7 @@ void GraphBuilder::createBlocks() {
                                    createBlock(param.funcletOff());
   }
   // main entry point
-  ASSERT(dv_index == m_graph->param_count);
+  assert(dv_index == m_graph->param_count);
   m_graph->entries[dv_index] = createBlock(m_func->base());
   // ordinary basic block boundaries
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
@@ -89,7 +89,7 @@ void GraphBuilder::linkBlocks() {
       } else {
         Offset target = instrJumpTarget(bc, pc - bc);
         if (target != InvalidAbsoluteOffset) {
-          ASSERT(numSuccBlocks(block) > 0);
+          assert(numSuccBlocks(block) > 0);
           succs(block)[numSuccBlocks(block) - 1] = at(target);
         }
       }
@@ -100,7 +100,7 @@ void GraphBuilder::linkBlocks() {
       block->next_linear = next;
       block->end = next_pc;
       if (!isTF(pc)) {
-        ASSERT(numSuccBlocks(block) > 0);
+        assert(numSuccBlocks(block) > 0);
         succs(block)[0] = next;
       }
       block = next;
@@ -146,7 +146,7 @@ const EHEnt* findFunclet(const Func::EHEntVec& ehtab, Offset off) {
       nearest = eh;
     }
   }
-  ASSERT(nearest != 0 && nearest->m_fault <= off);
+  assert(nearest != 0 && nearest->m_fault <= off);
   return nearest;
 }
 
@@ -176,11 +176,11 @@ void GraphBuilder::linkExBlocks() {
   // For every block, add edges to reachable fault and catch handlers.
   for (LinearBlocks i = linearBlocks(m_graph); !i.empty(); ) {
     Block* b = i.popFront();
-    ASSERT(m_func->findEH(offset(b->start)) == m_func->findEH(offset(b->last)));
+    assert(m_func->findEH(offset(b->start)) == m_func->findEH(offset(b->last)));
     Offset off = offset(b->start);
     int exn_index = 0;
     for (const EHEnt* eh = m_func->findEH(off); eh != 0; ) {
-      ASSERT(eh->m_base <= off && off < eh->m_past);
+      assert(eh->m_base <= off && off < eh->m_past);
       if (eh->m_ehtype == EHEnt::EHType_Catch) {
         // each catch block is reachable from b
         for (Range<EHEnt::CatchVec> j(eh->m_catches); !j.empty(); ) {
@@ -246,7 +246,7 @@ Block* GraphBuilder::at(PC target) {
 }
 
 void GraphBuilder::addEdge(Block* from, EdgeKind k, Block* target) {
-  ASSERT(target != 0);
+  assert(target != 0);
   from->succs[k] = target;
 }
 

@@ -46,7 +46,7 @@ void LabelStatement::analyzeProgram(AnalysisResultPtr ar) {
 ConstructPtr LabelStatement::getNthKid(int n) const {
   switch (n) {
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -59,7 +59,7 @@ int LabelStatement::getKidCount() const {
 void LabelStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

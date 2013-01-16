@@ -77,7 +77,7 @@ ConstructPtr TraitPrecStatement::getNthKid(int n) const {
     case 2:
       return m_otherTraitNames;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -99,7 +99,7 @@ void TraitPrecStatement::setNthKid(int n, ConstructPtr cp) {
       m_otherTraitNames = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }

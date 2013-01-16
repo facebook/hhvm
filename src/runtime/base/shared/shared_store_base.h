@@ -136,7 +136,7 @@ public:
   void reset();
 
   SharedStore& operator[](int id) {
-    ASSERT(id >= 0 && id < MAX_SHARED_STORE);
+    assert(id >= 0 && id < MAX_SHARED_STORE);
     return *m_stores[id];
   }
 

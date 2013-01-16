@@ -99,7 +99,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   }
 
   if (mw->slen + slen+1 >= mw->smax) {
-    ASSERT(mw->slen + slen > 0);
+    assert(mw->slen + slen > 0);
     char* ts = (char*)realloc(mw->s, (mw->slen + slen) << 1);
     if (ts == NULL) {
       mw->oom = true;

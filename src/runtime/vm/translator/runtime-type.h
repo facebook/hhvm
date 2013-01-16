@@ -40,7 +40,7 @@ struct Location {
   Location(Space spc)
   : space(spc)
   , offset(0)
-  { ASSERT(spc == This); }
+  { assert(spc == This); }
 
   Location(Space spc, int64 off)
     : space(spc)
@@ -213,12 +213,12 @@ class RuntimeType {
   };
 
   inline void consistencyCheck() const {
-    ASSERT(m_kind == VALUE || m_kind == ITER);
+    assert(m_kind == VALUE || m_kind == ITER);
     if (m_kind == VALUE) {
-      ASSERT(m_value.innerType != KindOfRef);
-      ASSERT(m_value.outerType == KindOfRef ||
+      assert(m_value.innerType != KindOfRef);
+      assert(m_value.outerType == KindOfRef ||
              m_value.innerType == KindOfInvalid);
-      ASSERT(m_value.outerType == KindOfString ||
+      assert(m_value.outerType == KindOfString ||
              m_value.innerType == KindOfString ||
              m_value.outerType == KindOfClass ||
              m_value.innerType == KindOfClass ||
@@ -229,7 +229,7 @@ class RuntimeType {
              m_value.outerType == KindOfBoolean ||
              m_value.outerType == KindOfInt64 ||
              m_value.klass == NULL);
-      ASSERT(m_value.innerType != KindOfStaticString &&
+      assert(m_value.innerType != KindOfStaticString &&
              m_value.outerType != KindOfStaticString);
     }
   }

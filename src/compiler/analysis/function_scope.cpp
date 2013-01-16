@@ -228,9 +228,9 @@ void FunctionScope::setParamCounts(AnalysisResultConstPtr ar, int minParam,
     m_minParam = minParam;
     m_maxParam = maxParam;
   } else {
-    ASSERT(maxParam == minParam);
+    assert(maxParam == minParam);
   }
-  ASSERT(m_minParam >= 0 && m_maxParam >= m_minParam);
+  assert(m_minParam >= 0 && m_maxParam >= m_minParam);
   if (m_maxParam > 0) {
     m_paramNames.resize(m_maxParam);
     m_paramTypes.resize(m_maxParam);
@@ -314,7 +314,7 @@ bool FunctionScope::isReferenceVariableArgument() const {
              !m_overriding;
   // If this method returns true, then isVariableArgument() must also
   // return true.
-  ASSERT(!res || isVariableArgument());
+  assert(!res || isVariableArgument());
   return res;
 }
 
@@ -322,7 +322,7 @@ bool FunctionScope::isMixedVariableArgument() const {
   bool res = (m_attribute & FileScope::MixedVariableArgument) && !m_overriding;
   // If this method returns true, then isReferenceVariableArgument()
   // must also return true.
-  ASSERT(!res || isReferenceVariableArgument());
+  assert(!res || isReferenceVariableArgument());
   return res;
 }
 
@@ -336,7 +336,7 @@ bool FunctionScope::isClosure() const {
 }
 
 bool FunctionScope::isGenerator() const {
-  ASSERT(!getOrigGenStmt() ||
+  assert(!getOrigGenStmt() ||
          (ParserBase::IsContinuationName(name()) &&
           m_paramNames.size() == 1 &&
           m_paramNames[0] == CONTINUATION_OBJECT_NAME));
@@ -345,7 +345,7 @@ bool FunctionScope::isGenerator() const {
 
 bool FunctionScope::isGeneratorFromClosure() const {
   bool res = isGenerator() && getOrigGenFS()->isClosure();
-  ASSERT(!res || getOrigGenFS()->isClosureGenerator());
+  assert(!res || getOrigGenFS()->isClosureGenerator());
   return res;
 }
 
@@ -707,7 +707,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
 
 TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,
                                     TypePtr type) {
-  ASSERT(index >= 0 && index < (int)m_paramTypes.size());
+  assert(index >= 0 && index < (int)m_paramTypes.size());
   TypePtr paramType = m_paramTypes[index];
 
   if (!paramType) paramType = Type::Some;
@@ -725,7 +725,7 @@ TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,
 }
 
 TypePtr FunctionScope::getParamType(int index) {
-  ASSERT(index >= 0 && index < (int)m_paramTypes.size());
+  assert(index >= 0 && index < (int)m_paramTypes.size());
   TypePtr paramType = m_paramTypes[index];
   if (!paramType) {
     paramType = Type::Some;
@@ -735,17 +735,17 @@ TypePtr FunctionScope::getParamType(int index) {
 }
 
 bool FunctionScope::isRefParam(int index) const {
-  ASSERT(index >= 0 && index < (int)m_refs.size());
+  assert(index >= 0 && index < (int)m_refs.size());
   return m_refs[index];
 }
 
 void FunctionScope::setRefParam(int index) {
-  ASSERT(index >= 0 && index < (int)m_refs.size());
+  assert(index >= 0 && index < (int)m_refs.size());
   m_refs[index] = true;
 }
 
 bool FunctionScope::hasRefParam(int max) const {
-  ASSERT(max >= 0 && max < (int)m_refs.size());
+  assert(max >= 0 && max < (int)m_refs.size());
   for (int i = 0; i < max; i++) {
     if (m_refs[i]) return true;
   }
@@ -753,18 +753,18 @@ bool FunctionScope::hasRefParam(int max) const {
 }
 
 const std::string &FunctionScope::getParamName(int index) const {
-  ASSERT(index >= 0 && index < (int)m_paramNames.size());
+  assert(index >= 0 && index < (int)m_paramNames.size());
   return m_paramNames[index];
 }
 
 void FunctionScope::setParamName(int index, const std::string &name) {
-  ASSERT(index >= 0 && index < (int)m_paramNames.size());
+  assert(index >= 0 && index < (int)m_paramNames.size());
   m_paramNames[index] = name;
 }
 
 void FunctionScope::setParamDefault(int index, const char* value, int64_t len,
                                     const std::string &text) {
-  ASSERT(index >= 0 && index < (int)m_paramNames.size());
+  assert(index >= 0 && index < (int)m_paramNames.size());
   StringData* sd = new StringData(value, len, AttachLiteral);
   sd->setStatic();
   m_paramDefaults[index] = String(sd);
@@ -802,7 +802,7 @@ void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
     type = Type::Coerce(ar, m_returnType, type);
   }
   m_returnType = type;
-  ASSERT(m_returnType);
+  assert(m_returnType);
 }
 
 void FunctionScope::pushReturnType() {
@@ -918,7 +918,7 @@ std::string FunctionScope::getInjectionId() const {
   string injectionName = CodeGenerator::FormatLabel(getOriginalName());
   MethodStatementPtr stmt =
     dynamic_pointer_cast<MethodStatement>(getStmt());
-  ASSERT(stmt);
+  assert(stmt);
   if (stmt->getGeneratorFunc()) {
     injectionName = isClosureGenerator() ?
       injectionName :
@@ -1098,9 +1098,9 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
         BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
           const string &name = param->getName();
           Symbol *sym = variables->getSymbol(name);
-          ASSERT(sym->isUsed());
+          assert(sym->isUsed());
           TypePtr t(sym->getFinalType());
-          ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
+          assert(!param->isRef() || t->is(Type::KindOfVariant));
           if (t->is(Type::KindOfVariant)) {
             const char *s = param->isRef() ? "Ref" : "Val";
             cg_printf("%s%s.assign%s(closure->%s%s);\n",
@@ -1189,8 +1189,8 @@ void FunctionScope::outputCPPParamsImpl(CodeGenerator &cg,
 bool FunctionScope::outputCPPArrayCreate(CodeGenerator &cg,
                                          AnalysisResultPtr ar,
                                          int m_maxParam) {
-  ASSERT(m_maxParam >= 0);
-  ASSERT(m_attribute & FileScope::VariableArgument);
+  assert(m_maxParam >= 0);
+  assert(m_attribute & FileScope::VariableArgument);
   if (!Option::GenArrayCreate ||
       cg.getOutput() == CodeGenerator::SystemCPP ||
       m_maxParam == 0) {
@@ -1203,10 +1203,10 @@ bool FunctionScope::outputCPPArrayCreate(CodeGenerator &cg,
     cg_printf("Array(");
     stmt->outputParamArrayCreate(cg, false);
   } else if (hasRefParam(m_maxParam)) {
-    ASSERT(false);
+    assert(false);
     return false;
   } else {
-    ASSERT(false);
+    assert(false);
     cg_printf("Array(");
     for (int i = 0; i < m_maxParam; i++) {
       cg_printf("%d, a%d", i, i);
@@ -1277,7 +1277,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     } else {
       isRef = !isWrapper && isRefParam(i);
       if (aggregateParams) {
-        ASSERT(false);
+        assert(false);
         cg_printf("set(a%d", i);
       } else {
         cg_printf("%sa%d%s",
@@ -1309,7 +1309,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
                                        bool ignoreFuncParamTypes /* = false */)
 {
   int paramCount = params ? params->getOutputCount() : 0;
-  ASSERT(extraArg <= paramCount);
+  assert(extraArg <= paramCount);
   int iMax = paramCount - extraArg;
   bool extra = false;
   bool callUserFuncFewArgs = false;
@@ -1399,7 +1399,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
               TypePtr());
       if (Expression::CheckVarNR(param, expType)) {
         if (scalar) {
-          ASSERT(!cg.hasScalarVariant());
+          assert(!cg.hasScalarVariant());
           cg.setScalarVariant();
         }
         if (!scalar ||
@@ -1436,7 +1436,7 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       if (wrap) cg_printf("VarNR(");
       param->outputCPP(cg, ar);
       if (scalar) cg.clearScalarVariant();
-      ASSERT(!cg.hasScalarVariant());
+      assert(!cg.hasScalarVariant());
       if (wrap || wrapv) {
         cg_printf(")");
       }
@@ -1560,7 +1560,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   int maxCount = fewArgs ? Option::InvokeFewArgsCount : INT_MAX;
   bool useDefaults = !m_stmt || ar->isSystem();
 
-  ASSERT(m_minParam >= 0);
+  assert(m_minParam >= 0);
 
   int guarded = outputCPPInvokeArgCountCheck(cg, ar, ret,
                                              constructor, maxCount);
@@ -1650,7 +1650,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           cg.setContext(CodeGenerator::CppParameterDefaultValueDecl);
           ExpressionPtr defVal = p->defaultValue();
           if (isCVarRef) {
-            ASSERT(!cg.hasScalarVariant());
+            assert(!cg.hasScalarVariant());
             cg.setScalarVariant();
           }
 
@@ -1660,7 +1660,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           defVal->setExpectedType(exp);
 
           if (isCVarRef) cg.clearScalarVariant();
-          ASSERT(!cg.hasScalarVariant());
+          assert(!cg.hasScalarVariant());
           cg.setContext(context);
           cg_printf(")");
         }
@@ -1703,7 +1703,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         } else {
           // in this case, avoid the un-necessary call to params.slice(),
           // since we want the entire params array anyways
-          ASSERT(m_maxParam == 0);
+          assert(m_maxParam == 0);
           cg_printf("const Array &p(count > 0 ? "
                     "ArrayUtil::EnsureIntKeys(params) : Array());\n");
         }
@@ -1813,7 +1813,7 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   for (int i = 0; i < m_maxParam; i++) {
     const string &name = getParamName(i);
     const Symbol *sym = getVariables()->getSymbol(name);
-    ASSERT(sym && sym->isParameter());
+    assert(sym && sym->isParameter());
     paramSymbols.push_back(SymParamWrapper(sym));
   }
   ms.add("parameters", paramSymbols);
@@ -2031,7 +2031,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
           ExpressionPtr expr = a->getExp();
           Variant v;
           bool isScalar UNUSED = expr->getScalarValue(v);
-          ASSERT(isScalar);
+          assert(isScalar);
           int valueLen = 0;
           string valueText = SymbolTable::getEscapedText(v, valueLen);
           cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
@@ -2062,7 +2062,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     ExpressionPtr expr = it->second;
     Variant v;
     bool isScalar UNUSED = expr->getScalarValue(v);
-    ASSERT(isScalar);
+    assert(isScalar);
     int valueLen = 0;
     string valueText = SymbolTable::getEscapedText(v, valueLen);
     cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
@@ -2166,7 +2166,7 @@ void FunctionScope::getClosureUseVars(
     bool filterUsed /* = true */) {
   useVars.clear();
   if (!m_closureVars) return;
-  ASSERT(isClosure());
+  assert(isClosure());
   VariableTablePtr variables = getVariables();
   for (int i = 0; i < m_closureVars->getCount(); i++) {
     ParameterExpressionPtr param =
@@ -2209,7 +2209,7 @@ void FunctionScope::outputCPPSubClassParam(CodeGenerator &cg,
   VariableTablePtr variables = getVariables();
   const string &name = param->getName();
   Symbol *sym = variables->getSymbol(name);
-  ASSERT(sym);
+  assert(sym);
   TypePtr t(sym->getFinalType());
   if (!param->isRef()) {
     if (t->is(Type::KindOfVariant) || t->is(Type::KindOfSome)) {
@@ -2298,9 +2298,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     BOOST_FOREACH(ParameterExpressionPtr param, useVars) {
       const string &name = param->getName();
       Symbol *sym = variables->getSymbol(name);
-      ASSERT(sym);
+      assert(sym);
       TypePtr t(sym->getFinalType());
-      ASSERT(!param->isRef() || t->is(Type::KindOfVariant));
+      assert(!param->isRef() || t->is(Type::KindOfVariant));
       const string &varName = variables->getVariableName(ar, sym);
       const string &tmpName =
         string(Option::TempVariablePrefix) + CodeGenerator::FormatLabel(name);
@@ -2308,7 +2308,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
         const char *s = param->isRef() ? "Ref" : "Val";
         cg_printf("%s.assign%s(%s);\n", varName.c_str(), s, tmpName.c_str());
       } else {
-        ASSERT(!param->isRef());
+        assert(!param->isRef());
         cg_printf("%s = %s;\n", varName.c_str(), tmpName.c_str());
       }
     }
@@ -2368,7 +2368,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
               Option::SmartPtrPrefix, funcName.c_str());
 
     MethodStatementRawPtr orig = getOrigGenStmt();
-    ASSERT(orig);
+    assert(orig);
     ExpressionListPtr params = orig->getParams();
 
     vector<ParameterExpressionPtr> ctorParams;
@@ -2383,7 +2383,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     bool needsClosureCls =
       orig->getFunctionScope()->needsAnonClosureClass(useVars);
     if (needsClosureCls) {
-      ASSERT(useVars.size() > 0);
+      assert(useVars.size() > 0);
       ctorParams.insert(ctorParams.end(), useVars.begin(), useVars.end());
     }
 
@@ -2429,7 +2429,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf("cont->%s.assign%s(%s);\n",
                     varName.c_str(), s, tmpName.c_str());
         } else {
-          ASSERT(!param->isRef());
+          assert(!param->isRef());
           cg_printf("cont->%s = %s;\n", varName.c_str(), tmpName.c_str());
         }
       }

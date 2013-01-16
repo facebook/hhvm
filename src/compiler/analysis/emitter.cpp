@@ -186,7 +186,7 @@ namespace StackSym {
   Logger::Warning(__VA_ARGS__);                             \
   Logger::Warning("Eval stack at the time of error: %s",    \
                   m_evalStack.pretty().c_str());            \
-  ASSERT(false);                                            \
+  assert(false);                                            \
 } while (0)
 
 // RAII guard for function creation.
@@ -224,7 +224,7 @@ public:
 
 // Count the number of stack elements in an immediate vector.
 static int32_t countStackValues(const std::vector<uchar>& immVec) {
-  ASSERT(!immVec.empty());
+  assert(!immVec.empty());
 
   int count = 0;
   const uint8_t* vec = &immVec[0];
@@ -251,7 +251,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
       ++count;
     }
   }
-  ASSERT(vec - &immVec[0] == int(immVec.size()));
+  assert(vec - &immVec[0] == int(immVec.size()));
   return count;
 }
 
@@ -650,7 +650,7 @@ static void checkJmpTargetEvalStack(const SymbolicStack& source,
     Logger::Warning("Emitter detected a point in the bytecode where the "
                     "depth of the stack is not the same for all possible "
                     "control flow paths");
-    ASSERT(false);
+    assert(false);
     return;
   }
 
@@ -666,7 +666,7 @@ static void checkJmpTargetEvalStack(const SymbolicStack& source,
                       "for all possible control flow paths");
       Logger::Warning("src stack : %s", source.pretty().c_str());
       Logger::Warning("dest stack: %s", dest.pretty().c_str());
-      ASSERT(false);
+      assert(false);
       return;
     }
   }
@@ -706,31 +706,31 @@ void SymbolicStack::push(char sym) {
 }
 
 void SymbolicStack::pop() {
-  // TODO(drew): ASSERT eval stack unknown is false?
-  ASSERT(!m_symStack.empty());
+  // TODO(drew): assert eval stack unknown is false?
+  assert(!m_symStack.empty());
   char sym = m_symStack.back().sym;
   char flavor = StackSym::GetSymFlavor(sym);
   if (StackSym::GetMarker(sym) != StackSym::W &&
       flavor != StackSym::L && flavor != StackSym::T && flavor != StackSym::I &&
       flavor != StackSym::H) {
-    ASSERT(!m_actualStack.empty());
+    assert(!m_actualStack.empty());
     m_actualStack.pop_back();
   }
   m_symStack.pop_back();
 }
 
 char SymbolicStack::top() const {
-  ASSERT(!m_symStack.empty());
+  assert(!m_symStack.empty());
   return m_symStack.back().sym;
 }
 
 char SymbolicStack::get(int index) const {
-  ASSERT(index >= 0 && index < (int)m_symStack.size());
+  assert(index >= 0 && index < (int)m_symStack.size());
   return m_symStack[index].sym;
 }
 
 const StringData* SymbolicStack::getName(int index) const {
-  ASSERT(index >= 0 && index < (int)m_symStack.size());
+  assert(index >= 0 && index < (int)m_symStack.size());
   if (m_symStack[index].metaType == META_LITSTR) {
     return m_symStack[index].metaData.name;
   }
@@ -738,33 +738,33 @@ const StringData* SymbolicStack::getName(int index) const {
 }
 
 const StringData* SymbolicStack::getClsName(int index) const {
-  ASSERT(index >= 0 && index < (int)m_symStack.size());
+  assert(index >= 0 && index < (int)m_symStack.size());
   return m_symStack[index].className;
 }
 
 bool SymbolicStack::isCls(int index) const {
-  ASSERT(index >= 0 && index < (int)m_symStack.size());
+  assert(index >= 0 && index < (int)m_symStack.size());
   return m_symStack[index].className != nullptr;
 }
 
 void SymbolicStack::setString(const StringData* s) {
-  ASSERT(m_symStack.size());
+  assert(m_symStack.size());
   SymEntry& se = m_symStack.back();
   if (se.metaType == META_LITSTR) {
-    ASSERT(se.metaData.name == s);
+    assert(se.metaData.name == s);
   } else {
-    ASSERT(se.metaType == META_NONE);
+    assert(se.metaType == META_NONE);
   }
   se.metaData.name = s;
   se.metaType = META_LITSTR;
 }
 
 void SymbolicStack::setKnownCls(const StringData* s, bool nonNull) {
-  ASSERT(m_symStack.size());
+  assert(m_symStack.size());
   SymEntry& se = m_symStack.back();
-  ASSERT(!se.className || se.className == s);
+  assert(!se.className || se.className == s);
   if (se.metaType == META_DATA_TYPE) {
-    ASSERT(se.metaData.dt == KindOfObject);
+    assert(se.metaData.dt == KindOfObject);
     nonNull = true;
   }
   se.className = s;
@@ -772,30 +772,30 @@ void SymbolicStack::setKnownCls(const StringData* s, bool nonNull) {
 }
 
 void SymbolicStack::setNotRef() {
-  ASSERT(m_symStack.size());
+  assert(m_symStack.size());
   SymEntry& se = m_symStack.back();
   se.notRef = true;
 }
 
 bool SymbolicStack::getNotRef() const {
-  ASSERT(m_symStack.size());
+  assert(m_symStack.size());
   const SymEntry& se = m_symStack.back();
   return se.notRef;
 }
 
 void SymbolicStack::setInt(int64 v) {
-  ASSERT(m_symStack.size());
+  assert(m_symStack.size());
   m_symStack.back().intval = v;
 }
 
 void SymbolicStack::setKnownType(DataType dt, bool predicted /* = false */) {
-  ASSERT(m_symStack.size());
+  assert(m_symStack.size());
   SymEntry& se = m_symStack.back();
   if (se.className) {
-    ASSERT(dt == KindOfObject);
+    assert(dt == KindOfObject);
     se.notNull = true;
   } else {
-    ASSERT(se.metaType == META_NONE);
+    assert(se.metaType == META_NONE);
     se.metaType = META_DATA_TYPE;
     se.metaData.dt = dt;
   }
@@ -804,7 +804,7 @@ void SymbolicStack::setKnownType(DataType dt, bool predicted /* = false */) {
 
 DataType SymbolicStack::getKnownType(int index, bool noRef) const {
   if (index < 0) index += m_symStack.size();
-  ASSERT((unsigned)index < m_symStack.size());
+  assert((unsigned)index < m_symStack.size());
   const SymEntry& se = m_symStack[index];
   if (!noRef || se.notRef) {
     if (se.className && se.notNull) {
@@ -818,7 +818,7 @@ DataType SymbolicStack::getKnownType(int index, bool noRef) const {
 
 bool SymbolicStack::isTypePredicted(int index /* = -1, stack top */) const {
   if (index < 0) index += m_symStack.size();
-  ASSERT((unsigned)index < m_symStack.size());
+  assert((unsigned)index < m_symStack.size());
   return m_symStack[index].dtPredicted;
 }
 
@@ -830,23 +830,23 @@ void SymbolicStack::cleanTopMeta() {
 }
 
 void SymbolicStack::setClsBaseType(ClassBaseType type) {
-  ASSERT(!m_symStack.empty());
+  assert(!m_symStack.empty());
   m_symStack.back().clsBaseType = type;
 }
 
 void SymbolicStack::setUnnamedLocal(int index,
                                     int localId,
                                     Offset startOff) {
-  ASSERT(size_t(index) < m_symStack.size());
-  ASSERT(m_symStack[index].sym == StackSym::K);
-  ASSERT(m_symStack[index].clsBaseType == CLS_UNNAMED_LOCAL);
+  assert(size_t(index) < m_symStack.size());
+  assert(m_symStack[index].sym == StackSym::K);
+  assert(m_symStack[index].clsBaseType == CLS_UNNAMED_LOCAL);
   m_symStack[index].intval = localId;
   m_symStack[index].unnamedLocalStart = startOff;
 }
 
 void SymbolicStack::set(int index, char sym) {
-  ASSERT(index >= 0 && index < (int)m_symStack.size());
-  // XXX Add ASSERT in debug build to make sure W is not getting
+  assert(index >= 0 && index < (int)m_symStack.size());
+  // XXX Add assert in debug build to make sure W is not getting
   // written or overwritten by something else
   m_symStack[index].sym = sym;
 }
@@ -870,10 +870,10 @@ void SymbolicStack::consumeBelowTop(int depth) {
     Logger::Warning(
       "Emitter tried to consumeBelowTop() when the symbolic "
       "stack did not have enough elements in it.");
-    ASSERT(false);
+    assert(false);
     return;
   }
-  ASSERT(int(m_symStack.size()) >= depth + 1);
+  assert(int(m_symStack.size()) >= depth + 1);
   int index = m_symStack.size() - depth - 1;
   m_symStack.erase(m_symStack.begin() + index);
 
@@ -892,8 +892,8 @@ void SymbolicStack::consumeBelowTop(int depth) {
 }
 
 int SymbolicStack::getActualPos(int vpos) const {
-  ASSERT(vpos >= 0 && vpos < int(m_symStack.size()));
-  ASSERT(!m_actualStack.empty());
+  assert(vpos >= 0 && vpos < int(m_symStack.size()));
+  assert(!m_actualStack.empty());
   for (int j = int(m_actualStack.size()) - 1; j >= 0; --j) {
     if (m_actualStack[j] == vpos) {
       return j;
@@ -903,49 +903,49 @@ int SymbolicStack::getActualPos(int vpos) const {
 }
 
 char SymbolicStack::getActual(int index) const {
-  ASSERT(index >= 0 && index < (int)m_actualStack.size());
+  assert(index >= 0 && index < (int)m_actualStack.size());
   return get(m_actualStack[index]);
 }
 
 void SymbolicStack::setActual(int index, char sym) {
-  ASSERT(index >= 0 && index < (int)m_actualStack.size());
+  assert(index >= 0 && index < (int)m_actualStack.size());
   set(m_actualStack[index], sym);
 }
 
 SymbolicStack::ClassBaseType
 SymbolicStack::getClsBaseType(int index) const {
-  ASSERT(m_symStack.size() > size_t(index));
-  ASSERT(m_symStack[index].sym == StackSym::K);
-  ASSERT(m_symStack[index].clsBaseType != CLS_INVALID);
+  assert(m_symStack.size() > size_t(index));
+  assert(m_symStack[index].sym == StackSym::K);
+  assert(m_symStack[index].clsBaseType != CLS_INVALID);
   return m_symStack[index].clsBaseType;
 }
 
 int SymbolicStack::getLoc(int index) const {
-  ASSERT(m_symStack.size() > size_t(index));
-  ASSERT(StackSym::GetSymFlavor(m_symStack[index].sym) == StackSym::L ||
+  assert(m_symStack.size() > size_t(index));
+  assert(StackSym::GetSymFlavor(m_symStack[index].sym) == StackSym::L ||
          m_symStack[index].clsBaseType == CLS_NAMED_LOCAL ||
          m_symStack[index].clsBaseType == CLS_UNNAMED_LOCAL);
-  ASSERT(m_symStack[index].intval != -1);
+  assert(m_symStack[index].intval != -1);
   return m_symStack[index].intval;
 }
 
 int64 SymbolicStack::getInt(int index) const {
-  ASSERT(m_symStack.size() > size_t(index));
-  ASSERT(StackSym::GetSymFlavor(m_symStack[index].sym) == StackSym::I);
+  assert(m_symStack.size() > size_t(index));
+  assert(StackSym::GetSymFlavor(m_symStack[index].sym) == StackSym::I);
   return m_symStack[index].intval;
 }
 
 Offset SymbolicStack::getUnnamedLocStart(int index) const {
-  ASSERT(m_symStack.size() > size_t(index));
-  ASSERT(m_symStack[index].sym == StackSym::K);
-  ASSERT(m_symStack[index].clsBaseType == CLS_UNNAMED_LOCAL);
+  assert(m_symStack.size() > size_t(index));
+  assert(m_symStack[index].sym == StackSym::K);
+  assert(m_symStack[index].clsBaseType == CLS_UNNAMED_LOCAL);
   return m_symStack[index].unnamedLocalStart;
 }
 
 // Insert an element in the actual stack at the specified depth of the
 // actual stack.
 void SymbolicStack::insertAt(int depth, char sym) {
-  ASSERT(depth <= sizeActual() && depth > 0);
+  assert(depth <= sizeActual() && depth > 0);
   int virtIdx = m_actualStack[sizeActual() - depth];
 
   m_symStack.insert(m_symStack.begin() + virtIdx, SymEntry(sym));
@@ -1049,7 +1049,7 @@ private:
 
 void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
                           bool mVector, int arg, Id data) {
-  ASSERT(arg >= 0);
+  assert(arg >= 0);
   if (arg > 127) return;
   if (mVector) arg |= Unit::MetaInfo::VectorArg;
   Vec& info = m_metaMap[pos];
@@ -1102,7 +1102,7 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
     index2.push_back(sz1 + sz2 + data.size());
 
     const Vec& v = it->second;
-    ASSERT(v.size());
+    assert(v.size());
     for (unsigned i = 0; i < v.size(); i++) {
       const Unit::MetaInfo& mi = v[i];
       data.push_back(mi.m_kind);
@@ -1265,7 +1265,7 @@ void EmitterVisitor::popEvalStackLMany() {
           m_ue.bcPos());
       }
     } else if (marker == StackSym::M) {
-      ASSERT(symFlavor == StackSym::A);
+      assert(symFlavor == StackSym::A);
     } else {
       break;
     }
@@ -1468,7 +1468,7 @@ void EmitterVisitor::visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
     }
   } else {
     // Reached a "leaf".  Lock in this index chain and deal with this exp.
-    ASSERT(!indexChain.empty());
+    assert(!indexChain.empty());
     all.push_back(new IndexChain(indexChain));
     visit(exp);
     emitClsIfSPropBase(e);
@@ -1574,7 +1574,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
   assignLocalVariableIds(func);
 
   AnalysisResultPtr ar(file->getContainingProgram());
-  ASSERT(ar);
+  assert(ar);
   MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(func->getStmt()));
   if (!m) return;
   StatementListPtr stmts(m->getStmts());
@@ -1643,7 +1643,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
             } else if (v.isArray()) {
               v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
             } else {
-              ASSERT(!IS_REFCOUNTED_TYPE(v.getType()));
+              assert(!IS_REFCOUNTED_TYPE(v.getType()));
             }
             mainReturn = *v.getTypedAccessor();
             m_ue.returnSeen();
@@ -1686,7 +1686,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
                     if (StatementListPtr sl = f->getStmt()) {
                       FunctionScopeRawPtr ps DEBUG_ONLY =
                         sl->getFunctionScope();
-                      ASSERT(ps && ps->inPseudoMain());
+                      assert(ps && ps->inPseudoMain());
                       UnitMergeKind kind = inc->isPrivateScope() ?
                         (inc->isDocumentRoot() ?
                          UnitMergeKindReqMod : UnitMergeKindReqSrc) :
@@ -1831,7 +1831,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
                                   Expression::ObjectContext))) {
     /* we dont support V in M-vectors, so leave it as an R in that
        case */
-    ASSERT(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
+    assert(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
     Offset cur = m_ue.bcPos();
     if (ref) {
       e.BoxR();
@@ -2051,7 +2051,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfExpStatement: {
-        ASSERT(node->getKidCount() == 1);
+        assert(node->getKidCount() == 1);
         if (visit(node->getNthKid(0))) {
           emitPop(e);
         }
@@ -2211,12 +2211,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           static_pointer_cast<StaticStatement>(node)->getVars());
         for (int i = 0, n = vars->getCount(); i < n; i++) {
           ExpressionPtr se((*vars)[i]);
-          ASSERT(se->is(Expression::KindOfAssignmentExpression));
+          assert(se->is(Expression::KindOfAssignmentExpression));
           AssignmentExpressionPtr ae(
             static_pointer_cast<AssignmentExpression>(se));
           ExpressionPtr var(ae->getVariable());
           ExpressionPtr value(ae->getValue());
-          ASSERT(var->is(Expression::KindOfSimpleVariable));
+          assert(var->is(Expression::KindOfSimpleVariable));
           SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(var));
           StringData* name = StringData::GetStaticString(sv->getName());
           Id local = m_curFunc->lookupVarId(name);
@@ -2307,7 +2307,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             } else if (stype == KindOfInt64) {
               emitIntegerSwitch(e, sw, caseLabels, done, state);
             } else {
-              ASSERT(IS_STRING_TYPE(stype));
+              assert(IS_STRING_TYPE(stype));
               emitStringSwitch(e, sw, caseLabels, done, state);
             }
             didSwitch = true;
@@ -2370,8 +2370,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         done.set(e);
         if (!didSwitch && !simpleSubject) {
           // Null out temp local, to invoke any needed refcounting
-          ASSERT(tempLocal >= 0);
-          ASSERT(start != InvalidAbsoluteOffset);
+          assert(tempLocal >= 0);
+          assert(start != InvalidAbsoluteOffset);
           newFaultRegion(start, m_ue.bcPos(),
                          new UnsetUnnamedLocalThunklet(tempLocal));
           emitVirtualLocal(tempLocal);
@@ -2493,7 +2493,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         not_reached();
 
       case Statement::KindOfFunctionStatement: {
-        ASSERT(!node->getClassScope()); // Handled directly by emitClass().
+        assert(!node->getClassScope()); // Handled directly by emitClass().
         MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
         // Only called for fn defs not on the top level
         StringData* nName = StringData::GetStaticString(m->getOriginalName());
@@ -2591,7 +2591,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             }
             e.NewTuple(tuple_cap);
           } else {
-            ASSERT(m_staticArrays.size() == 0);
+            assert(m_staticArrays.size() == 0);
             ExpressionPtr ex = u->getExpression();
             if (ex->getKindOf() == Expression::KindOfExpressionList) {
               ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
@@ -2669,7 +2669,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else {
           // __FILE__ and __DIR__ are special unary ops that don't
           // have expressions
-          ASSERT(op == T_FILE || op == T_DIR);
+          assert(op == T_FILE || op == T_DIR);
         }
         switch (op) {
           case T_INC:
@@ -2707,8 +2707,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case T_UNSET_CAST: emitPop(e); e.Null(); break;
           case T_EXIT: e.Exit(); break;
           case '@': {
-            ASSERT(oldErrorLevelLoc >= 0);
-            ASSERT(start != InvalidAbsoluteOffset);
+            assert(oldErrorLevelLoc >= 0);
+            assert(start != InvalidAbsoluteOffset);
             newFaultRegion(start, m_ue.bcPos(),
                            new RestoreErrorReportingThunklet(oldErrorLevelLoc));
             emitRestoreErrorReporting(e, oldErrorLevelLoc);
@@ -2726,7 +2726,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             break;
           }
           default:
-            ASSERT(false);
+            assert(false);
         }
         return true;
       }
@@ -2915,7 +2915,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case T_IS_SMALLER_OR_EQUAL: e.Lte(); break;
           case '>': e.Gt(); break;
           case T_IS_GREATER_OR_EQUAL: e.Gte(); break;
-          default: ASSERT(false);
+          default: assert(false);
         }
         return true;
       }
@@ -3077,7 +3077,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             ExpressionPtr p = (*params)[0];
             Variant v;
             if (p->getScalarValue(v)) {
-              ASSERT(v.isString());
+              assert(v.isString());
               StringData* msg = StringData::GetStaticString(v.toString());
               throw IncludeTimeFatalException(call, msg->data());
             }
@@ -3123,16 +3123,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             }
           }
         } else if (call->isCompilerCallToFunction("hphp_unpack_continuation")) {
-          ASSERT(params && params->getCount() == 1);
+          assert(params && params->getCount() == 1);
           inputIsAnObject(0);
           e.UnpackCont();
           return true;
         } else if (call->isCompilerCallToFunction("hphp_pack_continuation")) {
-          ASSERT(params && params->getCount() == 3);
+          assert(params && params->getCount() == 3);
           ExpressionPtr label = (*params)[1];
           Variant lVar;
           UNUSED bool isScalar = label->getScalarValue(lVar);
-          ASSERT(isScalar && lVar.isInteger());
+          assert(isScalar && lVar.isInteger());
 
           visit((*params)[2]);
           emitConvertToCell(e);
@@ -3140,12 +3140,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.PackCont(lVar.asInt64Val());
           return false;
         } else if (call->isCompilerCallToFunction("hphp_create_continuation")) {
-          ASSERT(params && (params->getCount() == 3 ||
+          assert(params && (params->getCount() == 3 ||
                             params->getCount() == 4));
           ExpressionPtr name = (*params)[1];
           Variant nameVar;
           UNUSED bool isScalar = name->getScalarValue(nameVar);
-          ASSERT(isScalar && nameVar.isString());
+          assert(isScalar && nameVar.isString());
           const StringData* nameStr =
             StringData::GetStaticString(nameVar.getStringData());
           bool callGetArgs = params->getCount() == 4;
@@ -3184,7 +3184,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           } else if (call->isCallToFunction("interface_exists")) {
             e.InterfaceExists();
           } else {
-            ASSERT(call->isCallToFunction("trait_exists"));
+            assert(call->isCallToFunction("trait_exists"));
             e.TraitExists();
           }
           return true;
@@ -3259,7 +3259,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         if (!rhs) {
           // visitListAssignmentLHS should have handled this
-          ASSERT(false);
+          assert(false);
         }
 
         // We use "index chains" to deal with nested list assignment.  We will
@@ -3322,8 +3322,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // Null out and free unnamed local
         if (!simpleRHS) {
-          ASSERT(tempLocal >= 0);
-          ASSERT(start != InvalidAbsoluteOffset);
+          assert(tempLocal >= 0);
+          assert(start != InvalidAbsoluteOffset);
           newFaultRegion(start, m_ue.bcPos(),
                          new UnsetUnnamedLocalThunklet(tempLocal));
           emitVirtualLocal(tempLocal);
@@ -3541,7 +3541,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case KindOfDouble:
             e.Double(v.getDouble()); break;
           default:
-            ASSERT(false);
+            assert(false);
         }
         return true;
       }
@@ -3625,7 +3625,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
           if (key != NULL) {
             // Key.
-            ASSERT(key->isScalar());
+            assert(key->isScalar());
             TypedValue tvKey;
             tvKey._count = 0;
             if (key->is(Expression::KindOfConstantExpression)) {
@@ -3641,7 +3641,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                 tvKey.m_type = KindOfInt64;
               } else {
                 // Handle INF and NAN
-                ASSERT(c->isDouble());
+                assert(c->isDouble());
                 Variant v;
                 c->getScalarValue(v);
                 tvKey.m_data.num = v.toInt64();
@@ -3819,8 +3819,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 }
 
 int EmitterVisitor::scanStackForLocation(int iLast) {
-  ASSERT(iLast >= 0);
-  ASSERT(iLast < (int)m_evalStack.size());
+  assert(iLast >= 0);
+  assert(iLast < (int)m_evalStack.size());
   for (int i = iLast; i >= 0; --i) {
     char marker = StackSym::GetMarker(m_evalStack.get(i));
     if (marker != StackSym::E && marker != StackSym::W &&
@@ -3837,9 +3837,9 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
 void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
                                     int iFirst, int iLast, bool allowW,
                                     Emitter& e) {
-  ASSERT(iFirst >= 0);
-  ASSERT(iFirst <= iLast);
-  ASSERT(iLast < (int)m_evalStack.size());
+  assert(iFirst >= 0);
+  assert(iFirst <= iLast);
+  assert(iLast < (int)m_evalStack.size());
   vectorImm.clear();
   vectorImm.reserve(iLast - iFirst + 1);
 
@@ -3869,7 +3869,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
         } else if (symFlavor == StackSym::L) {
           vectorImm.push_back(LNL);
         } else {
-          ASSERT(false);
+          assert(false);
         }
       } break;
       case StackSym::G: {
@@ -3878,7 +3878,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
         } else if (symFlavor == StackSym::L) {
           vectorImm.push_back(LGL);
         } else {
-          ASSERT(false);
+          assert(false);
         }
       } break;
       case StackSym::S: {
@@ -3941,7 +3941,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
 
     switch (marker) {
       case StackSym::M: {
-        ASSERT(symFlavor == StackSym::A);
+        assert(symFlavor == StackSym::A);
         break;
       }
       case StackSym::E: {
@@ -3973,15 +3973,15 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
         }
       } break;
       case StackSym::S: {
-        ASSERT(false);
+        assert(false);
       }
-      default: ASSERT(false); break;
+      default: assert(false); break;
     }
 
     if (symFlavor == StackSym::L) {
       encodeIvaToVector(vectorImm, m_evalStack.getLoc(i));
     } else if (symFlavor == StackSym::T) {
-      ASSERT(strid != -1);
+      assert(strid != -1);
       encodeToVector<int32>(vectorImm, strid);
     } else if (symFlavor == StackSym::I) {
       encodeToVector<int64>(vectorImm, m_evalStack.getInt(i));
@@ -4001,7 +4001,7 @@ void EmitterVisitor::emitPop(Emitter& e) {
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4029,18 +4029,18 @@ void EmitterVisitor::emitPop(Emitter& e) {
 }
 
 void EmitterVisitor::emitCGetL2(Emitter& e) {
-  ASSERT(m_evalStack.size() >= 2);
-  ASSERT(m_evalStack.sizeActual() >= 1);
-  ASSERT(StackSym::GetSymFlavor(m_evalStack.get(m_evalStack.size() - 2))
+  assert(m_evalStack.size() >= 2);
+  assert(m_evalStack.sizeActual() >= 1);
+  assert(StackSym::GetSymFlavor(m_evalStack.get(m_evalStack.size() - 2))
     == StackSym::L);
   int localIdx = m_evalStack.getLoc(m_evalStack.size() - 2);
   e.CGetL2(localIdx);
 }
 
 void EmitterVisitor::emitCGetL3(Emitter& e) {
-  ASSERT(m_evalStack.size() >= 3);
-  ASSERT(m_evalStack.sizeActual() >= 2);
-  ASSERT(StackSym::GetSymFlavor(m_evalStack.get(m_evalStack.size() - 3))
+  assert(m_evalStack.size() >= 3);
+  assert(m_evalStack.sizeActual() >= 2);
+  assert(StackSym::GetSymFlavor(m_evalStack.get(m_evalStack.size() - 3))
     == StackSym::L);
   int localIdx = m_evalStack.getLoc(m_evalStack.size() - 3);
   e.CGetL3(localIdx);
@@ -4071,7 +4071,7 @@ void EmitterVisitor::emitCGet(Emitter& e) {
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4106,7 +4106,7 @@ void EmitterVisitor::emitVGet(Emitter& e) {
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4266,7 +4266,7 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   // This ensures that the FPass instruction will be associated with
   // exp's source location.
@@ -4280,7 +4280,7 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
           case PassByRefKind::AllowCell:   e.FPassC(paramId); break;
           case PassByRefKind::WarnOnCell:  e.FPassCW(paramId); break;
           case PassByRefKind::ErrorOnCell: e.FPassCE(paramId); break;
-          default: ASSERT(false);
+          default: assert(false);
         }
         break;
       case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
@@ -4310,7 +4310,7 @@ void EmitterVisitor::emitIsset(Emitter& e) {
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4373,7 +4373,7 @@ void EmitterVisitor::emitEmpty(Emitter& e) {
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4409,7 +4409,7 @@ void EmitterVisitor::emitUnset(Emitter& e) {
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4440,7 +4440,7 @@ void EmitterVisitor::emitSet(Emitter& e) {
   int iLast = m_evalStack.size()-2;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4479,12 +4479,12 @@ void EmitterVisitor::emitSetOp(Emitter& e, int op) {
   case T_XOR_EQUAL: cop = SetOpXorEqual; break;
   case T_SL_EQUAL: cop = SetOpSlEqual; break;
   case T_SR_EQUAL: cop = SetOpSrEqual; break;
-  default: ASSERT(false);
+  default: assert(false);
   }
   int iLast = m_evalStack.size()-2;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4513,7 +4513,7 @@ void EmitterVisitor::emitBind(Emitter& e) {
   int iLast = m_evalStack.size()-2;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4543,7 +4543,7 @@ void EmitterVisitor::emitIncDec(Emitter& e, unsigned char cop) {
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-  ASSERT(sz >= 0);
+  assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
@@ -4689,7 +4689,7 @@ void EmitterVisitor::emitResolveClsBase(Emitter& e, int pos) {
   }
   case SymbolicStack::CLS_INVALID:
   default:
-    ASSERT(false);
+    assert(false);
   }
 
   m_evalStack.consumeBelowTop(m_evalStack.size() - pos - 1);
@@ -4759,7 +4759,7 @@ Label* EmitterVisitor::getContinuationGotoLabel(StatementPtr s) {
 void EmitterVisitor::emitContinuationSwitch(Emitter& e,
                                             SwitchStatementPtr sw) {
   StatementListPtr cases(sw->getCases());
-  ASSERT(cases);
+  assert(cases);
   const int ncase = cases->getCount();
 
   // There's an implicit fall-through "label 0" case in the switch
@@ -4780,7 +4780,7 @@ void EmitterVisitor::emitContinuationSwitch(Emitter& e,
       Variant v;
       c->getCondition()->getScalarValue(v);
       int caseIdx = v.asInt64Val();
-      ASSERT(caseIdx > 0 && caseIdx <= ncase);
+      assert(caseIdx > 0 && caseIdx <= ncase);
       targets[caseIdx] = getContinuationGotoLabel(c->getStatement());
     }
     visit(sw->getExp());
@@ -5097,13 +5097,13 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
 void EmitterVisitor::emitPostponedMeths() {
   vector<FuncEmitter*> top_fes;
   while (!m_postponedMeths.empty()) {
-    ASSERT(m_actualStackHighWater == 0);
-    ASSERT(m_fdescHighWater == 0);
+    assert(m_actualStackHighWater == 0);
+    assert(m_fdescHighWater == 0);
     PostponedMeth& p = m_postponedMeths.front();
     FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
     FuncEmitter* fe = p.m_fe;
     if (!fe) {
-      ASSERT(p.m_top);
+      assert(p.m_top);
       const StringData* methName =
         StringData::GetStaticString(p.m_meth->getOriginalName());
       fe = new FuncEmitter(m_ue, -1, -1, methName);
@@ -5118,8 +5118,8 @@ void EmitterVisitor::emitPostponedMeths() {
          it != userAttrs.end(); ++it) {
       const StringData* uaName = StringData::GetStaticString(it->first);
       ExpressionPtr uaValue = it->second;
-      ASSERT(uaValue);
-      ASSERT(uaValue->isScalar());
+      assert(uaValue);
+      assert(uaValue->isScalar());
       TypedValue tv;
       initScalar(tv, uaValue);
       fe->addUserAttribute(uaName, tv);
@@ -5195,8 +5195,8 @@ void EmitterVisitor::emitPostponedMeths() {
             (*paramUserAttrs)[j]);
           StringData* uaName = StringData::GetStaticString(a->getName());
           ExpressionPtr uaValue = a->getExp();
-          ASSERT(uaValue);
-          ASSERT(uaValue->isScalar());
+          assert(uaValue);
+          assert(uaValue->isScalar());
           TypedValue tv;
           initScalar(tv, uaValue);
           pi.addUserAttribute(uaName, tv);
@@ -5262,7 +5262,7 @@ void EmitterVisitor::emitPostponedMeths() {
     // For closures, the MethodStatement didn't have real attributes; enforce
     // that the __invoke method is public here
     if (fe->isClosureBody()) {
-      ASSERT(!(attrs & (AttrProtected | AttrPrivate)));
+      assert(!(attrs & (AttrProtected | AttrPrivate)));
       attrs = attrs | AttrPublic;
     }
 
@@ -5274,7 +5274,7 @@ void EmitterVisitor::emitPostponedMeths() {
       if (funcScope->needsLocalThis() &&
           !funcScope->isStatic() &&
           !funcScope->isGenerator()) {
-        ASSERT(!p.m_top);
+        assert(!p.m_top);
         static const StringData* thisStr = StringData::GetStaticString("this");
         Id thisId = fe->lookupVarId(thisStr);
         e.InitThisLoc(thisId);
@@ -5284,11 +5284,11 @@ void EmitterVisitor::emitPostponedMeths() {
         if (!tc.exists()) continue;
         TRACE(2, "permanent home for tc %s, param %d of func %s: %p\n",
               tc.typeName()->data(), i, fe->name()->data(), &tc);
-        ASSERT(tc.typeName()->data() != (const char*)0xdeadba5eba11f00d);
+        assert(tc.typeName()->data() != (const char*)0xdeadba5eba11f00d);
         e.VerifyParamType(i);
       }
       if (fe->isClosureBody()) {
-        ASSERT(p.m_closureUseVars != NULL);
+        assert(p.m_closureUseVars != NULL);
         // Emit code to unpack the instance variables (which store the
         // use-variables) into locals. Some of the use-variables may have the
         // same name, in which case the last one wins.
@@ -5447,7 +5447,7 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   //     # ...
   //   }
   size_t nProps = p.m_vec->size();
-  ASSERT(nProps > 0);
+  assert(nProps > 0);
   for (size_t i = 0; i < nProps; ++i) {
     const StringData* propName =
       StringData::GetStaticString(((*p.m_vec)[i]).first);
@@ -5537,7 +5537,7 @@ void EmitterVisitor::emitPostponedCinits() {
     //     }
     //   }
     size_t nConsts = p.m_vec->size();
-    ASSERT(nConsts > 0);
+    assert(nConsts > 0);
     Label retC;
     for (size_t i = 0; i < nConsts - 1; ++i) {
       Label mismatch;
@@ -5726,7 +5726,7 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     e.FPushCufF(nParams - param);
   } else if (flags & CallUserFuncSafe) {
     if (flags & CallUserFuncReturn) {
-      ASSERT(nParams >= 2);
+      assert(nParams >= 2);
       visit((*params)[param++]);
       emitConvertToCell(e);
     } else {
@@ -5907,8 +5907,8 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   }
   if (isBuiltinCall) {
     FunctionScopePtr func = node->getFuncScope();
-    ASSERT(func);
-    ASSERT(numParams <= func->getMaxParamCount()
+    assert(func);
+    assert(numParams <= func->getMaxParamCount()
            && numParams >= func->getMinParamCount());
     int i = 0;
     for (; i < numParams; i++) {
@@ -5983,7 +5983,7 @@ void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
     } else {
       TraitAliasStatementPtr aliasStmt =
         dynamic_pointer_cast<TraitAliasStatement>(rule);
-      ASSERT(aliasStmt);
+      assert(aliasStmt);
       emitClassTraitAliasRule(pce, aliasStmt);
     }
   }
@@ -6060,8 +6060,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
        it != userAttrs.end(); ++it) {
     const StringData* uaName = StringData::GetStaticString(it->first);
     ExpressionPtr uaValue = it->second;
-    ASSERT(uaValue);
-    ASSERT(uaValue->isScalar());
+    assert(uaValue);
+    assert(uaValue->isScalar());
     TypedValue tv;
     initScalar(tv, uaValue);
     pce->addUserAttribute(uaName, tv);
@@ -6083,7 +6083,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
         fe->setIsGeneratorFromClosure(
           meth->getFunctionScope()->isGeneratorFromClosure());
         bool added UNUSED = pce->addMethod(fe);
-        ASSERT(added);
+        assert(added);
         postponeMeth(meth, fe, false);
       } else if (ClassVariablePtr cv =
                  dynamic_pointer_cast<ClassVariable>((*stmts)[i])) {
@@ -6129,7 +6129,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
           }
           bool added UNUSED =
             pce->addProperty(propName, attrs, propDoc, &tvVal);
-          ASSERT(added);
+          assert(added);
         }
       } else if (ClassConstantPtr cc =
                  dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
@@ -6142,7 +6142,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             static_pointer_cast<ConstantExpression>(ae->getVariable()));
           ExpressionPtr vNode(ae->getValue());
           StringData* constName = StringData::GetStaticString(con->getName());
-          ASSERT(vNode);
+          assert(vNode);
           TypedValue tvVal;
           if (vNode->isArray()) {
             throw IncludeTimeFatalException(
@@ -6163,7 +6163,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
           vNode->outputPHP(cg, ar);
           bool added UNUSED = pce->addConstant(
             constName, &tvVal, StringData::GetStaticString(os.str()));
-          ASSERT(added);
+          assert(added);
         }
       } else if (UseTraitStatementPtr useStmt =
                  dynamic_pointer_cast<UseTraitStatement>((*stmts)[i])) {
@@ -6179,7 +6179,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     static const StringData* methName = StringData::GetStaticString("86ctor");
     FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
     bool added UNUSED = pce->addMethod(fe);
-    ASSERT(added);
+    assert(added);
     postponeCtor(is, fe);
   }
 
@@ -6206,9 +6206,9 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     // initialization support.
     static const StringData* methName = StringData::GetStaticString("86cinit");
     FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
-    ASSERT(!(attr & VM::AttrTrait));
+    assert(!(attr & VM::AttrTrait));
     bool added UNUSED = pce->addMethod(fe);
-    ASSERT(added);
+    assert(added);
     postponeCinit(is, fe, nonScalarConstVec);
   }
 
@@ -6385,7 +6385,7 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
     newFaultRegion(bIterStart, m_ue.bcPos(),
                    new UnsetUnnamedLocalThunklet(valTempLocal));
     if (key) {
-      ASSERT(keyTempLocal != -1);
+      assert(keyTempLocal != -1);
       emitVirtualLocal(keyTempLocal);
       emitCGet(e);
       emitSet(e);
@@ -6612,7 +6612,7 @@ StringData* EmitterVisitor::newClosureName() {
 }
 
 void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
-  ASSERT(val->isScalar());
+  assert(val->isScalar());
   tvVal.m_type = KindOfUninit;
   tvVal._count = 0;
   switch (val->getKindOf()) {
@@ -6652,7 +6652,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
         tvVal.m_type = KindOfDouble;
         break;
       }
-      ASSERT(false);
+      assert(false);
       break;
     }
     case Expression::KindOfUnaryOpExpression: {
@@ -6666,7 +6666,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
 
         HphpArray* va = m_staticArrays.back();
         m_staticArrays.pop_back();
-        ASSERT(IsHphpArray(ArrayData::GetScalarArray(va)));
+        assert(IsHphpArray(ArrayData::GetScalarArray(va)));
         va = static_cast<HphpArray*>(ArrayData::GetScalarArray(va));
 
         tvVal.m_data.parr = va;
@@ -6803,7 +6803,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     BuiltinFunction bif = (BuiltinFunction)info->m_builtinFunc;
     BuiltinFunction nif = (BuiltinFunction)info->m_nativeFunc;
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
-    ASSERT(mi &&
+    assert(mi &&
       "MethodInfo not found; probably need to rebuild src/system");
     FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
     Offset base = ue->bcPos();
@@ -6919,7 +6919,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
-  ASSERT(Class::s_extClassHash.size() == 0);
+  assert(Class::s_extClassHash.size() == 0);
   for (long long i = 0LL; i < numBuiltinClasses; ++i) {
     const HhbcExtClassInfo* info = builtinClasses + i;
     StringData *s = StringData::GetStaticString(info->m_name);
@@ -6941,7 +6941,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       e.name = const_cast<StringData*>(it->first);
       e.info = it->second;
       e.ci = ClassInfo::FindClass(e.name);
-      ASSERT(e.ci);
+      assert(e.ci);
       StringData* parentName
         = StringData::GetStaticString(e.ci->getParentClass().get());
       if (parentName->empty()) {
@@ -6966,7 +6966,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         pending.erase(pendingIt);
       }
     }
-    ASSERT(pending.empty());
+    assert(pending.empty());
   }
 
   for (unsigned int i = 0LL; i < classEntries.size(); ++i) {
@@ -7016,12 +7016,12 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       ClassInfo::ConstantVec cnsVec = e.ci->getConstantsVec();
       for (unsigned i = 0; i < cnsVec.size(); ++i) {
         const ClassInfo::ConstantInfo* cnsInfo = cnsVec[i];
-        ASSERT(cnsInfo);
+        assert(cnsInfo);
         Variant val;
         try {
           val = cnsInfo->getValue();
         } catch (Exception& e) {
-          ASSERT(false);
+          assert(false);
         }
         pce->addConstant(
           cnsInfo->name.get(), (TypedValue*)(&val), empty_string.get());

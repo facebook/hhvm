@@ -142,7 +142,7 @@ void RTTIInfo::loadParamMap(const char **p) {
 }
 
 void RTTIInfo::loadMetaData(const char *filename) {
-  ASSERT(!m_loaded);
+  assert(!m_loaded);
   FILE *f = fopen(filename, "r");
   if (f == NULL) return;
   char line[1024];
@@ -151,7 +151,7 @@ void RTTIInfo::loadMetaData(const char *filename) {
   }
   while (fgets(line, sizeof(line), f)) {
     int len = strlen(line);
-    ASSERT(len > 0);
+    assert(len > 0);
     if (line[len-1] == '\n') line[len-1] = 0;
     m_functions.insert(line);
   }
@@ -165,7 +165,7 @@ bool RTTIInfo::loadProfData(const char *rttiDirectory) {
 
   init(false);
   int size = m_count * sizeof(RTTICounter);
-  ASSERT(rttiDirectory);
+  assert(rttiDirectory);
   dp = opendir(rttiDirectory);
   if (!dp) return false;
 

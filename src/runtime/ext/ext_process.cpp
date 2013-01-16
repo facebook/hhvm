@@ -380,7 +380,7 @@ public:
   }
 
   FILE *exec(const char *cmd) {
-    ASSERT(m_proc == NULL);
+    assert(m_proc == NULL);
     if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
       return NULL;
     }
@@ -772,7 +772,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
                                     scwd.c_str(), envs);
-    ASSERT(child);
+    assert(child);
     return post_proc_open(cmd, pipes, env, items, child);
   } else {
     /* the unix way */
@@ -785,7 +785,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     }
   }
 
-  ASSERT(child == 0);
+  assert(child == 0);
   /* this is the child process */
 
   /* close those descriptors that we just opened for the parent stuff,

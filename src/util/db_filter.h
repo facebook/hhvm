@@ -96,7 +96,7 @@ class DBInStringFilter : public DBQueryFilter {
   /**
    * Just keep adding strings to the filter.
    */
-  void add(const char *value) { ASSERT(value); m_values.insert(value); }
+  void add(const char *value) { assert(value); m_values.insert(value); }
   void add(const std::string &value) { m_values.insert(value); }
   void add(const std::vector<std::string> &values) {
     m_values.insert(values.begin(), values.end());

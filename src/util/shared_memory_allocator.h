@@ -118,7 +118,7 @@ public:
 
   // called by allocator class
   static boost::interprocess::managed_shared_memory *GetSegment() {
-    ASSERT(Segment); // or Init() is missing
+    assert(Segment); // or Init() is missing
     return Segment;
   }
 
@@ -151,11 +151,11 @@ template<typename T>
 class SharedMemory {
 public:
   static T *OpenOrCreate(const char *name) {
-    ASSERT(name && *name);
+    assert(name && *name);
     return SharedMemoryManager::GetSegment()->find_or_construct<T>(name)();
   }
   static bool Destroy(const char *name) {
-    ASSERT(name && *name);
+    assert(name && *name);
     return SharedMemoryManager::GetSegment()->destroy<T>(name);
   }
 };
@@ -216,12 +216,12 @@ class SharedMemoryMap : public std::map<K, T> {};
 class SharedMemoryLock {
 public:
   static bool Destroy(const char *name) {
-    ASSERT(name && *name);
+    assert(name && *name);
     return boost::interprocess::named_mutex::remove(name);
   }
 
   SharedMemoryLock(const char *name) {
-    ASSERT(name && *name);
+    assert(name && *name);
     m_mutex = new boost::interprocess::named_mutex
       (boost::interprocess::open_or_create, name);
     m_mutex->lock();

@@ -368,7 +368,7 @@ char *url_decode(const char *s, int &len) {
 
 // copied and re-factored from clearsilver-0.10.5/cgi/cgi.c
 int url_decode(char *value) {
-  ASSERT(value && *value); // check before calling this function
+  assert(value && *value); // check before calling this function
 
   int i = 0, o = 0;
   unsigned char *s = (unsigned char *)value;
@@ -393,8 +393,8 @@ int url_decode(char *value) {
 }
 
 int url_decode_ex(char *value, int len) {
-  ASSERT(value && *value); // check before calling this function
-  ASSERT(len >= 0);
+  assert(value && *value); // check before calling this function
+  assert(len >= 0);
   if (len <= 0) return 0;
 
   int i = 0, o = 0;

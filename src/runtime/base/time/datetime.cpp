@@ -503,7 +503,7 @@ String DateTime::toString(DateFormat format) const {
   case Cookie:     return rfcFormat(DateFormatCookie);
   case HttpHeader: return rfcFormat(DateFormatHttpHeader);
   default:
-    ASSERT(false);
+    assert(false);
   }
   throw_invalid_argument("format: %d", format);
   return String();
@@ -894,7 +894,7 @@ Variant DateTime::getSunInfo(SunInfoFormat retformat,
     return String(retstr, CopyString);
   }
 
-  ASSERT(retformat == ReturnDouble);
+  assert(retformat == ReturnDouble);
   return N;
 }
 

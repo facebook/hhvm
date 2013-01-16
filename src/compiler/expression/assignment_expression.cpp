@@ -99,7 +99,7 @@ void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
                                shared_from_this(), scope->getModifiers());
     var->clearContext(Declaration); // to avoid wrong CodeError
   } else {
-    ASSERT(false); // parse phase shouldn't handle anything else
+    assert(false); // parse phase shouldn't handle anything else
   }
 }
 
@@ -141,7 +141,7 @@ ConstructPtr AssignmentExpression::getNthKid(int n) const {
     case 1:
       return m_value;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -160,7 +160,7 @@ void AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
       m_value = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -320,7 +320,7 @@ static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf("VarNR(");
       close = true;
     } else if (isScalar) {
-      ASSERT(!cg.hasScalarVariant());
+      assert(!cg.hasScalarVariant());
       cg.setScalarVariant();
     }
   }
@@ -363,7 +363,7 @@ void AssignmentExpression::preOutputStash(CodeGenerator &cg,
       cg_printf("));\n");
       m_value->setCPPTemp(tmp);
     }
-    ASSERT(m_value->hasCPPTemp());
+    assert(m_value->hasCPPTemp());
     setUnused(true);
     outputCPP(cg, ar);
     cg_printf(";\n");

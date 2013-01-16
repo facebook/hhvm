@@ -97,7 +97,7 @@ bool ini_on_update_string_non_empty(CStrRef value, void *p) {
 
 static void php_simple_ini_parser_cb
 (String *arg1, String *arg2, String *arg3, int callback_type, void *arg) {
-  ASSERT(arg1);
+  assert(arg1);
   if (!arg1 || !arg2) return;
 
   Variant *arr = (Variant*)arg;
@@ -128,7 +128,7 @@ struct CallbackData {
 
 static void php_ini_parser_cb_with_sections
 (String *arg1, String *arg2, String *arg3, int callback_type, void *arg) {
-  ASSERT(arg1);
+  assert(arg1);
   if (!arg1) return;
 
   CallbackData *data = (CallbackData*)arg;
@@ -185,17 +185,17 @@ typedef std::map<std::string, std::string> DefaultMap;
 static DefaultMap s_global_ini;
 
 void IniSetting::SetGlobalDefault(const char *name, const char *value) {
-  ASSERT(name && *name);
-  ASSERT(value);
-  ASSERT(!Extension::ModulesInitialised());
+  assert(name && *name);
+  assert(value);
+  assert(!Extension::ModulesInitialised());
 
   s_global_ini[name] = value;
 }
 
 void IniSetting::Bind(const char *name, const char *value,
                       PFN_UPDATE_CALLBACK callback, void *p /* = NULL */) {
-  ASSERT(name && *name);
-  ASSERT(value);
+  assert(name && *name);
+  assert(value);
 
   UpdateCallbackData &data = (*s_callbacks)[name];
   data.callback = callback;
@@ -204,7 +204,7 @@ void IniSetting::Bind(const char *name, const char *value,
 }
 
 void IniSetting::Unbind(const char *name) {
-  ASSERT(name && *name);
+  assert(name && *name);
   s_callbacks->erase(name);
 }
 

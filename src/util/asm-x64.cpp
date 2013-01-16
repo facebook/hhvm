@@ -72,7 +72,7 @@ void DataBlock::init(Address start, size_t sz) {
 }
 
 void DataBlock::makeExecable() {
-  ASSERT(base);
+  assert(base);
   if (mprotect(base, size, PROT_READ | PROT_WRITE | PROT_EXEC)) {
     panic("%s:%d (%s): mprotect @%p %zu bytes failed (%s)\n",
           __FILE__, __LINE__, __func__,
@@ -111,7 +111,7 @@ StoreImmPatcher::StoreImmPatcher(X64Assembler& as, uint64_t initial,
     as.store_reg64_disp_reg64(reg, offset, base);
   }
   m_addr = as.code.frontier - (m_is32 ? 4 : 8);
-  ASSERT((m_is32 ?  (uint64_t)*(int32_t*)m_addr : *(uint64_t*)m_addr)
+  assert((m_is32 ?  (uint64_t)*(int32_t*)m_addr : *(uint64_t*)m_addr)
          == initial);
 }
 

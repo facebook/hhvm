@@ -183,7 +183,7 @@ public:
   void* alloc() { return alloc(m_itemSize); }
   void* alloc(size_t size);
   void dealloc(void *obj) {
-    ASSERT(memset(obj, kSmartFreeFill, m_itemSize));
+    assert(memset(obj, kSmartFreeFill, m_itemSize));
     m_free.push(obj);
     MemoryManager::TheMemoryManager()->getStats().usage -= m_itemSize;
   }
@@ -337,24 +337,24 @@ public:
 template<typename T, HPHP::SmartAllocatorImpl::Name TNameEnum>
 inline void *operator new(size_t sizeT,
                           HPHP::SmartAllocator<T, TNameEnum> *a) {
-  ASSERT(sizeT == sizeof(T));
+  assert(sizeT == sizeof(T));
   return a->alloc(HPHP::SmartAllocatorImpl::itemSizeRoundup(sizeof(T)));
 }
 
 inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {
-  ASSERT(sizeT <= size_t(a->getItemSize()));
+  assert(sizeT <= size_t(a->getItemSize()));
   return a->alloc();
 }
 
 template<typename T, HPHP::SmartAllocatorImpl::Name TNameEnum>
 inline void operator delete
 (void *p, HPHP::SmartAllocator<T, TNameEnum> *a) {
-  ASSERT(p);
+  assert(p);
   a->dealloc((T*)p);
 }
 
 inline void operator delete(void *p , HPHP::ObjectAllocatorBase *a) {
-  ASSERT(p);
+  assert(p);
   a->dealloc(p);
 }
 

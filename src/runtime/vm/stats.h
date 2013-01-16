@@ -213,7 +213,7 @@ static inline void inc(StatCounter stat, int n = 1) {
 }
 
 static inline StatCounter opcodeToStatCounter(Opcode opc) {
-  ASSERT(OpLowInvalid == 0);
+  assert(OpLowInvalid == 0);
   return StatCounter(Instr_InterpBBLowInvalid + STATS_PER_OPCODE * opc);
 }
 
@@ -222,17 +222,17 @@ static inline void incOp(Opcode opc) {
 }
 
 static inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
-  ASSERT(OpLowInvalid == 0);
+  assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslLowInvalid + STATS_PER_OPCODE * opc);
 }
 
 static inline StatCounter opcodeToIRPreStatCounter(Opcode opc) {
-  ASSERT(OpLowInvalid == 0);
+  assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPreLowInvalid + STATS_PER_OPCODE * opc);
 }
 
 static inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
-  ASSERT(OpLowInvalid == 0);
+  assert(OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE * opc);
 }
 

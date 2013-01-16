@@ -60,7 +60,7 @@ StringData *StringData::GetStaticString(const StringData *str) {
     sd->~StringData();
     Util::low_free(sd);
   }
-  ASSERT(acc->first != NULL);
+  assert(acc->first != NULL);
   return const_cast<StringData*>(acc->first);
 }
 
@@ -90,27 +90,27 @@ void StringData::initLiteral(const char* data, int len) {
   m_len = len;
   m_cdata = data;
   m_big.cap = len | IsLiteral;
-  ASSERT(checkSane());
+  assert(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
 void StringData::enlist() {
-  ASSERT(isShared());
+  assert(isShared());
   SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
   // insert after head
   SweepNode* next = head.next;
-  ASSERT(uintptr_t(next) != kMallocFreeWord);
+  assert(uintptr_t(next) != kMallocFreeWord);
   m_big.node.next = next;
   m_big.node.prev = &head;
   next->prev = head.next = &m_big.node;
 }
 
 void StringData::delist() {
-  ASSERT(isShared());
+  assert(isShared());
   SweepNode* next = m_big.node.next;
   SweepNode* prev = m_big.node.prev;
-  ASSERT(uintptr_t(next) != kMallocFreeWord);
-  ASSERT(uintptr_t(prev) != kMallocFreeWord);
+  assert(uintptr_t(next) != kMallocFreeWord);
+  assert(uintptr_t(prev) != kMallocFreeWord);
   next->prev = prev;
   prev->next = next;
 }
@@ -119,11 +119,11 @@ void StringData::sweepAll() {
   SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
   for (SweepNode *next, *n = head.next; n != &head; n = next) {
     next = n->next;
-    ASSERT(next && uintptr_t(next) != kSmartFreeWord);
-    ASSERT(next && uintptr_t(next) != kMallocFreeWord);
+    assert(next && uintptr_t(next) != kSmartFreeWord);
+    assert(next && uintptr_t(next) != kMallocFreeWord);
     StringData* s = (StringData*)(uintptr_t(n) -
                                   offsetof(StringData, m_big.node));
-    ASSERT(s->isShared());
+    assert(s->isShared());
     s->m_big.shared->decRef();
   }
   head.next = head.prev = &head;
@@ -157,7 +157,7 @@ void StringData::initAttach(const char* data, int len) {
     m_big.cap = len | IsSmart;
     free((void*)data);
   }
-  ASSERT(checkSane());
+  assert(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
@@ -187,7 +187,7 @@ void StringData::initCopy(const char* data, int len) {
     m_cdata = buf;
     m_big.cap = len | IsSmart;
   }
-  ASSERT(checkSane());
+  assert(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
@@ -212,14 +212,14 @@ void StringData::initMalloc(const char* data, int len) {
     m_cdata = buf;
     m_big.cap = len | IsMalloc;
   }
-  ASSERT(checkSane());
+  assert(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
 HOT_FUNC
 StringData::StringData(SharedVariant *shared)
   : _count(0) {
-  ASSERT(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
+  assert(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
   shared->incRef();
   m_hash = 0;
   m_len = shared->stringLength();
@@ -234,16 +234,16 @@ HOT_FUNC
 void StringData::releaseData() {
   switch (format()) {
   case IsMalloc:
-    ASSERT(checkSane());
+    assert(checkSane());
     free(m_data);
     break;
   case IsShared:
-    ASSERT(checkSane());
+    assert(checkSane());
     m_big.shared->decRef();
     delist();
     break;
   case IsSmart:
-    ASSERT(checkSane());
+    assert(checkSane());
     smart_free(m_data);
     break;
   default:
@@ -303,7 +303,7 @@ StringData::StringData(int cap) {
 }
 
 void StringData::append(const char *s, int len) {
-  ASSERT(!isStatic()); // never mess around with static strings!
+  assert(!isStatic()); // never mess around with static strings!
   if (len == 0) return;
   if (UNLIKELY(uint32_t(len) > MaxSize)) {
     throw InvalidArgumentException("len > 2^31-2", len);
@@ -364,7 +364,7 @@ void StringData::append(const char *s, int len) {
     // generic "big string concat" path.  smart_realloc buffer.
     uint32_t oldlen = m_len;
     char* oldp = m_data;
-    ASSERT((oldp > s && oldp - s > len) ||
+    assert((oldp > s && oldp - s > len) ||
            (oldp < s && s - oldp > oldlen)); // no overlapping
     newlen = oldlen + len;
     char* newdata;
@@ -384,7 +384,7 @@ void StringData::append(const char *s, int len) {
     // generic "big string concat" path.  realloc buffer.
     uint32_t oldlen = m_len;
     char* oldp = m_data;
-    ASSERT((oldp > s && oldp - s > len) ||
+    assert((oldp > s && oldp - s > len) ||
            (oldp < s && s - oldp > oldlen)); // no overlapping
     newlen = oldlen + len;
     char* newdata = (char*) realloc(oldp, newlen + 1);
@@ -395,16 +395,16 @@ void StringData::append(const char *s, int len) {
     m_big.cap = newlen | IsMalloc;
     m_hash = 0;
   }
-  ASSERT(newlen <= MaxSize);
+  assert(newlen <= MaxSize);
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
-  ASSERT(checkSane());
+  assert(checkSane());
 }
 
 MutableSlice StringData::reserve(int cap) {
-  ASSERT(!isImmutable() && _count <= 1 && cap >= 0);
+  assert(!isImmutable() && _count <= 1 && cap >= 0);
   if (cap <= capacity()) return mutableSlice();
   switch (format()) {
-    default: ASSERT(false);
+    default: assert(false);
     case IsSmall:
       m_data = (char*) smart_malloc(cap + 1);
       memcpy(m_data, m_small, m_len + 1); // includes \0
@@ -459,7 +459,7 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
 }
 
 MutableSlice StringData::escalate(uint32_t cap) {
-  ASSERT(isImmutable() && !isStatic() && cap >= m_len);
+  assert(isImmutable() && !isStatic() && cap >= m_len);
   char *buf = (char*)smart_malloc(cap + 1);
   StringSlice s = slice();
   memcpy(buf, s.ptr, s.len);
@@ -468,7 +468,7 @@ MutableSlice StringData::escalate(uint32_t cap) {
   m_big.cap = s.len | IsSmart;
   // clear precomputed hashcode
   m_hash = 0;
-  ASSERT(checkSane());
+  assert(checkSane());
   return MutableSlice(buf, cap);
 }
 
@@ -534,7 +534,7 @@ StringData *StringData::getChar(int offset) const {
 
 // mutations
 void StringData::setChar(int offset, CStrRef substring) {
-  ASSERT(!isStatic());
+  assert(!isStatic());
   if (offset >= 0) {
     StringSlice s = slice();
     if (s.len == 0) {
@@ -559,7 +559,7 @@ void StringData::setChar(int offset, CStrRef substring) {
 }
 
 void StringData::setChar(int offset, char ch) {
-  ASSERT(offset >= 0 && offset < size() && !isStatic());
+  assert(offset >= 0 && offset < size() && !isStatic());
   if (isImmutable()) escalate(size());
   ((char*)rawdata())[offset] = ch;
   m_hash = 0;
@@ -572,7 +572,7 @@ void StringData::setChar(int offset, char ch) {
  * Otherwise return null.
  */
 char *increment_string(char *s, uint32_t &len) {
-  ASSERT(s && *s);
+  assert(s && *s);
   enum CharKind {
     UNKNOWN_KIND,
     LOWER_CASE,
@@ -645,12 +645,12 @@ char *increment_string(char *s, uint32_t &len) {
 }
 
 void StringData::inc() {
-  ASSERT(!isStatic());
-  ASSERT(!empty());
+  assert(!isStatic());
+  assert(!empty());
   StringSlice s = slice();
   if (isImmutable()) escalate(s.len);
   // if increment_string overflows, it returns a new ptr and updates len
-  ASSERT(s.len <= MaxSize); // safe int/uint casting
+  assert(s.len <= MaxSize); // safe int/uint casting
   auto len = s.len;
   char *overflowed = increment_string((char *)s.ptr, len);
   if (overflowed) {
@@ -668,7 +668,7 @@ void StringData::inc() {
 void StringData::negate() {
   if (empty()) return;
   // Assume we're a fresh mutable copy.
-  ASSERT(!isImmutable() && _count <= 1 && m_hash == 0);
+  assert(!isImmutable() && _count <= 1 && m_hash == 0);
   StringSlice s = slice();
   char *buf = (char*)s.ptr;
   for (int i = 0, len = s.len; i < len; i++) {
@@ -686,11 +686,11 @@ void StringData::set(CVarRef key, CStrRef v) {
 }
 
 void StringData::preCompute() const {
-  ASSERT(!isShared()); // because we are gonna reuse the space!
+  assert(!isShared()); // because we are gonna reuse the space!
   // We don't want to collect taint for a hash
   StringSlice s = slice();
   m_hash = hash_string(s.ptr, s.len);
-  ASSERT(m_hash >= 0);
+  assert(m_hash >= 0);
   int64 lval; double dval;
   if (isNumericWithVal(lval, dval, 1) == KindOfNull) {
     m_hash |= STRHASH_MSB;
@@ -729,7 +729,7 @@ bool StringData::isNumeric() const {
   case KindOfInt64:
   case KindOfDouble: return true;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return false;
@@ -744,7 +744,7 @@ bool StringData::isInteger() const {
   case KindOfInt64:  return true;
   case KindOfDouble: return false;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return false;
@@ -770,7 +770,7 @@ int64 StringData::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
   default:
     break;
   }
-  ASSERT(false);
+  assert(false);
   return 0;
 }
 
@@ -795,7 +795,7 @@ int64 StringData::hashForStringSwitch(
   default:
     break;
   }
-  ASSERT(false);
+  assert(false);
   return 0;
 }
 
@@ -827,7 +827,7 @@ DataType StringData::toNumeric(int64 &lval, double &dval) const {
 
 HOT_FUNC
 int StringData::numericCompare(const StringData *v2) const {
-  ASSERT(v2);
+  assert(v2);
 
   int64 lval1, lval2;
   double dval1, dval2;
@@ -849,11 +849,11 @@ int StringData::numericCompare(const StringData *v2) const {
     return -1;
   }
   if (ret1 == KindOfDouble) {
-    ASSERT(ret2 == KindOfInt64);
+    assert(ret2 == KindOfInt64);
     dval2 = (double)lval2;
   } else {
-    ASSERT(ret1 == KindOfInt64);
-    ASSERT(ret2 == KindOfDouble);
+    assert(ret1 == KindOfInt64);
+    assert(ret2 == KindOfDouble);
     dval1 = (double)lval1;
   }
 
@@ -864,7 +864,7 @@ int StringData::numericCompare(const StringData *v2) const {
 
 HOT_FUNC
 int StringData::compare(const StringData *v2) const {
-  ASSERT(v2);
+  assert(v2);
 
   if (v2 == this) return 0;
 
@@ -887,7 +887,7 @@ strhash_t StringData::hashHelper() const {
   // We don't want to collect taint for a hash
   strhash_t h = isShared() ? m_big.shared->stringHash() :
                              hash_string_inline(m_data, m_len);
-  ASSERT(h >= 0);
+  assert(h >= 0);
   m_hash |= h;
   return h;
 }
@@ -907,13 +907,13 @@ bool StringData::checkSane() const {
                 "_count at wrong offset");
   static_assert(MaxSmallSize == sizeof(StringData) -
                         offsetof(StringData, m_small) - 1, "layout bustage");
-  ASSERT(uint32_t(size()) <= MaxSize);
-  ASSERT(uint32_t(capacity()) <= MaxSize);
-  ASSERT(size() <= capacity());
+  assert(uint32_t(size()) <= MaxSize);
+  assert(uint32_t(capacity()) <= MaxSize);
+  assert(size() <= capacity());
   if (isSmall()) {
-    ASSERT(m_data == m_small && m_len <= MaxSmallSize);
+    assert(m_data == m_small && m_len <= MaxSmallSize);
   } else {
-    ASSERT(m_data && m_data != m_small);
+    assert(m_data && m_data != m_small);
   }
   return true;
 }

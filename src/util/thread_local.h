@@ -154,7 +154,7 @@ void ThreadLocal<T>::create() {
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  ASSERT(m_node.m_p == NULL);
+  assert(m_node.m_p == NULL);
   m_node.m_p = new T();
 }
 
@@ -162,7 +162,7 @@ template<typename T>
 struct ThreadLocalNoCheck {
   T *getCheck() const ATTRIBUTE_COLD NEVER_INLINE;
   T* getNoCheck() const {
-    ASSERT(m_node.m_p);
+    assert(m_node.m_p);
     return m_node.m_p;
   }
 
@@ -193,7 +193,7 @@ void ThreadLocalNoCheck<T>::create() {
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  ASSERT(m_node.m_p == NULL);
+  assert(m_node.m_p == NULL);
   m_node.m_p = new T();
 }
 template<typename T>
@@ -222,14 +222,14 @@ public:
   static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
 
   static T* getNoCheck() {
-    ASSERT(s_singleton == (T*)&s_storage);
+    assert(s_singleton == (T*)&s_storage);
     return (T*)&s_storage;
   }
 
   static bool isNull() { return s_singleton == NULL; }
 
   static void destroy() {
-    ASSERT(!s_singleton || s_singleton == (T*)&s_storage);
+    assert(!s_singleton || s_singleton == (T*)&s_storage);
     T* p = s_singleton;
     if (p) {
       T::Delete(p);
@@ -412,7 +412,7 @@ public:
 
   T* getNoCheck() const {
     T *obj = (T*)pthread_getspecific(m_key);
-    ASSERT(obj);
+    assert(obj);
     return obj;
   }
 
@@ -466,7 +466,7 @@ public:
   static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
   static T* getNoCheck() {
     T *obj = (T*)pthread_getspecific(s_key);
-    ASSERT(obj);
+    assert(obj);
     return obj;
   }
 

@@ -78,7 +78,7 @@ void SwitchStatement::analyzeProgram(AnalysisResultPtr ar) {
       for (int i = 0; i < m_cases->getCount(); i++) {
         CaseStatementPtr stmt =
           dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
-        ASSERT(stmt);
+        assert(stmt);
         ExpressionPtr caseCond = stmt->getCondition();
         if (caseCond && caseCond->isScalar()) {
           ScalarExpressionPtr name =
@@ -114,7 +114,7 @@ ConstructPtr SwitchStatement::getNthKid(int n) const {
     case 1:
       return m_cases;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -133,7 +133,7 @@ void SwitchStatement::setNthKid(int n, ConstructPtr cp) {
       m_cases = boost::dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -296,7 +296,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   // if theres no non-zero match, then we use the sentinel to create a no-match
   if (firstNonZero == 0) {
-    ASSERT(!staticIntCases || isStaticInt || hasSentinel);
+    assert(!staticIntCases || isStaticInt || hasSentinel);
     firstNonZero = sentinel;
   }
 
@@ -316,7 +316,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (staticStringCases) {
-    ASSERT(numDistinctLabels > 0);
+    assert(numDistinctLabels > 0);
     tableSize = Util::roundUpToPowerOfTwo(numDistinctLabels * 2);
     if (tableSize == ULLONG_MAX) {
       // we cannot guarantee a no match value in this case
@@ -345,14 +345,14 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       // use existing variable
       var = static_pointer_cast<SimpleVariable>(m_exp)
               ->getAssignableCPPVariable(ar);
-      ASSERT(!var.empty());
+      assert(!var.empty());
     } else {
       var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
       string var0; // holds the variable name to call outputCPP on
 
       bool needsDecl = true;
       if (staticIntCases) {
-        ASSERT(hasSentinel);
+        assert(hasSentinel);
         switch (m_exp->getType()->getKindOf()) {
         case Type::KindOfInt64:
         case Type::KindOfBoolean:
@@ -402,10 +402,10 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (staticIntCases) {
-    ASSERT(!closeBrace);
-    ASSERT(hasSentinel);
-    ASSERT(!needsPreOutput || !var.empty());
-    ASSERT(staticIntSwitchOpnd);
+    assert(!closeBrace);
+    assert(hasSentinel);
+    assert(!needsPreOutput || !var.empty());
+    assert(staticIntSwitchOpnd);
 
     cg_printf("switch (");
     if (staticIntSwitchOpnd->is(Type::KindOfDouble)) {
@@ -438,8 +438,8 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (m_cases) m_cases->outputCPP(cg, ar);
     cg_printf("}\n");
   } else if (staticStringCases) {
-    ASSERT(!var.empty());
-    ASSERT(tableSize > 0);
+    assert(!var.empty());
+    assert(tableSize > 0);
 
     // create cases
     MapIntToStatementPtrWithPosVec caseMap;
@@ -464,12 +464,12 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       for (int i = 0; i < m_cases->getCount(); i++) {
         CaseStatementPtr stmt =
           static_pointer_cast<CaseStatement>((*m_cases)[i]);
-        ASSERT(stmt);
+        assert(stmt);
         if (stmt->getCondition()) {
           Variant v;
           int64 condHash;
           bool hasValue ATTRIBUTE_UNUSED = stmt->getScalarConditionValue(v);
-          ASSERT(hasValue && !v.isNull());
+          assert(hasValue && !v.isNull());
 
           int64 lval; double dval;
           // allow errors, since we want "1abc" to match 1
@@ -490,7 +490,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             break;
           default:
             condHash = 0; // make the compiler happy
-            ASSERT(false);
+            assert(false);
             break;
           }
 
@@ -588,7 +588,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (p.first < maxHashCase) {
           int c = p.first + 1;
           while (defaultCases.find(c) != defaultCases.end()) c++;
-          ASSERT(c <= maxHashCase);
+          assert(c <= maxHashCase);
           if (caseIt + 1 == cases->end() ||
               (*(caseIt + 1)).first != c) {
             willJumpTo.insert(c);
@@ -618,7 +618,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf("case %lluUL:\n", bucket);
         }
 
-        ASSERT(p.second->getCondition());
+        assert(p.second->getCondition());
 
         // emit equality check
         cg.indentBegin();
@@ -632,13 +632,13 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (p.first < maxHashCase) {
           int c = p.first + 1;
           while (defaultCases.find(c) != defaultCases.end()) c++;
-          ASSERT(c <= maxHashCase);
+          assert(c <= maxHashCase);
 
           // see if the next hash case to jump to
           // is the next in the bucket chain, if so, no need to jump
           if (caseIt + 1 == cases->end() ||
               (*(caseIt + 1)).first != c) {
-            ASSERT(willJumpTo.find(c) != willJumpTo.end());
+            assert(willJumpTo.find(c) != willJumpTo.end());
             cg_printf("if (UNLIKELY(needsOrder)) goto case_%d_h_s%d;\n",
                       varId, c);
           }
@@ -686,9 +686,9 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         // use existing variable
         var = static_pointer_cast<SimpleVariable>(m_exp)
                 ->getAssignableCPPVariable(ar);
-        ASSERT(!var.empty());
+        assert(!var.empty());
       } else {
-        ASSERT(!closeBrace);
+        assert(!closeBrace);
         cg_indentBegin("{\n");
         closeBrace = true;
 

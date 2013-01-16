@@ -47,7 +47,7 @@ public:
 static SSLUnitializer s_ssl_uninitializer;
 
 void SSLInit::Init() {
-  ASSERT(!s_isSSLInited);
+  assert(!s_isSSLInited);
   s_locks = new Mutex[CRYPTO_num_locks()];
   CRYPTO_set_id_callback((unsigned long (*)())callback_thread_id);
   CRYPTO_set_locking_callback(

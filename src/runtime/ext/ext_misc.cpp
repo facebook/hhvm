@@ -121,7 +121,7 @@ bool f_define(CStrRef name, CVarRef value,
     return g_vmContext->setCns(name.get(), value, true);
   } else {
     // define() should be turned into constant definition by HPHP
-    ASSERT(false);
+    assert(false);
     return false;
   }
 }
@@ -165,7 +165,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
            parentClass = info->getParentClass()) {
         info = ClassInfo::FindClass(parentClass);
         if (!info) {
-          ASSERT(false);
+          assert(false);
         }
         if (info->hasConstant(constantName)) return true;
       }

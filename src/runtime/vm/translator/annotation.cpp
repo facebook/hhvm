@@ -59,11 +59,11 @@ encodeCallAndArgs(const StringData* name, int numArgs) {
 void
 decodeNameAndArgs(const StringData* enc, string& outName, int& outNumArgs) {
   const char* numArgs = strchr(enc->data(), '@');
-  ASSERT(numArgs && *numArgs =='@');
+  assert(numArgs && *numArgs =='@');
   numArgs++;
   outNumArgs = atoi(numArgs);
   const char* name = strchr(numArgs, '@');
-  ASSERT(name && *name == '@');
+  assert(name && *name == '@');
   name++;
   outName = name;
 }
@@ -93,12 +93,12 @@ static void recordActRecPush(NormalizedInstruction& i,
   SrcKey next(sk);
   next.advance(unit);
   const FPIEnt *fpi = curFunc()->findFPI(next.offset());
-  ASSERT(fpi);
-  ASSERT(name->isStatic());
-  ASSERT(sk.offset() == fpi->m_fpushOff);
+  assert(fpi);
+  assert(name->isStatic());
+  assert(sk.offset() == fpi->m_fpushOff);
   SrcKey fcall = sk;
   fcall.m_offset = fpi->m_fcallOff;
-  ASSERT(isFCallStar(*unit->at(fcall.offset())));
+  assert(isFCallStar(*unit->at(fcall.offset())));
   if (clsName) {
     const Class* cls = Unit::lookupClass(clsName);
     bool magic = false;
@@ -151,11 +151,11 @@ void annotate(NormalizedInstruction* i) {
         funcName = i->inputs[1]->rtt.valueString();
         className = cls->name();
       } else {
-        ASSERT(i->op() == OpFPushClsMethodD);
+        assert(i->op() == OpFPushClsMethodD);
         funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
         className = curUnit()->lookupLitstrId(i->imm[2].u_SA);
       }
-      ASSERT(funcName->isStatic());
+      assert(funcName->isStatic());
       recordActRecPush(*i, curUnit(), funcName, className,
                        i->op() == OpFPushClsMethodD ||
                        i->op() == OpFPushClsMethodF);
@@ -167,7 +167,7 @@ void annotate(NormalizedInstruction* i) {
         if (callRec.m_type == Function) {
           i->funcd = callRec.m_func;
         } else {
-          ASSERT(callRec.m_type == EncodedNameAndArgs);
+          assert(callRec.m_type == EncodedNameAndArgs);
           i->funcName = callRec.m_encodedName;
         }
       } else {

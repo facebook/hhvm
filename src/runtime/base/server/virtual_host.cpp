@@ -46,7 +46,7 @@ const VirtualHost *VirtualHost::GetCurrent() {
 
 int64 VirtualHost::GetMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
-  ASSERT(vh);
+  assert(vh);
   if (vh->m_runtimeOption.maxPostSize != -1) {
     return vh->m_runtimeOption.maxPostSize;
   }
@@ -55,7 +55,7 @@ int64 VirtualHost::GetMaxPostSize() {
 
 int64 VirtualHost::GetUploadMaxFileSize() {
   const VirtualHost *vh = GetCurrent();
-  ASSERT(vh);
+  assert(vh);
   if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
     return vh->m_runtimeOption.uploadMaxFileSize;
   }
@@ -64,7 +64,7 @@ int64 VirtualHost::GetUploadMaxFileSize() {
 
 const vector<string> &VirtualHost::GetAllowedDirectories() {
   const VirtualHost *vh = GetCurrent();
-  ASSERT(vh);
+  assert(vh);
   if (!vh->m_runtimeOption.allowedDirectories.empty()) {
     return vh->m_runtimeOption.allowedDirectories;
   }
@@ -233,7 +233,7 @@ bool VirtualHost::match(const string &host) const {
 }
 
 static int get_backref(const char **s) {
-  ASSERT('0' <= **s && **s <= '9');
+  assert('0' <= **s && **s <= '9');
   int val = **s - '0';
   *s += 1;
   if ('0' <= **s && **s <= '9') {
@@ -364,7 +364,7 @@ std::string VirtualHost::serverName(const std::string &host) const {
 // query string filter
 
 std::string VirtualHost::filterUrl(const std::string &url) const {
-  ASSERT(!m_queryStringFilters.empty());
+  assert(!m_queryStringFilters.empty());
 
   for (unsigned int i = 0; i < m_queryStringFilters.size(); i++) {
     const QueryStringFilter &filter = m_queryStringFilters[i];

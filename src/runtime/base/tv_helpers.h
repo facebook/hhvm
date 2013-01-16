@@ -60,38 +60,38 @@ inline bool tvWillBeReleased(TypedValue* tv) {
 
 // Assumes 'tv' is live
 inline void tvRefcountedDecRefCell(TypedValue* tv) {
-  ASSERT(tvIsPlausible(tv));
+  assert(tvIsPlausible(tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tvDecRefHelper(tv->m_type, tv->m_data.num);
   }
 }
 
 inline void tvDecRefStr(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfString);
+  assert(tv->m_type == KindOfString);
   decRefStr(tv->m_data.pstr);
 }
 
 inline void tvDecRefArr(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfArray);
+  assert(tv->m_type == KindOfArray);
   decRefArr(tv->m_data.parr);
 }
 
 inline void tvDecRefObj(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfObject);
+  assert(tv->m_type == KindOfObject);
   decRefObj(tv->m_data.pobj);
 }
 
 // Assumes 'r' is live and points to a RefData
 inline void tvDecRefRefInternal(RefData* r) {
-  ASSERT(tvIsPlausible(r->tv()));
-  ASSERT(r->tv()->m_type != KindOfRef);
-  ASSERT(r->_count > 0);
+  assert(tvIsPlausible(r->tv()));
+  assert(r->tv()->m_type != KindOfRef);
+  assert(r->_count > 0);
   decRefRef(r);
 }
 
 // Assumes 'tv' is live
 inline void tvDecRefRef(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfRef);
+  assert(tv->m_type == KindOfRef);
   tvDecRefRefInternal(tv->m_data.pref);
 }
 
@@ -121,7 +121,7 @@ ALWAYS_INLINE inline void tvRefcountedDecRef(TypedValue* tv) {
 
 // decref when the count is known not to reach zero
 ALWAYS_INLINE inline void tvDecRefOnly(TypedValue* tv) {
-  ASSERT(!tvWillBeReleased(tv));
+  assert(!tvWillBeReleased(tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tv->m_data.pstr->decRefCount();
   }
@@ -134,8 +134,8 @@ inline RefData* tvBoxHelper(DataType type, uint64_t datum) {
 
 // Assumes 'tv' is live
 inline void tvBox(TypedValue* tv) {
-  ASSERT(tvIsPlausible(tv));
-  ASSERT(tv->m_type != KindOfRef);
+  assert(tvIsPlausible(tv));
+  assert(tv->m_type != KindOfRef);
   tv->m_data.pref = tvBoxHelper(tv->m_type, tv->m_data.num);
   tv->m_type = KindOfRef;
 }
@@ -144,13 +144,13 @@ inline void tvBox(TypedValue* tv) {
 //
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 inline void tvIncRef(TypedValue* tv) {
-  ASSERT(tvIsPlausible(tv));
-  ASSERT(IS_REFCOUNTED_TYPE(tv->m_type));
+  assert(tvIsPlausible(tv));
+  assert(IS_REFCOUNTED_TYPE(tv->m_type));
   tv->m_data.pstr->incRefCount();
 }
 
 ALWAYS_INLINE inline void tvRefcountedIncRef(TypedValue* tv) {
-  ASSERT(tvIsPlausible(tv));
+  assert(tvIsPlausible(tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tvIncRef(tv);
   }
@@ -160,27 +160,27 @@ ALWAYS_INLINE inline void tvRefcountedIncRef(TypedValue* tv) {
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 // Assumes 'tv' is not shared (ie KindOfRef or KindOfObject)
 inline void tvIncRefNotShared(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
+  assert(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
   tv->m_data.pobj->incRefCount();
 }
 
 // Assumes 'tv' is live
 // Assumes 'tv.m_type == KindOfRef'
 inline void tvUnbox(TypedValue* tv) {
-  ASSERT(tvIsPlausible(tv));
-  ASSERT(tv->m_type == KindOfRef);
+  assert(tvIsPlausible(tv));
+  assert(tv->m_type == KindOfRef);
   RefData* r = tv->m_data.pref;
   TypedValue* innerCell = r->tv();
   tv->m_data.num = innerCell->m_data.num;
   tv->m_type = innerCell->m_type;
   tvRefcountedIncRef(tv);
   tvDecRefRefInternal(r);
-  ASSERT(tvIsPlausible(tv));
+  assert(tvIsPlausible(tv));
 }
 
 // Assumes 'fr' is live and 'to' is dead
 inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
-  ASSERT(tvIsPlausible(fr));
+  assert(tvIsPlausible(fr));
   if (fr->m_type != KindOfRef) {
     memcpy(to, fr, sizeof(TypedValue));
     tvRefcountedIncRef(to);
@@ -196,8 +196,8 @@ inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
 // Assumes 'fr->m_type != KindOfRef'
 // NOTE: this helper will not modify to->_count
 inline void tvDupCell(const TypedValue* fr, TypedValue* to) {
-  ASSERT(tvIsPlausible(fr));
-  ASSERT(fr->m_type != KindOfRef);
+  assert(tvIsPlausible(fr));
+  assert(fr->m_type != KindOfRef);
   to->m_data.num = fr->m_data.num;
   to->m_type = fr->m_type;
   tvRefcountedIncRef(to);
@@ -207,8 +207,8 @@ inline void tvDupCell(const TypedValue* fr, TypedValue* to) {
 // Assumes 'fr->m_type == KindOfRef'
 // NOTE: this helper will not modify to->_count
 inline void tvDupVar(const TypedValue* fr, TypedValue* to) {
-  ASSERT(tvIsPlausible(fr));
-  ASSERT(fr->m_type == KindOfRef);
+  assert(tvIsPlausible(fr));
+  assert(fr->m_type == KindOfRef);
   to->m_data.num = fr->m_data.num;
   to->m_type = KindOfRef;
   tvIncRefNotShared(to);
@@ -217,7 +217,7 @@ inline void tvDupVar(const TypedValue* fr, TypedValue* to) {
 // Assumes 'fr' is live and 'to' is dead
 // NOTE: this helper does not modify to->_count
 inline void tvDup(const TypedValue* fr, TypedValue* to) {
-  ASSERT(tvIsPlausible(fr));
+  assert(tvIsPlausible(fr));
   to->m_data.num = fr->m_data.num;
   to->m_type = fr->m_type;
   tvRefcountedIncRef(to);
@@ -247,7 +247,7 @@ inline const TypedValue* tvToCell(const TypedValue* tv) {
 
 template <bool respectRef>
 inline void tvSetImpl(const TypedValue* fr, TypedValue* to) {
-  ASSERT(fr->m_type != KindOfRef);
+  assert(fr->m_type != KindOfRef);
   if (respectRef) to = tvToCell(to);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
@@ -271,7 +271,7 @@ inline void tvSetIgnoreRef(const TypedValue* fr, TypedValue* to) {
 // Assumes 'to' and 'fr' are live
 // Assumes that 'fr->m_type == KindOfRef'
 inline void tvBind(TypedValue * fr, TypedValue * to) {
-  ASSERT(fr->m_type == KindOfRef);
+  assert(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
   tvDupVar(fr, to);
@@ -286,7 +286,7 @@ inline void tvUnset(TypedValue * to) {
 
 // Assumes `fr' is dead and binds it using KindOfIndirect to `to'.
 inline void tvBindIndirect(TypedValue* fr, TypedValue* to) {
-  ASSERT(tvIsPlausible(to));
+  assert(tvIsPlausible(to));
   fr->m_type = KindOfIndirect;
   fr->m_data.pind = to;
 }
@@ -305,7 +305,7 @@ inline const TypedValue* tvDerefIndirect(const TypedValue* tv) {
  * ref-counted type and the object pointed to is static.
  */
 inline bool tvIsStatic(const TypedValue* tv) {
-  ASSERT(tvIsPlausible(tv));
+  assert(tvIsPlausible(tv));
   return !IS_REFCOUNTED_TYPE(tv->m_type) ||
     tv->m_data.pref->_count == RefCountStaticValue;
 }
@@ -321,7 +321,7 @@ inline Variant& tvAsVariant(TypedValue* tv) {
   // Avoid treating uninitialized TV's as variants. We have some slightly
   // perverse, but defensible uses where we pass in NULL (and later check
   // a Variant* against NULL) so tolerate it.
-  ASSERT(NULL == tv || tvIsPlausible(tv));
+  assert(NULL == tv || tvIsPlausible(tv));
   return *(Variant*)(tv);
 }
 
@@ -338,25 +338,25 @@ inline const Variant& tvAsCVarRef(const TypedValue* tv) {
 
 // Assumes 'tv' is live
 inline Variant& tvCellAsVariant(TypedValue* tv) {
-  ASSERT(tv->m_type != KindOfRef);
+  assert(tv->m_type != KindOfRef);
   return *(Variant*)(tv);
 }
 
 // Assumes 'tv' is live
 inline const Variant& tvCellAsCVarRef(const TypedValue* tv) {
-  ASSERT(tv->m_type != KindOfRef);
+  assert(tv->m_type != KindOfRef);
   return *(const Variant*)(tv);
 }
 
 // Assumes 'tv' is live
 inline Variant& tvVarAsVariant(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfRef);
+  assert(tv->m_type == KindOfRef);
   return *(Variant*)(tv);
 }
 
 // Assumes 'tv' is live
 inline const Variant& tvVarAsCVarRef(const TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfRef);
+  assert(tv->m_type == KindOfRef);
   return *(const Variant*)(tv);
 }
 

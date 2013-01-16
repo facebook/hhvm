@@ -27,12 +27,12 @@
 // static handler
 
 static void on_request(struct evhttp_request *request, void *obj) {
-  ASSERT(obj);
+  assert(obj);
   ((HPHP::LibEventServer*)obj)->onRequest(request);
 }
 
 static void on_response(int fd, short what, void *obj) {
-  ASSERT(obj);
+  assert(obj);
   ((HPHP::PendingResponseQueue*)obj)->process();
 }
 
@@ -84,12 +84,12 @@ LibEventWorker::~LibEventWorker() {
 void LibEventWorker::doJob(LibEventJobPtr job) {
   job->stopTimer();
   evhttp_request *request = job->request;
-  ASSERT(m_opaque);
+  assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
 
   if (m_handler == NULL || server->supportReset()) {
     m_handler = server->createRequestHandler();
-    ASSERT(m_handler);
+    assert(m_handler);
   }
 
   LibEventTransport transport(server, request, m_id);
@@ -133,7 +133,7 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
 }
 
 void LibEventWorker::onThreadEnter() {
-  ASSERT(m_opaque);
+  assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
   server->onThreadEnter();
   if (RuntimeOption::EnableDebugger) {
@@ -142,7 +142,7 @@ void LibEventWorker::onThreadEnter() {
 }
 
 void LibEventWorker::onThreadExit() {
-  ASSERT(m_opaque);
+  assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
   server->onThreadExit(m_handler);
 }
@@ -174,8 +174,8 @@ LibEventServer::LibEventServer(const std::string &address, int port,
 }
 
 LibEventServer::~LibEventServer() {
-  ASSERT (getStatus() == STOPPED || getStatus() == STOPPING ||
-          getStatus() == NOT_YET_STARTED);
+  assert(getStatus() == STOPPED || getStatus() == STOPPING ||
+         getStatus() == NOT_YET_STARTED);
   // We can't free event base when server is still working on it.
   // This will cause a leak with event base, but normally this happens when
   // process exits, so we're probably fine.
@@ -282,7 +282,7 @@ void LibEventServer::stop() {
 #define SHUT_FBLISTEN 3
   /*
    * Modifications to the Linux kernel to support shutting down a listen
-   * socket for new connections only, but anything which has completed 
+   * socket for new connections only, but anything which has completed
    * the TCP handshake will still be accepted.  This allows for un-accepted
    * connections to be queued and then wait until all queued requests are
    * actively being processed.
@@ -443,7 +443,7 @@ void LibEventServer::onChunkedResponseEnd(int worker,
 // PendingResponseQueue
 
 PendingResponseQueue::PendingResponseQueue() {
-  ASSERT(RuntimeOption::ResponseQueueCount > 0);
+  assert(RuntimeOption::ResponseQueueCount > 0);
   for (int i = 0; i < RuntimeOption::ResponseQueueCount; i++) {
     m_responseQueues.push_back(ResponseQueuePtr(new ResponseQueue()));
   }

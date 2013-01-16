@@ -32,7 +32,7 @@ void ScannerToken::xhpLabel(bool prefix /* = true */) {
 }
 
 bool ScannerToken::htmlTrim() {
-  ASSERT(!m_text.empty());
+  assert(!m_text.empty());
 
   const char *p0 = m_text.c_str();
   const char *p1 = m_text.c_str() + m_text.size() - 1;
@@ -128,7 +128,7 @@ Scanner::Scanner(const char *source, int len, int type,
       m_pos(0), m_state(Start), m_type(type), m_yyscanner(NULL),
       m_token(NULL), m_loc(NULL), m_lastToken(-1), m_isStrictMode(0),
       m_lookaheadLtDepth(0) {
-  ASSERT(m_source);
+  assert(m_source);
   m_streamOwner = false;
   if (md5 || type & PreprocessXHP) {
     m_stream = new std::istringstream(string(source, len));
@@ -420,8 +420,8 @@ void Scanner::warn(const char* fmt, ...) {
 }
 
 void Scanner::incLoc(const char *rawText, int rawLeng) {
-  ASSERT(rawText);
-  ASSERT(rawLeng > 0);
+  assert(rawText);
+  assert(rawLeng > 0);
 
   switch (m_state) {
     case Start:
@@ -471,7 +471,7 @@ string Scanner::escape(char *str, int len, char quote_type) const {
             }
           }
         } else {
-          ASSERT(false);
+          assert(false);
           output += ch;
         }
       } else {

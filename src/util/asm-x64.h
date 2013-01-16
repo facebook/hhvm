@@ -159,7 +159,7 @@ struct ScaledIndex {
     : index(index)
     , scale(scale)
   {
-    ASSERT((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
+    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
            "Invalid index register scaling (must be 1,2,4 or 8).");
   }
 
@@ -511,16 +511,16 @@ struct DataBlock {
   void* allocAt(size_t &frontierOff, size_t sz, size_t align = 16) {
     align = Util::roundUpToPowerOfTwo(align);
     uint8_t* frontier = base + frontierOff;
-    ASSERT(base && frontier);
+    assert(base && frontier);
     int slop = uintptr_t(frontier) & (align - 1);
     if (slop) {
       int leftInBlock = (align - slop);
       frontier += leftInBlock;
       frontierOff += leftInBlock;
     }
-    ASSERT((uintptr_t(frontier) & (align - 1)) == 0);
+    assert((uintptr_t(frontier) & (align - 1)) == 0);
     frontierOff += sz;
-    ASSERT(frontierOff <= size);
+    assert(frontierOff <= size);
     return frontier;
   }
 
@@ -532,8 +532,8 @@ struct DataBlock {
   }
 
   bool canEmit(size_t nBytes) {
-    ASSERT(frontier >= base);
-    ASSERT(frontier <= base + size);
+    assert(frontier >= base);
+    assert(frontier <= base + size);
     return frontier + nBytes <= base + size;
   }
 
@@ -542,32 +542,32 @@ struct DataBlock {
   }
 
   void byte(const uint8_t byte) {
-    ASSERT(canEmit(sz::byte));
+    assert(canEmit(sz::byte));
     TRACE(10, "%p b : %02x\n", frontier, byte);
     *frontier = byte;
     frontier += sz::byte;
   }
   void word(const uint16_t word) {
-    ASSERT(canEmit(sz::word));
+    assert(canEmit(sz::word));
     *(uint16_t*)frontier = word;
     TRACE(10, "%p w : %04x\n", frontier, word);
     frontier += sz::word;
   }
   void dword(const uint32_t dword) {
-    ASSERT(canEmit(sz::dword));
+    assert(canEmit(sz::dword));
     TRACE(10, "%p d : %08x\n", frontier, dword);
     *(uint32_t*)frontier = dword;
     frontier += sz::dword;
   }
   void qword(const uint64_t qword) {
-    ASSERT(canEmit(sz::qword));
+    assert(canEmit(sz::qword));
     TRACE(10, "%p q : %016lx\n", frontier, qword);
     *(uint64_t*)frontier = qword;
     frontier += sz::qword;
   }
 
   void bytes(size_t n, const uint8_t *bs) {
-    ASSERT(canEmit(n));
+    assert(canEmit(n));
     TRACE(10, "%p [%ld b] : [%p]\n", frontier, n, bs);
     if (n <= 8) {
       // If it is a modest number of bytes, try executing in one machine
@@ -790,7 +790,7 @@ inline ConditionCode ccNegate(ConditionCode c) {
  */
 inline bool deltaFits(int64_t delta, int s) {
   // sz::qword is always true
-  ASSERT(s == sz::byte ||
+  assert(s == sz::byte ||
          s == sz::word ||
          s == sz::dword);
   int64_t bits = s * 8;
@@ -800,7 +800,7 @@ inline bool deltaFits(int64_t delta, int s) {
 // The unsigned equivalent of deltaFits
 inline bool magFits(uint64_t val, int s) {
   // sz::qword is always true
-  ASSERT(s == sz::byte ||
+  assert(s == sz::byte ||
          s == sz::word ||
          s == sz::dword);
   uint64_t bits = s * 8;
@@ -1198,31 +1198,31 @@ struct X64Assembler {
   }
 
   void patchJcc(CodeAddress jmp, CodeAddress dest) {
-    ASSERT(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
+    assert(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
     ssize_t diff = dest - (jmp + 6);
     *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
   }
 
   void patchJcc8(CodeAddress jmp, CodeAddress dest) {
-    ASSERT((jmp[0] & 0xF0) == 0x70);
+    assert((jmp[0] & 0xF0) == 0x70);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
   void patchJmp(CodeAddress jmp, CodeAddress dest) {
-    ASSERT(jmp[0] == 0xE9);
+    assert(jmp[0] == 0xE9);
     ssize_t diff = dest - (jmp + 5);
     *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
   }
 
   void patchJmp8(CodeAddress jmp, CodeAddress dest) {
-    ASSERT(jmp[0] == 0xEB);
+    assert(jmp[0] == 0xEB);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
   void patchCall(CodeAddress call, CodeAddress dest) {
-    ASSERT(call[0] == 0xE8);
+    assert(call[0] == 0xE8);
     ssize_t diff = dest - (call + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
   }
@@ -1284,7 +1284,7 @@ struct X64Assembler {
   void emitCR(X64Instr op, int jcond,
               RegNumber regN,
               int opSz = sz::qword) ALWAYS_INLINE {
-    ASSERT(regN != reg::noreg);
+    assert(regN != reg::noreg);
     int r = int(regN);
 
     // REX
@@ -1332,7 +1332,7 @@ struct X64Assembler {
   void emitCRR(X64Instr op, int jcond, RegNumber rn1,
                RegNumber rn2, int opSz = sz::qword)
       ALWAYS_INLINE {
-    ASSERT(rn1 != reg::noreg && rn2 != reg::noreg);
+    assert(rn1 != reg::noreg && rn2 != reg::noreg);
     int r1 = int(rn1);
     int r2 = int(rn2);
     bool reverse = ((op.flags & IF_REVERSE) != 0);
@@ -1344,7 +1344,7 @@ struct X64Assembler {
         // REX
         unsigned char rex = 0;
         if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
-        ASSERT(!(op.flags & IF_BYTEREG));
+        assert(!(op.flags & IF_BYTEREG));
         if (r2 & 8) rex |= (reverse ? 4 : 1);
         if (rex) byte(0x40 | rex);
         // If the second register is rax, emit opcode with the first
@@ -1423,7 +1423,7 @@ struct X64Assembler {
   void emitIR(X64Instr op, RegNumber rname, ssize_t imm,
               int opSz = sz::qword)
       ALWAYS_INLINE {
-    ASSERT(rname != reg::noreg);
+    assert(rname != reg::noreg);
     int r = int(rname);
     // Determine the size of the immediate.  This might change opSz so
     // do it first.
@@ -1495,7 +1495,7 @@ struct X64Assembler {
   void emitIRR(X64Instr op, RegNumber rn1, RegNumber rn2,
                ssize_t imm, int opSz = sz::qword)
       ALWAYS_INLINE {
-    ASSERT(rn1 != reg::noreg && rn2 != reg::noreg);
+    assert(rn1 != reg::noreg && rn2 != reg::noreg);
     int r1 = int(rn1);
     int r2 = int(rn2);
     bool reverse = ((op.flags & IF_REVERSE) != 0);
@@ -1553,7 +1553,7 @@ struct X64Assembler {
 
   void emitJ8(X64Instr op, ssize_t imm)
     ALWAYS_INLINE {
-    ASSERT((op.flags & IF_JCC) == 0);
+    assert((op.flags & IF_JCC) == 0);
     ssize_t delta = imm - ((ssize_t)code.frontier + 2);
     // Emit opcode and 8-bit immediate
     byte(0xEB);
@@ -1563,7 +1563,7 @@ struct X64Assembler {
   void emitCJ8(X64Instr op, int jcond, ssize_t imm)
     ALWAYS_INLINE {
     // this is for jcc only
-    ASSERT(op.flags & IF_JCC);
+    assert(op.flags & IF_JCC);
     ssize_t delta = imm - ((ssize_t)code.frontier + 2);
     // Emit opcode
     byte(jcond | 0x70);
@@ -1573,7 +1573,7 @@ struct X64Assembler {
 
   void emitJ32(X64Instr op, ssize_t imm) ALWAYS_INLINE {
     // call and jmp are supported, jcc is not supported
-    ASSERT((op.flags & IF_JCC) == 0);
+    assert((op.flags & IF_JCC) == 0);
     int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code.frontier + 5));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
@@ -1584,7 +1584,7 @@ struct X64Assembler {
   void emitCJ32(X64Instr op, int jcond, ssize_t imm)
       ALWAYS_INLINE {
     // jcc is supported, call and jmp are not supported
-    ASSERT(op.flags & IF_JCC);
+    assert(op.flags & IF_JCC);
     int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code.frontier + 6));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
@@ -1612,7 +1612,7 @@ struct X64Assembler {
                RegNumber rName, bool reverse, ssize_t imm,
                bool hasImmediate, int opSz = sz::qword,
                bool ripRelative = false) ALWAYS_INLINE {
-    ASSERT(irName != reg::rsp);
+    assert(irName != reg::rsp);
 
     int ir = int(irName);
     int r = int(rName);
@@ -1724,9 +1724,9 @@ struct X64Assembler {
     if (sibIsNeeded) {
       // s:                               0  1  2   3  4   5   6   7  8
       static const int scaleLookup[] = { -1, 0, 1, -1, 2, -1, -1, -1, 3 };
-      ASSERT(s > 0 && s <= 8);
+      assert(s > 0 && s <= 8);
       int scale = scaleLookup[s];
-      ASSERT(scale != -1);
+      assert(scale != -1);
       emitModrm(mod, r, 4);
       byte((scale << 6) | ((ir & 7) << 3) | (br & 7));
     } else {
@@ -2155,7 +2155,7 @@ private:
   // In 64-bit mode, you can't mix accesses to high byte registers
   // with low byte registers other than al,cl,bl,dl.  We assert this.
   void byteRegMisuse() const {
-    ASSERT(!"High byte registers can't be used with new x64 registers, or"
+    assert(!"High byte registers can't be used with new x64 registers, or"
             " anything requiring a REX prefix");
   }
 
@@ -2188,7 +2188,7 @@ private:
    * sign-extending.
    */
   int computeImmediateSizeForMovRI64(X64Instr op, ssize_t imm, int& opSz) {
-    ASSERT(opSz == sz::qword);
+    assert(opSz == sz::qword);
     if (deltaFits(imm, sz::dword)) {
       return computeImmediateSize(op, imm);
     }
@@ -2347,7 +2347,7 @@ struct Label : private boost::noncopyable {
 
   ~Label() {
     if (!m_toPatch.empty()) {
-      ASSERT(m_a && m_address && "Label had jumps but was never set");
+      assert(m_a && m_address && "Label had jumps but was never set");
     }
     for (auto& ji : m_toPatch) {
       switch (ji.type) {
@@ -2386,7 +2386,7 @@ struct Label : private boost::noncopyable {
   }
 
   void jmpAuto(X64Assembler& a) {
-    ASSERT(m_address);
+    assert(m_address);
     auto delta = m_address - (a.code.frontier + 2);
     if (deltaFits(delta, sz::byte)) {
       jmp8(a);
@@ -2396,7 +2396,7 @@ struct Label : private boost::noncopyable {
   }
 
   void jccAuto(X64Assembler& a, ConditionCode cc) {
-    ASSERT(m_address);
+    assert(m_address);
     auto delta = m_address - (a.code.frontier + 2);
     if (deltaFits(delta, sz::byte)) {
       jcc8(a, cc);
@@ -2406,7 +2406,7 @@ struct Label : private boost::noncopyable {
   }
 
   friend void asm_label(X64Assembler& a, Label& l) {
-    ASSERT(!l.m_address && !l.m_a && "Label was already set");
+    assert(!l.m_address && !l.m_a && "Label was already set");
     l.m_a = &a;
     l.m_address = a.code.frontier;
   }
@@ -2479,7 +2479,7 @@ class StoreImmPatcher {
  *   a.patchJmp(...);
  */
 inline X64Assembler& asmChoose(CodeAddress addr) {
-  ASSERT(false && "addr was not part of any known assembler");
+  assert(false && "addr was not part of any known assembler");
   NOT_REACHED();
   return *static_cast<X64Assembler*>(nullptr);
 }

@@ -208,7 +208,7 @@ bool SimpleVariable::canonCompare(ExpressionPtr e) const {
 
 TypePtr SimpleVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                    bool coerce) {
-  ASSERT(false);
+  assert(false);
   return TypePtr();
 }
 
@@ -220,7 +220,7 @@ bool SimpleVariable::checkUnused() const {
 static inline TypePtr GetAssertedInType(AnalysisResultPtr ar,
                                         TypePtr assertedType,
                                         TypePtr ret) {
-  ASSERT(assertedType);
+  assert(assertedType);
   if (!ret) return assertedType;
   TypePtr res = Type::Inferred(ar, ret, assertedType);
   // if the asserted type and the symbol table type are compatible, then use
@@ -289,7 +289,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     } else if (m_globals) {
       ret = Type::Array;
     } else if (scope->is(BlockScope::ClassScope)) {
-      ASSERT(getClassScope().get() == scope.get());
+      assert(getClassScope().get() == scope.get());
       // ClassVariable expression will come to this block of code
       ret = getClassScope()->checkProperty(getScope(), m_sym, type, true, ar);
     } else {
@@ -335,7 +335,7 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       !m_globals /* $GLOBALS always has reference semantics */ &&
       hasAssignableCPPVariable()) {
     const string &cppName   = getAssignableCPPVariable(ar);
-    ASSERT(!cppName.empty());
+    assert(!cppName.empty());
     if (m_sym && m_sym->isReseated()) {
       const string &arg_temp  = genCPPTemp(cg, ar);
       cg.wrapExpressionBegin();
@@ -351,7 +351,7 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     } else {
       Expression::preOutputStash(cg, ar, state);
       const string &ref_temp  = cppTemp();
-      ASSERT(!ref_temp.empty());
+      assert(!ref_temp.empty());
       const string &copy_temp = genCPPTemp(cg, ar);
       const string &arg_temp  = genCPPTemp(cg, ar);
       cg_printf("const Variant %s = %s;\n",
@@ -374,7 +374,7 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
         hasAssignableCPPVariable()) {
       cg.wrapExpressionBegin();
       const string &cppName = getAssignableCPPVariable(ar);
-      ASSERT(!cppName.empty());
+      assert(!cppName.empty());
       const string &tmp = genCPPTemp(cg, ar);
       cg_printf("VRefParamValue %s((ref(%s)));\n",
                 tmp.c_str(), cppName.c_str());
@@ -402,7 +402,7 @@ std::string SimpleVariable::getAssignableCPPVariable(AnalysisResultPtr ar)
   if (m_this) {
     if (!hasAnyContext(OprLValue | AssignmentLHS) &&
         variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
-      ASSERT(m_sym);
+      assert(m_sym);
       const string &namePrefix = getNamePrefix();
       return namePrefix + variables->getVariablePrefix(m_sym) + "this";
     }
@@ -413,7 +413,7 @@ std::string SimpleVariable::getAssignableCPPVariable(AnalysisResultPtr ar)
   } else if (m_globals) {
     return "get_global_array_wrapper()";
   } else {
-    ASSERT(m_sym);
+    assert(m_sym);
     const string &prefix0 = getNamePrefix();
     const char *prefix1 =
       getScope()->getVariables()->getVariablePrefix(m_sym);
@@ -425,13 +425,13 @@ std::string SimpleVariable::getAssignableCPPVariable(AnalysisResultPtr ar)
 void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   VariableTablePtr variables = getScope()->getVariables();
   if (m_this) {
-    ASSERT((getContext() & ObjectContext) == 0);
+    assert((getContext() & ObjectContext) == 0);
     if (hasContext(OprLValue) || hasContext(AssignmentLHS)) {
       cg_printf("throw_assign_this()");
       return;
     }
     if (variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
-      ASSERT(m_sym);
+      assert(m_sym);
       const string &namePrefix = getNamePrefix();
       cg_printf("%s%sthis",
                 namePrefix.c_str(),
@@ -455,11 +455,11 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   } else if (m_globals) {
     cg_printf("get_global_array_wrapper()");
   } else {
-    ASSERT(m_sym);
+    assert(m_sym);
     bool sw = false;
     if (m_sym->isShrinkWrapped() &&
         m_context == Declaration) {
-      ASSERT(!getFunctionScope()->isGenerator());
+      assert(!getFunctionScope()->isGenerator());
       TypePtr type = m_sym->getFinalType();
       type->outputCPPDecl(cg, ar, getScope());
       sw = true;

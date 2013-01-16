@@ -65,7 +65,7 @@ public:
   // that the array is not empty.
   enum NoIncNonNull { noIncNonNull = 0 };
   ArrayIter(const HphpArray* data, NoIncNonNull) {
-    ASSERT(data);
+    assert(data);
     setArrayData(data);
     m_pos = data->getIterBegin();
   }
@@ -100,8 +100,8 @@ public:
   void next() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
-      ASSERT(ad);
-      ASSERT(m_pos != ArrayData::invalid_index);
+      assert(ad);
+      assert(m_pos != ArrayData::invalid_index);
       m_pos = ad->iter_advance(m_pos);
       return;
     }
@@ -110,8 +110,8 @@ public:
   Variant first() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
-      ASSERT(ad);
-      ASSERT(m_pos != ArrayData::invalid_index);
+      assert(ad);
+      assert(m_pos != ArrayData::invalid_index);
       return ad->getKey(m_pos);
     }
     return firstHelper();
@@ -120,8 +120,8 @@ public:
   void second(Variant &v) {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
-      ASSERT(ad);
-      ASSERT(m_pos != ArrayData::invalid_index);
+      assert(ad);
+      assert(m_pos != ArrayData::invalid_index);
       v = ad->getValueRef(m_pos);
       return;
     }
@@ -131,13 +131,13 @@ public:
 
   void nvFirst(TypedValue* out) {
     const ArrayData* ad = getArrayData();
-    ASSERT(ad && m_pos != ArrayData::invalid_index);
+    assert(ad && m_pos != ArrayData::invalid_index);
     const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
   }
 
   TypedValue* nvSecond() {
     const ArrayData* ad = getArrayData();
-    ASSERT(ad && m_pos != ArrayData::invalid_index);
+    assert(ad && m_pos != ArrayData::invalid_index);
     return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
   }
 
@@ -171,7 +171,7 @@ public:
   }
  public:
   const ArrayData* getArrayData() {
-    ASSERT(hasArrayData());
+    assert(hasArrayData());
     return m_data;
   }
   ssize_t getPos() {
@@ -182,32 +182,32 @@ public:
   }
  private:
   c_Vector* getVector() {
-    ASSERT(hasVector());
+    assert(hasVector());
     return (c_Vector*)((intptr_t)m_obj & ~1);
   }
   c_Map* getMap() {
-    ASSERT(hasMap());
+    assert(hasMap());
     return (c_Map*)((intptr_t)m_obj & ~1);
   }
   c_StableMap* getStableMap() {
-    ASSERT(hasStableMap());
+    assert(hasStableMap());
     return (c_StableMap*)((intptr_t)m_obj & ~1);
   }
   ObjectData* getObject() {
-    ASSERT(hasObject());
+    assert(hasObject());
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
   ObjectData* getRawObject() {
-    ASSERT(!hasArrayData());
+    assert(!hasArrayData());
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
   void setArrayData(const ArrayData* ad) {
-    ASSERT((intptr_t(ad) & 1) == 0);
+    assert((intptr_t(ad) & 1) == 0);
     m_data = ad;
   }
   void setObject(ObjectData* obj) {
-    ASSERT((intptr_t(obj) & 1) == 0);
+    assert((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
   }
 
@@ -245,8 +245,8 @@ public:
   FullPosRange(FullPos* list) : m_fp(list) {}
   FullPosRange(const FullPosRange& other) : m_fp(other.m_fp) {}
   bool empty() const { return m_fp == 0; }
-  FullPos* front() const { ASSERT(!empty()); return m_fp; }
-  void popFront() { ASSERT(!empty()); m_fp = m_fp->next; }
+  FullPos* front() const { assert(!empty()); return m_fp; }
+  void popFront() { assert(!empty()); m_fp = m_fp->next; }
 private:
   FullPos* m_fp;
 };
@@ -300,7 +300,7 @@ struct MIterCtx {
     : m_key(*(const TypedValue*)&null_variant),
       m_val(*(const TypedValue*)&null_variant), m_ref(NULL),
       m_mArray(initMArray(ad, &tvAsVariant(&m_key), tvAsVariant(&m_val))) {
-    ASSERT(!ad->isStatic());
+    assert(!ad->isStatic());
   }
   MIterCtx(const RefData* ref)
     : m_key(*(TypedValue*)&null_variant), m_val(*(TypedValue*)&null_variant),
@@ -308,7 +308,7 @@ struct MIterCtx {
       m_mArray(initMArray((Variant*)(ref->tv()), &tvAsVariant(&m_key),
                           tvAsVariant(&m_val))) {
     // Reference must be an inner cell
-    ASSERT(ref->_count > 0);
+    assert(ref->_count > 0);
   }
   ~MIterCtx();
 

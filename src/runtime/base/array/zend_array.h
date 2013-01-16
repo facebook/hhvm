@@ -174,7 +174,7 @@ public:
     // ZendArray constructor
     Bucket(StringData *k, CVarRef d) :
       skey(k), data(d) {
-      ASSERT(k->isStatic());
+      assert(k->isStatic());
       data._count = encodeHash(k->getPrecomputedHash());
     }
     Bucket(int64 k, CVarRef d) : ikey(k), data(d) {

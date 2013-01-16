@@ -32,7 +32,7 @@ namespace VM {
 RenamedFuncDict::RenamedFuncDict() : m_restrictRenameableFunctions(false) { }
 
 bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
-  ASSERT(isFunctionRenameable(old) ||
+  assert(isFunctionRenameable(old) ||
          isFunctionRenameable(n3w));
 
   NamedEntity *oldNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(old));

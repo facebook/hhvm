@@ -88,7 +88,7 @@ struct RegContent {
       }
       return m_int > other.m_int ? 1 : -1;
     }
-    ASSERT(m_kind == Loc);
+    assert(m_kind == Loc);
     return m_loc.cmp(other.m_loc);
   }
 
@@ -239,14 +239,14 @@ class RegAlloc {
   }
 
   void setBranchSynced() {
-    ASSERT(!m_branchSynced);
+    assert(!m_branchSynced);
     m_branchSynced = true;
   }
   bool branchSynced() {
     return m_branchSynced;
   }
 
-  void assertNoScratch() { ASSERT(checkNoScratch()); }
+  void assertNoScratch() { assert(checkNoScratch()); }
 
   const RegInfo* getInfo(PhysReg pr) const {
     return physRegToInfo(pr);
@@ -407,7 +407,7 @@ class RegAlloc {
   void reconcile(RegAlloc& branch);
 
   void freeze() const  { m_freezeCount++; }
-  void defrost() const { m_freezeCount--; ASSERT(m_freezeCount >= 0); }
+  void defrost() const { m_freezeCount--; assert(m_freezeCount >= 0); }
   bool frozen() const  { return m_freezeCount > 0; }
 
   void bumpEpoch() { m_epoch++; }

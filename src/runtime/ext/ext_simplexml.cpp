@@ -82,7 +82,7 @@ static String node_list_to_string(xmlDocPtr doc, xmlNodePtr list) {
 }
 
 static Array collect_attributes(xmlNodePtr node, CStrRef ns, bool is_prefix) {
-  ASSERT(node);
+  assert(node);
   Array attributes = Array::Create();
   if (node->type != XML_ENTITY_DECL) {
     for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
@@ -1001,7 +1001,7 @@ void c_SimpleXMLElementIterator::set_parent(c_SimpleXMLElement* parent) {
 }
 
 void c_SimpleXMLElementIterator::reset_iterator() {
-  ASSERT(m_parent.get() != NULL);
+  assert(m_parent.get() != NULL);
   delete m_iter1; m_iter1 = NULL;
   delete m_iter2; m_iter2 = NULL;
 
@@ -1061,7 +1061,7 @@ Variant c_SimpleXMLElementIterator::t_current() {
     return iter->second();
   }
 
-  ASSERT(false);
+  assert(false);
   return null;
 }
 

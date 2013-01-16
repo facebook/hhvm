@@ -72,7 +72,7 @@ void ArrayIter::reset() {
   }
   ObjectData* obj = getRawObject();
   m_data = NULL;
-  ASSERT(obj);
+  assert(obj);
   decRefObj(obj);
 }
 
@@ -96,13 +96,13 @@ void ArrayIter::begin(CArrRef map, CStrRef context) {
 
 template <bool incRef>
 void ArrayIter::objInit(ObjectData *obj) {
-  ASSERT(obj);
+  assert(obj);
   setObject(obj);
   if (incRef) {
     obj->incRefCount();
   }
   if (!obj->isCollection()) {
-    ASSERT(obj->o_instanceof(s_Iterator));
+    assert(obj->o_instanceof(s_Iterator));
     obj->o_invoke(s_rewind, Array());
   } else {
     if (hasVector()) {
@@ -118,7 +118,7 @@ void ArrayIter::objInit(ObjectData *obj) {
       m_versionNumber = smp->getVersionNumber();
       m_pos = smp->iter_begin();
     } else {
-      ASSERT(false);
+      assert(false);
     }
   }
 }
@@ -149,7 +149,7 @@ ArrayIter::~ArrayIter() {
     return;
   }
   ObjectData* obj = getRawObject();
-  ASSERT(obj);
+  assert(obj);
   decRefObj(obj);
 }
 
@@ -164,7 +164,7 @@ bool ArrayIter::endHelper() {
   if (hasStableMap()) {
     return m_pos == 0;
   }
-  ASSERT(hasObject());
+  assert(hasObject());
   ObjectData* obj = getObject();
   return !obj->o_invoke(s_valid, Array());
 }
@@ -175,7 +175,7 @@ void ArrayIter::nextHelper() {
     return;
   }
   if (hasMap()) {
-    ASSERT(m_pos != 0);
+    assert(m_pos != 0);
     c_Map* mp = getMap();
     if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
       throw_collection_modified();
@@ -184,7 +184,7 @@ void ArrayIter::nextHelper() {
     return;
   }
   if (hasStableMap()) {
-    ASSERT(m_pos != 0);
+    assert(m_pos != 0);
     c_StableMap* smp = getStableMap();
     if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
       throw_collection_modified();
@@ -192,7 +192,7 @@ void ArrayIter::nextHelper() {
     m_pos = smp->iter_next(m_pos);
     return;
   }
-  ASSERT(hasObject());
+  assert(hasObject());
   ObjectData* obj = getObject();
   obj->o_invoke(s_next, Array());
 }
@@ -202,7 +202,7 @@ Variant ArrayIter::firstHelper() {
     return m_pos;
   }
   if (hasMap()) {
-    ASSERT(m_pos != 0);
+    assert(m_pos != 0);
     c_Map* mp = getMap();
     if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
       throw_collection_modified();
@@ -210,14 +210,14 @@ Variant ArrayIter::firstHelper() {
     return mp->iter_key(m_pos);
   }
   if (hasStableMap()) {
-    ASSERT(m_pos != 0);
+    assert(m_pos != 0);
     c_StableMap* smp = getStableMap();
     if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
       throw_collection_modified();
     }
     return smp->iter_key(m_pos);
   }
-  ASSERT(hasObject());
+  assert(hasObject());
   ObjectData* obj = getObject();
   return obj->o_invoke(s_key, Array());
 }
@@ -249,10 +249,10 @@ Variant ArrayIter::second() {
     ObjectData* obj = getObject();
     return obj->o_invoke(s_current, Array());
   }
-  ASSERT(hasArrayData());
-  ASSERT(m_pos != ArrayData::invalid_index);
+  assert(hasArrayData());
+  assert(m_pos != ArrayData::invalid_index);
   const ArrayData* ad = getArrayData();
-  ASSERT(ad);
+  assert(ad);
   return ad->getValue(m_pos);
 }
 
@@ -281,7 +281,7 @@ void ArrayIter::secondHelper(Variant & v) {
     v = smp->iter_value(m_pos);
     return;
   }
-  ASSERT(hasObject());
+  assert(hasObject());
   ObjectData* obj = getObject();
   v = obj->o_invoke(s_current, Array());
 }
@@ -291,10 +291,10 @@ CVarRef ArrayIter::secondRef() {
   if (!hasArrayData()) {
     throw FatalErrorException("taking reference on iterator objects");
   }
-  ASSERT(hasArrayData());
-  ASSERT(m_pos != ArrayData::invalid_index);
+  assert(hasArrayData());
+  assert(m_pos != ArrayData::invalid_index);
   const ArrayData* ad = getArrayData();
-  ASSERT(ad);
+  assert(ad);
   return ad->getValueRef(m_pos);
 }
 
@@ -304,13 +304,13 @@ CVarRef ArrayIter::secondRef() {
 MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
                                    Variant &val)
   : m_var(var), m_data(NULL), m_key(key), m_valp(&val), m_fp() {
-  ASSERT(m_var);
+  assert(m_var);
   escalateCheck();
   ArrayData* data = cowCheck();
   if (data) {
     data->reset();
     data->newFullPos(m_fp);
-    ASSERT(m_fp.container == data);
+    assert(m_fp.container == data);
   }
 }
 
@@ -322,7 +322,7 @@ MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
     data = cowCheck();
     data->reset();
     data->newFullPos(m_fp);
-    ASSERT(m_fp.container == data);
+    assert(m_fp.container == data);
   }
 }
 
@@ -330,7 +330,7 @@ MutableArrayIter::~MutableArrayIter() {
   // free the iterator
   if (m_fp.container != NULL) {
     m_fp.container->freeFullPos(m_fp);
-    ASSERT(m_fp.container == NULL);
+    assert(m_fp.container == NULL);
   }
   // unprotect the data
   if (m_data) decRefArr(m_data);
@@ -339,7 +339,7 @@ MutableArrayIter::~MutableArrayIter() {
 void MutableArrayIter::reset() {
   if (m_fp.container != NULL) {
     m_fp.container->freeFullPos(m_fp);
-    ASSERT(m_fp.container == NULL);
+    assert(m_fp.container == NULL);
   }
   // unprotect the data
   if (m_data) {
@@ -371,7 +371,7 @@ bool MutableArrayIter::advance() {
     if (m_fp.container != NULL) {
       m_fp.container->freeFullPos(m_fp);
     }
-    ASSERT(m_fp.container == NULL);
+    assert(m_fp.container == NULL);
     // If needed, escalate the array to an array type that can support
     // foreach by reference
     escalateCheck();
@@ -383,7 +383,7 @@ bool MutableArrayIter::advance() {
     // Trigger COW if needed, copying over strong iterators
     data = cowCheck();
   }
-  ASSERT(m_fp.container == data);
+  assert(m_fp.container == data);
   if (!data->setFullPos(m_fp)) return false;
   CVarRef curr = data->currentRef();
   m_valp->assignRef(curr);
@@ -403,7 +403,7 @@ void MutableArrayIter::escalateCheck() {
       *const_cast<Variant*>(m_var) = esc;
     }
   } else {
-    ASSERT(m_data);
+    assert(m_data);
     data = m_data;
     ArrayData* esc = data->escalate(true);
     if (data != esc) {
@@ -423,7 +423,7 @@ ArrayData* MutableArrayIter::cowCheck() {
       *const_cast<Variant*>(m_var) = (data = data->copyWithStrongIterators());
     }
   } else {
-    ASSERT(m_data);
+    assert(m_data);
     data = m_data;
     if (data->getCount() > 1 && !data->noCopyOnWrite()) {
       ArrayData* copied = data->copyWithStrongIterators();
@@ -436,7 +436,7 @@ ArrayData* MutableArrayIter::cowCheck() {
 }
 
 ArrayData* MutableArrayIter::getData() {
-  ASSERT(m_var);
+  assert(m_var);
   if (m_var->is(KindOfArray)) {
     return m_var->getArrayData();
   }

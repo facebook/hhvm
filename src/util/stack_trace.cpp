@@ -83,7 +83,7 @@ StackTraceBase::StackTraceBase() {
 }
 
 StackTrace::StackTrace(const StackTrace &bt) {
-  ASSERT(this != &bt);
+  assert(this != &bt);
 
   m_bt_pointers = bt.m_bt_pointers;
   m_bt = bt.m_bt;
@@ -217,8 +217,8 @@ public:
 IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
 
 void StackTraceNoHeap::AddExtraLogging(const char *name, const char *value) {
-  ASSERT(name && *name);
-  ASSERT(value);
+  assert(name && *name);
+  assert(value);
 
   StackTraceLog::s_logData->data[name] = value;
 }
@@ -508,7 +508,7 @@ extern "C" {
 }
 
 std::string StackTrace::Demangle(const char *mangled) {
-  ASSERT(mangled);
+  assert(mangled);
   if (!mangled || !*mangled) {
     return "";
   }
@@ -528,7 +528,7 @@ std::string StackTrace::Demangle(const char *mangled) {
 }
 
 void StackTraceNoHeap::Demangle(int fd, const char *mangled) {
-  ASSERT(mangled);
+  assert(mangled);
   if (!mangled || !*mangled) {
     dprintf(fd, "??");
     return ;

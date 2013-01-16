@@ -35,7 +35,7 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo()
     : m_stacklimit(0), m_executing(Idling) {
-  ASSERT(!t_stackbase);
+  assert(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
   if (hhvm) {
@@ -45,7 +45,7 @@ ThreadInfo::ThreadInfo()
     for (map<int, ObjectAllocatorBaseGetter>::iterator it = wrappers.begin();
          it != wrappers.end(); it++) {
       m_allocators[it->first] = it->second();
-      ASSERT(it->second() != NULL);
+      assert(it->second() != NULL);
     }
   }
   m_mm = MemoryManager::TheMemoryManager();
@@ -104,7 +104,7 @@ void ThreadInfo::onSessionInit() {
     m_stacklimit = t_stackbase - (rl.rlim_cur - StackSlack);
   } else {
     m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
-    ASSERT(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
+    assert(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
   }
 }
 

@@ -484,8 +484,8 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
                 ConstructPtr trueBranch, falseBranch;
                 ConstructLocation tLoc, fLoc;
                 getTrueFalseBranches(0, trueBranch, tLoc, falseBranch, fLoc);
-                ASSERT(trueBranch);
-                ASSERT(falseBranch);
+                assert(trueBranch);
+                assert(falseBranch);
                 if (b->isLogicalOrOperator()) {
                   addEdge(e->getNthExpr(0), AfterConstruct, trueBranch, tLoc);
                 } else {
@@ -581,7 +581,7 @@ void ControlFlowBuilder::getTrueFalseBranches(
         } else if (kid == s->getNthKid(ForStatement::IncExpr)) {
           ; // just do the default case
         } else {
-          ASSERT(false);
+          assert(false);
         }
       }
       break;
@@ -635,7 +635,7 @@ void ControlFlowBuilder::getTrueFalseBranches(
                   level + 1, trueBranch, tLoc,
                   falseBranch, fLoc);
             }
-            ASSERT(trueBranch && falseBranch);
+            assert(trueBranch && falseBranch);
             if (level == 0 ||
                 b->getExp1() == top(level - 1)) {
               falseBranch = b->getExp2();
@@ -648,7 +648,7 @@ void ControlFlowBuilder::getTrueFalseBranches(
                   level + 1, trueBranch, tLoc,
                   falseBranch, fLoc);
             }
-            ASSERT(trueBranch && falseBranch);
+            assert(trueBranch && falseBranch);
             if (level == 0 ||
                 b->getExp1() == top(level - 1)) {
               trueBranch = b->getExp2();
@@ -679,7 +679,7 @@ void ControlFlowBuilder::getTrueFalseBranches(
       break;
     case Expression::KindOfQOpExpression:
       {
-        ASSERT(level > 0);
+        assert(level > 0);
         QOpExpressionPtr qop(
             static_pointer_cast<QOpExpression>(e));
         if (qop->getCondition() == top(level - 1)) {
@@ -704,7 +704,7 @@ void ControlFlowBuilder::getTrueFalseBranches(
       break;
     }
   }
-  ASSERT(level > 0);
+  assert(level > 0);
   if (!trueBranch) {
     trueBranch = top(level - 1);
     tLoc = AfterConstruct;

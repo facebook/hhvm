@@ -49,7 +49,7 @@ void ImmutableMap::add(SharedVariant *key, SharedVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
   int pos = m_curPos++;
-  ASSERT(pos <= (int)m_capacity_mask);
+  assert(pos <= (int)m_capacity_mask);
   m_buckets[pos].key = key;
   m_buckets[pos].val = val;
   if (key->is(KindOfInt64)) {
@@ -57,7 +57,7 @@ void ImmutableMap::add(SharedVariant *key, SharedVariant *val) {
     m_buckets[pos].next = m_hash[hash_pos];
     m_hash[hash_pos] = pos;
   } else {
-    ASSERT(key->is(KindOfString) || key->is(KindOfStaticString));
+    assert(key->is(KindOfString) || key->is(KindOfStaticString));
     size_t hash_pos = key->getStringData()->hash() & (int64)m_capacity_mask;
     m_buckets[pos].next = m_hash[hash_pos];
     m_hash[hash_pos] = pos;

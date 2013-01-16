@@ -145,7 +145,7 @@ vm_decode_function(CVarRef function,
       // assign the value at index 1 to name and we use the value at index
       // 0 to populate cls (if the value is a string) or this_ and cls (if
       // the value is an object).
-      ASSERT(function.isArray());
+      assert(function.isArray());
       Array arr = function.toArray();
       if (!array_is_valid_callback(arr)) {
         if (warn) {
@@ -202,7 +202,7 @@ vm_decode_function(CVarRef function,
           return NULL;
         }
       } else {
-        ASSERT(elem0.isObject());
+        assert(elem0.isObject());
         this_ = elem0.getObjectData();
         cls = this_->getVMClass();
       }
@@ -272,10 +272,10 @@ vm_decode_function(CVarRef function,
         }
         return NULL;
       }
-      ASSERT(f && f->preClass() == NULL);
+      assert(f && f->preClass() == NULL);
       return f;
     }
-    ASSERT(cls);
+    assert(cls);
     CallType lookupType = this_ ? ObjMethod : ClsMethod;
     const HPHP::VM::Func* f =
       g_vmContext->lookupMethodCtx(cc, name.get(), ctx, lookupType);
@@ -297,11 +297,11 @@ vm_decode_function(CVarRef function,
           // If this_ is non-null AND we could not find a method, try
           // looking up __call in cls's method table
           f = cls->lookupMethod(s___call.get());
-          ASSERT(!f || !(f->attrs() & HPHP::VM::AttrStatic));
+          assert(!f || !(f->attrs() & HPHP::VM::AttrStatic));
         }
         if (!f && lookupType == ClsMethod) {
           f = cls->lookupMethod(s___callStatic.get());
-          ASSERT(!f || (f->attrs() & HPHP::VM::AttrStatic));
+          assert(!f || (f->attrs() & HPHP::VM::AttrStatic));
           this_ = NULL;
         }
         if (f) {
@@ -319,10 +319,10 @@ vm_decode_function(CVarRef function,
         }
       }
     }
-    ASSERT(f && f->preClass());
+    assert(f && f->preClass());
     // If this_ is non-NULL, then this_ is the current instance and cls is
     // the class of the current instance.
-    ASSERT(!this_ || this_->getVMClass() == cls);
+    assert(!this_ || this_->getVMClass() == cls);
     // If we are doing a forwarding call and this_ is null, set cls
     // appropriately to propagate the current late bound class.
     if (!this_ && forwarding && ar) {
@@ -377,7 +377,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
 }
 
 Variant vm_default_invoke_file(bool incOnce) {
-  ASSERT(hhvm);
+  assert(hhvm);
   SystemGlobals* g = (SystemGlobals*)get_global_variables();
   Variant& v_argc = g->GV(argc);
   Variant& v_argv = g->GV(argv);
@@ -666,7 +666,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
     if (doBind && !bound) {
       FrameInjection::StaticClassNameHelper scn(
         ThreadInfo::s_threadInfo.getNoCheck(), classname);
-      ASSERT(!mcp.m_isFunc);
+      assert(!mcp.m_isFunc);
       return mcp.ci->getMeth()(mcp, params);
     } else {
       if (mcp.m_isFunc) {
@@ -679,7 +679,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
 }
 
 Variant call_user_func_few_args(CVarRef function, int count, ...) {
-  ASSERT(count <= CALL_USER_FUNC_FEW_ARGS_COUNT);
+  assert(count <= CALL_USER_FUNC_FEW_ARGS_COUNT);
   va_list ap;
   va_start(ap, count);
   CVarRef a0 = (count > 0) ? *va_arg(ap, const Variant *) : null_variant;
@@ -701,7 +701,7 @@ Variant call_user_func_few_args(CVarRef function, int count, ...) {
   if (doBind) {
     FrameInjection::StaticClassNameHelper scn(
       ThreadInfo::s_threadInfo.getNoCheck(), classname);
-    ASSERT(!mcp.m_isFunc);
+    assert(!mcp.m_isFunc);
     if (UNLIKELY(!mcp.ci->getMethFewArgs())) {
       return mcp.ci->getMeth()(
         mcp, Array(ArrayInit::CreateParams(count, &a0, &a1, &a2,
@@ -740,7 +740,7 @@ Variant invoke_func_few_handler(void *extra, CArrRef params,
 Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   StringData *sd = function.get();
-  ASSERT(sd && sd->data());
+  assert(sd && sd->data());
   return invoke(sd->data(), params, hash < 0 ? sd->hash() : hash,
                 tryInterp, fatal);
 }
@@ -878,7 +878,7 @@ Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
     if (count > 8) args->append(a8, false);
     if (count > 9) args->append(a9, false);
 #endif
-    if (count > 10) ASSERT(false);
+    if (count > 10) assert(false);
     return args;
   }
 
@@ -933,7 +933,7 @@ Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   }
 #endif
   default:
-    ASSERT(false);
+    assert(false);
   }
   return null;
 }
@@ -1058,7 +1058,7 @@ void check_request_surprise(ThreadInfo *info) {
 }
 
 void throw_pending_exception(ThreadInfo *info) {
-  ASSERT(info->m_pendingException);
+  assert(info->m_pendingException);
   info->m_pendingException = false;
   FatalErrorException e(info->m_exceptionMsg, info->m_exceptionStack);
   info->m_exceptionMsg.clear();
@@ -1132,7 +1132,7 @@ Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
   if (cmax >= 0 && count > cmax) {
     return throw_toomany_arguments(fn, cmax, level);
   }
-  ASSERT(false);
+  assert(false);
   return null;
 }
 
@@ -1162,7 +1162,7 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
     throw_toomany_arguments(fn, cmax, level);
     return;
   }
-  ASSERT(false);
+  assert(false);
 }
 
 Variant throw_missing_typed_argument(const char *fn,
@@ -1325,7 +1325,7 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
   case KindOfArray:   otype = "array";       break;
   case KindOfObject:  otype = val.getObjectData()->o_getClassName(); break;
   default:
-    ASSERT(false);
+    assert(false);
   }
   raise_recoverable_error
     ("Argument %d passed to %s must be an instance of %s, %s given",
@@ -1378,7 +1378,7 @@ String f_serialize(CVarRef value) {
     return vs.serialize(value, true);
   }
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return "";
@@ -1873,7 +1873,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
                                                      CStrRef kind,
                                                      bool toLower,
                                                      const T &checkExists) {
-  ASSERT(!m_map.isNull());
+  assert(!m_map.isNull());
   while (true) {
     CVarRef &type_map = m_map.get()->get(kind);
     Variant::TypedValueAccessor tva = type_map.getTypedAccessor();
@@ -1976,7 +1976,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
     try {
       f_call_user_func_array(iter.second(), params);
     } catch (Object& ex) {
-      ASSERT(ex.instanceof(s_exception));
+      assert(ex.instanceof(s_exception));
       if (autoloadException.isNull()) {
         autoloadException = ex;
       } else {

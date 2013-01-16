@@ -108,7 +108,7 @@ IMPLEMENT_DEFAULT_EXTENSION(openssl);
 class Key : public SweepableResourceData {
 public:
   EVP_PKEY *m_key;
-  Key(EVP_PKEY *key) : m_key(key) { ASSERT(m_key);}
+  Key(EVP_PKEY *key) : m_key(key) { assert(m_key);}
   ~Key() { if (m_key) EVP_PKEY_free(m_key);}
 
   static StaticString s_class_name;
@@ -116,12 +116,12 @@ public:
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
   bool isPrivate() {
-    ASSERT(m_key);
+    assert(m_key);
     switch (m_key->type) {
 #ifndef NO_RSA
     case EVP_PKEY_RSA:
     case EVP_PKEY_RSA2:
-      ASSERT(m_key->pkey.rsa);
+      assert(m_key->pkey.rsa);
       if (!m_key->pkey.rsa->p || !m_key->pkey.rsa->q) {
         return false;
       }
@@ -133,7 +133,7 @@ public:
     case EVP_PKEY_DSA2:
     case EVP_PKEY_DSA3:
     case EVP_PKEY_DSA4:
-      ASSERT(m_key->pkey.dsa);
+      assert(m_key->pkey.dsa);
       if (!m_key->pkey.dsa->p || !m_key->pkey.dsa->q ||
           !m_key->pkey.dsa->priv_key) {
         return false;
@@ -142,7 +142,7 @@ public:
 #endif
 #ifndef NO_DH
     case EVP_PKEY_DH:
-      ASSERT(m_key->pkey.dh);
+      assert(m_key->pkey.dh);
       if (!m_key->pkey.dh->p || !m_key->pkey.dh->priv_key) {
         return false;
       }
@@ -249,7 +249,7 @@ StaticString Key::s_class_name("OpenSSL key");
 class CSRequest : public SweepableResourceData {
 public:
   X509_REQ *m_csr;
-  CSRequest(X509_REQ *csr) : m_csr(csr) { ASSERT(m_csr);}
+  CSRequest(X509_REQ *csr) : m_csr(csr) { assert(m_csr);}
   ~CSRequest() { if (m_csr) X509_REQ_free(m_csr);}
 
   static StaticString s_class_name;
@@ -351,7 +351,7 @@ public:
   }
 
   bool generatePrivateKey() {
-    ASSERT(priv_key == NULL);
+    assert(priv_key == NULL);
 
     if (priv_key_bits < MIN_KEY_LENGTH) {
       raise_warning("private key length is too short; it needs to be "
@@ -1188,7 +1188,7 @@ static bool openssl_pkcs12_export_impl(CVarRef x509, BIO *bio_out,
      (char*)(friendly_name.empty() ? NULL : friendly_name.data()),
      key, cert, ca, 0, 0, 0, 0, 0);
 
-  ASSERT(bio_out);
+  assert(bio_out);
   bool ret = i2d_PKCS12_bio(bio_out, p12);
   PKCS12_free(p12);
   sk_X509_free(ca);
@@ -1319,8 +1319,8 @@ bool f_openssl_pkcs7_decrypt(CStrRef infilename, CStrRef outfilename,
   if (p7 == NULL) {
     goto clean_exit;
   }
-  ASSERT(okey.getTyped<Key>()->m_key);
-  ASSERT(ocert.getTyped<Certificate>()->m_cert);
+  assert(okey.getTyped<Key>()->m_key);
+  assert(ocert.getTyped<Certificate>()->m_cert);
   if (PKCS7_decrypt(p7, okey.getTyped<Key>()->m_key,
                     ocert.getTyped<Certificate>()->m_cert, out,
                     PKCS7_DETACHED)) {
@@ -1577,7 +1577,7 @@ static bool openssl_pkey_export_impl(CVarRef key, BIO *bio_out,
     } else {
       cipher = NULL;
     }
-    ASSERT(bio_out);
+    assert(bio_out);
     ret = PEM_write_bio_PrivateKey(bio_out, pkey, cipher,
                                    (unsigned char *)passphrase.data(),
                                    passphrase.size(), NULL, NULL);
@@ -2038,7 +2038,7 @@ int64 f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
   }
   X509 *cert;
   cert = ocert.getTyped<Certificate>()->m_cert;
-  ASSERT(cert);
+  assert(cert);
 
   ret = check_cert(pcainfo, cert, untrustedchain, purpose);
 
@@ -2060,9 +2060,9 @@ static bool openssl_x509_export_impl(CVarRef x509, BIO *bio_out,
     return false;
   }
   X509 *cert = ocert.getTyped<Certificate>()->m_cert;
-  ASSERT(cert);
+  assert(cert);
 
-  ASSERT(bio_out);
+  assert(bio_out);
   if (!notext) {
     X509_print(bio_out, cert);
   }
@@ -2154,7 +2154,7 @@ Variant f_openssl_x509_parse(CVarRef x509cert, bool shortnames /* = true */) {
     return false;
   }
   X509 *cert = ocert.getTyped<Certificate>()->m_cert;
-  ASSERT(cert);
+  assert(cert);
 
   Array ret;
   if (cert->name) {

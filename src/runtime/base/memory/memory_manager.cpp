@@ -207,7 +207,7 @@ void MemoryManager::refreshStatsHelperStop() {
 #endif
 
 void MemoryManager::add(SmartAllocatorImpl *allocator) {
-  ASSERT(allocator);
+  assert(allocator);
   m_smartAllocators.push_back(allocator);
 }
 
@@ -286,13 +286,13 @@ void MemoryManager::checkMemory() {
 //
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
-  ASSERT(nbytes > 0);
+  assert(nbytes > 0);
   // add room for header before rounding up
   size_t padbytes = (nbytes + sizeof(SmallNode) + kMask) & ~kMask;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
     m_stats.usage += padbytes;
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
-    ASSERT(i < kNumSizes);
+    assert(i < kNumSizes);
     void* p = m_smartfree[i].maybePop();
     if (LIKELY(p != 0)) return p;
     char* mem = m_front;
@@ -308,13 +308,13 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
 }
 
 inline void MemoryManager::smartFree(void* ptr) {
-  ASSERT(ptr != 0);
+  assert(ptr != 0);
   SweepNode* n = ((SweepNode*)ptr) - 1;
   size_t padbytes = n->padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
-    ASSERT(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
+    assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
-    ASSERT(i < kNumSizes);
+    assert(i < kNumSizes);
     m_smartfree[i].push(ptr);
     m_stats.usage -= padbytes;
     return;
@@ -325,7 +325,7 @@ inline void MemoryManager::smartFree(void* ptr) {
 // quick-and-dirty realloc implementation.  We could do better if the block
 // is malloc'd, by deferring to the underlying realloc.
 inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
-  ASSERT(ptr != 0 && nbytes > 0);
+  assert(ptr != 0 && nbytes > 0);
   SweepNode* n = ((SweepNode*)ptr) - 1;
   size_t old_padbytes = n->padbytes;
   if (LIKELY(old_padbytes <= kMaxSmartSize)) {
@@ -383,20 +383,20 @@ inline void* MemoryManager::smartEnlist(SweepNode* n) {
   n->next = next;
   n->prev = &m_sweep;
   next->prev = m_sweep.next = n;
-  ASSERT(n->padbytes > kMaxSmartSize);
+  assert(n->padbytes > kMaxSmartSize);
   return n + 1;
 }
 
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
-  ASSERT(nbytes > 0);
+  assert(nbytes > 0);
   SweepNode* n = (SweepNode*) Util::safe_malloc(nbytes + sizeof(SweepNode));
   return smartEnlist(n);
 }
 
 NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {
-  ASSERT(totalbytes > 0);
+  assert(totalbytes > 0);
   SweepNode* n = (SweepNode*)Util::safe_calloc(totalbytes + sizeof(SweepNode),
                                                1);
   return smartEnlist(n);
@@ -414,7 +414,7 @@ void MemoryManager::smartFreeBig(SweepNode* n) {
 // allocate nbytes from the current slab, aligned to 16-bytes
 inline void* MemoryManager::slabAlloc(size_t nbytes) {
   const size_t kAlignMask = 15;
-  ASSERT((nbytes & 7) == 0);
+  assert((nbytes & 7) == 0);
   char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
   if (ptr + nbytes <= m_limit) {
     m_front = ptr + nbytes;
@@ -459,7 +459,7 @@ void smart_free(void* ptr) {
 
 HOT_FUNC
 void* SmartAllocatorImpl::alloc(size_t nbytes) {
-  ASSERT(nbytes == size_t(m_itemSize));
+  assert(nbytes == size_t(m_itemSize));
   MM().getStats().usage += nbytes;
   void* ptr = m_free.maybePop();
   if (LIKELY(ptr != NULL)) return ptr;

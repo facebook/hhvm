@@ -217,7 +217,7 @@ ConstructPtr ArrayElementExpression::getNthKid(int n) const {
     case 1:
       return m_offset;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -236,7 +236,7 @@ void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
       m_offset = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -467,12 +467,12 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       if (hasContext(UnsetContext)) {
         // do nothing
       } else if (hasContext(InvokeArgument) && cg.callInfoTop() != -1) {
-        ASSERT(!isRealChainRoot); // TODO: handle this case
+        assert(!isRealChainRoot); // TODO: handle this case
         cg_printf(".argvalAt(cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
       } else if (m_context & (LValue|RefValue|DeepReference)) {
         // if we see an array access element in LValue context, the
         // type inference pass will never infer its type to be a string
-        ASSERT(!isStringType);
+        assert(!isStringType);
         if (isRealChainRoot && !isArrayType) {
           // chain roots for non array types (variants) should call
           // lvalRef()
@@ -548,7 +548,7 @@ void ArrayElementExpression::outputCPPExistTest(CodeGenerator &cg,
   switch (op) {
   case T_ISSET:  cg_printf("isset("); break;
   case T_EMPTY:  cg_printf("empty("); break;
-  default: ASSERT(false);
+  default: assert(false);
   }
 
   if (m_global) {

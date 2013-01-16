@@ -116,7 +116,7 @@ void BuiltinSymbols::ParseExtFunctions(AnalysisResultPtr ar, const char **p,
     if (sep) {
       f->setSepExtension();
     }
-    ASSERT(!s_functions[f->getName()]);
+    assert(!s_functions[f->getName()]);
     s_functions[f->getName()] = f;
   }
 }
@@ -385,7 +385,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   const char **helper = HelperFunctions;
   while (*helper) {
     FunctionScopePtr f = ParseHelperFunction(ar, helper);
-    ASSERT(!s_helperFunctions[f->getName()]);
+    assert(!s_helperFunctions[f->getName()]);
     s_helperFunctions[f->getName()] = f;
   }
 
@@ -410,7 +410,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
         if (!parser.parse()) {
           Logger::Error("Unable to parse file %s: %s", fileName,
                         parser.getMessage().c_str());
-          ASSERT(false);
+          assert(false);
         }
       } catch (FileOpenException &e) {
         Logger::Error("%s", e.getMessage().c_str());
@@ -425,9 +425,9 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
         iterFile->second->getClasses();
       for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
            iter != classes.end(); ++iter) {
-        ASSERT(iter->second.size() == 1);
+        assert(iter->second.size() == 1);
         iter->second[0]->setSystem();
-        ASSERT(!s_classes[iter->first]);
+        assert(!s_classes[iter->first]);
         s_classes[iter->first] = iter->second[0];
       }
     }
@@ -484,7 +484,7 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
     Scanner scanner(fileName, Option::ScannerType);
     Compiler::Parser parser(scanner, baseName, ar);
     if (!parser.parse()) {
-      ASSERT(false);
+      assert(false);
       Logger::Error("Unable to parse file %s: %s", fileName,
                     parser.getMessage().c_str());
     }
@@ -498,7 +498,7 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
 
 void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
                                    StringToFunctionScopePtrMap &functions) {
-  ASSERT(Loaded);
+  assert(Loaded);
   for (StringToFunctionScopePtrMap::const_iterator it = s_functions.begin();
        it != s_functions.end(); ++it) {
     if (functions.find(it->first) == functions.end()) {
@@ -510,7 +510,7 @@ void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
 
 void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
                                  StringToClassScopePtrMap &classes) {
-  ASSERT(Loaded);
+  assert(Loaded);
   classes.insert(s_classes.begin(), s_classes.end());
 
   // we are adding these builtin functions, so that user-defined functions
@@ -527,7 +527,7 @@ void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
 
 void BuiltinSymbols::LoadVariables(AnalysisResultPtr ar,
                                    VariableTablePtr variables) {
-  ASSERT(Loaded);
+  assert(Loaded);
   if (s_variables) {
     variables->import(s_variables);
   }
@@ -535,7 +535,7 @@ void BuiltinSymbols::LoadVariables(AnalysisResultPtr ar,
 
 void BuiltinSymbols::LoadConstants(AnalysisResultPtr ar,
                                    ConstantTablePtr constants) {
-  ASSERT(Loaded);
+  assert(Loaded);
   if (s_constants) {
     constants->import(s_constants);
   }

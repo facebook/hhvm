@@ -33,7 +33,7 @@ ListAssignmentElement::ListAssignmentElement(Variant &var, int index, ...)
 }
 
 void ListAssignmentElement::assign(CArrRef data) {
-  ASSERT(!m_indices.empty());
+  assert(!m_indices.empty());
   Variant tmp = data;
   unsigned int size = m_indices.size();
   for (unsigned int i = 0; i < size; i++) {

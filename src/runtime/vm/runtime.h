@@ -85,8 +85,8 @@ frame_local_inner(const ActRec* fp, int n) {
 
 inline void ALWAYS_INLINE
 frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
-  ASSERT(numLocals == fp->m_func->numLocals());
-  ASSERT(!fp->hasInvName());
+  assert(numLocals == fp->m_func->numLocals());
+  assert(!fp->hasInvName());
   // Check if the frame has a VarEnv or if it has extraArgs
   if (UNLIKELY(fp->m_varEnv != NULL)) {
     if (fp->hasVarEnv()) {
@@ -96,7 +96,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
       return;
     }
     // Free extra args
-    ASSERT(fp->hasExtraArgs());
+    assert(fp->hasExtraArgs());
     ExtraArgs::deallocate(fp);
   }
   // Free locals
@@ -170,7 +170,7 @@ void call_intercept_handler(TypedValue* retval,
                             CArrRef intArgs,
                             ActRec* ar,
                             Variant* ihandler) {
-  if (handle_throw) { ASSERT(ar); }
+  if (handle_throw) { assert(ar); }
   ObjectData* intThis = NULL;
   Class* intCls = NULL;
   StringData* intInvName = NULL;
@@ -187,7 +187,7 @@ void call_intercept_handler(TypedValue* retval,
                               intThis, intCls, NULL, intInvName);
     } catch (...) {
       Stack& stack = g_vmContext->getStack();
-      ASSERT((TypedValue*)ar - stack.top() == ar->numArgs());
+      assert((TypedValue*)ar - stack.top() == ar->numArgs());
       while (uintptr_t(stack.top()) < uintptr_t(ar)) {
         stack.popTV();
       }
@@ -214,7 +214,7 @@ void call_intercept_handler(TypedValue* retval,
 template <bool handle_throw>
 bool run_intercept_handler(ActRec* ar, Variant* ihandler) {
   using namespace HPHP::VM::Transl;
-  ASSERT(ihandler);
+  assert(ihandler);
   TypedValue retval;
   tvWriteNull(&retval);
   Variant doneFlag = true;
@@ -230,7 +230,7 @@ bool run_intercept_handler(ActRec* ar, Variant* ihandler) {
     // the pre-live ActRec and the args, move the intercept handler's return
     // value to the right place, and get out.
     Stack& stack = g_vmContext->getStack();
-    ASSERT((TypedValue*)ar - stack.top() == ar->numArgs());
+    assert((TypedValue*)ar - stack.top() == ar->numArgs());
     while (uintptr_t(stack.top()) < uintptr_t(ar)) {
       stack.popTV();
     }
@@ -253,7 +253,7 @@ bool run_intercept_handler_for_invokefunc(TypedValue* retval,
 
 static inline Instance*
 newInstance(Class* cls) {
-  ASSERT(cls);
+  assert(cls);
   Instance *inst = Instance::newInstance(cls);
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.insert(inst);

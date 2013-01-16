@@ -126,7 +126,7 @@ std::string InterfaceStatement::getName() const {
 
 bool InterfaceStatement::checkVolatileBases(AnalysisResultConstPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
-  ASSERT(!classScope->isVolatile());
+  assert(!classScope->isVolatile());
   const vector<string> &bases = classScope->getBases();
   for (vector<string>::const_iterator it = bases.begin();
        it != bases.end(); ++it) {
@@ -187,7 +187,7 @@ ConstructPtr InterfaceStatement::getNthKid(int n) const {
     case 1:
       return m_base;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -206,7 +206,7 @@ void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
       m_base = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -410,7 +410,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
     // do nothing
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
 }

@@ -287,7 +287,7 @@ int string_natural_cmp(char const *a, size_t a_len,
 ///////////////////////////////////////////////////////////////////////////////
 
 char *string_to_upper(const char *s, int len) {
-  ASSERT(s);
+  assert(s);
   char *ret = (char *)malloc(len + 1);
   for (int i = 0; i < len; i++) {
     ret[i] = toupper(s[i]);
@@ -297,7 +297,7 @@ char *string_to_upper(const char *s, int len) {
 }
 
 char *string_to_upper_first(const char *s, int len) {
-  ASSERT(s);
+  assert(s);
   char *ret = string_duplicate(s, len);
   if (*ret) {
     *ret = toupper(*ret);
@@ -306,7 +306,7 @@ char *string_to_upper_first(const char *s, int len) {
 }
 
 char *string_to_upper_words(const char *s, int len) {
-  ASSERT(s);
+  assert(s);
   char *ret = string_duplicate(s, len);
   if (*ret) {
     *ret = toupper(*ret);
@@ -323,7 +323,7 @@ char *string_to_upper_words(const char *s, int len) {
 
 char *string_trim(const char *s, int &len,
                   const char *charlist, int charlistlen, int mode) {
-  ASSERT(s);
+  assert(s);
   char mask[256];
   string_charmask(charlist, charlistlen, mask);
 
@@ -363,7 +363,7 @@ char *string_trim(const char *s, int &len,
 char *string_pad(const char *input, int &len, int pad_length,
                  const char *pad_string, int pad_str_len,
                  int pad_type) {
-  ASSERT(input);
+  assert(input);
   int num_pad_chars = pad_length - len;
 
   /* If resulting string turns out to be shorter than input string,
@@ -424,7 +424,7 @@ char *string_pad(const char *input, int &len, int pad_length,
 
 char *string_substr(const char *s, int &len, int start, int length,
                     bool nullable) {
-  ASSERT(s);
+  assert(s);
   if (string_substr_check(len, start, length)) {
     len = length;
     return string_duplicate(s + start, length);
@@ -438,7 +438,7 @@ char *string_substr(const char *s, int &len, int start, int length,
 
 int string_find(const char *input, int len, char ch, int pos,
                 bool case_sensitive) {
-  ASSERT(input);
+  assert(input);
   if (pos < 0 || pos > len) {
     return -1;
   }
@@ -456,7 +456,7 @@ int string_find(const char *input, int len, char ch, int pos,
 
 int string_rfind(const char *input, int len, char ch, int pos,
                  bool case_sensitive) {
-  ASSERT(input);
+  assert(input);
   if (pos < -len || pos > len) {
     return -1;
   }
@@ -482,8 +482,8 @@ int string_rfind(const char *input, int len, char ch, int pos,
 
 int string_find(const char *input, int len, const char *s, int s_len,
                 int pos, bool case_sensitive) {
-  ASSERT(input);
-  ASSERT(s);
+  assert(input);
+  assert(s);
   if (!s_len || pos < 0 || pos > len) {
     return -1;
   }
@@ -501,8 +501,8 @@ int string_find(const char *input, int len, const char *s, int s_len,
 
 int string_rfind(const char *input, int len, const char *s, int s_len,
                  int pos, bool case_sensitive) {
-  ASSERT(input);
-  ASSERT(s);
+  assert(input);
+  assert(s);
   if (!s_len || pos < -len || pos > len) {
     return -1;
   }
@@ -548,8 +548,8 @@ const char *string_memnstr(const char *haystack, const char *needle,
 
 char *string_replace(const char *s, int &len, int start, int length,
                      const char *replacement, int len_repl) {
-  ASSERT(s);
-  ASSERT(replacement);
+  assert(s);
+  assert(replacement);
   if (!string_substr_check(len, start, length, false)) {
     len = 0;
     return string_duplicate("", 0);
@@ -581,8 +581,8 @@ char *string_replace(const char *input, int &len,
                      const char *search, int len_search,
                      const char *replacement, int len_replace,
                      int &count, bool case_sensitive) {
-  ASSERT(input);
-  ASSERT(search && len_search);
+  assert(input);
+  assert(search && len_search);
 
   if (len == 0) {
     return NULL;
@@ -647,7 +647,7 @@ char *string_replace(const char *input, int &len,
 ///////////////////////////////////////////////////////////////////////////////
 
 char *string_reverse(const char *s, int len) {
-  ASSERT(s);
+  assert(s);
   char *n = (char *)malloc(len + 1);
   char *p = n;
   const char *e = s + len;
@@ -661,7 +661,7 @@ char *string_reverse(const char *s, int len) {
 }
 
 char *string_repeat(const char *s, int &len, int count) {
-  ASSERT(s);
+  assert(s);
 
   if (len == 0 || count <= 0) {
     return NULL;
@@ -684,7 +684,7 @@ char *string_repeat(const char *s, int &len, int count) {
 }
 
 char *string_shuffle(const char *str, int len) {
-  ASSERT(str);
+  assert(str);
   if (len <= 1) {
     return NULL;
   }
@@ -1050,8 +1050,8 @@ static size_t strip_tags_impl(char *rbuf, int len, int *stateptr,
 
 char *string_strip_tags(const char *s, int &len, const char *allow,
                         int allow_len) {
-  ASSERT(s);
-  ASSERT(allow);
+  assert(s);
+  assert(allow);
 
   char *ret = string_duplicate(s, len);
   char *sallow = string_duplicate(allow, allow_len);
@@ -1064,8 +1064,8 @@ char *string_strip_tags(const char *s, int &len, const char *allow,
 
 char *string_wordwrap(const char *text, int &textlen, int linelength,
                       const char *breakchar, int breakcharlen, bool docut) {
-  ASSERT(text);
-  ASSERT(breakchar);
+  assert(text);
+  assert(breakchar);
 
   char *newtext;
   int newtextlen, chk;
@@ -1197,8 +1197,8 @@ char *string_wordwrap(const char *text, int &textlen, int linelength,
 
 char *string_addcslashes(const char *str, int &length, const char *what,
                          int wlength) {
-  ASSERT(str);
-  ASSERT(what);
+  assert(str);
+  assert(what);
 
   char flags[256];
   string_charmask(what, wlength, flags);
@@ -1235,7 +1235,7 @@ char *string_addcslashes(const char *str, int &length, const char *what,
 }
 
 char *string_stripcslashes(const char *input, int &nlen) {
-  ASSERT(input);
+  assert(input);
   if (nlen == 0) {
     return NULL;
   }
@@ -1298,7 +1298,7 @@ char *string_stripcslashes(const char *input, int &nlen) {
 }
 
 char *string_addslashes(const char *str, int &length) {
-  ASSERT(str);
+  assert(str);
   if (length == 0) {
     return NULL;
   }
@@ -1333,7 +1333,7 @@ char *string_addslashes(const char *str, int &length) {
 }
 
 char *string_stripslashes(const char *input, int &l) {
-  ASSERT(input);
+  assert(input);
   if (!*input) {
     return NULL;
   }
@@ -1369,7 +1369,7 @@ char *string_stripslashes(const char *input, int &l) {
 }
 
 char *string_quotemeta(const char *input, int &len) {
-  ASSERT(input);
+  assert(input);
   if (len == 0) {
     return NULL;
   }
@@ -1461,7 +1461,7 @@ char *string_quoted_printable_encode(const char *input, int &len) {
 }
 
 char *string_quoted_printable_decode(const char *input, int &len, bool is_q) {
-  ASSERT(input);
+  assert(input);
   if (len == 0) {
     return NULL;
   }
@@ -1561,7 +1561,7 @@ Variant string_base_to_numeric(const char *s, int len, int base) {
   int64 cutoff;
   int cutlim;
 
-  ASSERT(string_validate_base(base));
+  assert(string_validate_base(base));
 
   cutoff = LONG_MAX / base;
   cutlim = LONG_MAX % base;
@@ -1608,7 +1608,7 @@ char *string_long_to_base(unsigned long value, int base) {
   char buf[(sizeof(unsigned long) << 3) + 1];
   char *ptr, *end;
 
-  ASSERT(string_validate_base(base));
+  assert(string_validate_base(base));
 
   end = ptr = buf + sizeof(buf) - 1;
   *ptr = '\0';
@@ -1624,7 +1624,7 @@ char *string_long_to_base(unsigned long value, int base) {
 char *string_numeric_to_base(CVarRef value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-  ASSERT(string_validate_base(base));
+  assert(string_validate_base(base));
   if ((!value.isInteger() && !value.isDouble())) {
     return string_duplicate("", 0);
   }
@@ -1667,8 +1667,8 @@ char *string_numeric_to_base(CVarRef value, int base) {
   (((c) - ' ') & 077)
 
 char *string_uuencode(const char *src, int src_len, int &dest_len) {
-  ASSERT(src);
-  ASSERT(src_len);
+  assert(src);
+  assert(src_len);
 
   int len = 45;
   char *p;
@@ -2299,7 +2299,7 @@ char *string_number_format(double d, int dec, char dec_point,
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
 char *string_soundex(const char *str) {
-  ASSERT(str);
+  assert(str);
 
   int _small, code, last;
   char soundex[4 + 1];
@@ -2947,7 +2947,7 @@ static const _cyr_charset_table _cyr_mac = {
  */
 char *string_convert_cyrillic_string(const char *input, int length,
                                      char from, char to) {
-  ASSERT(input);
+  assert(input);
   const unsigned char *from_table, *to_table;
   unsigned char tmp;
   unsigned char *str = (unsigned char *)string_duplicate(input, length);
@@ -3012,7 +3012,7 @@ char *string_convert_cyrillic_string(const char *input, int length,
 char *string_convert_hebrew_string(const char *str, int &str_len,
                                    int max_chars_per_line,
                                    int convert_newlines) {
-  ASSERT(str);
+  assert(str);
   const char *tmp;
   char *heb_str, *broken_str;
   char *target;

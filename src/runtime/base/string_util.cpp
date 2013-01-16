@@ -53,7 +53,7 @@ String StringUtil::ToUpper(CStrRef input, ToUpperType type /*= ToUpperAll */) {
     ret = string_to_upper_words(input.data(), len);
     break;
   default:
-    ASSERT(false);
+    assert(false);
     break;
   }
   return String(ret, len, AttachString);
@@ -222,7 +222,7 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
     i++;
   }
   len -= lenDelim; // always one delimiter less than count of items
-  ASSERT(i == size);
+  assert(i == size);
 
   String s = String(len, ReserveString);
   char *buffer = s.mutableSlice().ptr;
@@ -242,7 +242,7 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
     sitems[i].~String();
   }
   smart_free(sitems);
-  ASSERT(p - buffer == len);
+  assert(p - buffer == len);
   return s.setSize(len);
 }
 
@@ -330,7 +330,7 @@ String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
                               const char *charset, bool nbsp) {
   if (input.empty()) return input;
 
-  ASSERT(charset);
+  assert(charset);
   bool utf8 = true;
   if (strcasecmp(charset, "ISO-8859-1") == 0) {
     utf8 = false;
@@ -372,7 +372,7 @@ String StringUtil::HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
                                    Array extra) {
   if (input.empty()) return input;
 
-  ASSERT(charset);
+  assert(charset);
   int flags = STRING_HTML_ENCODE_UTF8;
   if (nbsp) {
     flags |= STRING_HTML_ENCODE_NBSP;
@@ -436,7 +436,7 @@ String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
                               const char *charset, bool all) {
   if (input.empty()) return input;
 
-  ASSERT(charset);
+  assert(charset);
 
   if (!html_supported_charset(charset)) {
     throw NotImplementedException(charset);
@@ -533,7 +533,7 @@ String StringUtil::UrlDecode(CStrRef input, bool decodePlus /* = true */) {
 // formatting
 
 String StringUtil::MoneyFormat(const char *format, double value) {
-  ASSERT(format);
+  assert(format);
   char *formatted = string_money_format(format, value);
   return formatted ? String(formatted, AttachString) : String();
 }
@@ -612,7 +612,7 @@ void StringUtil::InitLiteralStrings(StaticString literalStrings[],
     memcpy(&size, pl, sizeof(size));
     literalStrings[i].init(pb, size);
     pb += size;
-    ASSERT(*pb == '\0');
+    assert(*pb == '\0');
     pb++;
     pl += sizeof(size);
   }

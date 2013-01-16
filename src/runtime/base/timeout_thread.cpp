@@ -62,13 +62,13 @@ TimeoutThread::~TimeoutThread() {
 }
 
 void TimeoutThread::registerRequestThread(RequestInjectionData* data) {
-  ASSERT(data);
+  assert(data);
   data->timeoutSeconds = m_timeoutSeconds;
 
   {
     Lock l(this);
     int id = m_nextId++;
-    ASSERT(!mapContains(m_clients, id));
+    assert(!mapContains(m_clients, id));
     m_clients[id].data = data;
     m_pendingIds.push(id);
   }
@@ -76,7 +76,7 @@ void TimeoutThread::registerRequestThread(RequestInjectionData* data) {
 }
 
 void TimeoutThread::removeRequestThread(RequestInjectionData* data) {
-  ASSERT(data);
+  assert(data);
   {
     Lock l(this);
     for (auto& pair : m_clients) {
@@ -101,7 +101,7 @@ void TimeoutThread::checkForNewWorkers() {
   Lock lock(this);
   for (; !m_pendingIds.empty(); m_pendingIds.pop()) {
     int id = m_pendingIds.front();
-    ASSERT(mapContains(m_clients, id));
+    assert(mapContains(m_clients, id));
     ClientThread& ct = m_clients[id];
 
     if (ct.data != nullptr) {
@@ -167,7 +167,7 @@ void TimeoutThread::stop() {
 
 void TimeoutThread::onTimer(int index) {
   Lock l(this);
-  ASSERT(mapContains(m_clients, index));
+  assert(mapContains(m_clients, index));
   ClientThread& ct = m_clients[index];
   if (ct.data == nullptr) {
     // The thread has been deleted but we haven't processed it
@@ -179,7 +179,7 @@ void TimeoutThread::onTimer(int index) {
   event_del(e);
 
   RequestInjectionData *data = ct.data;
-  ASSERT(data);
+  assert(data);
   struct timeval timeout;
   timeout.tv_usec = 0;
   if (data->started > 0) {

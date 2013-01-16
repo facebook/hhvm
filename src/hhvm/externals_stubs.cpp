@@ -41,7 +41,7 @@ Variant invoke_file(CStrRef s,
                     bool once,
                     LVariableTable* variables,
                     const char *currentDir) {
-  ASSERT(!variables); // this LVariableTable is unused in HHVM
+  assert(!variables); // this LVariableTable is unused in HHVM
   {
     Variant r;
     if (eval_invoke_file_hook(r, s, once, variables, currentDir)) {

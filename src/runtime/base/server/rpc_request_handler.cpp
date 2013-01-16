@@ -115,7 +115,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 
   // resolve virtual host
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
-  ASSERT(vhost);
+  assert(vhost);
   if (vhost->disabled()) {
     transport->sendString("Virtual host disabled.", 404);
     transport->onSendEnd();
@@ -263,7 +263,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       String response;
       switch (output) {
         case 0: {
-          ASSERT(m_returnEncodeType == Json ||
+          assert(m_returnEncodeType == Json ||
                  m_returnEncodeType == Serialize);
           try {
             response = (m_returnEncodeType == Json) ? f_json_encode(funcRet)

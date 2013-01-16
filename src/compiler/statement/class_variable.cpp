@@ -51,9 +51,9 @@ static bool isEquivRedecl(const std::string &name,
                           ExpressionPtr exp,
                           ModifierExpressionPtr modif,
                           Symbol * symbol) {
-  ASSERT(exp);
-  ASSERT(modif);
-  ASSERT(symbol);
+  assert(exp);
+  assert(modif);
+  assert(symbol);
   if (symbol->getName()     != name                 ||
       symbol->isProtected() != modif->isProtected() ||
       symbol->isPrivate()   != modif->isPrivate()   ||
@@ -199,7 +199,7 @@ ConstructPtr ClassVariable::getNthKid(int n) const {
     case 1:
       return m_declaration;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -218,7 +218,7 @@ void ClassVariable::setNthKid(int n, ConstructPtr cp) {
       m_declaration = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -240,7 +240,7 @@ StatementPtr ClassVariable::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 void ClassVariable::inferTypes(AnalysisResultPtr ar) {
-  ASSERT(getScope().get() == getClassScope().get());
+  assert(getScope().get() == getClassScope().get());
   IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
 
   // assignments will ignore the passed in type,
@@ -286,17 +286,17 @@ void ClassVariable::getCtorAndInitInfo(
   if (isAssign) {
     assignment = static_pointer_cast<AssignmentExpression>(exp);
     var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-    ASSERT(var);
+    assert(var);
     value = assignment->getValue();
-    ASSERT(value);
+    assert(value);
   } else {
     var = dynamic_pointer_cast<SimpleVariable>(exp);
-    ASSERT(var);
+    assert(var);
   }
   sym = scope->getVariables()->getSymbol(var->getName());
-  ASSERT(sym);
+  assert(sym);
   type = scope->getVariables()->getFinalType(var->getName());
-  ASSERT(type);
+  assert(type);
 
   bool isValueNull = isAssign ? value->isLiteralNull() : false;
   bool typeIsInitable = type->is(Type::KindOfVariant) ||
@@ -380,8 +380,8 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                       Option::PropertyPrefix, var->getName().c_str(),
                       Type::IsMappedToVariant(type) ? "Variant::nullInit" : "");
           } else {
-            ASSERT(value);
-            ASSERT(value->is(Expression::KindOfScalarExpression));
+            assert(value);
+            assert(value->is(Expression::KindOfScalarExpression));
             cg_printf("%s%s(",
                       Option::PropertyPrefix,
                       var->getName().c_str());
@@ -395,7 +395,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                       var->getName().c_str());
           } else {
             const char *initializer = type->getCPPInitializer();
-            ASSERT(initializer);
+            assert(initializer);
             cg_printf("%s%s(%s)",
                       Option::PropertyPrefix,
                       var->getName().c_str(),
@@ -434,7 +434,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                         var->getName().c_str());
             } else {
               const char *initializer = type->getCPPInitializer();
-              ASSERT(initializer);
+              assert(initializer);
               cg_printf("%s%s = %s;\n", Option::PropertyPrefix,
                         var->getName().c_str(), initializer);
             }

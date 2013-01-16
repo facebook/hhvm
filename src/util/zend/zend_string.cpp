@@ -45,7 +45,7 @@ void string_translate(char *str, int len, const char *str_from,
 }
 
 char *string_rot13(const char *input, int len) {
-  ASSERT(input);
+  assert(input);
 
   static char rot13_from[] =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -170,8 +170,8 @@ static void ito64(char *s, long v, int n) {
 }
 
 char *string_crypt(const char *key, const char *salt) {
-  ASSERT(key);
-  ASSERT(salt);
+  assert(key);
+  assert(salt);
 
   char random_salt[3];
   if (!*salt) {
@@ -201,7 +201,7 @@ char *string_crypt(const char *key, const char *salt) {
 char *string_bin2hex(const char *input, int &len) {
   static char hexconvtab[] = "0123456789abcdef";
 
-  ASSERT(input);
+  assert(input);
   if (len == 0) {
     return NULL;
   }

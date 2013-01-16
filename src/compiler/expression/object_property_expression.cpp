@@ -167,7 +167,7 @@ ConstructPtr ObjectPropertyExpression::getNthKid(int n) const {
     case 1:
       return m_property;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -186,7 +186,7 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
       m_property = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -213,7 +213,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 
   ScalarExpressionPtr exp = dynamic_pointer_cast<ScalarExpression>(m_property);
   const string &name = exp->getString();
-  ASSERT(!name.empty());
+  assert(!name.empty());
 
   m_property->inferAndCheck(ar, Type::String, false);
 
@@ -256,7 +256,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     }
   }
 
-  ASSERT(cls);
+  assert(cls);
   if (!m_propSym || cls != m_objectClass.lock()) {
     m_objectClass = cls;
     ClassScopePtr parent;
@@ -293,7 +293,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
            t->is(Type::KindOfSome) || t->is(Type::KindOfArray))) {
         type = Type::Array;
       }
-      ASSERT(getScope()->is(BlockScope::FunctionScope));
+      assert(getScope()->is(BlockScope::FunctionScope));
       GET_LOCK(m_symOwner);
       ret = m_symOwner->checkProperty(getScope(), m_propSym, type, coerce, ar);
     }
@@ -538,8 +538,8 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
     TypePtr thisActType (m_object->getActualType());
     bool close = false;
     if (m_valid && thisImplType) {
-      ASSERT(thisActType);
-      ASSERT(!Type::SameType(thisActType, thisImplType));
+      assert(thisActType);
+      assert(!Type::SameType(thisActType, thisImplType));
       ClassScopePtr implCls(thisImplType->getClass(ar, getScope()));
       if (implCls &&
           !implCls->derivesFrom(ar, thisActType->getName(), true, false)) {
@@ -548,7 +548,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
         //   ... $this->prop ...
         // }
         ClassScopePtr cls(thisActType->getClass(ar, getScope()));
-        ASSERT(cls && cls->derivesFrom(ar, thisImplType->getName(),
+        assert(cls && cls->derivesFrom(ar, thisImplType->getName(),
                                        true, false));
 
         cg_printf("static_cast<%s%s*>(",
@@ -590,7 +590,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       cg_printf(")->");
     }
   } else if (m_valid) {
-    ASSERT(m_object->is(KindOfSimpleVariable) &&
+    assert(m_object->is(KindOfSimpleVariable) &&
            static_pointer_cast<SimpleVariable>(m_object)->isGuarded());
     outputCPPValidObject(cg, ar, true);
     cg_printf("->");

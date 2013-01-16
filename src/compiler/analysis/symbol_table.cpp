@@ -81,7 +81,7 @@ TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
   if (!coerced) return oldType;
 
   type = CoerceTo(ar, m_coerced, type);
-  ASSERT(!isRefClosureVar() || (type && type->is(Type::KindOfVariant)));
+  assert(!isRefClosureVar() || (type && type->is(Type::KindOfVariant)));
 
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll &&
       !Type::SameType(oldType, type)) {
@@ -96,7 +96,7 @@ void Symbol::beginLocal(BlockScopeRawPtr scope) {
   if (isClosureVar()) {
     ExpressionListPtr useVars =
       scope->getContainingFunction()->getClosureVars();
-    ASSERT(useVars);
+    assert(useVars);
     // linear scan for now, since most use var lists are
     // fairly short
     bool found = false;
@@ -110,8 +110,8 @@ void Symbol::beginLocal(BlockScopeRawPtr scope) {
         break;
       }
     }
-    if (!found) ASSERT(false);
-    ASSERT(!isRefClosureVar() ||
+    if (!found) assert(false);
+    assert(!isRefClosureVar() ||
            (m_coerced && m_coerced->is(Type::KindOfVariant)));
   } else {
     m_coerced.reset();
@@ -168,28 +168,28 @@ void Symbol::triggerUpdates(BlockScopeRawPtr scope) const {
       /**
        * Constants can only belong to a file or class scope
        */
-      ASSERT(scope->is(BlockScope::FileScope) ||
+      assert(scope->is(BlockScope::FileScope) ||
              scope->is(BlockScope::ClassScope));
 
       /**
        * Constants can only be declared in a function or
        * class scope
        */
-      ASSERT(declScope->is(BlockScope::FunctionScope) ||
+      assert(declScope->is(BlockScope::FunctionScope) ||
              declScope->is(BlockScope::ClassScope));
 
       /**
        * For class scopes, the declaration scope *must*
        * match the scope the symbol lives in
        */
-      ASSERT(!scope->is(BlockScope::ClassScope) ||
+      assert(!scope->is(BlockScope::ClassScope) ||
              scope == declScope);
 
       /**
        * For file scopes, the declaration scope *must*
        * live in a function scope
        */
-      ASSERT(!scope->is(BlockScope::FileScope) ||
+      assert(!scope->is(BlockScope::FileScope) ||
              declScope->is(BlockScope::FunctionScope));
 
       /**
@@ -270,7 +270,7 @@ std::string ExtractInitializer(AnalysisResultPtr ar, ExpressionPtr e) {
 }
 
 void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
-  ASSERT(isParameter());
+  assert(isParameter());
 
   JSON::DocTarget::MapStream ms(out);
   ms.add("name",       m_name);
@@ -281,7 +281,7 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
   if (m_value) {
     ExpressionPtr valueExp(
       dynamic_pointer_cast<Expression>(m_value));
-    ASSERT(valueExp);
+    assert(valueExp);
     const string &init = ExtractInitializer(out.analysisResult(), valueExp);
     if (!init.empty()) out << init;
     else               out << JSON::Null;
@@ -315,7 +315,7 @@ static inline std::string ExtractDocComment(ExpressionPtr e) {
 }
 
 void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
-  ASSERT(!isParameter());
+  assert(!isParameter());
 
   JSON::DocTarget::MapStream ms(out);
   ms.add("name", m_name);
@@ -334,7 +334,7 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
   if (m_initVal) {
     ExpressionPtr initExp(
       dynamic_pointer_cast<Expression>(m_initVal));
-    ASSERT(initExp);
+    assert(initExp);
     const string &init = ExtractInitializer(out.analysisResult(), initExp);
     if (!init.empty()) out << init;
     else               out << JSON::Null;
@@ -378,7 +378,7 @@ SymbolTable::~SymbolTable() {
 }
 
 void SymbolTable::import(SymbolTablePtr src) {
-  ASSERT(m_symbolMap.empty());
+  assert(m_symbolMap.empty());
 
   for (unsigned int i = 0; i < src->m_symbolVec.size(); i++) {
     Symbol &src_sym = *src->m_symbolVec[i];
@@ -466,7 +466,7 @@ const Symbol *SymbolTable::getSymbol(const std::string &name) const {
 Symbol *SymbolTable::genSymbol(const std::string &name, bool konst) {
   std::map<std::string,Symbol>::iterator it = m_symbolMap.find(name);
   if (it != m_symbolMap.end()) {
-    ASSERT(konst == it->second.isConstant());
+    assert(konst == it->second.isConstant());
     return &it->second;
   }
 

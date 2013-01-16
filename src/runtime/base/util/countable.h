@@ -50,33 +50,33 @@ inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
  */
 #define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC   \
   int32_t getCount() const {                    \
-    ASSERT(is_refcount_realistic(_count));      \
+    assert(is_refcount_realistic(_count));      \
     return _count;                              \
   }                                             \
                                                 \
   bool isRefCounted() const {                   \
-    ASSERT(is_refcount_realistic(_count));      \
+    assert(is_refcount_realistic(_count));      \
     return _count != RefCountStaticValue;       \
   }                                             \
                                                 \
   void incRefCount() const {                    \
-    ASSERT(is_refcount_realistic(_count));      \
+    assert(is_refcount_realistic(_count));      \
     if (isRefCounted()) { ++_count; }           \
   }                                             \
                                                 \
   int32_t decRefCount() const {                 \
-    ASSERT(_count > 0);                         \
-    ASSERT(is_refcount_realistic(_count));      \
+    assert(_count > 0);                         \
+    assert(is_refcount_realistic(_count));      \
     return isRefCounted() ? --_count : _count;  \
   }
 
 #define IMPLEMENT_COUNTABLE_METHODS                                   \
   void setStatic() const {                                            \
-    ASSERT(is_refcount_realistic(_count));                            \
+    assert(is_refcount_realistic(_count));                            \
     _count = RefCountStaticValue;                                     \
   }                                                                   \
   bool isStatic() const {                                             \
-    ASSERT(is_refcount_realistic(_count));                            \
+    assert(is_refcount_realistic(_count));                            \
     return _count == STATIC_FLAG;                                     \
   }                                                                   \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
@@ -97,20 +97,20 @@ class Countable {
 
 #define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC \
   int32_t getCount() const {                    \
-    ASSERT(is_refcount_realistic(_count));      \
+    assert(is_refcount_realistic(_count));      \
     return _count;                              \
   }                                             \
                                                 \
   bool isRefCounted() const { return true; }    \
                                                 \
   void incRefCount() const {                    \
-    ASSERT(is_refcount_realistic(_count));      \
+    assert(is_refcount_realistic(_count));      \
     ++_count;                                   \
   }                                             \
                                                 \
   int32_t decRefCount() const {                 \
-    ASSERT(_count > 0);                         \
-    ASSERT(is_refcount_realistic(_count));      \
+    assert(_count > 0);                         \
+    assert(is_refcount_realistic(_count));      \
     return --_count;                            \
   }
 
@@ -119,7 +119,7 @@ class Countable {
  */
 class CountableNF : public Countable {
  public:
-  void setStatic() const { ASSERT(false); }
+  void setStatic() const { assert(false); }
   bool isStatic() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC;
 };

@@ -50,7 +50,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
                                       const char *file /* = "" */,
                                       int line /* = 0 */,
                                       int port /* = 0 */) {
-  ASSERT(input);
+  assert(input);
   if (port == 0) port = s_server_port;
 
   if (!CleanUp()) return false;

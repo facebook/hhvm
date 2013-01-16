@@ -207,7 +207,7 @@ ConstructPtr ListAssignment::getNthKid(int n) const {
     case 1:
       return m_array;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
   return ConstructPtr();
@@ -226,7 +226,7 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
       m_array = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:
-      ASSERT(false);
+      assert(false);
       break;
   }
 }
@@ -351,7 +351,7 @@ void ListAssignment::preOutputVariables(CodeGenerator &cg,
 
 bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                   int state) {
-  ASSERT(m_array);
+  assert(m_array);
 
   if (!cg.inExpression()) return true;
 

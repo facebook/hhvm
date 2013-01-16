@@ -110,7 +110,7 @@ class Variant : VariantBase {
      * store through m_countAndTypeUnion aliases _count and m_type.
      */
     m_countAndTypeUnion = 0;
-    ASSERT(!isInitialized());
+    assert(!isInitialized());
   }
 
   Variant() {
@@ -149,12 +149,12 @@ class Variant : VariantBase {
   Variant(const std::string &v);
   Variant(const StaticString &v) : _count(0), m_type(KindOfStaticString) {
     StringData *s = v.get();
-    ASSERT(s);
+    assert(s);
     m_data.pstr = s;
   }
   Variant(const StaticArray &v) : _count(0), m_type(KindOfArray) {
     ArrayData *a = v.get();
-    ASSERT(a);
+    assert(a);
     m_data.parr = a;
   }
 
@@ -236,12 +236,12 @@ public:
 // int64
 
   inline ALWAYS_INLINE int64 asInt64Val() const {
-    ASSERT(m_type == KindOfInt64);
+    assert(m_type == KindOfInt64);
     return m_data.num;
   }
 
   inline ALWAYS_INLINE int64 toInt64Val() const {
-    ASSERT(is(KindOfInt64));
+    assert(is(KindOfInt64));
     return
         LIKELY(m_type == KindOfInt64) ?
         m_data.num : m_data.pref->var()->m_data.num;
@@ -251,12 +251,12 @@ public:
 // double
 
   inline ALWAYS_INLINE double asDoubleVal() const {
-    ASSERT(m_type == KindOfDouble);
+    assert(m_type == KindOfDouble);
     return m_data.dbl;
   }
 
   inline ALWAYS_INLINE double toDoubleVal() const {
-    ASSERT(is(KindOfDouble));
+    assert(is(KindOfDouble));
     return
         LIKELY(m_type == KindOfDouble) ?
         m_data.dbl : m_data.pref->var()->m_data.dbl;
@@ -266,12 +266,12 @@ public:
 // boolean
 
   inline ALWAYS_INLINE bool asBooleanVal() const {
-    ASSERT(m_type == KindOfBoolean);
+    assert(m_type == KindOfBoolean);
     return m_data.num;
   }
 
   inline ALWAYS_INLINE bool toBooleanVal() const {
-    ASSERT(is(KindOfBoolean));
+    assert(is(KindOfBoolean));
     return
         LIKELY(m_type == KindOfBoolean) ?
         m_data.num : m_data.pref->var()->m_data.num;
@@ -281,28 +281,28 @@ public:
 // string
 
   inline ALWAYS_INLINE const String & asCStrRef() const {
-    ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
-    ASSERT(m_data.pstr);
+    assert(m_type == KindOfString || m_type == KindOfStaticString);
+    assert(m_data.pstr);
     return *(const String*)(this);
   }
 
   inline ALWAYS_INLINE const String & toCStrRef() const {
-    ASSERT(is(KindOfString) || is(KindOfStaticString));
-    ASSERT(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
+    assert(is(KindOfString) || is(KindOfStaticString));
+    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
     return *(const String*)(
         LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
         this : this->m_data.pref->var());
   }
 
   inline ALWAYS_INLINE String & asStrRef() {
-    ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
-    ASSERT(m_data.pstr);
+    assert(m_type == KindOfString || m_type == KindOfStaticString);
+    assert(m_data.pstr);
     return *(String*)(this);
   }
 
   inline ALWAYS_INLINE String & toStrRef() {
-    ASSERT(is(KindOfString) || is(KindOfStaticString));
-    ASSERT(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
+    assert(is(KindOfString) || is(KindOfStaticString));
+    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
     return *(String*)(
         LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
         this : this->m_data.pref->var());
@@ -312,28 +312,28 @@ public:
 // array
 
   inline ALWAYS_INLINE const Array & asCArrRef() const {
-    ASSERT(m_type == KindOfArray);
-    ASSERT(m_data.parr);
+    assert(m_type == KindOfArray);
+    assert(m_data.parr);
     return *(const Array*)(this);
   }
 
   inline ALWAYS_INLINE const Array & toCArrRef() const {
-    ASSERT(is(KindOfArray));
-    ASSERT(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
+    assert(is(KindOfArray));
+    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
     return *(const Array*)(
         LIKELY(m_type == KindOfArray) ?
         this : this->m_data.pref->var());
   }
 
   inline ALWAYS_INLINE Array & asArrRef() {
-    ASSERT(m_type == KindOfArray);
-    ASSERT(m_data.parr);
+    assert(m_type == KindOfArray);
+    assert(m_data.parr);
     return *(Array*)(this);
   }
 
   inline ALWAYS_INLINE Array & toArrRef() {
-    ASSERT(is(KindOfArray));
-    ASSERT(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
+    assert(is(KindOfArray));
+    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
     return *(Array*)(
         LIKELY(m_type == KindOfArray) ?
         this : this->m_data.pref->var());
@@ -343,28 +343,28 @@ public:
 // object
 
   inline ALWAYS_INLINE const Object & asCObjRef() const {
-    ASSERT(m_type == KindOfObject);
-    ASSERT(m_data.pobj);
+    assert(m_type == KindOfObject);
+    assert(m_data.pobj);
     return *(const Object*)(this);
   }
 
   inline ALWAYS_INLINE const Object & toCObjRef() const {
-    ASSERT(is(KindOfObject));
-    ASSERT(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
+    assert(is(KindOfObject));
+    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
     return *(const Object*)(
         LIKELY(m_type == KindOfObject) ?
         this : this->m_data.pref->var());
   }
 
   inline ALWAYS_INLINE Object & asObjRef() {
-    ASSERT(m_type == KindOfObject);
-    ASSERT(m_data.pobj);
+    assert(m_type == KindOfObject);
+    assert(m_data.pobj);
     return *(Object*)(this);
   }
 
   inline ALWAYS_INLINE Object & toObjRef() {
-    ASSERT(is(KindOfObject));
-    ASSERT(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
+    assert(is(KindOfObject));
+    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
     return *(Object*)(
         LIKELY(m_type == KindOfObject) ?
         this : this->m_data.pref->var());
@@ -473,16 +473,16 @@ public:
   int getRefCount() const;
 
   bool getBoolean() const {
-    ASSERT(getType() == KindOfBoolean);
+    assert(getType() == KindOfBoolean);
     bool val = m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
     return val;
   }
   int64 getInt64() const {
-    ASSERT(getType() == KindOfInt64);
+    assert(getType() == KindOfInt64);
     return m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
   }
   double getDouble() const {
-    ASSERT(getType() == KindOfDouble);
+    assert(getType() == KindOfDouble);
     return m_type == KindOfRef ? m_data.pref->var()->m_data.dbl : m_data.dbl;
   }
 
@@ -829,14 +829,14 @@ public:
       return m_data.pref->var()->lval(key);
     }
 
-    ASSERT(m_type == KindOfArray);
+    assert(m_type == KindOfArray);
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated = arr->lval(key, ret, arr->getCount() > 1);
     if (escalated) {
       set(escalated);
     }
-    ASSERT(ret);
+    assert(ret);
     return *ret;
   }
 
@@ -1054,54 +1054,54 @@ public:
    * Low level access that should be restricted to internal use.
    */
   int64 *getInt64Data() const {
-    ASSERT(getType() == KindOfInt64);
+    assert(getType() == KindOfInt64);
     return m_type == KindOfRef ? &m_data.pref->var()->m_data.num : &m_data.num;
   }
   double *getDoubleData() const {
-    ASSERT(getType() == KindOfDouble);
+    assert(getType() == KindOfDouble);
     return m_type == KindOfRef ? &m_data.pref->var()->m_data.dbl : &m_data.dbl;
   }
   StringData *getStringData() const {
-    ASSERT(getType() == KindOfString || getType() == KindOfStaticString);
+    assert(getType() == KindOfString || getType() == KindOfStaticString);
     return m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr;
   }
   StringData *getStringDataOrNull() const {
     // This is a necessary evil because getStringData() returns
     // an undefined result if this is a null variant
-    ASSERT(isNull() || is(KindOfString) || is(KindOfStaticString));
+    assert(isNull() || is(KindOfString) || is(KindOfStaticString));
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? NULL :
         m_data.pref->var()->m_data.pstr) :
       (m_type <= KindOfNull ? NULL : m_data.pstr);
   }
   ArrayData *getArrayData() const {
-    ASSERT(is(KindOfArray));
+    assert(is(KindOfArray));
     return m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr;
   }
   ArrayData *getArrayDataOrNull() const {
     // This is a necessary evil because getArrayData() returns
     // an undefined result if this is a null variant
-    ASSERT(isNull() || is(KindOfArray));
+    assert(isNull() || is(KindOfArray));
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? NULL :
         m_data.pref->var()->m_data.parr) :
       (m_type <= KindOfNull ? NULL : m_data.parr);
   }
   ObjectData *getObjectData() const {
-    ASSERT(is(KindOfObject));
+    assert(is(KindOfObject));
     return m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj;
   }
   ObjectData *getObjectDataOrNull() const {
     // This is a necessary evil because getObjectData() returns
     // an undefined result if this is a null variant
-    ASSERT(isNull() || is(KindOfObject));
+    assert(isNull() || is(KindOfObject));
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? NULL :
         m_data.pref->var()->m_data.pobj) :
       (m_type <= KindOfNull ? NULL : m_data.pobj);
   }
   Variant *getRefData() const {
-    ASSERT(m_type == KindOfRef);
+    assert(m_type == KindOfRef);
     return m_data.pref->var();
   }
 
@@ -1135,40 +1135,40 @@ public:
     return (TypedValueAccessor)value;
   }
   static DataType GetAccessorType(TypedValueAccessor acc) {
-    ASSERT(acc);
+    assert(acc);
     return acc->m_type;
   }
   static bool GetBoolean(TypedValueAccessor acc) {
-    ASSERT(acc && acc->m_type == KindOfBoolean);
+    assert(acc && acc->m_type == KindOfBoolean);
     return acc->m_data.num;
   }
   static int64 GetInt64(TypedValueAccessor acc) {
-    ASSERT(acc);
-    ASSERT(acc->m_type == KindOfInt64);
+    assert(acc);
+    assert(acc->m_type == KindOfInt64);
     return acc->m_data.num;
   }
   static double GetDouble(TypedValueAccessor acc) {
-    ASSERT(acc && acc->m_type == KindOfDouble);
+    assert(acc && acc->m_type == KindOfDouble);
     return acc->m_data.dbl;
   }
   static bool IsString(TypedValueAccessor acc) {
     return acc->m_type == KindOfString || acc->m_type == KindOfStaticString;
   }
   static StringData *GetStringData(TypedValueAccessor acc) {
-    ASSERT(acc);
-    ASSERT(acc->m_type == KindOfString || acc->m_type == KindOfStaticString);
+    assert(acc);
+    assert(acc->m_type == KindOfString || acc->m_type == KindOfStaticString);
     return acc->m_data.pstr;
   }
   static ArrayData *GetArrayData(TypedValueAccessor acc) {
-    ASSERT(acc && acc->m_type == KindOfArray);
+    assert(acc && acc->m_type == KindOfArray);
     return acc->m_data.parr;
   }
   static ObjectData *GetObjectData(TypedValueAccessor acc) {
-    ASSERT(acc && acc->m_type == KindOfObject);
+    assert(acc && acc->m_type == KindOfObject);
     return acc->m_data.pobj;
   }
   static ObjectData *GetArrayAccess(TypedValueAccessor acc) {
-    ASSERT(acc && acc->m_type == KindOfObject);
+    assert(acc && acc->m_type == KindOfObject);
     ObjectData *obj = acc->m_data.pobj;
     if (!obj->o_instanceof("ArrayAccess")) {
       throw InvalidOperandException("not ArrayAccess objects");
@@ -1176,12 +1176,12 @@ public:
     return obj;
   }
   static Array &GetAsArray(TypedValueAccessor acc) {
-    ASSERT(acc && acc->m_type == KindOfArray);
+    assert(acc && acc->m_type == KindOfArray);
     return *(Array*)acc;
   }
 
   static String &GetAsString(TypedValueAccessor acc) {
-    ASSERT(IsString(acc));
+    assert(IsString(acc));
     return *(String*)acc;
   }
 
@@ -1211,7 +1211,7 @@ public:
  private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
-    ASSERT(m_type != KindOfRef);
+    assert(m_type != KindOfRef);
     return m_type <= KindOfNull ||
       (m_type == KindOfBoolean && !m_data.num) ||
       ((m_type == KindOfString || m_type == KindOfStaticString) &&
@@ -1275,8 +1275,8 @@ public:
 public:
 #endif
   static inline ALWAYS_INLINE void PromoteToRef(CVarRef v) {
-    ASSERT(hhvm || !v.isVarNR());
-    ASSERT(&v != &null_variant);
+    assert(hhvm || !v.isVarNR());
+    assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
       RefData *ref = NEW(RefData)(v.m_type, v.m_data.num);
       const_cast<Variant&>(v).m_type = KindOfRef;
@@ -1311,7 +1311,7 @@ public:
   inline ALWAYS_INLINE void constructValHelper(CVarRef v) {
     const Variant *other =
       UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
-    ASSERT(this != other);
+    assert(this != other);
     if (IS_REFCOUNTED_TYPE(other->m_type)) {
       other->m_data.pstr->incRefCount();
     }
@@ -1322,13 +1322,13 @@ public:
 
   inline ALWAYS_INLINE
   void setWithRefHelper(CVarRef v, const ArrayData *arr, bool destroy) {
-    ASSERT(this != &v);
+    assert(this != &v);
 
     CVarRef rhs = v.m_type == KindOfRef && v.m_data.pref->getCount() <= 1 &&
       (!arr || v.m_data.pref->var()->m_data.parr != arr) ?
       *v.m_data.pref->var() : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
-      ASSERT(rhs.m_data.pstr);
+      assert(rhs.m_data.pstr);
       rhs.m_data.pstr->incRefCount();
     }
 
@@ -1402,7 +1402,7 @@ private:
    * The compiler needs to generate a real temporary.
    */
   bool needCopyForSet(CVarRef v) {
-    ASSERT(m_type == KindOfArray);
+    assert(m_type == KindOfArray);
     if (m_data.parr->getCount() > 1) return true;
     if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
     if (v.m_type == KindOfRef) {
@@ -1412,7 +1412,7 @@ private:
   }
 
   bool needCopyForSetRef(CVarRef v) {
-    ASSERT(m_type == KindOfArray);
+    assert(m_type == KindOfArray);
     return m_data.parr->getCount() > 1;
   }
 
@@ -1570,7 +1570,7 @@ public:
   explicit VarNR(const StaticString &v) {
     init(KindOfStaticString);
     StringData *s = v.get();
-    ASSERT(s);
+    assert(s);
     m_data.pstr = s;
   }
 
@@ -1579,7 +1579,7 @@ public:
   explicit VarNR(CObjRef v);
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
-    ASSERT(v && v->isStatic());
+    assert(v && v->isStatic());
     init(KindOfString);
     m_data.pstr = const_cast<StringData*>(v);
   }
@@ -1591,7 +1591,7 @@ public:
   explicit VarNR() { asVariant()->setUninitNull(); }
 
 #ifdef DEBUG
-  ~VarNR() { ASSERT(checkRefCount()); }
+  ~VarNR() { assert(checkRefCount()); }
 #endif
 
   operator CVarRef() const { return *asVariant(); }

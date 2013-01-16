@@ -81,7 +81,7 @@ void verifyFuncReferencesSevered() {
     void visit(Func* f) {
       for (int i = 0; i < f->numPrologues(); ++i) {
         DEBUG_ONLY TCA pro = (TCA)f->getPrologue(i);
-        ASSERT(pro == (TCA)fcallHelperThunk);
+        assert(pro == (TCA)fcallHelperThunk);
       }
     }
   } verify;
@@ -139,7 +139,7 @@ bool TranslatorX64::replace() {
     TxReaper(Translator* tx) : m_tx(tx) { }
     void operator()() {
       TRACE(1, "Tx: reaping tx at %p\n", m_tx);
-      ASSERT(Translator::ReplaceInFlight());
+      assert(Translator::ReplaceInFlight());
       // No prologues, old or new, should be active at treadmill
       // time.
       verifyFuncReferencesSevered();

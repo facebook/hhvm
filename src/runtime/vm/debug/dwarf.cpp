@@ -43,7 +43,7 @@ void DwarfBuf::byte(uint8_t c) {
 }
 
 void DwarfBuf::byte(int off, uint8_t c) {
-  ASSERT((size_t)off < m_buf.size());
+  assert((size_t)off < m_buf.size());
   m_buf[off] = c;
 }
 
@@ -229,7 +229,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
   if (name) {
     f->name = std::string(name);
   } else {
-    ASSERT(func != NULL);
+    assert(func != NULL);
     f->name = lookupFunction(func, exit, inPrologue, true);
   }
   f->file = lookupFile(unit);
@@ -251,7 +251,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
     m_functions.erase(it);
     delete(f);
     f = m_functions[end];
-    ASSERT(f->m_chunk != NULL);
+    assert(f->m_chunk != NULL);
     f->m_chunk->clearSynced();
     f->clearPerfSynced();
   } else {

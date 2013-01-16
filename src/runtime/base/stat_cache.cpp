@@ -447,8 +447,8 @@ void StatCache::clear() {
     m_root->expirePaths();
   }
   m_root = NULL;
-  ASSERT(m_path2Node.size() == 0);
-  ASSERT(m_lpath2Node.size() == 0);
+  assert(m_path2Node.size() == 0);
+  assert(m_lpath2Node.size() == 0);
 }
 
 void StatCache::reset() {
@@ -496,7 +496,7 @@ bool StatCache::mergePath(const std::string& path, bool follow) {
   std::string canonicalPath = Util::canonicalize(path);
   std::vector<std::string> pvec;
   Util::split('/', canonicalPath.c_str(), pvec);
-  ASSERT((pvec[0].size() == 0)); // path should be absolute.
+  assert((pvec[0].size() == 0)); // path should be absolute.
   // Lazily initialize so that if StatCache never gets used, no kernel
   // resources are consumed.
   if (m_ifd == -1 && init()) {
@@ -537,7 +537,7 @@ bool StatCache::handleEvent(const struct inotify_event* event) {
     reset();
     return true;
   }
-  ASSERT(event->wd != -1);
+  assert(event->wd != -1);
   NodePtr node;
   if (!mapGet(m_watch2Node, event->wd, &node)) {
     TRACE(1, "StatCache: inotify event (obsolete) %s\n",
@@ -631,7 +631,7 @@ void StatCache::refresh() {
     int nread = read(m_ifd, m_readBuf, kReadBufSize);
     if (nread == -1) {
       // No pending events.
-      ASSERT(errno == EAGAIN);
+      assert(errno == EAGAIN);
       // Record the last refresh time *after* processing the event queue, in
       // order to assure that once the event queue has been merged into the
       // cache state, all cached values have timestamps older than
@@ -775,7 +775,7 @@ __FBSDID("$FreeBSD: src/lib/libc/stdlib/realpath.c,v 1.24 2011/11/04 19:56:34 ed
 // components.  Returns the resolved path on success, or "" on failure,
 std::string StatCache::realpathImpl(const char* path) {
   std::string resolved;
-  ASSERT(path != NULL);
+  assert(path != NULL);
   if (path[0] != '/') {
     return realpathLibc(path);
   }

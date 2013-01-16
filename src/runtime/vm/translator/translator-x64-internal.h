@@ -728,13 +728,8 @@ emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
 
 static void
 emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
-  if (RuntimeOption::EvalJitCmovVarDeref) {
-    a.cmp_imm32_disp_reg32(KindOfRef, TVOFF(m_type), reg);
-    a.cload_reg64_disp_reg64(CC_Z, reg, TVOFF(m_data), reg);
-  } else {
-    IfVariant ifVar(a, reg);
-    emitDeref(a, reg, reg);
-  }
+  a.cmp_imm32_disp_reg32(KindOfRef, TVOFF(m_type), reg);
+  a.cload_reg64_disp_reg64(CC_Z, reg, TVOFF(m_data), reg);
 }
 
 // NB: leaves count field unmodified. Does not store to m_data if type

@@ -1189,7 +1189,7 @@ asm_label(a, release);
  * Translation call targets. It is a lot easier, and a bit more
  * portable, to use C linkage from assembly.
  */
-TCA TranslatorX64::retranslate(SrcKey sk, bool align, bool useHHIR) {
+TCA TranslatorX64::retranslate(SrcKey sk, bool align, bool allowIR) {
   if (isDebuggerAttachedProcess() && isSrcKeyInBL(curUnit(), sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
@@ -1199,7 +1199,7 @@ TCA TranslatorX64::retranslate(SrcKey sk, bool align, bool useHHIR) {
   LeaseHolder writer(s_writeLease);
   if (!writer) return NULL;
   SKTRACE(1, sk, "retranslate\n");
-  return translate(&sk, align, useHHIR);
+  return translate(sk, align, allowIR);
 }
 
 // Only use comes from HHIR's cgExitTrace() case TraceExitType::SlowNoProgress
@@ -1222,7 +1222,7 @@ TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
     // interpretation of this BB.
     return NULL;
   }
-  TCA start = translate(&sk, align, false);
+  TCA start = translate(sk, align, false);
   if (start != NULL) {
     smashJmp(getAsmFor(toSmash), toSmash, start);
   }
@@ -1287,24 +1287,24 @@ reqName(int req) {
  * a translation.
  */
 TCA
-TranslatorX64::getTranslation(const SrcKey *sk, bool align,
+TranslatorX64::getTranslation(SrcKey sk, bool align,
                               bool forceNoHHIR /* = false */) {
   curFunc()->validate();
-  SKTRACE(2, *sk, "getTranslation: curUnit %s funcId %llx offset %d\n",
+  SKTRACE(2, sk, "getTranslation: curUnit %s funcId %llx offset %d\n",
           curUnit()->filepath()->data(),
-          sk->m_funcId,
-          sk->offset());
-  SKTRACE(2, *sk, "   funcId: %llx\n",
+          sk.m_funcId,
+          sk.offset());
+  SKTRACE(2, sk, "   funcId: %llx\n",
           curFunc()->getFuncId());
 
   if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
-    SKTRACE(2, *sk, "punting on pseudoMain\n");
+    SKTRACE(2, sk, "punting on pseudoMain\n");
     return NULL;
   }
-  if (const SrcRec* sr = m_srcDB.find(*sk)) {
+  if (const SrcRec* sr = m_srcDB.find(sk)) {
     TCA tca = sr->getTopTranslation();
     if (tca) {
-      SKTRACE(2, *sk, "getTranslation: found %p\n", tca);
+      SKTRACE(2, sk, "getTranslation: found %p\n", tca);
       return tca;
     }
   }
@@ -1320,7 +1320,7 @@ TranslatorX64::numTranslations(SrcKey sk) const {
 }
 
 TCA
-TranslatorX64::createTranslation(const SrcKey* sk, bool align,
+TranslatorX64::createTranslation(SrcKey sk, bool align,
                                  bool forceNoHHIR /* = false */) {
   /*
    * Try to become the writer. We delay this until we *know* we will have
@@ -1328,9 +1328,12 @@ TranslatorX64::createTranslation(const SrcKey* sk, bool align,
    * lottery at the dawn of time. Hopefully lots of requests won't require
    * any new translation.
    */
+  auto retransl = [&] {
+    return retranslate(sk, align, !forceNoHHIR);
+  };
   LeaseHolder writer(s_writeLease);
   if (!writer) return NULL;
-  if (SrcRec* sr = m_srcDB.find(*sk)) {
+  if (SrcRec* sr = m_srcDB.find(sk)) {
     TCA tca = sr->getTopTranslation();
     if (tca) {
       // Handle extremely unlikely race; someone may have just already
@@ -1341,8 +1344,7 @@ TranslatorX64::createTranslation(const SrcKey* sk, bool align,
       // Since we are holding the write lease, we know that sk is properly
       // initialized, except that it has no translations (due to
       // replaceOldTranslations)
-      return retranslate(*sk, align,
-                         RuntimeOption::EvalJitUseIR && !forceNoHHIR);
+      return retransl();
     }
   }
 
@@ -1352,10 +1354,10 @@ TranslatorX64::createTranslation(const SrcKey* sk, bool align,
   TCA astart = a.code.frontier;
   TCA stubstart = astubs.code.frontier;
   TCA req = emitServiceReq(SRFlags::SRNone, REQ_RETRANSLATE,
-                           1, uint64_t(sk->offset()));
-  SKTRACE(1, *sk, "inserting anchor translation for (%p,%d) at %p\n",
-          curUnit(), sk->offset(), req);
-  SrcRec* sr = m_srcDB.insert(*sk);
+                           1, uint64_t(sk.offset()));
+  SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
+          curUnit(), sk.offset(), req);
+  SrcRec* sr = m_srcDB.insert(sk);
   sr->setFuncInfo(curFunc());
   sr->setAnchorTranslation(req);
 
@@ -1363,16 +1365,16 @@ TranslatorX64::createTranslation(const SrcKey* sk, bool align,
   size_t stubsize = astubs.code.frontier - stubstart;
   assert(asize == 0);
   if (stubsize) {
-    addTranslation(TransRec(*sk, curUnit()->md5(), TransAnchor,
+    addTranslation(TransRec(sk, curUnit()->md5(), TransAnchor,
                             astart, asize, stubstart, stubsize));
     assert(getTransRec(stubstart)->kind == TransAnchor);
   }
 
-  return retranslate(*sk, align, RuntimeOption::EvalJitUseIR && !forceNoHHIR);
+  return retransl();
 }
 
 TCA
-TranslatorX64::lookupTranslation(const SrcKey& sk) const {
+TranslatorX64::lookupTranslation(SrcKey sk) const {
   if (SrcRec* sr = m_srcDB.find(sk)) {
     return sr->getTopTranslation();
   }
@@ -1380,40 +1382,32 @@ TranslatorX64::lookupTranslation(const SrcKey& sk) const {
 }
 
 TCA
-TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
+TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
+  bool useHHIR = allowIR && RuntimeOption::EvalJitUseIR;
   INC_TPC(translate);
   assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assert(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
   if (useHHIR) {
     if (m_numHHIRTrans == RuntimeOption::EvalMaxHHIRTrans) {
-      useHHIR = false;
-      m_useHHIR = false;
+      useHHIR = m_useHHIR = false;
       RuntimeOption::EvalJitUseIR = false;
     } else {
-      hhirTraceStart(sk->offset());
+      hhirTraceStart(sk.offset());
     }
   } else {
     assert(m_useHHIR == false);
   }
-
-  std::unique_ptr<Tracelet> tlet = analyze(*sk);
 
   if (align) {
     moveToAlign(a, kNonFallthroughAlign);
   }
 
   TCA start = a.code.frontier;
-  if (!translateTracelet(*tlet)) {
-    // If translating with the IR failed, reanalyze.
-    assert(!m_useHHIR);
-    tlet = analyze(*sk);
-    UNUSED bool success = translateTracelet(*tlet);
-    assert(success);
-  }
+  translateTracelet(sk);
 
-  SKTRACE(1, *sk, "translate moved head from %p to %p\n",
-          getTopTranslation(*sk), start);
+  SKTRACE(1, sk, "translate moved head from %p to %p\n",
+          getTopTranslation(sk), start);
   if (Trace::moduleEnabledRelease(tcdump, 1)) {
     static __thread int n;
     if (++n % 10000 == 0) {
@@ -1784,7 +1778,7 @@ TranslatorX64::getCallArrayProlog(Func* func) {
     }
   } else {
     SrcKey sk(func, func->base());
-    tca = tx64->getTranslation(&sk, false);
+    tca = tx64->getTranslation(sk, false);
   }
 
   return tca;
@@ -2368,7 +2362,7 @@ TranslatorX64::emitBindCallHelper(SrcKey srcKey,
 
 // for documentation see bindJmpccFirst below
 void
-TranslatorX64::emitCondJmp(const SrcKey &skTaken, const SrcKey &skNotTaken,
+TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
                            ConditionCode cc) {
   // should be true for SrcKeys generated via OpJmpZ/OpJmpNZ
   assert(skTaken.m_funcId == skNotTaken.m_funcId);
@@ -2396,12 +2390,12 @@ TranslatorX64::emitCondJmp(const SrcKey &skTaken, const SrcKey &skNotTaken,
   a.jmp(stub); // MUST use 4-byte immediate form
 }
 
-static void skToName(const SrcKey& sk, char* name) {
+static void skToName(SrcKey sk, char* name) {
   sprintf(name, "sk_%08lx_%05d",
           long(sk.m_funcId), sk.offset());
 }
 
-static void skToClusterName(const SrcKey& sk, char* name) {
+static void skToClusterName(SrcKey sk, char* name) {
   sprintf(name, "skCluster_%08lx_%05d",
           long(sk.m_funcId), sk.offset());
 }
@@ -2493,7 +2487,7 @@ void TranslatorX64::drawCFG(std::ofstream& out) const {
 TCA
 TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
                        ServiceRequest req, bool& smashed) {
-  TCA tDest = getTranslation(&destSk, false, req == REQ_BIND_JMP_NO_IR);
+  TCA tDest = getTranslation(destSk, false, req == REQ_BIND_JMP_NO_IR);
   if (!tDest) return NULL;
   LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
@@ -2566,7 +2560,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
     !m_srcDB.find(dest);
 
   TCA tDest;
-  tDest = getTranslation(&dest, !fallThru /* align */);
+  tDest = getTranslation(dest, !fallThru /* align */);
   if (!tDest) {
     return 0;
   }
@@ -2598,7 +2592,7 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
                                ConditionCode cc, bool& smashed) {
   const Func* f = curFunc();
   SrcKey dest(f, off);
-  TCA branch = getTranslation(&dest, true);
+  TCA branch = getTranslation(dest, true);
   LeaseHolder writer(s_writeLease, NO_ACQUIRE);
   if (branch && writer.acquire()) {
     smashed = true;
@@ -2626,7 +2620,7 @@ static void emitJmpOrJcc(X64Assembler& a, ConditionCode cc, TCA addr) {
  */
 void
 TranslatorX64::emitBindJ(X64Assembler& _a, ConditionCode cc,
-                         const SrcKey& dest, ServiceRequest req) {
+                         SrcKey dest, ServiceRequest req) {
   prepareForSmash(_a, cc == CC_None ? (int)kJmpLen : kJmpccLen);
   TCA toSmash = _a.code.frontier;
   if (&_a == &astubs) {
@@ -2646,20 +2640,20 @@ TranslatorX64::emitBindJ(X64Assembler& _a, ConditionCode cc,
 
 void
 TranslatorX64::emitBindJcc(X64Assembler& _a, ConditionCode cc,
-                           const SrcKey& dest,
+                           SrcKey dest,
                            ServiceRequest req /* = REQ_BIND_JCC */) {
   emitBindJ(_a, cc, dest, req);
 }
 
 void
 TranslatorX64::emitBindJmp(X64Assembler& _a,
-                           const SrcKey& dest,
+                           SrcKey dest,
                            ServiceRequest req /* = REQ_BIND_JMP */) {
   emitBindJ(_a, CC_None, dest, req);
 }
 
 void
-TranslatorX64::emitBindJmp(const SrcKey& dest) {
+TranslatorX64::emitBindJmp(SrcKey dest) {
   emitBindJmp(a, dest);
 }
 
@@ -2812,7 +2806,7 @@ uint64_t TranslatorX64::packBitVec(const vector<bool>& bits, unsigned i) {
 
 void
 TranslatorX64::checkRefs(X64Assembler& a,
-                         const SrcKey& sk,
+                         SrcKey sk,
                          const RefDeps& refDeps,
                          SrcRec& fail) {
   if (refDeps.size() == 0) {
@@ -3130,7 +3124,7 @@ TranslatorX64::enterTC(SrcKey sk) {
   TReqInfo info;
   info.requestNum = -1;
   info.saved_rStashedAr = 0;
-  TCA start = getTranslation(&sk, true);
+  TCA start = getTranslation(sk, true);
   for (;;) {
     assert(sizeof(Cell) == 16);
     assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
@@ -3147,7 +3141,7 @@ TranslatorX64::enterTC(SrcKey sk) {
       PC newPc = g_vmContext->getPC();
       if (!newPc) { g_vmContext->m_fp = 0; return; }
       sk = SrcKey(curFunc(), newPc);
-      start = getTranslation(&sk, true);
+      start = getTranslation(sk, true);
     }
     assert(isValidCodeAddress(start));
     assert(!s_writeLease.amOwner());
@@ -3299,7 +3293,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_BIND_REQUIRE: {
     ReqLitStaticArgs* rlsa = (ReqLitStaticArgs*)args[0];
     sk = SrcKey((Func*)args[1], (Offset)args[2]);
-    start = getTranslation(&sk, true);
+    start = getTranslation(sk, true);
     if (start) {
       LeaseHolder writer(s_writeLease);
       if (writer) {
@@ -3320,7 +3314,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_RETRANSLATE: {
     INC_TPC(retranslate);
     sk = SrcKey(curFunc(), (Offset)args[0]);
-    start = retranslate(sk, true, RuntimeOption::EvalJitUseIR);
+    start = retranslate(sk, true, true);
     SKTRACE(2, sk, "retranslated @%p\n", start);
   } break;
 
@@ -3348,7 +3342,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     SrcKey newSk(curFunc(), newPc);
     SKTRACE(5, newSk, "interp: exit\n");
     sk = newSk;
-    start = getTranslation(&newSk, true);
+    start = getTranslation(newSk, true);
   } break;
 
   case REQ_POST_INTERP_RET: {
@@ -3362,7 +3356,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
     SrcKey dest(caller->m_func, vmpc());
     sk = dest;
-    start = getTranslation(&dest, true);
+    start = getTranslation(dest, true);
     TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
           ar->m_func->fullName()->data(),
           caller->m_func->fullName()->data());
@@ -3371,7 +3365,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_RESUME: {
     SrcKey dest(curFunc(), vmpc());
     sk = dest;
-    start = getTranslation(&dest, true);
+    start = getTranslation(dest, true);
   } break;
 
   case REQ_STACK_OVERFLOW: {
@@ -10987,6 +10981,7 @@ TranslatorX64::translateInstr(const Tracelet& t,
    *      up to date.
    */
   assert(!m_useHHIR);
+  assert(!(RuntimeOption::EvalJitUseIR && RuntimeOption::EvalHHIRDisableTx64));
   assert(!i.outStack || i.outStack->isStack());
   assert(!i.outLocal || i.outLocal->isLocal());
   const char *opNames[] = {
@@ -11112,7 +11107,7 @@ TranslatorX64::translateInstr(const Tracelet& t,
 }
 
 bool
-TranslatorX64::checkTranslationLimit(const SrcKey& sk,
+TranslatorX64::checkTranslationLimit(SrcKey sk,
                                      const SrcRec& srcRec) const {
   if (srcRec.translations().size() == SrcRec::kMaxTranslations) {
     INC_TPC(max_trans);
@@ -11150,7 +11145,7 @@ TranslatorX64::checkTranslationLimit(const SrcKey& sk,
 
 void
 TranslatorX64::emitGuardChecks(X64Assembler& a,
-                               const SrcKey& sk,
+                               SrcKey sk,
                                const ChangeMap& dependencies,
                                const RefDeps& refDeps,
                                SrcRec& fail) {
@@ -11188,7 +11183,7 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   if (!debug) return;
 
-  const SrcKey& sk = t.m_sk;
+  SrcKey sk = t.m_sk;
 
   TRACE(3, "----------------------------------------------\n");
   TRACE(3, "  Translating from file %s:%d %s at %p:\n",
@@ -11233,10 +11228,10 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   }
 }
 
-bool
-TranslatorX64::translateTracelet(const Tracelet& t) {
-  const SrcKey &sk = t.m_sk;
-
+void
+TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/) {
+  std::unique_ptr<Tracelet> tp = analyze(sk);
+  const Tracelet& t = *tp;
   m_curTrace = &t;
   Nuller<Tracelet> ctNuller(&m_curTrace);
 
@@ -11251,24 +11246,30 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   vector<TransBCMapping>  bcMapping;
   TransKind               transKind;
 
-  if (m_useHHIR) {
-    if (irTranslateTracelet(t, start, stubStart, &bcMapping)) {
-      m_irAUsage += (a.code.frontier - start);
-      m_irAstubsUsage += (astubs.code.frontier - stubStart);
-      transKind = TransNormalIR;
-    } else {
-      // If irTranslateTracelet failed we want to reanalyze the
-      // tracelet with more optimizations turned on, so bail out of here
-      return false;
-    }
-  } else {
+  if (m_useHHIR && irTranslateTracelet(t, start, stubStart, &bcMapping)) {
+    m_irAUsage += (a.code.frontier - start);
+    m_irAstubsUsage += (astubs.code.frontier - stubStart);
+    transKind = TransNormalIR;
+  } else { // Regular old tx64.
     assert(m_pendingFixups.size() == 0);
     assert(srcRec.inProgressTailJumps().size() == 0);
+    assert(!m_useHHIR);
     bcMapping.clear();
     transKind = TransNormal;
     try {
       if (t.m_analysisFailed || checkTranslationLimit(t.m_sk, srcRec)) {
         punt();
+      }
+      // If we failed to IR-translate the tracelet, either reanalyze
+      // with more aggressive assumptions, or fall back to the
+      // interpreter.
+      if (considerHHIR) {
+        if (RuntimeOption::EvalHHIRDisableTx64) {
+          punt();
+        }
+        // Recur. We need to re-analyze. Since m_useHHIR is clear, we
+        // won't go down this path again.
+        return translateTracelet(sk, false);
       }
 
       emitGuardChecks(a, t.m_sk, t.m_dependencies, t.m_refDeps, srcRec);
@@ -11351,7 +11352,6 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease(getUsage().c_str());
   }
-  return true;
 }
 
 /*
@@ -11856,7 +11856,7 @@ void TranslatorX64::recordBCInstr(uint32_t op,
   }
 }
 
-void TranslatorX64::recordGdbTranslation(const SrcKey& sk,
+void TranslatorX64::recordGdbTranslation(SrcKey sk,
                                          const Func* srcFunc,
                                          const X64Assembler& a,
                                          const TCA start,
@@ -11987,7 +11987,7 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
   return true;
 }
 
-void TranslatorX64::addDbgGuardImpl(const SrcKey& sk, SrcRec& srcRec) {
+void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
   TCA dbgGuard = a.code.frontier;
   // Emit the checks for debugger attach
   emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rScratch);
@@ -12182,7 +12182,7 @@ SUPPORTED_OPS()
 #undef INTERP_OP
 #undef SUPPORTED_OPS
 
-void TranslatorX64::invalidateSrcKey(const SrcKey& sk) {
+void TranslatorX64::invalidateSrcKey(SrcKey sk) {
   assert(!RuntimeOption::RepoAuthoritative);
   assert(s_writeLease.amOwner());
   /*

@@ -370,6 +370,25 @@ bool RuntimeOption::EnableTaintWarnings = false;
 int RuntimeOption::TaintTraceMaxStrlen = 127;
 #endif
 
+// Initializers for Eval flags.
+static inline bool evalJitDefault() {
+  // Only use JIT for HHVM
+  if (!hhvm) {
+    return false;
+  }
+
+  // --mode server or --mode daemon
+  // run long enough to justify JIT
+  if (RuntimeOption::serverExecutionMode()) {
+    return true;
+  }
+
+  // JIT explicitly turned on via .hhvm-jit file
+  static const char* path = "/.hhvm-jit";
+  struct stat dummy;
+  return stat(path, &dummy) == 0;
+}
+
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
  0x800
@@ -378,55 +397,12 @@ const uint64_t kEvalVMStackElmsDefault =
 #endif
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
-uint64 RuntimeOption::EvalVMStackElms = kEvalVMStackElmsDefault;
-uint32_t RuntimeOption::EvalVMInitialGlobalTableSize =
-  kEvalVMInitialGlobalTableSizeDefault;
-bool RuntimeOption::EvalJit = false;
-bool RuntimeOption::EvalAllowHhas = false;
-std::string RuntimeOption::EvalJitProfilePath = "/tmp/hhvm-profile";
-int RuntimeOption::EvalJitStressTypePredPercent = 0;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
-uint32 RuntimeOption::EvalJitWarmupRequests = kDefaultWarmupRequests;
-bool RuntimeOption::EvalJitProfileRecord = false;
-bool RuntimeOption::EvalJitNoGdb = true;
-bool RuntimeOption::EvalPerfPidMap = true;
-bool RuntimeOption::EvalProfileBC = false;
-uint32 RuntimeOption::EvalJitTargetCacheSize = 64 << 20;
-bool RuntimeOption::EvalProfileHWEnable = true;
-std::string RuntimeOption::EvalProfileHWEvents = "";
-#define JIT_TRAMPOLINES_DEFAULT true
-bool RuntimeOption::EvalJitTrampolines = JIT_TRAMPOLINES_DEFAULT;
-uint32 RuntimeOption::EvalGdbSyncChunks = 128;
-bool RuntimeOption::EvalJitStressLease = false;
-bool RuntimeOption::EvalJitKeepDbgFiles = false;
-bool RuntimeOption::EvalJitEnableRenameFunction = false;
+#define F(type, name, def) \
+  type RuntimeOption::Eval ## name = type(def);
+EVALFLAGS();
+#undef F
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
-bool RuntimeOption::EvalJitCmovVarDeref = true;
-bool RuntimeOption::EvalJitTransCounters = false;
-bool RuntimeOption::EvalJitUseIR = false;
-bool RuntimeOption::EvalIRPuntDontInterp = false;
-bool RuntimeOption::EvalHHIRGenericDtorHelper = true;
-bool RuntimeOption::EvalHHIRMemOpt = false;
-uint32 RuntimeOption::EvalHHIRNumFreeRegs = (uint32)-1;
-bool RuntimeOption::EvalHHIREnableRematerialization = true;
-bool RuntimeOption::EvalHHIREnableCalleeSavedOpt = true;
-bool RuntimeOption::EvalHHIREnablePreColoring = true;
-bool RuntimeOption::EvalHHIREnableCoalescing = true;
-bool RuntimeOption::EvalHHIREnableMmx = true;
-bool RuntimeOption::EvalHHIREnableRefCountOpt = true;
-bool RuntimeOption::EvalHHIREnableSinking = true;
-bool RuntimeOption::EvalHHIRGenerateAsserts = debug;
-uint64 RuntimeOption::EvalHHIRDirectExit = true;
-uint64 RuntimeOption::EvalMaxHHIRTrans = (uint64)-1;
-bool RuntimeOption::EvalThreadingJit = false;
-bool RuntimeOption::EvalJitDisabledByHphpd = false;
-bool RuntimeOption::EvalJitMGeneric = true;
-bool RuntimeOption::EvalDumpBytecode = false;
-uint32 RuntimeOption::EvalDumpIR = 0;
-bool RuntimeOption::EvalDumpTC = false;
-bool RuntimeOption::EvalDumpAst = false;
-bool RuntimeOption::EvalMapTCHuge = true;
-uint32 RuntimeOption::EvalConstEstimate = 10000;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 size_t RuntimeOption::VMTranslASize = 512 << 20;
@@ -519,24 +495,6 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
     }
   }
   return true;
-}
-
-static inline bool evalJitDefault() {
-  // Only use JIT for HHVM
-  if (!hhvm) {
-    return false;
-  }
-
-  // --mode server or --mode daemon
-  // run long enough to justify JIT
-  if (RuntimeOption::serverExecutionMode()) {
-    return true;
-  }
-
-  // JIT explicitly turned on via .hhvm-jit file
-  static const char* path = "/.hhvm-jit";
-  struct stat dummy;
-  return stat(path, &dummy) == 0;
 }
 
 void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
@@ -1175,57 +1133,36 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     TaintTraceMaxStrlen = eval["TaintTraceMaxStrlen"].getInt32(127);
 #endif
 
-    EvalVMStackElms = eval["VMStackElms"].getUInt64(kEvalVMStackElmsDefault);
-    EvalVMInitialGlobalTableSize =
-      eval["VMInitialGlobalTableSize"].getUInt64(
-        kEvalVMInitialGlobalTableSizeDefault);
-    EvalJit = eval["Jit"].getBool(evalJitDefault());
-    EvalAllowHhas = eval["AllowHhas"].getBool(false);
-    EvalJitNoGdb = eval["JitNoGdb"].getBool(true);
-    EvalPerfPidMap = eval["PerfPidMap"].getBool(true);
-    EvalJitTargetCacheSize = eval["JitTargetCacheSize"].getUInt32(64 << 20);
-    EvalProfileBC = eval["ProfileBC"].getBool(false);
-    EvalProfileHWEnable = eval["ProfileHWEnable"].getBool(true);
-    EvalProfileHWEvents = eval["ProfileHWEvents"].getString();
-    EvalJitTrampolines =
-      eval["JitTrampolines"].getBool(JIT_TRAMPOLINES_DEFAULT);
-    EvalGdbSyncChunks = eval["GdbSyncChunks"].getInt32(128);
-    EvalThreadingJit = eval["ThreadingJit"].getBool(false);
-    EvalJitStressLease = eval["JitStressLease"].getBool(false);
-    EvalJitKeepDbgFiles = eval["JitKeepDbgFiles"].getBool(false);
-    EvalJitEnableRenameFunction =
-      eval["JitEnableRenameFunction"].getBool(false) || !EvalJit;
-    EvalJitDisabledByHphpd = eval["EvalJitDisabledByHphpd"].getBool(false);
-    EvalJitCmovVarDeref = eval["JitCmovVarDeref"].getBool(true);
-    EvalJitTransCounters = eval["JitTransCounters"].getBool(false);
-    EvalJitProfilePath = eval["JitProfilePath"].getString();
-    EvalJitStressTypePredPercent = eval["JitStressTypePredPercent"].getInt32(0);
-    EvalJitProfileRecord = eval["JitProfileRecord"].getBool(false);
-    EvalJitWarmupRequests = eval["JitWarmupRequests"].getInt32(kDefaultWarmupRequests);
-    EvalJitMGeneric = eval["JitMGeneric"].getBool(true);
-    EvalJitUseIR = eval["JitUseIR"].getBool(false);
-    EvalIRPuntDontInterp = eval["IRPuntDontInterp"].getBool(false);
-    EvalHHIRGenericDtorHelper = eval["HHIRGenericDtorHelper"].getBool(true);
-    EvalHHIRMemOpt = eval["HHIRMemOpt"].getBool(true);
-    EvalHHIRNumFreeRegs = eval["HHIRNumFreeRegs"].getUInt32(-1);
-    EvalHHIREnableRematerialization = eval["HHIREnableRematerialization"].getBool(true);
-    EvalHHIREnableCalleeSavedOpt = eval["HHIREnableCalleeSavedOpt"].getBool(true);
-    EvalHHIREnablePreColoring = eval["HHIREnablePreColoring"].getBool(true);
-    EvalHHIREnableCoalescing = eval["HHIREnableCoalescing"].getBool(true);
-    EvalHHIREnableMmx = eval["HHIREnableMmx"].getBool(true);
-    EvalHHIREnableRefCountOpt = eval["HHIREnableRefCountOpt"].getBool(true);
-    EvalHHIREnableSinking = eval["HHIREnableSinking"].getBool(true);
-    EvalHHIRGenerateAsserts = eval["HHIRGenerateAsserts"].getBool(debug);
-    EvalHHIRDirectExit = eval["HHIRDirectExit"].getBool(true);
-    EvalMaxHHIRTrans = eval["MaxHHIRTrans"].getUInt64(-1);
+#define get_double getDouble
+#define get_bool getBool
+#define get_string getString
+#define get_int16 getInt16
+#define get_int32 getInt32
+#define get_int64 getInt64
+#define get_uint16 getUInt16
+#define get_uint32 getUInt32
+#define get_uint32_t getUInt32
+#define get_uint64 getUInt64
+#define F(type, name, defaultVal) \
+    Eval ## name = eval[#name].get_ ##type(defaultVal);
+    EVALFLAGS()
+#undef F
+#undef get_double
+#undef get_bool
+#undef get_string
+#undef get_int16
+#undef get_int32
+#undef get_int64
+#undef get_uint16
+#undef get_uint32
+#undef get_uint32_t
+#undef get_uint64
+
+    EvalJitEnableRenameFunction = EvalJitEnableRenameFunction
+      || !EvalJit;
+
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(!EvalJitUseIR);
     EnableEmitterStats = eval["EnableEmitterStats"].getBool(EnableEmitterStats);
-    EvalDumpBytecode = eval["DumpBytecode"].getBool(false);
-    EvalDumpIR = eval["DumpIR"].getUInt32(0);
-    EvalDumpTC = eval["DumpTC"].getBool(false);
-    EvalDumpAst = eval["DumpAst"].getBool(false);
-    EvalMapTCHuge = eval["MapTCHuge"].getBool(true);
-    EvalConstEstimate = eval["ConstEstimate"].getUInt32(10000);
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
     if (EvalJit && RecordCodeCoverage) {
       throw InvalidArgumentException(

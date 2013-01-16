@@ -833,7 +833,7 @@ private:
   void findImmable(ImmStack &stack, NormalizedInstruction* ni);
 
   virtual void syncWork() = 0;
-  virtual void invalidateSrcKey(const SrcKey& sk) = 0;
+  virtual void invalidateSrcKey(SrcKey sk) = 0;
 
 protected:
   void requestResetHighLevelTranslator();
@@ -846,8 +846,7 @@ protected:
   vector<TransRec>   m_translations;
   vector<uint64*>    m_transCounters;
 
-  // For HHIR-based translation
-  bool               m_useHHIR;
+  bool               m_useHHIR; // Is HHIR in effect for current trace?
 
   int64              m_createdTime;
 

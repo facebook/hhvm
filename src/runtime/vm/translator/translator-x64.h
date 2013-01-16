@@ -706,7 +706,7 @@ PSEUDOINSTRS
   const Func* findCuf(const NormalizedInstruction& ni,
                       Class* &cls, StringData*& invName, bool& forward);
   static uint64_t toStringHelper(ObjectData *obj);
-  void invalidateSrcKey(const SrcKey& sk);
+  void invalidateSrcKey(SrcKey sk);
   bool dontGuardAnyInputs(Opcode op);
  public:
   template<typename T>
@@ -736,14 +736,14 @@ PSEUDOINSTRS
   bool isCodeAddress(TCA) const;
 
   // helpers for srcDB.
-  SrcRec* getSrcRec(const SrcKey& sk) {
+  SrcRec* getSrcRec(SrcKey sk) {
     // TODO: add a insert-or-find primitive to THM
     if (SrcRec* r = m_srcDB.find(sk)) return r;
     assert(s_writeLease.amOwner());
     return m_srcDB.insert(sk);
   }
 
-  TCA getTopTranslation(const SrcKey& sk) {
+  TCA getTopTranslation(SrcKey sk) {
     return getSrcRec(sk)->getTopTranslation();
   }
 
@@ -765,7 +765,7 @@ PSEUDOINSTRS
   // professional.
 
   Asm& getAsm()   { return a; }
-  void emitChainTo(const SrcKey *dest, bool isCall = false);
+  void emitChainTo(SrcKey dest, bool isCall = false);
   void syncOutputs(const Tracelet& t);
   void syncOutputs(const NormalizedInstruction& i);
   void syncOutputs(int stackOff);
@@ -797,7 +797,7 @@ public:
   }
   void interceptPrologues(Func* func);
 
-  void emitGuardChecks(Asm& a, const SrcKey&, const ChangeMap&,
+  void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
     const RefDeps&, SrcRec&);
   void emitOneGuard(const Tracelet& t,
                     const NormalizedInstruction& i,
@@ -821,8 +821,8 @@ private:
   void irTranslateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateInstrDefault(const Tracelet& t,
                                const NormalizedInstruction& i);
-  bool checkTranslationLimit(const SrcKey&, const SrcRec&) const;
-  bool translateTracelet(const Tracelet& t);
+  bool checkTranslationLimit(SrcKey, const SrcRec&) const;
+  void translateTracelet(SrcKey sk, bool considerHHIR=true);
   bool irTranslateTracelet(const Tracelet&         t,
                            const TCA               start,
                            const TCA               stubStart,
@@ -840,7 +840,7 @@ private:
                    SrcRec& fail);
   void irEmitLoadDeps();
 
-  void checkRefs(Asm&, const SrcKey&, const RefDeps&, SrcRec&);
+  void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
 
   void emitDecRefThis(const ScratchReg& tmpReg);
   void emitVVRet(const ScratchReg&, Label& extraArgsReturn,
@@ -884,11 +884,10 @@ private:
     smash(a, src, dest, true);
   }
 
-  TCA getTranslation(const SrcKey* sk, bool align, bool forceNoHHIR = false);
-  TCA createTranslation(const SrcKey* sk, bool align,
-                        bool forceNoHHIR = false);
-  TCA lookupTranslation(const SrcKey& sk) const;
-  TCA translate(const SrcKey *sk, bool align, bool useHHIR);
+  TCA getTranslation(SrcKey sk, bool align, bool forceNoHHIR = false);
+  TCA createTranslation(SrcKey sk, bool align, bool forceNoHHIR = false);
+  TCA lookupTranslation(SrcKey sk) const;
+  TCA translate(SrcKey sk, bool align, bool useHHIR);
   TCA retranslate(SrcKey sk, bool align, bool useHHIR);
   TCA retranslateOpt(TransID transId, bool align);
   TCA retranslateAndPatchNoIR(SrcKey sk,
@@ -933,17 +932,16 @@ private:
 
   TCA emitRetFromInterpretedFrame();
   TCA emitRetFromInterpretedGeneratorFrame();
-  TCA emitGearTrigger(Asm& a, const SrcKey& sk, TransID transId);
+  TCA emitGearTrigger(Asm& a, SrcKey sk, TransID transId);
   void emitPopRetIntoActRec(Asm& a);
   void emitBox(DataType t, PhysReg rToBox);
   void emitUnboxTopOfStack(const NormalizedInstruction& ni);
   int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
-  void emitCondJmp(const SrcKey &skTrue, const SrcKey &skFalse,
-                   ConditionCode cc);
+  void emitCondJmp(SrcKey skTrue, SrcKey skFalse, ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
-  void recordGdbTranslation(const SrcKey& sk, const Func* f,
+  void recordGdbTranslation(SrcKey sk, const Func* f,
                             const Asm& a,
                             const TCA start,
                             bool exit, bool inPrologue);
@@ -965,13 +963,13 @@ private:
   SrcKey emitPrologue(Func* func, int nArgs);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   TCA emitInterceptPrologue(Func* func);
-  void emitBindJ(Asm& a, ConditionCode cc, const SrcKey& dest,
+  void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
                  ServiceRequest req);
-  void emitBindJmp(Asm& a, const SrcKey& dest,
+  void emitBindJmp(Asm& a, SrcKey dest,
                    ServiceRequest req = REQ_BIND_JMP);
-  void emitBindJcc(Asm& a, ConditionCode cc, const SrcKey& dest,
+  void emitBindJcc(Asm& a, ConditionCode cc, SrcKey dest,
                    ServiceRequest req = REQ_BIND_JCC);
-  void emitBindJmp(const SrcKey& dest);
+  void emitBindJmp(SrcKey dest);
   void emitBindCallHelper(SrcKey srcKey,
                           const Func* funcd,
                           int numArgs);
@@ -1066,7 +1064,7 @@ public:
 private:
   virtual bool addDbgGuards(const Unit* unit);
   virtual bool addDbgGuard(const Func* func, Offset offset);
-  void addDbgGuardImpl(const SrcKey& sk, SrcRec& sr);
+  void addDbgGuardImpl(SrcKey sk, SrcRec& sr);
 
 private: // Only for HackIR
   void emitReqRetransNoIR(Asm& as, SrcKey& sk);

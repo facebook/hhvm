@@ -377,61 +377,70 @@ public:
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
+#define EVALFLAGS() \
+  /* F(type, name, defaultVal) */ \
   /*
    * Maximum number of elements on the VM execution stack.
-   */
-  static uint64 EvalVMStackElms;
-
+   */ \
+  F(uint64, VMStackElms, kEvalVMStackElmsDefault) \
   /*
    * Initial space reserved for the global variable environment (in
    * number of global variables).
-   */
-  static uint32_t EvalVMInitialGlobalTableSize;
+   */ \
+  F(uint32_t, VMInitialGlobalTableSize, \
+    kEvalVMInitialGlobalTableSizeDefault) \
+  F(bool, Jit,                         evalJitDefault()) \
+  F(bool, JitUserIR,                   false) \
+  F(bool, AllowHhas,                   false) \
+  F(bool, JitNoGdb,                    true) \
+  F(bool, PerfPidMap,                  true) \
+  F(uint32, JitTargetCacheSize,        64 << 20) \
+  F(bool, ProfileBC,                   false) \
+  F(bool, ProfileHWEnable,             true) \
+  F(string, ProfileHWEvents,           string("")) \
+  F(bool, JitTrampolines,              true) \
+  F(string, JitProfilePath,            string("")) \
+  F(int32, JitStressTypePredPercent,   0) \
+  F(uint32, JitWarmupRequests,         kDefaultWarmupRequests) \
+  F(bool, JitProfileRecord,            false) \
+  F(uint32, GdbSyncChunks,             128) \
+  F(bool, JitStressLease,              false) \
+  F(bool, JitKeepDbgFiles,             false) \
+  F(bool, JitEnableRenameFunction,     false) \
+ \
+  F(bool, JitDisabledByHphpd,          false) \
+  F(bool, ThreadingJit,                false) \
+  F(bool, JitTransCounters,            true) \
+  F(bool, JitMGeneric,                 true) \
+  F(bool, JitUseIR,                    false) \
+  F(bool, IRPuntDontInterp,            false) \
+  F(bool, HHIRGenericDtorHelper,       true) \
+  F(bool, HHIRMemOpt,                  true) \
+  F(uint32, HHIRNumFreeRegs,           -1) \
+  F(bool, HHIREnableRematerialization, true) \
+  F(bool, HHIREnableCalleeSavedOpt,    true) \
+  F(bool, HHIREnablePreColoring,       true) \
+  F(bool, HHIREnableCoalescing,        true) \
+  F(bool, HHIREnableMmx,               true) \
+  F(bool, HHIREnableRefCountOpt,       true) \
+  F(bool, HHIREnableSinking,           true) \
+  F(bool, HHIRGenerateAsserts,         debug) \
+  F(bool, HHIRDirectExit,              true) \
+  F(bool, HHIRDisableTx64,             false) \
+  F(uint64, MaxHHIRTrans,              -1) \
+  F(bool, DumpBytecode,                false) \
+  F(uint32, DumpIR,                    0) \
+  F(bool, DumpTC,                      false) \
+  F(bool, DumpAst,                     false) \
+  F(bool, MapTCHuge,                   true) \
+  F(uint32, ConstEstimate,             10000) \
 
-  static bool EvalJit;
-  static bool EvalAllowHhas;
-  static bool EvalJitNoGdb;
-  static bool EvalPerfPidMap;
-  static uint32 EvalJitTargetCacheSize;
-  static bool EvalProfileBC;
-  static bool EvalProfileHWEnable;
-  static std::string EvalProfileHWEvents;
-  static bool EvalJitTrampolines;
-  static string EvalJitProfilePath;
-  static int EvalJitStressTypePredPercent;
-  static uint32 EvalJitWarmupRequests;
-  static bool EvalJitProfileRecord;
-  static uint32 EvalGdbSyncChunks;
-  static bool EvalJitStressLease;
-  static bool EvalJitKeepDbgFiles;
-  static bool EvalJitEnableRenameFunction;
+#define F(type, name, unused) \
+  static type Eval ## name;
+  EVALFLAGS()
 
-  static bool EvalJitDisabledByHphpd;
-  static bool EvalJitCmovVarDeref;
-  static bool EvalThreadingJit;
-  static bool EvalJitTransCounters;
-  static bool EvalJitMGeneric;
-  static bool EvalJitUseIR;
-  static bool EvalIRPuntDontInterp;
-  static bool EvalHHIRGenericDtorHelper;
-  static bool EvalHHIRMemOpt;
-  static uint32 EvalHHIRNumFreeRegs;
-  static bool EvalHHIREnableRematerialization;
-  static bool EvalHHIREnableCalleeSavedOpt;
-  static bool EvalHHIREnablePreColoring;
-  static bool EvalHHIREnableCoalescing;
-  static bool EvalHHIREnableMmx;
-  static bool EvalHHIREnableRefCountOpt;
-  static bool EvalHHIREnableSinking;
-  static bool EvalHHIRGenerateAsserts;
-  static uint64 EvalHHIRDirectExit;
-  static uint64 EvalMaxHHIRTrans;
-  static bool EvalDumpBytecode;
-  static uint32 EvalDumpIR;
-  static bool EvalDumpTC;
-  static bool EvalDumpAst;
-  static bool EvalMapTCHuge;
-  static uint32 EvalConstEstimate;
+#undef F
+
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
 

@@ -63,6 +63,7 @@ static StaticString s_final("final");
 static StaticString s_abstract("abstract");
 static StaticString s_internal("internal");
 static StaticString s_is_closure("is_closure");
+static StaticString s_is_generator("is_generator");
 static StaticString s_hphp("hphp");
 static StaticString s_static_variables("static_variables");
 static StaticString s_extension("extension");
@@ -217,6 +218,12 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
   }
   if (info->attribute & ClassInfo::HipHopSpecific) {
     ret.set(s_hphp,     true_varNR);
+  }
+  if (info->attribute & ClassInfo::IsClosure) {
+    ret.set(s_is_closure, true_varNR);
+  }
+  if (info->attribute & ClassInfo::HasGeneratorAsBody) {
+    ret.set(s_is_generator, true_varNR);
   }
 
   // doc comments
@@ -392,6 +399,9 @@ static void set_function_info(Array &ret, const VM::Func* func) {
 
   // closure info
   ret.set(s_is_closure, func->isClosureBody());
+  // Interestingly this isn't the same as calling isGenerator() because calling
+  // isGenerator() on the outside function for a generator returns false.
+  ret.set(s_is_generator, func->hasGeneratorAsBody());
 }
 
 static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,

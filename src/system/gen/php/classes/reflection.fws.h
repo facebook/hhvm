@@ -511,6 +511,10 @@ extern StaticStringProxy s_sys_ssp792013d3;
 #ifndef s_sys_ss792013d3
 #define s_sys_ss792013d3 (*(StaticString *)(&s_sys_ssp792013d3))
 #endif
+extern StaticStringProxy s_sys_ssp40fa34ba;
+#ifndef s_sys_ss40fa34ba
+#define s_sys_ss40fa34ba (*(StaticString *)(&s_sys_ssp40fa34ba))
+#endif
 extern StaticStringProxy s_sys_ssp03134d6c;
 #ifndef s_sys_ss03134d6c
 #define s_sys_ss03134d6c (*(StaticString *)(&s_sys_ssp03134d6c))
@@ -570,6 +574,10 @@ extern StaticStringProxy s_sys_ssp35ba87db;
 extern StaticStringProxy s_sys_ssp3b04461b;
 #ifndef s_sys_ss3b04461b
 #define s_sys_ss3b04461b (*(StaticString *)(&s_sys_ssp3b04461b))
+#endif
+extern StaticStringProxy s_sys_ssp2c1fca08;
+#ifndef s_sys_ss2c1fca08
+#define s_sys_ss2c1fca08 (*(StaticString *)(&s_sys_ssp2c1fca08))
 #endif
 extern StaticStringProxy s_sys_ssp1172f426;
 #ifndef s_sys_ss1172f426

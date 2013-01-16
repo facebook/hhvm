@@ -343,6 +343,11 @@ bool FunctionScope::isGenerator() const {
   return getOrigGenStmt();
 }
 
+bool FunctionScope::hasGeneratorAsBody() const {
+  MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(getStmt());
+  return stmt ? stmt->getGeneratorFunc() : false;
+}
+
 bool FunctionScope::isGeneratorFromClosure() const {
   bool res = isGenerator() && getOrigGenFS()->isClosure();
   assert(!res || getOrigGenFS()->isClosureGenerator());
@@ -1934,6 +1939,12 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   if (isMixedVariableArgument()) {
     attribute |= ClassInfo::MixedVariableArguments;
+  }
+  if (hasGeneratorAsBody()) {
+    attribute |= ClassInfo::HasGeneratorAsBody;
+  }
+  if (isClosure()) {
+    attribute |= ClassInfo::IsClosure;
   }
 
   attribute |= m_attributeClassInfo;

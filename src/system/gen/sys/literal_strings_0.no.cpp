@@ -1531,6 +1531,10 @@ StaticStringProxy s_sys_ssp2c1f9126;
 #ifndef s_sys_ss2c1f9126
 #define s_sys_ss2c1f9126 (*(StaticString *)(&s_sys_ssp2c1f9126))
 #endif
+StaticStringProxy s_sys_ssp2c1fca08;
+#ifndef s_sys_ss2c1fca08
+#define s_sys_ss2c1fca08 (*(StaticString *)(&s_sys_ssp2c1fca08))
+#endif
 StaticStringProxy s_sys_ssp2c20daac;
 #ifndef s_sys_ss2c20daac
 #define s_sys_ss2c20daac (*(StaticString *)(&s_sys_ssp2c20daac))
@@ -2310,6 +2314,10 @@ StaticStringProxy s_sys_ssp40c31149;
 StaticStringProxy s_sys_ssp40dadf1f;
 #ifndef s_sys_ss40dadf1f
 #define s_sys_ss40dadf1f (*(StaticString *)(&s_sys_ssp40dadf1f))
+#endif
+StaticStringProxy s_sys_ssp40fa34ba;
+#ifndef s_sys_ss40fa34ba
+#define s_sys_ss40fa34ba (*(StaticString *)(&s_sys_ssp40fa34ba))
 #endif
 StaticStringProxy s_sys_ssp41087d44;
 #ifndef s_sys_ss41087d44
@@ -4778,6 +4786,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp2bc9a7c8, (const char *)"SIGNIFICANT_WHITESPACE",
   (const char *)&s_sys_ssp2bf8b6e3, (const char *)"createAttributens",
   (const char *)&s_sys_ssp2c1f9126, (const char *)"PARAM_EVT_ALLOC",
+  (const char *)&s_sys_ssp2c1fca08, (const char *)"is_generator",
   (const char *)&s_sys_ssp2c20daac, (const char *)"writeDTD",
   (const char *)&s_sys_ssp2c39caf5, (const char *)"isnormalized",
   (const char *)&s_sys_ssp2c51e445, (const char *)"insertBefore",
@@ -4964,6 +4973,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp40b6058d, (const char *)"startDocument",
   (const char *)&s_sys_ssp40c31149, (const char *)"returnsReference",
   (const char *)&s_sys_ssp40dadf1f, (const char *)"getAttribute",
+  (const char *)&s_sys_ssp40fa34ba, (const char *)"isGenerator",
   (const char *)&s_sys_ssp41087d44, (const char *)"interfaces",
   (const char *)&s_sys_ssp410f2956, (const char *)"openblob",
   (const char *)&s_sys_ssp4136f476, (const char *)"startComment",
@@ -5492,7 +5502,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp6fd67d3d, (const char *)"\000*\000file", (const char *)7LL,
   (const char *)&s_sys_ssp7c4bb61c, (const char *)"\000SplObjectStorage\000storage", (const char *)25LL,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1049, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1051, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0514b8b1, (const char *)&s_sys_ss0514b8b1,

@@ -112,6 +112,7 @@ public:
   bool isClosure() const;
   bool isGenerator() const;
   bool isGeneratorFromClosure() const;
+  bool hasGeneratorAsBody() const;
   MethodStatementRawPtr getOrigGenStmt() const;
   FunctionScopeRawPtr getOrigGenFS() const;
   void setNeedsRefTemp() { m_needsRefTemp = true; }

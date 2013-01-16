@@ -590,7 +590,8 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_past(past), m_line1(line1), m_line2(line2),
     m_info(NULL), m_refBitVec(NULL), m_builtinFuncPtr(NULL),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false) {
+    m_isGenerator(false), m_isGeneratorFromClosure(false),
+    m_hasGeneratorAsBody(false) {
 }
 
 Func::SharedData::~SharedData() {
@@ -635,7 +636,8 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
     m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
     m_isClosureBody(false), m_isGenerator(false),
-    m_isGeneratorFromClosure(false), m_info(NULL), m_builtinFuncPtr(NULL) {
+    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(NULL),
+    m_builtinFuncPtr(NULL) {
 }
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
@@ -644,7 +646,8 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
     m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
     m_isClosureBody(false), m_isGenerator(false),
-    m_isGeneratorFromClosure(false), m_info(NULL), m_builtinFuncPtr(NULL) {
+    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(NULL),
+    m_builtinFuncPtr(NULL) {
 }
 
 FuncEmitter::~FuncEmitter() {
@@ -837,6 +840,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isClosureBody = m_isClosureBody;
   f->shared()->m_isGenerator = m_isGenerator;
   f->shared()->m_isGeneratorFromClosure = m_isGeneratorFromClosure;
+  f->shared()->m_hasGeneratorAsBody = m_hasGeneratorAsBody;
   f->shared()->m_userAttributes = m_userAttributes;
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
@@ -916,6 +920,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_isClosureBody)
     (m_isGenerator)
     (m_isGeneratorFromClosure)
+    (m_hasGeneratorAsBody)
 
     (m_params)
     (m_localNames)

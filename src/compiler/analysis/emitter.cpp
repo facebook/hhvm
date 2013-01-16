@@ -3808,6 +3808,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         pce->addMethod(invoke);
         MethodStatementPtr body(
           static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
+        invoke->setHasGeneratorAsBody(body->getGeneratorFunc());
         postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
 
         return true;
@@ -5109,6 +5110,7 @@ void EmitterVisitor::emitPostponedMeths() {
       fe = new FuncEmitter(m_ue, -1, -1, methName);
       fe->setIsGenerator(funcScope->isGenerator());
       fe->setIsGeneratorFromClosure(funcScope->isGeneratorFromClosure());
+      fe->setHasGeneratorAsBody(p.m_meth->getGeneratorFunc());
       p.m_fe = fe;
       top_fes.push_back(fe);
     }

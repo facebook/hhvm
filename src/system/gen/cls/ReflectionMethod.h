@@ -37,7 +37,7 @@ extern VariantProxy s_sys_svsp00000000;
 #define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
 #endif
 
-/* SRC: classes/reflection.php line 1767 */
+/* SRC: classes/reflection.php line 1771 */
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 extern const ObjectStaticCallbacks cw_ReflectionMethod;
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {

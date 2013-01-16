@@ -306,6 +306,17 @@ struct Func {
   bool isGeneratorFromClosure() const {
     return shared()->m_isGeneratorFromClosure;
   }
+  /**
+   * If this function is a generator then it is implemented as a simple
+   * function that just returns another function. hasGeneratorAsBody() will be 
+   * true for the outer functions and isGenerator() is true for the 
+   * inner function.
+   *
+   * This isn't a pointer to the function itself because it was too hard to
+   * hook the parts up. If you know more and need it, there probably isn't a
+   * technical reason not to.
+   */
+  bool hasGeneratorAsBody() const { return shared()->m_hasGeneratorAsBody; }
   const Func* getGeneratorBody(const StringData* name) const;
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
@@ -412,6 +423,7 @@ private:
     bool m_isClosureBody : 1;
     bool m_isGenerator : 1;
     bool m_isGeneratorFromClosure : 1;
+    bool m_hasGeneratorAsBody : 1;
     UserAttributeMap m_userAttributes;
     SharedData(PreClass* preClass, Id id, Offset base,
         Offset past, int line1, int line2, bool top,
@@ -570,6 +582,9 @@ public:
   void setIsGeneratorFromClosure(bool b) { m_isGeneratorFromClosure = b; }
   bool isGeneratorFromClosure() const { return m_isGeneratorFromClosure; }
 
+  void setHasGeneratorAsBody(bool b) { m_hasGeneratorAsBody = b; }
+  bool hasGeneratorAsBody() const { return m_hasGeneratorAsBody; }
+
   void addUserAttribute(const StringData* name, TypedValue tv);
 
   void commit(RepoTxn& txn) const;
@@ -612,6 +627,7 @@ private:
   bool m_isClosureBody;
   bool m_isGenerator;
   bool m_isGeneratorFromClosure;
+  bool m_hasGeneratorAsBody;
 
   Func::UserAttributeMap m_userAttributes;
 

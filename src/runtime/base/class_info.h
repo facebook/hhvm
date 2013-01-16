@@ -41,6 +41,7 @@ public:
     IsVolatile             = (1 <<  2), //    x             x
 
     IsInterface            = (1 <<  3), //    x
+    IsClosure              = (1 <<  3), //                  x      x
     IsAbstract             = (1 <<  4), //    x                    x
     IsFinal                = (1 <<  5), //    x                    x
 
@@ -60,6 +61,7 @@ public:
 
     HasDocComment          = (1 << 14), //                  x      x
     IsLazyInit             = (1 << 15), //    x
+    HasGeneratorAsBody     = (1 << 15), //                  x      x
     HipHopSpecific         = (1 << 16), //    x             x
 
     VariableArguments      = (1 << 17), //                  x      x

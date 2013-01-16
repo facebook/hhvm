@@ -5,6 +5,7 @@ function not_a_closure() {
 };
 $rf = new ReflectionFunction('not_a_closure');
 var_dump($rf->isClosure());
+var_dump($rf->isGenerator());
 
 
 function is_a_generator() {
@@ -13,6 +14,7 @@ function is_a_generator() {
 };
 $rf = new ReflectionFunction('is_a_generator');
 var_dump($rf->isClosure());
+var_dump($rf->isGenerator());
 
 
 $cl = function() {
@@ -20,6 +22,7 @@ $cl = function() {
 };
 $rf = new ReflectionFunction($cl);
 var_dump($rf->isClosure());
+var_dump($rf->isGenerator());
 
 
 $cl = function() {
@@ -28,3 +31,4 @@ $cl = function() {
 };
 $rf = new ReflectionFunction($cl);
 var_dump($rf->isClosure());
+var_dump($rf->isGenerator());

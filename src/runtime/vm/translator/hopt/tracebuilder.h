@@ -56,7 +56,6 @@ public:
   template<class... Args>
   SSATmp* gen(Args... args) {
     return makeInstruction(
-      m_irFactory,
       [this] (IRInstruction* inst) { return optimizeInst(inst); },
       args...
     );

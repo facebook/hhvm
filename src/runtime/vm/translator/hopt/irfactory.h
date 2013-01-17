@@ -27,7 +27,7 @@ namespace HPHP { namespace VM { namespace JIT {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * ReturnValue makeInstruction(IRFactory, Lambda, Args...) --
+ * ReturnValue makeInstruction(Lambda, Args...) --
  *
  *   Create an IRInstruction on the stack using Args, and call Lambda
  *   with a pointer to it, returning the result.
@@ -41,10 +41,7 @@ namespace detail {
 
 template<class Ret, class Func>
 struct InstructionBuilder {
-  explicit InstructionBuilder(const Func& func, IRFactory& factory)
-    : factory(factory)
-    , func(func)
-  {}
+  explicit InstructionBuilder(const Func& func) : func(func) {}
 
   template<class... Args>
   Ret go(Opcode op, Args... args) {
@@ -84,7 +81,6 @@ private:
   }
 
 private:
-  IRFactory& factory;
   const Func& func;
 };
 
@@ -92,9 +88,9 @@ private:
 
 template<class Func, class... Args>
 typename std::result_of<Func (IRInstruction*)>::type
-makeInstruction(IRFactory& factory, Func func, Args... args) {
+makeInstruction(Func func, Args... args) {
   typedef typename std::result_of<Func (IRInstruction*)>::type Ret;
-  return detail::InstructionBuilder<Ret,Func>(func, factory).go(args...);
+  return detail::InstructionBuilder<Ret,Func>(func).go(args...);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -124,7 +120,6 @@ public:
   template<class... Args>
   IRInstruction* gen(Args... args) {
     return makeInstruction(
-      *this,
       [this] (IRInstruction* inst) { return inst->clone(this); },
       args...
     );

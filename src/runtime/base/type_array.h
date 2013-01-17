@@ -585,7 +585,8 @@ class Array : protected ArrayBase {
   }
 
   static void compileTimeAssertions() {
-    CT_ASSERT(offsetof(Array, m_px) == offsetof(Value, m_data));
+    static_assert(offsetof(Array, m_px) == offsetof(Value, m_data),
+                  "Offset of m_px in Array must be offset of m_data in Value");
     BOOST_STATIC_ASSERT((offsetof(Array, m_px) == kExpectedMPxOffset));
   }
 };

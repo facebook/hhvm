@@ -406,7 +406,8 @@ class ArrayData : public Countable {
  private:
   void serializeImpl(VariableSerializer *serializer) const;
   static void compileTimeAssertions() {
-    CT_ASSERT(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET);
+    static_assert(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET,
+                  "Offset of _count in ArrayData must be FAST_REFCOUNT_OFFSET");
   }
   enum { kSiPastEnd = 1 };
  protected:

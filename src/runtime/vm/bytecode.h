@@ -392,8 +392,10 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32 offset) {
 }
 
 inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
-  CT_ASSERT(offsetof(ActRec, m_savedRbp) == 0);
-  CT_ASSERT(sizeof(ActRec*) <= sizeof(uint64_t));
+  static_assert(offsetof(ActRec, m_savedRbp) == 0,
+                "m_savedRbp should be at offset 0 of ActRec");
+  static_assert(sizeof(ActRec*) <= sizeof(uint64_t),
+                "ActRec* must be <= 64 bits");
   ar->m_savedRbp = (uint64_t)sfp;
 }
 

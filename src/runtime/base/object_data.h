@@ -405,7 +405,8 @@ public:
 
  private:
   static void compileTimeAssertions() {
-    CT_ASSERT(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET);
+    static_assert(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET,
+                  "Offset of ObjectData._count must be FAST_REFCOUNT_OFFSET");
   }
 
  public:

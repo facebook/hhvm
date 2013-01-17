@@ -302,7 +302,8 @@ TypePtr Type::Coerce(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
     return type2;
   }
 
-  CT_ASSERT(Type::KindOfString < Type::KindOfArray);
+  static_assert(Type::KindOfString < Type::KindOfArray,
+                "Expected Type::KindOfString < Type::KindOfArray");
   if (type1->m_kindOf == Type::KindOfString &&
       type2->m_kindOf == Type::KindOfArray) {
     return Type::Sequence;

@@ -223,7 +223,8 @@ class Object : protected ObjectBase {
 
  private:
   static void compileTimeAssertions() {
-    CT_ASSERT(offsetof(Object, m_px) == offsetof(Value, m_data));
+    static_assert(offsetof(Object, m_px) == offsetof(Value, m_data),
+                  "Offset of m_px in Object must be offset of m_data in Value");
   }
 };
 

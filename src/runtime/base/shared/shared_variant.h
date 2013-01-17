@@ -211,9 +211,12 @@ private:
   const static uint8 ObjAttempted = (1<<3);
 
   static void compileTimeAssertions() {
-    CT_ASSERT(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data));
-    CT_ASSERT(offsetof(SharedVar, m_count) == offsetof(TypedValue, _count));
-    CT_ASSERT(offsetof(SharedVar, m_type) == offsetof(TypedValue, m_type));
+    static_assert(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data),
+                  "Offset of m_data must be equal in SharedVar and TypedValue");
+    static_assert(offsetof(SharedVar, m_count) == offsetof(TypedValue, _count),
+                  "Offset of m_count must be equal SharedVar and TypedValue");
+    static_assert(offsetof(SharedVar, m_type) == offsetof(TypedValue, m_type),
+                  "Offset of m_type must be equal in SharedVar and TypedValue");
   }
 
   bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}

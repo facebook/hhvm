@@ -3208,7 +3208,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
       // only support the operations in that interval. Since the default
       // value of moduleLevel is 0 and OpLowInvalid is also 0, this ensures
       // that bisection is disabled by default.
-      CT_ASSERT(OpLowInvalid >= 0);
+      static_assert(OpLowInvalid >= 0,
+                    "OpLowInvalid must be nonnegative");
       if (ni->op() < txOpBisectLowOp ||
           ni->op() > txOpBisectHighOp)
         ni->m_txFlags = Interp;

@@ -92,12 +92,18 @@ VMExecutionContext::VMExecutionContext() :
 #ifdef HHVM
   // Make sure any fields accessed from the TC are within a byte of
   // ExecutionContext's beginning.
-  CT_ASSERT(offsetof(ExecutionContext, m_stack) <= 0xff);
-  CT_ASSERT(offsetof(ExecutionContext, m_fp) <= 0xff);
-  CT_ASSERT(offsetof(ExecutionContext, m_pc) <= 0xff);
-  CT_ASSERT(offsetof(ExecutionContext, m_isValid) <= 0xff);
-  CT_ASSERT(offsetof(ExecutionContext, m_eventHook) <= 0xff);
-  CT_ASSERT(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff);
+  static_assert(offsetof(ExecutionContext, m_stack) <= 0xff,
+                "m_stack offset too large");
+  static_assert(offsetof(ExecutionContext, m_fp) <= 0xff,
+                "m_fp offset too large");
+  static_assert(offsetof(ExecutionContext, m_pc) <= 0xff,
+                "m_pc offset too large");
+  static_assert(offsetof(ExecutionContext, m_isValid) <= 0xff,
+                "m_isValid offset too large");
+  static_assert(offsetof(ExecutionContext, m_eventHook) <= 0xff,
+                "m_eventHook offset too large");
+  static_assert(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff,
+                "m_currentThreadIdx offset too large");
 #endif
   const_assert(hhvm);
 

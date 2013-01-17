@@ -65,7 +65,8 @@ class PtrMap {
   // Radix-tree implementation of pointer map
 public:
   PtrMap() {
-    CT_ASSERT(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0);
+    static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
+                  "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");
     m_root = MakeNode();
   }
   ~PtrMap();

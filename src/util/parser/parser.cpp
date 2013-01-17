@@ -24,8 +24,10 @@ Mutex ParserBase::s_mutex;
 std::map<int64, int> ParserBase::s_closureIds;
 
 char ParserBase::GetAnonPrefix(AnonFuncKind kind) {
-  CT_ASSERT(Closure == 0 && Continuation <= 9);
-  CT_ASSERT(CharClosure == '0' && CharContinuation <= '9');
+  static_assert(Closure == 0 && Continuation <= 9,
+                "AnonFuncKind enum has unexpected values");
+  static_assert(CharClosure == '0' && CharContinuation <= '9',
+                "AnonFuncKindChar enum has unexpected values");
   return '0' + kind;
 }
 

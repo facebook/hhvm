@@ -96,10 +96,11 @@ class Variant : VariantBase {
    * setUninitNull occurs frequently; use this version where possible.
    */
   inline void setUninitNull() {
-    CT_ASSERT(offsetof(Variant, _count) == 8     &&
-              offsetof(Variant, m_type) == 12    &&
-              sizeof(_count) == sizeof(uint32_t) &&
-              sizeof(m_type) == sizeof(uint32_t));
+    static_assert(offsetof(Variant, _count) == 8     &&
+                  offsetof(Variant, m_type) == 12    &&
+                  sizeof(_count) == sizeof(uint32_t) &&
+                  sizeof(m_type) == sizeof(uint32_t),
+                  "Bad offset or size for _count or m_type");
     /**
      * One qword store is faster than two dword stores, and gcc can't figure it
      * out. Note that there are no endianness assumptions: while m_typeAndCount
@@ -1424,10 +1425,14 @@ private:
   Object toObjectHelper() const;
 
   static void compileTimeAssertions() {
-    CT_ASSERT(offsetof(Variant,m_data) == offsetof(TypedValue,m_data));
-    CT_ASSERT(offsetof(Variant,_count) == offsetof(TypedValue,_count));
-    CT_ASSERT(offsetof(Variant,m_type) == offsetof(TypedValue,m_type));
-    CT_ASSERT(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET);
+    static_assert(offsetof(Variant,m_data) == offsetof(TypedValue,m_data),
+                  "Offset of m_data must be equal in Variant and TypedValue");
+    static_assert(offsetof(Variant,_count) == offsetof(TypedValue,_count),
+                  "Offset of _count must be equal in Variant and TypedValue");
+    static_assert(offsetof(Variant,m_type) == offsetof(TypedValue,m_type),
+                  "Offset of m_type must be equal in Variant and TypedValue");
+    static_assert(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET,
+                  "Offset of _count in Variant must be FAST_REFCOUNT_OFFSET");
   }
   DataType convertToNumeric(int64 *lval, double *dval) const;
 };

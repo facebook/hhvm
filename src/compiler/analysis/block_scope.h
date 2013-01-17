@@ -132,8 +132,10 @@ public:
   };
 
   /* Assert the size and bit-consecutiveness of UseKindNonStaticRef */
-  CT_ASSERT(BitCount<UseKindNonStaticRef>::value == 16);
-  CT_ASSERT(BitPhase<UseKindNonStaticRef>::value <= 2);
+  static_assert(BitCount<UseKindNonStaticRef>::value == 16,
+                "UseKindNonStaticRef should have 16 bits set");
+  static_assert(BitPhase<UseKindNonStaticRef>::value <= 2,
+                "UseKindNonStaticRef set bits should be consecutive");
 
   static int GetNonStaticRefUseKind(unsigned int hash) {
     int res = ((int)UseKindNonStaticRef0) << (hash % 16);

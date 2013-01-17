@@ -24,13 +24,6 @@
 
 #define IMPLIES(a, b) (!(a) || (b))
 
-// causes a division by zero error at compile time if the assertion fails
-// NOTE: use __LINE__, instead of __COUNTER__, for better compatibility
-#define CT_CONCAT_HELPER(a, b) a##b
-#define CT_CONCAT(a, b) CT_CONCAT_HELPER(a, b)
-#define CT_ASSERT(cond) \
-  enum { CT_CONCAT(compile_time_assert_, __LINE__) = 1/(!!(cond)) }
-
 #ifndef __GXX_EXPERIMENTAL_CXX0X__
 # define static_assert(what, why) CT_ASSERT((what))
 #endif

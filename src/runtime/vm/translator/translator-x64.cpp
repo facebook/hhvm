@@ -1551,7 +1551,8 @@ TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup) {
       EventHook::FunctionEnter(ar, 0);
     }
     astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-    CT_ASSERT(EventHook::NormalFunc == 0);
+    static_assert(EventHook::NormalFunc == 0,
+                  "EventHook::NormalFunc should be the first enum element");
     astubs.xor_reg32_reg32(argNumToRegName[1], argNumToRegName[1]);
     emitCall(astubs, (TCA)&EventHook::FunctionEnter);
     if (inTracelet) {
@@ -7443,7 +7444,8 @@ static void contPreNextThrowHelper(c_Continuation* c) {
 void TranslatorX64::emitContPreNext(const NormalizedInstruction& i,
                                     ScratchReg& rCont) {
   const Offset doneOffset = CONTOFF(m_done);
-  CT_ASSERT((doneOffset + 1) == CONTOFF(m_running));
+  static_assert((doneOffset + 1) == CONTOFF(m_running),
+                "m_done should immediately precede m_running");
   // Check m_done and m_running at the same time
   a.    test_imm32_disp_reg32(0x0101, doneOffset, r(rCont));
   {

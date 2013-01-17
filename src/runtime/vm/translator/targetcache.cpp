@@ -97,7 +97,8 @@ undefinedError(const char* msg, const char* name) {
 // Targetcache memory. See the comment in targetcache.h
 __thread void* tl_targetCaches = NULL;
 
-CT_ASSERT(kConditionFlagsOff + sizeof(ssize_t) <= 64);
+static_assert(kConditionFlagsOff + sizeof(ssize_t) <= 64,
+              "kConditionFlagsOff too large");
 size_t s_frontier = kConditionFlagsOff + 64;
 static size_t s_persistent_frontier = 0;
 static size_t s_persistent_start = 0;
@@ -200,7 +201,7 @@ size_t allocCnsBit(const StringData* name) {
 }
 
 Handle bitOffToHandleAndMask(size_t bit, uint8 &mask) {
-  CT_ASSERT(!(8 % CHAR_BIT));
+  static_assert(!(8 % CHAR_BIT), "Unexpected size of char");
   mask = (uint8)1 << (bit % 8);
   size_t off = bit / CHAR_BIT;
   off -= off % (8 / CHAR_BIT);

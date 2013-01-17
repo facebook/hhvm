@@ -4006,7 +4006,8 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = inst->getSrc(0)->getReg();
 
   const Offset doneOffset = CONTOFF(m_done);
-  CT_ASSERT((doneOffset + 1) == CONTOFF(m_running));
+  static_assert((doneOffset + 1) == CONTOFF(m_running),
+                "m_done should immediately precede m_running");
   // Check m_done and m_running at the same time
   m_as.test_imm32_disp_reg32(0x0101, doneOffset, contReg);
   emitFwdJcc(CC_NZ, inst->getLabel());

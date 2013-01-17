@@ -48,7 +48,7 @@ struct GenCountGuard {
     if (!s_inflightRequests) {
       s_maxThreadID = 2;
       s_inflightRequests = (GenCount*)calloc(sizeof(GenCount), s_maxThreadID);
-      CT_ASSERT(kIdleGenCount == 0);
+      static_assert(kIdleGenCount == 0, "kIdleGenCount should be zero");
     }
   }
   ~GenCountGuard() {

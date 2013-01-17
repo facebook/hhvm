@@ -1124,12 +1124,34 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
   const StringData* clsNameStr = lookupStringId(clsNameStrId);
   TRACE(3, "%u: ClsCnsD %s::%s\n", m_bcOff, clsNameStr->data(),
         cnsNameStr->data());
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* cnsNameTmp = m_tb->genDefConst(cnsNameStr);
-  SSATmp* clsNameTmp = m_tb->genDefConst(clsNameStr);
-  SSATmp* cns = m_tb->gen(LdClsCns, Type::Cell, cnsNameTmp, clsNameTmp);
-  m_tb->genCheckInit(cns, exitTrace);
-  push(cns);
+  SSATmp* cnsNameTmp = m_tb->genDefConst<const StringData*>(cnsNameStr);
+  SSATmp* clsNameTmp = m_tb->genDefConst<const StringData*>(clsNameStr);
+  if (0) {
+    // TODO: 2068502 pick one of these two implementations and remove the other.
+    Trace* exitTrace = getExitSlowTrace();
+    SSATmp* cns = m_tb->gen(LdClsCns, Type::Cell, cnsNameTmp, clsNameTmp);
+    m_tb->genCheckInit(cns, exitTrace);
+    push(cns);
+  } else {
+    // if-then-else
+    // todo: t2068502: refine the type? hhbc spec says null|bool|int|dbl|str
+    //       and, str should always be static-str.
+    spillStack(); // do this on main trace so we update stack tracking once.
+    Type::Tag cnsType = Type::Cell;
+    SSATmp* c1 = m_tb->gen(LdClsCns, cnsType, cnsNameTmp, clsNameTmp);
+    SSATmp* result = m_tb->ifelse(getCurFunc(),
+      [&] (LabelInstruction* taken) { // branch
+        m_tb->genCheckInit(c1, taken);
+      },
+      [&] { // Next: LdClsCns hit in TC
+        return c1;
+      },
+      [&] { // Taken: miss in TC, do lookup & init
+        return m_tb->gen(LookupClsCns, cnsType, cnsNameTmp, clsNameTmp);
+      }
+    );
+    push(result);
+  }
 }
 
 void HhbcTranslator::emitFPassR() {

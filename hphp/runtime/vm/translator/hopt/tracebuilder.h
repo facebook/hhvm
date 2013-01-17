@@ -24,6 +24,8 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
 
+#include "folly/ScopeGuard.h"
+
 namespace HPHP {
 namespace VM {
 namespace JIT {
@@ -173,7 +175,10 @@ public:
   SSATmp* genJmpCond(SSATmp* src, Trace* target, bool negate);
   void    genExitWhenSurprised(Trace* target);
   void    genExitOnVarEnv(Trace* target);
-  void    genCheckInit(SSATmp* src, Trace* target);
+  void    genCheckInit(SSATmp* src, LabelInstruction* target);
+  void    genCheckInit(SSATmp* src, Trace* target) {
+    genCheckInit(src, getLabel(target));
+  }
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genConvToBool(SSATmp* src);
   SSATmp* genConvToInt(SSATmp* src);
@@ -293,6 +298,31 @@ public:
 
   Type::Tag getLocalType(int id);
   void      killLocalValue(int id);
+
+  /*
+   * ifelse() generates if-then-else blocks within a trace.  The caller
+   * supplies lambdas to create the branch, next-body, and taken-body.
+   * The next and taken lambdas must return one SSATmp* value; ifelse() returns
+   * the SSATmp for the merged value.
+   */
+  template <class Branch, class Next, class Taken>
+  SSATmp* ifelse(const Func* func, Branch branch, Next next, Taken taken) {
+    LabelInstruction* taken_label = m_irFactory.defLabel(func);
+    LabelInstruction* done_label = m_irFactory.defLabel(func, 1);
+    bool oldEnableCse = m_enableCse;
+    m_enableCse = false;
+    SCOPE_EXIT { m_enableCse = oldEnableCse; };
+    branch(taken_label);
+    SSATmp* v1 = next();
+    gen(Jmp_, done_label, v1);
+    appendInstruction(taken_label);
+    SSATmp* v2 = taken();
+    gen(Jmp_, done_label, v2);
+    appendInstruction(done_label);
+    SSATmp* result = done_label->getDst(0);
+    result->setType(Type::unionOf(v1->getType(), v2->getType()));
+    return result;
+  }
 
 private:
   void      appendInstruction(IRInstruction* inst);

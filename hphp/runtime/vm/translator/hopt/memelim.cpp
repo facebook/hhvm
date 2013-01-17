@@ -601,6 +601,14 @@ SSATmp* MemMap::getValue(SSATmp* ref, int offset) {
 }
 
 void MemMap::optimizeMemoryAccesses(Trace* trace) {
+  for (IRInstruction* inst : trace->getInstructionList()) {
+    if (inst->isControlFlowInstruction() &&
+        inst->getLabel()->getParent() == trace) {
+      // This algorithm only works with linear traces.
+      // TODO t2066994: reset state after each block, at least.
+      return;
+    }
+  }
   StoreList tracking;
 
   for (IRInstruction* inst : trace->getInstructionList()) {

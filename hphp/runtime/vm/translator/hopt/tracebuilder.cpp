@@ -515,9 +515,9 @@ SSATmp* TraceBuilder::genLdCls(SSATmp* className) {
   return gen(LdCls, className);
 }
 
-void TraceBuilder::genCheckInit(SSATmp* src, Trace* target) {
+void TraceBuilder::genCheckInit(SSATmp* src, LabelInstruction* target) {
   assert(target);
-  gen(CheckInit, getLabel(target), src);
+  gen(CheckInit, target, src);
 }
 
 SSATmp* TraceBuilder::genLdCurFuncPtr() {
@@ -1379,8 +1379,8 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst,
   if (clone == kCloneInst)  inst = inst->clone(&m_irFactory);
 
   appendInstruction(inst);
-  // returns NULL if instruction has no dest.
-  return inst->getDst();
+  // returns nullptr if instruction has no dest or multiple dests
+  return inst->hasDst() ? inst->getDst() : nullptr;
 }
 
 void TraceBuilder::optimizeTrace() {
@@ -1393,16 +1393,17 @@ void TraceBuilder::optimizeTrace() {
   clearTrackedState();
   for (auto inst : instructions) {
     SSATmp* result = optimizeInst(inst, kUseInst);
-    SSATmp* dst = inst->getDst();
-    if (dst && dst->getType() != Type::None && dst != result) {
-      // The result of optimization has a different destination register
-      // than the inst. Generate a move to get result into dst.
-      assert(result);
-      appendInstruction(m_irFactory.mov(dst, result));
+    if (result) {
+      SSATmp* dst = inst->getDst();
+      if (dst->getType() != Type::None && dst != result) {
+        // The result of optimization has a different destination register
+        // than the inst. Generate a move to get result into dst.
+        assert(result);
+        appendInstruction(m_irFactory.mov(dst, result));
+      }
     }
   }
 }
-
 
 void TraceBuilder::killCse() {
   m_cseHash.clear();

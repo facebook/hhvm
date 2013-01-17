@@ -199,6 +199,10 @@ BOOST_STATIC_ASSERT(!(KindOfRef        & KindOfUncountedInitBit));
 BOOST_STATIC_ASSERT(!(KindOfIndirect   & KindOfUncountedInitBit));
 BOOST_STATIC_ASSERT(!(KindOfClass      & KindOfUncountedInitBit));
 
+// assume KindOfUninit == 0 in ClsCns
+static_assert(KindOfUninit == 0,
+              "Several things assume this tag is 0, expecially target cache");
+
 const unsigned int kDataTypeMask = 0x7F;
 
 BOOST_STATIC_ASSERT(MaxNumDataTypes - 1 <= kDataTypeMask);

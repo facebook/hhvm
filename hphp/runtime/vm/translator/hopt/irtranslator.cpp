@@ -1697,18 +1697,21 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   if (RuntimeOption::EvalDumpIR) {
     traceTrace(" HHIR after initial translation ", false);
   }
+  assert(JIT::checkCfg(trace, *m_irFactory));
 
   JIT::optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
 
   if (RuntimeOption::EvalDumpIR > 1) {
     traceTrace(" HHIR after optimizing ", false);
   }
+  assert(JIT::checkCfg(trace, *m_irFactory));
 
   JIT::allocRegsForTrace(trace, m_irFactory.get());
 
   if (RuntimeOption::EvalDumpIR) {
     traceTrace(" HHIR after reg alloc ", false);
   }
+  assert(JIT::checkCfg(trace, *m_irFactory));
 
   JIT::genCodeForTrace(trace, a, astubs, m_irFactory.get(), bcMap, this);
 

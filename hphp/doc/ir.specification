@@ -190,13 +190,16 @@ or delimited by <> for instruction modifiers.
 Instruction flags further describe their behavior:
 
 HasDest
+NaryDest
 
-  The instruction produces a result (destination) value.
+  The instruction defines exactly one destination variable (HasDest) or
+  a varying number of destination variables (NaryDest).  These flags are
+  mutually exclusive.  An instruction with neither of these flags set has
+  zero destination variables.
 
-  Note that an instruction's destination value may sometimes be the
-  same as one of the input values.  (For example, AddElem returns the
-  array it took as an input.)  In these cases the instruction copies
-  the input value; SSA form dictates results always be new variables.
+  Note that an instruction's destination variable may sometimes be a
+  copy of one of the input variables.  (For example, AddElem returns the
+  array it took as an input.)
 
 CanCSE
 
@@ -255,6 +258,10 @@ MayRaiseError
   The instruction may raise an error, and therefore has an implicit
   exit edge.
 
+Terminal
+
+  The instruction has no next instruction; it either jumps, returns,
+  or throws.
 
 
 Instruction set
@@ -263,12 +270,12 @@ Instruction set
 
 1. Checks and Asserts
 
-D:T = GuardType<T> S0:Gen L:Label
+D:T = GuardType<T> S0:Gen -> L
 
   Check that the type of the src S0 is T, and if so copy it to D.  If
   S0 is not type T, branch to the exit trace label L.
 
-GuardLoc<T> S0:Home L:Label
+GuardLoc<T> S0:Home -> L
 
   Check that type of the local specified by S0 is T; if not, branch to
   the exit trace label L.
@@ -279,7 +286,7 @@ AssertLoc<T> S0:Home
   local type information, and is similar to GuardLoc except it doesn't
   imply a runtime check and cannot cause control flow.
 
-D:StkPtr = GuardStk<T> S0:StkPtr S1:ConstInt L:Label
+D:StkPtr = GuardStk<T> S0:StkPtr S1:ConstInt -> L
 
   Check that the type of the cell on the stack pointed to by S0 at
   index S1 (in cells) is T; if not, branch to the exit trace label L.
@@ -293,7 +300,7 @@ D:StkPtr = AssertStk<T> S0:StkPtr S1:ConstInt
   This is similar to a GuardStk except that it does not imply a
   runtime check and cannot cause control flow.
 
-CheckInit S0:Gen L:Label
+CheckInit S0:Gen -> L
 
   If S0's type is Uninit, branch to label L.
 
@@ -398,26 +405,46 @@ D:None = JmpNZero S0:{Bool|Int} L:Label
 
   Conditionally jump to L based on S0.
 
-D:None = Jmp_ L:Label
-
-  Unconditionally jump to the label L.
-
-ExitWhenSurprised L:Label
+ExitWhenSurprised -> L
 
   Tests the surprise flags and if they are set, jumps to the
   exit-trace label L.
 
-ExitOnVarEnv S0:StkPtr L:Label
+ExitOnVarEnv S0:StkPtr -> L
 
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   non-zero, jumps to the exit-trace label L.
 
+Marker<bcOff,spOff,FuncPtr>
+
+  Record HHBC virtual position information at the position of this instruction.
+  Marker has no executable semantics, and although it uses a LabelInstruction,
+  it is not a legal branch target.  The JIT compiler uses this to generate
+  bytecode<->machine code maps.
+
+Jmp_ [S:T ...] -> L
+
+  Unconditional jump to L.  L is the name of a DefLabel instruction.
+  Each the sources are copied to the corresponding destinations of the
+  target L.  The number of destinations on L must match the number of
+  sources of this Jmp_.
+
 DefLabel
+  L:
+  L(D:T ...):
 
   Denote the position of a jump target.  Branch instructions, and
   instructions which implicitly guard, take a Label argument which refers
   to a specific DefLabel instruction.  Additionally, every Trace must begin
   with a DefLabel instruction.
+
+  DefLabel can optionally define one or more destination variables.  In that
+  case, the values are passed to it by Jmp_ instruction(s) with the same
+  number of sources.  The type of each destination variable is the least common
+  supertype of each of the corresponding Jmp_ sources.
+
+  Note that when a label defines destination variables, it is only reachable
+  from the Jmp_ instruction.  Other branch instructions cannot pass arguments.
 
 
 6. Reference manipulation
@@ -472,20 +499,20 @@ D:Gen* = LdLocAddr S0:Home
 
   Loads the address of the local slot specified by S0 into D.
 
-D:T = LdMem<T> S0:{Gen*|Cell*} [L:Label]
+D:T = LdMem<T> S0:{Gen*|Cell*} [ -> L ]
 
   Loads from S0 and puts the value in D. If the optional label L is
   specified and the loaded value's type does not match T, this
   instruction does not load into D and transfers control to L.
 
-D:T = LdProp<T> S0:Obj S1:ConstInt [L:Label]
+D:T = LdProp<T> S0:Obj S1:ConstInt [ -> L ]
 
   Loads a property from the object referenced by S0 at the offset
   given by S1 and puts the value in D. If the optional label L is
   specified and the loaded value's type does not match T, this
   instruction does not load into D and transfers control to L.
 
-D:T = LdRef<T> S0:Cell& [L:Label]
+D:T = LdRef<T> S0:Cell& [ -> L ]
 
   Loads the value held in the box referenced by S0 and puts the value
   in D.  If the optional label L is specified and the loaded value's
@@ -518,7 +545,7 @@ D:Cls = LdCls S0:ConstSstr
   Loads the class named S0.  If the class is not defined, invokes
   autoload and may raise an error.
 
-D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [L:Label]
+D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [ -> L ]
 
   Loads the class constant named S0 from a class named S1 via the
   target cache. This instruction should generally be followed by
@@ -526,8 +553,8 @@ D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [L:Label]
   optional label L is specified and the loaded value's type does not
   match T, this instruction does not load into D and transfers control
   to L. The result may be uninitialized if the class is not defined.
-  Note that no decref is necessary because class constants will always
-  be static.
+  Note that no decref of the result is necessary because class
+  constants will always be static.
 
 D:FuncCtx = LdClsMethodFCache S0:ConstSstr S1:ConstSstr S2:{Obj|Cls|Ctx} L:Label
 
@@ -599,6 +626,7 @@ D:T = LdRaw<T> S0:Ptr S1:ConstInt
   describes the offset from the base, and the size.  The value in D is
   assumed to be of type T.
 
+
 8. Allocation
 
 NewObj
@@ -658,7 +686,7 @@ D:StkPtr = RetAdjustStack S0:StkPtr
   Loads the new VM stack pointer into the destination.  S0 is a
   pointer to the current activation record.
 
-ReleaseVVOrExit S0:StkPtr L:Label
+ReleaseVVOrExit S0:StkPtr -> L
 
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   null, does nothing.  If it is an ExtraArgs, deallocates the
@@ -716,11 +744,42 @@ d:StkP = SpillStack         s0:StkP, s1:StkP, s2:ConstInt, s3...sN
 
 11. Trace exits
 
-ExitTrace
-ExitTraceCc
-ExitSlow
-ExitSlowNoProgress
-ExitGuardFailure
+ExitTrace S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+          [S4:TCA]
+
+  Unconditional exit to bytecode offset S1 in function S0.  S2 and
+  S3 are the VM stack and frame pointers, respectively.  If given,
+  S4 is the address of a jmp instruction to patch later.
+
+  [Implementation note.  S4 refers to a branch instruction, but the
+  type is really None.  We access the branch instruction to find
+  the TCA to use, at compile time.  In effect, S4 is simply a
+  compile-time pointer to the IRInstruction to patch].
+
+ExitTraceCc S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+            S4:ConstInt [S5:TCA]
+
+  Exit conditionally to bytecode offset S1 or S4 in function S0.
+  S4 is bytecode address to exit to if the condition is false.
+  S2 and S3 are the VM stack and frame pointer, respectively.
+
+ExitGuardFailure S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+
+  A start-of-trace guard failed before the trace began executing.
+  Runtime may retranslate the bytecode using HHIR.  S1 is the
+  bytecode offset, S2 and S3 are the VM stack and frame pointer.
+
+ExitSlow S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+
+  Like ExitTrace, but with a runtime hint to not use HHIR at this func/pc
+  position in the future.  Runtime may start a new trace using Tx64 or
+  interpreter.
+
+ExitSlowNoProgress S0:ConstFuncPtr, S1:ConstInt, S2:StkPtr, S3:StkPtr
+
+  Like ExitGuardFailure, with the "slow" hint from ExitSlow.
+  In this case we can retranslate or interprete the whole tracelet since
+  it didn't make any progress.
 
 
 12. Refcounting and copies
@@ -759,12 +818,6 @@ DecRefNZ S0:Gen
 
 13. Misc
 
-Marker
-
-  Records Function, stack offset, and bytecode offset in the HHIR
-  instruction stream.  This just carries metadata; Marker has no
-  executable semantics.
-
 D:StkPtr = DefFP
 
   Creates a temporary D representing the current vm frame pointer.
@@ -793,8 +846,15 @@ Concat
 ArrayAdd
 DefCls
 DefFunc
-InterpOne
 
+D:StkPtr InterpOne S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
+                     S4:ConstInt [ -> L ]
+
+  Call the interpreter implementation function for one opcode.  S0 and
+  S1 are the VM frame and stack pointers, respectively.  S2 is the bytecode
+  offset.  S3 is the number of cells to adjust the stack pointer before
+  running the interpreter function.  S4 is the VM DataType of the return
+  type for the opcode.  Returns the updated VM stack pointer.
 
 15. Register allocation
 
@@ -844,7 +904,11 @@ IncStat S0:ConstInt S1:ConstInt S2:ConstBool
   'force' flag. This opcode becomes a noop iff (force == false and runtime
   stats are not enabled) at translation time.
 
-DbgAssertRefCount
+DbgAssertRefCount S0:T
+
+  Assert that S0 has a valid refcount.  T must be statically known and be a
+  refcounted type.  If S0's count is implausible then execute a hardware
+  trap instruction (int3 on x64).
 
 
 18. Iterators

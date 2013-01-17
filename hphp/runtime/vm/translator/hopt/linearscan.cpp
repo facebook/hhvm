@@ -90,39 +90,30 @@ private:
   };
 
 private:
-  void allocRegToInstruction(Trace* trace,
-                             IRInstruction::Iterator it);
+  void allocRegToInstruction(IRInstruction::Iterator it);
   void allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index);
   void allocRegToTmp(SSATmp* ssaTmp, uint32_t index);
   void freeRegsAtId(uint32_t id);
   void spill(SSATmp* tmp);
-  static RegSet computeLiveOutRegs(Trace* trace, RegSet = RegSet());
+  void computeLiveOutRegs();
   static RegSet computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs);
 
   void initFreeList();
   void coalesce(Trace* trace);
   void coalesceAux(Trace* trace);
-  void allocRegsToTraceAux(Trace* trace);
+  void allocRegsToTrace();
   uint32 createSpillSlot(SSATmp* tmp);
   static SSATmp* getSpilledTmp(SSATmp* tmp);
   static SSATmp* getOrigTmp(SSATmp* tmp);
-  void preAllocSpillLoc(Trace* trace, uint32 numSpillLocs);
-  void preAllocSpillLocAux(Trace* trace, uint32 numSpillLocs);
-  uint32 assignSpillLoc(Trace* trace);
-  uint32 assignSpillLocAux(Trace* trace,
-                           uint32 nextSpillLoc,
-                           uint32 nextMmxReg);
+  void preAllocSpillLoc(uint32 numSpillLocs);
+  uint32 assignSpillLoc();
   void insertAllocFreeSpill(Trace* trace, uint32 numExtraSpillLocs);
   void insertAllocFreeSpillAux(Trace* trace, uint32 numExtraSpillLocs);
   void rematerialize(Trace* trace);
-  void rematerializeAux(Trace* trace,
-                        SSATmp* curSp,
-                        SSATmp* curFp,
-                        std::vector<SSATmp*> localValues);
+  void rematerializeAux();
   void removeUnusedSpills(Trace* trace);
   void removeUnusedSpillsAux(Trace* trace);
-  void collectNatives(Trace* trace);
-  void collectNativesAux(Trace* trace);
+  void collectNatives();
   void computePreColoringHint();
   IRInstruction* getNextNative() const;
   uint32 getNextNativeId() const;
@@ -137,13 +128,17 @@ private:
   // Register allocation may generate Spill/Reload.
   IRFactory* const m_irFactory;
   RegState   m_regs[NumRegs];
+  // Lists of free caller and callee-saved registers, respectively.
   std::list<RegState*> m_freeCallerSaved;
   std::list<RegState*> m_freeCalleeSaved;
+  // List of assigned registers, sorted high to low by lastUseId.
   std::list<RegState*> m_allocatedRegs;
   // Indexed by slot ID.
   std::vector<SlotInfo> m_slots;
-  // the list of native instructions in the trace
-  // sorted by instruction ID
+  // All basic blocks in linearized order.
+  BlockList m_blocks;
+  // the list of native instructions in the trace sorted by instruction ID;
+  // i.e. a filtered list in the same order as visited by m_blocks.
   IRInstruction::List m_natives;
   // stores pre-coloring hints
   PreColoringHint m_preColoringHint;
@@ -221,18 +216,18 @@ RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
       }
     }
   }
-  // add the destination register to the live regs set
-  SSATmp* dst = inst->getDst();
-  if (dst != NULL && dst->getLastUseId() > instId) {
-    for (int locIndex = 0;
-         locIndex < dst->numAllocatedRegs();
-         locIndex++) {
-      if (dst->hasReg(locIndex)) {
-        liveRegs.add(dst->getReg(locIndex));
+  // add the destination registers to the live regs set
+  for (SSATmp* dst : inst->getDsts()) {
+    if (dst->getLastUseId() > instId) {
+      for (int locIndex = 0;
+           locIndex < dst->numAllocatedRegs();
+           locIndex++) {
+        if (dst->hasReg(locIndex)) {
+          liveRegs.add(dst->getReg(locIndex));
+        }
       }
     }
   }
-
   inst->setLiveOutRegs(liveRegs);
   return liveRegs;
 }
@@ -247,24 +242,16 @@ RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
  * important that this function iterates over the instruction in
  * the same order that linear scan orders the instructions.
  */
-RegSet LinearScan::computeLiveOutRegs(Trace* trace, RegSet liveOutRegs) {
-  for (auto* inst : trace->getInstructionList()) {
-    liveOutRegs = LinearScan::computeLiveOutRegs(inst, liveOutRegs);
-    if (inst->isControlFlowInstruction()) {
-      // follow control flow edges to the exit blocks in the same order
-      // that linear scan does
-      LabelInstruction* label = inst->getLabel();
-      if (label != NULL && label->getId() == inst->getId() + 1) {
-        liveOutRegs = LinearScan::computeLiveOutRegs(label->getParent(),
-                                                     liveOutRegs);
-      }
+void LinearScan::computeLiveOutRegs() {
+  RegSet liveOutRegs;
+  for (Block& block : m_blocks) {
+    for (IRInstruction* inst : block) {
+      liveOutRegs = LinearScan::computeLiveOutRegs(inst, liveOutRegs);
     }
   }
-  return liveOutRegs;
 }
 
-void LinearScan::allocRegToInstruction(Trace* trace,
-                                       IRInstruction::Iterator it) {
+void LinearScan::allocRegToInstruction(IRInstruction::Iterator it) {
   IRInstruction* inst = *it;
   if (RuntimeOption::EvalDumpIR > 3) {
     std::cout << "--- allocating to instruction: ";
@@ -297,15 +284,16 @@ void LinearScan::allocRegToInstruction(Trace* trace,
     }
   }
   for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
-    SSATmp* tmp = inst->getSrc(i);
-    int32 slotId = tmp->getSpillSlot();
     if (needsReloading[i]) {
+      SSATmp* tmp = inst->getSrc(i);
+      int32 slotId = tmp->getSpillSlot();
       // <tmp> is spilled, and not reloaded.
       // Therefore, We need to reload the value into a new SSATmp.
 
       // Insert the Reload instruction.
       SSATmp* spillTmp = m_slots[slotId].m_spillTmp;
       IRInstruction* reload = m_irFactory->gen(Reload, spillTmp);
+      Trace* trace = inst->getParent();
       trace->getInstructionList().insert(it, reload);
       reload->setParent(trace);
 
@@ -320,19 +308,11 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       // must be using its entire needed-count of registers.
       assert(reloadTmp->getType() == tmp->getType());
       assert(tmp->numNeededRegs() == tmp->numAllocatedRegs());
-      for (int locIndex = 0;
-           locIndex < tmp->numNeededRegs();
-           ++locIndex) {
+      for (int locIndex = 0; locIndex < tmp->numNeededRegs(); ++locIndex) {
         allocRegToTmp(reloadTmp, locIndex);
       }
-      if (trace->isMain()) {
-        // To make the algorithm simple, do not add reload in exit traces.
-        // Otherwise, we would have to check whether the latest reloaded
-        // value dominates the current instruction.
-        // std::cout << "m_latestReload[" << slotId <<
-        //              "] = " << reloadTmp << "\n";
-        m_slots[slotId].m_latestReload = reloadTmp;
-      }
+      // Remember this reload tmp in case we can reuse it in later blocks.
+      m_slots[slotId].m_latestReload = reloadTmp;
       if (RuntimeOption::EvalDumpIR > 4) {
         std::cout << "--- created reload: ";
         reload->print(std::cout);
@@ -349,49 +329,44 @@ void LinearScan::allocRegToInstruction(Trace* trace,
     computePreColoringHint();
   }
 
-  SSATmp* ssaTmp = inst->getDst();
-  if (!ssaTmp) {
-    return;
-  }
+  SSARange dsts = inst->getDsts();
+  if (dsts.empty()) return;
 
   Opcode opc = inst->getOpcode();
-  UNUSED Type::Tag type = ssaTmp->getType();
-
   if (opc == DefFP || opc == FreeActRec) {
-    allocRegToTmp(&m_regs[int(rVmFp)], ssaTmp, 0);
+    allocRegToTmp(&m_regs[int(rVmFp)], dsts[0], 0);
     return;
   }
   if (opc == DefSP || opc == Call || opc == SpillStack ||
       opc == RetAdjustStack ||
       opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
       opc == GuardStk || opc == AssertStk) {
-    assert(type == Type::StkPtr);
-    allocRegToTmp(&m_regs[int(rVmSp)], ssaTmp, 0);
+    assert(dsts[0]->getType() == Type::StkPtr);
+    allocRegToTmp(&m_regs[int(rVmSp)], dsts[0], 0);
     return;
   }
   if (opc == DefMIStateBase) {
-    assert(type == Type::PtrToCell);
-    allocRegToTmp(&m_regs[int(rsp)], ssaTmp, 0);
+    assert(dsts[0]->getType() == Type::PtrToCell);
+    allocRegToTmp(&m_regs[int(rsp)], dsts[0], 0);
     return;
   }
 
   // LdRaw, loading a generator's embedded AR, is the only time we have a
   // pointer to an AR that is not in rVmFp or rVmSp.
-  assert(type != Type::StkPtr ||
+  assert(dsts[0]->getType() != Type::StkPtr ||
          (opc == LdRaw &&
           inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr));
 
-  if (RuntimeOption::EvalHHIRDeadCodeElim) {
-    if (ssaTmp->getLastUseId() == 0) return;
-  }
-  for (int i = 0; i < ssaTmp->numNeededRegs(); ++i) {
-    allocRegToTmp(ssaTmp, i);
+  for (SSATmp* dst : dsts) {
+    for (int i = 0; i < dst->numNeededRegs(); ++i) {
+      if (!RuntimeOption::EvalHHIRDeadCodeElim || dst->getLastUseId() != 0) {
+        allocRegToTmp(dst, i);
+      }
+    }
   }
   if (!RuntimeOption::EvalHHIRDeadCodeElim) {
-    if (ssaTmp->getLastUseId() == 0) {
-      // if any outputs were unused, free regs now.
-      freeRegsAtId(inst->getId());
-    }
+    // if any outputs were unused, free regs now.
+    freeRegsAtId(inst->getId());
   }
 }
 
@@ -479,66 +454,63 @@ void LinearScan::allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
 }
 
 // Assign spill location numbers to Spill/Reload.
-uint32 LinearScan::assignSpillLoc(Trace* trace) {
-  return assignSpillLocAux(trace, 0, 0);
-}
+uint32 LinearScan::assignSpillLoc() {
+  uint32 nextSpillLoc = 0;
+  uint32 nextMmxReg = 0;
 
-uint32 LinearScan::assignSpillLocAux(Trace* trace,
-                                     uint32 nextSpillLoc,
-                                     uint32 nextMmxReg) {
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    if (getNextNative() == inst) {
-      assert(!m_natives.empty());
-      m_natives.pop_front();
-    }
-    if (inst->getOpcode() == Spill) {
-      SSATmp* dst = inst->getDst();
-      SSATmp* src = inst->getSrc(0);
-      for (int locIndex = 0;
-           locIndex < src->numNeededRegs();
-           ++locIndex) {
-        if (dst->getLastUseId() <= getNextNativeId()) {
-          TRACE(3, "[counter] 1 spill a tmp that does not span native\n");
-        } else {
-          TRACE(3, "[counter] 1 spill a tmp that spans native\n");
-        }
+  // visit blocks in reverse postorder and instructions in forward order,
+  // assigning a spill slot id or mmx register number to each Spill.
+  // We don't reuse slot id's or mmx registers, but both could be reused
+  // either by visiting the dominator tree in preorder or by analyzing
+  // lifetimes and reusing id/registers between non-conflicting spills.
 
-        const bool allowMmxSpill = RuntimeOption::EvalHHIREnableMmx &&
-          // The live range of the spill slot doesn't span native calls,
-          // and we still have free MMX registers.
-          dst->getLastUseId() <= getNextNativeId() &&
-          nextMmxReg < (uint32)NumMmxRegs;
+  for (Block& block : m_blocks) {
+    for (IRInstruction* inst : block) {
+      if (getNextNative() == inst) {
+        assert(!m_natives.empty());
+        m_natives.pop_front();
+      }
+      if (inst->getOpcode() == Spill) {
+        SSATmp* dst = inst->getDst();
+        SSATmp* src = inst->getSrc(0);
+        for (int locIndex = 0;
+             locIndex < src->numNeededRegs();
+             ++locIndex) {
+          if (dst->getLastUseId() <= getNextNativeId()) {
+            TRACE(3, "[counter] 1 spill a tmp that does not span native\n");
+          } else {
+            TRACE(3, "[counter] 1 spill a tmp that spans native\n");
+          }
 
-        dst->setSpillInfo(locIndex,
-          allowMmxSpill
-            ? SpillInfo(RegNumber(nextMmxReg++))
-            : SpillInfo(nextSpillLoc++)
-        );
-        if (allowMmxSpill) {
-          TRACE(3, "[counter] 1 spill to mmx\n");
-        } else {
-          TRACE(3, "[counter] 1 spill to memory\n");
+          const bool allowMmxSpill = RuntimeOption::EvalHHIREnableMmx &&
+            // The live range of the spill slot doesn't span native calls,
+            // and we still have free MMX registers.
+            dst->getLastUseId() <= getNextNativeId() &&
+            nextMmxReg < (uint32)NumMmxRegs;
+
+          dst->setSpillInfo(locIndex,
+            allowMmxSpill
+              ? SpillInfo(RegNumber(nextMmxReg++))
+              : SpillInfo(nextSpillLoc++)
+          );
+          if (allowMmxSpill) {
+            TRACE(3, "[counter] 1 spill to mmx\n");
+          } else {
+            TRACE(3, "[counter] 1 spill to memory\n");
+          }
         }
       }
-    }
-    if (inst->getOpcode() == Reload) {
-      SSATmp* src = inst->getSrc(0);
-      for (int locIndex = 0;
-           locIndex < src->numNeededRegs();
-           ++locIndex) {
-        if (src->getSpillInfo(locIndex).type() == SpillInfo::MMX) {
-          TRACE(3, "[counter] reload from mmx\n");
-        } else {
-          TRACE(3, "[counter] reload from memory\n");
+      if (inst->getOpcode() == Reload) {
+        SSATmp* src = inst->getSrc(0);
+        for (int locIndex = 0;
+             locIndex < src->numNeededRegs();
+             ++locIndex) {
+          if (src->getSpillInfo(locIndex).type() == SpillInfo::MMX) {
+            TRACE(3, "[counter] reload from mmx\n");
+          } else {
+            TRACE(3, "[counter] reload from memory\n");
+          }
         }
-      }
-    }
-    if (inst->isControlFlowInstruction()) {
-      LabelInstruction* label = inst->getLabel();
-      if (label != NULL && label->getId() == inst->getId() + 1) {
-        nextSpillLoc = assignSpillLocAux(label->getParent(),
-                                         nextSpillLoc,
-                                         nextMmxReg);
       }
     }
   }
@@ -588,22 +560,12 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
   }
 }
 
-void LinearScan::collectNatives(Trace* trace) {
+void LinearScan::collectNatives() {
   // May be re-executed. Need initialize <m_natives> each time.
   m_natives.clear();
-  collectNativesAux(trace);
-}
-
-void LinearScan::collectNativesAux(Trace* trace) {
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    if (inst->isNative()) {
-      m_natives.push_back(inst);
-    }
-    if (inst->isControlFlowInstruction()) {
-      LabelInstruction* label = inst->getLabel();
-      if (label->getId() == inst->getId() + 1) {
-        collectNativesAux(label->getParent());
-      }
+  for (Block& block : m_blocks) {
+    for (IRInstruction* inst : block) {
+      if (inst->isNative()) m_natives.push_back(inst);
     }
   }
 }
@@ -816,39 +778,34 @@ void LinearScan::coalesceAux(Trace* trace) {
   }
 }
 
-void LinearScan::preAllocSpillLoc(Trace* trace, uint32 numSpillLocs) {
-  preAllocSpillLocAux(trace, numSpillLocs);
-  for (Trace* exit : trace->getExitTraces()) {
-    preAllocSpillLocAux(exit, numSpillLocs);
-  }
-}
-
-void LinearScan::preAllocSpillLocAux(Trace* trace, uint32 numSpillLocs) {
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    if (inst->getOpcode() == Spill) {
-      SSATmp* dst = inst->getDst();
-      for (int index = 0; index < dst->numNeededRegs(); ++index) {
-        assert(!dst->hasReg(index));
-        if (dst->getSpillInfo(index).type() == SpillInfo::Memory) {
-          uint32 spillLoc = dst->getSpillInfo(index).mem();
-          // Native stack layout:
-          // |               |
-          // +---------------+
-          // |               |  <-- spill[5..]
-          // | pre allocated |  <-- spill[4]
-          // |  (16 slots)   |  <-- spill[3]
-          // +---------------+
-          // |  return addr  |
-          // +---------------+
-          // |    extra      |  <-- spill[2]
-          // |    spill      |  <-- spill[1]
-          // |  locations    |  <-- spill[0]
-          // +---------------+  <-- %rsp
-          // If a spill location falls into the pre-allocated region, we
-          // need to increase its index by 1 to avoid overwriting the
-          // return address.
-          if (spillLoc + NumPreAllocatedSpillLocs >= numSpillLocs) {
-            dst->setSpillInfo(index, SpillInfo(spillLoc + 1));
+void LinearScan::preAllocSpillLoc(uint32 numSpillLocs) {
+  for (Block& block : m_blocks) {
+    for (IRInstruction* inst : block) {
+      if (inst->getOpcode() == Spill) {
+        SSATmp* dst = inst->getDst();
+        for (int index = 0; index < dst->numNeededRegs(); ++index) {
+          assert(!dst->hasReg(index));
+          if (dst->getSpillInfo(index).type() == SpillInfo::Memory) {
+            uint32 spillLoc = dst->getSpillInfo(index).mem();
+            // Native stack layout:
+            // |               |
+            // +---------------+
+            // |               |  <-- spill[5..]
+            // | pre allocated |  <-- spill[4]
+            // |  (16 slots)   |  <-- spill[3]
+            // +---------------+
+            // |  return addr  |
+            // +---------------+
+            // |    extra      |  <-- spill[2]
+            // |    spill      |  <-- spill[1]
+            // |  locations    |  <-- spill[0]
+            // +---------------+  <-- %rsp
+            // If a spill location falls into the pre-allocated region, we
+            // need to increase its index by 1 to avoid overwriting the
+            // return address.
+            if (spillLoc + NumPreAllocatedSpillLocs >= numSpillLocs) {
+              dst->setSpillInfo(index, SpillInfo(spillLoc + 1));
+            }
           }
         }
       }
@@ -862,14 +819,14 @@ void LinearScan::allocRegs(Trace* trace) {
     coalesce(trace);
   }
 
-  numberInstructions(trace);
+  m_blocks = numberInstructions(trace);
 
-  collectNatives(trace);
+  collectNatives();
   computePreColoringHint();
   initFreeList();
-  allocRegsToTraceAux(trace);
+  allocRegsToTrace();
   // Renumber instructions, because we added spills and reloads.
-  numberInstructions(trace);
+  m_blocks = numberInstructions(trace);
 
   if (RuntimeOption::EvalHHIREnableRematerialization && m_slots.size() > 0) {
     // Don't bother rematerializing the trace if it has no Spill/Reload.
@@ -883,15 +840,15 @@ void LinearScan::allocRegs(Trace* trace) {
 
   // assignSpillLoc needs next natives in order to decide whether we
   // can use MMX registers.
-  collectNatives(trace);
+  collectNatives();
   // Make sure rsp is 16-aligned.
-  uint32 numSpillLocs = assignSpillLoc(trace);
+  uint32 numSpillLocs = assignSpillLoc();
   if (numSpillLocs % 2) {
     ++numSpillLocs;
   }
   assert(NumPreAllocatedSpillLocs % 2 == 0);
   if (numSpillLocs > 0) {
-    preAllocSpillLoc(trace, numSpillLocs);
+    preAllocSpillLoc(numSpillLocs);
     if (numSpillLocs > (uint32)NumPreAllocatedSpillLocs) {
       /*
        * We only insert AllocSpill and FreeSpill when the pre-allocated
@@ -907,177 +864,167 @@ void LinearScan::allocRegs(Trace* trace) {
       insertAllocFreeSpill(trace, numSpillLocs - NumPreAllocatedSpillLocs);
     }
   }
-  numberInstructions(trace);
+  m_blocks = numberInstructions(trace);
 
   // record the live out register set at each instruction
-  LinearScan::computeLiveOutRegs(trace);
+  computeLiveOutRegs();
 }
 
-void LinearScan::allocRegsToTraceAux(Trace* trace) {
-  IRInstruction::List& instructionList = trace->getInstructionList();
-  IRInstruction::Iterator it;
-  for (it = instructionList.begin();
-       it != instructionList.end();
-       it++) {
-    IRInstruction* inst = *it;
-    allocRegToInstruction(trace, it);
-    if (RuntimeOption::EvalDumpIR > 3) {
-      std::cout << "--- allocated to instruction: ";
-      inst->print(std::cout);
-      std::cout << "\n";
+void LinearScan::allocRegsToTrace() {
+  // First, visit every instruction, allocating registers as we go,
+  // and inserting Reload instructions where necessary.
+  for (Block& block : m_blocks) {
+    // Clear the remembered reloads because the previous block might not
+    // dominate this block.
+    for (SlotInfo& slot : m_slots) {
+      slot.m_latestReload = nullptr;
     }
-    if (inst->isControlFlowInstruction()) {
-      // This instruction may transfer control to another trace
-      // If this is the last instruction in the trace that can branch
-      // to this target trace, then allocate registers to the target
-      // trace, effectively linearizing the target trace after inst.
-      LabelInstruction* label = inst->getLabel();
-      if (label != NULL && label->getId() == inst->getId() + 1) {
-        allocRegsToTraceAux(label->getParent());
+    for (IRInstruction::Iterator it = block.begin();
+         it != block.end(); ++it) {
+      allocRegToInstruction(it);
+      if (RuntimeOption::EvalDumpIR > 3) {
+        std::cout << "--- allocated to instruction: ";
+        (*it)->print(std::cout);
+        std::cout << "\n";
       }
     }
   }
 
-  // Insert spill instructions.
-  // Reload instructions are already added in <allocRegsToTrace>.
-  for (it = instructionList.begin(); it != instructionList.end(); ) {
-    IRInstruction::Iterator next = it; ++next;
-    IRInstruction* inst = *it;
-    if (inst->getOpcode() != Reload) {
-      // Reloaded SSATmps needn't be spilled again.
-      if (SSATmp* dst = inst->getDst()) {
+  // Now that we have visited all instructions and inserted Reloads
+  // for SSATmps which needed to be spilled, we can go back and insert
+  // the spills.  All uses must have been visited before we do this.
+  for (Block& block : m_blocks) {
+    for (IRInstruction::Iterator it = block.begin(), next;
+         it != block.end(); it = next) {
+      next = it; ++next;
+      IRInstruction* inst = *it;
+      // Reloaded SSATmps needn't be spilled again, so ignore Reloads.
+      if (inst->getOpcode() == Reload) continue;
+      for (SSATmp* dst : inst->getDsts()) {
         int32 slotId = dst->getSpillSlot();
         if (slotId != -1) {
-          // If this instruction is marked to be spilled,
-          // add a spill right afterwards.
+          // If this instruction is marked to be spilled, append a spill.
           IRInstruction* spillInst =
             m_slots[slotId].m_spillTmp->getInstruction();
-          instructionList.insert(next, spillInst);
+          Trace* trace = (*next)->getParent();
+          trace->getInstructionList().insert(next, spillInst);
           spillInst->setParent(trace);
         }
       }
     }
-    it = next;
   }
 }
 
 void LinearScan::rematerialize(Trace* trace) {
-  rematerializeAux(trace,
-                   NULL,
-                   NULL,
-                   std::vector<SSATmp*>());
-  numberInstructions(trace);
+  rematerializeAux();
+  m_blocks = numberInstructions(trace);
 
   // We only replaced Reloads in <rematerializeAux>.
   // Here, we remove Spills that are never reloaded.
   removeUnusedSpills(trace);
-  numberInstructions(trace);
+  m_blocks = numberInstructions(trace);
 }
 
-void LinearScan::rematerializeAux(Trace* trace,
-                                  SSATmp* curSp,
-                                  SSATmp* curFp,
-                                  std::vector<SSATmp*> localValues) {
+void LinearScan::rematerializeAux() {
+  std::vector<SSATmp*> localValues;
   auto killLocal = [&](int loc) {
     if (localValues.size() > loc) {
       localValues[loc] = nullptr;
     }
   };
 
-  IRInstruction::List& instList = trace->getInstructionList();
-  for (IRInstruction::Iterator it = instList.begin();
-       it != instList.end();
-       ++it) {
-    IRInstruction* inst = *it;
-    Opcode opc = inst->getOpcode();
-    SSATmp* dst = inst->getDst();
-    if (opc == DefFP || opc == FreeActRec) {
-      curFp = dst;
-      assert(dst && dst->getReg() == rVmFp);
-    }
-    if (opc == Reload) {
-      // s = Spill t0
-      // t = Reload s
-      SSATmp* spilledTmp = getSpilledTmp(dst);
-      IRInstruction* spilledInst = spilledTmp->getInstruction();
-      IRInstruction* newInst = NULL;
-      if (spilledInst->isRematerializable() ||
-          (spilledInst->getOpcode() == LdStack &&
-           spilledInst->getSrc(0) == curSp)) {
-        // XXX: could change <newInst> to the non-check version.
-        // Rematerialize those rematerializable instructions (i.e.,
-        // isRematerializable returns true) and LdStack.
-        newInst = spilledInst->clone(m_irFactory);
-        // The new instruction needn't have an exit label, because it is always
-        // dominated by the original instruction.
-        newInst->setLabel(NULL);
-      } else {
-        // Rematerialize LdLoc.
-        std::vector<SSATmp*>::iterator pos =
-          std::find(localValues.begin(),
-                    localValues.end(),
-                    canonicalize(spilledTmp));
-        // Search for a local that stores the value of <spilledTmp>.
-        if (pos != localValues.end()) {
-          size_t locId = pos - localValues.begin();
-          assert(curFp != NULL);
-          SSATmp* srcs[] = { curFp };
-          ConstInstruction constInst(1, srcs, Local(locId));
-
-          IRInstruction* ldHome = m_irFactory->cloneInstruction(&constInst);
-          newInst = m_irFactory->gen(LdLoc, dst->getType(), ldHome->getDst());
+  for (Block& block : m_blocks) {
+    // only rematerialize within a block since previous block might
+    // not dominate this one.  TODO: t2068637.
+    SSATmp* curSp = nullptr;
+    SSATmp* curFp = nullptr;
+    localValues.clear();
+    for (IRInstruction::Iterator it = block.begin(); it != block.end(); ++it) {
+      IRInstruction* inst = *it;
+      Opcode opc = inst->getOpcode();
+      if (opc == DefFP || opc == FreeActRec) {
+        assert(inst->getDst()->getReg() == rVmFp);
+        curFp = inst->getDst();
+      }
+      else if (opc == Reload) {
+        // s = Spill t0
+        // t = Reload s
+        SSATmp* dst = inst->getDst();
+        SSATmp* spilledTmp = getSpilledTmp(dst);
+        IRInstruction* spilledInst = spilledTmp->getInstruction();
+        IRInstruction* newInst = NULL;
+        if (spilledInst->isRematerializable() ||
+            (spilledInst->getOpcode() == LdStack &&
+             spilledInst->getSrc(0) == curSp)) {
+          // XXX: could change <newInst> to the non-check version.
+          // Rematerialize those rematerializable instructions (i.e.,
+          // isRematerializable returns true) and LdStack.
+          newInst = spilledInst->clone(m_irFactory);
+          // The new instruction needn't have an exit label; it must always
+          // be dominated by the original instruction because reloads are
+          // inserted just before uses, which must be dominated by the
+          // original (spilled) def.
+          newInst->setLabel(NULL);
+        } else if (curFp) {
+          // Rematerialize LdLoc.
+          std::vector<SSATmp*>::iterator pos =
+            std::find(localValues.begin(),
+                      localValues.end(),
+                      canonicalize(spilledTmp));
+          // Search for a local that stores the value of <spilledTmp>.
+          if (pos != localValues.end()) {
+            size_t locId = pos - localValues.begin();
+            assert(curFp != NULL);
+            SSATmp* srcs[] = { curFp };
+            ConstInstruction constInst(1, srcs, Local(locId));
+            IRInstruction* ldHome = m_irFactory->cloneInstruction(&constInst);
+            newInst = m_irFactory->gen(LdLoc, dst->getType(), ldHome->getDst());
+          }
+        }
+        if (newInst) {
+          UNUSED Type::Tag oldType = dst->getType();
+          newInst->setDst(dst);
+          dst->setInstruction(newInst);
+          assert(outputType(newInst) == oldType);
+          *it = newInst;
+          newInst->setParent(inst->getParent());
         }
       }
-      if (newInst) {
-        UNUSED Type::Tag oldType = dst->getType();
-        newInst->setDst(dst);
-        dst->setInstruction(newInst);
-        assert(outputType(newInst) == oldType);
-        *it = newInst;
-        newInst->setParent(trace);
-      }
-    }
 
-    // Updating <curSp> and <localValues>.
-    if (dst && dst->getReg() == rVmSp) {
-      // <inst> modifies the stack pointer.
-      curSp = dst;
-    }
+      // Updating curSp and localValues
+      if (inst->hasDst() && inst->getDst()->getReg() == rVmSp) {
+        // inst modifies the stack pointer.
+        curSp = inst->getDst();
+      }
 
-    if (opc == LdLoc || opc == StLoc || opc == StLocNT) {
-      // dst = LdLoc home
-      // StLoc/StLocNT home, src
-      int locId = getLocalIdFromHomeOpnd(inst->getSrc(0));
-      // Note that when we implement inlining, we will need to deal
-      // with the new local id space of the inlined function.
-      SSATmp* localValue = (opc == LdLoc ? dst : inst->getSrc(1));
-      if (int(localValues.size()) < locId + 1) {
-        localValues.resize(locId + 1);
+      if (opc == LdLoc || opc == StLoc || opc == StLocNT) {
+        // dst = LdLoc home
+        // StLoc/StLocNT home, src
+        int locId = getLocalIdFromHomeOpnd(inst->getSrc(0));
+        // Note that when we implement inlining, we will need to deal
+        // with the new local id space of the inlined function.
+        SSATmp* localValue = (opc == LdLoc ? inst->getDst() : inst->getSrc(1));
+        if (int(localValues.size()) < locId + 1) {
+          localValues.resize(locId + 1);
+        }
+        localValues[locId] = canonicalize(localValue);
       }
-      localValues[locId] = canonicalize(localValue);
-    }
-    // Other instructions that may have side effects on locals must
-    // kill the local variable values.
-    else if (opc == IterInit) {
-      int valLocId = inst->getSrc(3)->getValInt();
-      killLocal(valLocId);
-      if (inst->getNumSrcs() == 5) {
-        int keyLocId = inst->getSrc(4)->getValInt();
-        killLocal(keyLocId);
-      }
-    } else if (opc == IterNext) {
-      int valLocId = inst->getSrc(2)->getValInt();
-      killLocal(valLocId);
-      if (inst->getNumSrcs() == 4) {
-        int keyLocId = inst->getSrc(3)->getValInt();
-        killLocal(keyLocId);
-      }
-    }
-
-    if (inst->isControlFlowInstruction()) {
-      LabelInstruction* label = inst->getLabel();
-      if (label != NULL && label->getId() == inst->getId() + 1) {
-        rematerializeAux(label->getParent(), curSp, curFp, localValues);
+      // Other instructions that may have side effects on locals must
+      // kill the local variable values.
+      else if (opc == IterInit) {
+        int valLocId = inst->getSrc(3)->getValInt();
+        killLocal(valLocId);
+        if (inst->getNumSrcs() == 5) {
+          int keyLocId = inst->getSrc(4)->getValInt();
+          killLocal(keyLocId);
+        }
+      } else if (opc == IterNext) {
+        int valLocId = inst->getSrc(2)->getValInt();
+        killLocal(valLocId);
+        if (inst->getNumSrcs() == 4) {
+          int keyLocId = inst->getSrc(3)->getValInt();
+          killLocal(keyLocId);
+        }
       }
     }
   }

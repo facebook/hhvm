@@ -30,15 +30,25 @@ static bool jccCanBeDirectExit(Opcode opc) {
     // TODO(#2053369): JmpIsType, etc
 }
 
-// If main trace ends with an unconditional jump, copy the target of
-// the jump to the end of the trace
+// If main trace ends with an unconditional jump, and the target is not
+// reached by any other branch, then copy the target of the jump to the
+// end of the trace
 static void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
+  boost::dynamic_bitset<> isJoin(irFactory->numLabels());
+  boost::dynamic_bitset<> havePred(irFactory->numLabels());
   IRInstruction::List& instList = trace->getInstructionList();
+  for (IRInstruction* inst : instList) {
+    if (inst->isControlFlowInstruction()) {
+      auto id = inst->getLabel()->getLabelId();
+      isJoin[id] = havePred[id];
+      havePred[id] = 1;
+    }
+  }
   IRInstruction::Iterator lastInst = instList.end();
-  lastInst--; // go back to the last instruction
-  IRInstruction* jmpInst = *lastInst;
-  if (jmpInst->getOpcode() == Jmp_) {
-    Trace* targetTrace = jmpInst->getLabel()->getParent();
+  --lastInst; // go back to the last instruction
+  IRInstruction* jmp = *lastInst;
+  if (jmp->getOpcode() == Jmp_ && !isJoin[jmp->getLabel()->getLabelId()]) {
+    Trace* targetTrace = jmp->getLabel()->getParent();
     IRInstruction::List& targetInstList = targetTrace->getInstructionList();
     IRInstruction::Iterator instIter = targetInstList.begin();
     instIter++; // skip over label
@@ -69,7 +79,7 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
     IRInstruction* inst = *tail;
     opc = inst->getOpcode();
     if (opc == ExitTrace) {
-      exitInst = *tail;
+      exitInst = inst;
       continue;
     }
     if (opc == Marker) {
@@ -130,7 +140,7 @@ static void hoistGuardJumps(Trace* trace, IRFactory* irFactory) {
          opc == GuardLoc || opc == GuardStk)) {
       LabelInstruction* exitLabel = inst->getLabel();
       // Find the GuardFailure's label and confirm this branches there
-      if (guardLabel == NULL) {
+      if (guardLabel == NULL && exitLabel->getParent() != trace) {
         Trace* exitTrace = exitLabel->getParent();
         IRInstruction::List& xList = exitTrace->getInstructionList();
         IRInstruction::Iterator instIter = xList.begin();

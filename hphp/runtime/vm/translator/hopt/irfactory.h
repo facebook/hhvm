@@ -136,6 +136,7 @@ public:
 
   ConstInstruction* defConst(int64 val);
   LabelInstruction* defLabel(const Func*);
+  LabelInstruction* defLabel(const Func*, unsigned numDst);
   MarkerInstruction* marker(uint32 bcOff, const Func* func, int32 spOff);
   /*
    * Creates move instrution that moves from src to dst. We can't use gen

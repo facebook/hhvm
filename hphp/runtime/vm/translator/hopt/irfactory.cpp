@@ -27,6 +27,18 @@ LabelInstruction* IRFactory::defLabel(const Func* f) {
   return cloneInstruction(&inst);
 }
 
+LabelInstruction* IRFactory::defLabel(const Func* f, unsigned numDst) {
+  LabelInstruction* label = defLabel(f);
+  if (numDst > 0) {
+    SSATmp** dsts = new (m_arena) SSATmp*[numDst];
+    for (unsigned i = 0; i < numDst; ++i) {
+      dsts[i] = new (m_arena) SSATmp(m_nextOpndId++, label);
+    }
+    label->setDsts(numDst, dsts);
+  }
+  return label;
+}
+
 MarkerInstruction* IRFactory::marker(uint32 bcOff, const Func* f, int32 spOff) {
   MarkerInstruction inst(bcOff, f, spOff);
   return cloneInstruction(&inst);

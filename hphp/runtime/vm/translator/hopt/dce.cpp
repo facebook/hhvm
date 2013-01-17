@@ -42,9 +42,9 @@ void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
 }
 
 bool isUnguardedLoad(IRInstruction* inst) {
+  if (!inst->hasDst() || !inst->getDst()) return false;
   Opcode opc = inst->getOpcode();
   SSATmp* dst = inst->getDst();
-  if (!dst) return false;
   Type::Tag type = dst->getType();
   return (opc == LdStack && (type == Type::Gen || type == Type::Cell))
           || (opc == LdLoc && type == Type::Gen)
@@ -53,12 +53,14 @@ bool isUnguardedLoad(IRInstruction* inst) {
               inst->getSrc(0)->getType() == Type::PtrToCell);
 }
 
-void initInstructions(Trace* trace, IRInstruction::List& wl) {
-  bool unreachable = false;
+IRInstruction::List initInstructions(Trace* trace) {
   TRACE(5, "DCE:vvvvvvvvvvvvvvvvvvvv\n");
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    assert(inst->getParent() == trace);
+  // 1. simplify unguarded loads to remove unnecssary branches, and
+  //    perform copy propagation on every instruction.  Targets that become
+  //    unreachable from this pass won't be visited in step 2 below.
+  forEachTraceInst(trace, [](IRInstruction* inst) {
     Simplifier::copyProp(inst);
+    inst->setId(DEAD);
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
     // instruction
@@ -69,36 +71,26 @@ void initInstructions(Trace* trace, IRInstruction::List& wl) {
       // that its no longer an essential control-flow instruction
       inst->setLabel(NULL);
     }
-    Opcode opc = inst->getOpcode();
-    // decref of anything that isn't ref counted is a nop
-    if ((opc == DecRef || opc == DecRefNZ) && !isRefCounted(inst->getSrc(0))) {
-      inst->setId(DEAD);
-      continue;
-    }
-    if (!unreachable && inst->isControlFlowInstruction()) {
-      // mark the destination label so that the destination trace
-      // is marked reachable
-      inst->getLabel()->setId(LIVE);
-    }
-    if (!unreachable && inst->isEssential()) {
-      inst->setId(LIVE);
-      wl.push_back(inst);
-    } else {
-      if (moduleEnabled(HPHP::Trace::hhir, 5)) {
-        std::ostringstream ss1;
-        inst->printSrcs(ss1);
-        TRACE(5, "DCE: %s\n", ss1.str().c_str());
-        std::ostringstream ss2;
-        inst->print(ss2);
-        TRACE(5, "DCE: %s\n", ss2.str().c_str());
+  });
+
+  // 2. mark reachable, essential, instructions live and enqueue them
+  IRInstruction::List wl;
+  BlockList blocks = buildCfg(trace);
+  for (Block& block : blocks) {
+    for (IRInstruction* inst : block) {
+      if (inst->isControlFlowInstruction()) {
+        // mark the destination label so that the destination trace
+        // is marked reachable
+        inst->getLabel()->setId(LIVE);
       }
-      inst->setId(DEAD);
-    }
-    if (inst->getOpcode() == Jmp_) {
-      unreachable = true;
+      if (inst->isEssential()) {
+        inst->setId(LIVE);
+        wl.push_back(inst);
+      }
     }
   }
   TRACE(5, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
+  return wl;
 }
 
 // Perform the following transformations:
@@ -126,52 +118,41 @@ void optimizeRefCount(Trace* trace) {
   }
 }
 
-// Sink IncRefs consumed off trace.
-// When <trace> is an exit trace, <toSink> contains all live IncRefs in the
-// main trace that are consumed off trace.
-void sinkIncRefs(Trace* trace,
-                 IRFactory* irFactory,
-                 IRInstruction::List& toSink) {
-  if (trace->isMain()) {
-    // An exit trace may be entered from multiple exit points. We keep track of
-    // which exit traces we already pushed sunk IncRefs to, so that we won't push
-    // them multiple times.
-    boost::dynamic_bitset<> pushedTo(irFactory->numLabels());
+/*
+ * Sink IncRefs consumed off trace.
+ * Assumptions: Flow graph must not have critical edges, and the instructions
+ * have been annotated already by the DCE algorithm.  This pass uses
+ * the REFCOUNT_CONSUMED* flags to copy IncRefs from the main trace to each
+ * exit trace that consumes the incremented pointer.
+ * 1. toSink = {}
+ * 2. iterate forwards over the main trace:
+ *    * when a movable IncRef is found, insert into toSink list and mark
+ *      it as DEAD.
+ *    * If a decref of a dead incref is found, remove the corresponding
+ *      incref from toSink, and mark the decref DEAD because too.
+ *    * the first time we see a branch to an exit trace, process the
+ *      exit tace.
+ * 3. to process an exit trace:
+ *    * clone each IncRef found in toSink then prepend to the exit trace.
+ *    * replace each use of the original incref's result with the new
+ *      incref's result.
+ */
+void sinkIncRefs(Trace* trace, IRFactory* irFactory) {
+  assert(trace->isMain());
+
+  auto copyProp = [] (Trace* trace) {
     for (IRInstruction* inst : trace->getInstructionList()) {
-      if (inst->getOpcode() == IncRef) {
-        // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
-        // otherwise, it should be already removed in optimizeRefCount.
-        assert(inst->getId() == REFCOUNT_CONSUMED ||
-               inst->getId() == REFCOUNT_CONSUMED_OFF_TRACE);
-        if (inst->getId() == REFCOUNT_CONSUMED_OFF_TRACE) {
-          inst->setOpcode(Mov);
-          // Mark them as dead so that they'll be removed later.
-          inst->setId(DEAD);
-          // Put all REFCOUNT_CONSUMED_OFF_TRACE IncRefs to the sinking list.
-          toSink.push_back(inst);
-        }
-      }
-      if (inst->getOpcode() == DecRefNZ) {
-        IRInstruction* srcInst = inst->getSrc(0)->getInstruction();
-        if (srcInst->getId() == DEAD) {
-          inst->setId(DEAD);
-          // This may take O(I) time where I is the number of IncRefs
-          // in the main trace.
-          toSink.remove(srcInst);
-        }
-      }
-      if (LabelInstruction* label = inst->getLabel()) {
-        if (!pushedTo[label->getLabelId()]) {
-          pushedTo[label->getLabelId()] = true;
-          sinkIncRefs(label->getParent(), irFactory, toSink);
-        }
-      }
+      Simplifier::copyProp(inst);
     }
-  } else {
-    std::vector<SSATmp*> sunkTmps(irFactory->numTmps(), nullptr);
+  };
+
+  IRInstruction::List toSink;
+
+  auto processExit = [&] (Trace* exit) {
     // Sink REFCOUNT_CONSUMED_OFF_TRACE IncRefs before the first non-label
     // instruction, and create a mapping between the original tmps to the sunk
     // tmps so that we can later replace the original ones with the sunk ones.
+    std::vector<SSATmp*> sunkTmps(irFactory->numTmps(), nullptr);
     for (IRInstruction::ReverseIterator j = toSink.rbegin();
          j != toSink.rend();
          ++j) {
@@ -180,13 +161,13 @@ void sinkIncRefs(Trace* trace,
       // we iterate through toSink in the reversed order.
       IRInstruction* sunkInst = irFactory->gen(IncRef, inst->getSrc(0));
       sunkInst->setId(LIVE);
-      trace->prependInstruction(sunkInst);
+      exit->prependInstruction(sunkInst);
 
       auto dstId = inst->getDst()->getId();
       assert(!sunkTmps[dstId]);
       sunkTmps[dstId] = sunkInst->getDst();
     }
-    for (IRInstruction* inst : trace->getInstructionList()) {
+    for (IRInstruction* inst : exit->getInstructionList()) {
       // Replace the original tmps with the sunk tmps.
       for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
         SSATmp* src = inst->getSrc(i);
@@ -195,34 +176,57 @@ void sinkIncRefs(Trace* trace,
         }
       }
     }
+    // Do copyProp at last, because we need to keep REFCOUNT_CONSUMED_OFF_TRACE
+    // Movs as the prototypes for sunk instructions.
+    copyProp(exit);
+  };
+
+  // An exit trace may be entered from multiple exit points. We keep track of
+  // which exit traces we already pushed sunk IncRefs to, so that we won't push
+  // them multiple times.
+  boost::dynamic_bitset<> pushedTo(irFactory->numLabels());
+  for (IRInstruction* inst : trace->getInstructionList()) {
+    if (inst->getOpcode() == IncRef) {
+      // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
+      // otherwise, it should be already removed in optimizeRefCount.
+      if (inst->getId() == REFCOUNT_CONSUMED_OFF_TRACE) {
+        inst->setOpcode(Mov);
+        // Mark them as dead so that they'll be removed later.
+        inst->setId(DEAD);
+        // Put all REFCOUNT_CONSUMED_OFF_TRACE IncRefs to the sinking list.
+        toSink.push_back(inst);
+      } else {
+        assert(inst->getId() == REFCOUNT_CONSUMED);
+      }
+    }
+    if (inst->getOpcode() == DecRefNZ) {
+      IRInstruction* srcInst = inst->getSrc(0)->getInstruction();
+      if (srcInst->getId() == DEAD) {
+        inst->setId(DEAD);
+        // This may take O(I) time where I is the number of IncRefs
+        // in the main trace.
+        toSink.remove(srcInst);
+      }
+    }
+    if (LabelInstruction* label = inst->getLabel()) {
+      if (!pushedTo[label->getLabelId()]) {
+        pushedTo[label->getLabelId()] = 1;
+        Trace* exit = label->getParent();
+        if (exit != trace) processExit(exit);
+      }
+    }
   }
 
   // Do copyProp at last, because we need to keep REFCOUNT_CONSUMED_OFF_TRACE
   // Movs as the prototypes for sunk instructions.
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    Simplifier::copyProp(inst);
-  }
+  copyProp(trace);
 }
 
 void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
-  IRInstruction::List wl; // worklist of live instructions
-  // first mark all exit traces as unreachable by setting the id on
-  // their labels to 0
-  for (Trace* exit : trace->getExitTraces()) {
-    exit->getLabel()->setId(DEAD);
-  }
-
   // mark the essential instructions and add them to the initial
-  // work list; also mark the exit traces that are reachable by
-  // any control flow instruction in the main trace.
-  initInstructions(trace, wl);
-  for (Trace* exit : trace->getExitTraces()) {
-    // only process those exit traces that are reachable from
-    // the main trace
-    if (exit->getLabel()->getId() != DEAD) {
-      initInstructions(exit, wl);
-    }
-  }
+  // work list; this will also mark reachable exit traces. All
+  // other instructions marked dead.
+  IRInstruction::List wl = initInstructions(trace);
 
   // process the worklist
   while (!wl.empty()) {
@@ -264,8 +268,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   if (RuntimeOption::EvalHHIREnableSinking) {
     // Sink IncRefs consumed off trace.
-    IRInstruction::List toSink;
-    sinkIncRefs(trace, irFactory, toSink);
+    sinkIncRefs(trace, irFactory);
   }
 
   // now remove instructions whose id == DEAD
@@ -273,6 +276,11 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   for (Trace* exit : trace->getExitTraces()) {
     removeDeadInstructions(exit);
   }
+
+  // and remove empty exit traces
+  trace->getExitTraces().remove_if([](Trace* exit) {
+    return exit->getInstructionList().empty();
+  });
 }
 
 } } }

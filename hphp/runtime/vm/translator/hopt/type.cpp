@@ -34,7 +34,8 @@ Type::Tag outputType(const IRInstruction* inst) {
 #define DUnbox(n) return Type::unbox(inst->getSrc(n)->getType());
 #define DBox(n)   return Type::box(inst->getSrc(n)->getType());
 #define DParam    return inst->getTypeParam();
-#define NA        assert(0 && "outputType requires inst->hasDst()");
+#define DLabel    return Type::None;
+#define NA        assert(0 && "outputType requires HasDest or NaryDest");
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -50,6 +51,7 @@ Type::Tag outputType(const IRInstruction* inst) {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DLabel
 #undef NA
 
 }

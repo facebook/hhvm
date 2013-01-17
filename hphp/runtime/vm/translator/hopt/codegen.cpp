@@ -4059,6 +4059,12 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
   }
 }
 
+static StringData* fullConstName(SSATmp* cls, SSATmp* cnsName) {
+  return StringData::GetStaticString(
+      Util::toLower(cls->getValStr()->data()) + "::" +
+      cnsName->getValStr()->data());
+}
+
 void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   SSATmp* cnsName = inst->getSrc(0);
   SSATmp* cls     = inst->getSrc(1);
@@ -4066,15 +4072,36 @@ void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   assert(cnsName->isConst() && cnsName->getType() == Type::StaticStr);
   assert(cls->isConst() && cls->getType() == Type::StaticStr);
 
-  StringData* fullName = StringData::GetStaticString(
-    Util::toLower(cls->getValStr()->data()) + "::" +
-    cnsName->getValStr()->data());
-
+  StringData* fullName = fullConstName(cls, cnsName);
   TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
   // note that we bail from the trace if the target cache entry is empty
   // for this class constant or if the type assertion fails.
   // TODO: handle the slow case helper call.
   cgLoad(inst->getTypeParam(), inst->getDst(), rVmTl, ch, inst->getLabel());
+}
+
+void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
+  SSATmp*   cnsName = inst->getSrc(0);
+  SSATmp*   cls     = inst->getSrc(1);
+
+  assert(inst->getTypeParam() == Type::Cell);
+  assert(cnsName->isConst() && cnsName->getType() == Type::StaticStr);
+  assert(cls->isConst() && cls->getType() == Type::StaticStr);
+
+  StringData* fullName = fullConstName(cls, cnsName);
+  TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
+
+  auto rTvPtr = rScratch; // Cell* ptr to slot in target cache
+  m_as.lea(rVmTl[ch], rTvPtr);
+
+  ArgGroup args;
+  args.reg(rTvPtr).
+  immPtr(Unit::GetNamedEntity(cls->getValStr())).
+  immPtr(cls->getValStr()).
+  immPtr(cnsName->getValStr());
+
+  cgCallHelper(m_as, TCA(TargetCache::lookupClassConstantTv),
+               inst->getDst(), kSyncPoint, args);
 }
 
 void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
@@ -4119,6 +4146,24 @@ void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmp_(IRInstruction* inst) {
+  assert(inst->getNumSrcs() == inst->getLabel()->getNumDsts());
+  if (unsigned n = inst->getNumSrcs()) {
+    // Parallel-copy sources to the label's destination registers.
+    // TODO: t2040286: this only works if all destinations fit in registers.
+    SSARange srcs = inst->getSrcs();
+    SSARange dsts = inst->getLabel()->getDsts();
+    ArgGroup args;
+    for (unsigned i = 0, j = 0; i < n; i++) {
+      assert(Type::subtypeOf(srcs[i]->getType(), dsts[i]->getType()));
+      args.ssa(srcs[i]);
+      args[j++].setDstReg(dsts[i]->getReg());
+      if (!Type::isStaticallyKnown(dsts[i]->getType())) {
+        args.rawType(srcs[i]);
+        args[j++].setDstReg(dsts[i]->getReg(1));
+      }
+    }
+    shuffleArgs(m_as, args, inst);
+  }
   emitFwdJmp(inst->getLabel());
 }
 

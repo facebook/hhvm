@@ -806,6 +806,14 @@ lookupClassConstant(TypedValue* cache,
   return cache;
 }
 
+TypedValue
+lookupClassConstantTv(TypedValue* cache,
+                      const NamedEntity* ne,
+                      const StringData* cls,
+                      const StringData* cns) {
+  return *lookupClassConstant(cache, ne, cls, cns);
+}
+
 //=============================================================================
 // *SPropCache
 //

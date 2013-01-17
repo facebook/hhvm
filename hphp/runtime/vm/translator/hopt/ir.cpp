@@ -31,6 +31,9 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
 
+#include <algorithm>
+#include <forward_list>
+
 namespace HPHP {
 namespace VM {
 namespace JIT{
@@ -49,6 +52,8 @@ enum OpcodeFlag : uint64_t {
   MayModifyRefs    = 0x0080,
   Rematerializable = 0x0100, // TODO: implies HasDest
   MayRaiseError    = 0x0200,
+  Terminal         = 0x0400, // has no next instruction
+  NaryDest         = 0x0800  // has 0 or more destinations
 };
 
 #define NF     0
@@ -61,6 +66,7 @@ enum OpcodeFlag : uint64_t {
 #define Rm     Rematerializable
 #define Er     MayRaiseError
 #define Mem    MemEffects
+#define T      Terminal
 
 #define NA        0
 #define D(n)      HasDest
@@ -68,6 +74,7 @@ enum OpcodeFlag : uint64_t {
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
 #define DParam    HasDest
+#define DLabel    NaryDest
 
 struct {
   const char* name;
@@ -88,6 +95,7 @@ struct {
 #undef Rm
 #undef Er
 #undef Mem
+#undef T
 
 #undef NA
 #undef D
@@ -95,6 +103,7 @@ struct {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DLabel
 
 }
 
@@ -102,16 +111,21 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   : m_op(inst->m_op)
   , m_typeParam(inst->m_typeParam)
   , m_numSrcs(inst->m_numSrcs)
+  , m_numDsts(inst->m_numDsts)
   , m_iid(iid)
   , m_id(0)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
-  , m_dst(NULL)
-  , m_asmAddr(NULL)
+  , m_dst(nullptr)
+  , m_asmAddr(nullptr)
   , m_label(inst->m_label)
-  , m_parent(NULL)
-  , m_tca(NULL)
+  , m_parent(nullptr)
+  , m_tca(nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
+  if (naryDst()) {
+    m_dsts = new (arena) SSATmp*[m_numDsts];
+    memset(m_dsts, 0, m_numDsts * sizeof(*m_dsts));
+  }
 }
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
@@ -122,6 +136,10 @@ static bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
 
 bool IRInstruction::hasDst() const {
   return opcodeHasFlags(getOpcode(), HasDest);
+}
+
+bool IRInstruction::naryDst() const {
+  return opcodeHasFlags(getOpcode(), NaryDest);
 }
 
 bool IRInstruction::isNative() const {
@@ -212,6 +230,10 @@ bool IRInstruction::isEssential() const {
   return opcodeHasFlags(opc, Essential) || mayReenterHelper();
 }
 
+bool IRInstruction::isTerminal() const {
+  return opcodeHasFlags(getOpcode(), Terminal);
+}
+
 bool IRInstruction::mayReenterHelper() const {
   if (isCmpOp(getOpcode())) {
     return cmpOpTypesMayReenter(getOpcode(),
@@ -221,6 +243,16 @@ bool IRInstruction::mayReenterHelper() const {
   // Not necessarily actually false; this is just a helper for other
   // bits.
   return false;
+}
+
+SSARange IRInstruction::getDsts() {
+  return hasDst() ? SSARange(&m_dst, m_numDsts) :
+         SSARange(m_dsts, m_numDsts);
+}
+
+folly::Range<SSATmp* const*> IRInstruction::getDsts() const {
+  return hasDst() ? Range<SSATmp* const*>(&m_dst, m_numDsts) :
+         Range<SSATmp* const*>(const_cast<SSATmp* const*>(m_dsts), m_numDsts);
 }
 
 Opcode negateQueryOp(Opcode opc) {
@@ -444,8 +476,8 @@ void IRInstruction::print(std::ostream& ostream) const {
   }
 
   if (m_label) {
-    ostream << ", ";
-    m_label->print(ostream);
+    ostream << " -> ";
+    m_label->printLabel(ostream);
   }
   if (m_tca) {
     ostream << ", ";
@@ -574,6 +606,7 @@ size_t MarkerInstruction::hash() const {
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
 void LabelInstruction::prependPatchAddr(TCA patchAddr) {
+  assert(getOpcode() == DefLabel);
   ssize_t diff = getPatchAddr() ? ((TCA)patchAddr - (TCA)getPatchAddr()) : 0;
   assert(deltaFits(diff, sz::dword));
   *(int*)(patchAddr) = (int)diff;
@@ -584,9 +617,23 @@ void* LabelInstruction::getPatchAddr() {
   return m_patchAddr;
 }
 
+void LabelInstruction::printLabel(std::ostream& ostream) const {
+  ostream << "L" << m_labelId;
+}
+
 void LabelInstruction::print(std::ostream& ostream) const {
   assert(getOpcode() == DefLabel);
-  ostream << "L" << m_labelId << ":";
+  printLabel(ostream);
+  if (unsigned n = getNumDsts()) {
+    auto dsts = getDsts();
+    ostream << '(';
+    for (unsigned i = 0; i < n; ++i) {
+      ostream << (i > 0 ? ", " : "");
+      dsts[i]->print(ostream, true);
+    }
+    ostream << ')';
+  }
+  ostream << ":";
 }
 
 void MarkerInstruction::print(std::ostream& ostream) const {
@@ -837,59 +884,194 @@ int32_t spillValueCells(IRInstruction* spillStack) {
   return ret;
 }
 
-uint32 numberInstructions(Trace* trace,
-                          uint32 nextId,
-                          bool followControlFlow) {
-  for (auto* inst : trace->getInstructionList()) {
-    for (SSATmp* dst : inst->getDsts()) {
-      // Initialize this value for register spilling.
-      dst->setSpillSlot(-1);
-    }
-    if (inst->getOpcode() == Marker) {
-      continue; // don't number markers
-    }
-    uint32 id = nextId++;
-    inst->setId(id);
-    for (SSATmp* tmp : inst->getSrcs()) {
-      tmp->setLastUseId(id);
-      tmp->incUseCount();
-    }
-    // This eagerly follows control flow edges to exit traces, so
-    // if no more than 1 instruction should branch to a exit trace's label
-    // otherwise that exit trace will be incorrectly processed more than once.
-    // The net result is that the exit trace's instruction ids will be greater
-    // than the ids of the instruction that can branch to it, which
-    // is exactly the invariant we want for linear scan register allocation
-    // and other analyses.
-    if (followControlFlow && inst->isControlFlowInstruction()) {
-      LabelInstruction* label = inst->getLabel();
-      if (label) {
-        nextId = numberInstructions(label->getParent(), nextId);
+BlockList numberInstructions(Trace* trace) {
+  resetIds(trace);
+  BlockList blocks = buildCfg(trace);
+  uint32_t nextId = 1;
+  for (Block& block : blocks) {
+    for (IRInstruction* inst : block) {
+      for (SSATmp* dst : inst->getDsts()) {
+        // Initialize this value for register spilling.
+        dst->setSpillSlot(-1);
+      }
+      if (inst->getOpcode() == Marker) {
+        continue; // don't number markers
+      }
+      uint32_t id = nextId++;
+      inst->setId(id);
+      for (SSATmp* tmp : inst->getSrcs()) {
+        tmp->setLastUseId(id);
+        tmp->incUseCount();
       }
     }
   }
-  return nextId;
+  return blocks;
+}
+
+/**
+ * TopoSort encapsulates a depth-first search which identifies basic
+ * blocks and populates a list of blocks in reverse-postorder.
+ */
+struct TopoSort {
+  typedef IRInstruction::Iterator Iter;
+
+  TopoSort(BlockList& blocks) : m_blocks(blocks), m_next_id(0) {
+    blocks.clear();
+  }
+
+  void visit(Iter start, Iter end) {
+    assert(start != end);
+    if (m_visited.find(*start) != m_visited.end()) return;
+    // first time in this block; remember the first instruction.
+    m_visited[*start] = nullptr;
+    Iter i = start;
+    while (i != end && !isBlockEnd(*i)) i++; // skip to end
+    IRInstruction* inst = *i; // last instruction in block
+    ++i;
+    if (!inst->isTerminal()) {
+      // visit fall-through path with remainder of list
+      visit(i, end);
+    }
+    if (inst->isControlFlowInstruction()) {
+      // visit target of branch with remainder of the target trace's list
+      LabelInstruction* target = inst->getLabel();
+      Trace* targetTrace = target->getParent();
+      auto& traceList = targetTrace->getInstructionList();
+      Iter t = targetTrace == inst->getParent() ?
+               find(i, end, target) : // search forward in current trace
+               find(traceList.begin(), traceList.end(), target);
+      visit(t, traceList.end());
+    }
+    // [start, i) is the basic block we just processed; prepend it.
+    m_blocks.push_front(Block(m_next_id++, start, i));
+    m_visited[*start] = &m_blocks.front();
+  }
+
+  static bool isBlockEnd(IRInstruction* inst) {
+    return inst->isControlFlowInstruction() || inst->isTerminal();
+  }
+
+  hphp_hash_map<IRInstruction*, Block*> m_visited;
+  BlockList& m_blocks;
+  unsigned m_next_id; // next postorder id to assign
+};
+
+BlockList buildCfg(Trace* trace) {
+  assert(trace->isMain());
+  auto& traceList = trace->getInstructionList();
+  BlockList blocks;
+  TopoSort sorter(blocks);
+  sorter.visit(traceList.begin(), traceList.end());
+  // link successors
+  boost::dynamic_bitset<> has_pred(blocks.size());
+  auto processSucc = [&] (IRInstruction* succInst) {
+    Block* s = sorter.m_visited[succInst];
+    s->m_isJoin = has_pred[s->postId()];
+    has_pred[s->postId()] = 1;
+    return s;
+  };
+  for (Block& block : blocks) {
+    assert(block.postId() < blocks.size());
+    IRInstruction* last = block.lastInst();
+    if (!last->isTerminal()) {
+      block.m_succ[0] = processSucc(*block.end());
+    }
+    if (last->isControlFlowInstruction()) {
+      block.m_succ[1] = processSucc(last->getLabel());
+    }
+  }
+  return blocks;
 }
 
 /*
- * Returns true if a label is unreachable -- that is, if a label's id is 0
- * because numbering never visited it.
+ * Find the immediate dominator of each block using Cooper, Harvey, and
+ * Kennedy's "A Simple, Fast Dominance Algorithm", returned as a vector
+ * of postorder ids, indexed by postorder id.
  */
-static bool labelIsUnreachable(const Trace* trace) {
-  return trace->getLabel()->getId() == 0;
+std::vector<int> findDominators(BlockList& blocks) {
+  // compute predecessors of each block
+  int num_blocks = blocks.size();
+  std::forward_list<int> preds[num_blocks];
+  for (Block& block : blocks) {
+    for (Block* succ : block.succ()) {
+      preds[succ->postId()].push_front(block.postId());
+    }
+  }
+  // Calculate immediate dominators with the iterative two-finger algorithm.
+  // When it terminates, idom[post-id] will contain the post-id of the
+  // immediate dominator of each block.  idom[start] will be -1.  This is
+  // the general algorithm but it will only loop twice for loop-free graphs.
+  vector<int> idom(num_blocks, -1);
+  auto start = blocks.begin();
+  int start_id = (*start).postId();
+  idom[start_id] = start_id;
+  start++;
+  for (bool changed = true; changed; ) {
+    changed = false;
+    // for each block after start, in reverse postorder
+    for (auto it = start; it != blocks.end(); it++) {
+      int b = (*it).postId();
+      // new_idom = any already-processed predecessor
+      auto pred_it = preds[b].begin();
+      int new_idom = *pred_it;
+      while (idom[new_idom] == -1) new_idom = *(++pred_it);
+      // for all other already-processed predecessors p of b
+      for (int p : preds[b]) {
+        if (p != new_idom && idom[p] != -1) {
+          // find earliest common predecessor of p and new_idom
+          // (higher postIds are earlier in flow and in dom-tree).
+          int b1 = p, b2 = new_idom;
+          do {
+            while (b1 < b2) b1 = idom[b1];
+            while (b2 < b1) b2 = idom[b2];
+          } while (b1 != b2);
+          new_idom = b1;
+        }
+      }
+      if (idom[b] != new_idom) {
+        idom[b] = new_idom;
+        changed = true;
+      }
+    }
+  }
+  idom[start_id] = -1; // start has no idom.
+  return idom;
 }
 
 /*
- * Assigns ids to instructions, sets the use count and last use id for the
- * SSA tmps, and removes unreachable exit traces. This sets us up for
- * linear scan register allocation.
+ * Build the CFG, then the dominator tree, then use it to validate SSA.
+ * 1. Each src must be defined by some other instruction, and each dst must
+ *    be defined by the current instruction.
+ * 2. Each src must be defined earlier in the same block or in a dominator.
+ * 3. Each dst must not be previously defined.
+ * 4. Treat tmps defined by DefConst or LdHome as always defined.
  */
-void numberInstructions(Trace* trace) {
-  resetIds(trace);
-  numberInstructions(trace, 1, true);
-  // any exit trace with a label whose id is 0 is unreachable and
-  // can be removed
-  trace->getExitTraces().remove_if(labelIsUnreachable);
+bool checkCfg(Trace* trace, const IRFactory& factory) {
+  BlockList blocks = buildCfg(trace);
+  vector<int> idom = findDominators(blocks);
+  // build dominator-children lists
+  std::forward_list<Block*> children[blocks.size()];
+  for (Block& block : blocks) {
+    int idom_id = idom[block.postId()];
+    if (idom_id != -1) children[idom_id].push_front(&block);
+  }
+  // visit dom tree in preorder, checking all tmps
+  boost::dynamic_bitset<> defined0(factory.numTmps());
+  forPreorderDoms(&blocks.front(), children, defined0,
+                  [] (Block* block, boost::dynamic_bitset<>& defined) {
+    for (IRInstruction* inst : *block) {
+      for (SSATmp* UNUSED src : inst->getSrcs()) {
+        assert(src->getInstruction() != inst);
+        assert(src->getInstruction()->isDefConst() || defined[src->getId()]);
+      }
+      for (SSATmp* dst : inst->getDsts()) {
+        assert(dst->getInstruction() == inst && !inst->isDefConst());
+        assert(!defined[dst->getId()]);
+        defined[dst->getId()] = 1;
+      }
+    }
+  });
+  return true;
 }
 
 }}}

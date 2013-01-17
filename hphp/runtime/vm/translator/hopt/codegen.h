@@ -323,7 +323,7 @@ struct ArgGroup {
   }
 
   ArgGroup& addr(PhysReg base, intptr_t off) {
-    m_args.push_back(ArgDesc(ArgDesc::Addr, PhysReg(base), off));
+    m_args.push_back(ArgDesc(ArgDesc::Addr, base, off));
     return *this;
   }
 
@@ -339,12 +339,18 @@ struct ArgGroup {
     return *this;
   }
 
-  /* loads the type of tmp into an arg register */
+  /*
+   * Loads the type of tmp into an arg register destined to be the
+   * upper word of a TypedValue parameter passed by value in registers.
+   */
   ArgGroup& type(SSATmp* tmp) {
     m_args.push_back(ArgDesc(tmp, false));
     return *this;
   }
 
+  /*
+   * Pass tmp as a TypedValue passed by value.
+   */
   ArgGroup& valueType(SSATmp* tmp) {
     return ssa(tmp).type(tmp);
   }
@@ -360,6 +366,19 @@ struct ArgGroup {
 
   ArgGroup& vectorKeyS(SSATmp* key) {
     return vectorKeyImpl(key, false);
+  }
+
+  /*
+   * Pass the DataType of tmp in a register. (not as part of a TypedValue).
+   */
+  ArgGroup& rawType(SSATmp* tmp) {
+    Type::Tag t = tmp->getType();
+    if (tmp->getInstruction()->isDefConst() ||
+        Type::isStaticallyKnown(t)) {
+      return type(t); // DataType is known immediate.
+    }
+    m_args.push_back(ArgDesc(ArgDesc::Reg, tmp->getReg(1), 0));
+    return *this;
   }
 
 private:

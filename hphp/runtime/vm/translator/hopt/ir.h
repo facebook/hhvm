@@ -23,6 +23,7 @@
 #include <vector>
 #include <stack>
 #include <list>
+#include <forward_list>
 #include <cassert>
 #include <type_traits>
 #include <boost/noncopyable.hpp>
@@ -86,7 +87,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
- *     <TODO>    multiple dests goes here
+ *     DLabel    multiple dests for a DefLabel
  *
  * srcinfo:
  *
@@ -120,7 +121,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *      Rm    isRematerializable
  *      Er    mayRaiseError
  *      Mem   hasMemEffects
- *
+ *      T     isTerminal
  */
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
@@ -176,7 +177,7 @@ O(JmpIsNType,                  D(None), SUnk,                              E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpZero,                     D(None), SNum,                              E) \
 O(JmpNZero,                    D(None), SNum,                              E) \
-O(Jmp_,                        D(None), NA,                                E) \
+O(Jmp_,                        D(None), SUnk,                            T|E) \
 O(ExitWhenSurprised,                NA, NA,                                E) \
 O(ExitOnVarEnv,                     NA, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  NA, S(StkPtr),                         E) \
@@ -199,6 +200,7 @@ O(LdConst,                      DParam, NA,                             C|Rm) \
 O(DefConst,                     DParam, NA,                                C) \
 O(LdCls,                        D(Cls), CStr,                   C|Refs|Rm|Er) \
 O(LdClsCns,                     DParam, CStr CStr,                         C) \
+O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
 O(LdClsMethodCache,         D(FuncCls), SUnk,                           C|Er) \
 O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx),     C|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Obj,Cls,Ctx) S(Func),            C) \
@@ -233,7 +235,7 @@ O(NativeImpl,                       NA, C(Func) S(StkPtr),      E|Mem|N|Refs) \
   /* XXX: why does RetCtrl sometimes get PtrToGen */                          \
 O(RetCtrl,                          NA, S(StkPtr,PtrToGen)                    \
                                           S(StkPtr)                           \
-                                          S(RetAddr),                  E|Mem) \
+                                          S(RetAddr),                T|E|Mem) \
 O(RetVal,                           NA, S(StkPtr) S(Gen),          E|Mem|CRc) \
 O(RetAdjustStack,            D(StkPtr), S(StkPtr),                         E) \
 O(StMem,                            NA, S(PtrToCell)                          \
@@ -248,11 +250,11 @@ O(StRef,                       DBox(1), SUnk,                 E|Mem|CRc|Refs) \
 O(StRefNT,                     DBox(1), SUnk,                      E|Mem|CRc) \
 O(StRaw,                            NA, SUnk,                          E|Mem) \
 O(SpillStack,                D(StkPtr), SUnk,                      E|Mem|CRc) \
-O(ExitTrace,                        NA, SUnk,                              E) \
-O(ExitTraceCc,                      NA, SUnk,                              E) \
-O(ExitSlow,                         NA, SUnk,                              E) \
-O(ExitSlowNoProgress,               NA, SUnk,                              E) \
-O(ExitGuardFailure,                 NA, SUnk,                              E) \
+O(ExitTrace,                        NA, SUnk,                            T|E) \
+O(ExitTraceCc,                      NA, SUnk,                            T|E) \
+O(ExitSlow,                         NA, SUnk,                            T|E) \
+O(ExitSlowNoProgress,               NA, SUnk,                            T|E) \
+O(ExitGuardFailure,                 NA, SUnk,                            T|E) \
 O(Mov,                         DofS(0), SUnk,                              C) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                      Mem|PRc) \
@@ -265,7 +267,7 @@ O(DecRef,                           NA, S(Gen),               E|Mem|CRc|Refs) \
 O(DecRefMem,                        NA, S(PtrToGen)                           \
                                           C(Int),             E|Mem|CRc|Refs) \
 O(DecRefNZ,                         NA, S(Gen),                      Mem|CRc) \
-O(DefLabel,                         NA, SUnk,                              E) \
+O(DefLabel,                     DLabel, SUnk,                              E) \
 O(Marker,                           NA, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
@@ -572,6 +574,27 @@ namespace Type {
     }
   }
 
+  /*
+   * unionOf: return the least common supertype of t1 and t2, i.e.. the most refined
+   * type t3 such that t1 <: t3 and t2 <: t3.
+   */
+  inline Tag unionOf(Tag t1, Tag t2) {
+    assert(subtypeOf(t1, Gen) == subtypeOf(t2, Gen));
+    assert(subtypeOf(t1, Gen) || t1 == t2); // can only union TypeValue types
+    if (t1 == t2) return t1;
+    if (subtypeOf(t1, t2)) return t2;
+    if (subtypeOf(t2, t1)) return t1;
+    static const Tag union_types[] = {
+      UncountedInit, Uncounted, Cell, BoxedCell, Gen
+    };
+    for (size_t i = 0; i < array_size(union_types); ++i) {
+      Tag u = union_types[i];
+      if (subtypeOf(t1, u) && subtypeOf(t2, u)) return u;
+    }
+    not_reached();
+    return None;
+  }
+
   inline Tag box(Tag t) {
     if (t == None) {
       // translator-x64 sometimes gives us an inner type of KindOfInvalid and
@@ -782,7 +805,9 @@ bool isRefCounted(SSATmp* opnd);
 
 class LabelInstruction;
 
-typedef folly::Range<SSATmp**> SSARange;
+using folly::Range;
+
+typedef Range<SSATmp**> SSARange;
 
 /*
  * All IRInstruction subclasses must be arena-allocatable.
@@ -800,6 +825,7 @@ struct IRInstruction {
     : m_op(op)
     , m_typeParam(Type::None)
     , m_numSrcs(numSrcs)
+    , m_numDsts(0)
     , m_iid(kTransient)
     , m_id(0)
     , m_srcs(srcs)
@@ -846,14 +872,28 @@ struct IRInstruction {
   SSARange   getSrcs() const {
     return SSARange(m_srcs, m_numSrcs);
   }
-  SSATmp*    getDst()      const       { return m_dst; }
-  void       setDst(SSATmp* newDst)    { m_dst = newDst; }
-  SSARange   getDsts() {
-    return SSARange(&m_dst, m_dst ? 1 : 0);
+  unsigned   getNumDsts() const     { return m_numDsts; }
+  SSATmp*    getDst() const         {
+    assert(!naryDst());
+    return m_dst;
   }
-  folly::Range<SSATmp* const*> getDsts() const {
-    return folly::makeRange(&m_dst, m_dst ? (&m_dst) + 1 : &m_dst);
+  void       setDst(SSATmp* newDst) {
+    assert(hasDst());
+    m_dst = newDst;
+    m_numDsts = newDst ? 1 : 0;
   }
+  SSATmp*    getDst(unsigned i) const {
+    assert(naryDst() && i < m_numDsts);
+    return m_dsts[i];
+  }
+  SSARange   getDsts();
+  Range<SSATmp* const*> getDsts() const;
+  void       setDsts(unsigned numDsts, SSATmp** newDsts) {
+    assert(naryDst());
+    m_numDsts = numDsts;
+    m_dsts = newDsts;
+  }
+
   TCA        getTCA()      const       { return m_tca; }
   void       setTCA(TCA    newTCA)     { m_tca = newTCA; }
 
@@ -910,6 +950,7 @@ struct IRInstruction {
    */
   bool canCSE() const;
   bool hasDst() const;
+  bool naryDst() const;
   bool hasMemEffects() const;
   bool isRematerializable() const;
   bool isNative() const;
@@ -919,6 +960,7 @@ struct IRInstruction {
   bool mayModifyRefs() const;
   bool mayRaiseError() const;
   bool isEssential() const;
+  bool isTerminal() const;
 
   void printDst(std::ostream& ostream) const;
   void printSrc(std::ostream& ostream, uint32 srcIndex) const;
@@ -932,11 +974,15 @@ private:
   Opcode            m_op;
   Type::Tag         m_typeParam;
   uint16            m_numSrcs;
+  uint16            m_numDsts;
   const IId         m_iid;
   uint32            m_id;
   SSATmp**          m_srcs;
   RegSet            m_liveOutRegs;
-  SSATmp*           m_dst;
+  union {
+    SSATmp*         m_dst;  // if HasDest
+    SSATmp**        m_dsts; // if NaryDest
+  };
   void*             m_asmAddr;
   LabelInstruction* m_label;
   Trace*            m_parent;
@@ -1135,6 +1181,7 @@ public:
   virtual size_t hash() const;
   virtual IRInstruction* clone(IRFactory* factory) const;
 
+  void    printLabel(std::ostream& ostream) const;
   void    prependPatchAddr(TCA addr);
   void*   getPatchAddr();
 
@@ -1392,7 +1439,9 @@ public:
     return m_instructionList;
   }
   LabelInstruction* getLabel() const {
-    return (LabelInstruction*)*m_instructionList.begin();
+    IRInstruction* first = *m_instructionList.begin();
+    assert(first->getOpcode() == DefLabel);
+    return (LabelInstruction*) first;
   }
   IRInstruction* prependInstruction(IRInstruction* inst) {
     // jump over the trace's label
@@ -1442,13 +1491,66 @@ private:
   bool m_isMain;
 };
 
+/**
+ * A Block (basic block) refers to a single-entry, single-exit, non-empty
+ * range of instructions within a trace.  The instruction range is denoted by
+ * iterators within the owning trace's instruction list, to facilitate
+ * mutating that list.
+ */
+class Block {
+  typedef IRInstruction::Iterator Iter;
+
+public:
+  Block(unsigned id, Iter start, Iter end) : m_post_id(id), m_isJoin(0),
+    m_range(start, end) {
+    m_succ[0] = m_succ[1] = nullptr;
+  }
+
+  Block(const Block& other) : m_post_id(other.m_post_id), m_isJoin(0),
+    m_range(other.m_range) {
+    m_succ[0] = m_succ[1] = nullptr;
+  }
+
+  // postorder number of this block in [0..NumBlocks); higher means earlier
+  unsigned postId() const { return m_post_id; }
+  bool isJoin() const { return m_isJoin != 0; }
+
+  // range-for interface
+  Iter begin() const { return m_range.begin(); }
+  Iter end() const { return m_range.end(); }
+
+  IRInstruction* lastInst() const {
+    Iter e = end();
+    return *(--e);
+  }
+
+  Range<Block**> succ() {
+    IRInstruction* last = lastInst();
+    if (last->isControlFlowInstruction() && !last->isTerminal()) {
+      return Range<Block**>(m_succ, m_succ + 2); // 2-way branch
+    }
+    if (last->isControlFlowInstruction()) {
+      return Range<Block**>(m_succ+1, m_succ + 2); // jmp
+    }
+    if (!last->isTerminal()) {
+      return Range<Block**>(m_succ, m_succ + 1); // ordinary instruction
+    }
+    return Range<Block**>(m_succ, m_succ); // exit, return, throw, etc
+  }
+
+private:
+  friend std::list<Block> buildCfg(Trace*);
+  unsigned const m_post_id;
+  unsigned m_isJoin:1; // true if this block has 2+ predecessors
+  Range<IRInstruction::Iterator> m_range;
+  Block* m_succ[2];
+};
+
+typedef std::list<Block> BlockList;
+
 /*
  * Some utility micro-passes used from other major passes.
  */
-void numberInstructions(Trace*);
-uint32 numberInstructions(Trace* trace,
-                          uint32 nextId,
-                          bool followControlFlow = true);
 
 /*
  * Remove any instruction whose id field == DEAD
@@ -1461,10 +1563,28 @@ void removeDeadInstructions(Trace* trace);
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);
 
 /*
- * Clears the IRInstructions' ids, and the SSATmps' use count and last use id
- * for the given trace and all its exit traces.
+ * Identify basic blocks in Trace and Trace's children, then produce a
+ * reverse-postorder list of blocks, with connected successors.
  */
-void resetIds(Trace* trace);
+BlockList buildCfg(Trace*);
+
+/*
+ * Ensure valid SSA properties; each SSATmp must be defined exactly once,
+ * only used in positions dominated by the definition.
+ */
+bool checkCfg(Trace*, const IRFactory&);
+
+/**
+ * Run all optimization passes on this trace
+ */
+void optimizeTrace(Trace*, IRFactory* irFactory);
+
+/**
+ * Assign ids to each instruction in reverse postorder (lowest id first),
+ * Removes any exit traces that are not reachable, and returns the reached
+ * instructions in numbered order.
+ */
+BlockList numberInstructions(Trace*);
 
 int getLocalIdFromHomeOpnd(SSATmp* srcHome);
 
@@ -1498,6 +1618,45 @@ inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
     default:
       return false;
   }
+}
+
+/*
+ * Visit basic blocks in a preorder traversal over the dominator tree.
+ * The state argument is passed by value (copied) as we move down the tree,
+ * so each child in the tree gets the state after the parent was processed.
+ * The body lambda should take State& (by reference) so it can modify it
+ * as each block is processed.
+ */
+template <class State, class Body>
+void forPreorderDoms(Block* block, std::forward_list<Block*> children[],
+                     State state, Body body) {
+  body(block, state);
+  for (Block* child : children[block->postId()]) {
+    forPreorderDoms(child, children, state, body);
+  }
+}
+
+/*
+ * Visit the main trace followed by exit traces.
+ */
+template <class Body>
+void forEachTrace(Trace* main, Body body) {
+  body(main);
+  for (Trace* exit : main->getExitTraces()) {
+    body(exit);
+  }
+}
+
+/*
+ * Visit each instruction in the main trace, then the exit traces
+ */
+template <class Body>
+void forEachTraceInst(Trace* main, Body body) {
+  forEachTrace(main, [=](Trace* t) {
+    for (IRInstruction* inst : t->getInstructionList()) {
+      body(inst);
+    }
+  });
 }
 
 }}}

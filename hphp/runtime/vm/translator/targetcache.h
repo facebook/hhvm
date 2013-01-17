@@ -323,6 +323,10 @@ TypedValue* lookupClassConstant(TypedValue* cache,
                                 const NamedEntity* ne,
                                 const StringData* cls,
                                 const StringData* cns);
+TypedValue lookupClassConstantTv(TypedValue* cache,
+                                 const NamedEntity* ne,
+                                 const StringData* cls,
+                                 const StringData* cns);
 
 /*
  * Static locals. Each StaticLocInit we translate gets its own soft

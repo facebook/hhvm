@@ -28,13 +28,13 @@ static void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
   for (it = instructions.begin(); it != instructions.end(); ) {
     IRInstruction* inst = *it;
     it++;
-    SSATmp* dst = inst->getDst();
-    if (dst &&
-        Type::isStaticallyKnown(dst->getType()) &&
-        Type::isRefCounted(dst->getType())) {
-      auto* assertInst = factory->gen(DbgAssertRefCount, dst);
-      assertInst->setParent(trace);
-      instructions.insert(it, assertInst);
+    for (SSATmp* dst : inst->getDsts()) {
+      if (Type::isStaticallyKnown(dst->getType()) &&
+          Type::isRefCounted(dst->getType())) {
+        auto* assertInst = factory->gen(DbgAssertRefCount, dst);
+        assertInst->setParent(trace);
+        instructions.insert(it, assertInst);
+      }
     }
   }
 }
@@ -55,6 +55,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       trace->print(std::cout, false);
       std::cout << "---------------------------\n";
     }
+    assert(JIT::checkCfg(trace, *irFactory));
   }
   if (RuntimeOption::EvalHHIRDeadCodeElim) {
     eliminateDeadCode(trace, irFactory);
@@ -63,6 +64,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       trace->print(std::cout, false);
       std::cout << "---------------------------\n";
     }
+    assert(JIT::checkCfg(trace, *irFactory));
   }
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
@@ -73,6 +75,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       trace->print(std::cout, false);
       std::cout << "---------------------------\n";
     }
+    assert(JIT::checkCfg(trace, *irFactory));
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
     // by optimzeTrace indicating whether DCE is necessary
@@ -83,6 +86,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
         trace->print(std::cout, false);
         std::cout << "---------------------------\n";
       }
+      assert(JIT::checkCfg(trace, *irFactory));
     }
   }
   if (RuntimeOption::EvalHHIRJumpOpts) {
@@ -92,6 +96,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       trace->print(std::cout, false);
       std::cout << "---------------------------\n";
     }
+    assert(JIT::checkCfg(trace, *irFactory));
   }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     insertRefCountAsserts(trace, irFactory);

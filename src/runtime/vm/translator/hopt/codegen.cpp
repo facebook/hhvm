@@ -290,6 +290,7 @@ NOOP_OPCODE(DefConst)
 NOOP_OPCODE(LdHome)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
+NOOP_OPCODE(Marker)
 
 PUNT_OPCODE(JmpInstanceOfD)
 PUNT_OPCODE(JmpNInstanceOfD)
@@ -326,10 +327,6 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
     void* next = (TCA)list - diffToNext;
     list = next;
   }
-}
-
-void CodeGenerator::cgMarker(IRInstruction*) {
-  // nothing to do.
 }
 
 static ConditionCode cmpOpToCC[JmpNSame - JmpGt + 1] = {

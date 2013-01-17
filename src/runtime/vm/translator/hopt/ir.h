@@ -964,8 +964,6 @@ public:
   void*   getPatchAddr();
 
 private:
-  friend class CodeGenerator;
-
   uint32 m_labelId;
   void*  m_patchAddr; // Support patching forward jumps
 };
@@ -996,8 +994,6 @@ public:
   virtual IRInstruction* clone(IRFactory* factory) const;
 
 private:
-  friend class CodeGenerator;
-
   uint32      m_bcOff;    // the bytecode offset in unit
   int32       m_stackOff; // stack off from start of trace
   const Func* m_func;     // which func are we in

@@ -622,7 +622,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
 
   {
     int cpus = Process::GetCPUCount();
-    int jobs = cpus * (hhvm ? 4 : 1);
+    int jobs = cpus * (hhvm ? 2 : 1);
     char* hphp_slow_tests_jobs = getenv("HPHP_SLOW_TESTS_JOBS");
     if (hphp_slow_tests_jobs) {
       int n = atoi(hphp_slow_tests_jobs);

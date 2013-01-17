@@ -1160,10 +1160,10 @@ void HhbcTranslator::emitFPushFunc(int32 numParams) {
   spillStack();
   SSATmp* func = m_tb->gen(LdFunc, funcName);
   m_fpiStack.push(func);
-  SSATmp* actRec = m_tb->genAllocActRec(func,
-                                        m_tb->genDefNull(),
-                                        numParams,
-                                        NULL);
+  m_tb->genAllocActRec(func,
+                       m_tb->genDefNull(),
+                       numParams,
+                       NULL);
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32 numParams,

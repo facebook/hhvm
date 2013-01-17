@@ -342,6 +342,25 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "lcfirst",
+    'desc'   => "Returns a string with the first character of str , lowercased if that character is alphabetic.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (ä) will not be converted.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Returns the resulting string.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "str",
+        'type'   => String,
+        'desc'   => "The input string.",
+      ),
+    ),
+  ));
+
+
+DefineFunction(
+  array(
     'name'   => "ucwords",
     'desc'   => "Returns a string with the first character of each word in str capitalized, if that character is alphabetic.\n\nThe definition of a word is any string of characters that is immediately after a whitespace (These are: space, form-feed, newline, carriage return, horizontal tab, and vertical tab).",
     'flags'  =>  HasDocComment,

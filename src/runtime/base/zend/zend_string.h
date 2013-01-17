@@ -114,9 +114,18 @@ int string_natural_cmp(char const *a, size_t a_len,
 /**
  * Changing string's cases. Return's length is always the same as "len".
  */
-char *string_to_upper(const char *s, int len);
-char *string_to_upper_first(const char *s, int len);
-char *string_to_upper_words(const char *s, int len);
+char *string_to_case(const char *s, int len, int (*tocase)(int));
+char *string_to_case_first(const char *s, int len, int (*tocase)(int));
+char *string_to_case_words(const char *s, int len, int (*tocase)(int));
+
+#define string_to_upper(s,len)        string_to_case((s), (len), toupper)
+#define string_to_upper_first(s, len) string_to_case_first((s), (len), toupper)
+#define string_to_upper_words(s, len) string_to_case_words((s), (len), toupper)
+
+#define string_to_lower(s,len)        string_to_case((s), (len), tolower)
+#define string_to_lower_first(s, len) string_to_case_first((s), (len), tolower)
+#define string_to_lower_words(s, len) string_to_case_words((s), (len), tolower)
+
 
 /**
  * Trim a string by removing characters in the specified charlist.

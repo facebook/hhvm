@@ -1001,6 +1001,10 @@ String fni_ucfirst(String const& str) {
   return f_ucfirst(str);
 }
 
+String fni_lcfirst(String const& str) {
+  return f_lcfirst(str);
+}
+
 String fni_ucwords(String const& str) {
   return f_ucwords(str);
 }

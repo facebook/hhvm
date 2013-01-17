@@ -41,6 +41,7 @@ class TestExtString : public TestCppExt {
   bool test_strtolower();
   bool test_strtoupper();
   bool test_ucfirst();
+  bool test_lcfirst();
   bool test_ucwords();
   bool test_strip_tags();
   bool test_trim();

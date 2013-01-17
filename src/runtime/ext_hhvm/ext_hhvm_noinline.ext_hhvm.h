@@ -2583,6 +2583,17 @@ str => rsi
 Value* fh_ucfirst(Value* _rv, Value* str) asm("_ZN4HPHP11fni_ucfirstERKNS_6StringE");
 
 /*
+HPHP::String HPHP::fni_lcfirst(HPHP::String const&)
+_ZN4HPHP11fni_lcfirstERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_lcfirst(Value* _rv, Value* str) asm("_ZN4HPHP11fni_lcfirstERKNS_6StringE");
+
+/*
 HPHP::String HPHP::fni_ucwords(HPHP::String const&)
 _ZN4HPHP11fni_ucwordsERKNS_6StringE
 

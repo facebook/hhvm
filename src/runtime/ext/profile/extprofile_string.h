@@ -103,6 +103,11 @@ inline String x_ucfirst(CStrRef str) {
   return f_ucfirst(str);
 }
 
+inline String x_lcfirst(CStrRef str) {
+  FUNCTION_INJECTION_BUILTIN(lcfirst);
+  return f_lcfirst(str);
+}
+
 inline String x_ucwords(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(ucwords);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);

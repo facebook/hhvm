@@ -36,6 +36,12 @@ public:
     ToUpperWords
   };
 
+  enum ToLowerType {
+    ToLowerAll,
+    ToLowerFirst,
+    ToLowerWords
+  };
+
   enum TrimType {
     TrimLeft  = 1,
     TrimRight = 2,
@@ -61,7 +67,7 @@ public:
    * Manipulations. Note, all these functions will create a new string than
    * modifying input, although names of these functions sound like mutating.
    */
-  static String ToLower(CStrRef input);
+  static String ToLower(CStrRef input, ToLowerType type = ToLowerAll);
   static String ToUpper(CStrRef input, ToUpperType type = ToUpperAll);
   static String Trim(CStrRef input, TrimType type = TrimBoth,
                      CStrRef charlist = k_HPHP_TRIM_CHARLIST);

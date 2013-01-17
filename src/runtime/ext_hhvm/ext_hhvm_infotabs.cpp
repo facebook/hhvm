@@ -1988,6 +1988,7 @@ TypedValue* fg_strrev(VM::ActRec *ar);
 TypedValue* fg_strtolower(VM::ActRec *ar);
 TypedValue* fg_strtoupper(VM::ActRec *ar);
 TypedValue* fg_ucfirst(VM::ActRec *ar);
+TypedValue* fg_lcfirst(VM::ActRec *ar);
 TypedValue* fg_ucwords(VM::ActRec *ar);
 TypedValue* fg_strip_tags(VM::ActRec *ar);
 TypedValue* fg_trim(VM::ActRec *ar);
@@ -2942,7 +2943,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2192;
+const long long hhbc_ext_funcs_count = 2193;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -4909,6 +4910,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "strtolower", fg_strtolower, (void *)&fh_strtolower },
   { "strtoupper", fg_strtoupper, (void *)&fh_strtoupper },
   { "ucfirst", fg_ucfirst, (void *)&fh_ucfirst },
+  { "lcfirst", fg_lcfirst, (void *)&fh_lcfirst },
   { "ucwords", fg_ucwords, (void *)&fh_ucwords },
   { "strip_tags", fg_strip_tags, (void *)&fh_strip_tags },
   { "trim", fg_trim, (void *)&fh_trim },

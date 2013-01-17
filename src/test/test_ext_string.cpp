@@ -37,6 +37,7 @@ bool TestExtString::RunTests(const std::string &which) {
   RUN_TEST(test_strtolower);
   RUN_TEST(test_strtoupper);
   RUN_TEST(test_ucfirst);
+  RUN_TEST(test_lcfirst);
   RUN_TEST(test_ucwords);
   RUN_TEST(test_strip_tags);
   RUN_TEST(test_trim);
@@ -195,6 +196,11 @@ bool TestExtString::test_strtoupper() {
 
 bool TestExtString::test_ucfirst() {
   VS(f_ucfirst("abc"), "Abc");
+  return Count(true);
+}
+
+bool TestExtString::test_lcfirst() {
+  VS(f_lcfirst("ABC"), "aBC");
   return Count(true);
 }
 

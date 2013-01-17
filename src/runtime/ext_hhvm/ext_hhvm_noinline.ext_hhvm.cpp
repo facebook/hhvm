@@ -12148,6 +12148,61 @@ TypedValue* fg_ucfirst(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::String HPHP::fni_lcfirst(HPHP::String const&)
+_ZN4HPHP11fni_lcfirstERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_lcfirst(Value* _rv, Value* str) asm("_ZN4HPHP11fni_lcfirstERKNS_6StringE");
+
+TypedValue * fg1_lcfirst(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_lcfirst(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfString;
+  tvCastToStringInPlace(args-0);
+  fh_lcfirst((Value*)(rv), (Value*)(args-0));
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_lcfirst(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv._count = 0;
+        rv.m_type = KindOfString;
+        fh_lcfirst((Value*)(&(rv)), (Value*)(args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_lcfirst(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("lcfirst", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::String HPHP::fni_ucwords(HPHP::String const&)
 _ZN4HPHP11fni_ucwordsERKNS_6StringE
 

@@ -74,6 +74,9 @@ inline String f_strtoupper(CStrRef str) {
 inline String f_ucfirst(CStrRef str) {
   return StringUtil::ToUpper(str, StringUtil::ToUpperFirst);
 }
+inline String f_lcfirst(CStrRef str) {
+  return StringUtil::ToLower(str, StringUtil::ToLowerFirst);
+}
 inline String f_ucwords(CStrRef str) {
   return StringUtil::ToUpper(str, StringUtil::ToUpperWords);
 }

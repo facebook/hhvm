@@ -286,33 +286,36 @@ int string_natural_cmp(char const *a, size_t a_len,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char *string_to_upper(const char *s, int len) {
+char *string_to_case(const char *s, int len, int (*tocase)(int)) {
   assert(s);
+  assert(tocase);
   char *ret = (char *)malloc(len + 1);
   for (int i = 0; i < len; i++) {
-    ret[i] = toupper(s[i]);
+    ret[i] = tocase(s[i]);
   }
   ret[len] = '\0';
   return ret;
 }
 
-char *string_to_upper_first(const char *s, int len) {
+char *string_to_case_first(const char *s, int len, int (*tocase)(int)) {
   assert(s);
+  assert(tocase);
   char *ret = string_duplicate(s, len);
   if (*ret) {
-    *ret = toupper(*ret);
+    *ret = tocase(*ret);
   }
   return ret;
 }
 
-char *string_to_upper_words(const char *s, int len) {
+char *string_to_case_words(const char *s, int len, int (*tocase)(int)) {
   assert(s);
+  assert(tocase);
   char *ret = string_duplicate(s, len);
   if (*ret) {
-    *ret = toupper(*ret);
+    *ret = tocase(*ret);
     for (int i = 1; i < len; i++) {
       if (isspace(ret[i-1])) {
-        ret[i] = toupper(ret[i]);
+        ret[i] = tocase(ret[i]);
       }
     }
   }

@@ -22,7 +22,7 @@
 #include <runtime/base/types.h>
 #include <util/case_insensitive.h>
 #include <runtime/vm/unit.h>
-#include <runtime/vm/type-profile.h>
+#include <runtime/vm/type_profile.h>
 
 namespace HPHP {
 namespace VM {

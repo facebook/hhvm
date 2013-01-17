@@ -58,7 +58,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_array.h>
 #include <runtime/vm/stats.h>
-#include <runtime/vm/type-profile.h>
+#include <runtime/vm/type_profile.h>
 #include <runtime/base/server/source_root_info.h>
 #include <runtime/base/util/extended_logger.h>
 

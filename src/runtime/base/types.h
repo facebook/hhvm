@@ -153,17 +153,17 @@ enum DataType {
   //       and StaticString, and it must be 0 for any other real DataType.
   KindOfUncountedInitBit = 8,
 
-  KindOfNull             = 8,     //   0001000
-  KindOfBoolean          = 9,     //   0001001
-  KindOfInt64            = 10,    //   0001010
-  KindOfDouble           = 11,    //   0001011
+  KindOfNull             = 8,     //   0001000    0x08
+  KindOfBoolean          = 9,     //   0001001    0x09
+  KindOfInt64            = 10,    //   0001010    0x0a
+  KindOfDouble           = 11,    //   0001011    0x0b
 
-  KindOfStaticString     = 12,    //   0001100
-  KindOfString           = 20,    //   0010100
-  KindOfArray            = 32,    //   0100000
-  KindOfObject           = 64,    //   1000000
-  KindOfRef              = 96,    //   1100000
-  KindOfIndirect         = 97,    //   1100001
+  KindOfStaticString     = 12,    //   0001100    0x0c
+  KindOfString           = 20,    //   0010100    0x14
+  KindOfArray            = 32,    //   0100000    0x20
+  KindOfObject           = 64,    //   1000000    0x40
+  KindOfRef              = 96,    //   1100000    0x60
+  KindOfIndirect         = 97,    //   1100001    0x61
 
   MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
   MaxNumDataTypesIndex   = 11 + 1,  // 1 + the number of valid DataTypes above

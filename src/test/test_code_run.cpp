@@ -12137,6 +12137,25 @@ bool TestCodeRun::TestCompilation() {
        "$x = new X;"
        "var_dump($x->foo(false, true));");
 
+  MVCR("<?php \n"
+       "\n"
+       "class C {\n"
+       "  public function loadAllWithIDs($ids) {\n"
+       "    if (!count($ids = array_filter($ids))) {\n"
+       "      return array();\n"
+       "    }\n"
+       "    var_dump('muy malo', $ids);\n"
+       "    return -666;\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "function main() {\n"
+       "  $testA = array(4 => false, 5 => false);\n"
+       "  $c = new C();\n"
+       "  var_dump($c->loadAllWithIDs($testA));\n"
+       "}\n"
+       "\n"
+       "main();\n");
   return true;
 }
 

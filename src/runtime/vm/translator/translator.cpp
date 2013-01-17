@@ -38,7 +38,7 @@
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/translator/annotation.h"
-#include "runtime/vm/type-profile.h"
+#include "runtime/vm/type_profile.h"
 #include "runtime/vm/runtime.h"
 
 namespace HPHP {

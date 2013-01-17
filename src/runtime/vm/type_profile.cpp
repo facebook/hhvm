@@ -25,7 +25,7 @@
 #include "runtime/base/runtime_option.h"
 #include "runtime/vm/stats.h"
 #include "runtime/vm/translator/translator.h"
-#include "runtime/vm/type-profile.h"
+#include "runtime/vm/type_profile.h"
 
 namespace HPHP {
 namespace VM {
@@ -190,7 +190,7 @@ TypeProfileKey::hash() const {
 }
 
 static inline ValueProfile*
-keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
+keyToVP(TypeProfileKey key, KeyToVPMode mode) {
   assert(profiles);
   uint64_t h = key.hash();
   // Use the low-order kLineSizeLog2 bits to as tag bits to distinguish
@@ -231,7 +231,7 @@ keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
   return NULL;
 }
 
-void recordType(const TypeProfileKey& key, DataType dt) {
+void recordType(TypeProfileKey key, DataType dt) {
   if (!profiles) return;
   if (!shouldProfile()) return;
   assert(dt != KindOfUninit);
@@ -251,9 +251,10 @@ void recordType(const TypeProfileKey& key, DataType dt) {
   ONTRACE(2, prof->dump());
 }
 
-std::pair<DataType, double> predictType(const TypeProfileKey& key) {
-  static const std::pair<DataType, double> kNullPred =
-    std::make_pair(KindOfUninit, 0.0);
+typedef std::pair<DataType, double> PredVal;
+
+PredVal predictType(TypeProfileKey key) {
+  PredVal kNullPred = std::make_pair(KindOfUninit, 0.0);
   if (!profiles) return kNullPred;
   const ValueProfile *prof = keyToVP(key, Read);
   if (!prof) {

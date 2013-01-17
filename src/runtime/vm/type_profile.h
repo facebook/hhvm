@@ -39,8 +39,8 @@ struct TypeProfileKey {
 void profileInit();
 void profileRequestStart();
 void profileRequestEnd();
-void recordType(const TypeProfileKey& sk, DataType dt);
-std::pair<DataType, double> predictType(const TypeProfileKey& key);
+void recordType(TypeProfileKey sk, DataType dt);
+std::pair<DataType, double> predictType(TypeProfileKey key);
 bool isProfileOpcode(const PC& pc);
 
 extern __thread bool profileOn;

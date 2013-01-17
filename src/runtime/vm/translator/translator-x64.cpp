@@ -70,7 +70,7 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/vm/pendq.h"
 #include "runtime/vm/treadmill.h"
 #include "runtime/vm/repo.h"
-#include "runtime/vm/type-profile.h"
+#include "runtime/vm/type_profile.h"
 #include "runtime/vm/member_operations.h"
 #include "runtime/vm/translator/abi-x64.h"
 #include "runtime/eval/runtime/file_repository.h"
@@ -4652,8 +4652,7 @@ TranslatorX64::translateBranchOp(const Tracelet& t,
 
   bool isZ = !i.isJmpNZ();
   assert(i.inputs.size()  == 1);
-  assert(!i.outStack && !i.outLocal);
-  m_regMap.allocOutputRegs(i);
+  assert(!i.outStack && !i.outLocal && !i.outStack2 && !i.outStack3);
   const DynLocation& in = *i.inputs[0];
   const RuntimeType& rtt = in.rtt;
   const Location& inLoc = in.location;
@@ -9971,6 +9970,9 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
       emitDecRef(ni, rScratch, pi.builtinType());
     }
   }
+
+  // invalidate return value
+  m_regMap.invalidate(ni.outStack->location); 
 
   // copy return value
   locToRegDisp(ni.outStack->location, &base, &disp);

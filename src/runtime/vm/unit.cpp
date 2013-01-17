@@ -1040,10 +1040,13 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
                 if (!fp) {
                   ve = g_vmContext->m_globalVarEnv;
                 } else {
-                  if (!fp->hasVarEnv()) {
-                    fp->m_varEnv = VarEnv::createLazyAttach(fp);
+                  if (fp->hasVarEnv()) {
+                    ve = fp->m_varEnv;
+                  } else {
+                    // Nothing to do. If there is no varEnv, the enclosing
+                    // file was called by fb_autoload_map, ReqSrc or ReqMod
+                    // All those cases wanted a local scope.
                   }
-                  ve = fp->m_varEnv;
                 }
               }
               g_vmContext->invokeFunc(&ret, unit->getMain(), Array(),

@@ -412,10 +412,29 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
             break;
           }
 
-          case Statement::KindOfReturnStatement:
+          case Statement::KindOfReturnStatement: {
             setEdge(s, AfterConstruct, root(), AfterConstruct);
             if (!m_isGenerator) noFallThrough(s);
+            /*
+             * Since almost anything in php /might/ throw, we
+             * approximate, and add edges from the beginning and
+             * end of a try block. But if there's a return, that
+             * would kill the edge from the end of the block.
+             * Explicitly add them here if the return is in a try
+             */
+            size_t d = depth();
+            for (size_t i = 1; i < d; i++) {
+              TryStatementPtr t = dynamic_pointer_cast<TryStatement>(top(i));
+              if (t) {
+                StatementListPtr catches = t->getCatches();
+                for (int n = catches->getCount(), j = 0; j < n; ++j) {
+                  addEdge(s, AfterConstruct, (*catches)[j], BeforeConstruct);
+                }
+                break;
+              }
+            }
             break;
+          }
 
           case Statement::KindOfBreakStatement:
           case Statement::KindOfContinueStatement: {

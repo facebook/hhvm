@@ -886,7 +886,18 @@ public:
     for (std::set<PDOConnection*>::iterator iter =
             m_persistent_connections.begin();
          iter != m_persistent_connections.end(); ++iter) {
-      (*iter)->persistentSave();
+      PDOConnection *conn = *iter;
+      if (!conn) {
+        // Dead handle in the set
+        continue;
+      }
+      if (conn->support(PDOConnection::MethodCheckLiveness) &&
+          !conn->checkLiveness()) {
+        // Dead connection in the handle
+        continue;
+      }
+      // All seems right, save it
+      conn->persistentSave();
     }
   }
 

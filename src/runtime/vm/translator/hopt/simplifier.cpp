@@ -149,7 +149,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdClsMethod:
   case Call:
   case SpillStack:
-  case SpillStackAllocAR:
   case ExitTrace:
   case ExitSlow:
   case ExitGuardFailure:

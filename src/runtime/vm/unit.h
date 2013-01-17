@@ -324,8 +324,19 @@ struct Unit {
       String,
       Class,
       NopOut,
+
+      /*
+       * Marks types that are proven to be a particular type by static
+       * analysis.  Guards are not needed in these cases.
+       */
       DataTypeInferred,
+
+      /*
+       * Marks types that are predicted by static analysis.  Guards
+       * will still be needed in case the prediction is wrong.
+       */
       DataTypePredicted,
+
       GuardedThis,
       GuardedCls,
       NoSurprise,

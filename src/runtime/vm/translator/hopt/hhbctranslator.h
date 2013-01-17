@@ -69,8 +69,8 @@ struct EvalStack {
     return ret;
   }
 
-  int size() const { return m_vector.size(); }
-  void clear()     { m_vector.clear(); }
+  int  size()  const { return m_vector.size(); }
+  void clear()       { m_vector.clear(); }
 
 private:
   std::vector<SSATmp*> m_vector;
@@ -248,9 +248,9 @@ struct HhbcTranslator {
                            const Class* baseClass);
   void emitFPushCtorD(int32 numParams, int32 classNameStrId);
   void emitFPushCtor(int32 numParams);
-  void emitFCall(uint32 numParams, uint32 returnBcOffset );
-  void emitFCallD(uint32 numParams, const Func* callee,
-                  uint32 returnBcOffset);
+  void emitFCall(uint32_t numParams,
+                  Offset returnBcOffset,
+                  const Func* callee);
   void emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId);
   void emitClsCns(int32 cnsNameStrId); // TODO
   void emitAGetC(const StringData* clsName);
@@ -347,24 +347,18 @@ struct HhbcTranslator {
   Trace* guardTypeStack(uint32 stackIndex,
                         Type::Tag type,
                         Trace* nextTrace = NULL);
-
-  void guardTypeLocal(uint32 locId, Type::Tag type);
-
+  void   guardTypeLocal(uint32 locId, Type::Tag type);
   Trace* guardRefs(int64               entryArDelta,
                    const vector<bool>& mask,
                    const vector<bool>& vals,
                    Trace*              exitTrace = NULL);
 
+  // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32 localIndex, Type::Tag type);
-
   void assertTypeStack(uint32 stackIndex, Type::Tag type);
-
   void checkTypeLocal(uint32 localIndex, Type::Tag type);
-
-  void checkTypeStack(uint32 stackIndex, Type::Tag type, Offset nextByteCode);
-
+  void checkTypeTopOfStack(Type::Tag type, Offset nextByteCode);
   void setThisAvailable();
-
   void emitLoadDeps();
 
 private:
@@ -374,9 +368,6 @@ private:
    */
   void emitUnboxRAux();
   void emitAGet(SSATmp* src);
-  void emitFCallAux(uint32 numParams,
-                    uint32 returnBcOffset,
-                    const Func* callee);
   void emitRet(SSATmp* retVal, Trace* exitTrace, bool freeInline);
   template<Type::Tag T> void emitIsTypeC();
   template<Type::Tag T> void emitIsTypeL(int id);
@@ -395,8 +386,6 @@ private:
   void emitInterpOne(Type::Tag type, Trace* target = NULL);
   void emitInterpOneOrPunt(Type::Tag type, Trace* target = NULL);
   void emitBinaryArith(Opcode);
-  void checkTypeStackAux(uint32 stackIndex, Type::Tag type, Trace* nextTrace);
-  void loadStack(uint32 stackIndex, Type::Tag type);
   template<class Lambda>
   Trace* emitIterInitCommon(int offset, Lambda genFunc);
 
@@ -421,22 +410,19 @@ private:
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb->genIncRef(tmp)); }
-  SSATmp* pop(Type::Tag type, Trace* exitTrace);
-  void    popDecRef(Type::Tag type, Trace* exitTrace);
-  SSATmp* pop()  { return pop(Type::Gen, NULL);       }
-  SSATmp* popC() { return pop(Type::Cell, NULL);      }
-  SSATmp* popV() { return pop(Type::BoxedCell, NULL); }
-  SSATmp* popR() { return pop(Type::Gen, NULL);       }
-  SSATmp* popA() { return pop(Type::ClassPtr, NULL);  }
-  SSATmp* popF() { return pop(Type::Gen, NULL);       }
+  SSATmp* pop(Type::Tag type);
+  void    popDecRef(Type::Tag type);
+  SSATmp* popC() { return pop(Type::Cell);      }
+  SSATmp* popV() { return pop(Type::BoxedCell); }
+  SSATmp* popR() { return pop(Type::Gen);       }
+  SSATmp* popA() { return pop(Type::ClassPtr);  }
+  SSATmp* popF() { return pop(Type::Gen);       }
   SSATmp* topC(uint32 i = 0) { return top(Type::Cell, i); }
   std::vector<SSATmp*> getSpillValues() const;
-  SSATmp* spillStack(bool allocActRec = false);
+  SSATmp* spillStack();
   SSATmp* loadStackAddr(int32 offset);
   SSATmp* top(Type::Tag type, uint32 index = 0);
-  void    extendStack(uint32 index,
-                      Type::Tag type = Type::Gen,
-                      Trace* exitTrace = NULL);
+  void    extendStack(uint32 index, Type::Tag type);
   void    replace(uint32 index, SSATmp* tmp);
   void    refineType(SSATmp* tmp, Type::Tag type);
 
@@ -462,10 +448,13 @@ private:
    *
    *   During HhbcTranslator's run over the bytecode, these stacks
    *   contain SSATmp values representing the execution stack state
-   *   since the last SpillStack.  The EvalStack contains cells and
-   *   ActRecs that need to be spilled before exiting the trace.  The
-   *   FpiStack tracks calls between FPush* and FCall, and contains
-   *   either functions or ActRecs.
+   *   since the last SpillStack.
+   *
+   *   The EvalStack contains cells and ActRecs that need to be
+   *   spilled in order to materialize the stack.  The FpiStack tracks
+   *   calls between FPush* and FCall, and contains either FuncPtrs or
+   *   ActRecs.  (It contains FuncPtr when we will need to use a
+   *   runtime value for the Func*.)
    *
    *   m_stackDeficit represents the number of cells we've popped off
    *   the virtual stack since the last sync.

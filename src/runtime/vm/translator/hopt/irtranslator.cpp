@@ -1219,14 +1219,9 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
   const Opcode* after = curUnit()->at(nextSrcKey(t, i).offset());
   const Func* srcFunc = curFunc();
 
-  int32 callOffsetInUnit =
+  Offset callOffsetInUnit =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
-  if (i.funcd) {
-    // add ni.source?
-    HHIR_EMIT(FCallD, numArgs, i.funcd, callOffsetInUnit);
-  } else {
-    HHIR_EMIT(FCall, numArgs, callOffsetInUnit);
-  }
+  HHIR_EMIT(FCall, numArgs, callOffsetInUnit, i.funcd);
 }
 
 void
@@ -1461,7 +1456,7 @@ TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
     } else {
       TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output predicted as %s\n",
             JIT::Type::Strings[jitType]);
-      m_hhbcTrans->checkTypeStack(0, jitType, i.next->offset());
+      m_hhbcTrans->checkTypeTopOfStack(jitType, i.next->offset());
     }
   }
 }

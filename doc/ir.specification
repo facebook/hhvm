@@ -270,29 +270,31 @@ GuardLoc<T> S0:Home L:Label
   Check that type of the local specified by S0 is T; if not, branch to
   the exit trace label L.
 
-GuardStk<T> S0:StkPtr S1:ConstInt L:Label
-
-  Check that the type of the cell on the stack pointed to by S0 at
-  offset S1 is T; if not, branch to the exit trace label L.
-
-GuardRefs
-
-GuardStk<T> S0:StkPtr S1:ConstInt L:Label
-
-  Checks if stack location S1 off of S0 contains a value of type T, and
-  branches to L if that's not the case.
-
-GuardLoc<T> S0:Home L:Label
-
-  Checks if local S0 has type T, and branches to L if that's not the case.
-
 AssertLoc<T> S0:Home
 
-  Asserts that type of local S0 is T.
+  Asserts that type of local S0 is T.  This is used as a hint for
+  local type information, and is similar to GuardLoc except it doesn't
+  imply a runtime check and cannot cause control flow.
+
+D:StkPtr = GuardStk<T> S0:StkPtr S1:ConstInt L:Label
+
+  Check that the type of the cell on the stack pointed to by S0 at
+  index S1 (in cells) is T; if not, branch to the exit trace label L.
+  Returns a new StkPtr that represents the same stack but with the
+  knowledge that the slot at the index S1 has type T.
+
+D:StkPtr = AssertStk<T> S0:StkPtr S1:ConstInt
+
+  Returns a new StkPtr that represents the same stack as S0, but with
+  the knowledge that the slot at the index S1 (in cells) has type T.
+  This is similar to a GuardStk except that it does not imply a
+  runtime check and cannot cause control flow.
 
 CheckUninit S0:T L:Label
 
   If S0's type T is Uninit, branch to label L.
+
+GuardRefs
 
 
 2. Arithmetic
@@ -381,12 +383,10 @@ UnboxPtr
 
 7. Loads
 
-D:T = LdStack<T> S0:StkPtr S1:ConstInt [L:Label]
+D:T = LdStack<T> S0:StkPtr S1:ConstInt
 
-  Loads from S0 at offset S1, and puts the value in D.  If the
-  optional label L is specified and the loaded value's type does not
-  match T, this instruction does not load into D and transfers control
-  to L.
+  Loads from S0 at index S1 (in cells), and puts the value in D as
+  type T.
 
 D:T = LdLoc<T> S0:Home
 
@@ -557,7 +557,6 @@ StRefNT
 StRaw
 
 d:StkP = SpillStack         s0:StkP, s1:StkP, s2:ConstInt, s3...sN
-d:StkP = SpillStackAllocAR  s0:StkP, s1:StkP, s2:ConstInt, s3...sN
 
   SpillStack synchronizes the virtual execution stack with the
   physical stack by storing a variadic list of SSATmps to the physical
@@ -577,7 +576,6 @@ d:StkP = SpillStackAllocAR  s0:StkP, s1:StkP, s2:ConstInt, s3...sN
                ActRec is followed by kSpillStackActRecExtraArgs for
                the contents of the ActRec.
 
-  TODO: explain SpillStackAllocAR.
 
 11. Trace exits
 
@@ -593,10 +591,23 @@ ExitGuardFailure
 Mov
 IncRef
 DecRefLoc
-DecRefStack
+
+DecRefStack<T> S0:StkPtr S1:ConstInt
+
+  DecRef a value of type T at offset S1 on the stack pointed to by S0.
+
 DecRefThis
-DecRef
-DecRefNZ
+
+DecRef S0:Gen
+
+  Decrease the reference count of S0 by one, and call a destructor for
+  types that require it if it goes to zero.
+
+DecRefNZ S0:Gen
+
+  Decrease the reference count of S0 by one, do not check if it goes
+  to zero.  This instruction can be used for more efficient code when
+  it is provable that the reference count cannot go to zero.
 
 
 13. Misc
@@ -672,7 +683,7 @@ ContStartedCheck
 17. Debugging and instrumentation
 
 IncStat
-AssertRefCount
+DbgAssertRefCount
 
 18. Iterators
 

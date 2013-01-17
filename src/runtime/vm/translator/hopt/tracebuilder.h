@@ -132,6 +132,7 @@ public:
   SSATmp* genFreeActRec();
   void    genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace);
   void    genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace);
+  void    genAssertStk(uint32_t id, Type::Tag type);
   SSATmp* genGuardType(SSATmp* src, Type::Tag type, Trace* nextTrace);
   void    genGuardRefs(SSATmp* funcPtr,
                        SSATmp* nParams,
@@ -188,20 +189,17 @@ public:
   SSATmp* genGenericRetDecRefs(SSATmp* retVal, int numLocals);
   void    genRetVal(SSATmp* val);
   SSATmp* genRetAdjustStack();
-  void genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
-  void genDecRef(SSATmp* tmp);
-  void genDecRefStack(Type::Tag type,
-                      uint32 stackOff,
-                      Trace* exit);
-  void genDecRefLoc(int id);
-  void genDecRefThis();
-  void genIncStat(int32 counter, int32 value);
+  void    genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
+  void    genDecRef(SSATmp* tmp);
+  void    genDecRefStack(Type::Tag type, uint32 stackOff);
+  void    genDecRefLoc(int id);
+  void    genDecRefThis();
+  void    genIncStat(int32 counter, int32 value);
   SSATmp* genIncRef(SSATmp* src);
   SSATmp* genSpillStack(uint32 stackAdjustment,
                         uint32 numOpnds,
-                        SSATmp** opnds,
-                        bool allocActRec = false);
-  SSATmp* genLdStack(int32 stackOff, Type::Tag type, Trace* target);
+                        SSATmp** opnds);
+  SSATmp* genLdStack(int32 stackOff, Type::Tag type);
   SSATmp* genDefFP();
   SSATmp* genDefSP();
   SSATmp* genLdStackAddr(int64 offset);

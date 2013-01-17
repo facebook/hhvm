@@ -32,7 +32,7 @@ static void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
     if (dst &&
         Type::isStaticallyKnown(dst->getType()) &&
         Type::isRefCounted(dst->getType())) {
-      auto* assertInst = factory->gen(AssertRefCount, dst);
+      auto* assertInst = factory->gen(DbgAssertRefCount, dst);
       assertInst->setParent(trace);
       instructions.insert(it, assertInst);
     }

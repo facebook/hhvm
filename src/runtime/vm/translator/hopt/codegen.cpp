@@ -299,6 +299,7 @@ NOOP_OPCODE(DefSP)
 NOOP_OPCODE(Marker)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(DefActRec)
+NOOP_OPCODE(AssertStk)
 
 PUNT_OPCODE(JmpInstanceOfD)
 PUNT_OPCODE(JmpNInstanceOfD)
@@ -1960,11 +1961,12 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
   Type::Tag type = inst->getTypeParam();
-  SSATmp* sp = inst->getSrc(0);
-  SSATmp* index= inst->getSrc(1);
-  LabelInstruction* exit = inst->getLabel();
-  cgDecRefMem(type, sp->getReg(),
-              index->getConstValAsInt() * sizeof(Cell), exit);
+  SSATmp* sp     = inst->getSrc(0);
+  SSATmp* index  = inst->getSrc(1);
+  cgDecRefMem(type,
+              sp->getReg(),
+              index->getConstValAsInt() * sizeof(Cell),
+              nullptr);
 }
 
 void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
@@ -2465,12 +2467,14 @@ void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
 void CodeGenerator::cgDecRef(IRInstruction *inst) {
   // DecRef may bring the count to zero, and run the destructor.
   // Generate code for this.
+  assert(!inst->getLabel());
   cgDecRefWork(inst, true);
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   // DecRefNZ cannot bring the count to zero.
   // Therefore, we don't generate zero-checking code.
+  assert(!inst->getLabel());
   cgDecRefWork(inst, false);
 }
 
@@ -2680,7 +2684,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
+void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   SSATmp* dst             = inst->getDst();
   SSATmp* sp              = inst->getSrc(0);
   SSATmp* spAdjustment    = inst->getSrc(1);
@@ -2702,9 +2706,6 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
       ++offset;
     }
   }
-  if (allocActRec) {
-    adjustment -= kNumActRecCells * sizeof(Cell);
-  }
   if (adjustment != 0) {
     if (dstReg != spReg) {
       m_as.lea_reg64_disp_reg64(spReg, adjustment, dstReg);
@@ -2714,7 +2715,7 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
   } else if (dstReg != spReg) {
     m_as.mov_reg64_reg64(spReg, dstReg);
     if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgSpillStackWork\n");
+      TRACE(3, "[counter] 1 reg move in cgSpillStack\n");
     }
   }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -2725,19 +2726,12 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
         i += kSpillStackActRecExtraArgs;
       } else {
         if (t != Type::Gen) {
-          emitCheckCell(m_as, dst, offset + (allocActRec ? 3 : 0));
+          emitCheckCell(m_as, dst, offset);
         }
         ++offset;
       }
     }
   }
-}
-
-void CodeGenerator::cgSpillStack(IRInstruction* inst) {
-  cgSpillStackWork(inst, false);
-}
-void CodeGenerator::cgSpillStackAllocAR(IRInstruction* inst) {
-  cgSpillStackWork(inst, true);
 }
 
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
@@ -3191,15 +3185,13 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
   SSATmp* dst    = inst->getDst();
   SSATmp* sp     = inst->getSrc(0);
   SSATmp* index  = inst->getSrc(1);
-  LabelInstruction* label = inst->getLabel();
 
   assert(index->isConst());
   cgLoad(type,
          dst,
          sp->getReg(),
-         index->getConstValAsInt()*sizeof(Cell),
-         // no need to worry about boxed types if loading a cell
-         type == Type::Cell ? NULL : label,
+         index->getConstValAsInt() * sizeof(Cell),
+         nullptr,
          inst);
 }
 
@@ -4148,10 +4140,8 @@ void CodeGenerator::cgIncStat(IRInstruction *inst) {
                  inst->getSrc(1)->getConstValAsInt());
 }
 
-void CodeGenerator::cgAssertRefCount(IRInstruction* inst) {
-  SSATmp* src = inst->getSrc(0);
-  auto srcReg = src->getReg();
-  emitAssertRefCount(m_as, srcReg);
+void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
+  emitAssertRefCount(m_as, inst->getSrc(0)->getReg());
 }
 
 void traceCallback(ActRec* fp, Cell* sp, int64 pcOff, void* rip) {

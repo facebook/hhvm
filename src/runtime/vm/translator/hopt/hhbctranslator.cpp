@@ -69,9 +69,7 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
       // At this point, we have no business refining the type of any
       // instructions other than the following, which all control
       // their destination type via a type parameter.
-      //
-      // FIXME: I think most of these shouldn't be possible still
-      // (except LdStack?).
+      // TODO(#2035446): fix this for LdClsCns
       assert(opc == LdLoc   || opc == LdStack  ||
              opc == LdMemNR || opc == LdPropNR ||
              opc == LdRefNR);
@@ -82,59 +80,53 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
   }
 }
 
-SSATmp* HhbcTranslator::pop(Type::Tag type, Trace* exitTrace) {
+SSATmp* HhbcTranslator::pop(Type::Tag type) {
   SSATmp* opnd = m_evalStack.pop();
   if (opnd == NULL) {
     uint32 stackOff = m_stackDeficit;
     m_stackDeficit++;
-    // we use an exit trace in case a later genGuardType adds a
-    // guardType to this instruction
-    return m_tb->genLdStack(stackOff, type, exitTrace);
+    return m_tb->genLdStack(stackOff, type);
   }
-  if (exitTrace == NULL) {
-    // if we have an exit trace label, then we are guarding that the
-    // top has a particular type and we should not use refineType
-    // to refine tmp's type.
-    refineType(opnd, type);
-  }
+
+  // Refine the type of the temp given the information we have from
+  // `type'.  This case can occur if we did an extendStack() and
+  // didn't know the type of the intermediate values yet (see below).
+  refineType(opnd, type);
   return opnd;
 }
 
 // type is the type expected on the stack.
-void HhbcTranslator::popDecRef(Type::Tag type, Trace* exitTrace) {
-  SSATmp* src = m_evalStack.pop();
-  if (src == NULL) {
-    uint32 stackOff = m_stackDeficit;
-    m_tb->genDecRefStack(type, stackOff, exitTrace);
-    m_stackDeficit++;
-    return;
-  } else {
+void HhbcTranslator::popDecRef(Type::Tag type) {
+  if (SSATmp* src = m_evalStack.pop()) {
     m_tb->genDecRef(src);
+    return;
   }
+
+  uint32 stackOff = m_stackDeficit;
+  m_tb->genDecRefStack(type, stackOff);
+  m_stackDeficit++;
 }
 
-void HhbcTranslator::extendStack(uint32 index,
-                                 Type::Tag type,
-                                 Trace* exitTrace) {
-  assert(index != (uint32)-1);
-  // We don't know what type description to expect, so we use a generic
-  // type here. If this ends up pushing a ldStack, refineType
-  // will later fix up the type to the expected type.
-  SSATmp* tmp;
-  if (index != 0) {
-    tmp = pop(Type::Gen, exitTrace);
-    extendStack(index-1, type, exitTrace);
-  } else {
-    tmp = pop(type, exitTrace);
+// We don't know what type description to expect for the stack
+// locations before index, so we use a generic type when popping the
+// intermediate values.  If it ends up creating a new LdStack,
+// refineType during a later pop() or top() will fix up the type to
+// the known type.
+void HhbcTranslator::extendStack(uint32 index, Type::Tag type) {
+  if (index == 0) {
+    push(pop(type));
+    return;
   }
+
+  SSATmp* tmp = pop(Type::Gen);
+  extendStack(index - 1, type);
   push(tmp);
 }
 
 SSATmp* HhbcTranslator::top(Type::Tag type, uint32 index) {
-  assert(index != (uint32)-1);
   SSATmp* tmp = m_evalStack.top(index);
   if (!tmp) {
-    extendStack(index);
+    extendStack(index, type);
     tmp = m_evalStack.top(index);
   }
   assert(tmp);
@@ -229,7 +221,7 @@ void HhbcTranslator::emitNewTuple(int numArgs) {
   // a problem then we should refactor the NewTuple opcode to take
   // its values directly as SSA operands.
   TRACE(3, "%u: NewTuple %d\n", m_bcOff, numArgs);
-  SSATmp* sp = spillStack(false);
+  SSATmp* sp = spillStack();
   for (int i = 0; i < numArgs; i++) popC();
   push(m_tb->genNewTuple(numArgs, sp));
 }
@@ -1015,17 +1007,17 @@ void HhbcTranslator::emitIsDoubleC() { emitIsTypeC<Type::Dbl>(); }
 
 void HhbcTranslator::emitPopC() {
   TRACE(3, "%u: PopC\n", m_bcOff);
-  popDecRef(Type::Cell, NULL);
+  popDecRef(Type::Cell);
 }
 
 void HhbcTranslator::emitPopV() {
   TRACE(3, "%u: PopV\n", m_bcOff);
-  popDecRef(Type::BoxedCell, NULL);
+  popDecRef(Type::BoxedCell);
 }
 
 void HhbcTranslator::emitPopR() {
   TRACE(3, "%u: PopR\n", m_bcOff);
-  popDecRef(Type::Gen, NULL);
+  popDecRef(Type::Gen);
 }
 
 void HhbcTranslator::emitDup() {
@@ -1348,55 +1340,33 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
   m_fpiStack.push(actRec);
 }
 
-void HhbcTranslator::emitFCallAux(uint32 numParams,
-                                  uint32 returnBcOffset,
-                                  const Func* callee) {
+void HhbcTranslator::emitFCall(uint32_t numParams,
+                               Offset returnBcOffset,
+                               const Func* callee) {
   // pop the actrec or func from FPI stack
   SSATmp* actRecOrFunc = m_fpiStack.pop();
+
   // pop the incoming parameters to the call
   SSATmp* params[numParams];
   for (uint32 i = 0; i < numParams; i++) {
     params[numParams - i - 1] = popF();
   }
-  SSATmp* func = callee ? m_tb->genDefConst<const Func*>(callee) : NULL;
-  SSATmp* actRec = nullptr;
-  if (actRecOrFunc == NULL) {
-    // this fcall and its FPush are in seperate traces; pop and throw
-    // away the cells corresponding to the act rec on the stack
-    uint32 numActRecCells = (sizeof(ActRec) / sizeof(Cell));
-    for (uint32 i = 0; i < numActRecCells; i++) {
-      pop();
-    }
-    actRec = spillStack(true /* allocActRec */);
-  } else {
-    if (!func && actRecOrFunc->getType() == Type::FuncPtr) {
-      // we had a func on the FPI stack
-      func = actRecOrFunc;
-    }
-    actRec = spillStack(false /* allocActRec */);
-  }
+
+  SSATmp* func = callee ? m_tb->genDefConst<const Func*>(callee) : nullptr;
+  SSATmp* actRec = spillStack();
   if (!func) {
-    func = m_tb->genDefNull();
+    if (actRecOrFunc && actRecOrFunc->getType() == Type::FuncPtr) {
+      func = actRecOrFunc;
+    } else {
+      func = m_tb->genDefNull();
+    }
   }
+
   m_tb->genCall(actRec,
                 returnBcOffset,
                 func,
                 numParams,
                 params);
-
-}
-
-void HhbcTranslator::emitFCall(uint32 numParams, uint32 returnBcOffset) {
-  TRACE(3, "%u: FCall %u %u\n", m_bcOff, numParams, returnBcOffset);
-  emitFCallAux(numParams, returnBcOffset, NULL);
-}
-
-void HhbcTranslator::emitFCallD(uint32 numParams,
-                                const Func* callee,
-                                uint32 returnBcOffset) {
-  TRACE(3, "%u: FCallD %s %u %u\n", m_bcOff,
-        callee->fullName()->data(), numParams, returnBcOffset);
-  emitFCallAux(numParams, returnBcOffset, callee);
 }
 
 void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
@@ -1473,21 +1443,6 @@ void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type::Tag type) {
   m_tb->genAssertLoc(localIndex, type);
 }
 
-void HhbcTranslator::checkTypeStackAux(uint32 stackIndex,
-                                       Type::Tag type,
-                                       Trace* nextTrace) {
-  assert(stackIndex != (uint32)-1);
-  SSATmp* tmp = m_evalStack.top(stackIndex);
-  if (!tmp) {
-    extendStack(stackIndex, type, nextTrace);
-    tmp = m_evalStack.top(stackIndex);
-  }
-  assert(tmp);
-  tmp = m_tb->genGuardType(tmp, type, nextTrace);
-  replace(stackIndex, tmp);
-}
-
-
 Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
                                       Type::Tag type,
                                       Trace* nextTrace) {
@@ -1500,24 +1455,37 @@ Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
   return nextTrace;
 }
 
-void HhbcTranslator::checkTypeStack(uint32 stackIndex,
-                                    Type::Tag type,
-                                    Offset nextByteCode) {
+void HhbcTranslator::checkTypeTopOfStack(Type::Tag type,
+                                         Offset nextByteCode) {
   Trace* exitTrace = getExitTrace(nextByteCode);
-  checkTypeStackAux(stackIndex, type, exitTrace);
+  SSATmp* tmp = m_evalStack.top();
+  if (!tmp) {
+    FTRACE(1, "checkTypeTopOfStack: no tmp: {}\n", Type::Strings[type]);
+    m_tb->genGuardStk(0, type, exitTrace);
+    push(pop(type));
+  } else {
+    FTRACE(1, "checkTypeTopOfStack: generating GuardType for {}\n",
+           Type::Strings[type]);
+    m_evalStack.pop();
+    tmp = m_tb->genGuardType(tmp, type, exitTrace);
+    push(tmp);
+  }
 }
 
 void HhbcTranslator::assertTypeStack(uint32 stackIndex, Type::Tag type) {
-  // Type assertions are currently implemented as loads. If the value doesn't
-  // get used, DCE gets rid of it.
-  loadStack(stackIndex, type);
-}
+  SSATmp* tmp = m_evalStack.top(stackIndex);
+  if (!tmp) {
+    m_tb->genAssertStk(stackIndex, type);
+    return;
+  }
 
-void HhbcTranslator::loadStack(uint32 stackIndex, Type::Tag type) {
-  assert(stackIndex != (uint32)-1);
-  // top() generates the LdStack if necessary, and sets 'type' accordingly
-  SSATmp* tmp = top(type, stackIndex);
-  replace(stackIndex, tmp);
+  /*
+   * We already had a value in flight---refine the type in case it
+   * allows generating better code.  This is safe because in this path
+   * we know the value is *actually* this type due to static analysis
+   * (not based on guards).
+   */
+  refineType(tmp, type);
 }
 
 void HhbcTranslator::emitLoadDeps() {
@@ -1528,7 +1496,6 @@ void HhbcTranslator::emitLoadDeps() {
     if (guard.getKind() == TypeGuard::Local) {
       m_tb->genLdLoc(index);
     } else if (guard.getKind() == TypeGuard::Stack) {
-      loadStack(index, type);
     } else {
       assert(false); // iterator guards should not happen
     }
@@ -2022,7 +1989,7 @@ Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff) {
                            notTakenBcOff);
 }
 
-SSATmp* HhbcTranslator::spillStack(bool allocActRec /* = false */) {
+SSATmp* HhbcTranslator::spillStack() {
   std::vector<SSATmp*> stackValues = getSpillValues();
   m_evalStack.clear();
 
@@ -2042,11 +2009,7 @@ SSATmp* HhbcTranslator::spillStack(bool allocActRec /* = false */) {
       }
       // now check the stack offset
       int64 stackOffset = inst->getSrc(1)->getConstValAsInt();
-      if (allocActRec) {
-        // if there is an AR on the stack, then we need to adjust
-        // the stack offset by its size
-        stackOffset -= (sizeof(ActRec) / sizeof(Cell));
-      }
+
       if (stackOffset != i) {
         break;
       }
@@ -2066,8 +2029,7 @@ SSATmp* HhbcTranslator::spillStack(bool allocActRec /* = false */) {
 
   SSATmp* sp = m_tb->genSpillStack(m_stackDeficit,
                                    stackValues.size(),
-                                   stackValues.size() ? &stackValues[0] : 0,
-                                   allocActRec);
+                                   stackValues.size() ? &stackValues[0] : 0);
   m_stackDeficit = 0;
   return sp;
 }

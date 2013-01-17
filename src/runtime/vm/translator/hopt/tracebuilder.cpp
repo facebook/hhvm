@@ -591,8 +591,11 @@ SSATmp* TraceBuilder::genLdAssertedLoc(uint32 id, Type::Tag type) {
 }
 
 void TraceBuilder::genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace) {
-  gen(GuardStk, type, getLabel(exitTrace), m_spValue,
-    genDefConst<int64>(id));
+  m_spValue = gen(GuardStk,
+                  type,
+                  getLabel(exitTrace),
+                  m_spValue,
+                  genDefConst<int64>(id));
 }
 
 SSATmp* TraceBuilder::genGuardType(SSATmp* src,
@@ -608,38 +611,18 @@ SSATmp* TraceBuilder::genGuardType(SSATmp* src,
     return src;
   }
   if (!Type::isMoreRefined(type, srcType)) {
-    // incompatible types!
-    // XXX TODO: generate a jump here and return NULL
-    return gen(GuardType, type, getLabel(target), src);
+    /*
+     * incompatible types!  We should just generate a jump here and
+     * return null.
+     *
+     * For now, this case should currently be impossible, but it may
+     * come up later due to other optimizations.  The assert is so
+     * we'll remember this spot ...
+     */
+    assert(0);
   }
-  // type is more refined that src's type, so we need a guard
-  IRInstruction* srcInst = src->getInstruction();
-  Opcode opc = srcInst->getOpcode();
-  // if srcInst is an incref or move, then Chase down its src
-  // TODO: FIXME: the refined type is only valid after the guard;
-  // we should leave previous def'n types alone but change the state
-  // vector to use the result of the guard for later code dominated
-  // by this guard.
-  SSATmp* origSrc = src;
-  while (opc == Mov || opc == IncRef) {
-    srcInst->getDst()->setType(type);
-    origSrc = srcInst->getSrc(0);
-    srcType = origSrc->getType();
-    srcInst = origSrc->getInstruction();
-    opc = srcInst->getOpcode();
-  }
-  if (srcInst->getLabel() &&
-      (opc == LdLoc   || opc == LdStack  ||
-       opc == LdMemNR || opc == LdPropNR ||
-       opc == LdRefNR || opc == LdClsCns)) {
-    if (srcType == Type::Gen ||
-        (srcType == Type::Cell && !Type::isBoxed(type))) {
-      origSrc->setType(type);
-      srcInst->setTypeParam(type);
-      assert(origSrc->getType() == outputType(srcInst));
-      return src;
-    }
-  }
+
+  // Type is more refined that src's type, so we need a guard.
   return gen(GuardType, type, getLabel(target), src);
 }
 
@@ -1053,25 +1036,41 @@ static SSATmp* getStackValue(SSATmp* sp,
                              bool& spansCall,
                              Type::Tag& type) {
   IRInstruction* inst = sp->getInstruction();
-  Opcode opc = inst->getOpcode();
-  if (opc == DefSP) {
-    return NULL;
+  switch (inst->getOpcode()) {
+  case DefSP:
+    return nullptr;
+
+  case AssertStk:
+    // fallthrough
+  case GuardStk: {
+    // sp = GuardStk<T> sp, offset
+    // We don't have a value, but we may know the type due to guarding
+    // on it.
+    if (inst->getSrc(1)->getConstValAsInt() == index) {
+      type = inst->getTypeParam();
+      return nullptr;
+    }
+    return getStackValue(inst->getSrc(0),
+                         index,
+                         spansCall,
+                         type);
   }
-  if (opc == Call) {
+
+  case Call:
     // sp = call(actrec, bcoffset, func, args...)
     if (index == 0) {
       // return value from call
-      return NULL;
+      return nullptr;
     }
     spansCall = true;
     // search recursively on the actrec argument
     return getStackValue(inst->getSrc(0), // sp = actrec argument to call
-                         // XXX: this should be call pops an ActRec and then pushes a value
-                         index - 1,//(kNumActRecCells + 1),
+                         index -
+                           (1 /* pushed */ - kNumActRecCells /* popped */),
                          spansCall,
                          type);
-  }
-  if (opc == SpillStack || opc == SpillStackAllocAR) {
+
+  case SpillStack: {
     // sp = spillstack(stkptr, stkAdjustment, spilledtmp0, spilledtmp1, ...)
     int64_t numPushed    = 0;
     int32_t numSpillSrcs = inst->getNumSrcs() - 2;
@@ -1079,8 +1078,7 @@ static SSATmp* getStackValue(SSATmp* sp,
     for (int i = 0; i < numSpillSrcs; ++i) {
       SSATmp* tmp = inst->getSrc(i + 2);
       if (tmp->getType() == Type::ActRec) {
-        // XXX: we should consider actrecs part of the stack?
-        //numPushed += kNumActRecCells;
+        numPushed += kNumActRecCells;
         i += kSpillStackActRecExtraArgs;
         continue;
       }
@@ -1105,7 +1103,8 @@ static SSATmp* getStackValue(SSATmp* sp,
                          spansCall,
                          type);
   }
-  if (opc == InterpOne) {
+
+  case InterpOne: {
     // sp = InterpOne(fp, sp, bcOff, stackAdjustment, resultType)
     SSATmp* prevSp = inst->getSrc(1);
     int64 numPopped = inst->getSrc(3)->getConstValAsInt();
@@ -1118,23 +1117,39 @@ static SSATmp* getStackValue(SSATmp* sp,
     return getStackValue(prevSp, index - (numPushed - numPopped),
                          spansCall, type);
   }
-  if (opc == NewObj) {
+
+  case NewObj:
     // sp = NewObj(numParams, className, sp, fp)
-    if (index == 0) {
+    if (index == kNumActRecCells) {
       // newly allocated object, which we unfortunately don't have any
-      // kind of handle to:-(
+      // kind of handle to :-(
       type = Type::Obj;
       return NULL;
     } else {
       return getStackValue(sp->getInstruction()->getSrc(2),
-                           index-1, // newObj pushes the new obj; -1 pops it
+                           // NewObj pushes an object and an ActRec
+                           index - (1 + kNumActRecCells),
                            spansCall,
                            type);
     }
+
+  default:
+    break;
   }
+
   // Should not get here!
   assert(0);
   return NULL;
+}
+
+void TraceBuilder::genAssertStk(uint32_t id, Type::Tag type) {
+  Type::Tag knownType = Type::None;
+  bool spansCall = false;
+  UNUSED SSATmp* tmp = getStackValue(m_spValue, id, spansCall, knownType);
+  assert(!tmp);
+  if (knownType == Type::None || Type::isMoreRefined(type, knownType)) {
+    m_spValue = gen(AssertStk, type, m_spValue, genDefConst<int64>(id));
+  }
 }
 
 SSATmp* TraceBuilder::genDefFP() {
@@ -1181,19 +1196,17 @@ SSATmp* TraceBuilder::genCall(SSATmp* actRec,
   srcs[2] = func;
   std::copy(params, params + numParams, srcs + 3);
 
-  // The call pushes 'numParams' arguments onto the stack
-  SSATmp* newSpValue = gen(Call, numParams + 3, srcs);
-
-  m_spValue = newSpValue;
-  // after the call: pop the ActRec and the params, and then push
-  // the result value
-  m_spOffset -= (sizeof(ActRec) / sizeof(Cell)); // pop actrec
-  m_spOffset += 1;// push result value
+  // The call gives a new stack, popping the ActRec and pushing a
+  // return value.
+  m_spValue = gen(Call, numParams + 3, srcs);
+  m_spOffset -= kNumActRecCells;
+  m_spOffset += 1;
   assert(m_spOffset >= 0);
-  // kill all available expressions; we can't keep them in regs anyway
+
+  // Kill all available expressions; we can't keep them in regs anyway.
   killCse();
   killLocals();
-  return newSpValue;
+  return m_spValue;
 }
 
 void TraceBuilder::genRetVal(SSATmp* val) {
@@ -1214,25 +1227,18 @@ IRInstruction* TraceBuilder::genMarker(uint32 bcOff, int32 spOff) {
                                               spOff));
 }
 
-void TraceBuilder::genDecRefStack(Type::Tag type,
-                                  uint32 stackOff,
-                                  Trace* exit) {
+void TraceBuilder::genDecRefStack(Type::Tag type, uint32 stackOff) {
   bool spansCall = false;
   Type::Tag knownType = Type::None;
   SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
   if (tmp == NULL || (spansCall && !tmp->getInstruction()->isDefConst())) {
-    // We don't want to extend live ranges of tmps across calls, so
-    // we don't get the value if spansCall is true; however, we
-    // use any type information known
-    if (knownType != Type::None && knownType != Type::Gen) {
-      type = knownType;
+    // We don't want to extend live ranges of tmps across calls, so we
+    // don't get the value if spansCall is true; however, we can use
+    // any type information known.
+    if (knownType != Type::None) {
+      type = Type::getMostRefined(type, knownType);
     }
-    SSATmp* index = genDefConst<int64>(stackOff);
-    if (exit) {
-      gen(DecRefStack, type, getLabel(exit), m_spValue, index);
-    } else {
-      gen(DecRefStack, type, m_spValue, index);
-    }
+    gen(DecRefStack, type, m_spValue, genDefConst<int64>(stackOff));
   } else {
     genDecRef(tmp);
   }
@@ -1266,9 +1272,8 @@ SSATmp* TraceBuilder::genIncRef(SSATmp* src) {
 
 SSATmp* TraceBuilder::genSpillStack(uint32 stackAdjustment,
                                     uint32 numOpnds,
-                                    SSATmp** spillOpnds,
-                                    bool allocActRec) {
-  if (stackAdjustment == 0 && numOpnds == 0 && !allocActRec) {
+                                    SSATmp** spillOpnds) {
+  if (stackAdjustment == 0 && numOpnds == 0) {
     return m_spValue;
   }
 
@@ -1277,44 +1282,33 @@ SSATmp* TraceBuilder::genSpillStack(uint32 stackAdjustment,
   srcs[1] = genDefConst<int64>(stackAdjustment);
   std::copy(spillOpnds, spillOpnds + numOpnds, srcs + 2);
 
-  SSATmp* newSpValue = gen(
-    allocActRec ? SpillStackAllocAR : SpillStack,
-    numOpnds + 2,
-    srcs);
+  SSATmp* newSpValue = gen(SpillStack,
+                           numOpnds + 2,
+                           srcs);
 
   m_spValue = newSpValue;
   // Push the spilled values but adjust for the popped values
   m_spOffset -= stackAdjustment;
   m_spOffset += spillValueCells(newSpValue->getInstruction());
-  if (allocActRec) {
-    m_spOffset += (sizeof(ActRec) / sizeof(Cell));
-  }
   assert(m_spOffset >= 0);
   return newSpValue;
 }
 
-/*
- * If target == NULL, then type is the expected type on the stack not
- * a type to guard against.
- */
-SSATmp* TraceBuilder::genLdStack(int32 stackOff,
-                                 Type::Tag type,
-                                 Trace* target) {
+SSATmp* TraceBuilder::genLdStack(int32 stackOff, Type::Tag type) {
   bool spansCall = false;
   Type::Tag knownType = Type::None;
   SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
   if (tmp == NULL || (spansCall && !tmp->getInstruction()->isDefConst())) {
-    // We don't want to extend live ranges of tmps across calls, so
-    // we don't get the value if spansCall is true; however, we
-    // use any type information known
-    if (knownType != Type::None && knownType != Type::Gen) {
-      type = knownType;
+    // We don't want to extend live ranges of tmps across calls, so we
+    // don't get the value if spansCall is true; however, we can use
+    // any type information known.
+    if (knownType != Type::None) {
+      type = Type::getMostRefined(type, knownType);
     }
     return gen(LdStack,
-                   type,
-                   getLabel(target),
-                   m_spValue,
-                   genDefConst<int64>(stackOff));
+               type,
+               m_spValue,
+               genDefConst<int64>(stackOff));
   }
   return tmp;
 }

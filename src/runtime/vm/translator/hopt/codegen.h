@@ -56,7 +56,6 @@ enum SyncOptions {
 
 class CodeGenerator {
 public:
-  // typedef copied from TranslatorX64 class
   typedef Transl::X64Assembler Asm;
   CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64) :
       m_as(as), m_astubs(astubs), m_tx64(tx64),
@@ -130,7 +129,6 @@ public:
   void cgNotWork(SSATmp* dst, SSATmp* src);
 
 
-  void cgSpillStackWork(IRInstruction* inst, bool allocActRec);
   void cgLoadTypedValue(Type::Tag type,
                         SSATmp* dst,
                         PhysReg base,

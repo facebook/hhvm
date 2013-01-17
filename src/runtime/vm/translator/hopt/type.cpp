@@ -37,6 +37,7 @@ Type::Tag outputType(const IRInstruction* inst) {
   case AddElem:            return Type::Arr;
   case AddNewElem:         return Type::Arr;
   case ArrayAdd:           return Type::Arr;
+  case AssertStk:          return Type::StkPtr;
   case Call:               return Type::StkPtr;
   case Concat:             return Type::Str;
   case CreateCont:         return Type::Obj;
@@ -47,6 +48,7 @@ Type::Tag outputType(const IRInstruction* inst) {
   case DefSP:              return Type::StkPtr;
   case FreeActRec:         return Type::StkPtr;
   case GenericRetDecRefs:  return Type::StkPtr;
+  case GuardStk:           return Type::StkPtr;
   case InstanceOfD:        return Type::Bool;
   case InterpOne:          return Type::StkPtr;
   case IsNSet:             return Type::Bool;
@@ -77,7 +79,6 @@ Type::Tag outputType(const IRInstruction* inst) {
   case NewTuple:           return Type::Arr;
   case NInstanceOfD:       return Type::Bool;
   case RetAdjustStack:     return Type::StkPtr;
-  case SpillStackAllocAR:  return Type::StkPtr;
   case SpillStack:         return Type::StkPtr;
   case UnboxPtr:           return Type::PtrToCell;
 

@@ -100,7 +100,8 @@ enum OpcodeFlag : uint64_t {
   /* checks */                                                          \
   OPC(GuardType,         (HasDest|CanCSE|Essential))                    \
   OPC(GuardLoc,          (Essential))                                   \
-  OPC(GuardStk,          (Essential))                                   \
+  OPC(GuardStk,          (HasDest|Essential))                           \
+  OPC(AssertStk,         (HasDest|Essential))                           \
   OPC(GuardRefs,         (Essential))                                   \
   OPC(AssertLoc,         (Essential))                                   \
                                                                         \
@@ -243,8 +244,6 @@ enum OpcodeFlag : uint64_t {
   OPC(StRaw,             (Essential|MemEffects))                        \
   OPC(SpillStack,        (HasDest|Essential|MemEffects|                 \
                           ConsumesRC))                                  \
-  OPC(SpillStackAllocAR, (HasDest|Essential|MemEffects|                 \
-                          ConsumesRC))                                  \
   /* Update ExitTrace entries in sync with ExitType below */            \
   OPC(ExitTrace,         (Essential))                                   \
   OPC(ExitTraceCc,       (Essential))                                   \
@@ -315,7 +314,7 @@ enum OpcodeFlag : uint64_t {
   OPC(IterNextK,         (HasDest|CallsNative|MemEffects|MayModifyRefs))\
                                                                         \
   OPC(IncStat,           (Essential|MemEffects))                        \
-  OPC(AssertRefCount,    (Essential))                                   \
+  OPC(DbgAssertRefCount, (Essential))                                   \
   /* */
 
 enum Opcode {
@@ -433,30 +432,30 @@ public:
 
   static const Tag RefCountThreshold = Uncounted;
 
-  static inline bool isBoxed(Tag t) {
+  static bool isBoxed(Tag t) {
     return (t > Cell && t < Gen);
   }
 
-  static inline bool isUnboxed(Tag t) {
+  static bool isUnboxed(Tag t) {
     return (t <= Type::Cell && t != Type::None);
   }
 
-  static inline bool isRefCounted(Tag t) {
+  static bool isRefCounted(Tag t) {
     return (t > RefCountThreshold && t <= Gen);
   }
 
-  static inline bool isStaticallyKnown(Tag t) {
+  static bool isStaticallyKnown(Tag t) {
     return (t != Cell       &&
             t != Gen        &&
             t != Uncounted  &&
             t != UncountedInit);
   }
 
-  static inline bool isStaticallyKnownUnboxed(Tag t) {
+  static bool isStaticallyKnownUnboxed(Tag t) {
     return isStaticallyKnown(t) && isUnboxed(t);
   }
 
-  static inline bool needsStaticBitCheck(Tag t) {
+  static bool needsStaticBitCheck(Tag t) {
     return (t == Cell ||
             t == Gen  ||
             t == Str  ||
@@ -464,12 +463,12 @@ public:
   }
 
   // returns true if definitely not uninitialized
-  static inline bool isInit(Tag t) {
+  static bool isInit(Tag t) {
     return ((t != Uninit && isStaticallyKnown(t)) ||
             isBoxed(t));
   }
 
-  static inline bool mayBeUninit(Tag t) {
+  static bool mayBeUninit(Tag t) {
     return (t == Uninit    ||
             t == Uncounted ||
             t == Cell      ||
@@ -477,7 +476,7 @@ public:
   }
 
   // returns true if t1 is a more refined that t2
-  static inline bool isMoreRefined(Tag t1, Tag t2) {
+  static bool isMoreRefined(Tag t1, Tag t2) {
     return ((t2 == Gen           && t1 < Gen)                    ||
             (t2 == Cell          && t1 < Cell)                   ||
             (t2 == BoxedCell     && t1 < BoxedCell && t1 > Cell) ||
@@ -487,15 +486,22 @@ public:
             (t2 == UncountedInit && t1 < UncountedInit && t1 > Uninit));
   }
 
-  static inline bool isString(Tag t) {
+  static Tag getMostRefined(Tag t1, Tag t2) {
+    if (isMoreRefined(t1, t2)) return t1;
+    if (isMoreRefined(t2, t1)) return t2;
+    if (t1 == t2) return t1;
+    always_assert(false);
+  }
+
+  static bool isString(Tag t) {
     return (t == Str || t == StaticStr);
   }
 
-  static inline bool isNull(Tag t) {
+  static bool isNull(Tag t) {
     return (t == Null || t == Uninit);
   }
 
-  static inline Tag getInnerType(Tag t) {
+  static Tag getInnerType(Tag t) {
     assert(isBoxed(t));
     switch (t) {
       case BoxedUninit    : return Uninit;
@@ -512,7 +518,7 @@ public:
     }
   }
 
-  static inline Tag box(Tag t) {
+  static Tag box(Tag t) {
     if (t == None) {
       // translator-x64 sometimes gives us an inner type of KindOfInvalid and
       // an outer type of KindOfRef
@@ -549,7 +555,7 @@ public:
   static const char* Strings[];
 
   // translates a compiler Type::Type to a HPHP::DataType
-  static inline DataType toDataType(Tag type) {
+  static DataType toDataType(Tag type) {
     switch (type) {
       case None          : return KindOfInvalid;
       case Uninit        : return KindOfUninit;
@@ -572,7 +578,7 @@ public:
     }
   }
 
-  static inline Tag fromDataType(DataType outerType, DataType innerType) {
+  static Tag fromDataType(DataType outerType, DataType innerType) {
     switch (outerType) {
       case KindOfInvalid       : return None;
       case KindOfUninit        : return Uninit;
@@ -594,11 +600,11 @@ public:
     }
   }
 
-  static inline Tag fromRuntimeType(const Transl::RuntimeType& rtt) {
+  static Tag fromRuntimeType(const Transl::RuntimeType& rtt) {
     return fromDataType(rtt.outerType(), rtt.innerType());
   }
 
-  static inline bool canRunDtor(Type::Tag t) {
+  static bool canRunDtor(Type::Tag t) {
     return (t == Obj       ||
             t == BoxedObj  ||
             t == Arr       ||

@@ -260,9 +260,21 @@ Instruction set
 
 1.  Checks
 
-GuardType
-GuardLoc
-GuardStk
+d:T = GuardType<T> s0:Gen l:Label
+
+  Check that the type of the src s0 is T, and if so copy it to d.  If
+  s0 is not type T, branch to the exit trace label l.
+
+GuardLoc<T> s0:Home l:Label
+
+  Check that type of the local specified by s0 is T; if not, branch to
+  the exit trace label l.
+
+GuardStk<T> s0:StkPtr s1:ConstInt l:Label
+
+  Check that the type of the cell on the stack pointed to by s0 at
+  offset s1 is T; if not, branch to the exit trace label l.
+
 GuardRefs
 
 
@@ -354,7 +366,7 @@ UnboxPtr
 
 7. Loads
 
-d:T = LdStack s0:StkPtr s1:ConstInt [l:Label]
+d:T = LdStack<T> s0:StkPtr s1:ConstInt [l:Label]
 
   Loads from s0 at offset s1, and puts the value in d.  If the
   optional label l is specified and the loaded value's type does not

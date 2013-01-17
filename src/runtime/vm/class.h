@@ -62,6 +62,50 @@ typedef hphp_hash_set<const Class*, pointer_hash<Class> > ClassSet;
 
 typedef Instance*(*BuiltinCtorFunction)(Class*);
 
+/*
+ * A PreClass represents the source-level definition of a php class,
+ * interface, or trait.  Includes things like the names of the parent
+ * class (if any), and the names of any interfaces implemented or
+ * traits used.  Also contains metadata about properites and methods
+ * of the class.
+ *
+ * This is separate from an actual Class because in different requests
+ * (depending on include order), the actual instantiation of a
+ * PreClass may differ since names may have different meanings.  For
+ * example, if the PreClass "extends Foo", and Foo is defined
+ * differently in different requests, we will make a different Class.
+ *
+ * Hoistability:
+ *
+ *    When a Unit is loaded at run time, each PreClass in the Unit
+ *    which is determined to be `hoistable' will be loaded by the
+ *    runtime (in the order they appear in the source) before the
+ *    Unit's pseudo-main is executed.  The hoistability rules ensure
+ *    that loading a PreClass which is determined to be hoistable will
+ *    never cause the autoload facility to be invoked.
+ *
+ *    A class is considered `hoistable' iff the following conditions
+ *    apply:
+ *
+ *      - It's defined at the top level.
+ *
+ *      - There is no other definition for a class of the same name in
+ *        its Unit.
+ *
+ *      - It uses no traits.  (It may however *be* a trait.)
+ *
+ *      - It implements no interfaces.  (It may however *be* an
+ *        interface.)
+ *
+ *      - It has no parent OR
+ *           The parent is hoistable and defined earlier in the unit OR
+ *           The parent is already defined when the unit is required
+ *
+ *    The very last condition here (parent already defined when the
+ *    unit is required) is not known at parse time.  This leads to the
+ *    MaybeHoistable/AlwaysHoistable split below.
+ *
+ */
 class PreClass : public AtomicCountable {
   friend class PreClassEmitter;
   friend class Peephole;
@@ -296,11 +340,13 @@ private:
   PropMap m_properties;
   ConstMap m_constants;
 };
+
 // It is possible for multiple Class'es to refer to the same PreClass, and we
 // need to make sure that the PreClass lives for as long as an associated Class
 // still exists (even if the associated Unit has been unloaded).  Therefore,
 // use AtomicSmartPtr's to enforce this invariant.
 typedef AtomicSmartPtr<PreClass> PreClassPtr;
+
 class PreClassEmitter {
  public:
   typedef std::vector<FuncEmitter*> MethodVec;
@@ -468,6 +514,12 @@ class PreClassRepoProxy : public RepoProxy {
 #undef PCRP_OP
 };
 
+/*
+ * Class represents the full definition of a user class in a given
+ * request context.
+ *
+ * See PreClass for more on the distinction.
+ */
 typedef AtomicSmartPtr<Class> ClassPtr;
 class Class : public AtomicCountable {
 public:

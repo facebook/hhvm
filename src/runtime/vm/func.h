@@ -30,7 +30,9 @@ static const int kNumFixedPrologues = 6;
 
 typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
 
-// Function.
+/*
+ * Metadata about a php function or object method.
+ */
 struct Func {
   friend class FuncEmitter;
 

@@ -298,7 +298,14 @@ typedef std::vector<PreConst> PreConstVec;
 //
 //==============================================================================
 
-// Compilation unit.
+/*
+ * Metadata about a compilation unit.
+ *
+ * Contains the list of PreClasses and global functions, along with a
+ * special function called the 'pseudo-main', which is logically
+ * invoked (modulo optimizations that avoid it) during execution when
+ * the unit is included/required.
+ */
 struct Unit {
   friend class UnitEmitter;
   friend class UnitRepoProxy;

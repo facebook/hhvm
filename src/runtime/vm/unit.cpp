@@ -2107,15 +2107,7 @@ FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* n,
 PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
                                                  PreClass::Hoistable
                                                  hoistable) {
-  // A class declaration is hoisted if all of the following are true:
-  // 1) It is at the top level of pseudomain (as indicated by the 'hoistable'
-  //    parameter).
-  // 2) It is the first hoistable declaration for the class name within the
-  //    unit.
-  // 3) Its parent (if any) has already been defined by the time the attempt
-  //    is made to hoist the class.
-  // Only the first two conditions are enforced here, because (3) cannot
-  // always be precomputed.
+  // See class.h for information about hoistability.
   if (hoistable && m_hoistablePreClassSet.count(n)) {
     hoistable = PreClass::Mergeable;
   }

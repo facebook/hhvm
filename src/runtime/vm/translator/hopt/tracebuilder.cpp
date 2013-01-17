@@ -224,7 +224,7 @@ void TraceBuilder::genDecRef(SSATmp* tmp) {
 
 Trace* TraceBuilder::genExitGuardFailure(uint32 bcOff) {
   Trace* trace = makeExitTrace(bcOff);
-  LabelInstruction* markerInst =
+  IRInstruction* markerInst =
     m_irFactory.marker(bcOff, m_curFunc->getConstValAsFunc(), m_spOffset);
   trace->appendInstruction(markerInst);
   SSATmp* pc = genDefConst<int64>((int64)bcOff);

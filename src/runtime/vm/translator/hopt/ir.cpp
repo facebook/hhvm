@@ -244,6 +244,10 @@ IRInstruction* LabelInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
+IRInstruction* MarkerInstruction::clone(IRFactory* factory) const {
+  return factory->cloneInstruction(this);
+}
+
 SSATmp* IRInstruction::getSrc(uint32 i) const {
   if (i >= getNumSrcs()) return nullptr;
   return m_srcs[i];
@@ -463,6 +467,16 @@ size_t LabelInstruction::hash() const {
   return 0;
 }
 
+bool MarkerInstruction::equals(IRInstruction* inst) const {
+  assert(0);
+  return false;
+}
+
+size_t MarkerInstruction::hash() const {
+  assert(0);
+  return 0;
+}
+
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
 void LabelInstruction::prependPatchAddr(TCA patchAddr) {
   ssize_t diff = getPatchAddr() ? ((TCA)patchAddr - (TCA)getPatchAddr()) : 0;
@@ -476,17 +490,13 @@ void* LabelInstruction::getPatchAddr() {
 }
 
 void LabelInstruction::print(std::ostream& ostream) {
-  if (getOpcode() == DefLabel) {
-    ostream << "L";
-  } else if (getOpcode() == Marker) {
-    ostream << "--- bc";
-  }
-  ostream << m_labelId;
-  if (getOpcode() == Marker) {
-    ostream << ", spOff: " << m_stackOff;
-  } else {
-    ostream << ":";
-  }
+  assert(getOpcode() == DefLabel);
+  ostream << "L" << m_labelId << ":";
+}
+
+void MarkerInstruction::print(std::ostream& ostream) {
+  ostream << "--- bc" << m_bcOff <<
+             ", spOff: " << m_stackOff;
 }
 
 int SSATmp::numNeededRegs() const {
@@ -683,7 +693,7 @@ void Trace::print(std::ostream& os, bool printAsm,
     auto* inst = *it;
     ++it;
     if (inst->getOpcode() == Marker) {
-      LabelInstruction* markerInst = (LabelInstruction*)inst;
+      MarkerInstruction* markerInst = (MarkerInstruction*)inst;
       if (isExit) {
         // Don't print bytecode, but print the label.
         os << std::string(6, ' ');
@@ -691,7 +701,7 @@ void Trace::print(std::ostream& os, bool printAsm,
         os << '\n';
         continue;
       }
-      uint32 bcOffset = markerInst->getLabelId();
+      uint32 bcOffset = markerInst->getBcOff();
       if (const auto* func = markerInst->getFunc()) {
         func->unit()->prettyPrint(
           os, Unit::PrintOpts()

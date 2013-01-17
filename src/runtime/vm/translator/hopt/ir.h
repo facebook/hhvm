@@ -944,30 +944,16 @@ public:
   explicit LabelInstruction(uint32 id)
     : IRInstruction(DefLabel)
     , m_labelId(id)
-    , m_stackOff(0)
     , m_patchAddr(0)
-    , m_func(NULL)
-  {}
-
-  LabelInstruction(Opcode opc, uint32 bcOff, const Func* f, int32 spOff)
-    : IRInstruction(opc)
-    , m_labelId(bcOff)
-    , m_stackOff(spOff)
-    , m_patchAddr(0)
-    , m_func(f)
   {}
 
   explicit LabelInstruction(IRFactory& factory, const LabelInstruction* inst)
     : IRInstruction(factory, inst)
     , m_labelId(inst->m_labelId)
-    , m_stackOff(inst->m_stackOff)
     , m_patchAddr(0)
-    , m_func(inst->m_func)
   {}
 
   uint32      getLabelId() const  { return m_labelId; }
-  int32       getStackOff() const { return m_stackOff; }
-  const Func* getFunc() const     { return m_func; }
 
   virtual void print(std::ostream& ostream);
   virtual bool equals(IRInstruction* inst) const;
@@ -980,10 +966,41 @@ public:
 private:
   friend class CodeGenerator;
 
-  uint32 m_labelId;  // for Marker instructions: the bytecode offset in unit
-  int32  m_stackOff; // for Marker instructions: stack off from start of trace
+  uint32 m_labelId;
   void*  m_patchAddr; // Support patching forward jumps
-  const  Func* m_func; // for Marker instructions
+};
+
+class MarkerInstruction : public IRInstruction {
+public:
+  MarkerInstruction(uint32 bcOff, const Func* f, int32 spOff)
+    : IRInstruction(Marker)
+    , m_bcOff(bcOff)
+    , m_stackOff(spOff)
+    , m_func(f)
+  {}
+
+  explicit MarkerInstruction(IRFactory& factory, const MarkerInstruction* inst)
+    : IRInstruction(factory, inst)
+    , m_bcOff(inst->m_bcOff)
+    , m_stackOff(inst->m_stackOff)
+    , m_func(inst->m_func)
+  {}
+
+  uint32      getBcOff() const    { return m_bcOff; }
+  int32       getStackOff() const { return m_stackOff; }
+  const Func* getFunc() const     { return m_func; }
+
+  virtual void print(std::ostream& ostream);
+  virtual bool equals(IRInstruction* inst) const;
+  virtual size_t hash() const;
+  virtual IRInstruction* clone(IRFactory* factory) const;
+
+private:
+  friend class CodeGenerator;
+
+  uint32      m_bcOff;    // the bytecode offset in unit
+  int32       m_stackOff; // stack off from start of trace
+  const Func* m_func;     // which func are we in
 };
 
 /*

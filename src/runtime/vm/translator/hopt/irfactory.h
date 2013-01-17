@@ -125,13 +125,14 @@ public:
     );
   }
 
-  IRInstruction*    cloneInstruction(const IRInstruction*);
-  ConstInstruction* cloneInstruction(const ConstInstruction*);
-  LabelInstruction* cloneInstruction(const LabelInstruction*);
+  IRInstruction*     cloneInstruction(const IRInstruction*);
+  ConstInstruction*  cloneInstruction(const ConstInstruction*);
+  LabelInstruction*  cloneInstruction(const LabelInstruction*);
+  MarkerInstruction* cloneInstruction(const MarkerInstruction*);
 
   ConstInstruction* defConst(int64 val);
   LabelInstruction* defLabel();
-  LabelInstruction* marker(uint32 bcOff, const Func* func, int32 spOff);
+  MarkerInstruction* marker(uint32 bcOff, const Func* func, int32 spOff);
 
   SSATmp* getSSATmp(IRInstruction* inst) {
     SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);

@@ -29,6 +29,10 @@ LabelInstruction* IRFactory::cloneInstruction(const LabelInstruction* inst) {
   return new (m_arena) LabelInstruction(*this, inst);
 }
 
+MarkerInstruction* IRFactory::cloneInstruction(const MarkerInstruction* inst) {
+  return new (m_arena) MarkerInstruction(*this, inst);
+}
+
 ConstInstruction* IRFactory::defConst(int64 val) {
   return new (m_arena) ConstInstruction(DefConst, val);
 }
@@ -37,8 +41,8 @@ LabelInstruction* IRFactory::defLabel() {
   return new (m_arena) LabelInstruction(m_nextLabelId++);
 }
 
-LabelInstruction* IRFactory::marker(uint32 bcOff, const Func* f, int32 spOff) {
-  return new (m_arena) LabelInstruction(Marker, bcOff, f, spOff);
+MarkerInstruction* IRFactory::marker(uint32 bcOff, const Func* f, int32 spOff) {
+  return new (m_arena) MarkerInstruction(bcOff, f, spOff);
 }
 
 }}}

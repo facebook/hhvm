@@ -337,6 +337,13 @@ ExitOnVarEnv s0:StkPtr l:Label
 
 CheckUninit
 
+DefLabel
+
+  Denote the position of a jump target.  Branch instructions, and
+  instructions which implicitly guard, take a Label argument which refers
+  to a specific DefLabel instruction.  Additionally, every Trace must begin
+  with a DefLabel instruction.
+
 
 6. Reference manipulation
 
@@ -548,12 +555,15 @@ DecRefStack
 DecRefThis
 DecRef
 DecRefNZ
-DefLabel
 
 
 13. Misc
 
 Marker
+
+  Records Function, stack offset, and bytecode offset in the HHIR
+  instruction stream.  This just carries metadata; Marker has no
+  executable semantics.
 
 d:StkPtr = DefFP
 

@@ -202,7 +202,7 @@ private:
   // current instruction for which code is being generated
   IRInstruction* m_curInst;
   // the last marker instruction before curInst
-  LabelInstruction* m_lastMarker;
+  MarkerInstruction* m_lastMarker;
   Trace* m_curTrace;
 };
 

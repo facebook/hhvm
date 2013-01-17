@@ -328,7 +328,9 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgMarker(IRInstruction* inst) { cgDefLabel(inst); }
+void CodeGenerator::cgMarker(IRInstruction*) {
+  // nothing to do.
+}
 
 static ConditionCode cmpOpToCC[JmpNSame - JmpGt + 1] = {
   CC_G,  // OpGt
@@ -2608,7 +2610,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     m_as.add_imm32_reg64(adjustment, spReg);
   }
 
-  SrcKey srcKey = SrcKey(m_lastMarker->getFunc(), m_lastMarker->getLabelId());
+  SrcKey srcKey = SrcKey(m_lastMarker->getFunc(), m_lastMarker->getBcOff());
   bool isImmutable = (func->isConst() && func->getType() != Type::Null);
   const Func* funcd = isImmutable ? func->getConstValAsFunc() : NULL;
   int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
@@ -3073,7 +3075,7 @@ void CodeGenerator::cgLdRefNR(IRInstruction* inst) {
 void CodeGenerator::recordSyncPoint(Asm& as) {
   assert(m_lastMarker);
   Offset stackOff = m_lastMarker->getStackOff();
-  Offset pcOff = m_lastMarker->getLabelId() - getCurrFunc()->base();
+  Offset pcOff = m_lastMarker->getBcOff() - getCurrFunc()->base();
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }
 
@@ -4079,9 +4081,9 @@ void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
           m_tx64->emitTransCounterInc(m_as);
         }
       }
-      m_lastMarker = (LabelInstruction*)inst;
+      m_lastMarker = (MarkerInstruction*)inst;
       if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
-        bcMap->push_back((TransBCMapping){Offset(m_lastMarker->getLabelId()),
+        bcMap->push_back((TransBCMapping){Offset(m_lastMarker->getBcOff()),
               m_as.code.frontier,
               m_astubs.code.frontier});
       }

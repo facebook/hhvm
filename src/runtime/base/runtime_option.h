@@ -307,7 +307,6 @@ public:
   static bool CheckMemory;
   static int MaxArrayChain;
   static bool UseHphpArray;
-  static bool UseSmallArray;
   static bool UseVectorArray;
   static bool StrictCollections;
   static bool WarnOnCollectionToArray;
@@ -365,8 +364,6 @@ public:
   static bool EnableObjDestructCall;
   static bool EnableEmitSwitch;
   static bool EnableEmitterStats;
-  static bool EnableEvalOptimization;
-  static int  EvalScalarValueExprLimit;
   static bool CheckSymLink;
   static bool NativeXHP;
   static int ScannerType;
@@ -379,9 +376,6 @@ public:
 #endif
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
-  static bool EnableStrict;
-  static int StrictLevel;
-  static bool StrictFatal;
 
   /*
    * Maximum number of elements on the VM execution stack.
@@ -457,7 +451,6 @@ public:
 
   // Sandbox options
   static bool SandboxMode;
-  static bool SandboxCheckMd5;
   static std::string SandboxPattern;
   static std::string SandboxHome;
   static std::string SandboxFallback;

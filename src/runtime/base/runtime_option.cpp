@@ -309,7 +309,6 @@ bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::UseHphpArray = hhvm;
-bool RuntimeOption::UseSmallArray = false;
 bool RuntimeOption::UseVectorArray = true;
 bool RuntimeOption::StrictCollections = true;
 bool RuntimeOption::WarnOnCollectionToArray = false;
@@ -370,14 +369,6 @@ bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableTaintWarnings = false;
 int RuntimeOption::TaintTraceMaxStrlen = 127;
 #endif
-
-// TODO: Task #1154042: These runtime options are no longer used, remove them
-bool RuntimeOption::EnableEvalOptimization = true;
-int RuntimeOption::EvalScalarValueExprLimit = 64;
-bool RuntimeOption::SandboxCheckMd5 = false;
-bool RuntimeOption::EnableStrict = false;
-int RuntimeOption::StrictLevel = 1;
-bool RuntimeOption::StrictFatal = false;
 
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
@@ -845,9 +836,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     UseHphpArray = server["UseHphpArray"].getBool(hhvm);
 
-    // TODO: Task #1154042: This runtime option is no longer used, remove it
-    UseSmallArray = server["UseSmallArray"].getBool(false);
-
     UseVectorArray = server["UseVectorArray"].getBool(true);
     StrictCollections = server["StrictCollections"].getBool(true);
     WarnOnCollectionToArray = server["WarnOnCollectionToArray"].getBool(false);
@@ -1153,8 +1141,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     EnableXHP = eval["EnableXHP"].getBool(true);
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
-    EnableEvalOptimization = eval["EnableEvalOptimization"].getBool(true);
-    EvalScalarValueExprLimit = eval["EvalScalarValueExprLimit"].getInt32(64);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
     NativeXHP = eval["NativeXHP"].getBool(true);
@@ -1170,9 +1156,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     TaintTraceMaxStrlen = eval["TaintTraceMaxStrlen"].getInt32(127);
 #endif
 
-    EnableStrict = eval["EnableStrict"].getBool();
-    StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
-    StrictFatal = eval["StrictFatal"].getBool();
     EvalVMStackElms = eval["VMStackElms"].getUInt64(kEvalVMStackElmsDefault);
     EvalVMInitialGlobalTableSize =
       eval["VMInitialGlobalTableSize"].getUInt64(
@@ -1314,8 +1297,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     SandboxFromCommonRoot = sandbox["FromCommonRoot"].getBool();
     SandboxDirectoriesRoot = sandbox["DirectoriesRoot"].getString();
     SandboxLogsRoot = sandbox["LogsRoot"].getString();
-    SandboxCheckMd5 = sandbox["CheckMd5"].getBool(false);
-    if (!SandboxMode || RecordCodeCoverage) SandboxCheckMd5 = false;
     sandbox["ServerVariables"].get(SandboxServerVariables);
   }
   {

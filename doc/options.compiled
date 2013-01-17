@@ -160,9 +160,6 @@ flood error logs.
     # SmartAllocator's usage for each thread to stdout.
     CheckMemory = false
 
-    # Faster data structure for arrays of size < 8.  Deprecated and ignored.
-    UseSmallArray = false
-
     # If ServerName is not specified for a virtual host, use prefix + this
     # suffix to compose one. If "Pattern" was specified, matched pattern,
     # either by parentheses for the first match or without parentheses for
@@ -713,11 +710,6 @@ users can use the same machine serving their own source files.
     EnableAspTags = false    # is <% %> allowed
     EnableXHP = true         # XHP extension
     NativeXHP = true         # Use HPHP to directly handle XHP
-
-    # error level, strict mode is a lot more picky about coding errors
-    EnableStrict = false
-    StrictLevel = 1     # StrictBasic
-    StrictFatal = false
 
     # debugger
     Debugger {

@@ -887,7 +887,7 @@ Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
   if (filename.isResource()) {
     f = filename.toObject().getTyped<File>();
   } else if (isfile) {
-    Variant stream = File::Open(filename, "rb", Array());
+    Variant stream = File::Open(filename, "rb");
     if (!same(stream, false)) {
       file = stream.toObject();
       f = file.getTyped<File>();

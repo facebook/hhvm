@@ -44,7 +44,7 @@ Wrapper* getWrapper(CStrRef scheme) {
   return nullptr;
 }
 
-File* open(CStrRef uri, CStrRef mode, CArrRef options) {
+File* open(CStrRef uri, CStrRef mode, int options, CVarRef context) {
   const char *uri_string = uri.data();
   Wrapper *wrapper = NULL;
 
@@ -63,7 +63,7 @@ File* open(CStrRef uri, CStrRef mode, CArrRef options) {
   }
   assert(wrapper);
 
-  return wrapper->open(uri, mode, options);
+  return wrapper->open(uri, mode, options, context);
 }
 
 static FileStreamWrapper s_file_stream_wrapper;

@@ -136,7 +136,7 @@ bool f_mailparse_msg_free(CObjRef mimemail) {
 }
 
 Variant f_mailparse_msg_parse_file(CStrRef filename) {
-  Variant stream = File::Open(filename, "rb", Array());
+  Variant stream = File::Open(filename, "rb");
   if (same(stream, false)) return false;
   File *f = stream.toObject().getTyped<File>();
 

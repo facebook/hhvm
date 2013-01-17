@@ -133,13 +133,15 @@ Array stat_impl(struct stat *stat_sb) {
 Variant f_fopen(CStrRef filename, CStrRef mode,
                 bool use_include_path /* = false */,
                 CVarRef context /* = null */) {
-  Array options;
-  if (!context.isNull()) {
-    StreamContext *streamContext =
-      context.toObject().getTyped<StreamContext>();
-    options = streamContext->m_options;
+  if (!context.isNull() &&
+      (!context.isObject() || !context.toObject().getTyped<StreamContext>())) {
+    raise_warning("$context must be a valid Stream Context or NULL");
+    return false;
   }
-  return File::Open(filename, mode, options);
+
+  return File::Open(filename, mode,
+                    use_include_path ? File::USE_INCLUDE_PATH : 0,
+                    context);
 }
 
 Variant f_popen(CStrRef command, CStrRef mode) {

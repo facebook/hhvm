@@ -29,7 +29,7 @@ class Wrapper;
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper);
 Wrapper* getWrapper(CStrRef scheme);
-File* open(CStrRef uri, CStrRef mode, CArrRef options);
+File* open(CStrRef uri, CStrRef mode, int options, CVarRef context);
 
 /* Called during process init to register core wrappers */
 void RegisterCoreWrappers();

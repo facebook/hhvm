@@ -48,7 +48,9 @@ File *PhpStreamWrapper::openFD(const char *sFD) {
   return NEWOBJ(PlainFile)(dup(nFD), true);
 }
 
-File* PhpStreamWrapper::open(CStrRef filename, CStrRef mode, CArrRef options) {
+
+File* PhpStreamWrapper::open(CStrRef filename, CStrRef mode,
+                             int options, CVarRef context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
     return NULL;
   }

@@ -27,7 +27,8 @@ namespace HPHP {
 
 class HttpStreamWrapper : public Stream::Wrapper {
  public:
-  virtual File* open(CStrRef filename, CStrRef mode, CArrRef options);
+  virtual File* open(CStrRef filename, CStrRef mode,
+                     int options, CVarRef context);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

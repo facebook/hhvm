@@ -75,8 +75,8 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
 
   Variant content = f_apc_fetch(cache_key);
   if (same(content, false)) {
-    Variant stream = File::Open(filename, "rb", CREATE_MAP1
-                                ("http", CREATE_MAP1("timeout", 1000)));
+    Variant stream = File::Open(filename, "rb", 0, f_stream_context_create(
+                CREATE_MAP1("http", CREATE_MAP1("timeout", 1000))));
     if (!same(stream, false)) {
       content = f_stream_get_contents(stream);
       if (!same(content, false)) {

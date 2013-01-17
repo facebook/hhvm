@@ -18,13 +18,14 @@
 #include <runtime/base/string_util.h>
 #include <runtime/base/file/url_file.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/ext/ext_stream.h>
 #include <memory>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
-                              CArrRef options) {
+                              int options, CVarRef context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return NULL;
   }
@@ -35,10 +36,12 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
   }
 
   std::unique_ptr<UrlFile> file;
-  if (options.isNull() || options["http"].isNull()) {
+  StreamContext *ctx = !context.isObject() ? nullptr : 
+                        context.toObject().getTyped<StreamContext>();
+  if (!ctx || ctx->m_options.isNull() || ctx->m_options["http"].isNull()) {
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)());
   } else {
-    Array opts = options["http"];
+    Array opts = ctx->m_options["http"];
     String method = "GET";
     if (opts.exists("method")) {
       method = opts["method"].toString();

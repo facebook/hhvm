@@ -52,12 +52,14 @@ public:
                               bool keepRelative = false);
   static String TranslateCommand(CStrRef cmd);
   static Variant Open(CStrRef filename, CStrRef mode,
-                      CArrRef options = null_array);
+                      int options = 0, CVarRef context = null);
 
   static bool IsVirtualDirectory(CStrRef filename);
   static bool IsPlainFilePath(CStrRef filename);
 
 public:
+  static const int USE_INCLUDE_PATH;
+
   File(bool nonblocking = true);
   virtual ~File();
 

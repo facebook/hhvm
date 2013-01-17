@@ -28,7 +28,8 @@ namespace HPHP {
 class FileStreamWrapper : public Stream::Wrapper {
  public:
   static MemFile* openFromCache(CStrRef filename, CStrRef mode);
-  virtual File* open(CStrRef filename, CStrRef mode, CArrRef options);
+  virtual File* open(CStrRef filename, CStrRef mode,
+                     int options, CVarRef context);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

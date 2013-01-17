@@ -42,6 +42,8 @@ StaticString File::s_resource_name("stream");
 
 IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
 
+const int File::USE_INCLUDE_PATH = 1;
+
 String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
                            bool keepRelative /*= false */) {
   String canonicalized(Util::canonicalize(filename.data(),
@@ -114,8 +116,9 @@ bool File::IsPlainFilePath(CStrRef filename) {
 }
 
 Variant File::Open(CStrRef filename, CStrRef mode,
-                   CArrRef options /* = null_array */) {
-  File *file = Stream::open(filename, mode, options);
+                   int options /* = 0 */,
+                   CVarRef context /* = null */) {
+  File *file = Stream::open(filename, mode, options, context);
   if (file != NULL) {
     file->m_name = filename.data();
     file->m_mode = mode.data();

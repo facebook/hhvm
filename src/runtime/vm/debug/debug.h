@@ -38,7 +38,8 @@ class DebugInfo {
                       bool inPrologue);
   void recordStub(TCRange range,
                   const char* name);
-  void recordPerfMap(DwarfChunk* d);
+  void recordPerfMap(TCRange range, const Func* func, bool exit,
+                     bool inPrologue);
   void recordBCInstr(TCRange range, uint32_t op);
 
   void debugSync();

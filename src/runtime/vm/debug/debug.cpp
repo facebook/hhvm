@@ -58,21 +58,15 @@ void DebugInfo::recordStub(TCRange range, const char* name) {
   }
 }
 
-void DebugInfo::recordPerfMap(DwarfChunk* chunk) {
+void DebugInfo::recordPerfMap(TCRange range, const Func* func,
+                              bool exit, bool inPrologue) {
   if (!m_perfMap) return;
   if (RuntimeOption::EvalProfileBC) return;
-  for (FuncPtrDB::const_iterator it = chunk->m_functions.begin();
-      it != chunk->m_functions.end();
-      ++it) {
-    FunctionInfo* fi = *it;
-    if (!fi->perfSynced()) {
-      fprintf(m_perfMap, "%lx %x %s\n",
-	      reinterpret_cast<uintptr_t>(fi->range.begin()),
-	      fi->range.size(),
-	      fi->name.c_str());
-      fi->setPerfSynced();
-    }
-  }
+  std::string name = lookupFunction(func, exit, inPrologue, true);
+  fprintf(m_perfMap, "%lx %x %s\n",
+    reinterpret_cast<uintptr_t>(range.begin()),
+    range.size(),
+    name.c_str());
   fflush(m_perfMap);
 }
 

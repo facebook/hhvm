@@ -456,7 +456,6 @@ ElfWriter::ElfWriter(DwarfChunk* d):
     return;
   }
   register_gdb_hook(symfile, elf_size, d);
-  DebugInfo::Get()->recordPerfMap(d);
   d->setSynced();
 }
 

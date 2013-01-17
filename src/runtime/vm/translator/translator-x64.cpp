@@ -11868,14 +11868,21 @@ void TranslatorX64::recordGdbTranslation(const SrcKey& sk,
                                          const TCA start,
                                          bool exit,
                                          bool inPrologue) {
-  if (start != a.code.frontier && !RuntimeOption::EvalJitNoGdb) {
+  if (start != a.code.frontier) {
     assert(s_writeLease.amOwner());
-    m_debugInfo.recordTracelet(rangeFrom(a, start,
-                                         &a == &astubs ? true : false),
-                               srcFunc,
-                               srcFunc->unit() ?
-                                 srcFunc->unit()->at(sk.offset()) : NULL,
-                               exit, inPrologue);
+    if (!RuntimeOption::EvalJitNoGdb) {
+      m_debugInfo.recordTracelet(rangeFrom(a, start,
+                                           &a == &astubs ? true : false),
+                                 srcFunc,
+                                 srcFunc->unit() ?
+                                   srcFunc->unit()->at(sk.offset()) : NULL,
+                                 exit, inPrologue);
+    }
+    if (RuntimeOption::EvalPerfPidMap) {
+      m_debugInfo.recordPerfMap(rangeFrom(a, start,
+                                          &a == &astubs ? true : false),
+                                srcFunc, exit, inPrologue);
+    }
   }
 }
 

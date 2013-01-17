@@ -16,6 +16,8 @@
 
 #include <sys/mman.h>
 
+#include "folly/ScopeGuard.h"
+
 #include <iostream>
 #include <iomanip>
 #include <tbb/concurrent_unordered_map.h>
@@ -457,13 +459,22 @@ Class* Unit::defClass(const PreClass* preClass,
       ec->m_pc = preClass->unit()->at(preClass->getOffset());
       ec->pushLocalsAndIterators(tmp.m_func);
     }
-    // The only reason the newClass param is not const is to increment its
-    // SmartPtr refcount, which is only modifying a mutable member anyway
-    ClassPtr newClass(Class::newClass(const_cast<PreClass*>(preClass), parent));
-    if (needsFrame) {
-      ec->m_stack.top() = (Cell*)(ec->m_fp+1);
-      ec->m_fp = fp;
-      ec->m_pc = pc;
+
+    ClassPtr newClass;
+    {
+      // newClass can throw. We have to make sure we restore the
+      // original frame no matter what happens here.
+      SCOPE_EXIT {
+        if (needsFrame) {
+          ec->m_stack.top() = (Cell*)(ec->m_fp+1);
+          ec->m_fp = fp;
+          ec->m_pc = pc;
+        }
+      };
+
+      // The only reason the newClass param is not const is to increment its
+      // SmartPtr refcount, which is only modifying a mutable member anyway
+      newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
     }
     Lock l(Unit::s_classesMutex);
     /*

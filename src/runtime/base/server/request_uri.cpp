@@ -93,7 +93,18 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
 void RequestURI::splitURL(String surl, String &base, String &querys) {
   const char *url = surl.c_str();
   const char *query = strchr(url, '?');
-  if (query) {
+  const char *fragment = strchr(url, '#');
+  if (fragment) {
+    // ignore everything after the #
+    if (query && fragment > query) {
+      base = String(url, query - url, CopyString);
+      ++query; // skipping ?
+      querys = String(query, fragment - query, CopyString);
+    } else {
+      base = String(url, fragment - url, CopyString);
+      querys = "";
+    }
+  } else if (query) {
     base = String(url, query - url, CopyString);
     ++query; // skipping ?
     querys = String(query, CopyString);

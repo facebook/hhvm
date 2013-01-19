@@ -608,7 +608,9 @@ void TranslatorX64::irTranslateDup(const Tracelet& t,
 
 void TranslatorX64::irTranslateCreateCont(const Tracelet& t,
                                           const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
+  HHIR_UNIMPLEMENTED(CreateCont);
+  // Task #2036200: Fix and re-enable this
+  // HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
 }
 
 void TranslatorX64::irTranslateContEnter(const Tracelet& t,

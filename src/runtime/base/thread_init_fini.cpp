@@ -28,6 +28,8 @@
 #include <runtime/ext/ext_icu.h>
 #include <runtime/base/intercept.h>
 
+#include "runtime/vm/repo.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

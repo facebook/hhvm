@@ -19,21 +19,16 @@
 #include <runtime/base/program_functions.h>
 #include <dlfcn.h>
 
-using namespace HPHP;
+#include "hhvm/process_init.h"
 
-namespace HPHP {
-  extern void (*g_vmProcessInit)();
-  namespace VM { extern void ProcessInit(); }
-}
+using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 extern "C" void compiler_hook_initialize();
 
 int main(int argc, char **argv) {
-#ifdef HHVM
-  HPHP::g_vmProcessInit = &HPHP::VM::ProcessInit;
-#endif
+  HPHP::register_process_init();
 
 #ifdef HHVM_FBMAKE
   // In an fbmake build, override the locations of hphp and hhvm that

@@ -288,11 +288,6 @@ void ProcessInit() {
   Stack::ValidateStackSize();
   SystemLib::s_inited = true;
 
-  // For debug build, run some quick unit tests at process start time
-  if (debug) {
-    VM::Transl::FixupMapUnitTest _;
-  }
-
   // Restore this after loading systemlib
   RuntimeOption::EvalDumpBytecode = db;
 }

@@ -13,37 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <gtest/gtest.h>
+#include "hhvm/process_init.h"
 
-#ifndef incl_TRANSL_TYPES_H_
-#define incl_TRANSL_TYPES_H_
-
-#include "util/base.h"
-
-namespace HPHP {
-namespace VM {
-namespace Transl {
-
-/*
- * Core types.
- */
-typedef unsigned char* TCA; // "Translation cache adddress."
-typedef const unsigned char* CTCA;
-
-struct ctca_identity_hash {
-  size_t operator()(CTCA val) const {
-    // Experiments show that this is a sufficient "hash function" on
-    // TCAs for now; using stronger functions didn't help given current
-    // data. Patterns of code emission in the translator could invalidate
-    // this finding going forward, though; e.g., if we frequently emit
-    // a call instruction N bytes into a cache-aligned region.
-    return uintptr_t(val);
-  }
-};
-
-
-typedef uint32_t               TransID;
-typedef hphp_hash_set<TransID> TransIDSet;
-
-}}}
-
-#endif
+int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
+  HPHP::init_for_unit_test();
+  return RUN_ALL_TESTS();
+}

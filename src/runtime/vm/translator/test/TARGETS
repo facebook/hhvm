@@ -1,0 +1,12 @@
+# -*- mode: python -*-
+
+cpp_unittest(
+  name='translator_tests',
+  srcs=['main.cpp',
+        'fixup_map.cpp',
+        'tread_hash_map.cpp',
+        ],
+  deps=['@/src/hhvm:unit_lib'],
+  external_deps = [('gtest', None, 'gtest'),],
+  type='gtest',
+)

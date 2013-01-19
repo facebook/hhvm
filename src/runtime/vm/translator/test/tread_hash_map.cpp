@@ -13,37 +13,37 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/vm/tread_hash_map.h"
 
-#ifndef incl_TRANSL_TYPES_H_
-#define incl_TRANSL_TYPES_H_
+#include <vector>
+#include <algorithm>
+#include <iostream>
+
+#include <gtest/gtest.h>
 
 #include "util/base.h"
 
-namespace HPHP {
-namespace VM {
-namespace Transl {
+namespace HPHP { namespace VM {
 
-/*
- * Core types.
- */
-typedef unsigned char* TCA; // "Translation cache adddress."
-typedef const unsigned char* CTCA;
+TEST(TreadHashMap, Iteration) {
+  TreadHashMap<int64_t,int64_t,int64_hash> thm(64);
 
-struct ctca_identity_hash {
-  size_t operator()(CTCA val) const {
-    // Experiments show that this is a sufficient "hash function" on
-    // TCAs for now; using stronger functions didn't help given current
-    // data. Patterns of code emission in the translator could invalidate
-    // this finding going forward, though; e.g., if we frequently emit
-    // a call instruction N bytes into a cache-aligned region.
-    return uintptr_t(val);
+  auto testExpect = [&](int size) {
+    std::vector<int> contents;
+    for (auto& k : thm) {
+      contents.push_back(k.first);
+    }
+    EXPECT_EQ(int(contents.size()), size);
+    std::sort(contents.begin(), contents.end());
+    for (size_t i = 0; i < contents.size(); ++i) {
+      EXPECT_EQ(contents[i], int(i + 1));
+    }
+  };
+
+  for (int i = 1 /* 0 is invalid key */; i < 1024; ++i) {
+    thm.insert(i, i);
+    testExpect(i);
   }
-};
+}
 
-
-typedef uint32_t               TransID;
-typedef hphp_hash_set<TransID> TransIDSet;
-
-}}}
-
-#endif
+}}

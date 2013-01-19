@@ -137,8 +137,6 @@ public:
     const ActRec* m_fp;
   };
 
-  static bool RunningUnitTest;
-
   FixupMap() : m_fixups(kInitCapac) {}
 
   void recordFixup(CTCA tca, const Fixup& fixup) {
@@ -214,17 +212,6 @@ private:
 
 private:
   TreadHashMap<CTCA,FixupEntry,ctca_identity_hash> m_fixups;
-};
-
-struct FixupMapUnitTest {
-  static const int kNumReaders = 7;
-  static const int kNumToCheck = 50 * 1000;
-  static const int kSpMul = 13;
-  static const int kPcMul = 17;
-
-  static void* writer(void* that);
-  static void* reader(void* that);
-  FixupMapUnitTest();
 };
 
 }}}

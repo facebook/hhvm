@@ -13,37 +13,43 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#ifndef incl_TRANSL_TYPES_H_
-#define incl_TRANSL_TYPES_H_
+#ifndef incl_HHVM_PROCESS_INIT_H_
+#define incl_HHVM_PROCESS_INIT_H_
 
 #include "util/base.h"
+#include "runtime/base/thread_init_fini.h"
 
 namespace HPHP {
+
+extern void (*g_vmProcessInit)();
+void hphp_process_init();
+
 namespace VM {
-namespace Transl {
+  void ProcessInit();
+  void initialize_repo();
+}
 
 /*
- * Core types.
+ * This must be called before execute_program_impl in an hhvm build.
  */
-typedef unsigned char* TCA; // "Translation cache adddress."
-typedef const unsigned char* CTCA;
+inline void register_process_init() {
+  if (hhvm) g_vmProcessInit = &VM::ProcessInit;
+}
 
-struct ctca_identity_hash {
-  size_t operator()(CTCA val) const {
-    // Experiments show that this is a sufficient "hash function" on
-    // TCAs for now; using stronger functions didn't help given current
-    // data. Patterns of code emission in the translator could invalidate
-    // this finding going forward, though; e.g., if we frequently emit
-    // a call instruction N bytes into a cache-aligned region.
-    return uintptr_t(val);
-  }
-};
+/*
+ * Initialize the runtime in a way that's appropriate for unit tests
+ * that make partial use of libhphp_runtime.a.  (There will not be a
+ * real execution context or anything like that.)
+ */
+inline void init_for_unit_test() {
+  register_process_init();
+  if (hhvm) VM::initialize_repo();
+  init_thread_locals();
+  Hdf config;
+  RuntimeOption::Load(config);
+  hphp_process_init();
+}
 
-
-typedef uint32_t               TransID;
-typedef hphp_hash_set<TransID> TransIDSet;
-
-}}}
+}
 
 #endif

@@ -462,7 +462,7 @@ bool Repo::openCentral(const char* path) {
     pragmas(RepoIdCentral);
   } catch (RepoExc& re) {
     TRACE(1, "Repo::%s() failed to initialize connection to canditate repo"
-             " '%s'\n", __func__, repoPath.c_str());
+             " '%s': %s\n", __func__, repoPath.c_str(), re.what());
     return true;
   }
   // sqlite3_open_v2() will silently open in read-only mode if file permissions

@@ -13,15 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-namespace HPHP {
-  extern int execute_program(int argc, char** argv);
-  extern void (*g_vmProcessInit)();
-  namespace VM { extern void ProcessInit(); }
-}
 
-//////////////////////////////////////////////////////////////////////
+#include "runtime/base/program_functions.h"
+#include "hhvm/process_init.h"
 
 int main(int argc, char** argv) {
-  HPHP::g_vmProcessInit = HPHP::VM::ProcessInit;
+  HPHP::register_process_init();
   return HPHP::execute_program(argc, argv);
 }

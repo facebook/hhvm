@@ -13,24 +13,23 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <util/util.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/translator/fixup.h>
+#include "runtime/vm/translator/fixup.h"
 
-namespace HPHP {
-namespace VM {
+#include <gtest/gtest.h>
+#include "hhvm/process_init.h"
 
-namespace Transl {
+namespace HPHP { namespace VM { namespace Transl {
 
-bool FixupMap::RunningUnitTest = false;
+//////////////////////////////////////////////////////////////////////
 
-/*
- * We've taken a few risks in the name of performance. In debug builds,
- * exercise a few million racy reads/writes to make sure we don't publish
- * partial TCAs.
- */
-void* FixupMapUnitTest::writer(void* that) {
+namespace {
+
+constexpr int kNumReaders = 7;
+constexpr int kNumToCheck = 50 * 1000;
+constexpr int kSpMul = 13;
+constexpr int kPcMul = 17;
+
+void* writer(void* that) {
   // Give the readers time to wind up.
   usleep(1000);
   FixupMap* m = (FixupMap*)that;
@@ -41,7 +40,7 @@ void* FixupMapUnitTest::writer(void* that) {
   return NULL;
 }
 
-void* FixupMapUnitTest::reader(void* that) {
+void* reader(void* that) {
   FixupMap* m = (FixupMap*)that;
   const StringData* sd = StringData::GetStaticString("test");
   // ar2: a mock actrec, requires a Func, which can't be builtin.
@@ -67,20 +66,15 @@ void* FixupMapUnitTest::reader(void* that) {
   return NULL;
 }
 
-FixupMapUnitTest::FixupMapUnitTest() {
-  if (!hhvm) return;
+}
 
-  // This unit test runs at the end of process init, and it
-  // directly spawns pthreads that don't init various HPHP
-  // thread locals.
+//////////////////////////////////////////////////////////////////////
 
-  // We set the 'RunningUnitTest' flag to true while we run
-  // the unit test to disable the logic that frees old blocks
-  // and to disable some asserts about the translator's write
-  // lease.
-
-  FixupMap::RunningUnitTest = true;
-
+/*
+ * Hammer a fixup map with a bunch of concurrent readers and hope it
+ * works.
+ */
+TEST(FixupMap, Concurrent) {
   FixupMap m;
   void* vm = (void*)&m;
   pthread_t threads[kNumReaders];
@@ -91,8 +85,8 @@ FixupMapUnitTest::FixupMapUnitTest() {
   for (int i = 0; i < kNumReaders; i++) {
     pthread_join(threads[i], NULL);
   }
-
-  FixupMap::RunningUnitTest = false;
 }
 
-} } } // HPHP::VM::Transl
+//////////////////////////////////////////////////////////////////////
+
+}}}

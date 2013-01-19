@@ -350,11 +350,7 @@ namespace reg {
   constexpr Reg64 r14(14);
   constexpr Reg64 r15(15);
 
-  /*
-   * rScratch is a symbolic name for a register that is always free. The
-   * ABI is silent about this register, other than to say that it is callee
-   * saved.
-   */
+  // rScratch is a symbolic name for a register that is always free.
   constexpr Reg64 rScratch(r10);
 
   constexpr RegRIP rip;

@@ -685,11 +685,6 @@ SSATmp* TraceBuilder::genLdClsMethod(SSATmp* cls, uint32 methodSlot) {
   return gen(LdClsMethod, cls, genDefConst<int64>(methodSlot));
 }
 
-SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* methodName,
-                                          SSATmp* classRef) {
-  return gen(LdClsMethodCache, methodName, classRef);
-}
-
 SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
                                           SSATmp* methodName,
                                           SSATmp* baseClass,

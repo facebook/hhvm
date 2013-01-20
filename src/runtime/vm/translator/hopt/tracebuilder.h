@@ -164,7 +164,6 @@ public:
   SSATmp* genLdPropAddr(SSATmp* obj, SSATmp* prop);
   SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* genLdClsMethod(SSATmp* cls, uint32 methodSlot);
-  SSATmp* genLdClsMethodCache(SSATmp* methodName, SSATmp* classOpnd);
   SSATmp* genLdClsMethodCache(SSATmp* className,
                               SSATmp* methodName,
                               SSATmp* baseClass,

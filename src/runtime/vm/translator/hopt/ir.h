@@ -191,8 +191,7 @@ enum OpcodeFlag : uint64_t {
                           Rematerializable|MayRaiseError))              \
   OPC(LdClsCns,          (HasDest|CanCSE))                              \
   OPC(CheckClsCnsDefined,(Essential|MayModifyRefs|MayRaiseError))       \
-  OPC(LdClsMethodCache,  (HasDest|CanCSE|                               \
-                          Rematerializable|MayRaiseError))              \
+  OPC(LdClsMethodCache,  (HasDest|CanCSE|MayRaiseError))                \
   OPC(LdClsMethod,       (HasDest|CanCSE))                              \
   /* XXX TODO Create version of LdClsPropAddr that doesn't check */     \
   OPC(LdPropAddr,        (HasDest|CanCSE))                              \

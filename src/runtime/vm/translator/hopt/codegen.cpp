@@ -2913,7 +2913,7 @@ void CodeGenerator::cgLoadTypedValue(Type::Tag type,
     assert(typeDstReg == InvalidReg);
     return;
   }
-  bool useScratchReg = (base == typeDstReg && valueDstReg != reg::noreg);
+  bool useScratchReg = (base == typeDstReg && valueDstReg != InvalidReg);
   if (useScratchReg) {
     // Save base to rScratch, because base will be overwritten.
     m_as.mov_reg64_reg64(base, reg::rScratch);
@@ -2928,12 +2928,12 @@ void CodeGenerator::cgLoadTypedValue(Type::Tag type,
   }
 
   // Load type if it's not dead
-  if (typeDstReg != reg::noreg) {
+  if (typeDstReg != InvalidReg) {
     m_as.load_reg64_disp_reg32(base, off + TVOFF(m_type), typeDstReg);
   }
 
   // Load value if it's not dead
-  if (valueDstReg != reg::noreg) {
+  if (valueDstReg != InvalidReg) {
     if (useScratchReg) {
       m_as.load_reg64_disp_reg64(reg::rScratch, off + TVOFF(m_data), valueDstReg);
     } else {
@@ -3257,7 +3257,7 @@ void CodeGenerator::cgGuardType(IRInstruction* inst) {
   }
   emitFwdJcc(cc, label);
 
-  if (srcValueReg != dstReg) {
+  if (srcValueReg != dstReg && dstReg != InvalidReg) {
     m_as.mov_reg64_reg64(srcValueReg, dstReg);
   }
 }

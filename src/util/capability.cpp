@@ -129,6 +129,14 @@ bool Capability::ChangeUnixUser(const std::string &username) {
   return false;
 }
 
+bool Capability::SetDumpable() {
+  if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
+    Logger::Error("Unable to make process dumpable: %s", strerror(errno));
+  }
+
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

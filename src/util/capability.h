@@ -34,6 +34,7 @@ public:
    */
   static bool ChangeUnixUser(uid_t uid);
   static bool ChangeUnixUser(const std::string &username);
+  static bool SetDumpable();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

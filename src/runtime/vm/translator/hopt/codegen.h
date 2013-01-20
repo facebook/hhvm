@@ -298,8 +298,8 @@ struct ArgGroup {
   }
 
   ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count) {
-    for (unsigned i = begin; i < (begin + count); ++i) {
-      m_args.push_back(ArgDesc(inst->getSrc(i)));
+    for (SSATmp* s : inst->getSrcs().subpiece(begin, count)) {
+      m_args.push_back(ArgDesc(s));
     }
     return *this;
   }

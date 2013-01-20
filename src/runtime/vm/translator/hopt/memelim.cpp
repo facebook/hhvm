@@ -531,8 +531,8 @@ void MemMap::processInstruction(IRInstruction* inst) {
         // escape any boxes that are on the right hand side of the current
         // instruction
         RefMap::iterator end = unescaped.end();
-        for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
-          RefMap::iterator find = unescaped.find(inst->getSrc(i));
+        for (SSATmp* src : inst->getSrcs()) {
+          RefMap::iterator find = unescaped.find(src);
           if (find != end) {
             escapeRef(find->first);
             break;

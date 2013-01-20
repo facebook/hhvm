@@ -2614,14 +2614,14 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SSATmp* actRec         = inst->getSrc(0);
   SSATmp* returnBcOffset = inst->getSrc(1);
   SSATmp* func           = inst->getSrc(2);
-  int32  numArgs         = inst->getNumSrcs() - 3;
-  auto arg               = [&] (int i) { return inst->getSrc(i + 3); };
+  SSARange args          = inst->getSrcs().subpiece(3);
+  int32 numArgs          = args.size();
 
   auto spReg = actRec->getReg();
   // put all outgoing arguments onto the VM stack
   int64 adjustment = (-(int64)numArgs) * sizeof(Cell);
   for (int32 i = 0; i < numArgs; i++) {
-    cgStore(spReg, -(i+1) * sizeof(Cell), arg(i));
+    cgStore(spReg, -(i + 1) * sizeof(Cell), args[i]);
   }
   // store the return bytecode offset into the outgoing actrec
   uint64 returnBc = returnBcOffset->getConstValAsInt();
@@ -2647,15 +2647,15 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
   SSATmp* dst   = inst->getDst();
   SSATmp* sp    = inst->getSrc(0);
   SSATmp* spAdjustment = inst->getSrc(1);
-  uint32   numSpill  = inst->getNumSrcs() - 2;
-  auto spillVal = [&] (int i) { return inst->getSrc(i + 2); };
+  SSARange spillVals = inst->getSrcs().subpiece(2);
+  uint32 numSpill = spillVals.size();
 
   auto dstReg = dst->getReg();
   auto spReg = sp->getReg();
   int64 adjustment =
     (spAdjustment->getConstValAsInt() - numSpill) * sizeof(Cell);
   for (uint32 i = 0; i < numSpill; i++) {
-    cgStore(spReg, (i * sizeof(Cell)) + adjustment, spillVal(i));
+    cgStore(spReg, (i * sizeof(Cell)) + adjustment, spillVals[i]);
   }
   if (allocActRec) {
     adjustment -= (3 * sizeof(Cell)); // XXX replace with symbolic constant
@@ -2677,7 +2677,7 @@ void CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
   }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     for (uint32 i = 0; i < numSpill; i++) {
-      if (spillVal(i)->getType() != Type::Gen) {
+      if (spillVals[i]->getType() != Type::Gen) {
         emitCheckCell(m_as, dst, i + (allocActRec ? 3 : 0));
       }
     }

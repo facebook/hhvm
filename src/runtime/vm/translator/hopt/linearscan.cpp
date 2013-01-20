@@ -203,8 +203,7 @@ LinearScan::LinearScan(IRFactory* irFactory)
 
 RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
   uint32 instId = inst->getId();
-  for (uint32 i = 0; i < inst->getNumSrcs(); i++) {
-    SSATmp* src = inst->getSrc(i);
+  for (SSATmp* src : inst->getSrcs()) {
     if (src->getLastUseId() == instId) {
       for (int locIndex = 0;
            locIndex < src->numAllocatedRegs();

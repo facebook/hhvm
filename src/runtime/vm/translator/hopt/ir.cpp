@@ -811,7 +811,7 @@ uint32 numberInstructions(Trace* trace,
                           uint32 nextId,
                           bool followControlFlow) {
   for (auto* inst : trace->getInstructionList()) {
-    if (SSATmp* dst = inst->getDst()) {
+    for (SSATmp* dst : inst->getDsts()) {
       // Initialize this value for register spilling.
       dst->setSpillSlot(-1);
     }
@@ -820,8 +820,7 @@ uint32 numberInstructions(Trace* trace,
     }
     uint32 id = nextId++;
     inst->setId(id);
-    for (uint32 i=0; i < inst->getNumSrcs(); i++) {
-      SSATmp* tmp = inst->getSrc(i);
+    for (SSATmp* tmp : inst->getSrcs()) {
       tmp->setLastUseId(id);
       tmp->incUseCount();
     }

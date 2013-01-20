@@ -36,6 +36,7 @@
 #include "runtime/base/types.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/class.h"
+#include "folly/Range.h"
 
 namespace HPHP {
 // forward declaration
@@ -700,6 +701,8 @@ bool isRefCounted(SSATmp* opnd);
 
 class LabelInstruction;
 
+typedef folly::Range<SSATmp**> SSARange;
+
 /*
  * All IRInstruction subclasses must be arena-allocatable.
  * (Destructors are not called when they come from IRFactory.)
@@ -738,8 +741,17 @@ struct IRInstruction : private boost::noncopyable {
   SSATmp*    getSrc(uint32 i) const;
   void       setSrc(uint32 i, SSATmp* newSrc);
   void       appendSrc(IRFactory&, SSATmp*);
+  SSARange   getSrcs() const {
+    return SSARange(m_srcs, m_numSrcs);
+  }
   SSATmp*    getDst()      const       { return m_dst; }
   void       setDst(SSATmp* newDst)    { m_dst = newDst; }
+  SSARange   getDsts() {
+    return SSARange(&m_dst, m_dst ? 1 : 0);
+  }
+  folly::Range<SSATmp* const*> getDsts() const {
+    return folly::makeRange(&m_dst, m_dst ? (&m_dst) + 1 : &m_dst);
+  }
   TCA        getTCA()      const       { return m_tca; }
   void       setTCA(TCA    newTCA)     { m_tca = newTCA; }
 

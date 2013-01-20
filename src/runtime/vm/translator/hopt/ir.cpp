@@ -17,6 +17,7 @@
 #include "runtime/vm/translator/hopt/ir.h"
 
 #include <string.h>
+#include <sstream>
 
 #include "folly/Format.h"
 
@@ -289,21 +290,21 @@ size_t IRInstruction::hash() const {
   return CSEHash::hashCombine(srcHash, m_op, m_typeParam);
 }
 
-void IRInstruction::printOpcode(std::ostream& ostream) {
+void IRInstruction::printOpcode(std::ostream& ostream) const {
   ostream << opcodeName(m_op);
   if (m_typeParam != Type::None) {
     ostream << '<' << Type::Strings[m_typeParam] << '>';
   }
 }
 
-void IRInstruction::printDst(std::ostream& ostream) {
+void IRInstruction::printDst(std::ostream& ostream) const {
   if (m_dst) {
     m_dst->print(ostream, true);
     ostream << " = ";
   }
 }
 
-void IRInstruction::printSrc(std::ostream& ostream, uint32 i) {
+void IRInstruction::printSrc(std::ostream& ostream, uint32 i) const {
   SSATmp* src = getSrc(i);
   if (src != NULL) {
     if (m_id != 0 && !src->isConst() && src->getLastUseId() == m_id) {
@@ -315,7 +316,7 @@ void IRInstruction::printSrc(std::ostream& ostream, uint32 i) {
   }
 }
 
-void IRInstruction::printSrcs(std::ostream& ostream) {
+void IRInstruction::printSrcs(std::ostream& ostream) const {
   bool first = true;
   if (getOpcode() == IncStat) {
     ostream << " " << Stats::g_counterNames[getSrc(0)->getConstValAsInt()] <<
@@ -333,7 +334,7 @@ void IRInstruction::printSrcs(std::ostream& ostream) {
   }
 }
 
-void IRInstruction::print(std::ostream& ostream) {
+void IRInstruction::print(std::ostream& ostream) const {
   ostream << folly::format("({:02d}) ", m_id);
   printDst(ostream);
 
@@ -383,9 +384,15 @@ void IRInstruction::print(std::ostream& ostream) {
   }
 }
 
-void IRInstruction::print() {
+void IRInstruction::print() const {
   print(std::cerr);
   std::cerr << std::endl;
+}
+
+std::string IRInstruction::toString() const {
+  std::ostringstream str;
+  print(str);
+  return str.str();
 }
 
 void ConstInstruction::printConst(std::ostream& ostream) const {
@@ -451,7 +458,7 @@ size_t ConstInstruction::hash() const {
   return CSEHash::hashCombine(IRInstruction::hash(), m_intVal);
 }
 
-void ConstInstruction::print(std::ostream& ostream) {
+void ConstInstruction::print(std::ostream& ostream) const {
   this->IRInstruction::print(ostream);
   ostream << " ";
   printConst(ostream);
@@ -489,12 +496,12 @@ void* LabelInstruction::getPatchAddr() {
   return m_patchAddr;
 }
 
-void LabelInstruction::print(std::ostream& ostream) {
+void LabelInstruction::print(std::ostream& ostream) const {
   assert(getOpcode() == DefLabel);
   ostream << "L" << m_labelId << ":";
 }
 
-void MarkerInstruction::print(std::ostream& ostream) {
+void MarkerInstruction::print(std::ostream& ostream) const {
   ostream << "--- bc" << m_bcOff <<
              ", spOff: " << m_stackOff;
 }
@@ -579,7 +586,7 @@ TCA SSATmp::getTCA() const {
   return getInstruction()->getTCA();
 }
 
-void SSATmp::print(std::ostream& os, bool printLastUse) {
+void SSATmp::print(std::ostream& os, bool printLastUse) const {
   if (m_inst->isDefConst()) {
     ((ConstInstruction*)m_inst)->printConst(os);
     return;
@@ -606,7 +613,7 @@ void SSATmp::print(std::ostream& os, bool printLastUse) {
   os << ":" << Type::Strings[getType()];
 }
 
-void SSATmp::print() {
+void SSATmp::print() const {
   print(std::cerr);
   std::cerr << std::endl;
 }
@@ -681,7 +688,7 @@ void printInstructions(xed_uint8_t* codeStartAddr,
 #endif
 
 void Trace::print(std::ostream& os, bool printAsm,
-                  bool isExit /* = false */) {
+                  bool isExit /* = false */) const {
 #ifdef DEBUG
   xed_state_init(&xed_state, XED_MACHINE_MODE_LONG_64,
                  XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
@@ -725,7 +732,7 @@ void Trace::print(std::ostream& os, bool printAsm,
       continue;
     }
     // Find the next instruction that has an non-NULL asm address.
-    IRInstruction::Iterator nextHasAsmAddr = it;
+    auto nextHasAsmAddr = it;
     while (nextHasAsmAddr != m_instructionList.end() &&
            (*nextHasAsmAddr)->getAsmAddr() == NULL) {
       ++nextHasAsmAddr;
@@ -747,10 +754,7 @@ void Trace::print(std::ostream& os, bool printAsm,
   }
 
   bool firstExitTracePrinted = false;
-  for (List::iterator it = m_exitTraces.begin();
-       it != m_exitTraces.end();
-       it++) {
-    Trace* exitTrace = *it;
+  for (auto* exitTrace : m_exitTraces) {
     if (!firstExitTracePrinted) {
       firstExitTracePrinted = true;
       // print out any extra code in astubs
@@ -772,7 +776,7 @@ void Trace::print(std::ostream& os, bool printAsm,
   }
 }
 
-void Trace::print() {
+void Trace::print() const {
   print(std::cout, true /* printAsm */);
 }
 

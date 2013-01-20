@@ -16,6 +16,8 @@
 
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 
+#include "folly/ScopeGuard.h"
+
 #include "util/trace.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 
@@ -1496,19 +1498,26 @@ SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {
  * tables generated from the IR_OPCODES macro.
  */
 SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
+  static DEBUG_ONLY __thread int instNest = 0;
+  if (debug) ++instNest;
+  SCOPE_EXIT { if (debug) --instNest; };
+  DEBUG_ONLY auto indent = [&] { return std::string(instNest * 2, ' '); };
+
+  FTRACE(1, "{}{}\n", indent(), inst->toString());
+
   SSATmp* result = NULL;
   if (inst->canCSE()) {
     result = cseLookup(inst);
     if (result) {
       // Found a dominating instruction that can be used instead of inst
+      FTRACE(1, "  {}cse found: {}\n", indent(), inst->toString());
       return result;
     }
   }
+
   // copy propagation on inst source operands
   Simplifier::copyProp(inst);
-  // simplification
-  // Note: simplifier's return value must be in the cse hash table
-  // but if there is no simplification the result will be NULL
+
   result = m_simplifier.simplify(inst);
   if (result) {
     assert(result->getInstruction()->hasDst());

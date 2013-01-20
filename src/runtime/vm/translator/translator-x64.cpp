@@ -3314,7 +3314,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     TCA toSmash = (TCA)args[0];
     sk = SrcKey(curFunc(), (Offset)args[1]);
     start = retranslateAndPatchNoIR(sk, true, toSmash);
-    SKTRACE(2, sk, "retranslated (without IR) @%p\n", start);
+    SKTRACE(1, sk, "retranslated (without IR) @%p\n", start);
   } break;
 
   case REQ_RETRANSLATE: {

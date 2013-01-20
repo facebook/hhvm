@@ -43,7 +43,7 @@ using namespace Util;
 using namespace Trace;
 using std::max;
 
-static const Trace::Module TRACEMOD = Trace::tx64;
+static const Trace::Module TRACEMOD = Trace::hhir;
 #ifdef DEBUG
 static const bool debug = true;
 #else
@@ -1471,7 +1471,7 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
   assert(m_useHHIR);
   assert(!i.outStack || i.outStack->isStack());
   assert(!i.outLocal || i.outLocal->isLocal());
-  FTRACE_MOD(Trace::hhir, 1, "translating: {}\n", opcodeToName(i.op()));
+  FTRACE(1, "translating: {}\n", opcodeToName(i.op()));
 
   m_hhbcTrans->setBcOff(i.source.offset(), i.breaksTracelet);
 
@@ -1573,21 +1573,14 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     recordBCInstr(OpTraceletGuard, a, start);
     m_hhbcTrans->setBcOffNextTrace(t.m_nextSk.offset());
 
-    {
-      FTRACE_MOD(Trace::hhir, 1, "{:-^40}\n", " HHIR during translation ");
-      SCOPE_EXIT {
-        FTRACE_MOD(Trace::hhir, 1, "{:-^40}\n", "");
-      };
-
-      // Translate each instruction in the tracelet
-      for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
-           ni = ni->next) {
-        irTranslateInstr(t, *ni);
-        assert(ni->source.offset() >= curFunc()->base());
-        // We sometimes leave the tail of a truncated tracelet in place to aid
-        // analysis, but breaksTracelet is authoritative.
-        if (ni->breaksTracelet) break;
-      }
+    // Translate each instruction in the tracelet
+    for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
+         ni = ni->next) {
+      irTranslateInstr(t, *ni);
+      assert(ni->source.offset() >= curFunc()->base());
+      // We sometimes leave the tail of a truncated tracelet in place to aid
+      // analysis, but breaksTracelet is authoritative.
+      if (ni->breaksTracelet) break;
     }
 
     hhirTraceEnd(t.m_nextSk.offset());
@@ -1635,8 +1628,7 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
   if (curFunc()->isGenerator()) {
     fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
   }
-  TRACE(1, "hhirTraceStart: bcStartOffset %d   vmfp() - vmsp() = %ld\n",
-        bcStartOffset, fp - vmsp());
+  FTRACE(1, "{:-^40}\n", " HHIR during translation ");
 
   m_useHHIR      = true;
   m_irFactory.reset(new JIT::IRFactory());
@@ -1647,46 +1639,55 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
 void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
   assert(m_useHHIR);
   m_hhbcTrans->end(bcSuccOffset);
+  FTRACE(1, "{:-^40}\n", "");
 }
 
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   assert(m_useHHIR);
 
   JIT::Trace* trace = m_hhbcTrans->getTrace();
-  std::ostream& os = std::cout;
 
-  auto banner = [&] (const char* s) {
-    os << folly::format("{:-^40}\n", s);
+  auto traceTrace = [&] (const char* banner, bool b) {
+    std::ostringstream str;
+    str << folly::format("{:-^40}\n", banner);
+    auto unitName = curUnit()->filepath()->empty()
+      ? "<systemlib>"
+      : curUnit()->filepath()->data();
+    str << folly::format(" {}() @{} ({})\n",
+             curFunc()->fullName()->data(),
+             trace->getBcOff(),
+             unitName);
+    trace->print(str, b);
+    str << folly::format("{:-^40}\n", "");
+    if (Trace::moduleEnabled(TRACEMOD, 1)) {
+      // If tracing is enabled, print using the trace facility so IR dumps
+      // interleave properly with traced output.
+      FTRACE(1, "{}", str.str());
+    } else {
+      std::cout << str.str();
+    }
   };
 
   if (RuntimeOption::EvalDumpIR) {
-    banner(" HHIR before code gen ");
-    trace->print(os, false);
-    banner("");
+    traceTrace(" HHIR before code gen ", false);
   }
 
   JIT::optimizeTrace(trace, m_irFactory.get());
 
   if (RuntimeOption::EvalDumpIR > 1) {
-    banner(" HHIR after optimizing ");
-    trace->print(os, false);
-    banner("");
+    traceTrace(" HHIR after optimizing ", false);
   }
 
   JIT::allocRegsForTrace(trace, m_irFactory.get());
 
   if (RuntimeOption::EvalDumpIR) {
-    banner(" HHIR after reg alloc ");
-    trace->print(os, false);
-    banner("");
+    traceTrace(" HHIR after reg alloc ", false);
   }
 
   JIT::genCodeForTrace(trace, a, astubs, m_irFactory.get(), bcMap, this);
 
   if (RuntimeOption::EvalDumpIR) {
-    banner(" HHIR after code gen ");
-    trace->print(os, true);
-    banner("");
+    traceTrace(" HHIR after code gen ", true);
   }
 
   m_numHHIRTrans++;

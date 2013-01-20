@@ -786,8 +786,9 @@ struct IRInstruction : private boost::noncopyable {
   virtual bool equals(IRInstruction* inst) const;
   virtual size_t hash() const;
   virtual IRInstruction* clone(IRFactory* factory) const;
-  virtual void print(std::ostream& ostream);
-  void print();
+  virtual void print(std::ostream& ostream) const;
+  void print() const;
+  std::string toString() const;
 
   /*
    * Helper accessors for the OpcodeFlag bits for this instruction.
@@ -809,10 +810,10 @@ struct IRInstruction : private boost::noncopyable {
   bool mayRaiseError() const;
   bool isEssential() const;
 
-  void printDst(std::ostream& ostream);
-  void printSrc(std::ostream& ostream, uint32 srcIndex);
-  void printOpcode(std::ostream& ostream);
-  void printSrcs(std::ostream& ostream);
+  void printDst(std::ostream& ostream) const;
+  void printSrc(std::ostream& ostream, uint32 srcIndex) const;
+  void printOpcode(std::ostream& ostream) const;
+  void printSrcs(std::ostream& ostream) const;
 
 private:
   bool mayReenterHelper() const;
@@ -936,7 +937,7 @@ public:
 
   void printConst(std::ostream& ostream) const;
   virtual bool isConstInstruction() const {return true;}
-  virtual void print(std::ostream& ostream);
+  virtual void print(std::ostream& ostream) const;
   virtual bool equals(IRInstruction* inst) const;
   virtual size_t hash() const;
   virtual IRInstruction* clone(IRFactory* factory) const;
@@ -976,7 +977,7 @@ public:
   uint32      getLabelId() const  { return m_labelId; }
   const Func* getFunc() const     { return m_func; }
 
-  virtual void print(std::ostream& ostream);
+  virtual void print(std::ostream& ostream) const;
   virtual bool equals(IRInstruction* inst) const;
   virtual size_t hash() const;
   virtual IRInstruction* clone(IRFactory* factory) const;
@@ -1010,7 +1011,7 @@ public:
   int32       getStackOff() const { return m_stackOff; }
   const Func* getFunc() const     { return m_func; }
 
-  virtual void print(std::ostream& ostream);
+  virtual void print(std::ostream& ostream) const;
   virtual bool equals(IRInstruction* inst) const;
   virtual size_t hash() const;
   virtual IRInstruction* clone(IRFactory* factory) const;
@@ -1084,8 +1085,9 @@ public:
   const Func*       getConstValAsFunc() const;
   const Class*      getConstValAsClass() const;
   uintptr_t         getConstValAsBits() const;
-  void              print(std::ostream& ostream, bool printLastUse = false);
-  void              print();
+  void              print(std::ostream& ostream,
+                          bool printLastUse = false) const;
+  void              print() const;
 
   // Used for Jcc to Jmp elimination
   void              setTCA(TCA tca);
@@ -1243,8 +1245,9 @@ public:
   typedef std::list<Trace*>::iterator Iterator;
 
   List& getExitTraces() { return m_exitTraces; }
-  void print(std::ostream& ostream, bool printAsm, bool isExit = false);
-  void print();  // default to std::cout and printAsm == true
+  void print(std::ostream& ostream, bool printAsm,
+             bool isExit = false) const;
+  void print() const;  // default to std::cout and printAsm == true
 
 private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't

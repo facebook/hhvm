@@ -739,6 +739,15 @@ Variant invoke_func_few_handler(void *extra, CArrRef params,
 
 Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
+  if (hhvm) {
+    VM::Func* func = VM::Unit::loadFunc(function.get());
+    if (func) {
+      Variant ret;
+      g_vmContext->invokeFunc(ret.asTypedValue(), func, params);
+      return ret;
+    }
+    return invoke_failed(function.c_str(), params, fatal);
+  }
   StringData *sd = function.get();
   assert(sd && sd->data());
   return invoke(sd->data(), params, hash < 0 ? sd->hash() : hash,
@@ -748,13 +757,8 @@ Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
 Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   if (hhvm) {
-    StringData funcName(function);
-    VM::Func* func = VM::Unit::loadFunc(&funcName);
-    if (func) {
-      Variant ret;
-      g_vmContext->invokeFunc((TypedValue*)&ret, func, params);
-      return ret;
-    }
+    String funcName(function, CopyString);
+    return invoke(funcName, params, hash, tryInterp, fatal);
   } else {
     const CallInfo *ci;
     void *extra;

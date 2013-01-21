@@ -552,10 +552,7 @@ class StackElms {
     return m_elms;
   }
   void flush() {
-    // For RPCRequestHandler threads, the ExecutionContext can stay alive
-    // across requests, and hold references to the VM stack. Make
-    // sure we don't free the stack from under the ExecutionContext
-    if (m_elms != NULL && g_context.isNull()) {
+    if (m_elms != NULL) {
       free(m_elms);
       m_elms = NULL;
     }
@@ -647,10 +644,18 @@ Stack::requestExit() {
 }
 
 void flush_evaluation_stack() {
-  if (!t_se.isNull()) {
-    t_se->flush();
+  if (g_context.isNull()) {
+    // For RPCRequestHandler threads, the ExecutionContext can stay alive
+    // across requests, and hold references to the VM stack, and
+    // the TargetCache needs to keep track of which classes are live etc
+    // So only flush the VM stack and the target cache if the execution
+    // context is dead.
+
+    if (!t_se.isNull()) {
+      t_se->flush();
+    }
+    TargetCache::flush();
   }
-  TargetCache::flush();
 }
 
 void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)

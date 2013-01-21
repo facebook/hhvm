@@ -1030,21 +1030,8 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   if (!po.parse.empty()) {
-    hphp_process_init();
-    const StringData *fileName = StringData::GetStaticString(po.parse);
-    struct stat s;
-    if (!Eval::FileRepository::findFile(fileName, &s)) return 0;
-    Eval::FileRepository::FileInfo fileInfo;
-    if (!Eval::FileRepository::readFile(fileName, s, fileInfo)) {
-      return 0;
-    }
-    Eval::PhpFile *f = Eval::FileRepository::parseFile(po.parse, fileInfo);
-    if (!f) return 0;
-    // TODO: Task #1154018: We should support the "parse" command line option
-    // under the VM or get rid of it. The logic above calls into FileRepository
-    // to load the file. What is missing is the logic that gets fishes the AST
-    // out of the PhpFile and outputs the AST as PHP source to STDOUT.
-    return 0;
+    Logger::Error("The 'parse' command line option is not supported\n\n");
+    return 1;
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {

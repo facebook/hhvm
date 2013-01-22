@@ -1038,7 +1038,6 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
     ActRec *prevFp = context->arGetSfp(fp);
     SKTRACE(1, sk, "unwindFrame: fp %p prevFp %p\n",
             fp, prevFp);
-    Offset prevOff = fp->m_soff + prevFp->m_func->base();
     if (LIKELY(!fp->m_func->isGenerator())) {
       // We don't need to refcount the AR's refcounted members; that was
       // taken care of in frame_free_locals, called from unwindFrag().
@@ -1052,9 +1051,10 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
       break;
     }
     // Keep the pc up to date while unwinding.
+    Offset prevOff = fp->m_soff + prevFp->m_func->base();
     const Func *prevF = prevFp->m_func;
     assert(isValidAddress((uintptr_t)prevFp) || prevF->isGenerator());
-    pc = prevF->unit()->at(prevF->base() + fp->m_soff);
+    pc = prevF->unit()->at(prevOff);
     fp = prevFp;
     offset = prevOff;
   }

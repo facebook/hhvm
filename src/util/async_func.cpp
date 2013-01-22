@@ -30,11 +30,12 @@ void* AsyncFuncImpl::s_finiFuncArg = NULL;
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
       m_threadStack(NULL), m_stackSize(0), m_threadId(0),
-      m_exceptioned(false), m_stopped(false), m_noInit(false) {
+      m_exception(NULL), m_stopped(false), m_noInit(false) {
 }
 
 AsyncFuncImpl::~AsyncFuncImpl() {
   assert(m_stopped || m_threadId == 0);
+  delete m_exception;
 }
 
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
@@ -106,9 +107,9 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
     m_threadStack = NULL;
   }
 
-  if (m_exceptioned) {
-    m_exceptioned = false;
-    throw m_exception;
+  if (Exception* e = m_exception) {
+    m_exception = 0;
+    e->throwException();
   }
 
   return true;
@@ -121,14 +122,11 @@ void AsyncFuncImpl::threadFuncImpl() {
   try {
     m_func(m_obj);
   } catch (Exception &e) {
-    m_exceptioned = true;
-    m_exception = e;
+    m_exception = e.clone();
   } catch (std::exception &e) {
-    m_exceptioned = true;
-    m_exception.setMessage(e.what());
+    m_exception = new Exception("%s", e.what());
   } catch (...) {
-    m_exceptioned = true;
-    m_exception.setMessage("(unknown exception)");
+    m_exception = new Exception("(unknown exception)");
   }
   {
     Lock lock(m_stopMonitor.getMutex());

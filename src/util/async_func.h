@@ -156,18 +156,17 @@ public:
 private:
   Synchronizable m_stopMonitor;
 
-  void *m_obj;
-  PFN_THREAD_FUNC *m_func;
-  static PFN_THREAD_FUNC *s_initFunc;
-  static PFN_THREAD_FUNC *s_finiFunc;
+  void* m_obj;
+  PFN_THREAD_FUNC* m_func;
+  static PFN_THREAD_FUNC* s_initFunc;
+  static PFN_THREAD_FUNC* s_finiFunc;
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
-  void *m_threadStack;
+  void* m_threadStack;
   size_t m_stackSize;
-  Exception m_exception; // exception was thrown and thread was terminated
   pthread_attr_t m_attr;
   pthread_t m_threadId;
-  bool m_exceptioned;
+  Exception* m_exception; // exception was thrown and thread was terminated
   bool m_stopped;
   bool m_noInit;
 

@@ -242,6 +242,10 @@ const int kNumX64Regs = 16;
 #define CONTOFF(nm) offsetof(c_Continuation, nm)
 #define MISOFF(nm) offsetof(Transl::MInstrState, nm)
 
+/* In hhir-translated tracelets, the MInstrState is stored right above
+ * the reserved spill space so we add an extra offset.  */
+#define HHIR_MISOFF(nm) (offsetof(Transl::MInstrState, nm) + kReservedRSPSpillSpace)
+
 //////////////////////////////////////////////////////////////////////
 
 /*

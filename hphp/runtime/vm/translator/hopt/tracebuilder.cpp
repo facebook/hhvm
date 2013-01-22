@@ -270,10 +270,9 @@ SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,
 }
 
 void TraceBuilder::genStRaw(SSATmp* base, RawMemSlot::Kind kind,
-                            SSATmp* value, int64 extraOff) {
+                            SSATmp* value) {
   assert(value->getType() == Type::Int || value->getType() == Type::Bool);
-  gen(StRaw, base, genDefConst(int64(kind)), value,
-      genDefConst<int64>(extraOff));
+  gen(StRaw, base, genDefConst(int64(kind)), value);
 }
 
 void TraceBuilder::genTraceEnd(uint32 nextPc,
@@ -798,6 +797,8 @@ static SSATmp* getStackValue(SSATmp* sp,
 
   case AssertStk:
     // fallthrough
+  case CastStk:
+    // fallthrough: sp = CastStk<T> sp, offset
   case GuardStk: {
     // sp = GuardStk<T> sp, offset
     // We don't have a value, but we may know the type due to guarding
@@ -908,6 +909,19 @@ void TraceBuilder::genAssertStk(uint32_t id, Type type) {
   }
 }
 
+SSATmp* TraceBuilder::genCastStk(uint32_t id, Type type) {
+  bool spansCall = false;
+  Type knownType = Type::None;
+  getStackValue(m_spValue, id, spansCall, knownType);
+  if (knownType.subtypeOf(Type::None) || !knownType.subtypeOf(type)) {
+    SSATmp* off = genDefConst<int>(id);
+    gen(CastStk, m_spValue, off);
+    IRInstruction* inst = m_spValue->getInstruction();
+    inst->setTypeParam(type);
+  }
+  return m_spValue;
+}
+
 SSATmp* TraceBuilder::genDefFP() {
   return gen(DefFP);
 }
@@ -948,6 +962,16 @@ SSATmp* TraceBuilder::genCall(SSATmp* actRec,
   srcs[2] = func;
   std::copy(params, params + numParams, srcs + 3);
   return gen(Call, numParams + 3, srcs);
+}
+
+SSATmp* TraceBuilder::genCallBuiltin(SSATmp* func,
+                                     Type type,
+                                     uint32 numArgs,
+                                     SSATmp** args) {
+  SSATmp* srcs[numArgs + 1];
+  srcs[0] = func;
+  std::copy(args, args + numArgs, srcs + 1);
+  return gen(CallBuiltin, type, numArgs + 1, srcs);
 }
 
 void TraceBuilder::genRetVal(SSATmp* val) {
@@ -1148,6 +1172,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       break;
     }
     case AssertStk:
+    case CastStk:
     case GuardStk: {
       m_spValue = inst->getDst();
       break;

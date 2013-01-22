@@ -113,6 +113,7 @@ enum OpcodeFlag : uint64_t {
 #define DLabel    NaryDest
 #define DVector   HasDest
 #define DPtrToParam HasDest
+#define DBuiltin  HasDest
 
 struct {
   const char* name;
@@ -146,6 +147,7 @@ struct {
 #undef DBox
 #undef DParam
 #undef DLabel
+#undef DBuiltin
 
 /*
  * dispatchExtra translates from runtime values for the Opcode enum

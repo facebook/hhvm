@@ -34,6 +34,19 @@ Type vectorReturn(const IRInstruction* inst) {
   return VectorEffects(inst).valType;
 }
 
+Type builtinReturn(const IRInstruction* inst) {
+  assert(inst->getOpcode() == CallBuiltin);
+
+  Type t = inst->getTypeParam();
+  if (t.isSimpleType() || t.equals(Type::Cell)) {
+    return t;
+  }
+  if (t.isReferenceType() || t.equals(Type::BoxedCell)) {
+    return (t | Type::Null);
+  }
+  not_reached();
+}
+
 }
 
 Type outputType(const IRInstruction* inst) {
@@ -46,6 +59,7 @@ Type outputType(const IRInstruction* inst) {
 #define DLabel    return Type::None;
 #define DVector   return vectorReturn(inst);
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
+#define DBuiltin  return builtinReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -64,6 +78,7 @@ Type outputType(const IRInstruction* inst) {
 #undef DLabel
 #undef DVector
 #undef ND
+#undef DBuiltin
 
 }
 
@@ -191,6 +206,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLabel
 #define DVector
 #define D(...)
+#define DBuiltin
 #define DUnbox(src) checkDst(src < inst->getNumSrcs(),  \
                              "invalid src num");
 #define DBox(src)   checkDst(src < inst->getNumSrcs(),  \

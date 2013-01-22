@@ -95,6 +95,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     DParam    single dst has type of the instruction's type parameter
  *     DLabel    multiple dests for a DefLabel
  *     DVector   single dst depends on semantics of the vector instruction
+ *     DBuiltin  single dst for CallBuiltin. This can return complex data
+ *               types such as (Type::Str | Type::Null)
  *
  * srcinfo:
  *
@@ -136,6 +138,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 O(GuardType,                    DParam, S(Gen),                          C|E) \
 O(GuardLoc,                         ND, S(StkPtr),                         E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr) C(Int),                  E) \
+O(CastStk,                   D(StkPtr), S(StkPtr) C(Int),           Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
 O(AssertLoc,                        ND, S(StkPtr),                         E) \
@@ -245,6 +248,7 @@ O(DefActRec,                 D(ActRec), S(StkPtr)                             \
 O(FreeActRec,                D(StkPtr), S(StkPtr),                       Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(Call,                      D(StkPtr), SUnk,                 E|Mem|CRc|Refs) \
+O(CallBuiltin,                DBuiltin, SUnk,            E|Mem|Refs|Er|N|PRc) \
 O(NativeImpl,                       ND, C(Func) S(StkPtr),      E|Mem|N|Refs) \
   /* XXX: why does RetCtrl sometimes get PtrToGen */                          \
 O(RetCtrl,                          ND, S(StkPtr,PtrToGen)                    \
@@ -997,6 +1001,37 @@ public:
     }
   }
 
+  // return true if this corresponds to a type that
+  // is passed by value in C++
+  bool isSimpleType() {
+    return subtypeOf(Type::Bool)
+           || subtypeOf(Type::Int)
+           || subtypeOf(Type::Dbl)
+           || subtypeOf(Type::Null);
+  }
+
+  // return true if this corresponds to a type that
+  // is passed by reference in C++
+  bool isReferenceType() {
+    return subtypeOf(Type::Str)
+           || subtypeOf(Type::Arr)
+           || subtypeOf(Type::Obj);
+  }
+
+  // In tx64, KindOfUnknown is used to represent Variants (Type::Cell).
+  // fromDataType() maps this to Type::None, which must be mapped
+  // back to Type::Cell. This is not the best place to handle this.
+  // See task #208726.
+  static Type fromDataTypeWithCell(DataType type) {
+    Type t = fromDataType(type);
+    return t.equals(Type::None) ? Type::Cell : t;
+  }
+
+  static Type fromDataTypeWithRef(DataType outerType, bool isRef) {
+    Type t = fromDataTypeWithCell(outerType);
+    return isRef ? t.box() : t;
+  }
+
   static Type fromRuntimeType(const Transl::RuntimeType& rtt) {
     return fromDataType(rtt.outerType(), rtt.innerType());
   }
@@ -1106,7 +1141,7 @@ class RawMemSlot {
     return m;
   }
   static RawMemSlot& GetMisBaseStrOff() {
-    static RawMemSlot m(MISOFF(baseStrOff), sz::byte, Type::Bool, true);
+    static RawMemSlot m(HHIR_MISOFF(baseStrOff), sz::byte, Type::Bool);
     return m;
   }
 

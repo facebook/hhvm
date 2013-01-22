@@ -340,7 +340,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
     assert(opc == DefSP || opc == Call || opc == SpillStack ||
            opc == RetAdjustStack ||
            opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
-           opc == GuardStk || opc == AssertStk ||
+           opc == GuardStk || opc == AssertStk || opc == CastStk ||
            opc == SetProp || opc == SetElem);
     allocRegToTmp(&m_regs[int(rVmSp)], &dsts[0], 0);
     return;

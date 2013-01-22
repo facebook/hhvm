@@ -3007,6 +3007,97 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgCastStk(IRInstruction *inst) {
+  Type type      = inst->getTypeParam();
+  SSATmp* sp     = inst->getSrc(0);
+  SSATmp* off    = inst->getSrc(1);
+  uint32 offset  = off->getValInt();
+  PhysReg spReg  = sp->getReg();
+
+  ArgGroup args;
+  args.addr(spReg, cellsToBytes(offset));
+
+  TCA tvCastHelper;
+  if (type.subtypeOf(Type::Bool)) {
+    tvCastHelper = (TCA)tvCastToBooleanInPlace;
+  } else if (type.subtypeOf(Type::Int)) {
+    // if casting to integer, pass 10 as the base for the conversion
+    args.imm(10);
+    tvCastHelper = (TCA)tvCastToInt64InPlace;
+  } else if (type.subtypeOf(Type::Dbl)) {
+    tvCastHelper = (TCA)tvCastToDoubleInPlace;
+  } else if (type.subtypeOf(Type::Arr)) {
+    tvCastHelper = (TCA)tvCastToArrayInPlace;
+  } else if (type.subtypeOf(Type::Str)) {
+    tvCastHelper = (TCA)tvCastToStringInPlace;
+  } else if (type.subtypeOf(Type::Obj)) {
+    tvCastHelper = (TCA)tvCastToObjectInPlace;
+  } else {
+    not_reached();
+  }
+  cgCallHelper(m_as, tvCastHelper, nullptr,
+               kSyncPoint, args);
+}
+
+void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
+  SSATmp* f             = inst->getSrc(0);
+  auto args             = inst->getSrcs().subpiece(1);
+  int32 numArgs         = args.size();
+  SSATmp* dst           = inst->getDst();
+  auto dstReg           = dst->getReg(0);
+  auto dstType          = dst->getReg(1);
+  Type returnType       = inst->getTypeParam();
+
+  const Func* func = f->getValFunc();
+
+  PhysReg returnBase = rsp;
+  int returnOffset = HHIR_MISOFF(tvBuiltinReturn);
+
+  // Load args into registers
+  ArgGroup callArgs;
+  callArgs.ssas(inst, 1, numArgs);
+
+  // Call Builtin
+  BuiltinFunction nativeFuncPtr = func->nativeFuncPtr();
+  cgCallHelper(m_as,
+              (TCA)nativeFuncPtr,
+              dstReg,
+              kSyncPoint,
+              callArgs);
+
+  if (dstReg == InvalidReg) {
+    return;
+  }
+  // load return value from builtin
+  // for primitive return types (int, bool, etc), the return value
+  // is already in dstReg (the builtin call returns in rax). For return
+  // by reference (String, Object, Array, etc), the builtin writes the
+  // return value into MInstrState::tvBuiltinReturn TV, from where it
+  // has to be tested and copied.
+  if (returnType.isSimpleType()) {
+    return;
+  }
+  if (returnType.isReferenceType()) {
+    m_as.   loadq (returnBase[returnOffset], dstReg);
+    m_as.   movl  (returnType.toDataType(), r32(dstType));
+    m_as.   movq  (KindOfNull, rScratch);
+    m_as.   testq (dstReg, dstReg);
+    m_as.   cmov_reg64_reg64 (CC_Z, rScratch, dstType);
+    return;
+  }
+  if (returnType.subtypeOf(Type::Cell)
+      || returnType.subtypeOf(Type::BoxedCell)) {
+    m_as.   loadl (returnBase[returnOffset + TVOFF(m_type)], r32(dstType));
+    m_as.   loadq (returnBase[returnOffset], dstReg);
+    m_as.   movq  (KindOfNull, rScratch);
+    static_assert(KindOfUninit == 0, "CallBuiltin needs update for KindOfUninit");
+    m_as.   testq  (dstType, dstType);
+    m_as.   cmov_reg64_reg64 (CC_Z, rScratch, dstType);
+    return;
+  }
+  not_reached();
+}
+
 void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   SSATmp* dst             = inst->getDst();
   SSATmp* sp              = inst->getSrc(0);
@@ -3192,12 +3283,10 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
   auto baseReg = inst->getSrc(0)->getReg();
   int64 kind = inst->getSrc(1)->getValInt();
   SSATmp* value = inst->getSrc(2);
-  int64 extraOff = inst->getSrc(3)->getValInt();
 
   RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
-  always_assert(IMPLIES(extraOff != 0, slot.allowExtra()));
   int stSize = slot.getSize();
-  int64 off = slot.getOffset() + extraOff;
+  int64 off = slot.getOffset();
 
   if (value->isConst()) {
     if (stSize == sz::qword) {

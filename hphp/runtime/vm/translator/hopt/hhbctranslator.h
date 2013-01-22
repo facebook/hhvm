@@ -259,6 +259,8 @@ struct HhbcTranslator {
   void emitFCall(uint32_t numParams,
                   Offset returnBcOffset,
                   const Func* callee);
+  void emitFCallBuiltin(uint32 numArgs, uint32 numNonDefault,
+                        int32 funcId);
   void emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId);
   void emitClsCns(int32 cnsNameStrId);
   void emitAKExists();

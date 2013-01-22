@@ -165,11 +165,11 @@ void HhbcTranslator::VectorTranslator::emitMPre() {
     SKTRACE(2, m_ni.source, "%s nLogicalRatchets=%u\n",
             __func__, nLogicalRatchets());
     if (nLogicalRatchets() > 0) {
-      m_tb.genStMem(m_misBase, MISOFF(tvRef), uninit, true);
-      m_tb.genStMem(m_misBase, MISOFF(tvRef2), uninit, true);
+      m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef), uninit, true);
+      m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef2), uninit, true);
     }
-    m_tb.genStRaw(m_misBase, RawMemSlot::MisBaseStrOff, m_tb.genDefConst(false),
-                  kReservedRSPSpillSpace);
+    m_tb.genStRaw(m_misBase, RawMemSlot::MisBaseStrOff,
+                  m_tb.genDefConst(false));
   }
 
   SKTRACE(2, m_ni.source, "%s\n", __func__);
@@ -461,18 +461,18 @@ void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
 
     // Clean up tvRef2 before overwriting it.
     if (ratchetInd() > 0) {
-      m_tb.genDecRefMem(m_misBase, MISOFF(tvRef2), Type::Gen);
+      m_tb.genDecRefMem(m_misBase, HHIR_MISOFF(tvRef2), Type::Gen);
     }
     // Copy tvRef to tvRef2. Use mmx at some point
-    SSATmp* tvRef = m_tb.genLdMem(m_misBase, MISOFF(tvRef), Type::Gen, nullptr);
-    m_tb.genStMem(m_misBase, MISOFF(tvRef2), tvRef, true);
+    SSATmp* tvRef = m_tb.genLdMem(m_misBase, HHIR_MISOFF(tvRef), Type::Gen, nullptr);
+    m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef2), tvRef, true);
 
     // Reset tvRef.
-    m_tb.genStMem(m_misBase, MISOFF(tvRef), m_tb.genDefUninit(), true);
+    m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef), m_tb.genDefUninit(), true);
 
     // Adjust base pointer.
     assert(m_base->getType().isPtr());
-    m_base = m_tb.genLdAddr(m_misBase, MISOFF(tvRef2));
+    m_base = m_tb.genLdAddr(m_misBase, HHIR_MISOFF(tvRef2));
   }
 }
 
@@ -825,11 +825,11 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   // Clean up tvRef(2)
   if (nLogicalRatchets() > 1) {
     SKTRACE(2, m_ni.source, "%s decref tvRef2\n", __func__);
-    m_tb.genDecRefMem(m_misBase, MISOFF(tvRef2), Type::Gen);
+    m_tb.genDecRefMem(m_misBase, HHIR_MISOFF(tvRef2), Type::Gen);
   }
   if (nLogicalRatchets() > 0) {
     SKTRACE(2, m_ni.source, "%s decref tvRef\n", __func__);
-    m_tb.genDecRefMem(m_misBase, MISOFF(tvRef), Type::Gen);
+    m_tb.genDecRefMem(m_misBase, HHIR_MISOFF(tvRef), Type::Gen);
   }
 }
 

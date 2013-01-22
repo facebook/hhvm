@@ -83,8 +83,7 @@ public:
   SSATmp* genLdCtxCls();
   SSATmp* genLdRetAddr();
   SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type type);
-  void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value,
-                   int64 extraOff);
+  void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
 
   SSATmp* genLdLoc(uint32 id);
   SSATmp* genLdLocAddr(uint32 id);
@@ -174,6 +173,7 @@ public:
     genCheckInit(src, getFirstBlock(target));
   }
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
+  SSATmp* genCastStk(uint32_t id, Type type);
   SSATmp* genConvToBool(SSATmp* src);
   SSATmp* genConvToInt(SSATmp* src);
   SSATmp* genConvToDbl(SSATmp* src);
@@ -192,6 +192,8 @@ public:
                   SSATmp* func,
                   uint32 numParams,
                   SSATmp** params);
+  SSATmp* genCallBuiltin(SSATmp* func, Type type,
+                         uint32 numArgs, SSATmp** args);
   void    genReleaseVVOrExit(Trace* exit);
   SSATmp* genGenericRetDecRefs(SSATmp* retVal, int numLocals);
   void    genRetVal(SSATmp* val);

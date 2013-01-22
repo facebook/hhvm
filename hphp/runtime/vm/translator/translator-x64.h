@@ -488,6 +488,7 @@ MINSTRS
 #undef MII
 
 #define INSTRS \
+  CASE(BPassC) \
   CASE(PopC) \
   CASE(PopV) \
   CASE(PopR) \

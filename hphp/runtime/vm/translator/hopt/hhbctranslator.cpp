@@ -24,7 +24,6 @@
 #include "runtime/vm/runtime.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 
-using namespace HPHP::VM::Transl;
 
 namespace HPHP {
 namespace VM {
@@ -709,7 +708,7 @@ void HhbcTranslator::emitPackCont(int64 labelId) {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   m_tb->genSetPropCell(cont, CONTOFF(m_value), popC());
   m_tb->genStRaw(cont, RawMemSlot::ContLabel,
-                 m_tb->genDefConst(labelId), 0);
+                 m_tb->genDefConst(labelId));
 }
 
 void HhbcTranslator::emitContReceive() {
@@ -728,7 +727,7 @@ void HhbcTranslator::emitContRaised() {
 
 void HhbcTranslator::emitContDone() {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
-  m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst(true), 0);
+  m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst(true));
   m_tb->genSetPropCell(cont, CONTOFF(m_value), m_tb->genDefInitNull());
 }
 
@@ -749,7 +748,7 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   m_tb->genSetPropCell(cont, CONTOFF(m_received), value);
   if (raise) {
     m_tb->genStRaw(cont, RawMemSlot::ContShouldThrow,
-                   m_tb->genDefConst(true), 0);
+                   m_tb->genDefConst(true));
   }
 }
 
@@ -778,8 +777,7 @@ void HhbcTranslator::emitContCurrent() {
 
 void HhbcTranslator::emitContStopped() {
   SSATmp* cont = m_tb->genLdThis(nullptr);
-  m_tb->genStRaw(cont, RawMemSlot::ContRunning, m_tb->genDefConst(false),
-                 0);
+  m_tb->genStRaw(cont, RawMemSlot::ContRunning, m_tb->genDefConst(false));
 }
 
 void HhbcTranslator::emitContHandle() {
@@ -1512,6 +1510,94 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
                 func,
                 numParams,
                 params);
+}
+
+// This is used to check that return types of builtins are not simple
+// types. This is different from IS_REFCOUNTED_TYPE because builtins
+// can return Variants, and we use KindOfUnknown to denote these
+// return types.
+static bool isCppByRef(DataType t) {
+  assert(t != KindOfDouble);
+  return t != KindOfBoolean && t != KindOfInt64 && t != KindOfNull;
+}
+
+void HhbcTranslator::emitFCallBuiltin(uint32 numArgs,
+                                      uint32 numNonDefault, int32 funcId) {
+  const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
+  const StringData* name = nep.first;
+  const Func* callee = Unit::lookupFunc(nep.second, name);
+
+  callee->validate();
+
+  // spill args to stack. We need to spill these for two resons:
+  // 1. some of the arguments may be passed by reference, for which
+  //    case we will generate LdStackAddr() (see below).
+  // 2. type conversions of the arguments (using tvCast* helpers)
+  //    may throw an exception, so we need to have the VM stack
+  //    in a clean state at that point.
+  spillStack();
+  // Convert types if needed
+  for (int i = 0; i < numNonDefault; i++) {
+    const Func::ParamInfo& pi = callee->params()[i];
+    switch (pi.builtinType()) {
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfString:
+        m_tb->genCastStk(numArgs - i - 1,
+                         Type::fromDataType(pi.builtinType(), KindOfInvalid));
+        break;
+      case KindOfDouble: not_reached();
+      case KindOfUnknown: break;
+      default:            not_reached();
+    }
+  }
+
+
+  // pass arguments for call
+  SSATmp* args[numArgs + 1];
+
+  int isRefReturn = 0;
+  // if the function returns by reference, the first parameter
+  // has to be the fixed C++ location for the return value
+  if (isCppByRef(callee->returnType())) {
+    isRefReturn = 1;
+    SSATmp* misBase = m_tb->gen(DefMIStateBase);
+    SSATmp* returnAddr = m_tb->genLdAddr(misBase, HHIR_MISOFF(tvBuiltinReturn));
+    args[0] = returnAddr;
+  }
+
+  for (int i = numArgs - 1; i >= 0; i--) {
+    const Func::ParamInfo& pi = callee->params()[i];
+    switch (pi.builtinType()) {
+      case KindOfBoolean:
+      case KindOfInt64:
+        args[isRefReturn + i] = top(Type::fromDataType(pi.builtinType(), KindOfInvalid),
+                                    numArgs - i - 1);
+        break;
+      case KindOfDouble: assert(false);
+      default:
+        args[isRefReturn + i] = loadStackAddr(numArgs - i - 1);
+        break;
+    }
+  }
+  // generate call and set return type
+  SSATmp* func = m_tb->genDefConst<const Func*>(callee);
+  Type type = Type::fromDataTypeWithRef(callee->returnType(),
+                       (callee->attrs() & ClassInfo::IsReference));
+  SSATmp* ret = m_tb->genCallBuiltin(func, type, numArgs + isRefReturn, args);
+
+  // decref and free args
+  for (int i = 0; i < numArgs; i++) {
+    SSATmp* arg = popR();
+    if (i >= numArgs - numNonDefault) {
+      m_tb->genDecRef(arg);
+    }
+  }
+
+  // push return value
+  push(ret);
 }
 
 void HhbcTranslator::emitRet(Type type, bool freeInline) {

@@ -1273,9 +1273,19 @@ TranslatorX64::irTranslateFPassR(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateBPassC(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  // BPassC desn't really do anything. No-op.
+}
+
+void
 TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
                               const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(FCallBuiltin);
+  int numArgs = i.imm[0].u_IVA;
+  int numNonDefault  = i.imm[1].u_IVA;
+  Id funcId = i.imm[2].u_SA;
+
+  HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId);
 }
 
 void

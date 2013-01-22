@@ -21,13 +21,9 @@
 #include "runtime/base/types.h"
 #include "runtime/vm/stats.h"
 #include "runtime/vm/translator/translator.h"
+#include "runtime/vm/member_operations.h"
 
 namespace HPHP { namespace VM { namespace JIT {
-
-/* In hhir-translated tracelets, the MInstrState is stored right above
- * the reserved spill space so we add an extra offset.  */
-#undef MISOFF
-#define MISOFF(nm) (offsetof(Transl::MInstrState, nm) + kReservedRSPSpillSpace)
 
 #define CTX() m_tb.genDefConst(arGetContextClass(curFrame()))
 

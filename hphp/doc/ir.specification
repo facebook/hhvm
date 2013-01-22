@@ -323,6 +323,11 @@ D:StkPtr = AssertStk<T> S0:StkPtr S1:ConstInt
   This is similar to a GuardStk except that it does not imply a
   runtime check and cannot cause control flow.
 
+D:StkPtr = CastStk<T> S0:StkPtr S1:ConstInt
+
+  Returns a new StkPtr that represents the same stack as S0, but with
+  the slot at index S1 (in cells) converted to type T.
+
 CheckInit S0:Gen -> L
 
   If S0's type is Uninit, branch to label L.
@@ -732,6 +737,14 @@ D:StkPtr = Call S0:ActRec S1:ConstInt S2:Func S3...
 NativeImpl = S0:ConstFunc S1:StkPtr
 
   Execute a call to the native builtin specified by the func in S0.
+
+D:T = CallBuiltin<T> S0:FuncPtr S1:ConstInt S2...SN
+
+  Call builtin function. Operands:
+
+    S0: callee Func
+    S1: number of arguments to builtin
+    S2..SN: arguments to builtin function
 
 D:RetAddr = LdRetAddr S0:StkPtr
 

@@ -5,6 +5,8 @@ function zero_default($f = "x\0x") {}
 function zero12_default($f = "x\00012x") {}
 function misc_default($f = "blah\n'\"\$") {}
 function float_default($f = 1.234) {}
+function float_default2($f = 1.0) {}
+function float_defaulte($f = 2e100) {}
 class Foo { const BLAH = 'blah'; }
 function clscns_default($f = Foo::BLAH) {}
 function id($x) { return $x; }
@@ -27,5 +29,7 @@ function main() {
   do_function('zero12_default');
   do_function('misc_default');
   do_function('float_default');
+  do_function('float_default2');
+  do_function('float_defaulte');
 }
 main();

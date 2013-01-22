@@ -213,6 +213,11 @@ void VariableSerializer::write(double v) {
       bool isExport = m_type == VarExport || m_type == PHPOutput;
       vspprintf(&buf, 0, isExport ? "%.*H" : "%.*G", 14, v);
       m_buf->append(buf);
+      // In PHPOutput mode, we always want doubles to parse as
+      // doubles, so make sure there's a decimal point.
+      if (m_type == PHPOutput && strpbrk(buf, ".E") == nullptr) {
+        m_buf->append(".0");
+      }
       free(buf);
     }
     break;

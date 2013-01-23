@@ -568,11 +568,19 @@ bool Hdf::exists(int name) const {
 }
 
 bool Hdf::exists(const char *name) const {
-  return Hdf(this, name).exists();
+  HDF *hdf = m_hdf;
+  if (m_rawp) {
+    string fullpath = getFullPath();
+    hdf = m_rawp->m_hdf;
+    if (!fullpath.empty()) {
+      hdf = hdf_get_obj(hdf, fullpath.c_str());
+    }
+  }
+  return hdf && hdf_get_obj(hdf, name);
 }
 
 bool Hdf::exists(const std::string &name) const {
-  return name.c_str();
+  return exists(name.c_str());
 }
 
 void Hdf::remove(int name) const {

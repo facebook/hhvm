@@ -1491,7 +1491,6 @@ void HhbcTranslator::assertTypeStack(uint32 stackIndex, Type::Tag type) {
 void HhbcTranslator::emitLoadDeps() {
   for (auto guard : m_typeGuards) {
     uint32   index = guard.getIndex();
-    Type::Tag type = guard.getType();
 
     if (guard.getKind() == TypeGuard::Local) {
       m_tb->genLdLoc(index);

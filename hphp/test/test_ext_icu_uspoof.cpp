@@ -77,10 +77,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_areconfusable() {
 
   VS(checker->t_areconfusable("facebook", "\U0001d41faceboo\u1d0b"), true);
 
-  // TODO: ICU bug 8341: \u017f should be treated as a spoof of "f".  Once
-  // that bug is fixed, enable this test.
-  //
-  // VS(checker->t_areconfusable("facebook", "\u017facebook"), true);
+  VS(checker->t_areconfusable("facebook", "\u017facebook"), true);
 
   VS(checker->t_areconfusable("paypal", "payp\u0430l"), true);
   VS(checker->t_areconfusable(

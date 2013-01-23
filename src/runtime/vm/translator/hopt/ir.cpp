@@ -781,15 +781,9 @@ void Trace::print() const {
 }
 
 void resetIdsAux(Trace* trace) {
-  IRInstruction::Iterator it;
-  IRInstruction::List instructionList = trace->getInstructionList();
-  for (it = instructionList.begin();
-       it != instructionList.end();
-       it++) {
-    IRInstruction* inst = *it;
+  for (IRInstruction* inst : trace->getInstructionList()) {
     inst->setId(0);
-    SSATmp* dst = inst->getDst();
-    if (dst) {
+    for (SSATmp* dst : inst->getDsts()) {
       dst->setLastUseId(0);
       dst->setUseCount(0);
       dst->setSpillSlot(-1);
@@ -803,11 +797,8 @@ void resetIdsAux(Trace* trace) {
  */
 void resetIds(Trace* trace) {
   resetIdsAux(trace);
-  Trace::List& exitTraces = trace->getExitTraces();
-  for (Trace::Iterator it = exitTraces.begin();
-       it != exitTraces.end();
-       it++) {
-    resetIdsAux(*it);
+  for (Trace* exit : trace->getExitTraces()) {
+    resetIdsAux(exit);
   }
 }
 

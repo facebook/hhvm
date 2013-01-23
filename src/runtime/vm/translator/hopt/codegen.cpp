@@ -503,7 +503,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  ArgGroup& args) {
   assert(int(args.size()) <= kNumRegisterArgs);
 
-  // We don't want to include the dst register defined by this
+  // We don't want to include the destination registers defined by this
   // instruction when saving the caller-saved registers.
   auto const regsToSave = (m_curInst->getLiveOutRegs() & kCallerSaved)
       .remove(dstReg0).remove(dstReg1);

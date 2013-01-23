@@ -559,6 +559,17 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     }
   }
 
+  if (overwrites) {
+    // Do these first, mainly so we can override Tier.*.machine,
+    // Tier.*.tier and Tier.*.cpu on the command line. But it can
+    // also make sense to override fields within a Tier (
+    // eg if you are using the same command line across a lot
+    // of different machines)
+    for (unsigned int i = 0; i < overwrites->size(); i++) {
+      config.fromString(overwrites->at(i).c_str());
+    }
+  }
+
   // Tier overwrites
   {
     Hdf tiers = config["Tiers"];
@@ -574,8 +585,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     }
   }
 
-  // More overwrites
   if (overwrites) {
+    // Do the command line overrides again, so we override
+    // any tier overwrites
     for (unsigned int i = 0; i < overwrites->size(); i++) {
       config.fromString(overwrites->at(i).c_str());
     }

@@ -339,7 +339,7 @@ void IRInstruction::print(std::ostream& ostream) const {
   printDst(ostream);
 
   bool isStMem = m_op == StMem || m_op == StMemNT || m_op == StRaw;
-  bool isLdMem = m_op == LdMemNR || m_op == LdRaw;
+  bool isLdMem = m_op == LdRaw;
   if (isStMem || m_op == StLoc || isLdMem) {
     ostream << opcodeName(m_op) << " [";
     printSrc(ostream, 0);

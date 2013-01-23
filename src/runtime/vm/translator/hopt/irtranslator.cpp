@@ -754,6 +754,8 @@ TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
 
   LocationCode locCode = i.immVec.locationCode();
   if (propOffset != -1 && (locCode == LC || locCode == LH)) {
+    // XXX Get rid of passing type because it's subsumed by
+    // irPassPredictedAndInferredTypes
     HHIR_EMIT(CGetProp, locCode, propOffset, propLoc.isStack(),
               getInferredOrPredictedType(i), isInferredType(i));
   } else {

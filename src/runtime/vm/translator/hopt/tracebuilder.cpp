@@ -99,7 +99,7 @@ SSATmp* TraceBuilder::genLdProp(SSATmp* obj,
   assert(obj->getType() == Type::Obj);
   assert(prop->getType() == Type::Int);
   assert(prop->isConst());
-  return gen(LdPropNR, type, getLabel(exit), obj, prop);
+  return gen(LdProp, type, getLabel(exit), obj, prop);
 }
 
 void TraceBuilder::genStProp(SSATmp* obj,
@@ -133,22 +133,15 @@ void TraceBuilder::genSetPropCell(SSATmp* base, int64 offset, SSATmp* value) {
 SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
                                Type::Tag type,
                                Trace* target) {
-  return genLdMem(addr, 0, type, target);
-}
-
-SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
-                               int64 offset,
-                               Type::Tag type,
-                               Trace* target) {
   assert(addr->getType() == Type::PtrToCell ||
          addr->getType() == Type::PtrToGen);
-  return gen(LdMemNR, type, getLabel(target), addr, genDefConst(offset));
+  return gen(LdMem, type, getLabel(target), addr);
 }
 
 SSATmp* TraceBuilder::genLdRef(SSATmp* ref, Type::Tag type, Trace* exit) {
   assert(Type::isUnboxed(type));
   assert(Type::isBoxed(ref->getType()));
-  return gen(LdRefNR, type, getLabel(exit), ref);
+  return gen(LdRef, type, getLabel(exit), ref);
 }
 
 SSATmp* TraceBuilder::genUnboxPtr(SSATmp* ptr) {
@@ -534,17 +527,6 @@ Trace* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
   return target;
 }
 
-Trace* TraceBuilder::genCheckUninit(SSATmp* src, Trace* target) {
-  assert(target);
-  Type::Tag type = src->getType();
-  // TODO: Add this to simplifier
-  if (type == Type::Cell || type == Type::Gen) {
-    gen(CheckUninit, getLabel(target), src);
-    return target;
-  }
-  return NULL;
-}
-
 Trace* TraceBuilder::genExitWhenSurprised(Trace* targetTrace) {
   gen(ExitWhenSurprised, getLabel(targetTrace));
   return targetTrace;
@@ -598,10 +580,60 @@ void TraceBuilder::genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace) {
                   genDefConst<int64>(id));
 }
 
+/*
+ * Looks for whether the value in tmp was defined by a load, and if
+ * so, changes that load into a load that guards on the given
+ * type. Returns true if it succeeds.
+ */
+static bool hoistGuardToLoad(SSATmp* tmp, Type::Tag type) {
+  IRInstruction* inst = tmp->getInstruction();
+  switch (inst->getOpcode()) {
+    case Mov:
+    case IncRef:
+    {
+      // if inst is an incref or move, then chase down its src
+      if (hoistGuardToLoad(inst->getSrc(0), type)) {
+        // guard was successfully attached to a load instruction
+        // refine the type of this mov/incref
+        // Note: We can also further simplify incref's here if type is not
+        // ref-counted
+        tmp->setType(type);
+        inst->setTypeParam(type);
+        return true;
+      }
+      break;
+    }
+    case LdLoc:
+    case LdStack:
+    case LdMem:
+    case LdProp:
+    case LdRef:
+    case LdClsCns:
+    {
+      if (!inst->getLabel()) {
+        // Not a control flow instruction, so can't give it check semantics
+        break;
+      }
+      Type::Tag instType = tmp->getType();
+      if (instType == Type::Gen ||
+          (instType == Type::Cell && !Type::isBoxed(type))) {
+        tmp->setType(type);
+        inst->setTypeParam(type);
+        return true;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+  return false;
+}
+
 SSATmp* TraceBuilder::genGuardType(SSATmp* src,
                                    Type::Tag type,
                                    Trace* target) {
   assert(target);
+  // TODO: Move this logic to simplifier
   Type::Tag srcType = src->getType();
   if (srcType == type || Type::isMoreRefined(srcType, type)) {
     /*
@@ -610,7 +642,13 @@ SSATmp* TraceBuilder::genGuardType(SSATmp* src,
      */
     return src;
   }
-  if (!Type::isMoreRefined(type, srcType)) {
+  if (Type::isMoreRefined(type, srcType)) {
+    if (hoistGuardToLoad(src, type)) {
+      src->setType(type);
+      src->getInstruction()->setTypeParam(type);
+      return src;
+    }
+  } else {
     /*
      * incompatible types!  We should just generate a jump here and
      * return null.
@@ -621,8 +659,6 @@ SSATmp* TraceBuilder::genGuardType(SSATmp* src,
      */
     assert(0);
   }
-
-  // Type is more refined that src's type, so we need a guard.
   return gen(GuardType, type, getLabel(target), src);
 }
 
@@ -660,12 +696,21 @@ SSATmp* TraceBuilder::genLdCls(SSATmp* className) {
   return gen(LdCls, className);
 }
 
-SSATmp* TraceBuilder::genLdClsCns(SSATmp* cnsName, SSATmp* cls) {
-  return gen(LdClsCns, Type::Cell, cnsName, cls);
+SSATmp* TraceBuilder::genLdClsCns(SSATmp* cnsName, SSATmp* cls, Trace* exit) {
+  return gen(LdClsCns, Type::Cell, getLabel(exit), cnsName, cls);
 }
 
-void TraceBuilder::genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace) {
-  gen(CheckClsCnsDefined, getLabel(exitTrace), cns);
+Trace* TraceBuilder::genCheckInit(SSATmp* src, Trace* target) {
+  assert(target);
+  Type::Tag type = src->getType();
+  // TODO: This optimization is redundant wrt simplifier. Remove it once we can
+  // simplifier as a separate pass.
+  if (Type::isStaticallyKnown(type) || type == Type::UncountedInit) {
+    // Unnecessary CheckInit
+    return NULL;
+  }
+  gen(CheckInit, getLabel(target), src);
+  return target;
 }
 
 SSATmp* TraceBuilder::genLdCurFuncPtr() {
@@ -952,7 +997,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   if (doRefCount) {
     assert(exit);
     Type::Tag innerType = Type::getInnerType(trackedType);
-    prevValue = gen(LdRefNR, innerType, getLabel(exit), prevRef);
+    prevValue = gen(LdRef, innerType, getLabel(exit), prevRef);
   }
   // stref [prevRef] = t1
   Opcode opc = genStoreType ? StRef : StRefNT;

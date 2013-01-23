@@ -101,7 +101,6 @@ public:
                    bool genStoreType,
                    Trace* exit);
   SSATmp* genLdMem(SSATmp* addr, Type::Tag type, Trace* target);
-  SSATmp* genLdMem(SSATmp* addr, int64 offset, Type::Tag type, Trace* target);
   void    genStMem(SSATmp* addr, SSATmp* src, bool genStoreType);
   void    genStMem(SSATmp* addr, int64 offset, SSATmp* src, bool stType);
   SSATmp* genLdProp(SSATmp* obj, SSATmp* prop, Type::Tag type, Trace* exit);
@@ -118,7 +117,7 @@ public:
   SSATmp* genLdHome(uint32 id);
   SSATmp* genLdCachedClass(SSATmp* classNameOpnd);
   SSATmp* genLdCls(SSATmp* classNameOpnd);
-  SSATmp* genLdClsCns(SSATmp* cnsName, SSATmp* cls);
+  SSATmp* genLdClsCns(SSATmp* cnsName, SSATmp* cls, Trace* exitTrace);
   void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
   SSATmp* genLdCurFuncPtr();
   SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
@@ -162,7 +161,7 @@ public:
   Trace*  genJmpCond(SSATmp* src, Trace* target, bool negate);
   Trace*  genExitWhenSurprised(Trace* target);
   Trace*  genExitOnVarEnv(Trace* target);
-  Trace*  genCheckUninit(SSATmp* src, Trace* target);
+  Trace*  genCheckInit(SSATmp* src, Trace* target);
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genConvToBool(SSATmp* src);
   SSATmp* genConvToInt(SSATmp* src);

@@ -96,11 +96,12 @@ private:
               LabelInstruction* label,
               IRInstruction* inst = NULL);
 
-  void cgGuardType(Type::Tag         type,
-                   PhysReg           baseReg,
-                   int64_t           offset,
-                   LabelInstruction* label,
-                   IRInstruction*    instr);
+  template<class OpndType>
+  void emitGuardType(Type::Tag         type,
+                     OpndType          src,
+                     LabelInstruction* label,
+                     IRInstruction*    instr);
+
   void cgGuardTypeCell(Type::Tag         type,
                        PhysReg           baseReg,
                        int64_t           offset,
@@ -185,7 +186,6 @@ private:
                        int64_t spOffset,
                        SSATmp* defAR);
 
-  void cgCheckUninit(SSATmp* src, LabelInstruction* label);
   void cgIterNextCommon(IRInstruction* inst, bool isNextK);
   void cgIterInitCommon(IRInstruction* inst, bool isInitK);
   Address emitFwdJcc(ConditionCode cc, LabelInstruction* label);

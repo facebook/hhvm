@@ -84,6 +84,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  * go through there.
  */
 enum OpcodeFlag : uint64_t {
+  NoFlags          = 0x0000,
   HasDest          = 0x0001,
   CanCSE           = 0x0002,
   Essential        = 0x0004,
@@ -165,7 +166,7 @@ enum OpcodeFlag : uint64_t {
   OPC(ExitWhenSurprised, (Essential))                                   \
   OPC(ExitOnVarEnv,      (Essential))                                   \
   OPC(ReleaseVVOrExit,   (Essential))                                   \
-  OPC(CheckUninit,       (Essential))                                   \
+  OPC(CheckInit,         (NoFlags))                                     \
                                                                         \
   OPC(Unbox,             (HasDest|ProducesRC))                          \
   OPC(Box,               (HasDest|Essential|MemEffects|                 \
@@ -178,9 +179,9 @@ enum OpcodeFlag : uint64_t {
   OPC(LdLoc,             (HasDest))                                     \
   OPC(LdStackAddr,       (HasDest|CanCSE))                              \
   OPC(LdLocAddr,         (HasDest|CanCSE))                              \
-  OPC(LdMemNR,           (HasDest))                                     \
-  OPC(LdPropNR,          (HasDest))                                     \
-  OPC(LdRefNR,           (HasDest))                                     \
+  OPC(LdMem,             (HasDest))                                     \
+  OPC(LdProp,            (HasDest))                                     \
+  OPC(LdRef,             (HasDest))                                     \
   OPC(LdThis,            (HasDest|CanCSE|Rematerializable))             \
   OPC(LdRetAddr,         (HasDest))                                     \
   OPC(LdHome,            (HasDest|CanCSE))                              \
@@ -189,7 +190,6 @@ enum OpcodeFlag : uint64_t {
   OPC(LdCls,             (HasDest|CanCSE|MayModifyRefs|                 \
                           Rematerializable|MayRaiseError))              \
   OPC(LdClsCns,          (HasDest|CanCSE))                              \
-  OPC(CheckClsCnsDefined,(Essential|MayModifyRefs|MayRaiseError))       \
   OPC(LdClsMethodCache,  (HasDest|CanCSE|MayRaiseError))                \
   OPC(LdClsMethod,       (HasDest|CanCSE))                              \
   /* XXX TODO Create version of LdClsPropAddr that doesn't check */     \
@@ -465,7 +465,7 @@ public:
   // returns true if definitely not uninitialized
   static bool isInit(Tag t) {
     return ((t != Uninit && isStaticallyKnown(t)) ||
-            isBoxed(t));
+            t == UncountedInit);
   }
 
   static bool mayBeUninit(Tag t) {

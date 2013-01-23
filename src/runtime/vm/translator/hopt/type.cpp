@@ -136,10 +136,10 @@ Type::Tag outputType(const IRInstruction* inst) {
   case Conv:
   case LdClsCns:
   case LdLoc:
-  case LdMemNR:
-  case LdPropNR:
+  case LdMem:
+  case LdProp:
   case LdRaw:
-  case LdRefNR:
+  case LdRef:
   case LdStack:
   case DefConst:
   case LdConst:

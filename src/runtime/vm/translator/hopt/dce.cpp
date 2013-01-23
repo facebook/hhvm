@@ -49,8 +49,8 @@ bool isUnguardedLoad(IRInstruction* inst) {
   Type::Tag type = dst->getType();
   return (opc == LdStack && (type == Type::Gen || type == Type::Cell))
           || (opc == LdLoc && type == Type::Gen)
-          || (opc == LdRefNR && type == Type::Cell)
-          || (opc == LdMemNR && type == Type::Cell &&
+          || (opc == LdRef && type == Type::Cell)
+          || (opc == LdMem && type == Type::Cell &&
               inst->getSrc(0)->getType() == Type::PtrToCell);
 }
 

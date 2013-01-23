@@ -290,7 +290,7 @@ D:StkPtr = AssertStk<T> S0:StkPtr S1:ConstInt
   This is similar to a GuardStk except that it does not imply a
   runtime check and cannot cause control flow.
 
-CheckUninit S0:T L:Label
+CheckInit S0:T L:Label
 
   If S0's type T is Uninit, branch to label L.
 
@@ -383,6 +383,22 @@ UnboxPtr
 
 7. Loads
 
+Some of the load instructions have an optional label parameter that
+make the load also perform a runtime type check. A load that has a
+label parameter present checks that the value it loads has the type T,
+where T is load instruction's type parameter, and branches to its
+label if the type check fails.
+
+LdLoc and LdStack have corresponding GuardLoc and GuardStk
+instructions that allow the compiler to decouple type checks from the
+load operation. The type guards for locals and stacks are generated
+eagerly at the start of a tracelet, while other guards (typically
+generated due to type prediction) are generated at the point where the
+guarded value is loaded. Allowing the checks for locals and stack to
+be decoupled gives the compiler the flexibility to avoid partially
+dead loads of local and stack values and to avoid unnecessarily long
+live ranges due to eagerly loaded values at the start of the tracelet.
+
 D:T = LdStack<T> S0:StkPtr S1:ConstInt
 
   Loads from S0 at index S1 (in cells), and puts the value in D as
@@ -394,13 +410,27 @@ D:T = LdLoc<T> S0:Home
 
 LdStackAddr
 LdLocAddr
-LdMemNR
 
-D:T = LdPropNR<T> S0:Obj S1:Int L:Label
+D:T = LdMem<T> S0:[Gen*|Cell*] [L:Label]
 
-  TODO
+  Loads from S0 and puts the value in D. If the optional label L is
+  specified and the loaded value's type does not match T, this
+  instruction does not load into D and transfers control to L.
 
-LdRefNR
+D:T = LdProp<T> S0:Obj S1:Int [L:Label]
+
+  Loads a property from the object referenced by S0 at the offset
+  given by S1 and puts the value in D. If the optional label L is
+  specified and the loaded value's type does not match T, this
+  instruction does not load into D and transfers control to L.
+
+D:T = LdRef<T> S0:T& [L:Label]
+
+  Loads the value held in the box referenced by S0 and puts the value
+  in D. If the optional label L is specified and the loaded value's
+  type does not match T, this instruction does not load into D and
+  transfers control to L.
+
 LdThis
 
 D:Home = LdHome S0:StkPtr S1:ConstInt
@@ -414,20 +444,16 @@ D:ConstT = DefConst<T>
 
 LdCls
 
-D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr
+D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [L:Label]
 
-  Loads the class constant named S0 from a class named S1, via target
-  cache.  The result may be uninitialized if the class is not defined.
-  This instruction should generally be followed by CheckClsCnsDefined,
-  unless we know the class is already loaded.
-
+  Loads the class constant named S0 from a class named S1 via the
+  target cache. This instruction should generally be followed by
+  CheckInit, unless we know the class is already loaded.  If the
+  optional label L is specified and the loaded value's type does not
+  match T, this instruction does not load into D and transfers control
+  to L. The result may be uninitialized if the class is not defined.
   Note that no decref is necessary because class constants will always
   be static.
-
-CheckClsCnsDefined S0:Cell L:Label
-
-  Checks that the result of a LdClsCns is defined, and if not jumps to
-  the exit trace label L.
 
 LdClsMethodCache
 LdClsMethod

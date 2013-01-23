@@ -69,10 +69,18 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
       // At this point, we have no business refining the type of any
       // instructions other than the following, which all control
       // their destination type via a type parameter.
+      //
+      // FIXME: I think most of these shouldn't be possible still
+      // (except LdStack?).
+      //
+      // XXX These are possible once we remove the inferred/predicted
+      // type from emitCGetProp etc in HhbcTranslator. We need to
+      // delete label on these instructions if this is due to an
+      // assertType and also handled LdClsCns.
       // TODO(#2035446): fix this for LdClsCns
-      assert(opc == LdLoc   || opc == LdStack  ||
-             opc == LdMemNR || opc == LdPropNR ||
-             opc == LdRefNR);
+      assert(opc == LdLoc || opc == LdStack  ||
+             opc == LdMem || opc == LdProp ||
+             opc == LdRef);
       inst->setTypeParam(type);
       tmp->setType(type);
       assert(outputType(inst) == type);
@@ -913,7 +921,7 @@ void HhbcTranslator::emitCGetProp(LocationCode locCode,
     } else {
       val = m_tb->genLdProp(obj, propOffset, resultType, exitTrace1);
     }
-    m_tb->genCheckUninit(val, exitTrace2);
+    m_tb->genCheckInit(val, exitTrace2);
   }
   pushIncRef(val);
   if (locCode != LH) {
@@ -1086,11 +1094,12 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
   const StringData* clsNameStr = lookupStringId(clsNameStrId);
   TRACE(3, "%u: ClsCnsD %s::%s\n", m_bcOff, clsNameStr->data(),
         cnsNameStr->data());
-  Trace* exitTrace = getExitSlowTrace();
+  Trace* exitTrace1 = getExitSlowTrace();
+  Trace* exitTrace2 = getExitSlowTrace();
   SSATmp* cnsNameTmp = m_tb->genDefConst<const StringData*>(cnsNameStr);
   SSATmp* clsNameTmp = m_tb->genDefConst<const StringData*>(clsNameStr);
-  SSATmp* cns = m_tb->genLdClsCns(cnsNameTmp, clsNameTmp);
-  m_tb->genCheckClsCnsDefined(cns, exitTrace);
+  SSATmp* cns = m_tb->genLdClsCns(cnsNameTmp, clsNameTmp, exitTrace1);
+  m_tb->genCheckInit(cns, exitTrace2);
   push(cns);
 }
 

@@ -57,6 +57,7 @@ private:
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
+  SSATmp* simplifyCheckInit(IRInstruction* inst);
 
 private:
   SSATmp* genDefInt(int64 val);

@@ -104,6 +104,9 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case IsType:
     return simplifyIsType(inst);
 
+  case CheckInit:
+    return simplifyCheckInit(inst);
+
   case JmpGt:
   case JmpGte:
   case JmpLt:
@@ -136,8 +139,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case GuardStk:
   case LdThis:
   case LdLoc:
-  case LdMemNR:
-  case LdRefNR:
+  case LdMem:
+  case LdRef:
   case LdStack:
   case LdPropAddr:
   case LdClsCns:
@@ -944,6 +947,17 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
   if (inst->getSrc(0)->getType() == Type::PtrToCell) {
     return inst->getSrc(0);
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
+  if (inst->getLabel() != NULL) {
+    Type::Tag type = inst->getSrc(0)->getType();
+    if (Type::isInit(type)) {
+      // Unnecessary CheckInit! Mark it unnecessary by deleting its label
+      inst->setLabel(NULL);
+    }
   }
   return nullptr;
 }

@@ -207,7 +207,7 @@ private:
   // returns true if 'opc' is a load that MemMap handles
   static inline bool isLoad(Opcode opc) {
     // doesn't handle LdMem yet
-    return opc == LdLoc || opc == LdRefNR || opc == LdPropNR;
+    return opc == LdLoc || opc == LdRef || opc == LdProp;
   }
 
   // returns true if 'opc' is a store that MemMap handles
@@ -225,7 +225,7 @@ void MemMap::killRefInfo(IRInstruction* save) {
   for (it = unknown.begin(), end = unknown.end(); it != end; ++it) {
     // if 'save' is a load, then don't kill access info of refs that have a
     // different type than 'save'
-    if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMemNR)) {
+    if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem)) {
       auto saveType = save->getDst()->getType();
       if (it->second->value != NULL &&
           it->second->value->getType() != saveType &&
@@ -261,7 +261,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
   // get out the offset only if we know one exists (we might be killing because
   // of a LdMem or StMem), otherwise -1
   Opcode op = save->getOpcode();
-  int offset = (op == LdPropNR || op == StProp || op == StPropNT) ?
+  int offset = (op == LdProp || op == StProp || op == StPropNT) ?
                save->getSrc(1)->getConstValAsInt() : -1;
 
   PropMap::iterator it, end;
@@ -281,7 +281,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
       if (offset == -1 || (copy->offset == offset && copy->access != save)) {
         // if 'save' is a load, then don't kill access info of properties that
         // have a different type than 'save'
-        if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMemNR) &&
+        if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem) &&
             copy->value != NULL &&
             copy->value->getType() != save->getDst()->getType() &&
             Type::isStaticallyKnown(copy->value->getType()) &&
@@ -346,7 +346,7 @@ void MemMap::processInstruction(IRInstruction* inst) {
       }
       break;
     }
-    case LdRefNR: {
+    case LdRef: {
       SSATmp* ref = inst->getSrc(0);
 
       // only need to kill access info of possibly escaped refs
@@ -461,7 +461,7 @@ void MemMap::processInstruction(IRInstruction* inst) {
       killRefInfo(inst);
       break;
     }
-    case LdMemNR:
+    case LdMem:
     case StMem:
     case StMemNT: {
       // might have trampled over the value of a box if it had been stored as
@@ -470,13 +470,13 @@ void MemMap::processInstruction(IRInstruction* inst) {
       killPropInfo(inst);
       break;
     }
-    case LdPropNR:
+    case LdProp:
     case StProp:
     case StPropNT: {
       SSATmp* obj = inst->getSrc(0);
 
       // if we're storing out an unescaped ref, then it has now escaped
-      if (op != LdPropNR && unescaped.count(inst->getSrc(2)) > 0) {
+      if (op != LdProp && unescaped.count(inst->getSrc(2)) > 0) {
         escapeRef(inst->getSrc(2));
       }
 
@@ -603,7 +603,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
     Opcode op = inst->getOpcode();
 
     if (isLoad(op)) {
-      if (op == LdPropNR) {
+      if (op == LdProp) {
         offset = inst->getSrc(1)->getConstValAsInt();
       }
 
@@ -695,7 +695,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
 
   // fix the instruction's arguments and rip off its label if it had one
   inst->setSrc(0, value);
-  if (op == LdPropNR) {
+  if (op == LdProp) {
     inst->setSrc(1, NULL);
     inst->setNumSrcs(1);
   } else {

@@ -428,6 +428,7 @@ public:
   F(bool, HHIRDirectExit,              true) \
   F(bool, HHIRDisableTx64,             false) \
   F(uint64, MaxHHIRTrans,              -1) \
+  F(bool, HHIRDeadCodeElim,            true) \
   F(bool, DumpBytecode,                false) \
   F(uint32, DumpIR,                    0) \
   F(bool, DumpTC,                      false) \

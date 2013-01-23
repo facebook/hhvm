@@ -653,10 +653,16 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
   SSATmp* src   = inst->getSrc(0);
   auto dstReg = dst->getReg();
   auto srcReg = src->getReg();
-  if (dstReg != srcReg) {
-    m_as.mov_reg64_reg64(srcReg, dstReg);
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgMov\n");
+  if (!src->hasReg(0)) {
+    assert(src->isConst());
+    if (src->getType() == Type::Bool) {
+      m_as.movl(src->getConstValAsBool(), r32(dstReg));
+    } else {
+      m_as.movq(src->getConstValAsRawInt(), r64(dstReg));
+    }
+  } else {
+    if (dstReg != srcReg) {
+      m_as.mov_reg64_reg64(srcReg, dstReg);
     }
   }
 }
@@ -3646,11 +3652,7 @@ void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmp_(IRInstruction* inst) {
-  LabelInstruction* label = inst->getLabel();
-
-  // removed when moving trace exit to main trace in eliminateDeadCode
-  assert(false);
-  emitFwdJmp(label);
+  emitFwdJmp(inst->getLabel());
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {

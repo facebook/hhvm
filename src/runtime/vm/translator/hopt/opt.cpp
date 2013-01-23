@@ -52,14 +52,21 @@ static void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
 void optimizeTrace(Trace* trace, IRFactory* irFactory) {
   if (RuntimeOption::EvalHHIRMemOpt) {
     optimizeMemoryAccesses(trace, irFactory);
+    if (RuntimeOption::EvalDumpIR > 5) {
+      std::cout << "----- HHIR after MemElim -----\n";
+      trace->print(std::cout, false);
+      std::cout << "---------------------------\n";
+    }
   }
-  if (RuntimeOption::EvalDumpIR > 5) {
-    std::cout << "----- HHIR before DCE -----\n";
-    trace->print(std::cout, false);
-    std::cout << "---------------------------\n";
+  if (RuntimeOption::EvalHHIRDeadCodeElim) {
+    eliminateDeadCode(trace, irFactory);
+    optimizeJumps(trace, irFactory);
+    if (RuntimeOption::EvalDumpIR > 5) {
+      std::cout << "----- HHIR after DCE -----\n";
+      trace->print(std::cout, false);
+      std::cout << "---------------------------\n";
+    }
   }
-  eliminateDeadCode(trace, irFactory);
-  optimizeJumps(trace, irFactory);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     insertRefCountAsserts(trace, irFactory);
   }

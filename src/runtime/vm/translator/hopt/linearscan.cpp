@@ -204,7 +204,7 @@ LinearScan::LinearScan(IRFactory* irFactory)
 RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
   uint32 instId = inst->getId();
   for (SSATmp* src : inst->getSrcs()) {
-    if (src->getLastUseId() == instId) {
+    if (src->getLastUseId() <= instId) {
       for (int locIndex = 0;
            locIndex < src->numAllocatedRegs();
            ++locIndex) {
@@ -218,7 +218,7 @@ RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
   }
   // add the destination register to the live regs set
   SSATmp* dst = inst->getDst();
-  if (dst != NULL) {
+  if (dst != NULL && dst->getLastUseId() > instId) {
     for (int locIndex = 0;
          locIndex < dst->numAllocatedRegs();
          locIndex++) {
@@ -371,13 +371,17 @@ void LinearScan::allocRegToInstruction(Trace* trace,
          (opc == LdRaw &&
           inst->getSrc(1)->getConstValAsInt() == RawMemSlot::ContARPtr));
 
-  if (ssaTmp->getLastUseId() == 0) {
-    // This instruction's destination is not used
-    return;
+  if (RuntimeOption::EvalHHIRDeadCodeElim) {
+    if (ssaTmp->getLastUseId() == 0) return;
   }
-
   for (int i = 0; i < ssaTmp->numNeededRegs(); ++i) {
     allocRegToTmp(ssaTmp, i);
+  }
+  if (!RuntimeOption::EvalHHIRDeadCodeElim) {
+    if (ssaTmp->getLastUseId() == 0) {
+      // if any outputs were unused, free regs now.
+      freeRegsAtId(inst->getId());
+    }
   }
 }
 

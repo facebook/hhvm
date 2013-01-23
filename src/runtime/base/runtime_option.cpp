@@ -781,14 +781,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     SafeFileAccess = server["SafeFileAccess"].getBool();
     server["AllowedDirectories"].get(AllowedDirectories);
-    for (unsigned int i = 0; i < AllowedDirectories.size(); i++) {
-      string &directory = AllowedDirectories[i];
-      char resolved_path[PATH_MAX];
-      if (realpath(directory.c_str(), resolved_path) &&
-          directory != resolved_path) {
-        RuntimeOption::AllowedDirectories.push_back(resolved_path);
-      }
-    }
 
     WhitelistExec = server["WhitelistExec"].getBool();
     WhitelistExecWarningOnly = server["WhitelistExecWarningOnly"].getBool();
@@ -898,14 +890,18 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     ServerUser = server["User"].getString("");
   }
+
+  VirtualHost::SortAllowedDirectories(AllowedDirectories);
   {
     Hdf hosts = config["VirtualHost"];
     if (hosts.exists()) {
       for (Hdf hdf = hosts.firstChild(); hdf.exists(); hdf = hdf.next()) {
         if (hdf.getName() == "default") {
           VirtualHost::GetDefault().init(hdf);
+          VirtualHost::GetDefault().addAllowedDirectories(AllowedDirectories);
         } else {
           VirtualHostPtr host(new VirtualHost(hdf));
+          host->addAllowedDirectories(AllowedDirectories);
           VirtualHosts.push_back(host);
         }
       }

@@ -65,12 +65,15 @@ String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
   if (RuntimeOption::SafeFileAccess) {
     const vector<string> &allowedDirectories =
       VirtualHost::GetAllowedDirectories();
-    for (unsigned int i = 0; i < allowedDirectories.size();
-         i++) {
-      const string &directory = allowedDirectories[i];
-      int len = directory.size();
-      if (canonicalized.length() >= len &&
-          strncmp(canonicalized.data(), directory.data(), len) == 0) {
+    auto it = std::upper_bound(allowedDirectories.begin(),
+                               allowedDirectories.end(), canonicalized,
+                               [](CStrRef val, const string& dir) {
+                                 return strcmp(val.c_str(), dir.c_str()) < 0;
+                               });
+    if (it != allowedDirectories.begin()) {
+      const string& dir = *--it;
+      if (dir.size() <= canonicalized.size() &&
+          !strncmp(dir.c_str(), canonicalized.c_str(), dir.size())) {
         return canonicalized;
       }
     }

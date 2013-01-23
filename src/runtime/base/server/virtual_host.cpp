@@ -71,6 +71,38 @@ const vector<string> &VirtualHost::GetAllowedDirectories() {
   return RuntimeOption::AllowedDirectories;
 }
 
+void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
+  /*
+    Make sure corresponding realpath's are also allowed
+  */
+  for (unsigned int i = 0, s = dirs.size(); i < s; i++) {
+    string &directory = dirs[i];
+    char resolved_path[PATH_MAX];
+    if (realpath(directory.c_str(), resolved_path) &&
+        directory != resolved_path) {
+      dirs.push_back(resolved_path);
+    }
+  }
+  /*
+    sort so we can use upper_bound to find the right prefix,
+    rather than using a linear scan (and so we can remove
+    duplicates, etc below)
+  */
+  std::sort(dirs.begin(), dirs.end());
+  /*
+     AllowedDirectories is a list of prefixes, so if x is a substring
+     of y, we dont need y (also remove any duplicates).
+  */
+  dirs.erase(std::unique(dirs.begin(), dirs.end(),
+                         [](const std::string &a, const std::string &b) {
+                           if (a.size() < b.size()) {
+                             return !b.compare(0, a.size(), a);
+                           }
+                           return !a.compare(0, b.size(), b);
+                         }),
+             dirs.end());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void VirtualHost::initRuntimeOption(Hdf overwrite) {
@@ -87,6 +119,15 @@ void VirtualHost::initRuntimeOption(Hdf overwrite) {
   m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
   m_runtimeOption.maxPostSize = maxPostSize;
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
+}
+
+void VirtualHost::addAllowedDirectories(const std::vector<std::string>& dirs) {
+  if (!m_runtimeOption.allowedDirectories.empty()) {
+    m_runtimeOption.allowedDirectories.insert(
+      m_runtimeOption.allowedDirectories.end(),
+      dirs.begin(), dirs.end());
+    SortAllowedDirectories(m_runtimeOption.allowedDirectories);
+  }
 }
 
 void VirtualHost::setRequestTimeoutSeconds() const {

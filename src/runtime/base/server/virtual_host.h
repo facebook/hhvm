@@ -34,12 +34,13 @@ public:
   static int64 GetMaxPostSize();
   static int64 GetUploadMaxFileSize();
   static const std::vector<std::string> &GetAllowedDirectories();
-
+  static void SortAllowedDirectories(std::vector<std::string>& dirs);
 public:
   VirtualHost();
   VirtualHost(Hdf vh);
 
   void init(Hdf vh);
+  void addAllowedDirectories(const std::vector<std::string>& dirs);
   void setRequestTimeoutSeconds() const;
 
   const std::string &getName() const { return m_name;}

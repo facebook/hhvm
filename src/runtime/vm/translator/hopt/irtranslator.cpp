@@ -30,6 +30,7 @@
 #include "runtime/vm/stats.h"
 
 #include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/opt.h"
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/hopt/codegen.h"
 #include "runtime/vm/translator/hopt/hhbctranslator.h"

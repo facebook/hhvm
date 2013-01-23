@@ -15,17 +15,14 @@
 */
 #include "runtime/vm/translator/hopt/opt.h"
 
-#include "runtime/vm/translator/hopt/dce.h"
-#include "runtime/vm/translator/hopt/memelim.h"
+#include "util/trace.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
-#include <util/trace.h>
-
 
 namespace HPHP {
 namespace VM {
 namespace JIT {
 
-void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
+static void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
   IRInstruction::List& instructions = trace->getInstructionList();
   IRInstruction::Iterator it;
   for (it = instructions.begin(); it != instructions.end(); ) {
@@ -42,7 +39,7 @@ void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
   }
 }
 
-void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
+static void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
   insertRefCountAssertsAux(trace, factory);
   Trace::List& exitTraces = trace->getExitTraces();
   for (Trace::Iterator it = exitTraces.begin();
@@ -62,6 +59,7 @@ void optimizeTrace(Trace* trace, IRFactory* irFactory) {
     std::cout << "---------------------------\n";
   }
   eliminateDeadCode(trace, irFactory);
+  optimizeJumps(trace, irFactory);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     insertRefCountAsserts(trace, irFactory);
   }

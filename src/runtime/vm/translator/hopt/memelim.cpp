@@ -18,10 +18,8 @@
 #include "util/asm-x64.h"
 #include "runtime/base/util/countable.h"
 #include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/dce.h"
-#include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/opt.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
-#include "runtime/vm/translator/hopt/memelim.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
 
 namespace HPHP {

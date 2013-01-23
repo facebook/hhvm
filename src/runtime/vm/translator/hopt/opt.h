@@ -13,24 +13,30 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHIR_OPT_H__
-#define incl_HHIR_OPT_H__
+#ifndef incl_HHIR_OPT_H_
+#define incl_HHIR_OPT_H_
 
-
-namespace HPHP {
-namespace VM {
-namespace JIT {
-
+namespace HPHP { namespace VM { namespace JIT {
 
 class Trace;
 class IRFactory;
 class IRInstruction;
 
+const unsigned DEAD = 0;
+const unsigned LIVE = 1;
 
-void optimizeTrace(Trace* trace, IRFactory* factory);
-void insertRefCountAsserts(Trace* trace, IRFactory* factory);
+/*
+ * The main optimization passes, in the order they run.
+ */
+void optimizeMemoryAccesses(Trace*, IRFactory*);
+void eliminateDeadCode(Trace*, IRFactory*);
+void optimizeJumps(Trace*, IRFactory*);
 
-} } }
+/*
+ * Run all the optimization passes.
+ */
+void optimizeTrace(Trace*, IRFactory*);
 
+}}}
 
 #endif

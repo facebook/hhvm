@@ -1260,11 +1260,15 @@ private:
   bool m_isMain;
 };
 
-void optimizeTrace(Trace*, IRFactory* irFactory);
+/*
+ * Some utility micro-passes used from other major passes.
+ */
 void numberInstructions(Trace*);
 uint32 numberInstructions(Trace* trace,
                           uint32 nextId,
                           bool followControlFlow = true);
+void removeDeadInstructions(Trace* trace);
+
 /*
  * Clears the IRInstructions' ids, and the SSATmps' use count and last use id.
  */

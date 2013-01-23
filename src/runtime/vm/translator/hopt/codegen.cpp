@@ -73,7 +73,7 @@ namespace JIT {
 
 using namespace Transl::reg;
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::tx64;
+static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 using Transl::rVmSp;
 using Transl::rVmFp;

@@ -23,7 +23,7 @@ namespace JIT{
 
 using namespace Transl::reg;
 
-static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::tx64;
+static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 const int NumMmxRegs = 8;
 
@@ -558,9 +558,9 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
       freeSpill->setParent(trace);
       instList.insert(next, allocSpill);
       allocSpill->setParent(trace);
-    } else if (opc == ExitTrace || opc == ExitSlow ||
+    } else if (opc == ExitTrace || opc == ExitSlow || opc == ExitTraceCc ||
                opc == ExitSlowNoProgress || opc == ExitGuardFailure ||
-               opc == RetCtrl) {
+               opc == LdRetAddr) {
       // Insert FreeSpill at trace exits.
       IRInstruction* freeSpill = m_irFactory->gen(FreeSpill, tmp);
       instList.insert(it, freeSpill);
@@ -843,10 +843,17 @@ void LinearScan::allocRegs(Trace* trace) {
   if (numSpillLocs > 0) {
     preAllocSpillLoc(trace, numSpillLocs);
     if (numSpillLocs > (uint32)NumPreAllocatedSpillLocs) {
-      // We only insert AllocSpill and FreeSpill when the pre-allocated
-      // spill locations are not enough.
-      // AllocSpill and FreeSpill take the number of extra spill locations
-      // besides the pre-allocated ones.
+      /*
+       * We only insert AllocSpill and FreeSpill when the pre-allocated
+       * spill locations are not enough.
+       *
+       * AllocSpill and FreeSpill take the number of extra spill locations
+       * besides the pre-allocated ones.
+       *
+       * TODO(#2044051) AllocSpill/FreeSpill are currently disabled
+       * due to bugs.
+       */
+      PUNT(LinearScan_AllocSpill);
       insertAllocFreeSpill(trace, numSpillLocs - NumPreAllocatedSpillLocs);
     }
   }

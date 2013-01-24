@@ -1033,7 +1033,13 @@ struct X64Assembler {
   void xchgq(Reg64 r1, Reg64 r2) { instrRR(instr_xchg, r1, r2); }
   void xchgl(Reg32 r1, Reg32 r2) { instrRR(instr_xchg, r1, r2); }
   void xchgb(Reg8 r1, Reg8 r2)   { instrRR(instr_xchgb, r1, r2); }
+
   void imul(Reg64 r1, Reg64 r2)  { instrRR(instr_imul, r1, r2); }
+
+  void imul(Immed im, Reg64 r1) {
+    movq(im, reg::rScratch);
+    imul(reg::rScratch, r1);
+  }
 
   void push(Reg64 r)  { instrR(instr_push, r); }
   void pop (Reg64 r)  { instrR(instr_pop,  r); }

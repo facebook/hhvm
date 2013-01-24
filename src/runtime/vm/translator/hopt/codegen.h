@@ -38,14 +38,6 @@ class FailedCodeGen : public std::exception {
       file(_file), line(_line), func(_func) { }
 };
 
-void cgPunt(const char* _file, int _line, const char* _func);
-
-#define CG_PUNT(instr) do {                                            \
-  if (tx64) {                                                          \
-    cgPunt( __FILE__, __LINE__, #instr);                               \
-  }                                                                    \
-} while(0)
-
 struct ArgGroup;
 
 enum SyncOptions {
@@ -54,21 +46,17 @@ enum SyncOptions {
   kSyncPointAdjustOne,
 };
 
-class CodeGenerator {
-public:
+struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
+
   CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64) :
       m_as(as), m_astubs(astubs), m_tx64(tx64),
       m_curInst(NULL), m_lastMarker(NULL), m_curTrace(NULL) {
   }
 
-  static const int64_t kTypeShiftBits = sizeof(int32_t) * CHAR_BIT;
-  static inline int64 toDataTypeForCall(Type::Tag type) {
-    return (int64)Type::toDataType(type) << (sizeof(int32_t) * CHAR_BIT);
-  }
-
   void cgTrace(Trace* trace, vector<TransBCMapping>* bcMap);
 
+private:
   Address cgInst(IRInstruction* inst);
 
   // Autogenerate function declarations for each IR instruction in ir.h
@@ -125,9 +113,20 @@ public:
   void cgStPropWork(IRInstruction* inst, bool genStoreType);
   void cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
+
+  template<class OpInstr, class Oper>
+  void cgUnaryIntOp(SSATmp* dst, SSATmp* src, OpInstr, Oper);
+
+  enum Commutativity { Commutative, NonCommutative };
+  template<class Oper>
+  void cgBinaryIntOp(IRInstruction*,
+                     void (Asm::*)(Immed, Reg64),
+                     void (Asm::*)(Reg64, Reg64),
+                     Oper,
+                     Commutativity);
+
   void cgNegateWork(SSATmp* dst, SSATmp* src);
   void cgNotWork(SSATmp* dst, SSATmp* src);
-
 
   void cgLoadTypedValue(Type::Tag type,
                         SSATmp* dst,

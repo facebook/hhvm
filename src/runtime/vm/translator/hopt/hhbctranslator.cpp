@@ -390,7 +390,6 @@ void HhbcTranslator::emitVGetG(const StringData* name) {
   emitInterpOneOrPunt(Type::Gen);
 }
 
-
 void HhbcTranslator::emitUnsetN() {
   // No reason to punt, translator-x64 does emitInterpOne as well
   spillStack();
@@ -404,7 +403,6 @@ void HhbcTranslator::emitUnsetG() {
   popC();
   emitInterpOne(Type::None);
 }
-
 
 void HhbcTranslator::emitUnsetL(int32 id) {
   TRACE(3, "%u: UnsetL %d\n", m_bcOff, id);
@@ -1489,13 +1487,14 @@ void HhbcTranslator::assertTypeStack(uint32 stackIndex, Type::Tag type) {
 }
 
 void HhbcTranslator::emitLoadDeps() {
-  for (auto guard : m_typeGuards) {
-    uint32   index = guard.getIndex();
-
-    if (guard.getKind() == TypeGuard::Local) {
-      m_tb->genLdLoc(index);
-    } else if (guard.getKind() == TypeGuard::Stack) {
-    } else {
+  for (auto& guard : m_typeGuards) {
+    switch (guard.getKind()) {
+    case TypeGuard::Local:
+      m_tb->genLdLoc(guard.getIndex());
+      break;
+    case TypeGuard::Stack:
+      break;
+    default:
       assert(false); // iterator guards should not happen
     }
   }

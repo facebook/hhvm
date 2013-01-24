@@ -71,12 +71,21 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
 using namespace Transl::reg;
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 using Transl::rVmSp;
 using Transl::rVmFp;
+
+const int64_t kTypeShiftBits = sizeof(int32_t) * CHAR_BIT;
+int64 toDataTypeForCall(Type::Tag type) {
+  return (int64)Type::toDataType(type) << (sizeof(int32_t) * CHAR_BIT);
+}
 
 void cgPunt(const char* _file, int _line, const char* _func) {
   if (RuntimeOption::EvalDumpIR) {
@@ -86,6 +95,12 @@ void cgPunt(const char* _file, int _line, const char* _func) {
   }
   throw FailedCodeGen(_file, _line, _func);
 }
+
+#define CG_PUNT(instr) do {                     \
+  if (tx64) {                                   \
+    cgPunt( __FILE__, __LINE__, #instr);        \
+  }                                             \
+} while(0)
 
 struct CycleInfo {
   int node;
@@ -202,13 +217,17 @@ pathloop:
   }
 }
 
+} // unnamed namespace
+
+//////////////////////////////////////////////////////////////////////
+
 ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
   if (tmp->getInstruction()->isDefConst()) {
     m_srcReg = InvalidReg;
     if (val) {
       m_imm = tmp->getConstValAsBits();
     } else {
-      m_imm = CodeGenerator::toDataTypeForCall(tmp->getType());
+      m_imm = toDataTypeForCall(tmp->getType());
     }
     m_kind = Imm;
     return;
@@ -218,7 +237,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     if (val) {
       m_imm = 0;
     } else {
-      m_imm = CodeGenerator::toDataTypeForCall(tmp->getType());
+      m_imm = toDataTypeForCall(tmp->getType());
     }
     m_kind = Imm;
     return;
@@ -236,7 +255,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     return;
   }
   m_srcReg = InvalidReg;
-  m_imm = CodeGenerator::toDataTypeForCall(tmp->getType());
+  m_imm = toDataTypeForCall(tmp->getType());
   m_kind = Imm;
 }
 
@@ -248,7 +267,7 @@ Address ArgDesc::genCode(CodeGenerator::Asm& a) const {
       a.    movq   (m_srcReg, m_dstReg);
       TRACE(3, "[counter] 1 reg move in ArgDesc::genCode\n");
       if (m_kind == TypeReg) {
-        a.  shlq   (CodeGenerator::kTypeShiftBits, m_dstReg);
+        a.  shlq   (kTypeShiftBits, m_dstReg);
       }
       break;
     case Imm:
@@ -642,170 +661,145 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
   }
 }
 
-#define GEN_UNARY_INT_OP(INSTR, OPER) do {                            \
-  if (src->getType() != Type::Int && src->getType() != Type::Bool) {  \
-    assert(0); CG_PUNT(INSTR);                                        \
-  }                                                                   \
-  auto dstReg = dst->getReg();                                        \
-  auto srcReg = src->getReg();                                        \
-  assert(dstReg != InvalidReg);                                       \
-  /* Integer operations require 64-bit representations */             \
-  if (src->getType() == Type::Bool && !src->isConst()) {              \
-    m_as.and_imm64_reg64(0xff, srcReg);                               \
-  }                                                                   \
-  /* const source */                                                  \
-  if (src->isConst()) {                                               \
-    m_as.mov_imm64_reg(OPER src->getConstValAsRawInt(), dstReg);      \
-    break;                                                            \
-  }                                                                   \
-  assert(srcReg != InvalidReg);                                       \
-  if (dstReg != srcReg) {                                             \
-    m_as.mov_reg64_reg64(srcReg, dstReg);                             \
-    if (m_curTrace->isMain()) {                                       \
-      TRACE(3, "[counter] 1 reg move in UNARY_INT_OP\n");             \
-    }                                                                 \
-  }                                                                   \
-  m_as. INSTR (r64(dstReg));                                          \
-} while (0)
+template<class OpInstr, class Oper>
+void CodeGenerator::cgUnaryIntOp(SSATmp* dst,
+                                 SSATmp* src,
+                                 OpInstr instr,
+                                 Oper oper) {
+  if (src->getType() != Type::Int && src->getType() != Type::Bool) {
+    assert(0); CG_PUNT(UnaryIntOp);
+  }
+  auto dstReg = dst->getReg();
+  auto srcReg = src->getReg();
+  assert(dstReg != InvalidReg);
+  auto& a = m_as;
+
+  // Integer operations require 64-bit representations
+  if (src->getType() == Type::Bool && !src->isConst()) {
+    a.    andq   (0xff, srcReg);
+  }
+
+  if (srcReg != InvalidReg) {
+    if (dstReg != srcReg) {
+      a.  movq   (srcReg, dstReg);
+    }
+    (a.*instr)(dstReg);
+  } else {
+    assert(src->isConst());
+    a.    movq   (oper(src->getConstValAsRawInt()), dstReg);
+  }
+}
 
 void CodeGenerator::cgNotWork(SSATmp* dst, SSATmp* src) {
-  GEN_UNARY_INT_OP(not, ~);
+  cgUnaryIntOp(dst, src, &Asm::not, [](int64_t i) { return ~i; });
 }
 
 void CodeGenerator::cgNegateWork(SSATmp* dst, SSATmp* src) {
-  GEN_UNARY_INT_OP(neg, -);
+  cgUnaryIntOp(dst, src, &Asm::neg, [](int64_t i) { return -i; });
 }
 
 void CodeGenerator::cgNegate(IRInstruction* inst) {
   cgNegateWork(inst->getDst(), inst->getSrc(0));
 }
 
-#define GEN_COMMUTATIVE_INT_OP(INSTR, OPER) do {                        \
-  if (!(src1->getType() == Type::Int || src1->getType() == Type::Bool) || \
-      !(src2->getType() == Type::Int || src2->getType() == Type::Bool)) { \
-    CG_PUNT(INSTR);                                                     \
-  }                                                                     \
-  auto dstReg  = dst->getReg();                                         \
-  auto src1Reg = src1->getReg();                                        \
-  auto src2Reg = src2->getReg();                                        \
-  /* Integer operations require 64-bit representations */               \
-  if (src1->getType() == Type::Bool && !src1->isConst()) {              \
-    m_as.and_imm64_reg64(0xff, src1Reg);                                \
-  }                                                                     \
-  if (src2->getType() == Type::Bool && !src2->isConst()) {              \
-    m_as.and_imm64_reg64(0xff, src2Reg);                                \
-  }                                                                     \
-  /* 2 consts */                                                        \
-  if (src1->isConst() && src2->isConst()) {                             \
-    int64 src1Const = src1->getConstValAsRawInt();                      \
-    int64 src2Const = src2->getConstValAsRawInt();                      \
-    m_as.mov_imm64_reg(src1Const OPER src2Const, dstReg);               \
-  /* 1 const, 1 reg */                                                  \
-  } else if (src1->isConst() || src2->isConst()) {                      \
-    int64 srcConst = (src1->isConst() ? src1 : src2)->getConstValAsRawInt(); \
-    auto srcReg = (src1->isConst() ? src2Reg : src1Reg);                \
-    if (srcReg == dstReg) {                                             \
-      m_as. INSTR ## _imm64_reg64(srcConst, dstReg);                    \
-    } else {                                                            \
-    /* TODO: use lea when possible */                                   \
-      m_as.mov_imm64_reg(srcConst, dstReg);                             \
-      m_as. INSTR ##_reg64_reg64(srcReg, dstReg);                       \
-    }                                                                   \
-  /* both src1 and src2 are regs */                                     \
-  } else {                                                              \
-    if (dstReg != src1Reg && dstReg != src2Reg) {                       \
-      m_as.mov_reg64_reg64(src1Reg, dstReg);                            \
-      if (m_curTrace->isMain()) {                                       \
-        TRACE(3, "[counter] 1 reg move in COMMUTATIVE_INT_OP\n");       \
-      }                                                                 \
-      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                     \
-    } else {                                                            \
-      if (dstReg == src1Reg) {                                          \
-        m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                   \
-      } else {                                                          \
-        assert(dstReg == src2Reg);                                      \
-        m_as. INSTR ## _reg64_reg64(src1Reg, dstReg);                   \
-      }                                                                 \
-    }                                                                   \
-  }                                                                     \
-  } while (0)
-
-#define GEN_NON_COMMUTATIVE_INT_OP(INSTR, OPER) do {                    \
-  if (!(src1->getType() == Type::Int || src1->getType() == Type::Bool) || \
-      !(src2->getType() == Type::Int || src2->getType() == Type::Bool)) { \
-    CG_PUNT(INSTR);                                                     \
-  }                                                                     \
-  auto dstReg  = dst->getReg();                                         \
-  auto src1Reg = src1->getReg();                                        \
-  auto src2Reg = src2->getReg();                                        \
-  /* Integer operations require 64-bit representations */               \
-  if (src1->getType() == Type::Bool && !src1->isConst()) {              \
-    m_as.and_imm64_reg64(0xff, src1Reg);                                \
-  }                                                                     \
-  if (src2->getType() == Type::Bool && !src2->isConst()) {              \
-    m_as.and_imm64_reg64(0xff, src2Reg);                                \
-  }                                                                     \
-  /* 2 consts */                                                        \
-  if (src1->isConst() && src2->isConst()) {                             \
-    int64 src1Const = src1->getConstValAsRawInt();                      \
-    int64 src2Const = src2->getConstValAsRawInt();                      \
-    m_as.mov_imm64_reg(src1Const OPER src2Const, dstReg);               \
-  /* 1 const, 1 reg */                                                  \
-  } else if (src2->isConst()) {                                         \
-    int64 src2Const = src2->getConstValAsRawInt();                      \
-    if (src1Reg != dstReg) {                                            \
-      m_as.mov_reg64_reg64(src1Reg, dstReg);                            \
-      if (m_curTrace->isMain()) {                                       \
-        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
-      }                                                                 \
-    }                                                                   \
-    m_as. INSTR ## _imm64_reg64(src2Const, dstReg);                     \
-  } else if (src1->isConst()) {                                         \
-    int64 src1Const = src1->getConstValAsRawInt();                      \
-    if (dstReg != src2Reg) {                                            \
-      m_as.mov_imm64_reg(src1Const, dstReg);                            \
-      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                     \
-    } else {                                                            \
-      m_as.mov_imm64_reg(src1Const, reg::rScratch);                     \
-      m_as. INSTR ## _reg64_reg64(src2Reg, reg::rScratch);              \
-      m_as.mov_reg64_reg64(reg::rScratch, dstReg);                      \
-      if (m_curTrace->isMain()) {                                       \
-        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
-      }                                                                 \
-    }                                                                   \
-  /* both src1 and src2 are regs */                                     \
-  } else {                                                              \
-    if (dstReg != src1Reg && dstReg != src2Reg) {                       \
-      m_as.mov_reg64_reg64(src1Reg, dstReg);                            \
-      if (m_curTrace->isMain()) {                                       \
-        TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n");   \
-      }                                                                 \
-      m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                     \
-    } else {                                                            \
-      if (dstReg == src1Reg) {                                          \
-        m_as. INSTR ## _reg64_reg64(src2Reg, dstReg);                   \
-      } else {                                                          \
-        assert(dstReg == src2Reg);                                      \
-        m_as.mov_reg64_reg64(src1Reg, reg::rScratch);                   \
-        if (m_curTrace->isMain()) {                                     \
-          TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n"); \
-        }                                                               \
-        m_as. INSTR ## _reg64_reg64(src2Reg, reg::rScratch);            \
-        m_as.mov_reg64_reg64(reg::rScratch, dstReg);                    \
-        if (m_curTrace->isMain()) {                                     \
-          TRACE(3, "[counter] 1 reg move in NON_COMMUTATIVE_INT_OP\n"); \
-        }                                                               \
-      }                                                                 \
-    }                                                                   \
-  }                                                                     \
-  } while (0)
-
-void CodeGenerator::cgOpAdd(IRInstruction* inst) {
+template<class Oper>
+void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
+                                  void (Asm::*instrIR)(Immed, Reg64),
+                                  void (Asm::*instrRR)(Reg64, Reg64),
+                                  Oper oper,
+                                  Commutativity commuteFlag) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
 
-  GEN_COMMUTATIVE_INT_OP(add, +);
+  if (!(src1->getType() == Type::Int || src1->getType() == Type::Bool) ||
+      !(src2->getType() == Type::Int || src2->getType() == Type::Bool)) {
+    CG_PUNT(BinaryIntOp);
+  }
+  bool const commutative = commuteFlag == Commutative;
+  auto const dstReg      = dst->getReg();
+  auto const src1Reg     = src1->getReg();
+  auto const src2Reg     = src2->getReg();
+  auto& a                = m_as;
+
+  // Extend booleans: integer operations require 64-bit
+  // representations.
+  if (src1->getType() == Type::Bool && src1Reg != InvalidReg) {
+    // TODO movbzl
+    a.    andq   (0xff, src1Reg);
+  }
+  if (src2->getType() == Type::Bool && src2Reg != InvalidReg) {
+    a.    andq   (0xff, src2Reg);
+  }
+
+  // Two registers.
+  if (src1Reg != InvalidReg && src2Reg != InvalidReg) {
+    if (dstReg == src1Reg) {
+      (a.*instrRR)  (src2Reg, dstReg);
+    } else if (dstReg == src2Reg) {
+      if (commutative) {
+        (a.*instrRR)(src1Reg, dstReg);
+      } else {
+        a.  movq    (src1Reg, rScratch);
+        (a.*instrRR)(src2Reg, rScratch);
+        a.  movq    (rScratch, dstReg);
+      }
+    } else {
+      a.    movq    (src1Reg, dstReg);
+      (a.*instrRR)  (src2Reg, dstReg);
+    }
+    return;
+  }
+
+  // Two immediates.
+  if (src1Reg == InvalidReg && src2Reg == InvalidReg) {
+    assert(src1->isConst() && src2->isConst());
+    int64 value = oper(src1->getConstValAsRawInt(),
+                       src2->getConstValAsRawInt());
+    a.  movq   (value, dstReg);
+    return;
+  }
+
+  // One register, and one immediate.
+
+  if (commutative) {
+    int64 immed = (src2Reg == InvalidReg
+                     ? src2 : src1)->getConstValAsRawInt();
+    auto srcReg = src2Reg == InvalidReg ? src1Reg : src2Reg;
+    if (srcReg == dstReg) {
+      (a.*instrIR) (immed, dstReg);
+    } else {
+      a.    movq   (immed, dstReg);
+      (a.*instrRR) (srcReg, dstReg);
+    }
+    return;
+  }
+
+  // NonCommutative:
+
+  if (src1Reg == InvalidReg) {
+    if (dstReg == src2Reg) {
+      a.    movq   (src1->getConstValAsRawInt(), rScratch);
+      (a.*instrRR) (src2Reg, rScratch);
+      a.    movq   (rScratch, dstReg);
+    } else {
+      a.    movq   (src1->getConstValAsRawInt(), dstReg);
+      (a.*instrRR) (src2Reg, dstReg);
+    }
+    return;
+  }
+
+  assert(src2Reg == InvalidReg);
+  a.    movq   (src1Reg, dstReg);
+  (a.*instrIR) (src2->getConstValAsRawInt(), dstReg);
+}
+
+void CodeGenerator::cgOpAdd(IRInstruction* inst) {
+  cgBinaryIntOp(inst,
+                &Asm::addq,
+                &Asm::addq,
+                std::plus<int64>(),
+                Commutative);
 }
 
 void CodeGenerator::cgOpSub(IRInstruction* inst) {
@@ -813,26 +807,31 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
 
-  if (src1->isConst() && src1->getConstValAsInt() == 0)
+  if (src1->isConst() && src1->getConstValAsInt() == 0) {
     return cgNegateWork(dst, src2);
+  }
 
-  GEN_NON_COMMUTATIVE_INT_OP(sub, -);
+  cgBinaryIntOp(inst,
+                &Asm::subq,
+                &Asm::subq,
+                std::minus<int64>(),
+                NonCommutative);
 }
 
 void CodeGenerator::cgOpAnd(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
-
-  GEN_COMMUTATIVE_INT_OP(and, &);
+  cgBinaryIntOp(inst,
+                &Asm::andq,
+                &Asm::andq,
+                [] (int64 a, int64 b) { return a & b; },
+                Commutative);
 }
 
 void CodeGenerator::cgOpOr(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
-
-  GEN_COMMUTATIVE_INT_OP(or, |);
+  cgBinaryIntOp(inst,
+                &Asm::orq,
+                &Asm::orq,
+                [] (int64 a, int64 b) { return a | b; },
+                Commutative);
 }
 
 void CodeGenerator::cgOpXor(IRInstruction* inst) {
@@ -844,15 +843,19 @@ void CodeGenerator::cgOpXor(IRInstruction* inst) {
     return cgNotWork(dst, src1);
   }
 
-  GEN_COMMUTATIVE_INT_OP(xor, ^);
+  cgBinaryIntOp(inst,
+                &Asm::xorq,
+                &Asm::xorq,
+                [] (int64 a, int64 b) { return a ^ b; },
+                Commutative);
 }
 
 void CodeGenerator::cgOpMul(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
-
-  GEN_COMMUTATIVE_INT_OP(imul, *);
+  cgBinaryIntOp(inst,
+                &Asm::imul,
+                &Asm::imul,
+                std::multiplies<int64>(),
+                Commutative);
 }
 
 // Runtime helpers

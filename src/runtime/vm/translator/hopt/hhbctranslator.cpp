@@ -373,7 +373,7 @@ void HhbcTranslator::emitCGetL(int32 id) {
 void HhbcTranslator::emitCGetL2(int32 id) {
   TRACE(3, "%u: CGetL2 %d\n", m_bcOff, id);
   Trace* exitTrace = getExitTrace();
-  SSATmp* oldTop = popC();
+  SSATmp* oldTop = pop(Type::Gen);
   pushIncRef(emitLdLocWarn(id, exitTrace));
   push(oldTop);
 }

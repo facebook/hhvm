@@ -107,6 +107,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case CheckInit:
     return simplifyCheckInit(inst);
 
+  case JmpZero:
+  case JmpNZero:
+    return simplifyCondJmp(inst);
+
   case JmpGt:
   case JmpGte:
   case JmpLt:
@@ -115,8 +119,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpNeq:
   case JmpSame:
   case JmpNSame:
-  case JmpZero:
-  case JmpNZero:
+    // TODO(#2049201): reuse the logic in simplifyCmp.
+    return nullptr;
   case Jmp_:
   case JmpInstanceOfD:
   case JmpNInstanceOfD:
@@ -974,6 +978,71 @@ SSATmp* Simplifier::genLdClsPropAddr(SSATmp* cls,
                                      SSATmp* clsName,
                                      SSATmp* prop) {
   return m_tb->genLdClsPropAddr(cls, clsName, prop);
+}
+
+SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
+  SSATmp* const src            = inst->getSrc(0);
+  IRInstruction* const srcInst = src->getInstruction();
+  const Opcode srcOpcode       = srcInst->getOpcode();
+
+  // After other simplifications below (isConvIntOrPtrToBool), we can
+  // end up with a non-Bool input.  Nothing more to do in this case.
+  if (src->getType() != Type::Bool) {
+    return nullptr;
+  }
+
+  // Constant propagate.
+  if (src->isConst()) {
+    bool val = src->getConstValAsBool();
+    if (inst->getOpcode() == JmpZero) {
+      val = !val;
+    }
+    if (val) {
+      return m_tb->gen(Jmp_, inst->getLabel());
+    }
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  // Pull negations into the jump.
+  if (isNotInst(src)) {
+    return m_tb->gen(inst->getOpcode() == JmpZero ? JmpNZero : JmpZero,
+                     inst->getLabel(),
+                     srcInst->getSrc(0));
+  }
+
+  /*
+   * Try to combine the src inst with the Jmp.  We can't do any
+   * combinations of the src instruction with the jump if the src's
+   * are refcounted, since we may have dec refs between the src
+   * instruction and the jump.
+   */
+  for (auto& src : srcInst->getSrcs()) {
+    if (isRefCounted(src)) return nullptr;
+  }
+
+  // If the source is conversion of an int or pointer to boolean, we
+  // can test the int/ptr value directly.
+  if (isConvIntOrPtrToBool(srcInst)) {
+    return m_tb->gen(inst->getOpcode(),
+                     inst->getLabel(),
+                     srcInst->getSrc(0));
+  }
+
+  // Fuse jumps with query operators.
+  if (isQueryOp(srcOpcode)) {
+    SSARange ssas = srcInst->getSrcs();
+    return m_tb->gen(queryToJmpOp(
+                       inst->getOpcode() == JmpZero
+                         ? negateQueryOp(srcOpcode)
+                         : srcOpcode),
+                     srcInst->getTypeParam(), // if it had a type param
+                     inst->getLabel(),
+                     ssas.size(),
+                     ssas.begin());
+  }
+
+  return nullptr;
 }
 
 }}} // namespace HPHP::VM::JIT

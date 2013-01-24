@@ -944,7 +944,7 @@ void HhbcTranslator::emitIssetL(int32 id) {
   } else {
     Trace* exitTrace = getExitTrace();
     SSATmp* ld = m_tb->genLdLocAsCell(id, exitTrace);
-    push(m_tb->genNot(m_tb->genIsType<Type::Null>(ld)));
+    push(m_tb->gen(IsNType, Type::Null, ld));
   }
 }
 
@@ -985,7 +985,7 @@ template<Type::Tag T>
 void HhbcTranslator::emitIsTypeC() {
   TRACE(3, "%u: Is%sC\n", m_bcOff, Type::Strings[T]);
   SSATmp* src = popC();
-  push(m_tb->genIsType<T>(src));
+  push(m_tb->gen(IsType, T, src));
   m_tb->genDecRef(src);
 }
 
@@ -993,7 +993,7 @@ template<Type::Tag T>
 void HhbcTranslator::emitIsTypeL(int id) {
   TRACE(3, "%u: Is%sH\n", m_bcOff, Type::Strings[T]);
   Trace* exitTrace = getExitTrace();
-  push(m_tb->genIsType<T>(emitLdLocWarn(id, exitTrace)));
+  push(m_tb->gen(IsType, T, emitLdLocWarn(id, exitTrace)));
 }
 
 void HhbcTranslator::emitIsNullL(int id)   { emitIsTypeL<Type::Null>(id);}
@@ -1822,7 +1822,7 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
 void HhbcTranslator::emitNot() {
   TRACE(3, "%u: Not\n", m_bcOff);
   SSATmp* src = popC();
-  push(m_tb->genNot(src));
+  push(m_tb->genNot(m_tb->genConvToBool(src)));
   m_tb->genDecRef(src);
 }
 

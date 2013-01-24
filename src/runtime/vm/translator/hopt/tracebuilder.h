@@ -272,16 +272,11 @@ public:
   void killLocals();
   void updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
   Local getLocal(uint32 id);
-  IRInstruction* appendInstruction(IRInstruction* inst);
+  void appendInstruction(IRInstruction* inst);
   SSATmp* getLocalValue(int id);
   Type::Tag getLocalType(int id);
   void setLocalValue(int id, SSATmp* value);
   void setLocalType(int id, Type::Tag type);
-
-  template<Type::Tag T>
-  SSATmp* genIsType(SSATmp* src) {
-    return gen(IsType, T, src);
-  }
 
   template<typename T>
   SSATmp* genDefConst(T val) {
@@ -304,10 +299,6 @@ private:
   LabelInstruction* getLabel(Trace* trace) {
     return trace ? trace->getLabel() : NULL;
   }
-
-  Trace*  genJmpCond(Opcode opc, SSATmp* src1, SSATmp* src2, Trace* target);
-  Trace*  genJmpCond(Opcode opc, SSATmp* src, Trace* target);
-  Trace*  genJmpCond(Opcode opc, Type::Tag, SSATmp* src, Trace* target);
 
   Trace* makeTrace(const Func* func, uint32 bcOff, bool isMain) {
     return new Trace(m_irFactory.defLabel(func), bcOff, isMain);

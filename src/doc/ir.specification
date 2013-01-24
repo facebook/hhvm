@@ -652,6 +652,11 @@ D:StkPtr = DefSP
 
   Creates a temporary D representing the current vm stack pointer.
 
+Nop
+
+  Does nothing.  It's sometimes useful for the simplifier to insert
+  one of these in the instruction stream.
+
 
 14. Runtime helpers
 
@@ -710,6 +715,7 @@ ContStartedCheck
 
 IncStat
 DbgAssertRefCount
+
 
 18. Iterators
 

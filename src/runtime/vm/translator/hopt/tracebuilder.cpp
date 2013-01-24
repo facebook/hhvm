@@ -338,8 +338,8 @@ SSATmp* TraceBuilder::genMul(SSATmp* src1, SSATmp* src2) {
 }
 
 SSATmp* TraceBuilder::genNot(SSATmp* src) {
-  // TODO: Move this to hhbctranslator
-  return genConvToBool(genXor(genConvToBool(src), genDefConst<int64>(1)));
+  assert(src->getType() == Type::Bool);
+  return genConvToBool(genXor(src, genDefConst<int64>(1)));
 }
 
 SSATmp* TraceBuilder::genDefUninit() {
@@ -384,80 +384,6 @@ SSATmp* TraceBuilder::genCmp(Opcode opc, SSATmp* src1, SSATmp* src2) {
   return gen(opc, src1, src2);
 }
 
-Trace* TraceBuilder::genJmpCond(Opcode opc,
-                                SSATmp* src1,
-                                SSATmp* src2,
-                                Trace* target) {
-  assert(target);
-  bool canResolve = false;
-  bool cond = false; // make compiler happy
-  // TODO move this to simplifier and use for comparison as well
-  if (src1->getType() == Type::Null && src2->getType() == Type::Null) {
-    switch (opc) {
-      case JmpSame:
-      case JmpEq:
-        canResolve = true;
-        cond = true;
-        break;
-      case JmpNSame:
-      case JmpNeq:
-        canResolve = true;
-        cond = false;
-        break;
-      default:
-        canResolve = false;
-    }
-  }
-  if (src1->getType() == Type::Int && src2->getType() == Type::Int &&
-      src1->isConst() && src2->isConst()) {
-    canResolve = true;
-    int64 val1 = src1->getConstValAsInt();
-    int64 val2 = src2->getConstValAsInt();
-    switch (opc) {
-      case JmpGt:  cond = val1 >  val2; break;
-      case JmpGte: cond = val1 >= val2; break;
-      case JmpLt:  cond = val1 <  val2; break;
-      case JmpLte: cond = val1 <= val2; break;
-      case JmpSame:
-      case JmpEq:  cond = val1 == val2; break;
-      case JmpNSame:
-      case JmpNeq: cond = val1 != val2; break;
-      default:
-        always_assert(0);
-    }
-  }
-  if (canResolve) {
-    // If cond is always true, generate an unconditional jump;
-    // if cond is always false, don't generate anything.
-    if (cond) {
-      return genJmp(target);
-    }
-    return NULL;
-  }
-
-  // XXX TODO: simplifier
-  gen(opc, getLabel(target), src1, src2);
-  return target;
-}
-
-Trace* TraceBuilder::genJmpCond(Opcode opc,
-                                Type::Tag type,
-                                SSATmp* src,
-                                Trace* target) {
-  assert(target);
-  gen(opc, type, getLabel(target), src);
-  return target;
-}
-
-
-Trace* TraceBuilder::genJmpCond(Opcode opc,
-                                SSATmp* src,
-                                Trace* target) {
-  assert(target);
-  gen(opc, getLabel(target), src);
-  return target;
-}
-
 Trace* TraceBuilder::genJmp(Trace* targetTrace) {
   assert(targetTrace);
   gen(Jmp_, getLabel(targetTrace));
@@ -467,63 +393,7 @@ Trace* TraceBuilder::genJmp(Trace* targetTrace) {
 Trace* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
   assert(target);
   assert(boolSrc->getType() == Type::Bool);
-  if (boolSrc->isConst()) {
-    bool val = boolSrc->getConstValAsBool();
-    if (negate) {
-      val = !val;
-    }
-    if (val) {
-      return genJmp(target); // taken
-    }
-    return NULL; // not taken
-  }
-
-  IRInstruction* srcInst = boolSrc->getInstruction();
-  Opcode srcOpcode = srcInst->getOpcode();
-  bool srcHasRefCountedOpnds = false;
-  for (uint32 i = 0; i < srcInst->getNumSrcs(); i++) {
-    if (isRefCounted(srcInst->getSrc(i))) {
-      srcHasRefCountedOpnds = true;
-      break;
-    }
-  }
-  // try to combine the src inst with the Jmp. We can't combine the src
-  // instruction with the jump if the src's are refcounted then we may dec
-  // refs between the src instruction and the jump and then combining
-  // would be illegal.
-  if (!srcHasRefCountedOpnds) {
-    if (isCmpOp(srcOpcode)) {
-      if (negate) {
-        srcOpcode = negateQueryOp(srcOpcode);
-      }
-      return genJmpCond(queryToJmpOp(srcOpcode),
-                        srcInst->getSrc(0),
-                        srcInst->getSrc(1),
-                        target);
-    } else if (isTypeQueryOp(srcOpcode)) {
-      if (negate) {
-        srcOpcode = negateQueryOp(srcOpcode);
-      }
-      return genJmpCond(queryToJmpOp(srcOpcode),
-                        srcInst->getTypeParam(),
-                        srcInst->getSrc(0),
-                        target);
-    } else if (isQueryOp(srcOpcode)) {
-      if (negate) {
-        srcOpcode = negateQueryOp(srcOpcode);
-      }
-      return genJmpCond(queryToJmpOp(srcOpcode),
-                        srcInst->getSrc(0),
-                        target);
-    }
-  }
-  Opcode opc = negate ? JmpZero : JmpNZero;
-  if (!srcHasRefCountedOpnds && isConvIntOrPtrToBool(srcInst)) {
-    // test the int/ptr value directly
-    gen(opc, getLabel(target), srcInst->getSrc(0));
-  } else {
-    gen(opc, getLabel(target), boolSrc);
-  }
+  gen(negate ? JmpZero : JmpNZero, getLabel(target), boolSrc);
   return target;
 }
 
@@ -770,8 +640,8 @@ Trace* TraceBuilder::genVerifyParamType(SSATmp* objClass,
   SSATmp* constraint =
     constraintClass ? genDefConst<const Class*>(constraintClass)
                     : genLdCachedClass(className);
-
-  return genJmpCond(JmpNSame, objClass, constraint, exitTrace);
+  gen(JmpNSame, getLabel(exitTrace), objClass, constraint);
+  return exitTrace;
 }
 
 SSATmp* TraceBuilder::genInstanceOfD(SSATmp* src, SSATmp* className) {
@@ -1267,9 +1137,11 @@ void TraceBuilder::genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retVal) {
 }
 
 IRInstruction* TraceBuilder::genMarker(uint32 bcOff, int32 spOff) {
-  return appendInstruction(m_irFactory.marker(bcOff,
-                                              m_curFunc->getConstValAsFunc(),
-                                              spOff));
+  auto* marker = m_irFactory.marker(bcOff,
+                                    m_curFunc->getConstValAsFunc(),
+                                    spOff);
+  appendInstruction(marker);
+  return marker;
 }
 
 void TraceBuilder::genDecRefStack(Type::Tag type, uint32 stackOff) {
@@ -1489,9 +1361,10 @@ SSATmp* TraceBuilder::getSSATmp(IRInstruction* inst) {
   return opnd;
 }
 
-IRInstruction* TraceBuilder::appendInstruction(IRInstruction* inst) {
-  m_trace->appendInstruction(inst);
-  return inst;
+void TraceBuilder::appendInstruction(IRInstruction* inst) {
+  if (inst->getOpcode() != Nop) {
+    m_trace->appendInstruction(inst);
+  }
 }
 
 CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {

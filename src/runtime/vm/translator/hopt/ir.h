@@ -152,17 +152,17 @@ enum OpcodeFlag : uint64_t {
   OPC(JmpLte,            (HasDest|Essential))                           \
   OPC(JmpEq,             (HasDest|Essential))                           \
   OPC(JmpNeq,            (HasDest|Essential))                           \
-  OPC(JmpZero,           (HasDest|Essential))                           \
-  OPC(JmpNZero,          (HasDest|Essential))                           \
   OPC(JmpSame,           (HasDest|Essential))                           \
   OPC(JmpNSame,          (HasDest|Essential))                           \
-    /* keep preceeding conditional branches contiguous */               \
   OPC(JmpInstanceOfD,    (HasDest|Essential))                           \
   OPC(JmpNInstanceOfD,   (HasDest|Essential))                           \
   OPC(JmpIsSet,          (HasDest|Essential))                           \
   OPC(JmpIsType,         (HasDest|Essential))                           \
   OPC(JmpIsNSet,         (HasDest|Essential))                           \
   OPC(JmpIsNType,        (HasDest|Essential))                           \
+    /* keep preceeding conditional branches contiguous */               \
+  OPC(JmpZero,           (HasDest|Essential))                           \
+  OPC(JmpNZero,          (HasDest|Essential))                           \
   OPC(Jmp_,              (HasDest|Essential))                           \
   OPC(ExitWhenSurprised, (Essential))                                   \
   OPC(ExitOnVarEnv,      (Essential))                                   \
@@ -307,6 +307,7 @@ enum OpcodeFlag : uint64_t {
   OPC(ContRaiseCheck,    (Essential))                                   \
   OPC(ContPreNext,       (Essential|MemEffects))                        \
   OPC(ContStartedCheck,  (Essential))                                   \
+  /*  */                                                                \
   OPC(IterInit,          (HasDest|CallsNative|MemEffects|MayModifyRefs| \
                           ConsumesRC))                                  \
   OPC(IterInitK,         (HasDest|CallsNative|MemEffects|MayModifyRefs| \
@@ -314,8 +315,10 @@ enum OpcodeFlag : uint64_t {
   OPC(IterNext,          (HasDest|CallsNative|MemEffects|MayModifyRefs))\
   OPC(IterNextK,         (HasDest|CallsNative|MemEffects|MayModifyRefs))\
                                                                         \
+  /* misc */                                                            \
   OPC(IncStat,           (Essential|MemEffects))                        \
   OPC(DbgAssertRefCount, (Essential))                                   \
+  OPC(Nop,               (NoFlags))                                     \
   /* */
 
 enum Opcode {
@@ -325,38 +328,47 @@ enum Opcode {
   IR_NUM_OPCODES
 };
 
-static inline bool isCmpOp(Opcode opc) {
+inline bool isCmpOp(Opcode opc) {
   return (opc >= OpGt && opc <= NInstanceOfD);
 }
 
-static inline Opcode cmpToJmpOp(Opcode opc) {
+inline Opcode cmpToJmpOp(Opcode opc) {
   assert(isCmpOp(opc));
   return (Opcode)(JmpGt + (opc - OpGt));
 }
 
-static inline bool isQueryOp(Opcode opc) {
+inline bool isQueryOp(Opcode opc) {
   return (opc >= OpGt && opc <= IsNType);
 }
 
-static inline bool isTypeQueryOp(Opcode opc) {
+inline bool isTypeQueryOp(Opcode opc) {
   return (opc == IsType || opc == IsNType);
 }
 
-static inline Opcode queryToJmpOp(Opcode opc) {
+inline Opcode queryToJmpOp(Opcode opc) {
   assert(isQueryOp(opc));
   return (Opcode)(JmpGt + (opc - OpGt));
 }
 
+inline bool isQueryJmpOp(Opcode opc) {
+  return opc >= JmpGt && opc <= JmpIsNType;
+}
+
+inline Opcode queryJmpToQueryOp(Opcode opc) {
+  assert(isQueryJmpOp(opc));
+  return Opcode(OpGt + (opc - JmpGt));
+}
+
 extern Opcode queryNegateTable[];
 
-static inline Opcode negateQueryOp(Opcode opc) {
+inline Opcode negateQueryOp(Opcode opc) {
   assert(isQueryOp(opc));
   return queryNegateTable[opc - OpGt];
 }
 
 extern Opcode queryCommuteTable[];
 
-static inline Opcode commuteQueryOp(Opcode opc) {
+inline Opcode commuteQueryOp(Opcode opc) {
   assert(opc >= OpGt && opc <= OpNSame);
   return queryCommuteTable[opc - OpGt];
 }
@@ -718,7 +730,7 @@ typedef folly::Range<SSATmp**> SSARange;
  * All IRInstruction subclasses must be arena-allocatable.
  * (Destructors are not called when they come from IRFactory.)
  */
-struct IRInstruction : private boost::noncopyable {
+struct IRInstruction {
   typedef std::list<IRInstruction*> List;
   typedef std::list<IRInstruction*>::iterator Iterator;
   typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
@@ -738,7 +750,25 @@ struct IRInstruction : private boost::noncopyable {
     , m_tca(nullptr)
   {}
 
+  IRInstruction(const IRInstruction&) = delete;
+
+  /*
+   * Construct an IRInstruction as a deep copy of `inst', using
+   * factory to allocate memory for its srcs/dests.
+   */
   explicit IRInstruction(IRFactory& factory, const IRInstruction* inst);
+
+  /*
+   * Replace an instruction in place with a Nop.  This sometimes may
+   * be a result of a simplification pass.
+   */
+  void convertToNop();
+
+  /*
+   * Deep-copy an IRInstruction, using factory to allocate memory for
+   * the IRInstruction itself, and its srcs/dests.
+   */
+  virtual IRInstruction* clone(IRFactory* factory) const;
 
   Opcode     getOpcode()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
@@ -790,7 +820,6 @@ struct IRInstruction : private boost::noncopyable {
   virtual bool isConstInstruction() const { return false; }
   virtual bool equals(IRInstruction* inst) const;
   virtual size_t hash() const;
-  virtual IRInstruction* clone(IRFactory* factory) const;
   virtual void print(std::ostream& ostream) const;
   void print() const;
   std::string toString() const;
@@ -821,6 +850,7 @@ struct IRInstruction : private boost::noncopyable {
   void printSrcs(std::ostream& ostream) const;
 
 private:
+  IRInstruction& operator=(const IRInstruction&) = default;
   bool mayReenterHelper() const;
 
 private:
@@ -1307,7 +1337,7 @@ int32_t spillValueCells(IRInstruction* spillStack);
  */
 constexpr int kSpillStackActRecExtraArgs = 4;
 
-static inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
+inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
   if (!(instr->getOpcode() == Conv &&
         instr->getTypeParam() == Type::Bool)) {
     return false;

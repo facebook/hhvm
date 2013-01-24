@@ -31,6 +31,15 @@ struct Simplifier {
 
   static void copyProp(IRInstruction* tmp);
 
+  /*
+   * Simplify performs a number of optimizations.
+   *
+   * In many cases this may involve returning a SSATmp* that should be
+   * used instead of the candidate instruction passed to this
+   * function.  If this function returns nullptr, the candidate
+   * instruction should still be used (but the call to simplify may
+   * have changed it, also).
+   */
   SSATmp* simplify(IRInstruction*);
 
 private:
@@ -64,6 +73,7 @@ private:
   SSATmp* genDefBool(bool val);
   SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyCondJmp(IRInstruction*);
 
 private:
   TraceBuilder* const m_tb;

@@ -233,6 +233,11 @@ bool isRefCounted(SSATmp* tmp) {
   return true;
 }
 
+void IRInstruction::convertToNop() {
+  IRInstruction nop(Nop);
+  *this = nop;
+}
+
 IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }

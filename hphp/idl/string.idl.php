@@ -972,7 +972,7 @@ DefineFunction(
       array(
         'name'   => "extra",
         'type'   => StringVec,
-        'value'  => "Array()",
+        'value'  => "empty_array",
         'desc'   => "An array of extra ascii chars to be encoded.",
       ),
     ),

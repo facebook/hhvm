@@ -958,21 +958,33 @@ TypedValue* fg_debug_zval_dump(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Variant HPHP::f_unserialize(HPHP::String const&)
-_ZN4HPHP13f_unserializeERKNS_6StringE
+HPHP::Variant HPHP::f_unserialize(HPHP::String const&, HPHP::Array const&)
+_ZN4HPHP13f_unserializeERKNS_6StringERKNS_5ArrayE
 
 (return value) => rax
 _rv => rdi
 str => rsi
+class_whitelist => rdx
 */
 
-TypedValue* fh_unserialize(TypedValue* _rv, Value* str) asm("_ZN4HPHP13f_unserializeERKNS_6StringE");
+TypedValue* fh_unserialize(TypedValue* _rv, Value* str, Value* class_whitelist) asm("_ZN4HPHP13f_unserializeERKNS_6StringERKNS_5ArrayE");
 
 TypedValue * fg1_unserialize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_unserialize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  tvCastToStringInPlace(args-0);
-  fh_unserialize((rv), &args[-0].m_data);
+  switch (count) {
+  default: // count >= 2
+    if ((args-1)->m_type != KindOfArray) {
+      tvCastToArrayInPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  Array defVal1 = empty_array;
+  fh_unserialize((rv), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -981,25 +993,26 @@ TypedValue* fg_unserialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_unserialize((&(rv)), &args[-0].m_data);
+    if (count >= 1LL && count <= 2LL) {
+      if ((count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
+        Array defVal1 = empty_array;
+        fh_unserialize((&(rv)), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 1);
+        frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_unserialize(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
+        frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("unserialize", count, 1, 1, 1);
+      throw_wrong_arguments_nr("unserialize", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
+    frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

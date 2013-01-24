@@ -182,8 +182,8 @@ void f_debug_zval_dump(CVarRef variable) {
   vs.serialize(variable, false);
 }
 
-Variant f_unserialize(CStrRef str) {
-  return unserialize_from_string(str);
+Variant f_unserialize(CStrRef str, CArrRef class_whitelist /* = empty_array */) {
+  return unserialize_from_string(str, class_whitelist);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

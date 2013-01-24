@@ -2145,7 +2145,7 @@ TypedValue * fg1_fb_htmlspecialchars(TypedValue* rv, HPHP::VM::ActRec* ar, int64
     tvCastToStringInPlace(args-0);
   }
   String defVal2 = "ISO-8859-1";
-  Array defVal3 = Array();
+  Array defVal3 = empty_array;
   fh_fb_htmlspecialchars((&rv->m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? &args[-3].m_data : (Value*)(&defVal3));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
@@ -2159,7 +2159,7 @@ TypedValue* fg_fb_htmlspecialchars(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || (args-3)->m_type == KindOfArray) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
         String defVal2 = "ISO-8859-1";
-        Array defVal3 = Array();
+        Array defVal3 = empty_array;
         fh_fb_htmlspecialchars((&rv.m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? &args[-3].m_data : (Value*)(&defVal3));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);

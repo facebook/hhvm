@@ -276,15 +276,16 @@ variable => rdi
 void fh_debug_zval_dump(TypedValue* variable) asm("_ZN4HPHP17f_debug_zval_dumpERKNS_7VariantE");
 
 /*
-HPHP::Variant HPHP::f_unserialize(HPHP::String const&)
-_ZN4HPHP13f_unserializeERKNS_6StringE
+HPHP::Variant HPHP::f_unserialize(HPHP::String const&, HPHP::Array const&)
+_ZN4HPHP13f_unserializeERKNS_6StringERKNS_5ArrayE
 
 (return value) => rax
 _rv => rdi
 str => rsi
+class_whitelist => rdx
 */
 
-TypedValue* fh_unserialize(TypedValue* _rv, Value* str) asm("_ZN4HPHP13f_unserializeERKNS_6StringE");
+TypedValue* fh_unserialize(TypedValue* _rv, Value* str, Value* class_whitelist) asm("_ZN4HPHP13f_unserializeERKNS_6StringERKNS_5ArrayE");
 
 /*
 HPHP::Array HPHP::f_get_defined_vars()

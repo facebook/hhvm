@@ -536,6 +536,12 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The serialized string.\n\nIf the variable being unserialized is an object, after successfully reconstructing the object PHP will automatically attempt to call the __wakeup() member function (if it exists).\n\nunserialize_callback_func directive\n\nIt's possible to set a callback-function which will be called, if an undefined class should be instantiated during unserializing. (to prevent getting an incomplete object \"__PHP_Incomplete_Class\".) Use your php.ini, ini_set() or .htaccess to define 'unserialize_callback_func'. Everytime an undefined class should be instantiated, it'll be called. To disable this feature just empty this setting.",
       ),
+      array(
+        'name'   => "class_whitelist",
+        'type'   => StringVec,
+        'desc'   => "The array of the class names that are authorized to be unserialized. The array is default to be empty, which means no class is allowed. If the class name is a super class, all its subclasses are also allowed. Note that primitive types and Serializable classes are not subject to this whitelist. See http://fburl.com/SafeSerializable for the reason why we need this.",
+        'value'  => "empty_array"
+      ),
     ),
   ));
 

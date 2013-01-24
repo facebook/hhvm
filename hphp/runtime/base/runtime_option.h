@@ -219,6 +219,9 @@ public:
   static bool WhitelistExecWarningOnly;
   static std::vector<std::string> AllowedExecCmds;
 
+  static bool UnserializationWhitelistCheck;
+  static bool UnserializationWhitelistCheckWarningOnly;
+
   static std::string TakeoverFilename;
   static int AdminServerPort;
   static int AdminThreadCount;

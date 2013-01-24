@@ -90,7 +90,7 @@ String f_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
                           bool double_encode = true);
 String f_fb_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
                              CStrRef charset = "ISO-8859-1",
-                             CArrRef extra = Array());
+                             CArrRef extra = empty_array);
 String f_quoted_printable_encode(CStrRef str);
 String f_quoted_printable_decode(CStrRef str);
 Variant f_convert_uudecode(CStrRef data);

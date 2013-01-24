@@ -220,6 +220,9 @@ bool RuntimeOption::WhitelistExec = false;
 bool RuntimeOption::WhitelistExecWarningOnly = false;
 std::vector<std::string> RuntimeOption::AllowedExecCmds;
 
+bool RuntimeOption::UnserializationWhitelistCheck = false;
+bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
+
 std::string RuntimeOption::TakeoverFilename;
 int RuntimeOption::AdminServerPort;
 int RuntimeOption::AdminThreadCount = 1;
@@ -772,6 +775,11 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     WhitelistExec = server["WhitelistExec"].getBool();
     WhitelistExecWarningOnly = server["WhitelistExecWarningOnly"].getBool();
     server["AllowedExecCmds"].get(AllowedExecCmds);
+
+    UnserializationWhitelistCheck =
+      server["UnserializationWhitelistCheck"].getBool(false);
+    UnserializationWhitelistCheckWarningOnly =
+      server["UnserializationWhitelistCheckWarningOnly"].getBool(true);
 
     server["AllowedFiles"].get(AllowedFiles);
 

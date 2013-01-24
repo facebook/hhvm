@@ -415,11 +415,10 @@ function get_serialized_default($s) {
   if (preg_match('/^".*"$/', $s) ||
       preg_match('/^[\-0-9.]+$/', $s) ||
       preg_match('/^0x[0-9a-fA-F]+$/', $s) ||
-      preg_match('/^(true|false|null)$/', $s) ||
-      $s == 'Array()'
-     ) {
+      preg_match('/^(true|false|null)$/', $s)) {
     return serialize(eval("return $s;"));
   }
+  if ($s == "empty_array") return serialize(array());
   if (preg_match('/^null_(string|array|object|variant)$/', $s)) {
     return serialize(null);
   }

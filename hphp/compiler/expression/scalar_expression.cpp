@@ -437,7 +437,7 @@ int64_t ScalarExpression::getHash() const {
 Variant ScalarExpression::getVariant() const {
   if (!m_serializedValue.empty()) {
     Variant ret = unserialize_from_buffer(
-      m_serializedValue.data(), m_serializedValue.size());
+      m_serializedValue.data(), m_serializedValue.size(), null_array);
     if (ret.isDouble()) {
       return m_dval;
     }

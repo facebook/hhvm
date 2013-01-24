@@ -17,7 +17,8 @@
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/zend/zend_strtod.h>
-
+#include <runtime/base/array/array_iterator.h>
+#include <runtime/ext/ext_class.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,6 +67,21 @@ void VariableUnserializer::read(char *buf, uint n) {
 Variant &VariableUnserializer::addVar() {
   m_vars.push_back(uninit_null());
   return m_vars.back();
+}
+
+bool VariableUnserializer::isWhitelistedClass(CStrRef cls_name) const {
+  if (m_type != Serialize || m_classWhiteList.isNull()) {
+    return true;
+  }
+  if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
+    for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
+      CVarRef value(iter.secondRef());
+      if (f_is_subclass_of(cls_name, value) || value.same(cls_name)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

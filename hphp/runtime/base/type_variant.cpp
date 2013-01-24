@@ -3089,6 +3089,18 @@ void Variant::unserialize(VariableUnserializer *uns,
 
       VM::Class* cls = VM::Unit::loadClass(clsName.get());
       Object obj;
+      if (RuntimeOption::UnserializationWhitelistCheck &&
+          !uns->isWhitelistedClass(clsName)) {
+        String err_msg =
+          "The object being unserialized with class name '%s' "
+          "is not in the given whitelist. "
+          "See http://fburl.com/SafeSerializable for more detail";
+        if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
+          raise_warning(err_msg, clsName.c_str());
+        } else {
+          raise_error(err_msg, clsName.c_str());
+        }
+      }
       if (cls) {
         obj = VM::Instance::newInstance(cls);
         if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {

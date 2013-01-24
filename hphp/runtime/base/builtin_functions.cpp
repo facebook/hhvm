@@ -747,15 +747,18 @@ String f_serialize(CVarRef value) {
 }
 
 Variant unserialize_ex(const char* str, int len,
-                       VariableUnserializer::Type type) {
+                       VariableUnserializer::Type type,
+                       CArrRef class_whitelist /* = null_array */) {
   if (str == nullptr || len <= 0) {
     return false;
   }
 
-  VariableUnserializer vu(str, len, type);
+  VariableUnserializer vu(str, len, type, false, class_whitelist);
   Variant v;
   try {
     v = vu.unserialize();
+  } catch (FatalErrorException &e) {
+    throw;
   } catch (Exception &e) {
     raise_notice("Unable to unserialize: [%s]. %s.", str,
                  e.getMessage().c_str());
@@ -764,8 +767,10 @@ Variant unserialize_ex(const char* str, int len,
   return v;
 }
 
-Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
-  return unserialize_ex(str.data(), str.size(), type);
+Variant unserialize_ex(CStrRef str,
+                       VariableUnserializer::Type type,
+                       CArrRef class_whitelist /* = null_array */) {
+  return unserialize_ex(str.data(), str.size(), type, class_whitelist);
 }
 
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {

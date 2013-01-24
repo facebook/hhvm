@@ -33,17 +33,27 @@ public:
   };
 
 public:
+  /**
+   * Be aware that the default class_whitelist is null_array instead of
+   * empty_array here because we do not limit the unserialization of arbitrary
+   * class for hphp internal use
+   */
   VariableUnserializer(const char *str, size_t len, Type type,
-                       bool allowUnknownSerializableClass = false)
+                       bool allowUnknownSerializableClass = false,
+                       CArrRef class_whitelist = null_array)
       : m_type(type), m_buf(str), m_end(str + len),
-        m_unknownSerializable(allowUnknownSerializableClass) {}
+        m_unknownSerializable(allowUnknownSerializableClass),
+        m_classWhiteList(class_whitelist) {}
   VariableUnserializer(const char *str, const char *end, Type type,
-                       bool allowUnknownSerializableClass = false)
+                       bool allowUnknownSerializableClass = false,
+                       CArrRef class_whitelist = null_array)
       : m_type(type), m_buf(str), m_end(end),
-        m_unknownSerializable(allowUnknownSerializableClass) {}
+        m_unknownSerializable(allowUnknownSerializableClass),
+        m_classWhiteList(class_whitelist) {}
 
   Type getType() const { return m_type;}
   bool allowUnknownSerializableClass() const { return m_unknownSerializable;}
+  bool isWhitelistedClass(CStrRef cls_name) const;
 
   Variant unserialize();
   Variant unserializeKey();
@@ -123,6 +133,7 @@ public:
   smart::vector<RefInfo> m_refs;
   smart::list<Variant> m_vars;
   bool m_unknownSerializable;
+  CArrRef m_classWhiteList;    // classes allowed to be unserialized
 
   void check() {
     if (m_buf >= m_end) {

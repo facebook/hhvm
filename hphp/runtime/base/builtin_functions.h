@@ -483,21 +483,28 @@ Object f_clone(CVarRef v);
 char const kUnserializableString[] = "\x01";
 
 /**
- * Serialize/unserialize a variant into/from a string. We need these two
- * functions in runtime/base, as there are functions in runtime/base that depend on
- * these two functions.
+ * Serialize/unserialize a variant into/from a string. We need these
+ * two functions in runtime/base, as there are functions in
+ * runtime/base that depend on these two functions.
  */
 String f_serialize(CVarRef value);
-Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type);
+Variant unserialize_ex(CStrRef str,
+                       VariableUnserializer::Type type,
+                       CArrRef class_whitelist = null_array);
 Variant unserialize_ex(const char* str, int len,
-                       VariableUnserializer::Type type);
+                       VariableUnserializer::Type type,
+                       CArrRef class_whitelist = null_array);
 
-inline Variant unserialize_from_buffer(const char* str, int len) {
-  return unserialize_ex(str, len, VariableUnserializer::Serialize);
+inline Variant unserialize_from_buffer(const char* str, int len,
+                                       CArrRef class_whitelist = null_array) {
+  return unserialize_ex(str, len,
+                        VariableUnserializer::Serialize,
+                        class_whitelist);
 }
 
-inline Variant unserialize_from_string(CStrRef str) {
-  return unserialize_from_buffer(str.data(), str.size());
+inline Variant unserialize_from_string(CStrRef str,
+                                       CArrRef class_whitelist = null_array) {
+  return unserialize_from_buffer(str.data(), str.size(), class_whitelist);
 }
 
 String resolve_include(CStrRef file, const char* currentDir,

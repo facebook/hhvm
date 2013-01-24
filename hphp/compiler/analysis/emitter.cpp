@@ -4305,6 +4305,9 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
           not_reached();
       }
       break;
+    case KindOfArray:
+      e.Array(v.getArrayData());
+      break;
     default:
       not_reached();
   }

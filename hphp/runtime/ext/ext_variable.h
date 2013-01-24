@@ -61,7 +61,8 @@ void f_var_dump(CVarRef v);
 void f_var_dump(int _argc, CVarRef expression, CArrRef _argv = null_array);
 void f_debug_zval_dump(CVarRef variable);
 String f_serialize(CVarRef value);
-Variant f_unserialize(CStrRef str);
+Variant f_unserialize(CStrRef str,
+                      CArrRef class_whitelist = empty_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // variable table

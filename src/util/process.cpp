@@ -515,7 +515,7 @@ std::string Process::GetCPUModel() {
     cpu_exthigh = regs[0];
   }
 
-  char cpu_brand[48];
+  char cpu_brand[3 * sizeof(regs) + 1];
   char *brand = cpu_brand;
   if (cpu_exthigh >= 0x80000004) {
     for (u_int i = 0x80000002; i < 0x80000005; i++) {
@@ -525,6 +525,7 @@ std::string Process::GetCPUModel() {
     }
   }
   *brand = '\0';
+  assert(brand - cpu_brand < sizeof(cpu_brand));
   return cpu_brand;
 }
 

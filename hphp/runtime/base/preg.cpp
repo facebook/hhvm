@@ -235,6 +235,12 @@ static const pcre_cache_entry* pcre_get_compiled_regex_cache(CStrRef regex) {
     }
   }
 
+  /* We've reached a null byte, now check if we're actually at the end of the
+     string.  If not this is a bad expression, and a potential security hole. */
+  if (regex.length() != (pp - regex.data())) {
+    raise_error("Error: Null byte found in pattern");
+  }
+
   /* Compile pattern and display a warning if compilation failed. */
   const char  *error;
   int erroffset;

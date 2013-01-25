@@ -542,22 +542,31 @@ void MarkerInstruction::print(std::ostream& ostream) const {
 
 int SSATmp::numNeededRegs() const {
   Type::Tag type = getType();
+  switch (type) {
+    // These don't need a register because their values are static or unused.
+    case Type::None:
+    case Type::Uninit:
+    case Type::Null:
+    case Type::RetAddr:
+    case Type::ActRec:
+      return 0;
 
-  // These types don't get a register because their values are static
-  // or not used.
-  if (type == Type::Null || type == Type::Uninit || type == Type::None ||
-      type == Type::RetAddr || type == Type::ActRec) {
-    return 0;
+    // These need 2 registers, 1 for the value and 1 for the type.
+    case Type::Cell:
+    case Type::Gen:
+    case Type::Uncounted:
+    case Type::UncountedInit:
+      return 2;
+
+    // These need 2 registers, 1 for Func*, and 1 for {Obj|Cls*|ClsCtx*}.
+    case Type::FuncClassPtr:
+    case Type::FuncCtxPtr:
+      return 2;
+
+    // By default, all other types only need 1 register.
+    default:
+      return 1;
   }
-
-  // Need 2 registers for these types, for type and value, or 1 for
-  // Func* and 1 for Class*.
-  if (!Type::isStaticallyKnown(type) || type == Type::FuncClassPtr) {
-    return 2;
-  }
-
-  // Everything else just has 1.
-  return 1;
 }
 
 int SSATmp::numAllocatedRegs() const {

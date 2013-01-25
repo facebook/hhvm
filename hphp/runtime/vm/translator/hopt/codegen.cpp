@@ -656,17 +656,12 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  ArgGroup& args) {
   assert(int(args.size()) <= kNumRegisterArgs);
 
-  // We don't want to include the destination registers defined by this
-  // instruction when saving the caller-saved registers.
-  auto const regSaver = [&]() -> PhysRegSaverParity<1> {
-    RegSet rs = m_curInst->getLiveOutRegs() & kCallerSaved;
-    for (auto& dst : m_curInst->getDsts()) {
-      for (int i = 0; i < dst->numAllocatedRegs(); ++i) {
-        rs.remove(dst->getReg(i));
-      }
-    }
-    return PhysRegSaverParity<1>(a, rs);
-  }();
+  // Save the register that are live at the point after this IR instruction.
+  // However, don't save the destination registers that will be overwritten
+  // by this call.
+  RegSet regsToSave = (m_curInst->getLiveOutRegs() & kCallerSaved).
+                      remove(dstReg0).remove(dstReg1);
+  PhysRegSaverParity<1> regSaver(a, regsToSave);
 
   // Assign registers to the arguments
   for (size_t i = 0; i < args.size(); i++) {
@@ -695,6 +690,12 @@ void CodeGenerator::cgCallHelper(Asm& a,
     // dstReg1 contains m_type and _count but we're expecting just the
     // type in the lower 32 bits, so shift right.
     a.    shrq (kTypeShiftBits, dstReg1);
+  }
+}
+
+void CodeGenerator::emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
+  if (srcReg != dstReg) {
+    as.movq(srcReg, dstReg);
   }
 }
 
@@ -1224,11 +1225,11 @@ static bool instanceOfHelperIFace(const Class* objClass,
   return testClass && objClass->classof(testClass->preClass());
 }
 
-void CodeGenerator::emitInstanceCheck(IRInstruction* inst) {
+void CodeGenerator::emitInstanceCheck(IRInstruction* inst, PhysReg dstReg) {
   const bool ifaceHint = inst->getSrc(2)->getValBool();
   cgCallHelper(m_as,
                TCA(ifaceHint ? instanceOfHelperIFace : instanceOfHelper),
-               rax,
+               dstReg,
                kNoSyncPoint,
                ArgGroup()
                  .ssa(inst->getSrc(0))
@@ -1236,13 +1237,7 @@ void CodeGenerator::emitInstanceCheck(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInstanceOfCommon(IRInstruction* inst) {
-  auto reg = rbyte(inst->getDst()->getReg());
-  auto& a = m_as;
-
-  emitInstanceCheck(inst);
-  if (al != reg) {
-    a.  movb   (al, reg);
-  }
+  emitInstanceCheck(inst, inst->getDst()->getReg());
 }
 
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
@@ -1255,14 +1250,14 @@ void CodeGenerator::cgNInstanceOf(IRInstruction* inst) {
 
 void CodeGenerator::cgJmpInstanceOf(IRInstruction* inst) {
   auto& a = m_as;
-  emitInstanceCheck(inst);
+  emitInstanceCheck(inst, rax);
   a.    testb   (al, al);
   emitJccDirectExit(inst, CC_NZ);
 }
 
 void CodeGenerator::cgJmpNInstanceOf(IRInstruction* inst) {
   auto& a = m_as;
-  emitInstanceCheck(inst);
+  emitInstanceCheck(inst, rax);
   a.    testb  (al, al);
   emitJccDirectExit(inst, CC_Z);
 }
@@ -2767,12 +2762,18 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(objOrCls->getReg(),
                                 spOffset + AROFF(m_this),
                                 spReg);
+  } else if (objOrCls->getType() == Type::CtxPtr) {
+    // Stores either a this pointer of a ClsCtxPtr -- statically unknown.
+    Reg64 objOrClsPtrReg = objOrCls->getReg();
+    m_as.storeq(objOrClsPtrReg, spReg[spOffset + AROFF(m_this)]);
   } else {
     assert(objOrCls->getType() == Type::Null);
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + AROFF(m_this);
-    // When func is Type::FuncClassPtr, m_this/m_cls will be initialized below
-    if (!func->isConst() && func->getType() == Type::FuncClassPtr) {
+    // When func is either Type::FuncClassPtr or Type::FuncCtxPtr,
+    // m_this/m_cls will be initialized below
+    if (!func->isConst() && (func->getType() == Type::FuncClassPtr ||
+                             func->getType() == Type::FuncCtxPtr)) {
       // m_this is unioned with m_cls and will be initialized below
       setThis = false;
     } else {
@@ -2801,7 +2802,8 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(rScratch,
                                 spOffset + AROFF(m_func),
                                 spReg);
-    if (func->getType() == Type::FuncClassPtr) {
+    if (func->getType() == Type::FuncClassPtr ||
+        func->getType() == Type::FuncCtxPtr) {
       // Fill in m_cls if provided with both func* and class*
       fprintf(stderr, "cgAllocActRec: const func->isFuncClassPtr()\n");
       CG_PUNT(cgAllocActRec);
@@ -2811,7 +2813,8 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(func->getReg(0),
                                 offset_m_func,
                                 spReg);
-    if (func->getType() == Type::FuncClassPtr) {
+    if (func->getType() == Type::FuncClassPtr ||
+        func->getType() == Type::FuncCtxPtr) {
       int offset_m_cls = spOffset + AROFF(m_cls);
       m_as.store_reg64_disp_reg64(func->getReg(1),
                                   offset_m_cls,
@@ -3060,6 +3063,14 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
     m_astubs.call((TCA)fatalNullThis);
     recordSyncPoint(m_astubs);
 #endif
+  }
+}
+
+void CodeGenerator::cgLdCtx(IRInstruction* inst) {
+  PhysReg dstReg = inst->getDst()->getReg();
+  PhysReg srcReg = inst->getSrc(0)->getReg();
+  if (dstReg != InvalidReg) {
+    m_as.loadq(srcReg[AROFF(m_this)], dstReg);
   }
 }
 
@@ -3814,6 +3825,147 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
     // StaticMethodCache::lookupIR() returned NULL, bail
     emitFwdJmp(m_astubs, label);
   }
+}
+
+/**
+ * Helper to emit getting the value for ActRec's m_this/m_cls slot
+ * (in destCtxReg) from a This pointer (in thisReg) depending on
+ * whether the callee method is static or not.
+ */
+void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg destCtxReg,
+                                              PhysReg thisReg,
+                                              bool    staticCallee) {
+  if (staticCallee) {
+    // Load (this->m_cls | 0x1) into destCtxReg.
+    m_as.loadq(thisReg[ObjectData::getVMClassOffset()], destCtxReg);
+    m_as.orq(1, destCtxReg);
+  } else {
+    // Move thisReg into destCtxReg and inc-ref it
+    emitMovRegReg(m_as, thisReg, destCtxReg);
+    emitIncRef(m_as, destCtxReg);
+  }
+}
+
+/**
+ * This method is similar to emitGetCtxFwdCallWithThis above,
+ * but whether or not the callee is a static method is uknown at JIT time,
+ * and that is determined dynamically by looking up into the StaticMethodFCache.
+ */
+void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
+                                                 PhysReg      thisReg,
+                                                 CacheHandle& ch) {
+  Label NonStaticCall, End;
+
+  // thisReg is holding $this. Should we pass it to the callee?
+  m_as.cmpl(1, rVmTl[ch + offsetof(StaticMethodFCache, m_static)]);
+  m_as.jcc8(CC_NE, NonStaticCall);
+  // If calling a static method...
+  {
+    // Load (this->m_cls | 0x1) into destCtxReg
+    m_as.loadq(thisReg[ObjectData::getVMClassOffset()], destCtxReg);
+    m_as.orq(1, destCtxReg);
+    m_as.jmp8(End);
+  }
+  // Else: calling non-static method
+  {
+    asm_label(m_as, NonStaticCall);
+    emitMovRegReg(m_as, thisReg, destCtxReg);
+    emitIncRef(m_as, destCtxReg);
+  }
+  asm_label(m_as, End);
+}
+
+void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
+  PhysReg destCtxReg = inst->getDst()->getReg(0);
+  SSATmp*  srcCtxTmp = inst->getSrc(0);
+  PhysReg  srcCtxReg = srcCtxTmp->getReg(0);
+  const Func* callee = inst->getSrc(1)->getValFunc();
+  bool      withThis = srcCtxTmp->getType() == Type::Obj;
+  bool        noThis = srcCtxTmp->getType() == Type::ClassPtr;
+
+  // If we're in a static method or we're sure we don't have a This pointer,
+  // then we're done
+  if ((getCurFunc()->attrs() & AttrStatic) || noThis) {
+    emitMovRegReg(m_as, srcCtxReg, destCtxReg);
+    return;
+  }
+
+  Label End;
+  // If we don't know whether we have a This, we need to check dynamically
+  if (!withThis) {
+    m_as.testb(1, rbyte(destCtxReg));
+    m_as.jcc8(CC_NZ, End);
+  }
+
+  // If we have a This pointer in srcCtxReg, then
+  //   Select either This of its Class based on whether callee is static or not
+  emitGetCtxFwdCallWithThis(destCtxReg, srcCtxReg,
+                            (callee->attrs() & AttrStatic));
+
+  asm_label(m_as, End);
+}
+
+void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
+  PhysReg         funcDestReg = inst->getDst()->getReg(0);
+  PhysReg          destCtxReg = inst->getDst()->getReg(1);
+  const Class*            cls = inst->getSrc(0)->getValClass();
+  const StringData*  methName = inst->getSrc(1)->getValStr();
+  SSATmp*           srcCtxTmp = inst->getSrc(2);
+  PhysReg           srcCtxReg = srcCtxTmp->getReg(0);
+  LabelInstruction* exitLabel = inst->getLabel();
+  const StringData*   clsName = cls->name();
+  CacheHandle              ch = StaticMethodFCache::alloc(clsName, methName,
+                                              getContextName(getCurClass()));
+
+  emitMovRegReg(m_as, srcCtxReg, destCtxReg);
+  m_as.loadq(rVmTl[ch], funcDestReg);
+  m_as.testq(funcDestReg, funcDestReg);
+
+  Label LookupCache, FoundMethod, End;
+
+  // Handle case where method is not entered in the cache
+  m_as.jcc(CC_E, LookupCache);
+  {
+    asm_label(m_astubs, LookupCache);
+    if (false) { // typecheck
+      const UNUSED Func* f = StaticMethodFCache::lookupIR(ch, cls, methName);
+    }
+    cgCallHelper(m_astubs,
+                 (TCA)StaticMethodFCache::lookupIR,
+                 funcDestReg,
+                 kSyncPoint,
+                 ArgGroup().imm(ch)
+                           .immPtr(cls)
+                           .immPtr(methName));
+    // If entry found in target cache, jump back to m_as.
+    // Otherwise, bail to exit label
+    m_astubs.testq(funcDestReg, funcDestReg);
+    m_astubs.jnz(FoundMethod);
+    emitFwdJmp(m_astubs, exitLabel);
+  }
+
+  asm_label(m_as, FoundMethod);
+
+  switch (srcCtxTmp->getType()) {
+    case Type::ClassPtr:
+      return; // done: destCtxReg already has srcCtxReg
+    case Type::Obj:
+      // unconditionally run code produced by emitGetCtxFwdCallWithThisDyn below
+      break;
+    case Type::CtxPtr: {
+      // dynamically check if we have a This pointer and
+      // call emitGetCtxFwdCallWithThisDyn below
+      m_as.testb(1, rbyte(destCtxReg));
+      m_as.jcc8(CC_NZ, End);
+      break;
+    }
+    default: not_reached();
+  }
+
+  // If we have a 'this' pointer ...
+  emitGetCtxFwdCallWithThisDyn(destCtxReg, destCtxReg, ch);
+
+  asm_label(m_as, End);
 }
 
 void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {

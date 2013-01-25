@@ -225,6 +225,8 @@ struct StaticMethodFCache {
                            const char* ctxName);
   static const Func* lookup(CacheHandle chand, const Class* cls,
                             const StringData* meth);
+  static const Func* lookupIR(CacheHandle chand, const Class* cls,
+                              const StringData* meth);
 };
 
 typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>

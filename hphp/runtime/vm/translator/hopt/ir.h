@@ -193,6 +193,7 @@ enum OpcodeFlag : uint64_t {
   OPC(LdProp,            (HasDest))                                     \
   OPC(LdRef,             (HasDest))                                     \
   OPC(LdThis,            (HasDest|CanCSE|Rematerializable))             \
+  OPC(LdCtx,             (HasDest|CanCSE|Rematerializable))             \
   OPC(LdRetAddr,         (HasDest))                                     \
   OPC(LdHome,            (HasDest|CanCSE))                              \
   OPC(LdConst,           (HasDest|CanCSE|Rematerializable))             \
@@ -201,6 +202,8 @@ enum OpcodeFlag : uint64_t {
                           Rematerializable|MayRaiseError))              \
   OPC(LdClsCns,          (HasDest|CanCSE))                              \
   OPC(LdClsMethodCache,  (HasDest|CanCSE|MayRaiseError))                \
+  OPC(LdClsMethodFCache, (HasDest|CanCSE|MayRaiseError))                \
+  OPC(GetCtxFwdCall,     (HasDest|CanCSE))                              \
   OPC(LdClsMethod,       (HasDest|CanCSE))                              \
   /* XXX TODO Create version of LdClsPropAddr that doesn't check */     \
   OPC(LdPropAddr,        (HasDest|CanCSE))                              \
@@ -428,7 +431,7 @@ public:
     IRT(Bool,            "Bool")  \
     IRT(Int,             "Int") /* HPHP::DataType::KindOfInt64 */      \
     IRT(Dbl,             "Dbl")   \
-    IRT(Placeholder,     "ERROR") /* Nothing in VM types enum at this position */ \
+    IRT(Placeholder,     "ERROR") /* Nothing in DataType enum w/ this value */ \
     IRT(StaticStr,       "Sstr")  \
     IRT(UncountedInit,   "UncountedInit") /* One of {Null,Bool,Int,Dbl,SStr} */\
     IRT(Uncounted,       "Uncounted") /* 1 of: {Unin,Null,Bool,Int,Dbl,SStr} */\
@@ -442,13 +445,14 @@ public:
     IRT(BoxedBool,       "Bool&") \
     IRT(BoxedInt,        "Int&")  /* HPHP::DataType::KindOfInt64 */ \
     IRT(BoxedDbl,        "Dbl&")  \
-    IRT(BoxedPlaceholder,"ERROR") /* Nothing in VM types enum at this position */ \
+    IRT(BoxedPlaceholder,"ERROR") /* Nothing in DataType enum w/ this value */ \
     IRT(BoxedStaticStr,  "SStr&") \
     IRT(BoxedStr,        "Str&")  \
     IRT(BoxedArr,        "Arr&")  \
     IRT(BoxedObj,        "Obj&")  \
-    IRT(BoxedCell,       "Cell&") /* any Boxed* types but statically unknown */ \
-    IRT(Gen,             "Gen")   /* Generic type value, (cell or variant but statically unknown) */ \
+    IRT(BoxedCell,       "Cell&") /* any Boxed* type but statically unknown */ \
+    IRT(Gen,             "Gen")     /* Generic type value, (cell or variant */ \
+                                    /* but statically unknown) */              \
     IRT(PtrToCell,       "Cell*") \
     IRT(PtrToGen,        "Gen*")  \
     IRT(Home,            "Home")  /* HPHP::DataType defines this as -2 */ \
@@ -456,10 +460,15 @@ public:
     IRT(ClassPtr,        "Cls*")   \
     IRT(FuncPtr,         "Func*") \
     IRT(VarEnvPtr,       "VarEnv*")\
-    IRT(FuncClassPtr,    "FuncClass*") /* this has both a Func* and a Class* */\
     IRT(NamedEntityPtr,  "NamedEntity*") \
-    IRT(RetAddr,         "RetAddr") /* Return address */ \
-    IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP */\
+    IRT(FuncClassPtr,    "FuncClass*") /* a tuple with a Func* and a Class* */ \
+    IRT(ClassCtxPtr,     "ClsCtx*")     /* Class* with the lowest bit set,  */ \
+                                        /* as stored in ActRec.m_cls field  */ \
+    IRT(CtxPtr,          "Ctx*")    /* Obj or ClassCtx*, statically unknown */ \
+    IRT(FuncCtxPtr,      "FuncCtx*")  /* this has a Func* and either an Obj */ \
+                                    /* or a ClassCtxPtr, statically unknown */ \
+    IRT(RetAddr,         "RetAddr")                       /* Return address */ \
+    IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP*/\
     IRT(TCA,             "TCA") \
     IRT(ActRec,          "ActRec") \
     /*  */
@@ -490,10 +499,12 @@ public:
   }
 
   static bool isStaticallyKnown(Tag t) {
-    return (t != Cell       &&
-            t != Gen        &&
-            t != Uncounted  &&
-            t != UncountedInit);
+    return (t != Cell          &&
+            t != Gen           &&
+            t != Uncounted     &&
+            t != UncountedInit &&
+            t != CtxPtr        &&
+            t != FuncCtxPtr);
   }
 
   static bool isStaticallyKnownUnboxed(Tag t) {
@@ -524,13 +535,14 @@ public:
    * Returns true if t1 is a strict subtype of t2.
    */
   static bool isMoreRefined(Tag t1, Tag t2) {
-    return ((t2 == Gen           && t1 < Gen)                    ||
-            (t2 == Cell          && t1 < Cell)                   ||
-            (t2 == BoxedCell     && t1 < BoxedCell && t1 > Cell) ||
-            (t2 == Str           && t1 == StaticStr)             ||
-            (t2 == BoxedStr      && t1 == BoxedStaticStr)        ||
-            (t2 == Uncounted     && t1 < Uncounted)              ||
-            (t2 == UncountedInit && t1 < UncountedInit && t1 > Uninit));
+    return ((t2 == Gen           && t1 < Gen)                          ||
+            (t2 == Cell          && t1 < Cell)                         ||
+            (t2 == BoxedCell     && t1 < BoxedCell && t1 > Cell)       ||
+            (t2 == Str           && t1 == StaticStr)                   ||
+            (t2 == BoxedStr      && t1 == BoxedStaticStr)              ||
+            (t2 == Uncounted     && t1 < Uncounted)                    ||
+            (t2 == UncountedInit && t1 < UncountedInit && t1 > Uninit) ||
+            (t2 == CtxPtr        && (t1 == Obj || t1 == ClassPtr)));
   }
 
   /*

@@ -76,6 +76,7 @@ public:
   void    genDefFunc(Func*);
 
   SSATmp* genLdThis(Trace* trace);
+  SSATmp* genLdCtx();
   SSATmp* genLdRetAddr();
   SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type::Tag type);
   void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value,

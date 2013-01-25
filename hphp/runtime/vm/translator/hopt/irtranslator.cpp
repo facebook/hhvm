@@ -1081,19 +1081,32 @@ TranslatorX64::irTranslateFPushClsMethodD(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateFPushClsMethodF(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(FPushClsMethodF);
+                                          const NormalizedInstruction& i) {
+  // For now, only support cases where both the class and the method are known.
+  const int classIdx  = 0;
+  const int methodIdx = 1;
+  DynLocation* classLoc  = i.inputs[classIdx];
+  DynLocation* methodLoc = i.inputs[methodIdx];
+
+  HHIR_UNIMPLEMENTED_WHEN(!(methodLoc->isString() &&
+                            methodLoc->rtt.valueString() != NULL &&
+                            classLoc->valueType() == KindOfClass &&
+                            classLoc->rtt.valueClass() != NULL),
+                          FPushClsMethodF_unknown);
+
+  HHIR_EMIT(FPushClsMethodF,
+            i.imm[0].u_IVA, // # of arguments
+            classLoc->rtt.valueClass(),
+            methodLoc->rtt.valueString());
 }
 
 void
 TranslatorX64::irTranslateFPushObjMethodD(const Tracelet &t,
-                                        const NormalizedInstruction& i) {
+                                          const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
   HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfObject),
                           FPushObjMethod_nonObj);
   assert(i.inputs[0]->valueType() == KindOfObject);
-  int id = i.imm[1].u_IVA;
-  UNUSED const StringData* name = curUnit()->lookupLitstrId(id);
   const Class* baseClass = i.inputs[0]->rtt.valueClass();
 
   HHIR_EMIT(FPushObjMethodD,

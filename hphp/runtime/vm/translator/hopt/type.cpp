@@ -60,6 +60,8 @@ Type::Tag outputType(const IRInstruction* inst) {
   case LdARFuncPtr:        return Type::FuncPtr;
   case LdCachedClass:      return Type::ClassPtr;
   case LdClsMethodCache:   return Type::FuncClassPtr;
+  case LdClsMethodFCache:  return Type::FuncCtxPtr;
+  case GetCtxFwdCall:      return Type::CtxPtr;
   case LdClsMethod:        return Type::FuncPtr;
   case LdClsPropAddr:      return Type::PtrToGen;
   case LdCls:              return Type::ClassPtr;
@@ -76,6 +78,7 @@ Type::Tag outputType(const IRInstruction* inst) {
   case LdRetAddr:          return Type::RetAddr;
   case LdStackAddr:        return Type::PtrToGen;
   case LdThis:             return Type::Obj;
+  case LdCtx:              return Type::CtxPtr;
   case NewArray:           return Type::Arr;
   case NewObj:             return Type::StkPtr;
   case NewTuple:           return Type::Arr;

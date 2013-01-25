@@ -1,4 +1,3 @@
-
 *******************************************
 * HipHop Intermediate Representation (HHIR)
 *******************************************
@@ -143,6 +142,9 @@ relation with the above PHP-facing types.
   VarEnv*         VarEnv*
   FuncClass*      Tuple of (Func*,Class*)
   NamedEntity*    NamedEntity*
+  ClsCtx*         A Class* with the lowest bit set (as stored in ActRec.m_cls)
+  Ctx*            {Obj | ClsCtx*}
+  FuncCtx*        Tuple of (Func*,Ctx*)
   StkPtr          Pointer into VM execution stack
   TCA             Machine code address
 
@@ -446,7 +448,7 @@ D:T = LdLoc<T> S0:Home
 LdStackAddr
 LdLocAddr
 
-D:T = LdMem<T> S0:[Gen*|Cell*] [L:Label]
+D:T = LdMem<T> S0:{Gen*|Cell*} [L:Label]
 
   Loads from S0 and puts the value in D. If the optional label L is
   specified and the loaded value's type does not match T, this
@@ -466,7 +468,16 @@ D:T = LdRef<T> S0:T& [L:Label]
   type does not match T, this instruction does not load into D and
   transfers control to L.
 
-LdThis
+D:Obj = LdThis S0:StkPtr [L:Label]
+
+  Loads into D the value of the m_this field out of the frame pointer
+  S0.  If label L is provided, also checks that m_this is valid
+  (i.e. contains an Obj).
+
+D:Ctx* = LdCtx S0:StkPtr
+
+  Loads into D the value of the m_this/m_cls field out of the frame
+  pointer S0.
 
 D:Home = LdHome S0:StkPtr S1:ConstInt
 
@@ -492,6 +503,20 @@ D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [L:Label]
   to L. The result may be uninitialized if the class is not defined.
   Note that no decref is necessary because class constants will always
   be static.
+
+D:FuncCtx* = LdClsMethodFCache S0:ConstSstr S1:ConstSstr S2:{Obj|Cls*|Ctx*} L:Label
+
+  Loads from the MethodFCache a pointer to the callee function and the
+  context (ActRec's m_this/m_cls slot) into D.  S0 and S1 hold the
+  names of the callee's class and method, respectively.  S2 is the
+  current context.  This instruction loads the corresponding entry in
+  the MethodFCache if needed.  In case the given method is not found,
+  control is transferred to label L.
+
+D:Ctx* = GetCtxFwdCall S0:{Obj|Cls*|Ctx*} S1:Func*
+
+  Loads the context (ActRec's m_this/m_cls slot) for a forwarding call
+  into D.  S0 is the current context, and S1 is the method being called.
 
 LdClsMethodCache
 LdClsMethod
@@ -549,8 +574,8 @@ NewTuple
 
 9. Call & Return
 
-D:ActRec = DefActRec S0:StkPtr S1:Func& S2:[Obj|Cls&|Null] S3:ConstInt
-                     S4:[String|Null]
+D:ActRec = DefActRec S0:StkPtr S1:Func& S2:{Obj|Cls&|Null} S3:ConstInt
+                     S4:{String|Null}
 
   Operands:
 
@@ -781,8 +806,8 @@ DbgAssertRefCount
 
 18. Iterators
 
-D:Bool = IterInit S0:[Arr|Obj] S1:StkP S2:ConstInt S3:ConstInt
-D:Bool = IterInitK S0:[Arr|Obj] S1:StkP S2:ConstInt S3:ConstInt S4:ConstInt
+D:Bool = IterInit S0:{Arr|Obj} S1:StkP S2:ConstInt S3:ConstInt
+D:Bool = IterInitK S0:{Arr|Obj} S1:StkP S2:ConstInt S3:ConstInt S4:ConstInt
 
   Initializes the iterator variable whose index is given by S2. This
   instruction creates the appropriate iterator for the array or object

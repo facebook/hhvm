@@ -987,8 +987,8 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
 }
 
 const Func*
-StaticMethodFCache::lookup(Handle handle, const Class* cls,
-                           const StringData* methName) {
+StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
+                             const StringData* methName) {
   assert(cls);
   StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
     (handleToPtr(handle));
@@ -1022,12 +1022,23 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
     return f;
   }
 
+  return nullptr;
+}
+
+const Func*
+StaticMethodFCache::lookup(Handle handle, const Class* cls,
+                           const StringData* methName) {
+  const Func* f = lookupIR(handle, cls, methName);
+  if (f) return f;
+
+  VMRegAnchor _; // needed for opFPushClsMethodF
+
   // We've already sync'ed regs; this is some hard case, we might as well
   // just let the interpreter handle this entirely.
   assert(*vmpc() == OpFPushClsMethodF);
   Stats::inc(Stats::Instr_TC, -1);
   Stats::inc(Stats::Instr_InterpOneFPushClsMethodF);
-  ec->opFPushClsMethodF();
+  g_vmContext->opFPushClsMethodF();
 
   // We already did all the work so tell our caller to do nothing.
   TRACE(1, "miss staticfcache %s :: %s -> intractable null\n",

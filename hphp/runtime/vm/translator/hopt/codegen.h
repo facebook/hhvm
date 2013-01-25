@@ -137,6 +137,14 @@ private:
   void cgNegateWork(SSATmp* dst, SSATmp* src);
   void cgNotWork(SSATmp* dst, SSATmp* src);
 
+  void emitGetCtxFwdCallWithThis(PhysReg destCtxReg,
+                                 PhysReg thisReg,
+                                 bool    staticCallee);
+
+  void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
+                                    PhysReg      thisReg,
+                                    CacheHandle& ch);
+
   void cgLoadTypedValue(Type::Tag type,
                         SSATmp* dst,
                         PhysReg base,
@@ -158,7 +166,7 @@ private:
   void cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
 
 private:
-  void emitInstanceCheck(IRInstruction*);
+  void emitInstanceCheck(IRInstruction* inst, PhysReg dstReg);
   void cgInstanceOfCommon(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
@@ -218,6 +226,7 @@ private:
   Address getDtorGeneric();
   Address getDtorTyped();
   int getIterOffset(SSATmp* tmp);
+  static void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
 
 private:
   /*

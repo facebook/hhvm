@@ -148,6 +148,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case GuardLoc:
   case GuardStk:
   case LdThis:
+  case LdCtx:
   case LdLoc:
   case LdMem:
   case LdRef:
@@ -159,6 +160,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case RetVal:
   case FreeActRec:
   case LdClsMethodCache:
+  case LdClsMethodFCache:
+  case GetCtxFwdCall:
   case LdClsMethod:
   case Call:
   case SpillStack:

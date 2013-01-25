@@ -1343,6 +1343,50 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
   m_fpiStack.push(actRec);
 }
 
+void HhbcTranslator::emitFPushClsMethodF(int32             numParams,
+                                         const Class*      cls,
+                                         const StringData* methName) {
+
+
+  LabelInstruction* exitLabel = getExitSlowTrace()->getLabel();
+
+  UNUSED SSATmp* clsVal  = popC();
+  UNUSED SSATmp* methVal = popC();
+
+  assert(cls);
+  assert(methName && methName->isStatic());
+
+  bool magicCall = false;
+  const Func* func = lookupImmutableMethod(cls, methName, magicCall,
+                                           true /* staticLookup */);
+  UNUSED ActRec* fp = curFrame();
+  assert(!fp->hasThis() || fp->getThis()->instanceof(cls));
+
+  SSATmp* actRec = nullptr;
+  SSATmp* curCtxTmp = m_tb->isThisAvailable() ? m_tb->genLdThis(nullptr)
+                                              : m_tb->genLdCtx();
+  if (func) {
+    SSATmp*   funcTmp = m_tb->genDefConst(func);
+    SSATmp* newCtxTmp = m_tb->gen(GetCtxFwdCall, curCtxTmp, funcTmp);
+
+    actRec = m_tb->genDefActRec(funcTmp, newCtxTmp, numParams,
+                                (magicCall ? methName : nullptr));
+
+  } else {
+    SSATmp*      clsTmp = m_tb->genDefConst(cls);
+    SSATmp* methNameTmp = m_tb->genDefConst(methName);
+    SSATmp*  funcCtxTmp = m_tb->gen(LdClsMethodFCache, exitLabel, clsTmp,
+                                    methNameTmp, curCtxTmp);
+    actRec = m_tb->genDefActRec(funcCtxTmp,
+                                m_tb->genDefNull(),
+                                numParams,
+                                (magicCall ? methName : nullptr));
+  }
+  m_evalStack.push(actRec);
+  spillStack(); // TODO(#2036900)
+  m_fpiStack.push(actRec);
+}
+
 void HhbcTranslator::emitFCall(uint32_t numParams,
                                Offset returnBcOffset,
                                const Func* callee) {

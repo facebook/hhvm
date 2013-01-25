@@ -95,6 +95,10 @@ SSATmp* TraceBuilder::genLdThis(Trace* exitTrace) {
   }
 }
 
+SSATmp* TraceBuilder::genLdCtx() {
+  return gen(LdCtx, m_fpValue);
+}
+
 SSATmp* TraceBuilder::genLdProp(SSATmp* obj,
                                 SSATmp* prop,
                                 Type::Tag type,

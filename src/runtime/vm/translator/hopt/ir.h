@@ -119,8 +119,11 @@ enum OpcodeFlag : uint64_t {
   /* convert from src operand's type to destination type */             \
   OPC(Conv,              (HasDest|CanCSE|CallsNative))                  \
                                                                         \
-  /* query operators returning bool */                                  \
-  /* comparisons (binary) */                                            \
+  /* predicates that can't be branch-fused */                           \
+  OPC(ExtendsClass,      (HasDest|CanCSE))                              \
+                                                                        \
+  /* branch-fusable query operators returning bool */                   \
+  /* (TODO(#2058842): enum order currently matters here) */             \
   OPC(OpGt,              (HasDest|CanCSE))                              \
   OPC(OpGte,             (HasDest|CanCSE))                              \
   OPC(OpLt,              (HasDest|CanCSE))                              \
@@ -133,9 +136,10 @@ enum OpcodeFlag : uint64_t {
   OPC(OpSame,            (HasDest|CanCSE|CallsNative))                  \
   OPC(OpNSame,           (HasDest|CanCSE|CallsNative))                  \
                                                                         \
-  /* XXX TODO check instanceof's hasEffects, isNative, RefCount, MayReenter */ \
-  OPC(InstanceOfD,       (HasDest|CanCSE))                              \
-  OPC(NInstanceOfD,      (HasDest|CanCSE))                              \
+  OPC(InstanceOf,        (HasDest|CanCSE|CallsNative))                  \
+  OPC(NInstanceOf,       (HasDest|CanCSE|CallsNative))                  \
+  OPC(InstanceOfBitmask, (HasDest|CanCSE))                              \
+  OPC(NInstanceOfBitmask,(HasDest|CanCSE))                              \
                                                                         \
   /* isset, empty, and istype queries (unary) */                        \
   OPC(IsSet,             (HasDest|CanCSE))                              \
@@ -155,8 +159,12 @@ enum OpcodeFlag : uint64_t {
   OPC(JmpNeq,            (HasDest|Essential))                           \
   OPC(JmpSame,           (HasDest|Essential))                           \
   OPC(JmpNSame,          (HasDest|Essential))                           \
-  OPC(JmpInstanceOfD,    (HasDest|Essential))                           \
-  OPC(JmpNInstanceOfD,   (HasDest|Essential))                           \
+  OPC(JmpInstanceOf,     (HasDest|Essential|CallsNative))               \
+  OPC(JmpNInstanceOf,    (HasDest|Essential|CallsNative))               \
+  OPC(JmpInstanceOfBitmask,                                             \
+                         (HasDest|Essential))                           \
+  OPC(JmpNInstanceOfBitmask,                                            \
+                         (HasDest|Essential))                           \
   OPC(JmpIsSet,          (HasDest|Essential))                           \
   OPC(JmpIsType,         (HasDest|Essential))                           \
   OPC(JmpIsNSet,         (HasDest|Essential))                           \
@@ -342,14 +350,11 @@ enum Opcode {
 };
 
 inline bool isCmpOp(Opcode opc) {
-  return (opc >= OpGt && opc <= NInstanceOfD);
+  return (opc >= OpGt && opc <= OpNSame);
 }
 
-inline Opcode cmpToJmpOp(Opcode opc) {
-  assert(isCmpOp(opc));
-  return (Opcode)(JmpGt + (opc - OpGt));
-}
-
+// A "query op" is any instruction returning Type::Bool that is both
+// branch-fusable and negateable.
 inline bool isQueryOp(Opcode opc) {
   return (opc >= OpGt && opc <= IsNType);
 }
@@ -372,12 +377,21 @@ inline Opcode queryJmpToQueryOp(Opcode opc) {
   return Opcode(OpGt + (opc - JmpGt));
 }
 
-extern Opcode queryNegateTable[];
-
-inline Opcode negateQueryOp(Opcode opc) {
-  assert(isQueryOp(opc));
-  return queryNegateTable[opc - OpGt];
+/*
+ * Right now branch fusion is too indiscriminate to handle fusing
+ * with potentially expensive-to-repeat operations.  TODO(#2053369)
+ */
+inline bool disableBranchFusion(Opcode opc) {
+  return opc == InstanceOf ||
+         opc == NInstanceOf ||
+         opc == InstanceOfBitmask ||
+         opc == NInstanceOfBitmask;
 }
+
+/*
+ * Return the opcode that corresponds to negation of opc.
+ */
+Opcode negateQueryOp(Opcode opc);
 
 extern Opcode queryCommuteTable[];
 
@@ -1210,8 +1224,9 @@ public:
    * Right now, we only spill both at the same time and only Spill and
    * Reload instructions need to deal with SSATmps that are spilled.
    */
-  bool              hasReg(uint32 i) const { return !m_isSpilled &&
-                                                m_regs[i] != reg::noreg; }
+  bool hasReg(uint32 i = 0) const {
+    return !m_isSpilled && m_regs[i] != InvalidReg;
+  }
 
   /*
    * The maximum number of registers this SSATmp may need allocated.

@@ -125,7 +125,6 @@ public:
   bool    isValueAvailable(SSATmp* tmp) const;
 
   SSATmp* genLdHome(uint32 id);
-  SSATmp* genLdCachedClass(SSATmp* classNameOpnd);
   SSATmp* genLdCls(SSATmp* classNameOpnd);
   SSATmp* genLdClsCns(SSATmp* cnsName, SSATmp* cls, Trace* exitTrace);
   void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
@@ -188,7 +187,6 @@ public:
                               SSATmp* baseClass,
                               Trace* slowPathExit);
   SSATmp* genLdObjMethod(const StringData* methodName, SSATmp* obj);
-  SSATmp* genLdObjClass(SSATmp* obj);
   SSATmp* genCall(SSATmp* actRec,
                   uint32 returnBcOffset,
                   SSATmp* func,
@@ -217,7 +215,6 @@ public:
   SSATmp* genQueryOp(Opcode queryOpc, SSATmp* addr);
   Trace*  genVerifyParamType(SSATmp* objClass, SSATmp* className,
                              const Class* constraint, Trace* exitTrace);
-  SSATmp* genInstanceOfD(SSATmp* src, SSATmp* className);
 
   void    genNativeImpl();
 

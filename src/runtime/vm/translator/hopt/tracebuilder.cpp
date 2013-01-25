@@ -591,11 +591,6 @@ SSATmp* TraceBuilder::genLdHome(uint32 id) {
   return optimizeInst(&inst);
 }
 
-// Helper to lookup class* by name, only using thread's cache
-SSATmp* TraceBuilder::genLdCachedClass(SSATmp* className) {
-  return gen(LdCachedClass, className);
-}
-
 SSATmp* TraceBuilder::genLdCls(SSATmp* className) {
   return gen(LdCls, className);
 }
@@ -662,10 +657,7 @@ SSATmp* TraceBuilder::genQueryOp(Opcode queryOpc, SSATmp* addr) {
   return gen(queryOpc, addr);
 }
 
-SSATmp* TraceBuilder::genLdObjClass(SSATmp* obj) {
-  return gen(LdObjClass, obj);
-}
-
+// TODO(#2058871): move this to hhbctranslator
 Trace* TraceBuilder::genVerifyParamType(SSATmp* objClass,
                                         SSATmp* className,
                                         const Class*  constraintClass,
@@ -673,13 +665,9 @@ Trace* TraceBuilder::genVerifyParamType(SSATmp* objClass,
   // do NOT use genLdCls() since don't want to load class if it isn't loaded
   SSATmp* constraint =
     constraintClass ? genDefConst<const Class*>(constraintClass)
-                    : genLdCachedClass(className);
+                    : gen(LdCachedClass, className);
   gen(JmpNSame, getLabel(exitTrace), objClass, constraint);
   return exitTrace;
-}
-
-SSATmp* TraceBuilder::genInstanceOfD(SSATmp* src, SSATmp* className) {
-  return gen(InstanceOfD, src, className);
 }
 
 Local getLocalFromHomeOpnd(SSATmp* srcHome) {

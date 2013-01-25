@@ -378,6 +378,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
 
 Class* Unit::defClass(const PreClass* preClass,
                       bool failIsFatal /* = true */) {
+  // TODO(#2054448): ARMv8
   Class* const* clsList = preClass->namedEntity()->clsList();
   Class* top = *clsList;
   if (top) {
@@ -493,7 +494,7 @@ Class* Unit::defClass(const PreClass* preClass,
     }
     newClass->m_nextClass = top;
 
-    if (atomic_acquire_load(&Class::s_instanceBitsInit)) {
+    if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
       // If the instance bitmap has already been set up, we can just initialize
       // our new class's bits and add ourselves to the class list normally.
       newClass->setInstanceBits();
@@ -504,7 +505,9 @@ Class* Unit::defClass(const PreClass* preClass,
       // must add the new class to the class list before dropping the lock to
       // ensure its bits are initialized when the time comes.
       ReadLock l(Class::s_instanceBitsLock);
-      if (Class::s_instanceBitsInit) newClass->setInstanceBits();
+      if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
+        newClass->setInstanceBits();
+      }
       atomic_release_store(const_cast<Class**>(clsList), newClass.get());
     }
     newClass.get()->incAtomicCount();

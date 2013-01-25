@@ -49,7 +49,9 @@ Type::Tag outputType(const IRInstruction* inst) {
   case FreeActRec:         return Type::StkPtr;
   case GenericRetDecRefs:  return Type::StkPtr;
   case GuardStk:           return Type::StkPtr;
-  case InstanceOfD:        return Type::Bool;
+  case InstanceOf:         return Type::Bool;
+  case InstanceOfBitmask:  return Type::Bool;
+  case ExtendsClass:       return Type::Bool;
   case InterpOne:          return Type::StkPtr;
   case IsNSet:             return Type::Bool;
   case IsNType:            return Type::Bool;
@@ -77,7 +79,8 @@ Type::Tag outputType(const IRInstruction* inst) {
   case NewArray:           return Type::Arr;
   case NewObj:             return Type::StkPtr;
   case NewTuple:           return Type::Arr;
-  case NInstanceOfD:       return Type::Bool;
+  case NInstanceOf:        return Type::Bool;
+  case NInstanceOfBitmask: return Type::Bool;
   case RetAdjustStack:     return Type::StkPtr;
   case SpillStack:         return Type::StkPtr;
   case UnboxPtr:           return Type::PtrToCell;
@@ -122,8 +125,10 @@ Type::Tag outputType(const IRInstruction* inst) {
   case JmpNZero:
   case JmpSame:
   case JmpNSame:
-  case JmpInstanceOfD:
-  case JmpNInstanceOfD:
+  case JmpInstanceOf:
+  case JmpNInstanceOf:
+  case JmpInstanceOfBitmask:
+  case JmpNInstanceOfBitmask:
   case JmpIsSet:
   case JmpIsType:
   case JmpIsNSet:

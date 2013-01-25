@@ -22,6 +22,7 @@
 #ifdef USE_JEMALLOC
 # include <jemalloc/jemalloc.h>
 #endif
+#include <atomic>
 
 #include <runtime/vm/core_types.h>
 #include <runtime/vm/repo_helpers.h>
@@ -771,6 +772,17 @@ public:
 public:
   static hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
                        string_data_hash, string_data_isame> s_extClassHash;
+
+  /*
+   * During warmup, we profile the most common classes involved in
+   * instanceof checks in order to set up a bitmask for each class to
+   * allow these checks to be performed quickly by the JIT.
+   *
+   * initInstanceBits() must be called by the first translation which
+   * uses instance bits, while holding the write lease.  The accessors
+   * for instance bits (haveInstanceBit, getInstanceBitMask) also
+   * require holding the write lease.
+   */
   static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
   static void profileInstanceOf(const StringData* name);
   static void initInstanceBits();
@@ -789,7 +801,7 @@ private:
   static ReadWriteMutex s_instanceCountsLock;
   static InstanceBitsMap s_instanceBits;
   static ReadWriteMutex s_instanceBitsLock;
-  static bool s_instanceBitsInit;
+  static std::atomic<bool> s_instanceBitsInit;
 
   struct TraitMethod {
     ClassPtr          m_trait;

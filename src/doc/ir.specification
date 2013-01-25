@@ -325,8 +325,30 @@ OpEq
 OpNeq
 OpSame
 OpNSame
-InstanceOfD
-NInstanceOfD
+
+D:Bool =  InstanceOf S0:ClassPtr S1:ClassPtr S2:ConstBool
+D:Bool = NInstanceOf S0:ClassPtr S1:ClassPtr S2:ConstBool
+
+  Sets D based on whether S0 is a descendant of the class, interface,
+  or trait in S1.  (Note that this is always false for a trait).  S1
+  may be null at runtime if the class is not defined.  The flag S2 is
+  just a hint that is true if we should assume S1 might be an
+  interface---the instruction must still handle it correctly if this
+  hint is wrong at runtime.
+
+D:Bool = ExtendsClass S0:ClassPtr S1:ClassPtr
+
+  A fast-path for instanceof checks.  Sets D based on whether S0 is a
+  descendant of the class in S1, where S1 must be a unique class that
+  is not an interface or a trait.
+
+D:Bool =  InstanceOfBitmask S0:ClassPtr S1:ConstSstr
+D:Bool = NInstanceOfBitmask S0:ClassPtr S1:ConstSstr
+
+  A fast-path for instanceof checks.  Sets D based on whether S0 is a
+  descendant of the class named by S1, where S1 must have a bit
+  allocated for it in the fast instance check bitvector (see class.h).
+
 IsSet
 IsType
 IsNSet
@@ -344,17 +366,29 @@ JmpLt
 JmpLte
 JmpEq
 JmpNeq
-JmpZero
-JmpNZero
 JmpSame
 JmpNSame
-JmpInstanceOfD
-JmpNInstanceOfD
+JmpInstanceOf
+JmpNInstanceOf
+JmpInstanceOfBitmask
+JmpNInstanceOfBitmask
 JmpIsSet
 JmpIsType
 JmpIsNSet
 JmpIsNType
-Jmp_
+
+  Fused jump instructions.  These all operate exactly as their
+  corresponding query op, but also take a label to jump to when the
+  condition is true.
+
+D:None = JmpZero S0:{Bool|Int} L:Label
+D:None = JmpNZero S0:{Bool|Int} L:Label
+
+  Conditionally jump to L based on S0.
+
+D:None = Jmp_ L:Label
+
+  Unconditionally jump to the label L.
 
 ExitWhenSurprised L:Label
 
@@ -442,7 +476,10 @@ D:T = LdConst<T>
 
 D:ConstT = DefConst<T>
 
-LdCls
+D:ClassPtr = LdCls S0:ConstSstr
+
+  Loads the class named S0.  If the class is not defined, invokes
+  autoload and may raise an error.
 
 D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [L:Label]
 
@@ -460,18 +497,26 @@ LdClsMethod
 LdPropAddr
 LdClsPropAddr
 LdObjMethod
-LdObjClass
-LdCachedClass
+
+D:ClassPtr = LdObjClass S0:Obj
+
+  Load the Class* out of the object in S0 and put it in D.
+
+D:ClassPtr = LdCachedClass S0:ConstSstr
+
+  Loads the Class* whose name is S0 out of target cache.  Does not
+  invoke autoload if the class is not defined and returns a null
+  ClassPtr.
 
 D:FuncPtr = LdFunc S0:Str
 
-  Loads the Func* whose name is S0. Fatal if the named function is not defined,
-  and the function autoloader fails to define it.
+  Loads the Func* whose name is S0.  Fatal if the named function is
+  not defined, and the function autoloader fails to define it.
 
 D:FuncPtr = LdFixedFunc S0:ConstStr
 
-  Loads the Func* whose name is S0. Fatal if the named function is not defined,
-  and the function autoloader fails to define it.
+  Loads the Func* whose name is S0.  Fatal if the named function is
+  not defined, and the function autoloader fails to define it.
 
 LdCurFuncPtr
 

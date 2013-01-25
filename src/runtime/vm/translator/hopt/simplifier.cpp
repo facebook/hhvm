@@ -89,8 +89,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpSame:      return simplifySame(src1, src2);
   case OpNSame:     return simplifyNSame(src1, src2);
   case Concat:      return simplifyConcat(src1, src2);
-  case InstanceOfD: return simplifyInstanceOfD(src1, src2, false);
-  case NInstanceOfD:return simplifyInstanceOfD(src1, src2, true);
   case Mov:         return simplifyMov(src1);
 
   case LdClsPropAddr:
@@ -122,8 +120,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
     // TODO(#2049201): reuse the logic in simplifyCmp.
     return nullptr;
   case Jmp_:
-  case JmpInstanceOfD:
-  case JmpNInstanceOfD:
+  case JmpInstanceOf:
+  case JmpNInstanceOf:
+  case JmpInstanceOfBitmask:
+  case JmpNInstanceOfBitmask:
   case JmpIsSet:
   case JmpIsType:
   case JmpIsNSet:
@@ -183,13 +183,13 @@ SSATmp* Simplifier::simplifyMov(SSATmp* src) {
 }
 
 SSATmp* Simplifier::simplifyNot(SSATmp* src) {
-  // const XORs are handled in simplifyXor()
-  assert(!src->isConst());
-  assert(src->getType() == Type::Bool);
-  IRInstruction* inst = src->getInstruction()->getSrc(0)->getInstruction();
+  IRInstruction* inst = src->getInstruction();
   Opcode op = inst->getOpcode();
+
   // TODO: Add more algebraic simplification rules for NOT
   switch (op) {
+    case Conv:
+      return simplifyNot(inst->getSrc(0));
     case OpXor: {
       // !!X --> bool(X)
       if (isNotInst(inst->getSrc(0))) {
@@ -206,7 +206,24 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
     case OpNeq:
     case OpSame:
     case OpNSame:
-      return m_tb->genCmp(negateQueryOp(op), inst->getSrc(0), inst->getSrc(1));
+      // XXX: this could technically be losing a ConvToBool, except
+      // that we kinda know "not" instructions (Xor with 1) are always
+      // going to be followed by ConvToBool.
+      //
+      // TODO(#2058865): This would make more sense with a real Not
+      // instruction and allowing boolean output types for query ops.
+      return m_tb->genCmp(negateQueryOp(op),
+                          inst->getSrc(0),
+                          inst->getSrc(1));
+    case InstanceOf:
+    case NInstanceOf:
+    case InstanceOfBitmask:
+    case NInstanceOfBitmask:
+      // TODO: combine this with the above check and use isQueryOp or
+      // add an isNegatable.
+      return m_tb->gen(negateQueryOp(op),
+                       inst->getNumSrcs(),
+                       inst->getSrcs().begin());
     // TODO !(X | non_zero) --> 0
     default: (void)op;
   }
@@ -901,15 +918,6 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
   return NULL;
 }
 
-SSATmp* Simplifier::simplifyInstanceOfD(SSATmp* src1,
-                                        SSATmp* src2,
-                                        bool negate) {
-  if (src1->getType() != Type::Obj) {
-    return genDefBool(false);
-  }
-  return NULL;
-}
-
 SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls,
                                           SSATmp* clsName,
                                           SSATmp* propName) {
@@ -1030,7 +1038,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   }
 
   // Fuse jumps with query operators.
-  if (isQueryOp(srcOpcode)) {
+  if (isQueryOp(srcOpcode) && !disableBranchFusion(srcOpcode)) {
     SSARange ssas = srcInst->getSrcs();
     return m_tb->gen(queryToJmpOp(
                        inst->getOpcode() == JmpZero

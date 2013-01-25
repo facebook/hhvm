@@ -221,6 +221,32 @@ pathloop:
   }
 }
 
+ConditionCode cmpOpToCC(Opcode opc) {
+  switch (opc) {
+  case OpGt:                return CC_G;
+  case OpGte:               return CC_GE;
+  case OpLt:                return CC_L;
+  case OpLte:               return CC_LE;
+  case OpEq:                return CC_E;
+  case OpNeq:               return CC_NE;
+  case OpSame:              return CC_E;
+  case OpNSame:             return CC_NE;
+  case InstanceOf:          return CC_NZ;
+  case NInstanceOf:         return CC_Z;
+  case InstanceOfBitmask:   return CC_NZ;
+  case NInstanceOfBitmask:  return CC_Z;
+  case IsSet:               return CC_NZ;
+  case IsType:              return CC_NZ;
+  case IsNSet:              return CC_Z;
+  case IsNType:             return CC_Z;
+  default:                  always_assert(0);
+  }
+}
+
+const char* getContextName(Class* ctx) {
+  return ctx ? ctx->name()->data() : ":anonymous:";
+}
+
 } // unnamed namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -268,7 +294,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
   m_kind = Imm;
 }
 
-const Func* CodeGenerator::getCurFunc() {
+const Func* CodeGenerator::getCurFunc() const {
   if (m_lastMarker) {
     return m_lastMarker->getFunc();
   }
@@ -286,8 +312,6 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #undef OPC
 
   default:
-    std::cerr << "CodeGenerator: unimplemented support for opcode " <<
-      opcodeName(opc) << '\n';
     assert(0);
     return nullptr;
   }
@@ -309,20 +333,16 @@ NOOP_OPCODE(DefActRec)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(Nop)
 
-PUNT_OPCODE(JmpInstanceOfD)
-PUNT_OPCODE(JmpNInstanceOfD)
 PUNT_OPCODE(JmpIsSet)
 PUNT_OPCODE(JmpIsType)
 PUNT_OPCODE(JmpIsNSet)
 PUNT_OPCODE(JmpIsNType)
-PUNT_OPCODE(NInstanceOfD)
 PUNT_OPCODE(IsSet)
 PUNT_OPCODE(IsNSet)
 PUNT_OPCODE(IsNType)
 PUNT_OPCODE(LdCurFuncPtr)
 PUNT_OPCODE(LdFuncCls)
 PUNT_OPCODE(IsType)
-PUNT_OPCODE(InstanceOfD)
 
 #undef NOOP_OPCODE
 #undef PUNT_OPCODE
@@ -344,17 +364,6 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
     list = next;
   }
 }
-
-static ConditionCode cmpOpToCC[JmpNSame - JmpGt + 1] = {
-  CC_G,  // OpGt
-  CC_GE, // OpGte
-  CC_L,
-  CC_LE,
-  CC_E,
-  CC_NE,
-  CC_E,  // OpSame
-  CC_NE  // OpNSame
-};
 
 Address CodeGenerator::emitFwdJcc(Asm& a,
                                   ConditionCode cc,
@@ -397,10 +406,10 @@ Address CodeGenerator::emitSmashableFwdJmp(LabelInstruction* label,
   return start;
 }
 
-// Patch with servie request REQ_BIND_JMPCC_FIRST/SECOND
+// Patch with service request REQ_BIND_JMPCC_FIRST/SECOND
 Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc,
-                                              LabelInstruction* label,
-                                              SSATmp* toSmash) {
+                                                LabelInstruction* label,
+                                                SSATmp* toSmash) {
   Address start = m_as.code.frontier;
   if (toSmash) {
     m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen +
@@ -412,6 +421,13 @@ Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc,
     emitFwdJcc(cc, label);
   }
   return start;
+}
+
+void CodeGenerator::emitJccDirectExit(IRInstruction* inst,
+                                      ConditionCode cc) {
+  SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive
+    ? inst->getDst() : nullptr;
+  emitSmashableFwdJccAtEnd(cc, inst->getLabel(), toSmash);
 }
 
 // Patch with service request REQ_BIND_JCC
@@ -463,8 +479,7 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
   Opcode opc = inst->getOpcode();
-  ConditionCode cc = cmpOpToCC[opc - JmpGt];
-  LabelInstruction* label = inst->getLabel();
+  ConditionCode cc = cmpOpToCC(queryJmpToQueryOp(opc));
   Type::Tag src1Type = src1->getType();
   Type::Tag src2Type = src2->getType();
 
@@ -508,9 +523,8 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
       }
     }
   }
-  SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive ?
-                                      inst->getDst() : NULL;
-  emitSmashableFwdJccAtEnd(cc, label, toSmash);
+
+  emitJccDirectExit(inst, cc);
 }
 
 void CodeGenerator::cgJmpGt   (IRInstruction* inst) { cgJcc(inst); }
@@ -522,47 +536,12 @@ void CodeGenerator::cgJmpNeq  (IRInstruction* inst) { cgJcc(inst); }
 void CodeGenerator::cgJmpSame (IRInstruction* inst) { cgJcc(inst); }
 void CodeGenerator::cgJmpNSame(IRInstruction* inst) { cgJcc(inst); }
 
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 TCA addr,
-                                 SSATmp* dst,
-                                 SyncOptions sync,
-                                 ArgGroup& args) {
-  PhysReg dstReg0 = InvalidReg;
-  PhysReg dstReg1 = InvalidReg;
-  if (dst) {
-    dstReg0 = dst->getReg(0);
-    dstReg1 = dst->getReg(1);
-  }
-  return cgCallHelper(a, Transl::Call(addr), dstReg0, dstReg1, sync, args);
-}
-
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 TCA addr,
-                                 PhysReg dstReg,
-                                 SyncOptions sync,
-                                 ArgGroup& args) {
-  cgCallHelper(a, Transl::Call(addr), dstReg, InvalidReg, sync, args);
-}
-
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 const Transl::Call& call,
-                                 PhysReg dstReg0,
-                                 PhysReg dstReg1,
-                                 SyncOptions sync,
-                                 ArgGroup& args) {
-  assert(int(args.size()) <= kNumRegisterArgs);
-
-  // We don't want to include the destination registers defined by this
-  // instruction when saving the caller-saved registers.
-  auto const regsToSave = (m_curInst->getLiveOutRegs() & kCallerSaved)
-      .remove(dstReg0).remove(dstReg1);
-  PhysRegSaverParity<1> regSaver(a, regsToSave);
-
-  // Assign registers to the arguments
-  for (size_t i = 0; i < args.size(); i++) {
-    args[i].setDstReg(argNumToRegName[i]);
-  }
-
+/**
+ * Once the arg sources and dests are all assigned; emit moves and exchanges
+ * to put all the args in desired registers.
+ */
+typedef Transl::X64Assembler Asm;
+static void shuffleArgs(Asm& a, ArgGroup& args, IRInstruction* inst) {
   // First schedule arg moves
   for (size_t i = 0; i < args.size(); ++i) {
     // We don't support memory-to-register moves currently.
@@ -624,23 +603,14 @@ void CodeGenerator::cgCallHelper(Asm& a,
         a.  addq   (argDesc1->getImm(), howTo[i].m_reg1);
       }
     }
-    if (m_curTrace->isMain()) {
-      if (m_curInst->isNative()) {
-        TRACE(3, "[counter] 1 reg move in cgCallHelper\n");
-      }
-    }
   }
-  if (m_curInst->isNative()) {
+  if (inst->isNative()) {
     int numBetweenCaller = 0;
     for (size_t i = 0; i < howTo.size(); ++i) {
       if (kCallerSaved.contains(howTo[i].m_reg1) &&
           kCallerSaved.contains(howTo[i].m_reg2)) {
         ++numBetweenCaller;
       }
-    }
-    if (numBetweenCaller > 0) {
-      TRACE(3, "[counter] %d moves are between caller-saved regs\n",
-            numBetweenCaller);
     }
   }
   // Handle const-to-register moves and type shifting
@@ -654,6 +624,56 @@ void CodeGenerator::cgCallHelper(Asm& a,
       a.    movq   (0xbadbadbadbadbad, args[i].getDstReg());
     }
   }
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 TCA addr,
+                                 SSATmp* dst,
+                                 SyncOptions sync,
+                                 ArgGroup& args) {
+  PhysReg dstReg0 = InvalidReg;
+  PhysReg dstReg1 = InvalidReg;
+  if (dst) {
+    dstReg0 = dst->getReg(0);
+    dstReg1 = dst->getReg(1);
+  }
+  return cgCallHelper(a, Transl::Call(addr), dstReg0, dstReg1, sync, args);
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 TCA addr,
+                                 PhysReg dstReg,
+                                 SyncOptions sync,
+                                 ArgGroup& args) {
+  cgCallHelper(a, Transl::Call(addr), dstReg, InvalidReg, sync, args);
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 const Transl::Call& call,
+                                 PhysReg dstReg0,
+                                 PhysReg dstReg1,
+                                 SyncOptions sync,
+                                 ArgGroup& args) {
+  assert(int(args.size()) <= kNumRegisterArgs);
+
+  // We don't want to include the destination registers defined by this
+  // instruction when saving the caller-saved registers.
+  auto const regSaver = [&]() -> PhysRegSaverParity<1> {
+    RegSet rs = m_curInst->getLiveOutRegs() & kCallerSaved;
+    for (auto& dst : m_curInst->getDsts()) {
+      for (int i = 0; i < dst->numAllocatedRegs(); ++i) {
+        rs.remove(dst->getReg(i));
+      }
+    }
+    return PhysRegSaverParity<1>(a, rs);
+  }();
+
+  // Assign registers to the arguments
+  for (size_t i = 0; i < args.size(); i++) {
+    args[i].setDstReg(argNumToRegName[i]);
+  }
+
+  shuffleArgs(a, args, m_curInst);
 
   // do the call; may use a trampoline
   m_tx64->emitCall(a, call);
@@ -667,11 +687,6 @@ void CodeGenerator::cgCallHelper(Asm& a,
   // grab the return value if any
   if (dstReg0 != InvalidReg && dstReg0 != reg::rax) {
     a.    movq (reg::rax, dstReg0);
-    if (m_curTrace->isMain()) {
-      if (m_curInst->isNative()) {
-        TRACE(3, "[counter] 1 reg move in cgCallHelper\n");
-      }
-    }
   }
   if (dstReg1 != InvalidReg) {
     if (dstReg1 != reg::rdx) {
@@ -1200,6 +1215,159 @@ void CodeGenerator::cgOpGte(IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static bool instanceOfHelper(const Class* objClass, const Class* testClass) {
+  return testClass && objClass->classof(testClass);
+}
+
+static bool instanceOfHelperIFace(const Class* objClass,
+                                  const Class* testClass) {
+  return testClass && objClass->classof(testClass->preClass());
+}
+
+void CodeGenerator::emitInstanceCheck(IRInstruction* inst) {
+  const bool ifaceHint = inst->getSrc(2)->getConstValAsBool();
+  cgCallHelper(m_as,
+               TCA(ifaceHint ? instanceOfHelperIFace : instanceOfHelper),
+               rax,
+               kNoSyncPoint,
+               ArgGroup()
+                 .ssa(inst->getSrc(0))
+                 .ssa(inst->getSrc(1)));
+}
+
+void CodeGenerator::cgInstanceOfCommon(IRInstruction* inst) {
+  auto reg = rbyte(inst->getDst()->getReg());
+  auto& a = m_as;
+
+  emitInstanceCheck(inst);
+  if (al != reg) {
+    a.  movb   (al, reg);
+  }
+}
+
+void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
+  cgInstanceOfCommon(inst);
+}
+
+void CodeGenerator::cgNInstanceOf(IRInstruction* inst) {
+  cgInstanceOfCommon(inst);
+}
+
+void CodeGenerator::cgJmpInstanceOf(IRInstruction* inst) {
+  auto& a = m_as;
+  emitInstanceCheck(inst);
+  a.    testb   (al, al);
+  emitJccDirectExit(inst, CC_NZ);
+}
+
+void CodeGenerator::cgJmpNInstanceOf(IRInstruction* inst) {
+  auto& a = m_as;
+  emitInstanceCheck(inst);
+  a.    testb  (al, al);
+  emitJccDirectExit(inst, CC_Z);
+}
+
+/*
+ * Check instanceof using instance bitmasks.
+ *
+ * Note it's not necessary to check whether the test class is defined:
+ * if it doesn't exist than the candidate can't be an instance of it
+ * and will fail this check.
+ */
+void CodeGenerator::emitInstanceBitmaskCheck(IRInstruction* inst) {
+  auto const rObjClass     = inst->getSrc(0)->getReg(0);
+  auto const testClassName = inst->getSrc(1)->getConstValAsStr();
+  auto& a = m_as;
+
+  int offset;
+  uint8_t mask;
+  if (!Class::getInstanceBitMask(testClassName, offset, mask)) {
+    always_assert(!"cgInstanceOfBitmask had no bitmask");
+  }
+  a.    testb  (int8_t(mask), rObjClass[offset]);
+}
+
+void CodeGenerator::cgInstanceOfBitmask(IRInstruction* inst) {
+  auto& a = m_as;
+  emitInstanceBitmaskCheck(inst);
+  a.    setnz  (rbyte(inst->getDst()->getReg()));
+}
+
+void CodeGenerator::cgNInstanceOfBitmask(IRInstruction* inst) {
+  auto& a = m_as;
+  emitInstanceBitmaskCheck(inst);
+  a.    setz   (rbyte(inst->getDst()->getReg()));
+}
+
+void CodeGenerator::cgJmpInstanceOfBitmask(IRInstruction* inst) {
+  emitInstanceBitmaskCheck(inst);
+  emitJccDirectExit(inst, CC_NZ);
+}
+
+void CodeGenerator::cgJmpNInstanceOfBitmask(IRInstruction* inst) {
+  emitInstanceBitmaskCheck(inst);
+  emitJccDirectExit(inst, CC_Z);
+}
+
+/*
+ * Check instanceof using the superclass vector on the end of the
+ * Class entry.
+ */
+void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
+  auto const rObjClass     = inst->getSrc(0)->getReg();
+  auto const testClass     = inst->getSrc(1)->getConstValAsClass();
+  auto rTestClass          = inst->getSrc(1)->getReg();
+  auto const rdst          = rbyte(inst->getDst()->getReg());
+  auto& a = m_as;
+
+  Label out;
+  Label notExact;
+  Label falseLabel;
+
+  if (rTestClass == InvalidReg) { // TODO(#2031606)
+    rTestClass = rScratch; // careful below about asm-x64 smashing this
+    a.  movq   (testClass, rTestClass);
+  }
+
+  // Test if it is the exact same class.  TODO(#2044801): we should be
+  // doing this control flow at the IR level.
+  if (!(testClass->attrs() & AttrAbstract)) {
+    if (Class::alwaysLowMem()) {
+      a.  cmpl   (r32(rTestClass), r32(rObjClass));
+    } else {
+      a.  cmpq   (rTestClass, rObjClass);
+    }
+    a.    jne8   (notExact);
+    a.    movb   (1, rdst);
+    a.    jmp8   (out);
+  }
+
+  auto const vecOffset = Class::classVecOff() +
+    sizeof(Class*) * (testClass->classVecLen() - 1);
+
+  // Check the length of the class vectors---if the candidate's is at
+  // least as long as the potential base (testClass) it might be a
+  // subclass.
+asm_label(a, notExact);
+  a.    cmpl   (testClass->classVecLen(),
+                rObjClass[Class::classVecLenOff()]);
+  a.    jb8    (falseLabel);
+
+  // If it's a subclass, rTestClass must be at the appropriate index.
+  if (Class::alwaysLowMem()) {
+    a.  cmpl   (r32(rTestClass), rObjClass[vecOffset]);
+  } else {
+    a.  cmpq   (rTestClass, rObjClass[vecOffset]);
+  }
+  a.    sete   (rdst);
+  a.    jmp8   (out);
+
+asm_label(a, falseLabel);
+  a.    xorl   (r32(rdst), r32(rdst));
+
+asm_label(a, out);
+}
+
 void CodeGenerator::cgConv(IRInstruction* inst) {
   Type::Tag toType   = inst->getTypeParam();
   Type::Tag fromType = inst->getSrc(0)->getType();
@@ -1441,26 +1609,17 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* obj   = inst->getSrc(0);
+  auto dstReg = inst->getDst()->getReg();
+  auto objReg = inst->getSrc(0)->getReg();
+  auto& a = m_as;
 
-  // TODO:MP assert copied from translatorx64. Update and make it work
-  // assert(obj->getType() == Type::Obj);
-  auto dstReg = dst->getReg();
-  auto objReg = obj->getReg();
-  m_as.load_reg64_disp_reg64(objReg, ObjectData::getVMClassOffset(), dstReg);
+  a.    loadq  (objReg[ObjectData::getVMClassOffset()], dstReg);
 }
 
 void CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* className = inst->getSrc(0);
-  assert(className->isConst() && className->getType() == Type::StaticStr);
-
-  auto dstReg = dst->getReg();
-  const StringData* classNameString = className->getConstValAsStr();
-  TargetCache::allocKnownClass(classNameString);
-  TargetCache::CacheHandle ch = TargetCache::allocKnownClass(classNameString);
-  m_as.load_reg64_disp_reg64(rVmTl, ch, dstReg);
+  const StringData* classNameString = inst->getSrc(0)->getConstValAsStr();
+  auto ch = TargetCache::allocKnownClass(classNameString);
+  m_as.  loadq  (rVmTl[ch], inst->getDst()->getReg());
 }
 
 void CodeGenerator::cgRetVal(IRInstruction* inst) {
@@ -1855,7 +2014,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
         // Patch the original jcc;jmp, don't emit another
         IRInstruction* jcc = toSmash->getInstruction();
         Opcode         opc = jcc->getOpcode();
-        ConditionCode  cc  = cmpOpToCC[opc - JmpGt];
+        ConditionCode  cc  = cmpOpToCC(queryJmpToQueryOp(opc));
         uint64_t     taken = pc->getConstValAsInt();
         uint64_t  notTaken = notTakenPC->getConstValAsInt();
 
@@ -3567,12 +3726,6 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   m_as.lea_reg64_disp_reg64(objReg, offset, dstReg);
 }
 
-// Copied from translator-x64.cpp
-static const char* getContextName() {
-  Class* ctx = arGetContextClass(curFrame());
-  return ctx ? ctx->name()->data() : ":anonymous:";
-}
-
 void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* cls   = inst->getSrc(0);
@@ -3617,7 +3770,9 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   const StringData*  method = methodName->getConstValAsStr();
   const NamedEntity* ne     = (NamedEntity*)baseClass->getConstValAsRawInt();
   TargetCache::CacheHandle ch =
-    TargetCache::StaticMethodCache::alloc(cls, method, getContextName());
+    TargetCache::StaticMethodCache::alloc(cls,
+                                          method,
+                                          getContextName(getCurClass()));
   auto funcDestReg  = dst->getReg(0);
   auto classDestReg = dst->getReg(1);
 
@@ -3750,9 +3905,6 @@ void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
 void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
                                     ConditionCode cc) {
   SSATmp* src   = inst->getSrc(0);
-  LabelInstruction* label = inst->getLabel();
-  SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive ?
-                                      inst->getDst() : NULL;
 
   auto srcReg = src->getReg();
   if (src->isConst()) {
@@ -3779,7 +3931,8 @@ void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
       m_as.test_reg64_reg64(srcReg, srcReg);
     }
   }
-  emitSmashableFwdJccAtEnd(cc, label, toSmash);
+
+  emitJccDirectExit(inst, cc);
 }
 
 void CodeGenerator::cgJmpZero(IRInstruction* inst) {

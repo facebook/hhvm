@@ -224,7 +224,7 @@ static_assert(std::has_trivial_destructor<RegSet>::value,
 //////////////////////////////////////////////////////////////////////
 
 template<int StackParity>
-struct PhysRegSaverParity : private boost::noncopyable {
+struct PhysRegSaverParity {
   PhysRegSaverParity(X64Assembler& a_, RegSet s_) : a(a_), s(s_) {
     s.forEach([&] (PhysReg pr) {
       a.    push   (pr);
@@ -234,6 +234,11 @@ struct PhysRegSaverParity : private boost::noncopyable {
       a.    subq   (8, reg::rsp);
     }
   }
+
+  PhysRegSaverParity(const PhysRegSaverParity&) = delete;
+  PhysRegSaverParity(PhysRegSaverParity&&) = default;
+  PhysRegSaverParity& operator=(const PhysRegSaverParity&) = delete;
+  PhysRegSaverParity& operator=(PhysRegSaverParity&&) = default;
 
   ~PhysRegSaverParity() {
     if ((s.size() & 1) == StackParity) {

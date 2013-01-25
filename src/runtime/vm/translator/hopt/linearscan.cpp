@@ -769,6 +769,12 @@ void LinearScan::computePreColoringHint() {
       assert(arg == 4);
       break;
     }
+    case InstanceOf:
+    case NInstanceOf:
+    case JmpInstanceOf:
+    case JmpNInstanceOf:
+      normalHint(2);
+      break;
     default:
       break;
   }

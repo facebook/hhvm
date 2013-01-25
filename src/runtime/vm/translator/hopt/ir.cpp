@@ -168,22 +168,29 @@ bool IRInstruction::mayReenterHelper() const {
   return false;
 }
 
-Opcode queryNegateTable[] = {
-  OpLte,        // OpGt
-  OpLt,         // OpGte
-  OpGte,        // OpLt
-  OpGt,         // OpLte
-  OpNeq,        // OpEq
-  OpEq,         // OpNeq
-  OpNSame,      // OpSame
-  OpSame,       // OpNSame
-  NInstanceOfD, // InstanceOfD
-  InstanceOfD,  // NInstanceOfD
-  IsNSet,       // IsSet
-  IsNType,      // IsType
-  IsSet,        // IsNSet
-  IsType        // IsNType
-};
+Opcode negateQueryOp(Opcode opc) {
+  assert(isQueryOp(opc));
+
+  switch (opc) {
+  case OpGt:                return OpLte;
+  case OpGte:               return OpLt;
+  case OpLt:                return OpGte;
+  case OpLte:               return OpGt;
+  case OpEq:                return OpNeq;
+  case OpNeq:               return OpEq;
+  case OpSame:              return OpNSame;
+  case OpNSame:             return OpSame;
+  case InstanceOf:          return NInstanceOf;
+  case NInstanceOf:         return InstanceOf;
+  case InstanceOfBitmask:   return NInstanceOfBitmask;
+  case NInstanceOfBitmask:  return InstanceOfBitmask;
+  case IsSet:               return IsNSet;
+  case IsType:              return IsNType;
+  case IsNSet:              return IsSet;
+  case IsNType:             return IsType;
+  default:                  always_assert(0);
+  }
+}
 
 Opcode queryCommuteTable[] = {
   OpLt,         // OpGt
@@ -197,9 +204,9 @@ Opcode queryCommuteTable[] = {
 };
 
 const char* Type::Strings[(int)Type::TAG_ENUM_COUNT] = {
-    #define IRT(type, name)  name,
+#define IRT(type, name)  name,
     IR_TYPES
-    #undef IRT
+#undef IRT
 };
 
 // Objects compared with strings may involve calling a user-defined

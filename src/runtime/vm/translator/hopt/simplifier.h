@@ -62,7 +62,6 @@ private:
   SSATmp* simplifyIsType(IRInstruction*);
   SSATmp* simplifyConcat(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyConv(IRInstruction*);
-  SSATmp* simplifyInstanceOfD(SSATmp* src1, SSATmp* src2, bool negate);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);

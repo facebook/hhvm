@@ -53,6 +53,7 @@ const NamedEntityPair& HhbcTranslator::lookupNamedEntityPairId(int id) {
 }
 
 SSATmp* HhbcTranslator::push(SSATmp* tmp) {
+  assert(tmp);
   m_evalStack.push(tmp);
   return tmp;
 }
@@ -1233,7 +1234,7 @@ void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
          *     given the Object and the method slot, which is the same as func's.
          */
         if (!(func->attrs() & AttrPrivate)) {
-          SSATmp* clsTmp = m_tb->genLdObjClass(objOrCls);
+          SSATmp* clsTmp = m_tb->gen(LdObjClass, objOrCls);
           funcTmp = m_tb->genLdClsMethod(clsTmp, func->methodSlot());
           if (res == MethodLookup::MethodFoundNoThis) {
             m_tb->genDecRef(objOrCls);
@@ -1563,7 +1564,7 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
   if (param->getType() != Type::Obj) {
     PUNT(VerifyParamType_nonobj);
   }
-  SSATmp* objClass = m_tb->genLdObjClass(param);
+  SSATmp* objClass = m_tb->gen(LdObjClass, param);
 
   if (tc.isObject()) {
     if (!(param->getType() == Type::Obj ||
@@ -1573,7 +1574,7 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
       return;
     }
   } else {
-    if (!tc.check(frame_local(curFrame(), paramId), getCurFunc())) {
+    if (!tc.check(frame_local(curFrame() /* FIXME */, paramId), getCurFunc())) {
       spillStack();
       emitInterpOne(Type::None);
       return;
@@ -1588,10 +1589,65 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
 
 void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
-  TRACE(3, "%u: InstanceOfD %s\n", m_bcOff, className->data());
   SSATmp* src = popC();
-  push(m_tb->genInstanceOfD(src,
-                           m_tb->genDefConst<const StringData*>(className)));
+
+  /*
+   * InstanceOfD is always false if it's not an object.
+   *
+   * We're prepared to generate translations for known non-object
+   * types, but if it's Gen/Cell we're going to PUNT because it's
+   * natural to translate that case with control flow TODO(#2020251)
+   */
+  if (!src->isA(Type::Obj)) {
+    // If it's a Cell, it might still be an object.  All other types
+    // push false.
+    if (!Type::isMoreRefined(src->getType(), Type::Cell)) {
+      PUNT(InstanceOfD_Cell);
+    }
+    push(m_tb->genDefConst(false));
+    m_tb->genDecRef(src);
+    return;
+  }
+
+  SSATmp* objClass     = m_tb->gen(LdObjClass, src);
+  SSATmp* ssaClassName = m_tb->genDefConst(className);
+
+  Class::initInstanceBits();
+  const bool haveBit = Class::haveInstanceBit(className);
+
+  Class* const maybeCls = Unit::lookupClass(className);
+  const bool isNormalClass = maybeCls &&
+                             !(maybeCls->attrs() &
+                               (AttrTrait | AttrInterface));
+  const bool isUnique = RuntimeOption::RepoAuthoritative &&
+                        maybeCls && (maybeCls->attrs() & AttrUnique);
+
+  /*
+   * If the class is unique or a parent of the current context, we
+   * don't need to load it out of target cache because it must
+   * already exist and be defined.
+   *
+   * Otherwise, we only use LdCachedClass---instanceof with an
+   * undefined class doesn't invoke autoload.
+   */
+  SSATmp* checkClass =
+    isUnique || (maybeCls && getCurClass() &&
+                  getCurClass()->classof(maybeCls))
+      ? m_tb->genDefConst(maybeCls)
+      : m_tb->gen(LdCachedClass, ssaClassName);
+
+  push(
+    haveBit ? m_tb->gen(InstanceOfBitmask,
+                        objClass,
+                        ssaClassName) :
+    isUnique && isNormalClass ? m_tb->gen(ExtendsClass,
+                                          objClass,
+                                          checkClass) :
+    m_tb->gen(InstanceOf,
+              objClass,
+              checkClass,
+              m_tb->genDefConst(maybeCls && !isNormalClass))
+  );
   m_tb->genDecRef(src);
 }
 
@@ -1654,7 +1710,7 @@ void HhbcTranslator::emitAGet(SSATmp* classSrc) {
   if (Type::isString(srcType)) {
     push(m_tb->genLdCls(classSrc));
   } else if (srcType == Type::Obj) {
-    push(m_tb->genLdObjClass(classSrc));
+    push(m_tb->gen(LdObjClass, classSrc));
   } else {
     assert(0);
   }

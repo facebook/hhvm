@@ -51,7 +51,7 @@ Class::InstanceCounts Class::s_instanceCounts;
 ReadWriteMutex Class::s_instanceCountsLock(RankInstanceCounts);
 Class::InstanceBitsMap Class::s_instanceBits;
 ReadWriteMutex Class::s_instanceBitsLock(RankInstanceBits);
-bool Class::s_instanceBitsInit = false;
+std::atomic<bool> Class::s_instanceBitsInit{false};
 
 static const StringData* manglePropName(const StringData* className,
                                         const StringData* propName,
@@ -573,14 +573,9 @@ bool Class::verifyPersistent() const {
   return true;
 }
 
-/*
- * Initializes s_instanceBits based on data collected during any warmup
- * requests that have happened so far. Must only be called while holding the
- * write lease.
- */
 void Class::initInstanceBits() {
   assert(Transl::Translator::WriteLease().amOwner());
-  if (s_instanceBitsInit) return;
+  if (s_instanceBitsInit.load(std::memory_order_acquire)) return;
 
   // First, grab a write lock on s_instanceCounts and grab the current set of
   // counts as quickly as possible to minimize blocking other threads still
@@ -647,7 +642,7 @@ void Class::initInstanceBits() {
     c->setInstanceBitsAndParents();
   }
 
-  atomic_release_store(&s_instanceBitsInit, true);
+  s_instanceBitsInit.store(true, std::memory_order_release);
 }
 
 void Class::profileInstanceOf(const StringData* name) {
@@ -655,7 +650,7 @@ void Class::profileInstanceOf(const StringData* name) {
   unsigned inc = 1;
   Class* c = Unit::lookupClass(name);
   if (c && (c->attrs() & AttrInterface)) {
-    // Favor traits and interfaces
+    // Favor interfaces
     inc = 250;
   }
   InstanceCounts::accessor acc;
@@ -669,13 +664,15 @@ void Class::profileInstanceOf(const StringData* name) {
 }
 
 bool Class::haveInstanceBit(const StringData* name) {
-  assert(s_instanceBitsInit);
+  assert(Transl::Translator::WriteLease().amOwner());
+  assert(s_instanceBitsInit.load(std::memory_order_acquire));
   return mapContains(s_instanceBits, name);
 }
 
 bool Class::getInstanceBitMask(const StringData* name,
                                int& offset, uint8& mask) {
-  assert(s_instanceBitsInit);
+  assert(Transl::Translator::WriteLease().amOwner());
+  assert(s_instanceBitsInit.load(std::memory_order_acquire));
   const size_t bitWidth = sizeof(mask) * CHAR_BIT;
   unsigned bit;
   if (!mapGet(s_instanceBits, name, &bit)) return false;

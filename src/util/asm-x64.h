@@ -134,8 +134,9 @@ struct RegRIP {
 // Go from a RegNumber to the same physical register of a given
 // size.
 
-inline Reg8 rbyte(RegNumber r) { return Reg8(int(r)); }
 inline Reg8 rbyte(Reg32 r)     { return Reg8(int(r)); }
+inline Reg8 rbyte(RegNumber r) { return Reg8(int(r)); }
+inline Reg32 r32(Reg8 r)       { return Reg32(int(r)); }
 inline Reg32 r32(RegNumber r)  { return Reg32(int(r)); }
 inline Reg64 r64(RegNumber r)  { return Reg64(int(r)); }
 
@@ -1155,6 +1156,7 @@ struct X64Assembler {
   CC(z,   CC_Z)         \
   CC(ne,  CC_NE)        \
   CC(nz,  CC_NZ)        \
+  CC(b,   CC_B)         \
   CC(be,  CC_BE)        \
   CC(nbe, CC_NBE)       \
   CC(s,   CC_S)         \

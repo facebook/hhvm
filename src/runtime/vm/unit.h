@@ -501,13 +501,13 @@ struct Unit {
                          bool failIsFatal = true);
 
   static Class *lookupClass(const NamedEntity *ne) {
-    Class *cls = *ne->clsList();
+    Class *cls = *ne->clsList(); // TODO(#2054448): ARMv8
     if (LIKELY(cls != NULL)) cls = cls->getCached();
     return cls;
   }
 
   static Class *lookupUniqueClass(const NamedEntity *ne) {
-    Class *cls = *ne->clsList();
+    Class *cls = *ne->clsList(); // TODO(#2054448): ARMv8
     if (LIKELY(cls != NULL)) {
       if (cls->attrs() & AttrUnique && RuntimeOption::RepoAuthoritative) {
         return cls;

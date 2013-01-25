@@ -157,8 +157,10 @@ private:
             int64 (*arr_cmp_arr)(ArrayData*, ArrayData*));
   void cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
 
-
 private:
+  void emitInstanceCheck(IRInstruction*);
+  void cgInstanceOfCommon(IRInstruction*);
+  void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
   void emitTraceRet(CodeGenerator::Asm& as);
   void emitCheckStack(CodeGenerator::Asm& as, SSATmp* sp, uint32 numElems,
@@ -203,14 +205,15 @@ private:
   Address emitSmashableFwdJmp(LabelInstruction* label, SSATmp* toSmash);
   Address emitSmashableFwdJccAtEnd(ConditionCode cc, LabelInstruction* label,
                               SSATmp* toSmash);
+  void emitJccDirectExit(IRInstruction*, ConditionCode);
   Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
                               SSATmp* toSmash);
   void emitGuardOrFwdJcc(IRInstruction*    inst,
                          ConditionCode     cc,
                          LabelInstruction* label);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
-  const Func* getCurFunc();
-  Class*      getCurClass() { return getCurFunc()->cls(); }
+  const Func* getCurFunc() const;
+  Class*      getCurClass() const { return getCurFunc()->cls(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = kSyncPoint);
   Address getDtorGeneric();
   Address getDtorTyped();

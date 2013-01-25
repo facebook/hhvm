@@ -23,7 +23,10 @@ namespace HPHP { namespace VM { namespace JIT {
 // to their target trace at TraceExit, TraceExitType::NormalCc
 static bool jccCanBeDirectExit(Opcode opc) {
   // JmpGt .. JmpNSame are contiguous and all use cgJcc
-  return (JmpGt <= opc && opc <= JmpNSame);
+  return (JmpGt <= opc && opc <= JmpNSame) ||
+    opc == JmpInstanceOf || opc == JmpNInstanceOf ||
+    opc == JmpInstanceOfBitmask || opc == JmpNInstanceOfBitmask;
+    // TODO(#2053369): JmpIsType, etc
 }
 
 // If main trace ends with an unconditional jump, copy the target of

@@ -2091,7 +2091,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2122];
+static hashNodeCon conBuckets[2126];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -3403,6 +3403,10 @@ void init_builtin_constant_table() {
       (const char *)"PHP_OUTPUT_HANDLER_END", (const char *)-1, (const char *)32, (const char *)&k_PHP_OUTPUT_HANDLER_END,
       (const char *)"PHP_OUTPUT_HANDLER_START", (const char *)-1, (const char *)32, (const char *)&k_PHP_OUTPUT_HANDLER_START,
       (const char *)"PHP_PREFIX", (const char *)-1, (const char *)128, (const char *)&k_PHP_PREFIX,
+      (const char *)"PHP_ROUND_HALF_DOWN", (const char *)-1, (const char *)32, (const char *)&k_PHP_ROUND_HALF_DOWN,
+      (const char *)"PHP_ROUND_HALF_EVEN", (const char *)-1, (const char *)32, (const char *)&k_PHP_ROUND_HALF_EVEN,
+      (const char *)"PHP_ROUND_HALF_ODD", (const char *)-1, (const char *)32, (const char *)&k_PHP_ROUND_HALF_ODD,
+      (const char *)"PHP_ROUND_HALF_UP", (const char *)-1, (const char *)32, (const char *)&k_PHP_ROUND_HALF_UP,
       (const char *)"PHP_SAPI", (const char *)-1, (const char *)128, (const char *)&k_PHP_SAPI,
       (const char *)"PHP_SHLIB_SUFFIX", (const char *)-1, (const char *)128, (const char *)&k_PHP_SHLIB_SUFFIX,
       (const char *)"PHP_SYSCONFDIR", (const char *)-1, (const char *)128, (const char *)&k_PHP_SYSCONFDIR,

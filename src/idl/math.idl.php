@@ -210,6 +210,38 @@ DefineFunction(
     'taint_observer' => false,
   ));
 
+DefineConstant(
+  array(
+    'name'   => "PHP_ROUND_HALF_UP",
+    'type'   => Int64,
+    'desc'   => "Round val up to precision decimal places away from zero, when it is half way there. Making 1.5 into 2 and -1.5 into -2.",
+  )
+);
+
+DefineConstant(
+  array(
+    'name'   => "PHP_ROUND_HALF_DOWN",
+    'type'   => Int64,
+    'desc'   => "Round val down to precision decimal places towards zero, when it is half way there. Making 1.5 into 1 and -1.5 into -1.",
+  )
+);
+
+DefineConstant(
+  array(
+    'name'   => "PHP_ROUND_HALF_EVEN",
+    'type'   => Int64,
+    'desc'   => "Round val to precision decimal places towards the next even value.",
+  )
+);
+
+DefineConstant(
+  array(
+    'name'   => "PHP_ROUND_HALF_ODD",
+    'type'   => Int64,
+    'desc'   => "Round val to precision decimal places towards the next odd value.",
+  )
+);
+
 DefineFunction(
   array(
     'name'   => "round",
@@ -230,6 +262,12 @@ DefineFunction(
         'type'   => Int64,
         'value'  => "0",
         'desc'   => "The optional number of decimal digits to round to.",
+      ),
+      array(
+        'name'   => "mode",
+        'type'   => Int64,
+        'value'  => "1", // PHP_ROUND_HALF_UP
+        'desc'   => "One of the PHP_ROUND_HALF_* constants to determine how rounding should occur.",
       ),
     ),
     'taint_observer' => false,

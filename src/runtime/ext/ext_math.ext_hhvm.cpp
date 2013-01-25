@@ -160,23 +160,35 @@ TypedValue* fg_abs(HPHP::VM::ActRec *ar) {
 
 
 /*
-double HPHP::f_round(HPHP::Variant const&, long long)
-_ZN4HPHP7f_roundERKNS_7VariantEx
+double HPHP::f_round(HPHP::Variant const&, long long, long long)
+_ZN4HPHP7f_roundERKNS_7VariantExx
 
 (return value) => xmm0
 val => rdi
 precision => rsi
+mode => rdx
 */
 
-double fh_round(TypedValue* val, long long precision) asm("_ZN4HPHP7f_roundERKNS_7VariantEx");
+double fh_round(TypedValue* val, long long precision, long long mode) asm("_ZN4HPHP7f_roundERKNS_7VariantExx");
 
 TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
-  tvCastToInt64InPlace(args-1);
-  rv->m_data.dbl = fh_round((args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(0));
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-2);
+    }
+  case 2:
+    if ((args-1)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  rv->m_data.dbl = fh_round((args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(0), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(1));
   return rv;
 }
 
@@ -184,27 +196,27 @@ TypedValue* fg_round(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 2LL) {
-      if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
+    if (count >= 1LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64)) {
         rv._count = 0;
         rv.m_type = KindOfDouble;
-        rv.m_data.dbl = fh_round((args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(0));
-        frame_free_locals_no_this_inl(ar, 2);
+        rv.m_data.dbl = fh_round((args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(0), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(1));
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_round(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("round", count, 1, 2, 1);
+      throw_wrong_arguments_nr("round", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

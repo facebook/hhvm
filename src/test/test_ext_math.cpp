@@ -169,6 +169,25 @@ bool TestExtMath::test_round() {
   VS(f_round("1241757", -3), 1242000.0);
   VS(f_round("5.045", 2), 5.05);
   VS(f_round("5.055", 2), 5.06);
+
+  // ext/standard/tests/math/round_modes.phpt
+  VS(f_round(2.5, 0, k_PHP_ROUND_HALF_UP), 3.0);
+  VS(f_round(2.5, 0, k_PHP_ROUND_HALF_DOWN), 2.0);
+  VS(f_round(2.5, 0, k_PHP_ROUND_HALF_EVEN), 2.0);
+  VS(f_round(2.5, 0, k_PHP_ROUND_HALF_ODD), 3.0);
+  VS(f_round(-2.5, 0, k_PHP_ROUND_HALF_UP), -3.0);
+  VS(f_round(-2.5, 0, k_PHP_ROUND_HALF_DOWN), -2.0);
+  VS(f_round(-2.5, 0, k_PHP_ROUND_HALF_EVEN), -2.0);
+  VS(f_round(-2.5, 0, k_PHP_ROUND_HALF_ODD), -3.0);
+  VS(f_round(3.5, 0, k_PHP_ROUND_HALF_UP), 4.0);
+  VS(f_round(3.5, 0, k_PHP_ROUND_HALF_DOWN), 3.0);
+  VS(f_round(3.5, 0, k_PHP_ROUND_HALF_EVEN), 4.0);
+  VS(f_round(3.5, 0, k_PHP_ROUND_HALF_ODD), 3.0);
+  VS(f_round(-3.5, 0, k_PHP_ROUND_HALF_UP), -4.0);
+  VS(f_round(-3.5, 0, k_PHP_ROUND_HALF_DOWN), -3.0);
+  VS(f_round(-3.5, 0, k_PHP_ROUND_HALF_EVEN), -4.0);
+  VS(f_round(-3.5, 0, k_PHP_ROUND_HALF_ODD), -3.0);
+
   return Count(true);
 }
 

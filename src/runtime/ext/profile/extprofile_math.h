@@ -70,9 +70,9 @@ inline double x_floor(double value) {
   return f_floor(value);
 }
 
-inline double x_round(CVarRef val, int64 precision = 0) {
+inline double x_round(CVarRef val, int64 precision = 0, int64 mode = 1) {
   FUNCTION_INJECTION_BUILTIN(round);
-  return f_round(val, precision);
+  return f_round(val, precision, mode);
 }
 
 inline double x_deg2rad(double number) {

@@ -22,6 +22,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const int64 k_PHP_ROUND_HALF_UP =   PHP_ROUND_HALF_UP;
+const int64 k_PHP_ROUND_HALF_DOWN = PHP_ROUND_HALF_DOWN;
+const int64 k_PHP_ROUND_HALF_EVEN = PHP_ROUND_HALF_EVEN;
+const int64 k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
+
 Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
   Variant ret;
   if (_argv.empty() && value.is(KindOfArray)) {
@@ -101,7 +106,8 @@ Variant f_abs(CVarRef number) {
   }
 }
 
-double f_round(CVarRef val, int64 precision /* = 0 */) {
+double f_round(CVarRef val, int64 precision /* = 0 */,
+               int64 mode /* = PHP_ROUND_HALF_UP */) {
   int64 ival;
   double dval;
   DataType k = val.toNumeric(ival, dval, true);
@@ -114,7 +120,7 @@ double f_round(CVarRef val, int64 precision /* = 0 */) {
   } else if (k != KindOfDouble) {
     dval = val.toDouble();
   }
-  PHP_ROUND_WITH_FUZZ(dval, precision);
+  dval = php_math_round(dval, precision, mode);
   return dval;
 }
 

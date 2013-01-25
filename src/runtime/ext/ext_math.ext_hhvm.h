@@ -54,15 +54,16 @@ number => rsi
 TypedValue* fh_abs(TypedValue* _rv, TypedValue* number) asm("_ZN4HPHP5f_absERKNS_7VariantE");
 
 /*
-double HPHP::f_round(HPHP::Variant const&, long long)
-_ZN4HPHP7f_roundERKNS_7VariantEx
+double HPHP::f_round(HPHP::Variant const&, long long, long long)
+_ZN4HPHP7f_roundERKNS_7VariantExx
 
 (return value) => xmm0
 val => rdi
 precision => rsi
+mode => rdx
 */
 
-double fh_round(TypedValue* val, long long precision) asm("_ZN4HPHP7f_roundERKNS_7VariantEx");
+double fh_round(TypedValue* val, long long precision, long long mode) asm("_ZN4HPHP7f_roundERKNS_7VariantExx");
 
 /*
 HPHP::Variant HPHP::f_base_convert(HPHP::String const&, long long, long long)

@@ -2126,9 +2126,6 @@
 /* whether pwrite64 is default */
 /* #undef PHP_PWRITE_64 */
 
-/* see #24142 */
-#define PHP_ROUND_FUZZ 0.5
-
 /* */
 #define PHP_SAFE_MODE 0
 

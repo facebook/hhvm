@@ -42,6 +42,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64 k_PHP_ROUND_HALF_UP;
+extern const int64 k_PHP_ROUND_HALF_DOWN;
+extern const int64 k_PHP_ROUND_HALF_EVEN;
+extern const int64 k_PHP_ROUND_HALF_ODD;
+
 inline double f_pi() { return k_M_PI;}
 
 Variant f_min(int _argc, CVarRef value, CArrRef _argv = null_array);
@@ -54,7 +59,8 @@ inline bool f_is_nan(double val) { return isnan(val);}
 
 inline double f_ceil(double value) { return ceil(value);}
 inline double f_floor(double value) { return floor(value);}
-double f_round(CVarRef val, int64 precision = 0);
+double f_round(CVarRef val, int64 precision = 0,
+               int64 mode = PHP_ROUND_HALF_UP);
 
 inline double f_deg2rad(double number) { return number / 180.0 * k_M_PI;}
 inline double f_rad2deg(double number) { return number / k_M_PI * 180.0;}

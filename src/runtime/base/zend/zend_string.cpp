@@ -2203,7 +2203,7 @@ char *string_number_format(double d, int dec, char dec_point,
   }
 
   if (dec < 0) dec = 0;
-  PHP_ROUND_WITH_FUZZ(d, dec);
+  d = php_math_round(d, dec);
 
   // departure from PHP: we got rid of dependencies on spprintf() here.
   tmpbuf = (char *)malloc(64);

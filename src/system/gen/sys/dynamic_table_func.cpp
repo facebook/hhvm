@@ -5665,11 +5665,13 @@ Variant i_metaphone(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_metaphone);
 }
 Variant ifa_round(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("round", count, 1, 2, 1);
+  if (UNLIKELY(count < 1 || count > 3)) return throw_wrong_arguments("round", count, 1, 3, 1);
   CVarRef arg0(a0);
   if (count <= 1) return (x_round(arg0));
   CVarRef arg1(a1);
-  return (x_round(arg0, arg1));
+  if (count <= 2) return (x_round(arg0, arg1));
+  CVarRef arg2(a2);
+  return (x_round(arg0, arg1, arg2));
 }
 Variant i_round(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_round);
@@ -22390,7 +22392,7 @@ extern const CallInfo ci_posix_seteuid = {(void*)&i_posix_seteuid, (void*)&ifa_p
 extern const CallInfo ci_dom_element_get_elements_by_tag_name_ns = {(void*)&i_dom_element_get_elements_by_tag_name_ns, (void*)&ifa_dom_element_get_elements_by_tag_name_ns, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_getopt = {(void*)&i_getopt, (void*)&ifa_getopt, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_metaphone = {(void*)&i_metaphone, (void*)&ifa_metaphone, 2, 0, 0x0000000000000000LL};
-extern const CallInfo ci_round = {(void*)&i_round, (void*)&ifa_round, 2, 0, 0x0000000000000000LL};
+extern const CallInfo ci_round = {(void*)&i_round, (void*)&ifa_round, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_symlink = {(void*)&i_symlink, (void*)&ifa_symlink, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_imap_get_quota = {(void*)&i_imap_get_quota, (void*)&ifa_imap_get_quota, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_spliti = {(void*)&i_spliti, (void*)&ifa_spliti, 3, 0, 0x0000000000000000LL};

@@ -38,7 +38,7 @@ parser => rdi
 bool fh_xml_parser_free(Value* parser) asm("_ZN4HPHP17f_xml_parser_freeERKNS_6ObjectE");
 
 /*
-long long HPHP::f_xml_parse(HPHP::Object const&, HPHP::String const&, bool)
+long HPHP::f_xml_parse(HPHP::Object const&, HPHP::String const&, bool)
 _ZN4HPHP11f_xml_parseERKNS_6ObjectERKNS_6StringEb
 
 (return value) => rax
@@ -47,10 +47,10 @@ data => rsi
 is_final => rdx
 */
 
-long long fh_xml_parse(Value* parser, Value* data, bool is_final) asm("_ZN4HPHP11f_xml_parseERKNS_6ObjectERKNS_6StringEb");
+long fh_xml_parse(Value* parser, Value* data, bool is_final) asm("_ZN4HPHP11f_xml_parseERKNS_6ObjectERKNS_6StringEb");
 
 /*
-long long HPHP::f_xml_parse_into_struct(HPHP::Object const&, HPHP::String const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
+long HPHP::f_xml_parse_into_struct(HPHP::Object const&, HPHP::String const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
 _ZN4HPHP23f_xml_parse_into_structERKNS_6ObjectERKNS_6StringERKNS_14VRefParamValueES8_
 
 (return value) => rax
@@ -60,7 +60,7 @@ values => rdx
 index => rcx
 */
 
-long long fh_xml_parse_into_struct(Value* parser, Value* data, TypedValue* values, TypedValue* index) asm("_ZN4HPHP23f_xml_parse_into_structERKNS_6ObjectERKNS_6StringERKNS_14VRefParamValueES8_");
+long fh_xml_parse_into_struct(Value* parser, Value* data, TypedValue* values, TypedValue* index) asm("_ZN4HPHP23f_xml_parse_into_structERKNS_6ObjectERKNS_6StringERKNS_14VRefParamValueES8_");
 
 /*
 HPHP::Object HPHP::f_xml_parser_create_ns(HPHP::String const&, HPHP::String const&)
@@ -210,44 +210,44 @@ object => rsi
 bool fh_xml_set_object(Value* parser, TypedValue* object) asm("_ZN4HPHP16f_xml_set_objectERKNS_6ObjectERKNS_14VRefParamValueE");
 
 /*
-long long HPHP::f_xml_get_current_byte_index(HPHP::Object const&)
+long HPHP::f_xml_get_current_byte_index(HPHP::Object const&)
 _ZN4HPHP28f_xml_get_current_byte_indexERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-long long fh_xml_get_current_byte_index(Value* parser) asm("_ZN4HPHP28f_xml_get_current_byte_indexERKNS_6ObjectE");
+long fh_xml_get_current_byte_index(Value* parser) asm("_ZN4HPHP28f_xml_get_current_byte_indexERKNS_6ObjectE");
 
 /*
-long long HPHP::f_xml_get_current_column_number(HPHP::Object const&)
+long HPHP::f_xml_get_current_column_number(HPHP::Object const&)
 _ZN4HPHP31f_xml_get_current_column_numberERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-long long fh_xml_get_current_column_number(Value* parser) asm("_ZN4HPHP31f_xml_get_current_column_numberERKNS_6ObjectE");
+long fh_xml_get_current_column_number(Value* parser) asm("_ZN4HPHP31f_xml_get_current_column_numberERKNS_6ObjectE");
 
 /*
-long long HPHP::f_xml_get_current_line_number(HPHP::Object const&)
+long HPHP::f_xml_get_current_line_number(HPHP::Object const&)
 _ZN4HPHP29f_xml_get_current_line_numberERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-long long fh_xml_get_current_line_number(Value* parser) asm("_ZN4HPHP29f_xml_get_current_line_numberERKNS_6ObjectE");
+long fh_xml_get_current_line_number(Value* parser) asm("_ZN4HPHP29f_xml_get_current_line_numberERKNS_6ObjectE");
 
 /*
-long long HPHP::f_xml_get_error_code(HPHP::Object const&)
+long HPHP::f_xml_get_error_code(HPHP::Object const&)
 _ZN4HPHP20f_xml_get_error_codeERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-long long fh_xml_get_error_code(Value* parser) asm("_ZN4HPHP20f_xml_get_error_codeERKNS_6ObjectE");
+long fh_xml_get_error_code(Value* parser) asm("_ZN4HPHP20f_xml_get_error_codeERKNS_6ObjectE");
 
 /*
 HPHP::String HPHP::f_xml_error_string(int)

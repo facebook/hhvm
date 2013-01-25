@@ -343,7 +343,7 @@ class Array : protected ArrayBase {
   CVarRef setRefImpl(const T &key, CVarRef v);
 
   CVarRef set(bool    key, CVarRef v) {
-    return set(key ? 1LL : 0LL, v);
+    return set(int64_t(key ? 1 : 0), v);
   }
   CVarRef set(int     key, CVarRef v) {
     return set((int64)key, v);

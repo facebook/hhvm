@@ -46,8 +46,8 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   c_RecursiveIteratorIterator(const ObjectStaticCallbacks *cb = &cw_RecursiveIteratorIterator) : ExtObjectData(cb), m_rsrc(Variant::nullInit) {
     if (!hhvm) setAttribute(NoDestructor);
   }
-  public: void t___construct(Variant v_iterator, Variant v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0LL);
-  public: c_RecursiveIteratorIterator *create(CVarRef v_iterator, CVarRef v_mode = NAMVAR(s_sys_svif01bca90, 0LL) /* RecursiveIteratorIterator::LEAVES_ONLY */, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
+  public: void t___construct(Variant v_iterator, Variant v_mode = 0L /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0L);
+  public: c_RecursiveIteratorIterator *create(CVarRef v_iterator, CVarRef v_mode = NAMVAR(s_sys_svif01bca90, int64_t(0)) /* RecursiveIteratorIterator::LEAVES_ONLY */, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, int64_t(0)));
   public: Object t_getinneriterator();
   public: Variant t_current();
   public: Variant t_key();
@@ -63,10 +63,10 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(valid);
 };
 ObjectData *coo_RecursiveIteratorIterator() NEVER_INLINE;
-extern const int64 q_RecursiveIteratorIterator$$LEAVES_ONLY;
-extern const int64 q_RecursiveIteratorIterator$$SELF_FIRST;
-extern const int64 q_RecursiveIteratorIterator$$CHILD_FIRST;
-extern const int64 q_RecursiveIteratorIterator$$CATCH_GET_CHILD;
+extern const int64_t q_RecursiveIteratorIterator$$LEAVES_ONLY;
+extern const int64_t q_RecursiveIteratorIterator$$SELF_FIRST;
+extern const int64_t q_RecursiveIteratorIterator$$CHILD_FIRST;
+extern const int64_t q_RecursiveIteratorIterator$$CATCH_GET_CHILD;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

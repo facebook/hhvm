@@ -147,7 +147,7 @@ void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
         fprintf(f, "%s(), called ", frame["function"].toString().c_str());
       }
     }
-    fprintf(f, "at [%s:%lld]", frame["file"].toString().c_str(),
+    fprintf(f, "at [%s:%"PRId64"]", frame["file"].toString().c_str(),
             frame["line"].toInt64());
   }
   fprintf(f, escapeMore ? "\\n" : "\n");

@@ -236,7 +236,7 @@ void ProcessInit() {
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 
   // Retrieve all of the class pointers
-  for (long long i = 0LL; i < hhbc_ext_class_count; ++i) {
+  for (long long i = 0; i < hhbc_ext_class_count; ++i) {
     const HhbcExtClassInfo* info = hhbc_ext_classes + i;
     const StringData* name = StringData::GetStaticString(info->m_name);
     const NamedEntity* ne = Unit::GetNamedEntity(name);

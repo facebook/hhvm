@@ -42,8 +42,8 @@ const int cw_SoapFault$$instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-extern const CallInfo ci_SoapFault$$__tostring = { (void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapFault$$__construct = { (void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SoapFault$$__tostring = { (void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapFault$$__construct = { (void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000L};
 Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -115,11 +115,11 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapFault, SoapFault::__construct);
   Variant v_fault_ns;
   Variant v_fault_code;
-  int64 v_SOAP_1_1 = 0;
-  int64 v_SOAP_1_2 = 0;
+  int64_t v_SOAP_1_1 = 0;
+  int64_t v_SOAP_1_2 = 0;
   String v_SOAP_1_1_ENV_NAMESPACE;
   String v_SOAP_1_2_ENV_NAMESPACE;
-  int64 v_soap_version = 0;
+  int64_t v_soap_version = 0;
 
   ObjectData *obj_tmp UNUSED;
   setNull(v_fault_ns);
@@ -134,8 +134,8 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
     {
       bool tmp1 = (x_is_array(v_code));
       if (tmp1) {
-        int64 tmp2((x_count(v_code)));
-        tmp1 = (equal(tmp2, 2LL));
+        int64_t tmp2((x_count(v_code)));
+        tmp1 = (equal(tmp2, 2L));
       }
       tmp0 = (tmp1);
     }
@@ -146,11 +146,11 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
           v_code.assignVal(tmp0);
         }
         {
-          const Variant &tmp0((v_code.rvalAt(0LL, AccessFlags::Error)));
+          const Variant &tmp0((v_code.rvalAt(0L, AccessFlags::Error)));
           v_fault_ns.assignVal(tmp0);
         }
         {
-          const Variant &tmp0((v_code.rvalAt(1LL, AccessFlags::Error)));
+          const Variant &tmp0((v_code.rvalAt(1L, AccessFlags::Error)));
           v_fault_code.assignVal(tmp0);
         }
         if ((!(x_is_string(v_fault_ns)) || !(x_is_string(v_fault_code)))) {
@@ -184,12 +184,12 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
   m_detail.assignVal(v_detail);
   m__name.assignVal(v_name);
   m_headerfault.assignVal(v_header);
-  v_SOAP_1_1 = 1LL;
-  v_SOAP_1_2 = 2LL;
+  v_SOAP_1_1 = 1L;
+  v_SOAP_1_2 = 2L;
   v_SOAP_1_1_ENV_NAMESPACE = NAMSTR(s_sys_ss0842226e, "http://schemas.xmlsoap.org/soap/envelope/");
   v_SOAP_1_2_ENV_NAMESPACE = NAMSTR(s_sys_ss2cc85e9b, "http://www.w3.org/2003/05/soap-envelope");
   {
-    int64 tmp0((x__soap_active_version()));
+    int64_t tmp0((x__soap_active_version()));
     v_soap_version = tmp0;
   }
   if (empty(m_faultcodens)) {

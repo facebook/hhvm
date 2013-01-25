@@ -35,8 +35,8 @@ url => rsi
 
 TypedValue* fh_curl_init(TypedValue* _rv, Value* url) asm("_ZN4HPHP11f_curl_initERKNS_6StringE");
 
-TypedValue * fg1_curl_init(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_init(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_curl_init((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
@@ -46,7 +46,7 @@ TypedValue * fg1_curl_init(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_curl_init(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
@@ -86,8 +86,8 @@ ch => rsi
 
 TypedValue* fh_curl_copy_handle(TypedValue* _rv, Value* ch) asm("_ZN4HPHP18f_curl_copy_handleERKNS_6ObjectE");
 
-TypedValue * fg1_curl_copy_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_copy_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_copy_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_copy_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_copy_handle((rv), (Value*)(args-0));
@@ -97,7 +97,7 @@ TypedValue * fg1_curl_copy_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_curl_copy_handle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -137,8 +137,8 @@ uversion => rsi
 
 TypedValue* fh_curl_version(TypedValue* _rv, int uversion) asm("_ZN4HPHP14f_curl_versionEi");
 
-TypedValue * fg1_curl_version(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_version(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_curl_version((rv), (count > 0) ? (int)(args[-0].m_data.num) : (int)(k_CURLVERSION_NOW));
@@ -148,7 +148,7 @@ TypedValue * fg1_curl_version(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_curl_version(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
@@ -189,8 +189,8 @@ value => rdx
 
 bool fh_curl_setopt(Value* ch, int option, TypedValue* value) asm("_ZN4HPHP13f_curl_setoptERKNS_6ObjectEiRKNS_7VariantE");
 
-TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -206,7 +206,7 @@ TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_curl_setopt(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -247,8 +247,8 @@ options => rsi
 
 bool fh_curl_setopt_array(Value* ch, Value* options) asm("_ZN4HPHP19f_curl_setopt_arrayERKNS_6ObjectERKNS_5ArrayE");
 
-TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -264,7 +264,7 @@ TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_curl_setopt_array(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -306,8 +306,8 @@ opt => rdx
 
 TypedValue* fh_fb_curl_getopt(TypedValue* _rv, Value* ch, int opt) asm("_ZN4HPHP16f_fb_curl_getoptERKNS_6ObjectEi");
 
-TypedValue * fg1_fb_curl_getopt(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_curl_getopt(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_curl_getopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_curl_getopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -327,7 +327,7 @@ TypedValue * fg1_fb_curl_getopt(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_fb_curl_getopt(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
@@ -367,8 +367,8 @@ ch => rsi
 
 TypedValue* fh_curl_exec(TypedValue* _rv, Value* ch) asm("_ZN4HPHP11f_curl_execERKNS_6ObjectE");
 
-TypedValue * fg1_curl_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_exec((rv), (Value*)(args-0));
@@ -378,7 +378,7 @@ TypedValue * fg1_curl_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_curl_exec(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -419,8 +419,8 @@ opt => rdx
 
 TypedValue* fh_curl_getinfo(TypedValue* _rv, Value* ch, int opt) asm("_ZN4HPHP14f_curl_getinfoERKNS_6ObjectEi");
 
-TypedValue * fg1_curl_getinfo(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_getinfo(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_getinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_getinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -440,7 +440,7 @@ TypedValue * fg1_curl_getinfo(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_curl_getinfo(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
@@ -480,8 +480,8 @@ ch => rsi
 
 TypedValue* fh_curl_errno(TypedValue* _rv, Value* ch) asm("_ZN4HPHP12f_curl_errnoERKNS_6ObjectE");
 
-TypedValue * fg1_curl_errno(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_errno(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_errno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_errno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_errno((rv), (Value*)(args-0));
@@ -491,7 +491,7 @@ TypedValue * fg1_curl_errno(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_curl_errno(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -531,8 +531,8 @@ ch => rsi
 
 TypedValue* fh_curl_error(TypedValue* _rv, Value* ch) asm("_ZN4HPHP12f_curl_errorERKNS_6ObjectE");
 
-TypedValue * fg1_curl_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_error((rv), (Value*)(args-0));
@@ -542,7 +542,7 @@ TypedValue * fg1_curl_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_curl_error(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -582,8 +582,8 @@ ch => rsi
 
 TypedValue* fh_curl_close(TypedValue* _rv, Value* ch) asm("_ZN4HPHP12f_curl_closeERKNS_6ObjectE");
 
-TypedValue * fg1_curl_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_close((rv), (Value*)(args-0));
@@ -593,7 +593,7 @@ TypedValue * fg1_curl_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_curl_close(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -634,7 +634,7 @@ Value* fh_curl_multi_init(Value* _rv) asm("_ZN4HPHP17f_curl_multi_initEv");
 
 TypedValue* fg_curl_multi_init(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -670,8 +670,8 @@ ch => rdx
 
 TypedValue* fh_curl_multi_add_handle(TypedValue* _rv, Value* mh, Value* ch) asm("_ZN4HPHP23f_curl_multi_add_handleERKNS_6ObjectES2_");
 
-TypedValue * fg1_curl_multi_add_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_multi_add_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_multi_add_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_multi_add_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -686,7 +686,7 @@ TypedValue * fg1_curl_multi_add_handle(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_curl_multi_add_handle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -727,8 +727,8 @@ ch => rdx
 
 TypedValue* fh_curl_multi_remove_handle(TypedValue* _rv, Value* mh, Value* ch) asm("_ZN4HPHP26f_curl_multi_remove_handleERKNS_6ObjectES2_");
 
-TypedValue * fg1_curl_multi_remove_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_multi_remove_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_multi_remove_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_multi_remove_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -743,7 +743,7 @@ TypedValue * fg1_curl_multi_remove_handle(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_curl_multi_remove_handle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -784,8 +784,8 @@ still_running => rdx
 
 TypedValue* fh_curl_multi_exec(TypedValue* _rv, Value* mh, TypedValue* still_running) asm("_ZN4HPHP17f_curl_multi_execERKNS_6ObjectERKNS_14VRefParamValueE");
 
-TypedValue * fg1_curl_multi_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_multi_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_multi_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_multi_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_multi_exec((rv), (Value*)(args-0), (args-1));
@@ -795,7 +795,7 @@ TypedValue * fg1_curl_multi_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_curl_multi_exec(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -836,8 +836,8 @@ timeout => xmm0
 
 TypedValue* fh_curl_multi_select(TypedValue* _rv, Value* mh, double timeout) asm("_ZN4HPHP19f_curl_multi_selectERKNS_6ObjectEd");
 
-TypedValue * fg1_curl_multi_select(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_multi_select(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_multi_select(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_multi_select(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -857,7 +857,7 @@ TypedValue * fg1_curl_multi_select(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_curl_multi_select(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfDouble) && (args-0)->m_type == KindOfObject) {
@@ -901,8 +901,8 @@ max_fd => r9
 
 TypedValue* fh_fb_curl_multi_fdset(TypedValue* _rv, Value* mh, TypedValue* read_fd_set, TypedValue* write_fd_set, TypedValue* exc_fd_set, TypedValue* max_fd) asm("_ZN4HPHP21f_fb_curl_multi_fdsetERKNS_6ObjectERKNS_14VRefParamValueES5_S5_S5_");
 
-TypedValue * fg1_fb_curl_multi_fdset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_curl_multi_fdset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_curl_multi_fdset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_curl_multi_fdset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   VRefParamValue defVal4 = null_object;
@@ -913,7 +913,7 @@ TypedValue * fg1_fb_curl_multi_fdset(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_fb_curl_multi_fdset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -954,8 +954,8 @@ ch => rsi
 
 TypedValue* fh_curl_multi_getcontent(TypedValue* _rv, Value* ch) asm("_ZN4HPHP23f_curl_multi_getcontentERKNS_6ObjectE");
 
-TypedValue * fg1_curl_multi_getcontent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_multi_getcontent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_multi_getcontent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_multi_getcontent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_multi_getcontent((rv), (Value*)(args-0));
@@ -965,7 +965,7 @@ TypedValue * fg1_curl_multi_getcontent(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_curl_multi_getcontent(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1006,8 +1006,8 @@ msgs_in_queue => rdx
 
 TypedValue* fh_curl_multi_info_read(TypedValue* _rv, Value* mh, TypedValue* msgs_in_queue) asm("_ZN4HPHP22f_curl_multi_info_readERKNS_6ObjectERKNS_14VRefParamValueE");
 
-TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   VRefParamValue defVal1 = null;
@@ -1018,7 +1018,7 @@ TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_curl_multi_info_read(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1059,8 +1059,8 @@ mh => rsi
 
 TypedValue* fh_curl_multi_close(TypedValue* _rv, Value* mh) asm("_ZN4HPHP18f_curl_multi_closeERKNS_6ObjectE");
 
-TypedValue * fg1_curl_multi_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_curl_multi_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_curl_multi_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_curl_multi_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_curl_multi_close((rv), (Value*)(args-0));
@@ -1070,7 +1070,7 @@ TypedValue * fg1_curl_multi_close(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_curl_multi_close(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1110,8 +1110,8 @@ port => rdx
 
 void fh_evhttp_set_cache(Value* address, int max_conn, int port) asm("_ZN4HPHP18f_evhttp_set_cacheERKNS_6StringEii");
 
-TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1136,7 +1136,7 @@ TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_evhttp_set_cache(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
@@ -1180,8 +1180,8 @@ timeout => rcx
 
 TypedValue* fh_evhttp_get(TypedValue* _rv, Value* url, Value* headers, int timeout) asm("_ZN4HPHP12f_evhttp_getERKNS_6StringERKNS_5ArrayEi");
 
-TypedValue * fg1_evhttp_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_evhttp_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_evhttp_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_evhttp_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1205,7 +1205,7 @@ TypedValue * fg1_evhttp_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_evhttp_get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -1248,8 +1248,8 @@ timeout => r8
 
 TypedValue* fh_evhttp_post(TypedValue* _rv, Value* url, Value* data, Value* headers, int timeout) asm("_ZN4HPHP13f_evhttp_postERKNS_6StringES2_RKNS_5ArrayEi");
 
-TypedValue * fg1_evhttp_post(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_evhttp_post(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_evhttp_post(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_evhttp_post(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -1276,7 +1276,7 @@ TypedValue * fg1_evhttp_post(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_evhttp_post(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfArray) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -1318,8 +1318,8 @@ timeout => rcx
 
 TypedValue* fh_evhttp_async_get(TypedValue* _rv, Value* url, Value* headers, int timeout) asm("_ZN4HPHP18f_evhttp_async_getERKNS_6StringERKNS_5ArrayEi");
 
-TypedValue * fg1_evhttp_async_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_evhttp_async_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_evhttp_async_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_evhttp_async_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1343,7 +1343,7 @@ TypedValue * fg1_evhttp_async_get(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_evhttp_async_get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -1386,8 +1386,8 @@ timeout => r8
 
 TypedValue* fh_evhttp_async_post(TypedValue* _rv, Value* url, Value* data, Value* headers, int timeout) asm("_ZN4HPHP19f_evhttp_async_postERKNS_6StringES2_RKNS_5ArrayEi");
 
-TypedValue * fg1_evhttp_async_post(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_evhttp_async_post(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_evhttp_async_post(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_evhttp_async_post(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -1414,7 +1414,7 @@ TypedValue * fg1_evhttp_async_post(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_evhttp_async_post(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfArray) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -1454,8 +1454,8 @@ handle => rsi
 
 TypedValue* fh_evhttp_recv(TypedValue* _rv, Value* handle) asm("_ZN4HPHP13f_evhttp_recvERKNS_6ObjectE");
 
-TypedValue * fg1_evhttp_recv(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_evhttp_recv(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_evhttp_recv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_evhttp_recv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_evhttp_recv((rv), (Value*)(args-0));
@@ -1465,7 +1465,7 @@ TypedValue * fg1_evhttp_recv(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_evhttp_recv(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {

@@ -40,10 +40,10 @@ const int cw_Directory$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_Directory$$read = { (void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Directory$$rewind = { (void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Directory$$__construct = { (void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Directory$$close = { (void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Directory$$read = { (void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Directory$$rewind = { (void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Directory$$__construct = { (void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Directory$$close = { (void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 4, 0x0000000000000000L};
 Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }

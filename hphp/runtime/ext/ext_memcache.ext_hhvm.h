@@ -112,7 +112,7 @@ expire => rdx
 bool fh_memcache_delete(Value* memcache, Value* key, int expire) asm("_ZN4HPHP17f_memcache_deleteERKNS_6ObjectERKNS_6StringEi");
 
 /*
-long long HPHP::f_memcache_increment(HPHP::Object const&, HPHP::String const&, int)
+long HPHP::f_memcache_increment(HPHP::Object const&, HPHP::String const&, int)
 _ZN4HPHP20f_memcache_incrementERKNS_6ObjectERKNS_6StringEi
 
 (return value) => rax
@@ -121,10 +121,10 @@ key => rsi
 offset => rdx
 */
 
-long long fh_memcache_increment(Value* memcache, Value* key, int offset) asm("_ZN4HPHP20f_memcache_incrementERKNS_6ObjectERKNS_6StringEi");
+long fh_memcache_increment(Value* memcache, Value* key, int offset) asm("_ZN4HPHP20f_memcache_incrementERKNS_6ObjectERKNS_6StringEi");
 
 /*
-long long HPHP::f_memcache_decrement(HPHP::Object const&, HPHP::String const&, int)
+long HPHP::f_memcache_decrement(HPHP::Object const&, HPHP::String const&, int)
 _ZN4HPHP20f_memcache_decrementERKNS_6ObjectERKNS_6StringEi
 
 (return value) => rax
@@ -133,7 +133,7 @@ key => rsi
 offset => rdx
 */
 
-long long fh_memcache_decrement(Value* memcache, Value* key, int offset) asm("_ZN4HPHP20f_memcache_decrementERKNS_6ObjectERKNS_6StringEi");
+long fh_memcache_decrement(Value* memcache, Value* key, int offset) asm("_ZN4HPHP20f_memcache_decrementERKNS_6ObjectERKNS_6StringEi");
 
 /*
 bool HPHP::f_memcache_close(HPHP::Object const&)
@@ -189,7 +189,7 @@ timeoutms => rsi
 bool fh_memcache_setoptimeout(Value* memcache, int timeoutms) asm("_ZN4HPHP23f_memcache_setoptimeoutERKNS_6ObjectEi");
 
 /*
-long long HPHP::f_memcache_get_server_status(HPHP::Object const&, HPHP::String const&, int)
+long HPHP::f_memcache_get_server_status(HPHP::Object const&, HPHP::String const&, int)
 _ZN4HPHP28f_memcache_get_server_statusERKNS_6ObjectERKNS_6StringEi
 
 (return value) => rax
@@ -198,7 +198,7 @@ host => rsi
 port => rdx
 */
 
-long long fh_memcache_get_server_status(Value* memcache, Value* host, int port) asm("_ZN4HPHP28f_memcache_get_server_statusERKNS_6ObjectERKNS_6StringEi");
+long fh_memcache_get_server_status(Value* memcache, Value* host, int port) asm("_ZN4HPHP28f_memcache_get_server_statusERKNS_6ObjectERKNS_6StringEi");
 
 /*
 bool HPHP::f_memcache_set_compress_threshold(HPHP::Object const&, int, double)

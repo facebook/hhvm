@@ -744,24 +744,24 @@ arg4 => r9
 bool fh_imagefilter(Value* image, int filtertype, int arg1, int arg2, int arg3, int arg4) asm("_ZN4HPHP13f_imagefilterERKNS_6ObjectEiiiii");
 
 /*
-long long HPHP::f_imagefontheight(int)
+long HPHP::f_imagefontheight(int)
 _ZN4HPHP17f_imagefontheightEi
 
 (return value) => rax
 font => rdi
 */
 
-long long fh_imagefontheight(int font) asm("_ZN4HPHP17f_imagefontheightEi");
+long fh_imagefontheight(int font) asm("_ZN4HPHP17f_imagefontheightEi");
 
 /*
-long long HPHP::f_imagefontwidth(int)
+long HPHP::f_imagefontwidth(int)
 _ZN4HPHP16f_imagefontwidthEi
 
 (return value) => rax
 font => rdi
 */
 
-long long fh_imagefontwidth(int font) asm("_ZN4HPHP16f_imagefontwidthEi");
+long fh_imagefontwidth(int font) asm("_ZN4HPHP16f_imagefontwidthEi");
 
 /*
 HPHP::Variant HPHP::f_imageftbbox(double, double, HPHP::String const&, HPHP::String const&, HPHP::Array const&)
@@ -1260,13 +1260,13 @@ text => st0
 TypedValue* fh_imagettftext(TypedValue* _rv, Value* image, double size, double angle, int x, int y, int color, Value* fontfile, Value* text) asm("_ZN4HPHP14f_imagettftextERKNS_6ObjectEddiiiRKNS_6StringES5_");
 
 /*
-long long HPHP::f_imagetypes()
+long HPHP::f_imagetypes()
 _ZN4HPHP12f_imagetypesEv
 
 (return value) => rax
 */
 
-long long fh_imagetypes() asm("_ZN4HPHP12f_imagetypesEv");
+long fh_imagetypes() asm("_ZN4HPHP12f_imagetypesEv");
 
 /*
 bool HPHP::f_imagewbmp(HPHP::Object const&, HPHP::String const&, int)

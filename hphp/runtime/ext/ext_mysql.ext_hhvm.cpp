@@ -41,8 +41,8 @@ query_timeout_ms => st8
 
 TypedValue* fh_mysql_connect(TypedValue* _rv, Value* server, Value* username, Value* password, bool new_link, int client_flags, int connect_timeout_ms, int query_timeout_ms) asm("_ZN4HPHP15f_mysql_connectERKNS_6StringES2_S2_biii");
 
-TypedValue * fg1_mysql_connect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_connect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 7
@@ -83,7 +83,7 @@ TypedValue * fg1_mysql_connect(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_mysql_connect(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 7LL) {
       if ((count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
@@ -128,8 +128,8 @@ query_timeout_ms => st0
 
 TypedValue* fh_mysql_pconnect(TypedValue* _rv, Value* server, Value* username, Value* password, int client_flags, int connect_timeout_ms, int query_timeout_ms) asm("_ZN4HPHP16f_mysql_pconnectERKNS_6StringES2_S2_iii");
 
-TypedValue * fg1_mysql_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -166,7 +166,7 @@ TypedValue * fg1_mysql_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_mysql_pconnect(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
@@ -213,8 +213,8 @@ query_timeout_ms => st16
 
 TypedValue* fh_mysql_connect_with_db(TypedValue* _rv, Value* server, Value* username, Value* password, Value* database, bool new_link, int client_flags, int connect_timeout_ms, int query_timeout_ms) asm("_ZN4HPHP23f_mysql_connect_with_dbERKNS_6StringES2_S2_S2_biii");
 
-TypedValue * fg1_mysql_connect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_connect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_connect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_connect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 8
@@ -259,7 +259,7 @@ TypedValue * fg1_mysql_connect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_mysql_connect_with_db(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 8LL) {
       if ((count <= 7 || (args-7)->m_type == KindOfInt64) && (count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfBoolean) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
@@ -305,8 +305,8 @@ query_timeout_ms => st8
 
 TypedValue* fh_mysql_pconnect_with_db(TypedValue* _rv, Value* server, Value* username, Value* password, Value* database, int client_flags, int connect_timeout_ms, int query_timeout_ms) asm("_ZN4HPHP24f_mysql_pconnect_with_dbERKNS_6StringES2_S2_S2_iii");
 
-TypedValue * fg1_mysql_pconnect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_pconnect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_pconnect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_pconnect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 7
@@ -347,7 +347,7 @@ TypedValue * fg1_mysql_pconnect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_mysql_pconnect_with_db(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 7LL) {
       if ((count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
@@ -387,8 +387,8 @@ unescaped_string => rsi
 
 Value* fh_mysql_escape_string(Value* _rv, Value* unescaped_string) asm("_ZN4HPHP21f_mysql_escape_stringERKNS_6StringE");
 
-TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -400,7 +400,7 @@ TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_mysql_escape_string(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -443,8 +443,8 @@ link_identifier => rdx
 
 TypedValue* fh_mysql_real_escape_string(TypedValue* _rv, Value* unescaped_string, TypedValue* link_identifier) asm("_ZN4HPHP26f_mysql_real_escape_stringERKNS_6StringERKNS_7VariantE");
 
-TypedValue * fg1_mysql_real_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_real_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_real_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_real_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -455,7 +455,7 @@ TypedValue * fg1_mysql_real_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_mysql_real_escape_string(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -498,7 +498,7 @@ TypedValue* fh_mysql_errno(TypedValue* _rv, TypedValue* link_identifier) asm("_Z
 
 TypedValue* fg_mysql_errno(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       Variant defVal0;
@@ -534,7 +534,7 @@ TypedValue* fh_mysql_error(TypedValue* _rv, TypedValue* link_identifier) asm("_Z
 
 TypedValue* fg_mysql_error(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       Variant defVal0;
@@ -570,7 +570,7 @@ TypedValue* fh_mysql_warning_count(TypedValue* _rv, TypedValue* link_identifier)
 
 TypedValue* fg_mysql_warning_count(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       Variant defVal0;
@@ -604,8 +604,8 @@ link_identifier => rsi
 
 bool fh_mysql_set_timeout(int query_timeout_ms, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_set_timeoutEiRKNS_7VariantE");
 
-TypedValue * fg1_mysql_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -617,7 +617,7 @@ TypedValue * fg1_mysql_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_mysql_set_timeout(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 2LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
@@ -660,8 +660,8 @@ link_identifier => rdx
 
 TypedValue* fh_mysql_query(TypedValue* _rv, Value* query, TypedValue* link_identifier) asm("_ZN4HPHP13f_mysql_queryERKNS_6StringERKNS_7VariantE");
 
-TypedValue * fg1_mysql_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -672,7 +672,7 @@ TypedValue * fg1_mysql_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_mysql_query(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -714,8 +714,8 @@ link_identifier => rdx
 
 TypedValue* fh_mysql_multi_query(TypedValue* _rv, Value* query, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_multi_queryERKNS_6StringERKNS_7VariantE");
 
-TypedValue * fg1_mysql_multi_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_multi_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_multi_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_multi_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -726,7 +726,7 @@ TypedValue * fg1_mysql_multi_query(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_mysql_multi_query(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -768,7 +768,7 @@ bool fh_mysql_next_result(TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_ne
 
 TypedValue* fg_mysql_next_result(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       rv._count = 0;
@@ -804,7 +804,7 @@ bool fh_mysql_more_results(TypedValue* link_identifier) asm("_ZN4HPHP20f_mysql_m
 
 TypedValue* fg_mysql_more_results(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       rv._count = 0;
@@ -841,7 +841,7 @@ TypedValue* fh_mysql_fetch_result(TypedValue* _rv, TypedValue* link_identifier) 
 
 TypedValue* fg_mysql_fetch_result(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       Variant defVal0;
@@ -876,8 +876,8 @@ link_identifier => rdx
 
 TypedValue* fh_mysql_unbuffered_query(TypedValue* _rv, Value* query, TypedValue* link_identifier) asm("_ZN4HPHP24f_mysql_unbuffered_queryERKNS_6StringERKNS_7VariantE");
 
-TypedValue * fg1_mysql_unbuffered_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_unbuffered_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_unbuffered_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_unbuffered_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -888,7 +888,7 @@ TypedValue * fg1_mysql_unbuffered_query(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_mysql_unbuffered_query(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -931,7 +931,7 @@ TypedValue* fh_mysql_list_dbs(TypedValue* _rv, TypedValue* link_identifier) asm(
 
 TypedValue* fg_mysql_list_dbs(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       Variant defVal0;
@@ -966,8 +966,8 @@ link_identifier => rdx
 
 TypedValue* fh_mysql_list_tables(TypedValue* _rv, Value* database, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_list_tablesERKNS_6StringERKNS_7VariantE");
 
-TypedValue * fg1_mysql_list_tables(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_list_tables(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_list_tables(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_list_tables(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -978,7 +978,7 @@ TypedValue * fg1_mysql_list_tables(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_mysql_list_tables(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -1021,7 +1021,7 @@ TypedValue* fh_mysql_list_processes(TypedValue* _rv, TypedValue* link_identifier
 
 TypedValue* fg_mysql_list_processes(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       Variant defVal0;
@@ -1057,7 +1057,7 @@ TypedValue* fh_mysql_num_fields(TypedValue* _rv, TypedValue* result) asm("_ZN4HP
 
 TypedValue* fg_mysql_num_fields(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_mysql_num_fields((&(rv)), (args-0));
@@ -1092,7 +1092,7 @@ TypedValue* fh_mysql_num_rows(TypedValue* _rv, TypedValue* result) asm("_ZN4HPHP
 
 TypedValue* fg_mysql_num_rows(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_mysql_num_rows((&(rv)), (args-0));
@@ -1127,7 +1127,7 @@ TypedValue* fh_mysql_free_result(TypedValue* _rv, TypedValue* result) asm("_ZN4H
 
 TypedValue* fg_mysql_free_result(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_mysql_free_result((&(rv)), (args-0));
@@ -1160,8 +1160,8 @@ row => rsi
 
 bool fh_mysql_data_seek(TypedValue* result, int row) asm("_ZN4HPHP17f_mysql_data_seekERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_data_seek(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_data_seek(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_data_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_data_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1172,7 +1172,7 @@ TypedValue * fg1_mysql_data_seek(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_mysql_data_seek(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64) {
@@ -1215,7 +1215,7 @@ TypedValue* fh_mysql_fetch_row(TypedValue* _rv, TypedValue* result) asm("_ZN4HPH
 
 TypedValue* fg_mysql_fetch_row(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_mysql_fetch_row((&(rv)), (args-0));
@@ -1250,7 +1250,7 @@ TypedValue* fh_mysql_fetch_assoc(TypedValue* _rv, TypedValue* result) asm("_ZN4H
 
 TypedValue* fg_mysql_fetch_assoc(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_mysql_fetch_assoc((&(rv)), (args-0));
@@ -1284,8 +1284,8 @@ result_type => rdx
 
 TypedValue* fh_mysql_fetch_array(TypedValue* _rv, TypedValue* result, int result_type) asm("_ZN4HPHP19f_mysql_fetch_arrayERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_fetch_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_fetch_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_fetch_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_fetch_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_fetch_array((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(3));
@@ -1295,7 +1295,7 @@ TypedValue * fg1_mysql_fetch_array(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_mysql_fetch_array(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -1337,7 +1337,7 @@ TypedValue* fh_mysql_fetch_lengths(TypedValue* _rv, TypedValue* result) asm("_ZN
 
 TypedValue* fg_mysql_fetch_lengths(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_mysql_fetch_lengths((&(rv)), (args-0));
@@ -1372,8 +1372,8 @@ params => rcx
 
 TypedValue* fh_mysql_fetch_object(TypedValue* _rv, TypedValue* result, Value* class_name, Value* params) asm("_ZN4HPHP20f_mysql_fetch_objectERKNS_7VariantERKNS_6StringERKNS_5ArrayE");
 
-TypedValue * fg1_mysql_fetch_object(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_fetch_object(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_fetch_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_fetch_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1396,7 +1396,7 @@ TypedValue * fg1_mysql_fetch_object(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_mysql_fetch_object(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfArray) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type))) {
@@ -1440,8 +1440,8 @@ field => rcx
 
 TypedValue* fh_mysql_result(TypedValue* _rv, TypedValue* result, int row, TypedValue* field) asm("_ZN4HPHP14f_mysql_resultERKNS_7VariantEiS2_");
 
-TypedValue * fg1_mysql_result(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_result(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_result((rv), (args-0), (int)(args[-1].m_data.num), (count > 2) ? (args-2) : (TypedValue*)(&null_variant));
@@ -1451,7 +1451,7 @@ TypedValue * fg1_mysql_result(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_mysql_result(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((args-1)->m_type == KindOfInt64) {
@@ -1492,8 +1492,8 @@ field => rdx
 
 TypedValue* fh_mysql_fetch_field(TypedValue* _rv, TypedValue* result, int field) asm("_ZN4HPHP19f_mysql_fetch_fieldERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_fetch_field(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_fetch_field(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_fetch_field(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_fetch_field(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_fetch_field((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1));
@@ -1503,7 +1503,7 @@ TypedValue * fg1_mysql_fetch_field(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_mysql_fetch_field(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -1543,8 +1543,8 @@ field => rsi
 
 bool fh_mysql_field_seek(TypedValue* result, int field) asm("_ZN4HPHP18f_mysql_field_seekERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_field_seek(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_field_seek(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_field_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_field_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1555,7 +1555,7 @@ TypedValue * fg1_mysql_field_seek(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_mysql_field_seek(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -1597,8 +1597,8 @@ field => rdx
 
 TypedValue* fh_mysql_field_name(TypedValue* _rv, TypedValue* result, int field) asm("_ZN4HPHP18f_mysql_field_nameERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_field_name(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_field_name(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_field_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_field_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_field_name((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
@@ -1608,7 +1608,7 @@ TypedValue * fg1_mysql_field_name(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_mysql_field_name(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -1649,8 +1649,8 @@ field => rdx
 
 TypedValue* fh_mysql_field_table(TypedValue* _rv, TypedValue* result, int field) asm("_ZN4HPHP19f_mysql_field_tableERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_field_table(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_field_table(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_field_table(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_field_table(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_field_table((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
@@ -1660,7 +1660,7 @@ TypedValue * fg1_mysql_field_table(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_mysql_field_table(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -1701,8 +1701,8 @@ field => rdx
 
 TypedValue* fh_mysql_field_len(TypedValue* _rv, TypedValue* result, int field) asm("_ZN4HPHP17f_mysql_field_lenERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_field_len(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_field_len(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_field_len(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_field_len(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_field_len((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
@@ -1712,7 +1712,7 @@ TypedValue * fg1_mysql_field_len(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_mysql_field_len(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -1753,8 +1753,8 @@ field => rdx
 
 TypedValue* fh_mysql_field_type(TypedValue* _rv, TypedValue* result, int field) asm("_ZN4HPHP18f_mysql_field_typeERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_field_type(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_field_type(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_field_type(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_field_type(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_field_type((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
@@ -1764,7 +1764,7 @@ TypedValue * fg1_mysql_field_type(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_mysql_field_type(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -1805,8 +1805,8 @@ field => rdx
 
 TypedValue* fh_mysql_field_flags(TypedValue* _rv, TypedValue* result, int field) asm("_ZN4HPHP19f_mysql_field_flagsERKNS_7VariantEi");
 
-TypedValue * fg1_mysql_field_flags(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_mysql_field_flags(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_mysql_field_flags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_field_flags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_mysql_field_flags((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
@@ -1816,7 +1816,7 @@ TypedValue * fg1_mysql_field_flags(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_mysql_field_flags(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {

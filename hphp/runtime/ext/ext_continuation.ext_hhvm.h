@@ -31,15 +31,15 @@ args => r8
 Value* fh_hphp_create_continuation(Value* _rv, Value* clsname, Value* funcname, Value* origFuncName, Value* args) asm("_ZN4HPHP26f_hphp_create_continuationERKNS_6StringES2_S2_RKNS_5ArrayE");
 
 /*
-void HPHP::f_hphp_pack_continuation(HPHP::Object const&, long long, HPHP::Variant const&)
-_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectExRKNS_7VariantE
+void HPHP::f_hphp_pack_continuation(HPHP::Object const&, long, HPHP::Variant const&)
+_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectElRKNS_7VariantE
 
 continuation => rdi
 label => rsi
 value => rdx
 */
 
-void fh_hphp_pack_continuation(Value* continuation, long long label, TypedValue* value) asm("_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectExRKNS_7VariantE");
+void fh_hphp_pack_continuation(Value* continuation, long label, TypedValue* value) asm("_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectElRKNS_7VariantE");
 
 /*
 void HPHP::f_hphp_unpack_continuation(HPHP::Object const&)

@@ -37,7 +37,7 @@ TypedValue* fh_fb_thrift_serialize(TypedValue* _rv, TypedValue* thing) asm("_ZN4
 
 TypedValue* fg_fb_thrift_serialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_fb_thrift_serialize((&(rv)), (args-0));
@@ -74,7 +74,7 @@ TypedValue* fh_fb_thrift_unserialize(TypedValue* _rv, TypedValue* thing, TypedVa
 
 TypedValue* fg_fb_thrift_unserialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       VRefParamValue defVal2 = null_variant;
@@ -110,7 +110,7 @@ TypedValue* fh_fb_serialize(TypedValue* _rv, TypedValue* thing) asm("_ZN4HPHP14f
 
 TypedValue* fg_fb_serialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_fb_serialize((&(rv)), (args-0));
@@ -147,7 +147,7 @@ TypedValue* fh_fb_unserialize(TypedValue* _rv, TypedValue* thing, TypedValue* su
 
 TypedValue* fg_fb_unserialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       VRefParamValue defVal2 = null_variant;
@@ -183,7 +183,7 @@ TypedValue* fh_fb_compact_serialize(TypedValue* _rv, TypedValue* thing) asm("_ZN
 
 TypedValue* fg_fb_compact_serialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_fb_compact_serialize((&(rv)), (args-0));
@@ -220,7 +220,7 @@ TypedValue* fh_fb_compact_unserialize(TypedValue* _rv, TypedValue* thing, TypedV
 
 TypedValue* fg_fb_compact_unserialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       VRefParamValue defVal2 = null_variant;
@@ -253,8 +253,8 @@ file => rdi
 
 bool fh_fb_could_include(Value* file) asm("_ZN4HPHP18f_fb_could_includeERKNS_6StringE");
 
-TypedValue * fg1_fb_could_include(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_could_include(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_could_include(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_could_include(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -265,7 +265,7 @@ TypedValue * fg1_fb_could_include(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_fb_could_include(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -307,8 +307,8 @@ data => rdx
 
 bool fh_fb_intercept(Value* name, TypedValue* handler, TypedValue* data) asm("_ZN4HPHP14f_fb_interceptERKNS_6StringERKNS_7VariantES5_");
 
-TypedValue * fg1_fb_intercept(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_intercept(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_intercept(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_intercept(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -319,7 +319,7 @@ TypedValue * fg1_fb_intercept(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_fb_intercept(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -364,8 +364,8 @@ done => r9
 
 TypedValue* fh_fb_stubout_intercept_handler(TypedValue* _rv, Value* name, TypedValue* obj, Value* params, TypedValue* data, TypedValue* done) asm("_ZN4HPHP30f_fb_stubout_intercept_handlerERKNS_6StringERKNS_7VariantERKNS_5ArrayES5_RKNS_14VRefParamValueE");
 
-TypedValue * fg1_fb_stubout_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_stubout_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_stubout_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_stubout_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -380,7 +380,7 @@ TypedValue * fg1_fb_stubout_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* 
 
 TypedValue* fg_fb_stubout_intercept_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
@@ -424,8 +424,8 @@ done => r9
 
 TypedValue* fh_fb_rpc_intercept_handler(TypedValue* _rv, Value* name, TypedValue* obj, Value* params, TypedValue* data, TypedValue* done) asm("_ZN4HPHP26f_fb_rpc_intercept_handlerERKNS_6StringERKNS_7VariantERKNS_5ArrayES5_RKNS_14VRefParamValueE");
 
-TypedValue * fg1_fb_rpc_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_rpc_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_rpc_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_rpc_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -440,7 +440,7 @@ TypedValue * fg1_fb_rpc_intercept_handler(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_fb_rpc_intercept_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
@@ -478,8 +478,8 @@ names => rdi
 
 void fh_fb_renamed_functions(Value* names) asm("_ZN4HPHP22f_fb_renamed_functionsERKNS_5ArrayE");
 
-TypedValue * fg1_fb_renamed_functions(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_renamed_functions(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_renamed_functions(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_renamed_functions(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -491,7 +491,7 @@ TypedValue * fg1_fb_renamed_functions(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_fb_renamed_functions(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
@@ -533,8 +533,8 @@ new_func_name => rsi
 
 bool fh_fb_rename_function(Value* orig_func_name, Value* new_func_name) asm("_ZN4HPHP20f_fb_rename_functionERKNS_6StringES2_");
 
-TypedValue * fg1_fb_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -550,7 +550,7 @@ TypedValue * fg1_fb_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_fb_rename_function(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -591,8 +591,8 @@ root => rsi
 
 bool fh_fb_autoload_map(TypedValue* map, Value* root) asm("_ZN4HPHP17f_fb_autoload_mapERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_fb_autoload_map(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_autoload_map(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_autoload_map(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_autoload_map(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -603,7 +603,7 @@ TypedValue * fg1_fb_autoload_map(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_fb_autoload_map(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
@@ -645,7 +645,7 @@ bool fh_fb_utf8ize(TypedValue* input) asm("_ZN4HPHP12f_fb_utf8izeERKNS_14VRefPar
 
 TypedValue* fg_fb_utf8ize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -669,34 +669,34 @@ TypedValue* fg_fb_utf8ize(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_fb_utf8_strlen_deprecated(HPHP::String const&)
+long HPHP::f_fb_utf8_strlen_deprecated(HPHP::String const&)
 _ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE
 
 (return value) => rax
 input => rdi
 */
 
-long long fh_fb_utf8_strlen_deprecated(Value* input) asm("_ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE");
+long fh_fb_utf8_strlen_deprecated(Value* input) asm("_ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE");
 
-TypedValue * fg1_fb_utf8_strlen_deprecated(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_utf8_strlen_deprecated(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_utf8_strlen_deprecated(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_utf8_strlen_deprecated(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (long long)fh_fb_utf8_strlen_deprecated((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_fb_utf8_strlen_deprecated((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_fb_utf8_strlen_deprecated(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_fb_utf8_strlen_deprecated((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_fb_utf8_strlen_deprecated((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -721,34 +721,34 @@ TypedValue* fg_fb_utf8_strlen_deprecated(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_fb_utf8_strlen(HPHP::String const&)
+long HPHP::f_fb_utf8_strlen(HPHP::String const&)
 _ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE
 
 (return value) => rax
 input => rdi
 */
 
-long long fh_fb_utf8_strlen(Value* input) asm("_ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE");
+long fh_fb_utf8_strlen(Value* input) asm("_ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE");
 
-TypedValue * fg1_fb_utf8_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_utf8_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_utf8_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_utf8_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (long long)fh_fb_utf8_strlen((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_fb_utf8_strlen((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_fb_utf8_strlen(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_fb_utf8_strlen((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_fb_utf8_strlen((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -785,8 +785,8 @@ length => rcx
 
 TypedValue* fh_fb_utf8_substr(TypedValue* _rv, Value* str, int start, int length) asm("_ZN4HPHP16f_fb_utf8_substrERKNS_6StringEii");
 
-TypedValue * fg1_fb_utf8_substr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_utf8_substr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_utf8_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_utf8_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -809,7 +809,7 @@ TypedValue * fg1_fb_utf8_substr(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_fb_utf8_substr(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
@@ -849,11 +849,11 @@ function => rdx
 _argv => rcx
 */
 
-Value* fh_fb_call_user_func_safe(Value* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_fb_call_user_func_safeEiRKNS_7VariantERKNS_5ArrayE");
+Value* fh_fb_call_user_func_safe(Value* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_fb_call_user_func_safeEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_fb_call_user_func_safe(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       rv._count = 0;
@@ -861,7 +861,7 @@ TypedValue* fg_fb_call_user_func_safe(HPHP::VM::ActRec *ar) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -902,17 +902,17 @@ def => rcx
 _argv => r8
 */
 
-TypedValue* fh_fb_call_user_func_safe_return(TypedValue* _rv, long long _argc, TypedValue* function, TypedValue* def, Value* _argv) asm("_ZN4HPHP31f_fb_call_user_func_safe_returnEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_fb_call_user_func_safe_return(TypedValue* _rv, int64_t _argc, TypedValue* function, TypedValue* def, Value* _argv) asm("_ZN4HPHP31f_fb_call_user_func_safe_returnEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 TypedValue* fg_fb_call_user_func_safe_return(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL) {
       Array extraArgs;
       {
         ArrayInit ai(count-2, false);
-        for (long long i = 2; i < count; ++i) {
+        for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
@@ -953,8 +953,8 @@ params => rdx
 
 Value* fh_fb_call_user_func_array_safe(Value* _rv, TypedValue* function, Value* params) asm("_ZN4HPHP30f_fb_call_user_func_array_safeERKNS_7VariantERKNS_5ArrayE");
 
-TypedValue * fg1_fb_call_user_func_array_safe(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_call_user_func_array_safe(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_call_user_func_array_safe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_call_user_func_array_safe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -966,7 +966,7 @@ TypedValue * fg1_fb_call_user_func_array_safe(TypedValue* rv, HPHP::VM::ActRec* 
 
 TypedValue* fg_fb_call_user_func_array_safe(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray) {
@@ -1008,8 +1008,8 @@ flush => rsi
 
 TypedValue* fh_fb_get_code_coverage(TypedValue* _rv, bool flush) asm("_ZN4HPHP22f_fb_get_code_coverageEb");
 
-TypedValue * fg1_fb_get_code_coverage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_get_code_coverage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_get_code_coverage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_get_code_coverage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-0);
   fh_fb_get_code_coverage((rv), (bool)(args[-0].m_data.num));
@@ -1019,7 +1019,7 @@ TypedValue * fg1_fb_get_code_coverage(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_fb_get_code_coverage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfBoolean) {
@@ -1058,7 +1058,7 @@ void fh_fb_enable_code_coverage() asm("_ZN4HPHP25f_fb_enable_code_coverageEv");
 
 TypedValue* fg_fb_enable_code_coverage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -1094,7 +1094,7 @@ TypedValue* fh_fb_disable_code_coverage(TypedValue* _rv) asm("_ZN4HPHP26f_fb_dis
 
 TypedValue* fg_fb_disable_code_coverage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       fh_fb_disable_code_coverage((&(rv)));
@@ -1125,8 +1125,8 @@ servers => rdi
 
 void fh_fb_load_local_databases(Value* servers) asm("_ZN4HPHP25f_fb_load_local_databasesERKNS_5ArrayE");
 
-TypedValue * fg1_fb_load_local_databases(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_load_local_databases(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_load_local_databases(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_load_local_databases(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1138,7 +1138,7 @@ TypedValue * fg1_fb_load_local_databases(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_fb_load_local_databases(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
@@ -1186,8 +1186,8 @@ timeout_in_ms => st8
 
 Value* fh_fb_parallel_query(Value* _rv, Value* sql_map, int max_thread, bool combine_result, bool retry_query_on_fail, int connect_timeout, int read_timeout, bool timeout_in_ms) asm("_ZN4HPHP19f_fb_parallel_queryERKNS_5ArrayEibbiib");
 
-TypedValue * fg1_fb_parallel_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_parallel_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_parallel_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_parallel_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -1229,7 +1229,7 @@ TypedValue * fg1_fb_parallel_query(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_fb_parallel_query(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 7LL) {
       if ((count <= 6 || (args-6)->m_type == KindOfBoolean) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfArray) {
@@ -1276,8 +1276,8 @@ timeout_in_ms => st0
 
 Value* fh_fb_crossall_query(Value* _rv, Value* sql, int max_thread, bool retry_query_on_fail, int connect_timeout, int read_timeout, bool timeout_in_ms) asm("_ZN4HPHP19f_fb_crossall_queryERKNS_6StringEibiib");
 
-TypedValue * fg1_fb_crossall_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_crossall_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_crossall_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_crossall_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -1315,7 +1315,7 @@ TypedValue * fg1_fb_crossall_query(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_fb_crossall_query(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfBoolean) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -1356,8 +1356,8 @@ taint => rsi
 
 void fh_fb_set_taint(TypedValue* str, int taint) asm("_ZN4HPHP14f_fb_set_taintERKNS_14VRefParamValueEi");
 
-TypedValue * fg1_fb_set_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_set_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_set_taint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_set_taint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1369,7 +1369,7 @@ TypedValue * fg1_fb_set_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_fb_set_taint(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64) {
@@ -1410,8 +1410,8 @@ taint => rsi
 
 void fh_fb_unset_taint(TypedValue* str, int taint) asm("_ZN4HPHP16f_fb_unset_taintERKNS_14VRefParamValueEi");
 
-TypedValue * fg1_fb_unset_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_unset_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_unset_taint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_unset_taint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1423,7 +1423,7 @@ TypedValue * fg1_fb_unset_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_fb_unset_taint(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64) {
@@ -1465,8 +1465,8 @@ taint => rsi
 
 bool fh_fb_get_taint(Value* str, int taint) asm("_ZN4HPHP14f_fb_get_taintERKNS_6StringEi");
 
-TypedValue * fg1_fb_get_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_get_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_get_taint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_get_taint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1482,7 +1482,7 @@ TypedValue * fg1_fb_get_taint(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_fb_get_taint(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
@@ -1524,7 +1524,7 @@ Value* fh_fb_get_taint_warning_counts(Value* _rv) asm("_ZN4HPHP29f_fb_get_taint_
 
 TypedValue* fg_fb_get_taint_warning_counts(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -1558,7 +1558,7 @@ void fh_fb_enable_html_taint_trace() asm("_ZN4HPHP28f_fb_enable_html_taint_trace
 
 TypedValue* fg_fb_enable_html_taint_trace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -1595,7 +1595,7 @@ TypedValue* fh_fb_const_fetch(TypedValue* _rv, TypedValue* key) asm("_ZN4HPHP16f
 
 TypedValue* fg_fb_const_fetch(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_fb_const_fetch((&(rv)), (args-0));
@@ -1627,8 +1627,8 @@ new_value => rdi
 
 bool fh_fb_output_compression(bool new_value) asm("_ZN4HPHP23f_fb_output_compressionEb");
 
-TypedValue * fg1_fb_output_compression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_output_compression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_output_compression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_output_compression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1639,7 +1639,7 @@ TypedValue * fg1_fb_output_compression(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_fb_output_compression(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfBoolean) {
@@ -1680,7 +1680,7 @@ void fh_fb_set_exit_callback(TypedValue* function) asm("_ZN4HPHP22f_fb_set_exit_
 
 TypedValue* fg_fb_set_exit_callback(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_data.num = 0LL;
@@ -1716,7 +1716,7 @@ Value* fh_fb_get_flush_stat(Value* _rv) asm("_ZN4HPHP19f_fb_get_flush_statEv");
 
 TypedValue* fg_fb_get_flush_stat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -1741,22 +1741,22 @@ TypedValue* fg_fb_get_flush_stat(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_fb_get_last_flush_size()
+long HPHP::f_fb_get_last_flush_size()
 _ZN4HPHP24f_fb_get_last_flush_sizeEv
 
 (return value) => rax
 */
 
-long long fh_fb_get_last_flush_size() asm("_ZN4HPHP24f_fb_get_last_flush_sizeEv");
+long fh_fb_get_last_flush_size() asm("_ZN4HPHP24f_fb_get_last_flush_sizeEv");
 
 TypedValue* fg_fb_get_last_flush_size(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
-      rv.m_data.num = (long long)fh_fb_get_last_flush_size();
+      rv.m_data.num = (int64_t)fh_fb_get_last_flush_size();
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
@@ -1785,8 +1785,8 @@ filename => rsi
 
 TypedValue* fh_fb_lazy_stat(TypedValue* _rv, Value* filename) asm("_ZN4HPHP14f_fb_lazy_statERKNS_6StringE");
 
-TypedValue * fg1_fb_lazy_stat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_lazy_stat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_lazy_stat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_lazy_stat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_fb_lazy_stat((rv), (Value*)(args-0));
@@ -1796,7 +1796,7 @@ TypedValue * fg1_fb_lazy_stat(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_fb_lazy_stat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -1836,8 +1836,8 @@ filename => rsi
 
 TypedValue* fh_fb_lazy_lstat(TypedValue* _rv, Value* filename) asm("_ZN4HPHP15f_fb_lazy_lstatERKNS_6StringE");
 
-TypedValue * fg1_fb_lazy_lstat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_lazy_lstat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_lazy_lstat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_lazy_lstat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_fb_lazy_lstat((rv), (Value*)(args-0));
@@ -1847,7 +1847,7 @@ TypedValue * fg1_fb_lazy_lstat(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_fb_lazy_lstat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -1887,8 +1887,8 @@ filename => rsi
 
 Value* fh_fb_lazy_realpath(Value* _rv, Value* filename) asm("_ZN4HPHP18f_fb_lazy_realpathERKNS_6StringE");
 
-TypedValue * fg1_fb_lazy_realpath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_lazy_realpath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_lazy_realpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_lazy_realpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -1900,7 +1900,7 @@ TypedValue * fg1_fb_lazy_realpath(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_fb_lazy_realpath(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -1943,7 +1943,7 @@ Value* fh_fb_gc_collect_cycles(Value* _rv) asm("_ZN4HPHP22f_fb_gc_collect_cycles
 
 TypedValue* fg_fb_gc_collect_cycles(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -1976,8 +1976,8 @@ filename => rdi
 
 void fh_fb_gc_detect_cycles(Value* filename) asm("_ZN4HPHP21f_fb_gc_detect_cyclesERKNS_6StringE");
 
-TypedValue * fg1_fb_gc_detect_cycles(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_fb_gc_detect_cycles(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_fb_gc_detect_cycles(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_gc_detect_cycles(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1989,7 +1989,7 @@ TypedValue * fg1_fb_gc_detect_cycles(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_fb_gc_detect_cycles(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {

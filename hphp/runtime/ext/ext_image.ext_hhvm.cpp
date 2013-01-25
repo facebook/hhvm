@@ -36,7 +36,7 @@ Value* fh_gd_info(Value* _rv) asm("_ZN4HPHP9f_gd_infoEv");
 
 TypedValue* fg_gd_info(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -72,8 +72,8 @@ imageinfo => rdx
 
 TypedValue* fh_getimagesize(TypedValue* _rv, Value* filename, TypedValue* imageinfo) asm("_ZN4HPHP14f_getimagesizeERKNS_6StringERKNS_14VRefParamValueE");
 
-TypedValue * fg1_getimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_getimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_getimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_getimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   VRefParamValue defVal1 = null;
@@ -84,7 +84,7 @@ TypedValue * fg1_getimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_getimagesize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -126,8 +126,8 @@ include_dot => rdx
 
 Value* fh_image_type_to_extension(Value* _rv, int imagetype, bool include_dot) asm("_ZN4HPHP25f_image_type_to_extensionEib");
 
-TypedValue * fg1_image_type_to_extension(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_image_type_to_extension(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_image_type_to_extension(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_image_type_to_extension(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -149,7 +149,7 @@ TypedValue * fg1_image_type_to_extension(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_image_type_to_extension(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfInt64) {
@@ -191,8 +191,8 @@ imagetype => rsi
 
 Value* fh_image_type_to_mime_type(Value* _rv, int imagetype) asm("_ZN4HPHP25f_image_type_to_mime_typeEi");
 
-TypedValue * fg1_image_type_to_mime_type(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_image_type_to_mime_type(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_image_type_to_mime_type(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_image_type_to_mime_type(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -204,7 +204,7 @@ TypedValue * fg1_image_type_to_mime_type(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_image_type_to_mime_type(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
@@ -247,8 +247,8 @@ threshold => rdx
 
 bool fh_image2wbmp(Value* image, Value* filename, int threshold) asm("_ZN4HPHP12f_image2wbmpERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_image2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_image2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_image2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_image2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -273,7 +273,7 @@ TypedValue * fg1_image2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_image2wbmp(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -314,8 +314,8 @@ blendmode => rsi
 
 bool fh_imagealphablending(Value* image, bool blendmode) asm("_ZN4HPHP20f_imagealphablendingERKNS_6ObjectEb");
 
-TypedValue * fg1_imagealphablending(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagealphablending(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagealphablending(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagealphablending(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -331,7 +331,7 @@ TypedValue * fg1_imagealphablending(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagealphablending(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
@@ -372,8 +372,8 @@ on => rsi
 
 bool fh_imageantialias(Value* image, bool on) asm("_ZN4HPHP16f_imageantialiasERKNS_6ObjectEb");
 
-TypedValue * fg1_imageantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -389,7 +389,7 @@ TypedValue * fg1_imageantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_imageantialias(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
@@ -436,8 +436,8 @@ color => st8
 
 bool fh_imagearc(Value* image, int cx, int cy, int width, int height, int start, int end, int color) asm("_ZN4HPHP10f_imagearcERKNS_6ObjectEiiiiiii");
 
-TypedValue * fg1_imagearc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagearc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagearc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagearc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -471,7 +471,7 @@ TypedValue * fg1_imagearc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_imagearc(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -516,8 +516,8 @@ color => r9
 
 bool fh_imagechar(Value* image, int font, int x, int y, Value* c, int color) asm("_ZN4HPHP11f_imagecharERKNS_6ObjectEiiiRKNS_6StringEi");
 
-TypedValue * fg1_imagechar(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagechar(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagechar(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagechar(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -545,7 +545,7 @@ TypedValue * fg1_imagechar(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_imagechar(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && IS_STRING_TYPE((args-4)->m_type) && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -590,8 +590,8 @@ color => r9
 
 bool fh_imagecharup(Value* image, int font, int x, int y, Value* c, int color) asm("_ZN4HPHP13f_imagecharupERKNS_6ObjectEiiiRKNS_6StringEi");
 
-TypedValue * fg1_imagecharup(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecharup(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecharup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecharup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -619,7 +619,7 @@ TypedValue * fg1_imagecharup(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagecharup(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && IS_STRING_TYPE((args-4)->m_type) && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -663,8 +663,8 @@ blue => r8
 
 TypedValue* fh_imagecolorallocate(TypedValue* _rv, Value* image, int red, int green, int blue) asm("_ZN4HPHP20f_imagecolorallocateERKNS_6ObjectEiii");
 
-TypedValue * fg1_imagecolorallocate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorallocate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorallocate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorallocate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -685,7 +685,7 @@ TypedValue * fg1_imagecolorallocate(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecolorallocate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -729,8 +729,8 @@ alpha => r9
 
 TypedValue* fh_imagecolorallocatealpha(TypedValue* _rv, Value* image, int red, int green, int blue, int alpha) asm("_ZN4HPHP25f_imagecolorallocatealphaERKNS_6ObjectEiiii");
 
-TypedValue * fg1_imagecolorallocatealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorallocatealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorallocatealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorallocatealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -754,7 +754,7 @@ TypedValue * fg1_imagecolorallocatealpha(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_imagecolorallocatealpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -796,8 +796,8 @@ y => rcx
 
 TypedValue* fh_imagecolorat(TypedValue* _rv, Value* image, int x, int y) asm("_ZN4HPHP14f_imagecoloratERKNS_6ObjectEii");
 
-TypedValue * fg1_imagecolorat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -815,7 +815,7 @@ TypedValue * fg1_imagecolorat(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_imagecolorat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -858,8 +858,8 @@ blue => r8
 
 TypedValue* fh_imagecolorclosest(TypedValue* _rv, Value* image, int red, int green, int blue) asm("_ZN4HPHP19f_imagecolorclosestERKNS_6ObjectEiii");
 
-TypedValue * fg1_imagecolorclosest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorclosest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorclosest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorclosest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -880,7 +880,7 @@ TypedValue * fg1_imagecolorclosest(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagecolorclosest(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -924,8 +924,8 @@ alpha => r9
 
 TypedValue* fh_imagecolorclosestalpha(TypedValue* _rv, Value* image, int red, int green, int blue, int alpha) asm("_ZN4HPHP24f_imagecolorclosestalphaERKNS_6ObjectEiiii");
 
-TypedValue * fg1_imagecolorclosestalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorclosestalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorclosestalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorclosestalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -949,7 +949,7 @@ TypedValue * fg1_imagecolorclosestalpha(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_imagecolorclosestalpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -992,8 +992,8 @@ blue => r8
 
 TypedValue* fh_imagecolorclosesthwb(TypedValue* _rv, Value* image, int red, int green, int blue) asm("_ZN4HPHP22f_imagecolorclosesthwbERKNS_6ObjectEiii");
 
-TypedValue * fg1_imagecolorclosesthwb(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorclosesthwb(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorclosesthwb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorclosesthwb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -1014,7 +1014,7 @@ TypedValue * fg1_imagecolorclosesthwb(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_imagecolorclosesthwb(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1054,8 +1054,8 @@ color => rsi
 
 bool fh_imagecolordeallocate(Value* image, int color) asm("_ZN4HPHP22f_imagecolordeallocateERKNS_6ObjectEi");
 
-TypedValue * fg1_imagecolordeallocate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolordeallocate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolordeallocate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolordeallocate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1071,7 +1071,7 @@ TypedValue * fg1_imagecolordeallocate(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_imagecolordeallocate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1115,8 +1115,8 @@ blue => r8
 
 TypedValue* fh_imagecolorexact(TypedValue* _rv, Value* image, int red, int green, int blue) asm("_ZN4HPHP17f_imagecolorexactERKNS_6ObjectEiii");
 
-TypedValue * fg1_imagecolorexact(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorexact(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorexact(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorexact(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -1137,7 +1137,7 @@ TypedValue * fg1_imagecolorexact(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_imagecolorexact(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1181,8 +1181,8 @@ alpha => r9
 
 TypedValue* fh_imagecolorexactalpha(TypedValue* _rv, Value* image, int red, int green, int blue, int alpha) asm("_ZN4HPHP22f_imagecolorexactalphaERKNS_6ObjectEiiii");
 
-TypedValue * fg1_imagecolorexactalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorexactalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorexactalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorexactalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -1206,7 +1206,7 @@ TypedValue * fg1_imagecolorexactalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_imagecolorexactalpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1247,8 +1247,8 @@ image2 => rdx
 
 TypedValue* fh_imagecolormatch(TypedValue* _rv, Value* image1, Value* image2) asm("_ZN4HPHP17f_imagecolormatchERKNS_6ObjectES2_");
 
-TypedValue * fg1_imagecolormatch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolormatch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolormatch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolormatch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -1263,7 +1263,7 @@ TypedValue * fg1_imagecolormatch(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_imagecolormatch(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -1306,8 +1306,8 @@ blue => r8
 
 TypedValue* fh_imagecolorresolve(TypedValue* _rv, Value* image, int red, int green, int blue) asm("_ZN4HPHP19f_imagecolorresolveERKNS_6ObjectEiii");
 
-TypedValue * fg1_imagecolorresolve(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorresolve(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorresolve(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorresolve(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -1328,7 +1328,7 @@ TypedValue * fg1_imagecolorresolve(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagecolorresolve(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1372,8 +1372,8 @@ alpha => r9
 
 TypedValue* fh_imagecolorresolvealpha(TypedValue* _rv, Value* image, int red, int green, int blue, int alpha) asm("_ZN4HPHP24f_imagecolorresolvealphaERKNS_6ObjectEiiii");
 
-TypedValue * fg1_imagecolorresolvealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorresolvealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorresolvealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorresolvealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -1397,7 +1397,7 @@ TypedValue * fg1_imagecolorresolvealpha(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_imagecolorresolvealpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1441,8 +1441,8 @@ blue => r9
 
 TypedValue* fh_imagecolorset(TypedValue* _rv, Value* image, int index, int red, int green, int blue) asm("_ZN4HPHP15f_imagecolorsetERKNS_6ObjectEiiii");
 
-TypedValue * fg1_imagecolorset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -1466,7 +1466,7 @@ TypedValue * fg1_imagecolorset(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_imagecolorset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1507,8 +1507,8 @@ index => rdx
 
 TypedValue* fh_imagecolorsforindex(TypedValue* _rv, Value* image, int index) asm("_ZN4HPHP21f_imagecolorsforindexERKNS_6ObjectEi");
 
-TypedValue * fg1_imagecolorsforindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorsforindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorsforindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorsforindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -1523,7 +1523,7 @@ TypedValue * fg1_imagecolorsforindex(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_imagecolorsforindex(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -1563,8 +1563,8 @@ image => rsi
 
 TypedValue* fh_imagecolorstotal(TypedValue* _rv, Value* image) asm("_ZN4HPHP18f_imagecolorstotalERKNS_6ObjectE");
 
-TypedValue * fg1_imagecolorstotal(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolorstotal(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolorstotal(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolorstotal(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imagecolorstotal((rv), (Value*)(args-0));
@@ -1574,7 +1574,7 @@ TypedValue * fg1_imagecolorstotal(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_imagecolorstotal(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1615,8 +1615,8 @@ color => rdx
 
 TypedValue* fh_imagecolortransparent(TypedValue* _rv, Value* image, int color) asm("_ZN4HPHP23f_imagecolortransparentERKNS_6ObjectEi");
 
-TypedValue * fg1_imagecolortransparent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecolortransparent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecolortransparent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecolortransparent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1636,7 +1636,7 @@ TypedValue * fg1_imagecolortransparent(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_imagecolortransparent(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
@@ -1678,8 +1678,8 @@ offset => xmm1
 
 bool fh_imageconvolution(Value* image, Value* matrix, double div, double offset) asm("_ZN4HPHP18f_imageconvolutionERKNS_6ObjectERKNS_5ArrayEdd");
 
-TypedValue * fg1_imageconvolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageconvolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageconvolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageconvolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1701,7 +1701,7 @@ TypedValue * fg1_imageconvolution(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_imageconvolution(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -1748,8 +1748,8 @@ src_h => st8
 
 bool fh_imagecopy(Value* dst_im, Value* src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h) asm("_ZN4HPHP11f_imagecopyERKNS_6ObjectES2_iiiiii");
 
-TypedValue * fg1_imagecopy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecopy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecopy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecopy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1783,7 +1783,7 @@ TypedValue * fg1_imagecopy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_imagecopy(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -1831,8 +1831,8 @@ pct => st16
 
 bool fh_imagecopymerge(Value* dst_im, Value* src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct) asm("_ZN4HPHP16f_imagecopymergeERKNS_6ObjectES2_iiiiiii");
 
-TypedValue * fg1_imagecopymerge(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecopymerge(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecopymerge(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecopymerge(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1869,7 +1869,7 @@ TypedValue * fg1_imagecopymerge(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_imagecopymerge(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 9LL) {
       if ((args-8)->m_type == KindOfInt64 && (args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -1917,8 +1917,8 @@ pct => st16
 
 bool fh_imagecopymergegray(Value* dst_im, Value* src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct) asm("_ZN4HPHP20f_imagecopymergegrayERKNS_6ObjectES2_iiiiiii");
 
-TypedValue * fg1_imagecopymergegray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecopymergegray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecopymergegray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecopymergegray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1955,7 +1955,7 @@ TypedValue * fg1_imagecopymergegray(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecopymergegray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 9LL) {
       if ((args-8)->m_type == KindOfInt64 && (args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -2004,8 +2004,8 @@ src_h => st24
 
 bool fh_imagecopyresampled(Value* dst_im, Value* src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h) asm("_ZN4HPHP20f_imagecopyresampledERKNS_6ObjectES2_iiiiiiii");
 
-TypedValue * fg1_imagecopyresampled(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecopyresampled(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecopyresampled(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecopyresampled(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2045,7 +2045,7 @@ TypedValue * fg1_imagecopyresampled(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecopyresampled(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 10LL) {
       if ((args-9)->m_type == KindOfInt64 && (args-8)->m_type == KindOfInt64 && (args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -2094,8 +2094,8 @@ src_h => st24
 
 bool fh_imagecopyresized(Value* dst_im, Value* src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h) asm("_ZN4HPHP18f_imagecopyresizedERKNS_6ObjectES2_iiiiiiii");
 
-TypedValue * fg1_imagecopyresized(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecopyresized(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecopyresized(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecopyresized(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2135,7 +2135,7 @@ TypedValue * fg1_imagecopyresized(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_imagecopyresized(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 10LL) {
       if ((args-9)->m_type == KindOfInt64 && (args-8)->m_type == KindOfInt64 && (args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -2177,8 +2177,8 @@ height => rdx
 
 TypedValue* fh_imagecreate(TypedValue* _rv, int width, int height) asm("_ZN4HPHP13f_imagecreateEii");
 
-TypedValue * fg1_imagecreate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -2193,7 +2193,7 @@ TypedValue * fg1_imagecreate(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagecreate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
@@ -2237,8 +2237,8 @@ height => r9
 
 TypedValue* fh_imagecreatefromgd2part(TypedValue* _rv, Value* filename, int srcx, int srcy, int width, int height) asm("_ZN4HPHP24f_imagecreatefromgd2partERKNS_6StringEiiii");
 
-TypedValue * fg1_imagecreatefromgd2part(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromgd2part(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromgd2part(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromgd2part(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -2262,7 +2262,7 @@ TypedValue * fg1_imagecreatefromgd2part(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_imagecreatefromgd2part(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
@@ -2302,8 +2302,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefromgd(TypedValue* _rv, Value* filename) asm("_ZN4HPHP19f_imagecreatefromgdERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromgd(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromgd(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromgd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromgd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromgd((rv), (Value*)(args-0));
@@ -2313,7 +2313,7 @@ TypedValue * fg1_imagecreatefromgd(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagecreatefromgd(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2353,8 +2353,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefromgd2(TypedValue* _rv, Value* filename) asm("_ZN4HPHP20f_imagecreatefromgd2ERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromgd2(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromgd2(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromgd2(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromgd2(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromgd2((rv), (Value*)(args-0));
@@ -2364,7 +2364,7 @@ TypedValue * fg1_imagecreatefromgd2(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecreatefromgd2(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2404,8 +2404,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefromgif(TypedValue* _rv, Value* filename) asm("_ZN4HPHP20f_imagecreatefromgifERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromgif(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromgif(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromgif(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromgif(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromgif((rv), (Value*)(args-0));
@@ -2415,7 +2415,7 @@ TypedValue * fg1_imagecreatefromgif(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecreatefromgif(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2455,8 +2455,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefromjpeg(TypedValue* _rv, Value* filename) asm("_ZN4HPHP21f_imagecreatefromjpegERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromjpeg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromjpeg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromjpeg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromjpeg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromjpeg((rv), (Value*)(args-0));
@@ -2466,7 +2466,7 @@ TypedValue * fg1_imagecreatefromjpeg(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_imagecreatefromjpeg(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2506,8 +2506,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefrompng(TypedValue* _rv, Value* filename) asm("_ZN4HPHP20f_imagecreatefrompngERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefrompng(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefrompng(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefrompng(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefrompng(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefrompng((rv), (Value*)(args-0));
@@ -2517,7 +2517,7 @@ TypedValue * fg1_imagecreatefrompng(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecreatefrompng(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2557,8 +2557,8 @@ data => rsi
 
 TypedValue* fh_imagecreatefromstring(TypedValue* _rv, Value* data) asm("_ZN4HPHP23f_imagecreatefromstringERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromstring((rv), (Value*)(args-0));
@@ -2568,7 +2568,7 @@ TypedValue * fg1_imagecreatefromstring(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_imagecreatefromstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2608,8 +2608,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefromwbmp(TypedValue* _rv, Value* filename) asm("_ZN4HPHP21f_imagecreatefromwbmpERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromwbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromwbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromwbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromwbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromwbmp((rv), (Value*)(args-0));
@@ -2619,7 +2619,7 @@ TypedValue * fg1_imagecreatefromwbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_imagecreatefromwbmp(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2659,8 +2659,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefromxbm(TypedValue* _rv, Value* filename) asm("_ZN4HPHP20f_imagecreatefromxbmERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromxbm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromxbm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromxbm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromxbm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromxbm((rv), (Value*)(args-0));
@@ -2670,7 +2670,7 @@ TypedValue * fg1_imagecreatefromxbm(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecreatefromxbm(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2710,8 +2710,8 @@ filename => rsi
 
 TypedValue* fh_imagecreatefromxpm(TypedValue* _rv, Value* filename) asm("_ZN4HPHP20f_imagecreatefromxpmERKNS_6StringE");
 
-TypedValue * fg1_imagecreatefromxpm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatefromxpm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatefromxpm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatefromxpm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imagecreatefromxpm((rv), (Value*)(args-0));
@@ -2721,7 +2721,7 @@ TypedValue * fg1_imagecreatefromxpm(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagecreatefromxpm(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -2762,8 +2762,8 @@ height => rdx
 
 TypedValue* fh_imagecreatetruecolor(TypedValue* _rv, int width, int height) asm("_ZN4HPHP22f_imagecreatetruecolorEii");
 
-TypedValue * fg1_imagecreatetruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagecreatetruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagecreatetruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagecreatetruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -2778,7 +2778,7 @@ TypedValue * fg1_imagecreatetruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_imagecreatetruecolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
@@ -2822,8 +2822,8 @@ color => r9
 
 bool fh_imagedashedline(Value* image, int x1, int y1, int x2, int y2, int color) asm("_ZN4HPHP17f_imagedashedlineERKNS_6ObjectEiiiii");
 
-TypedValue * fg1_imagedashedline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagedashedline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagedashedline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagedashedline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2851,7 +2851,7 @@ TypedValue * fg1_imagedashedline(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_imagedashedline(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -2891,8 +2891,8 @@ image => rdi
 
 bool fh_imagedestroy(Value* image) asm("_ZN4HPHP14f_imagedestroyERKNS_6ObjectE");
 
-TypedValue * fg1_imagedestroy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagedestroy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagedestroy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagedestroy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2903,7 +2903,7 @@ TypedValue * fg1_imagedestroy(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_imagedestroy(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -2948,8 +2948,8 @@ color => r9
 
 bool fh_imageellipse(Value* image, int cx, int cy, int width, int height, int color) asm("_ZN4HPHP14f_imageellipseERKNS_6ObjectEiiiii");
 
-TypedValue * fg1_imageellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2977,7 +2977,7 @@ TypedValue * fg1_imageellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_imageellipse(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -3020,8 +3020,8 @@ color => rcx
 
 bool fh_imagefill(Value* image, int x, int y, int color) asm("_ZN4HPHP11f_imagefillERKNS_6ObjectEiii");
 
-TypedValue * fg1_imagefill(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefill(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefill(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefill(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3043,7 +3043,7 @@ TypedValue * fg1_imagefill(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_imagefill(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -3091,8 +3091,8 @@ style => st16
 
 bool fh_imagefilledarc(Value* image, int cx, int cy, int width, int height, int start, int end, int color, int style) asm("_ZN4HPHP16f_imagefilledarcERKNS_6ObjectEiiiiiiii");
 
-TypedValue * fg1_imagefilledarc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefilledarc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefilledarc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefilledarc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3129,7 +3129,7 @@ TypedValue * fg1_imagefilledarc(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_imagefilledarc(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 9LL) {
       if ((args-8)->m_type == KindOfInt64 && (args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -3174,8 +3174,8 @@ color => r9
 
 bool fh_imagefilledellipse(Value* image, int cx, int cy, int width, int height, int color) asm("_ZN4HPHP20f_imagefilledellipseERKNS_6ObjectEiiiii");
 
-TypedValue * fg1_imagefilledellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefilledellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefilledellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefilledellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3203,7 +3203,7 @@ TypedValue * fg1_imagefilledellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagefilledellipse(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -3246,8 +3246,8 @@ color => rcx
 
 bool fh_imagefilledpolygon(Value* image, Value* points, int num_points, int color) asm("_ZN4HPHP20f_imagefilledpolygonERKNS_6ObjectERKNS_5ArrayEii");
 
-TypedValue * fg1_imagefilledpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefilledpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefilledpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefilledpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3269,7 +3269,7 @@ TypedValue * fg1_imagefilledpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_imagefilledpolygon(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -3314,8 +3314,8 @@ color => r9
 
 bool fh_imagefilledrectangle(Value* image, int x1, int y1, int x2, int y2, int color) asm("_ZN4HPHP22f_imagefilledrectangleERKNS_6ObjectEiiiii");
 
-TypedValue * fg1_imagefilledrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefilledrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefilledrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefilledrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3343,7 +3343,7 @@ TypedValue * fg1_imagefilledrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_imagefilledrectangle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -3387,8 +3387,8 @@ color => r8
 
 bool fh_imagefilltoborder(Value* image, int x, int y, int border, int color) asm("_ZN4HPHP19f_imagefilltoborderERKNS_6ObjectEiiii");
 
-TypedValue * fg1_imagefilltoborder(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefilltoborder(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefilltoborder(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefilltoborder(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3413,7 +3413,7 @@ TypedValue * fg1_imagefilltoborder(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagefilltoborder(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -3458,8 +3458,8 @@ arg4 => r9
 
 bool fh_imagefilter(Value* image, int filtertype, int arg1, int arg2, int arg3, int arg4) asm("_ZN4HPHP13f_imagefilterERKNS_6ObjectEiiiii");
 
-TypedValue * fg1_imagefilter(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefilter(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefilter(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefilter(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3495,7 +3495,7 @@ TypedValue * fg1_imagefilter(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagefilter(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -3526,34 +3526,34 @@ TypedValue* fg_imagefilter(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_imagefontheight(int)
+long HPHP::f_imagefontheight(int)
 _ZN4HPHP17f_imagefontheightEi
 
 (return value) => rax
 font => rdi
 */
 
-long long fh_imagefontheight(int font) asm("_ZN4HPHP17f_imagefontheightEi");
+long fh_imagefontheight(int font) asm("_ZN4HPHP17f_imagefontheightEi");
 
-TypedValue * fg1_imagefontheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefontheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefontheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefontheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
-  rv->m_data.num = (long long)fh_imagefontheight((int)(args[-0].m_data.num));
+  rv->m_data.num = (int64_t)fh_imagefontheight((int)(args[-0].m_data.num));
   return rv;
 }
 
 TypedValue* fg_imagefontheight(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_imagefontheight((int)(args[-0].m_data.num));
+        rv.m_data.num = (int64_t)fh_imagefontheight((int)(args[-0].m_data.num));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3578,34 +3578,34 @@ TypedValue* fg_imagefontheight(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_imagefontwidth(int)
+long HPHP::f_imagefontwidth(int)
 _ZN4HPHP16f_imagefontwidthEi
 
 (return value) => rax
 font => rdi
 */
 
-long long fh_imagefontwidth(int font) asm("_ZN4HPHP16f_imagefontwidthEi");
+long fh_imagefontwidth(int font) asm("_ZN4HPHP16f_imagefontwidthEi");
 
-TypedValue * fg1_imagefontwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefontwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefontwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefontwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
-  rv->m_data.num = (long long)fh_imagefontwidth((int)(args[-0].m_data.num));
+  rv->m_data.num = (int64_t)fh_imagefontwidth((int)(args[-0].m_data.num));
   return rv;
 }
 
 TypedValue* fg_imagefontwidth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_imagefontwidth((int)(args[-0].m_data.num));
+        rv.m_data.num = (int64_t)fh_imagefontwidth((int)(args[-0].m_data.num));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3644,8 +3644,8 @@ extrainfo => rcx
 
 TypedValue* fh_imageftbbox(TypedValue* _rv, double size, double angle, Value* font_file, Value* text, Value* extrainfo) asm("_ZN4HPHP13f_imageftbboxEddRKNS_6StringES2_RKNS_5ArrayE");
 
-TypedValue * fg1_imageftbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageftbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageftbbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageftbbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -3675,7 +3675,7 @@ TypedValue * fg1_imageftbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imageftbbox(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfArray) && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfDouble) {
@@ -3724,8 +3724,8 @@ extrainfo => st8
 
 TypedValue* fh_imagefttext(TypedValue* _rv, Value* image, double size, double angle, int x, int y, int col, Value* font_file, Value* text, Value* extrainfo) asm("_ZN4HPHP13f_imagefttextERKNS_6ObjectEddiiiRKNS_6StringES5_RKNS_5ArrayE");
 
-TypedValue * fg1_imagefttext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagefttext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagefttext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagefttext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 9
@@ -3767,7 +3767,7 @@ TypedValue * fg1_imagefttext(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagefttext(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 8LL && count <= 9LL) {
       if ((count <= 8 || (args-8)->m_type == KindOfArray) && IS_STRING_TYPE((args-7)->m_type) && IS_STRING_TYPE((args-6)->m_type) && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -3809,8 +3809,8 @@ outputgamma => xmm1
 
 bool fh_imagegammacorrect(Value* image, double inputgamma, double outputgamma) asm("_ZN4HPHP19f_imagegammacorrectERKNS_6ObjectEdd");
 
-TypedValue * fg1_imagegammacorrect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagegammacorrect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagegammacorrect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagegammacorrect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3829,7 +3829,7 @@ TypedValue * fg1_imagegammacorrect(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagegammacorrect(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -3872,8 +3872,8 @@ type => rcx
 
 bool fh_imagegd2(Value* image, Value* filename, int chunk_size, int type) asm("_ZN4HPHP10f_imagegd2ERKNS_6ObjectERKNS_6StringEii");
 
-TypedValue * fg1_imagegd2(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagegd2(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagegd2(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagegd2(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3902,7 +3902,7 @@ TypedValue * fg1_imagegd2(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_imagegd2(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -3943,8 +3943,8 @@ filename => rsi
 
 bool fh_imagegd(Value* image, Value* filename) asm("_ZN4HPHP9f_imagegdERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imagegd(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagegd(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagegd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagegd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3965,7 +3965,7 @@ TypedValue * fg1_imagegd(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 
 TypedValue* fg_imagegd(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -4006,8 +4006,8 @@ filename => rsi
 
 bool fh_imagegif(Value* image, Value* filename) asm("_ZN4HPHP10f_imagegifERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imagegif(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagegif(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagegif(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagegif(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4028,7 +4028,7 @@ TypedValue * fg1_imagegif(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_imagegif(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -4070,7 +4070,7 @@ TypedValue* fh_imagegrabscreen(TypedValue* _rv) asm("_ZN4HPHP17f_imagegrabscreen
 
 TypedValue* fg_imagegrabscreen(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       fh_imagegrabscreen((&(rv)));
@@ -4104,8 +4104,8 @@ client_area => rdx
 
 TypedValue* fh_imagegrabwindow(TypedValue* _rv, int window, int client_area) asm("_ZN4HPHP17f_imagegrabwindowEii");
 
-TypedValue * fg1_imagegrabwindow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagegrabwindow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagegrabwindow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagegrabwindow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -4125,7 +4125,7 @@ TypedValue * fg1_imagegrabwindow(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_imagegrabwindow(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfInt64) {
@@ -4166,8 +4166,8 @@ interlace => rdx
 
 TypedValue* fh_imageinterlace(TypedValue* _rv, Value* image, int interlace) asm("_ZN4HPHP16f_imageinterlaceERKNS_6ObjectEi");
 
-TypedValue * fg1_imageinterlace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageinterlace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageinterlace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageinterlace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -4187,7 +4187,7 @@ TypedValue * fg1_imageinterlace(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_imageinterlace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
@@ -4226,8 +4226,8 @@ image => rdi
 
 bool fh_imageistruecolor(Value* image) asm("_ZN4HPHP18f_imageistruecolorERKNS_6ObjectE");
 
-TypedValue * fg1_imageistruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageistruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageistruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageistruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4238,7 +4238,7 @@ TypedValue * fg1_imageistruecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_imageistruecolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4280,8 +4280,8 @@ quality => rdx
 
 bool fh_imagejpeg(Value* image, Value* filename, int quality) asm("_ZN4HPHP11f_imagejpegERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_imagejpeg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagejpeg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagejpeg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagejpeg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4306,7 +4306,7 @@ TypedValue * fg1_imagejpeg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_imagejpeg(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -4347,8 +4347,8 @@ effect => rsi
 
 bool fh_imagelayereffect(Value* image, int effect) asm("_ZN4HPHP18f_imagelayereffectERKNS_6ObjectEi");
 
-TypedValue * fg1_imagelayereffect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagelayereffect(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagelayereffect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagelayereffect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4364,7 +4364,7 @@ TypedValue * fg1_imagelayereffect(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_imagelayereffect(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -4409,8 +4409,8 @@ color => r9
 
 bool fh_imageline(Value* image, int x1, int y1, int x2, int y2, int color) asm("_ZN4HPHP11f_imagelineERKNS_6ObjectEiiiii");
 
-TypedValue * fg1_imageline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4438,7 +4438,7 @@ TypedValue * fg1_imageline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_imageline(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -4479,8 +4479,8 @@ file => rsi
 
 TypedValue* fh_imageloadfont(TypedValue* _rv, Value* file) asm("_ZN4HPHP15f_imageloadfontERKNS_6StringE");
 
-TypedValue * fg1_imageloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imageloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imageloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imageloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imageloadfont((rv), (Value*)(args-0));
@@ -4490,7 +4490,7 @@ TypedValue * fg1_imageloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_imageloadfont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -4529,8 +4529,8 @@ source => rsi
 
 void fh_imagepalettecopy(Value* destination, Value* source) asm("_ZN4HPHP18f_imagepalettecopyERKNS_6ObjectES2_");
 
-TypedValue * fg1_imagepalettecopy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepalettecopy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepalettecopy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepalettecopy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4547,7 +4547,7 @@ TypedValue * fg1_imagepalettecopy(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_imagepalettecopy(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -4591,8 +4591,8 @@ filters => rcx
 
 bool fh_imagepng(Value* image, Value* filename, int quality, int filters) asm("_ZN4HPHP10f_imagepngERKNS_6ObjectERKNS_6StringEii");
 
-TypedValue * fg1_imagepng(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepng(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepng(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepng(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4621,7 +4621,7 @@ TypedValue * fg1_imagepng(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_imagepng(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -4664,8 +4664,8 @@ color => rcx
 
 bool fh_imagepolygon(Value* image, Value* points, int num_points, int color) asm("_ZN4HPHP14f_imagepolygonERKNS_6ObjectERKNS_5ArrayEii");
 
-TypedValue * fg1_imagepolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4687,7 +4687,7 @@ TypedValue * fg1_imagepolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_imagepolygon(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -4733,8 +4733,8 @@ angle => xmm0
 
 Value* fh_imagepsbbox(Value* _rv, Value* text, int font, int size, int space, int tightness, double angle) asm("_ZN4HPHP13f_imagepsbboxERKNS_6StringEiiiid");
 
-TypedValue * fg1_imagepsbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepsbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepsbbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepsbbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -4770,7 +4770,7 @@ TypedValue * fg1_imagepsbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagepsbbox(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfDouble) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
@@ -4812,8 +4812,8 @@ encodingfile => rsi
 
 bool fh_imagepsencodefont(Value* font_index, Value* encodingfile) asm("_ZN4HPHP19f_imagepsencodefontERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imagepsencodefont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepsencodefont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepsencodefont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepsencodefont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4829,7 +4829,7 @@ TypedValue * fg1_imagepsencodefont(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagepsencodefont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -4870,8 +4870,8 @@ extend => xmm0
 
 bool fh_imagepsextendfont(int font_index, double extend) asm("_ZN4HPHP19f_imagepsextendfontEid");
 
-TypedValue * fg1_imagepsextendfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepsextendfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepsextendfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepsextendfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4887,7 +4887,7 @@ TypedValue * fg1_imagepsextendfont(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagepsextendfont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfInt64) {
@@ -4927,8 +4927,8 @@ fontindex => rdi
 
 bool fh_imagepsfreefont(Value* fontindex) asm("_ZN4HPHP17f_imagepsfreefontERKNS_6ObjectE");
 
-TypedValue * fg1_imagepsfreefont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepsfreefont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepsfreefont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepsfreefont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4939,7 +4939,7 @@ TypedValue * fg1_imagepsfreefont(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_imagepsfreefont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4980,8 +4980,8 @@ filename => rsi
 
 Value* fh_imagepsloadfont(Value* _rv, Value* filename) asm("_ZN4HPHP17f_imagepsloadfontERKNS_6StringE");
 
-TypedValue * fg1_imagepsloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepsloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepsloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepsloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -4993,7 +4993,7 @@ TypedValue * fg1_imagepsloadfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_imagepsloadfont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -5035,8 +5035,8 @@ slant => xmm0
 
 bool fh_imagepsslantfont(Value* font_index, double slant) asm("_ZN4HPHP18f_imagepsslantfontERKNS_6ObjectEd");
 
-TypedValue * fg1_imagepsslantfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepsslantfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepsslantfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepsslantfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5052,7 +5052,7 @@ TypedValue * fg1_imagepsslantfont(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_imagepsslantfont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5104,8 +5104,8 @@ antialias_steps => st40
 
 Value* fh_imagepstext(Value* _rv, Value* image, Value* text, Value* font, int size, int foreground, int background, int x, int y, int space, int tightness, double angle, int antialias_steps) asm("_ZN4HPHP13f_imagepstextERKNS_6ObjectERKNS_6StringES2_iiiiiiidi");
 
-TypedValue * fg1_imagepstext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagepstext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagepstext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagepstext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -5160,7 +5160,7 @@ TypedValue * fg1_imagepstext(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagepstext(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 8LL && count <= 12LL) {
       if ((count <= 11 || (args-11)->m_type == KindOfInt64) && (count <= 10 || (args-10)->m_type == KindOfDouble) && (count <= 9 || (args-9)->m_type == KindOfInt64) && (count <= 8 || (args-8)->m_type == KindOfInt64) && (args-7)->m_type == KindOfInt64 && (args-6)->m_type == KindOfInt64 && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfObject && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -5206,8 +5206,8 @@ color => r9
 
 bool fh_imagerectangle(Value* image, int x1, int y1, int x2, int y2, int color) asm("_ZN4HPHP16f_imagerectangleERKNS_6ObjectEiiiii");
 
-TypedValue * fg1_imagerectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagerectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagerectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagerectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5235,7 +5235,7 @@ TypedValue * fg1_imagerectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_imagerectangle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -5279,8 +5279,8 @@ ignore_transparent => rcx
 
 TypedValue* fh_imagerotate(TypedValue* _rv, Value* source_image, double angle, int bgd_color, int ignore_transparent) asm("_ZN4HPHP13f_imagerotateERKNS_6ObjectEdii");
 
-TypedValue * fg1_imagerotate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagerotate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagerotate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagerotate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -5306,7 +5306,7 @@ TypedValue * fg1_imagerotate(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagerotate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5346,8 +5346,8 @@ saveflag => rsi
 
 bool fh_imagesavealpha(Value* image, bool saveflag) asm("_ZN4HPHP16f_imagesavealphaERKNS_6ObjectEb");
 
-TypedValue * fg1_imagesavealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesavealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesavealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesavealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5363,7 +5363,7 @@ TypedValue * fg1_imagesavealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_imagesavealpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
@@ -5404,8 +5404,8 @@ brush => rsi
 
 bool fh_imagesetbrush(Value* image, Value* brush) asm("_ZN4HPHP15f_imagesetbrushERKNS_6ObjectES2_");
 
-TypedValue * fg1_imagesetbrush(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesetbrush(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesetbrush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesetbrush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5421,7 +5421,7 @@ TypedValue * fg1_imagesetbrush(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_imagesetbrush(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -5464,8 +5464,8 @@ color => rcx
 
 bool fh_imagesetpixel(Value* image, int x, int y, int color) asm("_ZN4HPHP15f_imagesetpixelERKNS_6ObjectEiii");
 
-TypedValue * fg1_imagesetpixel(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesetpixel(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesetpixel(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesetpixel(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5487,7 +5487,7 @@ TypedValue * fg1_imagesetpixel(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_imagesetpixel(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -5528,8 +5528,8 @@ style => rsi
 
 bool fh_imagesetstyle(Value* image, Value* style) asm("_ZN4HPHP15f_imagesetstyleERKNS_6ObjectERKNS_5ArrayE");
 
-TypedValue * fg1_imagesetstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesetstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesetstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesetstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5545,7 +5545,7 @@ TypedValue * fg1_imagesetstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_imagesetstyle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -5586,8 +5586,8 @@ thickness => rsi
 
 bool fh_imagesetthickness(Value* image, int thickness) asm("_ZN4HPHP19f_imagesetthicknessERKNS_6ObjectEi");
 
-TypedValue * fg1_imagesetthickness(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesetthickness(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesetthickness(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesetthickness(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5603,7 +5603,7 @@ TypedValue * fg1_imagesetthickness(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_imagesetthickness(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -5644,8 +5644,8 @@ tile => rsi
 
 bool fh_imagesettile(Value* image, Value* tile) asm("_ZN4HPHP14f_imagesettileERKNS_6ObjectES2_");
 
-TypedValue * fg1_imagesettile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesettile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesettile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesettile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5661,7 +5661,7 @@ TypedValue * fg1_imagesettile(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_imagesettile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -5706,8 +5706,8 @@ color => r9
 
 bool fh_imagestring(Value* image, int font, int x, int y, Value* str, int color) asm("_ZN4HPHP13f_imagestringERKNS_6ObjectEiiiRKNS_6StringEi");
 
-TypedValue * fg1_imagestring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagestring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagestring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagestring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5735,7 +5735,7 @@ TypedValue * fg1_imagestring(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_imagestring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && IS_STRING_TYPE((args-4)->m_type) && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -5780,8 +5780,8 @@ color => r9
 
 bool fh_imagestringup(Value* image, int font, int x, int y, Value* str, int color) asm("_ZN4HPHP15f_imagestringupERKNS_6ObjectEiiiRKNS_6StringEi");
 
-TypedValue * fg1_imagestringup(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagestringup(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagestringup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagestringup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -5809,7 +5809,7 @@ TypedValue * fg1_imagestringup(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_imagestringup(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && IS_STRING_TYPE((args-4)->m_type) && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -5850,8 +5850,8 @@ image => rsi
 
 TypedValue* fh_imagesx(TypedValue* _rv, Value* image) asm("_ZN4HPHP9f_imagesxERKNS_6ObjectE");
 
-TypedValue * fg1_imagesx(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesx(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesx(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesx(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imagesx((rv), (Value*)(args-0));
@@ -5861,7 +5861,7 @@ TypedValue * fg1_imagesx(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 
 TypedValue* fg_imagesx(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -5901,8 +5901,8 @@ image => rsi
 
 TypedValue* fh_imagesy(TypedValue* _rv, Value* image) asm("_ZN4HPHP9f_imagesyERKNS_6ObjectE");
 
-TypedValue * fg1_imagesy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagesy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagesy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagesy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imagesy((rv), (Value*)(args-0));
@@ -5912,7 +5912,7 @@ TypedValue * fg1_imagesy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 
 TypedValue* fg_imagesy(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -5954,8 +5954,8 @@ ncolors => rcx
 
 TypedValue* fh_imagetruecolortopalette(TypedValue* _rv, Value* image, bool dither, int ncolors) asm("_ZN4HPHP25f_imagetruecolortopaletteERKNS_6ObjectEbi");
 
-TypedValue * fg1_imagetruecolortopalette(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagetruecolortopalette(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagetruecolortopalette(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagetruecolortopalette(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -5973,7 +5973,7 @@ TypedValue * fg1_imagetruecolortopalette(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_imagetruecolortopalette(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
@@ -6016,8 +6016,8 @@ text => rdx
 
 TypedValue* fh_imagettfbbox(TypedValue* _rv, double size, double angle, Value* fontfile, Value* text) asm("_ZN4HPHP14f_imagettfbboxEddRKNS_6StringES2_");
 
-TypedValue * fg1_imagettfbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagettfbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagettfbbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagettfbbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -6038,7 +6038,7 @@ TypedValue * fg1_imagettfbbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_imagettfbbox(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfDouble) {
@@ -6085,8 +6085,8 @@ text => st0
 
 TypedValue* fh_imagettftext(TypedValue* _rv, Value* image, double size, double angle, int x, int y, int color, Value* fontfile, Value* text) asm("_ZN4HPHP14f_imagettftextERKNS_6ObjectEddiiiRKNS_6StringES5_");
 
-TypedValue * fg1_imagettftext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagettftext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagettftext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagettftext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-7)->m_type)) {
     tvCastToStringInPlace(args-7);
@@ -6119,7 +6119,7 @@ TypedValue * fg1_imagettftext(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_imagettftext(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 8LL) {
       if (IS_STRING_TYPE((args-7)->m_type) && IS_STRING_TYPE((args-6)->m_type) && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -6149,22 +6149,22 @@ TypedValue* fg_imagettftext(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_imagetypes()
+long HPHP::f_imagetypes()
 _ZN4HPHP12f_imagetypesEv
 
 (return value) => rax
 */
 
-long long fh_imagetypes() asm("_ZN4HPHP12f_imagetypesEv");
+long fh_imagetypes() asm("_ZN4HPHP12f_imagetypesEv");
 
 TypedValue* fg_imagetypes(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
-      rv.m_data.num = (long long)fh_imagetypes();
+      rv.m_data.num = (int64_t)fh_imagetypes();
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
@@ -6194,8 +6194,8 @@ foreground => rdx
 
 bool fh_imagewbmp(Value* image, Value* filename, int foreground) asm("_ZN4HPHP11f_imagewbmpERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_imagewbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagewbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagewbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagewbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6220,7 +6220,7 @@ TypedValue * fg1_imagewbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_imagewbmp(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -6262,8 +6262,8 @@ foreground => rdx
 
 bool fh_imagexbm(Value* image, Value* filename, int foreground) asm("_ZN4HPHP10f_imagexbmERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_imagexbm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_imagexbm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_imagexbm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imagexbm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6288,7 +6288,7 @@ TypedValue * fg1_imagexbm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_imagexbm(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -6331,8 +6331,8 @@ spool => rcx
 
 TypedValue* fh_iptcembed(TypedValue* _rv, Value* iptcdata, Value* jpeg_file_name, int spool) asm("_ZN4HPHP11f_iptcembedERKNS_6StringES2_i");
 
-TypedValue * fg1_iptcembed(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iptcembed(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iptcembed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iptcembed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -6355,7 +6355,7 @@ TypedValue * fg1_iptcembed(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_iptcembed(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -6395,8 +6395,8 @@ iptcblock => rsi
 
 TypedValue* fh_iptcparse(TypedValue* _rv, Value* iptcblock) asm("_ZN4HPHP11f_iptcparseERKNS_6StringE");
 
-TypedValue * fg1_iptcparse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iptcparse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iptcparse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iptcparse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_iptcparse((rv), (Value*)(args-0));
@@ -6406,7 +6406,7 @@ TypedValue * fg1_iptcparse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_iptcparse(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -6449,8 +6449,8 @@ threshold => r8
 
 bool fh_jpeg2wbmp(Value* jpegname, Value* wbmpname, int dest_height, int dest_width, int threshold) asm("_ZN4HPHP11f_jpeg2wbmpERKNS_6StringES2_iii");
 
-TypedValue * fg1_jpeg2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_jpeg2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_jpeg2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_jpeg2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6475,7 +6475,7 @@ TypedValue * fg1_jpeg2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_jpeg2wbmp(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -6519,8 +6519,8 @@ threshold => r8
 
 bool fh_png2wbmp(Value* pngname, Value* wbmpname, int dest_height, int dest_width, int threshold) asm("_ZN4HPHP10f_png2wbmpERKNS_6StringES2_iii");
 
-TypedValue * fg1_png2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_png2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_png2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_png2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6545,7 +6545,7 @@ TypedValue * fg1_png2wbmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_png2wbmp(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -6586,8 +6586,8 @@ filename => rsi
 
 TypedValue* fh_exif_imagetype(TypedValue* _rv, Value* filename) asm("_ZN4HPHP16f_exif_imagetypeERKNS_6StringE");
 
-TypedValue * fg1_exif_imagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_exif_imagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_exif_imagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_exif_imagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_exif_imagetype((rv), (Value*)(args-0));
@@ -6597,7 +6597,7 @@ TypedValue * fg1_exif_imagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_exif_imagetype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -6640,8 +6640,8 @@ thumbnail => r8
 
 TypedValue* fh_exif_read_data(TypedValue* _rv, Value* filename, Value* sections, bool arrays, bool thumbnail) asm("_ZN4HPHP16f_exif_read_dataERKNS_6StringES2_bb");
 
-TypedValue * fg1_exif_read_data(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_exif_read_data(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_exif_read_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_exif_read_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -6669,7 +6669,7 @@ TypedValue * fg1_exif_read_data(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_exif_read_data(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -6712,8 +6712,8 @@ thumbnail => r8
 
 TypedValue* fh_read_exif_data(TypedValue* _rv, Value* filename, Value* sections, bool arrays, bool thumbnail) asm("_ZN4HPHP16f_read_exif_dataERKNS_6StringES2_bb");
 
-TypedValue * fg1_read_exif_data(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_read_exif_data(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_read_exif_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_read_exif_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -6741,7 +6741,7 @@ TypedValue * fg1_read_exif_data(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_read_exif_data(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -6781,8 +6781,8 @@ index => rsi
 
 TypedValue* fh_exif_tagname(TypedValue* _rv, int index) asm("_ZN4HPHP14f_exif_tagnameEi");
 
-TypedValue * fg1_exif_tagname(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_exif_tagname(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_exif_tagname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_exif_tagname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_exif_tagname((rv), (int)(args[-0].m_data.num));
@@ -6792,7 +6792,7 @@ TypedValue * fg1_exif_tagname(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_exif_tagname(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
@@ -6835,8 +6835,8 @@ imagetype => r8
 
 TypedValue* fh_exif_thumbnail(TypedValue* _rv, Value* filename, TypedValue* width, TypedValue* height, TypedValue* imagetype) asm("_ZN4HPHP16f_exif_thumbnailERKNS_6StringERKNS_14VRefParamValueES5_S5_");
 
-TypedValue * fg1_exif_thumbnail(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_exif_thumbnail(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_exif_thumbnail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_exif_thumbnail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   VRefParamValue defVal1 = null;
@@ -6849,7 +6849,7 @@ TypedValue * fg1_exif_thumbnail(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_exif_thumbnail(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {

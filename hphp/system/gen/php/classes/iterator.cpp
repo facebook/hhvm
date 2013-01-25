@@ -49,15 +49,15 @@ const int cw_AppendIterator$$instanceof_index[] = {
 Variant c_AppendIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
-extern const CallInfo ci_AppendIterator$$__construct = { (void*)&c_AppendIterator::i___construct, (void*)&c_AppendIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$key = { (void*)&c_AppendIterator::i_key, (void*)&c_AppendIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$valid = { (void*)&c_AppendIterator::i_valid, (void*)&c_AppendIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$rewind = { (void*)&c_AppendIterator::i_rewind, (void*)&c_AppendIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$__call = { (void*)&c_AppendIterator::i___call, (void*)&c_AppendIterator::ifa___call, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$next = { (void*)&c_AppendIterator::i_next, (void*)&c_AppendIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$current = { (void*)&c_AppendIterator::i_current, (void*)&c_AppendIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$append = { (void*)&c_AppendIterator::i_append, (void*)&c_AppendIterator::ifa_append, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_AppendIterator$$getinneriterator = { (void*)&c_AppendIterator::i_getinneriterator, (void*)&c_AppendIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_AppendIterator$$__construct = { (void*)&c_AppendIterator::i___construct, (void*)&c_AppendIterator::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$key = { (void*)&c_AppendIterator::i_key, (void*)&c_AppendIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$valid = { (void*)&c_AppendIterator::i_valid, (void*)&c_AppendIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$rewind = { (void*)&c_AppendIterator::i_rewind, (void*)&c_AppendIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$__call = { (void*)&c_AppendIterator::i___call, (void*)&c_AppendIterator::ifa___call, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$next = { (void*)&c_AppendIterator::i_next, (void*)&c_AppendIterator::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$current = { (void*)&c_AppendIterator::i_current, (void*)&c_AppendIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$append = { (void*)&c_AppendIterator::i_append, (void*)&c_AppendIterator::ifa_append, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_AppendIterator$$getinneriterator = { (void*)&c_AppendIterator::i_getinneriterator, (void*)&c_AppendIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000L};
 Variant c_AppendIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -485,16 +485,16 @@ const int cw_FilterIterator$$instanceof_index[] = {
 Variant c_FilterIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
-extern const CallInfo ci_FilterIterator$$__clone = { (void*)&c_FilterIterator::i___clone, (void*)&c_FilterIterator::ifa___clone, 0, 68, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$__construct = { (void*)&c_FilterIterator::i___construct, (void*)&c_FilterIterator::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$key = { (void*)&c_FilterIterator::i_key, (void*)&c_FilterIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$valid = { (void*)&c_FilterIterator::i_valid, (void*)&c_FilterIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$rewind = { (void*)&c_FilterIterator::i_rewind, (void*)&c_FilterIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$__call = { (void*)&c_FilterIterator::i___call, (void*)&c_FilterIterator::ifa___call, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$current = { (void*)&c_FilterIterator::i_current, (void*)&c_FilterIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$next = { (void*)&c_FilterIterator::i_next, (void*)&c_FilterIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$fetch = { (void*)&c_FilterIterator::i_fetch, (void*)&c_FilterIterator::ifa_fetch, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_FilterIterator$$getinneriterator = { (void*)&c_FilterIterator::i_getinneriterator, (void*)&c_FilterIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FilterIterator$$__clone = { (void*)&c_FilterIterator::i___clone, (void*)&c_FilterIterator::ifa___clone, 0, 68, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$__construct = { (void*)&c_FilterIterator::i___construct, (void*)&c_FilterIterator::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$key = { (void*)&c_FilterIterator::i_key, (void*)&c_FilterIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$valid = { (void*)&c_FilterIterator::i_valid, (void*)&c_FilterIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$rewind = { (void*)&c_FilterIterator::i_rewind, (void*)&c_FilterIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$__call = { (void*)&c_FilterIterator::i___call, (void*)&c_FilterIterator::ifa___call, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$current = { (void*)&c_FilterIterator::i_current, (void*)&c_FilterIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$next = { (void*)&c_FilterIterator::i_next, (void*)&c_FilterIterator::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$fetch = { (void*)&c_FilterIterator::i_fetch, (void*)&c_FilterIterator::ifa_fetch, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_FilterIterator$$getinneriterator = { (void*)&c_FilterIterator::i_getinneriterator, (void*)&c_FilterIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000L};
 Variant c_FilterIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -804,14 +804,14 @@ const int cw_IteratorIterator$$instanceof_index[] = {
 Variant c_IteratorIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
-extern const CallInfo ci_IteratorIterator$$__construct = { (void*)&c_IteratorIterator::i___construct, (void*)&c_IteratorIterator::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_IteratorIterator$$rewind = { (void*)&c_IteratorIterator::i_rewind, (void*)&c_IteratorIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_IteratorIterator$$valid = { (void*)&c_IteratorIterator::i_valid, (void*)&c_IteratorIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_IteratorIterator$$key = { (void*)&c_IteratorIterator::i_key, (void*)&c_IteratorIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_IteratorIterator$$__call = { (void*)&c_IteratorIterator::i___call, (void*)&c_IteratorIterator::ifa___call, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_IteratorIterator$$next = { (void*)&c_IteratorIterator::i_next, (void*)&c_IteratorIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_IteratorIterator$$current = { (void*)&c_IteratorIterator::i_current, (void*)&c_IteratorIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_IteratorIterator$$getinneriterator = { (void*)&c_IteratorIterator::i_getinneriterator, (void*)&c_IteratorIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_IteratorIterator$$__construct = { (void*)&c_IteratorIterator::i___construct, (void*)&c_IteratorIterator::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_IteratorIterator$$rewind = { (void*)&c_IteratorIterator::i_rewind, (void*)&c_IteratorIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_IteratorIterator$$valid = { (void*)&c_IteratorIterator::i_valid, (void*)&c_IteratorIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_IteratorIterator$$key = { (void*)&c_IteratorIterator::i_key, (void*)&c_IteratorIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_IteratorIterator$$__call = { (void*)&c_IteratorIterator::i___call, (void*)&c_IteratorIterator::ifa___call, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_IteratorIterator$$next = { (void*)&c_IteratorIterator::i_next, (void*)&c_IteratorIterator::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_IteratorIterator$$current = { (void*)&c_IteratorIterator::i_current, (void*)&c_IteratorIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_IteratorIterator$$getinneriterator = { (void*)&c_IteratorIterator::i_getinneriterator, (void*)&c_IteratorIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000L};
 Variant c_IteratorIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1050,10 +1050,10 @@ Variant c_IteratorIterator::t___call(Variant v_func, Variant v_params) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 244 */
-const int64 q_RecursiveIteratorIterator$$LEAVES_ONLY = 0LL;
-const int64 q_RecursiveIteratorIterator$$SELF_FIRST = 1LL;
-const int64 q_RecursiveIteratorIterator$$CHILD_FIRST = 2LL;
-const int64 q_RecursiveIteratorIterator$$CATCH_GET_CHILD = 16LL;
+const int64_t q_RecursiveIteratorIterator$$LEAVES_ONLY = 0L;
+const int64_t q_RecursiveIteratorIterator$$SELF_FIRST = 1L;
+const int64_t q_RecursiveIteratorIterator$$CHILD_FIRST = 2L;
+const int64_t q_RecursiveIteratorIterator$$CATCH_GET_CHILD = 16L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RecursiveIteratorIterator)
 extern const InstanceOfInfo cw_RecursiveIteratorIterator$$instanceof_table[] = {
   {0x5CB957E8,1,"Iterator",(const ObjectStaticCallbacks*)2},
@@ -1066,13 +1066,13 @@ const int cw_RecursiveIteratorIterator$$instanceof_index[] = {
   0,-1,-1,1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_RecursiveIteratorIterator$$__construct = { (void*)&c_RecursiveIteratorIterator::i___construct, (void*)&c_RecursiveIteratorIterator::ifa___construct, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveIteratorIterator$$valid = { (void*)&c_RecursiveIteratorIterator::i_valid, (void*)&c_RecursiveIteratorIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveIteratorIterator$$rewind = { (void*)&c_RecursiveIteratorIterator::i_rewind, (void*)&c_RecursiveIteratorIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveIteratorIterator$$key = { (void*)&c_RecursiveIteratorIterator::i_key, (void*)&c_RecursiveIteratorIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveIteratorIterator$$current = { (void*)&c_RecursiveIteratorIterator::i_current, (void*)&c_RecursiveIteratorIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveIteratorIterator$$next = { (void*)&c_RecursiveIteratorIterator::i_next, (void*)&c_RecursiveIteratorIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveIteratorIterator$$getinneriterator = { (void*)&c_RecursiveIteratorIterator::i_getinneriterator, (void*)&c_RecursiveIteratorIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_RecursiveIteratorIterator$$__construct = { (void*)&c_RecursiveIteratorIterator::i___construct, (void*)&c_RecursiveIteratorIterator::ifa___construct, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveIteratorIterator$$valid = { (void*)&c_RecursiveIteratorIterator::i_valid, (void*)&c_RecursiveIteratorIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveIteratorIterator$$rewind = { (void*)&c_RecursiveIteratorIterator::i_rewind, (void*)&c_RecursiveIteratorIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveIteratorIterator$$key = { (void*)&c_RecursiveIteratorIterator::i_key, (void*)&c_RecursiveIteratorIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveIteratorIterator$$current = { (void*)&c_RecursiveIteratorIterator::i_current, (void*)&c_RecursiveIteratorIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveIteratorIterator$$next = { (void*)&c_RecursiveIteratorIterator::i_next, (void*)&c_RecursiveIteratorIterator::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveIteratorIterator$$getinneriterator = { (void*)&c_RecursiveIteratorIterator::i_getinneriterator, (void*)&c_RecursiveIteratorIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000L};
 Variant c_RecursiveIteratorIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1170,8 +1170,8 @@ extern const int cw_RecursiveIteratorIterator$$call_info_index[] = {
   -1,-1,-1,-1,4,5,-1,6,
 
 };
-c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(CVarRef v_iterator, CVarRef v_mode //  = NAMVAR(s_sys_svif01bca90, 0LL) /* RecursiveIteratorIterator::LEAVES_ONLY */
-, CVarRef v_flags //  = NAMVAR(s_sys_svif01bca90, 0LL)
+c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(CVarRef v_iterator, CVarRef v_mode //  = NAMVAR(s_sys_svif01bca90, int64_t(0)) /* RecursiveIteratorIterator::LEAVES_ONLY */
+, CVarRef v_flags //  = NAMVAR(s_sys_svif01bca90, int64_t(0))
 ) {
   CountableHelper h(this);
   init();
@@ -1191,8 +1191,8 @@ const ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
   &c_RecursiveIteratorIterator::s_cls
 };
 /* SRC: classes/iterator.php line 253 */
-void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
-, Variant v_flags //  = 0LL
+void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0L /* RecursiveIteratorIterator::LEAVES_ONLY */
+, Variant v_flags //  = 0L
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::__construct);
   x_hphp_recursiveiteratoriterator___construct(GET_THIS_TYPED(RecursiveIteratorIterator), toObject(v_iterator), toInt64(v_mode), toInt64(v_flags));
@@ -1235,8 +1235,8 @@ bool c_RecursiveIteratorIterator::t_valid() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 345 */
-const int64 q_ArrayIterator$$STD_PROP_LIST = 1LL;
-const int64 q_ArrayIterator$$ARRAY_AS_PROPS = 2LL;
+const int64_t q_ArrayIterator$$STD_PROP_LIST = 1L;
+const int64_t q_ArrayIterator$$ARRAY_AS_PROPS = 2L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ArrayIterator)
 extern const InstanceOfInfo cw_ArrayIterator$$instanceof_table[] = {
   {0x37AD55E4,0,"Countable",(const ObjectStaticCallbacks*)2},
@@ -1252,28 +1252,28 @@ const int cw_ArrayIterator$$instanceof_index[] = {
   3,-1,-1,-1,4,5,-1,-1,
 
 };
-extern const CallInfo ci_ArrayIterator$$rewind = { (void*)&c_ArrayIterator::i_rewind, (void*)&c_ArrayIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$__construct = { (void*)&c_ArrayIterator::i___construct, (void*)&c_ArrayIterator::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$seek = { (void*)&c_ArrayIterator::i_seek, (void*)&c_ArrayIterator::ifa_seek, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$offsetunset = { (void*)&c_ArrayIterator::i_offsetunset, (void*)&c_ArrayIterator::ifa_offsetunset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$natsort = { (void*)&c_ArrayIterator::i_natsort, (void*)&c_ArrayIterator::ifa_natsort, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$valid = { (void*)&c_ArrayIterator::i_valid, (void*)&c_ArrayIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$offsetset = { (void*)&c_ArrayIterator::i_offsetset, (void*)&c_ArrayIterator::ifa_offsetset, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$current = { (void*)&c_ArrayIterator::i_current, (void*)&c_ArrayIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$append = { (void*)&c_ArrayIterator::i_append, (void*)&c_ArrayIterator::ifa_append, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$getflags = { (void*)&c_ArrayIterator::i_getflags, (void*)&c_ArrayIterator::ifa_getflags, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$asort = { (void*)&c_ArrayIterator::i_asort, (void*)&c_ArrayIterator::ifa_asort, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$natcasesort = { (void*)&c_ArrayIterator::i_natcasesort, (void*)&c_ArrayIterator::ifa_natcasesort, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$offsetexists = { (void*)&c_ArrayIterator::i_offsetexists, (void*)&c_ArrayIterator::ifa_offsetexists, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$getarraycopy = { (void*)&c_ArrayIterator::i_getarraycopy, (void*)&c_ArrayIterator::ifa_getarraycopy, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$ksort = { (void*)&c_ArrayIterator::i_ksort, (void*)&c_ArrayIterator::ifa_ksort, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$uksort = { (void*)&c_ArrayIterator::i_uksort, (void*)&c_ArrayIterator::ifa_uksort, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$next = { (void*)&c_ArrayIterator::i_next, (void*)&c_ArrayIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$uasort = { (void*)&c_ArrayIterator::i_uasort, (void*)&c_ArrayIterator::ifa_uasort, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$setflags = { (void*)&c_ArrayIterator::i_setflags, (void*)&c_ArrayIterator::ifa_setflags, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$offsetget = { (void*)&c_ArrayIterator::i_offsetget, (void*)&c_ArrayIterator::ifa_offsetget, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$count = { (void*)&c_ArrayIterator::i_count, (void*)&c_ArrayIterator::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ArrayIterator$$key = { (void*)&c_ArrayIterator::i_key, (void*)&c_ArrayIterator::ifa_key, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ArrayIterator$$rewind = { (void*)&c_ArrayIterator::i_rewind, (void*)&c_ArrayIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$__construct = { (void*)&c_ArrayIterator::i___construct, (void*)&c_ArrayIterator::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$seek = { (void*)&c_ArrayIterator::i_seek, (void*)&c_ArrayIterator::ifa_seek, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$offsetunset = { (void*)&c_ArrayIterator::i_offsetunset, (void*)&c_ArrayIterator::ifa_offsetunset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$natsort = { (void*)&c_ArrayIterator::i_natsort, (void*)&c_ArrayIterator::ifa_natsort, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$valid = { (void*)&c_ArrayIterator::i_valid, (void*)&c_ArrayIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$offsetset = { (void*)&c_ArrayIterator::i_offsetset, (void*)&c_ArrayIterator::ifa_offsetset, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$current = { (void*)&c_ArrayIterator::i_current, (void*)&c_ArrayIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$append = { (void*)&c_ArrayIterator::i_append, (void*)&c_ArrayIterator::ifa_append, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$getflags = { (void*)&c_ArrayIterator::i_getflags, (void*)&c_ArrayIterator::ifa_getflags, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$asort = { (void*)&c_ArrayIterator::i_asort, (void*)&c_ArrayIterator::ifa_asort, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$natcasesort = { (void*)&c_ArrayIterator::i_natcasesort, (void*)&c_ArrayIterator::ifa_natcasesort, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$offsetexists = { (void*)&c_ArrayIterator::i_offsetexists, (void*)&c_ArrayIterator::ifa_offsetexists, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$getarraycopy = { (void*)&c_ArrayIterator::i_getarraycopy, (void*)&c_ArrayIterator::ifa_getarraycopy, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$ksort = { (void*)&c_ArrayIterator::i_ksort, (void*)&c_ArrayIterator::ifa_ksort, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$uksort = { (void*)&c_ArrayIterator::i_uksort, (void*)&c_ArrayIterator::ifa_uksort, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$next = { (void*)&c_ArrayIterator::i_next, (void*)&c_ArrayIterator::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$uasort = { (void*)&c_ArrayIterator::i_uasort, (void*)&c_ArrayIterator::ifa_uasort, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$setflags = { (void*)&c_ArrayIterator::i_setflags, (void*)&c_ArrayIterator::ifa_setflags, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$offsetget = { (void*)&c_ArrayIterator::i_offsetget, (void*)&c_ArrayIterator::ifa_offsetget, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$count = { (void*)&c_ArrayIterator::i_count, (void*)&c_ArrayIterator::ifa_count, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ArrayIterator$$key = { (void*)&c_ArrayIterator::i_key, (void*)&c_ArrayIterator::ifa_key, 0, 4, 0x0000000000000000L};
 Variant c_ArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1565,7 +1565,7 @@ extern const int cw_ArrayIterator$$call_info_index[] = {
   20,-1,-1,-1,21,-1,-1,-1,
 
 };
-c_ArrayIterator *c_ArrayIterator::create(CVarRef v_array, CVarRef v_flags //  = NAMVAR(s_sys_svif01bca90, 0LL)
+c_ArrayIterator *c_ArrayIterator::create(CVarRef v_array, CVarRef v_flags //  = NAMVAR(s_sys_svif01bca90, int64_t(0))
 ) {
   CountableHelper h(this);
   init();
@@ -1585,7 +1585,7 @@ const ObjectStaticCallbacks cw_ArrayIterator = {
   &c_ArrayIterator::s_cls
 };
 /* SRC: classes/iterator.php line 352 */
-void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
+void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0L
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::__construct);
   ObjectData *obj_tmp UNUSED;
@@ -1609,7 +1609,7 @@ bool c_ArrayIterator::t_asort() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 396 */
-int64 c_ArrayIterator::t_count() {
+int64_t c_ArrayIterator::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::count);
   ObjectData *obj_tmp UNUSED;
   return x_count(m_arr);
@@ -1721,13 +1721,13 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 586 */
 void c_ArrayIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::seek);
-  int64 v_i = 0;
+  int64_t v_i = 0;
 
   ObjectData *obj_tmp UNUSED;
   x_reset(ref(m_arr));
   {
     LOOP_COUNTER(1);
-    for (v_i = 0LL; (less(v_i, v_position)); v_i++) {
+    for (v_i = 0L; (less(v_i, v_position)); v_i++) {
       LOOP_COUNTER_CHECK(1);
       {
         if (!(toBoolean(x_next(ref(m_arr))))) {
@@ -1790,10 +1790,10 @@ ObjectData *coo_ArrayIterator() {
 // Class tables
 static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
-  (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
-  (int64)&NAMVAR(s_sys_svib794f8ce, 1LL),
-  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
-  (int64)&NAMVAR(s_sys_svi86af027e, 16LL),
+  (int64)&NAMVAR(s_sys_svi90d5f98c, int64_t(2)),
+  (int64)&NAMVAR(s_sys_svib794f8ce, int64_t(1)),
+  (int64)&NAMVAR(s_sys_svif01bca90, int64_t(0)),
+  (int64)&NAMVAR(s_sys_svi86af027e, int64_t(16)),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x36439C61,0,0,16,65,64,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ss4152806c, "\000AppendIterator\000iterators") },

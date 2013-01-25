@@ -35,12 +35,12 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/directoryiterator.php line 122 */
-const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_SELF = 0LL;
-const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO = 16LL;
-const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME = 32LL;
-const int64 q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME = 0LL;
-const int64 q_RecursiveDirectoryIterator$$KEY_AS_FILENAME = 256LL;
-const int64 q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY = 272LL;
+const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_SELF = 0L;
+const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO = 16L;
+const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME = 32L;
+const int64_t q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME = 0L;
+const int64_t q_RecursiveDirectoryIterator$$KEY_AS_FILENAME = 256L;
+const int64_t q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY = 272L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RecursiveDirectoryIterator)
 extern const InstanceOfInfo cw_RecursiveDirectoryIterator$$instanceof_table[] = {
   {0x7CE365F2,1,"DirectoryIterator",&cw_DirectoryIterator},
@@ -57,18 +57,18 @@ const int cw_RecursiveDirectoryIterator$$instanceof_index[] = {
   4,-1,-1,-1,6,-1,-1,-1,
 
 };
-extern const CallInfo ci_RecursiveDirectoryIterator$$rewind = { (void*)&c_RecursiveDirectoryIterator::i_rewind, (void*)&c_RecursiveDirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$__construct = { (void*)&c_RecursiveDirectoryIterator::i___construct, (void*)&c_RecursiveDirectoryIterator::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$seek = { (void*)&c_RecursiveDirectoryIterator::i_seek, (void*)&c_RecursiveDirectoryIterator::ifa_seek, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$valid = { (void*)&c_RecursiveDirectoryIterator::i_valid, (void*)&c_RecursiveDirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$getchildren = { (void*)&c_RecursiveDirectoryIterator::i_getchildren, (void*)&c_RecursiveDirectoryIterator::ifa_getchildren, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$current = { (void*)&c_RecursiveDirectoryIterator::i_current, (void*)&c_RecursiveDirectoryIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$getsubpathname = { (void*)&c_RecursiveDirectoryIterator::i_getsubpathname, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpathname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$haschildren = { (void*)&c_RecursiveDirectoryIterator::i_haschildren, (void*)&c_RecursiveDirectoryIterator::ifa_haschildren, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$next = { (void*)&c_RecursiveDirectoryIterator::i_next, (void*)&c_RecursiveDirectoryIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$__tostring = { (void*)&c_RecursiveDirectoryIterator::i___tostring, (void*)&c_RecursiveDirectoryIterator::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$key = { (void*)&c_RecursiveDirectoryIterator::i_key, (void*)&c_RecursiveDirectoryIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_RecursiveDirectoryIterator$$getsubpath = { (void*)&c_RecursiveDirectoryIterator::i_getsubpath, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpath, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_RecursiveDirectoryIterator$$rewind = { (void*)&c_RecursiveDirectoryIterator::i_rewind, (void*)&c_RecursiveDirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$__construct = { (void*)&c_RecursiveDirectoryIterator::i___construct, (void*)&c_RecursiveDirectoryIterator::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$seek = { (void*)&c_RecursiveDirectoryIterator::i_seek, (void*)&c_RecursiveDirectoryIterator::ifa_seek, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$valid = { (void*)&c_RecursiveDirectoryIterator::i_valid, (void*)&c_RecursiveDirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$getchildren = { (void*)&c_RecursiveDirectoryIterator::i_getchildren, (void*)&c_RecursiveDirectoryIterator::ifa_getchildren, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$current = { (void*)&c_RecursiveDirectoryIterator::i_current, (void*)&c_RecursiveDirectoryIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$getsubpathname = { (void*)&c_RecursiveDirectoryIterator::i_getsubpathname, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpathname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$haschildren = { (void*)&c_RecursiveDirectoryIterator::i_haschildren, (void*)&c_RecursiveDirectoryIterator::ifa_haschildren, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$next = { (void*)&c_RecursiveDirectoryIterator::i_next, (void*)&c_RecursiveDirectoryIterator::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$__tostring = { (void*)&c_RecursiveDirectoryIterator::i___tostring, (void*)&c_RecursiveDirectoryIterator::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$key = { (void*)&c_RecursiveDirectoryIterator::i_key, (void*)&c_RecursiveDirectoryIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_RecursiveDirectoryIterator$$getsubpath = { (void*)&c_RecursiveDirectoryIterator::i_getsubpath, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpath, 0, 4, 0x0000000000000000L};
 Variant c_RecursiveDirectoryIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -227,7 +227,7 @@ extern const int cw_RecursiveDirectoryIterator$$call_info_index[] = {
   -1,10,-1,-1,11,-1,-1,-1,
 
 };
-c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(CVarRef v_path, CVarRef v_flags //  = NAMVAR(s_sys_svi86af027e, 16LL) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
+c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(CVarRef v_path, CVarRef v_flags //  = NAMVAR(s_sys_svi86af027e, int64_t(16)) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
   CountableHelper h(this);
   init();
@@ -247,7 +247,7 @@ const ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
   &c_RecursiveDirectoryIterator::s_cls
 };
 /* SRC: classes/directoryiterator.php line 132 */
-void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
+void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16L /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
   if (!(x_hphp_recursivedirectoryiterator___construct(GET_THIS_TYPED(RecursiveDirectoryIterator), toString(v_path), toInt64(v_flags)))) {
@@ -341,15 +341,15 @@ const int cw_DirectoryIterator$$instanceof_index[] = {
   3,-1,-1,-1,4,-1,-1,-1,
 
 };
-extern const CallInfo ci_DirectoryIterator$$__construct = { (void*)&c_DirectoryIterator::i___construct, (void*)&c_DirectoryIterator::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$valid = { (void*)&c_DirectoryIterator::i_valid, (void*)&c_DirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$seek = { (void*)&c_DirectoryIterator::i_seek, (void*)&c_DirectoryIterator::ifa_seek, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$rewind = { (void*)&c_DirectoryIterator::i_rewind, (void*)&c_DirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$key = { (void*)&c_DirectoryIterator::i_key, (void*)&c_DirectoryIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$isdot = { (void*)&c_DirectoryIterator::i_isdot, (void*)&c_DirectoryIterator::ifa_isdot, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$current = { (void*)&c_DirectoryIterator::i_current, (void*)&c_DirectoryIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$next = { (void*)&c_DirectoryIterator::i_next, (void*)&c_DirectoryIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DirectoryIterator$$__tostring = { (void*)&c_DirectoryIterator::i___tostring, (void*)&c_DirectoryIterator::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DirectoryIterator$$__construct = { (void*)&c_DirectoryIterator::i___construct, (void*)&c_DirectoryIterator::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$valid = { (void*)&c_DirectoryIterator::i_valid, (void*)&c_DirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$seek = { (void*)&c_DirectoryIterator::i_seek, (void*)&c_DirectoryIterator::ifa_seek, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$rewind = { (void*)&c_DirectoryIterator::i_rewind, (void*)&c_DirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$key = { (void*)&c_DirectoryIterator::i_key, (void*)&c_DirectoryIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$isdot = { (void*)&c_DirectoryIterator::i_isdot, (void*)&c_DirectoryIterator::ifa_isdot, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$current = { (void*)&c_DirectoryIterator::i_current, (void*)&c_DirectoryIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$next = { (void*)&c_DirectoryIterator::i_next, (void*)&c_DirectoryIterator::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DirectoryIterator$$__tostring = { (void*)&c_DirectoryIterator::i___tostring, (void*)&c_DirectoryIterator::ifa___tostring, 0, 4, 0x0000000000000000L};
 Variant c_DirectoryIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -558,11 +558,11 @@ ObjectData *coo_DirectoryIterator() {
 
 // Class tables
 static const int64 cpt_static_inits[] = {
-  (int64)&NAMVAR(s_sys_svi86af027e, 16LL),
-  (int64)&NAMVAR(s_sys_svi71a5b5e7, 272LL),
-  (int64)&NAMVAR(s_sys_svif2a1fb10, 32LL),
-  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
-  (int64)&NAMVAR(s_sys_svi6af020b2, 256LL),
+  (int64)&NAMVAR(s_sys_svi86af027e, int64_t(16)),
+  (int64)&NAMVAR(s_sys_svi71a5b5e7, int64_t(272)),
+  (int64)&NAMVAR(s_sys_svif2a1fb10, int64_t(32)),
+  (int64)&NAMVAR(s_sys_svif01bca90, int64_t(0)),
+  (int64)&NAMVAR(s_sys_svi6af020b2, int64_t(256)),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x652237E0,2,0,0,100,10,0,&NAMSTR(s_sys_ss652237e0, "CURRENT_AS_FILEINFO") },

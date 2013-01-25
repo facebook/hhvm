@@ -60,7 +60,7 @@ function => rdx
 _argv => rcx
 */
 
-TypedValue* fh_call_user_func(TypedValue* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP16f_call_user_funcEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_call_user_func(TypedValue* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP16f_call_user_funcEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Object HPHP::f_call_user_func_array_async(HPHP::Variant const&, HPHP::Array const&)
@@ -85,7 +85,7 @@ function => rdx
 _argv => rcx
 */
 
-Value* fh_call_user_func_async(Value* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP22f_call_user_func_asyncEiRKNS_7VariantERKNS_5ArrayE");
+Value* fh_call_user_func_async(Value* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP22f_call_user_func_asyncEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_check_user_func_async(HPHP::Variant const&, int)
@@ -154,7 +154,7 @@ function => st0
 _argv => st8
 */
 
-TypedValue* fh_call_user_func_rpc(TypedValue* _rv, long long _argc, Value* host, int port, Value* auth, int timeout, TypedValue* function, Value* _argv) asm("_ZN4HPHP20f_call_user_func_rpcEiRKNS_6StringEiS2_iRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_call_user_func_rpc(TypedValue* _rv, int64_t _argc, Value* host, int port, Value* auth, int timeout, TypedValue* function, Value* _argv) asm("_ZN4HPHP20f_call_user_func_rpcEiRKNS_6StringEiS2_iRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_forward_static_call_array(HPHP::Variant const&, HPHP::Array const&)
@@ -179,7 +179,7 @@ function => rdx
 _argv => rcx
 */
 
-TypedValue* fh_forward_static_call(TypedValue* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP21f_forward_static_callEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_forward_static_call(TypedValue* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP21f_forward_static_callEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_get_called_class()
@@ -225,13 +225,13 @@ _rv => rdi
 Value* fh_func_get_args(Value* _rv) asm("_ZN4HPHP15f_func_get_argsEv");
 
 /*
-long long HPHP::f_func_num_args()
+long HPHP::f_func_num_args()
 _ZN4HPHP15f_func_num_argsEv
 
 (return value) => rax
 */
 
-long long fh_func_num_args() asm("_ZN4HPHP15f_func_num_argsEv");
+long fh_func_num_args() asm("_ZN4HPHP15f_func_num_argsEv");
 
 /*
 void HPHP::f_register_postsend_function(int, HPHP::Variant const&, HPHP::Array const&)
@@ -242,7 +242,7 @@ function => rsi
 _argv => rdx
 */
 
-void fh_register_postsend_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_postsend_functionEiRKNS_7VariantERKNS_5ArrayE");
+void fh_register_postsend_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_postsend_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 void HPHP::f_register_shutdown_function(int, HPHP::Variant const&, HPHP::Array const&)
@@ -253,7 +253,7 @@ function => rsi
 _argv => rdx
 */
 
-void fh_register_shutdown_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_shutdown_functionEiRKNS_7VariantERKNS_5ArrayE");
+void fh_register_shutdown_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_shutdown_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 void HPHP::f_register_cleanup_function(int, HPHP::Variant const&, HPHP::Array const&)
@@ -264,7 +264,7 @@ function => rsi
 _argv => rdx
 */
 
-void fh_register_cleanup_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP27f_register_cleanup_functionEiRKNS_7VariantERKNS_5ArrayE");
+void fh_register_cleanup_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP27f_register_cleanup_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 bool HPHP::f_register_tick_function(int, HPHP::Variant const&, HPHP::Array const&)
@@ -276,7 +276,7 @@ function => rsi
 _argv => rdx
 */
 
-bool fh_register_tick_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_register_tick_functionEiRKNS_7VariantERKNS_5ArrayE");
+bool fh_register_tick_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_register_tick_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 void HPHP::f_unregister_tick_function(HPHP::Variant const&)

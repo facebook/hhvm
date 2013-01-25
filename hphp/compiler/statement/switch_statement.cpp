@@ -389,7 +389,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (staticIntCases) {
         if (needsDecl) {
           // copy var0 over to var
-          cg_printf("%s = %s.hashForIntSwitch(%lldLL, %lldLL);\n",
+          cg_printf("%s = %s.hashForIntSwitch(%"PRId64"L, %"PRId64"L);\n",
                     var.c_str(),
                     var0.c_str(),
                     firstNonZero,
@@ -423,13 +423,13 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     if (staticIntSwitchOpnd->is(Type::KindOfBoolean)) {
       // boolean we must special case
-      cg_printf(" ? %lldLL : 0LL", firstNonZero);
+      cg_printf(" ? %"PRId64"L : 0L", firstNonZero);
     } else if (staticIntSwitchOpnd->is(Type::KindOfDouble)) {
-      cg_printf(", %lldLL)", (int64) sentinel);
+      cg_printf(", %"PRId64"L)", (int64) sentinel);
     } else if (!staticIntSwitchOpnd->is(Type::KindOfInt64)) {
       // at this point we must be dealing with a variable
       // which implements hashForIntSwitch()
-      cg_printf(".hashForIntSwitch(%lldLL, %lldLL)",
+      cg_printf(".hashForIntSwitch(%"PRId64"L, %"PRId64"L)",
                 firstNonZero,
                 (int64) sentinel);
     }
@@ -540,28 +540,29 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     switch (m_exp->getType()->getKindOf()) {
     case Type::KindOfBoolean:
       cg_printf("needsOrder = false;\n");
-      cg_printf("hash = %s ? %lldLL : %lldLL;\n",
+      cg_printf("hash = %s ? %"PRId64"L : %"PRId64"L;\n",
                 var.c_str(),
                 firstTrueCaseHash,
                 firstFalseCaseHash);
       break;
     case Type::KindOfInt64:
       cg_printf("needsOrder = false;\n");
-      cg_printf("hash = %s == 0 ? %lldLL : %s;\n",
+      cg_printf("hash = %s == 0 ? %"PRId64"L : %s;\n",
                 var.c_str(),
                 firstZeroCaseHash,
                 var.c_str());
       break;
     case Type::KindOfDouble:
       cg_printf("needsOrder = false;\n");
-      cg_printf("hash = %s == 0 ? %lldLL : ((int64)%s);\n",
+      cg_printf("hash = %s == 0 ? %ldL : ((int64)%s);\n",
                 var.c_str(),
                 firstZeroCaseHash,
                 var.c_str());
       break;
     default:
       cg_printf("hash = %s.hashForStringSwitch("
-                "%lldLL, %lldLL, %lldLL, %lldLL, %lldLL, %lldLL, needsOrder);\n",
+                "%"PRId64"L, %"PRId64"L, %"PRId64"L, %"PRId64"L, %"PRId64"L"
+                ", %"PRId64"L, needsOrder);\n",
                 var.c_str(),
                 firstTrueCaseHash,
                 firstNullCaseHash,

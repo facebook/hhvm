@@ -31,14 +31,14 @@ additional_parameters => r8
 bool fh_mail(Value* to, Value* subject, Value* message, Value* additional_headers, Value* additional_parameters) asm("_ZN4HPHP6f_mailERKNS_6StringES2_S2_S2_S2_");
 
 /*
-long long HPHP::f_ezmlm_hash(HPHP::String const&)
+long HPHP::f_ezmlm_hash(HPHP::String const&)
 _ZN4HPHP12f_ezmlm_hashERKNS_6StringE
 
 (return value) => rax
 addr => rdi
 */
 
-long long fh_ezmlm_hash(Value* addr) asm("_ZN4HPHP12f_ezmlm_hashERKNS_6StringE");
+long fh_ezmlm_hash(Value* addr) asm("_ZN4HPHP12f_ezmlm_hashERKNS_6StringE");
 
 /*
 HPHP::Object HPHP::f_mailparse_msg_create()

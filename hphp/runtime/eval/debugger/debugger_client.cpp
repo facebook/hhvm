@@ -2147,7 +2147,7 @@ void DebuggerClient::usageLog(const std::string& cmd, const std::string& line) {
 
 #define MAX_LINE 1024
   char buf[MAX_LINE];
-  int len = snprintf(buf, MAX_LINE, "%s %lld %lld %s #### %s",
+  int len = snprintf(buf, MAX_LINE, "%s %"PRId64" %"PRId64" %s #### %s",
                      m_usageLogHeader.c_str(),
                      (int64)tp.tv_sec, (int64)tp.tv_nsec,
                      cmd.c_str(), line.c_str());

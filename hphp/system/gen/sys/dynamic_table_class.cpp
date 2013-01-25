@@ -82,22 +82,22 @@ const int cw_PDO$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_PDO$$exec = { (void*)&c_PDO::i_exec, (void*)&c_PDO::ifa_exec, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$commit = { (void*)&c_PDO::i_commit, (void*)&c_PDO::ifa_commit, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$__construct = { (void*)&c_PDO::i___construct, (void*)&c_PDO::ifa___construct, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$quote = { (void*)&c_PDO::i_quote, (void*)&c_PDO::ifa_quote, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$begintransaction = { (void*)&c_PDO::i_begintransaction, (void*)&c_PDO::ifa_begintransaction, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$lastinsertid = { (void*)&c_PDO::i_lastinsertid, (void*)&c_PDO::ifa_lastinsertid, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$query = { (void*)&c_PDO::i_query, (void*)&c_PDO::ifa_query, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$__wakeup = { (void*)&c_PDO::i___wakeup, (void*)&c_PDO::ifa___wakeup, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$errorcode = { (void*)&c_PDO::i_errorcode, (void*)&c_PDO::ifa_errorcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$__sleep = { (void*)&c_PDO::i___sleep, (void*)&c_PDO::ifa___sleep, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$prepare = { (void*)&c_PDO::i_prepare, (void*)&c_PDO::ifa_prepare, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$rollback = { (void*)&c_PDO::i_rollback, (void*)&c_PDO::ifa_rollback, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$getavailabledrivers = { (void*)&c_PDO::i_getavailabledrivers, (void*)&c_PDO::ifa_getavailabledrivers, 0, 12, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$getattribute = { (void*)&c_PDO::i_getattribute, (void*)&c_PDO::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$errorinfo = { (void*)&c_PDO::i_errorinfo, (void*)&c_PDO::ifa_errorinfo, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$setattribute = { (void*)&c_PDO::i_setattribute, (void*)&c_PDO::ifa_setattribute, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_PDO$$exec = { (void*)&c_PDO::i_exec, (void*)&c_PDO::ifa_exec, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$commit = { (void*)&c_PDO::i_commit, (void*)&c_PDO::ifa_commit, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$__construct = { (void*)&c_PDO::i___construct, (void*)&c_PDO::ifa___construct, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$quote = { (void*)&c_PDO::i_quote, (void*)&c_PDO::ifa_quote, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$begintransaction = { (void*)&c_PDO::i_begintransaction, (void*)&c_PDO::ifa_begintransaction, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$lastinsertid = { (void*)&c_PDO::i_lastinsertid, (void*)&c_PDO::ifa_lastinsertid, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$query = { (void*)&c_PDO::i_query, (void*)&c_PDO::ifa_query, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$__wakeup = { (void*)&c_PDO::i___wakeup, (void*)&c_PDO::ifa___wakeup, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$errorcode = { (void*)&c_PDO::i_errorcode, (void*)&c_PDO::ifa_errorcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$__sleep = { (void*)&c_PDO::i___sleep, (void*)&c_PDO::ifa___sleep, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$prepare = { (void*)&c_PDO::i_prepare, (void*)&c_PDO::ifa_prepare, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$rollback = { (void*)&c_PDO::i_rollback, (void*)&c_PDO::ifa_rollback, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$getavailabledrivers = { (void*)&c_PDO::i_getavailabledrivers, (void*)&c_PDO::ifa_getavailabledrivers, 0, 12, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$getattribute = { (void*)&c_PDO::i_getattribute, (void*)&c_PDO::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$errorinfo = { (void*)&c_PDO::i_errorinfo, (void*)&c_PDO::ifa_errorinfo, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDO$$setattribute = { (void*)&c_PDO::i_setattribute, (void*)&c_PDO::ifa_setattribute, 2, 4, 0x0000000000000000L};
 Variant c_PDO::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -348,12 +348,12 @@ const int cw_SimpleXMLElementIterator$$instanceof_index[] = {
   0,-1,-1,-1,1,2,-1,-1,
 
 };
-extern const CallInfo ci_SimpleXMLElementIterator$$__construct = { (void*)&c_SimpleXMLElementIterator::i___construct, (void*)&c_SimpleXMLElementIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElementIterator$$valid = { (void*)&c_SimpleXMLElementIterator::i_valid, (void*)&c_SimpleXMLElementIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElementIterator$$rewind = { (void*)&c_SimpleXMLElementIterator::i_rewind, (void*)&c_SimpleXMLElementIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElementIterator$$key = { (void*)&c_SimpleXMLElementIterator::i_key, (void*)&c_SimpleXMLElementIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElementIterator$$current = { (void*)&c_SimpleXMLElementIterator::i_current, (void*)&c_SimpleXMLElementIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElementIterator$$next = { (void*)&c_SimpleXMLElementIterator::i_next, (void*)&c_SimpleXMLElementIterator::ifa_next, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SimpleXMLElementIterator$$__construct = { (void*)&c_SimpleXMLElementIterator::i___construct, (void*)&c_SimpleXMLElementIterator::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElementIterator$$valid = { (void*)&c_SimpleXMLElementIterator::i_valid, (void*)&c_SimpleXMLElementIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElementIterator$$rewind = { (void*)&c_SimpleXMLElementIterator::i_rewind, (void*)&c_SimpleXMLElementIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElementIterator$$key = { (void*)&c_SimpleXMLElementIterator::i_key, (void*)&c_SimpleXMLElementIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElementIterator$$current = { (void*)&c_SimpleXMLElementIterator::i_current, (void*)&c_SimpleXMLElementIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElementIterator$$next = { (void*)&c_SimpleXMLElementIterator::i_next, (void*)&c_SimpleXMLElementIterator::ifa_next, 0, 4, 0x0000000000000000L};
 Variant c_SimpleXMLElementIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -466,24 +466,24 @@ const int cw_Continuation$$instanceof_index[] = {
   0,-1,-1,-1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_Continuation$$rewind = { (void*)&c_Continuation::i_rewind, (void*)&c_Continuation::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$__construct = { (void*)&c_Continuation::i___construct, (void*)&c_Continuation::ifa___construct, 6, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$getorigfuncname = { (void*)&c_Continuation::i_getorigfuncname, (void*)&c_Continuation::ifa_getorigfuncname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$raised = { (void*)&c_Continuation::i_raised, (void*)&c_Continuation::ifa_raised, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$valid = { (void*)&c_Continuation::i_valid, (void*)&c_Continuation::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$raise = { (void*)&c_Continuation::i_raise, (void*)&c_Continuation::ifa_raise, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$done = { (void*)&c_Continuation::i_done, (void*)&c_Continuation::ifa_done, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$current = { (void*)&c_Continuation::i_current, (void*)&c_Continuation::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$getlabel = { (void*)&c_Continuation::i_getlabel, (void*)&c_Continuation::ifa_getlabel, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$get_arg = { (void*)&c_Continuation::i_get_arg, (void*)&c_Continuation::ifa_get_arg, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$__clone = { (void*)&c_Continuation::i___clone, (void*)&c_Continuation::ifa___clone, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$next = { (void*)&c_Continuation::i_next, (void*)&c_Continuation::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$receive = { (void*)&c_Continuation::i_receive, (void*)&c_Continuation::ifa_receive, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$key = { (void*)&c_Continuation::i_key, (void*)&c_Continuation::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$get_args = { (void*)&c_Continuation::i_get_args, (void*)&c_Continuation::ifa_get_args, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$send = { (void*)&c_Continuation::i_send, (void*)&c_Continuation::ifa_send, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$num_args = { (void*)&c_Continuation::i_num_args, (void*)&c_Continuation::ifa_num_args, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$update = { (void*)&c_Continuation::i_update, (void*)&c_Continuation::ifa_update, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Continuation$$rewind = { (void*)&c_Continuation::i_rewind, (void*)&c_Continuation::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$__construct = { (void*)&c_Continuation::i___construct, (void*)&c_Continuation::ifa___construct, 6, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$getorigfuncname = { (void*)&c_Continuation::i_getorigfuncname, (void*)&c_Continuation::ifa_getorigfuncname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$raised = { (void*)&c_Continuation::i_raised, (void*)&c_Continuation::ifa_raised, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$valid = { (void*)&c_Continuation::i_valid, (void*)&c_Continuation::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$raise = { (void*)&c_Continuation::i_raise, (void*)&c_Continuation::ifa_raise, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$done = { (void*)&c_Continuation::i_done, (void*)&c_Continuation::ifa_done, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$current = { (void*)&c_Continuation::i_current, (void*)&c_Continuation::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$getlabel = { (void*)&c_Continuation::i_getlabel, (void*)&c_Continuation::ifa_getlabel, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$get_arg = { (void*)&c_Continuation::i_get_arg, (void*)&c_Continuation::ifa_get_arg, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$__clone = { (void*)&c_Continuation::i___clone, (void*)&c_Continuation::ifa___clone, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$next = { (void*)&c_Continuation::i_next, (void*)&c_Continuation::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$receive = { (void*)&c_Continuation::i_receive, (void*)&c_Continuation::ifa_receive, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$key = { (void*)&c_Continuation::i_key, (void*)&c_Continuation::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$get_args = { (void*)&c_Continuation::i_get_args, (void*)&c_Continuation::ifa_get_args, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$send = { (void*)&c_Continuation::i_send, (void*)&c_Continuation::ifa_send, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$num_args = { (void*)&c_Continuation::i_num_args, (void*)&c_Continuation::ifa_num_args, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Continuation$$update = { (void*)&c_Continuation::i_update, (void*)&c_Continuation::ifa_update, 2, 4, 0x0000000000000000L};
 Variant c_Continuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -727,7 +727,7 @@ extern const int cw_Continuation$$call_info_index[] = {
   -1,-1,-1,16,17,-1,-1,-1,
 
 };
-c_Continuation *c_Continuation::create(int64 a0, int64 a1, bool a2, String a3, Variant a4, Array a5) {
+c_Continuation *c_Continuation::create(int64_t a0, int64_t a1, bool a2, String a3, Variant a4, Array a5) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
@@ -759,12 +759,12 @@ const int cw_DOMText$$instanceof_index[] = {
   -1,0,-1,-1,-1,-1,1,2,
 
 };
-extern const CallInfo ci_DOMText$$splittext = { (void*)&c_DOMText::i_splittext, (void*)&c_DOMText::ifa_splittext, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMText$$__construct = { (void*)&c_DOMText::i___construct, (void*)&c_DOMText::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMText$$__set = { (void*)&c_DOMText::i___set, (void*)&c_DOMText::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMText$$__get = { (void*)&c_DOMText::i___get, (void*)&c_DOMText::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMText$$__isset = { (void*)&c_DOMText::i___isset, (void*)&c_DOMText::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMText$$iswhitespaceinelementcontent = { (void*)&c_DOMText::i_iswhitespaceinelementcontent, (void*)&c_DOMText::ifa_iswhitespaceinelementcontent, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMText$$splittext = { (void*)&c_DOMText::i_splittext, (void*)&c_DOMText::ifa_splittext, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMText$$__construct = { (void*)&c_DOMText::i___construct, (void*)&c_DOMText::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMText$$__set = { (void*)&c_DOMText::i___set, (void*)&c_DOMText::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMText$$__get = { (void*)&c_DOMText::i___get, (void*)&c_DOMText::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMText$$__isset = { (void*)&c_DOMText::i___isset, (void*)&c_DOMText::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMText$$iswhitespaceinelementcontent = { (void*)&c_DOMText::i_iswhitespaceinelementcontent, (void*)&c_DOMText::ifa_iswhitespaceinelementcontent, 0, 4, 0x0000000000000000L};
 Variant c_DOMText::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -884,12 +884,12 @@ const int cw_DOMNodeIterator$$instanceof_index[] = {
   0,-1,1,-1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_DOMNodeIterator$$__construct = { (void*)&c_DOMNodeIterator::i___construct, (void*)&c_DOMNodeIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeIterator$$valid = { (void*)&c_DOMNodeIterator::i_valid, (void*)&c_DOMNodeIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeIterator$$rewind = { (void*)&c_DOMNodeIterator::i_rewind, (void*)&c_DOMNodeIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeIterator$$key = { (void*)&c_DOMNodeIterator::i_key, (void*)&c_DOMNodeIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeIterator$$current = { (void*)&c_DOMNodeIterator::i_current, (void*)&c_DOMNodeIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeIterator$$next = { (void*)&c_DOMNodeIterator::i_next, (void*)&c_DOMNodeIterator::ifa_next, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMNodeIterator$$__construct = { (void*)&c_DOMNodeIterator::i___construct, (void*)&c_DOMNodeIterator::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeIterator$$valid = { (void*)&c_DOMNodeIterator::i_valid, (void*)&c_DOMNodeIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeIterator$$rewind = { (void*)&c_DOMNodeIterator::i_rewind, (void*)&c_DOMNodeIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeIterator$$key = { (void*)&c_DOMNodeIterator::i_key, (void*)&c_DOMNodeIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeIterator$$current = { (void*)&c_DOMNodeIterator::i_current, (void*)&c_DOMNodeIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeIterator$$next = { (void*)&c_DOMNodeIterator::i_next, (void*)&c_DOMNodeIterator::ifa_next, 0, 4, 0x0000000000000000L};
 Variant c_DOMNodeIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1003,8 +1003,8 @@ const int cw_GenArrayWaitHandle$$instanceof_index[] = {
   -1,-1,-1,-1,-1,0,1,3,
 
 };
-extern const CallInfo ci_GenArrayWaitHandle$$__construct = { (void*)&c_GenArrayWaitHandle::i___construct, (void*)&c_GenArrayWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_GenArrayWaitHandle$$create = { (void*)&c_GenArrayWaitHandle::i_create, (void*)&c_GenArrayWaitHandle::ifa_create, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_GenArrayWaitHandle$$__construct = { (void*)&c_GenArrayWaitHandle::i___construct, (void*)&c_GenArrayWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_GenArrayWaitHandle$$create = { (void*)&c_GenArrayWaitHandle::i_create, (void*)&c_GenArrayWaitHandle::ifa_create, 1, 12, 0x0000000000000000L};
 Variant c_GenArrayWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1061,18 +1061,18 @@ const int cw_ImageSprite$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_ImageSprite$$addstring = { (void*)&c_ImageSprite::i_addstring, (void*)&c_ImageSprite::ifa_addstring, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$__construct = { (void*)&c_ImageSprite::i___construct, (void*)&c_ImageSprite::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$addfile = { (void*)&c_ImageSprite::i_addfile, (void*)&c_ImageSprite::ifa_addfile, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$output = { (void*)&c_ImageSprite::i_output, (void*)&c_ImageSprite::ifa_output, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$geterrors = { (void*)&c_ImageSprite::i_geterrors, (void*)&c_ImageSprite::ifa_geterrors, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$clear = { (void*)&c_ImageSprite::i_clear, (void*)&c_ImageSprite::ifa_clear, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$loadimages = { (void*)&c_ImageSprite::i_loadimages, (void*)&c_ImageSprite::ifa_loadimages, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$css = { (void*)&c_ImageSprite::i_css, (void*)&c_ImageSprite::ifa_css, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$addurl = { (void*)&c_ImageSprite::i_addurl, (void*)&c_ImageSprite::ifa_addurl, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$loaddims = { (void*)&c_ImageSprite::i_loaddims, (void*)&c_ImageSprite::ifa_loaddims, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$mapping = { (void*)&c_ImageSprite::i_mapping, (void*)&c_ImageSprite::ifa_mapping, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ImageSprite$$__destruct = { (void*)&c_ImageSprite::i___destruct, (void*)&c_ImageSprite::ifa___destruct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ImageSprite$$addstring = { (void*)&c_ImageSprite::i_addstring, (void*)&c_ImageSprite::ifa_addstring, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$__construct = { (void*)&c_ImageSprite::i___construct, (void*)&c_ImageSprite::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$addfile = { (void*)&c_ImageSprite::i_addfile, (void*)&c_ImageSprite::ifa_addfile, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$output = { (void*)&c_ImageSprite::i_output, (void*)&c_ImageSprite::ifa_output, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$geterrors = { (void*)&c_ImageSprite::i_geterrors, (void*)&c_ImageSprite::ifa_geterrors, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$clear = { (void*)&c_ImageSprite::i_clear, (void*)&c_ImageSprite::ifa_clear, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$loadimages = { (void*)&c_ImageSprite::i_loadimages, (void*)&c_ImageSprite::ifa_loadimages, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$css = { (void*)&c_ImageSprite::i_css, (void*)&c_ImageSprite::ifa_css, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$addurl = { (void*)&c_ImageSprite::i_addurl, (void*)&c_ImageSprite::ifa_addurl, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$loaddims = { (void*)&c_ImageSprite::i_loaddims, (void*)&c_ImageSprite::ifa_loaddims, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$mapping = { (void*)&c_ImageSprite::i_mapping, (void*)&c_ImageSprite::ifa_mapping, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ImageSprite$$__destruct = { (void*)&c_ImageSprite::i___destruct, (void*)&c_ImageSprite::ifa___destruct, 0, 4, 0x0000000000000000L};
 Variant c_ImageSprite::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1288,7 +1288,7 @@ const int cw_SoapHeader$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SoapHeader$$__construct = { (void*)&c_SoapHeader::i___construct, (void*)&c_SoapHeader::ifa___construct, 5, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SoapHeader$$__construct = { (void*)&c_SoapHeader::i___construct, (void*)&c_SoapHeader::ifa___construct, 5, 4, 0x0000000000000000L};
 Variant c_SoapHeader::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1344,22 +1344,22 @@ const int cw_DateTime$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_DateTime$$__construct = { (void*)&c_DateTime::i___construct, (void*)&c_DateTime::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$setisodate = { (void*)&c_DateTime::i_setisodate, (void*)&c_DateTime::ifa_setisodate, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$getoffset = { (void*)&c_DateTime::i_getoffset, (void*)&c_DateTime::ifa_getoffset, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$settimezone = { (void*)&c_DateTime::i_settimezone, (void*)&c_DateTime::ifa_settimezone, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$createfromformat = { (void*)&c_DateTime::i_createfromformat, (void*)&c_DateTime::ifa_createfromformat, 3, 12, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$gettimestamp = { (void*)&c_DateTime::i_gettimestamp, (void*)&c_DateTime::ifa_gettimestamp, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$add = { (void*)&c_DateTime::i_add, (void*)&c_DateTime::ifa_add, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$sub = { (void*)&c_DateTime::i_sub, (void*)&c_DateTime::ifa_sub, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$diff = { (void*)&c_DateTime::i_diff, (void*)&c_DateTime::ifa_diff, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$gettimezone = { (void*)&c_DateTime::i_gettimezone, (void*)&c_DateTime::ifa_gettimezone, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$format = { (void*)&c_DateTime::i_format, (void*)&c_DateTime::ifa_format, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$getlasterrors = { (void*)&c_DateTime::i_getlasterrors, (void*)&c_DateTime::ifa_getlasterrors, 0, 12, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$settimestamp = { (void*)&c_DateTime::i_settimestamp, (void*)&c_DateTime::ifa_settimestamp, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$settime = { (void*)&c_DateTime::i_settime, (void*)&c_DateTime::ifa_settime, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$setdate = { (void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$modify = { (void*)&c_DateTime::i_modify, (void*)&c_DateTime::ifa_modify, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$__construct = { (void*)&c_DateTime::i___construct, (void*)&c_DateTime::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$setisodate = { (void*)&c_DateTime::i_setisodate, (void*)&c_DateTime::ifa_setisodate, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$getoffset = { (void*)&c_DateTime::i_getoffset, (void*)&c_DateTime::ifa_getoffset, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$settimezone = { (void*)&c_DateTime::i_settimezone, (void*)&c_DateTime::ifa_settimezone, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$createfromformat = { (void*)&c_DateTime::i_createfromformat, (void*)&c_DateTime::ifa_createfromformat, 3, 12, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$gettimestamp = { (void*)&c_DateTime::i_gettimestamp, (void*)&c_DateTime::ifa_gettimestamp, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$add = { (void*)&c_DateTime::i_add, (void*)&c_DateTime::ifa_add, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$sub = { (void*)&c_DateTime::i_sub, (void*)&c_DateTime::ifa_sub, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$diff = { (void*)&c_DateTime::i_diff, (void*)&c_DateTime::ifa_diff, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$gettimezone = { (void*)&c_DateTime::i_gettimezone, (void*)&c_DateTime::ifa_gettimezone, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$format = { (void*)&c_DateTime::i_format, (void*)&c_DateTime::ifa_format, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$getlasterrors = { (void*)&c_DateTime::i_getlasterrors, (void*)&c_DateTime::ifa_getlasterrors, 0, 12, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$settimestamp = { (void*)&c_DateTime::i_settimestamp, (void*)&c_DateTime::ifa_settimestamp, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$settime = { (void*)&c_DateTime::i_settime, (void*)&c_DateTime::ifa_settime, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$setdate = { (void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTime$$modify = { (void*)&c_DateTime::i_modify, (void*)&c_DateTime::ifa_modify, 1, 4, 0x0000000000000000L};
 Variant c_DateTime::i_add(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_add);
 }
@@ -1612,9 +1612,9 @@ const int cw_WaitableWaitHandle$$instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-extern const CallInfo ci_WaitableWaitHandle$$getstacktrace = { (void*)&c_WaitableWaitHandle::i_getstacktrace, (void*)&c_WaitableWaitHandle::ifa_getstacktrace, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_WaitableWaitHandle$$__construct = { (void*)&c_WaitableWaitHandle::i___construct, (void*)&c_WaitableWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_WaitableWaitHandle$$getparents = { (void*)&c_WaitableWaitHandle::i_getparents, (void*)&c_WaitableWaitHandle::ifa_getparents, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_WaitableWaitHandle$$getstacktrace = { (void*)&c_WaitableWaitHandle::i_getstacktrace, (void*)&c_WaitableWaitHandle::ifa_getstacktrace, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_WaitableWaitHandle$$__construct = { (void*)&c_WaitableWaitHandle::i___construct, (void*)&c_WaitableWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_WaitableWaitHandle$$getparents = { (void*)&c_WaitableWaitHandle::i_getparents, (void*)&c_WaitableWaitHandle::ifa_getparents, 0, 4, 0x0000000000000000L};
 Variant c_WaitableWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1690,8 +1690,8 @@ const int cw_StaticResultWaitHandle$$instanceof_index[] = {
   -1,-1,-1,-1,-1,0,-1,2,
 
 };
-extern const CallInfo ci_StaticResultWaitHandle$$__construct = { (void*)&c_StaticResultWaitHandle::i___construct, (void*)&c_StaticResultWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_StaticResultWaitHandle$$create = { (void*)&c_StaticResultWaitHandle::i_create, (void*)&c_StaticResultWaitHandle::ifa_create, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_StaticResultWaitHandle$$__construct = { (void*)&c_StaticResultWaitHandle::i___construct, (void*)&c_StaticResultWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_StaticResultWaitHandle$$create = { (void*)&c_StaticResultWaitHandle::i_create, (void*)&c_StaticResultWaitHandle::ifa_create, 1, 12, 0x0000000000000000L};
 Variant c_StaticResultWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1752,8 +1752,8 @@ const int cw_SetResultToRefWaitHandle$$instanceof_index[] = {
   -1,-1,0,-1,-1,1,2,3,
 
 };
-extern const CallInfo ci_SetResultToRefWaitHandle$$__construct = { (void*)&c_SetResultToRefWaitHandle::i___construct, (void*)&c_SetResultToRefWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_SetResultToRefWaitHandle$$create = { (void*)&c_SetResultToRefWaitHandle::i_create, (void*)&c_SetResultToRefWaitHandle::ifa_create, 2, 12, 0x0000000000000002LL};
+extern const CallInfo ci_SetResultToRefWaitHandle$$__construct = { (void*)&c_SetResultToRefWaitHandle::i___construct, (void*)&c_SetResultToRefWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_SetResultToRefWaitHandle$$create = { (void*)&c_SetResultToRefWaitHandle::i_create, (void*)&c_SetResultToRefWaitHandle::ifa_create, 2, 12, 0x0000000000000002L};
 Variant c_SetResultToRefWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1814,12 +1814,12 @@ const int cw_DOMNodeList$$instanceof_index[] = {
   0,-1,-1,-1,1,-1,-1,2,
 
 };
-extern const CallInfo ci_DOMNodeList$$__construct = { (void*)&c_DOMNodeList::i___construct, (void*)&c_DOMNodeList::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeList$$__set = { (void*)&c_DOMNodeList::i___set, (void*)&c_DOMNodeList::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeList$$__get = { (void*)&c_DOMNodeList::i___get, (void*)&c_DOMNodeList::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeList$$getiterator = { (void*)&c_DOMNodeList::i_getiterator, (void*)&c_DOMNodeList::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeList$$item = { (void*)&c_DOMNodeList::i_item, (void*)&c_DOMNodeList::ifa_item, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeList$$__isset = { (void*)&c_DOMNodeList::i___isset, (void*)&c_DOMNodeList::ifa___isset, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMNodeList$$__construct = { (void*)&c_DOMNodeList::i___construct, (void*)&c_DOMNodeList::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeList$$__set = { (void*)&c_DOMNodeList::i___set, (void*)&c_DOMNodeList::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeList$$__get = { (void*)&c_DOMNodeList::i___get, (void*)&c_DOMNodeList::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeList$$getiterator = { (void*)&c_DOMNodeList::i_getiterator, (void*)&c_DOMNodeList::ifa_getiterator, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeList$$item = { (void*)&c_DOMNodeList::i_item, (void*)&c_DOMNodeList::ifa_item, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNodeList$$__isset = { (void*)&c_DOMNodeList::i___isset, (void*)&c_DOMNodeList::ifa___isset, 1, 4, 0x0000000000000000L};
 Variant c_DOMNodeList::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1935,10 +1935,10 @@ const int cw_DOMEntity$$instanceof_index[] = {
   3,
   -1,0,-1,-1,
 };
-extern const CallInfo ci_DOMEntity$$__isset = { (void*)&c_DOMEntity::i___isset, (void*)&c_DOMEntity::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMEntity$$__get = { (void*)&c_DOMEntity::i___get, (void*)&c_DOMEntity::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMEntity$$__construct = { (void*)&c_DOMEntity::i___construct, (void*)&c_DOMEntity::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMEntity$$__set = { (void*)&c_DOMEntity::i___set, (void*)&c_DOMEntity::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMEntity$$__isset = { (void*)&c_DOMEntity::i___isset, (void*)&c_DOMEntity::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMEntity$$__get = { (void*)&c_DOMEntity::i___get, (void*)&c_DOMEntity::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMEntity$$__construct = { (void*)&c_DOMEntity::i___construct, (void*)&c_DOMEntity::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMEntity$$__set = { (void*)&c_DOMEntity::i___set, (void*)&c_DOMEntity::ifa___set, 2, 4, 0x0000000000000000L};
 Variant c_DOMEntity::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -2027,11 +2027,11 @@ const int cw_EncodingDetector$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_EncodingDetector$$setdeclaredencoding = { (void*)&c_EncodingDetector::i_setdeclaredencoding, (void*)&c_EncodingDetector::ifa_setdeclaredencoding, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingDetector$$detectall = { (void*)&c_EncodingDetector::i_detectall, (void*)&c_EncodingDetector::ifa_detectall, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingDetector$$__construct = { (void*)&c_EncodingDetector::i___construct, (void*)&c_EncodingDetector::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingDetector$$detect = { (void*)&c_EncodingDetector::i_detect, (void*)&c_EncodingDetector::ifa_detect, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingDetector$$settext = { (void*)&c_EncodingDetector::i_settext, (void*)&c_EncodingDetector::ifa_settext, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_EncodingDetector$$setdeclaredencoding = { (void*)&c_EncodingDetector::i_setdeclaredencoding, (void*)&c_EncodingDetector::ifa_setdeclaredencoding, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingDetector$$detectall = { (void*)&c_EncodingDetector::i_detectall, (void*)&c_EncodingDetector::ifa_detectall, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingDetector$$__construct = { (void*)&c_EncodingDetector::i___construct, (void*)&c_EncodingDetector::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingDetector$$detect = { (void*)&c_EncodingDetector::i_detect, (void*)&c_EncodingDetector::ifa_detect, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingDetector$$settext = { (void*)&c_EncodingDetector::i_settext, (void*)&c_EncodingDetector::ifa_settext, 1, 4, 0x0000000000000000L};
 Variant c_EncodingDetector::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -2137,33 +2137,33 @@ const int cw_Vector$$instanceof_index[] = {
   1,-1,-1,2,3,-1,4,-1,
 
 };
-extern const CallInfo ci_Vector$$append = { (void*)&c_Vector::i_append, (void*)&c_Vector::ifa_append, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$slice = { (void*)&c_Vector::i_slice, (void*)&c_Vector::ifa_slice, 3, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$resize = { (void*)&c_Vector::i_resize, (void*)&c_Vector::ifa_resize, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$contains = { (void*)&c_Vector::i_contains, (void*)&c_Vector::ifa_contains, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$__tostring = { (void*)&c_Vector::i___tostring, (void*)&c_Vector::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$__get = { (void*)&c_Vector::i___get, (void*)&c_Vector::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$__isset = { (void*)&c_Vector::i___isset, (void*)&c_Vector::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$get = { (void*)&c_Vector::i_get, (void*)&c_Vector::ifa_get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$at = { (void*)&c_Vector::i_at, (void*)&c_Vector::ifa_at, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$toarray = { (void*)&c_Vector::i_toarray, (void*)&c_Vector::ifa_toarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$clear = { (void*)&c_Vector::i_clear, (void*)&c_Vector::ifa_clear, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$pop = { (void*)&c_Vector::i_pop, (void*)&c_Vector::ifa_pop, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$reverse = { (void*)&c_Vector::i_reverse, (void*)&c_Vector::ifa_reverse, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$fromarray = { (void*)&c_Vector::i_fromarray, (void*)&c_Vector::ifa_fromarray, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$sort = { (void*)&c_Vector::i_sort, (void*)&c_Vector::ifa_sort, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$getiterator = { (void*)&c_Vector::i_getiterator, (void*)&c_Vector::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$splice = { (void*)&c_Vector::i_splice, (void*)&c_Vector::ifa_splice, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$__set = { (void*)&c_Vector::i___set, (void*)&c_Vector::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$__unset = { (void*)&c_Vector::i___unset, (void*)&c_Vector::ifa___unset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$isempty = { (void*)&c_Vector::i_isempty, (void*)&c_Vector::ifa_isempty, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$count = { (void*)&c_Vector::i_count, (void*)&c_Vector::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$__construct = { (void*)&c_Vector::i___construct, (void*)&c_Vector::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$put = { (void*)&c_Vector::i_put, (void*)&c_Vector::ifa_put, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$linearsearch = { (void*)&c_Vector::i_linearsearch, (void*)&c_Vector::ifa_linearsearch, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$fromvector = { (void*)&c_Vector::i_fromvector, (void*)&c_Vector::ifa_fromvector, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$add = { (void*)&c_Vector::i_add, (void*)&c_Vector::ifa_add, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$shuffle = { (void*)&c_Vector::i_shuffle, (void*)&c_Vector::ifa_shuffle, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$append = { (void*)&c_Vector::i_append, (void*)&c_Vector::ifa_append, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$slice = { (void*)&c_Vector::i_slice, (void*)&c_Vector::ifa_slice, 3, 12, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$resize = { (void*)&c_Vector::i_resize, (void*)&c_Vector::ifa_resize, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$contains = { (void*)&c_Vector::i_contains, (void*)&c_Vector::ifa_contains, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$__tostring = { (void*)&c_Vector::i___tostring, (void*)&c_Vector::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$__get = { (void*)&c_Vector::i___get, (void*)&c_Vector::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$__isset = { (void*)&c_Vector::i___isset, (void*)&c_Vector::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$get = { (void*)&c_Vector::i_get, (void*)&c_Vector::ifa_get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$at = { (void*)&c_Vector::i_at, (void*)&c_Vector::ifa_at, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$toarray = { (void*)&c_Vector::i_toarray, (void*)&c_Vector::ifa_toarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$clear = { (void*)&c_Vector::i_clear, (void*)&c_Vector::ifa_clear, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$pop = { (void*)&c_Vector::i_pop, (void*)&c_Vector::ifa_pop, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$reverse = { (void*)&c_Vector::i_reverse, (void*)&c_Vector::ifa_reverse, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$fromarray = { (void*)&c_Vector::i_fromarray, (void*)&c_Vector::ifa_fromarray, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$sort = { (void*)&c_Vector::i_sort, (void*)&c_Vector::ifa_sort, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$getiterator = { (void*)&c_Vector::i_getiterator, (void*)&c_Vector::ifa_getiterator, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$splice = { (void*)&c_Vector::i_splice, (void*)&c_Vector::ifa_splice, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$__set = { (void*)&c_Vector::i___set, (void*)&c_Vector::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$__unset = { (void*)&c_Vector::i___unset, (void*)&c_Vector::ifa___unset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$isempty = { (void*)&c_Vector::i_isempty, (void*)&c_Vector::ifa_isempty, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$count = { (void*)&c_Vector::i_count, (void*)&c_Vector::ifa_count, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$__construct = { (void*)&c_Vector::i___construct, (void*)&c_Vector::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$put = { (void*)&c_Vector::i_put, (void*)&c_Vector::ifa_put, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$linearsearch = { (void*)&c_Vector::i_linearsearch, (void*)&c_Vector::ifa_linearsearch, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$fromvector = { (void*)&c_Vector::i_fromvector, (void*)&c_Vector::ifa_fromvector, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$add = { (void*)&c_Vector::i_add, (void*)&c_Vector::ifa_add, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Vector$$shuffle = { (void*)&c_Vector::i_shuffle, (void*)&c_Vector::ifa_shuffle, 0, 4, 0x0000000000000000L};
 Variant c_Vector::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -2548,8 +2548,8 @@ const int cw_DOMDocumentFragment$$instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-extern const CallInfo ci_DOMDocumentFragment$$appendxml = { (void*)&c_DOMDocumentFragment::i_appendxml, (void*)&c_DOMDocumentFragment::ifa_appendxml, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocumentFragment$$__construct = { (void*)&c_DOMDocumentFragment::i___construct, (void*)&c_DOMDocumentFragment::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMDocumentFragment$$appendxml = { (void*)&c_DOMDocumentFragment::i_appendxml, (void*)&c_DOMDocumentFragment::ifa_appendxml, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocumentFragment$$__construct = { (void*)&c_DOMDocumentFragment::i___construct, (void*)&c_DOMDocumentFragment::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_DOMDocumentFragment::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -2616,32 +2616,32 @@ const int cw_Map$$instanceof_index[] = {
   2,-1,-1,3,4,-1,-1,-1,
 
 };
-extern const CallInfo ci_Map$$copyasarray = { (void*)&c_Map::i_copyasarray, (void*)&c_Map::ifa_copyasarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$tokeysarray = { (void*)&c_Map::i_tokeysarray, (void*)&c_Map::ifa_tokeysarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$fromiterable = { (void*)&c_Map::i_fromiterable, (void*)&c_Map::ifa_fromiterable, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$contains = { (void*)&c_Map::i_contains, (void*)&c_Map::ifa_contains, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$discard = { (void*)&c_Map::i_discard, (void*)&c_Map::ifa_discard, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$__tostring = { (void*)&c_Map::i___tostring, (void*)&c_Map::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$__get = { (void*)&c_Map::i___get, (void*)&c_Map::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$__isset = { (void*)&c_Map::i___isset, (void*)&c_Map::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$get = { (void*)&c_Map::i_get, (void*)&c_Map::ifa_get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$at = { (void*)&c_Map::i_at, (void*)&c_Map::ifa_at, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$toarray = { (void*)&c_Map::i_toarray, (void*)&c_Map::ifa_toarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$clear = { (void*)&c_Map::i_clear, (void*)&c_Map::ifa_clear, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$fromarray = { (void*)&c_Map::i_fromarray, (void*)&c_Map::ifa_fromarray, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$getiterator = { (void*)&c_Map::i_getiterator, (void*)&c_Map::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$values = { (void*)&c_Map::i_values, (void*)&c_Map::ifa_values, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$differencebykey = { (void*)&c_Map::i_differencebykey, (void*)&c_Map::ifa_differencebykey, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$__set = { (void*)&c_Map::i___set, (void*)&c_Map::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$__unset = { (void*)&c_Map::i___unset, (void*)&c_Map::ifa___unset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$isempty = { (void*)&c_Map::i_isempty, (void*)&c_Map::ifa_isempty, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$count = { (void*)&c_Map::i_count, (void*)&c_Map::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$__construct = { (void*)&c_Map::i___construct, (void*)&c_Map::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$updatefromarray = { (void*)&c_Map::i_updatefromarray, (void*)&c_Map::ifa_updatefromarray, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$put = { (void*)&c_Map::i_put, (void*)&c_Map::ifa_put, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$tovaluesarray = { (void*)&c_Map::i_tovaluesarray, (void*)&c_Map::ifa_tovaluesarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$updatefromiterable = { (void*)&c_Map::i_updatefromiterable, (void*)&c_Map::ifa_updatefromiterable, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$remove = { (void*)&c_Map::i_remove, (void*)&c_Map::ifa_remove, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$copyasarray = { (void*)&c_Map::i_copyasarray, (void*)&c_Map::ifa_copyasarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$tokeysarray = { (void*)&c_Map::i_tokeysarray, (void*)&c_Map::ifa_tokeysarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$fromiterable = { (void*)&c_Map::i_fromiterable, (void*)&c_Map::ifa_fromiterable, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_Map$$contains = { (void*)&c_Map::i_contains, (void*)&c_Map::ifa_contains, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$discard = { (void*)&c_Map::i_discard, (void*)&c_Map::ifa_discard, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$__tostring = { (void*)&c_Map::i___tostring, (void*)&c_Map::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$__get = { (void*)&c_Map::i___get, (void*)&c_Map::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$__isset = { (void*)&c_Map::i___isset, (void*)&c_Map::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$get = { (void*)&c_Map::i_get, (void*)&c_Map::ifa_get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$at = { (void*)&c_Map::i_at, (void*)&c_Map::ifa_at, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$toarray = { (void*)&c_Map::i_toarray, (void*)&c_Map::ifa_toarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$clear = { (void*)&c_Map::i_clear, (void*)&c_Map::ifa_clear, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$fromarray = { (void*)&c_Map::i_fromarray, (void*)&c_Map::ifa_fromarray, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_Map$$getiterator = { (void*)&c_Map::i_getiterator, (void*)&c_Map::ifa_getiterator, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$values = { (void*)&c_Map::i_values, (void*)&c_Map::ifa_values, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$differencebykey = { (void*)&c_Map::i_differencebykey, (void*)&c_Map::ifa_differencebykey, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$__set = { (void*)&c_Map::i___set, (void*)&c_Map::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$__unset = { (void*)&c_Map::i___unset, (void*)&c_Map::ifa___unset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$isempty = { (void*)&c_Map::i_isempty, (void*)&c_Map::ifa_isempty, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$count = { (void*)&c_Map::i_count, (void*)&c_Map::ifa_count, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$__construct = { (void*)&c_Map::i___construct, (void*)&c_Map::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$updatefromarray = { (void*)&c_Map::i_updatefromarray, (void*)&c_Map::ifa_updatefromarray, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$put = { (void*)&c_Map::i_put, (void*)&c_Map::ifa_put, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$tovaluesarray = { (void*)&c_Map::i_tovaluesarray, (void*)&c_Map::ifa_tovaluesarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$updatefromiterable = { (void*)&c_Map::i_updatefromiterable, (void*)&c_Map::ifa_updatefromiterable, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Map$$remove = { (void*)&c_Map::i_remove, (void*)&c_Map::ifa_remove, 1, 4, 0x0000000000000000L};
 Variant c_Map::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3006,26 +3006,26 @@ const int cw_UConverter$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_UConverter$$getstandards = { (void*)&c_UConverter::i_getstandards, (void*)&c_UConverter::ifa_getstandards, 0, 12, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$__construct = { (void*)&c_UConverter::i___construct, (void*)&c_UConverter::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$getaliases = { (void*)&c_UConverter::i_getaliases, (void*)&c_UConverter::ifa_getaliases, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$setdestinationencoding = { (void*)&c_UConverter::i_setdestinationencoding, (void*)&c_UConverter::ifa_setdestinationencoding, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$getsourcetype = { (void*)&c_UConverter::i_getsourcetype, (void*)&c_UConverter::ifa_getsourcetype, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$getavailable = { (void*)&c_UConverter::i_getavailable, (void*)&c_UConverter::ifa_getavailable, 0, 12, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$geterrormessage = { (void*)&c_UConverter::i_geterrormessage, (void*)&c_UConverter::ifa_geterrormessage, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$setsubstchars = { (void*)&c_UConverter::i_setsubstchars, (void*)&c_UConverter::ifa_setsubstchars, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$getdestinationtype = { (void*)&c_UConverter::i_getdestinationtype, (void*)&c_UConverter::ifa_getdestinationtype, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$getsourceencoding = { (void*)&c_UConverter::i_getsourceencoding, (void*)&c_UConverter::ifa_getsourceencoding, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$convert = { (void*)&c_UConverter::i_convert, (void*)&c_UConverter::ifa_convert, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$geterrorcode = { (void*)&c_UConverter::i_geterrorcode, (void*)&c_UConverter::ifa_geterrorcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$setsourceencoding = { (void*)&c_UConverter::i_setsourceencoding, (void*)&c_UConverter::ifa_setsourceencoding, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$toucallback = { (void*)&c_UConverter::i_toucallback, (void*)&c_UConverter::ifa_toucallback, 4, 4, 0x0000000000000008LL};
-extern const CallInfo ci_UConverter$$fromucallback = { (void*)&c_UConverter::i_fromucallback, (void*)&c_UConverter::ifa_fromucallback, 4, 4, 0x0000000000000008LL};
-extern const CallInfo ci_UConverter$$getsubstchars = { (void*)&c_UConverter::i_getsubstchars, (void*)&c_UConverter::ifa_getsubstchars, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$reasontext = { (void*)&c_UConverter::i_reasontext, (void*)&c_UConverter::ifa_reasontext, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$transcode = { (void*)&c_UConverter::i_transcode, (void*)&c_UConverter::ifa_transcode, 4, 12, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$__destruct = { (void*)&c_UConverter::i___destruct, (void*)&c_UConverter::ifa___destruct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_UConverter$$getdestinationencoding = { (void*)&c_UConverter::i_getdestinationencoding, (void*)&c_UConverter::ifa_getdestinationencoding, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_UConverter$$getstandards = { (void*)&c_UConverter::i_getstandards, (void*)&c_UConverter::ifa_getstandards, 0, 12, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$__construct = { (void*)&c_UConverter::i___construct, (void*)&c_UConverter::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$getaliases = { (void*)&c_UConverter::i_getaliases, (void*)&c_UConverter::ifa_getaliases, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$setdestinationencoding = { (void*)&c_UConverter::i_setdestinationencoding, (void*)&c_UConverter::ifa_setdestinationencoding, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$getsourcetype = { (void*)&c_UConverter::i_getsourcetype, (void*)&c_UConverter::ifa_getsourcetype, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$getavailable = { (void*)&c_UConverter::i_getavailable, (void*)&c_UConverter::ifa_getavailable, 0, 12, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$geterrormessage = { (void*)&c_UConverter::i_geterrormessage, (void*)&c_UConverter::ifa_geterrormessage, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$setsubstchars = { (void*)&c_UConverter::i_setsubstchars, (void*)&c_UConverter::ifa_setsubstchars, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$getdestinationtype = { (void*)&c_UConverter::i_getdestinationtype, (void*)&c_UConverter::ifa_getdestinationtype, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$getsourceencoding = { (void*)&c_UConverter::i_getsourceencoding, (void*)&c_UConverter::ifa_getsourceencoding, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$convert = { (void*)&c_UConverter::i_convert, (void*)&c_UConverter::ifa_convert, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$geterrorcode = { (void*)&c_UConverter::i_geterrorcode, (void*)&c_UConverter::ifa_geterrorcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$setsourceencoding = { (void*)&c_UConverter::i_setsourceencoding, (void*)&c_UConverter::ifa_setsourceencoding, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$toucallback = { (void*)&c_UConverter::i_toucallback, (void*)&c_UConverter::ifa_toucallback, 4, 4, 0x0000000000000008L};
+extern const CallInfo ci_UConverter$$fromucallback = { (void*)&c_UConverter::i_fromucallback, (void*)&c_UConverter::ifa_fromucallback, 4, 4, 0x0000000000000008L};
+extern const CallInfo ci_UConverter$$getsubstchars = { (void*)&c_UConverter::i_getsubstchars, (void*)&c_UConverter::ifa_getsubstchars, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$reasontext = { (void*)&c_UConverter::i_reasontext, (void*)&c_UConverter::ifa_reasontext, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$transcode = { (void*)&c_UConverter::i_transcode, (void*)&c_UConverter::ifa_transcode, 4, 12, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$__destruct = { (void*)&c_UConverter::i___destruct, (void*)&c_UConverter::ifa___destruct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_UConverter$$getdestinationencoding = { (void*)&c_UConverter::i_getdestinationencoding, (void*)&c_UConverter::ifa_getdestinationencoding, 0, 4, 0x0000000000000000L};
 Variant c_UConverter::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3319,7 +3319,7 @@ const int cw_DOMCDATASection$$instanceof_index[] = {
   -1,0,-1,-1,-1,-1,1,2,
 
 };
-extern const CallInfo ci_DOMCDATASection$$__construct = { (void*)&c_DOMCDATASection::i___construct, (void*)&c_DOMCDATASection::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMCDATASection$$__construct = { (void*)&c_DOMCDATASection::i___construct, (void*)&c_DOMCDATASection::ifa___construct, 1, 4, 0x0000000000000000L};
 Variant c_DOMCDATASection::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3368,7 +3368,7 @@ const int cw_DummyClosure$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DummyClosure$$__construct = { (void*)&c_DummyClosure::i___construct, (void*)&c_DummyClosure::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DummyClosure$$__construct = { (void*)&c_DummyClosure::i___construct, (void*)&c_DummyClosure::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_DummyClosure::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3416,14 +3416,14 @@ const int cw_SQLite3Stmt$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SQLite3Stmt$$paramcount = { (void*)&c_SQLite3Stmt::i_paramcount, (void*)&c_SQLite3Stmt::ifa_paramcount, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Stmt$$__construct = { (void*)&c_SQLite3Stmt::i___construct, (void*)&c_SQLite3Stmt::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Stmt$$execute = { (void*)&c_SQLite3Stmt::i_execute, (void*)&c_SQLite3Stmt::ifa_execute, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Stmt$$close = { (void*)&c_SQLite3Stmt::i_close, (void*)&c_SQLite3Stmt::ifa_close, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Stmt$$clear = { (void*)&c_SQLite3Stmt::i_clear, (void*)&c_SQLite3Stmt::ifa_clear, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Stmt$$bindvalue = { (void*)&c_SQLite3Stmt::i_bindvalue, (void*)&c_SQLite3Stmt::ifa_bindvalue, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Stmt$$bindparam = { (void*)&c_SQLite3Stmt::i_bindparam, (void*)&c_SQLite3Stmt::ifa_bindparam, 3, 4, 0x0000000000000002LL};
-extern const CallInfo ci_SQLite3Stmt$$reset = { (void*)&c_SQLite3Stmt::i_reset, (void*)&c_SQLite3Stmt::ifa_reset, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SQLite3Stmt$$paramcount = { (void*)&c_SQLite3Stmt::i_paramcount, (void*)&c_SQLite3Stmt::ifa_paramcount, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Stmt$$__construct = { (void*)&c_SQLite3Stmt::i___construct, (void*)&c_SQLite3Stmt::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Stmt$$execute = { (void*)&c_SQLite3Stmt::i_execute, (void*)&c_SQLite3Stmt::ifa_execute, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Stmt$$close = { (void*)&c_SQLite3Stmt::i_close, (void*)&c_SQLite3Stmt::ifa_close, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Stmt$$clear = { (void*)&c_SQLite3Stmt::i_clear, (void*)&c_SQLite3Stmt::ifa_clear, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Stmt$$bindvalue = { (void*)&c_SQLite3Stmt::i_bindvalue, (void*)&c_SQLite3Stmt::ifa_bindvalue, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Stmt$$bindparam = { (void*)&c_SQLite3Stmt::i_bindparam, (void*)&c_SQLite3Stmt::ifa_bindparam, 3, 4, 0x0000000000000002L};
+extern const CallInfo ci_SQLite3Stmt$$reset = { (void*)&c_SQLite3Stmt::i_reset, (void*)&c_SQLite3Stmt::ifa_reset, 0, 4, 0x0000000000000000L};
 Variant c_SQLite3Stmt::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3570,12 +3570,12 @@ const int cw_DummyContinuation$$instanceof_index[] = {
   0,1,-1,-1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_DummyContinuation$$__construct = { (void*)&c_DummyContinuation::i___construct, (void*)&c_DummyContinuation::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DummyContinuation$$valid = { (void*)&c_DummyContinuation::i_valid, (void*)&c_DummyContinuation::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DummyContinuation$$rewind = { (void*)&c_DummyContinuation::i_rewind, (void*)&c_DummyContinuation::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DummyContinuation$$key = { (void*)&c_DummyContinuation::i_key, (void*)&c_DummyContinuation::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DummyContinuation$$current = { (void*)&c_DummyContinuation::i_current, (void*)&c_DummyContinuation::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DummyContinuation$$next = { (void*)&c_DummyContinuation::i_next, (void*)&c_DummyContinuation::ifa_next, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DummyContinuation$$__construct = { (void*)&c_DummyContinuation::i___construct, (void*)&c_DummyContinuation::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DummyContinuation$$valid = { (void*)&c_DummyContinuation::i_valid, (void*)&c_DummyContinuation::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DummyContinuation$$rewind = { (void*)&c_DummyContinuation::i_rewind, (void*)&c_DummyContinuation::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DummyContinuation$$key = { (void*)&c_DummyContinuation::i_key, (void*)&c_DummyContinuation::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DummyContinuation$$current = { (void*)&c_DummyContinuation::i_current, (void*)&c_DummyContinuation::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DummyContinuation$$next = { (void*)&c_DummyContinuation::i_next, (void*)&c_DummyContinuation::ifa_next, 0, 4, 0x0000000000000000L};
 Variant c_DummyContinuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3685,49 +3685,49 @@ const int cw_XMLWriter$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_XMLWriter$$writedtdentity = { (void*)&c_XMLWriter::i_writedtdentity, (void*)&c_XMLWriter::ifa_writedtdentity, 6, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$text = { (void*)&c_XMLWriter::i_text, (void*)&c_XMLWriter::ifa_text, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startattributens = { (void*)&c_XMLWriter::i_startattributens, (void*)&c_XMLWriter::ifa_startattributens, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writeelementns = { (void*)&c_XMLWriter::i_writeelementns, (void*)&c_XMLWriter::ifa_writeelementns, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$enddtdentity = { (void*)&c_XMLWriter::i_enddtdentity, (void*)&c_XMLWriter::ifa_enddtdentity, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$outputmemory = { (void*)&c_XMLWriter::i_outputmemory, (void*)&c_XMLWriter::ifa_outputmemory, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$setindentstring = { (void*)&c_XMLWriter::i_setindentstring, (void*)&c_XMLWriter::ifa_setindentstring, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writeattribute = { (void*)&c_XMLWriter::i_writeattribute, (void*)&c_XMLWriter::ifa_writeattribute, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$openuri = { (void*)&c_XMLWriter::i_openuri, (void*)&c_XMLWriter::ifa_openuri, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startcdata = { (void*)&c_XMLWriter::i_startcdata, (void*)&c_XMLWriter::ifa_startcdata, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$enddtd = { (void*)&c_XMLWriter::i_enddtd, (void*)&c_XMLWriter::ifa_enddtd, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startelementns = { (void*)&c_XMLWriter::i_startelementns, (void*)&c_XMLWriter::ifa_startelementns, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startdtdattlist = { (void*)&c_XMLWriter::i_startdtdattlist, (void*)&c_XMLWriter::ifa_startdtdattlist, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$enddtdelement = { (void*)&c_XMLWriter::i_enddtdelement, (void*)&c_XMLWriter::ifa_enddtdelement, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writedtdelement = { (void*)&c_XMLWriter::i_writedtdelement, (void*)&c_XMLWriter::ifa_writedtdelement, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$flush = { (void*)&c_XMLWriter::i_flush, (void*)&c_XMLWriter::ifa_flush, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$enddtdattlist = { (void*)&c_XMLWriter::i_enddtdattlist, (void*)&c_XMLWriter::ifa_enddtdattlist, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$endelement = { (void*)&c_XMLWriter::i_endelement, (void*)&c_XMLWriter::ifa_endelement, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writedtd = { (void*)&c_XMLWriter::i_writedtd, (void*)&c_XMLWriter::ifa_writedtd, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$fullendelement = { (void*)&c_XMLWriter::i_fullendelement, (void*)&c_XMLWriter::ifa_fullendelement, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writeattributens = { (void*)&c_XMLWriter::i_writeattributens, (void*)&c_XMLWriter::ifa_writeattributens, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$endcomment = { (void*)&c_XMLWriter::i_endcomment, (void*)&c_XMLWriter::ifa_endcomment, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writedtdattlist = { (void*)&c_XMLWriter::i_writedtdattlist, (void*)&c_XMLWriter::ifa_writedtdattlist, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$setindent = { (void*)&c_XMLWriter::i_setindent, (void*)&c_XMLWriter::ifa_setindent, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startdtdelement = { (void*)&c_XMLWriter::i_startdtdelement, (void*)&c_XMLWriter::ifa_startdtdelement, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startpi = { (void*)&c_XMLWriter::i_startpi, (void*)&c_XMLWriter::ifa_startpi, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startattribute = { (void*)&c_XMLWriter::i_startattribute, (void*)&c_XMLWriter::ifa_startattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writecdata = { (void*)&c_XMLWriter::i_writecdata, (void*)&c_XMLWriter::ifa_writecdata, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$__construct = { (void*)&c_XMLWriter::i___construct, (void*)&c_XMLWriter::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startelement = { (void*)&c_XMLWriter::i_startelement, (void*)&c_XMLWriter::ifa_startelement, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writepi = { (void*)&c_XMLWriter::i_writepi, (void*)&c_XMLWriter::ifa_writepi, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startcomment = { (void*)&c_XMLWriter::i_startcomment, (void*)&c_XMLWriter::ifa_startcomment, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writeelement = { (void*)&c_XMLWriter::i_writeelement, (void*)&c_XMLWriter::ifa_writeelement, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startdocument = { (void*)&c_XMLWriter::i_startdocument, (void*)&c_XMLWriter::ifa_startdocument, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$endpi = { (void*)&c_XMLWriter::i_endpi, (void*)&c_XMLWriter::ifa_endpi, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$enddocument = { (void*)&c_XMLWriter::i_enddocument, (void*)&c_XMLWriter::ifa_enddocument, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writecomment = { (void*)&c_XMLWriter::i_writecomment, (void*)&c_XMLWriter::ifa_writecomment, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$endattribute = { (void*)&c_XMLWriter::i_endattribute, (void*)&c_XMLWriter::ifa_endattribute, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startdtdentity = { (void*)&c_XMLWriter::i_startdtdentity, (void*)&c_XMLWriter::ifa_startdtdentity, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$startdtd = { (void*)&c_XMLWriter::i_startdtd, (void*)&c_XMLWriter::ifa_startdtd, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$writeraw = { (void*)&c_XMLWriter::i_writeraw, (void*)&c_XMLWriter::ifa_writeraw, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$openmemory = { (void*)&c_XMLWriter::i_openmemory, (void*)&c_XMLWriter::ifa_openmemory, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$endcdata = { (void*)&c_XMLWriter::i_endcdata, (void*)&c_XMLWriter::ifa_endcdata, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_XMLWriter$$writedtdentity = { (void*)&c_XMLWriter::i_writedtdentity, (void*)&c_XMLWriter::ifa_writedtdentity, 6, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$text = { (void*)&c_XMLWriter::i_text, (void*)&c_XMLWriter::ifa_text, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startattributens = { (void*)&c_XMLWriter::i_startattributens, (void*)&c_XMLWriter::ifa_startattributens, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writeelementns = { (void*)&c_XMLWriter::i_writeelementns, (void*)&c_XMLWriter::ifa_writeelementns, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$enddtdentity = { (void*)&c_XMLWriter::i_enddtdentity, (void*)&c_XMLWriter::ifa_enddtdentity, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$outputmemory = { (void*)&c_XMLWriter::i_outputmemory, (void*)&c_XMLWriter::ifa_outputmemory, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$setindentstring = { (void*)&c_XMLWriter::i_setindentstring, (void*)&c_XMLWriter::ifa_setindentstring, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writeattribute = { (void*)&c_XMLWriter::i_writeattribute, (void*)&c_XMLWriter::ifa_writeattribute, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$openuri = { (void*)&c_XMLWriter::i_openuri, (void*)&c_XMLWriter::ifa_openuri, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startcdata = { (void*)&c_XMLWriter::i_startcdata, (void*)&c_XMLWriter::ifa_startcdata, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$enddtd = { (void*)&c_XMLWriter::i_enddtd, (void*)&c_XMLWriter::ifa_enddtd, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startelementns = { (void*)&c_XMLWriter::i_startelementns, (void*)&c_XMLWriter::ifa_startelementns, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startdtdattlist = { (void*)&c_XMLWriter::i_startdtdattlist, (void*)&c_XMLWriter::ifa_startdtdattlist, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$enddtdelement = { (void*)&c_XMLWriter::i_enddtdelement, (void*)&c_XMLWriter::ifa_enddtdelement, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writedtdelement = { (void*)&c_XMLWriter::i_writedtdelement, (void*)&c_XMLWriter::ifa_writedtdelement, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$flush = { (void*)&c_XMLWriter::i_flush, (void*)&c_XMLWriter::ifa_flush, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$enddtdattlist = { (void*)&c_XMLWriter::i_enddtdattlist, (void*)&c_XMLWriter::ifa_enddtdattlist, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$endelement = { (void*)&c_XMLWriter::i_endelement, (void*)&c_XMLWriter::ifa_endelement, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writedtd = { (void*)&c_XMLWriter::i_writedtd, (void*)&c_XMLWriter::ifa_writedtd, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$fullendelement = { (void*)&c_XMLWriter::i_fullendelement, (void*)&c_XMLWriter::ifa_fullendelement, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writeattributens = { (void*)&c_XMLWriter::i_writeattributens, (void*)&c_XMLWriter::ifa_writeattributens, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$endcomment = { (void*)&c_XMLWriter::i_endcomment, (void*)&c_XMLWriter::ifa_endcomment, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writedtdattlist = { (void*)&c_XMLWriter::i_writedtdattlist, (void*)&c_XMLWriter::ifa_writedtdattlist, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$setindent = { (void*)&c_XMLWriter::i_setindent, (void*)&c_XMLWriter::ifa_setindent, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startdtdelement = { (void*)&c_XMLWriter::i_startdtdelement, (void*)&c_XMLWriter::ifa_startdtdelement, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startpi = { (void*)&c_XMLWriter::i_startpi, (void*)&c_XMLWriter::ifa_startpi, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startattribute = { (void*)&c_XMLWriter::i_startattribute, (void*)&c_XMLWriter::ifa_startattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writecdata = { (void*)&c_XMLWriter::i_writecdata, (void*)&c_XMLWriter::ifa_writecdata, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$__construct = { (void*)&c_XMLWriter::i___construct, (void*)&c_XMLWriter::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startelement = { (void*)&c_XMLWriter::i_startelement, (void*)&c_XMLWriter::ifa_startelement, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writepi = { (void*)&c_XMLWriter::i_writepi, (void*)&c_XMLWriter::ifa_writepi, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startcomment = { (void*)&c_XMLWriter::i_startcomment, (void*)&c_XMLWriter::ifa_startcomment, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writeelement = { (void*)&c_XMLWriter::i_writeelement, (void*)&c_XMLWriter::ifa_writeelement, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startdocument = { (void*)&c_XMLWriter::i_startdocument, (void*)&c_XMLWriter::ifa_startdocument, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$endpi = { (void*)&c_XMLWriter::i_endpi, (void*)&c_XMLWriter::ifa_endpi, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$enddocument = { (void*)&c_XMLWriter::i_enddocument, (void*)&c_XMLWriter::ifa_enddocument, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writecomment = { (void*)&c_XMLWriter::i_writecomment, (void*)&c_XMLWriter::ifa_writecomment, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$endattribute = { (void*)&c_XMLWriter::i_endattribute, (void*)&c_XMLWriter::ifa_endattribute, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startdtdentity = { (void*)&c_XMLWriter::i_startdtdentity, (void*)&c_XMLWriter::ifa_startdtdentity, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$startdtd = { (void*)&c_XMLWriter::i_startdtd, (void*)&c_XMLWriter::ifa_startdtd, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$writeraw = { (void*)&c_XMLWriter::i_writeraw, (void*)&c_XMLWriter::ifa_writeraw, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$openmemory = { (void*)&c_XMLWriter::i_openmemory, (void*)&c_XMLWriter::ifa_openmemory, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLWriter$$endcdata = { (void*)&c_XMLWriter::i_endcdata, (void*)&c_XMLWriter::ifa_endcdata, 0, 4, 0x0000000000000000L};
 Variant c_XMLWriter::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -4367,10 +4367,10 @@ const int cw_DebuggerClient$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DebuggerClient$$getstate = { (void*)&c_DebuggerClient::i_getstate, (void*)&c_DebuggerClient::ifa_getstate, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClient$$__construct = { (void*)&c_DebuggerClient::i___construct, (void*)&c_DebuggerClient::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClient$$processcmd = { (void*)&c_DebuggerClient::i_processcmd, (void*)&c_DebuggerClient::ifa_processcmd, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClient$$init = { (void*)&c_DebuggerClient::i_init, (void*)&c_DebuggerClient::ifa_init, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DebuggerClient$$getstate = { (void*)&c_DebuggerClient::i_getstate, (void*)&c_DebuggerClient::ifa_getstate, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClient$$__construct = { (void*)&c_DebuggerClient::i___construct, (void*)&c_DebuggerClient::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClient$$processcmd = { (void*)&c_DebuggerClient::i_processcmd, (void*)&c_DebuggerClient::ifa_processcmd, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClient$$init = { (void*)&c_DebuggerClient::i_init, (void*)&c_DebuggerClient::ifa_init, 1, 4, 0x0000000000000000L};
 Variant c_DebuggerClient::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -4461,7 +4461,7 @@ const int cw_BlockableWaitHandle$$instanceof_index[] = {
   -1,-1,-1,-1,-1,0,1,2,
 
 };
-extern const CallInfo ci_BlockableWaitHandle$$__construct = { (void*)&c_BlockableWaitHandle::i___construct, (void*)&c_BlockableWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
+extern const CallInfo ci_BlockableWaitHandle$$__construct = { (void*)&c_BlockableWaitHandle::i___construct, (void*)&c_BlockableWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
 Variant c_BlockableWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -4515,32 +4515,32 @@ const int cw_StableMap$$instanceof_index[] = {
   2,-1,-1,3,4,-1,-1,-1,
 
 };
-extern const CallInfo ci_StableMap$$copyasarray = { (void*)&c_StableMap::i_copyasarray, (void*)&c_StableMap::ifa_copyasarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$tokeysarray = { (void*)&c_StableMap::i_tokeysarray, (void*)&c_StableMap::ifa_tokeysarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$fromiterable = { (void*)&c_StableMap::i_fromiterable, (void*)&c_StableMap::ifa_fromiterable, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$__tostring = { (void*)&c_StableMap::i___tostring, (void*)&c_StableMap::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$contains = { (void*)&c_StableMap::i_contains, (void*)&c_StableMap::ifa_contains, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$discard = { (void*)&c_StableMap::i_discard, (void*)&c_StableMap::ifa_discard, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$__get = { (void*)&c_StableMap::i___get, (void*)&c_StableMap::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$__isset = { (void*)&c_StableMap::i___isset, (void*)&c_StableMap::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$get = { (void*)&c_StableMap::i_get, (void*)&c_StableMap::ifa_get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$at = { (void*)&c_StableMap::i_at, (void*)&c_StableMap::ifa_at, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$toarray = { (void*)&c_StableMap::i_toarray, (void*)&c_StableMap::ifa_toarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$clear = { (void*)&c_StableMap::i_clear, (void*)&c_StableMap::ifa_clear, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$fromarray = { (void*)&c_StableMap::i_fromarray, (void*)&c_StableMap::ifa_fromarray, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$getiterator = { (void*)&c_StableMap::i_getiterator, (void*)&c_StableMap::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$values = { (void*)&c_StableMap::i_values, (void*)&c_StableMap::ifa_values, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$differencebykey = { (void*)&c_StableMap::i_differencebykey, (void*)&c_StableMap::ifa_differencebykey, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$__set = { (void*)&c_StableMap::i___set, (void*)&c_StableMap::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$__unset = { (void*)&c_StableMap::i___unset, (void*)&c_StableMap::ifa___unset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$isempty = { (void*)&c_StableMap::i_isempty, (void*)&c_StableMap::ifa_isempty, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$count = { (void*)&c_StableMap::i_count, (void*)&c_StableMap::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$__construct = { (void*)&c_StableMap::i___construct, (void*)&c_StableMap::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$updatefromarray = { (void*)&c_StableMap::i_updatefromarray, (void*)&c_StableMap::ifa_updatefromarray, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$put = { (void*)&c_StableMap::i_put, (void*)&c_StableMap::ifa_put, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$tovaluesarray = { (void*)&c_StableMap::i_tovaluesarray, (void*)&c_StableMap::ifa_tovaluesarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$updatefromiterable = { (void*)&c_StableMap::i_updatefromiterable, (void*)&c_StableMap::ifa_updatefromiterable, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$remove = { (void*)&c_StableMap::i_remove, (void*)&c_StableMap::ifa_remove, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$copyasarray = { (void*)&c_StableMap::i_copyasarray, (void*)&c_StableMap::ifa_copyasarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$tokeysarray = { (void*)&c_StableMap::i_tokeysarray, (void*)&c_StableMap::ifa_tokeysarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$fromiterable = { (void*)&c_StableMap::i_fromiterable, (void*)&c_StableMap::ifa_fromiterable, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$__tostring = { (void*)&c_StableMap::i___tostring, (void*)&c_StableMap::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$contains = { (void*)&c_StableMap::i_contains, (void*)&c_StableMap::ifa_contains, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$discard = { (void*)&c_StableMap::i_discard, (void*)&c_StableMap::ifa_discard, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$__get = { (void*)&c_StableMap::i___get, (void*)&c_StableMap::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$__isset = { (void*)&c_StableMap::i___isset, (void*)&c_StableMap::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$get = { (void*)&c_StableMap::i_get, (void*)&c_StableMap::ifa_get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$at = { (void*)&c_StableMap::i_at, (void*)&c_StableMap::ifa_at, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$toarray = { (void*)&c_StableMap::i_toarray, (void*)&c_StableMap::ifa_toarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$clear = { (void*)&c_StableMap::i_clear, (void*)&c_StableMap::ifa_clear, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$fromarray = { (void*)&c_StableMap::i_fromarray, (void*)&c_StableMap::ifa_fromarray, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$getiterator = { (void*)&c_StableMap::i_getiterator, (void*)&c_StableMap::ifa_getiterator, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$values = { (void*)&c_StableMap::i_values, (void*)&c_StableMap::ifa_values, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$differencebykey = { (void*)&c_StableMap::i_differencebykey, (void*)&c_StableMap::ifa_differencebykey, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$__set = { (void*)&c_StableMap::i___set, (void*)&c_StableMap::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$__unset = { (void*)&c_StableMap::i___unset, (void*)&c_StableMap::ifa___unset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$isempty = { (void*)&c_StableMap::i_isempty, (void*)&c_StableMap::ifa_isempty, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$count = { (void*)&c_StableMap::i_count, (void*)&c_StableMap::ifa_count, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$__construct = { (void*)&c_StableMap::i___construct, (void*)&c_StableMap::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$updatefromarray = { (void*)&c_StableMap::i_updatefromarray, (void*)&c_StableMap::ifa_updatefromarray, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$put = { (void*)&c_StableMap::i_put, (void*)&c_StableMap::ifa_put, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$tovaluesarray = { (void*)&c_StableMap::i_tovaluesarray, (void*)&c_StableMap::ifa_tovaluesarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$updatefromiterable = { (void*)&c_StableMap::i_updatefromiterable, (void*)&c_StableMap::ifa_updatefromiterable, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMap$$remove = { (void*)&c_StableMap::i_remove, (void*)&c_StableMap::ifa_remove, 1, 4, 0x0000000000000000L};
 Variant c_StableMap::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -4906,11 +4906,11 @@ const int cw_DOMAttr$$instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-extern const CallInfo ci_DOMAttr$$__isset = { (void*)&c_DOMAttr::i___isset, (void*)&c_DOMAttr::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMAttr$$__get = { (void*)&c_DOMAttr::i___get, (void*)&c_DOMAttr::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMAttr$$isid = { (void*)&c_DOMAttr::i_isid, (void*)&c_DOMAttr::ifa_isid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMAttr$$__construct = { (void*)&c_DOMAttr::i___construct, (void*)&c_DOMAttr::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMAttr$$__set = { (void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMAttr$$__isset = { (void*)&c_DOMAttr::i___isset, (void*)&c_DOMAttr::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMAttr$$__get = { (void*)&c_DOMAttr::i___get, (void*)&c_DOMAttr::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMAttr$$isid = { (void*)&c_DOMAttr::i_isid, (void*)&c_DOMAttr::ifa_isid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMAttr$$__construct = { (void*)&c_DOMAttr::i___construct, (void*)&c_DOMAttr::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMAttr$$__set = { (void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 4, 0x0000000000000000L};
 Variant c_DOMAttr::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5018,33 +5018,33 @@ const int cw_PDOStatement$$instanceof_index[] = {
   0,-1,-1,-1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_PDOStatement$$valid = { (void*)&c_PDOStatement::i_valid, (void*)&c_PDOStatement::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$current = { (void*)&c_PDOStatement::i_current, (void*)&c_PDOStatement::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$next = { (void*)&c_PDOStatement::i_next, (void*)&c_PDOStatement::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$closecursor = { (void*)&c_PDOStatement::i_closecursor, (void*)&c_PDOStatement::ifa_closecursor, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$fetchobject = { (void*)&c_PDOStatement::i_fetchobject, (void*)&c_PDOStatement::ifa_fetchobject, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$errorcode = { (void*)&c_PDOStatement::i_errorcode, (void*)&c_PDOStatement::ifa_errorcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$__wakeup = { (void*)&c_PDOStatement::i___wakeup, (void*)&c_PDOStatement::ifa___wakeup, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$bindparam = { (void*)&c_PDOStatement::i_bindparam, (void*)&c_PDOStatement::ifa_bindparam, 5, 4, 0x0000000000000002LL};
-extern const CallInfo ci_PDOStatement$$getcolumnmeta = { (void*)&c_PDOStatement::i_getcolumnmeta, (void*)&c_PDOStatement::ifa_getcolumnmeta, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$getattribute = { (void*)&c_PDOStatement::i_getattribute, (void*)&c_PDOStatement::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$rowcount = { (void*)&c_PDOStatement::i_rowcount, (void*)&c_PDOStatement::ifa_rowcount, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$fetchcolumn = { (void*)&c_PDOStatement::i_fetchcolumn, (void*)&c_PDOStatement::ifa_fetchcolumn, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$setattribute = { (void*)&c_PDOStatement::i_setattribute, (void*)&c_PDOStatement::ifa_setattribute, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$bindvalue = { (void*)&c_PDOStatement::i_bindvalue, (void*)&c_PDOStatement::ifa_bindvalue, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$rewind = { (void*)&c_PDOStatement::i_rewind, (void*)&c_PDOStatement::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$setfetchmode = { (void*)&c_PDOStatement::i_setfetchmode, (void*)&c_PDOStatement::ifa_setfetchmode, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$bindcolumn = { (void*)&c_PDOStatement::i_bindcolumn, (void*)&c_PDOStatement::ifa_bindcolumn, 5, 4, 0x0000000000000002LL};
-extern const CallInfo ci_PDOStatement$$__sleep = { (void*)&c_PDOStatement::i___sleep, (void*)&c_PDOStatement::ifa___sleep, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$debugdumpparams = { (void*)&c_PDOStatement::i_debugdumpparams, (void*)&c_PDOStatement::ifa_debugdumpparams, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$columncount = { (void*)&c_PDOStatement::i_columncount, (void*)&c_PDOStatement::ifa_columncount, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$fetch = { (void*)&c_PDOStatement::i_fetch, (void*)&c_PDOStatement::ifa_fetch, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$__construct = { (void*)&c_PDOStatement::i___construct, (void*)&c_PDOStatement::ifa___construct, 0, 68, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$execute = { (void*)&c_PDOStatement::i_execute, (void*)&c_PDOStatement::ifa_execute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$errorinfo = { (void*)&c_PDOStatement::i_errorinfo, (void*)&c_PDOStatement::ifa_errorinfo, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$key = { (void*)&c_PDOStatement::i_key, (void*)&c_PDOStatement::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$fetchall = { (void*)&c_PDOStatement::i_fetchall, (void*)&c_PDOStatement::ifa_fetchall, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$nextrowset = { (void*)&c_PDOStatement::i_nextrowset, (void*)&c_PDOStatement::ifa_nextrowset, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_PDOStatement$$valid = { (void*)&c_PDOStatement::i_valid, (void*)&c_PDOStatement::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$current = { (void*)&c_PDOStatement::i_current, (void*)&c_PDOStatement::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$next = { (void*)&c_PDOStatement::i_next, (void*)&c_PDOStatement::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$closecursor = { (void*)&c_PDOStatement::i_closecursor, (void*)&c_PDOStatement::ifa_closecursor, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$fetchobject = { (void*)&c_PDOStatement::i_fetchobject, (void*)&c_PDOStatement::ifa_fetchobject, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$errorcode = { (void*)&c_PDOStatement::i_errorcode, (void*)&c_PDOStatement::ifa_errorcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$__wakeup = { (void*)&c_PDOStatement::i___wakeup, (void*)&c_PDOStatement::ifa___wakeup, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$bindparam = { (void*)&c_PDOStatement::i_bindparam, (void*)&c_PDOStatement::ifa_bindparam, 5, 4, 0x0000000000000002L};
+extern const CallInfo ci_PDOStatement$$getcolumnmeta = { (void*)&c_PDOStatement::i_getcolumnmeta, (void*)&c_PDOStatement::ifa_getcolumnmeta, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$getattribute = { (void*)&c_PDOStatement::i_getattribute, (void*)&c_PDOStatement::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$rowcount = { (void*)&c_PDOStatement::i_rowcount, (void*)&c_PDOStatement::ifa_rowcount, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$fetchcolumn = { (void*)&c_PDOStatement::i_fetchcolumn, (void*)&c_PDOStatement::ifa_fetchcolumn, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$setattribute = { (void*)&c_PDOStatement::i_setattribute, (void*)&c_PDOStatement::ifa_setattribute, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$bindvalue = { (void*)&c_PDOStatement::i_bindvalue, (void*)&c_PDOStatement::ifa_bindvalue, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$rewind = { (void*)&c_PDOStatement::i_rewind, (void*)&c_PDOStatement::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$setfetchmode = { (void*)&c_PDOStatement::i_setfetchmode, (void*)&c_PDOStatement::ifa_setfetchmode, 1, 5, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$bindcolumn = { (void*)&c_PDOStatement::i_bindcolumn, (void*)&c_PDOStatement::ifa_bindcolumn, 5, 4, 0x0000000000000002L};
+extern const CallInfo ci_PDOStatement$$__sleep = { (void*)&c_PDOStatement::i___sleep, (void*)&c_PDOStatement::ifa___sleep, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$debugdumpparams = { (void*)&c_PDOStatement::i_debugdumpparams, (void*)&c_PDOStatement::ifa_debugdumpparams, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$columncount = { (void*)&c_PDOStatement::i_columncount, (void*)&c_PDOStatement::ifa_columncount, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$fetch = { (void*)&c_PDOStatement::i_fetch, (void*)&c_PDOStatement::ifa_fetch, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$__construct = { (void*)&c_PDOStatement::i___construct, (void*)&c_PDOStatement::ifa___construct, 0, 68, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$execute = { (void*)&c_PDOStatement::i_execute, (void*)&c_PDOStatement::ifa_execute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$errorinfo = { (void*)&c_PDOStatement::i_errorinfo, (void*)&c_PDOStatement::ifa_errorinfo, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$key = { (void*)&c_PDOStatement::i_key, (void*)&c_PDOStatement::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$fetchall = { (void*)&c_PDOStatement::i_fetchall, (void*)&c_PDOStatement::ifa_fetchall, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_PDOStatement$$nextrowset = { (void*)&c_PDOStatement::i_nextrowset, (void*)&c_PDOStatement::ifa_nextrowset, 0, 4, 0x0000000000000000L};
 Variant c_PDOStatement::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5475,7 +5475,7 @@ const int cw_SoapVar$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SoapVar$$__construct = { (void*)&c_SoapVar::i___construct, (void*)&c_SoapVar::ifa___construct, 6, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SoapVar$$__construct = { (void*)&c_SoapVar::i___construct, (void*)&c_SoapVar::ifa___construct, 6, 4, 0x0000000000000000L};
 Variant c_SoapVar::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5534,7 +5534,7 @@ const int cw_DOMEntityReference$$instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-extern const CallInfo ci_DOMEntityReference$$__construct = { (void*)&c_DOMEntityReference::i___construct, (void*)&c_DOMEntityReference::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMEntityReference$$__construct = { (void*)&c_DOMEntityReference::i___construct, (void*)&c_DOMEntityReference::ifa___construct, 1, 4, 0x0000000000000000L};
 Variant c_DOMEntityReference::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5584,7 +5584,7 @@ const int cw_StaticWaitHandle$$instanceof_index[] = {
   3,
   -1,0,-1,-1,
 };
-extern const CallInfo ci_StaticWaitHandle$$__construct = { (void*)&c_StaticWaitHandle::i___construct, (void*)&c_StaticWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
+extern const CallInfo ci_StaticWaitHandle$$__construct = { (void*)&c_StaticWaitHandle::i___construct, (void*)&c_StaticWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
 Variant c_StaticWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5633,10 +5633,10 @@ const int cw_DOMProcessingInstruction$$instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-extern const CallInfo ci_DOMProcessingInstruction$$__isset = { (void*)&c_DOMProcessingInstruction::i___isset, (void*)&c_DOMProcessingInstruction::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMProcessingInstruction$$__get = { (void*)&c_DOMProcessingInstruction::i___get, (void*)&c_DOMProcessingInstruction::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMProcessingInstruction$$__construct = { (void*)&c_DOMProcessingInstruction::i___construct, (void*)&c_DOMProcessingInstruction::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMProcessingInstruction$$__set = { (void*)&c_DOMProcessingInstruction::i___set, (void*)&c_DOMProcessingInstruction::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMProcessingInstruction$$__isset = { (void*)&c_DOMProcessingInstruction::i___isset, (void*)&c_DOMProcessingInstruction::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMProcessingInstruction$$__get = { (void*)&c_DOMProcessingInstruction::i___get, (void*)&c_DOMProcessingInstruction::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMProcessingInstruction$$__construct = { (void*)&c_DOMProcessingInstruction::i___construct, (void*)&c_DOMProcessingInstruction::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMProcessingInstruction$$__set = { (void*)&c_DOMProcessingInstruction::i___set, (void*)&c_DOMProcessingInstruction::ifa___set, 2, 4, 0x0000000000000000L};
 Variant c_DOMProcessingInstruction::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5728,10 +5728,10 @@ const int cw_DOMImplementation$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_DOMImplementation$$createdocumenttype = { (void*)&c_DOMImplementation::i_createdocumenttype, (void*)&c_DOMImplementation::ifa_createdocumenttype, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMImplementation$$hasfeature = { (void*)&c_DOMImplementation::i_hasfeature, (void*)&c_DOMImplementation::ifa_hasfeature, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMImplementation$$createdocument = { (void*)&c_DOMImplementation::i_createdocument, (void*)&c_DOMImplementation::ifa_createdocument, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMImplementation$$__construct = { (void*)&c_DOMImplementation::i___construct, (void*)&c_DOMImplementation::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMImplementation$$createdocumenttype = { (void*)&c_DOMImplementation::i_createdocumenttype, (void*)&c_DOMImplementation::ifa_createdocumenttype, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMImplementation$$hasfeature = { (void*)&c_DOMImplementation::i_hasfeature, (void*)&c_DOMImplementation::ifa_hasfeature, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMImplementation$$createdocument = { (void*)&c_DOMImplementation::i_createdocument, (void*)&c_DOMImplementation::ifa_createdocument, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMImplementation$$__construct = { (void*)&c_DOMImplementation::i___construct, (void*)&c_DOMImplementation::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_DOMImplementation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5834,12 +5834,12 @@ const int cw_ContinuationWaitHandle$$instanceof_index[] = {
   -1,0,-1,-1,-1,1,2,3,
 
 };
-extern const CallInfo ci_ContinuationWaitHandle$$__construct = { (void*)&c_ContinuationWaitHandle::i___construct, (void*)&c_ContinuationWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_ContinuationWaitHandle$$markcurrentassucceeded = { (void*)&c_ContinuationWaitHandle::i_markcurrentassucceeded, (void*)&c_ContinuationWaitHandle::ifa_markcurrentassucceeded, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ContinuationWaitHandle$$getprivdata = { (void*)&c_ContinuationWaitHandle::i_getprivdata, (void*)&c_ContinuationWaitHandle::ifa_getprivdata, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ContinuationWaitHandle$$markcurrentastailcall = { (void*)&c_ContinuationWaitHandle::i_markcurrentastailcall, (void*)&c_ContinuationWaitHandle::ifa_markcurrentastailcall, 0, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ContinuationWaitHandle$$setprivdata = { (void*)&c_ContinuationWaitHandle::i_setprivdata, (void*)&c_ContinuationWaitHandle::ifa_setprivdata, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ContinuationWaitHandle$$start = { (void*)&c_ContinuationWaitHandle::i_start, (void*)&c_ContinuationWaitHandle::ifa_start, 2, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ContinuationWaitHandle$$__construct = { (void*)&c_ContinuationWaitHandle::i___construct, (void*)&c_ContinuationWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_ContinuationWaitHandle$$markcurrentassucceeded = { (void*)&c_ContinuationWaitHandle::i_markcurrentassucceeded, (void*)&c_ContinuationWaitHandle::ifa_markcurrentassucceeded, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_ContinuationWaitHandle$$getprivdata = { (void*)&c_ContinuationWaitHandle::i_getprivdata, (void*)&c_ContinuationWaitHandle::ifa_getprivdata, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ContinuationWaitHandle$$markcurrentastailcall = { (void*)&c_ContinuationWaitHandle::i_markcurrentastailcall, (void*)&c_ContinuationWaitHandle::ifa_markcurrentastailcall, 0, 12, 0x0000000000000000L};
+extern const CallInfo ci_ContinuationWaitHandle$$setprivdata = { (void*)&c_ContinuationWaitHandle::i_setprivdata, (void*)&c_ContinuationWaitHandle::ifa_setprivdata, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ContinuationWaitHandle$$start = { (void*)&c_ContinuationWaitHandle::i_start, (void*)&c_ContinuationWaitHandle::ifa_start, 2, 12, 0x0000000000000000L};
 Variant c_ContinuationWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5942,15 +5942,15 @@ const int cw_SoapServer$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_SoapServer$$addfunction = { (void*)&c_SoapServer::i_addfunction, (void*)&c_SoapServer::ifa_addfunction, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$fault = { (void*)&c_SoapServer::i_fault, (void*)&c_SoapServer::ifa_fault, 5, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$__construct = { (void*)&c_SoapServer::i___construct, (void*)&c_SoapServer::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$setobject = { (void*)&c_SoapServer::i_setobject, (void*)&c_SoapServer::ifa_setobject, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$handle = { (void*)&c_SoapServer::i_handle, (void*)&c_SoapServer::ifa_handle, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$setpersistence = { (void*)&c_SoapServer::i_setpersistence, (void*)&c_SoapServer::ifa_setpersistence, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$getfunctions = { (void*)&c_SoapServer::i_getfunctions, (void*)&c_SoapServer::ifa_getfunctions, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$addsoapheader = { (void*)&c_SoapServer::i_addsoapheader, (void*)&c_SoapServer::ifa_addsoapheader, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$setclass = { (void*)&c_SoapServer::i_setclass, (void*)&c_SoapServer::ifa_setclass, 1, 5, 0x0000000000000000LL};
+extern const CallInfo ci_SoapServer$$addfunction = { (void*)&c_SoapServer::i_addfunction, (void*)&c_SoapServer::ifa_addfunction, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$fault = { (void*)&c_SoapServer::i_fault, (void*)&c_SoapServer::ifa_fault, 5, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$__construct = { (void*)&c_SoapServer::i___construct, (void*)&c_SoapServer::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$setobject = { (void*)&c_SoapServer::i_setobject, (void*)&c_SoapServer::ifa_setobject, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$handle = { (void*)&c_SoapServer::i_handle, (void*)&c_SoapServer::ifa_handle, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$setpersistence = { (void*)&c_SoapServer::i_setpersistence, (void*)&c_SoapServer::ifa_setpersistence, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$getfunctions = { (void*)&c_SoapServer::i_getfunctions, (void*)&c_SoapServer::ifa_getfunctions, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$addsoapheader = { (void*)&c_SoapServer::i_addsoapheader, (void*)&c_SoapServer::ifa_addsoapheader, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapServer$$setclass = { (void*)&c_SoapServer::i_setclass, (void*)&c_SoapServer::ifa_setclass, 1, 5, 0x0000000000000000L};
 Variant c_SoapServer::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -6134,9 +6134,9 @@ const int cw_Closure$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_Closure$$__clone = { (void*)&c_Closure::i___clone, (void*)&c_Closure::ifa___clone, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Closure$$__invoke = { (void*)&c_Closure::i___invoke, (void*)&c_Closure::ifa___invoke, 0, 5, 0x0000000000000000LL};
-extern const CallInfo ci_Closure$$__construct = { (void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Closure$$__clone = { (void*)&c_Closure::i___clone, (void*)&c_Closure::ifa___clone, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Closure$$__invoke = { (void*)&c_Closure::i___invoke, (void*)&c_Closure::ifa___invoke, 0, 5, 0x0000000000000000L};
+extern const CallInfo ci_Closure$$__construct = { (void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_Closure::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -6222,10 +6222,10 @@ const int cw_DOMDocumentType$$instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-extern const CallInfo ci_DOMDocumentType$$__isset = { (void*)&c_DOMDocumentType::i___isset, (void*)&c_DOMDocumentType::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocumentType$$__get = { (void*)&c_DOMDocumentType::i___get, (void*)&c_DOMDocumentType::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocumentType$$__construct = { (void*)&c_DOMDocumentType::i___construct, (void*)&c_DOMDocumentType::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocumentType$$__set = { (void*)&c_DOMDocumentType::i___set, (void*)&c_DOMDocumentType::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMDocumentType$$__isset = { (void*)&c_DOMDocumentType::i___isset, (void*)&c_DOMDocumentType::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocumentType$$__get = { (void*)&c_DOMDocumentType::i___get, (void*)&c_DOMDocumentType::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocumentType$$__construct = { (void*)&c_DOMDocumentType::i___construct, (void*)&c_DOMDocumentType::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocumentType$$__set = { (void*)&c_DOMDocumentType::i___set, (void*)&c_DOMDocumentType::ifa___set, 2, 4, 0x0000000000000000L};
 Variant c_DOMDocumentType::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -6315,40 +6315,40 @@ const int cw_DOMDocument$$instanceof_index[] = {
   3,
   -1,0,-1,-1,
 };
-extern const CallInfo ci_DOMDocument$$schemavalidate = { (void*)&c_DOMDocument::i_schemavalidate, (void*)&c_DOMDocument::ifa_schemavalidate, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createcomment = { (void*)&c_DOMDocument::i_createcomment, (void*)&c_DOMDocument::ifa_createcomment, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createcdatasection = { (void*)&c_DOMDocument::i_createcdatasection, (void*)&c_DOMDocument::ifa_createcdatasection, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$savehtml = { (void*)&c_DOMDocument::i_savehtml, (void*)&c_DOMDocument::ifa_savehtml, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createattribute = { (void*)&c_DOMDocument::i_createattribute, (void*)&c_DOMDocument::ifa_createattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$xinclude = { (void*)&c_DOMDocument::i_xinclude, (void*)&c_DOMDocument::ifa_xinclude, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$getelementsbytagname = { (void*)&c_DOMDocument::i_getelementsbytagname, (void*)&c_DOMDocument::ifa_getelementsbytagname, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$save = { (void*)&c_DOMDocument::i_save, (void*)&c_DOMDocument::ifa_save, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createdocumentfragment = { (void*)&c_DOMDocument::i_createdocumentfragment, (void*)&c_DOMDocument::ifa_createdocumentfragment, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$__get = { (void*)&c_DOMDocument::i___get, (void*)&c_DOMDocument::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$registernodeclass = { (void*)&c_DOMDocument::i_registernodeclass, (void*)&c_DOMDocument::ifa_registernodeclass, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$__isset = { (void*)&c_DOMDocument::i___isset, (void*)&c_DOMDocument::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createattributens = { (void*)&c_DOMDocument::i_createattributens, (void*)&c_DOMDocument::ifa_createattributens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$validate = { (void*)&c_DOMDocument::i_validate, (void*)&c_DOMDocument::ifa_validate, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createelementns = { (void*)&c_DOMDocument::i_createelementns, (void*)&c_DOMDocument::ifa_createelementns, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$load = { (void*)&c_DOMDocument::i_load, (void*)&c_DOMDocument::ifa_load, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$loadhtmlfile = { (void*)&c_DOMDocument::i_loadhtmlfile, (void*)&c_DOMDocument::ifa_loadhtmlfile, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createelement = { (void*)&c_DOMDocument::i_createelement, (void*)&c_DOMDocument::ifa_createelement, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createprocessinginstruction = { (void*)&c_DOMDocument::i_createprocessinginstruction, (void*)&c_DOMDocument::ifa_createprocessinginstruction, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$getelementbyid = { (void*)&c_DOMDocument::i_getelementbyid, (void*)&c_DOMDocument::ifa_getelementbyid, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$__set = { (void*)&c_DOMDocument::i___set, (void*)&c_DOMDocument::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$normalizedocument = { (void*)&c_DOMDocument::i_normalizedocument, (void*)&c_DOMDocument::ifa_normalizedocument, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$loadxml = { (void*)&c_DOMDocument::i_loadxml, (void*)&c_DOMDocument::ifa_loadxml, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createtextnode = { (void*)&c_DOMDocument::i_createtextnode, (void*)&c_DOMDocument::ifa_createtextnode, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$loadhtml = { (void*)&c_DOMDocument::i_loadhtml, (void*)&c_DOMDocument::ifa_loadhtml, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$getelementsbytagnamens = { (void*)&c_DOMDocument::i_getelementsbytagnamens, (void*)&c_DOMDocument::ifa_getelementsbytagnamens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$__construct = { (void*)&c_DOMDocument::i___construct, (void*)&c_DOMDocument::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$createentityreference = { (void*)&c_DOMDocument::i_createentityreference, (void*)&c_DOMDocument::ifa_createentityreference, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$relaxngvalidatesource = { (void*)&c_DOMDocument::i_relaxngvalidatesource, (void*)&c_DOMDocument::ifa_relaxngvalidatesource, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$savexml = { (void*)&c_DOMDocument::i_savexml, (void*)&c_DOMDocument::ifa_savexml, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$savehtmlfile = { (void*)&c_DOMDocument::i_savehtmlfile, (void*)&c_DOMDocument::ifa_savehtmlfile, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$relaxngvalidate = { (void*)&c_DOMDocument::i_relaxngvalidate, (void*)&c_DOMDocument::ifa_relaxngvalidate, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$schemavalidatesource = { (void*)&c_DOMDocument::i_schemavalidatesource, (void*)&c_DOMDocument::ifa_schemavalidatesource, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$importnode = { (void*)&c_DOMDocument::i_importnode, (void*)&c_DOMDocument::ifa_importnode, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMDocument$$schemavalidate = { (void*)&c_DOMDocument::i_schemavalidate, (void*)&c_DOMDocument::ifa_schemavalidate, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createcomment = { (void*)&c_DOMDocument::i_createcomment, (void*)&c_DOMDocument::ifa_createcomment, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createcdatasection = { (void*)&c_DOMDocument::i_createcdatasection, (void*)&c_DOMDocument::ifa_createcdatasection, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$savehtml = { (void*)&c_DOMDocument::i_savehtml, (void*)&c_DOMDocument::ifa_savehtml, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createattribute = { (void*)&c_DOMDocument::i_createattribute, (void*)&c_DOMDocument::ifa_createattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$xinclude = { (void*)&c_DOMDocument::i_xinclude, (void*)&c_DOMDocument::ifa_xinclude, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$getelementsbytagname = { (void*)&c_DOMDocument::i_getelementsbytagname, (void*)&c_DOMDocument::ifa_getelementsbytagname, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$save = { (void*)&c_DOMDocument::i_save, (void*)&c_DOMDocument::ifa_save, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createdocumentfragment = { (void*)&c_DOMDocument::i_createdocumentfragment, (void*)&c_DOMDocument::ifa_createdocumentfragment, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$__get = { (void*)&c_DOMDocument::i___get, (void*)&c_DOMDocument::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$registernodeclass = { (void*)&c_DOMDocument::i_registernodeclass, (void*)&c_DOMDocument::ifa_registernodeclass, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$__isset = { (void*)&c_DOMDocument::i___isset, (void*)&c_DOMDocument::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createattributens = { (void*)&c_DOMDocument::i_createattributens, (void*)&c_DOMDocument::ifa_createattributens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$validate = { (void*)&c_DOMDocument::i_validate, (void*)&c_DOMDocument::ifa_validate, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createelementns = { (void*)&c_DOMDocument::i_createelementns, (void*)&c_DOMDocument::ifa_createelementns, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$load = { (void*)&c_DOMDocument::i_load, (void*)&c_DOMDocument::ifa_load, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$loadhtmlfile = { (void*)&c_DOMDocument::i_loadhtmlfile, (void*)&c_DOMDocument::ifa_loadhtmlfile, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createelement = { (void*)&c_DOMDocument::i_createelement, (void*)&c_DOMDocument::ifa_createelement, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createprocessinginstruction = { (void*)&c_DOMDocument::i_createprocessinginstruction, (void*)&c_DOMDocument::ifa_createprocessinginstruction, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$getelementbyid = { (void*)&c_DOMDocument::i_getelementbyid, (void*)&c_DOMDocument::ifa_getelementbyid, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$__set = { (void*)&c_DOMDocument::i___set, (void*)&c_DOMDocument::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$normalizedocument = { (void*)&c_DOMDocument::i_normalizedocument, (void*)&c_DOMDocument::ifa_normalizedocument, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$loadxml = { (void*)&c_DOMDocument::i_loadxml, (void*)&c_DOMDocument::ifa_loadxml, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createtextnode = { (void*)&c_DOMDocument::i_createtextnode, (void*)&c_DOMDocument::ifa_createtextnode, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$loadhtml = { (void*)&c_DOMDocument::i_loadhtml, (void*)&c_DOMDocument::ifa_loadhtml, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$getelementsbytagnamens = { (void*)&c_DOMDocument::i_getelementsbytagnamens, (void*)&c_DOMDocument::ifa_getelementsbytagnamens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$__construct = { (void*)&c_DOMDocument::i___construct, (void*)&c_DOMDocument::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$createentityreference = { (void*)&c_DOMDocument::i_createentityreference, (void*)&c_DOMDocument::ifa_createentityreference, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$relaxngvalidatesource = { (void*)&c_DOMDocument::i_relaxngvalidatesource, (void*)&c_DOMDocument::ifa_relaxngvalidatesource, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$savexml = { (void*)&c_DOMDocument::i_savexml, (void*)&c_DOMDocument::ifa_savexml, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$savehtmlfile = { (void*)&c_DOMDocument::i_savehtmlfile, (void*)&c_DOMDocument::ifa_savehtmlfile, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$relaxngvalidate = { (void*)&c_DOMDocument::i_relaxngvalidate, (void*)&c_DOMDocument::ifa_relaxngvalidate, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$schemavalidatesource = { (void*)&c_DOMDocument::i_schemavalidatesource, (void*)&c_DOMDocument::ifa_schemavalidatesource, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMDocument$$importnode = { (void*)&c_DOMDocument::i_importnode, (void*)&c_DOMDocument::ifa_importnode, 2, 4, 0x0000000000000000L};
 Variant c_DOMDocument::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -6867,7 +6867,7 @@ const int cw_DOMComment$$instanceof_index[] = {
   0,1,-1,-1,-1,-1,-1,2,
 
 };
-extern const CallInfo ci_DOMComment$$__construct = { (void*)&c_DOMComment::i___construct, (void*)&c_DOMComment::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMComment$$__construct = { (void*)&c_DOMComment::i___construct, (void*)&c_DOMComment::ifa___construct, 1, 4, 0x0000000000000000L};
 Variant c_DOMComment::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -6917,19 +6917,19 @@ const int cw_Collator$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_Collator$$__construct = { (void*)&c_Collator::i___construct, (void*)&c_Collator::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$getlocale = { (void*)&c_Collator::i_getlocale, (void*)&c_Collator::ifa_getlocale, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$compare = { (void*)&c_Collator::i_compare, (void*)&c_Collator::ifa_compare, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$geterrormessage = { (void*)&c_Collator::i_geterrormessage, (void*)&c_Collator::ifa_geterrormessage, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$setstrength = { (void*)&c_Collator::i_setstrength, (void*)&c_Collator::ifa_setstrength, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$asort = { (void*)&c_Collator::i_asort, (void*)&c_Collator::ifa_asort, 2, 4, 0x0000000000000001LL};
-extern const CallInfo ci_Collator$$getstrength = { (void*)&c_Collator::i_getstrength, (void*)&c_Collator::ifa_getstrength, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$geterrorcode = { (void*)&c_Collator::i_geterrorcode, (void*)&c_Collator::ifa_geterrorcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$sortwithsortkeys = { (void*)&c_Collator::i_sortwithsortkeys, (void*)&c_Collator::ifa_sortwithsortkeys, 1, 4, 0x0000000000000001LL};
-extern const CallInfo ci_Collator$$create = { (void*)&c_Collator::i_create, (void*)&c_Collator::ifa_create, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$getattribute = { (void*)&c_Collator::i_getattribute, (void*)&c_Collator::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$sort = { (void*)&c_Collator::i_sort, (void*)&c_Collator::ifa_sort, 2, 4, 0x0000000000000001LL};
-extern const CallInfo ci_Collator$$setattribute = { (void*)&c_Collator::i_setattribute, (void*)&c_Collator::ifa_setattribute, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Collator$$__construct = { (void*)&c_Collator::i___construct, (void*)&c_Collator::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$getlocale = { (void*)&c_Collator::i_getlocale, (void*)&c_Collator::ifa_getlocale, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$compare = { (void*)&c_Collator::i_compare, (void*)&c_Collator::ifa_compare, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$geterrormessage = { (void*)&c_Collator::i_geterrormessage, (void*)&c_Collator::ifa_geterrormessage, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$setstrength = { (void*)&c_Collator::i_setstrength, (void*)&c_Collator::ifa_setstrength, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$asort = { (void*)&c_Collator::i_asort, (void*)&c_Collator::ifa_asort, 2, 4, 0x0000000000000001L};
+extern const CallInfo ci_Collator$$getstrength = { (void*)&c_Collator::i_getstrength, (void*)&c_Collator::ifa_getstrength, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$geterrorcode = { (void*)&c_Collator::i_geterrorcode, (void*)&c_Collator::ifa_geterrorcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$sortwithsortkeys = { (void*)&c_Collator::i_sortwithsortkeys, (void*)&c_Collator::ifa_sortwithsortkeys, 1, 4, 0x0000000000000001L};
+extern const CallInfo ci_Collator$$create = { (void*)&c_Collator::i_create, (void*)&c_Collator::ifa_create, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$getattribute = { (void*)&c_Collator::i_getattribute, (void*)&c_Collator::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Collator$$sort = { (void*)&c_Collator::i_sort, (void*)&c_Collator::ifa_sort, 2, 4, 0x0000000000000001L};
+extern const CallInfo ci_Collator$$setattribute = { (void*)&c_Collator::i_setattribute, (void*)&c_Collator::ifa_setattribute, 2, 4, 0x0000000000000000L};
 Variant c_Collator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -7138,35 +7138,35 @@ const int cw_DebuggerClientCmdUser$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DebuggerClientCmdUser$$helpsection = { (void*)&c_DebuggerClientCmdUser::i_helpsection, (void*)&c_DebuggerClientCmdUser::ifa_helpsection, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$addcompletion = { (void*)&c_DebuggerClientCmdUser::i_addcompletion, (void*)&c_DebuggerClientCmdUser::ifa_addcompletion, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$tutorial = { (void*)&c_DebuggerClientCmdUser::i_tutorial, (void*)&c_DebuggerClientCmdUser::ifa_tutorial, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$info = { (void*)&c_DebuggerClientCmdUser::i_info, (void*)&c_DebuggerClientCmdUser::ifa_info, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$argvalue = { (void*)&c_DebuggerClientCmdUser::i_argvalue, (void*)&c_DebuggerClientCmdUser::ifa_argvalue, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$error = { (void*)&c_DebuggerClientCmdUser::i_error, (void*)&c_DebuggerClientCmdUser::ifa_error, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$wrap = { (void*)&c_DebuggerClientCmdUser::i_wrap, (void*)&c_DebuggerClientCmdUser::ifa_wrap, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$getframe = { (void*)&c_DebuggerClientCmdUser::i_getframe, (void*)&c_DebuggerClientCmdUser::ifa_getframe, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$arg = { (void*)&c_DebuggerClientCmdUser::i_arg, (void*)&c_DebuggerClientCmdUser::ifa_arg, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$ask = { (void*)&c_DebuggerClientCmdUser::i_ask, (void*)&c_DebuggerClientCmdUser::ifa_ask, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$helpcmds = { (void*)&c_DebuggerClientCmdUser::i_helpcmds, (void*)&c_DebuggerClientCmdUser::ifa_helpcmds, 2, 5, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$getcode = { (void*)&c_DebuggerClientCmdUser::i_getcode, (void*)&c_DebuggerClientCmdUser::ifa_getcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$print = { (void*)&c_DebuggerClientCmdUser::i_print, (void*)&c_DebuggerClientCmdUser::ifa_print, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$args = { (void*)&c_DebuggerClientCmdUser::i_args, (void*)&c_DebuggerClientCmdUser::ifa_args, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$getstacktrace = { (void*)&c_DebuggerClientCmdUser::i_getstacktrace, (void*)&c_DebuggerClientCmdUser::ifa_getstacktrace, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$xend = { (void*)&c_DebuggerClientCmdUser::i_xend, (void*)&c_DebuggerClientCmdUser::ifa_xend, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$helptitle = { (void*)&c_DebuggerClientCmdUser::i_helptitle, (void*)&c_DebuggerClientCmdUser::ifa_helptitle, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$printframe = { (void*)&c_DebuggerClientCmdUser::i_printframe, (void*)&c_DebuggerClientCmdUser::ifa_printframe, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$getcommand = { (void*)&c_DebuggerClientCmdUser::i_getcommand, (void*)&c_DebuggerClientCmdUser::ifa_getcommand, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$linerest = { (void*)&c_DebuggerClientCmdUser::i_linerest, (void*)&c_DebuggerClientCmdUser::ifa_linerest, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$code = { (void*)&c_DebuggerClientCmdUser::i_code, (void*)&c_DebuggerClientCmdUser::ifa_code, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$__construct = { (void*)&c_DebuggerClientCmdUser::i___construct, (void*)&c_DebuggerClientCmdUser::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$getcurrentlocation = { (void*)&c_DebuggerClientCmdUser::i_getcurrentlocation, (void*)&c_DebuggerClientCmdUser::ifa_getcurrentlocation, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$help = { (void*)&c_DebuggerClientCmdUser::i_help, (void*)&c_DebuggerClientCmdUser::ifa_help, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$helpbody = { (void*)&c_DebuggerClientCmdUser::i_helpbody, (void*)&c_DebuggerClientCmdUser::ifa_helpbody, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$quit = { (void*)&c_DebuggerClientCmdUser::i_quit, (void*)&c_DebuggerClientCmdUser::ifa_quit, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$argcount = { (void*)&c_DebuggerClientCmdUser::i_argcount, (void*)&c_DebuggerClientCmdUser::ifa_argcount, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$send = { (void*)&c_DebuggerClientCmdUser::i_send, (void*)&c_DebuggerClientCmdUser::ifa_send, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$output = { (void*)&c_DebuggerClientCmdUser::i_output, (void*)&c_DebuggerClientCmdUser::ifa_output, 1, 5, 0x0000000000000000LL};
+extern const CallInfo ci_DebuggerClientCmdUser$$helpsection = { (void*)&c_DebuggerClientCmdUser::i_helpsection, (void*)&c_DebuggerClientCmdUser::ifa_helpsection, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$addcompletion = { (void*)&c_DebuggerClientCmdUser::i_addcompletion, (void*)&c_DebuggerClientCmdUser::ifa_addcompletion, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$tutorial = { (void*)&c_DebuggerClientCmdUser::i_tutorial, (void*)&c_DebuggerClientCmdUser::ifa_tutorial, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$info = { (void*)&c_DebuggerClientCmdUser::i_info, (void*)&c_DebuggerClientCmdUser::ifa_info, 1, 5, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$argvalue = { (void*)&c_DebuggerClientCmdUser::i_argvalue, (void*)&c_DebuggerClientCmdUser::ifa_argvalue, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$error = { (void*)&c_DebuggerClientCmdUser::i_error, (void*)&c_DebuggerClientCmdUser::ifa_error, 1, 5, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$wrap = { (void*)&c_DebuggerClientCmdUser::i_wrap, (void*)&c_DebuggerClientCmdUser::ifa_wrap, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$getframe = { (void*)&c_DebuggerClientCmdUser::i_getframe, (void*)&c_DebuggerClientCmdUser::ifa_getframe, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$arg = { (void*)&c_DebuggerClientCmdUser::i_arg, (void*)&c_DebuggerClientCmdUser::ifa_arg, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$ask = { (void*)&c_DebuggerClientCmdUser::i_ask, (void*)&c_DebuggerClientCmdUser::ifa_ask, 1, 5, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$helpcmds = { (void*)&c_DebuggerClientCmdUser::i_helpcmds, (void*)&c_DebuggerClientCmdUser::ifa_helpcmds, 2, 5, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$getcode = { (void*)&c_DebuggerClientCmdUser::i_getcode, (void*)&c_DebuggerClientCmdUser::ifa_getcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$print = { (void*)&c_DebuggerClientCmdUser::i_print, (void*)&c_DebuggerClientCmdUser::ifa_print, 1, 5, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$args = { (void*)&c_DebuggerClientCmdUser::i_args, (void*)&c_DebuggerClientCmdUser::ifa_args, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$getstacktrace = { (void*)&c_DebuggerClientCmdUser::i_getstacktrace, (void*)&c_DebuggerClientCmdUser::ifa_getstacktrace, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$xend = { (void*)&c_DebuggerClientCmdUser::i_xend, (void*)&c_DebuggerClientCmdUser::ifa_xend, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$helptitle = { (void*)&c_DebuggerClientCmdUser::i_helptitle, (void*)&c_DebuggerClientCmdUser::ifa_helptitle, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$printframe = { (void*)&c_DebuggerClientCmdUser::i_printframe, (void*)&c_DebuggerClientCmdUser::ifa_printframe, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$getcommand = { (void*)&c_DebuggerClientCmdUser::i_getcommand, (void*)&c_DebuggerClientCmdUser::ifa_getcommand, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$linerest = { (void*)&c_DebuggerClientCmdUser::i_linerest, (void*)&c_DebuggerClientCmdUser::ifa_linerest, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$code = { (void*)&c_DebuggerClientCmdUser::i_code, (void*)&c_DebuggerClientCmdUser::ifa_code, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$__construct = { (void*)&c_DebuggerClientCmdUser::i___construct, (void*)&c_DebuggerClientCmdUser::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$getcurrentlocation = { (void*)&c_DebuggerClientCmdUser::i_getcurrentlocation, (void*)&c_DebuggerClientCmdUser::ifa_getcurrentlocation, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$help = { (void*)&c_DebuggerClientCmdUser::i_help, (void*)&c_DebuggerClientCmdUser::ifa_help, 1, 5, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$helpbody = { (void*)&c_DebuggerClientCmdUser::i_helpbody, (void*)&c_DebuggerClientCmdUser::ifa_helpbody, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$quit = { (void*)&c_DebuggerClientCmdUser::i_quit, (void*)&c_DebuggerClientCmdUser::ifa_quit, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$argcount = { (void*)&c_DebuggerClientCmdUser::i_argcount, (void*)&c_DebuggerClientCmdUser::ifa_argcount, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$send = { (void*)&c_DebuggerClientCmdUser::i_send, (void*)&c_DebuggerClientCmdUser::ifa_send, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerClientCmdUser$$output = { (void*)&c_DebuggerClientCmdUser::i_output, (void*)&c_DebuggerClientCmdUser::ifa_output, 1, 5, 0x0000000000000000L};
 Variant c_DebuggerClientCmdUser::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -7712,7 +7712,7 @@ const int cw_Locale$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_Locale$$__construct = { (void*)&c_Locale::i___construct, (void*)&c_Locale::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Locale$$__construct = { (void*)&c_Locale::i___construct, (void*)&c_Locale::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_Locale::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -7760,33 +7760,33 @@ const int cw_XMLReader$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_XMLReader$$movetoattributens = { (void*)&c_XMLReader::i_movetoattributens, (void*)&c_XMLReader::ifa_movetoattributens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$isvalid = { (void*)&c_XMLReader::i_isvalid, (void*)&c_XMLReader::ifa_isvalid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$next = { (void*)&c_XMLReader::i_next, (void*)&c_XMLReader::ifa_next, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$read = { (void*)&c_XMLReader::i_read, (void*)&c_XMLReader::ifa_read, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$setparserproperty = { (void*)&c_XMLReader::i_setparserproperty, (void*)&c_XMLReader::ifa_setparserproperty, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$getattributens = { (void*)&c_XMLReader::i_getattributens, (void*)&c_XMLReader::ifa_getattributens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$movetoelement = { (void*)&c_XMLReader::i_movetoelement, (void*)&c_XMLReader::ifa_movetoelement, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$readstring = { (void*)&c_XMLReader::i_readstring, (void*)&c_XMLReader::ifa_readstring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$expand = { (void*)&c_XMLReader::i_expand, (void*)&c_XMLReader::ifa_expand, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$movetofirstattribute = { (void*)&c_XMLReader::i_movetofirstattribute, (void*)&c_XMLReader::ifa_movetofirstattribute, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$close = { (void*)&c_XMLReader::i_close, (void*)&c_XMLReader::ifa_close, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$__get = { (void*)&c_XMLReader::i___get, (void*)&c_XMLReader::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$readinnerxml = { (void*)&c_XMLReader::i_readinnerxml, (void*)&c_XMLReader::ifa_readinnerxml, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$getattribute = { (void*)&c_XMLReader::i_getattribute, (void*)&c_XMLReader::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$movetoattribute = { (void*)&c_XMLReader::i_movetoattribute, (void*)&c_XMLReader::ifa_movetoattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$setschema = { (void*)&c_XMLReader::i_setschema, (void*)&c_XMLReader::ifa_setschema, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$getparserproperty = { (void*)&c_XMLReader::i_getparserproperty, (void*)&c_XMLReader::ifa_getparserproperty, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$movetoattributeno = { (void*)&c_XMLReader::i_movetoattributeno, (void*)&c_XMLReader::ifa_movetoattributeno, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$movetonextattribute = { (void*)&c_XMLReader::i_movetonextattribute, (void*)&c_XMLReader::ifa_movetonextattribute, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$lookupnamespace = { (void*)&c_XMLReader::i_lookupnamespace, (void*)&c_XMLReader::ifa_lookupnamespace, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$open = { (void*)&c_XMLReader::i_open, (void*)&c_XMLReader::ifa_open, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$__construct = { (void*)&c_XMLReader::i___construct, (void*)&c_XMLReader::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$setrelaxngschema = { (void*)&c_XMLReader::i_setrelaxngschema, (void*)&c_XMLReader::ifa_setrelaxngschema, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$xml = { (void*)&c_XMLReader::i_xml, (void*)&c_XMLReader::ifa_xml, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$setrelaxngschemasource = { (void*)&c_XMLReader::i_setrelaxngschemasource, (void*)&c_XMLReader::ifa_setrelaxngschemasource, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$getattributeno = { (void*)&c_XMLReader::i_getattributeno, (void*)&c_XMLReader::ifa_getattributeno, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$readouterxml = { (void*)&c_XMLReader::i_readouterxml, (void*)&c_XMLReader::ifa_readouterxml, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_XMLReader$$movetoattributens = { (void*)&c_XMLReader::i_movetoattributens, (void*)&c_XMLReader::ifa_movetoattributens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$isvalid = { (void*)&c_XMLReader::i_isvalid, (void*)&c_XMLReader::ifa_isvalid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$next = { (void*)&c_XMLReader::i_next, (void*)&c_XMLReader::ifa_next, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$read = { (void*)&c_XMLReader::i_read, (void*)&c_XMLReader::ifa_read, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$setparserproperty = { (void*)&c_XMLReader::i_setparserproperty, (void*)&c_XMLReader::ifa_setparserproperty, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$getattributens = { (void*)&c_XMLReader::i_getattributens, (void*)&c_XMLReader::ifa_getattributens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$movetoelement = { (void*)&c_XMLReader::i_movetoelement, (void*)&c_XMLReader::ifa_movetoelement, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$readstring = { (void*)&c_XMLReader::i_readstring, (void*)&c_XMLReader::ifa_readstring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$expand = { (void*)&c_XMLReader::i_expand, (void*)&c_XMLReader::ifa_expand, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$movetofirstattribute = { (void*)&c_XMLReader::i_movetofirstattribute, (void*)&c_XMLReader::ifa_movetofirstattribute, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$close = { (void*)&c_XMLReader::i_close, (void*)&c_XMLReader::ifa_close, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$__get = { (void*)&c_XMLReader::i___get, (void*)&c_XMLReader::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$readinnerxml = { (void*)&c_XMLReader::i_readinnerxml, (void*)&c_XMLReader::ifa_readinnerxml, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$getattribute = { (void*)&c_XMLReader::i_getattribute, (void*)&c_XMLReader::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$movetoattribute = { (void*)&c_XMLReader::i_movetoattribute, (void*)&c_XMLReader::ifa_movetoattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$setschema = { (void*)&c_XMLReader::i_setschema, (void*)&c_XMLReader::ifa_setschema, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$getparserproperty = { (void*)&c_XMLReader::i_getparserproperty, (void*)&c_XMLReader::ifa_getparserproperty, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$movetoattributeno = { (void*)&c_XMLReader::i_movetoattributeno, (void*)&c_XMLReader::ifa_movetoattributeno, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$movetonextattribute = { (void*)&c_XMLReader::i_movetonextattribute, (void*)&c_XMLReader::ifa_movetonextattribute, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$lookupnamespace = { (void*)&c_XMLReader::i_lookupnamespace, (void*)&c_XMLReader::ifa_lookupnamespace, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$open = { (void*)&c_XMLReader::i_open, (void*)&c_XMLReader::ifa_open, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$__construct = { (void*)&c_XMLReader::i___construct, (void*)&c_XMLReader::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$setrelaxngschema = { (void*)&c_XMLReader::i_setrelaxngschema, (void*)&c_XMLReader::ifa_setrelaxngschema, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$xml = { (void*)&c_XMLReader::i_xml, (void*)&c_XMLReader::ifa_xml, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$setrelaxngschemasource = { (void*)&c_XMLReader::i_setrelaxngschemasource, (void*)&c_XMLReader::ifa_setrelaxngschemasource, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$getattributeno = { (void*)&c_XMLReader::i_getattributeno, (void*)&c_XMLReader::ifa_getattributeno, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_XMLReader$$readouterxml = { (void*)&c_XMLReader::i_readouterxml, (void*)&c_XMLReader::ifa_readouterxml, 0, 4, 0x0000000000000000L};
 Variant c_XMLReader::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8183,10 +8183,10 @@ const int cw_DOMNotation$$instanceof_index[] = {
   3,
   -1,0,-1,-1,
 };
-extern const CallInfo ci_DOMNotation$$__isset = { (void*)&c_DOMNotation::i___isset, (void*)&c_DOMNotation::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNotation$$__get = { (void*)&c_DOMNotation::i___get, (void*)&c_DOMNotation::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNotation$$__construct = { (void*)&c_DOMNotation::i___construct, (void*)&c_DOMNotation::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNotation$$__set = { (void*)&c_DOMNotation::i___set, (void*)&c_DOMNotation::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMNotation$$__isset = { (void*)&c_DOMNotation::i___isset, (void*)&c_DOMNotation::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNotation$$__get = { (void*)&c_DOMNotation::i___get, (void*)&c_DOMNotation::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNotation$$__construct = { (void*)&c_DOMNotation::i___construct, (void*)&c_DOMNotation::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNotation$$__set = { (void*)&c_DOMNotation::i___set, (void*)&c_DOMNotation::ifa___set, 2, 4, 0x0000000000000000L};
 Variant c_DOMNotation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8275,11 +8275,11 @@ const int cw_SpoofChecker$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SpoofChecker$$setallowedlocales = { (void*)&c_SpoofChecker::i_setallowedlocales, (void*)&c_SpoofChecker::ifa_setallowedlocales, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SpoofChecker$$__construct = { (void*)&c_SpoofChecker::i___construct, (void*)&c_SpoofChecker::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SpoofChecker$$setchecks = { (void*)&c_SpoofChecker::i_setchecks, (void*)&c_SpoofChecker::ifa_setchecks, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SpoofChecker$$areconfusable = { (void*)&c_SpoofChecker::i_areconfusable, (void*)&c_SpoofChecker::ifa_areconfusable, 3, 4, 0x0000000000000004LL};
-extern const CallInfo ci_SpoofChecker$$issuspicious = { (void*)&c_SpoofChecker::i_issuspicious, (void*)&c_SpoofChecker::ifa_issuspicious, 2, 4, 0x0000000000000002LL};
+extern const CallInfo ci_SpoofChecker$$setallowedlocales = { (void*)&c_SpoofChecker::i_setallowedlocales, (void*)&c_SpoofChecker::ifa_setallowedlocales, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SpoofChecker$$__construct = { (void*)&c_SpoofChecker::i___construct, (void*)&c_SpoofChecker::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SpoofChecker$$setchecks = { (void*)&c_SpoofChecker::i_setchecks, (void*)&c_SpoofChecker::ifa_setchecks, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SpoofChecker$$areconfusable = { (void*)&c_SpoofChecker::i_areconfusable, (void*)&c_SpoofChecker::ifa_areconfusable, 3, 4, 0x0000000000000004L};
+extern const CallInfo ci_SpoofChecker$$issuspicious = { (void*)&c_SpoofChecker::i_issuspicious, (void*)&c_SpoofChecker::ifa_issuspicious, 2, 4, 0x0000000000000002L};
 Variant c_SpoofChecker::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8389,14 +8389,14 @@ const int cw_DOMNamedNodeMap$$instanceof_index[] = {
   0,-1,-1,1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_DOMNamedNodeMap$$__construct = { (void*)&c_DOMNamedNodeMap::i___construct, (void*)&c_DOMNamedNodeMap::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$__set = { (void*)&c_DOMNamedNodeMap::i___set, (void*)&c_DOMNamedNodeMap::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$getnameditem = { (void*)&c_DOMNamedNodeMap::i_getnameditem, (void*)&c_DOMNamedNodeMap::ifa_getnameditem, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$__get = { (void*)&c_DOMNamedNodeMap::i___get, (void*)&c_DOMNamedNodeMap::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$getiterator = { (void*)&c_DOMNamedNodeMap::i_getiterator, (void*)&c_DOMNamedNodeMap::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$item = { (void*)&c_DOMNamedNodeMap::i_item, (void*)&c_DOMNamedNodeMap::ifa_item, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$getnameditemns = { (void*)&c_DOMNamedNodeMap::i_getnameditemns, (void*)&c_DOMNamedNodeMap::ifa_getnameditemns, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$__isset = { (void*)&c_DOMNamedNodeMap::i___isset, (void*)&c_DOMNamedNodeMap::ifa___isset, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMNamedNodeMap$$__construct = { (void*)&c_DOMNamedNodeMap::i___construct, (void*)&c_DOMNamedNodeMap::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNamedNodeMap$$__set = { (void*)&c_DOMNamedNodeMap::i___set, (void*)&c_DOMNamedNodeMap::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNamedNodeMap$$getnameditem = { (void*)&c_DOMNamedNodeMap::i_getnameditem, (void*)&c_DOMNamedNodeMap::ifa_getnameditem, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNamedNodeMap$$__get = { (void*)&c_DOMNamedNodeMap::i___get, (void*)&c_DOMNamedNodeMap::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNamedNodeMap$$getiterator = { (void*)&c_DOMNamedNodeMap::i_getiterator, (void*)&c_DOMNamedNodeMap::ifa_getiterator, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNamedNodeMap$$item = { (void*)&c_DOMNamedNodeMap::i_item, (void*)&c_DOMNamedNodeMap::ifa_item, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNamedNodeMap$$getnameditemns = { (void*)&c_DOMNamedNodeMap::i_getnameditemns, (void*)&c_DOMNamedNodeMap::ifa_getnameditemns, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNamedNodeMap$$__isset = { (void*)&c_DOMNamedNodeMap::i___isset, (void*)&c_DOMNamedNodeMap::ifa___isset, 1, 4, 0x0000000000000000L};
 Variant c_DOMNamedNodeMap::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8538,12 +8538,12 @@ const int cw_MutableArrayIterator$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_MutableArrayIterator$$__construct = { (void*)&c_MutableArrayIterator::i___construct, (void*)&c_MutableArrayIterator::ifa___construct, 1, 4, 0x0000000000000001LL};
-extern const CallInfo ci_MutableArrayIterator$$valid = { (void*)&c_MutableArrayIterator::i_valid, (void*)&c_MutableArrayIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MutableArrayIterator$$key = { (void*)&c_MutableArrayIterator::i_key, (void*)&c_MutableArrayIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MutableArrayIterator$$currentref = { (void*)&c_MutableArrayIterator::i_currentref, (void*)&c_MutableArrayIterator::ifa_currentref, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MutableArrayIterator$$current = { (void*)&c_MutableArrayIterator::i_current, (void*)&c_MutableArrayIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MutableArrayIterator$$next = { (void*)&c_MutableArrayIterator::i_next, (void*)&c_MutableArrayIterator::ifa_next, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_MutableArrayIterator$$__construct = { (void*)&c_MutableArrayIterator::i___construct, (void*)&c_MutableArrayIterator::ifa___construct, 1, 4, 0x0000000000000001L};
+extern const CallInfo ci_MutableArrayIterator$$valid = { (void*)&c_MutableArrayIterator::i_valid, (void*)&c_MutableArrayIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MutableArrayIterator$$key = { (void*)&c_MutableArrayIterator::i_key, (void*)&c_MutableArrayIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MutableArrayIterator$$currentref = { (void*)&c_MutableArrayIterator::i_currentref, (void*)&c_MutableArrayIterator::ifa_currentref, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MutableArrayIterator$$current = { (void*)&c_MutableArrayIterator::i_current, (void*)&c_MutableArrayIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MutableArrayIterator$$next = { (void*)&c_MutableArrayIterator::i_next, (void*)&c_MutableArrayIterator::ifa_next, 0, 4, 0x0000000000000000L};
 Variant c_MutableArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8655,15 +8655,15 @@ const int cw_DOMCharacterData$$instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-extern const CallInfo ci_DOMCharacterData$$__construct = { (void*)&c_DOMCharacterData::i___construct, (void*)&c_DOMCharacterData::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$__set = { (void*)&c_DOMCharacterData::i___set, (void*)&c_DOMCharacterData::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$__get = { (void*)&c_DOMCharacterData::i___get, (void*)&c_DOMCharacterData::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$appenddata = { (void*)&c_DOMCharacterData::i_appenddata, (void*)&c_DOMCharacterData::ifa_appenddata, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$insertdata = { (void*)&c_DOMCharacterData::i_insertdata, (void*)&c_DOMCharacterData::ifa_insertdata, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$deletedata = { (void*)&c_DOMCharacterData::i_deletedata, (void*)&c_DOMCharacterData::ifa_deletedata, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$replacedata = { (void*)&c_DOMCharacterData::i_replacedata, (void*)&c_DOMCharacterData::ifa_replacedata, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$substringdata = { (void*)&c_DOMCharacterData::i_substringdata, (void*)&c_DOMCharacterData::ifa_substringdata, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$__isset = { (void*)&c_DOMCharacterData::i___isset, (void*)&c_DOMCharacterData::ifa___isset, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMCharacterData$$__construct = { (void*)&c_DOMCharacterData::i___construct, (void*)&c_DOMCharacterData::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$__set = { (void*)&c_DOMCharacterData::i___set, (void*)&c_DOMCharacterData::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$__get = { (void*)&c_DOMCharacterData::i___get, (void*)&c_DOMCharacterData::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$appenddata = { (void*)&c_DOMCharacterData::i_appenddata, (void*)&c_DOMCharacterData::ifa_appenddata, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$insertdata = { (void*)&c_DOMCharacterData::i_insertdata, (void*)&c_DOMCharacterData::ifa_insertdata, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$deletedata = { (void*)&c_DOMCharacterData::i_deletedata, (void*)&c_DOMCharacterData::ifa_deletedata, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$replacedata = { (void*)&c_DOMCharacterData::i_replacedata, (void*)&c_DOMCharacterData::ifa_replacedata, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$substringdata = { (void*)&c_DOMCharacterData::i_substringdata, (void*)&c_DOMCharacterData::ifa_substringdata, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMCharacterData$$__isset = { (void*)&c_DOMCharacterData::i___isset, (void*)&c_DOMCharacterData::ifa___isset, 1, 4, 0x0000000000000000L};
 Variant c_DOMCharacterData::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8828,12 +8828,12 @@ const int cw_StableMapIterator$$instanceof_index[] = {
   0,-1,-1,1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_StableMapIterator$$__construct = { (void*)&c_StableMapIterator::i___construct, (void*)&c_StableMapIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMapIterator$$rewind = { (void*)&c_StableMapIterator::i_rewind, (void*)&c_StableMapIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMapIterator$$valid = { (void*)&c_StableMapIterator::i_valid, (void*)&c_StableMapIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMapIterator$$key = { (void*)&c_StableMapIterator::i_key, (void*)&c_StableMapIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMapIterator$$current = { (void*)&c_StableMapIterator::i_current, (void*)&c_StableMapIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMapIterator$$next = { (void*)&c_StableMapIterator::i_next, (void*)&c_StableMapIterator::ifa_next, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMapIterator$$__construct = { (void*)&c_StableMapIterator::i___construct, (void*)&c_StableMapIterator::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMapIterator$$rewind = { (void*)&c_StableMapIterator::i_rewind, (void*)&c_StableMapIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMapIterator$$valid = { (void*)&c_StableMapIterator::i_valid, (void*)&c_StableMapIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMapIterator$$key = { (void*)&c_StableMapIterator::i_key, (void*)&c_StableMapIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMapIterator$$current = { (void*)&c_StableMapIterator::i_current, (void*)&c_StableMapIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_StableMapIterator$$next = { (void*)&c_StableMapIterator::i_next, (void*)&c_StableMapIterator::ifa_next, 0, 4, 0x0000000000000000L};
 Variant c_StableMapIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8943,13 +8943,13 @@ const int cw_DateTimeZone$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DateTimeZone$$__construct = { (void*)&c_DateTimeZone::i___construct, (void*)&c_DateTimeZone::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTimeZone$$getlocation = { (void*)&c_DateTimeZone::i_getlocation, (void*)&c_DateTimeZone::ifa_getlocation, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTimeZone$$listabbreviations = { (void*)&c_DateTimeZone::i_listabbreviations, (void*)&c_DateTimeZone::ifa_listabbreviations, 0, 12, 0x0000000000000000LL};
-extern const CallInfo ci_DateTimeZone$$getname = { (void*)&c_DateTimeZone::i_getname, (void*)&c_DateTimeZone::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTimeZone$$getoffset = { (void*)&c_DateTimeZone::i_getoffset, (void*)&c_DateTimeZone::ifa_getoffset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTimeZone$$gettransitions = { (void*)&c_DateTimeZone::i_gettransitions, (void*)&c_DateTimeZone::ifa_gettransitions, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTimeZone$$listidentifiers = { (void*)&c_DateTimeZone::i_listidentifiers, (void*)&c_DateTimeZone::ifa_listidentifiers, 0, 12, 0x0000000000000000LL};
+extern const CallInfo ci_DateTimeZone$$__construct = { (void*)&c_DateTimeZone::i___construct, (void*)&c_DateTimeZone::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTimeZone$$getlocation = { (void*)&c_DateTimeZone::i_getlocation, (void*)&c_DateTimeZone::ifa_getlocation, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTimeZone$$listabbreviations = { (void*)&c_DateTimeZone::i_listabbreviations, (void*)&c_DateTimeZone::ifa_listabbreviations, 0, 12, 0x0000000000000000L};
+extern const CallInfo ci_DateTimeZone$$getname = { (void*)&c_DateTimeZone::i_getname, (void*)&c_DateTimeZone::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTimeZone$$getoffset = { (void*)&c_DateTimeZone::i_getoffset, (void*)&c_DateTimeZone::ifa_getoffset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTimeZone$$gettransitions = { (void*)&c_DateTimeZone::i_gettransitions, (void*)&c_DateTimeZone::ifa_gettransitions, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateTimeZone$$listidentifiers = { (void*)&c_DateTimeZone::i_listidentifiers, (void*)&c_DateTimeZone::ifa_listidentifiers, 0, 12, 0x0000000000000000L};
 Variant c_DateTimeZone::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9065,11 +9065,11 @@ const int cw_DateInterval$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DateInterval$$__get = { (void*)&c_DateInterval::i___get, (void*)&c_DateInterval::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateInterval$$createfromdatestring = { (void*)&c_DateInterval::i_createfromdatestring, (void*)&c_DateInterval::ifa_createfromdatestring, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_DateInterval$$format = { (void*)&c_DateInterval::i_format, (void*)&c_DateInterval::ifa_format, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateInterval$$__construct = { (void*)&c_DateInterval::i___construct, (void*)&c_DateInterval::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateInterval$$__set = { (void*)&c_DateInterval::i___set, (void*)&c_DateInterval::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateInterval$$__get = { (void*)&c_DateInterval::i___get, (void*)&c_DateInterval::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateInterval$$createfromdatestring = { (void*)&c_DateInterval::i_createfromdatestring, (void*)&c_DateInterval::ifa_createfromdatestring, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_DateInterval$$format = { (void*)&c_DateInterval::i_format, (void*)&c_DateInterval::ifa_format, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateInterval$$__construct = { (void*)&c_DateInterval::i___construct, (void*)&c_DateInterval::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DateInterval$$__set = { (void*)&c_DateInterval::i___set, (void*)&c_DateInterval::ifa___set, 2, 4, 0x0000000000000000L};
 Variant c_DateInterval::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9169,9 +9169,9 @@ const int cw_Normalizer$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_Normalizer$$normalize = { (void*)&c_Normalizer::i_normalize, (void*)&c_Normalizer::ifa_normalize, 2, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Normalizer$$isnormalized = { (void*)&c_Normalizer::i_isnormalized, (void*)&c_Normalizer::ifa_isnormalized, 2, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Normalizer$$__construct = { (void*)&c_Normalizer::i___construct, (void*)&c_Normalizer::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Normalizer$$normalize = { (void*)&c_Normalizer::i_normalize, (void*)&c_Normalizer::ifa_normalize, 2, 12, 0x0000000000000000L};
+extern const CallInfo ci_Normalizer$$isnormalized = { (void*)&c_Normalizer::i_isnormalized, (void*)&c_Normalizer::ifa_isnormalized, 2, 12, 0x0000000000000000L};
+extern const CallInfo ci_Normalizer$$__construct = { (void*)&c_Normalizer::i___construct, (void*)&c_Normalizer::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_Normalizer::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9242,24 +9242,24 @@ const int cw_SQLite3$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SQLite3$$exec = { (void*)&c_SQLite3::i_exec, (void*)&c_SQLite3::ifa_exec, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$lasterrormsg = { (void*)&c_SQLite3::i_lasterrormsg, (void*)&c_SQLite3::ifa_lasterrormsg, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$__construct = { (void*)&c_SQLite3::i___construct, (void*)&c_SQLite3::ifa___construct, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$version = { (void*)&c_SQLite3::i_version, (void*)&c_SQLite3::ifa_version, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$openblob = { (void*)&c_SQLite3::i_openblob, (void*)&c_SQLite3::ifa_openblob, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$loadextension = { (void*)&c_SQLite3::i_loadextension, (void*)&c_SQLite3::ifa_loadextension, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$open = { (void*)&c_SQLite3::i_open, (void*)&c_SQLite3::ifa_open, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$query = { (void*)&c_SQLite3::i_query, (void*)&c_SQLite3::ifa_query, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$busytimeout = { (void*)&c_SQLite3::i_busytimeout, (void*)&c_SQLite3::ifa_busytimeout, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$createaggregate = { (void*)&c_SQLite3::i_createaggregate, (void*)&c_SQLite3::ifa_createaggregate, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$querysingle = { (void*)&c_SQLite3::i_querysingle, (void*)&c_SQLite3::ifa_querysingle, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$close = { (void*)&c_SQLite3::i_close, (void*)&c_SQLite3::ifa_close, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$changes = { (void*)&c_SQLite3::i_changes, (void*)&c_SQLite3::ifa_changes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$prepare = { (void*)&c_SQLite3::i_prepare, (void*)&c_SQLite3::ifa_prepare, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$lastinsertrowid = { (void*)&c_SQLite3::i_lastinsertrowid, (void*)&c_SQLite3::ifa_lastinsertrowid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$createfunction = { (void*)&c_SQLite3::i_createfunction, (void*)&c_SQLite3::ifa_createfunction, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$lasterrorcode = { (void*)&c_SQLite3::i_lasterrorcode, (void*)&c_SQLite3::ifa_lasterrorcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$escapestring = { (void*)&c_SQLite3::i_escapestring, (void*)&c_SQLite3::ifa_escapestring, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SQLite3$$exec = { (void*)&c_SQLite3::i_exec, (void*)&c_SQLite3::ifa_exec, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$lasterrormsg = { (void*)&c_SQLite3::i_lasterrormsg, (void*)&c_SQLite3::ifa_lasterrormsg, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$__construct = { (void*)&c_SQLite3::i___construct, (void*)&c_SQLite3::ifa___construct, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$version = { (void*)&c_SQLite3::i_version, (void*)&c_SQLite3::ifa_version, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$openblob = { (void*)&c_SQLite3::i_openblob, (void*)&c_SQLite3::ifa_openblob, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$loadextension = { (void*)&c_SQLite3::i_loadextension, (void*)&c_SQLite3::ifa_loadextension, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$open = { (void*)&c_SQLite3::i_open, (void*)&c_SQLite3::ifa_open, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$query = { (void*)&c_SQLite3::i_query, (void*)&c_SQLite3::ifa_query, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$busytimeout = { (void*)&c_SQLite3::i_busytimeout, (void*)&c_SQLite3::ifa_busytimeout, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$createaggregate = { (void*)&c_SQLite3::i_createaggregate, (void*)&c_SQLite3::ifa_createaggregate, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$querysingle = { (void*)&c_SQLite3::i_querysingle, (void*)&c_SQLite3::ifa_querysingle, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$close = { (void*)&c_SQLite3::i_close, (void*)&c_SQLite3::ifa_close, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$changes = { (void*)&c_SQLite3::i_changes, (void*)&c_SQLite3::ifa_changes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$prepare = { (void*)&c_SQLite3::i_prepare, (void*)&c_SQLite3::ifa_prepare, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$lastinsertrowid = { (void*)&c_SQLite3::i_lastinsertrowid, (void*)&c_SQLite3::ifa_lastinsertrowid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$createfunction = { (void*)&c_SQLite3::i_createfunction, (void*)&c_SQLite3::ifa_createfunction, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$lasterrorcode = { (void*)&c_SQLite3::i_lasterrorcode, (void*)&c_SQLite3::ifa_lasterrorcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3$$escapestring = { (void*)&c_SQLite3::i_escapestring, (void*)&c_SQLite3::ifa_escapestring, 1, 4, 0x0000000000000000L};
 Variant c_SQLite3::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9523,7 +9523,7 @@ extern const int cw_SQLite3$$call_info_index[] = {
   -1,17,-1,-1,-1,-1,-1,-1,
 
 };
-c_SQLite3 *c_SQLite3::create(String a0, int64 a1, String a2) {
+c_SQLite3 *c_SQLite3::create(String a0, int64_t a1, String a2) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2);
@@ -9555,8 +9555,8 @@ const int cw_StaticExceptionWaitHandle$$instanceof_index[] = {
   -1,0,-1,-1,-1,1,-1,-1,
 
 };
-extern const CallInfo ci_StaticExceptionWaitHandle$$__construct = { (void*)&c_StaticExceptionWaitHandle::i___construct, (void*)&c_StaticExceptionWaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_StaticExceptionWaitHandle$$create = { (void*)&c_StaticExceptionWaitHandle::i_create, (void*)&c_StaticExceptionWaitHandle::ifa_create, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_StaticExceptionWaitHandle$$__construct = { (void*)&c_StaticExceptionWaitHandle::i___construct, (void*)&c_StaticExceptionWaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_StaticExceptionWaitHandle$$create = { (void*)&c_StaticExceptionWaitHandle::i_create, (void*)&c_StaticExceptionWaitHandle::ifa_create, 1, 12, 0x0000000000000000L};
 Variant c_StaticExceptionWaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9613,9 +9613,9 @@ const int cw_DebuggerProxyCmdUser$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_DebuggerProxyCmdUser$$islocal = { (void*)&c_DebuggerProxyCmdUser::i_islocal, (void*)&c_DebuggerProxyCmdUser::ifa_islocal, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerProxyCmdUser$$send = { (void*)&c_DebuggerProxyCmdUser::i_send, (void*)&c_DebuggerProxyCmdUser::ifa_send, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerProxyCmdUser$$__construct = { (void*)&c_DebuggerProxyCmdUser::i___construct, (void*)&c_DebuggerProxyCmdUser::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DebuggerProxyCmdUser$$islocal = { (void*)&c_DebuggerProxyCmdUser::i_islocal, (void*)&c_DebuggerProxyCmdUser::ifa_islocal, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerProxyCmdUser$$send = { (void*)&c_DebuggerProxyCmdUser::i_send, (void*)&c_DebuggerProxyCmdUser::ifa_send, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DebuggerProxyCmdUser$$__construct = { (void*)&c_DebuggerProxyCmdUser::i___construct, (void*)&c_DebuggerProxyCmdUser::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_DebuggerProxyCmdUser::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9692,19 +9692,19 @@ const int cw_SoapClient$$instanceof_index[] = {
 Variant c_SoapClient::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
-extern const CallInfo ci_SoapClient$$__construct = { (void*)&c_SoapClient::i___construct, (void*)&c_SoapClient::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__getlastresponseheaders = { (void*)&c_SoapClient::i___getlastresponseheaders, (void*)&c_SoapClient::ifa___getlastresponseheaders, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__setlocation = { (void*)&c_SoapClient::i___setlocation, (void*)&c_SoapClient::ifa___setlocation, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__dorequest = { (void*)&c_SoapClient::i___dorequest, (void*)&c_SoapClient::ifa___dorequest, 5, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__soapcall = { (void*)&c_SoapClient::i___soapcall, (void*)&c_SoapClient::ifa___soapcall, 5, 4, 0x0000000000000010LL};
-extern const CallInfo ci_SoapClient$$__getlastresponse = { (void*)&c_SoapClient::i___getlastresponse, (void*)&c_SoapClient::ifa___getlastresponse, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__getlastrequestheaders = { (void*)&c_SoapClient::i___getlastrequestheaders, (void*)&c_SoapClient::ifa___getlastrequestheaders, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__getlastrequest = { (void*)&c_SoapClient::i___getlastrequest, (void*)&c_SoapClient::ifa___getlastrequest, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__gettypes = { (void*)&c_SoapClient::i___gettypes, (void*)&c_SoapClient::ifa___gettypes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__setsoapheaders = { (void*)&c_SoapClient::i___setsoapheaders, (void*)&c_SoapClient::ifa___setsoapheaders, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__getfunctions = { (void*)&c_SoapClient::i___getfunctions, (void*)&c_SoapClient::ifa___getfunctions, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__call = { (void*)&c_SoapClient::i___call, (void*)&c_SoapClient::ifa___call, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__setcookie = { (void*)&c_SoapClient::i___setcookie, (void*)&c_SoapClient::ifa___setcookie, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SoapClient$$__construct = { (void*)&c_SoapClient::i___construct, (void*)&c_SoapClient::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__getlastresponseheaders = { (void*)&c_SoapClient::i___getlastresponseheaders, (void*)&c_SoapClient::ifa___getlastresponseheaders, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__setlocation = { (void*)&c_SoapClient::i___setlocation, (void*)&c_SoapClient::ifa___setlocation, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__dorequest = { (void*)&c_SoapClient::i___dorequest, (void*)&c_SoapClient::ifa___dorequest, 5, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__soapcall = { (void*)&c_SoapClient::i___soapcall, (void*)&c_SoapClient::ifa___soapcall, 5, 4, 0x0000000000000010L};
+extern const CallInfo ci_SoapClient$$__getlastresponse = { (void*)&c_SoapClient::i___getlastresponse, (void*)&c_SoapClient::ifa___getlastresponse, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__getlastrequestheaders = { (void*)&c_SoapClient::i___getlastrequestheaders, (void*)&c_SoapClient::ifa___getlastrequestheaders, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__getlastrequest = { (void*)&c_SoapClient::i___getlastrequest, (void*)&c_SoapClient::ifa___getlastrequest, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__gettypes = { (void*)&c_SoapClient::i___gettypes, (void*)&c_SoapClient::ifa___gettypes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__setsoapheaders = { (void*)&c_SoapClient::i___setsoapheaders, (void*)&c_SoapClient::ifa___setsoapheaders, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__getfunctions = { (void*)&c_SoapClient::i___getfunctions, (void*)&c_SoapClient::ifa___getfunctions, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__call = { (void*)&c_SoapClient::i___call, (void*)&c_SoapClient::ifa___call, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SoapClient$$__setcookie = { (void*)&c_SoapClient::i___setcookie, (void*)&c_SoapClient::ifa___setcookie, 2, 4, 0x0000000000000000L};
 Variant c_SoapClient::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9926,7 +9926,7 @@ const int cw_SoapParam$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_SoapParam$$__construct = { (void*)&c_SoapParam::i___construct, (void*)&c_SoapParam::ifa___construct, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SoapParam$$__construct = { (void*)&c_SoapParam::i___construct, (void*)&c_SoapParam::ifa___construct, 2, 4, 0x0000000000000000L};
 Variant c_SoapParam::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9976,14 +9976,14 @@ const int cw_DOMXPath$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DOMXPath$$__construct = { (void*)&c_DOMXPath::i___construct, (void*)&c_DOMXPath::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$__set = { (void*)&c_DOMXPath::i___set, (void*)&c_DOMXPath::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$__get = { (void*)&c_DOMXPath::i___get, (void*)&c_DOMXPath::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$evaluate = { (void*)&c_DOMXPath::i_evaluate, (void*)&c_DOMXPath::ifa_evaluate, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$registernamespace = { (void*)&c_DOMXPath::i_registernamespace, (void*)&c_DOMXPath::ifa_registernamespace, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$__isset = { (void*)&c_DOMXPath::i___isset, (void*)&c_DOMXPath::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$registerphpfunctions = { (void*)&c_DOMXPath::i_registerphpfunctions, (void*)&c_DOMXPath::ifa_registerphpfunctions, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$query = { (void*)&c_DOMXPath::i_query, (void*)&c_DOMXPath::ifa_query, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMXPath$$__construct = { (void*)&c_DOMXPath::i___construct, (void*)&c_DOMXPath::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMXPath$$__set = { (void*)&c_DOMXPath::i___set, (void*)&c_DOMXPath::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMXPath$$__get = { (void*)&c_DOMXPath::i___get, (void*)&c_DOMXPath::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMXPath$$evaluate = { (void*)&c_DOMXPath::i_evaluate, (void*)&c_DOMXPath::ifa_evaluate, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMXPath$$registernamespace = { (void*)&c_DOMXPath::i_registernamespace, (void*)&c_DOMXPath::ifa_registernamespace, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMXPath$$__isset = { (void*)&c_DOMXPath::i___isset, (void*)&c_DOMXPath::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMXPath$$registerphpfunctions = { (void*)&c_DOMXPath::i_registerphpfunctions, (void*)&c_DOMXPath::ifa_registerphpfunctions, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMXPath$$query = { (void*)&c_DOMXPath::i_query, (void*)&c_DOMXPath::ifa_query, 2, 4, 0x0000000000000000L};
 Variant c_DOMXPath::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -10135,12 +10135,12 @@ const int cw_VectorIterator$$instanceof_index[] = {
   0,-1,-1,1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_VectorIterator$$__construct = { (void*)&c_VectorIterator::i___construct, (void*)&c_VectorIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_VectorIterator$$rewind = { (void*)&c_VectorIterator::i_rewind, (void*)&c_VectorIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_VectorIterator$$valid = { (void*)&c_VectorIterator::i_valid, (void*)&c_VectorIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_VectorIterator$$key = { (void*)&c_VectorIterator::i_key, (void*)&c_VectorIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_VectorIterator$$current = { (void*)&c_VectorIterator::i_current, (void*)&c_VectorIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_VectorIterator$$next = { (void*)&c_VectorIterator::i_next, (void*)&c_VectorIterator::ifa_next, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_VectorIterator$$__construct = { (void*)&c_VectorIterator::i___construct, (void*)&c_VectorIterator::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_VectorIterator$$rewind = { (void*)&c_VectorIterator::i_rewind, (void*)&c_VectorIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_VectorIterator$$valid = { (void*)&c_VectorIterator::i_valid, (void*)&c_VectorIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_VectorIterator$$key = { (void*)&c_VectorIterator::i_key, (void*)&c_VectorIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_VectorIterator$$current = { (void*)&c_VectorIterator::i_current, (void*)&c_VectorIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_VectorIterator$$next = { (void*)&c_VectorIterator::i_next, (void*)&c_VectorIterator::ifa_next, 0, 4, 0x0000000000000000L};
 Variant c_VectorIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -10251,28 +10251,28 @@ const int cw_DOMElement$$instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-extern const CallInfo ci_DOMElement$$__construct = { (void*)&c_DOMElement::i___construct, (void*)&c_DOMElement::ifa___construct, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$__get = { (void*)&c_DOMElement::i___get, (void*)&c_DOMElement::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$getattributenode = { (void*)&c_DOMElement::i_getattributenode, (void*)&c_DOMElement::ifa_getattributenode, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$setattributenodens = { (void*)&c_DOMElement::i_setattributenodens, (void*)&c_DOMElement::ifa_setattributenodens, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$__set = { (void*)&c_DOMElement::i___set, (void*)&c_DOMElement::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$getelementsbytagname = { (void*)&c_DOMElement::i_getelementsbytagname, (void*)&c_DOMElement::ifa_getelementsbytagname, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$hasattributens = { (void*)&c_DOMElement::i_hasattributens, (void*)&c_DOMElement::ifa_hasattributens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$removeattributenode = { (void*)&c_DOMElement::i_removeattributenode, (void*)&c_DOMElement::ifa_removeattributenode, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$setattributenode = { (void*)&c_DOMElement::i_setattributenode, (void*)&c_DOMElement::ifa_setattributenode, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$getattributens = { (void*)&c_DOMElement::i_getattributens, (void*)&c_DOMElement::ifa_getattributens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$getattributenodens = { (void*)&c_DOMElement::i_getattributenodens, (void*)&c_DOMElement::ifa_getattributenodens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$removeattribute = { (void*)&c_DOMElement::i_removeattribute, (void*)&c_DOMElement::ifa_removeattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$setidattributens = { (void*)&c_DOMElement::i_setidattributens, (void*)&c_DOMElement::ifa_setidattributens, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$setidattributenode = { (void*)&c_DOMElement::i_setidattributenode, (void*)&c_DOMElement::ifa_setidattributenode, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$setidattribute = { (void*)&c_DOMElement::i_setidattribute, (void*)&c_DOMElement::ifa_setidattribute, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$getattribute = { (void*)&c_DOMElement::i_getattribute, (void*)&c_DOMElement::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$setattributens = { (void*)&c_DOMElement::i_setattributens, (void*)&c_DOMElement::ifa_setattributens, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$__isset = { (void*)&c_DOMElement::i___isset, (void*)&c_DOMElement::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$setattribute = { (void*)&c_DOMElement::i_setattribute, (void*)&c_DOMElement::ifa_setattribute, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$removeattributens = { (void*)&c_DOMElement::i_removeattributens, (void*)&c_DOMElement::ifa_removeattributens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$getelementsbytagnamens = { (void*)&c_DOMElement::i_getelementsbytagnamens, (void*)&c_DOMElement::ifa_getelementsbytagnamens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$hasattribute = { (void*)&c_DOMElement::i_hasattribute, (void*)&c_DOMElement::ifa_hasattribute, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMElement$$__construct = { (void*)&c_DOMElement::i___construct, (void*)&c_DOMElement::ifa___construct, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$__get = { (void*)&c_DOMElement::i___get, (void*)&c_DOMElement::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$getattributenode = { (void*)&c_DOMElement::i_getattributenode, (void*)&c_DOMElement::ifa_getattributenode, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$setattributenodens = { (void*)&c_DOMElement::i_setattributenodens, (void*)&c_DOMElement::ifa_setattributenodens, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$__set = { (void*)&c_DOMElement::i___set, (void*)&c_DOMElement::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$getelementsbytagname = { (void*)&c_DOMElement::i_getelementsbytagname, (void*)&c_DOMElement::ifa_getelementsbytagname, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$hasattributens = { (void*)&c_DOMElement::i_hasattributens, (void*)&c_DOMElement::ifa_hasattributens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$removeattributenode = { (void*)&c_DOMElement::i_removeattributenode, (void*)&c_DOMElement::ifa_removeattributenode, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$setattributenode = { (void*)&c_DOMElement::i_setattributenode, (void*)&c_DOMElement::ifa_setattributenode, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$getattributens = { (void*)&c_DOMElement::i_getattributens, (void*)&c_DOMElement::ifa_getattributens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$getattributenodens = { (void*)&c_DOMElement::i_getattributenodens, (void*)&c_DOMElement::ifa_getattributenodens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$removeattribute = { (void*)&c_DOMElement::i_removeattribute, (void*)&c_DOMElement::ifa_removeattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$setidattributens = { (void*)&c_DOMElement::i_setidattributens, (void*)&c_DOMElement::ifa_setidattributens, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$setidattributenode = { (void*)&c_DOMElement::i_setidattributenode, (void*)&c_DOMElement::ifa_setidattributenode, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$setidattribute = { (void*)&c_DOMElement::i_setidattribute, (void*)&c_DOMElement::ifa_setidattribute, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$getattribute = { (void*)&c_DOMElement::i_getattribute, (void*)&c_DOMElement::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$setattributens = { (void*)&c_DOMElement::i_setattributens, (void*)&c_DOMElement::ifa_setattributens, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$__isset = { (void*)&c_DOMElement::i___isset, (void*)&c_DOMElement::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$setattribute = { (void*)&c_DOMElement::i_setattribute, (void*)&c_DOMElement::ifa_setattribute, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$removeattributens = { (void*)&c_DOMElement::i_removeattributens, (void*)&c_DOMElement::ifa_removeattributens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$getelementsbytagnamens = { (void*)&c_DOMElement::i_getelementsbytagnamens, (void*)&c_DOMElement::ifa_getelementsbytagnamens, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMElement$$hasattribute = { (void*)&c_DOMElement::i_hasattribute, (void*)&c_DOMElement::ifa_hasattribute, 1, 4, 0x0000000000000000L};
 Variant c_DOMElement::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -10619,12 +10619,12 @@ const int cw_WaitHandle$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_WaitHandle$$__construct = { (void*)&c_WaitHandle::i___construct, (void*)&c_WaitHandle::ifa___construct, 0, 132, 0x0000000000000000LL};
-extern const CallInfo ci_WaitHandle$$getexceptioniffailed = { (void*)&c_WaitHandle::i_getexceptioniffailed, (void*)&c_WaitHandle::ifa_getexceptioniffailed, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_WaitHandle$$getname = { (void*)&c_WaitHandle::i_getname, (void*)&c_WaitHandle::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_WaitHandle$$join = { (void*)&c_WaitHandle::i_join, (void*)&c_WaitHandle::ifa_join, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_WaitHandle$$getid = { (void*)&c_WaitHandle::i_getid, (void*)&c_WaitHandle::ifa_getid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_WaitHandle$$import = { (void*)&c_WaitHandle::i_import, (void*)&c_WaitHandle::ifa_import, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_WaitHandle$$__construct = { (void*)&c_WaitHandle::i___construct, (void*)&c_WaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
+extern const CallInfo ci_WaitHandle$$getexceptioniffailed = { (void*)&c_WaitHandle::i_getexceptioniffailed, (void*)&c_WaitHandle::ifa_getexceptioniffailed, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_WaitHandle$$getname = { (void*)&c_WaitHandle::i_getname, (void*)&c_WaitHandle::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_WaitHandle$$join = { (void*)&c_WaitHandle::i_join, (void*)&c_WaitHandle::ifa_join, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_WaitHandle$$getid = { (void*)&c_WaitHandle::i_getid, (void*)&c_WaitHandle::ifa_getid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_WaitHandle$$import = { (void*)&c_WaitHandle::i_import, (void*)&c_WaitHandle::ifa_import, 0, 4, 0x0000000000000000L};
 Variant c_WaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -10734,44 +10734,44 @@ const int cw_Memcached$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_Memcached$$getbykey = { (void*)&c_Memcached::i_getbykey, (void*)&c_Memcached::ifa_getbykey, 4, 4, 0x0000000000000008LL};
-extern const CallInfo ci_Memcached$$getdelayed = { (void*)&c_Memcached::i_getdelayed, (void*)&c_Memcached::ifa_getdelayed, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$append = { (void*)&c_Memcached::i_append, (void*)&c_Memcached::ifa_append, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$setbykey = { (void*)&c_Memcached::i_setbykey, (void*)&c_Memcached::ifa_setbykey, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$replace = { (void*)&c_Memcached::i_replace, (void*)&c_Memcached::ifa_replace, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$prepend = { (void*)&c_Memcached::i_prepend, (void*)&c_Memcached::ifa_prepend, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getresultcode = { (void*)&c_Memcached::i_getresultcode, (void*)&c_Memcached::ifa_getresultcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$replacebykey = { (void*)&c_Memcached::i_replacebykey, (void*)&c_Memcached::ifa_replacebykey, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$setmulti = { (void*)&c_Memcached::i_setmulti, (void*)&c_Memcached::ifa_setmulti, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$casbykey = { (void*)&c_Memcached::i_casbykey, (void*)&c_Memcached::ifa_casbykey, 5, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$set = { (void*)&c_Memcached::i_set, (void*)&c_Memcached::ifa_set, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$get = { (void*)&c_Memcached::i_get, (void*)&c_Memcached::ifa_get, 3, 4, 0x0000000000000004LL};
-extern const CallInfo ci_Memcached$$getoption = { (void*)&c_Memcached::i_getoption, (void*)&c_Memcached::ifa_getoption, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$addserver = { (void*)&c_Memcached::i_addserver, (void*)&c_Memcached::ifa_addserver, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$addservers = { (void*)&c_Memcached::i_addservers, (void*)&c_Memcached::ifa_addservers, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$deletebykey = { (void*)&c_Memcached::i_deletebykey, (void*)&c_Memcached::ifa_deletebykey, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$decrement = { (void*)&c_Memcached::i_decrement, (void*)&c_Memcached::ifa_decrement, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$flush = { (void*)&c_Memcached::i_flush, (void*)&c_Memcached::ifa_flush, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$appendbykey = { (void*)&c_Memcached::i_appendbykey, (void*)&c_Memcached::ifa_appendbykey, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getmulti = { (void*)&c_Memcached::i_getmulti, (void*)&c_Memcached::ifa_getmulti, 3, 4, 0x0000000000000002LL};
-extern const CallInfo ci_Memcached$$getserverlist = { (void*)&c_Memcached::i_getserverlist, (void*)&c_Memcached::ifa_getserverlist, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$addbykey = { (void*)&c_Memcached::i_addbykey, (void*)&c_Memcached::ifa_addbykey, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$increment = { (void*)&c_Memcached::i_increment, (void*)&c_Memcached::ifa_increment, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getserverbykey = { (void*)&c_Memcached::i_getserverbykey, (void*)&c_Memcached::ifa_getserverbykey, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$fetch = { (void*)&c_Memcached::i_fetch, (void*)&c_Memcached::ifa_fetch, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$__construct = { (void*)&c_Memcached::i___construct, (void*)&c_Memcached::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getdelayedbykey = { (void*)&c_Memcached::i_getdelayedbykey, (void*)&c_Memcached::ifa_getdelayedbykey, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$setmultibykey = { (void*)&c_Memcached::i_setmultibykey, (void*)&c_Memcached::ifa_setmultibykey, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getstats = { (void*)&c_Memcached::i_getstats, (void*)&c_Memcached::ifa_getstats, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$setoption = { (void*)&c_Memcached::i_setoption, (void*)&c_Memcached::ifa_setoption, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getversion = { (void*)&c_Memcached::i_getversion, (void*)&c_Memcached::ifa_getversion, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$fetchall = { (void*)&c_Memcached::i_fetchall, (void*)&c_Memcached::ifa_fetchall, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$cas = { (void*)&c_Memcached::i_cas, (void*)&c_Memcached::ifa_cas, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$delete = { (void*)&c_Memcached::i_delete, (void*)&c_Memcached::ifa_delete, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getmultibykey = { (void*)&c_Memcached::i_getmultibykey, (void*)&c_Memcached::ifa_getmultibykey, 4, 4, 0x0000000000000004LL};
-extern const CallInfo ci_Memcached$$add = { (void*)&c_Memcached::i_add, (void*)&c_Memcached::ifa_add, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$prependbykey = { (void*)&c_Memcached::i_prependbykey, (void*)&c_Memcached::ifa_prependbykey, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$getresultmessage = { (void*)&c_Memcached::i_getresultmessage, (void*)&c_Memcached::ifa_getresultmessage, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Memcached$$getbykey = { (void*)&c_Memcached::i_getbykey, (void*)&c_Memcached::ifa_getbykey, 4, 4, 0x0000000000000008L};
+extern const CallInfo ci_Memcached$$getdelayed = { (void*)&c_Memcached::i_getdelayed, (void*)&c_Memcached::ifa_getdelayed, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$append = { (void*)&c_Memcached::i_append, (void*)&c_Memcached::ifa_append, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$setbykey = { (void*)&c_Memcached::i_setbykey, (void*)&c_Memcached::ifa_setbykey, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$replace = { (void*)&c_Memcached::i_replace, (void*)&c_Memcached::ifa_replace, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$prepend = { (void*)&c_Memcached::i_prepend, (void*)&c_Memcached::ifa_prepend, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getresultcode = { (void*)&c_Memcached::i_getresultcode, (void*)&c_Memcached::ifa_getresultcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$replacebykey = { (void*)&c_Memcached::i_replacebykey, (void*)&c_Memcached::ifa_replacebykey, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$setmulti = { (void*)&c_Memcached::i_setmulti, (void*)&c_Memcached::ifa_setmulti, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$casbykey = { (void*)&c_Memcached::i_casbykey, (void*)&c_Memcached::ifa_casbykey, 5, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$set = { (void*)&c_Memcached::i_set, (void*)&c_Memcached::ifa_set, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$get = { (void*)&c_Memcached::i_get, (void*)&c_Memcached::ifa_get, 3, 4, 0x0000000000000004L};
+extern const CallInfo ci_Memcached$$getoption = { (void*)&c_Memcached::i_getoption, (void*)&c_Memcached::ifa_getoption, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$addserver = { (void*)&c_Memcached::i_addserver, (void*)&c_Memcached::ifa_addserver, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$addservers = { (void*)&c_Memcached::i_addservers, (void*)&c_Memcached::ifa_addservers, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$deletebykey = { (void*)&c_Memcached::i_deletebykey, (void*)&c_Memcached::ifa_deletebykey, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$decrement = { (void*)&c_Memcached::i_decrement, (void*)&c_Memcached::ifa_decrement, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$flush = { (void*)&c_Memcached::i_flush, (void*)&c_Memcached::ifa_flush, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$appendbykey = { (void*)&c_Memcached::i_appendbykey, (void*)&c_Memcached::ifa_appendbykey, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getmulti = { (void*)&c_Memcached::i_getmulti, (void*)&c_Memcached::ifa_getmulti, 3, 4, 0x0000000000000002L};
+extern const CallInfo ci_Memcached$$getserverlist = { (void*)&c_Memcached::i_getserverlist, (void*)&c_Memcached::ifa_getserverlist, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$addbykey = { (void*)&c_Memcached::i_addbykey, (void*)&c_Memcached::ifa_addbykey, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$increment = { (void*)&c_Memcached::i_increment, (void*)&c_Memcached::ifa_increment, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getserverbykey = { (void*)&c_Memcached::i_getserverbykey, (void*)&c_Memcached::ifa_getserverbykey, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$fetch = { (void*)&c_Memcached::i_fetch, (void*)&c_Memcached::ifa_fetch, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$__construct = { (void*)&c_Memcached::i___construct, (void*)&c_Memcached::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getdelayedbykey = { (void*)&c_Memcached::i_getdelayedbykey, (void*)&c_Memcached::ifa_getdelayedbykey, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$setmultibykey = { (void*)&c_Memcached::i_setmultibykey, (void*)&c_Memcached::ifa_setmultibykey, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getstats = { (void*)&c_Memcached::i_getstats, (void*)&c_Memcached::ifa_getstats, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$setoption = { (void*)&c_Memcached::i_setoption, (void*)&c_Memcached::ifa_setoption, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getversion = { (void*)&c_Memcached::i_getversion, (void*)&c_Memcached::ifa_getversion, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$fetchall = { (void*)&c_Memcached::i_fetchall, (void*)&c_Memcached::ifa_fetchall, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$cas = { (void*)&c_Memcached::i_cas, (void*)&c_Memcached::ifa_cas, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$delete = { (void*)&c_Memcached::i_delete, (void*)&c_Memcached::ifa_delete, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getmultibykey = { (void*)&c_Memcached::i_getmultibykey, (void*)&c_Memcached::ifa_getmultibykey, 4, 4, 0x0000000000000004L};
+extern const CallInfo ci_Memcached$$add = { (void*)&c_Memcached::i_add, (void*)&c_Memcached::ifa_add, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$prependbykey = { (void*)&c_Memcached::i_prependbykey, (void*)&c_Memcached::ifa_prependbykey, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcached$$getresultmessage = { (void*)&c_Memcached::i_getresultmessage, (void*)&c_Memcached::ifa_getresultmessage, 0, 4, 0x0000000000000000L};
 Variant c_Memcached::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -11396,12 +11396,12 @@ const int cw_MapIterator$$instanceof_index[] = {
   0,-1,-1,1,2,-1,-1,-1,
 
 };
-extern const CallInfo ci_MapIterator$$__construct = { (void*)&c_MapIterator::i___construct, (void*)&c_MapIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MapIterator$$rewind = { (void*)&c_MapIterator::i_rewind, (void*)&c_MapIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MapIterator$$valid = { (void*)&c_MapIterator::i_valid, (void*)&c_MapIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MapIterator$$key = { (void*)&c_MapIterator::i_key, (void*)&c_MapIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MapIterator$$current = { (void*)&c_MapIterator::i_current, (void*)&c_MapIterator::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MapIterator$$next = { (void*)&c_MapIterator::i_next, (void*)&c_MapIterator::ifa_next, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_MapIterator$$__construct = { (void*)&c_MapIterator::i___construct, (void*)&c_MapIterator::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MapIterator$$rewind = { (void*)&c_MapIterator::i_rewind, (void*)&c_MapIterator::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MapIterator$$valid = { (void*)&c_MapIterator::i_valid, (void*)&c_MapIterator::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MapIterator$$key = { (void*)&c_MapIterator::i_key, (void*)&c_MapIterator::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MapIterator$$current = { (void*)&c_MapIterator::i_current, (void*)&c_MapIterator::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_MapIterator$$next = { (void*)&c_MapIterator::i_next, (void*)&c_MapIterator::ifa_next, 0, 4, 0x0000000000000000L};
 Variant c_MapIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -11511,27 +11511,27 @@ const int cw_DOMNode$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DOMNode$$getnodepath = { (void*)&c_DOMNode::i_getnodepath, (void*)&c_DOMNode::ifa_getnodepath, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$lookupprefix = { (void*)&c_DOMNode::i_lookupprefix, (void*)&c_DOMNode::ifa_lookupprefix, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$__construct = { (void*)&c_DOMNode::i___construct, (void*)&c_DOMNode::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$insertbefore = { (void*)&c_DOMNode::i_insertbefore, (void*)&c_DOMNode::ifa_insertbefore, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$__get = { (void*)&c_DOMNode::i___get, (void*)&c_DOMNode::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$normalize = { (void*)&c_DOMNode::i_normalize, (void*)&c_DOMNode::ifa_normalize, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$lookupnamespaceuri = { (void*)&c_DOMNode::i_lookupnamespaceuri, (void*)&c_DOMNode::ifa_lookupnamespaceuri, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$issamenode = { (void*)&c_DOMNode::i_issamenode, (void*)&c_DOMNode::ifa_issamenode, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$removechild = { (void*)&c_DOMNode::i_removechild, (void*)&c_DOMNode::ifa_removechild, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$__set = { (void*)&c_DOMNode::i___set, (void*)&c_DOMNode::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$clonenode = { (void*)&c_DOMNode::i_clonenode, (void*)&c_DOMNode::ifa_clonenode, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$getlineno = { (void*)&c_DOMNode::i_getlineno, (void*)&c_DOMNode::ifa_getlineno, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$replacechild = { (void*)&c_DOMNode::i_replacechild, (void*)&c_DOMNode::ifa_replacechild, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$haschildnodes = { (void*)&c_DOMNode::i_haschildnodes, (void*)&c_DOMNode::ifa_haschildnodes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$isdefaultnamespace = { (void*)&c_DOMNode::i_isdefaultnamespace, (void*)&c_DOMNode::ifa_isdefaultnamespace, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$hasattributes = { (void*)&c_DOMNode::i_hasattributes, (void*)&c_DOMNode::ifa_hasattributes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$c14n = { (void*)&c_DOMNode::i_c14n, (void*)&c_DOMNode::ifa_c14n, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$__isset = { (void*)&c_DOMNode::i___isset, (void*)&c_DOMNode::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$issupported = { (void*)&c_DOMNode::i_issupported, (void*)&c_DOMNode::ifa_issupported, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$c14nfile = { (void*)&c_DOMNode::i_c14nfile, (void*)&c_DOMNode::ifa_c14nfile, 5, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$appendchild = { (void*)&c_DOMNode::i_appendchild, (void*)&c_DOMNode::ifa_appendchild, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMNode$$getnodepath = { (void*)&c_DOMNode::i_getnodepath, (void*)&c_DOMNode::ifa_getnodepath, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$lookupprefix = { (void*)&c_DOMNode::i_lookupprefix, (void*)&c_DOMNode::ifa_lookupprefix, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$__construct = { (void*)&c_DOMNode::i___construct, (void*)&c_DOMNode::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$insertbefore = { (void*)&c_DOMNode::i_insertbefore, (void*)&c_DOMNode::ifa_insertbefore, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$__get = { (void*)&c_DOMNode::i___get, (void*)&c_DOMNode::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$normalize = { (void*)&c_DOMNode::i_normalize, (void*)&c_DOMNode::ifa_normalize, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$lookupnamespaceuri = { (void*)&c_DOMNode::i_lookupnamespaceuri, (void*)&c_DOMNode::ifa_lookupnamespaceuri, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$issamenode = { (void*)&c_DOMNode::i_issamenode, (void*)&c_DOMNode::ifa_issamenode, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$removechild = { (void*)&c_DOMNode::i_removechild, (void*)&c_DOMNode::ifa_removechild, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$__set = { (void*)&c_DOMNode::i___set, (void*)&c_DOMNode::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$clonenode = { (void*)&c_DOMNode::i_clonenode, (void*)&c_DOMNode::ifa_clonenode, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$getlineno = { (void*)&c_DOMNode::i_getlineno, (void*)&c_DOMNode::ifa_getlineno, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$replacechild = { (void*)&c_DOMNode::i_replacechild, (void*)&c_DOMNode::ifa_replacechild, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$haschildnodes = { (void*)&c_DOMNode::i_haschildnodes, (void*)&c_DOMNode::ifa_haschildnodes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$isdefaultnamespace = { (void*)&c_DOMNode::i_isdefaultnamespace, (void*)&c_DOMNode::ifa_isdefaultnamespace, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$hasattributes = { (void*)&c_DOMNode::i_hasattributes, (void*)&c_DOMNode::ifa_hasattributes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$c14n = { (void*)&c_DOMNode::i_c14n, (void*)&c_DOMNode::ifa_c14n, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$__isset = { (void*)&c_DOMNode::i___isset, (void*)&c_DOMNode::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$issupported = { (void*)&c_DOMNode::i_issupported, (void*)&c_DOMNode::ifa_issupported, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$c14nfile = { (void*)&c_DOMNode::i_c14nfile, (void*)&c_DOMNode::ifa_c14nfile, 5, 4, 0x0000000000000000L};
+extern const CallInfo ci_DOMNode$$appendchild = { (void*)&c_DOMNode::i_appendchild, (void*)&c_DOMNode::ifa_appendchild, 1, 4, 0x0000000000000000L};
 Variant c_DOMNode::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -11863,13 +11863,13 @@ const int cw_SQLite3Result$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_SQLite3Result$$finalize = { (void*)&c_SQLite3Result::i_finalize, (void*)&c_SQLite3Result::ifa_finalize, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Result$$__construct = { (void*)&c_SQLite3Result::i___construct, (void*)&c_SQLite3Result::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Result$$columntype = { (void*)&c_SQLite3Result::i_columntype, (void*)&c_SQLite3Result::ifa_columntype, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Result$$reset = { (void*)&c_SQLite3Result::i_reset, (void*)&c_SQLite3Result::ifa_reset, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Result$$numcolumns = { (void*)&c_SQLite3Result::i_numcolumns, (void*)&c_SQLite3Result::ifa_numcolumns, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Result$$fetcharray = { (void*)&c_SQLite3Result::i_fetcharray, (void*)&c_SQLite3Result::ifa_fetcharray, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Result$$columnname = { (void*)&c_SQLite3Result::i_columnname, (void*)&c_SQLite3Result::ifa_columnname, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SQLite3Result$$finalize = { (void*)&c_SQLite3Result::i_finalize, (void*)&c_SQLite3Result::ifa_finalize, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Result$$__construct = { (void*)&c_SQLite3Result::i___construct, (void*)&c_SQLite3Result::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Result$$columntype = { (void*)&c_SQLite3Result::i_columntype, (void*)&c_SQLite3Result::ifa_columntype, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Result$$reset = { (void*)&c_SQLite3Result::i_reset, (void*)&c_SQLite3Result::ifa_reset, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Result$$numcolumns = { (void*)&c_SQLite3Result::i_numcolumns, (void*)&c_SQLite3Result::ifa_numcolumns, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Result$$fetcharray = { (void*)&c_SQLite3Result::i_fetcharray, (void*)&c_SQLite3Result::ifa_fetcharray, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SQLite3Result$$columnname = { (void*)&c_SQLite3Result::i_columnname, (void*)&c_SQLite3Result::ifa_columnname, 1, 4, 0x0000000000000000L};
 Variant c_SQLite3Result::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -12001,28 +12001,28 @@ const int cw_SimpleXMLElement$$instanceof_index[] = {
   3,-1,-1,-1,4,-1,-1,-1,
 
 };
-extern const CallInfo ci_SimpleXMLElement$$__construct = { (void*)&c_SimpleXMLElement::i___construct, (void*)&c_SimpleXMLElement::ifa___construct, 5, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$offsetunset = { (void*)&c_SimpleXMLElement::i_offsetunset, (void*)&c_SimpleXMLElement::ifa_offsetunset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$__get = { (void*)&c_SimpleXMLElement::i___get, (void*)&c_SimpleXMLElement::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$getdocnamespaces = { (void*)&c_SimpleXMLElement::i_getdocnamespaces, (void*)&c_SimpleXMLElement::ifa_getdocnamespaces, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$offsetset = { (void*)&c_SimpleXMLElement::i_offsetset, (void*)&c_SimpleXMLElement::ifa_offsetset, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$__set = { (void*)&c_SimpleXMLElement::i___set, (void*)&c_SimpleXMLElement::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$getname = { (void*)&c_SimpleXMLElement::i_getname, (void*)&c_SimpleXMLElement::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$xpath = { (void*)&c_SimpleXMLElement::i_xpath, (void*)&c_SimpleXMLElement::ifa_xpath, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$offsetexists = { (void*)&c_SimpleXMLElement::i_offsetexists, (void*)&c_SimpleXMLElement::ifa_offsetexists, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$children = { (void*)&c_SimpleXMLElement::i_children, (void*)&c_SimpleXMLElement::ifa_children, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$addattribute = { (void*)&c_SimpleXMLElement::i_addattribute, (void*)&c_SimpleXMLElement::ifa_addattribute, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$addchild = { (void*)&c_SimpleXMLElement::i_addchild, (void*)&c_SimpleXMLElement::ifa_addchild, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$__tostring = { (void*)&c_SimpleXMLElement::i___tostring, (void*)&c_SimpleXMLElement::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$asxml = { (void*)&c_SimpleXMLElement::i_asxml, (void*)&c_SimpleXMLElement::ifa_asxml, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$attributes = { (void*)&c_SimpleXMLElement::i_attributes, (void*)&c_SimpleXMLElement::ifa_attributes, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$getiterator = { (void*)&c_SimpleXMLElement::i_getiterator, (void*)&c_SimpleXMLElement::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$registerxpathnamespace = { (void*)&c_SimpleXMLElement::i_registerxpathnamespace, (void*)&c_SimpleXMLElement::ifa_registerxpathnamespace, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$offsetget = { (void*)&c_SimpleXMLElement::i_offsetget, (void*)&c_SimpleXMLElement::ifa_offsetget, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$count = { (void*)&c_SimpleXMLElement::i_count, (void*)&c_SimpleXMLElement::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$__isset = { (void*)&c_SimpleXMLElement::i___isset, (void*)&c_SimpleXMLElement::ifa___isset, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$getnamespaces = { (void*)&c_SimpleXMLElement::i_getnamespaces, (void*)&c_SimpleXMLElement::ifa_getnamespaces, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$__unset = { (void*)&c_SimpleXMLElement::i___unset, (void*)&c_SimpleXMLElement::ifa___unset, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SimpleXMLElement$$__construct = { (void*)&c_SimpleXMLElement::i___construct, (void*)&c_SimpleXMLElement::ifa___construct, 5, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$offsetunset = { (void*)&c_SimpleXMLElement::i_offsetunset, (void*)&c_SimpleXMLElement::ifa_offsetunset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$__get = { (void*)&c_SimpleXMLElement::i___get, (void*)&c_SimpleXMLElement::ifa___get, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$getdocnamespaces = { (void*)&c_SimpleXMLElement::i_getdocnamespaces, (void*)&c_SimpleXMLElement::ifa_getdocnamespaces, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$offsetset = { (void*)&c_SimpleXMLElement::i_offsetset, (void*)&c_SimpleXMLElement::ifa_offsetset, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$__set = { (void*)&c_SimpleXMLElement::i___set, (void*)&c_SimpleXMLElement::ifa___set, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$getname = { (void*)&c_SimpleXMLElement::i_getname, (void*)&c_SimpleXMLElement::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$xpath = { (void*)&c_SimpleXMLElement::i_xpath, (void*)&c_SimpleXMLElement::ifa_xpath, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$offsetexists = { (void*)&c_SimpleXMLElement::i_offsetexists, (void*)&c_SimpleXMLElement::ifa_offsetexists, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$children = { (void*)&c_SimpleXMLElement::i_children, (void*)&c_SimpleXMLElement::ifa_children, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$addattribute = { (void*)&c_SimpleXMLElement::i_addattribute, (void*)&c_SimpleXMLElement::ifa_addattribute, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$addchild = { (void*)&c_SimpleXMLElement::i_addchild, (void*)&c_SimpleXMLElement::ifa_addchild, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$__tostring = { (void*)&c_SimpleXMLElement::i___tostring, (void*)&c_SimpleXMLElement::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$asxml = { (void*)&c_SimpleXMLElement::i_asxml, (void*)&c_SimpleXMLElement::ifa_asxml, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$attributes = { (void*)&c_SimpleXMLElement::i_attributes, (void*)&c_SimpleXMLElement::ifa_attributes, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$getiterator = { (void*)&c_SimpleXMLElement::i_getiterator, (void*)&c_SimpleXMLElement::ifa_getiterator, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$registerxpathnamespace = { (void*)&c_SimpleXMLElement::i_registerxpathnamespace, (void*)&c_SimpleXMLElement::ifa_registerxpathnamespace, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$offsetget = { (void*)&c_SimpleXMLElement::i_offsetget, (void*)&c_SimpleXMLElement::ifa_offsetget, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$count = { (void*)&c_SimpleXMLElement::i_count, (void*)&c_SimpleXMLElement::ifa_count, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$__isset = { (void*)&c_SimpleXMLElement::i___isset, (void*)&c_SimpleXMLElement::ifa___isset, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$getnamespaces = { (void*)&c_SimpleXMLElement::i_getnamespaces, (void*)&c_SimpleXMLElement::ifa_getnamespaces, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SimpleXMLElement$$__unset = { (void*)&c_SimpleXMLElement::i___unset, (void*)&c_SimpleXMLElement::ifa___unset, 1, 4, 0x0000000000000000L};
 Variant c_SimpleXMLElement::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -12347,7 +12347,7 @@ extern const int cw_SimpleXMLElement$$call_info_index[] = {
   18,20,-1,21,-1,-1,-1,-1,
 
 };
-c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64 a1, bool a2, String a3, bool a4) {
+c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64_t a1, bool a2, String a3, bool a4) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
@@ -12376,7 +12376,7 @@ const int cw_LibXMLError$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_LibXMLError$$__construct = { (void*)&c_LibXMLError::i___construct, (void*)&c_LibXMLError::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_LibXMLError$$__construct = { (void*)&c_LibXMLError::i___construct, (void*)&c_LibXMLError::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_LibXMLError::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -12424,12 +12424,12 @@ const int cw_EncodingMatch$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_EncodingMatch$$getencoding = { (void*)&c_EncodingMatch::i_getencoding, (void*)&c_EncodingMatch::ifa_getencoding, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingMatch$$__construct = { (void*)&c_EncodingMatch::i___construct, (void*)&c_EncodingMatch::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingMatch$$getutf8 = { (void*)&c_EncodingMatch::i_getutf8, (void*)&c_EncodingMatch::ifa_getutf8, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingMatch$$getlanguage = { (void*)&c_EncodingMatch::i_getlanguage, (void*)&c_EncodingMatch::ifa_getlanguage, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingMatch$$isvalid = { (void*)&c_EncodingMatch::i_isvalid, (void*)&c_EncodingMatch::ifa_isvalid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingMatch$$getconfidence = { (void*)&c_EncodingMatch::i_getconfidence, (void*)&c_EncodingMatch::ifa_getconfidence, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_EncodingMatch$$getencoding = { (void*)&c_EncodingMatch::i_getencoding, (void*)&c_EncodingMatch::ifa_getencoding, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingMatch$$__construct = { (void*)&c_EncodingMatch::i___construct, (void*)&c_EncodingMatch::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingMatch$$getutf8 = { (void*)&c_EncodingMatch::i_getutf8, (void*)&c_EncodingMatch::ifa_getutf8, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingMatch$$getlanguage = { (void*)&c_EncodingMatch::i_getlanguage, (void*)&c_EncodingMatch::ifa_getlanguage, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingMatch$$isvalid = { (void*)&c_EncodingMatch::i_isvalid, (void*)&c_EncodingMatch::ifa_isvalid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_EncodingMatch$$getconfidence = { (void*)&c_EncodingMatch::i_getconfidence, (void*)&c_EncodingMatch::ifa_getconfidence, 0, 4, 0x0000000000000000L};
 Variant c_EncodingMatch::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -12539,27 +12539,27 @@ const int cw_Memcache$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_Memcache$$__construct = { (void*)&c_Memcache::i___construct, (void*)&c_Memcache::ifa___construct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$setserverparams = { (void*)&c_Memcache::i_setserverparams, (void*)&c_Memcache::ifa_setserverparams, 6, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$add = { (void*)&c_Memcache::i_add, (void*)&c_Memcache::ifa_add, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$decrement = { (void*)&c_Memcache::i_decrement, (void*)&c_Memcache::ifa_decrement, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$flush = { (void*)&c_Memcache::i_flush, (void*)&c_Memcache::ifa_flush, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$set = { (void*)&c_Memcache::i_set, (void*)&c_Memcache::ifa_set, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$increment = { (void*)&c_Memcache::i_increment, (void*)&c_Memcache::ifa_increment, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$getstats = { (void*)&c_Memcache::i_getstats, (void*)&c_Memcache::ifa_getstats, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$close = { (void*)&c_Memcache::i_close, (void*)&c_Memcache::ifa_close, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$getserverstatus = { (void*)&c_Memcache::i_getserverstatus, (void*)&c_Memcache::ifa_getserverstatus, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$setoptimeout = { (void*)&c_Memcache::i_setoptimeout, (void*)&c_Memcache::ifa_setoptimeout, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$getextendedstats = { (void*)&c_Memcache::i_getextendedstats, (void*)&c_Memcache::ifa_getextendedstats, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$addserver = { (void*)&c_Memcache::i_addserver, (void*)&c_Memcache::ifa_addserver, 9, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$getversion = { (void*)&c_Memcache::i_getversion, (void*)&c_Memcache::ifa_getversion, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$setcompressthreshold = { (void*)&c_Memcache::i_setcompressthreshold, (void*)&c_Memcache::ifa_setcompressthreshold, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$pconnect = { (void*)&c_Memcache::i_pconnect, (void*)&c_Memcache::ifa_pconnect, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$__destruct = { (void*)&c_Memcache::i___destruct, (void*)&c_Memcache::ifa___destruct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$replace = { (void*)&c_Memcache::i_replace, (void*)&c_Memcache::ifa_replace, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$get = { (void*)&c_Memcache::i_get, (void*)&c_Memcache::ifa_get, 2, 4, 0x0000000000000002LL};
-extern const CallInfo ci_Memcache$$delete = { (void*)&c_Memcache::i_delete, (void*)&c_Memcache::ifa_delete, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcache$$connect = { (void*)&c_Memcache::i_connect, (void*)&c_Memcache::ifa_connect, 4, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Memcache$$__construct = { (void*)&c_Memcache::i___construct, (void*)&c_Memcache::ifa___construct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$setserverparams = { (void*)&c_Memcache::i_setserverparams, (void*)&c_Memcache::ifa_setserverparams, 6, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$add = { (void*)&c_Memcache::i_add, (void*)&c_Memcache::ifa_add, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$decrement = { (void*)&c_Memcache::i_decrement, (void*)&c_Memcache::ifa_decrement, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$flush = { (void*)&c_Memcache::i_flush, (void*)&c_Memcache::ifa_flush, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$set = { (void*)&c_Memcache::i_set, (void*)&c_Memcache::ifa_set, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$increment = { (void*)&c_Memcache::i_increment, (void*)&c_Memcache::ifa_increment, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$getstats = { (void*)&c_Memcache::i_getstats, (void*)&c_Memcache::ifa_getstats, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$close = { (void*)&c_Memcache::i_close, (void*)&c_Memcache::ifa_close, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$getserverstatus = { (void*)&c_Memcache::i_getserverstatus, (void*)&c_Memcache::ifa_getserverstatus, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$setoptimeout = { (void*)&c_Memcache::i_setoptimeout, (void*)&c_Memcache::ifa_setoptimeout, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$getextendedstats = { (void*)&c_Memcache::i_getextendedstats, (void*)&c_Memcache::ifa_getextendedstats, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$addserver = { (void*)&c_Memcache::i_addserver, (void*)&c_Memcache::ifa_addserver, 9, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$getversion = { (void*)&c_Memcache::i_getversion, (void*)&c_Memcache::ifa_getversion, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$setcompressthreshold = { (void*)&c_Memcache::i_setcompressthreshold, (void*)&c_Memcache::ifa_setcompressthreshold, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$pconnect = { (void*)&c_Memcache::i_pconnect, (void*)&c_Memcache::ifa_pconnect, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$__destruct = { (void*)&c_Memcache::i___destruct, (void*)&c_Memcache::ifa___destruct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$replace = { (void*)&c_Memcache::i_replace, (void*)&c_Memcache::ifa_replace, 4, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$get = { (void*)&c_Memcache::i_get, (void*)&c_Memcache::ifa_get, 2, 4, 0x0000000000000002L};
+extern const CallInfo ci_Memcache$$delete = { (void*)&c_Memcache::i_delete, (void*)&c_Memcache::ifa_delete, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_Memcache$$connect = { (void*)&c_Memcache::i_connect, (void*)&c_Memcache::ifa_connect, 4, 4, 0x0000000000000000L};
 Variant c_Memcache::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }

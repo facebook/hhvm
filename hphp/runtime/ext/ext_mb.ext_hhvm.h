@@ -111,7 +111,7 @@ vars => r8
 _argv => r9
 */
 
-TypedValue* fh_mb_convert_variables(TypedValue* _rv, long long _argc, Value* to_encoding, TypedValue* from_encoding, TypedValue* vars, Value* _argv) asm("_ZN4HPHP22f_mb_convert_variablesEiRKNS_6StringERKNS_7VariantERKNS_14VRefParamValueERKNS_5ArrayE");
+TypedValue* fh_mb_convert_variables(TypedValue* _rv, int64_t _argc, Value* to_encoding, TypedValue* from_encoding, TypedValue* vars, Value* _argv) asm("_ZN4HPHP22f_mb_convert_variablesEiRKNS_6StringERKNS_7VariantERKNS_14VRefParamValueERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_mb_decode_mimeheader(HPHP::String const&)
@@ -216,13 +216,13 @@ option => r8
 TypedValue* fh_mb_ereg_replace(TypedValue* _rv, TypedValue* pattern, Value* replacement, Value* str, Value* option) asm("_ZN4HPHP17f_mb_ereg_replaceERKNS_7VariantERKNS_6StringES5_S5_");
 
 /*
-long long HPHP::f_mb_ereg_search_getpos()
+long HPHP::f_mb_ereg_search_getpos()
 _ZN4HPHP23f_mb_ereg_search_getposEv
 
 (return value) => rax
 */
 
-long long fh_mb_ereg_search_getpos() asm("_ZN4HPHP23f_mb_ereg_search_getposEv");
+long fh_mb_ereg_search_getpos() asm("_ZN4HPHP23f_mb_ereg_search_getposEv");
 
 /*
 HPHP::Variant HPHP::f_mb_ereg_search_getregs()

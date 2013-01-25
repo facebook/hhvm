@@ -116,13 +116,13 @@ delimiter => rdx
 Value* fh_preg_quote(Value* _rv, Value* str, Value* delimiter) asm("_ZN4HPHP12f_preg_quoteERKNS_6StringES2_");
 
 /*
-long long HPHP::f_preg_last_error()
+long HPHP::f_preg_last_error()
 _ZN4HPHP17f_preg_last_errorEv
 
 (return value) => rax
 */
 
-long long fh_preg_last_error() asm("_ZN4HPHP17f_preg_last_errorEv");
+long fh_preg_last_error() asm("_ZN4HPHP17f_preg_last_errorEv");
 
 /*
 HPHP::String HPHP::f_ereg_replace(HPHP::String const&, HPHP::String const&, HPHP::String const&)

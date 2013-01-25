@@ -40,15 +40,15 @@ const int cw_FB_MySQLLexer$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_FB_MySQLLexer$$revert = { (void*)&c_FB_MySQLLexer::i_revert, (void*)&c_FB_MySQLLexer::ifa_revert, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$__construct = { (void*)&c_FB_MySQLLexer::i___construct, (void*)&c_FB_MySQLLexer::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$iscompop = { (void*)&c_FB_MySQLLexer::i_iscompop, (void*)&c_FB_MySQLLexer::ifa_iscompop, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$lex = { (void*)&c_FB_MySQLLexer::i_lex, (void*)&c_FB_MySQLLexer::ifa_lex, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$nexttoken = { (void*)&c_FB_MySQLLexer::i_nexttoken, (void*)&c_FB_MySQLLexer::ifa_nexttoken, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$pushback = { (void*)&c_FB_MySQLLexer::i_pushback, (void*)&c_FB_MySQLLexer::ifa_pushback, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$unget = { (void*)&c_FB_MySQLLexer::i_unget, (void*)&c_FB_MySQLLexer::ifa_unget, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$skip = { (void*)&c_FB_MySQLLexer::i_skip, (void*)&c_FB_MySQLLexer::ifa_skip, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$get = { (void*)&c_FB_MySQLLexer::i_get, (void*)&c_FB_MySQLLexer::ifa_get, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$revert = { (void*)&c_FB_MySQLLexer::i_revert, (void*)&c_FB_MySQLLexer::ifa_revert, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$__construct = { (void*)&c_FB_MySQLLexer::i___construct, (void*)&c_FB_MySQLLexer::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$iscompop = { (void*)&c_FB_MySQLLexer::i_iscompop, (void*)&c_FB_MySQLLexer::ifa_iscompop, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$lex = { (void*)&c_FB_MySQLLexer::i_lex, (void*)&c_FB_MySQLLexer::ifa_lex, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$nexttoken = { (void*)&c_FB_MySQLLexer::i_nexttoken, (void*)&c_FB_MySQLLexer::ifa_nexttoken, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$pushback = { (void*)&c_FB_MySQLLexer::i_pushback, (void*)&c_FB_MySQLLexer::ifa_pushback, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$unget = { (void*)&c_FB_MySQLLexer::i_unget, (void*)&c_FB_MySQLLexer::ifa_unget, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$skip = { (void*)&c_FB_MySQLLexer::i_skip, (void*)&c_FB_MySQLLexer::ifa_skip, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_FB_MySQLLexer$$get = { (void*)&c_FB_MySQLLexer::i_get, (void*)&c_FB_MySQLLexer::ifa_get, 0, 4, 0x0000000000000000L};
 Variant c_FB_MySQLLexer::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -173,7 +173,7 @@ extern const int cw_FB_MySQLLexer$$call_info_index[] = {
 
 };
 c_FB_MySQLLexer *c_FB_MySQLLexer::create(CVarRef v_string //  = NAMVAR(s_sys_svs00000000, "")
-, CVarRef v_lookahead //  = NAMVAR(s_sys_svif01bca90, 0LL)
+, CVarRef v_lookahead //  = NAMVAR(s_sys_svif01bca90, int64_t(0))
 ) {
   CountableHelper h(this);
   init();
@@ -194,23 +194,23 @@ const ObjectStaticCallbacks cw_FB_MySQLLexer = {
 };
 void c_FB_MySQLLexer::init() {
   m_symbols = s_sys_sa00000000;
-  m_tokPtr = 0LL;
-  m_tokStart = 0LL;
-  m_tokLen = 0LL;
+  m_tokPtr = 0L;
+  m_tokStart = 0L;
+  m_tokLen = 0L;
   m_tokText = NAMSTR(s_sys_ss00000000, "");
-  m_lineNo = 0LL;
-  m_lineBegin = 0LL;
+  m_lineNo = 0L;
+  m_lineBegin = 0L;
   m_string = NAMSTR(s_sys_ss00000000, "");
-  m_stringLen = 0LL;
-  m_tokAbsStart = 0LL;
+  m_stringLen = 0L;
+  m_tokAbsStart = 0L;
   m_skipText = NAMSTR(s_sys_ss00000000, "");
-  m_lookahead = 0LL;
+  m_lookahead = 0L;
   m_tokenStack = s_sys_sa00000000;
-  m_stackPtr = 0LL;
+  m_stackPtr = 0L;
 }
 /* SRC: classes/fbmysqllexer.php line 69 */
 void c_FB_MySQLLexer::t___construct(Variant v_string //  = NAMSTR(s_sys_ss00000000, "")
-, Variant v_lookahead //  = 0LL
+, Variant v_lookahead //  = 0L
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::__construct);
   ObjectData *obj_tmp UNUSED;
@@ -228,7 +228,7 @@ Variant c_FB_MySQLLexer::t_get() {
   ObjectData *obj_tmp UNUSED;
   ++m_tokPtr;
   ++m_tokLen;
-  return (not_more(m_tokPtr, m_stringLen) ? ((Variant)(m_string.rvalAt((m_tokPtr - 1LL), AccessFlags::Error))) : ((Variant)(null)));
+  return (not_more(m_tokPtr, m_stringLen) ? ((Variant)(m_string.rvalAt((m_tokPtr - 1L), AccessFlags::Error))) : ((Variant)(null)));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 82 */
@@ -261,7 +261,7 @@ void c_FB_MySQLLexer::t_revert() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::revert);
   ObjectData *obj_tmp UNUSED;
   m_tokPtr.assignVal(m_tokStart);
-  m_tokLen = 0LL;
+  m_tokLen = 0L;
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 97 */
@@ -277,12 +277,12 @@ void c_FB_MySQLLexer::t_pushback() {
   {
     bool tmp0;
     {
-      bool tmp1 = (more(m_lookahead, 0LL));
+      bool tmp1 = (more(m_lookahead, 0L));
       if (tmp1) {
-        int64 tmp2((x_count(m_tokenStack)));
-        tmp1 = (more(tmp2, 0LL));
+        int64_t tmp2((x_count(m_tokenStack)));
+        tmp1 = (more(tmp2, 0L));
       }
-      tmp0 = ((tmp1 && more(m_stackPtr, 0LL)));
+      tmp0 = ((tmp1 && more(m_stackPtr, 0L)));
     }
     if (tmp0) {
       {
@@ -296,17 +296,17 @@ namespace hphp_impl_splitter {}
 Variant c_FB_MySQLLexer::t_lex() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::lex);
   Variant v_token;
-  int64 v_i = 0;
+  int64_t v_i = 0;
 
   Variant tmp_ref;
   ObjectData *obj_tmp UNUSED;
-  if (more(m_lookahead, 0LL)) {
+  if (more(m_lookahead, 0L)) {
     {
       {
         bool tmp0;
         {
           Variant tmp1((m_stackPtr));
-          int64 tmp2((x_count(m_tokenStack)));
+          int64_t tmp2((x_count(m_tokenStack)));
           tmp0 = (less(tmp1, tmp2));
         }
         if (tmp0) {
@@ -339,16 +339,16 @@ Variant c_FB_MySQLLexer::t_lex() {
               {
                 {
                   LOOP_COUNTER(1);
-                  for (v_i = 0LL; ; v_i++) {
+                  for (v_i = 0L; ; v_i++) {
                     {
-                      int64 tmp0((x_count(m_tokenStack)));
-                      int64 tmp1(((tmp0 - 1LL)));
+                      int64_t tmp0((x_count(m_tokenStack)));
+                      int64_t tmp1(((tmp0 - 1L)));
                       if (!((less(v_i, tmp1)))) break;
                     }
                     LOOP_COUNTER_CHECK(1);
                     {
                       {
-                        int64 tmp0(((v_i + 1LL)));
+                        int64_t tmp0(((v_i + 1L)));
                         const Variant &tmp1((m_tokenStack.rvalAt(tmp0, AccessFlags::Error)));
                         m_tokenStack.set(v_i, (tmp1));
                       }
@@ -381,7 +381,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 172 */
 Variant c_FB_MySQLLexer::t_nexttoken() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::nextToken);
-  int64 v_state = 0;
+  int64_t v_state = 0;
   Variant v_c;
   Variant v_t;
   Variant v_quote;
@@ -393,7 +393,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
   if (equal(m_string, NAMSTR(s_sys_ss00000000, ""))) {
     return null;
   }
-  v_state = 0LL;
+  v_state = 0L;
   m_tokAbsStart.assignVal(m_tokStart);
   LOOP_COUNTER(1);
   {
@@ -401,18 +401,18 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
       LOOP_COUNTER_CHECK(1);
       {
         switch ((v_state)) {
-        case 0LL:
+        case 0L:
           {
             m_tokPtr.assignVal(m_tokStart);
             m_tokText = NAMSTR(s_sys_ss00000000, "");
-            m_tokLen = 0LL;
+            m_tokLen = 0L;
             {
               const Variant &tmp0((t_get()));
               v_c.assignVal(tmp0);
             }
             if (x_is_null(v_c)) {
               {
-                v_state = 1000LL;
+                v_state = 1000L;
                 break;
               }
             }
@@ -442,7 +442,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                     const Variant &tmp0((t_skip()));
                     v_c.assignVal(tmp0);
                   }
-                  m_tokLen = 1LL;
+                  m_tokLen = 1L;
                 }
               }
             }
@@ -462,7 +462,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 else {
                   {
                     t_unget();
-                    v_state = 999LL;
+                    v_state = 999L;
                     break;
                   }
                 }
@@ -471,31 +471,31 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             if ((equal(v_c, NAMSTR(s_sys_ss18c7e86d, "'")) || equal(v_c, NAMSTR(s_sys_ss4f157ea2, "\"")))) {
               {
                 v_quote.assignVal(v_c);
-                v_state = 12LL;
+                v_state = 12L;
                 break;
               }
             }
             if (equal(v_c, NAMSTR(s_sys_ss37630289, "_"))) {
               {
-                v_state = 18LL;
+                v_state = 18L;
                 break;
               }
             }
             if (equal(v_c, NAMSTR(s_sys_ss72522744, "`"))) {
               {
-                v_state = 20LL;
+                v_state = 20L;
                 break;
               }
             }
             if (x_ctype_alpha(v_c)) {
               {
-                v_state = 1LL;
+                v_state = 1L;
                 break;
               }
             }
             if (x_ctype_digit(v_c)) {
               {
-                v_state = 5LL;
+                v_state = 5L;
                 break;
               }
             }
@@ -522,7 +522,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                       }
                       else {
                         {
-                          v_state = 999LL;
+                          v_state = 999L;
                           break;
                         }
                       }
@@ -532,7 +532,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 else if (x_ctype_digit(v_t)) {
                   {
                     t_unget();
-                    v_state = 7LL;
+                    v_state = 7L;
                     break;
                   }
                 }
@@ -545,7 +545,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if (equal(v_c, NAMSTR(s_sys_ss53a909a7, "#"))) {
               {
-                v_state = 14LL;
+                v_state = 14L;
                 break;
               }
             }
@@ -557,13 +557,13 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 }
                 if (equal(v_t, NAMSTR(s_sys_ss0b31e10c, "-"))) {
                   {
-                    v_state = 14LL;
+                    v_state = 14L;
                     break;
                   }
                 }
                 else {
                   {
-                    v_state = 999LL;
+                    v_state = 999L;
                     break;
                   }
                 }
@@ -571,14 +571,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if (t_iscompop(v_c)) {
               {
-                v_state = 10LL;
+                v_state = 10L;
                 break;
               }
             }
-            v_state = 999LL;
+            v_state = 999L;
             break;
           }
-        case 1LL:
+        case 1L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -586,14 +586,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if ((x_ctype_alnum(v_c) || equal(v_c, NAMSTR(s_sys_ss37630289, "_")))) {
               {
-                v_state = 1LL;
+                v_state = 1L;
                 break;
               }
             }
-            v_state = 2LL;
+            v_state = 2L;
             break;
           }
-        case 20LL:
+        case 20L:
           {
             {
               LOOP_COUNTER(4);
@@ -611,10 +611,10 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
               const Variant &tmp0((t_get()));
               v_c.assignVal(tmp0);
             }
-            v_state = 2LL;
+            v_state = 2L;
             break;
           }
-        case 2LL:
+        case 2L:
           {
             t_unget();
             {
@@ -657,7 +657,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             break;
           }
-        case 5LL:
+        case 5L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -665,7 +665,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if (x_ctype_digit(v_c)) {
               {
-                v_state = 5LL;
+                v_state = 5L;
                 break;
               }
             }
@@ -682,7 +682,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 }
                 else {
                   {
-                    v_state = 7LL;
+                    v_state = 7L;
                     break;
                   }
                 }
@@ -690,23 +690,23 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             else if (x_ctype_alpha(v_c)) {
               {
-                v_state = 999LL;
+                v_state = 999L;
                 break;
               }
             }
             else {
               {
-                v_state = 6LL;
+                v_state = 6L;
                 break;
               }
             }
           }
-        case 6LL:
+        case 6L:
           {
             t_unget();
             {
               const Variant &tmp0((x_substr(toString(m_string), toInt32(m_tokStart), toInt32(m_tokLen))));
-              int64 tmp1((x_intval(tmp0)));
+              int64_t tmp1((x_intval(tmp0)));
               m_tokText = tmp1;
             }
             {
@@ -717,7 +717,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             return NAMSTR(s_sys_ss65457f0a, "int_val");
             break;
           }
-        case 7LL:
+        case 7L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -725,20 +725,20 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if ((equal(v_c, NAMSTR(s_sys_ss23d5e994, "e")) || equal(v_c, NAMSTR(s_sys_ss559ab02e, "E")))) {
               {
-                v_state = 15LL;
+                v_state = 15L;
                 break;
               }
             }
             if (x_ctype_digit(v_c)) {
               {
-                v_state = 7LL;
+                v_state = 7L;
                 break;
               }
             }
-            v_state = 8LL;
+            v_state = 8L;
             break;
           }
-        case 8LL:
+        case 8L:
           {
             t_unget();
             {
@@ -753,7 +753,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             m_tokStart.assignVal(m_tokPtr);
             return NAMSTR(s_sys_ss5a368215, "real_val");
           }
-        case 10LL:
+        case 10L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -761,14 +761,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if (t_iscompop(v_c)) {
               {
-                v_state = 10LL;
+                v_state = 10L;
                 break;
               }
             }
-            v_state = 11LL;
+            v_state = 11L;
             break;
           }
-        case 11LL:
+        case 11L:
           {
             t_unget();
             {
@@ -785,10 +785,10 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 return m_tokText;
               }
             }
-            v_state = 999LL;
+            v_state = 999L;
             break;
           }
-        case 12LL:
+        case 12L:
           {
             v_bail = false;
             v_text = NAMSTR(s_sys_ss00000000, "");
@@ -826,7 +826,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                         switch9 = (v_c);
                         bool needsOrder;
                         int64 hash;
-                        hash = switch9.hashForStringSwitch(1610917649LL, 0LL, 0LL, 0LL, 0LL, 8LL, needsOrder);
+                        hash = switch9.hashForStringSwitch(1610917649L, 0L, 0L, 0L, 0L, 8L, needsOrder);
                         switch (((uint64) hash) & 7UL) {
                         case 0UL:
                           if (equal(switch9, (NAMSTR(s_sys_ss5546a380, "0")))) goto case_9_0;
@@ -903,14 +903,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if (!(x_is_null(m_tokText))) {
               {
-                v_state = 13LL;
+                v_state = 13L;
                 break;
               }
             }
-            v_state = 999LL;
+            v_state = 999L;
             break;
           }
-        case 13LL:
+        case 13L:
           {
             {
               const Variant &tmp0((x_substr(toString(m_string), toInt32(m_tokAbsStart), toInt32((m_tokStart - m_tokAbsStart)))));
@@ -920,7 +920,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             return NAMSTR(s_sys_ss515c823d, "text_val");
             break;
           }
-        case 14LL:
+        case 14L:
           {
             {
               const Variant &tmp0((t_skip()));
@@ -948,17 +948,17 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                   }
                 }
                 m_tokStart.assignVal(m_tokPtr);
-                v_state = 0LL;
+                v_state = 0L;
               }
             }
             else {
               {
-                v_state = 14LL;
+                v_state = 14L;
               }
             }
             break;
           }
-        case 15LL:
+        case 15L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -966,14 +966,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if ((equal(v_c, NAMSTR(s_sys_ss0b31e10c, "-")) || equal(v_c, NAMSTR(s_sys_ss76810686, "+")))) {
               {
-                v_state = 16LL;
+                v_state = 16L;
                 break;
               }
             }
-            v_state = 999LL;
+            v_state = 999L;
             break;
           }
-        case 16LL:
+        case 16L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -981,14 +981,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if (x_ctype_digit(v_c)) {
               {
-                v_state = 17LL;
+                v_state = 17L;
                 break;
               }
             }
-            v_state = 999LL;
+            v_state = 999L;
             break;
           }
-        case 17LL:
+        case 17L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -996,14 +996,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if (x_ctype_digit(v_c)) {
               {
-                v_state = 17LL;
+                v_state = 17L;
                 break;
               }
             }
-            v_state = 8LL;
+            v_state = 8L;
             break;
           }
-        case 18LL:
+        case 18L:
           {
             {
               const Variant &tmp0((t_get()));
@@ -1011,14 +1011,14 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             if ((x_ctype_alnum(v_c) || equal(v_c, NAMSTR(s_sys_ss37630289, "_")))) {
               {
-                v_state = 18LL;
+                v_state = 18L;
                 break;
               }
             }
-            v_state = 19LL;
+            v_state = 19L;
             break;
           }
-        case 19LL:
+        case 19L:
           {
             t_unget();
             {
@@ -1032,7 +1032,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             m_tokStart.assignVal(m_tokPtr);
             return NAMSTR(s_sys_ss75a6613c, "sys_var");
           }
-        case 999LL:
+        case 999L:
           {
             t_revert();
             {
@@ -1046,7 +1046,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             m_tokStart.assignVal(m_tokPtr);
             return m_tokText;
           }
-        case 1000LL:
+        case 1000L:
           {
             m_tokText = NAMSTR(s_sys_ss39eee0d6, "*end of input*");
             {
@@ -1069,7 +1069,7 @@ ObjectData *coo_FB_MySQLLexer() {
 
 // Class tables
 static const int64 cpt_static_inits[] = {
-  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
+  (int64)&NAMVAR(s_sys_svif01bca90, int64_t(0)),
   (int64)&s_sys_sva00000000,
   (int64)&NAMVAR(s_sys_svs00000000, ""),
 };

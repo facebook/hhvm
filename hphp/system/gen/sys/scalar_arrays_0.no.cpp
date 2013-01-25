@@ -29,7 +29,7 @@ StaticArray SystemScalarArrays::ssa_[2];
 void SystemScalarArrays::initialize() {
   ssa_[0] = StaticArray(ArrayData::Create());
   ssa_[0].setEvalScalar();
-  ssa_[1] = StaticArray(ArrayInit(9).add(NAMSTR(s_sys_ss2058ee93, "bool"), 1LL, true).add(NAMSTR(s_sys_ss7352a1bc, "boolean"), 1LL, true).add(NAMSTR(s_sys_ss0d4e9a89, "int"), 1LL, true).add(NAMSTR(s_sys_ss508ba625, "integer"), 1LL, true).add(NAMSTR(s_sys_ss4ed43ee6, "real"), 1LL, true).add(NAMSTR(s_sys_ss37da49a8, "double"), 1LL, true).add(NAMSTR(s_sys_ss3f37a7c7, "float"), 1LL, true).add(NAMSTR(s_sys_ss3b11235d, "string"), 1LL, true).add(NAMSTR(s_sys_ss28693096, "array"), 1LL, true).create());
+  ssa_[1] = StaticArray(ArrayInit(9).add(NAMSTR(s_sys_ss2058ee93, "bool"), 1L, true).add(NAMSTR(s_sys_ss7352a1bc, "boolean"), 1L, true).add(NAMSTR(s_sys_ss0d4e9a89, "int"), 1L, true).add(NAMSTR(s_sys_ss508ba625, "integer"), 1L, true).add(NAMSTR(s_sys_ss4ed43ee6, "real"), 1L, true).add(NAMSTR(s_sys_ss37da49a8, "double"), 1L, true).add(NAMSTR(s_sys_ss3f37a7c7, "float"), 1L, true).add(NAMSTR(s_sys_ss3b11235d, "string"), 1L, true).add(NAMSTR(s_sys_ss28693096, "array"), 1L, true).create());
   ssa_[1].setEvalScalar();
   SystemScalarArrays::initializeNamed();
 }

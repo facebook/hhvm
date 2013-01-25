@@ -44,7 +44,7 @@ Array stackTraceToBackTrace(const StackTrace& st) {
     for (unsigned int i = 0; i < bt_pointers.size(); i++) {
       Array frame;
       frame.set("file",     "");
-      frame.set("line",     0LL);
+      frame.set("line",     int64_t(0));
       frame.set("function", "");
       frame.set("args",     "");
       frame.set("bt",       (int64)bt_pointers[i]);

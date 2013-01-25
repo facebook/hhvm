@@ -95,7 +95,7 @@ microseconds => rdx
 bool fh_stream_set_timeout(Value* stream, int seconds, int microseconds) asm("_ZN4HPHP20f_stream_set_timeoutERKNS_6ObjectEii");
 
 /*
-long long HPHP::f_stream_set_write_buffer(HPHP::Object const&, int)
+long HPHP::f_stream_set_write_buffer(HPHP::Object const&, int)
 _ZN4HPHP25f_stream_set_write_bufferERKNS_6ObjectEi
 
 (return value) => rax
@@ -103,7 +103,7 @@ stream => rdi
 buffer => rsi
 */
 
-long long fh_stream_set_write_buffer(Value* stream, int buffer) asm("_ZN4HPHP25f_stream_set_write_bufferERKNS_6ObjectEi");
+long fh_stream_set_write_buffer(Value* stream, int buffer) asm("_ZN4HPHP25f_stream_set_write_bufferERKNS_6ObjectEi");
 
 /*
 HPHP::Variant HPHP::f_stream_socket_accept(HPHP::Object const&, double, HPHP::VRefParamValue const&)

@@ -59,14 +59,14 @@ extra_headers => rcx
 bool fh_error_log(Value* message, int message_type, Value* destination, Value* extra_headers) asm("_ZN4HPHP11f_error_logERKNS_6StringEiS2_S2_");
 
 /*
-long long HPHP::f_error_reporting(HPHP::Variant const&)
+long HPHP::f_error_reporting(HPHP::Variant const&)
 _ZN4HPHP17f_error_reportingERKNS_7VariantE
 
 (return value) => rax
 level => rdi
 */
 
-long long fh_error_reporting(TypedValue* level) asm("_ZN4HPHP17f_error_reportingERKNS_7VariantE");
+long fh_error_reporting(TypedValue* level) asm("_ZN4HPHP17f_error_reportingERKNS_7VariantE");
 
 /*
 bool HPHP::f_restore_error_handler()

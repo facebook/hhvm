@@ -25,8 +25,8 @@
 namespace HPHP {
 
 /*
-void HPHP::f_thrift_protocol_write_binary(HPHP::Object const&, HPHP::String const&, long long, HPHP::Object const&, int, bool)
-_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringExS2_ib
+void HPHP::f_thrift_protocol_write_binary(HPHP::Object const&, HPHP::String const&, long, HPHP::Object const&, int, bool)
+_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringElS2_ib
 
 transportobj => rdi
 method_name => rsi
@@ -36,10 +36,10 @@ seqid => r8
 strict_write => r9
 */
 
-void fh_thrift_protocol_write_binary(Value* transportobj, Value* method_name, long long msgtype, Value* request_struct, int seqid, bool strict_write) asm("_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringExS2_ib");
+void fh_thrift_protocol_write_binary(Value* transportobj, Value* method_name, long msgtype, Value* request_struct, int seqid, bool strict_write) asm("_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringElS2_ib");
 
-TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -62,20 +62,20 @@ TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_thrift_protocol_write_binary((Value*)(args-0), (Value*)(args-1), (long long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
+  fh_thrift_protocol_write_binary((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
   return rv;
 }
 
 TypedValue* fg_thrift_protocol_write_binary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv._count = 0;
         rv.m_type = KindOfNull;
-        fh_thrift_protocol_write_binary((Value*)(args-0), (Value*)(args-1), (long long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
+        fh_thrift_protocol_write_binary((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -112,8 +112,8 @@ strict_read => rcx
 
 TypedValue* fh_thrift_protocol_read_binary(TypedValue* _rv, Value* transportobj, Value* obj_typename, bool strict_read) asm("_ZN4HPHP29f_thrift_protocol_read_binaryERKNS_6ObjectERKNS_6StringEb");
 
-TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -131,7 +131,7 @@ TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_thrift_protocol_read_binary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {

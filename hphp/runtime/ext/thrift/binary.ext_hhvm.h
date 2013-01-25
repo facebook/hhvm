@@ -17,8 +17,8 @@
 namespace HPHP {
 
 /*
-void HPHP::f_thrift_protocol_write_binary(HPHP::Object const&, HPHP::String const&, long long, HPHP::Object const&, int, bool)
-_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringExS2_ib
+void HPHP::f_thrift_protocol_write_binary(HPHP::Object const&, HPHP::String const&, long, HPHP::Object const&, int, bool)
+_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringElS2_ib
 
 transportobj => rdi
 method_name => rsi
@@ -28,7 +28,7 @@ seqid => r8
 strict_write => r9
 */
 
-void fh_thrift_protocol_write_binary(Value* transportobj, Value* method_name, long long msgtype, Value* request_struct, int seqid, bool strict_write) asm("_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringExS2_ib");
+void fh_thrift_protocol_write_binary(Value* transportobj, Value* method_name, long msgtype, Value* request_struct, int seqid, bool strict_write) asm("_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringElS2_ib");
 
 /*
 HPHP::Variant HPHP::f_thrift_protocol_read_binary(HPHP::Object const&, HPHP::String const&, bool)

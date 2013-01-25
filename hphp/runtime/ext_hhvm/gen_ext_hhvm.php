@@ -218,12 +218,12 @@ function emitExtCall($obj, $ext_hhvm_cpp, $indent, $prefix) {
     } else if ($obj->returnType == 'int') {
       fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfInt64;' . "\n");
-      $func_call_prefix = 'rv.m_data.num = (long long)';
+      $func_call_prefix = 'rv.m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . copyAndReturnRV($indent, $obj);
-    } else if ($obj->returnType == 'long long') {
+    } else if ($obj->returnType == 'long') {
       fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfInt64;' . "\n");
-      $func_call_prefix = 'rv.m_data.num = (long long)';
+      $func_call_prefix = 'rv.m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . copyAndReturnRV($indent, $obj);
     } else if ($obj->returnType == 'double') {
       fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
@@ -300,7 +300,7 @@ function emitBuildExtraArgs($obj, $ext_hhvm_cpp, $indent) {
   fwrite($ext_hhvm_cpp, $indent . "{\n");
   fwrite($ext_hhvm_cpp, $indent . "  ArrayInit ai(count-" . $obj->maxNumParams .
          ", false);\n");
-  fwrite($ext_hhvm_cpp, $indent . "  for (long long i = " . $obj->maxNumParams .
+  fwrite($ext_hhvm_cpp, $indent . "  for (int64_t i = " . $obj->maxNumParams .
          "; i < count; ++i) {\n");
   fwrite($ext_hhvm_cpp, $indent . '    TypedValue* extraArg = ar->getExtraArg(i-' .
          $obj->maxNumParams . ');'."\n");
@@ -379,7 +379,7 @@ function emitRemappedFuncDecl($obj, $ext_hhvm_cpp, $indent, $prefix,
       $newsig .= ", ";
     }
     $firstParam = false;
-    $newsig .= "long long _argc";
+    $newsig .= "int64_t _argc";
     fwrite($ext_hhvm_cpp, "_argc => " . $regs[$nextReg] . "\n");
     ++$nextReg;
   }
@@ -468,7 +468,7 @@ function emitTypeCheckCondition($obj, $ext_hhvm_cpp) {
         switch ($p->type) {
           case 'bool': fwrite($ext_hhvm_cpp, 'KindOfBoolean'); break;
           case 'int': fwrite($ext_hhvm_cpp, 'KindOfInt64'); break;
-          case 'long long': fwrite($ext_hhvm_cpp, 'KindOfInt64'); break;
+          case 'long': fwrite($ext_hhvm_cpp, 'KindOfInt64'); break;
           case 'double': fwrite($ext_hhvm_cpp, 'KindOfDouble'); break;
           case 'HPHP::Array const&':
             fwrite($ext_hhvm_cpp, 'KindOfArray'); break;
@@ -495,7 +495,7 @@ function emitCast($p, $i, $ext_hhvm_cpp, $indent, $doCheck) {
       switch ($p->type) {
         case 'bool': fwrite($ext_hhvm_cpp, 'KindOfBoolean'); break;
         case 'int': fwrite($ext_hhvm_cpp, 'KindOfInt64'); break;
-        case 'long long': fwrite($ext_hhvm_cpp, 'KindOfInt64'); break;
+        case 'long': fwrite($ext_hhvm_cpp, 'KindOfInt64'); break;
         case 'double': fwrite($ext_hhvm_cpp, 'KindOfDouble'); break;
         case 'HPHP::Array const&':
           fwrite($ext_hhvm_cpp, 'KindOfArray');
@@ -514,7 +514,7 @@ function emitCast($p, $i, $ext_hhvm_cpp, $indent, $doCheck) {
   switch ($p->type) {
     case 'bool': fwrite($ext_hhvm_cpp, 'Boolean'); break;
     case 'int': fwrite($ext_hhvm_cpp, 'Int64'); break;
-    case 'long long': fwrite($ext_hhvm_cpp, 'Int64'); break;
+    case 'long': fwrite($ext_hhvm_cpp, 'Int64'); break;
     case 'double': fwrite($ext_hhvm_cpp, 'Double'); break;
     case 'HPHP::String const&': fwrite($ext_hhvm_cpp, 'String'); break;
     case 'HPHP::Array const&': fwrite($ext_hhvm_cpp, 'Array'); break;
@@ -590,12 +590,12 @@ function emitSlowPathHelper($obj, $ext_hhvm_cpp, $indent, $prefix) {
     } else if ($obj->returnType == 'int') {
       fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfInt64;' . "\n");
-      $func_call_prefix = 'rv->m_data.num = (long long)';
+      $func_call_prefix = 'rv->m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . $indent . "return rv;\n";
-    } else if ($obj->returnType == 'long long') {
+    } else if ($obj->returnType == 'long') {
       fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfInt64;' . "\n");
-      $func_call_prefix = 'rv->m_data.num = (long long)';
+      $func_call_prefix = 'rv->m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . $indent . "return rv;\n";
     } else if ($obj->returnType == 'double') {
       fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
@@ -734,10 +734,10 @@ function phase2() {
       // Emit the fg1_ function if needed
       if ($obj->numTypeChecks > 0) {
         fwrite($ext_hhvm_cpp, "TypedValue * fg1_" . $obj->name .
-          "(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) " .
+          "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) " .
           "__attribute__((noinline,cold));\n");
         fwrite($ext_hhvm_cpp, "TypedValue * fg1_" . $obj->name .
-          "(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {\n");
+          "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {\n");
         $indent = '  ';
         emitSlowPathHelper($obj, $ext_hhvm_cpp, $indent, 'fh_');
         fwrite($ext_hhvm_cpp, "}\n\n");
@@ -748,7 +748,7 @@ function phase2() {
       $indent = '  ';
       $indent .= '  ';
       fwrite($ext_hhvm_cpp, $indent . "TypedValue rv;\n");
-      fwrite($ext_hhvm_cpp, $indent . "long long count = ar->numArgs();\n");
+      fwrite($ext_hhvm_cpp, $indent . "int64_t count = ar->numArgs();\n");
       fwrite($ext_hhvm_cpp, $indent . "TypedValue* args UNUSED = ((TypedValue*)ar) - 1;\n");
       $firstParam = true;
       $needElseClause = false;
@@ -839,11 +839,11 @@ function phase2() {
         // Emit the tg1_ function if needed
         if ($obj->numTypeChecks > 0) {
           fwrite($ext_hhvm_cpp, "TypedValue* tg1_" . getUniqueFuncName($obj) .
-            "(TypedValue* rv, HPHP::VM::ActRec* ar, long long count" .
+            "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count" .
             (!$obj->isStatic ? ", ObjectData* this_" : "") .
             ") __attribute__((noinline,cold));\n");
           fwrite($ext_hhvm_cpp, "TypedValue* tg1_" . getUniqueFuncName($obj) .
-            "(TypedValue* rv, HPHP::VM::ActRec* ar, long long count" .
+            "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count" .
             (!$obj->isStatic ? ", ObjectData* this_" : "") .
             ") {\n");
           $indent = '  ';
@@ -857,7 +857,7 @@ function phase2() {
         $indent = '  ';
         $indent .= '  ';
         fwrite($ext_hhvm_cpp, $indent . "TypedValue rv;\n");
-        fwrite($ext_hhvm_cpp, $indent . "long long count = ar->numArgs();\n");
+        fwrite($ext_hhvm_cpp, $indent . "int64_t count = ar->numArgs();\n");
         fwrite($ext_hhvm_cpp, $indent . "TypedValue* args UNUSED "
                               . "= ((TypedValue*)ar) - 1;\n");
         if (!$obj->isStatic) {

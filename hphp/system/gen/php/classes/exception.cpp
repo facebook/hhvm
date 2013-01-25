@@ -41,7 +41,7 @@ const int cw_DOMException$$instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-extern const CallInfo ci_DOMException$$__construct = { (void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMException$$__construct = { (void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 4, 0x0000000000000000L};
 Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -206,21 +206,21 @@ const int cw_Exception$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_Exception$$getprevious = { (void*)&c_Exception::i_getprevious, (void*)&c_Exception::ifa_getprevious, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$__construct = { (void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$getmessage = { (void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$setprevious = { (void*)&c_Exception::i_setprevious, (void*)&c_Exception::ifa_setprevious, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$inittrace = { (void*)&c_Exception::i_inittrace, (void*)&c_Exception::ifa_inittrace, 0, 68, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$gettraceoptions = { (void*)&c_Exception::i_gettraceoptions, (void*)&c_Exception::ifa_gettraceoptions, 0, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$__tostring = { (void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$getfile = { (void*)&c_Exception::i_getfile, (void*)&c_Exception::ifa_getfile, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$getline = { (void*)&c_Exception::i_getline, (void*)&c_Exception::ifa_getline, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$settraceoptions = { (void*)&c_Exception::i_settraceoptions, (void*)&c_Exception::ifa_settraceoptions, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$gettraceasstring = { (void*)&c_Exception::i_gettraceasstring, (void*)&c_Exception::ifa_gettraceasstring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$gettrace = { (void*)&c_Exception::i_gettrace, (void*)&c_Exception::ifa_gettrace, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$__init__ = { (void*)&c_Exception::i___init__, (void*)&c_Exception::ifa___init__, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$getcode = { (void*)&c_Exception::i_getcode, (void*)&c_Exception::ifa_getcode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Exception$$setpreviouschain = { (void*)&c_Exception::i_setpreviouschain, (void*)&c_Exception::ifa_setpreviouschain, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Exception$$getprevious = { (void*)&c_Exception::i_getprevious, (void*)&c_Exception::ifa_getprevious, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$__construct = { (void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 3, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$getmessage = { (void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$setprevious = { (void*)&c_Exception::i_setprevious, (void*)&c_Exception::ifa_setprevious, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$inittrace = { (void*)&c_Exception::i_inittrace, (void*)&c_Exception::ifa_inittrace, 0, 68, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$gettraceoptions = { (void*)&c_Exception::i_gettraceoptions, (void*)&c_Exception::ifa_gettraceoptions, 0, 12, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$__tostring = { (void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$getfile = { (void*)&c_Exception::i_getfile, (void*)&c_Exception::ifa_getfile, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$getline = { (void*)&c_Exception::i_getline, (void*)&c_Exception::ifa_getline, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$settraceoptions = { (void*)&c_Exception::i_settraceoptions, (void*)&c_Exception::ifa_settraceoptions, 1, 12, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$gettraceasstring = { (void*)&c_Exception::i_gettraceasstring, (void*)&c_Exception::ifa_gettraceasstring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$gettrace = { (void*)&c_Exception::i_gettrace, (void*)&c_Exception::ifa_gettrace, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$__init__ = { (void*)&c_Exception::i___init__, (void*)&c_Exception::ifa___init__, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$getcode = { (void*)&c_Exception::i_getcode, (void*)&c_Exception::ifa_getcode, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_Exception$$setpreviouschain = { (void*)&c_Exception::i_setpreviouschain, (void*)&c_Exception::ifa_setpreviouschain, 1, 4, 0x0000000000000000L};
 Variant c_Exception::i___init__(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___init__);
 }
@@ -415,7 +415,7 @@ extern const int cw_Exception$$call_info_index[] = {
 
 };
 c_Exception *c_Exception::create(CVarRef v_message //  = NAMVAR(s_sys_svs00000000, "")
-, CVarRef v_code //  = NAMVAR(s_sys_svif01bca90, 0LL)
+, CVarRef v_code //  = NAMVAR(s_sys_svif01bca90, int64_t(0))
 , CVarRef v_previous //  = null_variant
 ) {
   CountableHelper h(this);
@@ -437,7 +437,7 @@ const ObjectStaticCallbacks cw_Exception = {
 };
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
-  m_code = 0LL;
+  m_code = 0L;
   m_inited = false;
   {CountableHelper h(this); t___init__();}
 }
@@ -456,7 +456,7 @@ void c_Exception::t___init__() {
 namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 35 */
 void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
-, Variant v_code //  = 0LL
+, Variant v_code //  = 0L
 , Variant v_previous //  = null
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__construct);
@@ -567,11 +567,11 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 137 */
 String c_Exception::t_gettraceasstring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTraceAsString);
-  int64 v_i = 0;
+  int64_t v_i = 0;
   String v_s;
   Variant v_frame;
 
-  v_i = 0LL;
+  v_i = 0L;
   v_s = NAMSTR(s_sys_ss00000000, "");
   {
     LOOP_COUNTER(1);
@@ -670,7 +670,7 @@ void c_Exception::t_inittrace() {
       LOOP_COUNTER_CHECK(1);
       {
         {
-          const Variant &tmp0((m_trace.rvalAt(0LL, AccessFlags::Error)));
+          const Variant &tmp0((m_trace.rvalAt(0L, AccessFlags::Error)));
           v_top.assignVal(tmp0);
         }
         {
@@ -683,14 +683,14 @@ void c_Exception::t_inittrace() {
             bool tmp2 = (tmp1);
             if (tmp2) {
               const String &tmp3((toString(v_top.rvalAt(NAMSTR(s_sys_ss59589f70, "class"), AccessFlags::Error_Key))));
-              int64 tmp4((x_strcasecmp(tmp3, NAMSTR(s_sys_ss372f4f14, "exception"))));
-              tmp2 = (same(tmp4, 0LL));
+              int64_t tmp4((x_strcasecmp(tmp3, NAMSTR(s_sys_ss372f4f14, "exception"))));
+              tmp2 = (same(tmp4, 0L));
             }
             bool tmp5 = (tmp2);
             if (tmp5) {
               const String &tmp6((toString(v_top.rvalAt(NAMSTR(s_sys_ss73f7dba7, "function"), AccessFlags::Error_Key))));
-              int64 tmp7((x_strcasecmp(tmp6, NAMSTR(s_sys_ss1ecb9c89, "__init__"))));
-              tmp5 = (same(tmp7, 0LL));
+              int64_t tmp7((x_strcasecmp(tmp6, NAMSTR(s_sys_ss1ecb9c89, "__init__"))));
+              tmp5 = (same(tmp7, 0L));
             }
             tmp0 = (tmp5);
           }
@@ -825,7 +825,7 @@ const int cw_PDOException$$instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-extern const CallInfo ci_PDOException$$__construct = { (void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_PDOException$$__construct = { (void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 4, 0x0000000000000000L};
 Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -923,8 +923,8 @@ const int cw_ErrorException$$instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-extern const CallInfo ci_ErrorException$$__construct = { (void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ErrorException$$getseverity = { (void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ErrorException$$__construct = { (void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 4, 0x0000000000000000L};
+extern const CallInfo ci_ErrorException$$getseverity = { (void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 4, 0x0000000000000000L};
 Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -966,8 +966,8 @@ extern const int cw_ErrorException$$call_info_index[] = {
   -1,0,-1,-1,
 };
 c_ErrorException *c_ErrorException::create(CVarRef v_message //  = NAMVAR(s_sys_svs00000000, "")
-, CVarRef v_code //  = NAMVAR(s_sys_svif01bca90, 0LL)
-, CVarRef v_severity //  = NAMVAR(s_sys_svif01bca90, 0LL)
+, CVarRef v_code //  = NAMVAR(s_sys_svif01bca90, int64_t(0))
+, CVarRef v_severity //  = NAMVAR(s_sys_svif01bca90, int64_t(0))
 , CVarRef v_filename //  = null_variant
 , CVarRef v_lineno //  = null_variant
 ) {
@@ -990,8 +990,8 @@ const ObjectStaticCallbacks cw_ErrorException = {
 };
 /* SRC: classes/exception.php line 317 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
-, Variant v_code //  = 0LL
-, Variant v_severity //  = 0LL
+, Variant v_code //  = 0L
+, Variant v_severity //  = 0L
 , Variant v_filename //  = null
 , Variant v_lineno //  = null
 ) {
@@ -1170,7 +1170,7 @@ static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
   (int64)&false_varNR,
   (int64)&NAMVAR(s_sys_svs00000000, ""),
-  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
+  (int64)&NAMVAR(s_sys_svif01bca90, int64_t(0)),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x562145CD,0,0,3,66,-1,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ss20bbc1e9, "\000*\000severity") },

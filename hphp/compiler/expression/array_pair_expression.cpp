@@ -164,7 +164,7 @@ bool ArrayPairExpression::outputCPPName(CodeGenerator &cg,
       string s = sc->getLiteralString();
       int64 res;
       if (is_strictly_integer(s.c_str(), s.size(), res)) {
-        cg_printf("%sLL", s.c_str());
+        cg_printf("%sL", s.c_str());
       } else {
         m_name->outputCPP(cg, ar);
       }

@@ -108,17 +108,7 @@ struct RegContent {
     }
   }
 
-  std::string pretty() const {
-    char  buf[256];
-    char  val[256] = "";
-    switch (m_kind) {
-      case Int : sprintf(val, "0x%llx", m_int); break;
-      case Loc : sprintf(val, "%s", m_loc.pretty().data()); break;
-      default  : break;
-    }
-    sprintf(buf, "(RegContent %s %s)", kindStr(), val);
-    return std::string(buf);
-  }
+  std::string pretty() const;
 
   // Hash function
   size_t operator()(const RegContent& cont) const {

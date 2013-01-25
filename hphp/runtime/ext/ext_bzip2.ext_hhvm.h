@@ -62,14 +62,14 @@ bz => rsi
 TypedValue* fh_bzerror(TypedValue* _rv, Value* bz) asm("_ZN4HPHP9f_bzerrorERKNS_6ObjectE");
 
 /*
-long long HPHP::f_bzerrno(HPHP::Object const&)
+long HPHP::f_bzerrno(HPHP::Object const&)
 _ZN4HPHP9f_bzerrnoERKNS_6ObjectE
 
 (return value) => rax
 bz => rdi
 */
 
-long long fh_bzerrno(Value* bz) asm("_ZN4HPHP9f_bzerrnoERKNS_6ObjectE");
+long fh_bzerrno(Value* bz) asm("_ZN4HPHP9f_bzerrnoERKNS_6ObjectE");
 
 /*
 HPHP::Variant HPHP::f_bzcompress(HPHP::String const&, int, int)

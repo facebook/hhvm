@@ -36,7 +36,7 @@ Value* fh_get_defined_functions(Value* _rv) asm("_ZN4HPHP23f_get_defined_functio
 
 TypedValue* fg_get_defined_functions(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -71,8 +71,8 @@ autoload => rsi
 
 bool fh_function_exists(Value* function_name, bool autoload) asm("_ZN4HPHP17f_function_existsERKNS_6StringEb");
 
-TypedValue * fg1_function_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_function_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_function_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_function_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -93,7 +93,7 @@ TypedValue * fg1_function_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_function_exists(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -135,8 +135,8 @@ name => rdx
 
 bool fh_is_callable(TypedValue* v, bool syntax, TypedValue* name) asm("_ZN4HPHP13f_is_callableERKNS_7VariantEbRKNS_14VRefParamValueE");
 
-TypedValue * fg1_is_callable(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_is_callable(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_is_callable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_is_callable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -148,7 +148,7 @@ TypedValue * fg1_is_callable(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_is_callable(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean)) {
@@ -190,17 +190,17 @@ function => rdx
 _argv => rcx
 */
 
-TypedValue* fh_call_user_func(TypedValue* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP16f_call_user_funcEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_call_user_func(TypedValue* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP16f_call_user_funcEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_call_user_func(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -241,8 +241,8 @@ params => rdx
 
 Value* fh_call_user_func_array_async(Value* _rv, TypedValue* function, Value* params) asm("_ZN4HPHP28f_call_user_func_array_asyncERKNS_7VariantERKNS_5ArrayE");
 
-TypedValue * fg1_call_user_func_array_async(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_call_user_func_array_async(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_call_user_func_array_async(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_call_user_func_array_async(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -254,7 +254,7 @@ TypedValue * fg1_call_user_func_array_async(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* fg_call_user_func_array_async(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray) {
@@ -296,11 +296,11 @@ function => rdx
 _argv => rcx
 */
 
-Value* fh_call_user_func_async(Value* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP22f_call_user_func_asyncEiRKNS_7VariantERKNS_5ArrayE");
+Value* fh_call_user_func_async(Value* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP22f_call_user_func_asyncEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_call_user_func_async(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       rv._count = 0;
@@ -308,7 +308,7 @@ TypedValue* fg_call_user_func_async(HPHP::VM::ActRec *ar) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -349,8 +349,8 @@ timeout => rdx
 
 TypedValue* fh_check_user_func_async(TypedValue* _rv, TypedValue* handles, int timeout) asm("_ZN4HPHP23f_check_user_func_asyncERKNS_7VariantEi");
 
-TypedValue * fg1_check_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_check_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_check_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_check_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_check_user_func_async((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1));
@@ -360,7 +360,7 @@ TypedValue * fg1_check_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_check_user_func_async(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -402,8 +402,8 @@ additional_strategies => rcx
 
 TypedValue* fh_end_user_func_async(TypedValue* _rv, Value* handle, int default_strategy, TypedValue* additional_strategies) asm("_ZN4HPHP21f_end_user_func_asyncERKNS_6ObjectEiRKNS_7VariantE");
 
-TypedValue * fg1_end_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_end_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_end_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_end_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -425,7 +425,7 @@ TypedValue * fg1_end_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_end_user_func_async(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
@@ -466,8 +466,8 @@ input => rsi
 
 Value* fh_call_user_func_serialized(Value* _rv, Value* input) asm("_ZN4HPHP27f_call_user_func_serializedERKNS_6StringE");
 
-TypedValue * fg1_call_user_func_serialized(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_call_user_func_serialized(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_call_user_func_serialized(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_call_user_func_serialized(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -479,7 +479,7 @@ TypedValue * fg1_call_user_func_serialized(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_call_user_func_serialized(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -526,8 +526,8 @@ params => st0
 
 TypedValue* fh_call_user_func_array_rpc(TypedValue* _rv, Value* host, int port, Value* auth, int timeout, TypedValue* function, Value* params) asm("_ZN4HPHP26f_call_user_func_array_rpcERKNS_6StringEiS2_iRKNS_7VariantERKNS_5ArrayE");
 
-TypedValue * fg1_call_user_func_array_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_call_user_func_array_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_call_user_func_array_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_call_user_func_array_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-5)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-5);
@@ -551,7 +551,7 @@ TypedValue * fg1_call_user_func_array_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_call_user_func_array_rpc(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfArray && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
@@ -595,10 +595,10 @@ function => st0
 _argv => st8
 */
 
-TypedValue* fh_call_user_func_rpc(TypedValue* _rv, long long _argc, Value* host, int port, Value* auth, int timeout, TypedValue* function, Value* _argv) asm("_ZN4HPHP20f_call_user_func_rpcEiRKNS_6StringEiS2_iRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_call_user_func_rpc(TypedValue* _rv, int64_t _argc, Value* host, int port, Value* auth, int timeout, TypedValue* function, Value* _argv) asm("_ZN4HPHP20f_call_user_func_rpcEiRKNS_6StringEiS2_iRKNS_7VariantERKNS_5ArrayE");
 
-TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -615,7 +615,7 @@ TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, long l
   Array extraArgs;
   {
     ArrayInit ai(count-5, false);
-    for (long long i = 5; i < count; ++i) {
+    for (int64_t i = 5; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-5);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-5, tvAsVariant(extraArg));
@@ -632,14 +632,14 @@ TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_call_user_func_rpc(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 5LL) {
       if ((args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
           ArrayInit ai(count-5, false);
-          for (long long i = 5; i < count; ++i) {
+          for (int64_t i = 5; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-5);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-5, tvAsVariant(extraArg));
@@ -686,8 +686,8 @@ params => rdx
 
 TypedValue* fh_forward_static_call_array(TypedValue* _rv, TypedValue* function, Value* params) asm("_ZN4HPHP27f_forward_static_call_arrayERKNS_7VariantERKNS_5ArrayE");
 
-TypedValue * fg1_forward_static_call_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_forward_static_call_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_forward_static_call_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_forward_static_call_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToArrayInPlace(args-1);
   fh_forward_static_call_array((rv), (args-0), (Value*)(args-1));
@@ -697,7 +697,7 @@ TypedValue * fg1_forward_static_call_array(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_forward_static_call_array(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray) {
@@ -737,17 +737,17 @@ function => rdx
 _argv => rcx
 */
 
-TypedValue* fh_forward_static_call(TypedValue* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP21f_forward_static_callEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_forward_static_call(TypedValue* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP21f_forward_static_callEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_forward_static_call(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -788,7 +788,7 @@ TypedValue* fh_get_called_class(TypedValue* _rv) asm("_ZN4HPHP18f_get_called_cla
 
 TypedValue* fg_get_called_class(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       fh_get_called_class((&(rv)));
@@ -822,8 +822,8 @@ code => rdx
 
 Value* fh_create_function(Value* _rv, Value* args, Value* code) asm("_ZN4HPHP17f_create_functionERKNS_6StringES2_");
 
-TypedValue * fg1_create_function(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_create_function(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_create_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_create_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -840,7 +840,7 @@ TypedValue * fg1_create_function(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_create_function(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -882,8 +882,8 @@ arg_num => rsi
 
 TypedValue* fh_func_get_arg(TypedValue* _rv, int arg_num) asm("_ZN4HPHP14f_func_get_argEi");
 
-TypedValue * fg1_func_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_func_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_func_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_func_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_func_get_arg((rv), (int)(args[-0].m_data.num));
@@ -893,7 +893,7 @@ TypedValue * fg1_func_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_func_get_arg(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
@@ -934,7 +934,7 @@ Value* fh_func_get_args(Value* _rv) asm("_ZN4HPHP15f_func_get_argsEv");
 
 TypedValue* fg_func_get_args(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -959,22 +959,22 @@ TypedValue* fg_func_get_args(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_func_num_args()
+long HPHP::f_func_num_args()
 _ZN4HPHP15f_func_num_argsEv
 
 (return value) => rax
 */
 
-long long fh_func_num_args() asm("_ZN4HPHP15f_func_num_argsEv");
+long fh_func_num_args() asm("_ZN4HPHP15f_func_num_argsEv");
 
 TypedValue* fg_func_num_args(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
-      rv.m_data.num = (long long)fh_func_num_args();
+      rv.m_data.num = (int64_t)fh_func_num_args();
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
@@ -1001,11 +1001,11 @@ function => rsi
 _argv => rdx
 */
 
-void fh_register_postsend_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_postsend_functionEiRKNS_7VariantERKNS_5ArrayE");
+void fh_register_postsend_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_postsend_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_register_postsend_function(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       rv.m_data.num = 0LL;
@@ -1014,7 +1014,7 @@ TypedValue* fg_register_postsend_function(HPHP::VM::ActRec *ar) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -1051,11 +1051,11 @@ function => rsi
 _argv => rdx
 */
 
-void fh_register_shutdown_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_shutdown_functionEiRKNS_7VariantERKNS_5ArrayE");
+void fh_register_shutdown_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP28f_register_shutdown_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_register_shutdown_function(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       rv.m_data.num = 0LL;
@@ -1064,7 +1064,7 @@ TypedValue* fg_register_shutdown_function(HPHP::VM::ActRec *ar) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -1101,11 +1101,11 @@ function => rsi
 _argv => rdx
 */
 
-void fh_register_cleanup_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP27f_register_cleanup_functionEiRKNS_7VariantERKNS_5ArrayE");
+void fh_register_cleanup_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP27f_register_cleanup_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_register_cleanup_function(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       rv.m_data.num = 0LL;
@@ -1114,7 +1114,7 @@ TypedValue* fg_register_cleanup_function(HPHP::VM::ActRec *ar) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -1152,11 +1152,11 @@ function => rsi
 _argv => rdx
 */
 
-bool fh_register_tick_function(long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_register_tick_functionEiRKNS_7VariantERKNS_5ArrayE");
+bool fh_register_tick_function(int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_register_tick_functionEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_register_tick_function(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       rv._count = 0;
@@ -1164,7 +1164,7 @@ TypedValue* fg_register_tick_function(HPHP::VM::ActRec *ar) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -1203,7 +1203,7 @@ void fh_unregister_tick_function(TypedValue* function_name) asm("_ZN4HPHP26f_unr
 
 TypedValue* fg_unregister_tick_function(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_data.num = 0LL;

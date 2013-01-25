@@ -362,7 +362,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
       const char *p = buf.data();
       assert(p);
       if (p == NULL) {
-        z = 0LL;
+        z = int64_t(0);
         return;
       }
 
@@ -382,7 +382,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
           return;
         }
       }
-      z = strtoll(buf.data(), NULL, 10);
+      z = int64_t(strtoll(buf.data(), NULL, 10));
     }
     break;
   case KindOfDouble:

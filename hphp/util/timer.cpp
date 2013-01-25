@@ -57,7 +57,7 @@ int64 Timer::getMicroSeconds() const {
 void Timer::report() const {
   int64 ms = getMicroSeconds();
   int seconds = ms / 1000000;
-  PRINT_MSG("%s took %d'%02d\" (%lld us) %s", m_name.c_str(),
+  PRINT_MSG("%s took %d'%02d\" (%"PRId64" us) %s", m_name.c_str(),
             seconds / 60, seconds % 60, ms, getName());
 }
 

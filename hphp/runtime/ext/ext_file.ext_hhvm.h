@@ -64,8 +64,8 @@ handle => rsi
 TypedValue* fh_pclose(TypedValue* _rv, Value* handle) asm("_ZN4HPHP8f_pcloseERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_fseek(HPHP::Object const&, long long, long long)
-_ZN4HPHP7f_fseekERKNS_6ObjectExx
+HPHP::Variant HPHP::f_fseek(HPHP::Object const&, long, long)
+_ZN4HPHP7f_fseekERKNS_6ObjectEll
 
 (return value) => rax
 _rv => rdi
@@ -74,7 +74,7 @@ offset => rdx
 whence => rcx
 */
 
-TypedValue* fh_fseek(TypedValue* _rv, Value* handle, long long offset, long long whence) asm("_ZN4HPHP7f_fseekERKNS_6ObjectExx");
+TypedValue* fh_fseek(TypedValue* _rv, Value* handle, long offset, long whence) asm("_ZN4HPHP7f_fseekERKNS_6ObjectEll");
 
 /*
 bool HPHP::f_rewind(HPHP::Object const&)
@@ -119,8 +119,8 @@ handle => rsi
 TypedValue* fh_fstat(TypedValue* _rv, Value* handle) asm("_ZN4HPHP7f_fstatERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_fread(HPHP::Object const&, long long)
-_ZN4HPHP7f_freadERKNS_6ObjectEx
+HPHP::Variant HPHP::f_fread(HPHP::Object const&, long)
+_ZN4HPHP7f_freadERKNS_6ObjectEl
 
 (return value) => rax
 _rv => rdi
@@ -128,7 +128,7 @@ handle => rsi
 length => rdx
 */
 
-TypedValue* fh_fread(TypedValue* _rv, Value* handle, long long length) asm("_ZN4HPHP7f_freadERKNS_6ObjectEx");
+TypedValue* fh_fread(TypedValue* _rv, Value* handle, long length) asm("_ZN4HPHP7f_freadERKNS_6ObjectEl");
 
 /*
 HPHP::Variant HPHP::f_fgetc(HPHP::Object const&)
@@ -142,8 +142,8 @@ handle => rsi
 TypedValue* fh_fgetc(TypedValue* _rv, Value* handle) asm("_ZN4HPHP7f_fgetcERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_fgets(HPHP::Object const&, long long)
-_ZN4HPHP7f_fgetsERKNS_6ObjectEx
+HPHP::Variant HPHP::f_fgets(HPHP::Object const&, long)
+_ZN4HPHP7f_fgetsERKNS_6ObjectEl
 
 (return value) => rax
 _rv => rdi
@@ -151,11 +151,11 @@ handle => rsi
 length => rdx
 */
 
-TypedValue* fh_fgets(TypedValue* _rv, Value* handle, long long length) asm("_ZN4HPHP7f_fgetsERKNS_6ObjectEx");
+TypedValue* fh_fgets(TypedValue* _rv, Value* handle, long length) asm("_ZN4HPHP7f_fgetsERKNS_6ObjectEl");
 
 /*
-HPHP::Variant HPHP::f_fgetss(HPHP::Object const&, long long, HPHP::String const&)
-_ZN4HPHP8f_fgetssERKNS_6ObjectExRKNS_6StringE
+HPHP::Variant HPHP::f_fgetss(HPHP::Object const&, long, HPHP::String const&)
+_ZN4HPHP8f_fgetssERKNS_6ObjectElRKNS_6StringE
 
 (return value) => rax
 _rv => rdi
@@ -164,7 +164,7 @@ length => rdx
 allowable_tags => rcx
 */
 
-TypedValue* fh_fgetss(TypedValue* _rv, Value* handle, long long length, Value* allowable_tags) asm("_ZN4HPHP8f_fgetssERKNS_6ObjectExRKNS_6StringE");
+TypedValue* fh_fgetss(TypedValue* _rv, Value* handle, long length, Value* allowable_tags) asm("_ZN4HPHP8f_fgetssERKNS_6ObjectElRKNS_6StringE");
 
 /*
 HPHP::Variant HPHP::f_fscanf(int, HPHP::Object const&, HPHP::String const&, HPHP::Array const&)
@@ -178,7 +178,7 @@ format => rcx
 _argv => r8
 */
 
-TypedValue* fh_fscanf(TypedValue* _rv, long long _argc, Value* handle, Value* format, Value* _argv) asm("_ZN4HPHP8f_fscanfEiRKNS_6ObjectERKNS_6StringERKNS_5ArrayE");
+TypedValue* fh_fscanf(TypedValue* _rv, int64_t _argc, Value* handle, Value* format, Value* _argv) asm("_ZN4HPHP8f_fscanfEiRKNS_6ObjectERKNS_6StringERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_fpassthru(HPHP::Object const&)
@@ -192,8 +192,8 @@ handle => rsi
 TypedValue* fh_fpassthru(TypedValue* _rv, Value* handle) asm("_ZN4HPHP11f_fpassthruERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_fwrite(HPHP::Object const&, HPHP::String const&, long long)
-_ZN4HPHP8f_fwriteERKNS_6ObjectERKNS_6StringEx
+HPHP::Variant HPHP::f_fwrite(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP8f_fwriteERKNS_6ObjectERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -202,11 +202,11 @@ data => rdx
 length => rcx
 */
 
-TypedValue* fh_fwrite(TypedValue* _rv, Value* handle, Value* data, long long length) asm("_ZN4HPHP8f_fwriteERKNS_6ObjectERKNS_6StringEx");
+TypedValue* fh_fwrite(TypedValue* _rv, Value* handle, Value* data, long length) asm("_ZN4HPHP8f_fwriteERKNS_6ObjectERKNS_6StringEl");
 
 /*
-HPHP::Variant HPHP::f_fputs(HPHP::Object const&, HPHP::String const&, long long)
-_ZN4HPHP7f_fputsERKNS_6ObjectERKNS_6StringEx
+HPHP::Variant HPHP::f_fputs(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP7f_fputsERKNS_6ObjectERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -215,7 +215,7 @@ data => rdx
 length => rcx
 */
 
-TypedValue* fh_fputs(TypedValue* _rv, Value* handle, Value* data, long long length) asm("_ZN4HPHP7f_fputsERKNS_6ObjectERKNS_6StringEx");
+TypedValue* fh_fputs(TypedValue* _rv, Value* handle, Value* data, long length) asm("_ZN4HPHP7f_fputsERKNS_6ObjectERKNS_6StringEl");
 
 /*
 HPHP::Variant HPHP::f_fprintf(int, HPHP::Object const&, HPHP::String const&, HPHP::Array const&)
@@ -229,7 +229,7 @@ format => rcx
 _argv => r8
 */
 
-TypedValue* fh_fprintf(TypedValue* _rv, long long _argc, Value* handle, Value* format, Value* _argv) asm("_ZN4HPHP9f_fprintfEiRKNS_6ObjectERKNS_6StringERKNS_5ArrayE");
+TypedValue* fh_fprintf(TypedValue* _rv, int64_t _argc, Value* handle, Value* format, Value* _argv) asm("_ZN4HPHP9f_fprintfEiRKNS_6ObjectERKNS_6StringERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_vfprintf(HPHP::Object const&, HPHP::String const&, HPHP::Array const&)
@@ -255,15 +255,15 @@ handle => rdi
 bool fh_fflush(Value* handle) asm("_ZN4HPHP8f_fflushERKNS_6ObjectE");
 
 /*
-bool HPHP::f_ftruncate(HPHP::Object const&, long long)
-_ZN4HPHP11f_ftruncateERKNS_6ObjectEx
+bool HPHP::f_ftruncate(HPHP::Object const&, long)
+_ZN4HPHP11f_ftruncateERKNS_6ObjectEl
 
 (return value) => rax
 handle => rdi
 size => rsi
 */
 
-bool fh_ftruncate(Value* handle, long long size) asm("_ZN4HPHP11f_ftruncateERKNS_6ObjectEx");
+bool fh_ftruncate(Value* handle, long size) asm("_ZN4HPHP11f_ftruncateERKNS_6ObjectEl");
 
 /*
 bool HPHP::f_flock(HPHP::Object const&, int, HPHP::VRefParamValue const&)
@@ -292,8 +292,8 @@ enclosure => r8
 TypedValue* fh_fputcsv(TypedValue* _rv, Value* handle, Value* fields, Value* delimiter, Value* enclosure) asm("_ZN4HPHP9f_fputcsvERKNS_6ObjectERKNS_5ArrayERKNS_6StringES8_");
 
 /*
-HPHP::Variant HPHP::f_fgetcsv(HPHP::Object const&, long long, HPHP::String const&, HPHP::String const&)
-_ZN4HPHP9f_fgetcsvERKNS_6ObjectExRKNS_6StringES5_
+HPHP::Variant HPHP::f_fgetcsv(HPHP::Object const&, long, HPHP::String const&, HPHP::String const&)
+_ZN4HPHP9f_fgetcsvERKNS_6ObjectElRKNS_6StringES5_
 
 (return value) => rax
 _rv => rdi
@@ -303,11 +303,11 @@ delimiter => rcx
 enclosure => r8
 */
 
-TypedValue* fh_fgetcsv(TypedValue* _rv, Value* handle, long long length, Value* delimiter, Value* enclosure) asm("_ZN4HPHP9f_fgetcsvERKNS_6ObjectExRKNS_6StringES5_");
+TypedValue* fh_fgetcsv(TypedValue* _rv, Value* handle, long length, Value* delimiter, Value* enclosure) asm("_ZN4HPHP9f_fgetcsvERKNS_6ObjectElRKNS_6StringES5_");
 
 /*
-HPHP::Variant HPHP::f_file_get_contents(HPHP::String const&, bool, HPHP::Variant const&, long long, long long)
-_ZN4HPHP19f_file_get_contentsERKNS_6StringEbRKNS_7VariantExx
+HPHP::Variant HPHP::f_file_get_contents(HPHP::String const&, bool, HPHP::Variant const&, long, long)
+_ZN4HPHP19f_file_get_contentsERKNS_6StringEbRKNS_7VariantEll
 
 (return value) => rax
 _rv => rdi
@@ -318,7 +318,7 @@ offset => r8
 maxlen => r9
 */
 
-TypedValue* fh_file_get_contents(TypedValue* _rv, Value* filename, bool use_include_path, TypedValue* context, long long offset, long long maxlen) asm("_ZN4HPHP19f_file_get_contentsERKNS_6StringEbRKNS_7VariantExx");
+TypedValue* fh_file_get_contents(TypedValue* _rv, Value* filename, bool use_include_path, TypedValue* context, long offset, long maxlen) asm("_ZN4HPHP19f_file_get_contentsERKNS_6StringEbRKNS_7VariantEll");
 
 /*
 HPHP::Variant HPHP::f_file_put_contents(HPHP::String const&, HPHP::Variant const&, int, HPHP::Variant const&)
@@ -466,15 +466,15 @@ raw_output => rdx
 TypedValue* fh_sha1_file(TypedValue* _rv, Value* filename, bool raw_output) asm("_ZN4HPHP11f_sha1_fileERKNS_6StringEb");
 
 /*
-bool HPHP::f_chmod(HPHP::String const&, long long)
-_ZN4HPHP7f_chmodERKNS_6StringEx
+bool HPHP::f_chmod(HPHP::String const&, long)
+_ZN4HPHP7f_chmodERKNS_6StringEl
 
 (return value) => rax
 filename => rdi
 mode => rsi
 */
 
-bool fh_chmod(Value* filename, long long mode) asm("_ZN4HPHP7f_chmodERKNS_6StringEx");
+bool fh_chmod(Value* filename, long mode) asm("_ZN4HPHP7f_chmodERKNS_6StringEl");
 
 /*
 bool HPHP::f_chown(HPHP::String const&, HPHP::Variant const&)
@@ -521,8 +521,8 @@ group => rsi
 bool fh_lchgrp(Value* filename, TypedValue* group) asm("_ZN4HPHP8f_lchgrpERKNS_6StringERKNS_7VariantE");
 
 /*
-bool HPHP::f_touch(HPHP::String const&, long long, long long)
-_ZN4HPHP7f_touchERKNS_6StringExx
+bool HPHP::f_touch(HPHP::String const&, long, long)
+_ZN4HPHP7f_touchERKNS_6StringEll
 
 (return value) => rax
 filename => rdi
@@ -530,7 +530,7 @@ mtime => rsi
 atime => rdx
 */
 
-bool fh_touch(Value* filename, long long mtime, long long atime) asm("_ZN4HPHP7f_touchERKNS_6StringExx");
+bool fh_touch(Value* filename, long mtime, long atime) asm("_ZN4HPHP7f_touchERKNS_6StringEll");
 
 /*
 bool HPHP::f_copy(HPHP::String const&, HPHP::String const&, HPHP::Variant const&)
@@ -557,14 +557,14 @@ context => rdx
 bool fh_rename(Value* oldname, Value* newname, TypedValue* context) asm("_ZN4HPHP8f_renameERKNS_6StringES2_RKNS_7VariantE");
 
 /*
-long long HPHP::f_umask(HPHP::Variant const&)
+long HPHP::f_umask(HPHP::Variant const&)
 _ZN4HPHP7f_umaskERKNS_7VariantE
 
 (return value) => rax
 mask => rdi
 */
 
-long long fh_umask(TypedValue* mask) asm("_ZN4HPHP7f_umaskERKNS_7VariantE");
+long fh_umask(TypedValue* mask) asm("_ZN4HPHP7f_umaskERKNS_7VariantE");
 
 /*
 bool HPHP::f_unlink(HPHP::String const&, HPHP::Variant const&)
@@ -955,8 +955,8 @@ directory => rsi
 TypedValue* fh_disk_total_space(TypedValue* _rv, Value* directory) asm("_ZN4HPHP18f_disk_total_spaceERKNS_6StringE");
 
 /*
-bool HPHP::f_mkdir(HPHP::String const&, long long, bool, HPHP::Variant const&)
-_ZN4HPHP7f_mkdirERKNS_6StringExbRKNS_7VariantE
+bool HPHP::f_mkdir(HPHP::String const&, long, bool, HPHP::Variant const&)
+_ZN4HPHP7f_mkdirERKNS_6StringElbRKNS_7VariantE
 
 (return value) => rax
 pathname => rdi
@@ -965,7 +965,7 @@ recursive => rdx
 context => rcx
 */
 
-bool fh_mkdir(Value* pathname, long long mode, bool recursive, TypedValue* context) asm("_ZN4HPHP7f_mkdirERKNS_6StringExbRKNS_7VariantE");
+bool fh_mkdir(Value* pathname, long mode, bool recursive, TypedValue* context) asm("_ZN4HPHP7f_mkdirERKNS_6StringElbRKNS_7VariantE");
 
 /*
 bool HPHP::f_rmdir(HPHP::String const&, HPHP::Variant const&)

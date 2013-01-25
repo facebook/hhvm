@@ -37,13 +37,13 @@ fault => rdi
 bool fh_is_soap_fault(TypedValue* fault) asm("_ZN4HPHP15f_is_soap_faultERKNS_7VariantE");
 
 /*
-long long HPHP::f__soap_active_version()
+long HPHP::f__soap_active_version()
 _ZN4HPHP22f__soap_active_versionEv
 
 (return value) => rax
 */
 
-long long fh__soap_active_version() asm("_ZN4HPHP22f__soap_active_versionEv");
+long fh__soap_active_version() asm("_ZN4HPHP22f__soap_active_versionEv");
 
 
 } // !HPHP

@@ -816,47 +816,22 @@ class ArgManager {
 public:
   ArgManager(TranslatorX64 &tx64, A& a) : m_tx64(tx64), m_a(a) { }
 
-  void addImm(uint64_t imm) {
-    TRACE(6, "ArgManager: push arg %zd imm:%lu\n",
-          m_args.size(), imm);
-    m_args.push_back(ArgContent(ArgContent::ArgImm, InvalidReg, imm));
-  }
+  void addImm(uint64_t imm);
 
-  void addLoc(const Location &loc) {
-    TRACE(6, "ArgManager: push arg %zd loc:(%s, %lld)\n",
-          m_args.size(), loc.spaceName(), loc.offset);
-    m_args.push_back(ArgContent(ArgContent::ArgLoc, loc));
-  }
+  void addLoc(const Location &loc);
 
-  void addDeref(const Location &loc) {
-    TRACE(6, "ArgManager: push arg %zd deref:(%s, %lld)\n",
-          m_args.size(), loc.spaceName(), loc.offset);
-    m_args.push_back(ArgContent(ArgContent::ArgDeref, loc));
-  }
+  void addDeref(const Location &loc);
 
-  void addReg(PhysReg reg) {
-    TRACE(6, "ArgManager: push arg %zd reg:r%d\n",
-          m_args.size(), int(reg));
-    m_args.push_back(ArgContent(ArgContent::ArgReg, reg, 0));
-  }
+  void addReg(PhysReg reg);
 
-  void addRegPlus(PhysReg reg, int32_t off) {
-    TRACE(6, "ArgManager: push arg %zd regplus:r%d+%d\n",
-          m_args.size(), int(reg), off);
-    m_args.push_back(ArgContent(ArgContent::ArgRegPlus, reg, off));
-  }
+  void addRegPlus(PhysReg reg, int32_t off);
 
   void addReg(const LazyScratchReg& l) { addReg(r(l)); }
   void addRegPlus(const LazyScratchReg& l, int32_t off) {
     addRegPlus(r(l), off);
   }
 
-  void addLocAddr(const Location &loc) {
-    TRACE(6, "ArgManager: push arg %zd addr:(%s, %lld)\n",
-          m_args.size(), loc.spaceName(), loc.offset);
-    assert(!loc.isLiteral());
-    m_args.push_back(ArgContent(ArgContent::ArgLocAddr, loc));
-  }
+  void addLocAddr(const Location &loc);
 
   void emitArguments() {
     size_t n = m_args.size();

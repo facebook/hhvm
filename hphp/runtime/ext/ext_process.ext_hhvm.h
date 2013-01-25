@@ -28,13 +28,13 @@ envs => rdx
 void fh_pcntl_exec(Value* path, Value* args, Value* envs) asm("_ZN4HPHP12f_pcntl_execERKNS_6StringERKNS_5ArrayES5_");
 
 /*
-long long HPHP::f_pcntl_fork()
+long HPHP::f_pcntl_fork()
 _ZN4HPHP12f_pcntl_forkEv
 
 (return value) => rax
 */
 
-long long fh_pcntl_fork() asm("_ZN4HPHP12f_pcntl_forkEv");
+long fh_pcntl_fork() asm("_ZN4HPHP12f_pcntl_forkEv");
 
 /*
 HPHP::Variant HPHP::f_pcntl_getpriority(int, int)
@@ -73,7 +73,7 @@ restart_syscalls => rdx
 bool fh_pcntl_signal(int signo, TypedValue* handler, bool restart_syscalls) asm("_ZN4HPHP14f_pcntl_signalEiRKNS_7VariantEb");
 
 /*
-long long HPHP::f_pcntl_wait(HPHP::VRefParamValue const&, int)
+long HPHP::f_pcntl_wait(HPHP::VRefParamValue const&, int)
 _ZN4HPHP12f_pcntl_waitERKNS_14VRefParamValueEi
 
 (return value) => rax
@@ -81,10 +81,10 @@ status => rdi
 options => rsi
 */
 
-long long fh_pcntl_wait(TypedValue* status, int options) asm("_ZN4HPHP12f_pcntl_waitERKNS_14VRefParamValueEi");
+long fh_pcntl_wait(TypedValue* status, int options) asm("_ZN4HPHP12f_pcntl_waitERKNS_14VRefParamValueEi");
 
 /*
-long long HPHP::f_pcntl_waitpid(int, HPHP::VRefParamValue const&, int)
+long HPHP::f_pcntl_waitpid(int, HPHP::VRefParamValue const&, int)
 _ZN4HPHP15f_pcntl_waitpidEiRKNS_14VRefParamValueEi
 
 (return value) => rax
@@ -93,7 +93,7 @@ status => rsi
 options => rdx
 */
 
-long long fh_pcntl_waitpid(int pid, TypedValue* status, int options) asm("_ZN4HPHP15f_pcntl_waitpidEiRKNS_14VRefParamValueEi");
+long fh_pcntl_waitpid(int pid, TypedValue* status, int options) asm("_ZN4HPHP15f_pcntl_waitpidEiRKNS_14VRefParamValueEi");
 
 /*
 bool HPHP::f_pcntl_signal_dispatch()
@@ -178,14 +178,14 @@ signal => rsi
 bool fh_proc_terminate(Value* process, int signal) asm("_ZN4HPHP16f_proc_terminateERKNS_6ObjectEi");
 
 /*
-long long HPHP::f_proc_close(HPHP::Object const&)
+long HPHP::f_proc_close(HPHP::Object const&)
 _ZN4HPHP12f_proc_closeERKNS_6ObjectE
 
 (return value) => rax
 process => rdi
 */
 
-long long fh_proc_close(Value* process) asm("_ZN4HPHP12f_proc_closeERKNS_6ObjectE");
+long fh_proc_close(Value* process) asm("_ZN4HPHP12f_proc_closeERKNS_6ObjectE");
 
 /*
 HPHP::Array HPHP::f_proc_get_status(HPHP::Object const&)

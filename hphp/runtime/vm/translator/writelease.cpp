@@ -83,7 +83,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
       pushRank(RankWriteLease);
       if (expire != 0 && m_owner != pthread_self()) {
         m_hintGrabbed++;
-        TRACE(3, "thr%lx acquired hinted lease: expired %lldus ago\n",
+        TRACE(3, "thr%lx acquired hinted lease: expired %"PRId64"us ago\n",
               pthread_self(), -expireDiff);
       } else if (expire != 0 && m_owner == pthread_self()) {
         m_hintKept++;

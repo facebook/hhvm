@@ -36,8 +36,8 @@ note_value => rdx
 
 TypedValue* fh_apache_note(TypedValue* _rv, Value* note_name, Value* note_value) asm("_ZN4HPHP13f_apache_noteERKNS_6StringES2_");
 
-TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -57,7 +57,7 @@ TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_apache_note(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -98,7 +98,7 @@ Value* fh_apache_request_headers(Value* _rv) asm("_ZN4HPHP24f_apache_request_hea
 
 TypedValue* fg_apache_request_headers(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -134,7 +134,7 @@ Value* fh_apache_response_headers(Value* _rv) asm("_ZN4HPHP25f_apache_response_h
 
 TypedValue* fg_apache_response_headers(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -170,8 +170,8 @@ walk_to_top => rdx
 
 bool fh_apache_setenv(Value* variable, Value* value, bool walk_to_top) asm("_ZN4HPHP15f_apache_setenvERKNS_6StringES2_b");
 
-TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -195,7 +195,7 @@ TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_apache_setenv(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -237,7 +237,7 @@ Value* fh_getallheaders(Value* _rv) asm("_ZN4HPHP15f_getallheadersEv");
 
 TypedValue* fg_getallheaders(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -271,8 +271,8 @@ filename => rdi
 
 bool fh_virtual(Value* filename) asm("_ZN4HPHP9f_virtualERKNS_6StringE");
 
-TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -283,7 +283,7 @@ TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 
 TypedValue* fg_virtual(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -325,7 +325,7 @@ TypedValue* fh_apache_get_config(TypedValue* _rv) asm("_ZN4HPHP19f_apache_get_co
 
 TypedValue* fg_apache_get_config(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       fh_apache_get_config((&(rv)));
@@ -359,7 +359,7 @@ TypedValue* fh_apache_get_scoreboard(TypedValue* _rv) asm("_ZN4HPHP23f_apache_ge
 
 TypedValue* fg_apache_get_scoreboard(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       fh_apache_get_scoreboard((&(rv)));
@@ -393,7 +393,7 @@ TypedValue* fh_apache_get_rewrite_rules(TypedValue* _rv) asm("_ZN4HPHP26f_apache
 
 TypedValue* fg_apache_get_rewrite_rules(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       fh_apache_get_rewrite_rules((&(rv)));

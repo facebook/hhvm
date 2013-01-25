@@ -43,19 +43,19 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
     int64 nret = ret.toInt64();
     char buf[64];
     if (strcmp(format, "hex") == 0 || strcmp(format, "x") == 0) {
-      snprintf(buf, sizeof(buf), "%llx", nret);
+      snprintf(buf, sizeof(buf), "%"PRIx64, nret);
       return buf;
     }
     if (strcmp(format, "oct") == 0) {
-      snprintf(buf, sizeof(buf), "%llo", nret);
+      snprintf(buf, sizeof(buf), "%"PRIo64, nret);
       return buf;
     }
     if (strcmp(format, "dec") == 0) {
-      snprintf(buf, sizeof(buf), "%lld", nret);
+      snprintf(buf, sizeof(buf), "%"PRId64, nret);
       return buf;
     }
     if (strcmp(format, "unsigned") == 0) {
-      snprintf(buf, sizeof(buf), "%llu", (unsigned long long)nret);
+      snprintf(buf, sizeof(buf), "%"PRIu64, nret);
       return buf;
     }
     if (strcmp(format, "time") == 0) {

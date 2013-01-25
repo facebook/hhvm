@@ -305,14 +305,14 @@ value => r8
 TypedValue* fh_ldap_compare(TypedValue* _rv, Value* link, Value* dn, Value* attribute, Value* value) asm("_ZN4HPHP14f_ldap_compareERKNS_6ObjectERKNS_6StringES5_S5_");
 
 /*
-long long HPHP::f_ldap_errno(HPHP::Object const&)
+long HPHP::f_ldap_errno(HPHP::Object const&)
 _ZN4HPHP12f_ldap_errnoERKNS_6ObjectE
 
 (return value) => rax
 link => rdi
 */
 
-long long fh_ldap_errno(Value* link) asm("_ZN4HPHP12f_ldap_errnoERKNS_6ObjectE");
+long fh_ldap_errno(Value* link) asm("_ZN4HPHP12f_ldap_errnoERKNS_6ObjectE");
 
 /*
 HPHP::String HPHP::f_ldap_error(HPHP::Object const&)
@@ -338,7 +338,7 @@ result_entry => rdx
 TypedValue* fh_ldap_get_dn(TypedValue* _rv, Value* link, Value* result_entry) asm("_ZN4HPHP13f_ldap_get_dnERKNS_6ObjectES2_");
 
 /*
-long long HPHP::f_ldap_count_entries(HPHP::Object const&, HPHP::Object const&)
+long HPHP::f_ldap_count_entries(HPHP::Object const&, HPHP::Object const&)
 _ZN4HPHP20f_ldap_count_entriesERKNS_6ObjectES2_
 
 (return value) => rax
@@ -346,7 +346,7 @@ link => rdi
 result => rsi
 */
 
-long long fh_ldap_count_entries(Value* link, Value* result) asm("_ZN4HPHP20f_ldap_count_entriesERKNS_6ObjectES2_");
+long fh_ldap_count_entries(Value* link, Value* result) asm("_ZN4HPHP20f_ldap_count_entriesERKNS_6ObjectES2_");
 
 /*
 HPHP::Variant HPHP::f_ldap_get_entries(HPHP::Object const&, HPHP::Object const&)

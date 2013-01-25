@@ -59,13 +59,13 @@ serialize => rsi
 TypedValue* fh_hphp_output_global_state(TypedValue* _rv, bool serialize) asm("_ZN4HPHP26f_hphp_output_global_stateEb");
 
 /*
-long long HPHP::f_hphp_instruction_counter()
+long HPHP::f_hphp_instruction_counter()
 _ZN4HPHP26f_hphp_instruction_counterEv
 
 (return value) => rax
 */
 
-long long fh_hphp_instruction_counter() asm("_ZN4HPHP26f_hphp_instruction_counterEv");
+long fh_hphp_instruction_counter() asm("_ZN4HPHP26f_hphp_instruction_counterEv");
 
 /*
 HPHP::Variant HPHP::f_hphp_get_hardware_counters()

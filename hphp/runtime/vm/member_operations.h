@@ -621,7 +621,9 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         x = tv.m_data.num;
       }
       if (x < 0 || x >= StringData::MaxSize) {
-        raise_warning("Illegal string offset: %lld", x);
+        // Andrei: can't use PRId64 here because of order of inclusion
+        // issues
+        raise_warning("Illegal string offset: %lld", (long long)x);
         break;
       }
       // Compute how long the resulting string will be. Type needs

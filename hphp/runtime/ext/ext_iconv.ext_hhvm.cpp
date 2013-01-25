@@ -37,8 +37,8 @@ preferences => rcx
 
 TypedValue* fh_iconv_mime_encode(TypedValue* _rv, Value* field_name, Value* field_value, TypedValue* preferences) asm("_ZN4HPHP19f_iconv_mime_encodeERKNS_6StringES2_RKNS_7VariantE");
 
-TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -58,7 +58,7 @@ TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_iconv_mime_encode(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -100,8 +100,8 @@ charset => rcx
 
 TypedValue* fh_iconv_mime_decode(TypedValue* _rv, Value* encoded_string, int mode, Value* charset) asm("_ZN4HPHP19f_iconv_mime_decodeERKNS_6StringEiS2_");
 
-TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -125,7 +125,7 @@ TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_iconv_mime_decode(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -167,8 +167,8 @@ charset => rcx
 
 TypedValue* fh_iconv_mime_decode_headers(TypedValue* _rv, Value* encoded_headers, int mode, Value* charset) asm("_ZN4HPHP27f_iconv_mime_decode_headersERKNS_6StringEiS2_");
 
-TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -192,7 +192,7 @@ TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_iconv_mime_decode_headers(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -232,8 +232,8 @@ type => rsi
 
 TypedValue* fh_iconv_get_encoding(TypedValue* _rv, Value* type) asm("_ZN4HPHP20f_iconv_get_encodingERKNS_6StringE");
 
-TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   String defVal0 = "all";
@@ -244,7 +244,7 @@ TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_iconv_get_encoding(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
@@ -285,8 +285,8 @@ charset => rsi
 
 bool fh_iconv_set_encoding(Value* type, Value* charset) asm("_ZN4HPHP20f_iconv_set_encodingERKNS_6StringES2_");
 
-TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -302,7 +302,7 @@ TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_iconv_set_encoding(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -345,8 +345,8 @@ str => rcx
 
 TypedValue* fh_iconv(TypedValue* _rv, Value* in_charset, Value* out_charset, Value* str) asm("_ZN4HPHP7f_iconvERKNS_6StringES2_S2_");
 
-TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -364,7 +364,7 @@ TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
 
 TypedValue* fg_iconv(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -405,8 +405,8 @@ charset => rdx
 
 TypedValue* fh_iconv_strlen(TypedValue* _rv, Value* str, Value* charset) asm("_ZN4HPHP14f_iconv_strlenERKNS_6StringES2_");
 
-TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -426,7 +426,7 @@ TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_iconv_strlen(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -469,8 +469,8 @@ charset => r8
 
 TypedValue* fh_iconv_strpos(TypedValue* _rv, Value* haystack, Value* needle, int offset, Value* charset) asm("_ZN4HPHP14f_iconv_strposERKNS_6StringES2_iS2_");
 
-TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -497,7 +497,7 @@ TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_iconv_strpos(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -539,8 +539,8 @@ charset => rcx
 
 TypedValue* fh_iconv_strrpos(TypedValue* _rv, Value* haystack, Value* needle, Value* charset) asm("_ZN4HPHP15f_iconv_strrposERKNS_6StringES2_S2_");
 
-TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -563,7 +563,7 @@ TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_iconv_strrpos(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -606,8 +606,8 @@ charset => r8
 
 TypedValue* fh_iconv_substr(TypedValue* _rv, Value* str, int offset, int length, Value* charset) asm("_ZN4HPHP14f_iconv_substrERKNS_6StringEiiS2_");
 
-TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -634,7 +634,7 @@ TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_iconv_substr(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
@@ -675,8 +675,8 @@ status => rdx
 
 Value* fh_ob_iconv_handler(Value* _rv, Value* contents, int status) asm("_ZN4HPHP18f_ob_iconv_handlerERKNS_6StringEi");
 
-TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -693,7 +693,7 @@ TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_ob_iconv_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {

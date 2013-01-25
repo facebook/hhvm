@@ -345,7 +345,7 @@ void HhbcTranslator::emitString(int strId) {
 }
 
 void HhbcTranslator::emitInt(int64 val) {
-  TRACE(3, "%u: Int %lld\n", m_bcOff, val);
+  TRACE(3, "%u: Int %"PRId64"\n", m_bcOff, val);
   push(m_tb->genDefConst<int64>(val));
 }
 

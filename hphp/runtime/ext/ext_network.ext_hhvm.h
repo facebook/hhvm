@@ -247,8 +247,8 @@ name => rdi
 void fh_header_remove(Value* name) asm("_ZN4HPHP15f_header_removeERKNS_6StringE");
 
 /*
-bool HPHP::f_setcookie(HPHP::String const&, HPHP::String const&, long long, HPHP::String const&, HPHP::String const&, bool, bool)
-_ZN4HPHP11f_setcookieERKNS_6StringES2_xS2_S2_bb
+bool HPHP::f_setcookie(HPHP::String const&, HPHP::String const&, long, HPHP::String const&, HPHP::String const&, bool, bool)
+_ZN4HPHP11f_setcookieERKNS_6StringES2_lS2_S2_bb
 
 (return value) => rax
 name => rdi
@@ -260,11 +260,11 @@ secure => r9
 httponly => st0
 */
 
-bool fh_setcookie(Value* name, Value* value, long long expire, Value* path, Value* domain, bool secure, bool httponly) asm("_ZN4HPHP11f_setcookieERKNS_6StringES2_xS2_S2_bb");
+bool fh_setcookie(Value* name, Value* value, long expire, Value* path, Value* domain, bool secure, bool httponly) asm("_ZN4HPHP11f_setcookieERKNS_6StringES2_lS2_S2_bb");
 
 /*
-bool HPHP::f_setrawcookie(HPHP::String const&, HPHP::String const&, long long, HPHP::String const&, HPHP::String const&, bool, bool)
-_ZN4HPHP14f_setrawcookieERKNS_6StringES2_xS2_S2_bb
+bool HPHP::f_setrawcookie(HPHP::String const&, HPHP::String const&, long, HPHP::String const&, HPHP::String const&, bool, bool)
+_ZN4HPHP14f_setrawcookieERKNS_6StringES2_lS2_S2_bb
 
 (return value) => rax
 name => rdi
@@ -276,7 +276,7 @@ secure => r9
 httponly => st0
 */
 
-bool fh_setrawcookie(Value* name, Value* value, long long expire, Value* path, Value* domain, bool secure, bool httponly) asm("_ZN4HPHP14f_setrawcookieERKNS_6StringES2_xS2_S2_bb");
+bool fh_setrawcookie(Value* name, Value* value, long expire, Value* path, Value* domain, bool secure, bool httponly) asm("_ZN4HPHP14f_setrawcookieERKNS_6StringES2_lS2_S2_bb");
 
 
 } // !HPHP

@@ -6806,7 +6806,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   fe->finish(ue->bcPos(), false);
   ue->recordFunction(fe);
 
-  for (ssize_t i = 0LL; i < numBuiltinFuncs; ++i) {
+  for (ssize_t i = 0; i < numBuiltinFuncs; ++i) {
     const HhbcExtFuncInfo* info = &builtinFuncs[i];
     StringData* name = StringData::GetStaticString(info->m_name);
     BuiltinFunction bif = (BuiltinFunction)info->m_builtinFunc;
@@ -6929,7 +6929,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
   assert(Class::s_extClassHash.size() == 0);
-  for (long long i = 0LL; i < numBuiltinClasses; ++i) {
+  for (long long i = 0; i < numBuiltinClasses; ++i) {
     const HhbcExtClassInfo* info = builtinClasses + i;
     StringData *s = StringData::GetStaticString(info->m_name);
     Class::s_extClassHash[s] = info;
@@ -6978,7 +6978,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     assert(pending.empty());
   }
 
-  for (unsigned int i = 0LL; i < classEntries.size(); ++i) {
+  for (unsigned int i = 0; i < classEntries.size(); ++i) {
     Entry& e = classEntries[i];
     StringData* parentName =
       StringData::GetStaticString(e.ci->getParentClass().get());

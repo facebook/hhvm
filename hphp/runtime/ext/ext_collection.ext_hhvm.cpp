@@ -44,7 +44,7 @@ void th_6Vector___construct(ObjectData* this_) asm("_ZN4HPHP8c_Vector13t___const
 
 TypedValue* tg_6Vector___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -83,7 +83,7 @@ bool th_6Vector_isEmpty(ObjectData* this_) asm("_ZN4HPHP8c_Vector9t_isemptyEv");
 
 TypedValue* tg_6Vector_isEmpty(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -110,25 +110,25 @@ TypedValue* tg_6Vector_isEmpty(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_Vector::t_count()
+long HPHP::c_Vector::t_count()
 _ZN4HPHP8c_Vector7t_countEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_6Vector_count(ObjectData* this_) asm("_ZN4HPHP8c_Vector7t_countEv");
+long th_6Vector_count(ObjectData* this_) asm("_ZN4HPHP8c_Vector7t_countEv");
 
 TypedValue* tg_6Vector_count(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_6Vector_count((this_));
+        rv.m_data.num = (int64_t)th_6Vector_count((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -161,7 +161,7 @@ TypedValue* th_6Vector_at(TypedValue* _rv, ObjectData* this_, TypedValue* key) a
 
 TypedValue* tg_6Vector_at(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -200,7 +200,7 @@ TypedValue* th_6Vector_get(TypedValue* _rv, ObjectData* this_, TypedValue* key) 
 
 TypedValue* tg_6Vector_get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -240,7 +240,7 @@ Value* th_6Vector_put(Value* _rv, ObjectData* this_, TypedValue* key, TypedValue
 
 TypedValue* tg_6Vector_put(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -280,7 +280,7 @@ Value* th_6Vector_clear(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vector7t_
 
 TypedValue* tg_6Vector_clear(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -320,7 +320,7 @@ bool th_6Vector_contains(ObjectData* this_, TypedValue* key) asm("_ZN4HPHP8c_Vec
 
 TypedValue* tg_6Vector_contains(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -360,7 +360,7 @@ Value* th_6Vector_append(Value* _rv, ObjectData* this_, TypedValue* val) asm("_Z
 
 TypedValue* tg_6Vector_append(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -401,7 +401,7 @@ Value* th_6Vector_add(Value* _rv, ObjectData* this_, TypedValue* val) asm("_ZN4H
 
 TypedValue* tg_6Vector_add(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -441,7 +441,7 @@ TypedValue* th_6Vector_pop(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP8c_V
 
 TypedValue* tg_6Vector_pop(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -479,7 +479,7 @@ void th_6Vector_resize(ObjectData* this_, TypedValue* sz, TypedValue* value) asm
 
 TypedValue* tg_6Vector_resize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -519,7 +519,7 @@ Value* th_6Vector_toArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vector9
 
 TypedValue* tg_6Vector_toArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -559,7 +559,7 @@ Value* th_6Vector_getIterator(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vec
 
 TypedValue* tg_6Vector_getIterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -598,7 +598,7 @@ void th_6Vector_sort(ObjectData* this_, TypedValue* col) asm("_ZN4HPHP8c_Vector6
 
 TypedValue* tg_6Vector_sort(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -637,7 +637,7 @@ void th_6Vector_reverse(ObjectData* this_) asm("_ZN4HPHP8c_Vector9t_reverseEv");
 
 TypedValue* tg_6Vector_reverse(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -678,7 +678,7 @@ void th_6Vector_splice(ObjectData* this_, TypedValue* offset, TypedValue* len, T
 
 TypedValue* tg_6Vector_splice(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -708,7 +708,7 @@ TypedValue* tg_6Vector_splice(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_Vector::t_linearsearch(HPHP::Variant const&)
+long HPHP::c_Vector::t_linearsearch(HPHP::Variant const&)
 _ZN4HPHP8c_Vector14t_linearsearchERKNS_7VariantE
 
 (return value) => rax
@@ -716,18 +716,18 @@ this_ => rdi
 search_value => rsi
 */
 
-long long th_6Vector_linearSearch(ObjectData* this_, TypedValue* search_value) asm("_ZN4HPHP8c_Vector14t_linearsearchERKNS_7VariantE");
+long th_6Vector_linearSearch(ObjectData* this_, TypedValue* search_value) asm("_ZN4HPHP8c_Vector14t_linearsearchERKNS_7VariantE");
 
 TypedValue* tg_6Vector_linearSearch(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_6Vector_linearSearch((this_), (args-0));
+        rv.m_data.num = (int64_t)th_6Vector_linearSearch((this_), (args-0));
         frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -757,7 +757,7 @@ void th_6Vector_shuffle(ObjectData* this_) asm("_ZN4HPHP8c_Vector9t_shuffleEv");
 
 TypedValue* tg_6Vector_shuffle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -797,7 +797,7 @@ Value* th_6Vector___toString(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vect
 
 TypedValue* tg_6Vector___toString(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -838,7 +838,7 @@ TypedValue* th_6Vector___get(TypedValue* _rv, ObjectData* this_, TypedValue* nam
 
 TypedValue* tg_6Vector___get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -878,7 +878,7 @@ TypedValue* th_6Vector___set(TypedValue* _rv, ObjectData* this_, TypedValue* nam
 
 TypedValue* tg_6Vector___set(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -916,7 +916,7 @@ bool th_6Vector___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP8c_Vec
 
 TypedValue* tg_6Vector___isset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -956,7 +956,7 @@ TypedValue* th_6Vector___unset(TypedValue* _rv, ObjectData* this_, TypedValue* n
 
 TypedValue* tg_6Vector___unset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -995,7 +995,7 @@ Value* th_6Vector_fromArray(Value* _rv, char const* cls_, TypedValue* arr) asm("
 
 TypedValue* tg_6Vector_fromArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -1031,7 +1031,7 @@ Value* th_6Vector_fromVector(Value* _rv, char const* cls_, TypedValue* vec) asm(
 
 TypedValue* tg_6Vector_fromVector(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -1069,7 +1069,7 @@ Value* th_6Vector_slice(Value* _rv, char const* cls_, TypedValue* vec, TypedValu
 
 TypedValue* tg_6Vector_slice(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       rv._count = 0;
@@ -1112,7 +1112,7 @@ void th_14VectorIterator___construct(ObjectData* this_) asm("_ZN4HPHP16c_VectorI
 
 TypedValue* tg_14VectorIterator___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1152,7 +1152,7 @@ TypedValue* th_14VectorIterator_current(TypedValue* _rv, ObjectData* this_) asm(
 
 TypedValue* tg_14VectorIterator_current(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1190,7 +1190,7 @@ TypedValue* th_14VectorIterator_key(TypedValue* _rv, ObjectData* this_) asm("_ZN
 
 TypedValue* tg_14VectorIterator_key(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1227,7 +1227,7 @@ bool th_14VectorIterator_valid(ObjectData* this_) asm("_ZN4HPHP16c_VectorIterato
 
 TypedValue* tg_14VectorIterator_valid(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1264,7 +1264,7 @@ void th_14VectorIterator_next(ObjectData* this_) asm("_ZN4HPHP16c_VectorIterator
 
 TypedValue* tg_14VectorIterator_next(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1302,7 +1302,7 @@ void th_14VectorIterator_rewind(ObjectData* this_) asm("_ZN4HPHP16c_VectorIterat
 
 TypedValue* tg_14VectorIterator_rewind(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1349,7 +1349,7 @@ void th_3Map___construct(ObjectData* this_) asm("_ZN4HPHP5c_Map13t___constructEv
 
 TypedValue* tg_3Map___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1388,7 +1388,7 @@ bool th_3Map_isEmpty(ObjectData* this_) asm("_ZN4HPHP5c_Map9t_isemptyEv");
 
 TypedValue* tg_3Map_isEmpty(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1415,25 +1415,25 @@ TypedValue* tg_3Map_isEmpty(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_Map::t_count()
+long HPHP::c_Map::t_count()
 _ZN4HPHP5c_Map7t_countEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_3Map_count(ObjectData* this_) asm("_ZN4HPHP5c_Map7t_countEv");
+long th_3Map_count(ObjectData* this_) asm("_ZN4HPHP5c_Map7t_countEv");
 
 TypedValue* tg_3Map_count(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_3Map_count((this_));
+        rv.m_data.num = (int64_t)th_3Map_count((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1466,7 +1466,7 @@ TypedValue* th_3Map_at(TypedValue* _rv, ObjectData* this_, TypedValue* key) asm(
 
 TypedValue* tg_3Map_at(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1505,7 +1505,7 @@ TypedValue* th_3Map_get(TypedValue* _rv, ObjectData* this_, TypedValue* key) asm
 
 TypedValue* tg_3Map_get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1545,7 +1545,7 @@ Value* th_3Map_put(Value* _rv, ObjectData* this_, TypedValue* key, TypedValue* v
 
 TypedValue* tg_3Map_put(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1585,7 +1585,7 @@ Value* th_3Map_clear(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map7t_clearE
 
 TypedValue* tg_3Map_clear(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1625,7 +1625,7 @@ bool th_3Map_contains(ObjectData* this_, TypedValue* key) asm("_ZN4HPHP5c_Map10t
 
 TypedValue* tg_3Map_contains(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1665,7 +1665,7 @@ Value* th_3Map_remove(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4H
 
 TypedValue* tg_3Map_remove(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1706,7 +1706,7 @@ Value* th_3Map_discard(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4
 
 TypedValue* tg_3Map_discard(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1746,7 +1746,7 @@ Value* th_3Map_toArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map9t_toar
 
 TypedValue* tg_3Map_toArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1786,7 +1786,7 @@ Value* th_3Map_copyAsArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map13t
 
 TypedValue* tg_3Map_copyAsArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1826,7 +1826,7 @@ Value* th_3Map_toKeysArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map13t
 
 TypedValue* tg_3Map_toKeysArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1866,7 +1866,7 @@ Value* th_3Map_values(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map8t_value
 
 TypedValue* tg_3Map_values(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1906,7 +1906,7 @@ Value* th_3Map_toValuesArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map1
 
 TypedValue* tg_3Map_toValuesArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1947,7 +1947,7 @@ Value* th_3Map_updateFromArray(Value* _rv, ObjectData* this_, TypedValue* arr) a
 
 TypedValue* tg_3Map_updateFromArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1988,7 +1988,7 @@ Value* th_3Map_updateFromIterable(Value* _rv, ObjectData* this_, TypedValue* it)
 
 TypedValue* tg_3Map_updateFromIterable(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2029,7 +2029,7 @@ Value* th_3Map_differenceByKey(Value* _rv, ObjectData* this_, TypedValue* it) as
 
 TypedValue* tg_3Map_differenceByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2069,7 +2069,7 @@ Value* th_3Map_getIterator(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map13t
 
 TypedValue* tg_3Map_getIterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2109,7 +2109,7 @@ Value* th_3Map___toString(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map12t_
 
 TypedValue* tg_3Map___toString(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2150,7 +2150,7 @@ TypedValue* th_3Map___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) 
 
 TypedValue* tg_3Map___get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2190,7 +2190,7 @@ TypedValue* th_3Map___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, 
 
 TypedValue* tg_3Map___set(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2228,7 +2228,7 @@ bool th_3Map___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP5c_Map9t_
 
 TypedValue* tg_3Map___isset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2268,7 +2268,7 @@ TypedValue* th_3Map___unset(TypedValue* _rv, ObjectData* this_, TypedValue* name
 
 TypedValue* tg_3Map___unset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2307,7 +2307,7 @@ Value* th_3Map_fromArray(Value* _rv, char const* cls_, TypedValue* mp) asm("_ZN4
 
 TypedValue* tg_3Map_fromArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -2343,7 +2343,7 @@ Value* th_3Map_fromIterable(Value* _rv, char const* cls_, TypedValue* mp) asm("_
 
 TypedValue* tg_3Map_fromIterable(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -2385,7 +2385,7 @@ void th_11MapIterator___construct(ObjectData* this_) asm("_ZN4HPHP13c_MapIterato
 
 TypedValue* tg_11MapIterator___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2425,7 +2425,7 @@ TypedValue* th_11MapIterator_current(TypedValue* _rv, ObjectData* this_) asm("_Z
 
 TypedValue* tg_11MapIterator_current(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2463,7 +2463,7 @@ TypedValue* th_11MapIterator_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HP
 
 TypedValue* tg_11MapIterator_key(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2500,7 +2500,7 @@ bool th_11MapIterator_valid(ObjectData* this_) asm("_ZN4HPHP13c_MapIterator7t_va
 
 TypedValue* tg_11MapIterator_valid(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2537,7 +2537,7 @@ void th_11MapIterator_next(ObjectData* this_) asm("_ZN4HPHP13c_MapIterator6t_nex
 
 TypedValue* tg_11MapIterator_next(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2575,7 +2575,7 @@ void th_11MapIterator_rewind(ObjectData* this_) asm("_ZN4HPHP13c_MapIterator8t_r
 
 TypedValue* tg_11MapIterator_rewind(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2622,7 +2622,7 @@ void th_9StableMap___construct(ObjectData* this_) asm("_ZN4HPHP11c_StableMap13t_
 
 TypedValue* tg_9StableMap___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2661,7 +2661,7 @@ bool th_9StableMap_isEmpty(ObjectData* this_) asm("_ZN4HPHP11c_StableMap9t_isemp
 
 TypedValue* tg_9StableMap_isEmpty(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2688,25 +2688,25 @@ TypedValue* tg_9StableMap_isEmpty(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_StableMap::t_count()
+long HPHP::c_StableMap::t_count()
 _ZN4HPHP11c_StableMap7t_countEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_9StableMap_count(ObjectData* this_) asm("_ZN4HPHP11c_StableMap7t_countEv");
+long th_9StableMap_count(ObjectData* this_) asm("_ZN4HPHP11c_StableMap7t_countEv");
 
 TypedValue* tg_9StableMap_count(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_9StableMap_count((this_));
+        rv.m_data.num = (int64_t)th_9StableMap_count((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2739,7 +2739,7 @@ TypedValue* th_9StableMap_at(TypedValue* _rv, ObjectData* this_, TypedValue* key
 
 TypedValue* tg_9StableMap_at(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2778,7 +2778,7 @@ TypedValue* th_9StableMap_get(TypedValue* _rv, ObjectData* this_, TypedValue* ke
 
 TypedValue* tg_9StableMap_get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2818,7 +2818,7 @@ Value* th_9StableMap_put(Value* _rv, ObjectData* this_, TypedValue* key, TypedVa
 
 TypedValue* tg_9StableMap_put(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2858,7 +2858,7 @@ Value* th_9StableMap_clear(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_Stabl
 
 TypedValue* tg_9StableMap_clear(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2898,7 +2898,7 @@ bool th_9StableMap_contains(ObjectData* this_, TypedValue* key) asm("_ZN4HPHP11c
 
 TypedValue* tg_9StableMap_contains(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2938,7 +2938,7 @@ Value* th_9StableMap_remove(Value* _rv, ObjectData* this_, TypedValue* key) asm(
 
 TypedValue* tg_9StableMap_remove(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2979,7 +2979,7 @@ Value* th_9StableMap_discard(Value* _rv, ObjectData* this_, TypedValue* key) asm
 
 TypedValue* tg_9StableMap_discard(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3019,7 +3019,7 @@ Value* th_9StableMap_toArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_Sta
 
 TypedValue* tg_9StableMap_toArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3059,7 +3059,7 @@ Value* th_9StableMap_copyAsArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c
 
 TypedValue* tg_9StableMap_copyAsArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3099,7 +3099,7 @@ Value* th_9StableMap_toKeysArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c
 
 TypedValue* tg_9StableMap_toKeysArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3139,7 +3139,7 @@ Value* th_9StableMap_values(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_Stab
 
 TypedValue* tg_9StableMap_values(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3179,7 +3179,7 @@ Value* th_9StableMap_toValuesArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP1
 
 TypedValue* tg_9StableMap_toValuesArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3220,7 +3220,7 @@ Value* th_9StableMap_updateFromArray(Value* _rv, ObjectData* this_, TypedValue* 
 
 TypedValue* tg_9StableMap_updateFromArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3261,7 +3261,7 @@ Value* th_9StableMap_updateFromIterable(Value* _rv, ObjectData* this_, TypedValu
 
 TypedValue* tg_9StableMap_updateFromIterable(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3302,7 +3302,7 @@ Value* th_9StableMap_differenceByKey(Value* _rv, ObjectData* this_, TypedValue* 
 
 TypedValue* tg_9StableMap_differenceByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3342,7 +3342,7 @@ Value* th_9StableMap_getIterator(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c
 
 TypedValue* tg_9StableMap_getIterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3383,7 +3383,7 @@ TypedValue* th_9StableMap___get(TypedValue* _rv, ObjectData* this_, TypedValue* 
 
 TypedValue* tg_9StableMap___get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3423,7 +3423,7 @@ TypedValue* th_9StableMap___set(TypedValue* _rv, ObjectData* this_, TypedValue* 
 
 TypedValue* tg_9StableMap___set(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3461,7 +3461,7 @@ bool th_9StableMap___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP11c
 
 TypedValue* tg_9StableMap___isset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3501,7 +3501,7 @@ TypedValue* th_9StableMap___unset(TypedValue* _rv, ObjectData* this_, TypedValue
 
 TypedValue* tg_9StableMap___unset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3539,7 +3539,7 @@ Value* th_9StableMap___toString(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_
 
 TypedValue* tg_9StableMap___toString(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3580,7 +3580,7 @@ Value* th_9StableMap_fromArray(Value* _rv, char const* cls_, TypedValue* mp) asm
 
 TypedValue* tg_9StableMap_fromArray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -3616,7 +3616,7 @@ Value* th_9StableMap_fromIterable(Value* _rv, char const* cls_, TypedValue* mp) 
 
 TypedValue* tg_9StableMap_fromIterable(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -3658,7 +3658,7 @@ void th_17StableMapIterator___construct(ObjectData* this_) asm("_ZN4HPHP19c_Stab
 
 TypedValue* tg_17StableMapIterator___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3698,7 +3698,7 @@ TypedValue* th_17StableMapIterator_current(TypedValue* _rv, ObjectData* this_) a
 
 TypedValue* tg_17StableMapIterator_current(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3736,7 +3736,7 @@ TypedValue* th_17StableMapIterator_key(TypedValue* _rv, ObjectData* this_) asm("
 
 TypedValue* tg_17StableMapIterator_key(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3773,7 +3773,7 @@ bool th_17StableMapIterator_valid(ObjectData* this_) asm("_ZN4HPHP19c_StableMapI
 
 TypedValue* tg_17StableMapIterator_valid(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3810,7 +3810,7 @@ void th_17StableMapIterator_next(ObjectData* this_) asm("_ZN4HPHP19c_StableMapIt
 
 TypedValue* tg_17StableMapIterator_next(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -3848,7 +3848,7 @@ void th_17StableMapIterator_rewind(ObjectData* this_) asm("_ZN4HPHP19c_StableMap
 
 TypedValue* tg_17StableMapIterator_rewind(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

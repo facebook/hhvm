@@ -2026,7 +2026,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         }
 
         // extra
-        cg_printf("0LL, ");
+        cg_printf("int64_t(0), ");
 
         // isMethod
         cg_printf("%s, ", cscope ? "true" : "false");
@@ -2193,8 +2193,8 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               if (idx >= func->getMaxParamCount()) {
                 if (func->isVariableArgument()) {
                   int64 idx0 = idx - func->getMaxParamCount();
-                  cg_printf("(%lldLL < num_args ? "
-                            "args.rvalAt(%lldLL) : Variant(false))",
+                  cg_printf("(%"PRId64"L < num_args ? "
+                            "args.rvalAt(int64_t(%"PRId64")) : Variant(false))",
                             idx, idx0);
                 } else {
                   cg_printf("Variant(false)");
@@ -2208,7 +2208,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               bool isStashed =
                 func->getVariables()->getSymbol(funcName)->isStashedVal();
               if (func->isVariableArgument()) {
-                cg_printf("(%lldLL < num_args ? ", idx);
+                cg_printf("(%"PRId64"L < num_args ? ", idx);
               }
               if (needsCast) cg_printf("Variant(");
               cg_printf("%s%s%s",
@@ -2386,8 +2386,8 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           error = true;
           return SimpleFunctionCallPtr();
         }
-        Variant classname = arr.rvalAt(0LL);
-        Variant methodname = arr.rvalAt(1LL);
+        Variant classname = arr.rvalAt(int64_t(0));
+        Variant methodname = arr.rvalAt(int64_t(1));
         if (!methodname.isString()) {
           error = true;
           return SimpleFunctionCallPtr();

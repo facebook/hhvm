@@ -433,7 +433,7 @@ key => rsi
 bool fh_openssl_x509_check_private_key(TypedValue* cert, TypedValue* key) asm("_ZN4HPHP32f_openssl_x509_check_private_keyERKNS_7VariantES2_");
 
 /*
-long long HPHP::f_openssl_x509_checkpurpose(HPHP::Variant const&, int, HPHP::Array const&, HPHP::String const&)
+long HPHP::f_openssl_x509_checkpurpose(HPHP::Variant const&, int, HPHP::Array const&, HPHP::String const&)
 _ZN4HPHP27f_openssl_x509_checkpurposeERKNS_7VariantEiRKNS_5ArrayERKNS_6StringE
 
 (return value) => rax
@@ -443,7 +443,7 @@ cainfo => rdx
 untrustedfile => rcx
 */
 
-long long fh_openssl_x509_checkpurpose(TypedValue* x509cert, int purpose, Value* cainfo, Value* untrustedfile) asm("_ZN4HPHP27f_openssl_x509_checkpurposeERKNS_7VariantEiRKNS_5ArrayERKNS_6StringE");
+long fh_openssl_x509_checkpurpose(TypedValue* x509cert, int purpose, Value* cainfo, Value* untrustedfile) asm("_ZN4HPHP27f_openssl_x509_checkpurposeERKNS_7VariantEiRKNS_5ArrayERKNS_6StringE");
 
 /*
 bool HPHP::f_openssl_x509_export_to_file(HPHP::Variant const&, HPHP::String const&, bool)

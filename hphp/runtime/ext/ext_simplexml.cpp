@@ -807,8 +807,8 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
                   "(duplicate subnodes or attr detected)");
   } else if (m_is_attribute) {
     if (name.isInteger()) {
-      raise_warning("Cannot change attribute number %lld when only %ld "
-                    "attributes exist", name.toInt64(),
+      raise_warning("Cannot change attribute number %"PRId64
+                    " when only %"PRId64" attributes exist", name.toInt64(),
                     m_attributes.toArray().size());
     } else {
       newnode = (xmlNodePtr)xmlNewProp(m_node, (xmlChar *)sname.data(), sv);

@@ -35,17 +35,17 @@ value => rdx
 _argv => rcx
 */
 
-TypedValue* fh_min(TypedValue* _rv, long long _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_minEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_min(TypedValue* _rv, int64_t _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_minEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_min(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -85,17 +85,17 @@ value => rdx
 _argv => rcx
 */
 
-TypedValue* fh_max(TypedValue* _rv, long long _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_maxEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_max(TypedValue* _rv, int64_t _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_maxEiRKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_max(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
       Array extraArgs;
       {
         ArrayInit ai(count-1, false);
-        for (long long i = 1; i < count; ++i) {
+        for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
@@ -137,7 +137,7 @@ TypedValue* fh_abs(TypedValue* _rv, TypedValue* number) asm("_ZN4HPHP5f_absERKNS
 
 TypedValue* fg_abs(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_abs((&(rv)), (args-0));
@@ -160,8 +160,8 @@ TypedValue* fg_abs(HPHP::VM::ActRec *ar) {
 
 
 /*
-double HPHP::f_round(HPHP::Variant const&, long long, long long)
-_ZN4HPHP7f_roundERKNS_7VariantExx
+double HPHP::f_round(HPHP::Variant const&, long, long)
+_ZN4HPHP7f_roundERKNS_7VariantEll
 
 (return value) => xmm0
 val => rdi
@@ -169,10 +169,10 @@ precision => rsi
 mode => rdx
 */
 
-double fh_round(TypedValue* val, long long precision, long long mode) asm("_ZN4HPHP7f_roundERKNS_7VariantExx");
+double fh_round(TypedValue* val, long precision, long mode) asm("_ZN4HPHP7f_roundERKNS_7VariantEll");
 
-TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -188,19 +188,19 @@ TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   case 1:
     break;
   }
-  rv->m_data.dbl = fh_round((args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(0), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(1));
+  rv->m_data.dbl = fh_round((args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(1));
   return rv;
 }
 
 TypedValue* fg_round(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64)) {
         rv._count = 0;
         rv.m_type = KindOfDouble;
-        rv.m_data.dbl = fh_round((args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(0), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(1));
+        rv.m_data.dbl = fh_round((args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(1));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -225,8 +225,8 @@ TypedValue* fg_round(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Variant HPHP::f_base_convert(HPHP::String const&, long long, long long)
-_ZN4HPHP14f_base_convertERKNS_6StringExx
+HPHP::Variant HPHP::f_base_convert(HPHP::String const&, long, long)
+_ZN4HPHP14f_base_convertERKNS_6StringEll
 
 (return value) => rax
 _rv => rdi
@@ -235,10 +235,10 @@ frombase => rdx
 tobase => rcx
 */
 
-TypedValue* fh_base_convert(TypedValue* _rv, Value* number, long long frombase, long long tobase) asm("_ZN4HPHP14f_base_convertERKNS_6StringExx");
+TypedValue* fh_base_convert(TypedValue* _rv, Value* number, long frombase, long tobase) asm("_ZN4HPHP14f_base_convertERKNS_6StringEll");
 
-TypedValue * fg1_base_convert(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_base_convert(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_base_convert(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_base_convert(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -249,18 +249,18 @@ TypedValue * fg1_base_convert(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_base_convert((rv), (Value*)(args-0), (long long)(args[-1].m_data.num), (long long)(args[-2].m_data.num));
+  fh_base_convert((rv), (Value*)(args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
 TypedValue* fg_base_convert(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_base_convert((&(rv)), (Value*)(args-0), (long long)(args[-1].m_data.num), (long long)(args[-2].m_data.num));
+        fh_base_convert((&(rv)), (Value*)(args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -299,7 +299,7 @@ TypedValue* fh_pow(TypedValue* _rv, TypedValue* base, TypedValue* exp) asm("_ZN4
 
 TypedValue* fg_pow(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       fh_pow((&(rv)), (args-0), (args-1));
@@ -332,7 +332,7 @@ void fh_srand(TypedValue* seed) asm("_ZN4HPHP7f_srandERKNS_7VariantE");
 
 TypedValue* fg_srand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       rv.m_data.num = 0LL;
@@ -357,18 +357,18 @@ TypedValue* fg_srand(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_rand(long long, long long)
-_ZN4HPHP6f_randExx
+long HPHP::f_rand(long, long)
+_ZN4HPHP6f_randEll
 
 (return value) => rax
 min => rdi
 max => rsi
 */
 
-long long fh_rand(long long min, long long max) asm("_ZN4HPHP6f_randExx");
+long fh_rand(long min, long max) asm("_ZN4HPHP6f_randEll");
 
-TypedValue * fg1_rand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_rand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_rand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_rand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
@@ -384,19 +384,19 @@ TypedValue * fg1_rand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   case 0:
     break;
   }
-  rv->m_data.num = (long long)fh_rand((count > 0) ? (long long)(args[-0].m_data.num) : (long long)(0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(RAND_MAX));
+  rv->m_data.num = (int64_t)fh_rand((count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(RAND_MAX));
   return rv;
 }
 
 TypedValue* fg_rand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (count <= 0 || (args-0)->m_type == KindOfInt64)) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_rand((count > 0) ? (long long)(args[-0].m_data.num) : (long long)(0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(RAND_MAX));
+        rv.m_data.num = (int64_t)fh_rand((count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(RAND_MAX));
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -431,7 +431,7 @@ void fh_mt_srand(TypedValue* seed) asm("_ZN4HPHP10f_mt_srandERKNS_7VariantE");
 
 TypedValue* fg_mt_srand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       rv.m_data.num = 0LL;

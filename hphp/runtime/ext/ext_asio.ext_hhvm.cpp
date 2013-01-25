@@ -34,7 +34,7 @@ void fh_asio_enter_context() asm("_ZN4HPHP20f_asio_enter_contextEv");
 
 TypedValue* fg_asio_enter_context(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -68,7 +68,7 @@ void fh_asio_exit_context() asm("_ZN4HPHP19f_asio_exit_contextEv");
 
 TypedValue* fg_asio_exit_context(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -104,7 +104,7 @@ Value* fh_asio_get_current(Value* _rv) asm("_ZN4HPHP18f_asio_get_currentEv");
 
 TypedValue* fg_asio_get_current(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -137,8 +137,8 @@ on_failed_cb => rdi
 
 void fh_asio_set_on_failed_callback(Value* on_failed_cb) asm("_ZN4HPHP29f_asio_set_on_failed_callbackERKNS_6ObjectE");
 
-TypedValue * fg1_asio_set_on_failed_callback(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_asio_set_on_failed_callback(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_asio_set_on_failed_callback(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_asio_set_on_failed_callback(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -150,7 +150,7 @@ TypedValue * fg1_asio_set_on_failed_callback(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_asio_set_on_failed_callback(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {

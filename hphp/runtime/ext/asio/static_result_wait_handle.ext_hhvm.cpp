@@ -44,7 +44,7 @@ void th_22StaticResultWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP24c
 
 TypedValue* tg_22StaticResultWaitHandle___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -85,7 +85,7 @@ Value* th_22StaticResultWaitHandle_create(Value* _rv, char const* cls_, TypedVal
 
 TypedValue* tg_22StaticResultWaitHandle_create(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;

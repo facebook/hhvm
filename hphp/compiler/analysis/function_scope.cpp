@@ -2165,7 +2165,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
               Option::InvokePrefix, id.c_str(),
               Option::InvokeFewArgsPrefix, id.c_str());
   }
-  cg.printf(", %d, %d, 0x%.16llXLL", m_maxParam, flags, refflags);
+  cg.printf(", %d, %d, 0x%.16llXL", m_maxParam, flags, refflags);
   if (isRedeclaring()) {
     cg_printf("}, %d", getRedeclaringId());
   }

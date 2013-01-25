@@ -61,13 +61,13 @@ _ZN4HPHP32f_hphp_thread_set_warmup_enabledEv
 void fh_hphp_thread_set_warmup_enabled() asm("_ZN4HPHP32f_hphp_thread_set_warmup_enabledEv");
 
 /*
-long long HPHP::f_hphp_get_thread_id()
+long HPHP::f_hphp_get_thread_id()
 _ZN4HPHP20f_hphp_get_thread_idEv
 
 (return value) => rax
 */
 
-long long fh_hphp_get_thread_id() asm("_ZN4HPHP20f_hphp_get_thread_idEv");
+long fh_hphp_get_thread_id() asm("_ZN4HPHP20f_hphp_get_thread_idEv");
 
 /*
 int HPHP::f_hphp_gettid()

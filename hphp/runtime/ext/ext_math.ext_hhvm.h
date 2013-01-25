@@ -27,7 +27,7 @@ value => rdx
 _argv => rcx
 */
 
-TypedValue* fh_min(TypedValue* _rv, long long _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_minEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_min(TypedValue* _rv, int64_t _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_minEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_max(int, HPHP::Variant const&, HPHP::Array const&)
@@ -40,7 +40,7 @@ value => rdx
 _argv => rcx
 */
 
-TypedValue* fh_max(TypedValue* _rv, long long _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_maxEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_max(TypedValue* _rv, int64_t _argc, TypedValue* value, Value* _argv) asm("_ZN4HPHP5f_maxEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_abs(HPHP::Variant const&)
@@ -54,8 +54,8 @@ number => rsi
 TypedValue* fh_abs(TypedValue* _rv, TypedValue* number) asm("_ZN4HPHP5f_absERKNS_7VariantE");
 
 /*
-double HPHP::f_round(HPHP::Variant const&, long long, long long)
-_ZN4HPHP7f_roundERKNS_7VariantExx
+double HPHP::f_round(HPHP::Variant const&, long, long)
+_ZN4HPHP7f_roundERKNS_7VariantEll
 
 (return value) => xmm0
 val => rdi
@@ -63,11 +63,11 @@ precision => rsi
 mode => rdx
 */
 
-double fh_round(TypedValue* val, long long precision, long long mode) asm("_ZN4HPHP7f_roundERKNS_7VariantExx");
+double fh_round(TypedValue* val, long precision, long mode) asm("_ZN4HPHP7f_roundERKNS_7VariantEll");
 
 /*
-HPHP::Variant HPHP::f_base_convert(HPHP::String const&, long long, long long)
-_ZN4HPHP14f_base_convertERKNS_6StringExx
+HPHP::Variant HPHP::f_base_convert(HPHP::String const&, long, long)
+_ZN4HPHP14f_base_convertERKNS_6StringEll
 
 (return value) => rax
 _rv => rdi
@@ -76,7 +76,7 @@ frombase => rdx
 tobase => rcx
 */
 
-TypedValue* fh_base_convert(TypedValue* _rv, Value* number, long long frombase, long long tobase) asm("_ZN4HPHP14f_base_convertERKNS_6StringExx");
+TypedValue* fh_base_convert(TypedValue* _rv, Value* number, long frombase, long tobase) asm("_ZN4HPHP14f_base_convertERKNS_6StringEll");
 
 /*
 HPHP::Variant HPHP::f_pow(HPHP::Variant const&, HPHP::Variant const&)
@@ -100,15 +100,15 @@ seed => rdi
 void fh_srand(TypedValue* seed) asm("_ZN4HPHP7f_srandERKNS_7VariantE");
 
 /*
-long long HPHP::f_rand(long long, long long)
-_ZN4HPHP6f_randExx
+long HPHP::f_rand(long, long)
+_ZN4HPHP6f_randEll
 
 (return value) => rax
 min => rdi
 max => rsi
 */
 
-long long fh_rand(long long min, long long max) asm("_ZN4HPHP6f_randExx");
+long fh_rand(long min, long max) asm("_ZN4HPHP6f_randEll");
 
 /*
 void HPHP::f_mt_srand(HPHP::Variant const&)

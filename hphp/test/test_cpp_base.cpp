@@ -103,7 +103,7 @@ bool TestCppBase::TestSmartAllocator() {
     }
     time1 = t.getMicroSeconds();
     if (!Test::s_quiet) {
-      printf("SmartAlloctor: %lld us\n", time1);
+      printf("SmartAlloctor: %"PRId64" us\n", time1);
     }
   }
   {
@@ -114,7 +114,7 @@ bool TestCppBase::TestSmartAllocator() {
     }
     time2 = t.getMicroSeconds();
     if (!Test::s_quiet) {
-      printf("malloc/free: %lld us\n", time2);
+      printf("malloc/free: %"PRId64" us\n", time2);
     }
   }
   return Count(true);
@@ -128,8 +128,8 @@ bool TestCppBase::TestString() {
   {
     VS((const char *)String(15), "15");
     VS((const char *)String(-15), "-15");
-    VS((const char *)String(12345678912345678LL), "12345678912345678");
-    VS((const char *)String(-12345678912345678LL), "-12345678912345678");
+    VS((const char *)String(int64_t(12345678912345678LL)), "12345678912345678");
+    VS((const char *)String(int64_t(-12345678912345678LL)), "-12345678912345678");
     VS((const char *)String(5.603), "5.603");
     VS((const char *)String("test"), "test");
     VS((const char *)String(String("test")), "test");

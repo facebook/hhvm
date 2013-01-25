@@ -216,7 +216,7 @@ obj => rcx
 _argv => r8
 */
 
-TypedValue* fh_call_user_method(TypedValue* _rv, long long _argc, Value* method_name, TypedValue* obj, Value* _argv) asm("_ZN4HPHP18f_call_user_methodEiRKNS_6StringERKNS_14VRefParamValueERKNS_5ArrayE");
+TypedValue* fh_call_user_method(TypedValue* _rv, int64_t _argc, Value* method_name, TypedValue* obj, Value* _argv) asm("_ZN4HPHP18f_call_user_methodEiRKNS_6StringERKNS_14VRefParamValueERKNS_5ArrayE");
 
 
 } // !HPHP

@@ -44,7 +44,7 @@ void th_18GenArrayWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP20c_Gen
 
 TypedValue* tg_18GenArrayWaitHandle___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -83,8 +83,8 @@ dependencies => rdx
 
 Value* th_18GenArrayWaitHandle_create(Value* _rv, char const* cls_, Value* dependencies) asm("_ZN4HPHP20c_GenArrayWaitHandle9ti_createEPKcRKNS_5ArrayE");
 
-TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -96,7 +96,7 @@ TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* tg_18GenArrayWaitHandle_create(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {

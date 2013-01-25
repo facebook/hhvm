@@ -43,8 +43,8 @@ persistent_id => rsi
 
 void th_9Memcached___construct(ObjectData* this_, Value* persistent_id) asm("_ZN4HPHP11c_Memcached13t___constructERKNS_6StringE");
 
-TypedValue* tg1_9Memcached___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -56,7 +56,7 @@ TypedValue* tg1_9Memcached___construct(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* tg_9Memcached___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -103,8 +103,8 @@ expiration => rcx
 
 bool th_9Memcached_add(ObjectData* this_, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached5t_addERKNS_6StringERKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -125,7 +125,7 @@ TypedValue* tg1_9Memcached_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* tg_9Memcached_add(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -172,8 +172,8 @@ expiration => r8
 
 bool th_9Memcached_addByKey(ObjectData* this_, Value* server_key, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached10t_addbykeyERKNS_6StringES3_RKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_addByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_addByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_addByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_addByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -197,7 +197,7 @@ TypedValue* tg1_9Memcached_addByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* tg_9Memcached_addByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -243,8 +243,8 @@ weight => rcx
 
 bool th_9Memcached_addServer(ObjectData* this_, Value* host, int port, int weight) asm("_ZN4HPHP11c_Memcached11t_addserverERKNS_6StringEii");
 
-TypedValue* tg1_9Memcached_addServer(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_addServer(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_addServer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_addServer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -268,7 +268,7 @@ TypedValue* tg1_9Memcached_addServer(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* tg_9Memcached_addServer(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -312,8 +312,8 @@ servers => rsi
 
 bool th_9Memcached_addServers(ObjectData* this_, Value* servers) asm("_ZN4HPHP11c_Memcached12t_addserversERKNS_5ArrayE");
 
-TypedValue* tg1_9Memcached_addServers(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_addServers(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_addServers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_addServers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -324,7 +324,7 @@ TypedValue* tg1_9Memcached_addServers(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* tg_9Memcached_addServers(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -369,8 +369,8 @@ value => rdx
 
 bool th_9Memcached_append(ObjectData* this_, Value* key, Value* value) asm("_ZN4HPHP11c_Memcached8t_appendERKNS_6StringES3_");
 
-TypedValue* tg1_9Memcached_append(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_append(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -386,7 +386,7 @@ TypedValue* tg1_9Memcached_append(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* tg_9Memcached_append(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -432,8 +432,8 @@ value => rcx
 
 bool th_9Memcached_appendByKey(ObjectData* this_, Value* server_key, Value* key, Value* value) asm("_ZN4HPHP11c_Memcached13t_appendbykeyERKNS_6StringES3_S3_");
 
-TypedValue* tg1_9Memcached_appendByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_appendByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_appendByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_appendByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -452,7 +452,7 @@ TypedValue* tg1_9Memcached_appendByKey(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* tg_9Memcached_appendByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -499,8 +499,8 @@ expiration => rcx
 
 bool th_9Memcached_cas(ObjectData* this_, double cas_token, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached5t_casEdRKNS_6StringERKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_cas(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_cas(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -524,7 +524,7 @@ TypedValue* tg1_9Memcached_cas(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* tg_9Memcached_cas(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -572,8 +572,8 @@ expiration => r8
 
 bool th_9Memcached_casByKey(ObjectData* this_, double cas_token, Value* server_key, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached10t_casbykeyEdRKNS_6StringES3_RKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_casByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_casByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_casByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_casByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -600,7 +600,7 @@ TypedValue* tg1_9Memcached_casByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* tg_9Memcached_casByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -634,8 +634,8 @@ TypedValue* tg_9Memcached_casByKey(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Variant HPHP::c_Memcached::t_decrement(HPHP::String const&, long long)
-_ZN4HPHP11c_Memcached11t_decrementERKNS_6StringEx
+HPHP::Variant HPHP::c_Memcached::t_decrement(HPHP::String const&, long)
+_ZN4HPHP11c_Memcached11t_decrementERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -644,10 +644,10 @@ key => rdx
 offset => rcx
 */
 
-TypedValue* th_9Memcached_decrement(TypedValue* _rv, ObjectData* this_, Value* key, long long offset) asm("_ZN4HPHP11c_Memcached11t_decrementERKNS_6StringEx");
+TypedValue* th_9Memcached_decrement(TypedValue* _rv, ObjectData* this_, Value* key, long offset) asm("_ZN4HPHP11c_Memcached11t_decrementERKNS_6StringEl");
 
-TypedValue* tg1_9Memcached_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -660,20 +660,20 @@ TypedValue* tg1_9Memcached_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, long 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_9Memcached_decrement((rv), (this_), (Value*)(args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(1));
+  th_9Memcached_decrement((rv), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
 TypedValue* tg_9Memcached_decrement(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_9Memcached_decrement((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(1));
+          th_9Memcached_decrement((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -711,8 +711,8 @@ time => rdx
 
 bool th_9Memcached_delete(ObjectData* this_, Value* key, int time) asm("_ZN4HPHP11c_Memcached8t_deleteERKNS_6StringEi");
 
-TypedValue* tg1_9Memcached_delete(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_delete(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -733,7 +733,7 @@ TypedValue* tg1_9Memcached_delete(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* tg_9Memcached_delete(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -779,8 +779,8 @@ time => rcx
 
 bool th_9Memcached_deleteByKey(ObjectData* this_, Value* server_key, Value* key, int time) asm("_ZN4HPHP11c_Memcached13t_deletebykeyERKNS_6StringES3_i");
 
-TypedValue* tg1_9Memcached_deleteByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_deleteByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_deleteByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_deleteByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -804,7 +804,7 @@ TypedValue* tg1_9Memcached_deleteByKey(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* tg_9Memcached_deleteByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -850,7 +850,7 @@ TypedValue* th_9Memcached_fetch(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPH
 
 TypedValue* tg_9Memcached_fetch(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -888,7 +888,7 @@ TypedValue* th_9Memcached_fetchAll(TypedValue* _rv, ObjectData* this_) asm("_ZN4
 
 TypedValue* tg_9Memcached_fetchAll(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -924,8 +924,8 @@ delay => rsi
 
 bool th_9Memcached_flush(ObjectData* this_, int delay) asm("_ZN4HPHP11c_Memcached7t_flushEi");
 
-TypedValue* tg1_9Memcached_flush(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_flush(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -936,7 +936,7 @@ TypedValue* tg1_9Memcached_flush(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* tg_9Memcached_flush(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -983,8 +983,8 @@ cas_token => r8
 
 TypedValue* th_9Memcached_get(TypedValue* _rv, ObjectData* this_, Value* key, TypedValue* cache_cb, TypedValue* cas_token) asm("_ZN4HPHP11c_Memcached5t_getERKNS_6StringERKNS_7VariantERKNS_14VRefParamValueE");
 
-TypedValue* tg1_9Memcached_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   VRefParamValue defVal2 = null_variant;
@@ -995,7 +995,7 @@ TypedValue* tg1_9Memcached_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* tg_9Memcached_get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1043,8 +1043,8 @@ cas_token => r9
 
 TypedValue* th_9Memcached_getByKey(TypedValue* _rv, ObjectData* this_, Value* server_key, Value* key, TypedValue* cache_cb, TypedValue* cas_token) asm("_ZN4HPHP11c_Memcached10t_getbykeyERKNS_6StringES3_RKNS_7VariantERKNS_14VRefParamValueE");
 
-TypedValue* tg1_9Memcached_getByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_getByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_getByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_getByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -1066,7 +1066,7 @@ TypedValue* tg1_9Memcached_getByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* tg_9Memcached_getByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1112,8 +1112,8 @@ value_cb => rcx
 
 bool th_9Memcached_getDelayed(ObjectData* this_, Value* keys, bool with_cas, TypedValue* value_cb) asm("_ZN4HPHP11c_Memcached12t_getdelayedERKNS_5ArrayEbRKNS_7VariantE");
 
-TypedValue* tg1_9Memcached_getDelayed(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_getDelayed(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_getDelayed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_getDelayed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1135,7 +1135,7 @@ TypedValue* tg1_9Memcached_getDelayed(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* tg_9Memcached_getDelayed(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1182,8 +1182,8 @@ value_cb => r8
 
 bool th_9Memcached_getDelayedByKey(ObjectData* this_, Value* server_key, Value* keys, bool with_cas, TypedValue* value_cb) asm("_ZN4HPHP11c_Memcached17t_getdelayedbykeyERKNS_6StringERKNS_5ArrayEbRKNS_7VariantE");
 
-TypedValue* tg1_9Memcached_getDelayedByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_getDelayedByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_getDelayedByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_getDelayedByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1208,7 +1208,7 @@ TypedValue* tg1_9Memcached_getDelayedByKey(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* tg_9Memcached_getDelayedByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1255,8 +1255,8 @@ flags => r8
 
 TypedValue* th_9Memcached_getMulti(TypedValue* _rv, ObjectData* this_, Value* keys, TypedValue* cas_tokens, int flags) asm("_ZN4HPHP11c_Memcached10t_getmultiERKNS_5ArrayERKNS_14VRefParamValueEi");
 
-TypedValue* tg1_9Memcached_getMulti(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_getMulti(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_getMulti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_getMulti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1278,7 +1278,7 @@ TypedValue* tg1_9Memcached_getMulti(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* tg_9Memcached_getMulti(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1326,8 +1326,8 @@ flags => r9
 
 TypedValue* th_9Memcached_getMultiByKey(TypedValue* _rv, ObjectData* this_, Value* server_key, Value* keys, TypedValue* cas_tokens, int flags) asm("_ZN4HPHP11c_Memcached15t_getmultibykeyERKNS_6StringERKNS_5ArrayERKNS_14VRefParamValueEi");
 
-TypedValue* tg1_9Memcached_getMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_getMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_getMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_getMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -1352,7 +1352,7 @@ TypedValue* tg1_9Memcached_getMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* tg_9Memcached_getMultiByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1397,8 +1397,8 @@ option => rdx
 
 TypedValue* th_9Memcached_getOption(TypedValue* _rv, ObjectData* this_, int option) asm("_ZN4HPHP11c_Memcached11t_getoptionEi");
 
-TypedValue* tg1_9Memcached_getOption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_getOption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_getOption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_getOption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_9Memcached_getOption((rv), (this_), (int)(args[-0].m_data.num));
@@ -1408,7 +1408,7 @@ TypedValue* tg1_9Memcached_getOption(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* tg_9Memcached_getOption(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1441,25 +1441,25 @@ TypedValue* tg_9Memcached_getOption(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_Memcached::t_getresultcode()
+long HPHP::c_Memcached::t_getresultcode()
 _ZN4HPHP11c_Memcached15t_getresultcodeEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_9Memcached_getResultCode(ObjectData* this_) asm("_ZN4HPHP11c_Memcached15t_getresultcodeEv");
+long th_9Memcached_getResultCode(ObjectData* this_) asm("_ZN4HPHP11c_Memcached15t_getresultcodeEv");
 
 TypedValue* tg_9Memcached_getResultCode(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_9Memcached_getResultCode((this_));
+        rv.m_data.num = (int64_t)th_9Memcached_getResultCode((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1491,7 +1491,7 @@ Value* th_9Memcached_getResultMessage(Value* _rv, ObjectData* this_) asm("_ZN4HP
 
 TypedValue* tg_9Memcached_getResultMessage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1530,8 +1530,8 @@ server_key => rdx
 
 TypedValue* th_9Memcached_getServerByKey(TypedValue* _rv, ObjectData* this_, Value* server_key) asm("_ZN4HPHP11c_Memcached16t_getserverbykeyERKNS_6StringE");
 
-TypedValue* tg1_9Memcached_getServerByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_getServerByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_getServerByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_getServerByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_9Memcached_getServerByKey((rv), (this_), (Value*)(args-0));
@@ -1541,7 +1541,7 @@ TypedValue* tg1_9Memcached_getServerByKey(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* tg_9Memcached_getServerByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1586,7 +1586,7 @@ Value* th_9Memcached_getServerList(Value* _rv, ObjectData* this_) asm("_ZN4HPHP1
 
 TypedValue* tg_9Memcached_getServerList(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1626,7 +1626,7 @@ TypedValue* th_9Memcached_getStats(TypedValue* _rv, ObjectData* this_) asm("_ZN4
 
 TypedValue* tg_9Memcached_getStats(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1664,7 +1664,7 @@ TypedValue* th_9Memcached_getVersion(TypedValue* _rv, ObjectData* this_) asm("_Z
 
 TypedValue* tg_9Memcached_getVersion(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1690,8 +1690,8 @@ TypedValue* tg_9Memcached_getVersion(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Variant HPHP::c_Memcached::t_increment(HPHP::String const&, long long)
-_ZN4HPHP11c_Memcached11t_incrementERKNS_6StringEx
+HPHP::Variant HPHP::c_Memcached::t_increment(HPHP::String const&, long)
+_ZN4HPHP11c_Memcached11t_incrementERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -1700,10 +1700,10 @@ key => rdx
 offset => rcx
 */
 
-TypedValue* th_9Memcached_increment(TypedValue* _rv, ObjectData* this_, Value* key, long long offset) asm("_ZN4HPHP11c_Memcached11t_incrementERKNS_6StringEx");
+TypedValue* th_9Memcached_increment(TypedValue* _rv, ObjectData* this_, Value* key, long offset) asm("_ZN4HPHP11c_Memcached11t_incrementERKNS_6StringEl");
 
-TypedValue* tg1_9Memcached_increment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_increment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1716,20 +1716,20 @@ TypedValue* tg1_9Memcached_increment(TypedValue* rv, HPHP::VM::ActRec* ar, long 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_9Memcached_increment((rv), (this_), (Value*)(args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(1));
+  th_9Memcached_increment((rv), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
 TypedValue* tg_9Memcached_increment(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_9Memcached_increment((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long long)(args[-1].m_data.num) : (long long)(1));
+          th_9Memcached_increment((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1767,8 +1767,8 @@ value => rdx
 
 bool th_9Memcached_prepend(ObjectData* this_, Value* key, Value* value) asm("_ZN4HPHP11c_Memcached9t_prependERKNS_6StringES3_");
 
-TypedValue* tg1_9Memcached_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1784,7 +1784,7 @@ TypedValue* tg1_9Memcached_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* tg_9Memcached_prepend(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1830,8 +1830,8 @@ value => rcx
 
 bool th_9Memcached_prependByKey(ObjectData* this_, Value* server_key, Value* key, Value* value) asm("_ZN4HPHP11c_Memcached14t_prependbykeyERKNS_6StringES3_S3_");
 
-TypedValue* tg1_9Memcached_prependByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_prependByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_prependByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_prependByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1850,7 +1850,7 @@ TypedValue* tg1_9Memcached_prependByKey(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* tg_9Memcached_prependByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1896,8 +1896,8 @@ expiration => rcx
 
 bool th_9Memcached_replace(ObjectData* this_, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached9t_replaceERKNS_6StringERKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_replace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_replace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1918,7 +1918,7 @@ TypedValue* tg1_9Memcached_replace(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* tg_9Memcached_replace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1965,8 +1965,8 @@ expiration => r8
 
 bool th_9Memcached_replaceByKey(ObjectData* this_, Value* server_key, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached14t_replacebykeyERKNS_6StringES3_RKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_replaceByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_replaceByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_replaceByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_replaceByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1990,7 +1990,7 @@ TypedValue* tg1_9Memcached_replaceByKey(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* tg_9Memcached_replaceByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2036,8 +2036,8 @@ expiration => rcx
 
 bool th_9Memcached_set(ObjectData* this_, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached5t_setERKNS_6StringERKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_set(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_set(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2058,7 +2058,7 @@ TypedValue* tg1_9Memcached_set(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* tg_9Memcached_set(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2105,8 +2105,8 @@ expiration => r8
 
 bool th_9Memcached_setByKey(ObjectData* this_, Value* server_key, Value* key, TypedValue* value, int expiration) asm("_ZN4HPHP11c_Memcached10t_setbykeyERKNS_6StringES3_RKNS_7VariantEi");
 
-TypedValue* tg1_9Memcached_setByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_setByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_setByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_setByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2130,7 +2130,7 @@ TypedValue* tg1_9Memcached_setByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* tg_9Memcached_setByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2175,8 +2175,8 @@ expiration => rdx
 
 bool th_9Memcached_setMulti(ObjectData* this_, Value* items, int expiration) asm("_ZN4HPHP11c_Memcached10t_setmultiERKNS_5ArrayEi");
 
-TypedValue* tg1_9Memcached_setMulti(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_setMulti(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_setMulti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_setMulti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2197,7 +2197,7 @@ TypedValue* tg1_9Memcached_setMulti(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* tg_9Memcached_setMulti(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2243,8 +2243,8 @@ expiration => rcx
 
 bool th_9Memcached_setMultiByKey(ObjectData* this_, Value* server_key, Value* items, int expiration) asm("_ZN4HPHP11c_Memcached15t_setmultibykeyERKNS_6StringERKNS_5ArrayEi");
 
-TypedValue* tg1_9Memcached_setMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_setMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_setMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_setMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2268,7 +2268,7 @@ TypedValue* tg1_9Memcached_setMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* tg_9Memcached_setMultiByKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -2313,8 +2313,8 @@ value => rdx
 
 bool th_9Memcached_setOption(ObjectData* this_, int option, TypedValue* value) asm("_ZN4HPHP11c_Memcached11t_setoptionEiRKNS_7VariantE");
 
-TypedValue* tg1_9Memcached_setOption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9Memcached_setOption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9Memcached_setOption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9Memcached_setOption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2325,7 +2325,7 @@ TypedValue* tg1_9Memcached_setOption(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* tg_9Memcached_setOption(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

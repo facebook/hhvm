@@ -40,14 +40,14 @@ assertion => rsi
 TypedValue* fh_assert(TypedValue* _rv, TypedValue* assertion) asm("_ZN4HPHP8f_assertERKNS_7VariantE");
 
 /*
-long long HPHP::f_dl(HPHP::String const&)
+long HPHP::f_dl(HPHP::String const&)
 _ZN4HPHP4f_dlERKNS_6StringE
 
 (return value) => rax
 library => rdi
 */
 
-long long fh_dl(Value* library) asm("_ZN4HPHP4f_dlERKNS_6StringE");
+long fh_dl(Value* library) asm("_ZN4HPHP4f_dlERKNS_6StringE");
 
 /*
 bool HPHP::f_extension_loaded(HPHP::String const&)
@@ -163,22 +163,22 @@ _rv => rdi
 Value* fh_inclued_get_data(Value* _rv) asm("_ZN4HPHP18f_inclued_get_dataEv");
 
 /*
-long long HPHP::f_get_magic_quotes_gpc()
+long HPHP::f_get_magic_quotes_gpc()
 _ZN4HPHP22f_get_magic_quotes_gpcEv
 
 (return value) => rax
 */
 
-long long fh_get_magic_quotes_gpc() asm("_ZN4HPHP22f_get_magic_quotes_gpcEv");
+long fh_get_magic_quotes_gpc() asm("_ZN4HPHP22f_get_magic_quotes_gpcEv");
 
 /*
-long long HPHP::f_get_magic_quotes_runtime()
+long HPHP::f_get_magic_quotes_runtime()
 _ZN4HPHP26f_get_magic_quotes_runtimeEv
 
 (return value) => rax
 */
 
-long long fh_get_magic_quotes_runtime() asm("_ZN4HPHP26f_get_magic_quotes_runtimeEv");
+long fh_get_magic_quotes_runtime() asm("_ZN4HPHP26f_get_magic_quotes_runtimeEv");
 
 /*
 HPHP::Array HPHP::f_get_required_files()
@@ -202,49 +202,49 @@ varname => rsi
 TypedValue* fh_getenv(TypedValue* _rv, Value* varname) asm("_ZN4HPHP8f_getenvERKNS_6StringE");
 
 /*
-long long HPHP::f_getlastmod()
+long HPHP::f_getlastmod()
 _ZN4HPHP12f_getlastmodEv
 
 (return value) => rax
 */
 
-long long fh_getlastmod() asm("_ZN4HPHP12f_getlastmodEv");
+long fh_getlastmod() asm("_ZN4HPHP12f_getlastmodEv");
 
 /*
-long long HPHP::f_getmygid()
+long HPHP::f_getmygid()
 _ZN4HPHP10f_getmygidEv
 
 (return value) => rax
 */
 
-long long fh_getmygid() asm("_ZN4HPHP10f_getmygidEv");
+long fh_getmygid() asm("_ZN4HPHP10f_getmygidEv");
 
 /*
-long long HPHP::f_getmyinode()
+long HPHP::f_getmyinode()
 _ZN4HPHP12f_getmyinodeEv
 
 (return value) => rax
 */
 
-long long fh_getmyinode() asm("_ZN4HPHP12f_getmyinodeEv");
+long fh_getmyinode() asm("_ZN4HPHP12f_getmyinodeEv");
 
 /*
-long long HPHP::f_getmypid()
+long HPHP::f_getmypid()
 _ZN4HPHP10f_getmypidEv
 
 (return value) => rax
 */
 
-long long fh_getmypid() asm("_ZN4HPHP10f_getmypidEv");
+long fh_getmypid() asm("_ZN4HPHP10f_getmypidEv");
 
 /*
-long long HPHP::f_getmyuid()
+long HPHP::f_getmyuid()
 _ZN4HPHP10f_getmyuidEv
 
 (return value) => rax
 */
 
-long long fh_getmyuid() asm("_ZN4HPHP10f_getmyuidEv");
+long fh_getmyuid() asm("_ZN4HPHP10f_getmyuidEv");
 
 /*
 HPHP::Array HPHP::f_getopt(HPHP::String const&, HPHP::Variant const&)
@@ -294,8 +294,8 @@ nsec => rdx
 bool fh_clock_gettime(int clk_id, TypedValue* sec, TypedValue* nsec) asm("_ZN4HPHP15f_clock_gettimeEiRKNS_14VRefParamValueES2_");
 
 /*
-bool HPHP::f_clock_settime(int, long long, long long)
-_ZN4HPHP15f_clock_settimeEixx
+bool HPHP::f_clock_settime(int, long, long)
+_ZN4HPHP15f_clock_settimeEill
 
 (return value) => rax
 clk_id => rdi
@@ -303,7 +303,7 @@ sec => rsi
 nsec => rdx
 */
 
-bool fh_clock_settime(int clk_id, long long sec, long long nsec) asm("_ZN4HPHP15f_clock_settimeEixx");
+bool fh_clock_settime(int clk_id, long sec, long nsec) asm("_ZN4HPHP15f_clock_settimeEill");
 
 /*
 HPHP::String HPHP::f_ini_alter(HPHP::String const&, HPHP::String const&)
@@ -361,33 +361,33 @@ newvalue => rdx
 Value* fh_ini_set(Value* _rv, Value* varname, Value* newvalue) asm("_ZN4HPHP9f_ini_setERKNS_6StringES2_");
 
 /*
-long long HPHP::f_memory_get_allocation()
+long HPHP::f_memory_get_allocation()
 _ZN4HPHP23f_memory_get_allocationEv
 
 (return value) => rax
 */
 
-long long fh_memory_get_allocation() asm("_ZN4HPHP23f_memory_get_allocationEv");
+long fh_memory_get_allocation() asm("_ZN4HPHP23f_memory_get_allocationEv");
 
 /*
-long long HPHP::f_memory_get_peak_usage(bool)
+long HPHP::f_memory_get_peak_usage(bool)
 _ZN4HPHP23f_memory_get_peak_usageEb
 
 (return value) => rax
 real_usage => rdi
 */
 
-long long fh_memory_get_peak_usage(bool real_usage) asm("_ZN4HPHP23f_memory_get_peak_usageEb");
+long fh_memory_get_peak_usage(bool real_usage) asm("_ZN4HPHP23f_memory_get_peak_usageEb");
 
 /*
-long long HPHP::f_memory_get_usage(bool)
+long HPHP::f_memory_get_usage(bool)
 _ZN4HPHP18f_memory_get_usageEb
 
 (return value) => rax
 real_usage => rdi
 */
 
-long long fh_memory_get_usage(bool real_usage) asm("_ZN4HPHP18f_memory_get_usageEb");
+long fh_memory_get_usage(bool real_usage) asm("_ZN4HPHP18f_memory_get_usageEb");
 
 /*
 HPHP::String HPHP::f_php_ini_scanned_files()
@@ -539,13 +539,13 @@ _ZN4HPHP12f_gc_disableEv
 void fh_gc_disable() asm("_ZN4HPHP12f_gc_disableEv");
 
 /*
-long long HPHP::f_gc_collect_cycles()
+long HPHP::f_gc_collect_cycles()
 _ZN4HPHP19f_gc_collect_cyclesEv
 
 (return value) => rax
 */
 
-long long fh_gc_collect_cycles() asm("_ZN4HPHP19f_gc_collect_cyclesEv");
+long fh_gc_collect_cycles() asm("_ZN4HPHP19f_gc_collect_cyclesEv");
 
 /*
 HPHP::String HPHP::f_zend_logo_guid()
@@ -558,13 +558,13 @@ _rv => rdi
 Value* fh_zend_logo_guid(Value* _rv) asm("_ZN4HPHP16f_zend_logo_guidEv");
 
 /*
-long long HPHP::f_zend_thread_id()
+long HPHP::f_zend_thread_id()
 _ZN4HPHP16f_zend_thread_idEv
 
 (return value) => rax
 */
 
-long long fh_zend_thread_id() asm("_ZN4HPHP16f_zend_thread_idEv");
+long fh_zend_thread_id() asm("_ZN4HPHP16f_zend_thread_idEv");
 
 /*
 HPHP::String HPHP::f_zend_version()

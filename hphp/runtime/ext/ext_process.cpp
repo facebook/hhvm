@@ -670,27 +670,27 @@ static bool pre_proc_open(CArrRef descriptorspec,
       break;
     } else {
       Array descarr = descitem.toArray();
-      if (!descarr.exists(0LL)) {
+      if (!descarr.exists(int64_t(0))) {
         raise_warning("Missing handle qualifier in array");
         break;
       }
-      String ztype = descarr[0LL].toString();
+      String ztype = descarr[int64_t(0)].toString();
       if (ztype == "pipe") {
-        if (!descarr.exists(1LL)) {
+        if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing mode parameter for 'pipe'");
           break;
         }
-        if (!item.readPipe(descarr[1LL].toString())) break;
+        if (!item.readPipe(descarr[int64_t(1)].toString())) break;
       } else if (ztype == "file") {
-        if (!descarr.exists(1LL)) {
+        if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing file name parameter for 'file'");
           break;
         }
-        if (!descarr.exists(2LL)) {
+        if (!descarr.exists(int64_t(2))) {
           raise_warning("Missing mode parameter for 'file'");
           break;
         }
-        if (!item.openFile(descarr[1LL].toString(), descarr[2LL].toString())) {
+        if (!item.openFile(descarr[int64_t(1)].toString(), descarr[int64_t(2)].toString())) {
           break;
         }
       } else {

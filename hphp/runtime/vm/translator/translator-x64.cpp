@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#define __STDC_FORMAT_MACROS
+#include <cinttypes>
 #include <stdint.h>
 #include <assert.h>
 #include <unistd.h>
@@ -1347,11 +1349,11 @@ TCA
 TranslatorX64::getTranslation(SrcKey sk, bool align,
                               bool forceNoHHIR /* = false */) {
   curFunc()->validate();
-  SKTRACE(2, sk, "getTranslation: curUnit %s funcId %llx offset %d\n",
+  SKTRACE(2, sk, "getTranslation: curUnit %s funcId %"PRIx64" offset %d\n",
           curUnit()->filepath()->data(),
           sk.m_funcId,
           sk.offset());
-  SKTRACE(2, sk, "   funcId: %llx\n",
+  SKTRACE(2, sk, "   funcId: %"PRIx64"\n",
           curFunc()->getFuncId());
 
   if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
@@ -2933,7 +2935,7 @@ TranslatorX64::checkRefs(X64Assembler& a,
         IfElseBlock<CC_L> ifFewEnoughArgs(a);
 
         // Load the appropriate qword off of the top actRec's func*.
-        SKTRACE(2, sk, "reffiness mask %lx value %lx, ar @%d\n",
+        SKTRACE(2, sk, "reffiness mask %"PRIx64" value %"PRIx64", ar @%d\n",
                 mask, value, entryArDelta);
         a.  load_reg64_disp_reg64(r(rBits), sizeof(uint64) * (i / 64),
                                   r(rBitsValue));  // rBitsValue <- rBits[i / 64]
@@ -3235,7 +3237,7 @@ TranslatorX64::enterTC(SrcKey sk) {
       start = TCA(0xbee5face);
     }
 
-    TRACE(4, "enterTC: request(%s) args: %lx %lx %lx %lx %lx\n",
+    TRACE(4, "enterTC: request(%s) args: %"PRIx64" %"PRIx64" %"PRIx64" %"PRIx64" %"PRIx64"\n",
           reqName(info.requestNum),
           info.args[0], info.args[1], info.args[2], info.args[3],
           info.args[4]);
@@ -3644,7 +3646,7 @@ TranslatorX64::spill(const Location& loc, DataType type,
   int disp;
   locToRegDisp(loc, &base, &disp);
   spillTo(type, reg, writeType, base, disp);
-  TRACE(2, "%s: (%s, %lld) -> v: %d(r%d) type%d\n",
+  TRACE(2, "%s: (%s, %"PRId64") -> v: %d(r%d) type%d\n",
         __func__,
         loc.spaceName(), loc.offset, int(disp + TVOFF(m_data)),
         int(base), type);
@@ -3660,7 +3662,7 @@ TranslatorX64::fill(const Location& loc, PhysReg reg) {
   PhysReg base;
   int disp;
   locToRegDisp(loc, &base, &disp);
-  TRACE(2, "fill: (%s, %lld) -> reg %d\n",
+  TRACE(2, "fill: (%s, %"PRId64") -> reg %d\n",
         loc.spaceName(), loc.offset, int(reg));
   m_spillFillCode->load_reg64_disp_reg64(base, disp + TVOFF(m_data), reg);
 }
@@ -3674,7 +3676,7 @@ void TranslatorX64::fillByMov(PhysReg src, PhysReg dst) {
 void
 TranslatorX64::loadImm(int64 immVal, PhysReg reg) {
   SpaceRecorder sr("_FillImm", *m_spillFillCode);
-  TRACE(2, "loadImm: 0x%llx -> reg %d\n", immVal, int(reg));
+  TRACE(2, "loadImm: 0x%"PRIx64" -> reg %d\n", immVal, int(reg));
   emitImmReg(*m_spillFillCode, immVal, reg);
 }
 
@@ -5663,7 +5665,7 @@ TranslatorX64::translateCns(const Tracelet& t,
 
   Stats::emitInc(a, Stats::Tx64_CnsSlow);
   CacheHandle ch = allocConstant(name);
-  TRACE(2, "Cns: %s -> ch %ld\n", name->data(), ch);
+  TRACE(2, "Cns: %s -> ch %"PRId64"\n", name->data(), ch);
   // Load the constant out of the thread-private tl_targetCaches.
   ScratchReg cns(m_regMap);
   a.    lea_reg64_disp_reg64(rVmTl, ch, r(cns));
@@ -5740,7 +5742,7 @@ TranslatorX64::translateDefCns(const Tracelet& t,
 
   using namespace TargetCache;
   CacheHandle ch = allocConstant(name);
-  TRACE(2, "DefCns: %s -> ch %ld\n", name->data(), ch);
+  TRACE(2, "DefCns: %s -> ch %"PRId64"\n", name->data(), ch);
 
   m_regMap.cleanLoc(i.inputs[0]->location);
   if (RuntimeOption::RepoAuthoritative) {
@@ -9539,8 +9541,8 @@ TranslatorX64::findCuf(const NormalizedInstruction& ni,
     sname = StringData::GetStaticString(name.substr(pos + 2).get());
   } else if (arr) {
     if (arr->size() != 2) return NULL;
-    CVarRef e0 = arr->get(0LL, false);
-    CVarRef e1 = arr->get(1LL, false);
+    CVarRef e0 = arr->get(int64_t(0), false);
+    CVarRef e1 = arr->get(int64_t(1), false);
     if (!e0.isString() || !e1.isString()) return NULL;
     sclass = e0.getStringData();
     sname = e1.getStringData();
@@ -10988,7 +10990,7 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   int disp;
   locToRegDisp(i.outStack->location, &base, &disp);
   assert(base == rVmSp);
-  TRACE(1, "PREDGUARD: %p dt %d offset %d voffset %lld\n",
+  TRACE(1, "PREDGUARD: %p dt %d offset %d voffset %"PRId64"\n",
         a.code.frontier, i.outStack->outerType(), disp,
         i.outStack->location.offset);
   DataType type = i.outStack->outerType();
@@ -11177,7 +11179,7 @@ TranslatorX64::checkTranslationLimit(SrcKey sk,
     INC_TPC(max_trans);
     if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
       const vector<TCA>& tns = srcRec.translations();
-      TRACE(1, "Too many (%ld) translations: %s, BC offset %d\n",
+      TRACE(1, "Too many (%"PRId64") translations: %s, BC offset %d\n",
             tns.size(), curUnit()->filepath()->data(),
             sk.offset());
       SKTRACE(2, sk, "{\n", tns.size());
@@ -11266,7 +11268,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
     for (RefDeps::ArMap::const_iterator i = t.m_refDeps.m_arMap.begin();
         i != t.m_refDeps.m_arMap.end();
         ++i) {
-      TRACE(3, "      (ActRec %lld : %-5s)\n", i->first,
+      TRACE(3, "      (ActRec %"PRId64" : %-5s)\n", i->first,
         i->second.pretty().c_str());
     }
   }
@@ -11909,7 +11911,7 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
 
 void
 TranslatorX64::requestInit() {
-  TRACE(1, "in requestInit(%ld)\n", g_vmContext->m_currentThreadIdx);
+  TRACE(1, "in requestInit(%"PRId64")\n", g_vmContext->m_currentThreadIdx);
   tl_regState = REGSTATE_CLEAN;
   PendQ::drain();
   requestResetHighLevelTranslator();
@@ -11924,12 +11926,13 @@ TranslatorX64::requestExit() {
   if (s_writeLease.amOwner()) {
     s_writeLease.drop();
   }
-  TRACE_MOD(txlease, 2, "%lx write lease stats: %15lld kept, %15lld grabbed\n",
+  TRACE_MOD(txlease, 2, "%"PRIx64" write lease stats: %15"PRId64
+            " kept, %15"PRId64" grabbed\n",
             pthread_self(), s_writeLease.m_hintKept,
             s_writeLease.m_hintGrabbed);
   PendQ::drain();
   Treadmill::finishRequest(g_vmContext->m_currentThreadIdx);
-  TRACE(1, "done requestExit(%ld)\n", g_vmContext->m_currentThreadIdx);
+  TRACE(1, "done requestExit(%"PRId64")\n", g_vmContext->m_currentThreadIdx);
   Stats::dump();
   Stats::clear();
   dumpJmpProfile();
@@ -12056,12 +12059,12 @@ std::string TranslatorX64::getUsage() {
   size_t dataUsage = m_globalData.frontier - m_globalData.base;
   size_t tcUsage = TargetCache::s_frontier;
   Util::string_printf(usage,
-                      "tx64: %9zd bytes (%ld%%) in a.code\n"
-                      "tx64: %9zd bytes (%ld%%) in astubs.code\n"
-                      "tx64: %9zd bytes (%ld%%) in a.code from ir\n"
-                      "tx64: %9zd bytes (%ld%%) in astubs.code from ir\n"
-                      "tx64: %9zd bytes (%ld%%) in m_globalData\n"
-                      "tx64: %9zd bytes (%ld%%) in targetCache\n",
+                      "tx64: %9zd bytes (%"PRId64"%%) in a.code\n"
+                      "tx64: %9zd bytes (%"PRId64"%%) in astubs.code\n"
+                      "tx64: %9zd bytes (%"PRId64"%%) in a.code from ir\n"
+                      "tx64: %9zd bytes (%"PRId64"%%) in astubs.code from ir\n"
+                      "tx64: %9zd bytes (%"PRId64"%%) in m_globalData\n"
+                      "tx64: %9zd bytes (%"PRId64"%%) in targetCache\n",
                       aUsage,     100 * aUsage / a.code.size,
                       stubsUsage, 100 * stubsUsage / astubs.code.size,
                       m_irAUsage,     100 * m_irAUsage / a.code.size,
@@ -12096,7 +12099,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
   gettime(CLOCK_MONOTONIC, &tsEnd);
   int64 elapsed = gettime_diff_us(tsBegin, tsEnd);
   if (Trace::moduleEnabledRelease(Trace::tx64, 5)) {
-    Trace::traceRelease("addDbgGuards got lease for %lld us\n", elapsed);
+    Trace::traceRelease("addDbgGuards got lease for %"PRId64" us\n", elapsed);
   }
   return true;
 }
@@ -12232,7 +12235,7 @@ bool TranslatorX64::dumpTCData() {
     return false;
   }
 
-  if (!gzprintf(tcDataFile, "total_translations = %lu\n\n",
+  if (!gzprintf(tcDataFile, "total_translations = %zu\n\n",
                 m_translations.size())) {
     return false;
   }
@@ -12400,5 +12403,43 @@ void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
   PendQ::defer(new DeferredPathInvalidate(path));
 }
+
+void ArgManager::addImm(uint64_t imm) {
+  TRACE(6, "ArgManager: push arg %zd imm:%"PRIu64"\n",
+        m_args.size(), imm);
+  m_args.push_back(ArgContent(ArgContent::ArgImm, InvalidReg, imm));
+}
+
+void ArgManager::addLoc(const Location &loc) {
+  TRACE(6, "ArgManager: push arg %zd loc:(%s, %"PRId64")\n",
+        m_args.size(), loc.spaceName(), loc.offset);
+  m_args.push_back(ArgContent(ArgContent::ArgLoc, loc));
+}
+
+void ArgManager::addLocAddr(const Location &loc) {
+  TRACE(6, "ArgManager: push arg %zd addr:(%s, %"PRId64")\n",
+        m_args.size(), loc.spaceName(), loc.offset);
+  assert(!loc.isLiteral());
+  m_args.push_back(ArgContent(ArgContent::ArgLocAddr, loc));
+}
+
+void ArgManager::addDeref(const Location &loc) {
+  TRACE(6, "ArgManager: push arg %zd deref:(%s, %"PRId64")\n",
+        m_args.size(), loc.spaceName(), loc.offset);
+  m_args.push_back(ArgContent(ArgContent::ArgDeref, loc));
+}
+
+void ArgManager::addReg(PhysReg reg) {
+  TRACE(6, "ArgManager: push arg %zd reg:r%d\n",
+        m_args.size(), int(reg));
+  m_args.push_back(ArgContent(ArgContent::ArgReg, reg, 0));
+}
+
+void ArgManager::addRegPlus(PhysReg reg, int32_t off) {
+  TRACE(6, "ArgManager: push arg %zd regplus:r%d+%d\n",
+        m_args.size(), int(reg), off);
+  m_args.push_back(ArgContent(ArgContent::ArgRegPlus, reg, off));
+}
+
 
 } } // HPHP::VM

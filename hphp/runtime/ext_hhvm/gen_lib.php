@@ -343,7 +343,7 @@ class PhpExtFunc {
 
 $typeMap = array('Boolean' => 'bool',
                  'Int32' => 'int',
-                 'Int64' => 'long long',
+                 'Int64' => 'long',
                  'Double' => 'double',
                  'String' => 'HPHP::String const&',
                  'Int64Vec' => 'HPHP::Array const&',
@@ -363,7 +363,7 @@ $typeMap = array('Boolean' => 'bool',
 
 $returnTypeMap = array('Boolean' => 'bool',
                        'Int32' => 'int',
-                       'Int64' => 'long long',
+                       'Int64' => 'long',
                        'Double' => 'double',
                        'String' => 'HPHP::String',
                        'Int64Vec' => 'HPHP::Array',

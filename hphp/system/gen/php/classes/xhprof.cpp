@@ -40,8 +40,8 @@ const int cw_XhprofFrame$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_XhprofFrame$$__destruct = { (void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XhprofFrame$$__construct = { (void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_XhprofFrame$$__destruct = { (void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_XhprofFrame$$__construct = { (void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000L};
 Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }

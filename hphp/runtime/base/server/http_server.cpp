@@ -335,7 +335,7 @@ void HttpServer::createPid() {
     if (f) {
       pid_t pid = Process::GetProcessId();
       char buf[64];
-      snprintf(buf, sizeof(buf), "%lld", (int64)pid);
+      snprintf(buf, sizeof(buf), "%"PRId64, (int64)pid);
       fwrite(buf, strlen(buf), 1, f);
       fclose(f);
     } else {

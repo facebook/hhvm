@@ -92,7 +92,7 @@ expression => rsi
 _argv => rdx
 */
 
-void fh_var_dump(long long _argc, TypedValue* expression, Value* _argv) asm("_ZN4HPHP10f_var_dumpEiRKNS_7VariantERKNS_5ArrayE");
+void fh_var_dump(int64_t _argc, TypedValue* expression, Value* _argv) asm("_ZN4HPHP10f_var_dumpEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 void HPHP::f_debug_zval_dump(HPHP::Variant const&)
@@ -125,7 +125,7 @@ prefix => rsi
 bool fh_import_request_variables(Value* types, Value* prefix) asm("_ZN4HPHP26f_import_request_variablesERKNS_6StringES2_");
 
 /*
-long long HPHP::f_extract(HPHP::Array const&, int, HPHP::String const&)
+long HPHP::f_extract(HPHP::Array const&, int, HPHP::String const&)
 _ZN4HPHP9f_extractERKNS_5ArrayEiRKNS_6StringE
 
 (return value) => rax
@@ -134,7 +134,7 @@ extract_type => rsi
 prefix => rdx
 */
 
-long long fh_extract(Value* var_array, int extract_type, Value* prefix) asm("_ZN4HPHP9f_extractERKNS_5ArrayEiRKNS_6StringE");
+long fh_extract(Value* var_array, int extract_type, Value* prefix) asm("_ZN4HPHP9f_extractERKNS_5ArrayEiRKNS_6StringE");
 
 
 } // !HPHP

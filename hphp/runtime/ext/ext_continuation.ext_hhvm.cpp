@@ -38,8 +38,8 @@ args => r8
 
 Value* fh_hphp_create_continuation(Value* _rv, Value* clsname, Value* funcname, Value* origFuncName, Value* args) asm("_ZN4HPHP26f_hphp_create_continuationERKNS_6StringES2_S2_RKNS_5ArrayE");
 
-TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -67,7 +67,7 @@ TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfArray) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -99,18 +99,18 @@ TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
 
 
 /*
-void HPHP::f_hphp_pack_continuation(HPHP::Object const&, long long, HPHP::Variant const&)
-_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectExRKNS_7VariantE
+void HPHP::f_hphp_pack_continuation(HPHP::Object const&, long, HPHP::Variant const&)
+_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectElRKNS_7VariantE
 
 continuation => rdi
 label => rsi
 value => rdx
 */
 
-void fh_hphp_pack_continuation(Value* continuation, long long label, TypedValue* value) asm("_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectExRKNS_7VariantE");
+void fh_hphp_pack_continuation(Value* continuation, long label, TypedValue* value) asm("_ZN4HPHP24f_hphp_pack_continuationERKNS_6ObjectElRKNS_7VariantE");
 
-TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -121,20 +121,20 @@ TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, lo
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_hphp_pack_continuation((Value*)(args-0), (long long)(args[-1].m_data.num), (args-2));
+  fh_hphp_pack_continuation((Value*)(args-0), (long)(args[-1].m_data.num), (args-2));
   return rv;
 }
 
 TypedValue* fg_hphp_pack_continuation(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv._count = 0;
         rv.m_type = KindOfNull;
-        fh_hphp_pack_continuation((Value*)(args-0), (long long)(args[-1].m_data.num), (args-2));
+        fh_hphp_pack_continuation((Value*)(args-0), (long)(args[-1].m_data.num), (args-2));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -167,8 +167,8 @@ continuation => rdi
 
 void fh_hphp_unpack_continuation(Value* continuation) asm("_ZN4HPHP26f_hphp_unpack_continuationERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -180,7 +180,7 @@ TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_hphp_unpack_continuation(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -221,8 +221,8 @@ HPHP::VM::Instance* new_Continuation_Instance(HPHP::VM::Class* cls) {
 }
 
 /*
-void HPHP::c_Continuation::t___construct(long long, long long, bool, HPHP::String const&, HPHP::Variant const&, HPHP::Array const&)
-_ZN4HPHP14c_Continuation13t___constructExxbRKNS_6StringERKNS_7VariantERKNS_5ArrayE
+void HPHP::c_Continuation::t___construct(long, long, bool, HPHP::String const&, HPHP::Variant const&, HPHP::Array const&)
+_ZN4HPHP14c_Continuation13t___constructEllbRKNS_6StringERKNS_7VariantERKNS_5ArrayE
 
 this_ => rdi
 func => rsi
@@ -233,10 +233,10 @@ obj => r9
 args => st0
 */
 
-void th_12Continuation___construct(ObjectData* this_, long long func, long long extra, bool isMethod, Value* origFuncName, TypedValue* obj, Value* args) asm("_ZN4HPHP14c_Continuation13t___constructExxbRKNS_6StringERKNS_7VariantERKNS_5ArrayE");
+void th_12Continuation___construct(ObjectData* this_, long func, long extra, bool isMethod, Value* origFuncName, TypedValue* obj, Value* args) asm("_ZN4HPHP14c_Continuation13t___constructEllbRKNS_6StringERKNS_7VariantERKNS_5ArrayE");
 
-TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -263,13 +263,13 @@ TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
     tvCastToInt64InPlace(args-0);
   }
   Variant defVal4;
-  th_12Continuation___construct((this_), (long long)(args[-0].m_data.num), (long long)(args[-1].m_data.num), (bool)(args[-2].m_data.num), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (Value*)(args-5) : (Value*)(&null_array));
+  th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (bool)(args[-2].m_data.num), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (Value*)(args-5) : (Value*)(&null_array));
   return rv;
 }
 
 TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -279,7 +279,7 @@ TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
           rv._count = 0;
           rv.m_type = KindOfNull;
           Variant defVal4;
-          th_12Continuation___construct((this_), (long long)(args[-0].m_data.num), (long long)(args[-1].m_data.num), (bool)(args[-2].m_data.num), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (Value*)(args-5) : (Value*)(&null_array));
+          th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (bool)(args[-2].m_data.num), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (Value*)(args-5) : (Value*)(&null_array));
           frame_free_locals_inl(ar, 6);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -305,30 +305,30 @@ TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
 }
 
 /*
-void HPHP::c_Continuation::t_update(long long, HPHP::Variant const&)
-_ZN4HPHP14c_Continuation8t_updateExRKNS_7VariantE
+void HPHP::c_Continuation::t_update(long, HPHP::Variant const&)
+_ZN4HPHP14c_Continuation8t_updateElRKNS_7VariantE
 
 this_ => rdi
 label => rsi
 value => rdx
 */
 
-void th_12Continuation_update(ObjectData* this_, long long label, TypedValue* value) asm("_ZN4HPHP14c_Continuation8t_updateExRKNS_7VariantE");
+void th_12Continuation_update(ObjectData* this_, long label, TypedValue* value) asm("_ZN4HPHP14c_Continuation8t_updateElRKNS_7VariantE");
 
-TypedValue* tg1_12Continuation_update(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12Continuation_update(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_12Continuation_update(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12Continuation_update(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToInt64InPlace(args-0);
-  th_12Continuation_update((this_), (long long)(args[-0].m_data.num), (args-1));
+  th_12Continuation_update((this_), (long)(args[-0].m_data.num), (args-1));
   return rv;
 }
 
 TypedValue* tg_12Continuation_update(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -337,7 +337,7 @@ TypedValue* tg_12Continuation_update(HPHP::VM::ActRec *ar) {
           rv.m_data.num = 0LL;
           rv._count = 0;
           rv.m_type = KindOfNull;
-          th_12Continuation_update((this_), (long long)(args[-0].m_data.num), (args-1));
+          th_12Continuation_update((this_), (long)(args[-0].m_data.num), (args-1));
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -373,7 +373,7 @@ void th_12Continuation_done(ObjectData* this_) asm("_ZN4HPHP14c_Continuation6t_d
 
 TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -401,25 +401,25 @@ TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_Continuation::t_getlabel()
+long HPHP::c_Continuation::t_getlabel()
 _ZN4HPHP14c_Continuation10t_getlabelEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_12Continuation_getLabel(ObjectData* this_) asm("_ZN4HPHP14c_Continuation10t_getlabelEv");
+long th_12Continuation_getLabel(ObjectData* this_) asm("_ZN4HPHP14c_Continuation10t_getlabelEv");
 
 TypedValue* tg_12Continuation_getLabel(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_12Continuation_getLabel((this_));
+        rv.m_data.num = (int64_t)th_12Continuation_getLabel((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -439,25 +439,25 @@ TypedValue* tg_12Continuation_getLabel(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_Continuation::t_num_args()
+long HPHP::c_Continuation::t_num_args()
 _ZN4HPHP14c_Continuation10t_num_argsEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_12Continuation_num_args(ObjectData* this_) asm("_ZN4HPHP14c_Continuation10t_num_argsEv");
+long th_12Continuation_num_args(ObjectData* this_) asm("_ZN4HPHP14c_Continuation10t_num_argsEv");
 
 TypedValue* tg_12Continuation_num_args(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_12Continuation_num_args((this_));
+        rv.m_data.num = (int64_t)th_12Continuation_num_args((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -489,7 +489,7 @@ Value* th_12Continuation_get_args(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14
 
 TypedValue* tg_12Continuation_get_args(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -517,8 +517,8 @@ TypedValue* tg_12Continuation_get_args(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Variant HPHP::c_Continuation::t_get_arg(long long)
-_ZN4HPHP14c_Continuation9t_get_argEx
+HPHP::Variant HPHP::c_Continuation::t_get_arg(long)
+_ZN4HPHP14c_Continuation9t_get_argEl
 
 (return value) => rax
 _rv => rdi
@@ -526,26 +526,26 @@ this_ => rsi
 id => rdx
 */
 
-TypedValue* th_12Continuation_get_arg(TypedValue* _rv, ObjectData* this_, long long id) asm("_ZN4HPHP14c_Continuation9t_get_argEx");
+TypedValue* th_12Continuation_get_arg(TypedValue* _rv, ObjectData* this_, long id) asm("_ZN4HPHP14c_Continuation9t_get_argEl");
 
-TypedValue* tg1_12Continuation_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12Continuation_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_12Continuation_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12Continuation_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
-  th_12Continuation_get_arg((rv), (this_), (long long)(args[-0].m_data.num));
+  th_12Continuation_get_arg((rv), (this_), (long)(args[-0].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
 TypedValue* tg_12Continuation_get_arg(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          th_12Continuation_get_arg((&(rv)), (this_), (long long)(args[-0].m_data.num));
+          th_12Continuation_get_arg((&(rv)), (this_), (long)(args[-0].m_data.num));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -584,7 +584,7 @@ TypedValue* th_12Continuation_current(TypedValue* _rv, ObjectData* this_) asm("_
 
 TypedValue* tg_12Continuation_current(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -610,25 +610,25 @@ TypedValue* tg_12Continuation_current(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_Continuation::t_key()
+long HPHP::c_Continuation::t_key()
 _ZN4HPHP14c_Continuation5t_keyEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_12Continuation_key(ObjectData* this_) asm("_ZN4HPHP14c_Continuation5t_keyEv");
+long th_12Continuation_key(ObjectData* this_) asm("_ZN4HPHP14c_Continuation5t_keyEv");
 
 TypedValue* tg_12Continuation_key(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_12Continuation_key((this_));
+        rv.m_data.num = (int64_t)th_12Continuation_key((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -658,7 +658,7 @@ void th_12Continuation_next(ObjectData* this_) asm("_ZN4HPHP14c_Continuation6t_n
 
 TypedValue* tg_12Continuation_next(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -696,7 +696,7 @@ void th_12Continuation_rewind(ObjectData* this_) asm("_ZN4HPHP14c_Continuation8t
 
 TypedValue* tg_12Continuation_rewind(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -735,7 +735,7 @@ bool th_12Continuation_valid(ObjectData* this_) asm("_ZN4HPHP14c_Continuation7t_
 
 TypedValue* tg_12Continuation_valid(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -773,7 +773,7 @@ void th_12Continuation_send(ObjectData* this_, TypedValue* v) asm("_ZN4HPHP14c_C
 
 TypedValue* tg_12Continuation_send(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -812,7 +812,7 @@ void th_12Continuation_raise(ObjectData* this_, TypedValue* v) asm("_ZN4HPHP14c_
 
 TypedValue* tg_12Continuation_raise(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -850,7 +850,7 @@ void th_12Continuation_raised(ObjectData* this_) asm("_ZN4HPHP14c_Continuation8t
 
 TypedValue* tg_12Continuation_raised(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -890,7 +890,7 @@ TypedValue* th_12Continuation_receive(TypedValue* _rv, ObjectData* this_) asm("_
 
 TypedValue* tg_12Continuation_receive(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -928,7 +928,7 @@ Value* th_12Continuation_getOrigFuncName(Value* _rv, ObjectData* this_) asm("_ZN
 
 TypedValue* tg_12Continuation_getOrigFuncName(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -968,7 +968,7 @@ TypedValue* th_12Continuation___clone(TypedValue* _rv, ObjectData* this_) asm("_
 
 TypedValue* tg_12Continuation___clone(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1013,7 +1013,7 @@ void th_17DummyContinuation___construct(ObjectData* this_) asm("_ZN4HPHP19c_Dumm
 
 TypedValue* tg_17DummyContinuation___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1053,7 +1053,7 @@ TypedValue* th_17DummyContinuation_current(TypedValue* _rv, ObjectData* this_) a
 
 TypedValue* tg_17DummyContinuation_current(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1079,25 +1079,25 @@ TypedValue* tg_17DummyContinuation_current(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_DummyContinuation::t_key()
+long HPHP::c_DummyContinuation::t_key()
 _ZN4HPHP19c_DummyContinuation5t_keyEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_17DummyContinuation_key(ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation5t_keyEv");
+long th_17DummyContinuation_key(ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation5t_keyEv");
 
 TypedValue* tg_17DummyContinuation_key(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_17DummyContinuation_key((this_));
+        rv.m_data.num = (int64_t)th_17DummyContinuation_key((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1127,7 +1127,7 @@ void th_17DummyContinuation_next(ObjectData* this_) asm("_ZN4HPHP19c_DummyContin
 
 TypedValue* tg_17DummyContinuation_next(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1165,7 +1165,7 @@ void th_17DummyContinuation_rewind(ObjectData* this_) asm("_ZN4HPHP19c_DummyCont
 
 TypedValue* tg_17DummyContinuation_rewind(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1204,7 +1204,7 @@ bool th_17DummyContinuation_valid(ObjectData* this_) asm("_ZN4HPHP19c_DummyConti
 
 TypedValue* tg_17DummyContinuation_valid(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

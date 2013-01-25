@@ -2216,7 +2216,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                           Option::ConstantPrefix,
                           CodeGenerator::FormatLabel(name).c_str());
               }
-              cg_printf("0x%x1LL", name_ix);
+              cg_printf("int64_t(0x%xd)", name_ix);
             } else if (flags & ConstRedeclared) {
               cg_printf("offsetof(%s,%s%s)+0x%x00000003",
                         system ? "SystemGlobals" : "GlobalVariables",
@@ -2232,7 +2232,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                         CodeGenerator::FormatLabel(name).c_str(),
                         cls_ix);
             } else {
-              cg_printf("0x%x%07x%dLL", name_ix, cls_ix,
+              cg_printf("0x%x%07x%dL", name_ix, cls_ix,
                         flags & ConstDerivesFromRedeclared ? 4 : 5);
             }
             *p = ++index;

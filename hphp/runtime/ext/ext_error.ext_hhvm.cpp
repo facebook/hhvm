@@ -35,8 +35,8 @@ provide_object => rsi
 
 Value* fh_debug_backtrace(Value* _rv, bool provide_object) asm("_ZN4HPHP17f_debug_backtraceEb");
 
-TypedValue * fg1_debug_backtrace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_debug_backtrace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_debug_backtrace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_debug_backtrace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -48,7 +48,7 @@ TypedValue * fg1_debug_backtrace(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_debug_backtrace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
@@ -89,7 +89,7 @@ void fh_debug_print_backtrace() asm("_ZN4HPHP23f_debug_print_backtraceEv");
 
 TypedValue* fg_debug_print_backtrace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -125,7 +125,7 @@ Value* fh_error_get_last(Value* _rv) asm("_ZN4HPHP16f_error_get_lastEv");
 
 TypedValue* fg_error_get_last(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -162,8 +162,8 @@ extra_headers => rcx
 
 bool fh_error_log(Value* message, int message_type, Value* destination, Value* extra_headers) asm("_ZN4HPHP11f_error_logERKNS_6StringEiS2_S2_");
 
-TypedValue * fg1_error_log(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_error_log(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_error_log(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_error_log(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -192,7 +192,7 @@ TypedValue * fg1_error_log(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_error_log(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -223,24 +223,24 @@ TypedValue* fg_error_log(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_error_reporting(HPHP::Variant const&)
+long HPHP::f_error_reporting(HPHP::Variant const&)
 _ZN4HPHP17f_error_reportingERKNS_7VariantE
 
 (return value) => rax
 level => rdi
 */
 
-long long fh_error_reporting(TypedValue* level) asm("_ZN4HPHP17f_error_reportingERKNS_7VariantE");
+long fh_error_reporting(TypedValue* level) asm("_ZN4HPHP17f_error_reportingERKNS_7VariantE");
 
 TypedValue* fg_error_reporting(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
       Variant defVal0;
-      rv.m_data.num = (long long)fh_error_reporting((count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      rv.m_data.num = (int64_t)fh_error_reporting((count > 0) ? (args-0) : (TypedValue*)(&defVal0));
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
@@ -269,7 +269,7 @@ bool fh_restore_error_handler() asm("_ZN4HPHP23f_restore_error_handlerEv");
 
 TypedValue* fg_restore_error_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -303,7 +303,7 @@ bool fh_restore_exception_handler() asm("_ZN4HPHP27f_restore_exception_handlerEv
 
 TypedValue* fg_restore_exception_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -338,8 +338,8 @@ error_types => rdx
 
 TypedValue* fh_set_error_handler(TypedValue* _rv, TypedValue* error_handler, int error_types) asm("_ZN4HPHP19f_set_error_handlerERKNS_7VariantEi");
 
-TypedValue * fg1_set_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_set_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_set_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_set_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_set_error_handler((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_E_ALL));
@@ -349,7 +349,7 @@ TypedValue * fg1_set_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_set_error_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
@@ -391,7 +391,7 @@ TypedValue* fh_set_exception_handler(TypedValue* _rv, TypedValue* exception_hand
 
 TypedValue* fg_set_exception_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_set_exception_handler((&(rv)), (args-0));
@@ -422,8 +422,8 @@ page => rdi
 
 void fh_hphp_set_error_page(Value* page) asm("_ZN4HPHP21f_hphp_set_error_pageERKNS_6StringE");
 
-TypedValue * fg1_hphp_set_error_page(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_set_error_page(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_hphp_set_error_page(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_set_error_page(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -435,7 +435,7 @@ TypedValue * fg1_hphp_set_error_page(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_hphp_set_error_page(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -475,8 +475,8 @@ error_msg => rdi
 
 void fh_hphp_throw_fatal_error(Value* error_msg) asm("_ZN4HPHP24f_hphp_throw_fatal_errorERKNS_6StringE");
 
-TypedValue * fg1_hphp_throw_fatal_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_throw_fatal_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_hphp_throw_fatal_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_throw_fatal_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -488,7 +488,7 @@ TypedValue * fg1_hphp_throw_fatal_error(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_hphp_throw_fatal_error(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -529,7 +529,7 @@ void fh_hphp_clear_unflushed() asm("_ZN4HPHP22f_hphp_clear_unflushedEv");
 
 TypedValue* fg_hphp_clear_unflushed(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -565,7 +565,7 @@ Value* fh_hphp_debug_caller_info(Value* _rv) asm("_ZN4HPHP24f_hphp_debug_caller_
 
 TypedValue* fg_hphp_debug_caller_info(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -600,8 +600,8 @@ error_type => rsi
 
 bool fh_trigger_error(Value* error_msg, int error_type) asm("_ZN4HPHP15f_trigger_errorERKNS_6StringEi");
 
-TypedValue * fg1_trigger_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_trigger_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_trigger_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_trigger_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -622,7 +622,7 @@ TypedValue * fg1_trigger_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_trigger_error(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -663,8 +663,8 @@ error_type => rsi
 
 bool fh_user_error(Value* error_msg, int error_type) asm("_ZN4HPHP12f_user_errorERKNS_6StringEi");
 
-TypedValue * fg1_user_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_user_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_user_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_user_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -685,7 +685,7 @@ TypedValue * fg1_user_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_user_error(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {

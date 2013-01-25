@@ -1814,14 +1814,14 @@ void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
     const vector<string> &strings = it->second;
     for (unsigned int i = 0; i < strings.size(); i++) {
       int64 val;
-      sscanf(strings[i].c_str(), "%llx", &val);
+      sscanf(strings[i].c_str(), "%"PRIx64, &val);
       Variant v(val);
       int64 *startp = (int64 *)&v;
       int64 *endp = (startp + multiple);
       for (int64 *p = startp; p < endp; p++) {
-        cg_printf("0x%016llxLL, ", *p);
+        cg_printf("0x%016"PRIx64"L, ", *p);
       }
-      cg_printf("// %lld\n", val);
+      cg_printf("// %"PRId64"\n", val);
     }
   }
   cg_indentEnd("};\n");
@@ -1882,12 +1882,12 @@ void AnalysisResult::outputCPPNamedScalarVarDoubles(const std::string &file) {
     const vector<string> &strings = it->second;
     for (unsigned int i = 0; i < strings.size(); i++) {
       double val;
-      sscanf(strings[i].c_str(), "%llx", (int64*)(&val));
+      sscanf(strings[i].c_str(), "%"PRIx64, (int64*)(&val));
       Variant v(val);
       int64 *startp = (int64 *)&v;
       int64 *endp = (startp + multiple);
       for (int64 *p = startp; p < endp; p++) {
-        cg_printf("0x%016llxLL, ", *p);
+        cg_printf("0x%016"PRIx64"L, ", *p);
       }
       cg_printf("// ");
       outputCPPFiniteDouble(cg, val);
@@ -2886,10 +2886,10 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   for (set<int64>::const_iterator it = m_allIntegers.begin();
        it != m_allIntegers.end(); it++) {
     if (!String::HasConverted(*(it))) {
-      if (*(it) == LONG_MIN) {
-        cg_printf("(int64)0x%llxLL,\n", (uint64)LONG_MIN);
+      if (*(it) == std::numeric_limits<int64_t>::min()) {
+        cg_printf("(int64)0x8000000000000000LL,\n");
       } else {
-        cg_printf("%lldLL,\n", *(it));
+        cg_printf("%"PRId64"L,\n", *(it));
       }
     }
   }
@@ -5065,7 +5065,7 @@ void AnalysisResult::outputStringProxyData(CodeGenerator &cg,
       cg_printf("%s,\n", lStrings[i].c_str());
     }
     for (uint i = 0; i < bStrings.size(); i++) {
-      cg_printf("%s, (const char *)%lldLL,\n",
+      cg_printf("%s, (const char *)%"PRId64"L,\n",
                 bStrings[i].first.c_str(), (int64)bStrings[i].second);
     }
     cg_indentEnd("};\n");

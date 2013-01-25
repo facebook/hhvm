@@ -803,7 +803,7 @@ public:
           buf.append(f_serialize(iter.second()));
         }
       } else {
-        raise_notice("Skipping numeric key %lld", key.toInt64());
+        raise_notice("Skipping numeric key %"PRId64, key.toInt64());
       }
     }
     return buf.detach();
@@ -856,7 +856,7 @@ public:
         buf.append(PS_DELIMITER);
         buf.append(f_serialize(iter.second()));
       } else {
-        raise_notice("Skipping numeric key %lld", key.toInt64());
+        raise_notice("Skipping numeric key %"PRId64, key.toInt64());
       }
     }
     return buf.detach();
@@ -1214,7 +1214,7 @@ CACHE_LIMITER_FUNC(public) {
   strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
   ADD_HEADER(buf);
 
-  snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=%lld",
+  snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=%"PRId64,
            PS(cache_expire) * 60); /* SAFE */
   ADD_HEADER(buf);
 
@@ -1224,8 +1224,8 @@ CACHE_LIMITER_FUNC(public) {
 CACHE_LIMITER_FUNC(private_no_expire) {
   char buf[MAX_STR + 1];
 
-  snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=%lld, "
-           "pre-check=%lld", PS(cache_expire) * 60,
+  snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=%"PRId64", "
+           "pre-check=%"PRId64, PS(cache_expire) * 60,
            PS(cache_expire) * 60); /* SAFE */
   ADD_HEADER(buf);
 

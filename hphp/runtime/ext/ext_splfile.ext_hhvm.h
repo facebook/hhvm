@@ -29,14 +29,14 @@ file_name => rdx
 Value* fh_hphp_splfileinfo___construct(Value* _rv, Value* obj, Value* file_name) asm("_ZN4HPHP30f_hphp_splfileinfo___constructERKNS_6ObjectERKNS_6StringE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getatime(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getatime(HPHP::Object const&)
 _ZN4HPHP27f_hphp_splfileinfo_getatimeERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getatime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getatimeERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getatime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getatimeERKNS_6ObjectE");
 
 /*
 HPHP::String HPHP::f_hphp_splfileinfo_getbasename(HPHP::Object const&, HPHP::String const&)
@@ -51,14 +51,14 @@ suffix => rdx
 Value* fh_hphp_splfileinfo_getbasename(Value* _rv, Value* obj, Value* suffix) asm("_ZN4HPHP30f_hphp_splfileinfo_getbasenameERKNS_6ObjectERKNS_6StringE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getctime(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getctime(HPHP::Object const&)
 _ZN4HPHP27f_hphp_splfileinfo_getctimeERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getctime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getctimeERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getctime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getctimeERKNS_6ObjectE");
 
 /*
 HPHP::Object HPHP::f_hphp_splfileinfo_getfileinfo(HPHP::Object const&, HPHP::String const&)
@@ -84,24 +84,24 @@ obj => rsi
 Value* fh_hphp_splfileinfo_getfilename(Value* _rv, Value* obj) asm("_ZN4HPHP30f_hphp_splfileinfo_getfilenameERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getgroup(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getgroup(HPHP::Object const&)
 _ZN4HPHP27f_hphp_splfileinfo_getgroupERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getgroup(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getgroupERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getgroup(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getgroupERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getinode(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getinode(HPHP::Object const&)
 _ZN4HPHP27f_hphp_splfileinfo_getinodeERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getinode(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getinodeERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getinode(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getinodeERKNS_6ObjectE");
 
 /*
 HPHP::String HPHP::f_hphp_splfileinfo_getlinktarget(HPHP::Object const&)
@@ -115,24 +115,24 @@ obj => rsi
 Value* fh_hphp_splfileinfo_getlinktarget(Value* _rv, Value* obj) asm("_ZN4HPHP32f_hphp_splfileinfo_getlinktargetERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getmtime(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getmtime(HPHP::Object const&)
 _ZN4HPHP27f_hphp_splfileinfo_getmtimeERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getmtime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getmtimeERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getmtime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getmtimeERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getowner(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getowner(HPHP::Object const&)
 _ZN4HPHP27f_hphp_splfileinfo_getownerERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getowner(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getownerERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getowner(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getownerERKNS_6ObjectE");
 
 /*
 HPHP::String HPHP::f_hphp_splfileinfo_getpath(HPHP::Object const&)
@@ -169,14 +169,14 @@ obj => rsi
 Value* fh_hphp_splfileinfo_getpathname(Value* _rv, Value* obj) asm("_ZN4HPHP30f_hphp_splfileinfo_getpathnameERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getperms(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getperms(HPHP::Object const&)
 _ZN4HPHP27f_hphp_splfileinfo_getpermsERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getperms(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getpermsERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getperms(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getpermsERKNS_6ObjectE");
 
 /*
 HPHP::Variant HPHP::f_hphp_splfileinfo_getrealpath(HPHP::Object const&)
@@ -190,14 +190,14 @@ obj => rsi
 TypedValue* fh_hphp_splfileinfo_getrealpath(TypedValue* _rv, Value* obj) asm("_ZN4HPHP30f_hphp_splfileinfo_getrealpathERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileinfo_getsize(HPHP::Object const&)
+long HPHP::f_hphp_splfileinfo_getsize(HPHP::Object const&)
 _ZN4HPHP26f_hphp_splfileinfo_getsizeERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileinfo_getsize(Value* obj) asm("_ZN4HPHP26f_hphp_splfileinfo_getsizeERKNS_6ObjectE");
+long fh_hphp_splfileinfo_getsize(Value* obj) asm("_ZN4HPHP26f_hphp_splfileinfo_getsizeERKNS_6ObjectE");
 
 /*
 HPHP::String HPHP::f_hphp_splfileinfo_gettype(HPHP::Object const&)
@@ -421,18 +421,18 @@ wouldblock => rsi
 bool fh_hphp_splfileobject_flock(Value* obj, TypedValue* wouldblock) asm("_ZN4HPHP26f_hphp_splfileobject_flockERKNS_6ObjectERKNS_14VRefParamValueE");
 
 /*
-long long HPHP::f_hphp_splfileobject_fpassthru(HPHP::Object const&)
+long HPHP::f_hphp_splfileobject_fpassthru(HPHP::Object const&)
 _ZN4HPHP30f_hphp_splfileobject_fpassthruERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileobject_fpassthru(Value* obj) asm("_ZN4HPHP30f_hphp_splfileobject_fpassthruERKNS_6ObjectE");
+long fh_hphp_splfileobject_fpassthru(Value* obj) asm("_ZN4HPHP30f_hphp_splfileobject_fpassthruERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_hphp_splfileobject_fscanf(long long, HPHP::Object const&, HPHP::String const&, HPHP::Variant const&)
-_ZN4HPHP27f_hphp_splfileobject_fscanfExRKNS_6ObjectERKNS_6StringERKNS_7VariantE
+HPHP::Variant HPHP::f_hphp_splfileobject_fscanf(long, HPHP::Object const&, HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP27f_hphp_splfileobject_fscanfElRKNS_6ObjectERKNS_6StringERKNS_7VariantE
 
 (return value) => rax
 _rv => rdi
@@ -442,11 +442,11 @@ format => rcx
 _argv => r8
 */
 
-TypedValue* fh_hphp_splfileobject_fscanf(TypedValue* _rv, long long _argc, Value* obj, Value* format, TypedValue* _argv) asm("_ZN4HPHP27f_hphp_splfileobject_fscanfExRKNS_6ObjectERKNS_6StringERKNS_7VariantE");
+TypedValue* fh_hphp_splfileobject_fscanf(TypedValue* _rv, long _argc, Value* obj, Value* format, TypedValue* _argv) asm("_ZN4HPHP27f_hphp_splfileobject_fscanfElRKNS_6ObjectERKNS_6StringERKNS_7VariantE");
 
 /*
-long long HPHP::f_hphp_splfileobject_fseek(HPHP::Object const&, long long, long long)
-_ZN4HPHP26f_hphp_splfileobject_fseekERKNS_6ObjectExx
+long HPHP::f_hphp_splfileobject_fseek(HPHP::Object const&, long, long)
+_ZN4HPHP26f_hphp_splfileobject_fseekERKNS_6ObjectEll
 
 (return value) => rax
 obj => rdi
@@ -454,7 +454,7 @@ offset => rsi
 whence => rdx
 */
 
-long long fh_hphp_splfileobject_fseek(Value* obj, long long offset, long long whence) asm("_ZN4HPHP26f_hphp_splfileobject_fseekERKNS_6ObjectExx");
+long fh_hphp_splfileobject_fseek(Value* obj, long offset, long whence) asm("_ZN4HPHP26f_hphp_splfileobject_fseekERKNS_6ObjectEll");
 
 /*
 HPHP::Variant HPHP::f_hphp_splfileobject_fstat(HPHP::Object const&)
@@ -468,29 +468,29 @@ obj => rsi
 TypedValue* fh_hphp_splfileobject_fstat(TypedValue* _rv, Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_fstatERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileobject_ftell(HPHP::Object const&)
+long HPHP::f_hphp_splfileobject_ftell(HPHP::Object const&)
 _ZN4HPHP26f_hphp_splfileobject_ftellERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileobject_ftell(Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_ftellERKNS_6ObjectE");
+long fh_hphp_splfileobject_ftell(Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_ftellERKNS_6ObjectE");
 
 /*
-bool HPHP::f_hphp_splfileobject_ftruncate(HPHP::Object const&, long long)
-_ZN4HPHP30f_hphp_splfileobject_ftruncateERKNS_6ObjectEx
+bool HPHP::f_hphp_splfileobject_ftruncate(HPHP::Object const&, long)
+_ZN4HPHP30f_hphp_splfileobject_ftruncateERKNS_6ObjectEl
 
 (return value) => rax
 obj => rdi
 size => rsi
 */
 
-bool fh_hphp_splfileobject_ftruncate(Value* obj, long long size) asm("_ZN4HPHP30f_hphp_splfileobject_ftruncateERKNS_6ObjectEx");
+bool fh_hphp_splfileobject_ftruncate(Value* obj, long size) asm("_ZN4HPHP30f_hphp_splfileobject_ftruncateERKNS_6ObjectEl");
 
 /*
-long long HPHP::f_hphp_splfileobject_fwrite(HPHP::Object const&, HPHP::String const&, long long)
-_ZN4HPHP27f_hphp_splfileobject_fwriteERKNS_6ObjectERKNS_6StringEx
+long HPHP::f_hphp_splfileobject_fwrite(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP27f_hphp_splfileobject_fwriteERKNS_6ObjectERKNS_6StringEl
 
 (return value) => rax
 obj => rdi
@@ -498,7 +498,7 @@ str => rsi
 length => rdx
 */
 
-long long fh_hphp_splfileobject_fwrite(Value* obj, Value* str, long long length) asm("_ZN4HPHP27f_hphp_splfileobject_fwriteERKNS_6ObjectERKNS_6StringEx");
+long fh_hphp_splfileobject_fwrite(Value* obj, Value* str, long length) asm("_ZN4HPHP27f_hphp_splfileobject_fwriteERKNS_6ObjectERKNS_6StringEl");
 
 /*
 HPHP::Variant HPHP::f_hphp_splfileobject_getcvscontrol(HPHP::Object const&)
@@ -512,34 +512,34 @@ obj => rsi
 TypedValue* fh_hphp_splfileobject_getcvscontrol(TypedValue* _rv, Value* obj) asm("_ZN4HPHP34f_hphp_splfileobject_getcvscontrolERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileobject_getflags(HPHP::Object const&)
+long HPHP::f_hphp_splfileobject_getflags(HPHP::Object const&)
 _ZN4HPHP29f_hphp_splfileobject_getflagsERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileobject_getflags(Value* obj) asm("_ZN4HPHP29f_hphp_splfileobject_getflagsERKNS_6ObjectE");
+long fh_hphp_splfileobject_getflags(Value* obj) asm("_ZN4HPHP29f_hphp_splfileobject_getflagsERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileobject_getmaxlinelen(HPHP::Object const&)
+long HPHP::f_hphp_splfileobject_getmaxlinelen(HPHP::Object const&)
 _ZN4HPHP34f_hphp_splfileobject_getmaxlinelenERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileobject_getmaxlinelen(Value* obj) asm("_ZN4HPHP34f_hphp_splfileobject_getmaxlinelenERKNS_6ObjectE");
+long fh_hphp_splfileobject_getmaxlinelen(Value* obj) asm("_ZN4HPHP34f_hphp_splfileobject_getmaxlinelenERKNS_6ObjectE");
 
 /*
-long long HPHP::f_hphp_splfileobject_key(HPHP::Object const&)
+long HPHP::f_hphp_splfileobject_key(HPHP::Object const&)
 _ZN4HPHP24f_hphp_splfileobject_keyERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_splfileobject_key(Value* obj) asm("_ZN4HPHP24f_hphp_splfileobject_keyERKNS_6ObjectE");
+long fh_hphp_splfileobject_key(Value* obj) asm("_ZN4HPHP24f_hphp_splfileobject_keyERKNS_6ObjectE");
 
 /*
 void HPHP::f_hphp_splfileobject_next(HPHP::Object const&)
@@ -570,14 +570,14 @@ obj => rdi
 bool fh_hphp_splfileobject_valid(Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_validERKNS_6ObjectE");
 
 /*
-void HPHP::f_hphp_splfileobject_seek(HPHP::Object const&, long long)
-_ZN4HPHP25f_hphp_splfileobject_seekERKNS_6ObjectEx
+void HPHP::f_hphp_splfileobject_seek(HPHP::Object const&, long)
+_ZN4HPHP25f_hphp_splfileobject_seekERKNS_6ObjectEl
 
 obj => rdi
 line_pos => rsi
 */
 
-void fh_hphp_splfileobject_seek(Value* obj, long long line_pos) asm("_ZN4HPHP25f_hphp_splfileobject_seekERKNS_6ObjectEx");
+void fh_hphp_splfileobject_seek(Value* obj, long line_pos) asm("_ZN4HPHP25f_hphp_splfileobject_seekERKNS_6ObjectEl");
 
 /*
 void HPHP::f_hphp_splfileobject_setcsvcontrol(HPHP::Object const&, HPHP::String const&, HPHP::String const&, HPHP::String const&)
@@ -592,24 +592,24 @@ escape => rcx
 void fh_hphp_splfileobject_setcsvcontrol(Value* obj, Value* delimiter, Value* enclosure, Value* escape) asm("_ZN4HPHP34f_hphp_splfileobject_setcsvcontrolERKNS_6ObjectERKNS_6StringES5_S5_");
 
 /*
-void HPHP::f_hphp_splfileobject_setflags(HPHP::Object const&, long long)
-_ZN4HPHP29f_hphp_splfileobject_setflagsERKNS_6ObjectEx
+void HPHP::f_hphp_splfileobject_setflags(HPHP::Object const&, long)
+_ZN4HPHP29f_hphp_splfileobject_setflagsERKNS_6ObjectEl
 
 obj => rdi
 flags => rsi
 */
 
-void fh_hphp_splfileobject_setflags(Value* obj, long long flags) asm("_ZN4HPHP29f_hphp_splfileobject_setflagsERKNS_6ObjectEx");
+void fh_hphp_splfileobject_setflags(Value* obj, long flags) asm("_ZN4HPHP29f_hphp_splfileobject_setflagsERKNS_6ObjectEl");
 
 /*
-void HPHP::f_hphp_splfileobject_setmaxlinelen(HPHP::Object const&, long long)
-_ZN4HPHP34f_hphp_splfileobject_setmaxlinelenERKNS_6ObjectEx
+void HPHP::f_hphp_splfileobject_setmaxlinelen(HPHP::Object const&, long)
+_ZN4HPHP34f_hphp_splfileobject_setmaxlinelenERKNS_6ObjectEl
 
 obj => rdi
 max_len => rsi
 */
 
-void fh_hphp_splfileobject_setmaxlinelen(Value* obj, long long max_len) asm("_ZN4HPHP34f_hphp_splfileobject_setmaxlinelenERKNS_6ObjectEx");
+void fh_hphp_splfileobject_setmaxlinelen(Value* obj, long max_len) asm("_ZN4HPHP34f_hphp_splfileobject_setmaxlinelenERKNS_6ObjectEl");
 
 
 } // !HPHP

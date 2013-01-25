@@ -25,8 +25,8 @@
 namespace HPHP {
 
 /*
-HPHP::Variant HPHP::f_icu_match(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&, long long)
-_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEx
+HPHP::Variant HPHP::f_icu_match(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&, long)
+_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEl
 
 (return value) => rax
 _rv => rdi
@@ -36,10 +36,10 @@ matches => rcx
 flags => r8
 */
 
-TypedValue* fh_icu_match(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, long long flags) asm("_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEx");
+TypedValue* fh_icu_match(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, long flags) asm("_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEl");
 
-TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -57,19 +57,19 @@ TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
     tvCastToStringInPlace(args-0);
   }
   VRefParamValue defVal2 = null;
-  fh_icu_match((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long long)(args[-3].m_data.num) : (long long)(0));
+  fh_icu_match((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
 TypedValue* fg_icu_match(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         VRefParamValue defVal2 = null;
-        fh_icu_match((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long long)(args[-3].m_data.num) : (long long)(0));
+        fh_icu_match((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -106,8 +106,8 @@ remove_accents => rdx
 
 Value* fh_icu_transliterate(Value* _rv, Value* str, bool remove_accents) asm("_ZN4HPHP19f_icu_transliterateERKNS_6StringEb");
 
-TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -124,7 +124,7 @@ TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_icu_transliterate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfBoolean && IS_STRING_TYPE((args-0)->m_type)) {
@@ -166,8 +166,8 @@ text => rsi
 
 Value* fh_icu_tokenize(Value* _rv, Value* text) asm("_ZN4HPHP14f_icu_tokenizeERKNS_6StringE");
 
-TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -179,7 +179,7 @@ TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_icu_tokenize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {

@@ -34,8 +34,8 @@ handler => rdi
 
 bool fh_use_soap_error_handler(bool handler) asm("_ZN4HPHP24f_use_soap_error_handlerEb");
 
-TypedValue * fg1_use_soap_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_use_soap_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_use_soap_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_use_soap_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -46,7 +46,7 @@ TypedValue * fg1_use_soap_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_use_soap_error_handler(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
@@ -88,7 +88,7 @@ bool fh_is_soap_fault(TypedValue* fault) asm("_ZN4HPHP15f_is_soap_faultERKNS_7Va
 
 TypedValue* fg_is_soap_fault(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -112,22 +112,22 @@ TypedValue* fg_is_soap_fault(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f__soap_active_version()
+long HPHP::f__soap_active_version()
 _ZN4HPHP22f__soap_active_versionEv
 
 (return value) => rax
 */
 
-long long fh__soap_active_version() asm("_ZN4HPHP22f__soap_active_versionEv");
+long fh__soap_active_version() asm("_ZN4HPHP22f__soap_active_versionEv");
 
 TypedValue* fg__soap_active_version(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
-      rv.m_data.num = (long long)fh__soap_active_version();
+      rv.m_data.num = (int64_t)fh__soap_active_version();
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
@@ -165,8 +165,8 @@ options => rdx
 
 void th_10SoapServer___construct(ObjectData* this_, TypedValue* wsdl, Value* options) asm("_ZN4HPHP12c_SoapServer13t___constructERKNS_7VariantERKNS_5ArrayE");
 
-TypedValue* tg1_10SoapServer___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapServer___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapServer___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapServer___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -178,7 +178,7 @@ TypedValue* tg1_10SoapServer___construct(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* tg_10SoapServer___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -222,10 +222,10 @@ name => rdx
 _argv => rcx
 */
 
-void th_10SoapServer_setclass(ObjectData* this_, long long _argc, Value* name, Value* _argv) asm("_ZN4HPHP12c_SoapServer10t_setclassEiRKNS_6StringERKNS_5ArrayE");
+void th_10SoapServer_setclass(ObjectData* this_, int64_t _argc, Value* name, Value* _argv) asm("_ZN4HPHP12c_SoapServer10t_setclassEiRKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -234,7 +234,7 @@ TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, long
   Array extraArgs;
   {
     ArrayInit ai(count-1, false);
-    for (long long i = 1; i < count; ++i) {
+    for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
@@ -250,7 +250,7 @@ TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* tg_10SoapServer_setclass(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -262,7 +262,7 @@ TypedValue* tg_10SoapServer_setclass(HPHP::VM::ActRec *ar) {
           Array extraArgs;
           {
             ArrayInit ai(count-1, false);
-            for (long long i = 1; i < count; ++i) {
+            for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
@@ -307,8 +307,8 @@ obj => rsi
 
 void th_10SoapServer_setobject(ObjectData* this_, Value* obj) asm("_ZN4HPHP12c_SoapServer11t_setobjectERKNS_6ObjectE");
 
-TypedValue* tg1_10SoapServer_setobject(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapServer_setobject(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapServer_setobject(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapServer_setobject(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -320,7 +320,7 @@ TypedValue* tg1_10SoapServer_setobject(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* tg_10SoapServer_setobject(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -366,7 +366,7 @@ void th_10SoapServer_addfunction(ObjectData* this_, TypedValue* func) asm("_ZN4H
 
 TypedValue* tg_10SoapServer_addfunction(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -406,7 +406,7 @@ TypedValue* th_10SoapServer_getfunctions(TypedValue* _rv, ObjectData* this_) asm
 
 TypedValue* tg_10SoapServer_getfunctions(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -441,8 +441,8 @@ request => rsi
 
 void th_10SoapServer_handle(ObjectData* this_, Value* request) asm("_ZN4HPHP12c_SoapServer8t_handleERKNS_6StringE");
 
-TypedValue* tg1_10SoapServer_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapServer_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapServer_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapServer_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -454,7 +454,7 @@ TypedValue* tg1_10SoapServer_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* tg_10SoapServer_handle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -489,29 +489,29 @@ TypedValue* tg_10SoapServer_handle(HPHP::VM::ActRec *ar) {
 }
 
 /*
-void HPHP::c_SoapServer::t_setpersistence(long long)
-_ZN4HPHP12c_SoapServer16t_setpersistenceEx
+void HPHP::c_SoapServer::t_setpersistence(long)
+_ZN4HPHP12c_SoapServer16t_setpersistenceEl
 
 this_ => rdi
 mode => rsi
 */
 
-void th_10SoapServer_setpersistence(ObjectData* this_, long long mode) asm("_ZN4HPHP12c_SoapServer16t_setpersistenceEx");
+void th_10SoapServer_setpersistence(ObjectData* this_, long mode) asm("_ZN4HPHP12c_SoapServer16t_setpersistenceEl");
 
-TypedValue* tg1_10SoapServer_setpersistence(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapServer_setpersistence(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapServer_setpersistence(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapServer_setpersistence(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToInt64InPlace(args-0);
-  th_10SoapServer_setpersistence((this_), (long long)(args[-0].m_data.num));
+  th_10SoapServer_setpersistence((this_), (long)(args[-0].m_data.num));
   return rv;
 }
 
 TypedValue* tg_10SoapServer_setpersistence(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -520,7 +520,7 @@ TypedValue* tg_10SoapServer_setpersistence(HPHP::VM::ActRec *ar) {
           rv.m_data.num = 0LL;
           rv._count = 0;
           rv.m_type = KindOfNull;
-          th_10SoapServer_setpersistence((this_), (long long)(args[-0].m_data.num));
+          th_10SoapServer_setpersistence((this_), (long)(args[-0].m_data.num));
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -559,8 +559,8 @@ name => r9
 
 void th_10SoapServer_fault(ObjectData* this_, TypedValue* code, Value* fault, Value* actor, TypedValue* detail, Value* name) asm("_ZN4HPHP12c_SoapServer7t_faultERKNS_7VariantERKNS_6StringES6_S3_S6_");
 
-TypedValue* tg1_10SoapServer_fault(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapServer_fault(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapServer_fault(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapServer_fault(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -588,7 +588,7 @@ TypedValue* tg1_10SoapServer_fault(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* tg_10SoapServer_fault(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -633,8 +633,8 @@ fault => rsi
 
 void th_10SoapServer_addsoapheader(ObjectData* this_, Value* fault) asm("_ZN4HPHP12c_SoapServer15t_addsoapheaderERKNS_6ObjectE");
 
-TypedValue* tg1_10SoapServer_addsoapheader(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapServer_addsoapheader(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapServer_addsoapheader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapServer_addsoapheader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -646,7 +646,7 @@ TypedValue* tg1_10SoapServer_addsoapheader(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* tg_10SoapServer_addsoapheader(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -700,8 +700,8 @@ options => rdx
 
 void th_10SoapClient___construct(ObjectData* this_, TypedValue* wsdl, Value* options) asm("_ZN4HPHP12c_SoapClient13t___constructERKNS_7VariantERKNS_5ArrayE");
 
-TypedValue* tg1_10SoapClient___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapClient___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapClient___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapClient___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -713,7 +713,7 @@ TypedValue* tg1_10SoapClient___construct(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* tg_10SoapClient___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -762,7 +762,7 @@ TypedValue* th_10SoapClient___call(TypedValue* _rv, ObjectData* this_, TypedValu
 
 TypedValue* tg_10SoapClient___call(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -803,8 +803,8 @@ output_headers => st0
 
 TypedValue* th_10SoapClient___soapcall(TypedValue* _rv, ObjectData* this_, Value* name, Value* args, Value* options, TypedValue* input_headers, TypedValue* output_headers) asm("_ZN4HPHP12c_SoapClient12t___soapcallERKNS_6StringERKNS_5ArrayES6_RKNS_7VariantERKNS_14VRefParamValueE");
 
-TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -830,7 +830,7 @@ TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* tg_10SoapClient___soapcall(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -876,7 +876,7 @@ TypedValue* th_10SoapClient___getlastrequest(TypedValue* _rv, ObjectData* this_)
 
 TypedValue* tg_10SoapClient___getlastrequest(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -914,7 +914,7 @@ TypedValue* th_10SoapClient___getlastresponse(TypedValue* _rv, ObjectData* this_
 
 TypedValue* tg_10SoapClient___getlastresponse(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -952,7 +952,7 @@ TypedValue* th_10SoapClient___getlastrequestheaders(TypedValue* _rv, ObjectData*
 
 TypedValue* tg_10SoapClient___getlastrequestheaders(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -990,7 +990,7 @@ TypedValue* th_10SoapClient___getlastresponseheaders(TypedValue* _rv, ObjectData
 
 TypedValue* tg_10SoapClient___getlastresponseheaders(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1028,7 +1028,7 @@ TypedValue* th_10SoapClient___getfunctions(TypedValue* _rv, ObjectData* this_) a
 
 TypedValue* tg_10SoapClient___getfunctions(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1066,7 +1066,7 @@ TypedValue* th_10SoapClient___gettypes(TypedValue* _rv, ObjectData* this_) asm("
 
 TypedValue* tg_10SoapClient___gettypes(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1092,8 +1092,8 @@ TypedValue* tg_10SoapClient___gettypes(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Variant HPHP::c_SoapClient::t___dorequest(HPHP::String const&, HPHP::String const&, HPHP::String const&, long long, bool)
-_ZN4HPHP12c_SoapClient13t___dorequestERKNS_6StringES3_S3_xb
+HPHP::Variant HPHP::c_SoapClient::t___dorequest(HPHP::String const&, HPHP::String const&, HPHP::String const&, long, bool)
+_ZN4HPHP12c_SoapClient13t___dorequestERKNS_6StringES3_S3_lb
 
 (return value) => rax
 _rv => rdi
@@ -1105,10 +1105,10 @@ version => r9
 oneway => st0
 */
 
-TypedValue* th_10SoapClient___dorequest(TypedValue* _rv, ObjectData* this_, Value* buf, Value* location, Value* action, long long version, bool oneway) asm("_ZN4HPHP12c_SoapClient13t___dorequestERKNS_6StringES3_S3_xb");
+TypedValue* th_10SoapClient___dorequest(TypedValue* _rv, ObjectData* this_, Value* buf, Value* location, Value* action, long version, bool oneway) asm("_ZN4HPHP12c_SoapClient13t___dorequestERKNS_6StringES3_S3_lb");
 
-TypedValue* tg1_10SoapClient___dorequest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapClient___dorequest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapClient___dorequest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapClient___dorequest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -1130,20 +1130,20 @@ TypedValue* tg1_10SoapClient___dorequest(TypedValue* rv, HPHP::VM::ActRec* ar, l
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10SoapClient___dorequest((rv), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (long long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
+  th_10SoapClient___dorequest((rv), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
 TypedValue* tg_10SoapClient___dorequest(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count >= 4LL && count <= 5LL) {
         if ((count <= 4 || (args-4)->m_type == KindOfBoolean) && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10SoapClient___dorequest((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (long long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
+          th_10SoapClient___dorequest((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 5);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1182,8 +1182,8 @@ value => rcx
 
 TypedValue* th_10SoapClient___setcookie(TypedValue* _rv, ObjectData* this_, Value* name, Value* value) asm("_ZN4HPHP12c_SoapClient13t___setcookieERKNS_6StringES3_");
 
-TypedValue* tg1_10SoapClient___setcookie(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapClient___setcookie(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapClient___setcookie(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapClient___setcookie(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1203,7 +1203,7 @@ TypedValue* tg1_10SoapClient___setcookie(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* tg_10SoapClient___setcookie(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1247,8 +1247,8 @@ new_location => rdx
 
 TypedValue* th_10SoapClient___setlocation(TypedValue* _rv, ObjectData* this_, Value* new_location) asm("_ZN4HPHP12c_SoapClient15t___setlocationERKNS_6StringE");
 
-TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_10SoapClient___setlocation((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
@@ -1258,7 +1258,7 @@ TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* tg_10SoapClient___setlocation(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1303,7 +1303,7 @@ bool th_10SoapClient___setsoapheaders(ObjectData* this_, TypedValue* headers) as
 
 TypedValue* tg_10SoapClient___setsoapheaders(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1353,8 +1353,8 @@ node_namespace => st0
 
 void th_7SoapVar___construct(ObjectData* this_, TypedValue* data, TypedValue* type, Value* type_name, Value* type_namespace, Value* node_name, Value* node_namespace) asm("_ZN4HPHP9c_SoapVar13t___constructERKNS_7VariantES3_RKNS_6StringES6_S6_S6_");
 
-TypedValue* tg1_7SoapVar___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SoapVar___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_7SoapVar___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SoapVar___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1385,7 +1385,7 @@ TypedValue* tg1_7SoapVar___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* tg_7SoapVar___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1439,8 +1439,8 @@ name => rdx
 
 void th_9SoapParam___construct(ObjectData* this_, TypedValue* data, Value* name) asm("_ZN4HPHP11c_SoapParam13t___constructERKNS_7VariantERKNS_6StringE");
 
-TypedValue* tg1_9SoapParam___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9SoapParam___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9SoapParam___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9SoapParam___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1452,7 +1452,7 @@ TypedValue* tg1_9SoapParam___construct(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* tg_9SoapParam___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1509,8 +1509,8 @@ actor => r9
 
 void th_10SoapHeader___construct(ObjectData* this_, Value* ns, Value* name, TypedValue* data, bool mustunderstand, TypedValue* actor) asm("_ZN4HPHP12c_SoapHeader13t___constructERKNS_6StringES3_RKNS_7VariantEbS6_");
 
-TypedValue* tg1_10SoapHeader___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10SoapHeader___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_10SoapHeader___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10SoapHeader___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1539,7 +1539,7 @@ TypedValue* tg1_10SoapHeader___construct(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* tg_10SoapHeader___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

@@ -35,7 +35,7 @@ bool fh_hphp_is_service_thread() asm("_ZN4HPHP24f_hphp_is_service_threadEv");
 
 TypedValue* fg_hphp_is_service_thread(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -68,7 +68,7 @@ void fh_hphp_service_thread_started() asm("_ZN4HPHP29f_hphp_service_thread_start
 
 TypedValue* fg_hphp_service_thread_started(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -102,8 +102,8 @@ timeout => rdi
 
 bool fh_hphp_service_thread_stopped(int timeout) asm("_ZN4HPHP29f_hphp_service_thread_stoppedEi");
 
-TypedValue * fg1_hphp_service_thread_stopped(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_service_thread_stopped(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_hphp_service_thread_stopped(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_service_thread_stopped(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -114,7 +114,7 @@ TypedValue * fg1_hphp_service_thread_stopped(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_hphp_service_thread_stopped(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
@@ -155,7 +155,7 @@ bool fh_hphp_thread_is_warmup_enabled() asm("_ZN4HPHP31f_hphp_thread_is_warmup_e
 
 TypedValue* fg_hphp_thread_is_warmup_enabled(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -188,7 +188,7 @@ void fh_hphp_thread_set_warmup_enabled() asm("_ZN4HPHP32f_hphp_thread_set_warmup
 
 TypedValue* fg_hphp_thread_set_warmup_enabled(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
@@ -213,22 +213,22 @@ TypedValue* fg_hphp_thread_set_warmup_enabled(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_hphp_get_thread_id()
+long HPHP::f_hphp_get_thread_id()
 _ZN4HPHP20f_hphp_get_thread_idEv
 
 (return value) => rax
 */
 
-long long fh_hphp_get_thread_id() asm("_ZN4HPHP20f_hphp_get_thread_idEv");
+long fh_hphp_get_thread_id() asm("_ZN4HPHP20f_hphp_get_thread_idEv");
 
 TypedValue* fg_hphp_get_thread_id(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
-      rv.m_data.num = (long long)fh_hphp_get_thread_id();
+      rv.m_data.num = (int64_t)fh_hphp_get_thread_id();
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
@@ -257,12 +257,12 @@ int fh_hphp_gettid() asm("_ZN4HPHP13f_hphp_gettidEv");
 
 TypedValue* fg_hphp_gettid(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
-      rv.m_data.num = (long long)fh_hphp_gettid();
+      rv.m_data.num = (int64_t)fh_hphp_gettid();
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;

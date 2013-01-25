@@ -51,7 +51,7 @@ inline bool f_apc_load_constants(CStrRef key, bool case_sensitive = true,
   throw NotSupportedException(__func__, "dynamic coding");
 }
 inline bool f_apc_compile_file(CStrRef filename, bool atomic = true,
-                               int64 cache_id = 0) {
+                               int64_t cache_id = 0) {
   throw NotSupportedException(__func__, "dynamic coding");
 }
 inline Array f_apc_filehits() {
@@ -83,13 +83,13 @@ void apc_load(int thread);
 
 // needed by generated apc archive .cpp files
 void apc_load_impl(struct cache_info *info,
-                   const char **int_keys, int64 *int_values,
+                   const char **int_keys, long long *int_values,
                    const char **char_keys, char *char_values,
                    const char **strings, const char **objects,
                    const char **thrifts, const char **others);
 void apc_load_impl_compressed(
   struct cache_info *info,
-  int *int_lens, const char *int_keys, int64 *int_values,
+  int *int_lens, const char *int_keys, long long *int_values,
   int *char_lens, const char *char_keys, char *char_values,
   int *string_lens, const char *strings,
   int *object_lens, const char *objects,
@@ -116,19 +116,22 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
 
 void const_load_impl(struct cache_info *info,
-                     const char **int_keys, int64 *int_values,
+                     const char **int_keys, long long *int_values,
                      const char **char_keys, char *char_values,
                      const char **strings, const char **objects,
                      const char **thrifts, const char **others);
 
 void const_load_impl_compressed(
   struct cache_info *info,
-  int *int_lens, const char *int_keys, int64 *int_values,
+  int *int_lens, const char *int_keys, long long *int_values,
   int *char_lens, const char *char_keys, char *char_values,
   int *string_lens, const char *strings,
   int *object_lens, const char *objects,
   int *thrift_lens, const char *thrifts,
   int *other_lens, const char *others);
+
+static_assert(sizeof(int64) == sizeof(long long),
+              "Must be able to cast an int64* to a long long*");
 
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization

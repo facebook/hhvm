@@ -16,8 +16,6 @@
 #ifndef incl_UTIL_COMPACT_SIZED_PTR_H_
 #define incl_UTIL_COMPACT_SIZED_PTR_H_
 
-#include <inttypes.h>
-
 /*
  * A combined pointer + size intended to save space on x64.  The
  * maximum size should be 2^16 anywhere you use this class (although

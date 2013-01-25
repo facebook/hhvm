@@ -75,11 +75,11 @@ void emitIncTranslOp(X64Assembler& a, Opcode opc, bool force) {
 static __thread int64 epoch;
 void dump() {
   if (!enabled()) return;
-  TRACE(1, "STATS %lld %s\n", epoch, g_context->getRequestUrl(50).c_str());
+  TRACE(1, "STATS %ld %s\n", epoch, g_context->getRequestUrl(50).c_str());
 #include "runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
-  if (tl_counters[s]) TRACE(1, "STAT %-50s %15ld\n", \
-                            #s, tl_counters[s]);
+  if (!tl_counters[s]) {} else                                  \
+    TRACE(1, "STAT %-50s %15"PRId64"\n", #s, tl_counters[s]);
   STATS
 #undef STAT
 #undef O

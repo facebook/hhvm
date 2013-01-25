@@ -17,13 +17,13 @@
 namespace HPHP {
 
 /*
-long long HPHP::f_intl_get_error_code()
+long HPHP::f_intl_get_error_code()
 _ZN4HPHP21f_intl_get_error_codeEv
 
 (return value) => rax
 */
 
-long long fh_intl_get_error_code() asm("_ZN4HPHP21f_intl_get_error_codeEv");
+long fh_intl_get_error_code() asm("_ZN4HPHP21f_intl_get_error_codeEv");
 
 /*
 HPHP::String HPHP::f_intl_get_error_message()
@@ -36,29 +36,29 @@ _rv => rdi
 Value* fh_intl_get_error_message(Value* _rv) asm("_ZN4HPHP24f_intl_get_error_messageEv");
 
 /*
-HPHP::String HPHP::f_intl_error_name(long long)
-_ZN4HPHP17f_intl_error_nameEx
+HPHP::String HPHP::f_intl_error_name(long)
+_ZN4HPHP17f_intl_error_nameEl
 
 (return value) => rax
 _rv => rdi
 error_code => rsi
 */
 
-Value* fh_intl_error_name(Value* _rv, long long error_code) asm("_ZN4HPHP17f_intl_error_nameEx");
+Value* fh_intl_error_name(Value* _rv, long error_code) asm("_ZN4HPHP17f_intl_error_nameEl");
 
 /*
-bool HPHP::f_intl_is_failure(long long)
-_ZN4HPHP17f_intl_is_failureEx
+bool HPHP::f_intl_is_failure(long)
+_ZN4HPHP17f_intl_is_failureEl
 
 (return value) => rax
 error_code => rdi
 */
 
-bool fh_intl_is_failure(long long error_code) asm("_ZN4HPHP17f_intl_is_failureEx");
+bool fh_intl_is_failure(long error_code) asm("_ZN4HPHP17f_intl_is_failureEl");
 
 /*
-HPHP::Variant HPHP::f_collator_asort(HPHP::Variant const&, HPHP::VRefParamValue const&, long long)
-_ZN4HPHP16f_collator_asortERKNS_7VariantERKNS_14VRefParamValueEx
+HPHP::Variant HPHP::f_collator_asort(HPHP::Variant const&, HPHP::VRefParamValue const&, long)
+_ZN4HPHP16f_collator_asortERKNS_7VariantERKNS_14VRefParamValueEl
 
 (return value) => rax
 _rv => rdi
@@ -67,7 +67,7 @@ arr => rdx
 sort_flag => rcx
 */
 
-TypedValue* fh_collator_asort(TypedValue* _rv, TypedValue* obj, TypedValue* arr, long long sort_flag) asm("_ZN4HPHP16f_collator_asortERKNS_7VariantERKNS_14VRefParamValueEx");
+TypedValue* fh_collator_asort(TypedValue* _rv, TypedValue* obj, TypedValue* arr, long sort_flag) asm("_ZN4HPHP16f_collator_asortERKNS_7VariantERKNS_14VRefParamValueEl");
 
 /*
 HPHP::Variant HPHP::f_collator_compare(HPHP::Variant const&, HPHP::String const&, HPHP::String const&)
@@ -94,8 +94,8 @@ locale => rsi
 TypedValue* fh_collator_create(TypedValue* _rv, Value* locale) asm("_ZN4HPHP17f_collator_createERKNS_6StringE");
 
 /*
-HPHP::Variant HPHP::f_collator_get_attribute(HPHP::Variant const&, long long)
-_ZN4HPHP24f_collator_get_attributeERKNS_7VariantEx
+HPHP::Variant HPHP::f_collator_get_attribute(HPHP::Variant const&, long)
+_ZN4HPHP24f_collator_get_attributeERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -103,7 +103,7 @@ obj => rsi
 attr => rdx
 */
 
-TypedValue* fh_collator_get_attribute(TypedValue* _rv, TypedValue* obj, long long attr) asm("_ZN4HPHP24f_collator_get_attributeERKNS_7VariantEx");
+TypedValue* fh_collator_get_attribute(TypedValue* _rv, TypedValue* obj, long attr) asm("_ZN4HPHP24f_collator_get_attributeERKNS_7VariantEl");
 
 /*
 HPHP::Variant HPHP::f_collator_get_error_code(HPHP::Variant const&)
@@ -128,8 +128,8 @@ obj => rsi
 TypedValue* fh_collator_get_error_message(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP28f_collator_get_error_messageERKNS_7VariantE");
 
 /*
-HPHP::Variant HPHP::f_collator_get_locale(HPHP::Variant const&, long long)
-_ZN4HPHP21f_collator_get_localeERKNS_7VariantEx
+HPHP::Variant HPHP::f_collator_get_locale(HPHP::Variant const&, long)
+_ZN4HPHP21f_collator_get_localeERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -137,7 +137,7 @@ obj => rsi
 type => rdx
 */
 
-TypedValue* fh_collator_get_locale(TypedValue* _rv, TypedValue* obj, long long type) asm("_ZN4HPHP21f_collator_get_localeERKNS_7VariantEx");
+TypedValue* fh_collator_get_locale(TypedValue* _rv, TypedValue* obj, long type) asm("_ZN4HPHP21f_collator_get_localeERKNS_7VariantEl");
 
 /*
 HPHP::Variant HPHP::f_collator_get_strength(HPHP::Variant const&)
@@ -151,8 +151,8 @@ obj => rsi
 TypedValue* fh_collator_get_strength(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP23f_collator_get_strengthERKNS_7VariantE");
 
 /*
-HPHP::Variant HPHP::f_collator_set_attribute(HPHP::Variant const&, long long, long long)
-_ZN4HPHP24f_collator_set_attributeERKNS_7VariantExx
+HPHP::Variant HPHP::f_collator_set_attribute(HPHP::Variant const&, long, long)
+_ZN4HPHP24f_collator_set_attributeERKNS_7VariantEll
 
 (return value) => rax
 _rv => rdi
@@ -161,11 +161,11 @@ attr => rdx
 val => rcx
 */
 
-TypedValue* fh_collator_set_attribute(TypedValue* _rv, TypedValue* obj, long long attr, long long val) asm("_ZN4HPHP24f_collator_set_attributeERKNS_7VariantExx");
+TypedValue* fh_collator_set_attribute(TypedValue* _rv, TypedValue* obj, long attr, long val) asm("_ZN4HPHP24f_collator_set_attributeERKNS_7VariantEll");
 
 /*
-HPHP::Variant HPHP::f_collator_set_strength(HPHP::Variant const&, long long)
-_ZN4HPHP23f_collator_set_strengthERKNS_7VariantEx
+HPHP::Variant HPHP::f_collator_set_strength(HPHP::Variant const&, long)
+_ZN4HPHP23f_collator_set_strengthERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -173,7 +173,7 @@ obj => rsi
 strength => rdx
 */
 
-TypedValue* fh_collator_set_strength(TypedValue* _rv, TypedValue* obj, long long strength) asm("_ZN4HPHP23f_collator_set_strengthERKNS_7VariantEx");
+TypedValue* fh_collator_set_strength(TypedValue* _rv, TypedValue* obj, long strength) asm("_ZN4HPHP23f_collator_set_strengthERKNS_7VariantEl");
 
 /*
 HPHP::Variant HPHP::f_collator_sort_with_sort_keys(HPHP::Variant const&, HPHP::VRefParamValue const&)
@@ -188,8 +188,8 @@ arr => rdx
 TypedValue* fh_collator_sort_with_sort_keys(TypedValue* _rv, TypedValue* obj, TypedValue* arr) asm("_ZN4HPHP30f_collator_sort_with_sort_keysERKNS_7VariantERKNS_14VRefParamValueE");
 
 /*
-HPHP::Variant HPHP::f_collator_sort(HPHP::Variant const&, HPHP::VRefParamValue const&, long long)
-_ZN4HPHP15f_collator_sortERKNS_7VariantERKNS_14VRefParamValueEx
+HPHP::Variant HPHP::f_collator_sort(HPHP::Variant const&, HPHP::VRefParamValue const&, long)
+_ZN4HPHP15f_collator_sortERKNS_7VariantERKNS_14VRefParamValueEl
 
 (return value) => rax
 _rv => rdi
@@ -198,7 +198,7 @@ arr => rdx
 sort_flag => rcx
 */
 
-TypedValue* fh_collator_sort(TypedValue* _rv, TypedValue* obj, TypedValue* arr, long long sort_flag) asm("_ZN4HPHP15f_collator_sortERKNS_7VariantERKNS_14VRefParamValueEx");
+TypedValue* fh_collator_sort(TypedValue* _rv, TypedValue* obj, TypedValue* arr, long sort_flag) asm("_ZN4HPHP15f_collator_sortERKNS_7VariantERKNS_14VRefParamValueEl");
 
 /*
 HPHP::Variant HPHP::f_idn_to_ascii(HPHP::String const&, HPHP::VRefParamValue const&)

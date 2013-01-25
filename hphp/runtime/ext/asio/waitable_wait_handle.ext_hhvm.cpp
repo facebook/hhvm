@@ -44,7 +44,7 @@ void th_18WaitableWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP20c_Wai
 
 TypedValue* tg_18WaitableWaitHandle___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -84,7 +84,7 @@ Value* th_18WaitableWaitHandle_getParents(Value* _rv, ObjectData* this_) asm("_Z
 
 TypedValue* tg_18WaitableWaitHandle_getParents(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -124,7 +124,7 @@ Value* th_18WaitableWaitHandle_getStackTrace(Value* _rv, ObjectData* this_) asm(
 
 TypedValue* tg_18WaitableWaitHandle_getStackTrace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

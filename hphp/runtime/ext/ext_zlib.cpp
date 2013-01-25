@@ -418,7 +418,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
   if ((int64)size < 0 ||
       (RuntimeOption::SerializationSizeLimit > 0 &&
        (int64)size > RuntimeOption::SerializationSizeLimit)) {
-    raise_notice("invalid size in compressed header: %lld", (int64)size);
+    raise_notice("invalid size in compressed header: %zd", size);
     return false;
   }
 

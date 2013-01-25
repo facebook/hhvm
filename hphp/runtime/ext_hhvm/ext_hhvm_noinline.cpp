@@ -24,15 +24,15 @@
 
 namespace HPHP {
 
-bool fni_apc_compile_file(String const& filename, bool atomic, long long cache_id) {
+bool fni_apc_compile_file(String const& filename, bool atomic, int64_t cache_id) {
   return f_apc_compile_file(filename, atomic, cache_id);
 }
 
-bool fni_apc_define_constants(String const& key, String const& constants, bool case_sensitive, long long cache_id) {
+bool fni_apc_define_constants(String const& key, String const& constants, bool case_sensitive, int64_t cache_id) {
   return f_apc_define_constants(key, constants, case_sensitive, cache_id);
 }
 
-bool fni_apc_load_constants(String const& key, bool case_sensitive, long long cache_id) {
+bool fni_apc_load_constants(String const& key, bool case_sensitive, int64_t cache_id) {
   return f_apc_load_constants(key, case_sensitive, cache_id);
 }
 
@@ -44,23 +44,23 @@ Array fni_apc_filehits() {
   return f_apc_filehits();
 }
 
-Variant fni_apc_delete_file(Variant const& keys, long long cache_id) {
+Variant fni_apc_delete_file(Variant const& keys, int64_t cache_id) {
   return f_apc_delete_file(keys, cache_id);
 }
 
-Variant fni_apc_bin_dump(long long cache_id, Variant const& filter) {
+Variant fni_apc_bin_dump(int64_t cache_id, Variant const& filter) {
   return f_apc_bin_dump(cache_id, filter);
 }
 
-bool fni_apc_bin_load(String const& data, long long flags, long long cache_id) {
+bool fni_apc_bin_load(String const& data, int64_t flags, int64_t cache_id) {
   return f_apc_bin_load(data, flags, cache_id);
 }
 
-Variant fni_apc_bin_dumpfile(long long cache_id, Variant const& filter, String const& filename, long long flags, Object const& context) {
+Variant fni_apc_bin_dumpfile(int64_t cache_id, Variant const& filter, String const& filename, int64_t flags, Object const& context) {
   return f_apc_bin_dumpfile(cache_id, filter, filename, flags, context);
 }
 
-bool fni_apc_bin_loadfile(String const& filename, Object const& context, long long flags, long long cache_id) {
+bool fni_apc_bin_loadfile(String const& filename, Object const& context, int64_t flags, int64_t cache_id) {
   return f_apc_bin_loadfile(filename, context, flags, cache_id);
 }
 
@@ -203,15 +203,15 @@ Object fni_date_sub(CObjRef datetime, CObjRef interval) {
   return f_date_sub(datetime, interval);
 }
 
-Array fni_date_sun_info(long long ts, double latitude, double longitude) {
+Array fni_date_sun_info(int64_t ts, double latitude, double longitude) {
   return f_date_sun_info(ts, latitude, longitude);
 }
 
-Variant fni_date_sunrise(long long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) {
+Variant fni_date_sunrise(int64_t timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) {
   return f_date_sunrise(timestamp, format, latitude, longitude, zenith, gmt_offset);
 }
 
-Variant fni_date_sunset(long long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) {
+Variant fni_date_sunset(int64_t timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) {
   return f_date_sunset(timestamp, format, latitude, longitude, zenith, gmt_offset);
 }
 
@@ -235,11 +235,11 @@ void fni_date_timezone_set(Object const& object, Object const& timezone) {
   return f_date_timezone_set(object, timezone);
 }
 
-Variant fni_date(String const& format, long long timestamp) {
+Variant fni_date(String const& format, int64_t timestamp) {
   return f_date(format, timestamp);
 }
 
-Array fni_getdate(long long timestamp) {
+Array fni_getdate(int64_t timestamp) {
   return f_getdate(timestamp);
 }
 
@@ -247,7 +247,7 @@ Variant fni_gettimeofday(bool return_float) {
   return f_gettimeofday(return_float);
 }
 
-Variant fni_gmdate(String const& format, long long timestamp) {
+Variant fni_gmdate(String const& format, int64_t timestamp) {
   return f_gmdate(format, timestamp);
 }
 
@@ -255,15 +255,15 @@ Variant fni_gmmktime(int hour, int minute, int second, int month, int day, int y
   return f_gmmktime(hour, minute, second, month, day, year);
 }
 
-String fni_gmstrftime(String const& format, long long timestamp) {
+String fni_gmstrftime(String const& format, int64_t timestamp) {
   return f_gmstrftime(format, timestamp);
 }
 
-Variant fni_idate(String const& format, long long timestamp) {
+Variant fni_idate(String const& format, int64_t timestamp) {
   return f_idate(format, timestamp);
 }
 
-Array fni_localtime(long long timestamp, bool is_associative) {
+Array fni_localtime(int64_t timestamp, bool is_associative) {
   return f_localtime(timestamp, is_associative);
 }
 
@@ -275,7 +275,7 @@ Variant fni_mktime(int hour, int minute, int second, int month, int day, int yea
   return f_mktime(hour, minute, second, month, day, year);
 }
 
-Variant fni_strftime(String const& format, long long timestamp) {
+Variant fni_strftime(String const& format, int64_t timestamp) {
   return f_strftime(format, timestamp);
 }
 
@@ -283,7 +283,7 @@ Variant fni_strptime(String const& date, String const& format) {
   return f_strptime(date, format);
 }
 
-Variant fni_strtotime(String const& input, long long timestamp) {
+Variant fni_strtotime(String const& input, int64_t timestamp) {
   return f_strtotime(input, timestamp);
 }
 
@@ -393,15 +393,15 @@ double fni_rad2deg(double number) {
   return f_rad2deg(number);
 }
 
-String fni_decbin(long long number) {
+String fni_decbin(int64_t number) {
   return f_decbin(number);
 }
 
-String fni_dechex(long long number) {
+String fni_dechex(int64_t number) {
   return f_dechex(number);
 }
 
-String fni_decoct(long long number) {
+String fni_decoct(int64_t number) {
   return f_decoct(number);
 }
 
@@ -501,15 +501,15 @@ double fni_sqrt(double arg) {
   return f_sqrt(arg);
 }
 
-long long fni_getrandmax() {
+int64_t fni_getrandmax() {
   return f_getrandmax();
 }
 
-long long fni_mt_getrandmax() {
+int64_t fni_mt_getrandmax() {
   return f_mt_getrandmax();
 }
 
-long long fni_mt_rand(long long min, long long max) {
+int64_t fni_mt_rand(int64_t min, int64_t max) {
   return f_mt_rand(min, max);
 }
 
@@ -709,11 +709,11 @@ bool fni_output_reset_rewrite_vars() {
   return f_output_reset_rewrite_vars();
 }
 
-void fni_hphp_stats(String const& name, long long value) {
+void fni_hphp_stats(String const& name, int64_t value) {
   return f_hphp_stats(name, value);
 }
 
-long long fni_hphp_get_stats(String const& name) {
+int64_t fni_hphp_get_stats(String const& name) {
   return f_hphp_get_stats(name);
 }
 
@@ -845,7 +845,7 @@ int64 fni_pcntl_wtermsig(int status) {
   return f_pcntl_wtermsig(status);
 }
 
-long long fni_hphp_object_pointer(Object const& obj) {
+int64_t fni_hphp_object_pointer(Object const& obj) {
   return f_hphp_object_pointer(obj);
 }
 
@@ -1101,7 +1101,7 @@ String fni_str_rot13(String const& str) {
   return f_str_rot13(str);
 }
 
-long long fni_crc32(String const& str) {
+int64_t fni_crc32(String const& str) {
   return f_crc32(str);
 }
 
@@ -1141,11 +1141,11 @@ Variant fni_vsprintf(String const& format, Array const& args) {
   return f_vsprintf(format, args);
 }
 
-String fni_chr(long long ascii) {
+String fni_chr(int64_t ascii) {
   return f_chr(ascii);
 }
 
-long long fni_ord(String const& str) {
+int64_t fni_ord(String const& str) {
   return f_ord(str);
 }
 
@@ -1273,7 +1273,7 @@ bool fni_is_null(Variant const& var) {
   return f_is_null(var);
 }
 
-long long fni_intval(Variant const& v, long long base) {
+int64_t fni_intval(Variant const& v, int64_t base) {
   return f_intval(v, base);
 }
 
@@ -1313,15 +1313,15 @@ Variant fni_gzgetc(Object const& zp) {
   return f_gzgetc(zp);
 }
 
-Variant fni_gzgets(Object const& zp, long long length) {
+Variant fni_gzgets(Object const& zp, int64_t length) {
   return f_gzgets(zp, length);
 }
 
-Variant fni_gzgetss(Object const& zp, long long length, String const& allowable_tags) {
+Variant fni_gzgetss(Object const& zp, int64_t length, String const& allowable_tags) {
   return f_gzgetss(zp, length, allowable_tags);
 }
 
-Variant fni_gzread(Object const& zp, long long length) {
+Variant fni_gzread(Object const& zp, int64_t length) {
   return f_gzread(zp, length);
 }
 
@@ -1329,7 +1329,7 @@ Variant fni_gzpassthru(Object const& zp) {
   return f_gzpassthru(zp);
 }
 
-Variant fni_gzseek(Object const& zp, long long offset, long long whence) {
+Variant fni_gzseek(Object const& zp, int64_t offset, int64_t whence) {
   return f_gzseek(zp, offset, whence);
 }
 
@@ -1337,11 +1337,11 @@ Variant fni_gztell(Object const& zp) {
   return f_gztell(zp);
 }
 
-Variant fni_gzwrite(Object const& zp, String const& str, long long length) {
+Variant fni_gzwrite(Object const& zp, String const& str, int64_t length) {
   return f_gzwrite(zp, str, length);
 }
 
-Variant fni_gzputs(Object const& zp, String const& str, long long length) {
+Variant fni_gzputs(Object const& zp, String const& str, int64_t length) {
   return f_gzputs(zp, str, length);
 }
 

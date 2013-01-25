@@ -19,7 +19,6 @@
 
 #include <algorithm>
 #include <cstdarg>
-#include <cinttypes>
 #include <iostream>
 #include <vector>
 #include <stack>

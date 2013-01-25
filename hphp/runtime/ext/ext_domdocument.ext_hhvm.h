@@ -202,8 +202,8 @@ obj => rsi
 TypedValue* fh_dom_document_normalize_document(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP33f_dom_document_normalize_documentERKNS_7VariantE");
 
 /*
-HPHP::Variant HPHP::f_dom_document_save(HPHP::Variant const&, HPHP::String const&, long long)
-_ZN4HPHP19f_dom_document_saveERKNS_7VariantERKNS_6StringEx
+HPHP::Variant HPHP::f_dom_document_save(HPHP::Variant const&, HPHP::String const&, long)
+_ZN4HPHP19f_dom_document_saveERKNS_7VariantERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -212,11 +212,11 @@ file => rdx
 options => rcx
 */
 
-TypedValue* fh_dom_document_save(TypedValue* _rv, TypedValue* obj, Value* file, long long options) asm("_ZN4HPHP19f_dom_document_saveERKNS_7VariantERKNS_6StringEx");
+TypedValue* fh_dom_document_save(TypedValue* _rv, TypedValue* obj, Value* file, long options) asm("_ZN4HPHP19f_dom_document_saveERKNS_7VariantERKNS_6StringEl");
 
 /*
-HPHP::Variant HPHP::f_dom_document_savexml(HPHP::Variant const&, HPHP::Object const&, long long)
-_ZN4HPHP22f_dom_document_savexmlERKNS_7VariantERKNS_6ObjectEx
+HPHP::Variant HPHP::f_dom_document_savexml(HPHP::Variant const&, HPHP::Object const&, long)
+_ZN4HPHP22f_dom_document_savexmlERKNS_7VariantERKNS_6ObjectEl
 
 (return value) => rax
 _rv => rdi
@@ -225,7 +225,7 @@ node => rdx
 options => rcx
 */
 
-TypedValue* fh_dom_document_savexml(TypedValue* _rv, TypedValue* obj, Value* node, long long options) asm("_ZN4HPHP22f_dom_document_savexmlERKNS_7VariantERKNS_6ObjectEx");
+TypedValue* fh_dom_document_savexml(TypedValue* _rv, TypedValue* obj, Value* node, long options) asm("_ZN4HPHP22f_dom_document_savexmlERKNS_7VariantERKNS_6ObjectEl");
 
 /*
 HPHP::Variant HPHP::f_dom_document_validate(HPHP::Variant const&)
@@ -239,8 +239,8 @@ obj => rsi
 TypedValue* fh_dom_document_validate(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP23f_dom_document_validateERKNS_7VariantE");
 
 /*
-HPHP::Variant HPHP::f_dom_document_xinclude(HPHP::Variant const&, long long)
-_ZN4HPHP23f_dom_document_xincludeERKNS_7VariantEx
+HPHP::Variant HPHP::f_dom_document_xinclude(HPHP::Variant const&, long)
+_ZN4HPHP23f_dom_document_xincludeERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -248,7 +248,7 @@ obj => rsi
 options => rdx
 */
 
-TypedValue* fh_dom_document_xinclude(TypedValue* _rv, TypedValue* obj, long long options) asm("_ZN4HPHP23f_dom_document_xincludeERKNS_7VariantEx");
+TypedValue* fh_dom_document_xinclude(TypedValue* _rv, TypedValue* obj, long options) asm("_ZN4HPHP23f_dom_document_xincludeERKNS_7VariantEl");
 
 /*
 HPHP::Variant HPHP::f_dom_document_save_html(HPHP::Variant const&)
@@ -478,8 +478,8 @@ namespaceuri => rdx
 TypedValue* fh_dom_node_lookup_namespace_uri(TypedValue* _rv, TypedValue* obj, Value* namespaceuri) asm("_ZN4HPHP31f_dom_node_lookup_namespace_uriERKNS_7VariantERKNS_6StringE");
 
 /*
-HPHP::Variant HPHP::f_dom_nodelist_item(HPHP::Variant const&, long long)
-_ZN4HPHP19f_dom_nodelist_itemERKNS_7VariantEx
+HPHP::Variant HPHP::f_dom_nodelist_item(HPHP::Variant const&, long)
+_ZN4HPHP19f_dom_nodelist_itemERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -487,7 +487,7 @@ obj => rsi
 index => rdx
 */
 
-TypedValue* fh_dom_nodelist_item(TypedValue* _rv, TypedValue* obj, long long index) asm("_ZN4HPHP19f_dom_nodelist_itemERKNS_7VariantEx");
+TypedValue* fh_dom_nodelist_item(TypedValue* _rv, TypedValue* obj, long index) asm("_ZN4HPHP19f_dom_nodelist_itemERKNS_7VariantEl");
 
 /*
 HPHP::Variant HPHP::f_dom_namednodemap_get_named_item(HPHP::Variant const&, HPHP::String const&)
@@ -502,8 +502,8 @@ name => rdx
 TypedValue* fh_dom_namednodemap_get_named_item(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP33f_dom_namednodemap_get_named_itemERKNS_7VariantERKNS_6StringE");
 
 /*
-HPHP::Variant HPHP::f_dom_namednodemap_item(HPHP::Variant const&, long long)
-_ZN4HPHP23f_dom_namednodemap_itemERKNS_7VariantEx
+HPHP::Variant HPHP::f_dom_namednodemap_item(HPHP::Variant const&, long)
+_ZN4HPHP23f_dom_namednodemap_itemERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -511,7 +511,7 @@ obj => rsi
 index => rdx
 */
 
-TypedValue* fh_dom_namednodemap_item(TypedValue* _rv, TypedValue* obj, long long index) asm("_ZN4HPHP23f_dom_namednodemap_itemERKNS_7VariantEx");
+TypedValue* fh_dom_namednodemap_item(TypedValue* _rv, TypedValue* obj, long index) asm("_ZN4HPHP23f_dom_namednodemap_itemERKNS_7VariantEl");
 
 /*
 HPHP::Variant HPHP::f_dom_namednodemap_get_named_item_ns(HPHP::Variant const&, HPHP::String const&, HPHP::String const&)
@@ -527,8 +527,8 @@ localname => rcx
 TypedValue* fh_dom_namednodemap_get_named_item_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP36f_dom_namednodemap_get_named_item_nsERKNS_7VariantERKNS_6StringES5_");
 
 /*
-HPHP::Variant HPHP::f_dom_characterdata_substring_data(HPHP::Variant const&, long long, long long)
-_ZN4HPHP34f_dom_characterdata_substring_dataERKNS_7VariantExx
+HPHP::Variant HPHP::f_dom_characterdata_substring_data(HPHP::Variant const&, long, long)
+_ZN4HPHP34f_dom_characterdata_substring_dataERKNS_7VariantEll
 
 (return value) => rax
 _rv => rdi
@@ -537,7 +537,7 @@ offset => rdx
 count => rcx
 */
 
-TypedValue* fh_dom_characterdata_substring_data(TypedValue* _rv, TypedValue* obj, long long offset, long long count) asm("_ZN4HPHP34f_dom_characterdata_substring_dataERKNS_7VariantExx");
+TypedValue* fh_dom_characterdata_substring_data(TypedValue* _rv, TypedValue* obj, long offset, long count) asm("_ZN4HPHP34f_dom_characterdata_substring_dataERKNS_7VariantEll");
 
 /*
 HPHP::Variant HPHP::f_dom_characterdata_append_data(HPHP::Variant const&, HPHP::String const&)
@@ -552,8 +552,8 @@ arg => rdx
 TypedValue* fh_dom_characterdata_append_data(TypedValue* _rv, TypedValue* obj, Value* arg) asm("_ZN4HPHP31f_dom_characterdata_append_dataERKNS_7VariantERKNS_6StringE");
 
 /*
-HPHP::Variant HPHP::f_dom_characterdata_insert_data(HPHP::Variant const&, long long, HPHP::String const&)
-_ZN4HPHP31f_dom_characterdata_insert_dataERKNS_7VariantExRKNS_6StringE
+HPHP::Variant HPHP::f_dom_characterdata_insert_data(HPHP::Variant const&, long, HPHP::String const&)
+_ZN4HPHP31f_dom_characterdata_insert_dataERKNS_7VariantElRKNS_6StringE
 
 (return value) => rax
 _rv => rdi
@@ -562,11 +562,11 @@ offset => rdx
 data => rcx
 */
 
-TypedValue* fh_dom_characterdata_insert_data(TypedValue* _rv, TypedValue* obj, long long offset, Value* data) asm("_ZN4HPHP31f_dom_characterdata_insert_dataERKNS_7VariantExRKNS_6StringE");
+TypedValue* fh_dom_characterdata_insert_data(TypedValue* _rv, TypedValue* obj, long offset, Value* data) asm("_ZN4HPHP31f_dom_characterdata_insert_dataERKNS_7VariantElRKNS_6StringE");
 
 /*
-HPHP::Variant HPHP::f_dom_characterdata_delete_data(HPHP::Variant const&, long long, long long)
-_ZN4HPHP31f_dom_characterdata_delete_dataERKNS_7VariantExx
+HPHP::Variant HPHP::f_dom_characterdata_delete_data(HPHP::Variant const&, long, long)
+_ZN4HPHP31f_dom_characterdata_delete_dataERKNS_7VariantEll
 
 (return value) => rax
 _rv => rdi
@@ -575,11 +575,11 @@ offset => rdx
 count => rcx
 */
 
-TypedValue* fh_dom_characterdata_delete_data(TypedValue* _rv, TypedValue* obj, long long offset, long long count) asm("_ZN4HPHP31f_dom_characterdata_delete_dataERKNS_7VariantExx");
+TypedValue* fh_dom_characterdata_delete_data(TypedValue* _rv, TypedValue* obj, long offset, long count) asm("_ZN4HPHP31f_dom_characterdata_delete_dataERKNS_7VariantEll");
 
 /*
-HPHP::Variant HPHP::f_dom_characterdata_replace_data(HPHP::Variant const&, long long, long long, HPHP::String const&)
-_ZN4HPHP32f_dom_characterdata_replace_dataERKNS_7VariantExxRKNS_6StringE
+HPHP::Variant HPHP::f_dom_characterdata_replace_data(HPHP::Variant const&, long, long, HPHP::String const&)
+_ZN4HPHP32f_dom_characterdata_replace_dataERKNS_7VariantEllRKNS_6StringE
 
 (return value) => rax
 _rv => rdi
@@ -589,7 +589,7 @@ count => rcx
 data => r8
 */
 
-TypedValue* fh_dom_characterdata_replace_data(TypedValue* _rv, TypedValue* obj, long long offset, long long count, Value* data) asm("_ZN4HPHP32f_dom_characterdata_replace_dataERKNS_7VariantExxRKNS_6StringE");
+TypedValue* fh_dom_characterdata_replace_data(TypedValue* _rv, TypedValue* obj, long offset, long count, Value* data) asm("_ZN4HPHP32f_dom_characterdata_replace_dataERKNS_7VariantEllRKNS_6StringE");
 
 /*
 HPHP::Variant HPHP::f_dom_attr_is_id(HPHP::Variant const&)
@@ -831,8 +831,8 @@ isid => rcx
 TypedValue* fh_dom_element_set_id_attribute_node(TypedValue* _rv, TypedValue* obj, Value* idattr, bool isid) asm("_ZN4HPHP35f_dom_element_set_id_attribute_nodeERKNS_7VariantERKNS_6ObjectEb");
 
 /*
-HPHP::Variant HPHP::f_dom_text_split_text(HPHP::Variant const&, long long)
-_ZN4HPHP21f_dom_text_split_textERKNS_7VariantEx
+HPHP::Variant HPHP::f_dom_text_split_text(HPHP::Variant const&, long)
+_ZN4HPHP21f_dom_text_split_textERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -840,7 +840,7 @@ obj => rsi
 offset => rdx
 */
 
-TypedValue* fh_dom_text_split_text(TypedValue* _rv, TypedValue* obj, long long offset) asm("_ZN4HPHP21f_dom_text_split_textERKNS_7VariantEx");
+TypedValue* fh_dom_text_split_text(TypedValue* _rv, TypedValue* obj, long offset) asm("_ZN4HPHP21f_dom_text_split_textERKNS_7VariantEl");
 
 /*
 HPHP::Variant HPHP::f_dom_text_is_whitespace_in_element_content(HPHP::Variant const&)

@@ -394,7 +394,7 @@ static int count_items(const char **p, int step) {
 
 KEEP_SECTION
 void const_load_impl(struct cache_info *info,
-                     const char **int_keys, int64 *int_values,
+                     const char **int_keys, long long *int_values,
                      const char **char_keys, char *char_values,
                      const char **strings, const char **objects,
                      const char **thrifts, const char **others) {
@@ -403,7 +403,7 @@ void const_load_impl(struct cache_info *info,
     int count = count_items(int_keys, 2);
     if (count) {
       const char **k = int_keys;
-      int64 *v = int_values;
+      long long* v = int_values;
       for (int i = 0; i < count; i++, k += 2) {
         String key(*k, (int)(int64)*(k+1), CopyString);
         int64 value = *v++;
@@ -490,7 +490,7 @@ void const_load_impl(struct cache_info *info,
 
 KEEP_SECTION
 void apc_load_impl(struct cache_info *info,
-                   const char **int_keys, int64 *int_values,
+                   const char **int_keys, long long *int_values,
                    const char **char_keys, char *char_values,
                    const char **strings, const char **objects,
                    const char **thrifts, const char **others) {
@@ -503,7 +503,7 @@ void apc_load_impl(struct cache_info *info,
     if (count) {
       vector<SharedStore::KeyValuePair> vars(count);
       const char **k = int_keys;
-      int64 *v = int_values;
+      long long*v = int_values;
       for (int i = 0; i < count; i++, k += 2) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *k;
@@ -616,7 +616,7 @@ void apc_load_impl(struct cache_info *info,
 KEEP_SECTION
 void const_load_impl_compressed
     (struct cache_info *info,
-     int *int_lens, const char *int_keys, int64 *int_values,
+     int *int_lens, const char *int_keys, long long *int_values,
      int *char_lens, const char *char_keys, char *char_values,
      int *string_lens, const char *strings,
      int *object_lens, const char *objects,
@@ -631,7 +631,7 @@ void const_load_impl_compressed
       if (keys == NULL) throw Exception("bad compressed const archive.");
       ScopedMem holder(keys);
       const char *k = keys;
-      int64 *v = int_values;
+      long long* v = int_values;
       for (int i = 0; i < count; i++) {
         String key(k, int_lens[i + 2], CopyString);
         int64 value = *v++;
@@ -754,7 +754,7 @@ void const_load_impl_compressed
 KEEP_SECTION
 void apc_load_impl_compressed
     (struct cache_info *info,
-     int *int_lens, const char *int_keys, int64 *int_values,
+     int *int_lens, const char *int_keys, long long *int_values,
      int *char_lens, const char *char_keys, char *char_values,
      int *string_lens, const char *strings,
      int *object_lens, const char *objects,
@@ -773,7 +773,7 @@ void apc_load_impl_compressed
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
       const char *k = keys;
-      int64 *v = int_values;
+      long long* v = int_values;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = k;

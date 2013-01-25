@@ -17,8 +17,8 @@
 namespace HPHP {
 
 /*
-HPHP::Variant HPHP::f_simplexml_load_string(HPHP::String const&, HPHP::String const&, long long, HPHP::String const&, bool)
-_ZN4HPHP23f_simplexml_load_stringERKNS_6StringES2_xS2_b
+HPHP::Variant HPHP::f_simplexml_load_string(HPHP::String const&, HPHP::String const&, long, HPHP::String const&, bool)
+_ZN4HPHP23f_simplexml_load_stringERKNS_6StringES2_lS2_b
 
 (return value) => rax
 _rv => rdi
@@ -29,11 +29,11 @@ ns => r8
 is_prefix => r9
 */
 
-TypedValue* fh_simplexml_load_string(TypedValue* _rv, Value* data, Value* class_name, long long options, Value* ns, bool is_prefix) asm("_ZN4HPHP23f_simplexml_load_stringERKNS_6StringES2_xS2_b");
+TypedValue* fh_simplexml_load_string(TypedValue* _rv, Value* data, Value* class_name, long options, Value* ns, bool is_prefix) asm("_ZN4HPHP23f_simplexml_load_stringERKNS_6StringES2_lS2_b");
 
 /*
-HPHP::Variant HPHP::f_simplexml_load_file(HPHP::String const&, HPHP::String const&, long long, HPHP::String const&, bool)
-_ZN4HPHP21f_simplexml_load_fileERKNS_6StringES2_xS2_b
+HPHP::Variant HPHP::f_simplexml_load_file(HPHP::String const&, HPHP::String const&, long, HPHP::String const&, bool)
+_ZN4HPHP21f_simplexml_load_fileERKNS_6StringES2_lS2_b
 
 (return value) => rax
 _rv => rdi
@@ -44,7 +44,7 @@ ns => r8
 is_prefix => r9
 */
 
-TypedValue* fh_simplexml_load_file(TypedValue* _rv, Value* filename, Value* class_name, long long options, Value* ns, bool is_prefix) asm("_ZN4HPHP21f_simplexml_load_fileERKNS_6StringES2_xS2_b");
+TypedValue* fh_simplexml_load_file(TypedValue* _rv, Value* filename, Value* class_name, long options, Value* ns, bool is_prefix) asm("_ZN4HPHP21f_simplexml_load_fileERKNS_6StringES2_lS2_b");
 
 /*
 HPHP::Variant HPHP::f_libxml_get_errors()

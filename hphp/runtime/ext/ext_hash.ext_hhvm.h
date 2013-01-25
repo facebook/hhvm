@@ -118,7 +118,7 @@ stream_context => rdx
 bool fh_hash_update_file(Value* init_context, Value* filename, Value* stream_context) asm("_ZN4HPHP18f_hash_update_fileERKNS_6ObjectERKNS_6StringES2_");
 
 /*
-long long HPHP::f_hash_update_stream(HPHP::Object const&, HPHP::Object const&, int)
+long HPHP::f_hash_update_stream(HPHP::Object const&, HPHP::Object const&, int)
 _ZN4HPHP20f_hash_update_streamERKNS_6ObjectES2_i
 
 (return value) => rax
@@ -127,7 +127,7 @@ handle => rsi
 length => rdx
 */
 
-long long fh_hash_update_stream(Value* context, Value* handle, int length) asm("_ZN4HPHP20f_hash_update_streamERKNS_6ObjectES2_i");
+long fh_hash_update_stream(Value* context, Value* handle, int length) asm("_ZN4HPHP20f_hash_update_streamERKNS_6ObjectES2_i");
 
 /*
 bool HPHP::f_hash_update(HPHP::Object const&, HPHP::String const&)
@@ -141,7 +141,7 @@ data => rsi
 bool fh_hash_update(Value* context, Value* data) asm("_ZN4HPHP13f_hash_updateERKNS_6ObjectERKNS_6StringE");
 
 /*
-long long HPHP::f_furchash_hphp_ext(HPHP::String const&, int, int)
+long HPHP::f_furchash_hphp_ext(HPHP::String const&, int, int)
 _ZN4HPHP19f_furchash_hphp_extERKNS_6StringEii
 
 (return value) => rax
@@ -150,7 +150,7 @@ len => rsi
 nPart => rdx
 */
 
-long long fh_furchash_hphp_ext(Value* key, int len, int nPart) asm("_ZN4HPHP19f_furchash_hphp_extERKNS_6StringEii");
+long fh_furchash_hphp_ext(Value* key, int len, int nPart) asm("_ZN4HPHP19f_furchash_hphp_extERKNS_6StringEii");
 
 /*
 bool HPHP::f_furchash_hphp_ext_supported()
@@ -162,7 +162,7 @@ _ZN4HPHP29f_furchash_hphp_ext_supportedEv
 bool fh_furchash_hphp_ext_supported() asm("_ZN4HPHP29f_furchash_hphp_ext_supportedEv");
 
 /*
-long long HPHP::f_hphp_murmurhash(HPHP::String const&, int, int)
+long HPHP::f_hphp_murmurhash(HPHP::String const&, int, int)
 _ZN4HPHP17f_hphp_murmurhashERKNS_6StringEii
 
 (return value) => rax
@@ -171,7 +171,7 @@ len => rsi
 seed => rdx
 */
 
-long long fh_hphp_murmurhash(Value* key, int len, int seed) asm("_ZN4HPHP17f_hphp_murmurhashERKNS_6StringEii");
+long fh_hphp_murmurhash(Value* key, int len, int seed) asm("_ZN4HPHP17f_hphp_murmurhashERKNS_6StringEii");
 
 
 } // !HPHP

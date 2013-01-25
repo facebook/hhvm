@@ -36,8 +36,8 @@ use_include_path => rdx
 
 TypedValue* fh_readgzfile(TypedValue* _rv, Value* filename, bool use_include_path) asm("_ZN4HPHP12f_readgzfileERKNS_6StringEb");
 
-TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -57,7 +57,7 @@ TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_readgzfile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -98,8 +98,8 @@ use_include_path => rdx
 
 TypedValue* fh_gzfile(TypedValue* _rv, Value* filename, bool use_include_path) asm("_ZN4HPHP8f_gzfileERKNS_6StringEb");
 
-TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -119,7 +119,7 @@ TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
 
 TypedValue* fg_gzfile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -160,8 +160,8 @@ level => rdx
 
 TypedValue* fh_gzcompress(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP12f_gzcompressERKNS_6StringEi");
 
-TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -181,7 +181,7 @@ TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_gzcompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -222,8 +222,8 @@ limit => rdx
 
 TypedValue* fh_gzuncompress(TypedValue* _rv, Value* data, int limit) asm("_ZN4HPHP14f_gzuncompressERKNS_6StringEi");
 
-TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -243,7 +243,7 @@ TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_gzuncompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -284,8 +284,8 @@ level => rdx
 
 TypedValue* fh_gzdeflate(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP11f_gzdeflateERKNS_6StringEi");
 
-TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -305,7 +305,7 @@ TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_gzdeflate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -346,8 +346,8 @@ limit => rdx
 
 TypedValue* fh_gzinflate(TypedValue* _rv, Value* data, int limit) asm("_ZN4HPHP11f_gzinflateERKNS_6StringEi");
 
-TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -367,7 +367,7 @@ TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_gzinflate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -409,8 +409,8 @@ encoding_mode => rcx
 
 TypedValue* fh_gzencode(TypedValue* _rv, Value* data, int level, int encoding_mode) asm("_ZN4HPHP10f_gzencodeERKNS_6StringEii");
 
-TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -434,7 +434,7 @@ TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_gzencode(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -474,8 +474,8 @@ data => rsi
 
 TypedValue* fh_gzdecode(TypedValue* _rv, Value* data) asm("_ZN4HPHP10f_gzdecodeERKNS_6StringE");
 
-TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_gzdecode((rv), (Value*)(args-0));
@@ -485,7 +485,7 @@ TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_gzdecode(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -527,8 +527,8 @@ use_include_path => rcx
 
 Value* fh_gzopen(Value* _rv, Value* filename, Value* mode, bool use_include_path) asm("_ZN4HPHP8f_gzopenERKNS_6StringES2_b");
 
-TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -553,7 +553,7 @@ TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
 
 TypedValue* fg_gzopen(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -596,8 +596,8 @@ level => rdx
 
 TypedValue* fh_qlzcompress(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP13f_qlzcompressERKNS_6StringEi");
 
-TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -617,7 +617,7 @@ TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_qlzcompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -658,8 +658,8 @@ level => rdx
 
 TypedValue* fh_qlzuncompress(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP15f_qlzuncompressERKNS_6StringEi");
 
-TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -679,7 +679,7 @@ TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_qlzuncompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -719,8 +719,8 @@ data => rsi
 
 TypedValue* fh_sncompress(TypedValue* _rv, Value* data) asm("_ZN4HPHP12f_sncompressERKNS_6StringE");
 
-TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_sncompress((rv), (Value*)(args-0));
@@ -730,7 +730,7 @@ TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_sncompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -770,8 +770,8 @@ data => rsi
 
 TypedValue* fh_snuncompress(TypedValue* _rv, Value* data) asm("_ZN4HPHP14f_snuncompressERKNS_6StringE");
 
-TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_snuncompress((rv), (Value*)(args-0));
@@ -781,7 +781,7 @@ TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_snuncompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -821,8 +821,8 @@ uncompressed => rsi
 
 TypedValue* fh_nzcompress(TypedValue* _rv, Value* uncompressed) asm("_ZN4HPHP12f_nzcompressERKNS_6StringE");
 
-TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_nzcompress((rv), (Value*)(args-0));
@@ -832,7 +832,7 @@ TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_nzcompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -872,8 +872,8 @@ compressed => rsi
 
 TypedValue* fh_nzuncompress(TypedValue* _rv, Value* compressed) asm("_ZN4HPHP14f_nzuncompressERKNS_6StringE");
 
-TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_nzuncompress((rv), (Value*)(args-0));
@@ -883,7 +883,7 @@ TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_nzuncompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -923,8 +923,8 @@ uncompressed => rsi
 
 TypedValue* fh_lz4compress(TypedValue* _rv, Value* uncompressed) asm("_ZN4HPHP13f_lz4compressERKNS_6StringE");
 
-TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_lz4compress((rv), (Value*)(args-0));
@@ -934,7 +934,7 @@ TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_lz4compress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -974,8 +974,8 @@ uncompressed => rsi
 
 TypedValue* fh_lz4hccompress(TypedValue* _rv, Value* uncompressed) asm("_ZN4HPHP15f_lz4hccompressERKNS_6StringE");
 
-TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_lz4hccompress((rv), (Value*)(args-0));
@@ -985,7 +985,7 @@ TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_lz4hccompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -1025,8 +1025,8 @@ compressed => rsi
 
 TypedValue* fh_lz4uncompress(TypedValue* _rv, Value* compressed) asm("_ZN4HPHP15f_lz4uncompressERKNS_6StringE");
 
-TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_lz4uncompress((rv), (Value*)(args-0));
@@ -1036,7 +1036,7 @@ TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_lz4uncompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {

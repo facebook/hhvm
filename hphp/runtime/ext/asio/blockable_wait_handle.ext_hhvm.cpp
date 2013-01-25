@@ -44,7 +44,7 @@ void th_19BlockableWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP21c_Bl
 
 TypedValue* tg_19BlockableWaitHandle___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

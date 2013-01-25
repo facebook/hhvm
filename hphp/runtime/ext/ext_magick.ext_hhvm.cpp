@@ -36,7 +36,7 @@ Value* fh_magickgetcopyright(Value* _rv) asm("_ZN4HPHP20f_magickgetcopyrightEv")
 
 TypedValue* fg_magickgetcopyright(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -72,7 +72,7 @@ Value* fh_magickgethomeurl(Value* _rv) asm("_ZN4HPHP18f_magickgethomeurlEv");
 
 TypedValue* fg_magickgethomeurl(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -108,7 +108,7 @@ Value* fh_magickgetpackagename(Value* _rv) asm("_ZN4HPHP22f_magickgetpackagename
 
 TypedValue* fg_magickgetpackagename(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -143,7 +143,7 @@ double fh_magickgetquantumdepth() asm("_ZN4HPHP23f_magickgetquantumdepthEv");
 
 TypedValue* fg_magickgetquantumdepth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -178,7 +178,7 @@ Value* fh_magickgetreleasedate(Value* _rv) asm("_ZN4HPHP22f_magickgetreleasedate
 
 TypedValue* fg_magickgetreleasedate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -212,8 +212,8 @@ resource_type => rdi
 
 double fh_magickgetresourcelimit(int resource_type) asm("_ZN4HPHP24f_magickgetresourcelimitEi");
 
-TypedValue * fg1_magickgetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -224,7 +224,7 @@ TypedValue * fg1_magickgetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickgetresourcelimit(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
@@ -266,7 +266,7 @@ Value* fh_magickgetversion(Value* _rv) asm("_ZN4HPHP18f_magickgetversionEv");
 
 TypedValue* fg_magickgetversion(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -291,22 +291,22 @@ TypedValue* fg_magickgetversion(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetversionnumber()
+long HPHP::f_magickgetversionnumber()
 _ZN4HPHP24f_magickgetversionnumberEv
 
 (return value) => rax
 */
 
-long long fh_magickgetversionnumber() asm("_ZN4HPHP24f_magickgetversionnumberEv");
+long fh_magickgetversionnumber() asm("_ZN4HPHP24f_magickgetversionnumberEv");
 
 TypedValue* fg_magickgetversionnumber(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
       rv.m_type = KindOfInt64;
-      rv.m_data.num = (long long)fh_magickgetversionnumber();
+      rv.m_data.num = (int64_t)fh_magickgetversionnumber();
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
@@ -336,7 +336,7 @@ Value* fh_magickgetversionstring(Value* _rv) asm("_ZN4HPHP24f_magickgetversionst
 
 TypedValue* fg_magickgetversionstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -371,8 +371,8 @@ option => rsi
 
 Value* fh_magickqueryconfigureoption(Value* _rv, Value* option) asm("_ZN4HPHP28f_magickqueryconfigureoptionERKNS_6StringE");
 
-TypedValue * fg1_magickqueryconfigureoption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickqueryconfigureoption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickqueryconfigureoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickqueryconfigureoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -384,7 +384,7 @@ TypedValue * fg1_magickqueryconfigureoption(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* fg_magickqueryconfigureoption(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -426,8 +426,8 @@ pattern => rsi
 
 Value* fh_magickqueryconfigureoptions(Value* _rv, Value* pattern) asm("_ZN4HPHP29f_magickqueryconfigureoptionsERKNS_6StringE");
 
-TypedValue * fg1_magickqueryconfigureoptions(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickqueryconfigureoptions(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickqueryconfigureoptions(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickqueryconfigureoptions(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -439,7 +439,7 @@ TypedValue * fg1_magickqueryconfigureoptions(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_magickqueryconfigureoptions(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -481,8 +481,8 @@ pattern => rsi
 
 Value* fh_magickqueryfonts(Value* _rv, Value* pattern) asm("_ZN4HPHP18f_magickqueryfontsERKNS_6StringE");
 
-TypedValue * fg1_magickqueryfonts(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickqueryfonts(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickqueryfonts(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickqueryfonts(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -494,7 +494,7 @@ TypedValue * fg1_magickqueryfonts(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickqueryfonts(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -536,8 +536,8 @@ pattern => rsi
 
 Value* fh_magickqueryformats(Value* _rv, Value* pattern) asm("_ZN4HPHP20f_magickqueryformatsERKNS_6StringE");
 
-TypedValue * fg1_magickqueryformats(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickqueryformats(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickqueryformats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickqueryformats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -549,7 +549,7 @@ TypedValue * fg1_magickqueryformats(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickqueryformats(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -591,8 +591,8 @@ limit => xmm0
 
 bool fh_magicksetresourcelimit(int resource_type, double limit) asm("_ZN4HPHP24f_magicksetresourcelimitEid");
 
-TypedValue * fg1_magicksetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -608,7 +608,7 @@ TypedValue * fg1_magicksetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magicksetresourcelimit(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfInt64) {
@@ -650,7 +650,7 @@ Value* fh_newdrawingwand(Value* _rv) asm("_ZN4HPHP16f_newdrawingwandEv");
 
 TypedValue* fg_newdrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -686,7 +686,7 @@ Value* fh_newmagickwand(Value* _rv) asm("_ZN4HPHP15f_newmagickwandEv");
 
 TypedValue* fg_newmagickwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -721,8 +721,8 @@ mgck_wnd => rsi
 
 Value* fh_newpixeliterator(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP18f_newpixeliteratorERKNS_6ObjectE");
 
-TypedValue * fg1_newpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_newpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_newpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_newpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -734,7 +734,7 @@ TypedValue * fg1_newpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_newpixeliterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -780,8 +780,8 @@ rows => r9
 
 Value* fh_newpixelregioniterator(Value* _rv, Value* mgck_wnd, int x, int y, int columns, int rows) asm("_ZN4HPHP24f_newpixelregioniteratorERKNS_6ObjectEiiii");
 
-TypedValue * fg1_newpixelregioniterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_newpixelregioniterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_newpixelregioniterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_newpixelregioniterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -807,7 +807,7 @@ TypedValue * fg1_newpixelregioniterator(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_newpixelregioniterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -849,8 +849,8 @@ imagemagick_col_str => rsi
 
 Value* fh_newpixelwand(Value* _rv, Value* imagemagick_col_str) asm("_ZN4HPHP14f_newpixelwandERKNS_6StringE");
 
-TypedValue * fg1_newpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_newpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_newpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_newpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -862,7 +862,7 @@ TypedValue * fg1_newpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_newpixelwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
@@ -904,8 +904,8 @@ num_pxl_wnds => rsi
 
 Value* fh_newpixelwandarray(Value* _rv, int num_pxl_wnds) asm("_ZN4HPHP19f_newpixelwandarrayEi");
 
-TypedValue * fg1_newpixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_newpixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_newpixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_newpixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -917,7 +917,7 @@ TypedValue * fg1_newpixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_newpixelwandarray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
@@ -959,8 +959,8 @@ num_pxl_wnds => rsi
 
 Value* fh_newpixelwands(Value* _rv, int num_pxl_wnds) asm("_ZN4HPHP15f_newpixelwandsEi");
 
-TypedValue * fg1_newpixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_newpixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_newpixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_newpixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -972,7 +972,7 @@ TypedValue * fg1_newpixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_newpixelwands(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
@@ -1012,8 +1012,8 @@ drw_wnd => rdi
 
 void fh_destroydrawingwand(Value* drw_wnd) asm("_ZN4HPHP20f_destroydrawingwandERKNS_6ObjectE");
 
-TypedValue * fg1_destroydrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_destroydrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_destroydrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_destroydrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1025,7 +1025,7 @@ TypedValue * fg1_destroydrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_destroydrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1065,8 +1065,8 @@ mgck_wnd => rdi
 
 void fh_destroymagickwand(Value* mgck_wnd) asm("_ZN4HPHP19f_destroymagickwandERKNS_6ObjectE");
 
-TypedValue * fg1_destroymagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_destroymagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_destroymagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_destroymagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1078,7 +1078,7 @@ TypedValue * fg1_destroymagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_destroymagickwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1118,8 +1118,8 @@ pxl_iter => rdi
 
 void fh_destroypixeliterator(Value* pxl_iter) asm("_ZN4HPHP22f_destroypixeliteratorERKNS_6ObjectE");
 
-TypedValue * fg1_destroypixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_destroypixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_destroypixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_destroypixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1131,7 +1131,7 @@ TypedValue * fg1_destroypixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_destroypixeliterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1171,8 +1171,8 @@ pxl_wnd => rdi
 
 void fh_destroypixelwand(Value* pxl_wnd) asm("_ZN4HPHP18f_destroypixelwandERKNS_6ObjectE");
 
-TypedValue * fg1_destroypixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_destroypixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_destroypixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_destroypixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1184,7 +1184,7 @@ TypedValue * fg1_destroypixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_destroypixelwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1224,8 +1224,8 @@ pxl_wnd_array => rdi
 
 void fh_destroypixelwandarray(Value* pxl_wnd_array) asm("_ZN4HPHP23f_destroypixelwandarrayERKNS_5ArrayE");
 
-TypedValue * fg1_destroypixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_destroypixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_destroypixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_destroypixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1237,7 +1237,7 @@ TypedValue * fg1_destroypixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_destroypixelwandarray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
@@ -1277,8 +1277,8 @@ pxl_wnd_array => rdi
 
 void fh_destroypixelwands(Value* pxl_wnd_array) asm("_ZN4HPHP19f_destroypixelwandsERKNS_5ArrayE");
 
-TypedValue * fg1_destroypixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_destroypixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_destroypixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_destroypixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1290,7 +1290,7 @@ TypedValue * fg1_destroypixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_destroypixelwands(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
@@ -1333,7 +1333,7 @@ bool fh_isdrawingwand(TypedValue* var) asm("_ZN4HPHP15f_isdrawingwandERKNS_7Vari
 
 TypedValue* fg_isdrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -1368,7 +1368,7 @@ bool fh_ismagickwand(TypedValue* var) asm("_ZN4HPHP14f_ismagickwandERKNS_7Varian
 
 TypedValue* fg_ismagickwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -1403,7 +1403,7 @@ bool fh_ispixeliterator(TypedValue* var) asm("_ZN4HPHP17f_ispixeliteratorERKNS_7
 
 TypedValue* fg_ispixeliterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -1438,7 +1438,7 @@ bool fh_ispixelwand(TypedValue* var) asm("_ZN4HPHP13f_ispixelwandERKNS_7VariantE
 
 TypedValue* fg_ispixelwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -1470,8 +1470,8 @@ drw_wnd => rdi
 
 void fh_cleardrawingwand(Value* drw_wnd) asm("_ZN4HPHP18f_cleardrawingwandERKNS_6ObjectE");
 
-TypedValue * fg1_cleardrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_cleardrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_cleardrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_cleardrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1483,7 +1483,7 @@ TypedValue * fg1_cleardrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_cleardrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1523,8 +1523,8 @@ mgck_wnd => rdi
 
 void fh_clearmagickwand(Value* mgck_wnd) asm("_ZN4HPHP17f_clearmagickwandERKNS_6ObjectE");
 
-TypedValue * fg1_clearmagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_clearmagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_clearmagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_clearmagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1536,7 +1536,7 @@ TypedValue * fg1_clearmagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_clearmagickwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1576,8 +1576,8 @@ pxl_iter => rdi
 
 void fh_clearpixeliterator(Value* pxl_iter) asm("_ZN4HPHP20f_clearpixeliteratorERKNS_6ObjectE");
 
-TypedValue * fg1_clearpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_clearpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_clearpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_clearpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1589,7 +1589,7 @@ TypedValue * fg1_clearpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_clearpixeliterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1629,8 +1629,8 @@ pxl_wnd => rdi
 
 void fh_clearpixelwand(Value* pxl_wnd) asm("_ZN4HPHP16f_clearpixelwandERKNS_6ObjectE");
 
-TypedValue * fg1_clearpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_clearpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_clearpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_clearpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -1642,7 +1642,7 @@ TypedValue * fg1_clearpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_clearpixelwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1684,8 +1684,8 @@ drw_wnd => rsi
 
 Value* fh_clonedrawingwand(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP18f_clonedrawingwandERKNS_6ObjectE");
 
-TypedValue * fg1_clonedrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_clonedrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_clonedrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_clonedrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -1697,7 +1697,7 @@ TypedValue * fg1_clonedrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_clonedrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1739,8 +1739,8 @@ mgck_wnd => rsi
 
 Value* fh_clonemagickwand(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP17f_clonemagickwandERKNS_6ObjectE");
 
-TypedValue * fg1_clonemagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_clonemagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_clonemagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_clonemagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -1752,7 +1752,7 @@ TypedValue * fg1_clonemagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_clonemagickwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1794,8 +1794,8 @@ wnd => rsi
 
 Value* fh_wandgetexception(Value* _rv, Value* wnd) asm("_ZN4HPHP18f_wandgetexceptionERKNS_6ObjectE");
 
-TypedValue * fg1_wandgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_wandgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_wandgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_wandgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -1807,7 +1807,7 @@ TypedValue * fg1_wandgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_wandgetexception(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1849,8 +1849,8 @@ wnd => rsi
 
 Value* fh_wandgetexceptionstring(Value* _rv, Value* wnd) asm("_ZN4HPHP24f_wandgetexceptionstringERKNS_6ObjectE");
 
-TypedValue * fg1_wandgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_wandgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_wandgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_wandgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -1862,7 +1862,7 @@ TypedValue * fg1_wandgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_wandgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -1894,34 +1894,34 @@ TypedValue* fg_wandgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_wandgetexceptiontype(HPHP::Object const&)
+long HPHP::f_wandgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP22f_wandgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 wnd => rdi
 */
 
-long long fh_wandgetexceptiontype(Value* wnd) asm("_ZN4HPHP22f_wandgetexceptiontypeERKNS_6ObjectE");
+long fh_wandgetexceptiontype(Value* wnd) asm("_ZN4HPHP22f_wandgetexceptiontypeERKNS_6ObjectE");
 
-TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_wandgetexceptiontype((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_wandgetexceptiontype((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_wandgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_wandgetexceptiontype((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_wandgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1955,8 +1955,8 @@ wnd => rdi
 
 bool fh_wandhasexception(Value* wnd) asm("_ZN4HPHP18f_wandhasexceptionERKNS_6ObjectE");
 
-TypedValue * fg1_wandhasexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_wandhasexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_wandhasexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_wandhasexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1967,7 +1967,7 @@ TypedValue * fg1_wandhasexception(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_wandhasexception(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -2012,8 +2012,8 @@ ty => xmm5
 
 void fh_drawaffine(Value* drw_wnd, double sx, double sy, double rx, double ry, double tx, double ty) asm("_ZN4HPHP12f_drawaffineERKNS_6ObjectEdddddd");
 
-TypedValue * fg1_drawaffine(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawaffine(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawaffine(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawaffine(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2045,7 +2045,7 @@ TypedValue * fg1_drawaffine(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_drawaffine(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -2088,8 +2088,8 @@ text => rsi
 
 void fh_drawannotation(Value* drw_wnd, double x, double y, Value* text) asm("_ZN4HPHP16f_drawannotationERKNS_6ObjectEddRKNS_6StringE");
 
-TypedValue * fg1_drawannotation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawannotation(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawannotation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawannotation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2112,7 +2112,7 @@ TypedValue * fg1_drawannotation(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_drawannotation(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -2158,8 +2158,8 @@ ed => xmm5
 
 void fh_drawarc(Value* drw_wnd, double sx, double sy, double ex, double ey, double sd, double ed) asm("_ZN4HPHP9f_drawarcERKNS_6ObjectEdddddd");
 
-TypedValue * fg1_drawarc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawarc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawarc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawarc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2191,7 +2191,7 @@ TypedValue * fg1_drawarc(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 
 TypedValue* fg_drawarc(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -2232,8 +2232,8 @@ x_y_points_array => rsi
 
 void fh_drawbezier(Value* drw_wnd, Value* x_y_points_array) asm("_ZN4HPHP12f_drawbezierERKNS_6ObjectERKNS_5ArrayE");
 
-TypedValue * fg1_drawbezier(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawbezier(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawbezier(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawbezier(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2250,7 +2250,7 @@ TypedValue * fg1_drawbezier(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_drawbezier(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -2294,8 +2294,8 @@ py => xmm3
 
 void fh_drawcircle(Value* drw_wnd, double ox, double oy, double px, double py) asm("_ZN4HPHP12f_drawcircleERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawcircle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawcircle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawcircle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawcircle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2321,7 +2321,7 @@ TypedValue * fg1_drawcircle(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_drawcircle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -2364,8 +2364,8 @@ paint_method => rsi
 
 void fh_drawcolor(Value* drw_wnd, double x, double y, int paint_method) asm("_ZN4HPHP11f_drawcolorERKNS_6ObjectEddi");
 
-TypedValue * fg1_drawcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2388,7 +2388,7 @@ TypedValue * fg1_drawcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_drawcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -2429,8 +2429,8 @@ comment => rsi
 
 void fh_drawcomment(Value* drw_wnd, Value* comment) asm("_ZN4HPHP13f_drawcommentERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawcomment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawcomment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawcomment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawcomment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2447,7 +2447,7 @@ TypedValue * fg1_drawcomment(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_drawcomment(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -2494,8 +2494,8 @@ mgck_wnd => rdx
 
 bool fh_drawcomposite(Value* drw_wnd, int composite_operator, double x, double y, double width, double height, Value* mgck_wnd) asm("_ZN4HPHP15f_drawcompositeERKNS_6ObjectEiddddS2_");
 
-TypedValue * fg1_drawcomposite(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawcomposite(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawcomposite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawcomposite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -2526,7 +2526,7 @@ TypedValue * fg1_drawcomposite(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_drawcomposite(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfObject && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -2571,8 +2571,8 @@ end => xmm5
 
 void fh_drawellipse(Value* drw_wnd, double ox, double oy, double rx, double ry, double start, double end) asm("_ZN4HPHP13f_drawellipseERKNS_6ObjectEdddddd");
 
-TypedValue * fg1_drawellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -2604,7 +2604,7 @@ TypedValue * fg1_drawellipse(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_drawellipse(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -2646,8 +2646,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetclippath(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP17f_drawgetclippathERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -2659,7 +2659,7 @@ TypedValue * fg1_drawgetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawgetclippath(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -2691,34 +2691,34 @@ TypedValue* fg_drawgetclippath(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetcliprule(HPHP::Object const&)
+long HPHP::f_drawgetcliprule(HPHP::Object const&)
 _ZN4HPHP17f_drawgetclipruleERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetcliprule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetclipruleERKNS_6ObjectE");
+long fh_drawgetcliprule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetclipruleERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetcliprule((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetcliprule((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetcliprule(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetcliprule((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetcliprule((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2743,34 +2743,34 @@ TypedValue* fg_drawgetcliprule(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetclipunits(HPHP::Object const&)
+long HPHP::f_drawgetclipunits(HPHP::Object const&)
 _ZN4HPHP18f_drawgetclipunitsERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetclipunits(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetclipunitsERKNS_6ObjectE");
+long fh_drawgetclipunits(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetclipunitsERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetclipunits((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetclipunits((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetclipunits(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetclipunits((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetclipunits((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2805,8 +2805,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetexception(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP18f_drawgetexceptionERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -2818,7 +2818,7 @@ TypedValue * fg1_drawgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawgetexception(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -2860,8 +2860,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetexceptionstring(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP24f_drawgetexceptionstringERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -2873,7 +2873,7 @@ TypedValue * fg1_drawgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -2905,34 +2905,34 @@ TypedValue* fg_drawgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetexceptiontype(HPHP::Object const&)
+long HPHP::f_drawgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP22f_drawgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetexceptiontype(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetexceptiontypeERKNS_6ObjectE");
+long fh_drawgetexceptiontype(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetexceptiontypeERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetexceptiontype((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetexceptiontype((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetexceptiontype((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2966,8 +2966,8 @@ drw_wnd => rdi
 
 double fh_drawgetfillalpha(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfillalphaERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -2978,7 +2978,7 @@ TypedValue * fg1_drawgetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawgetfillalpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3019,8 +3019,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetfillcolor(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfillcolorERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -3032,7 +3032,7 @@ TypedValue * fg1_drawgetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawgetfillcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3073,8 +3073,8 @@ drw_wnd => rdi
 
 double fh_drawgetfillopacity(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetfillopacityERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -3085,7 +3085,7 @@ TypedValue * fg1_drawgetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawgetfillopacity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3116,34 +3116,34 @@ TypedValue* fg_drawgetfillopacity(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetfillrule(HPHP::Object const&)
+long HPHP::f_drawgetfillrule(HPHP::Object const&)
 _ZN4HPHP17f_drawgetfillruleERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetfillrule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetfillruleERKNS_6ObjectE");
+long fh_drawgetfillrule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetfillruleERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetfillrule((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetfillrule((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetfillrule(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetfillrule((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetfillrule((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3178,8 +3178,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetfont(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP13f_drawgetfontERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -3191,7 +3191,7 @@ TypedValue * fg1_drawgetfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_drawgetfont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3233,8 +3233,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetfontfamily(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP19f_drawgetfontfamilyERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -3246,7 +3246,7 @@ TypedValue * fg1_drawgetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_drawgetfontfamily(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3287,8 +3287,8 @@ drw_wnd => rdi
 
 double fh_drawgetfontsize(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetfontsizeERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -3299,7 +3299,7 @@ TypedValue * fg1_drawgetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawgetfontsize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3330,34 +3330,34 @@ TypedValue* fg_drawgetfontsize(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetfontstretch(HPHP::Object const&)
+long HPHP::f_drawgetfontstretch(HPHP::Object const&)
 _ZN4HPHP20f_drawgetfontstretchERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetfontstretch(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetfontstretchERKNS_6ObjectE");
+long fh_drawgetfontstretch(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetfontstretchERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetfontstretch((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetfontstretch((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetfontstretch(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetfontstretch((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetfontstretch((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3382,34 +3382,34 @@ TypedValue* fg_drawgetfontstretch(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetfontstyle(HPHP::Object const&)
+long HPHP::f_drawgetfontstyle(HPHP::Object const&)
 _ZN4HPHP18f_drawgetfontstyleERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetfontstyle(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfontstyleERKNS_6ObjectE");
+long fh_drawgetfontstyle(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfontstyleERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetfontstyle((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetfontstyle((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetfontstyle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetfontstyle((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetfontstyle((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3443,8 +3443,8 @@ drw_wnd => rdi
 
 double fh_drawgetfontweight(Value* drw_wnd) asm("_ZN4HPHP19f_drawgetfontweightERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -3455,7 +3455,7 @@ TypedValue * fg1_drawgetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_drawgetfontweight(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3486,34 +3486,34 @@ TypedValue* fg_drawgetfontweight(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetgravity(HPHP::Object const&)
+long HPHP::f_drawgetgravity(HPHP::Object const&)
 _ZN4HPHP16f_drawgetgravityERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetgravity(Value* drw_wnd) asm("_ZN4HPHP16f_drawgetgravityERKNS_6ObjectE");
+long fh_drawgetgravity(Value* drw_wnd) asm("_ZN4HPHP16f_drawgetgravityERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetgravity((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetgravity((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetgravity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetgravity((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetgravity((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3547,8 +3547,8 @@ drw_wnd => rdi
 
 double fh_drawgetstrokealpha(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetstrokealphaERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -3559,7 +3559,7 @@ TypedValue * fg1_drawgetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawgetstrokealpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3599,8 +3599,8 @@ drw_wnd => rdi
 
 bool fh_drawgetstrokeantialias(Value* drw_wnd) asm("_ZN4HPHP24f_drawgetstrokeantialiasERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -3611,7 +3611,7 @@ TypedValue * fg1_drawgetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawgetstrokeantialias(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3652,8 +3652,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetstrokecolor(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP20f_drawgetstrokecolorERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -3665,7 +3665,7 @@ TypedValue * fg1_drawgetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawgetstrokecolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3707,8 +3707,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetstrokedasharray(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP24f_drawgetstrokedasharrayERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -3720,7 +3720,7 @@ TypedValue * fg1_drawgetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawgetstrokedasharray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3761,8 +3761,8 @@ drw_wnd => rdi
 
 double fh_drawgetstrokedashoffset(Value* drw_wnd) asm("_ZN4HPHP25f_drawgetstrokedashoffsetERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -3773,7 +3773,7 @@ TypedValue * fg1_drawgetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_drawgetstrokedashoffset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3804,34 +3804,34 @@ TypedValue* fg_drawgetstrokedashoffset(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetstrokelinecap(HPHP::Object const&)
+long HPHP::f_drawgetstrokelinecap(HPHP::Object const&)
 _ZN4HPHP22f_drawgetstrokelinecapERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetstrokelinecap(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetstrokelinecapERKNS_6ObjectE");
+long fh_drawgetstrokelinecap(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetstrokelinecapERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetstrokelinecap((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetstrokelinecap((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetstrokelinecap(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetstrokelinecap((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetstrokelinecap((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3856,34 +3856,34 @@ TypedValue* fg_drawgetstrokelinecap(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgetstrokelinejoin(HPHP::Object const&)
+long HPHP::f_drawgetstrokelinejoin(HPHP::Object const&)
 _ZN4HPHP23f_drawgetstrokelinejoinERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgetstrokelinejoin(Value* drw_wnd) asm("_ZN4HPHP23f_drawgetstrokelinejoinERKNS_6ObjectE");
+long fh_drawgetstrokelinejoin(Value* drw_wnd) asm("_ZN4HPHP23f_drawgetstrokelinejoinERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgetstrokelinejoin((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgetstrokelinejoin((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgetstrokelinejoin(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgetstrokelinejoin((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgetstrokelinejoin((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3917,8 +3917,8 @@ drw_wnd => rdi
 
 double fh_drawgetstrokemiterlimit(Value* drw_wnd) asm("_ZN4HPHP25f_drawgetstrokemiterlimitERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -3929,7 +3929,7 @@ TypedValue * fg1_drawgetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_drawgetstrokemiterlimit(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -3969,8 +3969,8 @@ drw_wnd => rdi
 
 double fh_drawgetstrokeopacity(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetstrokeopacityERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -3981,7 +3981,7 @@ TypedValue * fg1_drawgetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_drawgetstrokeopacity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4021,8 +4021,8 @@ drw_wnd => rdi
 
 double fh_drawgetstrokewidth(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetstrokewidthERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -4033,7 +4033,7 @@ TypedValue * fg1_drawgetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawgetstrokewidth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4064,34 +4064,34 @@ TypedValue* fg_drawgetstrokewidth(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgettextalignment(HPHP::Object const&)
+long HPHP::f_drawgettextalignment(HPHP::Object const&)
 _ZN4HPHP22f_drawgettextalignmentERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgettextalignment(Value* drw_wnd) asm("_ZN4HPHP22f_drawgettextalignmentERKNS_6ObjectE");
+long fh_drawgettextalignment(Value* drw_wnd) asm("_ZN4HPHP22f_drawgettextalignmentERKNS_6ObjectE");
 
-TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgettextalignment((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgettextalignment((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgettextalignment(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgettextalignment((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgettextalignment((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -4125,8 +4125,8 @@ drw_wnd => rdi
 
 bool fh_drawgettextantialias(Value* drw_wnd) asm("_ZN4HPHP22f_drawgettextantialiasERKNS_6ObjectE");
 
-TypedValue * fg1_drawgettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -4137,7 +4137,7 @@ TypedValue * fg1_drawgettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_drawgettextantialias(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4168,34 +4168,34 @@ TypedValue* fg_drawgettextantialias(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_drawgettextdecoration(HPHP::Object const&)
+long HPHP::f_drawgettextdecoration(HPHP::Object const&)
 _ZN4HPHP23f_drawgettextdecorationERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-long long fh_drawgettextdecoration(Value* drw_wnd) asm("_ZN4HPHP23f_drawgettextdecorationERKNS_6ObjectE");
+long fh_drawgettextdecoration(Value* drw_wnd) asm("_ZN4HPHP23f_drawgettextdecorationERKNS_6ObjectE");
 
-TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_drawgettextdecoration((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_drawgettextdecoration((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_drawgettextdecoration(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_drawgettextdecoration((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_drawgettextdecoration((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -4230,8 +4230,8 @@ drw_wnd => rsi
 
 Value* fh_drawgettextencoding(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP21f_drawgettextencodingERKNS_6ObjectE");
 
-TypedValue * fg1_drawgettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -4243,7 +4243,7 @@ TypedValue * fg1_drawgettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_drawgettextencoding(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4285,8 +4285,8 @@ drw_wnd => rsi
 
 Value* fh_drawgettextundercolor(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP23f_drawgettextundercolorERKNS_6ObjectE");
 
-TypedValue * fg1_drawgettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -4298,7 +4298,7 @@ TypedValue * fg1_drawgettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_drawgettextundercolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4340,8 +4340,8 @@ drw_wnd => rsi
 
 Value* fh_drawgetvectorgraphics(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP23f_drawgetvectorgraphicsERKNS_6ObjectE");
 
-TypedValue * fg1_drawgetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawgetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawgetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawgetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -4353,7 +4353,7 @@ TypedValue * fg1_drawgetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_drawgetvectorgraphics(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4397,8 +4397,8 @@ ey => xmm3
 
 void fh_drawline(Value* drw_wnd, double sx, double sy, double ex, double ey) asm("_ZN4HPHP10f_drawlineERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4424,7 +4424,7 @@ TypedValue * fg1_drawline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_drawline(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -4467,8 +4467,8 @@ paint_method => rsi
 
 void fh_drawmatte(Value* drw_wnd, double x, double y, int paint_method) asm("_ZN4HPHP11f_drawmatteERKNS_6ObjectEddi");
 
-TypedValue * fg1_drawmatte(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawmatte(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawmatte(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawmatte(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4491,7 +4491,7 @@ TypedValue * fg1_drawmatte(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_drawmatte(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -4531,8 +4531,8 @@ drw_wnd => rdi
 
 void fh_drawpathclose(Value* drw_wnd) asm("_ZN4HPHP15f_drawpathcloseERKNS_6ObjectE");
 
-TypedValue * fg1_drawpathclose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathclose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4544,7 +4544,7 @@ TypedValue * fg1_drawpathclose(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_drawpathclose(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -4590,8 +4590,8 @@ y => xmm5
 
 void fh_drawpathcurvetoabsolute(Value* drw_wnd, double x1, double y1, double x2, double y2, double x, double y) asm("_ZN4HPHP25f_drawpathcurvetoabsoluteERKNS_6ObjectEdddddd");
 
-TypedValue * fg1_drawpathcurvetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4623,7 +4623,7 @@ TypedValue * fg1_drawpathcurvetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_drawpathcurvetoabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -4667,8 +4667,8 @@ y => xmm3
 
 void fh_drawpathcurvetoquadraticbezierabsolute(Value* drw_wnd, double x1, double y1, double x, double y) asm("_ZN4HPHP40f_drawpathcurvetoquadraticbezierabsoluteERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawpathcurvetoquadraticbezierabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetoquadraticbezierabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetoquadraticbezierabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetoquadraticbezierabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4694,7 +4694,7 @@ TypedValue * fg1_drawpathcurvetoquadraticbezierabsolute(TypedValue* rv, HPHP::VM
 
 TypedValue* fg_drawpathcurvetoquadraticbezierabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -4738,8 +4738,8 @@ y => xmm3
 
 void fh_drawpathcurvetoquadraticbezierrelative(Value* drw_wnd, double x1, double y1, double x, double y) asm("_ZN4HPHP40f_drawpathcurvetoquadraticbezierrelativeERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawpathcurvetoquadraticbezierrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetoquadraticbezierrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetoquadraticbezierrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetoquadraticbezierrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4765,7 +4765,7 @@ TypedValue * fg1_drawpathcurvetoquadraticbezierrelative(TypedValue* rv, HPHP::VM
 
 TypedValue* fg_drawpathcurvetoquadraticbezierrelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -4807,8 +4807,8 @@ y => xmm1
 
 void fh_drawpathcurvetoquadraticbeziersmoothabsolute(Value* drw_wnd, double x, double y) asm("_ZN4HPHP46f_drawpathcurvetoquadraticbeziersmoothabsoluteERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4828,7 +4828,7 @@ TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothabsolute(TypedValue* rv, HP
 
 TypedValue* fg_drawpathcurvetoquadraticbeziersmoothabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -4870,8 +4870,8 @@ y => xmm1
 
 void fh_drawpathcurvetoquadraticbeziersmoothrelative(Value* drw_wnd, double x, double y) asm("_ZN4HPHP46f_drawpathcurvetoquadraticbeziersmoothrelativeERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4891,7 +4891,7 @@ TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothrelative(TypedValue* rv, HP
 
 TypedValue* fg_drawpathcurvetoquadraticbeziersmoothrelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -4937,8 +4937,8 @@ y => xmm5
 
 void fh_drawpathcurvetorelative(Value* drw_wnd, double x1, double y1, double x2, double y2, double x, double y) asm("_ZN4HPHP25f_drawpathcurvetorelativeERKNS_6ObjectEdddddd");
 
-TypedValue * fg1_drawpathcurvetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -4970,7 +4970,7 @@ TypedValue * fg1_drawpathcurvetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_drawpathcurvetorelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5014,8 +5014,8 @@ y => xmm3
 
 void fh_drawpathcurvetosmoothabsolute(Value* drw_wnd, double x2, double y2, double x, double y) asm("_ZN4HPHP31f_drawpathcurvetosmoothabsoluteERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawpathcurvetosmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetosmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetosmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetosmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5041,7 +5041,7 @@ TypedValue * fg1_drawpathcurvetosmoothabsolute(TypedValue* rv, HPHP::VM::ActRec*
 
 TypedValue* fg_drawpathcurvetosmoothabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5085,8 +5085,8 @@ y => xmm3
 
 void fh_drawpathcurvetosmoothrelative(Value* drw_wnd, double x2, double y2, double x, double y) asm("_ZN4HPHP31f_drawpathcurvetosmoothrelativeERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawpathcurvetosmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathcurvetosmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathcurvetosmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathcurvetosmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5112,7 +5112,7 @@ TypedValue * fg1_drawpathcurvetosmoothrelative(TypedValue* rv, HPHP::VM::ActRec*
 
 TypedValue* fg_drawpathcurvetosmoothrelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5159,8 +5159,8 @@ y => xmm4
 
 void fh_drawpathellipticarcabsolute(Value* drw_wnd, double rx, double ry, double x_axis_rotation, bool large_arc_flag, bool sweep_flag, double x, double y) asm("_ZN4HPHP29f_drawpathellipticarcabsoluteERKNS_6ObjectEdddbbdd");
 
-TypedValue * fg1_drawpathellipticarcabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathellipticarcabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathellipticarcabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathellipticarcabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5195,7 +5195,7 @@ TypedValue * fg1_drawpathellipticarcabsolute(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_drawpathellipticarcabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfDouble && (args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5242,8 +5242,8 @@ y => xmm4
 
 void fh_drawpathellipticarcrelative(Value* drw_wnd, double rx, double ry, double x_axis_rotation, bool large_arc_flag, bool sweep_flag, double x, double y) asm("_ZN4HPHP29f_drawpathellipticarcrelativeERKNS_6ObjectEdddbbdd");
 
-TypedValue * fg1_drawpathellipticarcrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathellipticarcrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathellipticarcrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathellipticarcrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5278,7 +5278,7 @@ TypedValue * fg1_drawpathellipticarcrelative(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_drawpathellipticarcrelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfDouble && (args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5318,8 +5318,8 @@ drw_wnd => rdi
 
 void fh_drawpathfinish(Value* drw_wnd) asm("_ZN4HPHP16f_drawpathfinishERKNS_6ObjectE");
 
-TypedValue * fg1_drawpathfinish(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathfinish(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathfinish(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathfinish(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5331,7 +5331,7 @@ TypedValue * fg1_drawpathfinish(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_drawpathfinish(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -5373,8 +5373,8 @@ y => xmm1
 
 void fh_drawpathlinetoabsolute(Value* drw_wnd, double x, double y) asm("_ZN4HPHP24f_drawpathlinetoabsoluteERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawpathlinetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathlinetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathlinetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathlinetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5394,7 +5394,7 @@ TypedValue * fg1_drawpathlinetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawpathlinetoabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5435,8 +5435,8 @@ x => xmm0
 
 void fh_drawpathlinetohorizontalabsolute(Value* drw_wnd, double x) asm("_ZN4HPHP34f_drawpathlinetohorizontalabsoluteERKNS_6ObjectEd");
 
-TypedValue * fg1_drawpathlinetohorizontalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathlinetohorizontalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathlinetohorizontalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathlinetohorizontalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5453,7 +5453,7 @@ TypedValue * fg1_drawpathlinetohorizontalabsolute(TypedValue* rv, HPHP::VM::ActR
 
 TypedValue* fg_drawpathlinetohorizontalabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5494,8 +5494,8 @@ x => xmm0
 
 void fh_drawpathlinetohorizontalrelative(Value* drw_wnd, double x) asm("_ZN4HPHP34f_drawpathlinetohorizontalrelativeERKNS_6ObjectEd");
 
-TypedValue * fg1_drawpathlinetohorizontalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathlinetohorizontalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathlinetohorizontalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathlinetohorizontalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5512,7 +5512,7 @@ TypedValue * fg1_drawpathlinetohorizontalrelative(TypedValue* rv, HPHP::VM::ActR
 
 TypedValue* fg_drawpathlinetohorizontalrelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5554,8 +5554,8 @@ y => xmm1
 
 void fh_drawpathlinetorelative(Value* drw_wnd, double x, double y) asm("_ZN4HPHP24f_drawpathlinetorelativeERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawpathlinetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathlinetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathlinetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathlinetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5575,7 +5575,7 @@ TypedValue * fg1_drawpathlinetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawpathlinetorelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5616,8 +5616,8 @@ y => xmm0
 
 void fh_drawpathlinetoverticalabsolute(Value* drw_wnd, double y) asm("_ZN4HPHP32f_drawpathlinetoverticalabsoluteERKNS_6ObjectEd");
 
-TypedValue * fg1_drawpathlinetoverticalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathlinetoverticalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathlinetoverticalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathlinetoverticalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5634,7 +5634,7 @@ TypedValue * fg1_drawpathlinetoverticalabsolute(TypedValue* rv, HPHP::VM::ActRec
 
 TypedValue* fg_drawpathlinetoverticalabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5675,8 +5675,8 @@ y => xmm0
 
 void fh_drawpathlinetoverticalrelative(Value* drw_wnd, double y) asm("_ZN4HPHP32f_drawpathlinetoverticalrelativeERKNS_6ObjectEd");
 
-TypedValue * fg1_drawpathlinetoverticalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathlinetoverticalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathlinetoverticalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathlinetoverticalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5693,7 +5693,7 @@ TypedValue * fg1_drawpathlinetoverticalrelative(TypedValue* rv, HPHP::VM::ActRec
 
 TypedValue* fg_drawpathlinetoverticalrelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5735,8 +5735,8 @@ y => xmm1
 
 void fh_drawpathmovetoabsolute(Value* drw_wnd, double x, double y) asm("_ZN4HPHP24f_drawpathmovetoabsoluteERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawpathmovetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathmovetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathmovetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathmovetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5756,7 +5756,7 @@ TypedValue * fg1_drawpathmovetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawpathmovetoabsolute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5798,8 +5798,8 @@ y => xmm1
 
 void fh_drawpathmovetorelative(Value* drw_wnd, double x, double y) asm("_ZN4HPHP24f_drawpathmovetorelativeERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawpathmovetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathmovetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathmovetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathmovetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5819,7 +5819,7 @@ TypedValue * fg1_drawpathmovetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawpathmovetorelative(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5859,8 +5859,8 @@ drw_wnd => rdi
 
 void fh_drawpathstart(Value* drw_wnd) asm("_ZN4HPHP15f_drawpathstartERKNS_6ObjectE");
 
-TypedValue * fg1_drawpathstart(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpathstart(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpathstart(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpathstart(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5872,7 +5872,7 @@ TypedValue * fg1_drawpathstart(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_drawpathstart(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -5914,8 +5914,8 @@ y => xmm1
 
 void fh_drawpoint(Value* drw_wnd, double x, double y) asm("_ZN4HPHP11f_drawpointERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawpoint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpoint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5935,7 +5935,7 @@ TypedValue * fg1_drawpoint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_drawpoint(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -5976,8 +5976,8 @@ x_y_points_array => rsi
 
 void fh_drawpolygon(Value* drw_wnd, Value* x_y_points_array) asm("_ZN4HPHP13f_drawpolygonERKNS_6ObjectERKNS_5ArrayE");
 
-TypedValue * fg1_drawpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -5994,7 +5994,7 @@ TypedValue * fg1_drawpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_drawpolygon(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -6035,8 +6035,8 @@ x_y_points_array => rsi
 
 void fh_drawpolyline(Value* drw_wnd, Value* x_y_points_array) asm("_ZN4HPHP14f_drawpolylineERKNS_6ObjectERKNS_5ArrayE");
 
-TypedValue * fg1_drawpolyline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpolyline(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpolyline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpolyline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6053,7 +6053,7 @@ TypedValue * fg1_drawpolyline(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_drawpolyline(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -6097,8 +6097,8 @@ y2 => xmm3
 
 void fh_drawrectangle(Value* drw_wnd, double x1, double y1, double x2, double y2) asm("_ZN4HPHP15f_drawrectangleERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6124,7 +6124,7 @@ TypedValue * fg1_drawrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_drawrectangle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -6165,8 +6165,8 @@ drw_wnd => rdi
 
 bool fh_drawrender(Value* drw_wnd) asm("_ZN4HPHP12f_drawrenderERKNS_6ObjectE");
 
-TypedValue * fg1_drawrender(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawrender(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawrender(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawrender(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6177,7 +6177,7 @@ TypedValue * fg1_drawrender(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_drawrender(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -6217,8 +6217,8 @@ degrees => xmm0
 
 void fh_drawrotate(Value* drw_wnd, double degrees) asm("_ZN4HPHP12f_drawrotateERKNS_6ObjectEd");
 
-TypedValue * fg1_drawrotate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawrotate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawrotate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawrotate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6235,7 +6235,7 @@ TypedValue * fg1_drawrotate(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_drawrotate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -6281,8 +6281,8 @@ ry => xmm5
 
 void fh_drawroundrectangle(Value* drw_wnd, double x1, double y1, double x2, double y2, double rx, double ry) asm("_ZN4HPHP20f_drawroundrectangleERKNS_6ObjectEdddddd");
 
-TypedValue * fg1_drawroundrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawroundrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawroundrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawroundrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6314,7 +6314,7 @@ TypedValue * fg1_drawroundrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawroundrectangle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -6356,8 +6356,8 @@ y => xmm1
 
 void fh_drawscale(Value* drw_wnd, double x, double y) asm("_ZN4HPHP11f_drawscaleERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawscale(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawscale(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawscale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawscale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6377,7 +6377,7 @@ TypedValue * fg1_drawscale(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_drawscale(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -6419,8 +6419,8 @@ clip_path => rsi
 
 bool fh_drawsetclippath(Value* drw_wnd, Value* clip_path) asm("_ZN4HPHP17f_drawsetclippathERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawsetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6436,7 +6436,7 @@ TypedValue * fg1_drawsetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawsetclippath(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -6476,8 +6476,8 @@ fill_rule => rsi
 
 void fh_drawsetcliprule(Value* drw_wnd, int fill_rule) asm("_ZN4HPHP17f_drawsetclipruleERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6494,7 +6494,7 @@ TypedValue * fg1_drawsetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawsetcliprule(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -6535,8 +6535,8 @@ clip_path_units => rsi
 
 void fh_drawsetclipunits(Value* drw_wnd, int clip_path_units) asm("_ZN4HPHP18f_drawsetclipunitsERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6553,7 +6553,7 @@ TypedValue * fg1_drawsetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawsetclipunits(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -6594,8 +6594,8 @@ fill_opacity => xmm0
 
 void fh_drawsetfillalpha(Value* drw_wnd, double fill_opacity) asm("_ZN4HPHP18f_drawsetfillalphaERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6612,7 +6612,7 @@ TypedValue * fg1_drawsetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawsetfillalpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -6653,8 +6653,8 @@ fill_pxl_wnd => rsi
 
 void fh_drawsetfillcolor(Value* drw_wnd, Value* fill_pxl_wnd) asm("_ZN4HPHP18f_drawsetfillcolorERKNS_6ObjectES2_");
 
-TypedValue * fg1_drawsetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6671,7 +6671,7 @@ TypedValue * fg1_drawsetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawsetfillcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -6712,8 +6712,8 @@ fill_opacity => xmm0
 
 void fh_drawsetfillopacity(Value* drw_wnd, double fill_opacity) asm("_ZN4HPHP20f_drawsetfillopacityERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6730,7 +6730,7 @@ TypedValue * fg1_drawsetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawsetfillopacity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -6772,8 +6772,8 @@ fill_url => rsi
 
 bool fh_drawsetfillpatternurl(Value* drw_wnd, Value* fill_url) asm("_ZN4HPHP23f_drawsetfillpatternurlERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawsetfillpatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfillpatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfillpatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfillpatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6789,7 +6789,7 @@ TypedValue * fg1_drawsetfillpatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_drawsetfillpatternurl(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -6829,8 +6829,8 @@ fill_rule => rsi
 
 void fh_drawsetfillrule(Value* drw_wnd, int fill_rule) asm("_ZN4HPHP17f_drawsetfillruleERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -6847,7 +6847,7 @@ TypedValue * fg1_drawsetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawsetfillrule(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -6889,8 +6889,8 @@ font_file => rsi
 
 bool fh_drawsetfont(Value* drw_wnd, Value* font_file) asm("_ZN4HPHP13f_drawsetfontERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawsetfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6906,7 +6906,7 @@ TypedValue * fg1_drawsetfont(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_drawsetfont(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -6947,8 +6947,8 @@ font_family => rsi
 
 bool fh_drawsetfontfamily(Value* drw_wnd, Value* font_family) asm("_ZN4HPHP19f_drawsetfontfamilyERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawsetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -6964,7 +6964,7 @@ TypedValue * fg1_drawsetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_drawsetfontfamily(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -7004,8 +7004,8 @@ pointsize => xmm0
 
 void fh_drawsetfontsize(Value* drw_wnd, double pointsize) asm("_ZN4HPHP17f_drawsetfontsizeERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7022,7 +7022,7 @@ TypedValue * fg1_drawsetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawsetfontsize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -7063,8 +7063,8 @@ stretch_type => rsi
 
 void fh_drawsetfontstretch(Value* drw_wnd, int stretch_type) asm("_ZN4HPHP20f_drawsetfontstretchERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7081,7 +7081,7 @@ TypedValue * fg1_drawsetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawsetfontstretch(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -7122,8 +7122,8 @@ style_type => rsi
 
 void fh_drawsetfontstyle(Value* drw_wnd, int style_type) asm("_ZN4HPHP18f_drawsetfontstyleERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7140,7 +7140,7 @@ TypedValue * fg1_drawsetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawsetfontstyle(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -7181,8 +7181,8 @@ font_weight => xmm0
 
 void fh_drawsetfontweight(Value* drw_wnd, double font_weight) asm("_ZN4HPHP19f_drawsetfontweightERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7199,7 +7199,7 @@ TypedValue * fg1_drawsetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_drawsetfontweight(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -7240,8 +7240,8 @@ gravity_type => rsi
 
 void fh_drawsetgravity(Value* drw_wnd, int gravity_type) asm("_ZN4HPHP16f_drawsetgravityERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7258,7 +7258,7 @@ TypedValue * fg1_drawsetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_drawsetgravity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -7299,8 +7299,8 @@ stroke_opacity => xmm0
 
 void fh_drawsetstrokealpha(Value* drw_wnd, double stroke_opacity) asm("_ZN4HPHP20f_drawsetstrokealphaERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7317,7 +7317,7 @@ TypedValue * fg1_drawsetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawsetstrokealpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -7358,8 +7358,8 @@ stroke_antialias => rsi
 
 void fh_drawsetstrokeantialias(Value* drw_wnd, bool stroke_antialias) asm("_ZN4HPHP24f_drawsetstrokeantialiasERKNS_6ObjectEb");
 
-TypedValue * fg1_drawsetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7381,7 +7381,7 @@ TypedValue * fg1_drawsetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawsetstrokeantialias(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
@@ -7422,8 +7422,8 @@ strokecolor_pxl_wnd => rsi
 
 void fh_drawsetstrokecolor(Value* drw_wnd, Value* strokecolor_pxl_wnd) asm("_ZN4HPHP20f_drawsetstrokecolorERKNS_6ObjectES2_");
 
-TypedValue * fg1_drawsetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7440,7 +7440,7 @@ TypedValue * fg1_drawsetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawsetstrokecolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -7481,8 +7481,8 @@ dash_array => rsi
 
 void fh_drawsetstrokedasharray(Value* drw_wnd, Value* dash_array) asm("_ZN4HPHP24f_drawsetstrokedasharrayERKNS_6ObjectERKNS_5ArrayE");
 
-TypedValue * fg1_drawsetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7504,7 +7504,7 @@ TypedValue * fg1_drawsetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_drawsetstrokedasharray(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfArray) && (args-0)->m_type == KindOfObject) {
@@ -7545,8 +7545,8 @@ dash_offset => xmm0
 
 void fh_drawsetstrokedashoffset(Value* drw_wnd, double dash_offset) asm("_ZN4HPHP25f_drawsetstrokedashoffsetERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7563,7 +7563,7 @@ TypedValue * fg1_drawsetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_drawsetstrokedashoffset(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -7604,8 +7604,8 @@ line_cap => rsi
 
 void fh_drawsetstrokelinecap(Value* drw_wnd, int line_cap) asm("_ZN4HPHP22f_drawsetstrokelinecapERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7622,7 +7622,7 @@ TypedValue * fg1_drawsetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_drawsetstrokelinecap(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -7663,8 +7663,8 @@ line_join => rsi
 
 void fh_drawsetstrokelinejoin(Value* drw_wnd, int line_join) asm("_ZN4HPHP23f_drawsetstrokelinejoinERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7681,7 +7681,7 @@ TypedValue * fg1_drawsetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_drawsetstrokelinejoin(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -7722,8 +7722,8 @@ miterlimit => xmm0
 
 void fh_drawsetstrokemiterlimit(Value* drw_wnd, double miterlimit) asm("_ZN4HPHP25f_drawsetstrokemiterlimitERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7740,7 +7740,7 @@ TypedValue * fg1_drawsetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_drawsetstrokemiterlimit(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -7781,8 +7781,8 @@ stroke_opacity => xmm0
 
 void fh_drawsetstrokeopacity(Value* drw_wnd, double stroke_opacity) asm("_ZN4HPHP22f_drawsetstrokeopacityERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7799,7 +7799,7 @@ TypedValue * fg1_drawsetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_drawsetstrokeopacity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -7841,8 +7841,8 @@ stroke_url => rsi
 
 bool fh_drawsetstrokepatternurl(Value* drw_wnd, Value* stroke_url) asm("_ZN4HPHP25f_drawsetstrokepatternurlERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawsetstrokepatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokepatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokepatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokepatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -7858,7 +7858,7 @@ TypedValue * fg1_drawsetstrokepatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_drawsetstrokepatternurl(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -7898,8 +7898,8 @@ stroke_width => xmm0
 
 void fh_drawsetstrokewidth(Value* drw_wnd, double stroke_width) asm("_ZN4HPHP20f_drawsetstrokewidthERKNS_6ObjectEd");
 
-TypedValue * fg1_drawsetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7916,7 +7916,7 @@ TypedValue * fg1_drawsetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_drawsetstrokewidth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -7957,8 +7957,8 @@ align_type => rsi
 
 void fh_drawsettextalignment(Value* drw_wnd, int align_type) asm("_ZN4HPHP22f_drawsettextalignmentERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -7975,7 +7975,7 @@ TypedValue * fg1_drawsettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_drawsettextalignment(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -8016,8 +8016,8 @@ text_antialias => rsi
 
 void fh_drawsettextantialias(Value* drw_wnd, bool text_antialias) asm("_ZN4HPHP22f_drawsettextantialiasERKNS_6ObjectEb");
 
-TypedValue * fg1_drawsettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8039,7 +8039,7 @@ TypedValue * fg1_drawsettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_drawsettextantialias(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
@@ -8080,8 +8080,8 @@ decoration_type => rsi
 
 void fh_drawsettextdecoration(Value* drw_wnd, int decoration_type) asm("_ZN4HPHP23f_drawsettextdecorationERKNS_6ObjectEi");
 
-TypedValue * fg1_drawsettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8098,7 +8098,7 @@ TypedValue * fg1_drawsettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_drawsettextdecoration(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -8139,8 +8139,8 @@ encoding => rsi
 
 void fh_drawsettextencoding(Value* drw_wnd, Value* encoding) asm("_ZN4HPHP21f_drawsettextencodingERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawsettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8157,7 +8157,7 @@ TypedValue * fg1_drawsettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_drawsettextencoding(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -8198,8 +8198,8 @@ undercolor_pxl_wnd => rsi
 
 void fh_drawsettextundercolor(Value* drw_wnd, Value* undercolor_pxl_wnd) asm("_ZN4HPHP23f_drawsettextundercolorERKNS_6ObjectES2_");
 
-TypedValue * fg1_drawsettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8216,7 +8216,7 @@ TypedValue * fg1_drawsettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_drawsettextundercolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -8258,8 +8258,8 @@ vector_graphics => rsi
 
 bool fh_drawsetvectorgraphics(Value* drw_wnd, Value* vector_graphics) asm("_ZN4HPHP23f_drawsetvectorgraphicsERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawsetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -8275,7 +8275,7 @@ TypedValue * fg1_drawsetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_drawsetvectorgraphics(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -8318,8 +8318,8 @@ y2 => xmm3
 
 void fh_drawsetviewbox(Value* drw_wnd, double x1, double y1, double x2, double y2) asm("_ZN4HPHP16f_drawsetviewboxERKNS_6ObjectEdddd");
 
-TypedValue * fg1_drawsetviewbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawsetviewbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawsetviewbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawsetviewbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8345,7 +8345,7 @@ TypedValue * fg1_drawsetviewbox(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_drawsetviewbox(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -8386,8 +8386,8 @@ degrees => xmm0
 
 void fh_drawskewx(Value* drw_wnd, double degrees) asm("_ZN4HPHP11f_drawskewxERKNS_6ObjectEd");
 
-TypedValue * fg1_drawskewx(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawskewx(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawskewx(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawskewx(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8404,7 +8404,7 @@ TypedValue * fg1_drawskewx(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_drawskewx(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -8445,8 +8445,8 @@ degrees => xmm0
 
 void fh_drawskewy(Value* drw_wnd, double degrees) asm("_ZN4HPHP11f_drawskewyERKNS_6ObjectEd");
 
-TypedValue * fg1_drawskewy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawskewy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawskewy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawskewy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8463,7 +8463,7 @@ TypedValue * fg1_drawskewy(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 
 TypedValue* fg_drawskewy(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -8505,8 +8505,8 @@ y => xmm1
 
 void fh_drawtranslate(Value* drw_wnd, double x, double y) asm("_ZN4HPHP15f_drawtranslateERKNS_6ObjectEdd");
 
-TypedValue * fg1_drawtranslate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawtranslate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawtranslate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawtranslate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8526,7 +8526,7 @@ TypedValue * fg1_drawtranslate(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_drawtranslate(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -8566,8 +8566,8 @@ drw_wnd => rdi
 
 void fh_pushdrawingwand(Value* drw_wnd) asm("_ZN4HPHP17f_pushdrawingwandERKNS_6ObjectE");
 
-TypedValue * fg1_pushdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pushdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pushdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pushdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8579,7 +8579,7 @@ TypedValue * fg1_pushdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_pushdrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -8620,8 +8620,8 @@ clip_path_id => rsi
 
 void fh_drawpushclippath(Value* drw_wnd, Value* clip_path_id) asm("_ZN4HPHP18f_drawpushclippathERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_drawpushclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpushclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpushclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpushclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8638,7 +8638,7 @@ TypedValue * fg1_drawpushclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_drawpushclippath(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -8678,8 +8678,8 @@ drw_wnd => rdi
 
 void fh_drawpushdefs(Value* drw_wnd) asm("_ZN4HPHP14f_drawpushdefsERKNS_6ObjectE");
 
-TypedValue * fg1_drawpushdefs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpushdefs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpushdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpushdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8691,7 +8691,7 @@ TypedValue * fg1_drawpushdefs(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_drawpushdefs(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -8736,8 +8736,8 @@ height => xmm3
 
 void fh_drawpushpattern(Value* drw_wnd, Value* pattern_id, double x, double y, double width, double height) asm("_ZN4HPHP17f_drawpushpatternERKNS_6ObjectERKNS_6StringEdddd");
 
-TypedValue * fg1_drawpushpattern(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpushpattern(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpushpattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpushpattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8766,7 +8766,7 @@ TypedValue * fg1_drawpushpattern(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawpushpattern(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -8806,8 +8806,8 @@ drw_wnd => rdi
 
 void fh_popdrawingwand(Value* drw_wnd) asm("_ZN4HPHP16f_popdrawingwandERKNS_6ObjectE");
 
-TypedValue * fg1_popdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_popdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_popdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_popdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8819,7 +8819,7 @@ TypedValue * fg1_popdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_popdrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -8859,8 +8859,8 @@ drw_wnd => rdi
 
 void fh_drawpopclippath(Value* drw_wnd) asm("_ZN4HPHP17f_drawpopclippathERKNS_6ObjectE");
 
-TypedValue * fg1_drawpopclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpopclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpopclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpopclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8872,7 +8872,7 @@ TypedValue * fg1_drawpopclippath(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_drawpopclippath(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -8912,8 +8912,8 @@ drw_wnd => rdi
 
 void fh_drawpopdefs(Value* drw_wnd) asm("_ZN4HPHP13f_drawpopdefsERKNS_6ObjectE");
 
-TypedValue * fg1_drawpopdefs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpopdefs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpopdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpopdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8925,7 +8925,7 @@ TypedValue * fg1_drawpopdefs(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_drawpopdefs(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -8965,8 +8965,8 @@ drw_wnd => rdi
 
 void fh_drawpoppattern(Value* drw_wnd) asm("_ZN4HPHP16f_drawpoppatternERKNS_6ObjectE");
 
-TypedValue * fg1_drawpoppattern(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_drawpoppattern(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_drawpoppattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_drawpoppattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -8978,7 +8978,7 @@ TypedValue * fg1_drawpoppattern(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_drawpoppattern(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -9022,8 +9022,8 @@ offset => xmm2
 
 bool fh_magickadaptivethresholdimage(Value* mgck_wnd, double width, double height, double offset) asm("_ZN4HPHP30f_magickadaptivethresholdimageERKNS_6ObjectEddd");
 
-TypedValue * fg1_magickadaptivethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickadaptivethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickadaptivethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickadaptivethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9045,7 +9045,7 @@ TypedValue * fg1_magickadaptivethresholdimage(TypedValue* rv, HPHP::VM::ActRec* 
 
 TypedValue* fg_magickadaptivethresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -9086,8 +9086,8 @@ add_wand => rsi
 
 bool fh_magickaddimage(Value* mgck_wnd, Value* add_wand) asm("_ZN4HPHP16f_magickaddimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickaddimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickaddimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickaddimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickaddimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9103,7 +9103,7 @@ TypedValue * fg1_magickaddimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_magickaddimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -9144,8 +9144,8 @@ noise_type => rsi
 
 bool fh_magickaddnoiseimage(Value* mgck_wnd, int noise_type) asm("_ZN4HPHP21f_magickaddnoiseimageERKNS_6ObjectEi");
 
-TypedValue * fg1_magickaddnoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickaddnoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickaddnoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickaddnoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9161,7 +9161,7 @@ TypedValue * fg1_magickaddnoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickaddnoiseimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -9202,8 +9202,8 @@ drw_wnd => rsi
 
 bool fh_magickaffinetransformimage(Value* mgck_wnd, Value* drw_wnd) asm("_ZN4HPHP28f_magickaffinetransformimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickaffinetransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickaffinetransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickaffinetransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickaffinetransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9219,7 +9219,7 @@ TypedValue * fg1_magickaffinetransformimage(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* fg_magickaffinetransformimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -9264,8 +9264,8 @@ text => rdx
 
 bool fh_magickannotateimage(Value* mgck_wnd, Value* drw_wnd, double x, double y, double angle, Value* text) asm("_ZN4HPHP21f_magickannotateimageERKNS_6ObjectES2_dddRKNS_6StringE");
 
-TypedValue * fg1_magickannotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickannotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickannotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickannotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9293,7 +9293,7 @@ TypedValue * fg1_magickannotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickannotateimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if (IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -9335,8 +9335,8 @@ stack_vertical => rdx
 
 Value* fh_magickappendimages(Value* _rv, Value* mgck_wnd, bool stack_vertical) asm("_ZN4HPHP20f_magickappendimagesERKNS_6ObjectEb");
 
-TypedValue * fg1_magickappendimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickappendimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickappendimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickappendimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -9358,7 +9358,7 @@ TypedValue * fg1_magickappendimages(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickappendimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
@@ -9400,8 +9400,8 @@ mgck_wnd => rsi
 
 Value* fh_magickaverageimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magickaverageimagesERKNS_6ObjectE");
 
-TypedValue * fg1_magickaverageimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickaverageimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickaverageimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickaverageimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -9413,7 +9413,7 @@ TypedValue * fg1_magickaverageimages(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickaverageimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -9455,8 +9455,8 @@ threshold_pxl_wnd => rsi
 
 bool fh_magickblackthresholdimage(Value* mgck_wnd, Value* threshold_pxl_wnd) asm("_ZN4HPHP27f_magickblackthresholdimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickblackthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickblackthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickblackthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickblackthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9472,7 +9472,7 @@ TypedValue * fg1_magickblackthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickblackthresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -9515,8 +9515,8 @@ channel_type => rsi
 
 bool fh_magickblurimage(Value* mgck_wnd, double radius, double sigma, int channel_type) asm("_ZN4HPHP17f_magickblurimageERKNS_6ObjectEddi");
 
-TypedValue * fg1_magickblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9543,7 +9543,7 @@ TypedValue * fg1_magickblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickblurimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -9586,8 +9586,8 @@ height => xmm1
 
 bool fh_magickborderimage(Value* mgck_wnd, Value* bordercolor, double width, double height) asm("_ZN4HPHP19f_magickborderimageERKNS_6ObjectES2_dd");
 
-TypedValue * fg1_magickborderimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickborderimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickborderimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickborderimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9609,7 +9609,7 @@ TypedValue * fg1_magickborderimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickborderimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -9651,8 +9651,8 @@ sigma => xmm1
 
 bool fh_magickcharcoalimage(Value* mgck_wnd, double radius, double sigma) asm("_ZN4HPHP21f_magickcharcoalimageERKNS_6ObjectEdd");
 
-TypedValue * fg1_magickcharcoalimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcharcoalimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcharcoalimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcharcoalimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9671,7 +9671,7 @@ TypedValue * fg1_magickcharcoalimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickcharcoalimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -9715,8 +9715,8 @@ y => rdx
 
 bool fh_magickchopimage(Value* mgck_wnd, double width, double height, int x, int y) asm("_ZN4HPHP17f_magickchopimageERKNS_6ObjectEddii");
 
-TypedValue * fg1_magickchopimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickchopimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickchopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickchopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9741,7 +9741,7 @@ TypedValue * fg1_magickchopimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickchopimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -9781,8 +9781,8 @@ mgck_wnd => rdi
 
 bool fh_magickclipimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magickclipimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickclipimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickclipimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickclipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickclipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9793,7 +9793,7 @@ TypedValue * fg1_magickclipimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickclipimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -9835,8 +9835,8 @@ inside => rdx
 
 bool fh_magickclippathimage(Value* mgck_wnd, Value* pathname, bool inside) asm("_ZN4HPHP21f_magickclippathimageERKNS_6ObjectERKNS_6StringEb");
 
-TypedValue * fg1_magickclippathimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickclippathimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickclippathimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickclippathimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9855,7 +9855,7 @@ TypedValue * fg1_magickclippathimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickclippathimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -9896,8 +9896,8 @@ mgck_wnd => rsi
 
 Value* fh_magickcoalesceimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP22f_magickcoalesceimagesERKNS_6ObjectE");
 
-TypedValue * fg1_magickcoalesceimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcoalesceimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcoalesceimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcoalesceimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -9909,7 +9909,7 @@ TypedValue * fg1_magickcoalesceimages(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickcoalesceimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -9955,8 +9955,8 @@ y => r8
 
 bool fh_magickcolorfloodfillimage(Value* mgck_wnd, Value* fillcolor_pxl_wnd, double fuzz, Value* bordercolor_pxl_wnd, int x, int y) asm("_ZN4HPHP27f_magickcolorfloodfillimageERKNS_6ObjectES2_dS2_ii");
 
-TypedValue * fg1_magickcolorfloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcolorfloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcolorfloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcolorfloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -9984,7 +9984,7 @@ TypedValue * fg1_magickcolorfloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickcolorfloodfillimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -10026,8 +10026,8 @@ opacity_pxl_wnd => rdx
 
 bool fh_magickcolorizeimage(Value* mgck_wnd, Value* colorize, Value* opacity_pxl_wnd) asm("_ZN4HPHP21f_magickcolorizeimageERKNS_6ObjectES2_S2_");
 
-TypedValue * fg1_magickcolorizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcolorizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcolorizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcolorizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10046,7 +10046,7 @@ TypedValue * fg1_magickcolorizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickcolorizeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -10088,8 +10088,8 @@ channel_type => rdx
 
 Value* fh_magickcombineimages(Value* _rv, Value* mgck_wnd, int channel_type) asm("_ZN4HPHP21f_magickcombineimagesERKNS_6ObjectEi");
 
-TypedValue * fg1_magickcombineimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcombineimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcombineimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcombineimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -10106,7 +10106,7 @@ TypedValue * fg1_magickcombineimages(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickcombineimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -10148,8 +10148,8 @@ comment => rsi
 
 bool fh_magickcommentimage(Value* mgck_wnd, Value* comment) asm("_ZN4HPHP20f_magickcommentimageERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magickcommentimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcommentimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcommentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcommentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10165,7 +10165,7 @@ TypedValue * fg1_magickcommentimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickcommentimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -10209,8 +10209,8 @@ channel_type => r8
 
 Value* fh_magickcompareimages(Value* _rv, Value* mgck_wnd, Value* reference_wnd, int metric_type, int channel_type) asm("_ZN4HPHP21f_magickcompareimagesERKNS_6ObjectES2_ii");
 
-TypedValue * fg1_magickcompareimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcompareimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcompareimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcompareimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -10238,7 +10238,7 @@ TypedValue * fg1_magickcompareimages(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickcompareimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -10283,8 +10283,8 @@ y => r8
 
 bool fh_magickcompositeimage(Value* mgck_wnd, Value* composite_wnd, int composite_operator, int x, int y) asm("_ZN4HPHP22f_magickcompositeimageERKNS_6ObjectES2_iii");
 
-TypedValue * fg1_magickcompositeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcompositeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcompositeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcompositeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10309,7 +10309,7 @@ TypedValue * fg1_magickcompositeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickcompositeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -10354,8 +10354,8 @@ pixel_array => rcx
 
 bool fh_magickconstituteimage(Value* mgck_wnd, double columns, double rows, Value* smap, int storage_type, Value* pixel_array) asm("_ZN4HPHP23f_magickconstituteimageERKNS_6ObjectEddRKNS_6StringEiRKNS_5ArrayE");
 
-TypedValue * fg1_magickconstituteimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickconstituteimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickconstituteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickconstituteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10383,7 +10383,7 @@ TypedValue * fg1_magickconstituteimage(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickconstituteimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfArray && (args-4)->m_type == KindOfInt64 && IS_STRING_TYPE((args-3)->m_type) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -10424,8 +10424,8 @@ sharpen => rsi
 
 bool fh_magickcontrastimage(Value* mgck_wnd, bool sharpen) asm("_ZN4HPHP21f_magickcontrastimageERKNS_6ObjectEb");
 
-TypedValue * fg1_magickcontrastimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcontrastimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcontrastimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcontrastimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10441,7 +10441,7 @@ TypedValue * fg1_magickcontrastimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickcontrastimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
@@ -10483,8 +10483,8 @@ channel_type => rdx
 
 bool fh_magickconvolveimage(Value* mgck_wnd, Value* kernel_array, int channel_type) asm("_ZN4HPHP21f_magickconvolveimageERKNS_6ObjectERKNS_5ArrayEi");
 
-TypedValue * fg1_magickconvolveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickconvolveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickconvolveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickconvolveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10508,7 +10508,7 @@ TypedValue * fg1_magickconvolveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickconvolveimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -10552,8 +10552,8 @@ y => rdx
 
 bool fh_magickcropimage(Value* mgck_wnd, double width, double height, int x, int y) asm("_ZN4HPHP17f_magickcropimageERKNS_6ObjectEddii");
 
-TypedValue * fg1_magickcropimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcropimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcropimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcropimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10578,7 +10578,7 @@ TypedValue * fg1_magickcropimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickcropimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -10619,8 +10619,8 @@ num_positions => rsi
 
 bool fh_magickcyclecolormapimage(Value* mgck_wnd, int num_positions) asm("_ZN4HPHP26f_magickcyclecolormapimageERKNS_6ObjectEi");
 
-TypedValue * fg1_magickcyclecolormapimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickcyclecolormapimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickcyclecolormapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickcyclecolormapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10636,7 +10636,7 @@ TypedValue * fg1_magickcyclecolormapimage(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickcyclecolormapimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -10677,8 +10677,8 @@ mgck_wnd => rsi
 
 Value* fh_magickdeconstructimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP25f_magickdeconstructimagesERKNS_6ObjectE");
 
-TypedValue * fg1_magickdeconstructimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickdeconstructimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickdeconstructimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickdeconstructimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -10690,7 +10690,7 @@ TypedValue * fg1_magickdeconstructimages(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_magickdeconstructimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -10732,8 +10732,8 @@ mgck_wnd => rsi
 
 Value* fh_magickdescribeimage(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magickdescribeimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickdescribeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickdescribeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickdescribeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickdescribeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -10745,7 +10745,7 @@ TypedValue * fg1_magickdescribeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickdescribeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -10786,8 +10786,8 @@ mgck_wnd => rdi
 
 bool fh_magickdespeckleimage(Value* mgck_wnd) asm("_ZN4HPHP22f_magickdespeckleimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickdespeckleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickdespeckleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickdespeckleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickdespeckleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10798,7 +10798,7 @@ TypedValue * fg1_magickdespeckleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickdespeckleimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -10839,8 +10839,8 @@ drw_wnd => rsi
 
 bool fh_magickdrawimage(Value* mgck_wnd, Value* drw_wnd) asm("_ZN4HPHP17f_magickdrawimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickdrawimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickdrawimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickdrawimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickdrawimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10856,7 +10856,7 @@ TypedValue * fg1_magickdrawimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickdrawimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -10896,8 +10896,8 @@ mgck_wnd => rdi
 
 bool fh_magickechoimageblob(Value* mgck_wnd) asm("_ZN4HPHP21f_magickechoimageblobERKNS_6ObjectE");
 
-TypedValue * fg1_magickechoimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickechoimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickechoimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickechoimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10908,7 +10908,7 @@ TypedValue * fg1_magickechoimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickechoimageblob(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -10948,8 +10948,8 @@ mgck_wnd => rdi
 
 bool fh_magickechoimagesblob(Value* mgck_wnd) asm("_ZN4HPHP22f_magickechoimagesblobERKNS_6ObjectE");
 
-TypedValue * fg1_magickechoimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickechoimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickechoimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickechoimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -10960,7 +10960,7 @@ TypedValue * fg1_magickechoimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickechoimagesblob(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11001,8 +11001,8 @@ radius => xmm0
 
 bool fh_magickedgeimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP17f_magickedgeimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickedgeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickedgeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickedgeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickedgeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11018,7 +11018,7 @@ TypedValue * fg1_magickedgeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickedgeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -11060,8 +11060,8 @@ sigma => xmm1
 
 bool fh_magickembossimage(Value* mgck_wnd, double radius, double sigma) asm("_ZN4HPHP19f_magickembossimageERKNS_6ObjectEdd");
 
-TypedValue * fg1_magickembossimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickembossimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickembossimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickembossimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11080,7 +11080,7 @@ TypedValue * fg1_magickembossimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickembossimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -11120,8 +11120,8 @@ mgck_wnd => rdi
 
 bool fh_magickenhanceimage(Value* mgck_wnd) asm("_ZN4HPHP20f_magickenhanceimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickenhanceimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickenhanceimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickenhanceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickenhanceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11132,7 +11132,7 @@ TypedValue * fg1_magickenhanceimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickenhanceimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11172,8 +11172,8 @@ mgck_wnd => rdi
 
 bool fh_magickequalizeimage(Value* mgck_wnd) asm("_ZN4HPHP21f_magickequalizeimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickequalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickequalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickequalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickequalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11184,7 +11184,7 @@ TypedValue * fg1_magickequalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickequalizeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11227,8 +11227,8 @@ channel_type => rdx
 
 bool fh_magickevaluateimage(Value* mgck_wnd, int evaluate_op, double constant, int channel_type) asm("_ZN4HPHP21f_magickevaluateimageERKNS_6ObjectEidi");
 
-TypedValue * fg1_magickevaluateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickevaluateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickevaluateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickevaluateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11255,7 +11255,7 @@ TypedValue * fg1_magickevaluateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickevaluateimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -11296,8 +11296,8 @@ mgck_wnd => rsi
 
 Value* fh_magickflattenimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magickflattenimagesERKNS_6ObjectE");
 
-TypedValue * fg1_magickflattenimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickflattenimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickflattenimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickflattenimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -11309,7 +11309,7 @@ TypedValue * fg1_magickflattenimages(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickflattenimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11350,8 +11350,8 @@ mgck_wnd => rdi
 
 bool fh_magickflipimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magickflipimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickflipimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickflipimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickflipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickflipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11362,7 +11362,7 @@ TypedValue * fg1_magickflipimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickflipimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11402,8 +11402,8 @@ mgck_wnd => rdi
 
 bool fh_magickflopimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magickflopimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickflopimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickflopimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickflopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickflopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11414,7 +11414,7 @@ TypedValue * fg1_magickflopimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickflopimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11459,8 +11459,8 @@ outer_bevel => rcx
 
 bool fh_magickframeimage(Value* mgck_wnd, Value* matte_color, double width, double height, int inner_bevel, int outer_bevel) asm("_ZN4HPHP18f_magickframeimageERKNS_6ObjectES2_ddii");
 
-TypedValue * fg1_magickframeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickframeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickframeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickframeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11488,7 +11488,7 @@ TypedValue * fg1_magickframeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickframeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -11531,8 +11531,8 @@ channel_type => rcx
 
 Value* fh_magickfximage(Value* _rv, Value* mgck_wnd, Value* expression, int channel_type) asm("_ZN4HPHP15f_magickfximageERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_magickfximage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickfximage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickfximage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickfximage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -11557,7 +11557,7 @@ TypedValue * fg1_magickfximage(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_magickfximage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -11600,8 +11600,8 @@ channel_type => rsi
 
 bool fh_magickgammaimage(Value* mgck_wnd, double gamma, int channel_type) asm("_ZN4HPHP18f_magickgammaimageERKNS_6ObjectEdi");
 
-TypedValue * fg1_magickgammaimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgammaimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgammaimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgammaimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11625,7 +11625,7 @@ TypedValue * fg1_magickgammaimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickgammaimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -11668,8 +11668,8 @@ channel_type => rsi
 
 bool fh_magickgaussianblurimage(Value* mgck_wnd, double radius, double sigma, int channel_type) asm("_ZN4HPHP25f_magickgaussianblurimageERKNS_6ObjectEddi");
 
-TypedValue * fg1_magickgaussianblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgaussianblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgaussianblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgaussianblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -11696,7 +11696,7 @@ TypedValue * fg1_magickgaussianblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_magickgaussianblurimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -11739,8 +11739,8 @@ multiline => rcx
 
 double fh_magickgetcharheight(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP21f_magickgetcharheightERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickgetcharheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetcharheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetcharheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetcharheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -11767,7 +11767,7 @@ TypedValue * fg1_magickgetcharheight(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgetcharheight(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -11810,8 +11810,8 @@ multiline => rcx
 
 double fh_magickgetcharwidth(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP20f_magickgetcharwidthERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickgetcharwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetcharwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetcharwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetcharwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -11838,7 +11838,7 @@ TypedValue * fg1_magickgetcharwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickgetcharwidth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -11879,8 +11879,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetexception(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetexceptionERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -11892,7 +11892,7 @@ TypedValue * fg1_magickgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickgetexception(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11934,8 +11934,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetexceptionstring(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetexceptionstringERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -11947,7 +11947,7 @@ TypedValue * fg1_magickgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -11979,34 +11979,34 @@ TypedValue* fg_magickgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetexceptiontype(HPHP::Object const&)
+long HPHP::f_magickgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP24f_magickgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetexceptiontype(Value* mgck_wnd) asm("_ZN4HPHP24f_magickgetexceptiontypeERKNS_6ObjectE");
+long fh_magickgetexceptiontype(Value* mgck_wnd) asm("_ZN4HPHP24f_magickgetexceptiontypeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetexceptiontype((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetexceptiontype((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetexceptiontype((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -12041,8 +12041,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetfilename(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP19f_magickgetfilenameERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -12054,7 +12054,7 @@ TypedValue * fg1_magickgetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickgetfilename(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12096,8 +12096,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetformat(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP17f_magickgetformatERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -12109,7 +12109,7 @@ TypedValue * fg1_magickgetformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickgetformat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12151,8 +12151,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimage(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP16f_magickgetimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -12164,7 +12164,7 @@ TypedValue * fg1_magickgetimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_magickgetimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12206,8 +12206,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagebackgroundcolor(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimagebackgroundcolorERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -12219,7 +12219,7 @@ TypedValue * fg1_magickgetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec*
 
 TypedValue* fg_magickgetimagebackgroundcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12261,8 +12261,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimageblob(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimageblobERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -12274,7 +12274,7 @@ TypedValue * fg1_magickgetimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickgetimageblob(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12316,8 +12316,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimageblueprimary(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP27f_magickgetimageblueprimaryERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -12329,7 +12329,7 @@ TypedValue * fg1_magickgetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickgetimageblueprimary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12371,8 +12371,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagebordercolor(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP27f_magickgetimagebordercolorERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -12384,7 +12384,7 @@ TypedValue * fg1_magickgetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickgetimagebordercolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12427,8 +12427,8 @@ channel_type => rdx
 
 Value* fh_magickgetimagechannelmean(Value* _rv, Value* mgck_wnd, int channel_type) asm("_ZN4HPHP27f_magickgetimagechannelmeanERKNS_6ObjectEi");
 
-TypedValue * fg1_magickgetimagechannelmean(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagechannelmean(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagechannelmean(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagechannelmean(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -12445,7 +12445,7 @@ TypedValue * fg1_magickgetimagechannelmean(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickgetimagechannelmean(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -12488,8 +12488,8 @@ index => xmm0
 
 Value* fh_magickgetimagecolormapcolor(Value* _rv, Value* mgck_wnd, double index) asm("_ZN4HPHP29f_magickgetimagecolormapcolorERKNS_6ObjectEd");
 
-TypedValue * fg1_magickgetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -12506,7 +12506,7 @@ TypedValue * fg1_magickgetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_magickgetimagecolormapcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -12547,8 +12547,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimagecolors(Value* mgck_wnd) asm("_ZN4HPHP22f_magickgetimagecolorsERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagecolors(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagecolors(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagecolors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagecolors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -12559,7 +12559,7 @@ TypedValue * fg1_magickgetimagecolors(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickgetimagecolors(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12590,34 +12590,34 @@ TypedValue* fg_magickgetimagecolors(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagecolorspace(HPHP::Object const&)
+long HPHP::f_magickgetimagecolorspace(HPHP::Object const&)
 _ZN4HPHP26f_magickgetimagecolorspaceERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagecolorspace(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimagecolorspaceERKNS_6ObjectE");
+long fh_magickgetimagecolorspace(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimagecolorspaceERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagecolorspace((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagecolorspace((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagecolorspace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagecolorspace((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagecolorspace((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -12642,34 +12642,34 @@ TypedValue* fg_magickgetimagecolorspace(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagecompose(HPHP::Object const&)
+long HPHP::f_magickgetimagecompose(HPHP::Object const&)
 _ZN4HPHP23f_magickgetimagecomposeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagecompose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagecomposeERKNS_6ObjectE");
+long fh_magickgetimagecompose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagecomposeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagecompose((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagecompose((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagecompose(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagecompose((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagecompose((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -12694,34 +12694,34 @@ TypedValue* fg_magickgetimagecompose(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagecompression(HPHP::Object const&)
+long HPHP::f_magickgetimagecompression(HPHP::Object const&)
 _ZN4HPHP27f_magickgetimagecompressionERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagecompression(Value* mgck_wnd) asm("_ZN4HPHP27f_magickgetimagecompressionERKNS_6ObjectE");
+long fh_magickgetimagecompression(Value* mgck_wnd) asm("_ZN4HPHP27f_magickgetimagecompressionERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagecompression((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagecompression((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagecompression(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagecompression((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagecompression((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -12755,8 +12755,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimagecompressionquality(Value* mgck_wnd) asm("_ZN4HPHP34f_magickgetimagecompressionqualityERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -12767,7 +12767,7 @@ TypedValue * fg1_magickgetimagecompressionquality(TypedValue* rv, HPHP::VM::ActR
 
 TypedValue* fg_magickgetimagecompressionquality(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12807,8 +12807,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimagedelay(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagedelayERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -12819,7 +12819,7 @@ TypedValue * fg1_magickgetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgetimagedelay(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -12860,8 +12860,8 @@ channel_type => rsi
 
 double fh_magickgetimagedepth(Value* mgck_wnd, int channel_type) asm("_ZN4HPHP21f_magickgetimagedepthERKNS_6ObjectEi");
 
-TypedValue * fg1_magickgetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -12882,7 +12882,7 @@ TypedValue * fg1_magickgetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgetimagedepth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
@@ -12913,34 +12913,34 @@ TypedValue* fg_magickgetimagedepth(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagedispose(HPHP::Object const&)
+long HPHP::f_magickgetimagedispose(HPHP::Object const&)
 _ZN4HPHP23f_magickgetimagedisposeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagedispose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagedisposeERKNS_6ObjectE");
+long fh_magickgetimagedispose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagedisposeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagedispose((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagedispose((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagedispose(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagedispose((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagedispose((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -12976,8 +12976,8 @@ channel_type => rdx
 
 Value* fh_magickgetimageextrema(Value* _rv, Value* mgck_wnd, int channel_type) asm("_ZN4HPHP23f_magickgetimageextremaERKNS_6ObjectEi");
 
-TypedValue * fg1_magickgetimageextrema(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageextrema(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageextrema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageextrema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -12999,7 +12999,7 @@ TypedValue * fg1_magickgetimageextrema(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickgetimageextrema(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
@@ -13041,8 +13041,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagefilename(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP24f_magickgetimagefilenameERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -13054,7 +13054,7 @@ TypedValue * fg1_magickgetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickgetimagefilename(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13096,8 +13096,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimageformat(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP22f_magickgetimageformatERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -13109,7 +13109,7 @@ TypedValue * fg1_magickgetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickgetimageformat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13150,8 +13150,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimagegamma(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagegammaERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -13162,7 +13162,7 @@ TypedValue * fg1_magickgetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgetimagegamma(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13203,8 +13203,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagegreenprimary(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP28f_magickgetimagegreenprimaryERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -13216,7 +13216,7 @@ TypedValue * fg1_magickgetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* fg_magickgetimagegreenprimary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13257,8 +13257,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimageheight(Value* mgck_wnd) asm("_ZN4HPHP22f_magickgetimageheightERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -13269,7 +13269,7 @@ TypedValue * fg1_magickgetimageheight(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickgetimageheight(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13310,8 +13310,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagehistogram(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP25f_magickgetimagehistogramERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagehistogram(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagehistogram(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagehistogram(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagehistogram(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -13323,7 +13323,7 @@ TypedValue * fg1_magickgetimagehistogram(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_magickgetimagehistogram(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13355,34 +13355,34 @@ TypedValue* fg_magickgetimagehistogram(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimageindex(HPHP::Object const&)
+long HPHP::f_magickgetimageindex(HPHP::Object const&)
 _ZN4HPHP21f_magickgetimageindexERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimageindex(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageindexERKNS_6ObjectE");
+long fh_magickgetimageindex(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageindexERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimageindex((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimageindex((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimageindex(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimageindex((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimageindex((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13407,34 +13407,34 @@ TypedValue* fg_magickgetimageindex(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimageinterlacescheme(HPHP::Object const&)
+long HPHP::f_magickgetimageinterlacescheme(HPHP::Object const&)
 _ZN4HPHP31f_magickgetimageinterlaceschemeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimageinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimageinterlaceschemeERKNS_6ObjectE");
+long fh_magickgetimageinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimageinterlaceschemeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimageinterlacescheme((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimageinterlacescheme((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimageinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimageinterlacescheme((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimageinterlacescheme((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13468,8 +13468,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimageiterations(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimageiterationsERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -13480,7 +13480,7 @@ TypedValue * fg1_magickgetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickgetimageiterations(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13521,8 +13521,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagemattecolor(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimagemattecolorERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -13534,7 +13534,7 @@ TypedValue * fg1_magickgetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickgetimagemattecolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13576,8 +13576,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagemimetype(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP24f_magickgetimagemimetypeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagemimetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagemimetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagemimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagemimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -13589,7 +13589,7 @@ TypedValue * fg1_magickgetimagemimetype(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickgetimagemimetype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13637,8 +13637,8 @@ storage_type => r9
 
 Value* fh_magickgetimagepixels(Value* _rv, Value* mgck_wnd, int x_offset, int y_offset, double columns, double rows, Value* smap, int storage_type) asm("_ZN4HPHP22f_magickgetimagepixelsERKNS_6ObjectEiiddRKNS_6StringEi");
 
-TypedValue * fg1_magickgetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -13670,7 +13670,7 @@ TypedValue * fg1_magickgetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickgetimagepixels(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfInt64 && IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -13713,8 +13713,8 @@ name => rdx
 
 Value* fh_magickgetimageprofile(Value* _rv, Value* mgck_wnd, Value* name) asm("_ZN4HPHP23f_magickgetimageprofileERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magickgetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -13731,7 +13731,7 @@ TypedValue * fg1_magickgetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickgetimageprofile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -13773,8 +13773,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimageredprimary(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimageredprimaryERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -13786,7 +13786,7 @@ TypedValue * fg1_magickgetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickgetimageredprimary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13818,34 +13818,34 @@ TypedValue* fg_magickgetimageredprimary(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagerenderingintent(HPHP::Object const&)
+long HPHP::f_magickgetimagerenderingintent(HPHP::Object const&)
 _ZN4HPHP31f_magickgetimagerenderingintentERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagerenderingintent(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimagerenderingintentERKNS_6ObjectE");
+long fh_magickgetimagerenderingintent(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimagerenderingintentERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagerenderingintent((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagerenderingintent((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagerenderingintent(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagerenderingintent((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagerenderingintent((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13880,8 +13880,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimageresolution(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimageresolutionERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -13893,7 +13893,7 @@ TypedValue * fg1_magickgetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickgetimageresolution(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13934,8 +13934,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimagescene(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagesceneERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -13946,7 +13946,7 @@ TypedValue * fg1_magickgetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgetimagescene(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -13987,8 +13987,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagesignature(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP25f_magickgetimagesignatureERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagesignature(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagesignature(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagesignature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagesignature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -14000,7 +14000,7 @@ TypedValue * fg1_magickgetimagesignature(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_magickgetimagesignature(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14032,34 +14032,34 @@ TypedValue* fg_magickgetimagesignature(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagesize(HPHP::Object const&)
+long HPHP::f_magickgetimagesize(HPHP::Object const&)
 _ZN4HPHP20f_magickgetimagesizeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagesize(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagesizeERKNS_6ObjectE");
+long fh_magickgetimagesize(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagesizeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagesize((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagesize((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagesize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagesize((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagesize((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14084,34 +14084,34 @@ TypedValue* fg_magickgetimagesize(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagetype(HPHP::Object const&)
+long HPHP::f_magickgetimagetype(HPHP::Object const&)
 _ZN4HPHP20f_magickgetimagetypeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagetype(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagetypeERKNS_6ObjectE");
+long fh_magickgetimagetype(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagetypeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagetype((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagetype((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagetype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagetype((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagetype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14136,34 +14136,34 @@ TypedValue* fg_magickgetimagetype(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimageunits(HPHP::Object const&)
+long HPHP::f_magickgetimageunits(HPHP::Object const&)
 _ZN4HPHP21f_magickgetimageunitsERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimageunits(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageunitsERKNS_6ObjectE");
+long fh_magickgetimageunits(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageunitsERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimageunits((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimageunits((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimageunits(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimageunits((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimageunits((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14188,34 +14188,34 @@ TypedValue* fg_magickgetimageunits(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetimagevirtualpixelmethod(HPHP::Object const&)
+long HPHP::f_magickgetimagevirtualpixelmethod(HPHP::Object const&)
 _ZN4HPHP34f_magickgetimagevirtualpixelmethodERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetimagevirtualpixelmethod(Value* mgck_wnd) asm("_ZN4HPHP34f_magickgetimagevirtualpixelmethodERKNS_6ObjectE");
+long fh_magickgetimagevirtualpixelmethod(Value* mgck_wnd) asm("_ZN4HPHP34f_magickgetimagevirtualpixelmethodERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetimagevirtualpixelmethod((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetimagevirtualpixelmethod((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetimagevirtualpixelmethod(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetimagevirtualpixelmethod((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetimagevirtualpixelmethod((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14250,8 +14250,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagewhitepoint(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimagewhitepointERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -14263,7 +14263,7 @@ TypedValue * fg1_magickgetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickgetimagewhitepoint(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14304,8 +14304,8 @@ mgck_wnd => rdi
 
 double fh_magickgetimagewidth(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagewidthERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -14316,7 +14316,7 @@ TypedValue * fg1_magickgetimagewidth(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgetimagewidth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14357,8 +14357,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetimagesblob(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagesblobERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -14370,7 +14370,7 @@ TypedValue * fg1_magickgetimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgetimagesblob(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14402,34 +14402,34 @@ TypedValue* fg_magickgetimagesblob(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_magickgetinterlacescheme(HPHP::Object const&)
+long HPHP::f_magickgetinterlacescheme(HPHP::Object const&)
 _ZN4HPHP26f_magickgetinterlaceschemeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-long long fh_magickgetinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetinterlaceschemeERKNS_6ObjectE");
+long fh_magickgetinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetinterlaceschemeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_magickgetinterlacescheme((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_magickgetinterlacescheme((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_magickgetinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_magickgetinterlacescheme((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_magickgetinterlacescheme((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14466,8 +14466,8 @@ multiline => rcx
 
 double fh_magickgetmaxtextadvance(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP25f_magickgetmaxtextadvanceERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickgetmaxtextadvance(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetmaxtextadvance(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetmaxtextadvance(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetmaxtextadvance(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -14494,7 +14494,7 @@ TypedValue * fg1_magickgetmaxtextadvance(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_magickgetmaxtextadvance(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -14535,8 +14535,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetmimetype(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP19f_magickgetmimetypeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetmimetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetmimetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetmimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetmimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -14548,7 +14548,7 @@ TypedValue * fg1_magickgetmimetype(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickgetmimetype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14589,8 +14589,8 @@ mgck_wnd => rdi
 
 double fh_magickgetnumberimages(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetnumberimagesERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetnumberimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetnumberimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetnumberimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetnumberimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -14601,7 +14601,7 @@ TypedValue * fg1_magickgetnumberimages(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickgetnumberimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14642,8 +14642,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetsamplingfactors(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetsamplingfactorsERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -14655,7 +14655,7 @@ TypedValue * fg1_magickgetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickgetsamplingfactors(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14697,8 +14697,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetsize(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP15f_magickgetsizeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -14710,7 +14710,7 @@ TypedValue * fg1_magickgetsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_magickgetsize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -14754,8 +14754,8 @@ multiline => rcx
 
 double fh_magickgetstringheight(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP23f_magickgetstringheightERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickgetstringheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetstringheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetstringheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetstringheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -14782,7 +14782,7 @@ TypedValue * fg1_magickgetstringheight(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickgetstringheight(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -14825,8 +14825,8 @@ multiline => rcx
 
 double fh_magickgetstringwidth(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP22f_magickgetstringwidthERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickgetstringwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetstringwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetstringwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetstringwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -14853,7 +14853,7 @@ TypedValue * fg1_magickgetstringwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickgetstringwidth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -14896,8 +14896,8 @@ multiline => rcx
 
 double fh_magickgettextascent(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP21f_magickgettextascentERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickgettextascent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgettextascent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgettextascent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgettextascent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -14924,7 +14924,7 @@ TypedValue * fg1_magickgettextascent(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickgettextascent(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -14967,8 +14967,8 @@ multiline => rcx
 
 double fh_magickgettextdescent(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP22f_magickgettextdescentERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickgettextdescent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgettextdescent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgettextdescent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgettextdescent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -14995,7 +14995,7 @@ TypedValue * fg1_magickgettextdescent(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickgettextdescent(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -15036,8 +15036,8 @@ mgck_wnd => rsi
 
 Value* fh_magickgetwandsize(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP19f_magickgetwandsizeERKNS_6ObjectE");
 
-TypedValue * fg1_magickgetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickgetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickgetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickgetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -15049,7 +15049,7 @@ TypedValue * fg1_magickgetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickgetwandsize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -15090,8 +15090,8 @@ mgck_wnd => rdi
 
 bool fh_magickhasnextimage(Value* mgck_wnd) asm("_ZN4HPHP20f_magickhasnextimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickhasnextimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickhasnextimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickhasnextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickhasnextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15102,7 +15102,7 @@ TypedValue * fg1_magickhasnextimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickhasnextimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -15142,8 +15142,8 @@ mgck_wnd => rdi
 
 bool fh_magickhaspreviousimage(Value* mgck_wnd) asm("_ZN4HPHP24f_magickhaspreviousimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickhaspreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickhaspreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickhaspreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickhaspreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15154,7 +15154,7 @@ TypedValue * fg1_magickhaspreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickhaspreviousimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -15195,8 +15195,8 @@ amount => xmm0
 
 bool fh_magickimplodeimage(Value* mgck_wnd, double amount) asm("_ZN4HPHP20f_magickimplodeimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickimplodeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickimplodeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickimplodeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickimplodeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15212,7 +15212,7 @@ TypedValue * fg1_magickimplodeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickimplodeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -15253,8 +15253,8 @@ label => rsi
 
 bool fh_magicklabelimage(Value* mgck_wnd, Value* label) asm("_ZN4HPHP18f_magicklabelimageERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magicklabelimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicklabelimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicklabelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicklabelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15270,7 +15270,7 @@ TypedValue * fg1_magicklabelimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magicklabelimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -15314,8 +15314,8 @@ channel_type => rsi
 
 bool fh_magicklevelimage(Value* mgck_wnd, double black_point, double gamma, double white_point, int channel_type) asm("_ZN4HPHP18f_magicklevelimageERKNS_6ObjectEdddi");
 
-TypedValue * fg1_magicklevelimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicklevelimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicklevelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicklevelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15345,7 +15345,7 @@ TypedValue * fg1_magicklevelimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magicklevelimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfInt64) && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -15385,8 +15385,8 @@ mgck_wnd => rdi
 
 bool fh_magickmagnifyimage(Value* mgck_wnd) asm("_ZN4HPHP20f_magickmagnifyimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickmagnifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmagnifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmagnifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmagnifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15397,7 +15397,7 @@ TypedValue * fg1_magickmagnifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickmagnifyimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -15439,8 +15439,8 @@ dither => rdx
 
 bool fh_magickmapimage(Value* mgck_wnd, Value* map_wand, bool dither) asm("_ZN4HPHP16f_magickmapimageERKNS_6ObjectES2_b");
 
-TypedValue * fg1_magickmapimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmapimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15459,7 +15459,7 @@ TypedValue * fg1_magickmapimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_magickmapimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -15504,8 +15504,8 @@ y => rcx
 
 bool fh_magickmattefloodfillimage(Value* mgck_wnd, double opacity, double fuzz, Value* bordercolor_pxl_wnd, int x, int y) asm("_ZN4HPHP27f_magickmattefloodfillimageERKNS_6ObjectEddS2_ii");
 
-TypedValue * fg1_magickmattefloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmattefloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmattefloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmattefloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15533,7 +15533,7 @@ TypedValue * fg1_magickmattefloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickmattefloodfillimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -15574,8 +15574,8 @@ radius => xmm0
 
 bool fh_magickmedianfilterimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP25f_magickmedianfilterimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickmedianfilterimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmedianfilterimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmedianfilterimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmedianfilterimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15591,7 +15591,7 @@ TypedValue * fg1_magickmedianfilterimage(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_magickmedianfilterimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -15631,8 +15631,8 @@ mgck_wnd => rdi
 
 bool fh_magickminifyimage(Value* mgck_wnd) asm("_ZN4HPHP19f_magickminifyimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickminifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickminifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickminifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickminifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15643,7 +15643,7 @@ TypedValue * fg1_magickminifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickminifyimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -15686,8 +15686,8 @@ hue => xmm2
 
 bool fh_magickmodulateimage(Value* mgck_wnd, double brightness, double saturation, double hue) asm("_ZN4HPHP21f_magickmodulateimageERKNS_6ObjectEddd");
 
-TypedValue * fg1_magickmodulateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmodulateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmodulateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmodulateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15709,7 +15709,7 @@ TypedValue * fg1_magickmodulateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickmodulateimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -15755,8 +15755,8 @@ frame => st0
 
 Value* fh_magickmontageimage(Value* _rv, Value* mgck_wnd, Value* drw_wnd, Value* tile_geometry, Value* thumbnail_geometry, int montage_mode, Value* frame) asm("_ZN4HPHP20f_magickmontageimageERKNS_6ObjectES2_RKNS_6StringES5_iS5_");
 
-TypedValue * fg1_magickmontageimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmontageimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmontageimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmontageimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -15785,7 +15785,7 @@ TypedValue * fg1_magickmontageimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickmontageimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if (IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfInt64 && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -15828,8 +15828,8 @@ number_frames => xmm0
 
 Value* fh_magickmorphimages(Value* _rv, Value* mgck_wnd, double number_frames) asm("_ZN4HPHP19f_magickmorphimagesERKNS_6ObjectEd");
 
-TypedValue * fg1_magickmorphimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmorphimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmorphimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmorphimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -15846,7 +15846,7 @@ TypedValue * fg1_magickmorphimages(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickmorphimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -15888,8 +15888,8 @@ mgck_wnd => rsi
 
 Value* fh_magickmosaicimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP20f_magickmosaicimagesERKNS_6ObjectE");
 
-TypedValue * fg1_magickmosaicimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmosaicimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmosaicimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmosaicimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -15901,7 +15901,7 @@ TypedValue * fg1_magickmosaicimages(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickmosaicimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -15945,8 +15945,8 @@ angle => xmm2
 
 bool fh_magickmotionblurimage(Value* mgck_wnd, double radius, double sigma, double angle) asm("_ZN4HPHP23f_magickmotionblurimageERKNS_6ObjectEddd");
 
-TypedValue * fg1_magickmotionblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickmotionblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickmotionblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickmotionblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -15968,7 +15968,7 @@ TypedValue * fg1_magickmotionblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickmotionblurimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -16010,8 +16010,8 @@ channel_type => rdx
 
 bool fh_magicknegateimage(Value* mgck_wnd, bool only_the_gray, int channel_type) asm("_ZN4HPHP19f_magicknegateimageERKNS_6ObjectEbi");
 
-TypedValue * fg1_magicknegateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicknegateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicknegateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicknegateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16036,7 +16036,7 @@ TypedValue * fg1_magicknegateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magicknegateimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
@@ -16079,8 +16079,8 @@ imagemagick_col_str => rsi
 
 bool fh_magicknewimage(Value* mgck_wnd, double width, double height, Value* imagemagick_col_str) asm("_ZN4HPHP16f_magicknewimageERKNS_6ObjectEddRKNS_6StringE");
 
-TypedValue * fg1_magicknewimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicknewimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicknewimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicknewimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16107,7 +16107,7 @@ TypedValue * fg1_magicknewimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_magicknewimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -16147,8 +16147,8 @@ mgck_wnd => rdi
 
 bool fh_magicknextimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magicknextimageERKNS_6ObjectE");
 
-TypedValue * fg1_magicknextimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicknextimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicknextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicknextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16159,7 +16159,7 @@ TypedValue * fg1_magicknextimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magicknextimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -16199,8 +16199,8 @@ mgck_wnd => rdi
 
 bool fh_magicknormalizeimage(Value* mgck_wnd) asm("_ZN4HPHP22f_magicknormalizeimageERKNS_6ObjectE");
 
-TypedValue * fg1_magicknormalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicknormalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicknormalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicknormalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16211,7 +16211,7 @@ TypedValue * fg1_magicknormalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magicknormalizeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -16252,8 +16252,8 @@ radius => xmm0
 
 bool fh_magickoilpaintimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP21f_magickoilpaintimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickoilpaintimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickoilpaintimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickoilpaintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickoilpaintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16269,7 +16269,7 @@ TypedValue * fg1_magickoilpaintimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickoilpaintimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -16312,8 +16312,8 @@ fuzz => xmm0
 
 bool fh_magickpaintopaqueimage(Value* mgck_wnd, Value* target_pxl_wnd, Value* fill_pxl_wnd, double fuzz) asm("_ZN4HPHP24f_magickpaintopaqueimageERKNS_6ObjectES2_S2_d");
 
-TypedValue * fg1_magickpaintopaqueimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickpaintopaqueimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickpaintopaqueimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickpaintopaqueimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16340,7 +16340,7 @@ TypedValue * fg1_magickpaintopaqueimage(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickpaintopaqueimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfDouble) && (args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -16383,8 +16383,8 @@ fuzz => xmm1
 
 bool fh_magickpainttransparentimage(Value* mgck_wnd, Value* target, double opacity, double fuzz) asm("_ZN4HPHP29f_magickpainttransparentimageERKNS_6ObjectES2_dd");
 
-TypedValue * fg1_magickpainttransparentimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickpainttransparentimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickpainttransparentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickpainttransparentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16412,7 +16412,7 @@ TypedValue * fg1_magickpainttransparentimage(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_magickpainttransparentimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfDouble) && (count <= 2 || (args-2)->m_type == KindOfDouble) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -16453,8 +16453,8 @@ filename => rsi
 
 bool fh_magickpingimage(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP17f_magickpingimageERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magickpingimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickpingimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickpingimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickpingimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16470,7 +16470,7 @@ TypedValue * fg1_magickpingimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickpingimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -16512,8 +16512,8 @@ dither => rsi
 
 bool fh_magickposterizeimage(Value* mgck_wnd, double levels, bool dither) asm("_ZN4HPHP22f_magickposterizeimageERKNS_6ObjectEdb");
 
-TypedValue * fg1_magickposterizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickposterizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickposterizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickposterizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16532,7 +16532,7 @@ TypedValue * fg1_magickposterizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickposterizeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -16574,8 +16574,8 @@ preview => rdx
 
 Value* fh_magickpreviewimages(Value* _rv, Value* mgck_wnd, int preview) asm("_ZN4HPHP21f_magickpreviewimagesERKNS_6ObjectEi");
 
-TypedValue * fg1_magickpreviewimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickpreviewimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickpreviewimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickpreviewimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -16592,7 +16592,7 @@ TypedValue * fg1_magickpreviewimages(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickpreviewimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -16633,8 +16633,8 @@ mgck_wnd => rdi
 
 bool fh_magickpreviousimage(Value* mgck_wnd) asm("_ZN4HPHP21f_magickpreviousimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickpreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickpreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickpreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickpreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16645,7 +16645,7 @@ TypedValue * fg1_magickpreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickpreviousimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -16687,8 +16687,8 @@ profile => rdx
 
 bool fh_magickprofileimage(Value* mgck_wnd, Value* name, Value* profile) asm("_ZN4HPHP20f_magickprofileimageERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_magickprofileimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickprofileimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickprofileimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickprofileimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16712,7 +16712,7 @@ TypedValue * fg1_magickprofileimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magickprofileimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -16757,8 +16757,8 @@ measure_error => rcx
 
 bool fh_magickquantizeimage(Value* mgck_wnd, double number_colors, int colorspace_type, double treedepth, bool dither, bool measure_error) asm("_ZN4HPHP21f_magickquantizeimageERKNS_6ObjectEdidbb");
 
-TypedValue * fg1_magickquantizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickquantizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickquantizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickquantizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16786,7 +16786,7 @@ TypedValue * fg1_magickquantizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickquantizeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -16831,8 +16831,8 @@ measure_error => rcx
 
 bool fh_magickquantizeimages(Value* mgck_wnd, double number_colors, int colorspace_type, double treedepth, bool dither, bool measure_error) asm("_ZN4HPHP22f_magickquantizeimagesERKNS_6ObjectEdidbb");
 
-TypedValue * fg1_magickquantizeimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickquantizeimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickquantizeimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickquantizeimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16860,7 +16860,7 @@ TypedValue * fg1_magickquantizeimages(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickquantizeimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -16904,8 +16904,8 @@ multiline => r8
 
 Value* fh_magickqueryfontmetrics(Value* _rv, Value* mgck_wnd, Value* drw_wnd, Value* txt, bool multiline) asm("_ZN4HPHP24f_magickqueryfontmetricsERKNS_6ObjectES2_RKNS_6StringEb");
 
-TypedValue * fg1_magickqueryfontmetrics(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickqueryfontmetrics(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickqueryfontmetrics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickqueryfontmetrics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -16933,7 +16933,7 @@ TypedValue * fg1_magickqueryfontmetrics(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickqueryfontmetrics(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -16975,8 +16975,8 @@ angle => xmm0
 
 bool fh_magickradialblurimage(Value* mgck_wnd, double angle) asm("_ZN4HPHP23f_magickradialblurimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickradialblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickradialblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickradialblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickradialblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -16992,7 +16992,7 @@ TypedValue * fg1_magickradialblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickradialblurimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -17037,8 +17037,8 @@ raise => rcx
 
 bool fh_magickraiseimage(Value* mgck_wnd, double width, double height, int x, int y, bool raise) asm("_ZN4HPHP18f_magickraiseimageERKNS_6ObjectEddiib");
 
-TypedValue * fg1_magickraiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickraiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickraiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickraiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17066,7 +17066,7 @@ TypedValue * fg1_magickraiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickraiseimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -17107,8 +17107,8 @@ filename => rsi
 
 bool fh_magickreadimage(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP17f_magickreadimageERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magickreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17124,7 +17124,7 @@ TypedValue * fg1_magickreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickreadimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -17165,8 +17165,8 @@ blob => rsi
 
 bool fh_magickreadimageblob(Value* mgck_wnd, Value* blob) asm("_ZN4HPHP21f_magickreadimageblobERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magickreadimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickreadimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickreadimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickreadimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17182,7 +17182,7 @@ TypedValue * fg1_magickreadimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickreadimageblob(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -17223,8 +17223,8 @@ handle => rsi
 
 bool fh_magickreadimagefile(Value* mgck_wnd, Value* handle) asm("_ZN4HPHP21f_magickreadimagefileERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickreadimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickreadimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickreadimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickreadimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17240,7 +17240,7 @@ TypedValue * fg1_magickreadimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickreadimagefile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -17281,8 +17281,8 @@ img_filenames_array => rsi
 
 bool fh_magickreadimages(Value* mgck_wnd, Value* img_filenames_array) asm("_ZN4HPHP18f_magickreadimagesERKNS_6ObjectERKNS_5ArrayE");
 
-TypedValue * fg1_magickreadimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickreadimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickreadimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickreadimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17298,7 +17298,7 @@ TypedValue * fg1_magickreadimages(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickreadimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
@@ -17339,8 +17339,8 @@ radius => xmm0
 
 bool fh_magickreducenoiseimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP24f_magickreducenoiseimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickreducenoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickreducenoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickreducenoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickreducenoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17356,7 +17356,7 @@ TypedValue * fg1_magickreducenoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickreducenoiseimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -17396,8 +17396,8 @@ mgck_wnd => rdi
 
 bool fh_magickremoveimage(Value* mgck_wnd) asm("_ZN4HPHP19f_magickremoveimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickremoveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickremoveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickremoveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickremoveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17408,7 +17408,7 @@ TypedValue * fg1_magickremoveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickremoveimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -17450,8 +17450,8 @@ name => rdx
 
 Value* fh_magickremoveimageprofile(Value* _rv, Value* mgck_wnd, Value* name) asm("_ZN4HPHP26f_magickremoveimageprofileERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magickremoveimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickremoveimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickremoveimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickremoveimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -17468,7 +17468,7 @@ TypedValue * fg1_magickremoveimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magickremoveimageprofile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -17509,8 +17509,8 @@ mgck_wnd => rdi
 
 bool fh_magickremoveimageprofiles(Value* mgck_wnd) asm("_ZN4HPHP27f_magickremoveimageprofilesERKNS_6ObjectE");
 
-TypedValue * fg1_magickremoveimageprofiles(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickremoveimageprofiles(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickremoveimageprofiles(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickremoveimageprofiles(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17521,7 +17521,7 @@ TypedValue * fg1_magickremoveimageprofiles(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickremoveimageprofiles(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -17565,8 +17565,8 @@ blur => xmm2
 
 bool fh_magickresampleimage(Value* mgck_wnd, double x_resolution, double y_resolution, int filter_type, double blur) asm("_ZN4HPHP21f_magickresampleimageERKNS_6ObjectEddid");
 
-TypedValue * fg1_magickresampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickresampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickresampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickresampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17591,7 +17591,7 @@ TypedValue * fg1_magickresampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickresampleimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -17630,8 +17630,8 @@ mgck_wnd => rdi
 
 void fh_magickresetiterator(Value* mgck_wnd) asm("_ZN4HPHP21f_magickresetiteratorERKNS_6ObjectE");
 
-TypedValue * fg1_magickresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -17643,7 +17643,7 @@ TypedValue * fg1_magickresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magickresetiterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -17688,8 +17688,8 @@ blur => xmm2
 
 bool fh_magickresizeimage(Value* mgck_wnd, double columns, double rows, int filter_type, double blur) asm("_ZN4HPHP19f_magickresizeimageERKNS_6ObjectEddid");
 
-TypedValue * fg1_magickresizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickresizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickresizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickresizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17714,7 +17714,7 @@ TypedValue * fg1_magickresizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickresizeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -17756,8 +17756,8 @@ y_offset => rdx
 
 bool fh_magickrollimage(Value* mgck_wnd, int x_offset, int y_offset) asm("_ZN4HPHP17f_magickrollimageERKNS_6ObjectEii");
 
-TypedValue * fg1_magickrollimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickrollimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickrollimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickrollimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17776,7 +17776,7 @@ TypedValue * fg1_magickrollimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickrollimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -17818,8 +17818,8 @@ degrees => xmm0
 
 bool fh_magickrotateimage(Value* mgck_wnd, Value* background, double degrees) asm("_ZN4HPHP19f_magickrotateimageERKNS_6ObjectES2_d");
 
-TypedValue * fg1_magickrotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickrotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickrotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickrotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17838,7 +17838,7 @@ TypedValue * fg1_magickrotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickrotateimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -17880,8 +17880,8 @@ rows => xmm1
 
 bool fh_magicksampleimage(Value* mgck_wnd, double columns, double rows) asm("_ZN4HPHP19f_magicksampleimageERKNS_6ObjectEdd");
 
-TypedValue * fg1_magicksampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17900,7 +17900,7 @@ TypedValue * fg1_magicksampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magicksampleimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -17942,8 +17942,8 @@ rows => xmm1
 
 bool fh_magickscaleimage(Value* mgck_wnd, double columns, double rows) asm("_ZN4HPHP18f_magickscaleimageERKNS_6ObjectEdd");
 
-TypedValue * fg1_magickscaleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickscaleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickscaleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickscaleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -17962,7 +17962,7 @@ TypedValue * fg1_magickscaleimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickscaleimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -18003,8 +18003,8 @@ channel_type => rsi
 
 bool fh_magickseparateimagechannel(Value* mgck_wnd, int channel_type) asm("_ZN4HPHP28f_magickseparateimagechannelERKNS_6ObjectEi");
 
-TypedValue * fg1_magickseparateimagechannel(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickseparateimagechannel(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickseparateimagechannel(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickseparateimagechannel(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18020,7 +18020,7 @@ TypedValue * fg1_magickseparateimagechannel(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* fg_magickseparateimagechannel(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -18061,8 +18061,8 @@ quality => xmm0
 
 bool fh_magicksetcompressionquality(Value* mgck_wnd, double quality) asm("_ZN4HPHP29f_magicksetcompressionqualityERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksetcompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetcompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetcompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetcompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18078,7 +18078,7 @@ TypedValue * fg1_magicksetcompressionquality(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_magicksetcompressionquality(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -18119,8 +18119,8 @@ filename => rsi
 
 bool fh_magicksetfilename(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP19f_magicksetfilenameERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magicksetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18141,7 +18141,7 @@ TypedValue * fg1_magicksetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magicksetfilename(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -18180,8 +18180,8 @@ mgck_wnd => rdi
 
 void fh_magicksetfirstiterator(Value* mgck_wnd) asm("_ZN4HPHP24f_magicksetfirstiteratorERKNS_6ObjectE");
 
-TypedValue * fg1_magicksetfirstiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetfirstiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetfirstiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetfirstiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -18193,7 +18193,7 @@ TypedValue * fg1_magicksetfirstiterator(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magicksetfirstiterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -18235,8 +18235,8 @@ format => rsi
 
 bool fh_magicksetformat(Value* mgck_wnd, Value* format) asm("_ZN4HPHP17f_magicksetformatERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magicksetformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18252,7 +18252,7 @@ TypedValue * fg1_magicksetformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magicksetformat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -18293,8 +18293,8 @@ replace_wand => rsi
 
 bool fh_magicksetimage(Value* mgck_wnd, Value* replace_wand) asm("_ZN4HPHP16f_magicksetimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magicksetimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18310,7 +18310,7 @@ TypedValue * fg1_magicksetimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_magicksetimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -18351,8 +18351,8 @@ background_pxl_wnd => rsi
 
 bool fh_magicksetimagebackgroundcolor(Value* mgck_wnd, Value* background_pxl_wnd) asm("_ZN4HPHP31f_magicksetimagebackgroundcolorERKNS_6ObjectES2_");
 
-TypedValue * fg1_magicksetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18368,7 +18368,7 @@ TypedValue * fg1_magicksetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec*
 
 TypedValue* fg_magicksetimagebackgroundcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -18409,8 +18409,8 @@ bias => xmm0
 
 bool fh_magicksetimagebias(Value* mgck_wnd, double bias) asm("_ZN4HPHP20f_magicksetimagebiasERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksetimagebias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagebias(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagebias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagebias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18426,7 +18426,7 @@ TypedValue * fg1_magicksetimagebias(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magicksetimagebias(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -18468,8 +18468,8 @@ y => xmm1
 
 bool fh_magicksetimageblueprimary(Value* mgck_wnd, double x, double y) asm("_ZN4HPHP27f_magicksetimageblueprimaryERKNS_6ObjectEdd");
 
-TypedValue * fg1_magicksetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18488,7 +18488,7 @@ TypedValue * fg1_magicksetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magicksetimageblueprimary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -18529,8 +18529,8 @@ border_pxl_wnd => rsi
 
 bool fh_magicksetimagebordercolor(Value* mgck_wnd, Value* border_pxl_wnd) asm("_ZN4HPHP27f_magicksetimagebordercolorERKNS_6ObjectES2_");
 
-TypedValue * fg1_magicksetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18546,7 +18546,7 @@ TypedValue * fg1_magicksetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magicksetimagebordercolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -18588,8 +18588,8 @@ mapcolor_pxl_wnd => rsi
 
 bool fh_magicksetimagecolormapcolor(Value* mgck_wnd, double index, Value* mapcolor_pxl_wnd) asm("_ZN4HPHP29f_magicksetimagecolormapcolorERKNS_6ObjectEdS2_");
 
-TypedValue * fg1_magicksetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18608,7 +18608,7 @@ TypedValue * fg1_magicksetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* fg_magicksetimagecolormapcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -18649,8 +18649,8 @@ colorspace_type => rsi
 
 bool fh_magicksetimagecolorspace(Value* mgck_wnd, int colorspace_type) asm("_ZN4HPHP26f_magicksetimagecolorspaceERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18666,7 +18666,7 @@ TypedValue * fg1_magicksetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetimagecolorspace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -18707,8 +18707,8 @@ composite_operator => rsi
 
 bool fh_magicksetimagecompose(Value* mgck_wnd, int composite_operator) asm("_ZN4HPHP23f_magicksetimagecomposeERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18724,7 +18724,7 @@ TypedValue * fg1_magicksetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magicksetimagecompose(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -18765,8 +18765,8 @@ compression_type => rsi
 
 bool fh_magicksetimagecompression(Value* mgck_wnd, int compression_type) asm("_ZN4HPHP27f_magicksetimagecompressionERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18782,7 +18782,7 @@ TypedValue * fg1_magicksetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magicksetimagecompression(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -18823,8 +18823,8 @@ quality => xmm0
 
 bool fh_magicksetimagecompressionquality(Value* mgck_wnd, double quality) asm("_ZN4HPHP34f_magicksetimagecompressionqualityERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18840,7 +18840,7 @@ TypedValue * fg1_magicksetimagecompressionquality(TypedValue* rv, HPHP::VM::ActR
 
 TypedValue* fg_magicksetimagecompressionquality(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -18881,8 +18881,8 @@ delay => xmm0
 
 bool fh_magicksetimagedelay(Value* mgck_wnd, double delay) asm("_ZN4HPHP21f_magicksetimagedelayERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18898,7 +18898,7 @@ TypedValue * fg1_magicksetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetimagedelay(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -18940,8 +18940,8 @@ channel_type => rdx
 
 bool fh_magicksetimagedepth(Value* mgck_wnd, int depth, int channel_type) asm("_ZN4HPHP21f_magicksetimagedepthERKNS_6ObjectEii");
 
-TypedValue * fg1_magicksetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -18965,7 +18965,7 @@ TypedValue * fg1_magicksetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetimagedepth(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -19006,8 +19006,8 @@ dispose_type => rsi
 
 bool fh_magicksetimagedispose(Value* mgck_wnd, int dispose_type) asm("_ZN4HPHP23f_magicksetimagedisposeERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19023,7 +19023,7 @@ TypedValue * fg1_magicksetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magicksetimagedispose(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -19064,8 +19064,8 @@ filename => rsi
 
 bool fh_magicksetimagefilename(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP24f_magicksetimagefilenameERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magicksetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19086,7 +19086,7 @@ TypedValue * fg1_magicksetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magicksetimagefilename(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -19127,8 +19127,8 @@ format => rsi
 
 bool fh_magicksetimageformat(Value* mgck_wnd, Value* format) asm("_ZN4HPHP22f_magicksetimageformatERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magicksetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19144,7 +19144,7 @@ TypedValue * fg1_magicksetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magicksetimageformat(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -19185,8 +19185,8 @@ gamma => xmm0
 
 bool fh_magicksetimagegamma(Value* mgck_wnd, double gamma) asm("_ZN4HPHP21f_magicksetimagegammaERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19202,7 +19202,7 @@ TypedValue * fg1_magicksetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetimagegamma(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -19244,8 +19244,8 @@ y => xmm1
 
 bool fh_magicksetimagegreenprimary(Value* mgck_wnd, double x, double y) asm("_ZN4HPHP28f_magicksetimagegreenprimaryERKNS_6ObjectEdd");
 
-TypedValue * fg1_magicksetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19264,7 +19264,7 @@ TypedValue * fg1_magicksetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* fg_magicksetimagegreenprimary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -19305,8 +19305,8 @@ index => rsi
 
 bool fh_magicksetimageindex(Value* mgck_wnd, int index) asm("_ZN4HPHP21f_magicksetimageindexERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19322,7 +19322,7 @@ TypedValue * fg1_magicksetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetimageindex(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -19363,8 +19363,8 @@ interlace_type => rsi
 
 bool fh_magicksetimageinterlacescheme(Value* mgck_wnd, int interlace_type) asm("_ZN4HPHP31f_magicksetimageinterlaceschemeERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19380,7 +19380,7 @@ TypedValue * fg1_magicksetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec*
 
 TypedValue* fg_magicksetimageinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -19421,8 +19421,8 @@ iterations => xmm0
 
 bool fh_magicksetimageiterations(Value* mgck_wnd, double iterations) asm("_ZN4HPHP26f_magicksetimageiterationsERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19438,7 +19438,7 @@ TypedValue * fg1_magicksetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetimageiterations(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -19479,8 +19479,8 @@ matte_pxl_wnd => rsi
 
 bool fh_magicksetimagemattecolor(Value* mgck_wnd, Value* matte_pxl_wnd) asm("_ZN4HPHP26f_magicksetimagemattecolorERKNS_6ObjectES2_");
 
-TypedValue * fg1_magicksetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19496,7 +19496,7 @@ TypedValue * fg1_magicksetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetimagemattecolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -19539,8 +19539,8 @@ value => rcx
 
 bool fh_magicksetimageoption(Value* mgck_wnd, Value* format, Value* key, Value* value) asm("_ZN4HPHP22f_magicksetimageoptionERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_magicksetimageoption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageoption(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19562,7 +19562,7 @@ TypedValue * fg1_magicksetimageoption(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magicksetimageoption(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -19609,8 +19609,8 @@ pixel_array => r9
 
 bool fh_magicksetimagepixels(Value* mgck_wnd, int x_offset, int y_offset, double columns, double rows, Value* smap, int storage_type, Value* pixel_array) asm("_ZN4HPHP22f_magicksetimagepixelsERKNS_6ObjectEiiddRKNS_6StringEiRKNS_5ArrayE");
 
-TypedValue * fg1_magicksetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19644,7 +19644,7 @@ TypedValue * fg1_magicksetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magicksetimagepixels(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfArray && (args-6)->m_type == KindOfInt64 && IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -19686,8 +19686,8 @@ profile => rdx
 
 bool fh_magicksetimageprofile(Value* mgck_wnd, Value* name, Value* profile) asm("_ZN4HPHP23f_magicksetimageprofileERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_magicksetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19706,7 +19706,7 @@ TypedValue * fg1_magicksetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magicksetimageprofile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -19748,8 +19748,8 @@ y => xmm1
 
 bool fh_magicksetimageredprimary(Value* mgck_wnd, double x, double y) asm("_ZN4HPHP26f_magicksetimageredprimaryERKNS_6ObjectEdd");
 
-TypedValue * fg1_magicksetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19768,7 +19768,7 @@ TypedValue * fg1_magicksetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetimageredprimary(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -19809,8 +19809,8 @@ rendering_intent => rsi
 
 bool fh_magicksetimagerenderingintent(Value* mgck_wnd, int rendering_intent) asm("_ZN4HPHP31f_magicksetimagerenderingintentERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19826,7 +19826,7 @@ TypedValue * fg1_magicksetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec*
 
 TypedValue* fg_magicksetimagerenderingintent(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -19868,8 +19868,8 @@ y_resolution => xmm1
 
 bool fh_magicksetimageresolution(Value* mgck_wnd, double x_resolution, double y_resolution) asm("_ZN4HPHP26f_magicksetimageresolutionERKNS_6ObjectEdd");
 
-TypedValue * fg1_magicksetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19888,7 +19888,7 @@ TypedValue * fg1_magicksetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetimageresolution(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -19929,8 +19929,8 @@ scene => xmm0
 
 bool fh_magicksetimagescene(Value* mgck_wnd, double scene) asm("_ZN4HPHP21f_magicksetimagesceneERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -19946,7 +19946,7 @@ TypedValue * fg1_magicksetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetimagescene(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -19987,8 +19987,8 @@ image_type => rsi
 
 bool fh_magicksetimagetype(Value* mgck_wnd, int image_type) asm("_ZN4HPHP20f_magicksetimagetypeERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20004,7 +20004,7 @@ TypedValue * fg1_magicksetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magicksetimagetype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -20045,8 +20045,8 @@ resolution_type => rsi
 
 bool fh_magicksetimageunits(Value* mgck_wnd, int resolution_type) asm("_ZN4HPHP21f_magicksetimageunitsERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20062,7 +20062,7 @@ TypedValue * fg1_magicksetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetimageunits(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -20103,8 +20103,8 @@ virtual_pixel_method => rsi
 
 bool fh_magicksetimagevirtualpixelmethod(Value* mgck_wnd, int virtual_pixel_method) asm("_ZN4HPHP34f_magicksetimagevirtualpixelmethodERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20120,7 +20120,7 @@ TypedValue * fg1_magicksetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActR
 
 TypedValue* fg_magicksetimagevirtualpixelmethod(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -20162,8 +20162,8 @@ y => xmm1
 
 bool fh_magicksetimagewhitepoint(Value* mgck_wnd, double x, double y) asm("_ZN4HPHP26f_magicksetimagewhitepointERKNS_6ObjectEdd");
 
-TypedValue * fg1_magicksetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20182,7 +20182,7 @@ TypedValue * fg1_magicksetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetimagewhitepoint(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -20223,8 +20223,8 @@ interlace_type => rsi
 
 bool fh_magicksetinterlacescheme(Value* mgck_wnd, int interlace_type) asm("_ZN4HPHP26f_magicksetinterlaceschemeERKNS_6ObjectEi");
 
-TypedValue * fg1_magicksetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20240,7 +20240,7 @@ TypedValue * fg1_magicksetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -20279,8 +20279,8 @@ mgck_wnd => rdi
 
 void fh_magicksetlastiterator(Value* mgck_wnd) asm("_ZN4HPHP23f_magicksetlastiteratorERKNS_6ObjectE");
 
-TypedValue * fg1_magicksetlastiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetlastiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetlastiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetlastiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -20292,7 +20292,7 @@ TypedValue * fg1_magicksetlastiterator(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magicksetlastiterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -20334,8 +20334,8 @@ passphrase => rsi
 
 bool fh_magicksetpassphrase(Value* mgck_wnd, Value* passphrase) asm("_ZN4HPHP21f_magicksetpassphraseERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magicksetpassphrase(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetpassphrase(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetpassphrase(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetpassphrase(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20351,7 +20351,7 @@ TypedValue * fg1_magicksetpassphrase(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetpassphrase(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -20393,8 +20393,8 @@ y_resolution => xmm1
 
 bool fh_magicksetresolution(Value* mgck_wnd, double x_resolution, double y_resolution) asm("_ZN4HPHP21f_magicksetresolutionERKNS_6ObjectEdd");
 
-TypedValue * fg1_magicksetresolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetresolution(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20413,7 +20413,7 @@ TypedValue * fg1_magicksetresolution(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksetresolution(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -20455,8 +20455,8 @@ sampling_factors => rsi
 
 bool fh_magicksetsamplingfactors(Value* mgck_wnd, double number_factors, Value* sampling_factors) asm("_ZN4HPHP26f_magicksetsamplingfactorsERKNS_6ObjectEdRKNS_5ArrayE");
 
-TypedValue * fg1_magicksetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20475,7 +20475,7 @@ TypedValue * fg1_magicksetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* fg_magicksetsamplingfactors(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -20517,8 +20517,8 @@ rows => rdx
 
 bool fh_magicksetsize(Value* mgck_wnd, int columns, int rows) asm("_ZN4HPHP15f_magicksetsizeERKNS_6ObjectEii");
 
-TypedValue * fg1_magicksetsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20537,7 +20537,7 @@ TypedValue * fg1_magicksetsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_magicksetsize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -20579,8 +20579,8 @@ rows => rdx
 
 bool fh_magicksetwandsize(Value* mgck_wnd, int columns, int rows) asm("_ZN4HPHP19f_magicksetwandsizeERKNS_6ObjectEii");
 
-TypedValue * fg1_magicksetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20599,7 +20599,7 @@ TypedValue * fg1_magicksetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magicksetwandsize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -20642,8 +20642,8 @@ channel_type => rsi
 
 bool fh_magicksharpenimage(Value* mgck_wnd, double radius, double sigma, int channel_type) asm("_ZN4HPHP20f_magicksharpenimageERKNS_6ObjectEddi");
 
-TypedValue * fg1_magicksharpenimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksharpenimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksharpenimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksharpenimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20670,7 +20670,7 @@ TypedValue * fg1_magicksharpenimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magicksharpenimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -20712,8 +20712,8 @@ rows => rdx
 
 bool fh_magickshaveimage(Value* mgck_wnd, int columns, int rows) asm("_ZN4HPHP18f_magickshaveimageERKNS_6ObjectEii");
 
-TypedValue * fg1_magickshaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickshaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickshaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickshaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20732,7 +20732,7 @@ TypedValue * fg1_magickshaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickshaveimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -20775,8 +20775,8 @@ y_shear => xmm1
 
 bool fh_magickshearimage(Value* mgck_wnd, Value* background, double x_shear, double y_shear) asm("_ZN4HPHP18f_magickshearimageERKNS_6ObjectES2_dd");
 
-TypedValue * fg1_magickshearimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickshearimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickshearimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickshearimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20798,7 +20798,7 @@ TypedValue * fg1_magickshearimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickshearimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -20839,8 +20839,8 @@ threshold => xmm0
 
 bool fh_magicksolarizeimage(Value* mgck_wnd, double threshold) asm("_ZN4HPHP21f_magicksolarizeimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magicksolarizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksolarizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksolarizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksolarizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20856,7 +20856,7 @@ TypedValue * fg1_magicksolarizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_magicksolarizeimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -20900,8 +20900,8 @@ y => rdx
 
 bool fh_magickspliceimage(Value* mgck_wnd, double width, double height, int x, int y) asm("_ZN4HPHP19f_magickspliceimageERKNS_6ObjectEddii");
 
-TypedValue * fg1_magickspliceimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickspliceimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickspliceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickspliceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20926,7 +20926,7 @@ TypedValue * fg1_magickspliceimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickspliceimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -20967,8 +20967,8 @@ radius => xmm0
 
 bool fh_magickspreadimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP19f_magickspreadimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickspreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickspreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickspreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickspreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -20984,7 +20984,7 @@ TypedValue * fg1_magickspreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickspreadimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -21027,8 +21027,8 @@ offset => rcx
 
 Value* fh_magicksteganoimage(Value* _rv, Value* mgck_wnd, Value* watermark_wand, int offset) asm("_ZN4HPHP20f_magicksteganoimageERKNS_6ObjectES2_i");
 
-TypedValue * fg1_magicksteganoimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicksteganoimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicksteganoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicksteganoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -21048,7 +21048,7 @@ TypedValue * fg1_magicksteganoimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magicksteganoimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -21090,8 +21090,8 @@ offset_wand => rsi
 
 bool fh_magickstereoimage(Value* mgck_wnd, Value* offset_wand) asm("_ZN4HPHP19f_magickstereoimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickstereoimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickstereoimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickstereoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickstereoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21107,7 +21107,7 @@ TypedValue * fg1_magickstereoimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickstereoimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -21147,8 +21147,8 @@ mgck_wnd => rdi
 
 bool fh_magickstripimage(Value* mgck_wnd) asm("_ZN4HPHP18f_magickstripimageERKNS_6ObjectE");
 
-TypedValue * fg1_magickstripimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickstripimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickstripimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickstripimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21159,7 +21159,7 @@ TypedValue * fg1_magickstripimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickstripimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -21200,8 +21200,8 @@ degrees => xmm0
 
 bool fh_magickswirlimage(Value* mgck_wnd, double degrees) asm("_ZN4HPHP18f_magickswirlimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magickswirlimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickswirlimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickswirlimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickswirlimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21217,7 +21217,7 @@ TypedValue * fg1_magickswirlimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickswirlimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -21259,8 +21259,8 @@ texture_wand => rdx
 
 Value* fh_magicktextureimage(Value* _rv, Value* mgck_wnd, Value* texture_wand) asm("_ZN4HPHP20f_magicktextureimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magicktextureimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicktextureimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicktextureimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicktextureimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -21277,7 +21277,7 @@ TypedValue * fg1_magicktextureimage(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_magicktextureimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -21320,8 +21320,8 @@ channel_type => rsi
 
 bool fh_magickthresholdimage(Value* mgck_wnd, double threshold, int channel_type) asm("_ZN4HPHP22f_magickthresholdimageERKNS_6ObjectEdi");
 
-TypedValue * fg1_magickthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21345,7 +21345,7 @@ TypedValue * fg1_magickthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickthresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -21387,8 +21387,8 @@ opacity_pxl_wnd => rdx
 
 bool fh_magicktintimage(Value* mgck_wnd, int tint_pxl_wnd, Value* opacity_pxl_wnd) asm("_ZN4HPHP17f_magicktintimageERKNS_6ObjectEiS2_");
 
-TypedValue * fg1_magicktintimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicktintimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicktintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicktintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21407,7 +21407,7 @@ TypedValue * fg1_magicktintimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magicktintimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -21450,8 +21450,8 @@ geometry => rcx
 
 Value* fh_magicktransformimage(Value* _rv, Value* mgck_wnd, Value* crop, Value* geometry) asm("_ZN4HPHP22f_magicktransformimageERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_magicktransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicktransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicktransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicktransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -21471,7 +21471,7 @@ TypedValue * fg1_magicktransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magicktransformimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -21513,8 +21513,8 @@ fuzz => xmm0
 
 bool fh_magicktrimimage(Value* mgck_wnd, double fuzz) asm("_ZN4HPHP17f_magicktrimimageERKNS_6ObjectEd");
 
-TypedValue * fg1_magicktrimimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magicktrimimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magicktrimimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magicktrimimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21530,7 +21530,7 @@ TypedValue * fg1_magicktrimimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magicktrimimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -21575,8 +21575,8 @@ channel_type => rsi
 
 bool fh_magickunsharpmaskimage(Value* mgck_wnd, double radius, double sigma, double amount, double threshold, int channel_type) asm("_ZN4HPHP24f_magickunsharpmaskimageERKNS_6ObjectEddddi");
 
-TypedValue * fg1_magickunsharpmaskimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickunsharpmaskimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickunsharpmaskimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickunsharpmaskimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21609,7 +21609,7 @@ TypedValue * fg1_magickunsharpmaskimage(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_magickunsharpmaskimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 5LL && count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfInt64) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -21651,8 +21651,8 @@ wave_length => xmm1
 
 bool fh_magickwaveimage(Value* mgck_wnd, double amplitude, double wave_length) asm("_ZN4HPHP17f_magickwaveimageERKNS_6ObjectEdd");
 
-TypedValue * fg1_magickwaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickwaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickwaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickwaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21671,7 +21671,7 @@ TypedValue * fg1_magickwaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_magickwaveimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -21712,8 +21712,8 @@ threshold_pxl_wnd => rsi
 
 bool fh_magickwhitethresholdimage(Value* mgck_wnd, Value* threshold_pxl_wnd) asm("_ZN4HPHP27f_magickwhitethresholdimageERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickwhitethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickwhitethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickwhitethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickwhitethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21729,7 +21729,7 @@ TypedValue * fg1_magickwhitethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_magickwhitethresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -21770,8 +21770,8 @@ filename => rsi
 
 bool fh_magickwriteimage(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP18f_magickwriteimageERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_magickwriteimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickwriteimage(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickwriteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickwriteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21787,7 +21787,7 @@ TypedValue * fg1_magickwriteimage(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_magickwriteimage(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -21828,8 +21828,8 @@ handle => rsi
 
 bool fh_magickwriteimagefile(Value* mgck_wnd, Value* handle) asm("_ZN4HPHP22f_magickwriteimagefileERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickwriteimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickwriteimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickwriteimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickwriteimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21845,7 +21845,7 @@ TypedValue * fg1_magickwriteimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_magickwriteimagefile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -21887,8 +21887,8 @@ join_images => rdx
 
 bool fh_magickwriteimages(Value* mgck_wnd, Value* filename, bool join_images) asm("_ZN4HPHP19f_magickwriteimagesERKNS_6ObjectERKNS_6StringEb");
 
-TypedValue * fg1_magickwriteimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickwriteimages(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickwriteimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickwriteimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21913,7 +21913,7 @@ TypedValue * fg1_magickwriteimages(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_magickwriteimages(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
@@ -21954,8 +21954,8 @@ handle => rsi
 
 bool fh_magickwriteimagesfile(Value* mgck_wnd, Value* handle) asm("_ZN4HPHP23f_magickwriteimagesfileERKNS_6ObjectES2_");
 
-TypedValue * fg1_magickwriteimagesfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_magickwriteimagesfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_magickwriteimagesfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_magickwriteimagesfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -21971,7 +21971,7 @@ TypedValue * fg1_magickwriteimagesfile(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_magickwriteimagesfile(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
@@ -22011,8 +22011,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetalpha(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetalphaERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22023,7 +22023,7 @@ TypedValue * fg1_pixelgetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelgetalpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22063,8 +22063,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetalphaquantum(Value* pxl_wnd) asm("_ZN4HPHP22f_pixelgetalphaquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22075,7 +22075,7 @@ TypedValue * fg1_pixelgetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelgetalphaquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22115,8 +22115,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetblack(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetblackERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetblack(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetblack(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22127,7 +22127,7 @@ TypedValue * fg1_pixelgetblack(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelgetblack(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22167,8 +22167,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetblackquantum(Value* pxl_wnd) asm("_ZN4HPHP22f_pixelgetblackquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22179,7 +22179,7 @@ TypedValue * fg1_pixelgetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelgetblackquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22219,8 +22219,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetblue(Value* pxl_wnd) asm("_ZN4HPHP14f_pixelgetblueERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetblue(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetblue(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22231,7 +22231,7 @@ TypedValue * fg1_pixelgetblue(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_pixelgetblue(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22271,8 +22271,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetbluequantum(Value* pxl_wnd) asm("_ZN4HPHP21f_pixelgetbluequantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22283,7 +22283,7 @@ TypedValue * fg1_pixelgetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_pixelgetbluequantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22324,8 +22324,8 @@ pxl_wnd => rsi
 
 Value* fh_pixelgetcolorasstring(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetcolorasstringERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetcolorasstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetcolorasstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetcolorasstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetcolorasstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -22337,7 +22337,7 @@ TypedValue * fg1_pixelgetcolorasstring(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_pixelgetcolorasstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22378,8 +22378,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetcolorcount(Value* pxl_wnd) asm("_ZN4HPHP20f_pixelgetcolorcountERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22390,7 +22390,7 @@ TypedValue * fg1_pixelgetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_pixelgetcolorcount(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22430,8 +22430,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetcyan(Value* pxl_wnd) asm("_ZN4HPHP14f_pixelgetcyanERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22442,7 +22442,7 @@ TypedValue * fg1_pixelgetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_pixelgetcyan(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22482,8 +22482,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetcyanquantum(Value* pxl_wnd) asm("_ZN4HPHP21f_pixelgetcyanquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22494,7 +22494,7 @@ TypedValue * fg1_pixelgetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_pixelgetcyanquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22535,8 +22535,8 @@ pxl_wnd => rsi
 
 Value* fh_pixelgetexception(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP19f_pixelgetexceptionERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -22548,7 +22548,7 @@ TypedValue * fg1_pixelgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_pixelgetexception(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22590,8 +22590,8 @@ pxl_wnd => rsi
 
 Value* fh_pixelgetexceptionstring(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP25f_pixelgetexceptionstringERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -22603,7 +22603,7 @@ TypedValue * fg1_pixelgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_pixelgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22635,34 +22635,34 @@ TypedValue* fg_pixelgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_pixelgetexceptiontype(HPHP::Object const&)
+long HPHP::f_pixelgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP23f_pixelgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 pxl_wnd => rdi
 */
 
-long long fh_pixelgetexceptiontype(Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetexceptiontypeERKNS_6ObjectE");
+long fh_pixelgetexceptiontype(Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetexceptiontypeERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_pixelgetexceptiontype((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_pixelgetexceptiontype((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_pixelgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_pixelgetexceptiontype((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_pixelgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -22696,8 +22696,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetgreen(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetgreenERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22708,7 +22708,7 @@ TypedValue * fg1_pixelgetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelgetgreen(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22748,8 +22748,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetgreenquantum(Value* pxl_wnd) asm("_ZN4HPHP22f_pixelgetgreenquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22760,7 +22760,7 @@ TypedValue * fg1_pixelgetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelgetgreenquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22800,8 +22800,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetindex(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetindexERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22812,7 +22812,7 @@ TypedValue * fg1_pixelgetindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelgetindex(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22852,8 +22852,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetmagenta(Value* pxl_wnd) asm("_ZN4HPHP17f_pixelgetmagentaERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22864,7 +22864,7 @@ TypedValue * fg1_pixelgetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_pixelgetmagenta(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22904,8 +22904,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetmagentaquantum(Value* pxl_wnd) asm("_ZN4HPHP24f_pixelgetmagentaquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22916,7 +22916,7 @@ TypedValue * fg1_pixelgetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_pixelgetmagentaquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -22956,8 +22956,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetopacity(Value* pxl_wnd) asm("_ZN4HPHP17f_pixelgetopacityERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -22968,7 +22968,7 @@ TypedValue * fg1_pixelgetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_pixelgetopacity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -23008,8 +23008,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetopacityquantum(Value* pxl_wnd) asm("_ZN4HPHP24f_pixelgetopacityquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -23020,7 +23020,7 @@ TypedValue * fg1_pixelgetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_pixelgetopacityquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -23061,8 +23061,8 @@ pxl_wnd => rsi
 
 Value* fh_pixelgetquantumcolor(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP22f_pixelgetquantumcolorERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -23074,7 +23074,7 @@ TypedValue * fg1_pixelgetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelgetquantumcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -23115,8 +23115,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetred(Value* pxl_wnd) asm("_ZN4HPHP13f_pixelgetredERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetred(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetred(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -23127,7 +23127,7 @@ TypedValue * fg1_pixelgetred(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_pixelgetred(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -23167,8 +23167,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetredquantum(Value* pxl_wnd) asm("_ZN4HPHP20f_pixelgetredquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -23179,7 +23179,7 @@ TypedValue * fg1_pixelgetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_pixelgetredquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -23219,8 +23219,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetyellow(Value* pxl_wnd) asm("_ZN4HPHP16f_pixelgetyellowERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -23231,7 +23231,7 @@ TypedValue * fg1_pixelgetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_pixelgetyellow(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -23271,8 +23271,8 @@ pxl_wnd => rdi
 
 double fh_pixelgetyellowquantum(Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetyellowquantumERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfDouble;
@@ -23283,7 +23283,7 @@ TypedValue * fg1_pixelgetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_pixelgetyellowquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -23323,8 +23323,8 @@ alpha => xmm0
 
 void fh_pixelsetalpha(Value* pxl_wnd, double alpha) asm("_ZN4HPHP15f_pixelsetalphaERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23341,7 +23341,7 @@ TypedValue * fg1_pixelsetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelsetalpha(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23382,8 +23382,8 @@ alpha => xmm0
 
 void fh_pixelsetalphaquantum(Value* pxl_wnd, double alpha) asm("_ZN4HPHP22f_pixelsetalphaquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23400,7 +23400,7 @@ TypedValue * fg1_pixelsetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelsetalphaquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23441,8 +23441,8 @@ black => xmm0
 
 void fh_pixelsetblack(Value* pxl_wnd, double black) asm("_ZN4HPHP15f_pixelsetblackERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetblack(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetblack(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23459,7 +23459,7 @@ TypedValue * fg1_pixelsetblack(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelsetblack(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23500,8 +23500,8 @@ black => xmm0
 
 void fh_pixelsetblackquantum(Value* pxl_wnd, double black) asm("_ZN4HPHP22f_pixelsetblackquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23518,7 +23518,7 @@ TypedValue * fg1_pixelsetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelsetblackquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23559,8 +23559,8 @@ blue => xmm0
 
 void fh_pixelsetblue(Value* pxl_wnd, double blue) asm("_ZN4HPHP14f_pixelsetblueERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetblue(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetblue(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23577,7 +23577,7 @@ TypedValue * fg1_pixelsetblue(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_pixelsetblue(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23618,8 +23618,8 @@ blue => xmm0
 
 void fh_pixelsetbluequantum(Value* pxl_wnd, double blue) asm("_ZN4HPHP21f_pixelsetbluequantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23636,7 +23636,7 @@ TypedValue * fg1_pixelsetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_pixelsetbluequantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23677,8 +23677,8 @@ imagemagick_col_str => rsi
 
 void fh_pixelsetcolor(Value* pxl_wnd, Value* imagemagick_col_str) asm("_ZN4HPHP15f_pixelsetcolorERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_pixelsetcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23695,7 +23695,7 @@ TypedValue * fg1_pixelsetcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelsetcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
@@ -23736,8 +23736,8 @@ count => rsi
 
 void fh_pixelsetcolorcount(Value* pxl_wnd, int count) asm("_ZN4HPHP20f_pixelsetcolorcountERKNS_6ObjectEi");
 
-TypedValue * fg1_pixelsetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23754,7 +23754,7 @@ TypedValue * fg1_pixelsetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_pixelsetcolorcount(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -23795,8 +23795,8 @@ cyan => xmm0
 
 void fh_pixelsetcyan(Value* pxl_wnd, double cyan) asm("_ZN4HPHP14f_pixelsetcyanERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23813,7 +23813,7 @@ TypedValue * fg1_pixelsetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_pixelsetcyan(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23854,8 +23854,8 @@ cyan => xmm0
 
 void fh_pixelsetcyanquantum(Value* pxl_wnd, double cyan) asm("_ZN4HPHP21f_pixelsetcyanquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23872,7 +23872,7 @@ TypedValue * fg1_pixelsetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_pixelsetcyanquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23913,8 +23913,8 @@ green => xmm0
 
 void fh_pixelsetgreen(Value* pxl_wnd, double green) asm("_ZN4HPHP15f_pixelsetgreenERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23931,7 +23931,7 @@ TypedValue * fg1_pixelsetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelsetgreen(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -23972,8 +23972,8 @@ green => xmm0
 
 void fh_pixelsetgreenquantum(Value* pxl_wnd, double green) asm("_ZN4HPHP22f_pixelsetgreenquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -23990,7 +23990,7 @@ TypedValue * fg1_pixelsetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelsetgreenquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24031,8 +24031,8 @@ index => xmm0
 
 void fh_pixelsetindex(Value* pxl_wnd, double index) asm("_ZN4HPHP15f_pixelsetindexERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24049,7 +24049,7 @@ TypedValue * fg1_pixelsetindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_pixelsetindex(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24090,8 +24090,8 @@ magenta => xmm0
 
 void fh_pixelsetmagenta(Value* pxl_wnd, double magenta) asm("_ZN4HPHP17f_pixelsetmagentaERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24108,7 +24108,7 @@ TypedValue * fg1_pixelsetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_pixelsetmagenta(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24149,8 +24149,8 @@ magenta => xmm0
 
 void fh_pixelsetmagentaquantum(Value* pxl_wnd, double magenta) asm("_ZN4HPHP24f_pixelsetmagentaquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24167,7 +24167,7 @@ TypedValue * fg1_pixelsetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_pixelsetmagentaquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24208,8 +24208,8 @@ opacity => xmm0
 
 void fh_pixelsetopacity(Value* pxl_wnd, double opacity) asm("_ZN4HPHP17f_pixelsetopacityERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24226,7 +24226,7 @@ TypedValue * fg1_pixelsetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_pixelsetopacity(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24267,8 +24267,8 @@ opacity => xmm0
 
 void fh_pixelsetopacityquantum(Value* pxl_wnd, double opacity) asm("_ZN4HPHP24f_pixelsetopacityquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24285,7 +24285,7 @@ TypedValue * fg1_pixelsetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_pixelsetopacityquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24329,8 +24329,8 @@ opacity => xmm3
 
 void fh_pixelsetquantumcolor(Value* pxl_wnd, double red, double green, double blue, double opacity) asm("_ZN4HPHP22f_pixelsetquantumcolorERKNS_6ObjectEdddd");
 
-TypedValue * fg1_pixelsetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24361,7 +24361,7 @@ TypedValue * fg1_pixelsetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, long
 
 TypedValue* fg_pixelsetquantumcolor(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfDouble) && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24402,8 +24402,8 @@ red => xmm0
 
 void fh_pixelsetred(Value* pxl_wnd, double red) asm("_ZN4HPHP13f_pixelsetredERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetred(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetred(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24420,7 +24420,7 @@ TypedValue * fg1_pixelsetred(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 
 TypedValue* fg_pixelsetred(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24461,8 +24461,8 @@ red => xmm0
 
 void fh_pixelsetredquantum(Value* pxl_wnd, double red) asm("_ZN4HPHP20f_pixelsetredquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24479,7 +24479,7 @@ TypedValue * fg1_pixelsetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_pixelsetredquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24520,8 +24520,8 @@ yellow => xmm0
 
 void fh_pixelsetyellow(Value* pxl_wnd, double yellow) asm("_ZN4HPHP16f_pixelsetyellowERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24538,7 +24538,7 @@ TypedValue * fg1_pixelsetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_pixelsetyellow(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24579,8 +24579,8 @@ yellow => xmm0
 
 void fh_pixelsetyellowquantum(Value* pxl_wnd, double yellow) asm("_ZN4HPHP23f_pixelsetyellowquantumERKNS_6ObjectEd");
 
-TypedValue * fg1_pixelsetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24597,7 +24597,7 @@ TypedValue * fg1_pixelsetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 
 TypedValue* fg_pixelsetyellowquantum(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
@@ -24639,8 +24639,8 @@ pxl_iter => rsi
 
 Value* fh_pixelgetiteratorexception(Value* _rv, Value* pxl_iter) asm("_ZN4HPHP27f_pixelgetiteratorexceptionERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetiteratorexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetiteratorexception(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetiteratorexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetiteratorexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -24652,7 +24652,7 @@ TypedValue * fg1_pixelgetiteratorexception(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* fg_pixelgetiteratorexception(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -24694,8 +24694,8 @@ pxl_iter => rsi
 
 Value* fh_pixelgetiteratorexceptionstring(Value* _rv, Value* pxl_iter) asm("_ZN4HPHP33f_pixelgetiteratorexceptionstringERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetiteratorexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetiteratorexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetiteratorexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetiteratorexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -24707,7 +24707,7 @@ TypedValue * fg1_pixelgetiteratorexceptionstring(TypedValue* rv, HPHP::VM::ActRe
 
 TypedValue* fg_pixelgetiteratorexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -24739,34 +24739,34 @@ TypedValue* fg_pixelgetiteratorexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_pixelgetiteratorexceptiontype(HPHP::Object const&)
+long HPHP::f_pixelgetiteratorexceptiontype(HPHP::Object const&)
 _ZN4HPHP31f_pixelgetiteratorexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 pxl_iter => rdi
 */
 
-long long fh_pixelgetiteratorexceptiontype(Value* pxl_iter) asm("_ZN4HPHP31f_pixelgetiteratorexceptiontypeERKNS_6ObjectE");
+long fh_pixelgetiteratorexceptiontype(Value* pxl_iter) asm("_ZN4HPHP31f_pixelgetiteratorexceptiontypeERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_pixelgetiteratorexceptiontype((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_pixelgetiteratorexceptiontype((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_pixelgetiteratorexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_pixelgetiteratorexceptiontype((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_pixelgetiteratorexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -24801,8 +24801,8 @@ pxl_iter => rsi
 
 Value* fh_pixelgetnextiteratorrow(Value* _rv, Value* pxl_iter) asm("_ZN4HPHP25f_pixelgetnextiteratorrowERKNS_6ObjectE");
 
-TypedValue * fg1_pixelgetnextiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelgetnextiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelgetnextiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelgetnextiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -24814,7 +24814,7 @@ TypedValue * fg1_pixelgetnextiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, l
 
 TypedValue* fg_pixelgetnextiteratorrow(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -24854,8 +24854,8 @@ pxl_iter => rdi
 
 void fh_pixelresetiterator(Value* pxl_iter) asm("_ZN4HPHP20f_pixelresetiteratorERKNS_6ObjectE");
 
-TypedValue * fg1_pixelresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->_count = 0;
@@ -24867,7 +24867,7 @@ TypedValue * fg1_pixelresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 
 TypedValue* fg_pixelresetiterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -24909,8 +24909,8 @@ row => rsi
 
 bool fh_pixelsetiteratorrow(Value* pxl_iter, int row) asm("_ZN4HPHP21f_pixelsetiteratorrowERKNS_6ObjectEi");
 
-TypedValue * fg1_pixelsetiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsetiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsetiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsetiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -24926,7 +24926,7 @@ TypedValue * fg1_pixelsetiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_pixelsetiteratorrow(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
@@ -24966,8 +24966,8 @@ pxl_iter => rdi
 
 bool fh_pixelsynciterator(Value* pxl_iter) asm("_ZN4HPHP19f_pixelsynciteratorERKNS_6ObjectE");
 
-TypedValue * fg1_pixelsynciterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_pixelsynciterator(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_pixelsynciterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pixelsynciterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -24978,7 +24978,7 @@ TypedValue * fg1_pixelsynciterator(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 
 TypedValue* fg_pixelsynciterator(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {

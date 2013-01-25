@@ -89,11 +89,7 @@ struct Location {
     }
   }
 
-  std::string pretty() const {
-    char buf[1024];
-    sprintf(buf, "(Location %s %lld)", spaceName(), offset);
-    return std::string(buf);
-  }
+  std::string pretty() const;
 
   bool isStack() const {
     return space == Stack;

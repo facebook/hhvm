@@ -1349,7 +1349,7 @@ Variant &Variant::operator>>=(int64 n) {
 Variant &Variant::operator++() {
   switch (getType()) {
   case KindOfUninit:
-  case KindOfNull:   set(1LL); break;
+  case KindOfNull:   set(int64_t(1)); break;
   case KindOfInt64:  set(toInt64() + 1);  break;
   case KindOfDouble: set(toDouble() + 1); break;
   case KindOfStaticString:
@@ -1394,7 +1394,7 @@ Variant &Variant::operator--() {
   case KindOfString:
     {
       if (getStringData()->empty()) {
-        set(-1LL);
+        set(int64_t(-1LL));
       } else {
         int64 lval; double dval;
         DataType ret = convertToNumeric(&lval, &dval);

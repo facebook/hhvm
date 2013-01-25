@@ -31,7 +31,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   char buf[32];
   snprintf(buf, sizeof(buf), "%u", Process::GetProcessId());
   hdf["pid"] = string(buf);
-  snprintf(buf, sizeof(buf), "%llx", (int64)Process::GetThreadId());
+  snprintf(buf, sizeof(buf), "%"PRIx64, (int64)Process::GetThreadId());
   hdf["tid"] = string(buf);
   snprintf(buf, sizeof(buf), "%u", Process::GetThreadPid());
   hdf["tpid"] = string(buf);

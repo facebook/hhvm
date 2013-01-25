@@ -141,9 +141,11 @@ class Variant : VariantBase {
    */
   Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = (v?1:0);}
   Variant(int     v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
-  Variant(int64   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  // The following two overloads will accept int64_t whether it's
+  // implemented as long or long long.
+  Variant(long   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  Variant(long long v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
-  Variant(long    v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
 
   Variant(litstr  v);
@@ -1567,9 +1569,11 @@ public:
   // Use to hold variant that do not need ref-counting
   explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
   explicit VarNR(int     v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(int64   v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(uint64  v) { init(KindOfInt64  ); m_data.num = v;}
+  // The following two overloads will accept int64_t whether it's
+  // implemented as long or long long.
   explicit VarNR(long    v) { init(KindOfInt64  ); m_data.num = v;}
+  explicit VarNR(long long v) { init(KindOfInt64  ); m_data.num = v;}
+  explicit VarNR(uint64  v) { init(KindOfInt64  ); m_data.num = v;}
   explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {

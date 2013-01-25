@@ -182,24 +182,24 @@ input => rdi
 bool fh_fb_utf8ize(TypedValue* input) asm("_ZN4HPHP12f_fb_utf8izeERKNS_14VRefParamValueE");
 
 /*
-long long HPHP::f_fb_utf8_strlen_deprecated(HPHP::String const&)
+long HPHP::f_fb_utf8_strlen_deprecated(HPHP::String const&)
 _ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE
 
 (return value) => rax
 input => rdi
 */
 
-long long fh_fb_utf8_strlen_deprecated(Value* input) asm("_ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE");
+long fh_fb_utf8_strlen_deprecated(Value* input) asm("_ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE");
 
 /*
-long long HPHP::f_fb_utf8_strlen(HPHP::String const&)
+long HPHP::f_fb_utf8_strlen(HPHP::String const&)
 _ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE
 
 (return value) => rax
 input => rdi
 */
 
-long long fh_fb_utf8_strlen(Value* input) asm("_ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE");
+long fh_fb_utf8_strlen(Value* input) asm("_ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE");
 
 /*
 HPHP::Variant HPHP::f_fb_utf8_substr(HPHP::String const&, int, int)
@@ -225,7 +225,7 @@ function => rdx
 _argv => rcx
 */
 
-Value* fh_fb_call_user_func_safe(Value* _rv, long long _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_fb_call_user_func_safeEiRKNS_7VariantERKNS_5ArrayE");
+Value* fh_fb_call_user_func_safe(Value* _rv, int64_t _argc, TypedValue* function, Value* _argv) asm("_ZN4HPHP24f_fb_call_user_func_safeEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_fb_call_user_func_safe_return(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -239,7 +239,7 @@ def => rcx
 _argv => r8
 */
 
-TypedValue* fh_fb_call_user_func_safe_return(TypedValue* _rv, long long _argc, TypedValue* function, TypedValue* def, Value* _argv) asm("_ZN4HPHP31f_fb_call_user_func_safe_returnEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_fb_call_user_func_safe_return(TypedValue* _rv, int64_t _argc, TypedValue* function, TypedValue* def, Value* _argv) asm("_ZN4HPHP31f_fb_call_user_func_safe_returnEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Array HPHP::f_fb_call_user_func_array_safe(HPHP::Variant const&, HPHP::Array const&)
@@ -414,13 +414,13 @@ _rv => rdi
 Value* fh_fb_get_flush_stat(Value* _rv) asm("_ZN4HPHP19f_fb_get_flush_statEv");
 
 /*
-long long HPHP::f_fb_get_last_flush_size()
+long HPHP::f_fb_get_last_flush_size()
 _ZN4HPHP24f_fb_get_last_flush_sizeEv
 
 (return value) => rax
 */
 
-long long fh_fb_get_last_flush_size() asm("_ZN4HPHP24f_fb_get_last_flush_sizeEv");
+long fh_fb_get_last_flush_size() asm("_ZN4HPHP24f_fb_get_last_flush_sizeEv");
 
 /*
 HPHP::Variant HPHP::f_fb_lazy_stat(HPHP::String const&)

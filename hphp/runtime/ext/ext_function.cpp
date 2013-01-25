@@ -92,8 +92,8 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
 
   if (Variant::GetAccessorType(tv_func) == KindOfArray) {
     CArrRef arr = Variant::GetAsArray(tv_func);
-    CVarRef clsname = arr.rvalAtRef(0LL);
-    CVarRef mthname = arr.rvalAtRef(1LL);
+    CVarRef clsname = arr.rvalAtRef(int64_t(0));
+    CVarRef mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
         &clsname == &null_variant ||
         &mthname == &null_variant) {

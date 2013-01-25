@@ -144,7 +144,7 @@ locale => rcx
 _argv => r8
 */
 
-TypedValue* fh_setlocale(TypedValue* _rv, long long _argc, int category, TypedValue* locale, Value* _argv) asm("_ZN4HPHP11f_setlocaleEiiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_setlocale(TypedValue* _rv, int64_t _argc, int category, TypedValue* locale, Value* _argv) asm("_ZN4HPHP11f_setlocaleEiiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Array HPHP::f_localeconv()
@@ -168,7 +168,7 @@ format => rcx
 _argv => r8
 */
 
-TypedValue* fh_sscanf(TypedValue* _rv, long long _argc, Value* str, Value* format, Value* _argv) asm("_ZN4HPHP8f_sscanfEiRKNS_6StringES2_RKNS_5ArrayE");
+TypedValue* fh_sscanf(TypedValue* _rv, int64_t _argc, Value* str, Value* format, Value* _argv) asm("_ZN4HPHP8f_sscanfEiRKNS_6StringES2_RKNS_5ArrayE");
 
 /*
 HPHP::String HPHP::f_number_format(double, int, HPHP::String const&, HPHP::String const&)
@@ -343,8 +343,8 @@ length => r8
 TypedValue* fh_strcspn(TypedValue* _rv, Value* str1, Value* str2, int start, int length) asm("_ZN4HPHP9f_strcspnERKNS_6StringES2_ii");
 
 /*
-HPHP::Variant HPHP::f_count_chars(HPHP::String const&, long long)
-_ZN4HPHP13f_count_charsERKNS_6StringEx
+HPHP::Variant HPHP::f_count_chars(HPHP::String const&, long)
+_ZN4HPHP13f_count_charsERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -352,11 +352,11 @@ str => rsi
 mode => rdx
 */
 
-TypedValue* fh_count_chars(TypedValue* _rv, Value* str, long long mode) asm("_ZN4HPHP13f_count_charsERKNS_6StringEx");
+TypedValue* fh_count_chars(TypedValue* _rv, Value* str, long mode) asm("_ZN4HPHP13f_count_charsERKNS_6StringEl");
 
 /*
-HPHP::Variant HPHP::f_str_word_count(HPHP::String const&, long long, HPHP::String const&)
-_ZN4HPHP16f_str_word_countERKNS_6StringExS2_
+HPHP::Variant HPHP::f_str_word_count(HPHP::String const&, long, HPHP::String const&)
+_ZN4HPHP16f_str_word_countERKNS_6StringElS2_
 
 (return value) => rax
 _rv => rdi
@@ -365,7 +365,7 @@ format => rdx
 charlist => rcx
 */
 
-TypedValue* fh_str_word_count(TypedValue* _rv, Value* str, long long format, Value* charlist) asm("_ZN4HPHP16f_str_word_countERKNS_6StringExS2_");
+TypedValue* fh_str_word_count(TypedValue* _rv, Value* str, long format, Value* charlist) asm("_ZN4HPHP16f_str_word_countERKNS_6StringElS2_");
 
 /*
 void HPHP::f_parse_str(HPHP::String const&, HPHP::VRefParamValue const&)

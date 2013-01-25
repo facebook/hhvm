@@ -17,18 +17,18 @@
 namespace HPHP {
 
 /*
-bool HPHP::f_bcscale(long long)
-_ZN4HPHP9f_bcscaleEx
+bool HPHP::f_bcscale(long)
+_ZN4HPHP9f_bcscaleEl
 
 (return value) => rax
 scale => rdi
 */
 
-bool fh_bcscale(long long scale) asm("_ZN4HPHP9f_bcscaleEx");
+bool fh_bcscale(long scale) asm("_ZN4HPHP9f_bcscaleEl");
 
 /*
-HPHP::String HPHP::f_bcadd(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP7f_bcaddERKNS_6StringES2_x
+HPHP::String HPHP::f_bcadd(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP7f_bcaddERKNS_6StringES2_l
 
 (return value) => rax
 _rv => rdi
@@ -37,11 +37,11 @@ right => rdx
 scale => rcx
 */
 
-Value* fh_bcadd(Value* _rv, Value* left, Value* right, long long scale) asm("_ZN4HPHP7f_bcaddERKNS_6StringES2_x");
+Value* fh_bcadd(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcaddERKNS_6StringES2_l");
 
 /*
-HPHP::String HPHP::f_bcsub(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP7f_bcsubERKNS_6StringES2_x
+HPHP::String HPHP::f_bcsub(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP7f_bcsubERKNS_6StringES2_l
 
 (return value) => rax
 _rv => rdi
@@ -50,11 +50,11 @@ right => rdx
 scale => rcx
 */
 
-Value* fh_bcsub(Value* _rv, Value* left, Value* right, long long scale) asm("_ZN4HPHP7f_bcsubERKNS_6StringES2_x");
+Value* fh_bcsub(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcsubERKNS_6StringES2_l");
 
 /*
-long long HPHP::f_bccomp(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP8f_bccompERKNS_6StringES2_x
+long HPHP::f_bccomp(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP8f_bccompERKNS_6StringES2_l
 
 (return value) => rax
 left => rdi
@@ -62,11 +62,11 @@ right => rsi
 scale => rdx
 */
 
-long long fh_bccomp(Value* left, Value* right, long long scale) asm("_ZN4HPHP8f_bccompERKNS_6StringES2_x");
+long fh_bccomp(Value* left, Value* right, long scale) asm("_ZN4HPHP8f_bccompERKNS_6StringES2_l");
 
 /*
-HPHP::String HPHP::f_bcmul(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP7f_bcmulERKNS_6StringES2_x
+HPHP::String HPHP::f_bcmul(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP7f_bcmulERKNS_6StringES2_l
 
 (return value) => rax
 _rv => rdi
@@ -75,11 +75,11 @@ right => rdx
 scale => rcx
 */
 
-Value* fh_bcmul(Value* _rv, Value* left, Value* right, long long scale) asm("_ZN4HPHP7f_bcmulERKNS_6StringES2_x");
+Value* fh_bcmul(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcmulERKNS_6StringES2_l");
 
 /*
-HPHP::String HPHP::f_bcdiv(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP7f_bcdivERKNS_6StringES2_x
+HPHP::String HPHP::f_bcdiv(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP7f_bcdivERKNS_6StringES2_l
 
 (return value) => rax
 _rv => rdi
@@ -88,7 +88,7 @@ right => rdx
 scale => rcx
 */
 
-Value* fh_bcdiv(Value* _rv, Value* left, Value* right, long long scale) asm("_ZN4HPHP7f_bcdivERKNS_6StringES2_x");
+Value* fh_bcdiv(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcdivERKNS_6StringES2_l");
 
 /*
 HPHP::String HPHP::f_bcmod(HPHP::String const&, HPHP::String const&)
@@ -103,8 +103,8 @@ right => rdx
 Value* fh_bcmod(Value* _rv, Value* left, Value* right) asm("_ZN4HPHP7f_bcmodERKNS_6StringES2_");
 
 /*
-HPHP::String HPHP::f_bcpow(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP7f_bcpowERKNS_6StringES2_x
+HPHP::String HPHP::f_bcpow(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP7f_bcpowERKNS_6StringES2_l
 
 (return value) => rax
 _rv => rdi
@@ -113,11 +113,11 @@ right => rdx
 scale => rcx
 */
 
-Value* fh_bcpow(Value* _rv, Value* left, Value* right, long long scale) asm("_ZN4HPHP7f_bcpowERKNS_6StringES2_x");
+Value* fh_bcpow(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcpowERKNS_6StringES2_l");
 
 /*
-HPHP::Variant HPHP::f_bcpowmod(HPHP::String const&, HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP10f_bcpowmodERKNS_6StringES2_S2_x
+HPHP::Variant HPHP::f_bcpowmod(HPHP::String const&, HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP10f_bcpowmodERKNS_6StringES2_S2_l
 
 (return value) => rax
 _rv => rdi
@@ -127,11 +127,11 @@ modulus => rcx
 scale => r8
 */
 
-TypedValue* fh_bcpowmod(TypedValue* _rv, Value* left, Value* right, Value* modulus, long long scale) asm("_ZN4HPHP10f_bcpowmodERKNS_6StringES2_S2_x");
+TypedValue* fh_bcpowmod(TypedValue* _rv, Value* left, Value* right, Value* modulus, long scale) asm("_ZN4HPHP10f_bcpowmodERKNS_6StringES2_S2_l");
 
 /*
-HPHP::Variant HPHP::f_bcsqrt(HPHP::String const&, long long)
-_ZN4HPHP8f_bcsqrtERKNS_6StringEx
+HPHP::Variant HPHP::f_bcsqrt(HPHP::String const&, long)
+_ZN4HPHP8f_bcsqrtERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -139,7 +139,7 @@ operand => rsi
 scale => rdx
 */
 
-TypedValue* fh_bcsqrt(TypedValue* _rv, Value* operand, long long scale) asm("_ZN4HPHP8f_bcsqrtERKNS_6StringEx");
+TypedValue* fh_bcsqrt(TypedValue* _rv, Value* operand, long scale) asm("_ZN4HPHP8f_bcsqrtERKNS_6StringEl");
 
 
 } // !HPHP

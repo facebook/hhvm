@@ -17,7 +17,7 @@
 namespace HPHP {
 
 /*
-long long HPHP::f_ftok(HPHP::String const&, HPHP::String const&)
+long HPHP::f_ftok(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP6f_ftokERKNS_6StringES2_
 
 (return value) => rax
@@ -25,11 +25,11 @@ pathname => rdi
 proj => rsi
 */
 
-long long fh_ftok(Value* pathname, Value* proj) asm("_ZN4HPHP6f_ftokERKNS_6StringES2_");
+long fh_ftok(Value* pathname, Value* proj) asm("_ZN4HPHP6f_ftokERKNS_6StringES2_");
 
 /*
-HPHP::Variant HPHP::f_msg_get_queue(long long, long long)
-_ZN4HPHP15f_msg_get_queueExx
+HPHP::Variant HPHP::f_msg_get_queue(long, long)
+_ZN4HPHP15f_msg_get_queueEll
 
 (return value) => rax
 _rv => rdi
@@ -37,21 +37,21 @@ key => rsi
 perms => rdx
 */
 
-TypedValue* fh_msg_get_queue(TypedValue* _rv, long long key, long long perms) asm("_ZN4HPHP15f_msg_get_queueExx");
+TypedValue* fh_msg_get_queue(TypedValue* _rv, long key, long perms) asm("_ZN4HPHP15f_msg_get_queueEll");
 
 /*
-bool HPHP::f_msg_queue_exists(long long)
-_ZN4HPHP18f_msg_queue_existsEx
+bool HPHP::f_msg_queue_exists(long)
+_ZN4HPHP18f_msg_queue_existsEl
 
 (return value) => rax
 key => rdi
 */
 
-bool fh_msg_queue_exists(long long key) asm("_ZN4HPHP18f_msg_queue_existsEx");
+bool fh_msg_queue_exists(long key) asm("_ZN4HPHP18f_msg_queue_existsEl");
 
 /*
-bool HPHP::f_msg_send(HPHP::Object const&, long long, HPHP::Variant const&, bool, bool, HPHP::VRefParamValue const&)
-_ZN4HPHP10f_msg_sendERKNS_6ObjectExRKNS_7VariantEbbRKNS_14VRefParamValueE
+bool HPHP::f_msg_send(HPHP::Object const&, long, HPHP::Variant const&, bool, bool, HPHP::VRefParamValue const&)
+_ZN4HPHP10f_msg_sendERKNS_6ObjectElRKNS_7VariantEbbRKNS_14VRefParamValueE
 
 (return value) => rax
 queue => rdi
@@ -62,11 +62,11 @@ blocking => r8
 errorcode => r9
 */
 
-bool fh_msg_send(Value* queue, long long msgtype, TypedValue* message, bool serialize, bool blocking, TypedValue* errorcode) asm("_ZN4HPHP10f_msg_sendERKNS_6ObjectExRKNS_7VariantEbbRKNS_14VRefParamValueE");
+bool fh_msg_send(Value* queue, long msgtype, TypedValue* message, bool serialize, bool blocking, TypedValue* errorcode) asm("_ZN4HPHP10f_msg_sendERKNS_6ObjectElRKNS_7VariantEbbRKNS_14VRefParamValueE");
 
 /*
-bool HPHP::f_msg_receive(HPHP::Object const&, long long, HPHP::VRefParamValue const&, long long, HPHP::VRefParamValue const&, bool, long long, HPHP::VRefParamValue const&)
-_ZN4HPHP13f_msg_receiveERKNS_6ObjectExRKNS_14VRefParamValueExS5_bxS5_
+bool HPHP::f_msg_receive(HPHP::Object const&, long, HPHP::VRefParamValue const&, long, HPHP::VRefParamValue const&, bool, long, HPHP::VRefParamValue const&)
+_ZN4HPHP13f_msg_receiveERKNS_6ObjectElRKNS_14VRefParamValueElS5_blS5_
 
 (return value) => rax
 queue => rdi
@@ -79,7 +79,7 @@ flags => st0
 errorcode => st8
 */
 
-bool fh_msg_receive(Value* queue, long long desiredmsgtype, TypedValue* msgtype, long long maxsize, TypedValue* message, bool unserialize, long long flags, TypedValue* errorcode) asm("_ZN4HPHP13f_msg_receiveERKNS_6ObjectExRKNS_14VRefParamValueExS5_bxS5_");
+bool fh_msg_receive(Value* queue, long desiredmsgtype, TypedValue* msgtype, long maxsize, TypedValue* message, bool unserialize, long flags, TypedValue* errorcode) asm("_ZN4HPHP13f_msg_receiveERKNS_6ObjectElRKNS_14VRefParamValueElS5_blS5_");
 
 /*
 bool HPHP::f_msg_remove_queue(HPHP::Object const&)
@@ -124,8 +124,8 @@ sem_identifier => rdi
 bool fh_sem_acquire(Value* sem_identifier) asm("_ZN4HPHP13f_sem_acquireERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_sem_get(long long, long long, long long, bool)
-_ZN4HPHP9f_sem_getExxxb
+HPHP::Variant HPHP::f_sem_get(long, long, long, bool)
+_ZN4HPHP9f_sem_getElllb
 
 (return value) => rax
 _rv => rdi
@@ -135,7 +135,7 @@ perm => rcx
 auto_release => r8
 */
 
-TypedValue* fh_sem_get(TypedValue* _rv, long long key, long long max_acquire, long long perm, bool auto_release) asm("_ZN4HPHP9f_sem_getExxxb");
+TypedValue* fh_sem_get(TypedValue* _rv, long key, long max_acquire, long perm, bool auto_release) asm("_ZN4HPHP9f_sem_getElllb");
 
 /*
 bool HPHP::f_sem_release(HPHP::Object const&)
@@ -158,8 +158,8 @@ sem_identifier => rdi
 bool fh_sem_remove(Value* sem_identifier) asm("_ZN4HPHP12f_sem_removeERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_shm_attach(long long, long long, long long)
-_ZN4HPHP12f_shm_attachExxx
+HPHP::Variant HPHP::f_shm_attach(long, long, long)
+_ZN4HPHP12f_shm_attachElll
 
 (return value) => rax
 _rv => rdi
@@ -168,31 +168,31 @@ shm_size => rdx
 shm_flag => rcx
 */
 
-TypedValue* fh_shm_attach(TypedValue* _rv, long long shm_key, long long shm_size, long long shm_flag) asm("_ZN4HPHP12f_shm_attachExxx");
+TypedValue* fh_shm_attach(TypedValue* _rv, long shm_key, long shm_size, long shm_flag) asm("_ZN4HPHP12f_shm_attachElll");
 
 /*
-bool HPHP::f_shm_detach(long long)
-_ZN4HPHP12f_shm_detachEx
+bool HPHP::f_shm_detach(long)
+_ZN4HPHP12f_shm_detachEl
 
 (return value) => rax
 shm_identifier => rdi
 */
 
-bool fh_shm_detach(long long shm_identifier) asm("_ZN4HPHP12f_shm_detachEx");
+bool fh_shm_detach(long shm_identifier) asm("_ZN4HPHP12f_shm_detachEl");
 
 /*
-bool HPHP::f_shm_remove(long long)
-_ZN4HPHP12f_shm_removeEx
+bool HPHP::f_shm_remove(long)
+_ZN4HPHP12f_shm_removeEl
 
 (return value) => rax
 shm_identifier => rdi
 */
 
-bool fh_shm_remove(long long shm_identifier) asm("_ZN4HPHP12f_shm_removeEx");
+bool fh_shm_remove(long shm_identifier) asm("_ZN4HPHP12f_shm_removeEl");
 
 /*
-HPHP::Variant HPHP::f_shm_get_var(long long, long long)
-_ZN4HPHP13f_shm_get_varExx
+HPHP::Variant HPHP::f_shm_get_var(long, long)
+_ZN4HPHP13f_shm_get_varEll
 
 (return value) => rax
 _rv => rdi
@@ -200,22 +200,22 @@ shm_identifier => rsi
 variable_key => rdx
 */
 
-TypedValue* fh_shm_get_var(TypedValue* _rv, long long shm_identifier, long long variable_key) asm("_ZN4HPHP13f_shm_get_varExx");
+TypedValue* fh_shm_get_var(TypedValue* _rv, long shm_identifier, long variable_key) asm("_ZN4HPHP13f_shm_get_varEll");
 
 /*
-bool HPHP::f_shm_has_var(long long, long long)
-_ZN4HPHP13f_shm_has_varExx
+bool HPHP::f_shm_has_var(long, long)
+_ZN4HPHP13f_shm_has_varEll
 
 (return value) => rax
 shm_identifier => rdi
 variable_key => rsi
 */
 
-bool fh_shm_has_var(long long shm_identifier, long long variable_key) asm("_ZN4HPHP13f_shm_has_varExx");
+bool fh_shm_has_var(long shm_identifier, long variable_key) asm("_ZN4HPHP13f_shm_has_varEll");
 
 /*
-bool HPHP::f_shm_put_var(long long, long long, HPHP::Variant const&)
-_ZN4HPHP13f_shm_put_varExxRKNS_7VariantE
+bool HPHP::f_shm_put_var(long, long, HPHP::Variant const&)
+_ZN4HPHP13f_shm_put_varEllRKNS_7VariantE
 
 (return value) => rax
 shm_identifier => rdi
@@ -223,18 +223,18 @@ variable_key => rsi
 variable => rdx
 */
 
-bool fh_shm_put_var(long long shm_identifier, long long variable_key, TypedValue* variable) asm("_ZN4HPHP13f_shm_put_varExxRKNS_7VariantE");
+bool fh_shm_put_var(long shm_identifier, long variable_key, TypedValue* variable) asm("_ZN4HPHP13f_shm_put_varEllRKNS_7VariantE");
 
 /*
-bool HPHP::f_shm_remove_var(long long, long long)
-_ZN4HPHP16f_shm_remove_varExx
+bool HPHP::f_shm_remove_var(long, long)
+_ZN4HPHP16f_shm_remove_varEll
 
 (return value) => rax
 shm_identifier => rdi
 variable_key => rsi
 */
 
-bool fh_shm_remove_var(long long shm_identifier, long long variable_key) asm("_ZN4HPHP16f_shm_remove_varExx");
+bool fh_shm_remove_var(long shm_identifier, long variable_key) asm("_ZN4HPHP16f_shm_remove_varEll");
 
 
 } // !HPHP

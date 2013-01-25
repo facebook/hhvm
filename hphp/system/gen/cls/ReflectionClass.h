@@ -70,9 +70,9 @@ class c_ReflectionClass : public ExtObjectData {
   public: Variant t_getdoccomment();
   public: Variant t_getconstructor();
   public: p_ReflectionMethod t_getmethod(CVarRef v_name);
-  public: Array t_getmethods(CVarRef v_filter = NAMVAR(s_sys_svi5830e7c6, 65535LL));
+  public: Array t_getmethods(CVarRef v_filter = NAMVAR(s_sys_svi5830e7c6, int64_t(65535)));
   public: p_ReflectionProperty t_getproperty(CVarRef v_name);
-  public: Array t_getproperties(CVarRef v_filter = NAMVAR(s_sys_svi5830e7c6, 65535LL));
+  public: Array t_getproperties(CVarRef v_filter = NAMVAR(s_sys_svi5830e7c6, int64_t(65535)));
   public: Variant t_getconstants();
   public: Variant t_getconstant(CVarRef v_name);
   public: Array t_getinterfaces();
@@ -156,9 +156,9 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getattributesrecursive);
 };
 ObjectData *coo_ReflectionClass() NEVER_INLINE;
-extern const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;
-extern const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT;
-extern const int64 q_ReflectionClass$$IS_FINAL;
+extern const int64_t q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;
+extern const int64_t q_ReflectionClass$$IS_EXPLICIT_ABSTRACT;
+extern const int64_t q_ReflectionClass$$IS_FINAL;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

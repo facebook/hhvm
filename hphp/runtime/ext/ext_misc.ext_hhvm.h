@@ -17,31 +17,31 @@
 namespace HPHP {
 
 /*
-long long HPHP::f_connection_aborted()
+long HPHP::f_connection_aborted()
 _ZN4HPHP20f_connection_abortedEv
 
 (return value) => rax
 */
 
-long long fh_connection_aborted() asm("_ZN4HPHP20f_connection_abortedEv");
+long fh_connection_aborted() asm("_ZN4HPHP20f_connection_abortedEv");
 
 /*
-long long HPHP::f_connection_status()
+long HPHP::f_connection_status()
 _ZN4HPHP19f_connection_statusEv
 
 (return value) => rax
 */
 
-long long fh_connection_status() asm("_ZN4HPHP19f_connection_statusEv");
+long fh_connection_status() asm("_ZN4HPHP19f_connection_statusEv");
 
 /*
-long long HPHP::f_connection_timeout()
+long HPHP::f_connection_timeout()
 _ZN4HPHP20f_connection_timeoutEv
 
 (return value) => rax
 */
 
-long long fh_connection_timeout() asm("_ZN4HPHP20f_connection_timeoutEv");
+long fh_connection_timeout() asm("_ZN4HPHP20f_connection_timeoutEv");
 
 /*
 HPHP::Variant HPHP::f_constant(HPHP::String const&)
@@ -167,14 +167,14 @@ ret => rdx
 TypedValue* fh_highlight_string(TypedValue* _rv, Value* str, bool ret) asm("_ZN4HPHP18f_highlight_stringERKNS_6StringEb");
 
 /*
-long long HPHP::f_ignore_user_abort(bool)
+long HPHP::f_ignore_user_abort(bool)
 _ZN4HPHP19f_ignore_user_abortEb
 
 (return value) => rax
 setting => rdi
 */
 
-long long fh_ignore_user_abort(bool setting) asm("_ZN4HPHP19f_ignore_user_abortEb");
+long fh_ignore_user_abort(bool setting) asm("_ZN4HPHP19f_ignore_user_abortEb");
 
 /*
 HPHP::Variant HPHP::f_pack(int, HPHP::String const&, HPHP::Array const&)
@@ -187,7 +187,7 @@ format => rdx
 _argv => rcx
 */
 
-TypedValue* fh_pack(TypedValue* _rv, long long _argc, Value* format, Value* _argv) asm("_ZN4HPHP6f_packEiRKNS_6StringERKNS_5ArrayE");
+TypedValue* fh_pack(TypedValue* _rv, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP6f_packEiRKNS_6StringERKNS_5ArrayE");
 
 /*
 bool HPHP::f_php_check_syntax(HPHP::String const&, HPHP::VRefParamValue const&)
@@ -212,14 +212,14 @@ filename => rsi
 Value* fh_php_strip_whitespace(Value* _rv, Value* filename) asm("_ZN4HPHP22f_php_strip_whitespaceERKNS_6StringE");
 
 /*
-long long HPHP::f_sleep(int)
+long HPHP::f_sleep(int)
 _ZN4HPHP7f_sleepEi
 
 (return value) => rax
 seconds => rdi
 */
 
-long long fh_sleep(int seconds) asm("_ZN4HPHP7f_sleepEi");
+long fh_sleep(int seconds) asm("_ZN4HPHP7f_sleepEi");
 
 /*
 void HPHP::f_usleep(int)
@@ -298,15 +298,15 @@ source => rsi
 Value* fh_token_get_all(Value* _rv, Value* source) asm("_ZN4HPHP15f_token_get_allERKNS_6StringE");
 
 /*
-HPHP::String HPHP::f_token_name(long long)
-_ZN4HPHP12f_token_nameEx
+HPHP::String HPHP::f_token_name(long)
+_ZN4HPHP12f_token_nameEl
 
 (return value) => rax
 _rv => rdi
 token => rsi
 */
 
-Value* fh_token_name(Value* _rv, long long token) asm("_ZN4HPHP12f_token_nameEx");
+Value* fh_token_name(Value* _rv, long token) asm("_ZN4HPHP12f_token_nameEl");
 
 /*
 HPHP::Variant HPHP::f_hphp_process_abort(HPHP::Variant const&)

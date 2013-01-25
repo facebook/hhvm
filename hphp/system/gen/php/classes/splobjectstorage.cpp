@@ -45,15 +45,15 @@ const int cw_SplObjectStorage$$instanceof_index[] = {
   0,-1,-1,-1,1,3,-1,-1,
 
 };
-extern const CallInfo ci_SplObjectStorage$$valid = { (void*)&c_SplObjectStorage::i_valid, (void*)&c_SplObjectStorage::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$rewind = { (void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$key = { (void*)&c_SplObjectStorage::i_key, (void*)&c_SplObjectStorage::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$current = { (void*)&c_SplObjectStorage::i_current, (void*)&c_SplObjectStorage::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$next = { (void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$count = { (void*)&c_SplObjectStorage::i_count, (void*)&c_SplObjectStorage::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$contains = { (void*)&c_SplObjectStorage::i_contains, (void*)&c_SplObjectStorage::ifa_contains, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$detach = { (void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$attach = { (void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplObjectStorage$$valid = { (void*)&c_SplObjectStorage::i_valid, (void*)&c_SplObjectStorage::ifa_valid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$rewind = { (void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$key = { (void*)&c_SplObjectStorage::i_key, (void*)&c_SplObjectStorage::ifa_key, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$current = { (void*)&c_SplObjectStorage::i_current, (void*)&c_SplObjectStorage::ifa_current, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$next = { (void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$count = { (void*)&c_SplObjectStorage::i_count, (void*)&c_SplObjectStorage::ifa_count, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$contains = { (void*)&c_SplObjectStorage::i_contains, (void*)&c_SplObjectStorage::ifa_contains, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$detach = { (void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_SplObjectStorage$$attach = { (void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 4, 0x0000000000000000L};
 Variant c_SplObjectStorage::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_rewind);
 }
@@ -208,7 +208,7 @@ bool c_SplObjectStorage::t_valid() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 50 */
-int64 c_SplObjectStorage::t_key() {
+int64_t c_SplObjectStorage::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::key);
   ObjectData *obj_tmp UNUSED;
   return m_index;
@@ -230,7 +230,7 @@ void c_SplObjectStorage::t_next() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 87 */
-int64 c_SplObjectStorage::t_count() {
+int64_t c_SplObjectStorage::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::count);
   ObjectData *obj_tmp UNUSED;
   return x_count(m_storage);
@@ -340,7 +340,7 @@ ObjectData *coo_SplObjectStorage() {
 // Class tables
 static const int64 cpt_static_inits[] = {
   (int64)&s_sys_sva00000000,
-  (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
+  (int64)&NAMVAR(s_sys_svif01bca90, int64_t(0)),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x7B6B4E95,1,0,18,65,-1,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss7c4bb61c, "\000SplObjectStorage\000storage") },

@@ -17,8 +17,8 @@
 namespace HPHP {
 
 /*
-HPHP::Variant HPHP::f_icu_match(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&, long long)
-_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEx
+HPHP::Variant HPHP::f_icu_match(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&, long)
+_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEl
 
 (return value) => rax
 _rv => rdi
@@ -28,7 +28,7 @@ matches => rcx
 flags => r8
 */
 
-TypedValue* fh_icu_match(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, long long flags) asm("_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEx");
+TypedValue* fh_icu_match(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, long flags) asm("_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEl");
 
 /*
 HPHP::String HPHP::f_icu_transliterate(HPHP::String const&, bool)

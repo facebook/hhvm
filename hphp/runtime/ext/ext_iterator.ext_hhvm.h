@@ -17,8 +17,8 @@
 namespace HPHP {
 
 /*
-HPHP::Object HPHP::f_hphp_recursiveiteratoriterator___construct(HPHP::Object const&, HPHP::Object const&, long long, long long)
-_ZN4HPHP44f_hphp_recursiveiteratoriterator___constructERKNS_6ObjectES2_xx
+HPHP::Object HPHP::f_hphp_recursiveiteratoriterator___construct(HPHP::Object const&, HPHP::Object const&, long, long)
+_ZN4HPHP44f_hphp_recursiveiteratoriterator___constructERKNS_6ObjectES2_ll
 
 (return value) => rax
 _rv => rdi
@@ -28,7 +28,7 @@ mode => rcx
 flags => r8
 */
 
-Value* fh_hphp_recursiveiteratoriterator___construct(Value* _rv, Value* obj, Value* iterator, long long mode, long long flags) asm("_ZN4HPHP44f_hphp_recursiveiteratoriterator___constructERKNS_6ObjectES2_xx");
+Value* fh_hphp_recursiveiteratoriterator___construct(Value* _rv, Value* obj, Value* iterator, long mode, long flags) asm("_ZN4HPHP44f_hphp_recursiveiteratoriterator___constructERKNS_6ObjectES2_ll");
 
 /*
 HPHP::Object HPHP::f_hphp_recursiveiteratoriterator_getinneriterator(HPHP::Object const&)
@@ -132,14 +132,14 @@ obj => rdi
 void fh_hphp_directoryiterator_rewind(Value* obj) asm("_ZN4HPHP31f_hphp_directoryiterator_rewindERKNS_6ObjectE");
 
 /*
-void HPHP::f_hphp_directoryiterator_seek(HPHP::Object const&, long long)
-_ZN4HPHP29f_hphp_directoryiterator_seekERKNS_6ObjectEx
+void HPHP::f_hphp_directoryiterator_seek(HPHP::Object const&, long)
+_ZN4HPHP29f_hphp_directoryiterator_seekERKNS_6ObjectEl
 
 obj => rdi
 position => rsi
 */
 
-void fh_hphp_directoryiterator_seek(Value* obj, long long position) asm("_ZN4HPHP29f_hphp_directoryiterator_seekERKNS_6ObjectEx");
+void fh_hphp_directoryiterator_seek(Value* obj, long position) asm("_ZN4HPHP29f_hphp_directoryiterator_seekERKNS_6ObjectEl");
 
 /*
 HPHP::Variant HPHP::f_hphp_directoryiterator_current(HPHP::Object const&)
@@ -184,8 +184,8 @@ obj => rdi
 bool fh_hphp_directoryiterator_isdot(Value* obj) asm("_ZN4HPHP30f_hphp_directoryiterator_isdotERKNS_6ObjectE");
 
 /*
-bool HPHP::f_hphp_recursivedirectoryiterator___construct(HPHP::Object const&, HPHP::String const&, long long)
-_ZN4HPHP45f_hphp_recursivedirectoryiterator___constructERKNS_6ObjectERKNS_6StringEx
+bool HPHP::f_hphp_recursivedirectoryiterator___construct(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP45f_hphp_recursivedirectoryiterator___constructERKNS_6ObjectERKNS_6StringEl
 
 (return value) => rax
 obj => rdi
@@ -193,7 +193,7 @@ path => rsi
 flags => rdx
 */
 
-bool fh_hphp_recursivedirectoryiterator___construct(Value* obj, Value* path, long long flags) asm("_ZN4HPHP45f_hphp_recursivedirectoryiterator___constructERKNS_6ObjectERKNS_6StringEx");
+bool fh_hphp_recursivedirectoryiterator___construct(Value* obj, Value* path, long flags) asm("_ZN4HPHP45f_hphp_recursivedirectoryiterator___constructERKNS_6ObjectERKNS_6StringEl");
 
 /*
 HPHP::Variant HPHP::f_hphp_recursivedirectoryiterator_key(HPHP::Object const&)
@@ -225,14 +225,14 @@ obj => rdi
 void fh_hphp_recursivedirectoryiterator_rewind(Value* obj) asm("_ZN4HPHP40f_hphp_recursivedirectoryiterator_rewindERKNS_6ObjectE");
 
 /*
-void HPHP::f_hphp_recursivedirectoryiterator_seek(HPHP::Object const&, long long)
-_ZN4HPHP38f_hphp_recursivedirectoryiterator_seekERKNS_6ObjectEx
+void HPHP::f_hphp_recursivedirectoryiterator_seek(HPHP::Object const&, long)
+_ZN4HPHP38f_hphp_recursivedirectoryiterator_seekERKNS_6ObjectEl
 
 obj => rdi
 position => rsi
 */
 
-void fh_hphp_recursivedirectoryiterator_seek(Value* obj, long long position) asm("_ZN4HPHP38f_hphp_recursivedirectoryiterator_seekERKNS_6ObjectEx");
+void fh_hphp_recursivedirectoryiterator_seek(Value* obj, long position) asm("_ZN4HPHP38f_hphp_recursivedirectoryiterator_seekERKNS_6ObjectEl");
 
 /*
 HPHP::Variant HPHP::f_hphp_recursivedirectoryiterator_current(HPHP::Object const&)

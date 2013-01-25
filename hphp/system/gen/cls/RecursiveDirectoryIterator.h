@@ -43,8 +43,8 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   c_RecursiveDirectoryIterator(const ObjectStaticCallbacks *cb = &cw_RecursiveDirectoryIterator) : c_DirectoryIterator(cb) {
     if (!hhvm) setAttribute(NoDestructor);
   }
-  public: void t___construct(Variant v_path, Variant v_flags = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
-  public: c_RecursiveDirectoryIterator *create(CVarRef v_path, CVarRef v_flags = NAMVAR(s_sys_svi86af027e, 16LL) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
+  public: void t___construct(Variant v_path, Variant v_flags = 16L /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
+  public: c_RecursiveDirectoryIterator *create(CVarRef v_path, CVarRef v_flags = NAMVAR(s_sys_svi86af027e, int64_t(16)) /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
   public: Variant t_current();
   public: Variant t_key();
   public: void t_next();
@@ -70,12 +70,12 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   DECLARE_METHOD_INVOKE_HELPERS(getsubpathname);
 };
 ObjectData *coo_RecursiveDirectoryIterator() NEVER_INLINE;
-extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_SELF;
-extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO;
-extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME;
-extern const int64 q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME;
-extern const int64 q_RecursiveDirectoryIterator$$KEY_AS_FILENAME;
-extern const int64 q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY;
+extern const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_SELF;
+extern const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO;
+extern const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME;
+extern const int64_t q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME;
+extern const int64_t q_RecursiveDirectoryIterator$$KEY_AS_FILENAME;
+extern const int64_t q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

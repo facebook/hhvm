@@ -213,7 +213,7 @@ public:
         String zphrase;
         if (var.is(KindOfArray)) {
           Array arr = var.toArray();
-          if (!arr.exists(0LL) || !arr.exists(1LL)) {
+          if (!arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
             raise_warning("key array must be of the form "
                             "array(0 => key, 1 => phrase)");
             return Object();

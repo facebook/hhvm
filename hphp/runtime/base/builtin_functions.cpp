@@ -100,14 +100,14 @@ String getUndefinedConstant(CStrRef name) {
 }
 
 bool array_is_valid_callback(CArrRef arr) {
-  if (arr.size() != 2 || !arr.exists(0LL) || !arr.exists(1LL)) {
+  if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
-  Variant elem0 = arr.rvalAt(0LL);
+  Variant elem0 = arr.rvalAt(int64_t(0));
   if (!elem0.isString() && !elem0.isObject()) {
     return false;
   }
-  Variant elem1 = arr.rvalAt(1LL);
+  Variant elem1 = arr.rvalAt(int64_t(1));
   if (!elem1.isString()) {
     return false;
   }
@@ -153,12 +153,12 @@ vm_decode_function(CVarRef function,
         }
         return NULL;
       }
-      Variant elem1 = arr.rvalAt(1LL);
+      Variant elem1 = arr.rvalAt(int64_t(1));
       name = elem1.toString();
       pos = name.find("::");
       nameContainsClass =
         (pos != 0 && pos != String::npos && pos + 2 < name.size());
-      Variant elem0 = arr.rvalAt(0LL);
+      Variant elem0 = arr.rvalAt(int64_t(0));
       if (elem0.isString()) {
         String sclass = elem0.toString();
         if (sclass->isame(s_self.get())) {
@@ -381,10 +381,10 @@ Variant vm_default_invoke_file(bool incOnce) {
   SystemGlobals* g = (SystemGlobals*)get_global_variables();
   Variant& v_argc = g->GV(argc);
   Variant& v_argv = g->GV(argv);
-  if (more(v_argc, 1LL)) {
+  if (more(v_argc, int64_t(1))) {
     v_argc--;
     v_argv.dequeue();
-    String s = toString(v_argv.rvalAt(0LL, AccessFlags::Error));
+    String s = toString(v_argv.rvalAt(int64_t(0), AccessFlags::Error));
     Variant r;
     if (eval_invoke_file_hook(r, s, incOnce, NULL, "")) return r;
     return throw_missing_file(s.c_str());
@@ -466,8 +466,8 @@ bool get_user_func_handler(CVarRef function, bool skip,
 
   if (LIKELY(Variant::GetAccessorType(tv_func) == KindOfArray)) {
     CArrRef arr = Variant::GetAsArray(tv_func);
-    CVarRef clsname = arr.rvalAtRef(0LL);
-    CVarRef mthname = arr.rvalAtRef(1LL);
+    CVarRef clsname = arr.rvalAtRef(int64_t(0));
+    CVarRef mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
         &clsname == &null_variant ||
         &mthname == &null_variant) {
@@ -2047,7 +2047,7 @@ String AutoloadHandler::getSignature(CVarRef handler) {
   }
   String lName = StringUtil::ToLower(name);
   if (handler.isArray()) {
-    Variant first = handler.getArrayData()->get(0LL);
+    Variant first = handler.getArrayData()->get(int64_t(0));
     if (first.isObject()) {
       // Add the object address as part of the signature
       int64 data = (int64)first.getObjectData();

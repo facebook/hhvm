@@ -36,7 +36,7 @@ Value* fh_get_declared_classes(Value* _rv) asm("_ZN4HPHP22f_get_declared_classes
 
 TypedValue* fg_get_declared_classes(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -72,7 +72,7 @@ Value* fh_get_declared_interfaces(Value* _rv) asm("_ZN4HPHP25f_get_declared_inte
 
 TypedValue* fg_get_declared_interfaces(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -108,7 +108,7 @@ Value* fh_get_declared_traits(Value* _rv) asm("_ZN4HPHP21f_get_declared_traitsEv
 
 TypedValue* fg_get_declared_traits(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv._count = 0;
@@ -143,8 +143,8 @@ autoload => rsi
 
 bool fh_class_exists(Value* class_name, bool autoload) asm("_ZN4HPHP14f_class_existsERKNS_6StringEb");
 
-TypedValue * fg1_class_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_class_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_class_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_class_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -165,7 +165,7 @@ TypedValue * fg1_class_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_class_exists(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -206,8 +206,8 @@ autoload => rsi
 
 bool fh_interface_exists(Value* interface_name, bool autoload) asm("_ZN4HPHP18f_interface_existsERKNS_6StringEb");
 
-TypedValue * fg1_interface_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_interface_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_interface_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_interface_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -228,7 +228,7 @@ TypedValue * fg1_interface_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_interface_exists(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -269,8 +269,8 @@ autoload => rsi
 
 bool fh_trait_exists(Value* trait_name, bool autoload) asm("_ZN4HPHP14f_trait_existsERKNS_6StringEb");
 
-TypedValue * fg1_trait_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_trait_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_trait_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_trait_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -291,7 +291,7 @@ TypedValue * fg1_trait_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_trait_exists(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -334,7 +334,7 @@ Value* fh_get_class_methods(Value* _rv, TypedValue* class_or_object) asm("_ZN4HP
 
 TypedValue* fg_get_class_methods(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;
@@ -369,8 +369,8 @@ class_name => rsi
 
 Value* fh_get_class_vars(Value* _rv, Value* class_name) asm("_ZN4HPHP16f_get_class_varsERKNS_6StringE");
 
-TypedValue * fg1_get_class_vars(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_get_class_vars(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_get_class_vars(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_get_class_vars(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -382,7 +382,7 @@ TypedValue * fg1_get_class_vars(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_get_class_vars(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -424,8 +424,8 @@ class_name => rsi
 
 Value* fh_get_class_constants(Value* _rv, Value* class_name) asm("_ZN4HPHP21f_get_class_constantsERKNS_6StringE");
 
-TypedValue * fg1_get_class_constants(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_get_class_constants(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_get_class_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_get_class_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfArray;
@@ -437,7 +437,7 @@ TypedValue * fg1_get_class_constants(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* fg_get_class_constants(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
@@ -481,7 +481,7 @@ TypedValue* fh_get_class(TypedValue* _rv, TypedValue* object) asm("_ZN4HPHP11f_g
 
 TypedValue* fg_get_class(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       fh_get_class((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&null_variant));
@@ -516,7 +516,7 @@ TypedValue* fh_get_parent_class(TypedValue* _rv, TypedValue* object) asm("_ZN4HP
 
 TypedValue* fg_get_parent_class(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       fh_get_parent_class((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&null_variant));
@@ -550,8 +550,8 @@ allow_string => rdx
 
 bool fh_is_a(TypedValue* class_or_object, Value* class_name, bool allow_string) asm("_ZN4HPHP6f_is_aERKNS_7VariantERKNS_6StringEb");
 
-TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -572,7 +572,7 @@ TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
 
 TypedValue* fg_is_a(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
@@ -614,8 +614,8 @@ allow_string => rdx
 
 bool fh_is_subclass_of(TypedValue* class_or_object, Value* class_name, bool allow_string) asm("_ZN4HPHP16f_is_subclass_ofERKNS_7VariantERKNS_6StringEb");
 
-TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -636,7 +636,7 @@ TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* fg_is_subclass_of(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
@@ -677,8 +677,8 @@ method_name => rsi
 
 bool fh_method_exists(TypedValue* class_or_object, Value* method_name) asm("_ZN4HPHP15f_method_existsERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_method_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_method_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_method_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_method_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -689,7 +689,7 @@ TypedValue * fg1_method_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 
 TypedValue* fg_method_exists(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
@@ -730,8 +730,8 @@ property => rsi
 
 bool fh_property_exists(TypedValue* class_or_object, Value* property) asm("_ZN4HPHP17f_property_existsERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -742,7 +742,7 @@ TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 
 TypedValue* fg_property_exists(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
@@ -785,7 +785,7 @@ TypedValue* fh_get_object_vars(TypedValue* _rv, TypedValue* object) asm("_ZN4HPH
 
 TypedValue* fg_get_object_vars(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       fh_get_object_vars((&(rv)), (args-0));
@@ -820,8 +820,8 @@ paramarr => rcx
 
 TypedValue* fh_call_user_method_array(TypedValue* _rv, Value* method_name, TypedValue* obj, Value* paramarr) asm("_ZN4HPHP24f_call_user_method_arrayERKNS_6StringERKNS_14VRefParamValueERKNS_5ArrayE");
 
-TypedValue * fg1_call_user_method_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_call_user_method_array(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_call_user_method_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_call_user_method_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -836,7 +836,7 @@ TypedValue * fg1_call_user_method_array(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* fg_call_user_method_array(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
@@ -877,16 +877,16 @@ obj => rcx
 _argv => r8
 */
 
-TypedValue* fh_call_user_method(TypedValue* _rv, long long _argc, Value* method_name, TypedValue* obj, Value* _argv) asm("_ZN4HPHP18f_call_user_methodEiRKNS_6StringERKNS_14VRefParamValueERKNS_5ArrayE");
+TypedValue* fh_call_user_method(TypedValue* _rv, int64_t _argc, Value* method_name, TypedValue* obj, Value* _argv) asm("_ZN4HPHP18f_call_user_methodEiRKNS_6StringERKNS_14VRefParamValueERKNS_5ArrayE");
 
-TypedValue * fg1_call_user_method(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_call_user_method(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_call_user_method(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_call_user_method(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
     ArrayInit ai(count-2, false);
-    for (long long i = 2; i < count; ++i) {
+    for (int64_t i = 2; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-2, tvAsVariant(extraArg));
@@ -903,14 +903,14 @@ TypedValue * fg1_call_user_method(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 
 TypedValue* fg_call_user_method(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
           ArrayInit ai(count-2, false);
-          for (long long i = 2; i < count; ++i) {
+          for (int64_t i = 2; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-2, tvAsVariant(extraArg));

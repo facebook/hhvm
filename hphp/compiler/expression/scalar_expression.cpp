@@ -494,7 +494,7 @@ void ScalarExpression::outputCPPNamedInteger(CodeGenerator &cg,
   int intId = ar->checkScalarVarInteger(val, index);
   always_assert(index != -1);
   string name = ar->getScalarVarIntegerName(intId, index);
-  cg_printf("NAMVAR(%s, %lldLL)", name.c_str(), val);
+  cg_printf("NAMVAR(%s, int64_t(%"PRId64"))", name.c_str(), val);
 
   getUsedScalarScope(cg)->addUsedScalarVarInteger(val);
   if (cg.isFileOrClassHeader()) {
@@ -510,10 +510,10 @@ void ScalarExpression::outputCPPInteger(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   Variant v = getVariant();
   assert(v.isInteger());
-  if (v.toInt64() == LONG_MIN) {
-    cg_printf("(int64)0x%llxLL", (uint64)LONG_MIN);
+  if (v.toInt64() == std::numeric_limits<int64_t>::min()) {
+    cg_printf("int64_t(0x8000000000000000LL)");
   } else {
-    cg_printf("%lldLL", v.toInt64());
+    cg_printf("%"PRId64"L", v.toInt64());
   }
 }
 
@@ -586,7 +586,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     if ((*s == '0' && m_value.size() == 1) || ('1' <= *s && *s <= '9')) {
       // Offset could be treated as a long
-      cg_printf("%sLL", m_value.c_str());
+      cg_printf("%sL", m_value.c_str());
     } else {
       // Offset must be treated as a string
       outputCPPString(cg, ar);

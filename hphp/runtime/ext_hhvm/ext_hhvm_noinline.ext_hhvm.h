@@ -16,8 +16,8 @@
 namespace HPHP {
 
 /*
-bool HPHP::fni_apc_compile_file(HPHP::String const&, bool, long long)
-_ZN4HPHP20fni_apc_compile_fileERKNS_6StringEbx
+bool HPHP::fni_apc_compile_file(HPHP::String const&, bool, long)
+_ZN4HPHP20fni_apc_compile_fileERKNS_6StringEbl
 
 (return value) => rax
 filename => rdi
@@ -25,11 +25,11 @@ atomic => rsi
 cache_id => rdx
 */
 
-bool fh_apc_compile_file(Value* filename, bool atomic, long long cache_id) asm("_ZN4HPHP20fni_apc_compile_fileERKNS_6StringEbx");
+bool fh_apc_compile_file(Value* filename, bool atomic, long cache_id) asm("_ZN4HPHP20fni_apc_compile_fileERKNS_6StringEbl");
 
 /*
-bool HPHP::fni_apc_define_constants(HPHP::String const&, HPHP::String const&, bool, long long)
-_ZN4HPHP24fni_apc_define_constantsERKNS_6StringES2_bx
+bool HPHP::fni_apc_define_constants(HPHP::String const&, HPHP::String const&, bool, long)
+_ZN4HPHP24fni_apc_define_constantsERKNS_6StringES2_bl
 
 (return value) => rax
 key => rdi
@@ -38,11 +38,11 @@ case_sensitive => rdx
 cache_id => rcx
 */
 
-bool fh_apc_define_constants(Value* key, Value* constants, bool case_sensitive, long long cache_id) asm("_ZN4HPHP24fni_apc_define_constantsERKNS_6StringES2_bx");
+bool fh_apc_define_constants(Value* key, Value* constants, bool case_sensitive, long cache_id) asm("_ZN4HPHP24fni_apc_define_constantsERKNS_6StringES2_bl");
 
 /*
-bool HPHP::fni_apc_load_constants(HPHP::String const&, bool, long long)
-_ZN4HPHP22fni_apc_load_constantsERKNS_6StringEbx
+bool HPHP::fni_apc_load_constants(HPHP::String const&, bool, long)
+_ZN4HPHP22fni_apc_load_constantsERKNS_6StringEbl
 
 (return value) => rax
 key => rdi
@@ -50,7 +50,7 @@ case_sensitive => rsi
 cache_id => rdx
 */
 
-bool fh_apc_load_constants(Value* key, bool case_sensitive, long long cache_id) asm("_ZN4HPHP22fni_apc_load_constantsERKNS_6StringEbx");
+bool fh_apc_load_constants(Value* key, bool case_sensitive, long cache_id) asm("_ZN4HPHP22fni_apc_load_constantsERKNS_6StringEbl");
 
 /*
 HPHP::Array HPHP::fni_apc_sma_info(bool)
@@ -74,8 +74,8 @@ _rv => rdi
 Value* fh_apc_filehits(Value* _rv) asm("_ZN4HPHP16fni_apc_filehitsEv");
 
 /*
-HPHP::Variant HPHP::fni_apc_delete_file(HPHP::Variant const&, long long)
-_ZN4HPHP19fni_apc_delete_fileERKNS_7VariantEx
+HPHP::Variant HPHP::fni_apc_delete_file(HPHP::Variant const&, long)
+_ZN4HPHP19fni_apc_delete_fileERKNS_7VariantEl
 
 (return value) => rax
 _rv => rdi
@@ -83,11 +83,11 @@ keys => rsi
 cache_id => rdx
 */
 
-TypedValue* fh_apc_delete_file(TypedValue* _rv, TypedValue* keys, long long cache_id) asm("_ZN4HPHP19fni_apc_delete_fileERKNS_7VariantEx");
+TypedValue* fh_apc_delete_file(TypedValue* _rv, TypedValue* keys, long cache_id) asm("_ZN4HPHP19fni_apc_delete_fileERKNS_7VariantEl");
 
 /*
-HPHP::Variant HPHP::fni_apc_bin_dump(long long, HPHP::Variant const&)
-_ZN4HPHP16fni_apc_bin_dumpExRKNS_7VariantE
+HPHP::Variant HPHP::fni_apc_bin_dump(long, HPHP::Variant const&)
+_ZN4HPHP16fni_apc_bin_dumpElRKNS_7VariantE
 
 (return value) => rax
 _rv => rdi
@@ -95,11 +95,11 @@ cache_id => rsi
 filter => rdx
 */
 
-TypedValue* fh_apc_bin_dump(TypedValue* _rv, long long cache_id, TypedValue* filter) asm("_ZN4HPHP16fni_apc_bin_dumpExRKNS_7VariantE");
+TypedValue* fh_apc_bin_dump(TypedValue* _rv, long cache_id, TypedValue* filter) asm("_ZN4HPHP16fni_apc_bin_dumpElRKNS_7VariantE");
 
 /*
-bool HPHP::fni_apc_bin_load(HPHP::String const&, long long, long long)
-_ZN4HPHP16fni_apc_bin_loadERKNS_6StringExx
+bool HPHP::fni_apc_bin_load(HPHP::String const&, long, long)
+_ZN4HPHP16fni_apc_bin_loadERKNS_6StringEll
 
 (return value) => rax
 data => rdi
@@ -107,11 +107,11 @@ flags => rsi
 cache_id => rdx
 */
 
-bool fh_apc_bin_load(Value* data, long long flags, long long cache_id) asm("_ZN4HPHP16fni_apc_bin_loadERKNS_6StringExx");
+bool fh_apc_bin_load(Value* data, long flags, long cache_id) asm("_ZN4HPHP16fni_apc_bin_loadERKNS_6StringEll");
 
 /*
-HPHP::Variant HPHP::fni_apc_bin_dumpfile(long long, HPHP::Variant const&, HPHP::String const&, long long, HPHP::Object const&)
-_ZN4HPHP20fni_apc_bin_dumpfileExRKNS_7VariantERKNS_6StringExRKNS_6ObjectE
+HPHP::Variant HPHP::fni_apc_bin_dumpfile(long, HPHP::Variant const&, HPHP::String const&, long, HPHP::Object const&)
+_ZN4HPHP20fni_apc_bin_dumpfileElRKNS_7VariantERKNS_6StringElRKNS_6ObjectE
 
 (return value) => rax
 _rv => rdi
@@ -122,11 +122,11 @@ flags => r8
 context => r9
 */
 
-TypedValue* fh_apc_bin_dumpfile(TypedValue* _rv, long long cache_id, TypedValue* filter, Value* filename, long long flags, Value* context) asm("_ZN4HPHP20fni_apc_bin_dumpfileExRKNS_7VariantERKNS_6StringExRKNS_6ObjectE");
+TypedValue* fh_apc_bin_dumpfile(TypedValue* _rv, long cache_id, TypedValue* filter, Value* filename, long flags, Value* context) asm("_ZN4HPHP20fni_apc_bin_dumpfileElRKNS_7VariantERKNS_6StringElRKNS_6ObjectE");
 
 /*
-bool HPHP::fni_apc_bin_loadfile(HPHP::String const&, HPHP::Object const&, long long, long long)
-_ZN4HPHP20fni_apc_bin_loadfileERKNS_6StringERKNS_6ObjectExx
+bool HPHP::fni_apc_bin_loadfile(HPHP::String const&, HPHP::Object const&, long, long)
+_ZN4HPHP20fni_apc_bin_loadfileERKNS_6StringERKNS_6ObjectEll
 
 (return value) => rax
 filename => rdi
@@ -135,7 +135,7 @@ flags => rdx
 cache_id => rcx
 */
 
-bool fh_apc_bin_loadfile(Value* filename, Value* context, long long flags, long long cache_id) asm("_ZN4HPHP20fni_apc_bin_loadfileERKNS_6StringERKNS_6ObjectExx");
+bool fh_apc_bin_loadfile(Value* filename, Value* context, long flags, long cache_id) asm("_ZN4HPHP20fni_apc_bin_loadfileERKNS_6StringERKNS_6ObjectEll");
 
 /*
 HPHP::Variant HPHP::fni_array_fill(int, int, HPHP::Variant const&)
@@ -184,7 +184,7 @@ array => rsi
 TypedValue* fh_array_shift(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP15fni_array_shiftERKNS_14VRefParamValueE");
 
 /*
-long long HPHP::fni_sizeof(HPHP::Variant const&, bool)
+long HPHP::fni_sizeof(HPHP::Variant const&, bool)
 _ZN4HPHP10fni_sizeofERKNS_7VariantEb
 
 (return value) => rax
@@ -192,7 +192,7 @@ var => rdi
 recursive => rsi
 */
 
-long long fh_sizeof(TypedValue* var, bool recursive) asm("_ZN4HPHP10fni_sizeofERKNS_7VariantEb");
+long fh_sizeof(TypedValue* var, bool recursive) asm("_ZN4HPHP10fni_sizeofERKNS_7VariantEb");
 
 /*
 HPHP::Variant HPHP::fni_each(HPHP::VRefParamValue const&)
@@ -491,14 +491,14 @@ modify => rsi
 void fh_date_modify(Value* object, Value* modify) asm("_ZN4HPHP15fni_date_modifyERKNS_6ObjectERKNS_6StringE");
 
 /*
-long long HPHP::fni_date_offset_get(HPHP::Object const&)
+long HPHP::fni_date_offset_get(HPHP::Object const&)
 _ZN4HPHP19fni_date_offset_getERKNS_6ObjectE
 
 (return value) => rax
 object => rdi
 */
 
-long long fh_date_offset_get(Value* object) asm("_ZN4HPHP19fni_date_offset_getERKNS_6ObjectE");
+long fh_date_offset_get(Value* object) asm("_ZN4HPHP19fni_date_offset_getERKNS_6ObjectE");
 
 /*
 HPHP::Variant HPHP::fni_date_parse(HPHP::String const&)
@@ -524,8 +524,8 @@ interval => rdx
 Value* fh_date_sub(Value* _rv, Value* datetime, Value* interval) asm("_ZN4HPHP12fni_date_subERKNS_6ObjectES2_");
 
 /*
-HPHP::Array HPHP::fni_date_sun_info(long long, double, double)
-_ZN4HPHP17fni_date_sun_infoExdd
+HPHP::Array HPHP::fni_date_sun_info(long, double, double)
+_ZN4HPHP17fni_date_sun_infoEldd
 
 (return value) => rax
 _rv => rdi
@@ -534,11 +534,11 @@ latitude => xmm0
 longitude => xmm1
 */
 
-Value* fh_date_sun_info(Value* _rv, long long ts, double latitude, double longitude) asm("_ZN4HPHP17fni_date_sun_infoExdd");
+Value* fh_date_sun_info(Value* _rv, long ts, double latitude, double longitude) asm("_ZN4HPHP17fni_date_sun_infoEldd");
 
 /*
-HPHP::Variant HPHP::fni_date_sunrise(long long, int, double, double, double, double)
-_ZN4HPHP16fni_date_sunriseExidddd
+HPHP::Variant HPHP::fni_date_sunrise(long, int, double, double, double, double)
+_ZN4HPHP16fni_date_sunriseElidddd
 
 (return value) => rax
 _rv => rdi
@@ -550,11 +550,11 @@ zenith => xmm2
 gmt_offset => xmm3
 */
 
-TypedValue* fh_date_sunrise(TypedValue* _rv, long long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) asm("_ZN4HPHP16fni_date_sunriseExidddd");
+TypedValue* fh_date_sunrise(TypedValue* _rv, long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) asm("_ZN4HPHP16fni_date_sunriseElidddd");
 
 /*
-HPHP::Variant HPHP::fni_date_sunset(long long, int, double, double, double, double)
-_ZN4HPHP15fni_date_sunsetExidddd
+HPHP::Variant HPHP::fni_date_sunset(long, int, double, double, double, double)
+_ZN4HPHP15fni_date_sunsetElidddd
 
 (return value) => rax
 _rv => rdi
@@ -566,7 +566,7 @@ zenith => xmm2
 gmt_offset => xmm3
 */
 
-TypedValue* fh_date_sunset(TypedValue* _rv, long long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) asm("_ZN4HPHP15fni_date_sunsetExidddd");
+TypedValue* fh_date_sunset(TypedValue* _rv, long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) asm("_ZN4HPHP15fni_date_sunsetElidddd");
 
 /*
 void HPHP::fni_date_time_set(HPHP::Object const&, int, int, int)
@@ -581,18 +581,18 @@ second => rcx
 void fh_date_time_set(Value* object, int hour, int minute, int second) asm("_ZN4HPHP17fni_date_time_setERKNS_6ObjectEiii");
 
 /*
-long long HPHP::fni_date_timestamp_get(HPHP::Object const&)
+long HPHP::fni_date_timestamp_get(HPHP::Object const&)
 _ZN4HPHP22fni_date_timestamp_getERKNS_6ObjectE
 
 (return value) => rax
 datetime => rdi
 */
 
-long long fh_date_timestamp_get(Value* datetime) asm("_ZN4HPHP22fni_date_timestamp_getERKNS_6ObjectE");
+long fh_date_timestamp_get(Value* datetime) asm("_ZN4HPHP22fni_date_timestamp_getERKNS_6ObjectE");
 
 /*
-HPHP::Object HPHP::fni_date_timestamp_set(HPHP::Object const&, long long)
-_ZN4HPHP22fni_date_timestamp_setERKNS_6ObjectEx
+HPHP::Object HPHP::fni_date_timestamp_set(HPHP::Object const&, long)
+_ZN4HPHP22fni_date_timestamp_setERKNS_6ObjectEl
 
 (return value) => rax
 _rv => rdi
@@ -600,7 +600,7 @@ datetime => rsi
 timestamp => rdx
 */
 
-Value* fh_date_timestamp_set(Value* _rv, Value* datetime, long long timestamp) asm("_ZN4HPHP22fni_date_timestamp_setERKNS_6ObjectEx");
+Value* fh_date_timestamp_set(Value* _rv, Value* datetime, long timestamp) asm("_ZN4HPHP22fni_date_timestamp_setERKNS_6ObjectEl");
 
 /*
 HPHP::Variant HPHP::fni_date_timezone_get(HPHP::Object const&)
@@ -624,8 +624,8 @@ timezone => rsi
 void fh_date_timezone_set(Value* object, Value* timezone) asm("_ZN4HPHP21fni_date_timezone_setERKNS_6ObjectES2_");
 
 /*
-HPHP::Variant HPHP::fni_date(HPHP::String const&, long long)
-_ZN4HPHP8fni_dateERKNS_6StringEx
+HPHP::Variant HPHP::fni_date(HPHP::String const&, long)
+_ZN4HPHP8fni_dateERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -633,18 +633,18 @@ format => rsi
 timestamp => rdx
 */
 
-TypedValue* fh_date(TypedValue* _rv, Value* format, long long timestamp) asm("_ZN4HPHP8fni_dateERKNS_6StringEx");
+TypedValue* fh_date(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP8fni_dateERKNS_6StringEl");
 
 /*
-HPHP::Array HPHP::fni_getdate(long long)
-_ZN4HPHP11fni_getdateEx
+HPHP::Array HPHP::fni_getdate(long)
+_ZN4HPHP11fni_getdateEl
 
 (return value) => rax
 _rv => rdi
 timestamp => rsi
 */
 
-Value* fh_getdate(Value* _rv, long long timestamp) asm("_ZN4HPHP11fni_getdateEx");
+Value* fh_getdate(Value* _rv, long timestamp) asm("_ZN4HPHP11fni_getdateEl");
 
 /*
 HPHP::Variant HPHP::fni_gettimeofday(bool)
@@ -658,8 +658,8 @@ return_float => rsi
 TypedValue* fh_gettimeofday(TypedValue* _rv, bool return_float) asm("_ZN4HPHP16fni_gettimeofdayEb");
 
 /*
-HPHP::Variant HPHP::fni_gmdate(HPHP::String const&, long long)
-_ZN4HPHP10fni_gmdateERKNS_6StringEx
+HPHP::Variant HPHP::fni_gmdate(HPHP::String const&, long)
+_ZN4HPHP10fni_gmdateERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -667,7 +667,7 @@ format => rsi
 timestamp => rdx
 */
 
-TypedValue* fh_gmdate(TypedValue* _rv, Value* format, long long timestamp) asm("_ZN4HPHP10fni_gmdateERKNS_6StringEx");
+TypedValue* fh_gmdate(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP10fni_gmdateERKNS_6StringEl");
 
 /*
 HPHP::Variant HPHP::fni_gmmktime(int, int, int, int, int, int)
@@ -686,8 +686,8 @@ year => st0
 TypedValue* fh_gmmktime(TypedValue* _rv, int hour, int minute, int second, int month, int day, int year) asm("_ZN4HPHP12fni_gmmktimeEiiiiii");
 
 /*
-HPHP::String HPHP::fni_gmstrftime(HPHP::String const&, long long)
-_ZN4HPHP14fni_gmstrftimeERKNS_6StringEx
+HPHP::String HPHP::fni_gmstrftime(HPHP::String const&, long)
+_ZN4HPHP14fni_gmstrftimeERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -695,11 +695,11 @@ format => rsi
 timestamp => rdx
 */
 
-Value* fh_gmstrftime(Value* _rv, Value* format, long long timestamp) asm("_ZN4HPHP14fni_gmstrftimeERKNS_6StringEx");
+Value* fh_gmstrftime(Value* _rv, Value* format, long timestamp) asm("_ZN4HPHP14fni_gmstrftimeERKNS_6StringEl");
 
 /*
-HPHP::Variant HPHP::fni_idate(HPHP::String const&, long long)
-_ZN4HPHP9fni_idateERKNS_6StringEx
+HPHP::Variant HPHP::fni_idate(HPHP::String const&, long)
+_ZN4HPHP9fni_idateERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -707,11 +707,11 @@ format => rsi
 timestamp => rdx
 */
 
-TypedValue* fh_idate(TypedValue* _rv, Value* format, long long timestamp) asm("_ZN4HPHP9fni_idateERKNS_6StringEx");
+TypedValue* fh_idate(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP9fni_idateERKNS_6StringEl");
 
 /*
-HPHP::Array HPHP::fni_localtime(long long, bool)
-_ZN4HPHP13fni_localtimeExb
+HPHP::Array HPHP::fni_localtime(long, bool)
+_ZN4HPHP13fni_localtimeElb
 
 (return value) => rax
 _rv => rdi
@@ -719,7 +719,7 @@ timestamp => rsi
 is_associative => rdx
 */
 
-Value* fh_localtime(Value* _rv, long long timestamp, bool is_associative) asm("_ZN4HPHP13fni_localtimeExb");
+Value* fh_localtime(Value* _rv, long timestamp, bool is_associative) asm("_ZN4HPHP13fni_localtimeElb");
 
 /*
 HPHP::Variant HPHP::fni_microtime(bool)
@@ -749,8 +749,8 @@ year => st0
 TypedValue* fh_mktime(TypedValue* _rv, int hour, int minute, int second, int month, int day, int year) asm("_ZN4HPHP10fni_mktimeEiiiiii");
 
 /*
-HPHP::Variant HPHP::fni_strftime(HPHP::String const&, long long)
-_ZN4HPHP12fni_strftimeERKNS_6StringEx
+HPHP::Variant HPHP::fni_strftime(HPHP::String const&, long)
+_ZN4HPHP12fni_strftimeERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -758,7 +758,7 @@ format => rsi
 timestamp => rdx
 */
 
-TypedValue* fh_strftime(TypedValue* _rv, Value* format, long long timestamp) asm("_ZN4HPHP12fni_strftimeERKNS_6StringEx");
+TypedValue* fh_strftime(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP12fni_strftimeERKNS_6StringEl");
 
 /*
 HPHP::Variant HPHP::fni_strptime(HPHP::String const&, HPHP::String const&)
@@ -773,8 +773,8 @@ format => rdx
 TypedValue* fh_strptime(TypedValue* _rv, Value* date, Value* format) asm("_ZN4HPHP12fni_strptimeERKNS_6StringES2_");
 
 /*
-HPHP::Variant HPHP::fni_strtotime(HPHP::String const&, long long)
-_ZN4HPHP13fni_strtotimeERKNS_6StringEx
+HPHP::Variant HPHP::fni_strtotime(HPHP::String const&, long)
+_ZN4HPHP13fni_strtotimeERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -782,16 +782,16 @@ input => rsi
 timestamp => rdx
 */
 
-TypedValue* fh_strtotime(TypedValue* _rv, Value* input, long long timestamp) asm("_ZN4HPHP13fni_strtotimeERKNS_6StringEx");
+TypedValue* fh_strtotime(TypedValue* _rv, Value* input, long timestamp) asm("_ZN4HPHP13fni_strtotimeERKNS_6StringEl");
 
 /*
-long long HPHP::fni_time()
+long HPHP::fni_time()
 _ZN4HPHP8fni_timeEv
 
 (return value) => rax
 */
 
-long long fh_time() asm("_ZN4HPHP8fni_timeEv");
+long fh_time() asm("_ZN4HPHP8fni_timeEv");
 
 /*
 HPHP::Array HPHP::fni_timezone_abbreviations_list()
@@ -849,7 +849,7 @@ object => rsi
 Value* fh_timezone_name_get(Value* _rv, Value* object) asm("_ZN4HPHP21fni_timezone_name_getERKNS_6ObjectE");
 
 /*
-long long HPHP::fni_timezone_offset_get(HPHP::Object const&, HPHP::Object const&)
+long HPHP::fni_timezone_offset_get(HPHP::Object const&, HPHP::Object const&)
 _ZN4HPHP23fni_timezone_offset_getERKNS_6ObjectES2_
 
 (return value) => rax
@@ -857,7 +857,7 @@ object => rdi
 dt => rsi
 */
 
-long long fh_timezone_offset_get(Value* object, Value* dt) asm("_ZN4HPHP23fni_timezone_offset_getERKNS_6ObjectES2_");
+long fh_timezone_offset_get(Value* object, Value* dt) asm("_ZN4HPHP23fni_timezone_offset_getERKNS_6ObjectES2_");
 
 /*
 HPHP::Object HPHP::fni_timezone_open(HPHP::String const&)
@@ -983,37 +983,37 @@ number => xmm0
 double fh_rad2deg(double number) asm("_ZN4HPHP11fni_rad2degEd");
 
 /*
-HPHP::String HPHP::fni_decbin(long long)
-_ZN4HPHP10fni_decbinEx
+HPHP::String HPHP::fni_decbin(long)
+_ZN4HPHP10fni_decbinEl
 
 (return value) => rax
 _rv => rdi
 number => rsi
 */
 
-Value* fh_decbin(Value* _rv, long long number) asm("_ZN4HPHP10fni_decbinEx");
+Value* fh_decbin(Value* _rv, long number) asm("_ZN4HPHP10fni_decbinEl");
 
 /*
-HPHP::String HPHP::fni_dechex(long long)
-_ZN4HPHP10fni_dechexEx
+HPHP::String HPHP::fni_dechex(long)
+_ZN4HPHP10fni_dechexEl
 
 (return value) => rax
 _rv => rdi
 number => rsi
 */
 
-Value* fh_dechex(Value* _rv, long long number) asm("_ZN4HPHP10fni_dechexEx");
+Value* fh_dechex(Value* _rv, long number) asm("_ZN4HPHP10fni_dechexEl");
 
 /*
-HPHP::String HPHP::fni_decoct(long long)
-_ZN4HPHP10fni_decoctEx
+HPHP::String HPHP::fni_decoct(long)
+_ZN4HPHP10fni_decoctEl
 
 (return value) => rax
 _rv => rdi
 number => rsi
 */
 
-Value* fh_decoct(Value* _rv, long long number) asm("_ZN4HPHP10fni_decoctEx");
+Value* fh_decoct(Value* _rv, long number) asm("_ZN4HPHP10fni_decoctEl");
 
 /*
 HPHP::Variant HPHP::fni_bindec(HPHP::String const&)
@@ -1263,33 +1263,33 @@ arg => xmm0
 double fh_sqrt(double arg) asm("_ZN4HPHP8fni_sqrtEd");
 
 /*
-long long HPHP::fni_getrandmax()
+long HPHP::fni_getrandmax()
 _ZN4HPHP14fni_getrandmaxEv
 
 (return value) => rax
 */
 
-long long fh_getrandmax() asm("_ZN4HPHP14fni_getrandmaxEv");
+long fh_getrandmax() asm("_ZN4HPHP14fni_getrandmaxEv");
 
 /*
-long long HPHP::fni_mt_getrandmax()
+long HPHP::fni_mt_getrandmax()
 _ZN4HPHP17fni_mt_getrandmaxEv
 
 (return value) => rax
 */
 
-long long fh_mt_getrandmax() asm("_ZN4HPHP17fni_mt_getrandmaxEv");
+long fh_mt_getrandmax() asm("_ZN4HPHP17fni_mt_getrandmaxEv");
 
 /*
-long long HPHP::fni_mt_rand(long long, long long)
-_ZN4HPHP11fni_mt_randExx
+long HPHP::fni_mt_rand(long, long)
+_ZN4HPHP11fni_mt_randEll
 
 (return value) => rax
 min => rdi
 max => rsi
 */
 
-long long fh_mt_rand(long long min, long long max) asm("_ZN4HPHP11fni_mt_randExx");
+long fh_mt_rand(long min, long max) asm("_ZN4HPHP11fni_mt_randEll");
 
 /*
 double HPHP::fni_lcg_value()
@@ -1628,13 +1628,13 @@ message => rsi
 bool fh_syslog(int priority, Value* message) asm("_ZN4HPHP10fni_syslogEiRKNS_6StringE");
 
 /*
-long long HPHP::fni_cpu_get_count()
+long HPHP::fni_cpu_get_count()
 _ZN4HPHP17fni_cpu_get_countEv
 
 (return value) => rax
 */
 
-long long fh_cpu_get_count() asm("_ZN4HPHP17fni_cpu_get_countEv");
+long fh_cpu_get_count() asm("_ZN4HPHP17fni_cpu_get_countEv");
 
 /*
 HPHP::String HPHP::fni_cpu_get_model()
@@ -1731,22 +1731,22 @@ _rv => rdi
 Value* fh_ob_get_flush(Value* _rv) asm("_ZN4HPHP16fni_ob_get_flushEv");
 
 /*
-long long HPHP::fni_ob_get_length()
+long HPHP::fni_ob_get_length()
 _ZN4HPHP17fni_ob_get_lengthEv
 
 (return value) => rax
 */
 
-long long fh_ob_get_length() asm("_ZN4HPHP17fni_ob_get_lengthEv");
+long fh_ob_get_length() asm("_ZN4HPHP17fni_ob_get_lengthEv");
 
 /*
-long long HPHP::fni_ob_get_level()
+long HPHP::fni_ob_get_level()
 _ZN4HPHP16fni_ob_get_levelEv
 
 (return value) => rax
 */
 
-long long fh_ob_get_level() asm("_ZN4HPHP16fni_ob_get_levelEv");
+long fh_ob_get_level() asm("_ZN4HPHP16fni_ob_get_levelEv");
 
 /*
 HPHP::Array HPHP::fni_ob_get_status(bool)
@@ -1811,24 +1811,24 @@ _ZN4HPHP29fni_output_reset_rewrite_varsEv
 bool fh_output_reset_rewrite_vars() asm("_ZN4HPHP29fni_output_reset_rewrite_varsEv");
 
 /*
-void HPHP::fni_hphp_stats(HPHP::String const&, long long)
-_ZN4HPHP14fni_hphp_statsERKNS_6StringEx
+void HPHP::fni_hphp_stats(HPHP::String const&, long)
+_ZN4HPHP14fni_hphp_statsERKNS_6StringEl
 
 name => rdi
 value => rsi
 */
 
-void fh_hphp_stats(Value* name, long long value) asm("_ZN4HPHP14fni_hphp_statsERKNS_6StringEx");
+void fh_hphp_stats(Value* name, long value) asm("_ZN4HPHP14fni_hphp_statsERKNS_6StringEl");
 
 /*
-long long HPHP::fni_hphp_get_stats(HPHP::String const&)
+long HPHP::fni_hphp_get_stats(HPHP::String const&)
 _ZN4HPHP18fni_hphp_get_statsERKNS_6StringE
 
 (return value) => rax
 name => rdi
 */
 
-long long fh_hphp_get_stats(Value* name) asm("_ZN4HPHP18fni_hphp_get_statsERKNS_6StringE");
+long fh_hphp_get_stats(Value* name) asm("_ZN4HPHP18fni_hphp_get_statsERKNS_6StringE");
 
 /*
 HPHP::Array HPHP::fni_hphp_get_iostatus()
@@ -1860,13 +1860,13 @@ _rv => rdi
 Value* fh_posix_ctermid(Value* _rv) asm("_ZN4HPHP17fni_posix_ctermidEv");
 
 /*
-long long HPHP::fni_posix_get_last_error()
+long HPHP::fni_posix_get_last_error()
 _ZN4HPHP24fni_posix_get_last_errorEv
 
 (return value) => rax
 */
 
-long long fh_posix_get_last_error() asm("_ZN4HPHP24fni_posix_get_last_errorEv");
+long fh_posix_get_last_error() asm("_ZN4HPHP24fni_posix_get_last_errorEv");
 
 /*
 HPHP::String HPHP::fni_posix_getcwd()
@@ -1879,31 +1879,31 @@ _rv => rdi
 Value* fh_posix_getcwd(Value* _rv) asm("_ZN4HPHP16fni_posix_getcwdEv");
 
 /*
-long long HPHP::fni_posix_getegid()
+long HPHP::fni_posix_getegid()
 _ZN4HPHP17fni_posix_getegidEv
 
 (return value) => rax
 */
 
-long long fh_posix_getegid() asm("_ZN4HPHP17fni_posix_getegidEv");
+long fh_posix_getegid() asm("_ZN4HPHP17fni_posix_getegidEv");
 
 /*
-long long HPHP::fni_posix_geteuid()
+long HPHP::fni_posix_geteuid()
 _ZN4HPHP17fni_posix_geteuidEv
 
 (return value) => rax
 */
 
-long long fh_posix_geteuid() asm("_ZN4HPHP17fni_posix_geteuidEv");
+long fh_posix_geteuid() asm("_ZN4HPHP17fni_posix_geteuidEv");
 
 /*
-long long HPHP::fni_posix_getgid()
+long HPHP::fni_posix_getgid()
 _ZN4HPHP16fni_posix_getgidEv
 
 (return value) => rax
 */
 
-long long fh_posix_getgid() asm("_ZN4HPHP16fni_posix_getgidEv");
+long fh_posix_getgid() asm("_ZN4HPHP16fni_posix_getgidEv");
 
 /*
 HPHP::Variant HPHP::fni_posix_getlogin()
@@ -1927,31 +1927,31 @@ pid => rsi
 TypedValue* fh_posix_getpgid(TypedValue* _rv, int pid) asm("_ZN4HPHP17fni_posix_getpgidEi");
 
 /*
-long long HPHP::fni_posix_getpgrp()
+long HPHP::fni_posix_getpgrp()
 _ZN4HPHP17fni_posix_getpgrpEv
 
 (return value) => rax
 */
 
-long long fh_posix_getpgrp() asm("_ZN4HPHP17fni_posix_getpgrpEv");
+long fh_posix_getpgrp() asm("_ZN4HPHP17fni_posix_getpgrpEv");
 
 /*
-long long HPHP::fni_posix_getpid()
+long HPHP::fni_posix_getpid()
 _ZN4HPHP16fni_posix_getpidEv
 
 (return value) => rax
 */
 
-long long fh_posix_getpid() asm("_ZN4HPHP16fni_posix_getpidEv");
+long fh_posix_getpid() asm("_ZN4HPHP16fni_posix_getpidEv");
 
 /*
-long long HPHP::fni_posix_getppid()
+long HPHP::fni_posix_getppid()
 _ZN4HPHP17fni_posix_getppidEv
 
 (return value) => rax
 */
 
-long long fh_posix_getppid() asm("_ZN4HPHP17fni_posix_getppidEv");
+long fh_posix_getppid() asm("_ZN4HPHP17fni_posix_getppidEv");
 
 /*
 HPHP::Variant HPHP::fni_posix_getsid(int)
@@ -1965,13 +1965,13 @@ pid => rsi
 TypedValue* fh_posix_getsid(TypedValue* _rv, int pid) asm("_ZN4HPHP16fni_posix_getsidEi");
 
 /*
-long long HPHP::fni_posix_getuid()
+long HPHP::fni_posix_getuid()
 _ZN4HPHP16fni_posix_getuidEv
 
 (return value) => rax
 */
 
-long long fh_posix_getuid() asm("_ZN4HPHP16fni_posix_getuidEv");
+long fh_posix_getuid() asm("_ZN4HPHP16fni_posix_getuidEv");
 
 /*
 bool HPHP::fni_posix_initgroups(HPHP::String const&, int)
@@ -2048,13 +2048,13 @@ pgid => rsi
 bool fh_posix_setpgid(int pid, int pgid) asm("_ZN4HPHP17fni_posix_setpgidEii");
 
 /*
-long long HPHP::fni_posix_setsid()
+long HPHP::fni_posix_setsid()
 _ZN4HPHP16fni_posix_setsidEv
 
 (return value) => rax
 */
 
-long long fh_posix_setsid() asm("_ZN4HPHP16fni_posix_setsidEv");
+long fh_posix_setsid() asm("_ZN4HPHP16fni_posix_setsidEv");
 
 /*
 bool HPHP::fni_posix_setuid(int)
@@ -2078,24 +2078,24 @@ errnum => rsi
 Value* fh_posix_strerror(Value* _rv, int errnum) asm("_ZN4HPHP18fni_posix_strerrorEi");
 
 /*
-long long HPHP::fni_pcntl_alarm(int)
+long HPHP::fni_pcntl_alarm(int)
 _ZN4HPHP15fni_pcntl_alarmEi
 
 (return value) => rax
 seconds => rdi
 */
 
-long long fh_pcntl_alarm(int seconds) asm("_ZN4HPHP15fni_pcntl_alarmEi");
+long fh_pcntl_alarm(int seconds) asm("_ZN4HPHP15fni_pcntl_alarmEi");
 
 /*
-long long HPHP::fni_pcntl_wexitstatus(int)
+long HPHP::fni_pcntl_wexitstatus(int)
 _ZN4HPHP21fni_pcntl_wexitstatusEi
 
 (return value) => rax
 status => rdi
 */
 
-long long fh_pcntl_wexitstatus(int status) asm("_ZN4HPHP21fni_pcntl_wexitstatusEi");
+long fh_pcntl_wexitstatus(int status) asm("_ZN4HPHP21fni_pcntl_wexitstatusEi");
 
 /*
 bool HPHP::fni_pcntl_wifexited(int)
@@ -2128,34 +2128,34 @@ status => rdi
 bool fh_pcntl_wifstopped(int status) asm("_ZN4HPHP20fni_pcntl_wifstoppedEi");
 
 /*
-long long HPHP::fni_pcntl_wstopsig(int)
+long HPHP::fni_pcntl_wstopsig(int)
 _ZN4HPHP18fni_pcntl_wstopsigEi
 
 (return value) => rax
 status => rdi
 */
 
-long long fh_pcntl_wstopsig(int status) asm("_ZN4HPHP18fni_pcntl_wstopsigEi");
+long fh_pcntl_wstopsig(int status) asm("_ZN4HPHP18fni_pcntl_wstopsigEi");
 
 /*
-long long HPHP::fni_pcntl_wtermsig(int)
+long HPHP::fni_pcntl_wtermsig(int)
 _ZN4HPHP18fni_pcntl_wtermsigEi
 
 (return value) => rax
 status => rdi
 */
 
-long long fh_pcntl_wtermsig(int status) asm("_ZN4HPHP18fni_pcntl_wtermsigEi");
+long fh_pcntl_wtermsig(int status) asm("_ZN4HPHP18fni_pcntl_wtermsigEi");
 
 /*
-long long HPHP::fni_hphp_object_pointer(HPHP::Object const&)
+long HPHP::fni_hphp_object_pointer(HPHP::Object const&)
 _ZN4HPHP23fni_hphp_object_pointerERKNS_6ObjectE
 
 (return value) => rax
 obj => rdi
 */
 
-long long fh_hphp_object_pointer(Value* obj) asm("_ZN4HPHP23fni_hphp_object_pointerERKNS_6ObjectE");
+long fh_hphp_object_pointer(Value* obj) asm("_ZN4HPHP23fni_hphp_object_pointerERKNS_6ObjectE");
 
 /*
 HPHP::Object HPHP::fni_stream_context_create(HPHP::Array const&, HPHP::Array const&)
@@ -2414,7 +2414,7 @@ context => rdx
 Value* fh_stream_resolve_include_path(Value* _rv, Value* filename, Value* context) asm("_ZN4HPHP31fni_stream_resolve_include_pathERKNS_6StringERKNS_6ObjectE");
 
 /*
-long long HPHP::fni_set_file_buffer(HPHP::Object const&, int)
+long HPHP::fni_set_file_buffer(HPHP::Object const&, int)
 _ZN4HPHP19fni_set_file_bufferERKNS_6ObjectEi
 
 (return value) => rax
@@ -2422,7 +2422,7 @@ stream => rdi
 buffer => rsi
 */
 
-long long fh_set_file_buffer(Value* stream, int buffer) asm("_ZN4HPHP19fni_set_file_bufferERKNS_6ObjectEi");
+long fh_set_file_buffer(Value* stream, int buffer) asm("_ZN4HPHP19fni_set_file_bufferERKNS_6ObjectEi");
 
 /*
 HPHP::Variant HPHP::fni_stream_socket_enable_crypto(HPHP::Object const&, bool, int, HPHP::Object const&)
@@ -2890,14 +2890,14 @@ str => rsi
 Value* fh_str_rot13(Value* _rv, Value* str) asm("_ZN4HPHP13fni_str_rot13ERKNS_6StringE");
 
 /*
-long long HPHP::fni_crc32(HPHP::String const&)
+long HPHP::fni_crc32(HPHP::String const&)
 _ZN4HPHP9fni_crc32ERKNS_6StringE
 
 (return value) => rax
 str => rdi
 */
 
-long long fh_crc32(Value* str) asm("_ZN4HPHP9fni_crc32ERKNS_6StringE");
+long fh_crc32(Value* str) asm("_ZN4HPHP9fni_crc32ERKNS_6StringE");
 
 /*
 HPHP::String HPHP::fni_crypt(HPHP::String const&, HPHP::String const&)
@@ -2969,7 +2969,7 @@ format => rdx
 _argv => rcx
 */
 
-TypedValue* fh_printf(TypedValue* _rv, long long _argc, Value* format, Value* _argv) asm("_ZN4HPHP10fni_printfEiRKNS_6StringERKNS_5ArrayE");
+TypedValue* fh_printf(TypedValue* _rv, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP10fni_printfEiRKNS_6StringERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::fni_vprintf(HPHP::String const&, HPHP::Array const&)
@@ -2994,7 +2994,7 @@ format => rdx
 _argv => rcx
 */
 
-TypedValue* fh_sprintf(TypedValue* _rv, long long _argc, Value* format, Value* _argv) asm("_ZN4HPHP11fni_sprintfEiRKNS_6StringERKNS_5ArrayE");
+TypedValue* fh_sprintf(TypedValue* _rv, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP11fni_sprintfEiRKNS_6StringERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::fni_vsprintf(HPHP::String const&, HPHP::Array const&)
@@ -3009,25 +3009,25 @@ args => rdx
 TypedValue* fh_vsprintf(TypedValue* _rv, Value* format, Value* args) asm("_ZN4HPHP12fni_vsprintfERKNS_6StringERKNS_5ArrayE");
 
 /*
-HPHP::String HPHP::fni_chr(long long)
-_ZN4HPHP7fni_chrEx
+HPHP::String HPHP::fni_chr(long)
+_ZN4HPHP7fni_chrEl
 
 (return value) => rax
 _rv => rdi
 ascii => rsi
 */
 
-Value* fh_chr(Value* _rv, long long ascii) asm("_ZN4HPHP7fni_chrEx");
+Value* fh_chr(Value* _rv, long ascii) asm("_ZN4HPHP7fni_chrEl");
 
 /*
-long long HPHP::fni_ord(HPHP::String const&)
+long HPHP::fni_ord(HPHP::String const&)
 _ZN4HPHP7fni_ordERKNS_6StringE
 
 (return value) => rax
 str => rdi
 */
 
-long long fh_ord(Value* str) asm("_ZN4HPHP7fni_ordERKNS_6StringE");
+long fh_ord(Value* str) asm("_ZN4HPHP7fni_ordERKNS_6StringE");
 
 /*
 HPHP::Variant HPHP::fni_money_format(HPHP::String const&, double)
@@ -3042,7 +3042,7 @@ number => xmm0
 TypedValue* fh_money_format(TypedValue* _rv, Value* format, double number) asm("_ZN4HPHP16fni_money_formatERKNS_6StringEd");
 
 /*
-long long HPHP::fni_strcmp(HPHP::String const&, HPHP::String const&)
+long HPHP::fni_strcmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP10fni_strcmpERKNS_6StringES2_
 
 (return value) => rax
@@ -3050,10 +3050,10 @@ str1 => rdi
 str2 => rsi
 */
 
-long long fh_strcmp(Value* str1, Value* str2) asm("_ZN4HPHP10fni_strcmpERKNS_6StringES2_");
+long fh_strcmp(Value* str1, Value* str2) asm("_ZN4HPHP10fni_strcmpERKNS_6StringES2_");
 
 /*
-long long HPHP::fni_strncmp(HPHP::String const&, HPHP::String const&, int)
+long HPHP::fni_strncmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP11fni_strncmpERKNS_6StringES2_i
 
 (return value) => rax
@@ -3062,10 +3062,10 @@ str2 => rsi
 len => rdx
 */
 
-long long fh_strncmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP11fni_strncmpERKNS_6StringES2_i");
+long fh_strncmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP11fni_strncmpERKNS_6StringES2_i");
 
 /*
-long long HPHP::fni_strnatcmp(HPHP::String const&, HPHP::String const&)
+long HPHP::fni_strnatcmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP13fni_strnatcmpERKNS_6StringES2_
 
 (return value) => rax
@@ -3073,10 +3073,10 @@ str1 => rdi
 str2 => rsi
 */
 
-long long fh_strnatcmp(Value* str1, Value* str2) asm("_ZN4HPHP13fni_strnatcmpERKNS_6StringES2_");
+long fh_strnatcmp(Value* str1, Value* str2) asm("_ZN4HPHP13fni_strnatcmpERKNS_6StringES2_");
 
 /*
-long long HPHP::fni_strcasecmp(HPHP::String const&, HPHP::String const&)
+long HPHP::fni_strcasecmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP14fni_strcasecmpERKNS_6StringES2_
 
 (return value) => rax
@@ -3084,10 +3084,10 @@ str1 => rdi
 str2 => rsi
 */
 
-long long fh_strcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP14fni_strcasecmpERKNS_6StringES2_");
+long fh_strcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP14fni_strcasecmpERKNS_6StringES2_");
 
 /*
-long long HPHP::fni_strncasecmp(HPHP::String const&, HPHP::String const&, int)
+long HPHP::fni_strncasecmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP15fni_strncasecmpERKNS_6StringES2_i
 
 (return value) => rax
@@ -3096,10 +3096,10 @@ str2 => rsi
 len => rdx
 */
 
-long long fh_strncasecmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP15fni_strncasecmpERKNS_6StringES2_i");
+long fh_strncasecmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP15fni_strncasecmpERKNS_6StringES2_i");
 
 /*
-long long HPHP::fni_strnatcasecmp(HPHP::String const&, HPHP::String const&)
+long HPHP::fni_strnatcasecmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP17fni_strnatcasecmpERKNS_6StringES2_
 
 (return value) => rax
@@ -3107,10 +3107,10 @@ str1 => rdi
 str2 => rsi
 */
 
-long long fh_strnatcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP17fni_strnatcasecmpERKNS_6StringES2_");
+long fh_strnatcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP17fni_strnatcasecmpERKNS_6StringES2_");
 
 /*
-long long HPHP::fni_strcoll(HPHP::String const&, HPHP::String const&)
+long HPHP::fni_strcoll(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP11fni_strcollERKNS_6StringES2_
 
 (return value) => rax
@@ -3118,7 +3118,7 @@ str1 => rdi
 str2 => rsi
 */
 
-long long fh_strcoll(Value* str1, Value* str2) asm("_ZN4HPHP11fni_strcollERKNS_6StringES2_");
+long fh_strcoll(Value* str1, Value* str2) asm("_ZN4HPHP11fni_strcollERKNS_6StringES2_");
 
 /*
 HPHP::Variant HPHP::fni_strchr(HPHP::String const&, HPHP::Variant const&)
@@ -3144,7 +3144,7 @@ str => rsi
 TypedValue* fh_strlen(TypedValue* _rv, TypedValue* str) asm("_ZN4HPHP10fni_strlenERKNS_7VariantE");
 
 /*
-long long HPHP::fni_levenshtein(HPHP::String const&, HPHP::String const&, int, int, int)
+long HPHP::fni_levenshtein(HPHP::String const&, HPHP::String const&, int, int, int)
 _ZN4HPHP15fni_levenshteinERKNS_6StringES2_iii
 
 (return value) => rax
@@ -3155,10 +3155,10 @@ cost_rep => rcx
 cost_del => r8
 */
 
-long long fh_levenshtein(Value* str1, Value* str2, int cost_ins, int cost_rep, int cost_del) asm("_ZN4HPHP15fni_levenshteinERKNS_6StringES2_iii");
+long fh_levenshtein(Value* str1, Value* str2, int cost_ins, int cost_rep, int cost_del) asm("_ZN4HPHP15fni_levenshteinERKNS_6StringES2_iii");
 
 /*
-long long HPHP::fni_similar_text(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&)
+long HPHP::fni_similar_text(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&)
 _ZN4HPHP16fni_similar_textERKNS_6StringES2_RKNS_14VRefParamValueE
 
 (return value) => rax
@@ -3167,7 +3167,7 @@ second => rsi
 percent => rdx
 */
 
-long long fh_similar_text(Value* first, Value* second, TypedValue* percent) asm("_ZN4HPHP16fni_similar_textERKNS_6StringES2_RKNS_14VRefParamValueE");
+long fh_similar_text(Value* first, Value* second, TypedValue* percent) asm("_ZN4HPHP16fni_similar_textERKNS_6StringES2_RKNS_14VRefParamValueE");
 
 /*
 HPHP::Variant HPHP::fni_soundex(HPHP::String const&)
@@ -3367,15 +3367,15 @@ var => rdi
 bool fh_is_null(TypedValue* var) asm("_ZN4HPHP11fni_is_nullERKNS_7VariantE");
 
 /*
-long long HPHP::fni_intval(HPHP::Variant const&, long long)
-_ZN4HPHP10fni_intvalERKNS_7VariantEx
+long HPHP::fni_intval(HPHP::Variant const&, long)
+_ZN4HPHP10fni_intvalERKNS_7VariantEl
 
 (return value) => rax
 v => rdi
 base => rsi
 */
 
-long long fh_intval(TypedValue* v, long long base) asm("_ZN4HPHP10fni_intvalERKNS_7VariantEx");
+long fh_intval(TypedValue* v, long base) asm("_ZN4HPHP10fni_intvalERKNS_7VariantEl");
 
 /*
 double HPHP::fni_doubleval(HPHP::Variant const&)
@@ -3471,8 +3471,8 @@ zp => rsi
 TypedValue* fh_gzgetc(TypedValue* _rv, Value* zp) asm("_ZN4HPHP10fni_gzgetcERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::fni_gzgets(HPHP::Object const&, long long)
-_ZN4HPHP10fni_gzgetsERKNS_6ObjectEx
+HPHP::Variant HPHP::fni_gzgets(HPHP::Object const&, long)
+_ZN4HPHP10fni_gzgetsERKNS_6ObjectEl
 
 (return value) => rax
 _rv => rdi
@@ -3480,11 +3480,11 @@ zp => rsi
 length => rdx
 */
 
-TypedValue* fh_gzgets(TypedValue* _rv, Value* zp, long long length) asm("_ZN4HPHP10fni_gzgetsERKNS_6ObjectEx");
+TypedValue* fh_gzgets(TypedValue* _rv, Value* zp, long length) asm("_ZN4HPHP10fni_gzgetsERKNS_6ObjectEl");
 
 /*
-HPHP::Variant HPHP::fni_gzgetss(HPHP::Object const&, long long, HPHP::String const&)
-_ZN4HPHP11fni_gzgetssERKNS_6ObjectExRKNS_6StringE
+HPHP::Variant HPHP::fni_gzgetss(HPHP::Object const&, long, HPHP::String const&)
+_ZN4HPHP11fni_gzgetssERKNS_6ObjectElRKNS_6StringE
 
 (return value) => rax
 _rv => rdi
@@ -3493,11 +3493,11 @@ length => rdx
 allowable_tags => rcx
 */
 
-TypedValue* fh_gzgetss(TypedValue* _rv, Value* zp, long long length, Value* allowable_tags) asm("_ZN4HPHP11fni_gzgetssERKNS_6ObjectExRKNS_6StringE");
+TypedValue* fh_gzgetss(TypedValue* _rv, Value* zp, long length, Value* allowable_tags) asm("_ZN4HPHP11fni_gzgetssERKNS_6ObjectElRKNS_6StringE");
 
 /*
-HPHP::Variant HPHP::fni_gzread(HPHP::Object const&, long long)
-_ZN4HPHP10fni_gzreadERKNS_6ObjectEx
+HPHP::Variant HPHP::fni_gzread(HPHP::Object const&, long)
+_ZN4HPHP10fni_gzreadERKNS_6ObjectEl
 
 (return value) => rax
 _rv => rdi
@@ -3505,7 +3505,7 @@ zp => rsi
 length => rdx
 */
 
-TypedValue* fh_gzread(TypedValue* _rv, Value* zp, long long length) asm("_ZN4HPHP10fni_gzreadERKNS_6ObjectEx");
+TypedValue* fh_gzread(TypedValue* _rv, Value* zp, long length) asm("_ZN4HPHP10fni_gzreadERKNS_6ObjectEl");
 
 /*
 HPHP::Variant HPHP::fni_gzpassthru(HPHP::Object const&)
@@ -3519,8 +3519,8 @@ zp => rsi
 TypedValue* fh_gzpassthru(TypedValue* _rv, Value* zp) asm("_ZN4HPHP14fni_gzpassthruERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::fni_gzseek(HPHP::Object const&, long long, long long)
-_ZN4HPHP10fni_gzseekERKNS_6ObjectExx
+HPHP::Variant HPHP::fni_gzseek(HPHP::Object const&, long, long)
+_ZN4HPHP10fni_gzseekERKNS_6ObjectEll
 
 (return value) => rax
 _rv => rdi
@@ -3529,7 +3529,7 @@ offset => rdx
 whence => rcx
 */
 
-TypedValue* fh_gzseek(TypedValue* _rv, Value* zp, long long offset, long long whence) asm("_ZN4HPHP10fni_gzseekERKNS_6ObjectExx");
+TypedValue* fh_gzseek(TypedValue* _rv, Value* zp, long offset, long whence) asm("_ZN4HPHP10fni_gzseekERKNS_6ObjectEll");
 
 /*
 HPHP::Variant HPHP::fni_gztell(HPHP::Object const&)
@@ -3543,8 +3543,8 @@ zp => rsi
 TypedValue* fh_gztell(TypedValue* _rv, Value* zp) asm("_ZN4HPHP10fni_gztellERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::fni_gzwrite(HPHP::Object const&, HPHP::String const&, long long)
-_ZN4HPHP11fni_gzwriteERKNS_6ObjectERKNS_6StringEx
+HPHP::Variant HPHP::fni_gzwrite(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP11fni_gzwriteERKNS_6ObjectERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -3553,11 +3553,11 @@ str => rdx
 length => rcx
 */
 
-TypedValue* fh_gzwrite(TypedValue* _rv, Value* zp, Value* str, long long length) asm("_ZN4HPHP11fni_gzwriteERKNS_6ObjectERKNS_6StringEx");
+TypedValue* fh_gzwrite(TypedValue* _rv, Value* zp, Value* str, long length) asm("_ZN4HPHP11fni_gzwriteERKNS_6ObjectERKNS_6StringEl");
 
 /*
-HPHP::Variant HPHP::fni_gzputs(HPHP::Object const&, HPHP::String const&, long long)
-_ZN4HPHP10fni_gzputsERKNS_6ObjectERKNS_6StringEx
+HPHP::Variant HPHP::fni_gzputs(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP10fni_gzputsERKNS_6ObjectERKNS_6StringEl
 
 (return value) => rax
 _rv => rdi
@@ -3566,7 +3566,7 @@ str => rdx
 length => rcx
 */
 
-TypedValue* fh_gzputs(TypedValue* _rv, Value* zp, Value* str, long long length) asm("_ZN4HPHP10fni_gzputsERKNS_6ObjectERKNS_6StringEx");
+TypedValue* fh_gzputs(TypedValue* _rv, Value* zp, Value* str, long length) asm("_ZN4HPHP10fni_gzputsERKNS_6ObjectERKNS_6StringEl");
 
 
 } // !HPHP

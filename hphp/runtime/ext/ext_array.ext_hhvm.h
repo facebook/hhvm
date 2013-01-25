@@ -135,7 +135,7 @@ arr1 => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_map(TypedValue* _rv, long long _argc, TypedValue* callback, TypedValue* arr1, Value* _argv) asm("_ZN4HPHP11f_array_mapEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_array_map(TypedValue* _rv, int64_t _argc, TypedValue* callback, TypedValue* arr1, Value* _argv) asm("_ZN4HPHP11f_array_mapEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_merge_recursive(int, HPHP::Variant const&, HPHP::Array const&)
@@ -148,7 +148,7 @@ array1 => rdx
 _argv => rcx
 */
 
-TypedValue* fh_array_merge_recursive(TypedValue* _rv, long long _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP23f_array_merge_recursiveEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_array_merge_recursive(TypedValue* _rv, int64_t _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP23f_array_merge_recursiveEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_merge(int, HPHP::Variant const&, HPHP::Array const&)
@@ -161,7 +161,7 @@ array1 => rdx
 _argv => rcx
 */
 
-TypedValue* fh_array_merge(TypedValue* _rv, long long _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP13f_array_mergeEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_array_merge(TypedValue* _rv, int64_t _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP13f_array_mergeEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_replace_recursive(int, HPHP::Variant const&, HPHP::Array const&)
@@ -174,7 +174,7 @@ array1 => rdx
 _argv => rcx
 */
 
-TypedValue* fh_array_replace_recursive(TypedValue* _rv, long long _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP25f_array_replace_recursiveEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_array_replace_recursive(TypedValue* _rv, int64_t _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP25f_array_replace_recursiveEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_replace(int, HPHP::Variant const&, HPHP::Array const&)
@@ -187,7 +187,7 @@ array1 => rdx
 _argv => rcx
 */
 
-TypedValue* fh_array_replace(TypedValue* _rv, long long _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP15f_array_replaceEiRKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_array_replace(TypedValue* _rv, int64_t _argc, TypedValue* array1, Value* _argv) asm("_ZN4HPHP15f_array_replaceEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 bool HPHP::f_array_multisort(int, HPHP::VRefParamValue const&, HPHP::Array const&)
@@ -199,7 +199,7 @@ ar1 => rsi
 _argv => rdx
 */
 
-bool fh_array_multisort(long long _argc, TypedValue* ar1, Value* _argv) asm("_ZN4HPHP17f_array_multisortEiRKNS_14VRefParamValueERKNS_5ArrayE");
+bool fh_array_multisort(int64_t _argc, TypedValue* ar1, Value* _argv) asm("_ZN4HPHP17f_array_multisortEiRKNS_14VRefParamValueERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_pad(HPHP::Variant const&, int, HPHP::Variant const&)
@@ -237,7 +237,7 @@ var => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_push(TypedValue* _rv, long long _argc, TypedValue* array, TypedValue* var, Value* _argv) asm("_ZN4HPHP12f_array_pushEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE");
+TypedValue* fh_array_push(TypedValue* _rv, int64_t _argc, TypedValue* array, TypedValue* var, Value* _argv) asm("_ZN4HPHP12f_array_pushEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_rand(HPHP::Variant const&, int)
@@ -341,7 +341,7 @@ sort_flags => rdx
 TypedValue* fh_array_unique(TypedValue* _rv, TypedValue* array, int sort_flags) asm("_ZN4HPHP14f_array_uniqueERKNS_7VariantEi");
 
 /*
-long long HPHP::f_array_unshift(int, HPHP::VRefParamValue const&, HPHP::Variant const&, HPHP::Array const&)
+long HPHP::f_array_unshift(int, HPHP::VRefParamValue const&, HPHP::Variant const&, HPHP::Array const&)
 _ZN4HPHP15f_array_unshiftEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE
 
 (return value) => rax
@@ -351,7 +351,7 @@ var => rdx
 _argv => rcx
 */
 
-long long fh_array_unshift(long long _argc, TypedValue* array, TypedValue* var, Value* _argv) asm("_ZN4HPHP15f_array_unshiftEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE");
+long fh_array_unshift(int64_t _argc, TypedValue* array, TypedValue* var, Value* _argv) asm("_ZN4HPHP15f_array_unshiftEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_values(HPHP::Variant const&)
@@ -399,7 +399,7 @@ varname => rdx
 _argv => rcx
 */
 
-Value* fh_compact(Value* _rv, long long _argc, TypedValue* varname, Value* _argv) asm("_ZN4HPHP9f_compactEiRKNS_7VariantERKNS_5ArrayE");
+Value* fh_compact(Value* _rv, int64_t _argc, TypedValue* varname, Value* _argv) asm("_ZN4HPHP9f_compactEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 bool HPHP::f_shuffle(HPHP::VRefParamValue const&)
@@ -412,7 +412,7 @@ array => rdi
 bool fh_shuffle(TypedValue* array) asm("_ZN4HPHP9f_shuffleERKNS_14VRefParamValueE");
 
 /*
-long long HPHP::f_count(HPHP::Variant const&, bool)
+long HPHP::f_count(HPHP::Variant const&, bool)
 _ZN4HPHP7f_countERKNS_7VariantEb
 
 (return value) => rax
@@ -420,7 +420,7 @@ var => rdi
 recursive => rsi
 */
 
-long long fh_count(TypedValue* var, bool recursive) asm("_ZN4HPHP7f_countERKNS_7VariantEb");
+long fh_count(TypedValue* var, bool recursive) asm("_ZN4HPHP7f_countERKNS_7VariantEb");
 
 /*
 HPHP::Variant HPHP::f_hphp_get_iterator(HPHP::Variant const&)
@@ -481,7 +481,7 @@ array2 => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_diff(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP12f_array_diffEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_array_diff(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP12f_array_diffEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_udiff(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -496,7 +496,7 @@ data_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_udiff(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP13f_array_udiffEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_udiff(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP13f_array_udiffEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_diff_assoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -510,7 +510,7 @@ array2 => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_diff_assoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP18f_array_diff_assocEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_array_diff_assoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP18f_array_diff_assocEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_diff_uassoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -525,7 +525,7 @@ key_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_diff_uassoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP19f_array_diff_uassocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_diff_uassoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP19f_array_diff_uassocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_udiff_assoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -540,7 +540,7 @@ data_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_udiff_assoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP19f_array_udiff_assocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_udiff_assoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP19f_array_udiff_assocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_udiff_uassoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -556,7 +556,7 @@ key_compare_func => r9
 _argv => st0
 */
 
-TypedValue* fh_array_udiff_uassoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP20f_array_udiff_uassocEiRKNS_7VariantES2_S2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_udiff_uassoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP20f_array_udiff_uassocEiRKNS_7VariantES2_S2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_diff_key(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -570,7 +570,7 @@ array2 => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_diff_key(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP16f_array_diff_keyEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_array_diff_key(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP16f_array_diff_keyEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_diff_ukey(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -585,7 +585,7 @@ key_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_diff_ukey(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP17f_array_diff_ukeyEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_diff_ukey(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP17f_array_diff_ukeyEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_intersect(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -599,7 +599,7 @@ array2 => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_intersect(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP17f_array_intersectEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_array_intersect(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP17f_array_intersectEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_uintersect(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -614,7 +614,7 @@ data_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_uintersect(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP18f_array_uintersectEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_uintersect(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP18f_array_uintersectEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_intersect_assoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -628,7 +628,7 @@ array2 => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_intersect_assoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP23f_array_intersect_assocEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_array_intersect_assoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP23f_array_intersect_assocEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_intersect_uassoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -643,7 +643,7 @@ key_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_intersect_uassoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP24f_array_intersect_uassocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_intersect_uassoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP24f_array_intersect_uassocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_uintersect_assoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -658,7 +658,7 @@ data_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_uintersect_assoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP24f_array_uintersect_assocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_uintersect_assoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, Value* _argv) asm("_ZN4HPHP24f_array_uintersect_assocEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_uintersect_uassoc(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -674,7 +674,7 @@ key_compare_func => r9
 _argv => st0
 */
 
-TypedValue* fh_array_uintersect_uassoc(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP25f_array_uintersect_uassocEiRKNS_7VariantES2_S2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_uintersect_uassoc(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* data_compare_func, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP25f_array_uintersect_uassocEiRKNS_7VariantES2_S2_S2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_intersect_key(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -688,7 +688,7 @@ array2 => rcx
 _argv => r8
 */
 
-TypedValue* fh_array_intersect_key(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP21f_array_intersect_keyEiRKNS_7VariantES2_RKNS_5ArrayE");
+TypedValue* fh_array_intersect_key(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, Value* _argv) asm("_ZN4HPHP21f_array_intersect_keyEiRKNS_7VariantES2_RKNS_5ArrayE");
 
 /*
 HPHP::Variant HPHP::f_array_intersect_ukey(int, HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&, HPHP::Array const&)
@@ -703,7 +703,7 @@ key_compare_func => r8
 _argv => r9
 */
 
-TypedValue* fh_array_intersect_ukey(TypedValue* _rv, long long _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP22f_array_intersect_ukeyEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
+TypedValue* fh_array_intersect_ukey(TypedValue* _rv, int64_t _argc, TypedValue* array1, TypedValue* array2, TypedValue* key_compare_func, Value* _argv) asm("_ZN4HPHP22f_array_intersect_ukeyEiRKNS_7VariantES2_S2_RKNS_5ArrayE");
 
 /*
 bool HPHP::f_sort(HPHP::VRefParamValue const&, int, bool)
@@ -851,25 +851,25 @@ locale => rdi
 bool fh_i18n_loc_set_default(Value* locale) asm("_ZN4HPHP22f_i18n_loc_set_defaultERKNS_6StringE");
 
 /*
-bool HPHP::f_i18n_loc_set_attribute(long long, long long)
-_ZN4HPHP24f_i18n_loc_set_attributeExx
+bool HPHP::f_i18n_loc_set_attribute(long, long)
+_ZN4HPHP24f_i18n_loc_set_attributeEll
 
 (return value) => rax
 attr => rdi
 val => rsi
 */
 
-bool fh_i18n_loc_set_attribute(long long attr, long long val) asm("_ZN4HPHP24f_i18n_loc_set_attributeExx");
+bool fh_i18n_loc_set_attribute(long attr, long val) asm("_ZN4HPHP24f_i18n_loc_set_attributeEll");
 
 /*
-bool HPHP::f_i18n_loc_set_strength(long long)
-_ZN4HPHP23f_i18n_loc_set_strengthEx
+bool HPHP::f_i18n_loc_set_strength(long)
+_ZN4HPHP23f_i18n_loc_set_strengthEl
 
 (return value) => rax
 strength => rdi
 */
 
-bool fh_i18n_loc_set_strength(long long strength) asm("_ZN4HPHP23f_i18n_loc_set_strengthEx");
+bool fh_i18n_loc_set_strength(long strength) asm("_ZN4HPHP23f_i18n_loc_set_strengthEl");
 
 /*
 HPHP::Variant HPHP::f_i18n_loc_get_error_code()

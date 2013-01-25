@@ -1382,7 +1382,7 @@ void c_Map::Bucket::dump() {
     printf("c_Map::Bucket: %s\n", (empty() ? "empty" : "tombstone"));
     return;
   }
-  printf("c_Map::Bucket: %llx\n", hashKey());
+  printf("c_Map::Bucket: %"PRIx64"\n", hashKey());
   if (hasStrKey()) {
     skey->dump();
   }
@@ -2328,7 +2328,7 @@ c_StableMap::Bucket::~Bucket() {
 }
 
 void c_StableMap::Bucket::dump() {
-  printf("c_StableMap::Bucket: %llx, %p, %p, %p\n",
+  printf("c_StableMap::Bucket: %"PRIx64", %p, %p, %p\n",
          hashKey(), pListNext, pListLast, pNext);
   if (hasStrKey()) {
     skey->dump();

@@ -44,7 +44,7 @@ void th_10WaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP12c_WaitHandle1
 
 TypedValue* tg_10WaitHandle___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -82,7 +82,7 @@ void th_10WaitHandle_import(ObjectData* this_) asm("_ZN4HPHP12c_WaitHandle8t_imp
 
 TypedValue* tg_10WaitHandle_import(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -122,7 +122,7 @@ TypedValue* th_10WaitHandle_join(TypedValue* _rv, ObjectData* this_) asm("_ZN4HP
 
 TypedValue* tg_10WaitHandle_join(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -148,25 +148,25 @@ TypedValue* tg_10WaitHandle_join(HPHP::VM::ActRec *ar) {
 }
 
 /*
-long long HPHP::c_WaitHandle::t_getid()
+long HPHP::c_WaitHandle::t_getid()
 _ZN4HPHP12c_WaitHandle7t_getidEv
 
 (return value) => rax
 this_ => rdi
 */
 
-long long th_10WaitHandle_getID(ObjectData* this_) asm("_ZN4HPHP12c_WaitHandle7t_getidEv");
+long th_10WaitHandle_getID(ObjectData* this_) asm("_ZN4HPHP12c_WaitHandle7t_getidEv");
 
 TypedValue* tg_10WaitHandle_getID(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)th_10WaitHandle_getID((this_));
+        rv.m_data.num = (int64_t)th_10WaitHandle_getID((this_));
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -198,7 +198,7 @@ Value* th_10WaitHandle_getName(Value* _rv, ObjectData* this_) asm("_ZN4HPHP12c_W
 
 TypedValue* tg_10WaitHandle_getName(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -238,7 +238,7 @@ Value* th_10WaitHandle_getExceptionIfFailed(Value* _rv, ObjectData* this_) asm("
 
 TypedValue* tg_10WaitHandle_getExceptionIfFailed(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

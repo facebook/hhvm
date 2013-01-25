@@ -44,7 +44,7 @@ void th_12DummyClosure___construct(ObjectData* this_) asm("_ZN4HPHP14c_DummyClos
 
 TypedValue* tg_12DummyClosure___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

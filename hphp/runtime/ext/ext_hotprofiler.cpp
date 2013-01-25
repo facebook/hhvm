@@ -758,10 +758,11 @@ private:
       const CountMap &counts = iter->second;
 
       char buf[512];
-      snprintf(buf, sizeof(buf),
-               ",\"ct\": %lld,\"wt\": %lld,\"ut\": %lld,\"st\": 0",
-               counts.count, to_usec(counts.tsc, m_MHz),
-               to_usec(counts.vtsc, m_MHz, true));
+      snprintf(
+        buf, sizeof(buf),
+        ",\"ct\": %"PRId64",\"wt\": %"PRId64",\"ut\": %"PRId64",\"st\": 0",
+        counts.count, (int64_t)to_usec(counts.tsc, m_MHz),
+        (int64_t)to_usec(counts.vtsc, m_MHz, true));
       print(buf);
 
       print("},\n");

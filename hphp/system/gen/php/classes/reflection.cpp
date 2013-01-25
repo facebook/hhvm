@@ -34,7 +34,7 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/reflection.php line 552 */
-const int64 q_ReflectionFunction$$IS_DEPRECATED = 262144LL;
+const int64_t q_ReflectionFunction$$IS_DEPRECATED = 262144L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunction)
 extern const InstanceOfInfo cw_ReflectionFunction$$instanceof_table[] = {
   {0x6AF55378,1,"ReflectionFunction",&cw_ReflectionFunction},
@@ -46,15 +46,15 @@ const int cw_ReflectionFunction$$instanceof_index[] = {
   0,-1,-1,-1,1,2,-1,-1,
 
 };
-extern const CallInfo ci_ReflectionFunction$$__construct = { (void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$invoke = { (void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 5, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$getattributerecursive = { (void*)&c_ReflectionFunction::i_getattributerecursive, (void*)&c_ReflectionFunction::ifa_getattributerecursive, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$getattributes = { (void*)&c_ReflectionFunction::i_getattributes, (void*)&c_ReflectionFunction::ifa_getattributes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$getattribute = { (void*)&c_ReflectionFunction::i_getattribute, (void*)&c_ReflectionFunction::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$export = { (void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$getattributesrecursive = { (void*)&c_ReflectionFunction::i_getattributesrecursive, (void*)&c_ReflectionFunction::ifa_getattributesrecursive, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$__tostring = { (void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunction$$invokeargs = { (void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunction$$__construct = { (void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$invoke = { (void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 5, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$getattributerecursive = { (void*)&c_ReflectionFunction::i_getattributerecursive, (void*)&c_ReflectionFunction::ifa_getattributerecursive, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$getattributes = { (void*)&c_ReflectionFunction::i_getattributes, (void*)&c_ReflectionFunction::ifa_getattributes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$getattribute = { (void*)&c_ReflectionFunction::i_getattribute, (void*)&c_ReflectionFunction::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$export = { (void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 12, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$getattributesrecursive = { (void*)&c_ReflectionFunction::i_getattributesrecursive, (void*)&c_ReflectionFunction::ifa_getattributesrecursive, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$__tostring = { (void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunction$$invokeargs = { (void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 4, 0x0000000000000000L};
 Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -386,21 +386,21 @@ const int cw_ReflectionFunctionAbstract$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_ReflectionFunctionAbstract$$isclosure = { (void*)&c_ReflectionFunctionAbstract::i_isclosure, (void*)&c_ReflectionFunctionAbstract::ifa_isclosure, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getdoccomment = { (void*)&c_ReflectionFunctionAbstract::i_getdoccomment, (void*)&c_ReflectionFunctionAbstract::ifa_getdoccomment, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getclosure = { (void*)&c_ReflectionFunctionAbstract::i_getclosure, (void*)&c_ReflectionFunctionAbstract::ifa_getclosure, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getparameters = { (void*)&c_ReflectionFunctionAbstract::i_getparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getparameters, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$returnsreference = { (void*)&c_ReflectionFunctionAbstract::i_returnsreference, (void*)&c_ReflectionFunctionAbstract::ifa_returnsreference, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getname = { (void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getendline = { (void*)&c_ReflectionFunctionAbstract::i_getendline, (void*)&c_ReflectionFunctionAbstract::ifa_getendline, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$isinternal = { (void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getstaticvariables = { (void*)&c_ReflectionFunctionAbstract::i_getstaticvariables, (void*)&c_ReflectionFunctionAbstract::ifa_getstaticvariables, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getfilename = { (void*)&c_ReflectionFunctionAbstract::i_getfilename, (void*)&c_ReflectionFunctionAbstract::ifa_getfilename, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$isgenerator = { (void*)&c_ReflectionFunctionAbstract::i_isgenerator, (void*)&c_ReflectionFunctionAbstract::ifa_isgenerator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getnumberofrequiredparameters = { (void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getstartline = { (void*)&c_ReflectionFunctionAbstract::i_getstartline, (void*)&c_ReflectionFunctionAbstract::ifa_getstartline, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$getnumberofparameters = { (void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionFunctionAbstract$$isuserdefined = { (void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$isclosure = { (void*)&c_ReflectionFunctionAbstract::i_isclosure, (void*)&c_ReflectionFunctionAbstract::ifa_isclosure, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getdoccomment = { (void*)&c_ReflectionFunctionAbstract::i_getdoccomment, (void*)&c_ReflectionFunctionAbstract::ifa_getdoccomment, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getclosure = { (void*)&c_ReflectionFunctionAbstract::i_getclosure, (void*)&c_ReflectionFunctionAbstract::ifa_getclosure, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getparameters = { (void*)&c_ReflectionFunctionAbstract::i_getparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getparameters, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$returnsreference = { (void*)&c_ReflectionFunctionAbstract::i_returnsreference, (void*)&c_ReflectionFunctionAbstract::ifa_returnsreference, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getname = { (void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getendline = { (void*)&c_ReflectionFunctionAbstract::i_getendline, (void*)&c_ReflectionFunctionAbstract::ifa_getendline, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$isinternal = { (void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getstaticvariables = { (void*)&c_ReflectionFunctionAbstract::i_getstaticvariables, (void*)&c_ReflectionFunctionAbstract::ifa_getstaticvariables, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getfilename = { (void*)&c_ReflectionFunctionAbstract::i_getfilename, (void*)&c_ReflectionFunctionAbstract::ifa_getfilename, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$isgenerator = { (void*)&c_ReflectionFunctionAbstract::i_isgenerator, (void*)&c_ReflectionFunctionAbstract::ifa_isgenerator, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getnumberofrequiredparameters = { (void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getstartline = { (void*)&c_ReflectionFunctionAbstract::i_getstartline, (void*)&c_ReflectionFunctionAbstract::ifa_getstartline, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getnumberofparameters = { (void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionFunctionAbstract$$isuserdefined = { (void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 4, 0x0000000000000000L};
 Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getname);
 }
@@ -737,7 +737,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 510 */
-int64 c_ReflectionFunctionAbstract::t_getnumberofparameters() {
+int64_t c_ReflectionFunctionAbstract::t_getnumberofparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfParameters);
   ObjectData *obj_tmp UNUSED;
   {
@@ -747,14 +747,14 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofparameters() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 526 */
-int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
+int64_t c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfRequiredParameters);
-  int64 v_count = 0;
+  int64_t v_count = 0;
   Array v_params;
   Primitive v_name = 0;
   Variant v_param;
 
-  v_count = 0LL;
+  v_count = 0L;
   {
     const Array &tmp0((t_getparameters()));
     v_params = tmp0;
@@ -804,27 +804,27 @@ const int cw_ReflectionParameter$$instanceof_index[] = {
   3,
   0,-1,-1,1,
 };
-extern const CallInfo ci_ReflectionParameter$$gettypehinttext = { (void*)&c_ReflectionParameter::i_gettypehinttext, (void*)&c_ReflectionParameter::ifa_gettypehinttext, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$__construct = { (void*)&c_ReflectionParameter::i___construct, (void*)&c_ReflectionParameter::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getposition = { (void*)&c_ReflectionParameter::i_getposition, (void*)&c_ReflectionParameter::ifa_getposition, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$isoptional = { (void*)&c_ReflectionParameter::i_isoptional, (void*)&c_ReflectionParameter::ifa_isoptional, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$isarray = { (void*)&c_ReflectionParameter::i_isarray, (void*)&c_ReflectionParameter::ifa_isarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getname = { (void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getdefaultvalue = { (void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getdefaultvaluetext = { (void*)&c_ReflectionParameter::i_getdefaultvaluetext, (void*)&c_ReflectionParameter::ifa_getdefaultvaluetext, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getdeclaringfunction = { (void*)&c_ReflectionParameter::i_getdeclaringfunction, (void*)&c_ReflectionParameter::ifa_getdeclaringfunction, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$allowsnull = { (void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getattributerecursive = { (void*)&c_ReflectionParameter::i_getattributerecursive, (void*)&c_ReflectionParameter::ifa_getattributerecursive, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getattributes = { (void*)&c_ReflectionParameter::i_getattributes, (void*)&c_ReflectionParameter::ifa_getattributes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$__tostring = { (void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getclass = { (void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$export = { (void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$collectattributes = { (void*)&c_ReflectionParameter::i_collectattributes, (void*)&c_ReflectionParameter::ifa_collectattributes, 4, 140, 0x0000000000000001LL};
-extern const CallInfo ci_ReflectionParameter$$ispassedbyreference = { (void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getattribute = { (void*)&c_ReflectionParameter::i_getattribute, (void*)&c_ReflectionParameter::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getdeclaringclass = { (void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$getattributesrecursive = { (void*)&c_ReflectionParameter::i_getattributesrecursive, (void*)&c_ReflectionParameter::ifa_getattributesrecursive, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionParameter$$isdefaultvalueavailable = { (void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$gettypehinttext = { (void*)&c_ReflectionParameter::i_gettypehinttext, (void*)&c_ReflectionParameter::ifa_gettypehinttext, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$__construct = { (void*)&c_ReflectionParameter::i___construct, (void*)&c_ReflectionParameter::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getposition = { (void*)&c_ReflectionParameter::i_getposition, (void*)&c_ReflectionParameter::ifa_getposition, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$isoptional = { (void*)&c_ReflectionParameter::i_isoptional, (void*)&c_ReflectionParameter::ifa_isoptional, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$isarray = { (void*)&c_ReflectionParameter::i_isarray, (void*)&c_ReflectionParameter::ifa_isarray, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getname = { (void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getdefaultvalue = { (void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getdefaultvaluetext = { (void*)&c_ReflectionParameter::i_getdefaultvaluetext, (void*)&c_ReflectionParameter::ifa_getdefaultvaluetext, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getdeclaringfunction = { (void*)&c_ReflectionParameter::i_getdeclaringfunction, (void*)&c_ReflectionParameter::ifa_getdeclaringfunction, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$allowsnull = { (void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getattributerecursive = { (void*)&c_ReflectionParameter::i_getattributerecursive, (void*)&c_ReflectionParameter::ifa_getattributerecursive, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getattributes = { (void*)&c_ReflectionParameter::i_getattributes, (void*)&c_ReflectionParameter::ifa_getattributes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$__tostring = { (void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getclass = { (void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$export = { (void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 12, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$collectattributes = { (void*)&c_ReflectionParameter::i_collectattributes, (void*)&c_ReflectionParameter::ifa_collectattributes, 4, 140, 0x0000000000000001L};
+extern const CallInfo ci_ReflectionParameter$$ispassedbyreference = { (void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getattribute = { (void*)&c_ReflectionParameter::i_getattribute, (void*)&c_ReflectionParameter::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getdeclaringclass = { (void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$getattributesrecursive = { (void*)&c_ReflectionParameter::i_getattributesrecursive, (void*)&c_ReflectionParameter::ifa_getattributesrecursive, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionParameter$$isdefaultvalueavailable = { (void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 4, 0x0000000000000000L};
 Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1487,7 +1487,7 @@ void c_ReflectionParameter::t_collectattributes(VRefParam rv_attrs, CVarRef v_cl
         {
           bool tmp0;
           {
-            int64 tmp1((x_count(v_params)));
+            int64_t tmp1((x_count(v_params)));
             tmp0 = (not_less(tmp1, v_index));
           }
           if (tmp0) {
@@ -1522,9 +1522,9 @@ void c_ReflectionParameter::t_collectattributes(VRefParam rv_attrs, CVarRef v_cl
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 662 */
-const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16LL;
-const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT = 32LL;
-const int64 q_ReflectionClass$$IS_FINAL = 64LL;
+const int64_t q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16L;
+const int64_t q_ReflectionClass$$IS_EXPLICIT_ABSTRACT = 32L;
+const int64_t q_ReflectionClass$$IS_FINAL = 64L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionClass)
 extern const InstanceOfInfo cw_ReflectionClass$$instanceof_table[] = {
   {0x0DC23C44,1,"Reflector",(const ObjectStaticCallbacks*)2},
@@ -1534,58 +1534,58 @@ const int cw_ReflectionClass$$instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-extern const CallInfo ci_ReflectionClass$$getextensionname = { (void*)&c_ReflectionClass::i_getextensionname, (void*)&c_ReflectionClass::ifa_getextensionname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$issubclassof = { (void*)&c_ReflectionClass::i_issubclassof, (void*)&c_ReflectionClass::ifa_issubclassof, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getextension = { (void*)&c_ReflectionClass::i_getextension, (void*)&c_ReflectionClass::ifa_getextension, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$export = { (void*)&c_ReflectionClass::i_export, (void*)&c_ReflectionClass::ifa_export, 2, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getinterfaces = { (void*)&c_ReflectionClass::i_getinterfaces, (void*)&c_ReflectionClass::ifa_getinterfaces, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$hasconstant = { (void*)&c_ReflectionClass::i_hasconstant, (void*)&c_ReflectionClass::ifa_hasconstant, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$test = { (void*)&c_ReflectionClass::i_test, (void*)&c_ReflectionClass::ifa_test, 2, 132, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getproperties = { (void*)&c_ReflectionClass::i_getproperties, (void*)&c_ReflectionClass::ifa_getproperties, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$gettraitnames = { (void*)&c_ReflectionClass::i_gettraitnames, (void*)&c_ReflectionClass::ifa_gettraitnames, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getparentclass = { (void*)&c_ReflectionClass::i_getparentclass, (void*)&c_ReflectionClass::ifa_getparentclass, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getfilename = { (void*)&c_ReflectionClass::i_getfilename, (void*)&c_ReflectionClass::ifa_getfilename, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getname = { (void*)&c_ReflectionClass::i_getname, (void*)&c_ReflectionClass::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isuserdefined = { (void*)&c_ReflectionClass::i_isuserdefined, (void*)&c_ReflectionClass::ifa_isuserdefined, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getattributes = { (void*)&c_ReflectionClass::i_getattributes, (void*)&c_ReflectionClass::ifa_getattributes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$hasproperty = { (void*)&c_ReflectionClass::i_hasproperty, (void*)&c_ReflectionClass::ifa_hasproperty, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$istrait = { (void*)&c_ReflectionClass::i_istrait, (void*)&c_ReflectionClass::ifa_istrait, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getconstant = { (void*)&c_ReflectionClass::i_getconstant, (void*)&c_ReflectionClass::ifa_getconstant, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isabstract = { (void*)&c_ReflectionClass::i_isabstract, (void*)&c_ReflectionClass::ifa_isabstract, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$__construct = { (void*)&c_ReflectionClass::i___construct, (void*)&c_ReflectionClass::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getmodifiers = { (void*)&c_ReflectionClass::i_getmodifiers, (void*)&c_ReflectionClass::ifa_getmodifiers, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$fetch = { (void*)&c_ReflectionClass::i_fetch, (void*)&c_ReflectionClass::ifa_fetch, 1, 132, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getmethod = { (void*)&c_ReflectionClass::i_getmethod, (void*)&c_ReflectionClass::ifa_getmethod, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$__tostring = { (void*)&c_ReflectionClass::i___tostring, (void*)&c_ReflectionClass::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$newinstance = { (void*)&c_ReflectionClass::i_newinstance, (void*)&c_ReflectionClass::ifa_newinstance, 0, 5, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getdoccomment = { (void*)&c_ReflectionClass::i_getdoccomment, (void*)&c_ReflectionClass::ifa_getdoccomment, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getendline = { (void*)&c_ReflectionClass::i_getendline, (void*)&c_ReflectionClass::ifa_getendline, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getconstants = { (void*)&c_ReflectionClass::i_getconstants, (void*)&c_ReflectionClass::ifa_getconstants, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$fetch_recur = { (void*)&c_ReflectionClass::i_fetch_recur, (void*)&c_ReflectionClass::ifa_fetch_recur, 1, 140, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getinterfacenames = { (void*)&c_ReflectionClass::i_getinterfacenames, (void*)&c_ReflectionClass::ifa_getinterfacenames, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isinstance = { (void*)&c_ReflectionClass::i_isinstance, (void*)&c_ReflectionClass::ifa_isinstance, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getproperty = { (void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isinterface = { (void*)&c_ReflectionClass::i_isinterface, (void*)&c_ReflectionClass::ifa_isinterface, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getstartline = { (void*)&c_ReflectionClass::i_getstartline, (void*)&c_ReflectionClass::ifa_getstartline, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getstaticproperties = { (void*)&c_ReflectionClass::i_getstaticproperties, (void*)&c_ReflectionClass::ifa_getstaticproperties, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getstaticpropertyvalue = { (void*)&c_ReflectionClass::i_getstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_getstaticpropertyvalue, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getattribute = { (void*)&c_ReflectionClass::i_getattribute, (void*)&c_ReflectionClass::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isfinal = { (void*)&c_ReflectionClass::i_isfinal, (void*)&c_ReflectionClass::ifa_isfinal, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$hasmethod = { (void*)&c_ReflectionClass::i_hasmethod, (void*)&c_ReflectionClass::ifa_hasmethod, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isinstantiable = { (void*)&c_ReflectionClass::i_isinstantiable, (void*)&c_ReflectionClass::ifa_isinstantiable, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getattributerecursive = { (void*)&c_ReflectionClass::i_getattributerecursive, (void*)&c_ReflectionClass::ifa_getattributerecursive, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$gettraits = { (void*)&c_ReflectionClass::i_gettraits, (void*)&c_ReflectionClass::ifa_gettraits, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isinternal = { (void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$check = { (void*)&c_ReflectionClass::i_check, (void*)&c_ReflectionClass::ifa_check, 1, 132, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getmethods = { (void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$setstaticpropertyvalue = { (void*)&c_ReflectionClass::i_setstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_setstaticpropertyvalue, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$implementsinterface = { (void*)&c_ReflectionClass::i_implementsinterface, (void*)&c_ReflectionClass::ifa_implementsinterface, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$isiterateable = { (void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getdefaultproperties = { (void*)&c_ReflectionClass::i_getdefaultproperties, (void*)&c_ReflectionClass::ifa_getdefaultproperties, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$newinstanceargs = { (void*)&c_ReflectionClass::i_newinstanceargs, (void*)&c_ReflectionClass::ifa_newinstanceargs, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$gettraitaliases = { (void*)&c_ReflectionClass::i_gettraitaliases, (void*)&c_ReflectionClass::ifa_gettraitaliases, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getconstructor = { (void*)&c_ReflectionClass::i_getconstructor, (void*)&c_ReflectionClass::ifa_getconstructor, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionClass$$getattributesrecursive = { (void*)&c_ReflectionClass::i_getattributesrecursive, (void*)&c_ReflectionClass::ifa_getattributesrecursive, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getextensionname = { (void*)&c_ReflectionClass::i_getextensionname, (void*)&c_ReflectionClass::ifa_getextensionname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$issubclassof = { (void*)&c_ReflectionClass::i_issubclassof, (void*)&c_ReflectionClass::ifa_issubclassof, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getextension = { (void*)&c_ReflectionClass::i_getextension, (void*)&c_ReflectionClass::ifa_getextension, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$export = { (void*)&c_ReflectionClass::i_export, (void*)&c_ReflectionClass::ifa_export, 2, 12, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getinterfaces = { (void*)&c_ReflectionClass::i_getinterfaces, (void*)&c_ReflectionClass::ifa_getinterfaces, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$hasconstant = { (void*)&c_ReflectionClass::i_hasconstant, (void*)&c_ReflectionClass::ifa_hasconstant, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$test = { (void*)&c_ReflectionClass::i_test, (void*)&c_ReflectionClass::ifa_test, 2, 132, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getproperties = { (void*)&c_ReflectionClass::i_getproperties, (void*)&c_ReflectionClass::ifa_getproperties, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$gettraitnames = { (void*)&c_ReflectionClass::i_gettraitnames, (void*)&c_ReflectionClass::ifa_gettraitnames, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getparentclass = { (void*)&c_ReflectionClass::i_getparentclass, (void*)&c_ReflectionClass::ifa_getparentclass, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getfilename = { (void*)&c_ReflectionClass::i_getfilename, (void*)&c_ReflectionClass::ifa_getfilename, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getname = { (void*)&c_ReflectionClass::i_getname, (void*)&c_ReflectionClass::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isuserdefined = { (void*)&c_ReflectionClass::i_isuserdefined, (void*)&c_ReflectionClass::ifa_isuserdefined, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getattributes = { (void*)&c_ReflectionClass::i_getattributes, (void*)&c_ReflectionClass::ifa_getattributes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$hasproperty = { (void*)&c_ReflectionClass::i_hasproperty, (void*)&c_ReflectionClass::ifa_hasproperty, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$istrait = { (void*)&c_ReflectionClass::i_istrait, (void*)&c_ReflectionClass::ifa_istrait, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getconstant = { (void*)&c_ReflectionClass::i_getconstant, (void*)&c_ReflectionClass::ifa_getconstant, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isabstract = { (void*)&c_ReflectionClass::i_isabstract, (void*)&c_ReflectionClass::ifa_isabstract, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$__construct = { (void*)&c_ReflectionClass::i___construct, (void*)&c_ReflectionClass::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getmodifiers = { (void*)&c_ReflectionClass::i_getmodifiers, (void*)&c_ReflectionClass::ifa_getmodifiers, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$fetch = { (void*)&c_ReflectionClass::i_fetch, (void*)&c_ReflectionClass::ifa_fetch, 1, 132, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getmethod = { (void*)&c_ReflectionClass::i_getmethod, (void*)&c_ReflectionClass::ifa_getmethod, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$__tostring = { (void*)&c_ReflectionClass::i___tostring, (void*)&c_ReflectionClass::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$newinstance = { (void*)&c_ReflectionClass::i_newinstance, (void*)&c_ReflectionClass::ifa_newinstance, 0, 5, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getdoccomment = { (void*)&c_ReflectionClass::i_getdoccomment, (void*)&c_ReflectionClass::ifa_getdoccomment, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getendline = { (void*)&c_ReflectionClass::i_getendline, (void*)&c_ReflectionClass::ifa_getendline, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getconstants = { (void*)&c_ReflectionClass::i_getconstants, (void*)&c_ReflectionClass::ifa_getconstants, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$fetch_recur = { (void*)&c_ReflectionClass::i_fetch_recur, (void*)&c_ReflectionClass::ifa_fetch_recur, 1, 140, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getinterfacenames = { (void*)&c_ReflectionClass::i_getinterfacenames, (void*)&c_ReflectionClass::ifa_getinterfacenames, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isinstance = { (void*)&c_ReflectionClass::i_isinstance, (void*)&c_ReflectionClass::ifa_isinstance, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getproperty = { (void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isinterface = { (void*)&c_ReflectionClass::i_isinterface, (void*)&c_ReflectionClass::ifa_isinterface, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getstartline = { (void*)&c_ReflectionClass::i_getstartline, (void*)&c_ReflectionClass::ifa_getstartline, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getstaticproperties = { (void*)&c_ReflectionClass::i_getstaticproperties, (void*)&c_ReflectionClass::ifa_getstaticproperties, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getstaticpropertyvalue = { (void*)&c_ReflectionClass::i_getstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_getstaticpropertyvalue, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getattribute = { (void*)&c_ReflectionClass::i_getattribute, (void*)&c_ReflectionClass::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isfinal = { (void*)&c_ReflectionClass::i_isfinal, (void*)&c_ReflectionClass::ifa_isfinal, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$hasmethod = { (void*)&c_ReflectionClass::i_hasmethod, (void*)&c_ReflectionClass::ifa_hasmethod, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isinstantiable = { (void*)&c_ReflectionClass::i_isinstantiable, (void*)&c_ReflectionClass::ifa_isinstantiable, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getattributerecursive = { (void*)&c_ReflectionClass::i_getattributerecursive, (void*)&c_ReflectionClass::ifa_getattributerecursive, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$gettraits = { (void*)&c_ReflectionClass::i_gettraits, (void*)&c_ReflectionClass::ifa_gettraits, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isinternal = { (void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$check = { (void*)&c_ReflectionClass::i_check, (void*)&c_ReflectionClass::ifa_check, 1, 132, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getmethods = { (void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$setstaticpropertyvalue = { (void*)&c_ReflectionClass::i_setstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_setstaticpropertyvalue, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$implementsinterface = { (void*)&c_ReflectionClass::i_implementsinterface, (void*)&c_ReflectionClass::ifa_implementsinterface, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$isiterateable = { (void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getdefaultproperties = { (void*)&c_ReflectionClass::i_getdefaultproperties, (void*)&c_ReflectionClass::ifa_getdefaultproperties, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$newinstanceargs = { (void*)&c_ReflectionClass::i_newinstanceargs, (void*)&c_ReflectionClass::ifa_newinstanceargs, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$gettraitaliases = { (void*)&c_ReflectionClass::i_gettraitaliases, (void*)&c_ReflectionClass::ifa_gettraitaliases, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getconstructor = { (void*)&c_ReflectionClass::i_getconstructor, (void*)&c_ReflectionClass::ifa_getconstructor, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionClass$$getattributesrecursive = { (void*)&c_ReflectionClass::i_getattributesrecursive, (void*)&c_ReflectionClass::ifa_getattributesrecursive, 0, 4, 0x0000000000000000L};
 Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -2417,7 +2417,7 @@ Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
         if (tmp0) {
           {
             {
-              lval(v_info.lvalAt(NAMSTR(s_sys_ss41087d44, "interfaces"), AccessFlags::CheckExist_Key)).set(v_parent, (NAMVAR(s_sys_svib794f8ce, 1LL)));
+              lval(v_info.lvalAt(NAMSTR(s_sys_ss41087d44, "interfaces"), AccessFlags::CheckExist_Key)).set(v_parent, (NAMVAR(s_sys_svib794f8ce, int64_t(1))));
             }
           }
         }
@@ -2685,7 +2685,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 987 */
-Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, 65535LL)
+Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, int64_t(65535))
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getMethods);
   Array v_ret;
@@ -2715,7 +2715,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi583
           const p_ReflectionMethod &tmp0((t_getmethod(v_name)));
           v_m = tmp0;
         }
-        if (((((((toBoolean(bitwise_and(v_filter, 256LL /* ReflectionMethod::IS_PUBLIC */)) && v_m->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* ReflectionMethod::IS_PROTECTED */)) && v_m->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* ReflectionMethod::IS_PRIVATE */)) && v_m->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* ReflectionMethod::IS_STATIC */)) && v_m->t_isstatic())) || (toBoolean(bitwise_and(v_filter, 4LL /* ReflectionMethod::IS_FINAL */)) && v_m->t_isfinal())) || (toBoolean(bitwise_and(v_filter, 2LL /* ReflectionMethod::IS_ABSTRACT */)) && v_m->t_isabstract()))) {
+        if (((((((toBoolean(bitwise_and(v_filter, 256L /* ReflectionMethod::IS_PUBLIC */)) && v_m->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512L /* ReflectionMethod::IS_PROTECTED */)) && v_m->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024L /* ReflectionMethod::IS_PRIVATE */)) && v_m->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1L /* ReflectionMethod::IS_STATIC */)) && v_m->t_isstatic())) || (toBoolean(bitwise_and(v_filter, 4L /* ReflectionMethod::IS_FINAL */)) && v_m->t_isfinal())) || (toBoolean(bitwise_and(v_filter, 2L /* ReflectionMethod::IS_ABSTRACT */)) && v_m->t_isabstract()))) {
           {
             v_ret.append((VarNR(v_m)));
           }
@@ -2776,7 +2776,7 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1039 */
-Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, 65535LL)
+Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, int64_t(65535))
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getProperties);
   Array v_ret;
@@ -2807,7 +2807,7 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi
           const p_ReflectionProperty &tmp0((t_getproperty(v_name)));
           v_p = tmp0;
         }
-        if (((((toBoolean(bitwise_and(v_filter, 256LL /* ReflectionProperty::IS_PUBLIC */)) && v_p->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* ReflectionProperty::IS_PROTECTED */)) && v_p->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* ReflectionProperty::IS_PRIVATE */)) && v_p->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* ReflectionProperty::IS_STATIC */)) && v_p->t_isstatic()))) {
+        if (((((toBoolean(bitwise_and(v_filter, 256L /* ReflectionProperty::IS_PUBLIC */)) && v_p->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512L /* ReflectionProperty::IS_PROTECTED */)) && v_p->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024L /* ReflectionProperty::IS_PRIVATE */)) && v_p->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1L /* ReflectionProperty::IS_STATIC */)) && v_p->t_isstatic()))) {
           {
             v_ret.append((VarNR(v_p)));
           }
@@ -3196,8 +3196,8 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
         {
           bool tmp0;
           {
-            int64 tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
-            tmp0 = (equal(tmp1, 0LL));
+            int64_t tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
+            tmp0 = (equal(tmp1, 0L));
           }
           if (tmp0) {
             {
@@ -3221,8 +3221,8 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     bool tmp0;
     {
-      int64 tmp1((x_strcasecmp(toString(v_cls), toString(v_parent))));
-      tmp0 = (equal(tmp1, 0LL));
+      int64_t tmp1((x_strcasecmp(toString(v_cls), toString(v_parent))));
+      tmp0 = (equal(tmp1, 0L));
     }
     if (tmp0) {
       {
@@ -3417,8 +3417,8 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
         {
           bool tmp0;
           {
-            int64 tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
-            tmp0 = (equal(tmp1, 0LL));
+            int64_t tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
+            tmp0 = (equal(tmp1, 0L));
           }
           if (tmp0) {
             {
@@ -3522,17 +3522,17 @@ const int cw_ReflectionExtension$$instanceof_index[] = {
   3,
   0,-1,-1,1,
 };
-extern const CallInfo ci_ReflectionExtension$$__construct = { (void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$getclasses = { (void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$getinientries = { (void*)&c_ReflectionExtension::i_getinientries, (void*)&c_ReflectionExtension::ifa_getinientries, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$getname = { (void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$getversion = { (void*)&c_ReflectionExtension::i_getversion, (void*)&c_ReflectionExtension::ifa_getversion, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$getconstants = { (void*)&c_ReflectionExtension::i_getconstants, (void*)&c_ReflectionExtension::ifa_getconstants, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$getfunctions = { (void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$export = { (void*)&c_ReflectionExtension::i_export, (void*)&c_ReflectionExtension::ifa_export, 2, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$getclassnames = { (void*)&c_ReflectionExtension::i_getclassnames, (void*)&c_ReflectionExtension::ifa_getclassnames, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$__tostring = { (void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionExtension$$info = { (void*)&c_ReflectionExtension::i_info, (void*)&c_ReflectionExtension::ifa_info, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$__construct = { (void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$getclasses = { (void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$getinientries = { (void*)&c_ReflectionExtension::i_getinientries, (void*)&c_ReflectionExtension::ifa_getinientries, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$getname = { (void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$getversion = { (void*)&c_ReflectionExtension::i_getversion, (void*)&c_ReflectionExtension::ifa_getversion, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$getconstants = { (void*)&c_ReflectionExtension::i_getconstants, (void*)&c_ReflectionExtension::ifa_getconstants, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$getfunctions = { (void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$export = { (void*)&c_ReflectionExtension::i_export, (void*)&c_ReflectionExtension::ifa_export, 2, 12, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$getclassnames = { (void*)&c_ReflectionExtension::i_getclassnames, (void*)&c_ReflectionExtension::ifa_getclassnames, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$__tostring = { (void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionExtension$$info = { (void*)&c_ReflectionExtension::i_info, (void*)&c_ReflectionExtension::ifa_info, 0, 4, 0x0000000000000000L};
 Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3832,7 +3832,7 @@ const int cw_ReflectionObject$$instanceof_index[] = {
   -1,-1,-1,-1,0,1,2,-1,
 
 };
-extern const CallInfo ci_ReflectionObject$$export = { (void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionObject$$export = { (void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000L};
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_export);
 }
@@ -3885,12 +3885,12 @@ Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret //  = false_va
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1771 */
-const int64 q_ReflectionMethod$$IS_STATIC = 1LL;
-const int64 q_ReflectionMethod$$IS_PUBLIC = 256LL;
-const int64 q_ReflectionMethod$$IS_PROTECTED = 512LL;
-const int64 q_ReflectionMethod$$IS_PRIVATE = 1024LL;
-const int64 q_ReflectionMethod$$IS_ABSTRACT = 2LL;
-const int64 q_ReflectionMethod$$IS_FINAL = 4LL;
+const int64_t q_ReflectionMethod$$IS_STATIC = 1L;
+const int64_t q_ReflectionMethod$$IS_PUBLIC = 256L;
+const int64_t q_ReflectionMethod$$IS_PROTECTED = 512L;
+const int64_t q_ReflectionMethod$$IS_PRIVATE = 1024L;
+const int64_t q_ReflectionMethod$$IS_ABSTRACT = 2L;
+const int64_t q_ReflectionMethod$$IS_FINAL = 4L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionMethod)
 extern const InstanceOfInfo cw_ReflectionMethod$$instanceof_table[] = {
   {0x41521F4A,1,"ReflectionMethod",&cw_ReflectionMethod},
@@ -3902,26 +3902,26 @@ const int cw_ReflectionMethod$$instanceof_index[] = {
   -1,-1,0,-1,1,2,-1,-1,
 
 };
-extern const CallInfo ci_ReflectionMethod$$__construct = { (void*)&c_ReflectionMethod::i___construct, (void*)&c_ReflectionMethod::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$isstatic = { (void*)&c_ReflectionMethod::i_isstatic, (void*)&c_ReflectionMethod::ifa_isstatic, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$isabstract = { (void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$getclosure = { (void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$isfinal = { (void*)&c_ReflectionMethod::i_isfinal, (void*)&c_ReflectionMethod::ifa_isfinal, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$isprotected = { (void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$isdestructor = { (void*)&c_ReflectionMethod::i_isdestructor, (void*)&c_ReflectionMethod::ifa_isdestructor, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$ispublic = { (void*)&c_ReflectionMethod::i_ispublic, (void*)&c_ReflectionMethod::ifa_ispublic, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$invokeargs = { (void*)&c_ReflectionMethod::i_invokeargs, (void*)&c_ReflectionMethod::ifa_invokeargs, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$getattributerecursive = { (void*)&c_ReflectionMethod::i_getattributerecursive, (void*)&c_ReflectionMethod::ifa_getattributerecursive, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$getattributes = { (void*)&c_ReflectionMethod::i_getattributes, (void*)&c_ReflectionMethod::ifa_getattributes, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$isconstructor = { (void*)&c_ReflectionMethod::i_isconstructor, (void*)&c_ReflectionMethod::ifa_isconstructor, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$__tostring = { (void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$export = { (void*)&c_ReflectionMethod::i_export, (void*)&c_ReflectionMethod::ifa_export, 3, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$getattribute = { (void*)&c_ReflectionMethod::i_getattribute, (void*)&c_ReflectionMethod::ifa_getattribute, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$getdeclaringclass = { (void*)&c_ReflectionMethod::i_getdeclaringclass, (void*)&c_ReflectionMethod::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$invoke = { (void*)&c_ReflectionMethod::i_invoke, (void*)&c_ReflectionMethod::ifa_invoke, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$getmodifiers = { (void*)&c_ReflectionMethod::i_getmodifiers, (void*)&c_ReflectionMethod::ifa_getmodifiers, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$isprivate = { (void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionMethod$$getattributesrecursive = { (void*)&c_ReflectionMethod::i_getattributesrecursive, (void*)&c_ReflectionMethod::ifa_getattributesrecursive, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$__construct = { (void*)&c_ReflectionMethod::i___construct, (void*)&c_ReflectionMethod::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$isstatic = { (void*)&c_ReflectionMethod::i_isstatic, (void*)&c_ReflectionMethod::ifa_isstatic, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$isabstract = { (void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$getclosure = { (void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$isfinal = { (void*)&c_ReflectionMethod::i_isfinal, (void*)&c_ReflectionMethod::ifa_isfinal, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$isprotected = { (void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$isdestructor = { (void*)&c_ReflectionMethod::i_isdestructor, (void*)&c_ReflectionMethod::ifa_isdestructor, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$ispublic = { (void*)&c_ReflectionMethod::i_ispublic, (void*)&c_ReflectionMethod::ifa_ispublic, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$invokeargs = { (void*)&c_ReflectionMethod::i_invokeargs, (void*)&c_ReflectionMethod::ifa_invokeargs, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$getattributerecursive = { (void*)&c_ReflectionMethod::i_getattributerecursive, (void*)&c_ReflectionMethod::ifa_getattributerecursive, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$getattributes = { (void*)&c_ReflectionMethod::i_getattributes, (void*)&c_ReflectionMethod::ifa_getattributes, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$isconstructor = { (void*)&c_ReflectionMethod::i_isconstructor, (void*)&c_ReflectionMethod::ifa_isconstructor, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$__tostring = { (void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$export = { (void*)&c_ReflectionMethod::i_export, (void*)&c_ReflectionMethod::ifa_export, 3, 12, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$getattribute = { (void*)&c_ReflectionMethod::i_getattribute, (void*)&c_ReflectionMethod::ifa_getattribute, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$getdeclaringclass = { (void*)&c_ReflectionMethod::i_getdeclaringclass, (void*)&c_ReflectionMethod::ifa_getdeclaringclass, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$invoke = { (void*)&c_ReflectionMethod::i_invoke, (void*)&c_ReflectionMethod::ifa_invoke, 1, 5, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$getmodifiers = { (void*)&c_ReflectionMethod::i_getmodifiers, (void*)&c_ReflectionMethod::ifa_getmodifiers, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$isprivate = { (void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionMethod$$getattributesrecursive = { (void*)&c_ReflectionMethod::i_getattributesrecursive, (void*)&c_ReflectionMethod::ifa_getattributesrecursive, 0, 4, 0x0000000000000000L};
 Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -4238,17 +4238,17 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
       {
         bool tmp0;
         {
-          int64 tmp1((x_count(v_arr)));
-          tmp0 = (equal(tmp1, 2LL));
+          int64_t tmp1((x_count(v_arr)));
+          tmp0 = (equal(tmp1, 2L));
         }
         if (tmp0) {
           {
             {
-              const Variant &tmp0((v_arr.rvalAt(0LL, AccessFlags::Error)));
+              const Variant &tmp0((v_arr.rvalAt(0L, AccessFlags::Error)));
               v_cls.assignVal(tmp0);
             }
             {
-              const Variant &tmp0((v_arr.rvalAt(1LL, AccessFlags::Error)));
+              const Variant &tmp0((v_arr.rvalAt(1L, AccessFlags::Error)));
               v_name.assignVal(tmp0);
             }
           }
@@ -4574,10 +4574,10 @@ Variant c_ReflectionMethod::t_getattributesrecursive() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1518 */
-const int64 q_ReflectionProperty$$IS_STATIC = 1LL;
-const int64 q_ReflectionProperty$$IS_PUBLIC = 256LL;
-const int64 q_ReflectionProperty$$IS_PROTECTED = 512LL;
-const int64 q_ReflectionProperty$$IS_PRIVATE = 1024LL;
+const int64_t q_ReflectionProperty$$IS_STATIC = 1L;
+const int64_t q_ReflectionProperty$$IS_PUBLIC = 256L;
+const int64_t q_ReflectionProperty$$IS_PROTECTED = 512L;
+const int64_t q_ReflectionProperty$$IS_PRIVATE = 1024L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionProperty)
 extern const InstanceOfInfo cw_ReflectionProperty$$instanceof_table[] = {
   {0x0DC23C44,1,"Reflector",(const ObjectStaticCallbacks*)2},
@@ -4587,21 +4587,21 @@ const int cw_ReflectionProperty$$instanceof_index[] = {
   3,
   0,-1,-1,1,
 };
-extern const CallInfo ci_ReflectionProperty$$getdoccomment = { (void*)&c_ReflectionProperty::i_getdoccomment, (void*)&c_ReflectionProperty::ifa_getdoccomment, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$__construct = { (void*)&c_ReflectionProperty::i___construct, (void*)&c_ReflectionProperty::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$isstatic = { (void*)&c_ReflectionProperty::i_isstatic, (void*)&c_ReflectionProperty::ifa_isstatic, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$getname = { (void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$isprotected = { (void*)&c_ReflectionProperty::i_isprotected, (void*)&c_ReflectionProperty::ifa_isprotected, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$setvalue = { (void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$getvalue = { (void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$setaccessible = { (void*)&c_ReflectionProperty::i_setaccessible, (void*)&c_ReflectionProperty::ifa_setaccessible, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$ispublic = { (void*)&c_ReflectionProperty::i_ispublic, (void*)&c_ReflectionProperty::ifa_ispublic, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$__tostring = { (void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$export = { (void*)&c_ReflectionProperty::i_export, (void*)&c_ReflectionProperty::ifa_export, 3, 12, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$getdeclaringclass = { (void*)&c_ReflectionProperty::i_getdeclaringclass, (void*)&c_ReflectionProperty::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$getmodifiers = { (void*)&c_ReflectionProperty::i_getmodifiers, (void*)&c_ReflectionProperty::ifa_getmodifiers, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$isprivate = { (void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_ReflectionProperty$$isdefault = { (void*)&c_ReflectionProperty::i_isdefault, (void*)&c_ReflectionProperty::ifa_isdefault, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$getdoccomment = { (void*)&c_ReflectionProperty::i_getdoccomment, (void*)&c_ReflectionProperty::ifa_getdoccomment, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$__construct = { (void*)&c_ReflectionProperty::i___construct, (void*)&c_ReflectionProperty::ifa___construct, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$isstatic = { (void*)&c_ReflectionProperty::i_isstatic, (void*)&c_ReflectionProperty::ifa_isstatic, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$getname = { (void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$isprotected = { (void*)&c_ReflectionProperty::i_isprotected, (void*)&c_ReflectionProperty::ifa_isprotected, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$setvalue = { (void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$getvalue = { (void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$setaccessible = { (void*)&c_ReflectionProperty::i_setaccessible, (void*)&c_ReflectionProperty::ifa_setaccessible, 1, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$ispublic = { (void*)&c_ReflectionProperty::i_ispublic, (void*)&c_ReflectionProperty::ifa_ispublic, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$__tostring = { (void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$export = { (void*)&c_ReflectionProperty::i_export, (void*)&c_ReflectionProperty::ifa_export, 3, 12, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$getdeclaringclass = { (void*)&c_ReflectionProperty::i_getdeclaringclass, (void*)&c_ReflectionProperty::ifa_getdeclaringclass, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$getmodifiers = { (void*)&c_ReflectionProperty::i_getmodifiers, (void*)&c_ReflectionProperty::ifa_getmodifiers, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$isprivate = { (void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_ReflectionProperty$$isdefault = { (void*)&c_ReflectionProperty::i_isdefault, (void*)&c_ReflectionProperty::ifa_isdefault, 0, 4, 0x0000000000000000L};
 Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -5093,18 +5093,18 @@ ObjectData *coo_ReflectionProperty() {
 
 // Class tables
 static const int64 cpt_static_inits[] = {
-  (int64)&NAMVAR(s_sys_svi86af027e, 16LL),
-  (int64)&NAMVAR(s_sys_svif2a1fb10, 32LL),
-  (int64)&NAMVAR(s_sys_svi1abc09e0, 64LL),
+  (int64)&NAMVAR(s_sys_svi86af027e, int64_t(16)),
+  (int64)&NAMVAR(s_sys_svif2a1fb10, int64_t(32)),
+  (int64)&NAMVAR(s_sys_svi1abc09e0, int64_t(64)),
   (int64)&s_sys_sva00000000,
   (int64)&null_variant,
-  (int64)&NAMVAR(s_sys_svibf7d1df5, 262144LL),
-  (int64)&NAMVAR(s_sys_svib794f8ce, 1LL),
-  (int64)&NAMVAR(s_sys_svid5e04164, 512LL),
-  (int64)&NAMVAR(s_sys_svi543f7d14, 1024LL),
-  (int64)&NAMVAR(s_sys_svi6af020b2, 256LL),
-  (int64)&NAMVAR(s_sys_svi5e544a31, 4LL),
-  (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
+  (int64)&NAMVAR(s_sys_svibf7d1df5, int64_t(262144)),
+  (int64)&NAMVAR(s_sys_svib794f8ce, int64_t(1)),
+  (int64)&NAMVAR(s_sys_svid5e04164, int64_t(512)),
+  (int64)&NAMVAR(s_sys_svi543f7d14, int64_t(1024)),
+  (int64)&NAMVAR(s_sys_svi6af020b2, int64_t(256)),
+  (int64)&NAMVAR(s_sys_svi5e544a31, int64_t(4)),
+  (int64)&NAMVAR(s_sys_svi90d5f98c, int64_t(2)),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x4C9B1319,1,0,0,100,10,0,&NAMSTR(s_sys_ss4c9b1319, "IS_IMPLICIT_ABSTRACT") },

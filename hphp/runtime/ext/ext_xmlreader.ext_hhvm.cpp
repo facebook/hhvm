@@ -44,7 +44,7 @@ void th_9XMLReader___construct(ObjectData* this_) asm("_ZN4HPHP11c_XMLReader13t_
 
 TypedValue* tg_9XMLReader___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -72,8 +72,8 @@ TypedValue* tg_9XMLReader___construct(HPHP::VM::ActRec *ar) {
 }
 
 /*
-bool HPHP::c_XMLReader::t_open(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP11c_XMLReader6t_openERKNS_6StringES3_x
+bool HPHP::c_XMLReader::t_open(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP11c_XMLReader6t_openERKNS_6StringES3_l
 
 (return value) => rax
 this_ => rdi
@@ -82,10 +82,10 @@ encoding => rdx
 options => rcx
 */
 
-bool th_9XMLReader_open(ObjectData* this_, Value* uri, Value* encoding, long long options) asm("_ZN4HPHP11c_XMLReader6t_openERKNS_6StringES3_x");
+bool th_9XMLReader_open(ObjectData* this_, Value* uri, Value* encoding, long options) asm("_ZN4HPHP11c_XMLReader6t_openERKNS_6StringES3_l");
 
-TypedValue* tg1_9XMLReader_open(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_open(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -104,13 +104,13 @@ TypedValue* tg1_9XMLReader_open(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_9XMLReader_open((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_open((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
 TypedValue* tg_9XMLReader_open(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -118,7 +118,7 @@ TypedValue* tg_9XMLReader_open(HPHP::VM::ActRec *ar) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv._count = 0;
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_open((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_open((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -144,8 +144,8 @@ TypedValue* tg_9XMLReader_open(HPHP::VM::ActRec *ar) {
 }
 
 /*
-bool HPHP::c_XMLReader::t_xml(HPHP::String const&, HPHP::String const&, long long)
-_ZN4HPHP11c_XMLReader5t_xmlERKNS_6StringES3_x
+bool HPHP::c_XMLReader::t_xml(HPHP::String const&, HPHP::String const&, long)
+_ZN4HPHP11c_XMLReader5t_xmlERKNS_6StringES3_l
 
 (return value) => rax
 this_ => rdi
@@ -154,10 +154,10 @@ encoding => rdx
 options => rcx
 */
 
-bool th_9XMLReader_XML(ObjectData* this_, Value* source, Value* encoding, long long options) asm("_ZN4HPHP11c_XMLReader5t_xmlERKNS_6StringES3_x");
+bool th_9XMLReader_XML(ObjectData* this_, Value* source, Value* encoding, long options) asm("_ZN4HPHP11c_XMLReader5t_xmlERKNS_6StringES3_l");
 
-TypedValue* tg1_9XMLReader_XML(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_XML(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_XML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_XML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -176,13 +176,13 @@ TypedValue* tg1_9XMLReader_XML(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_9XMLReader_XML((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_XML((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
 TypedValue* tg_9XMLReader_XML(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -190,7 +190,7 @@ TypedValue* tg_9XMLReader_XML(HPHP::VM::ActRec *ar) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv._count = 0;
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_XML((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long long)(args[-2].m_data.num) : (long long)(0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_XML((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -227,7 +227,7 @@ bool th_9XMLReader_close(ObjectData* this_) asm("_ZN4HPHP11c_XMLReader7t_closeEv
 
 TypedValue* tg_9XMLReader_close(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -265,7 +265,7 @@ bool th_9XMLReader_read(ObjectData* this_) asm("_ZN4HPHP11c_XMLReader6t_readEv")
 
 TypedValue* tg_9XMLReader_read(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -302,8 +302,8 @@ localname => rsi
 
 bool th_9XMLReader_next(ObjectData* this_, Value* localname) asm("_ZN4HPHP11c_XMLReader6t_nextERKNS_6StringE");
 
-TypedValue* tg1_9XMLReader_next(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_next(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -314,7 +314,7 @@ TypedValue* tg1_9XMLReader_next(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 
 TypedValue* tg_9XMLReader_next(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -360,7 +360,7 @@ Value* th_9XMLReader_readString(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_
 
 TypedValue* tg_9XMLReader_readString(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -400,7 +400,7 @@ Value* th_9XMLReader_readInnerXML(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11
 
 TypedValue* tg_9XMLReader_readInnerXML(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -440,7 +440,7 @@ Value* th_9XMLReader_readOuterXML(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11
 
 TypedValue* tg_9XMLReader_readOuterXML(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -479,7 +479,7 @@ bool th_9XMLReader_moveToNextAttribute(ObjectData* this_) asm("_ZN4HPHP11c_XMLRe
 
 TypedValue* tg_9XMLReader_moveToNextAttribute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -517,8 +517,8 @@ name => rdx
 
 TypedValue* th_9XMLReader_getAttribute(TypedValue* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP11c_XMLReader14t_getattributeERKNS_6StringE");
 
-TypedValue* tg1_9XMLReader_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_9XMLReader_getAttribute((rv), (this_), (Value*)(args-0));
@@ -528,7 +528,7 @@ TypedValue* tg1_9XMLReader_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 
 TypedValue* tg_9XMLReader_getAttribute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -561,8 +561,8 @@ TypedValue* tg_9XMLReader_getAttribute(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Variant HPHP::c_XMLReader::t_getattributeno(long long)
-_ZN4HPHP11c_XMLReader16t_getattributenoEx
+HPHP::Variant HPHP::c_XMLReader::t_getattributeno(long)
+_ZN4HPHP11c_XMLReader16t_getattributenoEl
 
 (return value) => rax
 _rv => rdi
@@ -570,26 +570,26 @@ this_ => rsi
 index => rdx
 */
 
-TypedValue* th_9XMLReader_getAttributeNo(TypedValue* _rv, ObjectData* this_, long long index) asm("_ZN4HPHP11c_XMLReader16t_getattributenoEx");
+TypedValue* th_9XMLReader_getAttributeNo(TypedValue* _rv, ObjectData* this_, long index) asm("_ZN4HPHP11c_XMLReader16t_getattributenoEl");
 
-TypedValue* tg1_9XMLReader_getAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_getAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_getAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_getAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
-  th_9XMLReader_getAttributeNo((rv), (this_), (long long)(args[-0].m_data.num));
+  th_9XMLReader_getAttributeNo((rv), (this_), (long)(args[-0].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
 TypedValue* tg_9XMLReader_getAttributeNo(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          th_9XMLReader_getAttributeNo((&(rv)), (this_), (long long)(args[-0].m_data.num));
+          th_9XMLReader_getAttributeNo((&(rv)), (this_), (long)(args[-0].m_data.num));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -628,8 +628,8 @@ namespaceURI => rcx
 
 TypedValue* th_9XMLReader_getAttributeNs(TypedValue* _rv, ObjectData* this_, Value* name, Value* namespaceURI) asm("_ZN4HPHP11c_XMLReader16t_getattributensERKNS_6StringES3_");
 
-TypedValue* tg1_9XMLReader_getAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_getAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_getAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_getAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -644,7 +644,7 @@ TypedValue* tg1_9XMLReader_getAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, 
 
 TypedValue* tg_9XMLReader_getAttributeNs(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -687,8 +687,8 @@ name => rsi
 
 bool th_9XMLReader_moveToAttribute(ObjectData* this_, Value* name) asm("_ZN4HPHP11c_XMLReader17t_movetoattributeERKNS_6StringE");
 
-TypedValue* tg1_9XMLReader_moveToAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_moveToAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_moveToAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_moveToAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -699,7 +699,7 @@ TypedValue* tg1_9XMLReader_moveToAttribute(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* tg_9XMLReader_moveToAttribute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -733,29 +733,29 @@ TypedValue* tg_9XMLReader_moveToAttribute(HPHP::VM::ActRec *ar) {
 }
 
 /*
-bool HPHP::c_XMLReader::t_movetoattributeno(long long)
-_ZN4HPHP11c_XMLReader19t_movetoattributenoEx
+bool HPHP::c_XMLReader::t_movetoattributeno(long)
+_ZN4HPHP11c_XMLReader19t_movetoattributenoEl
 
 (return value) => rax
 this_ => rdi
 index => rsi
 */
 
-bool th_9XMLReader_moveToAttributeNo(ObjectData* this_, long long index) asm("_ZN4HPHP11c_XMLReader19t_movetoattributenoEx");
+bool th_9XMLReader_moveToAttributeNo(ObjectData* this_, long index) asm("_ZN4HPHP11c_XMLReader19t_movetoattributenoEl");
 
-TypedValue* tg1_9XMLReader_moveToAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_moveToAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_moveToAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_moveToAttributeNo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
-  rv->m_data.num = (th_9XMLReader_moveToAttributeNo((this_), (long long)(args[-0].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_moveToAttributeNo((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
 TypedValue* tg_9XMLReader_moveToAttributeNo(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -763,7 +763,7 @@ TypedValue* tg_9XMLReader_moveToAttributeNo(HPHP::VM::ActRec *ar) {
         if ((args-0)->m_type == KindOfInt64) {
           rv._count = 0;
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_moveToAttributeNo((this_), (long long)(args[-0].m_data.num))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_moveToAttributeNo((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -800,8 +800,8 @@ namespaceURI => rdx
 
 bool th_9XMLReader_moveToAttributeNs(ObjectData* this_, Value* name, Value* namespaceURI) asm("_ZN4HPHP11c_XMLReader19t_movetoattributensERKNS_6StringES3_");
 
-TypedValue* tg1_9XMLReader_moveToAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_moveToAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_moveToAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_moveToAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -817,7 +817,7 @@ TypedValue* tg1_9XMLReader_moveToAttributeNs(TypedValue* rv, HPHP::VM::ActRec* a
 
 TypedValue* tg_9XMLReader_moveToAttributeNs(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -862,7 +862,7 @@ bool th_9XMLReader_moveToElement(ObjectData* this_) asm("_ZN4HPHP11c_XMLReader15
 
 TypedValue* tg_9XMLReader_moveToElement(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -900,7 +900,7 @@ bool th_9XMLReader_moveToFirstAttribute(ObjectData* this_) asm("_ZN4HPHP11c_XMLR
 
 TypedValue* tg_9XMLReader_moveToFirstAttribute(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -938,7 +938,7 @@ bool th_9XMLReader_isValid(ObjectData* this_) asm("_ZN4HPHP11c_XMLReader9t_isval
 
 TypedValue* tg_9XMLReader_isValid(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -976,7 +976,7 @@ bool th_9XMLReader_expand(ObjectData* this_) asm("_ZN4HPHP11c_XMLReader8t_expand
 
 TypedValue* tg_9XMLReader_expand(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1016,7 +1016,7 @@ TypedValue* th_9XMLReader___get(TypedValue* _rv, ObjectData* this_, TypedValue* 
 
 TypedValue* tg_9XMLReader___get(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1042,29 +1042,29 @@ TypedValue* tg_9XMLReader___get(HPHP::VM::ActRec *ar) {
 }
 
 /*
-bool HPHP::c_XMLReader::t_getparserproperty(long long)
-_ZN4HPHP11c_XMLReader19t_getparserpropertyEx
+bool HPHP::c_XMLReader::t_getparserproperty(long)
+_ZN4HPHP11c_XMLReader19t_getparserpropertyEl
 
 (return value) => rax
 this_ => rdi
 property => rsi
 */
 
-bool th_9XMLReader_getParserProperty(ObjectData* this_, long long property) asm("_ZN4HPHP11c_XMLReader19t_getparserpropertyEx");
+bool th_9XMLReader_getParserProperty(ObjectData* this_, long property) asm("_ZN4HPHP11c_XMLReader19t_getparserpropertyEl");
 
-TypedValue* tg1_9XMLReader_getParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_getParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_getParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_getParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
-  rv->m_data.num = (th_9XMLReader_getParserProperty((this_), (long long)(args[-0].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_getParserProperty((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
 TypedValue* tg_9XMLReader_getParserProperty(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1072,7 +1072,7 @@ TypedValue* tg_9XMLReader_getParserProperty(HPHP::VM::ActRec *ar) {
         if ((args-0)->m_type == KindOfInt64) {
           rv._count = 0;
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_getParserProperty((this_), (long long)(args[-0].m_data.num))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_getParserProperty((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -1109,8 +1109,8 @@ prefix => rdx
 
 TypedValue* th_9XMLReader_lookupNamespace(TypedValue* _rv, ObjectData* this_, Value* prefix) asm("_ZN4HPHP11c_XMLReader17t_lookupnamespaceERKNS_6StringE");
 
-TypedValue* tg1_9XMLReader_lookupNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_lookupNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_lookupNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_lookupNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_9XMLReader_lookupNamespace((rv), (this_), (Value*)(args-0));
@@ -1120,7 +1120,7 @@ TypedValue* tg1_9XMLReader_lookupNamespace(TypedValue* rv, HPHP::VM::ActRec* ar,
 
 TypedValue* tg_9XMLReader_lookupNamespace(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1163,8 +1163,8 @@ source => rsi
 
 bool th_9XMLReader_setSchema(ObjectData* this_, Value* source) asm("_ZN4HPHP11c_XMLReader11t_setschemaERKNS_6StringE");
 
-TypedValue* tg1_9XMLReader_setSchema(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_setSchema(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_setSchema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_setSchema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1175,7 +1175,7 @@ TypedValue* tg1_9XMLReader_setSchema(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 
 TypedValue* tg_9XMLReader_setSchema(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1209,8 +1209,8 @@ TypedValue* tg_9XMLReader_setSchema(HPHP::VM::ActRec *ar) {
 }
 
 /*
-bool HPHP::c_XMLReader::t_setparserproperty(long long, bool)
-_ZN4HPHP11c_XMLReader19t_setparserpropertyExb
+bool HPHP::c_XMLReader::t_setparserproperty(long, bool)
+_ZN4HPHP11c_XMLReader19t_setparserpropertyElb
 
 (return value) => rax
 this_ => rdi
@@ -1218,10 +1218,10 @@ property => rsi
 value => rdx
 */
 
-bool th_9XMLReader_setParserProperty(ObjectData* this_, long long property, bool value) asm("_ZN4HPHP11c_XMLReader19t_setparserpropertyExb");
+bool th_9XMLReader_setParserProperty(ObjectData* this_, long property, bool value) asm("_ZN4HPHP11c_XMLReader19t_setparserpropertyElb");
 
-TypedValue* tg1_9XMLReader_setParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_setParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_setParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_setParserProperty(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1231,13 +1231,13 @@ TypedValue* tg1_9XMLReader_setParserProperty(TypedValue* rv, HPHP::VM::ActRec* a
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  rv->m_data.num = (th_9XMLReader_setParserProperty((this_), (long long)(args[-0].m_data.num), (bool)(args[-1].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_setParserProperty((this_), (long)(args[-0].m_data.num), (bool)(args[-1].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
 TypedValue* tg_9XMLReader_setParserProperty(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1245,7 +1245,7 @@ TypedValue* tg_9XMLReader_setParserProperty(HPHP::VM::ActRec *ar) {
         if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfInt64) {
           rv._count = 0;
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_setParserProperty((this_), (long long)(args[-0].m_data.num), (bool)(args[-1].m_data.num))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_setParserProperty((this_), (long)(args[-0].m_data.num), (bool)(args[-1].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -1281,8 +1281,8 @@ filename => rsi
 
 bool th_9XMLReader_setRelaxNGSchema(ObjectData* this_, Value* filename) asm("_ZN4HPHP11c_XMLReader18t_setrelaxngschemaERKNS_6StringE");
 
-TypedValue* tg1_9XMLReader_setRelaxNGSchema(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_setRelaxNGSchema(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_setRelaxNGSchema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_setRelaxNGSchema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1293,7 +1293,7 @@ TypedValue* tg1_9XMLReader_setRelaxNGSchema(TypedValue* rv, HPHP::VM::ActRec* ar
 
 TypedValue* tg_9XMLReader_setRelaxNGSchema(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -1337,8 +1337,8 @@ source => rsi
 
 bool th_9XMLReader_setRelaxNGSchemaSource(ObjectData* this_, Value* source) asm("_ZN4HPHP11c_XMLReader24t_setrelaxngschemasourceERKNS_6StringE");
 
-TypedValue* tg1_9XMLReader_setRelaxNGSchemaSource(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLReader_setRelaxNGSchemaSource(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_9XMLReader_setRelaxNGSchemaSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLReader_setRelaxNGSchemaSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
@@ -1349,7 +1349,7 @@ TypedValue* tg1_9XMLReader_setRelaxNGSchemaSource(TypedValue* rv, HPHP::VM::ActR
 
 TypedValue* tg_9XMLReader_setRelaxNGSchemaSource(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {

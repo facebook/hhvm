@@ -347,14 +347,14 @@ errnum => rsi
 Value* fh_socket_strerror(Value* _rv, int errnum) asm("_ZN4HPHP17f_socket_strerrorEi");
 
 /*
-long long HPHP::f_socket_last_error(HPHP::Object const&)
+long HPHP::f_socket_last_error(HPHP::Object const&)
 _ZN4HPHP19f_socket_last_errorERKNS_6ObjectE
 
 (return value) => rax
 socket => rdi
 */
 
-long long fh_socket_last_error(Value* socket) asm("_ZN4HPHP19f_socket_last_errorERKNS_6ObjectE");
+long fh_socket_last_error(Value* socket) asm("_ZN4HPHP19f_socket_last_errorERKNS_6ObjectE");
 
 /*
 void HPHP::f_socket_clear_error(HPHP::Object const&)

@@ -17,8 +17,8 @@
 namespace HPHP {
 
 /*
-void HPHP::f_session_set_cookie_params(long long, HPHP::String const&, HPHP::String const&, HPHP::Variant const&, HPHP::Variant const&)
-_ZN4HPHP27f_session_set_cookie_paramsExRKNS_6StringES2_RKNS_7VariantES5_
+void HPHP::f_session_set_cookie_params(long, HPHP::String const&, HPHP::String const&, HPHP::Variant const&, HPHP::Variant const&)
+_ZN4HPHP27f_session_set_cookie_paramsElRKNS_6StringES2_RKNS_7VariantES5_
 
 lifetime => rdi
 path => rsi
@@ -27,7 +27,7 @@ secure => rcx
 httponly => r8
 */
 
-void fh_session_set_cookie_params(long long lifetime, Value* path, Value* domain, TypedValue* secure, TypedValue* httponly) asm("_ZN4HPHP27f_session_set_cookie_paramsExRKNS_6StringES2_RKNS_7VariantES5_");
+void fh_session_set_cookie_params(long lifetime, Value* path, Value* domain, TypedValue* secure, TypedValue* httponly) asm("_ZN4HPHP27f_session_set_cookie_paramsElRKNS_6StringES2_RKNS_7VariantES5_");
 
 /*
 HPHP::Array HPHP::f_session_get_cookie_params()
@@ -120,14 +120,14 @@ new_cache_limiter => rsi
 Value* fh_session_cache_limiter(Value* _rv, Value* new_cache_limiter) asm("_ZN4HPHP23f_session_cache_limiterERKNS_6StringE");
 
 /*
-long long HPHP::f_session_cache_expire(HPHP::String const&)
+long HPHP::f_session_cache_expire(HPHP::String const&)
 _ZN4HPHP22f_session_cache_expireERKNS_6StringE
 
 (return value) => rax
 new_cache_expire => rdi
 */
 
-long long fh_session_cache_expire(Value* new_cache_expire) asm("_ZN4HPHP22f_session_cache_expireERKNS_6StringE");
+long fh_session_cache_expire(Value* new_cache_expire) asm("_ZN4HPHP22f_session_cache_expireERKNS_6StringE");
 
 /*
 HPHP::Variant HPHP::f_session_encode()
@@ -203,7 +203,7 @@ var_names => rsi
 _argv => rdx
 */
 
-bool fh_session_register(long long _argc, TypedValue* var_names, Value* _argv) asm("_ZN4HPHP18f_session_registerEiRKNS_7VariantERKNS_5ArrayE");
+bool fh_session_register(int64_t _argc, TypedValue* var_names, Value* _argv) asm("_ZN4HPHP18f_session_registerEiRKNS_7VariantERKNS_5ArrayE");
 
 /*
 bool HPHP::f_session_unregister(HPHP::String const&)

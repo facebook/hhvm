@@ -44,7 +44,7 @@ void th_24SetResultToRefWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP2
 
 TypedValue* tg_24SetResultToRefWaitHandle___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
@@ -84,8 +84,8 @@ ref => rcx
 
 Value* th_24SetResultToRefWaitHandle_create(Value* _rv, char const* cls_, Value* wait_handle, TypedValue* ref) asm("_ZN4HPHP26c_SetResultToRefWaitHandle9ti_createEPKcRKNS_6ObjectERKNS_14VRefParamValueE");
 
-TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfObject;
@@ -97,7 +97,7 @@ TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActR
 
 TypedValue* tg_24SetResultToRefWaitHandle_create(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {

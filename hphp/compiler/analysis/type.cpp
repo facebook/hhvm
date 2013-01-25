@@ -595,7 +595,7 @@ string Type::getCPPDecl(AnalysisResultConstPtr ar,
   switch (m_kindOf) {
     case KindOfBoolean:     return "bool";
     case KindOfInt32:       return "int";
-    case KindOfInt64:       return "int64";
+    case KindOfInt64:       return "int64_t";
     case KindOfDouble:      return "double";
     case KindOfString:      return "String";
     case KindOfArray:       return "Array";

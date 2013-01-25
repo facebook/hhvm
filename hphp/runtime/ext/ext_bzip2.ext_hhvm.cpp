@@ -36,8 +36,8 @@ mode => rdx
 
 TypedValue* fh_bzopen(TypedValue* _rv, Value* filename, Value* mode) asm("_ZN4HPHP8f_bzopenERKNS_6StringES2_");
 
-TypedValue * fg1_bzopen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_bzopen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_bzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -52,7 +52,7 @@ TypedValue * fg1_bzopen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
 
 TypedValue* fg_bzopen(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -92,8 +92,8 @@ bz => rsi
 
 TypedValue* fh_bzflush(TypedValue* _rv, Value* bz) asm("_ZN4HPHP9f_bzflushERKNS_6ObjectE");
 
-TypedValue * fg1_bzflush(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_bzflush(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_bzflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_bzflush((rv), (Value*)(args-0));
@@ -103,7 +103,7 @@ TypedValue * fg1_bzflush(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 
 TypedValue* fg_bzflush(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -143,8 +143,8 @@ bz => rsi
 
 Value* fh_bzerrstr(Value* _rv, Value* bz) asm("_ZN4HPHP10f_bzerrstrERKNS_6ObjectE");
 
-TypedValue * fg1_bzerrstr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_bzerrstr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_bzerrstr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzerrstr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
@@ -156,7 +156,7 @@ TypedValue * fg1_bzerrstr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 
 TypedValue* fg_bzerrstr(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -198,8 +198,8 @@ bz => rsi
 
 TypedValue* fh_bzerror(TypedValue* _rv, Value* bz) asm("_ZN4HPHP9f_bzerrorERKNS_6ObjectE");
 
-TypedValue * fg1_bzerror(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_bzerror(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_bzerror(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzerror(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_bzerror((rv), (Value*)(args-0));
@@ -209,7 +209,7 @@ TypedValue * fg1_bzerror(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 
 TypedValue* fg_bzerror(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
@@ -239,34 +239,34 @@ TypedValue* fg_bzerror(HPHP::VM::ActRec *ar) {
 
 
 /*
-long long HPHP::f_bzerrno(HPHP::Object const&)
+long HPHP::f_bzerrno(HPHP::Object const&)
 _ZN4HPHP9f_bzerrnoERKNS_6ObjectE
 
 (return value) => rax
 bz => rdi
 */
 
-long long fh_bzerrno(Value* bz) asm("_ZN4HPHP9f_bzerrnoERKNS_6ObjectE");
+long fh_bzerrno(Value* bz) asm("_ZN4HPHP9f_bzerrnoERKNS_6ObjectE");
 
-TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (long long)fh_bzerrno((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_bzerrno((Value*)(args-0));
   return rv;
 }
 
 TypedValue* fg_bzerrno(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (long long)fh_bzerrno((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_bzerrno((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -303,8 +303,8 @@ workfactor => rcx
 
 TypedValue* fh_bzcompress(TypedValue* _rv, Value* source, int blocksize, int workfactor) asm("_ZN4HPHP12f_bzcompressERKNS_6StringEii");
 
-TypedValue * fg1_bzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_bzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_bzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -328,7 +328,7 @@ TypedValue * fg1_bzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 
 TypedValue* fg_bzcompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
@@ -369,8 +369,8 @@ small => rdx
 
 TypedValue* fh_bzdecompress(TypedValue* _rv, Value* source, int small) asm("_ZN4HPHP14f_bzdecompressERKNS_6StringEi");
 
-TypedValue * fg1_bzdecompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_bzdecompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+TypedValue * fg1_bzdecompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzdecompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -390,7 +390,7 @@ TypedValue * fg1_bzdecompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 
 TypedValue* fg_bzdecompress(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {

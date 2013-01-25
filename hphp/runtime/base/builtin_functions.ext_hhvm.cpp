@@ -36,7 +36,7 @@ Value* fh_serialize(Value* _rv, TypedValue* value) asm("_ZN4HPHP11f_serializeERK
 
 TypedValue* fg_serialize(HPHP::VM::ActRec *ar) {
     TypedValue rv;
-    long long count = ar->numArgs();
+    int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv._count = 0;

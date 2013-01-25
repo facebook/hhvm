@@ -676,14 +676,14 @@ void CodeGenerator::cgUnaryIntOp(SSATmp* dst,
 
   // Integer operations require 64-bit representations
   if (src->getType() == Type::Bool && !src->isConst()) {
-    a.    andq   (0xff, srcReg);
+    a.    movzbl (rbyte(srcReg), r32(srcReg));
   }
 
   if (srcReg != InvalidReg) {
     if (dstReg != srcReg) {
       a.  movq   (srcReg, dstReg);
     }
-    (a.*instr)(dstReg);
+    (a.*instr)   (dstReg);
   } else {
     assert(src->isConst());
     a.    movq   (oper(src->getConstValAsRawInt()), dstReg);
@@ -725,11 +725,10 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   // Extend booleans: integer operations require 64-bit
   // representations.
   if (src1->getType() == Type::Bool && src1Reg != InvalidReg) {
-    // TODO movbzl
-    a.    andq   (0xff, src1Reg);
+    a.    movzbl (rbyte(src1Reg), r32(src1Reg));
   }
   if (src2->getType() == Type::Bool && src2Reg != InvalidReg) {
-    a.    andq   (0xff, src2Reg);
+    a.    movzbl (rbyte(src2Reg), r32(src2Reg));
   }
 
   // Two registers.
@@ -1141,11 +1140,8 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
         } else {
           m_as.mov_imm64_reg(1, dstReg);
         }
-      } else if (srcReg != dstReg) {
-        m_as.movzbl (rbyte(srcReg), r32(dstReg));
       } else {
-        // srcReg == dstReg
-        m_as.and_imm64_reg64(0xff, dstReg);
+        m_as.movzbl (rbyte(srcReg), r32(dstReg));
       }
       return;
     }
@@ -2822,7 +2818,6 @@ void CodeGenerator::cgLdConst(IRInstruction* inst) {
   }
 }
 
-
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* baseAddr = inst->getSrc(0);
@@ -3045,10 +3040,7 @@ void CodeGenerator::cgStore(PhysReg base,
     }
   } else {
     if (type == Type::Bool) {
-      // BOOL BYTE
-      // XXX TODO: make into movzb?
-      // Why is src->getReg() not masked in the first place?
-      m_as.and_imm64_reg64(0xff, src->getReg());
+      m_as.    movzbl  (rbyte(src->getReg()), r32(src->getReg()));
     } else if (type == Type::Dbl) {
       CG_PUNT(cgStore_Dbl); // not handled yet!
     }

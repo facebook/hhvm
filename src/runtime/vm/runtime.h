@@ -62,7 +62,7 @@ int64 arr_to_bool(ArrayData* ad);
 
 void print_string(StringData* s);
 void print_int(int64 i);
-void print_boolean(int64 val);
+void print_boolean(bool val);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {

@@ -57,7 +57,7 @@ void print_int(int64 i) {
   TRACE(1, "t-x64 output(int): %lld\n", i);
 }
 
-void print_boolean(int64 val) {
+void print_boolean(bool val) {
   if (val) {
     echo("1");
   }

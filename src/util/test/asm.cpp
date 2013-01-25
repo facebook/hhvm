@@ -328,6 +328,7 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2)) {
 
 typedef void (Asm::*OpR64)(Reg64);
 typedef void (Asm::*OpR32)(Reg32);
+typedef void (Asm::*OpR8)(Reg8);
 typedef void (Asm::*OpRR64)(Reg64, Reg64);
 typedef void (Asm::*OpRR32)(Reg32, Reg32);
 typedef void (Asm::*OpRR8)(Reg8, Reg8);
@@ -403,6 +404,9 @@ TEST(Asm, General) {
   dotest(#op, a, OpMR8(&Asm::op##b));           \
   dotest(#op, a, OpSMR8(&Asm::op##b));
 
+#define UNARY_BYTE_OP(op)                       \
+  dotest(#op, a, OpR8(&Asm::op##b));
+
   dotest("inc", a, OpR32(&Asm::incl));
   dotest("inc", a, OpR64(&Asm::incq));
 
@@ -443,6 +447,8 @@ TEST(Asm, General) {
 
   FULL_BYTE_OP(cmp);
   BASIC_BYTE_OP(test);
+  UNARY_BYTE_OP(not);
+  UNARY_BYTE_OP(neg);
 
   doingByteOpcodes = false;
 }

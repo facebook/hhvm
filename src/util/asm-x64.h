@@ -693,7 +693,9 @@ const X64Instr instr_pop =     { { 0x8F,0xF1,0xF1,0x00,0xF1,0x58 }, 0x0500 };
 const X64Instr instr_inc =     { { 0xFF,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x0000 };
 const X64Instr instr_dec =     { { 0xFF,0xF1,0xF1,0x01,0xF1,0xF1 }, 0x0000 };
 const X64Instr instr_not =     { { 0xF7,0xF1,0xF1,0x02,0xF1,0xF1 }, 0x0000 };
+const X64Instr instr_notb =    { { 0xF6,0xF1,0xF1,0x02,0xF1,0xF1 }, 0x0000 };
 const X64Instr instr_neg =     { { 0xF7,0xF1,0xF1,0x03,0xF1,0xF1 }, 0x0000 };
+const X64Instr instr_negb =    { { 0xF6,0xF1,0xF1,0x03,0xF1,0xF1 }, 0x0000 };
 const X64Instr instr_add =     { { 0x01,0x03,0x81,0x00,0x05,0xF1 }, 0x0810 };
 const X64Instr instr_sub =     { { 0x29,0x2B,0x81,0x05,0x2D,0xF1 }, 0x0810 };
 const X64Instr instr_and =     { { 0x21,0x23,0x81,0x04,0x25,0xF1 }, 0x0810 };
@@ -1048,8 +1050,10 @@ struct X64Assembler {
   void incl(Reg32 r)  { instrR(instr_inc,  r); }
   void decq(Reg64 r)  { instrR(instr_dec,  r); }
   void decl(Reg32 r)  { instrR(instr_dec,  r); }
+  void notb(Reg8 r)   { instrR(instr_notb, r); }
   void not(Reg64 r)   { instrR(instr_not,  r); }
   void neg(Reg64 r)   { instrR(instr_neg,  r); }
+  void negb(Reg8 r)   { instrR(instr_negb, r); }
   void ret()          { emit(instr_ret); }
   void ret(Immed i)   { emitI(instr_ret, i.w(), sz::word); }
   void nop()          { emit(instr_nop); }
@@ -2243,6 +2247,7 @@ private:
 
   void instrR(X64Instr op, Reg64 r)           { emitR(op, rn(r)); }
   void instrR(X64Instr op, Reg32 r)           { emitR32(op, rn(r)); }
+  void instrR(X64Instr op, Reg8 r)            { emitR(op, rn(r), sz::byte); }
   void instrRR(X64Instr op, Reg64 x, Reg64 y) { emitRR(op, rn(x), rn(y)); }
   void instrRR(X64Instr op, Reg32 x, Reg32 y) { emitRR32(op, rn(x), rn(y)); }
   void instrRR(X64Instr op, Reg8 x, Reg8 y)   { emitRR8(op, rn(x), rn(y)); }

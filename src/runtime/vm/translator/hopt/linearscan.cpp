@@ -537,9 +537,8 @@ uint32 LinearScan::assignSpillLocAux(Trace* trace,
 
 void LinearScan::insertAllocFreeSpill(Trace* trace, uint32 numExtraSpillLocs) {
   insertAllocFreeSpillAux(trace, numExtraSpillLocs);
-  Trace::List& exitTraces = trace->getExitTraces();
-  for (Trace::Iterator it = exitTraces.begin(); it != exitTraces.end(); ++it) {
-    insertAllocFreeSpillAux(*it, numExtraSpillLocs);
+  for (Trace* exit : trace->getExitTraces()) {
+    insertAllocFreeSpillAux(exit, numExtraSpillLocs);
   }
 }
 
@@ -771,9 +770,8 @@ void LinearScan::coalesceAux(Trace* trace) {
 
 void LinearScan::preAllocSpillLoc(Trace* trace, uint32 numSpillLocs) {
   preAllocSpillLocAux(trace, numSpillLocs);
-  Trace::List& exitTraces = trace->getExitTraces();
-  for (Trace::Iterator it = exitTraces.begin(); it != exitTraces.end(); ++it) {
-    preAllocSpillLocAux(*it, numSpillLocs);
+  for (Trace* exit : trace->getExitTraces()) {
+    preAllocSpillLocAux(exit, numSpillLocs);
   }
 }
 

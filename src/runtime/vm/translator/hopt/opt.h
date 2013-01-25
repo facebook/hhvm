@@ -22,8 +22,21 @@ class Trace;
 class IRFactory;
 class IRInstruction;
 
-const unsigned DEAD = 0;
-const unsigned LIVE = 1;
+/*
+ * These flags are used by eliminateDeadCode and optimizeMemoryAccesses(),
+ * hence they're declared here.
+ *
+ * An IncRef is marked as REFCOUNT_CONSUMED[_OFF_TRACE], if it is consumed by
+ * an instruction other than DecRefNZ that decrements the ref count.
+ * REFCOUNT_CONSUMED: consumed by such an instruction in the main trace.
+ * REFCOUNT_CONSUMED_OFF_TRACE: consumed by such an instruction only in exits.
+ */
+enum DceFlags {
+  DEAD,
+  LIVE,
+  REFCOUNT_CONSUMED,
+  REFCOUNT_CONSUMED_OFF_TRACE
+};
 
 /*
  * The main optimization passes, in the order they run.

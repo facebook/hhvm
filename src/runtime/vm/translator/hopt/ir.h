@@ -1030,7 +1030,7 @@ public:
   void*   getPatchAddr();
 
 private:
-  uint32 m_labelId;
+  const uint32 m_labelId;
   void*  m_patchAddr; // Support patching forward jumps
   const Func* m_func; // which func are we in
 };

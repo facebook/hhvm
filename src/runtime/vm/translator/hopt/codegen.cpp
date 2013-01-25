@@ -4261,12 +4261,7 @@ void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
   if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
     emitTraceCall(m_as, trace->getBcOff());
   }
-  IRInstruction::Iterator it;
-  IRInstruction::List instructionList = trace->getInstructionList();
-  for (it = instructionList.begin();
-       it != instructionList.end();
-       it++) {
-    IRInstruction* inst = *it;
+  for (IRInstruction* inst : trace->getInstructionList()) {
     if (inst->getOpcode() == Marker) {
       if (!firstMarkerSeen) {
         firstMarkerSeen = true;
@@ -4308,11 +4303,8 @@ void genCodeForTrace(Trace* trace,
   CodeGenerator cgMain(as, astubs, tx64);
   cgMain.cgTrace(trace, bcMap);
   CodeGenerator cgExits(astubs, astubs, tx64);
-  Trace::List& exitTraces = trace->getExitTraces();
-  for (Trace::Iterator it = exitTraces.begin();
-       it != exitTraces.end();
-       it++) {
-    cgExits.cgTrace(*it, NULL);
+  for (Trace* exit : trace->getExitTraces()) {
+    cgExits.cgTrace(exit, NULL);
   }
 }
 

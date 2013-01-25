@@ -24,14 +24,6 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
-// An IncRef is marked as REFCOUNT_CONSUMED[_OFF_TRACE], if it is consumed by
-// an instruction other than DecRefNZ that decrements the ref count.
-// * REFCOUNT_CONSUMED: consumed by such an instruction in the main trace
-// * REFCOUNT_CONSUMED_OFF_TRACE: consumed by such an instruction only
-//   in exit traces.
-const unsigned REFCOUNT_CONSUMED = 2;
-const unsigned REFCOUNT_CONSUMED_OFF_TRACE = 3;
-
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 bool instructionIsMarkedDead(const IRInstruction* inst) {
@@ -55,12 +47,9 @@ bool isUnguardedLoad(IRInstruction* inst) {
 }
 
 void initInstructions(Trace* trace, IRInstruction::List& wl) {
-  IRInstruction::List instructions = trace->getInstructionList();
-  IRInstruction::Iterator it;
   bool unreachable = false;
   TRACE(5, "DCE:vvvvvvvvvvvvvvvvvvvv\n");
-  for (it = instructions.begin(); it != instructions.end(); it++) {
-    IRInstruction* inst = *it;
+  for (IRInstruction* inst : trace->getInstructionList()) {
     assert(inst->getParent() == trace);
     Simplifier::copyProp(inst);
     // if this is a load that does not generate a guard, then get rid
@@ -110,11 +99,7 @@ void initInstructions(Trace* trace, IRInstruction::List& wl) {
 // 2) Mark a conditionally dead DecRefNZ as live if its corresponding IncRef
 //    cannot be eliminated.
 void optimizeRefCount(Trace* trace) {
-  IRInstruction::List& instList = trace->getInstructionList();
-  for (IRInstruction::Iterator it = instList.begin();
-       it != instList.end();
-       ++it) {
-    IRInstruction* inst = *it;
+  for (IRInstruction* inst : trace->getInstructionList()) {
     if (inst->getOpcode() == IncRef &&
         inst->getId() != REFCOUNT_CONSUMED &&
         inst->getId() != REFCOUNT_CONSUMED_OFF_TRACE) {
@@ -140,36 +125,12 @@ void optimizeRefCount(Trace* trace) {
 void sinkIncRefs(Trace* trace,
                  IRFactory* irFactory,
                  IRInstruction::List& toSink) {
-  IRInstruction::List& instList = trace->getInstructionList();
-  IRInstruction::Iterator it;
-
-  std::map<SSATmp*, SSATmp*> sunkTmps;
-  if (!trace->isMain()) {
-    // Sink REFCOUNT_CONSUMED_OFF_TRACE IncRefs before the first non-label
-    // instruction, and create a mapping between the original tmps to the sunk
-    // tmps so that we can later replace the original ones with the sunk ones.
-    for (IRInstruction::ReverseIterator j = toSink.rbegin();
-         j != toSink.rend();
-         ++j) {
-      // prependInstruction inserts an instruction to the beginning. Therefore,
-      // we iterate through toSink in the reversed order.
-      IRInstruction* sunkInst = irFactory->gen(IncRef, (*j)->getSrc(0));
-      sunkInst->setId(LIVE);
-      trace->prependInstruction(sunkInst);
-
-      assert((*j)->getDst());
-      assert(!sunkTmps.count((*j)->getDst()));
-      sunkTmps[(*j)->getDst()] = irFactory->getSSATmp(sunkInst);
-    }
-  }
-
-  // An exit trace may be entered from multiple exit points. We keep track of
-  // which exit traces we already pushed sunk IncRefs to, so that we won't push
-  // them multiple times.
-  std::set<Trace*> pushedTo;
-  for (it = instList.begin(); it != instList.end(); ++it) {
-    IRInstruction* inst = *it;
-    if (trace->isMain()) {
+  if (trace->isMain()) {
+    // An exit trace may be entered from multiple exit points. We keep track of
+    // which exit traces we already pushed sunk IncRefs to, so that we won't push
+    // them multiple times.
+    boost::dynamic_bitset<> pushedTo(irFactory->numLabels());
+    for (IRInstruction* inst : trace->getInstructionList()) {
       if (inst->getOpcode() == IncRef) {
         // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
         // otherwise, it should be already removed in optimizeRefCount.
@@ -193,17 +154,36 @@ void sinkIncRefs(Trace* trace,
         }
       }
       if (LabelInstruction* label = inst->getLabel()) {
-        Trace* exitTrace = label->getParent();
-        if (!pushedTo.count(exitTrace)) {
-          pushedTo.insert(exitTrace);
-          sinkIncRefs(exitTrace, irFactory, toSink);
+        if (!pushedTo[label->getLabelId()]) {
+          pushedTo[label->getLabelId()] = true;
+          sinkIncRefs(label->getParent(), irFactory, toSink);
         }
       }
-    } else {
+    }
+  } else {
+    std::vector<SSATmp*> sunkTmps(irFactory->numTmps(), nullptr);
+    // Sink REFCOUNT_CONSUMED_OFF_TRACE IncRefs before the first non-label
+    // instruction, and create a mapping between the original tmps to the sunk
+    // tmps so that we can later replace the original ones with the sunk ones.
+    for (IRInstruction::ReverseIterator j = toSink.rbegin();
+         j != toSink.rend();
+         ++j) {
+      IRInstruction* inst = *j;
+      // prependInstruction inserts an instruction to the beginning. Therefore,
+      // we iterate through toSink in the reversed order.
+      IRInstruction* sunkInst = irFactory->gen(IncRef, inst->getSrc(0));
+      sunkInst->setId(LIVE);
+      trace->prependInstruction(sunkInst);
+
+      auto dstId = inst->getDst()->getId();
+      assert(!sunkTmps[dstId]);
+      sunkTmps[dstId] = irFactory->getSSATmp(sunkInst);
+    }
+    for (IRInstruction* inst : trace->getInstructionList()) {
       // Replace the original tmps with the sunk tmps.
       for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
         SSATmp* src = inst->getSrc(i);
-        if (SSATmp* sunkTmp = sunkTmps[src]) {
+        if (SSATmp* sunkTmp = sunkTmps[src->getId()]) {
           inst->setSrc(i, sunkTmp);
         }
       }
@@ -212,35 +192,28 @@ void sinkIncRefs(Trace* trace,
 
   // Do copyProp at last, because we need to keep REFCOUNT_CONSUMED_OFF_TRACE
   // Movs as the prototypes for sunk instructions.
-  for (it = instList.begin(); it != instList.end(); ++it) {
-    Simplifier::copyProp(*it);
+  for (IRInstruction* inst : trace->getInstructionList()) {
+    Simplifier::copyProp(inst);
   }
 }
 
 void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   IRInstruction::List wl; // worklist of live instructions
-  Trace::List& exitTraces = trace->getExitTraces();
   // first mark all exit traces as unreachable by setting the id on
   // their labels to 0
-  for (Trace::Iterator it = exitTraces.begin();
-       it != exitTraces.end();
-       it++) {
-    Trace* trace = *it;
-    trace->getLabel()->setId(DEAD);
+  for (Trace* exit : trace->getExitTraces()) {
+    exit->getLabel()->setId(DEAD);
   }
 
   // mark the essential instructions and add them to the initial
   // work list; also mark the exit traces that are reachable by
   // any control flow instruction in the main trace.
   initInstructions(trace, wl);
-  for (Trace::Iterator it = exitTraces.begin();
-       it != exitTraces.end();
-       it++) {
+  for (Trace* exit : trace->getExitTraces()) {
     // only process those exit traces that are reachable from
     // the main trace
-    Trace* trace = *it;
-    if (trace->getLabel()->getId() != DEAD) {
-      initInstructions(trace, wl);
+    if (exit->getLabel()->getId() != DEAD) {
+      initInstructions(exit, wl);
     }
   }
 
@@ -278,8 +251,8 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   // Optimize IncRefs and DecRefs.
   optimizeRefCount(trace);
-  for (Trace::Iterator it = exitTraces.begin(); it != exitTraces.end(); ++it) {
-    optimizeRefCount(*it);
+  for (Trace* exit : trace->getExitTraces()) {
+    optimizeRefCount(exit);
   }
 
   if (RuntimeOption::EvalHHIREnableSinking) {
@@ -290,8 +263,8 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace);
-  for (Trace::Iterator it = exitTraces.begin(); it != exitTraces.end(); it++) {
-    removeDeadInstructions(*it);
+  for (Trace* exit : trace->getExitTraces()) {
+    removeDeadInstructions(exit);
   }
 }
 

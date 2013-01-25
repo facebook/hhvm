@@ -119,9 +119,7 @@ static void hoistGuardJumps(Trace* trace, IRFactory* irFactory) {
   LabelInstruction* guardLabel = NULL;
   IRInstruction::List& instList = trace->getInstructionList();
   // Check the beginning of the trace for guards
-  for (IRInstruction::Iterator it = instList.begin(); it != instList.end();
-       ++it) {
-    IRInstruction* inst = *it;
+  for (IRInstruction* inst : instList) {
     Opcode opc = inst->getOpcode();
     if (inst->getLabel() &&
         (opc == LdLoc    || opc == LdStack ||

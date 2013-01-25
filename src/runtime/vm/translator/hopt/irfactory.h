@@ -141,6 +141,8 @@ public:
   }
 
   Arena&   arena()               { return m_arena; }
+  uint32_t numTmps() const       { return m_nextOpndId; }
+  uint32_t numLabels() const     { return m_nextLabelId; }
 
 private:
   uint32_t m_nextLabelId;

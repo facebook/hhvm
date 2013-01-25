@@ -591,11 +591,7 @@ SSATmp* MemMap::getValue(SSATmp* ref, int offset) {
 void MemMap::optimizeMemoryAccesses(Trace* trace) {
   StoreList tracking;
 
-  IRInstruction::List& insts = trace->getInstructionList();
-  IRInstruction::Iterator it, end;
-  for (it = insts.begin(), end = insts.end(); it != end; ++it) {
-    IRInstruction* inst = *it;
-
+  for (IRInstruction* inst : trace->getInstructionList()) {
     // initialize each instruction as live
     inst->setId(LIVE);
 
@@ -650,10 +646,9 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
     // if the current instruction is guarded, make sure all of our stores that
     // are not yet dead know about it
     if (inst->getLabel() != NULL) {
-      StoreList::iterator it, end;
-      for (it = tracking.begin(), end = tracking.end(); it != end; ++it) {
-        if (it->first->getId() != DEAD) {
-          it->second.push_back(inst);
+      for (auto& entry : tracking) {
+        if (entry.first->getId() != DEAD) {
+          entry.second.push_back(inst);
         }
       }
     }

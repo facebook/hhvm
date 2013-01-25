@@ -41,11 +41,8 @@ static void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
 
 static void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
   insertRefCountAssertsAux(trace, factory);
-  Trace::List& exitTraces = trace->getExitTraces();
-  for (Trace::Iterator it = exitTraces.begin();
-       it != exitTraces.end();
-       it++) {
-    insertRefCountAssertsAux(*it, factory);
+  for (Trace* exit : trace->getExitTraces()) {
+    insertRefCountAssertsAux(exit, factory);
   }
 }
 

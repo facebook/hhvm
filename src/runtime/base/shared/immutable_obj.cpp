@@ -35,24 +35,24 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
   Array props;
   ClassInfo::GetArray(obj, obj->o_getClassPropTable(), props,
                       ClassInfo::GetArrayAll);
+  m_propCount = 0;
   if (props.empty()) {
     m_props = NULL;
-    m_propCount = 0;
-  }
-  m_props = (Prop*)malloc(sizeof(Prop) * props.size());
-  m_propCount = 0;
-  for (ArrayIter it(props); !it.end(); it.next()) {
-    assert(m_propCount < props.size());
-    Variant key(it.first());
-    assert(key.isString());
-    CVarRef value = it.secondRef();
-    SharedVariant *val = NULL;
-    if (!value.isNull()) {
-      val = new SharedVariant(value, false, true, true);
+  } else {
+    m_props = (Prop*)malloc(sizeof(Prop) * props.size());
+    for (ArrayIter it(props); !it.end(); it.next()) {
+      assert(m_propCount < props.size());
+      Variant key(it.first());
+      assert(key.isString());
+      CVarRef value = it.secondRef();
+      SharedVariant *val = NULL;
+      if (!value.isNull()) {
+        val = new SharedVariant(value, false, true, true);
+      }
+      m_props[m_propCount].val = val;
+      m_props[m_propCount].name = key.getStringData()->copy(true);
+      m_propCount++;
     }
-    m_props[m_propCount].val = val;
-    m_props[m_propCount].name = key.getStringData()->copy(true);
-    m_propCount++;
   }
 }
 
@@ -79,11 +79,11 @@ Object ImmutableObj::getObject() {
 }
 
 ImmutableObj::~ImmutableObj() {
-  for (int i = 0; i < m_propCount; i++) {
-    m_props[i].name->destruct();
-    if (m_props[i].val) m_props[i].val->decRef();
-  }
   if (m_props) {
+    for (int i = 0; i < m_propCount; i++) {
+      m_props[i].name->destruct();
+      if (m_props[i].val) m_props[i].val->decRef();
+    }
     free(m_props);
   }
   m_cls->destruct();

@@ -439,6 +439,37 @@ Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc,
   return start;
 }
 
+void prepBinaryXmmOp(X64Assembler& a, SSATmp* l, SSATmp* r) {
+  auto intoXmm = [&](SSATmp* ssa, RegXMM xmm) {
+    RegNumber src(ssa->getReg());
+    if (ssa->isConst()) {
+      src = rScratch;
+      a.mov_imm64_reg(ssa->getConstValAsBits(), rScratch);
+    }
+    if (ssa->getType() == Type::Int) {
+      // cvtsi2sd doesn't modify the high bits of its target, which can
+      // cause false dependencies to prevent register renaming from kicking
+      // in. Break the dependency chain by zeroing out the destination reg.
+      a.  pxor_xmm_xmm(xmm, xmm);
+      a.  cvtsi2sd_reg64_xmm(src, xmm);
+    } else {
+      a.  mov_reg64_xmm(src, xmm);
+    }
+  };
+  intoXmm(l, xmm0);
+  intoXmm(r, xmm1);
+}
+
+void doubleCmp(X64Assembler& a, RegXMM xmm0, RegXMM xmm1) {
+  a.    ucomisd_xmm_xmm(xmm0, xmm1);
+  Label notPF;
+  a.    jnp8(notPF);
+  // PF means the doubles were unordered. We treat this as !equal, so
+  // clear ZF.
+  a.    or_imm32_reg64(1, rScratch);
+  asm_label(a, notPF);
+}
+
 void CodeGenerator::cgJcc(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
@@ -449,36 +480,43 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
   Type::Tag src2Type = src2->getType();
 
   // can't generate CMP instructions correctly for anything that isn't
-  // a bool or an int, and we can't mix the two types because
+  // a bool or a numeric, and we can't mix bool/numerics because
   // -1 == true in PHP, but not in HHIR binary representation
   if (!((src1Type == Type::Int && src2Type == Type::Int) ||
+        ((src1Type == Type::Int || src1Type == Type::Dbl) &&
+         (src2Type == Type::Int || src2Type == Type::Dbl)) ||
         (src1Type == Type::Bool && src2Type == Type::Bool) ||
         (src1Type == Type::ClassPtr && src2Type == Type::ClassPtr))) {
     CG_PUNT(cgJcc);
   }
-  if (src1Type == Type::ClassPtr && src2Type == Type::ClassPtr) {
-    assert(opc == JmpSame || opc == JmpNSame);
-  }
-  auto srcReg1 = src1->getReg();
-  auto srcReg2 = src2->getReg();
-
-  // Note: when both src1 and src2 are constants, we should transform the
-  // branch into an unconditional jump earlier in the IR.
-  if (src1->isConst()) {
-    // TODO: use compare with immediate or make sure simplifier
-    // canonicalizes this so that constant is src2
-    srcReg1 = rScratch;
-    m_as.mov_imm64_reg(src1->getConstValAsRawInt(), srcReg1);
-  }
-  if (src2->isConst()) {
-    m_as.cmp_imm64_reg64(src2->getConstValAsRawInt(), srcReg1);
+  if (src1Type == Type::Dbl || src2Type == Type::Dbl) {
+    prepBinaryXmmOp(m_as, src1, src2);
+    doubleCmp(m_as, xmm0, xmm1);
   } else {
-    // Note the reverse syntax in the assembler.
-    // This cmp will compute srcReg1 - srcReg2
-    if (src1Type == Type::Bool) {
-      m_as.    cmpb (Reg8(int(srcReg2)), Reg8(int(srcReg1)));
+    if (src1Type == Type::ClassPtr && src2Type == Type::ClassPtr) {
+      assert(opc == JmpSame || opc == JmpNSame);
+    }
+    auto srcReg1 = src1->getReg();
+    auto srcReg2 = src2->getReg();
+
+    // Note: when both src1 and src2 are constants, we should transform the
+    // branch into an unconditional jump earlier in the IR.
+    if (src1->isConst()) {
+      // TODO: use compare with immediate or make sure simplifier
+      // canonicalizes this so that constant is src2
+      srcReg1 = rScratch;
+      m_as.mov_imm64_reg(src1->getConstValAsRawInt(), srcReg1);
+    }
+    if (src2->isConst()) {
+      m_as.cmp_imm64_reg64(src2->getConstValAsRawInt(), srcReg1);
     } else {
-      m_as.cmp_reg64_reg64(srcReg2, srcReg1);
+      // Note the reverse syntax in the assembler.
+      // This cmp will compute srcReg1 - srcReg2
+      if (src1Type == Type::Bool) {
+        m_as.    cmpb (Reg8(int(srcReg2)), Reg8(int(srcReg1)));
+      } else {
+        m_as.cmp_reg64_reg64(srcReg2, srcReg1);
+      }
     }
   }
   SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive ?
@@ -981,6 +1019,9 @@ void CodeGenerator::cgOpCmpHelper(
   auto src2Reg = src2->getReg();
   auto dstReg  = dst ->getReg();
 
+  auto setFromFlags = [&] {
+    (m_as.*setter)(rbyte(dstReg));
+  };
   // It is possible that some pass has been done after simplification; if such
   // a pass invalidates our invariants, then just punt.
 
@@ -1010,7 +1051,7 @@ void CodeGenerator::cgOpCmpHelper(
     } else {
       m_as.    cmpb (Reg8(int(src2Reg)), Reg8(int(src1Reg)));
     }
-    (m_as.*setter)(rbyte(dstReg));
+    setFromFlags();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1026,15 +1067,22 @@ void CodeGenerator::cgOpCmpHelper(
       } else {
         m_as.cmp_reg64_reg64(src2Reg, src1Reg);
       }
-      (m_as.*setter)(rbyte(dstReg));
+      setFromFlags();
     }
 
     else if (type1 == Type::Dbl || type2 == Type::Dbl) {
-      CG_PUNT(cgOpCmpHelper_Dbl);
+      if ((type1 == Type::Dbl || type1 == Type::Int) &&
+          (type2 == Type::Dbl || type2 == Type::Int)) {
+        prepBinaryXmmOp(m_as, src1, src2);
+        doubleCmp(m_as, xmm0, xmm1);
+        setFromFlags();
+      } else {
+        CG_PUNT(cgOpCmpHelper_Dbl);
+      }
     }
 
     else if (Type::isString(type1)) {
-      // string cmp string is dealy with in case 1
+      // string cmp string is dealt with in case 1
       // string cmp double is punted above
 
       if (type2 == Type::Int) {
@@ -1067,10 +1115,7 @@ void CodeGenerator::cgOpCmpHelper(
       }
     }
 
-    // we should never get here
-    else {
-      CG_PUNT(cgOpCmpHelper_xx);
-    }
+   else NOT_REACHED();
   }
 
   /////////////////////////////////////////////////////////////////////////////

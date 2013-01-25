@@ -178,14 +178,6 @@ void
 TranslatorX64::irTranslateEqOp(const Tracelet& t,
                                const NormalizedInstruction& i) {
   const Opcode op = i.op();
-  if (i.inputs[0]->rtt.valueType() == KindOfDouble ||
-      i.inputs[1]->rtt.valueType() == KindOfDouble) {
-    if (op == OpEq) {
-      HHIR_UNIMPLEMENTED(Eq);
-    } else {
-      HHIR_UNIMPLEMENTED(Neq);
-    }
-  }
   assert(op == OpEq || op == OpNeq);
   if (op == OpEq) {
     HHIR_EMIT(Eq);

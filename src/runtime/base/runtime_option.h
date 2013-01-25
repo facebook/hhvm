@@ -391,7 +391,6 @@ public:
   F(uint32_t, VMInitialGlobalTableSize, \
     kEvalVMInitialGlobalTableSizeDefault) \
   F(bool, Jit,                         evalJitDefault()) \
-  F(bool, JitUserIR,                   false) \
   F(bool, AllowHhas,                   false) \
   F(bool, JitNoGdb,                    true) \
   F(bool, PerfPidMap,                  true) \

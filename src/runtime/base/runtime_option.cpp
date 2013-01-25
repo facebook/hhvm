@@ -359,6 +359,7 @@ bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableObjDestructCall = false;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
+bool RuntimeOption::EnableInstructionCounts = false;
 bool RuntimeOption::CheckSymLink = false;
 bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
@@ -1154,11 +1155,11 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 #undef get_uint32_t
 #undef get_uint64
 
-    EvalJitEnableRenameFunction = EvalJitEnableRenameFunction
-      || !EvalJit;
+    EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(!EvalJitUseIR);
     EnableEmitterStats = eval["EnableEmitterStats"].getBool(EnableEmitterStats);
+    EnableInstructionCounts = eval["EnableInstructionCounts"].getBool(false);
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
     if (EvalJit && RecordCodeCoverage) {
       throw InvalidArgumentException(

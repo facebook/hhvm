@@ -713,7 +713,13 @@ ContStartedCheck
 
 17. Debugging and instrumentation
 
-IncStat
+IncStat S0:ConstInt S1:ConstInt S2:ConstBool
+
+  Increment stat counter. S0 is the implementation defined stat counter index,
+  S1 is the amount to increment the counter (may be negative), and S2 is a
+  'force' flag. This opcode becomes a noop iff (force == false and runtime
+  stats are not enabled) at translation time.
+
 DbgAssertRefCount
 
 

@@ -341,7 +341,7 @@ struct HhbcTranslator {
   void emitContHandle();
 
   void emitStrlen();
-  void emitIncStat(int32 counter, int32 value);
+  void emitIncStat(int32 counter, int32 value, bool force = false);
 
   // tracelet guards
   Trace* guardTypeStack(uint32 stackIndex,
@@ -380,7 +380,7 @@ private:
   void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(Offset targetBcOff = -1);
   Trace* getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff);
-  Trace* getExitSlowTrace(Offset nextByteCode = -1);
+  Trace* getExitSlowTrace();
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32 id, Trace* target);
   void emitInterpOne(Type::Tag type, Trace* target = NULL);

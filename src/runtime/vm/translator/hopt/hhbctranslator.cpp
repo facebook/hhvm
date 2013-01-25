@@ -771,11 +771,10 @@ void HhbcTranslator::emitStrlen() {
   }
 }
 
-void HhbcTranslator::emitIncStat(int32 counter, int32 value) {
+void HhbcTranslator::emitIncStat(int32 counter, int32 value, bool force) {
   TRACE(3, "%u: IncStat %d %d\n", m_bcOff, counter, value);
-  if (Stats::enabled()) {
-    m_tb->genIncStat(m_tb->genDefConst<int64>(counter),
-                    m_tb->genDefConst<int64>(value));
+  if (Stats::enabled() || force) {
+    m_tb->genIncStat(counter, value, force);
   }
 }
 
@@ -1950,12 +1949,12 @@ std::vector<SSATmp*> HhbcTranslator::getSpillValues() const {
  * This should be used in situations that HHIR cannot handle -- ideally only in
  * slow paths.
  */
-Trace* HhbcTranslator::getExitSlowTrace(Offset nextByteCode /* = -1 */) {
+Trace* HhbcTranslator::getExitSlowTrace() {
   std::vector<SSATmp*> stackValues = getSpillValues();
-  return m_tb->getExitSlowTrace(nextByteCode == -1 ? m_bcOff : nextByteCode,
-                               m_stackDeficit,
-                               stackValues.size(),
-                               stackValues.size() ? &stackValues[0] : 0);
+  return m_tb->getExitSlowTrace(m_bcOff,
+                                m_stackDeficit,
+                                stackValues.size(),
+                                stackValues.size() ? &stackValues[0] : 0);
 }
 
 /*

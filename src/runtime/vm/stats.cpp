@@ -44,7 +44,8 @@ const char* volatile helperNames[kMaxNumTrampolines];
 
 void
 emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
-        ConditionCode cc) {
+        ConditionCode cc, bool force) {
+  if (!force && !enabled()) return;
   bool havecc = cc != CC_None;
   uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
 
@@ -65,15 +66,10 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
   }
 }
 
-void emitInc(X64Assembler& a, StatCounter stat, int n /* = 1*/,
-             ConditionCode cc /* = -1*/) {
-  if (!enabled()) return;
-  emitInc(a, &tl_counters[0], stat, n, cc);
-}
-
-void emitIncTranslOp(X64Assembler& a, Opcode opc) {
-  if (!enableInstrCount()) return;
-  emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1);
+void emitIncTranslOp(X64Assembler& a, Opcode opc, bool force) {
+  if (!force && !enableInstrCount()) return;
+  emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1,
+          Transl::CC_None, force);
 }
 
 static __thread int64 epoch;
@@ -97,7 +93,7 @@ void dump() {
 }
 
 void clear() {
-  if (!enabled()) return;
+  if (!RuntimeOption::EnableInstructionCounts && !enabled()) return;
   ++epoch;
   memset(&tl_counters[0], 0, sizeof(tl_counters));
   memset(&tl_helper_counters[0], 0, sizeof(tl_helper_counters));

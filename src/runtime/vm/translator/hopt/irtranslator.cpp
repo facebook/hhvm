@@ -1489,10 +1489,14 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
   if (moduleEnabled(HPHP::Trace::stats, 2)) {
     m_hhbcTrans->emitIncStat(Stats::opcodeToIRPreStatCounter(i.op()), 1);
   }
-  irTranslateInstrWork(t, i);
-  if (moduleEnabled(HPHP::Trace::stats, 3)) {
-    m_hhbcTrans->emitIncStat(Stats::opcodeToIRPostStatCounter(i.op()), 1);
+  if (RuntimeOption::EnableInstructionCounts ||
+      moduleEnabled(HPHP::Trace::stats, 3)) {
+    // If the instruction takes a slow exit, the exit trace will
+    // decrement the post counter for that opcode.
+    m_hhbcTrans->emitIncStat(Stats::opcodeToIRPostStatCounter(i.op()),
+                             1, true);
   }
+  irTranslateInstrWork(t, i);
 
   irPassPredictedAndInferredTypes(i);
 }

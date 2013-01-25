@@ -1175,9 +1175,11 @@ SSATmp* TraceBuilder::genGenericRetDecRefs(SSATmp* retVal, int numLocals) {
     genDefConst<int64>(numLocals));
 }
 
-void TraceBuilder::genIncStat(int32 counter, int32 value) {
-  genIncStat(genLdConst<int64>(counter),
-             genLdConst<int64>(value));
+void TraceBuilder::genIncStat(int32 counter, int32 value, bool force) {
+  gen(IncStat,
+      genDefConst<int64>(counter),
+      genDefConst<int64>(value),
+      genDefConst<bool>(force));
 }
 
 SSATmp* TraceBuilder::genIncRef(SSATmp* src) {
@@ -1347,10 +1349,6 @@ SSATmp* TraceBuilder::genIterInitK(SSATmp* src,
              genDefConst<int64>(iterId),
              genDefConst<int64>(valLocalId),
              genDefConst<int64>(keyLocalId));
-}
-
-void TraceBuilder::genIncStat(SSATmp* counter, SSATmp* value) {
-  gen(IncStat, counter, value);
 }
 
 SSATmp* TraceBuilder::getSSATmp(IRInstruction* inst) {

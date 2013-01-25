@@ -97,9 +97,14 @@ using std::max;
   TPC(enter_tc) \
   TPC(service_req)
 
+static const char* const kInstrCountTx64Name = "instr_tx64";
+static const char* const kInstrCountIRName = "instr_hhir";
+
 #define TPC(n) "trans_" #n,
 static const char* const kPerfCounterNames[] = {
   TRANS_PERF_COUNTERS
+  kInstrCountTx64Name,
+  kInstrCountIRName,
 };
 #undef TPC
 
@@ -11049,8 +11054,7 @@ TranslatorX64::translateInstr(const Tracelet& t,
     emitInterpOne(t, i);
   } else {
     // Actually translate the instruction's body.
-    Stats::emitIncTranslOp(a, op);
-
+    Stats::emitIncTranslOp(a, op, RuntimeOption::EnableInstructionCounts);
     translateInstrWork(t, i);
   }
 
@@ -11819,8 +11823,8 @@ TranslatorX64::requestExit() {
 
 bool
 TranslatorX64::isPseudoEvent(const char* event) {
-  for (int i = 0; i < tpc_num_counters; i++) {
-    if (!strcmp(event, kPerfCounterNames[i])) {
+  for (auto name : kPerfCounterNames) {
+    if (!strcmp(event, name)) {
       return true;
     }
   }
@@ -11834,6 +11838,22 @@ TranslatorX64::getPerfCounters(Array& ret) {
     // an appropriate range, we have to fudge these numbers so they
     // look more like reasonable hardware counter values.
     ret.set(kPerfCounterNames[i], s_perfCounters[i] * 1000);
+  }
+
+  if (RuntimeOption::EnableInstructionCounts) {
+    auto doCounts = [&](unsigned begin, const char* const name) {
+      int64_t count = 0;
+      for (; begin < Stats::Instr_InterpOneHighInvalid;
+           begin += STATS_PER_OPCODE) {
+        count += Stats::tl_counters[Stats::StatCounter(begin)];
+      }
+      ret.set(name, count);
+    };
+
+    doCounts(Stats::Instr_TranslLowInvalid + STATS_PER_OPCODE,
+             kInstrCountTx64Name);
+    doCounts(Stats::Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE,
+             kInstrCountIRName);
   }
 }
 

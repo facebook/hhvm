@@ -364,6 +364,7 @@ public:
   static bool EnableObjDestructCall;
   static bool EnableEmitSwitch;
   static bool EnableEmitterStats;
+  static bool EnableInstructionCounts;
   static bool CheckSymLink;
   static bool NativeXHP;
   static int ScannerType;

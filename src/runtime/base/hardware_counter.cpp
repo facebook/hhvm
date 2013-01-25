@@ -362,10 +362,8 @@ bool HardwareCounter::setPerfEvents(CStrRef events) {
     char* event = url_decode(s, len);
     bool isPseudoEvent = TranslatorX64::isPseudoEvent(event);
     m_pseudoEvents = m_pseudoEvents || isPseudoEvent;
-    if (!eventExists(event)) {
-      if (!addPerfEvent(event) && !isPseudoEvent) {
-        return false;
-      }
+    if (!isPseudoEvent && !eventExists(event) && !addPerfEvent(event)) {
+      return false;
     }
     s = strtok_r(NULL, ",", &strtok_buf);
   }

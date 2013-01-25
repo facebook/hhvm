@@ -25,9 +25,6 @@ namespace VM {
 namespace Transl { class X64Assembler; }
 namespace Stats {
 
-extern __thread uint64_t tl_interpInstrs;
-extern __thread uint64_t tl_tcInstrs;
-
 #include "stats-opcodeDef.h"
 
 #define STATS \
@@ -237,14 +234,20 @@ static inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
 }
 
 // Both emitIncs use r10.
-extern void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
-                    Transl::ConditionCode cc = Transl::CC_None);
 extern void emitInc(Transl::X64Assembler& a,
                     uint64_t* tl_table,
                     uint index,
                     int n = 1,
-                    Transl::ConditionCode cc = Transl::CC_None);
-extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc);
+                    Transl::ConditionCode cc = Transl::CC_None,
+                    bool force = false);
+inline void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
+                    Transl::ConditionCode cc = Transl::CC_None,
+                    bool force = false) {
+  emitInc(a, &tl_counters[0], stat, n, cc, force);
+}
+
+extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc,
+                            bool force = false);
 extern void dump();
 extern void clear();
 

@@ -193,7 +193,7 @@ public:
   void    genDecRefStack(Type::Tag type, uint32 stackOff);
   void    genDecRefLoc(int id);
   void    genDecRefThis();
-  void    genIncStat(int32 counter, int32 value);
+  void    genIncStat(int32 counter, int32 value, bool force = false);
   SSATmp* genIncRef(SSATmp* src);
   SSATmp* genSpillStack(uint32 stackAdjustment,
                         uint32 numOpnds,
@@ -228,8 +228,6 @@ public:
                        uint32 keyLocalId);
   SSATmp* genIterNext(uint32 iterId, uint32 valLocalId);
   SSATmp* genIterNextK(uint32 iterId, uint32 valLocalId, uint32 keyLocalId);
-
-  void    genIncStat(SSATmp* counter, SSATmp* value);
 
   SSATmp* genInterpOne(uint32 pcOff, uint32 stackAdjustment,
                        Type::Tag resultType, Trace* target);

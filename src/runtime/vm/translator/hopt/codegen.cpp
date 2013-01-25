@@ -1819,10 +1819,22 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
       }
       break;
     case TraceExitType::Slow:
-      m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP_NO_IR);
-      break;
     case TraceExitType::SlowNoProgress:
-      m_tx64->emitReqRetransNoIR(outputAsm, destSK);
+      if (RuntimeOption::EnableInstructionCounts ||
+          HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
+        Stats::emitInc(m_as,
+                       Stats::opcodeToIRPostStatCounter(
+                         Op(*getCurFunc()->unit()->at(destSK.m_offset))),
+                       -1,
+                       Transl::CC_None,
+                       true);
+      }
+
+      if (exitType == TraceExitType::Slow) {
+        m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP_NO_IR);
+      } else {
+        m_tx64->emitReqRetransNoIR(outputAsm, destSK);
+      }
       break;
     case TraceExitType::GuardFailure:
       SrcRec* destSR = m_tx64->getSrcRec(destSK);
@@ -4130,8 +4142,11 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst, bool isInitK) {
 }
 
 void CodeGenerator::cgIncStat(IRInstruction *inst) {
-  Stats::emitInc(m_as, Stats::StatCounter(inst->getSrc(0)->getConstValAsInt()),
-                 inst->getSrc(1)->getConstValAsInt());
+  Stats::emitInc(m_as,
+                 Stats::StatCounter(inst->getSrc(0)->getConstValAsInt()),
+                 inst->getSrc(1)->getConstValAsInt(),
+                 Transl::CC_None,
+                 inst->getSrc(2)->getConstValAsBool());
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {

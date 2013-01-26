@@ -72,7 +72,10 @@ bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) {
   }
   ScalarExpressionPtr name =
     dynamic_pointer_cast<ScalarExpression>(m_property);
-  string propName = name->getString();
+  string propName = name->getLiteralString();
+  if (propName.empty()) {
+    return false;
+  }
   Symbol *sym = cls->getVariables()->getSymbol(propName);
   if (!sym || sym->isStatic() || !sym->isPrivate()) return true;
   return false;
@@ -200,20 +203,24 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 
   if (!m_property->is(Expression::KindOfScalarExpression)) {
     m_property->inferAndCheck(ar, Type::String, false);
-
     // we also lost track of which class variable an expression is about, hence
     // any type inference could be wrong. Instead, we just force variants on
     // all class variables.
     if (m_context & (LValue | RefValue)) {
       ar->forceClassVariants(getOriginalClass(), false, true);
     }
-
     return Type::Variant; // we have to use a variant to hold dynamic value
   }
 
   ScalarExpressionPtr exp = dynamic_pointer_cast<ScalarExpression>(m_property);
-  const string &name = exp->getString();
-  assert(!name.empty());
+  const string &name = exp->getLiteralString();
+  if (name.empty()) {
+    m_property->inferAndCheck(ar, Type::String, false);
+    if (m_context & (LValue | RefValue)) {
+      ar->forceClassVariants(getOriginalClass(), false, true);
+    }
+    return Type::Variant; // we have to use a variant to hold dynamic value
+  }
 
   m_property->inferAndCheck(ar, Type::String, false);
 
@@ -456,7 +463,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     }
     cg_printf("(((%s%s*)obj_tmp)->%s%s)",
               Option::ClassPrefix, cls->getId().c_str(),
-              Option::PropertyPrefix, name->getString().c_str());
+              Option::PropertyPrefix, name->getLiteralString().c_str());
 
     if (!write_context) {
       cg_printf(" : (raise_null_object_prop(),%s)",
@@ -483,7 +490,8 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
            m_object->getActualType()->isSpecificObject());
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);
-    cg_printf("%s%s", Option::PropertyPrefix, name->getString().c_str());
+    cg_printf("%s%s", Option::PropertyPrefix,
+              name->getLiteralString().c_str());
     if (doExist || doUnset) cg_printf(")");
   } else {
     cg_printf("%s(", func.c_str());
@@ -628,10 +636,13 @@ void ObjectPropertyExpression::outputCPPProperty(CodeGenerator &cg,
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);
-    cg_printString(name->getString(), ar, shared_from_this());
-  } else {
-    m_property->outputCPP(cg, ar);
+    string propName = name->getLiteralString();
+    if (!propName.empty()) {
+      cg_printString(propName, ar, shared_from_this());
+      return;
+    }
   }
+  m_property->outputCPP(cg, ar);
 }
 
 void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,

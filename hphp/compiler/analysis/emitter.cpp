@@ -3398,20 +3398,29 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ExpressionListPtr params(om->getParams());
         int numParams = params ? params->getCount() : 0;
 
-        Offset fpiStart;
-        if (!om->getName().empty()) {
-          // $obj->name(...)
-          //       ^^^^
-          // Use getOriginalName, which hasn't been case-normalized, since
-          // __call() is case-preserving.
-          StringData* nameLiteral =
-            StringData::GetStaticString(om->getOriginalName());
-          fpiStart = m_ue.bcPos();
-          e.FPushObjMethodD(numParams, nameLiteral);
-        } else {
+        Offset fpiStart = 0;
+        ExpressionPtr methName = om->getNameExp();
+        bool useDirectForm = false;
+        if (methName->is(Expression::KindOfScalarExpression)) {
+          ScalarExpressionPtr sval(
+            static_pointer_cast<ScalarExpression>(methName));
+          const std::string& methStr = sval->getOriginalLiteralString();
+          if (!methStr.empty()) {
+            // $obj->name(...)
+            //       ^^^^
+            // Use getOriginalLiteralString(), which hasn't been
+            // case-normalized, since __call() needs to preserve
+            // the case.
+            StringData* nameLiteral = StringData::GetStaticString(methStr);
+            fpiStart = m_ue.bcPos();
+            e.FPushObjMethodD(numParams, nameLiteral);
+            useDirectForm = true;
+          }
+        }
+        if (!useDirectForm) {
           // $obj->{...}(...)
           //       ^^^^^
-          visit(om->getNameExp());
+          visit(methName);
           emitConvertToCell(e);
           fpiStart = m_ue.bcPos();
           e.FPushObjMethod(numParams);
@@ -3419,7 +3428,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (clsName) {
           Id id = m_ue.mergeLitstr(clsName);
           m_metaInfo.add(fpiStart, Unit::MetaInfo::Class, false,
-                         om->getName().empty() ? 1 : 0, id);
+                         useDirectForm ? 0 : 1, id);
         }
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);

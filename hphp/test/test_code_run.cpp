@@ -6062,6 +6062,35 @@ bool TestCodeRun::TestObject() {
        "test(45, 0);"
        "test(77, 1);");
 
+  MVCR("<?php\n"
+      "class FOo {\n"
+      "  public function exclAIM() { echo \"FOo::exclAIM\\n\"; }\n"
+      "  public function teST() { echo \"FOo::teST\\n\"; }\n"
+      "  public function __CaLL($name, $args) {\n"
+      "    echo \"FOo::\" . $name . \"\\n\";\n"
+      "  }\n"
+      "}\n"
+      "class TesT {\n"
+      "  public static function ExclAim() {\n"
+      "    $obj = new fOO();\n"
+      "    $obj->{__fUNCTION__} = 1;\n"
+      "    $obj->{__cLASS__} = 2;\n"
+      "    $obj->__FuNCTION__ = 3;\n"
+      "    $obj->__ClASS__ = 4;\n"
+      "    $obj->{__FUnCTION__}();\n"
+      "    $obj->{__CLaSS__}();\n"
+      "    $obj->__FUNcTION__();\n"
+      "    $obj->__CLAsS__();\n"
+      "    $arr = array();\n"
+      "    foreach ($obj as $k => $v) {\n"
+      "      $arr[$k] = $v;\n"
+      "    }\n"
+      "    ksort($arr);\n"
+      "    var_dump($arr);\n"
+      "  }\n"
+      "}\n"
+      "tEst::eXclaiM();\n");
+
   return true;
 }
 

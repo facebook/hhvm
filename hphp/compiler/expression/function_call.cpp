@@ -59,10 +59,9 @@ FunctionCall::FunctionCall
       m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
     assert(m_name.empty());
     ScalarExpressionPtr c = dynamic_pointer_cast<ScalarExpression>(m_nameExp);
-    m_origName = c->getString();
+    m_origName = c->getOriginalLiteralString();
     c->toLower(true /* func call*/);
-    m_name = c->getString();
-    assert(!m_name.empty());
+    m_name = c->getLiteralString();
   } else {
     m_origName = name;
     m_name = Util::toLower(name);

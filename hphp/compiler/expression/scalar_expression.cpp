@@ -322,6 +322,14 @@ bool ScalarExpression::isLiteralString() const {
 }
 
 std::string ScalarExpression::getLiteralString() const {
+  return getLiteralStringImpl(false);
+}
+
+std::string ScalarExpression::getOriginalLiteralString() const {
+  return getLiteralStringImpl(true);
+}
+
+std::string ScalarExpression::getLiteralStringImpl(bool original) const {
   string output;
   if (!isLiteralString() && m_type != T_STRING) {
     return output;
@@ -333,13 +341,12 @@ std::string ScalarExpression::getLiteralString() const {
   }
 
   switch (m_type) {
+  case T_NUM_STRING:
+    assert(isLiteralString());
   case T_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
   case T_CONSTANT_ENCAPSED_STRING:
-    return m_value;
-  case T_NUM_STRING:
-    assert(isLiteralString());
-    return m_value;
+    return original ? m_originalValue : m_value;
   default:
     assert(false);
     break;

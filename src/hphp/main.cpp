@@ -427,7 +427,9 @@ cout << "Compiler: " << COMPILER_ID << "\n";
     return 1;
   }
 
-  if (hhvm && (po.target == "hhbc" || po.target == "run")) {
+  if (hhvm &&
+      (po.target == "hhbc" || po.target == "run") &&
+      po.format.find("exe") == string::npos) {
     if (po.program == "program") {
       po.program = "hhvm.hhbc";
     }
@@ -882,6 +884,9 @@ void hhbcTargetInit(const ProgramOptions &po, AnalysisResultPtr ar) {
   }
   // Propagate relevant compiler-specific options to the runtime.
   RuntimeOption::RepoLocalPath = ar->getOutputPath() + '/' + po.program;
+  if (po.format.find("exe") != string::npos) {
+    RuntimeOption::RepoLocalPath += ".hhbc";
+  }
   RuntimeOption::RepoLocalMode = "rw";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
@@ -900,6 +905,11 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     formatCount++;
   }
   if (po.format.find("binary") != string::npos) {
+    Option::GenerateBinaryHHBC = true;
+    type = "creating binary HHBC files";
+    formatCount++;
+  }
+  if (po.format.find("exe") != string::npos) {
     Option::GenerateBinaryHHBC = true;
     type = "creating binary HHBC files";
     formatCount++;
@@ -929,6 +939,16 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     }
     Util::syncdir(po.outputDir, po.syncDir);
     boost::filesystem::remove_all(po.syncDir);
+  }
+
+  if (!ret && po.format.find("exe") != string::npos) {
+    string exe = po.outputDir + '/' + po.program;
+    string repo = "repo=" + exe + ".hhbc";
+
+    const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
+                           HHVM_PATH, exe.c_str(), 0 };
+    string out;
+    ret = Process::Exec(argv[0], argv, NULL, out, NULL) ? 0 : 1;
   }
 
   return ret;
@@ -1071,9 +1091,9 @@ int runTarget(const ProgramOptions &po) {
 
   // run the executable
   string cmd;
-  if (hhvm) {
+  if (hhvm && po.format.find("exe") == string::npos) {
     cmd += HHVM_PATH;
-    cmd += " -vRepo.Authoritative=true -vRepo.Commit=false";
+    cmd += " -vRepo.Authoritative=true";
     cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
   }
   cmd += po.outputDir + '/' + po.program;

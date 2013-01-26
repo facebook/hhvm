@@ -512,7 +512,8 @@ void Repo::attachLocal(const char* path, bool isWritable) {
     // Make sure the repo exists before attaching it, in order to avoid
     // creating a read-only repo.
     struct stat buf;
-    if (stat(repoPath.c_str(), &buf) != 0) {
+    if (!strchr(repoPath.c_str(), ':') &&
+        stat(repoPath.c_str(), &buf) != 0) {
       return;
     }
   }

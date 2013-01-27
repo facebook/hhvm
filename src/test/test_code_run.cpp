@@ -622,7 +622,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
 
   {
     int cpus = Process::GetCPUCount();
-    int jobs = cpus * (hhvm ? 2 : 1);
+    int jobs = cpus;
     char* hphp_slow_tests_jobs = getenv("HPHP_SLOW_TESTS_JOBS");
     if (hphp_slow_tests_jobs) {
       int n = atoi(hphp_slow_tests_jobs);
@@ -11600,6 +11600,8 @@ bool TestCodeRun::TestProgramFunctions() {
 bool TestCodeRun::TestCompilation() {
   MVCR("<?php class A { public static $foo = 123;} $a = foo(); "
        "function foo() { return 'foo';} var_dump(A::$$a);");
+
+  MVCRNW("<?php fun foo() {}");
 
   // testing re-declared classes with missing parents, VM raises error
   // but the compiled code does not.

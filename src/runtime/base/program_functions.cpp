@@ -1097,7 +1097,7 @@ static int execute_program_impl(int argc, char **argv) {
       ret = 0;
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-        ret = -1;
+        ret = 1;
         if (hphp_invoke_simple(po.file)) {
           ret = ExitException::ExitCode;
         }

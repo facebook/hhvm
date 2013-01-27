@@ -1080,14 +1080,15 @@ int runTarget(const ProgramOptions &po) {
   cmd += string(" --file ") +
     (po.inputs.size() == 1 ? po.inputs[0] : "") + po.programArgs;
   Logger::Info("running executable %s...", cmd.c_str());
-  Util::ssystem(cmd.c_str());
+  ret = Util::ssystem(cmd.c_str());
+  if (ret && ret != -1) ret = 1;
 
   // delete the temporary directory if not needed
   if (!po.keepTempDir) {
     Logger::Info("deleting temporary directory %s...", po.outputDir.c_str());
     boost::filesystem::remove_all(po.outputDir);
   }
-  return 0;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

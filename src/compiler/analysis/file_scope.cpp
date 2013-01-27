@@ -108,6 +108,7 @@ void FileScope::cleanupForError(AnalysisResultConstPtr ar,
   fs->setOuterScope(shared_from_this());
   fs->getStmt()->resetScope(fs);
   fs->getStmt()->setLocation(loc);
+  setOuterScope(const_cast<AnalysisResult*>(ar.get())->shared_from_this());
 }
 
 bool FileScope::addFunction(AnalysisResultConstPtr ar,

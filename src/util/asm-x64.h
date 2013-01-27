@@ -161,6 +161,7 @@ struct ScaledIndex {
   {
     assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
            "Invalid index register scaling (must be 1,2,4 or 8).");
+    assert(int(index) != -1 && "invalid register");
   }
 
   Reg64 index;
@@ -191,7 +192,9 @@ struct DispReg {
   explicit DispReg(Reg64 base, intptr_t disp = 0)
     : base(base)
     , disp(disp)
-  {}
+  {
+    assert(int(base) != -1 && "invalid register");
+  }
 
   MemoryRef operator*() const;
 
@@ -214,7 +217,9 @@ struct IndexedDispReg {
     , index(sr.index)
     , scale(sr.scale)
     , disp(0)
-  {}
+  {
+    assert(int(base) != -1 && "invalid register");
+  }
 
   IndexedMemoryRef operator*() const;
 

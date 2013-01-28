@@ -551,7 +551,7 @@ void HhbcTranslator::emitReqSrc(const StringData* name) {
 }
 
 template<class Lambda>
-Trace* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
+SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   SSATmp* src = popC();
   Type::Tag type = src->getType();
   if (type != Type::Arr && type != Type::Obj) {
@@ -562,36 +562,36 @@ Trace* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   return emitJmpCondHelper(offset, true, res);
 }
 
-Trace* HhbcTranslator::emitIterInit(uint32 iterId,
+void HhbcTranslator::emitIterInit(uint32 iterId,
                                     int offset,
                                     uint32 valLocalId) {
-  return emitIterInitCommon(offset, [=] (SSATmp* src) {
+  emitIterInitCommon(offset, [=] (SSATmp* src) {
     return m_tb->genIterInit(src, iterId, valLocalId);
   });
 }
 
-Trace* HhbcTranslator::emitIterInitK(uint32 iterId,
+void HhbcTranslator::emitIterInitK(uint32 iterId,
                                      int offset,
                                      uint32 valLocalId,
                                      uint32 keyLocalId) {
-  return emitIterInitCommon(offset, [=] (SSATmp* src) {
+  emitIterInitCommon(offset, [=] (SSATmp* src) {
     return m_tb->genIterInitK(src, iterId, valLocalId, keyLocalId);
   });
 }
 
-Trace* HhbcTranslator::emitIterNext(uint32 iterId,
+void HhbcTranslator::emitIterNext(uint32 iterId,
                                     int offset,
                                     uint32 valLocalId) {
   SSATmp* res = m_tb->genIterNext(iterId, valLocalId);
-  return emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, false, res);
 }
 
-Trace* HhbcTranslator::emitIterNextK(uint32 iterId,
+void HhbcTranslator::emitIterNextK(uint32 iterId,
                                      int offset,
                                      uint32 valLocalId,
                                      uint32 keyLocalId) {
   SSATmp* res = m_tb->genIterNextK(iterId, valLocalId, keyLocalId);
-  return emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, false, res);
 }
 
 void HhbcTranslator::emitCreateCont(bool getArgs,
@@ -656,9 +656,10 @@ void HhbcTranslator::emitContExit() {
   SSATmp* sp;
   if (m_stackDeficit) {
     // Adjust the hardware sp before leaving.
+    // XXX This returns a ptrToGen
     sp = m_tb->genLdStackAddr(m_stackDeficit);
   } else {
-    sp = m_tb->genDefSP();
+    sp = m_tb->getSp();
   }
 
   m_tb->genRetCtrl(sp, fp, retAddr);
@@ -1042,7 +1043,7 @@ void HhbcTranslator::emitDup() {
   pushIncRef(topC());
 }
 
-Trace* HhbcTranslator::emitJmp(int32 offset, bool breakTracelet) {
+void HhbcTranslator::emitJmp(int32 offset, bool breakTracelet) {
   TRACE(3, "%u: Jmp %d\n", m_bcOff, offset);
   spillStack(); //  spill early since every path will need it
   // If surprise flags are set, exit trace and handle surprise
@@ -1051,12 +1052,11 @@ Trace* HhbcTranslator::emitJmp(int32 offset, bool breakTracelet) {
     Trace* exit = getExitSlowTrace();
     m_tb->genExitWhenSurprised(exit);
   }
-  if (!breakTracelet) return NULL;
-  Trace* target = getExitTrace(offset);
-  return m_tb->genJmp(target);
+  if (!breakTracelet) return;
+  m_tb->genJmp(getExitTrace(offset));
 }
 
-Trace* HhbcTranslator::emitJmpCondHelper(int32 offset,
+SSATmp* HhbcTranslator::emitJmpCondHelper(int32 offset,
                                          bool negate,
                                          SSATmp* src) {
   Trace* target = NULL;
@@ -1072,16 +1072,16 @@ Trace* HhbcTranslator::emitJmpCondHelper(int32 offset,
   return m_tb->genJmpCond(boolSrc, target, negate);
 }
 
-Trace* HhbcTranslator::emitJmpZ(int32 offset) {
+void HhbcTranslator::emitJmpZ(int32 offset) {
   TRACE(3, "%u: JmpZ %d\n", m_bcOff, offset);
   SSATmp* src = popC();
-  return emitJmpCondHelper(offset, true, src);
+  emitJmpCondHelper(offset, true, src);
 }
 
-Trace* HhbcTranslator::emitJmpNZ(int32 offset) {
+void HhbcTranslator::emitJmpNZ(int32 offset) {
   TRACE(3, "%u: JmpNZ %d\n", m_bcOff, offset);
   SSATmp* src = popC();
-  return emitJmpCondHelper(offset, false, src);
+  emitJmpCondHelper(offset, false, src);
 }
 
 void HhbcTranslator::emitCmp(Opcode opc) {

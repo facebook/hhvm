@@ -141,6 +141,7 @@ struct HhbcTranslator {
 
   void end(int nextBcOff);
   Trace* getTrace() const { return m_tb->getTrace(); }
+  TraceBuilder* getTraceBuilder() const { return m_tb.get(); }
 
   void setBcOff(Offset newOff, bool lastBcOff);
   void setBcOffNextTrace(Offset bcOff) { m_bcOffNextTrace = bcOff; }
@@ -225,9 +226,9 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
-  Trace* emitJmpZ(int32 offset);
-  Trace* emitJmpNZ(int32 offset);
-  Trace* emitJmp(int32 offset, bool breakTracelet);
+  void emitJmpZ(int32 offset);
+  void emitJmpNZ(int32 offset);
+  void emitJmp(int32 offset, bool breakTracelet);
   void emitGt()    { emitCmp(OpGt);    }
   void emitGte()   { emitCmp(OpGte);   }
   void emitLt()    { emitCmp(OpLt);    }
@@ -310,16 +311,16 @@ struct HhbcTranslator {
   void emitReqSrc(const StringData* name);
 
   // iterators
-  Trace* emitIterInit(uint32 iterId, int targetOffset, uint32 valLocalId);
-  Trace* emitIterInitK(uint32 iterId,
-                       int targetOffset,
-                       uint32 valLocalId,
-                       uint32 keyLocalId);
-  Trace* emitIterNext(uint32 iterId, int targetOffset, uint32 valLocalId);
-  Trace* emitIterNextK(uint32 iterId,
-                       int targetOffset,
-                       uint32 valLocalId,
-                       uint32 keyLocalId);
+  void emitIterInit(uint32 iterId, int targetOffset, uint32 valLocalId);
+  void emitIterInitK(uint32 iterId,
+                     int targetOffset,
+                     uint32 valLocalId,
+                     uint32 keyLocalId);
+  void emitIterNext(uint32 iterId, int targetOffset, uint32 valLocalId);
+  void emitIterNextK(uint32 iterId,
+                     int targetOffset,
+                     uint32 valLocalId,
+                     uint32 keyLocalId);
 
   void emitVerifyParamType(uint32 paramId);
 
@@ -438,7 +439,7 @@ private:
   template<Type::Tag T> void emitIsTypeC();
   template<Type::Tag T> void emitIsTypeL(int id);
   void emitCmp(Opcode opc);
-  Trace* emitJmpCondHelper(int32 offset, bool negate, SSATmp* src);
+  SSATmp* emitJmpCondHelper(int32 offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
@@ -453,7 +454,7 @@ private:
   void emitInterpOneOrPunt(Type::Tag type, Trace* target = NULL);
   void emitBinaryArith(Opcode);
   template<class Lambda>
-  Trace* emitIterInitCommon(int offset, Lambda genFunc);
+  SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
 
   /*
    * Accessors for the current function being compiled and its

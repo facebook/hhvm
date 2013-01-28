@@ -36,6 +36,9 @@ public:
                CSEHash& constants,
                const Func* func = nullptr);
 
+  void setEnableCse(bool val)            { m_enableCse = val; }
+  void setEnableSimplification(bool val) { m_enableSimplification = val; }
+
   Trace* makeExitTrace(uint32 bcOff) {
     return m_trace->addExitTrace(makeTrace(m_curFunc->getConstValAsFunc(),
                                            bcOff, false));
@@ -46,6 +49,8 @@ public:
   void setThisAvailable() {
     m_thisIsAvailable = true;
   }
+
+  void optimizeTrace();
 
   void genPrint(SSATmp*);
 
@@ -120,9 +125,6 @@ public:
   SSATmp* genBoxLoc(uint32 id);
   void    genBindLoc(uint32 id, SSATmp* ref, bool doRefCount = true);
   void    genInitLoc(uint32 id, SSATmp* t);
-  void    killLocalValue(int id);
-  bool    anyLocalHasValue(SSATmp* tmp) const;
-  bool    isValueAvailable(SSATmp* tmp) const;
 
   SSATmp* genLdHome(uint32 id);
   SSATmp* genLdCls(SSATmp* classNameOpnd);
@@ -167,11 +169,11 @@ public:
 
   SSATmp* genDefUninit();
   SSATmp* genDefNull();
-  Trace*  genJmp(Trace* target);
-  Trace*  genJmpCond(SSATmp* src, Trace* target, bool negate);
-  Trace*  genExitWhenSurprised(Trace* target);
-  Trace*  genExitOnVarEnv(Trace* target);
-  Trace*  genCheckInit(SSATmp* src, Trace* target);
+  SSATmp* genJmp(Trace* target);
+  SSATmp* genJmpCond(SSATmp* src, Trace* target, bool negate);
+  void    genExitWhenSurprised(Trace* target);
+  void    genExitOnVarEnv(Trace* target);
+  void    genCheckInit(SSATmp* src, Trace* target);
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genConvToBool(SSATmp* src);
   SSATmp* genConvToInt(SSATmp* src);
@@ -210,10 +212,10 @@ public:
                         SSATmp** opnds);
   SSATmp* genLdStack(int32 stackOff, Type::Tag type);
   SSATmp* genDefFP();
-  SSATmp* genDefSP();
+  SSATmp* genDefSP(int32 spOffset);
   SSATmp* genLdStackAddr(int64 offset);
   SSATmp* genQueryOp(Opcode queryOpc, SSATmp* addr);
-  Trace*  genVerifyParamType(SSATmp* objClass, SSATmp* className,
+  void    genVerifyParamType(SSATmp* objClass, SSATmp* className,
                              const Class* constraint, Trace* exitTrace);
 
   void    genNativeImpl();
@@ -270,21 +272,6 @@ public:
   // generates the ExitTrace instruction at the end of a trace
   void genTraceEnd(uint32 nextPc,
                    TraceExitType::ExitType exitType = TraceExitType::Normal);
-  SSATmp* getSSATmp(IRInstruction* inst);
-  SSATmp* optimizeInst(IRInstruction* inst);
-  SSATmp* cseLookup(IRInstruction* inst);
-  SSATmp* cseInsert(IRInstruction* inst);
-  CSEHash* getCSEHashTable(IRInstruction* inst);
-  void killCse();
-  void killLocals();
-  void updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
-  Local getLocal(uint32 id);
-  void appendInstruction(IRInstruction* inst);
-  SSATmp* getLocalValue(int id);
-  Type::Tag getLocalType(int id);
-  void setLocalValue(int id, SSATmp* value);
-  void setLocalType(int id, Type::Tag type);
-
   template<typename T>
   SSATmp* genDefConst(T val) {
     ConstInstruction inst(DefConst, val);
@@ -305,7 +292,28 @@ public:
   int32 getSpOffset() { return m_spOffset; }
   SSATmp* getSp() { return m_spValue; }
 
+  Type::Tag getLocalType(int id);
+  void      killLocalValue(int id);
+
 private:
+  void      appendInstruction(IRInstruction* inst);
+  enum      CloneInstMode { kCloneInst, kUseInst };
+  SSATmp*   optimizeInst(IRInstruction* inst, CloneInstMode clone=kCloneInst);
+  SSATmp*   cseLookup(IRInstruction* inst);
+  void      cseInsert(IRInstruction* inst);
+  CSEHash*  getCSEHashTable(IRInstruction* inst);
+  void      killCse();
+  void      killLocals();
+  void      setLocalValue(int id, SSATmp* value);
+  void      setLocalType(int id, Type::Tag type);
+  SSATmp*   getLocalValue(int id);
+  bool      isValueAvailable(SSATmp* tmp) const;
+  bool      anyLocalHasValue(SSATmp* tmp) const;
+  void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
+  void      updateTrackedState(IRInstruction* inst);
+  void      clearTrackedState();
+
+  Local getLocal(uint32 id);
   LabelInstruction* getLabel(Trace* trace) {
     return trace ? trace->getLabel() : NULL;
   }
@@ -318,20 +326,53 @@ private:
   /*
    * Fields
    */
-  CSEHash    m_cseHash;
   IRFactory& m_irFactory;
-  CSEHash&   m_constTable;
   Simplifier m_simplifier;
+
+  Offset const m_initialBcOff; // offset of initial bytecode in trace
+  boost::scoped_ptr<Trace> const m_trace; // generated trace
+
+  // Flags that enable optimizations
+  bool       m_enableCse;
+  bool       m_enableSimplification;
+
+  /*
+   * While building a trace one instruction at a time, a TraceBuilder
+   * tracks various state for generating code and for optimization:
+   *
+   *   (1) m_fpValue & m_spValue track which SSATmp holds the current VM
+   *       frame and stack pointer values.
+   *
+   *   (2) m_spOffset tracks the offset of the m_spValue from m_fpValue.
+   *
+   *   (3) m_curFunc tracks the current function containing the
+   *       generated code; currently, this remains constant during
+   *       tracebuilding but once we implement inlining it'll have to
+   *       be updated to track the context of inlined functions.
+   *
+   *   (4) m_cseHash & m_constTable are hashtables for common
+   *       sub-expression elimination. m_constTable holds only constants.
+   *
+   *   (5) m_thisIsAvailable tracks whether the current ActRec has a
+   *       non-null this pointer.
+   *
+   *   (6) m_localValues & m_localTypes track the current values and
+   *       types held in locals. These vectors are indexed by the
+   *       local's id.
+   *
+   * The function updateTrackedState(IRInstruction* inst) updates this
+   * state (called after an instruction is appended to the trace), and
+   * the function clearTrackedState() clears it.
+   */
   SSATmp*    m_spValue;      // current physical sp
   SSATmp*    m_fpValue;      // current physical fp
   int32      m_spOffset;     // offset of physical sp from physical fp
-  // Pointer to function being compiled.
-  SSATmp*    m_curFunc;
+  SSATmp*    m_curFunc;      // current function context
+  CSEHash&   m_constTable;
+  CSEHash    m_cseHash;
+  bool       m_thisIsAvailable; // true only if current ActRec has non-null this
 
-  bool         m_thisIsAvailable;
-  Offset const m_initialBcOff;
-  boost::scoped_ptr<Trace> const m_trace;
-
+  // vectors that track local values & types
   std::vector<SSATmp*>   m_localValues;
   std::vector<Type::Tag> m_localTypes;
 };

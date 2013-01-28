@@ -177,7 +177,7 @@ void sinkIncRefs(Trace* trace,
 
       auto dstId = inst->getDst()->getId();
       assert(!sunkTmps[dstId]);
-      sunkTmps[dstId] = irFactory->getSSATmp(sunkInst);
+      sunkTmps[dstId] = sunkInst->getDst();
     }
     for (IRInstruction* inst : trace->getInstructionList()) {
       // Replace the original tmps with the sunk tmps.

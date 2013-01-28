@@ -17,32 +17,27 @@
 
 namespace HPHP { namespace VM { namespace JIT {
 
-IRInstruction* IRFactory::cloneInstruction(const IRInstruction* inst) {
-  return new (m_arena) IRInstruction(*this, inst);
-}
-
-ConstInstruction* IRFactory::cloneInstruction(const ConstInstruction* inst) {
-  return new (m_arena) ConstInstruction(*this, inst);
-}
-
-LabelInstruction* IRFactory::cloneInstruction(const LabelInstruction* inst) {
-  return new (m_arena) LabelInstruction(*this, inst);
-}
-
-MarkerInstruction* IRFactory::cloneInstruction(const MarkerInstruction* inst) {
-  return new (m_arena) MarkerInstruction(*this, inst);
-}
-
 ConstInstruction* IRFactory::defConst(int64 val) {
-  return new (m_arena) ConstInstruction(DefConst, val);
+  ConstInstruction inst(DefConst, val);
+  return cloneInstruction(&inst);
 }
 
 LabelInstruction* IRFactory::defLabel(const Func* f) {
-  return new (m_arena) LabelInstruction(m_nextLabelId++, f);
+  LabelInstruction inst(m_nextLabelId++, f);
+  return cloneInstruction(&inst);
 }
 
 MarkerInstruction* IRFactory::marker(uint32 bcOff, const Func* f, int32 spOff) {
-  return new (m_arena) MarkerInstruction(bcOff, f, spOff);
+  MarkerInstruction inst(bcOff, f, spOff);
+  return cloneInstruction(&inst);
 }
+
+IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {
+  IRInstruction* inst = gen(Mov, dst->getType(), src);
+  dst->setInstruction(inst);
+  inst->setDst(dst);
+  return inst;
+}
+
 
 }}}

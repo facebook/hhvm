@@ -72,22 +72,25 @@ static bool isNotInst(SSATmp *tmp) {
 SSATmp* Simplifier::simplify(IRInstruction* inst) {
   SSATmp* src1 = inst->getSrc(0);
   SSATmp* src2 = inst->getSrc(1);
-
-  switch (inst->getOpcode()) {
+  Opcode opc = inst->getOpcode();
+  switch (opc) {
   case OpAdd:       return simplifyAdd(src1, src2);
   case OpSub:       return simplifySub(src1, src2);
   case OpMul:       return simplifyMul(src1, src2);
   case OpAnd:       return simplifyAnd(src1, src2);
   case OpOr:        return simplifyOr(src1, src2);
   case OpXor:       return simplifyXor(src1, src2);
-  case OpGt:        return simplifyGt(src1, src2);
-  case OpGte:       return simplifyGte(src1, src2);
-  case OpLt:        return simplifyLt(src1, src2);
-  case OpLte:       return simplifyLte(src1, src2);
-  case OpEq:        return simplifyEq(src1, src2);
-  case OpNeq:       return simplifyNeq(src1, src2);
-  case OpSame:      return simplifySame(src1, src2);
-  case OpNSame:     return simplifyNSame(src1, src2);
+
+  case OpGt:
+  case OpGte:
+  case OpLt:
+  case OpLte:
+  case OpEq:
+  case OpNeq:
+  case OpSame:
+  case OpNSame:
+    return simplifyCmp(opc, src1, src2);
+
   case Concat:      return simplifyConcat(src1, src2);
   case Mov:         return simplifyMov(src1);
 
@@ -117,8 +120,14 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpNeq:
   case JmpSame:
   case JmpNSame:
-    // TODO(#2049201): reuse the logic in simplifyCmp.
-    return nullptr;
+    return simplifyQueryJmp(inst);
+
+  case Print:        return simplifyPrint(inst);
+  case DecRef:
+  case DecRefNZ:     return simplifyDecRef(inst);
+  case IncRef:       return simplifyIncRef(inst);
+  case GuardType:    return simplifyGuardType(inst);
+
   case Jmp_:
   case JmpInstanceOf:
   case JmpNInstanceOf:
@@ -136,9 +145,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdCachedClass:
   case DecRefLoc:
   case DecRefStack:
-  case DecRef:
-  case DecRefNZ:
-  case GuardType:
   case GuardLoc:
   case GuardStk:
   case LdThis:
@@ -162,7 +168,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case StMem:
   case StMemNT:
   case StLoc:
-  case IncRef:
   case DefFP:
   case DefSP:
   case LdFunc:
@@ -176,6 +181,110 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
     unimplementedSimplify(inst->getOpcode());
     return nullptr;
   }
+}
+
+/*
+ * Looks for whether the value in tmp was defined by a load, and if
+ * so, changes that load into a load that guards on the given
+ * type. Returns true if it succeeds.
+ */
+static bool hoistGuardToLoad(SSATmp* tmp, Type::Tag type) {
+  IRInstruction* inst = tmp->getInstruction();
+  switch (inst->getOpcode()) {
+    case Mov:
+    case IncRef:
+    {
+      // if inst is an incref or move, then chase down its src
+      if (hoistGuardToLoad(inst->getSrc(0), type)) {
+        // guard was successfully attached to a load instruction
+        // refine the type of this mov/incref
+        // Note: We can also further simplify incref's here if type is not
+        // ref-counted
+        tmp->setType(type);
+        inst->setTypeParam(type);
+        return true;
+      }
+      break;
+    }
+    case LdLoc:
+    case LdStack:
+    case LdMem:
+    case LdProp:
+    case LdRef:
+    case LdClsCns:
+    {
+      if (!inst->getLabel()) {
+        // Not a control flow instruction, so can't give it check semantics
+        break;
+      }
+      Type::Tag instType = tmp->getType();
+      if (instType == Type::Gen ||
+          (instType == Type::Cell && !Type::isBoxed(type))) {
+        tmp->setType(type);
+        inst->setTypeParam(type);
+        return true;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+  return false;
+}
+
+SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
+  Type::Tag type    = inst->getTypeParam();
+  SSATmp*   src     = inst->getSrc(0);
+  Type::Tag srcType = src->getType();
+  if (srcType == type || Type::isMoreRefined(srcType, type)) {
+    /*
+     * the type of the src is the same or more refined than type, so the
+     * guard is unnecessary.
+     */
+    return src;
+  }
+  if (Type::isMoreRefined(type, srcType)) {
+    if (hoistGuardToLoad(src, type)) {
+      return src;
+    }
+  } else {
+    /*
+     * incompatible types!  We should just generate a jump here and
+     * return null.
+     *
+     * For now, this case should currently be impossible, but it may
+     * come up later due to other optimizations.  The assert is so
+     * we'll remember this spot ...
+     */
+    assert(0);
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
+  SSATmp* src1 = inst->getSrc(0);
+  SSATmp* src2 = inst->getSrc(1);
+  Opcode opc = inst->getOpcode();
+  // reuse the logic in simplifyCmp.
+  SSATmp* newCmp = simplifyCmp(queryJmpToQueryOp(opc), src1, src2);
+  if (!newCmp) return nullptr;
+
+  SSATmp* newQueryJmp = makeInstruction(
+    [=, this] (IRInstruction* condJmp) {
+      SSATmp* newCondJmp = simplifyCondJmp(condJmp);
+      if (newCondJmp) return newCondJmp;
+      if (condJmp->getOpcode() == Nop) {
+        // simplifyCondJmp folded the branch into a nop
+        inst->convertToNop();
+      }
+      // Couldn't fold condJmp or combine it with newCmp
+      return (SSATmp*)nullptr;
+    },
+    JmpNZero,
+    inst->getLabel(),
+    newCmp);
+  if (!newQueryJmp) return nullptr;
+  return newQueryJmp;
 }
 
 SSATmp* Simplifier::simplifyMov(SSATmp* src) {
@@ -776,22 +885,6 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-#define DEF_SIMPLIFY_CMP(op)                                      \
-  SSATmp* Simplifier::simplify##op(SSATmp* src1, SSATmp* src2) {  \
-    return simplifyCmp(Op##op, src1, src2);                       \
-  }
-
-DEF_SIMPLIFY_CMP(Gt)
-DEF_SIMPLIFY_CMP(Gte)
-DEF_SIMPLIFY_CMP(Lt)
-DEF_SIMPLIFY_CMP(Lte)
-DEF_SIMPLIFY_CMP(Eq)
-DEF_SIMPLIFY_CMP(Neq)
-DEF_SIMPLIFY_CMP(Same)
-DEF_SIMPLIFY_CMP(NSame)
-
-#undef DEF_SIMPLIFY_CMP
-
 SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   auto type = inst->getTypeParam();
   auto src  = inst->getSrc(0);
@@ -967,9 +1060,31 @@ SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
   if (inst->getLabel() != NULL) {
     Type::Tag type = inst->getSrc(0)->getType();
     if (Type::isInit(type)) {
-      // Unnecessary CheckInit! Mark it unnecessary by deleting its label
-      inst->setLabel(NULL);
+      // Unnecessary CheckInit!
+      inst->convertToNop();
     }
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyPrint(IRInstruction* inst) {
+  if (inst->getSrc(0)->getType() == Type::Null) {
+    inst->convertToNop();
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyDecRef(IRInstruction* inst) {
+  if (!isRefCounted(inst->getSrc(0))) {
+    inst->convertToNop();
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
+  SSATmp* src = inst->getSrc(0);
+  if (!isRefCounted(src)) {
+    return src;
   }
   return nullptr;
 }

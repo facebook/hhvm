@@ -189,6 +189,9 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
         // pessimistic for now: we only really need to kill the value when
         // mutating the array.
         auto t = m_tb.getLocalType(loc);
+        // Task #2071378: Move this to
+        // TraceBuilder::updateTrackedState once you use the m_base
+        // that is a home address.
         m_tb.killLocalValue(loc);
         m_tb.genAssertLoc(loc, t);
       }

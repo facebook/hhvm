@@ -1473,6 +1473,7 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
   }
 
   if (i.guardedThis) {
+    // Task #2067635: This should really generate an AssertThis
     m_hhbcTrans->setThisAvailable();
   }
 
@@ -1665,10 +1666,10 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   };
 
   if (RuntimeOption::EvalDumpIR) {
-    traceTrace(" HHIR before code gen ", false);
+    traceTrace(" HHIR after initial translation ", false);
   }
 
-  JIT::optimizeTrace(trace, m_irFactory.get());
+  JIT::optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
 
   if (RuntimeOption::EvalDumpIR > 1) {
     traceTrace(" HHIR after optimizing ", false);

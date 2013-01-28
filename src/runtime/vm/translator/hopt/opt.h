@@ -19,6 +19,7 @@
 namespace HPHP { namespace VM { namespace JIT {
 
 class Trace;
+class TraceBuilder;
 class IRFactory;
 class IRInstruction;
 
@@ -48,7 +49,7 @@ void optimizeJumps(Trace*, IRFactory*);
 /*
  * Run all the optimization passes.
  */
-void optimizeTrace(Trace*, IRFactory*);
+void optimizeTrace(Trace*, TraceBuilder*);
 
 }}}
 

@@ -415,6 +415,11 @@ public:
   F(bool, JitUseIR,                    false) \
   F(bool, IRPuntDontInterp,            false) \
   F(bool, HHIRGenericDtorHelper,       true) \
+  F(bool, HHIRCse,                     true) \
+  F(bool, HHIRSimplification,          true) \
+  F(bool, HHIRGenOpts,                 true) \
+  F(bool, HHIRJumpOpts,                true) \
+  F(bool, HHIRExtraOptPass,            true) \
   F(bool, HHIRMemOpt,                  true) \
   F(uint32, HHIRNumFreeRegs,           -1) \
   F(bool, HHIREnableRematerialization, true) \

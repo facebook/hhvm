@@ -33,24 +33,29 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            CSEHash& constants,
                            const Func* func)
   : m_irFactory(irFactory)
-  , m_constTable(constants)
   , m_simplifier(this)
-  , m_spOffset(initialSpOffsetFromFp)
-  , m_thisIsAvailable(false)
   , m_initialBcOff(initialBcOffset)
   , m_trace(makeTrace(func, initialBcOffset, true))
+  , m_enableCse(false)
+  , m_enableSimplification(false)
+  , m_spValue(NULL)
+  , m_fpValue(NULL)
+  , m_spOffset(initialSpOffsetFromFp)
+  , m_constTable(constants)
+  , m_thisIsAvailable(false)
 {
   // put a function marker at the start of trace
   m_curFunc = genDefConst<const Func*>(func);
-  m_fpValue = genDefFP();
-  m_spValue = genDefSP();
+  if (RuntimeOption::EvalHHIRGenOpts) {
+    m_enableCse = RuntimeOption::EvalHHIRCse;
+    m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
+  }
+  genDefFP();
+  genDefSP(initialSpOffsetFromFp);
   assert(m_spOffset >= 0);
 }
 
 void TraceBuilder::genPrint(SSATmp* arg) {
-  if (arg->getType() == Type::Null) {
-    return;
-  }
   gen(Print, arg);
 }
 
@@ -83,11 +88,9 @@ void TraceBuilder::genDefFunc(Func* func) {
 }
 
 SSATmp* TraceBuilder::genLdThis(Trace* exitTrace) {
-  if (m_thisIsAvailable) { // mov m_thisIsAvailable to opt code
+  if (m_thisIsAvailable) {
     return gen(LdThis, m_fpValue);
   } else {
-    // future LdThis instructions don't need a null check
-    m_thisIsAvailable = true;
     return gen(LdThis, getLabel(exitTrace), m_fpValue);
   }
 }
@@ -180,7 +183,7 @@ SSATmp* TraceBuilder::genUnbox(SSATmp* src, Trace* exit) {
 }
 
 /**
- * Checks is the given SSATmp, or any of its aliases, is available in
+ * Checks if the given SSATmp, or any of its aliases, is available in
  * any VM location, including locals and the This pointer.
  */
 bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
@@ -298,10 +301,9 @@ void TraceBuilder::genStRaw(SSATmp* base, RawMemSlot::Kind kind,
 
 void TraceBuilder::genTraceEnd(uint32 nextPc,
                                TraceExitType::ExitType exitType /* = Normal */) {
-  SSATmp* pc = genDefConst<int64>(nextPc);
   gen(getExitOpcode(TraceExitType::Normal),
       m_curFunc,
-      pc,
+      genDefConst<int64>(nextPc),
       m_spValue,
       m_fpValue);
 }
@@ -315,8 +317,8 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
   Trace* exitTrace = makeExitTrace(bcOff);
   exitTrace->appendInstruction(
     m_irFactory.marker(bcOff,
-                     m_curFunc->getConstValAsFunc(),
-                     m_spOffset + numOpnds - stackDeficit));
+                       m_curFunc->getConstValAsFunc(),
+                       m_spOffset + numOpnds - stackDeficit));
   SSATmp* sp = m_spValue;
   if (numOpnds != 0 || stackDeficit != 0) {
     SSATmp* srcs[numOpnds + 2];
@@ -325,7 +327,7 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
     std::copy(opnds, opnds + numOpnds, srcs + 2);
 
     auto* spillInst = m_irFactory.gen(SpillStack, numOpnds + 2, srcs);
-    sp = m_irFactory.getSSATmp(spillInst);
+    sp = spillInst->getDst();
     exitTrace->appendInstruction(spillInst);
   }
   SSATmp* pc = genDefConst<int64>(bcOff);
@@ -417,27 +419,23 @@ SSATmp* TraceBuilder::genCmp(Opcode opc, SSATmp* src1, SSATmp* src2) {
   return gen(opc, src1, src2);
 }
 
-Trace* TraceBuilder::genJmp(Trace* targetTrace) {
+SSATmp* TraceBuilder::genJmp(Trace* targetTrace) {
   assert(targetTrace);
-  gen(Jmp_, getLabel(targetTrace));
-  return targetTrace;
+  return gen(Jmp_, getLabel(targetTrace));
 }
 
-Trace* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
+SSATmp* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
   assert(target);
   assert(boolSrc->getType() == Type::Bool);
-  gen(negate ? JmpZero : JmpNZero, getLabel(target), boolSrc);
-  return target;
+  return gen(negate ? JmpZero : JmpNZero, getLabel(target), boolSrc);
 }
 
-Trace* TraceBuilder::genExitWhenSurprised(Trace* targetTrace) {
+void TraceBuilder::genExitWhenSurprised(Trace* targetTrace) {
   gen(ExitWhenSurprised, getLabel(targetTrace));
-  return targetTrace;
 }
 
-Trace* TraceBuilder::genExitOnVarEnv(Trace* targetTrace) {
+void TraceBuilder::genExitOnVarEnv(Trace* targetTrace) {
   gen(ExitOnVarEnv, getLabel(targetTrace), m_fpValue);
-  return targetTrace;
 }
 
 void TraceBuilder::genReleaseVVOrExit(Trace* exit) {
@@ -453,7 +451,6 @@ void TraceBuilder::genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace) {
   Type::Tag prevType = getLocalType(id);
   if (prevType == Type::None) {
     gen(GuardLoc, type, getLabel(exitTrace), genLdHome(id));
-    setLocalType(id, type);
   } else {
     // It doesn't make sense to be guarding on something that's deemed to fail
     assert(prevType == type);
@@ -464,7 +461,6 @@ void TraceBuilder::genAssertLoc(uint32 id, Type::Tag type) {
   Type::Tag prevType = getLocalType(id);
   if (prevType == Type::None || Type::isMoreRefined(type, prevType)) {
     gen(AssertLoc, type, genLdHome(id));
-    setLocalType(id, type);
   } else {
     assert(prevType == type || Type::isMoreRefined(prevType, type));
   }
@@ -476,92 +472,13 @@ SSATmp* TraceBuilder::genLdAssertedLoc(uint32 id, Type::Tag type) {
 }
 
 void TraceBuilder::genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace) {
-  m_spValue = gen(GuardStk,
-                  type,
-                  getLabel(exitTrace),
-                  m_spValue,
-                  genDefConst<int64>(id));
-}
-
-/*
- * Looks for whether the value in tmp was defined by a load, and if
- * so, changes that load into a load that guards on the given
- * type. Returns true if it succeeds.
- */
-static bool hoistGuardToLoad(SSATmp* tmp, Type::Tag type) {
-  IRInstruction* inst = tmp->getInstruction();
-  switch (inst->getOpcode()) {
-    case Mov:
-    case IncRef:
-    {
-      // if inst is an incref or move, then chase down its src
-      if (hoistGuardToLoad(inst->getSrc(0), type)) {
-        // guard was successfully attached to a load instruction
-        // refine the type of this mov/incref
-        // Note: We can also further simplify incref's here if type is not
-        // ref-counted
-        tmp->setType(type);
-        inst->setTypeParam(type);
-        return true;
-      }
-      break;
-    }
-    case LdLoc:
-    case LdStack:
-    case LdMem:
-    case LdProp:
-    case LdRef:
-    case LdClsCns:
-    {
-      if (!inst->getLabel()) {
-        // Not a control flow instruction, so can't give it check semantics
-        break;
-      }
-      Type::Tag instType = tmp->getType();
-      if (instType == Type::Gen ||
-          (instType == Type::Cell && !Type::isBoxed(type))) {
-        tmp->setType(type);
-        inst->setTypeParam(type);
-        return true;
-      }
-      break;
-    }
-    default:
-      break;
-  }
-  return false;
+  gen(GuardStk, type, getLabel(exitTrace), m_spValue, genDefConst<int64>(id));
 }
 
 SSATmp* TraceBuilder::genGuardType(SSATmp* src,
                                    Type::Tag type,
                                    Trace* target) {
   assert(target);
-  // TODO: Move this logic to simplifier
-  Type::Tag srcType = src->getType();
-  if (srcType == type || Type::isMoreRefined(srcType, type)) {
-    /*
-     * the type of the src is the same or more refined than type, so the
-     * guard is unnecessary.
-     */
-    return src;
-  }
-  if (Type::isMoreRefined(type, srcType)) {
-    if (hoistGuardToLoad(src, type)) {
-      src->setType(type);
-      src->getInstruction()->setTypeParam(type);
-      return src;
-    }
-  } else {
-    /*
-     * incompatible types!  We should just generate a jump here and
-     * return null.
-     *
-     * For now, this case should currently be impossible, but it may
-     * come up later due to other optimizations.  The assert is so
-     * we'll remember this spot ...
-     */
-    assert(0);
-  }
   return gen(GuardType, type, getLabel(target), src);
 }
 
@@ -582,7 +499,6 @@ void TraceBuilder::genGuardRefs(SSATmp* funcPtr,
       vals64);
 }
 
-
 SSATmp* TraceBuilder::genLdHome(uint32 id) {
   SSATmp* srcs[] = { m_fpValue };
   ConstInstruction inst(1, srcs, Local(id));
@@ -599,17 +515,9 @@ SSATmp* TraceBuilder::genLdClsCns(SSATmp* cnsName, SSATmp* cls, Trace* exit) {
   return gen(LdClsCns, Type::Cell, getLabel(exit), cnsName, cls);
 }
 
-Trace* TraceBuilder::genCheckInit(SSATmp* src, Trace* target) {
+void TraceBuilder::genCheckInit(SSATmp* src, Trace* target) {
   assert(target);
-  Type::Tag type = src->getType();
-  // TODO: This optimization is redundant wrt simplifier. Remove it once we can
-  // simplifier as a separate pass.
-  if (Type::isStaticallyKnown(type) || type == Type::UncountedInit) {
-    // Unnecessary CheckInit
-    return NULL;
-  }
   gen(CheckInit, getLabel(target), src);
-  return target;
 }
 
 SSATmp* TraceBuilder::genLdCurFuncPtr() {
@@ -643,13 +551,13 @@ SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
                                           SSATmp* baseClass,
                                           Trace*  exit) {
   return gen(LdClsMethodCache, getLabel(exit), className, methodName,
-    baseClass);
+             baseClass);
 }
 
 SSATmp* TraceBuilder::genLdObjMethod(const StringData* methodName,
                                      SSATmp* actRec) {
   return gen(LdObjMethod, genDefConst<const StringData*>(methodName),
-    actRec);
+             actRec);
 }
 
 SSATmp* TraceBuilder::genQueryOp(Opcode queryOpc, SSATmp* addr) {
@@ -658,7 +566,7 @@ SSATmp* TraceBuilder::genQueryOp(Opcode queryOpc, SSATmp* addr) {
 }
 
 // TODO(#2058871): move this to hhbctranslator
-Trace* TraceBuilder::genVerifyParamType(SSATmp* objClass,
+void TraceBuilder::genVerifyParamType(SSATmp* objClass,
                                         SSATmp* className,
                                         const Class*  constraintClass,
                                         Trace*  exitTrace) {
@@ -667,24 +575,14 @@ Trace* TraceBuilder::genVerifyParamType(SSATmp* objClass,
     constraintClass ? genDefConst<const Class*>(constraintClass)
                     : gen(LdCachedClass, className);
   gen(JmpNSame, getLabel(exitTrace), objClass, constraint);
-  return exitTrace;
-}
-
-Local getLocalFromHomeOpnd(SSATmp* srcHome) {
-  // Invariant: only LdHome instructions generate home values
-  IRInstruction* ldHomeInstruction = srcHome->getInstruction();
-  assert(ldHomeInstruction->getOpcode() == LdHome);
-  assert(ldHomeInstruction->isConstInstruction());
-  assert(srcHome->getType() == Type::Home);
-  return ((ConstInstruction*)ldHomeInstruction)->getLocal();
 }
 
 int getLocalIdFromHomeOpnd(SSATmp* srcHome) {
   IRInstruction* ldHomeInstruction = srcHome->getInstruction();
-  if (ldHomeInstruction->getOpcode() == LdStack) {
-    return -1;
-  }
-  return getLocalFromHomeOpnd(srcHome).getId();
+  assert(ldHomeInstruction->getOpcode() == LdHome);
+  assert(ldHomeInstruction->isConstInstruction());
+  assert(srcHome->getType() == Type::Home);
+  return ((ConstInstruction*)ldHomeInstruction)->getLocal().getId();
 }
 
 SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
@@ -694,17 +592,9 @@ SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
    * StLoc = boxedValue
    * -- track local's value in boxedValue
    */
-  SSATmp* prevValue = getLocalValue(id);
-  SSATmp* home = genLdHome(id);
-  if (prevValue == NULL) {
-    // generate prevValue = ldloc
-    Type::Tag type = getLocalType(id);
-    // guards should ensure we have type info at this point
-    assert(type != Type::None);
-    prevValue = gen(LdLoc, type, home);
-  }
-  // Don't box if local's value already boxed
+  SSATmp* prevValue  = genLdLoc(id);
   Type::Tag prevType = prevValue->getType();
+  // Don't box if local's value already boxed
   if (Type::isBoxed(prevType)) {
     return prevValue;
   }
@@ -739,20 +629,18 @@ SSATmp* TraceBuilder::genLdLoc(uint32 id) {
   }
   // No prior value for this local is available, so actually generate a LdLoc.
   Type::Tag type = getLocalType(id);
-  assert(type != Type::None);
+  assert(type != Type::None); // tracelet guards guarantee we have a type
   switch (type) {
     case Type::Uninit : tmp = genDefUninit(); break;
     case Type::Null   : tmp = genDefNull();   break;
     default           : tmp = gen(LdLoc, type, genLdHome(id));
   }
-  setLocalValue(id, tmp);
   return tmp;
 }
 
 SSATmp* TraceBuilder::genLdLocAsCell(uint32 id, Trace* exitTrace) {
   SSATmp*    tmp = genLdLoc(id);
-  Type::Tag type = getLocalType(id);
-  assert(type != Type::None);
+  Type::Tag type = tmp->getType();
   if (!Type::isBoxed(type)) {
     return tmp;
   }
@@ -773,7 +661,6 @@ SSATmp* TraceBuilder::genLdLocAddr(uint32 id) {
 void TraceBuilder::genStLocAux(uint32 id, SSATmp* newValue, bool storeType) {
   Opcode opc = storeType ? StLoc : StLocNT;
   gen(opc, genLdHome(id), newValue);
-  setLocalValue(id, newValue);
 }
 
 /*
@@ -872,9 +759,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
    * -- track local value in newRef
    */
   Type::Tag trackedType = getLocalType(id);
-  // These asserts make sure we should have info on the local's type at
-  // this point thanks to the tracelet guards
-  assert(trackedType != Type::None);
+  assert(trackedType != Type::None);  // tracelet guards guarantee a type
   if (Type::isUnboxed(trackedType)) {
     SSATmp* retVal = doRefCount ? genIncRef(newValue) : newValue;
     genBindLoc(id, newValue, doRefCount);
@@ -883,7 +768,6 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   assert(Type::isBoxed(trackedType));
   SSATmp* prevRef = getLocalValue(id);
   assert(prevRef == NULL || prevRef->getType() == trackedType);
-
   // prevRef is a ref
   if (prevRef == NULL) {
     // prevRef = ldLoc
@@ -897,11 +781,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   }
   // stref [prevRef] = t1
   Opcode opc = genStoreType ? StRef : StRefNT;
-  SSATmp* newRef = gen(opc, prevRef, newValue);
-  // update tracked value for local 'id' -- or create one if not tracked yet
-  setLocalValue(id, newRef);
-  // update other tracked locals that also contain prevRef
-  updateLocalRefValues(prevRef, newRef);
+  gen(opc, prevRef, newValue);
 
   SSATmp* retVal = newValue;
   if (doRefCount) {
@@ -912,30 +792,16 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
 }
 
 SSATmp* TraceBuilder::genNewObj(int32 numParams, SSATmp* cls) {
-  SSATmp* newSpValue = gen(NewObj,
-                               genDefConst<int64>(numParams),
-                               cls,
-                               m_spValue,
-                               m_fpValue);
-  m_spValue = newSpValue;
-  // new obj leaves the new object and an actrec on the stack
-  m_spOffset += (sizeof(ActRec) / sizeof(Cell)) + 1;
-  assert(m_spOffset >= 0);
-  return newSpValue;
+  return gen(NewObj, genDefConst<int64>(numParams), cls, m_spValue, m_fpValue);
 }
 
 SSATmp* TraceBuilder::genNewObj(int32 numParams,
                                 const StringData* className) {
-  SSATmp* newSpValue = gen(NewObj,
-                               genDefConst<int64>(numParams),
-                               genDefConst<const StringData*>(className),
-                               m_spValue,
-                               m_fpValue);
-  m_spValue = newSpValue;
-  // new obj leaves the new object and an actrec on the stack
-  m_spOffset += (sizeof(ActRec) / sizeof(Cell)) + 1;
-  assert(m_spOffset >= 0);
-  return newSpValue;
+  return gen(NewObj,
+             genDefConst<int64>(numParams),
+             genDefConst<const StringData*>(className),
+             m_spValue,
+             m_fpValue);
 }
 
 SSATmp* TraceBuilder::genNewArray(int32 capacity) {
@@ -1089,7 +955,7 @@ void TraceBuilder::genAssertStk(uint32_t id, Type::Tag type) {
   UNUSED SSATmp* tmp = getStackValue(m_spValue, id, spansCall, knownType);
   assert(!tmp);
   if (knownType == Type::None || Type::isMoreRefined(type, knownType)) {
-    m_spValue = gen(AssertStk, type, m_spValue, genDefConst<int64>(id));
+    gen(AssertStk, type, m_spValue, genDefConst<int64>(id));
   }
 }
 
@@ -1097,8 +963,8 @@ SSATmp* TraceBuilder::genDefFP() {
   return gen(DefFP);
 }
 
-SSATmp* TraceBuilder::genDefSP() {
-  return gen(DefSP);
+SSATmp* TraceBuilder::genDefSP(int32 spOffset) {
+  return gen(DefSP, m_fpValue, genDefConst(spOffset));
 }
 
 SSATmp* TraceBuilder::genLdStackAddr(int64 index) {
@@ -1113,17 +979,13 @@ SSATmp* TraceBuilder::genInterpOne(uint32 pcOff,
                                    uint32 stackAdjustment,
                                    Type::Tag resultType,
                                    Trace* target) {
-  SSATmp* spVal = gen(InterpOne,
-                          getLabel(target),
-                          m_fpValue,
-                          m_spValue,
-                          genDefConst<int64>(pcOff),
-                          genDefConst<int64>(stackAdjustment),
-                          genDefConst<int64>((int64)resultType));
-  m_spValue = spVal;
-  // push the return value if any and adjust for the popped values
-  m_spOffset += ((resultType == Type::None ? 0 : 1) - stackAdjustment);
-  return spVal;
+  return gen(InterpOne,
+             getLabel(target),
+             m_fpValue,
+             m_spValue,
+             genDefConst<int64>(pcOff),
+             genDefConst<int64>(stackAdjustment),
+             genDefConst<int64>((int64)resultType));
 }
 
 SSATmp* TraceBuilder::genCall(SSATmp* actRec,
@@ -1136,18 +998,7 @@ SSATmp* TraceBuilder::genCall(SSATmp* actRec,
   srcs[1] = genDefConst<int64>(returnBcOffset);
   srcs[2] = func;
   std::copy(params, params + numParams, srcs + 3);
-
-  // The call gives a new stack, popping the ActRec and pushing a
-  // return value.
-  m_spValue = gen(Call, numParams + 3, srcs);
-  m_spOffset -= kNumActRecCells;
-  m_spOffset += 1;
-  assert(m_spOffset >= 0);
-
-  // Kill all available expressions; we can't keep them in regs anyway.
-  killCse();
-  killLocals();
-  return m_spValue;
+  return gen(Call, numParams + 3, srcs);
 }
 
 void TraceBuilder::genRetVal(SSATmp* val) {
@@ -1198,7 +1049,7 @@ void TraceBuilder::genDecRefThis() {
 
 SSATmp* TraceBuilder::genGenericRetDecRefs(SSATmp* retVal, int numLocals) {
   return gen(GenericRetDecRefs, m_fpValue, retVal,
-    genDefConst<int64>(numLocals));
+             genDefConst<int64>(numLocals));
 }
 
 void TraceBuilder::genIncStat(int32 counter, int32 value, bool force) {
@@ -1209,9 +1060,6 @@ void TraceBuilder::genIncStat(int32 counter, int32 value, bool force) {
 }
 
 SSATmp* TraceBuilder::genIncRef(SSATmp* src) {
-  if (!isRefCounted(src)) {
-    return src;
-  }
   return gen(IncRef, src);
 }
 
@@ -1226,17 +1074,7 @@ SSATmp* TraceBuilder::genSpillStack(uint32 stackAdjustment,
   srcs[0] = m_spValue;
   srcs[1] = genDefConst<int64>(stackAdjustment);
   std::copy(spillOpnds, spillOpnds + numOpnds, srcs + 2);
-
-  SSATmp* newSpValue = gen(SpillStack,
-                           numOpnds + 2,
-                           srcs);
-
-  m_spValue = newSpValue;
-  // Push the spilled values but adjust for the popped values
-  m_spOffset -= stackAdjustment;
-  m_spOffset += spillValueCells(newSpValue->getInstruction());
-  assert(m_spOffset >= 0);
-  return newSpValue;
+  return gen(SpillStack, numOpnds + 2, srcs);
 }
 
 SSATmp* TraceBuilder::genLdStack(int32 stackOff, Type::Tag type) {
@@ -1262,34 +1100,29 @@ SSATmp* TraceBuilder::genCreateCont(bool getArgs,
                                     const Func* origFunc,
                                     const Func* genFunc) {
   return gen(CreateCont,
-                 m_fpValue,
-                 genDefConst(getArgs),
-                 genDefConst(origFunc),
-                 genDefConst(genFunc));
+             m_fpValue,
+             genDefConst(getArgs),
+             genDefConst(origFunc),
+             genDefConst(genFunc));
 }
 
 void TraceBuilder::genFillContLocals(const Func* origFunc,
                                      const Func* genFunc,
                                      SSATmp* cont) {
   gen(FillContLocals,
-          m_fpValue,
-          genDefConst(origFunc),
-          genDefConst(genFunc),
-          cont);
+      m_fpValue,
+      genDefConst(origFunc),
+      genDefConst(genFunc),
+      cont);
 }
 
 void TraceBuilder::genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset) {
-  gen(FillContThis,
-          cont,
-          locals,
-          genDefConst(offset));
+  gen(FillContThis, cont, locals, genDefConst(offset));
 }
 
 void TraceBuilder::genContEnter(SSATmp* contAR, SSATmp* addr,
                                 int64 returnBcOffset) {
   gen(ContEnter, contAR, addr, genDefConst(returnBcOffset));
-  killCse();
-  killLocals();
 }
 
 void TraceBuilder::genUnlinkContVarEnv() {
@@ -1319,9 +1152,6 @@ Trace* TraceBuilder::genContStartedCheck(SSATmp* cont, Trace* target) {
 }
 
 SSATmp* TraceBuilder::genIterNext(uint32 iterId, uint32 localId) {
-  assert(m_fpValue &&
-         m_fpValue->getInstruction()->getOpcode() == DefFP);
-  killLocalValue(localId);
   // IterNext fpReg, iterId, localId
   return gen(IterNext,
              Type::Bool,
@@ -1333,10 +1163,6 @@ SSATmp* TraceBuilder::genIterNext(uint32 iterId, uint32 localId) {
 SSATmp* TraceBuilder::genIterNextK(uint32 iterId,
                                    uint32 valLocalId,
                                    uint32 keyLocalId) {
-  assert(m_fpValue &&
-         m_fpValue->getInstruction()->getOpcode() == DefFP);
-  killLocalValue(valLocalId);
-  killLocalValue(keyLocalId);
   // IterNextK fpReg, iterId, valLocalId, keyLocalId
   return gen(IterNextK,
              Type::Bool,
@@ -1349,8 +1175,6 @@ SSATmp* TraceBuilder::genIterNextK(uint32 iterId,
 SSATmp* TraceBuilder::genIterInit(SSATmp* src,
                                   uint32 iterId,
                                   uint32 valLocalId) {
-  assert(m_fpValue && m_fpValue->getInstruction()->getOpcode() == DefFP);
-  killLocalValue(valLocalId);
   // IterInit src, fpReg, iterId, valLocalId
   return gen(IterInit,
              Type::Bool,
@@ -1364,9 +1188,6 @@ SSATmp* TraceBuilder::genIterInitK(SSATmp* src,
                                    uint32 iterId,
                                    uint32 valLocalId,
                                    uint32 keyLocalId) {
-  assert(m_fpValue && m_fpValue->getInstruction()->getOpcode() == DefFP);
-  killLocalValue(valLocalId);
-  killLocalValue(keyLocalId);
   // IterInitK src, fpReg, iterId, valLocalId, keyLocalId
   return gen(IterInitK,
              Type::Bool,
@@ -1377,18 +1198,134 @@ SSATmp* TraceBuilder::genIterInitK(SSATmp* src,
              genDefConst<int64>(keyLocalId));
 }
 
-SSATmp* TraceBuilder::getSSATmp(IRInstruction* inst) {
-  SSATmp* opnd = m_irFactory.getSSATmp(inst);
-  if (!inst->isDefConst()) {
-    appendInstruction(inst);
+void TraceBuilder::updateTrackedState(IRInstruction* inst) {
+  Opcode opc = inst->getOpcode();
+  // Update tracked state of local values/types, stack/frame pointer, CSE, etc.
+  switch (opc) {
+    case Call: {
+      m_spValue = inst->getDst();
+      // A call pops the ActRec and pushes a return value.
+      m_spOffset -= kNumActRecCells;
+      m_spOffset += 1;
+      assert(m_spOffset >= 0);
+      killCse();
+      killLocals();
+      break;
+    }
+    case ContEnter: {
+      killCse();
+      killLocals();
+      break;
+    }
+    case DefFP: {
+      m_fpValue = inst->getDst();
+      break;
+    }
+    case DefSP: {
+      m_spValue = inst->getDst();
+      m_spOffset = inst->getSrc(1)->getConstValAsInt();
+      break;
+    }
+    case AssertStk:
+    case GuardStk: {
+      m_spValue = inst->getDst();
+      break;
+    }
+    case SpillStack: {
+      m_spValue = inst->getDst();
+      // Push the spilled values but adjust for the popped values
+      int64 stackAdjustment = inst->getSrc(1)->getConstValAsInt();
+      m_spOffset -= stackAdjustment;
+      m_spOffset += spillValueCells(inst);
+      assert(m_spOffset >= 0);
+      break;
+    }
+    case NewObj: {
+      m_spValue = inst->getDst();
+      // new obj leaves the new object and an actrec on the stack
+      m_spOffset += (sizeof(ActRec) / sizeof(Cell)) + 1;
+      assert(m_spOffset >= 0);
+      break;
+    }
+    case InterpOne: {
+      m_spValue = inst->getDst();
+      int64 stackAdjustment = inst->getSrc(3)->getConstValAsInt();
+      Type::Tag resultType = (Type::Tag)inst->getSrc(4)->getConstValAsInt();
+      // push the return value if any and adjust for the popped values
+      m_spOffset += ((resultType == Type::None ? 0 : 1) - stackAdjustment);
+      break;
+    }
+
+    case StRefNT:
+    case StRef: {
+      SSATmp* newRef = inst->getDst();
+      SSATmp* prevRef = inst->getSrc(0);
+      // update other tracked locals that also contain prevRef
+      updateLocalRefValues(prevRef, newRef);
+      break;
+    }
+
+    case StLocNT:
+    case StLoc: {
+      uint32 id = getLocalIdFromHomeOpnd(inst->getSrc(0));
+      setLocalValue(id, inst->getSrc(1));
+      break;
+    }
+    case LdLoc: {
+      uint32 id = getLocalIdFromHomeOpnd(inst->getSrc(0));
+      setLocalValue(id, inst->getDst());
+      break;
+    }
+    case AssertLoc:
+    case GuardLoc: {
+      uint32 id = getLocalIdFromHomeOpnd(inst->getSrc(0));
+      setLocalType(id, inst->getTypeParam());
+      break;
+    }
+    case IterInitK:
+    case IterNextK: {
+      // kill the local to which this instruction stores iter's key
+      killLocalValue(inst->getSrc(3)->getConstValAsInt());
+      // fall through to case below to handle value local
+    }
+    case IterInit:
+    case IterNext: {
+      // kill the local to which this instruction stores iter's value
+      killLocalValue(inst->getSrc(2)->getConstValAsInt());
+      break;
+    }
+    case LdThis: {
+      m_thisIsAvailable = true;
+      break;
+    }
+    default:
+      break;
   }
-  return opnd;
+  // update the CSE table
+  if (m_enableCse && inst->canCSE()) {
+    cseInsert(inst);
+  }
+}
+
+void TraceBuilder::clearTrackedState() {
+  killCse(); // clears m_cseHash
+  for (uint32 i = 0; i < m_localValues.size(); i++) {
+    m_localValues[i] = NULL;
+  }
+  for (uint32 i = 0; i < m_localTypes.size(); i++) {
+    m_localTypes[i] = Type::None;
+  }
+  m_spValue = m_fpValue = NULL;
+  m_spOffset = 0;
+  m_thisIsAvailable = false;
 }
 
 void TraceBuilder::appendInstruction(IRInstruction* inst) {
-  if (inst->getOpcode() != Nop) {
+  Opcode opc = inst->getOpcode();
+  if (opc != Nop && !inst->isDefConst()) {
     m_trace->appendInstruction(inst);
   }
+  updateTrackedState(inst);
 }
 
 CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
@@ -1398,24 +1335,16 @@ CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
   return &m_cseHash;
 }
 
-SSATmp* TraceBuilder::cseInsert(IRInstruction* inst) {
-  inst = inst->clone(&m_irFactory);
-  SSATmp* tmp = getSSATmp(inst);
-  getCSEHashTable(inst)->insert(tmp);
-  return tmp;
+void TraceBuilder::cseInsert(IRInstruction* inst) {
+  getCSEHashTable(inst)->insert(inst->getDst());
 }
 
 SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {
   return getCSEHashTable(inst)->lookup(inst);
 }
 
-/*
- * Should be able to run optimizeInst on everything and
- * have it generate the SSATmp result and appropriately
- * apply common subexpresson elimination according to the
- * tables generated from the IR_OPCODES macro.
- */
-SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
+SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst,
+                                   CloneInstMode clone /* =kCloneInst */) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };
@@ -1423,37 +1352,62 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
 
   FTRACE(1, "{}{}\n", indent(), inst->toString());
 
+  // copy propagation on inst source operands
+  Simplifier::copyProp(inst);
+
   SSATmp* result = NULL;
-  if (inst->canCSE()) {
+  if (m_enableCse && inst->canCSE()) {
     result = cseLookup(inst);
     if (result) {
       // Found a dominating instruction that can be used instead of inst
-      FTRACE(1, "  {}cse found: {}\n", indent(), inst->toString());
+      FTRACE(1, "  {}cse found: {}\n",
+             indent(), result->getInstruction()->toString());
       return result;
     }
   }
 
-  // copy propagation on inst source operands
-  Simplifier::copyProp(inst);
-
-  result = m_simplifier.simplify(inst);
-  if (result) {
-    assert(result->getInstruction()->hasDst());
-    return result;
+  if (m_enableSimplification) {
+    result = m_simplifier.simplify(inst);
+    if (result) {
+      // Found a simpler instruction that can be used instead of inst
+      FTRACE(1, "  {}simplification returned: {}\n",
+             indent(), result->getInstruction()->toString());
+      assert(result->getInstruction()->hasDst());
+      return result;
+    }
+    // simplifier could change an instruction into a Nop
+    // don't bother processing Nops any further
+    if (inst->getOpcode() == Nop) return nullptr;
   }
-  if (inst->canCSE()) {
-    result = cseInsert(inst);
-  } else {
-    inst = inst->clone(&m_irFactory);
-    if (inst->hasDst()) {
-      result = getSSATmp(inst);
-    } else {
-      // we will return NULL in this case because instruction has no dest.
-      appendInstruction(inst);
+  // Couldn't CSE or simplify the instruction; insert the instruction or
+  // its clone into the instruction list
+  if (clone == kCloneInst)  inst = inst->clone(&m_irFactory);
+
+  appendInstruction(inst);
+  // returns NULL if instruction has no dest.
+  return inst->getDst();
+}
+
+void TraceBuilder::optimizeTrace() {
+  m_enableCse = RuntimeOption::EvalHHIRCse;
+  m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
+  if (!m_enableCse && !m_enableSimplification) return;
+  auto instructions = std::move(m_trace->getInstructionList());
+  assert(m_trace->getInstructionList().empty());
+
+  clearTrackedState();
+  for (auto inst : instructions) {
+    SSATmp* result = optimizeInst(inst, kUseInst);
+    SSATmp* dst = inst->getDst();
+    if (dst && dst->getType() != Type::None && dst != result) {
+      // The result of optimization has a different destination register
+      // than the inst. Generate a move to get result into dst.
+      assert(result);
+      appendInstruction(m_irFactory.mov(dst, result));
     }
   }
-  return result;
 }
+
 
 void TraceBuilder::killCse() {
   m_cseHash.clear();
@@ -1551,7 +1505,7 @@ void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
  * locals, however.
  */
 void TraceBuilder::killLocals() {
-  for (uint32 i = 0; i < m_localValues.size(); i++) {
+   for (uint32 i = 0; i < m_localValues.size(); i++) {
     SSATmp* t = m_localValues[i];
     // should not kill DefConst, and LdConst should be replaced by DefConst
     if (t == NULL || t->getInstruction()->isDefConst()) {

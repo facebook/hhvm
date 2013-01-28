@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "runtime/vm/translator/hopt/opt.h"
-
+#include "runtime/vm/translator/hopt/tracebuilder.h"
 #include "util/trace.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 
@@ -46,7 +46,8 @@ static void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
   }
 }
 
-void optimizeTrace(Trace* trace, IRFactory* irFactory) {
+void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
+  IRFactory* irFactory = traceBuilder->getIrFactory();
   if (RuntimeOption::EvalHHIRMemOpt) {
     optimizeMemoryAccesses(trace, irFactory);
     if (RuntimeOption::EvalDumpIR > 5) {
@@ -57,9 +58,37 @@ void optimizeTrace(Trace* trace, IRFactory* irFactory) {
   }
   if (RuntimeOption::EvalHHIRDeadCodeElim) {
     eliminateDeadCode(trace, irFactory);
-    optimizeJumps(trace, irFactory);
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "----- HHIR after DCE -----\n";
+      trace->print(std::cout, false);
+      std::cout << "---------------------------\n";
+    }
+  }
+  if (RuntimeOption::EvalHHIRExtraOptPass
+      && (RuntimeOption::EvalHHIRCse
+          || RuntimeOption::EvalHHIRSimplification)) {
+    traceBuilder->optimizeTrace();
+    if (RuntimeOption::EvalDumpIR > 5) {
+      std::cout << "----- HHIR after CSE/Simplification -----\n";
+      trace->print(std::cout, false);
+      std::cout << "---------------------------\n";
+    }
+    // Cleanup any dead code left around by CSE/Simplification
+    // Ideally, this would be controlled by a flag returned
+    // by optimzeTrace indicating whether DCE is necessary
+    if (RuntimeOption::EvalHHIRDeadCodeElim) {
+      eliminateDeadCode(trace, irFactory);
+      if (RuntimeOption::EvalDumpIR > 5) {
+        std::cout << "----- HHIR after DCE -----\n";
+        trace->print(std::cout, false);
+        std::cout << "---------------------------\n";
+      }
+    }
+  }
+  if (RuntimeOption::EvalHHIRJumpOpts) {
+    optimizeJumps(trace, irFactory);
+    if (RuntimeOption::EvalDumpIR > 5) {
+      std::cout << "----- HHIR after jump opts -----\n";
       trace->print(std::cout, false);
       std::cout << "---------------------------\n";
     }

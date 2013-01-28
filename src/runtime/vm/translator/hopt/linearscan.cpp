@@ -307,7 +307,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
       // Create <reloadTmp> which inherits <tmp>'s slot ID and
       // <spillTmp>'s last use ID.
       // Replace <tmp> with <reloadTmp> in <inst>.
-      SSATmp* reloadTmp = m_irFactory->getSSATmp(reload);
+      SSATmp* reloadTmp = reload->getDst();
       reloadTmp->setLastUseId(spillTmp->getLastUseId());
       reloadTmp->setSpillSlot(slotId);
       inst->setSrc(i, reloadTmp);
@@ -549,8 +549,7 @@ void LinearScan::insertAllocFreeSpill(Trace* trace, uint32 numExtraSpillLocs) {
 
 void LinearScan::insertAllocFreeSpillAux(Trace* trace,
                                          uint32 numExtraSpillLocs) {
-  SSATmp* tmp = m_irFactory->getSSATmp(
-    m_irFactory->defConst((int64)numExtraSpillLocs));
+  SSATmp* tmp = m_irFactory->defConst((int64)numExtraSpillLocs)->getDst();
 
   IRInstruction::List& instList = trace->getInstructionList();
   for (IRInstruction::Iterator it = instList.begin();
@@ -1019,11 +1018,9 @@ void LinearScan::rematerializeAux(Trace* trace,
           assert(curFp != NULL);
           SSATmp* srcs[] = { curFp };
           ConstInstruction constInst(1, srcs, Local(locId));
-          IRInstruction* ldHomeInst =
-            m_irFactory->cloneInstruction(&constInst);
-          newInst = m_irFactory->gen(LdLoc,
-                                     dst->getType(),
-                                     m_irFactory->getSSATmp(ldHomeInst));
+
+          IRInstruction* ldHome = m_irFactory->cloneInstruction(&constInst);
+          newInst = m_irFactory->gen(LdLoc, dst->getType(), ldHome->getDst());
         }
       }
       if (newInst) {
@@ -1262,7 +1259,7 @@ uint32 LinearScan::createSpillSlot(SSATmp* tmp) {
   uint32 slotId = m_slots.size();
   tmp->setSpillSlot(slotId);
   IRInstruction* spillInst = m_irFactory->gen(Spill, tmp);
-  SSATmp* spillTmp = m_irFactory->getSSATmp(spillInst);
+  SSATmp* spillTmp = spillInst->getDst();
   SlotInfo si;
   si.m_spillTmp = spillTmp;
   si.m_latestReload = tmp;

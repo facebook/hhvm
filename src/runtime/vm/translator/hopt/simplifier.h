@@ -66,6 +66,10 @@ private:
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
+  SSATmp* simplifyPrint(IRInstruction* inst);
+  SSATmp* simplifyDecRef(IRInstruction* inst);
+  SSATmp* simplifyIncRef(IRInstruction* inst);
+  SSATmp* simplifyGuardType(IRInstruction* inst);
 
 private:
   SSATmp* genDefInt(int64 val);
@@ -73,6 +77,7 @@ private:
   SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
+  SSATmp* simplifyQueryJmp(IRInstruction*);
 
 private:
   TraceBuilder* const m_tb;

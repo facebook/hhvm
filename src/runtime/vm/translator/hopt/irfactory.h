@@ -125,26 +125,34 @@ public:
     );
   }
 
-  IRInstruction*     cloneInstruction(const IRInstruction*);
-  ConstInstruction*  cloneInstruction(const ConstInstruction*);
-  LabelInstruction*  cloneInstruction(const LabelInstruction*);
-  MarkerInstruction* cloneInstruction(const MarkerInstruction*);
+  template<class T>
+  T* cloneInstruction(const T* inst) {
+    T* newInst = new (m_arena) T(*this, inst);
+    newSSATmp(newInst);
+    return newInst;
+  }
 
   ConstInstruction* defConst(int64 val);
   LabelInstruction* defLabel(const Func*);
   MarkerInstruction* marker(uint32 bcOff, const Func* func, int32 spOff);
-
-  SSATmp* getSSATmp(IRInstruction* inst) {
-    SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);
-    inst->setDst(tmp);
-    return tmp;
-  }
+  /*
+   * Creates move instrution that moves from src to dst. We can't use gen
+   * to create such a move because gen assigns a newly allocated destination
+   * SSATmp whereas we want to use the given dst SSATmp.
+   */
+  IRInstruction* mov(SSATmp* dst, SSATmp* src);
 
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }
   uint32_t numLabels() const     { return m_nextLabelId; }
 
 private:
+  void newSSATmp(IRInstruction* inst) {
+    if (!inst->hasDst()) return;
+    SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);
+    inst->setDst(tmp);
+  }
+
   uint32_t m_nextLabelId;
   uint32_t m_nextOpndId;
 

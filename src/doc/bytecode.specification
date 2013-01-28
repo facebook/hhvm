@@ -1676,10 +1676,10 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   FPI push constructor. First, these instructions load a value into x as given
   by the following table:
 
-    instruction           x
-    -------------------+----
-      FPushObjMethod   | $1
-      FPushObjMethodD  | %2
+    instruction     x
+    --------------+----
+      FPushCtor   | $1
+      FPushCtorD  | %2
 
   When loading %2 into x, FPushCtorD will perform the work performed by the
   AGetC instruction to convert the name given by %2 into a classref.

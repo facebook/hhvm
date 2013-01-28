@@ -716,13 +716,7 @@ void MemMap::sinkStores(StoreList& stores) {
     std::vector<IRInstruction*>::iterator i, e;
     for (i = it->second.begin(), e = it->second.end(); i != e; ++i) {
       IRInstruction* guard = *i;
-
-      IRInstruction* clone = store->clone(factory);
-      if (store->getDst() != NULL) {
-        factory->getSSATmp(clone);
-      }
-
-      guard->getLabel()->getParent()->prependInstruction(clone);
+      guard->getLabel()->getParent()->prependInstruction(store->clone(factory));
     }
 
     // StRefs cannot just be removed, they have to be converted into Movs

@@ -25,6 +25,7 @@
 #include <stack>
 #include <list>
 #include <cassert>
+#include <type_traits>
 #include <boost/noncopyable.hpp>
 #include <boost/checked_delete.hpp>
 #include "util/asm-x64.h"
@@ -843,11 +844,20 @@ public:
     setTypeParam(t);
     m_intVal = 0;
   }
-  ConstInstruction(Opcode opc, int64 val) : IRInstruction(opc) {
+
+  template<class T>
+  ConstInstruction(Opcode opc,
+                   T val,
+                   typename std::enable_if<
+                     std::is_integral<T>::value && !std::is_same<T,bool>::value
+                   >::type* = 0)
+    : IRInstruction(opc)
+  {
     assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::Int);
     m_intVal = val;
   }
+
   ConstInstruction(Opcode opc, double val) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::Dbl);

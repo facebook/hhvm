@@ -299,7 +299,7 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
   IRInstruction* instr = NULL;
   if (exitType == TraceExitType::NormalCc) {
     assert(notTakenBcOff != 0);
-    SSATmp* notTakenPC = genDefConst<int64>(notTakenBcOff);
+    SSATmp* notTakenPC = genDefConst(notTakenBcOff);
     instr = m_irFactory.gen(getExitOpcode(exitType),
                             m_curFunc,
                             pc,

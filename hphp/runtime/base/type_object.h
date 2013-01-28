@@ -46,7 +46,7 @@ typedef SmartPtr<ObjectData> ObjectBase;
  * Object type wrapping around ObjectData to implement reference count.
  */
 class Object : protected ObjectBase {
- public:
+public:
   Object() {}
 
   static const Object s_nullObject;
@@ -64,6 +64,23 @@ class Object : protected ObjectBase {
    */
   Object(ObjectData *data) : ObjectBase(data) { }
   Object(CObjRef src) : ObjectBase(src.m_px) { }
+
+  // Move ctor
+  Object(Object&& src) : ObjectBase(std::move(src)) {
+    static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
+  }
+  // Regular assign
+  Object& operator=(const Object& src) {
+    static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
+    ObjectBase::operator=(src);
+    return *this;
+  }
+  // Move assign
+  Object& operator=(Object&& src) {
+    static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
+    ObjectBase::operator=(std::move(src));
+    return *this;
+  }
 
   ~Object();
 

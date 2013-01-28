@@ -197,7 +197,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   int half = RuntimeOption::InjectedStackTraceLimit / 2;
 
   // start over, get the top half
-  bt = sbt;
+  bt = std::move(sbt);
   t = st;
   while (t && bt.size() < half) {
     Array frame = t->getStackFrame(withSelf, withThis);

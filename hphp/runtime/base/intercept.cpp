@@ -258,7 +258,7 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
     }
 
     if (new_name.data()[0] != ParserBase::CharCreateFunction) {
-      funcs[new_name] = orig_name;
+      funcs[new_name] = std::move(orig_name);
     }
     *s_hasRenamedFunction = true;
   }

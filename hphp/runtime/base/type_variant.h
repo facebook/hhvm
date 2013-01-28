@@ -22,6 +22,8 @@
 #ifndef __HPHP_VARIANT_H__
 #define __HPHP_VARIANT_H__
 
+#include <type_traits>
+
 #include <util/trace.h>
 #include <runtime/base/types.h>
 #include <runtime/base/hphp_value.h>
@@ -139,13 +141,14 @@ class Variant : VariantBase {
    * Variant being able to take many other external types, messing up those
    * operator overloads.
    */
-  Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = (v?1:0);}
+  Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = v;}
   Variant(int     v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   // The following two overloads will accept int64_t whether it's
   // implemented as long or long long.
   Variant(long   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(long long v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
 
   Variant(litstr  v);
@@ -169,17 +172,51 @@ class Variant : VariantBase {
   Variant(ObjectData *v);
   Variant(RefData *r);
 
-  // These are prohibited, but defined just to prevent accidentally
-  // calling the bool constructor just because we had a pointer to
+  // Move ctor for strings
+  Variant(String&& v) : _count(0) {
+    StringData *s = v.get();
+    if (LIKELY(s != nullptr)) {
+      m_data.pstr = s;
+      m_type = s->isStatic()
+        ? KindOfStaticString
+        : KindOfString;
+      v.detach();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+
+  // Move ctor for arrays
+  Variant(Array&& v) : _count(0), m_type(KindOfArray) {
+    ArrayData *a = v.get();
+    if (LIKELY(a != nullptr)) {
+      m_data.parr = a;
+      v.detach();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+
+  // Move ctor for objects
+  Variant(Object&& v) : _count(0), m_type(KindOfObject) {
+    ObjectData *pobj = v.get();
+    if (pobj) {
+      m_data.pobj = pobj;
+      v.detach();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+
+  // These are  prohibited, but declared just  to prevent accidentally
+  // calling the  bool constructor  just because we  had a  pointer to
   // const.
-private:
-  Variant(const StringData *v); // no definition
-  Variant(const ArrayData *v);  // no definition
-  Variant(const ObjectData *v); // no definition
-  Variant(const RefData *v);    // no definition
-  Variant(const Variant *v);    // no definition
-  Variant(Variant *v);          // no definition
-public:
+  Variant(const StringData *v) = delete;
+  Variant(const ArrayData *v) = delete;
+  Variant(const ObjectData *v) = delete;
+  Variant(const RefData *v) = delete;
+  Variant(const Variant *v) = delete;
+  Variant(Variant *v) = delete;
 
 #ifdef INLINE_VARIANT_HELPER
   inline ALWAYS_INLINE Variant(CVarRef v) { constructValHelper(v); }
@@ -194,6 +231,35 @@ public:
   Variant(CVarStrongBind v);
   Variant(CVarWithRefBind v);
 #endif
+
+  // Move ctor
+  Variant(Variant&& v) : _count(0) {
+    const Variant *other =
+      UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
+    assert(this != other);
+    m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
+    m_data = other->m_data;
+    v.reset();
+  }
+
+  // Move assign
+  Variant& operator=(Variant &&rhs) {
+    // a = std::move(a), ILLEGAL per C++11 17.6.4.9
+    assert(this != &rhs);
+    if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
+
+    Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;
+
+    Variant goner(noInit);
+    goner.m_data = lhs.m_data;
+    goner.m_countAndTypeUnion = lhs.m_countAndTypeUnion;
+
+    lhs.m_data = rhs.m_data;
+    lhs.m_type = rhs.m_type == KindOfUninit ? KindOfNull : rhs.m_type;
+
+    rhs.reset();
+    return *this;
+  }
 
  private:
   inline ALWAYS_INLINE void destructImpl();
@@ -493,10 +559,12 @@ public:
    * Can just swap the data between variants sometimes to avoid inc and decref
    */
   void swap(Variant &other) {
-    char tmp[sizeof(Variant)];
-    memcpy(tmp, &other, sizeof(Variant));
-    memcpy((char*)&other, (char*)this, sizeof(Variant));
-    memcpy((char*)this, tmp, sizeof(Variant));
+    static_assert(sizeof(Variant) == sizeof(TypedValue), "Reimplement this");
+    auto& lhs = reinterpret_cast<TypedValue&>(*this);
+    auto& rhs = reinterpret_cast<TypedValue&>(other);
+    auto val = lhs;
+    lhs = rhs;
+    rhs = val;
   }
 
   /**
@@ -524,7 +592,7 @@ public:
 
   Variant  operator +  () const;
   Variant unary_plus() const { return Variant(*this).operator+();}
-  Variant  operator +  (CVarRef v) const;
+  friend Variant  operator +  (const Variant & lhs, const Variant & rhs);
   Variant &operator += (CVarRef v);
   Variant &operator += (int     n) { return operator+=((int64)n);}
   Variant &operator += (int64   n);
@@ -1026,7 +1094,7 @@ public:
   }
 
   /**
-   * More array opeartions.
+   * More array operations.
    */
   Variant pop();
   Variant dequeue();
@@ -1237,9 +1305,9 @@ public:
   CVarRef set(StringData  *v);
   CVarRef set(ArrayData   *v);
   CVarRef set(ObjectData  *v);
-  CVarRef set(const StringData  *v); // no definition
-  CVarRef set(const ArrayData   *v); // no definition
-  CVarRef set(const ObjectData  *v); // no definition
+  CVarRef set(const StringData  *v) = delete;
+  CVarRef set(const ArrayData   *v) = delete;
+  CVarRef set(const ObjectData  *v) = delete;
 
   CVarRef set(CStrRef v) { return set(v.get()); }
   CVarRef set(const StaticString & v);
@@ -1256,20 +1324,25 @@ public:
 
   static inline ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {
-    if (self->m_type == KindOfRef) self = self->m_data.pref->var();
-    if (other->m_type == KindOfRef) other = other->m_data.pref->var();
-    if (self != other) {
-      DataType otype = other->m_type;
-      Data odata = other->m_data;
-      Variant scopy(noInit);
-      scopy.m_data = self->m_data;
-      scopy.m_countAndTypeUnion = self->m_countAndTypeUnion;
+    if (UNLIKELY(self->m_type == KindOfRef)) self = self->m_data.pref->var();
+    if (UNLIKELY(other->m_type == KindOfRef)) other = other->m_data.pref->var();
+    if (UNLIKELY(self == other)) {
+      return;
+    }
+    Variant scopy(noInit);
+    scopy.m_data = self->m_data;
+    scopy.m_countAndTypeUnion = self->m_countAndTypeUnion;
 
+    const DataType otype = other->m_type;
+    if (UNLIKELY(otype == KindOfUninit)) {
+      self->m_type = KindOfNull;
+    } else {
+      const Data odata = other->m_data;
       if (IS_REFCOUNTED_TYPE(otype)) {
         odata.pstr->incRefCount();
       }
       self->m_data = odata;
-      self->m_type = otype == KindOfUninit ? KindOfNull : otype;
+      self->m_type = otype;
     }
   }
 

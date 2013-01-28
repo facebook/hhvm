@@ -135,6 +135,20 @@ public:
     }
   }
   String(CStrRef str) : StringBase(str.m_px) { }
+
+  // Move ctor
+  String(String&& str) : StringBase(std::move(str)) {}
+  String(Variant&& src);
+  // Move assign
+  String& operator=(String&& src) {
+    static_assert(sizeof(String) == sizeof(StringBase),"Fix this.");
+    StringBase::operator=(std::move(src));
+    return *this;
+  }
+
+  // Move assign from Variant
+  String& operator=(Variant&& src);
+
   String(const std::string &s) { // always make a copy
     m_px = NEW(StringData)(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
@@ -329,8 +343,14 @@ public:
   String &operator =  (CStrRef v);
   String &operator =  (CVarRef v);
   String &operator =  (const std::string &s);
-  String  operator +  (litstr  v) const;
-  String  operator +  (CStrRef v) const;
+  // These should be members, but g++ doesn't yet support the rvalue
+  // reference notation on lhs (http://goo.gl/LuCTo).
+  friend String&& operator+(String&& lhs, litstr rhs);
+  friend String&& operator+(String&& lhs, String&& rhs);
+  friend String operator+(String&& lhs, const String & rhs);
+  friend String operator+(const String & lhs, String&& rhs);
+  friend String operator+(const String& lhs, litstr rhs);
+  friend String operator+(const String & lhs, const String & rhs);
   String &operator += (litstr  v);
   String &operator += (CStrRef v);
   String &operator += (const StringSlice& slice);

@@ -56,7 +56,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
   }
 }
 
-RequestURI::RequestURI(const std::string rpcFunc)
+RequestURI::RequestURI(const std::string & rpcFunc)
   :  m_rewritten(false), m_defaultDoc(false), m_done(false) {
   m_originalURL = m_rewrittenURL = m_resolvedURL = String(rpcFunc);
 }
@@ -73,7 +73,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   String relUrl(canon.charAt(0) == '/' ? canon.substr(1) : canon);
   if (virtualFileExists(vhost, sourceRoot, pathTranslation, relUrl)) {
     m_rewrittenURL = relUrl;
-    m_resolvedURL = relUrl;
+    m_resolvedURL =  std::move(relUrl);
     PrependSlash(m_resolvedURL);
     return true;
   }

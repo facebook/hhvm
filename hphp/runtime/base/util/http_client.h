@@ -43,7 +43,7 @@ public:
   /**
    * StreamContext settings for this connection
    */
-  void setStreamContextOptions(Array &opts) {
+  void setStreamContextOptions(const Array &opts) {
     m_stream_context_options = opts;
   }
 

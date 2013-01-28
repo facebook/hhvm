@@ -726,37 +726,41 @@ Variant Variant::operator+() const {
 ///////////////////////////////////////////////////////////////////////////////
 // add or array append
 
-Variant Variant::operator+(CVarRef var) const {
-  if (m_type == KindOfInt64 && var.m_type == KindOfInt64) {
-    return m_data.num + var.m_data.num;
+Variant operator+(const Variant & lhs, const Variant & rhs) {
+  // Frequent case: two straight integers
+  if (lhs.m_type == KindOfInt64 && rhs.m_type == KindOfInt64) {
+    return lhs.m_data.num + rhs.m_data.num;
   }
-  if (isIntVal() && var.isIntVal()) {
-    return toInt64() + var.toInt64();
+  // Frequent case: two straight doubles
+  if (lhs.m_type == KindOfDouble && rhs.m_type == KindOfDouble) {
+    return lhs.m_data.dbl + rhs.m_data.dbl;
   }
-  int na = is(KindOfArray) + var.is(KindOfArray);
+  // Less frequent cases involving references etc.
+  if (lhs.isIntVal() && rhs.isIntVal()) {
+    return lhs.toInt64() + rhs.toInt64();
+  }
+  if (lhs.isDouble() || rhs.isDouble()) {
+    return lhs.toDouble() + rhs.toDouble();
+  }
+  if (lhs.isString()) {
+    int64 lval; double dval;
+    if (lhs.convertToNumeric(&lval, &dval) == KindOfDouble) {
+      return dval + rhs.toDouble();
+    }
+  }
+  if (rhs.isString()) {
+    int64 lval; double dval;
+    if (rhs.convertToNumeric(&lval, &dval) == KindOfDouble) {
+      return lhs.toDouble() + dval;
+    }
+  }
+  int na = lhs.is(KindOfArray) + rhs.is(KindOfArray);
   if (na == 2) {
-    return toCArrRef() + var.toCArrRef();
+    return lhs.toCArrRef() + rhs.toCArrRef();
   } else if (na) {
     throw BadArrayMergeException();
   }
-  if (isDouble() || var.isDouble()) {
-    return toDouble() + var.toDouble();
-  }
-  if (isString()) {
-    int64 lval; double dval;
-    DataType ret = convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      return dval + var.toDouble();
-    }
-  }
-  if (var.isString()) {
-    int64 lval; double dval;
-    DataType ret = var.convertToNumeric(&lval, &dval);
-    if (ret == KindOfDouble) {
-      return toDouble() + dval;
-    }
-  }
-  return toInt64() + var.toInt64();
+  return lhs.toInt64() + rhs.toInt64();
 }
 
 Variant &Variant::operator+=(CVarRef var) {

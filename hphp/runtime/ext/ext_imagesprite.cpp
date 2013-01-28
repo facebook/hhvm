@@ -163,7 +163,7 @@ void Image::reset() {
   m_error_string = null_string;
 }
 
-void Image::setError(String err) {
+void Image::setError(const String& err) {
   m_error = true;
   m_error_string = err;
   String sprite_err = String("Error in image '") + m_path + "': " + err;

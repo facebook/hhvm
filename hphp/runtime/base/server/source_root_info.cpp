@@ -135,7 +135,7 @@ void SourceRootInfo::createFromUserConfig() {
     }
   }
   if (!userOverride.empty()) {
-    m_user = userOverride;
+    m_user = std::move(userOverride);
   }
   if (m_sandbox == "default") {
     if (sp.isNull()) {
@@ -147,7 +147,7 @@ void SourceRootInfo::createFromUserConfig() {
     return;
   }
   if (sp.charAt(0) == '/') {
-    m_path = sp;
+    m_path = std::move(sp);
   } else {
     m_path = homePath + sp;
   }

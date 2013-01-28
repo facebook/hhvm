@@ -103,7 +103,7 @@ class Image {
 
     virtual void reset();
 
-    void setError(String err);
+    void setError(const String& err);
 
     void setOptions(Array options);
 

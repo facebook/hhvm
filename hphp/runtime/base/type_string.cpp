@@ -401,17 +401,37 @@ String& String::operator+=(const MutableSlice& slice) {
   return (*this += StringSlice(slice.begin(), slice.size()));
 }
 
-String String::operator+(litstr str) const {
-  if (empty()) return str;
-  if (!str || !*str) return *this;
-  return NEW(StringData)(slice(), str);
+String&& operator+(String&& lhs, litstr rhs) {
+  lhs += rhs;
+  return std::move(lhs);
+}
+
+String operator+(const String & lhs, litstr rhs) {
+  if (lhs.empty()) return rhs;
+  if (!rhs || !*rhs) return lhs;
+  return NEW(StringData)(lhs.slice(), rhs);
 }
 
 HOT_FUNC
-String String::operator+(CStrRef str) const {
-  if (empty()) return str;
-  if (str.empty()) return *this;
-  return NEW(StringData)(slice(), str.slice());
+String&& operator+(String&& lhs, String&& rhs) {
+  return std::move(lhs += rhs);
+}
+
+HOT_FUNC
+String operator+(String&& lhs, const String & rhs) {
+  return std::move(lhs += rhs);
+}
+
+HOT_FUNC
+String operator+(const String & lhs, String&& rhs) {
+  return NEW(StringData)(lhs.slice(), rhs.slice());
+}
+
+HOT_FUNC
+String operator+(const String & lhs, const String & rhs) {
+  if (lhs.empty()) return rhs;
+  if (rhs.empty()) return lhs;
+  return NEW(StringData)(lhs.slice(), rhs.slice());
 }
 
 String String::operator~() const {
@@ -846,6 +866,13 @@ public:
   }
 };
 static StaticStringUninitializer s_static_string_uninitializer;
+
+String::String(Variant&& src) : StringBase(src.toString()) {
+}
+
+String& String::operator=(Variant&& src) {
+  return *this = src.toString();
+}
 
 //////////////////////////////////////////////////////////////////////////////
 }

@@ -73,6 +73,17 @@ Array &Array::operator=(CVarRef var) {
   return operator=(var.toArray());
 }
 
+// Move assign
+Array &Array::operator =  (Variant&& v) {
+  if (v.m_type == KindOfArray) {
+    m_px = v.m_data.parr;
+    v.reset();
+  } else {
+    *this = const_cast<CVarRef>(v);
+  }
+  return *this;
+}
+
 HOT_FUNC
 Array &Array::operator=(const StaticArray &arr) {
   if (m_px != arr.m_px) {

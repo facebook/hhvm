@@ -21,6 +21,7 @@
 #include <util/base.h>
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/util/countable.h>
+#include <utility>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,10 +52,22 @@ public:
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
   }
+
+  // Move ctor
+  SmartPtr(SmartPtr&& src) : m_px(src.get()) {
+    src.m_px = nullptr;
+  }
+
   template<class Y>
   SmartPtr(const SmartPtr<Y>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
   }
+  // Move ctor for derived types
+  template<class Y>
+  SmartPtr(SmartPtr<Y>&& src) : m_px(src.get()) {
+    src.m_px = nullptr;
+  }
+
   ~SmartPtr() {
     if (m_px && m_px->decRefCount() == 0) {
       m_px->release();
@@ -67,23 +80,50 @@ public:
   SmartPtr& operator=(const SmartPtr<T>& src) {
     return operator=(src.m_px);
   }
+  // Move assignment
+  SmartPtr& operator=(SmartPtr&& src) {
+    // a = std::move(a), ILLEGAL per C++11 17.6.4.9
+    assert(this != &src);
+    std::swap(m_px, src.m_px);
+    return *this;
+  }
   template<class Y>
   SmartPtr& operator=(const SmartPtr<Y>& src) {
     return operator=(src.get());
   }
-  SmartPtr& operator=(T* px) {
-    T* old = m_px;
-    if (px) px->incRefCount();
-    m_px = px;
-    if (old && old->decRefCount() == 0) old->release();
+  // Move assignment for derived types
+  template<class Y>
+  SmartPtr& operator=(SmartPtr<Y>&& src) {
+    assert(this != &src);
+    // Update m_px before releasing the goner
+    auto goner = m_px;
+    m_px = src.m_px;
+    src.m_px = nullptr;
+    if (goner && !goner->decRefCount()) goner->release();
     return *this;
+  }
+  SmartPtr& operator=(T* px) {
+    // Incidentally works with self-assignment because incRefCount is
+    // called before decRefCount.
+    if (px) px->incRefCount();
+    auto goner = m_px;
+    m_px = px;
+    if (goner && !goner->decRefCount()) goner->release();
+    return *this;
+  }
+
+  /**
+   * Swap two smart pointers
+   */
+  void swap(SmartPtr & rhs) {
+    std::swap(m_px, rhs.m_px);
   }
 
   /**
    * Magic delegation.
    */
   T* operator->() const {
-    if (!m_px) throw_null_pointer_exception();
+    if (UNLIKELY(!m_px)) throw_null_pointer_exception();
     return m_px;
   }
 

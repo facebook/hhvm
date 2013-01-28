@@ -88,6 +88,16 @@ class Array : protected ArrayBase {
   Array(ArrayData *data) : ArrayBase(data) { }
   Array(CArrRef arr) : ArrayBase(arr.m_px) { }
 
+  // Move ctor
+  Array(Array&& src) : ArrayBase(std::move(src)) {
+    static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
+  }
+  // Move assign
+  Array& operator=(Array&& src) {
+    static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
+    ArrayBase::operator=(std::move(src));
+    return *this;
+  }
   /**
    * Informational
    */
@@ -137,6 +147,9 @@ class Array : protected ArrayBase {
   Array &operator += (ArrayData *data);
   Array &operator += (CArrRef v);
   Array &operator += (CVarRef v);
+
+  // Move assignment
+  Array &operator =  (Variant&& v);
 
   /**
    * Returns the entries that have keys and/or values that are not present in

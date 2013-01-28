@@ -31,7 +31,7 @@ public:
   RequestURI(const VirtualHost *vhost, Transport *transport,
              const std::string &pathTranslation,
              const std::string &sourceRoot);
-  RequestURI(const std::string rpcFunc);
+  RequestURI(const std::string & rpcFunc);
 
   CStrRef originalURL() const { return m_originalURL; }
   CStrRef resolvedURL() const { return m_resolvedURL; }

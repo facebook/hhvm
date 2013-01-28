@@ -414,7 +414,7 @@ Array BaseExecutionContext::obGetStatus(bool full) {
     if (full) {
       ret.append(status);
     } else {
-      ret = status;
+      ret = std::move(status);
     }
   }
   return ret;

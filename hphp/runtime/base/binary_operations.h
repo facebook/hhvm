@@ -36,22 +36,32 @@ inline Variant operator+(int64   n, CVarRef v) { return Variant(v) += n;}
 inline Variant operator+(double  n, CVarRef v) { return Variant(v) += n;}
 
 // String + Variant means string concatenation
-inline Variant operator+(CStrRef n, CVarRef v) { return String(n) += v;}
-inline Variant operator+(litstr  n, CVarRef v) { return Variant(v) += n;}
+inline Variant operator+(String&& n, CVarRef v) {
+  return Variant(std::move(n += v));
+}
 
+inline Variant operator+(CStrRef n, CVarRef v) { return String(n) += v;}
 // Array + Variant is already defined in type_array.h
 inline Variant operator+(CObjRef n, CVarRef v) { return Variant(v) += n;}
 
-inline Variant operator+(CVarRef v, bool    n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, char    n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, short   n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, int     n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, int64   n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, double  n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, CStrRef n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, litstr  n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, CArrRef n) { return Variant(v) += n;}
-inline Variant operator+(CVarRef v, CObjRef n) { return Variant(v) += n;}
+#define HPHP_DEFINE_ADDITION(T)                                         \
+  inline Variant&& operator+(Variant&& lhs, T rhs) {                  \
+    return std::move(lhs += rhs);                                       \
+  }                                                                     \
+  inline Variant operator+(CVarRef lhs, T rhs) {                        \
+    return Variant(lhs) += rhs;                                         \
+  }
+
+HPHP_DEFINE_ADDITION(bool);
+HPHP_DEFINE_ADDITION(int);
+HPHP_DEFINE_ADDITION(int64_t);
+HPHP_DEFINE_ADDITION(double);
+HPHP_DEFINE_ADDITION(CStrRef);
+HPHP_DEFINE_ADDITION(litstr);
+HPHP_DEFINE_ADDITION(CArrRef);
+HPHP_DEFINE_ADDITION(CObjRef);
+
+#undef HPHP_DEFINE_ADDITION
 
 // String + String is already defined in type_string.h
 // Array + Array is already defined in type_array.h

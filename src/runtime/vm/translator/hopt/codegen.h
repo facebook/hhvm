@@ -119,10 +119,18 @@ private:
   void cgUnaryIntOp(SSATmp* dst, SSATmp* src, OpInstr, Oper);
 
   enum Commutativity { Commutative, NonCommutative };
+
+  template<class Oper>
+  void cgBinaryOp(IRInstruction*,
+                  void (Asm::*intImm)(Immed, Reg64),
+                  void (Asm::*intRR)(Reg64, Reg64),
+                  void (Asm::*fpRR)(RegXMM, RegXMM),
+                  Oper,
+                  Commutativity);
   template<class Oper>
   void cgBinaryIntOp(IRInstruction*,
-                     void (Asm::*)(Immed, Reg64),
-                     void (Asm::*)(Reg64, Reg64),
+                     void (Asm::*intImm)(Immed, Reg64),
+                     void (Asm::*intRR)(Reg64, Reg64),
                      Oper,
                      Commutativity);
 

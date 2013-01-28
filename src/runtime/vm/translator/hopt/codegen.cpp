@@ -439,8 +439,8 @@ Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc,
   return start;
 }
 
-static void prepBinaryXmmOp(X64Assembler& a, SSATmp* l, SSATmp* r) {
-  auto intoXmm = [&](SSATmp* ssa, RegXMM xmm) {
+static void prepBinaryXmmOp(X64Assembler& a, const SSATmp* l, const SSATmp* r) {
+  auto intoXmm = [&](const SSATmp* ssa, RegXMM xmm) {
     RegNumber src(ssa->getReg());
     if (ssa->getReg() == InvalidReg) {
       src = rScratch;
@@ -754,14 +754,17 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
                                   void (Asm::*instrRR)(Reg64, Reg64),
                                   Oper oper,
                                   Commutativity commuteFlag) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
-
-  if (!(src1->getType() == Type::Int || src1->getType() == Type::Bool) ||
-      !(src2->getType() == Type::Int || src2->getType() == Type::Bool)) {
+  const SSATmp* dst   = inst->getDst();
+  const SSATmp* src1  = inst->getSrc(0);
+  const SSATmp* src2  = inst->getSrc(1);
+  auto isBoolOrInt = [](const SSATmp* ssa) {
+    auto t = ssa->getType();
+    return t == Type::Bool || t == Type::Int;
+  };
+  if (!isBoolOrInt(src1) || !isBoolOrInt(src2)) {
     CG_PUNT(BinaryIntOp);
   }
+
   bool const commutative = commuteFlag == Commutative;
   auto const dstReg      = dst->getReg();
   auto const src1Reg     = src1->getReg();
@@ -839,10 +842,38 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   (a.*instrIR) (src2->getConstValAsRawInt(), dstReg);
 }
 
+template<class Oper>
+void CodeGenerator::cgBinaryOp(IRInstruction* inst,
+                               void (Asm::*instrIR)(Immed, Reg64),
+                               void (Asm::*instrRR)(Reg64, Reg64),
+                               void (Asm::*fpInstr)(RegXMM, RegXMM),
+                               Oper oper,
+                               Commutativity commuteFlag) {
+  const SSATmp* dst   = inst->getDst();
+  const SSATmp* src1  = inst->getSrc(0);
+  const SSATmp* src2  = inst->getSrc(1);
+  auto isBoolOrNumeric = [](const SSATmp* ssa) {
+    auto t = ssa->getType();
+    return t == Type::Dbl || t == Type::Int || t == Type::Bool;
+  };
+
+  if (!isBoolOrNumeric(src1) || !isBoolOrNumeric(src2)) {
+    CG_PUNT(BinaryOp);
+  }
+  if (src1->getType() == Type::Dbl || src2->getType() == Type::Dbl) {
+    prepBinaryXmmOp(m_as, src1, src2);
+    (m_as.*fpInstr)(xmm1, xmm0);
+    m_as.    mov_xmm_reg64(xmm0, dst->getReg());
+    return;
+  }
+  cgBinaryIntOp(inst, instrIR, instrRR, oper, commuteFlag);
+}
+
 void CodeGenerator::cgOpAdd(IRInstruction* inst) {
-  cgBinaryIntOp(inst,
+  cgBinaryOp(inst,
                 &Asm::addq,
                 &Asm::addq,
+                &Asm::addsd_xmm_xmm,
                 std::plus<int64>(),
                 Commutative);
 }
@@ -856,11 +887,12 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
     return cgNegateWork(dst, src2);
   }
 
-  cgBinaryIntOp(inst,
-                &Asm::subq,
-                &Asm::subq,
-                std::minus<int64>(),
-                NonCommutative);
+  cgBinaryOp(inst,
+             &Asm::subq,
+             &Asm::subq,
+             &Asm::subsd_xmm_xmm,
+             std::minus<int64>(),
+             NonCommutative);
 }
 
 void CodeGenerator::cgOpAnd(IRInstruction* inst) {
@@ -896,11 +928,12 @@ void CodeGenerator::cgOpXor(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgOpMul(IRInstruction* inst) {
-  cgBinaryIntOp(inst,
-                &Asm::imul,
-                &Asm::imul,
-                std::multiplies<int64>(),
-                Commutative);
+  cgBinaryOp(inst,
+             &Asm::imul,
+             &Asm::imul,
+             &Asm::mulsd_xmm_xmm,
+             std::multiplies<int64>(),
+             Commutative);
 }
 
 // Runtime helpers

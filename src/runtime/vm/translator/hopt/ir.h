@@ -1166,8 +1166,8 @@ public:
    *
    * Returns InvalidReg for slots that aren't allocated.
    */
-  PhysReg     getReg() { assert(!m_isSpilled); return m_regs[0]; }
-  PhysReg     getReg(uint32 i) { assert(!m_isSpilled); return m_regs[i]; }
+  PhysReg     getReg() const { assert(!m_isSpilled); return m_regs[0]; }
+  PhysReg     getReg(uint32 i) const { assert(!m_isSpilled); return m_regs[i]; }
   void        setReg(PhysReg reg, uint32 i) { m_regs[i] = reg; }
 
   /*

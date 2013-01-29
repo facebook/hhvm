@@ -319,6 +319,9 @@ void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
   if (info->getAttribute() & ClassInfo::IsAbstract) {
     m_attrs = m_attrs | AttrAbstract;
   }
+  if (info->getAttribute() & ClassInfo::IsTrait) {
+    m_attrs = m_attrs | AttrTrait;
+  }
   m_attrs = m_attrs | AttrUnique;
   m_InstanceCtor = ctorFunc;
   m_builtinPropSize = sz - sizeof(ObjectData);

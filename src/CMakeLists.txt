@@ -22,7 +22,6 @@ if ("$ENV{USE_HHVM}" STREQUAL "1")
 	SET(USE_HHVM TRUE)
 	SET(ENV{HHVM} 1)
 	ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/src/hhvm/hhvm\\\"")
-	set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/ext_hhvm runtime/vm system/gen system/lib util)
 
 	if ("$ENV{USE_HPHPC}" STREQUAL "1")
 		message(FATAL_ERROR "Both USE_HHVM and USE_HPHPC are set, you may only select one")
@@ -31,14 +30,13 @@ else()
 	# HPHPc Build
 	SET(USE_HHVM FALSE)
 	ADD_DEFINITIONS("-DHHVM_PATH=\"\"")
-	set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/vm system/gen system/lib util)
 
 	if (NOT "$ENV{USE_HPHPC}" STREQUAL "1")
 		message(FATAL_ERROR "You must select which version of HipHop to build by setting either USE_HHVM=1 or USE_HPHPC=1 in your environment")
 	endif()
 endif()
 
-
+set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/vm system/gen system/lib util)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
@@ -183,12 +181,12 @@ SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 hphp_link(hphp_runtime_static)
 
 add_subdirectory(compiler)
-add_subdirectory(hphp)
 
 if (USE_HHVM)
 	add_subdirectory(runtime/ext_hhvm)
-	add_subdirectory(hhvm)
 endif()
+
+add_subdirectory(hhvm)
 
 if (NOT "$ENV{HPHP_NOTEST}" STREQUAL "1")
 	add_subdirectory(test)

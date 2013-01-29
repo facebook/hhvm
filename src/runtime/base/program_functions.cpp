@@ -1178,12 +1178,9 @@ void hphp_process_init() {
   // thread safe due to bugs
   onig_init();
 
+  init_literal_varstrings();
   if (hhvm) {
-    extern void sys_init_literal_varstrings();
-    sys_init_literal_varstrings();
     g_vmProcessInit();
-  } else {
-    init_literal_varstrings();
   }
 
   PageletServer::Restart();

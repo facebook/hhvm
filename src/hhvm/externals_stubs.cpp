@@ -117,6 +117,26 @@ Variant get_class_constant(CStrRef s,
   return null;
 }
 
+void init_literal_varstrings() {
+  extern void sys_init_literal_varstrings();
+  sys_init_literal_varstrings();
+}
+
+#ifndef HHVM
+const char *g_class_map[] = { NULL};
+Variant get_static_property(CStrRef s, const char *prop) {
+  return null;
+}
+Variant *get_static_property_lv(CStrRef s, const char *prop) {
+  return NULL;
+}
+Variant get_class_var_init(CStrRef s, const char *var) {
+  return null;
+}
+bool hphp_could_invoke_file(CStrRef s, void*) { return false; }
+Array get_global_state() { return Array(); }
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 const char *g_source_cls2file[] = {};

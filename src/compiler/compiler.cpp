@@ -47,14 +47,15 @@
 #include <sys/wait.h>
 #include <dlfcn.h>
 #include <system/lib/systemlib.h>
+#include <compiler/compiler.h>
 
-using namespace HPHP;
 using namespace boost::program_options;
 using std::cout;
 
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ProgramOptions {
+struct CompilerOptions {
   string target;
   string format;
   string outputDir;
@@ -134,33 +135,33 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // forward declarations
 
-int prepareOptions(ProgramOptions &po, int argc, char **argv);
-void createOutputDirectory(ProgramOptions &po);
-int process(const ProgramOptions &po);
-int lintTarget(const ProgramOptions &po);
-int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar);
-int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar);
-void hhbcTargetInit(const ProgramOptions &po, AnalysisResultPtr ar);
-int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
+int prepareOptions(CompilerOptions &po, int argc, char **argv);
+void createOutputDirectory(CompilerOptions &po);
+int process(const CompilerOptions &po);
+int lintTarget(const CompilerOptions &po);
+int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar);
+int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
+void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
+int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
                AsyncFileCacheSaver &fcThread);
-int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
+int cppTarget(const CompilerOptions &po, AnalysisResultPtr ar,
               AsyncFileCacheSaver &fcThread, bool allowSys = true);
-int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
+int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread);
-int buildTarget(const ProgramOptions &po);
-int runTarget(const ProgramOptions &po);
-int generateSepExtCpp(const ProgramOptions &po, AnalysisResultPtr ar);
+int buildTarget(const CompilerOptions &po);
+int runTarget(const CompilerOptions &po);
+int generateSepExtCpp(const CompilerOptions &po, AnalysisResultPtr ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 extern "C" void compiler_hook_initialize();
 
-int main(int argc, char **argv) {
+int compiler_main(int argc, char **argv) {
   try {
     Hdf empty;
     RuntimeOption::Load(empty);
 
-    ProgramOptions po;
+    CompilerOptions po;
 #ifdef FACEBOOK
     compiler_hook_initialize();
 #endif
@@ -211,7 +212,7 @@ int main(int argc, char **argv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int prepareOptions(ProgramOptions &po, int argc, char **argv) {
+int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   options_description desc("HipHop Compiler for PHP Usage:\n\n"
                            "\thphp <options> <inputs>\n\n"
                            "Options");
@@ -570,7 +571,7 @@ cout << "Compiler: " << COMPILER_ID << "\n";
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int process(const ProgramOptions &po) {
+int process(const CompilerOptions &po) {
   if (po.coredump) {
 #if defined(__APPLE__) || defined(__FreeBSD__)
     struct rlimit rl;
@@ -756,7 +757,7 @@ int process(const ProgramOptions &po) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int lintTarget(const ProgramOptions &po) {
+int lintTarget(const CompilerOptions &po) {
   int ret = 0;
   for (unsigned int i = 0; i < po.inputs.size(); i++) {
     string filename = po.inputDir + "/" + po.inputs[i];
@@ -781,7 +782,7 @@ int lintTarget(const ProgramOptions &po) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
+int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
   int ret = 0;
 
   if (!po.noTypeInference) {
@@ -812,7 +813,7 @@ int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
+int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
   int ret = 0;
 
   // format
@@ -876,7 +877,7 @@ int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void hhbcTargetInit(const ProgramOptions &po, AnalysisResultPtr ar) {
+void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   if (po.syncDir.empty()) {
     ar->setOutputPath(po.outputDir);
   } else {
@@ -894,7 +895,7 @@ void hhbcTargetInit(const ProgramOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
 }
 
-int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
+int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
                AsyncFileCacheSaver &fcThread) {
   int ret = 0;
   int formatCount = 0;
@@ -942,11 +943,19 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
   }
 
   if (!ret && po.format.find("exe") != string::npos) {
+    /*
+     * We need to create an executable with the repo
+     * embedded in it.
+     * Copy ourself, and embed the repo as a section
+     * named "repo".
+     */
     string exe = po.outputDir + '/' + po.program;
     string repo = "repo=" + exe + ".hhbc";
+    char buf[PATH_MAX];
+    if (!realpath("/proc/self/exe", buf)) return -1;
 
     const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
-                           HHVM_PATH, exe.c_str(), 0 };
+                           buf, exe.c_str(), 0 };
     string out;
     ret = Process::Exec(argv[0], argv, NULL, out, NULL) ? 0 : 1;
   }
@@ -956,7 +965,7 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
+int cppTarget(const CompilerOptions &po, AnalysisResultPtr ar,
               AsyncFileCacheSaver &fcThread, bool allowSys /* = true */) {
   int ret = 0;
   int clusterCount = po.clusterCount;
@@ -1012,14 +1021,14 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int generateSepExtCpp(const ProgramOptions &po, AnalysisResultPtr ar) {
+int generateSepExtCpp(const CompilerOptions &po, AnalysisResultPtr ar) {
   ar->outputCPPSepExtensionImpl(po.outputFile);
   return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int buildTarget(const ProgramOptions &po) {
+int buildTarget(const CompilerOptions &po) {
   const char *HPHP_HOME = getenv("HPHP_HOME");
   if (!HPHP_HOME || !*HPHP_HOME) {
     throw Exception("Environment variable HPHP_HOME is not set.");
@@ -1056,7 +1065,7 @@ int buildTarget(const ProgramOptions &po) {
   return 0;
 }
 
-int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
+int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread) {
   // generate code
   if (po.format == "sep") return 1;
@@ -1076,7 +1085,7 @@ int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
   return 0;
 }
 
-int runTarget(const ProgramOptions &po) {
+int runTarget(const CompilerOptions &po) {
   int ret = hhvm ? 0 : buildTarget(po);
   if (ret) {
     return ret;
@@ -1092,7 +1101,10 @@ int runTarget(const ProgramOptions &po) {
   // run the executable
   string cmd;
   if (hhvm && po.format.find("exe") == string::npos) {
-    cmd += HHVM_PATH;
+    char buf[PATH_MAX];
+    if (!realpath("/proc/self/exe", buf)) return -1;
+
+    cmd += buf;
     cmd += " -vRepo.Authoritative=true";
     cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
   }
@@ -1111,9 +1123,7 @@ int runTarget(const ProgramOptions &po) {
   return ret;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-void createOutputDirectory(ProgramOptions &po) {
+void createOutputDirectory(CompilerOptions &po) {
   if (po.outputDir.empty()) {
     const char *t = getenv("TEMP");
     if (!t) {
@@ -1134,4 +1144,7 @@ void createOutputDirectory(ProgramOptions &po) {
     boost::filesystem::remove_all(po.syncDir);
     mkdir(po.syncDir.c_str(), 0777);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

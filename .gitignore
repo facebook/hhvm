@@ -29,8 +29,6 @@ hphp.log
 /src/runtime/ext_hhvm/ext_noinline.cpp
 /src/compiler/analysis/code_error.inc
 
-/src/hphp/hphp
-
 /src/runtime/tmp/Test*
 /src/runtime/tmp/run
 /src/runtime/tmp/run.sh
@@ -43,10 +41,9 @@ hphp.log
 
 /src/hhvm/gen
 /src/hhvm/hhvm
+/src/hhvm/hphp
 
 /src/tools/shmw/shmw
-
-/tools/tc-print/tc-print
 
 /src/ffi/java/classes
 /src/ffi/java/hphp_ffi_java.h

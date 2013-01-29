@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   // dirs.mk will think we're using.  (This is used in test.mk when
   // building/running tests.)
   setenv("TEST_OVERRIDE_HHVM", "_bin/src/hhvm/hhvm", true);
-  setenv("TEST_OVERRIDE_HPHP", "_bin/src/hphp/hphp", true);
+  setenv("TEST_OVERRIDE_HPHP", "_bin/src/hhvm/hphp", true);
 #endif
 
 #ifdef FACEBOOK

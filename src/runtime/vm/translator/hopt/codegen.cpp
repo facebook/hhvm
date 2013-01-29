@@ -439,11 +439,12 @@ Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc,
   return start;
 }
 
-void prepBinaryXmmOp(X64Assembler& a, SSATmp* l, SSATmp* r) {
+static void prepBinaryXmmOp(X64Assembler& a, SSATmp* l, SSATmp* r) {
   auto intoXmm = [&](SSATmp* ssa, RegXMM xmm) {
     RegNumber src(ssa->getReg());
-    if (ssa->isConst()) {
+    if (ssa->getReg() == InvalidReg) {
       src = rScratch;
+      assert(ssa->isConst());
       a.mov_imm64_reg(ssa->getConstValAsBits(), rScratch);
     }
     if (ssa->getType() == Type::Int) {
@@ -460,14 +461,14 @@ void prepBinaryXmmOp(X64Assembler& a, SSATmp* l, SSATmp* r) {
   intoXmm(r, xmm1);
 }
 
-void doubleCmp(X64Assembler& a, RegXMM xmm0, RegXMM xmm1) {
+static void doubleCmp(X64Assembler& a, RegXMM xmm0, RegXMM xmm1) {
   a.    ucomisd_xmm_xmm(xmm0, xmm1);
   Label notPF;
   a.    jnp8(notPF);
   // PF means the doubles were unordered. We treat this as !equal, so
   // clear ZF.
   a.    or_imm32_reg64(1, rScratch);
-  asm_label(a, notPF);
+asm_label(a, notPF);
 }
 
 void CodeGenerator::cgJcc(IRInstruction* inst) {

@@ -115,12 +115,12 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return ti_slice("vector", vec, offset, len);
   }
   DECLARE_METHOD_INVOKE_HELPERS(slice);
+  
+  public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
 
   public: TypedValue* at(int64 key) {
     if (UNLIKELY((unsigned long long)key >= (unsigned long long)m_size)) {
-      Object e(SystemLib::AllocOutOfBoundsExceptionObject(
-        "Key is out of bounds"));
-      throw e;
+      throwOOB(key);
       return NULL;
     }
     return &m_data[key];
@@ -134,9 +134,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: void put(int64 key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     if (UNLIKELY((unsigned long long)key >= (unsigned long long)m_size)) {
-      Object e(SystemLib::AllocOutOfBoundsExceptionObject(
-        "Key is out of bounds"));
-      throw e;
+      throwOOB(key);
       return;
     }
     tvRefcountedIncRef(val);
@@ -317,12 +315,13 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   }
   DECLARE_METHOD_INVOKE_HELPERS(fromiterable);
 
-  public: static void throwOOB() ATTRIBUTE_COLD;
+  public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
+  public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
 
   public: TypedValue* at(int64 key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
-    throwOOB();
+    throwOOB(key);
     return NULL;
   }
   public: TypedValue* get(int64 key) {
@@ -333,7 +332,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: TypedValue* at(StringData* key) {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (LIKELY(p != NULL)) return &p->data;
-    throwOOB();
+    throwOOB(key);
     return NULL;
   }
   public: TypedValue* get(StringData* key) {
@@ -635,21 +634,20 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     return ti_fromiterable("map", vec);
   }
   DECLARE_METHOD_INVOKE_HELPERS(fromiterable);
+  
+  public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
+  public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
 
   public: TypedValue* at(int64 key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
-    Object e(SystemLib::AllocOutOfBoundsExceptionObject(
-      "Attempted to subscript a non-key"));
-    throw e;
+    throwOOB(key);
     return NULL;
   }
   public: TypedValue* at(StringData* key) {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (LIKELY(p != NULL)) return &p->data;
-    Object e(SystemLib::AllocOutOfBoundsExceptionObject(
-      "Attempted to subscript a non-key"));
-    throw e;
+    throwOOB(key);
     return NULL;
   }
   public: TypedValue* get(int64 key) {

@@ -25,6 +25,55 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static void throwIntOOB(int64 key, bool isVector = false) {
+  static const size_t reserveSize = 50;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.mutableSlice().ptr;
+  int sz = sprintf(buf, "Integer key %"PRId64" is %s", key,
+                   isVector ? "out of bounds" : "not defined");
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
+  throw e;
+}
+
+static void throwStrOOB(StringData* key) {
+  const size_t maxDisplaySize = 20;
+  const char dots[] = "...";
+  size_t dotsSize = sizeof(dots)-1;
+  int kSize = key->size();
+  bool keyIsLarge = (kSize > maxDisplaySize);
+  size_t kDisplaySize = keyIsLarge ? (maxDisplaySize - dotsSize) : kSize;
+  const char part1[] = "String key \"";
+  const char part3[] = "\" is not defined";
+  // Do some math ahead of time so we know exactly how large
+  // the String needs to be
+  size_t part1Size = sizeof(part1)-1;
+  size_t part2Size = keyIsLarge ? maxDisplaySize : kSize;
+  size_t part3Size = sizeof(part3)-1;
+  size_t totalSize = part1Size + part2Size + part3Size;
+  String msg(totalSize, ReserveString);
+  char* ptr = msg.mutableSlice().ptr;
+#define WRITE_STR(str, sz) do { \
+  memcpy(ptr, (str), (sz)); \
+  ptr += (sz); \
+} while (0)
+  // Avoid using sprintf because the PHP strings are allowed to
+  // contain NUL characters (ASCII 0)
+  WRITE_STR(part1, part1Size);
+  WRITE_STR(key->data(), kDisplaySize);
+  if (keyIsLarge) {
+    WRITE_STR(dots, dotsSize);
+  }
+  WRITE_STR(part3, part3Size);
+#undef WRITE_STR
+  msg.setSize(totalSize);
+  Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
+  throw e;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 c_Vector::c_Vector(const ObjectStaticCallbacks *cb) :
     ExtObjectDataFlags<ObjectData::VectorAttrInit|
                        ObjectData::UseGet|
@@ -489,6 +538,10 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
     tvDup(&v->m_data[startPos], &data[i]);
   }
   return ret;
+}
+
+void c_Vector::throwOOB(int64 key) {
+  throwIntOOB(key, true);
 }
 
 struct VectorValAccessor {
@@ -1094,10 +1147,12 @@ Variant c_Map::ti_fromiterable(const char* cls, CVarRef it) {
   return ret;
 }
 
-void c_Map::throwOOB() {
-  Object e(SystemLib::AllocOutOfBoundsExceptionObject(
-    "Attempted to subscript a non-key"));
-  throw e;
+void c_Map::throwOOB(int64 key) {
+  throwIntOOB(key);
+}
+
+void c_Map::throwOOB(StringData* key) {
+  throwStrOOB(key);
 }
 
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
@@ -1955,6 +2010,14 @@ Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
     }
   }
   return ret;
+}
+
+void c_StableMap::throwOOB(int64 key) {
+  throwIntOOB(key);
+}
+
+void c_StableMap::throwOOB(StringData* key) {
+  throwStrOOB(key);
 }
 
 bool inline sm_hit_string_key(const c_StableMap::Bucket* p,

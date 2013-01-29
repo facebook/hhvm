@@ -90,7 +90,7 @@
 #include <runtime/eval/runtime/file_repository.h>
 
 #ifdef FACEBOOK
-#include <../facebook/src/compiler/fb_compiler_hooks.h>
+#include <facebook/src/compiler/fb_compiler_hooks.h>
 #define RealSimpleFunctionCall FBSimpleFunctionCall
 #else
 #define RealSimpleFunctionCall SimpleFunctionCall

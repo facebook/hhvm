@@ -1033,7 +1033,7 @@ int buildTarget(const CompilerOptions &po) {
   if (!HPHP_HOME || !*HPHP_HOME) {
     throw Exception("Environment variable HPHP_HOME is not set.");
   }
-  string cmd = string(HPHP_HOME) + "/bin/run.sh";
+  string cmd = string(HPHP_HOME) + "/src/legacy/run.sh";
   string flags;
   if (getenv("RELEASE"))      flags += "RELEASE=1 ";
   if (getenv("SHOW_LINK"))    flags += "SHOW_LINK=1 ";

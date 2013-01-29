@@ -13,6 +13,7 @@ $excluded = array(
   'util/cronoutils.cpp',
   'runtime/ext/quicklz.h',
   'runtime/ext/quicklz.inc',
+  'facebook',
 
   // non-PHP licenses
   'runtime/base/zend/utf8_decode.c',

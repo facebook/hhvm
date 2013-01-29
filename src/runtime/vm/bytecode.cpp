@@ -2169,6 +2169,35 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
 }
 
+void VMExecutionContext::invokeContFunc(const Func* f,
+                                        ObjectData* this_,
+                                        TypedValue* param /* = NULL */) {
+  assert(f);
+  assert(this_);
+
+  VMRegAnchor _;
+
+  this_->incRefCount();
+
+  Cell* savedSP = m_stack.top();
+  checkStack(m_stack, f);
+
+  ActRec* ar = m_stack.allocA();
+  ar->m_savedRbp = 0;
+  ar->m_func = f;
+  ar->m_soff = 0;
+  ar->initNumArgs(param != NULL ? 1 : 0);
+  ar->setThis(this_);
+  ar->setVarEnv(NULL);
+
+  if (param != NULL) {
+    tvDup(param, m_stack.allocTV());
+  }
+
+  TypedValue retval;
+  reenterVM(&retval, ar, nullptr, savedSP);
+}
+
 void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   Func* func = unit->getMain();
   if (!m_globalVarEnv) {

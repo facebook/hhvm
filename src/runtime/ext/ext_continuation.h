@@ -119,6 +119,16 @@ private:
   template<typename FI> void nextImpl(FI& fi);
 
 public:
+#ifdef HHVM
+  void call_next();
+  void call_send(TypedValue* v);
+  void call_raise(ObjectData* e);
+#else
+  inline void call_next() { t_next(); }
+  inline void call_send(TypedValue* v) { t_send(tvAsCVarRef(v)); }
+  inline void call_raise(ObjectData* e) { t_raise(Variant(e)); }
+#endif
+
   inline void preNext() {
     if (m_done) {
       throw_exception(Object(SystemLib::AllocExceptionObject(

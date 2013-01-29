@@ -297,6 +297,36 @@ HphpArray* c_Continuation::getStaticLocals() {
 #endif
 }
 
+#ifdef HHVM
+namespace {
+  StaticString s_send("send");
+  StaticString s_raise("raise");
+}
+
+void c_Continuation::call_next() {
+  const HPHP::VM::Func* func = m_cls->lookupMethod(s_next.get());
+  g_vmContext->invokeContFunc(func, this);
+}
+
+void c_Continuation::call_send(TypedValue* v) {
+  const HPHP::VM::Func* func = m_cls->lookupMethod(s_send.get());
+  g_vmContext->invokeContFunc(func, this, v);
+}
+
+void c_Continuation::call_raise(ObjectData* e) {
+  assert(e);
+  assert(e->o_instanceof("Exception"));
+
+  const HPHP::VM::Func* func = m_cls->lookupMethod(s_raise.get());
+
+  TypedValue arg;
+  arg.m_type = KindOfObject;
+  arg.m_data.pobj = e;
+
+  g_vmContext->invokeContFunc(func, this, &arg);
+}
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DummyContinuation::c_DummyContinuation(const ObjectStaticCallbacks *cb) :

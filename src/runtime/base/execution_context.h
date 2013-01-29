@@ -709,6 +709,9 @@ public:
                   HPHP::VM::VarEnv* varEnv = NULL,
                   StringData* invName = NULL,
                   HPHP::VM::Unit* mergeUnit = NULL);
+  void invokeContFunc(const HPHP::VM::Func* f,
+                      ObjectData* this_,
+                      TypedValue* param = NULL);
   // VM ClassInfo support
   StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;

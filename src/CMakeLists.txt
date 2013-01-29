@@ -155,7 +155,7 @@ endforeach()
 
 add_custom_command(
   OUTPUT runtime/base/compiler_id.h
-  COMMAND bin/generate_compiler_id.sh
+  COMMAND src/tools/generate_compiler_id.sh
   DEPENDS ${CXX_SOURCES} ${C_SOURCES}
   WORKING_DIRECTORY ${HPHP_HOME}
   COMMENT "Generating Compiler ID"
@@ -163,7 +163,7 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT runtime/vm/repo_schema.h
-  COMMAND bin/generate_repo_schema.sh
+  COMMAND src/tools/generate_repo_schema.sh
   DEPENDS ${CXX_SOURCES} ${C_SOURCES}
   WORKING_DIRECTORY ${HPHP_HOME}
   COMMENT "Generating Repo Schema ID"

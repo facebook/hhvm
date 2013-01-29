@@ -19,6 +19,8 @@ HPHP=$HPHP_HOME/src/hphp/hphp
 HHVM=$HPHP_HOME/src/hhvm/hhvm
 [ ! -x "$HHVM" ] && check_err 1 "$HHVM is not executable"
 
+HPHP_TOOLS=$HPHP_HOME/src/tools/
+
 if [ "$1" = "help" ]; then
   echo "$0 gen        - Build src/system/gen/* files"
   echo "$0 hhvm       - Build src/system/runtime/ext/*.ext_hhvm.cpp"
@@ -87,7 +89,7 @@ fi
 if [ "$1" = "injection" -o "$1" = "all" ]; then
   cd $HPHP_HOME
   [ $VERBOSE -eq 1 ] && echo "Adding INJECTION macros to extensions"
-  $HHVM $HPHP_HOME/bin/ext_injection.php
+  $HHVM $HPHP_TOOLS/ext_injection.php
   check_err $? "Failed adding injection macros"
 fi
 
@@ -96,6 +98,6 @@ if [ "$1" = "license" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Updating license headers"
   # TODO: At the moment, license.php fails on PCRE_ERROR_MATCHLIMIT
   # Fix that script then change this to detect errors properly
-  $HHVM $HPHP_HOME/bin/license.php 2>&1 | grep -v PCRE_ERROR_MATCHLIMIT
+  $HHVM $HPHP_TOOLS/license.php 2>&1 | grep -v PCRE_ERROR_MATCHLIMIT
   #check_err $? "Failed updating license headers"
 fi

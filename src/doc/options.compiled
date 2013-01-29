@@ -307,7 +307,7 @@ more processes, but it has SharedMemorySize as upper limit.
 
 There is a way to prepare APC items in dry format, serialized in binary files,
 and these files can be loaded (or "primed") extremely fast at startup time.
-To prepare these .cpp files, check bin/apc_sample_serializer.php for one way
+To prepare these .cpp files, check apc_sample_serializer.php for one way
 of doing it. Once prepared, we can compiled them into .so that can be loaded
 through PrimeLibrary option. The loading can be done in parallel with
 LoadThread count of threads. Once loading is done, it can write to APC with

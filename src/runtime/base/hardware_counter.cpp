@@ -281,10 +281,14 @@ static int findEvent(char *event, struct PerfTable *t,
 
 // hack to get LLC counters on perflab frc machines
 static bool isIntelE5_2670() {
+#ifdef __x86_64__
   unsigned long x;
   asm volatile ("cpuid" : "=a"(x): "a"(1) : "ebx", "ecx", "edx");
   return CPUID_STEPPING(x) == 6 && CPUID_MODEL(x) == 0xd
          && CPUID_FAMILY(x) == 6 && CPUID_TYPE(x) == 0;
+#else
+  return false;
+#endif
 }
 
 static void checkLLCHack(char* event, uint32_t& type, uint64_t& config) {

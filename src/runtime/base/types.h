@@ -490,9 +490,15 @@ public:
 extern void throw_infinite_recursion_exception();
 extern void throw_call_non_object() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-inline void* stack_top_ptr() { // x64 specific
-  register void* rsp asm("rsp");
-  return rsp;
+inline void* stack_top_ptr() {
+#ifdef __x86_64__
+  register void* sp asm("rsp");
+#elif __AARCH64EL__
+  register void* sp asm("sp");
+#else
+#error Teach me how to get the stack pointer on your architecture!
+#endif
+  return sp;
 }
 
 inline bool stack_in_bounds(ThreadInfo *&info) {

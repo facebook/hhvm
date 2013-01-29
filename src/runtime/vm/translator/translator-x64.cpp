@@ -1372,7 +1372,7 @@ TranslatorX64::createTranslation(SrcKey sk, bool align,
   if (stubsize) {
     addTranslation(TransRec(sk, curUnit()->md5(), TransAnchor,
                             astart, asize, stubstart, stubsize));
-    assert(getTransRec(stubstart)->kind == TransAnchor);
+    assert(!isTransDBEnabled() || getTransRec(stubstart)->kind == TransAnchor);
   }
 
   return retransl();

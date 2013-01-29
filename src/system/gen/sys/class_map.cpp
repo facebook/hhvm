@@ -22,7 +22,7 @@ namespace hphp_impl_starter {}
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const char* g_system_class_map[] = {
+const char* g_class_map[] __attribute__((weak)) = {
   (const char *)ClassInfo::IsSystem, NULL, "", "", NULL, NULL,
   NULL,
   (const char *)0x10006040, "drawgetexception", "", (const char *)0, (const char *)0,

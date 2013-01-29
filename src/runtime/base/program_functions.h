@@ -82,6 +82,7 @@ void hphp_thread_exit();
 void hphp_session_exit();
 void hphp_process_exit() ATTRIBUTE_COLD;
 bool hphp_is_warmup_enabled();
+std::string systemlib_path();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

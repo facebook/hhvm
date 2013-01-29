@@ -273,6 +273,11 @@ public:
   static Array GetConstants();
 
   /**
+   * Get all statically known system constants
+   */
+  static Array GetSystemConstants();
+
+  /**
    * Return all methods a class has, including the ones on base classes and
    * interfaces.
    *   type: 0: unknown; 1: class; 2: interface

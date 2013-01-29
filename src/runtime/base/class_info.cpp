@@ -252,6 +252,18 @@ void ClassInfo::ConstantInfo::setStaticValue(CVarRef v) {
   deferred = false;
 }
 
+Array ClassInfo::GetSystemConstants() {
+  assert(s_loaded);
+  Array res;
+  const ConstantMap &scm = s_systemFuncs->getConstants();
+  for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
+    if (it->second->valueLen) {
+      res.set(it->second->name, it->second->getValue());
+    }
+  }
+  return res;
+}
+
 Array ClassInfo::GetConstants() {
   assert(s_loaded);
   Array res;
@@ -259,7 +271,7 @@ Array ClassInfo::GetConstants() {
   {
     const ConstantMap &scm = s_systemFuncs->getConstants();
     for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
-      res.set(it->first, it->second->getValue());
+      res.set(it->second->name, it->second->getValue());
     }
   }
   {
@@ -1028,19 +1040,9 @@ void ClassInfoRedeclared::postInit() {
   }
 }
 
-#ifdef HHVM
-extern const char* g_system_class_map[];
-#endif
-
 void ClassInfo::Load() {
   assert(!s_loaded);
-  const char **p =
-#ifdef HHVM
-    // In hhvm, only system classes are registered in the class map.
-    g_system_class_map;
-#else
-    g_class_map;
-#endif
+  const char **p = g_class_map;
   while (*p) {
     Attribute attribute = (Attribute)(int64)*p;
     ClassInfo *info = (attribute & IsRedeclared) ?

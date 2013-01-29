@@ -61,11 +61,12 @@ public:
   static void LoadSuperGlobals();
 
   static StringToFunctionScopePtrMap s_functions;
-  static StringToFunctionScopePtrMap s_helperFunctions;
   static StringToClassScopePtrMap s_classes;
   static VariableTablePtr s_variables;
   static ConstantTablePtr s_constants;
 
+  static const char *const GlobalNames[];
+  static int NumGlobalNames();
 private:
   static StringBag s_strings;
   static const char *ExtensionFunctions[];
@@ -73,8 +74,11 @@ private:
   static const char *ExtensionConsts[];
   static const char *ExtensionDeclaredDynamic[];
   static const char *SystemClasses[];
-  static const char *HelperFunctions[];
+
   static AnalysisResultPtr LoadGlobalSymbols(const char *fileName);
+  static void Parse(AnalysisResultPtr ar,
+                    const std::string& phpBaseName,
+                    const std::string& phpFileName);
 
   static StringToTypePtrMap s_superGlobals;
 

@@ -28,6 +28,8 @@
 #include <compiler/analysis/constant_table.h>
 #include <util/parser/hphp.tab.hpp>
 #include <runtime/base/class_info.h>
+#include <runtime/base/program_functions.h>
+#include <runtime/base/array/array_iterator.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <dlfcn.h>
@@ -76,13 +78,22 @@ const char *BuiltinSymbols::ExtensionClasses[] = {
 };
 #undef EXT_TYPE
 
-const char *BuiltinSymbols::HelperFunctions[] = {
-#include <system/helper.inc>
-  NULL,
-};
-
 StringToFunctionScopePtrMap BuiltinSymbols::s_functions;
-StringToFunctionScopePtrMap BuiltinSymbols::s_helperFunctions;
+
+const char *const BuiltinSymbols::GlobalNames[] = {
+  "HTTP_RAW_POST_DATA",
+  "_COOKIE",
+  "_ENV",
+  "_FILES",
+  "_GET",
+  "_POST",
+  "_REQUEST",
+  "_SERVER",
+  "_SESSION",
+  "argc",
+  "argv",
+  "http_response_header",
+};
 
 const char *BuiltinSymbols::SystemClasses[] = {
   "stdclass",
@@ -108,6 +119,11 @@ StringToTypePtrMap BuiltinSymbols::s_superGlobals;
 void *BuiltinSymbols::s_handle_main = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+int BuiltinSymbols::NumGlobalNames() {
+  return sizeof(BuiltinSymbols::GlobalNames) /
+    sizeof(BuiltinSymbols::GlobalNames[0]);
+}
 
 void BuiltinSymbols::ParseExtFunctions(AnalysisResultPtr ar, const char **p,
                                        bool sep) {
@@ -376,45 +392,48 @@ bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
   return true;
 }
 
+void BuiltinSymbols::Parse(AnalysisResultPtr ar,
+                           const std::string& phpBaseName,
+                           const std::string& phpFileName) {
+  const char *baseName = s_strings.add(phpBaseName.c_str());
+  const char *fileName = s_strings.add(phpFileName.c_str());
+  try {
+    Scanner scanner(fileName, Option::ScannerType);
+    Compiler::Parser parser(scanner, baseName, ar);
+    if (!parser.parse()) {
+      Logger::Error("Unable to parse file %s: %s", fileName,
+                    parser.getMessage().c_str());
+      assert(false);
+    }
+  } catch (FileOpenException &e) {
+    Logger::Error("%s", e.getMessage().c_str());
+  }
+}
+
 bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   if (Loaded) return true;
   Loaded = true;
 
-  // Build function scopes for some of the runtime helper functions
-  // declared in "runtime/base/builtin_functions.h"
-  const char **helper = HelperFunctions;
-  while (*helper) {
-    FunctionScopePtr f = ParseHelperFunction(ar, helper);
-    assert(!s_helperFunctions[f->getName()]);
-    s_helperFunctions[f->getName()] = f;
-  }
-
   // load extension functions first, so system/classes may call them
   ParseExtFunctions(ar, ExtensionFunctions, false);
-  AnalysisResultPtr ar2;
+  AnalysisResultPtr ar2 = AnalysisResultPtr(new AnalysisResult());
+  s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
+  s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
 
   // parse all PHP files under system/classes
   if (!extOnly) {
     ar = AnalysisResultPtr(new AnalysisResult());
     ar->loadBuiltinFunctions();
-    for (const char **cls = SystemClasses; *cls; cls++) {
-      string phpBaseName = "/system/classes/";
-      phpBaseName += *cls;
-      phpBaseName += ".php";
-      string phpFileName = Option::GetSystemRoot() + phpBaseName;
-      const char *baseName = s_strings.add(phpBaseName.c_str());
-      const char *fileName = s_strings.add(phpFileName.c_str());
-      try {
-        Scanner scanner(fileName, Option::ScannerType);
-        Compiler::Parser parser(scanner, baseName, ar);
-        if (!parser.parse()) {
-          Logger::Error("Unable to parse file %s: %s", fileName,
-                        parser.getMessage().c_str());
-          assert(false);
-        }
-      } catch (FileOpenException &e) {
-        Logger::Error("%s", e.getMessage().c_str());
+    string slib = systemlib_path();
+    if (slib.empty()) {
+      for (const char **cls = SystemClasses; *cls; cls++) {
+        string phpBaseName = "/system/classes/";
+        phpBaseName += *cls;
+        phpBaseName += ".php";
+        Parse(ar, phpBaseName, Option::GetSystemRoot() + phpBaseName);
       }
+    } else {
+      Parse(ar, slib, slib);
     }
     ar->analyzeProgram(true);
     ar->inferTypes();
@@ -431,26 +450,9 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
         s_classes[iter->first] = iter->second[0];
       }
     }
-
-    // parse globals/variables.php and globals/constants.php
-    NoSuperGlobals = true;
-    s_variables = LoadGlobalSymbols("symbols.php")->getVariables();
-    ar2 = LoadGlobalSymbols("constants.php");
-    const FileScopePtrVec &fileScopes = ar2->getAllFilesVector();
-    if (!fileScopes.empty()) {
-      s_constants = fileScopes[0]->getConstants();
-    } else {
-      Logger::Error("Couldn't load constants.php");
-      return false;
-    }
-    NoSuperGlobals = false;
   } else {
-    ar2 = AnalysisResultPtr(new AnalysisResult());
-    s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
-    s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
     NoSuperGlobals = true;
   }
-  s_constants->setDynamic(ar, "SID", true);
 
   // load extension constants, classes and dynamics
   ParseExtConsts(ar, ExtensionConsts, false);
@@ -468,6 +470,35 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
       return false;
     }
   }
+
+  if (!extOnly) {
+    Array constants = ClassInfo::GetSystemConstants();
+    LocationPtr loc(new Location);
+    for (ArrayIter it = constants.begin(); it; ++it) {
+      CVarRef key = it.first();
+      if (!key.isString()) continue;
+      std::string name = key.toCStrRef().data();
+      if (s_constants->getSymbol(name)) continue;
+      if (name == "true" || name == "false" || name == "null") continue;
+      CVarRef value = it.secondRef();
+      if (!value.isInitialized() || value.isObject()) continue;
+      ExpressionPtr e = Expression::MakeScalarExpression(ar2, ar2, loc, value);
+      TypePtr t =
+        value.isNull()    ? Type::Null    :
+        value.isBoolean() ? Type::Boolean :
+        value.isInteger() ? Type::Int64   :
+        value.isDouble()  ? Type::Double  :
+        value.isArray()   ? Type::Array   : Type::Variant;
+
+      s_constants->add(key.toCStrRef().data(), t, e, ar2, e);
+    }
+    s_variables = ar2->getVariables();
+    for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
+      s_variables->add(GlobalNames[i], Type::Variant, false, ar,
+                       ConstructPtr(), ModifierExpressionPtr());
+    }
+  }
+  s_constants->setDynamic(ar, "SID", true);
 
   return true;
 }

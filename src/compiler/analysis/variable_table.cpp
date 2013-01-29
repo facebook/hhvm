@@ -23,6 +23,7 @@
 #include <compiler/expression/modifier_expression.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/builtin_symbols.h>
 #include <compiler/option.h>
 #include <compiler/expression/simple_function_call.h>
 #include <compiler/analysis/class_scope.h>
@@ -825,26 +826,14 @@ void VariableTable::canonicalizeStaticGlobals() {
 // Make sure GlobalVariables::getRefByIdx has the correct indices
 void VariableTable::checkSystemGVOrder(SymbolSet &variants,
                                        unsigned int max) {
-  static const char *sgvNames[] = {
-    "gvm_HTTP_RAW_POST_DATA",
-    "gvm__COOKIE",
-    "gvm__ENV",
-    "gvm__FILES",
-    "gvm__GET",
-    "gvm__POST",
-    "gvm__REQUEST",
-    "gvm__SERVER",
-    "gvm__SESSION",
-    "gvm_argc",
-    "gvm_argv",
-    "gvm_http_response_header",
-  };
   always_assert(variants.size() >= max &&
-         sizeof(sgvNames) / sizeof(sgvNames[0]) == max);
+                BuiltinSymbols::NumGlobalNames());
+
   unsigned int i = 0;
   for (SymbolSet::const_iterator iterName = variants.begin();
        iterName != variants.end(); ++iterName) {
-    always_assert(!strcmp(sgvNames[i], iterName->c_str()));
+    string s = string("gvm_") + BuiltinSymbols::GlobalNames[i];
+    always_assert(s == iterName->c_str());
     i++;
   }
 }

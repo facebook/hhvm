@@ -169,52 +169,17 @@ void ProcessInit() {
   String currentDir = g_vmContext->getCwd();
   HPHP::Eval::PhpFile* file = NULL;
 
-#define SYSTEMLIB_PHP "/systemlib.php"
-#define LOOKUP_STR(s) do {                                                    \
-  String systemlibPath = String(s) + SYSTEMLIB_PHP;                           \
-  file = g_vmContext->lookupPhpFile(systemlibPath.get(), currentDir.data(),   \
-                                    NULL);                                    \
-} while (0)
-#define LOOKUP_ENV(v) do {                                                    \
-  if (!file) {                                                                \
-    const char* s = getenv(#v);                                               \
-    if (s && *s) {                                                            \
-      LOOKUP_STR(s);                                                          \
-    }                                                                         \
-  }                                                                           \
-} while (0)
-#define LOOKUP_CPP(v) do {                                                    \
-  if (!file) {                                                                \
-    LOOKUP_STR(v);                                                            \
-  }                                                                           \
-} while (0)
-
-  LOOKUP_ENV(HHVM_LIB_PATH);
-  if (!file) {
-    char hhvm_exe[PATH_MAX+1];
-    char hhvm_path[PATH_MAX+1];
-    ssize_t len = readlink("/proc/self/exe", hhvm_exe, sizeof(hhvm_exe));
-    if (len >= 0) {
-      hhvm_exe[len] = '\0';
-      if (realpath(hhvm_exe, hhvm_path) != NULL) {
-        char *hphp_lib = dirname(hhvm_path);
-        LOOKUP_STR(hphp_lib);
-      }
-    }
+  string slib = systemlib_path();
+  if (!slib.empty()) {
+    file = g_vmContext->lookupPhpFile(String(slib).get(),
+                                      currentDir.data(), NULL);
   }
-  LOOKUP_ENV(HPHP_LIB);
-#ifdef HHVM_LIB_PATH_DEFAULT
-  LOOKUP_CPP(HHVM_LIB_PATH_DEFAULT);
-#endif
   if (!file) {
     // Die a horrible death.
     Logger::Error("Unable to find/load systemlib.php");
     _exit(1);
   }
-#undef SYSTEMLIB_PHP
-#undef LOOKUP_STR
-#undef LOOKUP_ENV
-#undef LOOKUP_CPP
+
   SystemLib::s_phpFile = file;
   file->incRef();
   SystemLib::s_unit = file->unit();

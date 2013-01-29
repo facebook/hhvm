@@ -123,7 +123,6 @@ void init_literal_varstrings() {
 }
 
 #ifndef HHVM
-const char *g_class_map[] = { NULL};
 Variant get_static_property(CStrRef s, const char *prop) {
   return null;
 }

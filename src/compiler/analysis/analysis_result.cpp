@@ -4413,7 +4413,7 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg,
   }
 
   if (cgOutput == CodeGenerator::SystemCPP) {
-    cg_indentBegin("const char* g_system_class_map[] = {\n");
+    cg_indentBegin("const char* g_class_map[] __attribute__((weak)) = {\n");
   } else {
     cg_indentBegin("const char *g_class_map[] = {\n");
   }
@@ -4445,7 +4445,7 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg,
             len, output.c_str());
   if (cgOutput == CodeGenerator::SystemCPP) {
     /*
-     * We need system constants to show up in the g_system_class_map
+     * We need system constants to show up in g_class_map
      * for use in the hhvm build, even though they aren't necessarily
      * loaded in our m_constants.
      *

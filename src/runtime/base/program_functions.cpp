@@ -1160,6 +1160,33 @@ String canonicalize_path(CStrRef p, const char* root, int rootLen) {
   return path;
 }
 
+static bool check_path(const char *path) {
+  if (!path) return false;
+
+  string file = string(path) + "/systemlib.php";
+  struct stat result;
+  if (stat(file.c_str(), &result)) {
+    return false;
+  }
+  return S_ISREG(result.st_mode);
+}
+
+string systemlib_path() {
+  char *file;
+  char buf[PATH_MAX + 1];
+  if (!check_path(file = getenv("HHVM_LIB_PATH")) &&
+      !(realpath("/proc/self/exe", buf) &&
+        check_path(file = dirname(buf))) &&
+      !(check_path(file = getenv("HPHP_LIB")))
+#ifdef HHVM_LIB_PATH_DEFAULT
+      && !(check_path(file = HHVM_LIB_PATH_DEFAULT))
+#endif
+     ) {
+    return "";
+  }
+  return string(file) + "/systemlib.php";
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
 

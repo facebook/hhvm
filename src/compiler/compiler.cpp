@@ -616,9 +616,12 @@ int process(const CompilerOptions &po) {
     return false;
   }
 
-  // load the type hints
+  // one time initialization
   Type::InitTypeHintMap();
   BuiltinSymbols::LoadSuperGlobals();
+  ClassInfo::Load();
+
+  if (po.format == "sys") ar->setSystem();
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {

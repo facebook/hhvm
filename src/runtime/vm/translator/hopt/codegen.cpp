@@ -259,27 +259,6 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
   m_kind = Imm;
 }
 
-Address ArgDesc::genCode(CodeGenerator::Asm& a) const {
-  Address start = a.code.frontier;
-  switch (m_kind) {
-    case TypeReg:
-    case Reg:
-      a.    movq   (m_srcReg, m_dstReg);
-      TRACE(3, "[counter] 1 reg move in ArgDesc::genCode\n");
-      if (m_kind == TypeReg) {
-        a.  shlq   (kTypeShiftBits, m_dstReg);
-      }
-      break;
-    case Imm:
-      emitImmReg(a, m_imm, m_dstReg);
-      break;
-    case Addr:
-      a.    lea    (m_srcReg[m_imm.l()], m_dstReg);
-      break;
-  }
-  return start;
-}
-
 const Func* CodeGenerator::getCurFunc() {
   if (m_lastMarker) {
     return m_lastMarker->getFunc();

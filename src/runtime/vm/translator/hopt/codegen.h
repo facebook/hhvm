@@ -243,7 +243,6 @@ public:
   PhysReg getSrcReg() const { return m_srcReg; }
   Kind getKind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
-  Address genCode(CodeGenerator::Asm& as) const;
   Immed getImm() const { return m_imm; }
 
 private: // These should be created using ArgGroup.

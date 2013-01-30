@@ -76,6 +76,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     r.append(responseHeaders[i]);
   }
+  m_responseHeaders = r;
 
   if (code == 200) {
     m_name = url;

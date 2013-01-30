@@ -41,6 +41,7 @@ public:
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual int64 writeImpl(const char *buffer, int64 length);
   virtual bool flush();
+  virtual Array getWrapperMetaData() { return m_responseHeaders; }
   String getLastError();
 
 private:
@@ -51,6 +52,7 @@ private:
   int m_timeout;
   std::string m_error;
   StringBuffer m_response;
+  Array m_responseHeaders;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -316,6 +316,7 @@ Array File::getMetaData() {
   ret.set("timed_out",    false);
   ret.set("blocked",      true);
   ret.set("eof",          eof());
+  ret.set("wrapper_data", getWrapperMetaData());
   return ret;
 }
 

@@ -118,6 +118,7 @@ public:
   virtual bool lock(int operation, bool &wouldblock);
 
   virtual Array getMetaData();
+  virtual Array getWrapperMetaData() { return null_array; }
   virtual const char *getStreamType() const { return "";}
 
   /**

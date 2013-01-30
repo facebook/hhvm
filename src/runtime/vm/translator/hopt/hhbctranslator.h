@@ -187,33 +187,33 @@ struct HhbcTranslator {
   void emitCGetG(const StringData* name, Type::Tag resultType,
                  bool isInferedType);
   void emitVGetG(const StringData* name);
-  void emitVGetS(); // TODO (tx64 doesn't have a trans for this)
-  void emitVGetM(); // (tx64 doesn't have a trans for this);
+  void emitVGetS();
+  void emitVGetM();
   void emitSetL(int32 id);
   void emitSetS(const Class* cls, const StringData* propName);
   void emitSetG();
   void emitSetProp(int propOffset, bool isPropOnStack); // object + offset
   void emitBindL(int32 id);
-  void emitBindS(); // TODO (tx64 doesn't handle this?)
-  void emitBindM(const char* vectorDesc); // TODO (tx64 doesn't handle)
+  void emitBindS();
+  void emitBindM(const char* vectorDesc);
   void emitUnsetL(int32 id);
   void emitUnsetN();
   void emitUnsetG();
-  void emitUnsetProp(int offset); // TODO
+  void emitUnsetProp(int offset);
   void emitIssetL(int32 id);
   void emitIssetS();
-  void emitIssetM(const char* vectorDesc /*<H E> */ ); // TODO
-  void emitIssetProp(int offset); // TODO
+  void emitIssetM(const char* vectorDesc);
+  void emitIssetProp(int offset);
   void emitEmptyL(int32 id);
   void emitEmptyS();
-  void emitEmptyM(const char* vectorDesc); // TODO
-  void emitEmptyProp(int offset); // TODO
+  void emitEmptyM(const char* vectorDesc);
+  void emitEmptyProp(int offset);
   // The subOpc param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
-  void emitSetOpL(Opcode subOpc, uint32 id); // TODO
-  void emitSetOpS(Opcode subOpc); // TODO
-  void emitSetOpM(Opcode subOpc, const char* vectorDesc); // TODO
-  void emitSetOpProp(Opcode subOpc, int offset); // TODO
+  void emitSetOpL(Opcode subOpc, uint32 id);
+  void emitSetOpS(Opcode subOpc);
+  void emitSetOpM(Opcode subOpc, const char* vectorDesc);
+  void emitSetOpProp(Opcode subOpc, int offset);
   // the pre & inc params encode the 4 possible sub opcodes:
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32 id);
@@ -252,7 +252,7 @@ struct HhbcTranslator {
                   Offset returnBcOffset,
                   const Func* callee);
   void emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId);
-  void emitClsCns(int32 cnsNameStrId); // TODO
+  void emitClsCns(int32 cnsNameStrId);
   void emitAGetC(const StringData* clsName);
   void emitAGetL(int localId, const StringData* clsName);
   void emitIsNullL(int id);
@@ -283,7 +283,7 @@ struct HhbcTranslator {
   void emitRetC(bool freeInline);
   void emitRetV(bool freeInline);
 
-  void emitLateBoundCls(); // TODO: if this, then LdObjCls
+  void emitLateBoundCls();
 
   // binary arithmetic ops
   void emitAdd();

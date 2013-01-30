@@ -786,7 +786,6 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
   if (propName) {
     prop = m_tb->genDefConst<const StringData*>(propName);
   }
-  // TODO: fallback to interpone if we decide to punt
   if (!cls) {
     PUNT(ClsPropAddr_noCls);
   }
@@ -1301,21 +1300,6 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
       // generate code that tests at runtime whether to use
       // this pointer or class
       PUNT(FPushClsMethodD_MightNotBeStatic);
-#if 0
-      // XXX TODO: Need to represent this in the IR
-      ScratchReg rClsScratch(m_regMap);
-      PhysReg rCls = *rClsScratch;
-      a.    load_reg64_disp_reg64(rVmFp, AROFF(m_cls), rCls);
-      a.    test_imm32_reg64(1, rCls);
-      {
-        IfElseBlock<CC_NZ> ifThis(a);
-        // rCls is holding $this. We should pass it to the callee
-        emitIncRef(rCls, KindOfObject);
-        emitVStackStore(a, i, rCls, clsOff);
-        ifThis.Else();
-        emitVStackStoreImm(a, i, uintptr_t(baseClass)|1, clsOff);
-      }
-#endif
       assert(0);
     }
   } else {
@@ -1325,7 +1309,8 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
     SSATmp* funcClassTmp = m_tb->genLdClsMethodCache(
                               m_tb->genDefConst<const StringData*>(className),
                               m_tb->genDefConst<const StringData*>(methodName),
-    /*TODO: NamedEntity* */   m_tb->genDefConst<int64>((uintptr_t)np.second),
+                              /*TODO(#2062950): NamedEntity* */
+                              m_tb->genDefConst<int64>((uintptr_t)np.second),
                               exitTrace);
     SSATmp* actRec = m_tb->genDefActRec(funcClassTmp,
                                         m_tb->genDefNull(),
@@ -1390,8 +1375,6 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
     m_tb->genReleaseVVOrExit(exitTrace);
   }
   if (mayHaveThis) {
-    // TODO: tx64 breaks apart the cases of (isMethod && !isStatic)
-    // and isPseudoMain.
     m_tb->genDecRefThis();
   }
 
@@ -1618,8 +1601,6 @@ void HhbcTranslator::emitCastDouble() {
   m_tb->genDecRef(src);
 }
 
-// TODO for emitCastString, castAray, and castObject, double check that the
-// helpers already don't incref their return values
 void HhbcTranslator::emitCastString() {
   SSATmp* src = popC();
   Type::Tag fromType = src->getType();
@@ -1653,8 +1634,6 @@ bool isSupportedAGet(SSATmp* classSrc, const StringData* className) {
   Type::Tag srcType = classSrc->getType();
   return (srcType == Type::Obj ||
           className != NULL ||
-          // TODO: Remove this isConst() check once the code gen
-          // supports helper call for non-constant strings
           (Type::isString(srcType) && classSrc->isConst()));
 }
 
@@ -1731,14 +1710,9 @@ void HhbcTranslator::emitCGetS(const Class* cls,
   decRefPropAddr(propPtr);
 }
 
-// TODO
 void HhbcTranslator::emitVGetS() {
   TRACE(3, "%u: VGetS\n", m_bcOff);
-  SSATmp* propAddr = getClsPropAddr(NULL);
-// TODO
-//  push(m_tb->genLdMem());
   PUNT(VGetS);
-  decRefPropAddr(propAddr);
 }
 
 void HhbcTranslator::emitCGetG(const StringData* name,
@@ -1753,7 +1727,6 @@ void HhbcTranslator::emitCGetG(const StringData* name,
     assert(resultType == Type::None); // Type prediction shouldn't happen
     resultType = Type::Cell;
   }
-  // TODO: Consider type inference once we support CGetG translation
   emitInterpOneOrPunt(resultType);
 }
 

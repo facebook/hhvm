@@ -154,6 +154,10 @@ bool PlainFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   assert(valid());
 
   if (whence == SEEK_CUR) {
+    off_t result = lseek(m_fd, 0, SEEK_CUR);
+    if (result != (off_t)-1) {
+      offset += result - (m_writepos - m_readpos + m_position);
+    }
     if (offset > 0 && offset < m_writepos - m_readpos) {
       m_readpos += offset;
       m_position += offset;

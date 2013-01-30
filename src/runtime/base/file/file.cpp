@@ -213,8 +213,9 @@ String File::read(int64 length) {
 
 int64 File::write(CStrRef data, int64 length /* = 0 */) {
   if (seekable()) {
+    int64 offset = m_readpos - m_writepos;
     m_readpos = m_writepos = 0; // invalidating read buffer
-    seek(m_position, SEEK_SET);
+    seek(offset, SEEK_CUR);
   }
   if (length <= 0 || length > data.size()) {
     length = data.size();

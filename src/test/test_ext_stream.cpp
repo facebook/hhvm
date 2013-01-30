@@ -227,7 +227,7 @@ bool TestExtStream::test_stream_get_contents() {
     f_fseek(f, 0); VS(f_stream_get_contents(f), "fwrite1");
 
     f_fwrite(f, "fwrite2");
-    f_fseek(f, 0); VS(f_stream_get_contents(f), "fwrite2");
+    f_fseek(f, 0); VS(f_stream_get_contents(f), "fwrite1fwrite2");
 
     f_fwrite(f, "fwrite3");
     VS(f_stream_get_contents(f), "");

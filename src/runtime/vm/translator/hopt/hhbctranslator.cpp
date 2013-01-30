@@ -1998,41 +1998,6 @@ Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff) {
 SSATmp* HhbcTranslator::spillStack() {
   std::vector<SSATmp*> stackValues = getSpillValues();
   m_evalStack.clear();
-
-  // TODO(#2013938) remove spilled values that are already on the
-  // stack at the right offset
-  if (false) {
-    SSATmp* curSp = m_tb->getSp();
-    for (int32 i = stackValues.size() - 1; i >= 0; i--) {
-      IRInstruction* inst = stackValues[i]->getInstruction();
-      if (inst->getOpcode() != LdStack) {
-        break;
-      }
-      // first check that the ldstack uses the same sp as the current
-      // sp value
-      if (inst->getSrc(0) != curSp) {
-        break;
-      }
-      // now check the stack offset
-      int64 stackOffset = inst->getSrc(1)->getConstValAsInt();
-
-      if (stackOffset != i) {
-        break;
-      }
-      // XXX it's better not to eliminate these LdStack here but rather
-      // not generate code for them and not allocate registers to their
-      // ldstacks src (by not incrementing their use counts). This is
-      // because getStackValue uses these SpillStack instructions to
-      // propagate type and value information.  When checking to see if
-      // the stack offsets are the same, we should also chase down
-      // increfs.
-
-      // remove the operand by decrementing the number of operands
-      stackValues.erase(stackValues.begin() + i);
-      m_stackDeficit--; // compensate
-    }
-  }
-
   SSATmp* sp = m_tb->genSpillStack(m_stackDeficit,
                                    stackValues.size(),
                                    stackValues.size() ? &stackValues[0] : 0);

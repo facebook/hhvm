@@ -140,6 +140,11 @@ int PlainFile::getc() {
   return File::getc();
 }
 
+String PlainFile::read(int64 length) {
+  if (length) m_eof = false;
+  return File::read(length);
+}
+
 int64 PlainFile::writeImpl(const char *buffer, int64 length) {
   assert(valid());
   assert(length > 0);

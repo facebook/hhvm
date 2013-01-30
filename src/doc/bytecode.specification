@@ -3967,23 +3967,19 @@ RetC
 function f($a) { list($x, $y, $z) = $a[7]; return $x + $y + $z; }
 
 // Evaluate $a[7] and store it in an unnamed local
-Int 7
-CGetM <L:0 EC>
+CGetM <L:0 EI:7>
 SetL 4
 PopC
 // Read the unnamed local, get the value at index 2, and store it in $z
-Int 2
-CGetM <L:4 EC>
+CGetM <L:4 EI:2>
 SetL 3
 PopC
 // Read the unnamed local, get the value at index 1, and store it in $y
-Int 1
-CGetM <L:4 EC>
+CGetM <L:4 EI:1>
 SetL 2
 PopC
 // Read the unnamed local, get the value at index 0, and store it in $x
-Int 0
-CGetM <L:4 EC>
+CGetM <L:4 EI:0>
 SetL 1
 PopC
 // Unset the unnamed local
@@ -4027,32 +4023,23 @@ FPushFuncD 0 "z"
 FCall 0
 UnboxR
 // Evaluate $b[100] and store it in an unnamed local t
-Int 100
-CGetM <L:1 EC>
+CGetM <L:1 EI:100>
 SetL 3
 PopC
 // Read t[1][1] and store it in $a[z()]
-Int 1
-Int 1
-CGetM <L:3 EC EC>
+CGetM <L:3 EI:1 EI:1>
 SetM <L:0 EC>
 PopC
 // Read t[1][0] and store it in $a[y()]
-Int 1
-Int 0
-CGetM <L:3 EC EC>
+CGetM <L:3 EI:1 EI:0>
 SetM <L:0 EC>
 PopC
 // Read t[0][1] and store it in $a[x()]
-Int 0
-Int 1
-CGetM <L:3 EC EC>
+CGetM <L:3 EI:0 EI:1>
 SetM <L:0 EC>
 PopC
 // Read t[0][0] and store it in $a[w()]
-Int 0
-Int 0
-CGetM <L:3 EC EC>
+CGetM <L:3 EI:0 EI:0>
 SetM <L:0 EC>
 PopC
 // Read t and leave the value on the stack
@@ -4084,23 +4071,19 @@ PopC
 // Prepare to call array_merge
 FPushFuncD 2 "array_merge"
 // Evaluate (list($a, , $b) = $arr1)
-Int 2
-CGetM <L:0 EC>
+CGetM <L:0 EI:2>
 SetL 4
 PopC
-Int 0
-CGetM <L:0 EC>
+CGetM <L:0 EI:0>
 SetL 3
 PopC
 // Pass the result as the first parameter
 FPassL 0 0
 // Evaluate (list($c, , $d) = $arr2)
-Int 2
-CGetM <L:1 EC>
+CGetM <L:1 EI:2>
 SetL 6
 PopC
-Int 0
-CGetM <L:1 EC>
+CGetM <L:1 EI:0>
 SetL 5
 PopC
 // Pass the result as the second parameter

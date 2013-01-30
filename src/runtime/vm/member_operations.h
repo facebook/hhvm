@@ -201,10 +201,20 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
   opPre(base, type);
   switch (type) {
   case KindOfUninit:
-  case KindOfNull:
-  case KindOfBoolean:
+  case KindOfNull: {
+    result = (TypedValue*)&init_null_variant;
+    break;
+  }
   case KindOfInt64:
   case KindOfDouble: {
+    raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+    result = (TypedValue*)&init_null_variant;
+    break;
+  }
+  case KindOfBoolean: {
+    if (base->m_data.num) {
+      raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+    }
     result = (TypedValue*)&init_null_variant;
     break;
   }

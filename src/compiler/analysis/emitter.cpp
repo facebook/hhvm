@@ -3302,7 +3302,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               emitVirtualLocal(tempLocal);
             }
             for (int j = 0; j < (int)currIndexChain->size(); ++j) {
-              e.Int((*currIndexChain)[j]);
+              m_evalStack.push(StackSym::I);
+              m_evalStack.setInt((*currIndexChain)[j]);
               markElem(e);
             }
             emitCGet(e);

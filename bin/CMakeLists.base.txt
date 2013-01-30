@@ -89,6 +89,12 @@ SET_PROPERTY(TARGET afdt PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libafdt.a"
 add_library(mbfl STATIC IMPORTED)
 SET_PROPERTY(TARGET mbfl PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libmbfl.a")
 
+add_library(double-conversion STATIC IMPORTED)
+SET_PROPERTY(TARGET double-conversion PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libdouble-conversion.a")
+
+add_library(folly STATIC IMPORTED)
+SET_PROPERTY(TARGET folly PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libfolly.a")
+
 if (USE_HHVM)
 
 	add_library(libext_hhvm STATIC IMPORTED)

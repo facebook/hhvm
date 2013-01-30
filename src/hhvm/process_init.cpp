@@ -137,11 +137,9 @@ void ProcessInit() {
   // systemlib.php can be read from and stored in the
   // normal repo.
   bool db = RuntimeOption::EvalDumpBytecode;
-  bool p = RuntimeOption::RepoAuthoritative;
   bool rp = RuntimeOption::AlwaysUseRelativePath;
   bool sf = RuntimeOption::SafeFileAccess;
   RuntimeOption::EvalDumpBytecode = false;
-  RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
 
@@ -169,7 +167,9 @@ void ProcessInit() {
   String currentDir = g_vmContext->getCwd();
   HPHP::Eval::PhpFile* file = NULL;
 
-  string slib = systemlib_path();
+  string slib = RuntimeOption::RepoAuthoritative ?
+    string("/:systemlib.php") : systemlib_path();
+
   if (!slib.empty()) {
     file = g_vmContext->lookupPhpFile(String(slib).get(),
                                       currentDir.data(), NULL);
@@ -185,9 +185,7 @@ void ProcessInit() {
   SystemLib::s_unit = file->unit();
 
   // Restore most settings before merging anything,
-  // because of optimizations that depend on the
-  // setting of RepoAuthoritative
-  RuntimeOption::RepoAuthoritative = p;
+  // because of optimizations that depend on them
   RuntimeOption::AlwaysUseRelativePath = rp;
   RuntimeOption::SafeFileAccess = sf;
 
@@ -253,7 +251,7 @@ void ProcessInit() {
   Stack::ValidateStackSize();
   SystemLib::s_inited = true;
 
-  // Restore this after loading systemlib
+  // Restore last to avoid dumping system things
   RuntimeOption::EvalDumpBytecode = db;
 }
 

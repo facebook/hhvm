@@ -21,12 +21,6 @@
 #include <boost/type_traits/is_arithmetic.hpp>
 #include <boost/type_traits/is_pointer.hpp>
 
-#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2))
-#include <ext/atomicity.h>
-#else
-#include <bits/atomicity.h>
-#endif
-
 #include "util/assertions.h"
 #include "util/util.h"
 
@@ -43,10 +37,28 @@ inline void assert_address_is_atomically_accessible(T* address) {
     "Atomic operations only supported for built in integer, floating point "
     "and pointer types.");
 
+#ifdef __x86_64__
   assert(((uintptr_t(address) + sizeof(T) - 1) & ~63ul) ==
          ( uintptr_t(address)                  & ~63ul) &&
         "Atomically accessed addresses may not span cache lines");
+#elif __AARCH64EL__
+  // N-byte accesses must be N-byte aligned
+  assert((uintptr_t(address) & (sizeof(T) - 1)) == 0);
+#else
+# error What kind of memory accesses are atomic on this architecture?
+#endif
 }
+
+
+/**
+ * Use of the functions below is DISCOURAGED.
+ * Prefer the std::atomic library in C++11.
+ *
+ * Not only does it relieve you of worrying about architecture and compiler
+ * portability issues, but it also encourages you to really reason through the
+ * concurrency you're aiming to manage, by treating atomically-accessed data as
+ * a distinct type.
+ */
 
 template<class T> inline T atomic_acquire_load(const T* address) {
   assert_address_is_atomically_accessible(address);
@@ -68,27 +80,12 @@ inline void atomic_release_store(T* address, U val) {
 template<typename T>
 static inline T atomic_inc(T &count) {
   assert_address_is_atomically_accessible(&count);
-  return __gnu_cxx::__exchange_and_add(&count, 1) + 1;
+  return __sync_fetch_and_add(&count, 1) + 1;
 }
 
 static inline int atomic_dec(int &count) {
   assert_address_is_atomically_accessible(&count);
-  return __gnu_cxx::__exchange_and_add(&count, -1) - 1;
-}
-
-template<class T>
-static inline T atomic_add(T &mem, T val) {
-  assert_address_is_atomically_accessible(&mem);
-  T r;
-  asm volatile
-   (
-    "lock\n\t"
-    "xadd %1, %0":
-    "+m"( mem ), "=r"( r ): // outputs (%0, %1)
-    "1"( val ): // inputs (%2 == %1)
-    "memory", "cc" // clobbers
-    );
-  return r;
+  return __sync_fetch_and_add(&count, -1) - 1;
 }
 
 template<class T>

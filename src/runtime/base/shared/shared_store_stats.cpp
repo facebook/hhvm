@@ -230,23 +230,23 @@ void SharedValueProfile::removeFromGroup(SharedValueProfile *ind) {
 // Definition of static members
 #define MAX_KEY_LEN  120
 
-int32 SharedStoreStats::s_keyCount = 0;
-int32 SharedStoreStats::s_keySize = 0;
-int32 SharedStoreStats::s_variantCount = 0;
-int64 SharedStoreStats::s_dataSize = 0;
-int64 SharedStoreStats::s_dataTotalSize = 0;
-int64 SharedStoreStats::s_deleteSize = 0;
-int64 SharedStoreStats::s_replaceSize = 0;
+std::atomic<int32_t> SharedStoreStats::s_keyCount(0);
+std::atomic<int32_t> SharedStoreStats::s_keySize(0);
+int32_t SharedStoreStats::s_variantCount = 0;
+int64_t SharedStoreStats::s_dataSize = 0;
+std::atomic<int64_t> SharedStoreStats::s_dataTotalSize(0);
+int64_t SharedStoreStats::s_deleteSize = 0;
+int64_t SharedStoreStats::s_replaceSize = 0;
 
-int32 SharedStoreStats::s_addCount = 0;
-int32 SharedStoreStats::s_primeCount = 0;
-int32 SharedStoreStats::s_fromFileCount = 0;
-int32 SharedStoreStats::s_updateCount = 0;
-int32 SharedStoreStats::s_deleteCount = 0;
-int32 SharedStoreStats::s_expireCount = 0;
+std::atomic<int32_t> SharedStoreStats::s_addCount(0);
+std::atomic<int32_t> SharedStoreStats::s_primeCount(0);
+std::atomic<int32_t> SharedStoreStats::s_fromFileCount(0);
+std::atomic<int32_t> SharedStoreStats::s_updateCount(0);
+std::atomic<int32_t> SharedStoreStats::s_deleteCount(0);
+std::atomic<int32_t> SharedStoreStats::s_expireCount(0);
 
-int32 SharedStoreStats::s_expireQueueSize = 0;
-int64 SharedStoreStats::s_purgingTime = 0;
+int32_t SharedStoreStats::s_expireQueueSize = 0;
+std::atomic<int64_t> SharedStoreStats::s_purgingTime(0);
 
 ReadWriteMutex SharedStoreStats::s_rwlock;
 
@@ -386,37 +386,37 @@ void SharedStoreStats::add(SharedValueProfile *svp) {
 
 void SharedStoreStats::addDirect(int32 keySize, int32 dataTotal, bool prime,
                                  bool file) {
-  atomic_inc(s_keyCount);
-  atomic_add(s_keySize, keySize);
-  atomic_add(s_dataTotalSize, (int64)dataTotal);
-  atomic_inc(s_addCount);
+  s_keyCount.fetch_add(1, std::memory_order_relaxed);
+  s_keySize.fetch_add(keySize, std::memory_order_relaxed);
+  s_dataTotalSize.fetch_add((int64)dataTotal, std::memory_order_relaxed);
+  s_addCount.fetch_add(1, std::memory_order_relaxed);
   if (prime) {
-    atomic_inc(s_primeCount);
+    s_primeCount.fetch_add(1, std::memory_order_relaxed);
   }
   if (file) {
-    atomic_inc(s_fromFileCount);
+    s_fromFileCount.fetch_add(1, std::memory_order_relaxed);
   }
 }
 
 void SharedStoreStats::removeDirect(int32 keySize, int32 dataTotal, bool exp) {
-  atomic_dec(s_keyCount);
-  atomic_add(s_keySize, 0 - keySize);
-  atomic_add(s_dataTotalSize, 0 - (int64)dataTotal);
+  s_keyCount.fetch_sub(1, std::memory_order_relaxed);
+  s_keySize.fetch_sub(keySize, std::memory_order_relaxed);
+  s_dataTotalSize.fetch_sub((int64)dataTotal, std::memory_order_relaxed);
   if (exp) {
-    atomic_inc(s_expireCount);
+    s_expireCount.fetch_add(1, std::memory_order_relaxed);
   } else {
-    atomic_inc(s_deleteCount);
+    s_deleteCount.fetch_add(1, std::memory_order_relaxed);
   }
 }
 
 void SharedStoreStats::updateDirect(int32 dataTotalOld, int32 dataTotalNew) {
-  atomic_add(s_dataTotalSize, 0 - (int64)dataTotalOld);
-  atomic_add(s_dataTotalSize, (int64)dataTotalNew);
-  atomic_inc(s_updateCount);
+  s_dataTotalSize.fetch_sub((int64)dataTotalOld, std::memory_order_relaxed);
+  s_dataTotalSize.fetch_add((int64)dataTotalNew, std::memory_order_relaxed);
+  s_updateCount.fetch_add(1, std::memory_order_relaxed);
 }
 
 void SharedStoreStats::addPurgingTime(int64 purgingTime) {
-  atomic_add(s_purgingTime, purgingTime);
+  s_purgingTime.fetch_add(purgingTime, std::memory_order_relaxed);
 }
 
 void SharedStoreStats::onDelete(const StringData *key, const SharedVariant *var,

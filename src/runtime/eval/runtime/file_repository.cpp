@@ -18,7 +18,6 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
 #include <util/process.h>
-#include <util/atomic.h>
 #include <util/trace.h>
 #include <runtime/base/stat_cache.h>
 #include <runtime/base/server/source_root_info.h>
@@ -54,7 +53,7 @@ PhpFile::PhpFile(const string &fileName, const string &srcRoot,
 }
 
 PhpFile::~PhpFile() {
-  always_assert(m_refCount == 0);
+  always_assert(getRef() == 0);
   if (m_unit != NULL) {
     // Deleting a Unit can grab a low-ranked lock and we're probably
     // at a high rank right now
@@ -64,16 +63,16 @@ PhpFile::~PhpFile() {
 }
 
 void PhpFile::incRef() {
-  UNUSED int ret = atomic_inc(m_refCount);
+  UNUSED int ret = m_refCount.fetch_add(1, std::memory_order_acq_rel);
   TRACE(4, "PhpFile: %s incRef() %d -> %d %p called by %p\n",
         m_fileName.c_str(), ret - 1, ret, this, __builtin_return_address(0));
 }
 
 int PhpFile::decRef(int n) {
-  int ret = atomic_add(m_refCount, -n);
+  int ret = m_refCount.fetch_sub(n, std::memory_order_acq_rel);
   TRACE(4, "PhpFile: %s decRef() %d -> %d %p called by %p\n",
         m_fileName.c_str(), ret, ret - n, this, __builtin_return_address(0));
-  assert(ret >= n); // atomic_add returns the old value
+  assert(ret >= n); // fetch_sub returns the old value
   return ret - n;
 }
 

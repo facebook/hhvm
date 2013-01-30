@@ -109,7 +109,7 @@ protected:
     ExpMap;
   ExpMap m_expMap;
 
-  uint64 m_purgeCounter;
+  std::atomic<uint64> m_purgeCounter;
 
   // Should be called outside m_lock
   void purgeExpired();

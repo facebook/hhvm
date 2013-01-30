@@ -21,7 +21,6 @@
 #include "exception.h"
 #include "util.h"
 #include "text_color.h"
-#include <util/atomic.h>
 #include <syslog.h>
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                               \
@@ -59,7 +58,7 @@ int Logger::DropCacheChunkSize = (1 << 20);
 FILE *Logger::Output = NULL;
 Cronolog Logger::cronOutput;
 Logger::LogLevelType Logger::LogLevel = LogInfo;
-int Logger::bytesWritten = 0;
+std::atomic<int> Logger::bytesWritten(0);
 int Logger::prevBytesWritten = 0;
 bool Logger::LogHeader = false;
 bool Logger::LogNativeStackTrace = true;
@@ -184,15 +183,16 @@ void Logger::log(LogLevelType level, const std::string &msg,
     } else {
       bytes = fprintf(f, "%s%s%s", sheader.c_str(), escaped, ending);
     }
-    atomic_add(bytesWritten, bytes);
+    bytesWritten.fetch_add(bytes, std::memory_order_relaxed);
     FILE *tf = threadData->log;
     if (tf) {
       threadData->bytesWritten +=
         fprintf(tf, "%s%s%s", header.c_str(), escaped, ending);
       fflush(tf);
-      checkDropCache(threadData->bytesWritten,
-                     threadData->prevBytesWritten,
-                     tf);
+      threadData->prevBytesWritten =
+        checkDropCache(threadData->bytesWritten,
+                       threadData->prevBytesWritten,
+                       tf);
     }
     if (threadData->hook) {
       threadData->hook(header.c_str(), msg.c_str(), ending,
@@ -204,7 +204,9 @@ void Logger::log(LogLevelType level, const std::string &msg,
 
     fflush(f);
     if (UseCronolog || (Output && !Logger::IsPipeOutput)) {
-      checkDropCache(bytesWritten, prevBytesWritten, f);
+      prevBytesWritten =
+        checkDropCache(bytesWritten.load(std::memory_order_relaxed),
+                       prevBytesWritten, f);
     }
   }
 }
@@ -259,14 +261,13 @@ char *Logger::EscapeString(const std::string &msg) {
   return new_str;
 }
 
-bool Logger::checkDropCache(int &bytesWritten, int &prevBytesWritten,
-                            FILE *f) {
+int Logger::checkDropCache(int bytesWritten, int prevBytesWritten,
+                           FILE *f) {
   if (bytesWritten - prevBytesWritten > Logger::DropCacheChunkSize) {
     Util::drop_cache(f);
-    prevBytesWritten = bytesWritten;
-    return true;
+    return bytesWritten;
   }
-  return false;
+  return prevBytesWritten;
 }
 
 bool Logger::SetThreadLog(const char *file) {

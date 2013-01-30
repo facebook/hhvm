@@ -20,7 +20,6 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <util/lock.h>
-#include <util/atomic.h>
 
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/md5.h>
@@ -61,7 +60,7 @@ public:
   void incRef();
   int decRef(int num = 1);
   void decRefAndDelete();
-  int getRef() { return m_refCount; }
+  int getRef() { return m_refCount.load(std::memory_order_acquire); }
   // time_t readTime() const { return m_timestamp; }
   const std::string &getFileName() const { return m_fileName; }
   const std::string &getSrcRoot() const { return m_srcRoot; }
@@ -72,7 +71,7 @@ public:
   void setId(int id);
 
 private:
-  int m_refCount;
+  std::atomic<int> m_refCount;
   unsigned m_id;
   std::string m_profName;
   std::string m_fileName;

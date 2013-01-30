@@ -19,7 +19,6 @@
 
 #include <util/base.h>
 #include <util/lock.h>
-#include <util/atomic.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +70,7 @@ class LFUTable {
     V val;
     Node *prev;
     Node *next;
-    uint64 hits;
+    std::atomic<uint64> hits;
     uint heapIndex;
     bool immortal;
 
@@ -400,7 +399,7 @@ private:
 
   void _bumpNode(Node *n) {
     if (!m_maximumCapacity) return;
-    if ((atomic_add(n->hits, (uint64)1) + 1) % m_updatePeriod == 0) {
+    if (n->hits.fetch_add(1, std::memory_order_relaxed) % m_updatePeriod == 0) {
       Lock lock(m_queueLock);
       // hits could have increased between incrementing and taking the lock,
       // but it does not matter.

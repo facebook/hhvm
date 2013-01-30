@@ -18,7 +18,6 @@
 #define __SHM_COUNTER_H__
 
 #include <string.h>
-#include <util/atomic.h>
 
 // #define ENABLE_SHM_COUNTER
 
@@ -26,13 +25,6 @@
 
 #define SHM_COUNTER_DEF(n) ShmCounter n;
 #define SHM_COUNTER_INI(n) n(#n),
-
-#define SHM_COUNTING(n) \
-do { \
-  if (ShmCounters::s_shmCounters) { \
-    atomic_add(ShmCounters::s_shmCounters->n.count, 1LL); \
-  } \
-} while (false)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

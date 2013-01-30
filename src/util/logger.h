@@ -17,6 +17,7 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
+#include <atomic>
 #include <string>
 #include <stdarg.h>
 #include <util/thread_local.h>
@@ -32,8 +33,19 @@ class LogFileData {
 public:
   LogFileData() : log(NULL), bytesWritten(0), prevBytesWritten(0) {}
   LogFileData(FILE *f) : log(f), bytesWritten(0), prevBytesWritten(0) {}
+  LogFileData(const LogFileData& rhs) :
+      log(rhs.log), prevBytesWritten(rhs.prevBytesWritten) {
+    bytesWritten.store(rhs.bytesWritten.load());
+  }
+  LogFileData& operator=(const LogFileData& rhs) {
+    log = rhs.log;
+    prevBytesWritten = rhs.prevBytesWritten;
+    bytesWritten.store(rhs.bytesWritten.load());
+    return *this;
+  }
+
   FILE *log;
-  int bytesWritten;
+  std::atomic<int> bytesWritten;
   int prevBytesWritten;
 };
 
@@ -55,7 +67,7 @@ public:
   static FILE *Output;
   static Cronolog cronOutput;
   static LogLevelType LogLevel;
-  static int bytesWritten;
+  static std::atomic<int> bytesWritten;
   static int prevBytesWritten;
   static bool LogHeader;
   static bool LogNativeStackTrace;
@@ -99,8 +111,8 @@ public:
     }
   }
 
-  static bool checkDropCache(int &bytesWritten, int &prevBytesWritten,
-                             FILE *f);
+  static int checkDropCache(int bytesWritten, int prevBytesWritten,
+                            FILE *f);
   static char *EscapeString(const std::string &msg);
 
   virtual ~Logger() { }

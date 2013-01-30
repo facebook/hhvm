@@ -17,6 +17,7 @@
 #ifndef __CRONOLOG_H__
 #define __CRONOLOG_H__
 
+#include <atomic>
 #include <string>
 #include <util/cronoutils.h>
 #include <util/lock.h>
@@ -64,7 +65,7 @@ public:
   time_t m_nextPeriod;
   FILE *m_prevFile;
   FILE *m_file;
-  int m_bytesWritten;
+  std::atomic<int> m_bytesWritten;
   int m_prevBytesWritten;
   Mutex m_mutex;
 

@@ -152,8 +152,10 @@ bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
 
 // Should be called outside m_lock
 void ConcurrentTableSharedStore::purgeExpired() {
-  if ((atomic_add(m_purgeCounter, (uint64)1) %
-       RuntimeOption::ApcPurgeFrequency) != 0) return;
+  if (m_purgeCounter.fetch_add(1, std::memory_order_relaxed) %
+      RuntimeOption::ApcPurgeFrequency != 0) {
+    return;
+  }
   time_t now = time(NULL);
   ExpirationPair tmp;
   struct timespec tsBegin, tsEnd;

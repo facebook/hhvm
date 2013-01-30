@@ -101,7 +101,7 @@ void AccessLog::openFiles(const string &username) {
       if (!fp) {
         Logger::Error("Could not open access log file %s", file.c_str());
       }
-      m_output.push_back(LogFileData(fp));
+      m_output.emplace_back(fp);
     }
   }
 }
@@ -115,9 +115,10 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
   if (threadLog) {
     threadData->bytesWritten +=
       writeLog(transport, vhost, threadLog, m_defaultFormat.c_str());
-    Logger::checkDropCache(threadData->bytesWritten,
-                           threadData->prevBytesWritten,
-                           threadLog);
+    threadData->prevBytesWritten =
+      Logger::checkDropCache(threadData->bytesWritten,
+                             threadData->prevBytesWritten,
+                             threadLog);
   }
   if (Logger::UseCronolog) {
     for (uint i = 0; i < m_cronOutput.size(); ++i) {
@@ -126,23 +127,25 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
       if (!outFile) continue;
       const char *format = m_files[i].format.c_str();
       int bytes = writeLog(transport, vhost, outFile, format);
-      atomic_add(cronOutput.m_bytesWritten, bytes);
-      Logger::checkDropCache(cronOutput.m_bytesWritten,
-                             cronOutput.m_prevBytesWritten,
-                             outFile);
+      cronOutput.m_bytesWritten.fetch_add(bytes, std::memory_order_relaxed);
+      cronOutput.m_prevBytesWritten = Logger::checkDropCache(
+        cronOutput.m_bytesWritten.load(std::memory_order_relaxed),
+        cronOutput.m_prevBytesWritten,
+        outFile);
     }
   } else {
     for (uint i = 0; i < m_output.size(); ++i) {
-      LogFileData &output = m_output[i];
+      LogFileData& output = m_output[i];
       FILE *outFile = output.log;
       if (!outFile) continue;
       const char *format = m_files[i].format.c_str();
       int bytes = writeLog(transport, vhost, outFile, format);
-      atomic_add(output.bytesWritten, bytes);
+      output.bytesWritten.fetch_add(bytes, std::memory_order_relaxed);
       if (m_files[i].file[0] != '|') {
-        Logger::checkDropCache(output.bytesWritten,
-                               output.prevBytesWritten,
-                               outFile);
+        output.prevBytesWritten =
+          Logger::checkDropCache(output.bytesWritten,
+                                 output.prevBytesWritten,
+                                 outFile);
       }
     }
   }

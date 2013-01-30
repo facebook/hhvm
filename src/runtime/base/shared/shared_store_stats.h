@@ -17,9 +17,10 @@
 #ifndef __HPHP_SHARED_STORE_STATS_H__
 #define __HPHP_SHARED_STORE_STATS_H__
 
-#include <runtime/base/shared/shared_variant.h>
-#include <runtime/base/complex_types.h>
 #include <tbb/concurrent_hash_map.h>
+
+#include "runtime/base/shared/shared_variant.h"
+#include "runtime/base/complex_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,24 +113,24 @@ public:
 protected:
   static ReadWriteMutex s_rwlock;
 
-  static int32 s_keyCount; // how many distinct keys
-  static int32 s_keySize; // how much space these keys take
-  static int32 s_variantCount; // how many variant
-  static int64 s_dataSize; // how large is the data
-  static int64 s_dataTotalSize; // how much space to hold data
+  static std::atomic<int32_t> s_keyCount; // how many distinct keys
+  static std::atomic<int32_t> s_keySize; // how much space these keys take
+  static int32_t s_variantCount; // how many variant
+  static int64_t s_dataSize; // how large is the data
+  static std::atomic<int64_t> s_dataTotalSize; // how much space to hold data
                                 // including structures
-  static int64 s_deleteSize;
-  static int64 s_replaceSize;
+  static int64_t s_deleteSize;
+  static int64_t s_replaceSize;
 
-  static int32 s_addCount;
-  static int32 s_primeCount;
-  static int32 s_fromFileCount;
-  static int32 s_updateCount;
-  static int32 s_deleteCount;
-  static int32 s_expireCount;
+  static std::atomic<int32_t> s_addCount;
+  static std::atomic<int32_t> s_primeCount;
+  static std::atomic<int32_t> s_fromFileCount;
+  static std::atomic<int32_t> s_updateCount;
+  static std::atomic<int32_t> s_deleteCount;
+  static std::atomic<int32_t> s_expireCount;
 
-  static int32 s_expireQueueSize;
-  static int64 s_purgingTime;
+  static int32_t s_expireQueueSize;
+  static std::atomic<int64_t> s_purgingTime;
 
   static void remove(SharedValueProfile *svp, bool replace);
   static void add(SharedValueProfile *svp);

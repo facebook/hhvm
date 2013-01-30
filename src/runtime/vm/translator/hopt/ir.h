@@ -488,7 +488,9 @@ public:
             t == Gen);
   }
 
-  // returns true if t1 is a more refined that t2
+  /*
+   * Returns true if t1 is a strict subtype of t2.
+   */
   static bool isMoreRefined(Tag t1, Tag t2) {
     return ((t2 == Gen           && t1 < Gen)                    ||
             (t2 == Cell          && t1 < Cell)                   ||
@@ -499,6 +501,18 @@ public:
             (t2 == UncountedInit && t1 < UncountedInit && t1 > Uninit));
   }
 
+  /*
+   * Returns true if t1 is a non-strict subtype of t2.
+   */
+  static bool subtypeOf(Tag t1, Tag t2) {
+    return t1 == t2 || isMoreRefined(t1, t2);
+  }
+
+  /*
+   * Returns the most refined of two types.
+   *
+   * Pre: the types must not be completely unrelated.
+   */
   static Tag getMostRefined(Tag t1, Tag t2) {
     if (isMoreRefined(t1, t2)) return t1;
     if (isMoreRefined(t2, t1)) return t2;
@@ -1136,6 +1150,16 @@ public:
   // Used for Jcc to Jmp elimination
   void              setTCA(TCA tca);
   TCA               getTCA() const;
+
+  /*
+   * Returns: Type::subtypeOf(getType(), tag).
+   *
+   * This should be used for most checks on the types of IRInstruction
+   * sources.
+   */
+  bool isA(Type::Tag tag) const {
+    return Type::subtypeOf(getType(), tag);
+  }
 
   /*
    * Returns whether or not a given register index is allocated to a

@@ -839,7 +839,7 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
   if (!isBoolOrNumeric(src1) || !isBoolOrNumeric(src2)) {
     CG_PUNT(BinaryOp);
   }
-  if (src1->getType() == Type::Dbl || src2->getType() == Type::Dbl) {
+  if (src1->isA(Type::Dbl) || src2->isA(Type::Dbl)) {
     prepBinaryXmmOp(m_as, src1, src2);
     (m_as.*fpInstr)(xmm1, xmm0);
     m_as.    mov_xmm_reg64(xmm0, dst->getReg());

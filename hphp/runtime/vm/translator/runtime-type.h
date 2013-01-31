@@ -277,6 +277,7 @@ class RuntimeType {
   bool isBoolean() const;
   bool isString() const;
   bool isObject() const;
+  bool isClass() const;
   bool operator==(const RuntimeType& r) const;
   RuntimeType &operator=(const RuntimeType& r);
   size_t operator()(const RuntimeType& r) const; // hash function

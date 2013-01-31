@@ -2502,8 +2502,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
     assert(!mapContains(m_changeSet, l));
     if (ii.dontGuard && !l.isLiteral()) {
       assert(!useHHIR || staticType != KindOfRef);
-      dl = m_t->newDynLocation(l, RuntimeType(useHHIR ? staticType
-                                                      : KindOfInvalid));
+      dl = m_t->newDynLocation(l, RuntimeType(staticType));
       if (useHHIR && staticType != KindOfInvalid) {
         m_resolvedDeps[l] = dl;
       }
@@ -2970,10 +2969,12 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
   auto& t = *retval;
   t.m_sk = sk;
 
+  DEBUG_ONLY const char* file = curUnit()->filepath()->data();
+  DEBUG_ONLY const int lineNum = curUnit()->getLineNumber(t.m_sk.offset());
+  DEBUG_ONLY const char* funcName = curFunc()->fullName()->data();
+
   TRACE(3, "Translator::analyze %s:%d %s\n",
-           curUnit()->filepath()->data(),
-           curUnit()->getLineNumber(t.m_sk.offset()),
-           curFunc()->fullName()->data());
+           file, lineNum, funcName);
   TraceletContext tas(&t);
   ImmStack immStack;
   int stackFrameOffset = 0;

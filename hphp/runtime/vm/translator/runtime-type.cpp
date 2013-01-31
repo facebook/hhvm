@@ -282,6 +282,10 @@ bool RuntimeType::isObject() const {
   return isValue() && outerType() == KindOfObject;
 }
 
+bool RuntimeType::isClass() const {
+  return isValue() && outerType() == KindOfClass;
+}
+
 bool RuntimeType::isArray() const {
   return isValue() && outerType() == KindOfArray;
 }

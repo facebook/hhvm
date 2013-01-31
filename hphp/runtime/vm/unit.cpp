@@ -2423,7 +2423,7 @@ Unit* UnitEmitter::create() {
 
   if (RuntimeOption::EvalDumpBytecode) {
     // Dump human-readable bytecode.
-    std::cout << u->toString();
+    Trace::trace(u->toString());
   }
 
   static const bool kAlwaysVerify = getenv("HHVM_ALWAYS_VERIFY");

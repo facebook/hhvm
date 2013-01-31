@@ -92,13 +92,11 @@ int64_t spillSlotsToSize(int n) {
   return n * sizeof(int64_t);
 }
 
-void cgPunt(const char* _file, int _line, const char* _func) {
+void cgPunt(const char* file, int line, const char* func) {
   if (RuntimeOption::EvalDumpIR) {
-    std::cout << "--------- CG_PUNT " << _file <<
-                 "  " << _line << "  " << _func
-                 << "\n";
+    HPHP::Trace::trace("--------- CG_PUNT %s %d %s\n", file, line, func);
   }
-  throw FailedCodeGen(_file, _line, _func);
+  throw FailedCodeGen(file, line, func);
 }
 
 #define CG_PUNT(instr) do {                     \

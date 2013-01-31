@@ -881,7 +881,12 @@ TranslatorX64::irTranslateIssetS(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   const int kClassIdx = 0;
   const int kPropNameIdx = 1;
-  const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
+  auto const& clsInput = i.inputs[kClassIdx]->rtt;
+  if (!(clsInput.isObject() || clsInput.isClass())) {
+    using namespace JIT;
+    PUNT(IssetS);
+  }
+  const Class* cls = clsInput.valueClass();
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
   m_hhbcTrans->emitIssetS(cls, propName);
 }
@@ -1562,18 +1567,17 @@ void TranslatorX64::irAssertType(const Location& l,
 }
 
 void TranslatorX64::irEmitResolvedDeps(const ChangeMap& resolvedDeps) {
-  for (DepMap::const_iterator dep = resolvedDeps.begin();
-       dep != resolvedDeps.end(); dep++) {
-    irAssertType(dep->first, dep->second->rtt);
+  for (const auto dep : resolvedDeps) {
+    irAssertType(dep.first, dep.second->rtt);
   }
 }
 
-bool
-TranslatorX64::irTranslateTracelet(const Tracelet&         t,
+TranslatorX64::TranslateTraceletResult
+TranslatorX64::irTranslateTracelet(Tracelet&               t,
                                    const TCA               start,
                                    const TCA               stubStart,
                                    vector<TransBCMapping>* bcMap) {
-  bool hhirSucceeded = false;
+  auto transResult = Failure;
   assert(m_useHHIR);
 
   const SrcKey &sk = t.m_sk;
@@ -1594,13 +1598,29 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
     recordBCInstr(OpTraceletGuard, a, start);
     m_hhbcTrans->setBcOffNextTrace(t.m_nextSk.offset());
-
     // Translate each instruction in the tracelet
-    for (NormalizedInstruction* ni = t.m_instrStream.first; ni;
-         ni = ni->next) {
-      m_curNI = ni;
-      Nuller<NormalizedInstruction> niNuller(&m_curNI);
-      irTranslateInstr(t, *ni);
+    for (auto* ni = t.m_instrStream.first; ni; ni = ni->next) {
+      try {
+        SKTRACE(1, ni->source, "HHIR: irTranslateInstr\n");
+        Nuller<NormalizedInstruction> niNuller(&m_curNI);
+        m_curNI = ni;
+        irTranslateInstr(t, *ni);
+      } catch (JIT::FailedIRGen& fcg) {
+        if (!RuntimeOption::EvalHHIRDisableTx64 || !ni->prev) {
+          // Let tx64 handle the entire tracelet.
+          throw;
+        }
+        // We've made forward progress. Proceed with the partial tracelet,
+        // with this last instruction interpreted. Since the interpretation
+        // might have had unknowable side effects, kill the trace right
+        // after.
+        SKTRACE(1, ni->source, "HHIR: RETRY to translate, breaking tracelet.\n");
+        ni = ni->prev;
+        ni->breaksTracelet = true;
+        t.m_nextSk = ni->next->source;
+        transResult = Retry;
+        break;
+      }
       assert(ni->source.offset() >= curFunc()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
       // analysis, but breaksTracelet is authoritative.
@@ -1608,13 +1628,15 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     }
 
     hhirTraceEnd(t.m_nextSk.offset());
-    hhirTraceCodeGen(bcMap);
+    if (transResult != Retry) {
+      transResult = Success;
+      hhirTraceCodeGen(bcMap);
 
-    hhirSucceeded = true;
-    TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n",
-          getCurrentTransID());
+      TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n",
+            getCurrentTransID());
+    }
   } catch (JIT::FailedCodeGen& fcg) {
-    hhirSucceeded = false;
+    transResult = Failure;
     if (Trace::moduleEnabled(Trace::punt, 1)) m_lastHHIRPunt = fcg.func;
     TRACE(1, "HHIR: FAILED to generate code for Translation %d "
           "@ %s:%d (%s)\n", getCurrentTransID(),
@@ -1623,19 +1645,19 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           fcg.file, fcg.line, fcg.func);
   } catch (JIT::FailedIRGen& x) {
-    hhirSucceeded = false;
-    if (Trace::moduleEnabled(Trace::punt, 1)) m_lastHHIRPunt = x.func;
+    transResult = Failure;
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           x.file, x.line, x.func);
   } catch (TranslationFailedExc& tfe) {
     not_reached();
   } catch (const std::exception& e) {
-    hhirSucceeded = false;
+    transResult = Failure;
     FTRACE(1, "HHIR: FAILED with exception: {}\n", e.what());
     assert(0);
   }
 
-  if (!hhirSucceeded) {
+  m_useHHIR = transResult != Failure;
+  if (transResult != Success) {
     // The whole translation failed; give up on this BB. Since it is not
     // linked into srcDB yet, it is guaranteed not to be reachable.
     // Free IR resources for this trace, rollback the Translation cache
@@ -1647,12 +1669,12 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
     // Reset additions to list of addresses which need to be patched
     srcRec.clearInProgressTailJumps();
   }
-
-  return hhirSucceeded;
+  return transResult;
 }
 
 void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
   assert(!m_irFactory);
+  assert(m_useHHIR);
 
   Cell* fp = vmfp();
   if (curFunc()->isGenerator()) {
@@ -1730,8 +1752,6 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 void TranslatorX64::hhirTraceFree() {
   FTRACE(1, "HHIR free: arena size: {}\n",
          m_irFactory->arena().size());
-
-  m_useHHIR = false;
   m_hhbcTrans.reset();
   m_irFactory.reset();
 }

@@ -795,6 +795,15 @@ private:
   bool checkTranslationLimit(SrcKey, const SrcRec&) const;
   void translateTracelet(SrcKey sk, bool considerHHIR=true,
                          bool dryRun = false);
+  enum TranslateTraceletResult {
+    Failure,
+    Retry,
+    Success
+  };
+  TranslateTraceletResult irTranslateTracelet(Tracelet& t,
+                                              const TCA start,
+                                              const TCA stubStart,
+                                              vector<TransBCMapping>* bcMap);
   bool irTranslateTracelet(const Tracelet&         t,
                            const TCA               start,
                            const TCA               stubStart,

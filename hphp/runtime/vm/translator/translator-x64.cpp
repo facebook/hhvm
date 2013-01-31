@@ -1451,7 +1451,7 @@ TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
       useHHIR = m_useHHIR = false;
       RuntimeOption::EvalJitUseIR = false;
     } else {
-      hhirTraceStart(sk.offset());
+      m_useHHIR = true;
     }
   } else {
     assert(m_useHHIR == false);
@@ -11288,6 +11288,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
     TRACE(3, "  %6d: %s\n", ni->source.offset(),
       instrToString(ni->pc()).c_str());
+    if (ni->breaksTracelet) break;
   }
   TRACE(3, "----------------------------------------------\n");
   if (Trace::moduleEnabled(Trace::tx64, 5)) {
@@ -11306,7 +11307,7 @@ void
 TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
                                 bool dryRun /*= false */) {
   std::unique_ptr<Tracelet> tp = analyze(sk);
-  const Tracelet& t = *tp;
+  Tracelet& t = *tp;
   m_curTrace = &t;
   Nuller<Tracelet> ctNuller(&m_curTrace);
 
@@ -11319,13 +11320,23 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
   uint8                   counterLen = 0;
   SrcRec&                 srcRec = *getSrcRec(sk);
   vector<TransBCMapping>  bcMapping;
-  TransKind               transKind;
+  TransKind               transKind = TransNormal;
 
-  if (m_useHHIR && irTranslateTracelet(t, start, stubStart, &bcMapping)) {
-    m_irAUsage += (a.code.frontier - start);
-    m_irAstubsUsage += (astubs.code.frontier - stubStart);
-    transKind = TransNormalIR;
-  } else { // Regular old tx64.
+  if (m_useHHIR) {
+    TranslateTraceletResult result;
+    do {
+      hhirTraceStart(sk.offset());
+      SKTRACE(1, sk, "retrying irTranslateTracelet\n");
+      result = irTranslateTracelet(t, start, stubStart, &bcMapping);
+    } while (result == Retry);
+    m_useHHIR = false;
+    if (result == Success) {
+      m_irAUsage += (a.code.frontier - start);
+      m_irAstubsUsage += (astubs.code.frontier - stubStart);
+      transKind = TransNormalIR;
+    }
+  }
+  if (transKind == TransNormal) { // Regular old tx64.
     assert(m_pendingFixups.size() == 0);
     assert(srcRec.inProgressTailJumps().size() == 0);
     assert(!m_useHHIR);

@@ -1665,7 +1665,7 @@ Trace* HhbcTranslator::guardRefs(int64               entryArDelta,
                                  const vector<bool>& mask,
                                  const vector<bool>& vals,
                                  Trace*              exitTrace) {
-  if (exitTrace == NULL) {
+  if (exitTrace == nullptr) {
     exitTrace = getGuardExit();
   }
 

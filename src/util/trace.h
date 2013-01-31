@@ -85,6 +85,7 @@ namespace Trace {
       TM(jcc)         \
       TM(instancebits)\
       TM(hhas)        \
+      TM(punt)        \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

@@ -36,6 +36,7 @@ typedef __sighandler_t *sighandler_t;
 #include <boost/bind.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
+#include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include "util/pathtrack.h"
@@ -134,6 +135,53 @@ __thread VMRegState tl_regState = REGSTATE_CLEAN;
 
 __thread JmpHitMap* tl_unlikelyHits = nullptr;
 __thread JmpHitMap* tl_jccHits = nullptr;
+
+namespace {
+typedef hphp_hash_map<litstr, int64_t, pointer_hash<const char>> PuntMap;
+__thread PuntMap* tl_puntCounts = nullptr;
+
+void recordPunt(litstr key) {
+  assert(Trace::moduleEnabled(Trace::punt, 1));
+  assert(tl_puntCounts);
+  (*tl_puntCounts)[key]++;
+}
+
+void initPuntCounts() {
+  if (!Trace::moduleEnabled(Trace::punt, 1)) return;
+  assert(!tl_puntCounts);
+  tl_puntCounts = new PuntMap();
+}
+
+void dumpPuntCounts() {
+  if (!Trace::moduleEnabled(Trace::punt, 1)) return;
+  assert(tl_puntCounts);
+  TRACE_SET_MOD(punt);
+
+  int64_t total = 0;
+  std::map<int64_t, litstr> sortedPunts;
+  for (auto const& pair : *tl_puntCounts) {
+    sortedPunts[pair.second] = pair.first;
+    total += pair.second;
+  }
+
+  TRACE(1, "-------------------- hhir punts for %s --------------------\n",
+       g_context->getRequestUrl(50).c_str());
+  TRACE(1, "%30s   %9s %9s %9s\n",
+        "name", "count", "% total", "accum %");
+  int64_t accum = 0;
+  for (auto const& pair : boost::adaptors::reverse(sortedPunts)) {
+    accum += pair.first;
+    TRACE(1, "%30s : %9ld %8.2f%% %8.2f%%\n",
+          pair.second, pair.first,
+          100.0 * pair.first / total, 100.0 * accum / total);
+  }
+  TRACE(1, "\n");
+
+  delete tl_puntCounts;
+  tl_puntCounts = nullptr;
+}
+}
+
 static StaticString s___call(LITSTR_INIT("__call"));
 static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 
@@ -1409,6 +1457,7 @@ TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
   }
 
   TCA start = a.code.frontier;
+  m_lastHHIRPunt.clear();
   translateTracelet(sk);
 
   SKTRACE(1, sk, "translate moved head from %p to %p\n",
@@ -11284,6 +11333,13 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/) {
         emitTransCounterInc(a);
       }
 
+      // emit a counter for the hhir punt that got us here, if any
+      if (Trace::moduleEnabled(Trace::punt, 1) && !m_lastHHIRPunt.empty()) {
+        PhysRegSaver regs(a, kAllX64Regs);
+        a.  movq (StringData::GetStaticString(m_lastHHIRPunt)->data(), rdi);
+        a.  call ((TCA)recordPunt);
+      }
+
       emitRB(a, RBTypeTraceletBody, t.m_sk);
       Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
       recordBCInstr(OpTraceletGuard, a, start);
@@ -11793,6 +11849,7 @@ TranslatorX64::requestInit() {
   Treadmill::startRequest(g_vmContext->m_currentThreadIdx);
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   initJmpProfile();
+  initPuntCounts();
 }
 
 void
@@ -11809,6 +11866,7 @@ TranslatorX64::requestExit() {
   Stats::dump();
   Stats::clear();
   dumpJmpProfile();
+  dumpPuntCounts();
 
   if (Trace::moduleEnabledRelease(Trace::tx64stats, 1)) {
     Trace::traceRelease("TranslatorX64 perf counters for %s:\n",

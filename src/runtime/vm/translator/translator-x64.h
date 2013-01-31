@@ -167,6 +167,7 @@ class TranslatorX64 : public Translator
                          m_irFactory;
   std::unique_ptr<JIT::HhbcTranslator>
                          m_hhbcTrans;
+  std::string            m_lastHHIRPunt;
 
   void hhirTraceStart(Offset bcStartOffset);
   void hhirTraceCodeGen(vector<TransBCMapping>* bcMap);

@@ -15,7 +15,6 @@
    +----------------------------------------------------------------------+
 */
 #include "LifeEventTokenizer.h"
-#include "util/atomic.h"
 
 using namespace U_ICU_NAMESPACE;
 
@@ -139,11 +138,12 @@ $dictionary $dictionary;\n\
 
 // Master copy of the tokenizer object. Uses the rules above.
 
-const BreakIterator* kMaster = NULL;
+std::atomic<const BreakIterator*> kMaster(nullptr);
 
 const BreakIterator* getMaster() {
-  // Unlocked read of kMaster is safe (though a stale NULL is possible).
-  if (kMaster != NULL) { return kMaster; }
+  if (auto master = kMaster.load(std::memory_order_acquire)) {
+    return master;
+  }
   UParseError parseError;
   UErrorCode errorCode = U_ZERO_ERROR;
   const BreakIterator* bi
@@ -152,10 +152,12 @@ const BreakIterator* getMaster() {
                                       errorCode);
   // Atomically swap in bi, but delete it if this this thread loses the
   // initialization race.
-  if (!atomic_cas(&kMaster, static_cast<const BreakIterator*>(NULL), bi)) {
+  static const BreakIterator* expectedNull = nullptr;
+  if (!kMaster.compare_exchange_strong(expectedNull, bi,
+                                       std::memory_order_acq_rel)) {
     delete bi;
   }
-  return kMaster;
+  return kMaster.load(std::memory_order_acquire);
 }
 
 void tokenizeString(

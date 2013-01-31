@@ -88,12 +88,6 @@ static inline int atomic_dec(int &count) {
   return __sync_fetch_and_add(&count, -1) - 1;
 }
 
-template<class T>
-static inline bool atomic_cas(volatile T* mem, T cmpVal, T newVal) {
-  assert_address_is_atomically_accessible(mem);
-  return __sync_bool_compare_and_swap(mem, cmpVal, newVal);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

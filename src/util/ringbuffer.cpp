@@ -17,10 +17,10 @@
 #include "util/ringbuffer.h"
 #include "util/pathtrack.h"
 #include "util/util.h"
-#include "util/atomic.h"
 #include "util/assertions.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cstdio>
 #include <cstring>
 
@@ -87,7 +87,7 @@ struct RingBufferEntry {
 
 static const int kMaxRBEntries = (1 << 20); // Must exceed number of threads
 RingBufferEntry g_ring[kMaxRBEntries];
-volatile int g_ringIdx;
+std::atomic<int> g_ringIdx(0);
 
 RingBufferEntry*
 allocEntry(RingBufferType t) {
@@ -95,10 +95,11 @@ allocEntry(RingBufferType t) {
   RingBufferEntry* rb;
   int newRingPos, oldRingPos;
   do {
-    oldRingPos = g_ringIdx;
+    oldRingPos = g_ringIdx.load(std::memory_order_acquire);
     rb = &g_ring[oldRingPos];
     newRingPos = (oldRingPos + 1) % kMaxRBEntries;
-  } while (!atomic_cas(&g_ringIdx, oldRingPos, newRingPos));
+  } while (!g_ringIdx.compare_exchange_weak(oldRingPos, newRingPos,
+                                            std::memory_order_acq_rel));
   rb->m_ts = uint32_t(_rdtsc());
   rb->m_type = t;
   rb->m_threadId = (uint32_t)((int64_t)pthread_self() & 0xFFFFFFFF);
@@ -190,7 +191,7 @@ void dumpEntry(const RingBufferEntry* e) {
 //    (gdb) call HPHP::Trace::dumpRingBufferMasked(100,
 //       (1 << HPHP::Trace::RBTypeFuncEntry))
 void dumpRingBufferMasked(int numEntries, uint32_t types) {
-  int startIdx = (g_ringIdx - numEntries) % kMaxRBEntries;
+  int startIdx = (g_ringIdx.load() - numEntries) % kMaxRBEntries;
   while (startIdx < 0) {
     startIdx += kMaxRBEntries;
   }

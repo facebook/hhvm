@@ -17,6 +17,7 @@
 #ifndef __ICU_LIFE_EVENT_TOKENIZER_H__
 #define __ICU_LIFE_EVENT_TOKENIZER_H__
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <boost/scoped_ptr.hpp>
@@ -35,7 +36,7 @@ typedef icu::RuleBasedBreakIterator BreakIterator;
 // Master copy of the ICU object we use for tokenization. Creation is expensive,
 // but cloning is fast and thread-safe, so we clone a copy (in tokenizeString)
 // for each tokenization. Do NOT use it directly!
-extern const BreakIterator* kMaster;
+extern std::atomic<const BreakIterator*> kMaster;
 
 // Most status values come from ICU's ubrk.h.  The following
 // are Facebook custom.

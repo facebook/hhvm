@@ -12963,6 +12963,8 @@ bool TestCodeRun::TestAssertOptions() {
 }
 
 bool TestCodeRun::TestExtMisc() {
+  XhpSyntax w(this);
+
   MVCR("<?php var_dump(pack('nvc*', 0x1234, 0x5678, 65, 66));");
   MVCR("<?php var_dump(unpack('nfrist/vsecond/c2chars', "
       "pack('nvc*', 0x1234, 0x5678, 65, 66)));");
@@ -13002,6 +13004,23 @@ bool TestCodeRun::TestExtMisc() {
         "bool(false)\n"
         "string(5) \"hello\"\n"
         "bool(false)\n");
+
+  MVCRO("<?php\n"
+        "var_dump(token_name(396));\n"
+        "$str = \"<?php \\$x=<foo:bar/>;\\$y=<foo:bar>woo!</foo:bar>;\\n\";\n"
+        "$arr = token_get_all($str);\n"
+        "foreach ($arr as $t) {\n"
+        "  if ($t[0] == 396) {\n"
+        "    var_dump($t[1]);\n"
+        "  }\n"
+        "}\n"
+        ,
+        "string(12) \"T_XHP_TAG_LT\"\n"
+        "string(1) \"<\"\n"
+        "string(1) \"<\"\n"
+        "string(1) \"<\"\n"
+        );
+
   return true;
 }
 

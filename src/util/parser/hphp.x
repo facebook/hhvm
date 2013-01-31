@@ -211,12 +211,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"yield"                { SETTOKEN; return T_YIELD;}
 <ST_IN_SCRIPTING>"try"                  { SETTOKEN; return T_TRY;}
 <ST_IN_SCRIPTING>"catch"                { SETTOKEN; return T_CATCH;}
-<ST_IN_SCRIPTING>"finally"{TABS_AND_SPACES}"{" {
-  yyless(7);
-  SETTOKEN;
-  _scanner->setToken(yytext, 7);
-  return T_FINALLY;
-}
+<ST_IN_SCRIPTING>"finally"              { SETTOKEN; return T_FINALLY;}
 <ST_IN_SCRIPTING>"throw"                { SETTOKEN; return T_THROW;}
 <ST_IN_SCRIPTING>"if"                   { SETTOKEN; return T_IF;}
 <ST_IN_SCRIPTING>"elseif"               { SETTOKEN; return T_ELSEIF;}
@@ -288,6 +283,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_INT_CAST;
   }
   yyless(1);
+  STEPPOS;
   return '(';
 }
 
@@ -297,6 +293,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_DOUBLE_CAST;
   }
   yyless(1);
+  STEPPOS;
   return '(';
 }
 
@@ -306,6 +303,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_STRING_CAST;
   }
   yyless(1);
+  STEPPOS;
   return '(';
 }
 
@@ -315,6 +313,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_ARRAY_CAST;
   }
   yyless(1);
+  STEPPOS;
   return '(';
 }
 
@@ -324,6 +323,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_OBJECT_CAST;
   }
   yyless(1);
+  STEPPOS;
   return '(';
 }
 
@@ -333,6 +333,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_BOOL_CAST;
   }
   yyless(1);
+  STEPPOS;
   return '(';
 }
 
@@ -342,6 +343,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_UNSET_CAST;
   }
   yyless(1);
+  STEPPOS;
   return '(';
 }
 
@@ -399,6 +401,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_SR;
   }
   yyless(1);
+  STEPPOS;
   return '>';
 }
 
@@ -406,6 +409,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpTag) {
     yyless(1);
+    STEPPOS;
     yy_push_state(ST_XHP_IN_TAG, yyscanner);
     return T_XHP_TAG_LT;
   }
@@ -417,6 +421,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     break;
   }
   yyless(1);
+  STEPPOS;
   if (_scanner->isStrictMode() && (ntt & NextTokenType::TypeListMaybe)) {
     // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
     // to resolve this.
@@ -441,6 +446,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_LT_CHECK>"<"{XHPLABEL}(">"|"/>"|{WHITESPACE_AND_COMMENTS}(">"|"/>"|[a-zA-Z_\x7f-\xff])) {
   BEGIN(ST_IN_SCRIPTING);
   yyless(1);
+  STEPPOS;
   yy_push_state(ST_XHP_IN_TAG, yyscanner);
   return T_XHP_TAG_LT;
 }
@@ -459,6 +465,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_XHP_LABEL;
   }
   yyless(1);
+  STEPPOS;
   return ':';
 }
 
@@ -470,6 +477,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     return T_XHP_CATEGORY_LABEL;
   }
   yyless(1);
+  STEPPOS;
   return '%';
 }
 
@@ -952,6 +960,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_XHP_CHILD>"</" {
   BEGIN(ST_XHP_END_CLOSE_TAG);
   yyless(1);
+  STEPPOS;
   return T_XHP_TAG_LT;
 }
 

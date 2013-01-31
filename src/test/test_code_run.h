@@ -260,6 +260,16 @@ private:
   std::string m_saved;
 };
 
+class XhpSyntax {
+public:
+  XhpSyntax(TestCodeRun *tcr) :
+    m_compile(tcr, OptionSetter::CompileTime, "-vEnableXHP=1"),
+    m_runtime(tcr, OptionSetter::RunTime, "-vEval.EnableXHP=1") {}
+private:
+  OptionSetter m_compile;
+  OptionSetter m_runtime;
+};
+
 class HipHopSyntax {
 public:
   HipHopSyntax(TestCodeRun *tcr) :

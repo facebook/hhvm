@@ -39,5 +39,4 @@ IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {
   return inst;
 }
 
-
 }}}

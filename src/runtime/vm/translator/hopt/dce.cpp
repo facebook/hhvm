@@ -34,6 +34,13 @@ void removeDeadInstructions(Trace* trace) {
   trace->getInstructionList().remove_if(instructionIsMarkedDead);
 }
 
+void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
+  trace->getInstructionList().remove_if([&] (const IRInstruction* inst) {
+    assert(inst->getIId() < live.size());
+    return !live.test(inst->getIId());
+  });
+}
+
 bool isUnguardedLoad(IRInstruction* inst) {
   Opcode opc = inst->getOpcode();
   SSATmp* dst = inst->getDst();

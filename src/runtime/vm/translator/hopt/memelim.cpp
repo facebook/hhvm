@@ -32,15 +32,17 @@ namespace {
 
 class MemMap {
  public:
-  MemMap(IRFactory* factory) : factory(factory) {
+  MemMap(IRFactory* factory)
+    : m_factory(factory)
+    , m_liveInsts(factory->numInsts()) {
     assert(factory != NULL);
   }
 
   ~MemMap() {
-    clearCountedMap(unescaped);
-    clearCountedMap(unknown);
-    clearCountedMap(locs);
-    clearCountedMap(props);
+    clearCountedMap(m_unescaped);
+    clearCountedMap(m_unknown);
+    clearCountedMap(m_locs);
+    clearCountedMap(m_props);
   }
 
   void optimizeMemoryAccesses(Trace* trace);
@@ -162,13 +164,6 @@ private:
   void optimizeLoad(IRInstruction* inst, int offset = -1);
   void sinkStores(StoreList& stores);
 
-  RefMap unescaped;   // refs that are known not to have escaped
-  RefMap unknown;     // refs that have escaped or possibly escaped
-  LocalsMap locs;     // locals
-  PropMap props;      // property accesses
-
-  IRFactory* factory; // needed to clone instructions for sinking
-
   template <typename V>
   static inline void clearCountedMap(hphp_hash_map<SSATmp*, V*>& map) {
     typename hphp_hash_map<SSATmp*, V*>::iterator it, copy, end;
@@ -216,13 +211,31 @@ private:
     return opc == StRef || opc == StRefNT || opc == StLoc || opc == StLocNT ||
            opc == StProp || opc == StPropNT;
   }
+
+  bool isLive(IRInstruction* inst) const {
+    assert(inst->getIId() < m_liveInsts.size());
+    return m_liveInsts.test(inst->getIId());
+  }
+
+  void setLive(IRInstruction* inst, bool live) {
+    assert(inst->getIId() < m_liveInsts.size());
+    m_liveInsts.set(inst->getIId(), live);
+  }
+
+private:
+  IRFactory* m_factory; // needed to clone instructions for sinking
+  RefMap m_unescaped;   // refs that are known not to have escaped
+  RefMap m_unknown;     // refs that have escaped or possibly escaped
+  LocalsMap m_locs;     // locals
+  PropMap m_props;      // property accesses
+  boost::dynamic_bitset<> m_liveInsts;  // live/dead bits for each instruction
 };
 
 void MemMap::killRefInfo(IRInstruction* save) {
   assert(save != NULL);
 
-  RefMap::iterator it, end;
-  for (it = unknown.begin(), end = unknown.end(); it != end; ++it) {
+  for (RefMap::iterator it = m_unknown.begin(), end = m_unknown.end();
+       it != end; ++it) {
     // if 'save' is a load, then don't kill access info of refs that have a
     // different type than 'save'
     if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem)) {
@@ -253,8 +266,8 @@ void MemMap::killPropInfo(IRInstruction* save) {
   assert(save != NULL);
 
   PropInfoList* propInfoList = NULL;
-  PropMap::iterator find = props.find(save->getSrc(0));
-  if (find != props.end()) {
+  PropMap::iterator find = m_props.find(save->getSrc(0));
+  if (find != m_props.end()) {
     propInfoList = find->second;
   }
 
@@ -264,8 +277,8 @@ void MemMap::killPropInfo(IRInstruction* save) {
   int offset = (op == LdProp || op == StProp || op == StPropNT) ?
                save->getSrc(1)->getConstValAsInt() : -1;
 
-  PropMap::iterator it, end;
-  for (it = props.begin(), end = props.end(); it != end; ++it) {
+  for (PropMap::iterator it = m_props.begin(), end = m_props.end();
+       it != end; ++it) {
     // ignore info blocks that alias the source object in 'save'. we've already
     // updated their info
     if (it->second == propInfoList) {
@@ -303,20 +316,19 @@ void MemMap::killPropInfo(IRInstruction* save) {
 }
 
 void MemMap::escapeRef(SSATmp* ref) {
-  RefMap::iterator i = unescaped.find(ref);
-  assert(i != unescaped.end());
+  RefMap::iterator i = m_unescaped.find(ref);
+  assert(i != m_unescaped.end());
 
   RefInfo* info = i->second;
 
   // find all unescaped refs that alias 'ref' and move them over into 'unknown'
-  RefMap::iterator it, end;
-  for (it = unescaped.begin(), end = unescaped.end(); it != end; ) {
+  for (RefMap::iterator it = m_unescaped.begin(), end = m_unescaped.end();
+       it != end; ) {
     RefMap::iterator copy = it;
     ++it;
-
     if (copy->second == info) {
-      unknown.insert(*copy);
-      unescaped.erase(copy);
+      m_unknown.insert(*copy);
+      m_unescaped.erase(copy);
     }
   }
 }
@@ -328,7 +340,7 @@ void MemMap::processInstruction(IRInstruction* inst) {
 
   switch (op) {
     case Box: {
-      unescaped[inst->getDst()] = new RefInfo(inst);
+      m_unescaped[inst->getDst()] = new RefInfo(inst);
       break;
     }
 
@@ -339,10 +351,10 @@ void MemMap::processInstruction(IRInstruction* inst) {
       SSATmp* home = inst->getSrc(0);
 
       // locals never alias, so no access info needs to be killed
-      if (locs.count(home) > 0) {
-        locs[home]->update(inst);
+      if (m_locs.count(home) > 0) {
+        m_locs[home]->update(inst);
       } else {
-        locs[home] = new RefInfo(inst);
+        m_locs[home] = new RefInfo(inst);
       }
       break;
     }
@@ -350,15 +362,15 @@ void MemMap::processInstruction(IRInstruction* inst) {
       SSATmp* ref = inst->getSrc(0);
 
       // only need to kill access info of possibly escaped refs
-      if (unescaped.count(ref) > 0) {
-        unescaped[ref]->update(inst);
+      if (m_unescaped.count(ref) > 0) {
+        m_unescaped[ref]->update(inst);
         break;
       }
 
-      if (unknown.count(ref) > 0) {
-        unknown[ref]->update(inst);
+      if (m_unknown.count(ref) > 0) {
+        m_unknown[ref]->update(inst);
       } else {
-        unknown[ref] = new RefInfo(inst);
+        m_unknown[ref] = new RefInfo(inst);
       }
 
       killRefInfo(inst);
@@ -374,34 +386,34 @@ void MemMap::processInstruction(IRInstruction* inst) {
 
       // figure out which map the new alias is supposed to be inserted into
       if (Type::isBoxed(source->getType())) {
-        if (unescaped.count(source) > 0) {
-          unescaped[dest] = unescaped[source];
+        if (m_unescaped.count(source) > 0) {
+          m_unescaped[dest] = m_unescaped[source];
           if (op == IncRef) {
-            unescaped[dest]->inc();
+            m_unescaped[dest]->inc();
           }
-        } else if (unknown.count(source) > 0) {
-          unknown[dest] = unknown[source];
+        } else if (m_unknown.count(source) > 0) {
+          m_unknown[dest] = m_unknown[source];
           if (op == IncRef) {
-            unknown[dest]->inc();
+            m_unknown[dest]->inc();
           }
         } else {
-          unknown[source] = new RefInfo(source->getInstruction());
-          unknown[dest] = unknown[source];
+          m_unknown[source] = new RefInfo(source->getInstruction());
+          m_unknown[dest] = m_unknown[source];
           if (op == IncRef) {
-            unknown[dest]->inc();
+            m_unknown[dest]->inc();
           }
         }
       } else if (source->getType() == Type::Obj) {
-        if (props.count(source) > 0) {
-          props[dest] = props[source];
+        if (m_props.count(source) > 0) {
+          m_props[dest] = m_props[source];
           if (op == IncRef) {
-            props[dest]->inc();
+            m_props[dest]->inc();
           }
         } else {
-          props[source] = new PropInfoList;
-          props[dest] = props[source];
+          m_props[source] = new PropInfoList;
+          m_props[dest] = m_props[source];
           if (op == IncRef) {
-            props[dest]->inc();
+            m_props[dest]->inc();
           }
         }
       }
@@ -418,15 +430,15 @@ void MemMap::processInstruction(IRInstruction* inst) {
 
       // if 'val' is an unescaped ref, then we need to escape all refs that
       // alias 'val'
-      if (unescaped.count(val) > 0) {
+      if (m_unescaped.count(val) > 0) {
         escapeRef(val);
       }
 
       // storing into a local does not affect the info of any other ref
-      if (locs.count(home) > 0) {
-        locs[home]->update(inst);
+      if (m_locs.count(home) > 0) {
+        m_locs[home]->update(inst);
       } else {
-        locs[home] = new RefInfo(inst);
+        m_locs[home] = new RefInfo(inst);
       }
       break;
     }
@@ -441,21 +453,21 @@ void MemMap::processInstruction(IRInstruction* inst) {
 
       // we know all the refs that alias an unescaped ref, so just update their
       // value
-      if (unescaped.count(ref) > 0) {
-        unescaped[alias] = unescaped[ref];
-        unescaped[alias]->update(inst);
-        unescaped.erase(ref);
+      if (m_unescaped.count(ref) > 0) {
+        m_unescaped[alias] = m_unescaped[ref];
+        m_unescaped[alias]->update(inst);
+        m_unescaped.erase(ref);
         break;
       }
 
       // storing to a possibly escaped ref means we need to kill the info of
       // all other possibly escaped refs that may alias the source ref
-      if (unknown.count(ref) > 0) {
-        unknown[alias] = unknown[ref];
-        unknown[alias]->update(inst);
-        unknown.erase(ref);
+      if (m_unknown.count(ref) > 0) {
+        m_unknown[alias] = m_unknown[ref];
+        m_unknown[alias]->update(inst);
+        m_unknown.erase(ref);
       } else {
-        unknown[alias] = new RefInfo(inst);
+        m_unknown[alias] = new RefInfo(inst);
       }
 
       killRefInfo(inst);
@@ -476,17 +488,17 @@ void MemMap::processInstruction(IRInstruction* inst) {
       SSATmp* obj = inst->getSrc(0);
 
       // if we're storing out an unescaped ref, then it has now escaped
-      if (op != LdProp && unescaped.count(inst->getSrc(2)) > 0) {
+      if (op != LdProp && m_unescaped.count(inst->getSrc(2)) > 0) {
         escapeRef(inst->getSrc(2));
       }
 
-      if (props.count(obj) > 0) {
-        props[obj]->update(inst);
+      if (m_props.count(obj) > 0) {
+        m_props[obj]->update(inst);
       } else {
         PropInfoList* list = new PropInfoList;
         int offset = inst->getSrc(1)->getConstValAsInt();
         list->accesses.push_back(PropInfo(inst, offset));
-        props[obj] = list;
+        m_props[obj] = list;
       }
 
       killPropInfo(inst);
@@ -504,15 +516,15 @@ void MemMap::processInstruction(IRInstruction* inst) {
 
       int count = 0;
 
-      if (unescaped.count(ref) > 0) {
-        count = unescaped[ref]->dec();
-        unescaped.erase(ref);
-      } else if (unknown.count(ref) > 0) {
-        count = unknown[ref]->dec();
-        unknown.erase(ref);
-      } else if (props.count(ref) > 0) {
-        count = props[ref]->dec();
-        props.erase(ref);
+      if (m_unescaped.count(ref) > 0) {
+        count = m_unescaped[ref]->dec();
+        m_unescaped.erase(ref);
+      } else if (m_unknown.count(ref) > 0) {
+        count = m_unknown[ref]->dec();
+        m_unknown.erase(ref);
+      } else if (m_props.count(ref) > 0) {
+        count = m_props[ref]->dec();
+        m_props.erase(ref);
       }
       // don't kill info if we know we haven't destroyed the object, or if we
       // know that there won't be any destructors being called
@@ -528,21 +540,21 @@ void MemMap::processInstruction(IRInstruction* inst) {
 
         // escape any boxes that are on the right hand side of the current
         // instruction
-        RefMap::iterator end = unescaped.end();
+        RefMap::iterator end = m_unescaped.end();
         for (SSATmp* src : inst->getSrcs()) {
-          RefMap::iterator find = unescaped.find(src);
+          RefMap::iterator find = m_unescaped.find(src);
           if (find != end) {
             escapeRef(find->first);
             break;
           }
         }
 
-        clearCountedMap(unknown);
-        clearCountedMap(props);
+        clearCountedMap(m_unknown);
+        clearCountedMap(m_props);
 
         // TODO always killing locals on an instruction that can modify refs
         // is too conservative
-        clearCountedMap(locs);
+        clearCountedMap(m_locs);
       }
       break;
     }
@@ -553,8 +565,8 @@ void MemMap::processInstruction(IRInstruction* inst) {
   assert(offset >= -1);                                                       \
   /* check for property accesses */                                           \
   if (offset != -1) {                                                         \
-    PropMap::iterator it = props.find(ref);                                   \
-    if (it == props.end()) {                                                  \
+    PropMap::iterator it = m_props.find(ref);                                   \
+    if (it == m_props.end()) {                                                  \
       return NULL;                                                            \
     }                                                                         \
     PropList& list = it->second->accesses;                                    \
@@ -566,16 +578,16 @@ void MemMap::processInstruction(IRInstruction* inst) {
     return NULL;                                                              \
   }                                                                           \
   /* otherwise, check all of our ref maps */                                  \
-  RefMap::iterator it = unescaped.find(ref);                                  \
-  if (it != unescaped.end()) {                                                \
+  RefMap::iterator it = m_unescaped.find(ref);                                \
+  if (it != m_unescaped.end()) {                                              \
     return it->second->FIELD;                                                 \
   }                                                                           \
-  it = unknown.find(ref);                                                     \
-  if (it != unknown.end()) {                                                  \
+  it = m_unknown.find(ref);                                                     \
+  if (it != m_unknown.end()) {                                                  \
     return it->second->FIELD;                                                 \
   }                                                                           \
-  it = locs.find(ref);                                                        \
-  if (it != locs.end()) {                                                     \
+  it = m_locs.find(ref);                                                        \
+  if (it != m_locs.end()) {                                                     \
     return it->second->FIELD;                                                 \
   }                                                                           \
   return NULL;                                                                \
@@ -593,7 +605,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
   for (IRInstruction* inst : trace->getInstructionList()) {
     // initialize each instruction as live
-    inst->setId(LIVE);
+    setLive(inst, true);
 
     int offset = -1;
     Opcode op = inst->getOpcode();
@@ -623,7 +635,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
           inst->setOpcode(StRef);
         }
 
-        access->setId(DEAD);
+        setLive(access, false);
       }
 
       // start tracking the current store
@@ -636,7 +648,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
       for (it = tracking.begin(), end = tracking.end(); it != end; ) {
         StoreList::iterator copy = it;
         ++it;
-        if (copy->first->getId() != DEAD) {
+        if (isLive(copy->first)) {
           // XXX: t1779667
           tracking.erase(copy);
         }
@@ -647,7 +659,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
     // are not yet dead know about it
     if (inst->getLabel() != NULL) {
       for (auto& entry : tracking) {
-        if (entry.first->getId() != DEAD) {
+        if (isLive(entry.first)) {
           entry.second.push_back(inst);
         }
       }
@@ -660,7 +672,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
   sinkStores(tracking);
 
   // kill the dead stores
-  removeDeadInstructions(trace);
+  removeDeadInstructions(trace, m_liveInsts);
 }
 
 void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
@@ -709,14 +721,11 @@ void MemMap::sinkStores(StoreList& stores) {
   for (it = stores.rbegin(), end = stores.rend(); it != end; ++it) {
     IRInstruction* store = it->first;
 
-    if (store->getId() != DEAD) {
-      continue;
-    }
+    if (isLive(store)) continue;
 
-    std::vector<IRInstruction*>::iterator i, e;
-    for (i = it->second.begin(), e = it->second.end(); i != e; ++i) {
-      IRInstruction* guard = *i;
-      guard->getLabel()->getParent()->prependInstruction(store->clone(factory));
+    for (IRInstruction* guard : it->second) {
+      Trace* exit = guard->getLabel()->getParent();
+      exit->prependInstruction(store->clone(m_factory));
     }
 
     // StRefs cannot just be removed, they have to be converted into Movs
@@ -725,7 +734,7 @@ void MemMap::sinkStores(StoreList& stores) {
       store->setOpcode(Mov);
       store->setSrc(1, NULL);
       store->setNumSrcs(1);
-      store->setId(LIVE);
+      setLive(store, true);
     }
   }
 }

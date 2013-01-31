@@ -16,6 +16,7 @@
 
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/opt.h"
+#include "runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP { namespace VM { namespace JIT {
 
@@ -108,8 +109,8 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
     if (exitInst && exitCcInst) {
       // Found both exits, link them to Jcc for codegen
       assert(dst);
-      exitCcInst->appendSrc(*irFactory, dst);
-      exitInst->appendSrc(*irFactory, dst);
+      exitCcInst->appendSrc(irFactory->arena(), dst);
+      exitInst->appendSrc(irFactory->arena(), dst);
       // Set flag so Jcc and exits know this is active
       dst->setTCA(kIRDirectJccJmpActive);
     }

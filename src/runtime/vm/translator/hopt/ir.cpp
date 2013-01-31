@@ -35,12 +35,13 @@ namespace HPHP {
 namespace VM {
 namespace JIT{
 
-IRInstruction::IRInstruction(IRFactory& factory, const IRInstruction* inst)
+IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   : m_op(inst->m_op)
-  , m_id(0)
-  , m_numSrcs(inst->m_numSrcs)
   , m_typeParam(inst->m_typeParam)
-  , m_srcs(m_numSrcs ? new (factory.arena()) SSATmp*[m_numSrcs] : nullptr)
+  , m_numSrcs(inst->m_numSrcs)
+  , m_iid(iid)
+  , m_id(0)
+  , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(NULL)
   , m_asmAddr(NULL)
   , m_label(inst->m_label)
@@ -243,7 +244,17 @@ bool isRefCounted(SSATmp* tmp) {
 
 void IRInstruction::convertToNop() {
   IRInstruction nop(Nop);
-  *this = nop;
+  // copy all but m_iid and m_parent
+  m_op = nop.m_op;
+  m_typeParam = nop.m_typeParam;
+  m_numSrcs = nop.m_numSrcs;
+  m_id = nop.m_id;
+  m_srcs = nop.m_srcs;
+  m_liveOutRegs = nop.m_liveOutRegs;
+  m_dst = nop.m_dst;
+  m_asmAddr = nop.m_asmAddr;
+  m_label = nop.m_label;
+  m_tca = nop.m_tca;
 }
 
 IRInstruction* IRInstruction::clone(IRFactory* factory) const {
@@ -272,8 +283,8 @@ void IRInstruction::setSrc(uint32 i, SSATmp* newSrc) {
   m_srcs[i] = newSrc;
 }
 
-void IRInstruction::appendSrc(IRFactory& factory, SSATmp* newSrc) {
-  auto newSrcs = new (factory.arena()) SSATmp*[getNumSrcs() + 1];
+void IRInstruction::appendSrc(Arena& arena, SSATmp* newSrc) {
+  auto newSrcs = new (arena) SSATmp*[getNumSrcs() + 1];
   std::copy(m_srcs, m_srcs + getNumSrcs(), newSrcs);
   newSrcs[getNumSrcs()] = newSrc;
   ++m_numSrcs;

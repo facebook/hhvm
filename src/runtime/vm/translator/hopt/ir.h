@@ -342,7 +342,7 @@ enum OpcodeFlag : uint64_t {
   OPC(Nop,               (NoFlags))                                     \
   /* */
 
-enum Opcode {
+enum Opcode : uint16_t {
 #define OPC(name, flags) name,
   IR_OPCODES
 #undef OPC
@@ -796,14 +796,16 @@ struct IRInstruction {
   typedef std::list<IRInstruction*> List;
   typedef std::list<IRInstruction*>::iterator Iterator;
   typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
+  enum IId { kTransient = 0xffffffff };
 
   explicit IRInstruction(Opcode op,
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr)
     : m_op(op)
-    , m_id(0)
-    , m_numSrcs(numSrcs)
     , m_typeParam(Type::None)
+    , m_numSrcs(numSrcs)
+    , m_iid(kTransient)
+    , m_id(0)
     , m_srcs(srcs)
     , m_dst(nullptr)
     , m_asmAddr(nullptr)
@@ -816,9 +818,10 @@ struct IRInstruction {
 
   /*
    * Construct an IRInstruction as a deep copy of `inst', using
-   * factory to allocate memory for its srcs/dests.
+   * arena to allocate memory for its srcs/dests.
    */
-  explicit IRInstruction(IRFactory& factory, const IRInstruction* inst);
+  explicit IRInstruction(Arena& arena, const IRInstruction* inst,
+                         IId iid);
 
   /*
    * Replace an instruction in place with a Nop.  This sometimes may
@@ -843,7 +846,7 @@ struct IRInstruction {
   }
   SSATmp*    getSrc(uint32 i) const;
   void       setSrc(uint32 i, SSATmp* newSrc);
-  void       appendSrc(IRFactory&, SSATmp*);
+  void       appendSrc(Arena&, SSATmp*);
   SSARange   getSrcs() const {
     return SSARange(m_srcs, m_numSrcs);
   }
@@ -864,6 +867,14 @@ struct IRInstruction {
    */
   uint32     getId()       const       { return m_id; }
   void       setId(uint32 newId)       { m_id = newId; }
+
+  /*
+   * Instruction id (iid) is stable and useful as an array index.
+   */
+  uint32     getIId()      const       {
+    assert(m_iid != kTransient);
+    return m_iid;
+  }
 
   void       setAsmAddr(void* addr)    { m_asmAddr = addr; }
   void*      getAsmAddr() const        { return m_asmAddr; }
@@ -912,14 +923,14 @@ struct IRInstruction {
   void printSrcs(std::ostream& ostream) const;
 
 private:
-  IRInstruction& operator=(const IRInstruction&) = default;
   bool mayReenterHelper() const;
 
 private:
   Opcode            m_op;
-  uint32            m_id;
-  uint16            m_numSrcs;
   Type::Tag         m_typeParam;
+  uint16            m_numSrcs;
+  const IId         m_iid;
+  uint32            m_id;
   SSATmp**          m_srcs;
   RegSet            m_liveOutRegs;
   SSATmp*           m_dst;
@@ -992,11 +1003,10 @@ public:
     setTypeParam(Type::TCA);
     m_tca = tca;
   }
-  explicit ConstInstruction(IRFactory& factory,
-                            const ConstInstruction* inst)
-    : IRInstruction(factory, inst)
-    , m_strVal(inst->m_strVal)
-  {}
+  explicit ConstInstruction(Arena& arena, const ConstInstruction* inst, IId iid)
+    : IRInstruction(arena, inst, iid)
+    , m_strVal(inst->m_strVal) {
+  }
 
   bool getValAsBool() const {
     assert(getTypeParam() == Type::Bool);
@@ -1078,8 +1088,8 @@ public:
     , m_func(func)
   {}
 
-  explicit LabelInstruction(IRFactory& factory, const LabelInstruction* inst)
-    : IRInstruction(factory, inst)
+  explicit LabelInstruction(Arena& arena, const LabelInstruction* inst, IId iid)
+    : IRInstruction(arena, inst, iid)
     , m_labelId(inst->m_labelId)
     , m_patchAddr(0)
     , m_func(inst->m_func)
@@ -1111,8 +1121,9 @@ public:
     , m_func(f)
   {}
 
-  explicit MarkerInstruction(IRFactory& factory, const MarkerInstruction* inst)
-    : IRInstruction(factory, inst)
+  explicit MarkerInstruction(Arena& arena, const MarkerInstruction* inst,
+                             IId iid)
+    : IRInstruction(arena, inst, iid)
     , m_bcOff(inst->m_bcOff)
     , m_stackOff(inst->m_stackOff)
     , m_func(inst->m_func)
@@ -1395,7 +1406,16 @@ void numberInstructions(Trace*);
 uint32 numberInstructions(Trace* trace,
                           uint32 nextId,
                           bool followControlFlow = true);
+
+/*
+ * Remove any instruction whose id field == DEAD
+ */
 void removeDeadInstructions(Trace* trace);
+
+/*
+ * Remove any instruction if live[iid] == false
+ */
+void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);
 
 /*
  * Clears the IRInstructions' ids, and the SSATmps' use count and last use id

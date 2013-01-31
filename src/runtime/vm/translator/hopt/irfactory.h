@@ -104,6 +104,7 @@ public:
   IRFactory()
     : m_nextLabelId(0)
     , m_nextOpndId(0)
+    , m_nextInstId(0)
   {}
 
   /*
@@ -127,7 +128,8 @@ public:
 
   template<class T>
   T* cloneInstruction(const T* inst) {
-    T* newInst = new (m_arena) T(*this, inst);
+    T* newInst = new (m_arena) T(m_arena, inst,
+                                 IRInstruction::IId(m_nextInstId++));
     newSSATmp(newInst);
     return newInst;
   }
@@ -145,6 +147,7 @@ public:
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }
   uint32_t numLabels() const     { return m_nextLabelId; }
+  uint32_t numInsts() const      { return m_nextInstId; }
 
 private:
   void newSSATmp(IRInstruction* inst) {
@@ -155,6 +158,7 @@ private:
 
   uint32_t m_nextLabelId;
   uint32_t m_nextOpndId;
+  uint32_t m_nextInstId;
 
   // SSATmp and IRInstruction objects are allocated here.
   Arena m_arena;

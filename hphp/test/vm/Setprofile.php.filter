@@ -1,0 +1,2 @@
+#!/bin/bash
+sed -e 's/.*hphp\//hphp\//g' -e 's/.*systemlib.*//g' -e 's/string(..) "[0-9]\+_[0-9]\+"/string() "XX_X"/'

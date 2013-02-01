@@ -7149,11 +7149,16 @@ void VMExecutionContext::iopContEnter(PC& pc) {
 
   m_fp = contAR;
   pc = contAR->m_func->getEntry();
+  SYNC();
+
+  EventHook::FunctionEnter(contAR, EventHook::NormalFunc);
+  INST_HOOK_FENTRY(contAR->m_func->fullName());
 }
 
 void VMExecutionContext::iopContExit(PC& pc) {
   NEXT();
 
+  EventHook::FunctionExit(m_fp);
   ActRec* prevFp = arGetSfp(m_fp);
   pc = prevFp->m_func->getEntry() + m_fp->m_soff;
   m_fp = prevFp;

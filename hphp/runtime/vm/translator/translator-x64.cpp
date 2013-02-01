@@ -7468,6 +7468,13 @@ void TranslatorX64::translateContExit(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   syncOutputs(i);
 
+  emitTestSurpriseFlags(a);
+  {
+    UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
+    astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+    emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
+    recordReentrantStubCall(*m_curNI);
+  }
   a.    push  (rVmFp[AROFF(m_savedRip)]);
   a.    loadq (rVmFp[AROFF(m_savedRbp)], rVmFp);
   a.    ret   ();
@@ -12263,7 +12270,6 @@ bool TranslatorX64::dumpTCData() {
   NATIVE_OP(InitThisLoc) \
   NATIVE_OP(Dup) \
   NATIVE_OP(ContEnter) \
-  NATIVE_OP(ContExit) \
   NATIVE_OP(ContValid) \
   NATIVE_OP(ContStopped) \
   NATIVE_OP(IncStat) \
@@ -12280,6 +12286,7 @@ bool TranslatorX64::dumpTCData() {
    *
    * TODO: neither UnboxR nor FPassR can actually call destructors.
    */ \
+  SUPPORTED_OP(ContExit) \
   SUPPORTED_OP(UnboxR) \
   SUPPORTED_OP(FPassR) \
   SUPPORTED_OP(NativeImpl) \

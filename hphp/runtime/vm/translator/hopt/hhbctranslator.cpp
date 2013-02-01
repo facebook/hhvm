@@ -648,6 +648,7 @@ void HhbcTranslator::emitContEnter(int32 returnBcOffset) {
 }
 
 void HhbcTranslator::emitContExit() {
+  m_tb->genExitWhenSurprised(getExitSlowTrace());
   SSATmp* retAddr = m_tb->genLdRetAddr();
   // Despite the name, this doesn't actually free the AR; it updates the
   // hardware fp and returns the old one

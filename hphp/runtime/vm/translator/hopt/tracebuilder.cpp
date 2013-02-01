@@ -511,10 +511,6 @@ SSATmp* TraceBuilder::genLdCls(SSATmp* className) {
   return gen(LdCls, className);
 }
 
-SSATmp* TraceBuilder::genLdClsCns(SSATmp* cnsName, SSATmp* cls, Trace* exit) {
-  return gen(LdClsCns, Type::Cell, getLabel(exit), cnsName, cls);
-}
-
 void TraceBuilder::genCheckInit(SSATmp* src, Trace* target) {
   assert(target);
   gen(CheckInit, getLabel(target), src);

@@ -1105,12 +1105,11 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
   const StringData* clsNameStr = lookupStringId(clsNameStrId);
   TRACE(3, "%u: ClsCnsD %s::%s\n", m_bcOff, clsNameStr->data(),
         cnsNameStr->data());
-  Trace* exitTrace1 = getExitSlowTrace();
-  Trace* exitTrace2 = getExitSlowTrace();
-  SSATmp* cnsNameTmp = m_tb->genDefConst<const StringData*>(cnsNameStr);
-  SSATmp* clsNameTmp = m_tb->genDefConst<const StringData*>(clsNameStr);
-  SSATmp* cns = m_tb->genLdClsCns(cnsNameTmp, clsNameTmp, exitTrace1);
-  m_tb->genCheckInit(cns, exitTrace2);
+  Trace* exitTrace = getExitSlowTrace();
+  SSATmp* cnsNameTmp = m_tb->genDefConst(cnsNameStr);
+  SSATmp* clsNameTmp = m_tb->genDefConst(clsNameStr);
+  SSATmp* cns = m_tb->gen(LdClsCns, Type::Cell, cnsNameTmp, clsNameTmp);
+  m_tb->genCheckInit(cns, exitTrace);
   push(cns);
 }
 

@@ -67,12 +67,12 @@ bool TestParserExpr::TestExpressionList() {
 bool TestParserExpr::TestAssignmentExpression() {
   V("<?php $a = 1;",               "$a = 1;\n");
   V("<?php $a = &$b;",             "$a = &$b;\n");
-  V("<?php $a = &new Test();",     "$a = new Test();\n");
-  V("<?php $a = &new $b();",       "$a = new $b();\n");
-  V("<?php $a = &new $$b();",      "$a = new ${$b}();\n");
-  V("<?php $a = &new Test::$b();", "$a = new Test::$b();\n");
-  V("<?php $a = &new $b->c();",    "$a = new $b->c();\n");
-  V("<?php $a = &new $b->c->d();", "$a = new $b->c->d();\n");
+  V("<?php $a = &new Test();",     "$a = &new Test();\n");
+  V("<?php $a = &new $b();",       "$a = &new $b();\n");
+  V("<?php $a = &new $$b();",      "$a = &new ${$b}();\n");
+  V("<?php $a = &new Test::$b();", "$a = &new Test::$b();\n");
+  V("<?php $a = &new $b->c();",    "$a = &new $b->c();\n");
+  V("<?php $a = &new $b->c->d();", "$a = &new $b->c->d();\n");
   return true;
 }
 

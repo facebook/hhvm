@@ -621,7 +621,7 @@ void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
   ExpressionPtr exp =
     NEW_EXP(NewObjectExpression, name->exp,
             dynamic_pointer_cast<ExpressionList>(args->exp));
-  out->exp = NEW_EXP(AssignmentExpression, var->exp, exp, false);
+  out->exp = NEW_EXP(AssignmentExpression, var->exp, exp, true);
 }
 
 void Parser::onNewObject(Token &out, Token &name, Token &args) {

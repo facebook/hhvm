@@ -967,7 +967,8 @@ void LinearScan::rematerializeAux(Trace* trace,
         if (pos != localValues.end()) {
           size_t locId = pos - localValues.begin();
           assert(curFp != NULL);
-          ConstInstruction constInst(curFp, Local(locId));
+          SSATmp* srcs[] = { curFp };
+          ConstInstruction constInst(1, srcs, Local(locId));
           IRInstruction* ldHomeInst =
             m_irFactory->cloneInstruction(&constInst);
           newInst = m_irFactory->gen(LdLoc,

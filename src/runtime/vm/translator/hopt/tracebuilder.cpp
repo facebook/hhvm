@@ -551,7 +551,8 @@ void TraceBuilder::genGuardRefs(SSATmp* funcPtr,
 
 
 SSATmp* TraceBuilder::genLdHome(uint32 id) {
-  ConstInstruction inst(m_fpValue, Local(id));
+  SSATmp* srcs[] = { m_fpValue };
+  ConstInstruction inst(1, srcs, Local(id));
   assert(m_fpValue &&
          m_fpValue->getInstruction()->getOpcode() == DefFP);
   return optimizeInst(&inst);

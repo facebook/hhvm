@@ -923,8 +923,8 @@ public:
     m_intVal = 0;
     m_boolVal = val;
   }
-  ConstInstruction(SSATmp* src, Local l)
-    : IRInstruction(LdHome, 1, &src)
+  ConstInstruction(uint32_t numSrcs, SSATmp** srcs, Local l)
+    : IRInstruction(LdHome, numSrcs, srcs)
   {
     setTypeParam(Type::Home);
     new (&m_local) Local(l);

@@ -890,11 +890,10 @@ TranslatorX64::irTranslateIssetS(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateSetMProp(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+                                   const NormalizedInstruction& i) {
   using namespace TargetCache;
   assert(i.inputs.size() == 3);
 
-  UNUSED const int kRhsIdx       = 0;
   const int kBaseIdx      = 1;
   const int kPropIdx      = 2;
   const DynLocation& base = *i.inputs[kBaseIdx];
@@ -906,9 +905,11 @@ TranslatorX64::irTranslateSetMProp(const Tracelet& t,
 
   bool fastSet = propOffset != -1 && i.immVec.locationCode() == LC;
 
-  HHIR_UNIMPLEMENTED_WHEN(!fastSet || base.valueType() != KindOfObject,
-                          SetMPropSlow);
-  HHIR_EMIT(SetProp, propOffset, propLoc.isStack());
+  if (fastSet && base.valueType() == KindOfObject) {
+    HHIR_EMIT(SetProp, propOffset, propLoc.isStack());
+  } else {
+    m_hhbcTrans->emitMInstr(i);
+  }
 }
 
 static bool isSupportedSetMProp(const NormalizedInstruction& i) {

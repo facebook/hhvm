@@ -29,7 +29,7 @@ namespace HPHP { namespace VM { namespace JIT {
 #undef MISOFF
 #define MISOFF(nm) (offsetof(Transl::MInstrState, nm) + kReservedRSPSpillSpace)
 
-#define CTX() arGetContextClass(curFrame())
+#define CTX() m_tb.genDefConst(arGetContextClass(curFrame()))
 
 static const MInstrAttr Warn = MIA_warn;
 static const MInstrAttr Unset = MIA_unset;

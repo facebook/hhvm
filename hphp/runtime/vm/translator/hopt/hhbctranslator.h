@@ -410,6 +410,12 @@ private:
     void emit##instr##Prop();
     MINSTRS
 #   undef MII
+    void emitNotSuppNewElem();
+    void emitVGetNewElem();
+    void emitSetNewElem();
+    void emitSetOpNewElem();
+    void emitIncDecNewElem();
+    void emitBindNewElem();
 
     // Misc Helpers
     void numberStackInputs();

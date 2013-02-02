@@ -27,6 +27,20 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+Type vectorReturn(const IRInstruction* inst) {
+  assert(inst->getOpcode() == SetProp || inst->getOpcode() == SetElem);
+
+  int baseIdx = vectorBaseIdx(inst);
+  int valIdx = vectorValIdx(inst);
+  return VectorEffects(inst->getOpcode(),
+                       inst->getSrc(baseIdx)->getType(),
+                       inst->getSrc(valIdx)->getType()).valType;
+}
+
+}
+
 Type outputType(const IRInstruction* inst) {
 
 #define D(type)   return Type::type;
@@ -35,6 +49,7 @@ Type outputType(const IRInstruction* inst) {
 #define DBox(n)   return inst->getSrc(n)->getType().box();
 #define DParam    return inst->getTypeParam();
 #define DLabel    return Type::None;
+#define DVector   return vectorReturn(inst);
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
@@ -52,6 +67,7 @@ Type outputType(const IRInstruction* inst) {
 #undef DBox
 #undef DParam
 #undef DLabel
+#undef DVector
 #undef ND
 
 }
@@ -178,6 +194,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define SUnk     return;
 #define ND
 #define DLabel
+#define DVector
 #define D(...)
 #define DUnbox(src) checkDst(src < inst->getNumSrcs(),  \
                              "invalid src num");

@@ -956,19 +956,44 @@ D:PtrToCell = DefMIStateBase
 
   Declares a base register for MInstrState. Currently this is always %rsp
 
-D:Gen* = PropX S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
+All of the remaining opcodes in this section are simple wrappers
+around helper functions (specified in S0) to perform the corresponding
+vector operation. If S1 is a ConstCls it represents the context class
+for the operation. D:Vector indicates that the return value of the
+opcode depends on the input types:
 
-  Lookup intermediate property. Calls the helper specified by S0, passing the
-  class context (S1), pointer to the current base (S2), key (S3), and pointer
-  to MInstrState (S4).
+SetElem/SetOpElem/IncDecElem:
+- If the base is not a subtype of Type::Arr or Type::Obj, the
+  operation will fail with a warning and the return value is
+  null. Otherwise the return value has the same type as the rhs of the
+  set expression.
 
-D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
+SetProp/SetOpProp/IncDecProp:
+- If the base is not a subtype of Type::Obj, the operation will fail
+  with a warning and the return value is null. Otherwise the return
+  value has the type as the rhs of the set expression.
 
-  Get property as cell. Calls the helper specified by S0, passing the class
-  context (S1), pointer to the current base (S2), key (S3), and pointer to
-  MInstrState (S4).
 
-D:Cell = CGetElem S0:ConstTCA S1:{Cell*|Gen*} S2:Gen S3:Cell*
 
-  Get element as cell. Calls the helper specified by S0, passing a base (S1),
-  key (S2), and pointer to MInstrState.
+D:Gen* = PropX S0:ConstTCA S1:ConstCls S2:{Obj,Cell*} S3:Gen S4:Cell*
+
+  Lookup intermediate property in S2, with key S3. S4 should point to
+  an MInstrState struct.
+
+D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj,Cell*} S3:Gen S4:Cell*
+
+  Get property with key S3 from S2. S4 should point to an MInstrState
+  struct.
+
+D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj,Cell*} S3:Gen S4:Cell
+
+  Set property with key S3 in S2 to S4.
+
+D:Cell = CGetElem S0:ConstTCA S1:Cell* S2:Gen S3:Cell*
+
+  Get element with key S2 from S1. S3 should point to an MInstrState
+  struct.
+
+D:Vector = SetElem S0:ConstTCA S1:Cell* S2:Gen S3:Cell
+
+  Set element with key S2 in S1 to S3.

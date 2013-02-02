@@ -3580,6 +3580,27 @@ void CodeGenerator::cgCGetProp(IRInstruction* inst) {
                          .ssa(inst->getSrc(4)));
 }
 
+void CodeGenerator::cgSetProp(IRInstruction* inst) {
+  cgCallHelper(m_as,
+               inst->getSrc(0)->getValTCA(),
+               inst->getDst(),
+               kSyncPoint,
+               ArgGroup().ssa(inst->getSrc(1))
+                         .ssa(inst->getSrc(2))
+                         .vectorKeyS(inst->getSrc(3))
+                         .valueType(inst->getSrc(4)));
+}
+
+void CodeGenerator::cgSetElem(IRInstruction* inst) {
+  cgCallHelper(m_as,
+               inst->getSrc(0)->getValTCA(),
+               inst->getDst(),
+               kSyncPoint,
+               ArgGroup().ssa(inst->getSrc(1))
+                         .vectorKeyIS(inst->getSrc(2))
+                         .valueType(inst->getSrc(3)));
+}
+
 void CodeGenerator::cgCGetElem(IRInstruction* inst) {
   cgCallHelper(m_as,
                inst->getSrc(0)->getValTCA(),

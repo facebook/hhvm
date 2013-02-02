@@ -69,9 +69,10 @@ static const TCA kIRDirectJccActive = (TCA)0x02;
 // Optimize guard exit from beginning of trace
 static const TCA kIRDirectGuardActive = (TCA)0x03;
 
-#define PUNT(instr) do {                             \
-  throw FailedIRGen(__FILE__, __LINE__, #instr);     \
+#define SPUNT(instr) do {                           \
+  throw FailedIRGen(__FILE__, __LINE__, instr);     \
 } while(0)
+#define PUNT(instr) SPUNT(#instr)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -92,6 +93,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
  *     DLabel    multiple dests for a DefLabel
+ *     DVector   single dst depends on semantics of the vector instruction
  *
  * srcinfo:
  *
@@ -326,18 +328,27 @@ O(IterNextK,                   D(Bool), S(StkPtr)                             \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(PropX,                   D(PtrToGen), C(TCA)                                \
                                           C(Cls)                              \
-                                          S(Obj,PtrToGen)                     \
+                                          S(Obj,PtrToCell)                    \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(CGetProp,                    D(Cell), C(TCA)                                \
                                           C(Cls)                              \
-                                          S(Obj,PtrToGen)                     \
+                                          S(Obj,PtrToCell)                    \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O(SetProp,                     DVector, C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToCell)                    \
+                                          S(Gen)                              \
+                                          S(Cell),           E|N|Mem|Refs|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
-                                          S(PtrToGen)                         \
+                                          S(PtrToCell)                        \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O(SetElem,                     DVector, C(TCA)                                \
+                                          S(PtrToCell)                        \
+                                          S(Gen)                              \
+                                          S(Cell),           E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(DbgAssertRefCount,                ND, SUnk,                              E) \
 O(Nop,                              ND, NA,                               NF) \
@@ -836,7 +847,7 @@ public:
     // BoxedNull). #2087268
     assert(subtypeOf(Gen));
     assert(notBoxed());
-    if (isNull()) {
+    if (subtypeOf(Uninit)) {
       return BoxedNull;
     }
     return Type(m_bits << kBoxShift);
@@ -1340,6 +1351,18 @@ Type outputType(const IRInstruction*);
  * Assert that an instruction has operands of allowed types.
  */
 void assertOperandTypes(const IRInstruction*);
+
+struct VectorEffects {
+  VectorEffects(Opcode op, Type base, Type val);
+  Type baseType;
+  Type valType;
+  bool newBaseType;
+  bool newBaseVal;
+  bool newValType;
+};
+
+int vectorBaseIdx(const IRInstruction* inst);
+int vectorValIdx(const IRInstruction* inst);
 
 struct SpillInfo {
   enum Type { MMX, Memory };

@@ -118,13 +118,6 @@ public:
   void    genStProp(SSATmp* obj, SSATmp* prop, SSATmp* src, bool genStoreType);
   void    genSetPropCell(SSATmp* base, int64 offset, SSATmp* value);
 
-  SSATmp* genDefMIStateBase();
-  SSATmp* genPropX(TCA func, Class* ctx,
-                   SSATmp* base, SSATmp* key, SSATmp* mis);
-  SSATmp* genCGetProp(TCA func, Class* ctx, SSATmp* base, SSATmp* key,
-                      SSATmp* mis);
-  SSATmp* genCGetElem(TCA func, SSATmp* base, SSATmp* key, SSATmp* mis);
-
   SSATmp* genBoxLoc(uint32 id);
   void    genBindLoc(uint32 id, SSATmp* ref, bool doRefCount = true);
   void    genInitLoc(uint32 id, SSATmp* t);
@@ -299,7 +292,6 @@ public:
   SSATmp* getFp() const { return m_fpValue; }
 
   Type getLocalType(int id);
-  void      killLocalValue(int id);
 
   /*
    * ifelse() generates if-then-else blocks within a trace.  The caller
@@ -335,6 +327,7 @@ private:
   CSEHash*  getCSEHashTable(IRInstruction* inst);
   void      killCse();
   void      killLocals();
+  void      killLocalValue(int id);
   void      setLocalValue(int id, SSATmp* value);
   void      setLocalType(int id, Type type);
   SSATmp*   getLocalValue(int id);

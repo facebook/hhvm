@@ -337,11 +337,12 @@ void LinearScan::allocRegToInstruction(IRInstruction::Iterator it) {
     allocRegToTmp(&m_regs[int(rVmFp)], dsts[0], 0);
     return;
   }
-  if (opc == DefSP || opc == Call || opc == SpillStack ||
-      opc == RetAdjustStack ||
-      opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
-      opc == GuardStk || opc == AssertStk) {
-    assert(dsts[0]->isA(Type::StkPtr));
+  if (dsts[0]->isA(Type::StkPtr) && opc != LdRaw) {
+    assert(opc == DefSP || opc == Call || opc == SpillStack ||
+           opc == RetAdjustStack ||
+           opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
+           opc == GuardStk || opc == AssertStk ||
+           opc == SetProp || opc == SetElem);
     allocRegToTmp(&m_regs[int(rVmSp)], dsts[0], 0);
     return;
   }
@@ -353,7 +354,7 @@ void LinearScan::allocRegToInstruction(IRInstruction::Iterator it) {
 
   // LdRaw, loading a generator's embedded AR, is the only time we have a
   // pointer to an AR that is not in rVmFp or rVmSp.
-  assert(dsts[0]->getType() != Type::StkPtr ||
+  assert(!dsts[0]->isA(Type::StkPtr) ||
          (opc == LdRaw &&
           inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr));
 
@@ -719,6 +720,27 @@ void LinearScan::computePreColoringHint() {
       m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
       m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
       m_preColoringHint.add(nextNative->getSrc(4), 0, arg++);
+      assert(arg == 5);
+      break;
+    }
+    case SetProp: {
+      unsigned arg = 0;
+      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
+      m_preColoringHint.add(nextNative->getSrc(4), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(4), 1, arg++);
+      assert(arg == 6);
+      break;
+    }
+    case SetElem: {
+      unsigned arg = 0;
+      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(2), 1, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
+      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
       assert(arg == 5);
       break;
     }

@@ -3189,6 +3189,10 @@ void
 TranslatorX64::enterTC(SrcKey sk) {
   using namespace TargetCache;
 
+  if (debug) {
+    fflush(stdout);
+    fflush(stderr);
+  }
   DepthGuard d;
   TReqInfo info;
   info.requestNum = -1;

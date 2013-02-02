@@ -137,25 +137,6 @@ void TraceBuilder::genSetPropCell(SSATmp* base, int64 offset, SSATmp* value) {
   genDecRef(oldVal);
 }
 
-SSATmp* TraceBuilder::genDefMIStateBase() {
-  return gen(DefMIStateBase);
-}
-
-SSATmp* TraceBuilder::genPropX(TCA func, Class* ctx,
-                               SSATmp* base, SSATmp* key, SSATmp* mis) {
-  return gen(PropX, genDefConst(func), genDefConst(ctx), base, key, mis);
-}
-
-SSATmp* TraceBuilder::genCGetProp(TCA func, Class* ctx, SSATmp* base,
-                                  SSATmp* key, SSATmp* mis) {
-  return gen(CGetProp, genDefConst(func), genDefConst(ctx), base, key, mis);
-}
-
-SSATmp* TraceBuilder::genCGetElem(TCA func, SSATmp* base, SSATmp* key,
-                                  SSATmp* mis) {
-  return gen(CGetElem, genDefConst(func), base, key, mis);
-}
-
 SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
                                int64_t offset,
                                Type type,
@@ -809,7 +790,7 @@ SSATmp* TraceBuilder::genDefActRec(SSATmp* func,
              objOrClass,
              genDefConst<int64>(numArgs),
              invName ?
-               genDefConst<const StringData*>(invName) : genDefNull());
+               genDefConst<const StringData*>(invName) : genDefInitNull());
 }
 
 SSATmp* TraceBuilder::genFreeActRec() {
@@ -1276,6 +1257,26 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     case LdThis: {
       m_thisIsAvailable = true;
       break;
+    }
+    case SetProp:
+    case SetElem: {
+      // XXX: Handle stack cells at some point. t1961007
+
+      // If the base for this instruction is a local address, the
+      // helper call might have side effects on the local's value
+      IRInstruction* locInstr =
+        inst->getSrc(vectorBaseIdx(inst))->getInstruction();
+      if (locInstr->getOpcode() == LdLocAddr) {
+        Type baseType = locInstr->getDst()->getType();
+        assert(baseType.isStaticallyKnown());
+        int loc = locInstr->getExtra<LdLocAddr>()->locId;
+
+        VectorEffects ve(opc, baseType, Type::None);
+        if (ve.newBaseType || ve.newBaseVal) {
+          killLocalValue(loc);
+          setLocalType(loc, ve.baseType.derefIfPtr());
+        }
+      }
     }
     default:
       break;

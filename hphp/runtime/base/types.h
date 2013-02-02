@@ -126,9 +126,8 @@ class VariableUnserializer;
  */
 
 enum DataType {
-  MinDataType            = -13,
-
   KindOfClass            = -13,
+  MinDataType            = -13,
 
   // Values below zero are not PHP values, but runtime-internal.
   KindOfAny              = -8,
@@ -146,14 +145,6 @@ enum DataType {
    */
   KindOfUninit           = 0,
 
-  // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
-  //       and it must be 0 in any other real DataType.
-  KindOfStringBit        = 4,
-
-  // Note: KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
-  //       and StaticString, and it must be 0 for any other real DataType.
-  KindOfUncountedInitBit = 8,
-
   KindOfNull             = 8,     //   0001000    0x08
   KindOfBoolean          = 9,     //   0001001    0x09
   KindOfInt64            = 10,    //   0001010    0x0a
@@ -169,7 +160,15 @@ enum DataType {
   MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
   MaxNumDataTypesIndex   = 11 + 1,  // 1 + the number of valid DataTypes above
 
-  MaxDataType            = 0x7fffffff // Allow KindOf* > 11 in HphpArray.
+  MaxDataType            = 0x7fffffff, // Allow KindOf* > 11 in HphpArray.
+
+  // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
+  //       and it must be 0 in any other real DataType.
+  KindOfStringBit        = 4,
+
+  // Note: KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
+  //       and StaticString, and it must be 0 for any other real DataType.
+  KindOfUncountedInitBit = 8,
 };
 BOOST_STATIC_ASSERT((sizeof(DataType) == 4));
 

@@ -111,6 +111,7 @@ enum OpcodeFlag : uint64_t {
 #define DBox(n)   HasDest
 #define DParam    HasDest
 #define DLabel    NaryDest
+#define DVector   HasDest
 #define DPtrToParam HasDest
 
 struct {

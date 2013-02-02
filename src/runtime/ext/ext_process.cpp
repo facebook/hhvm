@@ -114,6 +114,10 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
   }
+  if (VM::Repo::prefork()) {
+    raise_error("execing is disallowed in multi-threaded mode");
+    return;
+  }
 
   // build argumnent list
   std::vector<String> sargs; // holding those char *

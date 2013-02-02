@@ -440,15 +440,31 @@ static const size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 static const size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
 struct Fault {
-  enum FaultType {
-    KindOfUserException,
-    KindOfCPPException
+  enum Type : int16_t {
+    UserException,
+    CppException
   };
-  FaultType m_faultType;
+
+  explicit Fault()
+    : m_handledCount(0)
+    , m_savedRaiseOffset(kInvalidOffset)
+  {}
+
   union {
     ObjectData* m_userException;
     Exception* m_cppException;
   };
+  Type m_faultType;
+
+  // During unwinding, this tracks the number of nested EHType_Fault
+  // regions we've propagated through in a given frame.
+  int16_t m_handledCount;
+
+  // This is used when executing a fault handler to remember the
+  // location the exception was raised at.  We will need to resume
+  // throwing at the same location when it executes Unwind.  In all
+  // other situations this is set to kInvalidOffset.
+  Offset m_savedRaiseOffset;
 };
 
 enum UnwindStatus {

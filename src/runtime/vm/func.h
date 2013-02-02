@@ -153,9 +153,21 @@ struct Func {
     return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
   }
   Id lookupVarId(const StringData* name) const;
+
+  /*
+   * Return true if Offset o is inside the protected region of a fault
+   * funclet for iterId, otherwise false.
+   */
   bool checkIterScope(Offset o, Id iterId) const;
+
+  /*
+   * Find the first EHEnt that covers a given offset, or return null.
+   */
   const EHEnt* findEH(Offset o) const;
-  Offset findFaultPCFromEH(Offset o) const;
+
+  /*
+   * Locate FPI regions by offset.
+   */
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
 

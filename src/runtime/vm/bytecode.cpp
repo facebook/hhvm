@@ -922,7 +922,7 @@ void Stack::clearEvalStack(ActRec *fp, int32 numLocals) {
 }
 
 UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
-                               PC& pc, Fault& f) {
+                               PC& pc, Fault& fault) {
   const Func* func = fp->m_func;
   TRACE(1, "unwindFrag: func %s\n", func->fullName()->data());
 
@@ -942,28 +942,52 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
     popTV();
   }
 
-  const EHEnt *eh = func->findEH(offset);
-  while (eh != NULL) {
-    if (eh->m_ehtype == EHEnt::EHType_Fault) {
-      pc = (uchar*)(func->unit()->entry() + eh->m_fault);
-      return UnwindResumeVM;
-    } else if (f.m_faultType == Fault::KindOfUserException) {
-      ObjectData* obj = f.m_userException;
-      std::vector<std::pair<Id, Offset> >::const_iterator it;
-      for (it = eh->m_catches.begin(); it != eh->m_catches.end(); it++) {
-        Class* cls = func->unit()->lookupClass(it->first);
-        if (cls && obj->instanceof(cls)) {
-          pc = func->unit()->at(it->second);
+  /*
+   * This code is repeatedly called with the same offset when an
+   * exception is raised and rethrown by fault handlers.  This
+   * `faultNest' iterator is here to skip the EHEnt handlers that have
+   * already been run for this in-flight exception.
+   */
+  if (const EHEnt* eh = func->findEH(offset)) {
+    int faultNest = 0;
+    for (;;) {
+      if (faultNest >= fault.m_handledCount) {
+        switch (eh->m_ehtype) {
+        case EHEnt::EHType_Fault:
+          FTRACE(1, "unwindFrag: Entering fault at {}: save {}\n",
+                 eh->m_fault,
+                 func->unit()->offsetOf(pc));
+          fault.m_savedRaiseOffset = func->unit()->offsetOf(pc);
+          ++fault.m_handledCount;
+          pc = (uchar*)(func->unit()->entry() + eh->m_fault);
           return UnwindResumeVM;
+        case EHEnt::EHType_Catch:
+          if (fault.m_faultType == Fault::UserException) {
+            ObjectData* obj = fault.m_userException;
+            for (auto& idOff : eh->m_catches) {
+              Class* cls = func->unit()->lookupClass(idOff.first);
+              if (cls && obj->instanceof(cls)) {
+                pc = func->unit()->at(idOff.second);
+                return UnwindResumeVM;
+              }
+            }
+          }
+          break;
         }
       }
-    }
-    if (eh->m_parentIndex != -1) {
-      eh = &func->ehtab()[eh->m_parentIndex];
-    } else {
-      break;
+
+      if (eh->m_parentIndex != -1) {
+        eh = &func->ehtab()[eh->m_parentIndex];
+      } else {
+        break;
+      }
+      ++faultNest;
     }
   }
+
+  // We found no more handlers in this frame, so the nested fault
+  // count starts over for the caller frame.
+  fault.m_handledCount = 0;
 
   if (fp->isFromFPushCtor()) {
     assert(fp->hasThis());
@@ -1859,11 +1883,11 @@ enum {
   EXCEPTION_DEBUGGER
 };
 
-static void pushFault(Fault::FaultType t, Exception* e, Object* o = NULL) {
+static void pushFault(Fault::Type t, Exception* e, Object* o = NULL) {
   VMExecutionContext* ec = g_vmContext;
   Fault fault;
   fault.m_faultType = t;
-  if (t == Fault::KindOfUserException) {
+  if (t == Fault::UserException) {
     // User object.
     assert(o);
     fault.m_userException = o->get();
@@ -1879,15 +1903,15 @@ static int exception_handler() {
   try {
     throw;
   } catch (Object& e) {
-    pushFault(HPHP::VM::Fault::KindOfUserException, NULL, &e);
+    pushFault(HPHP::VM::Fault::UserException, nullptr, &e);
     longJmpType = g_vmContext->hhvmPrepareThrow();
   } catch (VMSwitchModeException &e) {
     longJmpType = g_vmContext->switchMode(e.unwindBuiltin());
   } catch (Exception &e) {
-    pushFault(HPHP::VM::Fault::KindOfCPPException, e.clone());
+    pushFault(HPHP::VM::Fault::CppException, e.clone());
     longJmpType = g_vmContext->hhvmPrepareThrow();
   } catch (...) {
-    pushFault(HPHP::VM::Fault::KindOfCPPException,
+    pushFault(HPHP::VM::Fault::CppException,
               new Exception("unknown exception"));
     longJmpType = g_vmContext->hhvmPrepareThrow();
   }
@@ -1942,13 +1966,13 @@ short_jump:
     jumpCode = hhvmPrepareThrow();
     goto short_jump;
   } catch (const VMPrepareUnwind&) {
-    /*
-     * This is slightly different from VMPrepareThrow, because we need
-     * to get the offset for the EHEnt that raised the exception using
-     * findFaultPCFromEH.
-     */
-    Offset faultPC = m_fp->m_func->findFaultPCFromEH(pcOff());
-    Fault fault = m_faults.back();
+    // This is slightly different from VMPrepareThrow, because we need
+    // to re-raise the exception as if it came from the same offset.
+    Fault& fault = m_faults.back();
+    Offset faultPC = fault.m_savedRaiseOffset;
+    FTRACE(1, "unwind: restoring offset {}\n", faultPC);
+    assert(faultPC != kInvalidOffset);
+    fault.m_savedRaiseOffset = kInvalidOffset;
     UnwindStatus unwindType = m_stack.unwindFrame(m_fp, faultPC, m_pc, fault);
     jumpCode = handleUnwind(unwindType);
     goto short_jump;
@@ -1968,12 +1992,12 @@ propagate:
   Fault fault = m_faults.back();
   m_faults.pop_back();
   switch (fault.m_faultType) {
-  case Fault::KindOfUserException: {
+  case Fault::UserException: {
     Object obj = fault.m_userException;
     fault.m_userException->decRefCount();
     throw obj;
   }
-  case Fault::KindOfCPPException:
+  case Fault::CppException:
     // throwException() will take care of deleting heap-allocated
     // exception object for us
     fault.m_cppException->throwException();
@@ -2230,7 +2254,7 @@ void VMExecutionContext::unwindBuiltinFrame() {
 }
 
 int VMExecutionContext::hhvmPrepareThrow() {
-  Fault fault = m_faults.back();
+  Fault& fault = m_faults.back();
   tx64->sync();
   TRACE(2, "hhvmPrepareThrow: %p(\"%s\") {\n", m_fp,
            m_fp->m_func->name()->data());
@@ -4619,6 +4643,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRetV(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopUnwind(PC& pc) {
+  assert(!m_faults.empty());
+  assert(m_faults.back().m_savedRaiseOffset != kInvalidOffset);
   throw VMPrepareUnwind();
 }
 
@@ -4632,7 +4658,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopThrow(PC& pc) {
   }
   ObjectData* e = c1->m_data.pobj;
   Fault fault;
-  fault.m_faultType = Fault::KindOfUserException;
+  fault.m_faultType = Fault::UserException;
   fault.m_userException = e;
   m_faults.push_back(fault);
   m_stack.discard();
@@ -6868,7 +6894,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCatch(PC& pc) {
   NEXT();
   assert(m_faults.size() > 0);
   Fault& fault = m_faults.back();
-  assert(fault.m_faultType == Fault::KindOfUserException);
+  assert(fault.m_faultType == Fault::UserException);
   m_stack.pushObjectNoRc(fault.m_userException);
   m_faults.pop_back();
 }

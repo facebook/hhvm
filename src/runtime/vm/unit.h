@@ -160,20 +160,6 @@ class EHEnt {
   }
 };
 
-class EHEntComp {
- public:
-  bool operator() (const EHEnt &eh1, const EHEnt &eh2) {
-    if (eh1.m_base == eh2.m_base) {
-      // for identical address ranges, Catch funclet is "outer" to Fault funclet
-      if (eh1.m_past == eh2.m_past) {
-        return eh1.m_ehtype == EHEnt::EHType_Catch;
-      }
-      return eh1.m_past > eh2.m_past;
-    }
-    return eh1.m_base < eh2.m_base;
-  }
-};
-
 // Function paramater info region table entry.
 class FPIEnt {
  public:

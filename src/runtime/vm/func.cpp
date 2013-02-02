@@ -242,10 +242,6 @@ void Func::rename(const StringData* name) {
   Unit::loadFunc(this);
 }
 
-/**
- * Return true if Offset o is inside the protected region of a fault
- * funclet for iterId, otherwise false.
- */
 bool Func::checkIterScope(Offset o, Id iterId) const {
   const EHEntVec& ehtab = shared()->m_ehtab;
   assert(o >= base() && o < past());
@@ -272,26 +268,6 @@ const EHEnt* Func::findEH(Offset o) const {
     }
   }
   return eh;
-}
-
-Offset Func::findFaultPCFromEH(Offset o) const {
-  assert(o >= base() && o < past());
-  unsigned int i = 0;
-  int max = -1;
-
-  const EHEntVec& ehtab = shared()->m_ehtab;
-  for (i = 0; i < ehtab.size(); i++) {
-    if (ehtab[i].m_ehtype == EHEnt::EHType_Catch) {
-      continue;
-    }
-    if (ehtab[i].m_fault < o &&
-        (max == -1 ||
-         ehtab[i].m_fault > ehtab[max].m_fault)) {
-      max = i;
-    }
-  }
-  assert(max != -1);
-  return ehtab[max].m_past;
 }
 
 const FPIEnt* Func::findFPI(Offset o) const {
@@ -748,13 +724,39 @@ void FuncEmitter::addStaticVar(Func::SVInfo svInfo) {
   m_staticVars.push_back(svInfo);
 }
 
+namespace {
+
+/*
+ * Ordering on EHEnts where e1 < e2 iff
+ *
+ *    a) e1 and e2 do not overlap, and e1 comes first
+ *    b) e1 encloses e2
+ *    c) e1 and e2 have the same region, but e1 is a Catch funclet and
+ *       e2 is a Fault funclet.
+ */
+struct EHEntComp {
+  bool operator()(const EHEnt& e1, const EHEnt& e2) const {
+    if (e1.m_base == e2.m_base) {
+      if (e1.m_past == e2.m_past) {
+        return e1.m_ehtype == EHEnt::EHType_Catch;
+      }
+      return e1.m_past > e2.m_past;
+    }
+    return e1.m_base < e2.m_base;
+  }
+};
+
+}
+
 void FuncEmitter::sortEHTab() {
-  // Sort m_ehtab.
   std::sort(m_ehtab.begin(), m_ehtab.end(), EHEntComp());
+
   for (unsigned int i = 0; i < m_ehtab.size(); i++) {
     m_ehtab[i].m_parentIndex = -1;
     for (int j = i - 1; j >= 0; j--) {
-      if (m_ehtab[j].m_past > m_ehtab[i].m_past) {
+      if (m_ehtab[j].m_past >= m_ehtab[i].m_past) {
+        // parent EHEnt better enclose this one.
+        assert(m_ehtab[j].m_base <= m_ehtab[i].m_base);
         m_ehtab[i].m_parentIndex = j;
         break;
       }

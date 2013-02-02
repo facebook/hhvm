@@ -1,0 +1,10 @@
+Array
+(
+    [0] => Array
+        (
+            [file] => hphp/test/vm/include_backtrace.php
+            [line] => 1
+            [function] => include
+        )
+
+)

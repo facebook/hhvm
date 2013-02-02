@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot use 'bool' as class name as it is reserved in hphp/test/vm/reserved_class1.php on line 2

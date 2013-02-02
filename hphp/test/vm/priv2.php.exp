@@ -1,0 +1,1 @@
+HipHop Fatal error: Call to private method D::foo from context C in hphp/test/vm/priv2.php on line 8

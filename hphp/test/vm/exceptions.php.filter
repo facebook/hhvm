@@ -1,0 +1,2 @@
+#!/bin/bash
+sed -e 's/\\n/\n/g' | sed -e 's/\/.*hphp/hphp/g' | sed -e 's/string([0-9]*)/string/g'

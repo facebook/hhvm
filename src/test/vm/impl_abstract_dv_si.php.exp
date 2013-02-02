@@ -1,1 +1,0 @@
-HipHop Fatal error: Declaration of B::i() must be compatible with that of A::i() in src/test/vm/impl_abstract_dv_si.php on line 3

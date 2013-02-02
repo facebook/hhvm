@@ -1,0 +1,36 @@
+bar 0
+caught 1
+bar 1
+bar 2
+caught 2
+before
+caught
+caught exception
+string "#0 hphp/test/vm/exceptions.php(91): c()
+#1 hphp/test/vm/exceptions.php(88): b()
+#2 hphp/test/vm/exceptions.php(99): a()
+#3 hphp/test/vm/exceptions.php(111): main3()
+#4 {main}"
+string "hello, exception"
+string "#0 hphp/test/vm/exceptions.php(91): c()
+#1 hphp/test/vm/exceptions.php(88): b()
+#2 hphp/test/vm/exceptions.php(99): a()
+#3 hphp/test/vm/exceptions.php(111): main3()
+#4 {main}"
+Exception from hphp/test/vm/exceptions.php:96
+string "#0 hphp/test/vm/exceptions.php(91): c()
+#1 hphp/test/vm/exceptions.php(88): b()
+#2 hphp/test/vm/exceptions.php(99): a()
+#3 hphp/test/vm/exceptions.php(111): main3()
+#4 {main}"
+bar 3
+caught 3
+HipHop Fatal error: Uncaught exception 'Ex3' with message '' in hphp/test/vm/exceptions.php:21
+Stack trace:
+#0 hphp/test/vm/exceptions.php(28): bar()
+#1 hphp/test/vm/exceptions.php(35): foo2()
+#2 hphp/test/vm/exceptions.php(39): foo1()
+#3 (): foo()
+#4 hphp/test/vm/exceptions.php(105): array_map()
+#5 hphp/test/vm/exceptions.php(111): main3()
+#6 {main}

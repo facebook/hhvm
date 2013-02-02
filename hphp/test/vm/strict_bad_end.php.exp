@@ -1,0 +1,1 @@
+HipHop Fatal error: syntax error, unexpected T_STRICT_ERROR, expecting $end in hphp/test/vm/strict_bad_end.php on line 2

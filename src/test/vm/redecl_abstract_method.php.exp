@@ -1,1 +1,0 @@
-HipHop Fatal error: Cannot re-declare abstract method A::f() abstract in class B in src/test/vm/redecl_abstract_method.php on line 9

@@ -1,0 +1,2 @@
+C::__destruct
+HipHop Fatal error: Stack overflow in hphp/test/vm/exceptions3.php on line 14

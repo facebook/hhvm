@@ -1,0 +1,1 @@
+HipHop Fatal error: Can't use array() as base in write context in hphp/test/vm/func3.php on line 4

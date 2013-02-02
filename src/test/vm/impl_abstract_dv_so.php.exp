@@ -1,1 +1,0 @@
-HipHop Fatal error: Declaration of B::o() must be compatible with that of A::o() in src/test/vm/impl_abstract_dv_so.php on line 3

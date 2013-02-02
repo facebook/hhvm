@@ -1,0 +1,2 @@
+A accepts param from subclass A
+HipHop Fatal error: Argument 1 passed to B::bar() must be an instance of parent, A given in hphp/test/vm/typehint_lsb_parent.php on line 19

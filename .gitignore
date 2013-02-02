@@ -8,77 +8,46 @@
 .mkdir
 hphp.log
 
-/src/test/test
-/src/test/test_fast.inc
-/src/test/test_mysql_info.inc
-/src/test/test_suite.inc
-/src/test/real_mysql_info.inc
-/src/test/*.tmp
-/src/test/vm/*.out
-/src/test/vm/*.diff
-/src/test/vm/*.log
-/src/test/vm/*.reduce_out
-/src/test/vm/*.reduce_diff
-/src/test/vm/*.reduce_exp
-/src/test/vm/*.perf
-/src/test/vm/perf/*.out
-/src/test/vm/perf/*.diff
-/src/test/vm/perf/*.perf
-/src/runtime/ext_hhvm/xconstants.php
-/src/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
-/src/runtime/ext_hhvm/ext_noinline.cpp
-/src/compiler/analysis/code_error.inc
+/hphp/test/test
+/hphp/test/test_fast.inc
+/hphp/test/test_mysql_info.inc
+/hphp/test/test_suite.inc
+/hphp/test/real_mysql_info.inc
+/hphp/test/*.tmp
+/hphp/test/vm/*.out
+/hphp/test/vm/*.diff
+/hphp/test/vm/*.log
+/hphp/test/vm/*.reduce_out
+/hphp/test/vm/*.reduce_diff
+/hphp/test/vm/*.reduce_exp
+/hphp/test/vm/*.perf
+/hphp/test/vm/perf/*.out
+/hphp/test/vm/perf/*.diff
+/hphp/test/vm/perf/*.perf
+/hphp/runtime/ext_hhvm/ext_noinline.cpp
+/hphp/compiler/analysis/code_error.inc
 
-/src/runtime/tmp/Test*
-/src/runtime/tmp/run
-/src/runtime/tmp/run.sh
-/src/runtime/tmp/libtest.so
-/src/runtime/vm/repo_schema.h
-/src/runtime/base/compiler_id.h
+/hphp/runtime/tmp/Test*
+/hphp/runtime/tmp/run
+/hphp/runtime/tmp/run.sh
+/hphp/runtime/tmp/libtest.so
+/hphp/runtime/vm/repo_schema.h
+/hphp/runtime/base/compiler_id.h
 
-/src/hphpi/gen
-/src/hphpi/hphpi
+/hphp/hphpi/gen
+/hphp/hphpi/hphpi
 
-/src/hhvm/gen
-/src/hhvm/hhvm
-/src/hhvm/hphp
+/hphp/hhvm/gen
+/hphp/hhvm/hhvm
 
-/src/tools/shmw/shmw
+/hphp/tools/shmw/shmw
 
-/src/ffi/java/classes
-/src/ffi/java/hphp_ffi_java.h
+/hphp/ffi/java/classes
+/hphp/ffi/java/hphp_ffi_java.h
 
 # Ignore all makefiles generated for fbcode's third-party repo
 /bin/*.mk
 !/bin/run.mk
-
-/facebook/arcanist/.phutil_module_cache
-
-/facebook/autoload_files
-/facebook/hotcold.hdf
-/facebook/benchmark/shootout/output_bench
-/facebook/benchmark/shootout/output_bintree_new
-/facebook/libcore_files
-/facebook/output_*
-/facebook/push/install
-/facebook/stub_funcs.hdf
-/facebook/volatile.hdf
-/facebook/www.pid
-
-/facebook/push/apc
-/facebook/push/apclog
-/facebook/push/autoload_files
-/facebook/push/hotcold.hdf
-/facebook/push/output_www
-/facebook/push/system.tgz
-/facebook/push/volatile.hdf
-/facebook/push/stub_funcs.hdf
-/facebook/push/output
-/facebook/push/shared
-
-/facebook/extensions/gen
-/facebook/extensions/hphpi
-/local/*.mk
 
 CMakeFiles
 CMakeCache.txt
@@ -86,24 +55,15 @@ cmake_install.cmake
 
 /output_gd/
 
-/src/TAGS
-
-# arcanist working-copy settings
-.arc/
-
-# fbcode output directory
-/bin/_fbcode_bin/
+/hphp/TAGS
 
 # Generated makefiles
-/src/third_party/lz4/Makefile
-/src/third_party/double-conversion/Makefile
-/src/third_party/folly/Makefile
-/src/runtime/ext_hhvm/Makefile
-/src/test/Makefile
-/src/hphp/Makefile
-/src/hhvm/Makefile
-/src/compiler/Makefile
-/src/Makefile
+/hphp/runtime/ext_hhvm/Makefile
+/hphp/test/Makefile
+/hphp/hphp/Makefile
+/hphp/hhvm/Makefile
+/hphp/compiler/Makefile
+/hphp/Makefile
 /Makefile
 
 # eclipse files

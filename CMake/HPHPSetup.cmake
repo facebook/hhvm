@@ -126,6 +126,6 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 	SET (CMAKE_CXX_FLAGS_RELEASE "-O3")
 ENDIF()
 
-include_directories(${HPHP_HOME}/src)
-include_directories(${HPHP_HOME}/src/lib/system/gen)
+include_directories(${HPHP_HOME}/hphp)
+include_directories(${HPHP_HOME}/hphp/lib/system/gen)
 include_directories(${HPHP_HOME})

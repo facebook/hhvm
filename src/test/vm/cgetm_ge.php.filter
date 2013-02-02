@@ -1,2 +1,0 @@
-#!/bin/bash
-sed -e 's,/.*src,src,g'

@@ -1,1 +1,0 @@
-HipHop Fatal error: Default value for parameter a0 with type Int64 needs to have the same type as the type hint C in src/test/vm/dv_ci.php on line 4

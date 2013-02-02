@@ -1,0 +1,2 @@
+bool(true)
+HipHop Fatal error: Class HerpDerp may not inherit from final class (Continuation) in hphp/test/vm/continuation_inherit.php on line 4

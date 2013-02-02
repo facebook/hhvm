@@ -1,1 +1,0 @@
-HipHop Fatal error: Default value for parameter a0 with type Array needs to have the same type as the type hint int in src/test/vm/dv_ia.php on line 3

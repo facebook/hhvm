@@ -1,2 +1,0 @@
-Test begin
-HipHop Fatal error: Declaration of B::a() must be compatible with that of A::a() in src/test/vm/interface8.php on line 12

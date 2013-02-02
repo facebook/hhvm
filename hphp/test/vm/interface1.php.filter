@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sed -e 's, in [^ ]*hphp/, in hphp/,' | sed 's/(.*)/()/g'

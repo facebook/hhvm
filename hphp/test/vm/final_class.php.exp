@@ -1,0 +1,1 @@
+HipHop Fatal error: Class D may not inherit from final class (C) in hphp/test/vm/final_class.php on line 8

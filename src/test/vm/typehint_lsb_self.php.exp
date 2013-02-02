@@ -1,4 +1,0 @@
-A accepts param from subclass C
-B accepts param from subclass C
-A accepts param from subclass C
-HipHop Fatal error: Argument 1 passed to T::bar() must be an instance of T, C given in src/test/vm/typehint_lsb_self.php on line 4

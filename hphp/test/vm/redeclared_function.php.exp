@@ -1,0 +1,1 @@
+HipHop Fatal error: Function already defined: f in hphp/test/vm/redeclared_function.php on line 6

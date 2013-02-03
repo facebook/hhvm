@@ -1105,15 +1105,6 @@ Exit    [C]  ->  [C:Null]
   set the exit status to 0, push null onto the stack, and then it will
   terminate execution.
 
-Raise    [C C]  ->  []
-
-  Raise. This instruction raises an error of level $2 using $1 as the error
-  message. The error handling system may take several actions, including
-  printing a warning or notice, calling a user handler, and throwing a fatal
-  error. If $1 is not a string or if $2 is not an integer, this instruction
-  throws a fatal error with an error message that indicates that the error
-  message was not a string.
-
 Fatal <skip frame>  [C]  ->  []
 
   Fatal. This instruction throws a fatal error using $1 as the error message.

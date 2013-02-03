@@ -1028,7 +1028,6 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpContExit:
     case OpRetC:
     case OpRetV:
-    case OpRaise:
     case OpExit:
     case OpFatal:
     case OpIterNext:

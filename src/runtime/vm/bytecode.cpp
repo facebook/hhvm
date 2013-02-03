@@ -4392,10 +4392,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopExit(PC& pc) {
   throw ExitException(exitCode);
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopRaise(PC& pc) {
-  not_implemented();
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopFatal(PC& pc) {
   NEXT();
   TypedValue* top = m_stack.topTV();

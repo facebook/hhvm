@@ -186,9 +186,7 @@ Opcode negateQueryOp(Opcode opc) {
   case NInstanceOf:         return InstanceOf;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
   case NInstanceOfBitmask:  return InstanceOfBitmask;
-  case IsSet:               return IsNSet;
   case IsType:              return IsNType;
-  case IsNSet:              return IsSet;
   case IsNType:             return IsType;
   default:                  always_assert(0);
   }

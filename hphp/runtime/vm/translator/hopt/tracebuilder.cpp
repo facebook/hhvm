@@ -560,11 +560,6 @@ SSATmp* TraceBuilder::genLdObjMethod(const StringData* methodName,
              actRec);
 }
 
-SSATmp* TraceBuilder::genQueryOp(Opcode queryOpc, SSATmp* addr) {
-  assert(isQueryOp(queryOpc));
-  return gen(queryOpc, addr);
-}
-
 // TODO(#2058871): move this to hhbctranslator
 void TraceBuilder::genVerifyParamType(SSATmp* objClass,
                                         SSATmp* className,

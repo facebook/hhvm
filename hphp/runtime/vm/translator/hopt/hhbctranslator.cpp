@@ -809,6 +809,7 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
   if (cls) {
     const StringData* clsNameStr = cls->preClass()->name();
     clsName = m_tb->genDefConst<const StringData*>(clsNameStr);
+    // XXX Can't we use cls directly?
   } else {
     IRInstruction* clsInst = clsTmp->getInstruction();
     if (clsInst->getOpcode() == LdCls &&
@@ -961,10 +962,24 @@ void HhbcTranslator::emitIssetL(int32 id) {
   }
 }
 
-void HhbcTranslator::emitIssetS() {
+void HhbcTranslator::emitIssetG() {
   TRACE(3, "%u: IssetS\n", m_bcOff);
-  SSATmp* propAddr = getClsPropAddr(NULL);
-  push(m_tb->genQueryOp(IsSet, propAddr));
+  PUNT(IssetG);
+
+}
+
+/*
+ * IssetS: return true if class cls has an accessible static
+ * property named propName that is not null; returns false
+ * otherwise.
+ */
+void HhbcTranslator::emitIssetS(const Class* cls,
+                                const StringData* propName) {
+  TRACE(3, "%u: IssetS\n", m_bcOff);
+  SSATmp* propAddr = getClsPropAddr(cls, propName);
+  push(m_tb->gen(IsNTypeMem,
+                 Type::Null,
+                 m_unboxPtrs ? m_tb->genUnboxPtr(propAddr) : propAddr));
   decRefPropAddr(propAddr);
 }
 

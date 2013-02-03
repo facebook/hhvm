@@ -97,6 +97,9 @@ private:
               IRInstruction* inst = NULL);
 
   template<class OpndType>
+  ConditionCode emitTypeTest(Type::Tag type, OpndType src);
+
+  template<class OpndType>
   void emitGuardType(Type::Tag         type,
                      OpndType          src,
                      LabelInstruction* label,
@@ -167,6 +170,8 @@ private:
 
 private:
   void emitInstanceCheck(IRInstruction* inst, PhysReg dstReg);
+  void cgIsTypeMemCommon(IRInstruction*, bool negate);
+  void emitInstanceCheck(IRInstruction*);
   void cgInstanceOfCommon(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);

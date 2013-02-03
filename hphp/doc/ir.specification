@@ -352,11 +352,17 @@ D:Bool = NInstanceOfBitmask S0:ClassPtr S1:ConstSstr
   descendant of the class named by S1, where S1 must have a bit
   allocated for it in the fast instance check bitvector (see class.h).
 
-IsSet
-IsType
-IsNSet
-IsNType
+D:Bool =  IsType<T> S0:Cell
+D:Bool = IsNType<T> S0:Cell
 
+  IsType (IsNType) sets D to true iff S0 holds a value that is (not)
+  of type T.
+
+D:Bool =  IsTypeMem<T> S0:[Gen*|Cell*]
+D:Bool = IsNTypeMem<T> S0:[Gen*|Cell*]
+
+  IsTypeMem (IsNTypeMem) sets D to true iff the value referenced by S0
+  is (not) of type T.
 
 5. Branches
 
@@ -375,9 +381,7 @@ JmpInstanceOf
 JmpNInstanceOf
 JmpInstanceOfBitmask
 JmpNInstanceOfBitmask
-JmpIsSet
 JmpIsType
-JmpIsNSet
 JmpIsNType
 
   Fused jump instructions.  These all operate exactly as their

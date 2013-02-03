@@ -53,9 +53,9 @@ Type::Tag outputType(const IRInstruction* inst) {
   case InstanceOfBitmask:  return Type::Bool;
   case ExtendsClass:       return Type::Bool;
   case InterpOne:          return Type::StkPtr;
-  case IsNSet:             return Type::Bool;
+  case IsNTypeMem:         return Type::Bool;
+  case IsTypeMem:          return Type::Bool;
   case IsNType:            return Type::Bool;
-  case IsSet:              return Type::Bool;
   case IsType:             return Type::Bool;
   case LdARFuncPtr:        return Type::FuncPtr;
   case LdCachedClass:      return Type::ClassPtr;
@@ -132,9 +132,7 @@ Type::Tag outputType(const IRInstruction* inst) {
   case JmpNInstanceOf:
   case JmpInstanceOfBitmask:
   case JmpNInstanceOfBitmask:
-  case JmpIsSet:
   case JmpIsType:
-  case JmpIsNSet:
   case JmpIsNType:
   case Jmp_:
     return Type::None;

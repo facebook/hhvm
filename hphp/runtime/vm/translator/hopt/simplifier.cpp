@@ -133,14 +133,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpNInstanceOf:
   case JmpInstanceOfBitmask:
   case JmpNInstanceOfBitmask:
-  case JmpIsSet:
   case JmpIsType:
-  case JmpIsNSet:
   case JmpIsNType:
     return nullptr;
 
-  case IsSet:
-  case IsNSet:
   case LdObjClass:
   case LdCachedClass:
   case DecRefLoc:
@@ -891,14 +887,17 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
 SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   auto type = inst->getTypeParam();
   auto src  = inst->getSrc(0);
+  auto srcType = src->getType();
 
-  assert(Type::isUnboxed(type));
-  assert(type != Type::Cell);
+  // The comparisons below won't work for these cases covered by this
+  // assert, and we currently don't generate these types.
+  assert(Type::isStaticallyKnownUnboxed(type) && type != Type::StaticStr);
   if (type != Type::Obj) {
-    if (src->getType() == type) {
+    if (srcType == type ||
+        (type == Type::Str && srcType == Type::StaticStr)) {
       return genDefBool(true);
     }
-    if (src->getType() != Type::Cell) {
+    if (srcType != Type::Cell) {
       return genDefBool(false);
     }
   }

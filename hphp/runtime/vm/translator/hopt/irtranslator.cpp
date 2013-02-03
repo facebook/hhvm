@@ -877,6 +877,16 @@ TranslatorX64::irTranslateAKExists(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateIssetS(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  const int kClassIdx = 0;
+  const int kPropNameIdx = 1;
+  const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
+  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
+  m_hhbcTrans->emitIssetS(cls, propName);
+}
+
+void
 TranslatorX64::irTranslateSetMProp(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   using namespace TargetCache;
@@ -1410,6 +1420,12 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
   // Add to this switch the bytecodes that the IR handles but the base
   // translator does not analyze and translate
   switch (op) {
+    case OpIssetS:
+      irTranslateIssetS(t, i);
+      break;
+    case OpIssetG:
+      m_hhbcTrans->emitIssetG();
+      break;
     case OpUnsetN:
       m_hhbcTrans->emitUnsetN();
       break;

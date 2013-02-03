@@ -203,7 +203,8 @@ struct HhbcTranslator {
   void emitUnsetG();
   void emitUnsetProp(int offset);
   void emitIssetL(int32 id);
-  void emitIssetS();
+  void emitIssetS(const Class* cls, const StringData* propName);
+  void emitIssetG();
   void emitIssetM(const char* vectorDesc);
   void emitIssetProp(int offset);
   void emitEmptyL(int32 id);
@@ -441,6 +442,7 @@ private:
   void emitRet(SSATmp* retVal, Trace* exitTrace, bool freeInline);
   template<Type::Tag T> void emitIsTypeC();
   template<Type::Tag T> void emitIsTypeL(int id);
+  template<Type::Tag T> void emitIsTypeMem(SSATmp* addr);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32 offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);

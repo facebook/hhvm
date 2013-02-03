@@ -214,7 +214,6 @@ public:
   SSATmp* genDefFP();
   SSATmp* genDefSP(int32 spOffset);
   SSATmp* genLdStackAddr(int64 offset);
-  SSATmp* genQueryOp(Opcode queryOpc, SSATmp* addr);
   void    genVerifyParamType(SSATmp* objClass, SSATmp* className,
                              const Class* constraint, Trace* exitTrace);
 

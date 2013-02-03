@@ -1054,6 +1054,7 @@ PSEUDOINSTRS
 #undef DECLARE_FUNC
 
   // Helper functions not covered by macros above
+  void irTranslateIssetS(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateSetMProp(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateCGetMProp(const Tracelet &t, const NormalizedInstruction& i);
   void irTranslateReqLit(const Tracelet& t,

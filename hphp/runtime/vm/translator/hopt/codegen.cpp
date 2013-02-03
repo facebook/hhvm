@@ -235,9 +235,7 @@ ConditionCode cmpOpToCC(Opcode opc) {
   case NInstanceOf:         return CC_Z;
   case InstanceOfBitmask:   return CC_NZ;
   case NInstanceOfBitmask:  return CC_Z;
-  case IsSet:               return CC_NZ;
   case IsType:              return CC_NZ;
-  case IsNSet:              return CC_Z;
   case IsNType:             return CC_Z;
   default:                  always_assert(0);
   }
@@ -333,12 +331,8 @@ NOOP_OPCODE(DefActRec)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(Nop)
 
-PUNT_OPCODE(JmpIsSet)
 PUNT_OPCODE(JmpIsType)
-PUNT_OPCODE(JmpIsNSet)
 PUNT_OPCODE(JmpIsNType)
-PUNT_OPCODE(IsSet)
-PUNT_OPCODE(IsNSet)
 PUNT_OPCODE(IsNType)
 PUNT_OPCODE(LdCurFuncPtr)
 PUNT_OPCODE(LdFuncCls)
@@ -1214,6 +1208,26 @@ void CodeGenerator::cgOpGte(IRInstruction* inst) {
   CG_OP_CMP(inst, setge, gte);
 }
 
+
+void CodeGenerator::cgIsTypeMemCommon(IRInstruction* inst, bool negate) {
+  SSATmp*   dst  = inst->getDst();
+  PhysReg   dstReg = dst->getReg();
+  SSATmp*   addr = inst->getSrc(0);
+  PhysReg   base = addr->getReg();
+  Type::Tag type = inst->getTypeParam();
+  ConditionCode cc = emitTypeTest(type, base[TVOFF(m_type)]);
+  if (!negate) {
+    cc = ccNegate(cc);
+  }
+  m_as.setcc(cc, rbyte(dstReg));
+}
+void CodeGenerator::cgIsTypeMem(IRInstruction* inst) {
+  cgIsTypeMemCommon(inst, false);
+}
+void CodeGenerator::cgIsNTypeMem(IRInstruction* inst) {
+  cgIsTypeMemCommon(inst, true);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static bool instanceOfHelper(const Class* objClass, const Class* testClass) {
@@ -1427,11 +1441,7 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
         } else {
           m_as.mov_imm64_reg(1, dstReg);
         }
-      } else if (dstReg == srcReg) {
-        m_as.test_reg64_reg64(dstReg, dstReg);
-        m_as.setne(rbyte(dstReg));
       } else {
-        m_as.xor_reg64_reg64(dstReg, dstReg);
         m_as.test_reg64_reg64(srcReg, srcReg);
         m_as.setne(rbyte(dstReg));
       }
@@ -3478,10 +3488,7 @@ void CodeGenerator::cgGuardTypeCell(Type::Tag         type,
 }
 
 template<class OpndType>
-void CodeGenerator::emitGuardType(Type::Tag         type,
-                                  OpndType          src,
-                                  LabelInstruction* label,
-                                  IRInstruction*    inst) {
+ConditionCode CodeGenerator::emitTypeTest(Type::Tag type, OpndType src) {
   ConditionCode cc;
 
   switch (type) {
@@ -3507,7 +3514,7 @@ void CodeGenerator::emitGuardType(Type::Tag         type,
       break;
     }
     case Type::Gen : {
-      return; // nothing to check
+      return CC_None; // nothing to check
     }
     default: {
       DataType dataType = Type::toDataType(type);
@@ -3517,7 +3524,16 @@ void CodeGenerator::emitGuardType(Type::Tag         type,
       break;
     }
   }
+  return cc;
+}
 
+template<class OpndType>
+void CodeGenerator::emitGuardType(Type::Tag         type,
+                                  OpndType          src,
+                                  LabelInstruction* label,
+                                  IRInstruction*    inst) {
+  ConditionCode cc = emitTypeTest(type, src);
+  if (cc == CC_None) return;
   emitGuardOrFwdJcc(inst, cc, label);
 }
 

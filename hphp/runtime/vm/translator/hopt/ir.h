@@ -141,11 +141,11 @@ enum OpcodeFlag : uint64_t {
   OPC(InstanceOfBitmask, (HasDest|CanCSE))                              \
   OPC(NInstanceOfBitmask,(HasDest|CanCSE))                              \
                                                                         \
-  /* isset, empty, and istype queries (unary) */                        \
-  OPC(IsSet,             (HasDest|CanCSE))                              \
+  /* unary istype queries */                                            \
   OPC(IsType,            (HasDest|CanCSE))                              \
-  OPC(IsNSet,            (HasDest|CanCSE))                              \
   OPC(IsNType,           (HasDest|CanCSE))                              \
+  OPC(IsTypeMem,         (HasDest))                                     \
+  OPC(IsNTypeMem,        (HasDest))                                     \
                                                                         \
   /* conditional branches & jump */                                     \
   /* there is a conditional branch for each of the above query */       \
@@ -165,9 +165,7 @@ enum OpcodeFlag : uint64_t {
                          (HasDest|Essential))                           \
   OPC(JmpNInstanceOfBitmask,                                            \
                          (HasDest|Essential))                           \
-  OPC(JmpIsSet,          (HasDest|Essential))                           \
   OPC(JmpIsType,         (HasDest|Essential))                           \
-  OPC(JmpIsNSet,         (HasDest|Essential))                           \
   OPC(JmpIsNType,        (HasDest|Essential))                           \
     /* keep preceeding conditional branches contiguous */               \
   OPC(JmpZero,           (HasDest|Essential))                           \
@@ -360,10 +358,6 @@ inline bool isCmpOp(Opcode opc) {
 // branch-fusable and negateable.
 inline bool isQueryOp(Opcode opc) {
   return (opc >= OpGt && opc <= IsNType);
-}
-
-inline bool isTypeQueryOp(Opcode opc) {
-  return (opc == IsType || opc == IsNType);
 }
 
 inline Opcode queryToJmpOp(Opcode opc) {

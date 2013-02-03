@@ -25,24 +25,17 @@ int ExitException::ExitCode = 0;
 ///////////////////////////////////////////////////////////////////////////////
 
 ExtendedException::ExtendedException() : Exception() {
-  if (hhvm) {
-    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true)));
-  } else {
-    if (RuntimeOption::InjectedStackTrace) {
-      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
-    }
-  }
+  computeBacktrace();
 }
 
 ExtendedException::ExtendedException(const std::string &msg) {
   m_msg = msg;
-  if (hhvm) {
-    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true)));
-  } else {
-    if (RuntimeOption::InjectedStackTrace) {
-      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
-    }
-  }
+  computeBacktrace();
+}
+
+ExtendedException::ExtendedException(SkipFrame, const std::string &msg) {
+  m_msg = msg;
+  computeBacktrace(true);
 }
 
 ExtendedException::ExtendedException(const char *fmt, ...) {
@@ -50,19 +43,32 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   va_start(ap, fmt);
   format(fmt, ap);
   va_end(ap);
-  if (hhvm) {
-    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true)));
-  } else {
-    if (RuntimeOption::InjectedStackTrace) {
-      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
-    }
-  }
+  computeBacktrace();
 }
 
 FatalErrorException::FatalErrorException(const std::string &msg,
                                          ArrayPtr backtrace) {
   m_msg = msg;
   m_bt = backtrace;
+}
+
+ArrayPtr ExtendedException::getBackTrace() const {
+  assert(m_bt);
+  return m_bt;
+}
+
+/**
+ * This must be done in the constructor.
+ * If you wait too long, getFP() will be NULL.
+ */
+void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
+  if (hhvm) {
+    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(skipFrame, true)));
+  } else {
+    if (RuntimeOption::InjectedStackTrace) {
+      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(skipFrame, true)));
+    }
+  }
 }
 
 void throw_null_pointer_exception() {

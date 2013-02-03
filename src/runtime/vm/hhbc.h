@@ -413,7 +413,7 @@ enum SetOpOp {
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(Raise,           NA,               TWO(CV,CV),      NOV,        NF) \
-  O(Fatal,           NA,               ONE(CV),         NOV,        CF_TF) \
+  O(Fatal,           ONE(IVA),         ONE(CV),         NOV,        CF_TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \

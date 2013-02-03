@@ -63,6 +63,7 @@ namespace VM {
 
 void raise_error(const std::string &msg);
 void raise_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_error_without_first_frame(const std::string &msg);
 void raise_recoverable_error(const std::string &msg);
 void raise_recoverable_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_strict_warning(const std::string &msg);

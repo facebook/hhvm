@@ -27,14 +27,18 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Array);
 class ExtendedException : public Exception {
 public:
+  enum SkipFrame { skipFrame };
   ExtendedException();
   ExtendedException(const std::string &msg);
+  ExtendedException(SkipFrame frame, const std::string &msg);
   ExtendedException(const char *fmt, ...);
-  ArrayPtr getBackTrace() const { return m_bt; }
+  ArrayPtr getBackTrace() const;
   virtual ~ExtendedException() throw() {}
   EXCEPTION_COMMON_IMPL(ExtendedException);
 protected:
   ArrayPtr m_bt;
+private:
+  void computeBacktrace(bool skipFrame = false);
 };
 
 class Assertion : public ExtendedException {

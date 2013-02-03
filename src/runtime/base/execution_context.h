@@ -303,7 +303,8 @@ public:
                    int errnum,
                    bool callUserHandler,
                    ErrorThrowMode mode,
-                   const std::string &prefix);
+                   const std::string &prefix,
+                   bool skipFrame = false);
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
   void recordLastError(const Exception &e, int errnum = 0);

@@ -1737,7 +1737,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
       static const StringData* msg =
         StringData::GetStaticString("Cannot break/continue");
       e.String(msg);
-      e.Fatal();
+      e.Fatal(0);
     }
     if (exit.isUsed()) {
       exit.set(e);
@@ -1955,7 +1955,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             static const StringData* msg =
               StringData::GetStaticString("Cannot break/continue 1 level");
             e.String(msg);
-            e.Fatal();
+            e.Fatal(0);
             return false;
           }
           if (bs->is(Statement::KindOfBreakStatement)) {
@@ -1980,7 +1980,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             std::ostringstream msg;
             msg << "Cannot break/continue " << n << " levels";
             e.String(StringData::GetStaticString(msg.str()));
-            e.Fatal();
+            e.Fatal(0);
             return false;
           }
           e.Int(n);
@@ -5320,6 +5320,17 @@ void EmitterVisitor::emitPostponedMeths() {
           emitPop(e);
         }
       }
+
+      if (funcScope->isAbstract()) {
+        StringData* msg =
+          StringData::GetStaticString("Cannot call abstract method ");
+        const StringData* methName =
+          StringData::GetStaticString(p.m_meth->getOriginalFullName());
+        msg = NEW(StringData)(msg, methName->slice());
+        msg = NEW(StringData)(msg, "()");
+        e.String(msg);
+        e.Fatal(1);
+      }
     }
     Label ctFatal, ctFatalWithPop;
     {
@@ -5342,7 +5353,7 @@ void EmitterVisitor::emitPostponedMeths() {
       static const StringData* msg =
         StringData::GetStaticString("Cannot break/continue");
       e.String(msg);
-      e.Fatal();
+      e.Fatal(0);
     }
     if (exit.isUsed()) {
       exit.set(e);
@@ -6499,7 +6510,7 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
 void EmitterVisitor::emitMakeUnitFatal(Emitter& e, const std::string& msg) {
   StringData* sd = StringData::GetStaticString(msg);
   e.String(sd);
-  e.Fatal();
+  e.Fatal(0);
 }
 
 void EmitterVisitor::addFunclet(Thunklet* body, Label* entry) {

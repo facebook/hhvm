@@ -619,7 +619,8 @@ void BaseExecutionContext::handleError(const std::string &msg,
                                        int errnum,
                                        bool callUserHandler,
                                        ErrorThrowMode mode,
-                                       const std::string &prefix) {
+                                       const std::string &prefix,
+                                       bool skipFrame /* = false */) {
   SYNC_VM_REGS_SCOPED();
 
   int newErrorState = ErrorRaised;
@@ -634,7 +635,11 @@ void BaseExecutionContext::handleError(const std::string &msg,
     break;
   }
   ErrorStateHelper esh(this, newErrorState);
-  ExtendedException ee(msg);
+  ExtendedException ee = skipFrame ?
+    ExtendedException(ExtendedException::skipFrame, msg) :
+    ExtendedException(msg);
+  ArrayPtr bt = ee.getBackTrace();
+
   recordLastError(ee, errnum);
   bool handled = false;
   if (callUserHandler) {
@@ -644,7 +649,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
     try {
       if (!Eval::Debugger::InterruptException(String(msg))) return;
     } catch (const Eval::DebuggerClientExitException &e) {}
-    throw FatalErrorException(msg.c_str());
+    throw FatalErrorException(msg, bt);
   }
   if (!handled &&
       (RuntimeOption::NoSilencer ||
@@ -656,7 +661,6 @@ void BaseExecutionContext::handleError(const std::string &msg,
     const char *file = NULL;
     int line = 0;
     if (RuntimeOption::InjectedStackTrace) {
-      ArrayPtr bt = ee.getBackTrace();
       if (!bt->empty()) {
         Array top = bt->rvalAt(0).toArray();
         if (top.exists("file")) file = top.rvalAt("file").toString();

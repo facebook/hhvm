@@ -1114,11 +1114,14 @@ Raise    [C C]  ->  []
   throws a fatal error with an error message that indicates that the error
   message was not a string.
 
-Fatal    [C]  ->  []
+Fatal <skip frame>  [C]  ->  []
 
   Fatal. This instruction throws a fatal error using $1 as the error message.
   If $1 is not a string, this instruction throws a fatal error with an error
   message that indicates that the error message was not a string.
+  Setting %1 to 0 will include the full backtrace.
+  Setting %1 to 1 will make the backtrace not include the topmost frame. This
+  is useful when fatalling from functions that shouldn't be seen from userland.
 
 
 4. Control flow instructions

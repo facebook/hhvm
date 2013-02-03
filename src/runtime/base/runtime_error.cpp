@@ -46,6 +46,16 @@ void raise_error(const char *fmt, ...) {
   raise_error(msg);
 }
 
+void raise_error_without_first_frame(const std::string &msg) {
+  int errnum = ErrorConstants::ERROR;
+  g_context->handleError(msg, errnum, false,
+                         RuntimeOption::CallUserHandlerOnFatals ?
+                         ExecutionContext::ThrowIfUnhandled :
+                         ExecutionContext::AlwaysThrow,
+                         "HipHop Fatal error: ",
+                         true);
+}
+
 void raise_recoverable_error(const std::string &msg) {
   int errnum = ErrorConstants::RECOVERABLE_ERROR;
   g_context->handleError(msg, errnum, true,

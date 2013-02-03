@@ -4397,15 +4397,21 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRaise(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFatal(PC& pc) {
+  NEXT();
   TypedValue* top = m_stack.topTV();
   std::string msg;
+  DECODE_IVA(skipFrame);
   if (IS_STRING_TYPE(top->m_type)) {
     msg = top->m_data.pstr->data();
   } else {
     msg = "Fatal error message not a string";
   }
   m_stack.popTV();
-  raise_error(msg);
+  if (skipFrame) {
+    raise_error_without_first_frame(msg);
+  } else {
+    raise_error(msg);
+  }
 }
 
 #define JMP_SURPRISE_CHECK()                                               \
@@ -5665,10 +5671,6 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
                                            int numArgs) {
   const Func* f;
   LookupResult res = lookupClsMethod(f, cls, name, obj, true);
-  if (f->isAbstract()) {
-    raise_error("Cannot call abstract method %s()",
-                f->fullName()->data());
-  }
   if (res == MethodFoundNoThis || res == MagicCallStaticFound) {
     obj = NULL;
   } else {

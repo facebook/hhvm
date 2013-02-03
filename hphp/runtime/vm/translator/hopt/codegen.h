@@ -60,9 +60,9 @@ private:
   Address cgInst(IRInstruction* inst);
 
   // Autogenerate function declarations for each IR instruction in ir.h
-#define OPC(name, flags) void cg##name(IRInstruction* inst);
+#define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);
   IR_OPCODES
-#undef OPC
+#undef O
 
   // helper functions for code generation
   void cgCallHelper(Asm&,

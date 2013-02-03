@@ -303,11 +303,11 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->getOpcode();
   auto const start = m_as.code.frontier;
   switch (opc) {
-#define OPC(name, flags)                                          \
+#define O(name, dsts, srcs, flags)                                \
   case name: cg ## name (inst);                                   \
             return m_as.code.frontier == start ? nullptr : start;
   IR_OPCODES
-#undef OPC
+#undef O
 
   default:
     assert(0);

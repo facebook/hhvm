@@ -35,6 +35,69 @@ namespace HPHP {
 namespace VM {
 namespace JIT{
 
+namespace {
+
+enum OpcodeFlag : uint64_t {
+  NoFlags          = 0x0000,
+  HasDest          = 0x0001,
+  CanCSE           = 0x0002,
+  Essential        = 0x0004,
+  MemEffects       = 0x0008,
+  CallsNative      = 0x0010,
+  ConsumesRC       = 0x0020,
+  ProducesRC       = 0x0040,
+  MayModifyRefs    = 0x0080,
+  Rematerializable = 0x0100, // TODO: implies HasDest
+  MayRaiseError    = 0x0200,
+};
+
+#define NF     0
+#define C      CanCSE
+#define E      Essential
+#define N      CallsNative
+#define PRc    ProducesRC
+#define CRc    ConsumesRC
+#define Refs   MayModifyRefs
+#define Rm     Rematerializable
+#define Er     MayRaiseError
+#define Mem    MemEffects
+
+#define NA        0
+#define D(n)      HasDest
+#define DofS(n)   HasDest
+#define DUnbox(n) HasDest
+#define DBox(n)   HasDest
+#define DParam    HasDest
+
+struct {
+  const char* name;
+  uint64_t flags;
+} OpInfo[] = {
+#define O(name, dsts, srcs, flags) { #name, dsts | (flags) },
+  IR_OPCODES
+#undef O
+  { 0 }
+};
+
+#undef NF
+#undef C
+#undef E
+#undef PRc
+#undef CRc
+#undef Refs
+#undef Rm
+#undef Er
+#undef Mem
+
+#undef NA
+#undef D
+#undef DofS
+#undef DUnbox
+#undef DBox
+#undef DParam
+
+}
+
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   : m_op(inst->m_op)
   , m_typeParam(inst->m_typeParam)
@@ -50,16 +113,6 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
 }
-
-struct {
-  const char* name;
-  uint64_t flags;
-} OpInfo[] = {
-#define OPC(name, flags) { #name, flags },
-  IR_OPCODES
-#undef OPC
-  { 0 }
-};
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
 

@@ -14,220 +14,185 @@
    +----------------------------------------------------------------------+
 */
 
+#include "folly/Conv.h"
+#include "folly/Format.h"
+#include "folly/experimental/Gen.h"
+
+#include "util/trace.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
 namespace HPHP { namespace VM { namespace JIT {
 
+TRACE_SET_MOD(hhir);
+
 //////////////////////////////////////////////////////////////////////
 
 Type::Tag outputType(const IRInstruction* inst) {
-  assert(inst->hasDst() && "outputType requires inst->hasDst()");
+
+#define D(type)   return Type::type;
+#define DofS(n)   return inst->getSrc(n)->getType();
+#define DUnbox(n) return Type::unbox(inst->getSrc(n)->getType());
+#define DBox(n)   return Type::box(inst->getSrc(n)->getType());
+#define DParam    return inst->getTypeParam();
+#define NA        assert(0 && "outputType requires inst->hasDst()");
+
+#define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
   switch (inst->getOpcode()) {
-  case Unbox:
-    return Type::unbox(inst->getSrc(0)->getType());
-
-  case Box:
-    return Type::box(inst->getSrc(0)->getType());
-
-  case StRef:
-  case StRefNT:
-    return Type::box(inst->getSrc(1)->getType());
-
-  case AddElem:            return Type::Arr;
-  case AddNewElem:         return Type::Arr;
-  case ArrayAdd:           return Type::Arr;
-  case AssertStk:          return Type::StkPtr;
-  case Call:               return Type::StkPtr;
-  case Concat:             return Type::Str;
-  case CreateCont:         return Type::Obj;
-  case DefActRec:          return Type::ActRec;
-  case DefCns:             return Type::Bool;
-  case DefFP:              return Type::StkPtr;
-  case DefFunc:            return Type::Func;
-  case DefSP:              return Type::StkPtr;
-  case FreeActRec:         return Type::StkPtr;
-  case GenericRetDecRefs:  return Type::StkPtr;
-  case GuardStk:           return Type::StkPtr;
-  case InstanceOf:         return Type::Bool;
-  case InstanceOfBitmask:  return Type::Bool;
-  case ExtendsClass:       return Type::Bool;
-  case InterpOne:          return Type::StkPtr;
-  case IsNTypeMem:         return Type::Bool;
-  case IsTypeMem:          return Type::Bool;
-  case IsNType:            return Type::Bool;
-  case IsType:             return Type::Bool;
-  case LdARFuncPtr:        return Type::Func;
-  case LdCachedClass:      return Type::Cls;
-  case LdClsMethodCache:   return Type::FuncCls;
-  case LdClsMethodFCache:  return Type::FuncCtx;
-  case GetCtxFwdCall:      return Type::Ctx;
-  case LdClsMethod:        return Type::Func;
-  case LdClsPropAddr:      return Type::PtrToGen;
-  case LdCls:              return Type::Cls;
-  case LdContLocalsPtr:    return Type::PtrToCell;
-  case LdCurFuncPtr:       return Type::Func;
-  case LdFixedFunc:        return Type::Func;
-  case LdFuncCls:          return Type::Cls;
-  case LdFunc:             return Type::Func;
-  case LdHome:             return Type::Home;
-  case LdLocAddr:          return Type::PtrToGen;
-  case LdObjClass:         return Type::Cls;
-  case LdObjMethod:        return Type::Func;
-  case LdPropAddr:         return Type::PtrToGen;
-  case LdRetAddr:          return Type::RetAddr;
-  case LdStackAddr:        return Type::PtrToGen;
-  case LdThis:             return Type::Obj;
-  case LdCtx:              return Type::Ctx;
-  case NewArray:           return Type::Arr;
-  case NewObj:             return Type::StkPtr;
-  case NewTuple:           return Type::Arr;
-  case NInstanceOf:        return Type::Bool;
-  case NInstanceOfBitmask: return Type::Bool;
-  case RetAdjustStack:     return Type::StkPtr;
-  case SpillStack:         return Type::StkPtr;
-  case UnboxPtr:           return Type::PtrToCell;
-
-  // Vector translator opcodes
-  case DefMIStateBase:     return Type::PtrToCell;
-  case PropX:              return Type::PtrToGen;
-  case CGetProp:
-  case CGetElem:           return Type::Cell;
-
-  case OpAdd:
-  case OpSub:
-  case OpAnd:
-  case OpOr:
-  case OpXor:
-  case OpMul:
-    return Type::Int;
-
-  case OpGt:
-  case OpGte:
-  case OpLt:
-  case OpLte:
-  case OpEq:
-  case OpNeq:
-  case OpSame:
-  case OpNSame:
-  case IterNext:
-  case IterNextK:
-  case IterInit:
-  case IterInitK:
-    return Type::Bool;
-
-  // Jumps have dests just to allow finding the TCA to patch.  The
-  // dest SSATmp doesn't actually carry any value.
-  case JmpGt:
-  case JmpGte:
-  case JmpLt:
-  case JmpLte:
-  case JmpEq:
-  case JmpNeq:
-  case JmpZero:
-  case JmpNZero:
-  case JmpSame:
-  case JmpNSame:
-  case JmpInstanceOf:
-  case JmpNInstanceOf:
-  case JmpInstanceOfBitmask:
-  case JmpNInstanceOfBitmask:
-  case JmpIsType:
-  case JmpIsNType:
-  case Jmp_:
-    return Type::None;
-
-  // Output type is the same as the first input's type.
-  case Mov:
-  case IncRef:
-  case Spill:
-  case Reload:
-  case LdAddr:
-    return inst->getSrc(0)->getType();
-
-  // Output type is given by a type paramter to the instruction.
-  case Conv:
-  case LdClsCns:
-  case LdLoc:
-  case LdMem:
-  case LdProp:
-  case LdRaw:
-  case LdRef:
-  case LdStack:
-  case DefConst:
-  case LdConst:
-  case GuardType:
-    return inst->getTypeParam();
-
-  default:
-    always_assert(0 && "outputType not known for opcode");
+  IR_OPCODES
+  default: not_reached();
   }
+
+#undef O
+
+#undef D
+#undef DofS
+#undef DUnbox
+#undef DBox
+#undef DParam
+#undef NA
+
 }
 
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * subtypeAny(ssa, types...)
+ *
+ * Returns whether ssa->getType() is a subtype of any of the
+ * Type::Tags in the variable-length list.
+ */
+
+bool subtypeAny(const SSATmp* s, Type::Tag t) {
+  return s->isA(t);
+}
+template<class... Args>
+bool subtypeAny(const SSATmp* s, Type::Tag t, Args... args) {
+  return s->isA(t) || subtypeAny(s, args...);
+}
+
+// Return a renderable string for a union of types that was specified.
+// Used when a type assertion fails to produce an error message.
+template<class... Args>
+std::string expectedStr(Args... t) {
+  using namespace folly::gen;
+  return folly::join(
+    '|',
+    from({t...}) | mapped([](Type::Tag t) { return Type::Strings[t]; })
+                 | as<std::vector>()
+  );
+}
+
+}
+
+/*
+ * Runtime typechecking for IRInstruction operands.
+ *
+ * This is generated using the table in ir.h.  We instantiate
+ * IR_OPCODES after defining all the various source forms to do type
+ * assertions according to their form (see ir.h for documentation on
+ * the notation).  The checkers appear in argument order, so each one
+ * increments curSrc, and at the end we can check that the argument
+ * count was also correct.
+ */
 void assertOperandTypes(const IRInstruction* inst) {
-#ifdef DEBUG
-  auto const tparam = inst->getTypeParam();
-  auto const s0 = inst->getSrc(0);
-  auto const s1 = inst->getSrc(1);
-  auto const t0 = s0 ? s0->getType() : Type::None;
-  auto const t1 = s1 ? s1->getType() : Type::None;
+  if (!debug) return;
 
-  auto constStaticStr = [] (SSATmp* ssa) {
-    assert(ssa->isConst() && ssa->getType() == Type::StaticStr);
+  int curSrc = 0;
+
+  auto bail = [&] (const std::string& msg) {
+    FTRACE(1, "{}", msg);
+    if (!::HPHP::Trace::moduleEnabled(::HPHP::Trace::hhir, 1)) {
+      fprintf(stderr, "%s\n", msg.c_str());
+    }
+    always_assert(false && "instruction operand type check failure");
   };
 
-  auto constInt = [] (SSATmp* ssa) {
-    assert(ssa->isConst() && ssa->getType() == Type::Int);
+  auto getSrc = [&]() -> SSATmp* {
+    if (curSrc < inst->getNumSrcs()) {
+      return inst->getSrc(curSrc);
+    }
+
+    bail(folly::format(
+      "Internal error: instruction had too few operands\n"
+      "   instruction: {}\n",
+        inst->toString()
+      ).str()
+    );
+    not_reached();
   };
+
+  auto check = [&] (bool cond, const std::string& expected) {
+    if (cond) return;
+
+    bail(folly::format(
+      "Error: failed type check on operand {}\n"
+      "   instruction: {}\n"
+      "   was expecting: {}\n"
+      "   received: {}\n",
+        curSrc,
+        inst->toString(),
+        expected,
+        Type::Strings[inst->getSrc(curSrc)->getType()]
+      ).str()
+    );
+  };
+
+  auto checkNoArgs = [&]{
+    if (inst->getNumSrcs() == 0) return;
+    bail(folly::format(
+      "Error: instruction expected no operands\n"
+      "   instruction: {}\n",
+        inst->toString()
+      ).str()
+    );
+  };
+
+  auto countCheck = [&]{
+    if (inst->getNumSrcs() == curSrc) return;
+    bail(folly::format(
+      "Error: instruction had too many operands\n"
+      "   instruction: {}\n"
+      "   expected {} arguments\n",
+        inst->toString(),
+        curSrc
+      ).str()
+    );
+  };
+
+  using namespace Type;
+
+#define NA       return checkNoArgs();
+#define S(...)   check(subtypeAny(getSrc(), __VA_ARGS__), \
+                       expectedStr(__VA_ARGS__));         \
+                   ++curSrc;
+#define C(type)  check(getSrc()->isConst() &&       \
+                       getSrc()->isA(Type::type),   \
+                       "constant " #type);          \
+                  ++curSrc;
+#define CStr     C(StaticStr)
+#define SNum     S(Int,Bool)
+#define SUnk     return;
+
+#define O(opcode, dstinfo, srcinfo, flags)      \
+  case opcode: srcinfo countCheck(); return;
 
   switch (inst->getOpcode()) {
-  case OpAdd:
-  case OpSub:
-  case OpAnd:
-  case OpOr:
-  case OpXor:
-  case OpMul:
-    assert(t0 == Type::Int || t0 == Type::Bool);
-    assert(t1 == Type::Int || t1 == Type::Bool);
-    break;
-
-  case LdRaw:
-    assert(tparam == Type::Int || tparam == Type::Bool ||
-           tparam == Type::StkPtr || tparam == Type::TCA);
-    break;
-
-  case LdPropAddr:
-    assert(t0 == Type::Obj);
-    constInt(s1);
-    break;
-
-  case LdCls:
-    constStaticStr(s0);
-    break;
-
-  case LdClsCns:
-    constStaticStr(s0);
-    constStaticStr(s1);
-    break;
-
-  case LdObjClass:
-    assert(t0 == Type::Obj);
-    break;
-
-  case StRaw: {
-    auto valT = inst->getSrc(2)->getType();
-    assert(valT == Type::Int || valT == Type::Bool);
-    break;
+    IR_OPCODES
+  default: assert(0);
   }
 
-  case StMem:
-    assert(t0 == Type::PtrToCell || t0 == Type::PtrToGen);
-    break;
+#undef O
 
-  default:
-    break;
-  }
-#endif
+#undef NA
+#undef S
+#undef C
+#undef CStr
+#undef SNum
+#undef SUnk
+
 }
 
 //////////////////////////////////////////////////////////////////////

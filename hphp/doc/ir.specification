@@ -293,22 +293,24 @@ D:StkPtr = AssertStk<T> S0:StkPtr S1:ConstInt
   This is similar to a GuardStk except that it does not imply a
   runtime check and cannot cause control flow.
 
-CheckInit S0:T L:Label
+CheckInit S0:Gen L:Label
 
-  If S0's type T is Uninit, branch to label L.
+  If S0's type is Uninit, branch to label L.
 
 GuardRefs
 
 
 2. Arithmetic
 
-OpAdd
-OpSub
-OpAnd
-OpOr
-OpXor
-OpMul
+D:Int = OpAdd S0:{Int|Bool} S1:{Int|Bool}
+D:Int = OpSub S0:{Int|Bool} S1:{Int|Bool}
+D:Int = OpAnd S0:{Int|Bool} S1:{Int|Bool}
+D:Int = OpOr  S0:{Int|Bool} S1:{Int|Bool}
+D:Int = OpXor S0:{Int|Bool} S1:{Int|Bool}
+D:Int = OpMul S0:{Int|Bool} S1:{Int|Bool}
 
+  Integer/boolean arithmetic.  Performs the operation described by the
+  opcode name on S0 and S1, and puts the result in D.
 
 3. Type conversions
 
@@ -320,14 +322,17 @@ D:T = Conv<T> S0:Gen
 
 4. Boolean predicates
 
-OpGt
-OpGte
-OpLt
-OpLte
-OpEq
-OpNeq
-OpSame
-OpNSame
+D:Bool = OpGt    S0:Gen S1:Gen
+D:Bool = OpGte   S0:Gen S1:Gen
+D:Bool = OpLt    S0:Gen S1:Gen
+D:Bool = OpLte   S0:Gen S1:Gen
+D:Bool = OpEq    S0:Gen S1:Gen
+D:Bool = OpNeq   S0:Gen S1:Gen
+D:Bool = OpSame  S0:Gen S1:Gen
+D:Bool = OpNSame S0:Gen S1:Gen
+
+  Perform comparisons with PHP semantics on S0 and S1, and put the
+  result in D.
 
 D:Bool =  InstanceOf S0:Cls S1:Cls S2:ConstBool
 D:Bool = NInstanceOf S0:Cls S1:Cls S2:ConstBool
@@ -417,9 +422,18 @@ DefLabel
 
 6. Reference manipulation
 
-Unbox
-Box
-UnboxPtr
+D:Cell = Unbox S0:Gen
+
+  Unbox S0 if it is boxed, and put the resulting Cell in D.
+
+D:Cell& = Box S0:Gen
+
+  Box S0 is it is unboxed, and put the resulting Cell& in D.
+
+D:Cell* = UnboxPtr S0:Gen*
+
+  If S0 points to a cell that is KindOfRef, dereference the pointer in
+  the TypedValue and return a pointer to the inner-cell in D.
 
 
 7. Loads
@@ -449,8 +463,14 @@ D:T = LdLoc<T> S0:Home
 
   Loads from the StkPtr in S0 at the offset in S0.  Used to load locals.
 
-LdStackAddr
-LdLocAddr
+D:Gen* = LdStackAddr S0:StkPtr S1:ConstInt
+
+  Loads the address of the stack slot given by the pointer in S0 and
+  the index S1 (in cells).
+
+D:Gen* = LdLocAddr S0:Home
+
+  Loads the address of the local slot specified by S0 into D.
 
 D:T = LdMem<T> S0:{Gen*|Cell*} [L:Label]
 
@@ -458,25 +478,26 @@ D:T = LdMem<T> S0:{Gen*|Cell*} [L:Label]
   specified and the loaded value's type does not match T, this
   instruction does not load into D and transfers control to L.
 
-D:T = LdProp<T> S0:Obj S1:Int [L:Label]
+D:T = LdProp<T> S0:Obj S1:ConstInt [L:Label]
 
   Loads a property from the object referenced by S0 at the offset
   given by S1 and puts the value in D. If the optional label L is
   specified and the loaded value's type does not match T, this
   instruction does not load into D and transfers control to L.
 
-D:T = LdRef<T> S0:T& [L:Label]
+D:T = LdRef<T> S0:Cell& [L:Label]
 
   Loads the value held in the box referenced by S0 and puts the value
-  in D. If the optional label L is specified and the loaded value's
+  in D.  If the optional label L is specified and the loaded value's
   type does not match T, this instruction does not load into D and
   transfers control to L.
 
-D:Obj = LdThis S0:StkPtr [L:Label]
+D:Obj = LdThis S0:StkPtr [ -> L ]
 
-  Loads into D the value of the m_this field out of the frame pointer
-  S0.  If label L is provided, also checks that m_this is valid
-  (i.e. contains an Obj).
+  Loads the this pointer out of the ActRec pointed to by S0, and puts
+  it in D.  If the optional label L is supplied, if the this pointer
+  in S0 is not, this instruction does not load it into D and transfers
+  control to the exit label L.
 
 D:Ctx = LdCtx S0:StkPtr
 
@@ -548,16 +569,18 @@ D:Func = LdFixedFunc S0:ConstStr
   Loads the Func whose name is S0.  Fatal if the named function is
   not defined, and the function autoloader fails to define it.
 
-LdCurFuncPtr
+D:FuncPtr = LdCurFuncPtr
 
-D:Func& = LdARFuncPtr S0:Ptr S1:ConstInt
+  ...
+
+D:Func& = LdARFuncPtr S0:StkPtr S1:ConstInt
 
   Loads the m_func member of an ActRec.  S0 is the base address, and
   S1 is an offset, such that S0 + S1 points to the base of the ActRec.
 
 LdFuncCls
 
-D:PtrToCell = LdContLocalsPtr S0:Obj
+D:Cell* = LdContLocalsPtr S0:Obj
 
   Loads a pointer to the embedded local variables of S0 (a Continuation
   object) into D.
@@ -578,7 +601,10 @@ NewTuple
 
 9. Call & Return
 
-D:ActRec = DefActRec S0:StkPtr S1:Func& S2:{Obj|Cls&|Null} S3:ConstInt
+D:ActRec = DefActRec S0:StkPtr
+                     S1:FuncPtr
+                     S2:{CtxPtr|ClassPtr|Null}
+                     S3:ConstInt
                      S4:{String|Null}
 
   Operands:
@@ -599,20 +625,23 @@ D:StkPtr = FreeActRec S0:StkPtr
   by S0 into D.
 
 Call
-NativeImpl
+
+NativeImpl = S0:ConstFuncPtr S1:StkPtr
+
+  Execute a call to the native builtin specified by the func in S0.
 
 D:RetAddr = LdRetAddr S0:StkPtr
 
   Load the return address off the activation record pointed to by S0
   in preparation for a RetCtrl.
 
-RetCtrl S0:StkPtr S1:StkPtr S2:RetAddr
+RetCtrl S0:{StkPtr|Gen*} S1:StkPtr S2:RetAddr
 
   Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then
   execute a hardware procedure-return using the return address
   specified by S2.
 
-RetVal S0:StkPtr S1:T
+RetVal S0:StkPtr S1:Gen
 
   Writes the value in S1 to the return value slot on the activation
   record pointed to by S0.
@@ -628,7 +657,7 @@ ReleaseVVOrExit S0:StkPtr L:Label
   null, does nothing.  If it is an ExtraArgs, deallocates the
   ExtraArgs structure.  Otherwise jumps to the exit-trace label L.
 
-D:StkPtr = GenericRetDecRefs S0:StkPtr S1:T S2:ConstInt
+D:StkPtr = GenericRetDecRefs S0:StkPtr S1:Gen S2:ConstInt
 
   Does decrefs of all the current function's locals, where S0 is a
   pointer to the relevant activation record, and S2 is the number of
@@ -647,10 +676,10 @@ D:StkPtr = GenericRetDecRefs S0:StkPtr S1:T S2:ConstInt
 
 10. Stores
 
-StMem
-StMemNT
-StProp
-StPropNT
+StMem S0:Gen* S1:ConstInt S2:Gen
+StMemNT S0:Gen* S1:ConstInt S2:Gen
+StProp S0:Obj S1:Int S2:Gen
+StPropNT S0:Obj S1:Int S2:Gen
 StLoc
 StLocNT
 StRef
@@ -691,7 +720,7 @@ ExitGuardFailure
 
 Mov
 
-D:PtrTo* = LdAddr S0:PtrTo* S1:ConstInt
+D:T* = LdAddr S0:T* S1:ConstInt
 
   Load address. Returns a pointer to (S0 + S1) with the same type as S0.
 
@@ -709,10 +738,10 @@ DecRef S0:Gen
   Decrease the reference count of S0 by one, and call a destructor for
   types that require it if it goes to zero.
 
-DecRefMem S0:PtrToGen
+DecRefMem S0:{PtrToCell,PtrToGen} S1:ConstInt
 
-  Decref the value pointed to by S0, calling any appropriate destructor if the
-  refcount goes to zero.
+  Decref the value pointed to by S0 at offset S1 (in bytes), calling
+  any appropriate destructor if the refcount goes to zero.
 
 DecRefNZ S0:Gen
 
@@ -733,9 +762,12 @@ D:StkPtr = DefFP
 
   Creates a temporary D representing the current vm frame pointer.
 
-D:StkPtr = DefSP
+D:StkPtr = DefSP S0:StkPtr S1:ConstInt
 
-  Creates a temporary D representing the current vm stack pointer.
+  Creates a temporary D representing the current vm stack pointer.  S0
+  is a pointer to the current frame, and S1 is the offset between the
+  stack pointer and the frame pointer.  (XXX: this doesn't work
+  because of continuations, and is unused.)
 
 Nop
 
@@ -849,19 +881,19 @@ D:PtrToCell = DefMIStateBase
 
   Declares a base register for MInstrState. Currently this is always %rsp
 
-D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:PtrToGen S3:Gen S4:PtrToCell
+D:Gen* = PropX S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
 
   Lookup intermediate property. Calls the helper specified by S0, passing the
   class context (S1), pointer to the current base (S2), key (S3), and pointer
   to MInstrState (S4).
 
-D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:PtrToGen S3:Gen S4:PtrToCell
+D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
 
   Get property as cell. Calls the helper specified by S0, passing the class
   context (S1), pointer to the current base (S2), key (S3), and pointer to
   MInstrState (S4).
 
-D:Cell = CGetElem S0:ConstTCA S1:PtrToCell S2:Gen S3:PtrToCell
+D:Cell = CGetElem S0:ConstTCA S1:{Cell*|Gen*} S2:Gen S3:Cell*
 
   Get element as cell. Calls the helper specified by S0, passing a base (S1),
   key (S2), and pointer to MInstrState.

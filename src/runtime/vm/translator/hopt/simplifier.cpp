@@ -270,7 +270,7 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
   if (!newCmp) return nullptr;
 
   SSATmp* newQueryJmp = makeInstruction(
-    [=, this] (IRInstruction* condJmp) {
+    [=, this] (IRInstruction* condJmp) -> SSATmp* {
       SSATmp* newCondJmp = simplifyCondJmp(condJmp);
       if (newCondJmp) return newCondJmp;
       if (condJmp->getOpcode() == Nop) {
@@ -278,7 +278,7 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
         inst->convertToNop();
       }
       // Couldn't fold condJmp or combine it with newCmp
-      return (SSATmp*)nullptr;
+      return nullptr;
     },
     JmpNZero,
     inst->getLabel(),

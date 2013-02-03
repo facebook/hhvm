@@ -22,6 +22,8 @@
 #include "util/arena.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
+#include <vector>
+
 namespace HPHP { namespace VM { namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
@@ -163,6 +165,47 @@ private:
 
   // SSATmp and IRInstruction objects are allocated here.
   Arena m_arena;
+};
+
+/*
+ * Utility to keep a vector of state about each instruction, indexed by
+ * instruction id.
+ */
+template<class T>
+struct InstrState {
+  InstrState(IRFactory* factory, T init)
+    : m_info(factory->numInsts(), init)
+    , m_factory(factory)
+    , m_init(init) {
+  }
+  T& operator[](const IRInstruction* inst) {
+    auto iid = inst->getIId();
+    if (iid >= m_info.size()) grow();
+    assert(iid < m_info.size());
+    return m_info[iid];
+  }
+  const T& operator[](const IRInstruction* inst) const {
+    assert(inst->getIId() < m_info.size());
+    return m_info[inst->getIId()];
+  }
+  void reset() {
+    for (size_t i = 0, n = m_info.size(); i < n; ++i) {
+      m_info[i] = m_init;
+    }
+    grow();
+  }
+
+private:
+  void grow() {
+    for (size_t i = m_info.size(), n = m_factory->numInsts(); i < n; ++i) {
+      m_info.push_back(m_init);
+    }
+  }
+
+private:
+  std::vector<T> m_info;
+  IRFactory* m_factory;
+  T m_init;
 };
 
 //////////////////////////////////////////////////////////////////////

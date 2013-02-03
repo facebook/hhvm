@@ -26,18 +26,32 @@ namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
-bool instructionIsMarkedDead(const IRInstruction* inst) {
-  return inst->getId() == DEAD;
-}
+/*
+ * An IncRef is marked as REFCOUNT_CONSUMED[_OFF_TRACE], if it is consumed by
+ * an instruction other than DecRefNZ that decrements the ref count.
+ * REFCOUNT_CONSUMED: consumed by such an instruction in the main trace.
+ * REFCOUNT_CONSUMED_OFF_TRACE: consumed by such an instruction only in exits.
+ */
+enum DceFlags : uint8_t {
+  DEAD,
+  LIVE,
+  REFCOUNT_CONSUMED,
+  REFCOUNT_CONSUMED_OFF_TRACE
+};
 
-void removeDeadInstructions(Trace* trace) {
-  trace->getInstructionList().remove_if(instructionIsMarkedDead);
-}
+// DCE state indexed by instr->getIId.
+typedef InstrState<DceFlags> DceState;
 
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
   trace->getInstructionList().remove_if([&] (const IRInstruction* inst) {
     assert(inst->getIId() < live.size());
     return !live.test(inst->getIId());
+  });
+}
+
+void removeDeadInstructions(Trace* trace, const DceState& state) {
+  trace->getInstructionList().remove_if([&] (const IRInstruction* inst) {
+    return state[inst] == DEAD;
   });
 }
 
@@ -53,14 +67,13 @@ bool isUnguardedLoad(IRInstruction* inst) {
               inst->getSrc(0)->getType() == Type::PtrToCell);
 }
 
-IRInstruction::List initInstructions(Trace* trace) {
+IRInstruction::List initInstructions(Trace* trace, DceState& state) {
   TRACE(5, "DCE:vvvvvvvvvvvvvvvvvvvv\n");
   // 1. simplify unguarded loads to remove unnecssary branches, and
   //    perform copy propagation on every instruction.  Targets that become
   //    unreachable from this pass won't be visited in step 2 below.
   forEachTraceInst(trace, [](IRInstruction* inst) {
     Simplifier::copyProp(inst);
-    inst->setId(DEAD);
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
     // instruction
@@ -81,10 +94,10 @@ IRInstruction::List initInstructions(Trace* trace) {
       if (inst->isControlFlowInstruction()) {
         // mark the destination label so that the destination trace
         // is marked reachable
-        inst->getLabel()->setId(LIVE);
+        state[inst->getLabel()] = LIVE;
       }
       if (inst->isEssential()) {
-        inst->setId(LIVE);
+        state[inst] = LIVE;
         wl.push_back(inst);
       }
     }
@@ -97,19 +110,19 @@ IRInstruction::List initInstructions(Trace* trace) {
 // 1) Change all unconsumed IncRefs to Mov.
 // 2) Mark a conditionally dead DecRefNZ as live if its corresponding IncRef
 //    cannot be eliminated.
-void optimizeRefCount(Trace* trace) {
+void optimizeRefCount(Trace* trace, DceState& state) {
   for (IRInstruction* inst : trace->getInstructionList()) {
     if (inst->getOpcode() == IncRef &&
-        inst->getId() != REFCOUNT_CONSUMED &&
-        inst->getId() != REFCOUNT_CONSUMED_OFF_TRACE) {
+        state[inst] != REFCOUNT_CONSUMED &&
+        state[inst] != REFCOUNT_CONSUMED_OFF_TRACE) {
       inst->setOpcode(Mov);
-      inst->setId(DEAD);
+      state[inst] = DEAD;
     }
     if (inst->getOpcode() == DecRefNZ) {
       IRInstruction* srcInst = inst->getSrc(0)->getInstruction();
-      if (srcInst->getId() == REFCOUNT_CONSUMED ||
-          srcInst->getId() == REFCOUNT_CONSUMED_OFF_TRACE) {
-        inst->setId(LIVE);
+      if (state[srcInst] == REFCOUNT_CONSUMED ||
+          state[srcInst] == REFCOUNT_CONSUMED_OFF_TRACE) {
+        state[inst] = LIVE;
       }
     }
     // Do copyProp at last. When processing DecRefNZs, we still need to look at
@@ -137,7 +150,7 @@ void optimizeRefCount(Trace* trace) {
  *    * replace each use of the original incref's result with the new
  *      incref's result.
  */
-void sinkIncRefs(Trace* trace, IRFactory* irFactory) {
+void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
   assert(trace->isMain());
 
   auto copyProp = [] (Trace* trace) {
@@ -160,7 +173,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory) {
       // prependInstruction inserts an instruction to the beginning. Therefore,
       // we iterate through toSink in the reversed order.
       IRInstruction* sunkInst = irFactory->gen(IncRef, inst->getSrc(0));
-      sunkInst->setId(LIVE);
+      state[sunkInst] = LIVE;
       exit->prependInstruction(sunkInst);
 
       auto dstId = inst->getDst()->getId();
@@ -189,20 +202,20 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory) {
     if (inst->getOpcode() == IncRef) {
       // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
       // otherwise, it should be already removed in optimizeRefCount.
-      if (inst->getId() == REFCOUNT_CONSUMED_OFF_TRACE) {
+      if (state[inst] == REFCOUNT_CONSUMED_OFF_TRACE) {
         inst->setOpcode(Mov);
         // Mark them as dead so that they'll be removed later.
-        inst->setId(DEAD);
+        state[inst] = DEAD;
         // Put all REFCOUNT_CONSUMED_OFF_TRACE IncRefs to the sinking list.
         toSink.push_back(inst);
       } else {
-        assert(inst->getId() == REFCOUNT_CONSUMED);
+        assert(state[inst] == REFCOUNT_CONSUMED);
       }
     }
     if (inst->getOpcode() == DecRefNZ) {
       IRInstruction* srcInst = inst->getSrc(0)->getInstruction();
-      if (srcInst->getId() == DEAD) {
-        inst->setId(DEAD);
+      if (state[srcInst] == DEAD) {
+        state[inst] = DEAD;
         // This may take O(I) time where I is the number of IncRefs
         // in the main trace.
         toSink.remove(srcInst);
@@ -226,7 +239,8 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
-  IRInstruction::List wl = initInstructions(trace);
+  DceState state(irFactory, DEAD);
+  IRInstruction::List wl = initInstructions(trace, state);
 
   // process the worklist
   while (!wl.empty()) {
@@ -238,8 +252,8 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
         continue;
       }
       IRInstruction* srcInst = src->getInstruction();
-      if (srcInst->getId() == DEAD) {
-        srcInst->setId(LIVE);
+      if (state[srcInst] == DEAD) {
+        state[srcInst] = LIVE;
         wl.push_back(srcInst);
       }
       // <inst> consumes <srcInst> which is an IncRef,
@@ -247,13 +261,13 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
       if (inst->consumesReference(i) && srcInst->getOpcode() == IncRef) {
         if (inst->getParent()->isMain() || !srcInst->getParent()->isMain()) {
           // <srcInst> is consumed from its own trace.
-          srcInst->setId(REFCOUNT_CONSUMED);
+          state[srcInst] = REFCOUNT_CONSUMED;
         } else {
           // <srcInst> is consumed off trace.
-          if (srcInst->getId() != REFCOUNT_CONSUMED) {
+          if (state[srcInst] != REFCOUNT_CONSUMED) {
             // mark <srcInst> as REFCOUNT_CONSUMED_OFF_TRACE unless it is
             // also consumed from its own trace.
-            srcInst->setId(REFCOUNT_CONSUMED_OFF_TRACE);
+            state[srcInst] = REFCOUNT_CONSUMED_OFF_TRACE;
           }
         }
       }
@@ -261,20 +275,20 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   }
 
   // Optimize IncRefs and DecRefs.
-  optimizeRefCount(trace);
+  optimizeRefCount(trace, state);
   for (Trace* exit : trace->getExitTraces()) {
-    optimizeRefCount(exit);
+    optimizeRefCount(exit, state);
   }
 
   if (RuntimeOption::EvalHHIREnableSinking) {
     // Sink IncRefs consumed off trace.
-    sinkIncRefs(trace, irFactory);
+    sinkIncRefs(trace, irFactory, state);
   }
 
   // now remove instructions whose id == DEAD
-  removeDeadInstructions(trace);
+  removeDeadInstructions(trace, state);
   for (Trace* exit : trace->getExitTraces()) {
-    removeDeadInstructions(exit);
+    removeDeadInstructions(exit, state);
   }
 
   // and remove empty exit traces

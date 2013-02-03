@@ -1553,11 +1553,6 @@ typedef std::list<Block> BlockList;
  */
 
 /*
- * Remove any instruction whose id field == DEAD
- */
-void removeDeadInstructions(Trace* trace);
-
-/*
  * Remove any instruction if live[iid] == false
  */
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);

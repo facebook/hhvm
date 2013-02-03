@@ -343,8 +343,8 @@ void IRInstruction::printSrc(std::ostream& ostream, uint32 i) const {
 void IRInstruction::printSrcs(std::ostream& ostream) const {
   bool first = true;
   if (getOpcode() == IncStat) {
-    ostream << " " << Stats::g_counterNames[getSrc(0)->getConstValAsInt()] <<
-               ", " << getSrc(1)->getConstValAsInt();
+    ostream << " " << Stats::g_counterNames[getSrc(0)->getValInt()] <<
+               ", " << getSrc(1)->getValInt();
     return;
   }
   for (uint32 i = 0; i < m_numSrcs; i++) {
@@ -370,13 +370,13 @@ void IRInstruction::print(std::ostream& ostream) const {
     SSATmp* offset = getSrc(1);
     if (m_op == StRaw) {
       RawMemSlot& s =
-        RawMemSlot::Get(RawMemSlot::Kind(offset->getConstValAsInt()));
-      int64 offset = s.getOffset() + getSrc(3)->getConstValAsInt();
+        RawMemSlot::Get(RawMemSlot::Kind(offset->getValInt()));
+      int64 offset = s.getOffset() + getSrc(3)->getValInt();
       if (offset) {
         ostream << " + " << offset;
       }
     } else if ((isStMem || isLdMem) &&
-        (!offset->isConst() || offset->getConstValAsInt() != 0)) {
+        (!offset->isConst() || offset->getValInt() != 0)) {
       ostream << " + ";
       printSrc(ostream, 1);
     }
@@ -577,47 +577,47 @@ int SSATmp::numAllocatedRegs() const {
 }
 
 
-bool SSATmp::getConstValAsBool() const {
+bool SSATmp::getValBool() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBool();
 }
-int64 SSATmp::getConstValAsInt() const {
+int64 SSATmp::getValInt() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsInt();
 }
-int64 SSATmp::getConstValAsRawInt() const {
+int64 SSATmp::getValRawInt() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsRawInt();
 }
-double SSATmp::getConstValAsDbl() const {
+double SSATmp::getValDbl() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsDbl();
 }
-const StringData* SSATmp::getConstValAsStr() const {
+const StringData* SSATmp::getValStr() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsStr();
 }
-const ArrayData* SSATmp::getConstValAsArr() const {
+const ArrayData* SSATmp::getValArr() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsArr();
 }
-const Func* SSATmp::getConstValAsFunc() const {
+const Func* SSATmp::getValFunc() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsFunc();
 }
-const Class* SSATmp::getConstValAsClass() const {
+const Class* SSATmp::getValClass() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsClass();
 }
-const NamedEntity* SSATmp::getConstValAsNamedEntity() const {
+const NamedEntity* SSATmp::getValNamedEntity() const {
   assert(isConst());
   return static_cast<ConstInstruction*>(m_inst)->getValAsNamedEntity();
 }
-uintptr_t SSATmp::getConstValAsBits() const {
+uintptr_t SSATmp::getValBits() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBits();
 }
-TCA SSATmp::getConstValAsTCA() const {
+TCA SSATmp::getValTCA() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsTCA();
 }

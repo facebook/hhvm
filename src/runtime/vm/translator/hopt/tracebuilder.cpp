@@ -254,7 +254,7 @@ void TraceBuilder::genDecRefMem(SSATmp* base, int64 offset, Type::Tag type) {
 Trace* TraceBuilder::genExitGuardFailure(uint32 bcOff) {
   Trace* trace = makeExitTrace(bcOff);
   IRInstruction* markerInst =
-    m_irFactory.marker(bcOff, m_curFunc->getConstValAsFunc(), m_spOffset);
+    m_irFactory.marker(bcOff, m_curFunc->getValFunc(), m_spOffset);
   trace->appendInstruction(markerInst);
   SSATmp* pc = genDefConst<int64>((int64)bcOff);
   // TODO change exit trace to a control flow instruction that
@@ -317,7 +317,7 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
   Trace* exitTrace = makeExitTrace(bcOff);
   exitTrace->appendInstruction(
     m_irFactory.marker(bcOff,
-                       m_curFunc->getConstValAsFunc(),
+                       m_curFunc->getValFunc(),
                        m_spOffset + numOpnds - stackDeficit));
   SSATmp* sp = m_spValue;
   if (numOpnds != 0 || stackDeficit != 0) {
@@ -853,7 +853,7 @@ static SSATmp* getStackValue(SSATmp* sp,
     // sp = GuardStk<T> sp, offset
     // We don't have a value, but we may know the type due to guarding
     // on it.
-    if (inst->getSrc(1)->getConstValAsInt() == index) {
+    if (inst->getSrc(1)->getValInt() == index) {
       type = inst->getTypeParam();
       return nullptr;
     }
@@ -903,7 +903,7 @@ static SSATmp* getStackValue(SSATmp* sp,
     // this is not one of the values pushed onto the stack by this
     // spillstack instruction, so continue searching
     SSATmp* prevSp = inst->getSrc(0);
-    int64_t numPopped = inst->getSrc(1)->getConstValAsInt();
+    int64_t numPopped = inst->getSrc(1)->getValInt();
     return getStackValue(prevSp,
                          // pop values pushed by spillstack
                          index - (numPushed - numPopped),
@@ -914,8 +914,8 @@ static SSATmp* getStackValue(SSATmp* sp,
   case InterpOne: {
     // sp = InterpOne(fp, sp, bcOff, stackAdjustment, resultType)
     SSATmp* prevSp = inst->getSrc(1);
-    int64 numPopped = inst->getSrc(3)->getConstValAsInt();
-    Type::Tag resultType = (Type::Tag)inst->getSrc(4)->getConstValAsInt();
+    int64 numPopped = inst->getSrc(3)->getValInt();
+    Type::Tag resultType = (Type::Tag)inst->getSrc(4)->getValInt();
     int64 numPushed = resultType == Type::None ? 0 : 1;
     if (index == 0 && numPushed == 1) {
       type = resultType;
@@ -1015,7 +1015,7 @@ void TraceBuilder::genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retVal) {
 
 IRInstruction* TraceBuilder::genMarker(uint32 bcOff, int32 spOff) {
   auto* marker = m_irFactory.marker(bcOff,
-                                    m_curFunc->getConstValAsFunc(),
+                                    m_curFunc->getValFunc(),
                                     spOff);
   appendInstruction(marker);
   return marker;
@@ -1223,7 +1223,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     }
     case DefSP: {
       m_spValue = inst->getDst();
-      m_spOffset = inst->getSrc(1)->getConstValAsInt();
+      m_spOffset = inst->getSrc(1)->getValInt();
       break;
     }
     case AssertStk:
@@ -1234,7 +1234,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     case SpillStack: {
       m_spValue = inst->getDst();
       // Push the spilled values but adjust for the popped values
-      int64 stackAdjustment = inst->getSrc(1)->getConstValAsInt();
+      int64 stackAdjustment = inst->getSrc(1)->getValInt();
       m_spOffset -= stackAdjustment;
       m_spOffset += spillValueCells(inst);
       assert(m_spOffset >= 0);
@@ -1249,8 +1249,8 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     }
     case InterpOne: {
       m_spValue = inst->getDst();
-      int64 stackAdjustment = inst->getSrc(3)->getConstValAsInt();
-      Type::Tag resultType = (Type::Tag)inst->getSrc(4)->getConstValAsInt();
+      int64 stackAdjustment = inst->getSrc(3)->getValInt();
+      Type::Tag resultType = (Type::Tag)inst->getSrc(4)->getValInt();
       // push the return value if any and adjust for the popped values
       m_spOffset += ((resultType == Type::None ? 0 : 1) - stackAdjustment);
       break;
@@ -1285,13 +1285,13 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     case IterInitK:
     case IterNextK: {
       // kill the local to which this instruction stores iter's key
-      killLocalValue(inst->getSrc(3)->getConstValAsInt());
+      killLocalValue(inst->getSrc(3)->getValInt());
       // fall through to case below to handle value local
     }
     case IterInit:
     case IterNext: {
       // kill the local to which this instruction stores iter's value
-      killLocalValue(inst->getSrc(2)->getConstValAsInt());
+      killLocalValue(inst->getSrc(2)->getValInt());
       break;
     }
     case LdThis: {

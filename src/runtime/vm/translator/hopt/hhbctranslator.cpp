@@ -763,7 +763,7 @@ void HhbcTranslator::emitStrlen() {
     SSATmp* input = popC();
     if (input->isConst()) {
       // static string; fold its strlen operation
-      push(m_tb->genDefConst<int64>(input->getConstValAsStr()->size()));
+      push(m_tb->genDefConst<int64>(input->getValStr()->size()));
     } else {
       push(m_tb->genLdRaw(input, RawMemSlot::StrLen, Type::Int));
       m_tb->genDecRef(input);

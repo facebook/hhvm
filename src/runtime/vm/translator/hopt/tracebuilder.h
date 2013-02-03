@@ -40,7 +40,7 @@ public:
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
   Trace* makeExitTrace(uint32 bcOff) {
-    return m_trace->addExitTrace(makeTrace(m_curFunc->getConstValAsFunc(),
+    return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
                                            bcOff, false));
   }
   bool isThisAvailable() const {

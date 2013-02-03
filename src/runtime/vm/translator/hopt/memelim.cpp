@@ -109,7 +109,7 @@ private:
     void update(IRInstruction* inst) {
       assert(inst != NULL);
 
-      int offset = inst->getSrc(1)->getConstValAsInt();
+      int offset = inst->getSrc(1)->getValInt();
 
       PropList::iterator it, end;
       for (it = accesses.begin(), end = accesses.end(); it != end; ++it) {
@@ -275,7 +275,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
   // of a LdMem or StMem), otherwise -1
   Opcode op = save->getOpcode();
   int offset = (op == LdProp || op == StProp || op == StPropNT) ?
-               save->getSrc(1)->getConstValAsInt() : -1;
+               save->getSrc(1)->getValInt() : -1;
 
   for (PropMap::iterator it = m_props.begin(), end = m_props.end();
        it != end; ++it) {
@@ -496,7 +496,7 @@ void MemMap::processInstruction(IRInstruction* inst) {
         m_props[obj]->update(inst);
       } else {
         PropInfoList* list = new PropInfoList;
-        int offset = inst->getSrc(1)->getConstValAsInt();
+        int offset = inst->getSrc(1)->getValInt();
         list->accesses.push_back(PropInfo(inst, offset));
         m_props[obj] = list;
       }
@@ -612,13 +612,13 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
     if (isLoad(op)) {
       if (op == LdProp) {
-        offset = inst->getSrc(1)->getConstValAsInt();
+        offset = inst->getSrc(1)->getValInt();
       }
 
       optimizeLoad(inst, offset);
     } else if (isStore(op)) {
       if (op == StProp || op == StPropNT) {
-        offset = inst->getSrc(1)->getConstValAsInt();
+        offset = inst->getSrc(1)->getValInt();
       }
 
       // if we see a store, first check if its last available access is a store

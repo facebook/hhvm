@@ -374,7 +374,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
   // pointer to an AR that is not in rVmFp or rVmSp.
   assert(type != Type::StkPtr ||
          (opc == LdRaw &&
-          inst->getSrc(1)->getConstValAsInt() == RawMemSlot::ContARPtr));
+          inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr));
 
   if (RuntimeOption::EvalHHIRDeadCodeElim) {
     if (ssaTmp->getLastUseId() == 0) return;
@@ -1054,17 +1054,17 @@ void LinearScan::rematerializeAux(Trace* trace,
     // Other instructions that may have side effects on locals must
     // kill the local variable values.
     else if (opc == IterInit) {
-      int valLocId = inst->getSrc(3)->getConstValAsInt();
+      int valLocId = inst->getSrc(3)->getValInt();
       killLocal(valLocId);
       if (inst->getNumSrcs() == 5) {
-        int keyLocId = inst->getSrc(4)->getConstValAsInt();
+        int keyLocId = inst->getSrc(4)->getValInt();
         killLocal(keyLocId);
       }
     } else if (opc == IterNext) {
-      int valLocId = inst->getSrc(2)->getConstValAsInt();
+      int valLocId = inst->getSrc(2)->getValInt();
       killLocal(valLocId);
       if (inst->getNumSrcs() == 4) {
-        int keyLocId = inst->getSrc(3)->getConstValAsInt();
+        int keyLocId = inst->getSrc(3)->getValInt();
         killLocal(keyLocId);
       }
     }

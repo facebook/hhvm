@@ -1247,17 +1247,17 @@ public:
    *
    * Pre: getInstruction() && getInstruction()->isConstInstruction()
    */
-  bool               getConstValAsBool() const;
-  int64              getConstValAsInt() const;
-  int64              getConstValAsRawInt() const;
-  double             getConstValAsDbl() const;
-  const StringData*  getConstValAsStr() const;
-  const ArrayData*   getConstValAsArr() const;
-  const Func*        getConstValAsFunc() const;
-  const Class*       getConstValAsClass() const;
-  const NamedEntity* getConstValAsNamedEntity() const;
-  uintptr_t          getConstValAsBits() const;
-  TCA                getConstValAsTCA() const;
+  bool               getValBool() const;
+  int64              getValInt() const;
+  int64              getValRawInt() const;
+  double             getValDbl() const;
+  const StringData*  getValStr() const;
+  const ArrayData*   getValArr() const;
+  const Func*        getValFunc() const;
+  const Class*       getValClass() const;
+  const NamedEntity* getValNamedEntity() const;
+  uintptr_t          getValBits() const;
+  TCA                getValTCA() const;
 
   /*
    * Returns: Type::subtypeOf(getType(), tag).

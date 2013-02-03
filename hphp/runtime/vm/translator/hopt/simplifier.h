@@ -60,6 +60,7 @@ private:
   SSATmp* simplifySame(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyNSame(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyIsType(IRInstruction*);
+  SSATmp* simplifyJmpIsType(IRInstruction*);
   SSATmp* simplifyConcat(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyConv(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);

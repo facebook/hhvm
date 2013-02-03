@@ -103,6 +103,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case UnboxPtr:
     return simplifyUnboxPtr(inst);
   case IsType:
+  case IsNType:
     return simplifyIsType(inst);
 
   case CheckInit:
@@ -122,6 +123,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpNSame:
     return simplifyQueryJmp(inst);
 
+  case JmpIsType:
+  case JmpIsNType:
+    return simplifyJmpIsType(inst);
+
   case Print:        return simplifyPrint(inst);
   case DecRef:
   case DecRefNZ:     return simplifyDecRef(inst);
@@ -133,8 +138,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpNInstanceOf:
   case JmpInstanceOfBitmask:
   case JmpNInstanceOfBitmask:
-  case JmpIsType:
-  case JmpIsNType:
     return nullptr;
 
   case LdObjClass:
@@ -883,9 +886,25 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
+SSATmp* Simplifier::simplifyJmpIsType(IRInstruction* inst) {
+  SSATmp* res = simplifyIsType(inst);
+  if (res == nullptr) return nullptr;
+  assert(res->isConst());
+  if (res->getValBool()) {
+    // Taken jump
+    return m_tb->gen(Jmp_, inst->getLabel());
+  } else {
+    // Not taken jump; turn jump into a nop
+    inst->convertToNop();
+  }
+  return nullptr;
+}
+
 SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
-  auto type = inst->getTypeParam();
-  auto src  = inst->getSrc(0);
+  bool trueSense =
+    inst->getOpcode() == IsType || inst->getOpcode() == JmpIsType;
+  auto    type = inst->getTypeParam();
+  auto    src  = inst->getSrc(0);
   auto srcType = src->getType();
 
   // The comparisons below won't work for these cases covered by this
@@ -893,17 +912,17 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   assert(type.isStaticallyKnownUnboxed() && type != Type::StaticStr);
   if (type != Type::Obj) {
     if (srcType.subtypeOf(type) || (type.isString() && srcType.isString())) {
-      return genDefBool(true);
+      return genDefBool(trueSense);
     }
     if (srcType != Type::Cell) {
-      return genDefBool(false);
+      return genDefBool(!trueSense);
     }
   }
-  if (src->getType() != Type::Obj) {
+  if (srcType != Type::Obj) {
     // Note: for IsObject*, we need to emit a call to ObjectData::isResource
     // (or equivalent), so we can't fold away the case where we know we are
     // checking an object.
-    return genDefBool(false);
+    return genDefBool(!trueSense);
   }
   return NULL;
 }

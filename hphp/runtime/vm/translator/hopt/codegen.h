@@ -93,27 +93,15 @@ private:
                bool genStoreType = true);
   void cgStoreTypedValue(PhysReg base, int64_t off, SSATmp* src);
 
-  void cgLoad(Type type,
-              SSATmp* dst,
-              PhysReg base,
-              int64_t off,
-              LabelInstruction* label,
-              IRInstruction* inst = NULL);
+  void cgLoad(PhysReg base, int64_t off, IRInstruction* inst);
 
   template<class OpndType>
-  ConditionCode emitTypeTest(Type type, OpndType src);
+  ConditionCode emitTypeTest(IRInstruction* inst, OpndType src, bool negate);
 
   template<class OpndType>
-  void emitGuardType(Type         type,
-                     OpndType          src,
-                     LabelInstruction* label,
-                     IRInstruction*    instr);
+  void emitGuardType(OpndType src, IRInstruction* instr);
 
-  void cgGuardTypeCell(Type         type,
-                       PhysReg           baseReg,
-                       int64_t           offset,
-                       LabelInstruction* label,
-                       IRInstruction*    instr);
+  void cgGuardTypeCell(PhysReg baseReg,int64_t offset,IRInstruction* instr);
 
   void cgStMemWork(IRInstruction* inst, bool genStoreType);
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
@@ -152,12 +140,7 @@ private:
                                     PhysReg      thisReg,
                                     CacheHandle& ch);
 
-  void cgLoadTypedValue(Type type,
-                        SSATmp* dst,
-                        PhysReg base,
-                        int64_t off,
-                        LabelInstruction* label,
-                        IRInstruction* inst);
+  void cgLoadTypedValue(PhysReg base, int64_t off, IRInstruction* inst);
 
   void cgNegate(IRInstruction* inst); // helper
   void cgJcc(IRInstruction* inst); // helper
@@ -173,7 +156,11 @@ private:
   void cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
 
 private:
+  void emitSetCc(IRInstruction*, ConditionCode);
   void emitInstanceCheck(IRInstruction* inst, PhysReg dstReg);
+  ConditionCode emitIsTypeTest(IRInstruction* inst, bool negate);
+  void cgIsTypeCommon(IRInstruction* inst, bool negate);
+  void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceCheck(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
@@ -224,9 +211,7 @@ private:
   void emitJccDirectExit(IRInstruction*, ConditionCode);
   Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
                               SSATmp* toSmash);
-  void emitGuardOrFwdJcc(IRInstruction*    inst,
-                         ConditionCode     cc,
-                         LabelInstruction* label);
+  void emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurFunc() const;
   Class*      getCurClass() const { return getCurFunc()->cls(); }

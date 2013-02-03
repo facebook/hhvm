@@ -2445,7 +2445,14 @@ sm_typeargs_opt:
 
 sm_type_list:
     sm_type
-  | sm_type ',' sm_type_list
+  | sm_type_list ',' sm_type
+;
+
+sm_func_type_list:
+    sm_type_list ',' T_VARARG          { $$.reset(); }
+  | sm_type_list                       { $$.reset(); }
+  | T_VARARG                           { $$.reset(); }
+  |                                    { $$.reset(); }
 ;
 
 sm_opt_return_type:
@@ -2485,9 +2492,10 @@ sm_type:
   | T_ARRAY T_TYPELIST_LT sm_type ','
     sm_type T_TYPELIST_GT              { only_in_strict_mode(_p); $$.setText("array"); }
   | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1; }
-  | '(' T_FUNCTION '(' sm_type_list ')' ':' sm_type ')'
-                                       { only_in_strict_mode(_p); $$.reset(); }
-  | '(' sm_type ',' sm_type_list ')'   { only_in_strict_mode(_p);
+  | '(' T_FUNCTION
+    '(' sm_func_type_list ')'
+    ':' sm_type ')'                   { only_in_strict_mode(_p); $$.reset(); }
+  | '(' sm_type_list ',' sm_type ')'  { only_in_strict_mode(_p);
                                          $$.setText("array"); }
 ;
 

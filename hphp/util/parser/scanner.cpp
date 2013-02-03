@@ -260,6 +260,18 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
   }
 }
 
+bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
+  for (;;) {
+    if (pos->t == T_VARARG) {
+      nextLookahead(pos);
+      return true;
+    }
+    if (!tryParseNSType(pos)) return false;
+    if (pos->t != ',') return true;
+    nextLookahead(pos);
+  }
+}
+
 bool
 Scanner::tryParseNSType(TokenStore::iterator& pos) {
   if (pos->t == '@') {
@@ -274,7 +286,10 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       nextLookahead(pos);
       if (pos->t != '(') return false;
       nextLookahead(pos);
-      if (!tryParseTypeList(pos) || pos->t != ')') return false;
+      if (pos->t != ')') {
+        if (!tryParseFuncTypeList(pos)) return false;
+        if (pos->t != ')') return false;
+      }
       nextLookahead(pos);
       if (pos->t == ')') {
         nextLookahead(pos);
@@ -282,11 +297,13 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       }
       if (pos->t != ':') return false;
       nextLookahead(pos);
-      if (!tryParseNSType(pos) || pos->t != ')') return false;
+      if (!tryParseNSType(pos)) return false;
+      if (pos->t != ')') return false;
       nextLookahead(pos);
       return true;
     }
-    if (!tryParseTypeList(pos) || pos->t != ')') return false;
+    if (!tryParseTypeList(pos)) return false;
+    if (pos->t != ')') return false;
     nextLookahead(pos);
     return true;
   } 

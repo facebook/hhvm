@@ -191,6 +191,7 @@ public:
   void nextLookahead(TokenStore::iterator& pos);
   bool tryParseNSType(TokenStore::iterator& pos);
   bool tryParseTypeList(TokenStore::iterator& pos);
+  bool tryParseFuncTypeList(TokenStore::iterator& pos);
 
   /**
    * Called by parser or tokenizer.

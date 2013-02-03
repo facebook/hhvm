@@ -609,6 +609,10 @@ const Class* SSATmp::getConstValAsClass() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsClass();
 }
+const NamedEntity* SSATmp::getConstValAsNamedEntity() const {
+  assert(isConst());
+  return static_cast<ConstInstruction*>(m_inst)->getValAsNamedEntity();
+}
 uintptr_t SSATmp::getConstValAsBits() const {
   assert(isConst());
   return ((ConstInstruction*)m_inst)->getValAsBits();

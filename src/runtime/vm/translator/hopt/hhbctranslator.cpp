@@ -1320,10 +1320,9 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
     Trace* exitTrace = getExitSlowTrace();
     const StringData* className = np.first;
     SSATmp* funcClassTmp = m_tb->genLdClsMethodCache(
-                              m_tb->genDefConst<const StringData*>(className),
-                              m_tb->genDefConst<const StringData*>(methodName),
-                              /*TODO(#2062950): NamedEntity* */
-                              m_tb->genDefConst<int64>((uintptr_t)np.second),
+                              m_tb->genDefConst(className),
+                              m_tb->genDefConst(methodName),
+                              m_tb->genDefConst(np.second),
                               exitTrace);
     SSATmp* actRec = m_tb->genDefActRec(funcClassTmp,
                                         m_tb->genDefNull(),

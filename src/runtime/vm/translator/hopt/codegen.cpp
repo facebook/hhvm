@@ -3770,7 +3770,7 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   // Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
   const StringData*  cls    = className->getConstValAsStr();
   const StringData*  method = methodName->getConstValAsStr();
-  const NamedEntity* ne     = (NamedEntity*)baseClass->getConstValAsRawInt();
+  auto const ne             = baseClass->getConstValAsNamedEntity();
   TargetCache::CacheHandle ch =
     TargetCache::StaticMethodCache::alloc(cls,
                                           method,

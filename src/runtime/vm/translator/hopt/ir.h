@@ -457,6 +457,7 @@ public:
     IRT(FuncPtr,         "Func*") \
     IRT(VarEnvPtr,       "VarEnv*")\
     IRT(FuncClassPtr,    "FuncClass*") /* this has both a Func* and a Class* */\
+    IRT(NamedEntityPtr,  "NamedEntity*") \
     IRT(RetAddr,         "RetAddr") /* Return address */ \
     IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP */\
     IRT(TCA,             "TCA") \
@@ -961,68 +962,88 @@ public:
     m_intVal = val;
   }
 
-  ConstInstruction(Opcode opc, double val) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Dbl);
-    m_dblVal = val;
-  }
-  ConstInstruction(Opcode opc, const StringData* val) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::StaticStr);
-    m_strVal = val;
-  }
-  ConstInstruction(Opcode opc, const ArrayData* val) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Arr);
-    m_arrVal = val;
-  }
   ConstInstruction(Opcode opc, bool val) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::Bool);
     m_intVal = 0;
     m_boolVal = val;
   }
+
+  // TODO(#2028117): this should not be a ConstInstruction shape
   ConstInstruction(uint32_t numSrcs, SSATmp** srcs, Local l)
     : IRInstruction(LdHome, numSrcs, srcs)
   {
     setTypeParam(Type::Home);
     new (&m_local) Local(l);
   }
+
+  ConstInstruction(Opcode opc, double val) : IRInstruction(opc) {
+    assert(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::Dbl);
+    m_dblVal = val;
+  }
+
+  ConstInstruction(Opcode opc, const StringData* val) : IRInstruction(opc) {
+    assert(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::StaticStr);
+    m_strVal = val;
+  }
+
+  ConstInstruction(Opcode opc, const ArrayData* val) : IRInstruction(opc) {
+    assert(opc == DefConst || opc == LdConst);
+    setTypeParam(Type::Arr);
+    m_arrVal = val;
+  }
+
   ConstInstruction(Opcode opc, const Func* f) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::FuncPtr);
     m_func = f;
   }
+
   ConstInstruction(Opcode opc, const Class* f) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::ClassPtr);
     m_clss = f;
   }
+
+  ConstInstruction(Opcode opc, const NamedEntity* ne) : IRInstruction(opc) {
+    setTypeParam(Type::NamedEntityPtr);
+    m_namedEntity = ne;
+  }
+
   ConstInstruction(Opcode opc, TCA tca) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
     setTypeParam(Type::TCA);
     m_tca = tca;
   }
-  explicit ConstInstruction(Arena& arena, const ConstInstruction* inst, IId iid)
+
+  explicit ConstInstruction(Arena& arena,
+                            const ConstInstruction* inst,
+                            IId iid)
     : IRInstruction(arena, inst, iid)
-    , m_strVal(inst->m_strVal) {
-  }
+    , m_strVal(inst->m_strVal)
+  {}
 
   bool getValAsBool() const {
     assert(getTypeParam() == Type::Bool);
     return m_boolVal;
   }
+
   int64 getValAsInt() const {
     assert(getTypeParam() == Type::Int);
     return m_intVal;
   }
+
   int64 getValAsRawInt() const {
     return m_intVal;
   }
+
   double getValAsDbl() const {
     assert(getTypeParam() == Type::Dbl);
     return m_dblVal;
   }
+
   const StringData* getValAsStr() const {
     assert(getTypeParam() == Type::StaticStr);
     return m_strVal;
@@ -1043,18 +1064,26 @@ public:
     assert(getTypeParam() == Type::VarEnvPtr);
     return m_varEnv;
   }
+  const NamedEntity* getValAsNamedEntity() const {
+    assert(getTypeParam() == Type::NamedEntityPtr);
+    return m_namedEntity;
+  }
+
   TCA getValAsTCA() const {
     assert(getTypeParam() == Type::TCA);
     return m_tca;
   }
+
+  uintptr_t getValAsBits() const { return m_bits; }
+
   bool isEmptyArray() const {
     return m_arrVal == HphpArray::GetStaticEmptyArray();
   }
+
   Local getLocal() const {
     assert(getTypeParam() == Type::Home);
     return m_local;
   }
-  uintptr_t getValAsBits() const { return m_bits; }
 
   void printConst(std::ostream& ostream) const;
   virtual bool isConstInstruction() const {return true;}
@@ -1065,17 +1094,18 @@ public:
 
 private:
   union {
-    uintptr_t         m_bits;
-    bool              m_boolVal;
-    int64             m_intVal;
-    double            m_dblVal;
-    const StringData* m_strVal;
-    const ArrayData*  m_arrVal;
-    Local             m_local; // for LdHome opcode
-    const Func*       m_func;
-    const Class*      m_clss;
-    const VarEnv*     m_varEnv;
-    TCA               m_tca;
+    uintptr_t          m_bits;
+    bool               m_boolVal;
+    int64              m_intVal;
+    double             m_dblVal;
+    Local              m_local; // for LdHome opcode
+    const StringData*  m_strVal;
+    const ArrayData*   m_arrVal;
+    const Func*        m_func;
+    const Class*       m_clss;
+    const VarEnv*      m_varEnv;
+    const NamedEntity* m_namedEntity;
+    TCA                m_tca;
   };
 };
 
@@ -1197,19 +1227,8 @@ public:
   void              setUseCount(uint32 count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32            decUseCount() { return --m_useCount; }
-  bool              isConst() const { return m_inst->isConstInstruction(); }
   bool              isBoxed() const { return Type::isBoxed(getType()); }
   bool              isString() const { return isA(Type::Str); }
-  bool              getConstValAsBool() const;
-  int64             getConstValAsInt() const;
-  int64             getConstValAsRawInt() const;
-  double            getConstValAsDbl() const;
-  const StringData* getConstValAsStr() const;
-  const ArrayData*  getConstValAsArr() const;
-  const Func*       getConstValAsFunc() const;
-  const Class*      getConstValAsClass() const;
-  uintptr_t         getConstValAsBits() const;
-  TCA               getConstValAsTCA() const;
   void              print(std::ostream& ostream,
                           bool printLastUse = false) const;
   void              print() const;
@@ -1217,6 +1236,28 @@ public:
   // Used for Jcc to Jmp elimination
   void              setTCA(TCA tca);
   TCA               getTCA() const;
+
+  // XXX: false for Null, etc.  Would rather it returns whether we
+  // have a compile-time constant value.
+  bool              isConst() const { return m_inst->isConstInstruction(); }
+
+  /*
+   * For SSATmps with a compile-time constant value, the following
+   * functions allow accessing it.
+   *
+   * Pre: getInstruction() && getInstruction()->isConstInstruction()
+   */
+  bool               getConstValAsBool() const;
+  int64              getConstValAsInt() const;
+  int64              getConstValAsRawInt() const;
+  double             getConstValAsDbl() const;
+  const StringData*  getConstValAsStr() const;
+  const ArrayData*   getConstValAsArr() const;
+  const Func*        getConstValAsFunc() const;
+  const Class*       getConstValAsClass() const;
+  const NamedEntity* getConstValAsNamedEntity() const;
+  uintptr_t          getConstValAsBits() const;
+  TCA                getConstValAsTCA() const;
 
   /*
    * Returns: Type::subtypeOf(getType(), tag).

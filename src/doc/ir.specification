@@ -142,6 +142,7 @@ relation with the above PHP-facing types.
   Func*           Func*
   VarEnv*         VarEnv*
   FuncClass*      Tuple of (Func*,Class*)
+  NamedEntity*    NamedEntity*
   StkPtr          Pointer into VM execution stack
   TCA             Machine code address
 

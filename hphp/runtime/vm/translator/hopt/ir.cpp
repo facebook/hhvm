@@ -487,7 +487,9 @@ void IRInstruction::printSrcs(std::ostream& ostream) const {
 }
 
 void IRInstruction::print(std::ostream& ostream) const {
-  ostream << folly::format("({:02d}) ", m_id);
+  if (!isTransient()) {
+    ostream << folly::format("({:02d}) ", getIId());
+  }
   printDst(ostream);
 
   bool isStMem = m_op == StMem || m_op == StMemNT || m_op == StRaw;

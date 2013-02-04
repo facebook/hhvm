@@ -748,21 +748,21 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
   }
 }
 
-void Stack::toStringIter(std::ostream& os, Iter* it) const {
-  switch (it->m_itype) {
-  case Iter::TypeUndefined: {
+void Stack::toStringIter(std::ostream& os, Iter* it, bool itRef) const {
+  if (itRef) {
+    os << "I:MutableArray";
+    return;
+  }
+  switch (it->arr().getIterType()) {
+  case ArrayIter::TypeUndefined: {
     os << "I:Undefined";
     break;
   }
-  case Iter::TypeArray: {
+  case ArrayIter::TypeArray: {
     os << "I:Array";
     break;
   }
-  case Iter::TypeMutableArray: {
-    os << "I:MutableArray";
-    break;
-  }
-  case Iter::TypeIterator: {
+  case ArrayIter::TypeIterator: {
     os << "I:Iterator";
     break;
   }
@@ -892,8 +892,9 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
       if (i > 0) {
         os << " ";
       }
-      if (func->checkIterScope(offset, i)) {
-        toStringIter(os, it);
+      bool itRef;
+      if (func->checkIterScope(offset, i, itRef)) {
+        toStringIter(os, it, itRef);
       } else {
         os << "I:Undefined";
       }
@@ -6376,50 +6377,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCufSafeReturn(PC& pc) {
 
 inline bool VMExecutionContext::initIterator(PC& pc, PC& origPc, Iter* it,
                                              Offset offset, Cell* c1) {
-  bool hasElems = true;
-  if (c1->m_type == KindOfArray) {
-    if (!c1->m_data.parr->empty()) {
-      (void) new (&it->arr()) ArrayIter(c1->m_data.parr); // call CTor
-      it->m_itype = Iter::TypeArray;
-    } else {
-      ITER_SKIP(offset);
-      hasElems = false;
-    }
-  } else if (c1->m_type == KindOfObject) {
-    bool isIterator;
-    if (c1->m_data.pobj->isCollection()) {
-      isIterator = true;
-      (void) new (&it->arr()) ArrayIter(c1->m_data.pobj);
-    } else {
-      Object obj = c1->m_data.pobj->iterableObject(isIterator);
-      if (isIterator) {
-        (void) new (&it->arr()) ArrayIter(obj, ArrayIter::transferOwner);
-      } else {
-        Class* ctx = arGetContextClass(m_fp);
-        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
-        Array iterArray(obj->o_toIterArray(ctxStr));
-        ArrayData* ad = iterArray.getArrayData();
-        (void) new (&it->arr()) ArrayIter(ad);
-      }
-    }
-    try {
-      if (it->arr().end()) {
-        // Iterator was empty; call the destructor on the iterator we
-        // just constructed and branch to done case
-        it->arr().~ArrayIter();
-        ITER_SKIP(offset);
-        hasElems = false;
-      } else {
-        it->m_itype = (isIterator ? Iter::TypeIterator : Iter::TypeArray);
-      }
-    } catch (...) {
-      it->arr().~ArrayIter();
-      throw;
-    }
-  } else {
-    raise_warning("Invalid argument supplied for foreach()");
+  bool hasElems = it->init(c1);
+  if (!hasElems) {
     ITER_SKIP(offset);
-    hasElems = false;
   }
   m_stack.popC();
   return hasElems;
@@ -6435,7 +6395,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInit(PC& pc) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    storeIterValueC(it, tv1);
+    tvAsVariant(tv1) = it->arr().second();
   }
 }
 
@@ -6451,60 +6411,22 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitK(PC& pc) {
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    storeIterValueC(it, tv1);
-    storeIterKeyC(it, tv2);
+    tvAsVariant(tv1) = it->arr().second();
+    tvAsVariant(tv2) = it->arr().first();
   }
 }
 
 inline bool VMExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
                                               Offset offset, Var* v1) {
-  bool hasElems = true;
-  TypedValue* rtv = v1->m_data.pref->tv();
-  if (rtv->m_type == KindOfArray) {
-    ArrayData* ad = rtv->m_data.parr;
-    if (!ad->empty()) {
-      MIterCtx& mi = it->marr();
-      (void) new (&mi) MIterCtx(v1->m_data.pref);
-      it->m_itype = Iter::TypeMutableArray;
-      mi.mArray().advance();
-    } else {
-      ITER_SKIP(offset);
-      hasElems = false;
-    }
-  } else if (rtv->m_type == KindOfObject)  {
-    if (rtv->m_data.pobj->getCollectionType() != 0) {
-      raise_error("Collection elements cannot be taken by reference");
-    }
-    bool isIterator;
-    Object obj = rtv->m_data.pobj->iterableObject(isIterator);
-    if (isIterator) {
-      raise_error("An iterator cannot be used with foreach by reference");
-    }
-    Class* ctx = arGetContextClass(m_fp);
-    CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
-    Array iterArray = obj->o_toIterArray(ctxStr, true);
-    if (iterArray->empty()) {
-      ITER_SKIP(offset);
-      hasElems = false;
-    } else {
-      ArrayData* ad = iterArray.detach();
-      MIterCtx& mi = it->marr();
-      (void) new (&mi) MIterCtx(ad);
-      mi.mArray().advance();
-      it->m_itype = Iter::TypeMutableArray;
-    }
-  } else {
-    if (!hphpiCompat) {
-      raise_warning("Invalid argument supplied for foreach()");
-    }
+  bool hasElems = it->minit(v1);
+  if (!hasElems) {
     ITER_SKIP(offset);
-    hasElems = false;
   }
   m_stack.popV();
   return hasElems;
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
+inline void OPTBLD_INLINE VMExecutionContext::iopMIterInit(PC& pc) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6515,11 +6437,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (initIteratorM(pc, origPc, it, offset, v1)) {
-    storeIterValueV(it, tv1);
+    tvAsVariant(tv1).assignRef(it->marr().val());
   }
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopIterInitMK(PC& pc) {
+inline void OPTBLD_INLINE VMExecutionContext::iopMIterInitK(PC& pc) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6532,59 +6454,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitMK(PC& pc) {
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
   if (initIteratorM(pc, origPc, it, offset, v1)) {
-    storeIterValueV(it, tv1);
-    storeIterKeyV(it, tv2);
+    tvAsVariant(tv1).assignRef(it->marr().val());
+    tvAsVariant(tv2) = it->marr().key();
   }
-}
-
-inline void VMExecutionContext::storeIterValueC(Iter* it, TypedValue* tv1) {
-  assert(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
-  // The emitter should never generate bytecode where the iterator
-  // is at the end before IterValueC is executed. However, even if
-  // the iterator is at the end, it is safe to call second().
-  tvAsVariant(tv1) = it->arr().second();
-}
-
-inline void VMExecutionContext::storeIterValueV(Iter* it, TypedValue* tv1) {
-  assert(it->m_itype == Iter::TypeMutableArray);
-  // Dup value.
-  tvAsVariant(tv1).assignRef(tvAsVariant(&it->marr().val()));
-  assert(tv1->m_type == KindOfRef);
-}
-
-inline void VMExecutionContext::storeIterKeyC(Iter* it, TypedValue* tv1) {
-  assert(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
-  // The iterator should never be at the end here. We can't check for it,
-  // because that may call into user code, which has PHP-visible effects and
-  // is incorrect.
-  tvAsVariant(tv1) = it->arr().first();
-}
-
-inline void VMExecutionContext::storeIterKeyV(Iter* it, TypedValue* tv1) {
-  assert(it->m_itype == Iter::TypeMutableArray);
-  tvAsVariant(tv1) = tvAsVariant(&it->marr().key());
-}
-
-inline bool VMExecutionContext::iterNext(PC& pc, PC& origPc, Iter* it,
-                                         Offset offset) {
-  assert(it->m_itype == Iter::TypeArray || it->m_itype == Iter::TypeIterator);
-  // The emitter should never generate bytecode where the iterator
-  // is at the end before IterNext is executed. However, even if
-  // the iterator is at the end, it is safe to call next().
-  ArrayIter* ai = &it->arr();
-  ai->next();
-  if (ai->end()) {
-    // If after advancing the iterator we have reached the end, free
-    // the iterator and fall through to the next instruction.
-    // The ArrayIter destructor will decRef the array.
-    ai->~ArrayIter();
-    it->m_itype = Iter::TypeUndefined;
-    return false;
-  }
-  // If after advancing the iterator we have not reached the end,
-  // jump to the location specified by the second immediate argument.
-  ITER_SKIP(offset);
-  return true;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIterNext(PC& pc) {
@@ -6595,8 +6467,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterNext(PC& pc) {
   DECODE_HA(val);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
-  if (iterNext(pc, origPc, it, offset)) {
-    storeIterValueC(it, tv1);
+  if (it->next()) {
+    ITER_SKIP(offset);
+    tvAsVariant(tv1) = it->arr().second();
   }
 }
 
@@ -6610,31 +6483,14 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterNextK(PC& pc) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
-  if (iterNext(pc, origPc, it, offset)) {
-    storeIterValueC(it, tv1);
-    storeIterKeyC(it, tv2);
-  }
-}
-
-inline bool VMExecutionContext::iterNextM(PC& pc, PC& origPc, Iter* it,
-                                          Offset offset) {
-  assert(it->m_itype == Iter::TypeMutableArray);
-  MIterCtx &mi = it->marr();
-  if (!mi.mArray().advance()) {
-    // If after advancing the iterator we have reached the end, free
-    // the iterator and fall through to the next instruction.
-    mi.~MIterCtx();
-    it->m_itype = Iter::TypeUndefined;
-    return false;
-  } else {
-    // If after advancing the iterator we have not reached the end,
-    // jump to the location specified by the second immediate argument.
+  if (it->next()) {
     ITER_SKIP(offset);
-    return true;
+    tvAsVariant(tv1) = it->arr().second();
+    tvAsVariant(tv2) = it->arr().first();
   }
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopIterNextM(PC& pc) {
+inline void OPTBLD_INLINE VMExecutionContext::iopMIterNext(PC& pc) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6642,12 +6498,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterNextM(PC& pc) {
   DECODE_HA(val);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
-  if (iterNextM(pc, origPc, it, offset)) {
-    storeIterValueV(it, tv1);
+  if (it->mnext()) {
+    ITER_SKIP(offset);
+    tvAsVariant(tv1).assignRef(it->marr().val());
   }
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopIterNextMK(PC& pc) {
+inline void OPTBLD_INLINE VMExecutionContext::iopMIterNextK(PC& pc) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6657,9 +6514,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterNextMK(PC& pc) {
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
-  if (iterNextM(pc, origPc, it, offset)) {
-    storeIterValueV(it, tv1);
-    storeIterKeyV(it, tv2);
+  if (it->mnext()) {
+    ITER_SKIP(offset);
+    tvAsVariant(tv1).assignRef(it->marr().val());
+    tvAsVariant(tv2) = it->marr().key();
   }
 }
 
@@ -6667,26 +6525,14 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterFree(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   Iter* it = frame_iter(m_fp, itId);
-  switch (it->m_itype) {
-  case Iter::TypeUndefined: {
-    assert(false);
-    break;
-  }
-  case Iter::TypeArray:
-  case Iter::TypeIterator: {
-    it->arr().~ArrayIter();
-    break;
-  }
-  case Iter::TypeMutableArray: {
-    MIterCtx &mi = it->marr();
-    mi.~MIterCtx();
-    break;
-  }
-  default: {
-    not_reached();
-  }
-  }
-  it->m_itype = Iter::TypeUndefined;
+  it->free();
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopMIterFree(PC& pc) {
+  NEXT();
+  DECODE_IA(itId);
+  Iter* it = frame_iter(m_fp, itId);
+  it->mfree();
 }
 
 inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc,

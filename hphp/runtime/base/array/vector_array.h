@@ -121,8 +121,6 @@ public:
   virtual ArrayData *prepend(CVarRef v, bool copy);
   virtual void onSetEvalScalar();
 
-  virtual void getFullPos(FullPos &fp);
-  virtual bool setFullPos(const FullPos &fp);
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
   virtual ArrayData *escalate(bool mutableIteration = false) const;

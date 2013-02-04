@@ -650,7 +650,7 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
 inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   Elm* e = allocElmFast(ei);
   if (m_pos == ArrayData::invalid_index) m_pos = ssize_t(*ei);
-  return LIKELY(!siPastEnd()) ? e : allocElmExtra(e, ei);
+  return e;
 }
 
 inline ALWAYS_INLINE
@@ -663,28 +663,6 @@ NEVER_INLINE
 HphpArray::Elm* HphpArray::newElmGrow(size_t h0) {
   resize();
   return allocElm(findForNewInsert(h0));
-}
-
-NEVER_INLINE HphpArray::Elm* HphpArray::allocElmExtra(Elm* e, ElmInd* ei) {
-  // If there could be any strong iterators that are past the end, we need to
-  // do a pass and update these iterators to point to the newly added element.
-  if (siPastEnd()) {
-    setSiPastEnd(false);
-    bool shouldWarn = false;
-    for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
-      FullPos* fp = r.front();
-      if (fp->pos == ssize_t(ElmIndEmpty)) {
-        fp->pos = ssize_t(*ei);
-        shouldWarn = true;
-      }
-    }
-    if (shouldWarn) {
-      raise_warning("An element was added to an array inside foreach "
-                    "by reference when iterating over the last "
-                    "element. This may lead to unexpeced results.");
-    }
-  }
-  return e;
 }
 
 inline ALWAYS_INLINE
@@ -854,7 +832,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
   TinyVector<ElmKey, 3> siKeys;
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
-    ElmInd ei = r.front()->pos;
+    ElmInd ei = r.front()->m_pos;
     if (ei != ElmIndEmpty) {
       Elm* e = &m_data[ei];
       siKeys.push_back(ElmKey(e->hash, e->key));
@@ -909,13 +887,13 @@ void HphpArray::compact(bool renumber /* = false */) {
   int key = 0;
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     FullPos* fp = r.front();
-    if (fp->pos != ArrayData::invalid_index) {
+    if (fp->m_pos != ArrayData::invalid_index) {
       ElmKey &k = siKeys[key];
       key++;
       if (k.hash) { // string key
-        fp->pos = ssize_t(find(k.key, k.hash));
+        fp->m_pos = ssize_t(find(k.key, k.hash));
       } else { // int key
-        fp->pos = ssize_t(find(k.ikey));
+        fp->m_pos = ssize_t(find(k.ikey));
       }
     }
   }
@@ -1299,30 +1277,26 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
 
   Elm* elms = m_data;
 
-  bool nextElementUnsetInsideForeachByReference = false;
-  ElmInd eINext = ElmIndTombstone;
+  ElmInd eIPrev = ElmIndTombstone;
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     FullPos* fp = r.front();
-    if (fp->pos == ssize_t(pos)) {
-      nextElementUnsetInsideForeachByReference = true;
-      if (eINext == ElmIndTombstone) {
-        // eINext will actually be used, so properly initialize it with the
-        // next element past pos, or ElmIndEmpty if pos is the last element.
-        eINext = nextElm(elms, pos);
-        if (eINext == ElmIndEmpty) {
-          // Remember there is a strong iterator past the end.
-          setSiPastEnd(true);
-        }
+    if (fp->m_pos == ssize_t(pos)) {
+      if (eIPrev == ElmIndTombstone) {
+        // eIPrev will actually be used, so properly initialize it with the
+        // previous element before pos, or ElmIndEmpty if pos is the first
+        // element.
+        eIPrev = prevElm(elms, pos);
       }
-      fp->pos = ssize_t(eINext);
+      if (eIPrev == ElmIndEmpty) {
+        fp->setResetFlag(true);
+      }
+      fp->m_pos = ssize_t(eIPrev);
     }
   }
 
   // If the internal pointer points to this element, advance it.
   if (m_pos == ssize_t(pos)) {
-    if (eINext == ElmIndTombstone) {
-      eINext = nextElm(elms, pos);
-    }
+    ElmInd eINext = nextElm(elms, pos);
     m_pos = ssize_t(eINext);
   }
 
@@ -1368,13 +1342,6 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   if (m_size < (uint32_t)((m_lastE+1) >> 1)) {
     // Compact in order to keep elms from being overly sparse.
     compact();
-  }
-
-  if (nextElementUnsetInsideForeachByReference) {
-    if (RuntimeOption::EnableHipHopErrors) {
-      raise_warning("The next element was unset inside foreach by reference. "
-                    "This may lead to unexpeced results.");
-    }
   }
 }
 
@@ -1480,7 +1447,6 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
 }
 
 inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
-  assert(!target->siPastEnd());
   target->m_pos = m_pos;
   target->m_data = NULL;
   target->m_nextKI = m_nextKI;
@@ -1571,7 +1537,6 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
   int64 k;
   if (LIKELY(IsHphpArray(a)) &&
       ((h = (HphpArray*)a), LIKELY(h->m_pos >= 0)) &&
-      LIKELY(!h->siPastEnd()) &&
       LIKELY(!h->isFull()) &&
       ((k = h->m_nextKI), LIKELY(k >= 0)) &&
       ((ei = &h->m_hash[k & h->m_tableMask]), LIKELY(!validElmInd(*ei)))) {
@@ -1748,19 +1713,22 @@ void HphpArray::onSetEvalScalar() {
   }
 }
 
+bool HphpArray::validFullPos(const FullPos &fp) const {
+  assert(fp.getContainer() == (ArrayData*)this);
+  if (fp.getResetFlag()) return false;
+  return (fp.m_pos != ssize_t(ElmIndEmpty));
+}
+
 void HphpArray::getFullPos(FullPos& fp) {
-  assert(fp.container == (ArrayData*)this);
-  fp.pos = m_pos;
-  if (fp.pos == ssize_t(ElmIndEmpty)) {
-    // Remember there is a strong iterator past the end.
-    setSiPastEnd(true);
-  }
+  assert(fp.getContainer() == (ArrayData*)this);
+  fp.m_pos = m_pos;
 }
 
 bool HphpArray::setFullPos(const FullPos& fp) {
-  assert(fp.container == (ArrayData*)this);
-  if (fp.pos != ssize_t(ElmIndEmpty)) {
-    m_pos = fp.pos;
+  assert(fp.getContainer() == (ArrayData*)this);
+  assert(!fp.getResetFlag());
+  if (fp.m_pos != ssize_t(ElmIndEmpty)) {
+    m_pos = fp.m_pos;
     return true;
   }
   return false;

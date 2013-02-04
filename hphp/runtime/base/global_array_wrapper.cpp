@@ -179,7 +179,9 @@ Variant GlobalArrayWrapper::current() const {
 }
 
 Variant GlobalArrayWrapper::next() {
-  m_pos = m_globals->iter_advance(m_pos);
+  if (m_pos != ArrayData::invalid_index) {
+    m_pos = m_globals->iter_advance(m_pos);
+  }
   return value(m_pos);
 }
 
@@ -219,20 +221,33 @@ Variant GlobalArrayWrapper::each() {
   return false;
 }
 
+bool GlobalArrayWrapper::validFullPos(const FullPos &fp) const {
+  assert(fp.getContainer() == (ArrayData*)this);
+  if (fp.getResetFlag()) return false;
+  if (fp.m_pos == ArrayData::invalid_index) return false;
+  if (size_t(fp.m_pos) < size_t(m_globals->staticSize())) return true;
+  ArrayData *data = m_globals->getArrayData();
+  if (data) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void GlobalArrayWrapper::getFullPos(FullPos &fp) {
   if (m_pos == ArrayData::invalid_index) {
-    fp.pos = ArrayData::invalid_index;
-  } else if (m_pos < m_globals->staticSize()) {
-    fp.pos = m_pos;
+    fp.m_pos = ArrayData::invalid_index;
+  } else if (fp.m_pos < m_globals->staticSize()) {
+    fp.m_pos = m_pos;
   } else {
     m_globals->getFullPos(fp);
   }
 }
 
 bool GlobalArrayWrapper::setFullPos(const FullPos &fp) {
-  if (fp.pos != ArrayData::invalid_index) {
-    if (m_pos < m_globals->staticSize()) return true;
-    ArrayData *data = m_globals->getArrayData();
+  if (fp.m_pos != ArrayData::invalid_index) {
+    if (fp.m_pos < m_globals->staticSize()) return true;
+    ArrayData* data = m_globals->getArrayData();
     if (data) {
       data->reset();
       return true;
@@ -242,6 +257,9 @@ bool GlobalArrayWrapper::setFullPos(const FullPos &fp) {
   } else {
     return false;
   }
+}
+
+void GlobalArrayWrapper::nextForFullPos() {
 }
 
 CVarRef GlobalArrayWrapper::currentRef() {

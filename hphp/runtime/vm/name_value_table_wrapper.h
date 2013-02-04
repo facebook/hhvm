@@ -132,6 +132,7 @@ public: // ArrayData implementation
   virtual Variant key() const;
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
+  virtual bool validFullPos(const FullPos & fp) const;
   virtual void getFullPos(FullPos&);
   virtual bool setFullPos(const FullPos&);
 

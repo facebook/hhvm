@@ -379,12 +379,20 @@ public:
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
   };
 
-  void pushIterId(Id id) { m_pendingIters.push_back(id); }
-  void popIterId() { m_pendingIters.pop_back(); }
+  enum IterKind {
+    KindOfIter = 0,
+    KindOfMIter = 1
+  };
+
+  void pushIterScope(Id id, bool itRef = false) {
+    IterKind itKind = itRef ? KindOfMIter : KindOfIter;
+    m_pendingIters.push_back(std::pair<Id,IterKind>(id,itKind));
+  }
+  void popIterScope() { m_pendingIters.pop_back(); }
 private:
   typedef std::pair<StringData*, bool> ClosureUseVar;  // (name, byRef)
   typedef std::vector<ClosureUseVar> ClosureUseVarVec;
-  typedef std::vector<Id> IdVec;
+  typedef std::vector<std::pair<Id,IterKind> > PendingIterVec;
   class PostponedMeth {
   public:
     PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
@@ -427,10 +435,12 @@ private:
   };
   class ControlTargets {
   public:
-    ControlTargets(Id itId, Label& brkTarg, Label& cntTarg, Label& brkHand,
-        Label& cntHand) : m_itId(itId), m_brkTarg(brkTarg), m_cntTarg(cntTarg),
-    m_brkHand(brkHand), m_cntHand(cntHand) {}
+    ControlTargets(Id itId, bool itRef, Label& brkTarg, Label& cntTarg,
+                   Label& brkHand, Label& cntHand) :
+        m_itId(itId), m_itRef(itRef), m_brkTarg(brkTarg), m_cntTarg(cntTarg),
+        m_brkHand(brkHand), m_cntHand(cntHand) {}
     Id m_itId;
+    bool m_itRef;
     Label& m_brkTarg;  // Jump here for "break;" (after doing IterFree)
     Label& m_cntTarg;  // Jump here for "continue;"
     Label& m_brkHand;  // Push N and jump here for "break N;"
@@ -438,9 +448,9 @@ private:
   };
   class ControlTargetPusher {
   public:
-    ControlTargetPusher(EmitterVisitor* e, Id itId, Label& brkTarg,
+    ControlTargetPusher(EmitterVisitor* e, Id itId, bool itRef, Label& brkTarg,
         Label& cntTarg, Label& brkHand, Label& cntHand) : m_e(e) {
-      e->m_contTargets.push_front(ControlTargets(itId, brkTarg, cntTarg,
+      e->m_contTargets.push_front(ControlTargets(itId, itRef, brkTarg, cntTarg,
             brkHand, cntHand));
     }
     ~ControlTargetPusher() {
@@ -505,7 +515,7 @@ private:
   std::deque<PostponedNonScalars> m_postponedSinits;
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
-  IdVec m_pendingIters;
+  PendingIterVec m_pendingIters;
   typedef std::map<const StringData*, Label*, string_data_lt> LabelMap;
   LabelMap m_methLabels;
   SymbolicStack m_evalStack;
@@ -622,7 +632,8 @@ public:
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
                                 bool topLevel);
   void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
-      Label& brkHand, Label& cntHand, Id iter = -1);
+                        Label& brkHand, Label& cntHand, Id iter = -1,
+                        IterKind itKind = KindOfIter);
   void emitForeach(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e, const std::string& message);

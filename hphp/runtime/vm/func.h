@@ -156,9 +156,11 @@ struct Func {
 
   /*
    * Return true if Offset o is inside the protected region of a fault
-   * funclet for iterId, otherwise false.
+   * funclet for iterId, otherwise false. itRef will be set to true if
+   * the iterator was initialized with MIterInit*, false if the iterator
+   * was initialized with IterInit*.
    */
-  bool checkIterScope(Offset o, Id iterId) const;
+  bool checkIterScope(Offset o, Id iterId, bool& itRef) const;
 
   /*
    * Find the first EHEnt that covers a given offset, or return null.

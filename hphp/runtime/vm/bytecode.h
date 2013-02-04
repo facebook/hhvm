@@ -24,8 +24,6 @@
 #include "runtime/base/class_info.h"
 #include "runtime/base/array/array_iterator.h"
 
-#include "runtime/ext/bcmath/bcmath.h" // for MAX(a,b)
-
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/class.h"
 #include "runtime/vm/instance.h"
@@ -106,21 +104,20 @@ private:
 /*
  * Variable environment.
  *
- * A variable environment consists of the locals for the current
- * function (either pseudo-main or a normal function), plus any
- * variables that are dynamically defined.
+ * A variable environment consists of the locals for the current function
+ * (either pseudo-main, global function, or method), plus any variables that
+ * are dynamically defined.
  *
- * Logically, a normal (not pseudo-main) function starts off with a
- * variable environment that contains only its locals, but a
- * pseudo-main is handed its caller's existing variable environment.
- * Generally, however, we don't create a variable environment for a
- * non-pseudo main until it actually needs one (i.e. if it is about to
- * include another pseudo-main, or if it uses dynamic variable
- * lookups).
+ * Logically, a global function or method starts off with a variable
+ * environment that contains only its locals, but a pseudo-main is handed
+ * its caller's existing variable environment. Generally, however, we don't
+ * create a variable environment for global functions or methods until it
+ * actually needs one (i.e. if it is about to include a pseudo-main, or if
+ * it uses dynamic variable lookups).
  *
- * Named locals always appear in the expected place on the stack, even
- * after a VarEnv is attached.  Internally uses a NameValueTable to
- * hook up names to the local locations.
+ * Named locals always appear in the expected place on the stack, even after
+ * a VarEnv is attached. Internally uses a NameValueTable to hook up names to
+ * the local locations.
  */
 class VarEnv {
  private:
@@ -199,8 +196,8 @@ class VarEnv {
 };
 
 /**
- * An "ActRec" is a call activation record. The order assumes that stacks
- * grow toward lower addresses.
+ * An "ActRec" is a call activation record. The ordering of the fields assumes
+ * that stacks grow toward lower addresses.
  *
  * For most purposes, an ActRec can be considered to be in one of three
  * possible states:
@@ -253,7 +250,7 @@ struct ActRec {
         VarEnv* m_varEnv;       // Variable environment; only used when the
                                 //   ActRec is live.
         ExtraArgs* m_extraArgs; // Light-weight extra args; used only when the
-                                //   ActRec is live
+                                //   ActRec is live.
         StringData* m_invName;  // Invoked function name (used for __call);
                                 //   only used when ActRec is pre-live.
       };
@@ -414,28 +411,6 @@ struct CallCtx {
   StringData* invName;
 };
 
-struct Iter {
-  enum Type {
-    TypeUndefined,
-    TypeArray,
-    TypeMutableArray,
-    TypeIterator  // for "implements Iterator" objects
-  };
- private:
-  // C++ won't let you have union members with constructors. So we get to
-  // implement unions by hand.
-  char m_u[MAX(sizeof(ArrayIter), sizeof(MIterCtx))];
- public:
-  int32_t _pad;
-  Type m_itype;
-  MIterCtx& marr() {
-    return *(MIterCtx*)m_u;
-  }
-  ArrayIter& arr() {
-    return *(ArrayIter*)m_u;
-  }
-} __attribute__ ((aligned(16)));
-
 static const size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 static const size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
@@ -488,7 +463,7 @@ public:
   }
   void toStringElm(std::ostream& os, TypedValue* vv, const ActRec* fp)
     const;
-  void toStringIter(std::ostream& os, Iter* it) const;
+  void toStringIter(std::ostream& os, Iter* it, bool itRef) const;
   void clearEvalStack(ActRec* fp, int32 numLocals);
   void protect();
   void unprotect();

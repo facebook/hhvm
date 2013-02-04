@@ -102,7 +102,7 @@ class StringOffset;
 class ArrayIter;
 class MutableArrayIter;
 
-struct FullPos;
+class FullPos;
 
 class VariableSerializer;
 class VariableUnserializer;

@@ -574,13 +574,13 @@ BeginClass(
     'footer' => <<<EOT
 
   public: union {
-    char m_u[sizeof(MIterCtx)];
+    char m_u[sizeof(MArrayIter)];
     TypedValue m_align;
   };
   public: bool m_valid;
 
-  private: MIterCtx& marr() {
-    return *(MIterCtx*)(m_u);
+  private: MArrayIter& marr() {
+    return *(MArrayIter*)(m_u);
   }
 EOT
 ,

@@ -280,26 +280,26 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 // MutableArrayIter related functions
 
 void ArrayData::newFullPos(FullPos &fp) {
-  assert(fp.container == NULL);
-  fp.container = this;
-  fp.next = strongIterators();
+  assert(fp.getContainer() == NULL);
+  fp.setContainer(this);
+  fp.setNext(strongIterators());
   setStrongIterators(&fp);
   getFullPos(fp);
 }
 
 void ArrayData::freeFullPos(FullPos &fp) {
-  assert(strongIterators() != 0 && fp.container == (ArrayData*)this);
-  // search for fp in our list, then remove it.  Usually its the first one.
+  assert(strongIterators() != 0 && fp.getContainer() == (ArrayData*)this);
+  // search for fp in our list, then remove it. Usually its the first one.
   FullPos* p = strongIterators();
   if (p == &fp) {
-    setStrongIterators(p->next);
-    fp.container = NULL;
+    setStrongIterators(p->getNext());
+    fp.setContainer(NULL);
     return;
   }
-  for (; p->next; p = p->next) {
-    if (p->next == &fp) {
-      p->next = p->next->next;
-      fp.container = NULL;
+  for (; p->getNext(); p = p->getNext()) {
+    if (p->getNext() == &fp) {
+      p->setNext(p->getNext()->getNext());
+      fp.setContainer(NULL);
       return;
     }
   }
@@ -308,26 +308,35 @@ void ArrayData::freeFullPos(FullPos &fp) {
   assert(false);
 }
 
-void ArrayData::getFullPos(FullPos &fp) {
-  assert(fp.container == (ArrayData*)this);
-  fp.pos = ArrayData::invalid_index;
-}
-
-bool ArrayData::setFullPos(const FullPos &fp) {
-  assert(fp.container == (ArrayData*)this);
+bool ArrayData::validFullPos(const FullPos& fp) const {
+  assert(fp.getContainer() == (ArrayData*)this);
   return false;
 }
 
+void ArrayData::getFullPos(FullPos &fp) {
+  assert(fp.getContainer() == (ArrayData*)this);
+  fp.m_pos = ArrayData::invalid_index;
+}
+
+bool ArrayData::setFullPos(const FullPos &fp) {
+  assert(fp.getContainer() == (ArrayData*)this);
+  return false;
+}
+    
+void ArrayData::nextForFullPos() {
+  next();
+}
+  
 void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->container = NULL;
+    r.front()->setContainer(NULL);
   }
   setStrongIterators(0);
 }
 
 void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
   for (FullPosRange r(src->strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->container = dest;
+    r.front()->setContainer(dest);
   }
   // move pointer to list and flag in one copy
   dest->m_strongIterators = src->m_strongIterators;

@@ -102,8 +102,10 @@ public:
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
 
+  virtual bool validFullPos(const FullPos &fp) const;
   virtual void getFullPos(FullPos &fp);
   virtual bool setFullPos(const FullPos &fp);
+  virtual void nextForFullPos();
 
   virtual CVarRef currentRef();
   virtual CVarRef endRef();

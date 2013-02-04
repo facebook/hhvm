@@ -180,6 +180,7 @@ public:
   void onSetEvalScalar();
 
   // overrides ArrayData
+  bool validFullPos(const FullPos &fp) const;
   void getFullPos(FullPos& fp);
   bool setFullPos(const FullPos& fp);
   CVarRef currentRef();
@@ -466,7 +467,6 @@ private:
   Elm* newElmGrow(size_t h0);
   Elm* allocElm(ElmInd* ei);
   Elm* allocElmFast(ElmInd* ei);
-  Elm* allocElmExtra(Elm* e, ElmInd* ei);
   void initElmInt(Elm* e, int64_t ki, CVarRef data, bool byRef=false);
   void initElmStr(Elm* e, strhash_t h, StringData* key, CVarRef data,
                   bool byRef=false);

@@ -1145,14 +1145,15 @@ static const struct {
   /*** 11. Iterator instructions ***/
 
   { OpIterInit,    {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpMIterInit,   {Stack1,           Local,        OutUnknown,       -1 }},
   { OpIterInitK,   {Stack1,           Local,        OutUnknown,       -1 }},
-  { OpIterInitM,   {Stack1,           Local,        OutUnknown,       -1 }},
-  { OpIterInitMK,  {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpMIterInitK,  {Stack1,           Local,        OutUnknown,       -1 }},
   { OpIterNext,    {None,             Local,        OutUnknown,        0 }},
+  { OpMIterNext,   {None,             Local,        OutUnknown,        0 }},
   { OpIterNextK,   {None,             Local,        OutUnknown,        0 }},
-  { OpIterNextM,   {None,             Local,        OutUnknown,        0 }},
-  { OpIterNextMK,  {None,             Local,        OutUnknown,        0 }},
+  { OpMIterNextK,  {None,             Local,        OutUnknown,        0 }},
   { OpIterFree,    {None,             None,         OutNone,           0 }},
+  { OpMIterFree,   {None,             None,         OutNone,           0 }},
 
   /*** 12. Include, eval, and define instructions ***/
 
@@ -1614,14 +1615,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       case Unit::MetaInfo::ArrayCapacity:
         ni->imm[0].u_IVA = info.m_data;
-        break;
-      case Unit::MetaInfo::IteratorType:
-        if (!m_useHHIR) {
-          InputInfo& ii = inputInfos[arg];
-          ii.dontGuard = true;
-          DynLocation* dl = tas.recordRead(ii, m_useHHIR, KindOfInvalid);
-          dl->rtt = RuntimeType((Iter::Type)info.m_data);
-        }
         break;
       case Unit::MetaInfo::DataTypePredicted: {
         // If the original type was invalid or predicted, then use the
@@ -2198,9 +2191,9 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpSetL || op == OpBindL ||
                                op == OpUnsetL ||
                                op == OpIterInit || op == OpIterInitK ||
-                               op == OpIterInitM || op == OpIterInitMK ||
+                               op == OpMIterInit || op == OpMIterInitK ||
                                op == OpIterNext || op == OpIterNextK ||
-                               op == OpIterNextM || op == OpIterNextMK);
+                               op == OpMIterNext || op == OpMIterNextK);
         if (op == OpIncDecL) {
           assert(ni->inputs.size() == 1);
           const RuntimeType &inRtt = ni->inputs[0]->rtt;
@@ -2300,18 +2293,18 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           ni->outLocal = dl;
           continue;
         }
-        if (op >= OpIterInit && op <= OpIterNextMK) {
+        if (op >= OpIterInit && op <= OpMIterNextK) {
           assert(op == OpIterInit || op == OpIterInitK ||
-                 op == OpIterInitM || op == OpIterInitMK ||
+                 op == OpMIterInit || op == OpMIterInitK ||
                  op == OpIterNext || op == OpIterNextK ||
-                 op == OpIterNextM || op == OpIterNextMK);
+                 op == OpMIterNext || op == OpMIterNextK);
           const int kValImmIdx = 2;
           const int kKeyImmIdx = 3;
           DynLocation* outVal = t.newDynLocation();
           int off = ni->imm[kValImmIdx].u_IVA;
           outVal->location = Location(Location::Local, off);
-          if (op == OpIterInitM || op == OpIterInitMK ||
-              op == OpIterNextM || op == OpIterNextMK) {
+          if (op == OpMIterInit || op == OpMIterInitK ||
+              op == OpMIterNext || op == OpMIterNextK) {
             outVal->rtt = RuntimeType(KindOfRef, KindOfInvalid);
           } else {
             outVal->rtt = RuntimeType(KindOfInvalid);
@@ -2323,7 +2316,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
             outKey->location = Location(Location::Local, keyOff);
             outKey->rtt = RuntimeType(KindOfInvalid);
             ni->outLocal2 = outKey;
-          } else if (op == OpIterInitMK || op == OpIterNextMK) {
+          } else if (op == OpMIterInitK || op == OpMIterNextK) {
             DynLocation* outKey = t.newDynLocation();
             int keyOff = getImm(ni->pc(), kKeyImmIdx).u_IVA;
             outKey->location = Location(Location::Local, keyOff);

@@ -25,6 +25,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Static strings.
 
+static const Trace::Module TRACEMOD = Trace::runtime;
+
 static StaticString s_rewind("rewind");
 static StaticString s_valid("valid");
 static StaticString s_next("next");
@@ -146,11 +148,14 @@ ArrayIter::~ArrayIter() {
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
     if (ad) decRefArr(const_cast<ArrayData*>(ad));
-    return;
+  } else {
+    ObjectData* obj = getRawObject();
+    assert(obj);
+    decRefObj(obj);
   }
-  ObjectData* obj = getRawObject();
-  assert(obj);
-  decRefObj(obj);
+  if (debug) {
+    m_itype = TypeUndefined;
+  }
 }
 
 bool ArrayIter::endHelper() {
@@ -299,53 +304,203 @@ CVarRef ArrayIter::secondRef() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// FullPos
+
+void FullPos::reset() {
+  ArrayData* container = getContainer();
+  if (container != NULL) {
+    container->freeFullPos(*this);
+    assert(getContainer() == NULL);
+  }
+  setResetFlag(false);
+  // unprotect the data
+  if (hasAd()) {
+    decRefArr(getAd());
+    setVar(NULL);
+  }
+}
+
+bool FullPos::end() const {
+  return !const_cast<FullPos*>(this)->prepare();
+}
+
+bool FullPos::advance() {
+  ArrayData* data = getArray();
+  ArrayData* container = getContainer();
+  if (!data) {
+    if (container) {
+      container->freeFullPos(*this);
+    }
+    setResetFlag(false);
+    return false;
+  }
+  if (container == data) {
+    data = cowCheck();
+    if (getResetFlag()) {
+      setResetFlag(false);
+      data->reset();
+    } else {
+      data->setFullPos(*this);
+      data->next();
+    }
+    data->getFullPos(*this);
+  } else {
+    data = reregister();
+  }
+  assert(data && data == getContainer());
+  assert(!getResetFlag());
+  if (!data->validFullPos(*this)) return false;
+  // To match PHP-like semnatics, we need to set the internal cursor to
+  // point to the next element.
+  // TODO Task #2091628: We call nextForFullPos() here instead of next()
+  // because we need to do something different for GlobalArrayWrapper to
+  // keep it working for now. Once GlobalArrayWrapper is gone we can get
+  // rid of this hack.
+  data->nextForFullPos();
+  return true;
+}
+
+bool FullPos::prepare() {
+  ArrayData* data = getArray();
+  ArrayData* container = getContainer();
+  if (!data) {
+    if (container) {
+      container->freeFullPos(*this);
+    }
+    setResetFlag(false);
+    return false;
+  }
+  if (container != data) {
+    data = reregister();
+  }
+  return data->validFullPos(*this);
+}
+
+void FullPos::escalateCheck() {
+  ArrayData* data;
+  if (hasVar()) {
+    data = getData();
+    if (!data) return;
+    ArrayData* esc = data->escalate(true);
+    if (data != esc) {
+      *const_cast<Variant*>(getVar()) = esc;
+    }
+  } else {
+    assert(hasAd());
+    data = getAd();
+    ArrayData* esc = data->escalate(true);
+    if (data != esc) {
+      esc->incRefCount();
+      decRefArr(data);
+      setAd(esc);
+    }
+  }
+}
+
+ArrayData* FullPos::cowCheck() {
+  ArrayData* data;
+  if (hasVar()) {
+    data = getData();
+    if (!data) return NULL;
+    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+      *const_cast<Variant*>(getVar()) = data = data->copyWithStrongIterators();
+    }
+  } else {
+    assert(hasAd());
+    data = getAd();
+    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+      ArrayData* copied = data->copyWithStrongIterators();
+      copied->incRefCount();
+      decRefArr(data);
+      setAd(data = copied);
+    }
+  }
+  return data;
+}
+
+ArrayData* FullPos::getData() const {
+  assert(hasVar());
+  if (getVar()->is(KindOfArray)) {
+    return getVar()->getArrayData();
+  }
+  return NULL;
+}
+
+ArrayData* FullPos::reregister() {
+  ArrayData* container = getContainer();
+  assert(getArray() != NULL && container != getArray());
+  if (container != NULL) {
+    container->freeFullPos(*this);
+  }
+  setResetFlag(false);
+  assert(getContainer() == NULL);
+  escalateCheck();
+  ArrayData* data = cowCheck();
+  data->newFullPos(*this);
+  return data;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // MutableArrayIter
 
 MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
-                                   Variant &val)
-  : m_var(var), m_data(NULL), m_key(key), m_valp(&val), m_fp() {
-  assert(m_var);
+                                   Variant &val) {
+  m_var = NULL;
+  m_key = key;
+  m_valp = &val;
+  setVar(var);
+  assert(getVar());
   escalateCheck();
   ArrayData* data = cowCheck();
   if (data) {
     data->reset();
-    data->newFullPos(m_fp);
-    assert(m_fp.container == data);
+    data->newFullPos(*this);
+    setResetFlag(true);
+    data->next();
+    assert(getContainer() == data);
   }
 }
 
 MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
-                                   Variant &val)
-  : m_var(NULL), m_data(data), m_key(key), m_valp(&val), m_fp() {
+                                   Variant &val) {
+  m_var = NULL;
+  m_key = key;
+  m_valp = &val;
   if (data) {
+    setAd(data);
     escalateCheck();
     data = cowCheck();
     data->reset();
-    data->newFullPos(m_fp);
-    assert(m_fp.container == data);
+    data->newFullPos(*this);
+    setResetFlag(true);
+    data->next();
+    assert(getContainer() == data);
   }
 }
 
 MutableArrayIter::~MutableArrayIter() {
   // free the iterator
-  if (m_fp.container != NULL) {
-    m_fp.container->freeFullPos(m_fp);
-    assert(m_fp.container == NULL);
+  ArrayData* container = getContainer();
+  if (container) {
+    container->freeFullPos(*this);
+    assert(getContainer() == NULL);
   }
   // unprotect the data
-  if (m_data) decRefArr(m_data);
+  if (hasAd()) decRefArr(getAd());
 }
 
-void MutableArrayIter::reset() {
-  if (m_fp.container != NULL) {
-    m_fp.container->freeFullPos(m_fp);
-    assert(m_fp.container == NULL);
+bool MutableArrayIter::advance() {
+  if (!this->FullPos::advance()) {
+    return false;
   }
-  // unprotect the data
-  if (m_data) {
-    decRefArr(m_data);
-    m_data = NULL;
-  }
+  ArrayData* data = getArray();
+  assert(data);
+  assert(!getResetFlag());
+  assert(getContainer() == data);
+  assert(data->validFullPos(*this));
+  m_valp->assignRef(data->getValueRef(m_pos));
+  if (m_key) m_key->assignVal(data->getKey(m_pos));
+  return true;
 }
 
 void MutableArrayIter::begin(Variant& map, Variant* key, Variant& val,
@@ -353,102 +508,586 @@ void MutableArrayIter::begin(Variant& map, Variant* key, Variant& val,
   try {
     new (this) MutableArrayIter(map.begin(key, val, context));
   } catch (...) {
-    m_fp.container = NULL;
-    m_data = NULL;
+    setContainer(NULL);
+    setVar(NULL);
     throw;
   }
 }
 
-bool MutableArrayIter::advance() {
-  ArrayData *data = m_var ? getData() : m_data;
-  if (!data) return false;
-  // If the foreach loop's array changed since the previous iteration,
-  // we recover by creating a new strong iterator for the new array,
-  // starting with at the position indicated by the new array's internal
-  // pointer.
-  if (m_fp.container != data) {
-    // Free the current strong iterator if its valid
-    if (m_fp.container != NULL) {
-      m_fp.container->freeFullPos(m_fp);
-    }
-    assert(m_fp.container == NULL);
-    // If needed, escalate the array to an array type that can support
-    // foreach by reference
-    escalateCheck();
-    // Trigger COW if needed, copying over strong iterators
-    data = cowCheck();
-    // Create a new strong iterator for the new array
-    data->newFullPos(m_fp);
-  } else {
-    // Trigger COW if needed, copying over strong iterators
-    data = cowCheck();
+///////////////////////////////////////////////////////////////////////////////
+// MArrayIter
+
+MArrayIter::MArrayIter(const RefData* ref) {
+  m_var = NULL;
+  ref->incRefCount();
+  setVar((Variant*)(ref->tv()));
+  assert(hasVar());
+  escalateCheck();
+  ArrayData* data = cowCheck();
+  if (data) {
+    data->reset();
+    data->newFullPos(*this);
+    setResetFlag(true);
+    data->next();
+    assert(getContainer() == data);
   }
-  assert(m_fp.container == data);
-  if (!data->setFullPos(m_fp)) return false;
-  CVarRef curr = data->currentRef();
-  m_valp->assignRef(curr);
-  if (m_key) m_key->assignVal(data->key());
-  data->next();
-  data->getFullPos(m_fp);
+}
+
+MArrayIter::MArrayIter(ArrayData *data) {
+  m_var = NULL;
+  if (data) {
+    assert(!data->isStatic());
+    setAd(data);
+    escalateCheck();
+    data = cowCheck();
+    data->reset();
+    data->newFullPos(*this);
+    setResetFlag(true);
+    data->next();
+    assert(getContainer() == data);
+  }
+}
+
+MArrayIter::~MArrayIter() {
+  // free the iterator
+  ArrayData* container = getContainer();
+  if (container) {
+    container->freeFullPos(*this);
+    assert(getContainer() == NULL);
+  }
+  // unprotect the data
+  if (hasVar()) {
+    RefData* ref = (RefData*)getVar();
+    if (ref->decRefCount() == 0) ref->release();
+  } else if (hasAd()) {
+    decRefArr(getAd());
+  }
+}
+
+namespace VM {
+
+bool Iter::init(TypedValue* c1) {
+  assert(c1->m_type != KindOfRef);
+  bool hasElems = true;
+  if (c1->m_type == KindOfArray) {
+    if (!c1->m_data.parr->empty()) {
+      (void) new (&arr()) ArrayIter(c1->m_data.parr);
+      arr().setIterType(ArrayIter::TypeArray);
+    } else {
+      hasElems = false;
+    }
+  } else if (c1->m_type == KindOfObject) {
+    bool isIterator;
+    if (c1->m_data.pobj->isCollection()) {
+      isIterator = true;
+      (void) new (&arr()) ArrayIter(c1->m_data.pobj);
+    } else {
+      Object obj = c1->m_data.pobj->iterableObject(isIterator);
+      if (isIterator) {
+        (void) new (&arr()) ArrayIter(obj, ArrayIter::transferOwner);
+      } else {
+        Class* ctx = arGetContextClass(g_vmContext->getFP());
+        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+        Array iterArray(obj->o_toIterArray(ctxStr));
+        ArrayData* ad = iterArray.getArrayData();
+        (void) new (&arr()) ArrayIter(ad);
+      }
+    }
+    try {
+      if (arr().end()) {
+        // Iterator was empty; call the destructor on the iterator we
+        // just constructed and branch to done case
+        arr().~ArrayIter();
+        hasElems = false;
+      } else {
+        arr().setIterType(
+          isIterator ? ArrayIter::TypeIterator : ArrayIter::TypeArray);
+      }
+    } catch (...) {
+      arr().~ArrayIter();
+      throw;
+    }
+  } else {
+    raise_warning("Invalid argument supplied for foreach()");
+    hasElems = false;
+  }
+  return hasElems;
+}
+
+bool Iter::minit(TypedValue* v1) {
+  assert(v1->m_type == KindOfRef);
+  bool hasElems = true;
+  TypedValue* rtv = v1->m_data.pref->tv();
+  if (rtv->m_type == KindOfArray) {
+    ArrayData* ad = rtv->m_data.parr;
+    if (!ad->empty()) {
+      MArrayIter& mi = marr();
+      (void) new (&mi) MArrayIter(v1->m_data.pref);
+      mi.advance();
+    } else {
+      hasElems = false;
+    }
+  } else if (rtv->m_type == KindOfObject)  {
+    if (rtv->m_data.pobj->getCollectionType() != 0) {
+      raise_error("Collection elements cannot be taken by reference");
+    }
+    bool isIterator;
+    Object obj = rtv->m_data.pobj->iterableObject(isIterator);
+    if (isIterator) {
+      raise_error("An iterator cannot be used with foreach by reference");
+    }
+    Class* ctx = arGetContextClass(g_vmContext->getFP());
+    CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+    Array iterArray = obj->o_toIterArray(ctxStr, true);
+    if (iterArray->empty()) {
+      hasElems = false;
+    } else {
+      ArrayData* ad = iterArray.detach();
+      MArrayIter& mi = marr();
+      (void) new (&mi) MArrayIter(ad);
+      mi.advance();
+    }
+  } else {
+    if (!hphpiCompat) {
+      raise_warning("Invalid argument supplied for foreach()");
+    }
+    hasElems = false;
+  }
+  return hasElems;
+}
+
+bool Iter::next() {
+  assert(arr().getIterType() == ArrayIter::TypeArray ||
+         arr().getIterType() == ArrayIter::TypeIterator);
+  // The emitter should never generate bytecode where the iterator
+  // is at the end before IterNext is executed. However, even if
+  // the iterator is at the end, it is safe to call next().
+  ArrayIter* ai = &arr();
+  ai->next();
+  if (ai->end()) {
+    // If after advancing the iterator we have reached the end, free
+    // the iterator and fall through to the next instruction.
+    // The ArrayIter destructor will decRef the array.
+    ai->~ArrayIter();
+    return false;
+  }
+  // If after advancing the iterator we have not reached the end,
+  // jump to the location specified by the second immediate argument.
   return true;
 }
 
-void MutableArrayIter::escalateCheck() {
-  ArrayData* data;
-  if (m_var) {
-    data = getData();
-    if (!data) return;
-    ArrayData* esc = data->escalate(true);
-    if (data != esc) {
-      *const_cast<Variant*>(m_var) = esc;
+bool Iter::mnext() {
+  MArrayIter &mi = marr();
+  if (!mi.advance()) {
+    // If after advancing the iterator we have reached the end, free
+    // the iterator and fall through to the next instruction.
+    mi.~MArrayIter();
+    return false;
+  } else {
+    // If after advancing the iterator we have not reached the end,
+    // jump to the location specified by the second immediate argument.
+    return true;
+  }
+}
+
+void Iter::free() {
+  assert(arr().getIterType() == ArrayIter::TypeArray ||
+         arr().getIterType() == ArrayIter::TypeIterator);
+  arr().~ArrayIter();
+}
+
+void Iter::mfree() {
+  marr().~MArrayIter();
+}
+
+/*
+ * iter_value_cell* will store a copy of the current value at the address
+ * given by 'out'. iter_value_cell* will increment the refcount of the current
+ * value if appropriate.
+ *
+ * This function has been split into hot and cold parts. The hot part has
+ * been carefully crafted so that it's a leaf function (after all functions
+ * it calls have been trivially inlined) that then tail calls a cold
+ * version of itself (new_value_cell_cold). The hot part should cover the
+ * common case, which occurs when the array parameter is an HphpArray.
+ * If you make any changes to this function, please keep the hot/cold
+ * splitting in mind, and disasemble the optimized version of the binary
+ * to make sure the hot part is a good-looking leaf function; otherwise,
+ * you're likely to get a performance regression.
+ */
+template <bool typeArray>
+static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
+  DataType oldType = out->m_type;
+  assert(oldType != KindOfRef);
+  uint64_t oldDatum = out->m_data.num;
+  TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
+           __func__, typeArray ? "true" : "false", iter, out);
+  assert((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
+         (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
+  ArrayIter& arrIter = iter->arr();
+  if (typeArray) {
+    TypedValue* cur = tvToCell(arrIter.nvSecond());
+    tvDupCell(cur, out);
+  } else {
+    Variant val = arrIter.second();
+    assert(val.getRawType() != KindOfRef);
+    tvDupCell((TypedValue*)&val, out);
+  }
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+template <bool typeArray>
+static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
+  DataType oldType = out->m_type;
+  assert(oldType != KindOfRef);
+  uint64_t oldDatum = out->m_data.num;
+  TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
+  assert((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
+         (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
+  ArrayIter& arr = iter->arr();
+  if (typeArray) {
+    arr.nvFirst(out);
+  } else {
+    Variant key = arr.first();
+    tvDupCell((TypedValue*)&key, out);
+  }
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+/**
+ * new_iter_array creates an iterator for the specified array iff the array is
+ * not empty. If new_iter_array creates an iterator, it does not increment the
+ * refcount of the specified array. If new_iter_array does not create an
+ * iterator, it decRefs the array.
+ */
+static NEVER_INLINE
+int64 new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
+                          TypedValue* keyOut) {
+  TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
+  if (!arr->empty()) {
+    // We are transferring ownership of the array to the iterator, therefore
+    // we do not need to adjust the refcount.
+    (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noInc);
+    dest->arr().setIterType(ArrayIter::TypeArray);
+    iter_value_cell_local_impl<true>(dest, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<true>(dest, keyOut);
+    }
+    return 1LL;
+  }
+  // We did not transfer ownership of the array to an iterator, so we need
+  // to decRef the array.
+  decRefArr(arr);
+  return 0LL;
+}
+
+static inline void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
+                                   TypedValue* keyOut) {
+  TypedValue* cur = tvToCell(&elm->data);
+  tvDupCell(cur, valOut);
+  if (keyOut) {
+    HphpArray::getElmKey(elm, keyOut);
+  }
+}
+
+HOT_FUNC
+int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  valOut = tvToCell(valOut);
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    goto cold;
+  }
+  {
+    HphpArray* arr = (HphpArray*)ad;
+    if (LIKELY(arr->getSize() != 0)) {
+      if (UNLIKELY(tvWillBeReleased(valOut))) {
+        goto cold;
+      }
+      tvDecRefOnly(valOut);
+      // We are transferring ownership of the array to the iterator, therefore
+      // we do not need to adjust the refcount.
+      (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
+      dest->arr().setIterType(ArrayIter::TypeArray);
+      HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
+      getHphpArrayElm(elm, valOut, NULL);
+      return 1LL;
+    }
+    // We did not transfer ownership of the array to an iterator, so we need
+    // to decRef the array.
+    if (UNLIKELY(arr->getCount() == 1)) {
+      goto cold;
+    }
+    arr->decRefCount();
+    return 0LL;
+  }
+cold:
+  return new_iter_array_cold(dest, ad, valOut, NULL);
+}
+
+HOT_FUNC
+int64 new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
+                         TypedValue* keyOut) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  valOut = tvToCell(valOut);
+  keyOut = tvToCell(keyOut);
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    goto cold;
+  }
+  {
+    HphpArray* arr = (HphpArray*)ad;
+    if (LIKELY(arr->getSize() != 0)) {
+      if (UNLIKELY(tvWillBeReleased(valOut)) ||
+          UNLIKELY(tvWillBeReleased(keyOut))) {
+        goto cold;
+      }
+      tvDecRefOnly(valOut);
+      tvDecRefOnly(keyOut);
+      // We are transferring ownership of the array to the iterator, therefore
+      // we do not need to adjust the refcount.
+      (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
+      dest->arr().setIterType(ArrayIter::TypeArray);
+      HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
+      getHphpArrayElm(elm, valOut, keyOut);
+      return 1LL;
+    }
+    // We did not transfer ownership of the array to an iterator, so we need
+    // to decRef the array.
+    if (UNLIKELY(arr->getCount() == 1)) {
+      goto cold;
+    }
+    arr->decRefCount();
+    return 0LL;
+  }
+cold:
+  return new_iter_array_cold(dest, ad, valOut, keyOut);
+}
+
+class FreeObj {
+ public:
+  FreeObj() : m_obj(0) {}
+  void operator=(ObjectData* obj) { m_obj = obj; }
+  ~FreeObj() { if (UNLIKELY(m_obj != NULL)) decRefObj(m_obj); }
+ private:
+  ObjectData* m_obj;
+};
+
+/**
+ * new_iter_object creates an iterator for the specified object if the object
+ * is iterable and it is non-empty (has properties). If new_iter_object creates
+ * an iterator, it does not increment the refcount of the specified object. If
+ * new_iter_object does not create an iterator, it decRefs the object.
+ *
+ * If exceptions are thrown, new_iter_object takes care of decRefing the object.
+ */
+HOT_FUNC
+int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
+                      TypedValue* valOut, TypedValue* keyOut) {
+  valOut = tvToCell(valOut);
+  if (keyOut) {
+    keyOut = tvToCell(keyOut);
+  }
+  ArrayIter::Type itType;
+  {
+    FreeObj fo;
+    if (obj->isCollection() || obj->implementsIterator()) {
+      TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
+            __func__, dest, obj, ctx);
+      try {
+        (void) new (&dest->arr()) ArrayIter(obj, ArrayIter::noInc);
+      } catch (...) {
+        decRefObj(obj);
+        throw;
+      }
+      itType = ArrayIter::TypeIterator;
+    } else {
+      bool isIteratorAggregate;
+      /*
+       * We are not going to transfer ownership of obj to the iterator,
+       * so arrange to decRef it later. The actual decRef has to happen
+       * after the call to arr().end() below, because both can have visible side
+       * effects (calls to __destruct() and valid()). Similarly it has to
+       * happen before the iter_*_cell_local_impl calls below, because they call
+       * current() and key() (hence the explicit scope around FreeObj fo;)
+       */
+      fo = obj;
+
+      Object itObj = obj->iterableObject(isIteratorAggregate, false);
+      if (isIteratorAggregate) {
+        TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
+              __func__, dest, obj, ctx);
+        (void) new (&dest->arr()) ArrayIter(itObj, ArrayIter::transferOwner);
+        itType = ArrayIter::TypeIterator;
+      } else {
+        TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
+              __func__, dest, obj, ctx);
+        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+        Array iterArray(itObj->o_toIterArray(ctxStr));
+        ArrayData* ad = iterArray.getArrayData();
+        (void) new (&dest->arr()) ArrayIter(ad);
+        itType = ArrayIter::TypeArray;
+      }
+    }
+    try {
+      if (dest->arr().end()) {
+        // Iterator was empty; call the destructor on the iterator we just
+        // constructed.
+        dest->arr().~ArrayIter();
+        return 0LL;
+      }
+    } catch (...) {
+      dest->arr().~ArrayIter();
+      throw;
+    }
+  }
+
+  dest->arr().setIterType(itType);
+  if (itType == ArrayIter::TypeIterator) {
+    iter_value_cell_local_impl<false>(dest, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<false>(dest, keyOut);
     }
   } else {
-    assert(m_data);
-    data = m_data;
-    ArrayData* esc = data->escalate(true);
-    if (data != esc) {
-      esc->incRefCount();
-      decRefArr(data);
-      m_data = esc;
+    iter_value_cell_local_impl<true>(dest, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<true>(dest, keyOut);
     }
   }
+  return 1LL;
 }
 
-ArrayData* MutableArrayIter::cowCheck() {
-  ArrayData* data;
-  if (m_var) {
-    data = getData();
-    if (!data) return NULL;
-    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
-      *const_cast<Variant*>(m_var) = (data = data->copyWithStrongIterators());
+/**
+ * iter_next will advance the iterator to point to the next element.
+ * If the iterator reaches the end, iter_next will free the iterator
+ * and will decRef the array.
+ * This function has been split into hot and cold parts. The hot part has
+ * been carefully crafted so that it's a leaf function (after all functions
+ * it calls have been trivially inlined) that then tail calls a cold
+ * version of itself (iter_next_array_cold). The hot part should cover the
+ * common case, which occurs when the array parameter is an HphpArray.
+ * If you make any changes to this function, please keep the hot/cold
+ * splitting in mind, and disasemble the optimized version of the binary
+ * to make sure the hot part is a good-looking leaf function; otherwise,
+ * you're likely to get a performance regression.
+ */
+static NEVER_INLINE
+int64 iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "iter_next_cold: I %p\n", iter);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
+  ArrayIter* ai = &iter->arr();
+  ai->next();
+  if (ai->end()) {
+    // The ArrayIter destructor will decRef the array
+    ai->~ArrayIter();
+    return 0;
+  }
+  if (iter->arr().getIterType() == ArrayIter::TypeArray) {
+    iter_value_cell_local_impl<true>(iter, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<true>(iter, keyOut);
     }
   } else {
-    assert(m_data);
-    data = m_data;
-    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
-      ArrayData* copied = data->copyWithStrongIterators();
-      copied->incRefCount();
-      decRefArr(data);
-      m_data = data = copied;
+    iter_value_cell_local_impl<false>(iter, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<false>(iter, keyOut);
     }
   }
-  return data;
+  return 1;
 }
 
-ArrayData* MutableArrayIter::getData() {
-  assert(m_var);
-  if (m_var->is(KindOfArray)) {
-    return m_var->getArrayData();
+HOT_FUNC
+int64 iter_next(Iter* iter, TypedValue* valOut) {
+  TRACE(2, "iter_next: I %p\n", iter);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
+  ArrayIter* arrIter = &iter->arr();
+  valOut = tvToCell(valOut);
+  if (UNLIKELY(!arrIter->hasArrayData())) {
+    goto cold;
   }
-  return NULL;
+  {
+    const ArrayData* ad = arrIter->getArrayData();
+    if (UNLIKELY(!IsHphpArray(ad))) {
+      goto cold;
+    }
+    const HphpArray* arr = (HphpArray*)ad;
+    ssize_t pos = arrIter->getPos();
+    if (size_t(pos) >= size_t(arr->getLastE())) {
+      if (UNLIKELY(arr->getCount() == 1)) {
+        goto cold;
+      }
+      arr->decRefCount();
+      if (debug) {
+        iter->arr().setIterType(ArrayIter::TypeUndefined);
+      }
+      return 0;
+    }
+    pos = pos + 1;
+    HphpArray::Elm* elm = arr->getElm(pos);
+    if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
+      goto cold;
+    }
+    if (UNLIKELY(tvWillBeReleased(valOut))) {
+      goto cold;
+    }
+    tvDecRefOnly(valOut);
+    arrIter->setPos(pos);
+    getHphpArrayElm(elm, valOut, NULL);
+    return 1;
+  }
+cold:
+  return iter_next_cold(iter, valOut, NULL);
 }
 
-MIterCtx::~MIterCtx() {
-  m_mArray->~MutableArrayIter();
-  smart_free(m_mArray);
-  tvRefcountedDecRef(&m_key);
-  tvRefcountedDecRef(&m_val);
-  if (m_ref) decRefRef(const_cast<RefData*>(m_ref));
+HOT_FUNC
+int64 iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "iter_next: I %p\n", iter);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
+  ArrayIter* arrIter = &iter->arr();
+  valOut = tvToCell(valOut);
+  keyOut = tvToCell(keyOut);
+  if (UNLIKELY(!arrIter->hasArrayData())) {
+    goto cold;
+  }
+  {
+    const ArrayData* ad = arrIter->getArrayData();
+    if (UNLIKELY(!IsHphpArray(ad))) {
+      goto cold;
+    }
+    const HphpArray* arr = (HphpArray*)ad;
+    ssize_t pos = arrIter->getPos();
+    if (size_t(pos) >= size_t(arr->getLastE())) {
+      if (UNLIKELY(arr->getCount() == 1)) {
+        goto cold;
+      }
+      arr->decRefCount();
+      if (debug) {
+        iter->arr().setIterType(ArrayIter::TypeUndefined);
+      }
+      return 0;
+    }
+    pos = pos + 1;
+    HphpArray::Elm* elm = arr->getElm(pos);
+    if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
+      goto cold;
+    }
+    if (UNLIKELY(tvWillBeReleased(valOut))) {
+      goto cold;
+    }
+    if (UNLIKELY(tvWillBeReleased(keyOut))) {
+      goto cold;
+    }
+    tvDecRefOnly(valOut);
+    tvDecRefOnly(keyOut);
+    arrIter->setPos(pos);
+    getHphpArrayElm(elm, valOut, keyOut);
+    return 1;
+  }
+cold:
+  return iter_next_cold(iter, valOut, keyOut);
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

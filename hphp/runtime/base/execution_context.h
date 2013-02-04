@@ -479,14 +479,6 @@ private:
                     HPHP::VM::Offset offset, HPHP::VM::Cell* c1);
   bool initIteratorM(HPHP::VM::PC& pc, HPHP::VM::PC& origPc, HPHP::VM::Iter* it,
                      HPHP::VM::Offset offset, HPHP::VM::Var* v1);
-  void storeIterValueC(HPHP::VM::Iter* it, TypedValue* tv1);
-  void storeIterValueV(HPHP::VM::Iter* it, TypedValue* tv1);
-  void storeIterKeyC(HPHP::VM::Iter* it, TypedValue* tv1);
-  void storeIterKeyV(HPHP::VM::Iter* it, TypedValue* tv1);
-  bool iterNext(HPHP::VM::PC& pc, HPHP::VM::PC& origPc, HPHP::VM::Iter* it,
-                HPHP::VM::Offset offset);
-  bool iterNextM(HPHP::VM::PC& pc, HPHP::VM::PC& origPc, HPHP::VM::Iter* it,
-                 HPHP::VM::Offset offset);
 #define O(name, imm, pusph, pop, flags)                                       \
   void iop##name(HPHP::VM::PC& pc);
 OPCODES

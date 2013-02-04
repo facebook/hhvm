@@ -242,7 +242,7 @@ void Func::rename(const StringData* name) {
   Unit::loadFunc(this);
 }
 
-bool Func::checkIterScope(Offset o, Id iterId) const {
+bool Func::checkIterScope(Offset o, Id iterId, bool& itRef) const {
   const EHEntVec& ehtab = shared()->m_ehtab;
   assert(o >= base() && o < past());
   for (unsigned i = 0, n = ehtab.size(); i < n; i++) {
@@ -250,6 +250,7 @@ bool Func::checkIterScope(Offset o, Id iterId) const {
     if (eh->m_ehtype == EHEnt::EHType_Fault &&
         eh->m_base <= o && o < eh->m_past &&
         eh->m_iterId == iterId) {
+      itRef = eh->m_itRef;
       return true;
     }
   }
@@ -423,6 +424,7 @@ void Func::prettyPrint(std::ostream& out) const {
     }
     if (it->m_iterId != -1) {
       out << " iterId " << it->m_iterId;
+      out << " itRef " << (it->m_itRef ? "true" : "false");
     }
     if (catcher) {
       out << std::endl;

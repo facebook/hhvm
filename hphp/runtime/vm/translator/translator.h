@@ -261,7 +261,8 @@ class NormalizedInstruction {
   vector<DynLocation*> inputs;
   DynLocation* outStack;
   DynLocation* outLocal;
-  DynLocation* outLocal2; // Used for IterInit* and IterNext*
+  DynLocation* outLocal2; // Used for IterInitK, MIterInitK, IterNextK, and
+                          //   MIterNextK
   DynLocation* outStack2; // Used for CGetL2
   DynLocation* outStack3; // Used for CGetL3
   vector<Location> deadLocs; // locations that die at the end of this
@@ -1032,12 +1033,12 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpFatal:
     case OpIterNext:
     case OpIterNextK:
-    case OpIterNextM:
-    case OpIterNextMK:
+    case OpMIterNext:
+    case OpMIterNextK:
     case OpIterInit: // May branch to fail case.
     case OpIterInitK: // Ditto
-    case OpIterInitM: // Ditto
-    case OpIterInitMK: // Ditto
+    case OpMIterInit: // Ditto
+    case OpMIterInitK: // Ditto
     case OpThrow:
     case OpUnwind:
     case OpEval:

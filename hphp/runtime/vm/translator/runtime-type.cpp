@@ -101,12 +101,10 @@ RuntimeType::RuntimeType() :
 
 RuntimeType::RuntimeType(const Iter* it) :
   m_kind(ITER) {
-  m_iter.type = it->m_itype;
 }
 
-RuntimeType::RuntimeType(Iter::Type type) :
+RuntimeType::RuntimeType(ArrayIter::Type type) :
   m_kind(ITER) {
-  m_iter.type = type;
 }
 
 RuntimeType RuntimeType::box() const {
@@ -233,18 +231,8 @@ bool RuntimeType::isValue() const {
   return m_kind == VALUE;
 }
 
-Iter::Type RuntimeType::iterType() const {
-  assert(isIter());
-  return m_iter.type;
-}
-
-int RuntimeType::typeCheckOffset() const {
-  if (isIter()) return offsetof(Iter, m_itype);
-  return offsetof(Cell, m_type);
-}
-
 DataType RuntimeType::typeCheckValue() const {
-  if (isIter()) return DataType(m_iter.type);
+  if (isIter()) return (DataType)0;
   return outerType();
 }
 
@@ -305,7 +293,7 @@ bool RuntimeType::operator==(const RuntimeType& r) const {
   }
   switch (m_kind) {
     case ITER:
-      return r.m_iter.type == m_iter.type;
+      return true;
     case VALUE:
       return r.m_value.innerType == m_value.innerType &&
              r.m_value.outerType == m_value.outerType &&
@@ -318,7 +306,6 @@ bool RuntimeType::operator==(const RuntimeType& r) const {
 
 RuntimeType& RuntimeType::operator=(const RuntimeType& r) {
   m_kind            = r.m_kind;
-  m_iter            = r.m_iter;
   m_value.innerType = r.m_value.innerType;
   m_value.outerType = r.m_value.outerType;
   m_value.klass     = r.m_value.klass;
@@ -339,7 +326,7 @@ RuntimeType::operator()(const RuntimeType& r) const {
   //    { field1: 1, field2: 0 }
   switch(m_kind) {
     case ITER:
-      p2 = HPHP::hash_int64(m_iter.type);
+      p2 = 0;
       break;
     case VALUE:
       p2 = HPHP::hash_int64_pair(uintptr_t(m_value.klass),
@@ -355,8 +342,7 @@ using std::string;
 string RuntimeType::pretty() const {
   char buf[1024];
   if (isIter()) {
-    sprintf(buf, "(Iter %s)",
-            m_iter.type == Iter::TypeMutableArray ? "mutableArray" : "array");
+    sprintf(buf, "(Iter)");
     return std::string(buf);
   }
   if (m_value.outerType == KindOfRef) {

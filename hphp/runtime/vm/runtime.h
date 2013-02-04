@@ -25,15 +25,6 @@
 namespace HPHP {
 namespace VM {
 
-int64 new_iter_array(HPHP::VM::Iter* dest, ArrayData* arr,
-                     TypedValue* val);
-int64 new_iter_array_key(HPHP::VM::Iter* dest, ArrayData* arr,
-                         TypedValue* val, TypedValue* key);
-int64 new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx,
-                      TypedValue* val, TypedValue* key);
-int64 iter_next(HPHP::VM::Iter* dest, TypedValue* val);
-int64 iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
-
 ArrayData* new_array(int capacity);
 ArrayData* new_tuple(int numArgs, const TypedValue* args);
 

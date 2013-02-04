@@ -1,6 +1,6 @@
 
 **********************************
-* HipHop Bytecode v1 revision 16 *
+* HipHop Bytecode v1 revision 17 *
 **********************************
 
 
@@ -10,10 +10,9 @@ Introduction
 HipHop bytecode (HHBC) v1 is intended to serve as the conceptual basis for
 encoding the semantic meaning of HipHop source code into a format that is
 appropriate for consumption by interpreters and just-in-time compilers. By
-using simpler constructs to encode more complex statements such as control flow
-statements, function statements, method statements, and class statements, HHBC
-makes it straightforward for an interpreter or a compiler to determine the
-order of execution for a program.
+using simpler constructs to encode more complex expressesion and statements,
+HHBC makes it straightforward for an interpreter or a compiler to determine
+the order of execution for a program.
 
 HHBC was designed with several competing goals in mind:
 
@@ -21,12 +20,12 @@ HHBC was designed with several competing goals in mind:
 an efficient execution engine, whether it be an interpreter or a just-in-time
 compiler.
 
-2) PHP 5.3 compatibility. It should be possible to compile valid PHP 5.3 source
+2) PHP 5.4 compatibility. It should be possible to compile valid PHP 5.4 source
 code into HipHop bytecode in a way that preserves the semantic meaning of the
 source.
 
 3) Simplicity. The design of HHBC should avoid features that could be removed
-or simplified without comprimising PHP 5.3 compatibility, run-time efficiency,
+or simplified without comprimising PHP 5.4 compatibility, run-time efficiency,
 or design cleanliness.
 
 
@@ -137,11 +136,10 @@ can reach at run time.
 
 Each local variable and iterator variable has an id, and HHBC instructions can
 reference these variables using these ids. The id space for local variables is
-distinct from the id space for iterator variables. Thus local variable id 1
-refers to a different variable than iterator variable id 1. Local variable ids
-and iterator variable ids are signed 32-bit integer values. No function may
-have more than 2^31 - 1 local variables, and no function may have more than
-2^31 - 1 iterator variables.
+distinct from the id space for iterator variables. Thus local id 1 refers to a
+different variable than iterator id 1. Local variable ids and iterator ids are
+signed 32-bit integer values. No function may have more than 2^31 - 1 local
+variables, and no function may have more than 2^31 - 1 iterator variables.
 
 Some local variables have names associated with them (called "named local
 variables"), while other local variables do not have names associated with them
@@ -153,10 +151,10 @@ while variables that do not have a name associated with them will never appear
 in the current variable environment.
 
 Formally declared parameters are considered to be local variables. Given a
-function with n formally declared parameters, local variable ids 0 through n-1
-will be used to reference the formally declared parameters. Formal parameters
-without default values are called "required parameters", while formal parmeters
-with default values are called "optional parameters".
+function with n formally declared parameters, local ids 0 through n-1 will be
+used to reference the formally declared parameters. Formal parameters without
+default values are called "required parameters", while formal parmeters with
+default values are called "optional parameters".
 
 The bytecode for each function consists of the instructions of the primary
 function body, optionally followed by the instructions for one or more fault
@@ -320,7 +318,7 @@ function (the callee), transfers the parameters from the evaluation stack to
 the callee, pops the current FPI off of the FPI stack, and then invokes the
 dispatcher to call the function.
 
-Calls to buitin functions may be optimized to avoid pusing an entry on the FPI
+Calls to builtin functions may be optimized to avoid pusing an entry on the FPI
 stack if it is known that the builtin function does not need access to the call
 stack. In this case, the arguments to the builtin are passed with the BPass*
 instructions, and the builtin can be invoked with the FCallBuiltin instruction.
@@ -338,7 +336,7 @@ caller must pass the parameters in forward order, i.e. the first use of FPass*
 passes the first parameter, the second use of FPass* passes the second
 parameter, and so forth.
 
-The FPush*/FPass*/FCall* instructions can be used to call a standard function, a
+The FPush*/FPass*/FCall* instructions can be used to call a global function, a
 method on an object, or a method from a class. The caller is responsible for
 evaluating all of the parameters in forward order. When the caller executes an
 FCall* instruction, the dispatcher creates a new frame and moves the parameters
@@ -643,17 +641,22 @@ instructions must have a depth of n as well. Finally, no instruction between an
 FPush* and its corresponding FCall* may consume any of the values from the
 evaluation stack that were pushed onto the stack before the FPush* instruction.
 
-12) The initialized state of each iterator variable must be known at every
-point in the code and must be the same for all control paths. Every range of
-bytecode for which an iterator variable i is initialized must be protected
-by a fault funclet that unsets i by calling IterFree so that when the unwinder
-or dispatcher pops the current frame, each iterator variable is uninitialized.
+12) The initialization 'state' of each iterator variable must be known at every
+point in the code and must be the same for all control paths. There are three
+possible states: (1) uninitialized, (2) "iter-initialized" (initialized via
+IterInit*), and (3) "miter-initialized" (initialized via MIterInit*). Every
+range of bytecode for which an iterator variable i is initialized must be
+protected by a fault funclet that unsets i by calling IterFree or MIterFree so
+that when the unwinder or dispatcher pops the current frame, each iterator
+variable is uninitialized.
 
-13) The iterator variable referenced by IterInit* instructions must be
-uninitialized when IterInit* executes. The interator variable i referenced by
-IterValue*, IterNext, and IterFree instructions must be initialized. Note that
-IterInit* conditionally initializes, and IterNext conditionally frees, the
-iteration variable.
+13) The iterator variable referenced by IterInit* or MIterInit* must be in
+the uninitialized state when the instruction executes. An iterator variable
+referenced by IterNext* and IterFree must be in the "iter-initialized" state,
+and an iterator variable referenced by MIterNext* or MIterFree must be in the
+"miter-initialized" state. Note that IterInit* and MIterInit* conditionally
+initializes the iterator variable, and IterNext* and MIterNext* conditionally
+frees the iterator variable.
 
 
 Instruction set
@@ -698,8 +701,8 @@ refer to the value directly below $2, and so forth. Also, %1 is used to refer
 to the first immediate argument, and %2 is used to refer to the second
 immediate argument.
 
-Note that the relative offset immediate used by a Jmp*/Iter* instruction is
-relative the beginning of that Jmp*/Iter* instruction.
+Note that the relative offset immediate used by a Jmp*, Iter*, MIter*, Switch,
+or SSwitch instruction is relative the beginning of the instruction.
 
 There are numerous instructions that operate on different kinds of locations.
 Locations are specified using "location descriptors". The complete list of
@@ -1118,16 +1121,16 @@ Fatal <skip frame>  [C]  ->  []
 4. Control flow instructions
 ----------------------------
 
-Jmp <relative offset>    []  ->  []
+Jmp <rel offset>    []  ->  []
 
   Jump. Transfers control to the location specified by %1.
 
-JmpZ <relative offset>    [C]  ->  []
+JmpZ <rel offset>    [C]  ->  []
 
   Jump if zero. Conditionally transfers control to the location specified by %1
   if (bool)$1 == (bool)0.
 
-JmpNZ <relative offset>    [C]  ->  []
+JmpNZ <rel offset>    [C]  ->  []
 
   Jump if not zero. Conditionally transfers control to the location specified
   by %1 if (bool)$1 != (bool)0.
@@ -1687,10 +1690,10 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []
 
-  FPI push call user function. These instructions lookup $1 as a
-  callable, and push a new entry onto the FPI stack. If $1 is not callable,
-  they issue a warning, and push an entry representing a function which
-  does nothing, takes no argument, and returns null.
+  FPI push call user function. These instructions lookup $1 as a callable, and
+  push a new entry onto the FPI stack. If $1 is not callable, they issue a
+  warning, and push an entry representing a function which does nothing, takes
+  no argument, and returns null.
 
 FPushCufSafe <num params> [C C] ->  [C C]
 
@@ -3219,8 +3222,8 @@ UnsetM <loc-desc/M-vector>    [C..C]  ->  []
 11. Iterator instructions
 -------------------------
 
-IterInit  <iterator var id> <rel offset> <local id>                [C]  ->  []
-IterInitK <iterator var id> <rel offset> <local id> <local id>     [C]  ->  []
+IterInit  <iterator id> <rel offset> <local id>                [C]  ->  []
+IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
 
   Initialize iterator. If $1 is an array, these instructions create an array
   iterator, rewind the array iterator to point to the beginning of the array,
@@ -3282,8 +3285,8 @@ IterInitK <iterator var id> <rel offset> <local id> <local id>     [C]  ->  []
   this instruction stores a copy of the name of the current property in %4 as a
   cell.
 
-IterInitM  <iterator var id> <rel offset> <local id>               [V]  ->  []
-IterInitMK <iterator var id> <rel offset> <local id> <local id>    [V]  ->  []
+MIterInit  <iterator id> <rel offset> <local id>               [V]  ->  []
+MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
 
   Initialize mutable iterator. If $1 is an array, these instructions create a
   mutable array iterator, rewind the mutable array iterator to point to the
@@ -3317,7 +3320,7 @@ IterInitMK <iterator var id> <rel offset> <local id> <local id>    [V]  ->  []
   If the iterator specified by %1 is a mutable default class iterator, these
   instructions store the current property in %3 as a var.
 
-  For the IterInitMK version, the following also happens:
+  For the MIterInitK version, the following also happens:
 
   If the iterator specified by %1 is an array iterator, this instruction
   stores a copy of the current key in %4 as a cell.
@@ -3326,8 +3329,8 @@ IterInitMK <iterator var id> <rel offset> <local id> <local id>    [V]  ->  []
   this instruction stores a copy of the name of the current property in %4 as a
   cell.
 
-IterNext  <iter var id> <rel offset> <local id>               []  ->  []
-IterNextK <iter var id> <rel offset> <local id> <local id>    []  ->  []
+IterNext  <iterator id> <rel offset> <local id>               []  ->  []
+IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
 
   Iterator next. If the specified iterator is a non-mutable array iterator
   or an extension class iterator, advance the iterator to point to the next
@@ -3372,8 +3375,8 @@ IterNextK <iter var id> <rel offset> <local id> <local id>    []  ->  []
   this instruction stores a copy of the name of the new current property in %4
   as a cell.
 
-IterNextM  <iter var id> <rel offset> <local id>               []  ->  []
-IterNextMK <iter var id> <rel offset> <local id> <local id>    []  ->  []
+MIterNext  <iterator id> <rel offset> <local id>               []  ->  []
+MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
 
   Iterator next. If the specified iterator is a mutable array iterator,
   advance the iterator to point to the next element. If the iterator
@@ -3386,7 +3389,7 @@ IterNextMK <iter var id> <rel offset> <local id> <local id>    []  ->  []
   to the location specified by %2.
 
   If the specified iterator is at the end, free the iterator variable with
-  an implicit IterFree, then fall through to the next instruction.
+  an implicit MIterFree, then fall through to the next instruction.
 
   If the specified iterator is not at the end, retrieve the key and value:
 
@@ -3396,7 +3399,7 @@ IterNextMK <iter var id> <rel offset> <local id> <local id>    []  ->  []
   If the iterator specified by %1 is a mutable default class iterator, these
   instructions store the new current property in %3 as a var.
 
-  For the IterNextMK version, the following also happens:
+  For the MIterNextK version, the following also happens:
 
   If the iterator specified by %1 is an array iterator, this instruction
   stores a copy of the new current key in %4 as a cell.
@@ -3405,12 +3408,19 @@ IterNextMK <iter var id> <rel offset> <local id> <local id>    []  ->  []
   this instruction stores a copy of the name of the new current property in %4
   as a cell.
 
-IterFree <iterator variable id>    []  ->  []
+IterFree <iterator id>    []  ->  []
 
   Iterator free. This instruction frees the specified iterator variable.
   Typically an iterator gets freed by IterNext, so IterFree is only needed
   for guarding against exceptions and implementing break and continue control
   flow statements.
+
+MIterFree <iterator id>    []  ->  []
+
+  Mutable iterator free. This instruction frees the specified iterator
+  variable. Typically an iterator gets freed by MIterNext*, so MIterFree is
+  only needed for guarding against exceptions and implementing break and
+  continue control flow statements.
 
 
 12. Include, eval, and define instructions
@@ -3715,15 +3725,16 @@ statements; most real switch statements are implemented naively using the Eq
 and JmpNZ instructions. Also, the functionality of both the echo statement and
 the print statement is implemented with the Print instruction.
 
-Foreach statements are implemented using iterator variables and the Iter*
-instructions. Each foreach loop must be protected by a fault funclet to ensure
-that the iterator variable is freed when a foreach loop exits abnormally
+Foreach statements are implemented using iterator variables and the Iter* and
+MIter* instructions. Each foreach loop must be protected by a fault funclet to
+ensure that the iterator variable is freed when a foreach loop exits abnormally
 through an exception.
 
-Simple break statements and continue statements are implemented using the Jmp*
-and IterFree instructions. Dynamic break is implemented using a chain of basic
-blocks, where each block decrements $n and compares it with 0, and then decides
-where to jump next.
+Simple break statements and continue statements are implemented using the Jmp*,
+IterFree, and MIterFree instructions. Dynamic break is implemented using an
+unnamed local (to store the 'break count') and a chain of basic blocks, where
+each block decrements the unnamed local variable and compares it with 0, and
+then decides where to jump next.
 
 
 Basic expression transformations

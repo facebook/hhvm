@@ -708,20 +708,6 @@ void VectorArray::onSetEvalScalar() {
   }
 }
 
-void VectorArray::getFullPos(FullPos &fp) {
-  assert(fp.container == (ArrayData*)this);
-  fp.pos = m_pos;
-}
-
-bool VectorArray::setFullPos(const FullPos &fp) {
-  assert(fp.container == (ArrayData*)this);
-  if (fp.pos != ArrayData::invalid_index) {
-    m_pos = fp.pos;
-    return true;
-  }
-  return false;
-}
-
 CVarRef VectorArray::currentRef() {
   assert(m_pos >= 0 && m_pos < m_size);
   return tvAsCVarRef(&m_elems[m_pos]);

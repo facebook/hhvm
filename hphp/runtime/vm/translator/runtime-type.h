@@ -203,9 +203,6 @@ class RuntimeType {
         };
       };
     } m_value;
-    struct {
-      Iter::Type type;
-    } m_iter;
   };
 
   inline void consistencyCheck() const {
@@ -241,7 +238,7 @@ class RuntimeType {
   RuntimeType(const RuntimeType& copy);
   RuntimeType();
   RuntimeType(const Iter* iter);
-  RuntimeType(Iter::Type type);
+  RuntimeType(ArrayIter::Type type);
 
   static const int UnknownBool = -1;
 
@@ -261,10 +258,8 @@ class RuntimeType {
   int valueBoolean() const;
   int64 valueInt() const;
   int64 valueGeneric() const;
-  Iter::Type iterType() const;
 
   // Helpers for typechecking
-  int typeCheckOffset() const;
   DataType typeCheckValue() const;
 
   bool isValue() const;

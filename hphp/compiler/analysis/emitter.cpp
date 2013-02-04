@@ -1400,19 +1400,24 @@ bool EmitterVisitor::isJumpTarget(Offset target) {
 }
 
 #define CONTROL_BODY(brk, cnt, brkH, cntH) \
-  ControlTargetPusher _cop(this, -1, brk, cnt, brkH, cntH)
-#define FOREACH_BODY(itId, brk, cnt, brkH, cntH) \
-  ControlTargetPusher _cop(this, itId, brk, cnt, brkH, cntH)
+  ControlTargetPusher _cop(this, -1, false, brk, cnt, brkH, cntH)
+#define FOREACH_BODY(itId, itRef, brk, cnt, brkH, cntH) \
+  ControlTargetPusher _cop(this, itId, itRef, brk, cnt, brkH, cntH)
 
 class IterFreeThunklet : public Thunklet {
 public:
-  IterFreeThunklet(Id iterId) : m_id(iterId) {}
+  IterFreeThunklet(Id iterId, bool itRef) : m_id(iterId), m_itRef(itRef) {}
   virtual void emit(Emitter& e) {
-    e.IterFree(m_id);
+    if (m_itRef) {
+      e.MIterFree(m_id);
+    } else {
+      e.IterFree(m_id);
+    }
     e.Unwind();
   }
 private:
   Id m_id;
+  bool m_itRef;
 };
 
 /**
@@ -1960,7 +1965,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
           if (bs->is(Statement::KindOfBreakStatement)) {
             if (m_contTargets.front().m_itId != -1) {
-              e.IterFree(m_contTargets.front().m_itId);
+              if (m_contTargets.front().m_itRef) {
+                e.MIterFree(m_contTargets.front().m_itId);
+              } else {
+                e.IterFree(m_contTargets.front().m_itId);
+              }
             }
             e.Jmp(m_contTargets.front().m_brkTarg);
           } else {
@@ -4584,7 +4593,13 @@ void EmitterVisitor::emitConvertToCell(Emitter& e) {
 
 void EmitterVisitor::emitFreePendingIters(Emitter& e) {
   for (unsigned i = 0; i < m_pendingIters.size(); ++i) {
-    e.IterFree(m_pendingIters[i]);
+    auto pendingIter = m_pendingIters[i];
+    if (pendingIter.second == KindOfMIter) {
+      e.MIterFree(pendingIter.first);
+    } else {
+      assert(pendingIter.second == KindOfIter);
+      e.IterFree(pendingIter.first);
+    }
   }
 }
 
@@ -6239,15 +6254,25 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
   return hoistable;
 }
 
-void EmitterVisitor::emitBreakHandler(Emitter& e, Label& brkTarg,
-    Label& cntTarg, Label& brkHand, Label& cntHand, Id iter /* = -1 */) {
-
+void
+EmitterVisitor::emitBreakHandler(Emitter& e,
+                                 Label& brkTarg,
+                                 Label& cntTarg,
+                                 Label& brkHand,
+                                 Label& cntHand,
+                                 Id iter /* = -1 */,
+                                 IterKind itKind /* = KindOfIter */) {
   // Handle dynamic break
   if (brkHand.isUsed()) {
     brkHand.set(e);
     // Whatever happens, we have left this loop
     if (iter != -1) {
-      e.IterFree(iter);
+      if (itKind == KindOfMIter) {
+        e.MIterFree(iter);
+      } else {
+        assert(itKind == KindOfIter);
+        e.IterFree(iter);
+      }
     }
     e.Int(1);
     e.Sub();
@@ -6275,7 +6300,12 @@ void EmitterVisitor::emitBreakHandler(Emitter& e, Label& brkTarg,
       e.Jmp(cntTarg);
       leaving.set(e);
       // Leaving this loop
-      e.IterFree(iter);
+      if (itKind == KindOfMIter) {
+        e.MIterFree(iter);
+      } else {
+        assert(itKind == KindOfIter);
+        e.IterFree(iter);
+      }
       e.Jmp(topContHandler());
     } else {
       e.JmpZ(topContHandler());
@@ -6288,11 +6318,11 @@ void EmitterVisitor::emitBreakHandler(Emitter& e, Label& brkTarg,
 class ForeachIterGuard {
   EmitterVisitor& m_ev;
  public:
-  ForeachIterGuard(EmitterVisitor& ev, Id iterId) : m_ev(ev) {
-    m_ev.pushIterId(iterId);
+  ForeachIterGuard(EmitterVisitor& ev, Id iterId, bool itRef) : m_ev(ev) {
+    m_ev.pushIterScope(iterId, itRef);
   }
   ~ForeachIterGuard() {
-    m_ev.popIterId();
+    m_ev.popIterScope();
   }
 };
 
@@ -6315,7 +6345,7 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   Label start;
   Offset bIterStart;
   Id itId = m_curFunc->allocIterator();
-  ForeachIterGuard fig(*this, itId);
+  ForeachIterGuard fig(*this, itId, strong);
   bool simpleCase = (!key || key->is(Expression::KindOfSimpleVariable)) &&
                              val->is(Expression::KindOfSimpleVariable);
 
@@ -6343,9 +6373,9 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
     if (strong) {
       emitConvertToVar(e);
       if (key) {
-        e.IterInitMK(itId, exit, valTempLocal, keyTempLocal);
+        e.MIterInitK(itId, exit, valTempLocal, keyTempLocal);
       } else {
-        e.IterInitM(itId, exit, valTempLocal);
+        e.MIterInit(itId, exit, valTempLocal);
       }
     } else {
       emitConvertToCell(e);
@@ -6375,9 +6405,9 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
 
     if (strong) {
       if (key) {
-        e.IterInitMK(itId, exit, valTempLocal, keyTempLocal);
+        e.MIterInitK(itId, exit, valTempLocal, keyTempLocal);
       } else {
-        e.IterInitM(itId, exit, valTempLocal);
+        e.MIterInit(itId, exit, valTempLocal);
       }
     } else {
       if (key) {
@@ -6422,7 +6452,7 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   }
 
   {
-    FOREACH_BODY(itId, exit, next, brkHand, cntHand);
+    FOREACH_BODY(itId, strong, exit, next, brkHand, cntHand);
     if (body) visit(body);
   }
   bool needBreakHandler = (brkHand.isUsed() || cntHand.isUsed());
@@ -6441,9 +6471,9 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   m_evalStack.cleanTopMeta();
   if (strong) {
     if (key) {
-      e.IterNextMK(itId, start, valTempLocal, keyTempLocal);
+      e.MIterNextK(itId, start, valTempLocal, keyTempLocal);
     } else {
-      e.IterNextM(itId, start, valTempLocal);
+      e.MIterNext(itId, start, valTempLocal);
     }
   } else {
     if (key) {
@@ -6452,10 +6482,12 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
       e.IterNext(itId, start, valTempLocal);
     }
   }
-  newFaultRegion(bIterStart, m_ue.bcPos(), new IterFreeThunklet(itId), itId);
+  newFaultRegion(bIterStart, m_ue.bcPos(), new IterFreeThunklet(itId, strong),
+                 itId);
   if (needBreakHandler) {
     e.Jmp(exit);
-    emitBreakHandler(e, exit, next, brkHand, cntHand, itId);
+    IterKind itKind = strong ? KindOfMIter : KindOfIter;
+    emitBreakHandler(e, exit, next, brkHand, cntHand, itId, itKind);
   }
   if (!simpleCase) {
     m_curFunc->freeUnnamedLocal(valTempLocal);

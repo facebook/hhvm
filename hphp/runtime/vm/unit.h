@@ -141,6 +141,7 @@ class EHEnt {
   Offset m_base;
   Offset m_past;
   int m_iterId;
+  bool m_itRef;
   int m_parentIndex;
   Offset m_fault;
   typedef std::vector<std::pair<Id, Offset> > CatchVec;
@@ -152,6 +153,7 @@ class EHEnt {
       (m_past)
       (m_iterId)
       (m_fault)
+      (m_itRef)
       // eh.m_parentIndex is re-computed in sortEHTab, not serialized.
       ;
     if (m_ehtype == EHType_Catch) {
@@ -327,7 +329,6 @@ struct Unit {
       GuardedCls,
       NoSurprise,
       ArrayCapacity,
-      IteratorType,
 
       /*
        * Information about the known class of a property base in the

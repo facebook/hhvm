@@ -131,6 +131,7 @@ public:
   virtual void renumber();
   virtual void onSetEvalScalar();
 
+  virtual bool validFullPos(const FullPos &fp) const;
   virtual void getFullPos(FullPos &fp);
   virtual bool setFullPos(const FullPos &fp);
   virtual CVarRef currentRef();

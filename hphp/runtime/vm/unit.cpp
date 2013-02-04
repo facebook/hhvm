@@ -1243,9 +1243,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
         int arg = info.m_arg & ~MetaInfo::VectorArg;
         const char *argKind = info.m_arg & MetaInfo::VectorArg ? "M" : "";
         switch (info.m_kind) {
-          case Unit::MetaInfo::IteratorType:
-            out << " i" << argKind << arg << ":it=" << (int)info.m_data;
-            break;
           case Unit::MetaInfo::DataTypeInferred:
           case Unit::MetaInfo::DataTypePredicted:
             out << " i" << argKind << arg << ":t=" << (int)info.m_data;

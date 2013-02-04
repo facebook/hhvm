@@ -699,9 +699,11 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
   assert(isIter(pc));
   int id = getImmIva(pc);
   bool ok = true;
-  if (Op(*pc) == OpIterInit || Op(*pc) == OpIterInitM) {
+  if (Op(*pc) == OpIterInit || Op(*pc) == OpIterInitK ||
+      Op(*pc) == OpMIterInit || Op(*pc) == OpMIterInitK) {
     if (cur->iters[id]) {
-      verify_error("IterInit*<%d> trying to double-initialize\n", id);
+      verify_error(
+        "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
       ok = false;
     }
   } else {
@@ -709,7 +711,9 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
       verify_error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
-    if (Op(*pc) == OpIterFree) cur->iters[id] = false;
+    if (Op(*pc) == OpIterFree || Op(*pc) == OpMIterFree) {
+      cur->iters[id] = false;
+    }
   }
   return ok;
 }
@@ -901,11 +905,13 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     cur->fpilen = save_fpilen;
   }
   if (isIter(b->last)) {
-    // IterInit and IterNext*, Both implicitly free their iterator variable
+    // IterInit* and IterNext*, Both implicitly free their iterator variable
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.
     int id = getImmIva(b->last);
-    bool taken_state = Op(*b->last) == OpIterNext;
+    bool taken_state =
+      (Op(*b->last) == OpIterNext || Op(*b->last) == OpIterNextK ||
+       Op(*b->last) == OpMIterNext || Op(*b->last) == OpMIterNextK);
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
     if (m_verbose) {

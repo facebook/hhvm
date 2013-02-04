@@ -306,10 +306,63 @@ class ArrayData : public Countable {
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
+  /**
+   * Mutable iteration APIs
+   *
+   * The following six methods are used for mutable iteration. For all methods
+   * except newFullPos(), it is the caller's responsibility to ensure that the
+   * specified FullPos 'fp' is registered with this array and hasn't already
+   * been freed.
+   */
+
+  /**
+   * Create a new mutable iterator and register it with this array (the mutable
+   * iterator will be stored in 'fp'). The new iterator will point to whatever
+   * element the array's internal cursor currently points to. Note that the
+   * array keeps track of all mutable iterators that have registered with it.
+   *
+   * A mutable iterator remains live until one of the following happens:
+   *   (1) The mutable iterator is freed by calling the freeFullPos() method.
+   *   (2) The array's refcount drops to 0 and the array frees all mutable
+   *       iterators that were registered with it.
+   *   (3) Some other kind of "invalidation" event happens to the array that
+   *       causes it to free all mutable iterators that were registered with
+   *       it (ex. array_shift() is called on the array).
+   */
   void newFullPos(FullPos &fp);
+
+  /**
+   * Frees a mutable iterator that was registered with this array.
+   */
   void freeFullPos(FullPos &fp);
+
+  /**
+   * Checks if a mutable iterator points to a valid element within this array.
+   * This will return false if the iterator points past the last element, or
+   * if the iterator points before the first element.
+   */
+  virtual bool validFullPos(const FullPos& fp) const;
+
+  /**
+   * Sets the specified mutable iterator to point to whatever element the
+   * array's internal cursor currently points to.
+   */
   virtual void getFullPos(FullPos &fp);
+
+  /**
+   * Sets the array's internal cursor to point to whetever element the
+   * specified mutable iterator to currently points to. It is the caller's
+   * responsibility to ensure that fp.getResetFlag() is false.
+   */
   virtual bool setFullPos(const FullPos &fp);
+ 
+  /**
+   * TODO Task #2091628: nextForFullPos() is a temporary hack to keep
+   * GlobalArrayWrapper working. Once GlobalArrayWrapper is gone we can
+   * remove this hack.
+   */
+  virtual void nextForFullPos(); 
+
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
@@ -409,21 +462,14 @@ class ArrayData : public Countable {
     static_assert(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET,
                   "Offset of _count in ArrayData must be FAST_REFCOUNT_OFFSET");
   }
-  enum { kSiPastEnd = 1 };
  protected:
   void freeStrongIterators();
   static void moveStrongIterators(ArrayData* dest, ArrayData* src);
   FullPos* strongIterators() const {
-    return (FullPos*)(m_flags & ~kSiPastEnd);
-  }
-  bool siPastEnd() const {
-    return (m_flags & kSiPastEnd) != 0;
-  }
-  void setSiPastEnd(bool b) {
-    m_flags = (m_flags & ~kSiPastEnd) | (b ? kSiPastEnd : 0);
+    return m_strongIterators;
   }
   void setStrongIterators(FullPos* p) {
-    m_flags = uintptr_t(p) | (m_flags & kSiPastEnd);
+    m_strongIterators = p;
   }
   // error-handling helpers
   static CVarRef getNotFound(int64 k);
@@ -443,10 +489,7 @@ class ArrayData : public Countable {
   uint m_size;
   ssize_t m_pos;
  private:
-  union {
-    FullPos* m_strongIterators; // head of linked list
-    uintptr_t m_flags;
-  };
+  FullPos* m_strongIterators; // head of linked list
  protected:
   const uint8_t m_kind;  // enum ArrayKind
   const bool m_nonsmart; // never use smartalloc to allocate Elms

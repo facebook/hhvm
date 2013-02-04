@@ -20,6 +20,8 @@
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/runtime_option.h>
+#include <util/min_max_macros.h>
+
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */
 #include <gdfontmb.h> /* 3 Medium bold font */
@@ -4164,10 +4166,6 @@ bool f_imagefilter(CObjRef image, int filtertype,
 #define GET_PIXEL_FUNCTION(src) \
   (src->trueColor?gdImageGetTrueColorPixel:gdImageGetPixel)
 #endif
-#undef MAX
-#undef MIN
-#define MAX(a,b) ((a)<(b)?(b):(a))
-#define MIN(a,b) ((a)<(b)?(a):(b))
 
 static int gdImageConvolution(gdImagePtr src, float filter[3][3],
                               float filter_div, float offset) {

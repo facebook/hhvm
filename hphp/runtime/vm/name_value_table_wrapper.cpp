@@ -274,15 +274,24 @@ Variant NameValueTableWrapper::each() {
   return Variant(false);
 }
 
+bool NameValueTableWrapper::validFullPos(const FullPos & fp) const {
+  assert(fp.getContainer() == (ArrayData*)this);
+  if (fp.getResetFlag()) return false;
+  if (fp.m_pos == ArrayData::invalid_index) return false;
+  NameValueTable::Iterator iter(m_tab, fp.m_pos);
+  return (iter.valid());
+}
+
 void NameValueTableWrapper::getFullPos(FullPos &fp) {
-  assert(fp.container == this);
-  fp.pos = m_pos;
+  assert(fp.getContainer() == this);
+  fp.m_pos = m_pos;
 }
 
 bool NameValueTableWrapper::setFullPos(const FullPos& fp) {
-  assert(fp.container == this);
-  if (fp.pos != ArrayData::invalid_index) {
-    NameValueTable::Iterator iter(m_tab, fp.pos);
+  assert(fp.getContainer() == this);
+  assert(!fp.getResetFlag());
+  if (fp.m_pos != ArrayData::invalid_index) {
+    NameValueTable::Iterator iter(m_tab, fp.m_pos);
     if (iter.valid()) {
       m_pos = iter.toInteger();
       return true;

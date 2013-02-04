@@ -21,6 +21,7 @@
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/array/hphp_array.h>
+#include <util/min_max_macros.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,9 @@ struct TypedValue;
 class c_Vector;
 class c_Map;
 class c_StableMap;
+namespace VM {
+  struct Iter;
+}
 
 /**
  * An iteration normally looks like this:
@@ -42,7 +46,14 @@ class c_StableMap;
  * Iterator for an immutable array.
  */
 class ArrayIter {
-public:
+ public:
+  enum Type {
+    TypeUndefined = 0,
+    TypeArray,
+    TypeIterator  // for objects that implement Iterator or
+                  // IteratorAggregate
+  };
+
   /**
    * Constructors.
    */
@@ -50,8 +61,8 @@ public:
   ArrayIter(const ArrayData* data);
 
   enum NoInc { noInc = 0 };
-// Special constructor used by the VM. This constructor does not
-// increment the refcount of the specified array.
+  // Special constructor used by the VM. This constructor does not increment
+  // the refcount of the specified array.
   ArrayIter(const ArrayData* data, NoInc) {
     setArrayData(data);
     if (data) {
@@ -60,9 +71,9 @@ public:
       m_pos = ArrayData::invalid_index;
     }
   }
-  // This is also a special constructor used by the VM. This
-  // constructor doesn't increment the array's refcount and assumes
-  // that the array is not empty.
+  // This is also a special constructor used by the VM. This constructor
+  // doesn't increment the array's refcount and assumes that the array is not
+  // empty.
   enum NoIncNonNull { noIncNonNull = 0 };
   ArrayIter(const HphpArray* data, NoIncNonNull) {
     assert(data);
@@ -73,14 +84,16 @@ public:
   void begin(CVarRef map, CStrRef);
   void begin(CArrRef map, CStrRef);
   void reset();
-private:
+
+ private:
   // not defined.
   // Either use ArrayIter(const ArrayData*) or
   //            ArrayIter(const HphpArray*, NoIncNonNull)
   ArrayIter(const HphpArray*);
   template <bool incRef>
   void objInit(ObjectData* obj);
-public:
+
+ public:
   ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
   enum TransferOwner { transferOwner };
@@ -107,6 +120,7 @@ public:
     }
     nextHelper();
   }
+
   Variant first() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
@@ -134,24 +148,16 @@ public:
     assert(ad && m_pos != ArrayData::invalid_index);
     const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
   }
-
   TypedValue* nvSecond() {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
     return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
   }
 
-  union {
-    const ArrayData* m_data;
-    ObjectData* m_obj;
-  };
-  ssize_t m_pos;
-  int m_versionNumber;
-
- public:
   bool hasArrayData() {
     return !((intptr_t)m_data & 1);
   }
+
  private:
   bool hasVector() {
     return (!hasArrayData() &&
@@ -179,6 +185,12 @@ public:
   }
   void setPos(ssize_t newPos) {
     m_pos = newPos;
+  }
+  Type getIterType() const {
+    return m_itype;
+  }
+  void setIterType(Type iterType) {
+    m_itype = iterType;
   }
  private:
   c_Vector* getVector() {
@@ -215,118 +227,258 @@ public:
   void nextHelper();
   Variant firstHelper();
   void secondHelper(Variant &v);
+
+  union {
+    const ArrayData* m_data;
+    ObjectData* m_obj;
+  };
+ public:
+  ssize_t m_pos;
+ private:
+  int m_versionNumber;
+  Type m_itype;
+
+  friend struct VM::Iter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * FullPos represents a position in an array that could reallocate; so we store
- * information to access an element, instead of a pointer directly to
- * the element.
+ * FullPos provides the necessary functionality for supporting "foreach by
+ * reference" (also called "strong foreach"). Note that the runtime does not
+ * use FullPos directly, but instead uses two classes derived from FullPos
+ * (MutableArrayIter and MArrayIter).
  *
- * Each Array with an active MutableArrayIter keeps a linked list of active
- * FullPos's; list is maintained through the FullPos.next fields and the
- * head is ArrayData.m_strongIterators.
+ * In the common case, a FullPos is bound to a variable (m_var) when it is
+ * initialized. m_var points to an inner cell which points to the array to
+ * iterate over. For certain use cases, a FullPos is instead bound directly to
+ * an array which m_data points to.
+ *
+ * Foreach by reference is a pain. Iteration needs to be robust in the face of
+ * two challenges: (1) the case where an element is unset during iteration, and
+ * (2) the case where user code modifies the inner cell to be a different array
+ * or a non-array value. In such cases, we should never crash and ideally when
+ * an element is unset we should be able to keep track of where we are in the
+ * array.
+ *
+ * FullPos works by "registering" itself with the array being iterated over.
+ * The array maintains a linked list of the FullPos's actively iterating over
+ * it. When an element is unset, the FullPos's that were pointing to that
+ * element are moved back one position before the element is unset. Note that
+ * it is possible for an iterator to point to the position before the first
+ * element (this is what the "reset" flag is for). This dance allows FullPos to
+ * keep track of where it is in the array even when elements are unset.
+ *
+ * FullPos has also has a m_container field to keep track of which array it has
+ * "registered" itself with. By comparing the array pointed to by m_var with
+ * the array pointed to by m_container, FullPos can detect if user code has
+ * modified the inner cell to be a different array or a non-array value. When
+ * this happens, the FullPos unregisters itself with the old array (pointed to
+ * by m_container) and registers itself with the new array (pointed to
+ * by m_var->m_data.parr) and resumes iteration at the position pointed to by
+ * the new array's internal cursor (ArrayData::m_pos). If m_var points to a
+ * non-array value, iteration terminates.
  */
-struct FullPos {
-  ssize_t pos;  // pos within container
-  ArrayData* container; // the array itself
-  FullPos* next; // next FullPos of another iterator for the same array
-  FullPos() : pos(0), container(NULL), next(NULL) {}
+class FullPos {
+ protected:
+  FullPos() : m_pos(0), m_container(NULL), m_next(NULL) {}
+
+ public:
+  void reset();
+  void release() { delete this; }
+
+  // Returns true if the iterator points past the last element (or if
+  // it points before the first element)
+  bool end() const;
+
+  // Move the iterator forward one element
+  bool advance();
+
+  // Returns true if the iterator points to a valid element
+  bool prepare();
+
+  ArrayData* getArray() const {
+    ArrayData *data = hasVar() ? getData() : getAd();
+    return data;
+  }
+
+  bool hasVar() const {
+    return m_var && !(intptr_t(m_var) & 3LL);
+  }
+  bool hasAd() const {
+    return bool(intptr_t(m_data) & 1LL);
+  }
+  const Variant* getVar() const {
+    assert(hasVar());
+    return m_var;
+  }
+  ArrayData* getAd() const {
+    assert(hasAd());
+    return (ArrayData*)(intptr_t(m_data) & ~1LL);
+  }
+  void setVar(const Variant* val) {
+    m_var = val;
+  }
+  void setAd(ArrayData* val) {
+    m_data = (ArrayData*)(intptr_t(val) | 1LL);
+  }
+  ArrayData* getContainer() const {
+    return m_container;
+  }
+  void setContainer(ArrayData* arr) {
+    m_container = arr;
+  }
+  FullPos* getNext() const {
+    return (FullPos*)(m_resetBits & ~1);
+  }
+  void setNext(FullPos* fp) {
+    assert((intptr_t(fp) & 1) == 0);
+    m_resetBits = intptr_t(fp) | intptr_t(getResetFlag());
+  }
+  bool getResetFlag() const {
+    return m_resetBits & 1;
+  }
+  void setResetFlag(bool reset) {
+    m_resetBits = intptr_t(getNext()) | intptr_t(reset);
+  }
+
+ protected:
+  ArrayData* getData() const;
+  ArrayData* cowCheck();
+  void escalateCheck();
+  ArrayData* reregister();
+
+  // m_var/m_data are used to keep track of the array that were are supposed
+  // to be iterating over. The low bit is used to indicate whether we are using
+  // m_var or m_data. A helper function getArray() is provided to retrieve the
+  // array that this FullPos is supposed to be iterating over.
+  union {
+    const Variant* m_var;
+    ArrayData* m_data;
+  };
+ public:
+  // m_pos is an opaque value used by the array implementation to track the
+  // current position in the array.
+  ssize_t m_pos;
+ private:
+  // m_container keeps track of which array we're "registered" with. Normally
+  // getArray() and m_container refer to the same array. However, the two may
+  // differ in cases where user code has modified the inner cell to be a
+  // different array or non-array value.
+  ArrayData* m_container;
+  // m_next is used so that multiple FullPos's iterating over the same array
+  // can be chained together into a singly linked list. The low bit of m_next
+  // is used to track the state of the "reset" flag.
+  union {
+    FullPos* m_next;
+    intptr_t m_resetBits;
+  };
 };
 
 /**
- * Range which visits each entry in a list of FullPos.  Removing the
+ * Range which visits each entry in a list of FullPos. Removing the
  * front element will crash but removing an already-visited element
  * or future element will work.
  */
 class FullPosRange {
-public:
-  FullPosRange(FullPos* list) : m_fp(list) {}
-  FullPosRange(const FullPosRange& other) : m_fp(other.m_fp) {}
-  bool empty() const { return m_fp == 0; }
-  FullPos* front() const { assert(!empty()); return m_fp; }
-  void popFront() { assert(!empty()); m_fp = m_fp->next; }
-private:
-  FullPos* m_fp;
+ public:
+  FullPosRange(FullPos* list) : m_fpos(list) {}
+  FullPosRange(const FullPosRange& other) : m_fpos(other.m_fpos) {}
+  bool empty() const { return m_fpos == 0; }
+  FullPos* front() const { assert(!empty()); return m_fpos; }
+  void popFront() { assert(!empty()); m_fpos = m_fpos->getNext(); }
+ private:
+  FullPos* m_fpos;  
 };
 
 /**
- * Iterator for "foreach ($arr as &$v)" or "foreach ($array as $n => &$v)".
- * In this case, any changes to $arr inside iteration needs to be visible to
- * the iteration. Therefore, we need to store Variant* with the iterator to
- * see those changes. This class should only be used for generated code.
+ * MutableArrayIter is used by code genereated by HPHPc, and it is also used
+ * internally within the HipHop runtime
  */
-class MutableArrayIter {
-public:
-  MutableArrayIter() : m_data(NULL) {}
+class MutableArrayIter : public FullPos {
+ public:
+  MutableArrayIter() { m_var = NULL; }
   MutableArrayIter(const Variant* var, Variant* key, Variant& val);
   MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
   ~MutableArrayIter();
-  void begin(Variant& map, Variant* key, Variant& val, CStrRef context);
-  void reset();
-  void release() { delete this; }
+
   bool advance();
-private:
-  const Variant* m_var;
-  ArrayData* m_data;
+
+  void begin(Variant& map, Variant* key, Variant& val, CStrRef context);
+
+ private:
   Variant* m_key;
   Variant* m_valp;
-  FullPos m_fp;
-  int size();
-  ArrayData* getData();
-  ArrayData* cowCheck();
-  void escalateCheck();
 };
 
-struct MIterCtx {
-  const RefData* prepRef(const RefData* ref) {
-    ref->incRefCount();
-    return ref;
-  }
-  MutableArrayIter* initMArray(ArrayData* data, Variant* key, Variant& val) {
-    MutableArrayIter* mArray =
-      (MutableArrayIter*)smart_malloc(sizeof(MutableArrayIter));
-    (void) new (mArray) MutableArrayIter(data, key, val);
-    return mArray;
-  }
-  MutableArrayIter* initMArray(const Variant* var, Variant* key, Variant& val) {
-    MutableArrayIter* mArray =
-      (MutableArrayIter*)smart_malloc(sizeof(MutableArrayIter));
-    (void) new (mArray) MutableArrayIter(var, key, val);
-    return mArray;
-  }
-  MIterCtx(ArrayData *ad)
-    : m_key(*(const TypedValue*)&null_variant),
-      m_val(*(const TypedValue*)&null_variant), m_ref(NULL),
-      m_mArray(initMArray(ad, &tvAsVariant(&m_key), tvAsVariant(&m_val))) {
-    assert(!ad->isStatic());
-  }
-  MIterCtx(const RefData* ref)
-    : m_key(*(TypedValue*)&null_variant), m_val(*(TypedValue*)&null_variant),
-      m_ref(prepRef(ref)),
-      m_mArray(initMArray((Variant*)(ref->tv()), &tvAsVariant(&m_key),
-                          tvAsVariant(&m_val))) {
-    // Reference must be an inner cell
-    assert(ref->_count > 0);
-  }
-  ~MIterCtx();
+/**
+ * MArrayIter is used by the VM
+ */
+class MArrayIter : public FullPos {
+ public:
+  MArrayIter() { m_data = NULL; }
+  MArrayIter(const RefData* ref);
+  MArrayIter(ArrayData* data);
+  ~MArrayIter();
 
-  TypedValue& key() { return m_key; }
-  TypedValue& val() { return m_val; }
-  MutableArrayIter& mArray() const { return *m_mArray; }
+  /**
+   * It is only safe to call key() and val() if all of the following
+   * conditions are met:
+   *  1) The calls to key() and/or val() are immediately preceded by
+   *     a call to advance(), prepare(), or end().
+   *  2) The iterator points to a valid position in the array.
+   */
+  Variant key() {
+    ArrayData* data = getArray();
+    assert(data && data == getContainer());
+    assert(!getResetFlag() && data->validFullPos(*this));
+    return data->getKey(m_pos);
+  }
+  CVarRef val() {
+    ArrayData* data = getArray();
+    assert(data && data == getContainer());
+    assert(data->getCount() <= 1 || data->noCopyOnWrite());
+    assert(!getResetFlag() && data->validFullPos(*this));
+    return data->getValueRef(m_pos);
+  }
 
-private:
-  TypedValue m_key;
-  TypedValue m_val;
-  const RefData* m_ref;
-  // MutableArrayIter is big; allocate it separately (rather than directly
-  // embedding it) in order to keep iterators on the VM stack to a more
-  // reasonable size.  If all iterators were mutable, and they were guaranteed
-  // to be used by every function invocation, then this optimization would not
-  // make sense.
-  MutableArrayIter* m_mArray;
+  friend struct VM::Iter;
 };
+
+namespace VM {
+  struct Iter {
+    ArrayIter& arr() {
+      return *(ArrayIter*)m_u;
+    }
+    MArrayIter& marr() {
+      return *(MArrayIter*)m_u;
+    }
+    bool init(TypedValue* c1);
+    bool minit(TypedValue* v1);
+    bool next();
+    bool mnext();
+    void free();
+    void mfree();
+   private:
+    // C++ won't let you have union members with constructors. So we get to
+    // implement unions by hand.
+    char m_u[MAX(sizeof(ArrayIter), sizeof(MArrayIter))];
+  } __attribute__ ((aligned(16)));
+
+  bool interp_init_iterator(Iter* it, TypedValue* c1);
+  bool interp_init_iterator_m(Iter* it, TypedValue* v1);
+  bool interp_iter_next(Iter* it);
+  bool interp_iter_next_m(Iter* it);
+
+  int64 new_iter_array(HPHP::VM::Iter* dest, ArrayData* arr,
+                       TypedValue* val);
+  int64 new_iter_array_key(HPHP::VM::Iter* dest, ArrayData* arr,
+                           TypedValue* val, TypedValue* key);
+  int64 new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx,
+                        TypedValue* val, TypedValue* key);
+  int64 iter_next(HPHP::VM::Iter* dest, TypedValue* val);
+  int64 iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

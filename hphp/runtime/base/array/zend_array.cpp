@@ -59,25 +59,6 @@ do {                                                                    \
   if (m_pos == 0) {                                                     \
     m_pos = (ssize_t)(element);                                         \
   }                                                                     \
-  /* If there could be any strong iterators that are past the end, */   \
-  /* we need to a pass and update these iterators to point to the */    \
-  /* newly added element. */                                            \
-  if (siPastEnd()) {                                                    \
-    setSiPastEnd(false);                                                \
-    bool shouldWarn = false;                                            \
-    for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) { \
-      FullPos* fp = r.front();                                          \
-      if (fp->pos == 0) {                                               \
-        fp->pos = (ssize_t)(element);                                   \
-        shouldWarn = true;                                              \
-      }                                                                 \
-    }                                                                   \
-    if (shouldWarn) {                                                   \
-      raise_warning("An element was added to an array inside foreach "  \
-                    "by reference when iterating over the last "        \
-                    "element. This may lead to unexpeced results.");    \
-    }                                                                   \
-  }                                                                     \
 } while (false)
 
 #define SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p)                   \
@@ -955,7 +936,6 @@ void ZendArray::erase(Bucket ** prev, bool updateNext /* = false */) {
   if (prev == NULL)
     return;
   Bucket * p = *prev;
-  bool nextElementUnsetInsideForeachByReference = false;
   if (p) {
     *prev = p->pNext;
     if (p->pListLast) {
@@ -976,12 +956,10 @@ void ZendArray::erase(Bucket ** prev, bool updateNext /* = false */) {
     }
     for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
       FullPos* fp = r.front();
-      if (fp->pos == ssize_t(p)) {
-        nextElementUnsetInsideForeachByReference = true;
-        fp->pos = (ssize_t)p->pListNext;
-        if (!fp->pos) {
-          // Remember there is a strong iterator past the end
-          setSiPastEnd(true);
+      if (fp->m_pos == ssize_t(p)) {
+        fp->m_pos = (ssize_t)p->pListLast;
+        if (!fp->m_pos) {
+          fp->setResetFlag(true);
         }
       }
     }
@@ -992,12 +970,6 @@ void ZendArray::erase(Bucket ** prev, bool updateNext /* = false */) {
       --m_nNextFreeElement;
     }
     DELETE(Bucket)(p);
-  }
-  if (nextElementUnsetInsideForeachByReference) {
-    if (RuntimeOption::EnableHipHopErrors) {
-      raise_warning("The next element was unset inside foreach by reference. "
-                    "This may lead to unexpeced results.");
-    }
   }
 }
 
@@ -1034,14 +1006,14 @@ ArrayData *ZendArray::copyWithStrongIterators() const {
     moveStrongIterators(copied, const_cast<ZendArray*>(this));
     for (FullPosRange r(copied->strongIterators()); !r.empty(); r.popFront()) {
       FullPos* fp = r.front();
-      // Update fp.pos to point to the corresponding element in 'copied'
-      Bucket* p = reinterpret_cast<Bucket*>(fp->pos);
+      // Update fp.m_pos to point to the corresponding element in 'copied'
+      Bucket* p = reinterpret_cast<Bucket*>(fp->m_pos);
       if (p) {
         if (p->hasStrKey()) {
-          fp->pos = (ssize_t) copied->find(p->skey->data(), p->skey->size(),
+          fp->m_pos = (ssize_t) copied->find(p->skey->data(), p->skey->size(),
                                           (strhash_t)p->hash());
         } else {
-          fp->pos = (ssize_t) copied->find((int64)p->ikey);
+          fp->m_pos = (ssize_t) copied->find((int64)p->ikey);
         }
       }
     }
@@ -1304,19 +1276,22 @@ void ZendArray::onSetEvalScalar() {
   }
 }
 
+bool ZendArray::validFullPos(const FullPos &fp) const {
+  assert(fp.getContainer() == (ArrayData*)this);
+  if (fp.getResetFlag()) return false;
+  return fp.m_pos;
+}
+
 void ZendArray::getFullPos(FullPos &fp) {
-  assert(fp.container == (ArrayData*)this);
-  fp.pos = m_pos;
-  if (!fp.pos) {
-    // Remember there is a strong iterator past the end
-    setSiPastEnd(true);
-  }
+  assert(fp.getContainer() == (ArrayData*)this);
+  fp.m_pos = m_pos;
 }
 
 bool ZendArray::setFullPos(const FullPos &fp) {
-  assert(fp.container == (ArrayData*)this);
-  if (fp.pos) {
-    m_pos = fp.pos;
+  assert(fp.getContainer() == (ArrayData*)this);
+  assert(!fp.getResetFlag());
+  if (fp.m_pos) {
+    m_pos = fp.m_pos;
     return true;
   }
   return false;

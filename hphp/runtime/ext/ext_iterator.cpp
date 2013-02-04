@@ -437,7 +437,7 @@ String f_hphp_recursivedirectoryiterator_getsubpathname(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-c_MutableArrayIterator::c_MutableArrayIterator(const ObjectStaticCallbacks *cb /* = &cw_MIterCtx */)
+c_MutableArrayIterator::c_MutableArrayIterator(const ObjectStaticCallbacks *cb /* = &cw_MutableArrayIterator */)
     : ExtObjectData(cb), m_valid(false) {
 }
 
@@ -447,8 +447,8 @@ c_MutableArrayIterator::~c_MutableArrayIterator() {
 
 void c_MutableArrayIterator::sweep() {
   if (m_valid) {
-    MIterCtx& mi = marr();
-    mi.~MIterCtx();
+    MArrayIter& mi = marr();
+    mi.~MArrayIter();
     m_valid = false;
   }
 }
@@ -456,8 +456,8 @@ void c_MutableArrayIterator::sweep() {
 void c_MutableArrayIterator::t___construct(VRefParam array) {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::__construct);
   if (m_valid) {
-    MIterCtx& mi = marr();
-    mi.~MIterCtx();
+    MArrayIter& mi = marr();
+    mi.~MArrayIter();
     m_valid = false;
   }
   Variant var(strongBind(array));
@@ -465,10 +465,10 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
   assert(tv->m_type == KindOfRef);
   TypedValue* rtv = tv->m_data.pref->tv();
   if (rtv->m_type == KindOfArray) {
-    MIterCtx& mi = marr();
-    (void) new (&mi) MIterCtx(tv->m_data.pref);
-    m_valid = mi.mArray().advance();
-    if (!m_valid) mi.~MIterCtx();
+    MArrayIter& mi = marr();
+    (void) new (&mi) MArrayIter(tv->m_data.pref);
+    m_valid = mi.advance();
+    if (!m_valid) mi.~MArrayIter();
   } else if (rtv->m_type == KindOfObject) {
     CStrRef ctxStr = hhvm
                      ? g_vmContext->getContextClassName()
@@ -483,10 +483,10 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
     }
     Array iterArray = obj->o_toIterArray(ctxStr, true);
     ArrayData* ad = iterArray.detach();
-    MIterCtx& mi = marr();
-    (void) new (&mi) MIterCtx(ad);
-    m_valid = mi.mArray().advance();
-    if (!m_valid) mi.~MIterCtx();
+    MArrayIter& mi = marr();
+    (void) new (&mi) MArrayIter(ad);
+    m_valid = mi.advance();
+    if (!m_valid) mi.~MArrayIter();
   } else {
     raise_warning("Invalid argument supplied for foreach()");
   }
@@ -500,30 +500,33 @@ Variant c_MutableArrayIterator::t___destruct() {
 Variant c_MutableArrayIterator::t_currentref() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::currentref);
   if (!m_valid) return null;
-  MIterCtx& mi = marr();
-  return strongBind(*(Variant*)(&mi.val()));
+  MArrayIter& mi = marr();
+  if (mi.end()) return null;
+  return strongBind(mi.val());
 }
 
 Variant c_MutableArrayIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::current);
   if (!m_valid) return null;
-  MIterCtx& mi = marr();
-  return *(const Variant*)(&mi.val());
+  MArrayIter& mi = marr();
+  if (mi.end()) return null;
+  return mi.val();
 }
 
 Variant c_MutableArrayIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::key);
   if (!m_valid) return false;
-  MIterCtx& mi = marr();
-  return *(Variant*)(&mi.key());
+  MArrayIter& mi = marr();
+  if (mi.end()) return false;
+  return mi.key();
 }
 
 void c_MutableArrayIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::next);
   if (!m_valid) return;
-  MIterCtx &mi = marr();
-  if (!mi.mArray().advance()) {
-    mi.~MIterCtx();
+  MArrayIter &mi = marr();
+  if (!mi.advance()) {
+    mi.~MArrayIter();
     m_valid = false;
   }
 }

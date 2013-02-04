@@ -314,6 +314,9 @@ Variant f_func_get_arg(int arg_num) {
     if (ar == NULL || arg_num < 0 || arg_num >= ar->numArgs()) {
       return false;
     }
+    if (ar->m_func->isClosureBody()) {
+      ar = g_vmContext->getPrevVMState(ar);
+    }
 
     const int numParams = ar->m_func->numParams();
 
@@ -363,6 +366,10 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   if (ar == NULL) {
     return Array();
   }
+  if (ar->m_func->isClosureBody()) {
+    ar = g_vmContext->getPrevVMState(ar);
+  }
+
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
   HphpArray* retval = NEW(HphpArray)(numArgs);
@@ -418,6 +425,9 @@ int64 f_func_num_args() {
     ActRec* ar = cf();
     if (ar == NULL) {
       return -1;
+    }
+    if (ar->m_func->isClosureBody()) {
+      return g_vmContext->getPrevVMState(ar)->numArgs();
     }
     return ar->numArgs();
   } else {

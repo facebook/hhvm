@@ -177,6 +177,13 @@ public:
   }
 
   /**
+   * Tell this function about another outer scope that contains it.
+   */
+  void addClonedTraitOuterScope(FunctionScopePtr scope) {
+    m_clonedTraitOuterScope.push_back(scope);
+  }
+
+  /**
    * Get/set original name of the function, without case being lowered.
    */
   const std::string &getOriginalName() const;
@@ -237,16 +244,10 @@ public:
    * Whether this function contains a usage of $this
    */
   bool containsThis() const { return m_containsThis;}
-  void setContainsThis(bool f=true) { m_containsThis = f;}
+  void setContainsThis(bool f = true);
   bool containsBareThis() const { return m_containsBareThis; }
   bool containsRefThis() const { return m_containsBareThis & 2; }
-  void setContainsBareThis(bool f, bool ref = false) {
-    if (f) {
-      m_containsBareThis |= ref ? 2 : 1;
-    } else {
-      m_containsBareThis = 0;
-    }
-  }
+  void setContainsBareThis(bool f, bool ref = false);
   /**
    * How many parameters a caller should provide.
    */
@@ -589,6 +590,7 @@ private:
   ExpressionListPtr m_closureValues;
   ReadWriteMutex m_inlineMutex;
   unsigned m_nextID; // used when cloning generators for traits
+  std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

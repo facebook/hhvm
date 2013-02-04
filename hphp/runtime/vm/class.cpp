@@ -1692,7 +1692,7 @@ void Class::setMethods() {
       // locals and a separate translation, not a different context
       // class.
       f = f->clone();
-      if (f->attrs() & AttrClone) {
+      if (f->attrs() & AttrClone || f->isClosureBody()) {
         f->setCls(this);
       }
       f->setNewFuncId();

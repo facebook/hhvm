@@ -1618,7 +1618,7 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
   fatal error. Next, this instruction checks if object x has an accessible
   method named y. If it does, this instruction pushes a new entry on the FPI
   stack, initializing it with the number of parameters being passed (given by
-  y) and a reference to the FPI structure for the method named y from object x.
+  %1) and a reference to the FPI structure for the method named y from object x.
 
   If object x does not have an accessible method named y, this instruction
   checks if object x has a __call method. If a __call method is found, this

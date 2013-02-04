@@ -89,13 +89,29 @@ AnalysisResultRawPtr BlockScope::getContainingProgram() {
   return AnalysisResultRawPtr((AnalysisResult*)bs);
 }
 
-ClassScopeRawPtr BlockScope::getContainingClass() {
+FunctionScopeRawPtr BlockScope::getContainingNonClosureFunction() {
   BlockScope *bs = this;
-  if (bs->is(BlockScope::FunctionScope)) {
+  // walk out through all the closures
+  while (bs && bs->is(BlockScope::FunctionScope)) {
+    HPHP::FunctionScope *fs = static_cast<HPHP::FunctionScope*>(bs);
+    if (!fs->isClosure() && !fs->isGeneratorFromClosure()) {
+      return FunctionScopeRawPtr(fs);
+    }
     bs = bs->m_outerScope.get();
   }
-  if (bs && !bs->is(BlockScope::ClassScope)) {
-    bs = 0;
+  return FunctionScopeRawPtr();
+}
+
+ClassScopeRawPtr BlockScope::getContainingClass() {
+  BlockScope *bs = getContainingNonClosureFunction().get();
+  if (!bs) {
+    bs = this;
+  }
+  if (bs && bs->is(BlockScope::FunctionScope)) {
+    bs = bs->m_outerScope.get();
+  }
+  if (!bs || !bs->is(BlockScope::ClassScope)) {
+    return ClassScopeRawPtr();
   }
   return ClassScopeRawPtr((HPHP::ClassScope*)bs);
 }

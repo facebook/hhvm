@@ -378,6 +378,8 @@ HphpArray* get_static_locals(const ActRec* ar) {
   if (ar->m_func->isClosureBody()) {
     static const StringData* s___static_locals =
       StringData::GetStaticString("__static_locals");
+    // walk back to the __invoke method on the Closure
+    ar = g_vmContext->getPrevVMState(ar);
     assert(ar->hasThis());
     ObjectData* closureObj = ar->getThis();
     assert(closureObj);

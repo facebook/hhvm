@@ -1,0 +1,20 @@
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+array(2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+}
+string(12) "foofoobarbar"
+string(6) "foobar"

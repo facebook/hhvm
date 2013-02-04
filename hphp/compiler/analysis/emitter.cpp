@@ -650,7 +650,9 @@ static void checkJmpTargetEvalStack(const SymbolicStack& source,
   if (source.size() != dest.size()) {
     Logger::Warning("Emitter detected a point in the bytecode where the "
                     "depth of the stack is not the same for all possible "
-                    "control flow paths");
+                    "control flow paths. source size: %d. dest size: %d",
+                    source.size(),
+                    dest.size());
     assert(false);
     return;
   }
@@ -2503,11 +2505,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         not_reached();
 
       case Statement::KindOfFunctionStatement: {
-        assert(!node->getClassScope()); // Handled directly by emitClass().
         MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
         // Only called for fn defs not on the top level
         StringData* nName = StringData::GetStaticString(m->getOriginalName());
-        if (m->getFunctionScope()->isGenerator()) {
+        FunctionScopePtr funcScope = m->getFunctionScope();
+        if (funcScope->isGenerator()) {
           if (m->getFileScope() != m_file) {
             // the generator's definition is in another file typically
             // because it was defined in a trait that got inlined into
@@ -2523,8 +2525,20 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             return false;
           }
 
-          postponeMeth(m, nullptr, true);
+          FuncEmitter* fe = nullptr;
+          if (node->getClassScope()) {
+            PreClassEmitter* currentPCE  = m_curFunc->pce();
+            fe = m_ue.newMethodEmitter(nName, currentPCE);
+            fe->setIsGenerator(funcScope->isGenerator());
+            fe->setIsGeneratorFromClosure(funcScope->isGeneratorFromClosure());
+            fe->setHasGeneratorAsBody(m->getGeneratorFunc());
+            bool added UNUSED = currentPCE->addMethod(fe);
+            assert(added);
+          }
+
+          postponeMeth(m, fe, true);
         } else {
+          assert(!node->getClassScope()); // Handled directly by emitClass().
           FuncEmitter* fe = m_ue.newFuncEmitter(nName, false);
           e.DefFunc(fe->id());
           postponeMeth(m, fe, false);
@@ -3536,9 +3550,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               scalarExp(static_pointer_cast<ScalarExpression>(node));
             // Inside traits, __class__ cannot be resolved yet,
             // so emit call to get_class.
-            if (scalarExp->getType() == T_CLASS_C && m_curFunc &&
-                m_curFunc->pce() &&
-                (m_curFunc->pce()->attrs() & VM::AttrTrait)) {
+            if (scalarExp->getType() == T_CLASS_C &&
+                ex->getFunctionScope()->getContainingClass() &&
+                ex->getFunctionScope()->getContainingClass()->isTrait()) {
+
               static const StringData* fname =
                 StringData::GetStaticString("get_class");
               Offset fpiStart = m_ue.bcPos();
@@ -3756,8 +3771,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         not_implemented();
       }
       case Expression::KindOfClosureExpression: {
-        // Closures are implemented by anonymous classes that extend Closure.
-        // There is one anonymous class per closure body.
+        // Closures are implemented by anonymous classes that extend Closure,
+        // and an anonymous function inside the closing class.
+        // There is one anonymous class and one anonymous function per closure
+        // body.
         ClosureExpressionPtr ce(static_pointer_cast<ClosureExpression>(node));
 
         // Build a convenient list of use-variables. Each one corresponds to:
@@ -3779,35 +3796,105 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
+        MethodStatementPtr body(
+          static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
+
+        // The anonymous class.
         StringData* className = newClosureName();
         const static StringData* parentName =
-          StringData::GetStaticString("closure");
+          StringData::GetStaticString("Closure");
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
           className, PreClass::AlwaysHoistable);
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
                   AttrUnique | AttrPersistent, parentName, nullptr);
 
+        // The anonymous function.
+        // This is the body of the closure, preceded by
+        // code that pulls the object's instance variables into locals.
+        StringData* functionName = StringData::GetStaticString(
+          ((char) ParserBase::CharClosure) + string("methodFor") +
+          string(className->data())
+        );
+        FuncEmitter* fe;
+        PreClassEmitter* currentPCE  = m_curFunc->pce();
+        ClosureKind closureKind;
+        if (currentPCE) {
+          closureKind = ClosureKind::Class;
+          fe = m_ue.newMethodEmitter(functionName, currentPCE);
+          bool added UNUSED = currentPCE->addMethod(fe);
+          assert(added);
+        } else {
+          closureKind = ClosureKind::Function;
+          fe = m_ue.newFuncEmitter(functionName, true);
+          e.DefFunc(fe->id());
+        }
+
+        fe->setHasGeneratorAsBody(body->getGeneratorFunc());
+        fe->setIsClosureBody(true);
+        postponeMeth(
+            body, fe, false,
+            new ClosureUseVarVec(useVars), closureKind);
+
         // We're still at the closure definition site. Emit code to instantiate
         // the new anonymous class, with the use variables as arguments.
         ExpressionListPtr valuesList(ce->getClosureValues());
         Offset fpiStart = m_ue.bcPos();
-        e.FPushCtorD(useCount, className);
+        int stackCount = useCount + 3;
+        e.FPushCtorD(stackCount, className);
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           for (int i = 0; i < useCount; ++i) {
             emitFuncCallArg(e, (*valuesList)[i], i);
           }
+          // The last three params are the class name,
+          // the function name of the body, and the $this variable or null
+          if (currentPCE) {
+            if (currentPCE->attrs() & AttrTrait) {
+              Offset fpiStart = m_ue.bcPos();
+              e.FPushFuncD(0, StringData::GetStaticString("get_class"));
+              {
+                FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+              }
+              e.FCall(0);
+              e.UnboxR();
+            } else {
+              e.String(currentPCE->name());
+            }
+          } else {
+            e.Null();
+          }
+          e.FPassCE(useCount + 0);
+          e.String(fe->name());
+          e.FPassCE(useCount + 1);
+          switch (closureKind) {
+            case ClosureKind::Class: {
+              static const StringData* thisStr =
+                StringData::GetStaticString("this");
+              if (m_curFunc->hasVar(thisStr)) {
+                Id thisId = m_curFunc->lookupVarId(thisStr);
+                emitVirtualLocal(thisId);
+              } else {
+                e.BareThis(0);
+              }
+            } break;
+
+            case ClosureKind::Function: {
+              e.Null();
+            } break;
+
+          }
+          emitFPass(e, useCount + 2, PassByRefKind::ErrorOnCell);
         }
-        e.FCall(useCount);
+        e.FCall(stackCount);
         emitPop(e);
         // From here on out, we're just building metadata for the closure.
 
         // Instance variables.
-        TypedValue uninit;
-        tvWriteUninit(&uninit);
+        TypedValue tvNull;
+        tvWriteNull(&tvNull);
         for (int i = 0; i < useCount; ++i) {
-          pce->addProperty(useVars[i].first, AttrPrivate, nullptr, &uninit);
+          pce->addProperty(useVars[i].first, AttrPrivate, nullptr, &tvNull);
         }
 
         // The constructor. This is entirely generated; all it does is stash its
@@ -3819,17 +3906,30 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         m_postponedClosureCtors.push_back(
           PostponedClosureCtor(useVars, ce, ctor));
 
-        // The __invoke method. This is the body of the closure, preceded by
-        // code that pulls the object's instance variables into locals.
+        // The __invoke method. This is the body of the closure. It takes the
+        // stashed variables and calls the method on the class.
         static const StringData* invokeName =
           StringData::GetStaticString("__invoke");
         FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
-        invoke->setIsClosureBody(true);
-        pce->addMethod(invoke);
-        MethodStatementPtr body(
-          static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
         invoke->setHasGeneratorAsBody(body->getGeneratorFunc());
-        postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
+        pce->addMethod(invoke);
+
+        // Basically clone body but set m_stmt to nothing
+        MethodStatementPtr invokeBody(new MethodStatement(
+            body->getFunctionScope(),
+            body->getLocation(),
+            body->getModifiers(),
+            body->isRef(),
+            invokeName->toCPPString(),
+            body->getParams(),
+            StatementListPtr(),
+            0,
+            body->getDocComment(),
+            ExpressionListPtr(),
+            true));
+        postponeMeth(
+            invokeBody, invoke, false,
+            new ClosureUseVarVec(useVars), closureKind);
 
         return true;
       }
@@ -4115,6 +4215,37 @@ void EmitterVisitor::emitCGet(Emitter& e) {
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.CGetM(vectorImm);
+  }
+}
+
+void EmitterVisitor::emitCGetForName(Emitter& e, char* name) {
+  e.CheckThis();
+  m_evalStack.push(StackSym::H);
+  m_evalStack.push(StackSym::P | StackSym::T);
+  m_evalStack.setString(StringData::GetStaticString(name));
+  emitCGet(e);
+}
+
+void EmitterVisitor::emitClosureUseVars(
+    Emitter& e, int fpiStart, int paramCount, ClosureUseVarVec* useVars) {
+  FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+
+  for (unsigned i = 0; i < paramCount; ++i) {
+    emitVirtualLocal(i);
+    emitFPass(e, i, PassByRefKind::ErrorOnCell);
+  }
+
+  for (unsigned i = 0; i < useVars->size(); ++i) {
+    StringData* name = (*useVars)[i].first;
+    if (i) {
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                  false, 0, 0);
+    }
+    e.CheckThis();
+    m_evalStack.push(StackSym::H);
+    m_evalStack.push(StackSym::P | StackSym::T);
+    m_evalStack.setString(name);
+    emitFPass(e, i + paramCount, PassByRefKind::ErrorOnCell);
   }
 }
 
@@ -5074,12 +5205,13 @@ void EmitterVisitor::emitNameString(Emitter& e, ExpressionPtr n,
 
 void EmitterVisitor::postponeMeth(MethodStatementPtr m, FuncEmitter* fe,
                                   bool top,
-                                  ClosureUseVarVec* useVars /* = NULL */) {
-  m_postponedMeths.push_back(PostponedMeth(m, fe, top, useVars));
+                                  ClosureUseVarVec* useVars /* = NULL */,
+                                  ClosureKind closureKind /* = NULL */) {
+  m_postponedMeths.push_back(PostponedMeth(m, fe, top, useVars, closureKind));
 }
 
-void EmitterVisitor::postponeCtor(InterfaceStatementPtr is, FuncEmitter* fe) {
-  m_postponedCtors.push_back(PostponedCtor(is, fe));
+void EmitterVisitor::postponeCtor(ConstructPtr c, FuncEmitter* fe) {
+  m_postponedCtors.push_back(PostponedCtor(c, fe));
 }
 
 void EmitterVisitor::postponePinit(InterfaceStatementPtr is, FuncEmitter* fe,
@@ -5233,6 +5365,28 @@ void EmitterVisitor::emitPostponedMeths() {
       fe->appendParam(parName, pi);
     }
 
+    if (fe->isClosureBody()) {
+      // Because PHP is insane you can have a use variable with the same name
+      // as a param name.
+      // In that case, params win (which is different than zend but much easier)
+      for (auto it = p.m_closureUseVars->begin(); it != p.m_closureUseVars->end(); ) {
+        StringData* name = it->first;
+        if (fe->hasVar(name) && fe->lookupVarId(name) < fe->numParams()) {
+          it = p.m_closureUseVars->erase(it);
+        } else {
+          it++;
+        }
+      }
+
+      // The params to the closure function are:
+      // ($arg1, $arg2, ..., $use1, $use2, ...)
+      for (auto it = p.m_closureUseVars->begin(); it != p.m_closureUseVars->end(); ++it) {
+        FuncEmitter::ParamInfo pi;
+        pi.setRef(it->second);
+        fe->appendParam(it->first, pi);
+      }
+    }
+
     m_curFunc = fe;
 
     // Assign ids to all of the local variables eagerly. This gives us the
@@ -5285,11 +5439,14 @@ void EmitterVisitor::emitPostponedMeths() {
       attrs = attrs | AttrUnique | AttrPersistent;
     }
 
-    // For closures, the MethodStatement didn't have real attributes; enforce
-    // that the __invoke method is public here
-    if (fe->isClosureBody()) {
+    // For closures, the MethodStatement didn't have real attributes
+    // make both the body and  the __invoke method public, then hide the __invoke in backtraces
+    if (p.m_closureUseVars) {
       assert(!(attrs & (AttrProtected | AttrPrivate)));
       attrs = attrs | AttrPublic;
+      if (!fe->isClosureBody()) {
+        attrs = attrs | AttrNoInjection;
+      }
     }
 
     Label topOfBody(e);
@@ -5313,34 +5470,70 @@ void EmitterVisitor::emitPostponedMeths() {
         assert(tc.typeName()->data() != (const char*)0xdeadba5eba11f00d);
         e.VerifyParamType(i);
       }
-      if (fe->isClosureBody()) {
-        assert(p.m_closureUseVars != nullptr);
+
+      // The __invoke on the Closure class
+      // We could do this in PHP but it would invole array serialization
+      if (!fe->isClosureBody() && p.m_closureUseVars != nullptr) {
         // Emit code to unpack the instance variables (which store the
-        // use-variables) into locals. Some of the use-variables may have the
+        // use-variables) and then call the function.
+        // Some of the use-variables may have the
         // same name, in which case the last one wins.
-        unsigned n = p.m_closureUseVars->size();
-        for (unsigned i = 0; i < n; ++i) {
-          StringData* name = (*p.m_closureUseVars)[i].first;
-          bool byRef = (*p.m_closureUseVars)[i].second;
-          emitVirtualLocal(fe->lookupVarId(name));
-          if (i) {
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                        false, 0, 0);
-          }
-          e.CheckThis();
-          m_evalStack.push(StackSym::H);
-          m_evalStack.push(StackSym::T);
-          m_evalStack.setString(name);
-          markProp(e);
-          if (byRef) {
-            emitVGet(e);
-            emitBind(e);
-          } else {
-            emitCGet(e);
-            emitSet(e);
-          }
-          emitPop(e);
+
+        unsigned useCount = p.m_closureUseVars->size();
+        unsigned paramCount = fe->params().size();
+
+        Offset fpiStart = 0;
+
+        switch (p.m_closureKind) {
+          case ClosureKind::Function: {
+            // Basically (without the locals):
+            //   $func = $this->functionName;
+            //   $func($arg1, $arg2, ..., $use1, $use2, ...);
+
+            emitCGetForName(e, "functionName");
+            fpiStart = m_ue.bcPos();
+            e.FPushFunc(paramCount + useCount);
+            emitClosureUseVars(e, fpiStart, paramCount, p.m_closureUseVars);
+            e.FCall(paramCount + useCount);
+          } break;
+
+          case ClosureKind::Class: {
+            // Basically (without the locals):
+            //   $obj = $this->this;
+            //   $func = $this->functionName;
+            //   $obj->$func($arg1, $arg2, ..., $use1, $use2, ...);
+
+            Label noThis;
+            Label end;
+            emitCGetForName(e, "this");
+            e.JmpZ(noThis);
+
+            // this is fine
+            emitCGetForName(e, "this");
+            emitCGetForName(e, "functionName");
+            fpiStart = m_ue.bcPos();
+            e.FPushObjMethod(paramCount + useCount);
+            emitClosureUseVars(e, fpiStart, paramCount, p.m_closureUseVars);
+            e.FCall(paramCount + useCount);
+            e.Jmp(end);
+
+            // this is null
+            noThis.set(e);
+            emitCGetForName(e, "functionName");
+            emitCGetForName(e, "className");
+            emitAGet(e);
+            fpiStart = m_ue.bcPos();
+            e.FPushClsMethod(paramCount + useCount);
+            emitClosureUseVars(e, fpiStart, paramCount, p.m_closureUseVars);
+            e.FCall(paramCount + useCount);
+
+            end.set(e);
+          } break;
+
         }
+
+        e.UnboxR();
+        e.RetC();
       }
 
       if (funcScope->isAbstract()) {
@@ -5387,8 +5580,7 @@ void EmitterVisitor::emitPostponedMeths() {
         e.ContExit();
       } else {
         e.Null();
-        if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) ||
-            (fe->isClosureBody() && p.m_closureUseVars->size())) {
+        if (p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) {
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                          false, 0, 0);
         }
@@ -5429,9 +5621,9 @@ void EmitterVisitor::emitPostponedCtors() {
 
     Attr attrs = AttrPublic;
     StringData* methDoc = empty_string.get();
-    const Location* sLoc = p.m_is->getLocation().get();
+    const Location* sLoc = p.m_c->getLocation().get();
     p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
-    Emitter e(p.m_is, m_ue, *this);
+    Emitter e(p.m_c, m_ue, *this);
     FuncFinisher ff(this, e, p.m_fe);
     e.Null();
     e.RetC();
@@ -5607,45 +5799,60 @@ void EmitterVisitor::emitPostponedClosureCtors() {
     const Location* sLoc = ctor.m_expr->getLocation().get();
     fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrPublic, false, nullptr);
 
-    unsigned n = useVars.size();
+    unsigned useCount = useVars.size();
+    unsigned stackCount = useCount + 3;
     Emitter e(ctor.m_expr, m_ue, *this);
     FuncFinisher ff(this, e, fe);
-    if (n > 0) {
-      for (unsigned i = 0; i < n; ++i) {
-        // To ensure that we get a new local for every use var, we call
-        // appendParam with an artificial uniquified name. Because there's no
-        // user code here, the fact that the variable has a made-up name in the
-        // metadata doesn't matter.
-        std::ostringstream num;
-        num << i;
-        FuncEmitter::ParamInfo pi;
-        pi.setRef(useVars[i].second);
-        fe->appendParam(StringData::GetStaticString(num.str()), pi);
-        if (i) {
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                      false, 0, 0);
-        }
-        e.CheckThis();
-        m_evalStack.push(StackSym::H);
-        m_evalStack.push(StackSym::T);
-        m_evalStack.setString(useVars[i].first);
-        markProp(e);
-        emitVirtualLocal(i);
-        if (useVars[i].second) {
-          emitVGet(e);
-          emitBind(e);
-        } else {
-          emitCGet(e);
-          emitSet(e);
-        }
-        emitPop(e);
+
+    for (unsigned i = 0; i < stackCount; ++i) {
+      // To ensure that we get a new local for every use var, we call
+      // appendParam with an artificial uniquified name. Because there's no
+      // user code here, the fact that the variable has a made-up name in the
+      // metadata doesn't matter.
+
+      StringData* propertyName;
+      bool byRef;
+      if (i < useCount) {
+        propertyName = useVars[i].first;
+        byRef = useVars[i].second;
+      } else if (i == useCount + 0) {
+        propertyName = StringData::GetStaticString("className");
+        byRef = false;
+      } else if (i == useCount + 1) {
+        propertyName = StringData::GetStaticString("functionName");
+        byRef = false;
+      } else if (i == useCount + 2) {
+        propertyName = StringData::GetStaticString("this");
+        byRef = false;
       }
+
+      std::ostringstream num;
+      num << i;
+      FuncEmitter::ParamInfo pi;
+      pi.setRef(byRef);
+      fe->appendParam(StringData::GetStaticString(num.str()), pi);
+      if (i) {
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                    false, 0, 0);
+      }
+      e.CheckThis();
+      m_evalStack.push(StackSym::H);
+      m_evalStack.push(StackSym::T);
+      m_evalStack.setString(propertyName);
+      markProp(e);
+      emitVirtualLocal(i);
+      if (byRef) {
+        emitVGet(e);
+        emitBind(e);
+      } else {
+        emitCGet(e);
+        emitSet(e);
+      }
+      emitPop(e);
     }
+
     e.Null();
-    if (n > 0) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                  false, 0, 0);
-    }
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis, false, 0, 0);
     e.RetC();
 
     m_postponedClosureCtors.pop_front();

@@ -544,6 +544,7 @@ public:
   }
   void allocVarId(const StringData* name);
   Id lookupVarId(const StringData* name) const;
+  bool hasVar(const StringData* name) const;
   Id numParams() const { return m_params.size(); }
 
   Id allocIterator();

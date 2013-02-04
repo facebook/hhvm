@@ -1802,6 +1802,83 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::emitReqBindAddr(const Func* func,
+                                    TCA& dest,
+                                    Offset offset) {
+  dest = m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRNone,
+                                REQ_BIND_ADDR,
+                                2ull,
+                                &dest,
+                                offset);
+}
+
+typedef FixedStringMap<TCA,true> SSwitchMap;
+
+static TCA sswitchHelperFast(const StringData* val,
+                             const SSwitchMap* table,
+                             TCA* def) {
+  TCA* dest = table->find(val);
+  return dest ? *dest : *def;
+}
+
+void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
+  auto data = inst->getExtra<LdSSwitchDestFast>();
+
+  auto table = m_tx64->m_globalData.alloc<SSwitchMap>(64);
+  table->init(data->numCases);
+  for (int64_t i = 0; i < data->numCases; ++i) {
+    table->add(data->cases[i].str, nullptr);
+    TCA* addr = table->find(data->cases[i].str);
+    emitReqBindAddr(data->func, *addr, data->cases[i].dest);
+  }
+  TCA* def = m_tx64->m_globalData.alloc<TCA>(sizeof(TCA), 1);
+  emitReqBindAddr(data->func, *def, data->defaultOff);
+
+  cgCallHelper(m_as,
+               TCA(sswitchHelperFast),
+               inst->getDst(),
+               kNoSyncPoint,
+               ArgGroup()
+                 .ssa(inst->getSrc(0))
+                 .immPtr(table)
+                 .immPtr(def));
+}
+
+static TCA sswitchHelperSlow(TypedValue typedVal,
+                             const StringData** strs,
+                             int numStrs,
+                             TCA* jmptab) {
+  TypedValue* cell = tvToCell(&typedVal);
+  for (int i = 0; i < numStrs; ++i) {
+    if (tvAsCVarRef(cell).equal(strs[i])) return jmptab[i];
+  }
+  return jmptab[numStrs]; // default case
+}
+
+void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
+  auto data = inst->getExtra<LdSSwitchDestSlow>();
+
+  auto strtab = m_tx64->m_globalData.alloc<const StringData*>(
+    sizeof(const StringData*), data->numCases);
+  auto jmptab = m_tx64->m_globalData.alloc<TCA>(sizeof(TCA),
+    data->numCases + 1);
+  for (int i = 0; i < data->numCases; ++i) {
+    strtab[i] = data->cases[i].str;
+    emitReqBindAddr(data->func, jmptab[i], data->cases[i].dest);
+  }
+  emitReqBindAddr(data->func, jmptab[data->numCases], data->defaultOff);
+
+  cgCallHelper(m_as,
+               TCA(sswitchHelperSlow),
+               inst->getDst(),
+               kSyncPoint,
+               ArgGroup()
+                 .valueType(inst->getSrc(0))
+                 .immPtr(strtab)
+                 .imm(data->numCases)
+                 .immPtr(jmptab));
+}
+
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   SSATmp* outFp = inst->getDst();
   SSATmp* inFp  = inst->getSrc(0);
@@ -1971,6 +2048,11 @@ void CodeGenerator::cgStLocNT(IRInstruction* inst) {
   cgStLocWork(inst, false);
 }
 
+void CodeGenerator::cgSyncVMRegs(IRInstruction* inst) {
+  emitMovRegReg(m_as, inst->getSrc(0)->getReg(), rVmFp);
+  emitMovRegReg(m_as, inst->getSrc(1)->getReg(), rVmSp);
+}
+
 void CodeGenerator::cgExitTrace(IRInstruction* inst) {
   SSATmp* func = inst->getSrc(0);
   SSATmp* pc   = inst->getSrc(1);
@@ -1999,18 +2081,8 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
   Asm& outputAsm = m_as; // Note: m_as is the same as m_atubs for Exit Traces,
   // unless exit trace was moved to end of main trace
 
-  if (sp->getReg() != rVmSp) {
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgExitTrace\n");
-    }
-    outputAsm.mov_reg64_reg64(sp->getReg(), rVmSp);
-  }
-  if (fp->getReg() != rVmFp) {
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgExitTrace\n");
-    }
-    outputAsm.mov_reg64_reg64(fp->getReg(), rVmFp);
-  }
+  emitMovRegReg(outputAsm, sp->getReg(), rVmSp);
+  emitMovRegReg(outputAsm, fp->getReg(), rVmFp);
 
   // Get the SrcKey for the dest
   SrcKey  destSK(func->getValFunc(), pc->getValInt());
@@ -4201,6 +4273,10 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
     shuffleArgs(m_as, args, inst);
   }
   emitFwdJmp(inst->getLabel());
+}
+
+void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
+  m_as.jmp(inst->getSrc(0)->getReg());
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {

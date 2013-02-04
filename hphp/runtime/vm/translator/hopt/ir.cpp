@@ -89,6 +89,8 @@ Type Type::fromString(const std::string& str) {
   return mapGet(types, str, Type::None);
 }
 
+TRACE_SET_MOD(hhir);
+
 namespace {
 
 enum OpcodeFlag : uint64_t {
@@ -156,6 +158,36 @@ struct {
 #undef DParam
 #undef DLabel
 
+// If there is no IRExtraDataType for this op, this function template
+// will be removed from the overload set.
+template<Opcode op>
+typename IRExtraDataType<op>::type*
+cloneExtraImpl(Arena& arena, const IRExtraData* src) {
+  typedef typename IRExtraDataType<op>::type Data;
+  return new (arena) Data(arena, *static_cast<const Data*>(src));
+}
+
+// Case for ops without extra data.
+template<Opcode op>
+IRExtraData* cloneExtraImpl(Arena&, const void*) {
+  TRACE(1, "Logic error: attempted to clone extra data for %s\n",
+        opcodeName(op));
+  assert(0 && "bad ExtraData in doClone");
+  not_reached();
+}
+
+IRExtraData* cloneExtra(Arena& arena, Opcode srcOp, IRExtraData* src) {
+#define O(opcode, dstinfo, srcinfo, flags) \
+  case opcode: return cloneExtraImpl<opcode>(arena, src);
+
+  switch (srcOp) {
+  IR_OPCODES
+  default:
+    not_reached();
+  }
+#undef O
+}
+
 }
 
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
@@ -171,6 +203,8 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   , m_label(inst->m_label)
   , m_parent(nullptr)
   , m_tca(nullptr)
+  , m_extra(inst->m_extra ? cloneExtra(arena, getOpcode(), inst->m_extra)
+                          : nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
   if (naryDst()) {
@@ -383,6 +417,7 @@ void IRInstruction::convertToNop() {
   m_asmAddr = nop.m_asmAddr;
   m_label = nop.m_label;
   m_tca = nop.m_tca;
+  m_extra = nullptr;
 }
 
 IRInstruction* IRInstruction::clone(IRFactory* factory) const {

@@ -735,6 +735,11 @@ void LinearScan::computePreColoringHint() {
     case JmpNInstanceOf:
       normalHint(2);
       break;
+    case LdSSwitchDestFast:
+      normalHint(1);
+      break;
+    case LdSSwitchDestSlow:
+      normalHint(1);
     default:
       break;
   }

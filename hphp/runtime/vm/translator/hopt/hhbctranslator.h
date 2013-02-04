@@ -133,7 +133,7 @@ struct HhbcTranslator {
     , m_bcOff(-1)
     , m_startBcOff(bcStartOffset)
     , m_lastBcOff(false)
-    , m_hasRet(false)
+    , m_hasExit(false)
     , m_unboxPtrs(true)
     , m_stackDeficit(0)
     , m_exitGuardFailureTrace(m_tb->genExitGuardFailure(bcStartOffset))
@@ -287,6 +287,9 @@ struct HhbcTranslator {
   void emitCastString();
   void emitCastArray();
   void emitCastObject();
+
+  void emitSwitch(const ImmVector&, int64_t base, bool bounded);
+  void emitSSwitch(const ImmVector&);
 
   void emitRetC(bool freeInline);
   void emitRetV(bool freeInline);
@@ -511,7 +514,7 @@ private:
   Offset            m_startBcOff;
   Offset            m_bcOffNextTrace;
   bool              m_lastBcOff;
-  bool              m_hasRet;
+  bool              m_hasExit;
   // if set, then generate unbox instructions for memory accesses (Get
   // and Set bytecodes). Otherwise, memory accesses will bail the trace
   // on an access to a boxed value.

@@ -1157,7 +1157,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 
-    EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(!EvalJitUseIR);
+    EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(true);
     EnableEmitterStats = eval["EnableEmitterStats"].getBool(EnableEmitterStats);
     EnableInstructionCounts = eval["EnableInstructionCounts"].getBool(false);
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();

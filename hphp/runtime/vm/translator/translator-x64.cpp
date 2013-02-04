@@ -6438,8 +6438,8 @@ static TCA sswitchHelperSlow(TypedValue* val, const StringData** strs,
 typedef FixedStringMap<TCA, true> SSwitchMap;
 
 HOT_FUNC_VM
-static TCA sswitchHelperFast(const StringData* val, SSwitchMap* table,
-                             TCA* def) {
+TCA sswitchHelperFast(const StringData* val, SSwitchMap* table,
+                      TCA* def) {
   TCA* dest = table->find(val);
   if (dest) {
     return *dest;

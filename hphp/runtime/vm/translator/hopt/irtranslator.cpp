@@ -526,13 +526,13 @@ TranslatorX64::irTranslateJmp(const Tracelet& t,
 void
 TranslatorX64::irTranslateSwitch(const Tracelet& t,
                                  const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(Switch);
+  HHIR_EMIT(Switch, i.immVec, i.imm[1].u_I64A, i.imm[2].u_IVA);
 }
 
 void
 TranslatorX64::irTranslateSSwitch(const Tracelet& t,
                                   const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(SSwitch);
+  HHIR_EMIT(SSwitch, i.immVec);
 }
 
 /*

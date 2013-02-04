@@ -235,11 +235,9 @@ private:
   Address getDtorTyped();
   int getIterOffset(SSATmp* tmp);
   static void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
+  void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
 private:
-  /*
-   * Fields
-   */
   Asm& m_as;
   Asm& m_astubs;
   TranslatorX64* m_tx64;

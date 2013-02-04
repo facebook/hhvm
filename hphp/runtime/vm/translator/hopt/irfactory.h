@@ -45,41 +45,61 @@ template<class Ret, class Func>
 struct InstructionBuilder {
   explicit InstructionBuilder(const Func& func) : func(func) {}
 
+  // Create an IRInstruction, and then recursively chew on the Args
+  // list to populate its fields.
   template<class... Args>
   Ret go(Opcode op, Args... args) {
-    return go2(op, Type::None, nullptr, args...);
-  }
-
-  template<class... Args>
-  Ret go(Opcode op, Type t, Args... args) {
-    return go2(op, t, nullptr, args...);
-  }
-
-  template<class... Args>
-  Ret go(Opcode op, LabelInstruction* l, Args... args) {
-    return go2(op, Type::None, l, args...);
-  }
-
-  template<class... Args>
-  Ret go(Opcode op, Type t, LabelInstruction* l, Args... args) {
-    return go2(op, t, l, args...);
+    IRInstruction inst(op);
+    return go2(&inst, args...);
   }
 
 private:
-  template<class Int>
-  Ret go2(Opcode op, Type t, LabelInstruction* l, Int numArgs,
-      SSATmp** tmps) {
-    IRInstruction inst(op, numArgs, tmps);
-    inst.setTypeParam(t);
-    inst.setLabel(l);
-    if (debug) assertOperandTypes(&inst);
-    return func(&inst);
+  // Main loop: call setter() on the head of the list and repeat,
+  // until there's no overload for the Head type; then it will fall
+  // through to the base case.
+  template<class Head, class... Tail>
+  Ret go2(IRInstruction* inst, Head x, Tail... xs) {
+    setter(inst, x);
+    return go2(inst, xs...);
   }
 
-  template<class... SSATmps>
-  Ret go2(Opcode op, Type t, LabelInstruction* l, SSATmps... args) {
-    SSATmp* tmps[] = { args... };
-    return go2(op, t, l, sizeof...(args), tmps);
+  // Base cases: either there are no SSATmps, or there's a variadic
+  // list of SSATmp*'s, or there's an int followed by a SSATmp**.
+
+  Ret go2(IRInstruction* inst) { return stop(inst); }
+
+  template<class... SSAs>
+  Ret go2(IRInstruction* inst, SSATmp* t1, SSAs... ts) {
+    SSATmp* ssas[] = { t1, ts... };
+    inst->initializeSrcs(1 + sizeof...(ts), ssas);
+    return stop(inst);
+  }
+
+  template<class Int>
+  Ret go2(IRInstruction* inst, Int num, SSATmp** ssas) {
+    inst->initializeSrcs(num, ssas);
+    return stop(inst);
+  }
+
+  // For each of the optional parameters, there's an overloaded
+  // setter:
+
+  void setter(IRInstruction* inst, LabelInstruction* l) {
+    inst->setLabel(l);
+  }
+
+  void setter(IRInstruction* inst, Type t) {
+    inst->setTypeParam(t);
+  }
+
+  void setter(IRInstruction* inst, IRExtraData* extra) {
+    inst->setExtra(extra);
+  }
+
+  // Finally we end up here.
+  Ret stop(IRInstruction* inst) {
+    if (debug) assertOperandTypes(inst);
+    return func(inst);
   }
 
 private:
@@ -114,7 +134,7 @@ public:
    *
    * Arguments are passed in the following format:
    *
-   *   gen(Opcode, [type param], [exit label], [srcs ...]);
+   *   gen(Opcode, [IRExtraData*,] [type param,] [exit label,] [srcs ...]);
    *
    * All arguments are optional except the opcode.  `srcs' may be
    * specified either as a list of SSATmp*'s, or as a integer size and

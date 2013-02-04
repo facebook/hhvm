@@ -669,7 +669,7 @@ void HhbcTranslator::emitContExit() {
   }
 
   m_tb->genRetCtrl(sp, fp, retAddr);
-  m_hasRet = true;
+  m_hasExit = true;
 }
 
 void HhbcTranslator::emitUnpackCont() {
@@ -1187,7 +1187,7 @@ void HhbcTranslator::emitNativeImpl() {
   m_tb->genRetCtrl(sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction so no ExitTrace is needed
-  m_hasRet = true;
+  m_hasExit = true;
 }
 
 void HhbcTranslator::emitFPushCtor(int32 numParams) {
@@ -1513,7 +1513,62 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
   m_tb->genRetCtrl(sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
-  m_hasRet = true;
+  m_hasExit = true;
+}
+
+void HhbcTranslator::emitSwitch(const ImmVector& iv,
+                                int64_t base,
+                                bool bounded) {
+  PUNT(Switch);
+}
+
+void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
+  const int numCases = iv.size() - 1;
+
+  /*
+   * We use a fast path translation with a hashtable if none of the
+   * cases are numeric strings and if the input is actually a string.
+   *
+   * Otherwise we do a linear search through the cases calling string
+   * conversion routines.
+   */
+  const bool fastPath =
+    topC()->isA(Type::Str) &&
+    std::none_of(iv.strvec(), iv.strvec() + numCases,
+      [&](const StrVecItem& item) {
+        return getCurUnit()->lookupLitstrId(item.str)->isNumeric();
+      }
+    );
+
+  // The slow path can throw exceptions and reenter the VM.
+  if (!fastPath) spillStack();
+
+  SSATmp* const testVal = popC();
+  assert(m_bcOff != -1);
+  auto const bcOff = m_bcOff;
+
+  std::vector<LdSSwitchData::Elm> cases(numCases);
+  for (int i = 0; i < numCases; ++i) {
+    auto const& kv = iv.strvec()[i];
+    cases[i].str  = getCurUnit()->lookupLitstrId(kv.str);
+    cases[i].dest = bcOff + kv.dest;
+  }
+
+  LdSSwitchData data;
+  data.func       = getCurFunc();
+  data.numCases   = numCases;
+  data.cases      = &cases[0];
+  data.defaultOff = bcOff + iv.strvec()[iv.size() - 1].dest;
+
+  SSATmp* dest = m_tb->gen(fastPath ? LdSSwitchDestFast
+                                    : LdSSwitchDestSlow,
+                           &data,
+                           testVal);
+  m_tb->genDecRef(testVal);
+  SSATmp* stack = spillStack();
+  m_tb->gen(SyncVMRegs, m_tb->getFp(), stack);
+  m_tb->gen(JmpIndirect, dest);
+  m_hasExit = true;
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {
@@ -2178,7 +2233,7 @@ SSATmp* HhbcTranslator::emitLdLocWarn(uint32 id,
 }
 
 void HhbcTranslator::end(int nextPc) {
-  if (m_hasRet) return;
+  if (m_hasExit) return;
 
   if (nextPc >= getCurFunc()->past()) {
     // We have fallen off the end of the func's bytecodes. This happens

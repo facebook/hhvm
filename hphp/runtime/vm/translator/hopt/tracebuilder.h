@@ -294,7 +294,8 @@ public:
   Trace* getTrace() const { return m_trace.get(); }
   IRFactory* getIrFactory() { return &m_irFactory; }
   int32 getSpOffset() { return m_spOffset; }
-  SSATmp* getSp() { return m_spValue; }
+  SSATmp* getSp() const { return m_spValue; }
+  SSATmp* getFp() const { return m_fpValue; }
 
   Type getLocalType(int id);
   void      killLocalValue(int id);

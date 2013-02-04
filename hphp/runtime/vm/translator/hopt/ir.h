@@ -71,6 +71,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   throw FailedIRGen(__FILE__, __LINE__, #instr);     \
 } while(0)
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * The instruction table below uses the following notation.  To use
  * it, you have to define these symbols to do what you want, and then
@@ -178,6 +180,7 @@ O(JmpIsNType,                  D(None), SUnk,                              E) \
 O(JmpZero,                     D(None), SNum,                              E) \
 O(JmpNZero,                    D(None), SNum,                              E) \
 O(Jmp_,                        D(None), SUnk,                            T|E) \
+O(JmpIndirect,                      NA, S(TCA),                          T|E) \
 O(ExitWhenSurprised,                NA, NA,                                E) \
 O(ExitOnVarEnv,                     NA, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  NA, S(StkPtr),                         E) \
@@ -216,6 +219,8 @@ O(LdCurFuncPtr,                D(Func), NA,                             C|Rm) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr) C(Int),                  C) \
 O(LdFuncCls,                    D(Cls), SUnk,                           C|Rm) \
 O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                         C|Rm) \
+O(LdSSwitchDestFast,            D(TCA), S(Gen),                         N|Rm) \
+O(LdSSwitchDestSlow,            D(TCA), S(Gen),                 N|Rm|Refs|Er) \
 O(NewObj,                    D(StkPtr), C(Int)                                \
                                           S(Str,Cls)                          \
                                           S(StkPtr)                           \
@@ -255,6 +260,7 @@ O(ExitTraceCc,                      NA, SUnk,                            T|E) \
 O(ExitSlow,                         NA, SUnk,                            T|E) \
 O(ExitSlowNoProgress,               NA, SUnk,                            T|E) \
 O(ExitGuardFailure,                 NA, SUnk,                            T|E) \
+O(SyncVMRegs,                       NA, S(StkPtr) S(StkPtr),               E) \
 O(Mov,                         DofS(0), SUnk,                              C) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                      Mem|PRc) \
@@ -341,6 +347,65 @@ enum Opcode : uint16_t {
 #undef O
   IR_NUM_OPCODES
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Some IRInstructions with non-trivial compile-time-only constants
+ * may carry along extra data in the form of one of these structures.
+ *
+ * Note that this isn't really appropriate for compile-time constants
+ * that are actually representing user values (we want them to be
+ * visible to optimization passes, allocatable to registers, etc),
+ * just compile-time metadata.
+ *
+ * These types must all be arena-allocatable and have no non-trivial
+ * destructors.  They also must implement a "clone constructor"
+ * (i.e. taking an arena and a source object to deep-copy).
+ *
+ * All extra data structs are subtypes of IRExtraData, just for
+ * compile-time type organization purposes.
+ */
+
+struct IRExtraData {
+  explicit IRExtraData() {}
+  IRExtraData(const IRExtraData&) = delete;
+  IRExtraData& operator=(const IRExtraData&) = delete;
+};
+
+/*
+ * Traits that returns the type of the extra C++ data structure for a
+ * given instruction, or the inverse, if it has one.
+ */
+template<Opcode op> struct IRExtraDataType;
+#define DECLARE_IREXTRA(op, data) \
+  template<> struct IRExtraDataType<op> { typedef data type; }
+
+struct LdSSwitchData : IRExtraData {
+  struct Elm {
+    const StringData* str;
+    Offset            dest;
+  };
+
+  explicit LdSSwitchData() = default;
+  LdSSwitchData(Arena& arena, const LdSSwitchData& src)
+    : func(src.func)
+    , numCases(src.numCases)
+    , cases(new (arena) Elm[src.numCases])
+    , defaultOff(src.defaultOff)
+  {
+    std::copy(src.cases, src.cases + numCases, const_cast<Elm*>(cases));
+  }
+
+  const Func*       func;
+  int64_t           numCases;
+  const Elm*        cases;
+  Offset            defaultOff;
+};
+DECLARE_IREXTRA(LdSSwitchDestFast, LdSSwitchData);
+DECLARE_IREXTRA(LdSSwitchDestSlow, LdSSwitchData);
+
+//////////////////////////////////////////////////////////////////////
 
 inline bool isCmpOp(Opcode opc) {
   return (opc >= OpGt && opc <= OpNSame);
@@ -851,6 +916,12 @@ struct IRInstruction {
   typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
   enum IId { kTransient = 0xffffffff };
 
+  /*
+   * Create an IRInstruction for the opcode `op'.
+   *
+   * IRInstruction creation is usually done through IRFactory or
+   * TraceBuilder rather than directly.
+   */
   explicit IRInstruction(Opcode op,
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr)
@@ -866,9 +937,11 @@ struct IRInstruction {
     , m_label(nullptr)
     , m_parent(nullptr)
     , m_tca(nullptr)
+    , m_extra(nullptr)
   {}
 
   IRInstruction(const IRInstruction&) = delete;
+  IRInstruction& operator=(const IRInstruction&) = delete;
 
   /*
    * Construct an IRInstruction as a deep copy of `inst', using
@@ -876,6 +949,40 @@ struct IRInstruction {
    */
   explicit IRInstruction(Arena& arena, const IRInstruction* inst,
                          IId iid);
+
+  /*
+   * Initialize the source list for this IRInstruction.  We must not
+   * have already had our sources initialized before this function is
+   * called.
+   *
+   * Memory for `srcs' is owned outside of this class and must outlive
+   * it.
+   */
+  void initializeSrcs(uint32_t numSrcs, SSATmp** srcs) {
+    assert(!m_srcs && !m_numSrcs);
+    m_numSrcs = numSrcs;
+    m_srcs = srcs;
+  }
+
+  /*
+   * Return access to extra-data on this instruction, for the
+   * specified opcode type.
+   *
+   * Pre: getOpcode() == opc
+   */
+  template<Opcode opc>
+  const typename IRExtraDataType<opc>::type* getExtra() const {
+    assert(opc == getOpcode() && "getExtra type error");
+    assert(m_extra != nullptr);
+    return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
+  }
+
+  /*
+   * Set the extra-data for this IRInstruction to the given pointer.
+   * Lifetime is must outlast this IRInstruction (and any of its
+   * clones).
+   */
+  void setExtra(IRExtraData* data) { assert(!m_extra); m_extra = data; }
 
   /*
    * Replace an instruction in place with a Nop.  This sometimes may
@@ -1019,6 +1126,7 @@ private:
   LabelInstruction* m_label;
   Trace*            m_parent;
   TCA               m_tca;
+  IRExtraData*      m_extra;
 };
 
 class ConstInstruction : public IRInstruction {

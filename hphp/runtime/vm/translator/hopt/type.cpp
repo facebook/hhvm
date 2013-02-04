@@ -102,7 +102,7 @@ void assertOperandTypes(const IRInstruction* inst) {
     }
 
     bail(folly::format(
-      "Internal error: instruction had too few operands\n"
+      "Error: instruction had too few operands\n"
       "   instruction: {}\n",
         inst->toString()
       ).str()

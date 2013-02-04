@@ -4036,16 +4036,15 @@ void TranslatorX64::fixupWork(VMExecutionContext* ec,
 void TranslatorX64::fixup(VMExecutionContext* ec) const {
   // Start looking for fixup entries at the current (C++) frame.  This
   // will walk the frames upward until we find a TC frame.
-  ActRec* rbp;
-  asm volatile("mov %%rbp, %0" : "=r"(rbp));
-  fixupWork(ec, rbp);
+  DECLARE_FRAME_POINTER(framePtr);
+  fixupWork(ec, framePtr);
 }
 
 TCA TranslatorX64::getTranslatedCaller() const {
-  ActRec* rbp;
-  asm volatile("mov %%rbp, %0" : "=r"(rbp));
-  for (; rbp; rbp = (ActRec*)rbp->m_savedRbp) {
-    TCA rip = (TCA)rbp->m_savedRip;
+  DECLARE_FRAME_POINTER(fp);
+  ActRec* framePtr = fp;  // can't directly mutate the register-mapped one
+  for (; framePtr; framePtr = (ActRec*)framePtr->m_savedRbp) {
+    TCA rip = (TCA)framePtr->m_savedRip;
     if (isCodeAddress(rip)) {
       return rip;
     }

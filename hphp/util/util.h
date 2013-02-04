@@ -272,6 +272,19 @@ static inline void compiler_membar( ) {
 }
 
 /**
+ * Portable macros for mapping machine stack and frame pointers to variables.
+ */
+#if defined(__x86_64__)
+#  define DECLARE_STACK_POINTER(sp) register void*   sp asm("rsp");
+#  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
+#elif defined(__AARCH64EL__)
+#  define DECLARE_STACK_POINTER(sp) register void*   sp asm("sp");
+#  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
+#else
+#  error What are the stack and frame pointers called on your architecture?
+#endif
+
+/**
  * Given the address of a C++ function, returns that function's name
  * or a hex string representation of the address if it can't find
  * the function's name. Attempts to demangle C++ function names. It's

@@ -42,7 +42,7 @@ checkEval(HPHP::Eval::PhpFile* efile) {
 register Cell* sp asm("rbx");
 
 void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
-  register ActRec* rbp asm("rbp");
+  DECLARE_FRAME_POINTER(framePtr);
 
   HPHP::Eval::PhpFile* efile = args->m_efile;
   if (!checkEval(efile)) {
@@ -52,7 +52,7 @@ void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
     return;
   }
 
-  ActRec* fp = (ActRec*)rbp->m_savedRbp;
+  ActRec* fp = (ActRec*)framePtr->m_savedRbp;
 
   VMExecutionContext *ec = g_vmContext;
   ec->m_fp = fp;
@@ -66,11 +66,11 @@ void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
   tl_regState = REGSTATE_DIRTY;
   if (!runPseudoMain) return;
 
-  ec->m_fp->m_savedRip = rbp->m_savedRip;
-  // smash our return and rbp chain
-  rbp->m_savedRip = (uint64_t)args->m_pseudoMain;
+  ec->m_fp->m_savedRip = framePtr->m_savedRip;
+  // smash our return and frame pointer chain
+  framePtr->m_savedRip = (uint64_t)args->m_pseudoMain;
   sp = ec->m_stack.top();
-  rbp->m_savedRbp = (uint64_t)ec->m_fp;
+  framePtr->m_savedRbp = (uint64_t)ec->m_fp;
 }
 
 /*
@@ -133,9 +133,9 @@ TCA fcallHelper(ActRec* ar) {
       them for us - so we just have to tell the unwinder
       that.
     */
-    register ActRec* rbp asm("rbp");
+    DECLARE_FRAME_POINTER(framePtr);
     tl_regState = REGSTATE_CLEAN;
-    rbp->m_savedRip = ar->m_savedRip;
+    framePtr->m_savedRip = ar->m_savedRip;
     throw;
   }
 }
@@ -232,8 +232,8 @@ TCA funcBodyHelper(ActRec* fp) {
 }
 
 void TranslatorX64::fCallArrayHelper(const FCallArrayArgs* args) {
-  register ActRec* rbp asm("rbp");
-  ActRec* fp = (ActRec*)rbp->m_savedRbp;
+  DECLARE_FRAME_POINTER(framePtr);
+  ActRec* fp = (ActRec*)framePtr->m_savedRbp;
 
   VMExecutionContext *ec = g_vmContext;
   ec->m_fp = fp;
@@ -247,10 +247,10 @@ void TranslatorX64::fCallArrayHelper(const FCallArrayArgs* args) {
   tl_regState = REGSTATE_DIRTY;
   if (!runFunc) return;
 
-  ec->m_fp->m_savedRip = rbp->m_savedRip;
-  // smash our return and rbp chain
-  rbp->m_savedRip = (uint64_t)ec->m_fp->m_func->getFuncBody();
-  rbp->m_savedRbp = (uint64_t)ec->m_fp;
+  ec->m_fp->m_savedRip = framePtr->m_savedRip;
+  // smash our return and frame pointer chain
+  framePtr->m_savedRip = (uint64_t)ec->m_fp->m_func->getFuncBody();
+  framePtr->m_savedRbp = (uint64_t)ec->m_fp;
 }
 
 } } } // HPHP::VM::Transl

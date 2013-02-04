@@ -471,23 +471,23 @@ static inline TypedValue* baseNImpl(TypedValue* key,
 }
 
 static TypedValue* baseN(TypedValue* key, MInstrState* mis) {
-  register ActRec* rbp asm("rbp");
-  return baseNImpl<false, false>(key, mis, (ActRec*)rbp->m_savedRbp);
+  DECLARE_FRAME_POINTER(framePtr);
+  return baseNImpl<false, false>(key, mis, (ActRec*)framePtr->m_savedRbp);
 }
 
 static TypedValue* baseNW(TypedValue* key, MInstrState* mis) {
-  register ActRec* rbp asm("rbp");
-  return baseNImpl<true, false>(key, mis, (ActRec*)rbp->m_savedRbp);
+  DECLARE_FRAME_POINTER(framePtr);
+  return baseNImpl<true, false>(key, mis, (ActRec*)framePtr->m_savedRbp);
 }
 
 static TypedValue* baseND(TypedValue* key, MInstrState* mis) {
-  register ActRec* rbp asm("rbp");
-  return baseNImpl<false, true>(key, mis, (ActRec*)rbp->m_savedRbp);
+  DECLARE_FRAME_POINTER(framePtr);
+  return baseNImpl<false, true>(key, mis, (ActRec*)framePtr->m_savedRbp);
 }
 
 static TypedValue* baseNWD(TypedValue* key, MInstrState* mis) {
-  register ActRec* rbp asm("rbp");
-  return baseNImpl<true, true>(key, mis, (ActRec*)rbp->m_savedRbp);
+  DECLARE_FRAME_POINTER(framePtr);
+  return baseNImpl<true, true>(key, mis, (ActRec*)framePtr->m_savedRbp);
 }
 
 void TranslatorX64::emitBaseN(const Tracelet& t,

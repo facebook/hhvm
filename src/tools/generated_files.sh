@@ -13,10 +13,8 @@ check_err()
 
 VERBOSE=1
 
-HPHP=$HPHP_HOME/src/hphp/hphp
-[ ! -x "$HPHP" ] && check_err 1 "$HPHP is not executable"
-
 HHVM=$HPHP_HOME/src/hhvm/hhvm
+[ ! -x "$HHVM" ] && HHVM=`which hhvm`
 [ ! -x "$HHVM" ] && check_err 1 "$HHVM is not executable"
 
 HPHP_TOOLS=$HPHP_HOME/src/tools/
@@ -36,7 +34,8 @@ fi
 if [ "$1" = "gen" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating src/system/gen/* files using hphpc"
   cd $HPHP_HOME/src/system
-  $HPHP --opts=none -t cpp -f sys -o gen \
+  $HHVM --hphp \
+        --opts=none -t cpp -f sys -o gen \
         --input-dir . -i `find classes globals -name '*.php'`
   check_err $? "Failed generating src/system/gen/*"
 fi

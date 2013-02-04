@@ -173,7 +173,7 @@ function idl_format_inc($inc) {
 /*****************************************************************************/
 function idl_format_test($header, $impl) {
   idl_format_test_header($header);
-  idl_format_test_impl($impl);
+  idl_format_test_impl($header,$impl);
 }
 
 /*****************************************************************************/
@@ -221,7 +221,7 @@ EOT
 }
 
 /*****************************************************************************/
-function idl_format_test_impl($test_impl) {
+function idl_format_test_impl($test_header, $test_impl) {
   global $funcs, $classes, $Name, $name, $mode;
 
   ($f = fopen($test_impl, 'w')) || die("cannot open $test_impl");

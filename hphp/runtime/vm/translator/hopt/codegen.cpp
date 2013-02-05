@@ -1779,11 +1779,11 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
     m_as.mov_reg64_reg64(fp->getReg(), rVmFp);
   }
 
+  // Return control to caller
+  m_as.push(retReg);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitTraceRet(m_as);
   }
-  // Return control to caller
-  m_as.push(retReg);
   m_as.ret();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     m_as.ud2();

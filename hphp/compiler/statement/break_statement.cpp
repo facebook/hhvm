@@ -131,7 +131,7 @@ void BreakStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (!depth) {
     unsigned size = labelIds.size();
-    int labelId;
+    int labelId = 0;
 
     int varId = cg.createNewLocalId(shared_from_this());
     cg_printf("int64 %s%d;\n", Option::TempPrefix, varId);

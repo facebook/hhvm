@@ -702,7 +702,7 @@ void TraceBuilder::genBindLoc(uint32 id,
    */
   SSATmp* home = genLdHome(id);
   Type::Tag trackedType = getLocalType(id);
-  SSATmp* prevValue;
+  SSATmp* prevValue = 0;
   if (trackedType == Type::None) {
     if (doRefCount) {
       prevValue = gen(LdLoc, Type::Gen, home);

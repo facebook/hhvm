@@ -369,7 +369,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
 
   String str(data.size() + 400, ReserveString);
   char* compressed = str.mutableSlice().ptr;
-  size_t size;
+  size_t size = 0;
 
   switch (level) {
     case 1: {
@@ -424,7 +424,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
 
   String s = String(size, ReserveString);
   char *decompressed = s.mutableSlice().ptr;
-  size_t dsize;
+  size_t dsize = 0;
 
   switch (level) {
     case 1: {

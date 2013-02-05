@@ -21,6 +21,7 @@
 
 #include "folly/Format.h"
 
+#include "util/disasm.h"
 #include "util/trace.h"
 #include "runtime/base/string_data.h"
 #include "runtime/vm/runtime.h"
@@ -645,82 +646,9 @@ void SSATmp::print() const {
   std::cerr << std::endl;
 }
 
-#ifdef DEBUG
-
-extern "C" {
-#include "../tools/xed2-intel64/include/xed-interface.h"
-}
-
-static void error(std::string msg) {
-  fprintf(stderr, "Error: %s\n", msg.c_str());
-  exit(1);
-}
-
-
-#define MAX_INSTR_ASM_LEN 128
-xed_state_t xed_state;
-
-static const xed_syntax_enum_t s_xed_syntax =
-  getenv("HHVM_ATT_DISAS") ? XED_SYNTAX_ATT : XED_SYNTAX_INTEL;
-
-void printInstructions(xed_uint8_t* codeStartAddr,
-                       xed_uint8_t* codeEndAddr,
-                       bool printAddr,
-                       int indentLevel,
-                       std::ostream& os) {
-  char codeStr[MAX_INSTR_ASM_LEN];
-  xed_uint8_t *frontier;
-  xed_decoded_inst_t xedd;
-  uint64 ip;
-
-  // Decode and print each instruction
-  for (frontier = codeStartAddr, ip = (uint64)codeStartAddr;
-       frontier < codeEndAddr;
-      ) {
-    xed_decoded_inst_zero_set_mode(&xedd, &xed_state);
-    xed_decoded_inst_set_input_chip(&xedd, XED_CHIP_INVALID);
-    xed_error_enum_t xed_error = xed_decode(&xedd, frontier, 15);
-    if (xed_error != XED_ERROR_NONE) error("disasm error: xed_decode failed");
-
-    // Get disassembled instruction in codeStr
-    if (!xed_format_context(s_xed_syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, ip, NULL)) {
-      error("disasm error: xed_format_context failed");
-    }
-
-    for (int i = 0; i < indentLevel; ++i) {
-      os << ' ';
-    }
-    if (printAddr) {
-      os << folly::format("{:#10x}: ", ip);
-    }
-    uint32 instrLen = xed_decoded_inst_get_length(&xedd);
-    if (RuntimeOption::EvalDumpIR > 5) {
-      // print encoding, like in objdump
-      unsigned posi = 0;
-      for (; posi < instrLen; ++posi) {
-        os << folly::format("{:02x} ", (uint8_t)frontier[posi]);
-      }
-      for (; posi < 16; ++posi) {
-        os << "   ";
-      }
-    }
-    os << codeStr << "\n";;
-    frontier += instrLen;
-    ip       += instrLen;
-
-
-  }
-}
-#endif
-
 void Trace::print(std::ostream& os, bool printAsm,
                   bool isExit /* = false */) const {
-#ifdef DEBUG
-  xed_state_init(&xed_state, XED_MACHINE_MODE_LONG_64,
-                 XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
-  xed_tables_init();
-#endif
+  Disasm disasm(14, RuntimeOption::EvalDumpIR > 5);
 
   auto it = begin(m_instructionList);
   while (it != end(m_instructionList)) {
@@ -773,10 +701,8 @@ void Trace::print(std::ostream& os, bool printAsm,
     if (asmAddr != endAsm) {
       // print out the assembly
       os << '\n';
-#ifdef DEBUG
-      printInstructions(asmAddr, endAsm, true, 14, os);
+      disasm.disasm(os, asmAddr, endAsm);
       os << '\n';
-#endif
     }
   }
 
@@ -786,14 +712,9 @@ void Trace::print(std::ostream& os, bool printAsm,
       firstExitTracePrinted = true;
       // print out any extra code in astubs
       if (m_firstAstubsAddress < exitTrace->m_firstAsmAddress) {
-#ifdef DEBUG
         os << std::string(8, ' ') << "AStubs:\n";
-        printInstructions(m_firstAstubsAddress,
-                          exitTrace->m_firstAsmAddress,
-                          true,
-                          14,
-                          os);
-#endif
+        disasm.disasm(os, m_firstAstubsAddress,
+                      exitTrace->m_firstAsmAddress);
         os << '\n';
       }
 

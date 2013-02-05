@@ -104,6 +104,12 @@ else ()
 	# nothing for now
 endif()
 
+find_package(LibXed)
+if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
+	include_directories(${LibXed_INCLUDE_DIR})
+	add_definitions(-DHAVE_LIBXED)
+endif()
+
 # CURL checks
 find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
@@ -371,6 +377,10 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
+
+if (LibXed_LIBRARY)
+	target_link_libraries(${target} ${LibXed_LIBRARY})
+endif()
 
 if (LIBINOTIFY_LIBRARY)
 	target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})

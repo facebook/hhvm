@@ -465,6 +465,9 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
     case Type::Cls:
       ostream << "Cls(" << (m_clss ? m_clss->name()->data() : "0") << ")";
       break;
+    case Type::NamedEntity:
+      ostream << "NamedEntity(" << m_namedEntity << ")";
+      break;
     case Type::FuncCls:
       assert(false /* ConstInstruction does not hold both func* and class* */);
       break;

@@ -15,7 +15,6 @@
 */
 
 #include "util/ringbuffer.h"
-#include "util/pathtrack.h"
 #include "util/util.h"
 #include "util/assertions.h"
 
@@ -82,12 +81,13 @@ struct RingBufferEntry {
   // 16-31
   const char* m_msg;
   uint32_t m_len; // m_msg and m_len are specific to Msg
-  uint32_t m_ts;  // low-order bits of timestamp
+  uint32_t m_seq; // sequence number
 };
 
 static const int kMaxRBEntries = (1 << 20); // Must exceed number of threads
 RingBufferEntry g_ring[kMaxRBEntries];
 std::atomic<int> g_ringIdx(0);
+std::atomic<uint32_t> g_seqnum(0);
 
 RingBufferEntry*
 allocEntry(RingBufferType t) {
@@ -100,7 +100,7 @@ allocEntry(RingBufferType t) {
     newRingPos = (oldRingPos + 1) % kMaxRBEntries;
   } while (!g_ringIdx.compare_exchange_weak(oldRingPos, newRingPos,
                                             std::memory_order_acq_rel));
-  rb->m_ts = uint32_t(_rdtsc());
+  rb->m_seq = g_seqnum.fetch_add(1, std::memory_order_relaxed);
   rb->m_type = t;
   rb->m_threadId = (uint32_t)((int64_t)pthread_self() & 0xFFFFFFFF);
   return rb;
@@ -141,7 +141,7 @@ void dumpEntry(const RingBufferEntry* e) {
   switch(e->m_type) {
     case RBTypeUninit: return;
     case RBTypeMsg: {
-      printf("%#x %10u ", e->m_threadId, e->m_ts);
+      printf("%#x %10u ", e->m_threadId, e->m_seq);
       // The strings in thread-private ring buffers are not null-terminated;
       // we also can't trust their length, since they might wrap around.
       fwrite(e->m_msg,
@@ -168,14 +168,14 @@ void dumpEntry(const RingBufferEntry* e) {
       indentDepth -= e->m_type == RBTypeFuncExit;
       if (indentDepth < 0) indentDepth = 0;
       printf("%#x %10u %20s %*s%s\n",
-             e->m_threadId, e->m_ts,
+             e->m_threadId, e->m_seq,
              names[e->m_type], 4*indentDepth, " ", e->m_msg);
       indentDepth += e->m_type == RBTypeFuncEntry;
       break;
     }
     default: {
       printf("%#x %10u %#lx %d %20s\n",
-             e->m_threadId, e->m_ts, e->m_funcId, e->m_offset,
+             e->m_threadId, e->m_seq, e->m_funcId, e->m_offset,
              names[e->m_type]);
       break;
     }

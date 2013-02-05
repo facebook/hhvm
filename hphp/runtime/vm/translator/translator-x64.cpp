@@ -48,7 +48,6 @@ typedef __sighandler_t *sighandler_t;
 #include "util/debug.h"
 #include "util/disasm.h"
 #include "util/maphuge.h"
-#include "util/pathtrack.h"
 #include "util/rank.h"
 #include "util/ringbuffer.h"
 #include "util/timer.h"

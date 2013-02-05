@@ -1655,7 +1655,7 @@ void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = inst->getSrc(0)->getReg(0);
   auto dstReg = inst->getDst()->getReg();
   assert(fpReg != InvalidReg);
-  assert(inst->getDst() && !inst->getDst()->hasReg(0));
+  assert(inst->getDst() && inst->getDst()->hasReg(0));
   m_as.loadq(fpReg[AROFF(m_savedRip)], dstReg);
 }
 

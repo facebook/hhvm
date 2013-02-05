@@ -39,23 +39,7 @@ AsyncFuncImpl::~AsyncFuncImpl() {
 }
 
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
-  pthread_attr_t *attr;
-  size_t stacksize, guardsize;
-  void *stackaddr;
-
-  attr = ((AsyncFuncImpl*)obj)->getThreadAttr();
-  pthread_attr_getstack(attr, &stackaddr, &stacksize);
-
-  // Get the guard page's size, because the stack address returned
-  // above starts at the guard page, so the thread's stack limit is
-  // stackaddr + guardsize.
-  if (pthread_attr_getguardsize(attr, &guardsize) != 0)
-    guardsize = 0;
-
-  assert(stackaddr != NULL);
-  assert(stacksize >= PTHREAD_STACK_MIN);
-  Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
-  Util::s_stackSize = stacksize;
+  Util::init_stack_limits(((AsyncFuncImpl*)obj)->getThreadAttr());
 
   ((AsyncFuncImpl*)obj)->threadFuncImpl();
   return NULL;

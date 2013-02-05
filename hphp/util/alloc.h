@@ -154,6 +154,8 @@ class ScopedMem {
 
 extern __thread uintptr_t s_stackLimit;
 extern __thread size_t s_stackSize;
+void init_stack_limits(pthread_attr_t* attr);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

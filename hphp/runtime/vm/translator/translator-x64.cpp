@@ -3992,12 +3992,14 @@ void TranslatorX64::fixupWork(VMExecutionContext* ec,
   TRACE_SET_MOD(fixup);
   TRACE(1, "fixup(begin):\n");
 
-  void* const lowStack = ec->m_stack.getStackLowAddress();
-  void* const highStack = ec->m_stack.getStackHighAddress();
-  auto isVMFrame = [lowStack,highStack] (ActRec* ar) {
-    return (ar >= lowStack && ar < highStack) ||
-      // It might be a generator frame, away from the main stack.
-      (ar && *reinterpret_cast<int64_t*>(ar + 1) == c_Continuation::kMagic);
+  auto isVMFrame = [] (ActRec* ar) {
+    assert(ar);
+    bool ret = uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize;
+    assert(!ret ||
+           (ar >= g_vmContext->m_stack.getStackLowAddress() &&
+            ar < g_vmContext->m_stack.getStackHighAddress()) ||
+           ar->m_func->isGenerator());
+    return ret;
   };
 
   auto* nextRbp = rbp;
@@ -4023,8 +4025,6 @@ void TranslatorX64::fixupWork(VMExecutionContext* ec,
         return;
       }
     }
-
-    prevRbp = rbp;
   } while (rbp && rbp != nextRbp);
 
   // OK, we've exhausted the entire actRec chain.  We are only

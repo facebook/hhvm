@@ -846,8 +846,8 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
   // Use depth-first recursion to output the most deeply nested stack frame
   // first.
   {
-    Offset prevPc;
-    TypedValue* prevStackTop;
+    Offset prevPc = 0;
+    TypedValue* prevStackTop = nullptr;
     ActRec* prevFp = g_vmContext->getPrevVMState(fp, &prevPc, &prevStackTop);
     if (prevFp != NULL) {
       toStringFrame(os, prevFp, prevPc, prevStackTop, prefix);
@@ -1131,22 +1131,11 @@ using namespace HPHP::MethodLookup;
 
 ActRec* VMExecutionContext::arGetSfp(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
-  if (LIKELY(prevFrame >= m_stack.getStackLowAddress() &&
-             prevFrame < m_stack.getStackHighAddress())) {
-    return prevFrame;
+  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
+             Util::s_stackSize)) {
+    if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
-  // Generators have their frames outside the main stack, so prevFrame might
-  // point there. We need to be careful to distinguish this from a prevFrame
-  // that points into the C++ stack.
-  if (!prevFrame) {
-    return const_cast<ActRec*>(ar);
-  }
-  int64* magicPtr = (int64*)(prevFrame + 1);
-  if (*magicPtr == c_Continuation::kMagic) {
-    assert(prevFrame->m_func->isGenerator());
-    return prevFrame;
-  }
   return const_cast<ActRec*>(ar);
 }
 

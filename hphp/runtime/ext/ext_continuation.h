@@ -101,11 +101,6 @@ class c_Continuation : public ExtObjectData {
     cont->m_localsOffset = sizeof(c_Continuation) + sizeof(VM::Iter) * nIters;
     cont->m_arPtr = (VM::ActRec*)(cont->locals() + nLocals);
 
-    // The magic number is placed after the AR to enable stack-unwinding code to
-    // identify a pointer to this ActRec as such.
-    int64* magicPtr = (int64*)(cont->actRec() + 1);
-    *magicPtr = kMagic;
-
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
            sizeof(TypedValue) * nLocals + sizeof(VM::Iter) * nIters);
     return cont;
@@ -197,11 +192,9 @@ public:
 #endif
 
   HphpArray* getStaticLocals();
-  static const int64 kMagic = 0xd00beed00beed000;
   static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
     return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +
-            sizeof(VM::Iter) * nIters + sizeof(VM::ActRec) +
-            sizeof(kMagic));
+            sizeof(VM::Iter) * nIters + sizeof(VM::ActRec));
   }
   VM::ActRec* actRec() {
     return m_arPtr;

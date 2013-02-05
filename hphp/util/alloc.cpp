@@ -57,6 +57,26 @@ static NEVER_INLINE uintptr_t get_stack_top() {
   return rsp;
 }
 
+void init_stack_limits(pthread_attr_t* attr) {
+  size_t stacksize, guardsize;
+  void *stackaddr;
+
+  if (pthread_attr_getstack(attr, &stackaddr, &stacksize) != 0) {
+    always_assert(false);
+  }
+
+  // Get the guard page's size, because the stack address returned
+  // above starts at the guard page, so the thread's stack limit is
+  // stackaddr + guardsize.
+  if (pthread_attr_getguardsize(attr, &guardsize) != 0)
+    guardsize = 0;
+
+  assert(stackaddr != NULL);
+  assert(stacksize >= PTHREAD_STACK_MIN);
+  Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
+  Util::s_stackSize = stacksize;
+}
+
 void flush_thread_stack() {
   uintptr_t top = get_stack_top() & ~(PAGE_SIZE - 1);
   // s_stackLimit is already aligned
@@ -153,8 +173,8 @@ void* low_malloc_impl(size_t size) {
   // huge page we low_malloc with a huge mapping.
   for (void* oldValue = highest_lowmall_addr.load(); ptr > oldValue; ) {
     if (highest_lowmall_addr.compare_exchange_weak(oldValue, ptr)) {
-      uintptr_t prevRegion = uintptr_t(oldValue) >> kLgHugeGranularity; 
-      uintptr_t newRegion = uintptr_t(ptr) >> kLgHugeGranularity; 
+      uintptr_t prevRegion = uintptr_t(oldValue) >> kLgHugeGranularity;
+      uintptr_t newRegion = uintptr_t(ptr) >> kLgHugeGranularity;
       if (prevRegion != newRegion) {
         // Whoever updates highest_ever is responsible for hinting all the
         // intervening regions. prevRegion is already huge, so bump the

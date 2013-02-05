@@ -404,137 +404,179 @@ extern Opcode getExitOpcode(TraceExitType::ExitType);
 
 const char* opcodeName(Opcode opcode);
 
-namespace Type {
-  // This mostly parallels the DataType enum in runtime/base/types.h, but it's
-  // not the same as DataType. See typeToDataType below.
-  //    type name,    debug string
-  #define IR_TYPES \
-    IRT(None,            "None")  /* Corresponds to HPHP::TypeOfInvalid */ \
-    IRT(Uninit,          "Unin")  \
-    IRT(Null,            "Null")  \
-    IRT(Bool,            "Bool")  \
-    IRT(Int,             "Int") /* HPHP::DataType::KindOfInt64 */      \
-    IRT(Dbl,             "Dbl")   \
-    IRT(Placeholder,     "ERROR") /* Nothing in DataType enum w/ this value */ \
-    IRT(StaticStr,       "Sstr")  \
-    IRT(UncountedInit,   "UncountedInit") /* One of {Null,Bool,Int,Dbl,SStr} */\
-    IRT(Uncounted,       "Uncounted") /* 1 of: {Unin,Null,Bool,Int,Dbl,SStr} */\
-    IRT(Str,             "Str")   \
-    IRT(Arr,             "Arr")   \
-    IRT(Obj,             "Obj")   \
-    IRT(Cell,            "Cell")  /* any type above, but statically unknown */ \
-    /* Variant types */           \
-    IRT(BoxedUninit,     "Unin&")  /* Unused */ \
-    IRT(BoxedNull,       "Null&") \
-    IRT(BoxedBool,       "Bool&") \
-    IRT(BoxedInt,        "Int&")  /* HPHP::DataType::KindOfInt64 */ \
-    IRT(BoxedDbl,        "Dbl&")  \
-    IRT(BoxedPlaceholder,"ERROR") /* Nothing in DataType enum w/ this value */ \
-    IRT(BoxedStaticStr,  "SStr&") \
-    IRT(BoxedStr,        "Str&")  \
-    IRT(BoxedArr,        "Arr&")  \
-    IRT(BoxedObj,        "Obj&")  \
-    IRT(BoxedCell,       "Cell&") /* any Boxed* type but statically unknown */ \
-    IRT(Gen,             "Gen")     /* Generic type value, (cell or variant */ \
-                                    /* but statically unknown) */              \
-    IRT(PtrToCell,       "Cell*") \
-    IRT(PtrToGen,        "Gen*")  \
-    IRT(Home,            "Home")  /* HPHP::DataType defines this as -2 */ \
-    /* runtime metadata */        \
-    IRT(Cls,             "Cls")   \
-    IRT(Func,            "Func") \
-    IRT(VarEnv,          "VarEnv")\
-    IRT(NamedEntity,     "NamedEntity") \
-    IRT(FuncCls,         "FuncCls")    /* a tuple with a Func* and a Class* */ \
-    IRT(Cctx,            "Cctx")        /* Class* with the lowest bit set,  */ \
-                                        /* as stored in ActRec.m_cls field  */ \
-    IRT(Ctx,             "Ctx")          /* Obj or Cctx, statically unknown */ \
-    IRT(FuncCtx,         "FuncCtx")   /* this has a Func* and either an Obj */ \
-                                           /* or a Cctx, statically unknown */ \
-    IRT(RetAddr,         "RetAddr")                       /* Return address */ \
-    IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP*/\
-    IRT(TCA,             "TCA") \
-    IRT(ActRec,          "ActRec") \
-    /*  */
+#define IRT_BOXES(name, bit)                                            \
+  IRT(name,             (bit))                                          \
+  IRT(Boxed##name,      (bit) << Type::kBoxShift)                       \
+  IRT(PtrTo##name,      (bit) << Type::kPtrShift)                       \
+  IRT(PtrToBoxed##name, (bit) << Type::kPtrBoxShift)
 
-  enum Tag : uint16_t {
-#define IRT(type, name)  type,
-    IR_TYPES
-#undef IRT
-    TAG_ENUM_COUNT
-  };
+#define IRT_PHP(c)                                                      \
+  c(Uninit,       1ULL << 0)                                            \
+  c(InitNull,     1ULL << 1)                                            \
+  c(Bool,         1ULL << 2)                                            \
+  c(Int,          1ULL << 3)                                            \
+  c(Dbl,          1ULL << 4)                                            \
+  c(StaticStr,    1ULL << 5)                                            \
+  c(CountedStr,   1ULL << 6)                                            \
+  c(Arr,          1ULL << 7)                                            \
+  c(Obj,          1ULL << 8)
+// Boxed*:       9-17
+// PtrTo*:      18-26
+// PtrToBoxed*: 27-35
 
-  constexpr Tag RefCountThreshold = Uncounted;
+// This list should be in non-decreasing order of specificity
+#define IRT_PHP_UNIONS(c)                                               \
+  c(Null,          -1) /* {Uninit|InitNull} */                          \
+  c(Str,           -1) /* {StaticStr|CountedStr} */                     \
+  c(UncountedInit, -1) /* {InitNull|Bool|Int|Dbl|StaticStr} */          \
+  c(Uncounted,     -1) /* {Unin|InitNull|Bool|Int|Dbl|StaticStr} */     \
+  c(Cell,          -1) /* any unboxed type, statically unknown */
 
-  inline bool isBoxed(Tag t) {
-    return (t > Cell && t < Gen);
+#define IRT_RUNTIME                                                     \
+  IRT(Home,        1ULL << 36)                                          \
+  IRT(Cls,         1ULL << 37)                                          \
+  IRT(Func,        1ULL << 38)                                          \
+  IRT(VarEnv,      1ULL << 39)                                          \
+  IRT(NamedEntity, 1ULL << 40)                                          \
+  IRT(FuncCls,     1ULL << 41) /* {Func*, Cctx} */                      \
+  IRT(FuncObj,     1ULL << 42) /* {Func*, Obj} */                       \
+  IRT(Cctx,        1ULL << 43) /* Class* with the lowest bit set,  */   \
+                               /* as stored in ActRec.m_cls field  */   \
+  IRT(RetAddr,     1ULL << 44) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 45) /* any pointer into VM stack: VmSP or VmFP*/ \
+  IRT(TCA,         1ULL << 46)                                          \
+  IRT(ActRec,      1ULL << 47)                                          \
+  IRT(None,        1ULL << 48)
+
+// The definitions for these are in ir.cpp
+#define IRT_UNIONS                                                      \
+  IRT(Ctx,         -1) /* Obj or CCtx, statically unknown */            \
+  IRT(FuncCtx,     -1) /* {Func*, Class*|Obj} */
+
+// Gen and PtrToGen are here instead of IRT_PHP_UNIONS because
+// BoxedGen and PtrToBoxedGen are nonsense types.
+#define IRT_SPECIAL                                                \
+  IRT(Bottom,      -1)                                             \
+  IRT(Gen,         -1)                                             \
+  IRT(PtrToGen,    -1)
+
+// All types (including union types) that represent program values,
+// except Gen (which is special). Boxed*, PtrTo*, and PtrToBoxed* only
+// exist for these types.
+#define IRT_USERLAND(c) IRT_PHP(c) IRT_PHP_UNIONS(c)
+
+// All types with just a single bit set
+#define IRT_PRIMITIVE IRT_PHP(IRT_BOXES) IRT_RUNTIME
+
+// All types
+#define IR_TYPES IRT_USERLAND(IRT_BOXES) IRT_RUNTIME IRT_UNIONS IRT_SPECIAL
+
+class Type {
+  typedef uint64_t bits_t;
+
+  static const size_t kBoxShift = 9;
+  static const size_t kPtrShift = kBoxShift * 2;
+  static const size_t kPtrBoxShift = kBoxShift + kPtrShift;
+
+  bits_t m_bits;
+
+public:
+# define IRT(name, ...) static const Type name;
+  IR_TYPES
+# undef IRT
+
+  explicit Type(bits_t bits = None.m_bits)
+    : m_bits(bits)
+    {}
+
+  size_t hash() const {
+    return hash_int64(m_bits);
   }
 
-  inline bool isUnboxed(Tag t) {
-    return (t <= Type::Cell && t != Type::None);
+  bool operator==(Type other) const {
+    return m_bits == other.m_bits;
   }
 
-  inline bool isPtr(Tag t) {
-    return t == Type::PtrToCell || t == Type::PtrToGen;
+  bool operator!=(Type other) const {
+    return !operator==(other);
   }
 
-  inline bool isRefCounted(Tag t) {
-    return (t > RefCountThreshold && t <= Gen);
+  Type operator|(Type other) const {
+    return Type(m_bits | other.m_bits);
   }
 
-  inline bool isStaticallyKnown(Tag t) {
-    return (t != Cell          &&
-            t != Gen           &&
-            t != Uncounted     &&
-            t != UncountedInit &&
-            t != Ctx           &&
-            t != FuncCtx);
+  Type operator&(Type other) const {
+    return Type(m_bits & other.m_bits);
   }
 
-  inline bool isStaticallyKnownUnboxed(Tag t) {
-    return isStaticallyKnown(t) && isUnboxed(t);
+  std::string toString() const;
+  static Type fromString(const std::string& str);
+
+  bool isBoxed() const {
+    return subtypeOf(BoxedCell);
   }
 
-  inline bool needsStaticBitCheck(Tag t) {
-    return (t == Cell ||
-            t == Gen  ||
-            t == Str  ||
-            t == Arr);
+  bool notBoxed() const {
+    return subtypeOf(Cell);
+  }
+
+  bool maybeBoxed() const {
+    return (*this & BoxedCell) != Bottom;
+  }
+
+  bool isPtr() const {
+    return subtypeOf(PtrToGen);
+  }
+
+  bool maybeCounted() const {
+    return subtypeOf(Gen) && !subtypeOf(Uncounted);
+  }
+
+  bool notCounted() const {
+    return subtypeOf(Uncounted);
+  }
+
+  bool isStaticallyKnown() const {
+    // Str are Null are technically unions but are statically known
+    // for all practical purposes. Same for a union that consists of
+    // nothing but boxed types.
+    if (isString() || isNull() || isBoxed()) return true;
+
+    // This will return true iff no more than 1 bit is set in
+    // m_bits. If 0 bits are set, then *this == Bottom, which is
+    // statically known.
+    return (m_bits & (m_bits - 1)) == 0;
+  }
+
+  bool isStaticallyKnownUnboxed() const {
+    return isStaticallyKnown() && notBoxed();
+  }
+
+  bool needsStaticBitCheck() const {
+    return (*this & (StaticStr | Arr)) != Bottom;
   }
 
   // returns true if definitely not uninitialized
-  inline bool isInit(Tag t) {
-    return ((t != Uninit && isStaticallyKnown(t)) ||
-            t == UncountedInit);
+  bool isInit() const {
+    return !Uninit.subtypeOf(*this);
   }
 
-  inline bool mayBeUninit(Tag t) {
-    return (t == Uninit    ||
-            t == Uncounted ||
-            t == Cell      ||
-            t == Gen);
+  bool maybeUninit() const {
+    return !isInit();
   }
 
   /*
    * Returns true if t1 is a strict subtype of t2.
    */
-  inline bool isMoreRefined(Tag t1, Tag t2) {
-    return ((t2 == Gen           && t1 < Gen)                          ||
-            (t2 == Cell          && t1 < Cell)                         ||
-            (t2 == BoxedCell     && t1 < BoxedCell && t1 > Cell)       ||
-            (t2 == Str           && t1 == StaticStr)                   ||
-            (t2 == BoxedStr      && t1 == BoxedStaticStr)              ||
-            (t2 == Uncounted     && t1 < Uncounted)                    ||
-            (t2 == UncountedInit && t1 < UncountedInit && t1 > Uninit) ||
-            (t2 == Ctx           && (t1 == Obj || t1 == Cls))          ||
-            (t2 == PtrToGen      && t1 == PtrToCell));
+  bool strictSubtypeOf(Type t2) const {
+    return *this != t2 && subtypeOf(t2);
   }
 
   /*
    * Returns true if t1 is a non-strict subtype of t2.
    */
-  inline bool subtypeOf(Tag t1, Tag t2) {
-    return t1 == t2 || isMoreRefined(t1, t2);
+  bool subtypeOf(Type t2) const {
+    return (m_bits & t2.m_bits) == m_bits;
   }
 
   /*
@@ -542,133 +584,116 @@ namespace Type {
    *
    * Pre: the types must not be completely unrelated.
    */
-  inline Tag getMostRefined(Tag t1, Tag t2) {
-    if (isMoreRefined(t1, t2)) return t1;
-    if (isMoreRefined(t2, t1)) return t2;
-    if (t1 == t2) return t1;
-    always_assert(false);
+  static Type mostRefined(Type t1, Type t2) {
+    assert(t1.subtypeOf(t2) || t2.subtypeOf(t1));
+    return t1.subtypeOf(t2) ? t1 : t2;
   }
 
-  inline bool isString(Tag t) {
-    return (t == Str || t == StaticStr);
+  bool isString() const {
+    return subtypeOf(Str);
   }
 
-  inline bool isNull(Tag t) {
-    return (t == Null || t == Uninit);
+  bool isNull() const {
+    return subtypeOf(Null);
   }
 
-  inline Tag getInnerType(Tag t) {
-    assert(isBoxed(t));
-    switch (t) {
-      case BoxedUninit    : return Uninit;
-      case BoxedNull      : return Null;
-      case BoxedBool      : return Bool;
-      case BoxedInt       : return Int;
-      case BoxedDbl       : return Dbl;
-      case BoxedStaticStr : return StaticStr;
-      case BoxedStr       : return Str;
-      case BoxedArr       : return Arr;
-      case BoxedObj       : return Obj;
-      case BoxedCell      : return Cell;
-      default             : not_reached();
-    }
+  Type innerType() const {
+    assert(isBoxed());
+    return Type(m_bits >> kBoxShift);
   }
 
   /*
-   * unionOf: return the least common supertype of t1 and t2, i.e.. the most refined
-   * type t3 such that t1 <: t3 and t2 <: t3.
+   * unionOf: return the least common predefined supertype of t1 and
+   * t2, i.e.. the most refined type t3 such that t1 <: t3 and t2 <:
+   * t3. Note that arbitrary union types are possible, but this
+   * function always returns one of the predefined types.
    */
-  inline Tag unionOf(Tag t1, Tag t2) {
-    assert(subtypeOf(t1, Gen) == subtypeOf(t2, Gen));
-    assert(subtypeOf(t1, Gen) || t1 == t2); // can only union TypeValue types
+  static Type unionOf(Type t1, Type t2) {
+    assert(t1.subtypeOf(Gen) == t2.subtypeOf(Gen));
+    assert(t1.subtypeOf(Gen) || t1 == t2); // can only union TypeValue types
     if (t1 == t2) return t1;
-    if (subtypeOf(t1, t2)) return t2;
-    if (subtypeOf(t2, t1)) return t1;
-    static const Tag union_types[] = {
-      UncountedInit, Uncounted, Cell, BoxedCell, Gen
+    if (t1.subtypeOf(t2)) return t2;
+    if (t2.subtypeOf(t1)) return t1;
+    static const Type union_types[] = {
+#   define IRT(name, ...) name, Boxed##name,
+    IRT_PHP_UNIONS(IRT)
+#   undef IRT
+      Gen,
     };
-    for (size_t i = 0; i < array_size(union_types); ++i) {
-      Tag u = union_types[i];
-      if (subtypeOf(t1, u) && subtypeOf(t2, u)) return u;
+    Type t12 = t1 | t2;
+    for (auto u : union_types) {
+      if (t12.subtypeOf(u)) return u;
     }
     not_reached();
-    return None;
   }
 
-  inline Tag box(Tag t) {
-    if (t == None) {
-      // translator-x64 sometimes gives us an inner type of KindOfInvalid and
-      // an outer type of KindOfRef
-      return BoxedCell;
-    }
-    if (t == Uninit) {
+  Type box() const {
+    // XXX: Get php-specific logic that isn't a natural property of a
+    // sane type system out of this class (such as Uninit.box() ==
+    // BoxedNull). #2087268
+    assert(subtypeOf(Gen));
+    assert(notBoxed());
+    if (isNull()) {
       return BoxedNull;
     }
-    assert(isUnboxed(t));
-    switch (t) {
-      case Uninit     : return BoxedUninit;
-      case Null       : return BoxedNull;
-      case Bool       : return BoxedBool;
-      case Int        : return BoxedInt;
-      case Dbl        : return BoxedDbl;
-      case StaticStr  : return BoxedStaticStr;
-      case Str        : return BoxedStr;
-      case Arr        : return BoxedArr;
-      case Obj        : return BoxedObj;
-      case Cell       : return BoxedCell;
-      default         : not_reached();
-    }
+    return Type(m_bits << kBoxShift);
   }
 
-  inline Tag unbox(Tag t) {
-    assert(t == Gen || isMoreRefined(t, Gen));
-    if (isBoxed(t)) {
-      return getInnerType(t);
-    }
-    if (t == Gen) return Cell;
-    return t;
+  // This computes the type effects of the Unbox opcode.
+  Type unbox() const {
+    assert(subtypeOf(Gen));
+    return (*this & Cell) | (*this & BoxedCell).innerType();
   }
 
-  inline Tag derefPtr(Tag t) {
-    switch (t) {
-      case PtrToCell  : return Cell;
-      case PtrToGen   : return Gen;
-      default         : not_reached();
-    }
+  Type derefPtr() const {
+    assert(isPtr());
+    return Type(m_bits >> kPtrShift);
   }
 
-  extern const char* Strings[];
-
-  // translates a compiler Type::Type to a HPHP::DataType
-  inline DataType toDataType(Tag type) {
-    switch (type) {
-      case None          : return KindOfInvalid;
-      case Uninit        : return KindOfUninit;
-      case Null          : return KindOfNull;
-      case Bool          : return KindOfBoolean;
-      case Int           : return KindOfInt64;
-      case Dbl           : return KindOfDouble;
-      case StaticStr     : return KindOfStaticString;
-      case Str           : return KindOfString;
-      case Arr           : return KindOfArray;
-      case Obj           : return KindOfObject;
-      case Cls           : return KindOfClass;
-      case UncountedInit : return KindOfUncountedInit;
-      case Uncounted     : return KindOfUncounted;
-      case Gen           : return KindOfAny;
-      default: {
-        assert(isBoxed(type));
-        return KindOfRef;
-      }
-    }
+  Type ptr() const {
+    assert(!isPtr());
+    assert(subtypeOf(Gen));
+    return Type(m_bits << kPtrShift);
   }
 
-  inline Tag fromDataType(DataType outerType,
-                          DataType innerType = KindOfInvalid) {
+  bool canRunDtor() const {
+    return (*this & (Obj | Arr | BoxedObj | BoxedArr)) != Type::Bottom;
+  }
+
+  // translates a compiler Type to an HPHP::DataType
+  DataType toDataType() const {
+    assert(!isPtr());
+    if (isBoxed()) {
+      return KindOfRef;
+    }
+
+    // Order is important here: types must progress from more specific
+    // to less specific to return the most specific DataType.
+    if (subtypeOf(None))          return KindOfInvalid;
+    if (subtypeOf(Uninit))        return KindOfUninit;
+    if (subtypeOf(Null))          return KindOfNull;
+    if (subtypeOf(Bool))          return KindOfBoolean;
+    if (subtypeOf(Int))           return KindOfInt64;
+    if (subtypeOf(Dbl))           return KindOfDouble;
+    if (subtypeOf(StaticStr))     return KindOfStaticString;
+    if (subtypeOf(Str))           return KindOfString;
+    if (subtypeOf(Arr))           return KindOfArray;
+    if (subtypeOf(Obj))           return KindOfObject;
+    if (subtypeOf(Cls))           return KindOfClass;
+    if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
+    if (subtypeOf(Uncounted))     return KindOfUncounted;
+    if (subtypeOf(Gen))           return KindOfAny;
+    not_reached();
+  }
+
+  static Type fromDataType(DataType outerType,
+                           DataType innerType = KindOfInvalid) {
+    assert(innerType != KindOfRef);
+
     switch (outerType) {
       case KindOfInvalid       : return None;
       case KindOfUninit        : return Uninit;
-      case KindOfNull          : return Null;
+      case KindOfNull          : return InitNull;
       case KindOfBoolean       : return Bool;
       case KindOfInt64         : return Int;
       case KindOfDouble        : return Dbl;
@@ -680,28 +705,26 @@ namespace Type {
       case KindOfUncountedInit : return UncountedInit;
       case KindOfUncounted     : return Uncounted;
       case KindOfAny           : return Gen;
-      case KindOfRef           :
-        return box(fromDataType(innerType, KindOfInvalid));
+      case KindOfRef: {
+        if (innerType == KindOfInvalid) {
+          return BoxedCell;
+        } else {
+          return fromDataType(innerType).box();
+        }
+      }
       default                  : not_reached();
     }
   }
 
-  inline Tag fromRuntimeType(const Transl::RuntimeType& rtt) {
+  static Type fromRuntimeType(const Transl::RuntimeType& rtt) {
     return fromDataType(rtt.outerType(), rtt.innerType());
   }
+}; // class Type
 
-  inline bool canRunDtor(Type::Tag t) {
-    return (t == Obj       ||
-            t == BoxedObj  ||
-            t == Arr       ||
-            t == BoxedArr  ||
-            t == Cell      ||
-            t == BoxedCell ||
-            t == Gen);
-  }
-}
+static_assert(sizeof(Type) <= sizeof(uint64_t),
+              "JIT::Type should fit in a register");
 
-bool cmpOpTypesMayReenter(Opcode, Type::Tag t0, Type::Tag t1);
+bool cmpOpTypesMayReenter(Opcode, Type t0, Type t1);
 
 class RawMemSlot {
  public:
@@ -730,11 +753,11 @@ class RawMemSlot {
 
   int64 getOffset()   const { return m_offset; }
   int32 getSize()     const { return m_size; }
-  Type::Tag getType() const { return m_type; }
+  Type getType() const { return m_type; }
   bool allowExtra()   const { return m_allowExtra; }
 
  private:
-  RawMemSlot(int64 offset, int32 size, Type::Tag type, bool allowExtra = false)
+  RawMemSlot(int64 offset, int32 size, Type type, bool allowExtra = false)
     : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
@@ -780,7 +803,7 @@ class RawMemSlot {
 
   int64 m_offset;
   int32 m_size;
-  Type::Tag m_type;
+  Type m_type;
   bool m_allowExtra; // Used as a flag to ensure that extra offets are
                      // only used with RawMemSlots that support it
 };
@@ -859,8 +882,8 @@ struct IRInstruction {
 
   Opcode     getOpcode()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
-  Type::Tag  getTypeParam() const      { return m_typeParam; }
-  void       setTypeParam(Type::Tag t) { m_typeParam = t; }
+  Type       getTypeParam() const      { return m_typeParam; }
+  void       setTypeParam(Type t)      { m_typeParam = t; }
   uint32_t   getNumSrcs()  const       { return m_numSrcs; }
   void       setNumSrcs(uint32_t i)    {
     assert(i <= m_numSrcs);
@@ -972,7 +995,7 @@ private:
 
 private:
   Opcode            m_op;
-  Type::Tag         m_typeParam;
+  Type              m_typeParam;
   uint16            m_numSrcs;
   uint16            m_numDsts;
   const IId         m_iid;
@@ -991,7 +1014,7 @@ private:
 
 class ConstInstruction : public IRInstruction {
 public:
-  ConstInstruction(Opcode opc, Type::Tag t) : IRInstruction(opc) {
+  ConstInstruction(Opcode opc, Type t) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
     setTypeParam(t);
     m_intVal = 0;
@@ -1229,7 +1252,7 @@ private:
  * The destination type is always predictable from the types of the
  * inputs and any type parameters to the instruction.
  */
-Type::Tag outputType(const IRInstruction*);
+Type outputType(const IRInstruction*);
 
 /*
  * Assert that an instruction has operands of allowed types.
@@ -1268,15 +1291,15 @@ public:
   uint32            getId() const { return m_id; }
   IRInstruction*    getInstruction() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
-  Type::Tag         getType() const { return m_type; }
-  void              setType(Type::Tag t) { m_type = t; }
+  Type              getType() const { return m_type; }
+  void              setType(Type t) { m_type = t; }
   uint32            getLastUseId() { return m_lastUseId; }
   void              setLastUseId(uint32 newId) { m_lastUseId = newId; }
   uint32            getUseCount() { return m_useCount; }
   void              setUseCount(uint32 count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32            decUseCount() { return --m_useCount; }
-  bool              isBoxed() const { return Type::isBoxed(getType()); }
+  bool              isBoxed() const { return getType().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   void              print(std::ostream& ostream,
                           bool printLastUse = false) const;
@@ -1314,8 +1337,8 @@ public:
    * This should be used for most checks on the types of IRInstruction
    * sources.
    */
-  bool isA(Type::Tag tag) const {
-    return Type::subtypeOf(getType(), tag);
+  bool isA(Type tag) const {
+    return getType().subtypeOf(tag);
   }
 
   /*
@@ -1400,7 +1423,7 @@ private:
 
   IRInstruction*  m_inst;
   const uint32    m_id;
-  Type::Tag       m_type; // type when defined
+  Type            m_type; // type when defined
   uint32          m_lastUseId;
   uint16          m_useCount;
   bool            m_isSpilled : 1;
@@ -1602,17 +1625,9 @@ inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
     return false;
   }
 
-  switch (instr->getSrc(0)->getType()) {
-    case Type::Int     :
-    case Type::Func    :
-    case Type::Cls     :
-    case Type::FuncCls :
-    case Type::VarEnv  :
-    case Type::TCA     :
-      return true;
-    default:
-      return false;
-  }
+  return instr->getSrc(0)->isA(
+    Type::Int | Type::Func | Type::Cls | Type::FuncCls |
+    Type::VarEnv | Type::TCA);
 }
 
 /*
@@ -1660,8 +1675,8 @@ namespace std {
   template<> struct hash<HPHP::VM::JIT::Opcode> {
     size_t operator()(HPHP::VM::JIT::Opcode op) const { return op; }
   };
-  template<> struct hash<HPHP::VM::JIT::Type::Tag> {
-    size_t operator()(HPHP::VM::JIT::Type::Tag t) const { return t; }
+  template<> struct hash<HPHP::VM::JIT::Type> {
+    size_t operator()(HPHP::VM::JIT::Type t) const { return t.hash(); }
   };
 }
 

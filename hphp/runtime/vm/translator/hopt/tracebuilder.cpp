@@ -101,7 +101,7 @@ SSATmp* TraceBuilder::genLdCtx() {
 
 SSATmp* TraceBuilder::genLdProp(SSATmp* obj,
                                 SSATmp* prop,
-                                Type::Tag type,
+                                Type type,
                                 Trace* exit) {
   assert(obj->getType() == Type::Obj);
   assert(prop->getType() == Type::Int);
@@ -158,7 +158,7 @@ SSATmp* TraceBuilder::genCGetElem(TCA func, SSATmp* base, SSATmp* key,
 
 SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
                                int64_t offset,
-                               Type::Tag type,
+                               Type type,
                                Trace* target) {
   assert(addr->getType() == Type::PtrToCell ||
          addr->getType() == Type::PtrToGen);
@@ -167,14 +167,14 @@ SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
 }
 
 SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
-                               Type::Tag type,
+                               Type type,
                                Trace* target) {
   return genLdMem(addr, 0, type, target);
 }
 
-SSATmp* TraceBuilder::genLdRef(SSATmp* ref, Type::Tag type, Trace* exit) {
-  assert(Type::isUnboxed(type));
-  assert(Type::isBoxed(ref->getType()));
+SSATmp* TraceBuilder::genLdRef(SSATmp* ref, Type type, Trace* exit) {
+  assert(type.notBoxed());
+  assert(ref->getType().isBoxed());
   return gen(LdRef, type, getLabel(exit), ref);
 }
 
@@ -212,8 +212,8 @@ void TraceBuilder::genDecRef(SSATmp* tmp) {
     return;
   }
 
-  Type::Tag type = tmp->getType();
-  if (Type::isBoxed(type)) {
+  Type type = tmp->getType();
+  if (type.isBoxed()) {
     // we can't really rely on the types held in the boxed values since
     // aliasing stores may change them. We conservatively set the type
     // of the decref to a boxed cell and rely on later optimizations to
@@ -239,7 +239,7 @@ void TraceBuilder::genDecRef(SSATmp* tmp) {
   gen(DecRef, tmp);
 }
 
-void TraceBuilder::genDecRefMem(SSATmp* base, int64 offset, Type::Tag type) {
+void TraceBuilder::genDecRefMem(SSATmp* base, int64 offset, Type type) {
   gen(DecRefMem, type, base, genDefConst<int64>(offset));
 }
 
@@ -292,7 +292,7 @@ SSATmp* TraceBuilder::genLdRetAddr() {
 }
 
 SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,
-                               Type::Tag type) {
+                               Type type) {
   return gen(LdRaw, type, base, genDefConst(int64(kind)));
 }
 
@@ -446,13 +446,13 @@ void TraceBuilder::genReleaseVVOrExit(Trace* exit) {
   gen(ReleaseVVOrExit, getLabel(exit), m_fpValue);
 }
 
-void TraceBuilder::genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace) {
+void TraceBuilder::genGuardLoc(uint32 id, Type type, Trace* exitTrace) {
   SSATmp* prevValue = getLocalValue(id);
   if (prevValue) {
     genGuardType(prevValue, type, exitTrace);
     return;
   }
-  Type::Tag prevType = getLocalType(id);
+  Type prevType = getLocalType(id);
   if (prevType == Type::None) {
     gen(GuardLoc, type, getLabel(exitTrace), genLdHome(id));
   } else {
@@ -461,26 +461,26 @@ void TraceBuilder::genGuardLoc(uint32 id, Type::Tag type, Trace* exitTrace) {
   }
 }
 
-void TraceBuilder::genAssertLoc(uint32 id, Type::Tag type) {
-  Type::Tag prevType = getLocalType(id);
-  if (prevType == Type::None || Type::isMoreRefined(type, prevType)) {
+void TraceBuilder::genAssertLoc(uint32 id, Type type) {
+  Type prevType = getLocalType(id);
+  if (prevType == Type::None || type.strictSubtypeOf(prevType)) {
     gen(AssertLoc, type, genLdHome(id));
   } else {
-    assert(prevType == type || Type::isMoreRefined(prevType, type));
+    assert(prevType == type || prevType.strictSubtypeOf(type));
   }
 }
 
-SSATmp* TraceBuilder::genLdAssertedLoc(uint32 id, Type::Tag type) {
+SSATmp* TraceBuilder::genLdAssertedLoc(uint32 id, Type type) {
   genAssertLoc(id, type);
   return genLdLoc(id);
 }
 
-void TraceBuilder::genGuardStk(uint32 id, Type::Tag type, Trace* exitTrace) {
+void TraceBuilder::genGuardStk(uint32 id, Type type, Trace* exitTrace) {
   gen(GuardStk, type, getLabel(exitTrace), m_spValue, genDefConst<int64>(id));
 }
 
 SSATmp* TraceBuilder::genGuardType(SSATmp* src,
-                                   Type::Tag type,
+                                   Type type,
                                    Trace* target) {
   assert(target);
   return gen(GuardType, type, getLabel(target), src);
@@ -588,12 +588,12 @@ SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
    * -- track local's value in boxedValue
    */
   SSATmp* prevValue  = genLdLoc(id);
-  Type::Tag prevType = prevValue->getType();
+  Type prevType = prevValue->getType();
   // Don't box if local's value already boxed
-  if (Type::isBoxed(prevType)) {
+  if (prevType.isBoxed()) {
     return prevValue;
   }
-  assert(Type::isUnboxed(prevType));
+  assert(prevType.notBoxed());
   // The Box helper requires us to incref the values its boxing, but in
   // this case we don't need to incref prevValue because we are simply
   // transfering its refcount from the local to the box.
@@ -623,24 +623,26 @@ SSATmp* TraceBuilder::genLdLoc(uint32 id) {
     return tmp;
   }
   // No prior value for this local is available, so actually generate a LdLoc.
-  Type::Tag type = getLocalType(id);
+  auto type = getLocalType(id);
   assert(type != Type::None); // tracelet guards guarantee we have a type
-  switch (type) {
-    case Type::Uninit : tmp = genDefUninit(); break;
-    case Type::Null   : tmp = genDefNull();   break;
-    default           : tmp = gen(LdLoc, type, genLdHome(id));
+  if (type == Type::Uninit) {
+    tmp = genDefUninit();
+  } else if (type == Type::Null) {
+    tmp = genDefNull();
+  } else {
+    tmp = gen(LdLoc, type, genLdHome(id));
   }
   return tmp;
 }
 
 SSATmp* TraceBuilder::genLdLocAsCell(uint32 id, Trace* exitTrace) {
   SSATmp*    tmp = genLdLoc(id);
-  Type::Tag type = tmp->getType();
-  if (!Type::isBoxed(type)) {
+  Type type = tmp->getType();
+  if (!type.isBoxed()) {
     return tmp;
   }
   // Unbox tmp into a cell via a LdRef
-  return genLdRef(tmp, Type::getInnerType(type), exitTrace);
+  return genLdRef(tmp, type.innerType(), exitTrace);
 }
 
 SSATmp* TraceBuilder::genLdLocAddr(uint32 id) {
@@ -671,14 +673,14 @@ void TraceBuilder::genDecRefLoc(int id) {
     genDecRef(val);
     return;
   }
-  Type::Tag type = getLocalType(id);
+  Type type = getLocalType(id);
 
   // Don't generate code if type is not refcounted
-  if (type != Type::None && !Type::isRefCounted(type)) {
+  if (type != Type::None && type.notCounted()) {
     return;
   }
 
-  if (Type::isBoxed(type)) {
+  if (type.isBoxed()) {
     // we can't really rely on the types held in the boxed values since
     // aliasing stores may change them. We conservatively set the type
     // of the decref to a boxed cell.
@@ -701,7 +703,7 @@ void TraceBuilder::genBindLoc(uint32 id,
    * -- track local value in newValue
    */
   SSATmp* home = genLdHome(id);
-  Type::Tag trackedType = getLocalType(id);
+  Type trackedType = getLocalType(id);
   SSATmp* prevValue = 0;
   if (trackedType == Type::None) {
     if (doRefCount) {
@@ -713,23 +715,23 @@ void TraceBuilder::genBindLoc(uint32 id,
     if (prevValue == newValue) {
       // Silent store: home already contains value being stored
       // NewValue needs to be decref'ed
-      if (Type::isRefCounted(trackedType) && doRefCount) {
+      if (!trackedType.notCounted() && doRefCount) {
         genDecRef(prevValue);
       }
       return;
     }
-    if (Type::isRefCounted(trackedType) && !prevValue && doRefCount) {
+    if (!trackedType.notCounted() && !prevValue && doRefCount) {
       prevValue = gen(LdLoc, trackedType, home);
     }
   }
   bool genStoreType = true;
-  if ((Type::isBoxed(trackedType) && Type::isBoxed(newValue->getType())) ||
-      (trackedType == newValue->getType() && !Type::isString(trackedType))) {
+  if ((trackedType.isBoxed() && newValue->getType().isBoxed()) ||
+      (trackedType == newValue->getType() && !trackedType.isString())) {
     // no need to store type with local value
     genStoreType = false;
   }
   genStLocAux(id, newValue, genStoreType);
-  if (Type::isRefCounted(trackedType) && doRefCount) {
+  if (!trackedType.notCounted() && doRefCount) {
     genDecRef(prevValue);
   }
 }
@@ -742,7 +744,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
                                bool doRefCount,
                                bool genStoreType,
                                Trace* exit) {
-  assert(!Type::isBoxed(newValue->getType()));
+  assert(!newValue->getType().isBoxed());
   /*
    * If prior value of local is a cell, then  re-use genBindLoc.
    * Otherwise, if prior value of local is a ref:
@@ -753,14 +755,14 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
    * DecRef prevValue
    * -- track local value in newRef
    */
-  Type::Tag trackedType = getLocalType(id);
+  Type trackedType = getLocalType(id);
   assert(trackedType != Type::None);  // tracelet guards guarantee a type
-  if (Type::isUnboxed(trackedType)) {
+  if (trackedType.notBoxed()) {
     SSATmp* retVal = doRefCount ? genIncRef(newValue) : newValue;
     genBindLoc(id, newValue, doRefCount);
     return retVal;
   }
-  assert(Type::isBoxed(trackedType));
+  assert(trackedType.isBoxed());
   SSATmp* prevRef = getLocalValue(id);
   assert(prevRef == NULL || prevRef->getType() == trackedType);
   // prevRef is a ref
@@ -771,7 +773,7 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   SSATmp* prevValue = NULL;
   if (doRefCount) {
     assert(exit);
-    Type::Tag innerType = Type::getInnerType(trackedType);
+    Type innerType = trackedType.innerType();
     prevValue = gen(LdRef, innerType, getLabel(exit), prevRef);
   }
   // stref [prevRef] = t1
@@ -836,7 +838,7 @@ SSATmp* TraceBuilder::genFreeActRec() {
 static SSATmp* getStackValue(SSATmp* sp,
                              uint32 index,
                              bool& spansCall,
-                             Type::Tag& type) {
+                             Type& type) {
   IRInstruction* inst = sp->getInstruction();
   switch (inst->getOpcode()) {
   case DefSP:
@@ -910,7 +912,7 @@ static SSATmp* getStackValue(SSATmp* sp,
     // sp = InterpOne(fp, sp, bcOff, stackAdjustment, resultType)
     SSATmp* prevSp = inst->getSrc(1);
     int64 numPopped = inst->getSrc(3)->getValInt();
-    Type::Tag resultType = (Type::Tag)inst->getSrc(4)->getValInt();
+    Type resultType = inst->getTypeParam();
     int64 numPushed = resultType == Type::None ? 0 : 1;
     if (index == 0 && numPushed == 1) {
       type = resultType;
@@ -944,12 +946,12 @@ static SSATmp* getStackValue(SSATmp* sp,
   return NULL;
 }
 
-void TraceBuilder::genAssertStk(uint32_t id, Type::Tag type) {
-  Type::Tag knownType = Type::None;
+void TraceBuilder::genAssertStk(uint32_t id, Type type) {
+  Type knownType = Type::None;
   bool spansCall = false;
   UNUSED SSATmp* tmp = getStackValue(m_spValue, id, spansCall, knownType);
   assert(!tmp);
-  if (knownType == Type::None || Type::isMoreRefined(type, knownType)) {
+  if (knownType == Type::None || type.strictSubtypeOf(knownType)) {
     gen(AssertStk, type, m_spValue, genDefConst<int64>(id));
   }
 }
@@ -972,15 +974,15 @@ void TraceBuilder::genNativeImpl() {
 
 SSATmp* TraceBuilder::genInterpOne(uint32 pcOff,
                                    uint32 stackAdjustment,
-                                   Type::Tag resultType,
+                                   Type resultType,
                                    Trace* target) {
   return gen(InterpOne,
+             resultType,
              getLabel(target),
              m_fpValue,
              m_spValue,
              genDefConst<int64>(pcOff),
-             genDefConst<int64>(stackAdjustment),
-             genDefConst<int64>((int64)resultType));
+             genDefConst<int64>(stackAdjustment));
 }
 
 SSATmp* TraceBuilder::genCall(SSATmp* actRec,
@@ -1016,16 +1018,16 @@ IRInstruction* TraceBuilder::genMarker(uint32 bcOff, int32 spOff) {
   return marker;
 }
 
-void TraceBuilder::genDecRefStack(Type::Tag type, uint32 stackOff) {
+void TraceBuilder::genDecRefStack(Type type, uint32 stackOff) {
   bool spansCall = false;
-  Type::Tag knownType = Type::None;
+  Type knownType = Type::None;
   SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
   if (tmp == NULL || (spansCall && !tmp->getInstruction()->isDefConst())) {
     // We don't want to extend live ranges of tmps across calls, so we
     // don't get the value if spansCall is true; however, we can use
     // any type information known.
     if (knownType != Type::None) {
-      type = Type::getMostRefined(type, knownType);
+      type = Type::mostRefined(type, knownType);
     }
     gen(DecRefStack, type, m_spValue, genDefConst<int64>(stackOff));
   } else {
@@ -1072,16 +1074,16 @@ SSATmp* TraceBuilder::genSpillStack(uint32 stackAdjustment,
   return gen(SpillStack, numOpnds + 2, srcs);
 }
 
-SSATmp* TraceBuilder::genLdStack(int32 stackOff, Type::Tag type) {
+SSATmp* TraceBuilder::genLdStack(int32 stackOff, Type type) {
   bool spansCall = false;
-  Type::Tag knownType = Type::None;
+  Type knownType = Type::None;
   SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
   if (tmp == NULL || (spansCall && !tmp->getInstruction()->isDefConst())) {
     // We don't want to extend live ranges of tmps across calls, so we
     // don't get the value if spansCall is true; however, we can use
     // any type information known.
     if (knownType != Type::None) {
-      type = Type::getMostRefined(type, knownType);
+      type = Type::mostRefined(type, knownType);
     }
     return gen(LdStack,
                type,
@@ -1245,7 +1247,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     case InterpOne: {
       m_spValue = inst->getDst();
       int64 stackAdjustment = inst->getSrc(3)->getValInt();
-      Type::Tag resultType = (Type::Tag)inst->getSrc(4)->getValInt();
+      Type resultType = inst->getTypeParam();
       // push the return value if any and adjust for the popped values
       m_spOffset += ((resultType == Type::None ? 0 : 1) - stackAdjustment);
       break;
@@ -1415,7 +1417,7 @@ SSATmp* TraceBuilder::getLocalValue(int id) {
   }
   SSATmp* val = m_localValues[id];
   if (!val) {
-    Type::Tag type = getLocalType(id);
+    Type type = getLocalType(id);
     // TODO
     if (type == Type::Null) {
     }
@@ -1425,7 +1427,7 @@ SSATmp* TraceBuilder::getLocalValue(int id) {
   return val;
 }
 
-Type::Tag TraceBuilder::getLocalType(int id) {
+Type TraceBuilder::getLocalType(int id) {
   if (id == -1 || id >= (int)m_localValues.size()) {
     return Type::None;
   }
@@ -1444,7 +1446,7 @@ void TraceBuilder::setLocalValue(int id, SSATmp* value) {
   m_localTypes[id] = value->getType();
 }
 
-void TraceBuilder::setLocalType(int id, Type::Tag type) {
+void TraceBuilder::setLocalType(int id, Type type) {
   if (id == -1) {
     return;
   }
@@ -1481,10 +1483,10 @@ bool TraceBuilder::anyLocalHasValue(SSATmp* tmp) const {
 // This should only be called for ref/boxed types.
 //
 void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
-  assert(Type::isBoxed(oldRef->getType()));
-  assert(Type::isBoxed(newRef->getType()));
+  assert(oldRef->getType().isBoxed());
+  assert(newRef->getType().isBoxed());
 
-  Type::Tag newRefType = newRef->getType();
+  Type newRefType = newRef->getType();
   size_t nTrackedLocs = m_localValues.size();
   for (size_t id = 0; id < nTrackedLocs; id++) {
     if (m_localValues[id] == oldRef) {

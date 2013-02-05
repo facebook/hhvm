@@ -89,7 +89,7 @@ private:
                bool genStoreType = true);
   void cgStoreTypedValue(PhysReg base, int64_t off, SSATmp* src);
 
-  void cgLoad(Type::Tag type,
+  void cgLoad(Type type,
               SSATmp* dst,
               PhysReg base,
               int64_t off,
@@ -97,15 +97,15 @@ private:
               IRInstruction* inst = NULL);
 
   template<class OpndType>
-  ConditionCode emitTypeTest(Type::Tag type, OpndType src);
+  ConditionCode emitTypeTest(Type type, OpndType src);
 
   template<class OpndType>
-  void emitGuardType(Type::Tag         type,
+  void emitGuardType(Type         type,
                      OpndType          src,
                      LabelInstruction* label,
                      IRInstruction*    instr);
 
-  void cgGuardTypeCell(Type::Tag         type,
+  void cgGuardTypeCell(Type         type,
                        PhysReg           baseReg,
                        int64_t           offset,
                        LabelInstruction* label,
@@ -115,7 +115,7 @@ private:
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
   void cgStLocWork(IRInstruction* inst, bool genStoreType);
   void cgStPropWork(IRInstruction* inst, bool genStoreType);
-  void cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src);
+  void cgIncRefWork(Type type, SSATmp* dst, SSATmp* src);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class OpInstr, class Oper>
@@ -148,7 +148,7 @@ private:
                                     PhysReg      thisReg,
                                     CacheHandle& ch);
 
-  void cgLoadTypedValue(Type::Tag type,
+  void cgLoadTypedValue(Type type,
                         SSATmp* dst,
                         PhysReg base,
                         int64_t off,
@@ -180,16 +180,16 @@ private:
   void emitCheckCell(CodeGenerator::Asm& as,
                      SSATmp* sp,
                      uint32 index);
-  Address cgCheckStaticBit(Type::Tag type,
+  Address cgCheckStaticBit(Type type,
                            PhysReg reg,
                            bool regIsCount);
-  Address cgCheckStaticBitAndDecRef(Type::Tag type,
+  Address cgCheckStaticBitAndDecRef(Type type,
                                     PhysReg dataReg,
                                     LabelInstruction* exit);
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64 offset);
-  void cgDecRefStaticType(Type::Tag type,
+  void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
                           LabelInstruction* exit,
                           bool genZeroCheck);
@@ -200,7 +200,7 @@ private:
   void cgDecRefDynamicTypeMem(PhysReg baseReg,
                               int64 offset,
                               LabelInstruction* exit);
-  void cgDecRefMem(Type::Tag type,
+  void cgDecRefMem(Type type,
                    PhysReg baseReg,
                    int64 offset,
                    LabelInstruction* exit);
@@ -315,9 +315,9 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& type(Type::Tag tag) {
+  ArgGroup& type(Type tag) {
     m_args.push_back(ArgDesc(ArgDesc::Imm, InvalidReg,
-                             Type::toDataType(tag)));
+                             tag.toDataType()));
     return *this;
   }
 
@@ -371,9 +371,8 @@ struct ArgGroup {
    * Pass the DataType of tmp in a register. (not as part of a TypedValue).
    */
   ArgGroup& rawType(SSATmp* tmp) {
-    Type::Tag t = tmp->getType();
-    if (tmp->getInstruction()->isDefConst() ||
-        Type::isStaticallyKnown(t)) {
+    Type t = tmp->getType();
+    if (t.isStaticallyKnown() || tmp->getInstruction()->isDefConst()) {
       return type(t); // DataType is known immediate.
     }
     m_args.push_back(ArgDesc(ArgDesc::Reg, tmp->getReg(1), 0));
@@ -382,7 +381,7 @@ struct ArgGroup {
 
 private:
   ArgGroup& vectorKeyImpl(SSATmp* key, bool allowInt) {
-    if (Type::isString(key->getType()) || (allowInt && key->isA(Type::Int))) {
+    if (key->isString() || (allowInt && key->isA(Type::Int))) {
       ssa(key).none();
     } else {
       valueType(key);

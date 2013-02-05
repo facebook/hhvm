@@ -59,7 +59,7 @@ bool isUnguardedLoad(IRInstruction* inst) {
   if (!inst->hasDst() || !inst->getDst()) return false;
   Opcode opc = inst->getOpcode();
   SSATmp* dst = inst->getDst();
-  Type::Tag type = dst->getType();
+  Type type = dst->getType();
   return (opc == LdStack && (type == Type::Gen || type == Type::Cell))
           || (opc == LdLoc && type == Type::Gen)
           || (opc == LdRef && type == Type::Cell)

@@ -257,8 +257,8 @@ void MemMap::killRefInfo(IRInstruction* save) {
       auto saveType = save->getDst()->getType();
       if (it->second->value != NULL &&
           it->second->value->getType() != saveType &&
-          Type::isStaticallyKnown(it->second->value->getType()) &&
-          Type::isStaticallyKnown(saveType)) {
+          it->second->value->getType().isStaticallyKnown() &&
+          saveType.isStaticallyKnown()) {
         continue;
       }
     }
@@ -312,8 +312,8 @@ void MemMap::killPropInfo(IRInstruction* save) {
         if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem) &&
             copy->value != NULL &&
             copy->value->getType() != save->getDst()->getType() &&
-            Type::isStaticallyKnown(copy->value->getType()) &&
-            Type::isStaticallyKnown(save->getDst()->getType())) {
+            copy->value->getType().isStaticallyKnown() &&
+            save->getDst()->getType().isStaticallyKnown()) {
           continue;
         }
         // TODO consider doing the same with the type of the base ref pointer
@@ -400,7 +400,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       SSATmp* source = inst->getSrc(0);
 
       // figure out which map the new alias is supposed to be inserted into
-      if (Type::isBoxed(source->getType())) {
+      if (source->getType().isBoxed()) {
         if (m_unescaped.count(source) > 0) {
           m_unescaped[dest] = m_unescaped[source];
           if (op == IncRef) {
@@ -522,10 +522,10 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     case DecRef:
     case DecRefNZ: {
       SSATmp* ref = inst->getSrc(0);
-      Type::Tag ty = inst->getSrc(0)->getType();
+      Type ty = inst->getSrc(0)->getType();
 
       // decref of a string has no side effects
-      if (Type::isString(ty)) {
+      if (ty.isString()) {
         break;
       }
 
@@ -544,7 +544,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       // don't kill info if we know we haven't destroyed the object, or if we
       // know that there won't be any destructors being called
       // DecRefNZ can't call a destructor.
-      if (!Type::canRunDtor(ty) || count != 0 || op == DecRefNZ) {
+      if (!ty.canRunDtor() || count != 0 || op == DecRefNZ) {
         break;
       }
       // otherwise fall through to default case. a DecRef of an Obj{&}/Arr{&}
@@ -717,13 +717,13 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
     return;
   }
 
-  Type::Tag instTy = inst->getDst()->getType();
-  Type::Tag valTy = value->getType();
+  Type instTy = inst->getDst()->getType();
+  Type valTy = value->getType();
 
   // check for loads that have a guard and will fail it
   if (inst->getLabel() != NULL && valTy != instTy) {
-    if (!(Type::isString(valTy) && Type::isString(instTy)) &&
-        Type::isStaticallyKnown(valTy) && Type::isStaticallyKnown(instTy)) {
+    if (!(valTy.isString() && instTy.isString()) &&
+        valTy.isStaticallyKnown() && instTy.isStaticallyKnown()) {
       inst->setOpcode(Jmp_);
       inst->setNumSrcs(0);
       inst->setDst(NULL);

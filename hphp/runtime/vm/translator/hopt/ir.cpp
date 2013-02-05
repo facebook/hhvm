@@ -16,7 +16,9 @@
 
 #include "runtime/vm/translator/hopt/ir.h"
 
-#include <string.h>
+#include <algorithm>
+#include <cstring>
+#include <forward_list>
 #include <sstream>
 
 #include "folly/Format.h"
@@ -31,12 +33,61 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
 
-#include <algorithm>
-#include <forward_list>
+namespace HPHP { namespace VM { namespace JIT {
 
-namespace HPHP {
-namespace VM {
-namespace JIT{
+// IRT_PRIMITIVE
+#define IRT(name, bit) const Type Type::name(bit);
+IRT_PRIMITIVE
+#undef IRT
+
+// IRT_PHP_UNIONS
+const Type Type::Null(Type::Uninit | Type::InitNull);
+const Type Type::Str(Type::StaticStr | Type::CountedStr);
+const Type Type::UncountedInit(Type::InitNull | Type::Bool |
+                               Type::Int | Type::Dbl | Type::StaticStr);
+const Type Type::Uncounted(Type::Uninit | Type::UncountedInit);
+const Type Type::Cell(Type::Uncounted | Type::Str | Type::Arr | Type::Obj);
+#define IRT(name, bit)                                                  \
+const Type Type::Boxed##name(Type::name.m_bits << Type::kBoxShift);     \
+const Type Type::PtrTo##name(Type::name.m_bits << Type::kPtrShift);     \
+const Type Type::PtrToBoxed##name(Type::name.m_bits << Type::kPtrBoxShift);
+IRT_PHP_UNIONS(IRT)
+#undef IRT
+
+// IRT_UNIONS
+const Type Type::Ctx(Type::Obj | Type::Cctx);
+const Type Type::FuncCtx(Type::FuncCls | Type::FuncObj);
+
+// IRT_SPECIAL
+const Type Type::Bottom(0);
+const Type Type::Gen(Type::Cell | Type::BoxedCell);
+const Type Type::PtrToGen(Type::Gen.m_bits << Type::kPtrShift);
+
+std::string Type::toString() const {
+  // Try to find an exact match to a predefined type
+# define IRT(name, ...) if (*this == name) return #name;
+  IR_TYPES
+# undef IRT
+
+  // Concat all of the primitive types in the custom union type
+  std::vector<std::string> types;
+# define IRT(name, ...) if (name.subtypeOf(*this)) types.push_back(#name);
+  IRT_PRIMITIVE
+# undef IRT
+  return folly::format("{{{}}}", folly::join('|', types)).str();
+}
+
+Type Type::fromString(const std::string& str) {
+  static hphp_string_map<Type> types;
+  static bool init = false;
+  if (UNLIKELY(!init)) {
+#   define IRT(name, ...) types[#name] = name;
+    IR_TYPES
+#   undef IRT
+    init = true;
+  }
+  return mapGet(types, str, Type::None);
+}
 
 namespace {
 
@@ -194,14 +245,14 @@ bool IRInstruction::mayModifyRefs() const {
   // count. Therefore, its MayModifyRefs should be false.
   if (opc == DecRef) {
     auto type = getSrc(0)->getType();
-    if (isControlFlowInstruction() || Type::isString(type)) {
+    if (isControlFlowInstruction() || type.isString()) {
       // If the decref has a target label, then it exits if the destructor
       // has to be called, so it does not have any side effects on the main
       // trace.
       return false;
     }
-    if (Type::isBoxed(type)) {
-      Type::Tag innerType = Type::getInnerType(type);
+    if (type.isBoxed()) {
+      Type innerType = type.innerType();
       return innerType == Type::Obj || innerType == Type::Arr;
     }
   }
@@ -288,20 +339,14 @@ Opcode queryCommuteTable[] = {
   OpNSame       // OpNSame
 };
 
-const char* Type::Strings[(int)Type::TAG_ENUM_COUNT] = {
-#define IRT(type, name)  name,
-    IR_TYPES
-#undef IRT
-};
-
 // Objects compared with strings may involve calling a user-defined
 // __toString function.
-bool cmpOpTypesMayReenter(Opcode op, Type::Tag t0, Type::Tag t1) {
+bool cmpOpTypesMayReenter(Opcode op, Type t0, Type t1) {
   if (op == OpNSame || op == OpSame) return false;
   assert(t0 != Type::Gen && t1 != Type::Gen);
   return (t0 == Type::Cell || t1 == Type::Cell) ||
     ((t0 == Type::Obj || t1 == Type::Obj) &&
-     (Type::isString(t0) || Type::isString(t1)));
+     (t0.isString() || t1.isString()));
 }
 
 TraceExitType::ExitType getExitType(Opcode opc) {
@@ -314,7 +359,7 @@ Opcode getExitOpcode(TraceExitType::ExitType type) {
 }
 
 bool isRefCounted(SSATmp* tmp) {
-  if (!Type::isRefCounted(tmp->getType())) {
+  if (tmp->getType().notCounted()) {
     return false;
   }
   IRInstruction* inst = tmp->getInstruction();
@@ -400,7 +445,7 @@ size_t IRInstruction::hash() const {
 void IRInstruction::printOpcode(std::ostream& ostream) const {
   ostream << opcodeName(m_op);
   if (m_typeParam != Type::None) {
-    ostream << '<' << Type::Strings[m_typeParam] << '>';
+    ostream << '<' << m_typeParam.toString() << '>';
   }
 }
 
@@ -463,8 +508,8 @@ void IRInstruction::print(std::ostream& ostream) const {
       ostream << " + ";
       printSrc(ostream, 1);
     }
-    Type::Tag type = isStMem ? getSrc(2)->getType() : m_typeParam;
-    ostream << "]:" << Type::Strings[type];
+    Type type = isStMem ? getSrc(2)->getType() : m_typeParam;
+    ostream << "]:" << type.toString();
     if (!isLdMem) {
       assert(getNumSrcs() > 1);
       ostream << ", ";
@@ -510,60 +555,43 @@ std::string IRInstruction::toString() const {
 }
 
 void ConstInstruction::printConst(std::ostream& ostream) const {
-  switch (getTypeParam()) {
-    case Type::Int:
-      ostream << m_intVal;
-      break;
-    case Type::Dbl:
-      ostream << m_dblVal;
-      break;
-    case Type::Bool:
-      ostream << (m_boolVal ? "true" : "false");
-      break;
-    case Type::Str:
-    case Type::StaticStr:
-      ostream << "\""
-              << Util::escapeStringForCPP(m_strVal->data(), m_strVal->size())
-              << "\"";
-      break;
-    case Type::Arr:
-    {
-      if (isEmptyArray()) {
-        ostream << "array()";
-      } else {
-        ostream << "Array(" << (void*)m_arrVal << ")";
-      }
-      break;
+  auto t = getTypeParam();
+  if (t == Type::Int) {
+    ostream << m_intVal;
+  } else if (t == Type::Dbl) {
+    ostream << m_dblVal;
+  } else if (t == Type::Bool) {
+    ostream << (m_boolVal ? "true" : "false");
+  } else if (t.isString()) {
+    ostream << "\""
+        << Util::escapeStringForCPP(m_strVal->data(), m_strVal->size())
+        << "\"";
+  } else if (t == Type::Arr) {
+    if (isEmptyArray()) {
+      ostream << "array()";
+    } else {
+      ostream << "Array(" << (void*)m_arrVal << ")";
     }
-    case Type::Home:
-      m_local.print(ostream);
-      break;
-    case Type::Null:
-      ostream << "Null";
-      break;
-    case Type::Uninit:
-      ostream << "Unin";
-      break;
-    case Type::Func:
-      ostream << "Func(" << (m_func ? m_func->fullName()->data() : "0") << ")";
-      break;
-    case Type::Cls:
-      ostream << "Cls(" << (m_clss ? m_clss->name()->data() : "0") << ")";
-      break;
-    case Type::NamedEntity:
-      ostream << "NamedEntity(" << m_namedEntity << ")";
-      break;
-    case Type::FuncCls:
-      assert(false /* ConstInstruction does not hold both func* and class* */);
-      break;
-    case Type::TCA:
-      ostream << folly::format("TCA: 0x{:x}", m_intVal);
-      break;
-    case Type::None:
-      ostream << "None:" << m_intVal;
-      break;
-    default:
-      not_reached();
+  } else if (t == Type::Home) {
+    m_local.print(ostream);
+  } else if (t == Type::Null) {
+    ostream << "Null";
+  } else if (t == Type::Uninit) {
+    ostream << "Unin";
+  } else if (t == Type::Func) {
+    ostream << "Func(" << (m_func ? m_func->fullName()->data() : "0") << ")";
+  } else if (t == Type::Cls) {
+    ostream << "Cls(" << (m_clss ? m_clss->name()->data() : "0") << ")";
+  } else if (t == Type::NamedEntity) {
+    ostream << "NamedEntity(" << m_namedEntity << ")";
+  } else if (t == Type::FuncCls) {
+    assert(false && "ConstInstruction does not hold both func* and class*");
+  } else if (t == Type::TCA) {
+    ostream << folly::format("TCA: 0x{:x}", m_intVal);
+  } else if (t == Type::None) {
+    ostream << "None:" << m_intVal;
+  } else {
+    not_reached();
   }
 }
 
@@ -642,31 +670,24 @@ void MarkerInstruction::print(std::ostream& ostream) const {
 }
 
 int SSATmp::numNeededRegs() const {
-  Type::Tag type = getType();
-  switch (type) {
+  auto type = getType();
+  if (type.subtypeOf(Type::None | Type::Null | Type::ActRec)) {
     // These don't need a register because their values are static or unused.
-    case Type::None:
-    case Type::Uninit:
-    case Type::Null:
-    case Type::ActRec:
-      return 0;
-
-    // These need 2 registers, 1 for the value and 1 for the type.
-    case Type::Cell:
-    case Type::Gen:
-    case Type::Uncounted:
-    case Type::UncountedInit:
-      return 2;
-
-    // These need 2 registers, 1 for Func*, and 1 for {Obj|Cls|Cctx}.
-    case Type::FuncCls:
-    case Type::FuncCtx:
-      return 2;
-
-    // By default, all other types only need 1 register.
-    default:
-      return 1;
+    return 0;
   }
+  if (type.subtypeOf(Type::Ctx)) {
+    // Ctx is statically unknown but it always needs just 1 register.
+    return 1;
+  }
+  if (!type.isStaticallyKnown() || type.subtypeOf(Type::FuncCtx)) {
+    // These need 2 registers, 1 for the value and 1 for the type, or
+    // 1 for the Func* and 1 for the {Obj|Cctx}
+    return 2;
+  }
+
+  // By default, all other types only need 1 register.
+  assert(type.isStaticallyKnown());
+  return 1;
 }
 
 int SSATmp::numAllocatedRegs() const {
@@ -762,7 +783,7 @@ void SSATmp::print(std::ostream& os, bool printLastUse) const {
     }
     os << ')';
   }
-  os << ":" << Type::Strings[getType()];
+  os << ":" << getType().toString();
 }
 
 void SSATmp::print() const {

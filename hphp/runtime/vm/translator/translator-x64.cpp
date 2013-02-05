@@ -10946,7 +10946,7 @@ TranslatorX64::emitVariantGuards(const Tracelet& t,
     if (modifiableLocal) {
       if (m_useHHIR) {
         RuntimeType& rtt = input->rtt;
-        JIT::Type::Tag type = JIT::Type::fromRuntimeType(rtt);
+        JIT::Type type = JIT::Type::fromRuntimeType(rtt);
         if (isFirstInstr) {
           m_hhbcTrans->guardTypeLocal(input->location.offset, type);
         } else {

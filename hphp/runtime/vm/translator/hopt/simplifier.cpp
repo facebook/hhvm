@@ -187,7 +187,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
  * so, changes that load into a load that guards on the given
  * type. Returns true if it succeeds.
  */
-static bool hoistGuardToLoad(SSATmp* tmp, Type::Tag type) {
+static bool hoistGuardToLoad(SSATmp* tmp, Type type) {
   IRInstruction* inst = tmp->getInstruction();
   switch (inst->getOpcode()) {
     case Mov:
@@ -216,9 +216,9 @@ static bool hoistGuardToLoad(SSATmp* tmp, Type::Tag type) {
         // Not a control flow instruction, so can't give it check semantics
         break;
       }
-      Type::Tag instType = tmp->getType();
+      Type instType = tmp->getType();
       if (instType == Type::Gen ||
-          (instType == Type::Cell && !Type::isBoxed(type))) {
+          (instType == Type::Cell && !type.isBoxed())) {
         tmp->setType(type);
         inst->setTypeParam(type);
         return true;
@@ -232,17 +232,17 @@ static bool hoistGuardToLoad(SSATmp* tmp, Type::Tag type) {
 }
 
 SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
-  Type::Tag type    = inst->getTypeParam();
+  Type type    = inst->getTypeParam();
   SSATmp*   src     = inst->getSrc(0);
-  Type::Tag srcType = src->getType();
-  if (srcType == type || Type::isMoreRefined(srcType, type)) {
+  Type srcType = src->getType();
+  if (srcType == type || srcType.strictSubtypeOf(type)) {
     /*
      * the type of the src is the same or more refined than type, so the
      * guard is unnecessary.
      */
     return src;
   }
-  if (Type::isMoreRefined(type, srcType)) {
+  if (type.strictSubtypeOf(srcType)) {
     if (hoistGuardToLoad(src, type)) {
       return src;
     }
@@ -341,9 +341,9 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
 #define SIMPLIFY_CONST(OP) do {                                               \
   /* don't canonicalize to the right, OP might not be commutative */          \
   if (src1->isConst() && src2->isConst()) {                                   \
-    if (Type::isNull(src1->getType())) {                                      \
+    if (src1->getType().isNull()) {                                     \
       /* Null op Null */                                                      \
-      if (Type::isNull(src2->getType())) {                                    \
+      if (src2->getType().isNull()) {                                    \
         return genDefInt(0 OP 0);                                             \
       }                                                                       \
       /* Null op ConstInt */                                                  \
@@ -365,7 +365,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
     }                                                                         \
     if (src1->getType() == Type::Int) {                                       \
       /* ConstInt op Null */                                                  \
-      if (Type::isNull(src2->getType())) {                                    \
+      if (src2->getType().isNull()) {                                   \
         return genDefInt(src1->getValInt() OP 0);                      \
       }                                                                       \
       /* ConstInt op ConstInt */                                              \
@@ -389,7 +389,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
     }                                                                         \
     if (src1->getType() == Type::Bool) {                                      \
       /* ConstBool op Null */                                                 \
-      if (Type::isNull(src2->getType())) {                                    \
+      if (src2->getType().isNull()) {                                   \
         return genDefInt(src1->getValBool() OP 0);                     \
       }                                                                       \
       /* ConstBool op ConstInt */                                             \
@@ -418,7 +418,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
         strInt = str->toInt64();                                              \
       }                                                                       \
       /* StaticStr op Null */                                                 \
-      if (Type::isNull(src2->getType())) {                                    \
+      if (src2->getType().isNull()) {                                    \
         return genDefInt(strInt OP 0);                                        \
       }                                                                       \
       /* StaticStr op ConstInt */                                             \
@@ -658,8 +658,8 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   }
 
   // need both types to be unboxed and known to simplify
-  if (!Type::isUnboxed(src1->getType()) || src1->getType() == Type::Cell ||
-      !Type::isUnboxed(src2->getType()) || src2->getType() == Type::Cell) {
+  if (!src1->getType().notBoxed() || src1->getType() == Type::Cell ||
+      !src2->getType().notBoxed() || src2->getType() == Type::Cell) {
     return nullptr;
   }
 
@@ -670,8 +670,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   if (opName == OpSame || opName == OpNSame) {
     // OpSame and OpNSame do not perform type juggling
     if (src1->getType() != src2->getType()) {
-      if (!(Type::isString(src1->getType()) &&
-            Type::isString(src2->getType()))) {
+      if (!(src1->getType().isString() && src2->getType().isString())) {
         return genDefBool(opName == OpNSame);
       }
     }
@@ -680,7 +679,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
 
     // OpSame and OpNSame have special rules for string and object
     // Other types may simplify to OpEq and OpNeq, respectively
-    if (Type::isString(src1->getType()) && Type::isString(src2->getType())) {
+    if (src1->getType().isString() && src2->getType().isString()) {
       if (src1->isConst() && src2->isConst()) {
         auto str1 = src1->getValStr();
         auto str2 = src2->getValStr();
@@ -705,7 +704,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   // ---------------------------------------------------------------------
 
   // Null cmp Null
-  if (Type::isNull(src1->getType()) && Type::isNull(src2->getType())) {
+  if (src1->getType().isNull() && src2->getType().isNull()) {
     return genDefBool(cmpOp(opName, 0, 0));
   }
   // const cmp const
@@ -770,7 +769,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   // ---------------------------------------------------------------------
 
   if (src1->getType() == src2->getType() ||
-      (Type::isString(src1->getType()) && Type::isString(src2->getType()))) {
+      (src1->getType().isString() && src2->getType().isString())) {
     if (src1->isConst() && !src2->isConst()) {
       return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
     }
@@ -783,18 +782,18 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   // ---------------------------------------------------------------------
 
   // nulls get canonicalized to the right
-  if (Type::isNull(src1->getType())) {
+  if (src1->getType().isNull()) {
     return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
   }
 
   // case 1: null cmp string. Convert null to ""
-  if (Type::isString(src1->getType()) && Type::isNull(src2->getType())) {
+  if (src1->getType().isString() && src2->getType().isNull()) {
     return m_tb->genCmp(opName, src1,
                         m_tb->genDefConst(StringData::GetStaticString("")));
   }
 
   // case 2a: null cmp anything. Convert null to false
-  if (Type::isNull(src2->getType())) {
+  if (src2->getType().isNull()) {
     return m_tb->genCmp(opName, src1, genDefBool(false));
   }
 
@@ -808,7 +807,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     if (src1->isConst()) {
       if (src1->getType() == Type::Int) {
         return m_tb->genCmp(opName, genDefBool(src1->getValInt()), src2);
-      } else if (Type::isString(src1->getType())) {
+      } else if (src1->getType().isString()) {
         auto str = src1->getValStr();
         return m_tb->genCmp(opName, genDefBool(str->toBoolean()), src2);
       }
@@ -837,7 +836,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   // same-type simplification is performed above
 
   // strings get canonicalized to the left
-  if (Type::isString(src2->getType())) {
+  if (src2->getType().isString()) {
     return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
   }
 
@@ -851,7 +850,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   //  cases (specifically, string-int). Other cases (like string-string)
   //  are dealt with earlier, while other cases (like number-resource)
   //  are not caught at all (and end up exiting this macro at the bottom).
-  if (Type::isString(src1->getType()) && src1->isConst() &&
+  if (src1->getType().isString() && src1->isConst() &&
       src2->getType() == Type::Int) {
     auto str = src1->getValStr();
     int64 si; double sd;
@@ -891,10 +890,9 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.
-  assert(Type::isStaticallyKnownUnboxed(type) && type != Type::StaticStr);
+  assert(type.isStaticallyKnownUnboxed() && type != Type::StaticStr);
   if (type != Type::Obj) {
-    if (srcType == type ||
-        (type == Type::Str && srcType == Type::StaticStr)) {
+    if (srcType.subtypeOf(type) || (type.isString() && srcType.isString())) {
       return genDefBool(true);
     }
     if (srcType != Type::Cell) {
@@ -923,13 +921,13 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
 
 SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
   SSATmp* src      = inst->getSrc(0);
-  Type::Tag type   = src->getType();
-  Type::Tag toType = inst->getTypeParam();
+  Type type   = src->getType();
+  Type toType = inst->getTypeParam();
   if (toType == type) {
     return src;
   }
   if (toType == Type::Str) {
-    if (Type::isString(type)) {
+    if (type.isString()) {
       return src;
     }
     // arrays always get converted to the string "Array"
@@ -957,7 +955,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
     }
   }
   if (toType == Type::Bool) {
-    if (Type::isNull(type)) {
+    if (type.isNull()) {
       return genDefBool(false);
     }
     if (type == Type::Obj) {
@@ -985,7 +983,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
     }
   }
   if (toType == Type::Int) {
-    if (Type::isNull(type)) {
+    if (type.isNull()) {
       return genDefInt(0);
     }
     if (src->isConst()) {
@@ -1033,17 +1031,17 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   auto type           = outputType(inst);
 
   assert(typeFailLabel);
-  assert(Type::isUnboxed(type));
+  assert(type.notBoxed());
 
-  Type::Tag srcType = src->getType();
-  if (Type::isUnboxed(srcType)) {
+  Type srcType = src->getType();
+  if (srcType.notBoxed()) {
     // TODO: generate a guardType if this assertion fails
-    assert(!Type::isMoreRefined(type, srcType));
+    assert(!type.strictSubtypeOf(srcType));
     return src;
   }
-  if (Type::isBoxed(srcType)) {
-    srcType = Type::getInnerType(srcType);
-    if (Type::isMoreRefined(srcType, type)) {
+  if (srcType.isBoxed()) {
+    srcType = srcType.innerType();
+    if (srcType.strictSubtypeOf(type)) {
       type = srcType;
     }
     return m_tb->genLdRef(src, type, typeFailLabel->getParent());
@@ -1060,8 +1058,8 @@ SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
   if (inst->getLabel() != NULL) {
-    Type::Tag type = inst->getSrc(0)->getType();
-    if (Type::isInit(type)) {
+    Type type = inst->getSrc(0)->getType();
+    if (type.isInit()) {
       // Unnecessary CheckInit!
       inst->convertToNop();
     }

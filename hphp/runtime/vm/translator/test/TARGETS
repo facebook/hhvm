@@ -5,6 +5,7 @@ cpp_unittest(
   srcs=['main.cpp',
         'fixup_map.cpp',
         'tread_hash_map.cpp',
+        '../hopt/test/type.cpp',
         ],
   deps=['@/hphp/hhvm:unit_lib'],
   external_deps = [('gtest', None, 'gtest'),],

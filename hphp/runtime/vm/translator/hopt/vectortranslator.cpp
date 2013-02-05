@@ -367,7 +367,7 @@ void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
     m_tb.genStMem(m_misBase, MISOFF(tvRef), m_tb.genDefUninit(), true);
 
     // Adjust base pointer.
-    assert(Type::isPtr(m_base->getType()));
+    assert(m_base->getType().isPtr());
     m_base = m_tb.genLdAddr(m_misBase, MISOFF(tvRef2));
   }
 }

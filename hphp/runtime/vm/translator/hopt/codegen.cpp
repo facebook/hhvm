@@ -83,8 +83,8 @@ using Transl::rVmSp;
 using Transl::rVmFp;
 
 const int64_t kTypeShiftBits = sizeof(int32_t) * CHAR_BIT;
-int64_t toDataTypeForCall(Type::Tag type) {
-  return (int64)Type::toDataType(type) << (sizeof(int32_t) * CHAR_BIT);
+uint64_t toDataTypeForCall(Type type) {
+  return (uint64_t)type.toDataType() << (sizeof(int32_t) * CHAR_BIT);
 }
 
 int64_t spillSlotsToSize(int n) {
@@ -265,7 +265,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     m_kind = Imm;
     return;
   }
-  if (tmp->getType() == Type::Null || tmp->getType() == Type::Uninit) {
+  if (tmp->getType().isNull()) {
     m_srcReg = InvalidReg;
     if (val) {
       m_imm = 0;
@@ -474,8 +474,8 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
   SSATmp* src2  = inst->getSrc(1);
   Opcode opc = inst->getOpcode();
   ConditionCode cc = cmpOpToCC(queryJmpToQueryOp(opc));
-  Type::Tag src1Type = src1->getType();
-  Type::Tag src2Type = src2->getType();
+  Type src1Type = src1->getType();
+  Type src2Type = src2->getType();
 
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or a numeric, and we can't mix bool/numerics because
@@ -1034,8 +1034,8 @@ inline int64 ccmp_gte(A a, B b) { return !ccmp_less(a, b); }
                 ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
 
 // SRON - string, resource, object, or number
-static bool typeIsSRON(Type::Tag t) {
-  return Type::isString(t)
+static bool typeIsSRON(Type t) {
+  return t.isString()
       || t == Type::Obj // encompases object and resource
       || t == Type::Int
       || t == Type::Dbl
@@ -1056,8 +1056,8 @@ void CodeGenerator::cgOpCmpHelper(
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
 
-  Type::Tag type1 = src1->getType();
-  Type::Tag type2 = src2->getType();
+  Type type1 = src1->getType();
+  Type type2 = src2->getType();
 
   auto src1Reg = src1->getReg();
   auto src2Reg = src2->getReg();
@@ -1080,7 +1080,7 @@ void CodeGenerator::cgOpCmpHelper(
   /////////////////////////////////////////////////////////////////////////////
   // case 1: null/string cmp string
   // simplifyCmp has converted the null to ""
-  if (Type::isString(type1) && Type::isString(type2)) {
+  if (type1.isString() && type2.isString()) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);
     cgCallHelper(m_as, (TCA)str_cmp_str,  dst, kSyncPoint, args);
@@ -1125,7 +1125,7 @@ void CodeGenerator::cgOpCmpHelper(
       }
     }
 
-    else if (Type::isString(type1)) {
+    else if (type1.isString()) {
       // string cmp string is dealt with in case 1
       // string cmp double is punted above
 
@@ -1219,7 +1219,7 @@ void CodeGenerator::cgIsTypeMemCommon(IRInstruction* inst, bool negate) {
   PhysReg   dstReg = dst->getReg();
   SSATmp*   addr = inst->getSrc(0);
   PhysReg   base = addr->getReg();
-  Type::Tag type = inst->getTypeParam();
+  Type type = inst->getTypeParam();
   ConditionCode cc = emitTypeTest(type, base[TVOFF(m_type)]);
   if (!negate) {
     cc = ccNegate(cc);
@@ -1384,8 +1384,8 @@ asm_label(a, out);
 }
 
 void CodeGenerator::cgConv(IRInstruction* inst) {
-  Type::Tag toType   = inst->getTypeParam();
-  Type::Tag fromType = inst->getSrc(0)->getType();
+  Type toType   = inst->getTypeParam();
+  Type fromType = inst->getSrc(0)->getType();
   SSATmp* dst = inst->getDst();
   SSATmp* src = inst->getSrc(0);
 
@@ -1409,7 +1409,7 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
       }
       return;
     }
-    if (Type::isString(fromType)) {
+    if (fromType.isString()) {
       if (src->isConst()) {
         auto val = src->getValStr()->toInt64();
         m_as.mov_imm64_reg(val, dstReg);
@@ -1423,7 +1423,7 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
   }
 
   if (toType == Type::Bool) {
-    if (fromType == Type::Null || fromType == Type::Uninit) {
+    if (fromType.isNull()) {
       // Uninit/Null -> Bool (false)
       m_as.xor_reg64_reg64(dstReg, dstReg);
     } else if (fromType == Type::Bool) {
@@ -1459,7 +1459,7 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
         // Cell -> Bool
         args.type(src);
         helper = (TCA)cellToBoolHelper;
-      } else if (Type::isString(fromType)) {
+      } else if (fromType.isString()) {
         // Str -> Bool
         helper = (TCA)strToBoolHelper;
       } else if (fromType == Type::Arr) {
@@ -1477,7 +1477,7 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
     return;
   }
 
-  if (Type::isString(toType)) {
+  if (toType.isString()) {
     if (fromType == Type::Int) {
       // Int -> Str
       ArgGroup args;
@@ -1526,17 +1526,17 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
     CG_PUNT(Unbox);
   }
 
-  Type::Tag dstType = dst->getType();
-  Type::Tag srcType = src->getType();
+  Type dstType = dst->getType();
+  Type srcType = src->getType();
 
-  assert(!Type::isUnboxed(srcType));
-  assert(Type::isUnboxed(dstType));
+  assert(!srcType.notBoxed());
+  assert(dstType.notBoxed());
   if (dstType == Type::Cell) {
     CG_PUNT(Unbox_Cell);
   }
   auto srcReg = src->getReg();
   auto dstReg = dst->getReg();
-  if (Type::isBoxed(srcType)) {
+  if (srcType.isBoxed()) {
     emitDeref(m_as, PhysReg(srcReg), PhysReg(dstReg));
   } else if (srcType == Type::Gen) {
     CG_PUNT(Unbox_Gen);
@@ -1550,8 +1550,7 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
     assert(false);
     CG_PUNT(Unbox);
   }
-  if (genIncRef && Type::isRefCounted(dstType) &&
-      dst->getReg() != InvalidReg) {
+  if (genIncRef && !dstType.notCounted() && dst->getReg() != InvalidReg) {
     cgIncRefWork(dstType, dst, dst);
   }
 }
@@ -1640,15 +1639,15 @@ void CodeGenerator::cgRetVal(IRInstruction* inst) {
 
   // Store return value at the top of the caller's eval stack
   // (a) Store the type
-  if (Type::isStaticallyKnown(val->getType())) {
-    a.    storel (Type::toDataType(val->getType()),
+  if (val->getType().isStaticallyKnown()) {
+    a.    storel (val->getType().toDataType(),
                   rFp[AROFF(m_r) + TVOFF(m_type)]);
   } else {
     a.    storel (r32(val->getReg(1)), rFp[AROFF(m_r) + TVOFF(m_type)]);
   }
 
   // (b) Store the actual value (not necessary when storing Null)
-  if (val->getType() == Type::Null) return;
+  if (val->getType().isNull()) return;
   if (val->getInstruction()->isDefConst()) {
     a.    storeq (val->getValRawInt(),
                   rFp[AROFF(m_r) + TVOFF(m_data)]);
@@ -2138,10 +2137,10 @@ static void emitIncRef(CodeGenerator::Asm& as, PhysReg base) {
   }
 }
 
-void CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
-  assert(Type::isRefCounted(type));
+void CodeGenerator::cgIncRefWork(Type type, SSATmp* dst, SSATmp* src) {
+  assert(type.maybeCounted());
   auto base = src->getReg(0);
-  if (type == Type::Obj || Type::isBoxed(type)) {
+  if (!type.needsStaticBitCheck()) {
     emitIncRef(m_as, base);
     auto dstReg = dst->getReg(0);
     if (dstReg != InvalidReg && dstReg != base) {
@@ -2153,14 +2152,16 @@ void CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
     return;
   }
 
+  assert(type.needsStaticBitCheck());
   // Type::Cell, Type::Gen, Type::String, or Type::Arr
   TCA patch1 = NULL;
-  if (!Type::isStaticallyKnown(type)) {
+  if (!type.isStaticallyKnown()) {
     auto typ = src->getReg(1);
     m_as.cmp_imm32_reg32(KindOfRefCountThreshold, typ);
     patch1 = m_as.code.frontier;
     m_as.jcc8(CC_LE, patch1);
   }
+
   // check against static
   m_as.cmp_imm32_disp_reg32(RefCountStaticValue, TVOFF(_count), base);
   TCA patch2 = m_as.code.frontier;
@@ -2211,7 +2212,7 @@ void CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
   SSATmp* dst    = inst->getDst();
   SSATmp* src    = inst->getSrc(0);
-  Type::Tag type = src->getType();
+  Type type = src->getType();
 
   if (m_curTrace->isMain()) {
     TRACE(3, "[counter] 1 IncRef in main traces\n");
@@ -2220,7 +2221,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
-  Type::Tag type = inst->getTypeParam();
+  Type type = inst->getTypeParam();
   SSATmp* sp     = inst->getSrc(0);
   SSATmp* index  = inst->getSrc(1);
   cgDecRefMem(type,
@@ -2389,10 +2390,10 @@ Address CodeGenerator::getDtorTyped() {
 //
 // Return value: the address to be patched with the address to jump to in case
 // the static bit is set. If the check is unnecessary, this method retuns NULL.
-Address CodeGenerator::cgCheckStaticBit(Type::Tag type,
+Address CodeGenerator::cgCheckStaticBit(Type type,
                                         PhysReg reg,
                                         bool regIsCount) {
-  if (!Type::needsStaticBitCheck(type)) return NULL;
+  if (!type.needsStaticBitCheck()) return NULL;
 
   if (regIsCount) {
     // reg has the _count value
@@ -2417,10 +2418,10 @@ Address CodeGenerator::cgCheckStaticBit(Type::Tag type,
 // Return value: the address to be patched if a RefCountedStaticValue check is
 //               emitted; NULL otherwise.
 //
-Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
+Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
                                                  PhysReg dataReg,
                                                  LabelInstruction* exit) {
-  assert(Type::isRefCounted(type));
+  assert(type.maybeCounted());
 
   Address patchStaticCheck = NULL;
   const auto scratchReg = rScratch;
@@ -2430,7 +2431,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
   // TODO: run experiments to check whether the 'if' code sequence
   // is any better than the 'else' branch below; otherwise, always
   // use the 'else' code sequence
-  if (Type::needsStaticBitCheck(type) && canUseScratch) {
+  if (type.needsStaticBitCheck() && canUseScratch) {
     // If we need to check for static value, then load the _count into a
     // register to avoid doing two loads. The generated sequence is:
     //
@@ -2537,13 +2538,14 @@ Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg,
 //
 // Generates dec-ref of a typed value with statically known type.
 //
-void CodeGenerator::cgDecRefStaticType(Type::Tag type,
+void CodeGenerator::cgDecRefStaticType(Type type,
                                        PhysReg dataReg,
                                        LabelInstruction* exit,
                                        bool genZeroCheck) {
   assert(type != Type::Cell && type != Type::Gen);
+  assert(type.isStaticallyKnown());
 
-  if (!Type::isRefCounted(type)) return;
+  if (type.notCounted()) return;
 
   // Check for RefCountStaticValue if needed, do the actual DecRef,
   // and leave flags set based on the subtract result, which is
@@ -2565,7 +2567,7 @@ void CodeGenerator::cgDecRefStaticType(Type::Tag type,
     ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
     m_as.jcc(cc, m_astubs.code.frontier);
     // Emit the call to release in m_astubs
-    cgCallHelper(m_astubs, m_tx64->getDtorCall(Type::toDataType(type)),
+    cgCallHelper(m_astubs, m_tx64->getDtorCall(type.toDataType()),
                  InvalidReg, InvalidReg, kSyncPoint, ArgGroup().reg(dataReg));
     if (&m_as == &m_astubs) {
       m_as.patchJcc(patch, m_as.code.frontier);
@@ -2695,27 +2697,25 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 // Generates the dec-ref of a typed value in memory address [baseReg + offset].
 // This handles cases where type is either static or dynamic.
 //
-void CodeGenerator::cgDecRefMem(Type::Tag type,
+void CodeGenerator::cgDecRefMem(Type type,
                                 PhysReg baseReg,
                                 int64 offset,
                                 LabelInstruction* exit) {
   auto scratchReg = rScratch;
   assert(baseReg != scratchReg);
 
-  if (Type::isStaticallyKnown(type)) {
-    if (Type::isRefCounted(type)) {
-      m_as.load_reg64_disp_reg64(baseReg, offset, scratchReg);
-      cgDecRefStaticType(type, scratchReg, exit, true);
-    }
-  } else {
+  if (!type.isStaticallyKnown()) {
     // The type is dynamic, but we don't have two registers available
     // to load the type and the data.
     cgDecRefDynamicTypeMem(baseReg, offset, exit);
+  } else if (type.maybeCounted()) {
+    m_as.load_reg64_disp_reg64(baseReg, offset, scratchReg);
+    cgDecRefStaticType(type, scratchReg, exit, true);
   }
 }
 
 void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
-  assert(Type::isPtr(inst->getSrc(0)->getType()));
+  assert(inst->getSrc(0)->getType().isPtr());
   cgDecRefMem(inst->getTypeParam(),
               inst->getSrc(0)->getReg(),
               inst->getSrc(1)->getValInt(),
@@ -2726,8 +2726,8 @@ void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   SSATmp* src   = inst->getSrc(0);
   if (!isRefCounted(src)) return;
   LabelInstruction* exit = inst->getLabel();
-  Type::Tag type = src->getType();
-  if (Type::isStaticallyKnown(type)) {
+  Type type = src->getType();
+  if (type.isStaticallyKnown()) {
     cgDecRefStaticType(type, src->getReg(), exit, genZeroCheck);
   } else {
     cgDecRefDynamicType(src->getReg(1),
@@ -2896,7 +2896,7 @@ void CodeGenerator::cgNewObj(IRInstruction* inst) {
   SSATmp* sp    = inst->getSrc(2);
   SSATmp* fp    = inst->getSrc(3);
 
-  if (Type::isString(clsName->getType())) {
+  if (clsName->isString()) {
     const StringData* classNameString = clsName->getValStr();
     CacheHandle ch = allocKnownClass(classNameString);
     ArgGroup args;
@@ -3129,16 +3129,10 @@ void CodeGenerator::cgLdContLocalsPtr(IRInstruction* inst) {
   m_as.  addq   (rCont, rLocals);
 }
 
-static int getNativeTypeSize(Type::Tag type) {
-  switch (type) {
-    case Type::Int:
-    case Type::Func:
-      return sz::qword;
-    case Type::Bool:
-      return sz::byte;
-    default:
-      not_implemented();
-  }
+static int getNativeTypeSize(Type type) {
+  if (type.subtypeOf(Type::Int | Type::Func)) return sz::qword;
+  if (type.subtypeOf(Type::Bool))             return sz::byte;
+  not_implemented();
 }
 
 void CodeGenerator::cgLdRaw(IRInstruction* inst) {
@@ -3228,14 +3222,14 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 
 // If label is set and type is not Gen, this method generates a check
 // that bails to the label if the loaded typed value doesn't match type.
-void CodeGenerator::cgLoadTypedValue(Type::Tag type,
+void CodeGenerator::cgLoadTypedValue(Type type,
                                      SSATmp* dst,
                                      PhysReg base,
                                      int64_t off,
                                      LabelInstruction* label,
                                      IRInstruction* inst) {
   assert(type == dst->getType());
-  assert(!Type::isStaticallyKnown(type));
+  assert(!type.isStaticallyKnown());
   auto valueDstReg = dst->getReg(0);
   auto typeDstReg = dst->getReg(1);
   if (valueDstReg == InvalidReg && typeDstReg == InvalidReg &&
@@ -3278,7 +3272,7 @@ void CodeGenerator::cgLoadTypedValue(Type::Tag type,
 void CodeGenerator::cgStoreTypedValue(PhysReg base,
                                       int64_t off,
                                       SSATmp* src) {
-  assert(!Type::isStaticallyKnown(src->getType()));
+  assert(!src->getType().isStaticallyKnown());
   m_as.store_reg64_disp_reg64(src->getReg(0),
                               off + TVOFF(m_data),
                               base);
@@ -3292,35 +3286,29 @@ void CodeGenerator::cgStore(PhysReg base,
                             int64_t off,
                             SSATmp* src,
                             bool genStoreType) {
-  Type::Tag type = src->getType();
-  if (!Type::isStaticallyKnown(type)) {
+  Type type = src->getType();
+  if (!type.isStaticallyKnown()) {
     cgStoreTypedValue(base, off, src);
     return;
   }
   // store the type
   if (genStoreType) {
-    m_as.store_imm32_disp_reg(Type::toDataType(type),
+    m_as.store_imm32_disp_reg(type.toDataType(),
                               off + TVOFF(m_type),
                               base);
   }
-  if (type == Type::Uninit || type == Type::Null) {
+  if (type.isNull()) {
     // no need to store a value for null or uninit
     return;
   }
   assert(type != Type::Home);
   if (src->isConst()) {
     int64 val = 0;
-    switch (type) {
-      case Type::Bool:
-      case Type::Int:
-      case Type::Dbl:
-      case Type::Arr:
-      case Type::StaticStr:
-      case Type::Cls:
+    if (type.subtypeOf(Type::Bool | Type::Int | Type::Dbl |
+                       Type::Arr | Type::StaticStr | Type::Cls)) {
         val = src->getValBits();
-        break;
-      default:
-        assert(0);
+    } else {
+      not_reached();
     }
     m_as.store_imm64_disp_reg64(val, off + TVOFF(m_data), base);
   } else {
@@ -3352,19 +3340,19 @@ void CodeGenerator::emitGuardOrFwdJcc(IRInstruction*    inst,
   }
 }
 
-void CodeGenerator::cgLoad(Type::Tag type,
+void CodeGenerator::cgLoad(Type type,
                            SSATmp* dst,
                            PhysReg base,
                            int64_t off,
                            LabelInstruction* label,
                            IRInstruction* inst) {
-  if (!Type::isStaticallyKnown(type)) {
+  if (!type.isStaticallyKnown()) {
     return cgLoadTypedValue(type, dst, base, off, label, inst);
   }
   if (label != NULL && type != Type::Home) {
     cgGuardTypeCell(type, base, off, label, inst);
   }
-  if (type == Type::Uninit || type == Type::Null) {
+  if (type.isNull()) {
     return; // these are constants
   }
   auto dstReg = dst->getReg();
@@ -3379,7 +3367,7 @@ void CodeGenerator::cgLoad(Type::Tag type,
 }
 
 void CodeGenerator::cgLdProp(IRInstruction* inst) {
-  Type::Tag type  = inst->getTypeParam();
+  Type type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   obj   = inst->getSrc(0);
   SSATmp*   prop  = inst->getSrc(1);
@@ -3395,7 +3383,7 @@ void CodeGenerator::cgLdProp(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdMem(IRInstruction * inst) {
-  Type::Tag         type  = inst->getTypeParam();
+  Type         type  = inst->getTypeParam();
   SSATmp*           dst   = inst->getDst();
   SSATmp*           addr  = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
@@ -3405,7 +3393,7 @@ void CodeGenerator::cgLdMem(IRInstruction * inst) {
 }
 
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
-  Type::Tag type  = inst->getTypeParam();
+  Type type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   addr  = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
@@ -3441,7 +3429,7 @@ void CodeGenerator::cgLdAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
-  Type::Tag         type  = inst->getTypeParam();
+  Type         type  = inst->getTypeParam();
   SSATmp*           dst   = inst->getDst();
   PhysReg fpReg;
   int64 offset;
@@ -3465,7 +3453,7 @@ void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
-  Type::Tag type = inst->getTypeParam();
+  Type type = inst->getTypeParam();
   SSATmp* dst    = inst->getDst();
   SSATmp* sp     = inst->getSrc(0);
   SSATmp* index  = inst->getSrc(1);
@@ -3479,7 +3467,7 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
          inst);
 }
 
-void CodeGenerator::cgGuardTypeCell(Type::Tag         type,
+void CodeGenerator::cgGuardTypeCell(Type         type,
                                     PhysReg           baseReg,
                                     int64_t           offset,
                                     LabelInstruction* label,
@@ -3488,47 +3476,34 @@ void CodeGenerator::cgGuardTypeCell(Type::Tag         type,
 }
 
 template<class OpndType>
-ConditionCode CodeGenerator::emitTypeTest(Type::Tag type, OpndType src) {
+ConditionCode CodeGenerator::emitTypeTest(Type type, OpndType src) {
   ConditionCode cc;
 
-  switch (type) {
-    case Type::StaticStr     :
-    case Type::Str           : {
-      m_as.testl(KindOfStringBit, src);
-      cc = CC_Z;
-      break;
-    }
-    case Type::UncountedInit : {
-      m_as.testl(KindOfUncountedInitBit, src);
-      cc = CC_Z;
-      break;
-    }
-    case Type::Uncounted     : {
-      m_as.cmpl(KindOfRefCountThreshold, src);
-      cc = CC_G;
-      break;
-    }
-    case Type::Cell          : {
-      m_as.cmpl(KindOfRef, src);
-      cc = CC_GE;
-      break;
-    }
-    case Type::Gen : {
+  if (type.isString()) {
+    m_as.testl(KindOfStringBit, src);
+    cc = CC_Z;
+  } else if (type == Type::UncountedInit) {
+    m_as.testl(KindOfUncountedInitBit, src);
+    cc = CC_Z;
+  } else if (type == Type::Uncounted) {
+    m_as.cmpl(KindOfRefCountThreshold, src);
+    cc = CC_G;
+  } else if (type == Type::Cell) {
+    m_as.cmpl(KindOfRef, src);
+    cc = CC_GE;
+  } else if (type == Type::Gen) {
       return CC_None; // nothing to check
-    }
-    default: {
-      DataType dataType = Type::toDataType(type);
-      assert(dataType >= KindOfUninit);
-      m_as.cmpl(dataType, src);
-      cc = CC_NZ;
-      break;
-    }
+  } else {
+    DataType dataType = type.toDataType();
+    assert(dataType >= KindOfUninit);
+    m_as.cmpl(dataType, src);
+    cc = CC_NZ;
   }
   return cc;
 }
 
 template<class OpndType>
-void CodeGenerator::emitGuardType(Type::Tag         type,
+void CodeGenerator::emitGuardType(Type         type,
                                   OpndType          src,
                                   LabelInstruction* label,
                                   IRInstruction*    inst) {
@@ -3538,7 +3513,7 @@ void CodeGenerator::emitGuardType(Type::Tag         type,
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
-  Type::Tag          type = inst->getTypeParam();
+  Type          type = inst->getTypeParam();
   SSATmp*              sp = inst->getSrc(0);
   SSATmp*           index = inst->getSrc(1);
   LabelInstruction* label = inst->getLabel();
@@ -3553,7 +3528,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
-  Type::Tag          type = inst->getTypeParam();
+  Type          type = inst->getTypeParam();
   SSATmp*           index = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
   assert(index->isConst());
@@ -3602,7 +3577,7 @@ void CodeGenerator::cgCGetElem(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardType(IRInstruction* inst) {
-  Type::Tag type  = inst->getTypeParam();
+  Type type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   src   = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
@@ -3612,7 +3587,7 @@ void CodeGenerator::cgGuardType(IRInstruction* inst) {
   assert(srcTypeReg != InvalidReg);
 
   // compare srcTypeReg with type
-  DataType dataType = Type::toDataType(type);
+  DataType dataType = type.toDataType();
   ConditionCode cc;
   if (IS_STRING_TYPE(dataType)) {
     m_as.test_imm32_reg32(KindOfStringBit, srcTypeReg);
@@ -3900,8 +3875,8 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   SSATmp*  srcCtxTmp = inst->getSrc(0);
   PhysReg  srcCtxReg = srcCtxTmp->getReg(0);
   const Func* callee = inst->getSrc(1)->getValFunc();
-  bool      withThis = srcCtxTmp->getType() == Type::Obj;
-  bool        noThis = srcCtxTmp->getType() == Type::Cls;
+  bool      withThis = srcCtxTmp->getType().subtypeOf(Type::Obj);
+  bool        noThis = srcCtxTmp->getType().subtypeOf(Type::Cls);
 
   // If we're in a static method or we're sure we don't have a This pointer,
   // then we're done
@@ -3966,20 +3941,19 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
   asm_label(m_as, FoundMethod);
 
-  switch (srcCtxTmp->getType()) {
-    case Type::Cls:
-      return; // done: destCtxReg already has srcCtxReg
-    case Type::Obj:
-      // unconditionally run code produced by emitGetCtxFwdCallWithThisDyn below
-      break;
-    case Type::Ctx: {
-      // dynamically check if we have a This pointer and
-      // call emitGetCtxFwdCallWithThisDyn below
-      m_as.testb(1, rbyte(destCtxReg));
-      m_as.jcc8(CC_NZ, End);
-      break;
-    }
-    default: not_reached();
+  auto t = srcCtxTmp->getType();
+  if (t == Type::Cls) {
+    return; // done: destCtxReg already has srcCtxReg
+  } else if (t == Type::Obj) {
+    // unconditionally run code produced by emitGetCtxFwdCallWithThisDyn below
+    // break
+  } else if (t == Type::Ctx) {
+    // dynamically check if we have a This pointer and
+    // call emitGetCtxFwdCallWithThisDyn below
+    m_as.testb(1, rbyte(destCtxReg));
+    m_as.jcc8(CC_NZ, End);
+  } else {
+    not_reached();
   }
 
   // If we have a 'this' pointer ...
@@ -4155,10 +4129,10 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
     SSARange dsts = inst->getLabel()->getDsts();
     ArgGroup args;
     for (unsigned i = 0, j = 0; i < n; i++) {
-      assert(Type::subtypeOf(srcs[i]->getType(), dsts[i]->getType()));
+      assert(srcs[i]->getType().subtypeOf(dsts[i]->getType()));
       args.ssa(srcs[i]);
       args[j++].setDstReg(dsts[i]->getReg());
-      if (!Type::isStaticallyKnown(dsts[i]->getType())) {
+      if (!dsts[i]->getType().isStaticallyKnown()) {
         args.rawType(srcs[i]);
         args[j++].setDstReg(dsts[i]->getReg(1));
       }
@@ -4177,8 +4151,8 @@ void CodeGenerator::cgCheckInit(IRInstruction* inst) {
 
   // TODO: This optimization is redundant wrt simplifier. Remove it once we can
   // simplifier as a separate pass.
-  Type::Tag type = src->getType();
-  if (Type::isInit(type)) {
+  Type type = src->getType();
+  if (type.isInit()) {
     // Unnecessary CheckInit
     return;
   }
@@ -4251,8 +4225,8 @@ static RefData* box_value(TypedValue tv) {
 void CodeGenerator::cgBox(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
-  Type::Tag type = src->getType();
-  if (Type::isUnboxed(type)) {
+  Type type = src->getType();
+  if (type.notBoxed()) {
     cgCallHelper(m_as, (TCA)box_value, dst, kNoSyncPoint,
                  ArgGroup().valueType(src));
   } else {
@@ -4263,22 +4237,17 @@ void CodeGenerator::cgBox(IRInstruction* inst) {
 void CodeGenerator::cgPrint(IRInstruction* inst) {
   SSATmp* arg   = inst->getSrc(0);
   void* fptr = NULL;
-  switch (arg->getType()) {
-    case Type::Str: case Type::StaticStr:
-      fptr = (void*)print_string;
-      break;
-    case Type::Int:
-      fptr = (void*)print_int;
-      break;
-    case Type::Bool:
-      fptr = (void*)print_boolean;
-      break;
-    case Type::Null: // nothing to do
-      return;
-    default:
-      assert(0); // unsupported
-//      CG_PUNT(cgPrint);
-      return;
+  auto type = arg->getType();
+  if (type.isString()) {
+    fptr = (void*)print_string;
+  } else if (type == Type::Int) {
+    fptr = (void*)print_int;
+  } else if (type == Type::Bool) {
+    fptr = (void*)print_boolean;
+  } else if (type == Type::Null) {
+    return; // nothing to do
+  } else {
+    not_reached();
   }
   cgCallHelper(m_as, (TCA)fptr, InvalidReg, kNoSyncPoint,
                ArgGroup().ssa(arg));
@@ -4307,7 +4276,7 @@ void CodeGenerator::cgAddElem(IRInstruction* inst) {
   SSATmp* key   = inst->getSrc(1);
   SSATmp* val   = inst->getSrc(2);
 
-  Type::Tag keyType = key->getType();
+  Type keyType = key->getType();
   // TODO: Double check that these helpers don't re-enter
   if (keyType == Type::Int) {
     // decrefs the value but not the key
@@ -4369,16 +4338,16 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
   SSATmp* tl    = inst->getSrc(0);
   SSATmp* tr    = inst->getSrc(1);
 
-  Type::Tag lType = tl->getType();
-  Type::Tag rType = tr->getType();
+  Type lType = tl->getType();
+  Type rType = tr->getType();
   // We have specialized helpers for concatenating two strings, a
   // string and an int, and an int and a string.
   void* fptr = NULL;
-  if (Type::isString(lType) && Type::isString(rType)) {
+  if (lType.isString() && rType.isString()) {
     fptr = (void*)concat_ss;
-  } else if (Type::isString(lType) && rType == Type::Int) {
+  } else if (lType.isString() && rType == Type::Int) {
     fptr = (void*)concat_si;
-  } else if (lType == Type::Int && Type::isString(rType)) {
+  } else if (lType == Type::Int && rType.isString()) {
     fptr = (void*)concat_is;
   }
   if (fptr) {
@@ -4386,7 +4355,8 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
                  ArgGroup().ssa(tl)
                            .ssa(tr));
   } else {
-    if (lType >= Type::Obj || rType >= Type::Obj) {
+    if (lType.subtypeOf(Type::Obj) || !lType.isStaticallyKnown() ||
+        rType.subtypeOf(Type::Obj) || !rType.isStaticallyKnown()) {
       CG_PUNT(cgConcat);
     }
     cgCallHelper(m_as, (TCA)concat_value, dst, kNoSyncPoint,
@@ -4430,12 +4400,11 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   SSATmp* sp = inst->getSrc(1);
   SSATmp* pcOffTmp  = inst->getSrc(2);
   SSATmp* spAdjustmentTmp = inst->getSrc(3);
-  SSATmp* resultTypeTmp = inst->getSrc(4);
+  Type resultType = inst->getTypeParam();
   LabelInstruction* label = inst->getLabel();
 
   assert(pcOffTmp->isConst());
   assert(spAdjustmentTmp->isConst());
-  assert(resultTypeTmp->isConst());
   assert(fp->getType() == Type::StkPtr);
   assert(sp->getType() == Type::StkPtr);
 
@@ -4465,7 +4434,6 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   auto newSpReg = inst->getDst()->getReg();
   DEBUG_ONLY auto spReg = sp->getReg();
   int64 spAdjustment = spAdjustmentTmp->getValInt();
-  Type::Tag resultType = (Type::Tag)resultTypeTmp->getValInt();
   int64 adjustment =
     (spAdjustment - (resultType == Type::None ? 0 : 1)) * sizeof(Cell);
   assert(newSpReg == spReg);

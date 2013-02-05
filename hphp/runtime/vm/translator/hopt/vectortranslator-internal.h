@@ -109,7 +109,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 // both, respectively.
 static KeyType getKeyType(const SSATmp* key, bool nonLitStr,
                           bool nonLitInt) {
-  assert(Type::isStaticallyKnown(key->getType()));
+  assert(key->getType().isStaticallyKnown());
 
   if (key->isBoxed()) {
     // Variants can change types at arbitrary times, so don't try to
@@ -139,11 +139,11 @@ inline static KeyType getKeyTypeIS(const SSATmp* key) {
 // conditions about values. Most often used inline while passing
 // arguments to a helper.
 inline static SSATmp* ptr(SSATmp* t) {
-  assert(Type::isPtr(t->getType()));
+  assert(t->getType().isPtr());
   return t;
 }
 inline static SSATmp* objOrPtr(SSATmp* t) {
-  assert(t->isA(Type::Obj) || Type::isPtr(t->getType()));
+  assert(t->isA(Type::Obj) || t->getType().isPtr());
   return t;
 }
 inline static SSATmp* noLitInt(SSATmp* t) {

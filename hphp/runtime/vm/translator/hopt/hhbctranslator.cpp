@@ -58,10 +58,10 @@ SSATmp* HhbcTranslator::push(SSATmp* tmp) {
   return tmp;
 }
 
-void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
+void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
   // If type is more refined than tmp's type, reset tmp's type to type
   IRInstruction* inst = tmp->getInstruction();
-  if (Type::isMoreRefined(type, tmp->getType())) {
+  if (type.strictSubtypeOf(tmp->getType())) {
     // If tmp is incref or move, then chase down its src
     Opcode opc = inst->getOpcode();
     if (opc == Mov || opc == IncRef) {
@@ -90,7 +90,7 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
   }
 }
 
-SSATmp* HhbcTranslator::pop(Type::Tag type) {
+SSATmp* HhbcTranslator::pop(Type type) {
   SSATmp* opnd = m_evalStack.pop();
   if (opnd == NULL) {
     uint32 stackOff = m_stackDeficit;
@@ -112,7 +112,7 @@ void HhbcTranslator::discard(unsigned n) {
 }
 
 // type is the type expected on the stack.
-void HhbcTranslator::popDecRef(Type::Tag type) {
+void HhbcTranslator::popDecRef(Type type) {
   if (SSATmp* src = m_evalStack.pop()) {
     m_tb->genDecRef(src);
     return;
@@ -128,7 +128,7 @@ void HhbcTranslator::popDecRef(Type::Tag type) {
 // intermediate values.  If it ends up creating a new LdStack,
 // refineType during a later pop() or top() will fix up the type to
 // the known type.
-void HhbcTranslator::extendStack(uint32 index, Type::Tag type) {
+void HhbcTranslator::extendStack(uint32 index, Type type) {
   if (index == 0) {
     push(pop(type));
     return;
@@ -139,7 +139,7 @@ void HhbcTranslator::extendStack(uint32 index, Type::Tag type) {
   push(tmp);
 }
 
-SSATmp* HhbcTranslator::top(Type::Tag type, uint32 index) {
+SSATmp* HhbcTranslator::top(Type type, uint32 index) {
   SSATmp* tmp = m_evalStack.top(index);
   if (!tmp) {
     extendStack(index, type);
@@ -165,9 +165,9 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
 
 void HhbcTranslator::emitPrint() {
   TRACE(3, "%u: Print\n", m_bcOff);
-  Type::Tag type = topC()->getType();
+  Type type = topC()->getType();
   if (type == Type::Int || type == Type::Bool || type == Type::Null ||
-      Type::isString(type)) {
+      type.isString()) {
     // the print helpers decref their arg, so don't decref pop'ed value
     m_tb->genPrint(popC());
     push(m_tb->genDefConst<int64>(1));
@@ -179,7 +179,7 @@ void HhbcTranslator::emitPrint() {
 }
 
 void HhbcTranslator::emitUnboxRAux() {
-  if (Type::isUnboxed(top(Type::Gen)->getType())) {
+  if (top(Type::Gen)->getType().notBoxed()) {
     return; // top of stack already unboxed, nothing to do
   }
   Trace* exitTrace = getExitTrace();
@@ -244,8 +244,8 @@ void HhbcTranslator::emitNewTuple(int numArgs) {
 
 void HhbcTranslator::emitArrayAdd() {
   TRACE(3, "%u: ArrayAdd\n", m_bcOff);
-  Type::Tag type1 = topC(0)->getType();
-  Type::Tag type2 = topC(1)->getType();
+  Type type1 = topC(0)->getType();
+  Type type2 = topC(1)->getType();
   if (type1 != Type::Arr || type2 != Type::Arr) {
     // This happens when we have a prior spillstack that optimizes away
     // its spilled values because they were already on the stack. This
@@ -488,7 +488,7 @@ void HhbcTranslator::emitIncDecMem(bool pre,
   m_tb->genStMem(propAddr, res, false);
 }
 
-static bool isSupportedBinaryArith(Type::Tag type1, Type::Tag type2) {
+static bool isSupportedBinaryArith(Type type1, Type type2) {
   return ((type1 == Type::Int || type1 == Type::Bool) &&
           (type2 == Type::Int || type2 == Type::Bool));
 
@@ -558,7 +558,7 @@ void HhbcTranslator::emitReqSrc(const StringData* name) {
 template<class Lambda>
 SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   SSATmp* src = popC();
-  Type::Tag type = src->getType();
+  Type type = src->getType();
   if (type != Type::Arr && type != Type::Obj) {
     PUNT(IterInit);
   }
@@ -763,9 +763,9 @@ void HhbcTranslator::emitContHandle() {
 }
 
 void HhbcTranslator::emitStrlen() {
-  Type::Tag inType = topC()->getType();
+  Type inType = topC()->getType();
 
-  if (Type::isString(inType)) {
+  if (inType.isString()) {
     SSATmp* input = popC();
     if (input->isConst()) {
       // static string; fold its strlen operation
@@ -774,7 +774,7 @@ void HhbcTranslator::emitStrlen() {
       push(m_tb->genLdRaw(input, RawMemSlot::StrLen, Type::Int));
       m_tb->genDecRef(input);
     }
-  } else if (Type::isNull(inType)) {
+  } else if (inType.isNull()) {
     popC();
     push(m_tb->genDefConst<int64>(0));
   } else if (inType == Type::Bool) {
@@ -892,7 +892,7 @@ void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
 void HhbcTranslator::emitCGetProp(LocationCode locCode,
                                   int offset,
                                   bool isPropOnStack,
-                                  Type::Tag resultType,
+                                  Type resultType,
                                   bool isInferedType) {
   TRACE(3, "%u: CGetM %d\n", m_bcOff, offset);
 
@@ -919,14 +919,14 @@ void HhbcTranslator::emitCGetProp(LocationCode locCode,
   SSATmp* val;
 
   if (isInferedType) {
-    assert(Type::isStaticallyKnownUnboxed(resultType));
+    assert(resultType.isStaticallyKnownUnboxed());
     val = m_tb->genLdProp(obj, propOffset, resultType, NULL);
   } else {
     if (resultType == Type::None) {
       // result type not predicted
       resultType = Type::Cell;
     } else {
-      assert(Type::isStaticallyKnownUnboxed(resultType));
+      assert(resultType.isStaticallyKnownUnboxed());
     }
     // This code is currently correct, but once we enable type
     // prediction for CGetM, we should exit normally to a trace
@@ -953,7 +953,7 @@ void HhbcTranslator::emitCGetProp(LocationCode locCode,
 void HhbcTranslator::emitIssetL(int32 id) {
   TRACE(3, "%u: IssetL %d\n", m_bcOff, id);
 
-  Type::Tag trackedType = m_tb->getLocalType(id);
+  Type trackedType = m_tb->getLocalType(id);
   // guards should ensure we have type info at this point
   assert(trackedType != Type::None);
   if (trackedType == Type::Uninit) {
@@ -992,7 +992,7 @@ void HhbcTranslator::emitIssetS(const Class* cls,
 void HhbcTranslator::emitEmptyL(int32 id) {
   TRACE(3, "%u: EmptyL %d\n", m_bcOff, id);
 
-  Type::Tag trackedType = m_tb->getLocalType(id);
+  Type trackedType = m_tb->getLocalType(id);
   assert(trackedType != Type::None);
   if (trackedType == Type::Uninit) {
     push(m_tb->genDefConst<bool>(true));
@@ -1012,35 +1012,33 @@ void HhbcTranslator::emitEmptyS() {
   decRefPropAddr(propAddr);
 }
 
-template<Type::Tag T>
-void HhbcTranslator::emitIsTypeC() {
-  TRACE(3, "%u: Is%sC\n", m_bcOff, Type::Strings[T]);
+void HhbcTranslator::emitIsTypeC(Type t) {
+  TRACE(3, "%u: Is%sC\n", m_bcOff, t.toString().c_str());
   SSATmp* src = popC();
-  push(m_tb->gen(IsType, T, src));
+  push(m_tb->gen(IsType, t, src));
   m_tb->genDecRef(src);
 }
 
-template<Type::Tag T>
-void HhbcTranslator::emitIsTypeL(int id) {
-  TRACE(3, "%u: Is%sH\n", m_bcOff, Type::Strings[T]);
+void HhbcTranslator::emitIsTypeL(Type t, int id) {
+  TRACE(3, "%u: Is%sH\n", m_bcOff, t.toString().c_str());
   Trace* exitTrace = getExitTrace();
-  push(m_tb->gen(IsType, T, emitLdLocWarn(id, exitTrace)));
+  push(m_tb->gen(IsType, t, emitLdLocWarn(id, exitTrace)));
 }
 
-void HhbcTranslator::emitIsNullL(int id)   { emitIsTypeL<Type::Null>(id);}
-void HhbcTranslator::emitIsArrayL(int id)  { emitIsTypeL<Type::Arr>(id); }
-void HhbcTranslator::emitIsStringL(int id) { emitIsTypeL<Type::Str>(id); }
-void HhbcTranslator::emitIsObjectL(int id) { emitIsTypeL<Type::Obj>(id); }
-void HhbcTranslator::emitIsIntL(int id)    { emitIsTypeL<Type::Int>(id); }
-void HhbcTranslator::emitIsBoolL(int id)   { emitIsTypeL<Type::Bool>(id);}
-void HhbcTranslator::emitIsDoubleL(int id) { emitIsTypeL<Type::Dbl>(id); }
-void HhbcTranslator::emitIsNullC()   { emitIsTypeC<Type::Null>();}
-void HhbcTranslator::emitIsArrayC()  { emitIsTypeC<Type::Arr>(); }
-void HhbcTranslator::emitIsStringC() { emitIsTypeC<Type::Str>(); }
-void HhbcTranslator::emitIsObjectC() { emitIsTypeC<Type::Obj>(); }
-void HhbcTranslator::emitIsIntC()    { emitIsTypeC<Type::Int>(); }
-void HhbcTranslator::emitIsBoolC()   { emitIsTypeC<Type::Bool>();}
-void HhbcTranslator::emitIsDoubleC() { emitIsTypeC<Type::Dbl>(); }
+void HhbcTranslator::emitIsNullL(int id)   { emitIsTypeL(Type::Null, id);}
+void HhbcTranslator::emitIsArrayL(int id)  { emitIsTypeL(Type::Arr, id); }
+void HhbcTranslator::emitIsStringL(int id) { emitIsTypeL(Type::Str, id); }
+void HhbcTranslator::emitIsObjectL(int id) { emitIsTypeL(Type::Obj, id); }
+void HhbcTranslator::emitIsIntL(int id)    { emitIsTypeL(Type::Int, id); }
+void HhbcTranslator::emitIsBoolL(int id)   { emitIsTypeL(Type::Bool, id);}
+void HhbcTranslator::emitIsDoubleL(int id) { emitIsTypeL(Type::Dbl, id); }
+void HhbcTranslator::emitIsNullC()   { emitIsTypeC(Type::Null);}
+void HhbcTranslator::emitIsArrayC()  { emitIsTypeC(Type::Arr); }
+void HhbcTranslator::emitIsStringC() { emitIsTypeC(Type::Str); }
+void HhbcTranslator::emitIsObjectC() { emitIsTypeC(Type::Obj); }
+void HhbcTranslator::emitIsIntC()    { emitIsTypeC(Type::Int); }
+void HhbcTranslator::emitIsBoolC()   { emitIsTypeC(Type::Bool);}
+void HhbcTranslator::emitIsDoubleC() { emitIsTypeC(Type::Dbl); }
 
 void HhbcTranslator::emitPopC() {
   TRACE(3, "%u: PopC\n", m_bcOff);
@@ -1137,7 +1135,7 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
     // todo: t2068502: refine the type? hhbc spec says null|bool|int|dbl|str
     //       and, str should always be static-str.
     spillStack(); // do this on main trace so we update stack tracking once.
-    Type::Tag cnsType = Type::Cell;
+    Type cnsType = Type::Cell;
     SSATmp* c1 = m_tb->gen(LdClsCns, cnsType, cnsNameTmp, clsNameTmp);
     SSATmp* result = m_tb->ifelse(getCurFunc(),
       [&] (LabelInstruction* taken) { // branch
@@ -1224,7 +1222,7 @@ void HhbcTranslator::emitFPushFunc(int32 numParams) {
   // input must be a string or an object implementing __invoke();
   // otherwise fatal
   SSATmp* funcName = popC();
-  if (!Type::isString(funcName->getType())) {
+  if (!funcName->isString()) {
     PUNT(FPushFunc_not_Str);
   }
 
@@ -1515,21 +1513,21 @@ void HhbcTranslator::setThisAvailable() {
   m_tb->setThisAvailable();
 }
 
-void HhbcTranslator::guardTypeLocal(uint32 locId, Type::Tag type) {
+void HhbcTranslator::guardTypeLocal(uint32 locId, Type type) {
   checkTypeLocal(locId, type);
   m_typeGuards.push_back(TypeGuard(TypeGuard::Local, locId, type));
 }
 
-void HhbcTranslator::checkTypeLocal(uint32 locId, Type::Tag type) {
+void HhbcTranslator::checkTypeLocal(uint32 locId, Type type) {
   m_tb->genGuardLoc(locId, type, getExitTrace());
 }
 
-void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type::Tag type) {
+void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type type) {
   m_tb->genAssertLoc(localIndex, type);
 }
 
 Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
-                                      Type::Tag type,
+                                      Type type,
                                       Trace* nextTrace) {
   if (nextTrace == NULL) {
     nextTrace = getGuardExit();
@@ -1540,24 +1538,24 @@ Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
   return nextTrace;
 }
 
-void HhbcTranslator::checkTypeTopOfStack(Type::Tag type,
+void HhbcTranslator::checkTypeTopOfStack(Type type,
                                          Offset nextByteCode) {
   Trace* exitTrace = getExitTrace(nextByteCode);
   SSATmp* tmp = m_evalStack.top();
   if (!tmp) {
-    FTRACE(1, "checkTypeTopOfStack: no tmp: {}\n", Type::Strings[type]);
+    FTRACE(1, "checkTypeTopOfStack: no tmp: {}\n", type.toString());
     m_tb->genGuardStk(0, type, exitTrace);
     push(pop(type));
   } else {
     FTRACE(1, "checkTypeTopOfStack: generating GuardType for {}\n",
-           Type::Strings[type]);
+           type.toString());
     m_evalStack.pop();
     tmp = m_tb->genGuardType(tmp, type, exitTrace);
     push(tmp);
   }
 }
 
-void HhbcTranslator::assertTypeStack(uint32 stackIndex, Type::Tag type) {
+void HhbcTranslator::assertTypeStack(uint32 stackIndex, Type type) {
   SSATmp* tmp = m_evalStack.top(stackIndex);
   if (!tmp) {
     m_tb->genAssertStk(stackIndex, type);
@@ -1681,12 +1679,10 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
    * types, but if it's Gen/Cell we're going to PUNT because it's
    * natural to translate that case with control flow TODO(#2020251)
    */
+  if (Type::Obj.strictSubtypeOf(src->getType())) {
+    PUNT(InstanceOfD_MaybeObj);
+  }
   if (!src->isA(Type::Obj)) {
-    // If it's a Cell, it might still be an object.  All other types
-    // push false.
-    if (!Type::isMoreRefined(src->getType(), Type::Cell)) {
-      PUNT(InstanceOfD_Cell);
-    }
     push(m_tb->genDefConst(false));
     m_tb->genDecRef(src);
     return;
@@ -1754,7 +1750,7 @@ void HhbcTranslator::emitCastDouble() {
 
 void HhbcTranslator::emitCastString() {
   SSATmp* src = popC();
-  Type::Tag fromType = src->getType();
+  Type fromType = src->getType();
   if (fromType == Type::Cell) {
     PUNT(CastString_Cell);
   } else if (fromType == Type::Obj) {
@@ -1782,15 +1778,15 @@ void HhbcTranslator::emitCastObject() {
 
 static
 bool isSupportedAGet(SSATmp* classSrc, const StringData* className) {
-  Type::Tag srcType = classSrc->getType();
+  Type srcType = classSrc->getType();
   return (srcType == Type::Obj ||
           className != NULL ||
-          (Type::isString(srcType) && classSrc->isConst()));
+          (srcType.isString() && classSrc->isConst()));
 }
 
 void HhbcTranslator::emitAGet(SSATmp* classSrc) {
-  Type::Tag srcType = classSrc->getType();
-  if (Type::isString(srcType)) {
+  Type srcType = classSrc->getType();
+  if (srcType.isString()) {
     // srcType must be static string
     assert(srcType == Type::StaticStr);
     const Class* cls = Unit::lookupClass(classSrc->getValStr());
@@ -1840,7 +1836,7 @@ void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
 
 void HhbcTranslator::emitCGetS(const Class* cls,
                                const StringData* propName,
-                               Type::Tag resultType,
+                               Type resultType,
                                bool isInferedType) {
 
   TRACE(3, "%u: CGetS\n", m_bcOff);
@@ -1848,14 +1844,14 @@ void HhbcTranslator::emitCGetS(const Class* cls,
   SSATmp* propPtr = getClsPropAddr(cls, propName);
   SSATmp* val;
   if (isInferedType) {
-    assert(Type::isStaticallyKnownUnboxed(resultType));
+    assert(resultType.isStaticallyKnownUnboxed());
     val = m_tb->genLdMem(propPtr, resultType, NULL);
   } else {
     if (resultType == Type::None) {
       // result type not predicted
       resultType = Type::Cell;
     } else {
-      assert(Type::isStaticallyKnownUnboxed(resultType));
+      assert(resultType.isStaticallyKnownUnboxed());
     }
     // Type is predicted, so take slow exit if check fails to avoid repeating
     // this situation.
@@ -1877,11 +1873,11 @@ void HhbcTranslator::emitVGetS() {
 }
 
 void HhbcTranslator::emitCGetG(const StringData* name,
-                               Type::Tag resultType, bool isInferedType) {
+                               Type resultType, bool isInferedType) {
   spillStack();
   popC();
   if (isInferedType) {
-    assert(Type::isUnboxed(resultType) &&
+    assert(resultType.notBoxed() &&
            resultType != Type::Cell &&
            resultType != Type::None);
   } else {
@@ -1913,8 +1909,8 @@ void HhbcTranslator::emitSetS(const Class* cls, const StringData* propName) {
 
 void HhbcTranslator::emitBinaryArith(Opcode opc) {
   bool isBitOp = (opc == OpAnd || opc == OpOr || opc == OpXor);
-  Type::Tag type1 = topC(0)->getType();
-  Type::Tag type2 = topC(1)->getType();
+  Type type1 = topC(0)->getType();
+  Type type2 = topC(1)->getType();
   if (isSupportedBinaryArith(type1, type2)) {
     SSATmp* tr = popC();
     SSATmp* tl = popC();
@@ -1929,16 +1925,16 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
     spillStack();
     popC();
     popC();
-    Type::Tag type = Type::Int;
+    Type type = Type::Int;
     if (isBitOp) {
-      if (Type::isString(type1) && Type::isString(type2)) {
+      if (type1.isString() && type2.isString()) {
         type = Type::Str;
-      } else if ((!Type::isStaticallyKnown(type1) &&
-                  (!Type::isStaticallyKnown(type2)
-                   || Type::isString(type2)))
+      } else if ((!type1.isStaticallyKnown() &&
+                  (!type2.isStaticallyKnown()
+                   || type2.isString()))
                  ||
-                 (!Type::isStaticallyKnown(type2)
-                  && Type::isString(type1))) {
+                 (!type2.isStaticallyKnown()
+                  && type1.isString())) {
         // both types might be strings, but can't tell
         type = Type::Cell;
       } else {
@@ -1973,7 +1969,7 @@ void HhbcTranslator::emitMul() {
 }
 void HhbcTranslator::emitBitNot() {
   TRACE(3, "%u: BitNot\n", m_bcOff);
-  Type::Tag srcType = topC()->getType();
+  Type srcType = topC()->getType();
   if (srcType == Type::Int) {
     SSATmp* src = popC();
     SSATmp* ones = m_tb->genDefConst<int64>(~0);
@@ -1987,10 +1983,10 @@ void HhbcTranslator::emitBitNot() {
   } else {
     spillStack();
     popC();
-    Type::Tag resultType = Type::Int;
-    if (Type::isString(srcType)) {
+    Type resultType = Type::Int;
+    if (srcType.isString()) {
       resultType = Type::Str;
-    } else if (!Type::isStaticallyKnown(srcType)) {
+    } else if (!srcType.isStaticallyKnown()) {
       resultType = Type::Cell;
     }
     emitInterpOne(resultType);
@@ -2019,7 +2015,7 @@ void HhbcTranslator::emitXor() {
   m_tb->genDecRef(btr);
 }
 
-void HhbcTranslator::emitInterpOne(Type::Tag type, Trace* target /* = NULL */) {
+void HhbcTranslator::emitInterpOne(Type type, Trace* target /* = NULL */) {
   if (0) {
     m_tb->genTraceEnd(m_bcOff, TraceExitType::SlowNoProgress);
     // TODO need to push something on the stack...
@@ -2031,7 +2027,7 @@ void HhbcTranslator::emitInterpOne(Type::Tag type, Trace* target /* = NULL */) {
   }
 }
 
-void HhbcTranslator::emitInterpOneOrPunt(Type::Tag type,
+void HhbcTranslator::emitInterpOneOrPunt(Type type,
                                          Trace* target /* = NULL */) {
   if (RuntimeOption::EvalIRPuntDontInterp) {
     PUNT(PuntDontInterp);

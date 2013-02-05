@@ -101,7 +101,7 @@ class TypeGuard {
     Iter
   };
 
-  TypeGuard(Kind kind, uint32 index, Type::Tag type)
+  TypeGuard(Kind kind, uint32 index, Type type)
       : m_kind(kind)
       , m_index(index)
       , m_type(type) {
@@ -109,12 +109,12 @@ class TypeGuard {
 
   Kind      getKind()  const { return m_kind;  }
   uint32    getIndex() const { return m_index; }
-  Type::Tag getType()  const { return m_type;  }
+  Type getType()  const { return m_type;  }
 
  private:
   Kind      m_kind;
   uint32    m_index;
-  Type::Tag m_type;
+  Type m_type;
 };
 
 struct HhbcTranslator {
@@ -179,15 +179,15 @@ struct HhbcTranslator {
   void emitCGetL(int32 id);
   void emitCGetL2(int32 id);
   void emitCGetS(const Class* cls, const StringData* propName,
-                 Type::Tag resultType, bool isInferedType);
+                 Type resultType, bool isInferedType);
   void emitMInstr(const NormalizedInstruction& ni);
   void emitCGetProp(LocationCode locCode,
                     int propOffset,
                     bool isPropOnStack,
-                    Type::Tag resultType,
+                    Type resultType,
                     bool isInferedType);
   void emitVGetL(int32 id);
-  void emitCGetG(const StringData* name, Type::Tag resultType,
+  void emitCGetG(const StringData* name, Type resultType,
                  bool isInferedType);
   void emitVGetG(const StringData* name);
   void emitVGetS();
@@ -352,19 +352,19 @@ struct HhbcTranslator {
 
   // tracelet guards
   Trace* guardTypeStack(uint32 stackIndex,
-                        Type::Tag type,
+                        Type type,
                         Trace* nextTrace = NULL);
-  void   guardTypeLocal(uint32 locId, Type::Tag type);
+  void   guardTypeLocal(uint32 locId, Type type);
   Trace* guardRefs(int64               entryArDelta,
                    const vector<bool>& mask,
                    const vector<bool>& vals,
                    Trace*              exitTrace = NULL);
 
   // Interface to irtranslator for predicted and inferred types.
-  void assertTypeLocal(uint32 localIndex, Type::Tag type);
-  void assertTypeStack(uint32 stackIndex, Type::Tag type);
-  void checkTypeLocal(uint32 localIndex, Type::Tag type);
-  void checkTypeTopOfStack(Type::Tag type, Offset nextByteCode);
+  void assertTypeLocal(uint32 localIndex, Type type);
+  void assertTypeStack(uint32 stackIndex, Type type);
+  void checkTypeLocal(uint32 localIndex, Type type);
+  void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void setThisAvailable();
   void emitLoadDeps();
 
@@ -441,9 +441,8 @@ private:
   void emitUnboxRAux();
   void emitAGet(SSATmp* src);
   void emitRet(SSATmp* retVal, Trace* exitTrace, bool freeInline);
-  template<Type::Tag T> void emitIsTypeC();
-  template<Type::Tag T> void emitIsTypeL(int id);
-  template<Type::Tag T> void emitIsTypeMem(SSATmp* addr);
+  void emitIsTypeC(Type t);
+  void emitIsTypeL(Type t, int id);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32 offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
@@ -456,8 +455,8 @@ private:
   Trace* getExitSlowTrace();
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32 id, Trace* target);
-  void emitInterpOne(Type::Tag type, Trace* target = NULL);
-  void emitInterpOneOrPunt(Type::Tag type, Trace* target = NULL);
+  void emitInterpOne(Type type, Trace* target = NULL);
+  void emitInterpOneOrPunt(Type type, Trace* target = NULL);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
@@ -483,8 +482,8 @@ private:
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb->genIncRef(tmp)); }
-  SSATmp* pop(Type::Tag type);
-  void    popDecRef(Type::Tag type);
+  SSATmp* pop(Type type);
+  void    popDecRef(Type type);
   void    discard(unsigned n);
   SSATmp* popC() { return pop(Type::Cell);      }
   SSATmp* popV() { return pop(Type::BoxedCell); }
@@ -495,10 +494,10 @@ private:
   std::vector<SSATmp*> getSpillValues() const;
   SSATmp* spillStack();
   SSATmp* loadStackAddr(int32 offset);
-  SSATmp* top(Type::Tag type, uint32 index = 0);
-  void    extendStack(uint32 index, Type::Tag type);
+  SSATmp* top(Type type, uint32 index = 0);
+  void    extendStack(uint32 index, Type type);
   void    replace(uint32 index, SSATmp* tmp);
-  void    refineType(SSATmp* tmp, Type::Tag type);
+  void    refineType(SSATmp* tmp, Type type);
 
 private:
   IRFactory&        m_irFactory;

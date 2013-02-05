@@ -51,7 +51,7 @@ struct InstructionBuilder {
   }
 
   template<class... Args>
-  Ret go(Opcode op, Type::Tag t, Args... args) {
+  Ret go(Opcode op, Type t, Args... args) {
     return go2(op, t, nullptr, args...);
   }
 
@@ -61,13 +61,13 @@ struct InstructionBuilder {
   }
 
   template<class... Args>
-  Ret go(Opcode op, Type::Tag t, LabelInstruction* l, Args... args) {
+  Ret go(Opcode op, Type t, LabelInstruction* l, Args... args) {
     return go2(op, t, l, args...);
   }
 
 private:
   template<class Int>
-  Ret go2(Opcode op, Type::Tag t, LabelInstruction* l, Int numArgs,
+  Ret go2(Opcode op, Type t, LabelInstruction* l, Int numArgs,
       SSATmp** tmps) {
     IRInstruction inst(op, numArgs, tmps);
     inst.setTypeParam(t);
@@ -77,7 +77,7 @@ private:
   }
 
   template<class... SSATmps>
-  Ret go2(Opcode op, Type::Tag t, LabelInstruction* l, SSATmps... args) {
+  Ret go2(Opcode op, Type t, LabelInstruction* l, SSATmps... args) {
     SSATmp* tmps[] = { args... };
     return go2(op, t, l, sizeof...(args), tmps);
   }

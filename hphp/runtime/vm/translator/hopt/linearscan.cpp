@@ -47,7 +47,7 @@ private:
     bool isPinned() const { return m_pinned; }
     bool isRetAddr() const {
       if (!m_ssaTmp) return false;
-      Type::Tag type = m_ssaTmp->getType();
+      Type type = m_ssaTmp->getType();
       return type == Type::RetAddr;
     }
 
@@ -627,11 +627,11 @@ void LinearScan::computePreColoringHint() {
       break;
     case Concat:
       {
-        Type::Tag lType = nextNative->getSrc(0)->getType();
-        Type::Tag rType = nextNative->getSrc(1)->getType();
-        if ((Type::isString(lType) && Type::isString(rType)) ||
-            (Type::isString(lType) && rType == Type::Int) ||
-            (lType == Type::Int && Type::isString(rType))) {
+        Type lType = nextNative->getSrc(0)->getType();
+        Type rType = nextNative->getSrc(1)->getType();
+        if ((lType.isString() && rType.isString()) ||
+            (lType.isString() && rType == Type::Int) ||
+            (lType == Type::Int && rType.isString())) {
           m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
           m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
         } else {
@@ -664,8 +664,8 @@ void LinearScan::computePreColoringHint() {
         auto type2 = src2->getType();
 
         if ((type1 == Type::Arr && type2 == Type::Arr)
-            || (Type::isString(type1) && Type::isString(type2))
-            || (Type::isString(type1) && !src1->isConst())
+            || (type1.isString() && type2.isString())
+            || (type1.isString() && !src1->isConst())
             || (type1 == Type::Obj && type2 == Type::Obj)) {
           m_preColoringHint.add(src1, 0, 0);
           m_preColoringHint.add(src2, 0, 1);
@@ -680,28 +680,19 @@ void LinearScan::computePreColoringHint() {
     case Conv:
     {
       SSATmp* src = nextNative->getSrc(0);
-      Type::Tag toType = nextNative->getTypeParam();
-      Type::Tag fromType = src->getType();
+      Type toType = nextNative->getTypeParam();
+      Type fromType = src->getType();
       if (toType == Type::Bool) {
-        switch (fromType) {
-          case Type::Cell:
-            m_preColoringHint.add(src, 0, 0);
-            m_preColoringHint.add(src, 1, 1);
-            break;
-          case Type::Str:
-          case Type::StaticStr:
-          case Type::Arr:
-          case Type::Obj:
-            m_preColoringHint.add(src, 0, 0);
-            break;
-          default:
-            break;
-        }
-      } else if (Type::isString(toType)) {
-        if (fromType == Type::Int) {
+        if (fromType == Type::Cell) {
+          m_preColoringHint.add(src, 0, 0);
+          m_preColoringHint.add(src, 1, 1);
+        } else if (fromType == Type::Str ||
+                   fromType == Type::StaticStr ||
+                   fromType == Type::Arr ||
+                   fromType == Type::Obj) {
           m_preColoringHint.add(src, 0, 0);
         }
-      } else if (Type::isString(fromType) && toType == Type::Int) {
+      } else if (fromType.isString() && toType == Type::Int) {
         m_preColoringHint.add(src, 0, 0);
       }
       break;
@@ -982,7 +973,7 @@ void LinearScan::rematerializeAux() {
           }
         }
         if (newInst) {
-          UNUSED Type::Tag oldType = dst->getType();
+          UNUSED Type oldType = dst->getType();
           newInst->setDst(dst);
           dst->setInstruction(newInst);
           assert(outputType(newInst) == oldType);

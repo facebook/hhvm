@@ -97,7 +97,7 @@ bool isInferredType(const NormalizedInstruction& i) {
           NormalizedInstruction::OutputInferred);
 }
 
-JIT::Type::Tag getInferredOrPredictedType(const NormalizedInstruction& i) {
+JIT::Type getInferredOrPredictedType(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
   if (u == NormalizedInstruction::OutputInferred ||
       (u == NormalizedInstruction::OutputUsed && i.outputPredicted)) {
@@ -1469,14 +1469,14 @@ TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
 
   if ((u == NormalizedInstruction::OutputUsed && i.outputPredicted) ||
       (u == NormalizedInstruction::OutputInferred)) {
-    JIT::Type::Tag jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
+    JIT::Type jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
     if (u == NormalizedInstruction::OutputInferred) {
       TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output inferred as %s\n",
-            JIT::Type::Strings[jitType]);
+            jitType.toString().c_str());
       m_hhbcTrans->assertTypeStack(0, jitType);
     } else {
       TRACE(1, "HHIR: irPassPredictedAndInferredTypes: output predicted as %s\n",
-            JIT::Type::Strings[jitType]);
+            jitType.toString().c_str());
       m_hhbcTrans->checkTypeTopOfStack(jitType, i.next->offset());
     }
   }

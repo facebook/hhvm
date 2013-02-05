@@ -27,12 +27,12 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-Type::Tag outputType(const IRInstruction* inst) {
+Type outputType(const IRInstruction* inst) {
 
 #define D(type)   return Type::type;
 #define DofS(n)   return inst->getSrc(n)->getType();
-#define DUnbox(n) return Type::unbox(inst->getSrc(n)->getType());
-#define DBox(n)   return Type::box(inst->getSrc(n)->getType());
+#define DUnbox(n) return inst->getSrc(n)->getType().unbox();
+#define DBox(n)   return inst->getSrc(n)->getType().box();
 #define DParam    return inst->getTypeParam();
 #define DLabel    return Type::None;
 #define NA        assert(0 && "outputType requires HasDest or NaryDest");
@@ -60,31 +60,15 @@ Type::Tag outputType(const IRInstruction* inst) {
 
 namespace {
 
-/*
- * subtypeAny(ssa, types...)
- *
- * Returns whether ssa->getType() is a subtype of any of the
- * Type::Tags in the variable-length list.
- */
-
-bool subtypeAny(const SSATmp* s, Type::Tag t) {
-  return s->isA(t);
-}
-template<class... Args>
-bool subtypeAny(const SSATmp* s, Type::Tag t, Args... args) {
-  return s->isA(t) || subtypeAny(s, args...);
+// Returns a union type containing all the types in the
+// variable-length argument list
+Type buildUnion() {
+  return Type::None;
 }
 
-// Return a renderable string for a union of types that was specified.
-// Used when a type assertion fails to produce an error message.
 template<class... Args>
-std::string expectedStr(Args... t) {
-  using namespace folly::gen;
-  return folly::join(
-    '|',
-    from({t...}) | mapped([](Type::Tag t) { return Type::Strings[t]; })
-                 | as<std::vector>()
-  );
+Type buildUnion(Type t, Args... ts) {
+  return t | buildUnion(ts...);
 }
 
 }
@@ -137,7 +121,7 @@ void assertOperandTypes(const IRInstruction* inst) {
         curSrc,
         inst->toString(),
         expected,
-        Type::Strings[inst->getSrc(curSrc)->getType()]
+        inst->getSrc(curSrc)->getType().toString()
       ).str()
     );
   };
@@ -164,18 +148,22 @@ void assertOperandTypes(const IRInstruction* inst) {
     );
   };
 
-  using namespace Type;
+#define IRT(name, ...) UNUSED static const Type name = Type::name;
+  IR_TYPES
+#undef IRT
 
 #define NA       return checkNoArgs();
-#define S(...)   check(subtypeAny(getSrc(), __VA_ARGS__), \
-                       expectedStr(__VA_ARGS__));         \
-                   ++curSrc;
+#define S(...) do {                                                     \
+      Type t = buildUnion(__VA_ARGS__);                                 \
+      check(getSrc()->isA(t), t.toString());                            \
+      ++curSrc;                                                         \
+    } while (false);
 #define C(type)  check(getSrc()->isConst() &&       \
-                       getSrc()->isA(Type::type),   \
+                       getSrc()->isA(type),         \
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SNum     S(Int,Bool)
+#define SNum     S(Int, Bool)
 #define SUnk     return;
 
 #define O(opcode, dstinfo, srcinfo, flags)      \

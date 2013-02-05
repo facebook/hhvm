@@ -64,6 +64,9 @@ foreach (file ${CXX_SOURCES})
 	if (${file} MATCHES "runtime/vm/translator/test")
 		list(REMOVE_ITEM CXX_SOURCES ${file})
 	endif()
+	if (${file} MATCHES "runtime/vm/translator/hopt/test")
+		list(REMOVE_ITEM CXX_SOURCES ${file})
+	endif()
 endforeach(file ${CXX_SOURCES})
 
 # remove ext/sep for hhvm

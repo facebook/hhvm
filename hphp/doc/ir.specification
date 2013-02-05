@@ -90,61 +90,55 @@ is a union of S and T (U = {S|T}) if it represents the union of S and T's
 value sets.  In that case, S and T are both subtypes of U (S <: U, T <: U),
 even if S and T are not related.
 
-Variables in the IR contain a mix of PHP-visible types and internal types,
-described below.
+Variables in the IR contain a mix of PHP-visible types and internal types. The
+following table describes types representing PHP values. Note that the types
+used here are more specific than what can be discriminated by user code (e.g.,
+StaticStr and CountedStr both appear as type String at the PHP level).
 
   Type            HHVM representation
   ----            -------------------
-  None            No value, {}, KindOfInvalid
-  Unin            KindOfUninit
-  Null            KindOfNull
+  Uninit          KindOfUninit
+  InitNull        KindOfNull
+  Null            {Uninit|InitNull}
   Bool            false=0,true=1 (actual bit width varies)
   Int             int64_t (64-bit twos compliment binary integer)
   Dbl             double (IEEE 754 64-bit binary floating point)
-  Sstr            StringData* where isStatic() == true
+  StaticStr       StringData* where isStatic() == true
   UncountedInit   TypedValue {Null|Bool|Int|Dbl|Sstr}
   Uncounted       TypedValue {Unin|Null|Bool|Int|Dbl|Sstr}
-  Str             StringData*
-  Arr             ArrayData*
+  CountedStr      StringData* where isStatic() == false
+  Str             StringData* {CountedStr|StaticStr}
+  Arr             ArrayData* where isStatic() is unknown
   Obj             ObjectData*
-  Cell            TypedValue {Unin|Null|Bool|Int|Dbl|Sstr|Str|Arr|Obj}
+  Cell            {Null|Bool|Int|Dbl|Str|Arr|Obj}
 
 A PHP reference is implemented as a container object (RefData) which contains
-one value.  The types with & in their name denote a reference and the set of
-contained values.  Specifically, T& is represented by a pointer to a RefData
-that contains a value of type T.
+one value. For every type T in the table above there is a corresponding type
+BoxedT, which is a pointer to a RefData struct containing a value of type
+T. There is one top-level type representing all possible PHP types:
+
+  Gen             {Cell|BoxedCell}
+
+The VM also manipulates values of various internal types, which are never
+visible at the PHP semantic level, and do not have any type relation with the
+above PHP-facing types.
 
   Type            HHVM representation
   ----            -------------------
-  Unin&           RefData* to Unin
-  Null&           RefData* to Null
-  Bool&           RefData* to Bool
-  Int&            RefData* to Int
-  Dbl&            RefData* to Dbl
-  Sstr&           RefData* to Sstr
-  Str&            RefData* to Str
-  Arr&            RefData* to Arr
-  Obj&            RefData* to Obj
-  Cell&           RefData* to Cell, equivalently {Unin&|..|Obj&}
-  Gen             TypedValue {Cell,Cell&}
-
-The VM also manipulates values of various internal types, which are
-never visible at the PHP semantic level, and do not have any type
-relation with the above PHP-facing types.
-
-  Type            HHVM representation
-  ----            -------------------
-  Cell*           TypedValue* (cannot be KindOfRef)
-  Gen*            TypedValue*
+  PtrToT          Exists for all T in Gen. Represents a TypedValue*
+  None            No value, KindOfInvalid
+  Bottom          No value, {}. Subtype of every other type
   Home            Location of a local variable
   Cls             Class*
   Func            Func*
   VarEnv          VarEnv*
-  FuncCls         Tuple of (Func*,Class*)
   NamedEntity     NamedEntity*
+  FuncCls         Tuple of (Func*,Cctx)
+  FuncObj         Tuple of (Func*,Obj)
   Cctx            A Class* with the lowest bit set (as stored in ActRec.m_cls)
-  Ctx             {Obj | Cctx}
-  FuncCtx         Tuple of (Func*,Ctx*)
+  Ctx             {Obj|Cctx}
+  FuncCtx         Tuple of (Func*,{Cctx|Obj})
+  RetAddr         Return address
   StkPtr          Pointer into VM execution stack
   TCA             Machine code address
 

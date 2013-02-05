@@ -29,8 +29,8 @@ static void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
     IRInstruction* inst = *it;
     it++;
     for (SSATmp* dst : inst->getDsts()) {
-      if (Type::isStaticallyKnown(dst->getType()) &&
-          Type::isRefCounted(dst->getType())) {
+      if (dst->getType().isStaticallyKnown() &&
+          dst->getType().maybeCounted()) {
         auto* assertInst = factory->gen(DbgAssertRefCount, dst);
         assertInst->setParent(trace);
         instructions.insert(it, assertInst);

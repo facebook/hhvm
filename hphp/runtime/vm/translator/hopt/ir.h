@@ -451,16 +451,16 @@ public:
     IRT(PtrToGen,        "Gen*")  \
     IRT(Home,            "Home")  /* HPHP::DataType defines this as -2 */ \
     /* runtime metadata */        \
-    IRT(ClassPtr,        "Cls*")   \
-    IRT(FuncPtr,         "Func*") \
-    IRT(VarEnvPtr,       "VarEnv*")\
-    IRT(NamedEntityPtr,  "NamedEntity*") \
-    IRT(FuncClassPtr,    "FuncClass*") /* a tuple with a Func* and a Class* */ \
-    IRT(ClassCtxPtr,     "ClsCtx*")     /* Class* with the lowest bit set,  */ \
+    IRT(Cls,             "Cls")   \
+    IRT(Func,            "Func") \
+    IRT(VarEnv,          "VarEnv")\
+    IRT(NamedEntity,     "NamedEntity") \
+    IRT(FuncCls,         "FuncCls")    /* a tuple with a Func* and a Class* */ \
+    IRT(Cctx,            "Cctx")        /* Class* with the lowest bit set,  */ \
                                         /* as stored in ActRec.m_cls field  */ \
-    IRT(CtxPtr,          "Ctx*")    /* Obj or ClassCtx*, statically unknown */ \
-    IRT(FuncCtxPtr,      "FuncCtx*")  /* this has a Func* and either an Obj */ \
-                                    /* or a ClassCtxPtr, statically unknown */ \
+    IRT(Ctx,             "Ctx")          /* Obj or Cctx, statically unknown */ \
+    IRT(FuncCtx,         "FuncCtx")   /* this has a Func* and either an Obj */ \
+                                           /* or a Cctx, statically unknown */ \
     IRT(RetAddr,         "RetAddr")                       /* Return address */ \
     IRT(StkPtr,          "StkPtr") /* any pointer into VM stack: VmSP or VmFP*/\
     IRT(TCA,             "TCA") \
@@ -497,8 +497,8 @@ public:
             t != Gen           &&
             t != Uncounted     &&
             t != UncountedInit &&
-            t != CtxPtr        &&
-            t != FuncCtxPtr);
+            t != Ctx           &&
+            t != FuncCtx);
   }
 
   static bool isStaticallyKnownUnboxed(Tag t) {
@@ -536,7 +536,7 @@ public:
             (t2 == BoxedStr      && t1 == BoxedStaticStr)              ||
             (t2 == Uncounted     && t1 < Uncounted)                    ||
             (t2 == UncountedInit && t1 < UncountedInit && t1 > Uninit) ||
-            (t2 == CtxPtr        && (t1 == Obj || t1 == ClassPtr)));
+            (t2 == Ctx           && (t1 == Obj || t1 == Cls)));
   }
 
   /*
@@ -640,7 +640,7 @@ public:
       case Str           : return KindOfString;
       case Arr           : return KindOfArray;
       case Obj           : return KindOfObject;
-      case ClassPtr      : return KindOfClass;
+      case Cls           : return KindOfClass;
       case UncountedInit : return KindOfUncountedInit;
       case Uncounted     : return KindOfUncounted;
       case Gen           : return KindOfAny;
@@ -664,7 +664,7 @@ public:
       case KindOfString        : return Str;
       case KindOfArray         : return Arr;
       case KindOfObject        : return Obj;
-      case KindOfClass         : return ClassPtr;
+      case KindOfClass         : return Cls;
       case KindOfUncountedInit : return UncountedInit;
       case KindOfUncounted     : return Uncounted;
       case KindOfAny           : return Gen;
@@ -1003,18 +1003,18 @@ public:
 
   ConstInstruction(Opcode opc, const Func* f) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::FuncPtr);
+    setTypeParam(Type::Func);
     m_func = f;
   }
 
   ConstInstruction(Opcode opc, const Class* f) : IRInstruction(opc) {
     assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::ClassPtr);
+    setTypeParam(Type::Cls);
     m_clss = f;
   }
 
   ConstInstruction(Opcode opc, const NamedEntity* ne) : IRInstruction(opc) {
-    setTypeParam(Type::NamedEntityPtr);
+    setTypeParam(Type::NamedEntity);
     m_namedEntity = ne;
   }
 
@@ -1059,19 +1059,19 @@ public:
     return m_arrVal;
   }
   const Func* getValAsFunc() const {
-    assert(getTypeParam() == Type::FuncPtr);
+    assert(getTypeParam() == Type::Func);
     return m_func;
   }
   const Class* getValAsClass() const {
-    assert(getTypeParam() == Type::ClassPtr);
+    assert(getTypeParam() == Type::Cls);
     return m_clss;
   }
   const VarEnv* getValAsVarEnv() const {
-    assert(getTypeParam() == Type::VarEnvPtr);
+    assert(getTypeParam() == Type::VarEnv);
     return m_varEnv;
   }
   const NamedEntity* getValAsNamedEntity() const {
-    assert(getTypeParam() == Type::NamedEntityPtr);
+    assert(getTypeParam() == Type::NamedEntity);
     return m_namedEntity;
   }
 
@@ -1492,12 +1492,12 @@ inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
   }
 
   switch (instr->getSrc(0)->getType()) {
-    case Type::Int          :
-    case Type::FuncPtr      :
-    case Type::ClassPtr     :
-    case Type::FuncClassPtr :
-    case Type::VarEnvPtr    :
-    case Type::TCA          :
+    case Type::Int     :
+    case Type::Func    :
+    case Type::Cls     :
+    case Type::FuncCls :
+    case Type::VarEnv  :
+    case Type::TCA     :
       return true;
     default:
       return false;

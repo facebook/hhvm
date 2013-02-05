@@ -137,14 +137,14 @@ relation with the above PHP-facing types.
   Cell*           TypedValue* (cannot be KindOfRef)
   Gen*            TypedValue*
   Home            Location of a local variable
-  Cls*            Class*
-  Func*           Func*
-  VarEnv*         VarEnv*
-  FuncClass*      Tuple of (Func*,Class*)
-  NamedEntity*    NamedEntity*
-  ClsCtx*         A Class* with the lowest bit set (as stored in ActRec.m_cls)
-  Ctx*            {Obj | ClsCtx*}
-  FuncCtx*        Tuple of (Func*,Ctx*)
+  Cls             Class*
+  Func            Func*
+  VarEnv          VarEnv*
+  FuncCls         Tuple of (Func*,Class*)
+  NamedEntity     NamedEntity*
+  Cctx            A Class* with the lowest bit set (as stored in ActRec.m_cls)
+  Ctx             {Obj | Cctx}
+  FuncCtx         Tuple of (Func*,Ctx*)
   StkPtr          Pointer into VM execution stack
   TCA             Machine code address
 
@@ -329,8 +329,8 @@ OpNeq
 OpSame
 OpNSame
 
-D:Bool =  InstanceOf S0:ClassPtr S1:ClassPtr S2:ConstBool
-D:Bool = NInstanceOf S0:ClassPtr S1:ClassPtr S2:ConstBool
+D:Bool =  InstanceOf S0:Cls S1:Cls S2:ConstBool
+D:Bool = NInstanceOf S0:Cls S1:Cls S2:ConstBool
 
   Sets D based on whether S0 is a descendant of the class, interface,
   or trait in S1.  (Note that this is always false for a trait).  S1
@@ -339,14 +339,14 @@ D:Bool = NInstanceOf S0:ClassPtr S1:ClassPtr S2:ConstBool
   interface---the instruction must still handle it correctly if this
   hint is wrong at runtime.
 
-D:Bool = ExtendsClass S0:ClassPtr S1:ClassPtr
+D:Bool = ExtendsClass S0:Cls S1:Cls
 
   A fast-path for instanceof checks.  Sets D based on whether S0 is a
   descendant of the class in S1, where S1 must be a unique class that
   is not an interface or a trait.
 
-D:Bool =  InstanceOfBitmask S0:ClassPtr S1:ConstSstr
-D:Bool = NInstanceOfBitmask S0:ClassPtr S1:ConstSstr
+D:Bool =  InstanceOfBitmask S0:Cls S1:ConstSstr
+D:Bool = NInstanceOfBitmask S0:Cls S1:ConstSstr
 
   A fast-path for instanceof checks.  Sets D based on whether S0 is a
   descendant of the class named by S1, where S1 must have a bit
@@ -478,7 +478,7 @@ D:Obj = LdThis S0:StkPtr [L:Label]
   S0.  If label L is provided, also checks that m_this is valid
   (i.e. contains an Obj).
 
-D:Ctx* = LdCtx S0:StkPtr
+D:Ctx = LdCtx S0:StkPtr
 
   Loads into D the value of the m_this/m_cls field out of the frame
   pointer S0.
@@ -492,7 +492,7 @@ D:T = LdConst<T>
 
 D:ConstT = DefConst<T>
 
-D:ClassPtr = LdCls S0:ConstSstr
+D:Cls = LdCls S0:ConstSstr
 
   Loads the class named S0.  If the class is not defined, invokes
   autoload and may raise an error.
@@ -508,7 +508,7 @@ D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [L:Label]
   Note that no decref is necessary because class constants will always
   be static.
 
-D:FuncCtx* = LdClsMethodFCache S0:ConstSstr S1:ConstSstr S2:{Obj|Cls*|Ctx*} L:Label
+D:FuncCtx = LdClsMethodFCache S0:ConstSstr S1:ConstSstr S2:{Obj|Cls|Ctx} L:Label
 
   Loads from the MethodFCache a pointer to the callee function and the
   context (ActRec's m_this/m_cls slot) into D.  S0 and S1 hold the
@@ -517,7 +517,7 @@ D:FuncCtx* = LdClsMethodFCache S0:ConstSstr S1:ConstSstr S2:{Obj|Cls*|Ctx*} L:La
   the MethodFCache if needed.  In case the given method is not found,
   control is transferred to label L.
 
-D:Ctx* = GetCtxFwdCall S0:{Obj|Cls*|Ctx*} S1:Func*
+D:Ctx = GetCtxFwdCall S0:{Obj|Cls|Ctx} S1:Func
 
   Loads the context (ActRec's m_this/m_cls slot) for a forwarding call
   into D.  S0 is the current context, and S1 is the method being called.
@@ -528,24 +528,24 @@ LdPropAddr
 LdClsPropAddr
 LdObjMethod
 
-D:ClassPtr = LdObjClass S0:Obj
+D:Cls = LdObjClass S0:Obj
 
-  Load the Class* out of the object in S0 and put it in D.
+  Load the class out of the object in S0 and put it in D.
 
-D:ClassPtr = LdCachedClass S0:ConstSstr
+D:Cls = LdCachedClass S0:ConstSstr
 
-  Loads the Class* whose name is S0 out of target cache.  Does not
+  Loads the class whose name is S0 out of target cache.  Does not
   invoke autoload if the class is not defined and returns a null
-  ClassPtr.
+  class.
 
-D:FuncPtr = LdFunc S0:Str
+D:Func = LdFunc S0:Str
 
-  Loads the Func* whose name is S0.  Fatal if the named function is
+  Loads the Func whose name is S0.  Fatal if the named function is
   not defined, and the function autoloader fails to define it.
 
-D:FuncPtr = LdFixedFunc S0:ConstStr
+D:Func = LdFixedFunc S0:ConstStr
 
-  Loads the Func* whose name is S0.  Fatal if the named function is
+  Loads the Func whose name is S0.  Fatal if the named function is
   not defined, and the function autoloader fails to define it.
 
 LdCurFuncPtr
@@ -852,12 +852,12 @@ D:PtrToCell = DefMIStateBase
 D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:PtrToGen S3:Gen S4:PtrToCell
 
   Lookup intermediate property. Calls the helper specified by S0, passing the
-  Class context (S1), pointer to the current base (S2), key (S3), and pointer
+  class context (S1), pointer to the current base (S2), key (S3), and pointer
   to MInstrState (S4).
 
 D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:PtrToGen S3:Gen S4:PtrToCell
 
-  Get property as cell. Calls the helper specified by S0, passing the Class
+  Get property as cell. Calls the helper specified by S0, passing the class
   context (S1), pointer to the current base (S2), key (S3), and pointer to
   MInstrState (S4).
 

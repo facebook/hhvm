@@ -484,14 +484,14 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
         ((src1Type == Type::Int || src1Type == Type::Dbl) &&
          (src2Type == Type::Int || src2Type == Type::Dbl)) ||
         (src1Type == Type::Bool && src2Type == Type::Bool) ||
-        (src1Type == Type::ClassPtr && src2Type == Type::ClassPtr))) {
+        (src1Type == Type::Cls && src2Type == Type::Cls))) {
     CG_PUNT(cgJcc);
   }
   if (src1Type == Type::Dbl || src2Type == Type::Dbl) {
     prepBinaryXmmOp(m_as, src1, src2);
     doubleCmp(m_as, xmm0, xmm1);
   } else {
-    if (src1Type == Type::ClassPtr && src2Type == Type::ClassPtr) {
+    if (src1Type == Type::Cls && src2Type == Type::Cls) {
       assert(opc == JmpSame || opc == JmpNSame);
     }
     auto srcReg1 = src1->getReg();
@@ -2759,7 +2759,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
 
   auto spReg = sp->getReg();
   // actRec->m_this
-  if (objOrCls->getType() == Type::ClassPtr) {
+  if (objOrCls->getType() == Type::Cls) {
     // store class
     if (objOrCls->isConst()) {
       m_as.store_imm64_disp_reg64(uintptr_t(objOrCls->getValClass()) | 1,
@@ -2776,18 +2776,18 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(objOrCls->getReg(),
                                 spOffset + AROFF(m_this),
                                 spReg);
-  } else if (objOrCls->getType() == Type::CtxPtr) {
-    // Stores either a this pointer of a ClsCtxPtr -- statically unknown.
+  } else if (objOrCls->getType() == Type::Ctx) {
+    // Stores either a this pointer or a Cctx -- statically unknown.
     Reg64 objOrClsPtrReg = objOrCls->getReg();
     m_as.storeq(objOrClsPtrReg, spReg[spOffset + AROFF(m_this)]);
   } else {
     assert(objOrCls->getType() == Type::Null);
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + AROFF(m_this);
-    // When func is either Type::FuncClassPtr or Type::FuncCtxPtr,
+    // When func is either Type::FuncCls or Type::FuncCtx,
     // m_this/m_cls will be initialized below
-    if (!func->isConst() && (func->getType() == Type::FuncClassPtr ||
-                             func->getType() == Type::FuncCtxPtr)) {
+    if (!func->isConst() && (func->getType() == Type::FuncCls ||
+                             func->getType() == Type::FuncCtx)) {
       // m_this is unioned with m_cls and will be initialized below
       setThis = false;
     } else {
@@ -2816,10 +2816,9 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(rScratch,
                                 spOffset + AROFF(m_func),
                                 spReg);
-    if (func->getType() == Type::FuncClassPtr ||
-        func->getType() == Type::FuncCtxPtr) {
+    if (func->getType() == Type::FuncCls ||
+        func->getType() == Type::FuncCtx) {
       // Fill in m_cls if provided with both func* and class*
-      fprintf(stderr, "cgAllocActRec: const func->isFuncClassPtr()\n");
       CG_PUNT(cgAllocActRec);
     }
   } else {
@@ -2827,8 +2826,8 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(func->getReg(0),
                                 offset_m_func,
                                 spReg);
-    if (func->getType() == Type::FuncClassPtr ||
-        func->getType() == Type::FuncCtxPtr) {
+    if (func->getType() == Type::FuncCls ||
+        func->getType() == Type::FuncCtx) {
       int offset_m_cls = spOffset + AROFF(m_cls);
       m_as.store_reg64_disp_reg64(func->getReg(1),
                                   offset_m_cls,
@@ -3013,7 +3012,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   SSATmp* func  = inst->getSrc(0);
   SSATmp* fp    = inst->getSrc(1);
   assert(func->isConst());
-  assert(func->getType() == Type::FuncPtr);
+  assert(func->getType() == Type::Func);
   BuiltinFunction builtinFuncPtr = func->getValFunc()->builtinFuncPtr();
   auto fpReg = fp->getReg();
   if (fpReg != argNumToRegName[0]) {
@@ -3127,7 +3126,7 @@ void CodeGenerator::cgLdContLocalsPtr(IRInstruction* inst) {
 static int getNativeTypeSize(Type::Tag type) {
   switch (type) {
     case Type::Int:
-    case Type::FuncPtr:
+    case Type::Func:
       return sz::qword;
     case Type::Bool:
       return sz::byte;
@@ -3640,7 +3639,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   LabelInstruction* exitLabel = inst->getLabel();
 
   // Get values in place
-  assert(funcPtrTmp->getType() == Type::FuncPtr);
+  assert(funcPtrTmp->getType() == Type::Func);
   auto funcPtrReg = funcPtrTmp->getReg();
   assert(funcPtrReg != InvalidReg);
 
@@ -3764,7 +3763,7 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   SSATmp* cls   = inst->getSrc(0);
   SSATmp* mSlot = inst->getSrc(1);
 
-  assert(cls->getType() == Type::ClassPtr);
+  assert(cls->getType() == Type::Cls);
   assert(mSlot->isConst() && mSlot->getType() == Type::Int);
   uint64 mSlotInt64 = mSlot->getValRawInt();
   // We're going to multiply mSlotVal by sizeof(Func*) and use
@@ -3901,7 +3900,7 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   PhysReg  srcCtxReg = srcCtxTmp->getReg(0);
   const Func* callee = inst->getSrc(1)->getValFunc();
   bool      withThis = srcCtxTmp->getType() == Type::Obj;
-  bool        noThis = srcCtxTmp->getType() == Type::ClassPtr;
+  bool        noThis = srcCtxTmp->getType() == Type::Cls;
 
   // If we're in a static method or we're sure we don't have a This pointer,
   // then we're done
@@ -3967,12 +3966,12 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   asm_label(m_as, FoundMethod);
 
   switch (srcCtxTmp->getType()) {
-    case Type::ClassPtr:
+    case Type::Cls:
       return; // done: destCtxReg already has srcCtxReg
     case Type::Obj:
       // unconditionally run code produced by emitGetCtxFwdCallWithThisDyn below
       break;
-    case Type::CtxPtr: {
+    case Type::Ctx: {
       // dynamically check if we have a This pointer and
       // call emitGetCtxFwdCallWithThisDyn below
       m_as.testb(1, rbyte(destCtxReg));
@@ -3997,7 +3996,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
 
   if (clsName->isConst() && clsName->getType() == Type::StaticStr  &&
       prop->isConst() && prop->getType() == Type::StaticStr &&
-      cls->getType() == Type::ClassPtr) {
+      cls->getType() == Type::Cls) {
 
     const StringData* propName = prop->getValStr();
     auto dstReg = dst->getReg();

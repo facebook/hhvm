@@ -459,13 +459,13 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
     case Type::Uninit:
       ostream << "Unin";
       break;
-    case Type::FuncPtr:
+    case Type::Func:
       ostream << "Func(" << (m_func ? m_func->fullName()->data() : "0") << ")";
       break;
-    case Type::ClassPtr:
-      ostream << "Class(" << (m_clss ? m_clss->name()->data() : "0") << ")";
+    case Type::Cls:
+      ostream << "Cls(" << (m_clss ? m_clss->name()->data() : "0") << ")";
       break;
-    case Type::FuncClassPtr:
+    case Type::FuncCls:
       assert(false /* ConstInstruction does not hold both func* and class* */);
       break;
     case Type::TCA:
@@ -555,9 +555,9 @@ int SSATmp::numNeededRegs() const {
     case Type::UncountedInit:
       return 2;
 
-    // These need 2 registers, 1 for Func*, and 1 for {Obj|Cls*|ClsCtx*}.
-    case Type::FuncClassPtr:
-    case Type::FuncCtxPtr:
+    // These need 2 registers, 1 for Func*, and 1 for {Obj|Cls|Cctx}.
+    case Type::FuncCls:
+    case Type::FuncCtx:
       return 2;
 
     // By default, all other types only need 1 register.

@@ -1417,7 +1417,7 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   SSATmp* func = callee ? m_tb->genDefConst<const Func*>(callee) : nullptr;
   SSATmp* actRec = spillStack();
   if (!func) {
-    if (actRecOrFunc && actRecOrFunc->getType() == Type::FuncPtr) {
+    if (actRecOrFunc && actRecOrFunc->getType() == Type::Func) {
       func = actRecOrFunc;
     } else {
       func = m_tb->genDefNull();
@@ -1785,7 +1785,7 @@ void HhbcTranslator::emitAGetC(const StringData* clsName) {
   } else {
     spillStack();
     popC();
-    emitInterpOne(Type::ClassPtr);
+    emitInterpOne(Type::Cls);
   }
 }
 
@@ -1799,7 +1799,7 @@ void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
     emitAGet(src);
   } else {
     spillStack();
-    emitInterpOne(Type::ClassPtr);
+    emitInterpOne(Type::Cls);
   }
 }
 

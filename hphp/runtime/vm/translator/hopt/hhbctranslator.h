@@ -488,7 +488,7 @@ private:
   SSATmp* popC() { return pop(Type::Cell);      }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }
-  SSATmp* popA() { return pop(Type::ClassPtr);  }
+  SSATmp* popA() { return pop(Type::Cls);       }
   SSATmp* popF() { return pop(Type::Gen);       }
   SSATmp* topC(uint32 i = 0) { return top(Type::Cell, i); }
   std::vector<SSATmp*> getSpillValues() const;
@@ -525,8 +525,8 @@ private:
    *
    *   The EvalStack contains cells and ActRecs that need to be
    *   spilled in order to materialize the stack.  The FpiStack tracks
-   *   calls between FPush* and FCall, and contains either FuncPtrs or
-   *   ActRecs.  (It contains FuncPtr when we will need to use a
+   *   calls between FPush* and FCall, and contains either Func* or
+   *   ActRecs.  (It contains Func* when we will need to use a
    *   runtime value for the Func*.)
    *
    *   m_stackDeficit represents the number of cells we've popped off

@@ -577,14 +577,18 @@ static void shuffleArgs(Asm& a, ArgGroup& args, IRInstruction* inst) {
   doRegMoves(moves, int(reg::rScratch), howTo);
   for (size_t i = 0; i < howTo.size(); ++i) {
     if (howTo[i].m_kind == MoveInfo::Move) {
-      ArgDesc* argDesc = argDescs[int(howTo[i].m_reg2)];
-      if (argDesc->getKind() == ArgDesc::Reg ||
-          argDesc->getKind() == ArgDesc::TypeReg) {
-        a.    movq   (howTo[i].m_reg1, howTo[i].m_reg2);
+      if (howTo[i].m_reg2 == reg::rScratch) {
+        a.      movq   (howTo[i].m_reg1, howTo[i].m_reg2);
       } else {
-        assert(argDesc->getKind() == ArgDesc::Addr);
-        a.    lea    (howTo[i].m_reg1[argDesc->getImm().q()],
-                      howTo[i].m_reg2);
+        ArgDesc* argDesc = argDescs[int(howTo[i].m_reg2)];
+        if (argDesc->getKind() == ArgDesc::Reg ||
+            argDesc->getKind() == ArgDesc::TypeReg) {
+          a.    movq   (howTo[i].m_reg1, howTo[i].m_reg2);
+        } else {
+          assert(argDesc->getKind() == ArgDesc::Addr);
+          a.    lea    (howTo[i].m_reg1[argDesc->getImm().q()],
+                        howTo[i].m_reg2);
+        }
       }
     } else {
       a.    xchgq  (howTo[i].m_reg1, howTo[i].m_reg2);

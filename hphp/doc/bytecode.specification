@@ -3600,6 +3600,13 @@ IncStat <counter id> <value>    []  ->  []
   <value> to the counter specified by <counter id>. The meaning of the
   <counter id> immediate is implementation defined
 
+AKExists    [C C] -> [C:Bool]
+
+  Checks if array (object) in $1 contains key (property) in $2 and
+  pushes the resulting boolean onto the stack.  If $2 is null, uses
+  the empty string as key.  Throws a fatal error if $1 is not an array
+  or object, and raises a warning if $2 is not a string, integer, or
+  null.
 
 14. Continuation creation and execution
 ---------------------------------------

@@ -873,7 +873,7 @@ TranslatorX64::irTranslateCheckTypeOp(const Tracelet& t,
 void
 TranslatorX64::irTranslateAKExists(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
-  HHIR_UNIMPLEMENTED(AKExists);
+  HHIR_EMIT(AKExists);
 }
 
 void

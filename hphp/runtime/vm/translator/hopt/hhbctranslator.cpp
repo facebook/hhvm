@@ -1152,6 +1152,23 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
   }
 }
 
+void HhbcTranslator::emitAKExists() {
+  TRACE(3, "%u: AKExists\n", m_bcOff);
+  SSATmp* arr = popC();
+  SSATmp* key = popC();
+
+  if (!arr->isA(Type::Arr) && !arr->isA(Type::Obj)) {
+    PUNT(AKExists_badArray);
+  }
+  if (!key->isString() && !key->isA(Type::Int) && !key->isA(Type::Null)) {
+    PUNT(AKExists_badKey);
+  }
+
+  push(m_tb->gen(AKExists, arr, key));
+  m_tb->genDecRef(arr);
+  m_tb->genDecRef(key);
+}
+
 void HhbcTranslator::emitFPassR() {
   TRACE(3, "%u: FPassR\n", m_bcOff);
   emitUnboxRAux();

@@ -840,6 +840,7 @@ Concat
 ArrayAdd
 DefCls
 DefFunc
+AKExists
 
 D:StkPtr InterpOne S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
                      S4:ConstInt [ -> L ]

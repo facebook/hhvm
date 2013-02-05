@@ -4079,6 +4079,65 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
                inst->getDst(), kSyncPoint, args);
 }
 
+static inline int64 ak_exist_string_helper(StringData* key, ArrayData* arr) {
+  int64 n;
+  if (key->isStrictlyInteger(n)) {
+    return arr->exists(n);
+  }
+  return arr->exists(StrNR(key));
+}
+
+static int64 ak_exist_string(StringData* key, ArrayData* arr) {
+  int64 res = ak_exist_string_helper(key, arr);
+  return res;
+}
+
+static int64 ak_exist_int(int64 key, ArrayData* arr) {
+  bool res = arr->exists(key);
+  return res;
+}
+
+static int64 ak_exist_string_obj(StringData* key, ObjectData* obj) {
+  CArrRef arr = obj->o_toArray();
+  int64 res = ak_exist_string_helper(key, arr.get());
+  return res;
+}
+
+static int64 ak_exist_int_obj(int64 key, ObjectData* obj) {
+  CArrRef arr = obj->o_toArray();
+  bool res = arr.get()->exists(key);
+  return res;
+}
+
+void CodeGenerator::cgAKExists(IRInstruction* inst) {
+  SSATmp* arr = inst->getSrc(0);
+  SSATmp* key = inst->getSrc(1);
+
+  if (key->getType().isNull()) {
+    if (arr->isA(Type::Arr)) {
+      cgCallHelper(m_as,
+                   (TCA)ak_exist_string,
+                   inst->getDst(),
+                   kNoSyncPoint,
+                   ArgGroup().immPtr(empty_string.get()).ssa(arr));
+    } else {
+      m_as.mov_imm64_reg(0, inst->getDst()->getReg());
+    }
+    return;
+  }
+
+  TCA helper_func =
+    arr->isA(Type::Obj)
+    ? (key->isA(Type::Int) ? (TCA)ak_exist_int_obj : (TCA)ak_exist_string_obj)
+    : (key->isA(Type::Int) ? (TCA)ak_exist_int : (TCA)ak_exist_string);
+
+  cgCallHelper(m_as,
+               helper_func,
+               inst->getDst(),
+               kNoSyncPoint,
+               ArgGroup().ssa(key).ssa(arr));
+}
+
 void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
                                     ConditionCode cc) {
   SSATmp* src   = inst->getSrc(0);

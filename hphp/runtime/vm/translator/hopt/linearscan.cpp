@@ -643,6 +643,9 @@ void LinearScan::computePreColoringHint() {
     case ArrayAdd:
       normalHint(2);
       break;
+    case AKExists:
+      normalHint(2);
+      break;
     case DefFunc:
       normalHint(1);
       break;

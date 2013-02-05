@@ -260,6 +260,7 @@ struct HhbcTranslator {
                   const Func* callee);
   void emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId);
   void emitClsCns(int32 cnsNameStrId);
+  void emitAKExists();
   void emitAGetC(const StringData* clsName);
   void emitAGetL(int localId, const StringData* clsName);
   void emitIsNullL(int id);

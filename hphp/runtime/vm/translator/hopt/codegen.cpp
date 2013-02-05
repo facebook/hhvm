@@ -3293,7 +3293,8 @@ void CodeGenerator::cgStore(PhysReg base,
                             bool genStoreType) {
   Type::Tag type = src->getType();
   if (!Type::isStaticallyKnown(type)) {
-    return cgStoreTypedValue(base, off, src);
+    cgStoreTypedValue(base, off, src);
+    return;
   }
   // store the type
   if (genStoreType) {
@@ -3307,26 +3308,20 @@ void CodeGenerator::cgStore(PhysReg base,
   }
   assert(type != Type::Home);
   if (src->isConst()) {
-    if (type == Type::Bool) {
-      m_as.store_imm64_disp_reg64((int64)src->getValBool(),
-                                  off + TVOFF(m_data),
-                                  base);
-    } else if (type == Type::Int) {
-      m_as.store_imm64_disp_reg64(src->getValInt(),
-                                  off + TVOFF(m_data),
-                                  base);
-    } else if (type == Type::Dbl) {
-      CG_PUNT(cgStore_Dbl); // not handled yet!
-    } else if (type == Type::Arr) {
-      m_as.store_imm64_disp_reg64((int64)src->getValArr(),
-                                  off + TVOFF(m_data),
-                                  base);
-    } else {
-      assert(type == Type::StaticStr);
-      m_as.store_imm64_disp_reg64((int64)src->getValStr(),
-                                  off + TVOFF(m_data),
-                                  base);
+    int64 val = 0;
+    switch (type) {
+      case Type::Bool:
+      case Type::Int:
+      case Type::Dbl:
+      case Type::Arr:
+      case Type::StaticStr:
+      case Type::Cls:
+        val = src->getValBits();
+        break;
+      default:
+        assert(0);
     }
+    m_as.store_imm64_disp_reg64(val, off + TVOFF(m_data), base);
   } else {
     if (type == Type::Bool) {
       m_as.    movzbl  (rbyte(src->getReg()), r32(src->getReg()));
@@ -4005,14 +4000,16 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
 
     const StringData* propName = prop->getValStr();
     auto dstReg = dst->getReg();
-    auto srcReg = cls->getReg();
     const StringData* clsNameString = clsName->getValStr();
     string sds(Util::toLower(clsNameString->data()) + ":" +
                string(propName->data(), propName->size()));
     StringData sd(sds.c_str(), sds.size(), AttachLiteral);
     CacheHandle ch = SPropCache::alloc(&sd);
 
-    auto tmpReg = dstReg == srcReg ? PhysReg(rScratch) : dstReg;
+    auto tmpReg = dstReg;
+    if (!cls->isConst() && dstReg == cls->getReg()) {
+      tmpReg = PhysReg(rScratch);
+    }
     m_as.load_reg64_disp_reg64(rVmTl, ch, tmpReg);
     m_as.test_reg64_reg64(tmpReg, tmpReg);
     // jz off to the helper call in astubs

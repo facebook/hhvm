@@ -546,7 +546,14 @@ D:Ctx = GetCtxFwdCall S0:{Obj|Cls|Ctx} S1:Func
 LdClsMethodCache
 LdClsMethod
 LdPropAddr
-LdClsPropAddr
+
+D:Gen* = LdClsPropAddr S0:Cls S1:ConstSstr S2:ConstSstr
+
+  Loads a pointer to a static class property. S0 points to the class,
+  S1 is the class name, and S2 is the property name. Throws a fatal
+  error if class S0 does not have a visible and accessible static
+  property named S2.
+
 LdObjMethod
 
 D:Cls = LdObjClass S0:Obj

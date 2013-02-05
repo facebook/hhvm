@@ -798,32 +798,30 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
                                        const StringData* propName) {
   SSATmp* clsTmp = popA();
   SSATmp* prop = popC();
-  SSATmp* clsName;
-  if (propName) {
-    prop = m_tb->genDefConst<const StringData*>(propName);
+  if (clsTmp->isConst()) {
+    cls = clsTmp->getValClass();
   }
   if (!cls) {
+    // can't use property target cache if class name is not a
+    // compile-time constant
     PUNT(ClsPropAddr_noCls);
   }
-  if (getCurFunc()->cls() != cls) {
+  if (getCurClass() != cls) {
+    // SPropCache::lookup can't handle the case where context is
+    // different than cls
     PUNT(ClsPropAddr_clsNE);
   }
   if (!prop->isConst() || prop->getType() != Type::StaticStr) {
-    PUNT(ClsPropAddr_noProp);
-  }
-  if (cls) {
-    const StringData* clsNameStr = cls->preClass()->name();
-    clsName = m_tb->genDefConst<const StringData*>(clsNameStr);
-    // XXX Can't we use cls directly?
-  } else {
-    IRInstruction* clsInst = clsTmp->getInstruction();
-    if (clsInst->getOpcode() == LdCls &&
-        clsInst->getSrc(0)->getType() == Type::StaticStr) {
-      clsName = clsInst->getSrc(0);
+    if (propName) {
+      prop = m_tb->genDefConst(propName);
     } else {
-      PUNT(clsPropAddr_noClassName);
+      // can't use property target cache if property name is not a
+      // compile-time constant
+      PUNT(ClsPropAddr_noProp);
     }
   }
+  const StringData* clsNameStr = cls->preClass()->name();
+  SSATmp* clsName = m_tb->genDefConst(clsNameStr);
   return m_tb->genLdClsPropAddr(clsTmp, clsName, prop);
 }
 
@@ -1771,7 +1769,17 @@ bool isSupportedAGet(SSATmp* classSrc, const StringData* className) {
 void HhbcTranslator::emitAGet(SSATmp* classSrc) {
   Type::Tag srcType = classSrc->getType();
   if (Type::isString(srcType)) {
-    push(m_tb->genLdCls(classSrc));
+    // srcType must be static string
+    assert(srcType == Type::StaticStr);
+    const Class* cls = Unit::lookupClass(classSrc->getValStr());
+    Class* curClass = getCurClass();
+    if (cls && curClass && curClass->classof(cls) ) {
+      // the class of the current function being compiled is the same as or
+      // derived from cls, so we can just use cls
+      push(m_tb->genDefConst(cls));
+    } else {
+      push(m_tb->genLdCls(classSrc));
+    }
   } else if (srcType == Type::Obj) {
     push(m_tb->gen(LdObjClass, classSrc));
   } else {

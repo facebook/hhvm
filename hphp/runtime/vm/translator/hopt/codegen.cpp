@@ -1653,9 +1653,10 @@ void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = inst->getSrc(0)->getReg(0);
+  auto dstReg = inst->getDst()->getReg();
   assert(fpReg != InvalidReg);
   assert(inst->getDst() && !inst->getDst()->hasReg(0));
-  m_as.push(fpReg[AROFF(m_savedRip)]);
+  m_as.loadq(fpReg[AROFF(m_savedRip)], dstReg);
 }
 
 void checkStack(Cell* sp, int numElems) {
@@ -1759,8 +1760,10 @@ void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
 }
 
 void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
-  SSATmp* sp    = inst->getSrc(0);
-  SSATmp* fp    = inst->getSrc(1);
+  SSATmp* sp      = inst->getSrc(0);
+  SSATmp* fp      = inst->getSrc(1);
+  SSATmp* retAddr = inst->getSrc(2);
+  auto retReg     = retAddr->getReg();
 
   // Make sure rVmFp and rVmSp are set appropriately
   if (sp->getReg() != rVmSp) {
@@ -1780,6 +1783,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
     emitTraceRet(m_as);
   }
   // Return control to caller
+  m_as.push(retReg);
   m_as.ret();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     m_as.ud2();

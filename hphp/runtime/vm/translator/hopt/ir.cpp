@@ -547,7 +547,6 @@ int SSATmp::numNeededRegs() const {
     case Type::None:
     case Type::Uninit:
     case Type::Null:
-    case Type::RetAddr:
     case Type::ActRec:
       return 0;
 

@@ -45,6 +45,11 @@ private:
     bool isCalleeSaved() const { return !isCallerSaved(); }
     bool isAllocated() const { return m_ssaTmp != NULL; }
     bool isPinned() const { return m_pinned; }
+    bool isRetAddr() const {
+      if (!m_ssaTmp) return false;
+      Type::Tag type = m_ssaTmp->getType();
+      return type == Type::RetAddr;
+    }
 
   private:
     SSATmp*   m_ssaTmp; // non-null when allocated
@@ -1151,11 +1156,14 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
     // list; this register is the one whose last use is the most distant
     assert(!m_allocatedRegs.empty());
 
-    // Pick the first register in <m_allocatedRegs> that is not used
-    // for any source operand in the current instruction.
-    auto isUnpinned = [&] (RegState* reg) { return !reg->isPinned(); };
+    // Pick the first register in <m_allocatedRegs> that is:
+    // 1. not used for any source operand in the current instruction, and
+    // 2. not used for the return address of a function.
+    auto canSpill = [&] (RegState* reg) {
+      return !reg->isPinned() && !reg->isRetAddr();
+    };
     auto pos = std::find_if(m_allocatedRegs.begin(), m_allocatedRegs.end(),
-                            isUnpinned);
+                            canSpill);
     if (pos == m_allocatedRegs.end()) {
       PUNT(RegSpill);
     }

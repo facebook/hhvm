@@ -228,7 +228,7 @@ public:
    * In order to correctly copy circular arrays, even if v is the only
    * strong reference to arr, we still keep the reference.
    */
-  Variant &setWithRef(CVarRef v, const ArrayData *arr = NULL);
+  Variant &setWithRef(CVarRef v, const ArrayData *arr = nullptr);
 
   /**
    * Fast accessors that can be used by generated code when type inference can
@@ -833,7 +833,7 @@ public:
     }
 
     assert(m_type == KindOfArray);
-    Variant *ret = NULL;
+    Variant *ret = nullptr;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated = arr->lval(key, ret, arr->getCount() > 1);
     if (escalated) {
@@ -1073,9 +1073,9 @@ public:
     // an undefined result if this is a null variant
     assert(isNull() || is(KindOfString) || is(KindOfStaticString));
     return m_type == KindOfRef ?
-      (m_data.pref->var()->m_type <= KindOfNull ? NULL :
+      (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.pstr) :
-      (m_type <= KindOfNull ? NULL : m_data.pstr);
+      (m_type <= KindOfNull ? nullptr : m_data.pstr);
   }
   ArrayData *getArrayData() const {
     assert(is(KindOfArray));
@@ -1086,9 +1086,9 @@ public:
     // an undefined result if this is a null variant
     assert(isNull() || is(KindOfArray));
     return m_type == KindOfRef ?
-      (m_data.pref->var()->m_type <= KindOfNull ? NULL :
+      (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.parr) :
-      (m_type <= KindOfNull ? NULL : m_data.parr);
+      (m_type <= KindOfNull ? nullptr : m_data.parr);
   }
   ObjectData *getObjectData() const {
     assert(is(KindOfObject));
@@ -1099,9 +1099,9 @@ public:
     // an undefined result if this is a null variant
     assert(isNull() || is(KindOfObject));
     return m_type == KindOfRef ?
-      (m_data.pref->var()->m_type <= KindOfNull ? NULL :
+      (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.pobj) :
-      (m_type <= KindOfNull ? NULL : m_data.pobj);
+      (m_type <= KindOfNull ? nullptr : m_data.pobj);
   }
   Variant *getRefData() const {
     assert(m_type == KindOfRef);

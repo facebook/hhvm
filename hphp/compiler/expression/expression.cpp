@@ -484,7 +484,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
     // ...as in ClassConstant statement
     ConstantExpressionPtr exp =
       dynamic_pointer_cast<ConstantExpression>(variable);
-    BlockScope *defScope = NULL;
+    BlockScope *defScope = nullptr;
     std::vector<std::string> bases;
     scope->getConstants()->check(getScope(), exp->getName(), ret,
                                  true, ar, variable,

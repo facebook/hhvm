@@ -56,9 +56,9 @@ struct SrcRec {
   static const unsigned int kMaxTranslations = 12;
 
   SrcRec()
-    : m_topTranslation(NULL)
+    : m_topTranslation(nullptr)
     , m_anchorTranslation(0)
-    , m_dbgBranchGuardSrc(NULL)
+    , m_dbgBranchGuardSrc(nullptr)
   {}
 
   /*
@@ -85,7 +85,7 @@ struct SrcRec {
   void replaceOldTranslations(Asm& a, Asm& astubs);
   void addDebuggerGuard(Asm& a, Asm &astubs, TCA dbgGuard,
                         TCA m_dbgBranchGuardSrc);
-  bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != NULL; }
+  bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
   const MD5& unitMd5() const { return m_unitMd5; }
 
   const vector<TCA>& translations() const {

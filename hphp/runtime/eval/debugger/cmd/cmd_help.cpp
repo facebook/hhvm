@@ -68,7 +68,7 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
     "x {cmd}",      "extended commands",
     "y {cmd}",      "user extended commands",
 
-    NULL
+    nullptr
   );
 
   client->helpBody("* These commands are replayable by just hitting return.");
@@ -259,7 +259,7 @@ bool CmdHelp::help(DebuggerClient *client) {
   client->helpCmds(
     "[h]elp [s]tart", "displays material for getting started",
     "[h]elp [t]utorial on|off|auto", "changing tutorial modes",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Please read \"Getting Started\" material with '[h]elp [s]tart' for "

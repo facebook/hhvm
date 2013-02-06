@@ -97,7 +97,7 @@ const char *Timer::getName() const {
   case TotalCPU:  return "total cpu";
   default: assert(false);
   }
-  return NULL;
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
                       ClassInfo::GetArrayAll);
   m_propCount = 0;
   if (props.empty()) {
-    m_props = NULL;
+    m_props = nullptr;
   } else {
     m_props = (Prop*)malloc(sizeof(Prop) * props.size());
     for (ArrayIter it(props); !it.end(); it.next()) {
@@ -45,7 +45,7 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
       Variant key(it.first());
       assert(key.isString());
       CVarRef value = it.secondRef();
-      SharedVariant *val = NULL;
+      SharedVariant *val = nullptr;
       if (!value.isNull()) {
         val = new SharedVariant(value, false, true, true);
       }

@@ -63,7 +63,7 @@ static const bool debug = false;
  *   different offsets from rVmSp than the C++ runtime.
  */
 static inline int
-tx64LocPhysicalOffset(const Location& l, const Func *f = NULL) {
+tx64LocPhysicalOffset(const Location& l, const Func *f = nullptr) {
   return Translator::locPhysicalOffset(l, f);
 }
 
@@ -1112,9 +1112,9 @@ TranslatorX64::irTranslateFPushClsMethodF(const Tracelet& t,
   DynLocation* methodLoc = i.inputs[methodIdx];
 
   HHIR_UNIMPLEMENTED_WHEN(!(methodLoc->isString() &&
-                            methodLoc->rtt.valueString() != NULL &&
+                            methodLoc->rtt.valueString() != nullptr &&
                             classLoc->valueType() == KindOfClass &&
-                            classLoc->rtt.valueClass() != NULL),
+                            classLoc->rtt.valueClass() != nullptr),
                           FPushClsMethodF_unknown);
 
   HHIR_EMIT(FPushClsMethodF,
@@ -1308,7 +1308,7 @@ TranslatorX64::irTranslateVerifyParamType(const Tracelet& t,
 
   bool isSelf   = tc.isSelf();
   bool isParent = tc.isParent();
-  const Class *constraint = NULL;
+  const Class *constraint = nullptr;
 
   UNUSED TargetCache::CacheHandle ch = 0;
   if (isSelf) {
@@ -1320,7 +1320,7 @@ TranslatorX64::irTranslateVerifyParamType(const Tracelet& t,
     ch = TargetCache::allocKnownClass(clsName);
   }
 
-  HHIR_EMIT(VerifyParamType, param, (constraint ? constraint->name() : NULL));
+  HHIR_EMIT(VerifyParamType, param, (constraint ? constraint->name() : nullptr));
 }
 
 void

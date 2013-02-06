@@ -41,7 +41,7 @@ public:
 public:
   static void Add(InfoVec &out, const char *name, const std::string &value);
   static void AddServerStats(InfoVec &out, const char *name,
-                             const char *statsName = NULL);
+                             const char *statsName = nullptr);
 
   static std::string FormatNumber(const char *fmt, int64 n);
   static std::string FormatSize(int64 size);

@@ -596,7 +596,7 @@ void Parser::onAListVar(Token &out, Token *list, Token *var) {
 }
 
 void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
-  onListAssignment(out, sublist, NULL);
+  onListAssignment(out, sublist, nullptr);
   onExprListElem(out, list, out);
 }
 
@@ -856,7 +856,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       // the MethodStatement it's building will get the docComment
       pushComment(comment);
       Token origGenFunc;
-      create_generator(this, out, params, name, closureName, NULL, NULL,
+      create_generator(this, out, params, name, closureName, nullptr, nullptr,
                        hasCallToGetArgs, origGenFunc,
                        hhvm && Option::OutputHHBC &&
                        (!Option::WholeProgram || !Option::ParseTimeOpts),

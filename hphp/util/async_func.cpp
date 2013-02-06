@@ -21,16 +21,16 @@ namespace HPHP {
 
 typedef void PFN_THREAD_FUNC(void *);
 
-PFN_THREAD_FUNC* AsyncFuncImpl::s_initFunc = NULL;
-void* AsyncFuncImpl::s_initFuncArg = NULL;
+PFN_THREAD_FUNC* AsyncFuncImpl::s_initFunc = nullptr;
+void* AsyncFuncImpl::s_initFuncArg = nullptr;
 
-PFN_THREAD_FUNC* AsyncFuncImpl::s_finiFunc = NULL;
-void* AsyncFuncImpl::s_finiFuncArg = NULL;
+PFN_THREAD_FUNC* AsyncFuncImpl::s_finiFunc = nullptr;
+void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
-      m_threadStack(NULL), m_stackSize(0), m_threadId(0),
-      m_exception(NULL), m_stopped(false), m_noInit(false) {
+      m_threadStack(nullptr), m_stackSize(0), m_threadId(0),
+      m_exception(nullptr), m_stopped(false), m_noInit(false) {
 }
 
 AsyncFuncImpl::~AsyncFuncImpl() {
@@ -42,7 +42,7 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
   Util::init_stack_limits(((AsyncFuncImpl*)obj)->getThreadAttr());
 
   ((AsyncFuncImpl*)obj)->threadFuncImpl();
-  return NULL;
+  return nullptr;
 }
 
 void AsyncFuncImpl::start() {
@@ -82,13 +82,13 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
     }
   }
 
-  void *ret = NULL;
+  void *ret = nullptr;
   pthread_join(m_threadId, &ret);
   m_threadId = 0;
 
-  if (m_threadStack != NULL) {
+  if (m_threadStack != nullptr) {
     free(m_threadStack);
-    m_threadStack = NULL;
+    m_threadStack = nullptr;
   }
 
   if (Exception* e = m_exception) {

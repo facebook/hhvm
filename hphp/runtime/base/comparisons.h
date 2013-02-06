@@ -387,8 +387,8 @@ inline bool equal(const StringData *v1, int64   v2) { return equal(v2, v1);}
 inline bool equal(const StringData *v1, double  v2) { return equal(v2, v1);}
 inline bool equal(const StringData *v1, const StringData *v2) {
   if (v1 == v2) return true;
-  if (v1 == NULL) return v2->empty();
-  if (v2 == NULL) return v1->empty();
+  if (v1 == nullptr) return v2->empty();
+  if (v2 == nullptr) return v1->empty();
   return v1->compare(v2) == 0;
 }
 inline bool equal(const StringData *v1, CStrRef v2) {
@@ -399,13 +399,13 @@ inline bool equal(const StringData *v1, litstr  v2) {
   return equal(v1, &sd2);
 }
 inline bool equal(const StringData *v1, CArrRef v2) {
-  if (v1 == NULL || v2.get() == NULL) {
+  if (v1 == nullptr || v2.get() == nullptr) {
     return equal(toBoolean(v1), v2.toBoolean());
   }
   return false;
 }
 inline bool equal(const StringData *v1, CObjRef v2) {
-  if (v1 == NULL || v2.get() == NULL) {
+  if (v1 == nullptr || v2.get() == nullptr) {
     return equal(toBoolean(v1), v2.toBoolean());
   }
   if (v2.isResource()) return false;
@@ -455,8 +455,8 @@ inline bool less(const StringData *v1, int     v2)  { return more(v2, v1);}
 inline bool less(const StringData *v1, int64   v2)  { return more(v2, v1);}
 inline bool less(const StringData *v1, double  v2)  { return more(v2, v1);}
 inline bool less(const StringData *v1, const StringData *v2) {
-  if (v1 == v2 || v2 == NULL) return false;
-  if (v1 == NULL) return !v2->empty();
+  if (v1 == v2 || v2 == nullptr) return false;
+  if (v1 == nullptr) return !v2->empty();
   return v1->compare(v2) < 0;
 }
 inline bool less(const StringData *v1, CStrRef v2)  {
@@ -467,13 +467,13 @@ inline bool less(const StringData *v1, litstr  v2)  {
   return less(v1, &sd2);
 }
 inline bool less(const StringData *v1, CArrRef v2)  {
-  if (v1 == NULL || v2.get() == NULL) {
+  if (v1 == nullptr || v2.get() == nullptr) {
     return less(toBoolean(v1), v2.toBoolean());
   }
   return true;
 }
 inline bool less(const StringData *v1, CObjRef v2)  {
-  if (v1 == NULL || v2.get() == NULL) {
+  if (v1 == nullptr || v2.get() == nullptr) {
     return less(toBoolean(v1), v2.toBoolean());
   }
   if (v2.isResource()) return true;
@@ -492,8 +492,8 @@ inline bool more(const StringData *v1, int     v2)  { return less(v2, v1);}
 inline bool more(const StringData *v1, int64   v2)  { return less(v2, v1);}
 inline bool more(const StringData *v1, double  v2)  { return less(v2, v1);}
 inline bool more(const StringData *v1, const StringData *v2)  {
-  if (v1 == NULL) return false;
-  if (v2 == NULL) return !v1->empty();
+  if (v1 == nullptr) return false;
+  if (v2 == nullptr) return !v1->empty();
   return v1->compare(v2) > 0;
 }
 inline bool more(const StringData *v1, CStrRef v2)  {
@@ -504,13 +504,13 @@ inline bool more(const StringData *v1, litstr  v2)  {
   return more(v1, &sd2);
 }
 inline bool more(const StringData *v1, CArrRef v2)  {
-  if (v1 == NULL || v2.get() == NULL) {
+  if (v1 == nullptr || v2.get() == nullptr) {
     return more(toBoolean(v1), v2.toBoolean());
   }
   return false;
 }
 inline bool more(const StringData *v1, CObjRef v2)  {
-  if (v1 == NULL || v2.get() == NULL) {
+  if (v1 == nullptr || v2.get() == nullptr) {
     return more(toBoolean(v1), v2.toBoolean());
   }
   if (v2.isResource()) return false;

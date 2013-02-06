@@ -31,7 +31,7 @@ StaticString PlainFile::s_class_name("PlainFile");
 // constructor and destructor
 
 PlainFile::PlainFile(FILE *stream, bool nonblocking)
-  : File(nonblocking), m_stream(stream), m_eof(false), m_buffer(NULL) {
+  : File(nonblocking), m_stream(stream), m_eof(false), m_buffer(nullptr) {
   if (stream) {
     m_fd = fileno(stream);
     m_buffer = (char *)malloc(BUFSIZ);
@@ -41,7 +41,7 @@ PlainFile::PlainFile(FILE *stream, bool nonblocking)
 }
 
 PlainFile::PlainFile(int fd, bool nonblocking)
-  : File(nonblocking), m_stream(NULL), m_eof(false), m_buffer(NULL) {
+  : File(nonblocking), m_stream(nullptr), m_eof(false), m_buffer(nullptr) {
   m_fd = fd;
 }
 
@@ -52,7 +52,7 @@ PlainFile::~PlainFile() {
 bool PlainFile::open(CStrRef filename, CStrRef mode) {
   int fd;
   FILE *f;
-  assert(m_stream == NULL);
+  assert(m_stream == nullptr);
   assert(m_fd == -1);
 
   // For these definded in php fopen but C stream have different modes
@@ -103,13 +103,13 @@ bool PlainFile::closeImpl() {
   if (!m_closed) {
     if (m_stream) {
       s_file_data->m_pcloseRet = fclose(m_stream);
-      m_stream = NULL;
+      m_stream = nullptr;
     } else if (m_fd >= 0) {
       s_file_data->m_pcloseRet = ::close(m_fd);
     }
     if (m_buffer) {
       free(m_buffer);
-      m_buffer = NULL;
+      m_buffer = nullptr;
     }
     ret = (s_file_data->m_pcloseRet == 0);
     m_closed = true;
@@ -226,14 +226,14 @@ bool PlainFile::truncate(int64 size) {
 
 BuiltinFile::~BuiltinFile() {
   m_closed = true;
-  m_stream = NULL;
+  m_stream = nullptr;
   m_fd = -1;
 }
 
 bool BuiltinFile::close() {
   ::fclose(m_stream);
   m_closed = true;
-  m_stream = NULL;
+  m_stream = nullptr;
   m_fd = -1;
   File::closeImpl();
   return true;

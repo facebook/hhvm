@@ -34,7 +34,7 @@ const char *DBInNumberFilter::getFirst(const std::string &where) {
 }
 
 const char *DBInNumberFilter::getNext(const std::string &where) {
-  if (m_iter == m_values.end()) return NULL;
+  if (m_iter == m_values.end()) return nullptr;
   return getFilter(where);
 }
 
@@ -73,7 +73,7 @@ const char *DBInStringFilter::getFirst(const std::string &where) {
 }
 
 const char *DBInStringFilter::getNext(const std::string &where) {
-  if (m_iter == m_values.end()) return NULL;
+  if (m_iter == m_values.end()) return nullptr;
   return getFilter(where);
 }
 
@@ -117,7 +117,7 @@ const char *DBOrStringFilter::getFirst(const std::string &where) {
 }
 
 const char *DBOrStringFilter::getNext(const std::string &where) {
-  if (m_iter == m_values.end()) return NULL;
+  if (m_iter == m_values.end()) return nullptr;
   return getFilter(where);
 }
 

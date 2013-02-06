@@ -258,7 +258,7 @@ bool TestExtZlib::test_nzcompress() {
     return Count(false);
   }
   char *p = (char*)malloc(t.size());
-  if (p == NULL) {
+  if (p == nullptr) {
     return Count(false);
   }
 

@@ -23,11 +23,11 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 const char *CmdPrint::Formats[] = {
-  "x", "v", "hex", "oct", "dec", "unsigned", "time", NULL
+  "x", "v", "hex", "oct", "dec", "unsigned", "time", nullptr
 };
 
 std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
-  if (format == NULL) {
+  if (format == nullptr) {
     String sret = DebuggerClient::FormatVariable(ret, -1);
     return string(sret.data(), sret.size());
   }
@@ -195,7 +195,7 @@ bool CmdPrint::help(DebuggerClient *client) {
     "[p]rint [l]ist",             "lists watch expressions",
     "[p]rint [c]lear {index}",    "clears a watch expression",
     "[p]rint [c]lear [a]ll",      "clears all watch expressions",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Prints result of an expression in certain format. If '[a]lways' is "
@@ -307,7 +307,7 @@ bool CmdPrint::onClient(DebuggerClient *client) {
     return processClear(client);
   }
 
-  const char *format = NULL;
+  const char *format = nullptr;
   for (const char **fmt = Formats; *fmt; fmt++) {
     if (client->arg(index, *fmt)) {
       format = *fmt;

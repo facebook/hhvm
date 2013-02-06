@@ -60,7 +60,7 @@ StringData *StringData::GetStaticString(const StringData *str) {
     sd->~StringData();
     Util::low_free(sd);
   }
-  assert(acc->first != NULL);
+  assert(acc->first != nullptr);
   return const_cast<StringData*>(acc->first);
 }
 
@@ -641,7 +641,7 @@ char *increment_string(char *s, uint32_t &len) {
     }
     return t;
   }
-  return NULL;
+  return nullptr;
 }
 
 void StringData::inc() {
@@ -805,13 +805,13 @@ bool StringData::toBoolean() const {
 
 int64 StringData::toInt64(int base /* = 10 */) const {
   // Taint absorbtion unnecessary; taint is recreated later for numerics
-  return strtoll(rawdata(), NULL, base);
+  return strtoll(rawdata(), nullptr, base);
 }
 
 double StringData::toDouble() const {
   StringSlice s = slice();
   // Taint absorbtion unnecessary; taint is recreated later for numerics
-  if (s.len) return zend_strtod(s.ptr, NULL);
+  if (s.len) return zend_strtod(s.ptr, nullptr);
   return 0;
 }
 

@@ -155,11 +155,11 @@ struct DynLocation {
   RuntimeType rtt;
   NormalizedInstruction* source;
 
-  DynLocation(Location l, DataType t) : location(l), rtt(t), source(NULL) {}
+  DynLocation(Location l, DataType t) : location(l), rtt(t), source(nullptr) {}
 
-  DynLocation(Location l, RuntimeType t) : location(l), rtt(t), source(NULL) {}
+  DynLocation(Location l, RuntimeType t) : location(l), rtt(t), source(nullptr) {}
 
-  DynLocation() : location(), rtt(KindOfInvalid), source(NULL) {}
+  DynLocation() : location(), rtt(KindOfInvalid), source(nullptr) {}
 
   bool operator==(const DynLocation& r) const {
     return rtt == r.rtt && location == r.location;
@@ -374,15 +374,15 @@ class NormalizedInstruction {
   Offset offset() const;
 
   NormalizedInstruction() :
-    next(NULL),
-    prev(NULL),
+    next(nullptr),
+    prev(nullptr),
     source(),
     inputs(),
-    outStack(NULL),
-    outLocal(NULL),
-    outLocal2(NULL),
-    outStack2(NULL),
-    outStack3(NULL),
+    outStack(nullptr),
+    outLocal(nullptr),
+    outLocal2(nullptr),
+    outStack2(nullptr),
+    outStack3(nullptr),
     deadLocs(),
     checkedInputs(0),
     hasConstImm(false),
@@ -506,7 +506,7 @@ typedef hphp_hash_set<Location, Location> LocationSet;
 typedef hphp_hash_map<DynLocation*, GuardType>  DynLocTypeMap;
 
 struct InstrStream {
-  InstrStream() : first(NULL), last(NULL) {}
+  InstrStream() : first(nullptr), last(nullptr) {}
   void append(NormalizedInstruction* ni);
   void remove(NormalizedInstruction* ni);
   NormalizedInstruction* first;
@@ -680,7 +680,7 @@ struct TraceletContext {
   bool        m_varEnvTaint;
 
   TraceletContext()
-    : m_t(NULL)
+    : m_t(nullptr)
     , m_numJmps(0)
     , m_aliasTaint(false)
     , m_varEnvTaint(false)
@@ -902,20 +902,20 @@ public:
   }
 
   const TransRec* getTransRec(TCA tca) const {
-    if (!isTransDBEnabled()) return NULL;
+    if (!isTransDBEnabled()) return nullptr;
 
     TransDB::const_iterator it = m_transDB.find(tca);
     if (it == m_transDB.end()) {
-      return NULL;
+      return nullptr;
     }
     if (it->second >= m_translations.size()) {
-      return NULL;
+      return nullptr;
     }
     return &m_translations[it->second];
   }
 
   const TransRec* getTransRec(TransID transId) const {
-    if (!isTransDBEnabled()) return NULL;
+    if (!isTransDBEnabled()) return nullptr;
 
     always_assert(transId < m_translations.size());
     return &m_translations[transId];
@@ -963,7 +963,7 @@ public:
                    Tracelet& t, TraceletContext& tas);
   std::unique_ptr<Tracelet> analyze(SrcKey sk);
   void advance(Opcode const **instrs);
-  static int locPhysicalOffset(Location l, const Func* f = NULL);
+  static int locPhysicalOffset(Location l, const Func* f = nullptr);
   static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);
   static bool typeIsString(DataType type) {
     return type == KindOfString || type == KindOfStaticString;

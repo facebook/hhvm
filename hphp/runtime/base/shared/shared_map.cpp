@@ -30,7 +30,7 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  if (LIKELY(m_localCache != NULL)) {
+  if (LIKELY(m_localCache != nullptr)) {
     Variant *pv;
     ArrayData *escalated DEBUG_ONLY =
       m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
@@ -228,7 +228,7 @@ ArrayData *SharedMap::prepend(CVarRef v, bool copy) {
 }
 
 ArrayData *SharedMap::escalate(bool mutableIteration /* = false */) const {
-  ArrayData *ret = NULL;
+  ArrayData *ret = nullptr;
   m_arr->loadElems(ret, *this, mutableIteration);
   assert(!ret->isStatic());
   return ret;
@@ -236,13 +236,13 @@ ArrayData *SharedMap::escalate(bool mutableIteration /* = false */) const {
 
 TypedValue* SharedMap::nvGet(int64 k) const {
   int index = m_arr->getIndex(k);
-  if (index == -1) return NULL;
+  if (index == -1) return nullptr;
   return (TypedValue*)&getValueRef(index);
 }
 
 TypedValue* SharedMap::nvGet(const StringData* key) const {
   int index = m_arr->getIndex(key);
-  if (index == -1) return NULL;
+  if (index == -1) return nullptr;
   return (TypedValue*)&getValueRef(index);
 }
 
@@ -272,7 +272,7 @@ TypedValue* SharedMap::nvGetCell(const StringData* key) const {
 }
 
 ArrayData* SharedMap::escalateForSort() {
-  ArrayData *ret = NULL;
+  ArrayData *ret = nullptr;
   bool keepRef = false;
   bool mapInit = true;
   m_arr->loadElems(ret, *this, keepRef, mapInit);

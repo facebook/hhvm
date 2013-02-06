@@ -37,15 +37,15 @@ std::string get_embedded_repo() {
 
   int fd = open("/proc/self/exe", O_RDONLY, 0);
   if (fd < 0) return "";
-  Elf* e = elf_begin(fd, ELF_C_READ, NULL);
+  Elf* e = elf_begin(fd, ELF_C_READ, nullptr);
 
   if (!e ||
       elf_kind(e) != ELF_K_ELF ||
       !elf_getshstrndx(e, &shstrndx)) {
     return "";
   }
-  scn = NULL;
-  while ((scn = elf_nextscn(e, scn)) != NULL) {
+  scn = nullptr;
+  while ((scn = elf_nextscn(e, scn)) != nullptr) {
     if (gelf_getshdr(scn, &shdr) != &shdr ||
         !(name = elf_strptr(e, shstrndx , shdr.sh_name))) {
       return "";
@@ -55,7 +55,7 @@ std::string get_embedded_repo() {
       if (gelf_getshdr(scn, &ghdr) != &ghdr) return "";
       char buf[512];
       sprintf(buf, "/proc/self/exe:%lu:%lu", ghdr.sh_offset, ghdr.sh_size);
-      sqlite3_embedded_initialize(NULL, true);
+      sqlite3_embedded_initialize(nullptr, true);
       return buf;
     }
   }

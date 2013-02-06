@@ -136,7 +136,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
 void Debugger::InterruptSessionStarted(const char *file,
                                        const char *error /* = NULL */) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.debugger = true;
-  Interrupt(SessionStarted, file, NULL, error);
+  Interrupt(SessionStarted, file, nullptr, error);
 }
 
 void Debugger::InterruptSessionEnded(const char *file) {
@@ -164,11 +164,11 @@ void Debugger::InterruptPSPEnded(const char *url) {
 }
 
 void Debugger::InterruptFileLine(InterruptSite &site) {
-  Interrupt(BreakPointReached, NULL, &site);
+  Interrupt(BreakPointReached, nullptr, &site);
 }
 
 void Debugger::InterruptHard(InterruptSite &site) {
-  Interrupt(HardBreakPoint, NULL, &site);
+  Interrupt(HardBreakPoint, nullptr, &site);
 }
 
 bool Debugger::InterruptException(CVarRef e) {
@@ -181,7 +181,7 @@ bool Debugger::InterruptException(CVarRef e) {
       } else {
         if (ti->m_top) {
           Eval::InterruptSiteFI site(ti->m_top, e);
-          Eval::Debugger::Interrupt(ExceptionThrown, NULL, &site);
+          Eval::Debugger::Interrupt(ExceptionThrown, nullptr, &site);
           if (site.isJumping()) {
             return false;
           }
@@ -235,7 +235,7 @@ void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
   if (!site.valid()) {
     return;
   }
-  Interrupt(type, NULL, &site);
+  Interrupt(type, nullptr, &site);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -393,7 +393,7 @@ void Debugger::retireDummySandboxThread(DummySandbox* toRetire) {
 }
 
 void Debugger::cleanupDummySandboxThreads() {
-  DummySandbox* ptr = NULL;
+  DummySandbox* ptr = nullptr;
   while (m_cleanupDummySandboxQ.try_pop(ptr)) {
     ptr->notify();
     try {

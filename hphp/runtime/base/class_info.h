@@ -137,7 +137,7 @@ public:
   };
 
   struct MethodInfo {
-    MethodInfo() : docComment(NULL) {}
+    MethodInfo() : docComment(nullptr) {}
     MethodInfo(const char **&p);
     ~MethodInfo();
     MethodInfo *getDeclared();
@@ -158,7 +158,7 @@ public:
 
   class PropertyInfo {
   public:
-    PropertyInfo() : docComment(NULL) {}
+    PropertyInfo() : docComment(nullptr) {}
     Attribute attribute;
     String name;
     const char *docComment;
@@ -324,7 +324,7 @@ public:
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
 
 public:
-  ClassInfo() : m_cdec_offset(0), m_docComment(NULL) {}
+  ClassInfo() : m_cdec_offset(0), m_docComment(nullptr) {}
   virtual ~ClassInfo() {}
 
   inline const ClassInfo *checkCurrent() const {

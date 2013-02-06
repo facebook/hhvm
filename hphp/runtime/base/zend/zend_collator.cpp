@@ -97,20 +97,20 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) {
     }
 
     *bufpos = '\0';
-    value = zend_strtod(numbuf, NULL);
+    value = zend_strtod(numbuf, nullptr);
 
     if (numbuf != buf) {
       free(numbuf);
     }
 
-    if (endptr != NULL) {
+    if (endptr != nullptr) {
       *endptr = (UChar *)u;
     }
 
     return value;
   }
 
-  if (endptr != NULL) {
+  if (endptr != nullptr) {
     *endptr = (UChar *)nptr;
   }
 
@@ -125,10 +125,10 @@ static long collator_u_strtol(const UChar *nptr, UChar **endptr,
   unsigned long cutoff;
   int neg = 0, any, cutlim;
 
-  if (s == NULL) {
+  if (s == nullptr) {
     errno = ERANGE;
-    if (endptr != NULL) {
-      *endptr = NULL;
+    if (endptr != nullptr) {
+      *endptr = nullptr;
     }
     return 0;
   }
@@ -201,7 +201,7 @@ static long collator_u_strtol(const UChar *nptr, UChar **endptr,
     errno = ERANGE;
   } else if (neg)
     acc = -acc;
-  if (endptr != NULL)
+  if (endptr != nullptr)
     *endptr = (UChar *)(any ? s - 1 : nptr);
   return (acc);
 }
@@ -238,7 +238,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64 *lval,
       return KindOfNull;
     }
   } else {
-    end_ptr_long = NULL;
+    end_ptr_long = nullptr;
   }
 
   if (conv_base == 16) { /* hex string, under UNIX strtod() messes it up */
@@ -248,7 +248,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64 *lval,
 
   local_dval = collator_u_strtod(str, &end_ptr_double);
   if (local_dval == 0 && end_ptr_double == str) {
-    end_ptr_double = NULL;
+    end_ptr_double = nullptr;
   } else {
     if (end_ptr_double == str+length) { /* floating point string */
       if (!finite(local_dval)) {
@@ -284,7 +284,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64 *lval,
 
 static String intl_convert_str_utf8_to_utf16(CStrRef utf8_str,
                                              UErrorCode * status) {
-  UChar* ustr = NULL;
+  UChar* ustr = nullptr;
   int ustr_len = 0;
   intl_convert_utf8_to_utf16(&ustr, &ustr_len,
                              utf8_str.data(), utf8_str.length(),
@@ -297,7 +297,7 @@ static String intl_convert_str_utf8_to_utf16(CStrRef utf8_str,
 
 static String intl_convert_str_utf16_to_utf8(CStrRef utf16_str,
                                              UErrorCode * status) {
-  char* str = NULL;
+  char* str = nullptr;
   int str_len = 0;
   intl_convert_utf16_to_utf8(&str, &str_len,
                              (UChar*)(utf16_str.data()),

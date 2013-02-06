@@ -27,7 +27,7 @@ namespace HPHP {
 class DynamicObjectData : public ObjectData {
  public:
   DynamicObjectData(const ObjectStaticCallbacks *cb,
-                    const char* pname, ObjectData *r = NULL);
+                    const char* pname, ObjectData *r = nullptr);
   ~DynamicObjectData();
 
   virtual void init();

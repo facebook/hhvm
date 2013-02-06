@@ -25,8 +25,8 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdMachine);
 class CmdMachine : public DebuggerCommand {
 public:
-  static bool AttachSandbox(DebuggerClient *client, const char *user = NULL,
-                            const char *name = NULL, bool force = false);
+  static bool AttachSandbox(DebuggerClient *client, const char *user = nullptr,
+                            const char *name = nullptr, bool force = false);
   static bool AttachSandbox(DebuggerClient *client,
                             DSandboxInfoPtr sandbox,
                             bool force = false);

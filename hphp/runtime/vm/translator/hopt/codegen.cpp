@@ -361,7 +361,7 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
   LabelInstruction* label = (LabelInstruction*)inst;
   Address labelAddr = m_as.code.frontier;
   void* list = label->getPatchAddr();
-  while (list != NULL) {
+  while (list != nullptr) {
     int* toPatch   = (int*)list;
     int diffToNext = *toPatch;
     ssize_t diff = labelAddr - ((Address)list + 4);
@@ -1676,7 +1676,7 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
   LabelInstruction* typeFailLabel = inst->getLabel();
   bool genIncRef = true;
 
-  if (typeFailLabel != NULL) {
+  if (typeFailLabel != nullptr) {
     CG_PUNT(Unbox);
   }
 
@@ -2172,8 +2172,8 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
   SSATmp* pc   = inst->getSrc(1);
   SSATmp* sp   = inst->getSrc(2);
   SSATmp* fp   = inst->getSrc(3);
-  SSATmp* notTakenPC = NULL;
-  SSATmp* toSmash = NULL;
+  SSATmp* notTakenPC = nullptr;
+  SSATmp* toSmash = nullptr;
   assert(pc->isConst() && inst->getNumSrcs() <= 6);
 
   TraceExitType::ExitType exitType = getExitType(inst->getOpcode());
@@ -2232,7 +2232,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
       break;
     case TraceExitType::Normal:
       {
-        TCA smashAddr = toSmash ? toSmash->getTCA() : NULL;
+        TCA smashAddr = toSmash ? toSmash->getTCA() : nullptr;
         if (smashAddr) {
           assert(smashAddr != kIRDirectJmpInactive);
           if (smashAddr != kIRDirectJccJmpActive) {
@@ -2434,7 +2434,7 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   m_as.store_imm64_disp_reg64(0, AROFF(m_this), fpReg);
 
   // In pseudo-mains, emit check for presence of m_this
-  TCA patch1 = NULL;
+  TCA patch1 = nullptr;
   if (getCurFunc()->isPseudoMain()) {
     m_as.test_reg64_reg64(scratchReg, scratchReg);
     patch1 = m_as.code.frontier;
@@ -2613,7 +2613,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
                                                  LabelInstruction* exit) {
   assert(type.maybeCounted());
 
-  Address patchStaticCheck = NULL;
+  Address patchStaticCheck = nullptr;
   const auto scratchReg = rScratch;
 
   bool canUseScratch = dataReg != scratchReg;
@@ -2745,12 +2745,12 @@ void CodeGenerator::cgDecRefStaticType(Type type,
     patchStaticCheck = cgCheckStaticBitAndDecRef(type, dataReg, exit);
   } else {
     // Set exit as NULL so that the code doesn't jump to error checking.
-    patchStaticCheck = cgCheckStaticBitAndDecRef(type, dataReg, NULL);
+    patchStaticCheck = cgCheckStaticBitAndDecRef(type, dataReg, nullptr);
   }
 
   // If not exiting on count down to zero, emit the zero-check and
   // release call
-  if (genZeroCheck && exit == NULL) {
+  if (genZeroCheck && exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to
     // zero
     Address patch = m_as.code.frontier;
@@ -2786,11 +2786,11 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
   if (genZeroCheck) {
     patchStaticCheck = cgCheckStaticBitAndDecRef(Type::Cell, dataReg, exit);
   } else {
-    patchStaticCheck = cgCheckStaticBitAndDecRef(Type::Cell, dataReg, NULL);
+    patchStaticCheck = cgCheckStaticBitAndDecRef(Type::Cell, dataReg, nullptr);
   }
 
   // If not exiting on count down to zero, emit the zero-check and release call
-  if (genZeroCheck && exit == NULL) {
+  if (genZeroCheck && exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to zero
     Address patch = m_as.code.frontier;
     ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
@@ -2824,7 +2824,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 
   // Emit check for ref-counted type
   Address patchTypeCheck = cgCheckRefCountedType(baseReg, offset);
-  if (exit == NULL && RuntimeOption::EvalHHIRGenericDtorHelper) {
+  if (exit == nullptr && RuntimeOption::EvalHHIRGenericDtorHelper) {
     {
       // This PhysRegSaverParity saves rdi redundantly if
       // !m_curInst->getLiveOutRegs().contains(rdi), but its
@@ -2859,7 +2859,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
                                                        exit);
 
   // If not exiting on count down to zero, emit the zero-check and release call
-  if (exit == NULL) {
+  if (exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to
     // zero
     Address patch = m_as.code.frontier;
@@ -3123,7 +3123,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   assert(m_lastMarker);
   SrcKey srcKey = SrcKey(m_lastMarker->func, m_lastMarker->bcOff);
   bool isImmutable = (func->isConst() && !func->getType().isNull());
-  const Func* funcd = isImmutable ? func->getValFunc() : NULL;
+  const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
   int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
@@ -3393,7 +3393,7 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
   auto valueDstReg = dst->getReg(0);
   auto typeDstReg = dst->getReg(1);
   if (valueDstReg == InvalidReg && typeDstReg == InvalidReg &&
-      (label == NULL || type == Type::Gen)) {
+      (label == nullptr || type == Type::Gen)) {
     // a dead load
     return;
   }
@@ -3661,8 +3661,8 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   // Actually generate code
 
   auto bitsValReg = rScratch;
-  TCA patchEndOuterIf = NULL;
-  TCA patchEndInnerIf = NULL;
+  TCA patchEndOuterIf = nullptr;
+  TCA patchEndInnerIf = nullptr;
 
   // If few enought args...
   m_as.cmp_imm32_reg32(firstBitNum + 1, nParamsReg);
@@ -4384,7 +4384,7 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
   Type rType = tr->getType();
   // We have specialized helpers for concatenating two strings, a
   // string and an int, and an int and a string.
-  void* fptr = NULL;
+  void* fptr = nullptr;
   if (lType.isString() && rType.isString()) {
     fptr = (void*)concat_ss;
   } else if (lType.isString() && rType == Type::Int) {
@@ -4709,7 +4709,7 @@ void genCodeForTrace(Trace* trace,
   cgMain.cgTrace(trace, bcMap);
   CodeGenerator cgExits(astubs, astubs, tx64);
   for (Trace* exit : trace->getExitTraces()) {
-    cgExits.cgTrace(exit, NULL);
+    cgExits.cgTrace(exit, nullptr);
   }
 }
 

@@ -146,7 +146,7 @@ bool is_compressible_file(const char *filename) {
     "gif", "png", "jpeg", "jpg", "tiff", "swf", "zip", "gz", "bz2", "cab",
     "bmp", "xcf", "mp3", "wav", "rsrc", "ico", "jar", "exe", "dll", "so",
   };
-  const char *dot = NULL;
+  const char *dot = nullptr;
   for (const char *p = filename; *p; p++) {
     if (*p == '.') dot = p;
   }
@@ -269,7 +269,7 @@ char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
 
   free(s2);
   Logger::Error("%s", zError(status));
-  return NULL;
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,12 +277,12 @@ char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
 char *gzencode(const char *data, int &len, int level, int encoding_mode) {
   if (level < -1 || level > 9) {
     Logger::Warning("compression level(%ld) must be within -1..9", level);
-    return NULL;
+    return nullptr;
   }
 
   if (encoding_mode != CODING_GZIP && encoding_mode != CODING_DEFLATE) {
     Logger::Warning("encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
-    return NULL;
+    return nullptr;
   }
 
   z_stream stream;
@@ -299,7 +299,7 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
     (stream.avail_out + GZIP_HEADER_LENGTH +
      (encoding_mode == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0));
   if (!s2) {
-    return NULL;
+    return nullptr;
   }
   /* add gzip file header */
   s2[0] = gz_magic[0];
@@ -317,13 +317,13 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
     if ((status = deflateInit2(&stream, level, Z_DEFLATED, -MAX_WBITS,
                                MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY)) != Z_OK) {
       Logger::Warning("%s", zError(status));
-      return NULL;
+      return nullptr;
     }
     break;
   case CODING_DEFLATE:
     if ((status = deflateInit(&stream, level)) != Z_OK) {
       Logger::Warning("%s", zError(status));
-      return NULL;
+      return nullptr;
     }
     break;
   }
@@ -370,7 +370,7 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
 
   free(s2);
   Logger::Warning("%s", zError(status));
-  return NULL;
+  return nullptr;
 }
 
 char *gzdecode(const char *data, int &len) {
@@ -381,20 +381,20 @@ char *gzdecode(const char *data, int &len) {
   unsigned long length;
   int status;
   unsigned int factor = 4, maxfactor = 16;
-  char *s1 = NULL, *s2 = NULL;
+  char *s1 = nullptr, *s2 = nullptr;
   do {
     stream.next_in = (Bytef *)data;
     stream.avail_in = (uInt)len + 1; /* there is room for \0 */
     if (check_header(stream) != Z_OK) {
       Logger::Warning("gzdecode: header is in wrong format");
-      return NULL;
+      return nullptr;
     }
 
     length = len * (1 << factor++);
     s2 = (char *)realloc(s1, length);
     if (!s2) {
       if (s1) free(s1);
-      return NULL;
+      return nullptr;
     }
     s1 = s2;
 
@@ -429,7 +429,7 @@ char *gzdecode(const char *data, int &len) {
 
   free(s2);
   Logger::Warning("%s", zError(status));
-  return NULL;
+  return nullptr;
 }
 
 }

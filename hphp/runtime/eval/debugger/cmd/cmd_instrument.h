@@ -27,7 +27,7 @@ DECLARE_BOOST_TYPES(CmdInstrument);
 class CmdInstrument : public DebuggerCommand {
 public:
   CmdInstrument() : DebuggerCommand(KindOfInstrument), m_type(ActionRead),
-                    m_enabled(false), m_instPoints(NULL) {}
+                    m_enabled(false), m_instPoints(nullptr) {}
 
   virtual bool help(DebuggerClient *client);
   virtual bool onClient(DebuggerClient *client) {

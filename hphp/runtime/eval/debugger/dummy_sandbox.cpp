@@ -69,14 +69,14 @@ namespace {
 
 struct CLISession : boost::noncopyable {
   CLISession() {
-    char *argv[] = {"", NULL};
+    char *argv[] = {"", nullptr};
     execute_command_line_begin(1, argv, 0);
   }
   ~CLISession() {
     Debugger::UnregisterSandbox(g_context->getSandboxId());
     ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.debugger = false;
-    execute_command_line_end(0, false, NULL);
+    execute_command_line_end(0, false, nullptr);
   }
 };
 
@@ -131,7 +131,7 @@ void DummySandbox::run() {
       ti->m_reqInjectionData.debugger = true;
       {
         DebuggerDummyEnv dde;
-        Debugger::InterruptSessionStarted(NULL, msg.c_str());
+        Debugger::InterruptSessionStarted(nullptr, msg.c_str());
       }
 
       // Blocking until Ctrl-C is issued by end user and DebuggerProxy cannot

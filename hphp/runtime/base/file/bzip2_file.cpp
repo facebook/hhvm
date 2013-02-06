@@ -25,7 +25,7 @@ StaticString BZ2File::s_class_name("BZ2File");
 ///////////////////////////////////////////////////////////////////////////////
 
 
-BZ2File::BZ2File(): m_bzFile(NULL), m_eof(false) {
+BZ2File::BZ2File(): m_bzFile(nullptr), m_eof(false) {
   m_innerFile = NEWOBJ(PlainFile)();
   m_innerFile->unregister();
 }
@@ -36,7 +36,7 @@ BZ2File::~BZ2File() {
 }
 
 bool BZ2File::open(CStrRef filename, CStrRef mode) {
-  assert(m_bzFile == NULL);
+  assert(m_bzFile == nullptr);
 
   return m_innerFile->open(filename, mode) &&
     (m_bzFile = BZ2_bzdopen(dup(m_innerFile->fd()), mode.data()));
@@ -89,7 +89,7 @@ bool BZ2File::closeImpl() {
   assert(m_bzFile);
   bool ret = true;
   BZ2_bzclose(m_bzFile);
-  m_bzFile = NULL;
+  m_bzFile = nullptr;
   m_innerFile->close();
   File::closeImpl();
   m_eof = false;

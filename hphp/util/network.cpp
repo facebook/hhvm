@@ -95,9 +95,9 @@ std::string Util::GetPrimaryIP() {
 bool Util::GetNetworkStats(const char *iface, int &in_bps, int &out_bps) {
   assert(iface && *iface);
 
-  const char *argv[] = {"", "1", "1", "-n", "DEV", NULL};
+  const char *argv[] = {"", "1", "1", "-n", "DEV", nullptr};
   string out;
-  Process::Exec("sar", argv, NULL, out);
+  Process::Exec("sar", argv, nullptr, out);
 
   vector<string> lines;
   Util::split('\n', out.c_str(), lines, true);

@@ -39,7 +39,7 @@ bool CmdRun::help(DebuggerClient *client) {
   client->helpCmds(
     "[r]un",                             "restarts program",
     "[r]un {file} {arg1} {arg2} ...",    "starts a new program",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Aborts current execution and restarts program with specified arguments. "

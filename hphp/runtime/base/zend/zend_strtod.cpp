@@ -371,7 +371,7 @@ void destroy_freelist(void);
 
 class BigintData {
 public:
-  BigintData() : p5s(NULL) {
+  BigintData() : p5s(nullptr) {
     freelist = (Bigint **)calloc(Kmax + 1, sizeof(Bigint *));
   }
   ~BigintData() {
@@ -1272,11 +1272,11 @@ void destroy_freelist(void)
   Bigint **&freelist = s_bigint_data->freelist;
   for (i = 0; i <= Kmax; i++) {
     Bigint **listp = &freelist[i];
-    while ((tmp = *listp) != NULL) {
+    while ((tmp = *listp) != nullptr) {
       *listp = tmp->next;
       free(tmp);
     }
-    freelist[i] = NULL;
+    freelist[i] = nullptr;
   }
 
 }
@@ -2500,7 +2500,7 @@ double zend_hex_strtod(const char *str, char **endptr)
     value = value * 16 + c;
   }
 
-  if (endptr != NULL) {
+  if (endptr != nullptr) {
     *endptr = (char *)(any ? s - 1 : str);
   }
 
@@ -2528,7 +2528,7 @@ double zend_oct_strtod(const char *str, char **endptr)
     any = 1;
   }
 
-  if (endptr != NULL) {
+  if (endptr != nullptr) {
     *endptr = (char *)(any ? s - 1 : str);
   }
 

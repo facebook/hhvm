@@ -590,7 +590,7 @@ void IRInstruction::printDst(std::ostream& ostream) const {
 
 void IRInstruction::printSrc(std::ostream& ostream, uint32 i) const {
   SSATmp* src = getSrc(i);
-  if (src != NULL) {
+  if (src != nullptr) {
     if (m_id != 0 && !src->isConst() && src->getLastUseId() == m_id) {
       ostream << "~";
     }
@@ -957,13 +957,13 @@ void Trace::print(std::ostream& os, bool printAsm,
       continue;
     }
     uint8* asmAddr = (uint8*)inst->getAsmAddr();
-    if (asmAddr == NULL) {
+    if (asmAddr == nullptr) {
       continue;
     }
     // Find the next instruction that has an non-NULL asm address.
     auto nextHasAsmAddr = it;
     while (nextHasAsmAddr != m_instructionList.end() &&
-           (*nextHasAsmAddr)->getAsmAddr() == NULL) {
+           (*nextHasAsmAddr)->getAsmAddr() == nullptr) {
       ++nextHasAsmAddr;
     }
     uint8* endAsm;

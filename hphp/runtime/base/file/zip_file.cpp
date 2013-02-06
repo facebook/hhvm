@@ -27,7 +27,7 @@ StaticString ZipFile::s_class_name("ZipFile");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ZipFile::ZipFile() : m_gzFile(NULL) {
+ZipFile::ZipFile() : m_gzFile(nullptr) {
   m_innerFile = NEWOBJ(PlainFile)();
   m_innerFile->unregister(); // so Sweepable won't touch my child
 }
@@ -43,7 +43,7 @@ void ZipFile::sweep() {
 }
 
 bool ZipFile::open(CStrRef filename, CStrRef mode) {
-  assert(m_gzFile == NULL);
+  assert(m_gzFile == nullptr);
 
   if (strchr(mode, '+')) {
     raise_warning("cannot open a zlib stream for reading and writing "
@@ -66,7 +66,7 @@ bool ZipFile::closeImpl() {
     if (m_gzFile) {
       s_file_data->m_pcloseRet = gzclose(m_gzFile);
       ret = (s_file_data->m_pcloseRet == 0);
-      m_gzFile = NULL;
+      m_gzFile = nullptr;
     }
     m_closed = true;
     m_innerFile->close();

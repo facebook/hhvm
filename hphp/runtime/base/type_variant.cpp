@@ -772,7 +772,7 @@ Variant &Variant::operator+=(CVarRef var) {
   if (na == 2) {
     ArrayData *arr1 = getArrayData();
     ArrayData *arr2 = var.getArrayData();
-    if (arr1 == NULL || arr2 == NULL) {
+    if (arr1 == nullptr || arr2 == nullptr) {
       throw BadArrayMergeException();
     }
     if (arr2->empty() || arr1 == arr2) return *this;
@@ -1648,7 +1648,7 @@ bool Variant::same(litstr v2) const {
 
 bool Variant::same(const StringData *v2) const {
   bool null1 = isNull();
-  bool null2 = (v2 == NULL);
+  bool null2 = (v2 == nullptr);
   if (null1 && null2) return true;
   if (null1 || null2) return false;
   return isString() && HPHP::same(getStringData(), v2);
@@ -2333,7 +2333,7 @@ head:
   if (self->m_type == KindOfArray) {
     ArrayData *arr = self->m_data.parr;
     ArrayData *escalated;
-    Variant *ret = NULL;
+    Variant *ret = nullptr;
     if (LvalHelper<T>::CheckParams && flags & AccessFlags::Key) {
       escalated = arr->lval(key, ret, arr->getCount() > 1,
                             flags & AccessFlags::CheckExist);
@@ -2379,7 +2379,7 @@ head:
 
 template<typename T>
 Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
-  return Variant::LvalAtImpl0<T>(this, key, NULL, true, flags);
+  return Variant::LvalAtImpl0<T>(this, key, nullptr, true, flags);
 }
 
 Variant &Variant::lvalAt(bool    key, ACCESSPARAMS_IMPL) {
@@ -2435,7 +2435,7 @@ Variant *Variant::lvalPtr(CStrRef key, bool forWrite, bool create) {
   if (t->m_type == KindOfArray) {
     return t->asArrRef().lvalPtr(key, forWrite, create);
   }
-  return NULL;
+  return nullptr;
 }
 
 Variant &Variant::lvalAt() {
@@ -2482,7 +2482,7 @@ Variant &Variant::lvalAt() {
   }
 
   assert(m_type == KindOfArray);
-  Variant *ret = NULL;
+  Variant *ret = nullptr;
   ArrayData *arr = m_data.parr;
   ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
   if (escalated) {
@@ -2819,7 +2819,7 @@ Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
 #define IMPLEMENT_SETAT_OPEQUAL                                         \
 check_array:                                                            \
   if (m_type == KindOfArray) {                                          \
-    Variant *cv = NULL;                                                 \
+    Variant *cv = nullptr;                                                 \
     ArrayData *escalated =                                              \
       m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1)); \
     if (escalated) {                                                    \
@@ -3153,7 +3153,7 @@ CVarRef Variant::setOpEqual(int op, CStrRef key, CVarRef v,
                             bool isString /* = false */) {
 check_array:
   if (m_type == KindOfArray) {
-    Variant *cv = NULL;
+    Variant *cv = nullptr;
     ArrayData *escalated;
     if (isString) {
       escalated =
@@ -3224,7 +3224,7 @@ check_array:
 CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v) {
 check_array:
   if (m_type == KindOfArray) {
-    Variant *cv = NULL;
+    Variant *cv = nullptr;
     VarNR k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
     ArrayData *escalated =
@@ -3288,7 +3288,7 @@ check_array:
 CVarRef Variant::appendOpEqual(int op, CVarRef v) {
 check_array:
   if (m_type == KindOfArray) {
-    Variant *cv = NULL;
+    Variant *cv = nullptr;
     ArrayData *escalated =
       m_data.parr->lvalNew(cv, m_data.parr->getCount() > 1);
     if (escalated) {
@@ -3620,13 +3620,13 @@ static void setValue(void *addr, DataType type,
     case KindOfInt64:   *(int64*)addr = value;  break;
     case KindOfDouble:  *(double*)addr = value; break;
     case KindOfString:
-      *(String*)addr = value.isString() ? value.getStringData() : NULL;
+      *(String*)addr = value.isString() ? value.getStringData() : nullptr;
       break;
     case KindOfArray:
-      *(Array*)addr = value.isArray() ? value.getArrayData() : NULL;
+      *(Array*)addr = value.isArray() ? value.getArrayData() : nullptr;
       break;
     case KindOfObject:
-      *(Object*)addr = value.isObject() ? value.getObjectData() : NULL;
+      *(Object*)addr = value.isObject() ? value.getObjectData() : nullptr;
       break;
     default:
       raise_error("Internal error in unserialize!");
@@ -3701,7 +3701,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
     {
       int64 id = uns->readInt();
       Variant *v = uns->get(id);
-      if (v == NULL) {
+      if (v == nullptr) {
         throw Exception("Id %ld out of range", id);
       }
       operator=(*v);
@@ -3711,7 +3711,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
     {
       int64 id = uns->readInt();
       Variant *v = uns->get(id);
-      if (v == NULL) {
+      if (v == nullptr) {
         throw Exception("Id %ld out of range", id);
       }
       assignRef(*v);
@@ -3963,7 +3963,7 @@ SharedVariant *Variant::getSharedVariant() const {
   if (m_type == KindOfArray) {
     return m_data.parr->getSharedVariant();
   }
-  return NULL;
+  return nullptr;
 }
 
 void Variant::dump() const {

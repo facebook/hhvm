@@ -45,7 +45,7 @@ void CmdBreak::list(DebuggerClient *client) {
       "toggle",
       "enable",
       "disable",
-      NULL
+      nullptr
     };
     client->addCompletion(keywords1);
     client->addCompletion(DebuggerClient::AutoCompleteFileNames);
@@ -87,7 +87,7 @@ bool CmdBreak::help(DebuggerClient *client) {
     "[b]reak [d]isable {index}","disables the n-th breakpoint on list",
     "[b]reak [d]isable [a]ll",  "disables all breakpoints",
     "[b]reak [d]isable",        "disables current breakpoint",
-    NULL
+    nullptr
   );
 
   client->helpTitle("Where to break?");

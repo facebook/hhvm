@@ -35,13 +35,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Transport::Transport()
-  : m_instructions(0), m_url(NULL), m_postData(NULL), m_postDataParsed(false),
+  : m_instructions(0), m_url(nullptr), m_postData(nullptr), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
     m_headerCallback(null), m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
     m_flushTimeUs(0), m_sendContentType(true),
-    m_compression(true), m_compressor(NULL), m_isSSL(false),
+    m_compression(true), m_compressor(nullptr), m_isSSL(false),
     m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
   memset(&m_queueTime, 0, sizeof(m_queueTime));
   memset(&m_wallTime, 0, sizeof(m_wallTime));
@@ -161,7 +161,7 @@ void Transport::parseQuery(char *query, ParamMap &params) {
   while (k && *k) {
     char *v = strchr(k, '=');
     const char *fv;
-    if (v == NULL) {
+    if (v == nullptr) {
       fv = "";
     } else {
       *v = '\0';
@@ -171,12 +171,12 @@ void Transport::parseQuery(char *query, ParamMap &params) {
     }
     if (*k) urlUnescape(k);
     params[k].push_back(fv);
-    k = strtok_r(NULL, "&", &l);
+    k = strtok_r(nullptr, "&", &l);
   }
 }
 
 void Transport::parseGetParams() {
-  if (m_url == NULL) {
+  if (m_url == nullptr) {
     const char *url = getServerObject();
     assert(url);
 
@@ -193,7 +193,7 @@ void Transport::parseGetParams() {
 
 void Transport::parsePostParams() {
   if (!m_postDataParsed) {
-    assert(m_postData == NULL);
+    assert(m_postData == nullptr);
     int size;
     const char *data = (const char *)getPostData(size);
     if (data && *data && size) {
@@ -209,7 +209,7 @@ void Transport::parsePostParams() {
 bool Transport::paramExists(const char *name, Method method /* = GET */) {
   assert(name && *name);
   if (method == GET || method == AUTO) {
-    if (m_url == NULL) {
+    if (m_url == nullptr) {
       parseGetParams();
     }
     if (m_getParams.find(name) != m_getParams.end()) {
@@ -233,7 +233,7 @@ std::string Transport::getParam(const char *name,  Method method /* = GET */) {
   assert(name && *name);
 
   if (method == GET || method == AUTO) {
-    if (m_url == NULL) {
+    if (m_url == nullptr) {
       parseGetParams();
     }
     ParamMap::const_iterator iter = m_getParams.find(name);
@@ -276,7 +276,7 @@ void Transport::getArrayParam(const char *name,
                               std::vector<std::string> &values,
                               Method method /* = GET */) {
   if (method == GET || method == AUTO) {
-    if (m_url == NULL) {
+    if (m_url == nullptr) {
       parseGetParams();
     }
     ParamMap::const_iterator iter = m_getParams.find(name);
@@ -443,7 +443,7 @@ bool Transport::cookieExists(const char *name) {
   assert(name && *name);
   string header = getHeader("Cookie");
   int len = strlen(name);
-  bool hasValue = (strchr(name, '=') != NULL);
+  bool hasValue = (strchr(name, '=') != nullptr);
   for (size_t pos = header.find(name); pos != string::npos;
        pos = header.find(name, pos + 1)) {
     if (pos == 0 || isspace(header[pos-1]) || header[pos-1] == ';') {
@@ -534,7 +534,7 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64 expire /* = 0 */,
     return false;
   }
 
-  char *encoded_value = NULL;
+  char *encoded_value = nullptr;
   int len = 0;
   if (!value.empty() && encode_url) {
     int encoded_value_len = value.size();
@@ -685,7 +685,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   // where we don't really know if next chunk will benefit from compresseion.
   if (m_chunkedEncoding || size > 1000 ||
       m_compressionDecision == HasToCompress) {
-    if (m_compressor == NULL) {
+    if (m_compressor == nullptr) {
       m_compressor = new StreamCompressor(RuntimeOption::GzipCompressionLevel,
                                           CODING_GZIP, true);
     }

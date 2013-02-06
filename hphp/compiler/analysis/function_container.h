@@ -64,14 +64,14 @@ protected:
   void outputCPPJumpTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
                                  const StringToFunctionScopePtrVecMap *redec,
                                  bool &hasRedeclared,
-                                 std::vector<const char *> *funcs = NULL);
+                                 std::vector<const char *> *funcs = nullptr);
   void outputCPPJumpTableEvalSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     const StringToFunctionScopePtrVecMap *redec, bool &hasRedeclared);
   void outputCPPCallInfoTableSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     const StringToFunctionScopePtrVecMap *redec,
-    bool &hasRedeclared, std::vector<const char *> *funcs = NULL);
+    bool &hasRedeclared, std::vector<const char *> *funcs = nullptr);
   void outputCPPJumpTableSupportMethod(CodeGenerator &cg, AnalysisResultPtr ar,
                                        FunctionScopePtr func,
                                        const char *funcPrefix);

@@ -41,7 +41,7 @@ bool CmdExample::help(DebuggerClient *client) {
   client->helpCmds(
     "xample {string}",      "it will tell you how long it is!",
     "x ample {string}",     "it will tell you how long it is!",
-    NULL
+    nullptr
   );
   client->helpBody(
     "This is just an example of extending debugger commands with C++. "

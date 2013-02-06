@@ -89,13 +89,13 @@ public:
       t->m_staticClass = &cls;
       return old;
     }
-    return NULL;
+    return nullptr;
   }
   static void ResetStaticClassName(ThreadInfo *info) {
     const_assert(!hhvm);
     assert(info);
     FrameInjection *t = info->m_top;
-    if (t) t->m_staticClass = NULL;
+    if (t) t->m_staticClass = nullptr;
   }
 
   static bool IsGlobalScope();
@@ -120,7 +120,7 @@ protected:
   // constructors and destructor are supposed to be inlined by subclasses
   FrameInjection(const char *name, int fs)
     : m_name(name),
-      m_staticClass(NULL),
+      m_staticClass(nullptr),
       m_line(0), m_flags(fs) {
     const_assert(!hhvm);
     m_info = ThreadInfo::s_threadInfo.getNoCheck();
@@ -169,7 +169,7 @@ public:
   bool isPseudoMainFrame() const { return m_flags & PseudoMain; }
 
   void setStaticClassName(CStrRef cls) { m_staticClass = &cls; }
-  void resetStaticClassName() { m_staticClass = NULL; }
+  void resetStaticClassName() { m_staticClass = nullptr; }
 
   /**
    * Complex accessors.
@@ -244,7 +244,7 @@ public:
     hotProfilerFini();
   }
 
-  ObjectData *getThis() const { return NULL; }
+  ObjectData *getThis() const { return nullptr; }
   ObjectData *getThisForArrow() {
     throw FatalErrorException("Using $this when not in object context");
   }
@@ -276,7 +276,7 @@ public:
       // NULL out m_object before freeing it, so that debug_backtrace()
       // does not see freed object on stack.
       ObjectData* obj = m_object;
-      m_object = NULL;
+      m_object = nullptr;
       obj->release();
     }
     hotProfilerFini();

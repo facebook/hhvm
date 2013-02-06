@@ -110,26 +110,26 @@ extern const char *g_paramrtti_map[];
  * Dynamically create an object.
  */
 Object create_object(CStrRef s, const Array &params,
-                     bool init = true, ObjectData *root = NULL);
-extern Object create_object_only(CStrRef s, ObjectData *root = NULL);
+                     bool init = true, ObjectData *root = nullptr);
+extern Object create_object_only(CStrRef s, ObjectData *root = nullptr);
 extern ObjectData *create_object_only_no_init(CStrRef s,
-                                              ObjectData *root = NULL);
+                                              ObjectData *root = nullptr);
 /**
  * Dynamically create a system object.
  */
 extern Object create_builtin_object(CStrRef s, const Array &params,
-                                    bool init = true, ObjectData *root = NULL);
+                                    bool init = true, ObjectData *root = nullptr);
 extern Object create_builtin_object_only(CStrRef s,
-                                         ObjectData *root = NULL);
+                                         ObjectData *root = nullptr);
 extern ObjectData *create_builtin_object_only_no_init(CStrRef s,
-                                                      ObjectData *root = NULL);
+                                                      ObjectData *root = nullptr);
 /**
  * Dynamically include a file.
  */
 class LVariableTable;
 extern Variant invoke_file(CStrRef file, bool once = false,
-                           LVariableTable* variables = NULL,
-                           const char *currentDir = NULL);
+                           LVariableTable* variables = nullptr,
+                           const char *currentDir = nullptr);
 extern bool hphp_could_invoke_file(CStrRef file, void*);
 
 /**

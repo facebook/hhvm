@@ -59,7 +59,7 @@ private:
     test.fail_count = 0;                                                \
     test.skip_count = 0;                                                \
     test.error_messages = "";                                           \
-    gettimeofday(&start, NULL);                                         \
+    gettimeofday(&start, nullptr);                                         \
     if (test.RunTests(which)) {                                         \
       if (!s_quiet) {                                                   \
         printf("\n" #name " OK\n\n");                                   \
@@ -68,7 +68,7 @@ private:
       printf("\n" #name " #####>>> FAILED <<< #####\n\n");              \
       allPassed = false;                                                \
     }                                                                   \
-    gettimeofday(&finish, NULL);                                        \
+    gettimeofday(&finish, nullptr);                                        \
                                                                         \
     logTestResults(#name, test.error_messages, test.pass_count,         \
                    test.fail_count, test.skip_count);                   \

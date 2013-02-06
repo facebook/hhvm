@@ -62,7 +62,7 @@ class TCRange {
   bool m_isAstubs;
   void V() const { assert(isValid()); }
  public:
-  TCRange() : m_start(NULL), m_end(NULL), m_isAstubs(false) {
+  TCRange() : m_start(nullptr), m_end(nullptr), m_isAstubs(false) {
     assert(!isValid());
   }
   TCRange(const TCA start, const TCA end, bool isAstubs) :
@@ -136,9 +136,9 @@ struct FunctionInfo {
   bool m_perfSynced;
   std::vector<LineEntry> m_lineTable;
   DwarfChunk* m_chunk;
-  FunctionInfo() : m_chunk(NULL) { }
+  FunctionInfo() : m_chunk(nullptr) { }
   FunctionInfo(TCRange r, bool ex)
-    : range(r), exit(ex), m_perfSynced(false), m_chunk(NULL) {}
+    : range(r), exit(ex), m_perfSynced(false), m_chunk(nullptr) {}
   void setPerfSynced() { m_perfSynced = true; }
   void clearPerfSynced() { m_perfSynced = false; }
   bool perfSynced() const { return m_perfSynced; }
@@ -149,7 +149,7 @@ struct DwarfChunk {
   vector<FunctionInfo *> m_functions;
   char *m_symfile;
   bool m_synced;
-  DwarfChunk() : m_symfile(NULL), m_synced(false) {}
+  DwarfChunk() : m_symfile(nullptr), m_synced(false) {}
   void setSynced() { m_synced = true; }
   void clearSynced() { m_synced = false; }
   bool isSynced() const { return m_synced; }

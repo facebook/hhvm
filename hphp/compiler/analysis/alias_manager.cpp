@@ -1438,7 +1438,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::UnsetContext)) {
           ExpressionPtr rep;
           int interf =
-            findInterf(e, true, rep, NULL, doArrayCSE);
+            findInterf(e, true, rep, nullptr, doArrayCSE);
           add(m_accessList, e);
           if (interf == SameAccess) {
             if (e->getKindOf() == rep->getKindOf()) {
@@ -1498,7 +1498,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::UnsetContext))) {
         ExpressionPtr rep;
         int interf =
-          findInterf(e, true, rep, NULL, doArrayCSE);
+          findInterf(e, true, rep, nullptr, doArrayCSE);
         if (!m_inPseudoMain && interf == DisjointAccess && !m_cleared &&
             e->is(Expression::KindOfSimpleVariable) &&
             !e->isThis()) {
@@ -3669,7 +3669,7 @@ void AliasManager::doFinal(MethodStatementPtr m) {
 }
 
 void AliasManager::performReferencedAndNeededAnalysis(MethodStatementPtr m) {
-  always_assert(m_graph != NULL);
+  always_assert(m_graph != nullptr);
 
   // bail out for pseudomain context
   if (m->getScope()->inPseudoMain()) return;
@@ -3696,7 +3696,7 @@ void AliasManager::performReferencedAndNeededAnalysis(MethodStatementPtr m) {
 }
 
 int AliasManager::copyProp(MethodStatementPtr m) {
-  if (m_graph == NULL) createCFG(m);
+  if (m_graph == nullptr) createCFG(m);
 
   performReferencedAndNeededAnalysis(m);
 
@@ -3719,13 +3719,13 @@ int AliasManager::copyProp(MethodStatementPtr m) {
 }
 
 void AliasManager::deleteCFG() {
-  assert(m_graph != NULL);
+  assert(m_graph != nullptr);
   delete m_graph;
-  m_graph = NULL;
+  m_graph = nullptr;
 }
 
 void AliasManager::createCFG(MethodStatementPtr m) {
-  assert(m_graph == NULL);
+  assert(m_graph == nullptr);
   m_graph = ControlFlowGraph::buildControlFlow(m);
 }
 
@@ -3735,7 +3735,7 @@ void AliasManager::insertTypeAssertions(AnalysisResultConstPtr ar,
   i.walk(m->getStmts());
 
   if (Option::ControlFlow && Option::DumpAst) {
-    if (m_graph != NULL) deleteCFG();
+    if (m_graph != nullptr) deleteCFG();
     createCFG(m);
     printf("-------- BEGIN INSERTED -----------\n");
     m_graph->dump(m_arp);
@@ -3750,7 +3750,7 @@ void AliasManager::removeTypeAssertions(AnalysisResultConstPtr ar,
   r.walk(m->getStmts());
 
   if (Option::ControlFlow && Option::DumpAst) {
-    if (m_graph != NULL) deleteCFG();
+    if (m_graph != nullptr) deleteCFG();
     createCFG(m);
     printf("-------- BEGIN REMOVED -----------\n");
     m_graph->dump(m_arp);
@@ -3778,7 +3778,7 @@ int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
     if (copyProp(m)) return 1;
   }
 
-  if (m_graph != NULL) deleteCFG();
+  if (m_graph != nullptr) deleteCFG();
 
   m_hasChainRoot = false;
 

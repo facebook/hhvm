@@ -75,7 +75,7 @@ void LibEventJob::stopTimer() {
 ///////////////////////////////////////////////////////////////////////////////
 // LibEventWorker
 
-LibEventWorker::LibEventWorker() : m_handler(NULL) {
+LibEventWorker::LibEventWorker() : m_handler(nullptr) {
 }
 
 LibEventWorker::~LibEventWorker() {
@@ -87,7 +87,7 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
   assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
 
-  if (m_handler == NULL || server->supportReset()) {
+  if (m_handler == nullptr || server->supportReset()) {
     m_handler = server->createRequestHandler();
     assert(m_handler);
   }
@@ -164,7 +164,7 @@ LibEventServer::LibEventServer(const std::string &address, int port,
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
-  m_server_ssl = NULL;
+  m_server_ssl = nullptr;
   evhttp_set_connection_limit(m_server, RuntimeOption::ServerConnectionLimit);
   evhttp_set_gencb(m_server, on_request, this);
 #ifdef EVHTTP_PORTABLE_READ_LIMITING
@@ -189,7 +189,7 @@ LibEventServer::~LibEventServer() {
 
 int LibEventServer::getAcceptSocket() {
   int ret;
-  const char *address = m_address.empty() ? NULL : m_address.c_str();
+  const char *address = m_address.empty() ? nullptr : m_address.c_str();
   ret = evhttp_bind_socket_backlog_fd(m_server, address,
                                       m_port, RuntimeOption::ServerBacklog);
   if (ret < 0) {
@@ -211,7 +211,7 @@ void LibEventServer::start() {
     throw FailedToListenException(m_address, m_port);
   }
 
-  if (m_server_ssl != NULL && m_accept_sock_ssl != -2) {
+  if (m_server_ssl != nullptr && m_accept_sock_ssl != -2) {
     // m_accept_sock_ssl here serves as a flag to indicate whether it is
     // called from subclass (LibEventServerWithTakeover). If it is (==-2)
     // we delay the getAcceptSocketSSL();
@@ -255,7 +255,7 @@ void LibEventServer::dispatch() {
   event_set(&m_eventStop, m_pipeStop.getOut(), EV_READ|EV_PERSIST,
             on_thread_stop, m_eventBase);
   event_base_set(m_eventBase, &m_eventStop);
-  event_add(&m_eventStop, NULL);
+  event_add(&m_eventStop, nullptr);
 
   while (getStatus() != STOPPED) {
     event_base_loop(m_eventBase, EVLOOP_ONCE);
@@ -277,7 +277,7 @@ void LibEventServer::dispatch() {
 
 void LibEventServer::stop() {
   Lock lock(m_mutex);
-  if (getStatus() != RUNNING || m_server == NULL) return;
+  if (getStatus() != RUNNING || m_server == nullptr) return;
 
 #define SHUT_FBLISTEN 3
   /*
@@ -330,7 +330,7 @@ void LibEventServer::stop() {
   m_timeoutThread.waitForEnd();
 
   evhttp_free(m_server);
-  m_server = NULL;
+  m_server = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ void LibEventServer::stop() {
 bool LibEventServer::enableSSL(void *sslCTX, int port) {
 #ifdef _EVENT_USE_OPENSSL
   m_server_ssl = evhttp_new_openssl_ctx(m_eventBase, sslCTX);
-  if (m_server_ssl == NULL) {
+  if (m_server_ssl == nullptr) {
     Logger::Error("evhttp_new_openssl_ctx failed");
     return false;
   }
@@ -355,7 +355,7 @@ bool LibEventServer::enableSSL(void *sslCTX, int port) {
 }
 
 int LibEventServer::getAcceptSocketSSL() {
-  const char *address = m_address.empty() ? NULL : m_address.c_str();
+  const char *address = m_address.empty() ? nullptr : m_address.c_str();
   int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, address,
       m_port_ssl, RuntimeOption::ServerBacklog);
   if (ret < 0) {
@@ -400,7 +400,7 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
   int nwritten = 0;
   bool skip_sync = false;
 
-  if (request->evcon == NULL) {
+  if (request->evcon == nullptr) {
     evhttp_request_free(request);
     return;
   }
@@ -416,9 +416,9 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
     timespec begin, end;
     gettime(CLOCK_MONOTONIC, &begin);
 #ifdef EVHTTP_SYNC_SEND_REPORT_TOTAL_LEN
-    nwritten = evhttp_send_reply_sync(request, code, reason, NULL, &totalSize);
+    nwritten = evhttp_send_reply_sync(request, code, reason, nullptr, &totalSize);
 #else
-    nwritten = evhttp_send_reply_sync_begin(request, code, reason, NULL);
+    nwritten = evhttp_send_reply_sync_begin(request, code, reason, nullptr);
 #endif
     gettime(CLOCK_MONOTONIC, &end);
     int64 delay = gettime_diff_us(begin, end);
@@ -464,7 +464,7 @@ void PendingResponseQueue::create(event_base *eventBase) {
   }
   event_set(&m_event, m_ready.getOut(), EV_READ|EV_PERSIST, on_response, this);
   event_base_set(eventBase, &m_event);
-  event_add(&m_event, NULL);
+  event_add(&m_event, nullptr);
 }
 
 void PendingResponseQueue::close() {
@@ -535,7 +535,7 @@ void PendingResponseQueue::process() {
     evhttp_request *request = res.request;
     int code = res.code;
 
-    if (request->evcon == NULL) {
+    if (request->evcon == nullptr) {
       evhttp_request_free(request);
       continue;
     }
@@ -559,14 +559,14 @@ void PendingResponseQueue::process() {
       evhttp_send_reply_sync_end(res.nwritten, request);
     } else {
       const char *reason = HttpProtocol::GetReasonString(code);
-      evhttp_send_reply(request, code, reason, NULL);
+      evhttp_send_reply(request, code, reason, nullptr);
     }
   }
 }
 
 PendingResponseQueue::Response::Response()
-  : request(NULL), code(0), nwritten(0),
-    chunked(false), firstChunk(false), chunk(NULL) {
+  : request(nullptr), code(0), nwritten(0),
+    chunked(false), firstChunk(false), chunk(nullptr) {
 }
 
 PendingResponseQueue::Response::~Response() {

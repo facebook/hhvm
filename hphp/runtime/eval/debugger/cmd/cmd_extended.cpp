@@ -53,7 +53,7 @@ void CmdExtended::helpImpl(DebuggerClient *client, const char *name) {
   const char *help = "invoke specified command";
   client->helpCmds((string(name) + " " + cmd).c_str(), help,
                    (string(name) + cmd).c_str(), help,
-                   NULL);
+                   nullptr);
 
   const ExtendedCommandMap &cmds = getCommandMap();
   if (!cmds.empty()) {

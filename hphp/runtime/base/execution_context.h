@@ -545,12 +545,12 @@ public:
   HphpArray* getClsCnsData(const HPHP::VM::Class* class_) const {
     ClsCnsDataMap::const_iterator it = m_clsCnsData.find(class_);
     if (it == m_clsCnsData.end()) {
-      return NULL;
+      return nullptr;
     }
     return it->second;
   }
   void setClsCnsData(const HPHP::VM::Class* class_, HphpArray* clsCnsData) {
-    assert(getClsCnsData(class_) == NULL);
+    assert(getClsCnsData(class_) == nullptr);
     m_clsCnsData[class_] = clsCnsData;
   }
 
@@ -613,7 +613,7 @@ public:
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);
   HPHP::Eval::PhpFile* lookupPhpFile(
-      StringData* path, const char* currentDir, bool* initial = NULL);
+      StringData* path, const char* currentDir, bool* initial = nullptr);
   HPHP::VM::Unit* evalInclude(StringData* path,
                               const StringData* curUnitFilePath, bool* initial);
   HPHP::VM::Unit* evalIncludeRoot(StringData* path,
@@ -648,12 +648,12 @@ public:
 
   int hhvmPrepareThrow();
   VM::ActRec* getPrevVMState(const VM::ActRec* fp,
-                             VM::Offset* prevPc = NULL,
-                             TypedValue** prevSp = NULL);
+                             VM::Offset* prevPc = nullptr,
+                             TypedValue** prevSp = nullptr);
   Array debugBacktrace(bool skip = false,
                        bool withSelf = false,
                        bool withThis = false,
-                       VMParserFrame* parserFrame = NULL);
+                       VMParserFrame* parserFrame = nullptr);
   int handleUnwind(VM::UnwindStatus unwindType);
   HPHP::VM::VarEnv* getVarEnv();
   void setVar(StringData* name, TypedValue* v, bool ref);
@@ -699,14 +699,14 @@ public:
   void invokeFunc(TypedValue* retval,
                   const HPHP::VM::Func* f,
                   CArrRef params,
-                  ObjectData* this_ = NULL,
-                  HPHP::VM::Class* class_ = NULL,
-                  HPHP::VM::VarEnv* varEnv = NULL,
-                  StringData* invName = NULL,
-                  HPHP::VM::Unit* mergeUnit = NULL);
+                  ObjectData* this_ = nullptr,
+                  HPHP::VM::Class* class_ = nullptr,
+                  HPHP::VM::VarEnv* varEnv = nullptr,
+                  StringData* invName = nullptr,
+                  HPHP::VM::Unit* mergeUnit = nullptr);
   void invokeContFunc(const HPHP::VM::Func* f,
                       ObjectData* this_,
-                      TypedValue* param = NULL);
+                      TypedValue* param = nullptr);
   // VM ClassInfo support
   StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;

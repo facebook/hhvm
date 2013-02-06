@@ -69,7 +69,7 @@ public:
    * Called from differnt time point of execution thread.
    */
   static void InterruptSessionStarted(const char *file,
-                                      const char *error = NULL);
+                                      const char *error = nullptr);
   static void InterruptSessionEnded(const char *file);
   static void InterruptRequestStarted(const char *url);
   static void InterruptRequestEnded(const char *url);
@@ -100,7 +100,7 @@ private:
   static bool s_clientStarted;
 
   static void Interrupt(int type, const char *program,
-                        InterruptSite *site = NULL, const char *error = NULL);
+                        InterruptSite *site = nullptr, const char *error = nullptr);
 
   typedef tbb::concurrent_hash_map<const StringData*, DebuggerProxyPtr,
                                    StringDataHashCompare> ProxyMap;

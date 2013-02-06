@@ -122,12 +122,12 @@ bool Util::mkdir(const std::string &path, int mode /* = 0777 */) {
 
 static bool same(const char *file1, const char *file2) {
   FILE *f1 = fopen(file1, "r");
-  if (f1 == NULL) {
+  if (f1 == nullptr) {
     Logger::Error("unable to read %s", file1);
     return false;
   }
   FILE *f2 = fopen(file2, "r");
-  if (f2 == NULL) {
+  if (f2 == nullptr) {
     fclose(f1);
     Logger::Error("unable to read %s", file2);
     return false;
@@ -171,13 +171,13 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
   if (dest[dest.size() - 1] != '/') dest += '/';
 
   DIR *ddest = opendir(dest.c_str());
-  if (ddest == NULL) {
+  if (ddest == nullptr) {
     Logger::Error("syncdir: unable to open dest %s", dest.c_str());
     return;
   }
 
   DIR *dsrc = opendir(src.c_str());
-  if (dsrc == NULL) {
+  if (dsrc == nullptr) {
     closedir(ddest);
     Logger::Error("syncdir: unable to open src %s", src.c_str());
     return;
@@ -757,7 +757,7 @@ void Util::find(std::vector<std::string> &out,
     return;
   }
   DIR *dir = opendir(fullPath.c_str());
-  if (dir == NULL) {
+  if (dir == nullptr) {
     Logger::Error("Util::find(): unable to open directory %s",
                   fullPath.c_str());
     return;
@@ -857,8 +857,8 @@ std::string Util::format_pattern(const std::string &pattern,
 char* Util::getNativeFunctionName(void* codeAddr) {
   void* buf[1] = {codeAddr};
   char** symbols = backtrace_symbols(buf, 1);
-  char* functionName = NULL;
-  if (symbols != NULL) {
+  char* functionName = nullptr;
+  if (symbols != nullptr) {
     //
     // the output from backtrace_symbols looks like this:
     // ../path/hhvm/hhvm(_ZN4HPHP2VM6Transl17interpOneIterInitEv+0) [0x17cebe9]
@@ -878,7 +878,7 @@ char* Util::getNativeFunctionName(void* codeAddr) {
     if (start) {
       start++;
       char* end = strchr(start, '+');
-      if (end != NULL) {
+      if (end != nullptr) {
         size_t len = end-start;
         functionName = new char[len+1];
         strncpy(functionName, start, len);
@@ -893,7 +893,7 @@ char* Util::getNativeFunctionName(void* codeAddr) {
     }
   }
   free(symbols);
-  if (functionName == NULL) {
+  if (functionName == nullptr) {
 #define MAX_ADDR_HEX_LEN 40
     functionName = new char[MAX_ADDR_HEX_LEN + 3];
     sprintf(functionName, "%40p", codeAddr);

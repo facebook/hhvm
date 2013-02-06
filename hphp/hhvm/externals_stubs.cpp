@@ -54,7 +54,7 @@ Variant invoke_file(CStrRef s,
 
 bool get_call_info(const CallInfo *&ci, void *&extra,
                    const char *s, strhash_t hash) {
-  extra = NULL;
+  extra = nullptr;
   const char *ss = get_renamed_function(s);
   if (ss != s) { s = ss; hash = -1; }
   return get_call_info_builtin(ci, extra, s, hash);
@@ -62,7 +62,7 @@ bool get_call_info(const CallInfo *&ci, void *&extra,
 
 bool get_call_info_no_eval(const CallInfo *&ci, void *&extra,
                            const char *s, strhash_t hash) {
-  extra = NULL;
+  extra = nullptr;
   return get_call_info_builtin(ci, extra, s, hash);
 }
 
@@ -127,7 +127,7 @@ Variant get_static_property(CStrRef s, const char *prop) {
   return null;
 }
 Variant *get_static_property_lv(CStrRef s, const char *prop) {
-  return NULL;
+  return nullptr;
 }
 Variant get_class_var_init(CStrRef s, const char *var) {
   return null;

@@ -50,7 +50,7 @@ bool CmdWhere::help(DebuggerClient *client) {
     "[w]here",           "displays current stacktrace",
     "[w]here {num}",     "displays number of innermost frames",
     "[w]here -{num}",    "displays number of outermost frames",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use '[u]p {num}' or '[d]own {num}' to walk up or down the stacktrace. "

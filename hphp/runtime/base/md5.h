@@ -41,11 +41,11 @@ struct MD5 {
     buf[kQWordAsciiLen] = 0;
     memcpy(buf, str, kQWordAsciiLen);
     assert(strlen(buf) == 16);
-    q[0] = strtoull(buf, NULL, 16);
+    q[0] = strtoull(buf, nullptr, 16);
 
     memcpy(buf, str + kQWordAsciiLen, 16);
     assert(strlen(buf) == 16);
-    q[1] = strtoull(buf, NULL, 16);
+    q[1] = strtoull(buf, nullptr, 16);
   }
 
   std::string toString() const {

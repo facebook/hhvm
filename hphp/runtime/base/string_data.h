@@ -135,7 +135,7 @@ class StringData {
    */
   SharedVariant *getSharedVariant() const {
     if (isShared()) return m_big.shared;
-    return NULL;
+    return nullptr;
   }
 
   static StringData *Escalate(StringData *in);

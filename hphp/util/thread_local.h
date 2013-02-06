@@ -111,13 +111,13 @@ template<typename T>
 static void ThreadLocalOnThreadExit(void * p) {
   ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
   delete pNode->m_p;
-  pNode->m_p = NULL;
+  pNode->m_p = nullptr;
 }
 
 template<typename T>
 struct ThreadLocal {
   T *get() const {
-    if (m_node.m_p == NULL) {
+    if (m_node.m_p == nullptr) {
       const_cast<ThreadLocal<T>*>(this)->create();
     }
     return m_node.m_p;
@@ -125,15 +125,15 @@ struct ThreadLocal {
 
   void create() NEVER_INLINE;
 
-  bool isNull() const { return m_node.m_p == NULL; }
+  bool isNull() const { return m_node.m_p == nullptr; }
 
   void destroy() {
     delete m_node.m_p;
-    m_node.m_p = NULL;
+    m_node.m_p = nullptr;
   }
 
   void nullOut() {
-    m_node.m_p = NULL;
+    m_node.m_p = nullptr;
   }
 
   T *operator->() const {
@@ -149,12 +149,12 @@ struct ThreadLocal {
 
 template<typename T>
 void ThreadLocal<T>::create() {
-  if (m_node.m_on_thread_exit_fn == NULL) {
+  if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  assert(m_node.m_p == NULL);
+  assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
 }
 
@@ -168,11 +168,11 @@ struct ThreadLocalNoCheck {
 
   void create() NEVER_INLINE;
 
-  bool isNull() const { return m_node.m_p == NULL; }
+  bool isNull() const { return m_node.m_p == nullptr; }
 
   void destroy() {
     delete m_node.m_p;
-    m_node.m_p = NULL;
+    m_node.m_p = nullptr;
   }
 
   T *operator->() const {
@@ -188,17 +188,17 @@ struct ThreadLocalNoCheck {
 
 template<typename T>
 void ThreadLocalNoCheck<T>::create() {
-  if (m_node.m_on_thread_exit_fn == NULL) {
+  if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  assert(m_node.m_p == NULL);
+  assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
 }
 template<typename T>
 T *ThreadLocalNoCheck<T>::getCheck() const {
-  if (m_node.m_p == NULL) {
+  if (m_node.m_p == nullptr) {
     const_cast<ThreadLocalNoCheck<T>*>(this)->create();
   }
   return m_node.m_p;
@@ -226,14 +226,14 @@ public:
     return (T*)&s_storage;
   }
 
-  static bool isNull() { return s_singleton == NULL; }
+  static bool isNull() { return s_singleton == nullptr; }
 
   static void destroy() {
     assert(!s_singleton || s_singleton == (T*)&s_storage);
     T* p = s_singleton;
     if (p) {
       T::Delete(p);
-      s_singleton = NULL;
+      s_singleton = nullptr;
     }
   }
 
@@ -273,7 +273,7 @@ template<typename T> __thread typename ThreadLocalSingleton<T>::StorageType
 template<typename T, bool throwOnNull = true>
 struct ThreadLocalProxy {
   T *get() const {
-    if (m_p == NULL && throwOnNull) {
+    if (m_p == nullptr && throwOnNull) {
       throw Exception("ThreadLocalProxy::get() called before set()");
     }
     return m_p;
@@ -283,10 +283,10 @@ struct ThreadLocalProxy {
     m_p = obj;
   }
 
-  bool isNull() const { return m_p == NULL; }
+  bool isNull() const { return m_p == nullptr; }
 
   void destroy() {
-    m_p = NULL;
+    m_p = nullptr;
   }
 
   T *operator->() const {
@@ -354,22 +354,22 @@ public:
 
   T *get() const {
     T *obj = (T*)pthread_getspecific(m_key);
-    if (obj == NULL) {
+    if (obj == nullptr) {
       obj = new T();
       pthread_setspecific(m_key, obj);
     }
     return obj;
   }
 
-  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
+  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
 
   void destroy() {
     delete (T*)pthread_getspecific(m_key);
-    pthread_setspecific(m_key, NULL);
+    pthread_setspecific(m_key, nullptr);
   }
 
   void nullOut() {
-    pthread_setspecific(m_key, NULL);
+    pthread_setspecific(m_key, nullptr);
   }
 
   /**
@@ -405,11 +405,11 @@ public:
     return obj;
   }
 
-  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
+  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
 
   void destroy() {
     delete (T*)pthread_getspecific(m_key);
-    pthread_setspecific(m_key, NULL);
+    pthread_setspecific(m_key, nullptr);
   }
 
   /**
@@ -430,7 +430,7 @@ private:
 template<typename T>
 T *ThreadLocalNoCheck<T>::getCheck() const {
   T *obj = (T*)pthread_getspecific(m_key);
-  if (obj == NULL) {
+  if (obj == nullptr) {
     obj = new T();
     pthread_setspecific(m_key, obj);
   }
@@ -459,13 +459,13 @@ public:
     return obj;
   }
 
-  bool isNull() const { return pthread_getspecific(s_key) == NULL; }
+  bool isNull() const { return pthread_getspecific(s_key) == nullptr; }
 
   void destroy() {
     void* p = pthread_get_specific(s_key);
     T::Delete((T*)p);
     free(p);
-    pthread_setspecific(s_key, NULL);
+    pthread_setspecific(s_key, nullptr);
   }
 
   T *operator->() const {
@@ -490,7 +490,7 @@ private:
 template<typename T>
 T *ThreadLocalSingleton<T>::getCheck() {
   T *obj = (T*)pthread_getspecific(s_key);
-  if (obj == NULL) {
+  if (obj == nullptr) {
     obj = (T*)malloc(sizeof(T));
     T::Create(obj);
     pthread_setspecific(s_key, obj);
@@ -511,12 +511,12 @@ public:
    * Constructor that has to be called from a thread-neutral place.
    */
   ThreadLocalProxy() : m_key(0) {
-    ThreadLocalCreateKey(&m_key, NULL);
+    ThreadLocalCreateKey(&m_key, nullptr);
   }
 
   T *get() const {
     T *obj = (T*)pthread_getspecific(m_key);
-    if (obj == NULL && throwOnNull) {
+    if (obj == nullptr && throwOnNull) {
       throw Exception("ThreadLocalProxy::get() called before set()");
     }
     return obj;
@@ -526,10 +526,10 @@ public:
     pthread_setspecific(m_key, obj);
   }
 
-  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
+  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
 
   void destroy() {
-    pthread_setspecific(m_key, NULL);
+    pthread_setspecific(m_key, nullptr);
   }
 
   /**

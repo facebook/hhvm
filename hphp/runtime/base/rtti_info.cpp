@@ -30,7 +30,7 @@ namespace HPHP {
 
 RTTIInfo RTTIInfo::TheRTTIInfo;
 
-RTTIInfo::RTTIInfo() : m_loaded(false), m_count(0), m_profData(NULL) {
+RTTIInfo::RTTIInfo() : m_loaded(false), m_count(0), m_profData(nullptr) {
 }
 
 void RTTIInfo::translate_rtti(const char *rttiDirectory) {
@@ -69,13 +69,13 @@ void RTTIInfo::translate_rtti(const char *rttiDirectory) {
     printf("\n");
   }
   free(m_profData);
-  m_profData = NULL;
+  m_profData = nullptr;
 }
 
 class RTTICounters : public RequestEventHandler {
 public:
-  RTTICounters() : m_data(NULL), m_count(0), m_requests(0) { }
-  RTTICounter *getCounter(int id) { return m_data ? &m_data[id] : NULL; }
+  RTTICounters() : m_data(nullptr), m_count(0), m_requests(0) { }
+  RTTICounter *getCounter(int id) { return m_data ? &m_data[id] : nullptr; }
   virtual void requestInit() {
     if (!m_data) {
       m_count = RTTIInfo::TheRTTIInfo.getCount();
@@ -144,7 +144,7 @@ void RTTIInfo::loadParamMap(const char **p) {
 void RTTIInfo::loadMetaData(const char *filename) {
   assert(!m_loaded);
   FILE *f = fopen(filename, "r");
-  if (f == NULL) return;
+  if (f == nullptr) return;
   char line[1024];
   if (fgets(line, sizeof(line), f)) {
     sscanf(line, "%d", &m_count);
@@ -171,7 +171,7 @@ bool RTTIInfo::loadProfData(const char *rttiDirectory) {
 
   while (true) {
     de = readdir( dp );
-    if (de == NULL) break;
+    if (de == nullptr) break;
     struct stat st;
     string path(rttiDirectory);
     path += "/";

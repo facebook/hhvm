@@ -635,7 +635,7 @@ public:
 
 private:
   template <typename Visitor>
-  void processScopesParallel(const char *id, void *opaque = NULL);
+  void processScopesParallel(const char *id, void *opaque = nullptr);
 
   template <typename Visitor>
   void preWaitCallback(bool first,

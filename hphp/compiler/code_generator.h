@@ -132,7 +132,7 @@ public:
 public:
   CodeGenerator() {} // only for creating a dummy code generator
   CodeGenerator(std::ostream *primary, Output output = PickledPHP,
-                const std::string *filename = NULL);
+                const std::string *filename = nullptr);
 
   /**
    * ...if it was passed in from constructor.
@@ -196,7 +196,7 @@ public:
   void printImplSplitter(); // marker to split .cpp into smaller files
   const char *getGlobals(AnalysisResultPtr ar);
   static std::string FormatLabel(const std::string &name);
-  static std::string EscapeLabel(const std::string &name, bool *binary = NULL);
+  static std::string EscapeLabel(const std::string &name, bool *binary = nullptr);
 
   /**
    * Make sure PHP variables, functions and typenames are unique and

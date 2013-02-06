@@ -29,7 +29,7 @@ namespace HPHP {
 
 static void swap_fd(const string &filename, FILE *fdesc) {
   FILE *f = fopen(filename.c_str(), "a");
-  if (f == NULL || dup2(fileno(f), fileno(fdesc)) < 0) {
+  if (f == nullptr || dup2(fileno(f), fileno(fdesc)) < 0) {
     if (f) fclose(f);
     _exit(-1);
   }
@@ -198,7 +198,7 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
     for (int i = 0; i < count; i++) {
       argv[i] = (char*)argvs[i].c_str();
     }
-    argv[count] = NULL;
+    argv[count] = nullptr;
 
     execvp(argv[0], argv);
     Logger::Error("Failed to exec `%s'\n", cmd.c_str());
@@ -234,7 +234,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
         pipeerr.dupIn2(fileno(stderr))) {
       pipeout.close(); pipeerr.close(); pipein.close();
 
-      const char *argvnull[2] = {"", NULL};
+      const char *argvnull[2] = {"", nullptr};
       execvp(path, const_cast<char**>(argv ? argv : argvnull));
     }
     Logger::Error("Failed to exec `%s'\n", path);
@@ -311,9 +311,9 @@ pid_t Process::GetProcessId(const std::string &cmd,
 
 void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
                            bool matchAll /* = false */) {
-  const char *argv[] = {"", "/proc", "-regex", "/proc/[0-9]+/cmdline", NULL};
+  const char *argv[] = {"", "/proc", "-regex", "/proc/[0-9]+/cmdline", nullptr};
   string out;
-  Exec("find", argv, NULL, out);
+  Exec("find", argv, nullptr, out);
 
   vector<string> files;
   Util::split('\n', out.c_str(), files, true);
@@ -463,7 +463,7 @@ size_t Process::GetCodeFootprint(pid_t pid) {
 #define STATM_FIELD_READ(name)                                                \
   STATM_FIELD_NEXT();                                                         \
   size_t name = strtoull(statm.substr(pos0, pos1-pos0).c_str(),               \
-                         NULL, 0) * pageSize;
+                         nullptr, 0) * pageSize;
   STATM_FIELD_NEXT(); // size.
   STATM_FIELD_NEXT(); // resident.
   STATM_FIELD_READ(share);

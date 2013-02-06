@@ -73,7 +73,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, string &name,
 
   if (m_class) return false;
 
-  sym = NULL;
+  sym = nullptr;
   m_resolvedClass = resolveClass();
   if (!m_resolvedClass) return isRedeclared();
 
@@ -89,7 +89,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, string &name,
     if (sym && sym->isStatic()) {
       m_resolvedClass = parent;
     } else {
-      sym = NULL;
+      sym = nullptr;
     }
   }
 
@@ -158,7 +158,7 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultConstPtr ar) {
-  Symbol *sym = NULL;
+  Symbol *sym = nullptr;
   if (m_class) updateClassName();
   if (!m_class && m_resolvedClass && m_valid &&
       m_exp->is(Expression::KindOfScalarExpression)) {
@@ -266,7 +266,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
         }
       }
       tp = Type::Variant;
-      sym = NULL;
+      sym = nullptr;
     } else if (sym) {
       assert(m_resolvedClass);
       {

@@ -28,21 +28,21 @@ File *PhpStreamWrapper::openFD(const char *sFD) {
   if (!RuntimeOption::clientExecutionMode()) {
     raise_warning("Direct access to file descriptors "
                   "is only available from command-line");
-    return NULL;
+    return nullptr;
   }
 
-  char *end = NULL;
+  char *end = nullptr;
   long nFD = strtol(sFD, &end, 10);
   if ((sFD == end) || (*end != '\0')) {
     raise_warning("php://fd/ stream must be specified in the form "
                   "php://fd/<orig fd>");
-    return NULL;
+    return nullptr;
   }
   long dtablesize = getdtablesize();
   if ((nFD < 0) || (nFD >= dtablesize)) {
     raise_warning("The file descriptors must be non-negative numbers "
                   "smaller than %ld", dtablesize);
-    return NULL;
+    return nullptr;
   }
 
   return NEWOBJ(PlainFile)(dup(nFD), true);
@@ -52,7 +52,7 @@ File *PhpStreamWrapper::openFD(const char *sFD) {
 File* PhpStreamWrapper::open(CStrRef filename, CStrRef mode,
                              int options, CVarRef context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
-    return NULL;
+    return nullptr;
   }
 
   const char *req = filename.c_str() + sizeof("php://") - 1;
@@ -75,7 +75,7 @@ File* PhpStreamWrapper::open(CStrRef filename, CStrRef mode,
     std::unique_ptr<TempFile> file(NEWOBJ(TempFile)());
     if (!file->valid()) {
       raise_warning("Unable to create temporary file");
-      return NULL;
+      return nullptr;
     }
     return file.release();
   }
@@ -89,14 +89,14 @@ File* PhpStreamWrapper::open(CStrRef filename, CStrRef mode,
         return NEWOBJ(MemFile)((const char *)data, size);
       }
     }
-    return NEWOBJ(MemFile)(NULL, 0);
+    return NEWOBJ(MemFile)(nullptr, 0);
   }
 
   if (!strcasecmp(req, "output")) {
     return NEWOBJ(OutputFile)(filename);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

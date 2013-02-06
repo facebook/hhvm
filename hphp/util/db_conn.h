@@ -123,9 +123,9 @@ class DBConn {
    * Run an SQL and return number of affected rows. Consider DBQuery class,
    * instead of directly calling this function.
    */
-  int execute(const std::string &sql, DBDataSet *ds = NULL,
+  int execute(const std::string &sql, DBDataSet *ds = nullptr,
               bool retryQueryOnFail = true);
-  int execute(const char *sql, DBDataSet *ds = NULL,
+  int execute(const char *sql, DBDataSet *ds = nullptr,
               bool retryQueryOnFail = true);
 
   /**
@@ -171,7 +171,7 @@ class DBConn {
   /**
    * Whether or not a connection is opened.
    */
-  bool isOpened() const { return m_conn != NULL;}
+  bool isOpened() const { return m_conn != nullptr;}
 
   /**
    * Helper function for escaping strings in SQLs.

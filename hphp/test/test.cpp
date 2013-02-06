@@ -101,7 +101,7 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
   data.set("type",         "hphp");
   data.set("name",         name);
   data.set("contacts",     null_array);
-  data.set("endedTime",    time(NULL));
+  data.set("endedTime",    time(nullptr));
   data.set("durationSecs", mseconds / 1000.0);
   data.set("status",       status);
   data.set("summary",      std::string(summary));

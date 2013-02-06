@@ -102,7 +102,7 @@ SimpleFunctionCall::SimpleFunctionCall
     m_type(UnknownType), m_dynamicConstant(false),
     m_builtinFunction(false), m_noPrefix(false), m_fromCompiler(false),
     m_dynamicInvoke(false), m_transformed(false), m_no_volatile_check(false),
-    m_safe(0), m_extra(NULL) {
+    m_safe(0), m_extra(nullptr) {
 
   if (!m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=

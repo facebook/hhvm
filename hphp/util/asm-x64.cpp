@@ -62,7 +62,7 @@ void DataBlock::init() {
 
 void DataBlock::free() {
   freeSlab(base, size);
-  base = frontier = NULL;
+  base = frontier = nullptr;
   size = 0;
 }
 

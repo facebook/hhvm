@@ -105,7 +105,7 @@ public:
   static String FormatVariable(CVarRef v, int maxlen = 80,
                                bool vardump = false);
   static String FormatInfoVec(const IDebuggable::InfoVec &info,
-                              int *nameLen = NULL);
+                              int *nameLen = nullptr);
   static String FormatTitle(const char *title);
 
 public:

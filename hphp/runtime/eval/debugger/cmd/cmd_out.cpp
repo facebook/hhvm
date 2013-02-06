@@ -23,7 +23,7 @@ bool CmdOut::help(DebuggerClient *client) {
   client->helpTitle("Out Command");
   client->helpCmds(
     "[o]ut {count=1}", "steps out function calls",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command at break to step out function calls. Specify a "

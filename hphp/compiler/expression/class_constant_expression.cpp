@@ -37,7 +37,7 @@ ClassConstantExpression::ClassConstantExpression
  ExpressionPtr classExp, const std::string &varName)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ClassConstantExpression)),
-    StaticClassName(classExp), m_varName(varName), m_defScope(NULL),
+    StaticClassName(classExp), m_varName(varName), m_defScope(nullptr),
     m_valid(false), m_depsSet(false) {
 }
 

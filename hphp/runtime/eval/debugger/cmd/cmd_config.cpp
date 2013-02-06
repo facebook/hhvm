@@ -23,7 +23,7 @@ bool CmdConfig::help(DebuggerClient *client) {
   client->helpTitle("Config Command");
   client->helpCmds("set <var> <value>", "set variable <var> to be <value>",
                    "set", "list current values of variables",
-                   NULL);
+                   nullptr);
   client->helpBody(
     "Use this command to set up config variable, "
     "e.g. turning on/off a special mode."
@@ -60,9 +60,9 @@ bool CmdConfig::onClient(DebuggerClient *client) {
   if (var == "LogFile" || var == "lf") {
     // Close the current log file handler
     FILE *f = client->getLogFileHandler();
-    if (f != NULL) {
+    if (f != nullptr) {
       fclose(f);
-      client->setLogFileHandler(NULL);
+      client->setLogFileHandler(nullptr);
     }
 
     if (value == "off") {
@@ -70,11 +70,11 @@ bool CmdConfig::onClient(DebuggerClient *client) {
     } else {
       // Try open the log file and error if it's not working
       f = fopen(value.c_str(), "a");
-      if (f == NULL) {
+      if (f == nullptr) {
         client->error("Cannot open log file '%s'",
           value.c_str());
         value = "";
-        client->setLogFileHandler(NULL);
+        client->setLogFileHandler(nullptr);
       } else {
         client->setLogFileHandler(f);
       }
@@ -85,7 +85,7 @@ bool CmdConfig::onClient(DebuggerClient *client) {
     return true;
   }
   if (var == "PrintLevel" || var == "pl") {
-    int pl = strtol(value.c_str(), NULL, 10);
+    int pl = strtol(value.c_str(), nullptr, 10);
     if (pl > 0 && pl < DebuggerClient::MinPrintLevel) {
       client->error("%d is invalid for PrintLevel(pl)", pl);
       return true;
@@ -134,7 +134,7 @@ bool CmdConfig::onClient(DebuggerClient *client) {
     // to prevent or limit code spew after each breakpoint is hit (since emacs
     // hphpd-mode already loads the source file into a buffer and displays a
     // pointer to the current line).
-    int mcl = strtol(value.c_str(), NULL, 10);
+    int mcl = strtol(value.c_str(), nullptr, 10);
     if (mcl < -1) {
       client->error("%d is invalid for MaxCodeLines(mcl)", mcl);
       return true;

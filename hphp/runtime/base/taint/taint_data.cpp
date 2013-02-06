@@ -37,7 +37,7 @@ void TaintData::setTaintTrace(TaintTraceNodePtr trace) {
 void TaintData::setTaintTrace(TaintTraceDataPtr data) {
   assert(!m_taint_trace.get());
   if (data.get()) {
-    m_taint_trace = NEW(TaintTraceNode)(NULL, data);
+    m_taint_trace = NEW(TaintTraceNode)(nullptr, data);
   }
 }
 

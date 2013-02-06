@@ -37,7 +37,7 @@ void CmdThread::recvImpl(DebuggerThriftBuffer &thrift) {
 void CmdThread::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     static const char *keywords[] =
-      { "list", "normal", "sticky", "exclusive", NULL };
+      { "list", "normal", "sticky", "exclusive", nullptr };
     client->addCompletion(keywords);
   }
 }
@@ -51,7 +51,7 @@ bool CmdThread::help(DebuggerClient *client) {
     "[t]hread [n]ormal",        "breaks all threads",
     "[t]hread [s]ticky",        "only send command to current thread",
     "[t]hread [e]xclusive",     "only break current thread",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use '[t]hread' alone to display information of current thread.\n"

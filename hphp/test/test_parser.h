@@ -25,7 +25,7 @@ class TestParser : public TestBase {
  protected:
   bool VerifyParser(const char *input, const char *output,
                     const char *file = "", int line = 0,
-                    const char *output2 = NULL);
+                    const char *output2 = nullptr);
   bool SameCode(std::string code1, std::string code2);
 };
 

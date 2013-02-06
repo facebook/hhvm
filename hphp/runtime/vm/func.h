@@ -43,7 +43,7 @@ struct Func {
     // construct a dummy ParamInfo
     ParamInfo()
       : m_builtinType(KindOfInvalid), m_funcletOff(InvalidAbsoluteOffset),
-        m_phpCode(NULL) {
+        m_phpCode(nullptr) {
       tvWriteUninit(&m_defVal);
     }
 
@@ -246,7 +246,7 @@ struct Func {
   bool hasPrivateAncestor() const { return m_hasPrivateAncestor; }
   void setHasPrivateAncestor(bool b) { m_hasPrivateAncestor = b; }
   Id id() const {
-    assert(preClass() == NULL);
+    assert(preClass() == nullptr);
     return shared()->m_id;
   }
   Offset base() const { return shared()->m_base; }
@@ -259,19 +259,19 @@ struct Func {
   DataType returnType() const { return shared()->m_returnType; }
   const SVInfoVec& staticVars() const { return shared()->m_staticVars; }
   const StringData* name() const {
-    assert(m_name != NULL);
+    assert(m_name != nullptr);
     return m_name;
   }
   CStrRef nameRef() const {
-    assert(m_name != NULL);
+    assert(m_name != nullptr);
     return *(String*)(&m_name);
   }
   const StringData* fullName() const {
-    if (m_fullName == NULL) return m_name;
+    if (m_fullName == nullptr) return m_name;
     return m_fullName;
   }
   CStrRef fullNameRef() const {
-    assert(m_fullName != NULL);
+    assert(m_fullName != nullptr);
     return *(String*)(&m_fullName);
   }
   // Assembly linkage.
@@ -567,7 +567,7 @@ public:
   }
   int sn() const { return m_sn; }
   Id id() const {
-    assert(m_pce == NULL);
+    assert(m_pce == nullptr);
     return m_id;
   }
   Offset base() const { return m_base; }
@@ -601,7 +601,7 @@ public:
   void addUserAttribute(const StringData* name, TypedValue tv);
 
   void commit(RepoTxn& txn) const;
-  Func* create(Unit& unit, PreClass* preClass = NULL) const;
+  Func* create(Unit& unit, PreClass* preClass = nullptr) const;
 
   void setBuiltinFunc(const ClassInfo::MethodInfo* info,
       BuiltinFunction bif, BuiltinFunction nif, Offset base);

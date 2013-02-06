@@ -97,7 +97,7 @@ class Array : protected ArrayBase {
    * Informational
    */
   bool empty() const {
-    return m_px == NULL || m_px->empty();
+    return m_px == nullptr || m_px->empty();
   }
   ssize_t size() const {
     return m_px ? m_px->size() : 0;
@@ -106,7 +106,7 @@ class Array : protected ArrayBase {
     return m_px ? m_px->size() : 0;
   }
   bool isNull() const {
-    return m_px == NULL;
+    return m_px == nullptr;
   }
   bool valueExists(CVarRef search_value, bool strict = false) const;
   Variant key(CVarRef search_value, bool strict = false) const;
@@ -153,10 +153,10 @@ class Array : protected ArrayBase {
    */
   typedef int (*PFUNC_CMP)(CVarRef v1, CVarRef v2, const void *data);
   Array diff(CVarRef array, bool by_key, bool by_value,
-             PFUNC_CMP key_cmp_function = NULL,
-             const void *key_data = NULL,
-             PFUNC_CMP value_cmp_function = NULL,
-             const void *value_data = NULL) const;
+             PFUNC_CMP key_cmp_function = nullptr,
+             const void *key_data = nullptr,
+             PFUNC_CMP value_cmp_function = nullptr,
+             const void *value_data = nullptr) const;
 
   /**
    * Returns the entries that have keys and/or values that are present in
@@ -167,10 +167,10 @@ class Array : protected ArrayBase {
    * included.
    */
   Array intersect(CVarRef array, bool by_key, bool by_value,
-                  PFUNC_CMP key_cmp_function = NULL,
-                  const void *key_data = NULL,
-                  PFUNC_CMP value_cmp_function = NULL,
-                  const void *value_data = NULL) const;
+                  PFUNC_CMP key_cmp_function = nullptr,
+                  const void *key_data = nullptr,
+                  PFUNC_CMP value_cmp_function = nullptr,
+                  const void *value_data = nullptr) const;
 
   /**
    * Iterator functions. See array_iterator.h for end() and next().
@@ -213,7 +213,7 @@ class Array : protected ArrayBase {
   static int SortNaturalCase(CVarRef v1, CVarRef v2, const void *data);
 
   void sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
-            const void *data = NULL);
+            const void *data = nullptr);
 
   /**
    * Sort multiple arrays at once similar to how ORDER BY clause works in SQL.
@@ -231,7 +231,7 @@ class Array : protected ArrayBase {
   static void SortImpl(std::vector<int> &indices, CArrRef source,
                        Array::SortData &opaque,
                        Array::PFUNC_CMP cmp_func,
-                       bool by_key, const void *data = NULL);
+                       bool by_key, const void *data = nullptr);
 
   /**
    * Type conversions
@@ -293,7 +293,7 @@ class Array : protected ArrayBase {
     if (!m_px) {
       ArrayBase::operator=(ArrayData::Create());
     }
-    Variant *ret = NULL;
+    Variant *ret = nullptr;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {
       ArrayBase::operator=(escalated);
@@ -306,7 +306,7 @@ class Array : protected ArrayBase {
     if (!m_px) {
       ArrayBase::operator=(ArrayData::Create());
     }
-    Variant *ret = NULL;
+    Variant *ret = nullptr;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {
       ArrayBase::operator=(escalated);
@@ -414,7 +414,7 @@ class Array : protected ArrayBase {
     if (!m_px) {
       ArrayBase::operator=(ArrayData::Create());
     }
-    Variant *ret = NULL;
+    Variant *ret = nullptr;
     ArrayData *escalated = m_px->addLval(key, ret, m_px->getCount() > 1);
     if (escalated) {
       ArrayBase::operator=(escalated);
@@ -547,7 +547,7 @@ class Array : protected ArrayBase {
   // Transfer ownership of our reference to this ArrayData.
   ArrayData* detach() {
     ArrayData* ret = m_px;
-    m_px = NULL;
+    m_px = nullptr;
     return ret;
   }
 
@@ -573,7 +573,7 @@ class Array : protected ArrayBase {
     if (!m_px) {
       ArrayBase::operator=(ArrayData::Create());
     }
-    Variant *ret = NULL;
+    Variant *ret = nullptr;
     ArrayData *escalated =
       m_px->lval(key, ret, m_px->getCount() > 1,
                  flags & AccessFlags::CheckExist);
@@ -606,7 +606,7 @@ public:
   }
   ~StaticArray() {
     // prevent ~SmartPtr from calling decRefCount after data is released
-    m_px = NULL;
+    m_px = nullptr;
   }
 };
 

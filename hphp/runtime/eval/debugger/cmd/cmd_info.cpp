@@ -78,7 +78,7 @@ bool CmdInfo::help(DebuggerClient *client) {
     "info {cls::method}",     "displays declaration of this method",
     "info {cls::constant}",   "displays declaration of this constant",
     "info {cls::$property}",  "displays declaration of this property",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command to display declaration of a symbol."

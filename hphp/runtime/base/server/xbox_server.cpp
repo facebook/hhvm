@@ -212,7 +212,7 @@ void XboxServer::Restart() {
   if (s_dispatcher) {
     s_dispatcher->stop();
     delete s_dispatcher;
-    s_dispatcher = NULL;
+    s_dispatcher = nullptr;
   }
 
   if (RuntimeOption::XboxServerThreadCount > 0) {
@@ -221,7 +221,7 @@ void XboxServer::Restart() {
        RuntimeOption::ServerThreadRoundRobin,
        RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
        RuntimeOption::ServerThreadDropStack,
-       NULL);
+       nullptr);
     if (RuntimeOption::XboxServerLogInfo) {
       Logger::Info("xbox server started");
     }
@@ -233,7 +233,7 @@ void XboxServer::Stop() {
   if (s_dispatcher) {
     s_dispatcher->stop();
     delete s_dispatcher;
-    s_dispatcher = NULL;
+    s_dispatcher = nullptr;
   }
 }
 
@@ -440,7 +440,7 @@ XboxServerInfoPtr XboxServer::GetServerInfo() {
 }
 
 RPCRequestHandler *XboxServer::GetRequestHandler() {
-  if (s_xbox_request_handler.isNull()) return NULL;
+  if (s_xbox_request_handler.isNull()) return nullptr;
   return s_xbox_request_handler.get();
 }
 

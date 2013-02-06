@@ -54,11 +54,11 @@ PhpFile::PhpFile(const string &fileName, const string &srcRoot,
 
 PhpFile::~PhpFile() {
   always_assert(getRef() == 0);
-  if (m_unit != NULL) {
+  if (m_unit != nullptr) {
     // Deleting a Unit can grab a low-ranked lock and we're probably
     // at a high rank right now
     VM::PendQ::defer(new VM::DeferredDeleter<VM::Unit>(m_unit));
-    m_unit = NULL;
+    m_unit = nullptr;
   }
 }
 
@@ -144,7 +144,7 @@ size_t FileRepository::getLoadedFiles() {
 PhpFile *FileRepository::checkoutFile(StringData *rname,
                                       const struct stat &s) {
   FileInfo fileInfo;
-  PhpFile *ret = NULL;
+  PhpFile *ret = nullptr;
   String name(rname);
   if (rname->data()[0] != '/') {
     name = String(SourceRootInfo::GetCurrentSourceRoot()) + name;
@@ -176,7 +176,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       s_files.erase(acc);
       TRACE(1, "File disappeared between stat and FR::readNewFile: %s\n",
             rname->data());
-      return NULL;
+      return nullptr;
     }
     ret = fileInfo.m_phpFile;
     if (isChanged && ret == acc->second->getPhpFile()) {
@@ -208,10 +208,10 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     ret = parseFile(n->data(), fileInfo);
     if (!ret) {
       s_files.erase(acc);
-      return NULL;
+      return nullptr;
     }
   }
-  assert(ret != NULL);
+  assert(ret != nullptr);
 
   if (isNew) {
     acc->second = new PhpFileWrapper(s, ret);
@@ -421,13 +421,13 @@ PhpFile *FileRepository::readHhbc(const std::string &name,
                                   const FileInfo &fileInfo) {
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
   VM::Unit* u = VM::Repo::get().loadUnit(name, md5);
-  if (u != NULL) {
+  if (u != nullptr) {
     PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
                              fileInfo.m_md5, u);
     return p;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 PhpFile *FileRepository::parseFile(const std::string &name,

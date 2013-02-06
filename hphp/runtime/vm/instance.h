@@ -36,18 +36,18 @@ class Instance : public ObjectData {
  private:
   // This constructor is used for all pure classes that are not
   // descendents of cppext classes
-  explicit Instance(Class* cls) : ObjectData(NULL, false, cls) {
+  explicit Instance(Class* cls) : ObjectData(nullptr, false, cls) {
     instanceInit(cls);
   }
 
   enum NoInit { noinit };
-  explicit Instance(Class* cls, NoInit) : ObjectData(NULL, false, cls) {}
+  explicit Instance(Class* cls, NoInit) : ObjectData(nullptr, false, cls) {}
 
  public:
   // This constructor is used for all cppext classes (including resources)
   // and their descendents.
   Instance(const ObjectStaticCallbacks *cb, bool isResource)
-    : ObjectData(NULL, isResource) {
+    : ObjectData(nullptr, isResource) {
     if (ObjectStaticCallbacks::isEncodedVMClass(cb)) {
       m_cls = ObjectStaticCallbacks::decodeVMClass(cb);
     } else {
@@ -121,7 +121,7 @@ class Instance : public ObjectData {
     if (nProps > 0) {
       if (cls->pinitVec().size() > 0) {
         const Class::PropInitVec* propInitVec = m_cls->getPropData();
-        assert(propInitVec != NULL);
+        assert(propInitVec != nullptr);
         assert(nProps == propInitVec->size());
         memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {

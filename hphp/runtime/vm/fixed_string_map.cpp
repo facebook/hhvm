@@ -72,7 +72,7 @@ V* FixedStringMap<V, case_sensitive>::find(const StringData* sd) const {
   UNUSED unsigned numProbes = 0;
   for(;;) {
     assert(numProbes++ < m_mask + 1);
-    if (UNLIKELY(NULL == elm->sd)) return NULL;
+    if (UNLIKELY(nullptr == elm->sd)) return nullptr;
     if (strEqual(case_sensitive, elm->sd, sd)) return &elm->data;
     if (UNLIKELY(++elm == &m_table[m_mask + 1])) elm = m_table;
   }

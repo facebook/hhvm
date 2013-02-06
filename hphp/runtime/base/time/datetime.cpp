@@ -195,7 +195,7 @@ Array DateTime::Parse(CStrRef ts, CStrRef format) {
   struct tm parsed_time;
   memset(&parsed_time, 0, sizeof(parsed_time));
   char *unparsed_part = strptime(ts.data(), format.data(), &parsed_time);
-  if (unparsed_part == NULL) {
+  if (unparsed_part == nullptr) {
     return Array();
   }
 
@@ -323,7 +323,7 @@ const char *DateTime::shortMonthName() const {
 
 void DateTime::update() {
   if (utc()) {
-    timelib_update_ts(m_time.get(), NULL);
+    timelib_update_ts(m_time.get(), nullptr);
   } else {
     timelib_update_ts(m_time.get(), m_tz->get());
   }
@@ -384,7 +384,7 @@ void DateTime::setTimezone(SmartObject<TimeZone> timezone) {
 
 void DateTime::modify(CStrRef diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
-                                             NULL, TimeZone::GetDatabase());
+                                             nullptr, TimeZone::GetDatabase());
   internalModify(&(tmp_time->relative), tmp_time->have_relative, 1);
   timelib_time_dtor(tmp_time);
 }
@@ -600,7 +600,7 @@ String DateTime::rfcFormat(CStrRef format) const {
 
 String DateTime::stdcFormat(CStrRef format) const {
   struct tm ta;
-  timelib_time_offset *offset = NULL;
+  timelib_time_offset *offset = nullptr;
   ta.tm_sec  = second();
   ta.tm_min  = minute();
   ta.tm_hour = hour();

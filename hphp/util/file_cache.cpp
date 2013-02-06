@@ -60,11 +60,11 @@ FileCache::~FileCache() {
         free(buffer.cdata);
       }
     } else {
-      always_assert(buffer.data == NULL || buffer.cdata == NULL);
+      always_assert(buffer.data == nullptr || buffer.cdata == nullptr);
     }
   }
   if (m_fd != -1) {
-    always_assert(m_addr != NULL);
+    always_assert(m_addr != nullptr);
     always_assert(m_size > 0);
     munmap(m_addr, m_size);
     close(m_fd);
@@ -79,9 +79,9 @@ void FileCache::writeDirectories(const char *name) {
       if (!exists(dir.c_str())) {
         Buffer &buffer = m_files[dir];
         buffer.len = -2; // directory
-        buffer.data = NULL;
+        buffer.data = nullptr;
         buffer.clen = -2;
-        buffer.cdata = NULL;
+        buffer.cdata = nullptr;
       }
     }
   }
@@ -108,9 +108,9 @@ void FileCache::write(const char *name, bool addDirectories /* = true */) {
 
   Buffer &buffer = m_files[name];
   buffer.len = -1; // PHP file
-  buffer.data = NULL;
+  buffer.data = nullptr;
   buffer.clen = -1;
-  buffer.cdata = NULL;
+  buffer.cdata = nullptr;
 
   if (addDirectories) {
     writeDirectories(name);
@@ -130,13 +130,13 @@ void FileCache::write(const char *name, const char *fullpath) {
   int len = sb.st_size;
   Buffer &buffer = m_files[name];
   buffer.len = len; // static file
-  buffer.data = NULL;
+  buffer.data = nullptr;
   buffer.clen = -1;
-  buffer.cdata = NULL;
+  buffer.cdata = nullptr;
 
   if (len) {
     FILE *f = fopen(fullpath, "r");
-    if (f == NULL) {
+    if (f == nullptr) {
       throw Exception("Unable to open %s: %s", fullpath,
                       Util::safe_strerror(errno).c_str());
     }
@@ -169,7 +169,7 @@ void FileCache::save(const char *filename) {
   assert(filename && *filename);
 
   FILE *f = fopen(filename, "w");
-  if (f == NULL) {
+  if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
                     Util::safe_strerror(errno).c_str());
   }
@@ -213,7 +213,7 @@ short FileCache::getVersion(const char *filename) {
   assert(filename && *filename);
 
   FILE *f = fopen(filename, "r");
-  if (f == NULL) {
+  if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
                     Util::safe_strerror(errno).c_str());
   }
@@ -231,7 +231,7 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
   assert(filename && *filename);
 
   FILE *f = fopen(filename, "r");
-  if (f == NULL) {
+  if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
                     Util::safe_strerror(errno).c_str());
   }
@@ -269,9 +269,9 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
 
     Buffer &buffer = m_files[file];
     buffer.len = len;
-    buffer.data = NULL;
+    buffer.data = nullptr;
     buffer.clen = -1;
-    buffer.cdata = NULL;
+    buffer.cdata = nullptr;
 
     if (len > 0) {
       buffer.data = (char *)malloc(len + 1);
@@ -291,11 +291,11 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
           buffer.clen = buffer.len;
           buffer.cdata = buffer.data;
           buffer.len = -1;
-          buffer.data = NULL;
+          buffer.data = nullptr;
         } else {
           int new_len = buffer.len;
           char *uncompressed = gzdecode(buffer.data, new_len);
-          if (uncompressed == NULL) {
+          if (uncompressed == nullptr) {
             throw Exception("Bad compressed data in archive %s", filename);
           }
 
@@ -332,7 +332,7 @@ void FileCache::loadMmap(const char *filename, short version) {
                     Util::safe_strerror(errno).c_str());
   }
 
-  m_addr = mmap(NULL, sbuf.st_size, PROT_READ, MAP_PRIVATE, m_fd, 0);
+  m_addr = mmap(nullptr, sbuf.st_size, PROT_READ, MAP_PRIVATE, m_fd, 0);
   if (m_addr == (void *)-1) {
     close(m_fd);
     throw Exception("Unable to mmap %s: %s", filename,
@@ -372,9 +372,9 @@ void FileCache::loadMmap(const char *filename, short version) {
 
     Buffer &buffer = m_files[file];
     buffer.len = len;
-    buffer.data = NULL;
+    buffer.data = nullptr;
     buffer.clen = -1;
-    buffer.cdata = NULL;
+    buffer.cdata = nullptr;
 
     if (len > 0) {
       if (p + len >= e) {
@@ -388,7 +388,7 @@ void FileCache::loadMmap(const char *filename, short version) {
         buffer.clen = buffer.len;
         buffer.cdata = buffer.data;
         buffer.len = -1;
-        buffer.data = NULL;
+        buffer.data = nullptr;
       }
     }
   }
@@ -454,13 +454,13 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
       compressed = false;
       len = buf.len;
       if (len == 0) {
-        assert(buf.data == NULL);
+        assert(buf.data == nullptr);
         return "";
       }
       return buf.data;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 int64 FileCache::fileSize(const char *name, bool isRelative) const {
@@ -473,7 +473,7 @@ int64 FileCache::fileSize(const char *name, bool isRelative) const {
       if (buf.cdata) {
         int new_len = buf.clen;
         char *uncompressed = gzdecode(buf.cdata, new_len);
-        if (uncompressed == NULL) {
+        if (uncompressed == nullptr) {
           throw Exception("Bad compressed data in archive %s", name);
         } else {
           free(uncompressed);

@@ -36,8 +36,8 @@ enum InterruptType {
 
 class InterruptSite {
 public:
-  InterruptSite(CVarRef e = null_variant, const char *cls = NULL,
-                const char *function = NULL, StringData *file = NULL,
+  InterruptSite(CVarRef e = null_variant, const char *cls = nullptr,
+                const char *function = nullptr, StringData *file = nullptr,
                 int line0 = 0, int char0 = 0, int line1 = 0, int char1 = 0)
     : m_exception(e), m_class(cls), m_function(function), m_file(file),
       m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1),
@@ -46,7 +46,7 @@ public:
   virtual const char *getFile() const = 0;
   virtual const char *getClass() const = 0;
   virtual const char *getFunction() const = 0;
-  virtual const char *getNamespace() const { return NULL; }
+  virtual const char *getNamespace() const { return nullptr; }
   int getFileLen() const;
 
   int32 getLine0() const { return m_line0;}

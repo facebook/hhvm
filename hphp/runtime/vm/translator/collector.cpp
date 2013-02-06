@@ -89,7 +89,7 @@ void verifyFuncReferencesSevered() {
 }
 
 void severFuncReferences(Translator* tx) {
-  DEBUG_ONLY time_t start = time(NULL);
+  DEBUG_ONLY time_t start = time(nullptr);
   struct FuncPatcher : public FuncVisitor {
     FuncPatcher() { }
     void visit(Func* f) {
@@ -98,7 +98,7 @@ void severFuncReferences(Translator* tx) {
     }
   } fpatch;
   DEBUG_ONLY int n = fpatch.go();
-  TRACE(0, "Tx64: reset done: %d funcs %ld seconds\n", n, time(NULL) - start);
+  TRACE(0, "Tx64: reset done: %d funcs %ld seconds\n", n, time(nullptr) - start);
   verifyFuncReferencesSevered();
 }
 

@@ -23,7 +23,7 @@ bool CmdQuit::help(DebuggerClient *client) {
   client->helpTitle("Quit Command");
   client->helpCmds(
     "[q]uit", "quits this program",
-    NULL
+    nullptr
   );
   client->helpBody(
     "After you type this command, you will not see me anymore."

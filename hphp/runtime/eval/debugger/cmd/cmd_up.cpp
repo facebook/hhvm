@@ -24,7 +24,7 @@ bool CmdUp::help(DebuggerClient *client) {
   client->helpTitle("Up Command");
   client->helpCmds(
     "[u]p {num=1}", "moves to outer frames (callers) on stacktrace",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command to walk up on stacktrace to find out outer callers of "

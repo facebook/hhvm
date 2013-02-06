@@ -80,7 +80,7 @@ static char **debugger_completion(const char *text, int start, int end) {
   if (getStaticDebuggerClient().setCompletion(text, start, end)) {
     return rl_completion_matches((char*)text, &debugger_generator);
   }
-  return NULL;
+  return nullptr;
 }
 
 static void debugger_signal_handler(int sig) {
@@ -196,25 +196,25 @@ std::string DebuggerClient::HomePrefix = "/home";
 bool DebuggerClient::UseColor = true;
 bool DebuggerClient::NoPrompt = false;
 
-const char *DebuggerClient::HelpColor     = NULL;
-const char *DebuggerClient::InfoColor     = NULL;
-const char *DebuggerClient::OutputColor   = NULL;
-const char *DebuggerClient::ErrorColor    = NULL;
-const char *DebuggerClient::ItemNameColor = NULL;
-const char *DebuggerClient::HighlightForeColor = NULL;
-const char *DebuggerClient::HighlightBgColor = NULL;
+const char *DebuggerClient::HelpColor     = nullptr;
+const char *DebuggerClient::InfoColor     = nullptr;
+const char *DebuggerClient::OutputColor   = nullptr;
+const char *DebuggerClient::ErrorColor    = nullptr;
+const char *DebuggerClient::ItemNameColor = nullptr;
+const char *DebuggerClient::HighlightForeColor = nullptr;
+const char *DebuggerClient::HighlightBgColor = nullptr;
 
 const char *DebuggerClient::DefaultCodeColors[] = {
-  /* None        */ NULL, NULL,
-  /* Keyword     */ NULL, NULL,
-  /* Comment     */ NULL, NULL,
-  /* String      */ NULL, NULL,
-  /* Variable    */ NULL, NULL,
-  /* Html        */ NULL, NULL,
-  /* Tag         */ NULL, NULL,
-  /* Declaration */ NULL, NULL,
-  /* Constant    */ NULL, NULL,
-  /* LineNo      */ NULL, NULL,
+  /* None        */ nullptr, nullptr,
+  /* Keyword     */ nullptr, nullptr,
+  /* Comment     */ nullptr, nullptr,
+  /* String      */ nullptr, nullptr,
+  /* Variable    */ nullptr, nullptr,
+  /* Html        */ nullptr, nullptr,
+  /* Tag         */ nullptr, nullptr,
+  /* Declaration */ nullptr, nullptr,
+  /* Constant    */ nullptr, nullptr,
+  /* LineNo      */ nullptr, nullptr,
 };
 
 void DebuggerClient::LoadColors(Hdf hdf) {
@@ -243,7 +243,7 @@ const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
   const char *name = hdf.get(defaultName);
   hdf = name;  // for starter
   const char *color = Util::get_color_by_name(name);
-  if (color == NULL) {
+  if (color == nullptr) {
     Logger::Error("Bad color name %s", name);
     color = Util::get_color_by_name(defaultName);
   }
@@ -254,7 +254,7 @@ const char *DebuggerClient::LoadBgColor(Hdf hdf, const char *defaultName) {
   const char *name = hdf.get(defaultName);
   hdf = name;  // for starter
   const char *color = Util::get_bgcolor_by_name(name);
-  if (color == NULL) {
+  if (color == nullptr) {
     Logger::Error("Bad color name %s", name);
     color = Util::get_bgcolor_by_name(defaultName);
   }
@@ -265,7 +265,7 @@ void DebuggerClient::LoadCodeColor(CodeColor index, Hdf hdf,
                                    const char *defaultName) {
   const char *color = LoadColor(hdf, defaultName);
   DefaultCodeColors[index * 2] = color;
-  DefaultCodeColors[index * 2 + 1] = color ? ANSI_COLOR_END : NULL;
+  DefaultCodeColors[index * 2 + 1] = color ? ANSI_COLOR_END : nullptr;
 }
 
 SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
@@ -372,7 +372,7 @@ String DebuggerClient::FormatTitle(const char *title) {
 
 DebuggerClient::DebuggerClient(std::string name /* = "" */)
     : m_tutorial(0), m_printFunction(""),
-      m_logFile(""), m_logFileHandler(NULL),
+      m_logFile(""), m_logFileHandler(nullptr),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_quitting(false),
       m_inputState(TakingCommand), m_runState(NotYet),
@@ -380,7 +380,7 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
       m_clientState(StateUninit), m_inApiUse(false),
-      m_nameForApi(name), m_usageLogFP(NULL) {
+      m_nameForApi(name), m_usageLogFP(nullptr) {
   initUsageLogging();
 }
 
@@ -388,9 +388,9 @@ DebuggerClient::~DebuggerClient() {
   m_stopped = true;
   m_mainThread.waitForEnd();
   FILE *f = getLogFileHandler();
-  if (f != NULL) {
+  if (f != nullptr) {
     fclose(f);
-    setLogFileHandler(NULL);
+    setLogFileHandler(nullptr);
   }
   finiUsageLogging();
 }
@@ -759,7 +759,7 @@ char *DebuggerClient::getCompletion(const std::vector<std::string> &items,
     }
   }
   m_acPos = -1;
-  return NULL;
+  return nullptr;
 }
 
 std::vector<std::string> DebuggerClient::getAllCompletions(
@@ -791,7 +791,7 @@ char *DebuggerClient::getCompletion(const std::vector<const char *> &items,
     }
   }
   m_acPos = -1;
-  return NULL;
+  return nullptr;
 }
 
 static char first_non_whitespace(const char *s) {
@@ -898,7 +898,7 @@ bool DebuggerClient::initializeMachine() {
     int waitForgSandbox = false;
     if (!m_machine->m_sandboxAttached) {
       const char *user = m_options.user.empty() ?
-                         NULL : m_options.user.c_str();
+                         nullptr : m_options.user.c_str();
       m_machine->m_sandboxAttached = (waitForgSandbox =
         CmdMachine::AttachSandbox(this, user, m_options.sandbox.c_str()));
       if (!m_machine->m_sandboxAttached) {
@@ -1008,7 +1008,7 @@ void DebuggerClient::runImpl() {
 
 bool DebuggerClient::console() {
   while (true) {
-    const char *line = NULL;
+    const char *line = nullptr;
 
     string holder;
     if (m_macroPlaying) {
@@ -1019,9 +1019,9 @@ bool DebuggerClient::console() {
         m_macroPlaying.reset();
       }
     }
-    if (line == NULL) {
+    if (line == nullptr) {
       line = readline(getPrompt().c_str());
-      if (line == NULL) {
+      if (line == nullptr) {
         // treat ^D as quit
         try {
           print("quit");
@@ -1235,7 +1235,7 @@ do {                                                                    \
                                                                         \
   /* LogFile debugger setting */                                        \
   FILE *f = getLogFileHandler();                                        \
-  if (f != NULL) {                                                      \
+  if (f != nullptr) {                                                      \
     fwrite(ptr, size, nmemb, f);                                        \
   }                                                                     \
                                                                         \
@@ -1444,7 +1444,7 @@ const char **DebuggerClient::GetCommands() {
     "print",    "quit",     "run",        "step",    "thread",
     "up",       "variable", "where",      "x",       "y",
     "zend",     "!",        "&",
-    NULL
+    nullptr
   };
   return cmds;
 }
@@ -1464,7 +1464,7 @@ do {                                         \
     m_commandCanonical = name;               \
     return new cmd();                        \
   }                                          \
-  return NULL;                               \
+  return nullptr;                               \
 } while(0)                                   \
 
 #define NEW_CMD_NAME(name, cmd)              \
@@ -1511,7 +1511,7 @@ do {                                         \
     case '!': shiftCommand(); NEW_CMD_NAME("shell", CmdShell);
     case '&': shiftCommand(); NEW_CMD_NAME("macro", CmdMacro);
   }
-  return NULL;
+  return nullptr;
 #undef MATCH_CMD
 #undef NEW_CMD_NAME
 }
@@ -2126,7 +2126,7 @@ void DebuggerClient::initUsageLogging() {
 void DebuggerClient::finiUsageLogging() {
   if (m_usageLogFP) {
     fclose(m_usageLogFP);
-    m_usageLogFP = NULL;
+    m_usageLogFP = nullptr;
   }
 }
 

@@ -27,7 +27,7 @@
     if (m_xhpAttributes.num()) {                \
       return &m_xhpAttributes;                  \
     }                                           \
-    return NULL;                                \
+    return nullptr;                                \
   }                                             \
   void xhpSetAttributes(Token &t) {             \
     m_xhpAttributes = t;                        \

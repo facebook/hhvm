@@ -249,11 +249,11 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
                               Variant (*ifa)(MethodCallPackage &mcp, int count,
                                              INVOKE_FEW_ARGS_IMPL_ARGS),
                               ObjectData *(*coo)(ObjectData*)) {
-  assert(mcp.obj == NULL);
+  assert(mcp.obj == nullptr);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
-  mcp.obj = NULL;
+  mcp.obj = nullptr;
   return v;
 }
 
@@ -261,11 +261,11 @@ Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
                             Variant (*i)(MethodCallPackage &mcp,
                                          CArrRef params),
                             ObjectData *(*coo)(ObjectData*)) {
-  assert(mcp.obj == NULL);
+  assert(mcp.obj == nullptr);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = i(mcp, params);
-  mcp.obj = NULL;
+  mcp.obj = nullptr;
   return v;
 }
 
@@ -274,11 +274,11 @@ Variant ObjectData::ifa_dummy(MethodCallPackage &mcp, int count,
                               Variant (*ifa)(MethodCallPackage &mcp, int count,
                                              INVOKE_FEW_ARGS_IMPL_ARGS),
                               ObjectData *(*coo)()) {
-  assert(mcp.obj == NULL);
+  assert(mcp.obj == nullptr);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = ifa(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
-  mcp.obj = NULL;
+  mcp.obj = nullptr;
   return v;
 }
 
@@ -286,11 +286,11 @@ Variant ObjectData::i_dummy(MethodCallPackage &mcp, CArrRef params,
                             Variant (*i)(MethodCallPackage &mcp,
                                          CArrRef params),
                             ObjectData *(*coo)()) {
-  assert(mcp.obj == NULL);
+  assert(mcp.obj == nullptr);
   Object obj(Object::CreateDummy(coo));
   mcp.obj = obj.get();
   Variant v = i(mcp, params);
-  mcp.obj = NULL;
+  mcp.obj = nullptr;
   return v;
 }
 
@@ -784,7 +784,7 @@ Variant *ObjectData::RealPropPublicHelper(
       flags & RealPropCreate);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 void ObjectData::initProperties(int nProp) {
@@ -808,7 +808,7 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
      * behavior in cases where the named property is nonexistent or
      * inaccessible.
      */
-    HPHP::VM::Class* ctx = NULL;
+    HPHP::VM::Class* ctx = nullptr;
     if (!context.empty()) {
       ctx = VM::Unit::lookupClass(context.get());
     }
@@ -820,18 +820,18 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
                                           accessible, unset)
                       : thiz->getProp(ctx, propName.get(), visible,
                                       accessible, unset);
-    if (ret == NULL) {
+    if (ret == nullptr) {
       // Property is not declared, and not dynamically created yet.
       if (flags & RealPropCreate) {
         assert(!(flags & RealPropNoDynamic));
-        if (o_properties.get() == NULL) {
+        if (o_properties.get() == nullptr) {
           thiz->initDynProps();
         }
         o_properties.get()->lvalPtr(propName,
                                     *(Variant**)(&ret), false, true);
         return (Variant*)ret;
       } else {
-        return NULL;
+        return nullptr;
       }
     }
 
@@ -841,7 +841,7 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
         (flags & (RealPropUnchecked|RealPropExist))) {
       return (Variant*)ret;
     } else {
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -935,14 +935,14 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
   DataType type;
   if (void *p = o_realPropTyped(propName, flags, context, &type)) {
     if (LIKELY(type == KindOfUnknown)) return (Variant*)p;
-    if (flags & (RealPropCreate|RealPropWrite)) return NULL;
+    if (flags & (RealPropCreate|RealPropWrite)) return nullptr;
     char *globals = (char*)get_global_variables();
     Variant *res = &((Globals*)globals)->__realPropProxy;
     *res = ClassPropTableEntry::GetVariant(type, p);
     return res;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
@@ -965,7 +965,7 @@ Variant *ObjectData::o_realPropHook(CStrRef propName, int flags,
     return arr.lvalPtr(propName, flags & RealPropWrite,
       flags & RealPropCreate);
   }
-  return NULL;
+  return nullptr;
 }
 
 bool ObjectData::o_exists(CStrRef propName,
@@ -1223,7 +1223,7 @@ Variant *ObjectData::o_weakLval(CStrRef propName,
       return t;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 Array ObjectData::o_toArray() const {
@@ -1238,7 +1238,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
   CStrRef object_class = o_getClassName();
   const ClassInfo *classInfo = ClassInfo::FindClass(object_class);
-  const ClassInfo *contextClassInfo = NULL;
+  const ClassInfo *contextClassInfo = nullptr;
   int category;
 
   if (!classInfo) {
@@ -1354,14 +1354,14 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
     // vm_call_user_func, we should refactor this in the near future
     ObjectData* this_ = this;
     HPHP::VM::Class* cls = getVMClass();
-    StringData* invName = NULL;
+    StringData* invName = nullptr;
     // XXX The lookup below doesn't take context into account, so it will lead
     // to incorrect behavior in some corner cases. o_invoke is gradually being
     // removed from the HPHP runtime this should be ok for the short term.
     const HPHP::VM::Func* f = cls->lookupMethod(s.get());
     if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
       // If we found a method and its static, null out this_
-      this_ = NULL;
+      this_ = nullptr;
     } else if (!f) {
       if (this_) {
         // If this_ is non-null AND we could not find a method, try
@@ -1381,7 +1381,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
     assert(f);
     Variant ret;
     g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
-                            NULL, invName);
+                            nullptr, invName);
     return ret;
   }
   MethodCallPackage mcp;
@@ -1462,14 +1462,14 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
       o_invoke_failed(clsname.data(), s.data(), fatal);
       return null;
     }
-    StringData* invName = NULL;
+    StringData* invName = nullptr;
     // XXX The lookup below doesn't take context into account, so it will lead
     // to incorrect behavior in some corner cases. o_invoke is gradually being
     // removed from the HPHP runtime this should be ok for the short term.
     const HPHP::VM::Func* f = cls->lookupMethod(s.get());
     if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
       // If we found a method and its static, null out this_
-      this_ = NULL;
+      this_ = nullptr;
     } else if (!f) {
       if (this_) {
         // If this_ is non-null AND we could not find a method, try
@@ -1489,7 +1489,7 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
     assert(f);
     Variant ret;
     g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
-                            NULL, invName);
+                            nullptr, invName);
     return ret;
   }
   MethodCallPackage mcp;
@@ -1533,14 +1533,14 @@ Variant ObjectData::o_throw_fatal(const char *msg) {
 
 bool ObjectData::hasCall() {
   if (hhvm) {
-    return m_cls->lookupMethod(s___call.get()) != NULL;
+    return m_cls->lookupMethod(s___call.get()) != nullptr;
   }
   return getRoot()->getAttribute(HasCall);
 }
 
 bool ObjectData::hasCallStatic() {
   if (hhvm) {
-    return m_cls->lookupMethod(s___callStatic.get()) != NULL;
+    return m_cls->lookupMethod(s___callStatic.get()) != nullptr;
   }
   return getRoot()->getAttribute(HasCallStatic);
 }
@@ -1699,7 +1699,7 @@ ObjectData *ObjectData::clone() {
     return 0;
   }
 
-  ObjectData *clone = osc->createOnlyNoInit(NULL), *orig = clone;
+  ObjectData *clone = osc->createOnlyNoInit(nullptr), *orig = clone;
   CountableHelper h(clone);
   clone->init();
   ObjectData *obj = this;
@@ -1851,7 +1851,7 @@ Variant ObjectData::t___get(Variant v_name) {
 }
 
 Variant *ObjectData::___lval(Variant v_name) {
-  return NULL;
+  return nullptr;
 }
 
 Variant& ObjectData::___offsetget_lval(Variant key) {
@@ -1909,8 +1909,8 @@ Variant ObjectData::t___clone() {
 }
 
 const CallInfo *ObjectData::t___invokeCallInfoHelper(void *&extra) {
-  extra = NULL;
-  return NULL;
+  extra = nullptr;
+  return nullptr;
 }
 
 Variant ObjectData::callHandler(MethodCallPackage &info, CArrRef params) {

@@ -80,7 +80,7 @@ Repo::Repo()
     m_##o##Local(*this, RepoIdLocal), m_##o##Central(*this, RepoIdCentral),
     RP_OPS
 #undef RP_OP
-    m_dbc(NULL), m_localReadable(false), m_localWritable(false),
+    m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
     m_frp(*this) {
@@ -112,8 +112,8 @@ void Repo::setCliFile(const std::string& cliFile) {
 }
 
 Unit* Repo::loadUnit(const std::string& name, const MD5& md5) {
-  if (m_dbc == NULL) {
-    return NULL;
+  if (m_dbc == nullptr) {
+    return nullptr;
   }
   return m_urp.load(name, md5);
 }
@@ -160,7 +160,7 @@ bool Repo::GetFileHashStmt::get(const char *path, MD5& md5) {
 }
 
 bool Repo::findFile(const char *path, const string &root, MD5& md5) {
-  if (m_dbc == NULL) {
+  if (m_dbc == nullptr) {
     return false;
   }
   int repoId;
@@ -352,9 +352,9 @@ void Repo::connect() {
 }
 
 void Repo::disconnect() {
-  if (m_dbc != NULL) {
+  if (m_dbc != nullptr) {
     sqlite3_close(m_dbc);
-    m_dbc = NULL;
+    m_dbc = nullptr;
     m_localReadable = false;
     m_localWritable = false;
     m_evalRepoId = RepoIdInvalid;
@@ -364,7 +364,7 @@ void Repo::disconnect() {
 void Repo::initCentral() {
   std::vector<std::string> failPaths;
 
-  assert(m_dbc == NULL);
+  assert(m_dbc == nullptr);
 
   // Try Repo.Central.Path (or HHVM_REPO_CENTRAL_PATH).
   if (!RuntimeOption::RepoCentralPath.empty()) {
@@ -375,7 +375,7 @@ void Repo::initCentral() {
   }
 
   const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
-  if (HHVM_REPO_CENTRAL_PATH != NULL) {
+  if (HHVM_REPO_CENTRAL_PATH != nullptr) {
     if (!openCentral(HHVM_REPO_CENTRAL_PATH)) {
       return;
     }
@@ -384,7 +384,7 @@ void Repo::initCentral() {
 
   // Try "$HOME/.hhvm.hhbc".
   char* HOME = getenv("HOME");
-  if (HOME != NULL) {
+  if (HOME != nullptr) {
     std::string centralPath = HOME;
     centralPath += "/.hhvm.hhbc";
     if (!openCentral(centralPath.c_str())) {
@@ -402,7 +402,7 @@ void Repo::initCentral() {
     if (bufsize != -1) {
       char buf[size_t(bufsize)];
       if (!getpwuid_r(getuid(), &pwbuf, buf, size_t(bufsize), &pwbufp)
-          && (HOME == NULL || strcmp(HOME, pwbufp->pw_dir))) {
+          && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
         std::string centralPath = pwbufp->pw_dir;
         centralPath += "/.hhvm.hhbc";
         if (!openCentral(centralPath.c_str())) {
@@ -431,7 +431,7 @@ static int busyHandler(void* opaque, int nCalls) {
 }
 
 std::string Repo::insertSchema(const char* path) {
-  assert(strstr(kSchemaId, kSchemaPlaceholder) == NULL);
+  assert(strstr(kSchemaId, kSchemaPlaceholder) == nullptr);
   std::string result = path;
   size_t idx;
   if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
@@ -450,7 +450,7 @@ bool Repo::openCentral(const char* path) {
   // because SQLite as a whole is thread-safe.
   if (sqlite3_open_v2(repoPath.c_str(), &m_dbc,
                       SQLITE_OPEN_NOMUTEX |
-                      SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL)) {
+                      SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr)) {
     TRACE(1, "Repo::%s() failed to open candidate central repo '%s'\n",
              __func__, repoPath.c_str());
     return true;

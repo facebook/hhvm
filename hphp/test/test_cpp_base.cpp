@@ -53,7 +53,7 @@ bool TestCppBase::RunTests(const std::string &which) {
 
 class Timer {
 public:
-  Timer(const char *name = NULL) {
+  Timer(const char *name = nullptr) {
     if (name) m_name = name;
     gettimeofday(&m_start, 0);
   }
@@ -786,7 +786,7 @@ bool TestCppBase::TestVariant() {
   {
     Variant arr = CREATE_VECTOR2(1, 2);
     Variant v;
-    for (MutableArrayIter iter = arr.begin(NULL, v); iter.advance();) {
+    for (MutableArrayIter iter = arr.begin(nullptr, v); iter.advance();) {
       v++;
     }
     VS(arr, CREATE_VECTOR2(2, 3));

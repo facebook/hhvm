@@ -244,9 +244,9 @@ void string_vsnprintf(std::string &msg, const char *fmt, va_list ap);
  * Escaping strings for code generation.
  */
 std::string escapeStringForCPP(const char *input, int len,
-                               bool* binary = NULL);
+                               bool* binary = nullptr);
 inline std::string escapeStringForCPP(const std::string &input,
-                                      bool* binary = NULL) {
+                                      bool* binary = nullptr) {
   return escapeStringForCPP(input.data(), input.length(), binary);
 }
 std::string escapeStringForPHP(const char *input, int len);
@@ -259,8 +259,8 @@ inline std::string escapeStringForPHP(const std::string &input) {
  */
 void find(std::vector<std::string> &out,
           const std::string &root, const char *path, bool php,
-          const std::set<std::string> *excludeDirs = NULL,
-          const std::set<std::string> *excludeFiles = NULL);
+          const std::set<std::string> *excludeDirs = nullptr,
+          const std::set<std::string> *excludeFiles = nullptr);
 
 /**
  * Format a regex pattern by surrounding with slashes and escaping pattern.

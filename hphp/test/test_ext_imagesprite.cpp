@@ -59,17 +59,17 @@ bool TestExtImagesprite::test_ImageSprite() {
 bool TestExtImagesprite::test_addFile() {
   sprite->t_addfile("test/images/php.gif");
   VS((int) sprite->m_image_data.size(), 1);
-  VS(sprite->m_image_data["test/images/php.gif"] == NULL, false);
+  VS(sprite->m_image_data["test/images/php.gif"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_addfile("test/images/php.gif");
   VS((int) sprite->m_image_data.size(), 1);
-  VS(sprite->m_image_data["test/images/php.gif"] == NULL, false);
+  VS(sprite->m_image_data["test/images/php.gif"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_addfile("test/images/246x247.png");
   VS((int) sprite->m_image_data.size(), 2);
-  VS(sprite->m_image_data["test/images/php.gif"] == NULL, false);
+  VS(sprite->m_image_data["test/images/php.gif"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_loadimages(true);
@@ -77,7 +77,7 @@ bool TestExtImagesprite::test_addFile() {
 
   sprite->t_addfile("invalid-image");
   VS((int) sprite->m_image_data.size(), 3);
-  VS(sprite->m_image_data["invalid-image"] == NULL, false);
+  VS(sprite->m_image_data["invalid-image"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_loadimages(true);
@@ -89,17 +89,17 @@ bool TestExtImagesprite::test_addString() {
   String img = "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
   sprite->t_addstring("transparent", f_base64_decode(img));
   VS((int) sprite->m_image_data.size(), 1);
-  VS(sprite->m_image_data["transparent"] == NULL, false);
+  VS(sprite->m_image_data["transparent"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_addstring("transparent", f_base64_decode(img));
   VS((int) sprite->m_image_data.size(), 1);
-  VS(sprite->m_image_data["transparent"] == NULL, false);
+  VS(sprite->m_image_data["transparent"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_addstring("image-2", f_base64_decode(img));
   VS((int) sprite->m_image_data.size(), 2);
-  VS(sprite->m_image_data["image-2"] == NULL, false);
+  VS(sprite->m_image_data["image-2"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_loadimages(true);
@@ -107,7 +107,7 @@ bool TestExtImagesprite::test_addString() {
 
   sprite->t_addstring("invalid-image", "invalid-image");
   VS((int) sprite->m_image_data.size(), 3);
-  VS(sprite->m_image_data["invalid-image"] == NULL, false);
+  VS(sprite->m_image_data["invalid-image"] == nullptr, false);
   VS(sprite->m_img_errors.size(), 0);
 
   sprite->t_loadimages(true);
@@ -120,7 +120,7 @@ bool TestExtImagesprite::test_addUrl() {
   VS((int) sprite->m_image_data.size(), 1);
   VS(
     sprite->m_image_data["http://www.facebook.com/images/icons/like.png"]
-      == NULL,
+      == nullptr,
     false);
   VS(sprite->m_img_errors.size(), 0);
 
@@ -128,7 +128,7 @@ bool TestExtImagesprite::test_addUrl() {
   VS((int) sprite->m_image_data.size(), 1);
   VS(
     sprite->m_image_data["http://www.facebook.com/images/icons/like.png"]
-      == NULL,
+      == nullptr,
     false);
   VS(sprite->m_img_errors.size(), 0);
 
@@ -136,7 +136,7 @@ bool TestExtImagesprite::test_addUrl() {
   VS((int) sprite->m_image_data.size(), 2);
   VS(
     sprite->m_image_data["http://www.facebook.com/images/icons/friend.gif"]
-      == NULL,
+      == nullptr,
     false);
   VS(sprite->m_img_errors.size(), 0);
 
@@ -147,7 +147,7 @@ bool TestExtImagesprite::test_addUrl() {
   VS((int) sprite->m_image_data.size(), 3);
   VS(
     sprite->m_image_data["http://www.facebook.com/images/invalid-image.txt"]
-      == NULL,
+      == nullptr,
     false);
   VS(sprite->m_img_errors.size(), 0);
 
@@ -181,7 +181,7 @@ bool TestExtImagesprite::test_loadDims() {
   sprite->t_loaddims(true);
   VS(sprite->m_image_data["test/images/php.gif"]->m_width, 120);
   VS(sprite->m_image_data["test/images/php.gif"]->m_height, 67);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == NULL, false);
+  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, false);
 
   sprite->t_clear();
   Array dims = Array::Create();
@@ -191,7 +191,7 @@ bool TestExtImagesprite::test_loadDims() {
   sprite->t_loaddims(true);
   VS(sprite->m_image_data["test/images/php.gif"]->m_width, 1);
   VS(sprite->m_image_data["test/images/php.gif"]->m_height, 1);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == NULL, true);
+  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, true);
 
   sprite->t_clear();
   sprite->t_addurl("http://www.facebook.com/images/icons/like.png", -1, dims);
@@ -206,7 +206,7 @@ bool TestExtImagesprite::test_loadDims() {
     1);
   VS(
     sprite->m_image_data["http://www.facebook.com/images/icons/like.png"]
-      ->m_image == NULL,
+      ->m_image == nullptr,
     true);
 
   return Count(true);
@@ -216,7 +216,7 @@ bool TestExtImagesprite::test_loadImages() {
   sprite->t_loadimages(true);
   VS(sprite->m_image_data["test/images/php.gif"]->m_width, 120);
   VS(sprite->m_image_data["test/images/php.gif"]->m_height, 67);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == NULL, false);
+  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, false);
 
   sprite->t_clear();
   Array dims = Array::Create();
@@ -226,7 +226,7 @@ bool TestExtImagesprite::test_loadImages() {
   sprite->t_loadimages(true);
   VS(sprite->m_image_data["test/images/php.gif"]->m_width, 120);
   VS(sprite->m_image_data["test/images/php.gif"]->m_height, 67);
-  VS(sprite->m_image_data["test/images/php.gif"]->m_image == NULL, false);
+  VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, false);
 
   sprite->t_clear();
   sprite->t_addurl("http://www.facebook.com/images/icons/like.png", -1, dims);
@@ -242,7 +242,7 @@ bool TestExtImagesprite::test_loadImages() {
   VS(
     sprite->m_image_data["http://www.facebook.com/images/icons/like.png"]
       ->m_image
-      == NULL,
+      == nullptr,
     false);
 
   return Count(true);

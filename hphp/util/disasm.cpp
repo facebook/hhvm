@@ -66,7 +66,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
 
     // Get disassembled instruction in codeStr
     if (!xed_format_context(s_xed_syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, ip, NULL)) {
+                            MAX_INSTR_ASM_LEN, ip, nullptr)) {
       error("disasm error: xed_format_context failed");
     }
 

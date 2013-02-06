@@ -162,7 +162,7 @@ static const char *BuildCharSet(CharSet *cset, const char *format) {
   if (nranges > 0) {
     cset->ranges = (::Range*)malloc(sizeof(::Range) * nranges);
   } else {
-    cset->ranges = NULL;
+    cset->ranges = nullptr;
   }
 
   /*
@@ -299,7 +299,7 @@ static inline void scan_set_error_return(int numVars, Variant &return_value) {
 static int ValidateFormat(const char *format, int numVars, int *totalSubs) {
 #define STATIC_LIST_SIZE 16
   int gotXpg, gotSequential, value, i, flags;
-  const char *end, *ch = NULL;
+  const char *end, *ch = nullptr;
   int staticAssign[STATIC_LIST_SIZE];
   int *nassign = staticAssign;
   int objIndex, xpgSize, nspace = STATIC_LIST_SIZE;
@@ -576,7 +576,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
   int  base = 0;
   int  underflow = 0;
   size_t width;
-  long (*fn)(const char *, char **, int) = NULL;
+  long (*fn)(const char *, char **, int) = nullptr;
   const char *ch;
   char sch;
   int  flags;
@@ -944,7 +944,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
        */
       if (!(flags & SCAN_SUPPRESS)) {
         *end = '\0';
-        value = (int) (*fn)(buf, NULL, base);
+        value = (int) (*fn)(buf, nullptr, base);
         if ((flags & SCAN_UNSIGNED) && (value < 0)) {
           snprintf(buf, sizeof(buf), "%u", value); /* INTL: ISO digit */
           return_value.append(String(buf, CopyString));
@@ -1045,7 +1045,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
       if (!(flags & SCAN_SUPPRESS)) {
         double dvalue;
         *end = '\0';
-        dvalue = strtod(buf, NULL);
+        dvalue = strtod(buf, nullptr);
         return_value.append(dvalue);
       }
       break;

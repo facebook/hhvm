@@ -355,7 +355,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
     // TODO !(X | non_zero) --> 0
     default: (void)op;
   }
-  return NULL;
+  return nullptr;
 }
 
 #define SIMPLIFY_CONST(OP) do {                                               \
@@ -532,7 +532,7 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_CONST(-);
@@ -561,7 +561,7 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
   // (X - C1) + (X - C2)
   // (X - C1) + C2
   // (X - C1) + (X + C2)
-  return NULL;
+  return nullptr;
 }
 SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_COMMUTATIVE(*, Mul);
@@ -587,7 +587,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
     // X * (2^C + 1) --> ((X << C) + X)
     // X * (2^C - 1) --> ((X << C) - X)
   }
-  return NULL;
+  return nullptr;
 }
 SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_DISTRIBUTIVE(&, |, And, Or);
@@ -605,7 +605,7 @@ SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
       return src1;
     }
   }
-  return NULL;
+  return nullptr;
 }
 SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_DISTRIBUTIVE(|, &, Or, And);
@@ -623,7 +623,7 @@ SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
       return genDefInt(~0L);
     }
   }
-  return NULL;
+  return nullptr;
 }
 SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_COMMUTATIVE(^, Xor);
@@ -639,7 +639,7 @@ SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
   if (isNotInst(src1, src2)) {
     return simplifyNot(src1);
   }
-  return NULL;
+  return nullptr;
 }
 
 static SSATmp* chaseIncRefs(SSATmp* tmp) {
@@ -941,7 +941,7 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
     // checking an object.
     return genDefBool(!trueSense);
   }
-  return NULL;
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
@@ -952,7 +952,7 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
     StringData* merge = StringData::GetStaticString(concat_ss(str1, str2));
     return m_tb->genDefConst(merge);
   }
-  return NULL;
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
@@ -1038,7 +1038,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
@@ -1060,7 +1060,7 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
       }
     }
   }
-  if (!clsNameString) return NULL;
+  if (!clsNameString) return nullptr;
 
   // we known both the class name and the property name statically
   // so use the caching version of LdClsPropAddr
@@ -1093,7 +1093,7 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
     }
     return m_tb->genLdRef(src, type, typeFailLabel->getParent());
   }
-  return NULL;
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
@@ -1104,7 +1104,7 @@ SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
-  if (inst->getLabel() != NULL) {
+  if (inst->getLabel() != nullptr) {
     Type type = inst->getSrc(0)->getType();
     if (type.isInit()) {
       // Unnecessary CheckInit!

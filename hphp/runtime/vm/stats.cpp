@@ -49,7 +49,7 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
   bool havecc = cc != CC_None;
   uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
 
-  TCA jcc = NULL;
+  TCA jcc = nullptr;
   if (havecc) {
     jcc = a.code.frontier;
     a.  jcc8  (ccNegate(cc), jcc);

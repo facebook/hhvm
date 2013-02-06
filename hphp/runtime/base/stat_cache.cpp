@@ -401,7 +401,7 @@ StatCache::NodePtr StatCache::Node::getChild(const std::string& childName,
                                              bool follow) {
   NodePtr child;
   if (!mapGet(follow ? m_children : m_lChildren, childName, &child)) {
-    child = NULL;
+    child = nullptr;
   }
   return child;
 }
@@ -411,7 +411,7 @@ StatCache::NodePtr StatCache::Node::getChild(const std::string& childName,
 
 StatCache::StatCache()
   : m_lock(false /*reentrant*/, RankStatCache), m_ifd(-1),
-    m_lastRefresh(time(NULL)) {
+    m_lastRefresh(time(nullptr)) {
 }
 
 StatCache::~StatCache() {
@@ -424,7 +424,7 @@ bool StatCache::init() {
   if ((m_ifd = inotify_init()) == -1
       || fcntl(m_ifd, F_SETFD, FD_CLOEXEC) == -1
       || fcntl(m_ifd, F_SETFL, O_NONBLOCK) == -1
-      || (m_root = getNode("/", false)).get() == NULL) {
+      || (m_root = getNode("/", false)).get() == nullptr) {
     clear();
     return true;
   }
@@ -446,7 +446,7 @@ void StatCache::clear() {
   if (m_root.get()) {
     m_root->expirePaths();
   }
-  m_root = NULL;
+  m_root = nullptr;
   assert(m_path2Node.size() == 0);
   assert(m_lpath2Node.size() == 0);
 }
@@ -470,7 +470,7 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
   if (wd == -1 && errno != ENOTDIR) {
     TRACE(2, "StatCache: getNode('%s', follow=%s) failed\n",
              path.c_str(), follow ? "true" : "false");
-    return NULL;
+    return nullptr;
   }
   NodePtr node;
   if (wd != -1) {
@@ -510,9 +510,9 @@ bool StatCache::mergePath(const std::string& path, bool follow) {
     bool curFollow = (follow || i + 1 < pvec.size());
     curPath += pvec[i];
     NodePtr child = curNode->getChild(pvec[i], curFollow);
-    if (child.get() == NULL) {
+    if (child.get() == nullptr) {
       child = getNode(curPath, curFollow);
-      if (child.get() == NULL) {
+      if (child.get() == nullptr) {
         return true;
       }
       curNode->insertChild(pvec[i], child, curFollow);
@@ -550,7 +550,7 @@ bool StatCache::handleEvent(const struct inotify_event* event) {
   if (event->mask & (IN_MODIFY|IN_ATTRIB)) {
     bool touched = false;
     NodePtr child = node->getChild(event->name, true);
-    if (child.get() != NULL) {
+    if (child.get() != nullptr) {
       if ((event->mask & IN_MODIFY) && child->isLink()) {
         // A modified link is logically equivalent to IN_MOVED_FROM.
         child->expirePaths();
@@ -561,7 +561,7 @@ bool StatCache::handleEvent(const struct inotify_event* event) {
       touched = true;
     }
     child = node->getChild(event->name, false);
-    if (child.get() != NULL) {
+    if (child.get() != nullptr) {
       // The follow=false child is equivalent to the follow=true child unless
       // it's a link.  Avoid duplicate invalidations for non-links.
       child->touch(!touched || child->isLink());
@@ -574,12 +574,12 @@ bool StatCache::handleEvent(const struct inotify_event* event) {
     // Recursively invalidate the cached paths rooted at "node/name".
     bool expired = false;
     NodePtr child = node->getChild(event->name, true);
-    if (child.get() != NULL) {
+    if (child.get() != nullptr) {
       child->expirePaths();
       expired = true;
     }
     child = node->getChild(event->name, false);
-    if (child.get() != NULL) {
+    if (child.get() != nullptr) {
       // The follow=false child is equivalent to the follow=true child unless
       // it's a link.  Avoid duplicate invalidations for non-links.
       child->expirePaths(!expired || child->isLink());
@@ -636,7 +636,7 @@ void StatCache::refresh() {
       // order to assure that once the event queue has been merged into the
       // cache state, all cached values have timestamps older than
       // m_lastRefresh (assuming no timestamps are ever set into the future).
-      m_lastRefresh = time(NULL);
+      m_lastRefresh = time(nullptr);
       TRACE(1, "StatCache: refresh time %lu\n", (unsigned long)m_lastRefresh);
       return;
     }
@@ -775,7 +775,7 @@ __FBSDID("$FreeBSD: src/lib/libc/stdlib/realpath.c,v 1.24 2011/11/04 19:56:34 ed
 // components.  Returns the resolved path on success, or "" on failure,
 std::string StatCache::realpathImpl(const char* path) {
   std::string resolved;
-  assert(path != NULL);
+  assert(path != nullptr);
   if (path[0] != '/') {
     return realpathLibc(path);
   }

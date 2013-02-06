@@ -1247,7 +1247,7 @@ TypePtr ClassScope::checkConst(BlockScopeRawPtr context,
                                ConstructPtr construct,
                                const std::vector<std::string> &bases,
                                BlockScope *&defScope) {
-  defScope = NULL;
+  defScope = nullptr;
   return getConstants()->check(context, name, type, coerce,
                                ar, construct, m_bases, defScope);
 }
@@ -3219,9 +3219,9 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     assert(iterFuncs != funcScopes.end());
     FunctionScopePtr func = iterFuncs->second;
 
-    const char *extra = NULL;
+    const char *extra = nullptr;
     string prefix;
-    const char *instance = NULL;
+    const char *instance = nullptr;
     if (func->isStatic()) {
       prefix += Option::ClassPrefix;
       prefix += id;
@@ -3459,7 +3459,7 @@ void ClassScope::outputMethodWrappers(CodeGenerator &cg,
       FunctionScopePtr func = m_functionsVec[i];
       if (func->isPublic() && !func->isConstructor(self) &&
           !func->isMagic() && !func->isAbstract()) {
-        func->outputMethodWrapper(cg, ar, NULL);
+        func->outputMethodWrapper(cg, ar, nullptr);
       }
     }
   }

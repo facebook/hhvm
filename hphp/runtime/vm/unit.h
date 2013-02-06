@@ -401,7 +401,7 @@ struct Unit {
       VSI        m_data-n
     */
    public:
-    MetaHandle() : index(NULL), cur(0) {}
+    MetaHandle() : index(nullptr), cur(0) {}
     bool findMeta(const Unit* unit, Offset offset);
     bool nextArg(MetaInfo& info);
    private:
@@ -489,13 +489,13 @@ struct Unit {
 
   static Class *lookupClass(const NamedEntity *ne) {
     Class *cls = *ne->clsList(); // TODO(#2054448): ARMv8
-    if (LIKELY(cls != NULL)) cls = cls->getCached();
+    if (LIKELY(cls != nullptr)) cls = cls->getCached();
     return cls;
   }
 
   static Class *lookupUniqueClass(const NamedEntity *ne) {
     Class *cls = *ne->clsList(); // TODO(#2054448): ARMv8
-    if (LIKELY(cls != NULL)) {
+    if (LIKELY(cls != nullptr)) {
       if (cls->attrs() & AttrUnique && RuntimeOption::RepoAuthoritative) {
         return cls;
       }
@@ -506,7 +506,7 @@ struct Unit {
 
   static Class *lookupClass(const StringData *clsName) {
     Class *cls = *GetNamedEntity(clsName)->clsList();
-    if (LIKELY(cls != NULL)) cls = cls->getCached();
+    if (LIKELY(cls != nullptr)) cls = cls->getCached();
     return cls;
   }
 
@@ -549,7 +549,7 @@ public:
   Func* firstHoistable() const {
     return *m_mergeInfo->funcHoistableBegin();
   }
-  Func* getMain(Class* cls = NULL) const;
+  Func* getMain(Class* cls = nullptr) const;
   // Ranges for iterating over functions.
   MutableFuncRange nonMainFuncs() const {
     return m_mergeInfo->nonMainFuncs();
@@ -693,7 +693,7 @@ class UnitEmitter {
   const MD5& md5() const { return m_md5; }
   Id addPreConst(const StringData* name, const TypedValue& value);
   Id mergeLitstr(const StringData* litstr);
-  Id mergeArray(ArrayData* a, const StringData* key=NULL);
+  Id mergeArray(ArrayData* a, const StringData* key=nullptr);
   FuncEmitter* getMain();
   void initMain(int line1, int line2);
   FuncEmitter* newFuncEmitter(const StringData* n, bool top);

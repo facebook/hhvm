@@ -129,7 +129,7 @@ class FileRepository {
 public:
   class FileInfo {
   public:
-    FileInfo() : m_phpFile(NULL) {}
+    FileInfo() : m_phpFile(nullptr) {}
     PhpFile *m_phpFile;
     String m_inputString;
     std::string m_md5;

@@ -92,7 +92,7 @@ void ShmCounter::dump() {
 }
 
 void ShmCounters::dump() {
-  if (s_shmCounters == NULL) return;
+  if (s_shmCounters == nullptr) return;
   for (ShmCounter *cp = &s_shmCounters->dummy_def1;
        cp < (ShmCounter *)&s_shmCounters->dummy_defmax;
        cp++) {

@@ -24,7 +24,7 @@ bool CmdZend::help(DebuggerClient *client) {
   client->helpTitle("Zend Command");
   client->helpCmds(
     "[z]end", "running the most recent code snippet in Zend PHP",
-    NULL
+    nullptr
   );
   client->helpBody(
     "This is mainly for comparing results from PHP vs. HipHop. After you type "
@@ -42,7 +42,7 @@ bool CmdZend::onClient(DebuggerClient *client) {
   if (client->argCount() == 0) {
     const std::string &code = client->getCode();
     string out;
-    Process::Exec("php", NULL, code.c_str(), out, &out, true);
+    Process::Exec("php", nullptr, code.c_str(), out, &out, true);
     client->print(out);
     return true;
   }

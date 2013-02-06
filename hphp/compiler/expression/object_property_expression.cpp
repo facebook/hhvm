@@ -38,7 +38,7 @@ ObjectPropertyExpression::ObjectPropertyExpression
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectPropertyExpression)),
     LocalEffectsContainer(AccessorEffect),
-    m_object(object), m_property(property), m_propSym(NULL) {
+    m_object(object), m_property(property), m_propSym(nullptr) {
   m_valid = false;
   m_propSymValid = false;
   m_object->setContext(Expression::ObjectContext);

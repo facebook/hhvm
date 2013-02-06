@@ -67,7 +67,7 @@ void Package::addAllFiles(bool force) {
 void Package::addInputList(const char *listFileName) {
   assert(listFileName && *listFileName);
   FILE *f = fopen(listFileName, "r");
-  if (f == NULL) {
+  if (f == nullptr) {
     throw Exception("Unable to open %s: %s", listFileName,
                     Util::safe_strerror(errno).c_str());
   }

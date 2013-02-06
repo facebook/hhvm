@@ -74,7 +74,7 @@ inline const Func* Class::wouldCall(const Func* prev) const {
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 namespace Transl {
@@ -95,7 +95,7 @@ undefinedError(const char* msg, const char* name) {
 }
 
 // Targetcache memory. See the comment in targetcache.h
-__thread void* tl_targetCaches = NULL;
+__thread void* tl_targetCaches = nullptr;
 
 static_assert(kConditionFlagsOff + sizeof(ssize_t) <= 64,
               "kConditionFlagsOff too large");
@@ -165,11 +165,11 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
   ASSERT_NOT_IMPLEMENTED(ns == NSInvalid || ns >= FirstCaseSensitive);
   HandleMapCS& map = HandleInfo<true>::getHandleMap(ns);
   HandleMapCS::const_accessor a;
-  if (name != NULL && ns != NSInvalid && map.find(a, name)) {
+  if (name != nullptr && ns != NSInvalid && map.find(a, name)) {
     return a->second;
   }
   Lock l(s_handleMutex);
-  if (name != NULL && ns != NSInvalid && map.find(a, name)) {
+  if (name != nullptr && ns != NSInvalid && map.find(a, name)) {
     // Retry under the lock.
     return a->second;
   }
@@ -184,7 +184,7 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
     s_frontier += bytes;
   }
   s_bits_to_go--;
-  if (name != NULL && ns != NSInvalid) {
+  if (name != nullptr && ns != NSInvalid) {
     if (!name->isStatic()) name = StringData::GetStaticString(name);
     if (!map.insert(HandleMapCS::value_type(name, s_next_bit)))
       NOT_REACHED();
@@ -193,7 +193,7 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
 }
 
 size_t allocBit() {
-  return allocBitImpl(NULL, NSInvalid);
+  return allocBitImpl(nullptr, NSInvalid);
 }
 
 size_t allocCnsBit(const StringData* name) {
@@ -328,7 +328,7 @@ void threadInit() {
     initPersistentCache();
   }
 
-  tl_targetCaches = mmap(NULL, RuntimeOption::EvalJitTargetCacheSize,
+  tl_targetCaches = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
                          PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   always_assert(tl_targetCaches != MAP_FAILED);
   hintHuge(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
@@ -471,10 +471,10 @@ static void methodCacheSlowPath(MethodCache::Pair* mce,
     isStatic = mce->m_key & 0x2u;
     func = mce->m_value;
   } else {
-    if (LIKELY(storedClass != NULL &&
-               ((func = cls->wouldCall(mce->m_value)) != NULL) &&
+    if (LIKELY(storedClass != nullptr &&
+               ((func = cls->wouldCall(mce->m_value)) != nullptr) &&
                !isMagicCall)) {
-      Stats::inc(Stats::TgtCache_MethodHit, func != NULL);
+      Stats::inc(Stats::TgtCache_MethodHit, func != nullptr);
       isMagicCall = false;
     } else {
       Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
@@ -509,7 +509,7 @@ static void methodCacheSlowPath(MethodCache::Pair* mce,
 
   if (UNLIKELY(isStatic)) {
     decRefObj(ar->getThis());
-    if (debug) ar->setThis(NULL); // suppress assert in setClass
+    if (debug) ar->setThis(nullptr); // suppress assert in setClass
     ar->setClass(cls);
   }
 
@@ -774,7 +774,7 @@ CacheHandle allocConstant(StringData* name) {
 }
 
 CacheHandle allocStatic() {
-  return namedAlloc<NSInvalid>(NULL, sizeof(TypedValue*), sizeof(TypedValue*));
+  return namedAlloc<NSInvalid>(nullptr, sizeof(TypedValue*), sizeof(TypedValue*));
 }
 
 void
@@ -978,7 +978,7 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
     raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   }
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         NULL, // there may be an active this,
+                                         nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
                                          false /*raise*/);
@@ -1000,7 +1000,7 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
   assert(*vmpc() == OpFPushClsMethodD);
 
   // Indicate to the IR that it should take even slower path
-  return NULL;
+  return nullptr;
 }
 
 const Func*
@@ -1023,7 +1023,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
     raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   }
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         NULL, // there may be an active this,
+                                         nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
                                          false /*raise*/);
@@ -1054,7 +1054,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
   TRACE(1, "unfillable miss %s :: %s -> %p\n", clsName->data(),
         methName->data(), ar->m_func);
   // Indicate to the caller that there is no work to do.
-  return NULL;
+  return nullptr;
 }
 
 const Func*
@@ -1070,7 +1070,7 @@ StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
   const Func* f;
   VMExecutionContext* ec = g_vmContext;
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         NULL,
+                                         nullptr,
                                          false /*raise*/);
   assert(res != MethodFoundWithThis); // Not possible: no this supplied.
   if (LIKELY(res == MethodFoundNoThis && !f->isAbstract())) {
@@ -1114,7 +1114,7 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
   // We already did all the work so tell our caller to do nothing.
   TRACE(1, "miss staticfcache %s :: %s -> intractable null\n",
         cls->name()->data(), methName->data());
-  return NULL;
+  return nullptr;
 }
 
 } } } } // HPHP::VM::Transl::TargetCache

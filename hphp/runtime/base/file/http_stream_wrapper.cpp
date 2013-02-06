@@ -27,12 +27,12 @@ namespace HPHP {
 File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
                               int options, CVarRef context) {
   if (RuntimeOption::ServerHttpSafeMode) {
-    return NULL;
+    return nullptr;
   }
 
   if (strncmp(filename.data(), "http://",  sizeof("http://")  - 1) &&
       strncmp(filename.data(), "https://", sizeof("https://") - 1)) {
-    return NULL;
+    return nullptr;
   }
 
   std::unique_ptr<UrlFile> file;
@@ -69,7 +69,7 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),
                   file->getLastError().c_str());
-    return NULL;
+    return nullptr;
   }
   return file.release();
 }

@@ -20,8 +20,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DBDataSet::DBDataSet()
-  : m_fields(NULL), m_rowCount(0), m_colCount(0),
-    m_row(NULL), m_lengths(NULL) {
+  : m_fields(nullptr), m_rowCount(0), m_colCount(0),
+    m_row(nullptr), m_lengths(nullptr) {
 }
 
 DBDataSet::~DBDataSet() {
@@ -29,7 +29,7 @@ DBDataSet::~DBDataSet() {
 }
 
 void DBDataSet::addResult(MYSQL *conn, MYSQL_RES *result) {
-  if (result == NULL) return;
+  if (result == nullptr) return;
 
   int rowCount = mysql_num_rows(result);
   if (rowCount) {
@@ -70,9 +70,9 @@ void DBDataSet::close() {
     mysql_free_result(*m_iter);
   }
   m_results.clear();
-  m_fields = NULL;
-  m_row = NULL;
-  m_lengths = NULL;
+  m_fields = nullptr;
+  m_row = nullptr;
+  m_lengths = nullptr;
   m_rowCount = 0;
   m_colCount = 0;
 }
@@ -85,7 +85,7 @@ int DBDataSet::getFieldIndex(const char *fieldName) {
   // without any results, cannot really resolve field names
   if (m_results.empty()) return -1;
 
-  if (m_fields == NULL) {
+  if (m_fields == nullptr) {
     m_fields = mysql_fetch_fields(m_results.front());
   }
 
@@ -98,7 +98,7 @@ int DBDataSet::getFieldIndex(const char *fieldName) {
 }
 
 MYSQL_FIELD *DBDataSet::getFields() const {
-  if (m_fields == NULL && !m_results.empty()) {
+  if (m_fields == nullptr && !m_results.empty()) {
     m_fields = mysql_fetch_fields(m_results.front());
   }
   return m_fields;
@@ -117,8 +117,8 @@ void DBDataSet::moveFirst() {
       return;
     }
   }
-  m_row = NULL;
-  m_lengths = NULL;
+  m_row = nullptr;
+  m_lengths = nullptr;
 }
 
 void DBDataSet::moveNext() {
@@ -139,8 +139,8 @@ void DBDataSet::moveNext() {
       }
     }
   }
-  m_row = NULL;
-  m_lengths = NULL;
+  m_row = nullptr;
+  m_lengths = nullptr;
 }
 
 const char *DBDataSet::getField(int field) const {
@@ -149,7 +149,7 @@ const char *DBDataSet::getField(int field) const {
   if (m_row && field >= 0 && field < m_colCount) {
     return m_row[field];
   }
-  return NULL;
+  return nullptr;
 }
 
 int DBDataSet::getFieldLength(int field) const {

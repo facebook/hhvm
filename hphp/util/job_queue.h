@@ -194,7 +194,7 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
                                 dropCacheTimeout,
                                 dropStack,
                                 lifo) {
-    pthread_cond_init(&m_cond, NULL);
+    pthread_cond_init(&m_cond, nullptr);
   }
   ~JobQueue() {
     pthread_cond_destroy(&m_cond);
@@ -240,7 +240,7 @@ public:
    * Default constructor.
    */
   JobQueueWorker()
-      : m_func(NULL), m_opaque(NULL), m_stopped(false), m_queue(NULL) {
+      : m_func(nullptr), m_opaque(nullptr), m_stopped(false), m_queue(nullptr) {
   }
 
   virtual ~JobQueueWorker() {
@@ -435,7 +435,7 @@ public:
     Exception exception;
 
     while (true) {
-      AsyncFunc<TWorker> *func = NULL;
+      AsyncFunc<TWorker> *func = nullptr;
       {
         Lock lock(m_mutex);
         if (!m_funcs.empty()) {
@@ -443,7 +443,7 @@ public:
           m_funcs.erase(func);
         }
       }
-      if (func == NULL) {
+      if (func == nullptr) {
         break;
       }
       try {

@@ -38,14 +38,14 @@ static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
   return concat(f_strtoupper(c), a);
 }
 
-#define CLASS_INFO_EMPTY_ENTRY   "", NULL, NULL, NULL
-#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL, NULL
+#define CLASS_INFO_EMPTY_ENTRY   "", nullptr, nullptr, nullptr
+#define METHOD_INFO_EMPTY_ENTRY  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
 
 const char *g_class_map[] = {
   /* header */ (const char *)ClassInfo::IsSystem,
-  NULL, CLASS_INFO_EMPTY_ENTRY,
+  nullptr, CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
-  NULL,
+  nullptr,
   /* methods    */
   (const char *)ClassInfo::IsPublic, "xbox_process_message",
   METHOD_INFO_EMPTY_ENTRY,
@@ -59,70 +59,70 @@ const char *g_class_map[] = {
   (const char *)ClassInfo::IsPublic, "sum",         METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsPublic, "fault",       METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsPublic, "strlen",      METHOD_INFO_EMPTY_ENTRY,
-  NULL,
+  nullptr,
   /* properties */
-  NULL,
+  nullptr,
   /* constants */
-  NULL,
+  nullptr,
   /* user attributes */
-  NULL,
+  nullptr,
 
   /* header */ (const char *)ClassInfo::IsNothing,
-  NULL, CLASS_INFO_EMPTY_ENTRY,
+  nullptr, CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
-  NULL,
+  nullptr,
   /* methods    */
-  NULL,
+  nullptr,
   /* properties */
-  NULL,
+  nullptr,
   /* constants */
-  NULL,
+  nullptr,
   /* user attributes */
-  NULL,
+  nullptr,
 
   /* header */ (const char *)ClassInfo::IsSystem,
   "test", CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
-  "itestable", NULL,
+  "itestable", nullptr,
   /* methods    */
   (const char *)ClassInfo::IsPublic,    "foo",  METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsProtected, "func", METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsPrivate,   "bar",  METHOD_INFO_EMPTY_ENTRY,
-  NULL,
+  nullptr,
   /* properties */
   (const char *)ClassInfo::IsPublic,    "foo",
   (const char *)ClassInfo::IsProtected, "prop",
   (const char *)ClassInfo::IsPrivate,   "bar",
-  NULL,
+  nullptr,
   /* constants */
   "const_foo", (const char*)ClassInfo::IsInterface, "s:1:\"f\";",
-  NULL,
+  nullptr,
   /* user attributes */
-  NULL,
+  nullptr,
 
   /* header */ (const char *)ClassInfo::IsInterface,
   "itestable", CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
-  NULL,
+  nullptr,
   /* methods    */
   (const char *)ClassInfo::IsPublic,  "foo", METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsPrivate, "bar", METHOD_INFO_EMPTY_ENTRY,
-  NULL,
+  nullptr,
   /* properties */
-  NULL,
+  nullptr,
   /* constants */
-  NULL,
+  nullptr,
   /* user attributes */
-  NULL,
+  nullptr,
 
-  NULL
+  nullptr
 };
 
 const char *g_source_root = "";
-const char *g_source_info[] = { NULL};
-const char *g_source_cls2file[] = { "test", "test_file", 0, NULL};
-const char *g_source_func2file[] = { NULL};
-const char *g_paramrtti_map[] = { NULL};
+const char *g_source_info[] = { nullptr};
+const char *g_source_cls2file[] = { "test", "test_file", 0, nullptr};
+const char *g_source_func2file[] = { nullptr};
+const char *g_paramrtti_map[] = { nullptr};
 
 Variant get_class_var_init(CStrRef s, const char *var) {
   return null;
@@ -305,7 +305,7 @@ Variant invokeImpl(void *extra, CArrRef params) {
 
   return true;
 }
-CallInfoWithConstructor invokeImplCallInfo((void*)invokeImpl, NULL, 0,
+CallInfoWithConstructor invokeImplCallInfo((void*)invokeImpl, nullptr, 0,
                                            CallInfo::VarArgs, 0);
 bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
                    strhash_t hash /* = -1 */) {
@@ -328,7 +328,7 @@ void init_static_variables() { SystemScalarArrays::initialize();}
 
 class GlobalVariables : public SystemGlobals {};
 static IMPLEMENT_THREAD_LOCAL(GlobalVariables, g_variables);
-GlobalVariables *get_global_variables_check() { return NULL;}
+GlobalVariables *get_global_variables_check() { return nullptr;}
 GlobalVariables *get_global_variables() { return g_variables.get();}
 LVariableTable *get_variable_table() { return g_variables.get(); }
 Globals *get_globals() { return g_variables.get(); }
@@ -387,7 +387,7 @@ Array get_global_array_wrapper() {
 }
 
 Variant *get_static_property_lv(CStrRef s, const char *prop) {
-  return NULL;
+  return nullptr;
 }
 
 bool get_call_info_static_method(MethodCallPackage &mcp) {

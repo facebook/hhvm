@@ -35,7 +35,7 @@ SimpleVariable::SimpleVariable
  const std::string &docComment /* = "" */)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(SimpleVariable)),
     m_name(name), m_docComment(docComment),
-    m_sym(NULL), m_originalSym(NULL),
+    m_sym(nullptr), m_originalSym(nullptr),
     m_this(false), m_globals(false),
     m_superGlobal(false), m_alwaysStash(false) {
   setContext(Expression::NoLValueWrapper);

@@ -38,7 +38,7 @@ public:
   // we need to support pfsockopen() that can make a socket persistent.
 
   Socket();
-  Socket(int sockfd, int type, const char *address = NULL, int port = 0);
+  Socket(int sockfd, int type, const char *address = nullptr, int port = 0);
   virtual ~Socket();
 
   static StaticString s_class_name;

@@ -172,11 +172,11 @@ Func::Func(Unit& unit, Id id, int line1, int line2,
            Attr attrs, bool top, const StringData* docComment, int numParams,
            bool isGenerator)
   : m_unit(&unit)
-  , m_cls(NULL)
-  , m_baseCls(NULL)
+  , m_cls(nullptr)
+  , m_baseCls(nullptr)
   , m_name(name)
-  , m_namedEntity(NULL)
-  , m_refBitVec(NULL)
+  , m_namedEntity(nullptr)
+  , m_refBitVec(nullptr)
   , m_cachedOffset(0)
   , m_maxStackCells(0)
   , m_numParams(0)
@@ -184,7 +184,7 @@ Func::Func(Unit& unit, Id id, int line1, int line2,
   , m_funcId(InvalidId)
   , m_hasPrivateAncestor(false)
 {
-  m_shared = new SharedData(NULL, id, base, past, line1, line2,
+  m_shared = new SharedData(nullptr, id, base, past, line1, line2,
                             top, docComment);
   init(numParams, isGenerator);
 }
@@ -195,11 +195,11 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
            bool top, const StringData* docComment, int numParams,
            bool isGenerator)
   : m_unit(&unit)
-  , m_cls(NULL)
-  , m_baseCls(NULL)
+  , m_cls(nullptr)
+  , m_baseCls(nullptr)
   , m_name(name)
-  , m_namedEntity(NULL)
-  , m_refBitVec(NULL)
+  , m_namedEntity(nullptr)
+  , m_refBitVec(nullptr)
   , m_cachedOffset(0)
   , m_maxStackCells(0)
   , m_numParams(0)
@@ -214,7 +214,7 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
 }
 
 Func::~Func() {
-  if (m_fullName != NULL && s_interceptsEnabled && m_maybeIntercepted != -1) {
+  if (m_fullName != nullptr && s_interceptsEnabled && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameRef(), &m_maybeIntercepted);
   }
 #ifdef DEBUG
@@ -259,7 +259,7 @@ bool Func::checkIterScope(Offset o, Id iterId, bool& itRef) const {
 
 const EHEnt* Func::findEH(Offset o) const {
   assert(o >= base() && o < past());
-  const EHEnt* eh = NULL;
+  const EHEnt* eh = nullptr;
   unsigned int i;
 
   const EHEntVec& ehtab = shared()->m_ehtab;
@@ -273,7 +273,7 @@ const EHEnt* Func::findEH(Offset o) const {
 
 const FPIEnt* Func::findFPI(Offset o) const {
   assert(o >= base() && o < past());
-  const FPIEnt* fe = NULL;
+  const FPIEnt* fe = nullptr;
   unsigned int i;
 
   const FPIEntVec& fpitab = shared()->m_fpitab;
@@ -383,14 +383,14 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
 }
 
 Id Func::lookupVarId(const StringData* name) const {
-  assert(name != NULL);
+  assert(name != nullptr);
   return shared()->m_localNames.findIndex(name);
 }
 
 void Func::prettyPrint(std::ostream& out) const {
   if (isPseudoMain()) {
     out << "Pseudo-main";
-  } else if (preClass() != NULL) {
+  } else if (preClass() != nullptr) {
     out << "Method ";
     if (m_attrs & AttrStatic) { out << "static "; }
     if (m_attrs & AttrPublic) { out << "public "; }
@@ -449,7 +449,7 @@ HphpArray* Func::getStaticLocals() const {
 
 void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
   assert(mi);
-  if (info() != NULL) {
+  if (info() != nullptr) {
     // Very large operator=() invocation.
     *mi = *info();
     // Deep copy the vectors of mi-owned pointers.
@@ -500,7 +500,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
       pi->attribute = (ClassInfo::Attribute)attr;
       pi->name = shared()->m_localNames[i]->data();
       if (params.size() <= i || !fpi.hasDefaultValue()) {
-        pi->value = NULL;
+        pi->value = nullptr;
         pi->valueText = "";
       } else {
         if (fpi.hasScalarDefaultValue()) {
@@ -547,7 +547,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
          it != staticVars.end(); ++it) {
       ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo;
       ci->name = *(String*)(&(*it).name);
-      if ((*it).phpCode != NULL) {
+      if ((*it).phpCode != nullptr) {
         ci->valueLen = (*it).phpCode->size();
         ci->valueText = (*it).phpCode->data();
       } else {
@@ -566,7 +566,7 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
   : m_preClass(preClass), m_id(id), m_base(base),
     m_numLocals(0), m_numIterators(0),
     m_past(past), m_line1(line1), m_line2(line2),
-    m_info(NULL), m_refBitVec(NULL), m_builtinFuncPtr(NULL),
+    m_info(nullptr), m_refBitVec(nullptr), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
     m_isGenerator(false), m_isGeneratorFromClosure(false),
     m_hasGeneratorAsBody(false) {
@@ -610,12 +610,12 @@ const Func* Func::getGeneratorBody(const StringData* name) const {
 // FuncEmitter.
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
-  : m_ue(ue), m_pce(NULL), m_sn(sn), m_id(id), m_name(n), m_numLocals(0),
+  : m_ue(ue), m_pce(nullptr), m_sn(sn), m_id(id), m_name(n), m_numLocals(0),
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
     m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
     m_isClosureBody(false), m_isGenerator(false),
-    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(NULL),
-    m_builtinFuncPtr(NULL) {
+    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(nullptr),
+    m_builtinFuncPtr(nullptr) {
 }
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
@@ -624,8 +624,8 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
     m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
     m_isClosureBody(false), m_isGenerator(false),
-    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(NULL),
-    m_builtinFuncPtr(NULL) {
+    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(nullptr),
+    m_builtinFuncPtr(nullptr) {
 }
 
 FuncEmitter::~FuncEmitter() {
@@ -667,7 +667,7 @@ void FuncEmitter::appendParam(const StringData* name, const ParamInfo& info) {
 }
 
 void FuncEmitter::allocVarId(const StringData* name) {
-  assert(name != NULL);
+  assert(name != nullptr);
   // Unnamed locals are segregated (they all come after the named locals).
   assert(m_numUnnamedLocals == 0);
   UNUSED Id id;
@@ -679,7 +679,7 @@ void FuncEmitter::allocVarId(const StringData* name) {
 }
 
 Id FuncEmitter::lookupVarId(const StringData* name) const {
-  assert(name != NULL);
+  assert(name != nullptr);
   assert(m_localNames.find(name) != m_localNames.end());
   return m_localNames.find(name)->second;
 }
@@ -812,7 +812,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
-  Func* f = (m_pce == NULL)
+  Func* f = (m_pce == nullptr)
     ? m_ue.newFunc(this, unit, m_id, m_line1, m_line2, m_base,
                    m_past, m_name, attrs, m_top, m_docComment,
                    m_params.size(), m_isGenerator)

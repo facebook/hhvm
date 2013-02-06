@@ -60,7 +60,7 @@ bool CmdExtension::help(DebuggerClient *client) {
     "x [t]ension {name}",          "shows summary info of the extension",
     "x [t]ension {name} dump",     "shows detailed info of the extension",
     "x [t]ension {name} {verb} {args} ...",   "executes an action",
-    NULL
+    nullptr
   );
   client->helpBody(
     "In PHP, a lot of library functions are implemented as \"extensions\". "

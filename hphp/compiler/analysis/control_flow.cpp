@@ -128,7 +128,7 @@ private:
 
   ControlFlowInfo       *get(ConstructRawPtr cp) {
     ConstructCFIMap::iterator it = m_ccfiMap.find(cp);
-    return it == m_ccfiMap.end() ? NULL : &it->second;
+    return it == m_ccfiMap.end() ? nullptr : &it->second;
   }
 
   ControlFlowInfo       &cfi(ConstructRawPtr cp) {

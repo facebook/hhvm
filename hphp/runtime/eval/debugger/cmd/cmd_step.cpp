@@ -23,7 +23,7 @@ bool CmdStep::help(DebuggerClient *client) {
   client->helpTitle("Step Command");
   client->helpCmds(
     "[s]tep {count=1}", "steps into lines of code",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command at break to step into lines of code. Specify a "

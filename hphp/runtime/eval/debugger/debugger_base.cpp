@@ -264,7 +264,7 @@ const char *PHP_KEYWORDS[] = {
   "__FILE__",
   "parent",
   "self",
-  NULL
+  nullptr
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -360,7 +360,7 @@ static void get_color(int tokid, int prev, int next,
     color = palette[(int)c];
     end = palette[(int)(c+1)];
   } else {
-    color = end = NULL;
+    color = end = nullptr;
   }
 }
 
@@ -393,7 +393,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
   }
 
   // ending
-  if (text == NULL) {
+  if (text == nullptr) {
     if (line) {
       if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
                                      colorLineNo);
@@ -466,7 +466,7 @@ String highlight_php(CStrRef source, int line /* = 0 */,
   std::vector<std::pair<int, string> > ahead_tokens;
   Location loc1, loc2;
 
-  const char *colorComment = NULL, *endComment = NULL;
+  const char *colorComment = nullptr, *endComment = nullptr;
   get_color(T_COMMENT, 0, 0, colorComment, endComment);
 
   int prev = 0;
@@ -502,7 +502,7 @@ String highlight_php(CStrRef source, int line /* = 0 */,
         res.append((char)tokid);
       }
     } else {
-      const char *color = NULL, *end = NULL;
+      const char *color = nullptr, *end = nullptr;
       get_color(tokid, prev, next, color, end);
       if (!hcolor.empty()) {
         color = hcolor.c_str();
@@ -529,8 +529,8 @@ String highlight_php(CStrRef source, int line /* = 0 */,
       for (unsigned int i = 0; i < ahead_tokens.size(); i++) {
         bool comment = ahead_tokens[i].first != T_WHITESPACE;
         append_line_no(res, ahead_tokens[i].second.c_str(), line,
-                       comment ? colorComment : NULL,
-                       comment ? endComment : NULL,
+                       comment ? colorComment : nullptr,
+                       comment ? endComment : nullptr,
                        lineFocus0, charFocus0, lineFocus1, charFocus1);
       }
       ahead_tokens.clear();
@@ -545,7 +545,7 @@ String highlight_php(CStrRef source, int line /* = 0 */,
     tokid = next;
   }
 
-  append_line_no(res, NULL, line, NULL, NULL,
+  append_line_no(res, nullptr, line, nullptr, nullptr,
                  lineFocus0, charFocus0, lineFocus1, charFocus1);
   return res.detach();
 }

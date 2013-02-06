@@ -527,7 +527,7 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
       return sym;
     }
     assert(!sym->isStatic());
-    sym = NULL;
+    sym = nullptr;
   }
 
   if (!sym) {
@@ -733,7 +733,7 @@ bool VariableTable::isConvertibleSuperGlobal(const string &name) const {
 ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
                                         const string &name,
                                         const Symbol *&sym) const {
-  sym = NULL;
+  sym = nullptr;
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
        parent && !parent->isRedeclaring();
        parent = parent->getParentScope(ar)) {
@@ -1625,7 +1625,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
 
   if (m_forcedVariants) {
     cg_indentBegin("virtual Variant &getImpl(CStrRef s) {\n");
-    if (!outputCPPJumpTable(cg, ar, NULL, true, true, EitherStatic,
+    if (!outputCPPJumpTable(cg, ar, nullptr, true, true, EitherStatic,
                             JumpReturnString)) {
       m_emptyJumpTables.insert(JumpTableLocalGetImpl);
     }
@@ -1634,7 +1634,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
 
     if (getAttribute(ContainsExtract)) {
       cg_indentBegin("virtual bool exists(CStrRef s) const {\n");
-      if (!outputCPPJumpTable(cg, ar, NULL, true, false,
+      if (!outputCPPJumpTable(cg, ar, nullptr, true, false,
                               EitherStatic, JumpInitializedString)) {
         m_emptyJumpTables.insert(JumpTableLocalExists);
       }
@@ -1643,7 +1643,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     }
   } else {
     cg_indentBegin("virtual Variant getImpl(CStrRef s) {\n");
-    if (!outputCPPJumpTable(cg, ar, NULL, true, false, EitherStatic,
+    if (!outputCPPJumpTable(cg, ar, nullptr, true, false, EitherStatic,
                             JumpReturnString)) {
       m_emptyJumpTables.insert(JumpTableLocalGetImpl);
     }
@@ -1653,7 +1653,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
 
     if (getAttribute(ContainsCompact)) {
       cg_indentBegin("virtual bool exists(CStrRef s) const {\n");
-      if (!outputCPPJumpTable(cg, ar, NULL, true, false,
+      if (!outputCPPJumpTable(cg, ar, nullptr, true, false,
                               EitherStatic, JumpInitializedString)) {
         m_emptyJumpTables.insert(JumpTableLocalExists);
       }

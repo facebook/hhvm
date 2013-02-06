@@ -60,21 +60,21 @@ const char *BuiltinSymbols::ExtensionFunctions[] = {
 #define T(t) (const char *)Type::KindOf ## t
 #define EXT_TYPE 0
 #include <system/ext.inc>
-  NULL,
+  nullptr,
 };
 #undef EXT_TYPE
 
 const char *BuiltinSymbols::ExtensionConsts[] = {
 #define EXT_TYPE 1
 #include <system/ext.inc>
-  NULL,
+  nullptr,
 };
 #undef EXT_TYPE
 
 const char *BuiltinSymbols::ExtensionClasses[] = {
 #define EXT_TYPE 2
 #include <system/ext.inc>
-  NULL,
+  nullptr,
 };
 #undef EXT_TYPE
 
@@ -109,14 +109,14 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "directoryiterator",
   "soapfault",
   "fbmysqllexer",
-  NULL
+  nullptr
 };
 
 StringToClassScopePtrMap BuiltinSymbols::s_classes;
 VariableTablePtr BuiltinSymbols::s_variables;
 ConstantTablePtr BuiltinSymbols::s_constants;
 StringToTypePtrMap BuiltinSymbols::s_superGlobals;
-void *BuiltinSymbols::s_handle_main = NULL;
+void *BuiltinSymbols::s_handle_main = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -150,7 +150,7 @@ void BuiltinSymbols::ParseExtConsts(AnalysisResultPtr ar, const char **p,
 }
 
 TypePtr BuiltinSymbols::ParseType(const char **&p) {
-  const char *clsname = NULL;
+  const char *clsname = nullptr;
   Type::KindOf ktype = (Type::KindOf)(long)(*p++);
   if (ktype == CLASS_TYPE) {
     clsname = *p++;
@@ -277,7 +277,7 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   }
 
   int index = 0;
-  const char *paramName = NULL;
+  const char *paramName = nullptr;
   while ((paramName = *p++ /* argName */)) {
     TypePtr argType = ParseType(p);
     const char *argDefault = *p++;
@@ -342,11 +342,11 @@ bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
                                              const std::string &soname) {
   string mapname = name + "_map";
 
-  const char ***symbols = NULL;
+  const char ***symbols = nullptr;
 
   // If we linked with .a, the symbol is already in main program.
-  if (s_handle_main == NULL) {
-    s_handle_main = dlopen(NULL, RTLD_NOW | RTLD_GLOBAL);
+  if (s_handle_main == nullptr) {
+    s_handle_main = dlopen(nullptr, RTLD_NOW | RTLD_GLOBAL);
     if (!s_handle_main) {
       const char *error = dlerror();
       Logger::Error("Unable to load main program's symbols: %s",
@@ -358,7 +358,7 @@ bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
   }
 
   // Otherwise, look for .so to load it.
-  void *handle = NULL;
+  void *handle = nullptr;
   if (!symbols) {
     handle = dlopen(soname.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle) {

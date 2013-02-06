@@ -68,10 +68,10 @@ bool SharedStore::erase(CStrRef key, bool expired /* = false */) {
 
 void StoreValue::set(SharedVariant *v, int64 ttl) {
   var = v;
-  expiry = ttl ? time(NULL) + ttl : 0;
+  expiry = ttl ? time(nullptr) + ttl : 0;
 }
 bool StoreValue::expired() const {
-  return expiry && time(NULL) >= expiry;
+  return expiry && time(nullptr) >= expiry;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ SharedStores::~SharedStores() {
 void SharedStores::clear() {
   for (int i = 0; i < MAX_SHARED_STORE; i++) {
     delete m_stores[i];
-    m_stores[i] = NULL;
+    m_stores[i] = nullptr;
   }
 }
 
@@ -138,11 +138,11 @@ char *SharedStoreFileStorage::put(const char *data, int32 len) {
   Lock lock(m_lock);
   if (m_state != StateOpen ||
       len + PaddingSize > m_chunkSize - PaddingSize) {
-    return NULL;
+    return nullptr;
   }
   if (len + PaddingSize > m_chunkRemain && !addFile()) {
     m_state = StateFull;
-    return NULL;
+    return nullptr;
   }
   assert(m_current);
   assert(len + PaddingSize <= m_chunkRemain);
@@ -167,7 +167,7 @@ void SharedStoreFileStorage::seal() {
     return;
   }
   assert(m_state == StateOpen || m_state == StateFull);
-  m_current = NULL;
+  m_current = nullptr;
   m_chunkRemain = 0;
   m_state = StateSealed;
 
@@ -255,7 +255,7 @@ bool SharedStoreFileStorage::addFile() {
   } else {
     unlink(name);
   }
-  char *addr = (char *)mmap(NULL, m_chunkSize, PROT_READ | PROT_WRITE,
+  char *addr = (char *)mmap(nullptr, m_chunkSize, PROT_READ | PROT_WRITE,
                             MAP_SHARED, fd, 0);
   if (addr == (char *)-1) {
     Logger::Error("Failed to mmap of size %llu", name, m_chunkSize);

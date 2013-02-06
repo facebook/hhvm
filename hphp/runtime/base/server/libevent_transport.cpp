@@ -32,7 +32,7 @@ struct m_evkeyvalq {
 LibEventTransport::LibEventTransport(LibEventServer *server,
                                      evhttp_request *request,
                                      int workerId)
-  : m_server(server), m_request(request), m_eventBasePostData(NULL),
+  : m_server(server), m_request(request), m_eventBasePostData(nullptr),
     m_workerId(workerId), m_sendStarted(false), m_sendEnded(false) {
   // HttpProtocol::PrepareSystemVariables needs this
   evbuffer *buf = m_request->input_buffer;
@@ -116,9 +116,9 @@ const void *LibEventTransport::getPostData(int &size) {
 bool LibEventTransport::hasMorePostData() {
 #ifdef EVHTTP_PORTABLE_READ_LIMITING
   if (m_request->ntoread <= 0) {
-    if (m_eventBasePostData != NULL) {
+    if (m_eventBasePostData != nullptr) {
       event_base_free(m_eventBasePostData);
-      m_eventBasePostData = NULL;
+      m_eventBasePostData = nullptr;
     }
     return false;
   }
@@ -131,12 +131,12 @@ bool LibEventTransport::hasMorePostData() {
 const void *LibEventTransport::getMorePostData(int &size) {
 #ifdef EVHTTP_PORTABLE_READ_LIMITING
   if (m_request->ntoread == 0) {
-    if (m_eventBasePostData != NULL) {
+    if (m_eventBasePostData != nullptr) {
       event_base_free(m_eventBasePostData);
-      m_eventBasePostData = NULL;
+      m_eventBasePostData = nullptr;
     }
     size = 0;
-    return NULL;
+    return nullptr;
   }
 
   evbuffer *buf = m_request->input_buffer;
@@ -152,24 +152,24 @@ const void *LibEventTransport::getMorePostData(int &size) {
     // EVBUFFER_DATA(buf) might change after evbuffer_expand
     ((char*)EVBUFFER_DATA(buf))[size] = '\0';
     if (m_request->ntoread == 0) {
-      if (m_eventBasePostData != NULL) {
+      if (m_eventBasePostData != nullptr) {
         event_base_free(m_eventBasePostData);
-        m_eventBasePostData = NULL;
+        m_eventBasePostData = nullptr;
       }
       evhttp_get_post_data_done(m_request);
     }
     return EVBUFFER_DATA(buf);
   }
-  if (m_eventBasePostData != NULL) {
+  if (m_eventBasePostData != nullptr) {
     event_base_free(m_eventBasePostData);
-    m_eventBasePostData = NULL;
+    m_eventBasePostData = nullptr;
   }
   evhttp_get_post_data_done(m_request);
   size = 0;
-  return NULL;
+  return nullptr;
 #else
   size = 0;
-  return NULL;
+  return nullptr;
 #endif
 }
 

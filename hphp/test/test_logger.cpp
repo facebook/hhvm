@@ -38,7 +38,7 @@ bool TestLogger::initializeRun() {
   hostname = buf;
 
   ArrayInit data(8);
-  data.set("startedTime",  time(NULL));
+  data.set("startedTime",  time(nullptr));
   data.set("stillRunning", true);
   data.set("hostname",     hostname);
   data.set("username",     getpwuid(getuid())->pw_name);
@@ -92,7 +92,7 @@ bool TestLogger::logTest(Array test) {
 }
 
 bool TestLogger::doLog() {
-  return log_url != NULL;
+  return log_url != nullptr;
 }
 
 Array TestLogger::postData(Array arr) {
@@ -125,7 +125,7 @@ std::string TestLogger::getRepoRoot() {
 
   // Fall back to our current directory
   char buf[MAXPATHLEN];
-  if (getcwd(buf, sizeof(buf)) == NULL) {
+  if (getcwd(buf, sizeof(buf)) == nullptr) {
     out.assign(buf);
   } else {
     out.assign("/");
@@ -160,7 +160,7 @@ std::string TestLogger::getSVNRevision() {
  */
 int TestLogger::getOutput(const char* cmd, std::string &buf) {
   FILE *output = popen(cmd, "r");
-  if (output == NULL) {
+  if (output == nullptr) {
     buf = "";
     pclose(output);
     return -1;

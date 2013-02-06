@@ -512,7 +512,7 @@ bool TestExtDatetime::test_mktime() {
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 2100)),   "Jan-01-2100");
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 110)),    "Jan-01-0110");
 
-  VS(f_mktime(), time(NULL));
+  VS(f_mktime(), time(nullptr));
 
   VS(f_date("h", f_mktime(9)), "09");
 

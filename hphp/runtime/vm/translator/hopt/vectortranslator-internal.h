@@ -94,7 +94,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 #define BUILD_OPTAB(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW), __VA_ARGS__)
 #define BUILD_OPTABH(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROWH), __VA_ARGS__)
 #define BUILD_OPTAB_ARG(FILL_TABLE, ...)                                \
-  static OpFunc* optab = NULL;                                          \
+  static OpFunc* optab = nullptr;                                          \
   if (!optab) {                                                         \
     optab = (OpFunc*)calloc(1 << multiBitWidth(__VA_ARGS__), sizeof(OpFunc)); \
     FILL_TABLE                                                          \

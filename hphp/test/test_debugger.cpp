@@ -352,13 +352,13 @@ void TestDebugger::runServer() {
                         debugPortConfig.c_str(),
                         jitConfig.c_str(),
                         jitUseIRConfig.c_str(),
-                        NULL};
+                        nullptr};
   printf("Running server with arguments:\n");
   for (unsigned i = 1; i < array_size(argv) - 1; ++i) {
     printf("%s ", argv[i]);
   }
   printf("\n");
-  Process::Exec(HHVM_PATH, argv, NULL, out, &err);
+  Process::Exec(HHVM_PATH, argv, nullptr, out, &err);
 }
 
 void TestDebugger::stopServer() {

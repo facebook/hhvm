@@ -46,7 +46,7 @@ Wrapper* getWrapper(CStrRef scheme) {
 
 File* open(CStrRef uri, CStrRef mode, int options, CVarRef context) {
   const char *uri_string = uri.data();
-  Wrapper *wrapper = NULL;
+  Wrapper *wrapper = nullptr;
 
   /* Special case for PHP4 Backward Compatability */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
@@ -58,7 +58,7 @@ File* open(CStrRef uri, CStrRef mode, int options, CVarRef context) {
     }
   }
 
-  if (wrapper == NULL) {
+  if (wrapper == nullptr) {
     wrapper = getWrapper("file");
   }
   assert(wrapper);

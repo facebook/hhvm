@@ -70,7 +70,7 @@ public:
    * If data is NULL, do GET, otherwise, do POST.
    */
   bool send(const std::string &url, const std::vector<std::string> &headers,
-            int timeoutSeconds, bool async, const void *data = NULL,
+            int timeoutSeconds, bool async, const void *data = nullptr,
             int size = 0);
 
   /**

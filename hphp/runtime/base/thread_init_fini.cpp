@@ -81,8 +81,8 @@ void finish_thread_locals(void *arg /* = NULL */) {
 static class SetThreadInitFini {
 public:
   SetThreadInitFini() {
-    AsyncFuncImpl::SetThreadInitFunc(init_thread_locals, NULL);
-    AsyncFuncImpl::SetThreadFiniFunc(finish_thread_locals, NULL);
+    AsyncFuncImpl::SetThreadInitFunc(init_thread_locals, nullptr);
+    AsyncFuncImpl::SetThreadFiniFunc(finish_thread_locals, nullptr);
   }
 } s_SetThreadInitFini;
 

@@ -75,7 +75,7 @@ public:
   void outputCPPInteger(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDouble(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  std::string getCPPLiteralString(bool *binary = NULL);
+  std::string getCPPLiteralString(bool *binary = nullptr);
 
   bool getString(const std::string *&s) const;
   bool getInt(int64 &i) const;

@@ -50,8 +50,8 @@ static inline const Unit* curUnit() { return curFunc()->unit(); }
 static inline Class* curClass() {
   const Func* func = curFunc();
   Class* clss = func->cls();
-  if (func->isPseudoMain() || func->isTraitMethod() || clss == NULL) {
-    return NULL;
+  if (func->isPseudoMain() || func->isTraitMethod() || clss == nullptr) {
+    return nullptr;
   }
   return clss;
 }
@@ -119,10 +119,10 @@ struct CallerFrame : public VMRegAnchor {
     // in which case, getPrevVMState() gets the caller's frame.
     VMExecutionContext* context = g_vmContext;
     ActRec* cur = context->getFP();
-    if (!cur) return NULL;
+    if (!cur) return nullptr;
     if (cur->skipFrame()) {
       ActRec* prev = context->getPrevVMState(cur);
-      if (prev == cur) return NULL;
+      if (prev == cur) return nullptr;
       return prev;
     } else {
       return cur;

@@ -31,8 +31,8 @@ char *strndup(const char* str, size_t len) {
     str_len = len;
   }
   char *result = (char*)malloc(str_len + 1);
-  if (result == NULL) {
-    return NULL;
+  if (result == nullptr) {
+    return nullptr;
   }
   memcpy(result, str, str_len);
   result[str_len] = '\0';
@@ -41,7 +41,7 @@ char *strndup(const char* str, size_t len) {
 
 int dprintf(int fd, const char *format, ...) {
   va_list ap;
-  char *ptr = NULL;
+  char *ptr = nullptr;
   int ret = 0;
 
   va_start(ap, format);
@@ -65,7 +65,7 @@ int gettime(clockid_t which_clock, struct timespec *tp) {
     return 0;
   }
   struct timeval tv;
-  int ret = gettimeofday(&tv, NULL);
+  int ret = gettimeofday(&tv, nullptr);
   tp->tv_sec = tv.tv_sec;
   tp->tv_nsec = tv.tv_usec * 1000;
   return ret;

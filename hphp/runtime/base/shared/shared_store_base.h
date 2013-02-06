@@ -32,7 +32,7 @@ namespace HPHP {
 
 class StoreValue {
 public:
-  StoreValue() : var(NULL), sAddr(NULL), expiry(0), size(0), sSize(0) {}
+  StoreValue() : var(nullptr), sAddr(nullptr), expiry(0), size(0), sSize(0) {}
   StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
                                     expiry(v.expiry), size(v.size),
                                     sSize(v.sSize) {}
@@ -50,10 +50,10 @@ public:
   mutable SmallLock lock;
 
   bool inMem() const {
-    return var != NULL;
+    return var != nullptr;
   }
   bool inFile() const {
-    return sAddr != NULL;
+    return sAddr != nullptr;
   }
 
   int32 getSerializedSize() const {
@@ -87,7 +87,7 @@ public:
 
   // for priming only
   struct KeyValuePair {
-    KeyValuePair() : value(NULL), sAddr(NULL) {}
+    KeyValuePair() : value(nullptr), sAddr(nullptr) {}
     litstr key;
     int len;
     SharedVariant *value;
@@ -95,7 +95,7 @@ public:
     int32 sSize;
 
     bool inMem() const {
-      return value != NULL;
+      return value != nullptr;
     }
   };
   virtual void prime(const std::vector<KeyValuePair> &vars) = 0;
@@ -158,7 +158,7 @@ public:
   };
 
   SharedStoreFileStorage()
-  : m_state(StateInvalid), m_current(NULL), m_chunkRemain(0) {}
+  : m_state(StateInvalid), m_current(nullptr), m_chunkRemain(0) {}
   void enable(const std::string& prefix, int64 chunkSize, int64 maxSize);
   char *put(const char *data, int32 len);
   void seal();

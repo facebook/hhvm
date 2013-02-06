@@ -31,7 +31,7 @@ class Exception;
 
 class LogFileData {
 public:
-  LogFileData() : log(NULL), bytesWritten(0), prevBytesWritten(0) {}
+  LogFileData() : log(nullptr), bytesWritten(0), prevBytesWritten(0) {}
   LogFileData(FILE *f) : log(f), bytesWritten(0), prevBytesWritten(0) {}
   LogFileData(const LogFileData& rhs) :
       log(rhs.log), prevBytesWritten(rhs.prevBytesWritten) {
@@ -91,7 +91,7 @@ public:
   static void RawVerbose(const std::string &msg);
 
   static void Log(LogLevelType level, const char *type, const Exception &e,
-                  const char *file = NULL, int line = 0);
+                  const char *file = nullptr, int line = 0);
 
   static void OnNewRequest();
   static void ResetRequestCount();
@@ -105,7 +105,7 @@ public:
   static void SetThreadHook(PFUNC_LOG func, void *data);
 
   static void SetTheLogger(Logger* logger) {
-    if (logger != NULL) {
+    if (logger != nullptr) {
       delete s_logger;
       s_logger = logger;
     }
@@ -121,7 +121,7 @@ protected:
   class ThreadData {
   public:
     ThreadData() : request(0), message(0), bytesWritten(0), prevBytesWritten(0),
-                   log(NULL), hook(NULL) {}
+                   log(nullptr), hook(nullptr) {}
     int request;
     int message;
     int bytesWritten;
@@ -149,7 +149,7 @@ protected:
    * For subclasses to override, e.g., to support injected stack trace.
    */
   virtual void log(LogLevelType level, const char *type, const Exception &e,
-                   const char *file = NULL, int line = 0);
+                   const char *file = nullptr, int line = 0);
   virtual void log(LogLevelType level, const std::string &msg,
                    const StackTrace *stackTrace,
                    bool escape = true, bool escapeMore = false);

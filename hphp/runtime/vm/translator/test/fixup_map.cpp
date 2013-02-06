@@ -37,7 +37,7 @@ void* writer(void* that) {
     Fixup fxp(kPcMul * i, kSpMul * i);
     m->recordFixup(TCA(uintptr_t(i)), fxp);
   }
-  return NULL;
+  return nullptr;
 }
 
 void* reader(void* that) {
@@ -45,7 +45,7 @@ void* reader(void* that) {
   const StringData* sd = StringData::GetStaticString("test");
   // ar2: a mock actrec, requires a Func, which can't be builtin.
   Unit u;
-  Func f(u, 1, 1, 1, 0, 0, sd, AttrNone, true, NULL, 0, false);
+  Func f(u, 1, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0, false);
   ActRec ar2;
   ar2.m_savedRip = 0xdeadbeef;
   ar2.m_savedRbp = 0;
@@ -63,7 +63,7 @@ void* reader(void* that) {
     assert(vmr.m_fp == &ar2);
     assert(vmr.m_sp == (TypedValue*)&ar2 - i * kSpMul);
   }
-  return NULL;
+  return nullptr;
 }
 
 }
@@ -79,11 +79,11 @@ TEST(FixupMap, Concurrent) {
   void* vm = (void*)&m;
   pthread_t threads[kNumReaders];
   for (int i = 0; i < kNumReaders; i++) {
-    pthread_create(&threads[i], NULL, reader, vm);
+    pthread_create(&threads[i], nullptr, reader, vm);
   }
   writer(vm);
   for (int i = 0; i < kNumReaders; i++) {
-    pthread_join(threads[i], NULL);
+    pthread_join(threads[i], nullptr);
   }
 }
 

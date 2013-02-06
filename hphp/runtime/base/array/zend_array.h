@@ -140,27 +140,27 @@ public:
   class Bucket {
   public:
     Bucket() :
-      ikey(0), pListNext(NULL), pListLast(NULL), pNext(NULL) {
+      ikey(0), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
       data._count = 0;
     }
 
     Bucket(Variant::NoInit d) :
-      ikey(0), data(d), pListNext(NULL), pListLast(NULL), pNext(NULL) {
+      ikey(0), data(d), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
       data._count = 0;
     }
 
     Bucket(CVarRef d) :
-      ikey(0), data(d), pListNext(NULL), pListLast(NULL), pNext(NULL) {
+      ikey(0), data(d), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
       data._count = 0;
     }
 
     Bucket(CVarStrongBind d) :
-      ikey(0), data(d), pListNext(NULL), pListLast(NULL), pNext(NULL) {
+      ikey(0), data(d), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
       data._count = 0;
     }
 
     Bucket(CVarWithRefBind d) :
-      ikey(0), data(d), pListNext(NULL), pListLast(NULL), pNext(NULL) {
+      ikey(0), data(d), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
       data._count = 0;
     }
 

@@ -59,7 +59,7 @@ bool CmdList::help(DebuggerClient *client) {
     "list {file}:{l1}-",      "displays specified block in the file",
     "list {file}:-{l2}",      "displays specified block in the file",
     "list {directory}",       "sets PHP source root directory",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use list command to display PHP source code. In remote debugging, this "

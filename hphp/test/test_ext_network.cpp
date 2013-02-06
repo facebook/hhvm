@@ -246,7 +246,7 @@ bool TestExtNetwork::test_get_http_request_size() {
   //because no g_context in unit test,
   //instead of testing f_get_http_request_size(),
   //we test relevant code directly
-  evhttp_request* r=evhttp_request_new(NULL, NULL);
+  evhttp_request* r=evhttp_request_new(nullptr, nullptr);
   char* buf = "buffer";
   evbuffer_add(r->input_buffer, buf, strlen(buf));
   r->type=EVHTTP_REQ_POST;
@@ -256,7 +256,7 @@ bool TestExtNetwork::test_get_http_request_size() {
   r->minor=1;
   r->remote_host="127.0.0.1";
   r->remote_port=1234;
-  LibEventTransport t(NULL, r,0);
+  LibEventTransport t(nullptr, r,0);
   VERIFY(t.getRequestSize()==58);
   return Count(true);
 }

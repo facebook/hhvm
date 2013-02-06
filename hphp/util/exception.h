@@ -61,7 +61,7 @@ public:
 
   struct Deleter {
     Exception* m_e;
-    Deleter() : m_e(NULL) {}
+    Deleter() : m_e(nullptr) {}
     Deleter(Exception* e) : m_e(e) {}
     ~Deleter() { delete m_e; }
   };

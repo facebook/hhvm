@@ -32,7 +32,7 @@ namespace HPHP { namespace Util {
 
 class HostEnt {
 public:
-  HostEnt() : tmphstbuf(NULL) {}
+  HostEnt() : tmphstbuf(nullptr) {}
   ~HostEnt() { if (tmphstbuf) free(tmphstbuf);}
 
   struct hostent hostbuf;

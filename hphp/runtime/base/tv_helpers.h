@@ -370,7 +370,7 @@ inline Variant& tvAsVariant(TypedValue* tv) {
   // Avoid treating uninitialized TV's as variants. We have some slightly
   // perverse, but defensible uses where we pass in NULL (and later check
   // a Variant* against NULL) so tolerate it.
-  assert(NULL == tv || tvIsPlausible(tv));
+  assert(nullptr == tv || tvIsPlausible(tv));
   return *(Variant*)(tv);
 }
 

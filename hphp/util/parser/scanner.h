@@ -103,8 +103,8 @@ struct TokenStore {
   LookaheadSlab* m_head;
   LookaheadSlab* m_tail;
   TokenStore() {
-    m_head = NULL;
-    m_tail = NULL;
+    m_head = nullptr;
+    m_tail = nullptr;
   }
   ~TokenStore() {
     LookaheadSlab* s = m_head;

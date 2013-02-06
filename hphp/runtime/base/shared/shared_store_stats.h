@@ -28,7 +28,7 @@ namespace HPHP {
 class SharedValueProfile {
 private:
   void init() {
-    key = NULL;
+    key = nullptr;
     isGroup = false;
     isPrime = false;
     isValid = false;

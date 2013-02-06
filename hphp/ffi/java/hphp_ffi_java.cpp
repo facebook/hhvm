@@ -31,7 +31,7 @@
 
 using namespace HPHP;
 
-ExecutionContext *context = NULL;
+ExecutionContext *context = nullptr;
 vector <Variant *> pointers;
 
 /**
@@ -54,7 +54,7 @@ jobject exportVariantToJava(JNIEnv *env, jclass hphp, void *value, int kind) {
       result = hphp_ffi_buildVariant(1, value, 0);
       pointers.push_back(result);
       return env->CallStaticObjectMethod(hphp, boolean_init, (jlong)result,
-                                         value != NULL);
+                                         value != nullptr);
     case 2:
       static jmethodID int64_init =
           env->GetStaticMethodID(hphp, "createHphpInt64",
@@ -100,7 +100,7 @@ jobject exportVariantToJava(JNIEnv *env, jclass hphp, void *value, int kind) {
       pointers.push_back(result);
       return env->CallStaticObjectMethod(hphp, object_init, (jlong)result);
     default:
-      return NULL;
+      return nullptr;
   }
 }
 
@@ -195,7 +195,7 @@ Java_hphp_Hphp_getValue(JNIEnv *env, jclass hphp, jlong arrPtr, jlong pos) {
  */
 JNIEXPORT void JNICALL
 Java_hphp_Hphp_includeFile(JNIEnv *env, jclass hphp, jstring file) {
-  const char *fstr = env->GetStringUTFChars(file, NULL);
+  const char *fstr = env->GetStringUTFChars(file, nullptr);
   hphp_ffi_include_file(fstr);
   env->ReleaseStringUTFChars(file, fstr);
 }
@@ -208,7 +208,7 @@ Java_hphp_Hphp_includeFile(JNIEnv *env, jclass hphp, jstring file) {
 JNIEXPORT jobject JNICALL
 Java_hphp_Hphp_invokeFunction(JNIEnv *env, jclass hphp, jstring func,
                               jlong argsPtr) {
-  const char *fstr = env->GetStringUTFChars(func, NULL);
+  const char *fstr = env->GetStringUTFChars(func, nullptr);
   void *result;
   int kind =
       hphp_ffi_invoke_function(&result, fstr,
@@ -225,8 +225,8 @@ Java_hphp_Hphp_invokeFunction(JNIEnv *env, jclass hphp, jstring func,
 JNIEXPORT jobject JNICALL
 Java_hphp_Hphp_invokeStaticMethod(JNIEnv *env, jclass hphp, jstring cls,
                                   jstring func, jlong argsPtr) {
-  const char *cstr = env->GetStringUTFChars(cls, NULL);
-  const char *fstr = env->GetStringUTFChars(func, NULL);
+  const char *cstr = env->GetStringUTFChars(cls, nullptr);
+  const char *fstr = env->GetStringUTFChars(func, nullptr);
   void *result;
   int kind =
       hphp_ffi_invoke_static_method(&result, cstr, fstr,
@@ -244,7 +244,7 @@ Java_hphp_Hphp_invokeStaticMethod(JNIEnv *env, jclass hphp, jstring cls,
 JNIEXPORT jobject JNICALL
 Java_hphp_Hphp_invokeMethod(JNIEnv *env, jclass hphp, jlong targetPtr,
                             jstring func, jlong argsPtr) {
-  const char *fstr = env->GetStringUTFChars(func, NULL);
+  const char *fstr = env->GetStringUTFChars(func, nullptr);
   void *result;
   int kind =
       hphp_ffi_invoke_object_method(&result,
@@ -263,7 +263,7 @@ Java_hphp_Hphp_invokeMethod(JNIEnv *env, jclass hphp, jlong targetPtr,
 JNIEXPORT jobject JNICALL
 Java_hphp_Hphp_createObject(JNIEnv *env, jclass hphp, jstring cls,
                             jlong argsPtr) {
-  const char *cstr = env->GetStringUTFChars(cls, NULL);
+  const char *cstr = env->GetStringUTFChars(cls, nullptr);
   void *result;
   int kind =
       hphp_ffi_create_object(&result, cstr,
@@ -302,7 +302,7 @@ Java_hphp_Hphp_get(JNIEnv *env, jclass hphp, jlong map, jlong key) {
  */
 JNIEXPORT jlong JNICALL
 Java_hphp_Hphp_createHphpString(JNIEnv *env, jclass hphp, jstring str) {
-  const char *s = env->GetStringUTFChars(str, NULL);
+  const char *s = env->GetStringUTFChars(str, nullptr);
   jsize len = env->GetStringUTFLength(str);
 
   // make a copy of the underlying string to avoid GC issue
@@ -348,7 +348,7 @@ Java_hphp_Hphp_ffiSessionExit(JNIEnv *env, jclass hphp) {
   }
   pointers.clear();
   hphp_ffi_context_exit(context);
-  context = NULL;
+  context = nullptr;
   hphp_ffi_session_exit();
 }
 

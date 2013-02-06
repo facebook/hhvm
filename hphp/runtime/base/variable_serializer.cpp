@@ -40,14 +40,14 @@ static StaticString s_jsonSerialize("jsonSerialize");
 
 VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
-  : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
+  : m_type(type), m_option(option), m_buf(nullptr), m_indent(0),
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
     m_levelDebugger(0) {
   m_maxLevelDebugger = g_context->getDebuggerPrintLevel();
   if (type == Serialize || type == APCSerialize || type == DebuggerSerialize) {
     m_arrayIds = new PointerCounterMap();
   } else {
-    m_arrayIds = NULL;
+    m_arrayIds = nullptr;
   }
 }
 
@@ -260,7 +260,7 @@ void VariableSerializer::write(double v) {
 
 void VariableSerializer::write(const char *v, int len /* = -1 */,
                                bool isArrayKey /* = false */) {
-  if (v == NULL) v = "";
+  if (v == nullptr) v = "";
   if (len < 0) len = strlen(v);
 
   switch (m_type) {

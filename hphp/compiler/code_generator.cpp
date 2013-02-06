@@ -60,11 +60,11 @@ const char *CodeGenerator::HASH_INCLUDE =
 CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
                              const std::string *filename /* = NULL */)
-    : m_out(NULL), m_output(output),
+    : m_out(nullptr), m_output(output),
       m_hoistedClasses(0), m_collectHoistedClasses(false),
       m_context(NoContext), m_insideScalarArray(false), m_itemIndex(-1) {
   for (int i = 0; i < StreamCount; i++) {
-    m_streams[i] = NULL;
+    m_streams[i] = nullptr;
     m_indentation[i] = 0;
     m_indentPending[i] = true;
     m_lineNo[i] = 1;
@@ -87,7 +87,7 @@ void CodeGenerator::useStream(Stream stream) {
   assert(stream >= NullStream && stream < StreamCount);
   m_curStream = stream;
   if (stream == NullStream) {
-    m_out = NULL;
+    m_out = nullptr;
   } else {
     m_out = m_streams[stream];
   }

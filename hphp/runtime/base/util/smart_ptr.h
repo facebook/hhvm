@@ -46,7 +46,7 @@ static const std::size_t kExpectedMPxOffset = 0;
 template<typename T>
 class SmartPtr {
 public:
-  SmartPtr() : m_px(NULL) {}
+  SmartPtr() : m_px(nullptr) {}
   SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
@@ -98,7 +98,7 @@ public:
    * Reset the raw pointer.
    */
   void reset() {
-    operator=((T*)NULL);
+    operator=((T*)nullptr);
   }
 
 protected:
@@ -118,7 +118,7 @@ protected:
 template<typename T>
 class AtomicSmartPtr {
 public:
-  AtomicSmartPtr() : m_px(NULL) {}
+  AtomicSmartPtr() : m_px(nullptr) {}
   AtomicSmartPtr(T* px) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
@@ -126,11 +126,11 @@ public:
   AtomicSmartPtr(Y* px) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
-  AtomicSmartPtr(const AtomicSmartPtr<T>& src) : m_px(NULL) {
+  AtomicSmartPtr(const AtomicSmartPtr<T>& src) : m_px(nullptr) {
     operator=(src.get());
   }
   template<class Y>
-  AtomicSmartPtr(const AtomicSmartPtr<Y>& src) : m_px(NULL) {
+  AtomicSmartPtr(const AtomicSmartPtr<Y>& src) : m_px(nullptr) {
     operator=(src.get());
   }
   ~AtomicSmartPtr() {
@@ -195,7 +195,7 @@ public:
    * Reset the raw pointer.
    */
   void reset() {
-    operator=((T*)NULL);
+    operator=((T*)nullptr);
   }
 
 protected:

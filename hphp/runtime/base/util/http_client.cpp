@@ -39,7 +39,7 @@ static StaticInitializer s_initCurl;
 HttpClient::HttpClient(int timeout /* = 5 */, int maxRedirect /* = 1 */,
                        bool use11 /* = true */, bool decompress /* = false */)
   : m_timeout(timeout), m_maxRedirect(maxRedirect), m_use11(use11),
-    m_decompress(decompress), m_response(NULL), m_responseHeaders(NULL),
+    m_decompress(decompress), m_response(nullptr), m_responseHeaders(nullptr),
     m_proxyPort(0) {
   if (m_timeout <= 0) {
     m_timeout = RuntimeOption::SocketDefaultTimeout;
@@ -90,7 +90,7 @@ void HttpClient::proxy(const std::string &host, int port,
 int HttpClient::get(const char *url, StringBuffer &response,
                     const HeaderMap *requestHeaders /* = NULL */,
                     std::vector<String> *responseHeaders /* = NULL */) {
-  return impl(url, NULL, 0, response, requestHeaders, responseHeaders);
+  return impl(url, nullptr, 0, response, requestHeaders, responseHeaders);
 }
 
 int HttpClient::post(const char *url, const char *data, int size,
@@ -155,7 +155,7 @@ int HttpClient::impl(const char *url, const char *data, int size,
   }
 
   std::vector<String> headers; // holding those temporary strings
-  curl_slist *slist = NULL;
+  curl_slist *slist = nullptr;
   if (requestHeaders) {
     for (HeaderMap::const_iterator iter = requestHeaders->begin();
          iter != requestHeaders->end(); ++iter) {

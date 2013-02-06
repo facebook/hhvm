@@ -183,13 +183,13 @@ DataType is_numeric_string(const char *str, int length, int64 *lval,
       int cmp = strcmp(&ptr[-digits], long_min_digits);
       if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
         if (dval) {
-          *dval = strtod(str, NULL);
+          *dval = strtod(str, nullptr);
         }
         return KindOfDouble;
       }
     }
     if (lval) {
-      *lval = strtol(str, NULL, base);
+      *lval = strtol(str, nullptr, base);
     }
     return KindOfInt64;
   }

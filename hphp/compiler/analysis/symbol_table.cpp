@@ -452,7 +452,7 @@ const Symbol *SymbolTable::getSymbolImpl(const std::string &name) const {
   if (it != m_symbolMap.end()) {
     return &it->second;
   }
-  return NULL;
+  return nullptr;
 }
 
 Symbol *SymbolTable::getSymbol(const std::string &name) {

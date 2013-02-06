@@ -23,7 +23,7 @@ bool CmdNext::help(DebuggerClient *client) {
   client->helpTitle("Next Command");
   client->helpCmds(
     "[n]ext {count=1}", "steps over lines of code",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command at break to step over lines of code. Specify a "

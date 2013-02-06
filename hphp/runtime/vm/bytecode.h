@@ -546,7 +546,7 @@ public:
   inline void ALWAYS_INLINE popV() {
     assert(m_top != m_base);
     assert(m_top->m_type == KindOfRef);
-    assert(m_top->m_data.pref != NULL);
+    assert(m_top->m_data.pref != nullptr);
     tvDecRefRef(m_top);
     m_top++;
   }

@@ -51,7 +51,7 @@ bool CmdVariable::help(DebuggerClient *client) {
   client->helpCmds(
     "[v]ariable",           "lists all local variables on stack",
     "[v]ariable {text}",    "full-text search local variables",
-    NULL
+    nullptr
   );
   client->helpBody(
     "This will print names and values of all variables that are currently "

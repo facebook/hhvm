@@ -32,11 +32,11 @@
   }                                                                     \
   void Logger::LOGLEVEL(const std::string &msg) {                       \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
-    Log(Log ## LOGLEVEL, msg, NULL);                                    \
+    Log(Log ## LOGLEVEL, msg, nullptr);                                    \
   }                                                                     \
   void Logger::Raw ## LOGLEVEL(const std::string &msg) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
-    Log(Log ## LOGLEVEL, msg, NULL, false);                             \
+    Log(Log ## LOGLEVEL, msg, nullptr, false);                             \
   }                                                                     \
 
 namespace HPHP {
@@ -55,7 +55,7 @@ bool Logger::UseLogFile = true;
 bool Logger::UseCronolog = true;
 bool Logger::IsPipeOutput = false;
 int Logger::DropCacheChunkSize = (1 << 20);
-FILE *Logger::Output = NULL;
+FILE *Logger::Output = nullptr;
 Cronolog Logger::cronOutput;
 Logger::LogLevelType Logger::LogLevel = LogInfo;
 std::atomic<int> Logger::bytesWritten(0);
@@ -73,7 +73,7 @@ void Logger::Log(LogLevelType level, const char *fmt, va_list ap) {
 
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  Log(level, msg, NULL);
+  Log(level, msg, nullptr);
 }
 
 void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
@@ -81,7 +81,7 @@ void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
 
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  Log(level, msg, NULL, true, true);
+  Log(level, msg, nullptr, true, true);
 }
 
 void Logger::Log(LogLevelType level, const char *type, const Exception &e,
@@ -146,7 +146,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
   }
 
   boost::shared_ptr<StackTrace> deleter;
-  if (stackTrace == NULL) {
+  if (stackTrace == nullptr) {
     deleter = boost::shared_ptr<StackTrace>(new StackTrace());
     stackTrace = deleter.get();
   }
@@ -215,7 +215,7 @@ std::string Logger::GetHeader() {
   static std::string host = Process::GetHostName();
   static pid_t pid = Process::GetProcessId();
 
-  time_t now = time(NULL);
+  time_t now = time(nullptr);
   char snow[64];
   ctime_r(&now, snow);
   // Eliminate trailing newilne from ctime_r.
@@ -271,14 +271,14 @@ int Logger::checkDropCache(int bytesWritten, int prevBytesWritten,
 }
 
 bool Logger::SetThreadLog(const char *file) {
-  return (s_threadData->log = fopen(file, "a")) != NULL;
+  return (s_threadData->log = fopen(file, "a")) != nullptr;
 }
 void Logger::ClearThreadLog() {
   ThreadData *threadData = s_threadData.get();
   if (threadData->log) {
     fclose(threadData->log);
   }
-  threadData->log = NULL;
+  threadData->log = nullptr;
 }
 
 void Logger::SetThreadHook(PFUNC_LOG func, void *data) {

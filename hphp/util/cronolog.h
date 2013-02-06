@@ -34,12 +34,12 @@ public:
     m_periodMultiple(1),
     m_periodDelay(0),
     m_useAmericanDateFormats(0),
-    m_startTime(NULL),
-    m_prevLinkName(NULL),
+    m_startTime(nullptr),
+    m_prevLinkName(nullptr),
     m_timeOffset(0),
     m_nextPeriod(0),
-    m_prevFile(NULL),
-    m_file(NULL),
+    m_prevFile(nullptr),
+    m_file(nullptr),
     m_bytesWritten(0),
     m_prevBytesWritten(0) {}
   ~Cronolog() {

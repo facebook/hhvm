@@ -42,18 +42,18 @@ void phpDebuggerHook(const uchar* pc) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
-  if (UNLIKELY(g_vmContext->m_lastLocFilter != NULL) &&
+  if (UNLIKELY(g_vmContext->m_lastLocFilter != nullptr) &&
       g_vmContext->m_lastLocFilter->checkPC(pc)) {
     TRACE(5, "same location as last interrupt\n");
     return;
   }
-  if (LIKELY(g_vmContext->m_breakPointFilter == NULL ||
+  if (LIKELY(g_vmContext->m_breakPointFilter == nullptr ||
       !g_vmContext->m_breakPointFilter->checkPC(pc))) {
     TRACE(5, "not in the PC range for any breakpoints\n");
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
       // implies we left the location for last break;
       delete g_vmContext->m_lastLocFilter;
-      g_vmContext->m_lastLocFilter = NULL;
+      g_vmContext->m_lastLocFilter = nullptr;
       return;
     }
     TRACE(5, "DEBUGGER_FORCE_INTR\n");
@@ -240,7 +240,7 @@ void PtrMapNode::clearImpl(unsigned short bits) {
       ((PtrMapNode*)m_entries[i])->clearImpl(bits - PTRMAP_LEVEL_BITS);
       free(((PtrMapNode*)m_entries[i])->m_entries);
       free(m_entries[i]);
-      m_entries[i] = NULL;
+      m_entries[i] = nullptr;
     }
   }
 }

@@ -54,7 +54,7 @@ const char *StringBuffer::data() const {
     m_buffer[m_len] = '\0'; // fixup
     return m_buffer;
   }
-  return NULL;
+  return nullptr;
 }
 
 const char *StringBuffer::dataIgnoreTaint() const {
@@ -62,7 +62,7 @@ const char *StringBuffer::dataIgnoreTaint() const {
     m_buffer[m_len] = '\0'; // fixup
     return m_buffer;
   }
-  return NULL;
+  return nullptr;
 }
 
 char StringBuffer::charAt(int pos) const {
@@ -442,7 +442,7 @@ CstrBuffer::CstrBuffer(int cap)
 }
 
 CstrBuffer::CstrBuffer(const char *filename)
-  : m_buffer(NULL), m_len(0) {
+  : m_buffer(nullptr), m_len(0) {
   struct stat sb;
   if (stat(filename, &sb) == 0) {
     if (sb.st_size > kMaxCap - 1) {

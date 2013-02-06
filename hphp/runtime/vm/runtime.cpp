@@ -324,10 +324,10 @@ Unit* compile_string(const char* s, size_t sz) {
   md5 = MD5(string_md5(s, sz, false, out_len));
 
   VM::Unit* u = Repo::get().loadUnit("", md5);
-  if (u != NULL) {
+  if (u != nullptr) {
     return u;
   }
-  return g_hphp_compiler_parse(s, sz, md5, NULL);
+  return g_hphp_compiler_parse(s, sz, md5, nullptr);
 }
 
 // Returned array has refcount zero! Caller must refcount.
@@ -369,7 +369,7 @@ bool run_intercept_handler_for_invokefunc(TypedValue* retval,
   Array intArgs =
     CREATE_VECTOR5(f->fullNameRef(), (this_ ? Variant(Object(this_)) : null),
                    args, ihandler->asCArrRef()[1], ref(doneFlag));
-  call_intercept_handler<false>(retval, intArgs, NULL, ihandler);
+  call_intercept_handler<false>(retval, intArgs, nullptr, ihandler);
   // $done is true, meaning don't enter the intercepted function.
   return !doneFlag.toBoolean();
 }
@@ -401,7 +401,7 @@ HphpArray* get_static_locals(const ActRec* ar) {
   } else if (ar->m_func->isGeneratorFromClosure()) {
     TypedValue* contLoc = frame_local(ar, 0);
     c_Continuation* cont = static_cast<c_Continuation*>(contLoc->m_data.pobj);
-    assert(cont != NULL);
+    assert(cont != nullptr);
     return cont->getStaticLocals();
   } else {
     return ar->m_func->getStaticLocals();

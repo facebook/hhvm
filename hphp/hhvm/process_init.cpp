@@ -90,12 +90,12 @@ public:
   }
   virtual const ClassInfo *findClassLike(CStrRef name) const {
     const ClassInfo* ci;
-    if ((ci = g_vmContext->findClassInfo(name)) != NULL
-        || (ci = g_vmContext->findInterfaceInfo(name)) != NULL
-        || (ci = g_vmContext->findTraitInfo(name)) != NULL) {
+    if ((ci = g_vmContext->findClassInfo(name)) != nullptr
+        || (ci = g_vmContext->findInterfaceInfo(name)) != nullptr
+        || (ci = g_vmContext->findTraitInfo(name)) != nullptr) {
       return ci;
     }
-    return NULL;
+    return nullptr;
   }
   virtual const ClassInfo *findInterface(CStrRef name) const {
     return g_vmContext->findInterfaceInfo(name);
@@ -165,14 +165,14 @@ void ProcessInit() {
   // HHVM_LIB_PATH_DEFAULT-based lookup will always succeed, assuming that the
   // application was built and installed correctly.
   String currentDir = g_vmContext->getCwd();
-  HPHP::Eval::PhpFile* file = NULL;
+  HPHP::Eval::PhpFile* file = nullptr;
 
   string slib = RuntimeOption::RepoAuthoritative ?
     string("/:systemlib.php") : systemlib_path();
 
   if (!slib.empty()) {
     file = g_vmContext->lookupPhpFile(String(slib).get(),
-                                      currentDir.data(), NULL);
+                                      currentDir.data(), nullptr);
   }
   if (!file) {
     // Die a horrible death.
@@ -244,7 +244,7 @@ void ProcessInit() {
     assert(cls);
     const ObjectStaticCallbacks* osc =
       get_builtin_object_static_callbacks(info->m_name);
-    assert(osc != NULL);
+    assert(osc != nullptr);
     *(osc->os_cls_ptr) = cls;
   }
 

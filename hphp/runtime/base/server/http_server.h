@@ -34,7 +34,7 @@ public:
   static time_t StartTime;
 
 public:
-  HttpServer(void *sslCTX = NULL);
+  HttpServer(void *sslCTX = nullptr);
   ~HttpServer();
 
   void run();

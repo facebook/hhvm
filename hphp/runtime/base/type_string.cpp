@@ -313,7 +313,7 @@ String &String::operator=(litstr s) {
     m_px = NEW(StringData)(s, AttachLiteral);
     m_px->setRefCount(1);
   } else {
-    m_px = NULL;
+    m_px = nullptr;
   }
   return *this;
 }
@@ -438,7 +438,7 @@ String &String::operator|=(CStrRef v) {
   int len1 = size();
   int len2 = v.size();
   int len;
-  char *copy = NULL;
+  char *copy = nullptr;
   if (len2 > len1) {
     len = len2;
     copy = string_duplicate(s2, len2);
@@ -460,7 +460,7 @@ String &String::operator&=(CStrRef v) {
   int len1 = size();
   int len2 = v.size();
   int len;
-  char *copy = NULL;
+  char *copy = nullptr;
   if (len2 < len1) {
     len = len2;
     copy = string_duplicate(s2, len2);
@@ -482,7 +482,7 @@ String &String::operator^=(CStrRef v) {
   int len1 = size();
   int len2 = v.size();
   int len;
-  char *copy = NULL;
+  char *copy = nullptr;
   if (len2 < len1) {
     len = len2;
     copy = string_duplicate(s2, len2);
@@ -821,7 +821,7 @@ void StaticString::init(litstr s, int length) {
 }
 
 StringDataSet &StaticString::TheStaticStringSet() {
-  if (s_stringSet == NULL) {
+  if (s_stringSet == nullptr) {
     s_stringSet = new StringDataSet();
   }
   return *s_stringSet;
@@ -837,7 +837,7 @@ void StaticString::ResetAll() {
   delete s_stringSet;
 }
 
-StringDataSet *StaticString::s_stringSet = NULL;
+StringDataSet *StaticString::s_stringSet = nullptr;
 
 class StaticStringUninitializer {
 public:

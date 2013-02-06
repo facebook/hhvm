@@ -79,7 +79,7 @@ void IDebuggable::Add(InfoVec &out, const char *name,
 
 void IDebuggable::AddServerStats(InfoVec &out, const char *name,
                                  const char *statsName /* = NULL */) {
-  if (statsName == NULL) statsName = name;
+  if (statsName == nullptr) statsName = name;
   Add(out, name, FormatNumber("%" PRId64, ServerStats::Get(statsName)));
 }
 

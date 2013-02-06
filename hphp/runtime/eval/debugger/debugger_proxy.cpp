@@ -31,7 +31,7 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
-    : m_stopped(false), m_local(local), m_dummySandbox(NULL),
+    : m_stopped(false), m_local(local), m_dummySandbox(nullptr),
       m_hasBreakPoints(false), m_threadMode(Normal), m_thread(0),
       m_signalThread(this, &DebuggerProxy::pollSignal),
       m_signum(CmdSignal::SignalNone) {
@@ -344,16 +344,16 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
                                   bool log, int frame) {
   Variant ret;
   StringBuffer sb;
-  StringBuffer *save = g_context->swapOutputBuffer(NULL);
+  StringBuffer *save = g_context->swapOutputBuffer(nullptr);
   g_context->setStdout(append_stdout, &sb);
   if (log) {
     Logger::SetThreadHook(append_stderr, &sb);
   }
   ret = null;
-  g_context->setStdout(NULL, NULL);
+  g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (log) {
-    Logger::SetThreadHook(NULL, NULL);
+    Logger::SetThreadHook(nullptr, nullptr);
   }
   output = sb.detach();
   return ret;
@@ -617,7 +617,7 @@ bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
         } else {
           if (last != frame) {
             m_flow->setFrame(frame);
-            m_flow->setNegativeFrame(NULL);
+            m_flow->setNegativeFrame(nullptr);
           }
           m_flow->setFileLine(cmd.getFileLine());
         }
@@ -655,7 +655,7 @@ Variant DebuggerProxyVM::ExecutePHP(const std::string &php, String &output,
                                     bool log, int frame) {
   Variant ret;
   StringBuffer sb;
-  StringBuffer *save = g_context->swapOutputBuffer(NULL);
+  StringBuffer *save = g_context->swapOutputBuffer(nullptr);
   g_context->setStdout(append_stdout, &sb);
   if (log) {
     Logger::SetThreadHook(append_stderr, &sb);
@@ -680,10 +680,10 @@ Variant DebuggerProxyVM::ExecutePHP(const std::string &php, String &output,
   } catch (...) {
     sb.append(Debugger::ColorStderr(String("(unknown exception was thrown)")));
   }
-  g_context->setStdout(NULL, NULL);
+  g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (log) {
-    Logger::SetThreadHook(NULL, NULL);
+    Logger::SetThreadHook(nullptr, nullptr);
   }
   output = sb.detach();
   return ret;
@@ -758,7 +758,7 @@ void DebuggerProxyVM::readInjTablesFromThread() {
   }
   if (m_injTables) {
     delete m_injTables;
-    m_injTables = NULL;
+    m_injTables = nullptr;
   }
   if (!g_vmContext->m_injTables) {
     return;
@@ -769,7 +769,7 @@ void DebuggerProxyVM::readInjTablesFromThread() {
 void DebuggerProxyVM::writeInjTablesToThread() {
   if (g_vmContext->m_injTables) {
     delete g_vmContext->m_injTables;
-    g_vmContext->m_injTables = NULL;
+    g_vmContext->m_injTables = nullptr;
   }
   if (!m_injTables) {
     return;
@@ -783,8 +783,8 @@ int DebuggerProxyVM::getRealStackDepth() {
   HPHP::VM::ActRec *fp = context->getFP();
   if (!fp) return 0;
 
-  while (fp != NULL) {
-    fp = context->getPrevVMState(fp, NULL, NULL);
+  while (fp != nullptr) {
+    fp = context->getPrevVMState(fp, nullptr, nullptr);
     depth++;
   }
   return depth;

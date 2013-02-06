@@ -25,7 +25,7 @@ namespace HPHP { namespace Util {
 
 static Vdso s_vdso;
 
-Vdso::Vdso() : m_handle(NULL), m_clock_gettime_ns(NULL) {
+Vdso::Vdso() : m_handle(nullptr), m_clock_gettime_ns(nullptr) {
   m_handle = dlopen("linux-vdso.so.1", RTLD_LAZY | RTLD_LOCAL | RTLD_NOLOAD);
   if (!m_handle) {
     return;

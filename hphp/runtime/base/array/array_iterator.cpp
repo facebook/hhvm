@@ -39,7 +39,7 @@ static StaticString s_Continuation("Continuation");
 // ArrayIter
 
 ArrayIter::ArrayIter() : m_pos(ArrayData::invalid_index) {
-  m_data = NULL;
+  m_data = nullptr;
 }
 
 HOT_FUNC
@@ -68,12 +68,12 @@ ArrayIter::ArrayIter(CArrRef array) : m_pos(0) {
 void ArrayIter::reset() {
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
-    m_data = NULL;
+    m_data = nullptr;
     if (ad) decRefArr(const_cast<ArrayData*>(ad));
     return;
   }
   ObjectData* obj = getRawObject();
-  m_data = NULL;
+  m_data = nullptr;
   assert(obj);
   decRefObj(obj);
 }
@@ -82,7 +82,7 @@ void ArrayIter::begin(CVarRef map, CStrRef context) {
   try {
     new (this) ArrayIter(map.begin(context));
   } catch (...) {
-    m_data = NULL;
+    m_data = nullptr;
     throw;
   }
 }
@@ -91,7 +91,7 @@ void ArrayIter::begin(CArrRef map, CStrRef context) {
   try {
     new (this) ArrayIter(map.get());
   } catch (...) {
-    m_data = NULL;
+    m_data = nullptr;
     throw;
   }
 }
@@ -308,15 +308,15 @@ CVarRef ArrayIter::secondRef() {
 
 void FullPos::reset() {
   ArrayData* container = getContainer();
-  if (container != NULL) {
+  if (container) {
     container->freeFullPos(*this);
-    assert(getContainer() == NULL);
+    assert(!getContainer());
   }
   setResetFlag(false);
   // unprotect the data
   if (hasAd()) {
     decRefArr(getAd());
-    setVar(NULL);
+    setVar(nullptr);
   }
 }
 
@@ -401,7 +401,7 @@ ArrayData* FullPos::cowCheck() {
   ArrayData* data;
   if (hasVar()) {
     data = getData();
-    if (!data) return NULL;
+    if (!data) return nullptr;
     if (data->getCount() > 1 && !data->noCopyOnWrite()) {
       *const_cast<Variant*>(getVar()) = data = data->copyWithStrongIterators();
     }
@@ -423,17 +423,17 @@ ArrayData* FullPos::getData() const {
   if (getVar()->is(KindOfArray)) {
     return getVar()->getArrayData();
   }
-  return NULL;
+  return nullptr;
 }
 
 ArrayData* FullPos::reregister() {
   ArrayData* container = getContainer();
-  assert(getArray() != NULL && container != getArray());
-  if (container != NULL) {
+  assert(getArray() != nullptr && container != getArray());
+  if (container != nullptr) {
     container->freeFullPos(*this);
   }
   setResetFlag(false);
-  assert(getContainer() == NULL);
+  assert(getContainer() == nullptr);
   escalateCheck();
   ArrayData* data = cowCheck();
   data->newFullPos(*this);
@@ -445,7 +445,7 @@ ArrayData* FullPos::reregister() {
 
 MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
                                    Variant &val) {
-  m_var = NULL;
+  m_var = nullptr;
   m_key = key;
   m_valp = &val;
   setVar(var);
@@ -463,7 +463,7 @@ MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
 
 MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
                                    Variant &val) {
-  m_var = NULL;
+  m_var = nullptr;
   m_key = key;
   m_valp = &val;
   if (data) {
@@ -483,7 +483,7 @@ MutableArrayIter::~MutableArrayIter() {
   ArrayData* container = getContainer();
   if (container) {
     container->freeFullPos(*this);
-    assert(getContainer() == NULL);
+    assert(getContainer() == nullptr);
   }
   // unprotect the data
   if (hasAd()) decRefArr(getAd());
@@ -508,8 +508,8 @@ void MutableArrayIter::begin(Variant& map, Variant* key, Variant& val,
   try {
     new (this) MutableArrayIter(map.begin(key, val, context));
   } catch (...) {
-    setContainer(NULL);
-    setVar(NULL);
+    setContainer(nullptr);
+    setVar(nullptr);
     throw;
   }
 }
@@ -518,7 +518,7 @@ void MutableArrayIter::begin(Variant& map, Variant* key, Variant& val,
 // MArrayIter
 
 MArrayIter::MArrayIter(const RefData* ref) {
-  m_var = NULL;
+  m_var = nullptr;
   ref->incRefCount();
   setVar((Variant*)(ref->tv()));
   assert(hasVar());
@@ -534,7 +534,7 @@ MArrayIter::MArrayIter(const RefData* ref) {
 }
 
 MArrayIter::MArrayIter(ArrayData *data) {
-  m_var = NULL;
+  m_var = nullptr;
   if (data) {
     assert(!data->isStatic());
     setAd(data);
@@ -553,7 +553,7 @@ MArrayIter::~MArrayIter() {
   ArrayData* container = getContainer();
   if (container) {
     container->freeFullPos(*this);
-    assert(getContainer() == NULL);
+    assert(getContainer() == nullptr);
   }
   // unprotect the data
   if (hasVar()) {
@@ -809,7 +809,7 @@ int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
       dest->arr().setIterType(ArrayIter::TypeArray);
       HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
-      getHphpArrayElm(elm, valOut, NULL);
+      getHphpArrayElm(elm, valOut, nullptr);
       return 1LL;
     }
     // We did not transfer ownership of the array to an iterator, so we need
@@ -821,7 +821,7 @@ int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     return 0LL;
   }
 cold:
-  return new_iter_array_cold(dest, ad, valOut, NULL);
+  return new_iter_array_cold(dest, ad, valOut, nullptr);
 }
 
 HOT_FUNC
@@ -866,7 +866,7 @@ class FreeObj {
  public:
   FreeObj() : m_obj(0) {}
   void operator=(ObjectData* obj) { m_obj = obj; }
-  ~FreeObj() { if (UNLIKELY(m_obj != NULL)) decRefObj(m_obj); }
+  ~FreeObj() { if (UNLIKELY(m_obj != nullptr)) decRefObj(m_obj); }
  private:
   ObjectData* m_obj;
 };
@@ -1032,11 +1032,11 @@ int64 iter_next(Iter* iter, TypedValue* valOut) {
     }
     tvDecRefOnly(valOut);
     arrIter->setPos(pos);
-    getHphpArrayElm(elm, valOut, NULL);
+    getHphpArrayElm(elm, valOut, nullptr);
     return 1;
   }
 cold:
-  return iter_next_cold(iter, valOut, NULL);
+  return iter_next_cold(iter, valOut, nullptr);
 }
 
 HOT_FUNC

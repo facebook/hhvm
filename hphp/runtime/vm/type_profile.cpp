@@ -101,7 +101,7 @@ static ValueProfileLine*
 profileInitMmap() {
   const std::string& path = RuntimeOption::EvalJitProfilePath;
   if (path.empty()) {
-    return NULL;
+    return nullptr;
   }
 
   TRACE(1, "profileInit: path %s\n", path.c_str());
@@ -110,7 +110,7 @@ profileInitMmap() {
     TRACE(0, "profileInit: open %s failed: %s\n", path.c_str(),
           strerror(errno));
     perror("open");
-    return NULL;
+    return nullptr;
   }
 
   size_t len = sizeof(ValueProfileLine) * kNumLines;
@@ -119,7 +119,7 @@ profileInitMmap() {
     perror("truncate");
     TRACE(0, "profileInit: truncate %s failed: %s\n", path.c_str(),
           strerror(errno));
-    return NULL;
+    return nullptr;
   }
 
   int flags = PROT_READ |
@@ -130,7 +130,7 @@ profileInitMmap() {
     perror("mmap");
     TRACE(0, "profileInit: mmap %s failed: %s\n", path.c_str(),
           strerror(errno));
-    return NULL;
+    return nullptr;
   }
   return (ValueProfileLine*)mmapRet;
 }
@@ -228,7 +228,7 @@ keyToVP(TypeProfileKey key, KeyToVPMode mode) {
     vp.m_tag = uint32_t(h);
     return &l[replaceCandidate];
   }
-  return NULL;
+  return nullptr;
 }
 
 void recordType(TypeProfileKey key, DataType dt) {

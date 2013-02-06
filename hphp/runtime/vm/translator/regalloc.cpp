@@ -75,7 +75,7 @@ RegAlloc::freeRegInfo(RegInfo *r) {
 RegInfo*
 RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
                 bool needsFill, int64 immVal, PhysReg target) {
-  RegInfo   *retval = NULL;
+  RegInfo   *retval = nullptr;
   RegContent cont   = RegContent(loc, immVal);
 
   if (loc.isValid()) {
@@ -660,7 +660,7 @@ RegAlloc::findFreeReg(const Location& loc) {
     }
     favoriteRegs = m_allRegs;
   } while(i++ < 2);
-  return NULL;
+  return nullptr;
 }
 
 void
@@ -712,7 +712,7 @@ PhysReg
 RegAlloc::getImmReg(int64 immVal, bool allowAllocate /* = true */) {
   DataType       type    = KindOfInt64;
   RegInfo::State state   = RegInfo::CLEAN;
-  RegInfo       *freeReg = NULL;
+  RegInfo       *freeReg = nullptr;
   RegContent     cont    = RegContent(immVal);
 
   // Check if val is already in some reg, and return it if so.

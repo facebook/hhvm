@@ -29,13 +29,13 @@ int64 TimeStamp::Current() {
 
 double TimeStamp::CurrentSecond() {
   struct timeval tp;
-  gettimeofday(&tp, NULL);
+  gettimeofday(&tp, nullptr);
   return (double)tp.tv_sec + (double)tp.tv_usec / 1000000;
 }
 
 Array TimeStamp::CurrentTime() {
   struct timeval tp;
-  gettimeofday(&tp, NULL);
+  gettimeofday(&tp, nullptr);
 
   timelib_time_offset *offset =
     timelib_get_time_zone_info(tp.tv_sec, TimeZone::Current()->get());
@@ -52,7 +52,7 @@ Array TimeStamp::CurrentTime() {
 
 String TimeStamp::CurrentMicroTime() {
   struct timeval tp;
-  gettimeofday(&tp, NULL);
+  gettimeofday(&tp, nullptr);
   char ret[100];
   snprintf(ret, 100, "%.8F %ld", (double)tp.tv_usec / 1000000, tp.tv_sec);
   return String(ret, CopyString);

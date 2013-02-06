@@ -20,7 +20,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-LockProfiler::PFUNC_PROFILE LockProfiler::s_pfunc_profile = NULL;
+LockProfiler::PFUNC_PROFILE LockProfiler::s_pfunc_profile = nullptr;
 bool LockProfiler::s_profile = false;
 int LockProfiler::s_profile_sampling = 1000;
 
@@ -29,7 +29,7 @@ LockProfiler::LockProfiler(bool profile) : m_profiling(false) {
       s_profile_sampling && (rand() % s_profile_sampling) == 0) {
     m_profiling = true;
 #if defined(__APPLE__)
-    gettimeofday(&m_lockTime, NULL);
+    gettimeofday(&m_lockTime, nullptr);
 #else
     clock_gettime(CLOCK_MONOTONIC, &m_lockTime);
 #endif
@@ -42,7 +42,7 @@ LockProfiler::~LockProfiler() {
     timeval unlockTime;
     unlockTime.tv_sec = 0;
     unlockTime.tv_usec = 0;
-    gettimeofday(&unlockTime, NULL);
+    gettimeofday(&unlockTime, nullptr);
     time_t dsec = unlockTime.tv_sec - m_lockTime.tv_sec;
     long dnsec = unlockTime.tv_usec - m_lockTime.tv_usec;
     int64 dusec = dsec * 1000000 + dnsec;

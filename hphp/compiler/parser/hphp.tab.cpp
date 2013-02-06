@@ -24,7 +24,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -202,7 +202,7 @@ static void on_constant(Parser *_p, Token &out, Token *stmts,
   Token sname;   _p->onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
 
   Token fname;   fname.setText("define");
-  Token params1; _p->onCallParam(params1, NULL, sname, 0);
+  Token params1; _p->onCallParam(params1, nullptr, sname, 0);
   Token params2; _p->onCallParam(params2, &params1, value, 0);
   Token call;    _p->onCall(call, 0, fname, params2, 0);
   Token scall;   _p->onExpStatement(scall, call);
@@ -222,7 +222,7 @@ static void prepare_continuation_call(Parser* _p, Token& rhs, const char* cname)
   if (HPHP::hhvm) {
     Token fname;  fname.setText(std::string("hphp_continuation_") + cname);
     Token empty;
-    _p->onCall(rhs, false, fname, empty, NULL, true);
+    _p->onCall(rhs, false, fname, empty, nullptr, true);
   } else {
     Token name;   name.setText(CONTINUATION_OBJECT_NAME);
     Token var;    _p->onSynthesizedVariable(var, name);
@@ -269,10 +269,10 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
       // hphp_unpack_continuation(v___cont__)
       Token name;    name.setText(CONTINUATION_OBJECT_NAME);
       Token var;     _p->onSynthesizedVariable(var, name);
-      Token param1;  _p->onCallParam(param1, NULL, var, false);
+      Token param1;  _p->onCallParam(param1, nullptr, var, false);
 
       Token cname;   cname.setText("hphp_unpack_continuation");
-      Token call;    _p->onCall(call, false, cname, param1, NULL, true);
+      Token call;    _p->onCall(call, false, cname, param1, nullptr, true);
 
       if (HPHP::hhvm) {
         switchExp = call;
@@ -338,7 +338,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     if (HPHP::hhvm) {
       type.reset();
     }
-    _p->onParam(params, NULL, type, var, false, NULL, NULL);
+    _p->onParam(params, nullptr, type, var, false, nullptr, nullptr);
   }
 }
 
@@ -374,19 +374,19 @@ void create_generator(Parser *_p, Token &out, Token &params,
     Token ofn;     ofn.setText(clsname ? "__METHOD__" : "__FUNCTION__");
     Token oname;   _p->onScalar(oname, clsname ? T_METHOD_C : T_FUNC_C, ofn);
 
-    Token param1;  _p->onCallParam(param1, NULL, cname, false);
+    Token param1;  _p->onCallParam(param1, nullptr, cname, false);
                    _p->onCallParam(param1, &param1, fname, false);
                    _p->onCallParam(param1, &param1, oname, false);
 
     if (getArgs) {
       Token cname;   cname.setText("func_get_args");
       Token empty;
-      Token call;    _p->onCall(call, false, cname, empty, NULL);
+      Token call;    _p->onCall(call, false, cname, empty, nullptr);
                      _p->onCallParam(param1, &param1, call, false);
     }
 
     Token cname0;  cname0.setText("hphp_create_continuation");
-    Token call;    _p->onCall(call, false, cname0, param1, NULL, true);
+    Token call;    _p->onCall(call, false, cname0, param1, nullptr, true);
     Token ret;     _p->onReturn(ret, &call);
 
     Token stmts0;  _p->onStatementListStart(stmts0);
@@ -420,7 +420,7 @@ void transform_yield(Parser *_p, Token &stmts, int index,
   {
     Token name;    name.setText(CONTINUATION_OBJECT_NAME);
     Token var;     _p->onSynthesizedVariable(var, name);
-    Token param0;  _p->onCallParam(param0, NULL, var, false);
+    Token param0;  _p->onCallParam(param0, nullptr, var, false);
 
     Token snum;    snum.setText(boost::lexical_cast<std::string>(index));
     Token num;     _p->onScalar(num, T_LNUMBER, snum);
@@ -429,12 +429,12 @@ void transform_yield(Parser *_p, Token &stmts, int index,
     Token param2;  _p->onCallParam(param2, &param1, *expr, false);
 
     Token cname;   cname.setText("hphp_pack_continuation");
-    Token call;    _p->onCall(call, false, cname, param2, NULL, true);
+    Token call;    _p->onCall(call, false, cname, param2, nullptr, true);
     _p->onExpStatement(update, call);
   }
 
   // return
-  Token ret;     _p->onReturn(ret, NULL, false);
+  Token ret;     _p->onReturn(ret, nullptr, false);
 
   // __yield__N:
   Token lname;   lname.setText(YIELD_LABEL_PREFIX +
@@ -463,7 +463,7 @@ void transform_yield_break(Parser *_p, Token &out) {
   Token done;    _p->onExpStatement(done, mcall);
 
   // return
-  Token ret;     _p->onReturn(ret, NULL, false);
+  Token ret;     _p->onReturn(ret, nullptr, false);
 
   Token stmts0;  _p->onStatementListStart(stmts0);
   Token stmts1;  _p->addStatement(stmts1, stmts0, done);
@@ -486,22 +486,22 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
     Token cname;    cname.setText(byRef ?
                                   "hphp_get_mutable_iterator" :
                                   "hphp_get_iterator");
-    Token param1;   _p->onCallParam(param1, NULL, arr, 0);
-    Token call;     _p->onCall(call, 0, cname, param1, NULL);
+    Token param1;   _p->onCallParam(param1, nullptr, arr, 0);
+    Token call;     _p->onCall(call, 0, cname, param1, nullptr);
     Token lname;    lname.setText(loopvar);
     Token var;      _p->onSynthesizedVariable(var, lname);
     Token assign;   _p->onAssign(assign, var, call, false);
 
     if (byRef) {
       // hphp_get_mutable_iterator will reset the array's internal pointer.
-      _p->onExprListElem(init, NULL, assign);
+      _p->onExprListElem(init, nullptr, assign);
     } else {
       // We have to reset the iterator's pointer ourselves.
       Token rname;    rname.setText("rewind");
       Token empty;    empty = 1;
       Token rcall;    _p->onObjectMethodCall(rcall, assign, rname, empty);
 
-      _p->onExprListElem(init, NULL, rcall);
+      _p->onExprListElem(init, nullptr, rcall);
     }
   }
 
@@ -513,7 +513,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
     Token pname;    _p->onName(pname, pn, Parser::VarName);
     Token empty;    empty = 1;
     Token valid;    _p->onObjectMethodCall(valid, var, pname, empty);
-    _p->onExprListElem(cond, NULL, valid);
+    _p->onExprListElem(cond, nullptr, valid);
   }
 
   Token step;
@@ -524,7 +524,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
     Token pname;    _p->onName(pname, pn, Parser::VarName);
     Token empty;    empty = 1;
     Token next;     _p->onObjectMethodCall(next, var, pname, empty);
-    _p->onExprListElem(step, NULL, next);
+    _p->onExprListElem(step, nullptr, next);
   }
 
   {
@@ -752,7 +752,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   Token fname; fname.setText("__xhpAttributeDeclaration");
   {
     Token m;
-    Token m1; m1.setNum(T_PROTECTED); _p->onMemberModifier(m, NULL, m1);
+    Token m1; m1.setNum(T_PROTECTED); _p->onMemberModifier(m, nullptr, m1);
     Token m2; m2.setNum(T_STATIC);    _p->onMemberModifier(modifiers, &m, m2);
   }
   _p->pushFuncLocation();
@@ -788,7 +788,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     Token cls;     _p->onName(cls, parent, Parser::StringName);
     Token fname;   fname.setText("__xhpAttributeDeclaration");
     Token param1;  _p->onCall(param1, 0, fname, dummy, &cls);
-    Token params1; _p->onCallParam(params1, NULL, param1, 0);
+    Token params1; _p->onCallParam(params1, nullptr, param1, 0);
 
     for (unsigned int i = 0; i < classes.size(); i++) {
       Token parent;  parent.set(T_STRING, classes[i]);
@@ -803,7 +803,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     Token params2; _p->onCallParam(params2, &params1, arrAttributes, 0);
 
     Token name;    name.set(T_STRING, "array_merge");
-    Token call;    _p->onCall(call, 0, name, params2, NULL);
+    Token call;    _p->onCall(call, 0, name, params2, nullptr);
     Token tvar;    tvar.set(T_VARIABLE, "_");
     Token var;     _p->onSimpleVariable(var, tvar);
     Token assign;  _p->onAssign(assign, var, call, 0);
@@ -6808,7 +6808,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 1547 "../../../hphp/util/parser/hphp.y"
     { _p->onClassVariableStart
-                                         ((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);;}
+                                         ((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),nullptr);;}
     break;
 
   case 185:
@@ -6831,7 +6831,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 1553 "../../../hphp/util/parser/hphp.y"
     { _p->onClassVariableStart
-                                         ((yyval),NULL,(yyvsp[(1) - (2)]),NULL);;}
+                                         ((yyval),nullptr,(yyvsp[(1) - (2)]),nullptr);;}
     break;
 
   case 188:
@@ -8014,7 +8014,7 @@ yyreduce:
 #line 1892 "../../../hphp/util/parser/hphp.y"
     { Token t1; _p->onArray(t1,(yyvsp[(1) - (2)]));
                                          Token t2; _p->onArray(t2,(yyvsp[(2) - (2)]));
-                                         _p->onCallParam((yyvsp[(1) - (2)]),NULL,t1,0);
+                                         _p->onCallParam((yyvsp[(1) - (2)]),nullptr,t1,0);
                                          _p->onCallParam((yyval), &(yyvsp[(1) - (2)]),t2,0);
                                          (yyval).setText("");;}
     break;
@@ -8025,7 +8025,7 @@ yyreduce:
 #line 1899 "../../../hphp/util/parser/hphp.y"
     { _p->onArray((yyvsp[(4) - (6)]),(yyvsp[(1) - (6)]));
                                          _p->onArray((yyvsp[(5) - (6)]),(yyvsp[(3) - (6)]));
-                                         _p->onCallParam((yyvsp[(2) - (6)]),NULL,(yyvsp[(4) - (6)]),0);
+                                         _p->onCallParam((yyvsp[(2) - (6)]),nullptr,(yyvsp[(4) - (6)]),0);
                                          _p->onCallParam((yyval), &(yyvsp[(2) - (6)]),(yyvsp[(5) - (6)]),0);
                                          (yyval).setText((yyvsp[(6) - (6)]).text());;}
     break;

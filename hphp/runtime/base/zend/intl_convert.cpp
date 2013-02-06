@@ -22,7 +22,7 @@ namespace HPHP {
 void intl_convert_utf8_to_utf16(UChar** target, int* target_len,
                                 const char* src, int  src_len,
                                 UErrorCode* status) {
-  UChar* dst_buf = NULL;
+  UChar* dst_buf = nullptr;
   int32_t dst_len = 0;
 
   /* If *target is NULL determine required destination buffer size
@@ -55,7 +55,7 @@ void intl_convert_utf8_to_utf16(UChar** target, int* target_len,
 
   /* Convert source string from UTF-8 to UTF-16. */
   *status = U_ZERO_ERROR;
-  u_strFromUTF8(dst_buf, dst_len+1, NULL, src, src_len, status);
+  u_strFromUTF8(dst_buf, dst_len+1, nullptr, src, src_len, status);
   if (U_FAILURE(*status)) {
     free(dst_buf);
     return;
@@ -72,12 +72,12 @@ void intl_convert_utf8_to_utf16(UChar** target, int* target_len,
 void intl_convert_utf16_to_utf8(char** target, int* target_len,
                                 const UChar* src, int  src_len,
                                 UErrorCode*  status) {
-  char* dst_buf = NULL;
+  char* dst_buf = nullptr;
   int32_t dst_len;
 
   /* Determine required destination buffer size (pre-flighting). */
   *status = U_ZERO_ERROR;
-  u_strToUTF8(NULL, 0, &dst_len, src, src_len, status);
+  u_strToUTF8(nullptr, 0, &dst_len, src, src_len, status);
 
   /* Bail out if an unexpected error occured.
    * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
@@ -94,7 +94,7 @@ void intl_convert_utf16_to_utf8(char** target, int* target_len,
 
   /* Convert source string from UTF-16 to UTF-8. */
   *status = U_ZERO_ERROR;
-  u_strToUTF8(dst_buf, dst_len, NULL, src, src_len, status);
+  u_strToUTF8(dst_buf, dst_len, nullptr, src, src_len, status);
   if (U_FAILURE(*status)) {
     free(dst_buf);
     return;

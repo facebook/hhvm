@@ -47,7 +47,7 @@ bool CmdInstrument::help(DebuggerClient *client) {
                    "list injections",
                    "inst [c]lear",
                    "clear all injections",
-                   NULL);
+                   nullptr);
   client->helpBody(
     "Use this command to instrument the program"
   );
@@ -190,8 +190,8 @@ void CmdInstrument::validateAndWriteToTable(DebuggerProxyVM *proxy) {
   if (!proxy->getInjTables()) {
     proxy->setInjTables(new VM::InjectionTables());
   }
-  VM::InjectionTableInt64* tablePC = NULL;
-  VM::InjectionTableSD* tableFEntry = NULL;
+  VM::InjectionTableInt64* tablePC = nullptr;
+  VM::InjectionTableSD* tableFEntry = nullptr;
 
   for (int i = 0; i < (int)m_ips.size(); i++) {
     InstPointInfoPtr ipi = m_ips[i];
@@ -204,10 +204,10 @@ void CmdInstrument::validateAndWriteToTable(DebuggerProxyVM *proxy) {
         ipi->m_locType == InstPointInfo::LocFileLine) {
       // bytecode address
       const uchar *pc = ipi->lookupPC();
-      if (pc == NULL) {
+      if (pc == nullptr) {
         continue;
       }
-      if (tablePC == NULL) {
+      if (tablePC == nullptr) {
         tablePC = new VM::InjectionTableInt64();
       }
       ipi->m_valid = true;
@@ -216,7 +216,7 @@ void CmdInstrument::validateAndWriteToTable(DebuggerProxyVM *proxy) {
     if (ipi->m_locType == InstPointInfo::LocFuncEntry) {
       StackStringData sd(ipi->m_func.c_str(), ipi->m_func.size(), AttachLiteral);
       const StringData* sdCache = VM::InjectionCache::GetStringData(&sd);
-      if (tableFEntry == NULL) {
+      if (tableFEntry == nullptr) {
         tableFEntry = new VM::InjectionTableSD();
       }
       ipi->m_valid = true;

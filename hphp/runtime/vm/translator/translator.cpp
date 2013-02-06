@@ -60,15 +60,15 @@ void InstrStream::append(NormalizedInstruction* ni) {
     assert(first);
     last->next = ni;
     ni->prev = last;
-    ni->next = NULL;
+    ni->next = nullptr;
     last = ni;
     return;
   }
   assert(!first);
   first = ni;
   last = ni;
-  ni->prev = NULL;
-  ni->next = NULL;
+  ni->prev = nullptr;
+  ni->next = nullptr;
 }
 
 void InstrStream::remove(NormalizedInstruction* ni) {
@@ -82,8 +82,8 @@ void InstrStream::remove(NormalizedInstruction* ni) {
   } else {
     last = ni->prev;
   }
-  ni->prev = NULL;
-  ni->next = NULL;
+  ni->prev = nullptr;
+  ni->next = nullptr;
 }
 
 void Tracelet::constructLiveRanges() {
@@ -152,7 +152,7 @@ DynLocation* Tracelet::newDynLocation() {
 
 void Tracelet::print(std::ostream& out) const {
   const NormalizedInstruction* i = m_instrStream.first;
-  if (i == NULL) {
+  if (i == nullptr) {
     out << "<empty>\n";
     return;
   }
@@ -295,7 +295,7 @@ Translator::liveType(const Cell* outer, const Location& l) {
     TRACE(2, "liveType Var -> %d\n", innerType);
     return RuntimeType(KindOfRef, innerType);
   }
-  const Class *klass = NULL;
+  const Class *klass = nullptr;
   if (valueType == KindOfObject) {
     // TODO: Infer the class, too.
     if (false) {
@@ -314,7 +314,7 @@ RuntimeType Translator::outThisObjectType() {
   // ctx. Zend allows this assumption to be violated but we have
   // deliberately chosen to diverge from them here.
   const Class *ctx = curFunc()->isMethod() ?
-    arGetContextClass(curFrame()) : NULL;
+    arGetContextClass(curFrame()) : nullptr;
   if (ctx) {
     assert(!curFrame()->hasThis() ||
            curFrame()->getThis()->getVMClass()->classof(ctx));
@@ -690,7 +690,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
         return RuntimeType(curClass());
       } else if (op == OpParent) {
         Class* clss = curClass();
-        if (clss != NULL)
+        if (clss != nullptr)
           return RuntimeType(clss->parent());
       }
       return RuntimeType(KindOfClass);
@@ -867,7 +867,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
       if (inputs.size() == 2) {
         return bitOpType(inputs[0], inputs[1]);
       } else {
-        return bitOpType(inputs[0], NULL);
+        return bitOpType(inputs[0], nullptr);
       }
     }
 
@@ -1337,9 +1337,9 @@ void Translator::analyzeSecondPass(Tracelet& t) {
        * need to put the class and method name strings, or the
        * Class* into registers.
        */
-      prev->outStack = NULL;
-      prev->prev->outStack = NULL;
-      prev->prev->prev->outStack = NULL;
+      prev->outStack = nullptr;
+      prev->prev->outStack = nullptr;
+      prev->prev->prev->outStack = nullptr;
     }
 
     if (RuntimeOption::RepoAuthoritative &&
@@ -1388,7 +1388,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       const bool alreadyHoisted = !prev->outStack;
 
       if (!alreadyHoisted) {
-        prev->outStack = NULL;
+        prev->outStack = nullptr;
         SKTRACE(3, ni->source, "hoisting Pop instruction in analysis\n");
         for (unsigned i = 0; i < ni->deadLocs.size(); ++i) {
           prev->deadLocs.push_back(ni->deadLocs[i]);
@@ -1461,7 +1461,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
      * TODO: #1181258 this should mostly be subsumed by the IR.
      * Remove this once the IR is seen to be handling it.
      */
-    NormalizedInstruction* pp = NULL;
+    NormalizedInstruction* pp = nullptr;
     if (prevOp == OpString &&
         (ni->m_txFlags & Supported)) {
       switch (op) {
@@ -1469,7 +1469,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
         case OpReqSrc:
         case OpReqDoc:
           /* Dont waste a register on the string */
-          prev->outStack = NULL;
+          prev->outStack = nullptr;
           pp = prev->prev;
       }
     }
@@ -1486,7 +1486,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
          prevOp == OpBareThis)) {
       assert(!ni->outStack);
       ni->grouped = true;
-      prev->outStack = NULL;
+      prev->outStack = nullptr;
       pp = prev->prev;
     }
 
@@ -1504,7 +1504,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
               There is no need to inc/dec rbx between the two (since
               there will be no code between them)
             */
-            ppp->outStack = NULL;
+            ppp->outStack = nullptr;
             ni->skipSync = true;
             break;
 
@@ -1519,7 +1519,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
 
 static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
                                            DynLocation* dl) {
-  while (ni != NULL) {
+  while (ni != nullptr) {
     if (ni->outStack == dl ||
         ni->outLocal == dl ||
         ni->outLocal2 == dl ||
@@ -1658,13 +1658,13 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
             // profiler, or this code is unreachable,
             // and there's an earlier bytecode in the tracelet
             // thats going to fatal
-            NormalizedInstruction *src = NULL;
+            NormalizedInstruction *src = nullptr;
             if (mapContains(tas.m_changeSet, dl->location)) {
               src = findInputSrc(tas.m_t->m_instrStream.last, dl);
               if (src && src->outputPredicted) {
                 src->outputPredicted = false;
               } else {
-                src = NULL;
+                src = nullptr;
               }
             }
             if (!src) {
@@ -1724,11 +1724,11 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
 
         const StringData* metaName = ni->unit()->lookupLitstrId(info.m_data);
         const StringData* rttName =
-          dl->rtt.valueClass() ? dl->rtt.valueClass()->name() : NULL;
+          dl->rtt.valueClass() ? dl->rtt.valueClass()->name() : nullptr;
         // The two classes might not be exactly the same, which is ok
         // as long as metaCls is more derived than rttCls.
         Class* metaCls = Unit::lookupClass(metaName);
-        Class* rttCls = rttName ? Unit::lookupClass(rttName) : NULL;
+        Class* rttCls = rttName ? Unit::lookupClass(rttName) : nullptr;
         if (metaCls && rttCls && metaCls != rttCls &&
             !metaCls->classof(rttCls)) {
           // Runtime type is more derived
@@ -2992,7 +2992,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
     ni->source = sk;
     ni->stackOff = stackFrameOffset;
     ni->funcd = (t.m_arState.getCurrentState() == ActRecState::KNOWN) ?
-      t.m_arState.getCurrentFunc() : NULL;
+      t.m_arState.getCurrentFunc() : nullptr;
     ni->m_unit = unit;
     ni->preppedByRef = false;
     ni->breaksTracelet = false;
@@ -3300,7 +3300,7 @@ breakBB:
 }
 
 Translator::Translator() :
-    m_resumeHelper(NULL),
+    m_resumeHelper(nullptr),
     m_useHHIR(false),
     m_createdTime(Timer::GetCurrentTimeMicros()) {
   initInstrInfo();
@@ -3349,7 +3349,7 @@ Translator::addDbgBLPC(PC pc) {
 }
 
 uint64* Translator::getTransCounterAddr() {
-  if (!isTransDBEnabled()) return NULL;
+  if (!isTransDBEnabled()) return nullptr;
 
   TransID id = m_translations.size();
 
@@ -3453,7 +3453,7 @@ ActRecState::pushDynFunc() {
   TRACE(2, "ActRecState: pushDynFunc\n");
   Record r;
   r.m_state = UNKNOWABLE;
-  r.m_topFunc = NULL;
+  r.m_topFunc = nullptr;
   r.m_entryArDelta = InvalidEntryArDelta;
   m_arStack.push_back(r);
 }
@@ -3507,7 +3507,7 @@ ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
 
 const Func*
 ActRecState::getCurrentFunc() {
-  if (m_arStack.empty()) return NULL;
+  if (m_arStack.empty()) return nullptr;
   return m_arStack.back().m_topFunc;
 }
 
@@ -3519,13 +3519,13 @@ ActRecState::getCurrentState() {
 
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup) {
-  if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return NULL;
+  if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
   bool privateOnly = false;
   if (!RuntimeOption::RepoAuthoritative ||
       !(cls->preClass()->attrs() & AttrUnique)) {
     Class* ctx = curFunc()->cls();
     if (!ctx || !ctx->classof(cls)) {
-      return NULL;
+      return nullptr;
     }
     if (!staticLookup) privateOnly = true;
   }
@@ -3535,7 +3535,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
     g_vmContext->lookupClsMethod(func, cls, name, 0, false) :
     g_vmContext->lookupObjMethod(func, cls, name, false);
 
-  if (res == MethodLookup::MethodNotFound) return NULL;
+  if (res == MethodLookup::MethodNotFound) return nullptr;
 
   assert(res == MethodLookup::MethodFoundWithThis ||
          res == MethodLookup::MethodFoundNoThis ||
@@ -3550,7 +3550,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   if ((privateOnly && (!(func->attrs() & AttrPrivate) || magicCall)) ||
       func->isAbstract() ||
       func->attrs() & AttrDynamicInvoke) {
-    return NULL;
+    return nullptr;
   }
 
   if (staticLookup) {
@@ -3566,16 +3566,16 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
        *       - Could deal with this by checking for AttrNoOverride on the
        *         class
        */
-      func = NULL;
+      func = nullptr;
     }
   } else if (!(func->attrs() & AttrPrivate)) {
     if (magicCall || func->attrs() & AttrStatic) {
       if (!(cls->preClass()->attrs() & AttrNoOverride)) {
-        func = NULL;
+        func = nullptr;
       }
     } else if (!(func->attrs() & AttrNoOverride && !func->hasStaticLocals()) &&
                !(cls->preClass()->attrs() & AttrNoOverride)) {
-      func = NULL;
+      func = nullptr;
     }
   }
   return func;

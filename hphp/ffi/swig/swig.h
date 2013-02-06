@@ -46,7 +46,7 @@ public:
     }
     m_pointers.clear();
     hphp_ffi_context_exit(m_context);
-    m_context = NULL;
+    m_context = nullptr;
     hphp_ffi_session_exit();
   }
 
@@ -78,7 +78,7 @@ HPHP::Variant *hphpBuildVariant(int kind, void *v) {
     return hphp_ffi_buildVariant(8, v, 0);
   default:
     // impossible
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -287,7 +287,7 @@ HPHP::Variant *hphpInvoke(HPHP::HphpSession *s, const char *func,
     const HPHP::ExtendedException *ee =
       dynamic_cast<const HPHP::ExtendedException *>(&e);
     if (ee) HPHP::ExtendedLogger::Log(true, *ee->getBackTrace());
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -305,7 +305,7 @@ HPHP::Variant *hphpInvokeMethod(HPHP::HphpSession *s, HPHP::Variant *target,
     const HPHP::ExtendedException *ee =
       dynamic_cast<const HPHP::ExtendedException *>(&e);
     if (ee) HPHP::ExtendedLogger::Log(true, *ee->getBackTrace());
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -323,7 +323,7 @@ HPHP::Variant *hphpInvokeStaticMethod(HPHP::HphpSession *s, const char *cls,
     const HPHP::ExtendedException *ee =
       dynamic_cast<const HPHP::ExtendedException *>(&e);
     if (ee) HPHP::ExtendedLogger::Log(true, *ee->getBackTrace());
-    return NULL;
+    return nullptr;
   }
 }
 

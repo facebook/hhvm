@@ -23,7 +23,7 @@ bool CmdAbort::help(DebuggerClient *client) {
   client->helpTitle("Abort Command");
   client->helpCmds(
     "[a]bort", "aborts current PHP code input",
-    NULL
+    nullptr
   );
   client->helpBody(
     "You will have to type this command on a new line, while you're typing "

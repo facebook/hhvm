@@ -84,7 +84,7 @@ ObjectData *FrameInjection::GetThis(bool skip /* = false */) {
   if (t) {
     return t->getObjectV();
   }
-  return NULL;
+  return nullptr;
 }
 
 String FrameInjection::GetContainingFileName(bool skip /* = false */) {
@@ -371,12 +371,12 @@ ObjectData *FrameInjection::GetObjectV(
     }
 
     if (!(fi->m_flags & (PseudoMain | BuiltinFunction)) || !fi->m_prev) {
-      return NULL;
+      return nullptr;
     }
 
     fi = fi->m_prev;
   } while (true);
-  return NULL;
+  return nullptr;
 }
 
 String FrameInjection::getFileName() {
@@ -385,13 +385,13 @@ String FrameInjection::getFileName() {
     return m_name[0] == '_' ? m_name : m_name + 10;
   }
   const char *f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
-  if (f != NULL) {
+  if (f != nullptr) {
     return f;
   }
   const char *c = strstr(m_name, "::");
   if (c) {
     f = SourceInfo::TheSourceInfo.getClassDeclaringFile(getClassName());
-    if (f != NULL) {
+    if (f != nullptr) {
       return f;
     }
   }
@@ -409,7 +409,7 @@ ObjectData *FrameInjectionFunction::getThis() const {
   if ((m_flags & PseudoMain) && m_prev) {
     return m_prev->getObjectV();
   }
-  return NULL;
+  return nullptr;
 }
 
 ObjectData *FrameInjectionFunction::getThisForArrow() {
@@ -491,14 +491,14 @@ FIStaticMethodNoMem::~FIStaticMethodNoMem() {
 HOT_FUNC_HPHP
 ObjectData *FrameInjectionObjectMethod::getThis() const {
   if (!m_object->o_getId()) {
-    return NULL;
+    return nullptr;
   }
   return m_object;
 }
 
 ObjectData *FrameInjectionObjectMethod::getThisForBacktrace() const {
   if (m_object && !m_object->o_getId()) {
-    return NULL;
+    return nullptr;
   }
   return m_object;
 };

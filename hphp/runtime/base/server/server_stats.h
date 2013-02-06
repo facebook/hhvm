@@ -227,7 +227,7 @@ private:
  */
 class IOStatusHelper {
 public:
-  IOStatusHelper(const char *name, const char *address = NULL, int port = 0);
+  IOStatusHelper(const char *name, const char *address = nullptr, int port = 0);
   ~IOStatusHelper();
 
 private:

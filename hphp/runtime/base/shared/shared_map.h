@@ -32,7 +32,7 @@ namespace HPHP {
  */
 class SharedMap : public ArrayData, Sweepable {
 public:
-  SharedMap(SharedVariant* source) : m_arr(source), m_localCache(NULL) {
+  SharedMap(SharedVariant* source) : m_arr(source), m_localCache(nullptr) {
     source->incRef();
   }
 
@@ -44,7 +44,7 @@ public:
   virtual bool isSharedMap() const { return true; }
 
   virtual SharedVariant *getSharedVariant() const {
-    if (m_arr->shouldCache()) return NULL;
+    if (m_arr->shouldCache()) return nullptr;
     return m_arr;
   }
 

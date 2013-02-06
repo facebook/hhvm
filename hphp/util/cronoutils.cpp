@@ -99,7 +99,7 @@ extern char *tzname[2];
 /* debug_file is the file to output debug messages to.  No debug
  * messages are output if it is set to NULL.
  */
-FILE	*debug_file = NULL;
+FILE	*debug_file = nullptr;
 
 
 /* America and Europe disagree on whether weeks start on Sunday or
@@ -481,12 +481,12 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_mult
     struct tm * tempTime;
 
     tempTime = localtime(&start_time);
-    if (NULL != tempTime)
+    if (nullptr != tempTime)
     {
         memcpy(&tm_initial, tempTime, sizeof(struct tm));
 
         free(tempTime);
-        tempTime = NULL;
+        tempTime = nullptr;
     }
 #endif
     switch (periodicity)
@@ -548,12 +548,12 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_mult
 	localtime_r(&start_time, &tm_adjusted);
 #else
 	tempTime = localtime(&start_time);
-	if (NULL != tempTime)
+	if (nullptr != tempTime)
 	{
 	    memcpy(&tm_adjusted, tempTime, sizeof(struct tm));
 
 	    free(tempTime);
-	    tempTime = NULL;
+	    tempTime = nullptr;
 	}
 #endif
 	if (   (tm_adjusted.tm_hour != 0)
@@ -659,7 +659,7 @@ static const char *european_date_formats[] =
     "%d-%b-%Y",
     "%b %d %T %Y",
     "%b %d %Y",
-    NULL
+    nullptr
 };
 
 static const char *american_date_formats[] =
@@ -673,7 +673,7 @@ static const char *american_date_formats[] =
     "%b/%d/%Y %T",
     "%b/%d/%Y %H:%M",
     "%b/%d/%Y",
-    NULL
+    nullptr
 };
 
 

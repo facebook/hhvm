@@ -100,7 +100,7 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
   RunUserProfiler(ar, ProfileEnter);
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
-  if (profiler != NULL) {
+  if (profiler != nullptr) {
     const char* name;
     switch (funcType) {
       case NormalFunc:
@@ -131,7 +131,7 @@ void EventHook::onFunctionExit(const ActRec* ar) {
   RunUserProfiler(ar, ProfileExit);
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
-  if (profiler != NULL) {
+  if (profiler != nullptr) {
     end_profiler_frame(profiler);
   }
 #endif

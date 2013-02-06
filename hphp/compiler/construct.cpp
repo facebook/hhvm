@@ -364,7 +364,7 @@ void Construct::dumpNode(int spc) {
   }
 
   string refstr;
-  if (dynamic_cast<SimpleVariable*>(this) != NULL) {
+  if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
     if (isReferencedValid()) {
       if (isReferenced()) {
         refstr += ",Referenced";
@@ -380,7 +380,7 @@ void Construct::dumpNode(int spc) {
   if (refstr != "") refstr = " (" + refstr.substr(1) + ")";
 
   string objstr;
-  if (dynamic_cast<SimpleVariable*>(this) != NULL) {
+  if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
     if (isNeededValid()) {
       if (isNeeded()) {
         objstr += "Object";

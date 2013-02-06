@@ -104,13 +104,13 @@ public:
    */
   virtual const void *getPostData(int &size) = 0;
   virtual bool hasMorePostData() { return false; }
-  virtual const void *getMorePostData(int &size) { size = 0; return NULL; }
+  virtual const void *getMorePostData(int &size) { size = 0; return nullptr; }
   virtual bool getFiles(std::string &files) { return false; }
   /**
    * Is this a GET, POST or anything?
    */
   virtual Method getMethod() = 0;
-  virtual const char *getExtendedMethod() { return NULL;}
+  virtual const char *getExtendedMethod() { return nullptr;}
   const char *getMethodName();
 
   /**
@@ -297,27 +297,27 @@ public:
 private:
   void sendRawLocked(void *data, int size, int code = 200,
                      bool compressed = false, bool chunked = false,
-                     const char *codeInfo = NULL);
+                     const char *codeInfo = nullptr);
 public:
   virtual void sendRaw(void *data, int size, int code = 200,
                        bool compressed = false, bool chunked = false,
-                       const char *codeInfo = NULL);
+                       const char *codeInfo = nullptr);
 private:
   void sendStringLocked(const char *data, int code = 200,
                         bool compressed = false, bool chunked = false,
-                        const char * codeInfo = NULL) {
+                        const char * codeInfo = nullptr) {
     sendRawLocked((void*)data, strlen(data), code, compressed, chunked,
                   codeInfo);
   }
 public:
   void sendString(const char *data, int code = 200, bool compressed = false,
                   bool chunked = false,
-                  const char * codeInfo = NULL) {
+                  const char * codeInfo = nullptr) {
     sendRaw((void*)data, strlen(data), code, compressed, chunked, codeInfo);
   }
   void sendString(const std::string &data, int code = 200,
                   bool compressed = false, bool chunked = false,
-                  const char *codeInfo = NULL) {
+                  const char *codeInfo = nullptr) {
     sendRaw((void*)data.c_str(), data.length(), code, compressed, chunked,
             codeInfo);
   }

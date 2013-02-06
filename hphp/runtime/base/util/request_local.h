@@ -43,7 +43,7 @@ namespace HPHP {
 template<typename T>
 struct RequestLocal {
   T *get() const {
-    if (m_node.m_p == NULL) {
+    if (m_node.m_p == nullptr) {
       const_cast<RequestLocal<T>*>(this)->create();
     }
     if (!m_node.m_p->getInited()) {
@@ -60,7 +60,7 @@ struct RequestLocal {
   static void OnThreadExit(void * p) {
     ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
     delete pNode->m_p;
-    pNode->m_p = NULL;
+    pNode->m_p = nullptr;
   }
 
   T *operator->() const {
@@ -76,12 +76,12 @@ struct RequestLocal {
 
 template<typename T>
 void RequestLocal<T>::create() {
-  if (m_node.m_on_thread_exit_fn == NULL) {
+  if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = RequestLocal<T>::OnThreadExit;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  assert(m_node.m_p == NULL);
+  assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
 }
 

@@ -109,7 +109,7 @@ Variant *hphp_ffi_buildVariant(int t, void* v, int len) {
   case 9: return NEW(Variant)(Array::Create());
   }
   assert(false);
-  return NULL;
+  return nullptr;
 }
 
 void hphp_ffi_freeVariant(Variant *v) {

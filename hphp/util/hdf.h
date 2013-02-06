@@ -117,7 +117,7 @@ public:
    * default value instead.
    */
   bool getBool(bool defValue = false) const;
-  const char *get(const char *defValue = NULL) const;
+  const char *get(const char *defValue = nullptr) const;
   std::string getString(const std::string &defValue = "") const;
   char   getByte  (char   defValue = 0) const;
   uchar  getUByte (uchar  defValue = 0) const;

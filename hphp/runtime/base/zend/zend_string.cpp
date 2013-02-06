@@ -149,7 +149,7 @@ char *string_concat(const char *s1, int len1, const char *s2, int len2,
                     int &len) {
   len = len1 + len2;
   char *buf = (char *)malloc(len + 1);
-  if (buf == NULL) {
+  if (buf == nullptr) {
     throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1, len1);
@@ -354,7 +354,7 @@ char *string_trim(const char *s, int &len,
   }
 
   if (trimmed == 0) {
-    return NULL;
+    return nullptr;
   }
   return string_duplicate(s, len);
 }
@@ -378,7 +378,7 @@ char *string_pad(const char *input, int &len, int pad_length,
   /* Setup the padding string values if specified. */
   if (pad_str_len == 0) {
     throw_invalid_argument("pad_string: (empty)");
-    return NULL;
+    return nullptr;
   }
 
   char *result = (char *)malloc(pad_length + 1);
@@ -400,7 +400,7 @@ char *string_pad(const char *input, int &len, int pad_length,
     break;
   default:
     throw_invalid_argument("pad_type: %d", pad_type);
-    return NULL;
+    return nullptr;
   }
 
   /* First we pad on the left. */
@@ -434,7 +434,7 @@ char *string_substr(const char *s, int &len, int start, int length,
   }
   len = 0;
   if (nullable) {
-    return NULL;
+    return nullptr;
   }
   return string_duplicate("", 0);
 }
@@ -451,7 +451,7 @@ int string_find(const char *input, int len, char ch, int pos,
   } else {
     ptr = bstrcasechr(input + pos, ch, len - pos);
   }
-  if (ptr != NULL) {
+  if (ptr != nullptr) {
     return (int)((const char *)ptr - input);
   }
   return -1;
@@ -477,7 +477,7 @@ int string_rfind(const char *input, int len, char ch, int pos,
       ptr = bstrrcasechr(input, ch, len + pos + 1);
     }
   }
-  if (ptr != NULL) {
+  if (ptr != nullptr) {
     return (int)((const char *)ptr - input);
   }
   return -1;
@@ -496,7 +496,7 @@ int string_find(const char *input, int len, const char *s, int s_len,
   } else {
     ptr = bstrcasestr(input + pos, len - pos, s, s_len);
   }
-  if (ptr != NULL) {
+  if (ptr != nullptr) {
     return (int)((const char *)ptr - input);
   }
   return -1;
@@ -523,7 +523,7 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
       ptr = bstrrcasestr(input, len + pos + 1, s, s_len);
     }
   }
-  if (ptr != NULL) {
+  if (ptr != nullptr) {
     return (int)((const char *)ptr - input);
   }
   return -1;
@@ -541,12 +541,12 @@ const char *string_memnstr(const char *haystack, const char *needle,
         return p;
       }
     }
-    if (p == NULL) {
-      return NULL;
+    if (p == nullptr) {
+      return nullptr;
     }
     p++;
   }
-  return NULL;
+  return nullptr;
 }
 
 char *string_replace(const char *s, int &len, int start, int length,
@@ -588,7 +588,7 @@ char *string_replace(const char *input, int &len,
   assert(search && len_search);
 
   if (len == 0) {
-    return NULL;
+    return nullptr;
   }
 
   std::vector<int> founds;
@@ -612,7 +612,7 @@ char *string_replace(const char *input, int &len,
 
   count = founds.size();
   if (count == 0) {
-    return NULL; // not found
+    return nullptr; // not found
   }
 
   char *ret = (char *)malloc(len + (len_replace - len_search) * count + 1);
@@ -667,7 +667,7 @@ char *string_repeat(const char *s, int &len, int count) {
   assert(s);
 
   if (len == 0 || count <= 0) {
-    return NULL;
+    return nullptr;
   }
 
   char *ret = (char *)malloc(len * count + 1);
@@ -689,7 +689,7 @@ char *string_repeat(const char *s, int &len, int count) {
 char *string_shuffle(const char *str, int len) {
   assert(str);
   if (len <= 1) {
-    return NULL;
+    return nullptr;
   }
 
   char *ret = string_duplicate(str, len);
@@ -843,7 +843,7 @@ static size_t strip_tags_impl(char *rbuf, int len, int *stateptr,
     tbuf = (char *)malloc(PHP_TAG_BUF_SIZE+1);
     tp = tbuf;
   } else {
-    tbuf = tp = NULL;
+    tbuf = tp = nullptr;
   }
 
   while (i < len) {
@@ -1058,7 +1058,7 @@ char *string_strip_tags(const char *s, int &len, const char *allow,
 
   char *ret = string_duplicate(s, len);
   char *sallow = string_duplicate(allow, allow_len);
-  len = strip_tags_impl(ret, len, NULL, sallow, allow_len, false);
+  len = strip_tags_impl(ret, len, nullptr, sallow, allow_len, false);
   free(sallow);
   return ret;
 }
@@ -1081,12 +1081,12 @@ char *string_wordwrap(const char *text, int &textlen, int linelength,
 
   if (breakcharlen == 0) {
     throw_invalid_argument("wordbreak: (empty)");
-    return NULL;
+    return nullptr;
   }
 
   if (linelength == 0 && docut) {
     throw_invalid_argument("width", "can't force cut when width = 0");
-    return NULL;
+    return nullptr;
   }
 
   /* Special case for a single-character break as it needs no
@@ -1240,7 +1240,7 @@ char *string_addcslashes(const char *str, int &length, const char *what,
 char *string_stripcslashes(const char *input, int &nlen) {
   assert(input);
   if (nlen == 0) {
-    return NULL;
+    return nullptr;
   }
 
   char *str = string_duplicate(input, nlen);
@@ -1272,7 +1272,7 @@ char *string_stripcslashes(const char *input, int &nlen) {
             numtmp[1] = '\0';
             nlen-=2;
           }
-          *target++=(char)strtol(numtmp, NULL, 16);
+          *target++=(char)strtol(numtmp, nullptr, 16);
           break;
         }
         /* break is left intentionally */
@@ -1283,7 +1283,7 @@ char *string_stripcslashes(const char *input, int &nlen) {
         }
         if (i) {
           numtmp[i]='\0';
-          *target++=(char)strtol(numtmp, NULL, 8);
+          *target++=(char)strtol(numtmp, nullptr, 8);
           nlen-=i;
           source--;
         } else {
@@ -1303,7 +1303,7 @@ char *string_stripcslashes(const char *input, int &nlen) {
 char *string_addslashes(const char *str, int &length) {
   assert(str);
   if (length == 0) {
-    return NULL;
+    return nullptr;
   }
 
   char *new_str = (char *)malloc((length << 1) + 1);
@@ -1338,7 +1338,7 @@ char *string_addslashes(const char *str, int &length) {
 char *string_stripslashes(const char *input, int &l) {
   assert(input);
   if (!*input) {
-    return NULL;
+    return nullptr;
   }
 
   char *str = string_duplicate(input, l);
@@ -1374,7 +1374,7 @@ char *string_stripslashes(const char *input, int &l) {
 char *string_quotemeta(const char *input, int &len) {
   assert(input);
   if (len == 0) {
-    return NULL;
+    return nullptr;
   }
 
   char *ret = (char *)malloc((len << 1) + 1);
@@ -1466,7 +1466,7 @@ char *string_quoted_printable_encode(const char *input, int &len) {
 char *string_quoted_printable_decode(const char *input, int &len, bool is_q) {
   assert(input);
   if (len == 0) {
-    return NULL;
+    return nullptr;
   }
 
   int i = 0, j = 0, k;
@@ -1790,7 +1790,7 @@ char *string_uudecode(const char *src, int src_len, int &total_len) {
 
  err:
   free(dest);
-  return NULL;
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1832,10 +1832,10 @@ static unsigned char *php_base64_encode(const unsigned char *str, int length,
   unsigned char *result;
 
   if ((length + 2) < 0 || ((length + 2) / 3) >= (1 << (sizeof(int) * 8 - 2))) {
-    if (ret_length != NULL) {
+    if (ret_length != nullptr) {
       *ret_length = 0;
     }
-    return NULL;
+    return nullptr;
   }
 
   result = (unsigned char *)malloc(((length + 2) / 3) * 4 + 1);
@@ -1864,7 +1864,7 @@ static unsigned char *php_base64_encode(const unsigned char *str, int length,
       *p++ = base64_pad;
     }
   }
-  if (ret_length != NULL) {
+  if (ret_length != nullptr) {
     *ret_length = (int)(p - result);
   }
   *p = '\0';
@@ -1886,7 +1886,7 @@ static unsigned char *php_base64_decode(const unsigned char *str,
     if (ch == base64_pad) {
       if (*current != '=' && (i % 4) == 1) {
         free(result);
-        return NULL;
+        return nullptr;
       }
       continue;
     }
@@ -1897,7 +1897,7 @@ static unsigned char *php_base64_decode(const unsigned char *str,
       continue;
     } else if (ch == -2) {
       free(result);
-      return NULL;
+      return nullptr;
     }
 
     switch(i % 4) {
@@ -1925,7 +1925,7 @@ static unsigned char *php_base64_decode(const unsigned char *str,
     switch(i % 4) {
     case 1:
       free(result);
-      return NULL;
+      return nullptr;
     case 2:
       k++;
     case 3:
@@ -1979,7 +1979,7 @@ char *string_escape_shell_arg(const char *str) {
 char *string_escape_shell_cmd(const char *str) {
   register int x, y, l;
   char *cmd;
-  char *p = NULL;
+  char *p = nullptr;
 
   l = strlen(str);
   cmd = (char *)malloc((l << 1) + 1);
@@ -1991,7 +1991,7 @@ char *string_escape_shell_cmd(const char *str) {
       if (!p && (p = (char *)memchr(str + x + 1, str[x], l - x - 1))) {
         /* noop */
       } else if (p && *p == str[x]) {
-        p = NULL;
+        p = nullptr;
       } else {
         cmd[y++] = '\\';
       }
@@ -2170,7 +2170,7 @@ char *string_money_format(const char *format, double value) {
     } else {
       throw_invalid_argument
         ("format: Only a single %%i or %%n token can be used");
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -2179,7 +2179,7 @@ char *string_money_format(const char *format, double value) {
   char *str = (char *)malloc(str_len);
   if ((str_len = strfmon(str, str_len, format, value)) < 0) {
     free(str);
-    return NULL;
+    return nullptr;
   }
   str[str_len] = 0;
   return str;
@@ -2189,7 +2189,7 @@ char *string_money_format(const char *format, double value) {
 
 char *string_number_format(double d, int dec, char dec_point,
                            char thousand_sep) {
-  char *tmpbuf = NULL, *resbuf;
+  char *tmpbuf = nullptr, *resbuf;
   char *s, *t;  /* source, target */
   char *dp;
   int integral;
@@ -2209,7 +2209,7 @@ char *string_number_format(double d, int dec, char dec_point,
   tmpbuf = (char *)malloc(64);
   snprintf(tmpbuf, 64, "%.*F", dec, d);
   tmplen = strlen(tmpbuf);
-  if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
+  if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
     return tmpbuf;
   }
 
@@ -2217,7 +2217,7 @@ char *string_number_format(double d, int dec, char dec_point,
   if (dec) {
     dp = strpbrk(tmpbuf, ".,");
   } else {
-    dp = NULL;
+    dp = nullptr;
   }
 
   /* calculate the length of the return buffer */
@@ -2337,7 +2337,7 @@ char *string_soundex(const char *str) {
   };
 
   if (!*str) {
-    return NULL;
+    return nullptr;
   }
 
   /* build soundex string */
@@ -2489,14 +2489,14 @@ char *string_metaphone(const char *input, int word_len, long max_phonemes,
   /* Negative phoneme length is meaningless */
 
   if (max_phonemes < 0)
-    return NULL;
+    return nullptr;
 
   /* Empty/null string is meaningless */
   /* Overly paranoid */
   /* always_assert(word != NULL && word[0] != '\0'); */
 
-  if (word == NULL)
-    return NULL;
+  if (word == nullptr)
+    return nullptr;
 
   /*-- Allocate memory for our phoned_phrase --*/
   if (max_phonemes == 0) {  /* Assume largest possible */
@@ -2955,8 +2955,8 @@ char *string_convert_cyrillic_string(const char *input, int length,
   unsigned char tmp;
   unsigned char *str = (unsigned char *)string_duplicate(input, length);
 
-  from_table = NULL;
-  to_table   = NULL;
+  from_table = nullptr;
+  to_table   = nullptr;
 
   switch (toupper((int)(unsigned char)from)) {
   case 'W': from_table = _cyr_win1251;  break;
@@ -2989,8 +2989,8 @@ char *string_convert_cyrillic_string(const char *input, int length,
   }
 
   for (int i = 0; i<length; i++) {
-    tmp = (from_table == NULL)? str[i] : from_table[ str[i] ];
-    str[i] = (to_table == NULL) ? tmp : to_table[tmp + 256];
+    tmp = (from_table == nullptr)? str[i] : from_table[ str[i] ];
+    str[i] = (to_table == nullptr) ? tmp : to_table[tmp + 256];
   }
   return (char *)str;
 }
@@ -3024,7 +3024,7 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
   int begin, end, char_count, orig_begin;
 
   if (str_len == 0) {
-    return NULL;
+    return nullptr;
   }
 
   tmp = str;
@@ -3173,7 +3173,7 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
     for (const char *p = (const char *)s + n - 1; p >= s; p--) {
       if (*p == c) return (void *)p;
     }
-    return NULL;
+    return nullptr;
   }
 
 #endif

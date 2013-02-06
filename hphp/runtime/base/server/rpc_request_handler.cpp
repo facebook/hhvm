@@ -85,7 +85,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     if (iter == passwords.end()) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
-      HttpRequestHandler::GetAccessLog().log(transport, NULL);
+      HttpRequestHandler::GetAccessLog().log(transport, nullptr);
       /*
        * HPHP logs may need to access data in ServerStats, so we have to
        * clear the hashtable after writing the log entry.
@@ -98,7 +98,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     if (!password.empty() && password != transport->getParam("auth")) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
-      HttpRequestHandler::GetAccessLog().log(transport, NULL);
+      HttpRequestHandler::GetAccessLog().log(transport, nullptr);
       /*
        * HPHP logs may need to access data in ServerStats, so we have to
        * clear the hashtable after writing the log entry.

@@ -1473,14 +1473,14 @@ yyreduce:
         case 4:
 #line 118 "zend_ini.y"
     {
-      zend_ini_callback(&(yyvsp[(2) - (3)]), NULL, NULL, IniSetting::ParserSection);
+      zend_ini_callback(&(yyvsp[(2) - (3)]), nullptr, nullptr, IniSetting::ParserSection);
     ;}
     break;
 
   case 5:
 #line 121 "zend_ini.y"
     {
-      zend_ini_callback(&(yyvsp[(1) - (3)]), &(yyvsp[(3) - (3)]), NULL, IniSetting::ParserEntry);
+      zend_ini_callback(&(yyvsp[(1) - (3)]), &(yyvsp[(3) - (3)]), nullptr, IniSetting::ParserEntry);
     ;}
     break;
 
@@ -1494,7 +1494,7 @@ yyreduce:
   case 7:
 #line 127 "zend_ini.y"
     {
-      zend_ini_callback(&(yyvsp[(1) - (1)]), NULL, NULL, IniSetting::ParserEntry);
+      zend_ini_callback(&(yyvsp[(1) - (1)]), nullptr, nullptr, IniSetting::ParserEntry);
     ;}
     break;
 

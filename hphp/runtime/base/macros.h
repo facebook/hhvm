@@ -137,7 +137,7 @@ namespace HPHP {
 
 #define IMPLEMENT_CLASS_COMMON(cls)                                     \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
-  HPHP::VM::Class* c_##cls::s_cls = NULL;                               \
+  HPHP::VM::Class* c_##cls::s_cls = nullptr;                               \
 
 #define IMPLEMENT_CLASS(cls)                                            \
   IMPLEMENT_CLASS_COMMON(cls)                                           \
@@ -455,7 +455,7 @@ do { \
 #define CT_ASSERT_DESCENDENT_OF_OBJECTDATA(T)   \
   do {                                          \
     if (false) {                                \
-      ObjectData * dummy = NULL;                \
+      ObjectData * dummy = nullptr;                \
       if (static_cast<T*>(dummy)) {}            \
     }                                           \
   } while(0)                                    \

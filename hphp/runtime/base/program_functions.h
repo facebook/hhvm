@@ -76,7 +76,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool once = true, bool warmupOnly = false,
                  bool richErrorMsg = false);
 void hphp_context_exit(ExecutionContext *context, bool psp,
-                       bool shutdown = true, const char *program = NULL);
+                       bool shutdown = true, const char *program = nullptr);
 
 void hphp_thread_exit();
 void hphp_session_exit();

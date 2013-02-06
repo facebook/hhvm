@@ -49,35 +49,35 @@ char* bstrcasechr(const char* haystack, char needle, size_t haystackSize) {
       return (char*)haystack;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 HOT_FUNC
 char* bstrcasestr(const char* haystack, size_t haystackSize,
                   const char* needle, size_t needleSize) {
   if (needleSize > haystackSize) {
-    return NULL;
+    return nullptr;
   }
   const char* haystackLast = haystack + (haystackSize - needleSize);
   for (;;) {
     if (bstrcaseeq(haystack, needle, needleSize)) {
       return (char*)haystack;
     }
-    if (haystack == haystackLast) return NULL;
+    if (haystack == haystackLast) return nullptr;
     ++haystack;
   }
 }
 
 char* bstrrcasechr(const char* haystack, char needle, size_t haystackSize) {
   if (haystackSize == 0) {
-    return NULL;
+    return nullptr;
   }
   const char* haystackPtr = haystack + (haystackSize - 1);
   for (;;) {
     if (chrcaseeq(*haystackPtr, needle)) {
       return (char*)haystackPtr;
     }
-    if (haystackPtr == haystack) return NULL;
+    if (haystackPtr == haystack) return nullptr;
     --haystackPtr;
   }
 }
@@ -85,14 +85,14 @@ char* bstrrcasechr(const char* haystack, char needle, size_t haystackSize) {
 char* bstrrcasestr(const char* haystack, size_t haystackSize,
                    const char* needle, size_t needleSize) {
   if (needleSize > haystackSize) {
-    return NULL;
+    return nullptr;
   }
   const char* haystackPtr = haystack + (haystackSize - needleSize);
   for (;;) {
     if (bstrcaseeq(haystackPtr, needle, needleSize)) {
       return (char*)haystackPtr;
     }
-    if (haystackPtr == haystack) return NULL;
+    if (haystackPtr == haystack) return nullptr;
     --haystackPtr;
   }
 }
@@ -100,7 +100,7 @@ char* bstrrcasestr(const char* haystack, size_t haystackSize,
 char* bstrrstr(const char* haystack, size_t haystackSize,
                const char* needle, size_t needleSize) {
   if (needleSize > haystackSize) {
-    return NULL;
+    return nullptr;
   }
   const char* haystackPtr = haystack + (haystackSize - needleSize);
   if (needleSize == 0) {
@@ -113,7 +113,7 @@ char* bstrrstr(const char* haystack, size_t haystackSize,
       ++j;
       if (j == needleSize) return (char*)haystackPtr;
     }
-    if (haystackPtr == haystack) return NULL;
+    if (haystackPtr == haystack) return nullptr;
     --haystackPtr;
   }
 }

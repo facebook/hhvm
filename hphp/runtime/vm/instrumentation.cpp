@@ -33,10 +33,10 @@ void Injection::execute() const {
   }
   // Execute php code piece
   TypedValue retval;
-  VarEnv *varEnv = NULL;
-  ActRec *cfpSave = NULL;
-  ObjectData *this_ = NULL;
-  Class *cls = NULL;
+  VarEnv *varEnv = nullptr;
+  ActRec *cfpSave = nullptr;
+  ObjectData *this_ = nullptr;
+  Class *cls = nullptr;
   ActRec *fp = g_vmContext->getFP();
   if (fp) {
     if (!fp->hasVarEnv()) {
@@ -53,7 +53,7 @@ void Injection::execute() const {
   // Note: For now we don't merge analysis code's class and function.
   // Later we might decide to do so
   g_vmContext->invokeFunc(&retval, m_unit->getMain(Transl::curClass()),
-                          Array::Create(), this_, cls, varEnv, NULL, NULL);
+                          Array::Create(), this_, cls, varEnv, nullptr, nullptr);
   if (varEnv) {
     varEnv->setCfp(cfpSave);
   }
@@ -61,7 +61,7 @@ void Injection::execute() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static InjectionCache* s_injectionCache = NULL;
+static InjectionCache* s_injectionCache = nullptr;
 
 class InjectionCacheHolder {
 public:
@@ -102,8 +102,8 @@ void InjectionCache::ClearCache() {
 const Injection* InjectionCache::getInjectionImpl(const StringData* code,
                                                   const StringData* desc) {
   Unit* unit = getUnit(getStringData(code));
-  if (unit == NULL) {
-    return NULL;
+  if (unit == nullptr) {
+    return nullptr;
   }
   Injection injection(unit, getStringData(desc));
   const Injection* inj = getInjection(&injection);
@@ -196,10 +196,10 @@ const Injection* InjectionCache::getInjection(const Injection* inj) {
 InjectionTables::InjectionTables()
   : m_int64Tables(InstHookTypeInt64Count), m_sdTables(InstHookTypeSDCount) {
   for (int i = 0; i < InstHookTypeInt64Count; i++) {
-    m_int64Tables[i] = NULL;
+    m_int64Tables[i] = nullptr;
   }
   for (int i = 0; i < InstHookTypeSDCount; i++) {
-    m_sdTables[i] = NULL;
+    m_sdTables[i] = nullptr;
   }
 }
 
@@ -209,10 +209,10 @@ InjectionTables::~InjectionTables() {
 
 void InjectionTables::clear() {
   for (int i = 0; i < InstHookTypeInt64Count; i++) {
-    setInt64Table(i, NULL);
+    setInt64Table(i, nullptr);
   }
   for (int i = 0; i < InstHookTypeSDCount; i++) {
-    setSDTable(i, NULL);
+    setSDTable(i, nullptr);
   }
 }
 
@@ -222,7 +222,7 @@ InjectionTables* InjectionTables::clone() {
   for (int i = 0; i < InstHookTypeInt64Count; i++) {
     VM::InjectionTableInt64* table = m_int64Tables[i];
     if (!table) {
-      newTables->m_int64Tables[i] = NULL;
+      newTables->m_int64Tables[i] = nullptr;
       continue;
     }
     VM::InjectionTableInt64* newTable = new InjectionTableInt64();
@@ -232,7 +232,7 @@ InjectionTables* InjectionTables::clone() {
   for (int i = 0; i < InstHookTypeSDCount; i++) {
     VM::InjectionTableSD* table = m_sdTables[i];
     if (!table) {
-      newTables->m_sdTables[i] = NULL;
+      newTables->m_sdTables[i] = nullptr;
       continue;
     }
     VM::InjectionTableSD* newTable = new InjectionTableSD();
@@ -270,7 +270,7 @@ int InjectionTables::countInjections() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static InjectionTables* s_globalInjTables = NULL;
+static InjectionTables* s_globalInjTables = nullptr;
 static ReadWriteMutex s_globalInjTableLock;
 
 void InstHelpers::InstCustomStringCallback(const StringData* hook,
@@ -295,7 +295,7 @@ void InstHelpers::PushInstToGlobal() {
   WriteLock lock(s_globalInjTableLock);
   if (s_globalInjTables) {
     delete s_globalInjTables;
-    s_globalInjTables = NULL;
+    s_globalInjTables = nullptr;
   }
   if (g_vmContext->m_injTables) {
     s_globalInjTables = g_vmContext->m_injTables->clone();
@@ -305,7 +305,7 @@ void InstHelpers::PushInstToGlobal() {
 void InstHelpers::PullInstFromGlobal() {
   if (g_vmContext->m_injTables) {
     delete g_vmContext->m_injTables;
-    g_vmContext->m_injTables = NULL;
+    g_vmContext->m_injTables = nullptr;
   }
   ReadLock lock(s_globalInjTableLock);
   if (s_globalInjTables) {
@@ -325,7 +325,7 @@ void InstHelpers::ClearGlobalInst() {
   WriteLock lock(s_globalInjTableLock);
   if (s_globalInjTables) {
     delete s_globalInjTables;
-    s_globalInjTables = NULL;
+    s_globalInjTables = nullptr;
   }
 }
 

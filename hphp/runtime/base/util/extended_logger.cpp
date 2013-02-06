@@ -45,16 +45,16 @@
         !ExtendedLogger::EnabledByDefault) {                           \
       Array bt = FrameInjection::GetBacktrace();                       \
       if (!bt.empty()) {                                               \
-        Logger::Log(Log ## LOGLEVEL, msg, NULL, true, true);           \
+        Logger::Log(Log ## LOGLEVEL, msg, nullptr, true, true);           \
         Log(Log ## LOGLEVEL, bt);                                      \
         return;                                                        \
       }                                                                \
     }                                                                  \
-    Logger::Log(Log ## LOGLEVEL, msg, NULL, true);                     \
+    Logger::Log(Log ## LOGLEVEL, msg, nullptr, true);                     \
   }                                                                    \
   void ExtendedLogger::Raw ## LOGLEVEL(const std::string &msg) {       \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Logger::Log(Log ## LOGLEVEL, msg, NULL, false);                    \
+    Logger::Log(Log ## LOGLEVEL, msg, nullptr, false);                    \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
       Log(Log ## LOGLEVEL, FrameInjection::GetBacktrace());            \

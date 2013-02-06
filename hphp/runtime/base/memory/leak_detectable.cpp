@@ -130,13 +130,13 @@ private:
 static IMPLEMENT_THREAD_LOCAL(AllocData, s_allocs);
 
 static void hphp_malloc_hook_size_only(const void *ptr, size_t size) {
-  MallocHook::SetNewHook(NULL);
+  MallocHook::SetNewHook(nullptr);
   s_allocs->on_malloc(ptr, size);
   MallocHook::SetNewHook(hphp_malloc_hook_size_only);
 }
 
 static void hphp_free_hook_size_only(const void *ptr) {
-  MallocHook::SetDeleteHook(NULL);
+  MallocHook::SetDeleteHook(nullptr);
   s_allocs->on_free(ptr);
   MallocHook::SetDeleteHook(hphp_free_hook_size_only);
 }
@@ -148,8 +148,8 @@ void LeakDetectable::EnableMallocStats(bool enable) {
     MallocHook::SetDeleteHook(hphp_free_hook_size_only);
     MallocHook::SetNewHook(hphp_malloc_hook_size_only);
   } else {
-    MallocHook::SetNewHook(NULL);
-    MallocHook::SetDeleteHook(NULL);
+    MallocHook::SetNewHook(nullptr);
+    MallocHook::SetDeleteHook(nullptr);
   }
 #endif
 }
@@ -180,11 +180,11 @@ static void hphp_malloc_hook(const void *ptr, size_t size) {
   if (LeakDetectable::MallocSampling &&
       atomic_inc(sampling_counter) % LeakDetectable::MallocSampling == 0) {
     Lock lock(sampling_mutex);
-    MallocHook::SetNewHook(NULL);
+    MallocHook::SetNewHook(nullptr);
     SamplingMap::accessor acc;
     sampling_traces.insert(acc, ptr);
     AllocRecord &alloc = acc->second;
-    alloc.time = time(NULL);
+    alloc.time = time(nullptr);
     alloc.st = StackTracePtr(new StackTrace());
     alloc.size = size;
     MallocHook::SetNewHook(hphp_malloc_hook);
@@ -229,11 +229,11 @@ void LeakDetectable::EndMallocSampling(std::string &dumps, int cutoff) {
     // turn off hooks
     Lock lock(sampling_mutex);
 #ifdef GOOGLE_HEAP_PROFILER
-    MallocHook::SetNewHook(NULL);
-    MallocHook::SetDeleteHook(NULL);
+    MallocHook::SetNewHook(nullptr);
+    MallocHook::SetDeleteHook(nullptr);
 #endif
 
-    time_t cutoff_time = time(NULL) - cutoff;
+    time_t cutoff_time = time(nullptr) - cutoff;
     for (SamplingMap::iterator iter =
            sampling_traces.begin(); iter != sampling_traces.end(); ++iter) {
       if (iter->second.time > cutoff_time) continue; // too new

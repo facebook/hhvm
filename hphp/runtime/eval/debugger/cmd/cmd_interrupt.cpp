@@ -317,7 +317,7 @@ FrameInjection *CmdInterrupt::getFrame() {
       return site->getFrame();
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 std::string CmdInterrupt::getFileLine() const {

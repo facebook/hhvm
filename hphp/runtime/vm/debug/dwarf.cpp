@@ -160,11 +160,11 @@ void DwarfBuf::dwarf_cfa_offset_extended_sf(uint8_t reg, int8_t offset) {
 }
 
 const char *DwarfInfo::lookupFile(const Unit *unit) {
-  const char *file = NULL;
+  const char *file = nullptr;
   if (unit && unit->filepath()) {
     file = unit->filepath()->data();
   }
-  if (file == NULL || strlen(file) == 0) {
+  if (file == nullptr || strlen(file) == 0) {
     return "anonFile";
   }
   return file;
@@ -174,7 +174,7 @@ void DwarfInfo::addLineEntries(TCRange range,
                                const Unit *unit,
                                const Opcode *instr,
                                FunctionInfo* f) {
-  if (unit == NULL || instr == NULL) {
+  if (unit == nullptr || instr == nullptr) {
     // For stubs, just add line 0
     f->m_lineTable.push_back(LineEntry(range, 0));
     return;
@@ -199,12 +199,12 @@ void DwarfInfo::transferFuncs(DwarfChunk* from, DwarfChunk* to) {
 void DwarfInfo::compactChunks() {
   unsigned int i, j;
   for (i = 1; i < m_dwarfChunks.size(); i++) {
-    if (m_dwarfChunks[i] == NULL) {
+    if (m_dwarfChunks[i] == nullptr) {
       break;
     }
   }
   if (i >= m_dwarfChunks.size()) {
-    m_dwarfChunks.push_back(NULL);
+    m_dwarfChunks.push_back(nullptr);
   }
   DwarfChunk* chunk = new DwarfChunk();
   for (j = 0; j < i; j++) {
@@ -212,7 +212,7 @@ void DwarfInfo::compactChunks() {
     // unregister chunk from gdb and free chunk
     unregister_gdb_chunk(m_dwarfChunks[j]);
     delete(m_dwarfChunks[j]);
-    m_dwarfChunks[j] = NULL;
+    m_dwarfChunks[j] = nullptr;
   }
   m_dwarfChunks[i] = chunk;
   // register compacted chunk with gdb
@@ -223,13 +223,13 @@ static Mutex s_lock(RankLeaf);
 
 DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
   const Func *func, const Opcode *instr, bool exit, bool inPrologue) {
-  DwarfChunk* chunk = NULL;
+  DwarfChunk* chunk = nullptr;
   FunctionInfo* f = new FunctionInfo(range, exit);
-  const Unit* unit = func ? func->unit(): NULL;
+  const Unit* unit = func ? func->unit(): nullptr;
   if (name) {
     f->name = std::string(name);
   } else {
-    assert(func != NULL);
+    assert(func != nullptr);
     f->name = lookupFunction(func, exit, inPrologue, true);
   }
   f->file = lookupFile(unit);
@@ -251,7 +251,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
     m_functions.erase(it);
     delete(f);
     f = m_functions[end];
-    assert(f->m_chunk != NULL);
+    assert(f->m_chunk != nullptr);
     f->m_chunk->clearSynced();
     f->clearPerfSynced();
   } else {
@@ -260,8 +260,8 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
 
   addLineEntries(TCRange(start, end, range.isAstubs()), unit, instr, f);
 
-  if (f->m_chunk == NULL) {
-    if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == NULL) {
+  if (f->m_chunk == nullptr) {
+    if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == nullptr) {
       // new chunk of base size
       chunk = new DwarfChunk();
       m_dwarfChunks.push_back(chunk);

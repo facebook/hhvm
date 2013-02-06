@@ -192,7 +192,7 @@ bool TestExtMisc::test_time_nanosleep() {
 
 bool TestExtMisc::test_time_sleep_until() {
   struct timeval tm;
-  gettimeofday((struct timeval *)&tm, NULL);
+  gettimeofday((struct timeval *)&tm, nullptr);
   double timestamp = tm.tv_sec + tm.tv_usec / 1000000.0 + 2;
   f_time_sleep_until(timestamp);
   return Count(true);

@@ -74,7 +74,7 @@ void ParserBase::Reset() {
 
 ParserBase::ParserBase(Scanner &scanner, const char *fileName)
     : m_scanner(scanner), m_fileName(fileName), m_nsState(SeenNothing) {
-  if (m_fileName == NULL) m_fileName = "";
+  if (m_fileName == nullptr) m_fileName = "";
 
   // global scope
   m_labelInfos.reserve(3);

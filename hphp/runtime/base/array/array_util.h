@@ -68,7 +68,7 @@ public:
    */
   static Variant Splice(CArrRef input, int offset, int length = 0,
                         CVarRef replacement = null_variant,
-                        Array *removed = NULL);
+                        Array *removed = nullptr);
 
   /**
    * Returns a copy of input array padded with pad_value to size pad_size.
@@ -150,8 +150,8 @@ public:
    * Filters elements from the array via the callback.
    */
   typedef bool (*PFUNC_FILTER)(CVarRef value, const void *data);
-  static Variant Filter(CArrRef input, PFUNC_FILTER filter = NULL,
-                        const void *data = NULL);
+  static Variant Filter(CArrRef input, PFUNC_FILTER filter = nullptr,
+                        const void *data = nullptr);
 
   /**
    * Removes duplicate string values from array.
@@ -178,7 +178,7 @@ public:
   typedef void (*PFUNC_WALK)(VRefParam value, CVarRef key, CVarRef userdata,
                              const void *data);
   static void Walk(VRefParam input, PFUNC_WALK walk_function, const void *data,
-                   bool recursive = false, PointerSet *seen = NULL,
+                   bool recursive = false, PointerSet *seen = nullptr,
                    CVarRef userdata = null_variant);
 
   /**

@@ -273,7 +273,7 @@ public:
   String toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64 timestamp, bool utc = false);
-  bool fromString(CStrRef input, SmartObject<TimeZone> tz, const char* format=NULL);
+  bool fromString(CStrRef input, SmartObject<TimeZone> tz, const char* format=nullptr);
 
   // comparison
   SmartObject<DateInterval> diff(SmartObject<DateTime> datetime2, bool absolute = false);
@@ -292,7 +292,7 @@ private:
   class LastErrors : public RequestEventHandler {
     public:
       virtual void requestInit() {
-        m_errors = NULL;
+        m_errors = nullptr;
       }
       virtual void requestShutdown() {
         if (m_errors) {

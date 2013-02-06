@@ -44,8 +44,8 @@ IMPLEMENT_SMART_ALLOCATION_HOT(ZendArray);
 do {                                                                    \
   (element)->pListLast = m_pListTail;                                   \
   m_pListTail = (element);                                              \
-  (element)->pListNext = NULL;                                          \
-  if ((element)->pListLast != NULL) {                                   \
+  (element)->pListNext = nullptr;                                          \
+  if ((element)->pListLast != nullptr) {                                   \
     (element)->pListLast->pListNext = (element);                        \
   }                                                                     \
 } while (false)
@@ -97,7 +97,7 @@ void ZendArray::init(uint nSize) {
 
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize, bool nonsmart) :
-  ArrayData(kArrayData, nonsmart), m_pListHead(NULL), m_pListTail(NULL),
+  ArrayData(kArrayData, nonsmart), m_pListHead(nullptr), m_pListTail(nullptr),
   m_nNextFreeElement(0) {
   m_size = 0;
   init(nSize);
@@ -303,7 +303,7 @@ ZendArray::Bucket *ZendArray::find(int64 h) const {
       return p;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 ZendArray::Bucket *ZendArray::find(const char *k, int len,
@@ -312,17 +312,17 @@ ZendArray::Bucket *ZendArray::find(const char *k, int len,
   for (Bucket *p = m_arBuckets[prehash & m_nTableMask]; p; p = p->pNext) {
     if (hit_string_key(p, k, len, hash)) return p;
   }
-  return NULL;
+  return nullptr;
 }
 
 ZendArray::Bucket *ZendArray::findForInsert(int64 h) const {
   Bucket *p = m_arBuckets[h & m_nTableMask];
-  if (UNLIKELY(!p)) return NULL;
+  if (UNLIKELY(!p)) return nullptr;
   if (LIKELY(!p->hasStrKey() && p->ikey == h)) {
     return p;
   }
   p = p->pNext;
-  if (UNLIKELY(!p)) return NULL;
+  if (UNLIKELY(!p)) return nullptr;
   if (LIKELY(!p->hasStrKey() && p->ikey == h)) {
     return p;
   }
@@ -338,7 +338,7 @@ ZendArray::Bucket *ZendArray::findForInsert(int64 h) const {
   if (UNLIKELY(n > RuntimeOption::MaxArrayChain)) {
     raise_error("Array is too unbalanced (%d)", n);
   }
-  return NULL;
+  return nullptr;
 }
 
 ZendArray::Bucket *ZendArray::findForInsert(const char *k, int len,
@@ -352,7 +352,7 @@ ZendArray::Bucket *ZendArray::findForInsert(const char *k, int len,
   if (UNLIKELY(n > RuntimeOption::MaxArrayChain)) {
     raise_error("Array is too unbalanced (%d)", n);
   }
-  return NULL;
+  return nullptr;
 }
 
 ZendArray::Bucket ** ZendArray::findForErase(int64 h) const {
@@ -365,7 +365,7 @@ ZendArray::Bucket ** ZendArray::findForErase(int64 h) const {
     ret = &(p->pNext);
     p = *ret;
   }
-  return NULL;
+  return nullptr;
 }
 
 ZendArray::Bucket ** ZendArray::findForErase(const char *k, int len,
@@ -378,12 +378,12 @@ ZendArray::Bucket ** ZendArray::findForErase(const char *k, int len,
     ret = &(p->pNext);
     p = *ret;
   }
-  return NULL;
+  return nullptr;
 }
 
 ZendArray::Bucket ** ZendArray::findForErase(Bucket * bucketPtr) const {
-  if (bucketPtr == NULL)
-    return NULL;
+  if (bucketPtr == nullptr)
+    return nullptr;
   int64 h = bucketPtr->hashKey();
   Bucket ** ret = &(m_arBuckets[h & m_nTableMask]);
   Bucket * p = *ret;
@@ -392,7 +392,7 @@ ZendArray::Bucket ** ZendArray::findForErase(Bucket * bucketPtr) const {
     ret = &(p->pNext);
     p = *ret;
   }
-  return NULL;
+  return nullptr;
 }
 
 bool ZendArray::exists(int64 k) const {
@@ -525,7 +525,7 @@ bool ZendArray::nextInsertWithRef(CVarRef data) {
 HOT_FUNC_HPHP
 bool ZendArray::addLvalImpl(int64 h, Variant **pDest,
                             bool doFind /* = true */) {
-  assert(pDest != NULL);
+  assert(pDest != nullptr);
   Bucket *p;
   if (doFind) {
     p = findForInsert(h);
@@ -555,7 +555,7 @@ bool ZendArray::addLvalImpl(int64 h, Variant **pDest,
 HOT_FUNC_HPHP
 bool ZendArray::addLvalImpl(StringData *key, strhash_t h, Variant **pDest,
                             bool doFind /* = true */) {
-  assert(key != NULL && pDest != NULL);
+  assert(key != nullptr && pDest != nullptr);
   Bucket *p;
   if (doFind) {
     p = findForInsert(key->data(), key->size(), h);
@@ -715,7 +715,7 @@ ArrayData *ZendArray::lval(int64 k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   if (!copy) {
     addLvalImpl(k, &ret);
-    return NULL;
+    return nullptr;
   }
   if (!checkExist) {
     ZendArray *a = copyImpl();
@@ -726,7 +726,7 @@ ArrayData *ZendArray::lval(int64 k, Variant *&ret, bool copy,
   if (p &&
       (p->data.isReferenced() || p->data.isObject())) {
     ret = &p->data;
-    return NULL;
+    return nullptr;
   }
   ZendArray *a = copyImpl();
   a->addLvalImpl(k, &ret, p);
@@ -739,7 +739,7 @@ ArrayData *ZendArray::lval(StringData* key, Variant *&ret, bool copy,
   strhash_t prehash = key->hash();
   if (!copy) {
     addLvalImpl(key, prehash, &ret);
-    return NULL;
+    return nullptr;
   }
   if (!checkExist) {
     ZendArray *a = copyImpl();
@@ -750,7 +750,7 @@ ArrayData *ZendArray::lval(StringData* key, Variant *&ret, bool copy,
   if (p &&
       (p->data.isReferenced() || p->data.isObject())) {
     ret = &p->data;
-    return NULL;
+    return nullptr;
   }
   ZendArray *a = copyImpl();
   a->addLvalImpl(key, prehash, &ret, p);
@@ -773,7 +773,7 @@ ArrayData *ZendArray::lvalPtr(StringData* key, Variant *&ret, bool copy,
     if (p) {
       ret = &p->data;
     } else {
-      ret = NULL;
+      ret = nullptr;
     }
   }
   return a;
@@ -794,7 +794,7 @@ ArrayData *ZendArray::lvalPtr(int64 k, Variant *&ret, bool copy,
     if (p) {
       ret = &p->data;
     } else {
-      ret = NULL;
+      ret = nullptr;
     }
   }
   return a;
@@ -813,11 +813,11 @@ ArrayData *ZendArray::lvalNew(Variant *&ret, bool copy) {
   }
   if (!nextInsert(null)) {
     ret = &(Variant::lvalBlackHole());
-    return NULL;
+    return nullptr;
   }
   assert(m_pListTail);
   ret = &m_pListTail->data;
-  return NULL;
+  return nullptr;
 }
 
 HOT_FUNC_HPHP
@@ -828,7 +828,7 @@ ArrayData *ZendArray::set(int64 k, CVarRef v, bool copy) {
     return a;
   }
   update(k, v);
-  return NULL;
+  return nullptr;
 }
 
 HOT_FUNC_HPHP
@@ -839,7 +839,7 @@ ArrayData *ZendArray::set(StringData* k, CVarRef v, bool copy) {
     return a;
   }
   update(k, v);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::setRef(int64 k, CVarRef v, bool copy) {
@@ -849,7 +849,7 @@ ArrayData *ZendArray::setRef(int64 k, CVarRef v, bool copy) {
     return a;
   }
   updateRef(k, v);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::setRef(StringData* k, CVarRef v, bool copy) {
@@ -859,7 +859,7 @@ ArrayData *ZendArray::setRef(StringData* k, CVarRef v, bool copy) {
     return a;
   }
   updateRef(k, v);
-  return NULL;
+  return nullptr;
 }
 
 HOT_FUNC_HPHP
@@ -882,7 +882,7 @@ ArrayData *ZendArray::add(int64 k, CVarRef v, bool copy) {
   if (++m_size > tableSize()) {
     resize();
   }
-  return NULL;
+  return nullptr;
 }
 
 HOT_FUNC_HPHP
@@ -903,7 +903,7 @@ ArrayData *ZendArray::add(StringData* k, CVarRef v, bool copy) {
   if (++m_size > tableSize()) {
     resize();
   }
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::addLval(int64 k, Variant *&ret, bool copy) {
@@ -914,7 +914,7 @@ ArrayData *ZendArray::addLval(int64 k, Variant *&ret, bool copy) {
     return result;
   }
   addLvalImpl(k, &ret, false);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::addLval(StringData* k, Variant *&ret, bool copy) {
@@ -925,7 +925,7 @@ ArrayData *ZendArray::addLval(StringData* k, Variant *&ret, bool copy) {
     return result;
   }
   addLvalImpl(k, k->hash(), &ret, false);
-  return NULL;
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -933,7 +933,7 @@ ArrayData *ZendArray::addLval(StringData* k, Variant *&ret, bool copy) {
 
 HOT_FUNC_HPHP
 void ZendArray::erase(Bucket ** prev, bool updateNext /* = false */) {
-  if (prev == NULL)
+  if (prev == nullptr)
     return;
   Bucket * p = *prev;
   if (p) {
@@ -981,7 +981,7 @@ ArrayData *ZendArray::remove(int64 k, bool copy) {
     return a;
   }
   erase(findForErase(k));
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::remove(const StringData* k, bool copy) {
@@ -992,7 +992,7 @@ ArrayData *ZendArray::remove(const StringData* k, bool copy) {
     return a;
   }
   erase(findForErase(k->data(), k->size(), prehash));
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::copy() const {
@@ -1024,7 +1024,7 @@ ArrayData *ZendArray::copyWithStrongIterators() const {
 inline ALWAYS_INLINE ZendArray *ZendArray::copyImplHelper(bool sma) const {
   ZendArray *target = LIKELY(sma) ? NEW(ZendArray)(m_size)
                                   : new ZendArray(m_size, true /* !smart */);
-  Bucket *last = NULL;
+  Bucket *last = nullptr;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
     Bucket *np = LIKELY(sma) ? NEW(Bucket)(Variant::noInit)
                              : new Bucket(Variant::noInit);
@@ -1046,18 +1046,18 @@ inline ALWAYS_INLINE ZendArray *ZendArray::copyImplHelper(bool sma) const {
       np->pListLast = last;
     } else {
       target->m_pListHead = np;
-      np->pListLast = NULL;
+      np->pListLast = nullptr;
     }
     last = np;
   }
-  if (last) last->pListNext = NULL;
+  if (last) last->pListNext = nullptr;
   target->m_pListTail = last;
 
   target->m_size = m_size;
   target->m_nNextFreeElement = m_nNextFreeElement;
 
   Bucket *p = reinterpret_cast<Bucket *>(m_pos);
-  if (p == NULL) {
+  if (p == nullptr) {
     target->m_pos = (ssize_t)0;
   } else if (p == m_pListHead) {
     target->m_pos = (ssize_t)target->m_pListHead;
@@ -1090,7 +1090,7 @@ ArrayData *ZendArray::append(CVarRef v, bool copy) {
     return a;
   }
   nextInsert(v);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::appendRef(CVarRef v, bool copy) {
@@ -1100,7 +1100,7 @@ ArrayData *ZendArray::appendRef(CVarRef v, bool copy) {
     return a;
   }
   nextInsertRef(v);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::appendWithRef(CVarRef v, bool copy) {
@@ -1110,7 +1110,7 @@ ArrayData *ZendArray::appendWithRef(CVarRef v, bool copy) {
     return a;
   }
   nextInsertWithRef(v);
-  return NULL;
+  return nullptr;
 }
 
 HOT_FUNC_HPHP
@@ -1146,7 +1146,7 @@ ArrayData *ZendArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::pop(Variant &value) {
@@ -1164,7 +1164,7 @@ ArrayData *ZendArray::pop(Variant &value) {
   // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator
   m_pos = (ssize_t)m_pListHead;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::dequeue(Variant &value) {
@@ -1187,7 +1187,7 @@ ArrayData *ZendArray::dequeue(Variant &value) {
   // To match PHP-like semantics, the dequeue operation resets the array's
   // internal iterator
   m_pos = (ssize_t)m_pListHead;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
@@ -1202,7 +1202,7 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
 
   nextInsert(v);
   if (m_size == 1) {
-    return NULL; // only element in array, no need to move it.
+    return nullptr; // only element in array, no need to move it.
   }
 
   // Move the newly inserted element from the tail to the front.
@@ -1212,7 +1212,7 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
   // Remove from end of list
   m_pListTail = new_elem->pListLast;
   if (m_pListTail) {
-    m_pListTail->pListNext = NULL;
+    m_pListTail->pListNext = nullptr;
   }
 
   // Insert before new position (p)
@@ -1234,7 +1234,7 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
   // internal iterator
   m_pos = (ssize_t)m_pListHead;
 
-  return NULL;
+  return nullptr;
 }
 
 void ZendArray::renumber() {

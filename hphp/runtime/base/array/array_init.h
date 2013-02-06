@@ -287,7 +287,7 @@ public:
 
   ArrayData *create() {
     ArrayData *ret = m_data;
-    m_data = NULL;
+    m_data = nullptr;
     return ret;
   }
   operator ArrayData *() { return create(); }

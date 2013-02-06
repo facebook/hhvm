@@ -78,7 +78,7 @@ Object Object::CreateDummy(ObjectData*(*cooFunc)()) {
 }
 
 Object Object::CreateDummy(ObjectData*(*cooFunc)(ObjectData *)) {
-  Object r(cooFunc(NULL));
+  Object r(cooFunc(nullptr));
   r.get()->setDummy();
   return r;
 }

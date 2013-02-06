@@ -100,8 +100,8 @@ bool ElfWriter::initDwarfProducer() {
   m_dwarfProducer = dwarf_producer_init_c(
     DW_DLC_WRITE | DW_DLC_SIZE_64 | DW_DLC_SYMBOLIC_RELOCATIONS,
     g_dwarfCallback,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
     reinterpret_cast<Dwarf_Ptr>(this),
     &error);
   if (m_dwarfProducer == reinterpret_cast<Dwarf_P_Debug>(DW_DLV_BADADDR)) {
@@ -116,10 +116,10 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
 
   /* top level DIE for each function */
   Dwarf_P_Die func = dwarf_new_die(m_dwarfProducer,
-    DW_TAG_subprogram, NULL, NULL, NULL, NULL, &error);
+    DW_TAG_subprogram, nullptr, nullptr, nullptr, nullptr, &error);
   if (reinterpret_cast<Dwarf_Addr>(func) == DW_DLV_BADADDR) {
     logError("unable to create child DIE");
-    return NULL;
+    return nullptr;
   }
 
   Dwarf_Signed file;
@@ -131,7 +131,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
       (char *)f->file, 0, 0, 1000, &error);
     if (file == DW_DLV_NOCOUNT) {
       logError("unable to add file declaration");
-      return NULL;
+      return nullptr;
     }
     m_fileDB[f->file] = file;
   } else {
@@ -143,7 +143,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
   at = dwarf_add_AT_name(func, (char *)f->name.c_str(), &error);
   if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
     logError("unable to add name attribute to function");
-    return NULL;
+    return nullptr;
   }
 
   /* Add lower PC bound to function DIE */
@@ -151,7 +151,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
     reinterpret_cast<Dwarf_Unsigned>(f->range.begin()), 0, &error);
   if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
     logError("unable to add low_pc attribute to function");
-    return NULL;
+    return nullptr;
   }
 
   /* add upper PC bound to function DIE */
@@ -159,7 +159,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
     reinterpret_cast<Dwarf_Unsigned>(f->range.end()), 0, &error);
   if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
     logError("unable to add high_pc attribute to function");
-    return NULL;
+    return nullptr;
   }
 
   /* register line number information for function:
@@ -169,7 +169,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
     reinterpret_cast<Dwarf_Addr>(f->range.begin()), 0, &error);
   if (u != 0) {
     logError("unable to set line start address");
-    return NULL;
+    return nullptr;
   }
 
   /* 2. register line number info for each tracelet in function */
@@ -180,7 +180,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
       0, 1, 0, &error);
     if (u != 0) {
       logError("unable to add line entry");
-      return NULL;
+      return nullptr;
     }
     TRACE(1, "elfwriter tracelet: %s %p %p\n",
           m_filename.c_str(), it2->range.begin(), it2->range.end());
@@ -191,7 +191,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
     reinterpret_cast<Dwarf_Addr>(f->range.end()), &error);
   if (u != 0) {
     logError("unable to set line end address");
-    return NULL;
+    return nullptr;
   }
   return func;
 }
@@ -203,28 +203,28 @@ bool ElfWriter::addSymbolInfo(DwarfChunk* d) {
    * all subsequent DIEs' will be children of this DIE
    */
   Dwarf_P_Die codeUnit = dwarf_new_die(m_dwarfProducer,
-    DW_TAG_compile_unit, NULL, NULL, NULL, NULL, &error);
+    DW_TAG_compile_unit, nullptr, nullptr, nullptr, nullptr, &error);
   if (reinterpret_cast<Dwarf_Addr>(codeUnit) == DW_DLV_BADADDR) {
     logError("unable to create code unit DIE");
     return false;
   }
 
-  Dwarf_P_Die lastChild = NULL;
+  Dwarf_P_Die lastChild = nullptr;
   FuncPtrDB::iterator it;
   for (it = d->m_functions.begin(); it != d->m_functions.end(); it++) {
     Dwarf_P_Die res = 0;
     /* for each function, add DIE entries with information about name,
      * line number, file, etc */
     Dwarf_P_Die func = addFunctionInfo(*it);
-    if (func == NULL) {
+    if (func == nullptr) {
       logError("unable to create child DIE");
       return false;
     }
 
     if (lastChild) {
-      res = dwarf_die_link(func, NULL, NULL, lastChild, NULL, &error);
+      res = dwarf_die_link(func, nullptr, nullptr, lastChild, nullptr, &error);
     } else {
-      res = dwarf_die_link(func, codeUnit, NULL, NULL, NULL, &error);
+      res = dwarf_die_link(func, codeUnit, nullptr, nullptr, nullptr, &error);
     }
     if (reinterpret_cast<Dwarf_Addr>(res) == DW_DLV_BADADDR) {
       logError("unable to link die");
@@ -402,7 +402,7 @@ int ElfWriter::writeTextSection() {
     logError("unable to create text section");
     return -1;
   }
-  if (!addSectionData(section, NULL, a.code.size)) {
+  if (!addSectionData(section, nullptr, a.code.size)) {
     logError("unable to add text data");
     return -1;
   }
@@ -410,7 +410,7 @@ int ElfWriter::writeTextSection() {
 }
 
 ElfWriter::ElfWriter(DwarfChunk* d):
-  m_fd(-1), m_elf(NULL), m_dwarfProducer(NULL) {
+  m_fd(-1), m_elf(nullptr), m_dwarfProducer(nullptr) {
   off_t elf_size;
   char *symfile;
 
@@ -460,14 +460,14 @@ ElfWriter::ElfWriter(DwarfChunk* d):
 }
 
 ElfWriter::~ElfWriter() {
-  if (m_elf != NULL)
+  if (m_elf != nullptr)
     elf_end(m_elf);
   if (m_fd != -1)
     close(m_fd);
   if (!RuntimeOption::EvalJitKeepDbgFiles) {
     unlink(m_filename.c_str());
   }
-  if (m_dwarfProducer != NULL)
+  if (m_dwarfProducer != nullptr)
     dwarf_producer_finish(m_dwarfProducer, 0);
 }
 

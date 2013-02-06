@@ -28,7 +28,7 @@ static const Trace::Module TRACEMOD = Trace::hhbc;
 // RepoStmt.
 
 RepoStmt::RepoStmt(Repo& repo)
-  : m_repo(repo), m_stmt(NULL) {
+  : m_repo(repo), m_stmt(nullptr) {
 }
 
 RepoStmt::~RepoStmt() {
@@ -36,10 +36,10 @@ RepoStmt::~RepoStmt() {
 }
 
 void RepoStmt::finalize() {
-  if (m_stmt != NULL) {
+  if (m_stmt != nullptr) {
     m_sql.clear();
     sqlite3_finalize(m_stmt);
-    m_stmt = NULL;
+    m_stmt = nullptr;
   }
 }
 
@@ -47,7 +47,7 @@ void RepoStmt::prepare(const std::string& sql) {
   finalize();
   m_sql = sql;
   int rc = sqlite3_prepare_v2(m_repo.dbc(), sql.c_str(), sql.size(), &m_stmt,
-                              NULL);
+                              nullptr);
   if (rc != SQLITE_OK) {
     throw RepoExc("RepoStmt::%s(repo=%p) error: '%s' --> (%d) %s\n",
                   __func__, &m_repo, sql.c_str(), rc,
@@ -187,7 +187,7 @@ void RepoQuery::bindText(const char* paramName, const char* text,
 }
 
 void RepoQuery::bindStaticString(const char* paramName, const StringData* sd) {
-  if (sd == NULL) {
+  if (sd == nullptr) {
     bindNull(paramName);
   } else {
     bindText(paramName, sd->data(), sd->size(), true);
@@ -375,7 +375,7 @@ void RepoQuery::getText(int iCol, const char*& text, size_t& size) {
 
 void RepoQuery::getStaticString(int iCol, StringData*& s) {
   if (isNull(iCol)) {
-    s = NULL;
+    s = nullptr;
   } else {
     const char* text;
     size_t size;

@@ -169,7 +169,7 @@ public:
   typedef LookupKey CacheLookupKey;
   typedef Value CacheValue;
 
-  static CacheHandle alloc(const StringData* name = NULL) {
+  static CacheHandle alloc(const StringData* name = nullptr) {
     // Each lookup should access exactly one Pair so there's no point
     // in making sure the entire cache fits on one cache line.
     return namedAlloc<NameSpace>(name, sizeof(Self), sizeof(Pair));
@@ -186,7 +186,7 @@ public:
     memset(thiz, 0, sizeof(*thiz));
   }
   static ReturnValue lookup(CacheHandle chand, LookupKey lookup,
-                            const void* extraKey = NULL);
+                            const void* extraKey = nullptr);
 };
 
 struct FixedFuncCache {
@@ -198,7 +198,7 @@ struct FixedFuncCache {
 
   static void invalidate(CacheHandle handle) {
     FixedFuncCache* thiz = cacheAtHandle(handle);
-    thiz->m_func = NULL;
+    thiz->m_func = nullptr;
   }
 
   static const Func* lookupUnknownFunc(StringData* name);
@@ -348,7 +348,7 @@ private:
   CacheHandle allocConstantLocked(StringData* name);
 public:
   TypedValue* m_tv;  // public; it is used from TC and we assert the offset
-  static CacheHandle alloc(const StringData* sd = NULL) {
+  static CacheHandle alloc(const StringData* sd = nullptr) {
     return namedAlloc<NSSProp>(sd, sizeof(SPropCache), sizeof(SPropCache));
   }
   static TypedValue* lookup(CacheHandle handle, const Class* cls,

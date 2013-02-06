@@ -78,7 +78,7 @@ Func* NamedEntity::getCachedFunc() const {
   if (LIKELY(m_cachedFuncOffset != 0)) {
     return *(Func**)Transl::TargetCache::handleToPtr(m_cachedFuncOffset);
   }
-  return NULL;
+  return nullptr;
 }
 
 UnitMergeInfo* UnitMergeInfo::alloc(size_t size) {
@@ -278,15 +278,15 @@ bool Unit::MetaHandle::nextArg(MetaInfo& info) {
 // Unit.
 
 Unit::Unit()
-    : m_sn(-1), m_bc(NULL), m_bclen(0),
-      m_bc_meta(NULL), m_bc_meta_len(0), m_filepath(NULL),
-      m_dirpath(NULL), m_md5(),
-      m_mergeInfo(NULL),
+    : m_sn(-1), m_bc(nullptr), m_bclen(0),
+      m_bc_meta(nullptr), m_bc_meta_len(0), m_filepath(nullptr),
+      m_dirpath(nullptr), m_md5(),
+      m_mergeInfo(nullptr),
       m_cacheOffset(0),
       m_repoId(-1),
       m_mergeState(UnitMergeStateUnmerged),
       m_cacheMask(0),
-      m_pseudoMainCache(NULL) {
+      m_pseudoMainCache(nullptr) {
   tvWriteUninit(&m_mainReturn);
   m_mainReturn._count = 0; // flag for whether or not the unit is mergeable
 }
@@ -390,19 +390,19 @@ Class* Unit::defClass(const PreClass* preClass,
         if (failIsFatal) {
           raise_error("Class already declared: %s", preClass->name()->data());
         }
-        return NULL;
+        return nullptr;
       }
       return cls;
     }
   }
   // Get a compatible Class, and add it to the list of defined classes.
 
-  Class* parent = NULL;
+  Class* parent = nullptr;
   for (;;) {
     // Search for a compatible extant class.  Searching from most to least
     // recently created may have better locality than alternative search orders.
     // In addition, its the only simple way to make this work lock free...
-    for (Class* class_ = top; class_ != NULL; class_ = class_->m_nextClass) {
+    for (Class* class_ = top; class_ != nullptr; class_ = class_->m_nextClass) {
       if (class_->preClass() != preClass) continue;
 
       Class::Avail avail = class_->avail(parent, failIsFatal /*tryAutoload*/);
@@ -415,7 +415,7 @@ Class* Unit::defClass(const PreClass* preClass,
         if (failIsFatal) {
           raise_error("unknown class %s", parent->name()->data());
         }
-        return NULL;
+        return nullptr;
       }
       assert(avail == Class::AvailFalse);
     }
@@ -423,11 +423,11 @@ Class* Unit::defClass(const PreClass* preClass,
     // Create a new class.
     if (!parent && preClass->parent()->size() != 0) {
       parent = Unit::getClass(preClass->parent(), failIsFatal);
-      if (parent == NULL) {
+      if (parent == nullptr) {
         if (failIsFatal) {
           raise_error("unknown class %s", preClass->parent()->data());
         }
-        return NULL;
+        return nullptr;
       }
     }
 
@@ -453,7 +453,7 @@ Class* Unit::defClass(const PreClass* preClass,
       tmp.m_func = preClass->unit()->getMain();
       tmp.m_soff = !fp ? 0
                        : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
-      tmp.setThis(NULL);
+      tmp.setThis(nullptr);
       tmp.m_varEnv = 0;
       tmp.initNumArgs(0);
       ec->m_fp = &tmp;
@@ -540,9 +540,9 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
 Class* Unit::loadClass(const NamedEntity* ne,
                        const StringData* name) {
   Class *cls = *ne->clsList();
-  if (LIKELY(cls != NULL)) {
+  if (LIKELY(cls != nullptr)) {
     cls = cls->getCached();
-    if (LIKELY(cls != NULL)) return cls;
+    if (LIKELY(cls != nullptr)) return cls;
   }
   VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(
@@ -656,7 +656,7 @@ void Unit::initialMerge() {
             inc: {
                 StringData* s = (StringData*)((char*)obj - (int)k);
                 HPHP::Eval::PhpFile* efile =
-                  g_vmContext->lookupIncludeRoot(s, flags, NULL, this);
+                  g_vmContext->lookupIncludeRoot(s, flags, nullptr, this);
                 assert(efile);
                 Unit* unit = efile->unit();
                 unit->initialMerge();
@@ -717,7 +717,7 @@ void Unit::merge() {
 }
 
 void* Unit::replaceUnit() const {
-  if (m_mergeState & UnitMergeStateEmpty) return NULL;
+  if (m_mergeState & UnitMergeStateEmpty) return nullptr;
   if (isMergeOnly() &&
       m_mergeInfo->m_mergeablesSize == m_mergeInfo->m_firstHoistableFunc + 1) {
     void* obj =
@@ -975,7 +975,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         do {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_unique);
-          Class* other = NULL;
+          Class* other = nullptr;
           Class* cls = (Class*)((char*)obj - (int)k);
           if (cls->isPersistent()) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent);
@@ -1037,7 +1037,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
             if (UNLIKELY(!unit->isMergeOnly())) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
-              VarEnv* ve = NULL;
+              VarEnv* ve = nullptr;
               if (k == UnitMergeKindReqDoc) {
                 ActRec* fp = g_vmContext->m_fp;
                 if (!fp) {
@@ -1053,7 +1053,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
                 }
               }
               g_vmContext->invokeFunc(&ret, unit->getMain(), Array(),
-                                      NULL, NULL, ve, NULL, NULL);
+                                      nullptr, nullptr, ve, nullptr, nullptr);
               tvRefcountedDecRef(&ret);
             } else {
               Stats::inc(Stats::PseudoMain_SkipDeep);
@@ -1083,7 +1083,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
            * We can also remove any Persistent Class/Func*'s,
            * and any requires of modules that are (now) empty
            */
-          size_t delta = compactUnitMergeInfo(mi, NULL);
+          size_t delta = compactUnitMergeInfo(mi, nullptr);
           UnitMergeInfo* newMi = mi;
           if (delta) {
             newMi = UnitMergeInfo::alloc(mi->m_mergeablesSize - delta);
@@ -1182,14 +1182,14 @@ bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
 }
 
 const Func* Unit::getFunc(Offset pc) const {
-  FuncEntry key = FuncEntry(pc, NULL);
+  FuncEntry key = FuncEntry(pc, nullptr);
   FuncTable::const_iterator it =
     upper_bound(m_funcTable.begin(), m_funcTable.end(), key);
   if (it != m_funcTable.end()) {
     assert(pc < it->pastOffset());
     return it->val();
   }
-  return NULL;
+  return nullptr;
 }
 
 void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
@@ -1474,7 +1474,7 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   if (repoId < 0) {
     TRACE(3, "No repo contains '%s' (0x%016llx%016llx)\n",
              name.c_str(), md5.q[0], md5.q[1]);
-    return NULL;
+    return nullptr;
   }
   try {
     getUnitLitstrs(repoId).get(ue);
@@ -1487,7 +1487,7 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
     TRACE(0, "Repo error loading '%s' (0x%016llx%016llx) from '%s': %s\n",
              name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
              re.msg().c_str());
-    return NULL;
+    return nullptr;
   }
   TRACE(3, "Repo loaded '%s' (0x%016llx%016llx) from '%s'\n",
            name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str());
@@ -1936,7 +1936,7 @@ bool UnitRepoProxy::GetBaseOffsetAfterPCLocStmt
 
 UnitEmitter::UnitEmitter(const MD5& md5)
   : m_repoId(-1), m_sn(-1), m_bcmax(BCMaxInit), m_bc((uchar*)malloc(BCMaxInit)),
-    m_bclen(0), m_bc_meta(NULL), m_bc_meta_len(0), m_filepath(NULL),
+    m_bclen(0), m_bc_meta(nullptr), m_bc_meta_len(0), m_filepath(nullptr),
     m_md5(md5), m_nextFuncSn(0),
     m_allClassesHoistable(true), m_returnSeen(false) {
   tvWriteUninit(&m_mainReturn);
@@ -1967,7 +1967,7 @@ void UnitEmitter::setBc(const uchar* bc, size_t bclen) {
 }
 
 void UnitEmitter::setBcMeta(const uchar* bc_meta, size_t bc_meta_len) {
-  assert(m_bc_meta == NULL);
+  assert(m_bc_meta == nullptr);
   if (bc_meta_len) {
     m_bc_meta = (uchar*)malloc(bc_meta_len);
     memcpy(m_bc_meta, bc_meta, bc_meta_len);
@@ -1989,7 +1989,7 @@ void UnitEmitter::setLines(const LineTable& lines) {
 
 Id UnitEmitter::addPreConst(const StringData* name, const TypedValue& value) {
   assert(value.m_type != KindOfObject && value.m_type != KindOfArray);
-  PreConst pc = { value, NULL, name };
+  PreConst pc = { value, nullptr, name };
   if (pc.value.m_type == KindOfString && !pc.value.m_data.pstr->isStatic()) {
     pc.value.m_data.pstr = StringData::GetStaticString(pc.value.m_data.pstr);
     pc.value.m_type = KindOfStaticString;
@@ -2015,7 +2015,7 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
 }
 
 Id UnitEmitter::mergeArray(ArrayData* a, const StringData* key /* = NULL */) {
-  if (key == NULL) {
+  if (key == nullptr) {
     String s = f_serialize(a);
     key = StringData::GetStaticString(s.get());
   }
@@ -2234,7 +2234,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         case UnitMergeKindReqDoc: {
           urp.insertUnitMergeable(repoId).insert(
             txn, usn, i,
-            m_mergeableStmts[i].first, m_mergeableStmts[i].second, NULL);
+            m_mergeableStmts[i].first, m_mergeableStmts[i].second, nullptr);
           break;
         }
         case UnitMergeKindDefine:
@@ -2309,7 +2309,7 @@ Unit* UnitEmitter::create() {
   for (unsigned i = 0; i < m_litstrs.size(); ++i) {
     NamedEntityPair np;
     np.first = m_litstrs[i];
-    np.second = NULL;
+    np.second = nullptr;
     u->m_namedInfo.push_back(np);
   }
   for (unsigned i = 0; i < m_arrays.size(); ++i) {

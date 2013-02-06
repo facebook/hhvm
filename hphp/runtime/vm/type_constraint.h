@@ -59,7 +59,7 @@ protected:
 public:
   void verifyFail(const Func* func, int paramNum, const TypedValue* tv) const;
 
-  explicit TypeConstraint(const StringData* typeName=NULL, bool nullable=false);
+  explicit TypeConstraint(const StringData* typeName=nullptr, bool nullable=false);
 
   bool exists() const { return m_typeName; }
 
@@ -85,12 +85,12 @@ public:
     if (!hphpiCompat) {
       // php 5.4.0RC6 allows 'int' compatible to Int but not integer
       return (m_typeName == other.m_typeName
-              || (m_typeName != NULL && other.m_typeName != NULL
+              || (m_typeName != nullptr && other.m_typeName != nullptr
                   && m_typeName->isame(other.m_typeName)));
     } else {
       // For now, be compatible with hphpi: int $x != Int $x
       return (m_typeName == other.m_typeName
-              || (m_typeName != NULL && other.m_typeName != NULL
+              || (m_typeName != nullptr && other.m_typeName != nullptr
                   && m_typeName->same(other.m_typeName)));
     }
   }

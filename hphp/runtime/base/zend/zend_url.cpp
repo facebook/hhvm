@@ -26,7 +26,7 @@ static char *replace_controlchars(char *str, int len) {
   unsigned char *e = (unsigned char *)str + len;
 
   if (!str) {
-    return (NULL);
+    return (nullptr);
   }
 
   while (s < e) {

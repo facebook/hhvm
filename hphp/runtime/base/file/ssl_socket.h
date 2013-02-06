@@ -48,7 +48,7 @@ public:
 
 public:
   SSLSocket();
-  SSLSocket(int sockfd, int type, const char *address = NULL, int port = 0);
+  SSLSocket(int sockfd, int type, const char *address = nullptr, int port = 0);
   virtual ~SSLSocket();
 
   // will setup and enable crypto
@@ -83,7 +83,7 @@ private:
   bool closeImpl();
   bool handleError(int64 nr_bytes, bool is_init);
 
-  bool setupCrypto(SSLSocket *session = NULL);
+  bool setupCrypto(SSLSocket *session = nullptr);
   bool enableCrypto(bool activate = true);
 
   SSL *createSSL(SSL_CTX *ctx);
@@ -115,7 +115,7 @@ public:
    *  . it will be interpreted as the cert data
    */
   static Object Get(CVarRef var);
-  static BIO *ReadData(CVarRef var, bool *file = NULL);
+  static BIO *ReadData(CVarRef var, bool *file = nullptr);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

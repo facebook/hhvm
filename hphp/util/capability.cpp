@@ -29,7 +29,7 @@ namespace HPHP {
 
 static bool setInitialCapabilities() {
   cap_t cap_d = cap_init();
-  if (cap_d != NULL) {
+  if (cap_d != nullptr) {
     cap_value_t cap_list[] = {CAP_NET_BIND_SERVICE, CAP_SYS_RESOURCE,
                               CAP_SETUID, CAP_SETGID, CAP_SYS_NICE};
     cap_clear(cap_d);
@@ -63,7 +63,7 @@ static bool setInitialCapabilities() {
 static bool setMinimalCapabilities() {
   cap_t cap_d = cap_init();
 
-  if (cap_d != NULL) {
+  if (cap_d != nullptr) {
     cap_value_t cap_list[] = {CAP_NET_BIND_SERVICE, CAP_SYS_RESOURCE,
                               CAP_SYS_NICE};
 
@@ -95,7 +95,7 @@ bool Capability::ChangeUnixUser(uid_t uid) {
   if (setInitialCapabilities()) {
     struct passwd *pw;
 
-    if ((pw = getpwuid(uid)) == NULL) {
+    if ((pw = getpwuid(uid)) == nullptr) {
       Logger::Error("unable to getpwuid(%d): %s", uid, strerror(errno));
       return false;
     }

@@ -221,7 +221,7 @@ class RuntimeType {
              m_value.innerType == KindOfArray ||
              m_value.outerType == KindOfBoolean ||
              m_value.outerType == KindOfInt64 ||
-             m_value.klass == NULL);
+             m_value.klass == nullptr);
       assert(m_value.innerType != KindOfStaticString &&
              m_value.outerType != KindOfStaticString);
     }
@@ -229,7 +229,7 @@ class RuntimeType {
 
  public:
   RuntimeType(DataType outer, DataType inner = KindOfInvalid,
-              const Class* = NULL);
+              const Class* = nullptr);
   RuntimeType(const StringData*);
   RuntimeType(const ArrayData*);
   RuntimeType(const Class*);

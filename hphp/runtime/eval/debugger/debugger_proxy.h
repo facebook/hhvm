@@ -137,7 +137,7 @@ public:
 
 public:
   DebuggerProxyVM(SmartPtr<Socket> socket, bool local)
-    : DebuggerProxy(socket, local), m_injTables(NULL) {
+    : DebuggerProxy(socket, local), m_injTables(nullptr) {
   }
   virtual ~DebuggerProxyVM() {
     delete m_injTables;

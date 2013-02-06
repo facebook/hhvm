@@ -40,7 +40,7 @@ class AccessLog {
 public:
   class ThreadData {
   public:
-    ThreadData() : log(NULL), bytesWritten(0), prevBytesWritten(0) {}
+    ThreadData() : log(nullptr), bytesWritten(0), prevBytesWritten(0) {}
     FILE *log;
     int64 startTime;
     int bytesWritten;

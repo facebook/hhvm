@@ -150,8 +150,8 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
                       PFUNC_CMP value_cmp_function,
                       const void *value_data) const {
   assert(by_key || by_value);
-  assert(by_key || key_cmp_function == NULL);
-  assert(by_value || value_cmp_function == NULL);
+  assert(by_key || key_cmp_function == nullptr);
+  assert(by_value || value_cmp_function == nullptr);
   PFUNC_CMP value_cmp_as_string_function = value_cmp_function;
   if (!value_cmp_function) {
     value_cmp_function = SortStringAscending;
@@ -277,7 +277,7 @@ Array &Array::merge(CArrRef arr) {
 
 HOT_FUNC
 Array &Array::mergeImpl(ArrayData *data, ArrayData::ArrayOp op) {
-  if (m_px == NULL || data == NULL) {
+  if (m_px == nullptr || data == nullptr) {
     throw BadArrayMergeException();
   }
   if (!data->empty()) {
@@ -296,7 +296,7 @@ Array &Array::mergeImpl(ArrayData *data, ArrayData::ArrayOp op) {
 }
 
 Array Array::slice(int offset, int length, bool preserve_keys) const {
-  if (m_px == NULL) return Array();
+  if (m_px == nullptr) return Array();
   return ArrayUtil::Slice(m_px, offset, length, preserve_keys);
 }
 
@@ -311,7 +311,7 @@ Object Array::toObject() const {
 // comparisons
 
 bool Array::same(CArrRef v2) const {
-  if (m_px == NULL && v2.get() == NULL) return true;
+  if (m_px == nullptr && v2.get() == nullptr) return true;
   if (m_px && v2.get()) {
     return m_px->equal(v2.get(), true);
   }
@@ -323,14 +323,14 @@ bool Array::same(CObjRef v2) const {
 }
 
 bool Array::equal(CArrRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
+  if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
   return m_px->equal(v2.get(), false);
 }
 
 bool Array::equal(CObjRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
+  if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
   check_collection_compare(v2.get());
@@ -338,7 +338,7 @@ bool Array::equal(CObjRef v2) const {
 }
 
 bool Array::less(CArrRef v2, bool flip /* = false */) const {
-  if (m_px == NULL || v2.get() == NULL) {
+  if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   if (flip) {
@@ -348,7 +348,7 @@ bool Array::less(CArrRef v2, bool flip /* = false */) const {
 }
 
 bool Array::less(CObjRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
+  if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   check_collection_compare(v2.get());
@@ -356,7 +356,7 @@ bool Array::less(CObjRef v2) const {
 }
 
 bool Array::less(CVarRef v2) const {
-  if (m_px == NULL || v2.isNull()) {
+  if (m_px == nullptr || v2.isNull()) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   if (v2.getType() == KindOfArray) {
@@ -366,7 +366,7 @@ bool Array::less(CVarRef v2) const {
 }
 
 bool Array::more(CArrRef v2, bool flip /* = true */) const {
-  if (m_px == NULL || v2.get() == NULL) {
+  if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   if (flip) {
@@ -376,7 +376,7 @@ bool Array::more(CArrRef v2, bool flip /* = true */) const {
 }
 
 bool Array::more(CObjRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
+  if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   check_collection_compare(v2.get());
@@ -384,7 +384,7 @@ bool Array::more(CObjRef v2) const {
 }
 
 bool Array::more(CVarRef v2) const {
-  if (m_px == NULL || v2.isNull()) {
+  if (m_px == nullptr || v2.isNull()) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   if (v2.getType() == KindOfArray) {
@@ -541,7 +541,7 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
     }
     return &lvalAt(key, AccessFlags::Key);
   }
-  Variant *ret = NULL;
+  Variant *ret = nullptr;
   if (m_px) {
     ArrayData *escalated = m_px->lvalPtr(key, ret,
                                          forWrite && m_px->getCount() > 1,
@@ -561,7 +561,7 @@ Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
     }
     return &lvalAt(key, AccessFlags::None);
   }
-  Variant *ret = NULL;
+  Variant *ret = nullptr;
   if (m_px) {
     ArrayData *escalated = m_px->lvalPtr(key, ret,
                                          forWrite && m_px->getCount() > 1,
@@ -577,7 +577,7 @@ Variant &Array::lvalAt() {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create());
   }
-  Variant *ret = NULL;
+  Variant *ret = nullptr;
   ArrayData *arr = m_px;
   ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
   if (escalated) {
@@ -918,7 +918,7 @@ Variant Array::appendOpEqual(int op, CVarRef v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create());
   }
-  Variant *cv = NULL;
+  Variant *cv = nullptr;
   ArrayData *escalated = m_px->lvalNew(cv, m_px->getCount() > 1);
   if (escalated) {
     ArrayBase::operator=(escalated);

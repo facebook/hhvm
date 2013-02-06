@@ -50,7 +50,7 @@ protected:
    * Translate a frame pointer to file name and line number pair.
    */
   static bool Translate(void *bt, Frame * f, Dl_info&, void*,
-                        void *bfds=NULL, unsigned bfd_size=0) ;
+                        void *bfds=nullptr, unsigned bfd_size=0) ;
 
   /**
    * Run addr2line to translate a function pointer into function name and line

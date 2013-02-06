@@ -34,7 +34,7 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
                  CStrRef postData /* = null_string */,
                  int maxRedirect /* = 20 */,
                  int timeout /* = -1 */) {
-  m_get = (method == NULL || strcasecmp(method, "GET") == 0);
+  m_get = (method == nullptr || strcasecmp(method, "GET") == 0);
   m_headers = headers;
   m_postData = postData;
   m_maxRedirect = maxRedirect;
@@ -51,7 +51,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   HttpClient http(m_timeout, m_maxRedirect);
   m_response.reset();
 
-  HeaderMap *pHeaders = NULL;
+  HeaderMap *pHeaders = nullptr;
   HeaderMap requestHeaders;
   if (!m_headers.empty()) {
     pHeaders = &requestHeaders;

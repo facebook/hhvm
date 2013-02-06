@@ -407,9 +407,9 @@ public:
                               bool voidWrapperOff = false,
                               bool fewArgs = false,
                               bool ret = true,
-                              const char *extraArg = NULL,
+                              const char *extraArg = nullptr,
                               bool constructor = false,
-                              const char *instance = NULL,
+                              const char *instance = nullptr,
                               const char *class_name = "");
 
   void outputCPPDef(CodeGenerator &cg);

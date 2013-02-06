@@ -23,7 +23,7 @@ using namespace HPHP;
 
 int main() {
   for (int i = 0; ; i++) {
-    if (ShmCounters::s_shmCounters == NULL) {
+    if (ShmCounters::s_shmCounters == nullptr) {
       if (!ShmCounters::initialize(false)) break;
     }
     fprintf(stderr, "%d\n", i);

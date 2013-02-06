@@ -290,7 +290,7 @@ bool ScalarExpression::isLiteralInteger() const {
 
 int64 ScalarExpression::getLiteralInteger() const {
   assert(isLiteralInteger());
-  return strtoll(m_value.c_str(), NULL, 0);
+  return strtoll(m_value.c_str(), nullptr, 0);
 }
 
 bool ScalarExpression::isLiteralString() const {
@@ -653,7 +653,7 @@ Variant ScalarExpression::getVariant() const {
     case T_NUM_STRING:
       return String(m_value);
     case T_LNUMBER:
-      return strtoll(m_value.c_str(), NULL, 0);
+      return strtoll(m_value.c_str(), nullptr, 0);
     case T_LINE:
       return String(m_translated).toInt64();
     case T_TRAIT_C:
@@ -692,7 +692,7 @@ bool ScalarExpression::getString(const std::string *&s) const {
 
 bool ScalarExpression::getInt(int64 &i) const {
   if (m_type == T_LNUMBER) {
-    i = strtoll(m_value.c_str(), NULL, 0);
+    i = strtoll(m_value.c_str(), nullptr, 0);
     return true;
   } else if (m_type == T_LINE) {
     i = getLocation() ? getLocation()->line1 : 0;

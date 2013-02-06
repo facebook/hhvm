@@ -42,7 +42,7 @@ ResourceData::ResourceData()
         true) {
   assert(!m_cls->callsCustomInstanceInit());
 #else
-    : RD_PARENT(NULL, true) {
+    : RD_PARENT(nullptr, true) {
 #endif
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR

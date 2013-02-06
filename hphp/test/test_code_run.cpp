@@ -61,8 +61,8 @@ bool TestCodeRun::postTest() {
 
 bool TestCodeRun::CleanUp() {
   string out, err;
-  const char *argv[] = {"", NULL};
-  Process::Exec("runtime/tmp/cleanup.sh", argv, NULL, out, &err);
+  const char *argv[] = {"", nullptr};
+  Process::Exec("runtime/tmp/cleanup.sh", argv, nullptr, out, &err);
   if (!err.empty()) {
     printf("Failed to clean up runtime/tmp: %s\n", err.c_str());
     return false;
@@ -118,12 +118,12 @@ bool TestCodeRun::GenerateFiles(const char *input,
   ar->inferTypes();
   ar->postOptimize();
   ar->analyzeProgramFinal();
-  ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);
+  ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, nullptr);
 
   string target = path + "/Makefile";
-  const char *argv1[] = {"", "runtime/tmp/single.mk", target.c_str(), NULL};
+  const char *argv1[] = {"", "runtime/tmp/single.mk", target.c_str(), nullptr};
   string out, err;
-  Process::Exec("cp", argv1, NULL, out, &err);
+  Process::Exec("cp", argv1, nullptr, out, &err);
   if (!err.empty()) {
     printf("Failed to copy runtime/tmp/single.mk: %s\n", err.c_str());
     return false;
@@ -131,8 +131,8 @@ bool TestCodeRun::GenerateFiles(const char *input,
 
   if (FastMode) {
     string sys = string(subdir) + "/sys";
-    const char *argv2[] = {"", sys.c_str(), NULL};
-    Process::Exec("runtime/tmp/mergecpp.sh", argv2, NULL, out, &err);
+    const char *argv2[] = {"", sys.c_str(), nullptr};
+    Process::Exec("runtime/tmp/mergecpp.sh", argv2, nullptr, out, &err);
     if (!err.empty()) {
       printf("Failed to merge runtime/tmp/%s/*.cpp: %s\n",
              sys.c_str(), err.c_str());
@@ -157,8 +157,8 @@ static string filter_distcc(string &msg) {
 
 bool TestCodeRun::CompileFiles() {
   string out, err;
-  const char *argv[] = {"", FastMode ? "SHARED" : "LINK", NULL};
-  Process::Exec("runtime/makeall.sh", argv, NULL, out, &err);
+  const char *argv[] = {"", FastMode ? "SHARED" : "LINK", nullptr};
+  Process::Exec("runtime/makeall.sh", argv, nullptr, out, &err);
   err = filter_distcc(err);
   if (!err.empty()) {
     printf("Failed to compile files:\n");
@@ -238,12 +238,12 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   } else {
     const char *argv1[] = {"", "-ddisplay_errors=stderr",
                            "-dapc.enable_cli=1",
-                           fullPath.c_str(), NULL};
+                           fullPath.c_str(), nullptr};
     const char *argv2[] = {"", "-ddisplay_errors=On",
                            "-dapc.enable_cli=1",
-                           fullPath.c_str(), NULL};
+                           fullPath.c_str(), nullptr};
     string err;
-    Process::Exec(php_path, nowarnings ? argv2 : argv1, NULL, expected, &err);
+    Process::Exec(php_path, nowarnings ? argv2 : argv1, nullptr, expected, &err);
     if (!err.empty() && nowarnings) {
       printf("%s:%d\nParsing: [%s]\nFailed to run %s: %s\n",
              file, line, input, fullPath.c_str(), err.c_str());
@@ -262,13 +262,13 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       if (fastMode) {
         string path = dir + "libtest.so";
         const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
-                              repoarg.c_str(), path.c_str(), NULL};
-        Process::Exec("runtime/tmp/run.sh", argv, NULL, actual, &err);
+                              repoarg.c_str(), path.c_str(), nullptr};
+        Process::Exec("runtime/tmp/run.sh", argv, nullptr, actual, &err);
       } else {
         const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
-                              repoarg.c_str(), NULL};
+                              repoarg.c_str(), nullptr};
         string path = dir + "test";
-        Process::Exec(path.c_str(), argv, NULL, actual, &err);
+        Process::Exec(path.c_str(), argv, nullptr, actual, &err);
       }
     } else {
       string filearg = "--file=" + dir + "main.php";
@@ -285,8 +285,8 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
                             jitarg.c_str(),
                             jit_use_ir.c_str(),
                             jit_rename.c_str(),
-                            NULL};
-      Process::Exec(HHVM_PATH, argv, NULL, actual, &err);
+                            nullptr};
+      Process::Exec(HHVM_PATH, argv, nullptr, actual, &err);
     }
 
     if (perfMode) {
@@ -9655,7 +9655,7 @@ bool TestCodeRun::TestCollectionClasses() {
     COMPARE(a, op, '1')                         \
     COMPARE(a, op, '0')                         \
     COMPARE(a, op, '-1')                        \
-    COMPARE(a, op, NULL)                        \
+    COMPARE(a, op, nullptr)                        \
     COMPARE(a, op, array())                     \
     COMPARE(a, op, array(1))                    \
     COMPARE(a, op, array(2))                    \
@@ -9680,7 +9680,7 @@ bool TestCodeRun::TestCollectionClasses() {
   MVCR("<?php $i = 0; " COMPARE_ALL('1', op));                          \
   MVCR("<?php $i = 0; " COMPARE_ALL('0', op));                          \
   MVCR("<?php $i = 0; " COMPARE_ALL('-1', op));                         \
-  MVCR("<?php $i = 0; " COMPARE_ALL(NULL, op));                         \
+  MVCR("<?php $i = 0; " COMPARE_ALL(nullptr, op));                         \
   MVCR("<?php $i = 0; " COMPARE_ALL(array(), op));                      \
   MVCR("<?php $i = 0; " COMPARE_ALL(array(1), op));                     \
   MVCR("<?php $i = 0; " COMPARE_ALL(array(2), op));                     \

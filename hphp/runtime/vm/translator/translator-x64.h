@@ -55,7 +55,7 @@ struct TraceletCountersVec {
   TraceletCounters *m_elms;
   Mutex m_lock;
 
-  TraceletCountersVec() : m_size(0), m_elms(NULL), m_lock() { }
+  TraceletCountersVec() : m_size(0), m_elms(nullptr), m_lock() { }
 };
 
 struct FreeStubList {
@@ -65,7 +65,7 @@ struct FreeStubList {
   };
   static const uint64_t kStubFree = 0;
   StubNode* m_list;
-  FreeStubList() : m_list(NULL) {}
+  FreeStubList() : m_list(nullptr) {}
   TCA maybePop();
   void push(TCA stub);
 };
@@ -813,7 +813,7 @@ private:
   void emitStringCheck(Asm& _a, PhysReg base, int offset);
   void emitTypeCheck(Asm& _a, DataType dt,
                      PhysReg base, int offset,
-                     SrcRec* fail = NULL);
+                     SrcRec* fail = nullptr);
   void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
     SrcRec& fail);

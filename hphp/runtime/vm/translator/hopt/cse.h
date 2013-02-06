@@ -29,7 +29,7 @@ struct CSEHash {
   SSATmp* lookup(IRInstruction* inst) {
     MapType::iterator it = map.find(inst);
     if (it == map.end()) {
-      return NULL;
+      return nullptr;
     }
     return (*it).second;
   }

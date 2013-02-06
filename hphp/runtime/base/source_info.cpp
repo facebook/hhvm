@@ -22,7 +22,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 SourceInfo SourceInfo::TheSourceInfo;
-SourceInfoHook *SourceInfo::s_hook = NULL;
+SourceInfoHook *SourceInfo::s_hook = nullptr;
 
 SourceInfo::SourceInfo() : m_loaded(false), m_source_root_len(0) {
 }
@@ -92,7 +92,7 @@ const char *SourceInfo::getClassDeclaringFile(CStrRef name,
     }
     return iter->second[0]->file;
   }
-  return NULL;
+  return nullptr;
 }
 
 const char *SourceInfo::getFunctionDeclaringFile(CStrRef name,
@@ -109,7 +109,7 @@ const char *SourceInfo::getFunctionDeclaringFile(CStrRef name,
     }
     return iter->second[0]->file;
   }
-  return NULL;
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

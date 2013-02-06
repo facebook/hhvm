@@ -82,7 +82,7 @@ IRInstruction::List initInstructions(Trace* trace, DceState& state) {
       // and LdStack instruction that produce Cell types will not
       // generate guards, so remove the label from this instruction so
       // that its no longer an essential control-flow instruction
-      inst->setLabel(NULL);
+      inst->setLabel(nullptr);
     }
   });
 

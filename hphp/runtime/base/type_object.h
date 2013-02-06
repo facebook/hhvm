@@ -71,7 +71,7 @@ class Object : protected ObjectBase {
    * Informational
    */
   bool isNull() const {
-    return m_px == NULL;
+    return m_px == nullptr;
   }
   bool isResource() const {
     return m_px && m_px->isResource();
@@ -126,7 +126,7 @@ class Object : protected ObjectBase {
       if (!nullOkay) {
         throw_null_pointer_exception();
       }
-      return NULL;
+      return nullptr;
     }
     while (true) {
       T *px = dynamic_cast<T*>(cur);
@@ -136,7 +136,7 @@ class Object : protected ObjectBase {
         if (!badTypeOkay) {
           throw InvalidObjectTypeException(m_px->o_getClassName());
         }
-        return NULL;
+        return nullptr;
       }
 
       // Assert that casting does not adjust the 'this' pointer
@@ -146,7 +146,7 @@ class Object : protected ObjectBase {
   }
   template<typename T>
   bool is() const {
-    return getTyped<T>(true, true) != NULL;
+    return getTyped<T>(true, true) != nullptr;
   }
   template<typename T>
   T *cast() const {
@@ -217,7 +217,7 @@ class Object : protected ObjectBase {
   // Transfer ownership of our reference to this object.
   ObjectData *detach() {
     ObjectData *ret = m_px;
-    m_px = NULL;
+    m_px = nullptr;
     return ret;
   }
 

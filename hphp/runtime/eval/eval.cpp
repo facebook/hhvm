@@ -25,7 +25,7 @@ using namespace Eval;
 ///////////////////////////////////////////////////////////////////////////////
 
 ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root) {
-  assert_not_implemented(root == NULL);
+  assert_not_implemented(root == nullptr);
   const StringData* className = StringData::GetStaticString(s.get());
   return g_vmContext->createObjectOnly((StringData*)className);
 }
@@ -48,9 +48,9 @@ bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
   bool initial;
   HPHP::Eval::PhpFile* efile =
     g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
-  HPHP::VM::Unit* u = NULL;
+  HPHP::VM::Unit* u = nullptr;
   if (efile) u = efile->unit();
-  if (u == NULL) {
+  if (u == nullptr) {
     return false;
   }
   if (!once || initial) {

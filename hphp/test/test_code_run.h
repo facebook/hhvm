@@ -294,17 +294,17 @@ private:
 // macros
 
 #define VCR(a)                                                          \
-  if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__,false))) return false;
+  if (!Count(VerifyCodeRun(a,nullptr,__FILE__,__LINE__,false))) return false;
 
 #define VCRO(a, b)                                                      \
   if (!Count(VerifyCodeRun(a,b,__FILE__,__LINE__,false))) return false;
 
 #define VCRNW(a)                                                        \
-  if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__,true))) return false;
+  if (!Count(VerifyCodeRun(a,nullptr,__FILE__,__LINE__,true))) return false;
 
 // Multi VCR
 #define MVCR(a)                                                         \
-  if (!RecordMulti(a,NULL,__FILE__,__LINE__,false,false)) return false;
+  if (!RecordMulti(a,nullptr,__FILE__,__LINE__,false,false)) return false;
 
 #define MVCRO(a, b)                                                     \
   if (!RecordMulti(a, b, __FILE__,__LINE__,false,false)) return false;
@@ -313,7 +313,7 @@ private:
   if (!RecordMulti(a, b, __FILE__,__LINE__,false,true)) return false;
 
 #define MVCRNW(a)                                                       \
-  if (!RecordMulti(a,NULL,__FILE__,__LINE__,true,false)) return false;
+  if (!RecordMulti(a,nullptr,__FILE__,__LINE__,true,false)) return false;
 
 #define MVCRONW(a,b)                                                     \
   if (!RecordMulti(a,b,__FILE__,__LINE__,true,false)) return false;

@@ -425,7 +425,7 @@ void FunctionContainer::outputCPPCodeInfoTable(
   vector<const char *> funcs;
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   if (system) {
-    outputCPPCallInfoTableSupport(cg, ar, 0, needGlobals, NULL);
+    outputCPPCallInfoTableSupport(cg, ar, 0, needGlobals, nullptr);
   }
   for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin(),
          end = functions.end(); iter != end; ++iter) {

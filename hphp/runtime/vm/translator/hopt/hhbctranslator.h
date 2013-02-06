@@ -40,7 +40,7 @@ struct EvalStack {
 
   SSATmp* pop() {
     if (m_vector.size() == 0) {
-      return NULL;
+      return nullptr;
     }
     SSATmp* tmp = m_vector.back();
     m_vector.pop_back();
@@ -49,7 +49,7 @@ struct EvalStack {
 
   SSATmp* top(uint32 offset=0) const {
     if (offset >= m_vector.size()) {
-      return NULL;
+      return nullptr;
     }
     uint32 index = m_vector.size() - 1 - offset;
     return m_vector[index];
@@ -83,7 +83,7 @@ public:
   }
   SSATmp* pop() {
     if (stack.empty()) {
-      return NULL;
+      return nullptr;
     }
     SSATmp* tmp = stack.top();
     stack.pop();
@@ -361,12 +361,12 @@ struct HhbcTranslator {
   // tracelet guards
   Trace* guardTypeStack(uint32 stackIndex,
                         Type type,
-                        Trace* nextTrace = NULL);
+                        Trace* nextTrace = nullptr);
   void   guardTypeLocal(uint32 locId, Type type);
   Trace* guardRefs(int64               entryArDelta,
                    const vector<bool>& mask,
                    const vector<bool>& vals,
-                   Trace*              exitTrace = NULL);
+                   Trace*              exitTrace = nullptr);
 
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32 localIndex, Type type);
@@ -464,15 +464,15 @@ private:
   void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
   bool isSupportedClsProp(int stkIndex = 0);
-  SSATmp* getClsPropAddr(Trace* exitTrace, const StringData* propName = NULL);
+  SSATmp* getClsPropAddr(Trace* exitTrace, const StringData* propName = nullptr);
   void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(Offset targetBcOff = -1);
   Trace* getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff);
   Trace* getExitSlowTrace();
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32 id, Trace* target);
-  void emitInterpOne(Type type, Trace* target = NULL);
-  void emitInterpOneOrPunt(Type type, Trace* target = NULL);
+  void emitInterpOne(Type type, Trace* target = nullptr);
+  void emitInterpOneOrPunt(Type type, Trace* target = nullptr);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);

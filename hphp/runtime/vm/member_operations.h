@@ -264,7 +264,7 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   default: {
     assert(false);
-    result = NULL;
+    result = nullptr;
   }
   }
   return result;
@@ -357,7 +357,7 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
       tvAsVariant(base) = a;
     } else {
       raise_error("Operator not supported for strings");
-      result = NULL; // Silence compiler warning.
+      result = nullptr; // Silence compiler warning.
     }
     break;
   }
@@ -370,7 +370,7 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
     if (LIKELY(base->m_data.pobj->isCollection())) {
       if (reffy) {
         raise_error("Collection elements cannot be taken by reference");
-        result = NULL;
+        result = nullptr;
       } else {
         result = collectionGet(base->m_data.pobj, key);
       }
@@ -381,7 +381,7 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
   }
   default: {
     assert(false);
-    result = NULL; // Silence compiler warning.
+    result = nullptr; // Silence compiler warning.
   }
   }
   return result;
@@ -394,7 +394,7 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
 template <KeyType keyType = AnyKey>
 static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
                                 TypedValue* base, TypedValue* key) {
-  TypedValue* result = NULL;
+  TypedValue* result = nullptr;
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -441,7 +441,7 @@ static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
   }
   default: {
     assert(false);
-    result = NULL;
+    result = nullptr;
   }
   }
   return result;
@@ -493,7 +493,7 @@ static inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject: {
     if (LIKELY(base->m_data.pobj->isCollection())) {
       raise_error("Cannot use [] for reading");
-      result = NULL;
+      result = nullptr;
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
     }
@@ -547,7 +547,7 @@ template <bool setResult, KeyType keyType>
 static inline void SetElemArray(TypedValue* base, TypedValue* key,
                                 Cell* value) {
   ArrayData* a = base->m_data.parr;
-  ArrayData* newData = NULL;
+  ArrayData* newData = nullptr;
   bool copy = (a->getCount() > 1)
     || (value->m_type == KindOfArray && value->m_data.parr == a);
 
@@ -570,7 +570,7 @@ static inline void SetElemArray(TypedValue* base, TypedValue* key,
     }
   }
 
-  if (newData != NULL && newData != a) {
+  if (newData != nullptr && newData != a) {
     newData->incRefCount();
     decRefArr(a);
     base->m_data.parr = newData;
@@ -841,7 +841,7 @@ static inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   default: {
     assert(false);
-    result = NULL; // Silence compiler warning.
+    result = nullptr; // Silence compiler warning.
   }
   }
   return result;
@@ -901,7 +901,7 @@ static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject: {
     if (LIKELY(base->m_data.pobj->isCollection())) {
       raise_error("Cannot use [] for reading");
-      result = NULL;
+      result = nullptr;
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
       SETOP_BODY(result, op, rhs);
@@ -911,7 +911,7 @@ static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   default: {
     assert(false);
-    result = NULL; // Silence compiler warning.
+    result = nullptr; // Silence compiler warning.
   }
   }
   return result;
@@ -1132,7 +1132,7 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     TypedValue* result;
     if (LIKELY(base->m_data.pobj->isCollection())) {
       raise_error("Cannot use [] for reading");
-      result = NULL;
+      result = nullptr;
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
       IncDecBody<setResult>(op, result, &dest);
@@ -1292,8 +1292,8 @@ static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
                                Class* ctx, TypedValue* base, TypedValue* key) {
   static_assert(keyType != IntKey, "Integer property keys are not supported");
   assert(!warn || !unset);
-  TypedValue* result = NULL;
-  StringData* keySD = NULL;
+  TypedValue* result = nullptr;
+  StringData* keySD = nullptr;
   Instance* instance;
   if (baseIsObj) {
     instance = reinterpret_cast<Instance*>(base);
@@ -1418,7 +1418,7 @@ static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
   }
 
   TypedValue tvScratch;
-  TypedValue* result = NULL;
+  TypedValue* result = nullptr;
   DataType t = propPre<false, false, true>(tvScratch, result, base);
   if (t == KindOfNull) {
     return useEmpty;
@@ -1444,7 +1444,7 @@ static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
   Instance* obj = createDefaultObject();
   obj->incRefCount();
   StringData* keySD = prepareKey(key);
-  obj->setProp(NULL, keySD, (TypedValue*)val);
+  obj->setProp(nullptr, keySD, (TypedValue*)val);
   decRefStr(keySD);
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
@@ -1530,7 +1530,7 @@ static inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
   StringData* keySD = prepareKey(key);
   tvWriteNull(&tvRef);
   SETOP_BODY(&tvRef, op, rhs);
-  obj->setProp(NULL, keySD, &tvRef);
+  obj->setProp(nullptr, keySD, &tvRef);
   decRefStr(keySD);
   return &tvRef;
 }
@@ -1621,14 +1621,14 @@ static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
   tvWriteNull(&tv);
   if (setResult) {
     IncDecBody<true>(op, (&tv), &dest);
-    obj->setProp(NULL, keySD, &dest);
+    obj->setProp(nullptr, keySD, &dest);
   } else {
     // The caller doesn't actually want the result set, but we have to do so in
     // order to call obj->setProp().
     TypedValue tDest;
     tvWriteUninit(&tDest);
     IncDecBody<true>(op, (&tv), &tDest);
-    obj->setProp(NULL, keySD, &tDest);
+    obj->setProp(nullptr, keySD, &tDest);
     assert(!IS_REFCOUNTED_TYPE(tDest.m_type));
   }
   assert(!IS_REFCOUNTED_TYPE(tv.m_type));

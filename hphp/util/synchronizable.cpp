@@ -22,7 +22,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Synchronizable::Synchronizable() : m_mutex(RankLeaf) {
-  pthread_cond_init(&m_cond, NULL);
+  pthread_cond_init(&m_cond, nullptr);
 }
 
 Synchronizable::~Synchronizable() {

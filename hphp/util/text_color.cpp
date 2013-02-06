@@ -20,8 +20,8 @@
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *s_stdout_color = NULL;
-const char *s_stderr_color = NULL;
+const char *s_stdout_color = nullptr;
+const char *s_stderr_color = nullptr;
 
 const char *get_color_by_name(const char *name) {
   string upper = toUpper(name);
@@ -41,7 +41,7 @@ const char *get_color_by_name(const char *name) {
   if (upper == "LIGHT_MAGENTA" ) return  ANSI_COLOR_LIGHT_MAGENTA;
   if (upper == "LIGHT_CYAN"    ) return  ANSI_COLOR_LIGHT_CYAN;
   if (upper == "WHITE"         ) return  ANSI_COLOR_WHITE;
-  return NULL;
+  return nullptr;
 }
 
 const char *get_bgcolor_by_name(const char *name) {
@@ -54,7 +54,7 @@ const char *get_bgcolor_by_name(const char *name) {
   if (upper == "MAGENTA"       ) return  ANSI_BGCOLOR_MAGENTA;
   if (upper == "CYAN"          ) return  ANSI_BGCOLOR_CYAN;
   if (upper == "GRAY"          ) return  ANSI_BGCOLOR_GRAY;
-  return NULL;
+  return nullptr;
 }
 
 void get_supported_colors(std::vector<std::string> &names) {

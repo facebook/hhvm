@@ -77,13 +77,13 @@ void ScannerToken::xhpDecode() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
-    : m_filename(filename), m_stream(NULL), m_source(NULL), m_len(0), m_pos(0),
-      m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
-      m_loc(NULL), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
+    : m_filename(filename), m_stream(nullptr), m_source(nullptr), m_len(0), m_pos(0),
+      m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
+      m_loc(nullptr), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
   m_stream = new std::ifstream(filename);
   m_streamOwner = true;
   if (m_stream->fail()) {
-    delete m_stream; m_stream = NULL;
+    delete m_stream; m_stream = nullptr;
     throw FileOpenException(filename);
   }
   if (md5) computeMd5();
@@ -101,9 +101,9 @@ Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
 Scanner::Scanner(std::istream &stream, int type,
                  const char *fileName /* = "" */,
                  bool md5 /* = false */)
-    : m_filename(fileName), m_source(NULL), m_len(0), m_pos(0),
-      m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
-      m_loc(NULL), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
+    : m_filename(fileName), m_source(nullptr), m_len(0), m_pos(0),
+      m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
+      m_loc(nullptr), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
   m_stream = &stream;
   m_streamOwner = false;
   if (md5) computeMd5();
@@ -118,9 +118,9 @@ Scanner::Scanner(std::istream &stream, int type,
 
 Scanner::Scanner(const char *source, int len, int type,
                  const char *fileName /* = "" */, bool md5 /* = false */)
-    : m_filename(fileName), m_stream(NULL), m_source(source), m_len(len),
-      m_pos(0), m_state(Start), m_type(type), m_yyscanner(NULL),
-      m_token(NULL), m_loc(NULL), m_lastToken(-1), m_isStrictMode(0),
+    : m_filename(fileName), m_stream(nullptr), m_source(source), m_len(len),
+      m_pos(0), m_state(Start), m_type(type), m_yyscanner(nullptr),
+      m_token(nullptr), m_loc(nullptr), m_lastToken(-1), m_isStrictMode(0),
       m_lookaheadLtDepth(0) {
   assert(m_source);
   m_streamOwner = false;
@@ -516,7 +516,7 @@ string Scanner::escape(char *str, int len, char quote_type) const {
                 if (isxdigit(str[i+1])) {
                   shex += str[++i]; // 1st hex digit
                 }
-                output += strtol(shex.c_str(), NULL, 16);
+                output += strtol(shex.c_str(), nullptr, 16);
               } else {
                 output += ch;
                 output += str[i];
@@ -534,7 +534,7 @@ string Scanner::escape(char *str, int len, char quote_type) const {
                     soct += str[++i]; // 2nd octal digit
                   }
                 }
-                output += strtol(soct.c_str(), NULL, 8);
+                output += strtol(soct.c_str(), nullptr, 8);
               } else {
                 output += ch;
                 output += str[i];
@@ -565,7 +565,7 @@ TokenStore::iterator TokenStore::begin() {
 
 TokenStore::iterator TokenStore::end() {
   iterator it;
-  it.m_slab = NULL;
+  it.m_slab = nullptr;
   it.m_pos = 0;
   return it;
 }
@@ -596,7 +596,7 @@ TokenStore::iterator TokenStore::appendNew() {
     return it;
   }
   LookaheadSlab* newSlab = new LookaheadSlab;
-  newSlab->m_next = NULL;
+  newSlab->m_next = nullptr;
   newSlab->m_beginPos = 0;
   newSlab->m_endPos = 0;
   if (m_tail) {

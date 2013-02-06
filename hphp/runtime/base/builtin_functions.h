@@ -434,7 +434,7 @@ void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name);
 /**
  * When fatal coding errors are transformed to this function call.
  */
-inline Variant throw_fatal(const char *msg, void *dummy = NULL) {
+inline Variant throw_fatal(const char *msg, void *dummy = nullptr) {
   throw FatalErrorException(msg);
 }
 inline Variant throw_missing_class(const char *cls) {
@@ -477,7 +477,7 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
 /**
  * When fatal coding errors are transformed to this function call.
  */
-inline Object throw_fatal_object(const char *msg, void *dummy = NULL) {
+inline Object throw_fatal_object(const char *msg, void *dummy = nullptr) {
   throw FatalErrorException(msg);
 }
 
@@ -548,15 +548,15 @@ class LVariableTable;
 String resolve_include(CStrRef file, const char* currentDir,
                        bool (*tryFile)(CStrRef file, void* ctx), void* ctx);
 Variant include(CStrRef file, bool once = false,
-                LVariableTable* variables = NULL,
+                LVariableTable* variables = nullptr,
                 const char *currentDir = "",
                 bool raiseNotice = true);
 Variant require(CStrRef file, bool once = false,
-                LVariableTable* variables = NULL,
+                LVariableTable* variables = nullptr,
                 const char *currentDir = "",
                 bool raiseNotice = true);
 Variant include_impl_invoke(CStrRef file, bool once = false,
-                            LVariableTable* variables = NULL,
+                            LVariableTable* variables = nullptr,
                             const char *currentDir = "");
 
 /**
@@ -614,7 +614,7 @@ public:
   void removeAllHandlers();
   bool isRunning();
 
-  bool invokeHandler(CStrRef className, const bool *declared = NULL,
+  bool invokeHandler(CStrRef className, const bool *declared = nullptr,
                      bool forceSplStack = false);
   bool autoloadFunc(CStrRef name);
   bool autoloadConstant(CStrRef name);

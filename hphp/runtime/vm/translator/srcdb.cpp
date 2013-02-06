@@ -146,7 +146,7 @@ void SrcRec::patchIncomingBranches(Asm& a, Asm &astubs, TCA newStart) {
     TRACE(1, "SrcRec(%p)::newTranslation rechaining @%p -> %p\n",
           this, change[i].m_src, newStart);
     Asm *as = change[i].m_type == IncomingBranch::ADDR ?
-      NULL : &asmChoose(change[i].m_src, a, astubs);
+      nullptr : &asmChoose(change[i].m_src, a, astubs);
     patch(as, change[i], newStart);
   }
 }
@@ -191,7 +191,7 @@ void SrcDB::recordDependencyWork(const Eval::PhpFile* file, const SrcKey& sk) {
   if (RuntimeOption::RepoAuthoritative) return;
   assert(Translator::WriteLease().amOwner());
   std::pair<FileDepMap::iterator, bool> insRet =
-    m_deps.insert(FileDepMap::value_type(file, NULL));
+    m_deps.insert(FileDepMap::value_type(file, nullptr));
   if (insRet.second) {
     insRet.first->second = new GrowableVector<SrcKey>();
   }

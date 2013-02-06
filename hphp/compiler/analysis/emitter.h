@@ -604,7 +604,7 @@ public:
   void emitAssignment(Emitter& e, ExpressionPtr c, int op, bool bind);
   void emitListAssignment(Emitter& e, ListAssignmentPtr lst);
   void postponeMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
-                    ClosureUseVarVec* useVars = NULL);
+                    ClosureUseVarVec* useVars = nullptr);
   void postponeCtor(InterfaceStatementPtr m, FuncEmitter* fe);
   void postponePinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);

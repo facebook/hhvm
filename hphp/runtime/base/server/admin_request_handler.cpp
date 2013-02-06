@@ -77,14 +77,14 @@ struct malloc_write {
 };
 
 void malloc_write_init(malloc_write *mw) {
-  mw->s = NULL;
+  mw->s = nullptr;
   mw->slen = 0;
   mw->smax = 0;
   mw->oom = false;
 }
 
 void malloc_write_fini(malloc_write *mw) {
-  if (mw->s != NULL) {
+  if (mw->s != nullptr) {
     free(mw->s);
     malloc_write_init(mw);
   }
@@ -101,7 +101,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   if (mw->slen + slen+1 >= mw->smax) {
     assert(mw->slen + slen > 0);
     char* ts = (char*)realloc(mw->s, (mw->slen + slen) << 1);
-    if (ts == NULL) {
+    if (ts == nullptr) {
       mw->oom = true;
       return;
     }
@@ -412,7 +412,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (mallctl) {
       if (cmd == "free-mem") {
         // Purge all dirty unused pages.
-        int err = mallctl("arenas.purge", NULL, NULL, NULL, 0);
+        int err = mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"arenas.purge\", ...)"
@@ -426,17 +426,17 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
         uint64_t epoch = 1;
-        mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
+        mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
 
         size_t allocated = 0; // Initialize in case stats aren't enabled.
         size_t sz = sizeof(size_t);
-        mallctl("stats.allocated", &allocated, &sz, NULL, 0);
+        mallctl("stats.allocated", &allocated, &sz, nullptr, 0);
 
         size_t active = 0;
-        mallctl("stats.active", &active, &sz, NULL, 0);
+        mallctl("stats.active", &active, &sz, nullptr, 0);
 
         size_t mapped = 0;
-        mallctl("stats.mapped", &mapped, &sz, NULL, 0);
+        mallctl("stats.mapped", &mapped, &sz, nullptr, 0);
 
         std::ostringstream stats;
         stats << "<jemalloc-stats>" << endl;
@@ -464,7 +464,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       if (cmd == "jemalloc-prof-activate") {
         bool active = true;
-        int err = mallctl("prof.active", NULL, NULL, &active, sizeof(bool));
+        int err = mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
@@ -477,7 +477,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       if (cmd == "jemalloc-prof-deactivate") {
         bool active = false;
-        int err = mallctl("prof.active", NULL, NULL, &active, sizeof(bool));
+        int err = mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
@@ -492,7 +492,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         string f = transport->getParam("file");
         if (f != "") {
           const char *s = f.c_str();
-          int err = mallctl("prof.dump", NULL, NULL, (void *)&s,
+          int err = mallctl("prof.dump", nullptr, nullptr, (void *)&s,
               sizeof(char *));
           if (err) {
             std::ostringstream estr;
@@ -502,7 +502,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
             break;
           }
         } else {
-          int err = mallctl("prof.dump", NULL, NULL, NULL, 0);
+          int err = mallctl("prof.dump", nullptr, nullptr, nullptr, 0);
           if (err) {
             std::ostringstream estr;
             estr << "Error " << err << " in mallctl(\"prof.dump\", ...)"
@@ -519,7 +519,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);
-  GetAccessLog().log(transport, NULL);
+  GetAccessLog().log(transport, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -830,9 +830,9 @@ bool AdminRequestHandler::handleHeapProfilerRequest(const std::string &cmd,
       HeapProfilerStop();
       transport->sendString("OK\n");
 
-      const char *argv[] = {"", root.c_str(), "-name", "*.heap", NULL};
+      const char *argv[] = {"", root.c_str(), "-name", "*.heap", nullptr};
       string files;
-      Process::Exec("find", argv, NULL, files);
+      Process::Exec("find", argv, nullptr, files);
       vector<string> out;
       Util::split('\n', files.c_str(), out, true);
       if (out.size() > 1) {
@@ -1022,7 +1022,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
 // Dump cache content
 
 extern bool const_dump(const char *filename);
-bool (*file_dump)(const char *filename) = NULL;
+bool (*file_dump)(const char *filename) = nullptr;
 
 bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
                                                  Transport *transport) {

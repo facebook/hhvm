@@ -147,7 +147,7 @@ class ArrayData : public Countable {
    */
   virtual bool isVectorData() const;
 
-  virtual SharedVariant *getSharedVariant() const { return NULL; }
+  virtual SharedVariant *getSharedVariant() const { return nullptr; }
 
   /**
    * Whether or not this array has a referenced Variant or Object appearing
@@ -455,7 +455,7 @@ class ArrayData : public Countable {
   }
 
   static ArrayData *GetScalarArray(ArrayData *arr,
-                                   const StringData *key = NULL);
+                                   const StringData *key = nullptr);
  private:
   void serializeImpl(VariableSerializer *serializer) const;
   static void compileTimeAssertions() {

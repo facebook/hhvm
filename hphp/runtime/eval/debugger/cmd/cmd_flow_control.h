@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(CmdFlowControl);
 class CmdFlowControl : public DebuggerCommand {
 public:
   CmdFlowControl(Type type)
-      : DebuggerCommand(type), m_count(1), m_frame(NULL), m_nframe(NULL),
+      : DebuggerCommand(type), m_count(1), m_frame(nullptr), m_nframe(nullptr),
         m_stackDepth(0), m_vmDepth(0) { }
 
   int decCount() { assert(m_count > 0); return --m_count;}

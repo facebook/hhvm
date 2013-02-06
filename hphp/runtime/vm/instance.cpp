@@ -54,7 +54,7 @@ const TypedValue* Instance::propVec() const {
 Instance* Instance::callCustomInstanceInit() {
   static StringData* sd_init = StringData::GetStaticString("__init__");
   const Func* init = m_cls->lookupMethod(sd_init);
-  if (init != NULL) {
+  if (init != nullptr) {
     TypedValue tv;
     // We need to incRef/decRef here because we're still a new (_count
     // == 0) object and invokeFunc is going to expect us to have a
@@ -147,7 +147,7 @@ template <bool declOnly>
 TypedValue* Instance::getPropImpl(Class* ctx, const StringData* key,
                                   bool& visible, bool& accessible,
                                   bool& unset) {
-  TypedValue* prop = NULL;
+  TypedValue* prop = nullptr;
   unset = false;
   Slot propInd = m_cls->getDeclPropIndex(ctx, key, accessible);
   visible = (propInd != kInvalidSlot);
@@ -269,7 +269,7 @@ void Instance::propImpl(TypedValue*& retval, TypedValue& tvRef,
         raiseUndefProp(key);
       }
       if (define) {
-        if (o_properties.get() == NULL) {
+        if (o_properties.get() == nullptr) {
           initDynProps();
         }
         o_properties.get()->lvalPtr(*(const String*)&key,
@@ -361,7 +361,7 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
       }
     }
     // Return a pointer to the property if it's a declared property
-    return declPropInd(propVal) != kInvalidSlot ? propVal : NULL;
+    return declPropInd(propVal) != kInvalidSlot ? propVal : nullptr;
   }
   assert(!accessible);
   if (visible) {
@@ -373,7 +373,7 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseSet)) {
-    if (o_properties.get() == NULL) {
+    if (o_properties.get() == nullptr) {
       initDynProps();
     }
     // when seting a dynamic property, do not write
@@ -388,14 +388,14 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
       o_properties.get()->set(const_cast<StringData*>(key),
                               tvAsCVarRef(val), false);
     }
-    return NULL;
+    return nullptr;
   }
   assert(!accessible);
   assert(getAttribute(UseSet));
   TypedValue ignored;
   invokeSet(&ignored, key, val);
   tvRefcountedDecRef(&ignored);
-  return NULL;
+  return nullptr;
 }
 
 TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
@@ -433,7 +433,7 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseGet)) {
-    if (o_properties.get() == NULL) {
+    if (o_properties.get() == nullptr) {
       initDynProps();
     }
     o_properties.get()->lvalPtr(*(const String*)&key,
@@ -448,7 +448,7 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
     tvWriteUninit(&tvResult);
     invokeGet(&tvResult, key);
     SETOP_BODY(&tvResult, op, val);
-    if (o_properties.get() == NULL) {
+    if (o_properties.get() == nullptr) {
       initDynProps();
     }
     o_properties.get()->lvalPtr(*(const String*)&key, *(Variant**)(&propVal),
@@ -506,7 +506,7 @@ void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseGet)) {
-    if (o_properties.get() == NULL) {
+    if (o_properties.get() == nullptr) {
       initDynProps();
     }
     o_properties.get()->lvalPtr(*(const String*)&key,
@@ -521,7 +521,7 @@ void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     tvWriteUninit(&tvResult);
     invokeGet(&tvResult, key);
     IncDecBody<setResult>(op, &tvResult, &dest);
-    if (o_properties.get() == NULL) {
+    if (o_properties.get() == nullptr) {
       initDynProps();
     }
     o_properties.get()->lvalPtr(*(const String*)&key, *(Variant**)(&propVal),
@@ -568,7 +568,7 @@ void Instance::unsetProp(Class* ctx, const StringData* key) {
       tvSetIgnoreRef((TypedValue*)&null_variant, propVal);
     } else {
       // Dynamic property.
-      assert(o_properties.get() != NULL);
+      assert(o_properties.get() != nullptr);
       o_properties.get()->remove(CStrRef(key), false);
     }
   } else if (UNLIKELY(!*key->data())) {
@@ -592,9 +592,9 @@ void Instance::raiseUndefProp(const StringData* key) {
 
 Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
   int size = m_cls->m_declPropNumAccessible +
-               (o_properties.get() != NULL ? o_properties.get()->size() : 0);
+               (o_properties.get() != nullptr ? o_properties.get()->size() : 0);
   HphpArray* retval = NEW(HphpArray)(size);
-  Class* ctx = NULL;
+  Class* ctx = nullptr;
   if (!context.empty()) {
     ctx = Unit::lookupClass(context.get());
   }
@@ -602,7 +602,7 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
   // Get all declared properties first, bottom-to-top in the inheritance
   // hierarchy, in declaration order.
   const Class* klass = m_cls;
-  while (klass != NULL) {
+  while (klass != nullptr) {
     const PreClass::Prop* props = klass->m_preClass->properties();
     const size_t numProps = klass->m_preClass->numProperties();
 
@@ -625,7 +625,7 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
   }
 
   // Now get dynamic properties.
-  if (o_properties.get() != NULL) {
+  if (o_properties.get() != nullptr) {
     ssize_t iter = o_properties.get()->iter_begin();
     while (iter != HphpArray::ElmIndEmpty) {
       TypedValue key;
@@ -670,7 +670,7 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
 void Instance::o_setArray(CArrRef properties) {
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
-    Class* ctx = NULL;
+    Class* ctx = nullptr;
 
     // If the key begins with a NUL, it's a private or protected property. Read
     // the class name from between the two NUL bytes.
@@ -741,7 +741,7 @@ void Instance::o_getArray(Array& props, bool pubOnly /* = false */) const {
 
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
   const Class* klass = m_cls;
-  while (klass != NULL) {
+  while (klass != nullptr) {
     getProps(klass, pubOnly, klass->m_preClass.get(), props, inserted);
 
     const std::vector<ClassPtr> &usedTraits = klass->m_usedTraits;
@@ -754,7 +754,7 @@ void Instance::o_getArray(Array& props, bool pubOnly /* = false */) const {
   }
 
   // Iterate over dynamic properties and insert {name --> prop} pairs.
-  if (o_properties.get() != NULL && !o_properties.get()->empty()) {
+  if (o_properties.get() != nullptr && !o_properties.get()->empty()) {
     for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
       Variant key = it.first();
       CVarRef value = it.secondRef();
@@ -946,9 +946,9 @@ void Instance::cloneSet(ObjectData* clone) {
                                sizeof(ObjectData) + builtinPropSize());
   for (Slot i = 0; i < nProps; i++) {
     tvRefcountedDecRef(&iclonePropVec[i]);
-    tvDupFlattenVars(&propVec()[i], &iclonePropVec[i], NULL);
+    tvDupFlattenVars(&propVec()[i], &iclonePropVec[i], nullptr);
   }
-  if (o_properties.get() != NULL) {
+  if (o_properties.get()) {
     iclone->initDynProps();
     ssize_t iter = o_properties.get()->iter_begin();
     while (iter != HphpArray::ElmIndEmpty) {

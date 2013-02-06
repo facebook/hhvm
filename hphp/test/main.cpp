@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  Test::logger.log_url = NULL;
+  Test::logger.log_url = nullptr;
   if (argc >= 6) {
     Test::logger.log_url = argv[5];
   }

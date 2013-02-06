@@ -36,7 +36,7 @@ int SSLSocket::GetSSLExDataIndex() {
   Lock lock(s_mutex);
   if (s_ex_data_index < 0) {
     s_ex_data_index = SSL_get_ex_new_index(0, (void*)"PHP stream index",
-                                           NULL, NULL, NULL);
+                                           nullptr, nullptr, nullptr);
     assert(s_ex_data_index >= 0);
   }
   return s_ex_data_index;
@@ -99,7 +99,7 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
       if (!SSL_CTX_load_verify_locations(ctx, cafile.data(), capath.data())) {
         raise_warning("Unable to set verify locations `%s' `%s'",
                       cafile.data(), capath.data());
-        return NULL;
+        return nullptr;
       }
     }
 
@@ -108,7 +108,7 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
       SSL_CTX_set_verify_depth(ctx, depth);
     }
   } else {
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, nullptr);
   }
 
   /* callback for the passphrase (for localcert) */
@@ -133,14 +133,14 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
         raise_warning("Unable to set local cert chain file `%s'; Check "
                       "that your cafile/capath settings include details of "
                       "your certificate and its issuer", certfile.data());
-        return NULL;
+        return nullptr;
       }
 
       if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff.data(),
                                       SSL_FILETYPE_PEM) != 1) {
         raise_warning("Unable to set private key file `%s'",
                       resolved_path_buff.data());
-        return NULL;
+        return nullptr;
       }
 
       SSL *tmpssl = SSL_new(ctx);
@@ -169,7 +169,7 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
 // constructors and destructor
 
 SSLSocket::SSLSocket()
-    : m_handle(NULL), m_ssl_active(false), m_method((CryptoMethod)-1),
+    : m_handle(nullptr), m_ssl_active(false), m_method((CryptoMethod)-1),
       m_client(false), m_connect_timeout(0), m_enable_on_connect(false),
       m_state_set(false), m_is_blocked(true) {
 }
@@ -177,7 +177,7 @@ SSLSocket::SSLSocket()
 SSLSocket::SSLSocket(int sockfd, int type, const char *address /* = NULL */,
                      int port /* = 0 */)
     : Socket(sockfd, type, address, port),
-      m_handle(NULL), m_ssl_active(false), m_method((CryptoMethod)-1),
+      m_handle(nullptr), m_ssl_active(false), m_method((CryptoMethod)-1),
       m_client(false), m_connect_timeout(0), m_enable_on_connect(false),
       m_state_set(false), m_is_blocked(true) {
 }
@@ -301,7 +301,7 @@ SSLSocket *SSLSocket::Create(const char *&name, int port, double timeout) {
     name += 6;
     method = ClientTLS;
   } else {
-    return NULL;
+    return nullptr;
   }
 
   int domain = AF_INET;
@@ -325,7 +325,7 @@ bool SSLSocket::closeImpl() {
   }
   if (m_handle) {
     SSL_free(m_handle);
-    m_handle = NULL;
+    m_handle = nullptr;
   }
   return Socket::closeImpl();
 }
@@ -406,14 +406,14 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   }
 
   SSL_CTX *ctx = SSL_CTX_new(smethod);
-  if (ctx == NULL) {
+  if (ctx == nullptr) {
     raise_warning("failed to create an SSL context");
     return false;
   }
 
   SSL_CTX_set_options(ctx, SSL_OP_ALL);
   m_handle = createSSL(ctx);
-  if (m_handle == NULL) {
+  if (m_handle == nullptr) {
     raise_warning("failed to create an SSL handle");
     SSL_CTX_free(ctx);
     return false;
@@ -434,7 +434,7 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
     return true;
   }
 
-  if (peer == NULL) {
+  if (peer == nullptr) {
     raise_warning("Could not get peer certificate");
     return false;
   }
@@ -554,7 +554,7 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
         if (m_context["capture_peer_cert"].toBoolean()) {
           Object cert(new Certificate(peer_cert));
           m_context.set("peer_certificate", cert);
-          peer_cert = NULL;
+          peer_cert = nullptr;
         }
 
         if (m_context["capture_peer_cert_chain"].toBoolean()) {
@@ -636,7 +636,7 @@ BIO *Certificate::ReadData(CVarRef var, bool *file /* = NULL */) {
     if (svar.substr(0, 7) == "file://") {
       if (file) *file = true;
       BIO *ret = BIO_new_file((char*)svar.substr(7).data(), "r");
-      if (ret == NULL) {
+      if (ret == nullptr) {
         raise_warning("error opening the file, %s", svar.data());
       }
       return ret;
@@ -645,7 +645,7 @@ BIO *Certificate::ReadData(CVarRef var, bool *file /* = NULL */) {
     if (file) *file = false;
     return BIO_new_mem_buf((char*)svar.data(), svar.size());
   }
-  return NULL;
+  return nullptr;
 }
 
 
@@ -656,7 +656,7 @@ Object Certificate::Get(CVarRef var) {
   if (var.isString() || var.isObject()) {
     bool file;
     BIO *in = ReadData(var, &file);
-    if (in == NULL) return Object();
+    if (in == nullptr) return Object();
 
     X509 *cert;
     /*
@@ -667,7 +667,7 @@ Object Certificate::Get(CVarRef var) {
         ((char *(*)())d2i_X509, PEM_STRING_X509, in, NULL, NULL, NULL);
     }
     */
-    cert = PEM_read_bio_X509(in, NULL, NULL, NULL);
+    cert = PEM_read_bio_X509(in, nullptr, nullptr, nullptr);
     BIO_free(in);
     if (cert) {
       return Object(new Certificate(cert));

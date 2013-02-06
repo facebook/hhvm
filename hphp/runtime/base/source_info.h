@@ -58,8 +58,8 @@ public:
   /**
    * Which file contains this class/function's declaration.
    */
-  const char *getClassDeclaringFile(CStrRef name, int *line = NULL);
-  const char *getFunctionDeclaringFile(CStrRef name, int *line = NULL);
+  const char *getClassDeclaringFile(CStrRef name, int *line = nullptr);
+  const char *getFunctionDeclaringFile(CStrRef name, int *line = nullptr);
 
   static void SetHook(SourceInfoHook *hook) { s_hook = hook; }
 
@@ -99,9 +99,9 @@ class SourceInfoHook {
 public:
   virtual ~SourceInfoHook() {}
   virtual const char *getClassDeclaringFile(CStrRef name,
-                                            int *line = NULL) = 0;
+                                            int *line = nullptr) = 0;
   virtual const char *getFunctionDeclaringFile(CStrRef name,
-                                               int *line = NULL) = 0;
+                                               int *line = nullptr) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

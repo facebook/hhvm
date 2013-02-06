@@ -43,7 +43,7 @@ public:
     if (RuntimeOption::EnableUploadProgress) {
       rfc1867Callback = apc_rfc1867_progress;
     } else {
-      rfc1867Callback = NULL;
+      rfc1867Callback = nullptr;
     }
   }
   virtual void requestShutdown() {
@@ -81,7 +81,7 @@ static void safe_php_register_variable(char *var, CVarRef val,
 #define UPLOAD_ERROR_X    8  /* File upload stopped by extension */
 
 static void normalize_protected_variable(char *varname) {
-  char *s=varname, *index=NULL, *indexend=NULL, *p;
+  char *s=varname, *index=nullptr, *indexend=nullptr, *p;
 
   /* overjump leading space */
   while (*s == ' ') {
@@ -132,7 +132,7 @@ static void normalize_protected_variable(char *varname) {
       s++;
       index = s;
     } else {
-      index = NULL;
+      index = nullptr;
     }
   }
   *s++='\0';
@@ -374,7 +374,7 @@ static char *next_line(multipart_buffer *self) {
 
     /* buffer isn't completely full, fail */
     if (self->bytes_in_buffer < self->bufsize) {
-      return NULL;
+      return nullptr;
     }
     /* return entire buffer as a partial line */
     line[self->bufsize] = 0;
@@ -436,7 +436,7 @@ static int multipart_buffer_headers(multipart_buffer *self,
     /* add header to table */
 
     char *key = line;
-    char *value = NULL;
+    char *value = nullptr;
 
     /* space in the beginning means same header */
     if (!isspace(line[0])) {
@@ -464,14 +464,14 @@ static int multipart_buffer_headers(multipart_buffer *self,
 
 
 static char *php_mime_get_hdr_value(header_list &header, char *key) {
-  if (key == NULL) return NULL;
+  if (key == nullptr) return nullptr;
   for (header_list::iterator iter = header.begin();
        iter != header.end(); iter++) {
     if (!strcasecmp(iter->first.c_str(), key)) {
       return (char *)iter->second.c_str();
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 
@@ -671,10 +671,10 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf,
 */
 static char *multipart_buffer_read_body(multipart_buffer *self,
                                         unsigned int *len) {
-  char buf[FILLUNIT], *out=NULL;
+  char buf[FILLUNIT], *out=nullptr;
   int total_bytes=0, read_bytes=0;
 
-  while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), NULL))) {
+  while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), nullptr))) {
     out = (char *)realloc(out, total_bytes + read_bytes + 1);
     memcpy(out + total_bytes, buf, read_bytes);
     total_bytes += read_bytes;
@@ -694,15 +694,15 @@ static char *multipart_buffer_read_body(multipart_buffer *self,
 void rfc1867PostHandler(Transport *transport,
                         Variant &post, Variant &files, int content_length,
                         const void *&data, int &size, const string boundary) {
-  char *s=NULL, *start_arr=NULL;
+  char *s=nullptr, *start_arr=nullptr;
   string array_index, abuf;
-  char *temp_filename=NULL, *lbuf=NULL;
+  char *temp_filename=nullptr, *lbuf=nullptr;
   int total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0;
   int max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
   set<string> &uploaded_files = s_rfc1867_data->rfc1867UploadedFiles;
   multipart_buffer *mbuff;
   int fd=-1;
-  void *event_extra_data = NULL;
+  void *event_extra_data = nullptr;
   unsigned int llen = 0;
 
   /* Initialize the buffer */
@@ -721,7 +721,7 @@ void rfc1867PostHandler(Transport *transport,
                               unsigned int event, void *event_data,
                               void **extra) = s_rfc1867_data->rfc1867Callback;
 
-  if (php_rfc1867_callback != NULL) {
+  if (php_rfc1867_callback != nullptr) {
     multipart_event_start event_start;
 
     event_start.content_length = content_length;
@@ -734,7 +734,7 @@ void rfc1867PostHandler(Transport *transport,
 
   while (!multipart_buffer_eof(mbuff)) {
     char buff[FILLUNIT];
-    char *cd=NULL,*param=NULL,*filename=NULL, *tmp=NULL;
+    char *cd=nullptr,*param=nullptr,*filename=nullptr, *tmp=nullptr;
     size_t blen=0, wlen=0;
     off_t offset;
 
@@ -744,7 +744,7 @@ void rfc1867PostHandler(Transport *transport,
     }
 
     if ((cd = php_mime_get_hdr_value(header, "Content-Disposition"))) {
-      char *pair=NULL;
+      char *pair=nullptr;
       int end=0;
 
       while (isspace(*cd)) {
@@ -753,7 +753,7 @@ void rfc1867PostHandler(Transport *transport,
 
       while (*cd && (pair = php_ap_getword(&cd, ';')))
       {
-        char *key=NULL, *word = pair;
+        char *key=nullptr, *word = pair;
 
         while (isspace(*cd)) {
           ++cd;
@@ -789,7 +789,7 @@ void rfc1867PostHandler(Transport *transport,
         }
 
         new_val_len = value_len;
-        if (php_rfc1867_callback != NULL) {
+        if (php_rfc1867_callback != nullptr) {
           multipart_event_formdata event_formdata;
           size_t newlength = 0;
 
@@ -881,7 +881,7 @@ void rfc1867PostHandler(Transport *transport,
         temp_filename = strdup(path);
       }
 
-      if (!skip_upload && php_rfc1867_callback != NULL) {
+      if (!skip_upload && php_rfc1867_callback != nullptr) {
         multipart_event_file_start event_file_start;
 
         event_file_start.post_bytes_processed = mbuff->read_post_bytes;
@@ -922,7 +922,7 @@ void rfc1867PostHandler(Transport *transport,
       while (!cancel_upload &&
              (blen = multipart_buffer_read(mbuff, buff, sizeof(buff), &end)))
       {
-        if (php_rfc1867_callback != NULL) {
+        if (php_rfc1867_callback != nullptr) {
           multipart_event_file_data event_file_data;
 
           event_file_data.post_bytes_processed = mbuff->read_post_bytes;
@@ -981,7 +981,7 @@ void rfc1867PostHandler(Transport *transport,
         cancel_upload = 5;
       }
 
-      if (php_rfc1867_callback != NULL) {
+      if (php_rfc1867_callback != nullptr) {
         multipart_event_file_end event_file_end;
 
         event_file_end.post_bytes_processed = mbuff->read_post_bytes;
@@ -1072,7 +1072,7 @@ void rfc1867PostHandler(Transport *transport,
         safe_php_register_variable(lbuf, val, files, 0);
       }
       free(filename);
-      s = NULL;
+      s = nullptr;
 
       /* Possible Content-Type: */
       if (cancel_upload ||
@@ -1081,7 +1081,7 @@ void rfc1867PostHandler(Transport *transport,
       } else {
         /* fix for Opera 6.01 */
         s = strchr(cd, ';');
-        if (s != NULL) {
+        if (s != nullptr) {
           *s = '\0';
         }
       }
@@ -1109,7 +1109,7 @@ void rfc1867PostHandler(Transport *transport,
       safe_php_register_variable(lbuf, val, files, 0);
 
       /* Restore Content-Type Header */
-      if (s != NULL) {
+      if (s != nullptr) {
         *s = ';';
       }
       s = "";
@@ -1178,7 +1178,7 @@ void rfc1867PostHandler(Transport *transport,
 fileupload_done:
   data = mbuff->post_data;
   size = mbuff->post_size;
-  if (php_rfc1867_callback != NULL) {
+  if (php_rfc1867_callback != nullptr) {
     multipart_event_end event_end;
 
     event_end.post_bytes_processed = mbuff->read_post_bytes;

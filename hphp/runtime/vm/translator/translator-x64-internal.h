@@ -176,7 +176,7 @@ public:
   {}
 
   void kill() {
-    m_mainA = NULL;
+    m_mainA = nullptr;
   }
 
   ~DiamondReturn() {
@@ -630,7 +630,7 @@ typedef CondBlock <TVOFF(m_type),
  */
 static void
 locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
-             const Func* f = NULL) {
+             const Func* f = nullptr) {
   assert_not_implemented((l.space == Location::Stack ||
                           l.space == Location::Local ||
                           l.space == Location::Iter));
@@ -644,7 +644,7 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
 //   Try to use a nice encoding for the size and value.
 static void
 emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
-             int size = sz::qword, RegAlloc* regAlloc = NULL) {
+             int size = sz::qword, RegAlloc* regAlloc = nullptr) {
   if (size == sz::qword) {
     PhysReg immReg = regAlloc ? regAlloc->getImmReg(imm) : InvalidReg;
     if (immReg == InvalidReg) {
@@ -680,7 +680,7 @@ vstackOffset(const NormalizedInstruction& ni, COff off) {
 static inline void
 emitVStackStoreImm(X64Assembler &a, const NormalizedInstruction &ni,
                    uint64_t imm, int off, int size = sz::qword,
-                   RegAlloc *regAlloc = NULL) {
+                   RegAlloc *regAlloc = nullptr) {
   int hwOff = vstackOffset(ni, off);
   emitStoreImm(a, imm, rVmSp, hwOff, size, regAlloc);
 }
@@ -854,7 +854,7 @@ private:
     uint64_t m_imm;
 
     ArgContent(ArgKind kind, PhysReg reg, uint64_t imm) :
-      m_kind(kind), m_reg(reg), m_loc(NULL), m_imm(imm) { }
+      m_kind(kind), m_reg(reg), m_loc(nullptr), m_imm(imm) { }
     ArgContent(ArgKind kind, const Location &loc) :
       m_kind(kind), m_reg(InvalidReg), m_loc(&loc), m_imm(0) { }
   };
@@ -940,7 +940,7 @@ struct Deleter : private boost::noncopyable {
   explicit Deleter(T** p) : p(p) {}
   ~Deleter() {
     delete *p;
-    *p = NULL;
+    *p = nullptr;
   }
   T** p;
 };

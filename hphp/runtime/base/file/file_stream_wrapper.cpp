@@ -24,7 +24,7 @@ namespace HPHP {
 
 MemFile* FileStreamWrapper::openFromCache(CStrRef filename, CStrRef mode) {
   if (!StaticContentCache::TheFileCache) {
-    return NULL;
+    return nullptr;
   }
 
   String relative =
@@ -34,7 +34,7 @@ MemFile* FileStreamWrapper::openFromCache(CStrRef filename, CStrRef mode) {
   if (ret) {
     return file.release();
   }
-  return NULL;
+  return nullptr;
 }
 
 File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
@@ -51,7 +51,7 @@ File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
   bool ret = file->open(File::TranslatePath(fname), mode);
   if (!ret) {
     raise_warning("%s", file->getLastError().c_str());
-    return NULL;
+    return nullptr;
   }
   return file.release();
 }

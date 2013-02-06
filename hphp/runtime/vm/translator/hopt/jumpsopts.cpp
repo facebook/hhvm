@@ -69,9 +69,9 @@ static void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
 static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
   IRInstruction::List& instList = trace->getInstructionList();
   IRInstruction::Iterator tail  = instList.end();
-  IRInstruction* jccInst        = NULL;
-  IRInstruction* exitInst       = NULL;
-  IRInstruction* exitCcInst     = NULL;
+  IRInstruction* jccInst        = nullptr;
+  IRInstruction* exitInst       = nullptr;
+  IRInstruction* exitCcInst     = nullptr;
   Opcode opc = OpAdd;
   // Normally Jcc comes before a Marker
   for (int idx = 3; idx >= 0; idx--) {
@@ -130,7 +130,7 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
 // If main trace starts with guards, have them generate a patchable jump
 // to the anchor trace
 static void hoistGuardJumps(Trace* trace, IRFactory* irFactory) {
-  LabelInstruction* guardLabel = NULL;
+  LabelInstruction* guardLabel = nullptr;
   IRInstruction::List& instList = trace->getInstructionList();
   // Check the beginning of the trace for guards
   for (IRInstruction* inst : instList) {
@@ -140,7 +140,7 @@ static void hoistGuardJumps(Trace* trace, IRFactory* irFactory) {
          opc == GuardLoc || opc == GuardStk)) {
       LabelInstruction* exitLabel = inst->getLabel();
       // Find the GuardFailure's label and confirm this branches there
-      if (guardLabel == NULL && exitLabel->getParent() != trace) {
+      if (!guardLabel && exitLabel->getParent() != trace) {
         Trace* exitTrace = exitLabel->getParent();
         IRInstruction::List& xList = exitTrace->getInstructionList();
         IRInstruction::Iterator instIter = xList.begin();

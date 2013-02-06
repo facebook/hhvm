@@ -25,7 +25,7 @@ bool CmdFrame::help(DebuggerClient *client) {
   client->helpTitle("Frame Command");
   client->helpCmds(
     "[f]rame {index}",  "jumps to one particular frame",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use '[w]here' command to find out the frame number. Use 'f 0' to jump "

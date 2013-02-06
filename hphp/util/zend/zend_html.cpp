@@ -29,11 +29,11 @@ using namespace entity_charset_enum;
 
 /* codepage 1252 is a Windows extension to iso-8859-1. */
 static entity_table_t ent_cp_1252[] = {
-  "euro", NULL, "sbquo", "fnof", "bdquo", "hellip", "dagger",
+  "euro", nullptr, "sbquo", "fnof", "bdquo", "hellip", "dagger",
   "Dagger", "circ", "permil", "Scaron", "lsaquo", "OElig",
-  NULL, NULL, NULL, NULL, "lsquo", "rsquo", "ldquo", "rdquo",
+  nullptr, nullptr, nullptr, nullptr, "lsquo", "rsquo", "ldquo", "rdquo",
   "bull", "ndash", "mdash", "tilde", "trade", "scaron", "rsaquo",
-  "oelig", NULL, NULL, "Yuml"
+  "oelig", nullptr, nullptr, "Yuml"
 };
 
 static entity_table_t ent_iso_8859_1[] = {
@@ -57,8 +57,8 @@ static entity_table_t ent_iso_8859_1[] = {
 static entity_table_t ent_iso_8859_15[] = {
   "nbsp", "iexcl", "cent", "pound", "euro", "yen", "Scaron",
   "sect", "scaron", "copy", "ordf", "laquo", "not", "shy", "reg",
-  "macr", "deg", "plusmn", "sup2", "sup3", NULL, /* Zcaron */
-  "micro", "para", "middot", NULL, /* zcaron */ "sup1", "ordm",
+  "macr", "deg", "plusmn", "sup2", "sup3", nullptr, /* Zcaron */
+  "micro", "para", "middot", nullptr, /* zcaron */ "sup1", "ordm",
   "raquo", "OElig", "oelig", "Yuml", "iquest", "Agrave", "Aacute",
   "Acirc", "Atilde", "Auml", "Aring", "AElig", "Ccedil", "Egrave",
   "Eacute", "Ecirc", "Euml", "Igrave", "Iacute", "Icirc",
@@ -74,59 +74,59 @@ static entity_table_t ent_iso_8859_15[] = {
 
 static entity_table_t ent_uni_338_402[] = {
   /* 338 (0x0152) */
-  "OElig", "oelig", NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  "OElig", "oelig", nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 352 (0x0160) */
-  "Scaron", "scaron", NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  "Scaron", "scaron", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 376 (0x0178) */
-  "Yuml", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  "Yuml", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 400 (0x0190) */
-  NULL, NULL, "fnof"
+  nullptr, nullptr, "fnof"
 };
 
 static entity_table_t ent_uni_spacing[] = {
   /* 710 */
   "circ",
   /* 711 - 730 */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 731 - 732 */
-  NULL, "tilde"
+  nullptr, "tilde"
 };
 
 static entity_table_t ent_uni_greek[] = {
   /* 913 */
   "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
   "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho",
-  NULL, "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
+  nullptr, "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
   /* 938 - 944 are not mapped */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
   "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho",
   "sigmaf", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega",
   /* 970 - 976 are not mapped */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   "thetasym", "upsih",
-  NULL, NULL, NULL,
+  nullptr, nullptr, nullptr,
   "piv"
 };
 
 static entity_table_t ent_uni_punct[] = {
   /* 8194 */
-  "ensp", "emsp", NULL, NULL, NULL, NULL, NULL,
-  "thinsp", NULL, NULL, "zwnj", "zwj", "lrm", "rlm",
-  NULL, NULL, NULL, "ndash", "mdash", NULL, NULL, NULL,
+  "ensp", "emsp", nullptr, nullptr, nullptr, nullptr, nullptr,
+  "thinsp", nullptr, nullptr, "zwnj", "zwj", "lrm", "rlm",
+  nullptr, nullptr, nullptr, "ndash", "mdash", nullptr, nullptr, nullptr,
   /* 8216 */
-  "lsquo", "rsquo", "sbquo", NULL, "ldquo", "rdquo", "bdquo", NULL,
-  "dagger", "Dagger", "bull", NULL, NULL, NULL, "hellip",
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "permil", NULL,
+  "lsquo", "rsquo", "sbquo", nullptr, "ldquo", "rdquo", "bdquo", nullptr,
+  "dagger", "Dagger", "bull", nullptr, nullptr, nullptr, "hellip",
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, "permil", nullptr,
   /* 8242 */
-  "prime", "Prime", NULL, NULL, NULL, NULL, NULL, "lsaquo", "rsaquo", NULL,
-  NULL, NULL, "oline", NULL, NULL, NULL, NULL, NULL,
+  "prime", "Prime", nullptr, nullptr, nullptr, nullptr, nullptr, "lsaquo", "rsaquo", nullptr,
+  nullptr, nullptr, "oline", nullptr, nullptr, nullptr, nullptr, nullptr,
   "frasl"
 };
 
@@ -136,96 +136,96 @@ static entity_table_t ent_uni_euro[] = {
 
 static entity_table_t ent_uni_8465_8501[] = {
   /* 8465 */
-  "image", NULL, NULL, NULL, NULL, NULL, NULL,
+  "image", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8472 */
-  "weierp", NULL, NULL, NULL,
+  "weierp", nullptr, nullptr, nullptr,
   /* 8476 */
-  "real", NULL, NULL, NULL, NULL, NULL,
+  "real", nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8482 */
-  "trade", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  "trade", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8501 */
   "alefsym",
 };
 
 static entity_table_t ent_uni_8592_9002[] = {
   /* 8592 (0x2190) */
-  "larr", "uarr", "rarr", "darr", "harr", NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  "larr", "uarr", "rarr", "darr", "harr", nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8608 (0x21a0) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8624 (0x21b0) */
-  NULL, NULL, NULL, NULL, NULL, "crarr", NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, "crarr", nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8640 (0x21c0) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8656 (0x21d0) */
-  "lArr", "uArr", "rArr", "dArr", "hArr", "vArr", NULL, NULL,
-  NULL, NULL, "lAarr", "rAarr", NULL, "rarrw", NULL, NULL,
+  "lArr", "uArr", "rArr", "dArr", "hArr", "vArr", nullptr, nullptr,
+  nullptr, nullptr, "lAarr", "rAarr", nullptr, "rarrw", nullptr, nullptr,
   /* 8672 (0x21e0) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8704 (0x2200) */
-  "forall", "comp", "part", "exist", "nexist", "empty", NULL, "nabla",
-  "isin", "notin", "epsis", "ni", "notni", "bepsi", NULL, "prod",
+  "forall", "comp", "part", "exist", "nexist", "empty", nullptr, "nabla",
+  "isin", "notin", "epsis", "ni", "notni", "bepsi", nullptr, "prod",
   /* 8720 (0x2210) */
-  "coprod", "sum", "minus", "mnplus", "plusdo", NULL, "setmn", "lowast",
-  "compfn", NULL, "radic", NULL, NULL, "prop", "infin", "ang90",
+  "coprod", "sum", "minus", "mnplus", "plusdo", nullptr, "setmn", "lowast",
+  "compfn", nullptr, "radic", nullptr, nullptr, "prop", "infin", "ang90",
   /* 8736 (0x2220) */
   "ang", "angmsd", "angsph", "mid", "nmid", "par", "npar", "and",
-  "or", "cap", "cup", "int", NULL, NULL, "conint", NULL,
+  "or", "cap", "cup", "int", nullptr, nullptr, "conint", nullptr,
   /* 8752 (0x2230) */
-  NULL, NULL, NULL, NULL, "there4", "becaus", NULL, NULL,
-  NULL, NULL, NULL, NULL, "sim", "bsim", NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, "there4", "becaus", nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, "sim", "bsim", nullptr, nullptr,
   /* 8768 (0x2240) */
-  "wreath", "nsim", NULL, "sime", "nsime", "cong", NULL, "ncong",
-  "asymp", "nap", "ape", NULL, "bcong", "asymp", "bump", "bumpe",
+  "wreath", "nsim", nullptr, "sime", "nsime", "cong", nullptr, "ncong",
+  "asymp", "nap", "ape", nullptr, "bcong", "asymp", "bump", "bumpe",
   /* 8784 (0x2250) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8800 (0x2260) */
-  "ne", "equiv", NULL, NULL, "le", "ge", "lE", "gE",
-  "lnE", "gnE", "Lt", "Gt", "twixt", NULL, "nlt", "ngt",
+  "ne", "equiv", nullptr, nullptr, "le", "ge", "lE", "gE",
+  "lnE", "gnE", "Lt", "Gt", "twixt", nullptr, "nlt", "ngt",
   /* 8816 (0x2270) */
-  "nles", "nges", "lsim", "gsim", NULL, NULL, "lg", "gl",
-  NULL, NULL, "pr", "sc", "cupre", "sscue", "prsim", "scsim",
+  "nles", "nges", "lsim", "gsim", nullptr, nullptr, "lg", "gl",
+  nullptr, nullptr, "pr", "sc", "cupre", "sscue", "prsim", "scsim",
   /* 8832 (0x2280) */
   "npr", "nsc", "sub", "sup", "nsub", "nsup", "sube", "supe",
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8848 (0x2290) */
-  NULL, NULL, NULL, NULL, NULL, "oplus", NULL, "otimes",
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, "oplus", nullptr, "otimes",
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8864 (0x22a0) */
-  NULL, NULL, NULL, NULL, NULL, "perp", NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, "perp", nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8880 (0x22b0) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8896 (0x22c0) */
-  NULL, NULL, NULL, NULL, NULL, "sdot", NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, "sdot", nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8912 (0x22d0) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8928 (0x22e0) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8944 (0x22f0) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8960 (0x2300) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  "lceil", "rceil", "lfloor", "rfloor", NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  "lceil", "rceil", "lfloor", "rfloor", nullptr, nullptr, nullptr, nullptr,
   /* 8976 (0x2310) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   /* 8992 (0x2320) */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, "lang", "rang"
+  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, "lang", "rang"
 };
 
 static entity_table_t ent_uni_9674[] = {
@@ -235,7 +235,7 @@ static entity_table_t ent_uni_9674[] = {
 
 static entity_table_t ent_uni_9824_9830[] = {
   /* 9824 */
-  "spades", NULL, NULL, "clubs", NULL, "hearts", "diams"
+  "spades", nullptr, nullptr, "clubs", nullptr, "hearts", "diams"
 };
 
 static const struct html_entity_map entity_map[] = {
@@ -304,7 +304,7 @@ static const struct {
   { "ibm866",         cs_cp866 },
   { "MacRoman",       cs_macroman },
   */
-  { NULL }
+  { nullptr }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -312,7 +312,7 @@ static const struct {
 entity_charset determine_charset(const char *charset_hint) {
   entity_charset charset = cs_utf_8;
 
-  if (charset_hint == NULL) {
+  if (charset_hint == nullptr) {
     // default to utf-8
     return cs_utf_8;
   }
@@ -396,7 +396,7 @@ static void init_entity_table() {
     int index = 0;
     for (int ch = em.basechar; ch <= em.endchar; ch++, index++) {
       const char *entity = em.table[index];
-      if (entity == NULL) {
+      if (entity == nullptr) {
         continue;
       }
       unsigned char buf[10];
@@ -478,7 +478,7 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
    */
   char *ret = (char *)malloc(len * 6uL + 1);
   if (!ret) {
-    return NULL;
+    return nullptr;
   }
   char *q = ret;
   for (const char *p = input, *end = input + len; p < end; p++) {
@@ -529,7 +529,7 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
   }
   if (q - ret > INT_MAX) {
     free(ret);
-    return NULL;
+    return nullptr;
   }
   *q = 0;
   len = q - ret;
@@ -556,7 +556,7 @@ char *string_html_encode_extra(const char *input, int &len,
    */
   char *ret = (char *)malloc(len * 8uL + 1);
   if (!ret) {
-    return NULL;
+    return nullptr;
   }
   char *q = ret;
   const char *rep = "\ufffd";
@@ -635,7 +635,7 @@ char *string_html_encode_extra(const char *input, int &len,
   }
   if (q - ret > INT_MAX) {
     free(ret);
-    return NULL;
+    return nullptr;
   }
   *q = 0;
   len = q - ret;
@@ -653,9 +653,9 @@ inline static bool decode_entity(char *entity, int *len,
   if (entity[0] == '#') {
     int code;
     if (entity[1] == 'x' || entity[1] == 'X') {
-      code = strtol(entity + 2, NULL, 16);
+      code = strtol(entity + 2, nullptr, 16);
     } else {
-      code = strtol(entity + 1, NULL, 10);
+      code = strtol(entity + 1, nullptr, 10);
     }
 
     // since we don't support multibyte chars other than utf-8

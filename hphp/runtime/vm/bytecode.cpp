@@ -103,27 +103,27 @@ ActRec::skipFrame() const {
 
 template <>
 Class* arGetContextClassImpl<false>(const ActRec* ar) {
-  if (ar == NULL) {
-    return NULL;
+  if (ar == nullptr) {
+    return nullptr;
   }
   return ar->m_func->cls();
 }
 
 template <>
 Class* arGetContextClassImpl<true>(const ActRec* ar) {
-  if (ar == NULL) {
-    return NULL;
+  if (ar == nullptr) {
+    return nullptr;
   }
   if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
     // Pseudomains inherit the context of their caller
     VMExecutionContext* context = g_vmContext;
     ar = context->getPrevVMState(ar);
-    while (ar != NULL &&
+    while (ar != nullptr &&
              (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
       ar = context->getPrevVMState(ar);
     }
-    if (ar == NULL) {
-      return NULL;
+    if (ar == nullptr) {
+      return nullptr;
     }
   }
   return ar->m_func->cls();
@@ -182,7 +182,7 @@ static inline Class* frameStaticClass(ActRec* fp) {
   } else if (fp->hasClass()) {
     return fp->getClass();
   } else {
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -392,7 +392,7 @@ void VarEnv::detach(ActRec* fp) {
   m_cfp = context->getPrevVMState(fp);
   m_depth--;
   if (m_depth == 0) {
-    m_cfp = NULL;
+    m_cfp = nullptr;
     // don't free global varEnv
     if (context->m_globalVarEnv != this) {
       assert(!isGlobalScope());
@@ -532,12 +532,12 @@ TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
 // cost of allocation.
 class StackElms {
  public:
-  StackElms() : m_elms(NULL) {}
+  StackElms() : m_elms(nullptr) {}
   ~StackElms() {
     flush();
   }
   TypedValue* elms() {
-    if (m_elms == NULL) {
+    if (m_elms == nullptr) {
       // RuntimeOption::EvalVMStackElms-sized and -aligned.
       size_t algnSz = RuntimeOption::EvalVMStackElms * sizeof(TypedValue);
       if (posix_memalign((void**)&m_elms, algnSz, algnSz) != 0) {
@@ -548,9 +548,9 @@ class StackElms {
     return m_elms;
   }
   void flush() {
-    if (m_elms != NULL) {
+    if (m_elms != nullptr) {
       free(m_elms);
-      m_elms = NULL;
+      m_elms = nullptr;
     }
   }
  private:
@@ -578,7 +578,7 @@ void Stack::ValidateStackSize() {
 }
 
 Stack::Stack()
-  : m_elms(NULL), m_top(NULL), m_base(NULL) {
+  : m_elms(nullptr), m_top(nullptr), m_base(nullptr) {
 }
 
 Stack::~Stack() {
@@ -605,7 +605,7 @@ Stack::requestInit() {
   if (trustSigSegv) {
     RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
     Lock l(data.surpriseLock);
-    assert(data.surprisePage == NULL);
+    assert(data.surprisePage == nullptr);
     data.surprisePage = m_elms;
   }
   // Burn one element of the stack, to satisfy the constraint that
@@ -627,15 +627,15 @@ Stack::requestInit() {
 
 void
 Stack::requestExit() {
-  if (m_elms != NULL) {
+  if (m_elms != nullptr) {
     if (trustSigSegv) {
       RequestInjectionData& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
       Lock l(data.surpriseLock);
       assert(data.surprisePage == m_elms);
       unprotect();
-      data.surprisePage = NULL;
+      data.surprisePage = nullptr;
     }
-    m_elms = NULL;
+    m_elms = nullptr;
   }
 }
 
@@ -827,7 +827,7 @@ void Stack::toStringAR(std::ostream& os, const ActRec* fp,
 void Stack::toStringFragAR(std::ostream& os, const ActRec* fp,
                            int offset, const TypedValue* top) const {
   const FPIEnt *fe = fp->m_func->findFPI(offset);
-  if (fe != NULL) {
+  if (fe != nullptr) {
     toStringAR(os, fp, fe, top);
   } else {
     toStringFrag(os, fp, top);
@@ -845,7 +845,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
     Offset prevPc = 0;
     TypedValue* prevStackTop = nullptr;
     ActRec* prevFp = g_vmContext->getPrevVMState(fp, &prevPc, &prevStackTop);
-    if (prevFp != NULL) {
+    if (prevFp != nullptr) {
       toStringFrame(os, prevFp, prevPc, prevStackTop, prefix);
     }
   }
@@ -863,7 +863,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
   }
   os << "{func:" << funcName
      << ",soff:" << fp->m_soff
-     << ",this:0x" << std::hex << (fp->hasThis() ? fp->getThis() : NULL)
+     << ",this:0x" << std::hex << (fp->hasThis() ? fp->getThis() : nullptr)
      << std::dec << "}";
   TypedValue* tv = (TypedValue*)fp;
   tv--;
@@ -1159,11 +1159,11 @@ TypedValue* VMExecutionContext::lookupClsCns(const NamedEntity* ne,
                                              const StringData* cls,
                                              const StringData* cns) {
   Class* class_ = Unit::loadClass(ne, cls);
-  if (class_ == NULL) {
+  if (class_ == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, cls->data());
   }
   TypedValue* clsCns = class_->clsCnsGet(cns);
-  if (clsCns == NULL) {
+  if (clsCns == nullptr) {
     raise_error("Couldn't find constant %s::%s",
                 cls->data(), cns->data());
   }
@@ -1198,11 +1198,11 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                                                 bool raise /* = false */) {
   const Func* method;
   if (callType == CtorMethod) {
-    assert(methodName == NULL);
+    assert(methodName == nullptr);
     method = cls->getCtor();
   } else {
     assert(callType == ObjMethod || callType == ClsMethod);
-    assert(methodName != NULL);
+    assert(methodName != nullptr);
     method = cls->lookupMethod(methodName);
     while (!method) {
       static StringData* sd__construct
@@ -1220,7 +1220,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                     ctx ? "context " : "anonymous context",
                     ctx ? ctx->name()->data() : "");
       }
-      return NULL;
+      return nullptr;
     }
   }
   assert(method);
@@ -1239,14 +1239,14 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     }
     // The anonymous context cannot access protected or private methods,
     // so we can fail fast here.
-    if (ctx == NULL) {
+    if (ctx == nullptr) {
       if (raise) {
         raise_error("Call to %s method %s::%s from anonymous context",
                     (method->attrs() & AttrPrivate) ? "private" : "protected",
                     cls->name()->data(),
                     method->name()->data());
       }
-      return NULL;
+      return nullptr;
     }
     assert(ctx);
     if (method->attrs() & AttrPrivate) {
@@ -1278,7 +1278,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                       method->name()->data(),
                       ctx->name()->data());
         }
-        return NULL;
+        return nullptr;
       }
       // We now know this protected method is accessible, but we need to
       // keep going because the context class may define a private method
@@ -1310,7 +1310,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                 ctx ? "context " : "anonymous context",
                 ctx ? ctx->name()->data() : "");
   }
-  return NULL;
+  return nullptr;
 }
 
 LookupResult VMExecutionContext::lookupObjMethod(const Func*& f,
@@ -1381,7 +1381,7 @@ LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
   f = cls->getCtor();
   if (!(f->attrs() & AttrPublic)) {
     Class* ctx = arGetContextClass(getFP());
-    f = lookupMethodCtx(cls, NULL, ctx, CtorMethod, raise);
+    f = lookupMethodCtx(cls, nullptr, ctx, CtorMethod, raise);
     if (!f) {
       // If raise was true than lookupMethodCtx should have thrown,
       // so we should only be able to get here if raise was false
@@ -1396,7 +1396,7 @@ ObjectData* VMExecutionContext::createObject(StringData* clsName,
                                              CArrRef params,
                                              bool init /* = true */) {
   Class* class_ = Unit::loadClass(clsName);
-  if (class_ == NULL) {
+  if (class_ == nullptr) {
     throw_missing_class(clsName->data());
   }
   Object o;
@@ -1427,18 +1427,18 @@ ObjectData* VMExecutionContext::getThis() {
   ActRec* fp = getFP();
   if (fp->skipFrame()) {
     fp = getPrevVMState(fp);
-    if (!fp) return NULL;
+    if (!fp) return nullptr;
   }
   if (fp->hasThis()) {
     return fp->getThis();
   }
-  return NULL;
+  return nullptr;
 }
 
 CStrRef VMExecutionContext::getContextClassName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
-  assert(ar != NULL);
+  assert(ar != nullptr);
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
     if (!ar) return empty_string;
@@ -1455,20 +1455,20 @@ CStrRef VMExecutionContext::getContextClassName() {
 CStrRef VMExecutionContext::getParentContextClassName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
-  assert(ar != NULL);
+  assert(ar != nullptr);
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
     if (!ar) return empty_string;
   }
   if (ar->hasThis()) {
     const Class* cls = ar->getThis()->getVMClass();
-    if (cls->parent() == NULL) {
+    if (cls->parent() == nullptr) {
       return empty_string;
     }
     return cls->parent()->nameRef();
   } else if (ar->hasClass()) {
     const Class* cls = ar->getClass();
-    if (cls->parent() == NULL) {
+    if (cls->parent() == nullptr) {
       return empty_string;
     }
     return cls->parent()->nameRef();
@@ -1480,10 +1480,10 @@ CStrRef VMExecutionContext::getParentContextClassName() {
 CStrRef VMExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
-  if (ar == NULL) return empty_string;
+  if (ar == nullptr) return empty_string;
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
-    if (ar == NULL) return empty_string;
+    if (ar == nullptr) return empty_string;
   }
   Unit* unit = ar->m_func->unit();
   return unit->filepathRef();
@@ -1492,13 +1492,13 @@ CStrRef VMExecutionContext::getContainingFileName() {
 int VMExecutionContext::getLine() {
   VMRegAnchor _;
   ActRec* ar = getFP();
-  Unit* unit = ar ? ar->m_func->unit() : NULL;
+  Unit* unit = ar ? ar->m_func->unit() : nullptr;
   Offset pc = unit ? pcOff() : 0;
-  if (ar == NULL) return -1;
+  if (ar == nullptr) return -1;
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar, &pc);
   }
-  if (ar == NULL || (unit = ar->m_func->unit()) == NULL) return -1;
+  if (ar == nullptr || (unit = ar->m_func->unit()) == nullptr) return -1;
   return unit->getLineNumber(pc);
 }
 
@@ -1512,14 +1512,14 @@ Array VMExecutionContext::getCallerInfo() {
   while (ar->m_func->name()->isame(s_call_user_func.get())
          || ar->m_func->name()->isame(s_call_user_func_array.get())) {
     ar = getPrevVMState(ar);
-    if (ar == NULL) {
+    if (ar == nullptr) {
       return result;
     }
   }
 
   Offset pc = 0;
   ar = getPrevVMState(ar, &pc);
-  while (ar != NULL) {
+  while (ar != nullptr) {
     if (!ar->m_func->name()->isame(s_call_user_func.get())
         && !ar->m_func->name()->isame(s_call_user_func_array.get())) {
       Unit* unit = ar->m_func->unit();
@@ -1538,7 +1538,7 @@ Array VMExecutionContext::getCallerInfo() {
 }
 
 bool VMExecutionContext::defined(CStrRef name) {
-  return m_constants.nvGet(name.get()) != NULL;
+  return m_constants.nvGet(name.get()) != nullptr;
 }
 
 TypedValue* VMExecutionContext::getCns(StringData* cns,
@@ -1546,19 +1546,19 @@ TypedValue* VMExecutionContext::getCns(StringData* cns,
                                        bool dynamic /* = true */) {
   if (dynamic) {
     TypedValue* tv = m_constants.nvGet(cns);
-    if (tv != NULL) {
+    if (tv != nullptr) {
       return tv;
     }
   }
   if (system) {
     const ClassInfo::ConstantInfo* ci = ClassInfo::FindConstant(cns->data());
-    if (ci != NULL) {
+    if (ci != nullptr) {
       if (!dynamic) {
         ConstInfoMap::const_iterator it = m_constInfo.find(cns);
         if (it != m_constInfo.end()) {
           // This is a dynamic constant, so don't report it.
           assert(ci == it->second);
-          return NULL;
+          return nullptr;
         }
       }
       TypedValue tv;
@@ -1569,12 +1569,12 @@ TypedValue* VMExecutionContext::getCns(StringData* cns,
       return m_constants.nvGet(cns);
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 bool VMExecutionContext::setCns(StringData* cns, CVarRef val, bool dynamic) {
-  if (m_constants.nvGet(cns) != NULL ||
-      ClassInfo::FindConstant(cns->data()) != NULL) {
+  if (m_constants.nvGet(cns) != nullptr ||
+      ClassInfo::FindConstant(cns->data()) != nullptr) {
     raise_warning(Strings::CONSTANT_ALREADY_DEFINED, cns->data());
     return false;
   }
@@ -1585,7 +1585,7 @@ bool VMExecutionContext::setCns(StringData* cns, CVarRef val, bool dynamic) {
   val.setEvalScalar();
   TypedValue* tv = val.getTypedAccessor();
   m_constants.nvSet(cns, tv, false);
-  assert(m_constants.nvGet(cns) != NULL);
+  assert(m_constants.nvGet(cns) != nullptr);
   if (RuntimeOption::EvalJit) {
     if (dynamic) {
       newPreConst(cns, *tv);
@@ -1619,7 +1619,7 @@ void VMExecutionContext::addRenameableFunctions(ArrayData* arr) {
 VarEnv* VMExecutionContext::getVarEnv() {
   Transl::VMRegAnchor _;
 
-  HPHP::VM::VarEnv* builtinVarEnv = NULL;
+  HPHP::VM::VarEnv* builtinVarEnv = nullptr;
   HPHP::VM::ActRec* fp = getFP();
   if (UNLIKELY(!fp)) return NULL;
   if (fp->skipFrame()) {
@@ -1628,7 +1628,7 @@ VarEnv* VMExecutionContext::getVarEnv() {
     }
     fp = getPrevVMState(fp);
   }
-  if (!fp) return NULL;
+  if (!fp) return nullptr;
   assert(!fp->hasInvName());
   if (!fp->hasVarEnv()) {
     if (builtinVarEnv) {
@@ -1659,7 +1659,7 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
   }
   assert(!fp->hasInvName());
   assert(!fp->hasExtraArgs());
-  assert(fp->m_varEnv != NULL);
+  assert(fp->m_varEnv != nullptr);
   if (ref) {
     fp->m_varEnv->bind(name, v);
   } else {
@@ -1698,7 +1698,7 @@ void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to put this where the first argument is
   StringData* invName = ar->getInvName();
   int nargs = ar->numArgs();
-  ar->setVarEnv(NULL);
+  ar->setVarEnv(nullptr);
   assert(!ar->hasVarEnv() && !ar->hasInvName());
   // We need to make an array containing all the arguments passed by the
   // caller and put it where the second argument is
@@ -2090,16 +2090,16 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
     }
   }
 
-  bool isMagicCall = (invName != NULL);
+  bool isMagicCall = (invName != nullptr);
 
-  if (this_ != NULL) {
+  if (this_ != nullptr) {
     this_->incRefCount();
   }
   Cell* savedSP = m_stack.top();
 
   checkStack(m_stack, f);
 
-  if (toMerge != NULL) {
+  if (toMerge != nullptr) {
     assert(f->unit() == toMerge && f->isPseudoMain());
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
@@ -2117,7 +2117,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   } else if (cls) {
     ar->setClass(cls);
   } else {
-    ar->setThis(NULL);
+    ar->setThis(nullptr);
   }
   if (isMagicCall) {
     ar->initNumArgs(2);
@@ -2127,7 +2127,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   ar->setVarEnv(varEnv);
 
 #ifdef HPHP_TRACE
-  if (m_fp == NULL) {
+  if (m_fp == nullptr) {
     TRACE(1, "Reentry: enter %s(%p) from top-level\n",
           f->name()->data(), ar);
   } else {
@@ -2173,11 +2173,11 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
           if (!(f->attrs() & AttrMayUseVV)) {
             // Discard extra arguments, since the function cannot
             // possibly use them.
-            assert(extraArgs == NULL);
+            assert(extraArgs == nullptr);
             ar->setNumArgs(numParams);
             break;
           }
-          assert(extraArgs != NULL && numExtraArgs > 0);
+          assert(extraArgs != nullptr && numExtraArgs > 0);
           // VarEnv expects the extra args to be in "reverse" order
           // (i.e. the last extra arg has the lowest address)
           to = extraArgs->getExtraArg(paramId - numParams);
@@ -2222,11 +2222,11 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   ar->m_savedRbp = 0;
   ar->m_func = f;
   ar->m_soff = 0;
-  ar->initNumArgs(param != NULL ? 1 : 0);
+  ar->initNumArgs(param != nullptr ? 1 : 0);
   ar->setThis(this_);
-  ar->setVarEnv(NULL);
+  ar->setVarEnv(nullptr);
 
-  if (param != NULL) {
+  if (param != nullptr) {
     tvDup(param, m_stack.allocTV());
   }
 
@@ -2239,8 +2239,8 @@ void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   if (!m_globalVarEnv) {
     VarEnv::createGlobal();
   }
-  invokeFunc(retval, func, Array::Create(), NULL, NULL,
-             m_globalVarEnv, NULL, unit);
+  invokeFunc(retval, func, Array::Create(), nullptr, nullptr,
+             m_globalVarEnv, nullptr, unit);
 }
 
 void VMExecutionContext::unwindBuiltinFrame() {
@@ -2287,8 +2287,8 @@ int VMExecutionContext::hhvmPrepareThrow() {
 ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
                                            Offset*       prevPc /* = NULL */,
                                            TypedValue**  prevSp /* = NULL */) {
-  if (fp == NULL) {
-    return NULL;
+  if (fp == nullptr) {
+    return nullptr;
   }
   ActRec* prevFp = arGetSfp(fp);
   if (prevFp != fp) {
@@ -2308,7 +2308,7 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   for (; i >= 0; --i) {
     if (m_nestedVMs[i].m_entryFP == fp) break;
   }
-  if (i == -1) return NULL;
+  if (i == -1) return nullptr;
   const VMState& vmstate = m_nestedVMs[i].m_savedState;
   prevFp = vmstate.fp;
   assert(prevFp);
@@ -2386,7 +2386,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     }
   }
   // Handle the subsequent VM frames
-  for (ActRec* prevFp = getPrevVMState(fp, &pc); fp != NULL;
+  for (ActRec* prevFp = getPrevVMState(fp, &pc); fp != nullptr;
        fp = prevFp, prevFp = getPrevVMState(fp, &pc)) {
     Array frame = Array::Create();
     // do not capture frame for HPHP only functions
@@ -2419,7 +2419,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     if (funcname != s_include) {
       // Closures have an m_this but they aren't in object context
       Class* ctx = arGetContextClass(fp);
-      if (ctx != NULL && !fp->m_func->isClosureBody()) {
+      if (ctx != nullptr && !fp->m_func->isClosureBody()) {
         frame.set(String(s_class), ctx->name()->data(), true);
         if (fp->hasThis()) {
           if (withThis) {
@@ -2472,7 +2472,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
 MethodInfoVM::~MethodInfoVM() {
   for (std::vector<const ClassInfo::ParameterInfo*>::iterator it =
        parameters.begin(); it != parameters.end(); ++it) {
-    if ((*it)->value != NULL) {
+    if ((*it)->value != nullptr) {
       free((void*)(*it)->value);
     }
   }
@@ -2502,10 +2502,10 @@ const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
     m_functionInfos.find(name);
   if (it == m_functionInfos.end()) {
     Func* func = Unit::loadFunc(name.get());
-    if (func == NULL || func->builtinFuncPtr()) {
+    if (func == nullptr || func->builtinFuncPtr()) {
       // Fall back to the logic in ClassInfo::FindFunction() logic to deal
       // with builtin functions
-      return NULL;
+      return nullptr;
     }
     AtomicSmartPtr<MethodInfoVM> &m = m_functionInfos[name];
     m = new MethodInfoVM();
@@ -2517,17 +2517,17 @@ const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
 }
 
 const ClassInfo* VMExecutionContext::findClassInfo(CStrRef name) {
-  if (name->empty()) return NULL;
+  if (name->empty()) return nullptr;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_classInfos.find(name);
   if (it == m_classInfos.end()) {
     Class* cls = Unit::lookupClass(name.get());
-    if (cls == NULL) return NULL;
+    if (cls == nullptr) return nullptr;
     if (cls->clsInfo()) return cls->clsInfo();
     if (cls->attrs() & (AttrInterface | AttrTrait)) {
       // If the specified name matches with something that is not formally
       // a class, return NULL
-      return NULL;
+      return nullptr;
     }
     AtomicSmartPtr<ClassInfoVM> &c = m_classInfos[name];
     c = new ClassInfoVM();
@@ -2543,12 +2543,12 @@ const ClassInfo* VMExecutionContext::findInterfaceInfo(CStrRef name) {
     m_interfaceInfos.find(name);
   if (it == m_interfaceInfos.end()) {
     Class* cls = Unit::lookupClass(name.get());
-    if (cls == NULL)  return NULL;
+    if (cls == nullptr)  return nullptr;
     if (cls->clsInfo()) return cls->clsInfo();
     if (!(cls->attrs() & AttrInterface)) {
       // If the specified name matches with something that is not formally
       // an interface, return NULL
-      return NULL;
+      return nullptr;
     }
     AtomicSmartPtr<ClassInfoVM> &c = m_interfaceInfos[name];
     c = new ClassInfoVM();
@@ -2566,10 +2566,10 @@ const ClassInfo* VMExecutionContext::findTraitInfo(CStrRef name) {
     return it->second.get();
   }
   Class* cls = Unit::lookupClass(name.get());
-  if (cls == NULL) return NULL;
+  if (cls == nullptr) return nullptr;
   if (cls->clsInfo()) return cls->clsInfo();
   if (!(cls->attrs() & AttrTrait)) {
-    return NULL;
+    return nullptr;
   }
   AtomicSmartPtr<ClassInfoVM> &classInfo = m_traitInfos[name];
   classInfo = new ClassInfoVM();
@@ -2580,8 +2580,8 @@ const ClassInfo* VMExecutionContext::findTraitInfo(CStrRef name) {
 const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
     CStrRef name) {
   TypedValue* tv = m_constants.nvGet(name.get());
-  if (tv == NULL) {
-    return NULL;
+  if (tv == nullptr) {
+    return nullptr;
   }
   ConstInfoMap::const_iterator it = m_constInfo.find(name.get());
   if (it != m_constInfo.end()) {
@@ -2606,11 +2606,11 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
 
   struct stat s;
   String spath = Eval::resolveVmInclude(path, currentDir, &s);
-  if (spath.isNull()) return NULL;
+  if (spath.isNull()) return nullptr;
 
   // Check if this file has already been included.
   EvaledFilesMap::const_iterator it = m_evaledFiles.find(spath.get());
-  HPHP::Eval::PhpFile* efile = NULL;
+  HPHP::Eval::PhpFile* efile = nullptr;
   if (it != m_evaledFiles.end()) {
     // We found it! Return the unit.
     efile = it->second;
@@ -2674,7 +2674,7 @@ Unit* VMExecutionContext::evalInclude(StringData* path,
                                       const StringData* curUnitFilePath,
                                       bool* initial) {
   namespace fs = boost::filesystem;
-  HPHP::Eval::PhpFile* efile = NULL;
+  HPHP::Eval::PhpFile* efile = nullptr;
   if (curUnitFilePath) {
     fs::path currentUnit(curUnitFilePath->data());
     fs::path currentDir(currentUnit.branch_path());
@@ -2685,7 +2685,7 @@ Unit* VMExecutionContext::evalInclude(StringData* path,
   if (efile) {
     return efile->unit();
   }
-  return NULL;
+  return nullptr;
 }
 
 HPHP::VM::Unit* VMExecutionContext::evalIncludeRoot(
@@ -2751,8 +2751,8 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
   VM::Class* cls = curClass();
   if (local) {
-    cls = NULL;
-    ar->setThis(NULL);
+    cls = nullptr;
+    ar->setThis(nullptr);
   } else if (m_fp->hasThis()) {
     ObjectData *this_ = m_fp->getThis();
     this_->incRefCount();
@@ -2760,7 +2760,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   } else if (m_fp->hasClass()) {
     ar->setClass(m_fp->getClass());
   } else {
-    ar->setThis(NULL);
+    ar->setThis(nullptr);
   }
   Func* func = unit->getMain(cls);
   assert(!func->isBuiltin());
@@ -2799,7 +2799,7 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val) {
   }
   String code = HPHP::concat3("<?php return ", key, ";");
   VM::Unit* unit = compileEvalString(code.get());
-  assert(unit != NULL);
+  assert(unit != nullptr);
   Variant v;
   // Default arg values are not currently allowed to depend on class context.
   g_vmContext->invokeFunc((TypedValue*)&v, unit->getMain(),
@@ -2897,15 +2897,15 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   assert(retval);
   // The code has "<?php" prepended already
   Unit* unit = compileEvalString(code);
-  if (unit == NULL) {
+  if (unit == nullptr) {
     raise_error("Syntax error");
     tvWriteNull(retval);
     return;
   }
 
-  VarEnv *varEnv = NULL;
+  VarEnv *varEnv = nullptr;
   ActRec *fp = getFP();
-  ActRec *cfpSave = NULL;
+  ActRec *cfpSave = nullptr;
   if (fp) {
     VM::VarEnv* vit = 0;
     for (; frame > 0; --frame) {
@@ -2940,8 +2940,8 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     varEnv = fp->m_varEnv;
     cfpSave = varEnv->getCfp();
   }
-  ObjectData *this_ = NULL;
-  Class *cls = NULL;
+  ObjectData *this_ = nullptr;
+  Class *cls = nullptr;
   if (fp) {
     if (fp->hasThis()) {
       this_ = fp->getThis();
@@ -2957,7 +2957,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   const static StaticString s_fatal("Hit fatal");
   try {
     invokeFunc(retval, unit->getMain(fp->m_func->cls()), Array::Create(),
-               this_, cls, varEnv, NULL, unit);
+               this_, cls, varEnv, nullptr, unit);
   } catch (FatalErrorException &e) {
     g_vmContext->write(s_fatal);
     g_vmContext->write(" : ");
@@ -3002,7 +3002,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
 }
 
 void VMExecutionContext::enterDebuggerDummyEnv() {
-  static Unit* s_debuggerDummy = NULL;
+  static Unit* s_debuggerDummy = nullptr;
   if (!s_debuggerDummy) {
     s_debuggerDummy = compile_string("<?php?>", 7);
   }
@@ -3014,7 +3014,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     assert(m_stack.count() == 0);
     ActRec* ar = m_stack.allocA();
     ar->m_func = s_debuggerDummy->getMain();
-    ar->setThis(NULL);
+    ar->setThis(nullptr);
     ar->m_soff = 0;
     ar->m_savedRbp = 0;
     ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
@@ -3050,7 +3050,7 @@ static inline void lookup_var(ActRec* fp,
     if (fp->hasVarEnv()) {
       val = fp->m_varEnv->lookup(name);
     } else {
-      val = NULL;
+      val = nullptr;
     }
   }
 }
@@ -3070,7 +3070,7 @@ static inline void lookupd_var(ActRec* fp,
       fp->m_varEnv = VarEnv::createLazyAttach(fp);
     }
     val = fp->m_varEnv->lookup(name);
-    if (val == NULL) {
+    if (val == nullptr) {
       TypedValue tv;
       tvWriteNull(&tv);
       fp->m_varEnv->set(name, &tv);
@@ -3096,7 +3096,7 @@ static inline void lookupd_gbl(ActRec* fp,
   assert(g_vmContext->m_globalVarEnv);
   VarEnv* varEnv = g_vmContext->m_globalVarEnv;
   val = varEnv->lookup(name);
-  if (val == NULL) {
+  if (val == nullptr) {
     TypedValue tv;
     tvWriteNull(&tv);
     varEnv->set(name, &tv);
@@ -3120,10 +3120,10 @@ static inline void lookup_sprop(ActRec* fp,
 static inline void lookupClsRef(TypedValue* input,
                                 TypedValue* output,
                                 bool decRef = false) {
-  const Class* class_ = NULL;
+  const Class* class_ = nullptr;
   if (IS_STRING_TYPE(input->m_type)) {
     class_ = Unit::loadClass(input->m_data.pstr);
-    if (class_ == NULL) {
+    if (class_ == nullptr) {
       output->m_type = KindOfNull;
       raise_error(Strings::UNKNOWN_CLASS, input->m_data.pstr->data());
     }
@@ -3238,12 +3238,12 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
   int depth = ndiscard - 1;
   const LocationCode lcode = LocationCode(*vec++);
 
-  TypedValue* loc = NULL;
+  TypedValue* loc = nullptr;
   TypedValue dummy;
   Class* const ctx = arGetContextClass(getFP());
 
   StringData* name;
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   TypedValue* cref;
   TypedValue* pname;
   tvWriteUninit(&tvScratch);
@@ -3258,7 +3258,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
 
   lcodeName:
     lookup_var(m_fp, name, loc, fr);
-    if (fr == NULL) {
+    if (fr == nullptr) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
@@ -3279,7 +3279,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
 
   lcodeGlobal:
     lookup_gbl(m_fp, name, loc, fr);
-    if (fr == NULL) {
+    if (fr == nullptr) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
@@ -3389,13 +3389,13 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
       break;
     case MW:
       raise_error("Cannot use [] for reading");
-      result = NULL;
+      result = nullptr;
       break;
     default:
       assert(false);
-      result = NULL; // Silence compiler warning.
+      result = nullptr; // Silence compiler warning.
     }
-    assert(result != NULL);
+    assert(result != nullptr);
     ratchetRefs(result, tvRef, tvRef2);
     base = result;
   }
@@ -3537,12 +3537,12 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
   int depth = mdepth + ndiscard - 1;
   const LocationCode lcode = LocationCode(*vec++);
 
-  TypedValue* loc = NULL;
+  TypedValue* loc = nullptr;
   TypedValue dummy;
   Class* const ctx = arGetContextClass(getFP());
 
   StringData* name;
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   TypedValue* cref;
   TypedValue* pname;
   tvWriteUninit(&tvScratch);
@@ -3561,7 +3561,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     } else {
       lookup_var(m_fp, name, loc, fr);
     }
-    if (fr == NULL) {
+    if (fr == nullptr) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
@@ -3586,7 +3586,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     } else {
       lookup_gbl(m_fp, name, loc, fr);
     }
-    if (fr == NULL) {
+    if (fr == nullptr) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
@@ -3670,7 +3670,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
         curMember = frame_local_inner(m_fp, memberImm);
       }
     } else {
-      curMember = mcode == MW ? NULL : m_stack.indTV(depth--);
+      curMember = mcode == MW ? nullptr : m_stack.indTV(depth--);
     }
 
     if (mleave == LeaveLast) {
@@ -3706,9 +3706,9 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
       break;
     default:
       assert(false);
-      result = NULL; // Silence compiler warning.
+      result = nullptr; // Silence compiler warning.
     }
-    assert(result != NULL);
+    assert(result != nullptr);
     ratchetRefs(result, tvRef, tvRef2);
     // Check whether an error occurred (i.e. no result was set).
     if (result == &tvScratch && result->m_type == KindOfUninit) {
@@ -3959,7 +3959,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNewCol(PC& pc) {
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
     case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
     default:
-      obj = NULL;
+      obj = nullptr;
       raise_error("NewCol: Invalid collection type");
       break;
   }
@@ -4000,7 +4000,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {
   NEXT();
   DECODE_LITSTR(s);
   TypedValue* cns = getCns(s);
-  if (cns == NULL) {
+  if (cns == nullptr) {
     if (AutoloadHandler::s_instance->autoloadConstant(StrNR(s))) {
       cns = getCns(s);
     }
@@ -4029,9 +4029,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCns(PC& pc) {
   TypedValue* tv = m_stack.topTV();
   assert(tv->m_type == KindOfClass);
   Class* class_ = tv->m_data.pcls;
-  assert(class_ != NULL);
+  assert(class_ != nullptr);
   TypedValue* clsCns = class_->clsCnsGet(clsCnsName);
-  if (clsCns == NULL) {
+  if (clsCns == nullptr) {
     raise_error("Couldn't find constant %s::%s",
                 class_->name()->data(), clsCnsName->data());
   }
@@ -4047,7 +4047,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClsCnsD(PC& pc) {
 
   TypedValue* clsCns = lookupClsCns(classNamedEntity.second,
                                     classNamedEntity.first, clsCnsName);
-  assert(clsCns != NULL);
+  assert(clsCns != nullptr);
   Cell* c1 = m_stack.allocC();
   tvReadCell(clsCns, c1);
 }
@@ -4381,8 +4381,8 @@ VMExecutionContext::handleUnwind(UnwindStatus unwindType) {
   if (unwindType == UnwindPropagate) {
     longJumpType = EXCEPTION_PROPAGATE;
     if (m_nestedVMs.empty()) {
-      m_fp = NULL;
-      m_pc = NULL;
+      m_fp = nullptr;
+      m_pc = nullptr;
     }
   } else {
     assert(unwindType == UnwindResumeVM);
@@ -4754,9 +4754,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetN(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   lookup_var(m_fp, name, to, fr);
-  if (fr == NULL || fr->m_type == KindOfUninit) {
+  if (fr == nullptr || fr->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvRefcountedDecRefCell(to);
     tvWriteNull(to);
@@ -4771,9 +4771,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   lookup_gbl(m_fp, name, to, fr);
-  if (fr == NULL) {
+  if (fr == nullptr) {
     if (MoreWarnings) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
@@ -4863,9 +4863,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetN(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   lookupd_var(m_fp, name, to, fr);
-  assert(fr != NULL);
+  assert(fr != nullptr);
   tvRefcountedDecRefCell(to);
   vgetl_body(fr, to);
   decRefStr(name);
@@ -4875,9 +4875,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetG(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   lookupd_gbl(m_fp, name, to, fr);
-  assert(fr != NULL);
+  assert(fr != nullptr);
   tvRefcountedDecRefCell(to);
   vgetl_body(fr, to);
   decRefStr(name);
@@ -4910,10 +4910,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetN(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
-  TypedValue* tv = NULL;
+  TypedValue* tv = nullptr;
   bool e;
   lookup_var(m_fp, name, tv1, tv);
-  if (tv == NULL) {
+  if (tv == nullptr) {
     e = false;
   } else {
     e = isset(tvAsCVarRef(tv));
@@ -4928,10 +4928,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
-  TypedValue* tv = NULL;
+  TypedValue* tv = nullptr;
   bool e;
   lookup_gbl(m_fp, name, tv1, tv);
-  if (tv == NULL) {
+  if (tv == nullptr) {
     e = false;
   } else {
     e = isset(tvAsCVarRef(tv));
@@ -5039,10 +5039,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyN(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
-  TypedValue* tv = NULL;
+  TypedValue* tv = nullptr;
   bool e;
   lookup_var(m_fp, name, tv1, tv);
-  if (tv == NULL) {
+  if (tv == nullptr) {
     e = true;
   } else {
     e = empty(tvAsCVarRef(tv));
@@ -5057,10 +5057,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
-  TypedValue* tv = NULL;
+  TypedValue* tv = nullptr;
   bool e;
   lookup_gbl(m_fp, name, tv1, tv);
-  if (tv == NULL) {
+  if (tv == nullptr) {
     e = true;
   } else {
     e = empty(tvAsCVarRef(tv));
@@ -5140,9 +5140,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetN(PC& pc) {
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
-  TypedValue* to = NULL;
+  TypedValue* to = nullptr;
   lookupd_var(m_fp, name, tv2, to);
-  assert(to != NULL);
+  assert(to != nullptr);
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5154,9 +5154,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetG(PC& pc) {
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
-  TypedValue* to = NULL;
+  TypedValue* to = nullptr;
   lookupd_gbl(m_fp, name, tv2, to);
-  assert(to != NULL);
+  assert(to != nullptr);
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5233,10 +5233,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpN(PC& pc) {
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
-  TypedValue* to = NULL;
+  TypedValue* to = nullptr;
   // XXX We're probably not getting warnings totally correct here
   lookupd_var(m_fp, name, tv2, to);
-  assert(to != NULL);
+  assert(to != nullptr);
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
@@ -5251,10 +5251,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpG(PC& pc) {
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
-  TypedValue* to = NULL;
+  TypedValue* to = nullptr;
   // XXX We're probably not getting warnings totally correct here
   lookupd_gbl(m_fp, name, tv2, to);
-  assert(to != NULL);
+  assert(to != nullptr);
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
@@ -5315,7 +5315,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
       }
       default:
         assert(false);
-        result = NULL; // Silence compiler warning.
+        result = nullptr; // Silence compiler warning.
       }
     }
 
@@ -5343,10 +5343,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecN(PC& pc) {
   DECODE(unsigned char, op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
-  TypedValue* local = NULL;
+  TypedValue* local = nullptr;
   // XXX We're probably not getting warnings totally correct here
   lookupd_var(m_fp, name, nameCell, local);
-  assert(local != NULL);
+  assert(local != nullptr);
   IncDecBody<true>(op, local, nameCell);
   decRefStr(name);
 }
@@ -5356,10 +5356,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
   DECODE(unsigned char, op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
-  TypedValue* gbl = NULL;
+  TypedValue* gbl = nullptr;
   // XXX We're probably not getting warnings totally correct here
   lookupd_gbl(m_fp, name, nameCell, gbl);
-  assert(gbl != NULL);
+  assert(gbl != nullptr);
   IncDecBody<true>(op, gbl, nameCell);
   decRefStr(name);
 }
@@ -5425,9 +5425,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindN(PC& pc) {
   StringData* name;
   TypedValue* fr = m_stack.topTV();
   TypedValue* nameTV = m_stack.indTV(1);
-  TypedValue* to = NULL;
+  TypedValue* to = nullptr;
   lookupd_var(m_fp, name, nameTV, to);
-  assert(to != NULL);
+  assert(to != nullptr);
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5439,9 +5439,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindG(PC& pc) {
   StringData* name;
   TypedValue* fr = m_stack.topTV();
   TypedValue* nameTV = m_stack.indTV(1);
-  TypedValue* to = NULL;
+  TypedValue* to = nullptr;
   lookupd_gbl(m_fp, name, nameTV, to);
-  assert(to != NULL);
+  assert(to != nullptr);
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   m_stack.discard();
@@ -5495,10 +5495,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetN(PC& pc) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
-  TypedValue* tv = NULL;
+  TypedValue* tv = nullptr;
   lookup_var(m_fp, name, tv1, tv);
   assert(!m_fp->hasInvName());
-  if (tv != NULL) {
+  if (tv != nullptr) {
     tvRefcountedDecRef(tv);
     tvWriteUninit(tv);
   }
@@ -5511,7 +5511,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetG(PC& pc) {
   TypedValue* tv1 = m_stack.topTV();
   StringData* name = lookup_name(tv1);
   VarEnv* varEnv = m_globalVarEnv;
-  assert(varEnv != NULL);
+  assert(varEnv != nullptr);
   varEnv->unset(name);
   m_stack.popC();
   decRefStr(name);
@@ -5546,9 +5546,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
   NEXT();
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.topC();
-  const Func* func = NULL;
-  ObjectData* origObj = NULL;
-  StringData* origSd = NULL;
+  const Func* func = nullptr;
+  ObjectData* origObj = nullptr;
+  StringData* origSd = nullptr;
   if (IS_STRING_TYPE(c1->m_type)) {
     origSd = c1->m_data.pstr;
     func = Unit::loadFunc(origSd);
@@ -5557,13 +5557,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
     origObj = c1->m_data.pobj;
     const Class* cls = origObj->getVMClass();
     func = cls->lookupMethod(invokeName);
-    if (func == NULL) {
+    if (func == nullptr) {
       raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
     }
   } else {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
-  if (func == NULL) {
+  if (func == nullptr) {
     raise_error("Undefined function: %s", c1->m_data.pstr->data());
   }
   assert(!origObj || !origSd);
@@ -5585,11 +5585,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
       // ActRec. Don't try this at home.
     }
   } else {
-    ar->setThis(NULL);
+    ar->setThis(nullptr);
     decRefStr(origSd);
   }
   ar->initNumArgs(numArgs);
-  ar->setVarEnv(NULL);
+  ar->setVarEnv(nullptr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
@@ -5598,7 +5598,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
   DECODE(Id, id);
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
-  if (func == NULL) {
+  if (func == nullptr) {
     raise_error("Undefined function: %s",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
@@ -5606,9 +5606,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
   ActRec* ar = m_stack.allocA();
   arSetSfp(ar, m_fp);
   ar->m_func = func;
-  ar->setThis(NULL);
+  ar->setThis(nullptr);
   ar->initNumArgs(numArgs);
-  ar->setVarEnv(NULL);
+  ar->setVarEnv(nullptr);
 }
 
 void VMExecutionContext::fPushObjMethodImpl(
@@ -5678,7 +5678,7 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
   const Func* f;
   LookupResult res = lookupClsMethod(f, cls, name, obj, true);
   if (res == MethodFoundNoThis || res == MagicCallStaticFound) {
-    obj = NULL;
+    obj = nullptr;
   } else {
     assert(obj);
     assert(res == MethodFoundWithThis || res == MagicCallFound);
@@ -5708,7 +5708,7 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
   if (res == MagicCallFound || res == MagicCallStaticFound) {
     ar->setInvName(name);
   } else {
-    ar->setVarEnv(NULL);
+    ar->setVarEnv(nullptr);
     decRefStr(const_cast<StringData*>(name));
   }
 }
@@ -5727,7 +5727,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethod(PC& pc) {
   // CLSMETHOD_BODY will take care of decReffing name
   m_stack.ndiscard(2);
   assert(cls && name);
-  ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : NULL;
+  ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : nullptr;
   pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
 
@@ -5739,10 +5739,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodD(PC& pc) {
   const NamedEntityPair &nep =
     m_fp->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
-  if (cls == NULL) {
+  if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : NULL;
+  ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : nullptr;
   pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
 
@@ -5760,7 +5760,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodF(PC& pc) {
   StringData* name = c1->m_data.pstr;
   // CLSMETHOD_BODY will take care of decReffing name
   m_stack.ndiscard(2);
-  ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : NULL;
+  ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : nullptr;
   pushClsMethodImpl<true>(cls, name, obj, numArgs);
 }
 
@@ -5772,7 +5772,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtor(PC& pc) {
   TypedValue* tv = m_stack.topTV();
   assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
-  assert(cls != NULL);
+  assert(cls != nullptr);
   // Lookup the ctor
   const Func* f;
   LookupResult res UNUSED = lookupCtorMethod(f, cls, true);
@@ -5792,7 +5792,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtor(PC& pc) {
   ar->setThis(this_);
   ar->initNumArgs(numArgs, true /* isFPushCtor */);
   arSetSfp(ar, m_fp);
-  ar->setVarEnv(NULL);
+  ar->setVarEnv(nullptr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
@@ -5802,7 +5802,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
   const NamedEntityPair &nep =
     m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Class* cls = Unit::loadClass(nep.second, nep.first);
-  if (cls == NULL) {
+  if (cls == nullptr) {
     raise_error("Undefined class: %s",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
@@ -5822,7 +5822,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs, true /* isFPushCtor */);
-  ar->setVarEnv(NULL);
+  ar->setVarEnv(nullptr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
@@ -5833,9 +5833,9 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
 
   TypedValue func = m_stack.topTV()[safe];
 
-  ObjectData* obj = NULL;
-  HPHP::VM::Class* cls = NULL;
-  StringData* invName = NULL;
+  ObjectData* obj = nullptr;
+  HPHP::VM::Class* cls = nullptr;
+  StringData* invName = nullptr;
 
   const HPHP::VM::Func* f = vm_decode_function(tvAsVariant(&func), getFP(),
                                                forward,
@@ -5844,7 +5844,7 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
 
   if (safe) m_stack.topTV()[1] = m_stack.topTV()[0];
   m_stack.ndiscard(1);
-  if (f == NULL) {
+  if (f == nullptr) {
     f = SystemLib::GetNullFunction();
     if (safe) {
       m_stack.pushFalse();
@@ -5862,13 +5862,13 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
   } else if (cls) {
     ar->setClass(cls);
   } else {
-    ar->setThis(NULL);
+    ar->setThis(nullptr);
   }
   ar->initNumArgs(numArgs, false /* isFPushCtor */);
   if (invName) {
     ar->setInvName(invName);
   } else {
-    ar->setVarEnv(NULL);
+    ar->setVarEnv(nullptr);
   }
   tvRefcountedDecRef(&func);
 }
@@ -6150,7 +6150,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   DECODE(Id, id);
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::lookupFunc(nep.second, nep.first);
-  if (func == NULL) {
+  if (func == nullptr) {
     raise_error("Undefined function: %s",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
@@ -6215,7 +6215,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
 bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
                                           ArrayData* args,
                                           ExtraArgs*& extraArgs) {
-  extraArgs = NULL;
+  extraArgs = nullptr;
   if (UNLIKELY(ar->hasInvName())) {
     m_stack.pushStringNoRc(ar->getInvName());
     m_stack.pushArray(args);
@@ -6306,14 +6306,14 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     // this is what we /should/ do, but our code base depends
     // on the broken behavior of casting the second arg to an
     // array.
-    cleanupParamsAndActRec(m_stack, ar, NULL);
+    cleanupParamsAndActRec(m_stack, ar, nullptr);
     m_stack.pushNull();
     raise_warning("call_user_func_array() expects parameter 2 to be array");
     return false;
   }
 
   const Func* func = ar->m_func;
-  ExtraArgs* extraArgs = NULL;
+  ExtraArgs* extraArgs = nullptr;
   {
     Array args(LIKELY(c1->m_type == KindOfArray) ? c1->m_data.parr :
                tvAsVariant(c1).toArray().get());
@@ -6330,7 +6330,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
       - (uintptr_t)m_fp->m_func->base();
     assert(pcOff() > m_fp->m_func->base());
 
-    StringData* invName = ar->hasInvName() ? ar->getInvName() : NULL;
+    StringData* invName = ar->hasInvName() ? ar->getInvName() : nullptr;
     if (UNLIKELY(!prepareArrayArgs(ar, args.get(), extraArgs))) return false;
     if (UNLIKELY(func->maybeIntercepted())) {
       Variant *h = get_intercept_handler(func->fullNameRef(),
@@ -6340,7 +6340,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
           TypedValue retval;
           if (!run_intercept_handler_for_invokefunc(
                 &retval, func, args,
-                ar->hasThis() ? ar->getThis() : NULL,
+                ar->hasThis() ? ar->getThis() : nullptr,
                 invName, h)) {
             cleanupParamsAndActRec(m_stack, ar, extraArgs);
             *m_stack.allocTV() = retval;
@@ -6565,7 +6565,7 @@ inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc,
     ec->evalIncludeRoot(path.get(), flags, &initial) :
     ec->evalInclude(path.get(), ec->m_fp->m_func->unit()->filepath(), &initial);
   ec->m_stack.popC();
-  if (u == NULL) {
+  if (u == nullptr) {
     ((flags & InclOpFatal) ?
      (void (*)(const char *, ...))raise_error :
      (void (*)(const char *, ...))raise_warning)("File not found: %s",
@@ -6615,7 +6615,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEval(PC& pc) {
   String code(prepareKey(c1));
   String prefixedCode = concat("<?php ", code);
   Unit* unit = compileEvalString(prefixedCode.get());
-  if (unit == NULL) {
+  if (unit == nullptr) {
     raise_error("Syntax error in eval()");
   }
   m_stack.popC();
@@ -6688,9 +6688,9 @@ lookupStatic(StringData* name,
              const ActRec* fp,
              TypedValue*&val, bool& inited) {
   HphpArray* map = get_static_locals(fp);
-  assert(map != NULL);
+  assert(map != nullptr);
   val = map->nvGet(name);
-  if (val == NULL) {
+  if (val == nullptr) {
     TypedValue tv;
     tvWriteUninit(&tv);
     map->nvSet(name, &tv, false);
@@ -6705,10 +6705,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLoc(PC& pc) {
   NEXT();
   DECODE_IVA(localId);
   DECODE_LITSTR(var);
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   bool inited;
   lookupStatic(var, m_fp, fr, inited);
-  assert(fr != NULL);
+  assert(fr != nullptr);
   if (fr->m_type != KindOfRef) {
     assert(!inited);
     tvBox(fr);
@@ -6726,10 +6726,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLocInit(PC& pc) {
   NEXT();
   DECODE_IVA(localId);
   DECODE_LITSTR(var);
-  TypedValue* fr = NULL;
+  TypedValue* fr = nullptr;
   bool inited;
   lookupStatic(var, m_fp, fr, inited);
-  assert(fr != NULL);
+  assert(fr != nullptr);
   if (!inited) {
     Cell* initVal = m_stack.topC();
     tvDup(initVal, fr);
@@ -6876,10 +6876,10 @@ VMExecutionContext::createContinuation(ActRec* fp,
       ar->setClass(frameStaticClass(fp));
     }
   } else {
-    ar->setThis(NULL);
+    ar->setThis(nullptr);
   }
   ar->initNumArgs(1);
-  ar->setVarEnv(NULL);
+  ar->setVarEnv(nullptr);
 
   TypedValue* contLocal = frame_local(ar, 0);
   contLocal->m_type = KindOfObject;
@@ -6960,7 +6960,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
 
   const Func* origFunc = m_fp->m_func;
   const Func* genFunc = origFunc->getGeneratorBody(genName);
-  assert(genFunc != NULL);
+  assert(genFunc != nullptr);
 
   bool isMethod = origFunc->isNonClosureMethod();
   c_Continuation* cont = isMethod ?
@@ -7195,7 +7195,7 @@ VMExecutionContext::prettyStack(const string& prefix) const {
     string s("__Halted");
     return s;
   }
-  int offset = (m_fp->m_func->unit() != NULL)
+  int offset = (m_fp->m_func->unit() != nullptr)
                ? pcOff()
                : 0;
   string begPrefix = prefix + "__";
@@ -7220,14 +7220,14 @@ void VMExecutionContext::DumpCurUnit(int skip) {
   while (skip--) {
     fp = g_vmContext->getPrevVMState(fp, &pc);
   }
-  if (fp == NULL) {
+  if (fp == nullptr) {
     std::cout << "Don't have a valid fp\n";
     return;
   }
 
   printf("Offset = %d, in function %s\n", pc, fp->m_func->name()->data());
   Unit* u = fp->m_func->unit();
-  if (u == NULL) {
+  if (u == nullptr) {
     std::cout << "Current unit is NULL\n";
     return;
   }
@@ -7320,7 +7320,7 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
   assert(sizeof(optabDbg) / sizeof(const void *) == Op_count);
   const void **optab = optabDirect;
   InjectionTableInt64* injTable = g_vmContext->m_injTables ?
-    g_vmContext->m_injTables->getInt64Table(InstHookTypeBCPC) : NULL;
+    g_vmContext->m_injTables->getInt64Table(InstHookTypeBCPC) : nullptr;
   bool collectCoverage = ThreadInfo::s_threadInfo->m_reqInjectionData.coverage;
   if (injTable) {
     optab = optabInst;
@@ -7348,7 +7348,7 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
               Trace::trace("dispatch: Halt ExecutionContext::dispatch(%p)\n", \
                            m_fp));                                      \
       delete g_vmContext->m_lastLocFilter;                              \
-      g_vmContext->m_lastLocFilter = NULL;                              \
+      g_vmContext->m_lastLocFilter = nullptr;                              \
       return;                                                           \
     }                                                                   \
     Op op = (Op)*pc;                                                    \
@@ -7438,7 +7438,7 @@ void VMExecutionContext::dispatchBB() {
 
 void VMExecutionContext::recordCodeCoverage(PC pc) {
   Unit* unit = getFP()->m_func->unit();
-  assert(unit != NULL);
+  assert(unit != nullptr);
   if (unit == SystemLib::s_nativeFuncUnit ||
       unit == SystemLib::s_nativeClassUnit) {
     return;
@@ -7458,7 +7458,7 @@ void VMExecutionContext::recordCodeCoverage(PC pc) {
 
 void VMExecutionContext::resetCoverageCounters() {
   m_coverPrevLine = -1;
-  m_coverPrevUnit = NULL;
+  m_coverPrevUnit = nullptr;
 }
 
 void VMExecutionContext::pushVMState(VMState &savedVM,
@@ -7543,7 +7543,7 @@ void VMExecutionContext::requestExit() {
   destructObjects();
   syncGdbState();
   tx64->requestExit();
-  tx64 = NULL;
+  tx64 = nullptr;
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();

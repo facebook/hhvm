@@ -130,8 +130,8 @@ void annotate(NormalizedInstruction* i) {
     case OpFPushFuncD: {
       // When we push predictable action records, we can use a simpler
       // translation for their corresponding FCall.
-      const StringData* className = NULL;
-      const StringData* funcName = NULL;
+      const StringData* className = nullptr;
+      const StringData* funcName = nullptr;
       if (i->op() == OpFPushFuncD) {
       	funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
       } else if (i->op() == OpFPushObjMethodD) {
@@ -142,7 +142,7 @@ void annotate(NormalizedInstruction* i) {
         className = cls->name();
       } else if (i->op() == OpFPushClsMethodF) {
         if (!i->inputs[1]->isString() ||
-            i->inputs[1]->rtt.valueString() == NULL ||
+            i->inputs[1]->rtt.valueString() == nullptr ||
             i->inputs[0]->valueType() != KindOfClass) {
           break;
         }
@@ -171,7 +171,7 @@ void annotate(NormalizedInstruction* i) {
           i->funcName = callRec.m_encodedName;
         }
       } else {
-        i->funcName = NULL;
+        i->funcName = nullptr;
       }
     } break;
     default: break;
@@ -190,7 +190,7 @@ fcallToFuncName(const NormalizedInstruction* i) {
     decodeNameAndArgs(callRec.m_encodedName, name, numArgs);
     return StringData::GetStaticString(name.c_str());
   }
-  return NULL;
+  return nullptr;
 }
 
 } } }

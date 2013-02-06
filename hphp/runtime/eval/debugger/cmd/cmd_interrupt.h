@@ -28,7 +28,7 @@ class CmdInterrupt : public DebuggerCommand {
 public:
   CmdInterrupt()
       : DebuggerCommand(KindOfInterrupt),
-        m_interrupt(-1), m_threadId(0), m_site(NULL), m_pendingJump(false) {}
+        m_interrupt(-1), m_threadId(0), m_site(nullptr), m_pendingJump(false) {}
 
   CmdInterrupt(InterruptType interrupt, const char *program,
                InterruptSite *site, const char *error)

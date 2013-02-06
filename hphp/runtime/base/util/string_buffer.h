@@ -54,7 +54,7 @@ public:
     m_maxBytes = maxBytes > 0 ? maxBytes : kDefaultOutputLimit;
   }
 
-  bool valid() const { return m_buffer != NULL;}
+  bool valid() const { return m_buffer != nullptr;}
   bool empty() const { return m_len == 0;}
   int size() const { return m_len;}
   int length() const { return m_len;}
@@ -205,7 +205,7 @@ class CstrBuffer {
   ~CstrBuffer();
   const char* data() const;
   unsigned size() const { return m_len; }
-  bool valid() const { return m_buffer != NULL; }
+  bool valid() const { return m_buffer != nullptr; }
   void append(const char* s, int len);
   String detach();
 

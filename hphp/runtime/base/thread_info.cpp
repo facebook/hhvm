@@ -45,12 +45,12 @@ ThreadInfo::ThreadInfo()
     for (map<int, ObjectAllocatorBaseGetter>::iterator it = wrappers.begin();
          it != wrappers.end(); it++) {
       m_allocators[it->first] = it->second();
-      assert(it->second() != NULL);
+      assert(it->second() != nullptr);
     }
   }
   m_mm = MemoryManager::TheMemoryManager();
 
-  m_profiler = NULL;
+  m_profiler = nullptr;
   m_pendingException = false;
   m_coverage = new CodeCoverage();
 
@@ -88,7 +88,7 @@ void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
 }
 
 void ThreadInfo::onSessionInit() {
-  m_top = NULL;
+  m_top = nullptr;
   m_reqInjectionData.onSessionInit();
 
   // Take the address of the cached per-thread stackLimit, and use this to allow

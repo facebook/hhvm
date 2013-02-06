@@ -388,7 +388,7 @@ class FullPosRange {
   FullPos* front() const { assert(!empty()); return m_fpos; }
   void popFront() { assert(!empty()); m_fpos = m_fpos->getNext(); }
  private:
-  FullPos* m_fpos;  
+  FullPos* m_fpos;
 };
 
 /**

@@ -61,7 +61,7 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
     }
   }
 
-  if (typeName == NULL) {
+  if (typeName == nullptr) {
     m_type.m_dt = KindOfInvalid;
     m_type.m_metatype = Precise;
     return;
@@ -106,7 +106,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
       if (shouldProfile()) Class::profileInstanceOf(m_typeName);
       return true;
     }
-    const Class *c = NULL;
+    const Class *c = nullptr;
     if (isSelf() || isParent()) {
       if (isSelf()) {
         selfToClass(func, &c);
@@ -131,7 +131,7 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
   Transl::VMRegAnchor _;
   std::ostringstream fname;
-  if (func->preClass() != NULL) {
+  if (func->preClass() != nullptr) {
     fname << func->preClass()->name()->data() << "::"
       << func->name()->data() << "()";
   } else {
@@ -188,7 +188,7 @@ void TypeConstraint::parentToClass(const Func* func, const Class **cls) const {
   }
   // Match 5.4 for methods defined in classes and traits
   Class* c1 = func->cls();
-  const Class* c2 = c1 ? c1->parent() : NULL;
+  const Class* c2 = c1 ? c1->parent() : nullptr;
   if (c2) {
     *cls = c2;
   }
@@ -196,7 +196,7 @@ void TypeConstraint::parentToClass(const Func* func, const Class **cls) const {
 
 void TypeConstraint::parentToTypeName(const Func* func,
                                       const StringData **typeName) const {
-  const Class* c = NULL;
+  const Class* c = nullptr;
   parentToClass(func, &c);
   if (c) {
     *typeName = c->name();

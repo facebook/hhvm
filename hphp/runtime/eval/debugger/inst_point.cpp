@@ -29,19 +29,19 @@ const uchar* InstPointInfo::lookupPC() {
     // Instrument to current location
     HPHP::VM::ActRec *fp = context->getFP();
     if (!fp) {
-      return NULL;
+      return nullptr;
     }
     HPHP::VM::PC pc = context->getPC();
     HPHP::VM::Unit *unit = fp->m_func->unit();
     if (!unit) {
-      return NULL;
+      return nullptr;
     }
     m_file = unit->filepath()->data();
     m_line = unit->getLineNumber(unit->offsetOf(pc));
     return pc;
   }
   // TODO for file and line
-  return NULL;
+  return nullptr;
 }
 
 void InstPointInfo::setLocHere() {

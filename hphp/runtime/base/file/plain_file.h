@@ -30,7 +30,7 @@ class PlainFile : public File {
 public:
   DECLARE_OBJECT_ALLOCATION(PlainFile);
 
-  PlainFile(FILE *stream = NULL, bool nonblocking = false);
+  PlainFile(FILE *stream = nullptr, bool nonblocking = false);
   PlainFile(int fd, bool nonblocking = false);
   virtual ~PlainFile();
 

@@ -152,7 +152,7 @@ void DBConn::AddLocalDB(int dbId, const char *ip, const char *db,
 ///////////////////////////////////////////////////////////////////////////////
 
 DBConn::DBConn(int maxRetryOpenOnFail, int maxRetryQueryOnFail)
-  : m_conn(NULL), m_connectTimeout(DefaultConnectTimeout),
+  : m_conn(nullptr), m_connectTimeout(DefaultConnectTimeout),
     m_readTimeout(DefaultReadTimeout),
     m_maxRetryOpenOnFail(maxRetryOpenOnFail),
     m_maxRetryQueryOnFail(maxRetryQueryOnFail) {
@@ -171,7 +171,7 @@ void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
   if (connectTimeout <= 0) connectTimeout = DefaultConnectTimeout;
   if (readTimeout <= 0) readTimeout = DefaultReadTimeout;
 
-  m_conn = mysql_init(NULL);
+  m_conn = mysql_init(nullptr);
   MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
                                connectTimeout);
   MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ReadTimeout, readTimeout);
@@ -179,13 +179,13 @@ void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
                                   server->getUserName().c_str(),
                                   server->getPassword().c_str(),
                                   server->getDatabase().c_str(),
-                                  server->getPort(), NULL, 0);
+                                  server->getPort(), nullptr, 0);
   if (!ret) {
     int code = mysql_errno(m_conn);
     const char *msg = mysql_error(m_conn);
     string smsg = msg ? msg : "";
     mysql_close(m_conn);
-    m_conn = NULL;
+    m_conn = nullptr;
     throw DBConnectionException(code, server->getIP().c_str(),
                                 server->getDatabase().c_str(),
                                 smsg.c_str());
@@ -224,7 +224,7 @@ void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
 void DBConn::close() {
   if (isOpened()) {
     mysql_close(m_conn);
-    m_conn = NULL;
+    m_conn = nullptr;
     m_server.reset();
   }
 }
@@ -432,7 +432,7 @@ void DBConnQueryWorker::doJob(DBConnQueryJobPtr job) {
       Lock lock(*job->m_dsMutex);
       job->m_dsResult->addDataSet(ds);
     } else {
-      job->m_affected = conn.execute(sql.c_str(), NULL,
+      job->m_affected = conn.execute(sql.c_str(), nullptr,
                                      job->m_retryQueryOnFail);
     }
   } catch (DatabaseException &e) {

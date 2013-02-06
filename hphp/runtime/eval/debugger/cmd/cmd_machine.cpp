@@ -44,7 +44,7 @@ void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
 void CmdMachine::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     static const char *keywords[] =
-      { "disconnect", "connect", "rpc", "list", "attach", NULL };
+      { "disconnect", "connect", "rpc", "list", "attach", nullptr };
     client->addCompletion(keywords);
   }
 }
@@ -62,7 +62,7 @@ bool CmdMachine::help(DebuggerClient *client) {
     "[m]achine [a]ttach {sandbox}",       "attach to my sandbox by name",
     "[m]achine [a]ttach {user} {sandbox}",
     "attach to a sandbox by user and name",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command to switch between different machines or "
@@ -132,7 +132,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
                                const char *name /* = NULL */,
                                bool force /* = false */) {
   string login;
-  if (user == NULL) {
+  if (user == nullptr) {
     login = client->getCurrentUser();
     user = login.c_str();
   }

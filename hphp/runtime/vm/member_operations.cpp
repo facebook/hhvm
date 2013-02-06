@@ -46,7 +46,7 @@ TypedValue* objOffsetGet(TypedValue& tvRef, Instance* base,
   assert(!base->isCollection());
   static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
   const Func* method = base->methodNamed(sd__offsetGet);
-  assert(method != NULL);
+  assert(method != nullptr);
   base->invokeUserMethod(&tvRef, method, CREATE_VECTOR1(offset));
   result = &tvRef;
   return result;
@@ -60,7 +60,7 @@ static bool objOffsetExists(Instance* base, CVarRef offset) {
     = StringData::GetStaticString("offsetExists");
   assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetExists);
-  assert(method != NULL);
+  assert(method != nullptr);
   base->invokeUserMethod(&tvResult, method, CREATE_VECTOR1(offset));
   tvCastToBooleanInPlace(&tvResult);
   return bool(tvResult.m_data.num);
@@ -98,7 +98,7 @@ void objOffsetSet(Instance* base, CVarRef offset, TypedValue* val,
   static StringData* sd__offsetSet = StringData::GetStaticString("offsetSet");
   assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetSet);
-  assert(method != NULL);
+  assert(method != nullptr);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
   base->invokeUserMethod(&tvResult, method,
@@ -112,7 +112,7 @@ void objOffsetUnset(Instance* base, CVarRef offset) {
     = StringData::GetStaticString("offsetUnset");
   assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetUnset);
-  assert(method != NULL);
+  assert(method != nullptr);
   TypedValue tv;
   tvWriteUninit(&tv);
   base->invokeUserMethod(&tv, method, CREATE_VECTOR1(offset));

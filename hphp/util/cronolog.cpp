@@ -71,7 +71,7 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
 
   if (log_fd < 0) {
     perror(pfilename);
-    return NULL;
+    return nullptr;
   }
 
   if (linkname) {
@@ -101,7 +101,7 @@ void Cronolog::setPeriodicity() {
 FILE *Cronolog::getOutputFile() {
   if (m_template.empty()) return m_file;
 
-  time_t time_now = time(NULL) + m_timeOffset;
+  time_t time_now = time(nullptr) + m_timeOffset;
   /* If the current period has not finished and there is a log file, use it */
   if ((time_now < m_nextPeriod) && (m_file)) return m_file;
 
@@ -119,12 +119,12 @@ FILE *Cronolog::getOutputFile() {
        */
       if (m_prevFile) fclose(m_prevFile);
       m_prevFile = m_file;
-      m_file = NULL;
+      m_file = nullptr;
     }
 
     /* If there is no log file open then open a new one. */
-    if (m_file == NULL) {
-      const char *linkname = m_linkName.empty() ? NULL : m_linkName.c_str();
+    if (m_file == nullptr) {
+      const char *linkname = m_linkName.empty() ? nullptr : m_linkName.c_str();
       m_file = new_log_file(m_template.c_str(), linkname, S_IFLNK,
                             m_prevLinkName, m_periodicity, m_periodMultiple,
                             m_periodDelay, m_fileName, sizeof(m_fileName),

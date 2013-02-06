@@ -35,7 +35,7 @@ class MemMap {
   MemMap(IRFactory* factory)
     : m_factory(factory)
     , m_liveInsts(factory->numInsts()) {
-    assert(factory != NULL);
+    assert(factory != nullptr);
   }
 
   ~MemMap() {
@@ -76,7 +76,7 @@ private:
     }
 
     void update(IRInstruction* inst) {
-      assert(inst != NULL);
+      assert(inst != nullptr);
       access = inst;
       value = findValue(inst);
     }
@@ -91,7 +91,7 @@ private:
   struct PropInfo {
     PropInfo(IRInstruction* inst, int off)
       : access(inst), value(findValue(inst)), offset(off) {
-      assert(inst != NULL);
+      assert(inst != nullptr);
       assert(off >= 0);
     }
 
@@ -107,7 +107,7 @@ private:
   // list has a unique offset
   struct PropInfoList : public Counted {
     void update(IRInstruction* inst) {
-      assert(inst != NULL);
+      assert(inst != nullptr);
 
       int offset = inst->getSrc(1)->getValInt();
 
@@ -198,7 +198,7 @@ private:
 
   // helper function to return the value of a memory instruction
   static SSATmp* findValue(IRInstruction* inst) {
-    assert(inst != NULL);
+    assert(inst != nullptr);
 
     Opcode op = inst->getOpcode();
     if (isLoad(op)) {
@@ -215,7 +215,7 @@ private:
     }
 
     // no support for extracting the value from this instruction, so return NULL
-    return NULL;
+    return nullptr;
   }
 
   static bool isLoad(Opcode opc) {
@@ -247,7 +247,7 @@ private:
 };
 
 void MemMap::killRefInfo(IRInstruction* save) {
-  assert(save != NULL);
+  assert(save != nullptr);
 
   for (RefMap::iterator it = m_unknown.begin(), end = m_unknown.end();
        it != end; ++it) {
@@ -255,7 +255,7 @@ void MemMap::killRefInfo(IRInstruction* save) {
     // different type than 'save'
     if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem)) {
       auto saveType = save->getDst()->getType();
-      if (it->second->value != NULL &&
+      if (it->second->value != nullptr &&
           it->second->value->getType() != saveType &&
           it->second->value->getType().isStaticallyKnown() &&
           saveType.isStaticallyKnown()) {
@@ -268,19 +268,19 @@ void MemMap::killRefInfo(IRInstruction* save) {
     // if the last access of the current ref is different than the instruction
     // we're saving, kill its info
     if (it->second->access != save) {
-      it->second->access = NULL;
+      it->second->access = nullptr;
       if (isStore(save->getOpcode()) ||
           save->getOpcode() == StMem || save->getOpcode() == StMemNT) {
-        it->second->value = NULL;
+        it->second->value = nullptr;
       }
     }
   }
 }
 
 void MemMap::killPropInfo(IRInstruction* save) {
-  assert(save != NULL);
+  assert(save != nullptr);
 
-  PropInfoList* propInfoList = NULL;
+  PropInfoList* propInfoList = nullptr;
   PropMap::iterator find = m_props.find(save->getSrc(0));
   if (find != m_props.end()) {
     propInfoList = find->second;
@@ -310,7 +310,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
         // if 'save' is a load, then don't kill access info of properties that
         // have a different type than 'save'
         if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem) &&
-            copy->value != NULL &&
+            copy->value != nullptr &&
             copy->value->getType() != save->getDst()->getType() &&
             copy->value->getType().isStaticallyKnown() &&
             save->getDst()->getType().isStaticallyKnown()) {
@@ -323,7 +323,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
             save->getOpcode() == StMem || save->getOpcode() == StMemNT) {
           accesses.erase(copy);
         } else {
-          copy->access = NULL;
+          copy->access = nullptr;
         }
       }
     }
@@ -349,7 +349,7 @@ void MemMap::escapeRef(SSATmp* ref) {
 }
 
 void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
-  assert(inst != NULL);
+  assert(inst != nullptr);
 
   Opcode op = inst->getOpcode();
 
@@ -579,7 +579,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
   if (offset != -1) {                                                         \
     PropMap::iterator it = m_props.find(ref);                                   \
     if (it == m_props.end()) {                                                  \
-      return NULL;                                                            \
+      return nullptr;                                                            \
     }                                                                         \
     PropList& list = it->second->accesses;                                    \
     for (PropList::iterator i = list.begin(), e = list.end(); i != e; ++i) {  \
@@ -587,7 +587,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
         return i->FIELD;                                                      \
       }                                                                       \
     }                                                                         \
-    return NULL;                                                              \
+    return nullptr;                                                              \
   }                                                                           \
   /* otherwise, check all of our ref maps */                                  \
   RefMap::iterator it = m_unescaped.find(ref);                                \
@@ -598,7 +598,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
   if (it != m_unknown.end()) {                                                  \
     return it->second->FIELD;                                                 \
   }                                                                           \
-  return NULL;                                                                \
+  return nullptr;                                                                \
 
 IRInstruction* MemMap::getLastAccess(SSATmp* ref, int offset) {
   MEMMAP_GET(access)
@@ -647,7 +647,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
       auto access = inst->getOpcode() == StLoc || inst->getOpcode() == StLocNT
         ? lastLocalAccess(inst->getExtra<LocalId>()->locId)
         : getLastAccess(inst->getSrc(0), offset);
-      if (access != NULL && isStore(access->getOpcode())) {
+      if (access && isStore(access->getOpcode())) {
         // if a dead St* is followed by a St*NT, then the second store needs to
         // now write in the type because the first store will be removed
         if (access->getOpcode() == StProp && op == StPropNT) {
@@ -680,7 +680,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
     // if the current instruction is guarded, make sure all of our stores that
     // are not yet dead know about it
-    if (inst->getLabel() != NULL) {
+    if (inst->getLabel() != nullptr) {
       for (auto& entry : tracking) {
         if (isLive(entry.first)) {
           entry.second.push_back(inst);
@@ -717,7 +717,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
         valTy.isStaticallyKnown() && instTy.isStaticallyKnown()) {
       inst->setOpcode(Jmp_);
       inst->setNumSrcs(0);
-      inst->setDst(NULL);
+      inst->setDst(nullptr);
       return;
     }
   }
@@ -727,12 +727,12 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   // fix the instruction's arguments and rip off its label if it had one
   inst->setSrc(0, value);
   if (op == LdProp) {
-    inst->setSrc(1, NULL);
+    inst->setSrc(1, nullptr);
     inst->setNumSrcs(1);
   } else {
     assert(inst->getNumSrcs() == 1);
   }
-  inst->setLabel(NULL);
+  inst->setLabel(nullptr);
 
   // convert the instruction into a Mov with the known value
   inst->setOpcode(Mov);
@@ -756,7 +756,7 @@ void MemMap::sinkStores(StoreList& stores) {
     // as the destination of the StRef still has the DecRef attached to it.
     if (store->getOpcode() == StRef || store->getOpcode() == StRefNT) {
       store->setOpcode(Mov);
-      store->setSrc(1, NULL);
+      store->setSrc(1, nullptr);
       store->setNumSrcs(1);
       setLive(store, true);
     }

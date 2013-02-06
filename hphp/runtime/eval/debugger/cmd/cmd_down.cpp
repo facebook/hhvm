@@ -25,7 +25,7 @@ bool CmdDown::help(DebuggerClient *client) {
   client->helpTitle("Down Command");
   client->helpCmds(
     "[d]own {num=1}", "moves to inner frames (callees) on stacktrace",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command to walk down on stacktrace to find out inner callees of "

@@ -394,7 +394,7 @@ private:
                           bool variantOnly, StaticSelection staticVar,
                           JumpTableType type = JumpReturn,
                           PrivateSelection privateVar = NonPrivate,
-                          bool *declaredGlobals = NULL);
+                          bool *declaredGlobals = nullptr);
   bool outputCPPPrivateSelector(CodeGenerator &cg, AnalysisResultPtr ar,
                                 const char *op, const char *args);
   void outputCPPVariableInit(CodeGenerator &cg, AnalysisResultPtr ar,

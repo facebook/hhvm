@@ -52,9 +52,9 @@ DebugInfo::~DebugInfo() {
 
 void DebugInfo::recordStub(TCRange range, const char* name) {
   if (range.isAstubs()) {
-    m_astubsDwarfInfo.addTracelet(range, name, NULL, NULL, false, false);
+    m_astubsDwarfInfo.addTracelet(range, name, nullptr, nullptr, false, false);
   } else {
-    m_aDwarfInfo.addTracelet(range, name, NULL, NULL, false, false);
+    m_aDwarfInfo.addTracelet(range, name, nullptr, nullptr, false, false);
   }
 }
 
@@ -113,9 +113,9 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 void DebugInfo::recordTracelet(TCRange range, const Func* func,
     const Opcode *instr, bool exit, bool inPrologue) {
   if (range.isAstubs()) {
-    m_astubsDwarfInfo.addTracelet(range, NULL, func, instr, exit, inPrologue);
+    m_astubsDwarfInfo.addTracelet(range, nullptr, func, instr, exit, inPrologue);
   } else {
-    m_aDwarfInfo.addTracelet(range, NULL, func, instr, exit, inPrologue);
+    m_aDwarfInfo.addTracelet(range, nullptr, func, instr, exit, inPrologue);
   }
 }
 

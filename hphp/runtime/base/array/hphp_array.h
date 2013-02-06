@@ -81,7 +81,7 @@ public:
   // or will be swept.
   void dropContentsOnFloor() {
     m_lastE = ElmIndEmpty;
-    m_data = NULL;
+    m_data = nullptr;
   }
 
   // override/implement ArrayData api's

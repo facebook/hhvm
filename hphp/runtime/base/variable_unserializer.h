@@ -53,7 +53,7 @@ public:
     }
   }
   Variant *get(int id) {
-    if (id <= 0  || id > (int)m_refs.size()) return NULL;
+    if (id <= 0  || id > (int)m_refs.size()) return nullptr;
     return m_refs[id-1];
   }
   int64 readInt();

@@ -327,17 +327,17 @@ SharedVariant *SharedVariant::Create
 
 SharedVariant* SharedVariant::convertObj(CVarRef var) {
   if (!var.is(KindOfObject) || getObjAttempted()) {
-    return NULL;
+    return nullptr;
   }
   setObjAttempted();
   ObjectData *obj = var.getObjectData();
   if (obj->o_instanceof("Serializable")) {
     // should also check the object itself
-    return NULL;
+    return nullptr;
   }
   PointerSet seen;
   if (obj->hasInternalReference(seen, true)) {
-    return NULL;
+    return nullptr;
   }
   SharedVariant *tmp = new SharedVariant(var, false, true, true);
   tmp->setObjAttempted();

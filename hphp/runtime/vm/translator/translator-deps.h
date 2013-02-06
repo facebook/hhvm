@@ -75,7 +75,7 @@ const TypedValue* findUniquePreConst(Accessor& acc, const StringData* name) {
     TRACE(2, "%s: No preConsts for %s\n", __FUNCTION__, name->data());
   }
 
-  return NULL;
+  return nullptr;
 }
 
 void mergePreConst(const PreConst& preConst);

@@ -40,7 +40,7 @@ enum InstHookTypeSD {
 class Injection {
 public:
   Injection(Unit* unit, const StringData* desc)
-    : m_builtin(false), m_unit(unit), m_arg(NULL), m_desc(desc) { }
+    : m_builtin(false), m_unit(unit), m_arg(nullptr), m_desc(desc) { }
   typedef void (*Callback)(void*);
   Injection(Callback callback, void* arg, const StringData* desc)
     : m_builtin(true), m_callback(callback), m_arg(arg), m_desc(desc) { }

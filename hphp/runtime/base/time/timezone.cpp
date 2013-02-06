@@ -41,7 +41,7 @@ public:
     time_t the_time = time(0);
     struct tm tmbuf;
     struct tm *ta = localtime_r(&the_time, &tmbuf);
-    const char *tzid = NULL;
+    const char *tzid = nullptr;
     if (ta) {
       tzid = timelib_timezone_id_from_abbr(ta->tm_zone, ta->tm_gmtoff,
                                            ta->tm_isdst);
@@ -72,7 +72,7 @@ static GuessedTimeZone s_guessed_timezone;
 
 class TimeZoneData {
 public:
-  TimeZoneData() : Database(NULL) {}
+  TimeZoneData() : Database(nullptr) {}
 
   const timelib_tzdb *Database;
   MapStringToTimeZoneInfo Cache;
@@ -81,7 +81,7 @@ static IMPLEMENT_THREAD_LOCAL(TimeZoneData, s_timezone_data);
 
 const timelib_tzdb *TimeZone::GetDatabase() {
   const timelib_tzdb *&Database = s_timezone_data->Database;
-  if (Database == NULL) {
+  if (Database == nullptr) {
     Database = timelib_builtin_db();
   }
   return Database;

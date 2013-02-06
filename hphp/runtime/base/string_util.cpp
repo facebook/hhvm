@@ -30,7 +30,7 @@ String StringUtil::ToLower(CStrRef input, ToLowerType type /*= ToLowerAll */) {
   if (input.empty()) return input;
 
   int len = input.size();
-  char *ret = NULL;
+  char *ret = nullptr;
   switch (type) {
   case ToLowerAll:
     ret = string_to_lower(input.data(), len);
@@ -52,7 +52,7 @@ String StringUtil::ToUpper(CStrRef input, ToUpperType type /*= ToUpperAll */) {
   if (input.empty()) return input;
 
   int len = input.size();
-  char *ret = NULL;
+  char *ret = nullptr;
   switch (type) {
   case ToUpperAll:
     ret = string_to_upper(input.data(), len);
@@ -605,11 +605,11 @@ void StringUtil::InitLiteralStrings(StaticString literalStrings[],
     throw Exception("StringUtil::InitLiteralStrings called twice");
   }
   uncompressedBuf = gzdecode(literalStringBuf, bufSize);
-  if (uncompressedBuf == NULL) {
+  if (uncompressedBuf == nullptr) {
     throw Exception("Bad literalStringBuf %p", literalStringBuf);
   }
   uncompressedLen = gzdecode(literalStringLen, lenSize);
-  if (uncompressedLen == NULL) {
+  if (uncompressedLen == nullptr) {
     throw Exception("Bad literalStringLen %p", literalStringLen);
   }
 

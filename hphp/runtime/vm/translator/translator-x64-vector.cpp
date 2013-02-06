@@ -200,7 +200,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 #define BUILD_OPTAB(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW), __VA_ARGS__)
 #define BUILD_OPTABH(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROWH), __VA_ARGS__)
 #define BUILD_OPTAB_ARG(FILL_TABLE, ...)                                \
-  static OpFunc* optab = NULL;                                          \
+  static OpFunc* optab = nullptr;                                          \
   if (!optab) {                                                         \
     optab = (OpFunc*)calloc(1 << multiBitWidth(__VA_ARGS__), sizeof(OpFunc)); \
     FILL_TABLE                                                          \
@@ -258,11 +258,11 @@ bool TranslatorX64::generateMVal(const Tracelet& t,
     // Some instruction sequences, e.g. CGetL..SetM..PopC are optimized during
     // analysis to avoid the push/pop, in which case the input is a local
     // instead of a stack, and no val results from executing the VM instruction.
-    if (input.isStack() && ni.outStack != NULL) {
+    if (input.isStack() && ni.outStack != nullptr) {
       return true;
     }
   } else if (mii.instr() == MI_IncDecM) {
-    if (ni.outStack != NULL) {
+    if (ni.outStack != nullptr) {
       return true;
     }
   }
@@ -323,7 +323,7 @@ bool TranslatorX64::useTvResult(const Tracelet& t,
   // Otherwise the result must be temporarily stored to tvResult, then copied
   // to its final location after inputs have been discarded.
   const DynLocation& output = *ni.outStack;
-  if (&output == NULL) {
+  if (&output == nullptr) {
     SKTRACE(2, ni.source, "%s (no stack output) --> false\n", __func__);
     return false;
   }
@@ -335,7 +335,7 @@ bool TranslatorX64::useTvResult(const Tracelet& t,
   }
 
   int bottomI = 0;
-  const DynLocation* bottomStack = NULL;
+  const DynLocation* bottomStack = nullptr;
   for (unsigned i = firstDecrefInput(t, ni, mii); i < ni.inputs.size(); ++i) {
     const DynLocation& input = *ni.inputs[i];
     // Only the bottommost stack input can possibly overlay the
@@ -440,11 +440,11 @@ static inline TypedValue* baseNImpl(TypedValue* key,
   } else {
     assert(!fp->hasInvName());
     if (define) {
-      if (fp->m_varEnv == NULL) {
+      if (fp->m_varEnv == nullptr) {
         fp->m_varEnv = VarEnv::createLazyAttach(fp);
       }
       base = fp->m_varEnv->lookup(name);
-      if (base == NULL) {
+      if (base == nullptr) {
         if (warn) {
           raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
         }
@@ -454,7 +454,7 @@ static inline TypedValue* baseNImpl(TypedValue* key,
         base = fp->m_varEnv->lookup(name);
       }
     } else {
-      if (fp->m_varEnv == NULL || (base = fp->m_varEnv->lookup(name)) == NULL) {
+      if (fp->m_varEnv == nullptr || (base = fp->m_varEnv->lookup(name)) == nullptr) {
         if (warn) {
           raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
         }
@@ -517,9 +517,9 @@ static inline TypedValue* baseGImpl(TypedValue* key,
   TypedValue* base;
   StringData* name = prepareKey(key);
   VarEnv* varEnv = g_vmContext->m_globalVarEnv;
-  assert(varEnv != NULL);
+  assert(varEnv != nullptr);
   base = varEnv->lookup(name);
-  if (base == NULL) {
+  if (base == nullptr) {
     if (warn) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
@@ -615,7 +615,7 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
   const Class* cls = clsRef.rtt.valueClass();
 
   const bool uniqueKnownClass =
-    cls != NULL &&
+    cls != nullptr &&
     (cls->preClass()->attrs() & AttrUnique);
   const bool canUseCache =
     cls &&
@@ -1711,7 +1711,7 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
 template <KeyType keyType, bool unboxKey, SetOpOp op, bool setResult>
 static inline void setOpElemImpl(TypedValue* base, TypedValue* key, Cell* val,
                                  MInstrState* mis,
-                                 TypedValue* tvRes=NULL) {
+                                 TypedValue* tvRes=nullptr) {
   key = unbox<keyType, unboxKey>(key);
   TypedValue* result = SetOpElem<keyType>(mis->tvScratch, mis->tvRef, op, base,
                                           key, val);
@@ -1802,7 +1802,7 @@ template <KeyType keyType, bool unboxKey, SetOpOp op, bool setResult,
           bool isObj>
 static inline void setOpPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                  Cell* val, MInstrState* mis,
-                                 TypedValue* tvRes=NULL) {
+                                 TypedValue* tvRes=nullptr) {
   key = unbox<keyType, unboxKey>(key);
   TypedValue* result = SetOpProp<isObj, keyType>(mis->tvScratch, mis->tvRef,
                                                  ctx, op, base, key, val);
@@ -2258,7 +2258,7 @@ void TranslatorX64::emitSetNewElem(const Tracelet& t,
 template <unsigned char op, bool setResult>
 static inline void setOpNewElemImpl(TypedValue* base, Cell* val,
                                     MInstrState* mis,
-                                    TypedValue* tvRes=NULL) {
+                                    TypedValue* tvRes=nullptr) {
   TypedValue* result = SetOpNewElem(mis->tvScratch, mis->tvRef, op, base, val);
   if (setResult) {
     if (result->m_type == KindOfRef) {
@@ -2736,7 +2736,7 @@ mInstrHasUnknownOffsets(const NormalizedInstruction& ni) {
   for (; mi < ni.immVecM.size(); ++mi) {
     MemberCode mc = ni.immVecM[mi];
     if (mcodeMaybePropName(mc)) {
-      const Class* cls = NULL;
+      const Class* cls = nullptr;
       if (getPropertyOffset(ni, cls, mii, mi, ii) == -1) {
         return true;
       }
@@ -2816,10 +2816,10 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     if (!i.hasConstImm) flags |= CheckInts;
   }
   if (false) { // type-check
-    ArrayData *a = NULL;
+    ArrayData *a = nullptr;
     TypedValue tv;
     array_getm_i(a, 1, &tv);
-    StringData *sd = NULL;
+    StringData *sd = nullptr;
     array_getm_s(a, sd, &tv, 0);
   }
   if (keyIn->isInt()) {
@@ -2931,7 +2931,7 @@ void TranslatorX64::translateIssetMFast(const Tracelet& t,
   }
 
   typedef uint64 (*HelperFunc)(const void* arr, StringData* sd);
-  HelperFunc helper = NULL;
+  HelperFunc helper = nullptr;
   if (key.isInt()) {
     helper = (HelperFunc)array_issetm_i;
   } else {
@@ -3094,10 +3094,10 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   bool useBoxedForm = arr.isVariant();
   void* fptr;
   if (false) { // helper type-checks
-    TypedValue* cell = NULL;
-    ArrayData* arr = NULL;
-    TypedValue* rhs = NULL;
-    StringData* strKey = NULL;
+    TypedValue* cell = nullptr;
+    ArrayData* arr = nullptr;
+    TypedValue* rhs = nullptr;
+    StringData* strKey = nullptr;
     UNUSED ArrayData* ret;
     ret = array_setm_ik1_v(cell, arr, 12, rhs);
     ret = array_setm_sk1_v(cell, arr, strKey, rhs);

@@ -74,7 +74,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
     transport->addHeader("Content-Type", "application/octet-stream");
   }
 
-  time_t base = time(NULL);
+  time_t base = time(nullptr);
   if (RuntimeOption::ExpiresActive) {
     time_t expires = base + RuntimeOption::ExpiresDefault;
     char age[20];
@@ -181,7 +181,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
         // stat(RuntimeOption::FileCache.c_str(), &st);
         if (!original && compressed) {
           data = gzdecode(data, len);
-          if (data == NULL) {
+          if (data == nullptr) {
             throw FatalErrorException("cannot unzip compressed data");
           }
           decompressed_data = const_cast<char*>(data);

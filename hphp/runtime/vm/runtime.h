@@ -79,7 +79,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
   assert(numLocals == fp->m_func->numLocals());
   assert(!fp->hasInvName());
   // Check if the frame has a VarEnv or if it has extraArgs
-  if (UNLIKELY(fp->m_varEnv != NULL)) {
+  if (UNLIKELY(fp->m_varEnv != nullptr)) {
     if (fp->hasVarEnv()) {
       // If there is a VarEnv, free the locals and the VarEnv
       // by calling the detach method.
@@ -116,7 +116,7 @@ frame_free_locals_inl(ActRec* fp, int numLocals) {
     // If a destructor for a local calls debug_backtrace, it can read
     // the m_this field from the ActRec, so we need to zero it to
     // ensure they can't access a free'd object.
-    fp->setThis(NULL);
+    fp->setThis(nullptr);
     decRefObj(this_);
   }
   frame_free_locals_helper_inl(fp, numLocals);
@@ -162,9 +162,9 @@ void call_intercept_handler(TypedValue* retval,
                             ActRec* ar,
                             Variant* ihandler) {
   if (handle_throw) { assert(ar); }
-  ObjectData* intThis = NULL;
-  Class* intCls = NULL;
-  StringData* intInvName = NULL;
+  ObjectData* intThis = nullptr;
+  Class* intCls = nullptr;
+  StringData* intInvName = nullptr;
   const Func* handler = vm_decode_function(ihandler->asCArrRef()[0],
                                            g_vmContext->getFP(),
                                            false, intThis, intCls, intInvName);
@@ -175,7 +175,7 @@ void call_intercept_handler(TypedValue* retval,
     // the exception to propagate.
     try {
       g_vmContext->invokeFunc(retval, handler, intArgs,
-                              intThis, intCls, NULL, intInvName);
+                              intThis, intCls, nullptr, intInvName);
     } catch (...) {
       Stack& stack = g_vmContext->getStack();
       assert((TypedValue*)ar - stack.top() == ar->numArgs());
@@ -187,7 +187,7 @@ void call_intercept_handler(TypedValue* retval,
     }
   } else {
     g_vmContext->invokeFunc(retval, handler, intArgs,
-                            intThis, intCls, NULL, intInvName);
+                            intThis, intCls, nullptr, intInvName);
   }
 }
 

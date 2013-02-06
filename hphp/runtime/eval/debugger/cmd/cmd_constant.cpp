@@ -36,7 +36,7 @@ bool CmdConstant::help(DebuggerClient *client) {
   client->helpCmds(
     "[k]onstant",           "lists all constants",
     "[k]onstant {text}",    "full-text search constants",
-    NULL
+    nullptr
   );
   client->helpBody(
     "This will print names and values of all constants, if {text} is not "

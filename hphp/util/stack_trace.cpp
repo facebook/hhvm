@@ -51,7 +51,7 @@ std::string StackTrace::Frame::toString() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 struct bfd_cache {
-  bfd_cache() : abfd(NULL) {}
+  bfd_cache() : abfd(nullptr) {}
   bfd *abfd;
   asymbol **syms;
 
@@ -105,7 +105,7 @@ void StackTrace::initFromHex(const char *hexEncoded) {
   vector<string> frames;
   Util::split(':', hexEncoded, frames);
   for (unsigned int i = 0; i < frames.size(); i++) {
-    m_bt_pointers.push_back((void*)strtoll(frames[i].c_str(), NULL, 16));
+    m_bt_pointers.push_back((void*)strtoll(frames[i].c_str(), nullptr, 16));
   }
 }
 
@@ -400,7 +400,7 @@ static bool slurp_symtab(asymbol ***syms, bfd *abfd) {
 static bool translate_addresses(bfd *abfd, const char *addr,
                                 addr2line_data *adata) {
   if (!abfd) return false;
-  adata->pc = bfd_scan_vma(addr, NULL, 16);
+  adata->pc = bfd_scan_vma(addr, nullptr, 16);
 
   adata->found = FALSE;
   bfd_map_over_sections(abfd, find_address_in_section, adata);
@@ -422,10 +422,10 @@ static Mutex s_bfdMutex;
 static bfdMap s_bfds;
 
 static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
-  bfd *abfd = bfd_openr(filename, NULL); // hard to avoid heap here!
+  bfd *abfd = bfd_openr(filename, nullptr); // hard to avoid heap here!
   if (!abfd) return true;
   p->abfd = abfd;
-  p->syms = NULL;
+  p->syms = nullptr;
   char **match;
   if (bfd_check_format(abfd, bfd_archive) ||
       !bfd_check_format_matches(abfd, bfd_object, &match) ||
@@ -472,8 +472,8 @@ bool StackTraceBase::Addr2line(const char *filename, const char *address,
                            void *bfds, unsigned bfds_size) {
   Lock lock(s_bfdMutex);
   addr2line_data *data = reinterpret_cast<addr2line_data*>(adata);
-  data->filename = NULL;
-  data->functionname = NULL;
+  data->filename = nullptr;
+  data->functionname = nullptr;
   data->line = 0;
   bool ret;
 
@@ -518,7 +518,7 @@ std::string StackTrace::Demangle(const char *mangled) {
   //if (mangled[skip_first] == '_') ++skip_first;
 
   char *result = cplus_demangle(mangled + skip_first, DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
-  if (result == NULL) return mangled;
+  if (result == nullptr) return mangled;
 
   string ret;
   if (mangled[0] == '.') ret += '.';
@@ -540,7 +540,7 @@ void StackTraceNoHeap::Demangle(int fd, const char *mangled) {
 
   char *result = cplus_demangle(mangled + skip_first,
                                 DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
-  if (result == NULL) {
+  if (result == nullptr) {
     dprintf(fd, "%s", mangled);
     return;
   }

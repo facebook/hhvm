@@ -36,8 +36,8 @@ typedef tbb::concurrent_hash_map<const StringData *, ArrayData *,
 static ArrayDataMap s_arrayDataMap;
 
 ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
-                                     const StringData *key /* = NULL */) {
-  if (key == NULL) {
+                                     const StringData *key /* = nullptr */) {
+  if (key == nullptr) {
     key = StringData::GetStaticString(f_serialize(arr).get());
   } else {
     assert(key->isStatic());
@@ -58,11 +58,11 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
 // assersions should go upstream of the ArrayData api.
 
 bool ArrayData::IsValidKey(litstr k) {
-  return k != NULL;
+  return k != nullptr;
 }
 
 bool ArrayData::IsValidKey(const StringData* k) {
-  return k != NULL;
+  return k != nullptr;
 }
 
 bool ArrayData::IsValidKey(CStrRef k) {
@@ -254,7 +254,7 @@ ArrayData *ArrayData::pop(Variant &value) {
     return remove(getKey(pos), getCount() > 1);
   }
   value = null;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *ArrayData::dequeue(Variant &value) {
@@ -273,14 +273,14 @@ ArrayData *ArrayData::dequeue(Variant &value) {
     return ret;
   }
   value = null;
-  return NULL;
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // MutableArrayIter related functions
 
 void ArrayData::newFullPos(FullPos &fp) {
-  assert(fp.getContainer() == NULL);
+  assert(fp.getContainer() == nullptr);
   fp.setContainer(this);
   fp.setNext(strongIterators());
   setStrongIterators(&fp);
@@ -293,13 +293,13 @@ void ArrayData::freeFullPos(FullPos &fp) {
   FullPos* p = strongIterators();
   if (p == &fp) {
     setStrongIterators(p->getNext());
-    fp.setContainer(NULL);
+    fp.setContainer(nullptr);
     return;
   }
   for (; p->getNext(); p = p->getNext()) {
     if (p->getNext() == &fp) {
       p->setNext(p->getNext()->getNext());
-      fp.setContainer(NULL);
+      fp.setContainer(nullptr);
       return;
     }
   }
@@ -329,7 +329,7 @@ void ArrayData::nextForFullPos() {
 
 void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->setContainer(NULL);
+    r.front()->setContainer(nullptr);
   }
   setStrongIterators(0);
 }
@@ -526,12 +526,11 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
 
 TypedValue* ArrayData::nvGet(int64 k) const {
   return exists(k) ? (TypedValue*)&get(k, false) :
-         NULL;
+         nullptr;
 }
 
 TypedValue* ArrayData::nvGet(const StringData* key) const {
-  return exists(key) ? (TypedValue*)&get(key, false) :
-         NULL;
+  return exists(key) ? (TypedValue*)&get(key, false) : nullptr;
 }
 
 void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) {

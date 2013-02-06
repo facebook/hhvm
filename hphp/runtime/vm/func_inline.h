@@ -28,7 +28,7 @@ inline ALWAYS_INLINE Func** getCachedFuncAddr(unsigned offset) {
 inline ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   assert(!func->isMethod());
   Func** funcAddr = getCachedFuncAddr(func->getCachedOffset());
-  if (UNLIKELY(*funcAddr != NULL)) {
+  if (UNLIKELY(*funcAddr != nullptr)) {
     if (*funcAddr == func) return;
     if (!(*funcAddr)->isIgnoreRedefinition()) {
       raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());

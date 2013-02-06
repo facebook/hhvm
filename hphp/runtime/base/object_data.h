@@ -90,8 +90,8 @@ class ObjectData : public CountableNF {
     RealPropExist = 16,   // For property_exists
   };
 
-  ObjectData(const ObjectStaticCallbacks *cb = NULL, bool noId = false,
-             VM::Class* type = NULL)
+  ObjectData(const ObjectStaticCallbacks *cb = nullptr, bool noId = false,
+             VM::Class* type = nullptr)
       : o_attribute(0)
 #ifdef HHVM
         , m_cls(type)
@@ -454,8 +454,8 @@ class GlobalVariables;
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
   Object create(CArrRef params, bool init = true,
-                ObjectData* root = NULL) const;
-  Object createOnly(ObjectData *root = NULL) const;
+                ObjectData* root = nullptr) const;
+  Object createOnly(ObjectData *root = nullptr) const;
   inline bool os_get_call_info(MethodCallPackage &info,
                                strhash_t hash = -1) const {
     return GetCallInfo(this, info, hash);
@@ -514,10 +514,10 @@ struct RedeclaredObjectStaticCallbacks {
     return oscb.lazy_initializer(g);
   }
   bool os_get_call_info(MethodCallPackage &info, strhash_t hash = -1) const;
-  ObjectData *createOnlyNoInit(ObjectData* root = NULL) const;
+  ObjectData *createOnlyNoInit(ObjectData* root = nullptr) const;
   Object create(CArrRef params, bool init = true,
-                ObjectData* root = NULL) const;
-  Object createOnly(ObjectData *root = NULL) const;
+                ObjectData* root = nullptr) const;
+  Object createOnly(ObjectData *root = nullptr) const;
 };
 
 typedef const RedeclaredObjectStaticCallbacks

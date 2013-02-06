@@ -51,7 +51,7 @@ static inline bool useCounters() {
 
 class HardwareCounterImpl {
 public:
-  HardwareCounterImpl(int type, unsigned long config, StringData* desc = NULL)
+  HardwareCounterImpl(int type, unsigned long config, StringData* desc = nullptr)
     : m_desc(desc), m_err(0), m_fd(-1) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
     pe.type = type;
@@ -358,7 +358,7 @@ bool HardwareCounter::eventExists(char *event) {
 bool HardwareCounter::setPerfEvents(CStrRef events) {
   StringData* sd = events.get();
   StackStringData sevents(sd->data(), sd->size(), CopyString);
-  char *strtok_buf = NULL;
+  char *strtok_buf = nullptr;
   char *s = strtok_r(const_cast<char *>(sevents.data()), ",", &strtok_buf);
   m_pseudoEvents = false;
   while (s) {
@@ -369,7 +369,7 @@ bool HardwareCounter::setPerfEvents(CStrRef events) {
     if (!isPseudoEvent && !eventExists(event) && !addPerfEvent(event)) {
       return false;
     }
-    s = strtok_r(NULL, ",", &strtok_buf);
+    s = strtok_r(nullptr, ",", &strtok_buf);
   }
   return true;
 }

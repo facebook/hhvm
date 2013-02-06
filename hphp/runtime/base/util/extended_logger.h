@@ -55,7 +55,7 @@ public:
 
 protected:
   virtual void log(LogLevelType level, const char *type, const Exception &e,
-                   const char *file = NULL, int line = 0);
+                   const char *file = nullptr, int line = 0);
   virtual void log(LogLevelType level, const std::string &msg,
                    const StackTrace *stackTrace,
                    bool escape = true, bool escapeMore = false);

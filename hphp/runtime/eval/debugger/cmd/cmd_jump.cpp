@@ -44,7 +44,7 @@ bool CmdJump::help(DebuggerClient *client) {
     "[j]ump {line}",          "goto the specified line",
     "[j]ump {file}:{line}",   "goto the specified line",
     "[j]ump {label}",         "goto the specified label",
-    NULL
+    nullptr
   );
   client->helpBody(
     "This command changes program execution to the specified place without "

@@ -73,7 +73,7 @@ const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
       }
     }
   }
-  VirtualHost::SetCurrent(NULL);
+  VirtualHost::SetCurrent(nullptr);
   return VirtualHost::GetCurrent();
 }
 
@@ -92,7 +92,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   pm_php$globals$symbols_php(false, g, g);
 
   Variant &server = g->GV(_SERVER);
-  server.set("REQUEST_START_TIME", time(NULL));
+  server.set("REQUEST_START_TIME", time(nullptr));
 
   // $_ENV
   process_env_variables(g->GV(_ENV));
@@ -349,7 +349,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   case Transport::GET:  server.set("REQUEST_METHOD", "GET");  break;
   case Transport::HEAD: server.set("REQUEST_METHOD", "HEAD"); break;
   case Transport::POST:
-    if (transport->getExtendedMethod() == NULL) {
+    if (transport->getExtendedMethod() == nullptr) {
       server.set("REQUEST_METHOD", "POST");
     } else {
       server.set("REQUEST_METHOD", transport->getExtendedMethod());
@@ -358,7 +358,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   default:              server.set("REQUEST_METHOD", "");     break;
   }
   server.set("HTTPS", transport->isSSL() ? "1" : "");
-  server.set("REQUEST_TIME", time(NULL));
+  server.set("REQUEST_TIME", time(nullptr));
   server.set("QUERY_STRING", r.queryString());
 
   server.set("REMOTE_ADDR", String(transport->getRemoteHost(), CopyString));
@@ -426,7 +426,7 @@ void HttpProtocol::CopyParams(Variant &dest, Variant &src) {
 
 void HttpProtocol::DecodeParameters(Variant &variables, const char *data,
                                     int size, bool post /* = false */) {
-  if (data == NULL || size == 0) {
+  if (data == nullptr || size == 0) {
     return;
   }
 
@@ -469,7 +469,7 @@ void HttpProtocol::DecodeParameters(Variant &variables, const char *data,
 void HttpProtocol::DecodeCookies(Variant &variables, char *data) {
   assert(data && *data);
 
-  char *strtok_buf = NULL;
+  char *strtok_buf = nullptr;
   char *var = strtok_r(data, ";", &strtok_buf);
   while (var) {
     char *val = strchr(var, '=');
@@ -506,7 +506,7 @@ void HttpProtocol::DecodeCookies(Variant &variables, char *data) {
       }
     }
 
-    var = strtok_r(NULL, ";", &strtok_buf);
+    var = strtok_r(nullptr, ";", &strtok_buf);
   }
 }
 
@@ -622,7 +622,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   }
 
   int size = 0;
-  const char *data = NULL;
+  const char *data = nullptr;
   if (transport->getMethod() == Transport::POST) {
     data = (const char *)transport->getPostData(size);
   }

@@ -32,11 +32,11 @@ StaticString MemFile::s_class_name("MemFile");
 ///////////////////////////////////////////////////////////////////////////////
 
 MemFile::MemFile()
-  : File(false), m_data(NULL), m_len(-1), m_cursor(0), m_malloced(false) {
+  : File(false), m_data(nullptr), m_len(-1), m_cursor(0), m_malloced(false) {
 }
 
 MemFile::MemFile(const char *data, int64 len)
-  : File(false), m_data(NULL), m_len(len), m_cursor(0), m_malloced(true) {
+  : File(false), m_data(nullptr), m_len(len), m_cursor(0), m_malloced(true) {
   m_data = (char*)malloc(len + 1);
   if (m_data && len) {
     memcpy(m_data, data, len);
@@ -64,7 +64,7 @@ bool MemFile::open(CStrRef filename, CStrRef mode) {
     if (compressed) {
       assert(RuntimeOption::EnableOnDemandUncompress);
       data = gzdecode(data, len);
-      if (data == NULL) {
+      if (data == nullptr) {
         throw FatalErrorException("cannot unzip compressed data");
       }
       m_data = data;
@@ -93,7 +93,7 @@ bool MemFile::closeImpl() {
   m_closed = true;
   if (m_malloced && m_data) {
     free(m_data);
-    m_data = NULL;
+    m_data = nullptr;
   }
   File::closeImpl();
   return true;
@@ -184,7 +184,7 @@ void MemFile::unzip() {
   assert(m_cursor == 0);
   int len = m_len;
   char *data = gzdecode(m_data, len);
-  if (data == NULL) {
+  if (data == nullptr) {
     throw FatalErrorException((string("cannot unzip mem stream: ") +
                                m_name).c_str());
   }

@@ -110,7 +110,7 @@ void ZendArray::postSort(Bucket** buffer, bool resetKeys) {
   m_pListTail = buffer[last];
   m_pos = (ssize_t)m_pListHead;
   Bucket* b = buffer[0];
-  b->pListLast = NULL;
+  b->pListLast = nullptr;
   if (resetKeys) {
     memset(m_arBuckets, 0, tableSize() * sizeof(Bucket*));
     for (uint i = 0; i < last; ++i) {
@@ -142,7 +142,7 @@ void ZendArray::postSort(Bucket** buffer, bool resetKeys) {
       b = bNext;
     }
   }
-  b->pListNext = NULL;
+  b->pListNext = nullptr;
 }
 
 ArrayData* ZendArray::escalateForSort() {

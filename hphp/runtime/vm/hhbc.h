@@ -694,7 +694,7 @@ struct ImmVector {
    */
   bool decodeLastMember(const Unit*, StringData*& sdOut,
                         MemberCode& membOut,
-                        int64_t* strIdOut = NULL) const;
+                        int64_t* strIdOut = nullptr) const;
 
 
 private:
@@ -756,7 +756,7 @@ void encodeToVector(std::vector<uchar>& vec, T val) {
 
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
-std::string instrToString(const Opcode* it, const Unit* u = NULL);
+std::string instrToString(const Opcode* it, const Unit* u = nullptr);
 const char* opcodeToName(Opcode op);
 
 // returns a pointer to the location within the bytecode containing the jump

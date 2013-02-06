@@ -46,13 +46,13 @@ const uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
  */
 class GarbageList {
 public:
-  GarbageList() : ptr(NULL) {
+  GarbageList() : ptr(nullptr) {
   }
 
   // Pops an item, or returns NULL
   void* maybePop() {
     void** ret = ptr;
-    if (LIKELY(ret != NULL)) {
+    if (LIKELY(ret != nullptr)) {
       ptr = (void**)*ret;
     }
     return ret;
@@ -76,12 +76,12 @@ public:
   }
 
   bool empty() const {
-    return ptr == NULL;
+    return ptr == nullptr;
   }
 
   // Remove all items from this list
   void clear() {
-    ptr = NULL;
+    ptr = nullptr;
   }
 
   class Iterator {
@@ -89,7 +89,7 @@ public:
     Iterator(const GarbageList& l) : curptr(l.ptr) {}
 
     Iterator(const Iterator &other) : curptr(other.curptr) {}
-    Iterator() : curptr(NULL) {}
+    Iterator() : curptr(nullptr) {}
 
     bool operator==(const Iterator &it) {
       return curptr == it.curptr;

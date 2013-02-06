@@ -61,7 +61,7 @@ ShmCounters() :
 ~ShmCounters();
 
   typedef void (*logError_t)(const char *fmt, ...);
-  static bool initialize(bool create, logError_t logError = NULL);
+  static bool initialize(bool create, logError_t logError = nullptr);
   static void dump();
 public:
   static bool created;

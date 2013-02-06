@@ -139,7 +139,7 @@ bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
     }
     if (expired && acc->second.inFile()) {
       // a primed key expired, do not erase the table entry
-      acc->second.var = NULL;
+      acc->second.var = nullptr;
       acc->second.size = 0;
       acc->second.expiry = 0;
     } else {
@@ -156,7 +156,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
       RuntimeOption::ApcPurgeFrequency != 0) {
     return;
   }
-  time_t now = time(NULL);
+  time_t now = time(nullptr);
   ExpirationPair tmp;
   struct timespec tsBegin, tsEnd;
   gettime(CLOCK_MONOTONIC, &tsBegin);
@@ -173,7 +173,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
         strcmp(tmp.first, RuntimeOption::ApcFileStorageFlagKey.c_str()) == 0) {
       s_apc_file_storage.adviseOut();
       addToExpirationQueue(RuntimeOption::ApcFileStorageFlagKey.c_str(),
-                           time(NULL) +
+                           time(nullptr) +
                            RuntimeOption::ApcFileStorageAdviseOutPeriod);
       continue;
     }
@@ -224,7 +224,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
     // sv may not be same as svar here because some other thread may have
     // updated it already, check before updating
     if (sv == svar && !sv->isUnserializedObj()) {
-      int64 ttl = sval->expiry ? sval->expiry - time(NULL) : 0;
+      int64 ttl = sval->expiry ? sval->expiry - time(nullptr) : 0;
       stats_on_update(key.get(), sval, converted, ttl);
       sval->var = converted;
       sv->decRef();
@@ -258,13 +258,13 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
   } catch (Exception &e) {
     raise_notice("APC Primed fetch failed: key %s (%s).",
                  key.c_str(), e.getMessage().c_str());
-    return NULL;
+    return nullptr;
   }
 }
 
 bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   const StoreValue *sval;
-  SharedVariant *svar = NULL;
+  SharedVariant *svar = nullptr;
   ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
                                 m_lockingFlag);
   bool expired = false;
@@ -444,7 +444,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64 ttl,
           update = true;
         } else {
           // mark the inFile copy invalid since we are updating the key
-          sval->sAddr = NULL;
+          sval->sAddr = nullptr;
           sval->sSize = 0;
         }
       } else {
@@ -552,7 +552,7 @@ void ConcurrentTableSharedStore::primeDone() {
     // the keys in file, a deserialization from memory is required on first
     // access.
     addToExpirationQueue(RuntimeOption::ApcFileStorageFlagKey.c_str(),
-                         time(NULL) +
+                         time(nullptr) +
                          RuntimeOption::ApcFileStorageAdviseOutPeriod);
   }
 
@@ -577,9 +577,9 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
   // This functionality is for debugging and should not be called regularly
   if (RuntimeOption::ApcConcurrentTableLockFree) {
     m_lockingFlag = true;
-    int begin = time(NULL);
+    int begin = time(nullptr);
     Logger::Info("waiting %d seconds before dump", waitSeconds);
-    while (time(NULL) - begin < waitSeconds) {
+    while (time(nullptr) - begin < waitSeconds) {
       sleep(1);
     }
   }

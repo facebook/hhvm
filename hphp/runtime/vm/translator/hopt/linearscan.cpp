@@ -45,7 +45,7 @@ private:
       return kCallerSaved.contains(PhysReg(m_regNo));
     }
     bool isCalleeSaved() const { return !isCallerSaved(); }
-    bool isAllocated() const { return m_ssaTmp != NULL; }
+    bool isAllocated() const { return m_ssaTmp != nullptr; }
     bool isPinned() const { return m_pinned; }
     bool isRetAddr() const {
       if (!m_ssaTmp) return false;
@@ -177,7 +177,7 @@ LinearScan::LinearScan(IRFactory* irFactory)
   : m_irFactory(irFactory)
 {
   for (int i = 0; i < kNumX64Regs; i++) {
-    m_regs[i].m_ssaTmp = NULL;
+    m_regs[i].m_ssaTmp = nullptr;
     m_regs[i].m_regNo = i;
     m_regs[i].m_pinned = false;
     m_regs[i].m_reserved = false;
@@ -380,7 +380,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
     preferCallerSaved = (ssaTmp->getLastUseId() <= getNextNativeId());
   }
 
-  RegState* reg = NULL;
+  RegState* reg = nullptr;
   if (!preferCallerSaved) {
     reg = getFreeReg(false);
     if (reg->isCallerSaved()) {
@@ -389,10 +389,10 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       pushFreeReg(reg);
       // getFreeReg pins the reg. Need restore it here.
       reg->m_pinned = false;
-      reg = NULL;
+      reg = nullptr;
     }
   }
-  if (reg == NULL && RuntimeOption::EvalHHIREnablePreColoring) {
+  if (reg == nullptr && RuntimeOption::EvalHHIREnablePreColoring) {
     // Pre-colors ssaTmp if it's used as an argument of next native.
     // Search for the original tmp instead of <ssaTmp> itself, because
     // the pre-coloring hint is not aware of reloaded tmps.
@@ -402,7 +402,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       reg = getReg(&m_regs[int(targetRegNo)]);
     }
   }
-  if (reg == NULL &&
+  if (reg == nullptr &&
       RuntimeOption::EvalHHIREnablePreColoring &&
       ssaTmp->getInstruction()->isNative()) {
     // Pre-colors ssaTmp if it's the return value of a native.
@@ -414,7 +414,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       not_reached();
     }
   }
-  if (reg == NULL) {
+  if (reg == nullptr) {
     // No pre-coloring for this tmp.
     // Pick a regular caller-saved reg.
     reg = getFreeReg(true);
@@ -578,7 +578,7 @@ void LinearScan::collectNatives() {
 void LinearScan::computePreColoringHint() {
   m_preColoringHint.clear();
   IRInstruction* inst = getNextNative();
-  if (inst == NULL) {
+  if (inst == nullptr) {
     return;
   }
 
@@ -1044,7 +1044,7 @@ void LinearScan::freeRegsAtId(uint32_t id) {
 // otherwise, return <reg> and remove it from the free list.
 LinearScan::RegState* LinearScan::getReg(RegState* reg) {
   if (reg->isReserved() || reg->isAllocated()) {
-    return NULL;
+    return nullptr;
   }
   std::list<RegState*>& freeList = (reg->isCallerSaved() ?
                                     m_freeCallerSaved :
@@ -1075,8 +1075,8 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
     spill((*pos)->m_ssaTmp);
   }
 
-  std::list<RegState*>* preferred = NULL;
-  std::list<RegState*>* other = NULL;
+  std::list<RegState*>* preferred = nullptr;
+  std::list<RegState*>* other = nullptr;
   if (preferCallerSaved) {
     preferred = &m_freeCallerSaved;
     other = &m_freeCalleeSaved;
@@ -1085,7 +1085,7 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
     other = &m_freeCallerSaved;
   }
 
-  RegState* theFreeReg = NULL;
+  RegState* theFreeReg = nullptr;
   if (!preferred->empty()) {
     theFreeReg = popFreeReg(*preferred);
   } else {
@@ -1103,9 +1103,9 @@ void LinearScan::freeReg(RegState* reg) {
   SSATmp* tmp = reg->m_ssaTmp;
   int32 slotId = tmp->getSpillSlot();
   if (slotId != -1) {
-    m_slots[slotId].m_latestReload = NULL;
+    m_slots[slotId].m_latestReload = nullptr;
   }
-  reg->m_ssaTmp = NULL;
+  reg->m_ssaTmp = nullptr;
 }
 
 void LinearScan::pushFreeReg(RegState* reg) {
@@ -1126,7 +1126,7 @@ void LinearScan::pushFreeReg(RegState* reg) {
 
 LinearScan::RegState* LinearScan::popFreeReg(std::list<RegState*>& freeList) {
   if (freeList.empty()) {
-    return NULL;
+    return nullptr;
   }
   RegState* reg = freeList.front();
   freeList.pop_front();
@@ -1163,7 +1163,7 @@ void LinearScan::spill(SSATmp* tmp) {
     // createSpillSlot sets the latest reloaded value of slotId to tmp.
     // Here, we need reset this value because tmp is spilled and no longer
     // synced with memory.
-    m_slots[slotId].m_latestReload = NULL;
+    m_slots[slotId].m_latestReload = nullptr;
   }
 }
 
@@ -1183,7 +1183,7 @@ uint32 LinearScan::createSpillSlot(SSATmp* tmp) {
 }
 
 IRInstruction* LinearScan::getNextNative() const {
-  return m_natives.empty() ? NULL : m_natives.front();
+  return m_natives.empty() ? nullptr : m_natives.front();
 }
 
 uint32 LinearScan::getNextNativeId() const {
@@ -1207,7 +1207,7 @@ SSATmp* LinearScan::getOrigTmp(SSATmp* tmp) {
 }
 
 bool LinearScan::PreColoringHint::preColorsTmp(RegState* reg) const {
-  return m_preColoredTmps[reg->m_regNo].first != NULL;
+  return m_preColoredTmps[reg->m_regNo].first != nullptr;
 }
 
 // Get the pre-coloring register of (<tmp>, <index>).
@@ -1226,7 +1226,7 @@ RegNumber LinearScan::PreColoringHint::getPreColoringReg(
 
 void LinearScan::PreColoringHint::clear() {
   for (int i = 0; i < kNumX64Regs; ++i) {
-    m_preColoredTmps[i].first = NULL;
+    m_preColoredTmps[i].first = nullptr;
     m_preColoredTmps[i].second = 0;
   }
 }

@@ -53,7 +53,7 @@ char *string_rot13(const char *input, int len) {
     "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
   if (len == 0) {
-    return NULL;
+    return nullptr;
   }
   char *ret = string_duplicate(input, len);
   string_translate(ret, len, rot13_from, rot13_to, 52);
@@ -203,7 +203,7 @@ char *string_bin2hex(const char *input, int &len) {
 
   assert(input);
   if (len == 0) {
-    return NULL;
+    return nullptr;
   }
 
   int i, j;

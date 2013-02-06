@@ -300,10 +300,10 @@ bool TestServer::TestPost() {
 
 bool TestServer::TestCookie() {
   VSRX("<?php print $_COOKIE['name'];",
-       "value", "string", "GET", "Cookie: name=value;", NULL);
+       "value", "string", "GET", "Cookie: name=value;", nullptr);
 
   VSRX("<?php print $_COOKIE['name2'];",
-       "value2", "string", "GET", "Cookie: n=v;name2=value2;n3=v3", NULL);
+       "value2", "string", "GET", "Cookie: n=v;name2=value2;n3=v3", nullptr);
 
   return true;
 }
@@ -355,7 +355,7 @@ public:
    */
   virtual const char *getUrl() { return "/string";}
   virtual const char *getRemoteHost() { return "remote";}
-  virtual const void *getPostData(int &size) { size = 0; return NULL;}
+  virtual const void *getPostData(int &size) { size = 0; return nullptr;}
   virtual uint16 getRemotePort() { return 0; }
   virtual Method getMethod() { return Transport::GET;}
   virtual std::string getHeader(const char *name) { return "";}
@@ -468,14 +468,14 @@ bool TestServer::PreBindSocket() {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
 
-  if (getaddrinfo(NULL, lexical_cast<string>(s_server_port).c_str(),
+  if (getaddrinfo(nullptr, lexical_cast<string>(s_server_port).c_str(),
                   &hints, &res0) < 0) {
     printf("Error in getaddrinfo(): %s\n", strerror(errno));
     return false;
   }
 
   for (res = res0; res; res = res->ai_next) {
-    if (res->ai_family == AF_INET6 || res->ai_next == NULL) {
+    if (res->ai_family == AF_INET6 || res->ai_next == nullptr) {
       break;
     }
   }

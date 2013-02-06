@@ -116,13 +116,13 @@ public:
   static bool SkipRecurse(ConstructRawPtr cp);
 
   static bool SkipRecurse(StatementPtr s) {
-    return SkipRecurse(s ? s.get() : NULL);
+    return SkipRecurse(s ? s.get() : nullptr);
   }
   static bool SkipRecurse(StatementConstPtr s) {
-    return SkipRecurse(s ? s.get() : NULL);
+    return SkipRecurse(s ? s.get() : nullptr);
   }
   static bool SkipRecurse(StatementRawPtr s) {
-    return SkipRecurse(s ? s.get() : NULL);
+    return SkipRecurse(s ? s.get() : nullptr);
   }
 
   static bool SkipRecurse(const Statement *stmt);

@@ -66,7 +66,7 @@ RuntimeType::RuntimeType(bool value)
   : m_kind(VALUE) {
   m_value.outerType = KindOfBoolean;
   m_value.innerType = KindOfInvalid;
-  m_value.klass = NULL;
+  m_value.klass = nullptr;
   m_value.boolean = value;
   m_value.boolValid = true;
   consistencyCheck();
@@ -96,7 +96,7 @@ RuntimeType::RuntimeType() :
   m_kind(VALUE) {
   m_value.outerType = KindOfInvalid;
   m_value.innerType = KindOfInvalid;
-  m_value.klass = NULL;
+  m_value.klass = nullptr;
 }
 
 RuntimeType::RuntimeType(const Iter* it) :
@@ -159,7 +159,7 @@ RuntimeType::valueString() const {
 
 const StringData*
 RuntimeType::valueStringOrNull() const {
-  if (!isString()) return NULL;
+  if (!isString()) return nullptr;
   return valueString();
 }
 
@@ -208,7 +208,7 @@ RuntimeType::setValueType(DataType newInner) const {
     rtt.m_value.outerType = newInner;
   }
   assert(rtt.valueType() == newInner);
-  rtt.m_value.klass = NULL;
+  rtt.m_value.klass = nullptr;
   rtt.consistencyCheck();
   return rtt;
 }
@@ -355,12 +355,12 @@ string RuntimeType::pretty() const {
     sprintf(buf, "(Value %s)", tname(m_value.outerType).c_str());
   }
   string retval = buf;
-  if (valueType() == KindOfObject && valueClass() != NULL) {
+  if (valueType() == KindOfObject && valueClass() != nullptr) {
     char buf2[1024];
     sprintf(buf2, "(OfClass %s)", valueClass()->preClass()->name()->data());
     retval += string(buf2);
   }
-  if (valueType() == KindOfClass && valueClass() != NULL) {
+  if (valueType() == KindOfClass && valueClass() != nullptr) {
     char buf2[1024];
     sprintf(buf2, "(Class %s)", valueClass()->preClass()->name()->data());
     retval += string(buf2);

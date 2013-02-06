@@ -38,7 +38,7 @@ public:
   static void ChangeUser(const std::string &username);
 
   static FILE *popen(const char *cmd, const char *type,
-                     const char *cwd = NULL);
+                     const char *cwd = nullptr);
   static int pclose(FILE *f);
 
   /**

@@ -22,7 +22,7 @@ namespace HPHP {
 
 const char *SharedMemoryManager::Name = "HPHPSharedMemory";
 boost::interprocess::managed_shared_memory *
-SharedMemoryManager::Segment = NULL;
+SharedMemoryManager::Segment = nullptr;
 
 // just to make valgrind cleaner
 class SharedMemoryManagerUninitializer {
@@ -35,7 +35,7 @@ static SharedMemoryManagerUninitializer s_smm_uninitializer;
 
 void SharedMemoryManager::Init(int size, bool clean) {
   try {
-    if (Segment == NULL) {
+    if (Segment == nullptr) {
       if (clean) {
         boost::interprocess::shared_memory_object::remove(Name);
       }

@@ -75,7 +75,7 @@ static int recv_fd(int afdt_fd) {
 }
 
 static char **build_envp(const vector<string> &env) {
-  char **envp = NULL;
+  char **envp = nullptr;
   int size = env.size();
   if (size) {
     envp = (char **)malloc((size + 1) * sizeof(char *));
@@ -83,7 +83,7 @@ static char **build_envp(const vector<string> &env) {
     for (unsigned int i = 0; i < env.size(); i++, j++) {
       *(envp + j) = (char *)env[i].c_str();
     }
-    *(envp + j) = NULL;
+    *(envp + j) = nullptr;
   }
   return envp;
 }
@@ -116,13 +116,13 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
     }
   }
 
-  FILE *f = buf[0] ? ::popen(buf, read_only ? "r" : "w") : NULL;
+  FILE *f = buf[0] ? ::popen(buf, read_only ? "r" : "w") : nullptr;
 
   if (old_cwd != cwd && chdir(old_cwd.c_str())) {
     // only here if we can't change the cwd back
   }
 
-  if (f == NULL) {
+  if (f == nullptr) {
     Logger::Error("Light process failed popen: %d (%s).", errno,
                   strerror(errno));
     fprintf(fout, "error\n");
@@ -208,10 +208,10 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     }
     if (!env.empty()) {
       char **envp = build_envp(env);
-      execle("/bin/sh", "sh", "-c", cmd, NULL, envp);
+      execle("/bin/sh", "sh", "-c", cmd, nullptr, envp);
       free(envp);
     } else {
-      execl("/bin/sh", "sh", "-c", cmd, NULL);
+      execl("/bin/sh", "sh", "-c", cmd, nullptr);
     }
     _exit(127);
   } else if (child > 0) {
@@ -282,7 +282,7 @@ static boost::scoped_array<LightProcess> g_procs;
 static int g_procsCount = 0;
 
 LightProcess::LightProcess()
-: m_shadowProcess(0), m_fin(NULL), m_fout(NULL), m_afdt_fd(-1),
+: m_shadowProcess(0), m_fin(nullptr), m_fout(nullptr), m_afdt_fd(-1),
   m_afdt_lfd(-1) { }
 
 LightProcess::~LightProcess() {
@@ -406,7 +406,7 @@ void LightProcess::closeShadow() {
     fclose(m_fin);
     fclose(m_fout);
     // removes the "zombie" process, so not to interfere with later waits
-    ::waitpid(m_shadowProcess, NULL, 0);
+    ::waitpid(m_shadowProcess, nullptr, 0);
   }
   if (!m_afdtFilename.empty()) {
     remove(m_afdtFilename.c_str());
@@ -524,7 +524,7 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
   char buf[BUFFER_SIZE];
   read_buf(g_procs[id].m_fin, buf);
   if (strncmp(buf, "error", 5) == 0) {
-    return NULL;
+    return nullptr;
   }
 
   int64 fptr = 0;
@@ -532,13 +532,13 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
   sscanf(buf, "%" PRId64, &fptr);
   if (!fptr) {
     Logger::Error("Light process failed to return the file pointer.");
-    return NULL;
+    return nullptr;
   }
 
   int fd = recv_fd(g_procs[id].m_afdt_fd);
   if (fd < 0) {
     Logger::Error("Light process failed to send the file descriptor.");
-    return NULL;
+    return nullptr;
   }
   FILE *f = fdopen(fd, type);
   g_procs[id].m_popenMap[(int64)f] = fptr;

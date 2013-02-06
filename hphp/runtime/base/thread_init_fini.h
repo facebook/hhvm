@@ -22,9 +22,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void init_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
+void init_thread_locals(void *arg = nullptr) ATTRIBUTE_COLD
   NEVER_INLINE;
-void finish_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
+void finish_thread_locals(void *arg = nullptr) ATTRIBUTE_COLD
   NEVER_INLINE;
 
 struct InitFiniNode {

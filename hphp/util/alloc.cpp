@@ -31,9 +31,9 @@ void flush_thread_caches() {
   if (mallctl) {
     unsigned arena;
     size_t usz = sizeof(unsigned);
-    if (mallctl("tcache.flush", NULL, NULL, NULL, 0)
-        || mallctl("thread.arena", &arena, &usz, NULL, 0)
-        || mallctl("arenas.purge", NULL, NULL, &arena, usz)) {
+    if (mallctl("tcache.flush", nullptr, nullptr, nullptr, 0)
+        || mallctl("thread.arena", &arena, &usz, nullptr, 0)
+        || mallctl("arenas.purge", nullptr, nullptr, &arena, usz)) {
       // Error; do nothing.
     }
   }
@@ -72,7 +72,7 @@ void init_stack_limits(pthread_attr_t* attr) {
   if (pthread_attr_getguardsize(attr, &guardsize) != 0)
     guardsize = 0;
 
-  assert(stackaddr != NULL);
+  assert(stackaddr != nullptr);
   assert(stacksize >= PTHREAD_STACK_MIN);
   Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
   Util::s_stackSize = stacksize;
@@ -124,7 +124,7 @@ struct JEMallocInitializer {
     // Create a special arena to be used for allocating objects in low memory.
     int err;
     size_t sz = sizeof(low_arena);
-    if ((err = mallctl("arenas.extend", &low_arena, &sz, NULL, 0)) != 0) {
+    if ((err = mallctl("arenas.extend", &low_arena, &sz, nullptr, 0)) != 0) {
       // Error; bail out.
       return;
     }
@@ -136,7 +136,7 @@ struct JEMallocInitializer {
       return;
     }
     mib[1] = low_arena;
-    if ((err = mallctlbymib(mib, miblen, NULL, NULL, (void *)&dss,
+    if ((err = mallctlbymib(mib, miblen, nullptr, nullptr, (void *)&dss,
         sizeof(const char *))) != 0) {
       // Error; bail out.
       return;
@@ -166,8 +166,8 @@ struct JEMallocInitializer {
 
 static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 void* low_malloc_impl(size_t size) {
-  void* ptr = NULL;
-  allocm(&ptr, NULL, size, ALLOCM_ARENA(low_arena));
+  void* ptr = nullptr;
+  allocm(&ptr, nullptr, size, ALLOCM_ARENA(low_arena));
   // In practice, the things we low_malloc are both long-lived and likely
   // to be randomly accessed. This makes them good candidates for mapping
   // with huge pages. Track a high water mark, and incrementally map each

@@ -80,28 +80,28 @@ protected:
 // macros
 
 #define VSR(input, output)                                              \
-  if (!Count(VerifyServerResponse(input, output, "string", "GET", NULL, \
-                                  NULL, false, __FILE__,__LINE__)))     \
+  if (!Count(VerifyServerResponse(input, output, "string", "GET", nullptr, \
+                                  nullptr, false, __FILE__,__LINE__)))     \
     return false;
 
 #define VSRES(input, output)                                            \
-  if (!Count(VerifyServerResponse(input, output, "string", "GET", NULL, \
-                                  NULL, true, __FILE__,__LINE__)))      \
+  if (!Count(VerifyServerResponse(input, output, "string", "GET", nullptr, \
+                                  nullptr, true, __FILE__,__LINE__)))      \
     return false;
 
 #define VSGET(input, output, url)                                       \
-  if (!Count(VerifyServerResponse(input, output, url, "GET", NULL,      \
-                                  NULL, false, __FILE__,__LINE__)))     \
+  if (!Count(VerifyServerResponse(input, output, url, "GET", nullptr,      \
+                                  nullptr, false, __FILE__,__LINE__)))     \
     return false;
 
 #define VSGETP(input, output, url, port)                                \
-  if (!Count(VerifyServerResponse(input, output, url, "GET", NULL,      \
-                                  NULL, false, __FILE__,__LINE__,       \
+  if (!Count(VerifyServerResponse(input, output, url, "GET", nullptr,      \
+                                  nullptr, false, __FILE__,__LINE__,       \
                                   port)))                               \
     return false;
 
 #define VSPOST(input, output, url, postdata)                            \
-  if (!Count(VerifyServerResponse(input, output, url, "POST", NULL,     \
+  if (!Count(VerifyServerResponse(input, output, url, "POST", nullptr,     \
                                   postdata, false, __FILE__,__LINE__))) \
     return false;
 

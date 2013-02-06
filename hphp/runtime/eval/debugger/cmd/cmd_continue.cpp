@@ -23,7 +23,7 @@ bool CmdContinue::help(DebuggerClient *client) {
   client->helpTitle("Continue Command");
   client->helpCmds(
     "[c]ontinue {count=1}", "continues program execution",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Use this command at break to resume program execution. Specify a "

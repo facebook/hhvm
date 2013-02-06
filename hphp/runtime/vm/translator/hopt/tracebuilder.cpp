@@ -39,8 +39,8 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_trace(makeTrace(func, initialBcOffset, true))
   , m_enableCse(false)
   , m_enableSimplification(false)
-  , m_spValue(NULL)
-  , m_fpValue(NULL)
+  , m_spValue(nullptr)
+  , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
   , m_constTable(constants)
   , m_thisIsAvailable(false)
@@ -121,7 +121,7 @@ void TraceBuilder::genStMem(SSATmp* addr,
 }
 
 void TraceBuilder::genSetPropCell(SSATmp* base, int64 offset, SSATmp* value) {
-  SSATmp* oldVal = genLdProp(base, genDefConst(offset), Type::Cell, NULL);
+  SSATmp* oldVal = genLdProp(base, genDefConst(offset), Type::Cell, nullptr);
   genStProp(base, genDefConst(offset), value, true);
   genDecRef(oldVal);
 }
@@ -309,7 +309,7 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
     exitTrace->appendInstruction(spillInst);
   }
   SSATmp* pc = genDefConst<int64>(bcOff);
-  IRInstruction* instr = NULL;
+  IRInstruction* instr = nullptr;
   if (exitType == TraceExitType::NormalCc) {
     assert(notTakenBcOff != 0);
     SSATmp* notTakenPC = genDefConst(notTakenBcOff);
@@ -617,7 +617,7 @@ void TraceBuilder::genInitLoc(uint32 id, SSATmp* t0) {
 
 void TraceBuilder::genDecRefLoc(int id) {
   SSATmp* val = getLocalValue(id);
-  if (val != NULL) {
+  if (val != nullptr) {
     genDecRef(val);
     return;
   }
@@ -654,7 +654,7 @@ void TraceBuilder::genBindLoc(uint32 id,
     }
   } else {
     prevValue = getLocalValue(id);
-    assert(prevValue == NULL || prevValue->getType() == trackedType);
+    assert(prevValue == nullptr || prevValue->getType() == trackedType);
     if (prevValue == newValue) {
       // Silent store: local already contains value being stored
       // NewValue needs to be decref'ed
@@ -707,14 +707,14 @@ SSATmp* TraceBuilder::genStLoc(uint32 id,
   }
   assert(trackedType.isBoxed());
   SSATmp* prevRef = getLocalValue(id);
-  assert(prevRef == NULL || prevRef->getType() == trackedType);
+  assert(prevRef == nullptr || prevRef->getType() == trackedType);
   // prevRef is a ref
-  if (prevRef == NULL) {
+  if (prevRef == nullptr) {
     // prevRef = ldLoc
     LocalId locId(id);
     prevRef = gen(LdLoc, trackedType, &locId, m_fpValue);
   }
-  SSATmp* prevValue = NULL;
+  SSATmp* prevValue = nullptr;
   if (doRefCount) {
     assert(exit);
     Type innerType = trackedType.innerType();
@@ -860,7 +860,7 @@ static SSATmp* getStackValue(SSATmp* sp,
     int64 numPushed = resultType == Type::None ? 0 : 1;
     if (index == 0 && numPushed == 1) {
       type = resultType;
-      return NULL;
+      return nullptr;
     }
     return getStackValue(prevSp, index - (numPushed - numPopped),
                          spansCall, type);
@@ -872,7 +872,7 @@ static SSATmp* getStackValue(SSATmp* sp,
       // newly allocated object, which we unfortunately don't have any
       // kind of handle to :-(
       type = Type::Obj;
-      return NULL;
+      return nullptr;
     } else {
       return getStackValue(sp->getInstruction()->getSrc(2),
                            // NewObj pushes an object and an ActRec
@@ -887,7 +887,7 @@ static SSATmp* getStackValue(SSATmp* sp,
 
   // Should not get here!
   assert(0);
-  return NULL;
+  return nullptr;
 }
 
 void TraceBuilder::genAssertStk(uint32_t id, Type type) {
@@ -958,8 +958,7 @@ void TraceBuilder::genDecRefStack(Type type, uint32 stackOff) {
   bool spansCall = false;
   Type knownType = Type::None;
   SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
-  if (tmp == NULL ||
-      (spansCall && tmp->getInstruction()->getOpcode() != DefConst)) {
+  if (!tmp || (spansCall && tmp->getInstruction()->getOpcode() != DefConst)) {
     // We don't want to extend live ranges of tmps across calls, so we
     // don't get the value if spansCall is true; however, we can use
     // any type information known.
@@ -974,7 +973,7 @@ void TraceBuilder::genDecRefStack(Type type, uint32 stackOff) {
 
 void TraceBuilder::genDecRefThis() {
   if (isThisAvailable()) {
-    SSATmp* thiss = genLdThis(NULL);
+    SSATmp* thiss = genLdThis(nullptr);
     genDecRef(thiss);
   } else {
     gen(DecRefThis, m_fpValue);
@@ -1015,8 +1014,7 @@ SSATmp* TraceBuilder::genLdStack(int32 stackOff, Type type) {
   bool spansCall = false;
   Type knownType = Type::None;
   SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
-  if (tmp == NULL ||
-      (spansCall && tmp->getInstruction()->getOpcode() != DefConst)) {
+  if (!tmp || (spansCall && tmp->getInstruction()->getOpcode() != DefConst)) {
     // We don't want to extend live ranges of tmps across calls, so we
     // don't get the value if spansCall is true; however, we can use
     // any type information known.
@@ -1240,12 +1238,12 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 void TraceBuilder::clearTrackedState() {
   killCse(); // clears m_cseHash
   for (uint32 i = 0; i < m_localValues.size(); i++) {
-    m_localValues[i] = NULL;
+    m_localValues[i] = nullptr;
   }
   for (uint32 i = 0; i < m_localTypes.size(); i++) {
     m_localTypes[i] = Type::None;
   }
-  m_spValue = m_fpValue = NULL;
+  m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisIsAvailable = false;
 }
@@ -1282,7 +1280,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst,
   // copy propagation on inst source operands
   Simplifier::copyProp(inst);
 
-  SSATmp* result = NULL;
+  SSATmp* result = nullptr;
   if (m_enableCse && inst->canCSE()) {
     result = cseLookup(inst);
     if (result) {
@@ -1343,7 +1341,7 @@ void TraceBuilder::killCse() {
 
 SSATmp* TraceBuilder::getLocalValue(int id) {
   if (id == -1 || id >= (int)m_localValues.size()) {
-    return NULL;
+    return nullptr;
   }
   return m_localValues[id];
 }
@@ -1375,7 +1373,7 @@ void TraceBuilder::setLocalType(int id, Type type) {
     m_localValues.resize(id + 1);
     m_localTypes.resize(id + 1, Type::None);
   }
-  m_localValues[id] = NULL;
+  m_localValues[id] = nullptr;
   m_localTypes[id] = type;
 }
 
@@ -1385,7 +1383,7 @@ void TraceBuilder::killLocalValue(int id) {
   if (id == -1 || id >= (int)m_localValues.size()) {
     return;
   }
-  m_localValues[id] = NULL;
+  m_localValues[id] = nullptr;
   m_localTypes[id] = Type::None;
 }
 
@@ -1427,7 +1425,7 @@ void TraceBuilder::killLocals() {
    for (uint32 i = 0; i < m_localValues.size(); i++) {
     SSATmp* t = m_localValues[i];
     // should not kill DefConst, and LdConst should be replaced by DefConst
-    if (t == NULL || t->getInstruction()->getOpcode() == DefConst) {
+    if (!t || t->getInstruction()->getOpcode() == DefConst) {
       continue;
     }
     if (t->getInstruction()->getOpcode() == LdConst) {
@@ -1438,7 +1436,7 @@ void TraceBuilder::killLocals() {
       continue;
     }
     assert(!t->isConst());
-    m_localValues[i] = NULL;
+    m_localValues[i] = nullptr;
   }
 }
 

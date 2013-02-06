@@ -55,21 +55,21 @@ int64_t VMExecutionContext::s_threadIdxCounter = 0;
 Mutex VMExecutionContext::s_threadIdxLock;
 hphp_hash_map<pid_t, int64_t> VMExecutionContext::s_threadIdxMap;
 
-#define NEAR_FIELD_INIT m_fp(NULL), m_pc(NULL), m_isValid(1), m_eventHook(NULL),
+#define NEAR_FIELD_INIT m_fp(nullptr), m_pc(nullptr), m_isValid(1), m_eventHook(nullptr),
 
 BaseExecutionContext::BaseExecutionContext() :
 #ifdef HHVM
     NEAR_FIELD_INIT
 #endif
-    m_transport(NULL),
+    m_transport(nullptr),
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
-    m_out(NULL), m_implicitFlush(false), m_protectedLevel(0),
-    m_stdout(NULL), m_stdoutData(NULL),
+    m_out(nullptr), m_implicitFlush(false), m_protectedLevel(0),
+    m_stdout(nullptr), m_stdoutData(nullptr),
     m_errorState(ExecutionContext::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
-    m_vhost(NULL) {
+    m_vhost(nullptr) {
 
   setRequestMemoryMaxBytes(RuntimeOption::RequestMemoryMaxBytes);
   m_include_paths = Array::Create();
@@ -84,9 +84,9 @@ VMExecutionContext::VMExecutionContext() :
     NEAR_FIELD_INIT
 #endif
     m_lambdaCounter(0), m_nesting(0),
-    m_injTables(NULL), m_breakPointFilter(NULL), m_lastLocFilter(NULL),
+    m_injTables(nullptr), m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_interpreting(false), m_dbgNoBreak(false),
-    m_coverPrevLine(-1), m_coverPrevUnit(NULL),
+    m_coverPrevLine(-1), m_coverPrevUnit(nullptr),
     m_executingSetprofileCallback(false) {
 
 #ifdef HHVM
@@ -257,7 +257,7 @@ static void safe_stdout(const  void  *ptr,  size_t  size) {
 }
 
 void BaseExecutionContext::writeStdout(const char *s, int len) {
-  if (m_stdout == NULL) {
+  if (m_stdout == nullptr) {
     if (Util::s_stdout_color) {
       safe_stdout(Util::s_stdout_color, strlen(Util::s_stdout_color));
       safe_stdout(s, len);
@@ -437,7 +437,7 @@ void BaseExecutionContext::flush() {
   if (m_buffers.empty()) {
     fflush(stdout);
   } else if (RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
-             (m_transport == NULL ||
+             (m_transport == nullptr ||
               (m_transport->getHTTPVersion() == "1.1" &&
                m_transport->getMethod() != Transport::HEAD))) {
     StringBuffer &oss = m_buffers.front()->oss;
@@ -455,7 +455,7 @@ void BaseExecutionContext::flush() {
 
 void BaseExecutionContext::resetCurrentBuffer() {
   if (m_buffers.empty()) {
-    m_out = NULL;
+    m_out = nullptr;
   } else {
     m_out = &m_buffers.back()->oss;
   }
@@ -658,7 +658,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
       if (!Eval::Debugger::InterruptException(String(msg))) return;
     } catch (const Eval::DebuggerClientExitException &e) {}
 
-    const char *file = NULL;
+    const char *file = nullptr;
     int line = 0;
     if (RuntimeOption::InjectedStackTrace) {
       if (!bt.empty()) {
@@ -725,7 +725,7 @@ void BaseExecutionContext::recordLastError(const Exception &e,
 
 bool BaseExecutionContext::onFatalError(const Exception &e) {
   recordLastError(e);
-  const char *file = NULL;
+  const char *file = nullptr;
   int line = 0;
   if (RuntimeOption::InjectedStackTrace) {
     const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
@@ -790,7 +790,7 @@ void BaseExecutionContext::setLogErrors(bool on) {
         }
       }
     } else {
-      Logger::SetNewOutput(NULL);
+      Logger::SetNewOutput(nullptr);
     }
   }
 }
@@ -926,7 +926,7 @@ ResourceData *PersistentObjectStore::get(const char *type, const char *name) {
   ResourceMap &resources = m_objects[type];
   ResourceMap::const_iterator iter = resources.find(name);
   if (iter == resources.end()) {
-    return NULL;
+    return nullptr;
   }
   return iter->second;
 }

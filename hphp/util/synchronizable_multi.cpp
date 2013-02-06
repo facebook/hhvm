@@ -24,7 +24,7 @@ SynchronizableMulti::SynchronizableMulti(int size) : m_mutex(RankLeaf) {
   assert(size > 0);
   m_conds.resize(size);
   for (unsigned int i = 0; i < m_conds.size(); i++) {
-    pthread_cond_init(&m_conds[i], NULL);
+    pthread_cond_init(&m_conds[i], nullptr);
   }
 }
 
@@ -35,7 +35,7 @@ SynchronizableMulti::~SynchronizableMulti() {
 }
 
 void SynchronizableMulti::wait(int id, bool front) {
-  waitImpl(id, front, NULL);
+  waitImpl(id, front, nullptr);
 }
 
 bool SynchronizableMulti::wait(int id, bool front, long seconds) {

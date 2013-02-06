@@ -58,10 +58,10 @@ void StaticContentCache::load() {
   std::map<string, vector<string> > ext2files;
   {
     const char *argv[] = {"", (char*)RuntimeOption::SourceRoot.c_str(),
-                          "-type", "f", NULL};
+                          "-type", "f", nullptr};
     string files;
     vector<string> out;
-    Process::Exec("find", argv, NULL, files);
+    Process::Exec("find", argv, nullptr, files);
     Util::split('\n', files.c_str(), out, true);
     for (unsigned int i = 0; i < out.size(); i++) {
       const string &name = out[i];

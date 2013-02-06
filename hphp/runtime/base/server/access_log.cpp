@@ -79,7 +79,7 @@ void AccessLog::openFiles(const string &username) {
     const string &file = it->file;
     const string &symLink = it->symLink;
     assert(!file.empty());
-    FILE *fp = NULL;
+    FILE *fp = nullptr;
     if (Logger::UseCronolog) {
       CronologPtr cl(new Cronolog);
       if (strchr(file.c_str(), '%')) {
@@ -322,7 +322,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     break;
   case 'r':
     {
-      const char *method = NULL;
+      const char *method = nullptr;
       switch (transport->getMethod()) {
       case Transport::GET: method = "GET"; break;
       case Transport::POST: method = "POST"; break;
@@ -420,14 +420,14 @@ void AccessLog::onNewRequest() {
 }
 
 bool AccessLog::setThreadLog(const char *file) {
-  return (m_fGetThreadData()->log = fopen(file, "a")) != NULL;
+  return (m_fGetThreadData()->log = fopen(file, "a")) != nullptr;
 }
 void AccessLog::clearThreadLog() {
   FILE* &threadLog = m_fGetThreadData()->log;
   if (threadLog) {
     fclose(threadLog);
   }
-  threadLog = NULL;
+  threadLog = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -138,7 +138,7 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
 }
 
 Variant *get_enabled_intercept_handler(CStrRef name) {
-  Variant *handler = NULL;
+  Variant *handler = nullptr;
   StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   StringIMap<Variant>::iterator iter = handlers.find(name);
   if (iter != handlers.end()) {
@@ -146,7 +146,7 @@ Variant *get_enabled_intercept_handler(CStrRef name) {
   } else {
     handler = &s_intercept_data->m_global_handler;
     if (handler->isNull()) {
-      return NULL;
+      return nullptr;
     }
   }
   return handler;
@@ -168,8 +168,8 @@ Variant *get_intercept_handler(CStrRef name, char* flag) {
   }
 
   Variant *handler = get_enabled_intercept_handler(name);
-  if (handler == NULL) {
-    return NULL;
+  if (handler == nullptr) {
+    return nullptr;
   }
   *flag = 1;
   return handler;

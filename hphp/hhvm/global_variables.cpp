@@ -81,11 +81,11 @@ GlobalVariables* get_global_variables_check() {
 
 void free_global_variables() {
   if (g_variables) DELETE(GlobalVariables)(g_variables);
-  g_variables = NULL;
+  g_variables = nullptr;
 }
 
 void free_global_variables_after_sweep() {
-  g_variables = NULL;
+  g_variables = nullptr;
 }
 
 Globals*        get_globals()        { return get_global_variables(); }

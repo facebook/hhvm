@@ -150,7 +150,7 @@ static const char* s_null = "(null)";
 
 static char * __cvt(double value, int ndigit, int *decpt, int *sign,
                     int fmode, int pad) {
-  register char *s = NULL;
+  register char *s = nullptr;
   char *p, *rve, c;
   size_t siz;
 
@@ -164,8 +164,8 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
   if (value == 0.0) {
     *decpt = 1 - fmode; /* 1 for 'e', 0 for 'f' */
     *sign = 0;
-    if ((rve = s = (char *)malloc(ndigit?siz:2)) == NULL) {
-      return(NULL);
+    if ((rve = s = (char *)malloc(ndigit?siz:2)) == nullptr) {
+      return(nullptr);
     }
     *rve++ = '0';
     *rve = '\0';
@@ -185,9 +185,9 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
     if (pad && fmode) {
       siz += *decpt;
     }
-    if ((s = (char *)malloc(siz+1)) == NULL) {
+    if ((s = (char *)malloc(siz+1)) == nullptr) {
       zend_freedtoa(p);
-      return(NULL);
+      return(nullptr);
     }
     (void)string_copy(s, p, siz);
     rve = s + (rve - p);
@@ -219,7 +219,7 @@ static char *php_gcvt(double value, int ndigit, char dec_point,
   char *digits, *dst, *src;
   int i, decpt, sign;
 
-  digits = zend_dtoa(value, 2, ndigit, &decpt, &sign, NULL);
+  digits = zend_dtoa(value, 2, ndigit, &decpt, &sign, nullptr);
   if (decpt == 9999) {
     /*
      * Infinity or NaN, convert to inf or nan with sign.
@@ -669,7 +669,7 @@ inline static void appenddouble(char **buffer, int *pos,
                                 int adjust, char fmt,
                                 int always_sign) {
   char num_buf[NUM_BUF_SIZE];
-  char *s = NULL;
+  char *s = nullptr;
   int s_len = 0, is_negative = 0;
 
   if ((adjust & ADJ_PRECISION) == 0) {
@@ -762,7 +762,7 @@ inline static int getnumber(const char *buffer, int *pos) {
   register long num = strtol(buffer + *pos, &endptr, 10);
   register int i = 0;
 
-  if (endptr != NULL) {
+  if (endptr != nullptr) {
     i = (endptr - buffer - *pos);
   }
   *pos += i;
@@ -847,7 +847,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
         if (argnum <= 0) {
           free(result);
           throw_invalid_argument("argnum: must be greater than zero");
-          return NULL;
+          return nullptr;
         }
         inpos++;  /* skip the '$' */
       } else {
@@ -879,7 +879,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
           free(result);
           throw_invalid_argument("width: must be greater than zero "
                                  "and less than %d", INT_MAX);
-          return NULL;
+          return nullptr;
         }
         adjusting |= ADJ_WIDTH;
       } else {
@@ -895,7 +895,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
             free(result);
             throw_invalid_argument("precision: must be greater than zero "
                                    "and less than %d", INT_MAX);
-            return NULL;
+            return nullptr;
           }
           ch = format[inpos];
           adjusting |= ADJ_PRECISION;
@@ -914,7 +914,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
     if (argnum > vargs.size()) {
       free(result);
       throw_invalid_argument("arguments: (too few)");
-      return NULL;
+      return nullptr;
     }
 
     if (ch == 'l') {
@@ -995,7 +995,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
  */
 static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
 {
-  register char *s = NULL;
+  register char *s = nullptr;
   char *q;
   int s_len;
 
@@ -1015,7 +1015,7 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
   char char_buf[2];      /* for printing %% and %<unknown> */
 
 #ifdef HAVE_LOCALE_H
-  struct lconv *lconv = NULL;
+  struct lconv *lconv = nullptr;
 #endif
 
   /*
@@ -1360,7 +1360,7 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
         case 's':
         case 'v':
           s = va_arg(ap, char *);
-          if (s != NULL) {
+          if (s != nullptr) {
             s_len = strlen(s);
             if (adjust_precision && precision < s_len)
               s_len = precision;
@@ -1467,7 +1467,7 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
 
           s_len = strlen(s);
 
-          if (alternate_form && (q = strchr(s, '.')) == NULL)
+          if (alternate_form && (q = strchr(s, '.')) == nullptr)
             s[s_len++] = '.';
           break;
 

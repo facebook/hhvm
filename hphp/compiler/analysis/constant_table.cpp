@@ -165,7 +165,7 @@ TypePtr ConstantTable::check(BlockScopeRawPtr context,
   assert(!m_blockScope.is(BlockScope::FunctionScope));
   bool isClassScope = m_blockScope.is(BlockScope::ClassScope);
   TypePtr actualType;
-  defScope = NULL;
+  defScope = nullptr;
   if (name == "true" || name == "false") {
     actualType = Type::Boolean;
   } else {

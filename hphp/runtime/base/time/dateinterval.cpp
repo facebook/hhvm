@@ -52,7 +52,7 @@ DateInterval::DateInterval(timelib_rel_time *di) {
 bool DateInterval::setDateString(CStrRef date_string) {
   timelib_time *time;
   timelib_rel_time *di;
-  timelib_error_container *errors = NULL;
+  timelib_error_container *errors = nullptr;
 
   time = timelib_strtotime((char*)date_string.data(), date_string.size(),
                            &errors, TimeZone::GetDatabase());
@@ -71,11 +71,11 @@ bool DateInterval::setDateString(CStrRef date_string) {
 }
 
 bool DateInterval::setInterval(CStrRef date_interval) {
-  timelib_rel_time *di = NULL;
-  timelib_error_container *errors = NULL;
+  timelib_rel_time *di = nullptr;
+  timelib_error_container *errors = nullptr;
 
 #ifdef TIMELIB_HAVE_INTERVAL
-  timelib_time *start = NULL, *end = NULL;
+  timelib_time *start = nullptr, *end = nullptr;
   int r = 0;
 
   timelib_strtointerval((char*)date_interval.data(), date_interval.size(),

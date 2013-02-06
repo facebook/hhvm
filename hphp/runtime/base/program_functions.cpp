@@ -117,7 +117,7 @@ struct ProgramOptions {
 
 class StartTime {
 public:
-  StartTime() : startTime(time(NULL)) {}
+  StartTime() : startTime(time(nullptr)) {}
   time_t startTime;
 };
 static StartTime s_startTime;
@@ -162,7 +162,7 @@ void register_variable(Variant &variables, char *name, CVarRef value,
   // ensure that we don't have spaces or dots in the variable name
   // (not binary safe)
   bool is_array = false;
-  char *ip = NULL; // index pointer
+  char *ip = nullptr; // index pointer
   char *p = var;
   for (; *p; p++) {
     if (*p == ' ' || *p == '.') {
@@ -201,7 +201,7 @@ void register_variable(Variant &variables, char *name, CVarRef value,
         ip++;
       }
       if (*ip == ']') {
-        index_s = NULL;
+        index_s = nullptr;
       } else {
         ip = strchr(ip, ']');
         if (!ip) {
@@ -490,7 +490,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
   Variant &server = g->GV(_SERVER);
   process_env_variables(server);
-  time_t now = time(NULL);
+  time_t now = time(nullptr);
   server.set("REQUEST_START_TIME", now);
   server.set("REQUEST_TIME", now);
   server.set("DOCUMENT_ROOT", "");
@@ -553,12 +553,12 @@ static void pagein_self(void) {
   // pad due to the spaces between the inode number and the mapname
   bufsz = sizeof(unsigned long) * 4 + sizeof(mapname) + sizeof(char) * 11 + 100;
   buf = (char *)malloc(bufsz);
-  if (buf == NULL)
+  if (buf == nullptr)
     return;
 
   Timer timer(Timer::WallTime, "mapping self");
   fp = fopen("/proc/self/maps", "r");
-  if (fp != NULL) {
+  if (fp != nullptr) {
     while (!feof(fp)) {
       if (fgets(buf, bufsz, fp) == 0)
         break;
@@ -598,7 +598,7 @@ static int start_server(const std::string &username) {
      RuntimeOption::AdminLogFile,
      username);
 
-  void *sslCTX = NULL;
+  void *sslCTX = nullptr;
   if (RuntimeOption::EnableSSL) {
 #ifdef _EVENT_USE_OPENSSL
     struct ssl_config config;
@@ -701,7 +701,7 @@ static void prepare_args(int &argc, char **&argv, const StringVec &args,
   for (int i = 0; i < (int)args.size(); i++) {
     argv[argc++] = (char*)args[i].c_str();
   }
-  argv[argc] = NULL;
+  argv[argc] = nullptr;
 }
 
 static int execute_program_impl(int argc, char **argv);
@@ -1001,8 +1001,8 @@ static int execute_program_impl(int argc, char **argv) {
     hphp_process_init();
     try {
       HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
-        StringData::GetStaticString(po.lint.c_str()), "", NULL);
-      if (phpFile == NULL) {
+        StringData::GetStaticString(po.lint.c_str()), "", nullptr);
+      if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
       }
       VM::Unit* unit = phpFile->unit();
@@ -1078,17 +1078,17 @@ static int execute_program_impl(int argc, char **argv) {
           restart = false;
           execute_command_line_end(po.xhprofFlags, true, file.c_str());
         } catch (const Eval::DebuggerRestartException &e) {
-          execute_command_line_end(0, false, NULL);
+          execute_command_line_end(0, false, nullptr);
 
           if (!e.m_args->empty()) {
             file = e.m_args->at(0);
             client_args = e.m_args;
             free(new_argv);
-            prepare_args(new_argc, new_argv, *client_args, NULL);
+            prepare_args(new_argc, new_argv, *client_args, nullptr);
           }
           restart = true;
         } catch (const Eval::DebuggerClientExitException &e) {
-          execute_command_line_end(0, false, NULL);
+          execute_command_line_end(0, false, nullptr);
           break; // end user quitting debugger
         }
       }

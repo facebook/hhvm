@@ -51,15 +51,15 @@ public:
    * GET an URL and returns its response code.
    */
   int get(const char *url, StringBuffer &response,
-          const HeaderMap *requestHeaders = NULL,
-          std::vector<String> *responseHeaders = NULL);
+          const HeaderMap *requestHeaders = nullptr,
+          std::vector<String> *responseHeaders = nullptr);
 
   /**
    * POST data to an URL and returns its response code.
    */
   int post(const char *url, const char *data, int size, StringBuffer &response,
-           const HeaderMap *requestHeaders = NULL,
-           std::vector<String> *responseHeaders = NULL);
+           const HeaderMap *requestHeaders = nullptr,
+           std::vector<String> *responseHeaders = nullptr);
 
   std::string getLastError() const { return m_error;}
 

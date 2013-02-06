@@ -40,7 +40,7 @@ public:
   };
 
 public:
-  Timer(Type type, const char *name = NULL, ReportType r = Log);
+  Timer(Type type, const char *name = nullptr, ReportType r = Log);
   ~Timer();
 
   static int64 GetCurrentTimeMicros();

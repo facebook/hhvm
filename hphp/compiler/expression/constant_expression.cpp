@@ -255,7 +255,7 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       // read value and dynamic-ness together + check() atomically
       value = constants->getValue(m_name);
       isDynamic = constants->isDynamic(m_name);
-      BlockScope *defScope = NULL;
+      BlockScope *defScope = nullptr;
       std::vector<std::string> bases;
       actualType = constants->check(getScope(), m_name, type, coerce,
                                     ar, self, bases, defScope);

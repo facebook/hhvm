@@ -74,7 +74,7 @@ IMPLEMENT_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_arrayLitstrKeyMaxSize(0), m_arrayIntegerKeyMaxSize(0),
-    m_package(NULL), m_parseOnDemand(false), m_phase(ParseAllFiles),
+    m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
@@ -1611,7 +1611,7 @@ public:
 template<>
 void AnalysisResult::preWaitCallback<Post>(
     bool first, const BlockScopeRawPtrQueue &scopes, void *opaque) {
-  assert(!Option::ControlFlow || opaque != NULL);
+  assert(!Option::ControlFlow || opaque != nullptr);
   if (first && Option::ControlFlow) {
     JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *dispatcher
       = (JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *) opaque;
@@ -1844,7 +1844,7 @@ void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
 
 void AnalysisResult::outputCPPFiniteDouble(CodeGenerator &cg, double dval) {
   assert(finite(dval));
-  char *buf = NULL;
+  char *buf = nullptr;
   if (dval == 0.0) dval = 0.0; // so to avoid "-0" output
   // 17 to ensure lossless conversion
   vspprintf(&buf, 0, "%.*G", 17, dval);
@@ -2511,7 +2511,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   {
     vector<OutputJob*> jobs;
     JobQueueDispatcher<OutputJob*, OutputWorker>
-      dispatcher(threadCount, true, 0, false, NULL);
+      dispatcher(threadCount, true, 0, false, nullptr);
 
     string root = getOutputPath() + "/";
     for (StringToFileScopePtrVecMap::const_iterator iter = clusters.begin();
@@ -2544,7 +2544,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   {
     vector<OutputJob*> jobs;
     JobQueueDispatcher<OutputJob*, OutputWorker>
-      dispatcher(threadCount, true, 0, false, NULL);
+      dispatcher(threadCount, true, 0, false, nullptr);
 
     if (clusterCount > 0) {
       OutputJob *job = new RepartitionJob(ar, filenames, additionalCPPs);
@@ -2809,7 +2809,7 @@ void AnalysisResult::outputCPPNameMaps() {
     char **params = (char **)calloc(m_paramRTTICounter, sizeof(char*));
     for (map<string, int>::const_iterator
          iter = m_paramRTTIs.begin(); iter != m_paramRTTIs.end(); ++iter) {
-      assert(params[iter->second] == NULL);
+      assert(params[iter->second] == nullptr);
       params[iter->second] = (char *)iter->first.c_str();
     }
     for (int i = 0; i < m_paramRTTICounter; i++) {
@@ -2828,7 +2828,7 @@ void AnalysisResult::outputCPPNameMaps() {
 void AnalysisResult::outputRTTIMetaData(const char *filename) {
   assert(filename && *filename);
   FILE *f = fopen(filename, "w");
-  if (f == NULL) {
+  if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
                     Util::safe_strerror(errno).c_str());
   }
@@ -4587,7 +4587,7 @@ void AnalysisResult::preGenerateCPP(CodeGenerator::Output output,
   AnalysisResultPtr ar = shared_from_this();
   vector<PreGenerateCPPJob*> jobs;
   JobQueueDispatcher<OutputJob*, OutputWorker>
-    dispatcher(threadCount, true, 0, false, NULL);
+    dispatcher(threadCount, true, 0, false, nullptr);
 
   m_pregenerating = true;
   BOOST_FOREACH(FileScopePtr fs, files) {

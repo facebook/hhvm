@@ -960,7 +960,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
     const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
                            buf, exe.c_str(), 0 };
     string out;
-    ret = Process::Exec(argv[0], argv, NULL, out, NULL) ? 0 : 1;
+    ret = Process::Exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
   }
 
   return ret;
@@ -1007,7 +1007,7 @@ int cppTarget(const CompilerOptions &po, AnalysisResultPtr ar,
     Timer timer(Timer::WallTime, "creating CPP files");
     if (po.syncDir.empty()) {
       ar->setOutputPath(po.outputDir);
-      ar->outputAllCPP(format, clusterCount, NULL);
+      ar->outputAllCPP(format, clusterCount, nullptr);
     } else {
       ar->setOutputPath(po.syncDir);
       ar->outputAllCPP(format, clusterCount, &po.outputDir);
@@ -1044,7 +1044,7 @@ int buildTarget(const CompilerOptions &po) {
   if (po.format == "lib")     flags += "HPHP_BUILD_LIBRARY=1 ";
   if (Option::GenerateFFI)    flags += "HPHP_BUILD_FFI=1 ";
   const char *argv[] = {"", po.outputDir.c_str(),
-                        po.program.c_str(), flags.c_str(), NULL};
+                        po.program.c_str(), flags.c_str(), nullptr};
 
   if (getenv("SHOW_COMPILE")) {
     Logger::Info ("Compile command: %s %s %s", po.outputDir.c_str(),
@@ -1052,7 +1052,7 @@ int buildTarget(const CompilerOptions &po) {
   }
   Timer timer(Timer::WallTime, "compiling and linking CPP files");
   string out, err;
-  bool ret = Process::Exec(cmd.c_str(), argv, NULL, out, &err);
+  bool ret = Process::Exec(cmd.c_str(), argv, nullptr, out, &err);
   if (getenv("SHOW_COMPILE")) {
     Logger::Info("%s", out.c_str());
   } else {

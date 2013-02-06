@@ -289,7 +289,7 @@ public:
 #endif
   {
     invalidateWriteOwner();
-    pthread_rwlock_init(&m_rwlock, NULL);
+    pthread_rwlock_init(&m_rwlock, nullptr);
   }
 
   ~ReadWriteMutex() {

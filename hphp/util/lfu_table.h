@@ -57,11 +57,11 @@ template<class K, class V, class H, class E,
 class LFUTable {
   class Node {
   public:
-    Node(const K &k) : key(k), prev(NULL), next(NULL), hits(0), heapIndex(0),
-                       immortal(false), m_freq(0), m_timestamp(time(NULL)) {}
+    Node(const K &k) : key(k), prev(nullptr), next(nullptr), hits(0), heapIndex(0),
+                       immortal(false), m_freq(0), m_timestamp(time(nullptr)) {}
     Node(const K &k, const V &v)
-      : key(k), val(v), prev(NULL), next(NULL),  hits(0), heapIndex(0),
-        immortal(false), m_freq(0), m_timestamp(time(NULL))  {}
+      : key(k), val(v), prev(nullptr), next(nullptr),  hits(0), heapIndex(0),
+        immortal(false), m_freq(0), m_timestamp(time(nullptr))  {}
     ~Node() {
       D d;
       d(key, val);
@@ -78,7 +78,7 @@ class LFUTable {
     // Frequency updates must be accompanied by heap updates since otherwise
     // it may break the heap property. It should probably be under lock too.
     bool updateFrequency() {
-      double lifetime = time(NULL) - m_timestamp;
+      double lifetime = time(nullptr) - m_timestamp;
       double oldFreq = m_freq;
       if (lifetime > 0) {
         m_freq = hits / lifetime;
@@ -178,7 +178,7 @@ public:
 
 public:
   LFUTable(time_t maturity, size_t maxCap, int updatePeriod)
-    : m_head(NULL), m_tail(NULL), m_immortalCount(0),
+    : m_head(nullptr), m_tail(nullptr), m_immortalCount(0),
       m_maturityThreshold(maturity), m_maximumCapacity(maxCap),
       m_updatePeriod(updatePeriod) {
         //Lfu table is currently buggy and at the moment not worth fixing
@@ -213,7 +213,7 @@ public:
     }
     _makeRoom();
     // Add to the map
-    typename Map::iterator ins = m_map.insert(std::pair<const K, Node*>(k,NULL))
+    typename Map::iterator ins = m_map.insert(std::pair<const K, Node*>(k,nullptr))
       .first;
     Node *n = new Node(ins->first, v);
     ins->second = n;
@@ -315,8 +315,8 @@ public:
       m_map.erase(cit);
       delete n;
     }
-    assert(m_head == NULL);
-    assert(m_tail == NULL);
+    assert(m_head == nullptr);
+    assert(m_tail == nullptr);
     assert(m_heap.size() == 0);
   }
 
@@ -325,7 +325,7 @@ public:
     Lock qlock(m_queueLock);
 
     bool fail = false;
-    Node *prev = NULL;
+    Node *prev = nullptr;
     Node *n = m_head;
     while (n) {
       if (m_map.find(n->key) == m_map.end()) {
@@ -427,7 +427,7 @@ private:
     if (force) {
       return _createNode(k, immortal);
     } else {
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -438,7 +438,7 @@ private:
       _makeRoom();
     }
     // Add to the map
-    typename Map::iterator ins = m_map.insert(std::pair<const K, Node*>(k,NULL))
+    typename Map::iterator ins = m_map.insert(std::pair<const K, Node*>(k,nullptr))
       .first;
     Node *n = new Node(ins->first);
     ins->second = n;
@@ -479,7 +479,7 @@ private:
     Lock lock(m_queueLock);
     // Add to head of list
     item->heapIndex = 0;
-    item->prev = NULL;
+    item->prev = nullptr;
     item->next = m_head;
     if (m_head) m_head->prev = item;
     m_head = item;
@@ -502,7 +502,7 @@ private:
     if (item->next) {
       item->next->prev = item->prev;
     }
-    item->prev = item->next = NULL;
+    item->prev = item->next = nullptr;
     if (item->heapIndex != 0) {
       int pos = item->heapIndex;
       int last = m_heap.size();
@@ -515,18 +515,18 @@ private:
   }
   // Pop the minimum
   Node *popQueue() {
-    if (!m_maximumCapacity) return NULL;
+    if (!m_maximumCapacity) return nullptr;
     Lock lock(m_queueLock);
     _shiftMature();
     if (m_heap.size() == 0) {
       Node *res = m_tail;
-      if (!res) return NULL;
+      if (!res) return nullptr;
       if (res->prev) {
-        res->prev->next = NULL;
+        res->prev->next = nullptr;
       }
       m_tail = res->prev;
-      res->prev = NULL;
-      if (res == m_head) m_head = NULL;
+      res->prev = nullptr;
+      if (res == m_head) m_head = nullptr;
       return res;
     }
     Node *res = m_heap[0];
@@ -543,15 +543,15 @@ private:
 
   void _shiftMature() {
     // Move mature items to heap
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     while (m_tail && ((now - m_tail->timestamp()) >= m_maturityThreshold)) {
       Node *last = m_tail;
       if (last->prev) {
-        last->prev->next = NULL;
+        last->prev->next = nullptr;
       }
       m_tail = last->prev;
-      if (m_head == last) m_head = NULL;
-      last->prev = NULL;
+      if (m_head == last) m_head = nullptr;
+      last->prev = nullptr;
       last->updateFrequency();
       _heapInsert(last);
     }

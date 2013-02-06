@@ -23,7 +23,7 @@ namespace HPHP {
 IpBlockMap::Acl::Acl() : m_networks(true) {}
 
 IpBlockMap::BinaryPrefixTrie::BinaryPrefixTrie(bool allow) {
-  m_children[0] = m_children[1] = NULL;
+  m_children[0] = m_children[1] = nullptr;
   setAllowed(allow);
 }
 
@@ -102,7 +102,7 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
   char address[STRING_IPV6_ADDR_MAX_LENGTH + 1];
   int address_len;
   const char *slash;
-  bool is_ipv6 = (NULL != strchr(text, ':'));
+  bool is_ipv6 = (nullptr != strchr(text, ':'));
 
   // Find the bit count, if any.
   slash = strchr(text, '/');

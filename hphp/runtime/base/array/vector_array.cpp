@@ -307,7 +307,7 @@ ZendArray *VectorArray::escalateToNonEmptyZendArray() const {
     CVarRef v = tvAsCVarRef(&m_elems[i]);
     pp[i] = NEWALLOC(a) ZendArray::Bucket(i, withRefBind(v));
   }
-  pp[m_size] = NULL;
+  pp[m_size] = nullptr;
   ret = NEW(ZendArray)(m_size, m_size, pp);
   if (UNLIKELY(pp != p)) free(pp);
   if (m_pos != ArrayData::invalid_index) {
@@ -344,19 +344,19 @@ ArrayData *VectorArray::lvalNew(Variant *&ret, bool copy) {
   ret = &v;
   checkInsertIterator((ssize_t)index);
   m_size++;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::lval(int64 k, Variant *&ret, bool copy,
                              bool checkExist /* = false */) {
-  ret = inRange(k, m_size) ? &tvAsVariant(&m_elems[k]) : NULL;
-  if (ret == NULL && k != m_size) {
+  ret = inRange(k, m_size) ? &tvAsVariant(&m_elems[k]) : nullptr;
+  if (ret == nullptr && k != m_size) {
     ZendArray *a = escalateToZendArray();
     a->addLvalImpl(k, &ret, false);
     return a;
   }
   if (LIKELY(!copy)) {
-    if (ret) return NULL;
+    if (ret) return nullptr;
     assert(m_size == k);
     checkSize();
     Variant& v = tvAsUninitializedVariant(&m_elems[k]);
@@ -364,10 +364,10 @@ ArrayData *VectorArray::lval(int64 k, Variant *&ret, bool copy,
     ret = &v;
     checkInsertIterator((ssize_t)k);
     m_size++;
-    return NULL;
+    return nullptr;
   }
   if (checkExist && ret && (ret->isReferenced() || ret->isObject())) {
-    return NULL;
+    return nullptr;
   }
   VectorArray *a = NEW(VectorArray)(this);
   if (ret) {
@@ -411,7 +411,7 @@ ArrayData *VectorArray::set(int64 k, CVarRef v, bool copy) {
       return a;
     }
     tvAsVariant(&m_elems[k]).assignVal(v);
-    return NULL;
+    return nullptr;
   }
   if (k == m_size) return VectorArray::append(v, copy);
   ZendArray *a = escalateToZendArray();
@@ -436,13 +436,13 @@ ArrayData *VectorArray::setRef(int64 k, CVarRef v, bool copy) {
   } else {
     if (inRange(k, m_size)) {
       tvAsVariant(&m_elems[k]).assignRef(v);
-      return NULL;
+      return nullptr;
     } else if (k == m_size) {
       checkSize();
       tvAsUninitializedVariant(&m_elems[k]).constructRefHelper(v);
       checkInsertIterator((ssize_t)k);
       m_size++;
-      return NULL;
+      return nullptr;
     }
   }
   ZendArray *a = escalateToZendArray();
@@ -479,7 +479,7 @@ ArrayData *VectorArray::append(CVarRef v, bool copy) {
   tvAsUninitializedVariant(&m_elems[index]).constructValHelper(v);
   checkInsertIterator((ssize_t)index);
   m_size++;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::appendRef(CVarRef v, bool copy) {
@@ -493,7 +493,7 @@ ArrayData *VectorArray::appendRef(CVarRef v, bool copy) {
   tvAsUninitializedVariant(&m_elems[index]).constructRefHelper(v);
   checkInsertIterator((ssize_t)index);
   m_size++;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::appendWithRef(CVarRef v, bool copy) {
@@ -509,7 +509,7 @@ ArrayData *VectorArray::appendWithRef(CVarRef v, bool copy) {
   to.setWithRef(v);
   checkInsertIterator((ssize_t)index);
   m_size++;
-  return NULL;
+  return nullptr;
 }
 
 HOT_FUNC_HPHP
@@ -550,13 +550,13 @@ ArrayData *VectorArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
       m_size += velems->m_size;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::pop(Variant &value) {
   if (UNLIKELY(!m_size)) {
     value.setNull();
-    return NULL;
+    return nullptr;
   }
   if (UNLIKELY(getCount() > 1)) {
     value = tvAsCVarRef(&m_elems[m_size - 1]);
@@ -575,7 +575,7 @@ ArrayData *VectorArray::pop(Variant &value) {
   // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator
   m_pos = m_size ? (ssize_t)0 : ArrayData::invalid_index;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::add(int64 k, CVarRef v, bool copy) {
@@ -611,7 +611,7 @@ ArrayData *VectorArray::addLval(int64 k, Variant *&ret, bool copy) {
   ret = &v;
   checkInsertIterator((ssize_t)index);
   m_size++;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::addLval(StringData* k, Variant *&ret, bool copy) {
@@ -621,7 +621,7 @@ ArrayData *VectorArray::addLval(StringData* k, Variant *&ret, bool copy) {
 }
 
 ArrayData *VectorArray::remove(int64 k, bool copy) {
-  if (!inRange(k, m_size)) return NULL;
+  if (!inRange(k, m_size)) return nullptr;
   if (k != m_size - 1L) {
     ArrayData *a = escalateToNonEmptyZendArray();
     a->remove(k, false);
@@ -639,11 +639,11 @@ ArrayData *VectorArray::remove(int64 k, bool copy) {
   if (m_pos == k) m_pos = ArrayData::invalid_index;
   assert(m_size && k == m_size - 1L);
   m_size--;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::remove(const StringData* k, bool copy) {
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::prepend(CVarRef v, bool copy) {
@@ -672,13 +672,13 @@ ArrayData *VectorArray::prepend(CVarRef v, bool copy) {
   // To match PHP-like semantics, the prepend operation resets the array's
   // internal iterator
   m_pos = (ssize_t)0;
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *VectorArray::dequeue(Variant &value) {
   if (UNLIKELY(!m_size)) {
     value.setNull();
-    return NULL;
+    return nullptr;
   }
   if (UNLIKELY(getCount() > 1)) {
     value = tvAsCVarRef(&m_elems[0]);
@@ -699,7 +699,7 @@ ArrayData *VectorArray::dequeue(Variant &value) {
   // To match PHP-like semantics, the dequeue operation resets the array's
   // internal iterator
   m_pos = m_size ? (ssize_t)0 : ArrayData::invalid_index;
-  return NULL;
+  return nullptr;
 }
 
 void VectorArray::onSetEvalScalar() {

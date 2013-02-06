@@ -85,7 +85,7 @@ static int fd_transfer_request_handler(
 LibEventServerWithTakeover::LibEventServerWithTakeover
 (const std::string &address, int port, int thread, int timeoutSeconds)
   : LibEventServer(address, port, thread, timeoutSeconds),
-    m_delete_handle(NULL),
+    m_delete_handle(nullptr),
     m_took_over(false)
 {
 }
@@ -142,7 +142,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
       Logger::Error("Unable to close afdt server");
       return -1;
     }
-    m_delete_handle = NULL;
+    m_delete_handle = nullptr;
 
     *response = P_VERSION C_TERM_OK;
     Logger::Info("takeover: notifying all listeners");
@@ -187,7 +187,7 @@ void LibEventServerWithTakeover::setupFdServer() {
 
 int LibEventServerWithTakeover::getAcceptSocket() {
   int ret;
-  const char *address = m_address.empty() ? NULL : m_address.c_str();
+  const char *address = m_address.empty() ? nullptr : m_address.c_str();
 
   if (m_accept_sock != -1) {
     Logger::Warning("LibEventServerWithTakeover trying to get a socket, "
@@ -226,7 +226,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
       &timeout,
       &err);
   if (ret < 0) {
-    fd_transfer_error_hander(&err, NULL);
+    fd_transfer_error_hander(&err, nullptr);
     errno = EADDRINUSE;
     return -1;
   } else if (m_accept_sock < 0) {
@@ -291,7 +291,7 @@ void LibEventServerWithTakeover::start() {
         &timeout,
         &err);
     if (ret < 0) {
-      fd_transfer_error_hander(&err, NULL);
+      fd_transfer_error_hander(&err, nullptr);
       Logger::Warning("Failed to shut-down old server with AFDT.");
       // The higher-level start logic will try *very* hard to recover from this.
     }
@@ -318,7 +318,7 @@ void LibEventServerWithTakeover::start() {
 }
 
 void LibEventServerWithTakeover::stop() {
-  if (m_delete_handle != NULL) {
+  if (m_delete_handle != nullptr) {
     afdt_close_server(m_delete_handle);
   }
   m_accept_sock = -1;

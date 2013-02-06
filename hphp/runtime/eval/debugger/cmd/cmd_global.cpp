@@ -35,7 +35,7 @@ bool CmdGlobal::help(DebuggerClient *client) {
   client->helpCmds(
     "[g]lobal",           "lists all global variables",
     "[g]lobal {text}",    "full-text search global variables",
-    NULL
+    nullptr
   );
   client->helpBody(
     "This will print names and values of all global variables, if {text} is "

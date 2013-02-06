@@ -154,7 +154,7 @@ void DBQuery::setField(const char *fmt, unsigned int value) {
 ///////////////////////////////////////////////////////////////////////////////
 
 int DBQuery::execute() {
-  return execute(NULL);
+  return execute(nullptr);
 }
 
 int DBQuery::execute(DBDataSet &ds) {
@@ -208,7 +208,7 @@ const char *DBQuery::getNextSql() {
     const char *where = m_filter->getNext(m_where);
     if (where) return getSql(where);
   }
-  return NULL;
+  return nullptr;
 }
 
 const char *DBQuery::getSql(const char *where) {

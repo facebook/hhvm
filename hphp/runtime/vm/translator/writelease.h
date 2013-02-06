@@ -42,7 +42,7 @@ struct Lease {
   int64           m_hintGrabbed;
 
   Lease() : m_held(false), m_hintExpire(0), m_hintKept(0), m_hintGrabbed(0) {
-    pthread_mutex_init(&m_lock, NULL);
+    pthread_mutex_init(&m_lock, nullptr);
   }
   ~Lease() {
     if (m_held && m_owner == pthread_self()) {

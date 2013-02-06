@@ -22,7 +22,7 @@ namespace HPHP { namespace Eval {
 void CmdMacro::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     static const char *keywords[] =
-      { "start", "end", "replay", "list", "clear", NULL};
+      { "start", "end", "replay", "list", "clear", nullptr};
     client->addCompletion(keywords);
   }
 }
@@ -37,7 +37,7 @@ bool CmdMacro::help(DebuggerClient *client) {
     "& [r]eplay {name}",    "replays a named macro",
     "& [l]ist",             "lists all macros",
     "& [c]lear {index}",    "deletes a macro",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Macro command allows you to record a series of debugger command, so "

@@ -32,7 +32,7 @@ public:
   static std::string SourceRoot;
 
 public:
-  FileCache() : m_fd(-1), m_size(0), m_addr(NULL) {}
+  FileCache() : m_fd(-1), m_size(0), m_addr(nullptr) {}
   ~FileCache();
 
   /**

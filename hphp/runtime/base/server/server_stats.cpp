@@ -662,7 +662,7 @@ void ServerStats::Clear() {
 
 void ServerStats::CollectSlots(list<TimeSlot*> &slots, int64 from, int64 to) {
   if (from < 0 || to <= 0) {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     if (from < 0) from = now + from;
     if (to <= 0) to = now + to;
   }
@@ -1033,7 +1033,7 @@ int64 ServerStats::get(const std::string &name) {
 }
 
 void ServerStats::logPage(const string &url, int code) {
-  int64 now = time(NULL) / RuntimeOption::StatsSlotDuration;
+  int64 now = time(nullptr) / RuntimeOption::StatsSlotDuration;
   int slot = now % RuntimeOption::StatsMaxSlot;
 
   {
@@ -1297,7 +1297,7 @@ IOStatusHelper::IOStatusHelper(const char *name,
 IOStatusHelper::~IOStatusHelper() {
   if (ServerStats::s_profile_network ||
       (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats)) {
-    ServerStats::SetThreadIOStatus(NULL, NULL);
+    ServerStats::SetThreadIOStatus(nullptr, nullptr);
   }
 }
 

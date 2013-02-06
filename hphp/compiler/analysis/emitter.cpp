@@ -735,7 +735,7 @@ const StringData* SymbolicStack::getName(int index) const {
   if (m_symStack[index].metaType == META_LITSTR) {
     return m_symStack[index].metaData.name;
   }
-  return NULL;
+  return nullptr;
 }
 
 const StringData* SymbolicStack::getClsName(int index) const {
@@ -1600,7 +1600,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
         StringData::GetStaticString(meth->getOriginalName());
       m_methLabels[methName] = new Label();
       // Emit afterwards
-      postponeMeth(meth, NULL, true);
+      postponeMeth(meth, nullptr, true);
     }
   }
   {
@@ -1793,7 +1793,7 @@ static StringData* getClassName(ExpressionPtr e) {
   if (cls && !cls->isTrait()) {
     return StringData::GetStaticString(cls->getOriginalName());
   }
-  return NULL;
+  return nullptr;
 }
 
 static DataType getPredictedDataType(ExpressionPtr expr) {
@@ -1895,7 +1895,7 @@ bool isTupleInit(ExpressionPtr init_expr, int* cap) {
     ExpressionPtr ex = (*el)[i];
     if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
     ArrayPairExpressionPtr ap = static_pointer_cast<ArrayPairExpression>(ex);
-    if (ap->getName() != NULL || ap->isRef()) return false;
+    if (ap->getName() != nullptr || ap->isRef()) return false;
   }
   *cap = n;
   return true;
@@ -2523,7 +2523,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             return false;
           }
 
-          postponeMeth(m, NULL, true);
+          postponeMeth(m, nullptr, true);
         } else {
           FuncEmitter* fe = m_ue.newFuncEmitter(nName, false);
           e.DefFunc(fe->id());
@@ -2843,7 +2843,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (op == T_COLLECTION) {
           ScalarExpressionPtr cls =
             static_pointer_cast<ScalarExpression>(b->getExp1());
-          const std::string* clsName = NULL;
+          const std::string* clsName = nullptr;
           cls->getString(clsName);
           int cType = 0;
           if (!strcasecmp(clsName->c_str(), "vector")) {
@@ -2996,7 +2996,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ExpressionListPtr args(el->getExpressions());
         int n = args ? args->getCount() : 0;
         int i = 0;
-        FPIRegionRecorder* fpi = NULL;
+        FPIRegionRecorder* fpi = nullptr;
         if (el->getType() == '`') {
           const static StringData* s_shell_exec =
             StringData::GetStaticString("shell_exec");
@@ -3643,7 +3643,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           TypedValue tvVal;
           initScalar(tvVal, val);
 
-          if (key != NULL) {
+          if (key != nullptr) {
             // Key.
             assert(key->isScalar());
             TypedValue tvKey;
@@ -3786,7 +3786,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
           className, PreClass::AlwaysHoistable);
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
-                  AttrUnique | AttrPersistent, parentName, NULL);
+                  AttrUnique | AttrPersistent, parentName, nullptr);
 
         // We're still at the closure definition site. Emit code to instantiate
         // the new anonymous class, with the use variables as arguments.
@@ -3807,7 +3807,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         TypedValue uninit;
         tvWriteUninit(&uninit);
         for (int i = 0; i < useCount; ++i) {
-          pce->addProperty(useVars[i].first, AttrPrivate, NULL, &uninit);
+          pce->addProperty(useVars[i].first, AttrPrivate, nullptr, &uninit);
         }
 
         // The constructor. This is entirely generated; all it does is stash its
@@ -4761,7 +4761,7 @@ void EmitterVisitor::emitClsIfSPropBase(Emitter& e) {
 }
 
 Label* EmitterVisitor::getContinuationGotoLabel(StatementPtr s) {
-  Label* label = NULL;
+  Label* label = nullptr;
   StatementListPtr stmts(static_pointer_cast<StatementList>(s));
   for (int i = 0; i < stmts->getCount(); i++) {
     StatementPtr s((*stmts)[i]);
@@ -4771,7 +4771,7 @@ Label* EmitterVisitor::getContinuationGotoLabel(StatementPtr s) {
       visit(f);
     } else if (s->is(Statement::KindOfGotoStatement)) {
       GotoStatementPtr g(static_pointer_cast<GotoStatement>(s));
-      always_assert(label == NULL);
+      always_assert(label == nullptr);
       label = &m_gotoLabels[StringData::GetStaticString(g->label())];
     } else {
       not_implemented();
@@ -5314,7 +5314,7 @@ void EmitterVisitor::emitPostponedMeths() {
         e.VerifyParamType(i);
       }
       if (fe->isClosureBody()) {
-        assert(p.m_closureUseVars != NULL);
+        assert(p.m_closureUseVars != nullptr);
         // Emit code to unpack the instance variables (which store the
         // use-variables) into locals. Some of the use-variables may have the
         // same name, in which case the last one wins.
@@ -5605,7 +5605,7 @@ void EmitterVisitor::emitPostponedClosureCtors() {
     ClosureUseVarVec& useVars = ctor.m_useVars;
     FuncEmitter* fe = ctor.m_fe;
     const Location* sLoc = ctor.m_expr->getLocation().get();
-    fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrPublic, false, NULL);
+    fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrPublic, false, nullptr);
 
     unsigned n = useVars.size();
     Emitter e(ctor.m_expr, m_ue, *this);
@@ -5859,7 +5859,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   ExpressionListPtr params(node->getParams());
   int numParams = params ? params->getCount() : 0;
   bool isBuiltinCall = false;
-  StringData* nLiteral = NULL;
+  StringData* nLiteral = nullptr;
   Offset fpiStart;
   if (node->getClass() || !node->getClassName().empty()) {
     bool isSelfOrParent = node->isSelf() || node->isParent();
@@ -5906,7 +5906,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
       e.FPushFuncD(numParams, nLiteral);
     } else {
       // Special handling for func_get_args and friends inside a generator.
-      const StringData* specialMethodName = NULL;
+      const StringData* specialMethodName = nullptr;
       static const StringData* contName =
         StringData::GetStaticString(CONTINUATION_OBJECT_NAME);
       Id contId = m_curFunc->lookupVarId(contName);
@@ -5924,7 +5924,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
         specialMethodName = s_get_arg;
       }
 
-      if (specialMethodName != NULL) {
+      if (specialMethodName != nullptr) {
         emitVirtualLocal(contId);
         emitCGet(e);
         fpiStart = m_ue.bcPos();
@@ -6104,9 +6104,9 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     pce->addUserAttribute(uaName, tv);
   }
 
-  NonScalarVec* nonScalarPinitVec = NULL;
-  NonScalarVec* nonScalarSinitVec = NULL;
-  NonScalarVec* nonScalarConstVec = NULL;
+  NonScalarVec* nonScalarPinitVec = nullptr;
+  NonScalarVec* nonScalarSinitVec = nullptr;
+  NonScalarVec* nonScalarConstVec = nullptr;
   if (StatementListPtr stmts = is->getStmts()) {
     int i, n = stmts->getCount();
     for (i = 0; i < n; i++) {
@@ -6150,12 +6150,12 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             } else {
               tvWriteUninit(&tvVal);
               if (!(attrs & AttrStatic)) {
-                if (nonScalarPinitVec == NULL) {
+                if (nonScalarPinitVec == nullptr) {
                   nonScalarPinitVec = new NonScalarVec();
                 }
                 nonScalarPinitVec->push_back(NonScalarPair(propName, vNode));
               } else {
-                if (nonScalarSinitVec == NULL) {
+                if (nonScalarSinitVec == nullptr) {
                   nonScalarSinitVec = new NonScalarVec();
                 }
                 nonScalarSinitVec->push_back(NonScalarPair(propName, vNode));
@@ -6188,7 +6188,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             initScalar(tvVal, vNode);
           } else {
             tvWriteUninit(&tvVal);
-            if (nonScalarConstVec == NULL) {
+            if (nonScalarConstVec == nullptr) {
               nonScalarConstVec = new NonScalarVec();
             }
             nonScalarConstVec->push_back(NonScalarPair(constName, vNode));
@@ -6220,7 +6220,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     postponeCtor(is, fe);
   }
 
-  if (nonScalarPinitVec != NULL) {
+  if (nonScalarPinitVec != nullptr) {
     // Non-scalar property initializers require 86pinit() for run-time
     // initialization support.
     static const StringData* methName = StringData::GetStaticString("86pinit");
@@ -6229,7 +6229,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     postponePinit(is, fe, nonScalarPinitVec);
   }
 
-  if (nonScalarSinitVec != NULL) {
+  if (nonScalarSinitVec != nullptr) {
     // Non-scalar property initializers require 86sinit() for run-time
     // initialization support.
     static const StringData* methName = StringData::GetStaticString("86sinit");
@@ -6238,7 +6238,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     postponeSinit(is, fe, nonScalarSinitVec);
   }
 
-  if (nonScalarConstVec != NULL) {
+  if (nonScalarConstVec != nullptr) {
     // Non-scalar constant initializers require 86cinit() for run-time
     // initialization support.
     static const StringData* methName = StringData::GetStaticString("86cinit");
@@ -6644,7 +6644,7 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
 StringData* EmitterVisitor::newClosureName() {
   std::ostringstream str;
   str << "Closure" << '$';
-  if (m_curFunc->pce() != NULL) {
+  if (m_curFunc->pce() != nullptr) {
     str << m_curFunc->pce()->name()->data();
   }
   str << '$';
@@ -7023,7 +7023,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       StringData::GetStaticString(e.ci->getParentClass().get());
     PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
                                                   PreClass::AlwaysHoistable);
-    pce->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent, parentName, NULL);
+    pce->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent, parentName, nullptr);
     pce->setBuiltinClassInfo(e.ci, e.info->m_InstanceCtor, e.info->m_sizeof);
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
@@ -7052,7 +7052,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         const ClassInfo::MethodInfo* mi =
           e.ci->getMethodInfo(std::string(methodInfo->m_name));
         Offset base = ue->bcPos();
-        fe->setBuiltinFunc(mi, bcf, NULL, base);
+        fe->setBuiltinFunc(mi, bcf, nullptr, base);
         ue->emitOp(OpNativeImpl);
       }
       Offset past = ue->bcPos();
@@ -7101,7 +7101,7 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   }
 
   UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
-  assert(ue != NULL);
+  assert(ue != nullptr);
 
   if (Option::GenerateTextHHBC) {
     std::unique_ptr<Unit> unit(ue->create());
@@ -7126,7 +7126,7 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
 class UEQ : public Synchronizable {
  public:
   void push(UnitEmitter* ue) {
-    assert(ue != NULL);
+    assert(ue != nullptr);
     Lock lock(this);
     m_ues.push_back(ue);
     notify();
@@ -7136,12 +7136,12 @@ class UEQ : public Synchronizable {
     if (m_ues.empty()) {
       // Check for empty() after wait(), in case of spurious wakeup.
       if (!wait(sec, nsec) || m_ues.empty()) {
-        return NULL;
+        return nullptr;
       }
     }
     assert(m_ues.size() > 0);
     UnitEmitter* ue = m_ues.front();
-    assert(ue != NULL);
+    assert(ue != nullptr);
     m_ues.pop_front();
     return ue;
   }
@@ -7303,7 +7303,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
       // Poll, but with a 100ms timeout so that this thread doesn't spin wildly
       // if it gets ahead of the workers.
       UnitEmitter* ue = s_ueq.tryPop(0, 100 * 1000 * 1000);
-      if ((didPop = (ue != NULL))) {
+      if ((didPop = (ue != nullptr))) {
         ues.push_back(ue);
       }
       if (ues.size() == kBatchSize
@@ -7355,7 +7355,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     BuiltinSymbols::Load(ar, true);
     BuiltinSymbols::NoSuperGlobals = false;
     TypeConstraint tc;
-    return NULL;
+    return nullptr;
   }
 
   try {
@@ -7396,7 +7396,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     return unit;
   } catch (const std::exception&) {
     // extern "C" function should not be throwing exceptions...
-    return NULL;
+    return nullptr;
   }
 }
 

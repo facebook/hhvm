@@ -366,7 +366,7 @@ public:
   static const ssize_t LastFlag        = EventHookFlag;
 
   RequestInjectionData()
-    : conditionFlags(0), surprisePage(NULL), started(0), timeoutSeconds(-1),
+    : conditionFlags(0), surprisePage(nullptr), started(0), timeoutSeconds(-1),
       debugger(false), debuggerIdle(0), dummySandbox(false),
       debuggerIntr(false), coverage(false) {
   }

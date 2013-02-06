@@ -1193,7 +1193,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       RepoLocalMode = repoLocal["Mode"].getString();
       if (!empty && RepoLocalMode.empty()) {
         const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
-        if (HHVM_REPO_LOCAL_MODE != NULL) {
+        if (HHVM_REPO_LOCAL_MODE != nullptr) {
           RepoLocalMode = HHVM_REPO_LOCAL_MODE;
         }
       }
@@ -1211,7 +1211,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       RepoLocalPath = repoLocal["Path"].getString();
       if (!empty && RepoLocalPath.empty()) {
         const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
-        if (HHVM_REPO_LOCAL_PATH != NULL) {
+        if (HHVM_REPO_LOCAL_PATH != nullptr) {
           RepoLocalPath = HHVM_REPO_LOCAL_PATH;
         }
       }

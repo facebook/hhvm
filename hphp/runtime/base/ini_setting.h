@@ -48,7 +48,7 @@ public:
   static bool Set(CStrRef name, CStrRef value);
 
   static void Bind(const char *name, const char *value,
-                   PFN_UPDATE_CALLBACK callback, void *p = NULL);
+                   PFN_UPDATE_CALLBACK callback, void *p = nullptr);
   static void Unbind(const char *name);
 
   static void SetGlobalDefault(const char *name, const char *value);

@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static Mutex *s_locks = NULL;
+static Mutex *s_locks = nullptr;
 
 static unsigned long callback_thread_id() {
   return (unsigned long)Process::GetThreadId();

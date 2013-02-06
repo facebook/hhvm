@@ -35,28 +35,28 @@ namespace HPHP {
   NEWOBJ(c_##name)()
 #endif
 #define ALLOC_OBJECT_STUB(name)                                           \
-  HPHP::VM::Class* SystemLib::s_##name##Class = NULL;                     \
+  HPHP::VM::Class* SystemLib::s_##name##Class = nullptr;                     \
   ObjectData* SystemLib::Alloc##name##Object() {                          \
     return ALLOC_OBJECT_STUB_RETURN(name);                                \
   }
 
 bool SystemLib::s_inited = false;
-HPHP::Eval::PhpFile* SystemLib::s_phpFile = NULL;
-HPHP::VM::Unit* SystemLib::s_unit = NULL;
-HPHP::VM::Unit* SystemLib::s_nativeFuncUnit = NULL;
-HPHP::VM::Unit* SystemLib::s_nativeClassUnit = NULL;
-HPHP::VM::Class* SystemLib::s_stdclassClass = NULL;
-HPHP::VM::Class* SystemLib::s_ExceptionClass = NULL;
-HPHP::VM::Class* SystemLib::s_BadMethodCallExceptionClass = NULL;
-HPHP::VM::Class* SystemLib::s_InvalidArgumentExceptionClass = NULL;
-HPHP::VM::Class* SystemLib::s_RuntimeExceptionClass = NULL;
-HPHP::VM::Class* SystemLib::s_OutOfBoundsExceptionClass = NULL;
-HPHP::VM::Class* SystemLib::s_InvalidOperationExceptionClass = NULL;
-HPHP::VM::Class* SystemLib::s_pinitSentinelClass = NULL;
-HPHP::VM::Class* SystemLib::s_resourceClass = NULL;
-HPHP::VM::Class* SystemLib::s_DOMExceptionClass = NULL;
-HPHP::VM::Class* SystemLib::s_SoapFaultClass = NULL;
-HPHP::VM::Class* SystemLib::s_ContinuationClass = NULL;
+HPHP::Eval::PhpFile* SystemLib::s_phpFile = nullptr;
+HPHP::VM::Unit* SystemLib::s_unit = nullptr;
+HPHP::VM::Unit* SystemLib::s_nativeFuncUnit = nullptr;
+HPHP::VM::Unit* SystemLib::s_nativeClassUnit = nullptr;
+HPHP::VM::Class* SystemLib::s_stdclassClass = nullptr;
+HPHP::VM::Class* SystemLib::s_ExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_BadMethodCallExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_InvalidArgumentExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_RuntimeExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_OutOfBoundsExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_InvalidOperationExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_pinitSentinelClass = nullptr;
+HPHP::VM::Class* SystemLib::s_resourceClass = nullptr;
+HPHP::VM::Class* SystemLib::s_DOMExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_SoapFaultClass = nullptr;
+HPHP::VM::Class* SystemLib::s_ContinuationClass = nullptr;
 
 ObjectData* SystemLib::AllocStdClassObject() {
   if (hhvm) {

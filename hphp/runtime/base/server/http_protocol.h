@@ -36,7 +36,7 @@ public:
   static bool ProxyRequest(Transport *transport, bool force,
                            const std::string &url, int &code,
                            std::string &error, StringBuffer &response,
-                           HeaderMap *extraHeaders = NULL);
+                           HeaderMap *extraHeaders = nullptr);
 
   static std::string RecordRequest(Transport *transport);
   static void ClearRecord(bool success, const std::string &tmpfile);

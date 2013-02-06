@@ -489,7 +489,7 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
 
   bool setNull = false;
 
-  if (SpecialAssignment(cg, ar, m_variable, m_value, NULL, ref)) {
+  if (SpecialAssignment(cg, ar, m_variable, m_value, nullptr, ref)) {
     return;
   }
 

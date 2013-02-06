@@ -28,7 +28,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
                        const std::string &sourceRoot,
                        const std::string &pathTranslation)
   :  m_rewritten(false), m_defaultDoc(false), m_done(false),
-     m_forbidden(false), m_ext(NULL) {
+     m_forbidden(false), m_ext(nullptr) {
   if (!process(vhost, transport, sourceRoot, pathTranslation,
                transport->getServerObject()) ||
       (m_forbidden && RuntimeOption::ForbiddenAs404)) {
@@ -306,11 +306,11 @@ void RequestURI::processExt() {
 const char *RequestURI::parseExt(CStrRef s) {
   int pos = s.rfind('.');
   if (pos == -1) {
-    return NULL;
+    return nullptr;
   }
   if (s.find('/', pos) != -1) {
     // '/' after '.' is not extension, e.g., "./foo" "../bar"
-    return NULL;
+    return nullptr;
   }
   return s.data() + pos + 1;
 }

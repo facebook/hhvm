@@ -61,7 +61,7 @@ class FailedIRGen : public std::exception {
 
 // Flags to identify if a branch should go to a patchable jmp in astubs
 // happens when instructions have been moved off the main trace to the exit path.
-static const TCA kIRDirectJmpInactive = NULL;
+static const TCA kIRDirectJmpInactive = nullptr;
 // Fixup Jcc;Jmp branches out of trace using REQ_BIND_JMPCC_FIRST/SECOND
 static const TCA kIRDirectJccJmpActive = (TCA)0x01;
 // Optimize Jcc exit from trace when fall through path stays in trace
@@ -1260,7 +1260,7 @@ struct IRInstruction {
 
   void setLabel(LabelInstruction* l) { m_label = l; }
   LabelInstruction* getLabel() const { return m_label; }
-  bool isControlFlowInstruction() const { return m_label != NULL; }
+  bool isControlFlowInstruction() const { return m_label != nullptr; }
 
   virtual bool equals(IRInstruction* inst) const;
   virtual size_t hash() const;
@@ -1570,9 +1570,9 @@ public:
   explicit Trace(LabelInstruction* label, uint32 bcOff, bool isMain) {
     appendInstruction(label);
     m_bcOff = bcOff;
-    m_lastAsmAddress = NULL;
-    m_firstAsmAddress = NULL;
-    m_firstAstubsAddress = NULL;
+    m_lastAsmAddress = nullptr;
+    m_firstAsmAddress = nullptr;
+    m_firstAstubsAddress = nullptr;
     m_isMain = isMain;
   }
 

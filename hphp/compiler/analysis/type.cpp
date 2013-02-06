@@ -702,7 +702,7 @@ const char *Type::getCPPInitializer() {
   case KindOfPrimitive:
   case KindOfPlusOperand: return "0";
   case KindOfDouble:      return "0.0";
-  default:                return NULL;
+  default:                return nullptr;
   }
 }
 

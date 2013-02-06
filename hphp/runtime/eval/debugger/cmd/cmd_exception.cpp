@@ -45,7 +45,7 @@ bool CmdException::help(DebuggerClient *client) {
     "",                             "",
     "[e]xception {above} if {php}", "breaks if condition meets",
     "[e]xception {above} && {php}", "breaks and evaluates an expression",
-    NULL
+    nullptr
   );
   client->helpBody(
     "Exception command is similar to '[b]reak' command, except it's used "

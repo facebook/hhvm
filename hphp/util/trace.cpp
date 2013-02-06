@@ -73,7 +73,7 @@ class Init {
       }
       char *e = strdup(env);
       char *tok;
-      for (tok = strtok(e, ","); tok; tok = strtok(NULL, ",")) {
+      for (tok = strtok(e, ","); tok; tok = strtok(nullptr, ",")) {
         char *ctok;
         char *moduleName = tok;
         if (( ctok = strchr(moduleName, ':'))) {

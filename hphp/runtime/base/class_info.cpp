@@ -30,10 +30,10 @@ namespace HPHP {
 // statics
 
 bool ClassInfo::s_loaded = false;
-ClassInfo *ClassInfo::s_systemFuncs = NULL;
-ClassInfo *ClassInfo::s_userFuncs = NULL;
+ClassInfo *ClassInfo::s_systemFuncs = nullptr;
+ClassInfo *ClassInfo::s_userFuncs = nullptr;
 ClassInfo::ClassMap ClassInfo::s_class_like;
-ClassInfoHook *ClassInfo::s_hook = NULL;
+ClassInfoHook *ClassInfo::s_hook = nullptr;
 
 Array ClassInfo::GetSystemFunctions() {
   assert(s_loaded);
@@ -82,10 +82,10 @@ const ClassInfo::MethodInfo *ClassInfo::FindFunction(CStrRef name) {
   assert(s_loaded);
 
   const MethodInfo *ret = s_systemFuncs->getMethodInfo(name);
-  if (ret == NULL && s_hook) {
+  if (ret == nullptr && s_hook) {
     ret = s_hook->findFunction(name);
   }
-  if (ret == NULL) {
+  if (ret == nullptr) {
     ret = s_userFuncs->getMethodInfo(name);
   }
   return ret;
@@ -217,12 +217,12 @@ const ClassInfo::ConstantInfo *ClassInfo::FindConstant(CStrRef name) {
   return info;
 }
 
-ClassInfo::ConstantInfo::ConstantInfo() : callbacks(NULL), deferred(true) {
+ClassInfo::ConstantInfo::ConstantInfo() : callbacks(nullptr), deferred(true) {
 }
 
 Variant ClassInfo::ConstantInfo::getValue() const {
   if (deferred) {
-    if (callbacks == NULL) {
+    if (callbacks == nullptr) {
       return get_constant(name);
     }
     return callbacks->os_constant(name);
@@ -309,7 +309,7 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
                                 int type /* = 0 */) {
   if (classname.empty()) return false;
 
-  const ClassInfo *classInfo = NULL;
+  const ClassInfo *classInfo = nullptr;
   switch (type) {
     case 0:
       classInfo = FindClassInterfaceOrTrait(classname);
@@ -494,7 +494,7 @@ const ClassInfo *ClassInfo::getDeclared() const {
 
 const ClassInfo *ClassInfo::getParentClassInfo() const {
   CStrRef parentName = getParentClass();
-  if (parentName.empty()) return NULL;
+  if (parentName.empty()) return nullptr;
   return FindClass(parentName);
 }
 
@@ -574,7 +574,7 @@ ClassInfo::MethodInfo *ClassInfo::getMethodInfo(CStrRef name) const {
     }
     return m;
   }
-  return NULL;
+  return nullptr;
 }
 
 ClassInfo::MethodInfo *ClassInfo::hasMethod(CStrRef name,
@@ -589,7 +589,7 @@ const {
     assert(!(it->second->attribute & (IsVolatile|IsRedeclared)));
     return it->second;
   }
-  ClassInfo::MethodInfo *result = NULL;
+  ClassInfo::MethodInfo *result = nullptr;
   const ClassInfo *parent = getParentClassInfo();
   if (parent) result = parent->hasMethod(name, classInfo);
   if (result || !interfaces || !(m_attribute & IsAbstract)) return result;
@@ -601,7 +601,7 @@ const {
     if (iface) result = iface->hasMethod(name, classInfo, true);
     if (result) return result;
   }
-  return NULL;
+  return nullptr;
 }
 
 // internal function  className::methodName or callObject->methodName
@@ -666,7 +666,7 @@ const char *ClassInfo::getConstructor() const {
   if (!(m_attribute & IsTrait) && hasMethod(m_name, defClass)) {
     return m_name;
   }
-  return NULL;
+  return nullptr;
 }
 
 void ClassInfo::getAllProperties(PropertyMap &props) const {
@@ -709,7 +709,7 @@ ClassInfo::PropertyInfo *ClassInfo::getPropertyInfo(CStrRef name) const {
   if (iter != properties.end()) {
     return iter->second;
   }
-  return NULL;
+  return nullptr;
 }
 
 bool ClassInfo::hasProperty(CStrRef name) const {
@@ -725,7 +725,7 @@ ClassInfo::ConstantInfo *ClassInfo::getConstantInfo(CStrRef name) const {
   if (iter != constants.end()) {
     return iter->second;
   }
-  return NULL;
+  return nullptr;
 }
 
 bool ClassInfo::hasConstant(CStrRef name) const {
@@ -997,7 +997,7 @@ ClassInfoUnique::~ClassInfoUnique() {
 
 const ClassInfo *ClassInfoUnique::getParentClassInfo() const {
   if (m_parentInfo) return m_parentInfo;
-  if (m_parent.empty()) return NULL;
+  if (m_parent.empty()) return nullptr;
   return FindClass(m_parent);
 }
 
@@ -1051,10 +1051,10 @@ void ClassInfo::Load() {
 
     if (info->m_name.empty()) {
       if (attribute & IsSystem) {
-        assert(s_systemFuncs == NULL);
+        assert(s_systemFuncs == nullptr);
         s_systemFuncs = info;
       } else {
-        assert(s_userFuncs == NULL);
+        assert(s_userFuncs == nullptr);
         s_userFuncs = info;
       }
     } else {
@@ -1203,7 +1203,7 @@ static const ClassPropTableEntry *FindRedeclaredProp(
     cpt = osc->cpt;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
@@ -1365,13 +1365,13 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
         case KindOfInt64:   *(int64*)addr = value;  break;
         case KindOfDouble:  *(double*)addr = value; break;
         case KindOfString:
-          *(String*)addr = value.isString() ? value.getStringData() : NULL;
+          *(String*)addr = value.isString() ? value.getStringData() : nullptr;
           break;
         case KindOfArray:
-          *(Array*)addr = value.isArray() ? value.getArrayData() : NULL;
+          *(Array*)addr = value.isArray() ? value.getArrayData() : nullptr;
           break;
         case KindOfObject:
-          *(Object*)addr = value.isObject() ? value.getObjectData() : NULL;
+          *(Object*)addr = value.isObject() ? value.getObjectData() : nullptr;
           break;
         default:
           assert(false);

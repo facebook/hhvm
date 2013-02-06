@@ -105,7 +105,7 @@ inline void HphpArray::init(uint size) {
 }
 
 HphpArray::HphpArray(uint size) : ArrayData(kHphpArray),
-  m_lastE(ElmIndEmpty), m_data(NULL), m_nextKI(0), m_hLoad(0) {
+  m_lastE(ElmIndEmpty), m_data(nullptr), m_nextKI(0), m_hLoad(0) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -115,7 +115,7 @@ HphpArray::HphpArray(uint size) : ArrayData(kHphpArray),
 }
 
 HphpArray::HphpArray(uint size, const TypedValue* values) :
-    ArrayData(kHphpArray), m_lastE(ElmIndEmpty), m_data(NULL),
+    ArrayData(kHphpArray), m_lastE(ElmIndEmpty), m_data(nullptr),
     m_nextKI(0), m_hLoad(0)
   {
 #ifdef PEDANTIC
@@ -145,7 +145,7 @@ HphpArray::HphpArray(uint size, const TypedValue* values) :
 }
 
 HphpArray::HphpArray(EmptyMode) : ArrayData(kHphpArray),
-  m_lastE(ElmIndEmpty), m_data(NULL), m_nextKI(0), m_hLoad(0) {
+  m_lastE(ElmIndEmpty), m_data(nullptr), m_nextKI(0), m_hLoad(0) {
   init(0);
   setStatic();
 }
@@ -524,7 +524,7 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
 }
 
 #define FIND_FOR_INSERT_BODY(h0, hit) \
-  ElmInd* ret = NULL; \
+  ElmInd* ret = nullptr; \
   size_t tableMask = m_tableMask; \
   size_t probeIndex = size_t(h0) & tableMask; \
   Elm* elms = m_data; \
@@ -637,7 +637,7 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
 #ifdef PEDANTIC
   if (m_size >= 0x7fffffffU) {
     raise_error("Cannot insert into array with 2^31 - 1 elements");
-    return NULL;
+    return nullptr;
   }
 #endif
   ++m_size;
@@ -828,7 +828,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   } else {
     // Silence compiler warnings.
     mPos.hash = 0;
-    mPos.key = NULL;
+    mPos.key = nullptr;
   }
   TinyVector<ElmKey, 3> siKeys;
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
@@ -957,7 +957,7 @@ void HphpArray::nextInsertWithRef(CVarRef data) {
 }
 
 void HphpArray::addLvalImpl(int64 ki, Variant** pDest) {
-  assert(pDest != NULL);
+  assert(pDest != nullptr);
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     *pDest = &tvAsVariant(&m_data[*ei].data);
@@ -973,7 +973,7 @@ void HphpArray::addLvalImpl(int64 ki, Variant** pDest) {
 }
 
 void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
-  assert(key != NULL && pDest != NULL);
+  assert(key != nullptr && pDest != nullptr);
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
@@ -1104,7 +1104,7 @@ ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
   if (!copy) {
     addLvalImpl(k, &ret);
-    return NULL;
+    return nullptr;
   }
   if (!checkExist) {
     HphpArray* a = copyImpl();
@@ -1117,7 +1117,7 @@ ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
     if (tvAsVariant(&e->data).isReferenced() ||
         tvAsVariant(&e->data).isObject()) {
       ret = &tvAsVariant(&e->data);
-      return NULL;
+      return nullptr;
     }
   }
   HphpArray* a = copyImpl();
@@ -1130,7 +1130,7 @@ ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy,
   strhash_t prehash = key->hash();
   if (!copy) {
     addLvalImpl(key, prehash, &ret);
-    return NULL;
+    return nullptr;
   }
   if (!checkExist) {
     HphpArray* a = copyImpl();
@@ -1144,7 +1144,7 @@ ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy,
     if (tvAsVariant(tv).isReferenced() ||
         tvAsVariant(tv).isObject()) {
       ret = &tvAsVariant(tv);
-      return NULL;
+      return nullptr;
     }
   }
   HphpArray* a = copyImpl();
@@ -1168,7 +1168,7 @@ ArrayData *HphpArray::lvalPtr(StringData* key, Variant*& ret, bool copy,
       Elm* e = &t->m_data[pos];
       ret = &tvAsVariant(&e->data);
     } else {
-      ret = NULL;
+      ret = nullptr;
     }
   }
   return a;
@@ -1190,7 +1190,7 @@ ArrayData *HphpArray::lvalPtr(int64 k, Variant*& ret, bool copy,
       Elm* e = &t->m_data[pos];
       ret = &tvAsVariant(&e->data);
     } else {
-      ret = NULL;
+      ret = nullptr;
     }
   }
   return a;
@@ -1199,7 +1199,7 @@ ArrayData *HphpArray::lvalPtr(int64 k, Variant*& ret, bool copy,
 ArrayData* HphpArray::lvalNew(Variant*& ret, bool copy) {
   TypedValue* tv;
   ArrayData* a = nvNew(tv, copy);
-  if (tv == NULL) {
+  if (tv == nullptr) {
     ret = &(Variant::lvalBlackHole());
   } else {
     ret = &tvAsVariant(tv);
@@ -1390,7 +1390,7 @@ TypedValue* HphpArray::nvGet(int64 ki) const {
     Elm* e = &m_data[pos];
     return &e->data;
   }
-  return NULL;
+  return nullptr;
 }
 
 TypedValue* HphpArray::nvGet(const StringData* k) const {
@@ -1399,14 +1399,14 @@ TypedValue* HphpArray::nvGet(const StringData* k) const {
     Elm* e = &m_data[pos];
     return &e->data;
   }
-  return NULL;
+  return nullptr;
 }
 
 ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
   if (UNLIKELY(!a->nextInsert(null))) {
-    ret = NULL;
+    ret = nullptr;
     return t;
   }
   assert(a->m_lastE != ElmIndEmpty);
@@ -1448,7 +1448,7 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
 
 inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
   target->m_pos = m_pos;
-  target->m_data = NULL;
+  target->m_data = nullptr;
   target->m_nextKI = m_nextKI;
   target->m_tableMask = m_tableMask;
   target->m_size = m_size;
@@ -1568,7 +1568,7 @@ ArrayData *HphpArray::appendWithRef(CVarRef v, bool copy) {
 
 ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
   HphpArray* a = this;
-  HphpArray* result = NULL;
+  HphpArray* result = nullptr;
   if (copy) {
     result = a = copyImpl();
   }
@@ -1603,7 +1603,7 @@ ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
 
 ArrayData* HphpArray::pop(Variant& value) {
   HphpArray* a = this;
-  HphpArray* result = NULL;
+  HphpArray* result = nullptr;
   if (getCount() > 1) {
     result = a = copyImpl();
   }
@@ -1628,7 +1628,7 @@ ArrayData* HphpArray::pop(Variant& value) {
 
 ArrayData* HphpArray::dequeue(Variant& value) {
   HphpArray* a = this;
-  HphpArray* result = NULL;
+  HphpArray* result = nullptr;
   if (getCount() > 1) {
     result = a = copyImpl();
   }
@@ -1655,7 +1655,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
 
 ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   HphpArray* a = this;
-  HphpArray* result = NULL;
+  HphpArray* result = nullptr;
   if (copy) {
     result = a = copyImpl();
   }
@@ -1769,7 +1769,7 @@ void setmDecRef(StringData* sd) { decRefStr(sd); }
 
 static inline ArrayData*
 array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
-  if (NULL == retval) {
+  if (nullptr == retval) {
     return old;
   }
   retval->incRefCount();

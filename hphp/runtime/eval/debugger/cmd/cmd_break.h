@@ -25,7 +25,7 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdBreak);
 class CmdBreak : public DebuggerCommand {
 public:
-  CmdBreak() : DebuggerCommand(KindOfBreak), m_breakpoints(NULL) {}
+  CmdBreak() : DebuggerCommand(KindOfBreak), m_breakpoints(nullptr) {}
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);

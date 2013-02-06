@@ -802,7 +802,7 @@ void ArrayUtil::InitScalarArrays(Array arrs[], int nArrs,
                                  int scalarArrayDataSize) {
   int len = scalarArrayDataSize;
   char *uncompressed = gzdecode(scalarArrayData, len);
-  if (uncompressed == NULL) {
+  if (uncompressed == nullptr) {
     throw Exception("Bad scalarArrayData %p", scalarArrayData);
   }
   String s = String(uncompressed, len, AttachString);

@@ -67,7 +67,7 @@ class RepoStmt {
  private:
   void finalize();
  public:
-  bool prepared() const { return (m_stmt != NULL); }
+  bool prepared() const { return (m_stmt != nullptr); }
   void prepare(const std::string& sql);
   void reset();
   Repo& repo() const { return m_repo; }

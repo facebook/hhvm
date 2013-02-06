@@ -1377,7 +1377,7 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
 
         assert(Type::HasFastCastMethod(spec));
 
-        const char *nullGetMethod = NULL;
+        const char *nullGetMethod = nullptr;
         switch (spec->getKindOf()) {
         case Type::KindOfArray:
           nullGetMethod = "getArrayDataOrNull";
@@ -1393,7 +1393,7 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
           break;
         }
 
-        assert(!needsNullGet || nullGetMethod != NULL);
+        assert(!needsNullGet || nullGetMethod != nullptr);
 
         cg_printf("%s", paramName.c_str());
         if (needsNullGet) {

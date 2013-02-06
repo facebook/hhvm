@@ -27,17 +27,17 @@ TRACE_SET_MOD(txdeps);
 
 const TypedValue* preConstVecHasUnique(const PreConstPtrVec& preConsts) {
   if (preConsts.empty()) {
-    return NULL;
+    return nullptr;
   }
 
   assert(preConsts.size() >= 1);
   const TypedValue* first = &preConsts.front()->value;
   if (first->m_type == KindOfUninit) {
-    return NULL;
+    return nullptr;
   }
   for (size_t i = 1; i < preConsts.size(); ++i) {
     if (!tvSame(first, &preConsts[i]->value)) {
-      return NULL;
+      return nullptr;
     }
   }
   return first;

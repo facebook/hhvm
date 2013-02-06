@@ -33,7 +33,7 @@ Pipe::~Pipe() {
 }
 
 bool Pipe::open(CStrRef filename, CStrRef mode) {
-  assert(m_stream == NULL);
+  assert(m_stream == nullptr);
   assert(m_fd == -1);
 
   FILE *f = LightProcess::popen(filename.data(), mode.data());
@@ -59,7 +59,7 @@ bool Pipe::closeImpl() {
     s_file_data->m_pcloseRet = pcloseRet;
     ret = (pcloseRet == 0); 
     m_closed = true;
-    m_stream = NULL;
+    m_stream = nullptr;
   }
   File::closeImpl();
   return ret;

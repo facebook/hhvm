@@ -308,16 +308,16 @@ Offset* instrJumpOffset(Opcode* instr) {
   assert(!isSwitch(*instr));
   int mask = jumpMask[*instr];
   if (mask == 0) {
-    return NULL;
+    return nullptr;
   }
   int immNum;
   switch (mask) {
-    case 0: return NULL;
+    case 0: return nullptr;
     case 1: immNum = 0; break;
     case 2: immNum = 1; break;
     case 4: immNum = 2; break;
     case 8: immNum = 3; break;
-    default: assert(false); return NULL;
+    default: assert(false); return nullptr;
   }
 
   return &getImmPtr(instr, immNum)->u_BA;
@@ -676,7 +676,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define READOFF() do {                                              \
   Offset _value = *(Offset*)it;                                     \
   out << " " << _value;                                             \
-  if (u != NULL) {                                                  \
+  if (u != nullptr) {                                                  \
     out << " (" << u->offsetOf(iStart + _value) << ")";             \
   }                                                                 \
   it += sizeof(Offset);                                             \
@@ -779,7 +779,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
       out << ":";                           \
     }                                       \
     Offset o = readData<Offset>(it);        \
-    if (u != NULL) {                        \
+    if (u != nullptr) {                        \
       out << u->offsetOf(iStart + o);       \
     } else {                                \
       out << o;                             \

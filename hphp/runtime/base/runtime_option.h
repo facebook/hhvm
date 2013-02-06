@@ -31,7 +31,7 @@ class AccessLogFileData;
  */
 class RuntimeOption {
 public:
-  static void Load(Hdf &config, StringVec *overwrites = NULL,
+  static void Load(Hdf &config, StringVec *overwrites = nullptr,
                    bool empty = false);
 
   static bool Loaded;

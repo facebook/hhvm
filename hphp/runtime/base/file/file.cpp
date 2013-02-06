@@ -122,7 +122,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
                    int options /* = 0 */,
                    CVarRef context /* = null */) {
   File *file = Stream::open(filename, mode, options, context);
-  if (file != NULL) {
+  if (file != nullptr) {
     file->m_name = filename.data();
     file->m_mode = mode.data();
     return Object(file);
@@ -135,7 +135,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
 
 File::File(bool nonblocking)
   : m_fd(-1), m_closed(false), m_nonblocking(nonblocking), m_writepos(0),
-    m_readpos(0), m_position(0), m_buffer(NULL) {
+    m_readpos(0), m_position(0), m_buffer(nullptr) {
 }
 
 File::~File() {
@@ -145,7 +145,7 @@ File::~File() {
 void File::closeImpl() {
   if (m_buffer) {
     free(m_buffer);
-    m_buffer = NULL;
+    m_buffer = nullptr;
   }
 }
 
@@ -179,7 +179,7 @@ String File::read(int64 length) {
   int64 avail = m_writepos - m_readpos;
 
   while (avail < length && !eof()) {
-    if (m_buffer == NULL) {
+    if (m_buffer == nullptr) {
       m_buffer = (char *)malloc(CHUNK_SIZE);
     }
 
@@ -327,7 +327,7 @@ Array File::getMetaData() {
 String File::readLine(int64 maxlen /* = 0 */) {
   size_t current_buf_size = 0;
   size_t total_copied = 0;
-  char *ret = NULL;
+  char *ret = nullptr;
   for (;;) {
     int64 avail = m_writepos - m_readpos;
     if (avail > 0) {
@@ -380,7 +380,7 @@ String File::readLine(int64 maxlen /* = 0 */) {
     } else if (eof()) {
       break;
     } else {
-      if (m_buffer == NULL) {
+      if (m_buffer == nullptr) {
         m_buffer = (char *)malloc(CHUNK_SIZE);
       }
       m_writepos = readImpl(m_buffer, CHUNK_SIZE);
@@ -392,7 +392,7 @@ String File::readLine(int64 maxlen /* = 0 */) {
   }
 
   if (total_copied == 0) {
-    assert(ret == NULL);
+    assert(ret == nullptr);
     return String();
   }
 
@@ -410,7 +410,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
   }
 
   int64 avail = m_writepos - m_readpos;
-  if (m_buffer == NULL) {
+  if (m_buffer == nullptr) {
     m_buffer = (char *)malloc(CHUNK_SIZE * 3);
   }
   if (avail < maxlen && !eof()) {
@@ -439,7 +439,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
       if (pos >= 0) {
         e = m_buffer + m_readpos + pos;
       } else {
-        e = NULL;
+        e = nullptr;
       }
     }
 

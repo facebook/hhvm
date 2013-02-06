@@ -98,7 +98,7 @@ namespace HPHP {
 class RandData {
 public:
   RandData()
-    : seeded(false), left(0), next(NULL),
+    : seeded(false), left(0), next(nullptr),
       lcg_seeded(false), lcg_s1(0), lcg_s2(0) {
     memset(state, 0, sizeof(state));
   }
@@ -218,7 +218,7 @@ int64 math_mt_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
 static void lcg_seed() {
   RandData *data = s_rand_data.getNoCheck();
   struct timeval tv;
-  if (gettimeofday(&tv, NULL) == 0) {
+  if (gettimeofday(&tv, nullptr) == 0) {
     data->lcg_s1 = tv.tv_sec ^ (tv.tv_usec<<11);
   } else {
     data->lcg_s1 = 1;
@@ -226,7 +226,7 @@ static void lcg_seed() {
   data->lcg_s2 = (long)getpid();
 
   /* Add entropy to s2 by calling gettimeofday() again */
-  if (gettimeofday(&tv, NULL) == 0) {
+  if (gettimeofday(&tv, nullptr) == 0) {
     data->lcg_s2 ^= (tv.tv_usec<<11);
   }
 

@@ -64,7 +64,7 @@ bool TempFile::closeImpl() {
     s_file_data->m_pcloseRet = ::close(m_fd);
     ret = (s_file_data->m_pcloseRet == 0);
     m_closed = true;
-    m_stream = NULL;
+    m_stream = nullptr;
     m_fd = -1;
   }
   if (!m_rawName.empty()) {

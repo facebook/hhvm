@@ -129,31 +129,31 @@ void ThriftBuffer::skip(int8 type) {
       while (true) {
         int8 ttype; read(ttype); // get field type
         if (ttype == T_STOP) break;
-        read(NULL, 2); // skip field number, I16
+        read(nullptr, 2); // skip field number, I16
         skip(ttype); // skip field payload
       }
       return;
     case T_BOOL:
     case T_BYTE:
-      read(NULL, 1);
+      read(nullptr, 1);
       return;
     case T_I16:
-      read(NULL, 2);
+      read(nullptr, 2);
       return;
     case T_I32:
-      read(NULL, 4);
+      read(nullptr, 4);
       return;
     case T_U64:
     case T_I64:
     case T_DOUBLE:
-      read(NULL, 8);
+      read(nullptr, 8);
       return;
     //case T_UTF7: // aliases T_STRING
     case T_UTF8:
     case T_UTF16:
     case T_STRING: {
       int32 len; read(len);
-      read(NULL, len);
+      read(nullptr, len);
       } return;
     case T_MAP: {
       int8 keytype; read(keytype);

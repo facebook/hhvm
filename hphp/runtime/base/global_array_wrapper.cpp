@@ -78,32 +78,32 @@ ArrayData *GlobalArrayWrapper::lval(int64   k, Variant *&ret, bool copy,
 ArrayData *GlobalArrayWrapper::lval(StringData* k, Variant *&ret,
                                     bool copy, bool checkExist /* = false */) {
   ret = &m_globals->get(StrNR(k));
-  return NULL;
+  return nullptr;
 }
 ArrayData* GlobalArrayWrapper::lvalNew(Variant *&ret, bool copy) {
   ret = &m_globals->lvalAt();
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::set(int64   k, CVarRef v, bool copy) {
   ArrayData::set(String(k), v, copy);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::set(StringData* k, CVarRef v, bool copy) {
   m_globals->get(StrNR(k)).assignVal(v);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::setRef(int64   k, CVarRef v, bool copy) {
   ArrayData::setRef(String(k), v, copy);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::setRef(StringData* k, CVarRef v,
                                       bool copy) {
   m_globals->get(StrNR(k)).assignRef(v);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::remove(int64   k, bool copy) {
@@ -112,30 +112,30 @@ ArrayData *GlobalArrayWrapper::remove(int64   k, bool copy) {
 
 ArrayData *GlobalArrayWrapper::remove(const StringData* k, bool copy) {
   unset(m_globals->get(StrNR(k)));
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::copy() const {
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::append(CVarRef v, bool copy) {
   m_globals->append(v);
-  return NULL;
+  return nullptr;
 }
 ArrayData *GlobalArrayWrapper::appendRef(CVarRef v, bool copy) {
   m_globals->appendRef(v);
-  return NULL;
+  return nullptr;
 }
 ArrayData *GlobalArrayWrapper::appendWithRef(CVarRef v, bool copy) {
   m_globals->appendWithRef(v);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::append(const ArrayData *elems, ArrayOp op,
                                       bool copy) {
   ((Array*)m_globals)->get()->append(elems, op, false);
-  return NULL;
+  return nullptr;
 }
 
 ArrayData *GlobalArrayWrapper::pop(Variant &value) {

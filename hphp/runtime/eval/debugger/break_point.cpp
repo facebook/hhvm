@@ -86,7 +86,7 @@ const char *InterruptSiteFI::getClass() const {
 }
 
 const char *InterruptSiteFI::getFunction() const {
-  if (m_function == NULL) {
+  if (m_function == nullptr) {
     m_function = m_frame->getFunction();
     if (m_frame->getFlags() & FrameInjection::PseudoMain) {
       m_function = "";
@@ -103,7 +103,7 @@ const char *InterruptSiteFI::getFunction() const {
 
 InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
                                  CVarRef e /* = null_variant */)
-  : InterruptSite(e), m_unit(NULL), m_valid(false), m_funcEntry(false) {
+  : InterruptSite(e), m_unit(nullptr), m_valid(false), m_funcEntry(false) {
   const_assert(hhvm);
   VM::Transl::VMRegAnchor _;
 #define bail_on(c) if (c) { return; }
@@ -193,7 +193,7 @@ const char *BreakPointInfo::GetInterruptName(InterruptType interrupt) {
       assert(false);
       break;
   }
-  return NULL;
+  return nullptr;
 }
 
 BreakPointInfo::BreakPointInfo(bool regex, State state,
@@ -857,7 +857,7 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
           break;
         }
       }
-      if (f == NULL) {
+      if (f == nullptr) {
         return false;
       }
     }

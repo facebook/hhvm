@@ -296,7 +296,7 @@ class PreClass : public AtomicCountable {
 
   Func* lookupMethod(const StringData* methName) const {
     Func* f = m_methods.lookupDefault(methName, 0);
-    assert(f != NULL);
+    assert(f != nullptr);
     return f;
   }
 

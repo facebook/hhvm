@@ -79,7 +79,7 @@ public:
   static const StringData *GetIntegerStringData(int64 n) {
     if (HasConverted(n)) {
       const StringData *sd = *(converted_integers + n);
-      if (UNLIKELY(sd == NULL)) {
+      if (UNLIKELY(sd == nullptr)) {
         return ConvertInteger(n);
       }
       return sd;
@@ -87,7 +87,7 @@ public:
     IntegerStringDataMap::const_iterator it =
       integer_string_data_map.find(n);
     if (it != integer_string_data_map.end()) return it->second;
-    return NULL;
+    return nullptr;
   }
   static const StringData *GetIntegerStringData(int n) {
     return GetIntegerStringData((int64)n);
@@ -95,7 +95,7 @@ public:
   static const char *GetIntegerString(int64 n) {
     const StringData *sd = GetIntegerStringData(n);
     if (sd) return sd->data();
-    return NULL;
+    return nullptr;
   }
   static const char *GetIntegerString(int n) {
     return GetIntegerString((int64)n);
@@ -238,7 +238,7 @@ public:
     return m_px ? m_px->mutableSlice() : MutableSlice("", 0);
   }
   bool isNull() const {
-    return m_px == NULL;
+    return m_px == nullptr;
   }
   bool isNumeric() const {
     return m_px ? m_px->isNumeric() : false;
@@ -641,7 +641,7 @@ public:
   StaticString(const StaticString &str);
   ~StaticString() {
     // prevent ~SmartPtr from calling decRefCount after data is released
-    m_px = NULL;
+    m_px = nullptr;
   }
   StaticString& operator=(const StaticString &str);
 

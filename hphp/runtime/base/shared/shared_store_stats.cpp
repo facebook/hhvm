@@ -66,7 +66,7 @@ static void writeEntryStr(ostream& out, const char *name, const char* value,
 
 static bool regex_match(const pcre *pattern, const char *subject) {
   int ovector[3];
-  return pcre_exec(pattern, NULL, subject, strlen(subject), 0, 0, ovector,
+  return pcre_exec(pattern, nullptr, subject, strlen(subject), 0, 0, ovector,
                    3) >= 0;
 }
 
@@ -80,7 +80,7 @@ static bool regex_replace(const pcre *pattern, const char *subject,
   int offset = 0;
   int remain = resultLen;
   while (true) {
-    int cnt = pcre_exec(pattern, NULL, subject, strlen(subject), last, 0,
+    int cnt = pcre_exec(pattern, nullptr, subject, strlen(subject), last, 0,
                         ovector, 3);
     if (cnt < 0) {
       // error or no match
@@ -132,7 +132,7 @@ static void normalizeKey(const char *key, char *normalizedKey, size_t outlen) {
   vector<std::string> &middleReplace = RuntimeOption::APCSizeMiddleReplace;
   for (unsigned int i = 0; i < specialMiddle.size(); i++) {
     const char *middle = specialMiddle[i].c_str();
-    if (strstr(key, middle) != NULL) {
+    if (strstr(key, middle) != nullptr) {
       strncpy(normalizedKey, middleReplace[i].c_str(), outlen);
       return;
     }
@@ -141,24 +141,24 @@ static void normalizeKey(const char *key, char *normalizedKey, size_t outlen) {
   const char *error;
   int erroffset;
   static const pcre *re_lower =
-    pcre_compile("/[a-z]/", 0, &error, &erroffset, NULL);
+    pcre_compile("/[a-z]/", 0, &error, &erroffset, nullptr);
 
-  if (index(key, ':') == NULL && !regex_match(re_lower, key)) {
+  if (index(key, ':') == nullptr && !regex_match(re_lower, key)) {
     strncpy(normalizedKey, "ALL_CAPS_N_NUMBERS", outlen);
     return;
   }
 
   static const pcre *re_hash =
-    pcre_compile("[a-f0-9]{8,}", 0, &error, &erroffset, NULL);
+    pcre_compile("[a-f0-9]{8,}", 0, &error, &erroffset, nullptr);
   static const char *re_hash_replace = "{H}";
   static const pcre *re_number =
-    pcre_compile("-?\\d+", 0, &error, &erroffset, NULL);
+    pcre_compile("-?\\d+", 0, &error, &erroffset, nullptr);
   static const char *re_number_replace = "{N}";
   static const pcre *re_locale =
-    pcre_compile("\\b[a-z][a-z]_[A-Z][A-Z]\\b", 0, &error, &erroffset, NULL);
+    pcre_compile("\\b[a-z][a-z]_[A-Z][A-Z]\\b", 0, &error, &erroffset, nullptr);
   static const char *re_locale_replace = "{L}";
   static const pcre *re_i18n =
-    pcre_compile("^i{N}n", 0, &error, &erroffset, NULL);
+    pcre_compile("^i{N}n", 0, &error, &erroffset, nullptr);
   static const char *re_i18n_replace = "i18n";
 
   char *tempBuf = (char *)calloc(outlen + 1, 1);
@@ -324,7 +324,7 @@ bool SharedStoreStats::snapshot(const char *filename, std::string& keySample) {
   }
   ReadLock l(s_rwlock);
   StatsMap::iterator iter;
-  time_t now = time(NULL);
+  time_t now = time(nullptr);
   for (iter = s_detailMap.begin(); iter != s_detailMap.end();  ++iter) {
     assert(!iter->second->isGroup);
     if (keySample != "") {
@@ -441,7 +441,7 @@ void SharedStoreStats::onDelete(const StringData *key, const SharedVariant *var,
       assert(svp->isValid);
       svp->isValid = false;
       svp->deleteCount++;
-      svp->lastDeleteTime = time(NULL);
+      svp->lastDeleteTime = time(nullptr);
     }
   }
 
@@ -462,7 +462,7 @@ void SharedStoreStats::onGet(const StringData *key, const SharedVariant *var) {
   StatsMap::const_accessor cacc;
   if (s_detailMap.find(cacc, (char*)key->data())) {
     SharedValueProfile *svpInd = cacc->second;
-    svpInd->lastFetchTime = time(NULL);
+    svpInd->lastFetchTime = time(nullptr);
     svpInd->fetchCount++;
   }
 }
@@ -528,7 +528,7 @@ void SharedStoreStats::onStore(const StringData *key, const SharedVariant *var,
     }
     svpInd->isValid = true;
     svpInd->storeCount++;
-    svpInd->lastStoreTime = time(NULL);
+    svpInd->lastStoreTime = time(nullptr);
   } else {
     delete svpInd;
   }

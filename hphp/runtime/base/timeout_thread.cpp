@@ -146,7 +146,7 @@ void TimeoutThread::run() {
   event_set(&m_eventPipe, m_pipe.getOut(), EV_READ|EV_PERSIST,
             on_thread_stop, m_eventBase);
   event_base_set(m_eventBase, &m_eventPipe);
-  event_add(&m_eventPipe, NULL);
+  event_add(&m_eventPipe, nullptr);
 
   while (!m_stopped) {
     checkForNewWorkers();

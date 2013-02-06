@@ -120,7 +120,7 @@ LibEventHttpClientPtr LibEventHttpClient::Get(const std::string &address,
 
 LibEventHttpClient::LibEventHttpClient(const std::string &address, int port)
   : m_busy(true), m_address(address), m_port(port), m_requests(0),
-    m_conn(NULL), m_thread(NULL), m_code(0), m_response(NULL), m_len(0) {
+    m_conn(nullptr), m_thread(nullptr), m_code(0), m_response(nullptr), m_len(0) {
   m_eventBase = event_base_new();
 }
 
@@ -141,7 +141,7 @@ void LibEventHttpClient::clear() {
   if (m_thread) {
     m_thread->waitForEnd();
     delete m_thread;
-    m_thread = NULL;
+    m_thread = nullptr;
   }
   m_url.clear();
   m_code = 0;
@@ -149,7 +149,7 @@ void LibEventHttpClient::clear() {
   m_len = 0;
   if (m_response) {
     free(m_response);
-    m_response = NULL;
+    m_response = nullptr;
   }
   m_responseHeaders.clear();
 }
@@ -225,7 +225,7 @@ bool LibEventHttpClient::send(const std::string &url,
 
   // even if we had an m_conn immediately above, it may have been cleared out
   // by onConnectionClosed().
-  if (m_conn == NULL) {
+  if (m_conn == nullptr) {
     m_conn = evhttp_connection_new(m_address.c_str(), m_port);
     evhttp_connection_set_closecb(m_conn, on_connection_closed, this);
     evhttp_connection_set_base(m_conn, m_eventBase);
@@ -310,7 +310,7 @@ void LibEventHttpClient::onRequestCompleted(evhttp_request* request) {
 }
 
 void LibEventHttpClient::onConnectionClosed() {
-  m_conn = NULL;
+  m_conn = nullptr;
   m_requests = 0;
 }
 
@@ -318,12 +318,12 @@ char *LibEventHttpClient::recv(int &len) {
   if (m_thread) {
     m_thread->waitForEnd();
     delete m_thread;
-    m_thread = NULL;
+    m_thread = nullptr;
   }
 
   char *ret = m_response;
   len = m_len;
-  m_response = NULL;
+  m_response = nullptr;
   m_len = 0;
   return ret;
 }

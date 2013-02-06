@@ -89,21 +89,21 @@ static inline void threadStats(uint64*& allocated, uint64*& deallocated,
   size_t len = sizeof(allocated);
   if (mallctlbymib(threadAllocatedpMib,
                    sizeof(threadAllocatedpMib) / sizeof(size_t),
-                   &allocated, &len, NULL, 0)) {
+                   &allocated, &len, nullptr, 0)) {
     not_reached();
   }
 
   len = sizeof(deallocated);
   if (mallctlbymib(threadDeallocatedpMib,
                    sizeof(threadDeallocatedpMib) / sizeof(size_t),
-                   &deallocated, &len, NULL, 0)) {
+                   &deallocated, &len, nullptr, 0)) {
     not_reached();
   }
 
   len = sizeof(cactive);
   if (mallctlbymib(statsCactiveMib,
                    sizeof(statsCactiveMib) / sizeof(size_t),
-                   &cactive, &len, NULL, 0)) {
+                   &cactive, &len, nullptr, 0)) {
     not_reached();
   }
 
@@ -462,7 +462,7 @@ void* SmartAllocatorImpl::alloc(size_t nbytes) {
   assert(nbytes == size_t(m_itemSize));
   MM().getStats().usage += nbytes;
   void* ptr = m_free.maybePop();
-  if (LIKELY(ptr != NULL)) return ptr;
+  if (LIKELY(ptr != nullptr)) return ptr;
   return MM().slabAlloc(nbytes);
 }
 

@@ -27,7 +27,7 @@ class HdfRaw {
 public:
   static Mutex HdfMutex;
 
-  HdfRaw() : m_hdf(NULL), m_count(1) {
+  HdfRaw() : m_hdf(nullptr), m_count(1) {
     // ClearSilver is not thread-safe when calling hdf_init(), so guarding it.
     Lock lock(HdfMutex);
     Hdf::CheckNeoError(hdf_init(&m_hdf));
@@ -51,21 +51,21 @@ Mutex HdfRaw::HdfMutex;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 
-Hdf::Hdf() : m_hdf(NULL), m_dump(NULL) {
+Hdf::Hdf() : m_hdf(nullptr), m_dump(nullptr) {
   m_rawp = new HdfRaw();
 }
 
-Hdf::Hdf(const char *filename) : m_hdf(NULL), m_dump(NULL) {
+Hdf::Hdf(const char *filename) : m_hdf(nullptr), m_dump(nullptr) {
   m_rawp = new HdfRaw();
   append(filename);
 }
 
-Hdf::Hdf(const std::string &filename) : m_hdf(NULL), m_dump(NULL) {
+Hdf::Hdf(const std::string &filename) : m_hdf(nullptr), m_dump(nullptr) {
   m_rawp = new HdfRaw();
   append(filename.c_str());
 }
 
-Hdf::Hdf(const Hdf *hdf, const char *name) : m_hdf(NULL), m_dump(NULL) {
+Hdf::Hdf(const Hdf *hdf, const char *name) : m_hdf(nullptr), m_dump(nullptr) {
   assert(hdf);
   assert(name && *name);
   m_rawp = hdf->m_rawp;
@@ -81,14 +81,14 @@ Hdf::Hdf(const Hdf *hdf, const char *name) : m_hdf(NULL), m_dump(NULL) {
 
 Hdf::Hdf(const Hdf &hdf)
   : m_hdf(hdf.m_hdf), m_rawp(hdf.m_rawp), m_path(hdf.m_path),
-    m_name(hdf.m_name), m_dump(NULL) {
+    m_name(hdf.m_name), m_dump(nullptr) {
   if (m_rawp) {
     m_rawp->inc();
   }
 }
 
 Hdf::Hdf(HDF *hdf)
-  : m_hdf(hdf), m_rawp(NULL), m_dump(NULL) {
+  : m_hdf(hdf), m_rawp(nullptr), m_dump(nullptr) {
 }
 
 Hdf::~Hdf() {
@@ -113,12 +113,12 @@ void Hdf::assign(const Hdf &hdf) {
   m_name = hdf.m_name;
   if (m_dump) {
     free(m_dump);
-    m_dump = NULL;
+    m_dump = nullptr;
   }
 }
 
 void Hdf::copy(const Hdf &hdf) {
-  CheckNeoError(hdf_copy(getRaw(), NULL, hdf.getRaw()));
+  CheckNeoError(hdf_copy(getRaw(), nullptr, hdf.getRaw()));
 }
 
 void Hdf::open(const char *filename) {
@@ -132,7 +132,7 @@ void Hdf::append(const char *filename) {
 }
 
 void Hdf::close() {
-  m_hdf = NULL;
+  m_hdf = nullptr;
   if (m_rawp) {
     m_rawp->dec();
     m_rawp = new HdfRaw();
@@ -141,7 +141,7 @@ void Hdf::close() {
   m_name.clear();
   if (m_dump) {
     free(m_dump);
-    m_dump = NULL;
+    m_dump = nullptr;
   }
 }
 
@@ -234,13 +234,13 @@ const char *Hdf::get(const char *defValue /* = NULL */) const {
 
 std::string Hdf::getString(const std::string &defValue /* = "" */) const {
   const char *v = get();
-  if (v == NULL) return defValue;
+  if (v == nullptr) return defValue;
   return v;
 }
 
 bool Hdf::getBool(bool defValue /* = false */) const {
   const char *v = get();
-  if (v == NULL) return defValue;
+  if (v == nullptr) return defValue;
 
   return *v && strcmp(v, "0") &&
     strcasecmp(v, "false") && strcasecmp(v, "no") && strcasecmp(v, "off");
@@ -248,9 +248,9 @@ bool Hdf::getBool(bool defValue /* = false */) const {
 
 int64 Hdf::getInt(int64 defValue, const char *type, int64 maxValue) const {
   const char *v = get();
-  if (v == NULL) return defValue;
+  if (v == nullptr) return defValue;
 
-  char *endptr = NULL;
+  char *endptr = nullptr;
   int64 n = strtoll(v, &endptr, 0);
   if ((!endptr && !*endptr) ||
       (maxValue && (n > maxValue || n < (- maxValue - 1)))) {
@@ -278,9 +278,9 @@ int64 Hdf::getInt64(int64 defValue /* = 0 */) const {
 
 uint64 Hdf::getUInt(uint64 defValue, const char *type, uint64 mask) const {
   const char *v = get();
-  if (v == NULL) return defValue;
+  if (v == nullptr) return defValue;
 
-  char *endptr = NULL;
+  char *endptr = nullptr;
   int64 n = strtoull(v, &endptr, 0);
   if ((!endptr && !*endptr) || (mask && ((uint64)n & mask))) {
     throw HdfDataTypeException(this, type, v);
@@ -307,9 +307,9 @@ uint64 Hdf::getUInt64(uint64 defValue /* = 0 */) const {
 
 double Hdf::getDouble(double defValue /* = 0 */) const {
   const char *v = get();
-  if (v == NULL) return defValue;
+  if (v == nullptr) return defValue;
 
-  char *endptr = NULL;
+  char *endptr = nullptr;
   double n = strtod(v, &endptr);
   if (!endptr && !*endptr) {
     throw HdfDataTypeException(this, "double", v);
@@ -355,9 +355,9 @@ void Hdf::get(hphp_string_imap<std::string> &values) const {
 
 int Hdf::compare(const char *v2) const {
   const char *v1 = get();
-  if (v1 == NULL && v2 == NULL) return 0;
-  if (v1 == NULL) return -1;
-  if (v2 == NULL) return 1;
+  if (v1 == nullptr && v2 == nullptr) return 0;
+  if (v1 == nullptr) return -1;
+  if (v2 == nullptr) return 1;
   return strcmp(v1, v2);
 }
 
@@ -442,13 +442,13 @@ Hdf &Hdf::operator=(const Hdf &hdf) {
     if (m_dump) {
       free(m_dump);
     }
-    m_dump = NULL;
+    m_dump = nullptr;
   }
   return *this;
 }
 
 void Hdf::set(const char *value) {
-  CheckNeoError(hdf_set_value(getRaw(), NULL, (char*)value));
+  CheckNeoError(hdf_set_value(getRaw(), nullptr, (char*)value));
 }
 
 void Hdf::set(int64 value) {
@@ -550,8 +550,8 @@ Hdf Hdf::operator[](const std::string &name) {
 }
 
 bool Hdf::exists() const {
-  if (m_rawp == NULL) {
-    return m_hdf != NULL;
+  if (m_rawp == nullptr) {
+    return m_hdf != nullptr;
   }
 
   string fullpath = getFullPath();
@@ -629,7 +629,7 @@ void Hdf::fromString(const char *input) {
 const char *Hdf::toString() const {
   if (m_dump) {
     free(m_dump);
-    m_dump = NULL;
+    m_dump = nullptr;
   }
   CheckNeoError(hdf_write_string(getRaw(), &m_dump));
   return m_dump;
@@ -645,11 +645,11 @@ void Hdf::write(const char *filename) const {
 HDF *Hdf::getRaw() const {
   if (m_hdf) return m_hdf;
 
-  if (m_rawp == NULL) {
-    return NULL;
+  if (m_rawp == nullptr) {
+    return nullptr;
   }
 
-  HDF *ret = NULL;
+  HDF *ret = nullptr;
   string fullpath = getFullPath();
   if (fullpath.empty()) {
     ret = m_rawp->m_hdf;

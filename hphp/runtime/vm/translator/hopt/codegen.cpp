@@ -698,6 +698,7 @@ void CodeGenerator::emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
+  assert(!inst->getSrc(0)->hasReg(1)); // TODO: t2082361: handle Gen & Cell
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
   auto dstReg = dst->getReg();

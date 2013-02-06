@@ -103,7 +103,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  * flags:
  *
  *   See doc/ir.specification for the meaning of these flag various.
- * 
+ *
  *   The flags in this opcode table supply default values for the
  *   querying functions in IRInstruction---those functions involve
  *   additional logic (based on operand types, etc) on a
@@ -254,7 +254,7 @@ O(ExitTraceCc,                      NA, SUnk,                              E) \
 O(ExitSlow,                         NA, SUnk,                              E) \
 O(ExitSlowNoProgress,               NA, SUnk,                              E) \
 O(ExitGuardFailure,                 NA, SUnk,                              E) \
-O(Mov,                         DofS(0), S(Gen),                            C) \
+O(Mov,                         DofS(0), SUnk,                              C) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                      Mem|PRc) \
 O(DecRefLoc,                        NA, SUnk,                     E|Mem|Refs) \
@@ -281,8 +281,8 @@ O(ArrayAdd,                     D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 O(DefCls,                           NA, SUnk,                          C|E|N) \
 O(DefFunc,                          NA, SUnk,                          C|E|N) \
 O(InterpOne,                 D(StkPtr), SUnk,                E|N|Mem|Refs|Er) \
-O(Spill,                       DofS(0), S(Gen),                          Mem) \
-O(Reload,                      DofS(0), S(Gen),                          Mem) \
+O(Spill,                       DofS(0), SUnk,                            Mem) \
+O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(AllocSpill,                       NA, C(Int),                        E|Mem) \
 O(FreeSpill,                        NA, C(Int),                        E|Mem) \
 O(CreateCont,                   D(Obj), S(StkPtr)                             \

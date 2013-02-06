@@ -951,14 +951,16 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
   if (const EHEnt* eh = func->findEH(offset)) {
     int faultNest = 0;
     for (;;) {
-      if (faultNest >= fault.m_handledCount) {
+      assert(faultNest <= fault.m_handledCount);
+      if (faultNest == fault.m_handledCount) {
+        ++fault.m_handledCount;
+
         switch (eh->m_ehtype) {
         case EHEnt::EHType_Fault:
           FTRACE(1, "unwindFrag: Entering fault at {}: save {}\n",
                  eh->m_fault,
                  func->unit()->offsetOf(pc));
           fault.m_savedRaiseOffset = func->unit()->offsetOf(pc);
-          ++fault.m_handledCount;
           pc = (uchar*)(func->unit()->entry() + eh->m_fault);
           return UnwindResumeVM;
         case EHEnt::EHType_Catch:

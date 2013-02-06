@@ -24,24 +24,54 @@ namespace HPHP {
 // guys return success/failure (failure for input of all zeros) and the
 // unoffset bit position in their reference param.
 template<typename I64>
-inline bool
-ffs64(I64 input, I64 &out) {
+inline bool ffs64(I64 input, I64 &out) {
   bool retval;
-  asm volatile("bsfq %2, %1;\n\t"
-               "setnz %0;\n\t"
-               : "=r"(retval), "=r"(out)
-               : "r"(input));
+#if defined(__x86_64__)
+  asm volatile (
+    "bsfq  %2, %1\n\t"   // bit scan forward
+    "setnz %0\n\t":      // zero retval if input == 0
+    "=r"(retval), "=r"(out):
+    "r"(input):
+    "cc"
+  );
+#elif defined(__AARCH64EL__)
+  asm volatile (
+    "rbit  %2, %2\n\t"  // reverse bits
+    "clz   %1, %2\n\t"  // count leading zeros
+    "cmp   %1, #64\n\t"
+    "cset  %0, NE":     // return (result != 64)
+    "=r"(retval), "=r"(out), "+r"(input):
+    :
+    "cc"
+  );
+#endif
   return retval;
 }
 
 template<typename I64>
-inline bool
-fls64(I64 input, I64 &out) {
+inline bool fls64(I64 input, I64 &out) {
   bool retval;
-  asm volatile("bsrq %2, %1;\n\t"
-               "setnz %0;\n\t"
-               : "=r"(retval), "=r"(out)
-               : "r"(input));
+#if defined(__x86_64__)
+  asm volatile (
+    "bsrq  %2, %1\n\t"   // bit scan reverse
+    "setnz %0\n\t":      // zero retval if input == 0
+    "=r"(retval), "=r"(out):
+    "r"(input):
+    "cc"
+  );
+#elif defined(__AARCH64EL__)
+  asm volatile (
+    "clz   %1, %2\n\t"      // count leading zeros
+    "neg   %1, %1\n\t"
+    "adds  %1, %1, #63\n\t" // result = 63 - (# of leading zeros)
+                            // "s" suffix sets condition flags
+    "cset  %0, PL":         // return (result >= 0)
+                            //   because result < 0 iff input == 0
+    "=r"(retval), "=r"(out):
+    "r"(input):
+    "cc"
+  );
+#endif
   return retval;
 }
 

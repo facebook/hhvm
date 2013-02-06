@@ -1649,6 +1649,8 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
 }
 
 void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
+  PUNT(InstanceOfD);
+
   const StringData* className = lookupStringId(classNameStrId);
   SSATmp* src = popC();
 

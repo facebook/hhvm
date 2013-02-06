@@ -52,6 +52,7 @@ public:
     m_thisIsAvailable = true;
   }
 
+  // Run one more pass of simplification on this builder's trace.
   void optimizeTrace();
 
   SSATmp* getFP() {
@@ -167,9 +168,9 @@ public:
   SSATmp* genJmpCond(SSATmp* src, Trace* target, bool negate);
   void    genExitWhenSurprised(Trace* target);
   void    genExitOnVarEnv(Trace* target);
-  void    genCheckInit(SSATmp* src, LabelInstruction* target);
+  void    genCheckInit(SSATmp* src, Block* target);
   void    genCheckInit(SSATmp* src, Trace* target) {
-    genCheckInit(src, getLabel(target));
+    genCheckInit(src, getFirstBlock(target));
   }
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genConvToBool(SSATmp* src);
@@ -287,8 +288,8 @@ public:
 
   Type getLocalType(int id);
 
-  LabelInstruction* getLabel(Trace* trace) {
-    return trace ? trace->getLabel() : NULL;
+  Block* getFirstBlock(Trace* trace) {
+    return trace ? trace->front() : nullptr;
   }
 
   /*
@@ -299,27 +300,29 @@ public:
    */
   template <class Branch, class Next, class Taken>
   SSATmp* ifelse(const Func* func, Branch branch, Next next, Taken taken) {
-    LabelInstruction* taken_label = m_irFactory.defLabel(func);
-    LabelInstruction* done_label = m_irFactory.defLabel(func, 1);
+    Block* taken_block = m_irFactory.defBlock(func);
+    Block* done_block = m_irFactory.defBlock(func, 1);
     bool oldEnableCse = m_enableCse;
     m_enableCse = false;
     SCOPE_EXIT { m_enableCse = oldEnableCse; };
-    branch(taken_label);
+    branch(taken_block);
     SSATmp* v1 = next();
-    gen(Jmp_, done_label, v1);
-    appendInstruction(taken_label);
+    gen(Jmp_, done_block, v1);
+    m_trace->push_back(taken_block);
     SSATmp* v2 = taken();
-    gen(Jmp_, done_label, v2);
-    appendInstruction(done_label);
-    SSATmp* result = done_label->getDst(0);
+    gen(Jmp_, done_block, v2);
+    m_trace->push_back(done_block);
+    SSATmp* result = done_block->getLabel()->getDst(0);
     result->setType(Type::unionOf(v1->getType(), v2->getType()));
     return result;
   }
 
 private:
+  static void appendInstruction(IRInstruction* inst, Block* block);
   void      appendInstruction(IRInstruction* inst);
   enum      CloneInstMode { kCloneInst, kUseInst };
-  SSATmp*   optimizeInst(IRInstruction* inst, CloneInstMode clone=kCloneInst);
+  SSATmp*   optimizeWork(IRInstruction* inst);
+  SSATmp*   optimizeInst(IRInstruction* inst);
   SSATmp*   cseLookup(IRInstruction* inst);
   void      cseInsert(IRInstruction* inst);
   CSEHash*  getCSEHashTable(IRInstruction* inst);
@@ -336,7 +339,7 @@ private:
   void      clearTrackedState();
 
   Trace* makeTrace(const Func* func, uint32 bcOff, bool isMain) {
-    return new Trace(m_irFactory.defLabel(func), bcOff, isMain);
+    return new Trace(m_irFactory.defBlock(func), bcOff, isMain);
   }
   void genStLocAux(uint32 id, SSATmp* t0, bool genStoreType);
 

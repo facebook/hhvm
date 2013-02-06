@@ -210,7 +210,7 @@ static bool hoistGuardToLoad(SSATmp* tmp, Type type) {
     case LdRef:
     case LdClsCns:
     {
-      if (!inst->getLabel()) {
+      if (!inst->getTaken()) {
         // Not a control flow instruction, so can't give it check semantics
         break;
       }
@@ -300,7 +300,7 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
       return nullptr;
     },
     JmpNZero,
-    inst->getLabel(),
+    inst->getTaken(),
     newCmp);
   if (!newQueryJmp) return nullptr;
   return newQueryJmp;
@@ -909,7 +909,7 @@ SSATmp* Simplifier::simplifyJmpIsType(IRInstruction* inst) {
   assert(res->isConst());
   if (res->getValBool()) {
     // Taken jump
-    return m_tb->gen(Jmp_, inst->getLabel());
+    return m_tb->gen(Jmp_, inst->getTaken());
   } else {
     // Not taken jump; turn jump into a nop
     inst->convertToNop();
@@ -1065,7 +1065,7 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
   // we known both the class name and the property name statically
   // so use the caching version of LdClsPropAddr
   return m_tb->gen(LdClsPropAddrCached,
-                   inst->getLabel(),
+                   inst->getTaken(),
                    cls,
                    propName,
                    m_tb->genDefConst(clsNameString),
@@ -1074,10 +1074,10 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   auto* src           = inst->getSrc(0);
-  auto* typeFailLabel = inst->getLabel();
+  auto* typeFailBlock = inst->getTaken();
   auto type           = outputType(inst);
 
-  assert(typeFailLabel);
+  assert(typeFailBlock);
   assert(type.notBoxed());
 
   Type srcType = src->getType();
@@ -1091,7 +1091,7 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
     if (srcType.strictSubtypeOf(type)) {
       type = srcType;
     }
-    return m_tb->genLdRef(src, type, typeFailLabel->getParent());
+    return m_tb->genLdRef(src, type, typeFailBlock->getTrace());
   }
   return nullptr;
 }
@@ -1104,7 +1104,7 @@ SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
-  if (inst->getLabel() != nullptr) {
+  if (inst->getTaken() != nullptr) {
     Type type = inst->getSrc(0)->getType();
     if (type.isInit()) {
       // Unnecessary CheckInit!
@@ -1162,7 +1162,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
       val = !val;
     }
     if (val) {
-      return m_tb->gen(Jmp_, inst->getLabel());
+      return m_tb->gen(Jmp_, inst->getTaken());
     }
     inst->convertToNop();
     return nullptr;
@@ -1171,7 +1171,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   // Pull negations into the jump.
   if (isNotInst(src)) {
     return m_tb->gen(inst->getOpcode() == JmpZero ? JmpNZero : JmpZero,
-                     inst->getLabel(),
+                     inst->getTaken(),
                      srcInst->getSrc(0));
   }
 
@@ -1189,19 +1189,19 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   // can test the int/ptr value directly.
   if (isConvIntOrPtrToBool(srcInst)) {
     return m_tb->gen(inst->getOpcode(),
-                     inst->getLabel(),
+                     inst->getTaken(),
                      srcInst->getSrc(0));
   }
 
   // Fuse jumps with query operators.
   if (isQueryOp(srcOpcode) && !disableBranchFusion(srcOpcode)) {
-    SSARange ssas = srcInst->getSrcs();
+    SrcRange ssas = srcInst->getSrcs();
     return m_tb->gen(queryToJmpOp(
                        inst->getOpcode() == JmpZero
                          ? negateQueryOp(srcOpcode)
                          : srcOpcode),
                      srcInst->getTypeParam(), // if it had a type param
-                     inst->getLabel(),
+                     inst->getTaken(),
                      ssas.size(),
                      ssas.begin());
   }

@@ -232,9 +232,9 @@ private:
     return m_liveInsts.test(inst->getIId());
   }
 
-  void setLive(IRInstruction* inst, bool live) {
-    assert(inst->getIId() < m_liveInsts.size());
-    m_liveInsts.set(inst->getIId(), live);
+  void setLive(IRInstruction& inst, bool live) {
+    assert(inst.getIId() < m_liveInsts.size());
+    m_liveInsts.set(inst.getIId(), live);
   }
 
 private:
@@ -609,87 +609,87 @@ SSATmp* MemMap::getValue(SSATmp* ref, int offset) {
 }
 
 void MemMap::optimizeMemoryAccesses(Trace* trace) {
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    if (inst->isControlFlowInstruction() &&
-        inst->getLabel()->getParent() == trace) {
-      // This algorithm only works with linear traces.
-      // TODO t2066994: reset state after each block, at least.
-      return;
-    }
+  if (hasInternalFlow(trace)) {
+    // This algorithm only works with linear traces.
+    // TODO t2066994: reset state after each block, at least.
+    return;
   }
   StoreList tracking;
 
   const Func* curFunc = nullptr;
 
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    if (inst->getOpcode() == Marker) {
-      curFunc = inst->getExtra<Marker>()->func;
-    }
-    // initialize each instruction as live
-    setLive(inst, true);
-
-    int offset = -1;
-    Opcode op = inst->getOpcode();
-
-    if (isLoad(op)) {
-      if (op == LdProp) {
-        offset = inst->getSrc(1)->getValInt();
+  for (Block* block : trace->getBlocks()) {
+    for (IRInstruction& inst : *block) {
+      if (inst.getOpcode() == Marker) {
+        curFunc = inst.getExtra<Marker>()->func;
       }
+      // initialize each instruction as live
+      setLive(inst, true);
 
-      optimizeLoad(inst, offset);
-    } else if (isStore(op)) {
-      if (op == StProp || op == StPropNT) {
-        offset = inst->getSrc(1)->getValInt();
-      }
+      int offset = -1;
+      Opcode op = inst.getOpcode();
 
-      // if we see a store, first check if its last available access is a store
-      // if it is, then the last access is a dead store
-      auto access = inst->getOpcode() == StLoc || inst->getOpcode() == StLocNT
-        ? lastLocalAccess(inst->getExtra<LocalId>()->locId)
-        : getLastAccess(inst->getSrc(0), offset);
-      if (access && isStore(access->getOpcode())) {
-        // if a dead St* is followed by a St*NT, then the second store needs to
-        // now write in the type because the first store will be removed
-        if (access->getOpcode() == StProp && op == StPropNT) {
-          inst->setOpcode(StProp);
-        } else if (access->getOpcode() == StLoc && op == StLocNT) {
-          inst->setOpcode(StLoc);
-        } else if (access->getOpcode() == StRef && op == StRefNT) {
-          inst->setOpcode(StRef);
+      if (isLoad(op)) {
+        if (op == LdProp) {
+          offset = inst.getSrc(1)->getValInt();
+        }
+        // initialize each instruction as live
+        setLive(inst, true);
+
+        optimizeLoad(&inst, offset);
+      } else if (isStore(op)) {
+        if (op == StProp || op == StPropNT) {
+          offset = inst.getSrc(1)->getValInt();
         }
 
-        setLive(access, false);
-      }
+        // if we see a store, first check if its last available access is a store
+        // if it is, then the last access is a dead store
+        auto access = inst.getOpcode() == StLoc || inst.getOpcode() == StLocNT
+          ? lastLocalAccess(inst.getExtra<LocalId>()->locId)
+          : getLastAccess(inst.getSrc(0), offset);
+        if (access && isStore(access->getOpcode())) {
+          // if a dead St* is followed by a St*NT, then the second store needs to
+          // now write in the type because the first store will be removed
+          if (access->getOpcode() == StProp && op == StPropNT) {
+            inst.setOpcode(StProp);
+          } else if (access->getOpcode() == StLoc && op == StLocNT) {
+            inst.setOpcode(StLoc);
+          } else if (access->getOpcode() == StRef && op == StRefNT) {
+            inst.setOpcode(StRef);
+          }
 
-      // start tracking the current store
-      tracking.push_back(std::make_pair(inst, std::vector<IRInstruction*>()));
-    } else if (inst->mayRaiseError()) {
-      // if the function has an exit edge that we don't know anything about
-      // (raising an error), then all stores we're currently tracking need to
-      // be erased. all stores already declared dead are untouched
-      StoreList::iterator it, end;
-      for (it = tracking.begin(), end = tracking.end(); it != end; ) {
-        StoreList::iterator copy = it;
-        ++it;
-        if (isLive(copy->first)) {
-          // XXX: t1779667
-          tracking.erase(copy);
+          setLive(*access, false);
+        }
+
+        // start tracking the current store
+        tracking.push_back(std::make_pair(&inst, std::vector<IRInstruction*>()));
+      } else if (inst.mayRaiseError()) {
+        // if the function has an exit edge that we don't know anything about
+        // (raising an error), then all stores we're currently tracking need to
+        // be erased. all stores already declared dead are untouched
+        StoreList::iterator it, end;
+        for (it = tracking.begin(), end = tracking.end(); it != end; ) {
+          StoreList::iterator copy = it;
+          ++it;
+          if (isLive(copy->first)) {
+            // XXX: t1779667
+            tracking.erase(copy);
+          }
         }
       }
-    }
 
-    // if the current instruction is guarded, make sure all of our stores that
-    // are not yet dead know about it
-    if (inst->getLabel() != nullptr) {
-      for (auto& entry : tracking) {
-        if (isLive(entry.first)) {
-          entry.second.push_back(inst);
+      // if the current instruction is guarded, make sure all of our stores that
+      // are not yet dead know about it
+      if (inst.getTaken()) {
+        for (auto& entry : tracking) {
+          if (isLive(entry.first)) {
+            entry.second.push_back(&inst);
+          }
         }
       }
+      Simplifier::copyProp(&inst);
+      processInstruction(&inst, curFunc && curFunc->isPseudoMain());
     }
-
-    Simplifier::copyProp(inst);
-    processInstruction(inst, curFunc && curFunc->isPseudoMain());
   }
 
   sinkStores(tracking);
@@ -711,14 +711,11 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   Type instTy = inst->getDst()->getType();
   Type valTy = value->getType();
 
-  // check for loads that have a guard and will fail it
-  if (inst->getLabel() != NULL && valTy != instTy) {
+  // check for loads that have a guard that will fail
+  if (inst->getTaken() && valTy != instTy) {
     if (!(valTy.isString() && instTy.isString()) &&
         valTy.isStaticallyKnown() && instTy.isStaticallyKnown()) {
-      inst->setOpcode(Jmp_);
-      inst->setNumSrcs(0);
-      inst->setDst(nullptr);
-      return;
+      return inst->convertToJmp();
     }
   }
 
@@ -732,7 +729,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   } else {
     assert(inst->getNumSrcs() == 1);
   }
-  inst->setLabel(nullptr);
+  inst->setTaken(nullptr);
 
   // convert the instruction into a Mov with the known value
   inst->setOpcode(Mov);
@@ -748,8 +745,8 @@ void MemMap::sinkStores(StoreList& stores) {
     if (isLive(store)) continue;
 
     for (IRInstruction* guard : it->second) {
-      Trace* exit = guard->getLabel()->getParent();
-      exit->prependInstruction(store->clone(m_factory));
+      Block* exit = guard->getTaken();
+      exit->prepend(store->clone(m_factory));
     }
 
     // StRefs cannot just be removed, they have to be converted into Movs
@@ -758,7 +755,7 @@ void MemMap::sinkStores(StoreList& stores) {
       store->setOpcode(Mov);
       store->setSrc(1, nullptr);
       store->setNumSrcs(1);
-      setLive(store, true);
+      setLive(*store, true);
     }
   }
 }

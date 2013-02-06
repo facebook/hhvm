@@ -860,7 +860,7 @@ SSATmp* HhbcTranslator::getClsPropAddr(Trace* exitTrace,
     }
   }
   return m_tb->gen(LdClsPropAddr,
-                   m_tb->getLabel(exitTrace),
+                   m_tb->getFirstBlock(exitTrace),
                    clsTmp,
                    prop,
                    m_tb->genDefConst(getCurClass()));
@@ -1194,7 +1194,7 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
     Type cnsType = Type::Cell;
     SSATmp* c1 = m_tb->gen(LdClsCns, cnsType, cnsNameTmp, clsNameTmp);
     SSATmp* result = m_tb->ifelse(getCurFunc(),
-      [&] (LabelInstruction* taken) { // branch
+      [&] (Block* taken) { // branch
         m_tb->genCheckInit(c1, taken);
       },
       [&] { // Next: LdClsCns hit in TC
@@ -1459,7 +1459,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32             numParams,
                                          const StringData* methName) {
 
 
-  LabelInstruction* exitLabel = getExitSlowTrace()->getLabel();
+  Block* exitBlock = getExitSlowTrace()->front();
 
   UNUSED SSATmp* clsVal  = popC();
   UNUSED SSATmp* methVal = popC();
@@ -1486,7 +1486,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32             numParams,
   } else {
     SSATmp*      clsTmp = m_tb->genDefConst(cls);
     SSATmp* methNameTmp = m_tb->genDefConst(methName);
-    SSATmp*  funcCtxTmp = m_tb->gen(LdClsMethodFCache, exitLabel, clsTmp,
+    SSATmp*  funcCtxTmp = m_tb->gen(LdClsMethodFCache, exitBlock, clsTmp,
                                     methNameTmp, curCtxTmp);
     actRec = m_tb->genDefActRec(funcCtxTmp,
                                 m_tb->genDefInitNull(),

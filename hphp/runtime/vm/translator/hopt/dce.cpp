@@ -19,6 +19,7 @@
 #include "runtime/vm/translator/hopt/opt.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
+#include <boost/range/adaptors.hpp>
 
 namespace HPHP {
 namespace VM {
@@ -40,19 +41,31 @@ enum DceFlags : uint8_t {
 };
 
 // DCE state indexed by instr->getIId.
-typedef InstrState<DceFlags> DceState;
+typedef StateVector<IRInstruction, DceFlags> DceState;
 
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live) {
-  trace->getInstructionList().remove_if([&] (const IRInstruction* inst) {
-    assert(inst->getIId() < live.size());
-    return !live.test(inst->getIId());
-  });
+  auto &blocks = trace->getBlocks();
+  for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
+    auto cur = it; ++it;
+    Block* block = *cur;
+    block->remove_if([&] (const IRInstruction& inst) {
+      assert(inst.getIId() < live.size());
+      return !live.test(inst.getIId());
+    });
+    if (block->empty()) blocks.erase(cur);
+  }
 }
 
 void removeDeadInstructions(Trace* trace, const DceState& state) {
-  trace->getInstructionList().remove_if([&] (const IRInstruction* inst) {
-    return state[inst] == DEAD;
-  });
+  auto &blocks = trace->getBlocks();
+  for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
+    auto cur = it; ++it;
+    Block* block = *cur;
+    block->remove_if([&] (const IRInstruction& inst) {
+      return state[inst] == DEAD;
+    });
+    if (block->empty()) blocks.erase(cur);
+  }
 }
 
 bool isUnguardedLoad(IRInstruction* inst) {
@@ -67,7 +80,8 @@ bool isUnguardedLoad(IRInstruction* inst) {
               inst->getSrc(0)->getType() == Type::PtrToCell);
 }
 
-IRInstruction::List initInstructions(Trace* trace, DceState& state) {
+std::list<IRInstruction*> initInstructions(Trace* trace, DceState& state,
+                                           IRFactory* factory) {
   TRACE(5, "DCE:vvvvvvvvvvvvvvvvvvvv\n");
   // 1. simplify unguarded loads to remove unnecssary branches, and
   //    perform copy propagation on every instruction.  Targets that become
@@ -82,23 +96,23 @@ IRInstruction::List initInstructions(Trace* trace, DceState& state) {
       // and LdStack instruction that produce Cell types will not
       // generate guards, so remove the label from this instruction so
       // that its no longer an essential control-flow instruction
-      inst->setLabel(nullptr);
+      inst->setTaken(nullptr);
     }
   });
 
   // 2. mark reachable, essential, instructions live and enqueue them
-  IRInstruction::List wl;
-  BlockList blocks = buildCfg(trace);
-  for (Block& block : blocks) {
-    for (IRInstruction* inst : block) {
-      if (inst->isControlFlowInstruction()) {
+  std::list<IRInstruction*> wl;
+  BlockList blocks = sortCfg(trace, *factory);
+  for (Block* block : blocks) {
+    for (IRInstruction& inst : *block) {
+      if (inst.isControlFlowInstruction()) {
         // mark the destination label so that the destination trace
         // is marked reachable
-        state[inst->getLabel()] = LIVE;
+        state[inst.getTaken()->getLabel()] = LIVE;
       }
-      if (inst->isEssential()) {
+      if (inst.isEssential()) {
         state[inst] = LIVE;
-        wl.push_back(inst);
+        wl.push_back(&inst);
       }
     }
   }
@@ -111,7 +125,7 @@ IRInstruction::List initInstructions(Trace* trace, DceState& state) {
 // 2) Mark a conditionally dead DecRefNZ as live if its corresponding IncRef
 //    cannot be eliminated.
 void optimizeRefCount(Trace* trace, DceState& state) {
-  for (IRInstruction* inst : trace->getInstructionList()) {
+  forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->getOpcode() == IncRef &&
         state[inst] != REFCOUNT_CONSUMED &&
         state[inst] != REFCOUNT_CONSUMED_OFF_TRACE) {
@@ -128,7 +142,7 @@ void optimizeRefCount(Trace* trace, DceState& state) {
     // Do copyProp at last. When processing DecRefNZs, we still need to look at
     // its source which should not be trampled over.
     Simplifier::copyProp(inst);
-  }
+  });
 }
 
 /*
@@ -154,33 +168,28 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
   assert(trace->isMain());
 
   auto copyProp = [] (Trace* trace) {
-    for (IRInstruction* inst : trace->getInstructionList()) {
-      Simplifier::copyProp(inst);
-    }
+    forEachInst(trace, Simplifier::copyProp);
   };
 
-  IRInstruction::List toSink;
+  std::list<IRInstruction*> toSink;
 
   auto processExit = [&] (Trace* exit) {
     // Sink REFCOUNT_CONSUMED_OFF_TRACE IncRefs before the first non-label
     // instruction, and create a mapping between the original tmps to the sunk
     // tmps so that we can later replace the original ones with the sunk ones.
     std::vector<SSATmp*> sunkTmps(irFactory->numTmps(), nullptr);
-    for (IRInstruction::ReverseIterator j = toSink.rbegin();
-         j != toSink.rend();
-         ++j) {
-      IRInstruction* inst = *j;
-      // prependInstruction inserts an instruction to the beginning. Therefore,
-      // we iterate through toSink in the reversed order.
+    for (auto* inst : boost::adaptors::reverse(toSink)) {
+      // prepend inserts an instruction to the beginning of a block, after
+      // the label. Therefore, we iterate through toSink in the reversed order.
       IRInstruction* sunkInst = irFactory->gen(IncRef, inst->getSrc(0));
       state[sunkInst] = LIVE;
-      exit->prependInstruction(sunkInst);
+      exit->front()->prepend(sunkInst);
 
       auto dstId = inst->getDst()->getId();
       assert(!sunkTmps[dstId]);
       sunkTmps[dstId] = sunkInst->getDst();
     }
-    for (IRInstruction* inst : exit->getInstructionList()) {
+    forEachInst(exit, [&](IRInstruction* inst) {
       // Replace the original tmps with the sunk tmps.
       for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
         SSATmp* src = inst->getSrc(i);
@@ -188,7 +197,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
           inst->setSrc(i, sunkTmp);
         }
       }
-    }
+    });
     // Do copyProp at last, because we need to keep REFCOUNT_CONSUMED_OFF_TRACE
     // Movs as the prototypes for sunk instructions.
     copyProp(exit);
@@ -197,8 +206,8 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
   // An exit trace may be entered from multiple exit points. We keep track of
   // which exit traces we already pushed sunk IncRefs to, so that we won't push
   // them multiple times.
-  boost::dynamic_bitset<> pushedTo(irFactory->numLabels());
-  for (IRInstruction* inst : trace->getInstructionList()) {
+  boost::dynamic_bitset<> pushedTo(irFactory->numBlocks());
+  forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->getOpcode() == IncRef) {
       // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
       // otherwise, it should be already removed in optimizeRefCount.
@@ -221,14 +230,14 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
         toSink.remove(srcInst);
       }
     }
-    if (LabelInstruction* label = inst->getLabel()) {
-      if (!pushedTo[label->getLabelId()]) {
-        pushedTo[label->getLabelId()] = 1;
-        Trace* exit = label->getParent();
+    if (Block* target = inst->getTaken()) {
+      if (!pushedTo[target->getId()]) {
+        pushedTo[target->getId()] = 1;
+        Trace* exit = target->getTrace();
         if (exit != trace) processExit(exit);
       }
     }
-  }
+  });
 
   // Do copyProp at last, because we need to keep REFCOUNT_CONSUMED_OFF_TRACE
   // Movs as the prototypes for sunk instructions.
@@ -240,7 +249,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
   DceState state(irFactory, DEAD);
-  IRInstruction::List wl = initInstructions(trace, state);
+  std::list<IRInstruction*> wl = initInstructions(trace, state, irFactory);
 
   // process the worklist
   while (!wl.empty()) {
@@ -259,7 +268,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
       // <inst> consumes <srcInst> which is an IncRef,
       // so we mark <srcInst> as REFCOUNT_CONSUMED.
       if (inst->consumesReference(i) && srcInst->getOpcode() == IncRef) {
-        if (inst->getParent()->isMain() || !srcInst->getParent()->isMain()) {
+        if (inst->getTrace()->isMain() || !srcInst->getTrace()->isMain()) {
           // <srcInst> is consumed from its own trace.
           state[srcInst] = REFCOUNT_CONSUMED;
         } else {
@@ -293,7 +302,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   // and remove empty exit traces
   trace->getExitTraces().remove_if([](Trace* exit) {
-    return exit->getInstructionList().empty();
+    return exit->getBlocks().empty();
   });
 }
 

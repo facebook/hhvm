@@ -22,28 +22,32 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
-static void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
-  IRInstruction::List& instructions = trace->getInstructionList();
-  IRInstruction::Iterator it;
-  for (it = instructions.begin(); it != instructions.end(); ) {
-    IRInstruction* inst = *it;
-    it++;
-    for (SSATmp* dst : inst->getDsts()) {
-      if (dst->getType().isStaticallyKnown() &&
-          dst->getType().maybeCounted()) {
-        auto* assertInst = factory->gen(DbgAssertRefCount, dst);
-        assertInst->setParent(trace);
-        instructions.insert(it, assertInst);
+/*
+ * Insert a DbgAssertRefCount instruction after each place we produce
+ * a refcounted value.  The value must be something we can safely dereference
+ * to check the _count field.
+ */
+static void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
+  forEachTraceBlock(trace, [&](Block* block) {
+    for (auto it = block->begin(); it != block->end(); ) {
+      IRInstruction& inst = *it;
+      ++it;
+      for (SSATmp& dst : inst.getDsts()) {
+        Type t = dst.getType();
+        if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
+          auto* assertInst = factory->gen(DbgAssertRefCount, &dst);
+          if (inst.isBlockEnd()) {
+            // cannot insert after a branch.  A branch with a dest
+            // is a guard, and the guard's result is only valid on the
+            // fallthrough path.  so put the assert there.
+            block->getNext()->prepend(assertInst);
+          } else {
+            block->insert(it, factory->gen(DbgAssertRefCount, &dst));
+          }
+        }
       }
     }
-  }
-}
-
-static void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
-  insertRefCountAssertsAux(trace, factory);
-  for (Trace* exit : trace->getExitTraces()) {
-    insertRefCountAssertsAux(exit, factory);
-  }
+  });
 }
 
 void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
@@ -100,6 +104,12 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     insertRefCountAsserts(trace, irFactory);
+    if (RuntimeOption::EvalDumpIR > 5) {
+      std::cout << "----- HHIR after inserting RefCnt asserts -----\n";
+      trace->print(std::cout, false);
+      std::cout << "---------------------------\n";
+    }
+    assert(JIT::checkCfg(trace, *irFactory));
   }
 }
 

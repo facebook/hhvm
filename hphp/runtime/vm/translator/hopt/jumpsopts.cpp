@@ -34,49 +34,42 @@ static bool jccCanBeDirectExit(Opcode opc) {
 // reached by any other branch, then copy the target of the jump to the
 // end of the trace
 static void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
-  boost::dynamic_bitset<> isJoin(irFactory->numLabels());
-  boost::dynamic_bitset<> havePred(irFactory->numLabels());
-  IRInstruction::List& instList = trace->getInstructionList();
-  for (IRInstruction* inst : instList) {
-    if (inst->isControlFlowInstruction()) {
-      auto id = inst->getLabel()->getLabelId();
+  boost::dynamic_bitset<> isJoin(irFactory->numBlocks());
+  boost::dynamic_bitset<> havePred(irFactory->numBlocks());
+  for (Block* block : trace->getBlocks()) {
+    if (block->getTaken()) {
+      auto id = block->getTaken()->getId();
+      isJoin[id] = havePred[id];
+      havePred[id] = 1;
+    }
+    if (block->getNext()) {
+      auto id = block->getNext()->getId();
       isJoin[id] = havePred[id];
       havePred[id] = 1;
     }
   }
-  IRInstruction::Iterator lastInst = instList.end();
-  --lastInst; // go back to the last instruction
-  IRInstruction* jmp = *lastInst;
-  if (jmp->getOpcode() == Jmp_ && !isJoin[jmp->getLabel()->getLabelId()]) {
-    Trace* targetTrace = jmp->getLabel()->getParent();
-    IRInstruction::List& targetInstList = targetTrace->getInstructionList();
-    IRInstruction::Iterator instIter = targetInstList.begin();
-    instIter++; // skip over label
-    // update the parent trace of the moved instructions
-    for (IRInstruction::Iterator it = instIter;
-         it != targetInstList.end();
-         ++it) {
-      (*it)->setParent(trace);
-    }
-    instList.splice(lastInst, targetInstList, instIter, targetInstList.end());
-    // delete the jump instruction
-    instList.erase(lastInst);
+  Block* lastBlock = trace->back();
+  auto lastInst = lastBlock->backIter(); // iterator to last instruction
+  IRInstruction& jmp = *lastInst;
+  if (jmp.getOpcode() == Jmp_ && !isJoin[jmp.getTaken()->getId()]) {
+    Block* target = jmp.getTaken();
+    lastBlock->splice(lastInst, target, target->skipLabel(), target->end());
+    lastBlock->erase(lastInst); // delete the jmp
   }
 }
 
 // If main trace ends with a conditional jump with no side-effects on exit,
 // hook it to the exitTrace and make it a TraceExitType::NormalCc
 static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
-  IRInstruction::List& instList = trace->getInstructionList();
-  IRInstruction::Iterator tail  = instList.end();
+  auto tail = trace->back()->end();
   IRInstruction* jccInst        = nullptr;
   IRInstruction* exitInst       = nullptr;
   IRInstruction* exitCcInst     = nullptr;
   Opcode opc = OpAdd;
   // Normally Jcc comes before a Marker
   for (int idx = 3; idx >= 0; idx--) {
-    tail--; // go back to the previous instruction
-    IRInstruction* inst = *tail;
+    --tail; // go back to the previous instruction
+    IRInstruction* inst = &*tail;
     opc = inst->getOpcode();
     if (opc == ExitTrace) {
       exitInst = inst;
@@ -93,16 +86,12 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
   }
   if (jccCanBeDirectExit(opc)) {
     SSATmp* dst = jccInst->getDst();
-    Trace* targetTrace = jccInst->getLabel()->getParent();
-    IRInstruction::List& targetInstList = targetTrace->getInstructionList();
-    IRInstruction::Iterator targetInstIter = targetInstList.begin();
-    targetInstIter++; // skip over label
+    Block* targetBlock = jccInst->getTaken();
+    auto targetInstIter = targetBlock->skipLabel();
 
     // Check for a NormalCc exit with no side effects
-    for (IRInstruction::Iterator it = targetInstIter;
-         it != targetInstList.end();
-         ++it) {
-      IRInstruction* instr = (*it);
+    for (auto it = targetInstIter, end = targetBlock->end(); it != end; ++it) {
+      IRInstruction* instr = &*it;
       // Extend to support ExitSlow, ExitSlowNoProgress, ...
       Opcode opc = instr->getOpcode();
       if (opc == ExitTraceCc) {
@@ -130,46 +119,44 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
 // If main trace starts with guards, have them generate a patchable jump
 // to the anchor trace
 static void hoistGuardJumps(Trace* trace, IRFactory* irFactory) {
-  LabelInstruction* guardLabel = nullptr;
-  IRInstruction::List& instList = trace->getInstructionList();
+  Block* guardLabel = nullptr;
   // Check the beginning of the trace for guards
-  for (IRInstruction* inst : instList) {
-    Opcode opc = inst->getOpcode();
-    if (inst->getLabel() &&
-        (opc == LdLoc    || opc == LdStack ||
-         opc == GuardLoc || opc == GuardStk)) {
-      LabelInstruction* exitLabel = inst->getLabel();
-      // Find the GuardFailure's label and confirm this branches there
-      if (!guardLabel && exitLabel->getParent() != trace) {
-        Trace* exitTrace = exitLabel->getParent();
-        IRInstruction::List& xList = exitTrace->getInstructionList();
-        IRInstruction::Iterator instIter = xList.begin();
-        instIter++; // skip over label
-        // Confirm this is a GuardExit
-        for (IRInstruction::Iterator it = instIter; it != xList.end(); ++it) {
-          IRInstruction* i = *it;
-          Opcode op = i->getOpcode();
-          if (op == Marker) {
-            continue;
+  for (Block* block : trace->getBlocks()) {
+    for (IRInstruction& instr : *block) {
+      IRInstruction* inst = &instr;
+      Opcode opc = inst->getOpcode();
+      if (inst->getTaken() &&
+          (opc == LdLoc    || opc == LdStack ||
+           opc == GuardLoc || opc == GuardStk)) {
+        Block* exitLabel = inst->getTaken();
+        // Find the GuardFailure's label and confirm this branches there
+        if (!guardLabel && exitLabel->getTrace() != trace) {
+          auto instIter = exitLabel->skipLabel();
+          // Confirm this is a GuardExit
+          for (auto it = instIter, end = exitLabel->end(); it != end; ++it) {
+            Opcode op = it->getOpcode();
+            if (op == Marker) {
+              continue;
+            }
+            if (op == ExitGuardFailure) {
+              guardLabel = exitLabel;
+            }
+            // Do not optimize if other instructions are on exit trace
+            break;
           }
-          if (op == ExitGuardFailure) {
-            guardLabel = exitLabel;
-          }
-          // Do not optimize if other instructions are on exit trace
-          break;
         }
+        if (exitLabel == guardLabel) {
+          inst->setTCA(kIRDirectGuardActive);
+          continue;
+        }
+        return; // terminate search
       }
-      if (exitLabel == guardLabel) {
-        inst->setTCA(kIRDirectGuardActive);
+      if (opc == Marker || opc == DefLabel || opc == DefSP || opc == DefFP ||
+          opc == LdStack) {
         continue;
       }
-      break;
+      return; // terminate search
     }
-    if (opc == Marker || opc == DefLabel || opc == DefSP || opc == DefFP ||
-        opc == LdStack) {
-      continue;
-    }
-    break;
   }
 }
 

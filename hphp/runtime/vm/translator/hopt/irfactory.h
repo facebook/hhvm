@@ -84,8 +84,8 @@ private:
   // For each of the optional parameters, there's an overloaded
   // setter:
 
-  void setter(IRInstruction* inst, LabelInstruction* l) {
-    inst->setLabel(l);
+  void setter(IRInstruction* inst, Block* target) {
+    inst->setTaken(target);
   }
 
   void setter(IRInstruction* inst, Type t) {
@@ -124,7 +124,7 @@ makeInstruction(Func func, Args... args) {
 class IRFactory {
 public:
   IRFactory()
-    : m_nextLabelId(0)
+    : m_nextBlockId(0)
     , m_nextOpndId(0)
     , m_nextInstId(0)
   {}
@@ -156,8 +156,15 @@ public:
     return newInst;
   }
 
-  LabelInstruction* defLabel(const Func*);
-  LabelInstruction* defLabel(const Func*, unsigned numDst);
+  IRInstruction* defLabel();
+  IRInstruction* defLabel(unsigned numDst);
+  Block* defBlock(const Func* f, IRInstruction*);
+  Block* defBlock(const Func* f) {
+    return defBlock(f, defLabel());
+  }
+  Block* defBlock(const Func* f, unsigned numDst) {
+    return defBlock(f, defLabel(numDst));
+  }
 
   /*
    * Creates move instrution that moves from src to dst. We can't use gen
@@ -168,7 +175,7 @@ public:
 
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }
-  uint32_t numLabels() const     { return m_nextLabelId; }
+  uint32_t numBlocks() const     { return m_nextBlockId; }
   uint32_t numInsts() const      { return m_nextInstId; }
 
 private:
@@ -178,7 +185,7 @@ private:
     inst->setDst(tmp);
   }
 
-  uint32_t m_nextLabelId;
+  uint32_t m_nextBlockId;
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;
 
@@ -187,25 +194,39 @@ private:
 };
 
 /*
- * Utility to keep a vector of state about each instruction, indexed by
- * instruction id.
+ * Utility to keep a vector of state about each key, indexed by
+ * factoryId(key), where key can be an IRInstruction, Block, or SSATmp.
  */
-template<class T>
-struct InstrState {
-  InstrState(IRFactory* factory, T init)
-    : m_info(factory->numInsts(), init)
-    , m_factory(factory)
+template<class Key, class Info>
+struct StateVector {
+  static unsigned factoryId(const IRInstruction* inst) { return inst->getIId(); }
+  static unsigned factoryId(const Block* block) { return block->getId(); }
+  static unsigned factoryId(const SSATmp* tmp) { return tmp->getId(); }
+  static unsigned count(const IRFactory* factory, IRInstruction*) {
+    return factory->numInsts();
+  }
+  static unsigned count(const IRFactory* factory, SSATmp*) {
+    return factory->numTmps();
+  }
+  static unsigned count(const IRFactory* factory, Block*) {
+    return factory->numBlocks();
+  }
+  StateVector(IRFactory* factory, Info init)
+    : m_factory(factory)
+    , m_info(count(factory, (Key*)nullptr), init)
     , m_init(init) {
   }
-  T& operator[](const IRInstruction* inst) {
-    auto iid = inst->getIId();
-    if (iid >= m_info.size()) grow();
-    assert(iid < m_info.size());
-    return m_info[iid];
+  Info& operator[](const Key& k) { return (*this)[&k]; }
+  Info& operator[](const Key* k) {
+    auto id = factoryId(k);
+    if (id >= m_info.size()) grow();
+    assert(id < m_info.size());
+    return m_info[id];
   }
-  const T& operator[](const IRInstruction* inst) const {
-    assert(inst->getIId() < m_info.size());
-    return m_info[inst->getIId()];
+  const Info& operator[](const Key& k) const { return (*this)[&k]; }
+  const Info& operator[](const Key* k) const {
+    assert(factoryId(k) < m_info.size());
+    return m_info[factoryId(k)];
   }
   void reset() {
     for (size_t i = 0, n = m_info.size(); i < n; ++i) {
@@ -216,15 +237,16 @@ struct InstrState {
 
 private:
   void grow() {
-    for (size_t i = m_info.size(), n = m_factory->numInsts(); i < n; ++i) {
+    for (size_t i = m_info.size(), n = count(m_factory, (Key*)nullptr);
+         i < n; ++i) {
       m_info.push_back(m_init);
     }
   }
 
 private:
-  std::vector<T> m_info;
   IRFactory* m_factory;
-  T m_init;
+  std::vector<Info> m_info;
+  Info m_init;
 };
 
 //////////////////////////////////////////////////////////////////////

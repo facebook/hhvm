@@ -17,21 +17,25 @@
 
 namespace HPHP { namespace VM { namespace JIT {
 
-LabelInstruction* IRFactory::defLabel(const Func* f) {
-  LabelInstruction inst(m_nextLabelId++, f);
+IRInstruction* IRFactory::defLabel() {
+  IRInstruction inst(DefLabel);
   return cloneInstruction(&inst);
 }
 
-LabelInstruction* IRFactory::defLabel(const Func* f, unsigned numDst) {
-  LabelInstruction* label = defLabel(f);
+IRInstruction* IRFactory::defLabel(unsigned numDst) {
+  IRInstruction* label = defLabel();
   if (numDst > 0) {
-    SSATmp** dsts = new (m_arena) SSATmp*[numDst];
+    SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
     for (unsigned i = 0; i < numDst; ++i) {
-      dsts[i] = new (m_arena) SSATmp(m_nextOpndId++, label);
+      new (&dsts[i]) SSATmp(m_nextOpndId++, label);
     }
     label->setDsts(numDst, dsts);
   }
   return label;
+}
+
+Block* IRFactory::defBlock(const Func* func, IRInstruction* label) {
+  return new (m_arena) Block(m_nextBlockId++, func, label);
 }
 
 IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {

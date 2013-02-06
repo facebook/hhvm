@@ -294,10 +294,8 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
 }
 
 const Func* CodeGenerator::getCurFunc() const {
-  if (m_lastMarker) {
-    return m_lastMarker->func;
-  }
-  return m_curTrace->getLabel()->getFunc();
+  return m_lastMarker ? m_lastMarker->func :
+         m_curTrace->front()->getFunc();
 }
 
 Address CodeGenerator::cgInst(IRInstruction* inst) {
@@ -333,6 +331,7 @@ NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(DefActRec)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(Nop)
+NOOP_OPCODE(DefLabel)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -357,78 +356,64 @@ CALL_OPCODE(SetElem)
 #undef NOOP_OPCODE
 #undef PUNT_OPCODE
 
-void CodeGenerator::cgDefLabel(IRInstruction* inst) {
-  LabelInstruction* label = (LabelInstruction*)inst;
-  Address labelAddr = m_as.code.frontier;
-  void* list = label->getPatchAddr();
-  while (list != nullptr) {
-    int* toPatch   = (int*)list;
-    int diffToNext = *toPatch;
-    ssize_t diff = labelAddr - ((Address)list + 4);
-    assert(deltaFits(diff, sz::dword));
-    *toPatch = (int)diff; // patch the jump address
-    if (diffToNext == 0) {
-      break;
-    }
-    void* next = (TCA)list - diffToNext;
-    list = next;
-  }
+// Thread chain of patch locations using the 4 byte space in each jmp/jcc
+void CodeGenerator::prependPatchAddr(Block* block, TCA patchAddr) {
+  ssize_t diff = m_patches[block] ? (patchAddr - (TCA)m_patches[block]) : 0;
+  assert(deltaFits(diff, sz::dword));
+  *(int32_t*)(patchAddr) = (int32_t)diff;
+  m_patches[block] = patchAddr;
 }
 
-Address CodeGenerator::emitFwdJcc(Asm& a,
-                                  ConditionCode cc,
-                                  LabelInstruction* label) {
+Address CodeGenerator::emitFwdJcc(Asm& a, ConditionCode cc, Block* target) {
   Address start = a.code.frontier;
   a.jcc(cc, a.code.frontier);
   TCA immPtr = a.code.frontier - 4;
-  label->prependPatchAddr(immPtr);
+  prependPatchAddr(target, immPtr);
   return start;
 }
 
-Address CodeGenerator::emitFwdJmp(Asm& a, LabelInstruction* label) {
+Address CodeGenerator::emitFwdJmp(Asm& a, Block* target) {
   Address start = a.code.frontier;
   a.jmp(a.code.frontier);
   TCA immPtr = a.code.frontier - 4;
-  label->prependPatchAddr(immPtr);
+  prependPatchAddr(target, immPtr);
   return start;
 }
 
-Address CodeGenerator::emitFwdJcc(ConditionCode cc, LabelInstruction* label) {
-  return emitFwdJcc(m_as, cc, label);
+Address CodeGenerator::emitFwdJcc(ConditionCode cc, Block* target) {
+  return emitFwdJcc(m_as, cc, target);
 }
 
-Address CodeGenerator::emitFwdJmp(LabelInstruction* label) {
-  return emitFwdJmp(m_as, label);
+Address CodeGenerator::emitFwdJmp(Block* target) {
+  return emitFwdJmp(m_as, target);
 }
 
 // Patch with service request EMIT_BIND_JMP
-Address CodeGenerator::emitSmashableFwdJmp(LabelInstruction* label,
-                                           SSATmp* toSmash) {
+Address CodeGenerator::emitSmashableFwdJmp(Block* target, SSATmp* toSmash) {
   Address start = m_as.code.frontier;
   if (toSmash) {
     m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen);
-    Address tca = emitFwdJmp(label);
+    Address tca = emitFwdJmp(target);
     toSmash->setTCA(tca);
     //assert(false);  // TODO(#2012072): this path is supposed to be unused
   } else {
-    emitFwdJmp(label);
+    emitFwdJmp(target);
   }
   return start;
 }
 
 // Patch with service request REQ_BIND_JMPCC_FIRST/SECOND
-Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc,
-                                                LabelInstruction* label,
+Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
                                                 SSATmp* toSmash) {
   Address start = m_as.code.frontier;
   if (toSmash) {
     m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen +
                                   TranslatorX64::kJmpccLen);
-    Address tcaJcc = emitFwdJcc(cc, label);
-    emitFwdJmp(label);
+    Address tcaJcc = emitFwdJcc(cc, target);
+    emitFwdJmp(target);
     toSmash->setTCA(tcaJcc);
   } else {
-    emitFwdJcc(cc, label);
+    emitFwdJcc(cc, target);
   }
   return start;
 }
@@ -438,18 +423,17 @@ void CodeGenerator::emitJccDirectExit(IRInstruction* inst,
   if (cc == CC_None) return;
   SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive
     ? inst->getDst() : nullptr;
-  emitSmashableFwdJccAtEnd(cc, inst->getLabel(), toSmash);
+  emitSmashableFwdJccAtEnd(cc, inst->getTaken(), toSmash);
 }
 
 // Patch with service request REQ_BIND_JCC
-Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc,
-                                           LabelInstruction* label,
+Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc, Block* target,
                                            SSATmp* toSmash) {
   Address start = m_as.code.frontier;
   assert(toSmash);
 
   m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
-  Address tcaJcc = emitFwdJcc(cc, label);
+  Address tcaJcc = emitFwdJcc(cc, target);
   toSmash->setTCA(tcaJcc);
   return start;
 }
@@ -1688,7 +1672,7 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
 void CodeGenerator::cgUnbox(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
-  LabelInstruction* typeFailLabel = inst->getLabel();
+  Block* typeFailLabel = inst->getTaken();
   bool genIncRef = true;
 
   if (typeFailLabel != nullptr) {
@@ -2438,7 +2422,7 @@ void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
 
 void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   SSATmp* fp    = inst->getSrc(0);
-  LabelInstruction* exit = inst->getLabel();
+  Block* exit   = inst->getTaken();
   auto fpReg = fp->getReg();
   auto scratchReg = rScratch;
 
@@ -2473,7 +2457,7 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
   cgDecRefMem(inst->getTypeParam(),
               inst->getSrc(0)->getReg(),
               getLocalOffset(inst->getExtra<DecRefLoc>()->locId),
-              inst->getLabel());
+              inst->getTaken());
 }
 
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
@@ -2625,7 +2609,7 @@ Address CodeGenerator::cgCheckStaticBit(Type type,
 //
 Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
                                                  PhysReg dataReg,
-                                                 LabelInstruction* exit) {
+                                                 Block* exit) {
   assert(type.maybeCounted());
 
   Address patchStaticCheck = nullptr;
@@ -2745,7 +2729,7 @@ Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg,
 //
 void CodeGenerator::cgDecRefStaticType(Type type,
                                        PhysReg dataReg,
-                                       LabelInstruction* exit,
+                                       Block* exit,
                                        bool genZeroCheck) {
   assert(type != Type::Cell && type != Type::Gen);
   assert(type.isStaticallyKnown());
@@ -2791,7 +2775,7 @@ void CodeGenerator::cgDecRefStaticType(Type type,
 //
 void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
                                         PhysReg dataReg,
-                                        LabelInstruction* exit,
+                                        Block* exit,
                                         bool genZeroCheck) {
   // Emit check for ref-counted type
   Address patchTypeCheck = cgCheckRefCountedType(typeReg);
@@ -2832,7 +2816,7 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
 //
 void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
                                            int64 offset,
-                                           LabelInstruction* exit) {
+                                           Block* exit) {
   auto scratchReg = rScratch;
 
   assert(baseReg != scratchReg);
@@ -2905,7 +2889,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 void CodeGenerator::cgDecRefMem(Type type,
                                 PhysReg baseReg,
                                 int64 offset,
-                                LabelInstruction* exit) {
+                                Block* exit) {
   auto scratchReg = rScratch;
   assert(baseReg != scratchReg);
 
@@ -2924,13 +2908,13 @@ void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
   cgDecRefMem(inst->getTypeParam(),
               inst->getSrc(0)->getReg(),
               inst->getSrc(1)->getValInt(),
-              inst->getLabel());
+              inst->getTaken());
 }
 
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   SSATmp* src   = inst->getSrc(0);
   if (!isRefCounted(src)) return;
-  LabelInstruction* exit = inst->getLabel();
+  Block* exit = inst->getTaken();
   Type type = src->getType();
   if (type.isStaticallyKnown()) {
     cgDecRefStaticType(type, src->getReg(), exit, genZeroCheck);
@@ -2945,14 +2929,14 @@ void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
 void CodeGenerator::cgDecRef(IRInstruction *inst) {
   // DecRef may bring the count to zero, and run the destructor.
   // Generate code for this.
-  assert(!inst->getLabel());
+  assert(!inst->getTaken());
   cgDecRefWork(inst, true);
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   // DecRefNZ cannot bring the count to zero.
   // Therefore, we don't generate zero-checking code.
-  assert(!inst->getLabel());
+  assert(!inst->getTaken());
   cgDecRefWork(inst, false);
 }
 
@@ -3119,7 +3103,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SSATmp* actRec         = inst->getSrc(0);
   SSATmp* returnBcOffset = inst->getSrc(1);
   SSATmp* func           = inst->getSrc(2);
-  SSARange args          = inst->getSrcs().subpiece(3);
+  SrcRange args          = inst->getSrcs().subpiece(3);
   int32 numArgs          = args.size();
 
   auto spReg = actRec->getReg();
@@ -3219,7 +3203,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
 void CodeGenerator::cgLdThis(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
-  LabelInstruction* label = inst->getLabel();
+  Block* label = inst->getTaken();
   // mov dst, [fp + 0x20]
   auto dstReg = dst->getReg();
 
@@ -3399,7 +3383,7 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 void CodeGenerator::cgLoadTypedValue(PhysReg base,
                                      int64_t off,
                                      IRInstruction* inst) {
-  LabelInstruction* label = inst->getLabel();
+  Block* label = inst->getTaken();
   Type type   = inst->getTypeParam();
   SSATmp* dst = inst->getDst();
 
@@ -3497,7 +3481,7 @@ void CodeGenerator::cgStore(PhysReg base,
 
 void CodeGenerator::emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc) {
   if (cc == CC_None) return;
-  LabelInstruction* label = inst->getLabel();
+  Block* label = inst->getTaken();
   if (inst && inst->getTCA() == kIRDirectGuardActive) {
     if (RuntimeOption::EvalDumpIR) {
       m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
@@ -3519,7 +3503,7 @@ void CodeGenerator::cgLoad(PhysReg base,
   if (!type.isStaticallyKnown()) {
     return cgLoadTypedValue(base, off, inst);
   }
-  LabelInstruction* label = inst->getLabel();
+  Block* label = inst->getTaken();
   if (label != NULL) {
     cgGuardTypeCell(base, off, inst);
   }
@@ -3583,7 +3567,7 @@ void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
-  assert(inst->getLabel() == nullptr);
+  assert(inst->getTaken() == nullptr);
   cgLoad(inst->getSrc(0)->getReg(),
          cellsToBytes(inst->getSrc(1)->getValInt()),
          inst);
@@ -3612,10 +3596,10 @@ void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardType(IRInstruction* inst) {
-  Type type  = inst->getTypeParam();
+  Type      type  = inst->getTypeParam();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   src   = inst->getSrc(0);
-  LabelInstruction* label = inst->getLabel();
+  Block*    label = inst->getTaken();
   auto dstReg = dst->getReg(0);
   auto srcValueReg = src->getReg(0);
   auto srcTypeReg = src->getReg(1);
@@ -3647,7 +3631,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   SSATmp* firstBitNumTmp = inst->getSrc(3);
   SSATmp* mask64Tmp  = inst->getSrc(4);
   SSATmp* vals64Tmp  = inst->getSrc(5);
-  LabelInstruction* exitLabel = inst->getLabel();
+  Block* exitLabel   = inst->getTaken();
 
   // Get values in place
   assert(funcPtrTmp->getType() == Type::Func);
@@ -3799,11 +3783,11 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
+  SSATmp* dst        = inst->getDst();
   SSATmp* className  = inst->getSrc(0);
   SSATmp* methodName = inst->getSrc(1);
   SSATmp* baseClass  = inst->getSrc(2);
-  LabelInstruction* label = inst->getLabel();
+  Block*  label      = inst->getTaken();
 
   // Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
   const StringData*  cls    = className->getValStr();
@@ -3937,7 +3921,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   const StringData*  methName = inst->getSrc(1)->getValStr();
   SSATmp*           srcCtxTmp = inst->getSrc(2);
   PhysReg           srcCtxReg = srcCtxTmp->getReg(0);
-  LabelInstruction* exitLabel = inst->getLabel();
+  Block*            exitLabel = inst->getTaken();
   const StringData*   clsName = cls->name();
   CacheHandle              ch = StaticMethodFCache::alloc(clsName, methName,
                                               getContextName(getCurClass()));
@@ -3999,7 +3983,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   SSATmp* propName = inst->getSrc(1);
   SSATmp* clsName  = inst->getSrc(2);
   SSATmp* cxt      = inst->getSrc(3);
-  LabelInstruction* label = inst->getLabel();
+  Block* target    = inst->getTaken();
 
   const StringData* propNameString = propName->getValStr();
   const StringData* clsNameString  = clsName->getValStr();
@@ -4024,15 +4008,15 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   }
   {
     cgCallHelper(m_astubs,
-                 label ? (TCA)SPropCache::lookupIR<false>
-                       : (TCA)SPropCache::lookupIR<true>, // raise on error
+                 target ? (TCA)SPropCache::lookupIR<false>
+                        : (TCA)SPropCache::lookupIR<true>, // raise on error
                  dstReg,
                  kSyncPoint, // could re-enter to initialize properties
                  ArgGroup().imm(ch).ssa(cls).ssa(propName).ssa(cxt));
-    if (label) {
+    if (target) {
       m_astubs.testq(dstReg, dstReg);
       m_astubs.jcc(CC_NZ, m_as.code.frontier);
-      emitFwdJmp(m_astubs, label);
+      emitFwdJmp(m_astubs, target);
     } else {
       m_astubs.jmp(m_as.code.frontier);
     }
@@ -4044,7 +4028,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   SSATmp* cls   = inst->getSrc(0);
   SSATmp* prop  = inst->getSrc(1);
   SSATmp* cxt   = inst->getSrc(2);
-  LabelInstruction* label = inst->getLabel();
+  Block* target = inst->getTaken();
   auto dstReg = dst->getReg();
   if (dstReg == InvalidReg) {
     // result is unused but this instruction was not eliminated
@@ -4052,14 +4036,14 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
     dstReg = rScratch;
   }
   cgCallHelper(m_as,
-               label ? (TCA)SPropCache::lookupSProp<false>
-                     : (TCA)SPropCache::lookupSProp<true>, // raise on error
+               target ? (TCA)SPropCache::lookupSProp<false>
+                      : (TCA)SPropCache::lookupSProp<true>, // raise on error
                dstReg,
                kSyncPoint, // could re-enter to initialize properties
                ArgGroup().ssa(cls).ssa(prop).ssa(cxt));
-  if (label) {
+  if (target) {
     m_as.testq(dstReg, dstReg);
-    emitFwdJcc(m_as, CC_NZ, label);
+    emitFwdJcc(m_as, CC_NZ, target);
   }
 }
 
@@ -4255,25 +4239,37 @@ void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmp_(IRInstruction* inst) {
-  assert(inst->getNumSrcs() == inst->getLabel()->getNumDsts());
+  assert(inst->getNumSrcs() == inst->getTaken()->getLabel()->getNumDsts());
   if (unsigned n = inst->getNumSrcs()) {
     // Parallel-copy sources to the label's destination registers.
     // TODO: t2040286: this only works if all destinations fit in registers.
-    SSARange srcs = inst->getSrcs();
-    SSARange dsts = inst->getLabel()->getDsts();
+    SrcRange srcs = inst->getSrcs();
+    DstRange dsts = inst->getTaken()->getLabel()->getDsts();
     ArgGroup args;
     for (unsigned i = 0, j = 0; i < n; i++) {
-      assert(srcs[i]->getType().subtypeOf(dsts[i]->getType()));
-      args.ssa(srcs[i]);
-      args[j++].setDstReg(dsts[i]->getReg());
-      if (!dsts[i]->getType().isStaticallyKnown()) {
-        args.rawType(srcs[i]);
-        args[j++].setDstReg(dsts[i]->getReg(1));
+      assert(srcs[i]->getType().subtypeOf(dsts[i].getType()));
+      SSATmp *dst = &dsts[i], *src = srcs[i];
+      if (dst->getReg(0) == InvalidReg) continue; // dst is unused.
+      // first dst register
+      args.ssa(src);
+      args[j++].setDstReg(dst->getReg(0));
+      // second dst register, if any
+      if (dst->numNeededRegs() == 2) {
+        if (src->numNeededRegs() < 2) {
+          // src has known data type, but dst doesn't - pass immediate type
+          assert(src->getType().isStaticallyKnown());
+          args.imm(src->getType().toDataType());
+        } else {
+          // pass src's second register
+          assert(src->getReg(1) != InvalidReg);
+          args.reg(src->getReg(1));
+        }
+        args[j++].setDstReg(dst->getReg(1));
       }
     }
     shuffleArgs(m_as, args, inst);
   }
-  emitFwdJmp(inst->getLabel());
+  emitFwdJmp(inst->getTaken());
 }
 
 void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
@@ -4281,7 +4277,7 @@ void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {
-  LabelInstruction* label = inst->getLabel();
+  Block* label = inst->getTaken();
   if (!label) {
     return;
   }
@@ -4308,14 +4304,14 @@ void CodeGenerator::cgCheckInit(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgExitWhenSurprised(IRInstruction* inst) {
-  LabelInstruction* label = inst->getLabel();
+  Block* label = inst->getTaken();
   m_tx64->emitTestSurpriseFlags(m_as);
   emitFwdJcc(CC_NZ, label);
 }
 
 void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
   SSATmp* fp    = inst->getSrc(0);
-  LabelInstruction* label = inst->getLabel();
+  Block*  label = inst->getTaken();
 
   assert(!(fp->isConst()));
 
@@ -4325,7 +4321,7 @@ void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
-  auto* const label = inst->getLabel();
+  auto* const label = inst->getTaken();
   auto const rFp = inst->getSrc(0)->getReg();
 
   Label finished;
@@ -4452,7 +4448,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   SSATmp* pcOffTmp  = inst->getSrc(2);
   SSATmp* spAdjustmentTmp = inst->getSrc(3);
   Type resultType = inst->getTypeParam();
-  LabelInstruction* label = inst->getLabel();
+  Block* label = inst->getTaken();
 
   assert(pcOffTmp->isConst());
   assert(spAdjustmentTmp->isConst());
@@ -4473,7 +4469,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   if (label) {
     // compare the pc in the returned execution context with the
     // bytecode offset of the label
-    Trace* targetTrace = label->getParent();
+    Trace* targetTrace = label->getTrace();
     assert(targetTrace);
     uint32 targetBcOff = targetTrace->getBcOff();
     // compare the pc with the target bc offset
@@ -4561,7 +4557,7 @@ void CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {
   SSATmp* cont = inst->getSrc(0);
   m_as.test_imm32_disp_reg32(0x1, CONTOFF(m_should_throw),
                              cont->getReg());
-  emitFwdJcc(CC_NZ, inst->getLabel());
+  emitFwdJcc(CC_NZ, inst->getTaken());
 }
 
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
@@ -4572,7 +4568,7 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
                 "m_done should immediately precede m_running");
   // Check m_done and m_running at the same time
   m_as.test_imm32_disp_reg32(0x0101, doneOffset, contReg);
-  emitFwdJcc(CC_NZ, inst->getLabel());
+  emitFwdJcc(CC_NZ, inst->getTaken());
 
   // ++m_index
   m_as.add_imm64_disp_reg64(0x1, CONTOFF(m_index), contReg);
@@ -4583,7 +4579,7 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   m_as.cmp_imm64_disp_reg64(0, CONTOFF(m_index),
                             inst->getSrc(0)->getReg());
-  emitFwdJcc(CC_L, inst->getLabel());
+  emitFwdJcc(CC_L, inst->getTaken());
 }
 
 void CodeGenerator::cgIterNextK(IRInstruction* inst) {
@@ -4678,6 +4674,20 @@ void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff) {
   m_tx64->emitCall(as, (TCA)traceCallback);
 }
 
+void CodeGenerator::patchJumps(Block* block) {
+  void* list = m_patches[block];
+  Address labelAddr = m_as.code.frontier;
+  while (list) {
+    int32_t* toPatch = (int32_t*)list;
+    int32_t diffToNext = *toPatch;
+    ssize_t diff = labelAddr - ((Address)list + sizeof(int32_t));
+    *toPatch = safe_cast<int32_t>(diff); // patch the jump address
+    if (diffToNext == 0) break;
+    void* next = (TCA)list - diffToNext;
+    list = next;
+  }
+}
+
 void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
   bool firstMarkerSeen = false;
   m_curTrace = trace;
@@ -4686,28 +4696,32 @@ void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
   if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
     emitTraceCall(m_as, trace->getBcOff());
   }
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    if (inst->getOpcode() == Marker) {
-      if (!firstMarkerSeen) {
-        firstMarkerSeen = true;
-        // This will be generated right after the tracelet guards
-        if (RuntimeOption::EvalJitTransCounters && m_tx64 &&
-            trace->isMain()) {
-          m_tx64->emitTransCounterInc(m_as);
+  for (Block* block : trace->getBlocks()) {
+    patchJumps(block);
+    for (IRInstruction& instr : *block) {
+      IRInstruction* inst = &instr;
+      if (inst->getOpcode() == Marker) {
+        if (!firstMarkerSeen) {
+          firstMarkerSeen = true;
+          // This will be generated right after the tracelet guards
+          if (RuntimeOption::EvalJitTransCounters && m_tx64 &&
+              trace->isMain()) {
+            m_tx64->emitTransCounterInc(m_as);
+          }
+        }
+        m_lastMarker = inst->getExtra<Marker>();
+        if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
+          bcMap->push_back((TransBCMapping){Offset(m_lastMarker->bcOff),
+                m_as.code.frontier,
+                m_astubs.code.frontier});
         }
       }
-      m_lastMarker = inst->getExtra<Marker>();
-      if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
-        bcMap->push_back((TransBCMapping){Offset(m_lastMarker->bcOff),
-              m_as.code.frontier,
-              m_astubs.code.frontier});
-      }
-    }
 
-    m_curInst = inst;
-    auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
-    auto addr = cgInst(inst);
-    inst->setAsmAddr(addr);
+      m_curInst = inst;
+      auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
+      auto addr = cgInst(inst);
+      inst->setAsmAddr(addr);
+    }
   }
   trace->setLastAsmAddress(m_as.code.frontier);
   TRACE(3, "[counter] %lu bytes of code generated\n",
@@ -4725,9 +4739,10 @@ void genCodeForTrace(Trace* trace,
                      vector<TransBCMapping>* bcMap,
                      Transl::TranslatorX64* tx64) {
   // select instructions for the trace and its exits
-  CodeGenerator cgMain(as, astubs, tx64);
+  PatchAddrs patches(irFactory, nullptr);
+  CodeGenerator cgMain(as, astubs, tx64, patches);
   cgMain.cgTrace(trace, bcMap);
-  CodeGenerator cgExits(astubs, astubs, tx64);
+  CodeGenerator cgExits(astubs, astubs, tx64, patches);
   for (Trace* exit : trace->getExitTraces()) {
     cgExits.cgTrace(exit, nullptr);
   }

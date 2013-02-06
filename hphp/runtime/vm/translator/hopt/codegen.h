@@ -19,6 +19,7 @@
 
 #include <vector>
 #include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/targetcache.h"
 #include <runtime/vm/translator/translator-x64.h>
 
@@ -43,12 +44,15 @@ enum SyncOptions {
   kSyncPointAdjustOne,
 };
 
+typedef StateVector<Block,void*> PatchAddrs;
+
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
-  CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64) :
-      m_as(as), m_astubs(astubs), m_tx64(tx64),
-      m_curInst(nullptr), m_lastMarker(nullptr), m_curTrace(nullptr) {
+  CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
+                PatchAddrs& patches)
+    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_curInst(nullptr)
+    , m_lastMarker(nullptr), m_curTrace(nullptr), m_patches(patches) {
   }
 
   void cgTrace(Trace* trace, vector<TransBCMapping>* bcMap);
@@ -175,40 +179,40 @@ private:
                            bool regIsCount);
   Address cgCheckStaticBitAndDecRef(Type type,
                                     PhysReg dataReg,
-                                    LabelInstruction* exit);
+                                    Block* exit);
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64 offset);
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
-                          LabelInstruction* exit,
+                          Block* exit,
                           bool genZeroCheck);
   void cgDecRefDynamicType(PhysReg typeReg,
                            PhysReg dataReg,
-                           LabelInstruction* exit,
+                           Block* exit,
                            bool genZeroCheck);
   void cgDecRefDynamicTypeMem(PhysReg baseReg,
                               int64 offset,
-                              LabelInstruction* exit);
+                              Block* exit);
   void cgDecRefMem(Type type,
                    PhysReg baseReg,
                    int64 offset,
-                   LabelInstruction* exit);
+                   Block* exit);
   void emitSpillActRec(SSATmp* sp,
                        int64_t spOffset,
                        SSATmp* defAR);
 
   void cgIterNextCommon(IRInstruction* inst, bool isNextK);
   void cgIterInitCommon(IRInstruction* inst, bool isInitK);
-  Address emitFwdJcc(ConditionCode cc, LabelInstruction* label);
-  Address emitFwdJcc(Asm& a, ConditionCode cc, LabelInstruction* label);
-  Address emitFwdJmp(Asm& as, LabelInstruction* label);
-  Address emitFwdJmp(LabelInstruction* label);
-  Address emitSmashableFwdJmp(LabelInstruction* label, SSATmp* toSmash);
-  Address emitSmashableFwdJccAtEnd(ConditionCode cc, LabelInstruction* label,
+  Address emitFwdJcc(ConditionCode cc, Block* target);
+  Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
+  Address emitFwdJmp(Asm& as, Block* target);
+  Address emitFwdJmp(Block* target);
+  Address emitSmashableFwdJmp(Block* target, SSATmp* toSmash);
+  Address emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
                               SSATmp* toSmash);
   void emitJccDirectExit(IRInstruction*, ConditionCode);
-  Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
+  Address emitSmashableFwdJcc(ConditionCode cc, Block* target,
                               SSATmp* toSmash);
   void emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
@@ -220,6 +224,8 @@ private:
   int getIterOffset(SSATmp* tmp);
   static void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
+  void prependPatchAddr(Block* target, TCA patchAddr);
+  void patchJumps(Block* block);
 
 private:
   Asm& m_as;
@@ -230,6 +236,7 @@ private:
   // the last marker instruction before curInst
   const MarkerData* m_lastMarker;
   Trace* m_curTrace;
+  PatchAddrs& m_patches;
 };
 
 class ArgDesc {
@@ -301,12 +308,6 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& type(Type tag) {
-    m_args.push_back(ArgDesc(ArgDesc::Imm, InvalidReg,
-                             tag.toDataType()));
-    return *this;
-  }
-
   ArgGroup& addr(PhysReg base, intptr_t off) {
     m_args.push_back(ArgDesc(ArgDesc::Addr, base, off));
     return *this;
@@ -351,19 +352,6 @@ struct ArgGroup {
 
   ArgGroup& vectorKeyS(SSATmp* key) {
     return vectorKeyImpl(key, false);
-  }
-
-  /*
-   * Pass the DataType of tmp in a register. (not as part of a TypedValue).
-   */
-  ArgGroup& rawType(SSATmp* tmp) {
-    Type t = tmp->getType();
-    if (t.isStaticallyKnown() ||
-        tmp->getInstruction()->getOpcode() == DefConst) {
-      return type(t); // DataType is known immediate.
-    }
-    m_args.push_back(ArgDesc(ArgDesc::Reg, tmp->getReg(1), 0));
-    return *this;
   }
 
 private:

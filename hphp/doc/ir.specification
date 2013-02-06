@@ -32,12 +32,13 @@ programs used for just in time compilation, with these goals:
      instructions are still well behaved Instruction classes.  Types are
      machine independent.
 
-The unit of compilation is the Trace, which is an ordered collection of
-Instructions that produce and consume Variables.  Instructions may be
-annotated with Type which modifies the instruction's behavior.  Each
+The unit of compilation is the Trace, which is a sequence of Blocks of
+Instructions that produce and consume Variables.  Blocks are single-entry,
+single-exit sequences of instructions (i.e. basic blocks).  Instructions may
+be annotated with Type which modifies the instruction's behavior.  Each
 Variable has a Type which describes the set of values it may hold at
 the point it is defined.  Instructions may have side effects, which occur
-in the order they appear in the Trace.
+in execution order.
 
 The static single assignment form guarantees the following two invariants
 for a well-formed Trace:
@@ -55,12 +56,24 @@ broken during trace creation or during an optimizer pass.
 Control Flow
 ------------
 
-Traces have one entry point and one or more exits, as well as branch
-and label instructions, forming a restricted control flow graph.
+Traces have one entry block and zero or more exit traces.  Blocks may branch
+within a trace or to an exit trace; blocks form a restricted control flow graph.
 This control flow may contain join points (two or more branches exiting
-at the same point), but they may not form loops, nor do join points define
-Variables which depend on the path reaching them (there are no SSA Phi
-instructions).  There are no Variables defined at the start of a Trace.
+at the same point, or two jumps within the trace to a target in the same trace),
+but may not form loops.
+
+No Variables are defined on entry to the main Trace.
+
+Blocks which are join points may start with a DefLabel with destination
+Variables.  In that case, each predecessor must be a Jmp_ passing a matching
+number of source Variables.  In this case the Jmp_ acts as a tail-call, passing
+arguments the same way a plain call would.
+
+Together, the sources of the Jmp_ instructions and the destinations of the
+DefLabel instructions act as traditional SSA Phi pseudo-functions; The type
+of the label's destination is the type-union of the corresponding sources.
+Because the Jmp_ sources are at the ends of blocks, they do not violate the
+SSA dominator rule (rule 2, above).
 
 Implementation note: The JIT's compilation unit ("Trace" in this spec) actually
 consists of one or more instances of the Trace class.  There is exactly one
@@ -945,11 +958,11 @@ IncStat S0:ConstInt S1:ConstInt S2:ConstBool
   'force' flag. This opcode becomes a noop iff (force == false and runtime
   stats are not enabled) at translation time.
 
-DbgAssertRefCount S0:T
+DbgAssertRefCount S0:{Counted|StaticStr|StaticArr}
 
-  Assert that S0 has a valid refcount.  T must be statically known and be a
-  refcounted type.  If S0's count is implausible then execute a hardware
-  trap instruction (int3 on x64).
+  Assert that S0 has a valid refcount.  S0 must be a type with a valid
+  (counted or static) _count field.  If S0's count is implausible then
+  execute a hardware trap instruction (int3 on x64).
 
 
 18. Iterators

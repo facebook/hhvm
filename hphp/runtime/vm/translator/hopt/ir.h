@@ -41,6 +41,7 @@
 #include "runtime/vm/class.h"
 #include "folly/Range.h"
 #include "folly/Conv.h"
+#include <boost/intrusive/list.hpp>
 
 namespace HPHP {
 // forward declaration
@@ -1088,23 +1089,19 @@ class Trace;
 class CodeGenerator;
 class IRFactory;
 class Simplifier;
+struct Block;
 
 bool isRefCounted(SSATmp* opnd);
 
-class LabelInstruction;
-
 using folly::Range;
-
-typedef Range<SSATmp**> SSARange;
+typedef Range<SSATmp**> SrcRange;
+typedef Range<SSATmp*> DstRange;
 
 /*
- * All IRInstruction subclasses must be arena-allocatable.
+ * IRInstructions must be arena-allocatable.
  * (Destructors are not called when they come from IRFactory.)
  */
 struct IRInstruction {
-  typedef std::list<IRInstruction*> List;
-  typedef std::list<IRInstruction*>::iterator Iterator;
-  typedef std::list<IRInstruction*>::reverse_iterator ReverseIterator;
   enum IId { kTransient = 0xffffffff };
 
   /*
@@ -1125,8 +1122,8 @@ struct IRInstruction {
     , m_srcs(srcs)
     , m_dst(nullptr)
     , m_asmAddr(nullptr)
-    , m_label(nullptr)
-    , m_parent(nullptr)
+    , m_taken(nullptr)
+    , m_block(nullptr)
     , m_tca(nullptr)
     , m_extra(nullptr)
   {}
@@ -1203,10 +1200,16 @@ struct IRInstruction {
   void convertToNop();
 
   /*
+   * Replace a branch with a Jmp; used when we have proven the branch
+   * is always taken.
+   */
+  void convertToJmp();
+
+  /*
    * Deep-copy an IRInstruction, using factory to allocate memory for
    * the IRInstruction itself, and its srcs/dests.
    */
-  virtual IRInstruction* clone(IRFactory* factory) const;
+  IRInstruction* clone(IRFactory* factory) const;
 
   Opcode     getOpcode()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
@@ -1220,8 +1223,8 @@ struct IRInstruction {
   SSATmp*    getSrc(uint32 i) const;
   void       setSrc(uint32 i, SSATmp* newSrc);
   void       appendSrc(Arena&, SSATmp*);
-  SSARange   getSrcs() const {
-    return SSARange(m_srcs, m_numSrcs);
+  SrcRange   getSrcs() const {
+    return SrcRange(m_srcs, m_numSrcs);
   }
   unsigned   getNumDsts() const     { return m_numDsts; }
   SSATmp*    getDst() const         {
@@ -1233,16 +1236,13 @@ struct IRInstruction {
     m_dst = newDst;
     m_numDsts = newDst ? 1 : 0;
   }
-  SSATmp*    getDst(unsigned i) const {
-    assert(naryDst() && i < m_numDsts);
-    return m_dsts[i];
-  }
-  SSARange   getDsts();
-  Range<SSATmp* const*> getDsts() const;
-  void       setDsts(unsigned numDsts, SSATmp** newDsts) {
+  SSATmp*    getDst(unsigned i) const;
+  DstRange   getDsts();
+  Range<const SSATmp*> getDsts() const;
+  void       setDsts(unsigned numDsts, SSATmp* newDsts) {
     assert(naryDst());
     m_numDsts = numDsts;
-    m_dsts = newDsts;
+    m_dst = newDsts;
   }
 
   TCA        getTCA()      const       { return m_tca; }
@@ -1274,16 +1274,18 @@ struct IRInstruction {
   void*      getAsmAddr() const        { return m_asmAddr; }
   RegSet     getLiveOutRegs() const    { return m_liveOutRegs; }
   void       setLiveOutRegs(RegSet s)  { m_liveOutRegs = s; }
-  Trace*     getParent() const { return m_parent; }
-  void       setParent(Trace* parentTrace) { m_parent = parentTrace; }
+  Block*     getBlock() const          { return m_block; }
+  void       setBlock(Block* b)        { m_block = b; }
+  Trace*     getTrace() const;
+  void       setTaken(Block* b)        { m_taken = b; }
+  Block*     getTaken() const          { return m_taken; }
 
-  void setLabel(LabelInstruction* l) { m_label = l; }
-  LabelInstruction* getLabel() const { return m_label; }
-  bool isControlFlowInstruction() const { return m_label != nullptr; }
+  bool isControlFlowInstruction() const { return m_taken != nullptr; }
+  bool isBlockEnd() const { return m_taken || isTerminal(); }
 
-  virtual bool equals(IRInstruction* inst) const;
-  virtual size_t hash() const;
-  virtual void print(std::ostream& ostream) const;
+  bool equals(IRInstruction* inst) const;
+  size_t hash() const;
+  void print(std::ostream& ostream) const;
   void print() const;
   std::string toString() const;
 
@@ -1326,50 +1328,22 @@ private:
   uint32            m_id;
   SSATmp**          m_srcs;
   RegSet            m_liveOutRegs;
-  union {
-    SSATmp*         m_dst;  // if HasDest
-    SSATmp**        m_dsts; // if NaryDest
-  };
+  SSATmp*           m_dst;  // if HasDest or NaryDest
   void*             m_asmAddr;
-  LabelInstruction* m_label;
-  Trace*            m_parent;
+  Block*            m_taken; // for branches, guards, and jmp
+  Block*            m_block; // block that owns this instruction
   TCA               m_tca;
   IRExtraData*      m_extra;
-};
-
-class LabelInstruction : public IRInstruction {
 public:
-  explicit LabelInstruction(uint32 id, const Func* func)
-    : IRInstruction(DefLabel)
-    , m_labelId(id)
-    , m_patchAddr(0)
-    , m_func(func)
-  {}
-
-  explicit LabelInstruction(Arena& arena, const LabelInstruction* inst, IId iid)
-    : IRInstruction(arena, inst, iid)
-    , m_labelId(inst->m_labelId)
-    , m_patchAddr(0)
-    , m_func(inst->m_func)
-  {}
-
-  uint32      getLabelId() const  { return m_labelId; }
-  const Func* getFunc() const     { return m_func; }
-
-  virtual void print(std::ostream& ostream) const;
-  virtual bool equals(IRInstruction* inst) const;
-  virtual size_t hash() const;
-  virtual IRInstruction* clone(IRFactory* factory) const;
-
-  void    printLabel(std::ostream& ostream) const;
-  void    prependPatchAddr(TCA addr);
-  void*   getPatchAddr();
-
-private:
-  const uint32 m_labelId;
-  void*  m_patchAddr; // Support patching forward jumps
-  const Func* m_func; // which func are we in
+  boost::intrusive::list_member_hook<> m_listNode; // for InstructionList
 };
+
+typedef boost::intrusive::member_hook<IRInstruction,
+                                      boost::intrusive::list_member_hook<>,
+                                      &IRInstruction::m_listNode>
+        IRInstructionHookOption;
+typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
+        InstructionList;
 
 /*
  * Return the output type from a given IRInstruction.
@@ -1418,9 +1392,9 @@ public:
   void              setInstruction(IRInstruction* i) { m_inst = i; }
   Type              getType() const { return m_type; }
   void              setType(Type t) { m_type = t; }
-  uint32            getLastUseId() { return m_lastUseId; }
+  uint32            getLastUseId() const { return m_lastUseId; }
   void              setLastUseId(uint32 newId) { m_lastUseId = newId; }
-  uint32            getUseCount() { return m_useCount; }
+  uint32            getUseCount() const { return m_useCount; }
   void              setUseCount(uint32 count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32            decUseCount() { return --m_useCount; }
@@ -1597,10 +1571,134 @@ private:
   void init(Opcode op, const Type base, const Type key, const Type val);
 };
 
+/**
+ * A Block refers to a basic block: single-entry, single-exit, list of
+ * instructions.  The instruction list is an intrusive list, so each
+ * instruction can only be in one block at a time.  Likewise, a block
+ * can only be owned by one trace at a time.
+ *
+ * Block owns the InstructionList, but exposes several list methods itself
+ * so usually you can use Block directly.  These methods also update
+ * IRInstruction::m_block transparently.
+ */
+struct Block : boost::noncopyable {
+  typedef InstructionList::iterator iterator;
+
+  Block(unsigned id, const Func* func, IRInstruction* label)
+    : m_trace(nullptr), m_func(func), m_next(nullptr), m_id(id) {
+    push_back(label);
+  }
+
+  IRInstruction* getLabel() const {
+    assert(front()->getOpcode() == DefLabel);
+    return front();
+  }
+
+  uint32_t    getId() const      { return m_id; }
+  const Func* getFunc() const    { return m_func; }
+  Trace*      getTrace() const   { return m_trace; }
+  void        setTrace(Trace* t) { m_trace = t; }
+
+  // return the last instruction in the block
+  IRInstruction* back() const {
+    assert(!m_instrs.empty());
+    auto it = m_instrs.end();
+    return const_cast<IRInstruction*>(&*(--it));
+  }
+
+  // return the first instruction in the block.
+  IRInstruction* front() const {
+    assert(!m_instrs.empty());
+    return const_cast<IRInstruction*>(&*m_instrs.begin());
+  }
+
+  // return the fallthrough block.  Should be nullptr if the last
+  // instruction is a Terminal.
+  Block* getNext() const { return m_next; }
+  void setNext(Block* b) { m_next = b; }
+
+  // return the target block if the last instruction is a branch.
+  Block* getTaken() const {
+    return back()->getTaken();
+  }
+
+  // return the postorder number of this block. (updated each time
+  // sortBlocks() is called.
+  unsigned postId() const { return m_postid; }
+  void setPostId(unsigned id) { m_postid = id; }
+
+  void printLabel(std::ostream& ostream) const;
+
+  // insert inst after this block's label, return an iterator to the
+  // newly inserted instruction.
+  iterator prepend(IRInstruction* inst) {
+    assert(front()->getOpcode() == DefLabel);
+    auto it = begin();
+    return insert(++it, inst);
+  }
+
+  // return iterator to first instruction after the label
+  iterator skipLabel() { auto it = begin(); return ++it; }
+
+  // return iterator to last instruction
+  iterator backIter() { auto it = end(); return --it; }
+
+  // return an iterator to a specific instruction
+  iterator iteratorTo(IRInstruction* inst) {
+    assert(inst->getBlock() == this);
+    return m_instrs.iterator_to(*inst);
+  }
+
+  // list-compatible interface; these delegate to m_instrs but also update
+  // inst.m_block
+  InstructionList& getInstrs() { return m_instrs; }
+  bool             empty()     { return m_instrs.empty(); }
+  iterator         begin()     { return m_instrs.begin(); }
+  iterator         end()       { return m_instrs.end(); }
+
+  iterator insert(iterator pos, IRInstruction* inst) {
+    inst->setBlock(this);
+    return m_instrs.insert(pos, *inst);
+  }
+  void splice(iterator pos, Block* from, iterator begin, iterator end) {
+    assert(from != this);
+    for (auto i = begin; i != end; ++i) (*i).setBlock(this);
+    m_instrs.splice(pos, from->getInstrs(), begin, end);
+  }
+  void push_back(IRInstruction* inst) {
+    inst->setBlock(this);
+    return m_instrs.push_back(*inst);
+  }
+  template <class Predicate> void remove_if(Predicate p) {
+    m_instrs.remove_if(p);
+  }
+  void erase(iterator pos) {
+    m_instrs.erase(pos);
+  }
+
+ private:
+  InstructionList m_instrs; // instructions in this block
+  Trace* m_trace;           // owner of this block.
+  const Func* m_func;       // which func are we in
+  Block* m_next;            // fall-through path; null if back()->isTerminal().
+  const unsigned m_id;      // factory-assigned unique id of this block
+  unsigned m_postid;        // postorder number of this block
+};
+typedef std::list<Block*> BlockList;
+
+inline Trace* IRInstruction::getTrace() const {
+  return m_block->getTrace();
+}
+
+/*
+ * A Trace is a single-entry, multi-exit, sequence of blocks.  Typically
+ * each block falls through to the next block but this is not guaranteed;
+ * traces may contain internal forward-only control flow.
+ */
 class Trace : boost::noncopyable {
 public:
-  explicit Trace(LabelInstruction* label, uint32 bcOff, bool isMain) {
-    appendInstruction(label);
+  explicit Trace(Block* first, uint32 bcOff, bool isMain) {
+    push_back(first);
     m_bcOff = bcOff;
     m_lastAsmAddress = nullptr;
     m_firstAsmAddress = nullptr;
@@ -1613,26 +1711,14 @@ public:
                   boost::checked_deleter<Trace>());
   }
 
-  IRInstruction::List& getInstructionList() {
-    return m_instructionList;
-  }
-  LabelInstruction* getLabel() const {
-    IRInstruction* first = *m_instructionList.begin();
-    assert(first->getOpcode() == DefLabel);
-    return (LabelInstruction*) first;
-  }
-  IRInstruction* prependInstruction(IRInstruction* inst) {
-    // jump over the trace's label
-    std::list<IRInstruction*>::iterator it = m_instructionList.begin();
-    ++it;
-    m_instructionList.insert(it, inst);
-    inst->setParent(this);
-    return inst;
-  }
-  IRInstruction* appendInstruction(IRInstruction* inst) {
-    m_instructionList.push_back(inst);
-    inst->setParent(this);
-    return inst;
+  std::list<Block*>& getBlocks() { return m_blocks; }
+  Block* front() { return *m_blocks.begin(); }
+  Block* back() { auto it = m_blocks.end(); return *(--it); }
+
+  Block* push_back(Block* b) {
+    b->setTrace(this);
+    m_blocks.push_back(b);
+    return b;
   }
 
   uint32 getBcOff() { return m_bcOff; }
@@ -1647,10 +1733,10 @@ public:
   }
   bool isMain() const { return m_isMain; }
 
-  typedef std::list<Trace*> List;
-  typedef std::list<Trace*>::iterator Iterator;
+  typedef std::list<Trace*> ExitList;
+  typedef std::list<Trace*>::iterator ExitIterator;
 
-  List& getExitTraces() { return m_exitTraces; }
+  ExitList& getExitTraces() { return m_exitTraces; }
   void print(std::ostream& ostream, bool printAsm,
              bool isExit = false) const;
   void print() const;  // default to std::cout and printAsm == true
@@ -1659,72 +1745,13 @@ private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't
   // represent a bytecode boundary.
   uint32 m_bcOff;
-  // instructions in main trace starting with a label
-  std::list<IRInstruction*> m_instructionList;
-  // traces to which this trace exits
-  List m_exitTraces;
+  std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
+  ExitList m_exitTraces;      // traces to which this trace exits
   uint8* m_firstAsmAddress;
   uint8* m_firstAstubsAddress;
   uint8* m_lastAsmAddress;
   bool m_isMain;
 };
-
-/**
- * A Block (basic block) refers to a single-entry, single-exit, non-empty
- * range of instructions within a trace.  The instruction range is denoted by
- * iterators within the owning trace's instruction list, to facilitate
- * mutating that list.
- */
-class Block {
-  typedef IRInstruction::Iterator Iter;
-
-public:
-  Block(unsigned id, Iter start, Iter end) : m_post_id(id), m_isJoin(0),
-    m_range(start, end) {
-    m_succ[0] = m_succ[1] = nullptr;
-  }
-
-  Block(const Block& other) : m_post_id(other.m_post_id), m_isJoin(0),
-    m_range(other.m_range) {
-    m_succ[0] = m_succ[1] = nullptr;
-  }
-
-  // postorder number of this block in [0..NumBlocks); higher means earlier
-  unsigned postId() const { return m_post_id; }
-  bool isJoin() const { return m_isJoin != 0; }
-
-  // range-for interface
-  Iter begin() const { return m_range.begin(); }
-  Iter end() const { return m_range.end(); }
-
-  IRInstruction* lastInst() const {
-    Iter e = end();
-    return *(--e);
-  }
-
-  Range<Block**> succ() {
-    IRInstruction* last = lastInst();
-    if (last->isControlFlowInstruction() && !last->isTerminal()) {
-      return Range<Block**>(m_succ, m_succ + 2); // 2-way branch
-    }
-    if (last->isControlFlowInstruction()) {
-      return Range<Block**>(m_succ+1, m_succ + 2); // jmp
-    }
-    if (!last->isTerminal()) {
-      return Range<Block**>(m_succ, m_succ + 1); // ordinary instruction
-    }
-    return Range<Block**>(m_succ, m_succ); // exit, return, throw, etc
-  }
-
-private:
-  friend std::list<Block> buildCfg(Trace*);
-  unsigned const m_post_id;
-  unsigned m_isJoin:1; // true if this block has 2+ predecessors
-  Range<IRInstruction::Iterator> m_range;
-  Block* m_succ[2];
-};
-
-typedef std::list<Block> BlockList;
 
 /*
  * Some utility micro-passes used from other major passes.
@@ -1736,16 +1763,22 @@ typedef std::list<Block> BlockList;
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);
 
 /*
- * Identify basic blocks in Trace and Trace's children, then produce a
- * reverse-postorder list of blocks, with connected successors.
+ * Compute a reverse postorder list of the basic blocks reachable from
+ * the first block in trace.
  */
-BlockList buildCfg(Trace*);
+BlockList sortCfg(Trace*, const IRFactory&);
 
 /*
  * Ensure valid SSA properties; each SSATmp must be defined exactly once,
  * only used in positions dominated by the definition.
  */
 bool checkCfg(Trace*, const IRFactory&);
+
+/*
+ * Return true if trace has internal control flow (IE it has a branch
+ * to itself somewhere.
+ */
+bool hasInternalFlow(Trace*);
 
 /**
  * Run all optimization passes on this trace
@@ -1754,10 +1787,9 @@ void optimizeTrace(Trace*, IRFactory* irFactory);
 
 /**
  * Assign ids to each instruction in reverse postorder (lowest id first),
- * Removes any exit traces that are not reachable, and returns the reached
- * instructions in numbered order.
+ * and returns the reachable blocks in numbered order.
  */
-BlockList numberInstructions(Trace*);
+BlockList numberInstructions(Trace*, const IRFactory&);
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not
@@ -1811,14 +1843,39 @@ void forEachTrace(Trace* main, Body body) {
 }
 
 /*
+ * Visit the blocks in the main trace followed by exit trace blocks.
+ */
+template <class Body>
+void forEachTraceBlock(Trace* main, Body body) {
+  for (Block* block : main->getBlocks()) {
+    body(block);
+  }
+  for (Trace* exit : main->getExitTraces()) {
+    for (Block* block : exit->getBlocks()) {
+      body(block);
+    }
+  }
+}
+
+/*
+ * Visit the instructions in this trace, in block order.
+ */
+template <class Body>
+void forEachInst(Trace* trace, Body body) {
+  for (Block* block : trace->getBlocks()) {
+    for (IRInstruction& inst : *block) {
+      body(&inst);
+    }
+  }
+}
+
+/*
  * Visit each instruction in the main trace, then the exit traces
  */
 template <class Body>
 void forEachTraceInst(Trace* main, Body body) {
   forEachTrace(main, [=](Trace* t) {
-    for (IRInstruction* inst : t->getInstructionList()) {
-      body(inst);
-    }
+    forEachInst(t, body);
   });
 }
 

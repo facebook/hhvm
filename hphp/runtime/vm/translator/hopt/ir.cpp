@@ -286,17 +286,13 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
   , m_asmAddr(nullptr)
-  , m_label(inst->m_label)
-  , m_parent(nullptr)
+  , m_taken(inst->m_taken)
+  , m_block(nullptr)
   , m_tca(nullptr)
   , m_extra(inst->m_extra ? cloneExtra(getOpcode(), inst->m_extra, arena)
                           : nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
-  if (naryDst()) {
-    m_dsts = new (arena) SSATmp*[m_numDsts];
-    memset(m_dsts, 0, m_numDsts * sizeof(*m_dsts));
-  }
 }
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
@@ -418,14 +414,17 @@ bool IRInstruction::mayReenterHelper() const {
   return false;
 }
 
-SSARange IRInstruction::getDsts() {
-  return hasDst() ? SSARange(&m_dst, m_numDsts) :
-         SSARange(m_dsts, m_numDsts);
+SSATmp* IRInstruction::getDst(unsigned i) const {
+  assert(naryDst() && i < m_numDsts);
+  return &m_dst[i];
 }
 
-folly::Range<SSATmp* const*> IRInstruction::getDsts() const {
-  return hasDst() ? Range<SSATmp* const*>(&m_dst, m_numDsts) :
-         Range<SSATmp* const*>(const_cast<SSATmp* const*>(m_dsts), m_numDsts);
+DstRange IRInstruction::getDsts() {
+  return Range<SSATmp*>(m_dst, m_numDsts);
+}
+
+Range<const SSATmp*> IRInstruction::getDsts() const {
+  return Range<const SSATmp*>(m_dst, m_numDsts);
 }
 
 Opcode negateQueryOp(Opcode opc) {
@@ -494,25 +493,34 @@ bool isRefCounted(SSATmp* tmp) {
 
 void IRInstruction::convertToNop() {
   IRInstruction nop(Nop);
-  // copy all but m_iid and m_parent
+  // copy all but m_iid, m_block, m_taken, m_listNode
   m_op = nop.m_op;
   m_typeParam = nop.m_typeParam;
   m_numSrcs = nop.m_numSrcs;
   m_id = nop.m_id;
   m_srcs = nop.m_srcs;
   m_liveOutRegs = nop.m_liveOutRegs;
+  m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
   m_asmAddr = nop.m_asmAddr;
-  m_label = nop.m_label;
+  m_taken = nullptr;
   m_tca = nop.m_tca;
   m_extra = nullptr;
 }
 
-IRInstruction* IRInstruction::clone(IRFactory* factory) const {
-  return factory->cloneInstruction(this);
+void IRInstruction::convertToJmp() {
+  assert(isControlFlowInstruction());
+  assert(getBlock()->back() == this);
+  m_op = Jmp_;
+  m_typeParam = Type::None;
+  m_numSrcs = 0;
+  m_numDsts = 0;
+  m_srcs = nullptr;
+  m_dst = nullptr;
+  getBlock()->setNext(nullptr);
 }
 
-IRInstruction* LabelInstruction::clone(IRFactory* factory) const {
+IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
@@ -581,8 +589,11 @@ void IRInstruction::printOpcode(std::ostream& os) const {
 }
 
 void IRInstruction::printDst(std::ostream& ostream) const {
-  if (m_dst) {
-    m_dst->print(ostream, true);
+  if (unsigned n = m_numDsts) {
+    for (unsigned i = 0; i < n; ++i) {
+      if (i > 0) ostream << ", ";
+      m_dst->print(ostream, true);
+    }
     ostream << " = ";
   }
 }
@@ -660,10 +671,11 @@ void IRInstruction::print(std::ostream& ostream) const {
     printSrcs(ostream);
   }
 
-  if (m_label) {
+  if (m_taken) {
     ostream << " -> ";
-    m_label->printLabel(ostream);
+    m_taken->printLabel(ostream);
   }
+
   if (m_tca) {
     ostream << ", ";
     if (m_tca == kIRDirectJccJmpActive) {
@@ -736,46 +748,8 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
   }
 }
 
-bool LabelInstruction::equals(IRInstruction* inst) const {
-  assert(0);
-  return false;
-}
-
-size_t LabelInstruction::hash() const {
-  assert(0);
-  return 0;
-}
-
-// Thread chain of patch locations using the 4 byte space in each jmp/jcc
-void LabelInstruction::prependPatchAddr(TCA patchAddr) {
-  assert(getOpcode() == DefLabel);
-  ssize_t diff = getPatchAddr() ? ((TCA)patchAddr - (TCA)getPatchAddr()) : 0;
-  assert(deltaFits(diff, sz::dword));
-  *(int*)(patchAddr) = (int)diff;
-  m_patchAddr = patchAddr;
-}
-
-void* LabelInstruction::getPatchAddr() {
-  return m_patchAddr;
-}
-
-void LabelInstruction::printLabel(std::ostream& ostream) const {
-  ostream << "L" << m_labelId;
-}
-
-void LabelInstruction::print(std::ostream& ostream) const {
-  assert(getOpcode() == DefLabel);
-  printLabel(ostream);
-  if (unsigned n = getNumDsts()) {
-    auto dsts = getDsts();
-    ostream << '(';
-    for (unsigned i = 0; i < n; ++i) {
-      ostream << (i > 0 ? ", " : "");
-      dsts[i]->print(ostream, true);
-    }
-    ostream << ')';
-  }
-  ostream << ":";
+void Block::printLabel(std::ostream& ostream) const {
+  ostream << "L" << m_id;
 }
 
 int SSATmp::numNeededRegs() const {
@@ -900,12 +874,12 @@ void SSATmp::print(std::ostream& os, bool printLastUse) const {
     os << '(';
     if (!m_isSpilled) {
       for (int i = 0, sz = numAllocatedRegs(); i < sz; ++i) {
-        if (i != 0) os << ", ";
+        if (i != 0) os << ",";
         os << reg::regname(Reg64(int(m_regs[i])));
       }
     } else {
       for (int i = 0, sz = numNeededRegs(); i < sz; ++i) {
-        if (i != 0) os << ", ";
+        if (i != 0) os << ",";
         os << m_spillInfo[i];
       }
     }
@@ -923,16 +897,25 @@ void Trace::print(std::ostream& os, bool printAsm,
                   bool isExit /* = false */) const {
   Disasm disasm(14, RuntimeOption::EvalDumpIR > 5);
 
-  auto it = begin(m_instructionList);
-  while (it != end(m_instructionList)) {
-    auto* inst = *it;
+  // The main loop below interleaves HHIR output with assembly output,
+  // which involves searching forwards across block boundaries to find
+  // future instructions with assembly addresses.  To make this simpler,
+  // concat all the instructions into a single list first.
+  std::list<IRInstruction*> list;
+  for (Block* block : m_blocks) {
+    for (auto &inst : *block) {
+      list.push_back(&inst);
+    }
+  }
+  for (auto it = list.begin(); it != list.end();) {
+    auto& inst = **it;
     ++it;
-    if (inst->getOpcode() == Marker) {
-      auto* marker = inst->getExtra<Marker>();
+    if (inst.getOpcode() == Marker) {
+      auto* marker = inst.getExtra<Marker>();
       if (isExit) {
         // Don't print bytecode, but print the label.
         os << std::string(6, ' ');
-        inst->print(os);
+        inst.print(os);
         os << '\n';
         continue;
       }
@@ -945,28 +928,28 @@ void Trace::print(std::ostream& os, bool printAsm,
         continue;
       }
     }
-    if (inst->getOpcode() == DefLabel) {
+    if (inst.getOpcode() == DefLabel) {
       os << std::string(6, ' ');
-    } else {
-      os << std::string(8, ' ');
+      inst.getBlock()->printLabel(os);
+      os << ":\n";
     }
-    inst->print(os);
+    os << std::string(8, ' ');
+    inst.print(os);
     os << '\n';
     if (!printAsm) {
       continue;
     }
-    uint8* asmAddr = (uint8*)inst->getAsmAddr();
-    if (asmAddr == nullptr) {
+    uint8* asmAddr = (uint8*)inst.getAsmAddr();
+    if (!asmAddr) {
       continue;
     }
     // Find the next instruction that has an non-NULL asm address.
     auto nextHasAsmAddr = it;
-    while (nextHasAsmAddr != m_instructionList.end() &&
-           (*nextHasAsmAddr)->getAsmAddr() == nullptr) {
+    while (nextHasAsmAddr != list.end() && !(*nextHasAsmAddr)->getAsmAddr()) {
       ++nextHasAsmAddr;
     }
     uint8* endAsm;
-    if (nextHasAsmAddr != m_instructionList.end()) {
+    if (nextHasAsmAddr != list.end()) {
       endAsm = (uint8*)(*nextHasAsmAddr)->getAsmAddr();
     } else {
       endAsm = m_lastAsmAddress;
@@ -1001,22 +984,15 @@ void Trace::print() const {
   print(std::cout, true /* printAsm */);
 }
 
-void resetIdsAux(Trace* trace) {
-  for (IRInstruction* inst : trace->getInstructionList()) {
-    inst->setId(0);
-    for (SSATmp* dst : inst->getDsts()) {
-      dst->setLastUseId(0);
-      dst->setUseCount(0);
-      dst->setSpillSlot(-1);
-    }
-  }
-}
-
 void resetIds(Trace* trace) {
-  resetIdsAux(trace);
-  for (Trace* exit : trace->getExitTraces()) {
-    resetIdsAux(exit);
-  }
+  forEachTraceInst(trace, [](IRInstruction* inst) {
+    inst->setId(0);
+    for (SSATmp& dst : inst->getDsts()) {
+      dst.setLastUseId(0);
+      dst.setUseCount(0);
+      dst.setSpillSlot(-1);
+    }
+  });
 }
 
 int32_t spillValueCells(IRInstruction* spillStack) {
@@ -1033,22 +1009,18 @@ int32_t spillValueCells(IRInstruction* spillStack) {
   return ret;
 }
 
-BlockList numberInstructions(Trace* trace) {
+BlockList numberInstructions(Trace* trace, const IRFactory& factory) {
   resetIds(trace);
-  BlockList blocks = buildCfg(trace);
+  BlockList blocks = sortCfg(trace, factory);
   uint32_t nextId = 1;
-  for (Block& block : blocks) {
-    for (IRInstruction* inst : block) {
-      for (SSATmp* dst : inst->getDsts()) {
-        // Initialize this value for register spilling.
-        dst->setSpillSlot(-1);
-      }
-      if (inst->getOpcode() == Marker) {
+  for (Block* block : blocks) {
+    for (IRInstruction& inst : *block) {
+      if (inst.getOpcode() == Marker) {
         continue; // don't number markers
       }
       uint32_t id = nextId++;
-      inst->setId(id);
-      for (SSATmp* tmp : inst->getSrcs()) {
+      inst.setId(id);
+      for (SSATmp* tmp : inst.getSrcs()) {
         tmp->setLastUseId(id);
         tmp->incUseCount();
       }
@@ -1062,73 +1034,31 @@ BlockList numberInstructions(Trace* trace) {
  * blocks and populates a list of blocks in reverse-postorder.
  */
 struct TopoSort {
-  typedef IRInstruction::Iterator Iter;
-
-  TopoSort(BlockList& blocks) : m_blocks(blocks), m_next_id(0) {
+  TopoSort(BlockList& blocks, unsigned num_blocks) : m_visited(num_blocks),
+    m_blocks(blocks), m_next_id(0) {
     blocks.clear();
   }
 
-  void visit(Iter start, Iter end) {
-    assert(start != end);
-    if (m_visited.find(*start) != m_visited.end()) return;
-    // first time in this block; remember the first instruction.
-    m_visited[*start] = nullptr;
-    Iter i = start;
-    while (i != end && !isBlockEnd(*i)) i++; // skip to end
-    IRInstruction* inst = *i; // last instruction in block
-    ++i;
-    if (!inst->isTerminal()) {
-      // visit fall-through path with remainder of list
-      visit(i, end);
-    }
-    if (inst->isControlFlowInstruction()) {
-      // visit target of branch with remainder of the target trace's list
-      LabelInstruction* target = inst->getLabel();
-      Trace* targetTrace = target->getParent();
-      auto& traceList = targetTrace->getInstructionList();
-      Iter t = targetTrace == inst->getParent() ?
-               find(i, end, target) : // search forward in current trace
-               find(traceList.begin(), traceList.end(), target);
-      visit(t, traceList.end());
-    }
-    // [start, i) is the basic block we just processed; prepend it.
-    m_blocks.push_front(Block(m_next_id++, start, i));
-    m_visited[*start] = &m_blocks.front();
+  void visit(Block* block) {
+    assert(!block->empty());
+    if (m_visited.test(block->getId())) return;
+    m_visited.set(block->getId());
+    if (Block* next = block->getNext()) visit(next);
+    if (Block* taken = block->getTaken()) visit(taken);
+    block->setPostId(m_next_id++);
+    m_blocks.push_front(block);
   }
-
-  static bool isBlockEnd(IRInstruction* inst) {
-    return inst->isControlFlowInstruction() || inst->isTerminal();
-  }
-
-  hphp_hash_map<IRInstruction*, Block*> m_visited;
+private:
+  boost::dynamic_bitset<> m_visited;
   BlockList& m_blocks;
   unsigned m_next_id; // next postorder id to assign
 };
 
-BlockList buildCfg(Trace* trace) {
+BlockList sortCfg(Trace* trace, const IRFactory& factory) {
   assert(trace->isMain());
-  auto& traceList = trace->getInstructionList();
   BlockList blocks;
-  TopoSort sorter(blocks);
-  sorter.visit(traceList.begin(), traceList.end());
-  // link successors
-  boost::dynamic_bitset<> has_pred(blocks.size());
-  auto processSucc = [&] (IRInstruction* succInst) {
-    Block* s = sorter.m_visited[succInst];
-    s->m_isJoin = has_pred[s->postId()];
-    has_pred[s->postId()] = 1;
-    return s;
-  };
-  for (Block& block : blocks) {
-    assert(block.postId() < blocks.size());
-    IRInstruction* last = block.lastInst();
-    if (!last->isTerminal()) {
-      block.m_succ[0] = processSucc(*block.end());
-    }
-    if (last->isControlFlowInstruction()) {
-      block.m_succ[1] = processSucc(last->getLabel());
-    }
-  }
+  TopoSort sorter(blocks, factory.numBlocks());
+  sorter.visit(trace->front());
   return blocks;
 }
 
@@ -1141,9 +1071,12 @@ std::vector<int> findDominators(BlockList& blocks) {
   // compute predecessors of each block
   int num_blocks = blocks.size();
   std::forward_list<int> preds[num_blocks];
-  for (Block& block : blocks) {
-    for (Block* succ : block.succ()) {
-      preds[succ->postId()].push_front(block.postId());
+  for (Block* block : blocks) {
+    if (Block* succ = block->getNext()) {
+      preds[succ->postId()].push_front(block->postId());
+    }
+    if (Block* succ = block->getTaken()) {
+      preds[succ->postId()].push_front(block->postId());
     }
   }
   // Calculate immediate dominators with the iterative two-finger algorithm.
@@ -1152,14 +1085,14 @@ std::vector<int> findDominators(BlockList& blocks) {
   // the general algorithm but it will only loop twice for loop-free graphs.
   vector<int> idom(num_blocks, -1);
   auto start = blocks.begin();
-  int start_id = (*start).postId();
+  int start_id = (*start)->postId();
   idom[start_id] = start_id;
   start++;
   for (bool changed = true; changed; ) {
     changed = false;
     // for each block after start, in reverse postorder
     for (auto it = start; it != blocks.end(); it++) {
-      int b = (*it).postId();
+      int b = (*it)->postId();
       // new_idom = any already-processed predecessor
       auto pred_it = preds[b].begin();
       int new_idom = *pred_it;
@@ -1188,6 +1121,35 @@ std::vector<int> findDominators(BlockList& blocks) {
 }
 
 /*
+ * Check one block for being well formed.  It must:
+ * 1. have exactly one DefLabel as the first instruction
+ * 2. if any instruction is isBlockEnd(), it must be last
+ * 3. if the last instruction isTerminal(), block->next must be null.
+ */
+bool checkBlock(Block* b) {
+  assert(!b->empty());
+  assert(b->front()->getOpcode() == DefLabel);
+  if (b->back()->isTerminal()) assert(!b->getNext());
+  if (b->getTaken()) {
+    // only Jmp_ can branch to a join block expecting values.
+    assert(b->back()->getOpcode() == Jmp_ ||
+           b->getTaken()->front()->getNumDsts() == 0);
+  }
+  if (b->getNext()) {
+    // cannot fall-through to join block expecting values
+    assert(b->getNext()->front()->getNumDsts() == 0);
+  }
+  auto i = b->begin(), e = b->end();
+  ++i;
+  if (b->back()->isBlockEnd()) --e;
+  for (UNUSED IRInstruction& inst : folly::makeRange(i, e)) {
+    assert(inst.getOpcode() != DefLabel);
+    assert(!inst.isBlockEnd());
+  }
+  return true;
+}
+
+/*
  * Build the CFG, then the dominator tree, then use it to validate SSA.
  * 1. Each src must be defined by some other instruction, and each dst must
  *    be defined by the current instruction.
@@ -1196,33 +1158,45 @@ std::vector<int> findDominators(BlockList& blocks) {
  * 4. Treat tmps defined by DefConst as always defined.
  */
 bool checkCfg(Trace* trace, const IRFactory& factory) {
-  BlockList blocks = buildCfg(trace);
+  forEachTraceBlock(trace, [&](Block* b) {
+    checkBlock(b);
+  });
+  BlockList blocks = sortCfg(trace, factory);
   vector<int> idom = findDominators(blocks);
   // build dominator-children lists
   std::forward_list<Block*> children[blocks.size()];
-  for (Block& block : blocks) {
-    int idom_id = idom[block.postId()];
-    if (idom_id != -1) children[idom_id].push_front(&block);
+  for (Block* block : blocks) {
+    int idom_id = idom[block->postId()];
+    if (idom_id != -1) children[idom_id].push_front(block);
   }
   // visit dom tree in preorder, checking all tmps
   boost::dynamic_bitset<> defined0(factory.numTmps());
-  forPreorderDoms(&blocks.front(), children, defined0,
+  forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, boost::dynamic_bitset<>& defined) {
-    for (IRInstruction* inst : *block) {
-      for (SSATmp* UNUSED src : inst->getSrcs()) {
-        assert(src->getInstruction() != inst);
+    for (IRInstruction& inst : *block) {
+      for (SSATmp* UNUSED src : inst.getSrcs()) {
+        assert(src->getInstruction() != &inst);
         assert(src->getInstruction()->getOpcode() == DefConst ||
                defined[src->getId()]);
       }
-      for (SSATmp* dst : inst->getDsts()) {
-        assert(dst->getInstruction() == inst &&
-               inst->getOpcode() != DefConst);
-        assert(!defined[dst->getId()]);
-        defined[dst->getId()] = 1;
+      for (SSATmp& dst : inst.getDsts()) {
+        assert(dst.getInstruction() == &inst &&
+               inst.getOpcode() != DefConst);
+        assert(!defined[dst.getId()]);
+        defined[dst.getId()] = 1;
       }
     }
   });
   return true;
+}
+
+bool hasInternalFlow(Trace* trace) {
+  for (Block* block : trace->getBlocks()) {
+    if (Block* taken = block->getTaken()) {
+      if (taken->getTrace() == trace) return true;
+    }
+  }
+  return false;
 }
 
 }}}

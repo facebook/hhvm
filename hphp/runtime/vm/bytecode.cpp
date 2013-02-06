@@ -1052,13 +1052,19 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
     SKTRACE(1, sk, "unwindFrame: func %s, offset %d fp %p\n",
             fp->m_func->name()->data(),
             offset, fp);
-    const FPIEnt *fe = fp->m_func->findFPI(offset);
-    if (fe != NULL) {
-      unwindAR(fp, fe);
+
+    // If the exception is already propagating, if it was in any FPI
+    // region we already handled unwinding it the first time around.
+    if (f.m_handledCount == 0) {
+      if (const FPIEnt *fe = fp->m_func->findFPI(offset)) {
+        unwindAR(fp, fe);
+      }
     }
+
     if (unwindFrag(fp, offset, pc, f) == UnwindResumeVM) {
       return UnwindResumeVM;
     }
+
     ActRec *prevFp = context->arGetSfp(fp);
     SKTRACE(1, sk, "unwindFrame: fp %p prevFp %p\n",
             fp, prevFp);

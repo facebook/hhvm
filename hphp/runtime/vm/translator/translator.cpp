@@ -1736,8 +1736,11 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         // as long as metaCls is more derived than rttCls.
         Class* metaCls = Unit::lookupClass(metaName);
         Class* rttCls = rttName ? Unit::lookupClass(rttName) : NULL;
-        assert(IMPLIES(metaCls && rttCls && metaCls != rttCls,
-                       metaCls->classof(rttCls)));
+        if (metaCls && rttCls && metaCls != rttCls &&
+            !metaCls->classof(rttCls)) {
+          // Runtime type is more derived
+          metaCls = 0;
+        }
         if (metaCls && metaCls != rttCls) {
           SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
                   "class of %s; old type = %s\n",

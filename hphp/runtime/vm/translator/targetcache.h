@@ -353,6 +353,14 @@ public:
   }
   static TypedValue* lookup(CacheHandle handle, const Class* cls,
                             const StringData* nm);
+
+  template<bool raiseOnError>
+  static TypedValue* lookupIR(CacheHandle handle, const Class* cls,
+                              const StringData* nm, Class* ctx);
+
+  template<bool raiseOnError>
+  static TypedValue* lookupSProp(const Class *cls, const StringData *name,
+                                 Class* ctx);
 };
 
 } } } }

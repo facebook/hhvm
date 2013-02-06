@@ -695,6 +695,16 @@ void LinearScan::computePreColoringHint() {
       break;
     case LdSSwitchDestSlow:
       normalHint(1);
+      break;
+    case LdClsPropAddr:
+      normalHint(3);
+      break;
+    case LdCls:
+      m_preColoringHint.add(inst->getSrc(0), 0, 1);
+      break;
+    case BoxPtr:
+      normalHint(1);
+      break;
     default:
       break;
   }

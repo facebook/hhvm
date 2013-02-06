@@ -334,9 +334,6 @@ NOOP_OPCODE(DefActRec)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(Nop)
 
-PUNT_OPCODE(LdCurFuncPtr)
-PUNT_OPCODE(LdFuncCls)
-
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
 CALL_OPCODE(AddNewElem)
@@ -1275,10 +1272,9 @@ void CodeGenerator::cgOpGte(IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class OpndType>
-ConditionCode CodeGenerator::emitTypeTest(IRInstruction* inst,
+ConditionCode CodeGenerator::emitTypeTest(Type type,
                                           OpndType src,
                                           bool negate) {
-  Type type = inst->getTypeParam();
   ConditionCode cc;
 
   if (type.isString()) {
@@ -1307,6 +1303,13 @@ ConditionCode CodeGenerator::emitTypeTest(IRInstruction* inst,
     cc = ccNegate(cc);
   }
   return cc;
+}
+
+template<class OpndType>
+ConditionCode CodeGenerator::emitTypeTest(IRInstruction* inst,
+                                          OpndType src,
+                                          bool negate) {
+  return emitTypeTest(inst->getTypeParam(), src, negate);
 }
 
 void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc) {
@@ -1754,15 +1757,8 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
   auto dstReg = inst->getDst()->getReg();
   auto objReg = inst->getSrc(0)->getReg();
-  auto& a = m_as;
 
-  a.    loadq  (objReg[ObjectData::getVMClassOffset()], dstReg);
-}
-
-void CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
-  const StringData* classNameString = inst->getSrc(0)->getValStr();
-  auto ch = TargetCache::allocKnownClass(classNameString);
-  m_as.  loadq  (rVmTl[ch], inst->getDst()->getReg());
+  m_as.  loadq  (objReg[ObjectData::getVMClassOffset()], dstReg);
 }
 
 void CodeGenerator::cgRetVal(IRInstruction* inst) {
@@ -3237,6 +3233,12 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
 #endif
 }
 
+void CodeGenerator::cgLdCtxCls(IRInstruction* inst) {
+  cgLdCtx(inst);
+  PhysReg dstReg = inst->getDst()->getReg();
+  m_as.subq(1, dstReg);
+}
+
 void CodeGenerator::cgLdCtx(IRInstruction* inst) {
   PhysReg dstReg = inst->getDst()->getReg();
   PhysReg srcReg = inst->getSrc(0)->getReg();
@@ -3461,6 +3463,7 @@ void CodeGenerator::cgStore(PhysReg base,
     m_as.store_imm64_disp_reg64(val, off + TVOFF(m_data), base);
   } else {
     if (type == Type::Bool) {
+      // zero-extend the bool from a byte to a quad
       m_as.    movzbl  (rbyte(src->getReg()), r32(src->getReg()));
     }
     m_as.store_reg64_disp_reg64(src->getReg(),
@@ -3961,76 +3964,108 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   asm_label(m_as, End);
 }
 
-void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
+void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   using namespace Transl::TargetCache;
-  SSATmp* dst   = inst->getDst();
-  SSATmp* cls   = inst->getSrc(0);
-  SSATmp* clsName = inst->getSrc(1);
-  SSATmp* prop  = inst->getSrc(2);
+  SSATmp* dst      = inst->getDst();
+  SSATmp* cls      = inst->getSrc(0);
+  SSATmp* propName = inst->getSrc(1);
+  SSATmp* clsName  = inst->getSrc(2);
+  SSATmp* cxt      = inst->getSrc(3);
+  LabelInstruction* label = inst->getLabel();
 
-  if (clsName->isConst() && clsName->getType() == Type::StaticStr  &&
-      prop->isConst() && prop->getType() == Type::StaticStr &&
-      cls->getType() == Type::Cls) {
+  const StringData* propNameString = propName->getValStr();
+  const StringData* clsNameString  = clsName->getValStr();
 
-    const StringData* propName = prop->getValStr();
-    auto dstReg = dst->getReg();
-    const StringData* clsNameString = clsName->getValStr();
-    string sds(Util::toLower(clsNameString->data()) + ":" +
-               string(propName->data(), propName->size()));
-    StackStringData sd(sds.c_str(), sds.size(), AttachLiteral);
-    CacheHandle ch = SPropCache::alloc(&sd);
+  string sds(Util::toLower(clsNameString->data()) + ":" +
+             string(propNameString->data(), propNameString->size()));
+  StackStringData sd(sds.c_str(), sds.size(), AttachLiteral);
+  CacheHandle ch = SPropCache::alloc(&sd);
 
-    auto tmpReg = dstReg;
-    if (!cls->isConst() && dstReg == cls->getReg()) {
-      tmpReg = PhysReg(rScratch);
+  auto dstReg = dst->getReg();
+  // Cls is live in the slow path call to lookupIR, so we have to be
+  // careful not to clobber it before the branch to slow path. So
+  // use the scratch register as a temporary destination if cls is
+  // assigned the same register as the dst register.
+  auto tmpReg = dstReg == cls->getReg() ? PhysReg(rScratch) : dstReg;
+
+  m_as.loadq(rVmTl[ch], tmpReg);
+  m_as.testq(tmpReg, tmpReg);
+  m_as.jcc(CC_E, m_astubs.code.frontier);
+  if (tmpReg != dstReg) {
+    m_as.mov_reg64_reg64(tmpReg, dstReg);
+  }
+  {
+    cgCallHelper(m_astubs,
+                 label ? (TCA)SPropCache::lookupIR<false>
+                       : (TCA)SPropCache::lookupIR<true>, // raise on error
+                 dstReg,
+                 kSyncPoint, // could re-enter to initialize properties
+                 ArgGroup().imm(ch).ssa(cls).ssa(propName).ssa(cxt));
+    if (label) {
+      m_astubs.testq(dstReg, dstReg);
+      m_astubs.jcc(CC_NZ, m_as.code.frontier);
+      emitFwdJmp(m_astubs, label);
+    } else {
+      m_astubs.jmp(m_as.code.frontier);
     }
-    m_as.load_reg64_disp_reg64(rVmTl, ch, tmpReg);
-    m_as.test_reg64_reg64(tmpReg, tmpReg);
-    // jz off to the helper call in astubs
-    m_as.jcc(CC_E, m_astubs.code.frontier);
-    if (tmpReg != dstReg) {
-      m_as.mov_reg64_reg64(tmpReg, dstReg);
-    }
-    // this helper can raise an invalid property access error
-    cgCallHelper(m_astubs, (TCA)SPropCache::lookup, dstReg, kSyncPoint,
-                 ArgGroup().imm(ch).ssa(cls).ssa(prop));
-    // TODO make the lookup helper return null on an error, and bail out
-    // of the trace if it returns null
-    m_astubs.jmp(m_as.code.frontier);
-  } else {
-    CG_PUNT(LdClsPropAddr);
   }
 }
 
-void CodeGenerator::cgLdCls(IRInstruction* inst) {
-  // TODO: See TranslatorX64::emitKnownClassCheck for recent changes
-
+void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
-  SSATmp* className = inst->getSrc(0);
-
-  assert(className->isConst() && className->getType() == Type::StaticStr);
+  SSATmp* cls   = inst->getSrc(0);
+  SSATmp* prop  = inst->getSrc(1);
+  SSATmp* cxt   = inst->getSrc(2);
+  LabelInstruction* label = inst->getLabel();
   auto dstReg = dst->getReg();
+
+  cgCallHelper(m_as,
+               label ? (TCA)SPropCache::lookupSProp<false>
+                     : (TCA)SPropCache::lookupSProp<true>, // raise on error
+               dstReg,
+               kSyncPoint, // could re-enter to initialize properties
+               ArgGroup().ssa(cls).ssa(prop).ssa(cxt));
+  if (label) {
+    m_as.testq(dstReg, dstReg);
+    emitFwdJcc(m_as, CC_NZ, label);
+  }
+}
+
+void CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
+  const StringData* classNameString = inst->getSrc(0)->getValStr();
+  auto ch = TargetCache::allocKnownClass(classNameString);
+  m_as.  loadq  (rVmTl[ch], inst->getDst()->getReg());
+}
+
+void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
+  SSATmp* dst = inst->getDst();
+  auto dstReg = dst->getReg();
+  SSATmp* className = inst->getSrc(0);
+  // Note the redundancy with LdCachedClass above...
   const StringData* classNameString = className->getValStr();
-  TargetCache::CacheHandle ch = TargetCache::allocKnownClass(classNameString);
-  m_as.load_reg64_disp_reg64(rVmTl, ch, dstReg);
-  m_as.test_reg64_reg64(dstReg, dstReg);
-  // jz off to the helper call in astubs
-  m_as.jcc(CC_E, m_astubs.code.frontier);
+  auto ch = TargetCache::allocKnownClass(classNameString);
+  m_as.  loadq  (rVmTl[ch], dstReg);
+  m_as.  testq  (dstReg, dstReg);
+  m_as.  jcc    (CC_E, m_astubs.code.frontier);
   {
-    m_astubs.lea_reg64_disp_reg64(rVmTl, ch, dstReg);
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
-    ArgGroup args;
-    args.reg(dstReg)
-      .ssa(className);
-    // this helper can raise an undefined class error
     cgCallHelper(m_astubs,
                  (TCA)TargetCache::lookupKnownClass<false>,
                  dst,
                  kSyncPoint,
-                 args);
+                 ArgGroup().addr(rVmTl, intptr_t(ch)).ssa(className));
     m_astubs.jmp(m_as.code.frontier);
   }
+}
+
+void CodeGenerator::cgLdCls(IRInstruction* inst) {
+  SSATmp* dst       = inst->getDst();
+  SSATmp* className = inst->getSrc(0);
+
+  CacheHandle ch = ClassCache::alloc();
+  cgCallHelper(m_as, (TCA)ClassCache::lookup, dst, kSyncPoint,
+               ArgGroup().imm(ch).ssa(className));
 }
 
 static StringData* fullConstName(SSATmp* cls, SSATmp* cnsName) {
@@ -4284,6 +4319,19 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
+  SSATmp* dst  = inst->getDst();
+  SSATmp* addr = inst->getSrc(0);
+  auto base    = addr->getReg();
+  auto dstReg  = dst->getReg();
+  if (base != dstReg) m_as.movq(base, dstReg);
+  ConditionCode cc = emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], false);
+  TCA patch = m_as.code.frontier;
+  m_as.jcc8(cc, patch);
+  cgCallHelper(m_as, (TCA)tvBox, dstReg, kNoSyncPoint, ArgGroup().ssa(addr));
+  m_as.patchJcc8(patch, m_as.code.frontier);
+}
+
 void CodeGenerator::cgDefCns(IRInstruction* inst) {
   UNUSED SSATmp* dst     = inst->getDst();
   UNUSED SSATmp* cnsName = inst->getSrc(0);
@@ -4338,8 +4386,7 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
       CG_PUNT(cgConcat);
     }
     cgCallHelper(m_as, (TCA)concat_value, dst, kNoSyncPoint,
-                 ArgGroup().valueType(tl)
-                           .valueType(tr));
+                 ArgGroup().valueType(tl).valueType(tr));
   }
 }
 

@@ -84,6 +84,10 @@ SSATmp* TraceBuilder::genLdCtx() {
   return gen(LdCtx, m_fpValue);
 }
 
+SSATmp* TraceBuilder::genLdCtxCls() {
+  return gen(LdCtxCls, m_fpValue);
+}
+
 SSATmp* TraceBuilder::genLdProp(SSATmp* obj,
                                 SSATmp* prop,
                                 Type type,
@@ -126,10 +130,7 @@ SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
                                int64_t offset,
                                Type type,
                                Trace* target) {
-  assert(addr->getType() == Type::PtrToCell ||
-         addr->getType() == Type::PtrToGen);
-  return gen(LdMem, type, getLabel(target), addr,
-             genDefConst<int64>(offset));
+  return gen(LdMem, type, getLabel(target), addr, genDefConst<int64>(offset));
 }
 
 SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
@@ -490,35 +491,17 @@ void TraceBuilder::genGuardRefs(SSATmp* funcPtr,
       vals64);
 }
 
-SSATmp* TraceBuilder::genLdCls(SSATmp* className) {
-  return gen(LdCls, className);
-}
-
 void TraceBuilder::genCheckInit(SSATmp* src, LabelInstruction* target) {
   assert(target);
   gen(CheckInit, target, src);
-}
-
-SSATmp* TraceBuilder::genLdCurFuncPtr() {
-  return gen(LdCurFuncPtr);
 }
 
 SSATmp* TraceBuilder::genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset) {
   return gen(LdARFuncPtr, baseAddr, offset);
 }
 
-SSATmp* TraceBuilder::genLdFuncCls(SSATmp* func) {
-  return gen(LdFuncCls, func);
-}
-
 SSATmp* TraceBuilder::genLdPropAddr(SSATmp* obj, SSATmp* prop) {
   return gen(LdPropAddr, obj, prop);
-}
-
-SSATmp* TraceBuilder::genLdClsPropAddr(SSATmp* cls,
-                                       SSATmp* clsName,
-                                       SSATmp* propName) {
-  return gen(LdClsPropAddr, cls, clsName, propName);
 }
 
 SSATmp* TraceBuilder::genLdClsMethod(SSATmp* cls, uint32 methodSlot) {

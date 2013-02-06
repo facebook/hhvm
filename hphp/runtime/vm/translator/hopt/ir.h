@@ -193,19 +193,23 @@ O(CheckInit,                        ND, S(Gen),                           NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                          PRc) \
 O(Box,                         DBox(0), S(Gen),              E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
+O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \
 O(LdStack,                      DParam, S(StkPtr) C(Int),                 NF) \
 O(LdLoc,                        DParam, S(StkPtr),                        NF) \
 O(LdStackAddr,             D(PtrToGen), SUnk,                              C) \
 O(LdLocAddr,                    DParam, S(StkPtr),                         C) \
-O(LdMem,                        DParam, SUnk,                             NF) \
+O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdRef,                        DParam, S(BoxedCell),                     NF) \
 O(LdThis,                       D(Obj), S(StkPtr),                      C|Rm) \
 O(LdCtx,                        D(Ctx), S(StkPtr),                      C|Rm) \
+O(LdCtxCls,                     D(Cls), S(StkPtr),                      C|Rm) \
 O(LdRetAddr,                D(RetAddr), S(StkPtr),                        NF) \
 O(LdConst,                      DParam, NA,                             C|Rm) \
 O(DefConst,                     DParam, NA,                                C) \
-O(LdCls,                        D(Cls), CStr,                   C|Refs|Rm|Er) \
+O(LdCls,                        D(Cls), S(Str) C(Cls),    C|E|Refs|Rm|Er|Mem) \
+O(LdClsCached,                  D(Cls), C(Str),             C|Refs|Rm|Er|Mem) \
+O(LdCachedClass,                D(Cls), CStr,                              C) \
 O(LdClsCns,                     DParam, CStr CStr,                         C) \
 O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
 O(LdClsMethodCache,         D(FuncCls), SUnk,                           C|Er) \
@@ -213,15 +217,13 @@ O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx),     C|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Obj,Cls,Ctx) S(Func),            C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
-O(LdClsPropAddr,           D(PtrToGen), SUnk,                      C|E|Rm|Er) \
+O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),    C|E|N|Rm|Er) \
+O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) C(Str) C(Str) C(Cls), C|E|Rm|Er)\
 O(LdObjMethod,                 D(Func), C(Int) CStr S(StkPtr), C|E|N|Refs|Er) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
-O(LdCachedClass,                D(Cls), CStr,                           C|Rm) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFixedFunc,                 D(Func), CStr,                         C|E|Er) \
-O(LdCurFuncPtr,                D(Func), NA,                             C|Rm) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr) C(Int),                  C) \
-O(LdFuncCls,                    D(Cls), SUnk,                           C|Rm) \
 O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                         C|Rm) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                         N|Rm) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                 N|Rm|Refs|Er) \

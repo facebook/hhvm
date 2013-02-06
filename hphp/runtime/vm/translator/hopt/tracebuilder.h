@@ -78,6 +78,7 @@ public:
 
   SSATmp* genLdThis(Trace* trace);
   SSATmp* genLdCtx();
+  SSATmp* genLdCtxCls();
   SSATmp* genLdRetAddr();
   SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type type);
   void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value,
@@ -122,7 +123,6 @@ public:
   void    genBindLoc(uint32 id, SSATmp* ref, bool doRefCount = true);
   void    genInitLoc(uint32 id, SSATmp* t);
 
-  SSATmp* genLdCls(SSATmp* classNameOpnd);
   void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
   SSATmp* genLdCurFuncPtr();
   SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
@@ -179,7 +179,6 @@ public:
   SSATmp* genConvToArr(SSATmp* src);
   SSATmp* genConvToObj(SSATmp* src);
   SSATmp* genLdPropAddr(SSATmp* obj, SSATmp* prop);
-  SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* genLdClsMethod(SSATmp* cls, uint32 methodSlot);
   SSATmp* genLdClsMethodCache(SSATmp* className,
                               SSATmp* methodName,
@@ -288,6 +287,10 @@ public:
 
   Type getLocalType(int id);
 
+  LabelInstruction* getLabel(Trace* trace) {
+    return trace ? trace->getLabel() : NULL;
+  }
+
   /*
    * ifelse() generates if-then-else blocks within a trace.  The caller
    * supplies lambdas to create the branch, next-body, and taken-body.
@@ -331,10 +334,6 @@ private:
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
-
-  LabelInstruction* getLabel(Trace* trace) {
-    return trace ? trace->getLabel() : NULL;
-  }
 
   Trace* makeTrace(const Func* func, uint32 bcOff, bool isMain) {
     return new Trace(m_irFactory.defLabel(func), bcOff, isMain);

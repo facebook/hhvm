@@ -137,7 +137,7 @@ void HhbcTranslator::extendStack(uint32 index, Type type) {
     return;
   }
 
-  SSATmp* tmp = pop(Type::Gen);
+  SSATmp* tmp = pop(Type::Gen | Type::Cls);
   extendStack(index - 1, type);
   push(tmp);
 }
@@ -343,26 +343,36 @@ void HhbcTranslator::emitDefFunc(int fid) {
   emitInterpOneOrPunt(Type::None);
 }
 
+void HhbcTranslator::emitLateBoundCls() {
+  if (m_tb->isThisAvailable()) {
+    push(m_tb->gen(LdObjClass, m_tb->genLdThis(NULL)));
+  } else if (getCurFunc()->isStatic()) {
+    // ActRec->m_cls contains a valid class pointer
+    push(m_tb->genLdCtxCls());
+  } else {
+    // TODO: Task #2095788, use LdCtx to handle remaining cases
+    spillStack();
+    emitInterpOne(Type::Cls);
+  }
+}
+
 void HhbcTranslator::emitSelf() {
   Class* clss = getCurClass();
-  if (RuntimeOption::RepoAuthoritative &&
-     (clss->preClass()->attrs() & AttrUnique)) {
-    push(m_tb->genDefConst<const Class*>(clss));
+  if (clss == NULL) {
+    spillStack();
+    emitInterpOne(Type::Cls);
   } else {
-    push(m_tb->genLdFuncCls(m_tb->genLdCurFuncPtr()));
+    push(m_tb->genDefConst(clss));
   }
 }
 
 void HhbcTranslator::emitParent() {
-  Class* clss = getCurClass()->parent();
-  // if in repo authorative mode & the class is unique, then we can
-  // just burn the class ref into an immediate
-  if (RuntimeOption::RepoAuthoritative &&
-     (clss->preClass()->attrs() & AttrUnique)) {
-    push(m_tb->genDefConst<const Class*>(clss));
+  const Class* clss = getCurClass()->parent();
+  if (clss == NULL || clss->parent() == NULL) {
+    spillStack();
+    emitInterpOne(Type::Cls);
   } else {
-    SSATmp* className = m_tb->genDefConst<const StringData*>(clss->name());
-    push(m_tb->genLdCls(className));
+    push(m_tb->genDefConst(clss->parent()));
   }
 }
 
@@ -837,35 +847,27 @@ void HhbcTranslator::emitIncStat(int32 counter, int32 value, bool force) {
   }
 }
 
-SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
+SSATmp* HhbcTranslator::getClsPropAddr(Trace* exitTrace,
                                        const StringData* propName) {
   SSATmp* clsTmp = popA();
   SSATmp* prop = popC();
-  if (clsTmp->isConst()) {
-    cls = clsTmp->getValClass();
-  }
-  if (!cls) {
-    // can't use property target cache if class name is not a
-    // compile-time constant
-    PUNT(ClsPropAddr_noCls);
-  }
-  if (getCurClass() != cls) {
-    // SPropCache::lookup can't handle the case where context is
-    // different than cls
-    PUNT(ClsPropAddr_clsNE);
-  }
-  if (!prop->isConst() || prop->getType() != Type::StaticStr) {
+  if (!prop->isConst()) {
     if (propName) {
+      // The property name SSATmp on the evaluation stack was not a
+      // constant but the bytecode translator somehow knew the
+      // property name statically.
       prop = m_tb->genDefConst(propName);
-    } else {
-      // can't use property target cache if property name is not a
-      // compile-time constant
-      PUNT(ClsPropAddr_noProp);
     }
   }
-  const StringData* clsNameStr = cls->preClass()->name();
-  SSATmp* clsName = m_tb->genDefConst(clsNameStr);
-  return m_tb->genLdClsPropAddr(clsTmp, clsName, prop);
+  return m_tb->gen(LdClsPropAddr,
+                   m_tb->getLabel(exitTrace),
+                   clsTmp,
+                   prop,
+                   m_tb->genDefConst(getCurClass()));
+}
+
+bool HhbcTranslator::isSupportedClsProp(int stkIndex) {
+  return topC(stkIndex + 1)->isA(Type::Str);
 }
 
 void HhbcTranslator::decRefPropAddr(SSATmp* propAddr) {
@@ -873,11 +875,14 @@ void HhbcTranslator::decRefPropAddr(SSATmp* propAddr) {
   m_tb->genDecRef(prop);
 }
 
-
 void HhbcTranslator::emitIncDecS(bool pre, bool inc) {
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(NULL);
-  emitIncDecMem(pre, inc, propAddr, exitTrace);
+  if (!isSupportedClsProp()) {
+    PUNT(IncDecS);
+  }
+  Trace* exit1     = getExitSlowTrace();
+  Trace* exit2     = getExitSlowTrace();
+  SSATmp* propAddr = getClsPropAddr(exit1);
+  emitIncDecMem(pre, inc, propAddr, exit2);
   decRefPropAddr(propAddr);
 }
 
@@ -1009,9 +1014,8 @@ void HhbcTranslator::emitIssetL(int32 id) {
 }
 
 void HhbcTranslator::emitIssetG() {
-  TRACE(3, "%u: IssetS\n", m_bcOff);
+  TRACE(3, "%u: IssetG\n", m_bcOff);
   PUNT(IssetG);
-
 }
 
 /*
@@ -1019,10 +1023,13 @@ void HhbcTranslator::emitIssetG() {
  * property named propName that is not null; returns false
  * otherwise.
  */
-void HhbcTranslator::emitIssetS(const Class* cls,
-                                const StringData* propName) {
+void HhbcTranslator::emitIssetS(const StringData* propName) {
   TRACE(3, "%u: IssetS\n", m_bcOff);
-  SSATmp* propAddr = getClsPropAddr(cls, propName);
+  if (!isSupportedClsProp()) {
+    PUNT(IssetS);
+  }
+  Trace* exit      = getExitSlowTrace();
+  SSATmp* propAddr = getClsPropAddr(exit, propName);
   push(m_tb->gen(IsNTypeMem,
                  Type::Null,
                  m_unboxPtrs ? m_tb->genUnboxPtr(propAddr) : propAddr));
@@ -1048,9 +1055,15 @@ void HhbcTranslator::emitEmptyL(int32 id) {
 
 void HhbcTranslator::emitEmptyS() {
   TRACE(3, "%u: EmptyS\n", m_bcOff);
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(NULL);
-  SSATmp* ld = m_tb->genLdMem(propAddr, Type::Cell, exitTrace);
+  if (!isSupportedClsProp()) {
+    PUNT(EmptyS);
+  }
+  Trace* exit1     = getExitSlowTrace();
+  Trace* exit2     = getExitSlowTrace();
+  SSATmp* propAddr = getClsPropAddr(exit1);
+  SSATmp* ld = m_tb->genLdMem(m_unboxPtrs ? m_tb->genUnboxPtr(propAddr)
+                                          : propAddr,
+                              Type::Cell, exit2);
   push(m_tb->genNot(m_tb->genConvToBool(ld)));
   decRefPropAddr(propAddr);
 }
@@ -1644,6 +1657,10 @@ void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type type) {
 Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
                                       Type type,
                                       Trace* nextTrace) {
+  if (type.subtypeOf(Type::Cls)) {
+    // Should not generate guards for class
+    return nextTrace;
+  }
   if (nextTrace == NULL) {
     nextTrace = getGuardExit();
   }
@@ -1892,28 +1909,14 @@ void HhbcTranslator::emitCastObject() {
 }
 
 static
-bool isSupportedAGet(SSATmp* classSrc, const StringData* className) {
-  Type srcType = classSrc->getType();
-  return (srcType == Type::Obj ||
-          className != NULL ||
-          (srcType.isString() && classSrc->isConst()));
+bool isSupportedAGet(SSATmp* classSrc) {
+  return (classSrc->isA(Type::Obj) || classSrc->isA(Type::Str));
 }
 
 void HhbcTranslator::emitAGet(SSATmp* classSrc) {
-  Type srcType = classSrc->getType();
-  if (srcType.isString()) {
-    // srcType must be static string
-    assert(srcType == Type::StaticStr);
-    const Class* cls = Unit::lookupClass(classSrc->getValStr());
-    Class* curClass = getCurClass();
-    if (cls && curClass && curClass->classof(cls) ) {
-      // the class of the current function being compiled is the same as or
-      // derived from cls, so we can just use cls
-      push(m_tb->genDefConst(cls));
-    } else {
-      push(m_tb->genLdCls(classSrc));
-    }
-  } else if (srcType == Type::Obj) {
+  if (classSrc->isA(Type::Str)) {
+    push(m_tb->gen(LdCls, classSrc, m_tb->genDefConst(getCurClass())));
+  } else if (classSrc->isA(Type::Obj)) {
     push(m_tb->gen(LdObjClass, classSrc));
   } else {
     assert(0);
@@ -1921,7 +1924,7 @@ void HhbcTranslator::emitAGet(SSATmp* classSrc) {
 }
 
 void HhbcTranslator::emitAGetC(const StringData* clsName) {
-  if (isSupportedAGet(topC(), clsName)) {
+  if (isSupportedAGet(topC())) {
     SSATmp* src = popC();
     if (clsName != NULL) {
       src = m_tb->genDefConst<const StringData*>(clsName);
@@ -1938,10 +1941,7 @@ void HhbcTranslator::emitAGetC(const StringData* clsName) {
 void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
   Trace* exitTrace = getExitTrace();
   SSATmp* src = m_tb->genLdLocAsCell(id, exitTrace);
-  if (isSupportedAGet(src, clsName)) {
-    if (clsName != NULL) {
-      src = m_tb->genDefConst<const StringData*>(clsName);
-    }
+  if (isSupportedAGet(src)) {
     emitAGet(src);
   } else {
     spillStack();
@@ -1949,20 +1949,23 @@ void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
   }
 }
 
-void HhbcTranslator::emitCGetS(const Class* cls,
-                               const StringData* propName,
+void HhbcTranslator::emitCGetS(const StringData* propName,
                                Type resultType,
                                bool isInferedType) {
 
   TRACE(3, "%u: CGetS\n", m_bcOff);
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propPtr = getClsPropAddr(cls, propName);
+  if (!isSupportedClsProp()) {
+    PUNT(CGetS);
+  }
+  Trace* exit1    = getExitSlowTrace();
+  Trace* exit2    = getExitSlowTrace();
+  SSATmp* propPtr = getClsPropAddr(exit1, propName);
   SSATmp* val;
   if (isInferedType) {
     assert(resultType.isStaticallyKnownUnboxed());
     val = m_tb->genLdMem(propPtr, resultType, NULL);
   } else {
-    if (resultType == Type::None) {
+    if (resultType.equals(Type::None)) {
       // result type not predicted
       resultType = Type::Cell;
     } else {
@@ -1975,16 +1978,40 @@ void HhbcTranslator::emitCGetS(const Class* cls,
     // executes the CGetS as cell type (including the incref of the
     // result) and exits to the next bytecode.
     val = m_tb->genLdMem(m_unboxPtrs ? m_tb->genUnboxPtr(propPtr) : propPtr,
-                        resultType,
-                        exitTrace);
+                        resultType, exit2);
   }
   pushIncRef(val);
   decRefPropAddr(propPtr);
 }
 
+void HhbcTranslator::emitBindS() {
+  TRACE(3, "%u: BindS\n", m_bcOff);
+  if (!isSupportedClsProp(1)) {
+    PUNT(BindS);
+  }
+  Trace* exit       = getExitSlowTrace();
+  SSATmp* src       = popV();
+  SSATmp* propPtr   = getClsPropAddr(exit);
+  SSATmp* prevValue = m_tb->genLdMem(propPtr, Type::Gen, NULL);
+  pushIncRef(src);
+  m_tb->genStMem(propPtr, src, true);
+  m_tb->genDecRef(prevValue);
+  decRefPropAddr(propPtr);
+}
+
+void HhbcTranslator::emitVGetMem(SSATmp* ptr) {
+  pushIncRef(m_tb->genLdMem(m_tb->gen(BoxPtr, ptr), Type::BoxedCell, NULL));
+}
+
 void HhbcTranslator::emitVGetS() {
   TRACE(3, "%u: VGetS\n", m_bcOff);
-  PUNT(VGetS);
+  if (!isSupportedClsProp()) {
+    PUNT(VGetS);
+  }
+  Trace* exit     = getExitSlowTrace();
+  SSATmp* propPtr = getClsPropAddr(exit);
+  emitVGetMem(propPtr);
+  decRefPropAddr(propPtr);
 }
 
 void HhbcTranslator::emitCGetG(const StringData* name,
@@ -2009,13 +2036,17 @@ void HhbcTranslator::emitSetG() {
   emitInterpOneOrPunt(Type::Cell);
 }
 
-void HhbcTranslator::emitSetS(const Class* cls, const StringData* propName) {
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* src = popC();
-  SSATmp* propAddrToDecRef = getClsPropAddr(cls, propName);
+void HhbcTranslator::emitSetS(const StringData* propName) {
+  if (!isSupportedClsProp(1)) {
+    PUNT(CGetS);
+  }
+  Trace* exit1 = getExitSlowTrace();
+  Trace* exit2 = getExitSlowTrace();
+  SSATmp* src  = popC();
+  SSATmp* propAddrToDecRef = getClsPropAddr(exit1, propName);
   SSATmp* propPtr = m_unboxPtrs ? m_tb->genUnboxPtr(propAddrToDecRef)
                                 : propAddrToDecRef;
-  SSATmp* prevValue = m_tb->genLdMem(propPtr, Type::Cell, exitTrace);
+  SSATmp* prevValue = m_tb->genLdMem(propPtr, Type::Cell, exit2);
   pushIncRef(src);
   m_tb->genStMem(propPtr, src, true);
   m_tb->genDecRef(prevValue);

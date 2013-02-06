@@ -65,17 +65,17 @@ private:
   SSATmp* simplifyConv(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
-  SSATmp* simplifyLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
   SSATmp* simplifyPrint(IRInstruction* inst);
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyGuardType(IRInstruction* inst);
+  SSATmp* simplifyLdCls(IRInstruction* inst);
+  SSATmp* simplifyLdClsPropAddr(IRInstruction*);
 
 private:
   SSATmp* genDefInt(int64 val);
   SSATmp* genDefBool(bool val);
-  SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
   SSATmp* simplifyQueryJmp(IRInstruction*);

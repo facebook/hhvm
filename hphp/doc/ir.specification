@@ -448,13 +448,17 @@ D:Cell = Unbox S0:Gen
 
 D:Cell& = Box S0:Gen
 
-  Box S0 is it is unboxed, and put the resulting Cell& in D.
+  Box S0 if it is unboxed, and put the resulting Cell& in D.
 
 D:Cell* = UnboxPtr S0:Gen*
 
   If S0 points to a cell that is KindOfRef, dereference the pointer in
   the TypedValue and return a pointer to the inner-cell in D.
 
+D:Cell&* = BoxPtr S0:Gen*
+
+  Boxes the TypeValue that S0 points to if it is not boxed. The result
+  D points to the same TypedValue as S0 but has a more refined type.
 
 7. Loads
 
@@ -525,14 +529,38 @@ D:Ctx = LdCtx S0:StkPtr
   Loads into D the value of the m_this/m_cls field out of the frame
   pointer S0.
 
+D:Cls = LdCtxCls S0:StkPtr
+
+  Loads into D the value of the m_cls field out of the frame pointer
+  S0 as a Class pointer. The compiler should generate this only if it
+  can prove that the frame does not contain a $this pointer.
+
+D:Home = LdHome S0:StkPtr S1:ConstInt
+
+  Logically packages the location of a pointer into the VM stack and
+  an offset.  S0 will usually be the output of a DefFP.
+
 D:T = LdConst<T>
 
 D:ConstT = DefConst<T>
 
-D:Cls = LdCls S0:ConstSstr
+D:Cls = LdCls S0:Str S1:Cls
 
-  Loads the class named S0.  If the class is not defined, invokes
-  autoload and may raise an error.
+  Loads the class named S0 in the context of the class S1. Invokes
+  autoload and may raise an error if the class is not defined. The
+  explicit context parameter allows the compiler to optimize this
+  instruction by simplifying it to LdClsCached, which uses the target
+  cache.
+
+D:Cls = LdClsCached S0:ConstSstr
+
+  Loads the class named S0 via the target cache. Invokes autoload and
+  may raise an error if the class is not defined.
+
+D:Cls = LdCachedClass S0:ConstSstr
+
+  Loads the class whose name is S0 out of the target cache. Returns
+  null and has no side effects if the class is not defined.
 
 D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [ -> L ]
 
@@ -563,24 +591,30 @@ LdClsMethodCache
 LdClsMethod
 LdPropAddr
 
-D:Gen* = LdClsPropAddr S0:Cls S1:ConstSstr S2:ConstSstr
+D:Gen* = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> L ]
 
   Loads a pointer to a static class property. S0 points to the class,
-  S1 is the class name, and S2 is the property name. Throws a fatal
-  error if class S0 does not have a visible and accessible static
-  property named S2.
+  S1 is the property name, and S2 is the class representing the
+  context of the code accessing the property. If class S0 does not
+  have a visible and accessible static property named S1, then this
+  instruction will either (1) throw a fatal error if the optional
+  label L is not present, or (2) jump to L if it is present.
+
+D:Gen* = LdClsPropAddrCached S0:Cls S1:ConstSstr S2:ConstSstr S3:ConstCls [ -> L ]
+
+  Loads a pointer to a static class property via the target cache. S0
+  points to the class, S1 is the property name, S2 is the class name,
+  and S3 is the class representing the context of the code accessing
+  the property.  If class S0 does not have a visible and accessible
+  static property named S1, then this instruction will either (1)
+  throw a fatal error if the optional label L is not present, or (2)
+  jump to L if it is present.
 
 D:Func = LdObjMethod S0:ConstInt S1:ConstStr S2:StkPtr
 
 D:Cls = LdObjClass S0:Obj
 
   Load the class out of the object in S0 and put it in D.
-
-D:Cls = LdCachedClass S0:ConstSstr
-
-  Loads the class whose name is S0 out of target cache.  Does not
-  invoke autoload if the class is not defined and returns a null
-  class.
 
 D:Func = LdFunc S0:Str
 

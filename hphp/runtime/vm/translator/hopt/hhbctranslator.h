@@ -166,6 +166,7 @@ struct HhbcTranslator {
   void emitDefCls(int id, Offset after);
   void emitDefFunc(int id);
 
+  void emitLateBoundCls();
   void emitSelf();
   void emitParent();
 
@@ -178,7 +179,7 @@ struct HhbcTranslator {
   void emitFalse();
   void emitCGetL(int32 id);
   void emitCGetL2(int32 id);
-  void emitCGetS(const Class* cls, const StringData* propName,
+  void emitCGetS(const StringData* propName,
                  Type resultType, bool isInferedType);
   void emitMInstr(const NormalizedInstruction& ni);
   void emitCGetProp(LocationCode locCode,
@@ -193,7 +194,7 @@ struct HhbcTranslator {
   void emitVGetS();
   void emitVGetM();
   void emitSetL(int32 id);
-  void emitSetS(const Class* cls, const StringData* propName);
+  void emitSetS(const StringData* propName);
   void emitSetG();
   void emitSetProp(int propOffset, bool isPropOnStack); // object + offset
   void emitBindL(int32 id);
@@ -204,7 +205,7 @@ struct HhbcTranslator {
   void emitUnsetG();
   void emitUnsetProp(int offset);
   void emitIssetL(int32 id);
-  void emitIssetS(const Class* cls, const StringData* propName);
+  void emitIssetS(const StringData* propName);
   void emitIssetG();
   void emitIssetM(const char* vectorDesc);
   void emitIssetProp(int offset);
@@ -293,8 +294,6 @@ struct HhbcTranslator {
 
   void emitRetC(bool freeInline);
   void emitRetV(bool freeInline);
-
-  void emitLateBoundCls();
 
   // binary arithmetic ops
   void emitAdd();
@@ -453,6 +452,7 @@ private:
   /*
    * Emit helpers.
    */
+  void emitVGetMem(SSATmp* addr);
   void emitUnboxRAux();
   void emitAGet(SSATmp* src);
   void emitRet(SSATmp* retVal, Trace* exitTrace, bool freeInline);
@@ -463,7 +463,8 @@ private:
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  SSATmp* getClsPropAddr(const Class* cls, const StringData* propName = NULL);
+  bool isSupportedClsProp(int stkIndex = 0);
+  SSATmp* getClsPropAddr(Trace* exitTrace, const StringData* propName = NULL);
   void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(Offset targetBcOff = -1);
   Trace* getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff);

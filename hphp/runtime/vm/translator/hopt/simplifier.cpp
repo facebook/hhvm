@@ -91,23 +91,15 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case OpNSame:
     return simplifyCmp(opc, src1, src2);
 
-  case Concat:      return simplifyConcat(src1, src2);
-  case Mov:         return simplifyMov(src1);
-
-  case LdClsPropAddr:
-    return simplifyLdClsPropAddr(src1, src2, inst->getSrc(2));
-  case Conv:
-    return simplifyConv(inst);
-  case Unbox:
-    return simplifyUnbox(inst);
-  case UnboxPtr:
-    return simplifyUnboxPtr(inst);
+  case Concat:        return simplifyConcat(src1, src2);
+  case Mov:           return simplifyMov(src1);
+  case LdClsPropAddr: return simplifyLdClsPropAddr(inst);
+  case Conv:          return simplifyConv(inst);
+  case Unbox:         return simplifyUnbox(inst);
+  case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
-  case IsNType:
-    return simplifyIsType(inst);
-
-  case CheckInit:
-    return simplifyCheckInit(inst);
+  case IsNType:       return simplifyIsType(inst);
+  case CheckInit:     return simplifyCheckInit(inst);
 
   case JmpZero:
   case JmpNZero:
@@ -135,6 +127,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case IncRef:       return simplifyIncRef(inst);
   case GuardType:    return simplifyGuardType(inst);
 
+  case LdCls:        return simplifyLdCls(inst);
+
   case Jmp_:
   case JmpInstanceOf:
   case JmpNInstanceOf:
@@ -156,7 +150,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdStack:
   case LdPropAddr:
   case LdClsCns:
-  case LdCls:
   case LdObjMethod:
   case RetVal:
   case FreeActRec:
@@ -234,6 +227,28 @@ static bool hoistGuardToLoad(SSATmp* tmp, Type type) {
       break;
   }
   return false;
+}
+
+SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
+  SSATmp* clsName = inst->getSrc(0);
+  if (clsName->isConst()) {
+    const Class* cls = Unit::lookupClass(clsName->getValStr());
+    if (cls) {
+      if (RuntimeOption::RepoAuthoritative && (cls->attrs() & AttrUnique)) {
+        // the class is unique
+        return m_tb->genDefConst(cls);
+      }
+      const Class* ctx = inst->getSrc(1)->getValClass();
+      if (ctx && ctx->classof(cls)) {
+        // the class of the current function being compiled is the
+        // same as or derived from cls, so cls must be defined and
+        // cannot change the next time we execute this same code
+        return m_tb->genDefConst(cls);
+      }
+    }
+    return m_tb->gen(LdClsCached, clsName);
+  }
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
@@ -1026,18 +1041,35 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
   return NULL;
 }
 
-SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls,
-                                          SSATmp* clsName,
-                                          SSATmp* propName) {
-  if (clsName->getType().isNull()) {
+SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
+  SSATmp* propName  = inst->getSrc(1);
+  if (!propName->isConst()) return NULL;
+
+  SSATmp* cls   = inst->getSrc(0);
+  const StringData* clsNameString  = cls->isConst()
+                                     ? cls->getValClass()->preClass()->name()
+                                     : NULL;
+  if (!clsNameString) {
+    // see if you can get the class name from a LdCls
     IRInstruction* clsInst = cls->getInstruction();
-    if (clsInst->getOpcode() == LdCls) {
+    if (clsInst->getOpcode() == LdCls || clsInst->getOpcode() == LdClsCached) {
       SSATmp* clsName = clsInst->getSrc(0);
-      assert(clsName->isConst() && clsName->getType() == Type::StaticStr);
-      return genLdClsPropAddr(cls, clsName, propName);
+      assert(clsName->isA(Type::Str));
+      if (clsName->isConst()) {
+        clsNameString = clsName->getValStr();
+      }
     }
   }
-  return NULL;
+  if (!clsNameString) return NULL;
+
+  // we known both the class name and the property name statically
+  // so use the caching version of LdClsPropAddr
+  return m_tb->gen(LdClsPropAddrCached,
+                   inst->getLabel(),
+                   cls,
+                   propName,
+                   m_tb->genDefConst(clsNameString),
+                   inst->getSrc(2));
 }
 
 SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
@@ -1110,12 +1142,6 @@ SSATmp* Simplifier::genDefInt(int64 val) {
 
 SSATmp* Simplifier::genDefBool(bool val) {
   return m_tb->genDefConst<bool>(val);
-}
-
-SSATmp* Simplifier::genLdClsPropAddr(SSATmp* cls,
-                                     SSATmp* clsName,
-                                     SSATmp* prop) {
-  return m_tb->genLdClsPropAddr(cls, clsName, prop);
 }
 
 SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {

@@ -722,6 +722,7 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
   }
   return cls;
 }
+
 template Class* lookupKnownClass<true>(Class**, const StringData*, bool);
 template Class* lookupKnownClass<false>(Class**, const StringData*, bool);
 
@@ -856,6 +857,68 @@ SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
   assert(val->m_type >= MinDataType && val->m_type < MaxNumDataTypes);
   return val;
 }
+
+template<bool raiseOnError>
+TypedValue*
+SPropCache::lookupSProp(const Class *cls, const StringData *name, Class* ctx) {
+  bool visible, accessible;
+  TypedValue* val;
+  val = cls->getSProp(ctx, name, visible, accessible);
+  if (UNLIKELY(!visible || !accessible)) {
+    if (!raiseOnError) return NULL;
+    string methodName;
+    string_printf(methodName, "%s::$%s",
+                  cls->name()->data(), name->data());
+    undefinedError("Invalid static property access: %s", methodName.c_str());
+  }
+  return val;
+}
+
+template TypedValue* SPropCache::lookupSProp<true>(const Class *cls,
+                                                   const StringData *name,
+                                                   Class* ctx);
+
+template TypedValue* SPropCache::lookupSProp<false>(const Class *cls,
+                                                    const StringData *name,
+                                                    Class* ctx);
+
+template<bool raiseOnError>
+TypedValue*
+SPropCache::lookupIR(Handle handle, const Class *cls, const StringData *name,
+                     Class* ctx) {
+  // The fast path is in-TC. If we get here, we have already missed.
+  SPropCache* thiz = cacheAtHandle(handle);
+  Stats::inc(Stats::TgtCache_SPropMiss);
+  Stats::inc(Stats::TgtCache_SPropHit, -1);
+  assert(cls && name);
+  assert(!thiz->m_tv);
+  TRACE(3, "SPropCache miss: %s::$%s\n", cls->name()->data(),
+        name->data());
+  TypedValue* val = lookupSProp<raiseOnError>(cls, name, ctx);
+  if (!val) {
+    assert(!raiseOnError);
+    return NULL;
+  }
+  thiz->m_tv = val;
+  TRACE(3, "SPropCache::lookup(\"%s::$%s\") %p -> %p t%d\n",
+        cls->name()->data(),
+        name->data(),
+        val,
+        val->m_data.pref,
+        val->m_type);
+  assert(val->m_type >= MinDataType && val->m_type < MaxNumDataTypes);
+  return val;
+}
+
+template TypedValue* SPropCache::lookupIR<true>(Handle handle,
+                                                const Class *cls,
+                                                const StringData *name,
+                                                Class* ctx);
+
+template TypedValue* SPropCache::lookupIR<false>(Handle handle,
+                                                 const Class *cls,
+                                                 const StringData *name,
+                                                 Class* ctx);
 
 //=============================================================================
 // StaticMethodCache

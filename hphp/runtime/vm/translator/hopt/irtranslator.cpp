@@ -706,23 +706,42 @@ void TranslatorX64::irTranslateTraitExists(const Tracelet& t,
   HHIR_EMIT(TraitExists, traitName);
 }
 
+void TranslatorX64::irTranslateVGetS(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
+  HHIR_EMIT(VGetS);
+}
+
+void TranslatorX64::irTranslateBindS(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
+  HHIR_EMIT(BindS);
+}
+
+void TranslatorX64::irTranslateEmptyS(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
+  HHIR_EMIT(EmptyS);
+}
+
+void
+TranslatorX64::irTranslateIssetS(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  const int kPropNameIdx = 1;
+  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
+  HHIR_EMIT(IssetS, propName);
+}
+
 void TranslatorX64::irTranslateCGetS(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  const int kClassIdx = 0;
   const int kPropNameIdx = 1;
-  const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(CGetS, cls, propName,
+  HHIR_EMIT(CGetS, propName,
             getInferredOrPredictedType(i), isInferredType(i));
 }
 
 void TranslatorX64::irTranslateSetS(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  const int kClassIdx = 1;
   const int kPropIdx = 2;
-  const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
   const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(SetS, cls, propName);
+  HHIR_EMIT(SetS, propName);
 }
 
 void TranslatorX64::irTranslateSetG(const Tracelet& t,
@@ -792,6 +811,13 @@ TranslatorX64::irTranslateVGetM(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateLateBoundCls(const Tracelet&,
+                                       const NormalizedInstruction&i) {
+  HHIR_EMIT(LateBoundCls);
+}
+
+
+void
 TranslatorX64::irTranslateCGetG(const Tracelet& t,
                                 const NormalizedInstruction& i) {
   const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
@@ -810,8 +836,7 @@ void TranslatorX64::irTranslateFPassL(const Tracelet& t,
 void TranslatorX64::irTranslateFPassS(const Tracelet& t,
                                       const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
-    HHIR_UNIMPLEMENTED(FPassS);
-    assert(false);
+    irTranslateVGetS(t, ni);
   } else {
     irTranslateCGetS(t, ni);
   }
@@ -871,21 +896,6 @@ void
 TranslatorX64::irTranslateAKExists(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
   HHIR_EMIT(AKExists);
-}
-
-void
-TranslatorX64::irTranslateIssetS(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  const int kClassIdx = 0;
-  const int kPropNameIdx = 1;
-  auto const& clsInput = i.inputs[kClassIdx]->rtt;
-  if (!(clsInput.isObject() || clsInput.isClass())) {
-    using namespace JIT;
-    PUNT(IssetS);
-  }
-  const Class* cls = clsInput.valueClass();
-  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
-  m_hhbcTrans->emitIssetS(cls, propName);
 }
 
 void
@@ -1423,6 +1433,15 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
   // Add to this switch the bytecodes that the IR handles but the base
   // translator does not analyze and translate
   switch (op) {
+    case OpLateBoundCls:
+      irTranslateLateBoundCls(t, i);
+      break;
+    case OpEmptyS:
+      irTranslateEmptyS(t, i);
+      break;
+    case OpVGetS:
+      irTranslateVGetS(t, i);
+      break;
     case OpIssetS:
       irTranslateIssetS(t, i);
       break;

@@ -94,6 +94,9 @@ private:
   void cgLoad(PhysReg base, int64_t off, IRInstruction* inst);
 
   template<class OpndType>
+  ConditionCode emitTypeTest(Type type, OpndType src, bool negate);
+
+  template<class OpndType>
   ConditionCode emitTypeTest(IRInstruction* inst, OpndType src, bool negate);
 
   template<class OpndType>

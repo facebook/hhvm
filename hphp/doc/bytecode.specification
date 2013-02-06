@@ -1320,7 +1320,7 @@ IssetS    [C A]  ->  [C:Bool]
   it checks if class $1 has an accessible static property named x. If it
   doesn't, this instruction pushes false.
 
-  If class $1 goes have an accessible property named x, this instruction reads
+  If class $1 does have an accessible property named x, this instruction reads
   the static property named x. If the static property is null, this instruction
   pushes false onto the stack, otherwise it pushes true.
 
@@ -1601,7 +1601,7 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   by %1) and a reference to the FPI structure for the __invoke method from
   object x.
 
-  If x is no a string or object, this instruction throws a fatal error.
+  If x is not a string or object, this instruction throws a fatal error.
 
 FPushObjMethod <num params>                 [C C]  ->  []
 FPushObjMethodD <num params> <litstr id>    [C]  ->  []

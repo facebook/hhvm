@@ -172,6 +172,7 @@ struct HhbcTranslator {
   void emitString(int strId);
   void emitInt(int64 val);
   void emitDouble(double val);
+  void emitNullUninit();
   void emitNull();
   void emitTrue();
   void emitFalse();

@@ -354,6 +354,11 @@ void HhbcTranslator::emitDouble(double val) {
   push(m_tb->genDefConst<double>(val));
 }
 
+void HhbcTranslator::emitNullUninit() {
+  TRACE(3, "%u: NullUninit\n", m_bcOff);
+  push(m_tb->genDefUninit());
+}
+
 void HhbcTranslator::emitNull() {
   TRACE(3, "%u: Null\n", m_bcOff);
   push(m_tb->genDefNull());

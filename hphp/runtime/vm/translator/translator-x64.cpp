@@ -2323,18 +2323,20 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     }
   }
 
-  // Move rVmSp to the right place: just past all locals
-  int frameCells = func->numSlotsInFrame();
-  if (!func->isGenerator()) {
-    emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
-  }
-
   const Opcode* destPC = func->unit()->entry() + func->base();
   if (dvInitializer != InvalidAbsoluteOffset) {
     // dispatch to funclet.
     destPC = func->unit()->entry() + dvInitializer;
   }
   SrcKey funcBody(func, destPC);
+
+  // Move rVmSp to the right place: just past all locals
+  int frameCells = func->numSlotsInFrame();
+  if (func->isGenerator()) {
+    frameCells = 0;
+  } else {
+    emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
+  }
 
   Fixup fixup(funcBody.m_offset - func->base(), frameCells);
 

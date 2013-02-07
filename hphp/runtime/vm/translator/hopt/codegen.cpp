@@ -1255,16 +1255,17 @@ void CodeGenerator::emitInstanceCheck(IRInstruction* inst, PhysReg dstReg) {
                  .ssa(inst->getSrc(1)));
 }
 
-void CodeGenerator::cgInstanceOfCommon(IRInstruction* inst) {
+void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   emitInstanceCheck(inst, inst->getDst()->getReg());
 }
 
-void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
-  cgInstanceOfCommon(inst);
-}
-
 void CodeGenerator::cgNInstanceOf(IRInstruction* inst) {
-  cgInstanceOfCommon(inst);
+  // TODO(#2058865): having NInstanceOf is no better than InstanceOf
+  // followed by boolean Not opcode.
+  emitInstanceCheck(inst, inst->getDst()->getReg());
+  auto& a = m_as;
+  a.    testb   (al, al);
+  a.    setz    (al);
 }
 
 void CodeGenerator::cgJmpInstanceOf(IRInstruction* inst) {

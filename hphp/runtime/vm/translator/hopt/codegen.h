@@ -172,7 +172,6 @@ private:
   void emitInstanceCheck(IRInstruction* inst, PhysReg dstReg);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceCheck(IRInstruction*);
-  void cgInstanceOfCommon(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
   void emitTraceRet(CodeGenerator::Asm& as);

@@ -57,7 +57,7 @@ void AsyncFuncImpl::start() {
   }
 
   // On Success use the allocated memory for the thread's stack
-  if (posix_memalign(&m_threadStack, PAGE_SIZE, rlim.rlim_cur) == 0) {
+  if (posix_memalign(&m_threadStack, Util::s_pageSize, rlim.rlim_cur) == 0) {
     pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
   }
 

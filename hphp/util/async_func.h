@@ -18,7 +18,6 @@
 #define __CONCURRENCY_ASYNC_FUNC_H__
 
 #include "base.h"
-#include <sys/user.h>
 #include <pthread.h>
 #include "synchronizable.h"
 #include "lock.h"

@@ -18,7 +18,6 @@
 
 #include "alloc.h"
 #include <sys/mman.h>
-#include <sys/user.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "util.h"
@@ -48,6 +47,7 @@ void flush_thread_caches() {
 
 __thread uintptr_t s_stackLimit;
 __thread size_t s_stackSize;
+size_t s_pageSize;
 
 static NEVER_INLINE uintptr_t get_stack_top() {
   char marker;
@@ -77,12 +77,16 @@ void init_stack_limits(pthread_attr_t* attr) {
   Util::s_stackSize = stacksize;
 }
 
+void init_page_size() {
+  Util::s_pageSize = sysconf(_SC_PAGESIZE);
+}
+
 void flush_thread_stack() {
-  uintptr_t top = get_stack_top() & ~(PAGE_SIZE - 1);
+  uintptr_t top = get_stack_top() & ~(Util::s_pageSize - 1);
   // s_stackLimit is already aligned
   assert(top >= s_stackLimit);
   size_t len = top - s_stackLimit;
-  assert((len & (PAGE_SIZE - 1)) == 0);
+  assert((len & (Util::s_pageSize - 1)) == 0);
   if (madvise((void*)s_stackLimit, len, MADV_DONTNEED) != 0 &&
       errno != EAGAIN) {
     fprintf(stderr, "%s failed to madvise with error %d\n", __func__, errno);

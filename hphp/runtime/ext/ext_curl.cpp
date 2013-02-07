@@ -37,6 +37,10 @@
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(curl);
+
+static StaticString s_exception("exception");
+static StaticString s_previous("previous");
+
 ///////////////////////////////////////////////////////////////////////////////
 // helper data structure
 
@@ -187,6 +191,39 @@ public:
     m_opts.clear();
   }
 
+  void check_exception() {
+    if (m_exception) {
+      if (m_phpException) {
+        Object e((ObjectData*)m_exception);
+        m_exception = NULL;
+        e.get()->decRefCount();
+        throw e;
+      } else {
+        Exception *e = (Exception*)m_exception;
+        m_exception = NULL;
+        e->throwException();
+      }
+    }
+  }
+
+  ObjectData* getAndClearPhpException() {
+    if (m_exception && m_phpException) {
+      ObjectData* ret = (ObjectData*)m_exception;
+      m_exception = nullptr;
+      return ret;
+    }
+    return nullptr;
+  }
+
+  Exception* getAndClearCppException() {
+    if (!m_phpException) {
+      Exception* e = (Exception*)m_exception;
+      m_exception = nullptr;
+      return e;
+    }
+    return nullptr;
+  }
+
   Variant execute() {
     assert(!m_exception);
     if (m_cp == NULL) {
@@ -206,18 +243,7 @@ public:
       IOStatusHelper io("curl_easy_perform", m_url.data());
       SYNC_VM_REGS_SCOPED();
       m_error_no = curl_easy_perform(m_cp);
-      if (m_exception) {
-        if (m_phpException) {
-          Object e((ObjectData*)m_exception);
-          m_exception = NULL;
-          e.get()->decRefCount();
-          throw e;
-        } else {
-          Exception *e = (Exception*)m_exception;
-          m_exception = NULL;
-          e->throwException();
-        }
-      }
+      check_exception();
     }
     set_curl_statuses(m_cp, m_url.data());
 
@@ -1001,6 +1027,33 @@ public:
     return Object();
   }
 
+  void check_exceptions() {
+    ObjectData* phpException = 0;
+    Exception* cppException = 0;
+    for (ArrayIter iter(m_easyh); iter; ++iter) {
+      CurlResource* curl = iter.second().toCObjRef(). getTyped<CurlResource>();
+      if (ObjectData* e = curl->getAndClearPhpException()) {
+        if (phpException) {
+          e->o_set(s_previous, Variant(phpException), s_exception);
+          phpException->decRefCount();
+        }
+        phpException = e;
+      } else if (Exception *e = curl->getAndClearCppException()) {
+        delete cppException;
+        cppException = e;
+      }
+    }
+    if (cppException) {
+      if (phpException) decRefObj(phpException);
+      cppException->throwException();
+    }
+    if (phpException) {
+      Object e(phpException);
+      phpException->decRefCount();
+      throw e;
+    }
+  }
+
   CURLM *get() {
     if (m_multi == NULL) {
       throw NullPointerException();
@@ -1055,6 +1108,7 @@ Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running) {
   IOStatusHelper io("curl_multi_exec");
   SYNC_VM_REGS_SCOPED();
   int result = curl_multi_perform(curlm->get(), &running);
+  curlm->check_exceptions();
   still_running = running;
   return result;
 }
@@ -1159,6 +1213,7 @@ Variant f_curl_multi_info_read(CObjRef mh,
 
   int queued_msgs;
   CURLMsg *tmp_msg = curl_multi_info_read(curlm->get(), &queued_msgs);
+  curlm->check_exceptions();
   if (tmp_msg == NULL) {
     return false;
   }

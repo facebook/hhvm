@@ -139,7 +139,7 @@ private:
     StoreList;
 
   // updates the memory map given the information from the new instruction
-  void processInstruction(IRInstruction* inst);
+  void processInstruction(IRInstruction* inst, bool isPseudoMain);
 
   // returns the last memory access of a ref, or an object property. an offset
   // of -1 means that the ssa temp is a ref or a local, otherwise the temp is
@@ -174,6 +174,21 @@ private:
         copy->second->dec();
       }
       map.erase(copy);
+    }
+  }
+
+  template <typename V>
+  static inline void clearCountedMapNotIn(hphp_hash_map<SSATmp*, V*>& mapTarget,
+                                          const hphp_hash_map<SSATmp*, V*>& mapSafe) {
+    typename hphp_hash_map<SSATmp*, V*>::iterator it, copy, end;
+    for (it = mapTarget.begin(), end = mapTarget.end(); it != end; ) {
+      if (mapSafe.find(it->first) != mapSafe.end()) continue;
+      copy = it;
+      ++it;
+      if (copy->first->getInstruction()->getOpcode() != Mov) {
+        copy->second->dec();
+      }
+      mapTarget.erase(copy);
     }
   }
 
@@ -333,7 +348,7 @@ void MemMap::escapeRef(SSATmp* ref) {
   }
 }
 
-void MemMap::processInstruction(IRInstruction* inst) {
+void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
   assert(inst != NULL);
 
   Opcode op = inst->getOpcode();
@@ -552,9 +567,14 @@ void MemMap::processInstruction(IRInstruction* inst) {
         clearCountedMap(m_unknown);
         clearCountedMap(m_props);
 
-        // TODO always killing locals on an instruction that can modify refs
-        // is too conservative
-        clearCountedMap(m_locs);
+        // Be conservative about locals in pseudo-mains,
+        // since they may be accessed through $GLOBALS too
+        if (isPseudoMain) {
+          clearCountedMap(m_locs);
+        } else {
+          // Just clear locals that are not known to be unescaped
+          clearCountedMapNotIn(m_locs, m_unescaped);
+        }
       }
       break;
     }
@@ -611,7 +631,12 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
   }
   StoreList tracking;
 
+  const Func* curFunc = nullptr;
+
   for (IRInstruction* inst : trace->getInstructionList()) {
+    if (inst->getOpcode() == Marker) {
+      curFunc = ((MarkerInstruction*)inst)->getFunc();
+    }
     // initialize each instruction as live
     setLive(inst, true);
 
@@ -674,7 +699,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
     }
 
     Simplifier::copyProp(inst);
-    processInstruction(inst);
+    processInstruction(inst, curFunc && curFunc->isPseudoMain());
   }
 
   sinkStores(tracking);

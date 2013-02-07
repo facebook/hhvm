@@ -235,6 +235,7 @@ bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
+bool Option::RecordErrors = true;
 std::string Option::DocJson;
 
 bool Option::AllDynamic = true;

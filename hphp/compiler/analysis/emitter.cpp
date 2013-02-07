@@ -7315,6 +7315,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     for (auto& i : RuntimeOption::DynamicInvokeFunctions) {
       Option::DynamicInvokeFunctions.insert(i);
     }
+    Option::RecordErrors = false;
     Option::OutputHHBC = true;
     Option::ParseTimeOpts = false;
     Option::WholeProgram = false;

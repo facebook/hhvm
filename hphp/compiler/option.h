@@ -388,6 +388,7 @@ public:
   static bool VariableCoalescing;
   static bool DumpAst;
   static bool WholeProgram;
+  static bool RecordErrors;
   static std::string DocJson; // filename to dump doc JSON to
   static bool PregenerateCPP;
   static bool GenerateFFIStaticBinding;

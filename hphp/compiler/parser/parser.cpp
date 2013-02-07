@@ -1348,15 +1348,13 @@ void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
   if (checkYield && !m_funcContexts.empty()) {
     if (!m_funcContexts.back().setIsNotGenerator()) {
-      if (!hhvm) Compiler::Error(InvalidYield, out->stmt);
+      Compiler::Error(InvalidYield, out->stmt);
       PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
     }
   }
 }
 
 static void invalidYield(LocationPtr loc) {
-  if (hhvm) return;
-
   ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(), loc, "yield",
                                            ExpressionListPtr(),
                                            ExpressionPtr()));

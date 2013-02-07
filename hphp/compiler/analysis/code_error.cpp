@@ -178,7 +178,7 @@ void ClearErrors() {
 }
 
 void Error(ErrorType error, ConstructPtr construct) {
-  if (hhvm) return;
+  if (!Option::RecordErrors) return;
   ErrorInfoPtr errorInfo(new ErrorInfo());
   errorInfo->m_error = error;
   errorInfo->m_construct1 = construct;
@@ -187,7 +187,7 @@ void Error(ErrorType error, ConstructPtr construct) {
 }
 
 void Error(ErrorType error, ConstructPtr construct1, ConstructPtr construct2) {
-  if (hhvm) return;
+  if (!Option::RecordErrors) return;
   ErrorInfoPtr errorInfo(new ErrorInfo());
   errorInfo->m_error = error;
   errorInfo->m_construct1 = construct1;
@@ -197,7 +197,7 @@ void Error(ErrorType error, ConstructPtr construct1, ConstructPtr construct2) {
 }
 
 void Error(ErrorType error, ConstructPtr construct, const std::string &data) {
-  if (hhvm) return;
+  if (!Option::RecordErrors) return;
   ErrorInfoPtr errorInfo(new ErrorInfo());
   errorInfo->m_error = error;
   errorInfo->m_construct1 = construct;

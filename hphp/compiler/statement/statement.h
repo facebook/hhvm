@@ -78,7 +78,8 @@ DECLARE_BOOST_TYPES(Statement);
     x(LabelStatement),                          \
     x(UseTraitStatement),                       \
     x(TraitPrecStatement),                      \
-    x(TraitAliasStatement)
+    x(TraitAliasStatement),                     \
+    x(TypedefStatement)
 
 class Statement : public Construct {
 public:

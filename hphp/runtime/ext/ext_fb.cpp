@@ -1470,13 +1470,14 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
 }
 
 /*
-  fb_autoload_map($map, $root) specifies a mapping
-  from classes, functions and constants to the files
-  that define them. The map has the form:
+  fb_autoload_map($map, $root) specifies a mapping from classes,
+  functions, constants, and typedefs to the files that define
+  them. The map has the form:
 
     array('class'    => array('cls' => 'cls_file.php', ...),
           'function' => array('fun' => 'fun_file.php', ...),
           'constant' => array('con' => 'con_file.php', ...),
+          'type'     => array('type' => 'type_file.php', ...),
           'failure' => callable);
 
     If the 'failure' element exists, it will be called if the

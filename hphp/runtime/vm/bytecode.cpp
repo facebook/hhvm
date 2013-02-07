@@ -5646,7 +5646,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
     m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Class* cls = Unit::loadClass(nep.second, nep.first);
   if (cls == nullptr) {
-    raise_error("Undefined class: %s",
+    raise_error(Strings::UNKNOWN_CLASS,
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
   // Lookup the ctor
@@ -6475,6 +6475,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDefCls(PC& pc) {
   DECODE_IVA(cid);
   PreClass* c = m_fp->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopDefTypedef(PC& pc) {
+  NEXT();
+  DECODE_IVA(tid);
+  m_fp->m_func->unit()->defTypedef(tid);
 }
 
 static inline void checkThis(ActRec* fp) {
@@ -7386,7 +7392,7 @@ void VMExecutionContext::requestInit() {
   profileRequestStart();
 
 #ifdef DEBUG
-  Class *cls = *Unit::GetNamedEntity(s_stdclass.get())->clsList();
+  Class* cls = Unit::GetNamedEntity(s_stdclass.get())->clsList();
   assert(cls);
   assert(cls == SystemLib::s_stdclassClass);
 #endif

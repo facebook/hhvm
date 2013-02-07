@@ -1850,16 +1850,28 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     m_tb->gen(VerifyParamCallable, locVal, cns(paramId));
     return;
   }
-  // For non-object guards, or object guards with non-object runtime
-  // types, we rely on what we know from the tracelet guards and never
-  // have to do runtime checks.
-  if ((!tc.isObject() && !tc.check(locType.toDataType())) ||
-      (tc.isObject() && !locType.subtypeOf(Type::Obj))) {
-    spillStack();
-    m_tb->gen(VerifyParamFail, cns(paramId));
+
+  // For non-object guards, we rely on what we know from the tracelet
+  // guards and never have to do runtime checks.
+  if (!tc.isObjectOrTypedef()) {
+    if (!tc.checkPrimitive(locType.toDataType())) {
+      spillStack();
+      m_tb->gen(VerifyParamFail, cns(paramId));
+      return;
+    }
     return;
   }
-  if (!tc.isObject()) {
+
+  /*
+   * If the parameter is an object, we check the object in one of
+   * various ways (similar to instance of).  If the parameter is not
+   * an object, it still might pass the VerifyParamType if the
+   * constraint is a typedef.
+   *
+   * For now we just interp that case.
+   */
+  if (!locType.isObj()) {
+    emitInterpOneOrPunt(Type::None);
     return;
   }
 
@@ -1897,9 +1909,9 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   locVal = m_tb->gen(Unbox, getExitTrace(), locVal);
   SSATmp* objClass = m_tb->gen(LdObjClass, locVal);
   if (haveBit || classIsUniqueNormalClass(knownConstraint)) {
-    SSATmp* isInstance = haveBit ?
-      m_tb->gen(InstanceOfBitmask, objClass, cns(clsName))
-    : m_tb->gen(ExtendsClass, objClass, constraint);
+    SSATmp* isInstance = haveBit
+      ? m_tb->gen(InstanceOfBitmask, objClass, cns(clsName))
+      : m_tb->gen(ExtendsClass, objClass, constraint);
     m_tb->ifThen(getCurFunc(),
       [&](Block* taken) {
         m_tb->gen(JmpZero, taken, isInstance);
@@ -1912,7 +1924,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     );
   } else {
     spillStack();
-    m_tb->gen(VerifyParamCls, objClass, constraint, cns(paramId));
+    m_tb->gen(VerifyParamCls,
+              objClass,
+              constraint,
+              cns(paramId),
+              cns(uintptr_t(&tc)));
   }
 }
 

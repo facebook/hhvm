@@ -536,6 +536,7 @@ enum SetOpOp {
   O(DefFunc,         ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(DefTypedef,      ONE(IVA),         NOV,             NOV,        NF) \
   O(This,            NA,               NOV,             ONE(CV),    NF) \
   O(BareThis,        ONE(OA),          NOV,             ONE(CV),    NF) \
   O(CheckThis,       NA,               NOV,             NOV,        NF) \

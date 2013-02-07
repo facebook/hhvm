@@ -55,7 +55,8 @@ int main(int argc, char** argv) try {
   try {
     using HPHP::Scanner;
     using HPHP::Test::Parser;
-    Scanner scan(in, Scanner::AllowShortTags);
+    Scanner scan(in, Scanner::AllowShortTags |
+                     Scanner::EnableHipHopKeywords);
     Parser parser(scan, argv[1]);
     parser.parse();
   } catch (const std::exception& e) {

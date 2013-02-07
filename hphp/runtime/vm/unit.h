@@ -17,13 +17,12 @@
 #ifndef incl_VM_UNIT_H_
 #define incl_VM_UNIT_H_
 
-#include <tbb/concurrent_unordered_map.h>
-
 // Expects that runtime/vm/core_types.h is already included.
 #include "runtime/base/runtime_option.h"
 #include "runtime/vm/hhbc.h"
 #include "runtime/vm/class.h"
 #include "runtime/vm/repo_helpers.h"
+#include "runtime/vm/named_entity.h"
 #include "runtime/base/array/hphp_array.h"
 #include "util/range.h"
 #include "util/parser/location.h"
@@ -108,25 +107,9 @@ struct UnitMergeInfo {
   }
   void*& mergeableObj(int ix) { return ((void**)m_mergeables)[ix]; }
   void* mergeableData(int ix) { return (char*)m_mergeables + ix*sizeof(void*); }
-
 };
 
 typedef const uchar* PC;
-
-struct NamedEntity {
-  Class* m_class;
-  unsigned m_cachedClassOffset;
-  unsigned m_cachedFuncOffset;
-
-  Class* const* clsList() const { return &m_class; }
-  void setCachedFunc(Func *f);
-  Func* getCachedFunc() const;
-};
-
-typedef tbb::concurrent_unordered_map<const StringData *, NamedEntity,
-                                      string_data_hash,
-                                      string_data_isame> NamedEntityMap;
-typedef std::pair<const StringData*,const NamedEntity*> NamedEntityPair;
 
 // Exception handler table entry.
 class EHEnt {
@@ -275,6 +258,28 @@ struct PreConst {
 };
 
 typedef std::vector<PreConst> PreConstVec;
+
+/*
+ * This is the runtime representation of a typedef.  Typedefs are only
+ * allowed when hip hop extensions are enabled.
+ *
+ * The m_kind field is KindOfObject whenever the typedef is basically
+ * just a name.  At runtime we still might resolve this name to
+ * another typedef, becoming a typedef for KindOfArray or something in
+ * that request.
+ */
+struct Typedef {
+  const StringData* m_name;
+  const StringData* m_value;
+  DataType          m_kind;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd(m_name)
+      (m_value)
+      (m_kind)
+      ;
+  }
+};
 
 //==============================================================================
 // (const StringData*) versus (StringData*)
@@ -442,7 +447,7 @@ struct Unit {
 
   MD5 md5() const { return m_md5; }
 
-  static const NamedEntity* GetNamedEntity(const StringData *);
+  static NamedEntity* GetNamedEntity(const StringData *);
   static Array getUserFunctions();
   static Array getClassesInfo();
   static Array getInterfacesInfo();
@@ -484,32 +489,37 @@ struct Unit {
 
   static Class* defClass(const HPHP::VM::PreClass* preClass,
                          bool failIsFatal = true);
+  void defTypedef(Id id);
 
   static Class *lookupClass(const NamedEntity *ne) {
-    Class *cls = *ne->clsList(); // TODO(#2054448): ARMv8
-    if (LIKELY(cls != nullptr)) cls = cls->getCached();
-    return cls;
+    Class* cls;
+    if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
+      return cls;
+    }
+    return nullptr;
   }
 
+  static Class *lookupClass(const StringData *clsName) {
+    return lookupClass(GetNamedEntity(clsName));
+  }
+
+  /*
+   * Look up a unique class even if it hasn't been loaded in this
+   * request yet.
+   */
   static Class *lookupUniqueClass(const NamedEntity *ne) {
-    Class *cls = *ne->clsList(); // TODO(#2054448): ARMv8
+    Class* cls = ne->clsList();
     if (LIKELY(cls != nullptr)) {
       if (cls->attrs() & AttrUnique && RuntimeOption::RepoAuthoritative) {
         return cls;
       }
-      cls = cls->getCached();
+      return cls->getCached();
     }
-    return cls;
+    return nullptr;
   }
 
   static Class *lookupUniqueClass(const StringData *clsName) {
     return lookupUniqueClass(GetNamedEntity(clsName));
-  }
-
-  static Class *lookupClass(const StringData *clsName) {
-    Class *cls = *GetNamedEntity(clsName)->clsList();
-    if (LIKELY(cls != nullptr)) cls = cls->getCached();
-    return cls;
   }
 
   static Class *loadClass(const NamedEntity *ne,
@@ -560,7 +570,6 @@ public:
     return m_mergeInfo->hoistableFuncs();
   }
   void renameFunc(const StringData* oldName, const StringData* newName);
-  void mergeFuncs() const;
   static void loadFunc(const Func *func);
   FuncRange funcs() const {
     return m_mergeInfo->funcs();
@@ -580,7 +589,6 @@ public:
     return m_preClasses[id].get();
   }
   typedef std::vector<PreClassPtr> PreClassPtrVec;
-  typedef std::vector<PreClass*> PreClassVec;
   typedef Range<PreClassPtrVec> PreClassRange;
   void initialMerge();
   void merge();
@@ -661,6 +669,7 @@ private:
   std::vector<NamedEntityPair> m_namedInfo;
   std::vector<const ArrayData*> m_arrays;
   PreClassPtrVec m_preClasses;
+  FixedVector<Typedef> m_typedefs;
   UnitMergeInfo* m_mergeInfo;
   unsigned m_cacheOffset;
   int8_t m_repoId;
@@ -693,6 +702,7 @@ class UnitEmitter {
   void setMergeOnly(bool b) { m_mergeOnly = b; }
   const MD5& md5() const { return m_md5; }
   Id addPreConst(const StringData* name, const TypedValue& value);
+  Id addTypedef(const Typedef& td);
   Id mergeLitstr(const StringData* litstr);
   Id mergeArray(ArrayData* a, const StringData* key=nullptr);
   FuncEmitter* getMain();
@@ -840,6 +850,7 @@ class UnitEmitter {
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
   PreConstVec m_preConsts;
+  std::vector<Typedef> m_typedefs;
 };
 
 class UnitRepoProxy : public RepoProxy {
@@ -876,7 +887,8 @@ class UnitRepoProxy : public RepoProxy {
     void insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5, const uchar* bc,
                 size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
                 const TypedValue* mainReturn, bool mergeOnly,
-                const LineTable& lines);
+                const LineTable& lines,
+                const std::vector<Typedef>&);
   };
   class GetUnitStmt : public RepoProxy::Stmt {
    public:

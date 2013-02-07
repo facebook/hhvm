@@ -717,6 +717,14 @@ CacheHandle allocFixedFunction(const StringData* name) {
   return allocFixedFunction(Unit::GetNamedEntity(name), false);
 }
 
+CacheHandle allocNameDef(const NamedEntity* ne) {
+  if (ne->m_cachedNameDefOffset) {
+    return ne->m_cachedNameDefOffset;
+  }
+  return allocFuncOrClass(&ne->m_cachedNameDefOffset,
+    false /* persistent */); // TODO(#2103214): support persistent
+}
+
 template<bool checkOnly>
 Class*
 lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {

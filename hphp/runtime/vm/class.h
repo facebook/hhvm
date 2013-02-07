@@ -32,6 +32,7 @@
 #include <util/range.h>
 #include <runtime/vm/fixed_string_map.h>
 #include <runtime/vm/indexed_string_map.h>
+#include "runtime/vm/named_entity.h"
 
 namespace HPHP {
 
@@ -311,7 +312,7 @@ class PreClass : public AtomicCountable {
 
   void prettyPrint(std::ostream& out) const;
 
-  const NamedEntity* namedEntity() const { return m_namedEntity; }
+  NamedEntity* namedEntity() const { return m_namedEntity; }
 
 private:
   typedef IndexedStringMap<Func*,false,Slot> MethodMap;
@@ -320,7 +321,7 @@ private:
 
 private:
   Unit* m_unit;
-  const NamedEntity* m_namedEntity;
+  NamedEntity* m_namedEntity;
   int m_line1;
   int m_line2;
   Offset m_offset;

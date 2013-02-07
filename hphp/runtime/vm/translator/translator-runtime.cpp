@@ -82,10 +82,32 @@ void VerifyParamTypeCallable(TypedValue value, int param) {
 }
 
 HOT_FUNC_VM
-void VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param) {
-  if (UNLIKELY(!(constraint && cls->classof(constraint)))) {
-    VerifyParamTypeFail(param);
+void VerifyParamTypeSlow(const Class* cls,
+                         const Class* constraint,
+                         int param,
+                         const TypeConstraint* expected) {
+  if (LIKELY(constraint && cls->classof(constraint))) {
+    return;
   }
+
+  // Check a typedef for a class.  We interp'd if the param wasn't an
+  // object, so if it's a typedef for something non-objecty we're
+  // failing anyway.
+  if (auto namedEntity = expected->namedEntity()) {
+    NameDef def = namedEntity->getCachedNameDef();
+    if (UNLIKELY(!def)) {
+      VMRegAnchor _;
+      String nameStr(const_cast<StringData*>(expected->typeName()));
+      if (AutoloadHandler::s_instance->autoloadType(nameStr)) {
+        def = namedEntity->getCachedNameDef();
+      }
+    }
+    if (def && (constraint = def.asClass()) && cls->classof(constraint)) {
+      return;
+    }
+  }
+
+  VerifyParamTypeFail(param);
 }
 
 } } }

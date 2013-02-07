@@ -495,6 +495,10 @@ struct Parser : ParserBase {
 
   void onLabel(Token &out, Token &label) { X(label); }
   void onGoto(Token &out, Token &label, bool limited) { X(label, limited); }
+
+  void onTypedef(Token& out, Token& name, Token& value) {
+    X(out, name, value);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

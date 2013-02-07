@@ -168,9 +168,10 @@ struct TokenStore {
 class Scanner {
 public:
   enum Type {
-    AllowShortTags   = 1, // allow <?
-    AllowAspTags     = 2, // allow <% %>
-    ReturnAllTokens  = 8, // return comments and whitespaces
+    AllowShortTags       = 0x01, // allow <?
+    AllowAspTags         = 0x02, // allow <% %>
+    ReturnAllTokens      = 0x08, // return comments and whitespaces
+    EnableHipHopKeywords = 0x10, // allow hip-hop specific reserved words
   };
 
 public:
@@ -277,8 +278,15 @@ public:
     m_isStrictMode = 1;
   }
 
-  bool isStrictMode() {
+  bool isStrictMode() const {
     return m_isStrictMode;
+  }
+
+  /*
+   * Returns: whether HipHop-extension keywords are enabled.
+   */
+  bool hipHopKeywordsEnabled() const {
+    return m_type & EnableHipHopKeywords;
   }
 
   int getLookaheadLtDepth() {
@@ -286,6 +294,11 @@ public:
   }
 
 private:
+  bool tryParseShapeType(TokenStore::iterator& pos);
+  bool tryParseShapeMemberList(TokenStore::iterator& pos);
+
+  bool nextIfToken(TokenStore::iterator& pos, int tok);
+
   void computeMd5();
 
   std::string m_filename;

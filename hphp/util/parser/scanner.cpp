@@ -226,6 +226,12 @@ void Scanner::nextLookahead(TokenStore::iterator& pos) {
   }
 }
 
+bool Scanner::nextIfToken(TokenStore::iterator& pos, int tok) {
+  if (pos->t != tok) return false;
+  nextLookahead(pos);
+  return true;
+}
+
 bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
   for (;;) {
     if (!tryParseNSType(pos)) return false;
@@ -303,6 +309,8 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_ARRAY:
         nextLookahead(pos);
         break;
+      case T_SHAPE:
+        return tryParseShapeType(pos);
       case T_XHP_LABEL:
         nextLookahead(pos);
         return true;
@@ -331,11 +339,55 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
   }
 }
 
+bool Scanner::tryParseShapeType(TokenStore::iterator& pos) {
+  assert(pos->t == T_SHAPE);
+  nextLookahead(pos);
+
+  if (pos->t == T_STRING) {
+    nextLookahead(pos);
+    return true;
+  }
+
+  if (pos->t == '(') {
+    nextLookahead(pos);
+    if (pos->t != ')') {
+      if (!tryParseShapeMemberList(pos)) return false;
+      if (pos->t != ')') return false;
+    }
+    nextLookahead(pos);
+    return true;
+  }
+
+  return false;
+}
+
+bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
+  assert(pos->t != ')'); // already determined to be nonempty
+
+  for (;;) {
+    if (!nextIfToken(pos, T_CONSTANT_ENCAPSED_STRING) ||
+        !nextIfToken(pos, T_DOUBLE_ARROW)) {
+      return false;
+    }
+    if (!tryParseNSType(pos)) return false;
+    if (pos->t == ')') return true;
+    if (!nextIfToken(pos, ',')) return false;
+    if (pos->t == ')') return true;
+  }
+
+  return false;
+}
+
+static bool isUnresolved(int tokid) {
+  return tokid == T_UNRESOLVED_LT ||
+         tokid == T_UNRESOLVED_TYPE;
+}
+
 int Scanner::getNextToken(ScannerToken &t, Location &l) {
   int tokid;
   bool la = !m_lookahead.empty();
   tokid = fetchToken(t, l);
-  if (LIKELY(tokid != T_UNRESOLVED_LT)) {
+  if (LIKELY(!isUnresolved(tokid))) {
     // In the common case, we don't have to perform any resolution
     // and we can just return the token
     if (UNLIKELY(la)) {
@@ -345,7 +397,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     }
     return tokid;
   }
-  // We encountered a '<' character that needs to be resolved.
+
   if (!la) {
     // If this token didn't come from the lookahead store, we
     // need to stash it there
@@ -353,20 +405,39 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     LookaheadToken ltd = { t, l, tokid };
     *it = ltd;
   }
-  // Look at subsequent tokens to determine if the '<' character
-  // is the start of a type list
-  TokenStore::iterator pos = m_lookahead.begin();
-  TokenStore::iterator ltPos = pos;
-  nextLookahead(pos);
-  ++m_lookaheadLtDepth;
-  bool isTypeList = tryParseTypeList(pos);
-  --m_lookaheadLtDepth;
-  if (!isTypeList || pos->t != '>') {
-    ltPos->t = '<';
-  } else {
-    ltPos->t = T_TYPELIST_LT;
-    pos->t = T_TYPELIST_GT;
+
+  switch (tokid) {
+  case T_UNRESOLVED_TYPE: {
+    auto pos = m_lookahead.begin();
+    auto typePos = pos;
+    nextLookahead(pos);
+    if (pos->t == T_STRING) {
+      typePos->t = T_TYPE;
+    } else {
+      typePos->t = T_STRING;
+    }
+    break;
   }
+  case T_UNRESOLVED_LT: {
+    // Look at subsequent tokens to determine if the '<' character
+    // is the start of a type list
+    auto pos = m_lookahead.begin();
+    auto ltPos = pos;
+    nextLookahead(pos);
+    ++m_lookaheadLtDepth;
+    bool isTypeList = tryParseTypeList(pos);
+    --m_lookaheadLtDepth;
+    if (!isTypeList || pos->t != '>') {
+      ltPos->t = '<';
+    } else {
+      ltPos->t = T_TYPELIST_LT;
+      pos->t = T_TYPELIST_GT;
+    }
+    break;
+  }
+  default: always_assert(0);
+  }
+
   tokid = fetchToken(t, l);
   // We pulled a lookahead token, we need to remove it from the
   // lookahead store

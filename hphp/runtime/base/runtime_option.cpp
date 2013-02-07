@@ -1092,17 +1092,18 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableHipHopExperimentalSyntax =
       eval["EnableHipHopExperimentalSyntax"].getBool();
     EnableShortTags= eval["EnableShortTags"].getBool(true);
-    if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
-    else ScannerType &= ~Scanner::AllowShortTags;
-
     EnableAspTags = eval["EnableAspTags"].getBool();
-    if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
-    else ScannerType &= ~Scanner::AllowAspTags;
-
     EnableXHP = eval["EnableXHP"].getBool(true);
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
+
+    if (EnableHipHopSyntax) ScannerType |= Scanner::EnableHipHopKeywords;
+    else ScannerType &= ~Scanner::EnableHipHopKeywords;
+    if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
+    else ScannerType &= ~Scanner::AllowShortTags;
+    if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
+    else ScannerType &= ~Scanner::AllowAspTags;
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
 

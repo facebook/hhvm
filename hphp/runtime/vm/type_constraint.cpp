@@ -77,6 +77,7 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
           this, typeName->data());
     m_type = { KindOfObject, Precise };
     m_namedEntity = Unit::GetNamedEntity(typeName);
+    TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
     return;
   }
   if (RuntimeOption::EnableHipHopSyntax || dtype.m_dt == KindOfArray ||
@@ -90,6 +91,47 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
   assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
 }
 
+/*
+ * Note:
+ *
+ * We don't need to autoload classes because you can't have an
+ * instance of a class if it's not defined.  However, we need to
+ * autoload typedefs because they can affect whether the
+ * VerifyParamType would succeed.
+ */
+static NameDef getNameDefWithAutoload(const NamedEntity* ne,
+                                      const StringData* name) {
+  NameDef def = ne->getCachedNameDef();
+  if (!def) {
+    String nameStr(const_cast<StringData*>(name));
+    if (!AutoloadHandler::s_instance->autoloadType(nameStr)) {
+      return NameDef();
+    }
+    def = ne->getCachedNameDef();
+  }
+  return def;
+}
+
+bool TypeConstraint::checkTypedefNonObj(const TypedValue* tv) const {
+  assert(tv->m_type != KindOfObject); // this checks when tv is not an object
+  assert(!isSelf() && !isParent());
+
+  NameDef def = getNameDefWithAutoload(m_namedEntity, m_typeName);
+  if (!def) return false;
+  Typedef* td = def.asTypedef();
+  return td && equivDataTypes(td->m_kind, tv->m_type);
+}
+
+bool TypeConstraint::checkTypedefObj(const TypedValue* tv) const {
+  assert(tv->m_type == KindOfObject); // this checks when tv is an object
+  assert(!isSelf() && !isParent() && !isCallable());
+
+  NameDef def = getNameDefWithAutoload(m_namedEntity, m_typeName);
+  if (!def) return false;
+  Class* c = def.asClass();
+  return c && tv->m_data.pobj->instanceof(c);
+}
+
 bool
 TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   assert(exists());
@@ -101,7 +143,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (m_nullable && IS_NULL_TYPE(tv->m_type)) return true;
 
   if (tv->m_type == KindOfObject) {
-    if (!isObject()) return false;
+    if (!isObjectOrTypedef()) return false;
     // Perfect match seems common enough to be worth skipping the hash
     // table lookup.
     if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
@@ -109,12 +151,14 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
       return true;
     }
     const Class *c = nullptr;
-    if (isSelf() || isParent() || isCallable()) {
+    const bool selfOrParentOrCallable = isSelf() || isParent() || isCallable();
+    if (selfOrParentOrCallable) {
       if (isSelf()) {
         selfToClass(func, &c);
       } else if (isParent()) {
         parentToClass(func, &c);
-      } else if (isCallable()) {
+      } else {
+        assert(isCallable());
         return f_is_callable(tvAsCVarRef(tv));
       }
     } else {
@@ -126,13 +170,19 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     if (shouldProfile() && c) {
       Class::profileInstanceOf(c->preClass()->name());
     }
-    return c && tv->m_data.pobj->instanceof(c);
+    if (c && tv->m_data.pobj->instanceof(c)) {
+      return true;
+    }
+    return !selfOrParentOrCallable && checkTypedefObj(tv);
   }
-  return equivDataTypes(m_type.m_dt, tv->m_type);
+
+  return isObjectOrTypedef() && !isCallable()
+    ? checkTypedefNonObj(tv)
+    : equivDataTypes(m_type.m_dt, tv->m_type);
 }
 
 bool
-TypeConstraint::check(DataType dt) const {
+TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.m_dt != KindOfObject);
   assert(dt != KindOfRef);
   if (m_nullable && IS_NULL_TYPE(dt)) return true;

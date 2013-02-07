@@ -17,10 +17,13 @@
 #ifndef incl_TREADMILL_H_
 #define incl_TREADMILL_H_
 
+#include "runtime/vm/unit.h"
+
 namespace HPHP {
 namespace VM {
 
 class Class;
+class Typedef;
 
 namespace Treadmill {
 

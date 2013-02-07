@@ -334,7 +334,10 @@ O(DefLabel,                     DMulti, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
-O(VerifyParamCls,                   ND, S(Cls) S(Cls) C(Int),E|N|Mem|Refs|Er) \
+O(VerifyParamCls,                   ND, S(Cls)                                \
+                                          S(Cls)                              \
+                                          C(Int)                              \
+                                          C(Int),            E|N|Mem|Refs|Er) \
 O(VerifyParamCallable,              ND, S(Cell) C(Int),      E|N|Mem|Refs|Er) \
 O(VerifyParamFail,                  ND, C(Int),              E|N|Mem|Refs|Er) \
 O(RaiseUninitLoc,                   ND, S(Str),              E|N|Mem|Refs|Er) \

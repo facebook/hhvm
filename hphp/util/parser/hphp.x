@@ -30,6 +30,11 @@
 #define SETTOKEN _scanner->setToken(yytext, yyleng)
 #define STEPPOS  _scanner->stepPos(yytext, yyleng)
 
+#define HH_ONLY_KEYWORD(tok) do {                             \
+  SETTOKEN;                                                   \
+  return _scanner->hipHopKeywordsEnabled() ? tok : T_STRING;  \
+} while (0)
+
 #define IS_LABEL_START(c) \
   (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || \
    (c) == '_' || (c) >= 0x7F)
@@ -394,6 +399,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"XOR"                { SETTOKEN; return T_LOGICAL_XOR;}
 <ST_IN_SCRIPTING>"<<"                 { STEPPOS; return T_SL;}
 <ST_IN_SCRIPTING>"..."                { SETTOKEN; return T_VARARG; }
+
+<ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
+<ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
+<ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 
 <ST_IN_SCRIPTING>">>" {
   if (_scanner->getLookaheadLtDepth() < 2) {

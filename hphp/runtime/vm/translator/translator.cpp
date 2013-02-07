@@ -567,8 +567,8 @@ predictOutputs(const Tracelet& t,
     const NamedEntityPair& cne =
       curFrame()->m_func->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
     StringData* cnsName = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
-    Class* cls = *cne.second->clsList();
-    if (cls && (cls = cls->getCached())) {
+    Class* cls = cne.second->getCachedClass();
+    if (cls) {
       DataType dt = cls->clsCnsType(cnsName);
       if (dt != KindOfUninit) {
         ni->outputPredicted = true;
@@ -1168,6 +1168,7 @@ static const struct {
   { OpReqDoc,      {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpEval,        {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpDefFunc,     {None,             None,         OutNone,           0 }},
+  { OpDefTypedef,  {None,             None,         OutNone,           0 }},
   { OpDefCls,      {None,             None,         OutNone,           0 }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean,        0 }},
 

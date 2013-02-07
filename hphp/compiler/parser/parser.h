@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_PARSER_H__
-#define __HPHP_PARSER_H__
+#ifndef incl_HPHP_COMPILER_PARSER_H_
+#define incl_HPHP_COMPILER_PARSER_H_
 
-#include <runtime/base/util/exceptions.h>
-#include <util/parser/parser.h>
-#include <compiler/construct.h>
-#include <compiler/option.h>
+#include "runtime/base/util/exceptions.h"
+#include "util/parser/parser.h"
+#include "compiler/construct.h"
+#include "compiler/option.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -236,6 +236,7 @@ public:
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
+  void onTypedef(Token& out, const Token& name, const Token& type);
 
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
   virtual void invalidateLabel(TStatementPtr stmt);
@@ -310,4 +311,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_PARSER_H__
+#endif

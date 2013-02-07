@@ -1,0 +1,2 @@
+#!/bin/sh
+exec sed -e 's@in .*@@g'

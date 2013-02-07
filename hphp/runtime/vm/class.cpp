@@ -527,12 +527,7 @@ void Class::atomicRelease() {
     PreClass* pcls = m_preClass.get();
     {
       Lock l(Unit::s_classesMutex);
-      Class *const*cls = pcls->namedEntity()->clsList();
-      while (*cls != this) {
-        assert(*cls);
-        cls = &(*cls)->m_nextClass;
-      }
-      *const_cast<Class**>(cls) = m_nextClass;
+      pcls->namedEntity()->removeClass(this);
     }
     Treadmill::WorkItem::enqueue(new Treadmill::FreeClassTrigger(this));
     return;

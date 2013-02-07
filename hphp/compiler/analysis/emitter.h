@@ -22,6 +22,7 @@
 #include <compiler/statement/use_trait_statement.h>
 #include <compiler/statement/trait_prec_statement.h>
 #include <compiler/statement/trait_alias_statement.h>
+#include "compiler/statement/typedef_statement.h"
 
 #include <runtime/vm/func.h>
 #include <runtime/vm/unit.h>
@@ -504,6 +505,10 @@ private:
     int defI;
   };
 
+private:
+  void emitFatal(Emitter& e, const char* message);
+
+private:
   static const size_t kMinStringSwitchCases = 8;
   UnitEmitter& m_ue;
   FuncEmitter* m_curFunc;
@@ -642,6 +647,7 @@ public:
   void emitBuiltinDefaultArg(Emitter& e, Variant& v, DataType t, int paramId);
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
                                 bool topLevel);
+  void emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
                         Label& brkHand, Label& cntHand, Id iter = -1,
                         IterKind itKind = KindOfIter);

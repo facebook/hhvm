@@ -1,0 +1,100 @@
+Notes on the typedef feature in Hack:
+
+In HipHop, <?hh files allow a language extension to define new types
+for use in typehinting.  The syntax looks like this:
+
+  type MyInt = int;
+  type Point = (int, int);
+
+Or
+
+  newtype AbstractInt = int;
+
+This document is not a complete design rationale, but may address a
+few questions.
+
+Notes:
+
+- We want to support short names for types that should be compatible
+  with the underlying representation.  The syntax used above is found
+  in several languages (Haskell, OCaml, F#, Rust, others).  Go is
+  similar, but has no equal sign.  C#/Java don't have typedefs so they
+  don't provide much inspiration.  C/C++'s typedef/declaration syntax
+  isn't appropriate (or particularly reasonable).
+
+- Another use case is making types that abstract away the details of
+  their underlying implementation.  For example:
+
+    <?hh
+
+    newtype SQLSafeString = string;
+
+    function scrub_user_input_for_sql(string $str): SQLSafeString {
+      // ...
+    }
+
+  Haskell uses "newtype" in this case, but requires a named "value
+  constructor" which you have to use to turn strings into
+  SQLSafeString in the first place.  OCaml doesn't have this kind of
+  newtype, but you can use the module system to create abstract types.
+
+  C++ has strong typedefs only for integral types, with the syntax
+  "enum class Foo : int {}", which is clearly not something to
+  emulate.  A language proposal for general strong typedefs has
+  suggested a "using Foo = private int" syntax, which is probably
+  worth avoiding based on keyword reuse and being a little strange
+  (and for that matter not actually part of C++ yet, so it may
+  change).
+
+  The semantics planned here is that a type declared with "newtype" is
+  exactly the same as one declared with "type" as far as the runtime
+  is concerned, but Hack will consider it compatible with its
+  underlying type only in the file that declared it.
+
+- Since we want to use them for signatures on functions, we considered
+  two choices relating to how typedefs would interact with the
+  runtime.  One option is to "drop" typehints about them the same way
+  most Hack annotations are dropped.  Unfortunately this has an impact
+  on syntax.  Imagine the following function definition:
+
+    function is_x_large(Point2D $x): bool { return $x['x'] > 10; }
+
+  Since hhvm compiles php files separately, we don't know at bytecode
+  generation time whether Point2D should be a typehint for a class or
+  dropped for Hack.  One option is to mangle hints for types:
+
+   function is_x_large(type Point2D $x): bool { return $x['x'] > 10; }
+
+  We figured this syntax (and other variants) might hurt adoption
+  excessively, and runtime checking of typedefs is also preferable to
+  wrong behavior.
+
+- Because of this, we need some runtime changes for typedefs.  An
+  identifier in a typehint might be a typedef instead of a class in a
+  given request.
+
+- We support typedefs from one class to another.  For Hack the
+  motivation is mostly support for typedefs of generics.  For example:
+
+    newtype LinearModel = Vector<float>;
+
+  As far as the runtime is concerned, this just means that the type
+  LinearModel = Vector.  Generic information is currently dropped, and
+  only checked by Hack.
+
+- Typehints for typedefs only check the "top-level" type for primitive
+  types.  In the case of shapes, this means we only check for now that
+  the parameter is KindOfArray, and rely on Hack to typecheck the
+  contents.  This is pretty much the best we can do currently: the
+  runtime doesn't really know much about the "deep" type of most
+  runtime values.
+
+- We do not support "instanceof SomeTypedef".  Rationale: instanceof
+  is important to perf, and we don't know of an important use case.
+  Not implementing it yet seems like a safe position, since we could
+  find a way to add it later if there is a compelling use case.
+
+- You can't allocate a class instance via a typedef name.
+  Essentially, declaring new types only creates new names for
+  type---it does not create new "value constructors".  This may be
+  changed later if we find it is useful.

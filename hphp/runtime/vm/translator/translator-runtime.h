@@ -61,7 +61,10 @@ void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void VerifyParamTypeFail(int param);
 void VerifyParamTypeCallable(TypedValue value, int param);
-void VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param);
+void VerifyParamTypeSlow(const Class* cls,
+                         const Class* constraint,
+                         int param,
+                         const TypeConstraint* expected);
 
 
 void raise_error_sd(const StringData* sd);

@@ -182,7 +182,7 @@ void ProcessInit() {
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
-    Class *cls = *Unit::GetNamedEntity(s_##cls.get())->clsList();       \
+    Class *cls = Unit::GetNamedEntity(s_##cls.get())->clsList();       \
     assert(!hhbc_ext_class_count || cls);                               \
     SystemLib::s_##cls##Class = cls;                                    \
   }

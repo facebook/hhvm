@@ -61,6 +61,7 @@ StaticString s_static("static");
 StaticString s_class("class");
 StaticString s_function("function");
 StaticString s_constant("constant");
+StaticString s_type("type");
 StaticString s_failure("failure");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1368,6 +1369,15 @@ bool AutoloadHandler::autoloadFunc(CStrRef name) {
 bool AutoloadHandler::autoloadConstant(CStrRef name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_constant, false, ConstantExistsChecker()) != Failure;
+}
+
+bool AutoloadHandler::autoloadType(CStrRef name) {
+  return !m_map.isNull() &&
+    loadFromMap(name, s_type, true,
+      [] (CStrRef name) {
+        return !!VM::Unit::GetNamedEntity(name.get())->getCachedNameDef();
+      }
+    ) != Failure;
 }
 
 /**

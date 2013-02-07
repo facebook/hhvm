@@ -304,8 +304,21 @@ Class* lookupKnownClass(Class** cache, const StringData* clsName,
 CacheHandle allocClassInitProp(const StringData* name);
 CacheHandle allocClassInitSProp(const StringData* name);
 
+/*
+ * Functions.
+ */
 CacheHandle allocFixedFunction(const NamedEntity* ne, bool persistent);
 CacheHandle allocFixedFunction(const StringData* name);
+
+/*
+ * NameDefs.
+ *
+ * Request-private values for typedef names.  When a typedef is
+ * defined, a NameDef for it is cached here.  If it is a typedef for a
+ * class, the NameDef will be for the target class.  Otherwise it's a
+ * NameDef pointing to the Typedef*.
+ */
+CacheHandle allocNameDef(const NamedEntity* name);
 
 /*
  * Constants.

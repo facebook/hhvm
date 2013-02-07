@@ -7,7 +7,6 @@
 #   % fbconfig hphp/util/parser/test && fbmake dbg && \
 #      ./hphp/tools/run_verify_parse.sh
 #
-
 : ${FBMAKE_BIN_ROOT=$HPHP_HOME/_bin}
 
 VERIFY_SCRIPT=./test/verify.sh
@@ -18,10 +17,10 @@ PARSE_SKIP='dv_i0.php strict_bad_end.php strict_bad_start.php \
   strict_numbers.php syntax-error.php xhp-malformed.php Xhp.php \
   trailing_comma_bad1.php trailing_comma_bad2.php trailing_comma_bad3.php \
   trailing_comma_bad4.php trailing_comma_bad5.php trailing_comma_bad6.php'
+PARSE_SKIP="$PARSE_SKIP $(cd test/vm && ls parse_fail_*.php)"
 
 ######################################################################
 
-cd $HPHP_HOME/hphp
 
 skip_list=
 for x in $PARSE_SKIP ; do

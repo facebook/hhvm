@@ -1,0 +1,17 @@
+int:
+int(12)
+bool
+bool(false)
+double
+float(1.2)
+array:
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+string:
+string(6) "asdasd"

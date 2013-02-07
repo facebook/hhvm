@@ -1,0 +1,81 @@
+Notes on the `shapes' feature in Hack:
+
+Shapes in <?hh files are a way for us to add typechecking
+incrementally to existing php code that uses php arrays somewhat like
+structs.
+
+For example, code like this:
+
+  <?php
+
+  function dot_product($a, $b) {
+    return $a['x'] * $b['x'] + $a['y'] * $b['y'];
+  }
+
+Can be annotated with types to look like this:
+
+  <?hh
+
+  type Point2D = shape('x' => int, 'y' => int);
+
+  function dot_product(Point2D $a, Point2D $b): int {
+    return $a['x'] * $b['x'] + $a['y'] * $b['y'];
+  }
+
+This is not a complete design rationale, but contains a few notes to
+explain why things are the way they are so far.
+
+Notes:
+
+- Classes with public members (or getters/setters) exist and probably
+  work fine as a sort of record/struct thing. When people want them
+  (particularly in newer code), they work.
+
+- This is intended to allow type-checking cases where arrays are
+  currently being used as aggregates (instead of people using
+  classes). In order for them to be adopted and do what they are
+  intended to do, migration has to be as painless as possible (which
+  is why the object-like structs above are not "enough": no one is
+  going to switch all of www away from struct-like arrays to that).
+
+- Generally we want most <?hh migration to be primarily about adding
+  type annotations somewhere in a function signature, not about
+  significantly changing method bodies.
+
+- To be explicit: this last point means $x['foo'] still needs to be
+  valid syntax for accessing a shape member to ease conversion in the
+  short term. For construction sites we are just doing s/array/shape/
+  when you want them checked as shapes (which will also require at
+  parse time that the keys are string literals, do not start with
+  digits, etc).
+
+- People sometimes write code that operates on sub-pieces of these
+  record-like arrays. This means a traditional (C/C++/Java style)
+  structure is going to be a little weird to add type annotations
+  for. You can imagine trying to migrate a function to <?hh that
+  legitimately take "any array with elements named 'id' and 'name'
+  that are int and string", and is called with various other
+  struct-like arrays that have other elements lying around in them. To
+  make this possible to migrate with minimal pain, we're using
+  structural subtyping.
+
+- Because they don't work like the "structs" people are used to,
+  calling it a "struct" seemed potentially confusing.
+
+- With enough code in hack so we know the types of things, it might be
+  possible to automate migration to a new syntax at access
+  sites. However, in the short term, we definitely can't use $x->foo
+  since this is an object property access and the runtime can't
+  compile it differently based on the type of $x. You might also
+  consider $x.foo (which might work in <?hh files for reasons I'll
+  leave out), but again for the foreseeable future we probably want
+  the same syntax to work in a <?php file, and right now this means
+  the variable $x converted to a string and concatenated with the
+  value of the constant foo (which will be the string "foo" if
+  undefined).
+
+- In the syntax for defining shape *types*, our hands are probably a
+  little less tied. The current choice was to try to keep it somewhat
+  similar to the access sites and arrays in general (maybe helps so we
+  can explain this as "shapes are just special/limited arrays"), and
+  also to fit in with typedefs and possible syntax for adding enums.

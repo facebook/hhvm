@@ -582,6 +582,7 @@ public:
   bool invokeHandler(CStrRef className, bool forceSplStack = false);
   bool autoloadFunc(CStrRef name);
   bool autoloadConstant(CStrRef name);
+  bool autoloadType(CStrRef name);
   bool setMap(CArrRef map, CStrRef root);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 

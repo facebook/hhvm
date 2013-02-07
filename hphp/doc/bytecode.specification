@@ -3498,6 +3498,16 @@ DefCns <litstr id>    [C]  ->  [C]
   pushes false. Otherwise defines the constant named %1 to have the value $1,
   and pushes true.
 
+DefTypedef <litstr id>   []  ->  []
+
+  Define typedef.  Typedefs are a hhvm extension to php that allow
+  declaring new names for existing types.  The unit contains a table
+  of the typedefs it was compiled with.  This instruction looks up the
+  typedef given by %1 in the table.  If there is an existing class or
+  typedef defined with the same name as %1, this function checks
+  whether it is compatible with the typedef given by %1, and if it
+  isn't it raises a fatal error.
+
 
 13. Miscellaneous instructions
 ------------------------------

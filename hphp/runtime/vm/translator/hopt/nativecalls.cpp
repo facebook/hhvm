@@ -78,7 +78,7 @@ static CallMap s_callMap({
     {PrintInt,           (TCA)print_int, DNone, SNone, {{SSA, 0}}},
     {PrintBool,          (TCA)print_boolean, DNone, SNone, {{SSA, 0}}},
     {VerifyParamCls,     (TCA)VerifyParamTypeSlow, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {VerifyParamCallable, (TCA)VerifyParamTypeCallable, DNone, SSync,
                            {{TV, 0}, {SSA, 1}}},
     {VerifyParamFail,    (TCA)VerifyParamTypeFail, DNone, SSync, {{SSA, 0}}},

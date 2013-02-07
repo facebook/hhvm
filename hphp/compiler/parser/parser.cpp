@@ -78,6 +78,7 @@
 #include <compiler/statement/use_trait_statement.h>
 #include <compiler/statement/trait_prec_statement.h>
 #include <compiler/statement/trait_alias_statement.h>
+#include "compiler/statement/typedef_statement.h"
 
 #include <compiler/analysis/function_scope.h>
 
@@ -1577,6 +1578,10 @@ void Parser::onLabel(Token &out, Token &label) {
 
 void Parser::onGoto(Token &out, Token &label, bool limited) {
   out->stmt = NEW_STMT(GotoStatement, label.text());
+}
+
+void Parser::onTypedef(Token& out, const Token& name, const Token& type) {
+  out->stmt = NEW_STMT(TypedefStatement, name.text(), type.text());
 }
 
 void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {

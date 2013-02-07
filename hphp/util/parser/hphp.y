@@ -656,6 +656,17 @@ static void only_in_hphp_syntax(Parser *_p) {
   }
 }
 
+// Shapes may not have leading integers in key names, considered as a
+// parse time error.  This is because at runtime they are currently
+// hphp arrays, which will treat leading integer keys as numbers.
+static void validate_shape_keyname(Token& tok, Parser* _p) {
+  if (tok.text().empty()) {
+    HPHP_PARSER_ERROR("Shape key names may not be empty", _p);
+  }
+  if (isdigit(tok.text()[0])) {
+    HPHP_PARSER_ERROR("Shape key names may not start with integers", _p);
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -795,6 +806,9 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_UNRESOLVED_LT
 
 %token T_COLLECTION
+%token T_SHAPE
+%token T_TYPE
+%token T_UNRESOLVED_TYPE
 
 %%
 
@@ -814,6 +828,7 @@ top_statement:
   | function_declaration_statement     { _p->nns(); $$ = $1;}
   | class_declaration_statement        { _p->nns(); $$ = $1;}
   | trait_declaration_statement        { _p->nns(); $$ = $1;}
+  | sm_typedef_statement               { $$ = $1; }
   | T_HALT_COMPILER '(' ')' ';'        { $$.reset();}
   | T_NAMESPACE namespace_name ';'     { _p->onNamespaceStart($2.text());
                                          $$.reset();}
@@ -1593,8 +1608,9 @@ expr_no_variable:
   | T_UNSET_CAST expr                  { UEXP($$,$2,T_UNSET_CAST,1);}
   | T_EXIT exit_expr                   { UEXP($$,$2,T_EXIT,1);}
   | '@' expr                           { UEXP($$,$2,'@',1);}
-  | scalar                             { $$ = $1;}
-  | array_literal                      { $$ = $1;}
+  | scalar                             { $$ = $1; }
+  | array_literal                      { $$ = $1; }
+  | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | function_loc 
@@ -1618,8 +1634,49 @@ expr_no_variable:
   | collection_literal                 { $$ = $1;}
 ;
 
+non_empty_shape_pair_list:
+    non_empty_shape_pair_list ','
+      T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW
+      expr                            { validate_shape_keyname($3, _p);
+                                        _p->onArrayPair($$,&$1,&$3,$5,0); }
+  | T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW
+      expr                            { validate_shape_keyname($1, _p);
+                                        _p->onArrayPair($$,  0,&$1,$3,0); }
+;
+
+non_empty_static_shape_pair_list:
+    non_empty_static_shape_pair_list ','
+      T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW
+      static_scalar                   { validate_shape_keyname($3, _p);
+                                        _p->onArrayPair($$,&$1,&$3,$5,0); }
+  | T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW
+      static_scalar                   { validate_shape_keyname($1, _p);
+                                        _p->onArrayPair($$,  0,&$1,$3,0); }
+;
+
+shape_pair_list:
+    non_empty_shape_pair_list
+    possible_comma                    { $$ = $1; }
+  |                                   { $$.reset(); }
+;
+
+static_shape_pair_list:
+    non_empty_static_shape_pair_list
+    possible_comma                    { $$ = $1; }
+  |                                   { $$.reset(); }
+;
+
+shape_literal:
+    T_SHAPE '(' shape_pair_list ')'   { only_in_strict_mode(_p);
+                                        _p->onArray($$, $3, T_ARRAY); }
+;
+
 array_literal:
-    T_ARRAY '(' array_pair_list ')'    { _p->onArray($$,$3,T_ARRAY);}
+    T_ARRAY '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
 ;
 
 collection_literal:
@@ -1801,6 +1858,7 @@ xhp_bareword:
   | T_NS_C                             { $$ = $1;}
   | T_TRAIT                            { $$ = $1;}
   | T_TRAIT_C                          { $$ = $1;}
+  | T_TYPE                             { $$ = $1;}
 ;
 
 simple_function_call:
@@ -1867,10 +1925,14 @@ static_scalar:
   | '+' static_scalar                  { UEXP($$,$2,'+',1);}
   | '-' static_scalar                  { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
-    static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY);}
+    static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
+  | T_SHAPE '('
+    static_shape_pair_list ')'         { only_in_strict_mode(_p);
+                                         _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
 ;
+
 static_class_constant:
     class_namespace_string_typeargs
     T_PAAMAYIM_NEKUDOTAYIM
@@ -1879,6 +1941,7 @@ static_class_constant:
     ident                              { $1.xhpLabel();
                                          _p->onClassConst($$, $1, $3, 1);}
 ;
+
 scalar:
     namespace_string                   { _p->onConstantValue($$, $1);}
   | T_STRING_VARNAME                   { _p->onConstantValue($$, $1);}
@@ -1895,6 +1958,7 @@ static_array_pair_list:
     possible_comma                     { $$ = $1;}
   |                                    { $$.reset();}
 ;
+
 possible_comma:
     ','                                { $$.reset();}
   |                                    { $$.reset();}
@@ -1903,6 +1967,7 @@ possible_comma_in_hphp_syntax:
     ','                                { only_in_hphp_syntax(_p); $$.reset();}
   |                                    { $$.reset();}
 ;
+
 non_empty_static_array_pair_list:
     non_empty_static_array_pair_list
     ',' static_scalar T_DOUBLE_ARROW
@@ -1937,7 +2002,11 @@ static_scalar_ae:
   | '-' static_numeric_scalar_ae       { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
+  | T_SHAPE '('
+    static_shape_pair_list_ae ')'      { only_in_strict_mode(_p);
+                                         _p->onArray($$,$3,T_ARRAY); }
 ;
+
 static_array_pair_list_ae:
     non_empty_static_array_pair_list_ae
     possible_comma                     { $$ = $1;}
@@ -1958,6 +2027,23 @@ non_empty_static_scalar_list_ae:
     ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,$3,0);}
   | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,$1,0);}
 ;
+
+static_shape_pair_list_ae:
+    non_empty_static_shape_pair_list_ae
+    possible_comma                     { $$ = $1; }
+  |                                    { $$.reset(); }
+;
+non_empty_static_shape_pair_list_ae:
+    non_empty_static_shape_pair_list_ae
+      ',' T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW static_scalar_ae  { validate_shape_keyname($3, _p);
+                                         _p->onArrayPair($$,&$1,&$3,$5,0); }
+  | T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW
+      static_scalar_ae                 { validate_shape_keyname($1, _p);
+                                         _p->onArrayPair($$,  0,&$1,$3,0); }
+;
+
 static_scalar_list_ae:
     non_empty_static_scalar_list_ae
     possible_comma                     { $$ = $1;}
@@ -1968,6 +2054,7 @@ attribute_static_scalar_list:
   |                                    { Token t; t.reset();
                                          _p->onArray($$,t,T_ARRAY);}
 ;
+
 non_empty_user_attribute_list:
     non_empty_user_attribute_list
     ',' ident
@@ -2240,6 +2327,11 @@ class_constant:
  * mode, but simplify down to the original thing
  */
 
+sm_typedef_statement:
+    T_TYPE ident '=' sm_type ';'       { only_in_strict_mode(_p);
+                                         _p->onTypedef($$, $2, $4); }
+;
+
 sm_name_with_type:  /* foo -> int foo */
     ident                              { $$ = $1; }
   | sm_type ident                      { only_in_strict_mode(_p); $$ = $2; }
@@ -2283,10 +2375,36 @@ sm_opt_return_type:
 sm_typevar_list:
     ident ',' sm_typevar_list       { _p->addTypeVar($1.text()); }
  |  ident                           { _p->addTypeVar($1.text()); }
+ |  ident T_AS sm_shape_type
+    sm_typevar_list
  |  ident T_AS ident ','
     sm_typevar_list                 { _p->addTypeVar($1.text()); }
  |  ident T_AS ident                { _p->addTypeVar($1.text()); }
+ |  ident T_AS sm_shape_type
+;
 
+sm_shape_member_type:
+    T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW
+      sm_type                      { validate_shape_keyname($1, _p); }
+;
+
+sm_non_empty_shape_member_list:
+    sm_non_empty_shape_member_list ','
+      sm_shape_member_type
+  | sm_shape_member_type
+;
+
+sm_shape_member_list:
+    sm_non_empty_shape_member_list
+    possible_comma                     { $$ = $1; }
+  | /* empty */
+{}
+
+sm_shape_type:
+    T_SHAPE
+     '(' sm_shape_member_list ')'      { only_in_strict_mode(_p);
+                                         $$.setText("array"); }
 ;
 
 /* extends non_empty_type_decl with some more types */
@@ -2307,6 +2425,7 @@ sm_type:
                                          }
                                        }
   | T_ARRAY                            { $$.setText("array"); }
+  | sm_shape_type                      { $$ = $1; }
   | T_ARRAY T_TYPELIST_LT sm_type
     T_TYPELIST_GT                      { only_in_strict_mode(_p);
                                          $$.setText("array"); }

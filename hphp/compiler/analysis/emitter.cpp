@@ -90,6 +90,7 @@
 #include <compiler/statement/use_trait_statement.h>
 #include <compiler/statement/trait_prec_statement.h>
 #include <compiler/statement/trait_alias_statement.h>
+#include "compiler/statement/typedef_statement.h"
 
 #include <compiler/parser/parser.h>
 
@@ -1636,6 +1637,10 @@ void EmitterVisitor::visit(FileScopePtr file) {
           if (h < allHoistable) allHoistable = h;
           break;
         }
+        case Statement::KindOfTypedefStatement:
+          emitTypedef(e, static_pointer_cast<TypedefStatement>(s));
+          notMergeOnly = true; // TODO(#2103206): typedefs should be mergable
+          break;
         case Statement::KindOfReturnStatement:
           if (mainReturn.m_type != KindOfInvalid) break;
           if (notMergeOnly) {
@@ -1939,6 +1944,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   return ret;
 }
 
+void EmitterVisitor::emitFatal(Emitter& e, const char* message) {
+  const StringData* msg = StringData::GetStaticString(message);
+  e.String(msg);
+  e.Fatal(0);
+}
+
 bool EmitterVisitor::visitImpl(ConstructPtr node) {
   if (!node) return false;
 
@@ -1950,6 +1961,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfStatementList:
         visitKids(node);
         return false;
+
+      case Statement::KindOfTypedefStatement: {
+        emitFatal(e, "Type statements are currently only allowed at "
+                     "the top-level");
+        return false;
+      }
 
       case Statement::KindOfContinueStatement:
       case Statement::KindOfBreakStatement: {
@@ -6048,6 +6065,33 @@ void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
       emitClassTraitAliasRule(pce, aliasStmt);
     }
   }
+}
+
+void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
+  auto kind = !strcasecmp(td->value.c_str(), "array")   ? KindOfArray :
+              !strcasecmp(td->value.c_str(), "int")     ? KindOfInt64 :
+              !strcasecmp(td->value.c_str(), "integer") ? KindOfInt64 :
+              !strcasecmp(td->value.c_str(), "bool")    ? KindOfBoolean :
+              !strcasecmp(td->value.c_str(), "boolean") ? KindOfBoolean :
+              !strcasecmp(td->value.c_str(), "string")  ? KindOfString :
+              !strcasecmp(td->value.c_str(), "real")    ? KindOfDouble :
+              !strcasecmp(td->value.c_str(), "float")   ? KindOfDouble :
+              !strcasecmp(td->value.c_str(), "double")  ? KindOfDouble :
+              KindOfObject;
+
+  // We have to merge the strings as litstrs to ensure namedentity
+  // creation.
+  auto const name = StringData::GetStaticString(td->name);
+  auto const value = StringData::GetStaticString(td->value);
+  m_ue.mergeLitstr(name);
+  m_ue.mergeLitstr(value);
+
+  Typedef record;
+  record.m_name  = name;
+  record.m_value = value;
+  record.m_kind  = kind;
+  Id id = m_ue.addTypedef(record);
+  e.DefTypedef(id);
 }
 
 PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,

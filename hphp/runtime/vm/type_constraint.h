@@ -52,6 +52,10 @@ protected:
     }
   };
 
+  // m_type represents the DataType to check on.  We don't know
+  // whether a bare name is a class/interface name or a typedef, so
+  // when this is set to KindOfObject we may have to look up a typedef
+  // name and test for a different DataType.
   Type m_type;
   bool m_nullable;
   const StringData* m_typeName;
@@ -68,6 +72,7 @@ public:
   bool exists() const { return m_typeName; }
 
   const StringData* typeName() const { return m_typeName; }
+  const NamedEntity* namedEntity() const { return m_namedEntity; }
 
   bool nullable() const { return m_nullable; }
 
@@ -83,7 +88,7 @@ public:
     return m_type.isCallable();
   }
 
-  bool isObject() const {
+  bool isObjectOrTypedef() const {
     assert(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
     assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
     assert(IMPLIES(isCallable(), m_type.m_dt == KindOfObject));
@@ -111,8 +116,15 @@ public:
       (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
   }
 
+  // General check for any constraint.
   bool check(const TypedValue* tv, const Func* func) const;
-  bool check(DataType dt) const;
+
+  // Check a constraint when !isObjectOrTypedef().
+  bool checkPrimitive(DataType dt) const;
+
+  // Typedef checks when we know tv is or is not an object.
+  bool checkTypedefObj(const TypedValue* tv) const;
+  bool checkTypedefNonObj(const TypedValue* tv) const;
 
   // NB: will throw if the check fails.
   void verify(const TypedValue* tv,

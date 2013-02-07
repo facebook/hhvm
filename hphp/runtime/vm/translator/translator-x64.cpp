@@ -10288,7 +10288,7 @@ void
 TranslatorX64::analyzeVerifyParamType(Tracelet& t, NormalizedInstruction& i) {
   int param = i.imm[0].u_IVA;
   const TypeConstraint& tc = curFunc()->params()[param].typeConstraint();
-  if (!tc.isObject()) {
+  if (!tc.isObjectOrTypedef()) {
     // We are actually using the translation-time value of this local as a
     // prediction; if the param check failed at compile-time, we predict it
     // will continue failing.
@@ -10387,18 +10387,20 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
     Stats::emitInc(a, Stats::Tx64_VerifyParamTypeFast);
     emitInstanceCheck(t, i, clsName, constraint, inCls, cls, dummy);
   } else {
-    // Compare this class to the incoming object's class. If the typehint's
-    // class is not present, can not be an instance: fail
+    // Compare this class to the incoming object's class. If the
+    // typehint's class is not present, can not be an instance, unless
+    // this is a typedef.  The slow path handles that case.
     Stats::emitInc(a, Stats::Tx64_VerifyParamTypeSlowShortcut);
     a.  cmp_reg64_reg64(r(inCls), r(cls));
     {
       JccBlock<CC_E> subclassCheck(a);
       // Call helper since ObjectData::instanceof is a member function
       if (false) {
-        VerifyParamTypeSlow(constraint, constraint, param);
+        VerifyParamTypeSlow(constraint, constraint, param, &tc);
       }
       EMIT_RCALL(a, i, VerifyParamTypeSlow, R(inCls), R(cls),
-                 IMM(param));
+                 IMM(param),
+                 IMM(uintptr_t(&tc)));
     }
   }
 }

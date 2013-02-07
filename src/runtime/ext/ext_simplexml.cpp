@@ -237,6 +237,10 @@ Variant f_simplexml_load_string(CStrRef data,
                                 int64 options /* = 0 */,
                                 CStrRef ns /* = "" */,
                                 bool is_prefix /* = false */) {
+  if (!class_exists(class_name)) {
+    throw_invalid_argument("class %s does not exist", class_name.data());
+    return null;
+  }
   const ClassInfo *cls = ClassInfo::FindClass(!class_name.empty() ? class_name : s_SimpleXMLElement);
   if (cls == NULL) {
     throw_invalid_argument("class not found: %s", class_name.data());

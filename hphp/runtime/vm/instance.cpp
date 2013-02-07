@@ -937,8 +937,8 @@ void Instance::cloneSet(ObjectData* clone) {
     tvRefcountedDecRef(&iclonePropVec[i]);
     tvDupFlattenVars(&propVec()[i], &iclonePropVec[i], NULL);
   }
-  iclone->initDynProps();
   if (o_properties.get() != NULL) {
+    iclone->initDynProps();
     ssize_t iter = o_properties.get()->iter_begin();
     while (iter != HphpArray::ElmIndEmpty) {
       auto props = static_cast<HphpArray*>(o_properties.get());

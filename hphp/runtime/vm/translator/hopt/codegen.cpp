@@ -20,6 +20,7 @@
 
 #include "folly/ScopeGuard.h"
 #include "util/trace.h"
+#include "util/util.h"
 
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/linearscan.h"
@@ -75,6 +76,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+using namespace Util;
 using namespace Transl::reg;
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
@@ -648,6 +650,14 @@ void CodeGenerator::cgCallHelper(Asm& a,
 
 void CodeGenerator::cgCallHelper(Asm& a,
                                  const Transl::Call& call,
+                                 PhysReg dstReg,
+                                 SyncOptions sync,
+                                 ArgGroup& args) {
+  cgCallHelper(a, call, dstReg, InvalidReg, sync, args);
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 const Transl::Call& call,
                                  PhysReg dstReg0,
                                  PhysReg dstReg1,
                                  SyncOptions sync,
@@ -947,23 +957,12 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
 }
 
 // Runtime helpers
-int64 strToBoolHelper(const StringData *s) {
-  return s->toBoolean();
-}
 
-int64 strToIntHelper(const StringData* s) {
-  return s->toInt64();
-}
-
-int64 arrToBoolHelper(const ArrayData *a) {
+HOT_FUNC_VM static int64 arrToBoolHelper(const ArrayData *a) {
   return a->size() != 0;
 }
 
-int64 objToBoolHelper(const ObjectData *o) {
-  return o->o_toBoolean();
-}
-
-int64 cellToBoolHelper(TypedValue tv) {
+HOT_FUNC_VM static int64 cellToBoolHelper(TypedValue tv) {
   if (IS_NULL_TYPE(tv.m_type)) {
     return 0;
   }
@@ -985,30 +984,23 @@ int64 cellToBoolHelper(TypedValue tv) {
   return 0;
 }
 
-const StringData* intToStringHelper(int64 n) {
-  // This returns a string with ref count of 0, so be sure
-  // to incref it immediately, or dispose of it when done
-  StringData* s = buildStringData(n);
-  return s;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison Operators
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DISPATCHER(name)                                                      \
-  int64 ccmp_ ## name (StringData* a1, StringData* a2)                        \
-    { return name(a1, a2); }                                                  \
-  int64 ccmp_ ## name (StringData* a1, int64 a2)                              \
-    { return name(a1, a2); }                                                  \
-  int64 ccmp_ ## name (StringData* a1, ObjectData* a2)                        \
-    { return name(a1, Object(a2)); }                                          \
-  int64 ccmp_ ## name (ObjectData* a1, ObjectData* a2)                        \
-    { return name(Object(a1), Object(a2)); }                                  \
-  int64 ccmp_ ## name (ObjectData* a1, int64 a2)                              \
-    { return name(Object(a1), a2); }                                          \
-  int64 ccmp_ ## name (ArrayData* a1, ArrayData* a2)                          \
-    { return name(Array(a1), Array(a2)); }
+#define DISPATCHER(name)                                                \
+  HOT_FUNC_VM int64 ccmp_ ## name (StringData* a1, StringData* a2)      \
+  { return name(a1, a2); }                                              \
+  HOT_FUNC_VM int64 ccmp_ ## name (StringData* a1, int64 a2)            \
+  { return name(a1, a2); }                                              \
+  HOT_FUNC_VM int64 ccmp_ ## name (StringData* a1, ObjectData* a2)      \
+  { return name(a1, Object(a2)); }                                      \
+  HOT_FUNC_VM int64 ccmp_ ## name (ObjectData* a1, ObjectData* a2)      \
+  { return name(Object(a1), Object(a2)); }                              \
+  HOT_FUNC_VM int64 ccmp_ ## name (ObjectData* a1, int64 a2)            \
+  { return name(Object(a1), a2); }                                      \
+  HOT_FUNC_VM int64 ccmp_ ## name (ArrayData* a1, ArrayData* a2)        \
+  { return name(Array(a1), Array(a2)); }
 
 DISPATCHER(same)
 DISPATCHER(equal)
@@ -1235,12 +1227,13 @@ void CodeGenerator::cgIsNTypeMem(IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool instanceOfHelper(const Class* objClass, const Class* testClass) {
+HOT_FUNC_VM static bool instanceOfHelper(const Class* objClass,
+                                         const Class* testClass) {
   return testClass && objClass->classof(testClass);
 }
 
-static bool instanceOfHelperIFace(const Class* objClass,
-                                  const Class* testClass) {
+HOT_FUNC_VM static bool instanceOfHelperIFace(const Class* objClass,
+                                              const Class* testClass) {
   return testClass && objClass->classof(testClass->preClass());
 }
 
@@ -1415,8 +1408,10 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
         m_as.mov_imm64_reg(val, dstReg);
       } else {
         ArgGroup args;
-        args.ssa(src);
-        cgCallHelper(m_as, (TCA)strToIntHelper, dst, kNoSyncPoint, args);
+        args.ssa(src).imm(10);
+        cgCallHelper(m_as,
+                     Transl::Call(getMethodPtr(&StringData::toInt64)),
+                     dstReg, kNoSyncPoint, args);
       }
       return;
     }
@@ -1452,27 +1447,27 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
         m_as.setne(rbyte(dstReg));
       }
     } else {
-      TCA helper = NULL;
+      Transl::Call helper(nullptr);
       ArgGroup args;
       args.ssa(src);
       if (fromType == Type::Cell) {
         // Cell -> Bool
         args.type(src);
-        helper = (TCA)cellToBoolHelper;
+        helper = Transl::Call((TCA)cellToBoolHelper);
       } else if (fromType.isString()) {
         // Str -> Bool
-        helper = (TCA)strToBoolHelper;
+        helper = Transl::Call(getMethodPtr(&StringData::toBoolean));
       } else if (fromType == Type::Arr) {
         // Arr -> Bool
-        helper = (TCA)arrToBoolHelper;
+        helper = Transl::Call((TCA)arrToBoolHelper);
       } else if (fromType == Type::Obj) {
         // Obj -> Bool
-        helper = (TCA)objToBoolHelper;
+        helper = Transl::Call(getMethodPtr(&ObjectData::o_toBoolean));
       } else {
         // Dbl -> Bool
         CG_PUNT(Conv_Dbl_Bool);
       }
-      cgCallHelper(m_as, helper, dst, kNoSyncPoint, args);
+      cgCallHelper(m_as, helper, dstReg, kNoSyncPoint, args);
     }
     return;
   }
@@ -1482,7 +1477,9 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
       // Int -> Str
       ArgGroup args;
       args.ssa(src);
-      cgCallHelper(m_as, (TCA)intToStringHelper, dst, kNoSyncPoint, args);
+      StringData*(*fPtr)(int64) = buildStringData;
+      cgCallHelper(m_as, (TCA)fPtr,
+                   dst, kNoSyncPoint, args);
     } else if (fromType == Type::Bool) {
       // Bool -> Str
       m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
@@ -2854,7 +2851,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
                             spReg);
 }
 
-static ActRec*
+HOT_FUNC_VM static ActRec*
 cgNewInstanceHelper(Class* cls,
                     int numArgs,
                     Cell* sp,
@@ -2869,7 +2866,7 @@ cgNewInstanceHelper(Class* cls,
   return ar;
 }
 
-static ActRec*
+HOT_FUNC_VM static ActRec*
 cgNewInstanceHelperCached(CacheHandle cacheHandle,
                           const StringData* clsName,
                           int numArgs,
@@ -4079,6 +4076,7 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
                inst->getDst(), kSyncPoint, args);
 }
 
+HOT_FUNC_VM
 static inline int64 ak_exist_string_helper(StringData* key, ArrayData* arr) {
   int64 n;
   if (key->isStrictlyInteger(n)) {
@@ -4087,22 +4085,26 @@ static inline int64 ak_exist_string_helper(StringData* key, ArrayData* arr) {
   return arr->exists(StrNR(key));
 }
 
+HOT_FUNC_VM
 static int64 ak_exist_string(StringData* key, ArrayData* arr) {
   int64 res = ak_exist_string_helper(key, arr);
   return res;
 }
 
+HOT_FUNC_VM
 static int64 ak_exist_int(int64 key, ArrayData* arr) {
   bool res = arr->exists(key);
   return res;
 }
 
+HOT_FUNC_VM
 static int64 ak_exist_string_obj(StringData* key, ObjectData* obj) {
   CArrRef arr = obj->o_toArray();
   int64 res = ak_exist_string_helper(key, arr.get());
   return res;
 }
 
+HOT_FUNC_VM
 static int64 ak_exist_int_obj(int64 key, ObjectData* obj) {
   CArrRef arr = obj->o_toArray();
   bool res = arr.get()->exists(key);
@@ -4277,7 +4279,7 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
 }
 
 // TODO: Kill this #2031980
-static RefData* box_value(TypedValue tv) {
+HOT_FUNC_VM static RefData* box_value(TypedValue tv) {
   return tvBoxHelper(tv.m_type, tv.m_data.num);
 }
 

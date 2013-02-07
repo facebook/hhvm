@@ -295,7 +295,7 @@ char* getNativeFunctionName(void* codeAddr);
 /**
  * Get the vtable offset corresponding to a method pointer. NB: only works
  * for single inheritance. For no inheritance at all, use
- * getMethodHardwarePtr. ABI-specific, don't play on or around.
+ * getMethodPtr. ABI-specific, don't play on or around.
  */
 template <typename MethodPtr>
 int64_t getVTableOffset(MethodPtr meth) {
@@ -308,7 +308,7 @@ int64_t getVTableOffset(MethodPtr meth) {
 }
 
 template <typename MethodPtr>
-void* getMethodHardwarePtr(MethodPtr meth) {
+void* getMethodPtr(MethodPtr meth) {
   union {
     MethodPtr meth;
     void* ptr;

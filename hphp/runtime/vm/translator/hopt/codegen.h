@@ -75,7 +75,11 @@ private:
                     PhysReg dstReg,
                     SyncOptions sync,
                     ArgGroup& args);
-
+  void cgCallHelper(Asm& a,
+                    const Transl::Call& call,
+                    PhysReg dstReg,
+                    SyncOptions sync,
+                    ArgGroup& args);
   void cgCallHelper(Asm& a,
                     const Transl::Call& call,
                     PhysReg dstReg0,

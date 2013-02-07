@@ -985,13 +985,13 @@ emitEagerVMRegSave(X64Assembler& a,
 Call TranslatorX64::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
-    return Call(getMethodHardwarePtr(&StringData::release));
+    return Call(getMethodPtr(&StringData::release));
   case KindOfArray:
     return Call(getVTableOffset(&HphpArray::release));
   case KindOfObject:
-    return Call(getMethodHardwarePtr(&ObjectData::release));
+    return Call(getMethodPtr(&ObjectData::release));
   case KindOfRef:
-    return Call(getMethodHardwarePtr(&RefData::release));
+    return Call(getMethodPtr(&RefData::release));
   default:
     assert(false);
     NOT_REACHED();
@@ -6698,7 +6698,7 @@ void TranslatorX64::emitVVRet(const ScratchReg& rTmp,
     m_regMap.cleanAll();
     EMIT_RCALL(
       a, *m_curNI,
-      TCA(getMethodHardwarePtr(&VarEnv::detach)),
+      TCA(getMethodPtr(&VarEnv::detach)),
       R(rTmp),
       R(rVmFp)
     );
@@ -9216,7 +9216,7 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
       {
         UnlikelyIfBlock ifZero(CC_Z, a, astubs);
         Stats::emitInc(a, Stats::Tx64_NewInstancePropInit);
-        EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initProps),
+        EMIT_RCALL(astubs, i, getMethodPtr(&Class::initProps),
                    IMM(int64(cls)));
       }
     }
@@ -9227,7 +9227,7 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
       {
         UnlikelyIfBlock ifZero(CC_Z, a, astubs);
         Stats::emitInc(a, Stats::Tx64_NewInstanceSPropInit);
-        EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initSProps),
+        EMIT_RCALL(astubs, i, getMethodPtr(&Class::initSProps),
                    IMM(int64(cls)));
       }
     }
@@ -9238,7 +9238,7 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
     EMIT_RCALL(a, i, cls->instanceCtor(), IMM(int64(cls)));
   } else {
     assert(allocator != -1);
-    EMIT_RCALL(a, i, getMethodHardwarePtr(&Instance::newInstanceRaw),
+    EMIT_RCALL(a, i, getMethodPtr(&Instance::newInstanceRaw),
                IMM(int64(cls)), IMM(allocator));
   }
   ScratchReg holdRax(m_regMap, rax);
@@ -9289,7 +9289,7 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
       UNUSED Instance* ret = ret->callCustomInstanceInit();
     }
     EMIT_RCALL(a, i,
-               getMethodHardwarePtr(&Instance::callCustomInstanceInit),
+               getMethodPtr(&Instance::callCustomInstanceInit),
                R(rax));
   }
 
@@ -11689,10 +11689,10 @@ TranslatorX64::TranslatorX64()
   typedef void* vp;
 
   TCA strDtor, arrDtor, objDtor, refDtor;
-  strDtor = emitUnaryStub(a, Call(getMethodHardwarePtr(&StringData::release)));
+  strDtor = emitUnaryStub(a, Call(getMethodPtr(&StringData::release)));
   arrDtor = emitUnaryStub(a, Call(getVTableOffset(&HphpArray::release)));
-  objDtor = emitUnaryStub(a, Call(getMethodHardwarePtr(&ObjectData::release)));
-  refDtor = emitUnaryStub(a, Call(vp(getMethodHardwarePtr(&RefData::release))));
+  objDtor = emitUnaryStub(a, Call(getMethodPtr(&ObjectData::release)));
+  refDtor = emitUnaryStub(a, Call(vp(getMethodPtr(&RefData::release))));
 
   m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
   m_dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;

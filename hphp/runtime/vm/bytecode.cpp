@@ -4189,7 +4189,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopLt(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopLte(PC& pc) {
-  CMPOP(<=, not_more);
+  CMPOP(<=, less_or_equal);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopGt(PC& pc) {
@@ -4197,7 +4197,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopGt(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopGte(PC& pc) {
-  CMPOP(>=, not_less);
+  CMPOP(>=, more_or_equal);
 }
 #undef CMPOP
 

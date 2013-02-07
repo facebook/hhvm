@@ -72,8 +72,8 @@ c_Vector::c_Vector(VM::Class* cb) :
 }
 
 c_Vector::~c_Vector() {
-  int sz = m_size;
-  for (int i = 0; i < sz; ++i) {
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
   c_Vector::freeData();
@@ -106,18 +106,22 @@ void c_Vector::resize(int64 sz, TypedValue* val) {
   assert(val && val->m_type != KindOfRef);
   ++m_versionNumber;
   assert(sz >= 0);
-  if (m_capacity < sz) {
-    m_capacity = sz;
+  uint requestedSize = (uint)sz;
+  if (m_capacity < requestedSize) {
+    m_capacity = requestedSize;
     m_data =
       (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
   }
-  for (int64 i = m_size-1; i >= sz; --i) {
-    tvRefcountedDecRef(&m_data[i]);
+  if (m_size > requestedSize) {
+    do {
+      --m_size;
+      tvRefcountedDecRef(&m_data[m_size]);
+    } while (m_size > requestedSize);
+  } else {
+    for (; m_size < requestedSize; ++m_size) {
+      tvDup(val, &m_data[m_size]);
+    }
   }
-  for (int64 i = m_size; i < sz; ++i) {
-    tvDup(val, &m_data[i]);
-  }
-  m_size = sz;
 }
 
 void c_Vector::reserve(int64 sz) {
@@ -132,8 +136,8 @@ void c_Vector::reserve(int64 sz) {
 
 Array c_Vector::toArrayImpl() const {
   ArrayInit ai(m_size, ArrayInit::vectorInit);
-  int sz = m_size;
-  for (int i = 0; i < sz; ++i) {
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
     ai.set(tvAsCVarRef(&m_data[i]));
   }
   return ai.create();
@@ -146,8 +150,8 @@ Array c_Vector::o_toArray() const {
 
 ObjectData* c_Vector::clone() {
   ObjectData* obj = ObjectData::clone();
-  c_Vector* vec = static_cast<c_Vector*>(obj);
-  int sz = m_size;
+  auto vec = static_cast<c_Vector*>(obj);
+  uint sz = m_size;
   TypedValue* data;
   vec->m_capacity = vec->m_size = sz;
   vec->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
@@ -210,7 +214,7 @@ void c_Vector::t_resize(CVarRef sz, CVarRef value) {
 
 Object c_Vector::t_clear() {
   ++m_versionNumber;
-  int sz = m_size;
+  uint sz = m_size;
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
@@ -281,7 +285,7 @@ void c_Vector::t_sort(CVarRef col /* = null */) {
         "Expected col to be an instance of Collator"));
       throw e;
     }
-    c_Collator* collator = static_cast<c_Collator*>(obj);
+    auto collator = static_cast<c_Collator*>(obj);
     // TODO Task #1429976: What do we do if the Collator encountered errors
     // while sorting? How is this reported to the user?
     collator->t_sort(ref(arr));
@@ -325,12 +329,13 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
       "Vector::splice does not support replacement parameter"));
     throw e;
   }
+  int64 sz = m_size;
   int64 startPos = offset.toInt64();
-  if (UNLIKELY(uint64_t(startPos) >= uint64_t(m_size))) {
+  if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
     if (startPos >= 0) {
       return;
     }
-    startPos += m_size;
+    startPos += sz;
     if (startPos < 0) {
       startPos = 0;
     }
@@ -340,20 +345,20 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
     int64 intLen = len.toInt64();
     if (LIKELY(intLen > 0)) {
       endPos = startPos + intLen;
-      if (endPos > m_size) {
-        endPos = m_size;
+      if (endPos > sz) {
+        endPos = sz;
       }
     } else {
       if (intLen == 0) {
         return;
       }
-      endPos = m_size + intLen;
+      endPos = sz + intLen;
       if (endPos <= startPos) {
         return;
       }
     }
   } else {
-    endPos = m_size;
+    endPos = sz;
   }
   // Null out each element before decreffing it. We need to do this in case
   // a __destruct method reenters and accesses this Vector object.
@@ -364,16 +369,16 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
     tvRefcountedDecRefHelper(t, datum);
   }
   // Move elements that came after the deleted elements (if there are any)
-  if (endPos < m_size) {
+  if (endPos < sz) {
     memmove(&m_data[startPos], &m_data[endPos],
-            (m_size-endPos) * sizeof(TypedValue));
+            (sz - endPos) * sizeof(TypedValue));
   }
   m_size -= (endPos - startPos);
 }
 
 int64 c_Vector::t_linearsearch(CVarRef search_value) {
-  int sz = m_size;
-  for (int i = 0; i < sz; ++i) {
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
     if (search_value.same(tvAsCVarRef(&m_data[i]))) {
       return i;
     }
@@ -382,8 +387,8 @@ int64 c_Vector::t_linearsearch(CVarRef search_value) {
 }
 
 void c_Vector::t_shuffle() {
-  for (int64 i = 1; i < m_size; ++i) {
-    int64 j = f_mt_rand(0, i);
+  for (uint i = 1; i < m_size; ++i) {
+    uint j = f_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
   }
 }
@@ -418,12 +423,12 @@ Object c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   c_Vector* vec;
   Object ret = vec = NEWOBJ(c_Vector)();
   ArrayData* ad = arr.getArrayData();
-  int sz = ad->size();
+  uint sz = ad->size();
   vec->m_capacity = vec->m_size = sz;
   TypedValue* data;
   vec->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
-  for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
+  for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
     TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
     if (UNLIKELY(tv->m_type == KindOfRef)) {
@@ -448,14 +453,14 @@ Object c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
       "vec must be an instance of Vector"));
     throw e;
   }
-  c_Vector* v = static_cast<c_Vector*>(obj);
+  auto v = static_cast<c_Vector*>(obj);
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
-  int sz = v->m_size;
+  uint sz = v->m_size;
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
-  for (int i = 0; i < sz; ++i) {
+  for (uint i = 0; i < sz; ++i) {
     tvDup(&v->m_data[i], &data[i]);
   }
   return ret;
@@ -486,13 +491,14 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
   }
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
-  c_Vector* v = static_cast<c_Vector*>(obj);
+  auto v = static_cast<c_Vector*>(obj);
+  int64 sz = v->m_size;
   int64 startPos = offset.toInt64();
-  if (UNLIKELY(uint64_t(startPos) >= uint64_t(v->m_size))) {
+  if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
     if (startPos >= 0) {
       return ret;
     }
-    startPos += v->m_size;
+    startPos += sz;
     if (startPos < 0) {
       startPos = 0;
     }
@@ -502,27 +508,28 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
     int64 intLen = len.toInt64();
     if (LIKELY(intLen > 0)) {
       endPos = startPos + intLen;
-      if (endPos > v->m_size) {
-        endPos = v->m_size;
+      if (endPos > sz) {
+        endPos = sz;
       }
     } else {
       if (intLen == 0) {
         return ret;
       }
-      endPos = v->m_size + intLen;
+      endPos = sz + intLen;
       if (endPos <= startPos) {
         return ret;
       }
     }
   } else {
-    endPos = v->m_size;
+    endPos = sz;
   }
   assert(startPos < endPos);
-  int64 sz = endPos - startPos;
+  uint targetSize = endPos - startPos;
   TypedValue* data;
-  target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
-  for (int64 i = 0; i < sz; ++i, ++startPos) {
+  target->m_capacity = target->m_size = targetSize;
+  target->m_data = data =
+    (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
+  for (uint i = 0; i < targetSize; ++i, ++startPos) {
     tvDup(&v->m_data[startPos], &data[i]);
   }
   return ret;
@@ -551,10 +558,10 @@ struct VectorValAccessor {
 template <typename AccessorT>
 c_Vector::SortFlavor c_Vector::preSort(const AccessorT& acc) {
   assert(m_size > 0);
-  int64 sz = m_size;
+  uint sz = m_size;
   bool allInts = true;
   bool allStrs = true;
-  for (int64 i = 0; i < sz; ++i) {
+  for (uint i = 0; i < sz; ++i) {
     allInts = (allInts && acc.isInt(m_data[i]));
     allStrs = (allStrs && acc.isStr(m_data[i]));
   }
@@ -620,7 +627,7 @@ void c_Vector::throwBadKeyType() {
 
 TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Vector* vec = static_cast<c_Vector*>(obj);
+  auto vec = static_cast<c_Vector*>(obj);
   if (key->m_type == KindOfInt64) {
     return vec->at(key->m_data.num);
   }
@@ -631,7 +638,7 @@ TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
 void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
-  c_Vector* vec = static_cast<c_Vector*>(obj);
+  auto vec = static_cast<c_Vector*>(obj);
   if (key->m_type == KindOfInt64) {
     vec->put(key->m_data.num, val);
     return;
@@ -641,7 +648,7 @@ void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
 
 bool c_Vector::OffsetIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Vector* vec = static_cast<c_Vector*>(obj);
+  auto vec = static_cast<c_Vector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = vec->get(key->m_data.num);
@@ -654,7 +661,7 @@ bool c_Vector::OffsetIsset(ObjectData* obj, TypedValue* key) {
 
 bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Vector* vec = static_cast<c_Vector*>(obj);
+  auto vec = static_cast<c_Vector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = vec->get(key->m_data.num);
@@ -667,7 +674,7 @@ bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
 
 bool c_Vector::OffsetContains(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Vector* vec = static_cast<c_Vector*>(obj);
+  auto vec = static_cast<c_Vector*>(obj);
   if (key->m_type == KindOfInt64) {
     return vec->contains(key->m_data.num);
   } else {
@@ -678,7 +685,7 @@ bool c_Vector::OffsetContains(ObjectData* obj, TypedValue* key) {
 
 void c_Vector::OffsetAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfRef);
-  c_Vector* vec = static_cast<c_Vector*>(obj);
+  auto vec = static_cast<c_Vector*>(obj);
   vec->add(val);
 }
 
@@ -686,6 +693,22 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "Cannot unset element of a Vector"));
   throw e;
+}
+
+bool c_Vector::Equals(ObjectData* obj1, ObjectData* obj2) {
+  auto vec1 = static_cast<c_Vector*>(obj1);
+  auto vec2 = static_cast<c_Vector*>(obj2);
+  uint sz = vec1->m_size;
+  if (sz != vec2->m_size) {
+    return false;
+  }
+  for (uint i = 0; i < sz; ++i) {
+    if (!equal(tvAsCVarRef(&vec1->m_data[i]),
+               tvAsCVarRef(&vec2->m_data[i]))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 c_VectorIterator::c_VectorIterator(VM::Class* cb) :
@@ -720,7 +743,7 @@ Variant c_VectorIterator::t_key() {
 bool c_VectorIterator::t_valid() {
   assert(m_pos >= 0);
   c_Vector* vec = m_obj.get();
-  return vec && (m_pos < vec->m_size);
+  return vec && (m_pos < (ssize_t)vec->m_size);
 }
 
 void c_VectorIterator::t_next() {
@@ -799,7 +822,7 @@ Array c_Map::o_toArray() const {
 
 ObjectData* c_Map::clone() {
   ObjectData* obj = ObjectData::clone();
-  c_Map* target = static_cast<c_Map*>(obj);
+  auto target = static_cast<c_Map*>(obj);
 
   if (!m_size) return obj;
 
@@ -945,7 +968,7 @@ Object c_Map::t_values() {
     return ret;
   }
   TypedValue* data;
-  target->m_capacity = target->m_size = sz;
+  target->m_capacity = target->m_size = m_size;
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
 
   int64 j = 0;
@@ -1005,7 +1028,7 @@ Object c_Map::t_updatefromiterable(CVarRef it) {
   }
   ObjectData* obj = it.getObjectData();
   if (obj->getCollectionType() == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
+    auto mp = static_cast<c_Map*>(obj);
     for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
       c_Map::Bucket& p = mp->m_data[i];
       if (p.validValue()) {
@@ -1045,7 +1068,7 @@ Object c_Map::t_differencebykey(CVarRef it) {
   c_Map* target;
   Object ret = target = static_cast<c_Map*>(clone());
   if (obj->getCollectionType() == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
+    auto mp = static_cast<c_Map*>(obj);
     for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
       c_Map::Bucket& p = mp->m_data[i];
       if (p.validValue()) {
@@ -1434,7 +1457,7 @@ void c_Map::Bucket::dump() {
 
 TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Map* mp = static_cast<c_Map*>(obj);
+  auto mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     return mp->at(key->m_data.num);
   }
@@ -1448,7 +1471,7 @@ TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
 void c_Map::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
-  c_Map* mp = static_cast<c_Map*>(obj);
+  auto mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     mp->put(key->m_data.num, val);
     return;
@@ -1462,7 +1485,7 @@ void c_Map::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
 
 bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Map* mp = static_cast<c_Map*>(obj);
+  auto mp = static_cast<c_Map*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = mp->get(key->m_data.num);
@@ -1477,7 +1500,7 @@ bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
 
 bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Map* mp = static_cast<c_Map*>(obj);
+  auto mp = static_cast<c_Map*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = mp->get(key->m_data.num);
@@ -1492,7 +1515,7 @@ bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
 
 bool c_Map::OffsetContains(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Map* mp = static_cast<c_Map*>(obj);
+  auto mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     return mp->contains(key->m_data.num);
   } else if (IS_STRING_TYPE(key->m_type)) {
@@ -1511,7 +1534,7 @@ void c_Map::OffsetAppend(ObjectData* obj, TypedValue* val) {
 
 void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Map* mp = static_cast<c_Map*>(obj);
+  auto mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
     mp->remove(key->m_data.num);
     return;
@@ -1521,6 +1544,27 @@ void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
     return;
   }
   throwBadKeyType();
+}
+
+bool c_Map::Equals(ObjectData* obj1, ObjectData* obj2) {
+  auto mp1 = static_cast<c_Map*>(obj1);
+  auto mp2 = static_cast<c_Map*>(obj2);
+  if (mp1->m_size != mp2->m_size) return false;
+  for (uint i = 0; i <= mp1->m_nLastSlot; ++i) {
+    c_Map::Bucket& p = mp1->m_data[i];
+    if (p.validValue()) {
+      TypedValue* tv2;
+      if (p.hasIntKey()) {
+        tv2 = mp2->get(p.ikey);
+      } else {
+        assert(p.hasStrKey());
+        tv2 = mp2->get(p.skey);
+      }
+      if (!tv2) return false;
+      if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
+    }
+  }
+  return true;
 }
 
 c_MapIterator::c_MapIterator(VM::Class* cb) :
@@ -1656,7 +1700,7 @@ Array c_StableMap::o_toArray() const {
 
 ObjectData* c_StableMap::clone() {
   ObjectData* obj = ObjectData::clone();
-  c_StableMap* target = static_cast<c_StableMap*>(obj);
+  auto target = static_cast<c_StableMap*>(obj);
 
   if (!m_size) return obj;
 
@@ -1819,7 +1863,7 @@ Object c_StableMap::t_values() {
     return ret;
   }
   TypedValue* data;
-  target->m_capacity = target->m_size = sz;
+  target->m_capacity = target->m_size = m_size;
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   Bucket* p = m_pListHead;
   for (int64 i = 0; i < sz; ++i) {
@@ -1872,7 +1916,7 @@ Object c_StableMap::t_updatefromiterable(CVarRef it) {
   }
   ObjectData* obj = it.getObjectData();
   if (obj->getCollectionType() == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
+    auto smp = static_cast<c_StableMap*>(obj);
     c_StableMap::Bucket* p = smp->m_pListHead;
     while (p) {
       if (p->hasIntKey()) {
@@ -1911,7 +1955,7 @@ Object c_StableMap::t_differencebykey(CVarRef it) {
   c_StableMap* target;
   Object ret = target = static_cast<c_StableMap*>(clone());
   if (obj->getCollectionType() == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
+    auto smp = static_cast<c_StableMap*>(obj);
     c_StableMap::Bucket* p = smp->m_pListHead;
     while (p) {
       if (p->hasIntKey()) {
@@ -2389,7 +2433,7 @@ void c_StableMap::Bucket::dump() {
 
 TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_StableMap* smp = static_cast<c_StableMap*>(obj);
+  auto smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
     return smp->at(key->m_data.num);
   }
@@ -2403,7 +2447,7 @@ TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
 void c_StableMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
-  c_StableMap* smp = static_cast<c_StableMap*>(obj);
+  auto smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
     smp->put(key->m_data.num, val);
     return;
@@ -2417,7 +2461,7 @@ void c_StableMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
 
 bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_StableMap* smp = static_cast<c_StableMap*>(obj);
+  auto smp = static_cast<c_StableMap*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = smp->get(key->m_data.num);
@@ -2432,7 +2476,7 @@ bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
 
 bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_StableMap* smp = static_cast<c_StableMap*>(obj);
+  auto smp = static_cast<c_StableMap*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = smp->get(key->m_data.num);
@@ -2447,7 +2491,7 @@ bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
 
 bool c_StableMap::OffsetContains(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_Map* smp = static_cast<c_Map*>(obj);
+  auto smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
     return smp->contains(key->m_data.num);
   } else if (IS_STRING_TYPE(key->m_type)) {
@@ -2466,7 +2510,7 @@ void c_StableMap::OffsetAppend(ObjectData* obj, TypedValue* val) {
 
 void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  c_StableMap* smp = static_cast<c_StableMap*>(obj);
+  auto smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
     smp->remove(key->m_data.num);
     return;
@@ -2476,6 +2520,31 @@ void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
     return;
   }
   throwBadKeyType();
+}
+
+bool c_StableMap::Equals(ObjectData* obj1, ObjectData* obj2) {
+  auto smp1 = static_cast<c_StableMap*>(obj1);
+  auto smp2 = static_cast<c_StableMap*>(obj2);
+  if (smp1->m_size != smp2->m_size) return false;
+  auto p1 = smp1->m_pListHead;
+  auto p2 = smp2->m_pListHead;
+  for (; p1; p1 = p1->pListNext, p2 = p2->pListNext) {
+    assert(p2);
+    // Check if the keys are identical (===)
+    if (p1->hasIntKey()) {
+      if (!p2->hasIntKey()) return false;
+      if (p1->ikey != p2->ikey) return false;
+    } else {
+      assert(p1->hasStrKey());
+      if (!p2->hasStrKey()) return false;
+      if (!p1->skey->same(p2->skey)) return false;
+    }
+    // Compare the values using equals (==)
+    if (!equal(tvAsCVarRef(&p1->data), tvAsCVarRef(&p2->data))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 #undef CONNECT_TO_GLOBAL_DLLIST

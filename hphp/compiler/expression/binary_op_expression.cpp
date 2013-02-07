@@ -524,11 +524,11 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case '<':
           result = less(v1, v2); break;
         case T_IS_SMALLER_OR_EQUAL:
-          result = not_more(v1, v2); break;
+          result = less_or_equal(v1, v2); break;
         case '>':
           result = more(v1, v2); break;
         case T_IS_GREATER_OR_EQUAL:
-          result = not_less(v1, v2); break;
+          result = more_or_equal(v1, v2); break;
         case '+':
           result = plus(v1, v2); break;
         case '-':

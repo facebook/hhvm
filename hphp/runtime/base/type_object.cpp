@@ -20,6 +20,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/strings.h>
+#include <runtime/ext/ext_collection.h>
 
 #include <system/lib/systemlib.h>
 
@@ -85,18 +86,21 @@ Object Object::CreateDummy(ObjectData*(*cooFunc)(ObjectData *)) {
 
 bool Object::equal(CObjRef v2) const {
   if (m_px == v2.get()) {
-    check_collection_compare(m_px);
     return true;
   }
   if (!m_px || !v2.get()) {
     return false;
   }
-  check_collection_compare(m_px, v2.get());
   if (isResource() || v2.isResource()) {
     return false;
   }
-  return (v2.get()->o_isClass(m_px->o_getClassName()) &&
-          toArray().equal(v2.toArray()));
+  if (!v2.get()->o_isClass(m_px->o_getClassName())) {
+    return false;
+  }
+  if (m_px->isCollection()) {
+    return collectionEquals(m_px, v2.get());
+  }
+  return toArray().equal(v2.toArray());
 }
 
 bool Object::less(CObjRef v2) const {

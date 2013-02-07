@@ -91,21 +91,21 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
 
   public: TypedValue* at(int64 key) {
-    if (UNLIKELY((unsigned long long)key >= (unsigned long long)m_size)) {
+    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
       return NULL;
     }
     return &m_data[key];
   }
   public: TypedValue* get(int64 key) {
-    if ((unsigned long long)key >= (unsigned long long)m_size) {
+    if ((uint64_t)key >= (uint64_t)m_size) {
       return NULL;
     }
     return &m_data[key];
   }
   public: void put(int64 key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
-    if (UNLIKELY((unsigned long long)key >= (unsigned long long)m_size)) {
+    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
       return;
     }
@@ -130,7 +130,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   }
   public: void resize(int64 sz, TypedValue* val);
   public: bool contains(int64 key) {
-    return ((unsigned long long)key < (unsigned long long)m_size);
+    return ((uint64_t)key < (uint64_t)m_size);
   }
   public: void reserve(int64 sz);
   public: int getVersionNumber() {
@@ -157,6 +157,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
 
 
  private:
@@ -164,8 +165,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   static void throwBadKeyType();
 
   TypedValue* m_data;
-  int m_size;
-  int m_capacity;
+  uint m_size;
+  uint m_capacity;
   int m_versionNumber;
 };
 
@@ -314,6 +315,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
 
 
 public:
@@ -595,6 +597,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
 
 
 public:
@@ -1073,6 +1076,20 @@ void collectionUnserialize(ObjectData* obj,
                            VariableUnserializer* uns,
                            int64 sz,
                            char type);
+
+inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
+  int ct = obj1->getCollectionType();
+  assert(ct == obj2->getCollectionType());
+  if (ct == Collection::VectorType) {
+    return c_Vector::Equals(obj1, obj2);
+  } else if (ct == Collection::MapType) {
+    return c_Map::Equals(obj1, obj2);
+  } else if (ct == Collection::StableMapType) {
+    return c_StableMap::Equals(obj1, obj2);
+  }
+  assert(false);
+  return false;
+}
 
 class CollectionInit {
 public:

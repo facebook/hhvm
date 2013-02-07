@@ -1890,11 +1890,11 @@ bool Variant::operator!=(CVarRef v) const {
 }
 
 bool Variant::operator>=(CVarRef v) const {
-  return not_less(*this, v);
+  return more_or_equal(*this, v);
 }
 
 bool Variant::operator<=(CVarRef v) const {
-  return not_more(*this, v);
+  return less_or_equal(*this, v);
 }
 
 bool Variant::operator>(CVarRef v) const {

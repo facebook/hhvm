@@ -627,11 +627,11 @@ bool String::operator!=(litstr v) const {
 }
 
 bool String::operator>=(litstr v) const {
-  return not_less(m_px, v);
+  return more_or_equal(m_px, v);
 }
 
 bool String::operator<=(litstr v) const {
-  return not_more(m_px, v);
+  return less_or_equal(m_px, v);
 }
 
 bool String::operator>(litstr v) const {
@@ -651,11 +651,11 @@ bool String::operator!=(CStrRef v) const {
 }
 
 bool String::operator>=(CStrRef v) const {
-  return not_less(m_px, v);
+  return more_or_equal(m_px, v);
 }
 
 bool String::operator<=(CStrRef v) const {
-  return not_more(m_px, v);
+  return less_or_equal(m_px, v);
 }
 
 bool String::operator>(CStrRef v) const {
@@ -675,11 +675,11 @@ bool String::operator!=(CVarRef v) const {
 }
 
 bool String::operator>=(CVarRef v) const {
-  return not_less(m_px, v);
+  return more_or_equal(m_px, v);
 }
 
 bool String::operator<=(CVarRef v) const {
-  return not_more(m_px, v);
+  return less_or_equal(m_px, v);
 }
 
 bool String::operator>(CVarRef v) const {

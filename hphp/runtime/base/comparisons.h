@@ -171,7 +171,7 @@ inline bool equal(int v1, CStrRef v2) { return equal(v1, v2.get());}
 inline bool equal(int v1, litstr  v2) { return equal(v1, String(v2));}
 inline bool equal(int v1, CArrRef v2) { return false;}
 inline bool equal(int v1, CObjRef v2) {
-  return equal(v1, v2.toInt64ForCompare());
+  return v2->isCollection() ? false : equal(v1, v2.toInt64());
 }
 inline bool equal(int v1, CVarRef v2) { return equal(v2, v1);}
 
@@ -237,7 +237,7 @@ inline bool equal(int64 v1, CStrRef v2) { return equal(v1, v2.get());}
 inline bool equal(int64 v1, litstr  v2) { return equal(v1, String(v2));}
 inline bool equal(int64 v1, CArrRef v2) { return false;}
 inline bool equal(int64 v1, CObjRef v2) {
-  return equal(v1, v2.toInt64ForCompare());
+  return v2->isCollection() ? false : equal(v1, v2.toInt64());
 }
 inline bool equal(int64 v1, CVarRef v2) { return equal(v2, v1);}
 
@@ -308,7 +308,8 @@ inline bool equal(double v1, CStrRef v2) { return v1 == v2.toDouble();}
 inline bool equal(double v1, litstr  v2) { return equal(v1,String(v2));}
 inline bool equal(double v1, CArrRef v2) { return false;}
 inline bool equal(double v1, CObjRef v2) {
-  return equal(v1, v2.toDoubleForCompare());
+  if (v2->isCollection()) return false;
+  return equal(v1, v2.toDouble());
 }
 inline bool equal(double v1, CVarRef v2) { return equal(v2, v1);}
 
@@ -409,7 +410,7 @@ inline bool equal(const StringData *v1, CObjRef v2) {
     return equal(toBoolean(v1), v2.toBoolean());
   }
   if (v2.isResource()) return false;
-  check_collection_compare(v2.get());
+  if (v2->isCollection()) return false;
   try {
     return equal(v1, v2.toString());
   } catch (BadTypeConversionException &e) {
@@ -804,9 +805,9 @@ inline bool more(CObjRef v1, CVarRef v2)  { return less(v2, v1);}
  * Special-casing comparisons between arrays to get the same results from
  * comparisons between uncomparable arrays.
  */
-bool not_more(CVarRef v1, CVarRef v2);
+bool less_or_equal(CVarRef v1, CVarRef v2);
 
-bool not_less(CVarRef v1, CVarRef v2);
+bool more_or_equal(CVarRef v1, CVarRef v2);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

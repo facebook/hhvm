@@ -40,6 +40,7 @@ $opt_coverage = "";
 $opt_hhvm = "hhvm";
 $opt_cpu_time_limit = 0;
 $opt_real_time_limit = 0;
+$opt_no_exp = 0;
 
 $opt_retval =
 &GetOptions("h|help" => \$opt_help,
@@ -56,6 +57,7 @@ $opt_retval =
             "threads=i" => \$opt_threads,
             "r|reduce=s" => \$opt_reduce,
             "coverage=s" => \$opt_coverage,
+            "no-exp" => \$opt_no_exp,
             "hhvm=s" => \$opt_hhvm,
             "cpu-time-limit=i" => \$opt_cpu_time_limit,
             "real-time-limit=i" => \$opt_real_time_limit,
@@ -384,7 +386,7 @@ sub run_test
     }
 
     # Compare the results with the expected, and update "okay".
-    if (-e "$opt_srcdir/$test.exp")
+    if (!$opt_no_exp && -e "$opt_srcdir/$test.exp")
     {
         # Diff mode.
         if (-e "$opt_objdir/$test.out")
@@ -641,13 +643,14 @@ $0 usage:
                   | (default is unlimited).
     -u --ustats   | Update historical statistics (stored in "<test>.perf".
     -z --zero     | Consider non-zero exit code to be an error.
+       --no-exp   | Don't diff with .exp files
     --------------+-------------------------------------------------------------
 
-    If <test>.exp exists, <test>'s output is diff'ed with <test>.exp.  Any
-    difference is considered failure.
+    If <test>.exp exists and --no-exp is not specified, <test>'s output is
+    diff'ed with <test>.exp.  Any difference is considered failure.
 
-    If <test>.exp does not exist, output to stdout of the following form is
-    expected:
+    If <test>.exp does not exist or --no-exp is specified, output to stdout of
+    the following form is expected:
 
         1..<n>
         {not }ok[ 1]

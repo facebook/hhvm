@@ -1353,7 +1353,7 @@ void EmitterVisitor::prepareEvalStack() {
   if (m_evalStackIsUnknown) {
     if (!m_evalStack.empty()) {
       InvariantViolation("Emitter expected to have an empty evaluation "
-                         "stack because the eval stack was unknown, but"
+                         "stack because the eval stack was unknown, but "
                          "it was non-empty.");
       return;
     }

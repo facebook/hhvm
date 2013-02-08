@@ -77,6 +77,18 @@ class Instance : public ObjectData {
     size_t size = sizeForNProps(nProps);
     Instance* obj = (Instance*)ALLOCOBJSZ(size);
     new (obj) Instance(cls);
+    if (UNLIKELY(cls->callsCustomInstanceInit())) {
+      /*
+        This must happen after the constructor finishes,
+        because it can leak references to obj AND it can
+        throw exceptions. If we have this in the Instance
+        constructor, and it throws, obj will be partially
+        destroyed (ie ~ObjectData will be called, resetting
+        the vtable pointer) leaving dangling references
+        to the object (eg in backtraces).
+      */
+      obj->callCustomInstanceInit();
+    }
     return obj;
   }
 
@@ -116,9 +128,6 @@ class Instance : public ObjectData {
         assert(nProps == cls->declPropInit().size());
         memcpy(propVec(), &cls->declPropInit()[0], nProps * sizeof(TypedValue));
       }
-    }
-    if (UNLIKELY(cls->callsCustomInstanceInit())) {
-      callCustomInstanceInit();
     }
   }
 
@@ -284,7 +293,9 @@ namespace HPHP {
 class ExtObjectData : public HPHP::VM::Instance {
  public:
   ExtObjectData(const ObjectStaticCallbacks *cb)
-    : HPHP::VM::Instance(cb, false) {}
+    : HPHP::VM::Instance(cb, false) {
+    assert(!m_cls->callsCustomInstanceInit());
+  }
   virtual void setRoot(ObjectData *r) {}
   virtual ObjectData *getRoot() { return this; }
   ObjectData *getBuiltinRoot() { return this; }

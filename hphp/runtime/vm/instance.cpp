@@ -59,10 +59,16 @@ Instance* Instance::callCustomInstanceInit() {
     // We need to incRef/decRef here because we're still a new (_count
     // == 0) object and invokeFunc is going to expect us to have a
     // reasonable refcount.
-    incRefCount();
-    g_vmContext->invokeFunc(&tv, init, Array::Create(), this);
-    decRefCount();
-    assert(!IS_REFCOUNTED_TYPE(tv.m_type));
+    try {
+      incRefCount();
+      g_vmContext->invokeFunc(&tv, init, Array::Create(), this);
+      decRefCount();
+      assert(!IS_REFCOUNTED_TYPE(tv.m_type));
+    } catch (...) {
+      this->setNoDestruct();
+      decRefObj(this);
+      throw;
+    }
   }
   return this;
 }

@@ -1,0 +1,3 @@
+string(6) "Caught"
+bool(true)
+string(18) "canary::__destruct"

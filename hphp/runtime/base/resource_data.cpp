@@ -40,6 +40,7 @@ ResourceData::ResourceData()
     : RD_PARENT(
         ObjectStaticCallbacks::encodeVMClass(SystemLib::s_resourceClass),
         true) {
+  assert(!m_cls->callsCustomInstanceInit());
 #else
     : RD_PARENT(NULL, true) {
 #endif

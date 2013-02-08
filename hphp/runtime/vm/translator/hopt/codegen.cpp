@@ -860,12 +860,9 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   const SSATmp* dst   = inst->getDst();
   const SSATmp* src1  = inst->getSrc(0);
   const SSATmp* src2  = inst->getSrc(1);
-  auto isBoolOrInt = [](const SSATmp* ssa) {
-    auto t = ssa->getType();
-    return t == Type::Bool || t == Type::Int;
-  };
-  if (!isBoolOrInt(src1) || !isBoolOrInt(src2)) {
-    CG_PUNT(BinaryIntOp);
+  if (!(src1->isA(Type::Bool) || src1->isA(Type::Int)) ||
+      !(src2->isA(Type::Bool) || src2->isA(Type::Int))) {
+    CG_PUNT(cgBinaryIntOp);
   }
 
   bool const commutative = commuteFlag == Commutative;
@@ -892,8 +889,8 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
         a.  movq    (rScratch, dstReg);
       }
     } else {
-      a.    movq    (src1Reg, dstReg);
-      (a.*instrRR)  (src2Reg, dstReg);
+      emitMovRegReg(a, src1Reg, dstReg);
+      (a.*instrRR) (src2Reg, dstReg);
     }
     return;
   }
@@ -937,7 +934,7 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   }
 
   assert(src2Reg == InvalidReg);
-  a.    movq   (src1Reg, dstReg);
+  emitMovRegReg(a, src1Reg, dstReg);
   (a.*instrIR) (src2->getValRawInt(), dstReg);
 }
 
@@ -951,14 +948,12 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
   const SSATmp* dst   = inst->getDst();
   const SSATmp* src1  = inst->getSrc(0);
   const SSATmp* src2  = inst->getSrc(1);
-  auto isBoolOrNumeric = [](const SSATmp* ssa) {
-    auto t = ssa->getType();
-    return t == Type::Dbl || t == Type::Int || t == Type::Bool;
-  };
-
-  if (!isBoolOrNumeric(src1) || !isBoolOrNumeric(src2)) {
-    CG_PUNT(BinaryOp);
-  }
+  if (!(src1->isA(Type::Bool) || src1->isA(Type::Int) || src1->isA(Type::Dbl))
+      ||
+      !(src2->isA(Type::Bool) || src2->isA(Type::Int) || src2->isA(Type::Dbl)) )
+    {
+      CG_PUNT(cgBinaryOp);
+    }
   if (src1->isA(Type::Dbl) || src2->isA(Type::Dbl)) {
     prepBinaryXmmOp(m_as, src1, src2);
     (m_as.*fpInstr)(xmm1, xmm0);
@@ -968,19 +963,57 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
   cgBinaryIntOp(inst, instrIR, instrRR, oper, commuteFlag);
 }
 
+bool CodeGenerator::emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
+                                     void(Asm::*emitFunc)(Reg64)) {
+  if (src1->getReg() != InvalidReg &&
+      dst ->getReg() != InvalidReg &&
+      // src2 == 1:
+      src2->isConst() && src2->isA(Type::Int) && src2->getValInt() == 1) {
+    emitMovRegReg(m_as, src1->getReg(), dst->getReg());
+    (m_as.*emitFunc)(dst->getReg());
+    return true;
+  }
+  return false;
+}
+
+/*
+ * If src2 is 1, this generates dst = src1 + 1 using the "inc" x86 instruction.
+ * The return value is whether or not the instruction could be generated.
+ */
+bool CodeGenerator::emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
+  return emitIncDecHelper(dst, src1, src2, &Asm::incq);
+}
+
+/*
+ * If src2 is 1, this generates dst = src1 - 1 using the "dec" x86 instruction.
+ * The return value is whether or not the instruction could be generated.
+ */
+bool CodeGenerator::emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
+  return emitIncDecHelper(dst, src1, src2, &Asm::decq);
+}
+
 void CodeGenerator::cgOpAdd(IRInstruction* inst) {
+  SSATmp* dst  = inst->getDst();
+  SSATmp* src1 = inst->getSrc(0);
+  SSATmp* src2 = inst->getSrc(1);
+
+  // Special cases: x = y + 1
+  if (emitInc(dst, src1, src2) || emitInc(dst, src2, src1)) return;
+
   cgBinaryOp(inst,
-                &Asm::addq,
-                &Asm::addq,
-                &Asm::addsd_xmm_xmm,
-                std::plus<int64>(),
-                Commutative);
+             &Asm::addq,
+             &Asm::addq,
+             &Asm::addsd_xmm_xmm,
+             std::plus<int64>(),
+             Commutative);
 }
 
 void CodeGenerator::cgOpSub(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
+
+  if (emitDec(dst, src1, src2)) return;
 
   if (src1->isConst() && src1->getValInt() == 0 && !src2->isA(Type::Dbl)) {
     return cgNegateWork(dst, src2);

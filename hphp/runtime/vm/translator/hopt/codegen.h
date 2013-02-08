@@ -203,6 +203,10 @@ private:
             int64 (*obj_cmp_int)(ObjectData*, int64),
             int64 (*arr_cmp_arr)(ArrayData*, ArrayData*));
   void cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
+  bool emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
+                        void(Asm::*emitFunc)(Reg64));
+  bool emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2);
+  bool emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2);
 
 private:
   void emitSetCc(IRInstruction*, ConditionCode);

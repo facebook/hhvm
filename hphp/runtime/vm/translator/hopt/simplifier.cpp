@@ -515,10 +515,15 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
 
 SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_DISTRIBUTIVE(+, *, Add, Mul);
-  // X + 0 --> X
   if (src2->isConst() && src2->getType() == Type::Int) {
-    if (src2->getValInt() == 0) {
+    int64_t src2Val = src2->getValInt();
+    // X + 0 --> X
+    if (src2Val == 0) {
       return src1;
+    }
+    // X + -C --> X - C
+    if (src2Val < 0) {
+      return m_tb->genSub(src1, genDefInt(-src2Val));
     }
   }
   // X + (0 - Y) --> X - Y
@@ -540,10 +545,15 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
   if (src1 == src2) {
     return genDefInt(0);
   }
-  // X - 0 --> X
   if (src2->isConst() && src2->getType() == Type::Int) {
-    if (src2->getValInt() == 0) {
+    int64_t src2Val = src2->getValInt();
+    // X - 0 --> X
+    if (src2Val == 0) {
       return src1;
+    }
+    // X - -C --> X + C
+    if (src2Val < 0 && src2Val > std::numeric_limits<int64_t>::min()) {
+      return m_tb->genAdd(src1, genDefInt(-src2Val));
     }
   }
   // X - (0 - Y) --> X + Y

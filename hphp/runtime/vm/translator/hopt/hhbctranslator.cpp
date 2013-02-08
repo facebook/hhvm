@@ -475,16 +475,16 @@ void HhbcTranslator::emitSetL(int32 id) {
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32 id) {
   // Handle only integer inc/dec for now
   Trace* exitTrace = getExitSlowTrace();
-  m_tb->genGuardLoc(id, Type::Int, exitTrace);
-  SSATmp* src = m_tb->genLdLoc(id);
+  SSATmp* src = m_tb->genLdLocAsCell(id, exitTrace);
   SSATmp* res = emitIncDec(pre, inc, src);
   m_tb->genStLoc(id, res, false, false, nullptr);
 }
 
-// only handles integer inc/dec
+// only handles integer or double inc/dec
 SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
-  assert(src->getType() == Type::Int);
-  SSATmp* one = m_tb->genDefConst<int64>(1);
+  assert(src->isA(Type::Int) || src->isA(Type::Dbl));
+  SSATmp* one = src->isA(Type::Int) ? m_tb->genDefConst(1)
+                                    : m_tb->genDefConst(1.0);
   SSATmp* res = inc ? m_tb->genAdd(src, one) : m_tb->genSub(src, one);
   // no incref necessary on push since result is an int
   push(pre ? res : src);

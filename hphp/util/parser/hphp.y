@@ -917,6 +917,13 @@ static void only_in_strict_mode(Parser *_p) {
   }
 }
 
+static void only_in_hphp_syntax(Parser *_p) {
+  if (!_p->enableHipHopSyntax()) {
+    HPHP_PARSER_ERROR("Syntax only allowed with -v Eval.EnableHipHopSyntax=true", _p);
+  }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
@@ -1474,7 +1481,8 @@ new_else_single:
 parameter_list:
     non_empty_parameter_list ',' T_VARARG
                                        { only_in_strict_mode(_p); $$ = $1; }
-  | non_empty_parameter_list           { $$ = $1;}
+  | non_empty_parameter_list
+    possible_comma_in_hphp_syntax      { $$ = $1;}
   | T_VARARG                           { only_in_strict_mode(_p); $$.reset(); }
   |                                    { $$.reset();}
 ;
@@ -1507,7 +1515,8 @@ non_empty_parameter_list:
 ;
 
 function_call_parameter_list:
-    non_empty_fcall_parameter_list     { $$ = $1;}
+    non_empty_fcall_parameter_list
+    possible_comma_in_hphp_syntax      { $$ = $1;}
   |                                    { $$.reset();}
 ;
 non_empty_fcall_parameter_list:
@@ -1871,7 +1880,10 @@ dim_expr_base:
 ;
 
 lexical_vars:
-    T_USE '(' lexical_var_list ')'     { $$ = $3;}
+    T_USE '('
+    lexical_var_list
+    possible_comma_in_hphp_syntax
+    ')'                                { $$ = $3;}
   |                                    { $$.reset();}
 ;
 
@@ -2114,6 +2126,10 @@ static_array_pair_list:
 ;
 possible_comma:
     ','                                { $$.reset();}
+  |                                    { $$.reset();}
+;
+possible_comma_in_hphp_syntax:
+    ','                                { only_in_hphp_syntax(_p); $$.reset();}
   |                                    { $$.reset();}
 ;
 non_empty_static_array_pair_list:

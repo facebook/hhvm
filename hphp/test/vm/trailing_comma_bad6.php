@@ -1,0 +1,2 @@
+<?php
+function () use ($x,,) { }

@@ -6643,7 +6643,7 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
 
 StringData* EmitterVisitor::newClosureName() {
   std::ostringstream str;
-  str << "closure$";
+  str << "Closure" << '$';
   if (m_curFunc->pce() != NULL) {
     str << m_curFunc->pce()->name()->data();
   }

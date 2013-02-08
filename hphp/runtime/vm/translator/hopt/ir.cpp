@@ -309,10 +309,9 @@ bool IRInstruction::isEssential() const {
       return true;
     }
   }
-  if (isControlFlowInstruction() && opc != LdCls) {
-    return true;
-  }
-  return opcodeHasFlags(opc, Essential) || mayReenterHelper();
+  return isControlFlowInstruction() ||
+         opcodeHasFlags(opc, Essential) ||
+         mayReenterHelper();
 }
 
 bool IRInstruction::isTerminal() const {

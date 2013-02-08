@@ -566,17 +566,25 @@ public:
   }
 
   /*
-   * Returns true if t1 is a strict subtype of t2.
+   * Returns true if this is a strict subtype of t2.
    */
   bool strictSubtypeOf(Type t2) const {
     return *this != t2 && subtypeOf(t2);
   }
 
   /*
-   * Returns true if t1 is a non-strict subtype of t2.
+   * Returns true if this is a non-strict subtype of t2.
    */
   bool subtypeOf(Type t2) const {
     return (m_bits & t2.m_bits) == m_bits;
+  }
+
+  /*
+   * Returns true if this is exactly equal to t2. Be careful: you
+   * probably mean subtypeOf.
+   */
+  bool equals(Type t2) const {
+    return m_bits == t2.m_bits;
   }
 
   /*

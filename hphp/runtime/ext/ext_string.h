@@ -15,13 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_STRING_H__
-#define __EXT_STRING_H__
+#ifndef incl_HPHP__EXT_STRING_H_
+#define incl_HPHP_EXT_STRING_H_
 
+#include "util/zend/zend_html.h"
 #include <runtime/base/base_includes.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/zend/zend_html.h>
 #include <runtime/base/bstring.h>
 #include <langinfo.h>
 #include <runtime/ext/ext_class.h>
@@ -384,4 +384,4 @@ void f_parse_str(CStrRef str, VRefParam arr = null);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_STRING_H__
+#endif

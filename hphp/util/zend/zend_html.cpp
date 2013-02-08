@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/zend/zend_html.h>
+#include "util/zend/zend_html.h"
 #include <util/lock.h>
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>

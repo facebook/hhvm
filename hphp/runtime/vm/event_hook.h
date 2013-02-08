@@ -55,14 +55,17 @@ class EventHook {
                (ar, funcType));
 
   /*
-   * FunctionExit is nothrow, because we need to be able to call it
-   * while tearing down frames (which might be because an exception is
-   * propagating).
+   * FunctionExit may throw.
+   *
+   * This means we have to be extra careful when tearing down frames
+   * (which might be because an exception is propagating).  The
+   * unwinder itself will call the function exit hooks and swallow
+   * exceptions.
    */
-  DECLARE_HOOK(FunctionExit, (const ActRec* ar), (ar)); // nothrow
+  DECLARE_HOOK(FunctionExit, (const ActRec* ar), (ar));
 
 private:
-  static void RunUserProfiler(const ActRec* ar, int mode); // nothrow
+  static void RunUserProfiler(const ActRec* ar, int mode);
 };
 
 #undef DECLARE_HOOK

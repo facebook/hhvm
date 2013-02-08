@@ -1,0 +1,10 @@
+hi exit fb_setprofile
+hi enter foo
+hi enter stdClass::86ctor
+hi exit stdClass::86ctor
+yep
+yep
+hi enter Exception::getMessage
+hi exit Exception::getMessage
+yo
+hi exit 

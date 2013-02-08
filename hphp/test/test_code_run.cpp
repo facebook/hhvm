@@ -621,7 +621,9 @@ bool TestCodeRun::RunTests(const std::string &which) {
   GEN_TEST(TestAdHoc);
 
   {
-    int cpus = Process::GetCPUCount();
+    // We have a still unresolved repo contention issues with more
+    // than 20 jobs. t1394416
+    int cpus = std::min(20, Process::GetCPUCount());
     int jobs = cpus;
     char* hphp_slow_tests_jobs = getenv("HPHP_SLOW_TESTS_JOBS");
     if (hphp_slow_tests_jobs) {

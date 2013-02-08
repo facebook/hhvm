@@ -1564,6 +1564,10 @@ void Parser::onThrow(Token &out, Token &expr) {
   out->stmt = NEW_STMT(ThrowStatement, expr->exp);
 }
 
+void Parser::onClosureStart(Token &name) {
+  onFunctionStart(name, true);
+}
+
 void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
                        Token &cparams, Token &stmts) {
   Token func, name;

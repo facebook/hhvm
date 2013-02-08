@@ -7874,7 +7874,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1837 "../../../hphp/util/parser/hphp.y"
-    { Token t; _p->onFunctionStart(t);
+    { Token t; _p->onClosureStart(t);
                                          _p->pushLabelInfo();;}
     break;
 

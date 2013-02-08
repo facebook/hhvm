@@ -227,6 +227,7 @@ public:
   void onFinally(Token &out, Token &stmt);
   void onThrow(Token &out, Token &expr);
 
+  void onClosureStart(Token &name);
   void onClosure(Token &out, Token &ret, Token &ref, Token &params,
                  Token &cparams, Token &stmts);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);

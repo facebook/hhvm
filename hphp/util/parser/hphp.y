@@ -1834,7 +1834,7 @@ expr_no_variable:
   | array_literal                      { $$ = $1;}
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
-  | function_loc is_reference '('      { Token t; _p->onFunctionStart(t);
+  | function_loc is_reference '('      { Token t; _p->onClosureStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')'
     sm_opt_return_type lexical_vars

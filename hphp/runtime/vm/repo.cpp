@@ -320,6 +320,8 @@ bool Repo::insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin, RepoTxn& txn) {
 }
 
 void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
+  if (!RuntimeOption::RepoCommit) return;
+
   try {
     commitMd5(unitOrigin, ue);
     ue->commit(unitOrigin);

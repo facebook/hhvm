@@ -7359,9 +7359,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     fsp->analyzeProgram(ar);
 
     UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
-    if (RuntimeOption::RepoCommit) {
-      Repo::get().commitUnit(ue, unitOrigin);
-    }
+    Repo::get().commitUnit(ue, unitOrigin);
     Unit* unit = ue->create();
     delete ue;
     return unit;

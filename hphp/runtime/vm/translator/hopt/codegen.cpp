@@ -2902,7 +2902,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
 
   auto spReg = sp->getReg();
   // actRec->m_this
-  if (objOrCls->getType() == Type::Cls) {
+  if (objOrCls->isA(Type::Cls)) {
     // store class
     if (objOrCls->isConst()) {
       m_as.store_imm64_disp_reg64(uintptr_t(objOrCls->getValClass()) | 1,
@@ -2914,23 +2914,22 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
       m_as.orq   (1, rScratch);
       m_as.storeq(rScratch, spReg[spOffset + AROFF(m_this)]);
     }
-  } else if (objOrCls->getType() == Type::Obj) {
+  } else if (objOrCls->isA(Type::Obj)) {
     // store this pointer
     m_as.store_reg64_disp_reg64(objOrCls->getReg(),
                                 spOffset + AROFF(m_this),
                                 spReg);
-  } else if (objOrCls->getType() == Type::Ctx) {
+  } else if (objOrCls->isA(Type::Ctx)) {
     // Stores either a this pointer or a Cctx -- statically unknown.
     Reg64 objOrClsPtrReg = objOrCls->getReg();
     m_as.storeq(objOrClsPtrReg, spReg[spOffset + AROFF(m_this)]);
   } else {
-    assert(objOrCls->getType() == Type::Null);
+    assert(objOrCls->isA(Type::InitNull));
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + AROFF(m_this);
     // When func is either Type::FuncCls or Type::FuncCtx,
     // m_this/m_cls will be initialized below
-    if (!func->isConst() && (func->getType() == Type::FuncCls ||
-                             func->getType() == Type::FuncCtx)) {
+    if (!func->isConst() && (func->isA(Type::FuncCtx))) {
       // m_this is unioned with m_cls and will be initialized below
       setThis = false;
     } else {
@@ -2942,7 +2941,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
   // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
   // set to distinguish it from m_varEnv and m_extrArgs
   uintptr_t invName =
-    (magicName->getType() == Type::Null
+    (magicName->getType().isNull()
       ? 0
       : (uintptr_t(magicName->getValStr()) | ActRec::kInvNameBit));
   m_as.store_imm64_disp_reg64(invName,
@@ -2950,7 +2949,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
                               spReg);
   // actRec->m_func  and possibly actRec->m_cls
   // Note m_cls is unioned with m_this and may overwrite previous value
-  if (func->getType() == Type::Null) {
+  if (func->getType().isNull()) {
     assert(func->isConst());
   } else if (func->isConst()) {
     // TODO: have register allocator materialize constants
@@ -2959,8 +2958,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(rScratch,
                                 spOffset + AROFF(m_func),
                                 spReg);
-    if (func->getType() == Type::FuncCls ||
-        func->getType() == Type::FuncCtx) {
+    if (func->isA(Type::FuncCtx)) {
       // Fill in m_cls if provided with both func* and class*
       CG_PUNT(cgAllocActRec);
     }
@@ -2969,8 +2967,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     m_as.store_reg64_disp_reg64(func->getReg(0),
                                 offset_m_func,
                                 spReg);
-    if (func->getType() == Type::FuncCls ||
-        func->getType() == Type::FuncCtx) {
+    if (func->isA(Type::FuncCtx)) {
       int offset_m_cls = spOffset + AROFF(m_cls);
       m_as.store_reg64_disp_reg64(func->getReg(1),
                                   offset_m_cls,
@@ -3089,7 +3086,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   assert(m_lastMarker);
   SrcKey srcKey = SrcKey(m_lastMarker->func, m_lastMarker->bcOff);
-  bool isImmutable = (func->isConst() && func->getType() != Type::Null);
+  bool isImmutable = (func->isConst() && !func->getType().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : NULL;
   int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
   if (adjust) {
@@ -3886,8 +3883,8 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   PhysReg destCtxReg = inst->getDst()->getReg(0);
   SSATmp*  srcCtxTmp = inst->getSrc(0);
   const Func* callee = inst->getSrc(1)->getValFunc();
-  bool      withThis = srcCtxTmp->getType().subtypeOf(Type::Obj);
-  bool        noThis = srcCtxTmp->getType().subtypeOf(Type::Cls);
+  bool      withThis = srcCtxTmp->isA(Type::Obj);
+  bool        noThis = srcCtxTmp->isA(Type::Cls);
 
   // Eagerly move src into the dest reg
   emitMovRegReg(m_as, srcCtxTmp->getReg(0), destCtxReg);
@@ -4320,11 +4317,11 @@ void CodeGenerator::cgPrint(IRInstruction* inst) {
   auto type = arg->getType();
   if (type.isString()) {
     fptr = (void*)print_string;
-  } else if (type == Type::Int) {
+  } else if (type.subtypeOf(Type::Int)) {
     fptr = (void*)print_int;
-  } else if (type == Type::Bool) {
+  } else if (type.subtypeOf(Type::Bool)) {
     fptr = (void*)print_boolean;
-  } else if (type == Type::Null) {
+  } else if (type.isNull()) {
     return; // nothing to do
   } else {
     not_reached();

@@ -341,12 +341,12 @@ void LinearScan::allocRegToInstruction(IRInstruction::Iterator it) {
       opc == RetAdjustStack ||
       opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
       opc == GuardStk || opc == AssertStk) {
-    assert(dsts[0]->getType() == Type::StkPtr);
+    assert(dsts[0]->isA(Type::StkPtr));
     allocRegToTmp(&m_regs[int(rVmSp)], dsts[0], 0);
     return;
   }
   if (opc == DefMIStateBase) {
-    assert(dsts[0]->getType() == Type::PtrToCell);
+    assert(dsts[0]->isA(Type::PtrToCell));
     allocRegToTmp(&m_regs[int(rsp)], dsts[0], 0);
     return;
   }

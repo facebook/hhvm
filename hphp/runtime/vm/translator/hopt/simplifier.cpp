@@ -953,7 +953,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
     if (type == Type::Arr) {
       return m_tb->genDefConst(StringData::GetStaticString("Array"));
     }
-    if (type == Type::Null) {
+    if (type.isNull()) {
       return m_tb->genDefConst(StringData::GetStaticString(""));
     }
     if (src->isConst()) {
@@ -1027,7 +1027,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls,
                                           SSATmp* clsName,
                                           SSATmp* propName) {
-  if (clsName->getType() == Type::Null) {
+  if (clsName->getType().isNull()) {
     IRInstruction* clsInst = cls->getInstruction();
     if (clsInst->getOpcode() == LdCls) {
       SSATmp* clsName = clsInst->getSrc(0);
@@ -1081,7 +1081,7 @@ SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyPrint(IRInstruction* inst) {
-  if (inst->getSrc(0)->getType() == Type::Null) {
+  if (inst->getSrc(0)->getType().isNull()) {
     inst->convertToNop();
   }
   return nullptr;

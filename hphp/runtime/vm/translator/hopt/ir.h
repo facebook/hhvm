@@ -194,7 +194,7 @@ O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(LdStack,                      DParam, S(StkPtr) C(Int),                 NF) \
 O(LdLoc,                        DParam, S(StkPtr),                        NF) \
 O(LdStackAddr,             D(PtrToGen), SUnk,                              C) \
-O(LdLocAddr,               D(PtrToGen), S(StkPtr),                         C) \
+O(LdLocAddr,                    DParam, S(StkPtr),                         C) \
 O(LdMem,                        DParam, SUnk,                             NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdRef,                        DParam, S(BoxedCell),                     NF) \
@@ -232,7 +232,7 @@ O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
 O(DefActRec,                 D(ActRec), S(StkPtr)                             \
                                           S(Func,FuncCls,FuncCtx,Null)        \
-                                          S(Ctx,Cls,Null)                     \
+                                          S(Ctx,Cls,InitNull)                 \
                                           C(Int)                              \
                                           S(Str,Null),                   Mem) \
 O(FreeActRec,                D(StkPtr), S(StkPtr),                       Mem) \
@@ -693,6 +693,7 @@ public:
   }
 
   std::string toString() const;
+  static std::string debugString(Type t);
   static Type fromString(const std::string& str);
 
   bool isBoxed() const {
@@ -723,7 +724,11 @@ public:
     // Str are Null are technically unions but are statically known
     // for all practical purposes. Same for a union that consists of
     // nothing but boxed types.
-    if (isString() || isNull() || isBoxed()) return true;
+    if (isString() || isNull() ||
+        (isPtr() && (deref().isString() || deref().isNull())) ||
+        isBoxed()) {
+      return true;
+    }
 
     // This will return true iff no more than 1 bit is set in
     // m_bits. If 0 bits are set, then *this == Bottom, which is
@@ -843,9 +848,14 @@ public:
     return (*this & Cell) | (*this & BoxedCell).innerType();
   }
 
-  Type derefPtr() const {
+  Type deref() const {
     assert(isPtr());
     return Type(m_bits >> kPtrShift);
+  }
+
+  Type derefIfPtr() const {
+    assert(subtypeOf(Gen | PtrToGen));
+    return isPtr() ? deref() : *this;
   }
 
   Type ptr() const {

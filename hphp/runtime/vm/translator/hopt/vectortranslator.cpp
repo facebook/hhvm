@@ -183,8 +183,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       assert(m_base->isA(Type::Obj));
     } else {
       // Everything else is passed by reference
-      LocalId baseLocalId(loc);
-      m_base = m_tb.gen(LdLocAddr, &baseLocalId, m_tb.getFp());
+      m_base = m_tb.genLdLocAddr(loc);
       if (base.rtt.valueType() == KindOfArray) {
         // The local's type will be unchanged but its value might change
         // because of COW. Kill the value but leave the type intact. This is

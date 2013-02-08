@@ -55,6 +55,10 @@ std::string Type::toString() const {
   return folly::format("{{{}}}", folly::join('|', types)).str();
 }
 
+std::string Type::debugString(Type t) {
+  return t.toString();
+}
+
 Type Type::fromString(const std::string& str) {
   static hphp_string_map<Type> types;
   static bool init = false;
@@ -107,6 +111,7 @@ enum OpcodeFlag : uint64_t {
 #define DBox(n)   HasDest
 #define DParam    HasDest
 #define DLabel    NaryDest
+#define DPtrToParam HasDest
 
 struct {
   const char* name;
@@ -710,10 +715,8 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     } else {
       os << "Array(" << arr << ")";
     }
-  } else if (t == Type::Null) {
-    os << "Null";
-  } else if (t == Type::Uninit) {
-    os << "Unin";
+  } else if (t.isNull()) {
+    os << t.toString();
   } else if (t == Type::Func) {
     auto func = c->as<const Func*>();
     os << "Func(" << (func ? func->fullName()->data() : "0") << ")";

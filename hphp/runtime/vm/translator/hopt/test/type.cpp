@@ -48,8 +48,11 @@ TEST(Type, Equality) {
 TEST(Type, Null) {
   EXPECT_TRUE(Type::Null.isNull());
   EXPECT_TRUE(Type::Uninit.isNull());
+  EXPECT_TRUE(Type::InitNull.isNull());
   EXPECT_FALSE(Type::Bool.isNull());
+  EXPECT_FALSE(Type::Null.subtypeOf(Type::InitNull));
   EXPECT_NE(Type::Null, Type::Uninit);
+  EXPECT_NE(Type::Null, Type::InitNull);
 }
 
 TEST(Type, StaticallyKnown) {
@@ -107,8 +110,8 @@ TEST(Type, Ptr) {
 
   EXPECT_EQ(Type::PtrToInt, Type::Int.ptr());
   EXPECT_EQ(Type::PtrToCell, Type::Cell.ptr());
-  EXPECT_EQ(Type::Int, Type::PtrToInt.derefPtr());
-  EXPECT_EQ(Type::BoxedCell, Type::PtrToBoxedCell.derefPtr());
+  EXPECT_EQ(Type::Int, Type::PtrToInt.deref());
+  EXPECT_EQ(Type::BoxedCell, Type::PtrToBoxedCell.deref());
 }
 
 TEST(Type, Subtypes) {

@@ -489,7 +489,7 @@ D:Gen* = LdStackAddr S0:StkPtr S1:ConstInt
   Loads the address of the stack slot given by the pointer in S0 and
   the index S1 (in cells).
 
-D:Gen* = LdLocAddr<localId> S0:StkPtr
+D:T* = LdLocAddr<T, localId> S0:StkPtr
 
   Loads the address of the local slot localId from the frame S0 into D.
 

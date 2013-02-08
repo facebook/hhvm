@@ -67,6 +67,9 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
     if (opc == Mov || opc == IncRef) {
       refineType(inst->getSrc(0), type);
       tmp->setType(outputType(inst));
+    } else if (tmp->getType().isNull() && type.isNull()) {
+      // Refining Null to Uninit or InitNull is supported
+      tmp->setType(type);
     } else {
       // At this point, we have no business refining the type of any
       // instructions other than the following, which all control
@@ -171,8 +174,7 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
 void HhbcTranslator::emitPrint() {
   TRACE(3, "%u: Print\n", m_bcOff);
   Type type = topC()->getType();
-  if (type == Type::Int || type == Type::Bool || type == Type::Null ||
-      type.isString()) {
+  if (type.subtypeOf(Type::Int | Type::Bool | Type::Null | Type::Str)) {
     // the print helpers decref their arg, so don't decref pop'ed value
     m_tb->genPrint(popC());
     push(m_tb->genDefConst<int64>(1));
@@ -365,7 +367,7 @@ void HhbcTranslator::emitNullUninit() {
 
 void HhbcTranslator::emitNull() {
   TRACE(3, "%u: Null\n", m_bcOff);
-  push(m_tb->genDefNull());
+  push(m_tb->genDefInitNull());
 }
 
 void HhbcTranslator::emitTrue() {
@@ -718,7 +720,7 @@ void HhbcTranslator::emitContRaised() {
 void HhbcTranslator::emitContDone() {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst<bool>(true), 0);
-  m_tb->genSetPropCell(cont, CONTOFF(m_value), m_tb->genDefNull());
+  m_tb->genSetPropCell(cont, CONTOFF(m_value), m_tb->genDefInitNull());
 }
 
 void HhbcTranslator::emitContNext() {
@@ -971,7 +973,7 @@ void HhbcTranslator::emitIssetL(int32 id) {
   Type trackedType = m_tb->getLocalType(id);
   // guards should ensure we have type info at this point
   assert(trackedType != Type::None);
-  if (trackedType == Type::Uninit) {
+  if (trackedType.subtypeOf(Type::Uninit)) {
     push(m_tb->genDefConst<bool>(false));
   } else {
     Trace* exitTrace = getExitTrace();
@@ -1241,7 +1243,7 @@ void HhbcTranslator::emitFPushFuncD(int32 numParams, int32 funcId) {
                               : m_tb->gen(LdFixedFunc,
                                           m_tb->genDefConst(name));
   SSATmp* actRec  = m_tb->genDefActRec(ssaFunc,
-                                       m_tb->genDefNull(),
+                                       m_tb->genDefInitNull(),
                                        numParams,
                                        nullptr);
   m_evalStack.push(actRec);
@@ -1262,7 +1264,7 @@ void HhbcTranslator::emitFPushFunc(int32 numParams) {
   SSATmp* func = m_tb->gen(LdFunc, funcName);
   m_fpiStack.push(func);
   m_evalStack.push(m_tb->genDefActRec(func,
-                                      m_tb->genDefNull(),
+                                      m_tb->genDefInitNull(),
                                       numParams,
                                       nullptr));
   spillStack(); // TODO(#2036900)
@@ -1370,7 +1372,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
                                                          /* staticLookup: */
                                                              true);
   spillStack();
-  SSATmp* objOrCls = m_tb->genDefNull();
+  SSATmp* objOrCls = m_tb->genDefInitNull();
   if (func) {
     if (!mightNotBeStatic) { // definitely static
       // static function: store base class into the m_cls/m_this slot
@@ -1395,7 +1397,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
                               m_tb->genDefConst(np.second),
                               exitTrace);
     SSATmp* actRec = m_tb->genDefActRec(funcClassTmp,
-                                        m_tb->genDefNull(),
+                                        m_tb->genDefInitNull(),
                                         numParams,
                                         nullptr);
     m_evalStack.push(actRec);
@@ -1448,7 +1450,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32             numParams,
     SSATmp*  funcCtxTmp = m_tb->gen(LdClsMethodFCache, exitLabel, clsTmp,
                                     methNameTmp, curCtxTmp);
     actRec = m_tb->genDefActRec(funcCtxTmp,
-                                m_tb->genDefNull(),
+                                m_tb->genDefInitNull(),
                                 numParams,
                                 (magicCall ? methName : nullptr));
   }
@@ -1736,7 +1738,7 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
 
   if (tc.isObject()) {
     if (!(param->getType() == Type::Obj ||
-          (param->getType() == Type::Null && tc.nullable()))) {
+          (param->getType().isNull() && tc.nullable()))) {
       spillStack();
       emitInterpOne(Type::None);
       return;
@@ -2061,8 +2063,7 @@ void HhbcTranslator::emitBitNot() {
     SSATmp* src = popC();
     SSATmp* ones = m_tb->genDefConst<int64>(~0);
     push(m_tb->genXor(src, ones));
-  } else if (srcType == Type::Null || srcType == Type::Bool ||
-             srcType == Type::Arr || srcType == Type::Obj) {
+  } else if (srcType.subtypeOf(Type::Null | Type::Bool | Type::Arr | Type::Obj)) {
     // raise fatal
     spillStack();
     popC();
@@ -2238,11 +2239,11 @@ SSATmp* HhbcTranslator::emitLdLocWarn(uint32 id,
                                       Trace* target) {
   SSATmp* locVal = m_tb->genLdLocAsCell(id, target);
 
-  if (locVal->getType() == Type::Uninit) {
+  if (locVal->getType().subtypeOf(Type::Uninit)) {
     spillStack();
     LocalId data(id);
     m_tb->gen(RaiseUninitWarning, &data);
-    return m_tb->genDefNull();
+    return m_tb->genDefInitNull();
   }
 
   return locVal;

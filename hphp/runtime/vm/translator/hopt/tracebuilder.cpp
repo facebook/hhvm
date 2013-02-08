@@ -399,6 +399,11 @@ SSATmp* TraceBuilder::genDefUninit() {
   return gen(DefConst, Type::Uninit, &cdata);
 }
 
+SSATmp* TraceBuilder::genDefInitNull() {
+  ConstData cdata(0);
+  return gen(DefConst, Type::InitNull, &cdata);
+}
+
 SSATmp* TraceBuilder::genDefNull() {
   ConstData cdata(0);
   return gen(DefConst, Type::Null, &cdata);
@@ -615,10 +620,9 @@ SSATmp* TraceBuilder::genLdLoc(uint32 id) {
   // No prior value for this local is available, so actually generate a LdLoc.
   auto type = getLocalType(id);
   assert(type != Type::None); // tracelet guards guarantee we have a type
-  if (type == Type::Uninit) {
-    tmp = genDefUninit();
-  } else if (type == Type::Null) {
-    tmp = genDefNull();
+  assert(type != Type::Null); // we can get Uninit or InitNull but not both
+  if (type.isNull()) {
+    tmp = genDefConst(type);
   } else {
     LocalId loc(id);
     tmp = gen(LdLoc, type, &loc, m_fpValue);
@@ -634,6 +638,11 @@ SSATmp* TraceBuilder::genLdLocAsCell(uint32 id, Trace* exitTrace) {
   }
   // Unbox tmp into a cell via a LdRef
   return genLdRef(tmp, type.innerType(), exitTrace);
+}
+
+SSATmp* TraceBuilder::genLdLocAddr(uint32 id) {
+  LocalId baseLocalId(id);
+  return gen(LdLocAddr, getLocalType(id).ptr(), &baseLocalId, getFp());
 }
 
 void TraceBuilder::genStLocAux(uint32 id, SSATmp* newValue, bool storeType) {
@@ -1385,16 +1394,7 @@ SSATmp* TraceBuilder::getLocalValue(int id) {
   if (id == -1 || id >= (int)m_localValues.size()) {
     return NULL;
   }
-  SSATmp* val = m_localValues[id];
-  if (!val) {
-    Type type = getLocalType(id);
-    // TODO
-    if (type == Type::Null) {
-    }
-    if (type == Type::Uninit) {
-    }
-  }
-  return val;
+  return m_localValues[id];
 }
 
 Type TraceBuilder::getLocalType(int id) {

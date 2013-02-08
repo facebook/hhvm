@@ -85,6 +85,7 @@ public:
                    int64 extraOff);
 
   SSATmp* genLdLoc(uint32 id);
+  SSATmp* genLdLocAddr(uint32 id);
 
   /*
    * Returns an SSATmp containing the (inner) value of the given local.
@@ -167,6 +168,7 @@ public:
   SSATmp* genNot(SSATmp* src);
 
   SSATmp* genDefUninit();
+  SSATmp* genDefInitNull();
   SSATmp* genDefNull();
   SSATmp* genJmp(Trace* target);
   SSATmp* genJmpCond(SSATmp* src, Trace* target, bool negate);
@@ -404,6 +406,12 @@ private:
   std::vector<SSATmp*>   m_localValues;
   std::vector<Type> m_localTypes;
 };
+
+template<>
+inline SSATmp* TraceBuilder::genDefConst(Type t) {
+  ConstData cdata(0);
+  return gen(DefConst, t, &cdata);
+}
 
 }}}
 

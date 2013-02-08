@@ -16,36 +16,16 @@
 */
 
 #include <runtime/base/zend/zend_html.h>
-#include <runtime/base/complex_types.h>
 #include <util/lock.h>
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
 
 namespace HPHP {
 
-#define HTML_SPECIALCHARS   0
-#define HTML_ENTITIES       1
-
-#define ENT_HTML_QUOTE_NONE     0
-#define ENT_HTML_QUOTE_SINGLE   1
-#define ENT_HTML_QUOTE_DOUBLE   2
-
-#define ENT_COMPAT    ENT_HTML_QUOTE_DOUBLE
-#define ENT_QUOTES    (ENT_HTML_QUOTE_DOUBLE | ENT_HTML_QUOTE_SINGLE)
-#define ENT_NOQUOTES  ENT_HTML_QUOTE_NONE
-
 ///////////////////////////////////////////////////////////////////////////////
 // UTF-8 entity tables
 
-enum entity_charset {
-  cs_terminator, cs_8859_1, cs_cp1252,
-  cs_8859_15, cs_utf_8, cs_big5, cs_gb2312,
-  cs_big5hkscs, cs_sjis, cs_eucjp, cs_koi8r,
-  cs_cp1251, cs_8859_5, cs_cp866, cs_macroman,
-  cs_end
-};
-
-typedef const char *const entity_table_t;
+using namespace entity_charset_enum;
 
 /* codepage 1252 is a Windows extension to iso-8859-1. */
 static entity_table_t ent_cp_1252[] = {
@@ -258,13 +238,6 @@ static entity_table_t ent_uni_9824_9830[] = {
   "spades", NULL, NULL, "clubs", NULL, "hearts", "diams"
 };
 
-struct html_entity_map {
-  enum entity_charset charset; /* charset identifier */
-  unsigned short basechar; /* char code at start of table */
-  unsigned short endchar;  /* last char code in the table */
-  entity_table_t *table;   /* the table of mappings */
-};
-
 static const struct html_entity_map entity_map[] = {
   { cs_cp1252,    0x80, 0x9f, ent_cp_1252 },
   { cs_cp1252,    0xa0, 0xff, ent_iso_8859_1 },
@@ -297,7 +270,7 @@ static const struct html_entity_map entity_map[] = {
 
 static const struct {
   const char *codeset;
-  enum entity_charset charset;
+  entity_charset charset;
 } charset_map[] = {
   { "ISO-8859-1",     cs_8859_1 },
   { "ISO8859-1",      cs_8859_1 },
@@ -334,29 +307,17 @@ static const struct {
   { NULL }
 };
 
-static const struct {
-  unsigned short charcode;
-  const char *entity;
-  int entitylen;
-  int flags;
-} basic_entities[] = {
-  { '"',  "&quot;",   6,  ENT_HTML_QUOTE_DOUBLE },
-  { '\'', "&#039;",   6,  ENT_HTML_QUOTE_SINGLE },
-  { '\'', "&#39;",    5,  ENT_HTML_QUOTE_SINGLE },
-  { '<',  "&lt;",     4,  0 },
-  { '>',  "&gt;",     4,  0 },
-  { 0, NULL, 0, 0 }
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
-static enum entity_charset determine_charset(const char *charset_hint) {
-  enum entity_charset charset = cs_utf_8;
+entity_charset determine_charset(const char *charset_hint) {
+  entity_charset charset = cs_utf_8;
 
-  if (charset_hint == NULL)
+  if (charset_hint == NULL) {
+    // default to utf-8
     return cs_utf_8;
+  }
 
-  bool found = 0;
+  bool found = false;
   size_t len = strlen(charset_hint);
 
   /* now walk the charset map and look for the codeset */
@@ -364,14 +325,14 @@ static enum entity_charset determine_charset(const char *charset_hint) {
     if (len == strlen(charset_map[i].codeset) &&
       strncasecmp(charset_hint, charset_map[i].codeset, len) == 0) {
       charset = charset_map[i].charset;
-      found = 1;
+      found = true;
       break;
     }
   }
 
-  if (!found) {
-    raise_warning("Charset `%s' not supported, assuming utf-8", charset_hint);
-  }
+  // All code paths that go into this check html_supported_charset()
+  // and throw if not.
+  assert(found && "currently we expect to only use supported charsets");
 
   return charset;
 }
@@ -430,7 +391,7 @@ static HtmlEntityMap XHPEntityMap[cs_end];
 static void init_entity_table() {
   for (unsigned int i = 0; entity_map[i].charset != cs_terminator; i++) {
     const html_entity_map &em = entity_map[i];
-    const enum entity_charset charset = entity_map[i].charset;
+    const entity_charset charset = entity_map[i].charset;
 
     int index = 0;
     for (int ch = em.basechar; ch <= em.endchar; ch++, index++) {
@@ -684,7 +645,7 @@ char *string_html_encode_extra(const char *input, int &len,
 inline static bool decode_entity(char *entity, int *len,
                                  bool decode_double_quote,
                                  bool decode_single_quote,
-                                 enum entity_charset charset, bool all,
+                                 entity_charset charset, bool all,
                                  bool xhp = false) {
   // entity is 16 bytes, allocated statically below
   // default in PHP
@@ -804,7 +765,7 @@ char *string_html_decode(const char *input, int &len,
     }
   }
 
-  enum entity_charset charset = determine_charset(charset_hint);
+  entity_charset charset = determine_charset(charset_hint);
 
   char *ret = (char *)malloc(len + 1);
   char *q = ret;
@@ -854,53 +815,15 @@ char *string_html_decode(const char *input, int &len,
   return ret;
 }
 
-Array string_get_html_translation_table(int which, int quote_style) {
-  char ind[2]; ind[1] = 0;
-  enum entity_charset charset = determine_charset(NULL);
-
-  Array ret;
-  switch (which) {
-  case HTML_ENTITIES:
+const html_entity_map* html_get_entity_map() {
+  if (!EntityMapInited) {
+    Lock lock(EntityMapMutex);
     if (!EntityMapInited) {
-      Lock lock(EntityMapMutex);
-      if (!EntityMapInited) {
-        init_entity_table();
-        EntityMapInited = true;
-      }
+      init_entity_table();
+      EntityMapInited = true;
     }
-
-    for (int j = 0; entity_map[j].charset != cs_terminator; j++) {
-      const html_entity_map &em = entity_map[j];
-      if (em.charset != charset)
-        continue;
-
-      for (int i = 0; i <= em.endchar - em.basechar; i++) {
-        char buffer[16];
-
-        if (em.table[i] == NULL)
-          continue;
-        /* what about wide chars here ?? */
-        ind[0] = i + em.basechar;
-        snprintf(buffer, sizeof(buffer), "&%s;", em.table[i]);
-        ret.set(ind, String(buffer, CopyString));
-      }
-    }
-    /* break thru */
-
-  case HTML_SPECIALCHARS:
-    for (int j = 0; basic_entities[j].charcode != 0; j++) {
-      if (basic_entities[j].flags &&
-          (quote_style & basic_entities[j].flags) == 0)
-        continue;
-
-      ind[0] = (unsigned char)basic_entities[j].charcode;
-      ret.set(String(ind, 2, CopyString), basic_entities[j].entity);
-    }
-    ret.set("&", "&amp;");
-    break;
   }
-
-  return ret;
+  return entity_map;
 }
 
 bool html_supported_charset(const char *charset) {

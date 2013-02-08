@@ -1117,10 +1117,6 @@ String fni_sha1(String const& str, bool raw_output) {
   return f_sha1(str, raw_output);
 }
 
-Array fni_get_html_translation_table(int table, int quote_style) {
-  return f_get_html_translation_table(table, quote_style);
-}
-
 String fni_nl_langinfo(int item) {
   return f_nl_langinfo(item);
 }

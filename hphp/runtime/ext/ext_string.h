@@ -216,10 +216,8 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to = null_variant);
 
 String f_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to);
 
-inline Array f_get_html_translation_table(int table = 0,
-                                          int quote_style = k_ENT_COMPAT) {
-  return string_get_html_translation_table(table, quote_style);
-}
+Array f_get_html_translation_table(int table = 0,
+                                   int quote_style = k_ENT_COMPAT);
 
 String f_hebrev(CStrRef hebrew_text, int max_chars_per_line = 0);
 

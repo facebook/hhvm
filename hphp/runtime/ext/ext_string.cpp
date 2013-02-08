@@ -789,6 +789,71 @@ String f_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to) {
   return String(ret, str.size(), AttachString);
 }
 
+#define ENT_HTML_QUOTE_NONE     0
+#define ENT_HTML_QUOTE_SINGLE   1
+#define ENT_HTML_QUOTE_DOUBLE   2
+
+#define ENT_COMPAT    ENT_HTML_QUOTE_DOUBLE
+#define ENT_QUOTES    (ENT_HTML_QUOTE_DOUBLE | ENT_HTML_QUOTE_SINGLE)
+#define ENT_NOQUOTES  ENT_HTML_QUOTE_NONE
+
+static const HtmlBasicEntity basic_entities[] = {
+  { '"',  "&quot;",   6,  ENT_HTML_QUOTE_DOUBLE },
+  { '\'', "&#039;",   6,  ENT_HTML_QUOTE_SINGLE },
+  { '\'', "&#39;",    5,  ENT_HTML_QUOTE_SINGLE },
+  { '<',  "&lt;",     4,  0 },
+  { '>',  "&gt;",     4,  0 },
+  { 0, NULL, 0, 0 }
+};
+
+Array f_get_html_translation_table(int table, int quote_style) {
+  char ind[2]; ind[1] = 0;
+  entity_charset charset = determine_charset(NULL);
+
+  const int HTML_SPECIALCHARS = 0;
+  const int HTML_ENTITIES = 1;
+
+  using namespace entity_charset_enum;
+
+  Array ret;
+  switch (table) {
+  case HTML_ENTITIES: {
+    auto entity_map = html_get_entity_map();
+
+    for (int j = 0; entity_map[j].charset != cs_terminator; j++) {
+      const html_entity_map &em = entity_map[j];
+      if (em.charset != charset)
+        continue;
+
+      for (int i = 0; i <= em.endchar - em.basechar; i++) {
+        char buffer[16];
+
+        if (em.table[i] == NULL)
+          continue;
+        /* what about wide chars here ?? */
+        ind[0] = i + em.basechar;
+        snprintf(buffer, sizeof(buffer), "&%s;", em.table[i]);
+        ret.set(ind, String(buffer, CopyString));
+      }
+    }
+    /* fall thru */
+  }
+  case HTML_SPECIALCHARS:
+    for (int j = 0; basic_entities[j].charcode != 0; j++) {
+      if (basic_entities[j].flags &&
+          (quote_style & basic_entities[j].flags) == 0)
+        continue;
+
+      ind[0] = (unsigned char)basic_entities[j].charcode;
+      ret.set(String(ind, 2, CopyString), basic_entities[j].entity);
+    }
+    ret.set("&", "&amp;");
+    break;
+  }
+
+  return ret;
+}
+
 String f_hebrev(CStrRef hebrew_text, int max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
   int len = hebrew_text.size();

@@ -15,11 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_HTML_H__
-#define __HPHP_ZEND_HTML_H__
+#ifndef incl_HPHP_ZEND_HTML_H_
+#define incl_HPHP_ZEND_HTML_H_
 
 #include <util/base.h>
-#include <runtime/base/types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,6 +56,37 @@ enum StringHtmlEncoding {
   STRING_HTML_ENCODE_UTF8IZE_REPLACE = 8
 };
 
+namespace entity_charset_enum {
+enum entity_charset {
+  cs_terminator, cs_8859_1, cs_cp1252,
+  cs_8859_15, cs_utf_8, cs_big5, cs_gb2312,
+  cs_big5hkscs, cs_sjis, cs_eucjp, cs_koi8r,
+  cs_cp1251, cs_8859_5, cs_cp866, cs_macroman,
+  cs_end
+};
+}
+typedef entity_charset_enum::entity_charset entity_charset;
+
+struct HtmlBasicEntity {
+  unsigned short charcode;
+  const char *entity;
+  int entitylen;
+  int flags;
+};
+
+typedef const char *const entity_table_t;
+
+struct html_entity_map {
+  entity_charset charset; /* charset identifier */
+  unsigned short basechar; /* char code at start of table */
+  unsigned short endchar;  /* last char code in the table */
+  entity_table_t *table;   /* the table of mappings */
+};
+
+const html_entity_map* html_get_entity_map();
+
+entity_charset determine_charset(const char*);
+
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
                          bool encode_single_quote, bool utf8, bool nbsp);
 char *string_html_encode_extra(const char *input, int &len,
@@ -66,10 +96,9 @@ char *string_html_decode(const char *input, int &len,
                          bool decode_double_quote, bool decode_single_quote,
                          const char *charset_hint,
                          bool all, bool xhp = false );
-Array string_get_html_translation_table(int which, int quote_style);
 bool html_supported_charset(const char *charset);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_STRING_H__
+#endif

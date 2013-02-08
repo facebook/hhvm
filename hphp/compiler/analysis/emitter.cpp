@@ -4153,13 +4153,7 @@ void EmitterVisitor::emitVGet(Emitter& e) {
   }
 }
 
-namespace PassByRefKind {
-  static const ssize_t AllowCell = 0;
-  static const ssize_t WarnOnCell = 1;
-  static const ssize_t ErrorOnCell = 2;
-}
-
-static ssize_t getPassByRefKind(ExpressionPtr exp) {
+EmitterVisitor::PassByRefKind EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
   // The PassByRefKind of a list assignment expression is determined
   // by the PassByRefKind of the RHS. This loop will repeatedly recurse
   // on the RHS until it encounters an expression other than a list
@@ -4283,21 +4277,25 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
     }
     return;
   }
+  emitFPass(e, paramId, getPassByRefKind(exp));
+}
+
+void EmitterVisitor::emitFPass(Emitter& e, int paramId, PassByRefKind passByRefKind) {
+  if (checkIfStackEmpty("FPass*")) return;
+  LocationGuard locGuard(e, m_tempLoc);
+  m_tempLoc.reset();
+
   emitClsIfSPropBase(e);
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
   assert(sz >= 0);
   char sym = m_evalStack.get(i);
-  // This ensures that the FPass instruction will be associated with
-  // exp's source location.
-  LocationGuard locGuard(e, m_tempLoc);
-  m_tempLoc.reset();
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
       case StackSym::L:  e.FPassL(paramId, m_evalStack.getLoc(i)); break;
       case StackSym::C:
-        switch (getPassByRefKind(exp)) {
+        switch (passByRefKind) {
           case PassByRefKind::AllowCell:   e.FPassC(paramId); break;
           case PassByRefKind::WarnOnCell:  e.FPassCW(paramId); break;
           case PassByRefKind::ErrorOnCell: e.FPassCE(paramId); break;

@@ -545,6 +545,12 @@ public:
   void buildVectorImm(std::vector<uchar>& vectorImm,
                       int iFirst, int iLast, bool allowW,
                       Emitter& e);
+  enum class PassByRefKind {
+    AllowCell,
+    WarnOnCell,
+    ErrorOnCell,
+  };
+  PassByRefKind getPassByRefKind(ExpressionPtr exp);
   void emitAGet(Emitter& e);
   void emitCGetL2(Emitter& e);
   void emitCGetL3(Emitter& e);
@@ -571,6 +577,7 @@ public:
   void emitConvertToCellOrLoc(Emitter& e);
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
+  void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind);
   void emitVirtualLocal(int localId, DataType dt = KindOfUnknown);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);

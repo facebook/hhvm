@@ -190,54 +190,6 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(10) "strcasecmp"
-  [2]=>
-  array(1) {
-    ["args"]=>
-    array(2) {
-      [0]=>
-      string(9) "Exception"
-      [1]=>
-      string(9) "exception"
-    }
-  }
-}
-array(3) {
-  [0]=>
-  string(4) "exit"
-  [1]=>
-  string(10) "strcasecmp"
-  [2]=>
-  NULL
-}
-array(3) {
-  [0]=>
-  string(5) "enter"
-  [1]=>
-  string(10) "strcasecmp"
-  [2]=>
-  array(1) {
-    ["args"]=>
-    array(2) {
-      [0]=>
-      string(9) "initTrace"
-      [1]=>
-      string(8) "__init__"
-    }
-  }
-}
-array(3) {
-  [0]=>
-  string(4) "exit"
-  [1]=>
-  string(10) "strcasecmp"
-  [2]=>
-  NULL
-}
-array(3) {
-  [0]=>
-  string(5) "enter"
-  [1]=>
   string(11) "array_shift"
   [2]=>
   array(1) {
@@ -347,7 +299,7 @@ array(3) {
     ["args"]=>
     array(2) {
       [0]=>
-      string(8) "__init__"
+      string(9) "initTrace"
       [1]=>
       string(8) "__init__"
     }
@@ -421,6 +373,54 @@ array(3) {
   string(4) "exit"
   [1]=>
   string(11) "array_shift"
+  [2]=>
+  NULL
+}
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(10) "strcasecmp"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(2) {
+      [0]=>
+      string(9) "Exception"
+      [1]=>
+      string(9) "exception"
+    }
+  }
+}
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(10) "strcasecmp"
+  [2]=>
+  NULL
+}
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(10) "strcasecmp"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(2) {
+      [0]=>
+      string(8) "__init__"
+      [1]=>
+      string(8) "__init__"
+    }
+  }
+}
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(10) "strcasecmp"
   [2]=>
   NULL
 }

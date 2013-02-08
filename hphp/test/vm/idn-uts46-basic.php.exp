@@ -1,0 +1,24 @@
+all ok, no details:
+string(22) "www.xn--fuball-cta.com"
+all ok, no details, transitional:
+string(16) "www.fussball.com"
+all ok, with details:
+string(22) "www.xn--fuball-cta.com"
+array(3) {
+  ["result"]=>
+  string(22) "www.xn--fuball-cta.com"
+  ["isTransitionalDifferent"]=>
+  int(1)
+  ["errors"]=>
+  int(0)
+}
+reverse, ok, with details:
+string(16) "www.fußball.com"
+array(3) {
+  ["result"]=>
+  string(16) "www.fußball.com"
+  ["isTransitionalDifferent"]=>
+  int(0)
+  ["errors"]=>
+  int(0)
+}

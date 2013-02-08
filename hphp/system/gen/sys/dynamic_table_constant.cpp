@@ -473,16 +473,39 @@ extern const StaticString k_ICONV_IMPL;
 extern const int64 k_ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 extern const int64 k_ICONV_MIME_DECODE_STRICT;
 extern const StaticString k_ICONV_VERSION;
+extern const int64 k_IDNA_ALLOW_UNASSIGNED;
+extern const int64 k_IDNA_CHECK_BIDI;
+extern const int64 k_IDNA_CHECK_CONTEXTJ;
+extern const int64 k_IDNA_CHECK_CONTEXTO;
 extern const int64 k_IDNA_CONTAINS_ACE_PREFIX;
 extern const int64 k_IDNA_CONTAINS_MINUS;
 extern const int64 k_IDNA_CONTAINS_NON_LDH;
+extern const int64 k_IDNA_DEFAULT;
+extern const int64 k_IDNA_ERROR_CONTEXTJ;
+extern const int64 k_IDNA_ERROR_CONTEXTO_DIGITS;
+extern const int64 k_IDNA_ERROR_CONTEXTO_PUNCTUATION;
+extern const int64 k_IDNA_ERROR_BIDI;
+extern const int64 k_IDNA_ERROR_DISALLOWED;
+extern const int64 k_IDNA_ERROR_DOMAIN_NAME_TOO_LONG;
+extern const int64 k_IDNA_ERROR_EMPTY_LABEL;
+extern const int64 k_IDNA_ERROR_HYPHEN_3_4;
+extern const int64 k_IDNA_ERROR_INVALID_ACE_LABEL;
+extern const int64 k_IDNA_ERROR_LABEL_HAS_DOT;
+extern const int64 k_IDNA_ERROR_LABEL_TOO_LONG;
+extern const int64 k_IDNA_ERROR_LEADING_COMBINING_MARK;
+extern const int64 k_IDNA_ERROR_LEADING_HYPHEN;
+extern const int64 k_IDNA_ERROR_PUNYCODE;
+extern const int64 k_IDNA_ERROR_TRAILING_HYPHEN;
 extern const int64 k_IDNA_ICONV_ERROR;
 extern const int64 k_IDNA_INVALID_LENGTH;
 extern const int64 k_IDNA_MALLOC_ERROR;
 extern const int64 k_IDNA_NO_ACE_PREFIX;
+extern const int64 k_IDNA_NONTRANSITIONAL_TO_ASCII;
+extern const int64 k_IDNA_NONTRANSITIONAL_TO_UNICODE;
 extern const int64 k_IDNA_PUNYCODE_ERROR;
 extern const int64 k_IDNA_ROUNDTRIP_VERIFY_ERROR;
 extern const int64 k_IDNA_STRINGPREP_ERROR;
+extern const int64 k_IDNA_USE_STD3_RULES;
 extern const int64 k_IMAGETYPE_BMP;
 extern const int64 k_IMAGETYPE_GIF;
 extern const int64 k_IMAGETYPE_IFF;
@@ -552,6 +575,8 @@ extern const int64 k_INI_SCANNER_NORMAL;
 extern const int64 k_INI_SCANNER_RAW;
 extern const int64 k_INI_SYSTEM;
 extern const int64 k_INI_USER;
+extern const int64 k_INTL_IDNA_VARIANT_2003;
+extern const int64 k_INTL_IDNA_VARIANT_UTS46;
 extern const int64 k_INTL_MAX_LOCALE_LEN;
 extern const int64 k_LATT_HASCHILDREN;
 extern const int64 k_LATT_HASNOCHILDREN;
@@ -2091,7 +2116,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2126];
+static hashNodeCon conBuckets[2151];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2549,16 +2574,39 @@ void init_builtin_constant_table() {
       (const char *)"ICONV_MIME_DECODE_CONTINUE_ON_ERROR", (const char *)-1, (const char *)32, (const char *)&k_ICONV_MIME_DECODE_CONTINUE_ON_ERROR,
       (const char *)"ICONV_MIME_DECODE_STRICT", (const char *)-1, (const char *)32, (const char *)&k_ICONV_MIME_DECODE_STRICT,
       (const char *)"ICONV_VERSION", (const char *)-1, (const char *)128, (const char *)&k_ICONV_VERSION,
+      (const char *)"IDNA_ALLOW_UNASSIGNED", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ALLOW_UNASSIGNED,
+      (const char *)"IDNA_CHECK_BIDI", (const char *)-1, (const char *)32, (const char *)&k_IDNA_CHECK_BIDI,
+      (const char *)"IDNA_CHECK_CONTEXTJ", (const char *)-1, (const char *)32, (const char *)&k_IDNA_CHECK_CONTEXTJ,
+      (const char *)"IDNA_CHECK_CONTEXTO", (const char *)-1, (const char *)32, (const char *)&k_IDNA_CHECK_CONTEXTO,
       (const char *)"IDNA_CONTAINS_ACE_PREFIX", (const char *)-1, (const char *)32, (const char *)&k_IDNA_CONTAINS_ACE_PREFIX,
       (const char *)"IDNA_CONTAINS_MINUS", (const char *)-1, (const char *)32, (const char *)&k_IDNA_CONTAINS_MINUS,
       (const char *)"IDNA_CONTAINS_NON_LDH", (const char *)-1, (const char *)32, (const char *)&k_IDNA_CONTAINS_NON_LDH,
+      (const char *)"IDNA_DEFAULT", (const char *)-1, (const char *)32, (const char *)&k_IDNA_DEFAULT,
+      (const char *)"IDNA_ERROR_BIDI", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_BIDI,
+      (const char *)"IDNA_ERROR_CONTEXTJ", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_CONTEXTJ,
+      (const char *)"IDNA_ERROR_CONTEXTO_DIGITS", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_CONTEXTO_DIGITS,
+      (const char *)"IDNA_ERROR_CONTEXTO_PUNCTUATION", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_CONTEXTO_PUNCTUATION,
+      (const char *)"IDNA_ERROR_DISALLOWED", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_DISALLOWED,
+      (const char *)"IDNA_ERROR_DOMAIN_NAME_TOO_LONG", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_DOMAIN_NAME_TOO_LONG,
+      (const char *)"IDNA_ERROR_EMPTY_LABEL", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_EMPTY_LABEL,
+      (const char *)"IDNA_ERROR_HYPHEN_3_4", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_HYPHEN_3_4,
+      (const char *)"IDNA_ERROR_INVALID_ACE_LABEL", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_INVALID_ACE_LABEL,
+      (const char *)"IDNA_ERROR_LABEL_HAS_DOT", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_LABEL_HAS_DOT,
+      (const char *)"IDNA_ERROR_LABEL_TOO_LONG", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_LABEL_TOO_LONG,
+      (const char *)"IDNA_ERROR_LEADING_COMBINING_MARK", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_LEADING_COMBINING_MARK,
+      (const char *)"IDNA_ERROR_LEADING_HYPHEN", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_LEADING_HYPHEN,
+      (const char *)"IDNA_ERROR_PUNYCODE", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_PUNYCODE,
+      (const char *)"IDNA_ERROR_TRAILING_HYPHEN", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ERROR_TRAILING_HYPHEN,
       (const char *)"IDNA_ICONV_ERROR", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ICONV_ERROR,
       (const char *)"IDNA_INVALID_LENGTH", (const char *)-1, (const char *)32, (const char *)&k_IDNA_INVALID_LENGTH,
       (const char *)"IDNA_MALLOC_ERROR", (const char *)-1, (const char *)32, (const char *)&k_IDNA_MALLOC_ERROR,
+      (const char *)"IDNA_NONTRANSITIONAL_TO_ASCII", (const char *)-1, (const char *)32, (const char *)&k_IDNA_NONTRANSITIONAL_TO_ASCII,
+      (const char *)"IDNA_NONTRANSITIONAL_TO_UNICODE", (const char *)-1, (const char *)32, (const char *)&k_IDNA_NONTRANSITIONAL_TO_UNICODE,
       (const char *)"IDNA_NO_ACE_PREFIX", (const char *)-1, (const char *)32, (const char *)&k_IDNA_NO_ACE_PREFIX,
       (const char *)"IDNA_PUNYCODE_ERROR", (const char *)-1, (const char *)32, (const char *)&k_IDNA_PUNYCODE_ERROR,
       (const char *)"IDNA_ROUNDTRIP_VERIFY_ERROR", (const char *)-1, (const char *)32, (const char *)&k_IDNA_ROUNDTRIP_VERIFY_ERROR,
       (const char *)"IDNA_STRINGPREP_ERROR", (const char *)-1, (const char *)32, (const char *)&k_IDNA_STRINGPREP_ERROR,
+      (const char *)"IDNA_USE_STD3_RULES", (const char *)-1, (const char *)32, (const char *)&k_IDNA_USE_STD3_RULES,
       (const char *)"IMAGETYPE_BMP", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_BMP,
       (const char *)"IMAGETYPE_GIF", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_GIF,
       (const char *)"IMAGETYPE_ICO", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_ICO,
@@ -2629,6 +2677,8 @@ void init_builtin_constant_table() {
       (const char *)"INI_SCANNER_RAW", (const char *)-1, (const char *)32, (const char *)&k_INI_SCANNER_RAW,
       (const char *)"INI_SYSTEM", (const char *)-1, (const char *)32, (const char *)&k_INI_SYSTEM,
       (const char *)"INI_USER", (const char *)-1, (const char *)32, (const char *)&k_INI_USER,
+      (const char *)"INTL_IDNA_VARIANT_2003", (const char *)-1, (const char *)32, (const char *)&k_INTL_IDNA_VARIANT_2003,
+      (const char *)"INTL_IDNA_VARIANT_UTS46", (const char *)-1, (const char *)32, (const char *)&k_INTL_IDNA_VARIANT_UTS46,
       (const char *)"INTL_MAX_LOCALE_LEN", (const char *)-1, (const char *)32, (const char *)&k_INTL_MAX_LOCALE_LEN,
       (const char *)"JSON_FB_EXTRA_ESCAPES", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_EXTRA_ESCAPES,
       (const char *)"JSON_FB_LOOSE", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_LOOSE,

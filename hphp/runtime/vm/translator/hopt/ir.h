@@ -85,7 +85,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *   Contains a description of how to compute the type of the
  *   destination(s) of an instruction from its sources.
  *
- *     NA        instruction has no destination
+ *     ND        instruction has no destination
  *     D(type)   single dst has a specific type
  *     DofS(N)   single dst has the type of src N
  *     DUnbox(N) single dst has unboxed type of src N
@@ -102,7 +102,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     S(t1,...,tn)  source must be a subtype of {t1|..|tn}
  *     C(type)       source must be a constant, and subtype of type
  *     CStr          same as C(StaticStr)
- *     SNum          same as S(Int,Bool)
+ *     SNumInt       same as S(Int,Bool)
+ *     SNum          same as S(Int,Bool,Dbl)
  *
  * flags:
  *
@@ -130,17 +131,17 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(GuardType,                    DParam, S(Gen),                          C|E) \
-O(GuardLoc,                         NA, S(StkPtr),                         E) \
+O(GuardLoc,                         ND, S(StkPtr),                         E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(AssertStk,                 D(StkPtr), S(StkPtr) C(Int),                  E) \
-O(GuardRefs,                        NA, SUnk,                              E) \
-O(AssertLoc,                        NA, S(StkPtr),                         E) \
-O(OpAdd,                        D(Int), SNum SNum,                         C) \
-O(OpSub,                        D(Int), SNum SNum,                         C) \
-O(OpAnd,                        D(Int), SNum SNum,                         C) \
+O(GuardRefs,                        ND, SUnk,                              E) \
+O(AssertLoc,                        ND, S(StkPtr),                         E) \
+O(OpAdd,                        DParam, SNum SNum,                         C) \
+O(OpSub,                        DParam, SNum SNum,                         C) \
+O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpOr,                         D(Int), SNum SNum,                         C) \
-O(OpXor,                        D(Int), SNum SNum,                         C) \
-O(OpMul,                        D(Int), SNum SNum,                         C) \
+O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
+O(OpMul,                        DParam, SNum SNum,                         C) \
 O(Conv,                         DParam, S(Gen),                          C|N) \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
@@ -182,11 +183,11 @@ O(JmpIsNType,                  D(None), SUnk,                              E) \
 O(JmpZero,                     D(None), SNum,                              E) \
 O(JmpNZero,                    D(None), SNum,                              E) \
 O(Jmp_,                        D(None), SUnk,                            T|E) \
-O(JmpIndirect,                      NA, S(TCA),                          T|E) \
-O(ExitWhenSurprised,                NA, NA,                                E) \
-O(ExitOnVarEnv,                     NA, S(StkPtr),                         E) \
-O(ReleaseVVOrExit,                  NA, S(StkPtr),                         E) \
-O(CheckInit,                        NA, S(Gen),                           NF) \
+O(JmpIndirect,                      ND, S(TCA),                          T|E) \
+O(ExitWhenSurprised,                ND, NA,                                E) \
+O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
+O(ReleaseVVOrExit,                  ND, S(StkPtr),                         E) \
+O(CheckInit,                        ND, S(Gen),                           NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                          PRc) \
 O(Box,                         DBox(0), S(Gen),              E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
@@ -237,79 +238,79 @@ O(DefActRec,                 D(ActRec), S(StkPtr)                             \
 O(FreeActRec,                D(StkPtr), S(StkPtr),                       Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(Call,                      D(StkPtr), SUnk,                 E|Mem|CRc|Refs) \
-O(NativeImpl,                       NA, C(Func) S(StkPtr),      E|Mem|N|Refs) \
+O(NativeImpl,                       ND, C(Func) S(StkPtr),      E|Mem|N|Refs) \
   /* XXX: why does RetCtrl sometimes get PtrToGen */                          \
-O(RetCtrl,                          NA, S(StkPtr,PtrToGen)                    \
+O(RetCtrl,                          ND, S(StkPtr,PtrToGen)                    \
                                           S(StkPtr)                           \
                                           S(RetAddr),                T|E|Mem) \
-O(RetVal,                           NA, S(StkPtr) S(Gen),          E|Mem|CRc) \
+O(RetVal,                           ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
 O(RetAdjustStack,            D(StkPtr), S(StkPtr),                         E) \
-O(StMem,                            NA, S(PtrToCell)                          \
+O(StMem,                            ND, S(PtrToCell)                          \
                                           C(Int) S(Gen),      E|Mem|CRc|Refs) \
-O(StMemNT,                          NA, S(PtrToCell)                          \
+O(StMemNT,                          ND, S(PtrToCell)                          \
                                           C(Int) S(Gen),           E|Mem|CRc) \
-O(StProp,                           NA, S(Obj) S(Int) S(Gen), E|Mem|CRc|Refs) \
-O(StPropNT,                         NA, S(Obj) S(Int) S(Gen),      E|Mem|CRc) \
-O(StLoc,                            NA, S(StkPtr) S(Gen),          E|Mem|CRc) \
-O(StLocNT,                          NA, S(StkPtr) S(Gen),          E|Mem|CRc) \
+O(StProp,                           ND, S(Obj) S(Int) S(Gen), E|Mem|CRc|Refs) \
+O(StPropNT,                         ND, S(Obj) S(Int) S(Gen),      E|Mem|CRc) \
+O(StLoc,                            ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
+O(StLocNT,                          ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
 O(StRef,                       DBox(1), SUnk,                 E|Mem|CRc|Refs) \
 O(StRefNT,                     DBox(1), SUnk,                      E|Mem|CRc) \
-O(StRaw,                            NA, SUnk,                          E|Mem) \
+O(StRaw,                            ND, SUnk,                          E|Mem) \
 O(SpillStack,                D(StkPtr), SUnk,                      E|Mem|CRc) \
-O(ExitTrace,                        NA, SUnk,                            T|E) \
-O(ExitTraceCc,                      NA, SUnk,                            T|E) \
-O(ExitSlow,                         NA, SUnk,                            T|E) \
-O(ExitSlowNoProgress,               NA, SUnk,                            T|E) \
-O(ExitGuardFailure,                 NA, SUnk,                            T|E) \
-O(SyncVMRegs,                       NA, S(StkPtr) S(StkPtr),               E) \
+O(ExitTrace,                        ND, SUnk,                            T|E) \
+O(ExitTraceCc,                      ND, SUnk,                            T|E) \
+O(ExitSlow,                         ND, SUnk,                            T|E) \
+O(ExitSlowNoProgress,               ND, SUnk,                            T|E) \
+O(ExitGuardFailure,                 ND, SUnk,                            T|E) \
+O(SyncVMRegs,                       ND, S(StkPtr) S(StkPtr),               E) \
 O(Mov,                         DofS(0), SUnk,                              C) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                      Mem|PRc) \
-O(DecRefLoc,                        NA, S(StkPtr),                E|Mem|Refs) \
-O(DecRefStack,                      NA, S(StkPtr) C(Int),         E|Mem|Refs) \
-O(DecRefThis,                       NA, SUnk,                     E|Mem|Refs) \
+O(DecRefLoc,                        ND, S(StkPtr),                E|Mem|Refs) \
+O(DecRefStack,                      ND, S(StkPtr) C(Int),         E|Mem|Refs) \
+O(DecRefThis,                       ND, SUnk,                     E|Mem|Refs) \
 O(GenericRetDecRefs,         D(StkPtr), S(StkPtr)                             \
                                           S(Gen) C(Int),        E|N|Mem|Refs) \
-O(DecRef,                           NA, S(Gen),               E|Mem|CRc|Refs) \
-O(DecRefMem,                        NA, S(PtrToGen)                           \
+O(DecRef,                           ND, S(Gen),               E|Mem|CRc|Refs) \
+O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),             E|Mem|CRc|Refs) \
-O(DecRefNZ,                         NA, S(Gen),                      Mem|CRc) \
+O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DLabel, SUnk,                              E) \
-O(Marker,                           NA, NA,                                E) \
+O(Marker,                           ND, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
-O(RaiseUninitWarning,               NA, NA,                  E|N|Mem|Refs|Er) \
-O(Print,                            NA, S(Gen),                  E|N|Mem|CRc) \
+O(RaiseUninitWarning,               ND, NA,                  E|N|Mem|Refs|Er) \
+O(Print,                            ND, S(Gen),                  E|N|Mem|CRc) \
 O(AddElem,                      D(Arr), SUnk,             N|Mem|CRc|PRc|Refs) \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(DefCns,                      D(Bool), SUnk,                      C|E|N|Mem) \
 O(Concat,                       D(Str), S(Gen) S(Gen),    N|Mem|CRc|PRc|Refs) \
 O(ArrayAdd,                     D(Arr), SUnk,                  N|Mem|CRc|PRc) \
-O(DefCls,                           NA, SUnk,                          C|E|N) \
-O(DefFunc,                          NA, SUnk,                          C|E|N) \
+O(DefCls,                           ND, SUnk,                          C|E|N) \
+O(DefFunc,                          ND, SUnk,                          C|E|N) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
 O(InterpOne,                 D(StkPtr), SUnk,                E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
-O(AllocSpill,                       NA, C(Int),                        E|Mem) \
-O(FreeSpill,                        NA, C(Int),                        E|Mem) \
+O(AllocSpill,                       ND, C(Int),                        E|Mem) \
+O(FreeSpill,                        ND, C(Int),                        E|Mem) \
 O(CreateCont,                   D(Obj), S(StkPtr)                             \
                                           C(Bool)                             \
                                           C(Func)                             \
                                           C(Func),               E|N|Mem|PRc) \
-O(FillContLocals,                   NA, S(StkPtr)                             \
+O(FillContLocals,                   ND, S(StkPtr)                             \
                                           C(Func)                             \
                                           C(Func)                             \
                                           S(Obj),                    E|N|Mem) \
-O(FillContThis,                     NA, S(StkPtr)                             \
+O(FillContThis,                     ND, S(StkPtr)                             \
                                           C(Func) C(Func) S(Obj),      E|Mem) \
-O(ContEnter,                        NA, SUnk,                          E|Mem) \
-O(UnlinkContVarEnv,                 NA, S(StkPtr),                   E|N|Mem) \
-O(LinkContVarEnv,                   NA, S(StkPtr),                   E|N|Mem) \
-O(ContRaiseCheck,                   NA, S(Obj),                            E) \
-O(ContPreNext,                      NA, S(Obj),                        E|Mem) \
-O(ContStartedCheck,                 NA, S(Obj),                            E) \
+O(ContEnter,                        ND, SUnk,                          E|Mem) \
+O(UnlinkContVarEnv,                 ND, S(StkPtr),                   E|N|Mem) \
+O(LinkContVarEnv,                   ND, S(StkPtr),                   E|N|Mem) \
+O(ContRaiseCheck,                   ND, S(Obj),                            E) \
+O(ContPreNext,                      ND, S(Obj),                        E|Mem) \
+O(ContStartedCheck,                 ND, S(Obj),                            E) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(StkPtr)                           \
                                           C(Int)                              \
@@ -337,9 +338,9 @@ O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
-O(IncStat,                          NA, C(Int) C(Int) C(Bool),         E|Mem) \
-O(DbgAssertRefCount,                NA, SUnk,                              E) \
-O(Nop,                              NA, NA,                               NF) \
+O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
+O(DbgAssertRefCount,                ND, SUnk,                              E) \
+O(Nop,                              ND, NA,                               NF) \
 /* */
 
 enum Opcode : uint16_t {
@@ -777,6 +778,13 @@ public:
   static Type mostRefined(Type t1, Type t2) {
     assert(t1.subtypeOf(t2) || t2.subtypeOf(t1));
     return t1.subtypeOf(t2) ? t1 : t2;
+  }
+
+  static Type binArithResultType(Type t1, Type t2) {
+    if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
+      return Type::Dbl;
+    }
+    return Type::Int;
   }
 
   bool isString() const {

@@ -35,7 +35,7 @@ Type outputType(const IRInstruction* inst) {
 #define DBox(n)   return inst->getSrc(n)->getType().box();
 #define DParam    return inst->getTypeParam();
 #define DLabel    return Type::None;
-#define NA        assert(0 && "outputType requires HasDest or NaryDest");
+#define ND        assert(0 && "outputType requires HasDest or NaryDest");
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -52,7 +52,7 @@ Type outputType(const IRInstruction* inst) {
 #undef DBox
 #undef DParam
 #undef DLabel
-#undef NA
+#undef ND
 
 }
 
@@ -148,6 +148,16 @@ void assertOperandTypes(const IRInstruction* inst) {
     );
   };
 
+  auto checkDst = [&] (bool cond, const std::string& errorMessage) {
+    if (cond) return;
+
+    bail(folly::format("Error: failed type check on dest operand\n"
+                       "   instruction: {}\n"
+                       "   message: {}\n",
+                       inst->toString(),
+                       errorMessage).str());
+  };
+
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
 #undef IRT
@@ -163,11 +173,23 @@ void assertOperandTypes(const IRInstruction* inst) {
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SNum     S(Int, Bool)
+#define SNumInt  S(Int, Bool)
+#define SNum     S(Int, Bool, Dbl)
 #define SUnk     return;
+#define ND
+#define DLabel
+#define D(...)
+#define DUnbox(src) checkDst(src < inst->getNumSrcs(),  \
+                             "invalid src num");
+#define DBox(src)   checkDst(src < inst->getNumSrcs(),  \
+                             "invalid src num");
+#define DofS(src)   checkDst(src < inst->getNumSrcs(),  \
+                             "invalid src num");
+#define DParam      checkDst(inst->getTypeParam() != Type::None,        \
+                             "DParam with paramType None");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
-  case opcode: srcinfo countCheck(); return;
+  case opcode: dstinfo srcinfo countCheck(); return;
 
   switch (inst->getOpcode()) {
     IR_OPCODES
@@ -182,6 +204,13 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef CStr
 #undef SNum
 #undef SUnk
+
+#undef ND
+#undef D
+#undef DUnbox
+#undef DBox
+#undef DofS
+#undef DParam
 
 }
 

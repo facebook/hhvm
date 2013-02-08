@@ -100,7 +100,7 @@ enum OpcodeFlag : uint64_t {
 #define Mem    MemEffects
 #define T      Terminal
 
-#define NA        0
+#define ND        0
 #define D(n)      HasDest
 #define DofS(n)   HasDest
 #define DUnbox(n) HasDest
@@ -133,7 +133,7 @@ struct {
 #undef Mem
 #undef T
 
-#undef NA
+#undef ND
 #undef D
 #undef DofS
 #undef DUnbox

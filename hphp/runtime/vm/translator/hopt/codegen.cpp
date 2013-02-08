@@ -440,7 +440,13 @@ static void prepBinaryXmmOp(X64Assembler& a, const SSATmp* l, const SSATmp* r) {
       assert(ssa->isConst());
       a.mov_imm64_reg(ssa->getValBits(), rScratch);
     }
-    if (ssa->getType() == Type::Int) {
+    if (ssa->isA(Type::Int | Type::Bool)) {
+      // Expand non-const bools to 64-bit.
+      //   Note: movzbl actually extends the value to 64 bits.
+      // (Consts are already moved into src as 64-bit values above.)
+      if (!ssa->isConst() && ssa->isA(Type::Bool)) {
+        a.movzbl(rbyte(src), r32(src));
+      }
       // cvtsi2sd doesn't modify the high bits of its target, which can
       // cause false dependencies to prevent register renaming from kicking
       // in. Break the dependency chain by zeroing out the destination reg.
@@ -3427,8 +3433,6 @@ void CodeGenerator::cgStore(PhysReg base,
   } else {
     if (type == Type::Bool) {
       m_as.    movzbl  (rbyte(src->getReg()), r32(src->getReg()));
-    } else if (type == Type::Dbl) {
-      CG_PUNT(cgStore_Dbl); // not handled yet!
     }
     m_as.store_reg64_disp_reg64(src->getReg(),
                                 off + TVOFF(m_data),

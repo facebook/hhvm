@@ -365,10 +365,14 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
 }
 
 SSATmp* TraceBuilder::genAdd(SSATmp* src1, SSATmp* src2) {
-  return gen(OpAdd, src1, src2);
+  Type resultType = Type::binArithResultType(src1->getType(),
+                                             src2->getType());
+  return gen(OpAdd, resultType, src1, src2);
 }
 SSATmp* TraceBuilder::genSub(SSATmp* src1, SSATmp* src2) {
-  return gen(OpSub, src1, src2);
+  Type resultType = Type::binArithResultType(src1->getType(),
+                                             src2->getType());
+  return gen(OpSub, resultType, src1, src2);
 }
 SSATmp* TraceBuilder::genAnd(SSATmp* src1, SSATmp* src2) {
   return gen(OpAnd, src1, src2);
@@ -380,7 +384,9 @@ SSATmp* TraceBuilder::genXor(SSATmp* src1, SSATmp* src2) {
   return gen(OpXor, src1, src2);
 }
 SSATmp* TraceBuilder::genMul(SSATmp* src1, SSATmp* src2) {
-  return gen(OpMul, src1, src2);
+  Type resultType = Type::binArithResultType(src1->getType(),
+                                             src2->getType());
+  return gen(OpMul, resultType, src1, src2);
 }
 
 SSATmp* TraceBuilder::genNot(SSATmp* src) {

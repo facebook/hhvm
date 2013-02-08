@@ -451,9 +451,6 @@ TranslatorX64::irTranslateAdd(const Tracelet& t,
     HHIR_EMIT(ArrayAdd);
     return;
   }
-
-  HHIR_UNIMPLEMENTED_WHEN(!planInstrAdd_Int(i), Add);
-  assert(planInstrAdd_Int(i));
   HHIR_EMIT(Add);
 }
 

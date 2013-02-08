@@ -492,10 +492,19 @@ void HhbcTranslator::emitIncDecMem(bool pre,
   m_tb->genStMem(propAddr, res, false);
 }
 
-static bool isSupportedBinaryArith(Type type1, Type type2) {
-  return ((type1 == Type::Int || type1 == Type::Bool) &&
-          (type2 == Type::Int || type2 == Type::Bool));
+static bool isSupportedBinaryArith(Opcode opc,
+                                   Type t1,
+                                   Type t2) {
+  switch (opc) {
+    // Opcodes supporting FP
+    case OpAdd:
+    case OpSub:
+    case OpMul: return (t1.subtypeOf(Type::Int | Type::Bool | Type::Dbl) &&
+                        t2.subtypeOf(Type::Int | Type::Bool | Type::Dbl));
 
+    default:    return (t1.subtypeOf(Type::Int | Type::Bool) &&
+                        t2.subtypeOf(Type::Int | Type::Bool));
+  }
 }
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
@@ -511,8 +520,10 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
     // need an extra incref for the push onto the stack.
     result = m_tb->genConcat(loc, val);
     pushIncRef(m_tb->genStLoc(id, result, false, true, exitTrace));
-  } else if (isSupportedBinaryArith(loc->getType(), val->getType())) {
-    result = m_tb->gen(subOpc, loc, val);
+  } else if (isSupportedBinaryArith(subOpc, loc->getType(), val->getType())) {
+    Type resultType = Type::binArithResultType(loc->getType(),
+                                               val->getType());
+    result = m_tb->gen(subOpc, resultType, loc, val);
     push(m_tb->genStLoc(id, result, true, true, exitTrace));
   } else {
     PUNT(SetOpL);
@@ -1987,10 +1998,10 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
   bool isBitOp = (opc == OpAnd || opc == OpOr || opc == OpXor);
   Type type1 = topC(0)->getType();
   Type type2 = topC(1)->getType();
-  if (isSupportedBinaryArith(type1, type2)) {
+  if (isSupportedBinaryArith(opc, type1, type2)) {
     SSATmp* tr = popC();
     SSATmp* tl = popC();
-    push(m_tb->gen(opc, tl, tr));
+    push(m_tb->gen(opc, Type::binArithResultType(type1, type2), tl, tr));
   } else if (isBitOp && (type1 == Type::Obj || type2 == Type::Obj)) {
     // raise fatal
     spillStack();

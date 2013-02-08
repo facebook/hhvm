@@ -2393,6 +2393,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     if (fp->m_func->isNoInjection()) {
       continue;
     }
+    while (prevFp && prevFp->m_func->isNoInjection()) {
+      prevFp = getPrevVMState(prevFp, &pc);
+    }
     // Builtins don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin()) {
       Unit* unit = prevFp->m_func->unit();

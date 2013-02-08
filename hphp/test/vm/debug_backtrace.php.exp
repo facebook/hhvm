@@ -102,7 +102,11 @@ array(5) {
     }
   }
   [1]=>
-  array(5) {
+  array(7) {
+    ["file"]=>
+    string() "hphp/test/vm/debug_backtrace.php"
+    ["line"]=>
+    int(16)
     ["function"]=>
     string(3) "bar"
     ["class"]=>

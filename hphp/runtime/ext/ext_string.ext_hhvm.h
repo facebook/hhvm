@@ -109,6 +109,18 @@ to => rcx
 Value* fh_convert_cyr_string(Value* _rv, Value* str, Value* from, Value* to) asm("_ZN4HPHP20f_convert_cyr_stringERKNS_6StringES2_S2_");
 
 /*
+HPHP::Array HPHP::f_get_html_translation_table(int, int)
+_ZN4HPHP28f_get_html_translation_tableEii
+
+(return value) => rax
+_rv => rdi
+table => rsi
+quote_style => rdx
+*/
+
+Value* fh_get_html_translation_table(Value* _rv, int table, int quote_style) asm("_ZN4HPHP28f_get_html_translation_tableEii");
+
+/*
 HPHP::String HPHP::f_hebrev(HPHP::String const&, int)
 _ZN4HPHP8f_hebrevERKNS_6StringEi
 

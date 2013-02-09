@@ -2936,18 +2936,6 @@ raw_output => rdx
 Value* fh_sha1(Value* _rv, Value* str, bool raw_output) asm("_ZN4HPHP8fni_sha1ERKNS_6StringEb");
 
 /*
-HPHP::Array HPHP::fni_get_html_translation_table(int, int)
-_ZN4HPHP30fni_get_html_translation_tableEii
-
-(return value) => rax
-_rv => rdi
-table => rsi
-quote_style => rdx
-*/
-
-Value* fh_get_html_translation_table(Value* _rv, int table, int quote_style) asm("_ZN4HPHP30fni_get_html_translation_tableEii");
-
-/*
 HPHP::String HPHP::fni_nl_langinfo(int)
 _ZN4HPHP15fni_nl_langinfoEi
 

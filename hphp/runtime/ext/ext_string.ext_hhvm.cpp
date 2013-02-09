@@ -350,6 +350,73 @@ TypedValue* fg_convert_cyr_string(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Array HPHP::f_get_html_translation_table(int, int)
+_ZN4HPHP28f_get_html_translation_tableEii
+
+(return value) => rax
+_rv => rdi
+table => rsi
+quote_style => rdx
+*/
+
+Value* fh_get_html_translation_table(Value* _rv, int table, int quote_style) asm("_ZN4HPHP28f_get_html_translation_tableEii");
+
+TypedValue * fg1_get_html_translation_table(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_get_html_translation_table(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfArray;
+  switch (count) {
+  default: // count >= 2
+    if ((args-1)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-1);
+    }
+  case 1:
+    if ((args-0)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-0);
+    }
+  case 0:
+    break;
+  }
+  fh_get_html_translation_table((Value*)(rv), (count > 0) ? (int)(args[-0].m_data.num) : (int)(0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT));
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_get_html_translation_table(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 2LL) {
+      if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (count <= 0 || (args-0)->m_type == KindOfInt64)) {
+        rv._count = 0;
+        rv.m_type = KindOfArray;
+        fh_get_html_translation_table((Value*)(&(rv)), (count > 0) ? (int)(args[-0].m_data.num) : (int)(0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_get_html_translation_table(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_toomany_arguments_nr("get_html_translation_table", 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::String HPHP::f_hebrev(HPHP::String const&, int)
 _ZN4HPHP8f_hebrevERKNS_6StringEi
 

@@ -317,7 +317,7 @@ entity_charset determine_charset(const char *charset_hint) {
     return cs_utf_8;
   }
 
-  bool found = false;
+  DEBUG_ONLY bool found = false;
   size_t len = strlen(charset_hint);
 
   /* now walk the charset map and look for the codeset */

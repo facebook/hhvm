@@ -54,7 +54,9 @@ public:
 
   void optimizeTrace();
 
-  void genPrint(SSATmp*);
+  SSATmp* getFP() {
+    return m_fpValue;
+  }
 
   /*
    * Create an IRInstruction attached to this Trace, and allocate a
@@ -69,11 +71,8 @@ public:
     );
   }
 
-  SSATmp* genAddElem(SSATmp* arr, SSATmp* key, SSATmp* val);
-  SSATmp* genAddNewElem(SSATmp* arr, SSATmp* val);
   SSATmp* genDefCns(const StringData* cnsName, SSATmp* val);
   SSATmp* genConcat(SSATmp* tl, SSATmp* tr);
-  SSATmp* genArrayAdd(SSATmp* src1, SSATmp* src2);
   void    genDefCls(PreClass*, const HPHP::VM::Opcode* after);
   void    genDefFunc(Func*);
 
@@ -86,6 +85,7 @@ public:
 
   SSATmp* genLdLoc(uint32 id);
   SSATmp* genLdLocAddr(uint32 id);
+  void genRaiseUninitWarning(uint32 id);
 
   /*
    * Returns an SSATmp containing the (inner) value of the given local.
@@ -215,11 +215,6 @@ public:
 
   void    genNativeImpl();
 
-  SSATmp* genCreateCont(bool getArgs, const Func* origFunc,
-                        const Func* genFunc);
-  void    genFillContLocals(const Func* origFunc, const Func* genFunc,
-                            SSATmp* cont);
-  void    genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset);
   void    genUnlinkContVarEnv();
   void    genLinkContVarEnv();
   void    genContEnter(SSATmp* contAR, SSATmp* addr, int64 returnBcOffset);

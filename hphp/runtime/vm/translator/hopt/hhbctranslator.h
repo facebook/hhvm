@@ -354,6 +354,11 @@ struct HhbcTranslator {
   void emitStrlen();
   void emitIncStat(int32 counter, int32 value, bool force = false);
 
+  template<typename T>
+  SSATmp* cns(T val) {
+    return m_tb->genDefConst(val);
+  }
+
   // tracelet guards
   Trace* guardTypeStack(uint32 stackIndex,
                         Type type,

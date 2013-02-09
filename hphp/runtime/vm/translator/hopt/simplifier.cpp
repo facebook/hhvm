@@ -127,7 +127,9 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpIsNType:
     return simplifyJmpIsType(inst);
 
-  case Print:        return simplifyPrint(inst);
+  case PrintStr:
+  case PrintInt:
+  case PrintBool:    return simplifyPrint(inst);
   case DecRef:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);

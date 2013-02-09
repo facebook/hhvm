@@ -17,7 +17,7 @@
 
 #include "util/trace.h"
 #include "runtime/ext/ext_continuation.h"
-#include "runtime/vm/translator/hopt/hhbctranslator.h"
+#include "runtime/vm/translator/translator-runtime.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/stats.h"
 #include "runtime/vm/unit.h"
@@ -172,11 +172,21 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
 }
 
 void HhbcTranslator::emitPrint() {
-  TRACE(3, "%u: Print\n", m_bcOff);
   Type type = topC()->getType();
   if (type.subtypeOf(Type::Int | Type::Bool | Type::Null | Type::Str)) {
+    Opcode op;
+    if (type.isString()) {
+      op = PrintStr;
+    } else if (type.subtypeOf(Type::Int)) {
+      op = PrintInt;
+    } else if (type.subtypeOf(Type::Bool)) {
+      op = PrintBool;
+    } else {
+      assert(type.isNull());
+      op = Nop;
+    }
     // the print helpers decref their arg, so don't decref pop'ed value
-    m_tb->genPrint(popC());
+    if (op != Nop) m_tb->gen(op, popC());
     push(m_tb->genDefConst<int64>(1));
   } else {
     spillStack();
@@ -269,7 +279,7 @@ void HhbcTranslator::emitArrayAdd() {
   SSATmp* tl = popC();
   // the ArrrayAdd helper decrefs its args, so don't decref pop'ed values
   // TODO task 1805916: verify that ArrayAdd increfs its result
-  push(m_tb->genArrayAdd(tl, tr));
+  push(m_tb->gen(ArrayAdd, tl, tr));
 }
 
 void HhbcTranslator::emitAddElemC() {
@@ -277,9 +287,20 @@ void HhbcTranslator::emitAddElemC() {
   SSATmp* val = popC();
   SSATmp* key = popC();
   SSATmp* arr = popC();
-  // the AddElem helper decrefs its args, so don't decref pop'ed values
-  // TODO task 1805916: verify that AddElem increfs its result
-  push(m_tb->genAddElem(arr, key, val));
+  // the AddElem* instructions decrefs their args, so don't decref
+  // pop'ed values. TODO task 1805916: verify that AddElem* increfs
+  // their result
+  auto kt = key->getType();
+  Opcode op;
+  if (kt.subtypeOf(Type::Int)) {
+    op = AddElemIntKey;
+  } else if (kt.isString()) {
+    op = AddElemStrKey;
+  } else {
+    PUNT(AddElem-NonIntNonStr);
+  }
+
+  push(m_tb->gen(op, arr, key, val));
 }
 
 void HhbcTranslator::emitAddNewElemC() {
@@ -288,7 +309,7 @@ void HhbcTranslator::emitAddNewElemC() {
   SSATmp* arr = popC();
   // the AddNewElem helper decrefs its args, so don't decref pop'ed values
   // TODO task 1805916: verify that NewElem increfs its result
-  push(m_tb->genAddNewElem(arr, val));
+  push(m_tb->gen(AddNewElem, arr, val));
 }
 
 void HhbcTranslator::emitCns(uint32 id) {
@@ -627,7 +648,11 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   int origLocals = origFunc->numLocals();
   int genLocals = genFunc->numLocals();
 
-  SSATmp* cont = m_tb->genCreateCont(getArgs, origFunc, genFunc);
+  TCA helper = getCurFunc()->isNonClosureMethod() ?
+    (TCA)&VMExecutionContext::createContinuation<true> :
+    (TCA)&VMExecutionContext::createContinuation<false>;
+  SSATmp* cont = m_tb->gen(CreateCont, cns(helper), m_tb->getFP(),
+                           cns(getArgs), cns(origFunc), cns(genFunc));
 
   TranslatorX64::ContParamMap params;
   if (origLocals <= TranslatorX64::kMaxInlineContLocals &&
@@ -645,10 +670,11 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
     }
     if (fillThis) {
       assert(thisId != kInvalidId);
-      m_tb->genFillContThis(cont, locals, cellsToBytes(genLocals - thisId - 1));
+      m_tb->gen(FillContThis, cont, locals,
+                cns(cellsToBytes(genLocals - thisId - 1)));
     }
   } else {
-    m_tb->genFillContLocals(origFunc, genFunc, cont);
+    m_tb->gen(FillContLocals, m_tb->getFP(), cns(origFunc), cns(genFunc), cont);
   }
 
   push(cont);
@@ -2241,8 +2267,7 @@ SSATmp* HhbcTranslator::emitLdLocWarn(uint32 id,
 
   if (locVal->getType().subtypeOf(Type::Uninit)) {
     spillStack();
-    LocalId data(id);
-    m_tb->gen(RaiseUninitWarning, &data);
+    m_tb->genRaiseUninitWarning(id);
     return m_tb->genDefInitNull();
   }
 

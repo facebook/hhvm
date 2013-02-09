@@ -22,28 +22,30 @@
 #include "util/trace.h"
 #include "util/util.h"
 
-#include "runtime/vm/translator/hopt/ir.h"
-#include "runtime/vm/translator/hopt/linearscan.h"
-#include "runtime/ext/ext_continuation.h"
+#include "runtime/base/array/hphp_array.h"
 #include "runtime/base/comparisons.h"
 #include "runtime/base/complex_types.h"
-#include "runtime/base/types.h"
-#include "runtime/vm/bytecode.h"
-#include "runtime/vm/runtime.h"
 #include "runtime/base/runtime_option.h"
 #include "runtime/base/string_data.h"
-#include "runtime/base/array/hphp_array.h"
+#include "runtime/base/types.h"
+#include "runtime/ext/ext_continuation.h"
+#include "runtime/vm/bytecode.h"
+#include "runtime/vm/runtime.h"
 #include "runtime/vm/stats.h"
-#include "runtime/vm/translator/types.h"
-#include "runtime/vm/translator/translator.h"
-#include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator-inline.h"
+#include "runtime/vm/translator/translator-x64.h"
+#include "runtime/vm/translator/translator.h"
+#include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/x64-util.h"
+#include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/linearscan.h"
+#include "runtime/vm/translator/hopt/nativecalls.h"
 
 using HPHP::DataType;
 using HPHP::TypedValue;
 using HPHP::VM::Transl::TCA;
+using namespace HPHP::VM::Transl::TargetCache;
 
 // emitDispDeref --
 // emitDeref --
@@ -320,6 +322,9 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define PUNT_OPCODE(opcode) \
   void CodeGenerator::cg##opcode(IRInstruction*) { CG_PUNT(opcode); }
 
+#define CALL_OPCODE(opcode) \
+  void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(i); }
+
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
@@ -331,6 +336,26 @@ NOOP_OPCODE(Nop)
 
 PUNT_OPCODE(LdCurFuncPtr)
 PUNT_OPCODE(LdFuncCls)
+
+CALL_OPCODE(AddElemStrKey)
+CALL_OPCODE(AddElemIntKey)
+CALL_OPCODE(AddNewElem)
+CALL_OPCODE(ArrayAdd)
+CALL_OPCODE(Box)
+CALL_OPCODE(CreateCont)
+CALL_OPCODE(FillContLocals)
+CALL_OPCODE(LdObjMethod)
+CALL_OPCODE(NewArray)
+CALL_OPCODE(NewTuple)
+CALL_OPCODE(PrintStr)
+CALL_OPCODE(PrintInt)
+CALL_OPCODE(PrintBool)
+CALL_OPCODE(RaiseUninitWarning)
+CALL_OPCODE(PropX)
+CALL_OPCODE(CGetProp)
+CALL_OPCODE(SetProp)
+CALL_OPCODE(CGetElem)
+CALL_OPCODE(SetElem)
 
 #undef NOOP_OPCODE
 #undef PUNT_OPCODE
@@ -623,6 +648,47 @@ static void shuffleArgs(Asm& a, ArgGroup& args, IRInstruction* inst) {
       a.    movq   (0xbadbadbadbadbad, args[i].getDstReg());
     }
   }
+}
+
+void CodeGenerator::cgCallNative(IRInstruction* inst) {
+  using namespace NativeCalls;
+  Opcode opc = inst->getOpcode();
+  always_assert(CallMap::hasInfo(opc));
+
+  const CallInfo& info = CallMap::getInfo(opc);
+  ArgGroup argGroup;
+  for (auto const& arg : info.args) {
+    SSATmp* src = inst->getSrc(arg.srcIdx);
+    switch (arg.type) {
+      case SSA:
+        argGroup.ssa(src);
+        break;
+      case TV:
+        argGroup.valueType(src);
+        break;
+      case VecKeyS:
+        argGroup.vectorKeyS(src);
+        break;
+      case VecKeyIS:
+        argGroup.vectorKeyIS(src);
+        break;
+    }
+  }
+
+  TCA addr = nullptr;
+  switch (info.func.type) {
+    case FPtr:
+      addr = info.func.ptr;
+      break;
+    case FSSA:
+      addr = inst->getSrc(info.func.srcIdx)->getValTCA();
+      break;
+  }
+  cgCallHelper(m_as,
+               addr,
+               info.dest ? inst->getDst() : nullptr,
+               info.sync,
+               argGroup);
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
@@ -1674,7 +1740,7 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
   auto dstReg = dst->getReg();
   if (dstReg == InvalidReg) {
-    // this happens if LdFixedFunc and FCAll are not in the same trace
+    // this happens if LdFixedFunc and FCall are not in the same trace
     // TODO: try to get rax instead to avoid a move after the call
     dstReg = rScratch;
   }
@@ -1682,24 +1748,6 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   cgCallHelper(m_as, (TCA)FuncCache::lookup, dstReg, kSyncPoint,
                ArgGroup().imm(ch)
                          .ssa(methodName));
-}
-
-void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
-  SSATmp* dst        = inst->getDst();
-  SSATmp* methodName = inst->getSrc(0);
-  SSATmp* actRec     = inst->getSrc(1);
-
-  CacheHandle ch = MethodCache::alloc();
-  // raises an error if function not found
-  cgCallHelper(m_as,
-               (TCA)MethodCache::lookup,
-               dst,
-               kSyncPoint,
-               ArgGroup().imm(ch)
-                         .ssa(actRec)
-                         .ssa(methodName));
-  // TODO: Don't allocate a register to the destination of this
-  // instruction as its no longer used
 }
 
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
@@ -3047,23 +3095,6 @@ void CodeGenerator::cgNewObj(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgNewArray(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* cap   = inst->getSrc(0);
-  ArgGroup args;
-  args.ssa(cap);
-  cgCallHelper(m_as, (TCA)new_array, dst, kNoSyncPoint, args);
-}
-
-void CodeGenerator::cgNewTuple(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  SSATmp* numArgs = inst->getSrc(0);
-  SSATmp* sp = inst->getSrc(1);
-  ArgGroup args;
-  args.ssa(numArgs).ssa(sp);
-  cgCallHelper(m_as, (TCA) new_tuple, dst, kNoSyncPoint, args);
-}
-
 void CodeGenerator::cgCall(IRInstruction* inst) {
   SSATmp* actRec         = inst->getSrc(0);
   SSATmp* returnBcOffset = inst->getSrc(1);
@@ -3498,16 +3529,6 @@ void CodeGenerator::recordSyncPoint(Asm& as,
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }
 
-void CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
-  auto const data = inst->getExtra<RaiseUninitWarning>();
-  auto const name = getCurFunc()->localVarName(data->locId);
-  cgCallHelper(m_as,
-               (TCA)HPHP::VM::Transl::raiseUndefVariable,
-               (SSATmp*)NULL,
-               kSyncPoint,
-               ArgGroup().immPtr(name));
-}
-
 void CodeGenerator::cgLdAddr(IRInstruction* inst) {
   auto base = inst->getSrc(0)->getReg();
   int64 offset = inst->getSrc(1)->getValInt();
@@ -3556,59 +3577,6 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
   assert(inst->getDst()->getType() == Type::PtrToCell);
   assert(inst->getDst()->getReg() == rsp);
-}
-
-void CodeGenerator::cgPropX(IRInstruction* inst) {
-  cgCallHelper(m_as,
-               inst->getSrc(0)->getValTCA(),
-               inst->getDst(),
-               kSyncPoint,
-               ArgGroup().ssa(inst->getSrc(1))
-                         .ssa(inst->getSrc(2))
-                         .vectorKeyS(inst->getSrc(3))
-                         .ssa(inst->getSrc(4)));
-}
-
-void CodeGenerator::cgCGetProp(IRInstruction* inst) {
-  cgCallHelper(m_as,
-               inst->getSrc(0)->getValTCA(),
-               inst->getDst(),
-               kSyncPoint,
-               ArgGroup().ssa(inst->getSrc(1))
-                         .ssa(inst->getSrc(2))
-                         .vectorKeyS(inst->getSrc(3))
-                         .ssa(inst->getSrc(4)));
-}
-
-void CodeGenerator::cgSetProp(IRInstruction* inst) {
-  cgCallHelper(m_as,
-               inst->getSrc(0)->getValTCA(),
-               inst->getDst(),
-               kSyncPoint,
-               ArgGroup().ssa(inst->getSrc(1))
-                         .ssa(inst->getSrc(2))
-                         .vectorKeyS(inst->getSrc(3))
-                         .valueType(inst->getSrc(4)));
-}
-
-void CodeGenerator::cgSetElem(IRInstruction* inst) {
-  cgCallHelper(m_as,
-               inst->getSrc(0)->getValTCA(),
-               inst->getDst(),
-               kSyncPoint,
-               ArgGroup().ssa(inst->getSrc(1))
-                         .vectorKeyIS(inst->getSrc(2))
-                         .valueType(inst->getSrc(3)));
-}
-
-void CodeGenerator::cgCGetElem(IRInstruction* inst) {
-  cgCallHelper(m_as,
-               inst->getSrc(0)->getValTCA(),
-               inst->getDst(),
-               kSyncPoint,
-               ArgGroup().ssa(inst->getSrc(1))
-                         .vectorKeyIS(inst->getSrc(2))
-                         .ssa(inst->getSrc(3)));
 }
 
 void CodeGenerator::cgGuardType(IRInstruction* inst) {
@@ -4315,95 +4283,6 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   }
 }
 
-// TODO: Kill this #2031980
-HOT_FUNC_VM static RefData* box_value(TypedValue tv) {
-  return tvBoxHelper(tv.m_type, tv.m_data.num);
-}
-
-void CodeGenerator::cgBox(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
-  Type type = src->getType();
-  if (type.notBoxed()) {
-    cgCallHelper(m_as, (TCA)box_value, dst, kNoSyncPoint,
-                 ArgGroup().valueType(src));
-  } else {
-    assert(0); // can't have any other type!
-  }
-}
-
-void CodeGenerator::cgPrint(IRInstruction* inst) {
-  SSATmp* arg   = inst->getSrc(0);
-  void* fptr = NULL;
-  auto type = arg->getType();
-  if (type.isString()) {
-    fptr = (void*)print_string;
-  } else if (type.subtypeOf(Type::Int)) {
-    fptr = (void*)print_int;
-  } else if (type.subtypeOf(Type::Bool)) {
-    fptr = (void*)print_boolean;
-  } else if (type.isNull()) {
-    return; // nothing to do
-  } else {
-    not_reached();
-  }
-  cgCallHelper(m_as, (TCA)fptr, InvalidReg, kNoSyncPoint,
-               ArgGroup().ssa(arg));
-}
-
-ArrayData* addElemIntKeyHelper(ArrayData* ad,
-                               int64 key,
-                               TypedValue value) {
-  // this does not re-enter
-  // change to array_setm_ik1_v0, which decrefs the value
-  return array_setm_ik1_v0(0, ad, key, &value);
-}
-
-ArrayData* addElemStringKeyHelper(ArrayData* ad,
-                                  StringData* key,
-                                  TypedValue value) {
-  // this does not re-enter
-  // change to array_setm_s0k1_v0, which decrefs both the key & value
-//  return array_setm_sk1_v(0, ad, key, &tv);
-  return array_setm_s0k1_v0(0, ad, key, &value);
-}
-
-void CodeGenerator::cgAddElem(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* arr   = inst->getSrc(0);
-  SSATmp* key   = inst->getSrc(1);
-  SSATmp* val   = inst->getSrc(2);
-
-  Type keyType = key->getType();
-  // TODO: Double check that these helpers don't re-enter
-  if (keyType == Type::Int) {
-    // decrefs the value but not the key
-    cgCallHelper(m_as, (TCA)addElemIntKeyHelper, dst, kNoSyncPoint,
-                 ArgGroup().ssa(arr)
-                           .ssa(key)
-                           .valueType(val));
-  } else if (keyType == Type::Str || keyType == Type::StaticStr) {
-    // decrefs the value but not the key
-    cgCallHelper(m_as, (TCA)addElemStringKeyHelper, dst, kNoSyncPoint,
-                 ArgGroup().ssa(arr)
-                           .ssa(key)
-                           .valueType(val));
-  } else {
-    CG_PUNT(AddElem);
-  }
-}
-
-void CodeGenerator::cgAddNewElem(IRInstruction* inst) {
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* arr   = inst->getSrc(0);
-  UNUSED SSATmp* val   = inst->getSrc(1);
-
-  // decrefs value
-  cgCallHelper(m_as, (TCA)&HphpArray::AddNewElemC, dst, kNoSyncPoint,
-               ArgGroup().ssa(arr)
-                         .valueType(val));
-}
-
 void CodeGenerator::cgDefCns(IRInstruction* inst) {
   UNUSED SSATmp* dst     = inst->getDst();
   UNUSED SSATmp* cnsName = inst->getSrc(0);
@@ -4461,16 +4340,6 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
                  ArgGroup().valueType(tl)
                            .valueType(tr));
   }
-}
-
-void CodeGenerator::cgArrayAdd(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src1  = inst->getSrc(0);
-  SSATmp* src2  = inst->getSrc(1);
-  // TODO: Double check that array_add is not re-entrant
-  cgCallHelper(m_as, (TCA)array_add, dst, kNoSyncPoint,
-               ArgGroup().ssa(src1)
-                         .ssa(src2));
 }
 
 void CodeGenerator::cgDefCls(IRInstruction* inst) {
@@ -4545,21 +4414,6 @@ void CodeGenerator::cgDefFunc(IRInstruction* inst) {
   SSATmp* func  = inst->getSrc(0);
   cgCallHelper(m_as, (TCA)defFuncHelper, dst, kSyncPoint,
                ArgGroup().ssa(func));
-}
-
-void CodeGenerator::cgCreateCont(IRInstruction* inst) {
-  auto helper = getCurFunc()->isNonClosureMethod() ?
-    VMExecutionContext::createContinuation<true> :
-    VMExecutionContext::createContinuation<false>;
-  cgCallHelper(m_as, (TCA)helper,
-               inst->getDst(), kNoSyncPoint,
-               ArgGroup().ssas(inst, 0, 4));
-}
-
-void CodeGenerator::cgFillContLocals(IRInstruction* inst) {
-  cgCallHelper(m_as, (TCA)VMExecutionContext::fillContinuationVars,
-               InvalidReg, kNoSyncPoint,
-               ArgGroup().ssas(inst, 0, 4));
 }
 
 void CodeGenerator::cgFillContThis(IRInstruction* inst) {

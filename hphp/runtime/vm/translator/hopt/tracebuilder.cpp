@@ -19,6 +19,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "util/trace.h"
+#include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 
 namespace HPHP {
@@ -55,28 +56,12 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   assert(m_spOffset >= 0);
 }
 
-void TraceBuilder::genPrint(SSATmp* arg) {
-  gen(Print, arg);
-}
-
-SSATmp* TraceBuilder::genAddElem(SSATmp* arr, SSATmp* key, SSATmp* val) {
-  return gen(AddElem, arr, key, val);
-}
-
-SSATmp* TraceBuilder::genAddNewElem(SSATmp* arr, SSATmp* val) {
-  return gen(AddNewElem, arr, val);
-}
-
 SSATmp* TraceBuilder::genDefCns(const StringData* cnsName, SSATmp* val) {
   return gen(DefCns, genDefConst<const StringData*>(cnsName), val);
 }
 
 SSATmp* TraceBuilder::genConcat(SSATmp* tl, SSATmp* tr) {
   return gen(Concat, tl, tr);
-}
-
-SSATmp* TraceBuilder::genArrayAdd(SSATmp* tl, SSATmp* tr) {
-  return gen(ArrayAdd, tl, tr);
 }
 
 void TraceBuilder::genDefCls(PreClass* clss, const HPHP::VM::Opcode* after) {
@@ -550,8 +535,9 @@ SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
 
 SSATmp* TraceBuilder::genLdObjMethod(const StringData* methodName,
                                      SSATmp* actRec) {
-  return gen(LdObjMethod, genDefConst<const StringData*>(methodName),
-             actRec);
+  return gen(LdObjMethod,
+             genDefConst<int64>(Transl::TargetCache::MethodCache::alloc()),
+             genDefConst<const StringData*>(methodName), actRec);
 }
 
 // TODO(#2058871): move this to hhbctranslator
@@ -580,6 +566,11 @@ SSATmp* TraceBuilder::genBoxLoc(uint32 id) {
   SSATmp* newValue = gen(Box, prevValue);
   genStLocAux(id, newValue, true);
   return newValue;
+}
+
+void TraceBuilder::genRaiseUninitWarning(uint32 id) {
+  gen(RaiseUninitWarning,
+      genDefConst(m_curFunc->getValFunc()->localVarName(id)));
 }
 
 SSATmp* TraceBuilder::genLdAddr(SSATmp* base, int64 offset) {
@@ -1055,30 +1046,6 @@ SSATmp* TraceBuilder::genLdStack(int32 stackOff, Type type) {
                genDefConst<int64>(stackOff));
   }
   return tmp;
-}
-
-SSATmp* TraceBuilder::genCreateCont(bool getArgs,
-                                    const Func* origFunc,
-                                    const Func* genFunc) {
-  return gen(CreateCont,
-             m_fpValue,
-             genDefConst(getArgs),
-             genDefConst(origFunc),
-             genDefConst(genFunc));
-}
-
-void TraceBuilder::genFillContLocals(const Func* origFunc,
-                                     const Func* genFunc,
-                                     SSATmp* cont) {
-  gen(FillContLocals,
-      m_fpValue,
-      genDefConst(origFunc),
-      genDefConst(genFunc),
-      cont);
-}
-
-void TraceBuilder::genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset) {
-  gen(FillContThis, cont, locals, genDefConst(offset));
 }
 
 void TraceBuilder::genContEnter(SSATmp* contAR, SSATmp* addr,

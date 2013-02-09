@@ -570,7 +570,7 @@ D:Gen* = LdClsPropAddr S0:Cls S1:ConstSstr S2:ConstSstr
   error if class S0 does not have a visible and accessible static
   property named S2.
 
-LdObjMethod
+D:Func = LdObjMethod S0:ConstInt S1:ConstStr S2:StkPtr
 
 D:Cls = LdObjClass S0:Obj
 

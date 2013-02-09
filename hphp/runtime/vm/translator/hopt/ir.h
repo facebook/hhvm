@@ -121,7 +121,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *      NF    no flags
  *      C     canCSE
  *      E     isEssential
- *      N     isNative
+ *      N     callsNative
  *      PRc   producesRC
  *      CRc   consumesRC
  *      Refs  mayModifyRefs
@@ -214,7 +214,7 @@ O(GetCtxFwdCall,                D(Ctx), S(Obj,Cls,Ctx) S(Func),            C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), SUnk,                      C|E|Rm|Er) \
-O(LdObjMethod,                 D(Func), CStr S(StkPtr),        C|E|N|Refs|Er) \
+O(LdObjMethod,                 D(Func), C(Int) CStr S(StkPtr), C|E|N|Refs|Er) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdCachedClass,                D(Cls), CStr,                           C|Rm) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
@@ -281,9 +281,16 @@ O(DefLabel,                     DLabel, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
-O(RaiseUninitWarning,               ND, NA,                  E|N|Mem|Refs|Er) \
-O(Print,                            ND, S(Gen),                  E|N|Mem|CRc) \
-O(AddElem,                      D(Arr), SUnk,             N|Mem|CRc|PRc|Refs) \
+O(RaiseUninitWarning,               ND, S(Str),              E|N|Mem|Refs|Er) \
+O(PrintStr,                         ND, S(Str),                  E|N|Mem|CRc) \
+O(PrintInt,                         ND, S(Int),                  E|N|Mem|CRc) \
+O(PrintBool,                        ND, S(Bool),                 E|N|Mem|CRc) \
+O(AddElemStrKey,                D(Arr), S(Arr)                                \
+                                          S(Str)                              \
+                                          S(Cell),        N|Mem|CRc|PRc|Refs) \
+O(AddElemIntKey,                D(Arr), S(Arr)                                \
+                                          S(Int)                              \
+                                          S(Cell),        N|Mem|CRc|PRc|Refs) \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(DefCns,                      D(Bool), SUnk,                      C|E|N|Mem) \
@@ -297,7 +304,8 @@ O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(AllocSpill,                       ND, C(Int),                        E|Mem) \
 O(FreeSpill,                        ND, C(Int),                        E|Mem) \
-O(CreateCont,                   D(Obj), S(StkPtr)                             \
+O(CreateCont,                   D(Obj), C(TCA)                                \
+                                          S(StkPtr)                           \
                                           C(Bool)                             \
                                           C(Func)                             \
                                           C(Func),               E|N|Mem|PRc) \

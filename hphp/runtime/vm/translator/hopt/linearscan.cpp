@@ -15,7 +15,9 @@
 */
 
 #include "runtime/vm/translator/hopt/linearscan.h"
+
 #include "runtime/vm/translator/hopt/irfactory.h"
+#include "runtime/vm/translator/hopt/nativecalls.h"
 
 namespace HPHP {
 namespace VM {
@@ -573,13 +575,30 @@ void LinearScan::collectNatives() {
   }
 }
 
-// XXX: to be refactored
-// This function repeats the logic in cg to pre-color tmps that are
-// going to be used in next native.
 void LinearScan::computePreColoringHint() {
   m_preColoringHint.clear();
-  IRInstruction* nextNative = getNextNative();
-  if (nextNative == NULL) {
+  IRInstruction* inst = getNextNative();
+  if (inst == NULL) {
+    return;
+  }
+
+  Opcode opc = inst->getOpcode();
+  using namespace NativeCalls;
+  if (CallMap::hasInfo(opc)) {
+    unsigned reg = 0;
+    for (auto const& arg : CallMap::getInfo(opc).args) {
+      switch (arg.type) {
+        case SSA:
+          m_preColoringHint.add(inst->getSrc(arg.srcIdx), 0, reg++);
+          break;
+        case TV:
+        case VecKeyS:
+        case VecKeyIS:
+          m_preColoringHint.add(inst->getSrc(arg.srcIdx), 0, reg++);
+          m_preColoringHint.add(inst->getSrc(arg.srcIdx), 1, reg++);
+          break;
+      }
+    }
     return;
   }
 
@@ -588,63 +607,31 @@ void LinearScan::computePreColoringHint() {
   // registers.
   auto normalHint = [&](int count, int srcBase = 0, int argBase = 0) {
     for (int i = 0; i < count; ++i) {
-      m_preColoringHint.add(nextNative->getSrc(i + srcBase), 0,
+      m_preColoringHint.add(inst->getSrc(i + srcBase), 0,
                             i + argBase);
     }
   };
-  switch (nextNative->getOpcode()) {
-    case Box:
-      if (nextNative->getSrc(0)->getType() == Type::Cell) {
-        m_preColoringHint.add(nextNative->getSrc(0), 1, 0);
-      }
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 1);
-      break;
-    case LdObjMethod:
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 2);
-      break;
+  switch (opc) {
     case LdFunc:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 1);
+      m_preColoringHint.add(inst->getSrc(0), 0, 1);
       break;
     case NativeImpl:
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 0);
-      break;
-    case Print:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      break;
-    case AddElem:
-      if (nextNative->getSrc(1)->getType() == Type::Int &&
-          nextNative->getSrc(2)->getType() == Type::Int) {
-        normalHint(3, 0, 1);
-      } else {
-        m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-        m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
-        m_preColoringHint.add(nextNative->getSrc(2), 0, 2);
-        m_preColoringHint.add(nextNative->getSrc(2), 1, 3);
-      }
-      break;
-    case AddNewElem:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
-      m_preColoringHint.add(nextNative->getSrc(1), 1, 2);
+      m_preColoringHint.add(inst->getSrc(1), 0, 0);
       break;
     case Concat:
       {
-        Type lType = nextNative->getSrc(0)->getType();
-        Type rType = nextNative->getSrc(1)->getType();
+        Type lType = inst->getSrc(0)->getType();
+        Type rType = inst->getSrc(1)->getType();
         if ((lType.isString() && rType.isString()) ||
             (lType.isString() && rType == Type::Int) ||
             (lType == Type::Int && rType.isString())) {
-          m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-          m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
+          m_preColoringHint.add(inst->getSrc(0), 0, 0);
+          m_preColoringHint.add(inst->getSrc(1), 0, 1);
         } else {
-          m_preColoringHint.add(nextNative->getSrc(0), 0, 1);
-          m_preColoringHint.add(nextNative->getSrc(1), 0, 3);
+          m_preColoringHint.add(inst->getSrc(0), 0, 1);
+          m_preColoringHint.add(inst->getSrc(1), 0, 3);
         }
       }
-      break;
-    case ArrayAdd:
-      normalHint(2);
       break;
     case AKExists:
       normalHint(2);
@@ -652,19 +639,13 @@ void LinearScan::computePreColoringHint() {
     case DefFunc:
       normalHint(1);
       break;
-    case CreateCont:
-      normalHint(4);
-      break;
-    case FillContLocals:
-      normalHint(4);
-      break;
     case OpEq:
     case OpNeq:
     case OpSame:
     case OpNSame:
       {
-        auto src1 = nextNative->getSrc(0);
-        auto src2 = nextNative->getSrc(1);
+        auto src1 = inst->getSrc(0);
+        auto src2 = inst->getSrc(1);
 
         auto type1 = src1->getType();
         auto type2 = src2->getType();
@@ -680,13 +661,13 @@ void LinearScan::computePreColoringHint() {
       break;
     case IterInit:
     {
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 1);
+      m_preColoringHint.add(inst->getSrc(0), 0, 1);
     }
     break;
     case Conv:
     {
-      SSATmp* src = nextNative->getSrc(0);
-      Type toType = nextNative->getTypeParam();
+      SSATmp* src = inst->getSrc(0);
+      Type toType = inst->getTypeParam();
       Type fromType = src->getType();
       if (toType == Type::Bool) {
         if (fromType == Type::Cell) {
@@ -701,56 +682,6 @@ void LinearScan::computePreColoringHint() {
       } else if (fromType.isString() && toType == Type::Int) {
         m_preColoringHint.add(src, 0, 0);
       }
-      break;
-    }
-    case PropX: {
-      unsigned arg = 0;
-      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
-      m_preColoringHint.add(nextNative->getSrc(4), 0, arg++);
-      assert(arg == 5);
-      break;
-    }
-    case CGetProp: {
-      unsigned arg = 0;
-      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
-      m_preColoringHint.add(nextNative->getSrc(4), 0, arg++);
-      assert(arg == 5);
-      break;
-    }
-    case SetProp: {
-      unsigned arg = 0;
-      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
-      m_preColoringHint.add(nextNative->getSrc(4), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(4), 1, arg++);
-      assert(arg == 6);
-      break;
-    }
-    case SetElem: {
-      unsigned arg = 0;
-      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(2), 1, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 1, arg++);
-      assert(arg == 5);
-      break;
-    }
-    case CGetElem: {
-      unsigned arg = 0;
-      m_preColoringHint.add(nextNative->getSrc(1), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(2), 0, arg++);
-      m_preColoringHint.add(nextNative->getSrc(2), 1, arg++);
-      m_preColoringHint.add(nextNative->getSrc(3), 0, arg++);
-      assert(arg == 4);
       break;
     }
     case InstanceOf:

@@ -26,9 +26,6 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
-using namespace HPHP::VM::Transl;
-using namespace HPHP::VM::Transl::TargetCache;
-
 class FailedCodeGen : public std::exception {
  public:
   const char* file;
@@ -65,6 +62,7 @@ private:
 #undef O
 
   // helper functions for code generation
+  void cgCallNative(IRInstruction* inst);
   void cgCallHelper(Asm&,
                     TCA addr,
                     SSATmp* dst,
@@ -136,7 +134,7 @@ private:
 
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                     PhysReg      thisReg,
-                                    CacheHandle& ch);
+                                    Transl::TargetCache::CacheHandle& ch);
 
   void cgLoadTypedValue(PhysReg base, int64_t off, IRInstruction* inst);
 

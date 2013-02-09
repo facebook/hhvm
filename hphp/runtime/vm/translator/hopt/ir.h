@@ -28,6 +28,7 @@
 #include <type_traits>
 #include <boost/noncopyable.hpp>
 #include <boost/checked_delete.hpp>
+#include <boost/type_traits/has_trivial_destructor.hpp>
 #include "util/asm-x64.h"
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/translator/physreg.h"
@@ -39,6 +40,7 @@
 #include "runtime/vm/func.h"
 #include "runtime/vm/class.h"
 #include "folly/Range.h"
+#include "folly/Conv.h"
 
 namespace HPHP {
 // forward declaration
@@ -128,11 +130,11 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(GuardType,                    DParam, S(Gen),                          C|E) \
-O(GuardLoc,                         NA, S(Home),                           E) \
+O(GuardLoc,                         NA, S(StkPtr),                         E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(AssertStk,                 D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(GuardRefs,                        NA, SUnk,                              E) \
-O(AssertLoc,                        NA, S(Home),                           E) \
+O(AssertLoc,                        NA, S(StkPtr),                         E) \
 O(OpAdd,                        D(Int), SNum SNum,                         C) \
 O(OpSub,                        D(Int), SNum SNum,                         C) \
 O(OpAnd,                        D(Int), SNum SNum,                         C) \
@@ -189,16 +191,15 @@ O(Unbox,                     DUnbox(0), S(Gen),                          PRc) \
 O(Box,                         DBox(0), S(Gen),              E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(LdStack,                      DParam, S(StkPtr) C(Int),                 NF) \
-O(LdLoc,                        DParam, S(Home),                          NF) \
+O(LdLoc,                        DParam, S(StkPtr),                        NF) \
 O(LdStackAddr,             D(PtrToGen), SUnk,                              C) \
-O(LdLocAddr,               D(PtrToGen), S(Home),                           C) \
+O(LdLocAddr,               D(PtrToGen), S(StkPtr),                         C) \
 O(LdMem,                        DParam, SUnk,                             NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdRef,                        DParam, S(BoxedCell),                     NF) \
 O(LdThis,                       D(Obj), S(StkPtr),                      C|Rm) \
 O(LdCtx,                        D(Ctx), S(StkPtr),                      C|Rm) \
 O(LdRetAddr,                D(RetAddr), S(StkPtr),                        NF) \
-O(LdHome,                      D(Home), S(StkPtr) C(Int),                  C) \
 O(LdConst,                      DParam, NA,                             C|Rm) \
 O(DefConst,                     DParam, NA,                                C) \
 O(LdCls,                        D(Cls), CStr,                   C|Refs|Rm|Er) \
@@ -249,8 +250,8 @@ O(StMemNT,                          NA, S(PtrToCell)                          \
                                           C(Int) S(Gen),           E|Mem|CRc) \
 O(StProp,                           NA, S(Obj) S(Int) S(Gen), E|Mem|CRc|Refs) \
 O(StPropNT,                         NA, S(Obj) S(Int) S(Gen),      E|Mem|CRc) \
-O(StLoc,                            NA, SUnk,                      E|Mem|CRc) \
-O(StLocNT,                          NA, SUnk,                      E|Mem|CRc) \
+O(StLoc,                            NA, S(StkPtr) S(Gen),          E|Mem|CRc) \
+O(StLocNT,                          NA, S(StkPtr) S(Gen),          E|Mem|CRc) \
 O(StRef,                       DBox(1), SUnk,                 E|Mem|CRc|Refs) \
 O(StRefNT,                     DBox(1), SUnk,                      E|Mem|CRc) \
 O(StRaw,                            NA, SUnk,                          E|Mem) \
@@ -264,7 +265,7 @@ O(SyncVMRegs,                       NA, S(StkPtr) S(StkPtr),               E) \
 O(Mov,                         DofS(0), SUnk,                              C) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                      Mem|PRc) \
-O(DecRefLoc,                        NA, SUnk,                     E|Mem|Refs) \
+O(DecRefLoc,                        NA, S(StkPtr),                E|Mem|Refs) \
 O(DecRefStack,                      NA, S(StkPtr) C(Int),         E|Mem|Refs) \
 O(DecRefThis,                       NA, SUnk,                     E|Mem|Refs) \
 O(GenericRetDecRefs,         D(StkPtr), S(StkPtr)                             \
@@ -277,7 +278,7 @@ O(DefLabel,                     DLabel, SUnk,                              E) \
 O(Marker,                           NA, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
-O(RaiseUninitWarning,               NA, SUnk,                E|N|Mem|Refs|Er) \
+O(RaiseUninitWarning,               NA, NA,                  E|N|Mem|Refs|Er) \
 O(Print,                            NA, S(Gen),                  E|N|Mem|CRc) \
 O(AddElem,                      D(Arr), SUnk,             N|Mem|CRc|PRc|Refs) \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
@@ -351,35 +352,42 @@ enum Opcode : uint16_t {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Some IRInstructions with non-trivial compile-time-only constants
- * may carry along extra data in the form of one of these structures.
+ * Some IRInstructions with compile-time-only constants may carry
+ * along extra data in the form of one of these structures.
  *
  * Note that this isn't really appropriate for compile-time constants
  * that are actually representing user values (we want them to be
  * visible to optimization passes, allocatable to registers, etc),
  * just compile-time metadata.
  *
- * These types must all be arena-allocatable and have no non-trivial
- * destructors.  They also must implement a "clone constructor"
- * (i.e. taking an arena and a source object to deep-copy).
+ * These types must:
  *
- * All extra data structs are subtypes of IRExtraData, just for
- * compile-time type organization purposes.
+ *   - Derive from IRExtraData (for overloading purposes)
+ *   - Be arena-allocatable (no non-trivial destructors)
+ *   - Either CopyConstructible, or implement a clone member
+ *     function that takes an arena to clone to
+ *
+ * In addition, for extra data used with a cse-able instruction:
+ *
+ *   - Implement an equals() member that indicates equality for CSE
+ *     purposes.
+ *   - Implement a hash() method.
+ *
+ * Finally, optionally they may implement a show() method for use in
+ * debug printouts.
  */
-
-struct IRExtraData {
-  explicit IRExtraData() {}
-  IRExtraData(const IRExtraData&) = delete;
-  IRExtraData& operator=(const IRExtraData&) = delete;
-};
 
 /*
  * Traits that returns the type of the extra C++ data structure for a
- * given instruction, if it has one.
+ * given instruction, if it has one, along with some other information
+ * about the type.
  */
+template<Opcode op> struct OpHasExtraData { enum { value = 0 }; };
 template<Opcode op> struct IRExtraDataType;
-#define DECLARE_IREXTRA(op, data) \
-  template<> struct IRExtraDataType<op> { typedef data type; }
+
+//////////////////////////////////////////////////////////////////////
+
+struct IRExtraData {};
 
 struct LdSSwitchData : IRExtraData {
   struct Elm {
@@ -388,36 +396,92 @@ struct LdSSwitchData : IRExtraData {
   };
 
   explicit LdSSwitchData() = default;
-  LdSSwitchData(Arena& arena, const LdSSwitchData& src)
-    : func(src.func)
-    , numCases(src.numCases)
-    , cases(new (arena) Elm[src.numCases])
-    , defaultOff(src.defaultOff)
-  {
-    std::copy(src.cases, src.cases + numCases, const_cast<Elm*>(cases));
+  LdSSwitchData(const LdSSwitchData&) = delete;
+  LdSSwitchData& operator=(const LdSSwitchData&) = delete;
+
+  LdSSwitchData* clone(Arena& arena) const {
+    LdSSwitchData* target = new (arena) LdSSwitchData;
+    target->func       = func;
+    target->numCases   = numCases;
+    target->defaultOff = defaultOff;
+    target->cases      = new (arena) Elm[numCases];
+    std::copy(cases, cases + numCases, const_cast<Elm*>(target->cases));
+    return target;
   }
 
-  const Func*       func;
-  int64_t           numCases;
-  const Elm*        cases;
-  Offset            defaultOff;
+  const Func* func;
+  int64_t     numCases;
+  const Elm*  cases;
+  Offset      defaultOff;
 };
-DECLARE_IREXTRA(LdSSwitchDestFast, LdSSwitchData);
-DECLARE_IREXTRA(LdSSwitchDestSlow, LdSSwitchData);
 
 struct MarkerData : IRExtraData {
-  explicit MarkerData() = default;
-  MarkerData(Arena&, const MarkerData& src)
-    : bcOff(src.bcOff)
-    , stackOff(src.stackOff)
-    , func(src.func)
-  {}
-
-  uint32      bcOff;    // the bytecode offset in unit
-  int32       stackOff; // stack off from start of trace
+  uint32_t    bcOff;    // the bytecode offset in unit
+  int32_t     stackOff; // stack off from start of trace
   const Func* func;     // which func are we in
 };
-DECLARE_IREXTRA(Marker, MarkerData);
+
+struct LocalId : IRExtraData {
+  explicit LocalId(uint32_t id)
+    : locId(id)
+  {}
+
+  bool equals(LocalId o) const { return locId == o.locId; }
+  size_t hash() const { return std::hash<uint32_t>()(locId); }
+  std::string show() const { return folly::to<std::string>(locId); }
+
+  uint32_t locId;
+};
+
+#define X(op, data)                                                   \
+  template<> struct IRExtraDataType<op> { typedef data type; };       \
+  template<> struct OpHasExtraData<op> { enum { value = 1 }; };       \
+  static_assert(boost::has_trivial_destructor<data>::value,           \
+                "IR extra data type must be trivially destructible")
+
+X(LdSSwitchDestFast,  LdSSwitchData);
+X(LdSSwitchDestSlow,  LdSSwitchData);
+X(Marker,             MarkerData);
+X(RaiseUninitWarning, LocalId);
+X(GuardLoc,           LocalId);
+X(AssertLoc,          LocalId);
+X(LdLocAddr,          LocalId);
+X(DecRefLoc,          LocalId);
+X(LdLoc,              LocalId);
+X(StLoc,              LocalId);
+X(StLocNT,            LocalId);
+
+#undef X
+
+//////////////////////////////////////////////////////////////////////
+
+template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
+  static void doassert() {
+    assert(!"called getExtra on an opcode without extra data");
+  }
+};
+
+template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
+  static void doassert() {
+    typedef typename IRExtraDataType<opc>::type ExtraType;
+    if (!std::is_same<ExtraType,T>::value) {
+      assert(!"getExtra<T> was called with an extra data "
+              "type that doesn't match the opcode type");
+    }
+  }
+};
+
+// Asserts that Opcode opc has extradata and it is of type T.
+template<class T> void assert_opcode_extra(Opcode opc) {
+#define O(opcode, dstinfo, srcinfo, flags)      \
+  case opcode:                                  \
+    AssertExtraTypes<                           \
+      OpHasExtraData<opcode>::value,opcode,T    \
+    >::doassert();                              \
+    break;
+  switch (opc) { IR_OPCODES default: not_reached(); }
+#undef O
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -513,20 +577,19 @@ const char* opcodeName(Opcode opcode);
   c(Cell,          -1) /* any unboxed type, statically unknown */
 
 #define IRT_RUNTIME                                                     \
-  IRT(Home,        1ULL << 36)                                          \
-  IRT(Cls,         1ULL << 37)                                          \
-  IRT(Func,        1ULL << 38)                                          \
-  IRT(VarEnv,      1ULL << 39)                                          \
-  IRT(NamedEntity, 1ULL << 40)                                          \
-  IRT(FuncCls,     1ULL << 41) /* {Func*, Cctx} */                      \
-  IRT(FuncObj,     1ULL << 42) /* {Func*, Obj} */                       \
-  IRT(Cctx,        1ULL << 43) /* Class* with the lowest bit set,  */   \
+  IRT(Cls,         1ULL << 36)                                          \
+  IRT(Func,        1ULL << 37)                                          \
+  IRT(VarEnv,      1ULL << 38)                                          \
+  IRT(NamedEntity, 1ULL << 39)                                          \
+  IRT(FuncCls,     1ULL << 40) /* {Func*, Cctx} */                      \
+  IRT(FuncObj,     1ULL << 41) /* {Func*, Obj} */                       \
+  IRT(Cctx,        1ULL << 42) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 44) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 45) /* any pointer into VM stack: VmSP or VmFP*/ \
-  IRT(TCA,         1ULL << 46)                                          \
-  IRT(ActRec,      1ULL << 47)                                          \
-  IRT(None,        1ULL << 48)
+  IRT(RetAddr,     1ULL << 43) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 44) /* any pointer into VM stack: VmSP or VmFP*/ \
+  IRT(TCA,         1ULL << 45)                                          \
+  IRT(ActRec,      1ULL << 46)                                          \
+  IRT(None,        1ULL << 47)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
@@ -896,16 +959,6 @@ class RawMemSlot {
                      // only used with RawMemSlots that support it
 };
 
-struct Local {
-  explicit Local(uint32_t id) : m_id(id) {}
-  uint32_t getId() const { return m_id; }
-  void print(std::ostream& os) const {
-    os << "h" << m_id;
-  }
-private:
-  const uint32_t m_id;
-};
-
 class SSATmp;
 class Trace;
 class CodeGenerator;
@@ -992,6 +1045,27 @@ struct IRInstruction {
   }
 
   /*
+   * Return access to extra-data of type T.  Requires that
+   * IRExtraDataType<opc>::type is T for this instruction's opcode.
+   *
+   * It's normally preferable to use the version of this function that
+   * takes the opcode instead of this one.  This is for writing code
+   * that is supposed to be able to handle multiple opcode types that
+   * share the same kind of extra data.
+   */
+  template<class T> const T* getExtra() const {
+    auto opcode = getOpcode();
+    if (debug) assert_opcode_extra<T>(opcode);
+    return static_cast<const T*>(m_extra);
+  }
+
+  /*
+   * Returns whether or not this opcode has an associated extra data
+   * struct.
+   */
+  bool hasExtra() const;
+
+  /*
    * Set the extra-data for this IRInstruction to the given pointer.
    * Lifetime is must outlast this IRInstruction (and any of its
    * clones).
@@ -1076,9 +1150,6 @@ struct IRInstruction {
   void*      getAsmAddr() const        { return m_asmAddr; }
   RegSet     getLiveOutRegs() const    { return m_liveOutRegs; }
   void       setLiveOutRegs(RegSet s)  { m_liveOutRegs = s; }
-  bool       isDefConst() const {
-    return (m_op == DefConst || m_op == LdHome);
-  }
   Trace*     getParent() const { return m_parent; }
   void       setParent(Trace* parentTrace) { m_parent = parentTrace; }
 
@@ -1169,14 +1240,6 @@ public:
     setTypeParam(Type::Bool);
     m_intVal = 0;
     m_boolVal = val;
-  }
-
-  // TODO(#2028117): this should not be a ConstInstruction shape
-  ConstInstruction(uint32_t numSrcs, SSATmp** srcs, Local l)
-    : IRInstruction(LdHome, numSrcs, srcs)
-  {
-    setTypeParam(Type::Home);
-    new (&m_local) Local(l);
   }
 
   ConstInstruction(Opcode opc, double val) : IRInstruction(opc) {
@@ -1282,11 +1345,6 @@ public:
     return m_arrVal == HphpArray::GetStaticEmptyArray();
   }
 
-  Local getLocal() const {
-    assert(getTypeParam() == Type::Home);
-    return m_local;
-  }
-
   void printConst(std::ostream& ostream) const;
   virtual bool isConstInstruction() const {return true;}
   virtual void print(std::ostream& ostream) const;
@@ -1300,7 +1358,6 @@ private:
     bool               m_boolVal;
     int64              m_intVal;
     double             m_dblVal;
-    Local              m_local; // for LdHome opcode
     const StringData*  m_strVal;
     const ArrayData*   m_arrVal;
     const Func*        m_func;
@@ -1702,8 +1759,6 @@ void optimizeTrace(Trace*, IRFactory* irFactory);
  * instructions in numbered order.
  */
 BlockList numberInstructions(Trace*);
-
-int getLocalIdFromHomeOpnd(SSATmp* srcHome);
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not

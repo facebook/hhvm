@@ -153,11 +153,11 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef IRT
 
 #define NA       return checkNoArgs();
-#define S(...) do {                                                     \
-      Type t = buildUnion(__VA_ARGS__);                                 \
-      check(getSrc()->isA(t), t.toString());                            \
-      ++curSrc;                                                         \
-    } while (false);
+#define S(...)   {                                        \
+                   Type t = buildUnion(__VA_ARGS__);      \
+                   check(getSrc()->isA(t), t.toString()); \
+                   ++curSrc;                              \
+                 }
 #define C(type)  check(getSrc()->isConst() &&       \
                        getSrc()->isA(type),         \
                        "constant " #type);          \

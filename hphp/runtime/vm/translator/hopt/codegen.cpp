@@ -50,8 +50,7 @@ using HPHP::VM::Transl::TCA;
 //
 //   Helpers for common cell operations.
 //
-//   Dereference the var or home in the cell whose address lives in src
-//   into dest.
+//   Dereference the cell whose address lives in src into dest.
 /*static */void
 emitDispDeref(X64Assembler &a, PhysReg src, int disp, PhysReg dest) {
   a.    load_reg64_disp_reg64(src, disp + TVOFF(m_data), dest);
@@ -257,7 +256,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     m_kind = None;
     return;
   }
-  if (tmp->getInstruction()->isDefConst()) {
+  if (tmp->getInstruction()->getOpcode() == DefConst) {
     m_srcReg = InvalidReg;
     if (val) {
       m_imm = tmp->getValBits();
@@ -324,7 +323,6 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   void CodeGenerator::cg##opcode(IRInstruction*) { CG_PUNT(opcode); }
 
 NOOP_OPCODE(DefConst)
-NOOP_OPCODE(LdHome)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(Marker)
@@ -1730,7 +1728,7 @@ void CodeGenerator::cgRetVal(IRInstruction* inst) {
 
   // (b) Store the actual value (not necessary when storing Null)
   if (val->getType().isNull()) return;
-  if (val->getInstruction()->isDefConst()) {
+  if (val->getInstruction()->getOpcode() == DefConst) {
     a.    storeq (val->getValRawInt(),
                   rFp[AROFF(m_r) + TVOFF(m_data)]);
   } else {
@@ -2101,27 +2099,18 @@ int CodeGenerator::getIterOffset(SSATmp* tmp) {
   return -cellsToBytes(((index + 1) * kNumIterCells + func->numLocals()));
 }
 
-static void getLocalRegOffset(SSATmp* src, PhysReg& reg, int64& off) {
-  ConstInstruction* homeInstr =
-    dynamic_cast<ConstInstruction*>(src->getInstruction());
-  assert(homeInstr && homeInstr->getOpcode() == LdHome);
-  reg = homeInstr->getSrc(0)->getReg();
-  assert(reg == rVmFp);
-  int64 index = homeInstr->getLocal().getId();
-  off = getLocalOffset(index);
+void CodeGenerator::cgStLoc(IRInstruction* inst) {
+  cgStore(inst->getSrc(0)->getReg(),
+          getLocalOffset(inst->getExtra<StLoc>()->locId),
+          inst->getSrc(1),
+          true /* store type */);
 }
 
-void CodeGenerator::cgStLocWork(IRInstruction* inst, bool genStoreType) {
-  PhysReg fpReg;
-  int64 offset;
-  getLocalRegOffset(inst->getSrc(0), fpReg, offset);
-  cgStore(fpReg, offset, inst->getSrc(1), genStoreType);
-}
-void CodeGenerator::cgStLoc(IRInstruction* inst) {
-  cgStLocWork(inst, true);
-}
 void CodeGenerator::cgStLocNT(IRInstruction* inst) {
-  cgStLocWork(inst, false);
+  cgStore(inst->getSrc(0)->getReg(),
+          getLocalOffset(inst->getExtra<StLocNT>()->locId),
+          inst->getSrc(1),
+          false /* store type */);
 }
 
 void CodeGenerator::cgSyncVMRegs(IRInstruction* inst) {
@@ -2409,10 +2398,10 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
-  PhysReg fpReg;
-  int64 offset;
-  getLocalRegOffset(inst->getSrc(0), fpReg, offset);
-  cgDecRefMem(inst->getTypeParam(), fpReg, offset, inst->getLabel());
+  cgDecRefMem(inst->getTypeParam(),
+              inst->getSrc(0)->getReg(),
+              getLocalOffset(inst->getExtra<DecRefLoc>()->locId),
+              inst->getLabel());
 }
 
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
@@ -3431,7 +3420,6 @@ void CodeGenerator::cgStore(PhysReg base,
     // no need to store a value for null or uninit
     return;
   }
-  assert(type != Type::Home);
   if (src->isConst()) {
     int64 val = 0;
     if (type.subtypeOf(Type::Bool | Type::Int | Type::Dbl |
@@ -3478,7 +3466,7 @@ void CodeGenerator::cgLoad(PhysReg base,
     return cgLoadTypedValue(base, off, inst);
   }
   LabelInstruction* label = inst->getLabel();
-  if (label != NULL && type != Type::Home) {
+  if (label != NULL) {
     cgGuardTypeCell(base, off, inst);
   }
   if (type.isNull()) return; // these are constants
@@ -3515,10 +3503,8 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 }
 
 void CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
-  SSATmp* home  = inst->getSrc(0);
-  ConstInstruction* homeInst = (ConstInstruction*)home->getInstruction();
-  int64_t index = homeInst->getLocal().getId();
-  const StringData* name = getCurFunc()->localVarName(index);
+  auto const data = inst->getExtra<RaiseUninitWarning>();
+  auto const name = getCurFunc()->localVarName(data->locId);
   cgCallHelper(m_as,
                (TCA)HPHP::VM::Transl::raiseUndefVariable,
                (SSATmp*)NULL,
@@ -3533,18 +3519,17 @@ void CodeGenerator::cgLdAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
-  assert(inst->getLabel() == nullptr);
-  PhysReg fpReg;
-  int64 offset;
-  getLocalRegOffset(inst->getSrc(0), fpReg, offset);
-  cgLoad(fpReg, offset, inst);
+  cgLoad(inst->getSrc(0)->getReg(),
+         getLocalOffset(inst->getExtra<LdLoc>()->locId),
+         inst);
 }
 
 void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
-  PhysReg fpReg;
-  int64 offset;
-  getLocalRegOffset(inst->getSrc(0), fpReg, offset);
-  m_as.lea (fpReg[offset], inst->getDst()->getReg());
+  auto const fpReg  = inst->getSrc(0)->getReg();
+  auto const offset = getLocalOffset(inst->getExtra<LdLocAddr>()->locId);
+  if (inst->getDst()->hasReg()) {
+    m_as.lea(fpReg[offset], inst->getDst()->getReg());
+  }
 }
 
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
@@ -3567,10 +3552,9 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
-  PhysReg fpReg;
-  int64 offset;
-  getLocalRegOffset(inst->getSrc(0), fpReg, offset);
-  cgGuardTypeCell(fpReg, offset, inst);
+  cgGuardTypeCell(inst->getSrc(0)->getReg(),
+                  getLocalOffset(inst->getExtra<GuardLoc>()->locId),
+                  inst);
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {

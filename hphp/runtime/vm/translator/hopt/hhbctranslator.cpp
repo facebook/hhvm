@@ -328,7 +328,6 @@ void HhbcTranslator::emitSelf() {
   } else {
     push(m_tb->genLdFuncCls(m_tb->genLdCurFuncPtr()));
   }
-
 }
 
 void HhbcTranslator::emitParent() {
@@ -2230,7 +2229,8 @@ SSATmp* HhbcTranslator::emitLdLocWarn(uint32 id,
 
   if (locVal->getType() == Type::Uninit) {
     spillStack();
-    m_tb->genRaiseUninitWarning(id);
+    LocalId data(id);
+    m_tb->gen(RaiseUninitWarning, &data);
     return m_tb->genDefNull();
   }
 

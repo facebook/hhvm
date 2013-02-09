@@ -972,12 +972,8 @@ void LinearScan::rematerializeAux() {
                       canonicalize(spilledTmp));
           // Search for a local that stores the value of <spilledTmp>.
           if (pos != localValues.end()) {
-            size_t locId = pos - localValues.begin();
-            assert(curFp != NULL);
-            SSATmp* srcs[] = { curFp };
-            ConstInstruction constInst(1, srcs, Local(locId));
-            IRInstruction* ldHome = m_irFactory->cloneInstruction(&constInst);
-            newInst = m_irFactory->gen(LdLoc, dst->getType(), ldHome->getDst());
+            LocalId localId(pos - localValues.begin());
+            newInst = m_irFactory->gen(LdLoc, dst->getType(), &localId, curFp);
           }
         }
         if (newInst) {
@@ -997,9 +993,7 @@ void LinearScan::rematerializeAux() {
       }
 
       if (opc == LdLoc || opc == StLoc || opc == StLocNT) {
-        // dst = LdLoc home
-        // StLoc/StLocNT home, src
-        int locId = getLocalIdFromHomeOpnd(inst->getSrc(0));
+        int locId = inst->getExtra<LocalId>()->locId;
         // Note that when we implement inlining, we will need to deal
         // with the new local id space of the inlined function.
         SSATmp* localValue = (opc == LdLoc ? inst->getDst() : inst->getSrc(1));

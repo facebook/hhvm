@@ -156,7 +156,8 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   const DynLocation& base = *m_ni.inputs[m_iInd];
   if (mia & MIA_warn) {
     if (base.rtt.isUninit()) {
-      m_tb.genRaiseUninitWarning(base.location.offset);
+      LocalId data(base.location.offset);
+      m_tb.gen(RaiseUninitWarning, &data);
     }
   }
 
@@ -182,7 +183,8 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       assert(m_base->isA(Type::Obj));
     } else {
       // Everything else is passed by reference
-      m_base = m_tb.genLdLocAddr(loc);
+      LocalId baseLocalId(loc);
+      m_base = m_tb.gen(LdLocAddr, &baseLocalId, m_tb.getFp());
       if (base.rtt.valueType() == KindOfArray) {
         // The local's type will be unchanged but its value might change
         // because of COW. Kill the value but leave the type intact. This is
@@ -191,7 +193,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
         auto t = m_tb.getLocalType(loc);
         // Task #2071378: Move this to
         // TraceBuilder::updateTrackedState once you use the m_base
-        // that is a home address.
+        // that is a local address.
         m_tb.killLocalValue(loc);
         m_tb.genAssertLoc(loc, t);
       }

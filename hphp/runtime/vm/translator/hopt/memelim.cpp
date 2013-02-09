@@ -41,7 +41,7 @@ class MemMap {
   ~MemMap() {
     clearCountedMap(m_unescaped);
     clearCountedMap(m_unknown);
-    clearCountedMap(m_locs);
+    clearLocalsMap();
     clearCountedMap(m_props);
   }
 
@@ -131,7 +131,9 @@ private:
 
   // maps objects to a block of information about their property accesses
   typedef hphp_hash_map<SSATmp*, PropInfoList*> PropMap;
-  typedef RefMap LocalsMap;
+
+  // map local ids to information about the locals.
+  typedef hphp_hash_map<int32_t,RefInfo*> LocalsMap;
 
   // a mapping of stores to a vector of guarded instructions that follow them.
   // this is used to track where we need to sink partially dead stores.
@@ -152,6 +154,16 @@ private:
   // of the ref is not known, then this function returns NULL
   SSATmp* getValue(SSATmp* ref, int offset = -1);
 
+  IRInstruction* lastLocalAccess(int32_t id) const {
+    auto it = m_locs.find(id);
+    return it == m_locs.end() ? nullptr : it->second->access;
+  }
+
+  SSATmp* getLocalValue(int32_t id) const {
+    auto it = m_locs.find(id);
+    return it == m_locs.end() ? nullptr : it->second->value;
+  }
+
   // kills information in our 'unknown' map
   void killRefInfo(IRInstruction* save);
   // kills information in our 'props' map
@@ -165,7 +177,7 @@ private:
   void sinkStores(StoreList& stores);
 
   template <typename V>
-  static inline void clearCountedMap(hphp_hash_map<SSATmp*, V*>& map) {
+  static void clearCountedMap(hphp_hash_map<SSATmp*, V*>& map) {
     typename hphp_hash_map<SSATmp*, V*>::iterator it, copy, end;
     for (it = map.begin(), end = map.end(); it != end; ) {
       copy = it;
@@ -175,6 +187,13 @@ private:
       }
       map.erase(copy);
     }
+  }
+
+  void clearLocalsMap() {
+    for (auto& kv : m_locs) {
+      kv.second->dec();
+    }
+    m_locs.clear();
   }
 
   // helper function to return the value of a memory instruction
@@ -199,15 +218,11 @@ private:
     return NULL;
   }
 
-  // returns true if 'opc' is a load that MemMap handles
-  static inline bool isLoad(Opcode opc) {
-    // doesn't handle LdMem yet
+  static bool isLoad(Opcode opc) {
     return opc == LdLoc || opc == LdRef || opc == LdProp;
   }
 
-  // returns true if 'opc' is a store that MemMap handles
-  static inline bool isStore(Opcode opc) {
-    // doesn't handle StMem, StMemNT
+  static bool isStore(Opcode opc) {
     return opc == StRef || opc == StRefNT || opc == StLoc || opc == StLocNT ||
            opc == StProp || opc == StPropNT;
   }
@@ -348,13 +363,13 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     // access info for any refs that may alias
 
     case LdLoc: {
-      SSATmp* home = inst->getSrc(0);
+      auto id = inst->getExtra<LdLoc>()->locId;
 
       // locals never alias, so no access info needs to be killed
-      if (m_locs.count(home) > 0) {
-        m_locs[home]->update(inst);
+      if (m_locs.count(id) > 0) {
+        m_locs[id]->update(inst);
       } else {
-        m_locs[home] = new RefInfo(inst);
+        m_locs[id] = new RefInfo(inst);
       }
       break;
     }
@@ -425,7 +440,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
     case StLoc:
     case StLocNT: {
-      SSATmp* home = inst->getSrc(0);
+      auto locId = inst->getExtra<LocalId>()->locId;
       SSATmp* val = inst->getSrc(1);
 
       // if 'val' is an unescaped ref, then we need to escape all refs that
@@ -435,10 +450,10 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       }
 
       // storing into a local does not affect the info of any other ref
-      if (m_locs.count(home) > 0) {
-        m_locs[home]->update(inst);
+      if (m_locs.count(locId) > 0) {
+        m_locs[locId]->update(inst);
       } else {
-        m_locs[home] = new RefInfo(inst);
+        m_locs[locId] = new RefInfo(inst);
       }
       break;
     }
@@ -551,7 +566,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
         clearCountedMap(m_unknown);
         clearCountedMap(m_props);
-        clearCountedMap(m_locs);
+        clearLocalsMap();
       }
       break;
     }
@@ -581,10 +596,6 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
   }                                                                           \
   it = m_unknown.find(ref);                                                     \
   if (it != m_unknown.end()) {                                                  \
-    return it->second->FIELD;                                                 \
-  }                                                                           \
-  it = m_locs.find(ref);                                                        \
-  if (it != m_locs.end()) {                                                     \
     return it->second->FIELD;                                                 \
   }                                                                           \
   return NULL;                                                                \
@@ -633,7 +644,9 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
       // if we see a store, first check if its last available access is a store
       // if it is, then the last access is a dead store
-      IRInstruction* access = getLastAccess(inst->getSrc(0), offset);
+      auto access = inst->getOpcode() == StLoc || inst->getOpcode() == StLocNT
+        ? lastLocalAccess(inst->getExtra<LocalId>()->locId)
+        : getLastAccess(inst->getSrc(0), offset);
       if (access != NULL && isStore(access->getOpcode())) {
         // if a dead St* is followed by a St*NT, then the second store needs to
         // now write in the type because the first store will be removed
@@ -688,9 +701,10 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   // check if we still know the value at this memory location. if we do,
   // then replace the load with a Mov
-  SSATmp* value = getValue(inst->getSrc(0), offset);
-
-  if (value == NULL) {
+  auto value = inst->getOpcode() == LdLoc
+    ? getLocalValue(inst->getExtra<LocalId>()->locId)
+    : getValue(inst->getSrc(0), offset);
+  if (value == nullptr) {
     return;
   }
 
@@ -752,9 +766,7 @@ void MemMap::sinkStores(StoreList& stores) {
 }
 
 void optimizeMemoryAccesses(Trace* trace, IRFactory* factory) {
-  MemMap mem(factory);
-
-  mem.optimizeMemoryAccesses(trace);
+  MemMap(factory).optimizeMemoryAccesses(trace);
 }
 
 } } }

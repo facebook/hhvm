@@ -103,7 +103,6 @@ public:
    */
   SSATmp* genLdAssertedLoc(uint32 id, Type type);
 
-  SSATmp* genLdLocAddr(uint32 id);
   SSATmp* genStLoc(uint32 id,
                    SSATmp* src,
                    bool doRefCount,
@@ -129,7 +128,6 @@ public:
   void    genBindLoc(uint32 id, SSATmp* ref, bool doRefCount = true);
   void    genInitLoc(uint32 id, SSATmp* t);
 
-  SSATmp* genLdHome(uint32 id);
   SSATmp* genLdCls(SSATmp* classNameOpnd);
   void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
   SSATmp* genLdCurFuncPtr();
@@ -159,7 +157,6 @@ public:
   SSATmp* genUnboxPtr(SSATmp* ptr);
   SSATmp* genLdRef(SSATmp* ref, Type type, Trace* exit);
   SSATmp* genAdd(SSATmp* src1, SSATmp* src2);
-  void    genRaiseUninitWarning(uint32 id);
   SSATmp* genLdAddr(SSATmp* base, int64 offset);
 
   SSATmp* genSub(SSATmp* src1, SSATmp* src2);
@@ -342,7 +339,6 @@ private:
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
 
-  Local getLocal(uint32 id);
   LabelInstruction* getLabel(Trace* trace) {
     return trace ? trace->getLabel() : NULL;
   }

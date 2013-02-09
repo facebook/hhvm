@@ -248,7 +248,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     wl.pop_front();
     for (uint32 i = 0; i < inst->getNumSrcs(); i++) {
       SSATmp* src = inst->getSrc(i);
-      if (src->getInstruction()->isDefConst()) {
+      if (src->getInstruction()->getOpcode() == DefConst) {
         continue;
       }
       IRInstruction* srcInst = src->getInstruction();

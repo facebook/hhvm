@@ -42,7 +42,7 @@ TypeSet allTypes() {
 }
 
 TEST(Type, Equality) {
-  EXPECT_NE(Type::Home, Type::PtrToBoxedObj);
+  EXPECT_NE(Type::Cls, Type::PtrToBoxedObj);
 }
 
 TEST(Type, Null) {

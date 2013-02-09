@@ -105,7 +105,6 @@ private:
 
   void cgStMemWork(IRInstruction* inst, bool genStoreType);
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
-  void cgStLocWork(IRInstruction* inst, bool genStoreType);
   void cgStPropWork(IRInstruction* inst, bool genStoreType);
   void cgIncRefWork(Type type, SSATmp* dst, SSATmp* src);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
@@ -359,7 +358,8 @@ struct ArgGroup {
    */
   ArgGroup& rawType(SSATmp* tmp) {
     Type t = tmp->getType();
-    if (t.isStaticallyKnown() || tmp->getInstruction()->isDefConst()) {
+    if (t.isStaticallyKnown() ||
+        tmp->getInstruction()->getOpcode() == DefConst) {
       return type(t); // DataType is known immediate.
     }
     m_args.push_back(ArgDesc(ArgDesc::Reg, tmp->getReg(1), 0));

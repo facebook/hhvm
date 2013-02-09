@@ -20,8 +20,10 @@
 #include <cstring>
 #include <forward_list>
 #include <sstream>
+#include <type_traits>
 
 #include "folly/Format.h"
+#include "folly/Traits.h"
 
 #include "util/disasm.h"
 #include "util/trace.h"
@@ -106,7 +108,8 @@ enum OpcodeFlag : uint64_t {
   Rematerializable = 0x0100, // TODO: implies HasDest
   MayRaiseError    = 0x0200,
   Terminal         = 0x0400, // has no next instruction
-  NaryDest         = 0x0800  // has 0 or more destinations
+  NaryDest         = 0x0800, // has 0 or more destinations
+  HasExtra         = 0x1000,
 };
 
 #define NF     0
@@ -133,7 +136,11 @@ struct {
   const char* name;
   uint64_t flags;
 } OpInfo[] = {
-#define O(name, dsts, srcs, flags) { #name, dsts | (flags) },
+#define O(name, dsts, srcs, flags)                    \
+    { #name,                                          \
+       (OpHasExtraData<name>::value ? HasExtra : 0) | \
+       dsts | (flags)                                 \
+    },
   IR_OPCODES
 #undef O
   { 0 }
@@ -158,34 +165,131 @@ struct {
 #undef DParam
 #undef DLabel
 
-// If there is no IRExtraDataType for this op, this function template
-// will be removed from the overload set.
-template<Opcode op>
-typename IRExtraDataType<op>::type*
-cloneExtraImpl(Arena& arena, const IRExtraData* src) {
-  typedef typename IRExtraDataType<op>::type Data;
-  return new (arena) Data(arena, *static_cast<const Data*>(src));
-}
+/*
+ * dispatchExtra translates from runtime values for the Opcode enum
+ * into compile time types.  The goal is to call a `targetFunction'
+ * that is overloaded on the extra data type structs.
+ *
+ * The purpose of the MAKE_DISPATCHER layer is to weed out Opcode
+ * values that have no associated extra data.
+ *
+ * Basically this is doing dynamic dispatch without a vtable in
+ * IRExtraData, instead using the Opcode tag from the associated
+ * instruction to discriminate the runtime type.
+ *
+ * Note: functions made with this currently only make sense to call if
+ * it's already known that the opcode has extra data.  If you call it
+ * for one that doesn't, you'll get an abort.  Generally hasExtra()
+ * should be checked first.
+ */
 
-// Case for ops without extra data.
-template<Opcode op>
-IRExtraData* cloneExtraImpl(Arena&, const void*) {
-  TRACE(1, "Logic error: attempted to clone extra data for %s\n",
-        opcodeName(op));
-  assert(0 && "bad ExtraData in doClone");
+#define MAKE_DISPATCHER(name, rettype, targetFunction)                \
+  template<bool HasExtra, Opcode opc> struct name {                   \
+    template<class... Args>                                           \
+    static rettype go(IRExtraData* vp, Args&&...) { not_reached(); }  \
+  };                                                                  \
+  template<Opcode opc> struct name<true,opc> {                        \
+    template<class... Args>                                           \
+    static rettype go(IRExtraData* vp, Args&&... args) {              \
+      return targetFunction(                                          \
+        static_cast<typename IRExtraDataType<opc>::type*>(vp),        \
+        std::forward<Args>(args)...                                   \
+      );                                                              \
+    }                                                                 \
+  };
+
+template<
+  class RetType,
+  template<bool, Opcode> class Dispatcher,
+  class... Args
+>
+RetType dispatchExtra(Opcode opc, IRExtraData* data, Args&&... args) {
+#define O(opcode, dstinfo, srcinfo, flags)      \
+  case opcode:                                  \
+    return Dispatcher<                          \
+      OpHasExtraData<opcode>::value,            \
+      opcode                                    \
+    >::go(data, std::forward<Args>(args)...);
+  switch (opc) { IR_OPCODES default: not_reached(); }
+#undef O
   not_reached();
 }
 
-IRExtraData* cloneExtra(Arena& arena, Opcode srcOp, IRExtraData* src) {
-#define O(opcode, dstinfo, srcinfo, flags) \
-  case opcode: return cloneExtraImpl<opcode>(arena, src);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_hash,   hash);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_equals, equals);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_clone,  clone);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_show,   show);
 
-  switch (srcOp) {
-  IR_OPCODES
-  default:
-    not_reached();
-  }
-#undef O
+template<class T>
+typename std::enable_if<
+  has_hash<T,size_t () const>::value,
+  size_t
+>::type hashExtraImpl(T* t) { return t->hash(); }
+size_t hashExtraImpl(IRExtraData*) {
+  // This probably means an instruction was marked CanCSE but its
+  // extra data had no hash function.
+  always_assert(!"attempted to hash extra data that didn't "
+    "provide a hash function");
+}
+
+template<class T>
+typename std::enable_if<
+  has_equals<T,bool (T const&) const>::value ||
+  has_equals<T,bool (T)        const>::value,
+  bool
+>::type equalsExtraImpl(T* t, IRExtraData* o) {
+  return t->equals(*static_cast<T*>(o));
+}
+bool equalsExtraImpl(IRExtraData*, IRExtraData*) {
+  // This probably means an instruction was marked CanCSE but its
+  // extra data had no equals function.
+  always_assert(!"attempted to compare extra data that didn't "
+                 "provide an equals function");
+}
+
+// Clone using a data-specific clone function.
+template<class T>
+typename std::enable_if<
+  has_clone<T,T* (Arena&) const>::value,
+  T*
+>::type cloneExtraImpl(T* t, Arena& arena) {
+  return t->clone(arena);
+}
+
+// Use the copy constructor if no clone() function was supplied.
+template<class T>
+typename std::enable_if<
+  !has_clone<T,T* (Arena&) const>::value,
+  T*
+>::type cloneExtraImpl(T* t, Arena& arena) {
+  return new (arena) T(*t);
+}
+
+template<class T>
+typename std::enable_if<
+  has_show<T,std::string () const>::value,
+  std::string
+>::type showExtraImpl(T* t) { return t->show(); }
+std::string showExtraImpl(IRExtraData*) { return "..."; }
+
+MAKE_DISPATCHER(HashDispatcher, size_t, hashExtraImpl);
+size_t hashExtra(Opcode opc, IRExtraData* data) {
+  return dispatchExtra<size_t,HashDispatcher>(opc, data);
+}
+
+MAKE_DISPATCHER(EqualsDispatcher, bool, equalsExtraImpl);
+bool equalsExtra(Opcode opc, IRExtraData* data, IRExtraData* other) {
+  return dispatchExtra<bool,EqualsDispatcher>(opc, data, other);
+}
+
+MAKE_DISPATCHER(CloneDispatcher, IRExtraData*, cloneExtraImpl);
+IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a) {
+  return dispatchExtra<IRExtraData*,CloneDispatcher>(opc, data, a);
+}
+
+MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
+std::string showExtra(Opcode opc, IRExtraData* data) {
+  return dispatchExtra<std::string,ShowDispatcher>(opc, data);
 }
 
 }
@@ -203,7 +307,7 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   , m_label(inst->m_label)
   , m_parent(nullptr)
   , m_tca(nullptr)
-  , m_extra(inst->m_extra ? cloneExtra(arena, getOpcode(), inst->m_extra)
+  , m_extra(inst->m_extra ? cloneExtra(getOpcode(), inst->m_extra, arena)
                           : nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
@@ -217,6 +321,10 @@ const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
 
 static bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
   return OpInfo[opcode].flags & flags;
+}
+
+bool IRInstruction::hasExtra() const {
+  return opcodeHasFlags(getOpcode(), HasExtra);
 }
 
 bool IRInstruction::hasDst() const {
@@ -460,6 +568,9 @@ bool IRInstruction::equals(IRInstruction* inst) const {
       return false;
     }
   }
+  if (hasExtra() && !equalsExtra(getOpcode(), m_extra, inst->m_extra)) {
+    return false;
+  }
   // TODO: check label for ControlFlowInstructions?
   return true;
 }
@@ -469,6 +580,9 @@ size_t IRInstruction::hash() const {
   for (unsigned i = 0; i < getNumSrcs(); ++i) {
     srcHash = CSEHash::hashCombine(srcHash, getSrc(i));
   }
+  if (hasExtra()) {
+    srcHash = CSEHash::hashCombine(srcHash, hashExtra(getOpcode(), m_extra));
+  }
   return CSEHash::hashCombine(srcHash, m_op, m_typeParam);
 }
 
@@ -476,6 +590,9 @@ void IRInstruction::printOpcode(std::ostream& ostream) const {
   ostream << opcodeName(m_op);
   if (m_typeParam != Type::None) {
     ostream << '<' << m_typeParam.toString() << '>';
+  }
+  if (hasExtra()) {
+    ostream << '{' << showExtra(getOpcode(), m_extra) << '}';
   }
 }
 
@@ -531,7 +648,7 @@ void IRInstruction::print(std::ostream& ostream) const {
 
   bool isStMem = m_op == StMem || m_op == StMemNT || m_op == StRaw;
   bool isLdMem = m_op == LdRaw;
-  if (isStMem || m_op == StLoc || isLdMem) {
+  if (isStMem || isLdMem) {
     ostream << opcodeName(m_op) << " [";
     printSrc(ostream, 0);
     SSATmp* offset = getSrc(1);
@@ -611,8 +728,6 @@ void ConstInstruction::printConst(std::ostream& ostream) const {
     } else {
       ostream << "Array(" << (void*)m_arrVal << ")";
     }
-  } else if (t == Type::Home) {
-    m_local.print(ostream);
   } else if (t == Type::Null) {
     ostream << "Null";
   } else if (t == Type::Uninit) {
@@ -784,7 +899,7 @@ TCA SSATmp::getTCA() const {
 }
 
 void SSATmp::print(std::ostream& os, bool printLastUse) const {
-  if (m_inst->isDefConst()) {
+  if (m_inst->getOpcode() == DefConst) {
     ((ConstInstruction*)m_inst)->printConst(os);
     return;
   }
@@ -1089,7 +1204,7 @@ std::vector<int> findDominators(BlockList& blocks) {
  *    be defined by the current instruction.
  * 2. Each src must be defined earlier in the same block or in a dominator.
  * 3. Each dst must not be previously defined.
- * 4. Treat tmps defined by DefConst or LdHome as always defined.
+ * 4. Treat tmps defined by DefConst as always defined.
  */
 bool checkCfg(Trace* trace, const IRFactory& factory) {
   BlockList blocks = buildCfg(trace);
@@ -1107,10 +1222,12 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
     for (IRInstruction* inst : *block) {
       for (SSATmp* UNUSED src : inst->getSrcs()) {
         assert(src->getInstruction() != inst);
-        assert(src->getInstruction()->isDefConst() || defined[src->getId()]);
+        assert(src->getInstruction()->getOpcode() == DefConst ||
+               defined[src->getId()]);
       }
       for (SSATmp* dst : inst->getDsts()) {
-        assert(dst->getInstruction() == inst && !inst->isDefConst());
+        assert(dst->getInstruction() == inst &&
+               inst->getOpcode() != DefConst);
         assert(!defined[dst->getId()]);
         defined[dst->getId()] = 1;
       }

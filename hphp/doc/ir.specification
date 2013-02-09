@@ -128,7 +128,6 @@ above PHP-facing types.
   PtrToT          Exists for all T in Gen. Represents a TypedValue*
   None            No value, KindOfInvalid
   Bottom          No value, {}. Subtype of every other type
-  Home            Location of a local variable
   Cls             Class*
   Func            Func*
   VarEnv          VarEnv*
@@ -269,16 +268,17 @@ D:T = GuardType<T> S0:Gen -> L
   Check that the type of the src S0 is T, and if so copy it to D.  If
   S0 is not type T, branch to the exit trace label L.
 
-GuardLoc<T> S0:Home -> L
+GuardLoc<T>{localId} S0:StkPtr -> L
 
-  Check that type of the local specified by S0 is T; if not, branch to
-  the exit trace label L.
+  Check that type of the given localId on the frame S0 is T; if not,
+  branch to the exit trace label L.
 
-AssertLoc<T> S0:Home
+AssertLoc<T>{localId} S0:StkPtr
 
-  Asserts that type of local S0 is T.  This is used as a hint for
-  local type information, and is similar to GuardLoc except it doesn't
-  imply a runtime check and cannot cause control flow.
+  Asserts that type of the supplied local on the frame S0 is T.  This
+  is used as a hint for local type information, and is similar to
+  GuardLoc except it doesn't imply a runtime check and cannot cause
+  control flow.
 
 D:StkPtr = GuardStk<T> S0:StkPtr S1:ConstInt -> L
 
@@ -409,12 +409,11 @@ ExitOnVarEnv S0:StkPtr -> L
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   non-zero, jumps to the exit-trace label L.
 
-Marker<bcOff,spOff,FuncPtr>
+Marker{bcOff,stackOff,func}
 
-  Record HHBC virtual position information at the position of this instruction.
-  Marker has no executable semantics, and although it uses a LabelInstruction,
-  it is not a legal branch target.  The JIT compiler uses this to generate
-  bytecode<->machine code maps.
+  Record HHBC virtual position information at the position of this
+  instruction.  Marker has no executable semantics.  The JIT compiler
+  uses this to generate bytecode<->machine code maps.
 
 Jmp_ [S:T ...] -> L
 
@@ -480,18 +479,19 @@ D:T = LdStack<T> S0:StkPtr S1:ConstInt
   Loads from S0 at index S1 (in cells), and puts the value in D as
   type T.
 
-D:T = LdLoc<T> S0:Home
+D:T = LdLoc<T>{localId} S0:StkPtr
 
-  Loads from the StkPtr in S0 at the offset in S0.  Used to load locals.
+  Loads local number localId from the frame S0 and puts the value in D
+  as type T.
 
 D:Gen* = LdStackAddr S0:StkPtr S1:ConstInt
 
   Loads the address of the stack slot given by the pointer in S0 and
   the index S1 (in cells).
 
-D:Gen* = LdLocAddr S0:Home
+D:Gen* = LdLocAddr{localId} S0:StkPtr
 
-  Loads the address of the local slot specified by S0 into D.
+  Loads the address of the local slot localId from the frame S0 into D.
 
 D:T = LdMem<T> S0:{Gen*|Cell*} [ -> L ]
 
@@ -524,11 +524,6 @@ D:Ctx = LdCtx S0:StkPtr
 
   Loads into D the value of the m_this/m_cls field out of the frame
   pointer S0.
-
-D:Home = LdHome S0:StkPtr S1:ConstInt
-
-  Logically packages the location of a pointer into the VM stack and
-  an offset.  S0 will usually be the output of a DefFP.
 
 D:T = LdConst<T>
 
@@ -597,7 +592,7 @@ D:Func = LdFixedFunc S0:ConstStr
   Loads the Func whose name is S0.  Fatal if the named function is
   not defined, and the function autoloader fails to define it.
 
-D:FuncPtr = LdCurFuncPtr
+D:Func = LdCurFuncPtr
 
   ...
 
@@ -631,7 +626,7 @@ NewTuple
 9. Call & Return
 
 D:ActRec = DefActRec S0:StkPtr
-                     S1:FuncPtr
+                     S1:Func
                      S2:{CtxPtr|ClassPtr|Null}
                      S3:ConstInt
                      S4:{String|Null}
@@ -655,7 +650,7 @@ D:StkPtr = FreeActRec S0:StkPtr
 
 Call
 
-NativeImpl = S0:ConstFuncPtr S1:StkPtr
+NativeImpl = S0:ConstFunc S1:StkPtr
 
   Execute a call to the native builtin specified by the func in S0.
 
@@ -709,8 +704,16 @@ StMem S0:Gen* S1:ConstInt S2:Gen
 StMemNT S0:Gen* S1:ConstInt S2:Gen
 StProp S0:Obj S1:Int S2:Gen
 StPropNT S0:Obj S1:Int S2:Gen
-StLoc
-StLocNT
+
+StLoc{localId} S0:StkPtr S1:Gen
+
+  Store S1 to local number localId on the frame pointed to by S0.
+
+StLocNT{localId} S0:StkPtr S1:Gen
+
+  Store S1 to local number localId on the frame pointed to by S0,
+  without storing the type.
+
 StRef
 StRefNT
 StRaw
@@ -738,7 +741,7 @@ d:StkP = SpillStack         s0:StkP, s1:StkP, s2:ConstInt, s3...sN
 
 11. Trace exits
 
-ExitTrace S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+ExitTrace S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
           [S4:TCA]
 
   Unconditional exit to bytecode offset S1 in function S0.  S2 and
@@ -750,26 +753,26 @@ ExitTrace S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
   the TCA to use, at compile time.  In effect, S4 is simply a
   compile-time pointer to the IRInstruction to patch].
 
-ExitTraceCc S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+ExitTraceCc S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
             S4:ConstInt [S5:TCA]
 
   Exit conditionally to bytecode offset S1 or S4 in function S0.
   S4 is bytecode address to exit to if the condition is false.
   S2 and S3 are the VM stack and frame pointer, respectively.
 
-ExitGuardFailure S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+ExitGuardFailure S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
 
   A start-of-trace guard failed before the trace began executing.
   Runtime may retranslate the bytecode using HHIR.  S1 is the
   bytecode offset, S2 and S3 are the VM stack and frame pointer.
 
-ExitSlow S0:ConstFuncPtr S1:ConstInt S2:StkPtr S3:StkPtr
+ExitSlow S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
 
   Like ExitTrace, but with a runtime hint to not use HHIR at this func/pc
   position in the future.  Runtime may start a new trace using Tx64 or
   interpreter.
 
-ExitSlowNoProgress S0:ConstFuncPtr, S1:ConstInt, S2:StkPtr, S3:StkPtr
+ExitSlowNoProgress S0:ConstFunc, S1:ConstInt, S2:StkPtr, S3:StkPtr
 
   Like ExitGuardFailure, with the "slow" hint from ExitSlow.
   In this case we can retranslate or interprete the whole tracelet since
@@ -785,7 +788,10 @@ D:T* = LdAddr S0:T* S1:ConstInt
   Load address. Returns a pointer to (S0 + S1) with the same type as S0.
 
 IncRef
-DecRefLoc
+
+DecRefLoc{localId} S0:StkPtr
+
+  DecRef the local given by localId on the frame S0.
 
 DecRefStack<T> S0:StkPtr S1:ConstInt
 
@@ -831,7 +837,10 @@ Nop
 
 14. Runtime helpers
 
-RaiseUninitWarning
+RaiseUninitWarning{localId}
+
+  Raise a warning for an uninitialized local variable.
+
 Print
 AddElem
 AddNewElem

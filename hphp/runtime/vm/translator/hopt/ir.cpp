@@ -700,8 +700,8 @@ int SSATmp::numNeededRegs() const {
     // These don't need a register because their values are static or unused.
     return 0;
   }
-  if (type.subtypeOf(Type::Ctx)) {
-    // Ctx is statically unknown but it always needs just 1 register.
+  if (type.subtypeOf(Type::Ctx) || type.isPtr()) {
+    // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
   if (!type.isStaticallyKnown() || type.subtypeOf(Type::FuncCtx)) {

@@ -47,14 +47,13 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
 }
 
 FatalErrorException::FatalErrorException(const std::string &msg,
-                                         ArrayPtr backtrace) {
+                                         CArrRef backtrace) {
   m_msg = msg;
-  m_bt = backtrace;
+  m_btp = backtrace.get();
 }
 
-ArrayPtr ExtendedException::getBackTrace() const {
-  assert(m_bt);
-  return m_bt;
+Array ExtendedException::getBackTrace() const {
+  return m_btp.get();
 }
 
 /**
@@ -63,16 +62,24 @@ ArrayPtr ExtendedException::getBackTrace() const {
  */
 void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
   if (hhvm) {
-    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(skipFrame, true)));
+    m_btp = g_vmContext->debugBacktrace(skipFrame, true).get();
   } else {
     if (RuntimeOption::InjectedStackTrace) {
-      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(skipFrame, true)));
+      m_btp = FrameInjection::GetBacktrace(skipFrame, true).get();
     }
   }
 }
 
 void throw_null_pointer_exception() {
   throw NullPointerException();
+}
+
+void intrusive_ptr_add_ref(ArrayData* a) {
+  a->incRefCount();
+}
+
+void intrusive_ptr_release(ArrayData* a) {
+  decRefArr(a);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

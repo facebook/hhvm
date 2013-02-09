@@ -265,9 +265,9 @@ enum ContextOfException {
 
 static void handle_exception_append_bt(std::string& errorMsg,
                                        const ExtendedException& e) {
-  ArrayPtr bt = e.getBackTrace();
-  if (!bt->empty()) {
-    errorMsg += ExtendedLogger::StringOfStackTrace(*bt);
+  Array bt = e.getBackTrace();
+  if (!bt.empty()) {
+    errorMsg += ExtendedLogger::StringOfStackTrace(bt);
   }
 }
 
@@ -287,7 +287,7 @@ static void handle_exception_helper(bool& ret,
     } else if (where != HandlerException &&
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
-      Array stack = e.getBackTrace()->get();
+      Array stack = e.getBackTrace();
       Array argv = CREATE_VECTOR2(e.ExitCode, stack);
       f_call_user_func_array(context->getExitCallback(), argv);
     }
@@ -310,7 +310,7 @@ static void handle_exception_helper(bool& ret,
     } else if (RuntimeOption::InjectedStackTrace) {
       errorMsg = e.getMessage();
       errorMsg += "\n";
-      errorMsg += ExtendedLogger::StringOfStackTrace(*e.getBackTrace());
+      errorMsg += ExtendedLogger::StringOfStackTrace(e.getBackTrace());
     } else {
       errorMsg = e.getStackTrace().hexEncode();
       errorMsg += " ";
@@ -1010,10 +1010,8 @@ static int execute_program_impl(int argc, char **argv) {
         VMParserFrame parserFrame;
         parserFrame.filename = po.lint.c_str();
         parserFrame.lineNumber = line;
-        ArrayPtr bt =
-          ArrayPtr(new Array(
-                     g_vmContext->debugBacktrace(false, true,
-                                                 false, &parserFrame)));
+        Array bt = g_vmContext->debugBacktrace(false, true,
+                                               false, &parserFrame);
         throw FatalErrorException(msg->data(), bt);
       }
     } catch (FileOpenException &e) {

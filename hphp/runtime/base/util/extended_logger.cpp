@@ -85,7 +85,7 @@ void ExtendedLogger::log(LogLevelType level, const char *type,
   if (RuntimeOption::InjectedStackTrace) {
     const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
     if (ee) {
-      Log(level, *ee->getBackTrace());
+      Log(level, ee->getBackTrace());
     }
   }
 }

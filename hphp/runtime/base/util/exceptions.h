@@ -19,12 +19,12 @@
 
 #include <util/exception.h>
 #include <util/util.h>
+#include <runtime/base/types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // all defined exceptions
 
-DECLARE_BOOST_TYPES(Array);
 class ExtendedException : public Exception {
 public:
   enum SkipFrame { skipFrame };
@@ -32,11 +32,11 @@ public:
   ExtendedException(const std::string &msg);
   ExtendedException(SkipFrame frame, const std::string &msg);
   ExtendedException(const char *fmt, ...);
-  ArrayPtr getBackTrace() const;
+  Array getBackTrace() const;
   virtual ~ExtendedException() throw() {}
   EXCEPTION_COMMON_IMPL(ExtendedException);
 protected:
-  ArrayPtr m_bt;
+  ArrayHolder m_btp;
 private:
   void computeBacktrace(bool skipFrame = false);
 };
@@ -160,7 +160,7 @@ public:
   FatalErrorException(int, const char *msg, ...) {
     va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
   }
-  FatalErrorException(const std::string &msg, ArrayPtr backtrace);
+  FatalErrorException(const std::string &msg, const Array& backtrace);
   virtual ~FatalErrorException() throw() {}
   EXCEPTION_COMMON_IMPL(FatalErrorException);
 };

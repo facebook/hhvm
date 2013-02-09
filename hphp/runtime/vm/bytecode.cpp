@@ -2949,7 +2949,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     g_vmContext->write(" : ");
     g_vmContext->write(e.getMessage().c_str());
     g_vmContext->write("\n");
-    g_vmContext->write(ExtendedLogger::StringOfStackTrace(*e.getBackTrace()));
+    g_vmContext->write(ExtendedLogger::StringOfStackTrace(e.getBackTrace()));
   } catch (ExitException &e) {
     g_vmContext->write(s_exit.data());
     g_vmContext->write(" : ");
@@ -2969,7 +2969,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     if (ee) {
       g_vmContext->write("\n");
       g_vmContext->write(
-        ExtendedLogger::StringOfStackTrace(*ee->getBackTrace()));
+        ExtendedLogger::StringOfStackTrace(ee->getBackTrace()));
     }
   } catch (Object &e) {
     g_vmContext->write(s_phpException.data());

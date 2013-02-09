@@ -638,7 +638,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
   ExtendedException ee = skipFrame ?
     ExtendedException(ExtendedException::skipFrame, msg) :
     ExtendedException(msg);
-  ArrayPtr bt = ee.getBackTrace();
+  Array bt = ee.getBackTrace();
 
   recordLastError(ee, errnum);
   bool handled = false;
@@ -661,8 +661,8 @@ void BaseExecutionContext::handleError(const std::string &msg,
     const char *file = NULL;
     int line = 0;
     if (RuntimeOption::InjectedStackTrace) {
-      if (!bt->empty()) {
-        Array top = bt->rvalAt(0).toArray();
+      if (!bt.empty()) {
+        Array top = bt.rvalAt(0).toArray();
         if (top.exists("file")) file = top.rvalAt("file").toString();
         if (top.exists("line")) line = top.rvalAt("line");
       }
@@ -688,9 +688,9 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     Array backtrace;
     const ExtendedException *ee = dynamic_cast<const ExtendedException*>(&e);
     if (ee) {
-      ArrayPtr arr = ee->getBackTrace();
-      if (arr) {
-        backtrace = *arr;
+      Array arr = ee->getBackTrace();
+      if (!arr.isNull()) {
+        backtrace = arr;
         Array top = backtrace.rvalAt(0);
         if (!top.isNull()) {
           errfile = top.rvalAt("file");
@@ -730,9 +730,9 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
   if (RuntimeOption::InjectedStackTrace) {
     const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
     if (ee) {
-      ArrayPtr bt = ee->getBackTrace();
-      if (!bt->empty()) {
-        Array top = bt->rvalAt(0).toArray();
+      Array bt = ee->getBackTrace();
+      if (!bt.empty()) {
+        Array top = bt.rvalAt(0).toArray();
         if (top.exists("file")) file = top.rvalAt("file").toString();
         if (top.exists("line")) line = top.rvalAt("line");
       }

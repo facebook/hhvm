@@ -1064,7 +1064,7 @@ void check_request_surprise(ThreadInfo *info) {
 void throw_pending_exception(ThreadInfo *info) {
   assert(info->m_pendingException);
   info->m_pendingException = false;
-  FatalErrorException e(info->m_exceptionMsg, info->m_exceptionStack);
+  FatalErrorException e(info->m_exceptionMsg, info->m_exceptionStack.get());
   info->m_exceptionMsg.clear();
   info->m_exceptionStack.reset();
   throw e;
@@ -1270,8 +1270,8 @@ void generate_request_timeout_exception() {
       info->m_exceptionMsg += " seconds and timed out";
       if (RuntimeOption::InjectedStackTrace) {
         info->m_exceptionStack = hhvm
-          ? ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true, true)))
-          : ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+          ? g_vmContext->debugBacktrace(false, true, true).get()
+          : FrameInjection::GetBacktrace(false, true).get();
       }
     }
   }
@@ -1283,8 +1283,8 @@ void generate_memory_exceeded_exception() {
   info->m_exceptionMsg = "request has exceeded memory limit";
   if (RuntimeOption::InjectedStackTrace) {
     info->m_exceptionStack = hhvm
-      ? ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true, true)))
-      : ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+      ? g_vmContext->debugBacktrace(false, true, true).get()
+      : FrameInjection::GetBacktrace(false, true).get();
   }
 }
 

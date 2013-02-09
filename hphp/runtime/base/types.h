@@ -26,6 +26,7 @@
 #include <runtime/base/memory/memory_manager.h>
 
 #include <boost/static_assert.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -424,7 +425,10 @@ int object_alloc_size_to_index(size_t);
 size_t object_alloc_index_to_size(int);
 
 // implemented in runtime/base/thread_info
-DECLARE_BOOST_TYPES(Array);
+typedef boost::intrusive_ptr<ArrayData> ArrayHolder;
+void intrusive_ptr_add_ref(ArrayData* a);
+void intrusive_ptr_release(ArrayData* a);
+
 class ThreadInfo {
 public:
   enum Executing {
@@ -467,7 +471,7 @@ public:
   GlobalVariables *m_globals;
   Executing m_executing;
   bool m_pendingException;
-  ArrayPtr m_exceptionStack;
+  ArrayHolder m_exceptionStack;
   std::string m_exceptionMsg;
 
   ThreadInfo();

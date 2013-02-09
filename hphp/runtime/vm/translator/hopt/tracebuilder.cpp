@@ -257,9 +257,13 @@ void TraceBuilder::genDecRefMem(SSATmp* base, int64 offset, Type type) {
 
 Trace* TraceBuilder::genExitGuardFailure(uint32 bcOff) {
   Trace* trace = makeExitTrace(bcOff);
-  IRInstruction* markerInst =
-    m_irFactory.marker(bcOff, m_curFunc->getValFunc(), m_spOffset);
-  trace->appendInstruction(markerInst);
+
+  MarkerData marker;
+  marker.bcOff    = bcOff;
+  marker.stackOff = m_spOffset;
+  marker.func     = m_curFunc->getValFunc();
+  gen(Marker, &marker);
+
   SSATmp* pc = genDefConst<int64>((int64)bcOff);
   // TODO change exit trace to a control flow instruction that
   // takes sp, fp, and a Marker as the target label instruction
@@ -319,10 +323,13 @@ Trace* TraceBuilder::genExitTrace(uint32   bcOff,
                                   TraceExitType::ExitType exitType,
                                   uint32   notTakenBcOff) {
   Trace* exitTrace = makeExitTrace(bcOff);
-  exitTrace->appendInstruction(
-    m_irFactory.marker(bcOff,
-                       m_curFunc->getValFunc(),
-                       m_spOffset + numOpnds - stackDeficit));
+
+  MarkerData marker;
+  marker.bcOff    = bcOff;
+  marker.stackOff = m_spOffset + numOpnds - stackDeficit;
+  marker.func     = m_curFunc->getValFunc();
+  gen(Marker, &marker);
+
   SSATmp* sp = m_spValue;
   if (numOpnds != 0 || stackDeficit != 0) {
     SSATmp* srcs[numOpnds + 2];
@@ -1008,14 +1015,6 @@ SSATmp* TraceBuilder::genRetAdjustStack() {
 
 void TraceBuilder::genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retVal) {
   gen(RetCtrl, sp, fp, retVal);
-}
-
-IRInstruction* TraceBuilder::genMarker(uint32 bcOff, int32 spOff) {
-  auto* marker = m_irFactory.marker(bcOff,
-                                    m_curFunc->getValFunc(),
-                                    spOff);
-  appendInstruction(marker);
-  return marker;
 }
 
 void TraceBuilder::genDecRefStack(Type type, uint32 stackOff) {

@@ -51,7 +51,7 @@ struct CodeGenerator {
 
   CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64) :
       m_as(as), m_astubs(astubs), m_tx64(tx64),
-      m_curInst(NULL), m_lastMarker(NULL), m_curTrace(NULL) {
+      m_curInst(nullptr), m_lastMarker(nullptr), m_curTrace(nullptr) {
   }
 
   void cgTrace(Trace* trace, vector<TransBCMapping>* bcMap);
@@ -244,7 +244,7 @@ private:
   // current instruction for which code is being generated
   IRInstruction* m_curInst;
   // the last marker instruction before curInst
-  MarkerInstruction* m_lastMarker;
+  const MarkerData* m_lastMarker;
   Trace* m_curTrace;
 };
 

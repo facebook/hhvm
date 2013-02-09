@@ -199,7 +199,6 @@ public:
                   SSATmp* func,
                   uint32 numParams,
                   SSATmp** params);
-  IRInstruction* genMarker(uint32 bcOff, int spOff);
   void    genReleaseVVOrExit(Trace* exit);
   SSATmp* genGenericRetDecRefs(SSATmp* retVal, int numLocals);
   void    genRetVal(SSATmp* val);

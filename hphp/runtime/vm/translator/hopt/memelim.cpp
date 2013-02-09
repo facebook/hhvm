@@ -635,7 +635,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
   for (IRInstruction* inst : trace->getInstructionList()) {
     if (inst->getOpcode() == Marker) {
-      curFunc = ((MarkerInstruction*)inst)->getFunc();
+      curFunc = inst->getExtra<Marker>()->func;
     }
     // initialize each instruction as live
     setLive(inst, true);

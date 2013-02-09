@@ -39,11 +39,6 @@ LabelInstruction* IRFactory::defLabel(const Func* f, unsigned numDst) {
   return label;
 }
 
-MarkerInstruction* IRFactory::marker(uint32 bcOff, const Func* f, int32 spOff) {
-  MarkerInstruction inst(bcOff, f, spOff);
-  return cloneInstruction(&inst);
-}
-
 IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {
   IRInstruction* inst = gen(Mov, dst->getType(), src);
   dst->setInstruction(inst);

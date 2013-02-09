@@ -296,7 +296,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
 
 const Func* CodeGenerator::getCurFunc() const {
   if (m_lastMarker) {
-    return m_lastMarker->getFunc();
+    return m_lastMarker->func;
   }
   return m_curTrace->getLabel()->getFunc();
 }
@@ -3020,7 +3020,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   }
 
   assert(m_lastMarker);
-  SrcKey srcKey = SrcKey(m_lastMarker->getFunc(), m_lastMarker->getBcOff());
+  SrcKey srcKey = SrcKey(m_lastMarker->func, m_lastMarker->bcOff);
   bool isImmutable = (func->isConst() && func->getType() != Type::Null);
   const Func* funcd = isImmutable ? func->getValFunc() : NULL;
   int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
@@ -3473,8 +3473,8 @@ void CodeGenerator::recordSyncPoint(Asm& as,
                                     SyncOptions sync /* = kSyncPoint */) {
   assert(m_lastMarker);
   assert(sync != kNoSyncPoint);
-  Offset stackOff = m_lastMarker->getStackOff() - (sync - kSyncPoint);
-  Offset pcOff = m_lastMarker->getBcOff() - getCurFunc()->base();
+  Offset stackOff = m_lastMarker->stackOff - (sync - kSyncPoint);
+  Offset pcOff = m_lastMarker->bcOff - m_lastMarker->func->base();
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }
 
@@ -4797,9 +4797,9 @@ void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
           m_tx64->emitTransCounterInc(m_as);
         }
       }
-      m_lastMarker = (MarkerInstruction*)inst;
+      m_lastMarker = inst->getExtra<Marker>();
       if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
-        bcMap->push_back((TransBCMapping){Offset(m_lastMarker->getBcOff()),
+        bcMap->push_back((TransBCMapping){Offset(m_lastMarker->bcOff),
               m_as.code.frontier,
               m_astubs.code.frontier});
       }

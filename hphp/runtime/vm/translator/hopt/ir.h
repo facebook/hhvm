@@ -375,7 +375,7 @@ struct IRExtraData {
 
 /*
  * Traits that returns the type of the extra C++ data structure for a
- * given instruction, or the inverse, if it has one.
+ * given instruction, if it has one.
  */
 template<Opcode op> struct IRExtraDataType;
 #define DECLARE_IREXTRA(op, data) \
@@ -404,6 +404,20 @@ struct LdSSwitchData : IRExtraData {
 };
 DECLARE_IREXTRA(LdSSwitchDestFast, LdSSwitchData);
 DECLARE_IREXTRA(LdSSwitchDestSlow, LdSSwitchData);
+
+struct MarkerData : IRExtraData {
+  explicit MarkerData() = default;
+  MarkerData(Arena&, const MarkerData& src)
+    : bcOff(src.bcOff)
+    , stackOff(src.stackOff)
+    , func(src.func)
+  {}
+
+  uint32      bcOff;    // the bytecode offset in unit
+  int32       stackOff; // stack off from start of trace
+  const Func* func;     // which func are we in
+};
+DECLARE_IREXTRA(Marker, MarkerData);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1329,38 +1343,6 @@ private:
   const uint32 m_labelId;
   void*  m_patchAddr; // Support patching forward jumps
   const Func* m_func; // which func are we in
-};
-
-class MarkerInstruction : public IRInstruction {
-public:
-  MarkerInstruction(uint32 bcOff, const Func* f, int32 spOff)
-    : IRInstruction(Marker)
-    , m_bcOff(bcOff)
-    , m_stackOff(spOff)
-    , m_func(f)
-  {}
-
-  explicit MarkerInstruction(Arena& arena, const MarkerInstruction* inst,
-                             IId iid)
-    : IRInstruction(arena, inst, iid)
-    , m_bcOff(inst->m_bcOff)
-    , m_stackOff(inst->m_stackOff)
-    , m_func(inst->m_func)
-  {}
-
-  uint32      getBcOff() const    { return m_bcOff; }
-  int32       getStackOff() const { return m_stackOff; }
-  const Func* getFunc() const     { return m_func; }
-
-  virtual void print(std::ostream& ostream) const;
-  virtual bool equals(IRInstruction* inst) const;
-  virtual size_t hash() const;
-  virtual IRInstruction* clone(IRFactory* factory) const;
-
-private:
-  uint32      m_bcOff;    // the bytecode offset in unit
-  int32       m_stackOff; // stack off from start of trace
-  const Func* m_func;     // which func are we in
 };
 
 /*

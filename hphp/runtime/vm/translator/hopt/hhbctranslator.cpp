@@ -157,8 +157,13 @@ void HhbcTranslator::replace(uint32 index, SSATmp* tmp) {
 void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   if (newOff != m_bcOff || m_bcOff == m_startBcOff) {
     m_bcOff = newOff;
-    m_tb->genMarker(m_bcOff,
-      m_tb->getSpOffset() + m_evalStack.numCells() - m_stackDeficit);
+
+    MarkerData marker;
+    marker.bcOff     = m_bcOff;
+    marker.func      = getCurFunc();
+    marker.stackOff  = m_tb->getSpOffset() +
+                         m_evalStack.numCells() - m_stackDeficit;
+    m_tb->gen(Marker, &marker);
   }
   m_lastBcOff = lastBcOff;
 }

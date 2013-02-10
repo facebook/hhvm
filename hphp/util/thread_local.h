@@ -217,7 +217,7 @@ static void ThreadLocalSingletonOnThreadExit(void *obj) {
 template <typename T>
 class ThreadLocalSingleton {
 public:
-  ThreadLocalSingleton() { getKey(); }
+  ThreadLocalSingleton() {}
 
   static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
 
@@ -234,7 +234,6 @@ public:
     if (p) {
       T::Delete(p);
       s_singleton = NULL;
-      pthread_setspecific(s_key, NULL);
     }
   }
 
@@ -247,18 +246,10 @@ public:
   }
 
 private:
-  static pthread_key_t s_key;
   static __thread T *s_singleton;
   typedef typename boost::aligned_storage<sizeof(T), sizeof(void*)>::type
           StorageType;
   static __thread StorageType s_storage;
-
-  static pthread_key_t getKey() {
-    if (s_key == 0) {
-      ThreadLocalCreateKey(&s_key, ThreadLocalSingletonOnThreadExit<T>);
-    }
-    return s_key;
-  }
 };
 
 template<typename T>
@@ -267,12 +258,10 @@ T *ThreadLocalSingleton<T>::getCheck() {
     T* p = (T*) &s_storage;
     T::Create(p);
     s_singleton = p;
-    pthread_setspecific(s_key, p);
   }
   return s_singleton;
 }
 
-template<typename T> pthread_key_t ThreadLocalSingleton<T>::s_key;
 template<typename T> __thread T *ThreadLocalSingleton<T>::s_singleton;
 template<typename T> __thread typename ThreadLocalSingleton<T>::StorageType
                               ThreadLocalSingleton<T>::s_storage;

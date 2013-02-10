@@ -75,9 +75,7 @@ Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
       continue;
     }
 
-    c_WaitHandle* child = current->m_type == KindOfObject
-      ? dynamic_cast<c_WaitHandle*>(current->m_data.pobj) : nullptr;
-
+    c_WaitHandle* child = c_WaitHandle::fromTypedValue(current);
     if (UNLIKELY(!child)) {
       putInvalidArgumentException(exception);
     } else if (child->isSucceeded()) {
@@ -131,9 +129,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
       continue;
     }
 
-    c_WaitHandle* child = current->m_type == KindOfObject
-      ? dynamic_cast<c_WaitHandle*>(current->m_data.pobj) : nullptr;
-
+    c_WaitHandle* child = c_WaitHandle::fromTypedValue(current);
     if (UNLIKELY(!child)) {
       putInvalidArgumentException(m_exception);
     } else if (child->isSucceeded()) {

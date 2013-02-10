@@ -30,6 +30,7 @@ namespace {
 
   StaticString s_continuationResult("<continuation-result>");
   StaticString s_continuationException("<continuation-exception>");
+  StaticString s_continuation("Continuation");
 }
 
 c_ContinuationWaitHandle::c_ContinuationWaitHandle(
@@ -50,8 +51,7 @@ void c_ContinuationWaitHandle::t___construct() {
 
 Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation, int prio) {
   AsioContext* ctx = AsioSession::GetCurrentContext();
-  c_Continuation* cont = continuation.getTyped<c_Continuation>(true, true);
-  if (UNLIKELY(!cont)) {
+  if (UNLIKELY(!continuation.instanceof(s_continuation))) {
     STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::start);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected continuation to be an instance of Continuation"));
@@ -73,6 +73,7 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
     throw e;
   }
 
+  c_Continuation* cont = static_cast<c_Continuation*>(continuation.get());
   if (!cont->m_waitHandle.isNull()) {
     if (ctx) {
       cont->m_waitHandle->enterContext(ctx);
@@ -191,10 +192,8 @@ void c_ContinuationWaitHandle::run() {
         // array of dependencies; TODO: deprecate this
         m_child = c_GenArrayWaitHandle::t_create(value->m_data.parr);
       } else {
-        c_WaitHandle* child = value->m_type == KindOfObject
-          ? dynamic_cast<c_WaitHandle*>(value->m_data.pobj) : nullptr;
-
-        if (!child) {
+        c_WaitHandle* child = c_WaitHandle::fromTypedValue(value);
+        if (UNLIKELY(!child)) {
           Object e(SystemLib::AllocInvalidArgumentExceptionObject(
               "Expected yield argument to be an instance of WaitHandle"));
           throw e;

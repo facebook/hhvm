@@ -83,6 +83,12 @@ class c_WaitHandle : public ExtObjectData {
   public: c_WaitHandle *create();
 
  public:
+  static inline c_WaitHandle* fromTypedValue(TypedValue* tv) {
+    return (
+        tv->m_type == KindOfObject &&
+        tv->m_data.pobj->o_instanceof(q_ClassName)
+      ) ? static_cast<c_WaitHandle*>(tv->m_data.pobj) : nullptr;
+  }
   inline bool isFinished() { return getState() <= STATE_FAILED; }
   inline bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
   inline bool isFailed() { return getState() == STATE_FAILED; }
@@ -97,6 +103,7 @@ class c_WaitHandle : public ExtObjectData {
   inline uint8_t getState() { return o_subclassData.u8[0]; }
   inline void setState(uint8_t state) { o_subclassData.u8[0] = state; }
 
+  static const StaticString q_ClassName;
   static const int8_t STATE_SUCCEEDED = 0;
   static const int8_t STATE_FAILED    = 1;
 

@@ -47,18 +47,19 @@ void c_SetResultToRefWaitHandle::t___construct() {
 
 Object c_SetResultToRefWaitHandle::ti_create(const char* cls, CObjRef wait_handle, VRefParam ref) {
   TypedValue* var_or_cell = ref->asTypedValue();
-  c_WaitHandle* wh = wait_handle.getTyped<c_WaitHandle>(true, true);
-  if (!wh) {
-    if (wait_handle.isNull()) {
-      tvSetNull(var_or_cell);
-      return wait_handle;
-    }
+  if (wait_handle.isNull()) {
+    tvSetNull(var_or_cell);
+    return wait_handle;
+  }
 
+  if (!wait_handle.get()->o_instanceof(c_WaitHandle::q_ClassName)) {
     STATIC_METHOD_INJECTION_BUILTIN(SetResultToRefWaitHandle, SetResultToRefWaitHandle::create);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected wait_handle to be an instance of WaitHandle or null"));
     throw e;
   }
+
+  c_WaitHandle* wh = static_cast<c_WaitHandle*>(wait_handle.get());
 
   // succeeded? set result to ref and give back succeeded wait handle
   if (wh->isSucceeded()) {

@@ -456,7 +456,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   if (stmt && stmt->stmt()) {
     pdo_raise_impl_error(stmt->dbh, NULL, pdo_err[0], einfo->errmsg);
   } else {
-    throw_pdo_exception(null, null, "SQLSTATE[%s] [%d] %s",
+    throw_pdo_exception((int)einfo->errcode, null, "SQLSTATE[%s] [%d] %s",
                         pdo_err[0], einfo->errcode, einfo->errmsg);
   }
   return einfo->errcode;

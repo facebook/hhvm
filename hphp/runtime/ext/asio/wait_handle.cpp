@@ -55,26 +55,6 @@ Object c_WaitHandle::t_getexceptioniffailed() {
   return isFailed() ? getException() : nullptr;
 }
 
-bool c_WaitHandle::isFinished() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
-bool c_WaitHandle::isSucceeded() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
-bool c_WaitHandle::isFailed() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
-TypedValue* c_WaitHandle::getResult() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
-ObjectData* c_WaitHandle::getException() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
 String c_WaitHandle::getName() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }

@@ -27,10 +27,12 @@ namespace {
 
 c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(
     const ObjectStaticCallbacks *cb)
-    : c_StaticWaitHandle(cb), m_exception() {
+    : c_StaticWaitHandle(cb) {
+  setState(STATE_FAILED);
 }
 
 c_StaticExceptionWaitHandle::~c_StaticExceptionWaitHandle() {
+  tvDecRefObj(&m_resultOrException);
 }
 
 void c_StaticExceptionWaitHandle::t___construct() {
@@ -49,12 +51,13 @@ Object c_StaticExceptionWaitHandle::ti_create(const char* cls, CObjRef exception
   }
 
   p_StaticExceptionWaitHandle wh = NEWOBJ(c_StaticExceptionWaitHandle)();
-  wh->m_exception = exception;
+  tvWriteObject(exception.get(), &wh->m_resultOrException);
   return wh;
 }
 
 const TypedValue* c_StaticExceptionWaitHandle::join() {
-  throw m_exception;
+  Object e(m_resultOrException.m_data.pobj);
+  throw e;
 }
 
 String c_StaticExceptionWaitHandle::getName() {

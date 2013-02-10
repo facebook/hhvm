@@ -28,10 +28,11 @@ namespace {
 c_StaticResultWaitHandle::c_StaticResultWaitHandle(
     const ObjectStaticCallbacks *cb)
     : c_StaticWaitHandle(cb) {
+  setState(STATE_SUCCEEDED);
 }
 
 c_StaticResultWaitHandle::~c_StaticResultWaitHandle() {
-  tvRefcountedDecRefCell(&m_result);
+  tvRefcountedDecRefCell(&m_resultOrException);
 }
 
 void c_StaticResultWaitHandle::t___construct() {
@@ -43,12 +44,12 @@ void c_StaticResultWaitHandle::t___construct() {
 
 Object c_StaticResultWaitHandle::ti_create(const char* cls, CVarRef result) {
   p_StaticResultWaitHandle wh = NEWOBJ(c_StaticResultWaitHandle)();
-  tvReadCell(result.asTypedValue(), &wh->m_result);
+  tvReadCell(result.asTypedValue(), &wh->m_resultOrException);
   return wh;
 }
 
 const TypedValue* c_StaticResultWaitHandle::join() {
-  return &m_result;
+  return &m_resultOrException;
 }
 
 String c_StaticResultWaitHandle::getName() {

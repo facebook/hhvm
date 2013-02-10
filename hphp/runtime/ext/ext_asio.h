@@ -77,16 +77,26 @@ class c_WaitHandle : public ExtObjectData {
   public: c_WaitHandle *create();
 
  public:
-  virtual bool isFinished();
-  virtual bool isSucceeded();
-  virtual bool isFailed();
-  virtual TypedValue* getResult();
-  virtual ObjectData* getException();
+  inline bool isFinished() { return getState() <= STATE_FAILED; }
+  inline bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
+  inline bool isFailed() { return getState() == STATE_FAILED; }
+  inline TypedValue* getResult() { assert(isSucceeded()); return &m_resultOrException; }
+  inline ObjectData* getException() { assert(isFailed()); return m_resultOrException.m_data.pobj; }
   virtual String getName();
   virtual void enterContext(AsioContext* ctx);
 
  protected:
   virtual const TypedValue* join();
+
+  inline uint8_t getState() { return ((uint8_t*)&o_subclassData)[0]; }
+  inline void setState(uint8_t state) {
+    ((uint8_t*)&o_subclassData)[0] = state;
+  }
+
+  static const int8_t STATE_SUCCEEDED = 0;
+  static const int8_t STATE_FAILED    = 1;
+
+  TypedValue m_resultOrException;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +123,6 @@ class c_StaticWaitHandle : public c_WaitHandle {
   public: c_StaticWaitHandle *create();
 
  public:
-  inline bool isFinished() { return true; }
   void enterContext(AsioContext* ctx);
 };
 
@@ -143,20 +152,10 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   public: c_StaticResultWaitHandle *create();
 
  public:
-  inline bool isSucceeded() { return true; }
-  inline bool isFailed() { return false; }
-  inline TypedValue* getResult() { return &m_result; }
-  inline ObjectData* getException() {
-    throw FatalErrorException(
-        "Invariant violation: static result does not have exception");
-  }
   String getName();
 
  protected:
   const TypedValue* join();
-
- private:
-  TypedValue m_result;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -185,13 +184,6 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   public: c_StaticExceptionWaitHandle *create();
 
  public:
-  inline bool isSucceeded() { return false; }
-  inline bool isFailed() { return true; }
-  inline TypedValue* getResult() {
-    throw FatalErrorException(
-        "Invariant violation: static exception does not have result");
-  }
-  inline ObjectData* getException() { return m_exception.get(); }
   String getName();
 
  protected:
@@ -230,25 +222,11 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: c_WaitableWaitHandle *create();
 
  public:
-  inline bool isFinished() {
-    return getState() == STATE_SUCCEEDED || getState() == STATE_FAILED;
-  }
-  inline bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
-  inline bool isFailed() { return getState() == STATE_FAILED; }
-  TypedValue* getResult();
-  ObjectData* getException();
-
- public:
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
   inline c_BlockableWaitHandle** getFirstParentPtr() { return &m_firstParent; }
   inline AsioContext* getContext() { return m_context; }
 
  protected:
-  inline uint8_t getState() { return ((uint8_t*)&o_subclassData)[0]; }
-  inline void setState(uint8_t state) {
-    ((uint8_t*)&o_subclassData)[0] = state;
-  }
-
   void setResult(const TypedValue* result);
   void setException(ObjectData* exception);
 
@@ -257,15 +235,11 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   inline c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
   c_BlockableWaitHandle* getParentInContext(AsioContext* ctx);
 
-
   const TypedValue* join();
 
-  static const int8_t STATE_NEW       = 0;
-  static const int8_t STATE_SUCCEEDED = 1;
-  static const int8_t STATE_FAILED    = 2;
+  static const int8_t STATE_NEW       = 2;
 
  private:
-  TypedValue m_resultOrException;
   AsioContext* m_context;
   c_BlockableWaitHandle* m_firstParent;
 };

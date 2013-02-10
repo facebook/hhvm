@@ -113,22 +113,6 @@ Array c_WaitableWaitHandle::t_getstacktrace() {
   }
 }
 
-TypedValue* c_WaitableWaitHandle::getResult() {
-  if (getState() == STATE_SUCCEEDED) {
-    return &m_resultOrException;
-  }
-  throw FatalErrorException(
-      "Invariant violation: getting result from non-succeeded wait handle");
-}
-
-ObjectData* c_WaitableWaitHandle::getException() {
-  if (getState() == STATE_FAILED) {
-    return m_resultOrException.m_data.pobj;
-  }
-  throw FatalErrorException(
-      "Invariant violation: getting exception from non-failed wait handle");
-}
-
 c_BlockableWaitHandle* c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* parent) {
   c_BlockableWaitHandle* prev = m_firstParent;
   m_firstParent = parent;

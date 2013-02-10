@@ -538,7 +538,7 @@ void Class::atomicRelease() {
   }
 
   this->~Class();
-  free(this);
+  Util::low_free(this);
 }
 
 Class *Class::getCached() const {

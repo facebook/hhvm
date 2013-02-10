@@ -95,7 +95,7 @@ void c_ContinuationWaitHandle::ti_markcurrentassucceeded(const char* cls, CVarRe
     throw e;
   }
 
-  wh->markAsSucceeded(result.asTypedValue());
+  wh->markAsSucceeded(tvToCell(result.asTypedValue()));
 }
 
 void c_ContinuationWaitHandle::ti_markcurrentastailcall(const char* cls) {

@@ -177,21 +177,6 @@ private:
     }
   }
 
-  template <typename V>
-  static inline void clearCountedMapNotIn(hphp_hash_map<SSATmp*, V*>& mapTarget,
-                                          const hphp_hash_map<SSATmp*, V*>& mapSafe) {
-    typename hphp_hash_map<SSATmp*, V*>::iterator it, copy, end;
-    for (it = mapTarget.begin(), end = mapTarget.end(); it != end; ) {
-      if (mapSafe.find(it->first) != mapSafe.end()) continue;
-      copy = it;
-      ++it;
-      if (copy->first->getInstruction()->getOpcode() != Mov) {
-        copy->second->dec();
-      }
-      mapTarget.erase(copy);
-    }
-  }
-
   // helper function to return the value of a memory instruction
   static SSATmp* findValue(IRInstruction* inst) {
     assert(inst != NULL);
@@ -566,15 +551,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
         clearCountedMap(m_unknown);
         clearCountedMap(m_props);
-
-        // Be conservative about locals in pseudo-mains,
-        // since they may be accessed through $GLOBALS too
-        if (isPseudoMain) {
-          clearCountedMap(m_locs);
-        } else {
-          // Just clear locals that are not known to be unescaped
-          clearCountedMapNotIn(m_locs, m_unescaped);
-        }
+        clearCountedMap(m_locs);
       }
       break;
     }

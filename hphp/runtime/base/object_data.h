@@ -382,7 +382,12 @@ public:
  private:
   mutable int16 o_attribute;     // various flags
  protected:
-  int16         o_subclassData;  // field that can be reused by subclasses
+  // 16 bits of unused memory that can be reused by subclasses
+  union {
+    uint16_t u16;
+    uint8_t u8[2];
+
+  } o_subclassData;
 
  protected:
 #ifdef HHVM

@@ -88,10 +88,8 @@ class c_WaitHandle : public ExtObjectData {
  protected:
   virtual const TypedValue* join();
 
-  inline uint8_t getState() { return ((uint8_t*)&o_subclassData)[0]; }
-  inline void setState(uint8_t state) {
-    ((uint8_t*)&o_subclassData)[0] = state;
-  }
+  inline uint8_t getState() { return o_subclassData.u8[0]; }
+  inline void setState(uint8_t state) { o_subclassData.u8[0] = state; }
 
   static const int8_t STATE_SUCCEEDED = 0;
   static const int8_t STATE_FAILED    = 1;

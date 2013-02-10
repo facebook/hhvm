@@ -117,7 +117,7 @@ String f_spl_object_hash(CObjRef obj) {
   }
 
   char buf[33];
-  snprintf(buf, sizeof(buf), "%032"PRIx64,
+  snprintf(buf, sizeof(buf), "%032" PRIx64,
            s_hash_mask_handle ^ (int64)obj.get());
   return String(buf, CopyString);
 }

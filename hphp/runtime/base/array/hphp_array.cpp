@@ -187,7 +187,7 @@ void HphpArray::dumpDebugInfo() const {
          uintptr_t(this));
   fprintf(stderr, "m_data = %p\tm_hash = %p\n"
          "m_tableMask = %u\tm_size = %d\tm_hLoad = %d\n"
-         "m_nextKI = %"PRId64"\t\tm_lastE = %d\tm_pos = %zd\n",
+         "m_nextKI = %" PRId64 "\t\tm_lastE = %d\tm_pos = %zd\n",
          m_data, m_hash, m_tableMask, m_size, m_hLoad,
          m_nextKI, m_lastE, m_pos);
   fprintf(stderr, "Elements:\n");
@@ -204,7 +204,7 @@ void HphpArray::dumpDebugInfo() const {
         fprintf(stderr, "  [%3d] hash=0x%016x key=\"%s\" data=(%.*s)\n",
                int(i), elms[i].hash, k.data(), s.size()-1, s.data());
       } else {
-        fprintf(stderr, "  [%3d] ind=%"PRId64" data.m_type=(%.*s)\n", int(i),
+        fprintf(stderr, "  [%3d] ind=%" PRId64 " data.m_type=(%.*s)\n", int(i),
                elms[i].ikey, s.size()-1, s.data());
       }
     } else {
@@ -1887,7 +1887,7 @@ ArrayData*
 array_getm_i(void* dptr, int64 key, TypedValue* out) {
   assert(dptr);
   ArrayData* ad = (ArrayData*)dptr;
-  TRACE(2, "array_getm_ik1: (%p) <- %p[%"PRId64"]\n", out, dptr, key);
+  TRACE(2, "array_getm_ik1: (%p) <- %p[%" PRId64 "]\n", out, dptr, key);
   // Ref-counting the value is the translator's responsibility. We know out
   // pointed to uninitialized memory, so no need to dec it.
   TypedValue* ret = ad->nvGetCell(key);

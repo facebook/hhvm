@@ -103,7 +103,7 @@ bool TestCppBase::TestSmartAllocator() {
     }
     time1 = t.getMicroSeconds();
     if (!Test::s_quiet) {
-      printf("SmartAlloctor: %"PRId64" us\n", time1);
+      printf("SmartAlloctor: %" PRId64 " us\n", time1);
     }
   }
   {
@@ -114,7 +114,7 @@ bool TestCppBase::TestSmartAllocator() {
     }
     time2 = t.getMicroSeconds();
     if (!Test::s_quiet) {
-      printf("malloc/free: %"PRId64" us\n", time2);
+      printf("malloc/free: %" PRId64 " us\n", time2);
     }
   }
   return Count(true);

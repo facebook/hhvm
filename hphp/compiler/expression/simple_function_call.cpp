@@ -2194,8 +2194,8 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               if (idx >= func->getMaxParamCount()) {
                 if (func->isVariableArgument()) {
                   int64 idx0 = idx - func->getMaxParamCount();
-                  cg_printf("(%"PRId64"L < num_args ? "
-                            "args.rvalAt(int64_t(%"PRId64")) : Variant(false))",
+                  cg_printf("(%" PRId64 "L < num_args ? "
+                            "args.rvalAt(int64_t(%" PRId64 ")) : Variant(false))",
                             idx, idx0);
                 } else {
                   cg_printf("Variant(false)");
@@ -2209,7 +2209,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               bool isStashed =
                 func->getVariables()->getSymbol(funcName)->isStashedVal();
               if (func->isVariableArgument()) {
-                cg_printf("(%"PRId64"L < num_args ? ", idx);
+                cg_printf("(%" PRId64 "L < num_args ? ", idx);
               }
               if (needsCast) cg_printf("Variant(");
               cg_printf("%s%s%s",

@@ -322,11 +322,11 @@ bool ArrayData::setFullPos(const FullPos &fp) {
   assert(fp.getContainer() == (ArrayData*)this);
   return false;
 }
-    
+
 void ArrayData::nextForFullPos() {
   next();
 }
-  
+
 void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(NULL);
@@ -561,7 +561,7 @@ TypedValue* ArrayData::nvGetCell(const StringData* key) const {
 }
 
 CVarRef ArrayData::getNotFound(int64 k) {
-  raise_notice("Undefined index: %"PRId64, k);
+  raise_notice("Undefined index: %" PRId64, k);
   return null_variant;
 }
 
@@ -586,7 +586,7 @@ CVarRef ArrayData::getNotFound(CVarRef k) {
 }
 
 TypedValue* ArrayData::nvGetNotFound(int64 k) {
-  raise_notice("Undefined index: %"PRId64, k);
+  raise_notice("Undefined index: %" PRId64, k);
   return (TypedValue*)&init_null_variant;
 }
 

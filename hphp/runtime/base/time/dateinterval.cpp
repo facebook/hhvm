@@ -116,27 +116,27 @@ String DateInterval::format(CStrRef format_spec) {
     c = format_spec.charAt(i);
 
     switch(c) {
-      case 'Y': l = snprintf(buf, MAXLEN, "%02"PRId64, getYears()); break;
-      case 'y': l = snprintf(buf, MAXLEN, "%"PRId64,   getYears()); break;
+      case 'Y': l = snprintf(buf, MAXLEN, "%02" PRId64, getYears()); break;
+      case 'y': l = snprintf(buf, MAXLEN, "%" PRId64,   getYears()); break;
 
-      case 'M': l = snprintf(buf, MAXLEN, "%02"PRId64, getMonths()); break;
-      case 'm': l = snprintf(buf, MAXLEN, "%"PRId64,   getMonths()); break;
+      case 'M': l = snprintf(buf, MAXLEN, "%02" PRId64, getMonths()); break;
+      case 'm': l = snprintf(buf, MAXLEN, "%" PRId64,   getMonths()); break;
 
-      case 'D': l = snprintf(buf, MAXLEN, "%02"PRId64, getDays()); break;
-      case 'd': l = snprintf(buf, MAXLEN, "%"PRId64,   getDays()); break;
+      case 'D': l = snprintf(buf, MAXLEN, "%02" PRId64, getDays()); break;
+      case 'd': l = snprintf(buf, MAXLEN, "%" PRId64,   getDays()); break;
 
-      case 'H': l = snprintf(buf, MAXLEN, "%02"PRId64, getHours()); break;
-      case 'h': l = snprintf(buf, MAXLEN, "%"PRId64,   getHours()); break;
+      case 'H': l = snprintf(buf, MAXLEN, "%02" PRId64, getHours()); break;
+      case 'h': l = snprintf(buf, MAXLEN, "%" PRId64,   getHours()); break;
 
-      case 'I': l = snprintf(buf, MAXLEN, "%02"PRId64, getMinutes()); break;
-      case 'i': l = snprintf(buf, MAXLEN, "%"PRId64,   getMinutes()); break;
+      case 'I': l = snprintf(buf, MAXLEN, "%02" PRId64, getMinutes()); break;
+      case 'i': l = snprintf(buf, MAXLEN, "%" PRId64,   getMinutes()); break;
 
-      case 'S': l = snprintf(buf, MAXLEN, "%02"PRId64, getSeconds()); break;
-      case 's': l = snprintf(buf, MAXLEN, "%"PRId64,   getSeconds()); break;
+      case 'S': l = snprintf(buf, MAXLEN, "%02" PRId64, getSeconds()); break;
+      case 's': l = snprintf(buf, MAXLEN, "%" PRId64,   getSeconds()); break;
 
       case 'a':
         if (haveTotalDays()) {
-          l = snprintf(buf, MAXLEN, "%"PRId64, getTotalDays());
+          l = snprintf(buf, MAXLEN, "%" PRId64, getTotalDays());
         } else {
           l = snprintf(buf, MAXLEN, "(unknown)");
         }

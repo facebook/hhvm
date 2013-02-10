@@ -79,7 +79,7 @@ void dump() {
 #include "runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
   if (!tl_counters[s]) {} else                                  \
-    TRACE(1, "STAT %-50s %15"PRId64"\n", #s, tl_counters[s]);
+    TRACE(1, "STAT %-50s %15" PRId64 "\n", #s, tl_counters[s]);
   STATS
 #undef STAT
 #undef O

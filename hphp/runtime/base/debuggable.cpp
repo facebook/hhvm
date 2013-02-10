@@ -35,15 +35,15 @@ std::string IDebuggable::FormatSize(int64 size) {
       n /= 1024;
       if (n >= 1024) {
         n /= 1024;
-        snprintf(buf, sizeof(buf), "%"PRId64" bytes (%.2fG)", size, n);
+        snprintf(buf, sizeof(buf), "%" PRId64" bytes (%.2fG)", size, n);
       } else {
-        snprintf(buf, sizeof(buf), "%"PRId64" bytes (%.2fM)", size, n);
+        snprintf(buf, sizeof(buf), "%" PRId64" bytes (%.2fM)", size, n);
       }
     } else {
-      snprintf(buf, sizeof(buf), "%"PRId64" bytes (%.2fk)", size, n);
+      snprintf(buf, sizeof(buf), "%" PRId64" bytes (%.2fk)", size, n);
     }
   } else {
-    snprintf(buf, sizeof(buf), "%"PRId64" bytes", size);
+    snprintf(buf, sizeof(buf), "%" PRId64" bytes", size);
   }
   return buf;
 }
@@ -57,15 +57,15 @@ std::string IDebuggable::FormatTime(int64 milliSeconds) {
       n /= 60;
       if (n >= 60) {
         n /= 60;
-        snprintf(buf, sizeof(buf), "%"PRId64" ms (%.2f hrs)", milliSeconds, n);
+        snprintf(buf, sizeof(buf), "%" PRId64 " ms (%.2f hrs)", milliSeconds, n);
       } else {
-        snprintf(buf, sizeof(buf), "%"PRId64" ms (%.2f min)", milliSeconds, n);
+        snprintf(buf, sizeof(buf), "%" PRId64 " ms (%.2f min)", milliSeconds, n);
       }
     } else {
-      snprintf(buf, sizeof(buf), "%"PRId64" ms (%.2f sec)", milliSeconds, n);
+      snprintf(buf, sizeof(buf), "%" PRId64 " ms (%.2f sec)", milliSeconds, n);
     }
   } else {
-    snprintf(buf, sizeof(buf), "%"PRId64" ms", milliSeconds);
+    snprintf(buf, sizeof(buf), "%" PRId64 " ms", milliSeconds);
   }
   return buf;
 }
@@ -80,7 +80,7 @@ void IDebuggable::Add(InfoVec &out, const char *name,
 void IDebuggable::AddServerStats(InfoVec &out, const char *name,
                                  const char *statsName /* = NULL */) {
   if (statsName == NULL) statsName = name;
-  Add(out, name, FormatNumber("%"PRId64, ServerStats::Get(statsName)));
+  Add(out, name, FormatNumber("%" PRId64, ServerStats::Get(statsName)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

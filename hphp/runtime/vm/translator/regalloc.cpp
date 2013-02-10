@@ -87,7 +87,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
       assert(retval->m_state == RegInfo::CLEAN ||
              retval->m_state == RegInfo::DIRTY);
       assert(retval->m_cont == cont);
-      TRACE(1, "alloc (%s, %"PRId64") t%d state %d hit r%d\n",
+      TRACE(1, "alloc (%s, %" PRId64 ") t%d state %d hit r%d\n",
             loc.spaceName(), loc.offset, type, state, int(retval->m_pReg));
       needsFill = false;
     }
@@ -102,7 +102,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
       retval = findFreeReg(loc);
     }
     if (retval) {
-      TRACE(1, "alloc (%s, %"PRId64") found a free reg %d state %d\n",
+      TRACE(1, "alloc (%s, %" PRId64 ") found a free reg %d state %d\n",
             loc.spaceName(), loc.offset, int(retval->m_pReg),
             retval->m_state);
     }
@@ -122,7 +122,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
     // register that still might need preservation.
     assert(retval->m_epoch < m_epoch);
 
-    TRACE(1, "alloc (%s, %"PRId64") found a %s victim reg r%d\n",
+    TRACE(1, "alloc (%s, %" PRId64 ") found a %s victim reg r%d\n",
           loc.spaceName(), loc.offset,
           retval->m_state == RegInfo::CLEAN ? "clean" : "dirty",
           int(retval->m_pReg));
@@ -142,7 +142,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
 
   assert(retval);
   retval->m_epoch = m_epoch;
-  TRACE(1, "alloc (%s, %"PRId64") t%d state %d r%d fill? %d\n",
+  TRACE(1, "alloc (%s, %" PRId64 ") t%d state %d r%d fill? %d\n",
         loc.spaceName(), loc.offset, type, state, int(retval->m_pReg),
         needsFill);
   if (needsFill && !IS_NULL_TYPE(type)) {
@@ -488,11 +488,11 @@ void RegAlloc::spill(RegInfo *toSpill) {
   if (toSpill->m_type == KindOfInvalid) {
     // KindOfInvalid outputs are auto-spilled; it is the translator's
     // responsibility to keep them sync'ed in memory and registers.
-    TRACE(1, "spill: (%s, %"PRId64") skipping invalid output\n",
+    TRACE(1, "spill: (%s, %" PRId64 ") skipping invalid output\n",
           toSpill->m_cont.m_loc.spaceName(), toSpill->m_cont.m_loc.offset);
     return;
   }
-  TRACE(1, "spill: (%s, %"PRId64") <- type %d, r%d\n",
+  TRACE(1, "spill: (%s, %" PRId64 ") <- type %d, r%d\n",
         toSpill->m_cont.m_loc.spaceName(), toSpill->m_cont.m_loc.offset,
         toSpill->m_type, int(toSpill->m_pReg));
   m_spf->spill(toSpill->m_cont.m_loc, toSpill->m_type, toSpill->m_pReg, true);
@@ -737,7 +737,7 @@ RegAlloc::getImmReg(int64 immVal, bool allowAllocate /* = true */) {
   }
 
   // Allocate freeReg, load it with immVal, and return it.
-  TRACE(1, "allocImmReg (0x%"PRIx64") t%d state %d r%d\n",
+  TRACE(1, "allocImmReg (0x%" PRIx64 ") t%d state %d r%d\n",
         immVal, type, state, int(freeReg->m_pReg));
   m_spf->loadImm(immVal, freeReg->m_pReg);
   assignRegInfo(freeReg, cont, state, type);
@@ -778,7 +778,7 @@ void
 RegAlloc::scrubStackEntries(int firstUnreachable) {
   FOR_EACH_REG(r) {
     if (r->m_cont.isUnreachableStack(firstUnreachable)) {
-      TRACE(1, "scrubbing dead stack value: (Stack, %"PRId64")\n",
+      TRACE(1, "scrubbing dead stack value: (Stack, %" PRId64 ")\n",
             r->m_cont.m_loc.offset);
       assert(r->m_state == RegInfo::CLEAN || r->m_state == RegInfo::DIRTY);
       stateTransition(r, RegInfo::CLEAN);
@@ -794,7 +794,7 @@ RegAlloc::scrubStackRange(int firstToDiscard, int lastToDiscard) {
         r->m_cont.m_loc.space == Location::Stack &&
         r->m_cont.m_loc.offset >= firstToDiscard &&
         r->m_cont.m_loc.offset <= lastToDiscard) {
-      TRACE(1, "scrubbing dead stack value: (Stack, %"PRId64")\n",
+      TRACE(1, "scrubbing dead stack value: (Stack, %" PRId64 ")\n",
             r->m_cont.m_loc.offset);
       assert(r->m_state == RegInfo::CLEAN || r->m_state == RegInfo::DIRTY);
       stateTransition(r, RegInfo::CLEAN);
@@ -1011,7 +1011,7 @@ std::string RegContent::pretty() const {
   char  val[256];
   val[0] = 0;
   switch (m_kind) {
-    case Int : sprintf(val, "0x%"PRIx64, m_int); break;
+    case Int : sprintf(val, "0x%" PRIx64, m_int); break;
     case Loc : sprintf(val, "%s", m_loc.pretty().data()); break;
     default  : break;
   }

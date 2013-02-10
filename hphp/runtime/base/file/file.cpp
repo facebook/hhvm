@@ -169,7 +169,7 @@ int File::getc() {
 
 String File::read(int64 length) {
   if (length <= 0) {
-    raise_notice("Invalid length %"PRId64, length);
+    raise_notice("Invalid length %" PRId64, length);
     return "";
   }
 

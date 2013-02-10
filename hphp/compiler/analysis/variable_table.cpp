@@ -1302,7 +1302,7 @@ void VariableTable::outputCPPGVHashTableGetImpl(CodeGenerator &cg,
     string escaped = CodeGenerator::EscapeLabel(name);
     string varName = string("gvm_") + CodeGenerator::FormatLabel(name);
     cg_printf("  (const char *)\"%s\",\n"
-              "  (const char *)%"PRId64",\n"
+              "  (const char *)%" PRId64 ",\n"
               "  (const char *)GET_GV_OFFSET(%s),\n"
               "  (const char *)%u,\n",
               escaped.c_str(),

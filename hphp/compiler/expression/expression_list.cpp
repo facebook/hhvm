@@ -674,7 +674,7 @@ void ExpressionList::outputCPPUniqLitKeyArrayInit(
   bool arrayElements /* = true */, unsigned int start /* = 0 */) {
   if (arrayElements) assert(m_arrayElements && !m_collectionType);
   unsigned int n =  m_exps.size();
-  cg_printf("array_createv%c(%"PRId64", ", litstrKeys ? 's' : 'i', num);
+  cg_printf("array_createv%c(%" PRId64 ", ", litstrKeys ? 's' : 'i', num);
   always_assert(n - start == num);
   for (unsigned int i = start; i < n; i++) {
     ExpressionPtr exp = m_exps[i];

@@ -1416,7 +1416,7 @@ int64 MySQLResult::getRowCount() const {
 
 bool MySQLResult::seekRow(int64 row) {
   if (row < 0 || row >= getRowCount()) {
-    raise_warning("Unable to jump to row %"PRId64" on MySQL result index %d",
+    raise_warning("Unable to jump to row %" PRId64 " on MySQL result index %d",
                     row, o_getId());
     return false;
   }
@@ -1442,7 +1442,7 @@ bool MySQLResult::fetchRow() {
 
 bool MySQLResult::seekField(int64 field) {
   if (field < 0 || field >= getFieldCount()) {
-    raise_warning("Field %"PRId64" is invalid for MySQL result index %d",
+    raise_warning("Field %" PRId64 " is invalid for MySQL result index %d",
                     field, o_getId());
     return false;
   }
@@ -1474,7 +1474,7 @@ public:
   }
   virtual void debuggerInfo(InfoVec &info) {
     int count = g_persistentObjects->getMap("mysql::persistent_conns").size();
-    Add(info, "Persistent", FormatNumber("%"PRId64, count));
+    Add(info, "Persistent", FormatNumber("%" PRId64, count));
 
     AddServerStats(info, "sql.conn"       );
     AddServerStats(info, "sql.reconn_new" );

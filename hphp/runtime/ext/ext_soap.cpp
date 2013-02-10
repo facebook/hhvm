@@ -2244,7 +2244,7 @@ void c_SoapServer::t_setpersistence(int64 mode) {
     if (mode == SOAP_PERSISTENCE_SESSION || mode == SOAP_PERSISTENCE_REQUEST) {
       m_soap_class.persistance = mode;
     } else {
-      raise_warning("Tried to set persistence with bogus value (%"PRId64")",
+      raise_warning("Tried to set persistence with bogus value (%" PRId64 ")",
                     mode);
     }
   } else {

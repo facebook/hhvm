@@ -269,7 +269,7 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
   if (!newCmp) return nullptr;
 
   SSATmp* newQueryJmp = makeInstruction(
-    [=, this] (IRInstruction* condJmp) -> SSATmp* {
+    [=] (IRInstruction* condJmp) -> SSATmp* {
       SSATmp* newCondJmp = simplifyCondJmp(condJmp);
       if (newCondJmp) return newCondJmp;
       if (condJmp->getOpcode() == Nop) {

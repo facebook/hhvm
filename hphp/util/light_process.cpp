@@ -128,7 +128,7 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
     fprintf(fout, "error\n");
     fflush(fout);
   } else {
-    fprintf(fout, "success\n%"PRId64"\n", (int64)f);
+    fprintf(fout, "success\n%" PRId64 "\n", (int64)f);
     fflush(fout);
     int fd = fileno(f);
     send_fd(afdt_fd, fd);
@@ -140,7 +140,7 @@ static void do_pclose(FILE *fin, FILE *fout) {
 
   int64 fptr = 0;
   read_buf(fin, buf);
-  sscanf(buf, "%"PRId64, &fptr);
+  sscanf(buf, "%" PRId64, &fptr);
   FILE *f = (FILE *)fptr;
   int ret = ::pclose(f);
 
@@ -216,7 +216,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     _exit(127);
   } else if (child > 0) {
     // successfully created the child process
-    fprintf(fout, "%"PRId64"\n", (int64)child);
+    fprintf(fout, "%" PRId64 "\n", (int64)child);
     fflush(fout);
   } else {
     // failed creating the child process
@@ -241,7 +241,7 @@ static void do_waitpid(FILE *fin, FILE *fout) {
   int64 p = -1;
   int options = 0;
   int timeout = 0;
-  sscanf(buf, "%"PRId64" %d %d", &p, &options, &timeout);
+  sscanf(buf, "%" PRId64 " %d %d", &p, &options, &timeout);
   pid_t pid = (pid_t)p;
   int stat;
   if (timeout > 0) {
@@ -252,7 +252,7 @@ static void do_waitpid(FILE *fin, FILE *fout) {
   pid_t ret = ::waitpid(pid, &stat, options);
   alarm(0); // cancel the previous alarm if not triggered yet
   waited = 0;
-  fprintf(fout, "%"PRId64" %d\n", (int64)ret, stat);
+  fprintf(fout, "%" PRId64 " %d\n", (int64)ret, stat);
   if (ret < 0) {
     fprintf(fout, "%d\n", errno);
   }
@@ -529,7 +529,7 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
 
   int64 fptr = 0;
   read_buf(g_procs[id].m_fin, buf);
-  sscanf(buf, "%"PRId64, &fptr);
+  sscanf(buf, "%" PRId64, &fptr);
   if (!fptr) {
     Logger::Error("Light process failed to return the file pointer.");
     return NULL;
@@ -563,7 +563,7 @@ int LightProcess::pclose(FILE *f) {
   int64 f2 = it->second;
   g_procs[id].m_popenMap.erase((int64)f);
   fclose(f);
-  fprintf(g_procs[id].m_fout, "pclose\n%"PRId64"\n", f2);
+  fprintf(g_procs[id].m_fout, "pclose\n%" PRId64 "\n", f2);
   fflush(g_procs[id].m_fout);
 
   char buf[BUFFER_SIZE];
@@ -623,7 +623,7 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
     return -1;
   }
   int64 pid = -1;
-  sscanf(buf, "%"PRId64, &pid);
+  sscanf(buf, "%" PRId64, &pid);
   assert(pid);
   return (pid_t)pid;
 }
@@ -638,7 +638,7 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
-  fprintf(g_procs[id].m_fout, "waitpid\n%"PRId64" %d %d\n", (int64)pid, options,
+  fprintf(g_procs[id].m_fout, "waitpid\n%" PRId64 " %d %d\n", (int64)pid, options,
           timeout);
   fflush(g_procs[id].m_fout);
 
@@ -647,7 +647,7 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
   if (!buf[0]) return -1;
   int64 ret;
   int stat;
-  sscanf(buf, "%"PRId64" %d", &ret, &stat);
+  sscanf(buf, "%" PRId64 " %d", &ret, &stat);
   *stat_loc = stat;
   if (ret < 0) {
     read_buf(g_procs[id].m_fin, buf);

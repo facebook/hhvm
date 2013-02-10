@@ -501,7 +501,7 @@ void ScalarExpression::outputCPPNamedInteger(CodeGenerator &cg,
   int intId = ar->checkScalarVarInteger(val, index);
   always_assert(index != -1);
   string name = ar->getScalarVarIntegerName(intId, index);
-  cg_printf("NAMVAR(%s, int64_t(%"PRId64"))", name.c_str(), val);
+  cg_printf("NAMVAR(%s, int64_t(%" PRId64 "))", name.c_str(), val);
 
   getUsedScalarScope(cg)->addUsedScalarVarInteger(val);
   if (cg.isFileOrClassHeader()) {
@@ -520,7 +520,7 @@ void ScalarExpression::outputCPPInteger(CodeGenerator &cg,
   if (v.toInt64() == std::numeric_limits<int64_t>::min()) {
     cg_printf("int64_t(0x8000000000000000LL)");
   } else {
-    cg_printf("%"PRId64"L", v.toInt64());
+    cg_printf("%" PRId64 "L", v.toInt64());
   }
 }
 

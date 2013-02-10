@@ -199,7 +199,7 @@ std::string StackTrace::hexEncode(int minLevel /* = 0 */,
   for (int i = minLevel; i < (int)m_bt_pointers.size() && i < maxLevel; i++) {
     if (i > minLevel) bts += ':';
     char buf[20];
-    snprintf(buf, sizeof(buf), "%"PRIx64, (int64)m_bt_pointers[i]);
+    snprintf(buf, sizeof(buf), "%" PRIx64, (int64)m_bt_pointers[i]);
     bts.append(buf);
   }
   return bts;
@@ -234,7 +234,7 @@ void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
 
   dprintf(fd, "Host: %s\n",Process::GetHostName().c_str());
   dprintf(fd, "ProcessID: %s\n", pid);
-  dprintf(fd, "ThreadID: %"PRIx64"\n", (int64)Process::GetThreadId());
+  dprintf(fd, "ThreadID: %" PRIx64"\n", (int64)Process::GetThreadId());
   dprintf(fd, "ThreadPID: %u\n", Process::GetThreadPid());
   dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
   dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");

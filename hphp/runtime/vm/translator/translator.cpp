@@ -254,7 +254,7 @@ RuntimeType Translator::liveType(Location l, const Unit& u) {
     } break;
     case Location::Iter: {
       const Iter *it = frame_iter(curFrame(), l.offset);
-      TRACE(1, "Iter input: fp %p, iter %p, offset %"PRId64"\n", vmfp(),
+      TRACE(1, "Iter input: fp %p, iter %p, offset %" PRId64 "\n", vmfp(),
             it, l.offset);
       return RuntimeType(it);
     } break;
@@ -2558,7 +2558,7 @@ void TraceletContext::aliasTaint() {
        it != m_currentMap.end(); ++it) {
     DynLocation* dl = it->second;
     if (dl->canBeAliased()) {
-      TRACE(1, "(%s, %"PRId64") <- inner type invalidated\n",
+      TRACE(1, "(%s, %" PRId64 ") <- inner type invalidated\n",
             it->first.spaceName(), it->first.offset);
       RuntimeType newRtt = dl->rtt.setValueType(KindOfInvalid);
       it->second = m_t->newDynLocation(dl->location, newRtt);
@@ -2572,7 +2572,7 @@ void TraceletContext::varEnvTaint() {
        it != m_currentMap.end(); ++it) {
     DynLocation* dl = it->second;
     if (dl->isValue() && dl->isLocal()) {
-      TRACE(1, "(%s, %"PRId64") <- type invalidated\n",
+      TRACE(1, "(%s, %" PRId64 ") <- type invalidated\n",
             it->first.spaceName(), it->first.offset);
       it->second = m_t->newDynLocation(dl->location,
                                        RuntimeType(KindOfInvalid));

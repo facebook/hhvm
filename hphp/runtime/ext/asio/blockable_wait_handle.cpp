@@ -110,12 +110,12 @@ void c_BlockableWaitHandle::killCycle() {
 
   visited.insert(current);
   exception_msg_items.push_back(folly::stringPrintf(
-      "  %s (%"PRId64")\n", current->getName()->data(), current->t_getid()));
+      "  %s (%" PRId64 ")\n", current->getName()->data(), current->t_getid()));
 
   while (visited.find(next) == visited.end()) {
     visited.insert(next);
     exception_msg_items.push_back(folly::stringPrintf(
-        "  %s (%"PRId64")\n", next->getName()->data(), next->t_getid()));
+        "  %s (%" PRId64 ")\n", next->getName()->data(), next->t_getid()));
 
     current = dynamic_cast<c_BlockableWaitHandle*>(next);
 
@@ -132,7 +132,7 @@ void c_BlockableWaitHandle::killCycle() {
 
   // generate the exception
   exception_msg_items.push_back(folly::stringPrintf(
-      "  %s (%"PRId64") (dupe)\n", next->getName()->data(), next->t_getid()));
+      "  %s (%" PRId64 ") (dupe)\n", next->getName()->data(), next->t_getid()));
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
       folly::join("", exception_msg_items)));
 

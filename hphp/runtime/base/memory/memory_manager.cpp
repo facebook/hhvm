@@ -262,10 +262,10 @@ void MemoryManager::checkMemory() {
   printf("----- MemoryManager for Thread %ld -----\n", (long)pthread_self());
 
   refreshStats();
-  printf("Current Usage: %"PRId64" bytes\t", m_stats.usage);
-  printf("Current Alloc: %"PRId64" bytes\n", m_stats.alloc);
-  printf("Peak Usage: %"PRId64" bytes\t", m_stats.peakUsage);
-  printf("Peak Alloc: %"PRId64" bytes\n", m_stats.peakAlloc);
+  printf("Current Usage: %" PRId64 " bytes\t", m_stats.usage);
+  printf("Current Alloc: %" PRId64 " bytes\n", m_stats.alloc);
+  printf("Peak Usage: %" PRId64 " bytes\t", m_stats.peakUsage);
+  printf("Peak Alloc: %" PRId64 " bytes\n", m_stats.peakAlloc);
 
   printf("Slabs: %lu KiB\n", m_slabs.size() * SLAB_SIZE / 1024);
 }

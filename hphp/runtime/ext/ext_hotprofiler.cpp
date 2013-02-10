@@ -760,7 +760,7 @@ private:
       char buf[512];
       snprintf(
         buf, sizeof(buf),
-        ",\"ct\": %"PRId64",\"wt\": %"PRId64",\"ut\": %"PRId64",\"st\": 0",
+        ",\"ct\": %" PRId64 ",\"wt\": %" PRId64 ",\"ut\": %" PRId64 ",\"st\": 0",
         counts.count, (int64_t)to_usec(counts.tsc, m_MHz),
         (int64_t)to_usec(counts.vtsc, m_MHz, true));
       print(buf);

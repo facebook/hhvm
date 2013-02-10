@@ -366,7 +366,7 @@ string RuntimeType::pretty() const {
 
 std::string Location::pretty() const {
   char buf[1024];
-  sprintf(buf, "(Location %s %"PRId64")", spaceName(), offset);
+  sprintf(buf, "(Location %s %" PRId64 ")", spaceName(), offset);
   return std::string(buf);
 }
 

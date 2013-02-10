@@ -1320,7 +1320,7 @@ ZendArray::Bucket::~Bucket() {
 }
 
 void ZendArray::Bucket::dump() {
-  printf("ZendArray::Bucket: %"PRIx64", %p, %p, %p\n",
+  printf("ZendArray::Bucket: %" PRIx64 ", %p, %p, %p\n",
          hashKey(), pListNext, pListLast, pNext);
   if (hasStrKey()) {
     skey->dump();

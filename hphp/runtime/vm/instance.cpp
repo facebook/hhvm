@@ -250,8 +250,13 @@ void Instance::propImpl(TypedValue*& retval, TypedValue& tvRef,
       if (getAttribute(UseGet)) {
         invokeGetProp(retval, tvRef, key);
       } else {
-        raise_error("Inaccessible property: %s::$%s",
-                    m_cls->m_preClass->name()->data(), key->data());
+        // No need to check hasProp since visible is true
+        // Visibility is either protected or private since accessible is false
+        const PreClass::Prop *prop = m_cls->preClass()->lookupProp(key);
+        raise_error("Cannot access %s property %s::$%s",
+                    (prop->attrs() & AttrPrivate) ? "private" : "protected",
+                    m_cls->m_preClass->name()->data(),
+                    key->data());
       }
     }
   } else if (UNLIKELY(!*key->data())) {

@@ -62,6 +62,11 @@ class ArenaImpl {
   void* alloc(size_t nbytes);
 
   /*
+   * Return the amount of memory this arena has handed out via alloc().
+   */
+  size_t size() const;
+
+  /*
    * Return the amount of memory the arena has allocated, but not yet
    * handed out via alloc().  This can be used to estimate memory
    * usage ignoring arena overhead.
@@ -108,6 +113,9 @@ class ArenaImpl {
   Frame m_frame;
   TinyVector<char*> m_ptrs; // inlines 1 pointer, may not be optimal
   PointerList<char> m_externalPtrs;
+#ifdef DEBUG
+  size_t m_externalAllocSize;
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////

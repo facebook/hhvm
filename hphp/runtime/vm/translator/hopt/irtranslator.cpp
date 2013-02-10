@@ -1724,6 +1724,9 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 }
 
 void TranslatorX64::hhirTraceFree() {
+  FTRACE(1, "HHIR free: arena size: {}\n",
+         m_irFactory->arena().size());
+
   m_useHHIR = false;
   m_hhbcTrans.reset();
   m_irFactory.reset();

@@ -35,6 +35,9 @@ ArenaImpl<kChunkBytes>::ArenaImpl() {
   memset(&m_frame, 0, sizeof m_frame);
   m_current = static_cast<char*>(malloc(kChunkBytes));
   m_ptrs.push_back(m_current);
+#ifdef DEBUG
+  m_externalAllocSize = 0;
+#endif
 }
 
 template<size_t kChunkBytes>
@@ -48,11 +51,23 @@ ArenaImpl<kChunkBytes>::~ArenaImpl() {
 }
 
 template<size_t kChunkBytes>
+size_t ArenaImpl<kChunkBytes>::size() const {
+  size_t ret = m_ptrs.size() * kChunkBytes - slackEstimate();
+#ifdef DEBUG
+  ret += m_externalAllocSize;
+#endif
+  return ret;
+}
+
+template<size_t kChunkBytes>
 void* ArenaImpl<kChunkBytes>::allocSlow(size_t nbytes) {
   // Large allocations go directly to malloc without discarding our
   // current chunk.
   if (UNLIKELY(nbytes >= kChunkBytes)) {
     char* ptr = static_cast<char*>(malloc(nbytes));
+#ifdef DEBUG
+    m_externalAllocSize += nbytes;
+#endif
     m_externalPtrs.push(ptr);
     assert((intptr_t(ptr) & (kMinBytes - 1)) == 0);
     return ptr;

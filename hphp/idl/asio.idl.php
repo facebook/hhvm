@@ -181,6 +181,39 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "isFinished",
+    'desc'   => "Check if this wait handle finished (succeeded or failed)",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "A boolean indicating whether this wait handle finished",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "isSucceeded",
+    'desc'   => "Check if this wait handle succeeded",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "A boolean indicating whether this wait handle succeeded",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "isFailed",
+    'desc'   => "Check if this wait handle failed",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "A boolean indicating whether this wait handle failed",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "getID",
     'desc'   => "Get unique ID of this wait handle (amongst existing ones)",
     'flags'  => HasDocComment,

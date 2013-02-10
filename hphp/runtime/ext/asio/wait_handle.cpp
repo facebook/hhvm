@@ -43,6 +43,18 @@ Variant c_WaitHandle::t_join() {
   return tvAsCVarRef(join());
 }
 
+bool c_WaitHandle::t_isfinished() {
+  return isFinished();
+}
+
+bool c_WaitHandle::t_issucceeded() {
+  return isSucceeded();
+}
+
+bool c_WaitHandle::t_isfailed() {
+  return isFailed();
+}
+
 int64 c_WaitHandle::t_getid() {
   return ((long) this) / sizeof(void*);
 }

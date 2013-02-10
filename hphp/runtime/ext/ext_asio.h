@@ -66,6 +66,12 @@ class c_WaitHandle : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(import);
   public: Variant t_join();
   DECLARE_METHOD_INVOKE_HELPERS(join);
+  public: bool t_isfinished();
+  DECLARE_METHOD_INVOKE_HELPERS(isfinished);
+  public: bool t_issucceeded();
+  DECLARE_METHOD_INVOKE_HELPERS(issucceeded);
+  public: bool t_isfailed();
+  DECLARE_METHOD_INVOKE_HELPERS(isfailed);
   public: int64 t_getid();
   DECLARE_METHOD_INVOKE_HELPERS(getid);
   public: String t_getname();

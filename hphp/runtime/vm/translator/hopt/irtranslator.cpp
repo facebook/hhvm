@@ -1629,6 +1629,10 @@ TranslatorX64::irTranslateTracelet(const Tracelet&         t,
           x.file, x.line, x.func);
   } catch (TranslationFailedExc& tfe) {
     not_reached();
+  } catch (const std::exception& e) {
+    hhirSucceeded = false;
+    FTRACE(1, "HHIR: FAILED with exception: {}\n", e.what());
+    assert(0);
   }
 
   if (!hhirSucceeded) {

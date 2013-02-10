@@ -433,6 +433,34 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
+struct ConstData : IRExtraData {
+  template<class T>
+  explicit ConstData(T data)
+    : m_dataBits(0)
+  {
+    static_assert(sizeof(T) <= sizeof m_dataBits,
+                  "Constant data was larger than supported");
+    static_assert(std::is_pod<T>::value,
+                  "Constant data wasn't a pod?");
+    std::memcpy(&m_dataBits, &data, sizeof data);
+  }
+
+  template<class T>
+  T as() const {
+    T ret;
+    std::memcpy(&ret, &m_dataBits, sizeof ret);
+    return ret;
+  }
+
+  bool equals(ConstData o) const { return m_dataBits == o.m_dataBits; }
+  size_t hash() const { return std::hash<uintptr_t>()(m_dataBits); }
+
+private:
+  uintptr_t m_dataBits;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 #define X(op, data)                                                   \
   template<> struct IRExtraDataType<op> { typedef data type; };       \
   template<> struct OpHasExtraData<op> { enum { value = 1 }; };       \
@@ -450,6 +478,8 @@ X(DecRefLoc,          LocalId);
 X(LdLoc,              LocalId);
 X(StLoc,              LocalId);
 X(StLocNT,            LocalId);
+X(DefConst,           ConstData);
+X(LdConst,            ConstData);
 
 #undef X
 
@@ -875,6 +905,30 @@ public:
 static_assert(sizeof(Type) <= sizeof(uint64_t),
               "JIT::Type should fit in a register");
 
+/*
+ * typeForConst(T)
+ *
+ *   returns the Type type for a C++ type that may be used with
+ *   ConstData.
+ */
+
+// The only interesting case is int/bool disambiguation.
+template<class T>
+typename std::enable_if<
+  std::is_integral<T>::value,
+  Type
+>::type typeForConst(T) {
+  return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
+}
+
+inline Type typeForConst(const StringData*)  { return Type::StaticStr; }
+inline Type typeForConst(const NamedEntity*) { return Type::NamedEntity; }
+inline Type typeForConst(const ArrayData*)   { return Type::Arr; }
+inline Type typeForConst(const Func*)        { return Type::Func; }
+inline Type typeForConst(const Class*)       { return Type::Cls; }
+inline Type typeForConst(TCA)                { return Type::TCA; }
+inline Type typeForConst(double)             { return Type::Dbl; }
+
 bool cmpOpTypesMayReenter(Opcode, Type t0, Type t1);
 
 class RawMemSlot {
@@ -1157,7 +1211,6 @@ struct IRInstruction {
   LabelInstruction* getLabel() const { return m_label; }
   bool isControlFlowInstruction() const { return m_label != NULL; }
 
-  virtual bool isConstInstruction() const { return false; }
   virtual bool equals(IRInstruction* inst) const;
   virtual size_t hash() const;
   virtual void print(std::ostream& ostream) const;
@@ -1212,160 +1265,6 @@ private:
   Trace*            m_parent;
   TCA               m_tca;
   IRExtraData*      m_extra;
-};
-
-class ConstInstruction : public IRInstruction {
-public:
-  ConstInstruction(Opcode opc, Type t) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(t);
-    m_intVal = 0;
-  }
-
-  template<class T>
-  ConstInstruction(Opcode opc,
-                   T val,
-                   typename std::enable_if<
-                     std::is_integral<T>::value && !std::is_same<T,bool>::value
-                   >::type* = 0)
-    : IRInstruction(opc)
-  {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Int);
-    m_intVal = val;
-  }
-
-  ConstInstruction(Opcode opc, bool val) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Bool);
-    m_intVal = 0;
-    m_boolVal = val;
-  }
-
-  ConstInstruction(Opcode opc, double val) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Dbl);
-    m_dblVal = val;
-  }
-
-  ConstInstruction(Opcode opc, const StringData* val) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::StaticStr);
-    m_strVal = val;
-  }
-
-  ConstInstruction(Opcode opc, const ArrayData* val) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Arr);
-    m_arrVal = val;
-  }
-
-  ConstInstruction(Opcode opc, const Func* f) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Func);
-    m_func = f;
-  }
-
-  ConstInstruction(Opcode opc, const Class* f) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::Cls);
-    m_clss = f;
-  }
-
-  ConstInstruction(Opcode opc, const NamedEntity* ne) : IRInstruction(opc) {
-    setTypeParam(Type::NamedEntity);
-    m_namedEntity = ne;
-  }
-
-  ConstInstruction(Opcode opc, TCA tca) : IRInstruction(opc) {
-    assert(opc == DefConst || opc == LdConst);
-    setTypeParam(Type::TCA);
-    m_tca = tca;
-  }
-
-  explicit ConstInstruction(Arena& arena,
-                            const ConstInstruction* inst,
-                            IId iid)
-    : IRInstruction(arena, inst, iid)
-    , m_strVal(inst->m_strVal)
-  {}
-
-  bool getValAsBool() const {
-    assert(getTypeParam() == Type::Bool);
-    return m_boolVal;
-  }
-
-  int64 getValAsInt() const {
-    assert(getTypeParam() == Type::Int);
-    return m_intVal;
-  }
-
-  int64 getValAsRawInt() const {
-    return m_intVal;
-  }
-
-  double getValAsDbl() const {
-    assert(getTypeParam() == Type::Dbl);
-    return m_dblVal;
-  }
-
-  const StringData* getValAsStr() const {
-    assert(getTypeParam() == Type::StaticStr);
-    return m_strVal;
-  }
-  const ArrayData* getValAsArr() const {
-    assert(getTypeParam() == Type::Arr);
-    return m_arrVal;
-  }
-  const Func* getValAsFunc() const {
-    assert(getTypeParam() == Type::Func);
-    return m_func;
-  }
-  const Class* getValAsClass() const {
-    assert(getTypeParam() == Type::Cls);
-    return m_clss;
-  }
-  const VarEnv* getValAsVarEnv() const {
-    assert(getTypeParam() == Type::VarEnv);
-    return m_varEnv;
-  }
-  const NamedEntity* getValAsNamedEntity() const {
-    assert(getTypeParam() == Type::NamedEntity);
-    return m_namedEntity;
-  }
-
-  TCA getValAsTCA() const {
-    assert(getTypeParam() == Type::TCA);
-    return m_tca;
-  }
-
-  uintptr_t getValAsBits() const { return m_bits; }
-
-  bool isEmptyArray() const {
-    return m_arrVal == HphpArray::GetStaticEmptyArray();
-  }
-
-  void printConst(std::ostream& ostream) const;
-  virtual bool isConstInstruction() const {return true;}
-  virtual void print(std::ostream& ostream) const;
-  virtual bool equals(IRInstruction* inst) const;
-  virtual size_t hash() const;
-  virtual IRInstruction* clone(IRFactory* factory) const;
-
-private:
-  union {
-    uintptr_t          m_bits;
-    bool               m_boolVal;
-    int64              m_intVal;
-    double             m_dblVal;
-    const StringData*  m_strVal;
-    const ArrayData*   m_arrVal;
-    const Func*        m_func;
-    const Class*       m_clss;
-    const VarEnv*      m_varEnv;
-    const NamedEntity* m_namedEntity;
-    TCA                m_tca;
-  };
 };
 
 class LabelInstruction : public IRInstruction {
@@ -1467,13 +1366,18 @@ public:
 
   // XXX: false for Null, etc.  Would rather it returns whether we
   // have a compile-time constant value.
-  bool              isConst() const { return m_inst->isConstInstruction(); }
+  bool isConst() const {
+    return m_inst->getOpcode() == DefConst ||
+      m_inst->getOpcode() == LdConst;
+  }
 
   /*
    * For SSATmps with a compile-time constant value, the following
    * functions allow accessing it.
    *
-   * Pre: getInstruction() && getInstruction()->isConstInstruction()
+   * Pre: getInstruction() &&
+   *   (getInstruction()->getOpcode() == DefConst ||
+   *    getInstruction()->getOpcode() == LdConst)
    */
   bool               getValBool() const;
   int64              getValInt() const;

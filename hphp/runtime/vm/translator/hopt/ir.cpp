@@ -531,10 +531,6 @@ IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
-IRInstruction* ConstInstruction::clone(IRFactory* factory) const {
-  return factory->cloneInstruction(this);
-}
-
 IRInstruction* LabelInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
@@ -710,60 +706,48 @@ std::string IRInstruction::toString() const {
   return str.str();
 }
 
-void ConstInstruction::printConst(std::ostream& ostream) const {
-  auto t = getTypeParam();
+static void printConst(std::ostream& os, IRInstruction* inst) {
+  auto t = inst->getTypeParam();
+  auto c = inst->getExtra<DefConst>();
   if (t == Type::Int) {
-    ostream << m_intVal;
+    os << c->as<int64_t>();
   } else if (t == Type::Dbl) {
-    ostream << m_dblVal;
+    os << c->as<double>();
   } else if (t == Type::Bool) {
-    ostream << (m_boolVal ? "true" : "false");
+    os << (c->as<bool>() ? "true" : "false");
   } else if (t.isString()) {
-    ostream << "\""
-        << Util::escapeStringForCPP(m_strVal->data(), m_strVal->size())
-        << "\"";
+    auto str = c->as<const StringData*>();
+    os << "\""
+       << Util::escapeStringForCPP(str->data(), str->size())
+       << "\"";
   } else if (t == Type::Arr) {
-    if (isEmptyArray()) {
-      ostream << "array()";
+    auto arr = inst->getExtra<DefConst>()->as<const ArrayData*>();
+    if (arr->empty()) {
+      os << "array()";
     } else {
-      ostream << "Array(" << (void*)m_arrVal << ")";
+      os << "Array(" << arr << ")";
     }
   } else if (t == Type::Null) {
-    ostream << "Null";
+    os << "Null";
   } else if (t == Type::Uninit) {
-    ostream << "Unin";
+    os << "Unin";
   } else if (t == Type::Func) {
-    ostream << "Func(" << (m_func ? m_func->fullName()->data() : "0") << ")";
+    auto func = c->as<const Func*>();
+    os << "Func(" << (func ? func->fullName()->data() : "0") << ")";
   } else if (t == Type::Cls) {
-    ostream << "Cls(" << (m_clss ? m_clss->name()->data() : "0") << ")";
+    auto cls = c->as<const Class*>();
+    os << "Cls(" << (cls ? cls->name()->data() : "0") << ")";
   } else if (t == Type::NamedEntity) {
-    ostream << "NamedEntity(" << m_namedEntity << ")";
-  } else if (t == Type::FuncCls) {
-    assert(false && "ConstInstruction does not hold both func* and class*");
+    auto ne = c->as<const NamedEntity*>();
+    os << "NamedEntity(" << ne << ")";
   } else if (t == Type::TCA) {
-    ostream << folly::format("TCA: 0x{:x}", m_intVal);
+    void* vp = c->as<TCA>();
+    os << folly::format("TCA: 0x{}", vp);
   } else if (t == Type::None) {
-    ostream << "None:" << m_intVal;
+    os << "None:" << c->as<int64_t>();
   } else {
     not_reached();
   }
-}
-
-bool ConstInstruction::equals(IRInstruction* inst) const {
-  if (!this->IRInstruction::equals(inst)) {
-    return false;
-  }
-  return m_intVal == ((ConstInstruction*)inst)->m_intVal;
-}
-
-size_t ConstInstruction::hash() const {
-  return CSEHash::hashCombine(IRInstruction::hash(), m_intVal);
-}
-
-void ConstInstruction::print(std::ostream& ostream) const {
-  this->IRInstruction::print(ostream);
-  ostream << " ";
-  printConst(ostream);
 }
 
 bool LabelInstruction::equals(IRInstruction* inst) const {
@@ -848,47 +832,66 @@ int SSATmp::numAllocatedRegs() const {
 
 bool SSATmp::getValBool() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsBool();
+  assert(m_inst->getTypeParam().equals(Type::Bool));
+  return m_inst->getExtra<ConstData>()->as<bool>();
 }
+
 int64 SSATmp::getValInt() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsInt();
+  assert(m_inst->getTypeParam().equals(Type::Int));
+  return m_inst->getExtra<ConstData>()->as<int64_t>();
 }
+
 int64 SSATmp::getValRawInt() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsRawInt();
+  return m_inst->getExtra<ConstData>()->as<int64_t>();
 }
+
 double SSATmp::getValDbl() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsDbl();
+  assert(m_inst->getTypeParam().equals(Type::Dbl));
+  return m_inst->getExtra<ConstData>()->as<double>();
 }
+
 const StringData* SSATmp::getValStr() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsStr();
+  assert(m_inst->getTypeParam().equals(Type::StaticStr));
+  return m_inst->getExtra<ConstData>()->as<const StringData*>();
 }
+
 const ArrayData* SSATmp::getValArr() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsArr();
+  assert(m_inst->getTypeParam().equals(Type::Arr));
+  return m_inst->getExtra<ConstData>()->as<const ArrayData*>();
 }
+
 const Func* SSATmp::getValFunc() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsFunc();
+  assert(m_inst->getTypeParam().equals(Type::Func));
+  return m_inst->getExtra<ConstData>()->as<const Func*>();
 }
+
 const Class* SSATmp::getValClass() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsClass();
+  assert(m_inst->getTypeParam().equals(Type::Cls));
+  return m_inst->getExtra<ConstData>()->as<const Class*>();
 }
+
 const NamedEntity* SSATmp::getValNamedEntity() const {
   assert(isConst());
-  return static_cast<ConstInstruction*>(m_inst)->getValAsNamedEntity();
+  assert(m_inst->getTypeParam().equals(Type::NamedEntity));
+  return m_inst->getExtra<ConstData>()->as<const NamedEntity*>();
 }
+
 uintptr_t SSATmp::getValBits() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsBits();
+  return m_inst->getExtra<ConstData>()->as<uintptr_t>();
 }
+
 TCA SSATmp::getValTCA() const {
   assert(isConst());
-  return ((ConstInstruction*)m_inst)->getValAsTCA();
+  assert(m_inst->getTypeParam().equals(Type::TCA));
+  return m_inst->getExtra<ConstData>()->as<TCA>();
 }
 
 void SSATmp::setTCA(TCA tca) {
@@ -900,7 +903,7 @@ TCA SSATmp::getTCA() const {
 
 void SSATmp::print(std::ostream& os, bool printLastUse) const {
   if (m_inst->getOpcode() == DefConst) {
-    ((ConstInstruction*)m_inst)->printConst(os);
+    printConst(os, m_inst);
     return;
   }
   os << "t" << m_id;

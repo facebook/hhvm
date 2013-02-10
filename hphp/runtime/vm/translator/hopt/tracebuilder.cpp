@@ -389,12 +389,13 @@ SSATmp* TraceBuilder::genNot(SSATmp* src) {
 }
 
 SSATmp* TraceBuilder::genDefUninit() {
-  ConstInstruction inst(DefConst, Type::Uninit);
-  return optimizeInst(&inst);
+  ConstData cdata(0);
+  return gen(DefConst, Type::Uninit, &cdata);
 }
+
 SSATmp* TraceBuilder::genDefNull() {
-  ConstInstruction inst(DefConst, Type::Null);
-  return optimizeInst(&inst);
+  ConstData cdata(0);
+  return gen(DefConst, Type::Null, &cdata);
 }
 
 SSATmp* TraceBuilder::genConvToInt(SSATmp* src) {

@@ -156,7 +156,6 @@ public:
     return newInst;
   }
 
-  ConstInstruction* defConst(int64 val);
   LabelInstruction* defLabel(const Func*);
   LabelInstruction* defLabel(const Func*, unsigned numDst);
 

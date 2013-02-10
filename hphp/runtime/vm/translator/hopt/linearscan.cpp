@@ -526,7 +526,9 @@ void LinearScan::insertAllocFreeSpill(Trace* trace, uint32 numExtraSpillLocs) {
 
 void LinearScan::insertAllocFreeSpillAux(Trace* trace,
                                          uint32 numExtraSpillLocs) {
-  SSATmp* tmp = m_irFactory->defConst((int64)numExtraSpillLocs)->getDst();
+  ConstData numSpillConst(numExtraSpillLocs);
+  SSATmp* tmp = m_irFactory->gen(DefConst, Type::Int,
+    &numSpillConst)->getDst();
 
   IRInstruction::List& instList = trace->getInstructionList();
   for (IRInstruction::Iterator it = instList.begin();

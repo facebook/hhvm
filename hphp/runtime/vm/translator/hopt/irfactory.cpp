@@ -17,11 +17,6 @@
 
 namespace HPHP { namespace VM { namespace JIT {
 
-ConstInstruction* IRFactory::defConst(int64 val) {
-  ConstInstruction inst(DefConst, val);
-  return cloneInstruction(&inst);
-}
-
 LabelInstruction* IRFactory::defLabel(const Func* f) {
   LabelInstruction inst(m_nextLabelId++, f);
   return cloneInstruction(&inst);

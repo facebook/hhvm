@@ -272,19 +272,22 @@ public:
   // generates the ExitTrace instruction at the end of a trace
   void genTraceEnd(uint32 nextPc,
                    TraceExitType::ExitType exitType = TraceExitType::Normal);
+
   template<typename T>
   SSATmp* genDefConst(T val) {
-    ConstInstruction inst(DefConst, val);
-    return optimizeInst(&inst);
+    ConstData cdata(val);
+    return gen(DefConst, typeForConst(val), &cdata);
   }
+
   SSATmp* genDefVoid() {
-    ConstInstruction inst(DefConst, Type::None);
-    return optimizeInst(&inst);
+    ConstData cdata(0);
+    return gen(DefConst, Type::None, &cdata);
   }
+
   template<typename T>
   SSATmp* genLdConst(T val) {
-    ConstInstruction inst(LdConst, val);
-    return optimizeInst(&inst);
+    ConstData cdata(val);
+    return gen(LdConst, typeForConst(val), &cdata);
   }
 
   Trace* getTrace() const { return m_trace.get(); }

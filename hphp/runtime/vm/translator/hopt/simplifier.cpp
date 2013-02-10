@@ -991,9 +991,6 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
         return genDefBool(!str->empty() && !str->isZero());
       }
       if (type == Type::Arr) {
-        if (((ConstInstruction*)src->getInstruction())->isEmptyArray()) {
-          return genDefBool(false);
-        }
         if (src->getValArr()->empty()) {
           return genDefBool(false);
         }
@@ -1017,9 +1014,6 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
         return genDefInt(0);
       }
       if (type == Type::Arr) {
-        if (((ConstInstruction*)src->getInstruction())->isEmptyArray()) {
-          return genDefInt(0);
-        }
         if (src->getValArr()->empty()) {
           return genDefInt(0);
         }

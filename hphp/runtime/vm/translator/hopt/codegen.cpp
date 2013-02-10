@@ -3213,16 +3213,13 @@ void CodeGenerator::cgLdCtx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdConst(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  int64 constVal= ((ConstInstruction*)inst)->getValAsInt();
-
-  auto dstReg = dst->getReg();
-  assert(dstReg != InvalidReg);
-
-  if (constVal == 0) {
-    m_as.xor_reg64_reg64(dstReg, dstReg);
+  auto const dstReg   = inst->getDst()->getReg();
+  auto const val      = inst->getExtra<LdConst>()->as<uintptr_t>();
+  if (dstReg == InvalidReg) return;
+  if (val == 0) {
+    m_as.xorq(dstReg, dstReg);
   } else {
-    m_as.mov_imm64_reg(constVal, dstReg);
+    m_as.movq(val, dstReg);
   }
 }
 

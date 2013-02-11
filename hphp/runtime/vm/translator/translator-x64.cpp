@@ -7835,7 +7835,7 @@ void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
   const StringData* clsName = cls->preClass()->name();
   string sds(Util::toLower(clsName->data()) + ":" +
              string(propName->data(), propName->size()));
-  StringData sd(sds.c_str(), sds.size(), AttachLiteral);
+  StackStringData sd(sds.c_str(), sds.size(), AttachLiteral);
   ch = SPropCache::alloc(&sd);
   SKTRACE(1, i.source, "SPropInlineLookup %s %d\n", sd.data(), int(ch));
 
@@ -8757,7 +8757,7 @@ TranslatorX64::translateFPushFunc(const Tracelet& t,
   size_t funcOff = AROFF(m_func) + startOfActRec;
   size_t thisOff = AROFF(m_this) + startOfActRec;
   if (false) { // typecheck
-    StringData sd("foo");
+    StackStringData sd("foo");
     const UNUSED Func* f = FuncCache::lookup(ch, &sd);
   }
   SKTRACE(1, i.source, "ch %d\n", ch);
@@ -9503,7 +9503,7 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
       UnlikelyIfBlock ifNull(CC_Z, a, astubs);
 
       if (false) { // typecheck
-        StringData sd("foo");
+        StackStringData sd("foo");
         FixedFuncCache::lookupUnknownFunc(&sd);
       }
 

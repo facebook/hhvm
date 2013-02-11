@@ -123,7 +123,7 @@ bool TestExtString::RunTests(const std::string &which) {
 
 bool TestExtString::test_stringdata() {
   // None of these should assert.
-  StringData s1;
+  StackStringData s1;
   String s2(StringData::MaxSmallSize / 2, ReserveString);
   String s3(StringData::MaxSmallSize * 2, ReserveString);
   String s4(StringData::MaxSmallSize * 2, ReserveString);

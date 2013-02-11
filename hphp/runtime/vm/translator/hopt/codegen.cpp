@@ -3992,7 +3992,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
     const StringData* clsNameString = clsName->getValStr();
     string sds(Util::toLower(clsNameString->data()) + ":" +
                string(propName->data(), propName->size()));
-    StringData sd(sds.c_str(), sds.size(), AttachLiteral);
+    StackStringData sd(sds.c_str(), sds.size(), AttachLiteral);
     CacheHandle ch = SPropCache::alloc(&sd);
 
     auto tmpReg = dstReg;

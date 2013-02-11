@@ -65,12 +65,12 @@ StringData *StringData::GetStaticString(const StringData *str) {
 }
 
 StringData *StringData::GetStaticString(const std::string &str) {
-  StringData sd(str.c_str(), str.size(), AttachLiteral);
+  StackStringData sd(str.c_str(), str.size(), AttachLiteral);
   return GetStaticString(&sd);
 }
 
 StringData *StringData::GetStaticString(const char *str) {
-  StringData sd(str, strlen(str), AttachLiteral);
+  StackStringData sd(str, strlen(str), AttachLiteral);
   return GetStaticString(&sd);
 }
 
@@ -510,7 +510,7 @@ static StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
   for (int i = 0; i < 256; i++) {
     char s[2] = { (char)i, 0 };
-    StringData str(s, 1, AttachLiteral);
+    StackStringData str(s, 1, AttachLiteral);
     raw[i] = StringData::GetStaticString(&str);
   }
   return raw;

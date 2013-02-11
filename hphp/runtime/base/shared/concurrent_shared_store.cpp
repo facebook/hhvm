@@ -498,7 +498,7 @@ void ConcurrentTableSharedStore::prime
       continue;
     }
     if (RuntimeOption::APCSizeCountPrime) {
-      StringData sd(copy);
+      StackStringData sd(copy);
       stats_on_add(&sd, &acc->second, 0, true, false);
     }
   }

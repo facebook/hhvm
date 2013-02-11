@@ -23,6 +23,7 @@
 #include <runtime/base/macros.h>
 #include <runtime/base/bstring.h>
 #include <util/hash.h>
+#include <util/alloc.h>
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/taint/taint_observer.h>
 #include <runtime/base/taint/taint_data.h>
@@ -94,6 +95,7 @@ enum CopyMallocMode { CopyMalloc };
  * resemblences to fbstring are not accidental.
  */
 class StringData {
+  friend class StackStringData;
   StringData(const StringData&); // disable copying
   StringData& operator=(const StringData&);
 
@@ -230,7 +232,19 @@ public:
     return this;
   }
 
-  ~StringData() { releaseData(); }
+  ~StringData() { checkStack(); releaseData(); }
+  void checkStack() {
+    /**
+     * StringData should not generally be allocated on the
+     * stack - because references to it could escape. If
+     * you know what you're doing, use StackStringData,
+     * which maintains refCounts appropriately, and checks
+     * that the StringData didnt escape
+     */
+    assert(!m_data ||
+           (uintptr_t(this) - Util::s_stackLimit >=
+            Util::s_stackSize));
+  }
 
   /**
    * Informational.
@@ -437,6 +451,29 @@ public:
   int bigCap() const {
     assert(!isSmall());
     return m_big.cap & ~IsMask;
+  }
+};
+
+/**
+ * Use this class to declare a StringData on the stack
+ * It will verify that the StringData does not escape.
+ */
+class StackStringData : public StringData {
+ public:
+  StackStringData() {}
+  StackStringData(const char* s) : StringData(s) { incRefCount(); }
+  template <class T>
+  StackStringData(const char* s, T p) : StringData(s, p) { incRefCount(); }
+  template <class T>
+  StackStringData(const char* s, int len, T p) :
+      StringData(s, len, p) { incRefCount(); }
+
+  ~StackStringData() {
+    // verify that no references escaped
+    assert(!decRefCount());
+    releaseData();
+    m_data = 0;
+    m_big.cap = IsSmall;
   }
 };
 

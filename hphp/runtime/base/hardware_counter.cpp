@@ -357,7 +357,7 @@ bool HardwareCounter::eventExists(char *event) {
 
 bool HardwareCounter::setPerfEvents(CStrRef events) {
   StringData* sd = events.get();
-  StringData sevents(sd->data(), sd->size(), CopyString);
+  StackStringData sevents(sd->data(), sd->size(), CopyString);
   char *strtok_buf = NULL;
   char *s = strtok_r(const_cast<char *>(sevents.data()), ",", &strtok_buf);
   m_pseudoEvents = false;

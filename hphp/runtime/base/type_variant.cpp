@@ -1642,7 +1642,7 @@ bool Variant::same(double v2) const {
 }
 
 bool Variant::same(litstr v2) const {
-  StringData sd2(v2);
+  StackStringData sd2(v2);
   return same(&sd2);
 }
 

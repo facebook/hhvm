@@ -9,6 +9,8 @@
   }
 
 ex:
+  Catch
+  PopC
   String "Finished!\n"
   Print
   RetC

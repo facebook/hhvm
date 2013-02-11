@@ -90,10 +90,6 @@ static const Trace::Module TRACEMOD = Trace::bcinterp;
 
 namespace {
 
-struct VMPrepareThrow : std::exception {
-  const char* what() const throw() { return "VMPrepareThrow"; }
-};
-
 struct VMPrepareUnwind : std::exception {
   const char* what() const throw() { return "VMPrepareUnwind"; }
 };
@@ -925,7 +921,8 @@ void Stack::clearEvalStack(ActRec *fp, int32 numLocals) {
 UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
                                PC& pc, Fault& fault) {
   const Func* func = fp->m_func;
-  TRACE(1, "unwindFrag: func %s\n", func->fullName()->data());
+  FTRACE(1, "unwindFrag: func {} ({})\n",
+         func->fullName()->data(), func->unit()->filepath()->data());
 
   bool unwindingGeneratorFrame = func->isGenerator();
   TypedValue* evalTop;
@@ -958,7 +955,7 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
 
         switch (eh->m_ehtype) {
         case EHEnt::EHType_Fault:
-          FTRACE(1, "unwindFrag: Entering fault at {}: save {}\n",
+          FTRACE(1, "unwindFrag: entering fault at {}: save {}\n",
                  eh->m_fault,
                  func->unit()->offsetOf(pc));
           fault.m_savedRaiseOffset = func->unit()->offsetOf(pc);
@@ -968,9 +965,12 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
           if (fault.m_faultType == Fault::UserException) {
             ObjectData* obj = fault.m_userException;
             for (auto& idOff : eh->m_catches) {
+              auto handler = func->unit()->at(idOff.second);
+              FTRACE(1, "unwindFrag: catch candidate {}\n", handler);
               Class* cls = func->unit()->lookupClass(idOff.first);
               if (cls && obj->instanceof(cls)) {
-                pc = func->unit()->at(idOff.second);
+                pc = handler;
+                FTRACE(1, "unwindFrag: entering catch at {}\n", pc);
                 return UnwindResumeVM;
               }
             }
@@ -1005,6 +1005,7 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
     } catch (...) {}
     ndiscard(func->numSlotsInFrame());
   }
+  FTRACE(1, "unwindFrag: propagate\n");
   return UnwindPropagate;
 }
 
@@ -1047,7 +1048,7 @@ void Stack::unwindAR(ActRec* fp, const FPIEnt* fe) {
   }
 }
 
-UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
+UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault fault) {
   VMExecutionContext* context = g_vmContext;
 
   while (true) {
@@ -1058,13 +1059,19 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
 
     // If the exception is already propagating, if it was in any FPI
     // region we already handled unwinding it the first time around.
-    if (f.m_handledCount == 0) {
+    if (fault.m_handledCount == 0) {
       if (const FPIEnt *fe = fp->m_func->findFPI(offset)) {
         unwindAR(fp, fe);
       }
     }
 
-    if (unwindFrag(fp, offset, pc, f) == UnwindResumeVM) {
+    if (unwindFrag(fp, offset, pc, fault) == UnwindResumeVM) {
+      // We've kept our own copy of the Fault, because m_faults may
+      // change if we have a reentry during unwinding.  When we're
+      // ready to resume, we need to replace the current fault to
+      // reflect any state changes we've made (handledCount, etc).
+      assert(!context->m_faults.empty());
+      context->m_faults.back() = fault;
       return UnwindResumeVM;
     }
 
@@ -1881,7 +1888,11 @@ enum {
   EXCEPTION_DEBUGGER
 };
 
-static void pushFault(Fault::Type t, Exception* e, Object* o = NULL) {
+static void pushFault(Fault::Type t, Exception* e, const Object* o = nullptr) {
+  FTRACE(1, "pushing new fault: {} {} {}\n",
+         t == Fault::UserException ? "[user exception]" : "[cpp exception]",
+         e, o);
+
   VMExecutionContext* ec = g_vmContext;
   Fault fault;
   fault.m_faultType = t;
@@ -1900,16 +1911,16 @@ static int exception_handler() {
   int longJmpType;
   try {
     throw;
-  } catch (Object& e) {
-    pushFault(HPHP::VM::Fault::UserException, nullptr, &e);
+  } catch (const Object& e) {
+    pushFault(Fault::UserException, nullptr, &e);
     longJmpType = g_vmContext->hhvmPrepareThrow();
   } catch (VMSwitchModeException &e) {
     longJmpType = g_vmContext->switchMode(e.unwindBuiltin());
   } catch (Exception &e) {
-    pushFault(HPHP::VM::Fault::CppException, e.clone());
+    pushFault(Fault::CppException, e.clone());
     longJmpType = g_vmContext->hhvmPrepareThrow();
   } catch (...) {
-    pushFault(HPHP::VM::Fault::CppException,
+    pushFault(Fault::CppException,
               new Exception("unknown exception"));
     longJmpType = g_vmContext->hhvmPrepareThrow();
   }
@@ -1921,6 +1932,11 @@ void VMExecutionContext::enterVM(TypedValue* retval,
                                  ExtraArgs* extraArgs) {
   m_firstAR = ar;
   ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
+
+  DEBUG_ONLY int faultDepth = m_faults.size();
+  SCOPE_EXIT {
+    if (debug) assert(m_faults.size() == faultDepth);
+  };
 
   /*
    * TODO(#1343044): some of the structure of this code dates back to
@@ -1960,13 +1976,10 @@ short_jump:
     default:
       NOT_REACHED();
     }
-  } catch (const VMPrepareThrow&) {
-    jumpCode = hhvmPrepareThrow();
-    goto short_jump;
   } catch (const VMPrepareUnwind&) {
     // This is slightly different from VMPrepareThrow, because we need
     // to re-raise the exception as if it came from the same offset.
-    Fault& fault = m_faults.back();
+    Fault fault = m_faults.back();
     Offset faultPC = fault.m_savedRaiseOffset;
     FTRACE(1, "unwind: restoring offset {}\n", faultPC);
     assert(faultPC != kInvalidOffset);
@@ -4656,14 +4669,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopThrow(PC& pc) {
     raise_error("Exceptions must be valid objects derived from the "
                 "Exception base class");
   }
-  ObjectData* e = c1->m_data.pobj;
-  Fault fault;
-  fault.m_faultType = Fault::UserException;
-  fault.m_userException = e;
-  m_faults.push_back(fault);
-  m_stack.discard();
-  DEBUGGER_ATTACHED_ONLY(phpExceptionHook(e));
-  throw VMPrepareThrow();
+
+  Object obj(c1->m_data.pobj);
+  m_stack.popC();
+  DEBUGGER_ATTACHED_ONLY(phpExceptionHook(obj.get()));
+  throw obj;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopAGetC(PC& pc) {
@@ -6734,10 +6744,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLocInit(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopCatch(PC& pc) {
   NEXT();
   assert(m_faults.size() > 0);
-  Fault& fault = m_faults.back();
+  Fault fault = m_faults.back();
+  m_faults.pop_back();
   assert(fault.m_faultType == Fault::UserException);
   m_stack.pushObjectNoRc(fault.m_userException);
-  m_faults.pop_back();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopLateBoundCls(PC& pc) {

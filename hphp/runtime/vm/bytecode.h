@@ -501,7 +501,7 @@ public:
   std::string toString(const ActRec* fp, int offset,
                        std::string prefix="") const;
 
-  UnwindStatus unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f);
+  UnwindStatus unwindFrame(ActRec*& fp, int offset, PC& pc, Fault f);
 
   bool wouldOverflow(int numCells) const;
 

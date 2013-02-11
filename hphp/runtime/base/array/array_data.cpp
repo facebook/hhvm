@@ -530,8 +530,7 @@ TypedValue* ArrayData::nvGet(int64 k) const {
 }
 
 TypedValue* ArrayData::nvGet(const StringData* key) const {
-  StrNR k(key);
-  return exists(k) ? (TypedValue*)&get(k, false) :
+  return exists(key) ? (TypedValue*)&get(key, false) :
          NULL;
 }
 
@@ -555,7 +554,7 @@ TypedValue* ArrayData::nvGetCell(int64 k) const {
 }
 
 TypedValue* ArrayData::nvGetCell(const StringData* key) const {
-  TypedValue* tv = (TypedValue*)&get(StrNR(key), false);
+  TypedValue* tv = (TypedValue*)&get(key, false);
   return LIKELY(tv != (TypedValue*)&null_variant) ? tvToCell(tv) :
          nvGetNotFound(key);
 }

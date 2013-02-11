@@ -41,8 +41,8 @@ inline static StringData *getStringKey(TypedValueAccessor tva) {
 
 inline bool ArrayData::exists(litstr k) const {
   assert(IsValidKey(k));
-  StringData s(k);
-  return exists(&s);
+  String s(k);
+  return exists(s.get());
 }
 
 inline bool ArrayData::exists(CStrRef k) const {
@@ -59,8 +59,8 @@ inline bool ArrayData::exists(CVarRef k) const {
 
 inline CVarRef ArrayData::get(litstr k, bool error) const {
   assert(IsValidKey(k));
-  StringData s(k);
-  return get(&s, error);
+  String s(k);
+  return get(s.get(), error);
 }
 
 inline CVarRef ArrayData::get(CStrRef k, bool error) const {
@@ -77,8 +77,8 @@ inline CVarRef ArrayData::get(CVarRef k, bool error) const {
 
 inline ssize_t ArrayData::getIndex(litstr k) const {
   assert(IsValidKey(k));
-  StringData s(k);
-  return getIndex(&s);
+  String s(k);
+  return getIndex(s);
 }
 
 inline ssize_t ArrayData::getIndex(CStrRef k) const {
@@ -144,7 +144,7 @@ inline ArrayData* ArrayData::nvSet(int64 ki, const TypedValue* v, bool copy) {
 
 inline ArrayData* ArrayData::nvSet(StringData* k, const TypedValue* v,
                                    bool copy) {
-  return set(StrNR(k), tvAsCVarRef(v), copy);
+  return set(k, tvAsCVarRef(v), copy);
 }
 
 inline ArrayData* ArrayData::setRef(litstr k, CVarRef v, bool copy) {
@@ -191,8 +191,8 @@ inline ArrayData* ArrayData::addLval(CVarRef k, Variant *&ret, bool copy) {
 
 inline ArrayData* ArrayData::remove(litstr k, bool copy) {
   assert(IsValidKey(k));
-  StringData s(k);
-  return remove(&s, copy);
+  String s(k);
+  return remove(s.get(), copy);
 }
 
 inline ArrayData* ArrayData::remove(CStrRef k, bool copy) {

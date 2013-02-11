@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Facebook, Inc.
+ * Copyright 2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@
 #include "folly/Conv.h"
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"
-#include "folly/experimental/io/Cursor.h"
+#include "folly/io/Cursor.h"
 
 extern char** environ;
 
@@ -427,6 +427,7 @@ ProcessReturnCode Subprocess::wait() {
   checkUnixError(found, "waitpid");
   DCHECK_EQ(found, pid_);
   returnCode_ = ProcessReturnCode(status);
+  pid_ = -1;
   return returnCode_;
 }
 
@@ -441,13 +442,11 @@ void Subprocess::sendSignal(int signal) {
   checkUnixError(r, "kill");
 }
 
-namespace {
-void setNonBlocking(int fd) {
-  int flags = ::fcntl(fd, F_GETFL);
-  checkUnixError(flags, "fcntl");
-  int r = ::fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-  checkUnixError(r, "fcntl");
+pid_t Subprocess::pid() const {
+  return pid_;
 }
+
+namespace {
 
 std::pair<const uint8_t*, size_t> queueFront(const IOBufQueue& queue) {
   auto* p = queue.front();
@@ -544,7 +543,7 @@ std::pair<IOBufQueue, IOBufQueue> Subprocess::communicateIOBuf(
     IOBufQueue data) {
   std::pair<IOBufQueue, IOBufQueue> out;
 
-  auto readCallback = [&] (int pfd, int cfd) {
+  auto readCallback = [&] (int pfd, int cfd) -> bool {
     if (cfd == 1 && flags.readStdout_) {
       return handleRead(pfd, out.first);
     } else if (cfd == 2 && flags.readStderr_) {
@@ -556,7 +555,7 @@ std::pair<IOBufQueue, IOBufQueue> Subprocess::communicateIOBuf(
     }
   };
 
-  auto writeCallback = [&] (int pfd, int cfd) {
+  auto writeCallback = [&] (int pfd, int cfd) -> bool {
     if (cfd == 0 && flags.writeStdin_) {
       return handleWrite(pfd, data);
     } else {

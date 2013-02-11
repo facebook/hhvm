@@ -205,7 +205,7 @@ namespace detail {
   void populateMemForward(T* mem, std::size_t n, Function const& op) {
     std::size_t idx = 0;
     try {
-      for (int i = 0; i < n; ++i) {
+      for (size_t i = 0; i < n; ++i) {
         op(&mem[idx]);
         ++idx;
       }
@@ -414,7 +414,8 @@ namespace detail {
   }
   template <class T>
   T* pointerFlagClear(T* p) {
-    return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(p) & ~1);
+    return reinterpret_cast<T*>(
+      reinterpret_cast<uintptr_t>(p) & ~uintptr_t(1));
   }
   inline void* shiftPointer(void* p, size_t sizeBytes) {
     return static_cast<char*>(p) + sizeBytes;

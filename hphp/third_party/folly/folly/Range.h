@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Facebook, Inc.
+ * Copyright 2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits.hpp>
 #include <bits/c++config.h>
+#include "folly/CpuId.h"
 #include "folly/Traits.h"
 
 namespace folly {
@@ -126,26 +127,9 @@ public:
   Range() : b_(), e_() {
   }
 
-private:
-  static bool reachable(Iter b, Iter e, std::forward_iterator_tag) {
-    for (; b != e; ++b) {
-      LOG_EVERY_N(INFO, 100000) << __FILE__ ":" << __LINE__
-                                << " running reachability test ("
-                                << google::COUNTER << " iterations)...";
-    }
-    return true;
-  }
-
-  static bool reachable(Iter b, Iter e, std::random_access_iterator_tag) {
-    return b <= e;
-  }
-
 public:
   // Works for all iterators
-  Range(Iter start, Iter end)
-      : b_(start), e_(end) {
-    assert(reachable(b_, e_,
-                     typename std::iterator_traits<Iter>::iterator_category()));
+  Range(Iter start, Iter end) : b_(start), e_(end) {
   }
 
   // Works only for random-access iterators
@@ -387,7 +371,7 @@ public:
 
   size_type find_first_of(Range needles, size_t pos) const {
     if (pos > size()) return std::string::npos;
-    size_type ret = qfind_first_of(pos ? subpiece(pos) : *this, needles);
+    size_type ret = qfind_first_of(subpiece(pos), needles);
     return ret == npos ? ret : ret + pos;
   }
 
@@ -592,12 +576,30 @@ size_t qfind(const Range<T>& haystack,
   return std::string::npos;
 }
 
+namespace detail {
+
+size_t qfind_first_byte_of_sse42(const StringPiece& haystack,
+                                 const StringPiece& needles);
+
+size_t qfind_first_byte_of_nosse(const StringPiece& haystack,
+                                 const StringPiece& needles);
+
+inline size_t qfind_first_byte_of(const StringPiece& haystack,
+                                  const StringPiece& needles) {
+  static auto const qfind_first_byte_of_fn =
+    folly::CpuId().sse42() ? qfind_first_byte_of_sse42
+                           : qfind_first_byte_of_nosse;
+  return qfind_first_byte_of_fn(haystack, needles);
+}
+
+} // namespace detail
+
 template <class T, class Comp>
 size_t qfind_first_of(const Range<T> & haystack,
-                      const Range<T> & needle,
+                      const Range<T> & needles,
                       Comp eq) {
   auto ret = std::find_first_of(haystack.begin(), haystack.end(),
-                                needle.begin(), needle.end(),
+                                needles.begin(), needles.end(),
                                 eq);
   return ret == haystack.end() ? std::string::npos : ret - haystack.begin();
 }
@@ -649,10 +651,24 @@ inline size_t qfind(const Range<const unsigned char*>& haystack,
 
 template <class T>
 size_t qfind_first_of(const Range<T>& haystack,
-                      const Range<T>& needle) {
-  return qfind_first_of(haystack, needle, asciiCaseSensitive);
+                      const Range<T>& needles) {
+  return qfind_first_of(haystack, needles, asciiCaseSensitive);
 }
 
+// specialization for StringPiece
+template <>
+inline size_t qfind_first_of(const Range<const char*>& haystack,
+                             const Range<const char*>& needles) {
+  return detail::qfind_first_byte_of(haystack, needles);
+}
+
+// specialization for ByteRange
+template <>
+inline size_t qfind_first_of(const Range<const unsigned char*>& haystack,
+                             const Range<const unsigned char*>& needles) {
+  return detail::qfind_first_byte_of(StringPiece(haystack),
+                                     StringPiece(needles));
+}
 }  // !namespace folly
 
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(folly::Range);

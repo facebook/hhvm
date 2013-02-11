@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Facebook, Inc.
+ * Copyright 2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,9 +197,22 @@ private:
   dynamic val_;
 };
 
-template<class... Args>
-inline dynamic::ObjectMaker dynamic::object(Args&&... args) {
-  return dynamic::ObjectMaker(std::forward<Args>(args)...);
+// This looks like a case for perfect forwarding, but our use of
+// std::initializer_list for constructing dynamic arrays makes it less
+// functional than doing this manually.
+inline dynamic::ObjectMaker dynamic::object() { return ObjectMaker(); }
+inline dynamic::ObjectMaker dynamic::object(dynamic&& a, dynamic&& b) {
+  return ObjectMaker(std::move(a), std::move(b));
+}
+inline dynamic::ObjectMaker dynamic::object(dynamic const& a, dynamic&& b) {
+  return ObjectMaker(a, std::move(b));
+}
+inline dynamic::ObjectMaker dynamic::object(dynamic&& a, dynamic const& b) {
+  return ObjectMaker(std::move(a), b);
+}
+inline dynamic::ObjectMaker
+dynamic::object(dynamic const& a, dynamic const& b) {
+  return ObjectMaker(a, b);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -677,6 +690,20 @@ template<class T> struct dynamic::TypeInfo {
   static char const name[];
   static Type const type;
 };
+
+#define FB_DEC_TYPE(T)                                      \
+  template<> char const dynamic::TypeInfo<T>::name[];       \
+  template<> dynamic::Type const dynamic::TypeInfo<T>::type
+
+FB_DEC_TYPE(void*);
+FB_DEC_TYPE(bool);
+FB_DEC_TYPE(fbstring);
+FB_DEC_TYPE(dynamic::Array);
+FB_DEC_TYPE(double);
+FB_DEC_TYPE(int64_t);
+FB_DEC_TYPE(dynamic::ObjectImpl);
+
+#undef FB_DEC_TYPE
 
 template<class T>
 T dynamic::asImpl() const {

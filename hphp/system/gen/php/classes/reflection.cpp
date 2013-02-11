@@ -34,7 +34,7 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/reflection.php line 552 */
-const int64_t q_ReflectionFunction$$IS_DEPRECATED = 262144L;
+const int64 q_ReflectionFunction$$IS_DEPRECATED = 262144L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunction)
 extern const InstanceOfInfo cw_ReflectionFunction$$instanceof_table[] = {
   {0x6AF55378,1,"ReflectionFunction",&cw_ReflectionFunction},
@@ -737,7 +737,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 510 */
-int64_t c_ReflectionFunctionAbstract::t_getnumberofparameters() {
+int64 c_ReflectionFunctionAbstract::t_getnumberofparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfParameters);
   ObjectData *obj_tmp UNUSED;
   {
@@ -747,9 +747,9 @@ int64_t c_ReflectionFunctionAbstract::t_getnumberofparameters() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 526 */
-int64_t c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
+int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfRequiredParameters);
-  int64_t v_count = 0;
+  int64 v_count = 0;
   Array v_params;
   Primitive v_name = 0;
   Variant v_param;
@@ -1487,7 +1487,7 @@ void c_ReflectionParameter::t_collectattributes(VRefParam rv_attrs, CVarRef v_cl
         {
           bool tmp0;
           {
-            int64_t tmp1((x_count(v_params)));
+            int64 tmp1((x_count(v_params)));
             tmp0 = (not_less(tmp1, v_index));
           }
           if (tmp0) {
@@ -1522,9 +1522,9 @@ void c_ReflectionParameter::t_collectattributes(VRefParam rv_attrs, CVarRef v_cl
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 662 */
-const int64_t q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16L;
-const int64_t q_ReflectionClass$$IS_EXPLICIT_ABSTRACT = 32L;
-const int64_t q_ReflectionClass$$IS_FINAL = 64L;
+const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16L;
+const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT = 32L;
+const int64 q_ReflectionClass$$IS_FINAL = 64L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionClass)
 extern const InstanceOfInfo cw_ReflectionClass$$instanceof_table[] = {
   {0x0DC23C44,1,"Reflector",(const ObjectStaticCallbacks*)2},
@@ -3196,7 +3196,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
         {
           bool tmp0;
           {
-            int64_t tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
+            int64 tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
             tmp0 = (equal(tmp1, 0L));
           }
           if (tmp0) {
@@ -3221,7 +3221,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     bool tmp0;
     {
-      int64_t tmp1((x_strcasecmp(toString(v_cls), toString(v_parent))));
+      int64 tmp1((x_strcasecmp(toString(v_cls), toString(v_parent))));
       tmp0 = (equal(tmp1, 0L));
     }
     if (tmp0) {
@@ -3417,7 +3417,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
         {
           bool tmp0;
           {
-            int64_t tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
+            int64 tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
             tmp0 = (equal(tmp1, 0L));
           }
           if (tmp0) {
@@ -3885,12 +3885,12 @@ Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret //  = false_va
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1771 */
-const int64_t q_ReflectionMethod$$IS_STATIC = 1L;
-const int64_t q_ReflectionMethod$$IS_PUBLIC = 256L;
-const int64_t q_ReflectionMethod$$IS_PROTECTED = 512L;
-const int64_t q_ReflectionMethod$$IS_PRIVATE = 1024L;
-const int64_t q_ReflectionMethod$$IS_ABSTRACT = 2L;
-const int64_t q_ReflectionMethod$$IS_FINAL = 4L;
+const int64 q_ReflectionMethod$$IS_STATIC = 1L;
+const int64 q_ReflectionMethod$$IS_PUBLIC = 256L;
+const int64 q_ReflectionMethod$$IS_PROTECTED = 512L;
+const int64 q_ReflectionMethod$$IS_PRIVATE = 1024L;
+const int64 q_ReflectionMethod$$IS_ABSTRACT = 2L;
+const int64 q_ReflectionMethod$$IS_FINAL = 4L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionMethod)
 extern const InstanceOfInfo cw_ReflectionMethod$$instanceof_table[] = {
   {0x41521F4A,1,"ReflectionMethod",&cw_ReflectionMethod},
@@ -4238,7 +4238,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
       {
         bool tmp0;
         {
-          int64_t tmp1((x_count(v_arr)));
+          int64 tmp1((x_count(v_arr)));
           tmp0 = (equal(tmp1, 2L));
         }
         if (tmp0) {
@@ -4574,10 +4574,10 @@ Variant c_ReflectionMethod::t_getattributesrecursive() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1518 */
-const int64_t q_ReflectionProperty$$IS_STATIC = 1L;
-const int64_t q_ReflectionProperty$$IS_PUBLIC = 256L;
-const int64_t q_ReflectionProperty$$IS_PROTECTED = 512L;
-const int64_t q_ReflectionProperty$$IS_PRIVATE = 1024L;
+const int64 q_ReflectionProperty$$IS_STATIC = 1L;
+const int64 q_ReflectionProperty$$IS_PUBLIC = 256L;
+const int64 q_ReflectionProperty$$IS_PROTECTED = 512L;
+const int64 q_ReflectionProperty$$IS_PRIVATE = 1024L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionProperty)
 extern const InstanceOfInfo cw_ReflectionProperty$$instanceof_table[] = {
   {0x0DC23C44,1,"Reflector",(const ObjectStaticCallbacks*)2},

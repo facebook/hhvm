@@ -70,12 +70,12 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   DECLARE_METHOD_INVOKE_HELPERS(getsubpathname);
 };
 ObjectData *coo_RecursiveDirectoryIterator() NEVER_INLINE;
-extern const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_SELF;
-extern const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO;
-extern const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME;
-extern const int64_t q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME;
-extern const int64_t q_RecursiveDirectoryIterator$$KEY_AS_FILENAME;
-extern const int64_t q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY;
+extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_SELF;
+extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO;
+extern const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator$$KEY_AS_FILENAME;
+extern const int64 q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

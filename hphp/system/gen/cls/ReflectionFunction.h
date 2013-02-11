@@ -62,7 +62,7 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(getattributesrecursive);
 };
 ObjectData *coo_ReflectionFunction() NEVER_INLINE;
-extern const int64_t q_ReflectionFunction$$IS_DEPRECATED;
+extern const int64 q_ReflectionFunction$$IS_DEPRECATED;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -1050,10 +1050,10 @@ Variant c_IteratorIterator::t___call(Variant v_func, Variant v_params) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 244 */
-const int64_t q_RecursiveIteratorIterator$$LEAVES_ONLY = 0L;
-const int64_t q_RecursiveIteratorIterator$$SELF_FIRST = 1L;
-const int64_t q_RecursiveIteratorIterator$$CHILD_FIRST = 2L;
-const int64_t q_RecursiveIteratorIterator$$CATCH_GET_CHILD = 16L;
+const int64 q_RecursiveIteratorIterator$$LEAVES_ONLY = 0L;
+const int64 q_RecursiveIteratorIterator$$SELF_FIRST = 1L;
+const int64 q_RecursiveIteratorIterator$$CHILD_FIRST = 2L;
+const int64 q_RecursiveIteratorIterator$$CATCH_GET_CHILD = 16L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RecursiveIteratorIterator)
 extern const InstanceOfInfo cw_RecursiveIteratorIterator$$instanceof_table[] = {
   {0x5CB957E8,1,"Iterator",(const ObjectStaticCallbacks*)2},
@@ -1235,8 +1235,8 @@ bool c_RecursiveIteratorIterator::t_valid() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 345 */
-const int64_t q_ArrayIterator$$STD_PROP_LIST = 1L;
-const int64_t q_ArrayIterator$$ARRAY_AS_PROPS = 2L;
+const int64 q_ArrayIterator$$STD_PROP_LIST = 1L;
+const int64 q_ArrayIterator$$ARRAY_AS_PROPS = 2L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ArrayIterator)
 extern const InstanceOfInfo cw_ArrayIterator$$instanceof_table[] = {
   {0x37AD55E4,0,"Countable",(const ObjectStaticCallbacks*)2},
@@ -1609,7 +1609,7 @@ bool c_ArrayIterator::t_asort() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 396 */
-int64_t c_ArrayIterator::t_count() {
+int64 c_ArrayIterator::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::count);
   ObjectData *obj_tmp UNUSED;
   return x_count(m_arr);
@@ -1721,7 +1721,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 586 */
 void c_ArrayIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::seek);
-  int64_t v_i = 0;
+  int64 v_i = 0;
 
   ObjectData *obj_tmp UNUSED;
   x_reset(ref(m_arr));

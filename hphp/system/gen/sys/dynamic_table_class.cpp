@@ -727,7 +727,7 @@ extern const int cw_Continuation$$call_info_index[] = {
   -1,-1,-1,16,17,-1,-1,-1,
 
 };
-c_Continuation *c_Continuation::create(int64_t a0, int64_t a1, bool a2, String a3, Variant a4, Array a5) {
+c_Continuation *c_Continuation::create(int64 a0, int64 a1, bool a2, String a3, Variant a4, Array a5) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
@@ -9523,7 +9523,7 @@ extern const int cw_SQLite3$$call_info_index[] = {
   -1,17,-1,-1,-1,-1,-1,-1,
 
 };
-c_SQLite3 *c_SQLite3::create(String a0, int64_t a1, String a2) {
+c_SQLite3 *c_SQLite3::create(String a0, int64 a1, String a2) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2);
@@ -12347,7 +12347,7 @@ extern const int cw_SimpleXMLElement$$call_info_index[] = {
   18,20,-1,21,-1,-1,-1,-1,
 
 };
-c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64_t a1, bool a2, String a3, bool a4) {
+c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64 a1, bool a2, String a3, bool a4) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);

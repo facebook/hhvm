@@ -55,8 +55,8 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   public: Variant t_getstaticvariables();
   public: bool t_returnsreference();
   public: Array t_getparameters();
-  public: int64_t t_getnumberofparameters();
-  public: int64_t t_getnumberofrequiredparameters();
+  public: int64 t_getnumberofparameters();
+  public: int64 t_getnumberofrequiredparameters();
   DECLARE_METHOD_INVOKE_HELPERS(getname);
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
   DECLARE_METHOD_INVOKE_HELPERS(getclosure);

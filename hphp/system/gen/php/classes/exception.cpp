@@ -567,7 +567,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 137 */
 String c_Exception::t_gettraceasstring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTraceAsString);
-  int64_t v_i = 0;
+  int64 v_i = 0;
   String v_s;
   Variant v_frame;
 
@@ -683,13 +683,13 @@ void c_Exception::t_inittrace() {
             bool tmp2 = (tmp1);
             if (tmp2) {
               const String &tmp3((toString(v_top.rvalAt(NAMSTR(s_sys_ss59589f70, "class"), AccessFlags::Error_Key))));
-              int64_t tmp4((x_strcasecmp(tmp3, NAMSTR(s_sys_ss372f4f14, "exception"))));
+              int64 tmp4((x_strcasecmp(tmp3, NAMSTR(s_sys_ss372f4f14, "exception"))));
               tmp2 = (same(tmp4, 0L));
             }
             bool tmp5 = (tmp2);
             if (tmp5) {
               const String &tmp6((toString(v_top.rvalAt(NAMSTR(s_sys_ss73f7dba7, "function"), AccessFlags::Error_Key))));
-              int64_t tmp7((x_strcasecmp(tmp6, NAMSTR(s_sys_ss1ecb9c89, "__init__"))));
+              int64 tmp7((x_strcasecmp(tmp6, NAMSTR(s_sys_ss1ecb9c89, "__init__"))));
               tmp5 = (same(tmp7, 0L));
             }
             tmp0 = (tmp5);

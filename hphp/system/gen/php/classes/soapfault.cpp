@@ -115,11 +115,11 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapFault, SoapFault::__construct);
   Variant v_fault_ns;
   Variant v_fault_code;
-  int64_t v_SOAP_1_1 = 0;
-  int64_t v_SOAP_1_2 = 0;
+  int64 v_SOAP_1_1 = 0;
+  int64 v_SOAP_1_2 = 0;
   String v_SOAP_1_1_ENV_NAMESPACE;
   String v_SOAP_1_2_ENV_NAMESPACE;
-  int64_t v_soap_version = 0;
+  int64 v_soap_version = 0;
 
   ObjectData *obj_tmp UNUSED;
   setNull(v_fault_ns);
@@ -134,7 +134,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
     {
       bool tmp1 = (x_is_array(v_code));
       if (tmp1) {
-        int64_t tmp2((x_count(v_code)));
+        int64 tmp2((x_count(v_code)));
         tmp1 = (equal(tmp2, 2L));
       }
       tmp0 = (tmp1);
@@ -189,7 +189,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
   v_SOAP_1_1_ENV_NAMESPACE = NAMSTR(s_sys_ss0842226e, "http://schemas.xmlsoap.org/soap/envelope/");
   v_SOAP_1_2_ENV_NAMESPACE = NAMSTR(s_sys_ss2cc85e9b, "http://www.w3.org/2003/05/soap-envelope");
   {
-    int64_t tmp0((x__soap_active_version()));
+    int64 tmp0((x__soap_active_version()));
     v_soap_version = tmp0;
   }
   if (empty(m_faultcodens)) {

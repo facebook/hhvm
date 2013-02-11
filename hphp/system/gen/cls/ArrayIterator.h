@@ -52,7 +52,7 @@ class c_ArrayIterator : public ExtObjectData {
   public: c_ArrayIterator *create(CVarRef v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, int64_t(0)));
   public: void t_append(CVarRef v_value);
   public: bool t_asort();
-  public: int64_t t_count();
+  public: int64 t_count();
   public: Variant t_current();
   public: Variant t_getarraycopy();
   public: Variant t_getflags();
@@ -96,8 +96,8 @@ class c_ArrayIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(valid);
 };
 ObjectData *coo_ArrayIterator() NEVER_INLINE;
-extern const int64_t q_ArrayIterator$$STD_PROP_LIST;
-extern const int64_t q_ArrayIterator$$ARRAY_AS_PROPS;
+extern const int64 q_ArrayIterator$$STD_PROP_LIST;
+extern const int64 q_ArrayIterator$$ARRAY_AS_PROPS;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

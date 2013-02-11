@@ -35,12 +35,12 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/directoryiterator.php line 122 */
-const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_SELF = 0L;
-const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO = 16L;
-const int64_t q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME = 32L;
-const int64_t q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME = 0L;
-const int64_t q_RecursiveDirectoryIterator$$KEY_AS_FILENAME = 256L;
-const int64_t q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY = 272L;
+const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_SELF = 0L;
+const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO = 16L;
+const int64 q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME = 32L;
+const int64 q_RecursiveDirectoryIterator$$KEY_AS_PATHNAME = 0L;
+const int64 q_RecursiveDirectoryIterator$$KEY_AS_FILENAME = 256L;
+const int64 q_RecursiveDirectoryIterator$$NEW_CURRENT_AND_KEY = 272L;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(RecursiveDirectoryIterator)
 extern const InstanceOfInfo cw_RecursiveDirectoryIterator$$instanceof_table[] = {
   {0x7CE365F2,1,"DirectoryIterator",&cw_DirectoryIterator},

@@ -35,7 +35,7 @@ class c_SplObjectStorage : public ExtObjectData {
 
   // Properties
   Variant m_storage;
-  int64_t m_index;
+  int64 m_index;
 
   // Destructor
   ~c_SplObjectStorage() NEVER_INLINE {}
@@ -48,10 +48,10 @@ class c_SplObjectStorage : public ExtObjectData {
   void init();
   public: void t_rewind();
   public: bool t_valid();
-  public: int64_t t_key();
+  public: int64 t_key();
   public: Variant t_current();
   public: void t_next();
-  public: int64_t t_count();
+  public: int64 t_count();
   public: bool t_contains(CVarRef v_obj);
   public: void t_attach(CVarRef v_obj);
   public: void t_detach(CVarRef v_obj);

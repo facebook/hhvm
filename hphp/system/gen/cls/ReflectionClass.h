@@ -156,9 +156,9 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getattributesrecursive);
 };
 ObjectData *coo_ReflectionClass() NEVER_INLINE;
-extern const int64_t q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;
-extern const int64_t q_ReflectionClass$$IS_EXPLICIT_ABSTRACT;
-extern const int64_t q_ReflectionClass$$IS_FINAL;
+extern const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass$$IS_FINAL;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

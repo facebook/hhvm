@@ -87,19 +87,19 @@ class c_SplFileObject : public c_SplFileInfo {
   public: String t_fgets();
   public: String t_fgetss(CVarRef v_allowable_tags);
   public: bool t_flock(CVarRef v_operation, VRefParam rv_wouldblock);
-  public: int64_t t_fpassthru();
+  public: int64 t_fpassthru();
   public: Variant t_fscanf(int num_args, CVarRef v_format, Array args = Array());
-  public: int64_t t_fseek(CVarRef v_offset, CVarRef v_whence);
+  public: int64 t_fseek(CVarRef v_offset, CVarRef v_whence);
   public: Variant t_fstat();
-  public: int64_t t_ftell();
+  public: int64 t_ftell();
   public: bool t_ftruncate(CVarRef v_size);
-  public: int64_t t_fwrite(CVarRef v_str, CVarRef v_length);
+  public: int64 t_fwrite(CVarRef v_str, CVarRef v_length);
   public: Variant t_getchildren();
   public: Variant t_getcsvcontrol();
-  public: int64_t t_getflags();
-  public: int64_t t_getmaxlinelen();
+  public: int64 t_getflags();
+  public: int64 t_getmaxlinelen();
   public: bool t_haschildren();
-  public: int64_t t_key();
+  public: int64 t_key();
   public: void t_next();
   public: void t_rewind();
   public: void t_seek(CVarRef v_line_pos);
@@ -138,10 +138,10 @@ class c_SplFileObject : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(valid);
 };
 ObjectData *coo_SplFileObject() NEVER_INLINE;
-extern const int64_t q_SplFileObject$$DROP_NEW_LINE;
-extern const int64_t q_SplFileObject$$READ_AHEAD;
-extern const int64_t q_SplFileObject$$SKIP_EMPTY;
-extern const int64_t q_SplFileObject$$READ_CSV;
+extern const int64 q_SplFileObject$$DROP_NEW_LINE;
+extern const int64 q_SplFileObject$$READ_AHEAD;
+extern const int64 q_SplFileObject$$SKIP_EMPTY;
+extern const int64 q_SplFileObject$$READ_CSV;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

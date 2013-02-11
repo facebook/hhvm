@@ -279,7 +279,7 @@ void c_FB_MySQLLexer::t_pushback() {
     {
       bool tmp1 = (more(m_lookahead, 0L));
       if (tmp1) {
-        int64_t tmp2((x_count(m_tokenStack)));
+        int64 tmp2((x_count(m_tokenStack)));
         tmp1 = (more(tmp2, 0L));
       }
       tmp0 = ((tmp1 && more(m_stackPtr, 0L)));
@@ -296,7 +296,7 @@ namespace hphp_impl_splitter {}
 Variant c_FB_MySQLLexer::t_lex() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::lex);
   Variant v_token;
-  int64_t v_i = 0;
+  int64 v_i = 0;
 
   Variant tmp_ref;
   ObjectData *obj_tmp UNUSED;
@@ -306,7 +306,7 @@ Variant c_FB_MySQLLexer::t_lex() {
         bool tmp0;
         {
           Variant tmp1((m_stackPtr));
-          int64_t tmp2((x_count(m_tokenStack)));
+          int64 tmp2((x_count(m_tokenStack)));
           tmp0 = (less(tmp1, tmp2));
         }
         if (tmp0) {
@@ -341,14 +341,14 @@ Variant c_FB_MySQLLexer::t_lex() {
                   LOOP_COUNTER(1);
                   for (v_i = 0L; ; v_i++) {
                     {
-                      int64_t tmp0((x_count(m_tokenStack)));
-                      int64_t tmp1(((tmp0 - 1L)));
+                      int64 tmp0((x_count(m_tokenStack)));
+                      int64 tmp1(((tmp0 - 1L)));
                       if (!((less(v_i, tmp1)))) break;
                     }
                     LOOP_COUNTER_CHECK(1);
                     {
                       {
-                        int64_t tmp0(((v_i + 1L)));
+                        int64 tmp0(((v_i + 1L)));
                         const Variant &tmp1((m_tokenStack.rvalAt(tmp0, AccessFlags::Error)));
                         m_tokenStack.set(v_i, (tmp1));
                       }
@@ -381,7 +381,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 172 */
 Variant c_FB_MySQLLexer::t_nexttoken() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::nextToken);
-  int64_t v_state = 0;
+  int64 v_state = 0;
   Variant v_c;
   Variant v_t;
   Variant v_quote;
@@ -706,7 +706,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             t_unget();
             {
               const Variant &tmp0((x_substr(toString(m_string), toInt32(m_tokStart), toInt32(m_tokLen))));
-              int64_t tmp1((x_intval(tmp0)));
+              int64 tmp1((x_intval(tmp0)));
               m_tokText = tmp1;
             }
             {

@@ -208,7 +208,7 @@ bool c_SplObjectStorage::t_valid() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 50 */
-int64_t c_SplObjectStorage::t_key() {
+int64 c_SplObjectStorage::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::key);
   ObjectData *obj_tmp UNUSED;
   return m_index;
@@ -230,7 +230,7 @@ void c_SplObjectStorage::t_next() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 87 */
-int64_t c_SplObjectStorage::t_count() {
+int64 c_SplObjectStorage::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::count);
   ObjectData *obj_tmp UNUSED;
   return x_count(m_storage);

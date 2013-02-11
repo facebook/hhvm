@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 238 */
+/* SRC: classes/exception.php line 236 */
 FORWARD_DECLARE_CLASS(InvalidArgumentException);
 extern const ObjectStaticCallbacks cw_InvalidArgumentException;
 class c_InvalidArgumentException : public c_LogicException {

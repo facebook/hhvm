@@ -2399,6 +2399,10 @@ StaticStringProxy s_sys_ssp42099663;
 #ifndef s_sys_ss42099663
 #define s_sys_ss42099663 (*(StaticString *)(&s_sys_ssp42099663))
 #endif
+StaticStringProxy s_sys_ssp420b0763;
+#ifndef s_sys_ss420b0763
+#define s_sys_ss420b0763 (*(StaticString *)(&s_sys_ssp420b0763))
+#endif
 StaticStringProxy s_sys_ssp4223ae99;
 #ifndef s_sys_ss4223ae99
 #define s_sys_ss4223ae99 (*(StaticString *)(&s_sys_ssp4223ae99))
@@ -2967,6 +2971,10 @@ StaticStringProxy s_sys_ssp5123905f;
 #ifndef s_sys_ss5123905f
 #define s_sys_ss5123905f (*(StaticString *)(&s_sys_ssp5123905f))
 #endif
+StaticStringProxy s_sys_ssp5130bc21;
+#ifndef s_sys_ss5130bc21
+#define s_sys_ss5130bc21 (*(StaticString *)(&s_sys_ssp5130bc21))
+#endif
 StaticStringProxy s_sys_ssp5157a035;
 #ifndef s_sys_ss5157a035
 #define s_sys_ss5157a035 (*(StaticString *)(&s_sys_ssp5157a035))
@@ -3198,6 +3206,10 @@ StaticStringProxy s_sys_ssp5828962a;
 StaticStringProxy s_sys_ssp58532c4b;
 #ifndef s_sys_ss58532c4b
 #define s_sys_ss58532c4b (*(StaticString *)(&s_sys_ssp58532c4b))
+#endif
+StaticStringProxy s_sys_ssp58596548;
+#ifndef s_sys_ss58596548
+#define s_sys_ss58596548 (*(StaticString *)(&s_sys_ssp58596548))
 #endif
 StaticStringProxy s_sys_ssp5874650e;
 #ifndef s_sys_ss5874650e
@@ -5032,6 +5044,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp42041cf0, (const char *)"nextrowset",
   (const char *)&s_sys_ssp4209030c, (const char *)"getMulti",
   (const char *)&s_sys_ssp42099663, (const char *)"setattribute",
+  (const char *)&s_sys_ssp420b0763, (const char *)"isFinished",
   (const char *)&s_sys_ssp4223ae99, (const char *)"protected",
   (const char *)&s_sys_ssp422a0242, (const char *)"wrap",
   (const char *)&s_sys_ssp424c5a2c, (const char *)"replaceByKey",
@@ -5166,6 +5179,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp50f88882, (const char *)"setDate",
   (const char *)&s_sys_ssp510db70b, (const char *)"tokStart",
   (const char *)&s_sys_ssp5123905f, (const char *)"openMemory",
+  (const char *)&s_sys_ssp5130bc21, (const char *)"isSucceeded",
   (const char *)&s_sys_ssp5157a035, (const char *)"decrement",
   (const char *)&s_sys_ssp515c823d, (const char *)"text_val",
   (const char *)&s_sys_ssp51674573, (const char *)"fflush",
@@ -5224,6 +5238,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp58006f2e, (const char *)"addserver",
   (const char *)&s_sys_ssp5828962a, (const char *)"getAttributeNode",
   (const char *)&s_sys_ssp58532c4b, (const char *)"Sender",
+  (const char *)&s_sys_ssp58596548, (const char *)"isFailed",
   (const char *)&s_sys_ssp5874650e, (const char *)"getFile",
   (const char *)&s_sys_ssp589432fe, (const char *)"UTF32_LittleEndian",
   (const char *)&s_sys_ssp589a75dc, (const char *)"token",
@@ -5552,7 +5567,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp6fd67d3d, (const char *)"\000*\000file", (const char *)7L,
   (const char *)&s_sys_ssp7c4bb61c, (const char *)"\000SplObjectStorage\000storage", (const char *)25L,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1061, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1064, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0514b8b1, (const char *)&s_sys_ss0514b8b1,

@@ -10619,11 +10619,14 @@ const int cw_WaitHandle$$instanceof_index[] = {
   1,
   -1,0,
 };
+extern const CallInfo ci_WaitHandle$$isfailed = { (void*)&c_WaitHandle::i_isfailed, (void*)&c_WaitHandle::ifa_isfailed, 0, 4, 0x0000000000000000L};
 extern const CallInfo ci_WaitHandle$$__construct = { (void*)&c_WaitHandle::i___construct, (void*)&c_WaitHandle::ifa___construct, 0, 132, 0x0000000000000000L};
 extern const CallInfo ci_WaitHandle$$getexceptioniffailed = { (void*)&c_WaitHandle::i_getexceptioniffailed, (void*)&c_WaitHandle::ifa_getexceptioniffailed, 0, 4, 0x0000000000000000L};
 extern const CallInfo ci_WaitHandle$$getname = { (void*)&c_WaitHandle::i_getname, (void*)&c_WaitHandle::ifa_getname, 0, 4, 0x0000000000000000L};
 extern const CallInfo ci_WaitHandle$$join = { (void*)&c_WaitHandle::i_join, (void*)&c_WaitHandle::ifa_join, 0, 4, 0x0000000000000000L};
 extern const CallInfo ci_WaitHandle$$getid = { (void*)&c_WaitHandle::i_getid, (void*)&c_WaitHandle::ifa_getid, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_WaitHandle$$isfinished = { (void*)&c_WaitHandle::i_isfinished, (void*)&c_WaitHandle::ifa_isfinished, 0, 4, 0x0000000000000000L};
+extern const CallInfo ci_WaitHandle$$issucceeded = { (void*)&c_WaitHandle::i_issucceeded, (void*)&c_WaitHandle::ifa_issucceeded, 0, 4, 0x0000000000000000L};
 extern const CallInfo ci_WaitHandle$$import = { (void*)&c_WaitHandle::i_import, (void*)&c_WaitHandle::ifa_import, 0, 4, 0x0000000000000000L};
 Variant c_WaitHandle::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
@@ -10633,6 +10636,15 @@ Variant c_WaitHandle::i_import(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_WaitHandle::i_join(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_join);
+}
+Variant c_WaitHandle::i_isfinished(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_isfinished);
+}
+Variant c_WaitHandle::i_issucceeded(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_issucceeded);
+}
+Variant c_WaitHandle::i_isfailed(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_isfailed);
 }
 Variant c_WaitHandle::i_getid(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getid);
@@ -10667,6 +10679,30 @@ Variant NEVER_INLINE c_WaitHandle::ifa_join(MethodCallPackage &mcp, int count, I
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("join", 0, 1);
   return (self->t_join());
 }
+Variant NEVER_INLINE c_WaitHandle::ifa_isfinished(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isfinished, coo_WaitHandle);
+  }
+  c_WaitHandle *self ATTRIBUTE_UNUSED (static_cast<c_WaitHandle*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("isfinished", 0, 1);
+  return (self->t_isfinished());
+}
+Variant NEVER_INLINE c_WaitHandle::ifa_issucceeded(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_issucceeded, coo_WaitHandle);
+  }
+  c_WaitHandle *self ATTRIBUTE_UNUSED (static_cast<c_WaitHandle*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("issucceeded", 0, 1);
+  return (self->t_issucceeded());
+}
+Variant NEVER_INLINE c_WaitHandle::ifa_isfailed(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isfailed, coo_WaitHandle);
+  }
+  c_WaitHandle *self ATTRIBUTE_UNUSED (static_cast<c_WaitHandle*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("isfailed", 0, 1);
+  return (self->t_isfailed());
+}
 Variant NEVER_INLINE c_WaitHandle::ifa_getid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getid, coo_WaitHandle);
@@ -10692,17 +10728,22 @@ Variant NEVER_INLINE c_WaitHandle::ifa_getexceptioniffailed(MethodCallPackage &m
   return (self->t_getexceptioniffailed());
 }
 extern const MethodCallInfoTable cw_WaitHandle$$call_info_table[] = {
-  { 0x15043B12, 1, 6, "import", &ci_WaitHandle$$import },
+  { 0x5DBD50E1, 1, 8, "isFailed", &ci_WaitHandle$$isfailed },
   { 0x54E89523, 1, 5, "getID", &ci_WaitHandle$$getid },
+  { 0x1FD9CE07, 1, 10, "isFinished", &ci_WaitHandle$$isfinished },
+  { 0x3A40C6ED, 1, 11, "__construct", &ci_WaitHandle$$__construct },
+  { 0x15043B12, 1, 6, "import", &ci_WaitHandle$$import },
+  { 0x115F3134, 1, 11, "isSucceeded", &ci_WaitHandle$$issucceeded },
   { 0x521EA5D8, 1, 4, "join", &ci_WaitHandle$$join },
   { 0x06C1353B, 1, 7, "getName", &ci_WaitHandle$$getname },
-  { 0x3A40C6ED, 0, 11, "__construct", &ci_WaitHandle$$__construct },
   { 0x56B8DB3D, 1, 20, "getExceptionIfFailed", &ci_WaitHandle$$getexceptioniffailed },
 };
 extern const int cw_WaitHandle$$call_info_index[] = {
-  15,
-  -1,-1,0,1,-1,-1,-1,-1,
-  2,-1,-1,3,-1,4,-1,-1,
+  31,
+  -1,0,-1,1,-1,-1,-1,2,
+  -1,-1,-1,-1,-1,3,-1,-1,
+  -1,-1,4,-1,5,-1,-1,-1,
+  6,-1,-1,7,-1,8,-1,-1,
 
 };
 c_WaitHandle *c_WaitHandle::create() {

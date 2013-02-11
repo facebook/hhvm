@@ -2224,6 +2224,9 @@ VM::Instance* new_WaitHandle_Instance(VM::Class*);
 TypedValue* tg_10WaitHandle___construct(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_import(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_join(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_isFinished(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_isSucceeded(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_isFailed(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_getID(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_getName(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_getExceptionIfFailed(VM::ActRec *ar);
@@ -5182,11 +5185,14 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "lz4uncompress", fg_lz4uncompress, (void *)&fh_lz4uncompress }
 };
 
-static const long long hhbc_ext_method_count_WaitHandle = 6;
+static const long long hhbc_ext_method_count_WaitHandle = 9;
 static const HhbcExtMethodInfo hhbc_ext_methods_WaitHandle[] = {
   { "__construct", tg_10WaitHandle___construct },
   { "import", tg_10WaitHandle_import },
   { "join", tg_10WaitHandle_join },
+  { "isFinished", tg_10WaitHandle_isFinished },
+  { "isSucceeded", tg_10WaitHandle_isSucceeded },
+  { "isFailed", tg_10WaitHandle_isFailed },
   { "getID", tg_10WaitHandle_getID },
   { "getName", tg_10WaitHandle_getName },
   { "getExceptionIfFailed", tg_10WaitHandle_getExceptionIfFailed }

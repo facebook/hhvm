@@ -179,16 +179,14 @@ class Exception {
     // Remove top stack frames up to and including Exception::__init__,
     // set the 'file' and 'line' properties appropriately
     while (!empty($this->trace)) {
-      $top = $this->trace[0];
+      $top = array_shift($this->trace);
       if (isset($top['class']) && isset($top['function']) &&
           strcasecmp($top['class'], 'exception') === 0 &&
           strcasecmp($top['function'], '__init__') === 0) {
-        $frame = array_shift($this->trace);
-        if (isset($frame['file'])) $this->file = $frame['file'];
-        if (isset($frame['line'])) $this->line = $frame['line'];
+        if (isset($top['file'])) $this->file = $top['file'];
+        if (isset($top['line'])) $this->line = $top['line'];
         return;
       }
-      array_shift($this->trace);
     }
   }
 

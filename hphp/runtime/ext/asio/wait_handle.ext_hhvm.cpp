@@ -148,6 +148,120 @@ TypedValue* tg_10WaitHandle_join(HPHP::VM::ActRec *ar) {
 }
 
 /*
+bool HPHP::c_WaitHandle::t_isfinished()
+_ZN4HPHP12c_WaitHandle12t_isfinishedEv
+
+(return value) => rax
+this_ => rdi
+*/
+
+bool th_10WaitHandle_isFinished(ObjectData* this_) asm("_ZN4HPHP12c_WaitHandle12t_isfinishedEv");
+
+TypedValue* tg_10WaitHandle_isFinished(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_10WaitHandle_isFinished((this_))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("WaitHandle::isFinished", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("WaitHandle::isFinished");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_WaitHandle::t_issucceeded()
+_ZN4HPHP12c_WaitHandle13t_issucceededEv
+
+(return value) => rax
+this_ => rdi
+*/
+
+bool th_10WaitHandle_isSucceeded(ObjectData* this_) asm("_ZN4HPHP12c_WaitHandle13t_issucceededEv");
+
+TypedValue* tg_10WaitHandle_isSucceeded(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_10WaitHandle_isSucceeded((this_))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("WaitHandle::isSucceeded", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("WaitHandle::isSucceeded");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_WaitHandle::t_isfailed()
+_ZN4HPHP12c_WaitHandle10t_isfailedEv
+
+(return value) => rax
+this_ => rdi
+*/
+
+bool th_10WaitHandle_isFailed(ObjectData* this_) asm("_ZN4HPHP12c_WaitHandle10t_isfailedEv");
+
+TypedValue* tg_10WaitHandle_isFailed(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_10WaitHandle_isFailed((this_))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("WaitHandle::isFailed", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("WaitHandle::isFailed");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 long HPHP::c_WaitHandle::t_getid()
 _ZN4HPHP12c_WaitHandle7t_getidEv
 

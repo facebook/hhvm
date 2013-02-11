@@ -189,9 +189,7 @@ void HhbcTranslator::emitPrint() {
     if (op != Nop) m_tb->gen(op, popC());
     push(m_tb->genDefConst<int64>(1));
   } else {
-    spillStack();
-    popC();
-    emitInterpOne(Type::Int);
+    emitInterpOne(Type::Int, 1);
   }
 }
 
@@ -269,10 +267,7 @@ void HhbcTranslator::emitArrayAdd() {
     // prevents us from getting to type of the SSATmps popped from the
     // eval stack. Most likely we had an interpone before this
     // instruction.
-    spillStack();
-    popC();
-    popC();
-    emitInterpOne(Type::Arr);
+    emitInterpOne(Type::Arr, 2);
     return;
   }
   SSATmp* tr = popC();
@@ -313,7 +308,6 @@ void HhbcTranslator::emitAddNewElemC() {
 }
 
 void HhbcTranslator::emitCns(uint32 id) {
-  spillStack();
   emitInterpOneOrPunt(Type::Cell);
 }
 
@@ -333,13 +327,11 @@ void HhbcTranslator::emitConcat() {
 
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
 //  m_tb->genDefCls(lookupPreClassId(cid), getCurUnit()->at(after));
-  spillStack();
   emitInterpOneOrPunt(Type::None);
 }
 
 void HhbcTranslator::emitDefFunc(int fid) {
 //  m_tb->genDefFunc(lookupFuncId(fid));
-  spillStack();
   emitInterpOneOrPunt(Type::None);
 }
 
@@ -351,7 +343,6 @@ void HhbcTranslator::emitLateBoundCls() {
     push(m_tb->genLdCtxCls());
   } else {
     // TODO: Task #2095788, use LdCtx to handle remaining cases
-    spillStack();
     emitInterpOne(Type::Cls);
   }
 }
@@ -359,7 +350,6 @@ void HhbcTranslator::emitLateBoundCls() {
 void HhbcTranslator::emitSelf() {
   Class* clss = getCurClass();
   if (clss == NULL) {
-    spillStack();
     emitInterpOne(Type::Cls);
   } else {
     push(m_tb->genDefConst(clss));
@@ -369,7 +359,6 @@ void HhbcTranslator::emitSelf() {
 void HhbcTranslator::emitParent() {
   const Class* clss = getCurClass()->parent();
   if (clss == NULL || clss->parent() == NULL) {
-    spillStack();
     emitInterpOne(Type::Cls);
   } else {
     push(m_tb->genDefConst(clss->parent()));
@@ -441,25 +430,14 @@ void HhbcTranslator::emitVGetL(int32 id) {
   pushIncRef(m_tb->genBoxLoc(id));
 }
 
-void HhbcTranslator::emitVGetG(const StringData* name) {
-  // helper function BoxedGlobalCache::lookupCreate
-  spillStack();
-  popC();
-  emitInterpOneOrPunt(Type::Gen);
-}
-
 void HhbcTranslator::emitUnsetN() {
   // No reason to punt, translator-x64 does emitInterpOne as well
-  spillStack();
-  popC();
-  emitInterpOne(Type::None);
+  emitInterpOne(Type::None, 1);
 }
 
-void HhbcTranslator::emitUnsetG() {
+void HhbcTranslator::emitUnsetG(const StringData* gblName) {
   // No reason to punt, translator-x64 does emitInterpOne as well
-  spillStack();
-  popC();
-  emitInterpOne(Type::None);
+  emitInterpOne(Type::None, 1);
 }
 
 void HhbcTranslator::emitUnsetL(int32 id) {
@@ -564,10 +542,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
 }
 
 void HhbcTranslator::emitClassExists(const StringData* clsName) {
-  spillStack();
-  popC();
-  popC();
-  emitInterpOneOrPunt(Type::Bool);
+  emitInterpOneOrPunt(Type::Bool, 2);
 }
 
 void HhbcTranslator::emitInterfaceExists(const StringData* ifaceName) {
@@ -579,9 +554,7 @@ void HhbcTranslator::emitTraitExists(const StringData* traitName) {
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32 varId, uint32 listStrId) {
-  spillStack();
-  popC();
-  emitInterpOneOrPunt(Type::None);
+  emitInterpOneOrPunt(Type::None, 1);
 }
 
 void HhbcTranslator::emitReqDoc(const StringData* name) {
@@ -811,9 +784,7 @@ void HhbcTranslator::emitContStopped() {
 
 void HhbcTranslator::emitContHandle() {
   // No reason to punt, translator-x64 does emitInterpOne as well
-  spillStack();
-  popC();
-  emitInterpOne(Type::None);
+  emitInterpOne(Type::None, 1);
 }
 
 void HhbcTranslator::emitStrlen() {
@@ -835,9 +806,7 @@ void HhbcTranslator::emitStrlen() {
     // strlen(true) == 1, strlen(false) == 0.
     push(m_tb->genConvToInt(popC()));
   } else {
-    spillStack();
-    popC();
-    emitInterpOneOrPunt(Type::Gen);
+    emitInterpOne(Type::Int | Type::InitNull, 1);
   }
 }
 
@@ -848,43 +817,71 @@ void HhbcTranslator::emitIncStat(int32 counter, int32 value, bool force) {
   }
 }
 
-SSATmp* HhbcTranslator::getClsPropAddr(Trace* exitTrace,
-                                       const StringData* propName) {
-  SSATmp* clsTmp = popA();
-  SSATmp* prop = popC();
-  if (!prop->isConst()) {
-    if (propName) {
-      // The property name SSATmp on the evaluation stack was not a
-      // constant but the bytecode translator somehow knew the
-      // property name statically.
-      prop = m_tb->genDefConst(propName);
+SSATmp* HhbcTranslator::getStrName(const StringData* knownName) {
+  SSATmp* name = popC();
+  assert(name->isA(Type::Str) || knownName);
+  if (!name->isConst() || !name->isA(Type::Str)) {
+    if (knownName) {
+      // The SSATmp on the evaluation stack was not a string constant,
+      // but the bytecode translator somehow knew the name statically.
+      name = m_tb->genDefConst(knownName);
     }
+  } else {
+    assert(!knownName || knownName->same(name->getValStr()));
   }
-  return m_tb->gen(LdClsPropAddr,
-                   m_tb->getFirstBlock(exitTrace),
-                   clsTmp,
-                   prop,
-                   m_tb->genDefConst(getCurClass()));
+  return name;
 }
 
-bool HhbcTranslator::isSupportedClsProp(int stkIndex) {
-  return topC(stkIndex + 1)->isA(Type::Str);
+SSATmp* HhbcTranslator::emitLdClsPropAddrOrExit(const StringData* propName,
+                                                Trace* exitTrace) {
+  SSATmp* clsTmp = popA();
+  SSATmp* prop = getStrName(propName);
+  SSATmp* addr = m_tb->gen(LdClsPropAddr,
+                           m_tb->getFirstBlock(exitTrace),
+                           clsTmp,
+                           prop,
+                           m_tb->genDefConst(getCurClass()));
+  m_tb->genDecRef(prop); // safe to do early because prop is a string
+  return addr;
 }
 
-void HhbcTranslator::decRefPropAddr(SSATmp* propAddr) {
-  SSATmp* prop = propAddr->getInstruction()->getSrc(1);
-  m_tb->genDecRef(prop);
+bool HhbcTranslator::checkSupportedClsProp(const StringData* propName,
+                                           Type resultType,
+                                           int stkIndex) {
+  if (topC(stkIndex + 1)->isA(Type::Str) || propName) {
+    return true;
+  }
+  emitInterpOne(resultType, stkIndex + 2);
+  return false;
+}
+
+bool HhbcTranslator::checkSupportedGblName(const StringData* gblName,
+                                           Type resultType,
+                                           int stkIndex) {
+  if (topC(stkIndex)->isA(Type::Str) || gblName) {
+    return true;
+  }
+  emitInterpOne(resultType, stkIndex + 1);
+  return false;
+}
+
+SSATmp* HhbcTranslator::emitLdGblAddr(const StringData* gblName, Trace* exit) {
+  SSATmp* name = getStrName(gblName);
+  // Note: Once we use control flow to implement IssetG/EmptyG, we can
+  // use a LdGblAddr helper that decrefs name for us
+  SSATmp* addr = m_tb->gen(LdGblAddr, m_tb->getFirstBlock(exit), name);
+  m_tb->genDecRef(name);
+  return addr;
+}
+
+SSATmp* HhbcTranslator::emitLdGblAddrDef(const StringData* gblName) {
+  return m_tb->gen(LdGblAddrDef, getStrName(gblName));
 }
 
 void HhbcTranslator::emitIncDecS(bool pre, bool inc) {
-  if (!isSupportedClsProp()) {
-    PUNT(IncDecS);
-  }
-  Trace* exit1     = getExitSlowTrace();
-  Trace* exit2     = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(exit1);
-  emitIncDecMem(pre, inc, propAddr, exit2);
-  decRefPropAddr(propAddr);
+  if (!checkSupportedClsProp(nullptr, Type::Cell, 0)) return;
+  Trace* exit = getExitSlowTrace();
+  emitIncDecMem(pre, inc, emitLdClsPropAddr(nullptr), exit);
 }
 
 void HhbcTranslator::emitIncDecProp(bool pre, bool inc, int offset,
@@ -1014,30 +1011,20 @@ void HhbcTranslator::emitIssetL(int32 id) {
   }
 }
 
-void HhbcTranslator::emitIssetG() {
+void HhbcTranslator::emitIssetG(const StringData* gblName) {
   TRACE(3, "%u: IssetG\n", m_bcOff);
-  PUNT(IssetG);
+  emitIsset(gblName,
+            &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
+            &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddr);
 }
 
-/*
- * IssetS: return true if class cls has an accessible static
- * property named propName that is not null; returns false
- * otherwise.
- */
 void HhbcTranslator::emitIssetS(const StringData* propName) {
   TRACE(3, "%u: IssetS\n", m_bcOff);
-  if (!isSupportedClsProp()) {
-    PUNT(IssetS);
-  }
-  Trace*      exit = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(exit, propName);
-  push(m_tb->gen(IsNTypeMem, Type::Null, m_tb->genUnboxPtr(propAddr)));
-  decRefPropAddr(propAddr);
+  emitIsset(propName,
+            &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
+            &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddrOrExit);
 }
 
-/*
- * EmptyL: return true if var is uninit or !var
- */
 void HhbcTranslator::emitEmptyL(int32 id) {
   TRACE(3, "%u: EmptyL %d\n", m_bcOff, id);
 
@@ -1052,19 +1039,18 @@ void HhbcTranslator::emitEmptyL(int32 id) {
   }
 }
 
-void HhbcTranslator::emitEmptyS() {
+void HhbcTranslator::emitEmptyG(const StringData* gblName) {
+  TRACE(3, "%u: EmptyG\n", m_bcOff);
+  emitEmpty(gblName,
+            &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
+            &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddr);
+}
+
+void HhbcTranslator::emitEmptyS(const StringData* propName) {
   TRACE(3, "%u: EmptyS\n", m_bcOff);
-  if (!isSupportedClsProp()) {
-    PUNT(EmptyS);
-  }
-  Trace* exit1     = getExitSlowTrace();
-  Trace* exit2     = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(exit1);
-  SSATmp* ld = m_tb->genLdMem(m_unboxPtrs ? m_tb->genUnboxPtr(propAddr)
-                                          : propAddr,
-                              Type::Cell, exit2);
-  push(m_tb->genNot(m_tb->genConvToBool(ld)));
-  decRefPropAddr(propAddr);
+  emitEmpty(propName,
+            &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
+            &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddrOrExit);
 }
 
 void HhbcTranslator::emitIsTypeC(Type t) {
@@ -1759,7 +1745,6 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
                                          const StringData* constraintClsName) {
   /* It's currently better to interpOne all of these, since the slow path punts
    * for the entire tracelet */
-  spillStack();
   emitInterpOneOrPunt(Type::None);
   return;
 
@@ -1783,13 +1768,11 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
   if (tc.isObject()) {
     if (!(param->getType() == Type::Obj ||
           (param->getType().isNull() && tc.nullable()))) {
-      spillStack();
       emitInterpOne(Type::None);
       return;
     }
   } else {
     if (!tc.check(frame_local(curFrame() /* FIXME */, paramId), getCurFunc())) {
-      spillStack();
       emitInterpOne(Type::None);
       return;
     }
@@ -1910,147 +1893,200 @@ void HhbcTranslator::emitCastObject() {
 }
 
 static
-bool isSupportedAGet(SSATmp* classSrc) {
-  return (classSrc->isA(Type::Obj) || classSrc->isA(Type::Str));
+bool isSupportedAGet(SSATmp* classSrc, const StringData* clsName) {
+  return (classSrc->isA(Type::Obj) || classSrc->isA(Type::Str) || clsName);
 }
 
-void HhbcTranslator::emitAGet(SSATmp* classSrc) {
+void HhbcTranslator::emitAGet(SSATmp* classSrc, const StringData* clsName) {
   if (classSrc->isA(Type::Str)) {
     push(m_tb->gen(LdCls, classSrc, m_tb->genDefConst(getCurClass())));
   } else if (classSrc->isA(Type::Obj)) {
     push(m_tb->gen(LdObjClass, classSrc));
+  } else if (clsName) {
+    push(m_tb->gen(LdCls,
+                   m_tb->genDefConst(clsName),
+                   m_tb->genDefConst(getCurClass())));
   } else {
-    assert(0);
+    not_reached();
   }
 }
 
 void HhbcTranslator::emitAGetC(const StringData* clsName) {
-  if (isSupportedAGet(topC())) {
+  if (isSupportedAGet(topC(), clsName)) {
     SSATmp* src = popC();
-    if (clsName != nullptr) {
-      src = m_tb->genDefConst(clsName);
-    }
-    emitAGet(src);
+    emitAGet(src, clsName);
     m_tb->genDecRef(src);
   } else {
-    spillStack();
-    popC();
-    emitInterpOne(Type::Cls);
+    emitInterpOne(Type::Cls, 1);
   }
 }
 
 void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
-  Trace* exitTrace = getExitTrace();
-  SSATmp* src = m_tb->genLdLocAsCell(id, exitTrace);
-  if (isSupportedAGet(src)) {
-    emitAGet(src);
+  SSATmp* src = m_tb->genLdLocAsCell(id, getExitTrace());
+  if (isSupportedAGet(src, clsName)) {
+    emitAGet(src, clsName);
   } else {
-    PUNT(AGetL);
+    PUNT(AGetL); // need to teach interpone about local uses
   }
 }
 
-void HhbcTranslator::emitCGetS(const StringData* propName,
-                               Type resultType,
-                               bool isInferedType) {
-
-  TRACE(3, "%u: CGetS\n", m_bcOff);
-  if (!isSupportedClsProp()) {
-    PUNT(CGetS);
-  }
-  Trace* exit1    = getExitSlowTrace();
-  Trace* exit2    = getExitSlowTrace();
-  SSATmp* propPtr = getClsPropAddr(exit1, propName);
-  SSATmp* val;
-  if (isInferedType) {
-    assert(resultType.isStaticallyKnownUnboxed());
-    val = m_tb->genLdMem(propPtr, resultType, nullptr);
-  } else {
-    if (resultType.equals(Type::None)) {
-      // result type not predicted
-      resultType = Type::Cell;
-    } else {
-      assert(resultType.isStaticallyKnownUnboxed());
-    }
-    // Type is predicted, so take slow exit if check fails to avoid repeating
-    // this situation.
-    // This code is currently correct, but once we enable type
-    // prediction for CGetS, we should exit normally to a trace that
-    // executes the CGetS as cell type (including the incref of the
-    // result) and exits to the next bytecode.
-    val = m_tb->genLdMem(m_unboxPtrs ? m_tb->genUnboxPtr(propPtr) : propPtr,
-                        resultType, exit2);
-  }
-  pushIncRef(val);
-  decRefPropAddr(propPtr);
+SSATmp* HhbcTranslator::unboxPtr(SSATmp* ptr) {
+  return m_unboxPtrs ? m_tb->genUnboxPtr(ptr) : ptr;
 }
 
-void HhbcTranslator::emitBindS() {
-  TRACE(3, "%u: BindS\n", m_bcOff);
-  if (!isSupportedClsProp(1)) {
-    PUNT(BindS);
-  }
-  Trace* exit       = getExitSlowTrace();
-  SSATmp* src       = popV();
-  SSATmp* propPtr   = getClsPropAddr(exit);
-  SSATmp* prevValue = m_tb->genLdMem(propPtr, Type::Gen, NULL);
+void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
+  SSATmp* prevValue = m_tb->genLdMem(ptr, Type::Gen, NULL);
   pushIncRef(src);
-  m_tb->genStMem(propPtr, src, true);
+  m_tb->genStMem(ptr, src, true);
   m_tb->genDecRef(prevValue);
-  decRefPropAddr(propPtr);
+}
+
+template<class CheckSupportedFun, class EmitLdAddrFun>
+void HhbcTranslator::emitBind(const StringData* name,
+                              CheckSupportedFun checkSupported,
+                              EmitLdAddrFun emitLdAddr) {
+  if (!(this->*checkSupported)(name, topC(0)->getType(), 1)) return;
+  SSATmp* src = popV();
+  emitBindMem((this->*emitLdAddr)(name), src);
+}
+
+void HhbcTranslator::emitSetMem(SSATmp* ptr, SSATmp* src) {
+  ptr = unboxPtr(ptr);
+  SSATmp* prevValue = m_tb->genLdMem(ptr, Type::Cell, nullptr);
+  pushIncRef(src);
+  m_tb->genStMem(ptr, src, true);
+  m_tb->genDecRef(prevValue);
+}
+
+template<class CheckSupportedFun, class EmitLdAddrFun>
+void HhbcTranslator::emitSet(const StringData* name,
+                             CheckSupportedFun checkSupported,
+                             EmitLdAddrFun emitLdAddr) {
+  if (!(this->*checkSupported)(name, topC(0)->getType(), 1)) return;
+  SSATmp* src = popC();
+  emitSetMem((this->*emitLdAddr)(name), src);
 }
 
 void HhbcTranslator::emitVGetMem(SSATmp* ptr) {
   pushIncRef(m_tb->genLdMem(m_tb->gen(BoxPtr, ptr), Type::BoxedCell, NULL));
 }
 
-void HhbcTranslator::emitVGetS() {
+template<class CheckSupportedFun, class EmitLdAddrFun>
+void HhbcTranslator::emitVGet(const StringData* name,
+                              CheckSupportedFun checkSupported,
+                              EmitLdAddrFun emitLdAddr) {
+  if (!(this->*checkSupported)(name, Type::BoxedCell, 0)) return;
+  emitVGetMem((this->*emitLdAddr)(name));
+}
+
+void HhbcTranslator::emitIssetMem(SSATmp* ptr) {
+  push(m_tb->gen(IsNTypeMem, Type::Null, m_tb->genUnboxPtr(ptr)));
+}
+
+template<class CheckSupportedFun, class EmitLdAddrFun>
+void HhbcTranslator::emitIsset(const StringData* name,
+                               CheckSupportedFun checkSupported,
+                               EmitLdAddrFun emitLdAddr) {
+  if (!(this->*checkSupported)(name, Type::Bool, 0)) return;
+  emitIssetMem((this->*emitLdAddr)(name, getExitSlowTrace()));
+}
+
+void HhbcTranslator::emitEmptyMem(SSATmp* ptr, Trace* exit) {
+  SSATmp* ld = m_tb->genLdMem(unboxPtr(ptr), Type::Cell, exit);
+  push(m_tb->genNot(m_tb->genConvToBool(ld)));
+}
+
+template<class CheckSupportedFun, class EmitLdAddrFun>
+void HhbcTranslator::emitEmpty(const StringData* name,
+                               CheckSupportedFun checkSupported,
+                               EmitLdAddrFun emitLdAddr) {
+  if (!(this->*checkSupported)(name, Type::Bool, 0)) return;
+  Trace* exit = getExitSlowTrace();
+  emitEmptyMem((this->*emitLdAddr)(name, getExitSlowTrace()), exit);
+}
+
+void HhbcTranslator::emitBindG(const StringData* gblName) {
+  TRACE(3, "%u: BindG\n", m_bcOff);
+  emitBind(gblName,
+           &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
+           &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddrDef);
+}
+
+void HhbcTranslator::emitBindS(const StringData* propName) {
+  TRACE(3, "%u: BindS\n", m_bcOff);
+  emitBind(propName,
+           &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
+           &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddr);
+}
+
+void HhbcTranslator::emitVGetG(const StringData* gblName) {
+  TRACE(3, "%u: VGetG\n", m_bcOff);
+  emitVGet(gblName,
+           &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
+           &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddrDef);
+}
+
+void HhbcTranslator::emitVGetS(const StringData* propName) {
   TRACE(3, "%u: VGetS\n", m_bcOff);
-  if (!isSupportedClsProp()) {
-    PUNT(VGetS);
-  }
-  Trace* exit     = getExitSlowTrace();
-  SSATmp* propPtr = getClsPropAddr(exit);
-  emitVGetMem(propPtr);
-  decRefPropAddr(propPtr);
+  emitVGet(propName,
+           &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
+           &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddr);
 }
 
-void HhbcTranslator::emitCGetG(const StringData* name,
-                               Type resultType, bool isInferedType) {
-  spillStack();
-  popC();
-  if (isInferedType) {
-    assert(resultType.notBoxed() &&
-           resultType != Type::Cell &&
-           resultType != Type::None);
-  } else {
-    assert(resultType == Type::None); // Type prediction shouldn't happen
-    resultType = Type::Cell;
-  }
-  emitInterpOneOrPunt(resultType);
-}
-
-void HhbcTranslator::emitSetG() {
-  spillStack();
-  popC();
-  popC();
-  emitInterpOneOrPunt(Type::Cell);
+void HhbcTranslator::emitSetG(const StringData* gblName) {
+  emitSet(gblName,
+          &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
+          &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddrDef);
 }
 
 void HhbcTranslator::emitSetS(const StringData* propName) {
-  if (!isSupportedClsProp(1)) {
-    PUNT(CGetS);
+  emitSet(propName,
+          &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
+          &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddr);
+}
+
+static Type getResultType(Type resultType, bool isInferedType) {
+  assert(!isInferedType || resultType.isStaticallyKnownUnboxed());
+  if (resultType.equals(Type::None)) {
+    // result type neither predicted nor inferred
+    return Type::Cell;
   }
-  Trace* exit1 = getExitSlowTrace();
-  Trace* exit2 = getExitSlowTrace();
-  SSATmp* src  = popC();
-  SSATmp* propAddrToDecRef = getClsPropAddr(exit1, propName);
-  SSATmp* propPtr = m_unboxPtrs ? m_tb->genUnboxPtr(propAddrToDecRef)
-                                : propAddrToDecRef;
-  SSATmp* prevValue = m_tb->genLdMem(propPtr, Type::Cell, exit2);
-  pushIncRef(src);
-  m_tb->genStMem(propPtr, src, true);
-  m_tb->genDecRef(prevValue);
-  decRefPropAddr(propAddrToDecRef);
+  assert(resultType.isStaticallyKnownUnboxed());
+  return resultType;
+}
+
+template<class CheckSupportedFun, class EmitLdAddrFun>
+void HhbcTranslator::emitCGet(const StringData* name,
+                              Type resultType,
+                              bool isInferedType,
+                              bool exitOnFailure,
+                              CheckSupportedFun checkSupported,
+                              EmitLdAddrFun emitLdAddr) {
+  resultType = getResultType(resultType, isInferedType);
+  if (!(this->*checkSupported)(name, resultType, 0)) return;
+  Trace* exit = isInferedType ? nullptr : getExitSlowTrace();
+  SSATmp* ptr = (this->*emitLdAddr)(name, exitOnFailure ? getExitSlowTrace()
+                                                        : nullptr);
+  if (!isInferedType) ptr = unboxPtr(ptr);
+  pushIncRef(m_tb->genLdMem(ptr, resultType, exit));
+}
+
+void HhbcTranslator::emitCGetG(const StringData* gblName,
+                               Type resultType,
+                               bool isInferedType) {
+  TRACE(3, "%u: CGetG\n", m_bcOff);
+  emitCGet(gblName, resultType, isInferedType, true,
+           &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
+           &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddr);
+}
+
+void HhbcTranslator::emitCGetS(const StringData* propName,
+                               Type resultType,
+                               bool isInferedType) {
+  TRACE(3, "%u: CGetS\n", m_bcOff);
+  emitCGet(propName, resultType, isInferedType, false,
+           &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
+           &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddrOrExit);
 }
 
 void HhbcTranslator::emitBinaryArith(Opcode opc) {
@@ -2063,14 +2099,8 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
     push(m_tb->gen(opc, Type::binArithResultType(type1, type2), tl, tr));
   } else if (isBitOp && (type1 == Type::Obj || type2 == Type::Obj)) {
     // raise fatal
-    spillStack();
-    popC();
-    popC();
-    emitInterpOne(Type::Cell);
+    emitInterpOne(Type::Cell, 2);
   } else {
-    spillStack();
-    popC();
-    popC();
     Type type = Type::Int;
     if (isBitOp) {
       if (type1.isString() && type2.isString()) {
@@ -2090,7 +2120,7 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
       // either an int or a dbl, but can't tell
       type = Type::Cell;
     }
-    emitInterpOne(type);
+    emitInterpOne(type, 2);
   }
 }
 
@@ -2122,19 +2152,15 @@ void HhbcTranslator::emitBitNot() {
     push(m_tb->genXor(src, ones));
   } else if (srcType.subtypeOf(Type::Null | Type::Bool | Type::Arr | Type::Obj)) {
     // raise fatal
-    spillStack();
-    popC();
-    emitInterpOne(Type::Cell);
+    emitInterpOne(Type::Cell, 1);
   } else {
-    spillStack();
-    popC();
     Type resultType = Type::Int;
     if (srcType.isString()) {
       resultType = Type::Str;
     } else if (!srcType.isStaticallyKnown()) {
       resultType = Type::Cell;
     }
-    emitInterpOne(resultType);
+    emitInterpOne(resultType, 1);
   }
 }
 void HhbcTranslator::emitBitAnd() {
@@ -2160,24 +2186,23 @@ void HhbcTranslator::emitXor() {
   m_tb->genDecRef(btr);
 }
 
-void HhbcTranslator::emitInterpOne(Type type, Trace* target /* = NULL */) {
-  if (0) {
-    m_tb->genTraceEnd(m_bcOff, TraceExitType::SlowNoProgress);
-    // TODO need to push something on the stack...
-    // Better approach here is to modify the code gen to generate an exit
-    // when it sees interp one
-  } else {
-    m_tb->genInterpOne(m_bcOff, m_stackDeficit, type, target);
-    m_stackDeficit = 0;
-  }
+void HhbcTranslator::emitInterpOne(Type type,
+                                   int numDiscard, /* = 0 */
+                                   Trace* target /* = NULL */) {
+  spillStack();
+  // discard the top elements of the stack
+  discard(numDiscard);
+  m_tb->genInterpOne(m_bcOff, m_stackDeficit, type, target);
+  m_stackDeficit = 0;
 }
 
 void HhbcTranslator::emitInterpOneOrPunt(Type type,
+                                         int numDiscard, /* = 0 */
                                          Trace* target /* = NULL */) {
   if (RuntimeOption::EvalIRPuntDontInterp) {
     PUNT(PuntDontInterp);
   } else {
-    emitInterpOne(type, target);
+    emitInterpOne(type, numDiscard, target);
   }
 }
 

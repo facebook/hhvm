@@ -866,10 +866,10 @@ SPropCache::lookupSProp(const Class *cls, const StringData *name, Class* ctx) {
   val = cls->getSProp(ctx, name, visible, accessible);
   if (UNLIKELY(!visible || !accessible)) {
     if (!raiseOnError) return NULL;
-    string methodName;
-    string_printf(methodName, "%s::$%s",
+    string propertyName;
+    string_printf(propertyName, "%s::%s",
                   cls->name()->data(), name->data());
-    undefinedError("Invalid static property access: %s", methodName.c_str());
+    undefinedError("Invalid static property access: %s", propertyName.c_str());
   }
   return val;
 }

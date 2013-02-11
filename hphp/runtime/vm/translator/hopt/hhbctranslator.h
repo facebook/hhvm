@@ -181,6 +181,8 @@ struct HhbcTranslator {
   void emitCGetL2(int32 id);
   void emitCGetS(const StringData* propName,
                  Type resultType, bool isInferedType);
+  void emitCGetG(const StringData* name, Type resultType,
+                 bool isInferedType);
   void emitMInstr(const NormalizedInstruction& ni);
   void emitCGetProp(LocationCode locCode,
                     int propOffset,
@@ -188,29 +190,29 @@ struct HhbcTranslator {
                     Type resultType,
                     bool isInferedType);
   void emitVGetL(int32 id);
-  void emitCGetG(const StringData* name, Type resultType,
-                 bool isInferedType);
+  void emitVGetS(const StringData* propName);
   void emitVGetG(const StringData* name);
-  void emitVGetS();
   void emitVGetM();
   void emitSetL(int32 id);
   void emitSetS(const StringData* propName);
-  void emitSetG();
+  void emitSetG(const StringData* gblName);
   void emitSetProp(int propOffset, bool isPropOnStack); // object + offset
   void emitBindL(int32 id);
-  void emitBindS();
+  void emitBindS(const StringData* propName);
+  void emitBindG(const StringData* gblName);
   void emitBindM(const char* vectorDesc);
   void emitUnsetL(int32 id);
   void emitUnsetN();
-  void emitUnsetG();
+  void emitUnsetG(const StringData* gblName);
   void emitUnsetProp(int offset);
   void emitIssetL(int32 id);
   void emitIssetS(const StringData* propName);
-  void emitIssetG();
+  void emitIssetG(const StringData* gblName);
   void emitIssetM(const char* vectorDesc);
   void emitIssetProp(int offset);
   void emitEmptyL(int32 id);
-  void emitEmptyS();
+  void emitEmptyS(const StringData* propName);
+  void emitEmptyG(const StringData* gblName);
   void emitEmptyM(const char* vectorDesc);
   void emitEmptyProp(int offset);
   // The subOpc param can be one of either
@@ -452,27 +454,76 @@ private:
   /*
    * Emit helpers.
    */
+  template<class CheckSupportedFun, class EmitLdAddrFun>
+  void emitCGet(const StringData* name,
+                Type resultType,
+                bool isInferedType,
+                bool exitOnFailure,
+                CheckSupportedFun checkSupported,
+                EmitLdAddrFun emitLdAddr);
+
   void emitVGetMem(SSATmp* addr);
+
+  template<class CheckSupportedFun, class EmitLdAddrFun>
+  void emitVGet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
+
+  void emitBindMem(SSATmp* ptr, SSATmp* src);
+
+  template<class CheckSupportedFun, class EmitLdAddrFun>
+  void emitBind(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
+
+  void emitSetMem(SSATmp* ptr, SSATmp* src);
+
+  template<class CheckSupportedFun, class EmitLdAddrFun>
+  void emitSet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
+
+  void emitIssetMem(SSATmp* ptr);
+
+  template<class CheckSupportedFun, class EmitLdAddrFun>
+  void emitIsset(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
+
+  void emitEmptyMem(SSATmp* ptr, Trace* exit);
+
+  template<class CheckSupportedFun, class EmitLdAddrFun>
+  void emitEmpty(const StringData* name,
+                 CheckSupportedFun checkSupported,
+                 EmitLdAddrFun emitLdAddr);
+
+  void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Trace* exitTrace);
+
+  bool checkSupportedClsProp(const StringData* propName,
+                             Type resultType,
+                             int stkIndex);
+  bool checkSupportedGblName(const StringData* gblName,
+                             HPHP::VM::JIT::Type resultType,
+                             int stkIndex);
+  SSATmp* emitLdClsPropAddrOrExit(const StringData* propName, Trace* exit);
+  SSATmp* emitLdClsPropAddr(const StringData* propName) {
+    return emitLdClsPropAddrOrExit(propName, nullptr);
+  }
+  SSATmp* getStrName(const StringData* propName = nullptr);
+  SSATmp* emitLdGblAddrDef(const StringData* gblName = nullptr);
+  SSATmp* emitLdGblAddr(const StringData* gblName, Trace* exitTrace);
+  SSATmp* unboxPtr(SSATmp* ptr);
+
   void emitUnboxRAux();
-  void emitAGet(SSATmp* src);
+  void emitAGet(SSATmp* src, const StringData* clsName);
   void emitRet(SSATmp* retVal, Trace* exitTrace, bool freeInline);
   void emitIsTypeC(Type t);
   void emitIsTypeL(Type t, int id);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32 offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
-  void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  bool isSupportedClsProp(int stkIndex = 0);
-  SSATmp* getClsPropAddr(Trace* exitTrace, const StringData* propName = nullptr);
-  void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(Offset targetBcOff = -1);
   Trace* getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff);
   Trace* getExitSlowTrace();
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32 id, Trace* target);
-  void emitInterpOne(Type type, Trace* target = nullptr);
-  void emitInterpOneOrPunt(Type type, Trace* target = nullptr);
+  void emitInterpOne(Type type, int numDiscard = 0, Trace* target = nullptr);
+  void emitInterpOneOrPunt(Type type,
+                           int numDiscard = 0,
+                           Trace* target = nullptr);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);

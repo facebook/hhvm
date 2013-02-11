@@ -708,17 +708,36 @@ void TranslatorX64::irTranslateTraitExists(const Tracelet& t,
 
 void TranslatorX64::irTranslateVGetS(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  HHIR_EMIT(VGetS);
+  const int kPropNameIdx = 1;
+  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
+  HHIR_EMIT(VGetS, propName);
+}
+
+void
+TranslatorX64::irTranslateVGetG(const Tracelet& t,
+                                const NormalizedInstruction& i) {
+  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(VGetG, name);
 }
 
 void TranslatorX64::irTranslateBindS(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  HHIR_EMIT(BindS);
+  const int kPropIdx = 2;
+  const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
+  HHIR_EMIT(BindS, propName);
 }
 
 void TranslatorX64::irTranslateEmptyS(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  HHIR_EMIT(EmptyS);
+  const int kPropNameIdx = 1;
+  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
+  HHIR_EMIT(EmptyS, propName);
+}
+
+void TranslatorX64::irTranslateEmptyG(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
+  const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(EmptyG, gblName);
 }
 
 void
@@ -727,6 +746,20 @@ TranslatorX64::irTranslateIssetS(const Tracelet& t,
   const int kPropNameIdx = 1;
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
   HHIR_EMIT(IssetS, propName);
+}
+
+void
+TranslatorX64::irTranslateIssetG(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(IssetG, gblName);
+}
+
+void
+TranslatorX64::irTranslateUnsetG(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(UnsetG, gblName);
 }
 
 void TranslatorX64::irTranslateCGetS(const Tracelet& t,
@@ -744,9 +777,23 @@ void TranslatorX64::irTranslateSetS(const Tracelet& t,
   HHIR_EMIT(SetS, propName);
 }
 
+void
+TranslatorX64::irTranslateCGetG(const Tracelet& t,
+                                const NormalizedInstruction& i) {
+  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(CGetG, name, getInferredOrPredictedType(i), isInferredType(i));
+}
+
 void TranslatorX64::irTranslateSetG(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  HHIR_EMIT(SetG);
+  const StringData* name = i.inputs[1]->rtt.valueStringOrNull();
+  HHIR_EMIT(SetG, name);
+}
+
+void TranslatorX64::irTranslateBindG(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
+  const StringData* name = i.inputs[1]->rtt.valueStringOrNull();
+  HHIR_EMIT(BindG, name);
 }
 
 void
@@ -798,13 +845,6 @@ TranslatorX64::irTranslateCGetM(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateVGetG(const Tracelet& t,
-                                const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(VGetG, name);
-}
-
-void
 TranslatorX64::irTranslateVGetM(const Tracelet& t,
                                 const NormalizedInstruction& i) {
   m_hhbcTrans->emitMInstr(i);
@@ -816,13 +856,6 @@ TranslatorX64::irTranslateLateBoundCls(const Tracelet&,
   HHIR_EMIT(LateBoundCls);
 }
 
-
-void
-TranslatorX64::irTranslateCGetG(const Tracelet& t,
-                                const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(CGetG, name, getInferredOrPredictedType(i), isInferredType(i));
-}
 
 void TranslatorX64::irTranslateFPassL(const Tracelet& t,
                                       const NormalizedInstruction& ni) {
@@ -1439,6 +1472,9 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
     case OpEmptyS:
       irTranslateEmptyS(t, i);
       break;
+    case OpEmptyG:
+      irTranslateEmptyG(t, i);
+      break;
     case OpVGetS:
       irTranslateVGetS(t, i);
       break;
@@ -1446,13 +1482,16 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
       irTranslateIssetS(t, i);
       break;
     case OpIssetG:
-      m_hhbcTrans->emitIssetG();
+      irTranslateIssetG(t, i);
       break;
     case OpUnsetN:
       m_hhbcTrans->emitUnsetN();
       break;
     case OpUnsetG:
-      m_hhbcTrans->emitUnsetG();
+      irTranslateUnsetG(t, i);
+      break;
+    case OpBindG:
+      irTranslateBindG(t, i);
       break;
     default:
       // GO: if you hit this, check opNames[op] and add support for it

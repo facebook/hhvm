@@ -607,6 +607,17 @@ LdClsMethodCache
 LdClsMethod
 LdPropAddr
 
+D:Gen* = LdGblAddr S0:Str -> L
+
+  Loads a pointer to a global. S0 is the global's name. Branches to L
+  if the global is not defined.
+
+D:Gen* = LdGblAddrDef S0:Str
+
+  Loads a pointer to a global. S0 is the global's name. Defines the
+  global if it is not already defined. Decrements the reference count
+  of S0.
+
 D:Gen* = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> L ]
 
   Loads a pointer to a static class property. S0 points to the class,

@@ -369,6 +369,7 @@ void prependPatchAddr(CodegenState& state, Block* block, TCA patchAddr) {
 }
 
 Address CodeGenerator::emitFwdJcc(Asm& a, ConditionCode cc, Block* target) {
+  assert(target);
   Address start = a.code.frontier;
   a.jcc(cc, a.code.frontier);
   TCA immPtr = a.code.frontier - 4;
@@ -4160,6 +4161,29 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
                inst->getDst(),
                kNoSyncPoint,
                ArgGroup().ssa(key).ssa(arr));
+}
+
+HOT_FUNC_VM static TypedValue* ldGblAddrHelper(StringData* name) {
+  return g_vmContext->m_globalVarEnv->lookup(name);
+}
+
+HOT_FUNC_VM static TypedValue* ldGblAddrDefHelper(StringData* name) {
+  TypedValue* r = g_vmContext->m_globalVarEnv->lookupAdd(name);
+  decRefStr(name);
+  return r;
+}
+
+void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
+  auto dstReg = inst->getDst()->getReg();
+  cgCallHelper(m_as, (TCA)ldGblAddrHelper, dstReg, kNoSyncPoint,
+               ArgGroup().ssa(inst->getSrc(0)));
+  m_as.testq(dstReg, dstReg);
+  emitFwdJcc(CC_Z, inst->getTaken());
+}
+
+void CodeGenerator::cgLdGblAddrDef(IRInstruction* inst) {
+  cgCallHelper(m_as, (TCA)ldGblAddrDefHelper, inst->getDst(), kNoSyncPoint,
+               ArgGroup().ssa(inst->getSrc(0)));
 }
 
 void CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,

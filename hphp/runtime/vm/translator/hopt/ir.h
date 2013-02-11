@@ -221,6 +221,8 @@ O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|  Er) \
 O(LdObjMethod,                 D(Func), C(Int) CStr S(StkPtr), C|E|N|Refs|Er) \
+O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
+O(LdGblAddr,               D(PtrToGen), S(Str),                        N    ) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFixedFunc,                 D(Func), CStr,                         C|E|Er) \
@@ -250,9 +252,9 @@ O(RetCtrl,                          ND, S(StkPtr,PtrToGen)                    \
                                           S(RetAddr),                T|E|Mem) \
 O(RetVal,                           ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
 O(RetAdjustStack,            D(StkPtr), S(StkPtr),                         E) \
-O(StMem,                            ND, S(PtrToCell)                          \
+O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),      E|Mem|CRc|Refs) \
-O(StMemNT,                          ND, S(PtrToCell)                          \
+O(StMemNT,                          ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),           E|Mem|CRc) \
 O(StProp,                           ND, S(Obj) S(Int) S(Gen), E|Mem|CRc|Refs) \
 O(StPropNT,                         ND, S(Obj) S(Int) S(Gen),      E|Mem|CRc) \

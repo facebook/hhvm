@@ -1224,7 +1224,7 @@ void HhbcTranslator::emitFPushFuncD(int32 numParams, int32 funcId) {
 
   const bool immutable = func->isNameBindingImmutable(getCurUnit());
 
-  if (immutable) {
+  if (!immutable) {
     spillStack();  // LdFixedFunc can reenter
   }
   SSATmp* ssaFunc = immutable ? m_tb->genDefConst<const Func*>(func)

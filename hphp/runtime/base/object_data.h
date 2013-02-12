@@ -129,6 +129,9 @@ class ObjectData : public CountableNF {
     // Return the upper 3 bits of o_attribute
     return (int)(o_attribute >> 13) & 7;
   }
+  bool supportsUnsetElem() const {
+    return isCollection() || o_instanceof("arrayaccess");
+  }
 
   bool implementsIterator() {
     return (o_instanceof(ssIterator));

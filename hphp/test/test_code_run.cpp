@@ -9631,6 +9631,21 @@ bool TestCodeRun::TestCollectionClasses() {
         "32 100 101 102 105 110 101 100\n"
         );
 
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $x = StableMap { 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4 };\n"
+        "  unset($x['a']);\n"
+        "  unset($x['c']);\n"
+        "  foreach ($x as $k => $v) {\n"
+        "    echo $k . ' ' . $v . \"\\n\";\n"
+        "  }\n"
+        "}\n"
+        "f();\n"
+        ,
+        "b 2\n"
+        "d 4\n"
+        );
+
   return true;
 }
 

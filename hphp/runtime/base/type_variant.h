@@ -991,7 +991,7 @@ public:
 
   void weakRemove(litstr key, bool isStr = false) {
     if (is(KindOfArray) ||
-        (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
+        (is(KindOfObject) && getObjectData()->supportsUnsetElem())) {
       remove(key, isStr);
       return;
     }
@@ -1003,7 +1003,7 @@ public:
 
   void weakRemove(CStrRef key, bool isStr = false) {
     if (is(KindOfArray) ||
-        (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
+        (is(KindOfObject) && getObjectData()->supportsUnsetElem())) {
       remove(key, isStr);
       return;
     }
@@ -1016,7 +1016,7 @@ public:
   template<typename T>
   void weakRemove(const T &key) {
     if (is(KindOfArray) ||
-        (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
+        (is(KindOfObject) && getObjectData()->supportsUnsetElem())) {
       remove(key);
       return;
     }

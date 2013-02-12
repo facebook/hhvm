@@ -421,6 +421,11 @@ SSATmp* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
   return gen(negate ? JmpZero : JmpNZero, getFirstBlock(target), boolSrc);
 }
 
+void TraceBuilder::genJmp(Block* target, SSATmp* src) {
+  EdgeData edge;
+  gen(Jmp_, target, &edge, src)->getInstruction();
+}
+
 void TraceBuilder::genExitWhenSurprised(Trace* targetTrace) {
   gen(ExitWhenSurprised, getFirstBlock(targetTrace));
 }

@@ -482,6 +482,16 @@ private:
   uintptr_t m_dataBits;
 };
 
+/*
+ * EdgeData is linked list node that tracks the set of Jmp_'s that pass values
+ * to a particular block.  Each such Jmp_ has one node, and the block points
+ * to the list head.
+ */
+struct EdgeData : IRExtraData {
+  struct IRInstruction* jmp;  // owner of this edge
+  EdgeData* next;             // next edge to same target
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -503,6 +513,7 @@ X(StLoc,              LocalId);
 X(StLocNT,            LocalId);
 X(DefConst,           ConstData);
 X(LdConst,            ConstData);
+X(Jmp_,               EdgeData);
 
 #undef X
 
@@ -1165,6 +1176,12 @@ struct IRInstruction {
     return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
   }
 
+  template<Opcode opc>
+  typename IRExtraDataType<opc>::type* getExtra() {
+    assert(opc == getOpcode() && "getExtra type error");
+    return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
+  }
+
   /*
    * Return access to extra-data of type T.  Requires that
    * IRExtraDataType<opc>::type is T for this instruction's opcode.
@@ -1277,7 +1294,7 @@ struct IRInstruction {
   Block*     getBlock() const          { return m_block; }
   void       setBlock(Block* b)        { m_block = b; }
   Trace*     getTrace() const;
-  void       setTaken(Block* b)        { m_taken = b; }
+  void       setTaken(Block* b);
   Block*     getTaken() const          { return m_taken; }
 
   bool isControlFlowInstruction() const { return m_taken != nullptr; }
@@ -1585,7 +1602,8 @@ struct Block : boost::noncopyable {
   typedef InstructionList::iterator iterator;
 
   Block(unsigned id, const Func* func, IRInstruction* label)
-    : m_trace(nullptr), m_func(func), m_next(nullptr), m_id(id) {
+    : m_trace(nullptr), m_func(func), m_next(nullptr), m_id(id)
+    , m_preds(nullptr) {
     push_back(label);
   }
 
@@ -1598,6 +1616,9 @@ struct Block : boost::noncopyable {
   const Func* getFunc() const    { return m_func; }
   Trace*      getTrace() const   { return m_trace; }
   void        setTrace(Trace* t) { m_trace = t; }
+
+  void        addEdge(IRInstruction* jmp);
+  void        removeEdge(IRInstruction* jmp);
 
   // return the last instruction in the block
   IRInstruction* back() const {
@@ -1649,6 +1670,15 @@ struct Block : boost::noncopyable {
     return m_instrs.iterator_to(*inst);
   }
 
+  // visit each src that provides a value to label->dsts[i]
+  template <class Body>
+  void forEachSrc(unsigned i, Body body) {
+    for (const EdgeData* n = m_preds; n; n = n->next) {
+      assert(n->jmp->getOpcode() == Jmp_ && n->jmp->getTaken() == this);
+      body(n->jmp, n->jmp->getSrc(i));
+    }
+  }
+
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
   InstructionList& getInstrs() { return m_instrs; }
@@ -1683,6 +1713,7 @@ struct Block : boost::noncopyable {
   Block* m_next;            // fall-through path; null if back()->isTerminal().
   const unsigned m_id;      // factory-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
+  EdgeData* m_preds;        // head of list of predecessor Jmps
 };
 typedef std::list<Block*> BlockList;
 

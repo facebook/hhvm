@@ -286,13 +286,14 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
   , m_asmAddr(nullptr)
-  , m_taken(inst->m_taken)
+  , m_taken(nullptr)
   , m_block(nullptr)
   , m_tca(nullptr)
   , m_extra(inst->m_extra ? cloneExtra(getOpcode(), inst->m_extra, arena)
                           : nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
+  setTaken(inst->m_taken);
 }
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
@@ -540,6 +541,32 @@ void IRInstruction::appendSrc(Arena& arena, SSATmp* newSrc) {
   newSrcs[getNumSrcs()] = newSrc;
   ++m_numSrcs;
   m_srcs = newSrcs;
+}
+
+void IRInstruction::setTaken(Block* target) {
+  if (m_op == Jmp_ && m_extra) {
+    if (m_taken) m_taken->removeEdge(this);
+    if (target) target->addEdge(this);
+  }
+  m_taken = target;
+}
+
+void Block::addEdge(IRInstruction* jmp) {
+  assert(!jmp->isTransient());
+  EdgeData* node = jmp->getExtra<Jmp_>();
+  node->jmp = jmp;
+  node->next = m_preds;
+  m_preds = node;
+}
+
+void Block::removeEdge(IRInstruction* jmp) {
+  assert(!jmp->isTransient());
+  EdgeData* node = jmp->getExtra<Jmp_>();
+  assert(node->jmp == jmp);
+  EdgeData** ptr = &m_preds;
+  while (*ptr != node) ptr = &(*ptr)->next;
+  *ptr = node->next;
+  assert((node->next = nullptr, true));
 }
 
 bool IRInstruction::equals(IRInstruction* inst) const {
@@ -932,6 +959,21 @@ void Trace::print(std::ostream& os, bool printAsm,
       os << std::string(6, ' ');
       inst.getBlock()->printLabel(os);
       os << ":\n";
+      // print phi pseudo-instructions
+      for (unsigned i = 0, n = inst.getNumDsts(); i < n; ++i) {
+        os << std::string(13, ' ');
+        inst.getDst(i)->print(os, false);
+        os << " = phi ";
+        bool first = true;
+        inst.getBlock()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
+          if (!first) os << ", ";
+          first = false;
+          jmp->printSrc(os, i);
+          os << "@";
+          jmp->getBlock()->printLabel(os);
+        });
+        os << '\n';
+      }
     }
     os << std::string(8, ' ');
     inst.print(os);

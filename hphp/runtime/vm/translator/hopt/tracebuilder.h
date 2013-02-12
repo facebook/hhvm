@@ -166,6 +166,7 @@ public:
   SSATmp* genDefNull();
   SSATmp* genJmp(Trace* target);
   SSATmp* genJmpCond(SSATmp* src, Trace* target, bool negate);
+  void    genJmp(Block* target, SSATmp* src);
   void    genExitWhenSurprised(Trace* target);
   void    genExitOnVarEnv(Trace* target);
   void    genCheckInit(SSATmp* src, Block* target);
@@ -307,10 +308,10 @@ public:
     SCOPE_EXIT { m_enableCse = oldEnableCse; };
     branch(taken_block);
     SSATmp* v1 = next();
-    gen(Jmp_, done_block, v1);
+    genJmp(done_block, v1);
     m_trace->push_back(taken_block);
     SSATmp* v2 = taken();
-    gen(Jmp_, done_block, v2);
+    genJmp(done_block, v2);
     m_trace->push_back(done_block);
     SSATmp* result = done_block->getLabel()->getDst(0);
     result->setType(Type::unionOf(v1->getType(), v2->getType()));

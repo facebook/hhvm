@@ -7406,7 +7406,7 @@ void VMExecutionContext::dispatch() {
 
 void VMExecutionContext::dispatchN(int numInstrs) {
   InterpretingFlagGuard ifg;
-  dispatchImpl<LimitInstrs>(numInstrs);
+  dispatchImpl<LimitInstrs | BreakOnCtlFlow>(numInstrs);
   // We are about to go back to Jit, check whether we should
   // stick with interpreter
   if (DEBUGGER_FORCE_INTR) {

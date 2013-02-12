@@ -887,11 +887,11 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
     ar->setOutputPath(po.syncDir);
   }
   // Propagate relevant compiler-specific options to the runtime.
-  RuntimeOption::RepoLocalPath = ar->getOutputPath() + '/' + po.program;
+  RuntimeOption::RepoCentralPath = ar->getOutputPath() + '/' + po.program;
   if (po.format.find("exe") != string::npos) {
-    RuntimeOption::RepoLocalPath += ".hhbc";
+    RuntimeOption::RepoCentralPath += ".hhbc";
   }
-  RuntimeOption::RepoLocalMode = "rw";
+  RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;

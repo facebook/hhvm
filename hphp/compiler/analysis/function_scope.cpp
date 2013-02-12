@@ -2458,24 +2458,27 @@ FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;
 static Mutex s_refParamInfoLock;
 
 void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
-  if (!Option::WholeProgram) return; // Only needed in WholeProgram mode.
-  Lock lock(s_refParamInfoLock);
-  FunctionInfoPtr &info = s_refParamInfo[fname];
-  if (!info) {
-    info = FunctionInfoPtr(new FunctionInfo());
-  }
-  if (func->isStatic()) {
-    info->setMaybeStatic();
-  }
-  if (func->isRefReturn()) {
-    info->setMaybeRefReturn();
-  }
-  if (func->isReferenceVariableArgument()) {
-    info->setRefVarArg(func->getMaxParamCount());
-  }
   VariableTablePtr variables = func->getVariables();
+  if (Option::WholeProgram) {
+    Lock lock(s_refParamInfoLock);
+    FunctionInfoPtr &info = s_refParamInfo[fname];
+    if (!info) {
+      info = FunctionInfoPtr(new FunctionInfo());
+    }
+    if (func->isStatic()) {
+      info->setMaybeStatic();
+    }
+    if (func->isRefReturn()) {
+      info->setMaybeRefReturn();
+    }
+    if (func->isReferenceVariableArgument()) {
+      info->setRefVarArg(func->getMaxParamCount());
+    }
+    for (int i = 0; i < func->getMaxParamCount(); i++) {
+      if (func->isRefParam(i)) info->setRefParam(i);
+    }
+  }
   for (int i = 0; i < func->getMaxParamCount(); i++) {
-    if (func->isRefParam(i)) info->setRefParam(i);
     variables->addParam(func->getParamName(i),
                         TypePtr(), AnalysisResultPtr(), ConstructPtr());
   }

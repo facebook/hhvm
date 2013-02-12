@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "runtime/eval/eval.h"
 #include <runtime/base/class_info.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/ext/ext_string.h>
@@ -128,11 +129,20 @@ Variant get_class_var_init(CStrRef s, const char *var) {
 }
 
 Object create_object_only(CStrRef s, ObjectData *root /* = NULL */) {
-  return create_builtin_object_only(s, root);
+  ObjectData *obj = create_object_only_no_init(s, root);
+  if (UNLIKELY(!obj)) throw_missing_class(s);
+  Object r = obj;
+  obj->init();
+  return r;
 }
 
 ObjectData *create_object_only_no_init(CStrRef s, ObjectData *root) {
-  return create_builtin_object_only_no_init(s, root);
+  if (hhvm) {
+    if (ObjectData* r = eval_create_object_only_hook(s, root)) return r;
+  }
+  const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
+  if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);
+  return 0;
 }
 
 Variant invokeImpl(void *extra, CArrRef params) {

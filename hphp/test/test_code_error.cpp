@@ -37,6 +37,10 @@ bool TestCodeError::RunTests(const std::string &which) {
 
 bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
                            const char *file, int line, bool exists) {
+  WithOpt w0(Option::RecordErrors);
+  WithOpt w1(Option::WholeProgram);
+  WithOpt w2(Option::ParseTimeOpts);
+
   Compiler::ClearErrors();
 
   Type::ResetTypeHintTypes();
@@ -52,8 +56,6 @@ bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
   ar->inferTypes();
   ar->analyzeProgramFinal();
   if (Compiler::HasError(type) != exists) {
-    std::ostringstream code;
-    ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);
     std::ostringstream error;
     JSON::CodeError::OutputStream out(error, ar);
     Compiler::SaveErrors(out);

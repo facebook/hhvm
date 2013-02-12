@@ -442,8 +442,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_fromCompiler && !m_class && !m_redeclared &&
-        !m_dynamicInvoke && !m_funcScope &&
+    if (!m_fromCompiler && !m_noPrefix && m_type == UnknownType &&
+        !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
         (m_className.empty() ||
          (m_classScope &&
           !m_classScope->isTrait() &&

@@ -73,20 +73,19 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestServer);
     return;
   }
+  // QuickTests
+  if (set != "TestExt") {
+#include <test/test_base_fast.inc>
+  }
+  if (set == "QuickTests") {
+    return;
+  }
   if (hhvm) {
     fprintf(stderr, "%s is not supported with USE_HHVM=1\n", suite.c_str());
     exit(-1);
   }
   if (suite == "TestPerformance") {
     RUN_TESTSUITE(TestPerformance);
-    return;
-  }
-
-  // fast unit tests
-  if (set != "TestExt") {
-#include <test/test_base_fast.inc>
-  }
-  if (set == "QuickTests") {
     return;
   }
 

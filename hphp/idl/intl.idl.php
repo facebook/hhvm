@@ -390,10 +390,22 @@ DefineFunction(
         'desc'   => "Domain to convert. In PHP 5 must be UTF-8 encoded.",
       ),
       array(
-        'name'   => "errorcode",
+        'name'   => "options",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "Conversion options - combination of IDNA_* constants (except IDNA_ERROR_* constants). ",
+      ),
+      array(
+        'name'   => "variant",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or INTL_IDNA_VARIANT_UTS46 for UTS #46.",
+      ),
+      array(
+        'name'   => "idna_info",
         'type'   => Variant | Reference,
         'value'  => "null",
-        'desc'   => "Conversion options - combination of IDNA_* constants.",
+        'desc'   => "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
       ),
     ),
     'taint_observer' => array(
@@ -415,9 +427,22 @@ DefineFunction(
         'type'   => String,
       ),
       array(
-        'name'   => "errorcode",
+        'name'   => "options",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "Conversion options - combination of IDNA_* constants (except IDNA_ERROR_* constants). ",
+      ),
+      array(
+        'name'   => "variant",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or INTL_IDNA_VARIANT_UTS46 for UTS #46.",
+      ),
+      array(
+        'name'   => "idna_info",
         'type'   => Variant | Reference,
         'value'  => "null",
+        'desc'   => "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
       ),
     ),
     'taint_observer' => array(
@@ -442,10 +467,22 @@ DefineFunction(
         'desc'   => "Domain to convert in IDNA ASCII-compatible format.",
       ),
       array(
-        'name'   => "errorcode",
+        'name'   => "options",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "Conversion options - combination of IDNA_* constants (except IDNA_ERROR_* constants). ",
+      ),
+      array(
+        'name'   => "variant",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or INTL_IDNA_VARIANT_UTS46 for UTS #46.",
+      ),
+      array(
+        'name'   => "idna_info",
         'type'   => Variant | Reference,
         'value'  => "null",
-        'desc'   => "Conversion options - combination of IDNA_* constants.",
+        'desc'   => "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
       ),
     ),
     'taint_observer' => array(
@@ -825,7 +862,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setstrength",
-    'desc'   => "Procedural style bool collator_set_strength ( Collator \$coll , int \$strength ) The � ICU Collation Service supports many levels of comparison (named \"Levels\", but also known as \"Strengths\"). Having these categories enables ICU to sort strings precisely according to local conventions. However, by allowing the levels to be selectively employed, searching for a string in text can be performed with various matching conditions.\n\n\n\nPrimary Level: Typically, this is used to denote differences between base characters (for example, \"a\" < \"b\"). It is the strongest difference. For example, dictionaries are divided into different sections by base character. This is also called the level1 strength.\n\nSecondary Level: Accents in the characters are considered secondary differences (for example, \"as\" < \"às\" < \"at\"). Other differences between letters can also be considered secondary differences, depending on the language. A secondary difference is ignored when there is a primary difference anywhere in the strings. This is also called the level2 strength.\n\nNote: In some languages (such as Danish), certain accented letters are considered to be separate base characters. In most languages, however, an accented letter only has a secondary difference from the unaccented version of that letter.\n\nTertiary Level: Upper and lower case differences in characters are distinguished at the tertiary level (for example, \"ao\" < \"Ao\" < \"aò\"). In addition, a variant of a letter differs from the base form on the tertiary level (such as \"A\" and \" \"). Another example is the difference between large and small Kana. A tertiary difference is ignored when there is a primary or secondary difference anywhere in the strings. This is also called the level3 strength.\n\nQuaternary Level: When punctuation is ignored (see Ignoring Punctuations ) at level 13, an additional level can be used to distinguish words with and without punctuation (for example, \"ab\" < \"a-b\" < \"aB\"). This difference is ignored when there is a primary, secondary or tertiary difference. This is also known as the level4 strength. The quaternary level should only be used if ignoring punctuation is required or when processing Japanese text (see Hiragana processing).\n\nIdentical Level: When all other levels are equal, the identical level is used as a tiebreaker. The Unicode code point values of the NFD form of each string are compared at this level, just in case there is no difference at levels 14. For example, Hebrew cantillation marks are only distinguished at this level. This level should be used sparingly, as only code point values differences between two strings is an extremely rare occurrence. Using this level substantially decreases the performance for both incremental comparison and sort key generation (as well as increasing the sort key length). It is also known as level 5 strength.\n\nFor example, people may choose to ignore accents or ignore accents and case when searching for text. Almost all characters are distinguished by the first three levels, and in most locales the default value is thus Tertiary. However, if Alternate is set to be Shifted, then the Quaternary strength can be used to break ties among whitespace, punctuation, and symbols that would otherwise be ignored. If very fine distinctions among characters are required, then the Identical strength can be used (for example, Identical Strength distinguishes between the Mathematical Bold Small A and the Mathematical Italic Small A.). However, using levels higher than Tertiary the Identical strength result in significantly longer sort keys, and slower string comparison performance for equal strings.",
+    'desc'   => "Procedural style bool collator_set_strength ( Collator \$coll , int \$strength ) The ICU Collation Service supports many levels of comparison (named \"Levels\", but also known as \"Strengths\"). Having these categories enables ICU to sort strings precisely according to local conventions. However, by allowing the levels to be selectively employed, searching for a string in text can be performed with various matching conditions.\n\n\n\nPrimary Level: Typically, this is used to denote differences between base characters (for example, \"a\" < \"b\"). It is the strongest difference. For example, dictionaries are divided into different sections by base character. This is also called the level1 strength.\n\nSecondary Level: Accents in the characters are considered secondary differences. Other differences between letters can also be considered secondary differences, depending on the language. A secondary difference is ignored when there is a primary difference anywhere in the strings. This is also called the level2 strength.\n\nNote: In some languages (such as Danish), certain accented letters are considered to be separate base characters. In most languages, however, an accented letter only has a secondary difference from the unaccented version of that letter.\n\nTertiary Level: Upper and lower case differences in characters are distinguished at the tertiary level. In addition, a variant of a letter differs from the base form on the tertiary level (such as \"A\" and \" \"). Another example is the difference between large and small Kana. A tertiary difference is ignored when there is a primary or secondary difference anywhere in the strings. This is also called the level3 strength.\n\nQuaternary Level: When punctuation is ignored (see Ignoring Punctuations ) at level 13, an additional level can be used to distinguish words with and without punctuation (for example, \"ab\" < \"a-b\" < \"aB\"). This difference is ignored when there is a primary, secondary or tertiary difference. This is also known as the level4 strength. The quaternary level should only be used if ignoring punctuation is required or when processing Japanese text (see Hiragana processing).\n\nIdentical Level: When all other levels are equal, the identical level is used as a tiebreaker. The Unicode code point values of the NFD form of each string are compared at this level, just in case there is no difference at levels 14. For example, Hebrew cantillation marks are only distinguished at this level. This level should be used sparingly, as only code point values differences between two strings is an extremely rare occurrence. Using this level substantially decreases the performance for both incremental comparison and sort key generation (as well as increasing the sort key length). It is also known as level 5 strength.\n\nFor example, people may choose to ignore accents or ignore accents and case when searching for text. Almost all characters are distinguished by the first three levels, and in most locales the default value is thus Tertiary. However, if Alternate is set to be Shifted, then the Quaternary strength can be used to break ties among whitespace, punctuation, and symbols that would otherwise be ignored. If very fine distinctions among characters are required, then the Identical strength can be used (for example, Identical Strength distinguishes between the Mathematical Bold Small A and the Mathematical Italic Small A.). However, using levels higher than Tertiary the Identical strength result in significantly longer sort keys, and slower string comparison performance for equal strings.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,

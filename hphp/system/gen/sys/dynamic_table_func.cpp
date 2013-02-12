@@ -2142,11 +2142,15 @@ Variant i_pixelgetblack(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_pixelgetblack);
 }
 Variant ifa_idn_to_ascii(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("idn_to_ascii", count, 1, 2, 1);
+  if (UNLIKELY(count < 1 || count > 4)) return throw_wrong_arguments("idn_to_ascii", count, 1, 4, 1);
   CVarRef arg0(a0);
   if (count <= 1) return (x_idn_to_ascii(arg0));
-  VRefParam arg1(vref(a1));
-  return (x_idn_to_ascii(arg0, arg1));
+  CVarRef arg1(a1);
+  if (count <= 2) return (x_idn_to_ascii(arg0, arg1));
+  CVarRef arg2(a2);
+  if (count <= 3) return (x_idn_to_ascii(arg0, arg1, arg2));
+  VRefParam arg3(vref(a3));
+  return (x_idn_to_ascii(arg0, arg1, arg2, arg3));
 }
 Variant i_idn_to_ascii(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_idn_to_ascii);
@@ -6201,11 +6205,15 @@ Variant i_posix_getuid(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_posix_getuid);
 }
 Variant ifa_idn_to_unicode(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("idn_to_unicode", count, 1, 2, 1);
+  if (UNLIKELY(count < 1 || count > 4)) return throw_wrong_arguments("idn_to_unicode", count, 1, 4, 1);
   CVarRef arg0(a0);
   if (count <= 1) return (x_idn_to_unicode(arg0));
-  VRefParam arg1(vref(a1));
-  return (x_idn_to_unicode(arg0, arg1));
+  CVarRef arg1(a1);
+  if (count <= 2) return (x_idn_to_unicode(arg0, arg1));
+  CVarRef arg2(a2);
+  if (count <= 3) return (x_idn_to_unicode(arg0, arg1, arg2));
+  VRefParam arg3(vref(a3));
+  return (x_idn_to_unicode(arg0, arg1, arg2, arg3));
 }
 Variant i_idn_to_unicode(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_idn_to_unicode);
@@ -9214,11 +9222,15 @@ Variant i_override_function(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_override_function);
 }
 Variant ifa_idn_to_utf8(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("idn_to_utf8", count, 1, 2, 1);
+  if (UNLIKELY(count < 1 || count > 4)) return throw_wrong_arguments("idn_to_utf8", count, 1, 4, 1);
   CVarRef arg0(a0);
   if (count <= 1) return (x_idn_to_utf8(arg0));
-  VRefParam arg1(vref(a1));
-  return (x_idn_to_utf8(arg0, arg1));
+  CVarRef arg1(a1);
+  if (count <= 2) return (x_idn_to_utf8(arg0, arg1));
+  CVarRef arg2(a2);
+  if (count <= 3) return (x_idn_to_utf8(arg0, arg1, arg2));
+  VRefParam arg3(vref(a3));
+  return (x_idn_to_utf8(arg0, arg1, arg2, arg3));
 }
 Variant i_idn_to_utf8(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_idn_to_utf8);
@@ -22079,7 +22091,7 @@ extern const CallInfo ci_magickrollimage = {(void*)&i_magickrollimage, (void*)&i
 extern const CallInfo ci_get_headers = {(void*)&i_get_headers, (void*)&ifa_get_headers, 2, 0, 0x0000000000000000L};
 extern const CallInfo ci_inclued_get_data = {(void*)&i_inclued_get_data, (void*)&ifa_inclued_get_data, 0, 0, 0x0000000000000000L};
 extern const CallInfo ci_pixelgetblack = {(void*)&i_pixelgetblack, (void*)&ifa_pixelgetblack, 1, 0, 0x0000000000000000L};
-extern const CallInfo ci_idn_to_ascii = {(void*)&i_idn_to_ascii, (void*)&ifa_idn_to_ascii, 2, 0, 0x0000000000000002L};
+extern const CallInfo ci_idn_to_ascii = {(void*)&i_idn_to_ascii, (void*)&ifa_idn_to_ascii, 4, 0, 0x0000000000000008L};
 extern const CallInfo ci_magickgetimageblob = {(void*)&i_magickgetimageblob, (void*)&ifa_magickgetimageblob, 1, 0, 0x0000000000000000L};
 extern const CallInfo ci_imagecolorsforindex = {(void*)&i_imagecolorsforindex, (void*)&ifa_imagecolorsforindex, 2, 0, 0x0000000000000000L};
 extern const CallInfo ci_diskfreespace = {(void*)&i_diskfreespace, (void*)&ifa_diskfreespace, 1, 0, 0x0000000000000000L};
@@ -22477,7 +22489,7 @@ extern const CallInfo ci_imap_set_quota = {(void*)&i_imap_set_quota, (void*)&ifa
 extern const CallInfo ci_xbox_schedule_thread_reset = {(void*)&i_xbox_schedule_thread_reset, (void*)&ifa_xbox_schedule_thread_reset, 0, 0, 0x0000000000000000L};
 extern const CallInfo ci_mysql_query = {(void*)&i_mysql_query, (void*)&ifa_mysql_query, 2, 0, 0x0000000000000000L};
 extern const CallInfo ci_posix_getuid = {(void*)&i_posix_getuid, (void*)&ifa_posix_getuid, 0, 0, 0x0000000000000000L};
-extern const CallInfo ci_idn_to_unicode = {(void*)&i_idn_to_unicode, (void*)&ifa_idn_to_unicode, 2, 0, 0x0000000000000002L};
+extern const CallInfo ci_idn_to_unicode = {(void*)&i_idn_to_unicode, (void*)&ifa_idn_to_unicode, 4, 0, 0x0000000000000008L};
 extern const CallInfo ci_imap_check = {(void*)&i_imap_check, (void*)&ifa_imap_check, 1, 0, 0x0000000000000000L};
 extern const CallInfo ci_magickgetimagesize = {(void*)&i_magickgetimagesize, (void*)&ifa_magickgetimagesize, 1, 0, 0x0000000000000000L};
 extern const CallInfo ci_openssl_private_encrypt = {(void*)&i_openssl_private_encrypt, (void*)&ifa_openssl_private_encrypt, 4, 0, 0x0000000000000002L};
@@ -22791,7 +22803,7 @@ extern const CallInfo ci_ob_clean = {(void*)&i_ob_clean, (void*)&ifa_ob_clean, 0
 extern const CallInfo ci_magickgetimagechannelmean = {(void*)&i_magickgetimagechannelmean, (void*)&ifa_magickgetimagechannelmean, 2, 0, 0x0000000000000000L};
 extern const CallInfo ci_curl_error = {(void*)&i_curl_error, (void*)&ifa_curl_error, 1, 0, 0x0000000000000000L};
 extern const CallInfo ci_override_function = {(void*)&i_override_function, (void*)&ifa_override_function, 3, 0, 0x0000000000000000L};
-extern const CallInfo ci_idn_to_utf8 = {(void*)&i_idn_to_utf8, (void*)&ifa_idn_to_utf8, 2, 0, 0x0000000000000002L};
+extern const CallInfo ci_idn_to_utf8 = {(void*)&i_idn_to_utf8, (void*)&ifa_idn_to_utf8, 4, 0, 0x0000000000000008L};
 extern const CallInfo ci_asio_exit_context = {(void*)&i_asio_exit_context, (void*)&ifa_asio_exit_context, 0, 0, 0x0000000000000000L};
 extern const CallInfo ci_magickadaptivethresholdimage = {(void*)&i_magickadaptivethresholdimage, (void*)&ifa_magickadaptivethresholdimage, 4, 0, 0x0000000000000000L};
 extern const CallInfo ci_imagecolortransparent = {(void*)&i_imagecolortransparent, (void*)&ifa_imagecolortransparent, 2, 0, 0x0000000000000000L};

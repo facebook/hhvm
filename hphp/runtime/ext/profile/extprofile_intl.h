@@ -105,22 +105,22 @@ inline Variant x_collator_sort(CVarRef obj, VRefParam arr, int64 sort_flag = q_C
   return f_collator_sort(obj, arr, sort_flag);
 }
 
-inline Variant x_idn_to_ascii(CStrRef domain, VRefParam errorcode = null) {
+inline Variant x_idn_to_ascii(CStrRef domain, int64 options = 0, int64 variant = 0, VRefParam idna_info = null) {
   FUNCTION_INJECTION_BUILTIN(idn_to_ascii);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-  return f_idn_to_ascii(domain, errorcode);
+  return f_idn_to_ascii(domain, options, variant, idna_info);
 }
 
-inline Variant x_idn_to_unicode(CStrRef domain, VRefParam errorcode = null) {
+inline Variant x_idn_to_unicode(CStrRef domain, int64 options = 0, int64 variant = 0, VRefParam idna_info = null) {
   FUNCTION_INJECTION_BUILTIN(idn_to_unicode);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-  return f_idn_to_unicode(domain, errorcode);
+  return f_idn_to_unicode(domain, options, variant, idna_info);
 }
 
-inline Variant x_idn_to_utf8(CStrRef domain, VRefParam errorcode = null) {
+inline Variant x_idn_to_utf8(CStrRef domain, int64 options = 0, int64 variant = 0, VRefParam idna_info = null) {
   FUNCTION_INJECTION_BUILTIN(idn_to_utf8);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-  return f_idn_to_utf8(domain, errorcode);
+  return f_idn_to_utf8(domain, options, variant, idna_info);
 }
 
 

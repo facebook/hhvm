@@ -31,6 +31,10 @@
 
 #include <system/lib/systemlib.h>
 
+#ifdef UIDNA_INFO_INITIALIZER
+#define HAVE_46_API 1 /* has UTS#46 API (introduced in ICU 4.6) */
+#endif  
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(idn);
 ///////////////////////////////////////////////////////////////////////////////
@@ -733,13 +737,66 @@ Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum IdnVariant {
+  INTL_IDN_VARIANT_2003 = 0,
+  INTL_IDN_VARIANT_UTS46
+};
+
 enum {
   INTL_IDN_TO_ASCII = 0,
   INTL_IDN_TO_UTF8
 };
 
-static Variant php_intl_idn_to(CStrRef domain, VRefParam errorcode, int mode) {
-  long option = 0;
+#ifdef HAVE_46_API
+static Variant php_intl_idn_to_46(CStrRef domain, int64 options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
+  int32_t     converted_capacity;
+  char        *converted = NULL;
+  int32_t     converted_len;
+  UIDNA       *uts46;
+  UIDNAInfo   info = UIDNA_INFO_INITIALIZER;
+  UErrorCode  status;
+
+  // Get UIDNA instance which implements UTS #46. 
+  uts46 = uidna_openUTS46(options, &status);
+  SCOPE_EXIT { uidna_close(uts46); };
+  if (U_FAILURE(status)) return false;
+
+  // Call the appropriate IDN function
+  status = U_ZERO_ERROR;
+  converted_capacity = 255; // no domain name may exceed this
+  String result(converted_capacity, ReserveString); // reserves converted_capacity+1 characters.
+  converted = result.mutableSlice().ptr;
+  if (mode == INTL_IDN_TO_ASCII) {
+    converted_len = uidna_nameToASCII_UTF8(uts46, (char*)domain.data(), domain.size(),
+      converted, converted_capacity, &info, &status);
+  } else {
+    converted_len = uidna_nameToUnicodeUTF8(uts46, (char*)domain.data(), domain.size(),
+      converted, converted_capacity, &info, &status);
+  }
+  if (U_FAILURE(status) || converted_len > converted_capacity) return false;
+  if (info.errors == 0) {
+    result.setSize(converted_len); 
+  } else {
+    result.setSize(0);
+  }
+  
+  // Set up the array returned in idna_info.
+  Array arr;
+  arr.set("result", result);
+  arr.set("isTransitionalDifferent", info.isTransitionalDifferent);
+  arr.set("errors", (long)info.errors);
+  idna_info = arr; // As in Zend, the previous value of idn_variant is overwritten, not modified.
+
+  if (info.errors == 0) {
+    return result; 
+  } else {
+    return false;
+  }
+}
+
+#endif
+
+static Variant php_intl_idn_to(CStrRef domain, int64 options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
   UChar* ustring = NULL;
   int ustring_len = 0;
   UErrorCode status;
@@ -748,13 +805,21 @@ static Variant php_intl_idn_to(CStrRef domain, VRefParam errorcode, int mode) {
   UChar*    converted = NULL;
   int32_t   converted_ret_len;
 
+  if (idn_variant != INTL_IDN_VARIANT_2003) {
+#ifdef HAVE_46_API
+    if (idn_variant == INTL_IDN_VARIANT_UTS46) {
+      return php_intl_idn_to_46(domain, options, idn_variant, ref(idna_info), mode); 
+    } 
+#endif
+    return false;
+  }
+
   // Convert the string to UTF-16
   status = U_ZERO_ERROR;
   intl_convert_utf8_to_utf16(&ustring, &ustring_len,
       (char*)domain.data(), domain.size(), &status);
   if (U_FAILURE(status)) {
     free(ustring);
-    errorcode = status;
     return false;
   }
 
@@ -767,17 +832,16 @@ static Variant php_intl_idn_to(CStrRef domain, VRefParam errorcode, int mode) {
     // If the malloc failed, bail out
     if (!converted) {
       free(ustring);
-      errorcode = U_MEMORY_ALLOCATION_ERROR;
       return false;
     }
     if (mode == INTL_IDN_TO_ASCII) {
       converted_ret_len = uidna_IDNToASCII(ustring,
           ustring_len, converted, converted_len,
-          (int32_t)option, &parse_error, &status);
+          (int32_t)options, &parse_error, &status);
     } else {
       converted_ret_len = uidna_IDNToUnicode(ustring,
           ustring_len, converted, converted_len,
-          (int32_t)option, &parse_error, &status);
+          (int32_t)options, &parse_error, &status);
     }
     if (status != U_BUFFER_OVERFLOW_ERROR)
       break;
@@ -789,7 +853,6 @@ static Variant php_intl_idn_to(CStrRef domain, VRefParam errorcode, int mode) {
   free(ustring);
   if (U_FAILURE(status)) {
     free(converted);
-    errorcode = status;
     return false;
   }
 
@@ -800,7 +863,6 @@ static Variant php_intl_idn_to(CStrRef domain, VRefParam errorcode, int mode) {
   free(converted);
   if (U_FAILURE(status)) {
     free(converted_utf8);
-    errorcode = status;
     return false;
   }
 
@@ -808,16 +870,16 @@ static Variant php_intl_idn_to(CStrRef domain, VRefParam errorcode, int mode) {
   return String(converted_utf8, converted_utf8_len, AttachString);
 }
 
-Variant f_idn_to_ascii(CStrRef domain, VRefParam errorcode /* = null */) {
-  return php_intl_idn_to(domain, ref(errorcode), INTL_IDN_TO_ASCII);
+Variant f_idn_to_ascii(CStrRef domain, int64 options /* = 0 */, int64 variant /* = 0 */, VRefParam idna_info /* = null */) {
+  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_ASCII);
 }
 
-Variant f_idn_to_unicode(CStrRef domain, VRefParam errorcode /* = null */) {
-  return php_intl_idn_to(domain, ref(errorcode), INTL_IDN_TO_UTF8);
+Variant f_idn_to_unicode(CStrRef domain, int64 options /* = 0 */, int64 variant /* = 0 */, VRefParam idna_info /* = null */) {
+  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_UTF8);
 }
 
-Variant f_idn_to_utf8(CStrRef domain, VRefParam errorcode /* = null */) {
-  return php_intl_idn_to(domain, ref(errorcode), INTL_IDN_TO_UTF8);
+Variant f_idn_to_utf8(CStrRef domain, int64 options /* = 0 */, int64 variant /* = 0 */, VRefParam idna_info /* = null */) {
+  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_UTF8);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1657,10 +1657,6 @@ void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type type) {
 Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
                                       Type type,
                                       Trace* nextTrace) {
-  if (type.subtypeOf(Type::Cls)) {
-    // Should not generate guards for class
-    return nextTrace;
-  }
   if (nextTrace == nullptr) {
     nextTrace = getGuardExit();
   }

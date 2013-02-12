@@ -338,25 +338,25 @@ O(IterNextK,                   D(Bool), S(StkPtr)                             \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(PropX,                   D(PtrToGen), C(TCA)                                \
                                           C(Cls)                              \
-                                          S(Obj,PtrToCell)                    \
+                                          S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(CGetProp,                    D(Cell), C(TCA)                                \
                                           C(Cls)                              \
-                                          S(Obj,PtrToCell)                    \
+                                          S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(SetProp,                     DVector, C(TCA)                                \
                                           C(Cls)                              \
-                                          S(Obj,PtrToCell)                    \
+                                          S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(Cell),           E|N|Mem|Refs|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
-                                          S(PtrToCell)                        \
+                                          S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(SetElem,                     DVector, C(TCA)                                \
-                                          S(PtrToCell)                        \
+                                          S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(Cell),           E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
@@ -741,7 +741,7 @@ public:
   }
 
   bool notCounted() const {
-    return subtypeOf(Uncounted);
+    return subtypeOf(Uncounted | Cls);
   }
 
   bool isStaticallyKnown() const {

@@ -3590,6 +3590,11 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
+  if (inst->getSrc(0)->isA(Type::Cls)) {
+    // No need to generate guards for Cls; the IR instruction is just
+    // here as a type marker.
+    return;
+  }
   cgGuardTypeCell(inst->getSrc(0)->getReg(),
                   cellsToBytes(inst->getSrc(1)->getValInt()),
                   inst);

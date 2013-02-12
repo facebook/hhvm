@@ -1009,25 +1009,25 @@ SetProp/SetOpProp/IncDecProp:
 
 
 
-D:Gen* = PropX S0:ConstTCA S1:ConstCls S2:{Obj,Cell*} S3:Gen S4:Cell*
+D:Gen* = PropX S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
 
   Lookup intermediate property in S2, with key S3. S4 should point to
   an MInstrState struct.
 
-D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj,Cell*} S3:Gen S4:Cell*
+D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
 
   Get property with key S3 from S2. S4 should point to an MInstrState
   struct.
 
-D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj,Cell*} S3:Gen S4:Cell
+D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell
 
   Set property with key S3 in S2 to S4.
 
-D:Cell = CGetElem S0:ConstTCA S1:Cell* S2:Gen S3:Cell*
+D:Cell = CGetElem S0:ConstTCA S1:Gen* S2:Gen S3:Cell*
 
   Get element with key S2 from S1. S3 should point to an MInstrState
   struct.
 
-D:Vector = SetElem S0:ConstTCA S1:Cell* S2:Gen S3:Cell
+D:Vector = SetElem S0:ConstTCA S1:Gen* S2:Gen S3:Cell
 
   Set element with key S2 in S1 to S3.

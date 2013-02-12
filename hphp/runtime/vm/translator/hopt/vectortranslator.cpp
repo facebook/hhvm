@@ -227,7 +227,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
   assert(mapContains(m_stackInputs, i) == (l.space == Location::Stack));
   switch (l.space) {
     case Location::Stack: {
-      SSATmp* val = m_ht.top(Type::Gen, m_stackInputs[i]);
+      SSATmp* val = m_ht.top(Type::Gen | Type::Cls, m_stackInputs[i]);
       // Check if the type on our eval stack is at least as specific
       // as what Transl::Translator came up with.
       auto t = Type::fromRuntimeType(dl.rtt);
@@ -316,7 +316,13 @@ void HhbcTranslator::VectorTranslator::emitBaseG() {
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseS() {
-  PUNT(emitBaseS);
+  const int kClassIdx = m_ni.inputs.size() - 1;
+  SSATmp* key = getInput(m_iInd);
+  SSATmp* clsRef = getInput(kClassIdx);
+  m_base = m_tb.gen(LdClsPropAddr,
+                    clsRef,
+                    key,
+                    CTX());
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseOp() {

@@ -135,10 +135,12 @@ struct FunctionInfo {
   bool exit;
   bool m_perfSynced;
   std::vector<LineEntry> m_lineTable;
+  std::vector<std::string> m_namedLocals;
   DwarfChunk* m_chunk;
   FunctionInfo() : m_chunk(nullptr) { }
   FunctionInfo(TCRange r, bool ex)
-    : range(r), exit(ex), m_perfSynced(false), m_chunk(nullptr) {}
+    : range(r), exit(ex), m_perfSynced(false),
+    m_namedLocals(std::vector<std::string>()), m_chunk(nullptr) {}
   void setPerfSynced() { m_perfSynced = true; }
   void clearPerfSynced() { m_perfSynced = false; }
   bool perfSynced() const { return m_perfSynced; }

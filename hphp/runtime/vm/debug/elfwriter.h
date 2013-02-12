@@ -48,7 +48,8 @@ struct ElfWriter {
   void initStrtab();
   bool initElfHeader();
   bool initDwarfProducer();
-  Dwarf_P_Die addFunctionInfo(FunctionInfo* f);
+  Dwarf_P_Die makeLocalTypeDie();
+  Dwarf_P_Die addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type);
   bool addSymbolInfo(DwarfChunk* d);
   bool addFrameInfo(DwarfChunk* d);
   bool writeDwarfInfo();

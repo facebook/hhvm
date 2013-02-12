@@ -231,6 +231,10 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
   } else {
     assert(func != nullptr);
     f->name = lookupFunction(func, exit, inPrologue, true);
+    const StringData* const *names = func->localNames();
+    for (int i = 0; i < func->numNamedLocals(); i++) {
+      f->m_namedLocals.push_back(names[i]->toCPPString());
+    }
   }
   f->file = lookupFile(unit);
 

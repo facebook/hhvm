@@ -36,6 +36,7 @@ namespace VM {
 namespace Debug {
 
 static const Trace::Module TRACEMOD = Trace::debuginfo;
+static const uint8_t CFA_OFFSET = 16;
 
 void ElfWriter::logError(const string& msg) {
   perror("");
@@ -111,7 +112,7 @@ bool ElfWriter::initDwarfProducer() {
   return true;
 }
 
-Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
+Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   Dwarf_Error error = 0;
 
   /* top level DIE for each function */
@@ -193,7 +194,133 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
     logError("unable to set line end address");
     return nullptr;
   }
+
+  /* 4. register frame base of function */
+  Dwarf_P_Expr locExpr = dwarf_new_expr(m_dwarfProducer, &error);
+  if (locExpr == nullptr) {
+    logError("unable to create new location expression");
+    return nullptr;
+  }
+
+  u = dwarf_add_expr_gen(locExpr, DW_OP_call_frame_cfa, 0, 0, &error);
+  if (u == DW_DLV_NOCOUNT) {
+    logError("unable to add subexpression to location expression");
+    return nullptr;
+  }
+
+  u = dwarf_add_expr_gen(locExpr, DW_OP_const1u, CFA_OFFSET, 0, &error);
+  if (u == DW_DLV_NOCOUNT) {
+    logError("unable to add subexpression to location expression");
+    return nullptr;
+  }
+
+  u = dwarf_add_expr_gen(locExpr, DW_OP_minus, 0, 0, &error);
+  if (u == DW_DLV_NOCOUNT) {
+    logError("unable to add subexpression to location expression");
+    return nullptr;
+  }
+
+  Dwarf_P_Attribute frameBaseAttr = dwarf_add_AT_location_expr(m_dwarfProducer,
+    func, DW_AT_frame_base, locExpr, &error);
+  if (reinterpret_cast<Dwarf_Addr>(frameBaseAttr) == DW_DLV_BADADDR) {
+    logError("unable to add frame_base attribute");
+    return nullptr;
+  }
+
+  /* 5. register all the named locals of function */
+  Dwarf_P_Die lastLocal = nullptr;
+  int i = 1;
+  for (std::vector<std::string>::iterator it = f->m_namedLocals.begin();
+       it != f->m_namedLocals.end(); it++) {
+    Dwarf_P_Die localVar = dwarf_new_die(m_dwarfProducer,
+      DW_TAG_variable, nullptr, nullptr, nullptr, nullptr, &error);
+    if (reinterpret_cast<Dwarf_Addr>(localVar) == DW_DLV_BADADDR) {
+      logError("unable to create new DIE for local variable");
+      return nullptr;
+    }
+
+    /* Create location expression defined w.r.t DW_AT_frame_base */
+    Dwarf_P_Expr locExpr = dwarf_new_expr(m_dwarfProducer, &error);
+    if (locExpr == nullptr) {
+      logError("unable to create new location expression");
+      return nullptr;
+    }
+
+    u = dwarf_add_expr_gen(locExpr, DW_OP_fbreg,
+      -(i * sizeof(TypedValue)), 0, &error);
+    ++i;
+    if (u == DW_DLV_NOCOUNT) {
+      logError("unable to add subexpression to location expression");
+      return nullptr;
+    }
+
+    Dwarf_P_Attribute locAttr = dwarf_add_AT_location_expr(m_dwarfProducer,
+      localVar, DW_AT_location, locExpr, &error);
+    if (reinterpret_cast<Dwarf_Addr>(locAttr) == DW_DLV_BADADDR) {
+      logError("unable to add location attribute to local variable");
+      return nullptr;
+    }
+
+    Dwarf_P_Attribute nameAttr = dwarf_add_AT_name(localVar, const_cast<char *>(it->data()), &error);
+    if (reinterpret_cast<Dwarf_Addr>(nameAttr) == DW_DLV_BADADDR) {
+      logError("unable to add name attribute to local variable");
+      return nullptr;
+    }
+
+    Dwarf_P_Attribute varTypeAttr = dwarf_add_AT_reference(m_dwarfProducer,
+      localVar, DW_AT_type, type, &error);
+    if (reinterpret_cast<Dwarf_Addr>(varTypeAttr) == DW_DLV_BADADDR) {
+      logError("unable to add type attribute to local variable DIE");
+      return nullptr;
+    }
+
+    Dwarf_P_Die res = 0;
+    if (lastLocal != nullptr) {
+      res = dwarf_die_link(localVar, nullptr, nullptr, lastLocal, nullptr, &error);
+    } else {
+      res = dwarf_die_link(localVar, func, nullptr, nullptr, nullptr, &error);
+    }
+    if (reinterpret_cast<Dwarf_Addr>(res) == DW_DLV_BADADDR) {
+      logError("unable to link die");
+      return nullptr;
+    }
+    lastLocal = localVar;
+  }
+
   return func;
+}
+
+Dwarf_P_Die ElfWriter::makeLocalTypeDie() {
+  Dwarf_Error error = 0;
+  Dwarf_P_Die typedValueType = dwarf_new_die(m_dwarfProducer,
+    DW_TAG_structure_type, nullptr, nullptr, nullptr, nullptr, &error);
+  if (reinterpret_cast<Dwarf_Addr>(typedValueType) == DW_DLV_BADADDR) {
+    logError("unable to create new DIE for TypedValue type");
+    return nullptr;
+  }
+
+  /* hard coding the name of 'HPHP::TypedValue' */
+  Dwarf_P_Attribute at;
+  at = dwarf_add_AT_name(typedValueType, "HPHP::TypedValue", &error);
+  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+    logError("unable to add name attribute to TypedValue type DIE");
+    return nullptr;
+  }
+
+  at = dwarf_add_AT_flag(m_dwarfProducer,
+    typedValueType, DW_AT_declaration, 1, &error);
+  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+    logError("unable to add declaration attribute to TypedValue type DIE");
+    return nullptr;
+  }
+
+  at = dwarf_add_AT_unsigned_const(m_dwarfProducer,
+    typedValueType, DW_AT_byte_size, sizeof(TypedValue), &error);
+  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+    logError("unable to add byte_size attribute to TypedValue type DIE");
+    return nullptr;
+  }
+  return typedValueType;
 }
 
 bool ElfWriter::addSymbolInfo(DwarfChunk* d) {
@@ -211,22 +338,33 @@ bool ElfWriter::addSymbolInfo(DwarfChunk* d) {
 
   Dwarf_P_Die lastChild = nullptr;
   FuncPtrDB::iterator it;
+  Dwarf_P_Die type = makeLocalTypeDie();
+  if (type == nullptr) {
+    logError("unable to create type DIE");
+    return false;
+  }
+  Dwarf_P_Die linkRes;
+  linkRes = dwarf_die_link(type, codeUnit, nullptr, nullptr, nullptr, &error);
+  if (reinterpret_cast<Dwarf_Addr>(linkRes) == DW_DLV_BADADDR) {
+    logError("unable to link die");
+    return false;
+  }
+
   for (it = d->m_functions.begin(); it != d->m_functions.end(); it++) {
-    Dwarf_P_Die res = 0;
     /* for each function, add DIE entries with information about name,
      * line number, file, etc */
-    Dwarf_P_Die func = addFunctionInfo(*it);
+    Dwarf_P_Die func = addFunctionInfo(*it, type);
     if (func == nullptr) {
       logError("unable to create child DIE");
       return false;
     }
 
     if (lastChild) {
-      res = dwarf_die_link(func, nullptr, nullptr, lastChild, nullptr, &error);
+      linkRes = dwarf_die_link(func, nullptr, nullptr, lastChild, nullptr, &error);
     } else {
-      res = dwarf_die_link(func, codeUnit, nullptr, nullptr, nullptr, &error);
+      linkRes = dwarf_die_link(func, codeUnit, nullptr, nullptr, nullptr, &error);
     }
-    if (reinterpret_cast<Dwarf_Addr>(res) == DW_DLV_BADADDR) {
+    if (reinterpret_cast<Dwarf_Addr>(linkRes) == DW_DLV_BADADDR) {
       logError("unable to link die");
       return false;
     }
@@ -251,7 +389,7 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
   /* Define common set of rules for unwinding frames in the VM stack*/
 
   /* Frame pointer (CFA) for previous frame is in RBP + 16 */
-  b.dwarf_cfa_def_cfa(RBP, 16);
+  b.dwarf_cfa_def_cfa(RBP, CFA_OFFSET);
   /* Previous RIP is at CFA - 1 . DWARF_DATA_ALIGN (8) */
   b.dwarf_cfa_offset_extended_sf(RIP, -1);
   /* Previous RBP is at CFA - 2 . DWARF_DATA_ALIGN (8) */

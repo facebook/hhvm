@@ -772,23 +772,40 @@ TypedValue* fg_collator_sort(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Variant HPHP::f_idn_to_ascii(HPHP::String const&, HPHP::VRefParamValue const&)
-_ZN4HPHP14f_idn_to_asciiERKNS_6StringERKNS_14VRefParamValueE
+HPHP::Variant HPHP::f_idn_to_ascii(HPHP::String const&, long, long, HPHP::VRefParamValue const&)
+_ZN4HPHP14f_idn_to_asciiERKNS_6StringEllRKNS_14VRefParamValueE
 
 (return value) => rax
 _rv => rdi
 domain => rsi
-errorcode => rdx
+options => rdx
+variant => rcx
+idna_info => r8
 */
 
-TypedValue* fh_idn_to_ascii(TypedValue* _rv, Value* domain, TypedValue* errorcode) asm("_ZN4HPHP14f_idn_to_asciiERKNS_6StringERKNS_14VRefParamValueE");
+TypedValue* fh_idn_to_ascii(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP14f_idn_to_asciiERKNS_6StringEllRKNS_14VRefParamValueE");
 
 TypedValue * fg1_idn_to_ascii(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_idn_to_ascii(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
-  fh_idn_to_ascii((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  switch (count) {
+  default: // count >= 4
+  case 3:
+    if ((args-2)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-2);
+    }
+  case 2:
+    if ((args-1)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  VRefParamValue defVal3 = null;
+  fh_idn_to_ascii((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -797,27 +814,27 @@ TypedValue* fg_idn_to_ascii(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 2LL) {
-      if (IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal1 = null;
-        fh_idn_to_ascii((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+    if (count >= 1LL && count <= 4LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
+        VRefParamValue defVal3 = null;
+        fh_idn_to_ascii((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_idn_to_ascii(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("idn_to_ascii", count, 1, 2, 1);
+      throw_wrong_arguments_nr("idn_to_ascii", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -826,23 +843,40 @@ TypedValue* fg_idn_to_ascii(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Variant HPHP::f_idn_to_unicode(HPHP::String const&, HPHP::VRefParamValue const&)
-_ZN4HPHP16f_idn_to_unicodeERKNS_6StringERKNS_14VRefParamValueE
+HPHP::Variant HPHP::f_idn_to_unicode(HPHP::String const&, long, long, HPHP::VRefParamValue const&)
+_ZN4HPHP16f_idn_to_unicodeERKNS_6StringEllRKNS_14VRefParamValueE
 
 (return value) => rax
 _rv => rdi
 domain => rsi
-errorcode => rdx
+options => rdx
+variant => rcx
+idna_info => r8
 */
 
-TypedValue* fh_idn_to_unicode(TypedValue* _rv, Value* domain, TypedValue* errorcode) asm("_ZN4HPHP16f_idn_to_unicodeERKNS_6StringERKNS_14VRefParamValueE");
+TypedValue* fh_idn_to_unicode(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP16f_idn_to_unicodeERKNS_6StringEllRKNS_14VRefParamValueE");
 
 TypedValue * fg1_idn_to_unicode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_idn_to_unicode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
-  fh_idn_to_unicode((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  switch (count) {
+  default: // count >= 4
+  case 3:
+    if ((args-2)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-2);
+    }
+  case 2:
+    if ((args-1)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  VRefParamValue defVal3 = null;
+  fh_idn_to_unicode((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -851,27 +885,27 @@ TypedValue* fg_idn_to_unicode(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 2LL) {
-      if (IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal1 = null;
-        fh_idn_to_unicode((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+    if (count >= 1LL && count <= 4LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
+        VRefParamValue defVal3 = null;
+        fh_idn_to_unicode((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_idn_to_unicode(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("idn_to_unicode", count, 1, 2, 1);
+      throw_wrong_arguments_nr("idn_to_unicode", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -880,23 +914,40 @@ TypedValue* fg_idn_to_unicode(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Variant HPHP::f_idn_to_utf8(HPHP::String const&, HPHP::VRefParamValue const&)
-_ZN4HPHP13f_idn_to_utf8ERKNS_6StringERKNS_14VRefParamValueE
+HPHP::Variant HPHP::f_idn_to_utf8(HPHP::String const&, long, long, HPHP::VRefParamValue const&)
+_ZN4HPHP13f_idn_to_utf8ERKNS_6StringEllRKNS_14VRefParamValueE
 
 (return value) => rax
 _rv => rdi
 domain => rsi
-errorcode => rdx
+options => rdx
+variant => rcx
+idna_info => r8
 */
 
-TypedValue* fh_idn_to_utf8(TypedValue* _rv, Value* domain, TypedValue* errorcode) asm("_ZN4HPHP13f_idn_to_utf8ERKNS_6StringERKNS_14VRefParamValueE");
+TypedValue* fh_idn_to_utf8(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP13f_idn_to_utf8ERKNS_6StringEllRKNS_14VRefParamValueE");
 
 TypedValue * fg1_idn_to_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_idn_to_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
-  fh_idn_to_utf8((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  switch (count) {
+  default: // count >= 4
+  case 3:
+    if ((args-2)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-2);
+    }
+  case 2:
+    if ((args-1)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  VRefParamValue defVal3 = null;
+  fh_idn_to_utf8((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -905,27 +956,27 @@ TypedValue* fg_idn_to_utf8(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 2LL) {
-      if (IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal1 = null;
-        fh_idn_to_utf8((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+    if (count >= 1LL && count <= 4LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
+        VRefParamValue defVal3 = null;
+        fh_idn_to_utf8((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_idn_to_utf8(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("idn_to_utf8", count, 1, 2, 1);
+      throw_wrong_arguments_nr("idn_to_utf8", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

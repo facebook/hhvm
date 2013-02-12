@@ -201,40 +201,46 @@ sort_flag => rcx
 TypedValue* fh_collator_sort(TypedValue* _rv, TypedValue* obj, TypedValue* arr, long sort_flag) asm("_ZN4HPHP15f_collator_sortERKNS_7VariantERKNS_14VRefParamValueEl");
 
 /*
-HPHP::Variant HPHP::f_idn_to_ascii(HPHP::String const&, HPHP::VRefParamValue const&)
-_ZN4HPHP14f_idn_to_asciiERKNS_6StringERKNS_14VRefParamValueE
+HPHP::Variant HPHP::f_idn_to_ascii(HPHP::String const&, long, long, HPHP::VRefParamValue const&)
+_ZN4HPHP14f_idn_to_asciiERKNS_6StringEllRKNS_14VRefParamValueE
 
 (return value) => rax
 _rv => rdi
 domain => rsi
-errorcode => rdx
+options => rdx
+variant => rcx
+idna_info => r8
 */
 
-TypedValue* fh_idn_to_ascii(TypedValue* _rv, Value* domain, TypedValue* errorcode) asm("_ZN4HPHP14f_idn_to_asciiERKNS_6StringERKNS_14VRefParamValueE");
+TypedValue* fh_idn_to_ascii(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP14f_idn_to_asciiERKNS_6StringEllRKNS_14VRefParamValueE");
 
 /*
-HPHP::Variant HPHP::f_idn_to_unicode(HPHP::String const&, HPHP::VRefParamValue const&)
-_ZN4HPHP16f_idn_to_unicodeERKNS_6StringERKNS_14VRefParamValueE
+HPHP::Variant HPHP::f_idn_to_unicode(HPHP::String const&, long, long, HPHP::VRefParamValue const&)
+_ZN4HPHP16f_idn_to_unicodeERKNS_6StringEllRKNS_14VRefParamValueE
 
 (return value) => rax
 _rv => rdi
 domain => rsi
-errorcode => rdx
+options => rdx
+variant => rcx
+idna_info => r8
 */
 
-TypedValue* fh_idn_to_unicode(TypedValue* _rv, Value* domain, TypedValue* errorcode) asm("_ZN4HPHP16f_idn_to_unicodeERKNS_6StringERKNS_14VRefParamValueE");
+TypedValue* fh_idn_to_unicode(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP16f_idn_to_unicodeERKNS_6StringEllRKNS_14VRefParamValueE");
 
 /*
-HPHP::Variant HPHP::f_idn_to_utf8(HPHP::String const&, HPHP::VRefParamValue const&)
-_ZN4HPHP13f_idn_to_utf8ERKNS_6StringERKNS_14VRefParamValueE
+HPHP::Variant HPHP::f_idn_to_utf8(HPHP::String const&, long, long, HPHP::VRefParamValue const&)
+_ZN4HPHP13f_idn_to_utf8ERKNS_6StringEllRKNS_14VRefParamValueE
 
 (return value) => rax
 _rv => rdi
 domain => rsi
-errorcode => rdx
+options => rdx
+variant => rcx
+idna_info => r8
 */
 
-TypedValue* fh_idn_to_utf8(TypedValue* _rv, Value* domain, TypedValue* errorcode) asm("_ZN4HPHP13f_idn_to_utf8ERKNS_6StringERKNS_14VRefParamValueE");
+TypedValue* fh_idn_to_utf8(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP13f_idn_to_utf8ERKNS_6StringEllRKNS_14VRefParamValueE");
 
 
 } // !HPHP

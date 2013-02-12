@@ -90,6 +90,71 @@ be located by the compiled program at runtime, perhaps with ldconfig or any
 other ways.
 
 
+<h2>How to modify existing non-separable extension functions/classes</h2>
+
+All commands and directories are from src/ in this guide.
+
+1. Update IDL
+
+Change the function/class prototypes in the corresponding IDL file. 
+Follow existing ones for formats. Most of them are straightforward.
+Possible types are listed in idl/base.php.
+
+NOTE regarding the "NeedsActRec" flag:
+
+A function that examines the state of the current or previous
+frames in its call stack must have the "NeedsActRec" flag set
+in its "flags" field. Examples of use of the frame state include
+examining the arguments of the function, looking up the invocation
+context for the function (e.g., for permissions check), etc.
+
+2. Update headers and implementation.
+
+Edit runtime/ext/ext_[name].h and runtime/ext/ext_[name].cpp to
+reflect the desired modifications in signature and behavior.
+
+3. Auto-generate files from IDL
+
+Run
+
+  EXT=[name] make -C idl update
+
+For example,
+
+  EXT=string make -C idl update
+
+This will modify several files with the new signatures.
+
+4. Unit tests
+
+The "EXT=name make -C idl update" does the following for test files:
+  creates  test/test_ext_[name].h -- entry points for this unit test, don't modify
+  updates  test/test_ext.inc      -- to invoke the test, don't modify
+  creates  idl/test_ext_[name].cpp -- A template to be modified.
+
+You can probably delete these and modify the existing unit tests.
+
+5. Compile the php to c compiler (so that we can use it to bootstrap hhvm)
+
+  make -j (if you compile using make) (unset USE_HHVM)
+    or
+  fbconfig -r hphp (if you haven't done so already)
+  fbmake --fast dbg -j (if you compile using fbmake)
+
+6. Use the new php compiler to generate the marshalling code
+
+  make -C system  (if you compile using make)
+
+     or
+
+  ./tools/remake_system.sh (if you use fbmake)
+
+7. Compile hhvm
+
+  make -j (if you compile using make) (export USE_HHVM=1)
+    or
+  fbmake --fast dbg -j (if you compile using fbmake)
+
 <h2>How to add new non-separable extension functions/classes</h2>
 
 All commands and directories are from src/ in this guide.
@@ -162,14 +227,13 @@ unit test function like this,
 
   void TestExt[Name]::test_ext_[function] () { ... }
 
-6. How to modify existing extension functions/classes
 
-Modify the IDL file. Then run
+6. After compiling once, do this to update the compiler with the latest functions:
 
-  EXT=existing make -C idl update
+  make -C system  (if you compile using make)
 
-Follow all steps after step 3 at above.
+     or
 
-7. After compiling once, do this to update compiler with the latest functions:
+  ./tools/remake_system.sh (if you use fbmake)
 
-  make -C system
+

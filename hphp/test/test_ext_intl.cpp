@@ -116,44 +116,45 @@ bool TestExtIntl::test_collator_sort() {
 }
 
 bool TestExtIntl::test_idn_to_ascii() {
-  Variant errorcode;
-  VS(f_idn_to_ascii("www.m\xc3\xa5nsjonasson.se", errorcode),
+  VS(f_idn_to_ascii("www.m\xc3\xa5nsjonasson.se"),
       "www.xn--mnsjonasson-x8a.se");
-  VS(f_idn_to_ascii("www.facebook.com", errorcode),
+  VS(f_idn_to_ascii("www.facebook.com"),
       "www.facebook.com");
-  VS(f_idn_to_ascii("www.xn--m\xc3\xa5nsjonasson.se", errorcode),
+  VS(f_idn_to_ascii("www.xn--m\xc3\xa5nsjonasson.se"),
       false);
   VS(f_idn_to_ascii("www.12345678901234567890123456789"
-                    "012345678901234m\xc3\xa5nsjonasson.se", errorcode),
+                    "012345678901234m\xc3\xa5nsjonasson.se"),
       "www.xn--123456789012345678901234567890123456789"
       "01234mnsjonasson-5we.se");
   VS(f_idn_to_ascii("www.12345678901234567890123456789"
-                    "0123456789012345m\xc3\xa5nsjonasson.se", errorcode),
+                    "0123456789012345m\xc3\xa5nsjonasson.se"),
       false);
+  VS(f_idn_to_ascii("\u1937ai\u18ed-\u18f0.tk", 1),
+    "xn--ai--youq53b.tk")
+  VS(f_idn_to_ascii("\u1937ai\u18ed-\u18f0.tk", 0),
+    false)
   return Count(true);
 }
 
 bool TestExtIntl::test_idn_to_unicode() {
-  Variant errorcode;
-  VS(f_idn_to_unicode("www.xn--mnsjonasson-x8a.se", errorcode),
+  VS(f_idn_to_unicode("www.xn--mnsjonasson-x8a.se"),
       "www.m\xc3\xa5nsjonasson.se");
-  VS(f_idn_to_unicode("www.facebook.com", errorcode),
+  VS(f_idn_to_unicode("www.facebook.com"),
       "www.facebook.com");
   VS(f_idn_to_unicode("www.xn--12345678901234567890123456789"
-                      "012345678901234mnsjonasson-5we.se", errorcode),
+                      "012345678901234mnsjonasson-5we.se"),
       "www.12345678901234567890123456789"
       "012345678901234m\xc3\xa5nsjonasson.se");
   return Count(true);
 }
 
 bool TestExtIntl::test_idn_to_utf8() {
-  Variant errorcode;
-  VS(f_idn_to_utf8("www.xn--mnsjonasson-x8a.se", errorcode),
+  VS(f_idn_to_utf8("www.xn--mnsjonasson-x8a.se"),
       "www.m\xc3\xa5nsjonasson.se");
-  VS(f_idn_to_utf8("www.facebook.com", errorcode),
+  VS(f_idn_to_utf8("www.facebook.com"),
       "www.facebook.com");
   VS(f_idn_to_utf8("www.xn--12345678901234567890123456789"
-                   "012345678901234mnsjonasson-5we.se", errorcode),
+                   "012345678901234mnsjonasson-5we.se"),
       "www.12345678901234567890123456789"
       "012345678901234m\xc3\xa5nsjonasson.se");
   return Count(true);

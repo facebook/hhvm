@@ -59,7 +59,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
       return false;
     }
   } else {
-    string fullPath = "/unittest/rootdoc/string";
+    string fullPath = "runtime/tmp/string";
     std::ofstream f(fullPath.c_str());
     if (!f) {
       printf("Unable to open %s for write. Run this test from hphp/.\n",
@@ -131,18 +131,20 @@ void TestServer::RunServer() {
   string portConfig = "Server.Port=" + lexical_cast<string>(s_server_port);
   string fd = lexical_cast<string>(inherit_fd);
 
+  const char *argv[] = {
+    "", "--mode=server", "--config=test/config-server.hdf",
+    "-v", portConfig.c_str(),
+    "--port-fd", fd.c_str(),
+    NULL
+  };
+
   if (Option::EnableEval < Option::FullEval) {
-    const char *argv[] = {"", "--mode=server",
-                          "--config=test/config-server.hdf", "-v",
-                          portConfig.c_str(), "--port-fd", fd.c_str(), NULL};
-    Process::Exec("runtime/tmp/TestServer/test", argv, NULL, out, &err);
+    argv[0] = "runtime/tmp/TestServer/test";
   } else {
-    const char *argv[] = {"", "--file=/unittest/rootdoc/string",
-                          "--mode=server", portConfig.c_str(), "-v",
-                          "--config=test/config-eval.hdf",
-                          portConfig.c_str(), "--port-fd", fd.c_str(), NULL};
-    Process::Exec(HHVM_PATH, argv, NULL, out, &err);
+    argv[0] = HHVM_PATH;
   }
+
+  Process::Exec(argv[0], argv, NULL, out, &err);
 }
 
 void TestServer::StopServer() {
@@ -208,35 +210,37 @@ bool TestServer::TestServerVariables() {
 
   VSGET("<?php "
         "var_dump($_SERVER['PATH_INFO']);"
-        "var_dump($_SERVER['PATH_TRANSLATED']);"
+        "var_dump(clean($_SERVER['PATH_TRANSLATED']));"
         "var_dump($_SERVER['SCRIPT_NAME']);"
         "var_dump($_SERVER['REQUEST_URI']);"
-        "var_dump($_SERVER['SCRIPT_FILENAME']);"
-        "var_dump($_SERVER['QUERY_STRING']);",
+        "var_dump(clean($_SERVER['SCRIPT_FILENAME']));"
+        "var_dump($_SERVER['QUERY_STRING']);"
+        "function clean($x) { return str_replace(getcwd(),'',$x); }",
 
         "string(13) \"/path/subpath\"\n"
-        "string(30) \"/unittest/rootdoc/path/subpath\"\n"
+        "string(13) \"/path/subpath\"\n"
         "string(7) \"/string\"\n"
         "string(28) \"/string/path/subpath?a=1&b=2\"\n"
-        "string(24) \"/unittest/rootdoc/string\"\n"
+        "string(7) \"/string\"\n"
         "string(7) \"a=1&b=2\"\n",
 
         "string/path/subpath?a=1&b=2");
 
   VSGET("<?php "
         "var_dump($_SERVER['PATH_INFO']);"
-        "var_dump($_SERVER['PATH_TRANSLATED']);"
+        "var_dump(clean($_SERVER['PATH_TRANSLATED']));"
         "var_dump($_SERVER['SCRIPT_NAME']);"
         "var_dump($_SERVER['REQUEST_URI']);"
-        "var_dump($_SERVER['SCRIPT_FILENAME']);"
+        "var_dump(clean($_SERVER['SCRIPT_FILENAME']));"
         "var_dump($_SERVER['QUERY_STRING']);"
-        "var_dump(isset($_ENV['HPHP_RPC']));",
+        "var_dump(isset($_ENV['HPHP_RPC']));"
+        "function clean($x) { return str_replace(getcwd(),'',$x); }",
 
         "NULL\n"
-        "string(24) \"/unittest/rootdoc/string\"\n"
+        "string(7) \"/string\"\n"
         "string(7) \"/string\"\n"
         "string(15) \"/string?a=1&b=2\"\n"
-        "string(24) \"/unittest/rootdoc/string\"\n"
+        "string(7) \"/string\"\n"
         "string(7) \"a=1&b=2\"\n"
         "bool(false)\n",
 
@@ -641,12 +645,14 @@ bool TestServer::TestRPCServer() {
   // "int(100)" is printed twice, one from warmup, and the other from include
   VSGETP("<?php\n"
          "var_dump(100);\n",
+         "int(100)\n"
          "int(100)\n",
          "?include=string&output=1&auth=test",
          8083);
 
   VSGETP("<?php\n"
          "var_dump(isset($_ENV['HPHP_RPC']));\n",
+         "bool(true)\n"
          "bool(true)\n",
          "?include=string&output=1&auth=test",
          8083);

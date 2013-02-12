@@ -5,7 +5,7 @@ Log {
 
 Server {
   Port = 8080
-  SourceRoot = /unittest/rootdoc
+  SourceRoot != echo $(pwd)/runtime/tmp
 
   AllowedFiles {
     0 = string
@@ -22,7 +22,7 @@ Satellites {
     Type = RPCServer
     Port = 8083
     Password = test
-    WarmupDocument = string
+    RequestInitDocument = string
   }
 }
 

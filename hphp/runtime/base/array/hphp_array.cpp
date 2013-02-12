@@ -1601,7 +1601,7 @@ ArrayData* HphpArray::pop(Variant& value) {
   } else {
     value = uninit_null();
   }
-  // To match PHP-like semantics, the pop operation resets the array's
+  // To conform to PHP behavior, the pop operation resets the array's
   // internal iterator.
   a->m_pos = a->nextElm(elms, ElmIndEmpty);
   return result;
@@ -1613,7 +1613,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   if (getCount() > 1) {
     result = a = copyImpl();
   }
-  // To match PHP-like semantics, we invalidate all strong iterators when an
+  // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   a->freeStrongIterators();
   Elm* elms = a->m_data;
@@ -1628,7 +1628,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   } else {
     value = uninit_null();
   }
-  // To match PHP-like semantics, the dequeue operation resets the array's
+  // To conform to PHP behavior, the dequeue operation resets the array's
   // internal iterator
   a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
   return result;
@@ -1640,7 +1640,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   if (copy) {
     result = a = copyImpl();
   }
-  // To match PHP-like semantics, we invalidate all strong iterators when an
+  // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
   a->freeStrongIterators();
 
@@ -1666,7 +1666,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
 
   // Renumber.
   a->compact(true);
-  // To match PHP-like semantics, the prepend operation resets the array's
+  // To conform to PHP behavior, the prepend operation resets the array's
   // internal iterator
   a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
   return result;
@@ -1700,19 +1700,22 @@ bool HphpArray::validFullPos(const FullPos &fp) const {
   return (fp.m_pos != ssize_t(ElmIndEmpty));
 }
 
-void HphpArray::getFullPos(FullPos& fp) {
-  assert(fp.getContainer() == (ArrayData*)this);
-  fp.m_pos = m_pos;
-}
-
-bool HphpArray::setFullPos(const FullPos& fp) {
-  assert(fp.getContainer() == (ArrayData*)this);
-  assert(!fp.getResetFlag());
-  if (fp.m_pos != ssize_t(ElmIndEmpty)) {
-    m_pos = fp.m_pos;
-    return true;
+bool HphpArray::advanceFullPos(FullPos& fp) {
+  Elm* elms = m_data;
+  if (fp.getResetFlag()) {
+    fp.setResetFlag(false);
+    fp.m_pos = ElmIndEmpty;
+  } else if (fp.m_pos == ssize_t(ElmIndEmpty)) {
+    return false;
   }
-  return false;
+  fp.m_pos = nextElm(elms, fp.m_pos);
+  if (fp.m_pos == ssize_t(ElmIndEmpty)) {
+    return false;
+  }
+  // To conform to PHP behavior, we need to set the internal
+  // cursor to point to the next element.
+  m_pos = nextElm(elms, fp.m_pos);
+  return true;
 }
 
 CVarRef HphpArray::currentRef() {

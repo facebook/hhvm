@@ -133,8 +133,7 @@ public: // ArrayData implementation
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
   virtual bool validFullPos(const FullPos & fp) const;
-  virtual void getFullPos(FullPos&);
-  virtual bool setFullPos(const FullPos&);
+  virtual bool advanceFullPos(FullPos&);
 
   virtual ArrayData* escalateForSort();
   virtual void ksort(int sort_flags, bool ascending);

@@ -85,8 +85,7 @@ void ArrayIter::objInit(ObjectData *obj) {
   }
   switch (getCollectionType()) {
     case Collection::VectorType: {
-      c_Vector* vec = getVector();
-      m_version = vec->getVersion();
+      m_version = getVector()->getVersion();
       m_pos = 0;
       break;
     }
@@ -150,8 +149,7 @@ ArrayIter::~ArrayIter() {
 bool ArrayIter::endHelper() {
   switch (getCollectionType()) {
     case Collection::VectorType: {
-      c_Vector* vec = getVector();
-      return m_pos >= vec->t_count();
+      return m_pos >= getVector()->t_count();
     }
     case Collection::MapType: {
       return m_pos == 0;
@@ -160,8 +158,7 @@ bool ArrayIter::endHelper() {
       return m_pos == 0;
     }
     case Collection::PairType: {
-      c_Pair* pair = getPair();
-      return m_pos >= pair->t_count();
+      return m_pos >= getPair()->t_count();
     }
     default: {
       ObjectData* obj = getIteratorObj();
@@ -343,23 +340,14 @@ bool FullPos::advance() {
     return false;
   }
   if (container == data) {
-    data = cowCheck();
-    if (getResetFlag()) {
-      setResetFlag(false);
-      data->reset();
-    } else {
-      data->setFullPos(*this);
-      data->next();
-    }
-    data->getFullPos(*this);
-  } else {
-    data = reregister();
+    return cowCheck()->advanceFullPos(*this);
   }
+  data = reregister();
   assert(data && data == getContainer());
   assert(!getResetFlag());
   if (!data->validFullPos(*this)) return false;
-  // To match PHP-like semnatics, we need to set the internal cursor to
-  // point to the next element.
+  // To conform to PHP behavior, we need to set the internal
+  // cursor to point to the next element.
   data->next();
   return true;
 }
@@ -422,14 +410,6 @@ ArrayData* FullPos::cowCheck() {
   return data;
 }
 
-ArrayData* FullPos::getData() const {
-  assert(hasVar());
-  if (getVar()->is(KindOfArray)) {
-    return getVar()->getArrayData();
-  }
-  return nullptr;
-}
-
 ArrayData* FullPos::reregister() {
   ArrayData* container = getContainer();
   assert(getArray() != nullptr && container != getArray());
@@ -456,13 +436,12 @@ MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
   assert(getVar());
   escalateCheck();
   ArrayData* data = cowCheck();
-  if (data) {
-    data->reset();
-    data->newFullPos(*this);
-    setResetFlag(true);
-    data->next();
-    assert(getContainer() == data);
-  }
+  if (!data) return;
+  data->reset();
+  data->newFullPos(*this);
+  setResetFlag(true);
+  data->next();
+  assert(getContainer() == data);
 }
 
 MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
@@ -470,16 +449,15 @@ MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
   m_var = nullptr;
   m_key = key;
   m_valp = &val;
-  if (data) {
-    setAd(data);
-    escalateCheck();
-    data = cowCheck();
-    data->reset();
-    data->newFullPos(*this);
-    setResetFlag(true);
-    data->next();
-    assert(getContainer() == data);
-  }
+  if (!data) return;
+  setAd(data);
+  escalateCheck();
+  data = cowCheck();
+  data->reset();
+  data->newFullPos(*this);
+  setResetFlag(true);
+  data->next();
+  assert(getContainer() == data);
 }
 
 MutableArrayIter::~MutableArrayIter() {
@@ -494,9 +472,7 @@ MutableArrayIter::~MutableArrayIter() {
 }
 
 bool MutableArrayIter::advance() {
-  if (!this->FullPos::advance()) {
-    return false;
-  }
+  if (!this->FullPos::advance()) return false;
   ArrayData* data = getArray();
   assert(data);
   assert(!getResetFlag());
@@ -517,28 +493,26 @@ MArrayIter::MArrayIter(const RefData* ref) {
   assert(hasVar());
   escalateCheck();
   ArrayData* data = cowCheck();
-  if (data) {
-    data->reset();
-    data->newFullPos(*this);
-    setResetFlag(true);
-    data->next();
-    assert(getContainer() == data);
-  }
+  if (!data) return;
+  data->reset();
+  data->newFullPos(*this);
+  setResetFlag(true);
+  data->next();
+  assert(getContainer() == data);
 }
 
 MArrayIter::MArrayIter(ArrayData *data) {
   m_var = nullptr;
-  if (data) {
-    assert(!data->isStatic());
-    setAd(data);
-    escalateCheck();
-    data = cowCheck();
-    data->reset();
-    data->newFullPos(*this);
-    setResetFlag(true);
-    data->next();
-    assert(getContainer() == data);
-  }
+  if (!data) return;
+  assert(!data->isStatic());
+  setAd(data);
+  escalateCheck();
+  data = cowCheck();
+  data->reset();
+  data->newFullPos(*this);
+  setResetFlag(true);
+  data->next();
+  assert(getContainer() == data);
 }
 
 MArrayIter::~MArrayIter() {
@@ -621,7 +595,7 @@ bool Iter::minit(TypedValue* v1) {
       hasElems = false;
     }
   } else if (rtv->m_type == KindOfObject)  {
-    if (rtv->m_data.pobj->getCollectionType() != 0) {
+    if (rtv->m_data.pobj->isCollection()) {
       raise_error("Collection elements cannot be taken by reference");
     }
     bool isIterator;

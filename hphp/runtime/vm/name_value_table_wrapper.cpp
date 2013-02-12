@@ -282,22 +282,26 @@ bool NameValueTableWrapper::validFullPos(const FullPos & fp) const {
   return (iter.valid());
 }
 
-void NameValueTableWrapper::getFullPos(FullPos &fp) {
-  assert(fp.getContainer() == this);
-  fp.m_pos = m_pos;
-}
-
-bool NameValueTableWrapper::setFullPos(const FullPos& fp) {
-  assert(fp.getContainer() == this);
-  assert(!fp.getResetFlag());
-  if (fp.m_pos != ArrayData::invalid_index) {
-    NameValueTable::Iterator iter(m_tab, fp.m_pos);
-    if (iter.valid()) {
-      m_pos = iter.toInteger();
-      return true;
+bool NameValueTableWrapper::advanceFullPos(FullPos& fp) {
+  bool reset = fp.getResetFlag();
+  NameValueTable::Iterator iter = reset ?
+    NameValueTable::Iterator(m_tab) :
+    NameValueTable::Iterator(m_tab, fp.m_pos);
+  if (reset) {
+    fp.setResetFlag(false);
+  } else {
+    if (!iter.valid()) {
+      return false;
     }
+    iter.next();
   }
-  return false;
+  fp.m_pos = iter.toInteger();
+  if (!iter.valid()) return false;
+  // To conform to PHP behavior, we need to set the internal
+  // cursor to point to the next element.
+  iter.next();
+  m_pos = iter.toInteger();
+  return true;
 }
 
 ArrayData* NameValueTableWrapper::escalateForSort() {

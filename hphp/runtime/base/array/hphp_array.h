@@ -180,8 +180,7 @@ public:
 
   // overrides ArrayData
   bool validFullPos(const FullPos &fp) const;
-  void getFullPos(FullPos& fp);
-  bool setFullPos(const FullPos& fp);
+  bool advanceFullPos(FullPos& fp);
   CVarRef currentRef();
   CVarRef endRef();
 

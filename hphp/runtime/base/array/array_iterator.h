@@ -294,8 +294,7 @@ class FullPos {
   bool prepare();
 
   ArrayData* getArray() const {
-    ArrayData *data = hasVar() ? getData() : getAd();
-    return data;
+    return hasVar() ? getData() : getAd();
   }
 
   bool hasVar() const {
@@ -339,7 +338,10 @@ class FullPos {
   }
 
  protected:
-  ArrayData* getData() const;
+  ArrayData* getData() const {
+    assert(hasVar());
+    return m_var->is(KindOfArray) ? m_var->getArrayData() : nullptr;
+  }
   ArrayData* cowCheck();
   void escalateCheck();
   ArrayData* reregister();

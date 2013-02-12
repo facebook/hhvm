@@ -253,7 +253,7 @@ void ArrayData::newFullPos(FullPos &fp) {
   fp.setContainer(this);
   fp.setNext(strongIterators());
   setStrongIterators(&fp);
-  getFullPos(fp);
+  fp.m_pos = m_pos;
 }
 
 void ArrayData::freeFullPos(FullPos &fp) {
@@ -282,16 +282,10 @@ bool ArrayData::validFullPos(const FullPos& fp) const {
   return false;
 }
 
-void ArrayData::getFullPos(FullPos &fp) {
-  assert(fp.getContainer() == (ArrayData*)this);
-  fp.m_pos = ArrayData::invalid_index;
-}
-
-bool ArrayData::setFullPos(const FullPos &fp) {
-  assert(fp.getContainer() == (ArrayData*)this);
+bool ArrayData::advanceFullPos(FullPos& fp) {
   return false;
 }
-
+    
 void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(nullptr);

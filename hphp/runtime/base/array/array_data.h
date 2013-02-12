@@ -355,18 +355,12 @@ class ArrayData : public Countable {
   virtual bool validFullPos(const FullPos& fp) const;
 
   /**
-   * Sets the specified mutable iterator to point to whatever element the
-   * array's internal cursor currently points to.
+   * Advances the mutable iterator to the next element in the array. Returns
+   * false if the iterator has moved past the last element, otherwise returns
+   * true.
    */
-  virtual void getFullPos(FullPos &fp);
-
-  /**
-   * Sets the array's internal cursor to point to whetever element the
-   * specified mutable iterator to currently points to. It is the caller's
-   * responsibility to ensure that fp.getResetFlag() is false.
-   */
-  virtual bool setFullPos(const FullPos &fp);
-
+  virtual bool advanceFullPos(FullPos& fp); 
+ 
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 

@@ -333,6 +333,8 @@ public:
   String  operator +  (CStrRef v) const;
   String &operator += (litstr  v);
   String &operator += (CStrRef v);
+  String &operator += (const StringSlice& slice);
+  String &operator += (const MutableSlice& slice);
   String  operator |  (CStrRef v) const;
   String  operator &  (CStrRef v) const;
   String  operator ^  (CStrRef v) const;

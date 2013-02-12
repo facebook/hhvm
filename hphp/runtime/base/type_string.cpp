@@ -376,6 +376,31 @@ String &String::operator+=(CStrRef str) {
   return *this;
 }
 
+String& String::operator+=(const StringSlice& slice) {
+  if (slice.size() == 0) {
+    return *this;
+  }
+  if (m_px && m_px->getCount() == 1) {
+    m_px->append(slice);
+    return *this;
+  }
+  if (empty()) {
+    if (m_px) decRefStr(m_px);
+    m_px = NEW(StringData)(slice.begin(), slice.size(), CopyString);
+    m_px->setRefCount(1);
+    return *this;
+  }
+  StringData* px = NEW(StringData)(m_px, slice);
+  px->setRefCount(1);
+  decRefStr(m_px);
+  m_px = px;
+  return *this;
+}
+
+String& String::operator+=(const MutableSlice& slice) {
+  return (*this += StringSlice(slice.begin(), slice.size()));
+}
+
 String String::operator+(litstr str) const {
   if (empty()) return str;
   if (!str || !*str) return *this;

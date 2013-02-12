@@ -39,35 +39,23 @@ static void throwIntOOB(int64 key, bool isVector = false) {
 
 static void throwStrOOB(StringData* key) {
   const size_t maxDisplaySize = 20;
-  const char dots[] = "...";
-  size_t dotsSize = sizeof(dots)-1;
-  int kSize = key->size();
-  bool keyIsLarge = (kSize > maxDisplaySize);
-  size_t kDisplaySize = keyIsLarge ? (maxDisplaySize - dotsSize) : kSize;
-  const char part1[] = "String key \"";
-  const char part3[] = "\" is not defined";
+  const char* dots = "...";
+  size_t dotsSize = strlen(dots);
+  int keySize = key->size();
+  bool keyIsLarge = (keySize > maxDisplaySize);
+  size_t displaySize = keyIsLarge ? (maxDisplaySize - dotsSize) : keySize;
+  const char* part1 = "String key \"";
+  size_t part1Size = strlen(part1);
+  size_t part2Size = keyIsLarge ? maxDisplaySize : keySize;
+  const char* part3 = "\" is not defined";
+  size_t part3Size = strlen(part3);
   // Do some math ahead of time so we know exactly how large
   // the String needs to be
-  size_t part1Size = sizeof(part1)-1;
-  size_t part2Size = keyIsLarge ? maxDisplaySize : kSize;
-  size_t part3Size = sizeof(part3)-1;
-  size_t totalSize = part1Size + part2Size + part3Size;
-  String msg(totalSize, ReserveString);
-  char* ptr = msg.mutableSlice().ptr;
-#define WRITE_STR(str, sz) do { \
-  memcpy(ptr, (str), (sz)); \
-  ptr += (sz); \
-} while (0)
-  // Avoid using sprintf because the PHP strings are allowed to
-  // contain NUL characters (ASCII 0)
-  WRITE_STR(part1, part1Size);
-  WRITE_STR(key->data(), kDisplaySize);
-  if (keyIsLarge) {
-    WRITE_STR(dots, dotsSize);
-  }
-  WRITE_STR(part3, part3Size);
-#undef WRITE_STR
-  msg.setSize(totalSize);
+  String msg(part1Size + part2Size + part3Size, ReserveString);
+  msg += StringSlice(part1, part1Size);
+  msg += StringSlice(key->data(), displaySize);
+  if (keyIsLarge) msg += StringSlice(dots, dotsSize);
+  msg += StringSlice(part3, part3Size);
   Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
   throw e;
 }

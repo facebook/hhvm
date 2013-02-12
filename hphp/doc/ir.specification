@@ -268,12 +268,12 @@ D:T = GuardType<T> S0:Gen -> L
   Check that the type of the src S0 is T, and if so copy it to D.  If
   S0 is not type T, branch to the exit trace label L.
 
-GuardLoc<T>{localId} S0:StkPtr -> L
+GuardLoc<T,localId> S0:StkPtr -> L
 
   Check that type of the given localId on the frame S0 is T; if not,
   branch to the exit trace label L.
 
-AssertLoc<T>{localId} S0:StkPtr
+AssertLoc<T,localId> S0:StkPtr
 
   Asserts that type of the supplied local on the frame S0 is T.  This
   is used as a hint for local type information, and is similar to
@@ -409,7 +409,7 @@ ExitOnVarEnv S0:StkPtr -> L
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   non-zero, jumps to the exit-trace label L.
 
-Marker{bcOff,stackOff,func}
+Marker<bcOff,stackOff,func>
 
   Record HHBC virtual position information at the position of this
   instruction.  Marker has no executable semantics.  The JIT compiler
@@ -479,7 +479,7 @@ D:T = LdStack<T> S0:StkPtr S1:ConstInt
   Loads from S0 at index S1 (in cells), and puts the value in D as
   type T.
 
-D:T = LdLoc<T>{localId} S0:StkPtr
+D:T = LdLoc<T,localId> S0:StkPtr
 
   Loads local number localId from the frame S0 and puts the value in D
   as type T.
@@ -489,7 +489,7 @@ D:Gen* = LdStackAddr S0:StkPtr S1:ConstInt
   Loads the address of the stack slot given by the pointer in S0 and
   the index S1 (in cells).
 
-D:Gen* = LdLocAddr{localId} S0:StkPtr
+D:Gen* = LdLocAddr<localId> S0:StkPtr
 
   Loads the address of the local slot localId from the frame S0 into D.
 
@@ -705,11 +705,11 @@ StMemNT S0:Gen* S1:ConstInt S2:Gen
 StProp S0:Obj S1:Int S2:Gen
 StPropNT S0:Obj S1:Int S2:Gen
 
-StLoc{localId} S0:StkPtr S1:Gen
+StLoc<localId> S0:StkPtr S1:Gen
 
   Store S1 to local number localId on the frame pointed to by S0.
 
-StLocNT{localId} S0:StkPtr S1:Gen
+StLocNT<localId> S0:StkPtr S1:Gen
 
   Store S1 to local number localId on the frame pointed to by S0,
   without storing the type.
@@ -789,7 +789,7 @@ D:T* = LdAddr S0:T* S1:ConstInt
 
 IncRef
 
-DecRefLoc{localId} S0:StkPtr
+DecRefLoc<localId> S0:StkPtr
 
   DecRef the local given by localId on the frame S0.
 
@@ -837,7 +837,7 @@ Nop
 
 14. Runtime helpers
 
-RaiseUninitWarning{localId}
+RaiseUninitWarning<localId>
 
   Raise a warning for an uninitialized local variable.
 

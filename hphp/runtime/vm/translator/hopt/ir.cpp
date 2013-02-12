@@ -558,14 +558,21 @@ size_t IRInstruction::hash() const {
   return CSEHash::hashCombine(srcHash, m_op, m_typeParam);
 }
 
-void IRInstruction::printOpcode(std::ostream& ostream) const {
-  ostream << opcodeName(m_op);
+void IRInstruction::printOpcode(std::ostream& os) const {
+  os << opcodeName(m_op);
+
+  if (m_typeParam == Type::None && !hasExtra()) {
+    return;
+  }
+  os << '<';
   if (m_typeParam != Type::None) {
-    ostream << '<' << m_typeParam.toString() << '>';
+    os << m_typeParam.toString();
+    if (hasExtra()) os << ',';
   }
   if (hasExtra()) {
-    ostream << '{' << showExtra(getOpcode(), m_extra) << '}';
+    os << showExtra(getOpcode(), m_extra);
   }
+  os << '>';
 }
 
 void IRInstruction::printDst(std::ostream& ostream) const {

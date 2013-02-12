@@ -1297,6 +1297,7 @@ ConditionCode CodeGenerator::emitTypeTest(IRInstruction* inst,
     return CC_None; // nothing to check
   } else {
     DataType dataType = type.toDataType();
+    if (dataType == KindOfClass) return CC_None;
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfObject));
     m_as.cmpl(dataType, src);

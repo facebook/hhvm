@@ -2860,6 +2860,12 @@ void TranslatorX64::emitReqRetransNoIR(Asm& as, SrcKey& sk) {
   }
 }
 
+void TranslatorX64::emitRecordPunt(Asm& a, const std::string& name) {
+  PhysRegSaver regs(a, kAllX64Regs);
+  a.  movq (StringData::GetStaticString(name)->data(), rdi);
+  a.  call ((TCA)recordPunt);
+}
+
 uint64_t TranslatorX64::packBitVec(const vector<bool>& bits, unsigned i) {
   uint64_t retval = 0;
   assert(i % 64 == 0);
@@ -11382,9 +11388,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
 
       // emit a counter for the hhir punt that got us here, if any
       if (Trace::moduleEnabled(Trace::punt, 1) && !m_lastHHIRPunt.empty()) {
-        PhysRegSaver regs(a, kAllX64Regs);
-        a.  movq (StringData::GetStaticString(m_lastHHIRPunt)->data(), rdi);
-        a.  call ((TCA)recordPunt);
+        emitRecordPunt(a, m_lastHHIRPunt);
       }
 
       emitRB(a, RBTypeTraceletBody, t.m_sk);

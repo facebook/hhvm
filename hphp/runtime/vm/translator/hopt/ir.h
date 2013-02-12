@@ -597,6 +597,9 @@ enum ExitType {
 
 extern TraceExitType::ExitType getExitType(Opcode opc);
 extern Opcode getExitOpcode(TraceExitType::ExitType);
+inline bool isExitSlow(TraceExitType::ExitType t) {
+  return t == TraceExitType::Slow || t == TraceExitType::SlowNoProgress;
+}
 
 const char* opcodeName(Opcode opcode);
 

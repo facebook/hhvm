@@ -2192,11 +2192,11 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
   }
   using namespace HPHP::VM::Transl;
 
-  Asm& outputAsm = m_as; // Note: m_as is the same as m_atubs for Exit Traces,
+  Asm& a = m_as; // Note: m_as is the same as m_atubs for Exit Traces,
   // unless exit trace was moved to end of main trace
 
-  emitMovRegReg(outputAsm, sp->getReg(), rVmSp);
-  emitMovRegReg(outputAsm, fp->getReg(), rVmFp);
+  emitMovRegReg(a, sp->getReg(), rVmSp);
+  emitMovRegReg(a, fp->getReg(), rVmFp);
 
   // Get the SrcKey for the dest
   SrcKey  destSK(func->getValFunc(), pc->getValInt());
@@ -2227,7 +2227,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
                                 uint64_t(cc));
       } else {
         // NormalCc exit but not optimized to jcc directly to destination
-        m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP);
+        m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP);
       }
       break;
     case TraceExitType::Normal:
@@ -2246,7 +2246,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
           }
         } else {
           assert(smashAddr == kIRDirectJmpInactive);
-          m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP);
+          m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP);
         }
       }
       break;
@@ -2262,15 +2262,23 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
                        true);
       }
 
+      if (HPHP::Trace::moduleEnabled(HPHP::Trace::punt, 1)) {
+        VM::Op op = (VM::Op)*func->getValFunc()->unit()->at(destSK.m_offset);
+        std::string name = folly::format(
+          "exitSlow{}-{}",
+          exitType == TraceExitType::SlowNoProgress ? "-np" : "",
+          VM::opcodeToName(op)).str();
+        m_tx64->emitRecordPunt(a, name);
+      }
       if (exitType == TraceExitType::Slow) {
-        m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP_NO_IR);
+        m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP_NO_IR);
       } else {
-        m_tx64->emitReqRetransNoIR(outputAsm, destSK);
+        m_tx64->emitReqRetransNoIR(a, destSK);
       }
       break;
     case TraceExitType::GuardFailure:
       SrcRec* destSR = m_tx64->getSrcRec(destSK);
-      m_tx64->emitFallbackUncondJmp(outputAsm, *destSR);
+      m_tx64->emitFallbackUncondJmp(a, *destSR);
       break;
   }
 }

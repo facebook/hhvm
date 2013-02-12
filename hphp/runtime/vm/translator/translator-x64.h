@@ -1049,6 +1049,7 @@ private:
 
 private: // Only for HackIR
   void emitReqRetransNoIR(Asm& as, SrcKey& sk);
+  void emitRecordPunt(Asm& as, const std::string& name);
 
 public: // Only for HackIR
 #define DECLARE_FUNC(nm) \

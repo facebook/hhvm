@@ -131,8 +131,7 @@ private:
   void cgNegateWork(SSATmp* dst, SSATmp* src);
   void cgNotWork(SSATmp* dst, SSATmp* src);
 
-  void emitGetCtxFwdCallWithThis(PhysReg destCtxReg,
-                                 PhysReg thisReg,
+  void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
 
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,

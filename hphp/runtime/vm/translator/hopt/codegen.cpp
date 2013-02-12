@@ -3838,20 +3838,18 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
 
 /**
  * Helper to emit getting the value for ActRec's m_this/m_cls slot
- * (in destCtxReg) from a This pointer (in thisReg) depending on
- * whether the callee method is static or not.
+ * from a This pointer depending on whether the callee method is
+ * static or not.
  */
-void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg destCtxReg,
-                                              PhysReg thisReg,
+void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                               bool    staticCallee) {
   if (staticCallee) {
-    // Load (this->m_cls | 0x1) into destCtxReg.
-    m_as.loadq(thisReg[ObjectData::getVMClassOffset()], destCtxReg);
-    m_as.orq(1, destCtxReg);
+    // Load (this->m_cls | 0x1) into ctxReg.
+    m_as.loadq(ctxReg[ObjectData::getVMClassOffset()], ctxReg);
+    m_as.orq(1, ctxReg);
   } else {
-    // Move thisReg into destCtxReg and inc-ref it
-    emitMovRegReg(m_as, thisReg, destCtxReg);
-    emitIncRef(m_as, destCtxReg);
+    // Just incref $this.
+    emitIncRef(m_as, ctxReg);
   }
 }
 
@@ -3887,15 +3885,16 @@ void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
 void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   PhysReg destCtxReg = inst->getDst()->getReg(0);
   SSATmp*  srcCtxTmp = inst->getSrc(0);
-  PhysReg  srcCtxReg = srcCtxTmp->getReg(0);
   const Func* callee = inst->getSrc(1)->getValFunc();
   bool      withThis = srcCtxTmp->getType().subtypeOf(Type::Obj);
   bool        noThis = srcCtxTmp->getType().subtypeOf(Type::Cls);
 
+  // Eagerly move src into the dest reg
+  emitMovRegReg(m_as, srcCtxTmp->getReg(0), destCtxReg);
+
   // If we're in a static method or we're sure we don't have a This pointer,
   // then we're done
   if ((getCurFunc()->attrs() & AttrStatic) || noThis) {
-    emitMovRegReg(m_as, srcCtxReg, destCtxReg);
     return;
   }
 
@@ -3906,10 +3905,9 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
     m_as.jcc8(CC_NZ, End);
   }
 
-  // If we have a This pointer in srcCtxReg, then
-  //   Select either This of its Class based on whether callee is static or not
-  emitGetCtxFwdCallWithThis(destCtxReg, srcCtxReg,
-                            (callee->attrs() & AttrStatic));
+  // If we have a This pointer in destCtxReg, then select either This
+  // or its Class based on whether callee is static or not
+  emitGetCtxFwdCallWithThis(destCtxReg, (callee->attrs() & AttrStatic));
 
   asm_label(m_as, End);
 }

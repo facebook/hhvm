@@ -37,33 +37,9 @@
 
 namespace HPHP { namespace VM { namespace JIT {
 
-// IRT_PRIMITIVE
-#define IRT(name, bit) const Type Type::name(bit);
-IRT_PRIMITIVE
+#define IRT(name, ...) const Type Type::name(Type::k##name);
+IR_TYPES
 #undef IRT
-
-// IRT_PHP_UNIONS
-const Type Type::Null(Type::Uninit | Type::InitNull);
-const Type Type::Str(Type::StaticStr | Type::CountedStr);
-const Type Type::UncountedInit(Type::InitNull | Type::Bool |
-                               Type::Int | Type::Dbl | Type::StaticStr);
-const Type Type::Uncounted(Type::Uninit | Type::UncountedInit);
-const Type Type::Cell(Type::Uncounted | Type::Str | Type::Arr | Type::Obj);
-#define IRT(name, bit)                                                  \
-const Type Type::Boxed##name(Type::name.m_bits << Type::kBoxShift);     \
-const Type Type::PtrTo##name(Type::name.m_bits << Type::kPtrShift);     \
-const Type Type::PtrToBoxed##name(Type::name.m_bits << Type::kPtrBoxShift);
-IRT_PHP_UNIONS(IRT)
-#undef IRT
-
-// IRT_UNIONS
-const Type Type::Ctx(Type::Obj | Type::Cctx);
-const Type Type::FuncCtx(Type::FuncCls | Type::FuncObj);
-
-// IRT_SPECIAL
-const Type Type::Bottom(0);
-const Type Type::Gen(Type::Cell | Type::BoxedCell);
-const Type Type::PtrToGen(Type::Gen.m_bits << Type::kPtrShift);
 
 std::string Type::toString() const {
   // Try to find an exact match to a predefined type

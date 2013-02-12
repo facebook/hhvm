@@ -580,9 +580,9 @@ const char* opcodeName(Opcode opcode);
 
 #define IRT_BOXES(name, bit)                                            \
   IRT(name,             (bit))                                          \
-  IRT(Boxed##name,      (bit) << Type::kBoxShift)                       \
-  IRT(PtrTo##name,      (bit) << Type::kPtrShift)                       \
-  IRT(PtrToBoxed##name, (bit) << Type::kPtrBoxShift)
+  IRT(Boxed##name,      (bit) << kBoxShift)                             \
+  IRT(PtrTo##name,      (bit) << kPtrShift)                             \
+  IRT(PtrToBoxed##name, (bit) << kPtrBoxShift)
 
 #define IRT_PHP(c)                                                      \
   c(Uninit,       1ULL << 0)                                            \
@@ -600,11 +600,11 @@ const char* opcodeName(Opcode opcode);
 
 // This list should be in non-decreasing order of specificity
 #define IRT_PHP_UNIONS(c)                                               \
-  c(Null,          -1) /* {Uninit|InitNull} */                          \
-  c(Str,           -1) /* {StaticStr|CountedStr} */                     \
-  c(UncountedInit, -1) /* {InitNull|Bool|Int|Dbl|StaticStr} */          \
-  c(Uncounted,     -1) /* {Unin|InitNull|Bool|Int|Dbl|StaticStr} */     \
-  c(Cell,          -1) /* any unboxed type, statically unknown */
+  c(Null,          kUninit|kInitNull)                                   \
+  c(Str,           kStaticStr|kCountedStr)                              \
+  c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr)                \
+  c(Uncounted,     kUncountedInit|kUninit)                              \
+  c(Cell,          kUncounted|kStr|kArr|kObj)
 
 #define IRT_RUNTIME                                                     \
   IRT(Cls,         1ULL << 36)                                          \
@@ -623,15 +623,15 @@ const char* opcodeName(Opcode opcode);
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
-  IRT(Ctx,         -1) /* Obj or CCtx, statically unknown */            \
-  IRT(FuncCtx,     -1) /* {Func*, Class*|Obj} */
+  IRT(Ctx,         kObj|kCctx)                                          \
+  IRT(FuncCtx,     kFuncCls|kFuncObj)
 
 // Gen and PtrToGen are here instead of IRT_PHP_UNIONS because
 // BoxedGen and PtrToBoxedGen are nonsense types.
 #define IRT_SPECIAL                                                \
-  IRT(Bottom,      -1)                                             \
-  IRT(Gen,         -1)                                             \
-  IRT(PtrToGen,    -1)
+  IRT(Bottom,      0)                                              \
+  IRT(Gen,         kCell|kBoxedCell)                               \
+  IRT(PtrToGen,    kGen << kPtrShift)
 
 // All types (including union types) that represent program values,
 // except Gen (which is special). Boxed*, PtrTo*, and PtrToBoxed* only
@@ -651,14 +651,23 @@ class Type {
   static const size_t kPtrShift = kBoxShift * 2;
   static const size_t kPtrBoxShift = kBoxShift + kPtrShift;
 
-  bits_t m_bits;
+  enum TypeBits {
+#define IRT(name, bits) k##name = (bits),
+  IR_TYPES
+#undef IRT
+  };
+
+  union {
+    bits_t m_bits;
+    TypeBits m_typedBits;
+  };
 
 public:
 # define IRT(name, ...) static const Type name;
   IR_TYPES
 # undef IRT
 
-  explicit Type(bits_t bits = None.m_bits)
+  explicit Type(bits_t bits = kNone)
     : m_bits(bits)
     {}
 

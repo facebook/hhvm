@@ -3412,15 +3412,15 @@ IterFree <iterator id>    []  ->  []
 
   Iterator free. This instruction frees the specified iterator variable.
   Typically an iterator gets freed by IterNext, so IterFree is only needed
-  for guarding against exceptions and implementing break and continue control
-  flow statements.
+  for guarding against exceptions and implementing break and return control
+  flow statements inside iterator loops.
 
 MIterFree <iterator id>    []  ->  []
 
   Mutable iterator free. This instruction frees the specified iterator
   variable. Typically an iterator gets freed by MIterNext*, so MIterFree is
   only needed for guarding against exceptions and implementing break and
-  continue control flow statements.
+  return control flow statements inside iterator loops.
 
 
 12. Include, eval, and define instructions

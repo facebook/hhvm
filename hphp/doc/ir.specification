@@ -1011,6 +1011,11 @@ D:Bool = IterNextK S0:StkP S1:ConstInt S2:ConstInt S3:ConstInt
   the iterator's next value (and key) into the local variable S3 (and
   S4, respectively).
 
+IterFree S0:StkP S1:ConstInt
+
+  Free the iterator variable whose index is given by S1 in the stack
+  frame pointed to by S0.
+
 19. Vector instruction support
 
 D:PtrToCell = DefMIStateBase

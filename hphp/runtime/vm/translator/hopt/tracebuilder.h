@@ -230,6 +230,7 @@ public:
                        uint32 keyLocalId);
   SSATmp* genIterNext(uint32 iterId, uint32 valLocalId);
   SSATmp* genIterNextK(uint32 iterId, uint32 valLocalId, uint32 keyLocalId);
+  SSATmp* genIterFree(uint32 iterId);
 
   SSATmp* genInterpOne(uint32 pcOff, uint32 stackAdjustment,
                        Type resultType, Trace* target);

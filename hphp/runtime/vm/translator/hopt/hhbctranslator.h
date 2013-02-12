@@ -332,6 +332,7 @@ struct HhbcTranslator {
                      uint32 valLocalId,
                      uint32 keyLocalId);
 
+  void emitIterFree(uint32 iterId);
   void emitVerifyParamType(uint32 paramId);
 
   // continuations

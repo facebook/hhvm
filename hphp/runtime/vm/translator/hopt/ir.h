@@ -338,6 +338,7 @@ O(IterInitK,                   D(Bool), S(Arr,Obj)                            \
 O(IterNext,                    D(Bool), S(StkPtr) C(Int) C(Int),E|N|Mem|Refs) \
 O(IterNextK,                   D(Bool), S(StkPtr)                             \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
+O(IterFree,                         ND, S(StkPtr) C(Int),       E|N|Mem|Refs) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(PropX,                   D(PtrToGen), C(TCA)                                \
                                           C(Cls)                              \

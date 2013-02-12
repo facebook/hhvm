@@ -1114,6 +1114,10 @@ SSATmp* TraceBuilder::genIterInitK(SSATmp* src,
              genDefConst<int64>(keyLocalId));
 }
 
+SSATmp* TraceBuilder::genIterFree(uint32 iterId) {
+  return gen(IterFree, m_fpValue, genDefConst<int64>(iterId));
+}
+
 void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   Opcode opc = inst->getOpcode();
   // Update tracked state of local values/types, stack/frame pointer, CSE, etc.

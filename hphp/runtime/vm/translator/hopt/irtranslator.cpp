@@ -1358,7 +1358,7 @@ TranslatorX64::irTranslateVerifyParamType(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateInstanceOfD(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
+                                      const NormalizedInstruction& i) {
   HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
 }
 
@@ -1383,7 +1383,7 @@ TranslatorX64::irTranslateIterInitK(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateIterNext(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+                                   const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterNext,
             i.imm[0].u_IVA,
@@ -1393,13 +1393,20 @@ TranslatorX64::irTranslateIterNext(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateIterNextK(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+                                    const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterNextK,
             i.imm[0].u_IVA,
             i.offset() + i.imm[1].u_BA,
             i.imm[2].u_IVA,
             i.imm[3].u_IVA);
+}
+
+void
+TranslatorX64::irTranslateIterFree(const Tracelet& t,
+                                   const NormalizedInstruction& i) {
+
+  HHIR_EMIT(IterFree, i.imm[0].u_IVA);
 }
 
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
@@ -1492,6 +1499,9 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
       break;
     case OpBindG:
       irTranslateBindG(t, i);
+      break;
+    case OpIterFree:
+      irTranslateIterFree(t, i);
       break;
     default:
       // GO: if you hit this, check opNames[op] and add support for it

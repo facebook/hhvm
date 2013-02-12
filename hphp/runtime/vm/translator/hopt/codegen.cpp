@@ -4580,6 +4580,17 @@ void CodeGenerator::cgIterInit(IRInstruction* inst) {
   cgIterInitCommon(inst, false);
 }
 
+void iterFreeHelper(Iter* iter) {
+  iter->free();
+}
+
+void CodeGenerator::cgIterFree(IRInstruction* inst) {
+  PhysReg fpReg = inst->getSrc(0)->getReg();
+  int64  offset = getIterOffset(inst->getSrc(1));
+  cgCallHelper(m_as, (TCA)iterFreeHelper, InvalidReg, kSyncPoint,
+               ArgGroup().addr(fpReg, offset));
+}
+
 void CodeGenerator::cgIterInitK(IRInstruction* inst) {
   cgIterInitCommon(inst, true);
 }

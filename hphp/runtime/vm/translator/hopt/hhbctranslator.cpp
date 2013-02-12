@@ -589,35 +589,39 @@ SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
 }
 
 void HhbcTranslator::emitIterInit(uint32 iterId,
-                                    int offset,
-                                    uint32 valLocalId) {
+                                  int offset,
+                                  uint32 valLocalId) {
   emitIterInitCommon(offset, [=] (SSATmp* src) {
     return m_tb->genIterInit(src, iterId, valLocalId);
   });
 }
 
 void HhbcTranslator::emitIterInitK(uint32 iterId,
-                                     int offset,
-                                     uint32 valLocalId,
-                                     uint32 keyLocalId) {
+                                   int offset,
+                                   uint32 valLocalId,
+                                   uint32 keyLocalId) {
   emitIterInitCommon(offset, [=] (SSATmp* src) {
     return m_tb->genIterInitK(src, iterId, valLocalId, keyLocalId);
   });
 }
 
 void HhbcTranslator::emitIterNext(uint32 iterId,
-                                    int offset,
-                                    uint32 valLocalId) {
+                                  int offset,
+                                  uint32 valLocalId) {
   SSATmp* res = m_tb->genIterNext(iterId, valLocalId);
   emitJmpCondHelper(offset, false, res);
 }
 
 void HhbcTranslator::emitIterNextK(uint32 iterId,
-                                     int offset,
-                                     uint32 valLocalId,
-                                     uint32 keyLocalId) {
+                                   int offset,
+                                   uint32 valLocalId,
+                                   uint32 keyLocalId) {
   SSATmp* res = m_tb->genIterNextK(iterId, valLocalId, keyLocalId);
   emitJmpCondHelper(offset, false, res);
+}
+
+void HhbcTranslator::emitIterFree(uint32 iterId) {
+  m_tb->genIterFree(iterId);
 }
 
 void HhbcTranslator::emitCreateCont(bool getArgs,

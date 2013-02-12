@@ -29,7 +29,7 @@ static void throwIntOOB(int64 key, bool isVector = false) {
   static const size_t reserveSize = 50;
   String msg(reserveSize, ReserveString);
   char* buf = msg.mutableSlice().ptr;
-  int sz = sprintf(buf, "Integer key %"PRId64" is %s", key,
+  int sz = sprintf(buf, "Integer key %" PRId64 " is %s", key,
                    isVector ? "out of bounds" : "not defined");
   assert(sz <= reserveSize);
   msg.setSize(sz);

@@ -1983,7 +1983,15 @@ TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
   TCA aStart DEBUG_ONLY = a.code.frontier;
   if (!deltaFits((intptr_t)func, sz::dword)) {
     a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
-    a.    mov_imm64_reg(uint64_t(func), rdx);
+    /*
+      Although func doesnt fit in a signed 32-bit immediate, it may still
+      fit in an unsigned one. Rather than deal with yet another case
+      (which only happens when we disable jemalloc) just force it to
+      be an 8-byte immediate, and patch it up afterwards.
+    */
+    a.    mov_imm64_reg(0xdeadbeeffeedface, rdx);
+    assert(((uint64_t*)a.code.frontier)[-1] == 0xdeadbeeffeedface);
+    ((uint64_t*)a.code.frontier)[-1] = uintptr_t(func);
     a.    cmp_reg64_reg64(rax, rdx);
   } else {
     a.    cmp_imm32_disp_reg32(uint64_t(func), AROFF(m_func), rStashedAR);

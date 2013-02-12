@@ -149,7 +149,10 @@ void c_ContinuationWaitHandle::run() {
 
     do {
       if (m_tailCall) {
-        if (m_child->isSucceeded()) {
+        if (m_child.isNull()) {
+          markAsSucceeded(init_null_variant.asTypedValue());
+          return;
+        } else if (m_child->isSucceeded()) {
           markAsSucceeded(m_child->getResult());
           return;
         } else {

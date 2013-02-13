@@ -30,11 +30,14 @@ TRACE_SET_MOD(hhir);
 using Transl::MInstrState;
 using Transl::mInstrHasUnknownOffsets;
 
-VectorEffects::VectorEffects(Opcode op, Type origBase, Type origVal)
-    : baseType(origBase)
-    , valType(origVal)
-    , newBaseVal(false)
-{
+void VectorEffects::init(Opcode op, const Type origBase,
+                         const Type key, const Type origVal) {
+  // In reality the base can be a pointer but we can ignore "pointerness" in
+  // here for the type logic
+  baseType = origBase.derefIfPtr();
+  valType = origVal;
+  baseTypeChanged = baseValChanged = valTypeChanged = false;
+
   // Canonicalize the op to SetProp or SetElem
   switch (op) {
     case SetProp:
@@ -45,33 +48,46 @@ VectorEffects::VectorEffects(Opcode op, Type origBase, Type origVal)
       not_implemented();
   }
   assert(op == SetProp || op == SetElem);
+  assert(key.isStaticallyKnown());
+  assert(origVal.isStaticallyKnown());
 
-  // Only SetProp supports a non pointer base
-  assert(baseType.isPtr() || (op == SetProp && baseType.subtypeOf(Type::Obj)));
-  // SetProp doesn't support PtrToObj bases
-  assert(IMPLIES(op == SetProp, !baseType.subtypeOf(Type::PtrToObj)));
-
-  const bool baseNull = baseType.isNull();
-  const bool baseArr = baseType.subtypeOf(Type::PtrToArr | Type::Arr);
-  const bool baseObj = baseType.subtypeOf(Type::PtrToObj | Type::Obj);
-
-  if (baseNull) {
-    // Promotion to stdClass or array
-    newBaseVal = true;
-    baseType = op == SetProp ? Type::Obj : Type::Arr;
+  if ((baseType & Type::Null) != Type::Bottom) {
+    // stdClass or array promotion might happen
+    auto newBase = op == SetElem ? Type::Arr : Type::Obj;
+    // if the base is known to be null, promotion will happen
+    baseType = baseType.isNull() ? newBase : (baseType | newBase);
+    baseValChanged = true;
   }
-  if (baseArr) {
-    // Possible COW
-    newBaseVal = true;
+  if (op == SetElem && (baseType & Type::Arr) != Type::Bottom) {
+    // possible COW when modifying an array
+    baseValChanged = true;
   }
-  if ((op == SetElem && !baseArr && !baseObj) ||
+
+  const bool baseArr = baseType.subtypeOf(Type::Arr);
+  const bool baseObj = baseType.subtypeOf(Type::Obj);
+  const bool maybeBadArrKey = (key & (Type::Arr | Type::Obj)) != Type::Bottom;
+  if ((op == SetElem && (!(baseArr || baseObj) || maybeBadArrKey)) ||
       (op == SetProp && !baseObj)) {
-    // The set operation will fail, issue a warning, and evaluate to null
-    valType = Type::InitNull;
+    // The set operation might fail, issue a warning, and evaluate to null. Any
+    // other invalid combinations of base/key will throw an exception/fatal.
+
+    const bool definitelyFail =
+      // SetElem and the base is known to not be an array or object
+      (op == SetElem && (baseType & (Type::Arr | Type::Obj)) == Type::Bottom) ||
+      // SetElem and the array key is known to be bad
+      (op == SetElem && (key.subtypeOf(Type::Arr | Type::Obj))) ||
+      // SetProp and the base is known to not be an object
+      (op == SetProp && (baseType & Type::Obj) == Type::Bottom);
+
+    valType = definitelyFail ? Type::InitNull : (valType | Type::InitNull);
   }
 
-  newBaseType = baseType != origBase;
-  newValType = valType != origVal;
+  // The final baseType should be a pointer iff the input was
+  baseType = origBase.isPtr() ? baseType.ptr() : baseType;
+
+  baseTypeChanged = baseTypeChanged || baseType != origBase;
+  baseValChanged = baseValChanged || baseTypeChanged;
+  valTypeChanged = valTypeChanged || valType != origVal;
 }
 
 // vectorBaseIdx returns the src index for inst's base operand.
@@ -79,6 +95,15 @@ int vectorBaseIdx(const IRInstruction* inst) {
   switch (inst->getOpcode()) {
     case SetProp: return 2;
     case SetElem: return 1;
+    default:      not_reached();
+  }
+}
+
+// vectorKeyIdx returns the src index for inst's key operand.
+int vectorKeyIdx(const IRInstruction* inst) {
+  switch (inst->getOpcode()) {
+    case SetProp: return 3;
+    case SetElem: return 2;
     default:      not_reached();
   }
 }
@@ -598,8 +623,8 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   SSATmp* result =
     m_tb.gen(SetProp, m_tb.genDefConst((TCA)opFunc), CTX(),
              objOrPtr(m_base), noLitInt(key), value);
-  VectorEffects ve(SetProp, m_base->getType(), value->getType());
-  m_result = ve.newValType ? result : value;
+  VectorEffects ve(result->getInstruction());
+  m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
 
@@ -712,8 +737,8 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   m_ht.spillStack();
   SSATmp* result = m_tb.gen(SetElem, m_tb.genDefConst((TCA)opFunc),
                             ptr(m_base), key, value);
-  VectorEffects ve(SetElem, m_base->getType(), value->getType());
-  m_result = ve.newValType ? result : value;
+  VectorEffects ve(result->getInstruction());
+  m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
 

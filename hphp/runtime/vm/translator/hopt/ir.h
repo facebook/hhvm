@@ -1365,18 +1365,6 @@ Type outputType(const IRInstruction*);
  */
 void assertOperandTypes(const IRInstruction*);
 
-struct VectorEffects {
-  VectorEffects(Opcode op, Type base, Type val);
-  Type baseType;
-  Type valType;
-  bool newBaseType;
-  bool newBaseVal;
-  bool newValType;
-};
-
-int vectorBaseIdx(const IRInstruction* inst);
-int vectorValIdx(const IRInstruction* inst);
-
 struct SpillInfo {
   enum Type { MMX, Memory };
 
@@ -1563,6 +1551,30 @@ private:
     PhysReg m_regs[kMaxNumRegs];
     SpillInfo m_spillInfo[kMaxNumRegs];
   };
+};
+
+int vectorBaseIdx(const IRInstruction* inst);
+int vectorKeyIdx(const IRInstruction* inst);
+int vectorValIdx(const IRInstruction* inst);
+
+struct VectorEffects {
+  VectorEffects(const IRInstruction* inst) {
+    init(inst->getOpcode(),
+         inst->getSrc(vectorBaseIdx(inst))->getType(),
+         inst->getSrc(vectorKeyIdx(inst))->getType(),
+         inst->getSrc(vectorValIdx(inst))->getType());
+  }
+  VectorEffects(Opcode op, Type base, Type key, Type val) {
+    init(op, base, key, val);
+  }
+  Type baseType;
+  Type valType;
+  bool baseTypeChanged;
+  bool baseValChanged;
+  bool valTypeChanged;
+
+private:
+  void init(Opcode op, const Type base, const Type key, const Type val);
 };
 
 class Trace : boost::noncopyable {

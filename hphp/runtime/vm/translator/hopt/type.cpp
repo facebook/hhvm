@@ -31,12 +31,7 @@ namespace {
 
 Type vectorReturn(const IRInstruction* inst) {
   assert(inst->getOpcode() == SetProp || inst->getOpcode() == SetElem);
-
-  int baseIdx = vectorBaseIdx(inst);
-  int valIdx = vectorValIdx(inst);
-  return VectorEffects(inst->getOpcode(),
-                       inst->getSrc(baseIdx)->getType(),
-                       inst->getSrc(valIdx)->getType()).valType;
+  return VectorEffects(inst).valType;
 }
 
 }

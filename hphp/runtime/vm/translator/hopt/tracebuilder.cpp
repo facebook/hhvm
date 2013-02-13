@@ -1212,15 +1212,16 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
       // If the base for this instruction is a local address, the
       // helper call might have side effects on the local's value
-      IRInstruction* locInstr =
-        inst->getSrc(vectorBaseIdx(inst))->getInstruction();
+      SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
+      IRInstruction* locInstr =base->getInstruction();
       if (locInstr->getOpcode() == LdLocAddr) {
-        Type baseType = locInstr->getDst()->getType();
+        UNUSED Type baseType = locInstr->getDst()->getType();
+        assert(baseType.equals(base->getType()));
         assert(baseType.isStaticallyKnown());
         int loc = locInstr->getExtra<LdLocAddr>()->locId;
 
-        VectorEffects ve(opc, baseType, Type::None);
-        if (ve.newBaseType || ve.newBaseVal) {
+        VectorEffects ve(inst);
+        if (ve.baseTypeChanged || ve.baseValChanged) {
           killLocalValue(loc);
           setLocalType(loc, ve.baseType.derefIfPtr());
         }

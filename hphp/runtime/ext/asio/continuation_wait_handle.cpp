@@ -36,7 +36,7 @@ namespace {
 c_ContinuationWaitHandle::c_ContinuationWaitHandle(
     const ObjectStaticCallbacks *cb)
     : c_BlockableWaitHandle(cb), m_continuation(), m_child(), m_privData(),
-      m_prio(0), m_depth(0), m_tailCall(false) {
+      m_depth(0), m_tailCall(false) {
 }
 
 c_ContinuationWaitHandle::~c_ContinuationWaitHandle() {
@@ -127,14 +127,19 @@ void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint32_t prio
   m_continuation = continuation;
   m_child = nullptr;
   m_privData = nullptr;
-  m_prio = prio;
   m_depth = depth;
   m_tailCall = false;
   continuation->m_waitHandle = this;
 
-  setState(STATE_SCHEDULED);
-  if (ctx) {
-    ctx->schedule(this, prio);
+  if (prio == 0) {
+    setState(STATE_SCHEDULED);
+    if (ctx) {
+      ctx->schedule(this);
+    }
+  } else {
+    // TODO: deprecate directly passed non-zero priorities
+    m_child = c_RescheduleWaitHandle::t_create(AsioContext::QUEUE_DEFAULT, prio);
+    blockOn(static_cast<c_WaitableWaitHandle*>(m_child.get()));
   }
 }
 
@@ -166,7 +171,12 @@ void c_ContinuationWaitHandle::run() {
         m_continuation->call_next();
       } else if (m_child->isSucceeded()) {
         // child succeeded, pass the result to the continuation
-        m_continuation->call_send(m_child->getResult());
+        if (IS_NULL_TYPE(m_child->getResult()->m_type)) {
+          // FIXME: may happen due to RescheduleWaitHandle
+          m_continuation->call_next();
+        } else {
+          m_continuation->call_send(m_child->getResult());
+        }
       } else if (m_child->isFailed()) {
         // child failed, raise the exception inside continuation
         m_continuation->call_raise(m_child->getException());
@@ -222,9 +232,8 @@ c_WaitableWaitHandle* c_ContinuationWaitHandle::getBlockedOn() {
 void c_ContinuationWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (getContext()) {
-    getContext()->schedule(this, 0);
+    getContext()->schedule(this);
   }
-  m_prio = 0;
 }
 
 void c_ContinuationWaitHandle::failBlock(CObjRef exception) {
@@ -290,7 +299,7 @@ void c_ContinuationWaitHandle::enterContext(AsioContext* ctx) {
     case STATE_SCHEDULED:
       // reschedule so that we get run
       setContext(ctx);
-      ctx->schedule(this, m_prio);
+      ctx->schedule(this);
       break;
 
     case STATE_RUNNING: {
@@ -332,7 +341,7 @@ void c_ContinuationWaitHandle::exitContext(AsioContext* ctx) {
       AsioContext* pctx = ctx->getParent();
       setContext(pctx);
       if (pctx) {
-        pctx->schedule(this, m_prio);
+        pctx->schedule(this);
       }
 
       // recursively move all wait handles blocked by us

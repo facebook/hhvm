@@ -2257,6 +2257,9 @@ TypedValue* tg_18GenArrayWaitHandle_create(VM::ActRec *ar);
 VM::Instance* new_SetResultToRefWaitHandle_Instance(VM::Class*);
 TypedValue* tg_24SetResultToRefWaitHandle___construct(VM::ActRec *ar);
 TypedValue* tg_24SetResultToRefWaitHandle_create(VM::ActRec *ar);
+VM::Instance* new_RescheduleWaitHandle_Instance(VM::Class*);
+TypedValue* tg_20RescheduleWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_20RescheduleWaitHandle_create(VM::ActRec *ar);
 VM::Instance* new_DummyClosure_Instance(VM::Class*);
 TypedValue* tg_12DummyClosure___construct(VM::ActRec *ar);
 VM::Instance* new_Vector_Instance(VM::Class*);
@@ -5249,6 +5252,12 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SetResultToRefWaitHandle[] = {
   { "create", tg_24SetResultToRefWaitHandle_create }
 };
 
+static const long long hhbc_ext_method_count_RescheduleWaitHandle = 2;
+static const HhbcExtMethodInfo hhbc_ext_methods_RescheduleWaitHandle[] = {
+  { "__construct", tg_20RescheduleWaitHandle___construct },
+  { "create", tg_20RescheduleWaitHandle_create }
+};
+
 static const long long hhbc_ext_method_count_DummyClosure = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
@@ -6155,7 +6164,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "outputMemory", tg_9XMLWriter_outputMemory }
 };
 
-const long long hhbc_ext_class_count = 69;
+const long long hhbc_ext_class_count = 70;
 const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "WaitHandle", new_WaitHandle_Instance, sizeof(c_WaitHandle), hhbc_ext_method_count_WaitHandle, hhbc_ext_methods_WaitHandle },
   { "StaticWaitHandle", new_StaticWaitHandle_Instance, sizeof(c_StaticWaitHandle), hhbc_ext_method_count_StaticWaitHandle, hhbc_ext_methods_StaticWaitHandle },
@@ -6166,6 +6175,7 @@ const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "ContinuationWaitHandle", new_ContinuationWaitHandle_Instance, sizeof(c_ContinuationWaitHandle), hhbc_ext_method_count_ContinuationWaitHandle, hhbc_ext_methods_ContinuationWaitHandle },
   { "GenArrayWaitHandle", new_GenArrayWaitHandle_Instance, sizeof(c_GenArrayWaitHandle), hhbc_ext_method_count_GenArrayWaitHandle, hhbc_ext_methods_GenArrayWaitHandle },
   { "SetResultToRefWaitHandle", new_SetResultToRefWaitHandle_Instance, sizeof(c_SetResultToRefWaitHandle), hhbc_ext_method_count_SetResultToRefWaitHandle, hhbc_ext_methods_SetResultToRefWaitHandle },
+  { "RescheduleWaitHandle", new_RescheduleWaitHandle_Instance, sizeof(c_RescheduleWaitHandle), hhbc_ext_method_count_RescheduleWaitHandle, hhbc_ext_methods_RescheduleWaitHandle },
   { "DummyClosure", new_DummyClosure_Instance, sizeof(c_DummyClosure), hhbc_ext_method_count_DummyClosure, hhbc_ext_methods_DummyClosure },
   { "Vector", new_Vector_Instance, sizeof(c_Vector), hhbc_ext_method_count_Vector, hhbc_ext_methods_Vector },
   { "VectorIterator", new_VectorIterator_Instance, sizeof(c_VectorIterator), hhbc_ext_method_count_VectorIterator, hhbc_ext_methods_VectorIterator },

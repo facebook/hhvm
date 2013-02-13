@@ -576,3 +576,59 @@ DefineFunction(
   ));
 
 EndClass();
+
+BeginClass(
+  array(
+    'name'   => "RescheduleWaitHandle",
+    'parent' => "WaitableWaitHandle",
+    'desc'   => "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
+    'flags'  => HasDocComment,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__construct",
+    'flags'  => HasDocComment | IsPrivate,
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "create",
+    'desc'   => "Create a wait handle that succeeds once desired scheduling priority is eligible for execution",
+    'flags'  => HasDocComment | IsStatic,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "A RescheduleWaitHandle that succeeds once desired scheduling priority is eligible for execution",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "queue",
+        'type'   => Int32,
+        'desc'   => "A scheduling queue to use (defined by QUEUE_* constants)",
+      ),
+      array(
+        'name'   => "priority",
+        'type'   => Int32,
+        'desc'   => "A non-negative number indicating scheduling priority (0 runs first)",
+      ),
+    ),
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "QUEUE_DEFAULT",
+    'type'   => Int32,
+    'desc'   => "A queue that is run whenever there is nothing else to do",
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "QUEUE_NO_PENDING_IO",
+    'type'   => Int32,
+    'desc'   => "A queue that is run only once there is no pending I/O operation",
+  ));
+
+EndClass();

@@ -28,6 +28,7 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
 
 class AsioContext : public Sweepable {
   public:
@@ -50,22 +51,33 @@ class AsioContext : public Sweepable {
         LIKELY(this == ctx) || (ctx && m_contextDepth < ctx->m_contextDepth);
     }
 
-    void schedule(c_ContinuationWaitHandle* wait_handle, uint32_t prio);
+    void schedule(c_ContinuationWaitHandle* wait_handle);
+    void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
     void runUntil(c_WaitableWaitHandle* wait_handle);
 
+    static const uint32_t QUEUE_DEFAULT       = 0;
+    static const uint32_t QUEUE_NO_PENDING_IO = 1;
+
   private:
+    typedef std::map<uint32_t, std::queue<c_RescheduleWaitHandle*>> reschedule_priority_queue_t;
+
     AsioContext(AsioContext* parent);
+
+    bool runSingle(reschedule_priority_queue_t& queue);
 
     uint16_t m_contextDepth;
     uint16_t m_waitHandleDepth;
     AsioContext* m_parent;
     c_ContinuationWaitHandle* m_current;
 
-    // queue for Continuations scheduled with default priority (0)
-    std::queue<c_ContinuationWaitHandle*> m_default_queue;
+    // queue of ContinuationWaitHandles ready for immediate execution
+    std::queue<c_ContinuationWaitHandle*> m_queue_ready;
 
-    // queue for Continuations scheduled with other priority
-    std::map<uint32_t, std::queue<c_ContinuationWaitHandle*>> m_priority_queue;
+    // queue of RescheduleWaitHandles scheduled in default mode
+    reschedule_priority_queue_t m_priority_queue_default;
+
+    // queue of RescheduleWaitHandles scheduled to be run once there is no pending I/O
+    reschedule_priority_queue_t m_priority_queue_no_pending_io;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

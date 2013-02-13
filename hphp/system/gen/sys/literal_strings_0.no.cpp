@@ -1759,6 +1759,10 @@ StaticStringProxy s_sys_ssp32b9eeff;
 #ifndef s_sys_ss32b9eeff
 #define s_sys_ss32b9eeff (*(StaticString *)(&s_sys_ssp32b9eeff))
 #endif
+StaticStringProxy s_sys_ssp32c7309b;
+#ifndef s_sys_ss32c7309b
+#define s_sys_ss32c7309b (*(StaticString *)(&s_sys_ssp32c7309b))
+#endif
 StaticStringProxy s_sys_ssp32e71488;
 #ifndef s_sys_ss32e71488
 #define s_sys_ss32e71488 (*(StaticString *)(&s_sys_ssp32e71488))
@@ -3174,6 +3178,10 @@ StaticStringProxy s_sys_ssp57276d28;
 StaticStringProxy s_sys_ssp57398ffa;
 #ifndef s_sys_ss57398ffa
 #define s_sys_ss57398ffa (*(StaticString *)(&s_sys_ssp57398ffa))
+#endif
+StaticStringProxy s_sys_ssp575096ee;
+#ifndef s_sys_ss575096ee
+#define s_sys_ss575096ee (*(StaticString *)(&s_sys_ssp575096ee))
 #endif
 StaticStringProxy s_sys_ssp57567407;
 #ifndef s_sys_ss57567407
@@ -4892,6 +4900,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp32a02f99, (const char *)"getStackTrace",
   (const char *)&s_sys_ssp32b8bd9b, (const char *)"FETCH_PROPS_LATE",
   (const char *)&s_sys_ssp32b9eeff, (const char *)"setstrength",
+  (const char *)&s_sys_ssp32c7309b, (const char *)"QUEUE_DEFAULT",
   (const char *)&s_sys_ssp32e71488, (const char *)"asXML",
   (const char *)&s_sys_ssp332aac3f, (const char *)"UTF16_BigEndian",
   (const char *)&s_sys_ssp3340d870, (const char *)"DOC",
@@ -5230,6 +5239,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp56e2fa1d, (const char *)"getOrigFuncName",
   (const char *)&s_sys_ssp57276d28, (const char *)"error",
   (const char *)&s_sys_ssp57398ffa, (const char *)"num_args",
+  (const char *)&s_sys_ssp575096ee, (const char *)"QUEUE_NO_PENDING_IO",
   (const char *)&s_sys_ssp57567407, (const char *)"isPrivate",
   (const char *)&s_sys_ssp577a2703, (const char *)"deleteByKey",
   (const char *)&s_sys_ssp57c5fafb, (const char *)"isTrait",
@@ -5567,7 +5577,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp6fd67d3d, (const char *)"\000*\000file", (const char *)7L,
   (const char *)&s_sys_ssp7c4bb61c, (const char *)"\000SplObjectStorage\000storage", (const char *)25L,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1064, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 1066, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0514b8b1, (const char *)&s_sys_ss0514b8b1,

@@ -22,6 +22,18 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+  template<class TWaitHandle>
+  void exitContextQueue(AsioContext* ctx, std::queue<TWaitHandle*> &queue) {
+    while (!queue.empty()) {
+      auto wait_handle = queue.front();
+      queue.pop();
+      wait_handle->exitContext(ctx);
+      decRefObj(wait_handle);
+    }
+  }
+}
+
 AsioContext::AsioContext(AsioContext* parent)
     : m_contextDepth(parent ? parent->m_contextDepth + 1 : 0)
     , m_waitHandleDepth(parent ? parent->getCurrentWaitHandleDepth() : 0)
@@ -35,24 +47,14 @@ AsioContext* AsioContext::Enter(AsioContext* parent) {
 AsioContext* AsioContext::exit() {
   AsioContext* parent = m_parent;
 
-  c_ContinuationWaitHandle* wait_handle;
+  exitContextQueue(this, m_queue_ready);
 
-  while (!m_default_queue.empty()) {
-    wait_handle = m_default_queue.front();
-    wait_handle->exitContext(this);
-    m_default_queue.pop();
-    decRefObj(wait_handle);
+  for (auto it : m_priority_queue_default) {
+    exitContextQueue(this, it.second);
   }
 
-  for (auto it = m_priority_queue.begin(); it != m_priority_queue.end(); ++it) {
-    auto& queue = it->second;
-
-    while (!queue.empty()) {
-      wait_handle = queue.front();
-      wait_handle->exitContext(this);
-      queue.pop();
-      decRefObj(wait_handle);
-    }
+  for (auto it : m_priority_queue_no_pending_io) {
+    exitContextQueue(this, it.second);
   }
 
   // release memory explicitly and make sure we are not sweeped
@@ -62,15 +64,22 @@ AsioContext* AsioContext::exit() {
   return parent;
 }
 
-void AsioContext::schedule(c_ContinuationWaitHandle* wait_handle, uint32_t prio) {
-  if (prio == 0) {
-    m_default_queue.push(wait_handle);
-    wait_handle->incRefCount();
-  } else {
-    // creates a new per-prio queue if necessary
-    m_priority_queue[prio].push(wait_handle);
-    wait_handle->incRefCount();
-  }
+void AsioContext::schedule(c_ContinuationWaitHandle* wait_handle) {
+  m_queue_ready.push(wait_handle);
+  wait_handle->incRefCount();
+}
+
+void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority) {
+  assert(queue == QUEUE_DEFAULT || queue == QUEUE_NO_PENDING_IO);
+
+  reschedule_priority_queue_t& dst_queue =
+    (queue == QUEUE_DEFAULT)
+      ? m_priority_queue_default
+      : m_priority_queue_no_pending_io;
+
+  // creates a new per-prio queue if necessary
+  dst_queue[priority].push(wait_handle);
+  wait_handle->incRefCount();
 }
 
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
@@ -78,11 +87,11 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(wait_handle);
   assert(wait_handle->getContext() == this);
 
-  while (true) {
-    // run default queue
-    while (!m_default_queue.empty()) {
-      auto current = m_default_queue.front();
-      m_default_queue.pop();
+  while (!wait_handle->isFinished()) {
+    // run queue of ready continuations
+    while (!m_queue_ready.empty()) {
+      auto current = m_queue_ready.front();
+      m_queue_ready.pop();
       m_current = current;
       m_current->run();
       m_current = nullptr;
@@ -93,25 +102,13 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       }
     }
 
-    // run priority queue once (it can schedule new default queue events)
-    if (!m_priority_queue.empty()) {
-      auto top_queue_iter = m_priority_queue.begin();
-      auto& top_queue = top_queue_iter->second;
-      auto current = top_queue.front();
-      top_queue.pop();
-      m_current = current;
-      m_current->run();
-      m_current = nullptr;
-      decRefObj(current);
+    // run default priority queue once
+    if (runSingle(m_priority_queue_default)) {
+      continue;
+    }
 
-      if (top_queue.empty()) {
-        m_priority_queue.erase(top_queue_iter);
-      }
-
-      if (wait_handle->isFinished()) {
-        return;
-      }
-
+    // run no-pending-io priority queue once
+    if (runSingle(m_priority_queue_no_pending_io)) {
       continue;
     }
 
@@ -129,6 +126,29 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     }
     blockable_wh->killCycle();
   }
+}
+
+/**
+ * Try to run single RescheduleWaitHandle from the queue.
+ */
+bool AsioContext::runSingle(reschedule_priority_queue_t& queue) {
+  if (queue.empty()) {
+    // nothing to run
+    return false;
+  }
+
+  auto top_queue_iter = queue.begin();
+  auto& top_queue = top_queue_iter->second;
+  auto reschedule_wait_handle = top_queue.front();
+  top_queue.pop();
+  reschedule_wait_handle->run();
+  decRefObj(reschedule_wait_handle);
+
+  if (top_queue.empty()) {
+    queue.erase(top_queue_iter);
+  }
+
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

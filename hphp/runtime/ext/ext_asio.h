@@ -45,6 +45,7 @@ void f_asio_set_on_failed_callback(CObjRef on_failed_cb);
  *       ContinuationWaitHandle   - Continuation-powered asynchronous execution
  *       GenArrayWaitHandle       - wait handle representing an array of WHs
  *       SetResultToRefWaitHandle - wait handle that sets result to reference
+ *     RescheduleWaitHandle       - wait handle that reschedules execution
  *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
@@ -361,7 +362,6 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   p_Continuation m_continuation;
   p_WaitHandle m_child;
   Object m_privData;
-  uint32_t m_prio;
   uint16_t m_depth;
   bool m_tailCall;
 
@@ -456,6 +456,53 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
 
   p_WaitableWaitHandle m_child;
   RefData* m_ref;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class RescheduleWaitHandle
+
+extern const int q_RescheduleWaitHandle$$QUEUE_DEFAULT;
+extern const int q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
+
+/**
+ * A wait handle that is enqueued into a given priority queue and once desired
+ * execution priority is eligible for execution, it succeeds with a null result.
+ *
+ * RescheduleWaitHandle is guaranteed to never finish immediately.
+ */
+FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
+class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
+ public:
+  DECLARE_CLASS(RescheduleWaitHandle, RescheduleWaitHandle, WaitableWaitHandle)
+
+  // need to implement
+  public: c_RescheduleWaitHandle(const ObjectStaticCallbacks *cb = &cw_RescheduleWaitHandle);
+  public: ~c_RescheduleWaitHandle();
+  public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: static Object ti_create(const char* cls , int queue, int priority);
+  public: static Object t_create(int queue, int priority) {
+    return ti_create("reschedulewaithandle", queue, priority);
+  }
+  DECLARE_METHOD_INVOKE_HELPERS(create);
+
+  // implemented by HPHP
+  public: c_RescheduleWaitHandle *create();
+  public: static const ClassPropTable os_prop_table;
+
+ public:
+  void run();
+  String getName();
+  void enterContext(AsioContext* ctx);
+  void exitContext(AsioContext* ctx);
+
+ private:
+  void initialize(uint32_t queue, uint32_t priority);
+
+  uint32_t m_queue;
+  uint32_t m_priority;
+
+  static const int8_t STATE_SCHEDULED = 3;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

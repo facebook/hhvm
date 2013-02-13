@@ -113,6 +113,7 @@
 #include "../ext/asio/static_exception_wait_handle.ext_hhvm.h"
 #include "../ext/asio/wait_handle.ext_hhvm.h"
 #include "../ext/asio/gen_array_wait_handle.ext_hhvm.h"
+#include "../ext/asio/reschedule_wait_handle.ext_hhvm.h"
 #include "../ext/ext_error.ext_hhvm.h"
 #include "../ext/ext_pdo.ext_hhvm.h"
 #include "../ext/ext_session.ext_hhvm.h"

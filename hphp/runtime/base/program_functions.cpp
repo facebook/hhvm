@@ -78,6 +78,8 @@ extern char **environ;
 
 namespace HPHP {
 
+extern InitFiniNode *extra_process_init, *extra_process_exit;
+
 namespace VM { void initialize_repo(); }
 
 /*
@@ -1217,6 +1219,9 @@ void hphp_process_init() {
   XboxServer::Restart();
   Stream::RegisterCoreWrappers();
   Extension::InitModules();
+  for (InitFiniNode *in = extra_process_init; in; in = in->next) {
+    in->func();
+  }
   int64 save = RuntimeOption::SerializationSizeLimit;
   RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
   apc_load(RuntimeOption::ApcLoadThread);
@@ -1450,6 +1455,9 @@ void hphp_process_exit() {
   Eval::Debugger::Stop();
   Extension::ShutdownModules();
   LightProcess::Close();
+  for (InitFiniNode *in = extra_process_exit; in; in = in->next) {
+    in->func();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

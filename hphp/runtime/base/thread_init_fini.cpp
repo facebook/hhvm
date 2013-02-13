@@ -34,10 +34,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-InitFiniNode *extra_init, *extra_fini;
+InitFiniNode *extra_init, *extra_fini, *extra_process_init, *extra_process_exit;
 
-InitFiniNode::InitFiniNode(void(*f)(), bool init) {
-  InitFiniNode *&ifn = init ? extra_init : extra_fini;
+InitFiniNode::InitFiniNode(void(*f)(), When init) {
+  InitFiniNode *&ifn =
+    init == ThreadInit ? extra_init :
+    init == ThreadFini ? extra_fini :
+    init == ProcessInit ? extra_process_init : extra_process_exit;
+
   func = f;
   next = ifn;
   ifn = this;
@@ -67,6 +71,9 @@ void init_thread_locals(void *arg /* = NULL */) {
 }
 
 void finish_thread_locals(void *arg /* = NULL */) {
+  for (InitFiniNode *in = extra_fini; in; in = in->next) {
+    in->func();
+  }
   if (!g_context.isNull()) g_context.destroy();
   if (!g_persistentObjects.isNull()) g_persistentObjects.destroy();
 }

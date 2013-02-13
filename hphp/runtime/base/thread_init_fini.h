@@ -28,12 +28,17 @@ void finish_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
   NEVER_INLINE;
 
 struct InitFiniNode {
-  InitFiniNode(void(*f)(), bool init);
+  enum When {
+    ThreadInit,
+    ThreadFini,
+    ProcessInit,
+    ProcessExit
+  };
+  InitFiniNode(void(*f)(), When when);
   void (*func)();
   InitFiniNode *next;
 };
 
-extern InitFiniNode *extra_init, *extra_fini;
 ///////////////////////////////////////////////////////////////////////////////
 }
 

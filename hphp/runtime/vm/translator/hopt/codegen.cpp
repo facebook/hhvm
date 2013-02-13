@@ -965,7 +965,7 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
 
-  if (src1->isConst() && src1->getValInt() == 0) {
+  if (src1->isConst() && src1->getValInt() == 0 && !src2->isA(Type::Dbl)) {
     return cgNegateWork(dst, src2);
   }
 

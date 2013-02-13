@@ -1287,8 +1287,8 @@ struct IRInstruction {
    */
   bool       isTransient() const       { return m_iid == kTransient; }
 
-  void       setAsmAddr(void* addr)    { m_asmAddr = addr; }
-  void*      getAsmAddr() const        { return m_asmAddr; }
+  void       setAsmAddr(TCA addr)      { m_asmAddr = addr; }
+  TCA        getAsmAddr() const        { return m_asmAddr; }
   RegSet     getLiveOutRegs() const    { return m_liveOutRegs; }
   void       setLiveOutRegs(RegSet s)  { m_liveOutRegs = s; }
   Block*     getBlock() const          { return m_block; }
@@ -1345,10 +1345,10 @@ private:
   uint32            m_id;
   SSATmp**          m_srcs;
   RegSet            m_liveOutRegs;
-  SSATmp*           m_dst;  // if HasDest or NaryDest
-  void*             m_asmAddr;
-  Block*            m_taken; // for branches, guards, and jmp
-  Block*            m_block; // block that owns this instruction
+  SSATmp*           m_dst;     // if HasDest or NaryDest
+  TCA               m_asmAddr; // start of asm code for this instruction
+  Block*            m_taken;   // for branches, guards, and jmp
+  Block*            m_block;   // block that owns this instruction
   TCA               m_tca;
   IRExtraData*      m_extra;
 public:
@@ -1588,6 +1588,8 @@ private:
   void init(Opcode op, const Type base, const Type key, const Type val);
 };
 
+typedef folly::Range<TCA> TcaRange;
+
 /**
  * A Block refers to a basic block: single-entry, single-exit, list of
  * instructions.  The instruction list is an intrusive list, so each
@@ -1601,9 +1603,12 @@ private:
 struct Block : boost::noncopyable {
   typedef InstructionList::iterator iterator;
 
+  // Execution frequency hint; codegen will put Unlikely blocks in astubs.
+  enum Hint { Neither, Likely, Unlikely };
+
   Block(unsigned id, const Func* func, IRInstruction* label)
     : m_trace(nullptr), m_func(func), m_next(nullptr), m_id(id)
-    , m_preds(nullptr) {
+    , m_preds(nullptr), m_hint(Neither) {
     push_back(label);
   }
 
@@ -1616,6 +1621,13 @@ struct Block : boost::noncopyable {
   const Func* getFunc() const    { return m_func; }
   Trace*      getTrace() const   { return m_trace; }
   void        setTrace(Trace* t) { m_trace = t; }
+  void        setHint(Hint hint) { m_hint = hint; }
+  Hint        getHint() const    { return m_hint; }
+
+  TcaRange getAsmRange() const          { return m_asmRange; }
+  void     setAsmRange(TCA s, TCA e)    { m_asmRange = TcaRange(s, e); }
+  TcaRange getAstubsRange() const       { return m_astubsRange; }
+  void     setAstubsRange(TCA s, TCA e) { m_astubsRange = TcaRange(s, e); }
 
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
@@ -1714,6 +1726,9 @@ struct Block : boost::noncopyable {
   const unsigned m_id;      // factory-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
   EdgeData* m_preds;        // head of list of predecessor Jmps
+  Hint m_hint;              // execution frequency hint
+  TcaRange m_asmRange;      // main code for this block
+  TcaRange m_astubsRange;   // stub code for this block (if main != stubs).
 };
 typedef std::list<Block*> BlockList;
 
@@ -1731,9 +1746,6 @@ public:
   explicit Trace(Block* first, uint32 bcOff, bool isMain) {
     push_back(first);
     m_bcOff = bcOff;
-    m_lastAsmAddress = nullptr;
-    m_firstAsmAddress = nullptr;
-    m_firstAstubsAddress = nullptr;
     m_isMain = isMain;
   }
 
@@ -1753,11 +1765,6 @@ public:
   }
 
   uint32 getBcOff() { return m_bcOff; }
-  void setLastAsmAddress(uint8* addr) { m_lastAsmAddress = addr; }
-  void setFirstAsmAddress(uint8* addr) { m_firstAsmAddress = addr; }
-  void setFirstAstubsAddress(uint8* addr) { m_firstAstubsAddress = addr; }
-  uint8* getLastAsmAddress() { return m_lastAsmAddress; }
-  uint8* getFirstAsmAddress() { return m_firstAsmAddress; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
     return exit;
@@ -1768,8 +1775,7 @@ public:
   typedef std::list<Trace*>::iterator ExitIterator;
 
   ExitList& getExitTraces() { return m_exitTraces; }
-  void print(std::ostream& ostream, bool printAsm,
-             bool isExit = false) const;
+  void print(std::ostream& ostream, bool printAsm) const;
   void print() const;  // default to std::cout and printAsm == true
 
 private:
@@ -1778,9 +1784,6 @@ private:
   uint32 m_bcOff;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
   ExitList m_exitTraces;      // traces to which this trace exits
-  uint8* m_firstAsmAddress;
-  uint8* m_firstAstubsAddress;
-  uint8* m_lastAsmAddress;
   bool m_isMain;
 };
 

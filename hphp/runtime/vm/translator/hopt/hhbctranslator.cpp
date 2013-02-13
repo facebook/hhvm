@@ -1201,6 +1201,7 @@ void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {
         return c1;
       },
       [&] { // Taken: miss in TC, do lookup & init
+        m_tb->hint(Block::Unlikely);
         return m_tb->gen(LookupClsCns, cnsType, cnsNameTmp, clsNameTmp);
       }
     );

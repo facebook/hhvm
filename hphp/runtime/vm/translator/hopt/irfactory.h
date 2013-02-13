@@ -211,7 +211,7 @@ struct StateVector {
   static unsigned count(const IRFactory* factory, Block*) {
     return factory->numBlocks();
   }
-  StateVector(IRFactory* factory, Info init)
+  StateVector(const IRFactory* factory, Info init)
     : m_factory(factory)
     , m_info(count(factory, (Key*)nullptr), init)
     , m_init(init) {
@@ -244,7 +244,7 @@ private:
   }
 
 private:
-  IRFactory* m_factory;
+  const IRFactory* m_factory;
   std::vector<Info> m_info;
   Info m_init;
 };

@@ -920,105 +920,81 @@ void SSATmp::print() const {
   std::cerr << std::endl;
 }
 
-void Trace::print(std::ostream& os, bool printAsm,
-                  bool isExit /* = false */) const {
+void Trace::print(std::ostream& os, bool printAsm) const {
   Disasm disasm(14, RuntimeOption::EvalDumpIR > 5);
 
-  // The main loop below interleaves HHIR output with assembly output,
-  // which involves searching forwards across block boundaries to find
-  // future instructions with assembly addresses.  To make this simpler,
-  // concat all the instructions into a single list first.
-  std::list<IRInstruction*> list;
   for (Block* block : m_blocks) {
-    for (auto &inst : *block) {
-      list.push_back(&inst);
-    }
-  }
-  for (auto it = list.begin(); it != list.end();) {
-    auto& inst = **it;
-    ++it;
-    if (inst.getOpcode() == Marker) {
-      auto* marker = inst.getExtra<Marker>();
-      if (isExit) {
-        // Don't print bytecode, but print the label.
+    for (auto it = block->begin(); it != block->end();) {
+      auto& inst = *it; ++it;
+      if (inst.getOpcode() == Marker) {
+        auto* marker = inst.getExtra<Marker>();
+        if (!m_isMain) {
+          // Don't print bytecode, but print the label.
+          os << std::string(6, ' ');
+          inst.print(os);
+          os << '\n';
+          continue;
+        }
+        uint32 bcOffset = marker->bcOff;
+        if (const auto* func = marker->func) {
+          func->unit()->prettyPrint(
+            os, Unit::PrintOpts()
+                  .range(bcOffset, bcOffset+1)
+                  .noLineNumbers());
+          continue;
+        }
+      }
+      if (inst.getOpcode() == DefLabel) {
         os << std::string(6, ' ');
-        inst.print(os);
-        os << '\n';
-        continue;
+        inst.getBlock()->printLabel(os);
+        os << ":\n";
+        // print phi pseudo-instructions
+        for (unsigned i = 0, n = inst.getNumDsts(); i < n; ++i) {
+          os << std::string(13, ' ');
+          inst.getDst(i)->print(os, false);
+          os << " = phi ";
+          bool first = true;
+          inst.getBlock()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
+            if (!first) os << ", ";
+            first = false;
+            jmp->printSrc(os, i);
+            os << "@";
+            jmp->getBlock()->printLabel(os);
+          });
+          os << '\n';
+        }
       }
-      uint32 bcOffset = marker->bcOff;
-      if (const auto* func = marker->func) {
-        func->unit()->prettyPrint(
-          os, Unit::PrintOpts()
-                .range(bcOffset, bcOffset+1)
-                .noLineNumbers());
-        continue;
-      }
-    }
-    if (inst.getOpcode() == DefLabel) {
-      os << std::string(6, ' ');
-      inst.getBlock()->printLabel(os);
-      os << ":\n";
-      // print phi pseudo-instructions
-      for (unsigned i = 0, n = inst.getNumDsts(); i < n; ++i) {
-        os << std::string(13, ' ');
-        inst.getDst(i)->print(os, false);
-        os << " = phi ";
-        bool first = true;
-        inst.getBlock()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
-          if (!first) os << ", ";
-          first = false;
-          jmp->printSrc(os, i);
-          os << "@";
-          jmp->getBlock()->printLabel(os);
-        });
-        os << '\n';
-      }
-    }
-    os << std::string(8, ' ');
-    inst.print(os);
-    os << '\n';
-    if (!printAsm) {
-      continue;
-    }
-    uint8* asmAddr = (uint8*)inst.getAsmAddr();
-    if (!asmAddr) {
-      continue;
-    }
-    // Find the next instruction that has an non-NULL asm address.
-    auto nextHasAsmAddr = it;
-    while (nextHasAsmAddr != list.end() && !(*nextHasAsmAddr)->getAsmAddr()) {
-      ++nextHasAsmAddr;
-    }
-    uint8* endAsm;
-    if (nextHasAsmAddr != list.end()) {
-      endAsm = (uint8*)(*nextHasAsmAddr)->getAsmAddr();
-    } else {
-      endAsm = m_lastAsmAddress;
-    }
-    if (asmAddr != endAsm) {
-      // print out the assembly
+      os << std::string(8, ' ');
+      inst.print(os);
       os << '\n';
-      disasm.disasm(os, asmAddr, endAsm);
-      os << '\n';
+      if (!printAsm) continue;
+      TCA asmAddr = inst.getAsmAddr();
+      if (!asmAddr) continue;
+      // Find the next instruction that has an non-NULL asm address.
+      TCA endAsm = inst.getBlock()->getAsmRange().end();
+      for (auto i = it; i != block->end(); ++i) {
+        if (TCA addr = i->getAsmAddr()) {
+          endAsm = addr;
+          break;
+        }
+      }
+      if (asmAddr != endAsm) {
+        // print out the assembly
+        os << '\n';
+        disasm.disasm(os, asmAddr, endAsm);
+        os << '\n';
+      }
+    }
+    auto const &astubs = block->getAstubsRange();
+    if (!astubs.empty()) {
+      os << std::string(8, ' ') << "AStubs:\n";
+      disasm.disasm(os, astubs.start(), astubs.end());
     }
   }
 
-  bool firstExitTracePrinted = false;
   for (auto* exitTrace : m_exitTraces) {
-    if (!firstExitTracePrinted) {
-      firstExitTracePrinted = true;
-      // print out any extra code in astubs
-      if (m_firstAstubsAddress < exitTrace->m_firstAsmAddress) {
-        os << std::string(8, ' ') << "AStubs:\n";
-        disasm.disasm(os, m_firstAstubsAddress,
-                      exitTrace->m_firstAsmAddress);
-        os << '\n';
-      }
-
-    }
     os << "\n      -------  Exit Trace  -------\n";
-    exitTrace->print(os, printAsm, true);
+    exitTrace->print(os, printAsm);
   }
 }
 

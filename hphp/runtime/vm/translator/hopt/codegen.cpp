@@ -294,7 +294,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
 }
 
 const Func* CodeGenerator::getCurFunc() const {
-  return m_lastMarker ? m_lastMarker->func :
+  return m_state.lastMarker ? m_state.lastMarker->func :
          m_curTrace->front()->getFunc();
 }
 
@@ -357,27 +357,32 @@ CALL_OPCODE(SetElem)
 #undef PUNT_OPCODE
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
-void CodeGenerator::prependPatchAddr(Block* block, TCA patchAddr) {
-  ssize_t diff = m_patches[block] ? (patchAddr - (TCA)m_patches[block]) : 0;
+void prependPatchAddr(CodegenState& state, Block* block, TCA patchAddr) {
+  auto &patches = state.patches;
+  ssize_t diff = patches[block] ? (patchAddr - (TCA)patches[block]) : 0;
   assert(deltaFits(diff, sz::dword));
   *(int32_t*)(patchAddr) = (int32_t)diff;
-  m_patches[block] = patchAddr;
+  patches[block] = patchAddr;
 }
 
 Address CodeGenerator::emitFwdJcc(Asm& a, ConditionCode cc, Block* target) {
   Address start = a.code.frontier;
   a.jcc(cc, a.code.frontier);
   TCA immPtr = a.code.frontier - 4;
-  prependPatchAddr(target, immPtr);
+  prependPatchAddr(m_state, target, immPtr);
+  return start;
+}
+
+Address CodeGenerator::emitFwdJmp(Asm& a, Block* target, CodegenState& state) {
+  Address start = a.code.frontier;
+  a.jmp(a.code.frontier);
+  TCA immPtr = a.code.frontier - 4;
+  prependPatchAddr(state, target, immPtr);
   return start;
 }
 
 Address CodeGenerator::emitFwdJmp(Asm& a, Block* target) {
-  Address start = a.code.frontier;
-  a.jmp(a.code.frontier);
-  TCA immPtr = a.code.frontier - 4;
-  prependPatchAddr(target, immPtr);
-  return start;
+  return emitFwdJmp(a, target, m_state);
 }
 
 Address CodeGenerator::emitFwdJcc(ConditionCode cc, Block* target) {
@@ -1729,11 +1734,11 @@ void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   m_as.load_reg64_disp_reg64(rVmTl, funcCacheOff, dstReg);
   m_as.test_reg64_reg64(dstReg, dstReg);
   // jz off to the helper call in astubs
-  m_as.jcc(CC_E, m_astubs.code.frontier);
-  // this helper tries the autoload map, and fatals on failure
-  cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupUnknownFunc,
-               dst, kSyncPoint, ArgGroup().immPtr(name));
-  m_astubs.jmp(m_as.code.frontier);
+  unlikelyIfBlock(CC_Z, [&] {
+    // this helper tries the autoload map, and fatals on failure
+    cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupUnknownFunc,
+                 dst, kSyncPoint, ArgGroup().immPtr(name));
+  });
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
@@ -2723,7 +2728,6 @@ Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg,
   return addrToPatch;
 }
 
-
 //
 // Generates dec-ref of a typed value with statically known type.
 //
@@ -2750,19 +2754,12 @@ void CodeGenerator::cgDecRefStaticType(Type type,
   // If not exiting on count down to zero, emit the zero-check and
   // release call
   if (genZeroCheck && exit == nullptr) {
-    // Emit jump to m_astubs (to call release) if count got down to
-    // zero
-    Address patch = m_as.code.frontier;
-    ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
-    m_as.jcc(cc, m_astubs.code.frontier);
-    // Emit the call to release in m_astubs
-    cgCallHelper(m_astubs, m_tx64->getDtorCall(type.toDataType()),
-                 InvalidReg, InvalidReg, kSyncPoint, ArgGroup().reg(dataReg));
-    if (&m_as == &m_astubs) {
-      m_as.patchJcc(patch, m_as.code.frontier);
-    } else {
-      m_astubs.jmp(m_as.code.frontier);
-    }
+    // Emit jump to m_astubs (to call release) if count got down to zero
+    unlikelyIfBlock(CC_Z, [&] {
+      // Emit the call to release in m_astubs
+      cgCallHelper(m_astubs, m_tx64->getDtorCall(type.toDataType()),
+                   InvalidReg, InvalidReg, kSyncPoint, ArgGroup().reg(dataReg));
+    });
   }
   if (patchStaticCheck) {
     m_as.patchJcc8(patchStaticCheck, m_as.code.frontier);
@@ -2791,17 +2788,11 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
   // If not exiting on count down to zero, emit the zero-check and release call
   if (genZeroCheck && exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to zero
-    Address patch = m_as.code.frontier;
-    ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
-    m_as.jcc(cc, m_astubs.code.frontier);
-    // Emit call to release in m_astubs
-    cgCallHelper(m_astubs, getDtorTyped(), InvalidReg, kSyncPoint,
-                 ArgGroup().reg(dataReg).reg(typeReg));
-    if (&m_as == &m_astubs) {
-      m_as.patchJcc(patch, m_as.code.frontier);
-    } else {
-      m_astubs.jmp(m_as.code.frontier);
-    }
+    unlikelyIfBlock(CC_Z, [&] {
+      // Emit call to release in m_astubs
+      cgCallHelper(m_astubs, getDtorTyped(), InvalidReg, kSyncPoint,
+                   ArgGroup().reg(dataReg).reg(typeReg));
+    });
   }
   // Patch checks to jump around the DecRef
   if (patchTypeCheck)   m_as.patchJcc8(patchTypeCheck,   m_as.code.frontier);
@@ -2859,22 +2850,13 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 
   // If not exiting on count down to zero, emit the zero-check and release call
   if (exit == nullptr) {
-    // Emit jump to m_astubs (to call release) if count got down to
-    // zero
-    Address patch = m_as.code.frontier;
-    ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
-    m_as.jcc(cc, m_astubs.code.frontier);
-
-    m_astubs.lea_reg64_disp_reg64(baseReg, offset, scratchReg);
-
-    // Emit call to release in m_astubs
-    cgCallHelper(m_astubs, getDtorGeneric(), InvalidReg, kSyncPoint,
-                 ArgGroup().reg(scratchReg));
-    if (&m_as == &m_astubs) {
-      m_as.patchJcc(patch, m_as.code.frontier);
-    } else {
-      m_astubs.jmp(m_as.code.frontier);
-    }
+    // Emit jump to m_astubs (to call release) if count got down to zero
+    unlikelyIfBlock(CC_Z, [&] {
+      // Emit call to release in m_astubs
+      m_astubs.lea_reg64_disp_reg64(baseReg, offset, scratchReg);
+      cgCallHelper(m_astubs, getDtorGeneric(), InvalidReg, kSyncPoint,
+                   ArgGroup().reg(scratchReg));
+    });
   }
 
   // Patch checks to jump around the DecRef
@@ -3119,8 +3101,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     m_as.add_imm32_reg64(adjustment, spReg);
   }
 
-  assert(m_lastMarker);
-  SrcKey srcKey = SrcKey(m_lastMarker->func, m_lastMarker->bcOff);
+  assert(m_state.lastMarker);
+  SrcKey srcKey = SrcKey(m_state.lastMarker->func, m_state.lastMarker->bcOff);
   bool isImmutable = (func->isConst() && !func->getType().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
   int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
@@ -3533,10 +3515,10 @@ void CodeGenerator::cgLdRef(IRInstruction* inst) {
 
 void CodeGenerator::recordSyncPoint(Asm& as,
                                     SyncOptions sync /* = kSyncPoint */) {
-  assert(m_lastMarker);
+  assert(m_state.lastMarker);
   assert(sync != kNoSyncPoint);
-  Offset stackOff = m_lastMarker->stackOff - (sync - kSyncPoint);
-  Offset pcOff = m_lastMarker->bcOff - m_lastMarker->func->base();
+  Offset stackOff = m_state.lastMarker->stackOff - (sync - kSyncPoint);
+  Offset pcOff = m_state.lastMarker->bcOff - m_state.lastMarker->func->base();
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }
 
@@ -3811,8 +3793,7 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
                              classDestReg);
 
   // handle case where method is not entered in the cache
-  m_as.jcc(CC_E, m_astubs.code.frontier);
-  {
+  unlikelyIfBlock(CC_E, [&] {
     if (false) { // typecheck
       const UNUSED Func* f = StaticMethodCache::lookupIR(ch, ne, cls, method);
     }
@@ -3832,10 +3813,9 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
                                    ch + offsetof(TargetCache::StaticMethodCache,
                                                  m_cls),
                                    classDestReg);
-    m_astubs.jnz(m_as.code.frontier);
-    // StaticMethodCache::lookupIR() returned NULL, bail
-    emitFwdJmp(m_astubs, label);
-  }
+    // if StaticMethodCache::lookupIR() returned NULL, jmp to label
+    emitFwdJcc(m_astubs, CC_Z, label);
+  });
 }
 
 /**
@@ -3930,12 +3910,10 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   m_as.loadq(rVmTl[ch], funcDestReg);
   m_as.testq(funcDestReg, funcDestReg);
 
-  Label LookupCache, FoundMethod, End;
+  Label End;
 
   // Handle case where method is not entered in the cache
-  m_as.jcc(CC_E, LookupCache);
-  {
-    asm_label(m_astubs, LookupCache);
+  unlikelyIfBlock(CC_E, [&] {
     if (false) { // typecheck
       const UNUSED Func* f = StaticMethodFCache::lookupIR(ch, cls, methName);
     }
@@ -3949,11 +3927,8 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
     // If entry found in target cache, jump back to m_as.
     // Otherwise, bail to exit label
     m_astubs.testq(funcDestReg, funcDestReg);
-    m_astubs.jnz(FoundMethod);
-    emitFwdJmp(m_astubs, exitLabel);
-  }
-
-  asm_label(m_as, FoundMethod);
+    emitFwdJcc(m_astubs, CC_Z, exitLabel);
+  });
 
   auto t = srcCtxTmp->getType();
   if (t == Type::Cls) {
@@ -4002,24 +3977,20 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
 
   m_as.loadq(rVmTl[ch], tmpReg);
   m_as.testq(tmpReg, tmpReg);
-  m_as.jcc(CC_E, m_astubs.code.frontier);
-  if (tmpReg != dstReg) {
-    m_as.mov_reg64_reg64(tmpReg, dstReg);
-  }
-  {
+  unlikelyIfBlock(CC_E, [&] {
     cgCallHelper(m_astubs,
                  target ? (TCA)SPropCache::lookupIR<false>
                         : (TCA)SPropCache::lookupIR<true>, // raise on error
-                 dstReg,
+                 tmpReg,
                  kSyncPoint, // could re-enter to initialize properties
                  ArgGroup().imm(ch).ssa(cls).ssa(propName).ssa(cxt));
     if (target) {
-      m_astubs.testq(dstReg, dstReg);
-      m_astubs.jcc(CC_NZ, m_as.code.frontier);
-      emitFwdJmp(m_astubs, target);
-    } else {
-      m_astubs.jmp(m_as.code.frontier);
+      m_astubs.testq(tmpReg, tmpReg);
+      emitFwdJcc(m_astubs, CC_Z, target);
     }
+  });
+  if (tmpReg != dstReg) {
+    m_as.mov_reg64_reg64(tmpReg, dstReg);
   }
 }
 
@@ -4066,8 +4037,7 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
     m_as.  loadq  (rVmTl[ch], dstReg);
     m_as.  testq  (dstReg, dstReg);
   }
-  m_as.    jcc    (CC_E, m_astubs.code.frontier);
-  {
+  unlikelyIfBlock(CC_E, [&] {
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
     cgCallHelper(m_astubs,
@@ -4075,8 +4045,7 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
                  dst,
                  kSyncPoint,
                  ArgGroup().addr(rVmTl, intptr_t(ch)).ssa(className));
-    m_astubs.jmp(m_as.code.frontier);
-  }
+  });
 }
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {
@@ -4324,31 +4293,18 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   auto* const label = inst->getTaken();
   auto const rFp = inst->getSrc(0)->getReg();
 
-  Label finished;
-  Label hasVV;
-
-  {
-    auto& a = m_as;
-    a.    cmpq   (0, rFp[AROFF(m_varEnv)]);
-    a.    jnz    (hasVV);
-  asm_label(a, finished);
-  }
-
-  {
-    auto& a = m_astubs;
-  asm_label(a, hasVV);
-    a.    testl  (ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]);
-    emitFwdJcc(a, CC_Z, label);
+  m_as.    cmpq   (0, rFp[AROFF(m_varEnv)]);
+  unlikelyIfBlock(CC_NZ, [&] {
+    m_astubs.    testl  (ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]);
+    emitFwdJcc(m_astubs, CC_Z, label);
     cgCallHelper(
-      a,
+      m_astubs,
       TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
       nullptr,
       kSyncPoint,
-      ArgGroup()
-        .reg(rFp)
+      ArgGroup().reg(rFp)
     );
-    a.    jmp    (finished);
-  }
+  });
 }
 
 void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
@@ -4533,12 +4489,10 @@ void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
 
   m_as.  loadq (fp->getReg()[AROFF(m_varEnv)], scratch);
   m_as.  testq (scratch, scratch);
-  m_as.  jnz   (m_astubs.code.frontier);
-  {
+  unlikelyIfBlock(CC_NZ, [&] {
     cgCallHelper(m_astubs, helper, InvalidReg, kNoSyncPoint,
                  ArgGroup().ssa(fp));
-    m_astubs.jmp(m_as.code.frontier);
-  }
+  });
 }
 
 void CodeGenerator::cgUnlinkContVarEnv(IRInstruction* inst) {
@@ -4664,19 +4618,20 @@ void traceCallback(ActRec* fp, Cell* sp, int64 pcOff, void* rip) {
   checkFrame(fp, sp, true);
 }
 
-void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff) {
+void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff,
+                                  Transl::TranslatorX64* tx64) {
   // call to a trace function
   as.mov_imm64_reg((int64_t)as.code.frontier, reg::rcx);
   as.mov_reg64_reg64(rVmFp, reg::rdi);
   as.mov_reg64_reg64(rVmSp, reg::rsi);
   as.mov_imm64_reg(pcOff, reg::rdx);
   // do the call; may use a trampoline
-  m_tx64->emitCall(as, (TCA)traceCallback);
+  tx64->emitCall(as, (TCA)traceCallback);
 }
 
-void CodeGenerator::patchJumps(Block* block) {
-  void* list = m_patches[block];
-  Address labelAddr = m_as.code.frontier;
+void patchJumps(Asm& as, CodegenState& state, Block* block) {
+  void* list = state.patches[block];
+  Address labelAddr = as.code.frontier;
   while (list) {
     int32_t* toPatch = (int32_t*)list;
     int32_t diffToNext = *toPatch;
@@ -4688,63 +4643,87 @@ void CodeGenerator::patchJumps(Block* block) {
   }
 }
 
-void CodeGenerator::cgTrace(Trace* trace, vector<TransBCMapping>* bcMap) {
-  bool firstMarkerSeen = false;
-  m_curTrace = trace;
-  trace->setFirstAsmAddress(m_as.code.frontier);
-  trace->setFirstAstubsAddress(m_astubs.code.frontier);
-  if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
-    emitTraceCall(m_as, trace->getBcOff());
-  }
-  for (Block* block : trace->getBlocks()) {
-    patchJumps(block);
-    for (IRInstruction& instr : *block) {
-      IRInstruction* inst = &instr;
-      if (inst->getOpcode() == Marker) {
-        if (!firstMarkerSeen) {
-          firstMarkerSeen = true;
-          // This will be generated right after the tracelet guards
-          if (RuntimeOption::EvalJitTransCounters && m_tx64 &&
-              trace->isMain()) {
-            m_tx64->emitTransCounterInc(m_as);
-          }
-        }
-        m_lastMarker = inst->getExtra<Marker>();
-        if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
-          bcMap->push_back((TransBCMapping){Offset(m_lastMarker->bcOff),
-                m_as.code.frontier,
-                m_astubs.code.frontier});
+void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
+  for (IRInstruction& instr : *block) {
+    IRInstruction* inst = &instr;
+    if (inst->getOpcode() == Marker) {
+      if (!m_state.firstMarkerSeen) {
+        m_state.firstMarkerSeen = true;
+        // This will be generated right after the tracelet guards
+        if (RuntimeOption::EvalJitTransCounters && m_tx64 &&
+            block->getTrace()->isMain()) {
+          m_tx64->emitTransCounterInc(m_as);
         }
       }
-
-      m_curInst = inst;
-      auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
-      auto addr = cgInst(inst);
-      inst->setAsmAddr(addr);
+      m_state.lastMarker = inst->getExtra<Marker>();
+      if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
+        bcMap->push_back((TransBCMapping){Offset(m_state.lastMarker->bcOff),
+              m_as.code.frontier,
+              m_astubs.code.frontier});
+      }
     }
-  }
-  trace->setLastAsmAddress(m_as.code.frontier);
-  TRACE(3, "[counter] %lu bytes of code generated\n",
-        trace->getLastAsmAddress() - trace->getFirstAsmAddress());
-  if (trace->isMain()) {
-    TRACE(3, "[counter] %lu bytes of code generated in main traces\n",
-          trace->getLastAsmAddress() - trace->getFirstAsmAddress());
+
+    m_curInst = inst;
+    auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
+    auto addr = cgInst(inst);
+    inst->setAsmAddr(addr);
   }
 }
 
+void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
+             vector<TransBCMapping>* bcMap, CodegenState& state) {
+  state.firstMarkerSeen = false;
+  state.lastMarker = nullptr;
+  TCA traceStart = amain.code.frontier;
+  if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
+    CodeGenerator::emitTraceCall(amain, trace->getBcOff(), tx64);
+  }
+  auto chooseAs = [&](Block* b) {
+    return b->getHint() != Block::Unlikely ? &amain : &astubs;
+  };
+  auto& blocks = trace->getBlocks();
+  for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
+    Block* block = *it; ++it;
+    Asm* as = chooseAs(block);
+    TCA asmStart = as->code.frontier;
+    TCA astubsStart = astubs.code.frontier;
+    patchJumps(*as, state, block);
+    CodeGenerator cg(trace, *as, astubs, tx64, state);
+    cg.cgBlock(block, bcMap);
+    if (Block* next = block->getNext()) {
+      // if there's a fallthrough block and it's not the next thing going
+      // into this assembler, then emit a jump to it.
+      if (it == end || next != *it || as != chooseAs(next)) {
+        CodeGenerator::emitFwdJmp(*as, next, state);
+      }
+    }
+    block->setAsmRange(asmStart, as->code.frontier);
+    if (as != &astubs) {
+      block->setAstubsRange(astubsStart, astubs.code.frontier);
+    } else {
+      block->setAstubsRange(nullptr, nullptr);
+    }
+  }
+  size_t UNUSED traceSize = amain.code.frontier - traceStart;
+  TRACE(3, "[counter] %lu bytes of code generated\n", traceSize);
+  if (trace->isMain()) {
+    TRACE(3, "[counter] %lu bytes of code generated in main traces\n",
+          traceSize);
+  }
+}
+
+// select instructions for the trace and its exits
 void genCodeForTrace(Trace* trace,
                      CodeGenerator::Asm& as,
                      CodeGenerator::Asm& astubs,
                      IRFactory* irFactory,
                      vector<TransBCMapping>* bcMap,
                      Transl::TranslatorX64* tx64) {
-  // select instructions for the trace and its exits
-  PatchAddrs patches(irFactory, nullptr);
-  CodeGenerator cgMain(as, astubs, tx64, patches);
-  cgMain.cgTrace(trace, bcMap);
-  CodeGenerator cgExits(astubs, astubs, tx64, patches);
+  assert(trace->isMain());
+  CodegenState state(irFactory);
+  cgTrace(trace, as, astubs, tx64, bcMap, state);
   for (Trace* exit : trace->getExitTraces()) {
-    cgExits.cgTrace(exit, nullptr);
+    cgTrace(exit, astubs, astubs, tx64, nullptr, state);
   }
 }
 

@@ -44,18 +44,35 @@ enum SyncOptions {
   kSyncPointAdjustOne,
 };
 
-typedef StateVector<Block,void*> PatchAddrs;
+// stuff we need to preserve between blocks while generating code.
+struct CodegenState {
+  CodegenState(const IRFactory* factory)
+    : patches(factory, nullptr), lastMarker(nullptr), firstMarkerSeen(false) {
+  }
+
+  // Each block has a list of addresses to patch
+  StateVector<Block,void*> patches;
+
+  // Keep track of the most recent Marker instruction we've seen in the
+  // current trace (even across blocks).
+  const MarkerData* lastMarker;
+  bool firstMarkerSeen;
+};
 
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
-  CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
-                PatchAddrs& patches)
-    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_curInst(nullptr)
-    , m_lastMarker(nullptr), m_curTrace(nullptr), m_patches(patches) {
+  CodeGenerator(Trace* trace, Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
+                CodegenState& state)
+    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state)
+    , m_curInst(nullptr), m_curTrace(trace) {
   }
 
-  void cgTrace(Trace* trace, vector<TransBCMapping>* bcMap);
+  void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
+
+  static void emitTraceCall(CodeGenerator::Asm& as, int64_t pcOff,
+                            Transl::TranslatorX64* tx64);
+  static Address emitFwdJmp(Asm& as, Block* target, CodegenState& state);
 
 private:
   Address cgInst(IRInstruction* inst);
@@ -167,7 +184,6 @@ private:
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceCheck(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
-  void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
   void emitTraceRet(CodeGenerator::Asm& as);
   void emitCheckStack(CodeGenerator::Asm& as, SSATmp* sp, uint32 numElems,
                       bool allocActRec);
@@ -224,19 +240,32 @@ private:
   int getIterOffset(SSATmp* tmp);
   static void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
-  void prependPatchAddr(Block* target, TCA patchAddr);
-  void patchJumps(Block* block);
+
+  /*
+   * Generate an if-block that branches around some unlikely code, handling
+   * the cases when a == astubs and a != astubs.  cc is the branch condition
+   * to run the unlikely block.
+   */
+  template <class Block>
+  void unlikelyIfBlock(ConditionCode cc, Block unlikely) {
+    if (&m_as == &m_astubs) cc = ccNegate(cc);
+    auto *patch = m_as.code.frontier;
+    m_as.jcc(cc, m_astubs.code.frontier);
+    unlikely();
+    if (&m_as == &m_astubs) {
+      m_as.patchJcc(patch, m_as.code.frontier);
+    } else {
+      m_astubs.jmp(m_as.code.frontier);
+    }
+  }
 
 private:
-  Asm& m_as;
-  Asm& m_astubs;
+  Asm& m_as;                // current "main" assembler
+  Asm& m_astubs;            // assembler for stubs and other cold code.
   TranslatorX64* m_tx64;
-  // current instruction for which code is being generated
-  IRInstruction* m_curInst;
-  // the last marker instruction before curInst
-  const MarkerData* m_lastMarker;
+  CodegenState& m_state;
+  IRInstruction* m_curInst; // current instruction being generated
   Trace* m_curTrace;
-  PatchAddrs& m_patches;
 };
 
 class ArgDesc {

@@ -293,6 +293,11 @@ public:
     return trace ? trace->front() : nullptr;
   }
 
+  // hint the execution frequency of the current block
+  void hint(Block::Hint h) const {
+    m_trace->back()->setHint(h);
+  }
+
   /*
    * ifelse() generates if-then-else blocks within a trace.  The caller
    * supplies lambdas to create the branch, next-body, and taken-body.

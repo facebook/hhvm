@@ -9684,7 +9684,7 @@ int64 checkClass(TargetCache::CacheHandle ch, StringData* clsName,
   return false;
 }
 
-static const Func* autoloadMissingFunc(const Func* func) {
+static const Func* autoloadMissingFunc(const Func* func, bool safe) {
   VMRegAnchor _;
   AutoloadHandler::s_instance->autoloadFunc(func->name()->data());
   Func* toCall = *(Func**)TargetCache::handleToPtr(func->getCachedOffset());
@@ -9692,8 +9692,10 @@ static const Func* autoloadMissingFunc(const Func* func) {
   if (toCall) {
     return toCall;
   }
-  throw_invalid_argument("function: method '%s' not found",
-                         func->name()->data());
+  if (!safe) {
+    throw_invalid_argument("function: method '%s' not found",
+                           func->name()->data());
+  }
   return SystemLib::GetNullFunction();
 }
 
@@ -9757,14 +9759,14 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       a.          test_reg64_reg64(r(funcReg), r(funcReg));
       {
         UnlikelyIfBlock ifNull(CC_Z, a, astubs);
+        EMIT_CALL(astubs, TCA(autoloadMissingFunc), IMM(uintptr_t(func)),
+                  IMM(safe));
+        recordReentrantStubCall(ni, true);
+        emitVStackStore(astubs, ni, rax, funcOff);
         if (safe) {
-          emitVStackStoreImm(astubs, ni,
-                             uintptr_t(SystemLib::GetNullFunction()), funcOff);
-          emitImmReg(astubs, false, r(flag));
-        } else {
-          EMIT_CALL(astubs, TCA(autoloadMissingFunc), IMM(uintptr_t(func)));
-          recordReentrantStubCall(ni, true);
-          emitVStackStore(astubs, ni, rax, funcOff);
+          astubs.xorq(r(flag), r(flag));
+          astubs.cmpq(SystemLib::GetNullFunction(), rax);
+          astubs.setne(rbyte(flag));
         }
       }
     }

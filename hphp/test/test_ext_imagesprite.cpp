@@ -24,6 +24,8 @@ IMPLEMENT_SEP_EXTENSION_TEST(Imagesprite);
 bool TestExtImagesprite::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_ImageSprite);
   RUN_TEST(test_addFile);
   RUN_TEST(test_addString);
@@ -32,6 +34,8 @@ bool TestExtImagesprite::RunTests(const std::string &which) {
   RUN_TEST(test_loadDims);
   RUN_TEST(test_loadImages);
   RUN_TEST(test_map);
+
+  sprite.reset();
 
   return ret;
 }

@@ -22,6 +22,10 @@
 bool TestExtFunction::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function test($s1) {"
+                         " return $s1;"
+                         "}");
+
   RUN_TEST(test_get_defined_functions);
   RUN_TEST(test_function_exists);
   RUN_TEST(test_is_callable);
@@ -87,11 +91,11 @@ bool TestExtFunction::test_forward_static_call() {
 
 bool TestExtFunction::test_create_function() {
   try {
-    f_create_function("test", "");
+    f_create_function("$a", "");
   } catch (NotSupportedException e) {
-    return Count(true);
+    return Count(!hhvm);
   }
-  return Count(false);
+  return Count(hhvm);
 }
 
 bool TestExtFunction::test_func_get_arg() {

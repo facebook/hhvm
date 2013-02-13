@@ -23,6 +23,16 @@
 bool TestExtSqlite3::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function lower($a) {"
+                         " return strtolower($a);"
+                         "}"
+                         "function sumlen_step($a,$b,$c) {"
+                         " return (int)$a + strlen($c);"
+                         "}"
+                         "function sumlen_fini($a) {"
+                         " return (int)$a;"
+                         "}");
+
   RUN_TEST(test_sqlite3);
   RUN_TEST(test_sqlite3stmt);
   RUN_TEST(test_sqlite3result);

@@ -70,6 +70,12 @@ static ServerPtr runServer() {
 bool TestExtCurl::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function curl_write_func($s1, $s2) {"
+                         " print 'curl_write_func called with ';"
+                         " print $s2;"
+                         " return strlen($s2);"
+                         "}");
+
   ServerPtr server = runServer();
 
   RUN_TEST(test_curl_init);

@@ -27,6 +27,8 @@ IMPLEMENT_SEP_EXTENSION_TEST(Pdo);
 bool TestExtPdo::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_pdo_drivers);
   RUN_TEST(test_pdo_mysql);
   RUN_TEST(test_pdo_sqlite);

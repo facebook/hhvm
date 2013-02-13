@@ -460,7 +460,7 @@ public:
  */
 class StackStringData : public StringData {
  public:
-  StackStringData() {}
+  StackStringData() { incRefCount(); }
   StackStringData(const char* s) : StringData(s) { incRefCount(); }
   template <class T>
   StackStringData(const char* s, T p) : StringData(s, p) { incRefCount(); }

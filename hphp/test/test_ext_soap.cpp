@@ -22,12 +22,34 @@
 bool TestExtSoap::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function hello() {"
+                         "  return 'Hello World';"
+                         "}"
+                         "function add($a, $b) {"
+                         "  return (int)$a + (int)$b;"
+                         "}"
+                         "function sub($a, $b) {"
+                         "  return (int)$a - (int)$b;"
+                         "}"
+                         "function sum($a) {"
+                         "  $sum = 0;"
+                         "  foreach ($a as $v) {"
+                         "    $sum += (int)$v;"
+                         "  }"
+                         "  return $sum;"
+                         "}"
+                         "function fault() {"
+                         " return new SoapFault('MyFault', 'My fault string');"
+                         "}");
+
   RUN_TEST(test_SoapServerSanity);
   RUN_TEST(test_SoapServerFunctionAll);
   RUN_TEST(test_SoapServerFunctionParam);
   RUN_TEST(test_SoapServerArrayParam);
   RUN_TEST(test_SoapServerWSDL);
   RUN_TEST(test_SoapServerFault);
+
+  m_server.reset();
 
   return ret;
 }

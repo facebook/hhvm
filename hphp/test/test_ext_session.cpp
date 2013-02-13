@@ -22,6 +22,8 @@
 bool TestExtSession::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_session_set_cookie_params);
   RUN_TEST(test_session_get_cookie_params);
   RUN_TEST(test_session_name);

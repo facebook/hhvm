@@ -1621,6 +1621,7 @@ VarEnv* VMExecutionContext::getVarEnv() {
 
   HPHP::VM::VarEnv* builtinVarEnv = NULL;
   HPHP::VM::ActRec* fp = getFP();
+  if (UNLIKELY(!fp)) return NULL;
   if (fp->skipFrame()) {
     if (fp->hasVarEnv()) {
       builtinVarEnv = fp->getVarEnv();

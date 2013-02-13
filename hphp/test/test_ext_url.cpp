@@ -23,6 +23,8 @@
 bool TestExtUrl::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_base64_decode);
   RUN_TEST(test_base64_encode);
   RUN_TEST(test_get_headers);

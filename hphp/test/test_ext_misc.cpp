@@ -22,6 +22,8 @@
 bool TestExtMisc::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_connection_aborted);
   RUN_TEST(test_connection_status);
   RUN_TEST(test_connection_timeout);
@@ -97,11 +99,11 @@ bool TestExtMisc::test_exit() {
 
 bool TestExtMisc::test_eval() {
   try {
-    f_eval("a");
+    f_eval("sleep(5);");
   } catch (NotSupportedException e) {
-    return Count(true);
+    return Count(!hhvm);
   }
-  return Count(false);
+  return Count(hhvm);
 }
 
 bool TestExtMisc::test_get_browser() {

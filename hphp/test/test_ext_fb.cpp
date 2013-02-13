@@ -25,6 +25,10 @@
 bool TestExtFb::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function test($s1) {"
+                         " return $s1;"
+                         "}");
+
   RUN_TEST(test_fb_compact_serialize);
   RUN_TEST(test_fb_compact_unserialize);
   RUN_TEST(test_fb_thrift_serialize);

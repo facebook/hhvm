@@ -24,6 +24,14 @@
 bool TestExtPreg::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function test_preg_rep($a,$b,$c) {"
+                         "  return strtoupper($c).$a;"
+                         "}"
+                         "function next_year($m) {"
+                         "  return $m[1].((int)$m[2] + 1);"
+                         "}"
+                        );
+
   RUN_TEST(test_preg_grep);
   RUN_TEST(test_preg_match);
   RUN_TEST(test_preg_match_all);

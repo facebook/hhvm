@@ -24,6 +24,8 @@
 bool TestExtVariable::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_is_bool);
   RUN_TEST(test_is_int);
   RUN_TEST(test_is_integer);

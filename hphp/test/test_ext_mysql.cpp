@@ -25,6 +25,8 @@ bool TestExtMysql::RunTests(const std::string &which) {
   bool ret = true;
   RuntimeOption::MySQLReadOnly = false;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_mysql_connect);
   RUN_TEST(test_mysql_pconnect);
   RUN_TEST(test_mysql_set_charset);

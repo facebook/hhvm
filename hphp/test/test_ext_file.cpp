@@ -26,6 +26,8 @@
 bool TestExtFile::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
   RUN_TEST(test_fopen);
   RUN_TEST(test_fpassthru);
   RUN_TEST(test_fputcsv);

@@ -41,24 +41,12 @@ bool TestExtError::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtError::test_debug_backtrace() {
-  bool oldValue = RuntimeOption::InjectedStackTrace;
-  RuntimeOption::InjectedStackTrace = false;
-  Array ret = f_debug_backtrace();
-  VERIFY(ret.size() > 0);
-  RuntimeOption::InjectedStackTrace = oldValue;
+  // better tested by php code
   return Count(true);
 }
 
 bool TestExtError::test_debug_print_backtrace() {
-  bool oldValue = RuntimeOption::InjectedStackTrace;
-  RuntimeOption::InjectedStackTrace = false;
-  StackTrace::Enabled = true;
-  g_context->obStart();
-  f_debug_print_backtrace();
-  String output = g_context->obCopyContents();
-  g_context->obEnd();
-  VERIFY(strstr((const char *)output, "test_debug_print_backtrace"));
-  RuntimeOption::InjectedStackTrace = oldValue;
+  // better tested by php code
   return Count(true);
 }
 

@@ -23,6 +23,10 @@ IMPLEMENT_SEP_EXTENSION_TEST(Output);
 bool TestExtOutput::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function mytolower($a) {"
+                         " return strtolower($a);"
+                         "}");
+
   RUN_TEST(test_ob_start);
   RUN_TEST(test_ob_clean);
   RUN_TEST(test_ob_flush);
@@ -53,7 +57,7 @@ bool TestExtOutput::RunTests(const std::string &which) {
 
 bool TestExtOutput::test_ob_start() {
   f_ob_start();
-  f_ob_start("strtolower");
+  f_ob_start("mytolower");
   g_context->write("TEst");
   f_ob_end_flush();
   VS(f_ob_get_clean(), "test");
@@ -70,7 +74,7 @@ bool TestExtOutput::test_ob_clean() {
 
 bool TestExtOutput::test_ob_flush() {
   f_ob_start();
-  f_ob_start("strtolower");
+  f_ob_start("mytolower");
   g_context->write("TEst");
   f_ob_flush();
   VS(f_ob_get_clean(), "");
@@ -80,7 +84,7 @@ bool TestExtOutput::test_ob_flush() {
 
 bool TestExtOutput::test_ob_end_clean() {
   f_ob_start();
-  f_ob_start("strtolower");
+  f_ob_start("mytolower");
   g_context->write("TEst");
   f_ob_end_clean();
   VS(f_ob_get_clean(), "");
@@ -89,7 +93,7 @@ bool TestExtOutput::test_ob_end_clean() {
 
 bool TestExtOutput::test_ob_end_flush() {
   f_ob_start();
-  f_ob_start("strtolower");
+  f_ob_start("mytolower");
   g_context->write("TEst");
   f_ob_end_flush();
   VS(f_ob_get_clean(), "test");
@@ -98,7 +102,7 @@ bool TestExtOutput::test_ob_end_flush() {
 
 bool TestExtOutput::test_flush() {
   f_ob_start();
-  f_ob_start("strtolower");
+  f_ob_start("mytolower");
   g_context->write(""); // we can't really verify what's written to stdout
   f_flush();
   f_ob_end_clean();

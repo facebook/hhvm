@@ -19,6 +19,8 @@
 
 #include <test/test_cpp_base.h>
 #include <runtime/ext/ext_variable.h> // we frequently need to call f_var_dump()
+#include <runtime/base/program_functions.h>
+#include <runtime/ext/ext_misc.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -29,6 +31,19 @@ class TestCppExt : public TestCppBase {
 public:
   TestCppExt();
 };
+
+#define DECLARE_TEST_FUNCTIONS(s)                                       \
+  if (hhvm) {                                                           \
+    char *argv[] = { const_cast<char*>(which.c_str()), nullptr };       \
+    execute_command_line_begin(1, argv, false);                         \
+    f_eval(s);                                                          \
+  }                                                                     \
+                                                                        \
+  SCOPE_EXIT {                                                          \
+    if (hhvm) {                                                         \
+      execute_command_line_end(0, false, which.c_str());                \
+    }                                                                   \
+  }
 
 ///////////////////////////////////////////////////////////////////////////////
 

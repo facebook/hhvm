@@ -24,6 +24,40 @@
 bool TestExtArray::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("function odd($s1) {"
+                         "  return $s1 & 1;"
+                         "}"
+                         "function even($s1) {"
+                         "  return !($s1 & 1);"
+                         "}"
+                         "function cube($s1) {"
+                         "  return $s1*$s1*$s1;"
+                         "}"
+                         "function rsum($s1,$s2) {"
+                         "  return (int)$s1 + (int)$s2;"
+                         "}"
+                         "function rmul($s1,$s2) {"
+                         "  return (int)$s1 * (int)$s2;"
+                         "}"
+                         "function test_print($item,$key) {"
+                         "  echo \"$key: $item\\n\";"
+                         "}"
+                         "function test_alter(&$item,$key,$prefix) {"
+                         "  $item = $prefix.': '.$item;"
+                         "}"
+                         "function comp_func($n1,$n2) {"
+                         "  $n1=(int)$n1; $n2=(int)$n2;"
+                         "  return $n1 === $n2 ? 0 : ($n1 > $n2 ? 1 : -1);"
+                         "}"
+                         "function reverse_comp_func($n1,$n2) {"
+                         "  $n1=(int)$n1; $n2=(int)$n2;"
+                         "  return $n1 === $n2 ? 0 : ($n1 > $n2 ? -1 : 1);"
+                         "}"
+                         "function reverse_strcasecmp($s1,$s2) {"
+                         "  return strcasecmp($s2,$s1);"
+                         "}"
+                        );
+
   RUN_TEST(test_array_change_key_case);
   RUN_TEST(test_array_chunk);
   RUN_TEST(test_array_combine);

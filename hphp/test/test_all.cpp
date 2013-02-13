@@ -80,11 +80,12 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
   if (set == "QuickTests") {
     return;
   }
-  if (hhvm) {
-    fprintf(stderr, "%s is not supported with USE_HHVM=1\n", suite.c_str());
-    exit(-1);
-  }
+
   if (suite == "TestPerformance") {
+    if (hhvm) {
+      fprintf(stderr, "%s is not supported with USE_HHVM=1\n", suite.c_str());
+      exit(-1);
+    }
     RUN_TESTSUITE(TestPerformance);
     return;
   }

@@ -19,16 +19,23 @@
 #include <runtime/base/server/pagelet_server.h>
 #include <runtime/base/server/xbox_server.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/ext/ext_file.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtServer::RunTests(const std::string &which) {
   bool ret = true;
 
+  DECLARE_TEST_FUNCTIONS("");
+
+  std::string root = std::string(f_getcwd().toString().c_str()) + "/test/";
+
+  RuntimeOption::SourceRoot = root;
   RuntimeOption::PageletServerThreadCount = 10;
   PageletServer::Restart();
 
   RuntimeOption::XboxServerThreadCount = 10;
+  RuntimeOption::XboxServerInfoReqInitDoc = root + "test_xbox_init.php";
   XboxServer::Restart();
 
   RUN_TEST(test_dangling_server_proxy_old_request);

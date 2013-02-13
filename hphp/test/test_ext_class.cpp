@@ -16,11 +16,27 @@
 
 #include <test/test_ext_class.h>
 #include <runtime/ext/ext_class.h>
+#include <runtime/ext/ext_array.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtClass::RunTests(const std::string &which) {
   bool ret = true;
+
+  DECLARE_TEST_FUNCTIONS("class test implements itestable {"
+                         "  public $foo;"
+                         "  protected $prop;"
+                         "  private $bar;"
+                         "  public function foo() {}"
+                         "  protected function func() {}"
+                         "  function bar() {}"
+                         "  const const_foo = 'f';"
+                         "}"
+                         "interface itestable {"
+                         "  function foo();"
+                         "  function bar();"
+                         "}"
+                        );
 
   RUN_TEST(test_get_declared_classes);
   RUN_TEST(test_get_declared_interfaces);
@@ -47,13 +63,13 @@ bool TestExtClass::RunTests(const std::string &which) {
 
 bool TestExtClass::test_get_declared_classes() {
   Array classes = f_get_declared_classes();
-  VS(classes[0], "test");
+  VS(f_in_array("test", classes, true), true);
   return Count(true);
 }
 
 bool TestExtClass::test_get_declared_interfaces() {
   Array classes = f_get_declared_interfaces();
-  VS(classes[0], "itestable");
+  VS(f_in_array("itestable", classes, true), true);
   return Count(true);
 }
 

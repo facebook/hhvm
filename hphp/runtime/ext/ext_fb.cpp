@@ -426,40 +426,53 @@ Variant f_fb_thrift_serialize(CVarRef thing) {
   return s.setSize(len);
 }
 
-int fb_compact_unserialize_from_buffer(
-  Variant& out, const char* buf, int n, int& p);
-
-Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success,
-                                VRefParam errcode /* = null_variant */) {
+Variant fb_thrift_unserialize(const char* str, int len, VRefParam success,
+                              VRefParam errcode /* = null_variant */) {
   int pos = 0;
   errcode = null;
   int errcd;
   Variant ret;
   success = false;
+
+  // high bit set: it's a fb_compact_serialize'd
+  if (str != nullptr && len > 0 && (str[0] & 0x80)) {
+    errcd = fb_compact_unserialize_from_buffer(
+      ret, str, len, pos);
+  } else {
+    errcd = fb_unserialize_from_buffer(
+      ret, str, len, &pos);
+  }
+
+  if (errcd) {
+    errcode = errcd;
+    return false;
+  }
+
+  success = true;
+  return ret;
+}
+
+Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success,
+                                VRefParam errcode /* = null_variant */) {
   if (thing.isString()) {
     String sthing = thing.toString();
-    // high bit set: it's a fb_compact_serialize'd string
-    if (!sthing.empty() && (sthing[0] & 0x80)) {
-      errcd = fb_compact_unserialize_from_buffer(
-        ret, sthing.data(), sthing.size(), pos);
-    } else {
-      errcd = fb_unserialize_from_buffer(
-        ret, sthing.data(), sthing.size(), &pos);
-    }
-    if (errcd) {
-      errcode = errcd;
-    } else {
-      success = true;
-      return ret;
-    }
-  } else {
-    errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
+
+    return fb_thrift_unserialize(sthing.data(), sthing.size(),
+                                 ref(success), ref(errcode));
   }
+
+  success = false;
+  errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
   return false;
 }
 
 Variant f_fb_serialize(CVarRef thing) {
   return f_fb_thrift_serialize(thing);
+}
+
+Variant fb_unserialize(const char* str, int len, VRefParam success,
+                       VRefParam errcode /* = null_variant */) {
+  return fb_thrift_unserialize(str, len, ref(success), ref(errcode));
 }
 
 Variant f_fb_unserialize(CVarRef thing, VRefParam success,
@@ -976,17 +989,13 @@ int fb_compact_unserialize_from_buffer(
   return 0;
 }
 
-Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefParam errcode /* = null_variant */) {
+Variant fb_compact_unserialize(const char* str, int len,
+                               VRefParam success,
+                               VRefParam errcode /* = null_variant */) {
 
-  if (!thing.isString()) {
-    success = false;
-    errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
-    return false;
-  }
   Variant ret;
-  String s = thing.toString();
   int p = 0;
-  int err = fb_compact_unserialize_from_buffer(ret, s.data(), s.size(), p);
+  int err = fb_compact_unserialize_from_buffer(ret, str, len, p);
   if (err) {
     success = false;
     errcode = err;
@@ -995,6 +1004,20 @@ Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefParam err
   success = true;
   errcode = null;
   return ret;
+}
+
+Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
+                                 VRefParam errcode /* = null_variant */) {
+
+  if (!thing.isString()) {
+    success = false;
+    errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
+    return false;
+  }
+
+  String s = thing.toString();
+  return fb_compact_unserialize(s.data(), s.size(), ref(success),
+                                ref(errcode));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

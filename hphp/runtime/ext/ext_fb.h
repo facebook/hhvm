@@ -102,6 +102,11 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff, int buff_len,
                                int *pos);
 int fb_compact_unserialize_from_buffer(Variant &res, const char *buff,
                                        int buff_len, int &pos);
+Variant fb_unserialize(const char* str, int len, VRefParam success,
+                       VRefParam errcode = null_variant);
+Variant fb_compact_unserialize(const char* str, int len,
+                               VRefParam success,
+                               VRefParam errcode = null_variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

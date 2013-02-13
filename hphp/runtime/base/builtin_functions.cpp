@@ -1388,22 +1388,27 @@ String f_serialize(CVarRef value) {
   return "";
 }
 
-Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
-  if (str.empty()) {
+Variant unserialize_ex(const char* str, int len,
+                       VariableUnserializer::Type type) {
+  if (str == nullptr || len <= 0) {
     return false;
   }
 
-  VariableUnserializer vu(str.data(), str.size(), type);
+  VariableUnserializer vu(str, len, type);
   Variant v;
   try {
     v = vu.unserialize();
   } catch (Exception &e) {
-    raise_notice("Unable to unserialize: [%s]. [%s] %s.", (const char *)str,
+    raise_notice("Unable to unserialize: [%s]. [%s] %s.", str,
                  e.getStackTrace().hexEncode().c_str(),
                  e.getMessage().c_str());
     return false;
   }
   return v;
+}
+
+Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
+  return unserialize_ex(str.data(), str.size(), type);
 }
 
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {

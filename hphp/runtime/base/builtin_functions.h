@@ -540,8 +540,15 @@ char const kUnserializableString[] = "\x01";
  */
 String f_serialize(CVarRef value);
 Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type);
+Variant unserialize_ex(const char* str, int len,
+                       VariableUnserializer::Type type);
+
+inline Variant unserialize_from_buffer(const char* str, int len) {
+  return unserialize_ex(str, len, VariableUnserializer::Serialize);
+}
+
 inline Variant f_unserialize(CStrRef str) {
-  return unserialize_ex(str, VariableUnserializer::Serialize);
+  return unserialize_from_buffer(str.data(), str.size());
 }
 
 class LVariableTable;

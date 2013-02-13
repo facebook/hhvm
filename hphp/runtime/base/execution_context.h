@@ -487,6 +487,8 @@ OPCODES
   template<bool raise>
   void contSendImpl();
   void classExistsImpl(HPHP::VM::PC& pc, HPHP::VM::Attr typeAttr);
+  void fPushObjMethodImpl(
+      VM::Class* cls, StringData* name, ObjectData* obj, int numArgs);
 
 private:
   HphpArray m_constants;

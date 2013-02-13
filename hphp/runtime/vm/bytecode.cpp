@@ -5611,29 +5611,30 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
   ar->setVarEnv(NULL);
 }
 
-#define OBJMETHOD_BODY(cls, name, obj) do { \
-  const Func* f; \
-  LookupResult res = lookupObjMethod(f, cls, name, true); \
-  assert(f); \
-  ActRec* ar = m_stack.allocA(); \
-  arSetSfp(ar, m_fp); \
-  ar->m_func = f; \
-  if (res == MethodFoundNoThis) { \
-    decRefObj(obj); \
-    ar->setClass(cls); \
-  } else { \
-    assert(res == MethodFoundWithThis || res == MagicCallFound); \
-    /* Transfer ownership of obj to the ActRec*/ \
-    ar->setThis(obj); \
-  } \
-  ar->initNumArgs(numArgs); \
-  if (res == MagicCallFound) { \
-    ar->setInvName(name); \
-  } else { \
-    ar->setVarEnv(NULL); \
-    decRefStr(name); \
-  } \
-} while (0)
+void VMExecutionContext::fPushObjMethodImpl(
+    Class* cls, StringData* name, ObjectData* obj, int numArgs) {
+  const Func* f;
+  LookupResult res = lookupObjMethod(f, cls, name, true);
+  assert(f);
+  ActRec* ar = m_stack.allocA();
+  arSetSfp(ar, m_fp);
+  ar->m_func = f;
+  if (res == MethodFoundNoThis) {
+    decRefObj(obj);
+    ar->setClass(cls);
+  } else {
+    assert(res == MethodFoundWithThis || res == MagicCallFound);
+    /* Transfer ownership of obj to the ActRec*/
+    ar->setThis(obj);
+  }
+  ar->initNumArgs(numArgs);
+  if (res == MagicCallFound) {
+    ar->setInvName(name);
+  } else {
+    ar->setVarEnv(NULL);
+    decRefStr(name);
+  }
+}
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushObjMethod(PC& pc) {
   NEXT();
@@ -5649,9 +5650,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushObjMethod(PC& pc) {
   ObjectData* obj = c2->m_data.pobj;
   Class* cls = obj->getVMClass();
   StringData* name = c1->m_data.pstr;
-  // We handle decReffing obj and name below
+  // We handle decReffing obj and name in fPushObjMethodImpl
   m_stack.ndiscard(2);
-  OBJMETHOD_BODY(cls, name, obj);
+  fPushObjMethodImpl(cls, name, obj, numArgs);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushObjMethodD(PC& pc) {
@@ -5664,9 +5665,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushObjMethodD(PC& pc) {
   }
   ObjectData* obj = c1->m_data.pobj;
   Class* cls = obj->getVMClass();
-  // We handle decReffing obj below
+  // We handle decReffing obj in fPushObjMethodImpl
   m_stack.discard();
-  OBJMETHOD_BODY(cls, name, obj);
+  fPushObjMethodImpl(cls, name, obj, numArgs);
 }
 
 template<bool forwarding>

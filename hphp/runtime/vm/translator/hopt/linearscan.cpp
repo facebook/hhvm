@@ -110,10 +110,9 @@ private:
   uint32 assignSpillLoc();
   void insertAllocFreeSpill(Trace* trace, uint32 numExtraSpillLocs);
   void insertAllocFreeSpillAux(Trace* trace, uint32 numExtraSpillLocs);
-  void rematerialize(Trace* trace);
+  void rematerialize();
   void rematerializeAux();
-  void removeUnusedSpills(Trace* trace);
-  void removeUnusedSpillsAux(Trace* trace);
+  void removeUnusedSpills();
   void collectNatives();
   void computePreColoringHint();
   IRInstruction* getNextNative() const;
@@ -134,10 +133,11 @@ private:
   std::list<RegState*> m_freeCalleeSaved;
   // List of assigned registers, sorted high to low by lastUseId.
   std::list<RegState*> m_allocatedRegs;
-  // Indexed by slot ID.
-  std::vector<SlotInfo> m_slots;
-  // All basic blocks in linearized order.
-  BlockList m_blocks;
+
+  std::vector<SlotInfo> m_slots;  // Spill info indexed by slot id
+  BlockList m_blocks;             // all basic blocks in reverse postorder
+  IdomVector m_idoms;             // immediate dominator vector
+
   // the list of native instructions in the trace sorted by instruction ID;
   // i.e. a filtered list in the same order as visited by m_blocks.
   std::list<IRInstruction*> m_natives;
@@ -763,20 +763,43 @@ void LinearScan::preAllocSpillLoc(uint32 numSpillLocs) {
   }
 }
 
+// Assign ids to each instruction in linear order.
+void numberInstructions(const BlockList& blocks) {
+  forEachInst(blocks, [](IRInstruction* inst) {
+    for (SSATmp& dst : inst->getDsts()) {
+      dst.setLastUseId(0);
+      dst.setUseCount(0);
+      dst.setSpillSlot(-1);
+    }
+  });
+  uint32_t nextId = 1;
+  forEachInst(blocks, [&](IRInstruction* inst) {
+    if (inst->getOpcode() == Marker) return; // don't number markers
+    uint32_t id = nextId++;
+    inst->setId(id);
+    for (SSATmp* tmp : inst->getSrcs()) {
+      tmp->setLastUseId(id);
+      tmp->incUseCount();
+    }
+  });
+}
+
 void LinearScan::allocRegs(Trace* trace) {
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
     coalesce(trace);
   }
 
-  m_blocks = numberInstructions(trace, *m_irFactory);
+  m_blocks = sortCfg(trace, *m_irFactory);
+  m_idoms = findDominators(m_blocks);
+  numberInstructions(m_blocks);
 
   collectNatives();
   computePreColoringHint();
   initFreeList();
   allocRegsToTrace();
   // Renumber instructions, because we added spills and reloads.
-  m_blocks = numberInstructions(trace, *m_irFactory);
+  numberInstructions(m_blocks);
 
   if (RuntimeOption::EvalHHIREnableRematerialization && m_slots.size() > 0) {
     // Don't bother rematerializing the trace if it has no Spill/Reload.
@@ -785,7 +808,7 @@ void LinearScan::allocRegs(Trace* trace) {
       trace->print(std::cout);
       std::cout << "-------------------------------------------------\n";
     }
-    rematerialize(trace);
+    rematerialize();
   }
 
   // assignSpillLoc needs next natives in order to decide whether we
@@ -814,7 +837,7 @@ void LinearScan::allocRegs(Trace* trace) {
       insertAllocFreeSpill(trace, numSpillLocs - NumPreAllocatedSpillLocs);
     }
   }
-  m_blocks = numberInstructions(trace, *m_irFactory);
+  numberInstructions(m_blocks);
 
   // record the live out register set at each instruction
   computeLiveOutRegs();
@@ -824,10 +847,13 @@ void LinearScan::allocRegsToTrace() {
   // First, visit every instruction, allocating registers as we go,
   // and inserting Reload instructions where necessary.
   for (Block* block : m_blocks) {
-    // Clear the remembered reloads because the previous block might not
-    // dominate this block.
+    // clear remembered reloads that don't dominate this block
     for (SlotInfo& slot : m_slots) {
-      slot.m_latestReload = nullptr;
+      if (SSATmp* reload = slot.m_latestReload) {
+        if (!dominates(reload->getInstruction()->getBlock(), block, m_idoms)) {
+          slot.m_latestReload = nullptr;
+        }
+      }
     }
     for (auto it = block->begin(), end = block->end(); it != end; ++it) {
       allocRegToInstruction(it);
@@ -857,17 +883,25 @@ void LinearScan::allocRegsToTrace() {
   }
 }
 
-void LinearScan::rematerialize(Trace* trace) {
+void LinearScan::rematerialize() {
   rematerializeAux();
-  m_blocks = numberInstructions(trace, *m_irFactory);
+  numberInstructions(m_blocks);
 
-  // We only replaced Reloads in <rematerializeAux>.
+  // We only replaced Reloads in rematerializeAux().
   // Here, we remove Spills that are never reloaded.
-  removeUnusedSpills(trace);
-  m_blocks = numberInstructions(trace, *m_irFactory);
+  removeUnusedSpills();
+  numberInstructions(m_blocks);
 }
 
 void LinearScan::rematerializeAux() {
+  struct State {
+    SSATmp *sp, *fp;
+    std::vector<SSATmp*> values;
+  };
+  StateVector<Block, State*> states(m_irFactory, nullptr);
+  SCOPE_EXIT { for (State* s : states) delete s; };
+  SSATmp* curSp = nullptr;
+  SSATmp* curFp = nullptr;
   std::vector<SSATmp*> localValues;
   auto killLocal = [&](IRInstruction& inst, unsigned src) {
     if (src < inst.getNumSrcs()) {
@@ -875,13 +909,46 @@ void LinearScan::rematerializeAux() {
       if (loc < localValues.size()) localValues[loc] = nullptr;
     }
   };
+  auto setLocal = [&](unsigned loc, SSATmp* value) {
+    // Note that when we implement inlining, we will need to deal
+    // with the new local id space of the inlined function.
+    if (loc >= localValues.size()) localValues.resize(loc + 1);
+    localValues[loc] = canonicalize(value);
+  };
+  // Search for a local that stores <value>
+  auto findLocal = [&](SSATmp* value) -> int {
+    auto pos = std::find(localValues.begin(), localValues.end(),
+                         canonicalize(value));
+    return pos != localValues.end() ? pos - localValues.begin() : -1;
+  };
+  // save the current state for future use by block; merge if necessary.
+  auto saveState = [&](Block* block) {
+    if (State* state = states[block]) {
+      // merge with saved state
+      assert(curFp == state->fp);
+      if (curSp != state->sp) state->sp = nullptr;
+      for (unsigned i = 0; i < state->values.size(); ++i) {
+        if (i >= localValues.size() || localValues[i] != state->values[i]) {
+          state->values[i] = nullptr;
+        }
+      }
+    } else {
+      // snapshot state for use at target.
+      State* state = states[block] = new State;
+      state->sp = curSp;
+      state->fp = curFp;
+      state->values = localValues;
+    }
+  };
 
   for (Block* block : m_blocks) {
-    // only rematerialize within a block since previous block might
-    // not dominate this one.  TODO: t2068637.
-    SSATmp* curSp = nullptr;
-    SSATmp* curFp = nullptr;
-    localValues.clear();
+    if (State* state = states[block]) {
+      states[block] = nullptr;
+      localValues = state->values;
+      curSp = state->sp;
+      curFp = state->fp;
+      delete state;
+    }
     for (auto it = block->begin(); it != block->end(); ++it) {
       IRInstruction& inst = *it;
       Opcode opc = inst.getOpcode();
@@ -910,13 +977,9 @@ void LinearScan::rematerializeAux() {
           newInst->setTaken(nullptr);
         } else if (curFp) {
           // Rematerialize LdLoc.
-          std::vector<SSATmp*>::iterator pos =
-            std::find(localValues.begin(),
-                      localValues.end(),
-                      canonicalize(spilledTmp));
-          // Search for a local that stores the value of <spilledTmp>.
-          if (pos != localValues.end()) {
-            LocalId localId(pos - localValues.begin());
+          int loc = findLocal(spilledTmp);
+          if (loc != -1) {
+            LocalId localId(loc);
             newInst = m_irFactory->gen(LdLoc, dst->getType(), &localId, curFp);
           }
         }
@@ -939,14 +1002,8 @@ void LinearScan::rematerializeAux() {
       }
 
       if (opc == LdLoc || opc == StLoc || opc == StLocNT) {
-        int locId = inst.getExtra<LocalId>()->locId;
-        // Note that when we implement inlining, we will need to deal
-        // with the new local id space of the inlined function.
-        SSATmp* localValue = (opc == LdLoc ? inst.getDst() : inst.getSrc(1));
-        if (int(localValues.size()) < locId + 1) {
-          localValues.resize(locId + 1);
-        }
-        localValues[locId] = canonicalize(localValue);
+        setLocal(inst.getExtra<LocalId>()->locId,
+                 opc == LdLoc ? inst.getDst() : inst.getSrc(1));
       }
       // Other instructions that may have side effects on locals must
       // kill the local variable values.
@@ -962,36 +1019,28 @@ void LinearScan::rematerializeAux() {
         killLocal(inst, 3);
       }
     }
+    if (Block* taken = block->getTaken()) saveState(taken);
+    if (Block* next = block->getNext()) saveState(next);
   }
 }
 
-void LinearScan::removeUnusedSpills(Trace* trace) {
-  removeUnusedSpillsAux(trace);
-  for (Trace* exit : trace->getExitTraces()) {
-    removeUnusedSpillsAux(exit);
-  }
-}
-
-void LinearScan::removeUnusedSpillsAux(Trace* trace) {
-  for (Block* block : trace->getBlocks()) {
-    for (auto it = block->begin(), end = block->end(); it != end;) {
-      auto next = it; ++next;
-      IRInstruction& inst = *it;
-      if (inst.getOpcode() == Spill && inst.getDst()->getUseCount() == 0) {
-        block->erase(it);
-        SSATmp* src = inst.getSrc(0);
-        if (src->decUseCount() == 0) {
-          Opcode srcOpc = src->getInstruction()->getOpcode();
-          // Not all instructions are able to take noreg as its dest
-          // reg.  We pick LdLoc and IncRef because they occur often.
-          if (srcOpc == IncRef || srcOpc == LdLoc) {
-            for (int locIndex = 0; locIndex < src->numNeededRegs(); ++locIndex) {
-              src->setReg(InvalidReg, locIndex);
-            }
+void LinearScan::removeUnusedSpills() {
+  for (SlotInfo& slot : m_slots) {
+    IRInstruction* spill = slot.m_spillTmp->getInstruction();
+    if (spill->getDst()->getUseCount() == 0) {
+      Block* block = spill->getBlock();
+      block->erase(block->iteratorTo(spill));
+      SSATmp* src = spill->getSrc(0);
+      if (src->decUseCount() == 0) {
+        Opcode srcOpc = src->getInstruction()->getOpcode();
+        // Not all instructions are able to take noreg as its dest
+        // reg.  We pick LdLoc and IncRef because they occur often.
+        if (srcOpc == IncRef || srcOpc == LdLoc) {
+          for (int i = 0, n = src->numNeededRegs(); i < n; ++i) {
+            src->setReg(InvalidReg, i);
           }
         }
       }
-      it = next;
     }
   }
 }

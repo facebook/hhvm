@@ -560,7 +560,7 @@ void CodeGenerator::cgJmpNSame(IRInstruction* inst) { cgJcc(inst); }
  * to put all the args in desired registers.
  */
 typedef Transl::X64Assembler Asm;
-static void shuffleArgs(Asm& a, ArgGroup& args, IRInstruction* inst) {
+static void shuffleArgs(Asm& a, ArgGroup& args) {
   // First schedule arg moves
   for (size_t i = 0; i < args.size(); ++i) {
     // We don't support memory-to-register moves currently.
@@ -632,15 +632,6 @@ static void shuffleArgs(Asm& a, ArgGroup& args, IRInstruction* inst) {
         a.  addq   (argDesc1->getImm(), howTo[i].m_reg1);
       } else if (argDesc1->isZeroExtend()) {
         a.  movzbl (rbyte(howTo[i].m_reg1), r32(howTo[i].m_reg1));
-      }
-    }
-  }
-  if (inst->isNative()) {
-    int numBetweenCaller = 0;
-    for (size_t i = 0; i < howTo.size(); ++i) {
-      if (kCallerSaved.contains(howTo[i].m_reg1) &&
-          kCallerSaved.contains(howTo[i].m_reg2)) {
-        ++numBetweenCaller;
       }
     }
   }
@@ -769,7 +760,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
     args[i].setDstReg(argNumToRegName[i]);
   }
 
-  shuffleArgs(a, args, m_curInst);
+  shuffleArgs(a, args);
 
   // do the call; may use a trampoline
   m_tx64->emitCall(a, call);
@@ -2820,6 +2811,13 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
 void CodeGenerator::emitSpillActRec(SSATmp* sp,
                                     int64_t spOffset,
                                     SSATmp* defAR) {
+  if (debug) {
+    // Ensure srcs of defAR are still live, since we use their registers.
+    for (SSATmp* UNUSED src : defAR->getInstruction()->getSrcs()) {
+      assert(src->getInstruction()->getOpcode() == DefConst ||
+             src->getLastUseId() >= m_curInst->getId());
+    }
+  }
   auto* defInst     = defAR->getInstruction();
   SSATmp* fp        = defInst->getSrc(0);
   SSATmp* func      = defInst->getSrc(1);
@@ -4170,7 +4168,7 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
         args[j++].setDstReg(dst->getReg(1));
       }
     }
-    shuffleArgs(m_as, args, inst);
+    shuffleArgs(m_as, args);
   }
   emitFwdJmp(inst->getTaken());
 }

@@ -1004,17 +1004,6 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
   }
 }
 
-void resetIds(Trace* trace) {
-  forEachTraceInst(trace, [](IRInstruction* inst) {
-    inst->setId(0);
-    for (SSATmp& dst : inst->getDsts()) {
-      dst.setLastUseId(0);
-      dst.setUseCount(0);
-      dst.setSpillSlot(-1);
-    }
-  });
-}
-
 int32_t spillValueCells(IRInstruction* spillStack) {
   int32_t numSrcs = spillStack->getNumSrcs();
   int32_t ret = 0;
@@ -1027,26 +1016,6 @@ int32_t spillValueCells(IRInstruction* spillStack) {
     }
   }
   return ret;
-}
-
-BlockList numberInstructions(Trace* trace, const IRFactory& factory) {
-  resetIds(trace);
-  BlockList blocks = sortCfg(trace, factory);
-  uint32_t nextId = 1;
-  for (Block* block : blocks) {
-    for (IRInstruction& inst : *block) {
-      if (inst.getOpcode() == Marker) {
-        continue; // don't number markers
-      }
-      uint32_t id = nextId++;
-      inst.setId(id);
-      for (SSATmp* tmp : inst.getSrcs()) {
-        tmp->setLastUseId(id);
-        tmp->incUseCount();
-      }
-    }
-  }
-  return blocks;
 }
 
 /**
@@ -1191,7 +1160,7 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
     checkBlock(b);
   });
   BlockList blocks = sortCfg(trace, factory);
-  vector<int> idom = findDominators(blocks);
+  IdomVector idom = findDominators(blocks);
   // build dominator-children lists
   std::forward_list<Block*> children[blocks.size()];
   for (Block* block : blocks) {

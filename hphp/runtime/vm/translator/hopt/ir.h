@@ -1436,7 +1436,11 @@ struct SpillInfo {
   explicit SpillInfo(uint32_t v)  : m_type(Memory), m_val(v) {}
 
   Type      type() const { return m_type; }
+
+  // return MMX register number for this spill
   RegNumber mmx()  const { return RegNumber(m_val); }
+
+  // return offset in 8-byte-words from stack pointer
   uint32_t  mem()  const { return m_val; }
 
 private:
@@ -1877,12 +1881,6 @@ bool hasInternalFlow(Trace*);
  */
 void optimizeTrace(Trace*, IRFactory* irFactory);
 
-/**
- * Assign ids to each instruction in reverse postorder (lowest id first),
- * and returns the reachable blocks in numbered order.
- */
-BlockList numberInstructions(Trace*, const IRFactory&);
-
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not
  * including the number it pops.)  That is, for each SSATmp in the
@@ -1952,13 +1950,18 @@ void forEachTraceBlock(Trace* main, Body body) {
 /*
  * Visit the instructions in this trace, in block order.
  */
-template <class Body>
-void forEachInst(Trace* trace, Body body) {
-  for (Block* block : trace->getBlocks()) {
+template <class BlockList, class Body>
+void forEachInst(const BlockList& blocks, Body body) {
+  for (Block* block : blocks) {
     for (IRInstruction& inst : *block) {
       body(&inst);
     }
   }
+}
+
+template <class Body>
+void forEachInst(Trace* trace, Body body) {
+  forEachInst(trace->getBlocks(), body);
 }
 
 /*

@@ -284,6 +284,8 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
                             repoarg.c_str(),
                             jitarg.c_str(),
                             jit_use_ir.c_str(),
+                            // Next arg only takes effect if JitUseIR=true also
+                            "-vEval.HHIRDisableTx64=true",
                             jit_rename.c_str(),
                             nullptr};
       Process::Exec(HHVM_PATH, argv, nullptr, actual, &err);

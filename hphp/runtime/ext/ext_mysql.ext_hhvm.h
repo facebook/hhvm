@@ -34,6 +34,86 @@ query_timeout_ms => st8
 TypedValue* fh_mysql_connect(TypedValue* _rv, Value* server, Value* username, Value* password, bool new_link, int client_flags, int connect_timeout_ms, int query_timeout_ms) asm("_ZN4HPHP15f_mysql_connectERKNS_6StringES2_S2_biii");
 
 /*
+HPHP::Variant HPHP::f_mysql_async_connect_start(HPHP::String const&, HPHP::String const&, HPHP::String const&, HPHP::String const&)
+_ZN4HPHP27f_mysql_async_connect_startERKNS_6StringES2_S2_S2_
+
+(return value) => rax
+_rv => rdi
+server => rsi
+username => rdx
+password => rcx
+database => r8
+*/
+
+TypedValue* fh_mysql_async_connect_start(TypedValue* _rv, Value* server, Value* username, Value* password, Value* database) asm("_ZN4HPHP27f_mysql_async_connect_startERKNS_6StringES2_S2_S2_");
+
+/*
+bool HPHP::f_mysql_async_connect_completed(HPHP::Variant const&)
+_ZN4HPHP31f_mysql_async_connect_completedERKNS_7VariantE
+
+(return value) => rax
+link_identifier => rdi
+*/
+
+bool fh_mysql_async_connect_completed(TypedValue* link_identifier) asm("_ZN4HPHP31f_mysql_async_connect_completedERKNS_7VariantE");
+
+/*
+bool HPHP::f_mysql_async_query_start(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP25f_mysql_async_query_startERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+query => rdi
+link_identifier => rsi
+*/
+
+bool fh_mysql_async_query_start(Value* query, TypedValue* link_identifier) asm("_ZN4HPHP25f_mysql_async_query_startERKNS_6StringERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_async_query_result(HPHP::Variant const&)
+_ZN4HPHP26f_mysql_async_query_resultERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_async_query_result(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP26f_mysql_async_query_resultERKNS_7VariantE");
+
+/*
+bool HPHP::f_mysql_async_query_completed(HPHP::Variant const&)
+_ZN4HPHP29f_mysql_async_query_completedERKNS_7VariantE
+
+(return value) => rax
+result => rdi
+*/
+
+bool fh_mysql_async_query_completed(TypedValue* result) asm("_ZN4HPHP29f_mysql_async_query_completedERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_async_fetch_array(HPHP::Variant const&, int)
+_ZN4HPHP25f_mysql_async_fetch_arrayERKNS_7VariantEi
+
+(return value) => rax
+_rv => rdi
+result => rsi
+result_type => rdx
+*/
+
+TypedValue* fh_mysql_async_fetch_array(TypedValue* _rv, TypedValue* result, int result_type) asm("_ZN4HPHP25f_mysql_async_fetch_arrayERKNS_7VariantEi");
+
+/*
+HPHP::Variant HPHP::f_mysql_async_wait_actionable(HPHP::Variant const&, double)
+_ZN4HPHP29f_mysql_async_wait_actionableERKNS_7VariantEd
+
+(return value) => rax
+_rv => rdi
+items => rsi
+timeout => xmm0
+*/
+
+TypedValue* fh_mysql_async_wait_actionable(TypedValue* _rv, TypedValue* items, double timeout) asm("_ZN4HPHP29f_mysql_async_wait_actionableERKNS_7VariantEd");
+
+/*
 HPHP::Variant HPHP::f_mysql_pconnect(HPHP::String const&, HPHP::String const&, HPHP::String const&, int, int, int)
 _ZN4HPHP16f_mysql_pconnectERKNS_6StringES2_S2_iii
 

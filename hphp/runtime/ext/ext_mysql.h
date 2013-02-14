@@ -102,6 +102,10 @@ public:
   bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
                CStrRef password, CStrRef database, int client_flags,
                int connect_timeout);
+#ifdef FACEBOOK
+  bool async_connect(CStrRef host, int port, CStrRef socket, CStrRef username,
+                     CStrRef password, CStrRef database);
+#endif
   bool reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
                  CStrRef password, CStrRef database, int client_flags,
                  int connect_timeout);
@@ -196,8 +200,14 @@ public:
 
   MySQLFieldInfo *fetchFieldInfo();
 
+  void setAsyncConnection(MySQL* conn) {
+    m_conn = conn;
+    m_conn->incRefCount();
+  }
+
 protected:
   MYSQL_RES *m_res;
+  MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
   MySQLFieldInfo *m_fields;
   std::list<std::vector<Variant *> > *m_rows;
@@ -206,6 +216,7 @@ protected:
   bool m_row_ready; // set to false after seekRow, true after fetchRow
   int64 m_field_count;
   int64 m_row_count;
+  MySQL* m_conn;  // only set for async for refcounting underlying buffers
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -240,6 +251,17 @@ Variant f_mysql_pconnect_with_db(CStrRef server = null_string,
                          int client_flags = 0,
                          int connect_timeout_ms = -1,
                          int query_timeout_ms = -1);
+
+Variant f_mysql_async_connect_start(CStrRef server = null_string,
+                                    CStrRef username = null_string,
+                                    CStrRef password = null_string,
+                                    CStrRef database = null_string);
+bool f_mysql_async_connect_completed(CVarRef link_identifier);
+bool f_mysql_async_query_start(CStrRef query, CVarRef link_identifier);
+Variant f_mysql_async_query_result(CVarRef link_identifier);
+bool f_mysql_async_query_completed(CVarRef result);
+Variant f_mysql_async_fetch_array(CVarRef result, int result_type = 1);
+Variant f_mysql_async_wait_actionable(CVarRef items, double timeout);
 
 String f_mysql_escape_string(CStrRef unescaped_string);
 

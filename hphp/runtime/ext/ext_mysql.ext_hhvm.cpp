@@ -113,6 +113,341 @@ TypedValue* fg_mysql_connect(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_mysql_async_connect_start(HPHP::String const&, HPHP::String const&, HPHP::String const&, HPHP::String const&)
+_ZN4HPHP27f_mysql_async_connect_startERKNS_6StringES2_S2_S2_
+
+(return value) => rax
+_rv => rdi
+server => rsi
+username => rdx
+password => rcx
+database => r8
+*/
+
+TypedValue* fh_mysql_async_connect_start(TypedValue* _rv, Value* server, Value* username, Value* password, Value* database) asm("_ZN4HPHP27f_mysql_async_connect_startERKNS_6StringES2_S2_S2_");
+
+TypedValue * fg1_mysql_async_connect_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_async_connect_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  switch (count) {
+  default: // count >= 4
+    if (!IS_STRING_TYPE((args-3)->m_type)) {
+      tvCastToStringInPlace(args-3);
+    }
+  case 3:
+    if (!IS_STRING_TYPE((args-2)->m_type)) {
+      tvCastToStringInPlace(args-2);
+    }
+  case 2:
+    if (!IS_STRING_TYPE((args-1)->m_type)) {
+      tvCastToStringInPlace(args-1);
+    }
+  case 1:
+    if (!IS_STRING_TYPE((args-0)->m_type)) {
+      tvCastToStringInPlace(args-0);
+    }
+  case 0:
+    break;
+  }
+  fh_mysql_async_connect_start((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_async_connect_start(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 4LL) {
+      if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
+        fh_mysql_async_connect_start((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 4);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_async_connect_start(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 4);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_toomany_arguments_nr("mysql_async_connect_start", 4, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 4);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_mysql_async_connect_completed(HPHP::Variant const&)
+_ZN4HPHP31f_mysql_async_connect_completedERKNS_7VariantE
+
+(return value) => rax
+link_identifier => rdi
+*/
+
+bool fh_mysql_async_connect_completed(TypedValue* link_identifier) asm("_ZN4HPHP31f_mysql_async_connect_completedERKNS_7VariantE");
+
+TypedValue* fg_mysql_async_connect_completed(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv._count = 0;
+      rv.m_type = KindOfBoolean;
+      rv.m_data.num = (fh_mysql_async_connect_completed((args-0))) ? 1LL : 0LL;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("mysql_async_connect_completed", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_mysql_async_query_start(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP25f_mysql_async_query_startERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+query => rdi
+link_identifier => rsi
+*/
+
+bool fh_mysql_async_query_start(Value* query, TypedValue* link_identifier) asm("_ZN4HPHP25f_mysql_async_query_startERKNS_6StringERKNS_7VariantE");
+
+TypedValue * fg1_mysql_async_query_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_async_query_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfBoolean;
+  tvCastToStringInPlace(args-0);
+  rv->m_data.num = (fh_mysql_async_query_start((Value*)(args-0), (args-1))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_mysql_async_query_start(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_mysql_async_query_start((Value*)(args-0), (args-1))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_async_query_start(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_async_query_start", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_async_query_result(HPHP::Variant const&)
+_ZN4HPHP26f_mysql_async_query_resultERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_async_query_result(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP26f_mysql_async_query_resultERKNS_7VariantE");
+
+TypedValue* fg_mysql_async_query_result(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      fh_mysql_async_query_result((&(rv)), (args-0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("mysql_async_query_result", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_mysql_async_query_completed(HPHP::Variant const&)
+_ZN4HPHP29f_mysql_async_query_completedERKNS_7VariantE
+
+(return value) => rax
+result => rdi
+*/
+
+bool fh_mysql_async_query_completed(TypedValue* result) asm("_ZN4HPHP29f_mysql_async_query_completedERKNS_7VariantE");
+
+TypedValue* fg_mysql_async_query_completed(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv._count = 0;
+      rv.m_type = KindOfBoolean;
+      rv.m_data.num = (fh_mysql_async_query_completed((args-0))) ? 1LL : 0LL;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("mysql_async_query_completed", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_async_fetch_array(HPHP::Variant const&, int)
+_ZN4HPHP25f_mysql_async_fetch_arrayERKNS_7VariantEi
+
+(return value) => rax
+_rv => rdi
+result => rsi
+result_type => rdx
+*/
+
+TypedValue* fh_mysql_async_fetch_array(TypedValue* _rv, TypedValue* result, int result_type) asm("_ZN4HPHP25f_mysql_async_fetch_arrayERKNS_7VariantEi");
+
+TypedValue * fg1_mysql_async_fetch_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_async_fetch_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToInt64InPlace(args-1);
+  fh_mysql_async_fetch_array((rv), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(1));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_async_fetch_array(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 1LL && count <= 2LL) {
+      if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
+        fh_mysql_async_fetch_array((&(rv)), (args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_async_fetch_array(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_async_fetch_array", count, 1, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_async_wait_actionable(HPHP::Variant const&, double)
+_ZN4HPHP29f_mysql_async_wait_actionableERKNS_7VariantEd
+
+(return value) => rax
+_rv => rdi
+items => rsi
+timeout => xmm0
+*/
+
+TypedValue* fh_mysql_async_wait_actionable(TypedValue* _rv, TypedValue* items, double timeout) asm("_ZN4HPHP29f_mysql_async_wait_actionableERKNS_7VariantEd");
+
+TypedValue * fg1_mysql_async_wait_actionable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_async_wait_actionable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToDoubleInPlace(args-1);
+  fh_mysql_async_wait_actionable((rv), (args-0), (args[-1].m_data.dbl));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_async_wait_actionable(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if ((args-1)->m_type == KindOfDouble) {
+        fh_mysql_async_wait_actionable((&(rv)), (args-0), (args[-1].m_data.dbl));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_async_wait_actionable(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_async_wait_actionable", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_mysql_pconnect(HPHP::String const&, HPHP::String const&, HPHP::String const&, int, int, int)
 _ZN4HPHP16f_mysql_pconnectERKNS_6StringES2_S2_iii
 

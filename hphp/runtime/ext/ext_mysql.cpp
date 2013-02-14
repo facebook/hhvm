@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_preg.h>
 #include <runtime/ext/ext_network.h>
 #include <runtime/ext/mysql_stats.h>
+#include <runtime/base/file/socket.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/util/request_local.h>
@@ -41,7 +42,8 @@ StaticString MySQLResult::s_class_name("mysql result");
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(MySQLResult);
 
 MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)
-  : m_res(res), m_localized(localized) {
+    : m_res(res), m_current_async_row(NULL), m_localized(localized),
+      m_conn(NULL) {
   m_fields = NULL;
   m_field_count = 0;
   m_current_field = -1;
@@ -79,6 +81,10 @@ MySQLResult::~MySQLResult() {
     }
     delete m_rows;
     m_rows = NULL;
+  }
+  if (m_conn) {
+    m_conn->decRefCount();
+    m_conn = NULL;
   }
 }
 
@@ -507,6 +513,7 @@ static Variant php_mysql_field_info(CVarRef result, int field,
 static Variant php_mysql_do_connect(String server, String username,
                                     String password, String database,
                                     int client_flags, bool persistent,
+                                    bool async,
                                     int connect_timeout_ms,
                                     int query_timeout_ms) {
   if (connect_timeout_ms < 0) {
@@ -554,11 +561,24 @@ static Variant php_mysql_do_connect(String server, String username,
   if (mySQL == NULL) {
     mySQL = new MySQL(host, port, username, password, database);
     ret = mySQL;
-    if (!mySQL->connect(host, port, socket, username, password,
-                        database, client_flags, connect_timeout_ms)) {
-      MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
-      mySQL->setLastError("mysql_connect");
-      return false;
+    if (async) {
+#ifdef FACEBOOK
+      if (!mySQL->async_connect(host, port, socket, username, password,
+                                database)) {
+        MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
+        mySQL->setLastError("mysql_real_connect_nonblocking_init");
+        return false;
+      }
+#else
+      throw NotImplementedException("mysql_async_connect_start");
+#endif
+    } else {
+      if (!mySQL->connect(host, port, socket, username, password,
+                          database, client_flags, connect_timeout_ms)) {
+        MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
+        mySQL->setLastError("mysql_connect");
+        return false;
+      }
     }
   } else {
     ret = mySQL;
@@ -588,7 +608,7 @@ Variant f_mysql_connect(CStrRef server /* = null_string */,
                         int connect_timeout_ms /* = -1 */,
                         int query_timeout_ms /* = -1 */) {
   return php_mysql_do_connect(server, username, password, "",
-                              client_flags, false,
+                              client_flags, false, false,
                               connect_timeout_ms, query_timeout_ms);
 }
 
@@ -601,7 +621,7 @@ Variant f_mysql_connect_with_db(CStrRef server /* = null_string */,
                         int connect_timeout_ms /* = -1 */,
                         int query_timeout_ms /* = -1 */) {
   return php_mysql_do_connect(server, username, password, database,
-                              client_flags, false,
+                              client_flags, false, false,
                               connect_timeout_ms, query_timeout_ms);
 }
 
@@ -612,7 +632,7 @@ Variant f_mysql_pconnect(CStrRef server /* = null_string */,
                          int connect_timeout_ms /* = -1 */,
                          int query_timeout_ms /* = -1 */) {
   return php_mysql_do_connect(server, username, password, "",
-                              client_flags, true,
+                              client_flags, true, false,
                               connect_timeout_ms, query_timeout_ms);
 }
 
@@ -624,7 +644,7 @@ Variant f_mysql_pconnect_with_db(CStrRef server /* = null_string */,
                          int connect_timeout_ms /* = -1 */,
                          int query_timeout_ms /* = -1 */) {
   return php_mysql_do_connect(server, username, password, database,
-                              client_flags, true,
+                              client_flags, true, false,
                               connect_timeout_ms, query_timeout_ms);
 }
 
@@ -803,7 +823,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 }
 
 static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
-                                          bool use_store) {
+                                          bool use_store, bool async_mode) {
   if (RuntimeOption::MySQLReadOnly &&
       same(f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query), 0)) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",
@@ -883,6 +903,20 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     mySQL->m_multi_query = false;
   }
 
+  if (async_mode) {
+#ifdef FACEBOOK
+    int ok =
+      mysql_real_query_nonblocking_init(conn, query.data(), query.size());
+    if (!ok) {
+      raise_notice("runtime/ext_mysql: failed async executing [%s] [%s]",
+                   query.data(), mysql_error(conn));
+    }
+    return ok;
+#else
+    throw NotImplementedException("mysql_async_query_start");
+#endif
+  }
+
   if (mysql_real_query(conn, query.data(), query.size())) {
     raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
                  mysql_error(conn));
@@ -953,7 +987,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
 }
 
 Variant f_mysql_query(CStrRef query, CVarRef link_identifier /* = null */) {
-  return php_mysql_do_query_general(query, link_identifier, true);
+  return php_mysql_do_query_general(query, link_identifier, true, false);
 }
 
 Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier /* = null */) {
@@ -1009,7 +1043,7 @@ Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
 
 Variant f_mysql_unbuffered_query(CStrRef query,
                                  CVarRef link_identifier /* = null */) {
-  return php_mysql_do_query_general(query, link_identifier, false);
+  return php_mysql_do_query_general(query, link_identifier, false, false);
 }
 
 Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
@@ -1118,6 +1152,300 @@ static Variant php_mysql_fetch_hash(CVarRef result, int result_type) {
   }
   return ret;
 }
+
+/* The mysql_*_nonblocking calls are Facebook extensions to
+   libmysqlclient; for now, protect with an ifdef.  Once open sourced,
+   the client will be detectable via its own ifdef. */
+#ifdef FACEBOOK
+bool MySQL::async_connect(CStrRef host, int port, CStrRef socket,
+                          CStrRef username, CStrRef password,
+                          CStrRef database) {
+  if (m_conn == NULL) {
+    m_conn = create_new_conn();
+  }
+  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    ServerStats::Log("sql.conn", 1);
+  }
+  IOStatusHelper io("mysql::async_connect", host.data(), port);
+  m_xaction_count = 0;
+  if (!mysql_real_connect_nonblocking_init(
+        m_conn, host.data(), username.data(), password.data(),
+        (database.empty() ? NULL : database.data()), port,
+        socket.empty() ? NULL : socket.data(), CLIENT_INTERACTIVE)) {
+    return false;
+  }
+  return true;
+}
+
+Variant f_mysql_async_connect_start(CStrRef server /* = null_string */,
+                                    CStrRef username /* = null_string */,
+                                    CStrRef password /* = null_string */,
+                                    CStrRef database /* = null_string */) {
+  return php_mysql_do_connect(server, username, password, database,
+                              0, false, true, 0, 0);
+}
+
+bool f_mysql_async_connect_completed(CVarRef link_identifier) {
+  MySQL* mySQL = MySQL::Get(link_identifier);
+  if (!mySQL) {
+    raise_warning("supplied argument is not a valid MySQL-Link resource");
+    return true;
+  }
+
+  MYSQL* conn = mySQL->get();
+  if (conn->async_op_status != ASYNC_OP_CONNECT) {
+    // Don't warn if we're in UNSET state (ie between queries, etc)
+    if (conn->async_op_status != ASYNC_OP_UNSET) {
+      raise_warning("runtime/ext_mysql: no pending async connect in progress");
+    }
+    return true;
+  }
+
+  int error = 0;
+  int status = mysql_real_connect_nonblocking_run(conn, &error);
+  if (error) {
+    return true;
+  }
+  return status == ASYNC_CLIENT_COMPLETE;
+}
+
+bool f_mysql_async_query_start(CStrRef query, CVarRef link_identifier) {
+  MYSQL* conn = MySQL::GetConn(link_identifier);
+  if (!conn) {
+    return false;
+  }
+
+  if (conn->async_op_status != ASYNC_OP_UNSET) {
+    raise_warning("runtime/ext_mysql: attempt to run async query while async "
+                  "operation already pending");
+    return false;
+  }
+  Variant ret = php_mysql_do_query_general(query, link_identifier, true, true);
+  if (ret.m_type != KindOfInt64) {
+    raise_warning("runtime/ext_mysql: unexpected return from "
+                  "php_mysql_do_query_general");
+    return false;
+  }
+  return true;
+}
+
+Variant f_mysql_async_query_result(CVarRef link_identifier) {
+  MySQL* mySQL = MySQL::Get(link_identifier);
+  if (!mySQL) {
+    raise_warning("supplied argument is not a valid MySQL-Link resource");
+    return false;
+  }
+  MYSQL* conn = mySQL->get();
+  if (!conn || conn->async_op_status != ASYNC_OP_QUERY) {
+    raise_warning("runtime/ext_mysql: attempt to check query result when query "
+                  "not executing");
+    return false;
+  }
+
+  int error = 0;
+  int status = mysql_real_query_nonblocking_run(conn, &error);
+  if (error) {
+    return false;
+  }
+  if (status != ASYNC_CLIENT_COMPLETE) {
+    return false;
+  }
+
+  MYSQL_RES* mysql_result = mysql_use_result(conn);
+  MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
+  r->setAsyncConnection(mySQL);
+  Object ret(r);
+  return ret;
+}
+
+bool f_mysql_async_query_completed(CVarRef result) {
+  MySQLResult *res = result.toObject().getTyped<MySQLResult>
+    (!RuntimeOption::ThrowBadTypeExceptions,
+     !RuntimeOption::ThrowBadTypeExceptions);
+  return !res || res->get() == NULL;
+}
+
+Variant f_mysql_async_fetch_array(CVarRef result, int result_type /* = 1 */) {
+  if ((result_type & MYSQL_BOTH) == 0) {
+    throw_invalid_argument("result_type: %d", result_type);
+    return false;
+  }
+
+  MySQLResult* res = get_result(result);
+  if (!res) {
+    return false;
+  }
+
+  MYSQL_RES* mysql_result = res->get();
+  if (!mysql_result) {
+    raise_warning("invalid parameter to mysql_async_fetch_array");
+    return false;
+  }
+
+  MYSQL_ROW mysql_row = NULL;
+  int status = mysql_fetch_row_nonblocking(&mysql_row, mysql_result);
+  // Last row, or no row yet available.
+  if (status == ASYNC_CLIENT_NOT_READY) {
+    return false;
+  }
+  if (mysql_row == NULL) {
+    res->close();
+    return false;
+  }
+
+  unsigned long *mysql_row_lengths = mysql_fetch_lengths(mysql_result);
+  if (!mysql_row_lengths) {
+    return false;
+  }
+
+  mysql_field_seek(mysql_result, 0);
+
+  Array ret;
+  MYSQL_FIELD *mysql_field;
+  int i;
+  for (mysql_field = mysql_fetch_field(mysql_result), i = 0; mysql_field;
+       mysql_field = mysql_fetch_field(mysql_result), i++) {
+    Variant data;
+    if (mysql_row[i]) {
+      data = mysql_makevalue(String(mysql_row[i], mysql_row_lengths[i],
+                                    CopyString), mysql_field);
+    }
+    if (result_type & MYSQL_NUM) {
+      ret.set(i, data);
+    }
+    if (result_type & MYSQL_ASSOC) {
+      ret.set(String(mysql_field->name, CopyString), data);
+    }
+  }
+
+  return ret;
+}
+
+// This function takes an array of arrays, each of which is of the
+// form array($dbh, ...).  The only thing that matters in the inner
+// arrays is the first element being a MySQL instance.  It then
+// procedes to block for up to 'timeout' seconds, waiting for the
+// first actionable descriptor(s), which it then returns in the form
+// of the original arrays passed in.  The intention is the caller
+// would include other information they care about in the tail of the
+// array so they can decide how to act on the
+// potentially-now-queryable descriptors.
+//
+// This function is a poor shadow of how the async library can be
+// used; for more complex cases, we'd use libevent and share our event
+// loop with other IO operations such as memcache ops, thrift calls,
+// etc.  That said, this function is reasonably efficient for most use
+// cases.
+Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
+  size_t count = items.toArray().size();
+  if (count == 0 || timeout < 0) {
+    return Array::Create();
+  }
+
+  struct pollfd* fds = (struct pollfd*)calloc(count, sizeof(struct pollfd));
+  ScopeGuard fds_free([fds]() { free(fds); });
+
+  // Walk our input, determine what kind of poll() operation is
+  // necessary for the descriptor in question, and put an entry into
+  // fds.
+  int nfds = 0;
+  for (ArrayIter iter(items); iter; ++iter) {
+    Array entry = iter.second().toArray();
+    if (entry.size() < 1) {
+      raise_warning("element %d did not have at least one entry",
+                   nfds);
+      return Array::Create();
+    }
+
+    MySQL* mySQL = entry.rvalAt(0).toObject().getTyped<MySQL>();
+    MYSQL* conn = mySQL->get();
+    if (conn->async_op_status == ASYNC_OP_UNSET) {
+      raise_warning("runtime/ext_mysql: no pending async operation in "
+                    "progress");
+      return Array::Create();
+    }
+
+    pollfd* fd = &fds[nfds++];
+    fd->fd = conn->net.fd;
+    if (conn->net.nonblocking_status == NET_NONBLOCKING_READ) {
+      fd->events = POLLIN;
+    } else {
+      fd->events = POLLOUT;
+    }
+    fd->revents = 0;
+  }
+
+  // The poll itself; either the timeout is hit or one or more of the
+  // input fd's is ready.
+  int timeout_millis = static_cast<long>(timeout * 1000);
+  int res = poll(fds, nfds, timeout_millis);
+  if (res == -1) {
+    raise_warning("unable to poll [%d]: %s", errno,
+                  Util::safe_strerror(errno).c_str());
+    return Array::Create();
+  }
+
+  // Now just find the ones that are ready, and copy the corresponding
+  // arrays from our input array into our return value.
+  Array ret = Array::Create();
+  nfds = 0;
+  for (ArrayIter iter(items); iter; ++iter) {
+    Array entry = iter.second().toArray();
+    if (entry.size() < 1) {
+      raise_warning("element %d did not have at least one entry",
+                   nfds);
+      return Array::Create();
+    }
+    MySQL* mySQL = entry.rvalAt(0).toObject().getTyped<MySQL>();
+    MYSQL* conn = mySQL->get();
+
+    pollfd* fd = &fds[nfds++];
+    if (fd->fd != conn->net.fd) {
+      raise_warning("poll returned events out of order wtf");
+      continue;
+    }
+    if (fd->revents != 0) {
+      ret.append(iter.second());
+    }
+  }
+
+  return ret;
+}
+
+#else
+
+Variant f_mysql_async_connect_start(CStrRef server,
+                                    CStrRef username,
+                                    CStrRef password,
+                                    CStrRef database) {
+  throw NotImplementedException(__func__);
+}
+
+bool f_mysql_async_connect_completed(CVarRef link_identifier) {
+  throw NotImplementedException(__func__);
+}
+
+bool f_mysql_async_query_start(CStrRef query, CVarRef link_identifier) {
+  throw NotImplementedException(__func__);
+}
+
+Variant f_mysql_async_query_result(CVarRef link_identifier) {
+  throw NotImplementedException(__func__);
+}
+
+bool f_mysql_async_query_completed(CVarRef result) {
+  throw NotImplementedException(__func__);
+}
+
+Variant f_mysql_async_fetch_array(CVarRef result, int result_type /* = 1 */) {
+  throw NotImplementedException(__func__);
+}
+
+Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
+  throw NotImplementedException(__func__);
+}
+
+#endif
 
 Variant f_mysql_fetch_row(CVarRef result) {
   return php_mysql_fetch_hash(result, MYSQL_NUM);

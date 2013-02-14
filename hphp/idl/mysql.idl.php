@@ -25,7 +25,6 @@ CPP
 //   'note' => additional note about this constant's schema
 // )
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
 //
@@ -100,6 +99,177 @@ DefineFunction(
         'type'   => Int32,
         'value'  => "-1",
         'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_connect_start",
+    'desc'   => "Initiate an asynchronous (non-blocking) connection to the specified MySQL server.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Initiate an asynchronos mysql connect.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "server",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "The MySQL server. It can also include a port number. e.g. \"hostname:port\" or a path to a local socket e.g. \":/path/to/socket\" for the localhost.\n\nIf the PHP directive mysql.default_host is undefined (default), then the default value is 'localhost:3306'. In SQL safe mode, this parameter is ignored and value 'localhost:3306' is always used.",
+      ),
+      array(
+        'name'   => "username",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "The username. Default value is defined by mysql.default_user. In SQL safe mode, this parameter is ignored and the name of the user that owns the server process is used.",
+      ),
+      array(
+        'name'   => "password",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "The password. Default value is defined by mysql.default_password. In SQL safe mode, this parameter is ignored and empty password is used.",
+      ),
+      array(
+        'name'   => "database",
+        'type'   => String,
+        'desc'   => "The name of the database that will be selected.",
+        'value'  => "null_string",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_connect_completed",
+    'desc'   => "A nonblocking test whether a connection has completed, or errored out.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Has the connection finished (either successfully or with error).",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "link_identifier",
+        'type'   => Variant,
+        'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_query_start",
+    'desc'   => "Initiate a nonblocking query on a given connection.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "TRUE if the query can properly be prepared and queued on the network.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "query",
+        'type'   => String,
+        'desc'   => "An SQL query\n\nThe query string should not end with a semicolon. Data inside the query should be properly escaped.",
+      ),
+      array(
+        'name'   => "link_identifier",
+        'type'   => Variant,
+        'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_query_result",
+    'desc'   => "Fetch a result object, if available, containing some rows of the nonblocking query.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "A mysql result object, or null if one isn't ready yet.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "link_identifier",
+        'type'   => Variant,
+        'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_query_completed",
+    'desc'   => "Perform a nonblocking test whether an asynchronous query has completed.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "True if the the query has completed (i.e., either all rows have been returned or an error occurred).",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "result",
+        'type'   => Variant,
+        'desc'   => "The mysql result object from mysql_async_query_result.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_fetch_array",
+    'desc'   => "Returns an array that corresponds to the fetched row, if available.  Nonblocking.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns an array of strings that corresponds to the fetched row, or FALSE if there are no rows currently available. The type of returned array depends on how result_type is defined. By using MYSQL_BOTH, you'll get an array with both associative and number indices. Using MYSQL_ASSOC (the default), you only get associative indices (as mysql_fetch_assoc() works), using MYSQL_NUM, you only get number indices (as mysql_fetch_row() works).\n\nIf two or more columns of the result have the same field names, the last column will take precedence. To access the other column(s) of the same name, you must use the numeric index of the column or make an alias for the column. For aliased columns, you cannot access the contents with the original column name.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "result",
+        'type'   => Variant,
+        'desc'   => "resource that is being evaluated. This result comes from a call to mysql_async_query_result().",
+      ),
+      array(
+        'name'   => "result_type",
+        'type'   => Int32,
+        'value'  => "1",
+        'desc'   => "The type of array that is to be fetched. It's a constant and can take the following values: MYSQL_ASSOC, MYSQL_NUM, and MYSQL_BOTH.  The default is MYSQL_ASSOC (1)",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_ALL",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_wait_actionable",
+    'desc'   => "Block on one or more asynchronous operations, or until the specified timeout has occurred.  Returns values from the 'items' parameter when they become actionable.  Entries are returned as soon as they are actionable (i.e., it does not wait for the entire timeout before returning results).",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns input entries that are now ready for action (such as a connection has completed or rows are available).",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "items",
+        'type'   => Variant,
+        'desc'   => "An array of arrays.  These arrays contain a MySQL link identifier in the 0'th position, and any other values in the remainder of the array.  Items from this parameter are returned unmodified as the result set of actionable entries.",
+      ),
+      array(
+        'name'   => "timeout",
+        'type'   => Double,
+        'desc'   => "Time, in seconds, to wait for actionable events.  Subsecond accuracy is supported.",
       ),
     ),
     'taint_observer' => false,

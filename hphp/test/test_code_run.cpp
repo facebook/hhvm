@@ -560,6 +560,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   GEN_TEST(TestXML);
   GEN_TEST(TestDOMDocument);
   GEN_TEST(TestFile);
+  GEN_TEST(TestUserWrappers);
   GEN_TEST(TestDirectory);
   GEN_TEST(TestAssignment);
   GEN_TEST(TestBadFunctionCalls);
@@ -20007,6 +20008,198 @@ bool TestCodeRun::TestFile() {
        "define('BAR','Some Value');"
        "var_dump(parse_ini_string('foo=BAR'));"
       );
+  return true;
+}
+
+bool TestCodeRun::TestUserWrappers() {
+  if (!hhvm) {
+    // User-defined wrappers are only supported under hhvm
+    return true;
+  }
+
+  // Verify constructor is called
+  MVCR("<?php "
+       "class MyWrapper {"
+       "  private $ctorRan = false;"
+       "  public function __construct() {"
+       "    $this->ctorRan = true;"
+       "  }"
+       "  public function stream_open($fn, $mode, $opt, &$opened_path) {"
+       "    var_dump($this->ctorRan);"
+       "    return true;"
+       "  }"
+       "}"
+       "stream_wrapper_register('wrap', 'MyWrapper');"
+       "fclose(fopen('wrap://test', 'r'));"
+      );
+
+  // Private wrapper
+  MVCR("<?php "
+       "class PrivateWrapper {"
+       "  private function stream_open($fn, $mode, $opt, &$opened_path) {"
+       "    return true;"
+       "  }"
+       "  public static function openme() {"
+       "    return fopen('pw://foo', 'r');"
+       "  }"
+       "}"
+       "stream_wrapper_register('pw', 'PrivateWrapper');"
+       "var_dump(is_resource(PrivateWrapper::openme()));"
+      );
+
+  // Wrapper calls via __call
+  //
+  // PHP 5.3 passes ENFORCE_SAFE_MODE(4) with options
+  // Since HPHP doesn't have a safe mode analog,
+  // we need to explicitly strip it from options
+  // in order for the comparison to match.
+  // Later versions of PHP do not pass this bit.
+  MVCR("<?php "
+       "class MagicStream {"
+       "  public function __call($fname, $args) {"
+       "    echo \"Method: $fname\\n\";"
+       "    if ($fname == 'stream_open') $args[2] &= ~4;"
+       "    var_dump($args);"
+       "    return true;"
+       "  }"
+       "}"
+       "stream_wrapper_register('magic', 'MagicStream');"
+       "$fp = fopen('magic://stream-via-call', 'r');"
+       "fclose($fp);"
+      );
+
+  // ext/standard/tests/streams/bug60455_02.phpt
+  MVCR("<?php "
+       "class TestStream {"
+       "  private $s = 0;"
+       "  function stream_open($path, $mode, $options, &$opened_path) {"
+       "    return true;"
+       "  }"
+       "  function stream_read($count) {"
+       "    if ($this->s++ == 0)"
+       "      return \"a\\n\";"
+       "    return '';"
+       "  }"
+       "  function stream_eof() {"
+       "    return $this->s >= 2;"
+       "  }"
+       "}"
+       "stream_wrapper_register('test', 'TestStream');"
+       "$f = fopen('test://', 'r');"
+       "while (!feof($f)) {"
+       "  $line = stream_get_line($f, 99, \"\\n\");"
+       "  var_dump($line);"
+       "}"
+      );
+
+  // ext/standard/tests/streams/bug60455_03.phpt
+  MVCR("<?php "
+       "class TestStream {"
+       "  private $lines = array();"
+       "  private $s = 0;"
+       "  private $eofth = 3;"
+       "  function stream_open($path, $mode, $options, &$opened_path) {"
+       "    $this->lines[] = \"a\\n\";"
+       "    $this->lines[] = ($path == 'test://nonempty2nd' ? \"b\\n\" : \"\\n\");"
+       "    if ($path == 'test://eofafter2nd')"
+       "      $this->eofth = 2;"
+       "    return true;"
+       "  }"
+       "  function stream_read($count) {"
+       "    if (key_exists($this->s++, $this->lines))"
+       "      return $this->lines[$this->s - 1];"
+       "    return '';"
+       "  }"
+       "  function stream_eof() {"
+       "    return $this->s >= $this->eofth;"
+       "  }"
+       "}"
+       "stream_wrapper_register('test', 'TestStream');"
+       "$f = fopen('test://nonempty2nd', 'r');"
+       "while (!feof($f)) {"
+       "  $line = stream_get_line($f, 99, \"\\n\");"
+       "  var_dump($line);"
+       "}"
+       "$f = fopen('test://', 'r');"
+       "while (!feof($f)) {"
+       "  $line = stream_get_line($f, 99, \"\\n\");"
+       "  var_dump($line);"
+       "}"
+       "$f = fopen('test://eofafter2nd', 'r');"
+       "while (!feof($f)) {"
+       "  $line = stream_get_line($f, 99, \"\\n\");"
+       "  var_dump($line);"
+       "}"
+      );
+
+  // Fifo Stream
+  MVCR("<?php "
+       "class FifoStream {"
+       "  private $data;"
+       "  function stream_open($filename, $mode, $options, &$opened_path) {"
+       "    echo \"Open\\n\";"
+       "    var_dump($filename, $mode, $options & USE_INCLUDE_PATH);"
+       "    return true;"
+       "  }"
+       "  function stream_write($buf) { $this->data .= $buf; }"
+       "  function stream_read($count) {"
+       "    $chunk = substr($this->data, 0, $count);"
+       "    $this->data = substr($this->data, $count);"
+       "    return $chunk;"
+       "  }"
+       "  function stream_eof() { return strlen($this->data) == 0; }"
+       "  function stream_flush() { $this->data = ''; }"
+       "  function stream_close() { echo \"Close\\n\"; }"
+       "}"
+       "var_dump(stream_wrapper_register('fifo', 'FifoStream'));"
+       "$fp = fopen('fifo://testing', 'w+');"
+       "var_dump(fwrite($fp, \"Data one...\\n\"));"
+       "fflush($fp);"
+       "var_dump(fwrite($fp, \"Data two...\\n\"));"
+       "var_dump(fwrite($fp, \"Data three...\\n\"));"
+       "while(!feof($fp)) {"
+       "  var_dump(fgets($fp));"
+       "}"
+       "fclose($fp);"
+      );
+
+  // Memory Stream
+  MVCR("<?php "
+       "class MemoryStream {"
+       "  private $data;"
+       "  private $ofs = 0;"
+       "  function stream_open($filename, $mode, $options, &$opened_path) {"
+       "    if (strncmp($filename, \"mem://\", 6)) { return false; }"
+       "    $this->data = substr($filename, 6);"
+       "    return true;"
+       "  }"
+       "  function stream_read($count) {"
+       "    $ret = substr($this->data, $this->ofs, $count);"
+       "    $this->ofs += $count;"
+       "    if ($this->ofs > strlen($this->data))"
+       "      $this->ofs = strlen($this->data);"
+       "    return $ret;"
+       "  }"
+       "  function stream_seek($ofs, $whence) {"
+       "    if ($whence == SEEK_CUR) $this->ofs += $ofs;"
+       "    if ($whence == SEEK_SET) $this->ofs  = $ofs;"
+       "    if ($whence == SEEK_END) $this->ofs  = strlen($this->data) + $ofs;"
+       "    if ($this->ofs < 0) $this->ofs = 0;"
+       "    if ($this->ofs > strlen($this->data))"
+       "      $this->ofs = strlen($this->data);"
+       "    return true;"
+       "  }"
+       "  function stream_tell() { return $this->ofs; }"
+       "}"
+       "stream_wrapper_register('mem', 'MemoryStream');"
+       "$fp = fopen('mem://abcdefghijklmnopqrstuvwxyz', 'r');"
+       "var_dump(fgetc($fp), fgetc($fp));"
+       "fseek($fp, 11, SEEK_CUR);"
+       "var_dump(fgetc($fp), fgetc($fp));"
+       "fseek($fp, 0, SEEK_END);"
+       "var_dump(ftell($fp));"
+      );
+
   return true;
 }
 

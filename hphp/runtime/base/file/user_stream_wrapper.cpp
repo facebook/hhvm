@@ -14,32 +14,29 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef HPHP_STREAM_WRAPPER_REGISTRY_H
-#define HPHP_STREAM_WRAPPER_REGISTRY_H
+#include <runtime/base/file/user_stream_wrapper.h>
+#include <runtime/base/file/user_file.h>
 
-#include <map>
-#include <string>
-#include <memory>
-#include <runtime/base/types.h>
-#include <runtime/base/file/file.h>
-#include <runtime/base/file/stream_wrapper.h>
-
-namespace HPHP { namespace Stream {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-class Wrapper;
 
-bool registerWrapper(const std::string &scheme, Wrapper *wrapper);
-bool disableWrapper(CStrRef scheme);
-bool restoreWrapper(CStrRef scheme);
-bool registerRequestWrapper(CStrRef scheme, std::unique_ptr<Wrapper> wrapper);
-Array enumWrappers();
-Wrapper* getWrapper(CStrRef scheme);
-File* open(CStrRef uri, CStrRef mode, int options, CVarRef context);
+UserStreamWrapper::UserStreamWrapper(CStrRef name, CStrRef clsname) :
+  m_name(name) {
+  if (!hhvm) {
+    throw NotSupportedException("user-streams", "Not supported under HPHPc");
+  }
+  m_cls = VM::Unit::loadClass(clsname.get());
+  if (!m_cls) {
+    throw InvalidArgumentException(0, "Undefined class '%s'", clsname.data());
+  }
+}
 
-/* Called during process init to register core wrappers */
-void RegisterCoreWrappers();
+File* UserStreamWrapper::open(CStrRef filename, CStrRef mode,
+                              int options, CVarRef context) {
+  std::unique_ptr<File> file(NEWOBJ(UserFile)(m_cls, options, context));
+  file->open(filename, mode);
+  return file.release();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
-
-#endif // HPHP_STREAM_WRAPPER_REGISTRY_H
+}

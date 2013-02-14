@@ -165,6 +165,7 @@ class TestCodeRun : public TestBase {
   bool TestDOMDocument();
   bool TestDirectory();
   bool TestFile();
+  bool TestUserWrappers();
   bool TestUselessAssignment();
   bool TestExtString();
   bool TestExtArray();

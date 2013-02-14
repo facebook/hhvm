@@ -2350,58 +2350,6 @@ _rv => rdi
 Value* fh_stream_get_transports(Value* _rv) asm("_ZN4HPHP25fni_stream_get_transportsEv");
 
 /*
-HPHP::Array HPHP::fni_stream_get_wrappers()
-_ZN4HPHP23fni_stream_get_wrappersEv
-
-(return value) => rax
-_rv => rdi
-*/
-
-Value* fh_stream_get_wrappers(Value* _rv) asm("_ZN4HPHP23fni_stream_get_wrappersEv");
-
-/*
-bool HPHP::fni_stream_register_wrapper(HPHP::String const&, HPHP::String const&)
-_ZN4HPHP27fni_stream_register_wrapperERKNS_6StringES2_
-
-(return value) => rax
-protocol => rdi
-classname => rsi
-*/
-
-bool fh_stream_register_wrapper(Value* protocol, Value* classname) asm("_ZN4HPHP27fni_stream_register_wrapperERKNS_6StringES2_");
-
-/*
-bool HPHP::fni_stream_wrapper_register(HPHP::String const&, HPHP::String const&)
-_ZN4HPHP27fni_stream_wrapper_registerERKNS_6StringES2_
-
-(return value) => rax
-protocol => rdi
-classname => rsi
-*/
-
-bool fh_stream_wrapper_register(Value* protocol, Value* classname) asm("_ZN4HPHP27fni_stream_wrapper_registerERKNS_6StringES2_");
-
-/*
-bool HPHP::fni_stream_wrapper_restore(HPHP::String const&)
-_ZN4HPHP26fni_stream_wrapper_restoreERKNS_6StringE
-
-(return value) => rax
-protocol => rdi
-*/
-
-bool fh_stream_wrapper_restore(Value* protocol) asm("_ZN4HPHP26fni_stream_wrapper_restoreERKNS_6StringE");
-
-/*
-bool HPHP::fni_stream_wrapper_unregister(HPHP::String const&)
-_ZN4HPHP29fni_stream_wrapper_unregisterERKNS_6StringE
-
-(return value) => rax
-protocol => rdi
-*/
-
-bool fh_stream_wrapper_unregister(Value* protocol) asm("_ZN4HPHP29fni_stream_wrapper_unregisterERKNS_6StringE");
-
-/*
 HPHP::String HPHP::fni_stream_resolve_include_path(HPHP::String const&, HPHP::Object const&)
 _ZN4HPHP31fni_stream_resolve_include_pathERKNS_6StringERKNS_6ObjectE
 

@@ -13,33 +13,27 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef HPHP_USER_STREAM_WRAPPER_H
+#define HPHP_USER_STREAM_WRAPPER_H
 
-#ifndef HPHP_STREAM_WRAPPER_REGISTRY_H
-#define HPHP_STREAM_WRAPPER_REGISTRY_H
-
-#include <map>
-#include <string>
-#include <memory>
 #include <runtime/base/types.h>
 #include <runtime/base/file/file.h>
 #include <runtime/base/file/stream_wrapper.h>
 
-namespace HPHP { namespace Stream {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-class Wrapper;
 
-bool registerWrapper(const std::string &scheme, Wrapper *wrapper);
-bool disableWrapper(CStrRef scheme);
-bool restoreWrapper(CStrRef scheme);
-bool registerRequestWrapper(CStrRef scheme, std::unique_ptr<Wrapper> wrapper);
-Array enumWrappers();
-Wrapper* getWrapper(CStrRef scheme);
-File* open(CStrRef uri, CStrRef mode, int options, CVarRef context);
-
-/* Called during process init to register core wrappers */
-void RegisterCoreWrappers();
+class UserStreamWrapper : public Stream::Wrapper {
+ public:
+  UserStreamWrapper(CStrRef name, CStrRef clsname);
+  virtual File* open(CStrRef filename, CStrRef mode,
+                     int options, CVarRef context);
+ private:
+  String m_name;
+  VM::Class *m_cls;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
-#endif // HPHP_STREAM_WRAPPER_REGISTRY_H
+#endif // HPHP_USER_STREAM_WRAPPER_H

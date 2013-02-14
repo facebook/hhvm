@@ -130,25 +130,11 @@ inline Array f_stream_get_transports() {
   return CREATE_VECTOR4("tcp", "udp", "unix", "udg");
 }
 
-inline Array f_stream_get_wrappers() {
-  throw NotSupportedException(__func__, "stream protocol is not supported");
-}
-
-inline bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname) {
-  throw NotSupportedException(__func__, "stream protocol is not supported");
-}
-
-inline bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
-  throw NotSupportedException(__func__, "stream protocol is not supported");
-}
-
-inline bool f_stream_wrapper_restore(CStrRef protocol) {
-  throw NotSupportedException(__func__, "stream protocol is not supported");
-}
-
-inline bool f_stream_wrapper_unregister(CStrRef protocol) {
-  throw NotSupportedException(__func__, "stream protocol is not supported");
-}
+Array f_stream_get_wrappers();
+bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname);
+bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname);
+bool f_stream_wrapper_restore(CStrRef protocol);
+bool f_stream_wrapper_unregister(CStrRef protocol);
 
 inline String f_stream_resolve_include_path(CStrRef filename,
                                             CObjRef context = null_object) {

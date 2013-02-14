@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_socket.h>
 #include <runtime/ext/ext_file.h>
 #include <runtime/ext/ext_options.h>
+#include <runtime/ext/ext_array.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -288,48 +289,36 @@ bool TestExtStream::test_stream_get_transports() {
 }
 
 bool TestExtStream::test_stream_get_wrappers() {
-  try {
-    f_stream_get_wrappers();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  Array w = f_stream_get_wrappers();
+  VS(f_in_array("file", w), true);
+  VS(f_in_array("http", w), true);
+
+  return Count(true);
 }
 
 bool TestExtStream::test_stream_register_wrapper() {
-  try {
-    f_stream_register_wrapper("", "");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  return test_stream_wrapper_register();
 }
 
 bool TestExtStream::test_stream_wrapper_register() {
-  try {
-    f_stream_wrapper_register("", "");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  // test_code_run
+  return Count(true);
 }
 
 bool TestExtStream::test_stream_wrapper_restore() {
-  try {
-    f_stream_wrapper_restore("");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  int64 count = f_count(f_stream_get_wrappers());
+
+  VS(f_stream_wrapper_unregister("http"), true);
+  VS(f_count(f_stream_get_wrappers()), count - 1);
+
+  VS(f_stream_wrapper_restore("http"), true);
+  VS(f_count(f_stream_get_wrappers()), count);
+
+  return Count(true);
 }
 
 bool TestExtStream::test_stream_wrapper_unregister() {
-  try {
-    f_stream_wrapper_unregister("");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  return test_stream_wrapper_restore();
 }
 
 bool TestExtStream::test_stream_resolve_include_path() {

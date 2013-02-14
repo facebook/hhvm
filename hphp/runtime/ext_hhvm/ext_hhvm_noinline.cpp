@@ -917,26 +917,6 @@ Array fni_stream_get_transports() {
   return f_stream_get_transports();
 }
 
-Array fni_stream_get_wrappers() {
-  return f_stream_get_wrappers();
-}
-
-bool fni_stream_register_wrapper(String const& protocol, String const& classname) {
-  return f_stream_register_wrapper(protocol, classname);
-}
-
-bool fni_stream_wrapper_register(String const& protocol, String const& classname) {
-  return f_stream_wrapper_register(protocol, classname);
-}
-
-bool fni_stream_wrapper_restore(String const& protocol) {
-  return f_stream_wrapper_restore(protocol);
-}
-
-bool fni_stream_wrapper_unregister(String const& protocol) {
-  return f_stream_wrapper_unregister(protocol);
-}
-
 String fni_stream_resolve_include_path(String const& filename, Object const& context) {
   return f_stream_resolve_include_path(filename, context);
 }

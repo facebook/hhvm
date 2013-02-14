@@ -57,6 +57,58 @@ ending => rcx
 TypedValue* fh_stream_get_line(TypedValue* _rv, Value* handle, int length, Value* ending) asm("_ZN4HPHP17f_stream_get_lineERKNS_6ObjectEiRKNS_6StringE");
 
 /*
+HPHP::Array HPHP::f_stream_get_wrappers()
+_ZN4HPHP21f_stream_get_wrappersEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_stream_get_wrappers(Value* _rv) asm("_ZN4HPHP21f_stream_get_wrappersEv");
+
+/*
+bool HPHP::f_stream_register_wrapper(HPHP::String const&, HPHP::String const&)
+_ZN4HPHP25f_stream_register_wrapperERKNS_6StringES2_
+
+(return value) => rax
+protocol => rdi
+classname => rsi
+*/
+
+bool fh_stream_register_wrapper(Value* protocol, Value* classname) asm("_ZN4HPHP25f_stream_register_wrapperERKNS_6StringES2_");
+
+/*
+bool HPHP::f_stream_wrapper_register(HPHP::String const&, HPHP::String const&)
+_ZN4HPHP25f_stream_wrapper_registerERKNS_6StringES2_
+
+(return value) => rax
+protocol => rdi
+classname => rsi
+*/
+
+bool fh_stream_wrapper_register(Value* protocol, Value* classname) asm("_ZN4HPHP25f_stream_wrapper_registerERKNS_6StringES2_");
+
+/*
+bool HPHP::f_stream_wrapper_restore(HPHP::String const&)
+_ZN4HPHP24f_stream_wrapper_restoreERKNS_6StringE
+
+(return value) => rax
+protocol => rdi
+*/
+
+bool fh_stream_wrapper_restore(Value* protocol) asm("_ZN4HPHP24f_stream_wrapper_restoreERKNS_6StringE");
+
+/*
+bool HPHP::f_stream_wrapper_unregister(HPHP::String const&)
+_ZN4HPHP27f_stream_wrapper_unregisterERKNS_6StringE
+
+(return value) => rax
+protocol => rdi
+*/
+
+bool fh_stream_wrapper_unregister(Value* protocol) asm("_ZN4HPHP27f_stream_wrapper_unregisterERKNS_6StringE");
+
+/*
 HPHP::Variant HPHP::f_stream_select(HPHP::VRefParamValue const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&, HPHP::Variant const&, int)
 _ZN4HPHP15f_stream_selectERKNS_14VRefParamValueES2_S2_RKNS_7VariantEi
 

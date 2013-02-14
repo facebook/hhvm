@@ -23,6 +23,10 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/server/server_stats.h>
+#include <runtime/base/file/stream_wrapper.h>
+#include <runtime/base/file/stream_wrapper_registry.h>
+#include <runtime/base/file/user_stream_wrapper.h>
+#include <memory>
 #include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -161,6 +165,41 @@ int64 f_stream_set_write_buffer(CObjRef stream, int buffer) {
     }
   }
   return -1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Wrappers
+
+Array f_stream_get_wrappers() {
+  return Stream::enumWrappers();
+}
+
+bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname) {
+  return f_stream_wrapper_register(protocol, classname);
+}
+
+bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
+  std::unique_ptr<Stream::Wrapper> wrapper;
+  try {
+    wrapper = std::unique_ptr<Stream::Wrapper>(
+                   new UserStreamWrapper(protocol, classname));
+  } catch (InvalidArgumentException e) {
+    raise_warning("%s", e.what());
+    return false;
+  }
+  if (!Stream::registerRequestWrapper(protocol, std::move(wrapper))) {
+    raise_warning("Unable to register protocol: %s\n", protocol.data());
+    return false;
+  }
+  return true;
+}
+
+bool f_stream_wrapper_restore(CStrRef protocol) {
+  return Stream::restoreWrapper(protocol);
+}
+
+bool f_stream_wrapper_unregister(CStrRef protocol) {
+  return Stream::disableWrapper(protocol);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

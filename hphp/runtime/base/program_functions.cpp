@@ -1198,7 +1198,6 @@ void hphp_process_init() {
   pthread_attr_t attr;
   pthread_getattr_np(pthread_self(), &attr);
   Util::init_stack_limits(&attr);
-  Util::init_page_size();
   pthread_attr_destroy(&attr);
 
   init_thread_locals();

@@ -47,7 +47,8 @@ void flush_thread_caches() {
 
 __thread uintptr_t s_stackLimit;
 __thread size_t s_stackSize;
-size_t s_pageSize;
+const size_t s_pageSize =  sysconf(_SC_PAGESIZE);
+
 
 static NEVER_INLINE uintptr_t get_stack_top() {
   char marker;
@@ -75,10 +76,6 @@ void init_stack_limits(pthread_attr_t* attr) {
   assert(stacksize >= PTHREAD_STACK_MIN);
   Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
   Util::s_stackSize = stacksize;
-}
-
-void init_page_size() {
-  Util::s_pageSize = sysconf(_SC_PAGESIZE);
 }
 
 void flush_thread_stack() {

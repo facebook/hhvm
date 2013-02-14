@@ -56,8 +56,8 @@ typedef Variant Sequence;
  * Macros related to Variant that are needed by StringData, ObjectData,
  * and ArrayData.
  */
-extern const Variant null_variant;
-extern const Variant init_null_variant;
+extern const Variant null_variant;      // uninitialized variant
+extern const Variant init_null_variant; // php null
 extern const VarNR null_varNR;
 extern const VarNR true_varNR;
 extern const VarNR false_varNR;

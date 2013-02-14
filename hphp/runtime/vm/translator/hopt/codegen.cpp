@@ -749,17 +749,32 @@ void CodeGenerator::cgCallHelper(Asm& a,
   if (sync != kNoSyncPoint) {
     recordSyncPoint(a, sync);
   }
-  // grab the return value if any
-  if (dstReg0 != InvalidReg && dstReg0 != reg::rax) {
-    a.    movq (reg::rax, dstReg0);
-  }
+
+  // assume if dstReg1 is needed that the result is a TypedValue passed
+  // by value.  In that case we need to rightshift the packed m_type
+  // enum to occupy the low 32bits of the dest register.
   if (dstReg1 != InvalidReg) {
-    if (dstReg1 != reg::rdx) {
-      a.  movq (reg::rdx, dstReg1);
-    }
     // dstReg1 contains m_type and _count but we're expecting just the
-    // type in the lower 32 bits, so shift right.
-    a.    shrq (kTypeShiftBits, dstReg1);
+    // type in the lower 32 bits, so shift the 2nd result register.
+    a.      shrq (kTypeShiftBits, reg::rdx);
+  }
+
+  // safely copy the return value (rax:rdx) to (dstReg0:dstReg1)
+  if (dstReg0 == reg::rdx && dstReg1 != InvalidReg) {
+    assert(dstReg0 != dstReg1);
+    if (dstReg1 == reg::rax) {
+      a.    xchgq (reg::rdx, reg::rax);
+    } else {
+      a.    movq (reg::rdx, dstReg1); // save rdx first; dstReg1 != rax
+      a.    movq (reg::rax, dstReg0);
+    }
+  } else {
+    if (dstReg0 != InvalidReg) {
+      emitMovRegReg(a, reg::rax, dstReg0); // dstReg0 != rdx
+    }
+    if (dstReg1 != InvalidReg) {
+      emitMovRegReg(a, reg::rdx, dstReg1);
+    }
   }
 }
 

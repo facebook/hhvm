@@ -1,1 +1,1 @@
-HipHop Fatal error: Redeclared method C::f on line 6
+HipHop Fatal error: Redeclared method C::f in hphp/test/vm/redeclared_method.php on line 6

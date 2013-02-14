@@ -1,2 +1,1 @@
-#!/bin/bash
-sed -e 's, in [^ ]*hphp/, in hphp/,'
+filepath.filter

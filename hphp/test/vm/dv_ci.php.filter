@@ -1,2 +1,1 @@
-#!/bin/bash
-sed -e 's/\/.*hphp/hphp/g'
+filepath.filter

@@ -1,2 +1,2 @@
 #!/bin/bash
-sed -e 's/\/.*hphp/hphp/g; s/, expecting [A-Z_]*//'
+./test/vm/filepath.filter | sed -e 's/, expecting [A-Z_]*//'

@@ -1,2 +1,1 @@
-#!/bin/sh
-sed -e 's%> .*\(hphp/test/vm/\)%> \1%'
+filepath.filter

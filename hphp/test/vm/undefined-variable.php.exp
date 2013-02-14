@@ -1,2 +1,2 @@
-HipHop Notice:  Undefined variable: b
-HipHop Notice:  Undefined variable: a
+HipHop Notice:  Undefined variable: b in hphp/test/vm/undefined-variable.php on line 3
+HipHop Notice:  Undefined variable: a in hphp/test/vm/undefined-variable.php on line 9

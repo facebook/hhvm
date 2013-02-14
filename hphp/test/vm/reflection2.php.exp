@@ -31,7 +31,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string "hphp/test/vm/reflection2.php"
+      string hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(20)
       ["line2"]=>
@@ -70,7 +70,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string "hphp/test/vm/reflection2.php"
+      string hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(21)
       ["line2"]=>
@@ -109,7 +109,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string "hphp/test/vm/reflection2.php"
+      string hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(13)
       ["line2"]=>
@@ -148,7 +148,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string "hphp/test/vm/reflection2.php"
+      string hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(15)
       ["line2"]=>
@@ -187,7 +187,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string "hphp/test/vm/reflection2.php"
+      string hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(4)
       ["line2"]=>
@@ -226,7 +226,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string "hphp/test/vm/reflection2.php"
+      string hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(8)
       ["line2"]=>

@@ -4026,7 +4026,11 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   SSATmp* cxt   = inst->getSrc(2);
   LabelInstruction* label = inst->getLabel();
   auto dstReg = dst->getReg();
-
+  if (dstReg == InvalidReg) {
+    // result is unused but this instruction was not eliminated
+    // because its essential
+    dstReg = rScratch;
+  }
   cgCallHelper(m_as,
                label ? (TCA)SPropCache::lookupSProp<false>
                      : (TCA)SPropCache::lookupSProp<true>, // raise on error
@@ -4047,14 +4051,18 @@ void CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
 
 void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   SSATmp* dst = inst->getDst();
-  auto dstReg = dst->getReg();
   SSATmp* className = inst->getSrc(0);
   // Note the redundancy with LdCachedClass above...
   const StringData* classNameString = className->getValStr();
   auto ch = TargetCache::allocKnownClass(classNameString);
-  m_as.  loadq  (rVmTl[ch], dstReg);
-  m_as.  testq  (dstReg, dstReg);
-  m_as.  jcc    (CC_E, m_astubs.code.frontier);
+  auto dstReg = dst->getReg();
+  if (dstReg == InvalidReg) {
+    m_as. cmpq   (0, rVmTl[ch]);
+  } else {
+    m_as.  loadq  (rVmTl[ch], dstReg);
+    m_as.  testq  (dstReg, dstReg);
+  }
+  m_as.    jcc    (CC_E, m_astubs.code.frontier);
   {
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.

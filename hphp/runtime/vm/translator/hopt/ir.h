@@ -207,8 +207,8 @@ O(LdCtxCls,                     D(Cls), S(StkPtr),                      C|Rm) \
 O(LdRetAddr,                D(RetAddr), S(StkPtr),                        NF) \
 O(LdConst,                      DParam, NA,                             C|Rm) \
 O(DefConst,                     DParam, NA,                                C) \
-O(LdCls,                        D(Cls), S(Str) C(Cls),    C|E|Refs|Rm|Er|Mem) \
-O(LdClsCached,                  D(Cls), C(Str),             C|Refs|Rm|Er|Mem) \
+O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
+O(LdClsCached,                  D(Cls), CStr,              C|E|  Refs|Er|Mem) \
 O(LdCachedClass,                D(Cls), CStr,                              C) \
 O(LdClsCns,                     DParam, CStr CStr,                         C) \
 O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
@@ -217,8 +217,8 @@ O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx),     C|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Obj,Cls,Ctx) S(Func),            C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
-O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),    C|E|N|Rm|Er) \
-O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) C(Str) C(Str) C(Cls), C|E|Rm|Er)\
+O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
+O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|  Er) \
 O(LdObjMethod,                 D(Func), C(Int) CStr S(StkPtr), C|E|N|Refs|Er) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \

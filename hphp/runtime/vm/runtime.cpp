@@ -466,5 +466,20 @@ void assertTv(const TypedValue* tv) {
   always_assert(checkTv(tv));
 }
 
+void deepInitHelper(TypedValue* propVec, const TypedValue* propData,
+                    size_t nProps) {
+  TypedValue* dst = propVec;
+  const TypedValue* src = propData;
+  for (; src != propData + nProps; ++src, ++dst) {
+    *dst = *src;
+    // _count is set to 1 for properties that need "deep" initialization,
+    // otherwise _count is set to 0
+    if (src->_count) {
+      dst->m_data.pstr->incRefCount();
+      collectionDeepCopyTV(dst);
+    }
+  }
+}
+
 } } // HPHP::VM
 

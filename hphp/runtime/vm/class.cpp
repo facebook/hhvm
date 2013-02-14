@@ -795,7 +795,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
   assert(getPropData() == nullptr);
   // Copy initial values for properties to a new vector that can be used to
   // complete initialization for non-scalar properties via the iterative
-  // 86pinit() calls below.  86pinit() takes a reference to an array that
+  // 86pinit() calls below. 86pinit() takes a reference to an array that
   // contains the initial property values; alias propVec inside propArr such
   // that propVec contains complete property initialization values as soon as
   // the 86pinit() calls are done.
@@ -860,18 +860,27 @@ Class::PropInitVec* Class::initPropsImpl() const {
     g_vmContext->invokeFunc(&retval, *it, args, nullptr, const_cast<Class*>(this));
     assert(!IS_REFCOUNTED_TYPE(retval.m_type));
   }
-
-  // Promote non-static arrays/strings (that came from 86pinit) to
-  // static. This allows us to use memcpy to initialize object
-  // properties, without conflicting with the refcounting that happens
-  // on object destruction.
+  // For properties that do not require deep initialization, promote strings
+  // and arrays that came from 86pinit to static. This allows us to initialize
+  // object properties very quickly because we can just memcpy and we don't
+  // have to do any refcounting.
+  // For properties that require "deep" initialization, we have to do a little
+  // more work at object creation time.
+  Slot slot = 0;
   for (PropInitVec::iterator it = propVec->begin();
-       it != propVec->end(); ++it) {
-    tvAsVariant(&(*it)).setEvalScalar();
+       it != propVec->end(); ++it, ++slot) {
+    TypedValue* tv = &(*it);
+    // We set the TypedValue::_count field to 1 if the property requires
+    // "deep" initialization, otherwise we set it to 0.
+    if (m_declProperties[slot].m_attrs & AttrDeepInit) {
+      tv->_count = 1;
+    } else {
+      tvAsVariant(tv).setEvalScalar();
+      tv->_count = 0;
+    }
   }
-
-  // Free the args array.  propArr is allocated on the stack so it
-  // better be only referenced from args.
+  // Free the args array.  propArr is allocated on the stack so it better be
+  // only referenced from args.
   assert(propArr.getCount() == 1);
   assert(args->getCount() == 1);
   decRefArr(args);
@@ -1797,12 +1806,29 @@ void Class::setConstants() {
   m_constants.create(builder);
 }
 
+static void copyDeepInitAttr(const PreClass::Prop* pclsProp,
+                             Class::Prop* clsProp) {
+  if (pclsProp->attrs() & AttrDeepInit) {
+    clsProp->m_attrs = (Attr)(clsProp->m_attrs | AttrDeepInit);
+  } else {
+    clsProp->m_attrs = (Attr)(clsProp->m_attrs & ~AttrDeepInit);
+  }
+}
+
 void Class::setProperties() {
   int numInaccessible = 0;
   PropMap::Builder curPropMap;
   SPropMap::Builder curSPropMap;
+  m_hasDeepInitProps = false;
 
   if (m_parent.get() != nullptr) {
+    // m_hasDeepInitProps indicates if there are properties that require
+    // deep initialization. Note there are cases where m_hasDeepInitProps is
+    // true but none of the properties require deep initialization; this can
+    // happen if a derived class redeclares a public or protected property
+    // from an ancestor class. We still get correct behavior in these cases,
+    // so it works out okay.
+    m_hasDeepInitProps = m_parent->m_hasDeepInitProps;
     for (Slot slot = 0; slot < m_parent->m_declProperties.size(); ++slot) {
       const Prop& parentProp = m_parent->m_declProperties[slot];
 
@@ -1847,7 +1873,6 @@ void Class::setProperties() {
       // Overlay/append this class's protected and public properties onto/to
       // those of the parent, and append this class's private properties.
       // Append order doesn't matter here (unlike in setMethods()).
-
       // Prohibit static-->non-static redeclaration.
       SPropMap::Builder::iterator it2 = curSPropMap.find(preProp->name());
       if (it2 != curSPropMap.end()) {
@@ -1874,6 +1899,9 @@ void Class::setProperties() {
           attrToVisibilityStr(parentProp->m_attrs),
           m_parent->name()->data());
       }
+      if (preProp->attrs() & AttrDeepInit) {
+        m_hasDeepInitProps = true;
+      }
       switch (preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate)) {
       case AttrPrivate: {
         // Append a new private property.
@@ -1899,6 +1927,7 @@ void Class::setProperties() {
                  & (AttrPublic|AttrProtected|AttrPrivate)) == AttrProtected);
           m_declPropInit[it2->second] = m_preClass->lookupProp(preProp
                                         ->name())->val();
+          copyDeepInitAttr(preProp, &curPropMap[it2->second]);
           break;
         }
         // Append a new protected property.
@@ -1930,6 +1959,7 @@ void Class::setProperties() {
           }
           m_declPropInit[it2->second] = m_preClass->lookupProp(preProp
                                         ->name())->val();
+          copyDeepInitAttr(preProp, &curPropMap[it2->second]);
           break;
         }
         // Append a new public property.

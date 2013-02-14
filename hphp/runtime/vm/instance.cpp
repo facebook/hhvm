@@ -23,6 +23,7 @@
 #include "runtime/vm/instance.h"
 #include "runtime/vm/object_allocator_sizes.h"
 #include "runtime/vm/translator/translator-inline.h"
+#include "runtime/ext/ext_collection.h"
 #include "system/lib/systemlib.h"
 
 namespace HPHP {

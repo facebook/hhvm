@@ -28,6 +28,8 @@
 namespace HPHP {
 namespace VM {
 
+void deepInitHelper(TypedValue*, const TypedValue*, size_t);
+
 class Instance : public ObjectData {
   // Do not declare any fields directly in Instance; instead embed them in
   // ObjectData, so that a property vector can always reside immediately past
@@ -117,7 +119,11 @@ class Instance : public ObjectData {
         const Class::PropInitVec* propInitVec = m_cls->getPropData();
         assert(propInitVec != nullptr);
         assert(nProps == propInitVec->size());
-        memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
+        if (!cls->hasDeepInitProps()) {
+          memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
+        } else {
+          deepInitHelper(propVec(), &(*propInitVec)[0], nProps);
+        }
       } else {
         assert(nProps == cls->declPropInit().size());
         memcpy(propVec(), &cls->declPropInit()[0], nProps * sizeof(TypedValue));

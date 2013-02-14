@@ -666,7 +666,12 @@ public:
   const Func* getToString() const { return m_toString; }
   const PreClass* preClass() const { return m_preClass.get(); }
   const ClassInfo* clsInfo() const { return m_clsInfo; }
+
+  // We use the TypedValue::_count field to indicate whether a property
+  // requires "deep" initialization (0 = no, 1 = yes)
   const PropInitVec* getPropData() const;
+
+  bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const ClassSet& allInterfaces() const { return m_allInterfaces; }
@@ -911,7 +916,8 @@ private:
   unsigned m_needInitialization : 1;      // any __[ps]init() methods?
   unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
                                           // on new instances?
-  unsigned m_attrCopy : 30;               // cache of m_preClass->attrs().
+  unsigned m_hasDeepInitProps : 1;
+  unsigned m_attrCopy : 29;               // cache of m_preClass->attrs().
   int m_ODAttrs;
 
   int m_builtinPropSize;

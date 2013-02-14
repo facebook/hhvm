@@ -6368,6 +6368,9 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             } else {
               tvWriteUninit(&tvVal);
               if (!(attrs & AttrStatic)) {
+                if (requiresDeepInit(vNode)) {
+                  attrs = (Attr)(attrs | AttrDeepInit);
+                }
                 if (nonScalarPinitVec == nullptr) {
                   nonScalarPinitVec = new NonScalarVec();
                 }
@@ -6958,6 +6961,39 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
       }
       not_reached();
     }
+  }
+}
+
+bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
+  switch (initExpr->getKindOf()) {
+    case Expression::KindOfScalarExpression:
+    case Expression::KindOfConstantExpression:
+    case Expression::KindOfClassConstantExpression:
+      return false;
+    case Expression::KindOfUnaryOpExpression: {
+      UnaryOpExpressionPtr u(
+        static_pointer_cast<UnaryOpExpression>(initExpr));
+      if (u->getOp() == T_ARRAY) {
+        ExpressionListPtr el =
+          static_pointer_cast<ExpressionList>(u->getExpression());
+        int n = el->getCount();
+        for (int i = 0; i < n; i++) {
+          ArrayPairExpressionPtr ap =
+            static_pointer_cast<ArrayPairExpression>((*el)[i]);
+          ExpressionPtr key = ap->getName();
+          if (requiresDeepInit(ap->getValue()) ||
+              (key && requiresDeepInit(key))) {
+            return true;
+          }
+        }
+        return false;
+      } else if (u->getOp() == '+' || u->getOp() == '-') {
+        return requiresDeepInit(u->getExpression());
+      }
+      // fall through
+    }
+    default:
+      return true;
   }
 }
 

@@ -168,6 +168,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   uint m_size;
   uint m_capacity;
   int m_versionNumber;
+
+  friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -452,6 +454,8 @@ private:
   Variant iter_value(ssize_t pos) const;
 
   static void throwBadKeyType();
+
+  friend ObjectData* collectionDeepCopyMap(c_Map* mp);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -696,6 +700,8 @@ private:
   Variant iter_value(ssize_t pos) const;
 
   static void throwBadKeyType();
+
+  friend ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1090,6 +1096,12 @@ inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
   assert(false);
   return false;
 }
+
+void collectionDeepCopyTV(TypedValue* tv);
+ArrayData* collectionDeepCopyArray(ArrayData* arr);
+ObjectData* collectionDeepCopyVector(c_Vector* vec);
+ObjectData* collectionDeepCopyMap(c_Map* vec);
+ObjectData* collectionDeepCopyStableMap(c_StableMap* vec);
 
 class CollectionInit {
 public:

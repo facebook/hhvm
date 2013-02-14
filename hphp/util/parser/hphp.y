@@ -1876,6 +1876,13 @@ collection_literal:
                                          BEXP($$,t,$3,T_COLLECTION);}
 ;
 
+static_collection_literal:
+    fully_qualified_class_name
+    '{' static_collection_init '}'     { Token t;
+                                         _p->onName(t,$1,Parser::StringName);
+                                         BEXP($$,t,$3,T_COLLECTION);}
+;
+
 dim_expr:
     dim_expr
     '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
@@ -2109,6 +2116,7 @@ static_scalar:
   | T_ARRAY '('
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY);}
   | static_class_constant              { $$ = $1;}
+  | static_collection_literal          { $$ = $1;}
 ;
 static_class_constant:
     class_namespace_string_typeargs
@@ -2409,6 +2417,22 @@ non_empty_collection_init:
   | non_empty_collection_init ',' expr { _p->onCollectionPair($$,&$1,  0,$3);}
   | expr T_DOUBLE_ARROW expr           { _p->onCollectionPair($$,  0,&$1,$3);}
   | expr                               { _p->onCollectionPair($$,  0,  0,$1);}
+;
+
+static_collection_init:
+    non_empty_static_collection_init
+    possible_comma                     { $$ = $1;}
+  |                                    { _p->onEmptyCollection($$);}
+;
+non_empty_static_collection_init:
+    non_empty_static_collection_init
+    ',' static_scalar T_DOUBLE_ARROW
+    static_scalar                      { _p->onCollectionPair($$,&$1,&$3,$5);}
+  | non_empty_static_collection_init
+    ',' static_scalar                  { _p->onCollectionPair($$,&$1,  0,$3);}
+  | static_scalar T_DOUBLE_ARROW
+    static_scalar                      { _p->onCollectionPair($$,  0,&$1,$3);}
+  | static_scalar                      { _p->onCollectionPair($$,  0,  0,$1);}
 ;
 
 encaps_list:

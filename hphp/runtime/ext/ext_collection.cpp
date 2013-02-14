@@ -2682,6 +2682,81 @@ void collectionUnserialize(ObjectData* obj,
   }
 }
 
+void collectionDeepCopyTV(TypedValue* tv) {
+  switch (tv->m_type) {
+    case KindOfArray: {
+      ArrayData* arr = collectionDeepCopyArray(tv->m_data.parr);
+      if (tv->m_data.parr->decRefCount() == 0) {
+        tv->m_data.parr->release();
+      }
+      tv->m_data.parr = arr;
+      break;
+    }
+    case KindOfObject: {
+      ObjectData* obj = tv->m_data.pobj;
+      if (!obj->isCollection()) break;
+      switch (obj->getCollectionType()) {
+        case Collection::VectorType:
+          obj = collectionDeepCopyVector(static_cast<c_Vector*>(obj));
+          break;
+        case Collection::MapType:
+          obj = collectionDeepCopyMap(static_cast<c_Map*>(obj));
+          break;
+        case Collection::StableMapType:
+          obj = collectionDeepCopyStableMap(static_cast<c_StableMap*>(obj));
+          break;
+        default:
+          assert(false);
+          obj = NULL;
+          break;
+      }
+      if (tv->m_data.pobj->decRefCount() == 0) {
+        tv->m_data.pobj->release();
+      }
+      tv->m_data.pobj = obj;
+      break;
+    }
+    default: break;
+  }
+}
+
+ArrayData* collectionDeepCopyArray(ArrayData* arr) {
+  Array a = arr = arr->copy();
+  for (ArrayIter iter(arr); iter; ++iter) {
+    collectionDeepCopyTV((TypedValue*)(&iter.secondRef()));
+  }
+  return a.detach();
+}
+
+ObjectData* collectionDeepCopyVector(c_Vector* vec) {
+  Object o = vec = static_cast<c_Vector*>(vec->clone());
+  size_t sz = vec->m_size;
+  for (size_t i = 0; i < sz; ++i) {
+    collectionDeepCopyTV(&vec->m_data[i]);
+  }
+  return o.detach();
+}
+
+ObjectData* collectionDeepCopyMap(c_Map* mp) {
+  Object o = mp = static_cast<c_Map*>(mp->clone());
+  uint lastSlot = mp->m_nLastSlot;
+  for (uint i = 0; i <= lastSlot; ++i) {
+    c_Map::Bucket* p = mp->fetchBucket(i);
+    if (p->validValue()) {
+      collectionDeepCopyTV(&p->data);
+    }
+  }
+  return o.detach();
+}
+
+ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
+  Object o = smp = static_cast<c_StableMap*>(smp->clone());
+  for (c_StableMap::Bucket* p = smp->m_pListHead; p; p = p->pListNext) {
+    collectionDeepCopyTV(&p->data);
+  }
+  return o.detach();
+}
+
 CollectionInit::CollectionInit(int cType, ssize_t nElems) {
   switch (cType) {
     case Collection::VectorType: m_data = NEWOBJ(c_Vector)(); break;

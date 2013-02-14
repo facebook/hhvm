@@ -9300,10 +9300,17 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
       // propData holds the PropInitVec. We want &(*propData)[0]
       a.load_reg64_disp_reg64(r(propData), Class::PropInitVec::dataOff(),
                               r(propData));
-      EMIT_CALL(a, memcpy,
-                R(propVec),
-                R(propData),
-                IMM(cellsToBytes(nProps)));
+      if (!cls->hasDeepInitProps()) {
+        EMIT_CALL(a, memcpy,
+                  R(propVec),
+                  R(propData),
+                  IMM(cellsToBytes(nProps)));
+      } else {
+        EMIT_CALL(a, deepInitHelper,
+                  R(propVec),
+                  R(propData),
+                  IMM(nProps));
+      }
     }
     a.add_imm32_reg64(8, rsp);
     a.pop(rax);

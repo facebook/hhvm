@@ -667,6 +667,7 @@ public:
   StringData* newClosureName();
 
   void initScalar(TypedValue& tvVal, ExpressionPtr val);
+  bool requiresDeepInit(ExpressionPtr initExpr) const;
 
   void emitClassTraitPrecRule(PreClassEmitter* pce, TraitPrecStatementPtr rule);
   void emitClassTraitAliasRule(PreClassEmitter* pce,

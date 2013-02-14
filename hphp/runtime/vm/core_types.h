@@ -102,7 +102,8 @@ enum Attr {
   AttrClone     = (1 << 14),     //                     X    //
   AttrVariadicByRef = (1 << 15), //                     X    //
   AttrMayUseVV  = (1 << 16),     //                     X    //
-  AttrPersistent= (1 << 17)      //    X                X    //
+  AttrPersistent= (1 << 17),     //    X                X    //
+  AttrDeepInit = (1 << 18)       //            X
 };
 
 static inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

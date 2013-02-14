@@ -13,6 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#ifdef __x86_64__
+
 #include <emmintrin.h>
 #include <stdint.h>
 
@@ -86,3 +89,5 @@ memcpy(void* vdest, const void* vsrc, size_t len) {
 }
 
 }
+#endif // __x86_64__
+

@@ -473,25 +473,17 @@ size_t Process::GetCodeFootprint(pid_t pid) {
   return share + text;
 }
 
-#ifndef __LP64__
-/* For PIC code we need to save the %EBX */
+
+#ifdef __x86_64__
 static __inline void do_cpuid(u_int ax, u_int *p) {
-  __asm __volatile("pushl %%ebx\n\t"
-                   "cpuid\n\t"
-                   "movl %%ebx, %1\n\t" // %1 is the register assigned to p[1]
-                   "popl %%ebx\n\t"
-                   : "=a" (p[0]), "=r" (p[1]), "=c" (p[2]), "=d" (p[3])
-                   : "a" (ax));
-}
-#else
-static __inline void do_cpuid(u_int ax, u_int *p) {
-  __asm __volatile("cpuid"
-                   : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
-                   : "0" (ax));
+  asm volatile ("cpuid"
+                : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
+                : "0" (ax));
 }
 #endif
 
 std::string Process::GetCPUModel() {
+#ifdef __x86_64__
   uint32_t regs[4];
   do_cpuid(0, regs);
 
@@ -501,12 +493,6 @@ std::string Process::GetCPUModel() {
   ((uint32_t *)&cpu_vendor)[1] = regs[3];
   ((uint32_t *)&cpu_vendor)[2] = regs[2];
   cpu_vendor[12] = '\0';
-
-  //do_cpuid(1, regs);
-  //uint32_t cpu_id       = regs[0];
-  //uint32_t cpu_procinfo = regs[1];
-  //uint32_t cpu_feature  = regs[3];
-  //uint32_t cpu_feature2 = regs[2];
 
   uint32_t cpu_exthigh = 0;
   if (strcmp(cpu_vendor, "GenuineIntel") == 0 ||
@@ -527,6 +513,16 @@ std::string Process::GetCPUModel() {
   *brand = '\0';
   assert(brand - cpu_brand < sizeof(cpu_brand));
   return cpu_brand;
+
+#else
+  // On non-x64, fall back to calling uname
+  std::string model = "Unknown ";
+  struct utsname uname_buf;
+  uname(&uname_buf);
+  model.append(uname_buf.machine);
+  return model;
+
+#endif  // __x86_64__
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,2 +1,2 @@
-HipHop Notice:  Use of undefined constant D00Dz - assumed 'D00Dz' in /test/vm/typechecks-dv.php on line 3
-D00Dzw00tHipHop Fatal error: Argument 1 passed to woot() must be an instance of string, int given in /test/vm/typechecks-dv.php on line 5
+HipHop Notice:  Use of undefined constant D00Dz - assumed 'D00Dz' in hphp/test/vm/typechecks-dv.php on line 3
+D00Dzw00tHipHop Fatal error: Argument 1 passed to woot() must be an instance of string, int given in hphp/test/vm/typechecks-dv.php on line 5

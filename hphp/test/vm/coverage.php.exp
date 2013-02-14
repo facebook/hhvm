@@ -3,7 +3,7 @@ Going to enable
 Enabled
 Done enabling
 array(1) {
-  ["hphp/test/vm/coverage.php"]=>
+  hphp/test/vm/coverage.php"]=>
   array(27) {
     [4]=>
     int(4)

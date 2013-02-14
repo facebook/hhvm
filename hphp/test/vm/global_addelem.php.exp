@@ -1,1 +1,1 @@
-HipHop Fatal error: append on $GLOBALS is not implemented yet. 
+HipHop Fatal error: append on $GLOBALS is not implemented yet. in hphp/test/vm/global_addelem.php on line 6

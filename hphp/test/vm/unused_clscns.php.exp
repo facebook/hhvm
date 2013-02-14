@@ -1,1 +1,1 @@
-HipHop Fatal error: Class undefined: Foo 
+HipHop Fatal error: Class undefined: Foo in hphp/test/vm/unused_clscns.php on line 2

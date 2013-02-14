@@ -1,2 +1,2 @@
 #!/bin/bash
-sed -e 's,\\n,\n,g' | sed -e 's, /.*hphp/, hphp/,g'
+./test/vm/filepath.filter | sed -e 's,\\n,\n,g'

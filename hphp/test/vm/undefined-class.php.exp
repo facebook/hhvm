@@ -1,1 +1,1 @@
-HipHop Fatal error: Class undefined: X
+HipHop Fatal error: Class undefined: X in hphp/test/vm/undefined-class.php on line 4

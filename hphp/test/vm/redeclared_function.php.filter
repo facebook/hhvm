@@ -1,4 +1,1 @@
-#!/bin/bash
-
-sed -e 's, [^ ]*\(hphp/[^ (]*\), \1,g'
-
+filepath.filter

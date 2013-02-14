@@ -104,8 +104,6 @@
 # endif
 #endif
 
-#include "config.h"
-
 #ifdef _WIN32
 #define mode_t int
 

@@ -1233,7 +1233,7 @@ void CodeGenerator::cgOpCmpHelper(
 
   /////////////////////////////////////////////////////////////////////////////
   // case 5: array cmp array
-  else if (type1 == Type::Arr && type2 == Type::Arr) {
+  else if (type1.isArray() && type2.isArray()) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);
     cgCallHelper(m_as, (TCA)arr_cmp_arr,  dst, kSyncPoint, args);
@@ -1629,7 +1629,7 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
       } else if (fromType.isString()) {
         // Str -> Bool
         helper = Transl::Call(getMethodPtr(&StringData::toBoolean));
-      } else if (fromType == Type::Arr) {
+      } else if (fromType.isArray()) {
         // Arr -> Bool
         helper = Transl::Call((TCA)arrToBoolHelper);
       } else if (fromType == Type::Obj) {
@@ -4621,7 +4621,7 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst, bool isInitK) {
   SSATmp*          src = inst->getSrc(0);
   ArgGroup args;
   args.addr(fpReg, iterOffset).ssa(src);
-  if (src->getType() == Type::Arr) {
+  if (src->isArray()) {
     args.addr(fpReg, valLocalOffset);
     if (isInitK) {
       args.addr(fpReg, getLocalOffset(inst->getSrc(4)));

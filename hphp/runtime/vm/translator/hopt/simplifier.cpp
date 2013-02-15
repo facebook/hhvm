@@ -888,10 +888,10 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   // same-type simplification is performed above
 
   // case 6: array cmp anything. Array is greater
-  if (src1->getType() == Type::Arr) {
+  if (src1->isArray()) {
     return genDefBool(cmpOp(opName, 1, 0));
   }
-  if (src2->getType() == Type::Arr) {
+  if (src2->isArray()) {
     return genDefBool(cmpOp(opName, 0, 1));
   }
 
@@ -967,7 +967,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
       return src;
     }
     // arrays always get converted to the string "Array"
-    if (type == Type::Arr) {
+    if (type.isArray()) {
       return m_tb->genDefConst(StringData::GetStaticString("Array"));
     }
     if (type.isNull()) {
@@ -1007,7 +1007,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
         const StringData* str = src->getValStr();
         return genDefBool(!str->empty() && !str->isZero());
       }
-      if (type == Type::Arr) {
+      if (type.isArray()) {
         if (src->getValArr()->empty()) {
           return genDefBool(false);
         }
@@ -1030,7 +1030,7 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
         }
         return genDefInt(0);
       }
-      if (type == Type::Arr) {
+      if (type.isArray()) {
         if (src->getValArr()->empty()) {
           return genDefInt(0);
         }

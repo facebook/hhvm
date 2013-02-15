@@ -369,15 +369,14 @@ bool IRInstruction::mayModifyRefs() const {
   // count. Therefore, its MayModifyRefs should be false.
   if (opc == DecRef) {
     auto type = getSrc(0)->getType();
-    if (isControlFlowInstruction() || type.isString()) {
+    if (isControlFlowInstruction()) {
       // If the decref has a target label, then it exits if the destructor
       // has to be called, so it does not have any side effects on the main
       // trace.
       return false;
     }
-    if (type.isBoxed()) {
-      Type innerType = type.innerType();
-      return innerType == Type::Obj || innerType == Type::Arr;
+    if (!type.canRunDtor()) {
+      return false;
     }
   }
   return opcodeHasFlags(opc, MayModifyRefs) || mayReenterHelper();
@@ -709,7 +708,7 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     os << "\""
        << Util::escapeStringForCPP(str->data(), str->size())
        << "\"";
-  } else if (t == Type::Arr) {
+  } else if (t.isArray()) {
     auto arr = inst->getExtra<DefConst>()->as<const ArrayData*>();
     if (arr->empty()) {
       os << "array()";
@@ -848,7 +847,7 @@ const StringData* SSATmp::getValStr() const {
 
 const ArrayData* SSATmp::getValArr() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::Arr));
+  assert(m_inst->getTypeParam().equals(Type::StaticArr));
   return m_inst->getExtra<ConstData>()->as<const ArrayData*>();
 }
 

@@ -650,7 +650,7 @@ void LinearScan::computePreColoringHint() {
         auto type1 = src1->getType();
         auto type2 = src2->getType();
 
-        if ((type1 == Type::Arr && type2 == Type::Arr)
+        if ((type1.isArray() && type2.isArray())
             || (type1.isString() && type2.isString())
             || (type1.isString() && !src1->isConst())
             || (type1 == Type::Obj && type2 == Type::Obj)) {
@@ -675,7 +675,7 @@ void LinearScan::computePreColoringHint() {
           m_preColoringHint.add(src, 1, 1);
         } else if (fromType == Type::Str ||
                    fromType == Type::StaticStr ||
-                   fromType == Type::Arr ||
+                   fromType.isArray() ||
                    fromType == Type::Obj) {
           m_preColoringHint.add(src, 0, 0);
         }

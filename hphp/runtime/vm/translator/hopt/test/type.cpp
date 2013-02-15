@@ -134,8 +134,11 @@ TEST(Type, CanRunDtor) {
     types.erase(t);
   };
   expectTrue(Type::Arr);
+  expectTrue(Type::CountedArr);
   expectTrue(Type::Obj);
+  expectTrue(Type::Counted);
   expectTrue(Type::BoxedArr);
+  expectTrue(Type::BoxedCountedArr);
   expectTrue(Type::BoxedObj);
   expectTrue(Type::BoxedCell);
   expectTrue(Type::Cell);

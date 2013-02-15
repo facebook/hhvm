@@ -617,46 +617,51 @@ const char* opcodeName(Opcode opcode);
   c(Dbl,          1ULL << 4)                                            \
   c(StaticStr,    1ULL << 5)                                            \
   c(CountedStr,   1ULL << 6)                                            \
-  c(Arr,          1ULL << 7)                                            \
-  c(Obj,          1ULL << 8)
-// Boxed*:       9-17
-// PtrTo*:      18-26
-// PtrToBoxed*: 27-35
+  c(StaticArr,    1ULL << 7)                                            \
+  c(CountedArr,   1ULL << 8)                                            \
+  c(Obj,          1ULL << 9)
+// Boxed*:       10-19
+// PtrTo*:       20-29
+// PtrToBoxed*:  30-39
 
 // This list should be in non-decreasing order of specificity
 #define IRT_PHP_UNIONS(c)                                               \
   c(Null,          kUninit|kInitNull)                                   \
   c(Str,           kStaticStr|kCountedStr)                              \
-  c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr)                \
+  c(Arr,           kStaticArr|kCountedArr)                              \
+  c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr|kStaticArr)     \
   c(Uncounted,     kUncountedInit|kUninit)                              \
   c(Cell,          kUncounted|kStr|kArr|kObj)
 
 #define IRT_RUNTIME                                                     \
-  IRT(Cls,         1ULL << 36)                                          \
-  IRT(Func,        1ULL << 37)                                          \
-  IRT(VarEnv,      1ULL << 38)                                          \
-  IRT(NamedEntity, 1ULL << 39)                                          \
-  IRT(FuncCls,     1ULL << 40) /* {Func*, Cctx} */                      \
-  IRT(FuncObj,     1ULL << 41) /* {Func*, Obj} */                       \
-  IRT(Cctx,        1ULL << 42) /* Class* with the lowest bit set,  */   \
+  IRT(Cls,         1ULL << 40)                                          \
+  IRT(Func,        1ULL << 41)                                          \
+  IRT(VarEnv,      1ULL << 42)                                          \
+  IRT(NamedEntity, 1ULL << 43)                                          \
+  IRT(FuncCls,     1ULL << 44) /* {Func*, Cctx} */                      \
+  IRT(FuncObj,     1ULL << 45) /* {Func*, Obj} */                       \
+  IRT(Cctx,        1ULL << 46) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 43) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 44) /* any pointer into VM stack: VmSP or VmFP*/ \
-  IRT(TCA,         1ULL << 45)                                          \
-  IRT(ActRec,      1ULL << 46)                                          \
-  IRT(None,        1ULL << 47)
+  IRT(RetAddr,     1ULL << 47) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 48) /* any pointer into VM stack: VmSP or VmFP*/ \
+  IRT(TCA,         1ULL << 49)                                          \
+  IRT(ActRec,      1ULL << 50)                                          \
+  IRT(None,        1ULL << 51)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
   IRT(Ctx,         kObj|kCctx)                                          \
   IRT(FuncCtx,     kFuncCls|kFuncObj)
 
-// Gen and PtrToGen are here instead of IRT_PHP_UNIONS because
-// BoxedGen and PtrToBoxedGen are nonsense types.
-#define IRT_SPECIAL                                                \
-  IRT(Bottom,      0)                                              \
-  IRT(Gen,         kCell|kBoxedCell)                               \
-  IRT(PtrToGen,    kGen << kPtrShift)
+// Gen, Counted, PtrToGen, and PtrToCounted are here instead of
+// IRT_PHP_UNIONS because boxing them (e.g., BoxedGen, PtrToBoxedGen)
+// would be nonsense types.
+#define IRT_SPECIAL                                                 \
+  IRT(Bottom,       0)                                              \
+  IRT(Counted,      kCountedStr|kCountedArr|kObj|kBoxedCell)        \
+  IRT(PtrToCounted, kCounted << kPtrShift)                          \
+  IRT(Gen,          kCell|kBoxedCell)                               \
+  IRT(PtrToGen,     kGen << kPtrShift)
 
 // All types (including union types) that represent program values,
 // except Gen (which is special). Boxed*, PtrTo*, and PtrToBoxed* only
@@ -672,7 +677,7 @@ const char* opcodeName(Opcode opcode);
 class Type {
   typedef uint64_t bits_t;
 
-  static const size_t kBoxShift = 9;
+  static const size_t kBoxShift = 10;
   static const size_t kPtrShift = kBoxShift * 2;
   static const size_t kPtrBoxShift = kBoxShift + kPtrShift;
 
@@ -736,20 +741,25 @@ public:
     return subtypeOf(PtrToGen);
   }
 
+  bool isCounted() const {
+    return subtypeOf(Counted);
+  }
+
   bool maybeCounted() const {
-    return subtypeOf(Gen) && !subtypeOf(Uncounted);
+    return (*this & Counted) != Bottom;
   }
 
   bool notCounted() const {
-    return subtypeOf(Uncounted | Cls);
+    return !maybeCounted();
   }
 
   bool isStaticallyKnown() const {
-    // Str are Null are technically unions but are statically known
-    // for all practical purposes. Same for a union that consists of
-    // nothing but boxed types.
-    if (isString() || isNull() ||
-        (isPtr() && (deref().isString() || deref().isNull())) ||
+    // Str, Arr and Null are technically unions but are statically
+    // known for all practical purposes. Same for a union that
+    // consists of nothing but boxed types.
+    if (isString() || isArray() || isNull() ||
+        (isPtr() &&
+         (deref().isString() || deref().isArray() || deref().isNull())) ||
         isBoxed()) {
       return true;
     }
@@ -765,7 +775,7 @@ public:
   }
 
   bool needsStaticBitCheck() const {
-    return (*this & (StaticStr | Arr)) != Bottom;
+    return (*this & (StaticStr | StaticArr)) != Bottom;
   }
 
   // returns true if definitely not uninitialized
@@ -814,6 +824,10 @@ public:
       return Type::Dbl;
     }
     return Type::Int;
+  }
+
+  bool isArray() const {
+    return subtypeOf(Arr);
   }
 
   bool isString() const {
@@ -889,7 +903,9 @@ public:
   }
 
   bool canRunDtor() const {
-    return (*this & (Obj | Arr | BoxedObj | BoxedArr)) != Type::Bottom;
+    return
+      (*this & (Obj | CountedArr | BoxedObj | BoxedCountedArr))
+      != Type::Bottom;
   }
 
   // translates a compiler Type to an HPHP::DataType
@@ -974,11 +990,14 @@ typename std::enable_if<
 
 inline Type typeForConst(const StringData*)  { return Type::StaticStr; }
 inline Type typeForConst(const NamedEntity*) { return Type::NamedEntity; }
-inline Type typeForConst(const ArrayData*)   { return Type::Arr; }
 inline Type typeForConst(const Func*)        { return Type::Func; }
 inline Type typeForConst(const Class*)       { return Type::Cls; }
 inline Type typeForConst(TCA)                { return Type::TCA; }
 inline Type typeForConst(double)             { return Type::Dbl; }
+inline Type typeForConst(const ArrayData* ad) {
+  assert(ad->isStatic());
+  return Type::StaticArr;
+}
 
 bool cmpOpTypesMayReenter(Opcode, Type t0, Type t1);
 
@@ -1407,6 +1426,7 @@ public:
   uint32            decUseCount() { return --m_useCount; }
   bool              isBoxed() const { return getType().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
+  bool              isArray() const { return isA(Type::Arr); }
   void              print(std::ostream& ostream,
                           bool printLastUse = false) const;
   void              print() const;

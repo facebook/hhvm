@@ -108,8 +108,11 @@ StaticStr and CountedStr both appear as type String at the PHP level).
   Uncounted       TypedValue {Unin|Null|Bool|Int|Dbl|Sstr}
   CountedStr      StringData* where isStatic() == false
   Str             StringData* {CountedStr|StaticStr}
-  Arr             ArrayData* where isStatic() is unknown
+  StaticArr       ArrayData* where isStatic() == true
+  CountedArr      ArrayData* where isStatic() == false
+  Arr             ArrayData* {CountedArr|StaticArr}
   Obj             ObjectData*
+  Counted         {CountedStr|CountedArr|Obj|BoxedCell}
   Cell            {Null|Bool|Int|Dbl|Str|Arr|Obj}
 
 A PHP reference is implemented as a container object (RefData) which contains

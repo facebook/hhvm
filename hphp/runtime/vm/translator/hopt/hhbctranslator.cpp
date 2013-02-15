@@ -263,7 +263,7 @@ void HhbcTranslator::emitArrayAdd() {
   TRACE(3, "%u: ArrayAdd\n", m_bcOff);
   Type type1 = topC(0)->getType();
   Type type2 = topC(1)->getType();
-  if (type1 != Type::Arr || type2 != Type::Arr) {
+  if (!type1.isArray() || !type2.isArray()) {
     // This happens when we have a prior spillstack that optimizes away
     // its spilled values because they were already on the stack. This
     // prevents us from getting to type of the SSATmps popped from the
@@ -607,7 +607,7 @@ template<class Lambda>
 SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   SSATmp* src = popC();
   Type type = src->getType();
-  if (type != Type::Arr && type != Type::Obj) {
+  if (!type.isArray() && type != Type::Obj) {
     PUNT(IterInit);
   }
   spillStack();

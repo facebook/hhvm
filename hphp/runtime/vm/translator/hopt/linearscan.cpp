@@ -782,7 +782,7 @@ void LinearScan::allocRegs(Trace* trace) {
     // Don't bother rematerializing the trace if it has no Spill/Reload.
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "--------- HHIR before rematerialization ---------\n";
-      trace->print(std::cout, false);
+      trace->print(std::cout);
       std::cout << "-------------------------------------------------\n";
     }
     rematerialize(trace);

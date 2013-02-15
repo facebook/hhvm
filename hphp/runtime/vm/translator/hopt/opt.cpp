@@ -56,7 +56,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     optimizeMemoryAccesses(trace, irFactory);
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "----- HHIR after MemElim -----\n";
-      trace->print(std::cout, false);
+      trace->print(std::cout);
       std::cout << "---------------------------\n";
     }
     assert(JIT::checkCfg(trace, *irFactory));
@@ -65,7 +65,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     eliminateDeadCode(trace, irFactory);
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "----- HHIR after DCE -----\n";
-      trace->print(std::cout, false);
+      trace->print(std::cout);
       std::cout << "---------------------------\n";
     }
     assert(JIT::checkCfg(trace, *irFactory));
@@ -76,7 +76,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     traceBuilder->optimizeTrace();
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "----- HHIR after CSE/Simplification -----\n";
-      trace->print(std::cout, false);
+      trace->print(std::cout);
       std::cout << "---------------------------\n";
     }
     assert(JIT::checkCfg(trace, *irFactory));
@@ -87,7 +87,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       eliminateDeadCode(trace, irFactory);
       if (RuntimeOption::EvalDumpIR > 5) {
         std::cout << "----- HHIR after DCE -----\n";
-        trace->print(std::cout, false);
+        trace->print(std::cout);
         std::cout << "---------------------------\n";
       }
       assert(JIT::checkCfg(trace, *irFactory));
@@ -97,7 +97,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     optimizeJumps(trace, irFactory);
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "----- HHIR after jump opts -----\n";
-      trace->print(std::cout, false);
+      trace->print(std::cout);
       std::cout << "---------------------------\n";
     }
     assert(JIT::checkCfg(trace, *irFactory));
@@ -106,7 +106,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     insertRefCountAsserts(trace, irFactory);
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "----- HHIR after inserting RefCnt asserts -----\n";
-      trace->print(std::cout, false);
+      trace->print(std::cout);
       std::cout << "---------------------------\n";
     }
     assert(JIT::checkCfg(trace, *irFactory));

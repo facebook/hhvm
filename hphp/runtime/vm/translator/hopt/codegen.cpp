@@ -4658,11 +4658,12 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
               m_astubs.code.frontier});
       }
     }
-
     m_curInst = inst;
     auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
-    auto addr = cgInst(inst);
-    inst->setAsmAddr(addr);
+    auto* addr = cgInst(inst);
+    if (m_state.asmInfo && addr) {
+      m_state.asmInfo->instRanges[inst] = TcaRange(addr, m_as.code.frontier);
+    }
   }
 }
 
@@ -4693,11 +4694,12 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
         CodeGenerator::emitFwdJmp(*as, next, state);
       }
     }
-    block->setAsmRange(asmStart, as->code.frontier);
-    if (as != &astubs) {
-      block->setAstubsRange(astubsStart, astubs.code.frontier);
-    } else {
-      block->setAstubsRange(nullptr, nullptr);
+    if (state.asmInfo) {
+      state.asmInfo->asmRanges[block] = TcaRange(asmStart, as->code.frontier);
+      if (as != &astubs) {
+        state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
+                                                     astubs.code.frontier);
+      }
     }
   }
   size_t UNUSED traceSize = amain.code.frontier - traceStart;
@@ -4714,9 +4716,10 @@ void genCodeForTrace(Trace* trace,
                      CodeGenerator::Asm& astubs,
                      IRFactory* irFactory,
                      vector<TransBCMapping>* bcMap,
-                     Transl::TranslatorX64* tx64) {
+                     Transl::TranslatorX64* tx64,
+                     AsmInfo* asmInfo) {
   assert(trace->isMain());
-  CodegenState state(irFactory);
+  CodegenState state(irFactory, asmInfo);
   cgTrace(trace, as, astubs, tx64, bcMap, state);
   for (Trace* exit : trace->getExitTraces()) {
     cgTrace(exit, astubs, astubs, tx64, nullptr, state);

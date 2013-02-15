@@ -44,11 +44,29 @@ enum SyncOptions {
   kSyncPointAdjustOne,
 };
 
-// stuff we need to preserve between blocks while generating code.
+// Information about where code was generated, for pretty-printing.
+struct AsmInfo {
+  AsmInfo(const IRFactory* factory)
+    : instRanges(factory, TcaRange(nullptr, nullptr))
+    , asmRanges(factory, TcaRange(nullptr, nullptr))
+    , astubRanges(factory, TcaRange(nullptr, nullptr))
+  {}
+
+  // Asm address info for each instruction and block
+  StateVector<IRInstruction,TcaRange> instRanges;
+  StateVector<Block,TcaRange> asmRanges;
+  StateVector<Block,TcaRange> astubRanges;
+};
+
+// Stuff we need to preserve between blocks while generating code,
+// and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRFactory* factory)
-    : patches(factory, nullptr), lastMarker(nullptr), firstMarkerSeen(false) {
-  }
+  CodegenState(const IRFactory* factory, AsmInfo* asmInfo)
+    : patches(factory, nullptr)
+    , lastMarker(nullptr)
+    , firstMarkerSeen(false)
+    , asmInfo(asmInfo)
+  {}
 
   // Each block has a list of addresses to patch
   StateVector<Block,void*> patches;
@@ -57,6 +75,8 @@ struct CodegenState {
   // current trace (even across blocks).
   const MarkerData* lastMarker;
   bool firstMarkerSeen;
+
+  AsmInfo* asmInfo;
 };
 
 struct CodeGenerator {
@@ -404,7 +424,8 @@ void genCodeForTrace(Trace*                  trace,
                      CodeGenerator::Asm&     astubs,
                      IRFactory*              irFactory,
                      vector<TransBCMapping>* bcMap,
-                     TranslatorX64*          tx64);
+                     TranslatorX64*          tx64,
+                     AsmInfo                 *asmInfo = nullptr);
 
 }}}
 

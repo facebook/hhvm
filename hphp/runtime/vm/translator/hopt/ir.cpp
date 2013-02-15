@@ -285,7 +285,6 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   , m_id(0)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
-  , m_asmAddr(nullptr)
   , m_taken(nullptr)
   , m_block(nullptr)
   , m_tca(nullptr)
@@ -503,7 +502,6 @@ void IRInstruction::convertToNop() {
   m_liveOutRegs = nop.m_liveOutRegs;
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
-  m_asmAddr = nop.m_asmAddr;
   m_taken = nullptr;
   m_tca = nop.m_tca;
   m_extra = nullptr;
@@ -921,10 +919,12 @@ void SSATmp::print() const {
   std::cerr << std::endl;
 }
 
-void Trace::print(std::ostream& os, bool printAsm) const {
+void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
   Disasm disasm(14, RuntimeOption::EvalDumpIR > 5);
 
   for (Block* block : m_blocks) {
+    TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
+                          TcaRange(nullptr, nullptr);
     for (auto it = block->begin(); it != block->end();) {
       auto& inst = *it; ++it;
       if (inst.getOpcode() == Marker) {
@@ -968,39 +968,38 @@ void Trace::print(std::ostream& os, bool printAsm) const {
       os << std::string(8, ' ');
       inst.print(os);
       os << '\n';
-      if (!printAsm) continue;
-      TCA asmAddr = inst.getAsmAddr();
-      if (!asmAddr) continue;
-      // Find the next instruction that has an non-NULL asm address.
-      TCA endAsm = inst.getBlock()->getAsmRange().end();
-      for (auto i = it; i != block->end(); ++i) {
-        if (TCA addr = i->getAsmAddr()) {
-          endAsm = addr;
-          break;
+      if (asmInfo) {
+        TcaRange instRange = asmInfo->instRanges[inst];
+        if (!instRange.empty()) {
+          os << '\n';
+          disasm.disasm(os, instRange.begin(), instRange.end());
+          os << '\n';
+          assert(instRange.end() >= blockRange.start() &&
+                 instRange.end() <= blockRange.end());
+          blockRange = TcaRange(instRange.end(), blockRange.end());
         }
       }
-      if (asmAddr != endAsm) {
-        // print out the assembly
-        os << '\n';
-        disasm.disasm(os, asmAddr, endAsm);
-        os << '\n';
-      }
     }
-    auto const &astubs = block->getAstubsRange();
-    if (!astubs.empty()) {
-      os << std::string(8, ' ') << "AStubs:\n";
-      disasm.disasm(os, astubs.start(), astubs.end());
+    if (asmInfo) {
+      // print code associated with this block that isn't tied to any
+      // instruction.  This includes code after the last isntruction (e.g.
+      // jmp to next block), and AStubs code.
+      if (!blockRange.empty()) {
+        os << std::string(8, ' ') << "A:\n";
+        disasm.disasm(os, blockRange.start(), blockRange.end());
+      }
+      auto astubRange = asmInfo->astubRanges[block];
+      if (!astubRange.empty()) {
+        os << std::string(8, ' ') << "AStubs:\n";
+        disasm.disasm(os, astubRange.start(), astubRange.end());
+      }
     }
   }
 
   for (auto* exitTrace : m_exitTraces) {
     os << "\n      -------  Exit Trace  -------\n";
-    exitTrace->print(os, printAsm);
+    exitTrace->print(os, asmInfo);
   }
-}
-
-void Trace::print() const {
-  print(std::cout, true /* printAsm */);
 }
 
 void resetIds(Trace* trace) {

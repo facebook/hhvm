@@ -1717,7 +1717,8 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 
   JIT::Trace* trace = m_hhbcTrans->getTrace();
 
-  auto traceTrace = [&] (const char* banner, bool b) {
+  auto traceTrace = [&] (const char* banner,
+                         const JIT::AsmInfo* asmInfo = nullptr) {
     std::ostringstream str;
     str << folly::format("{:-^40}\n", banner);
     auto unitName = curUnit()->filepath()->empty()
@@ -1727,7 +1728,7 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
              curFunc()->fullName()->data(),
              trace->getBcOff(),
              unitName);
-    trace->print(str, b);
+    trace->print(str, asmInfo);
     str << folly::format("{:-^40}\n", "");
     if (Trace::moduleEnabled(TRACEMOD, 1)) {
       // If tracing is enabled, print using the trace facility so IR dumps
@@ -1739,28 +1740,31 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   };
 
   if (RuntimeOption::EvalDumpIR) {
-    traceTrace(" HHIR after initial translation ", false);
+    traceTrace(" HHIR after initial translation ");
   }
   assert(JIT::checkCfg(trace, *m_irFactory));
 
   JIT::optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
 
   if (RuntimeOption::EvalDumpIR > 1) {
-    traceTrace(" HHIR after optimizing ", false);
+    traceTrace(" HHIR after optimizing ");
   }
   assert(JIT::checkCfg(trace, *m_irFactory));
 
   JIT::allocRegsForTrace(trace, m_irFactory.get());
 
   if (RuntimeOption::EvalDumpIR) {
-    traceTrace(" HHIR after reg alloc ", false);
+    traceTrace(" HHIR after reg alloc ");
   }
   assert(JIT::checkCfg(trace, *m_irFactory));
 
-  JIT::genCodeForTrace(trace, a, astubs, m_irFactory.get(), bcMap, this);
-
+  auto* factory = m_irFactory.get();
   if (RuntimeOption::EvalDumpIR) {
-    traceTrace(" HHIR after code gen ", true);
+    JIT::AsmInfo ai(factory);
+    JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this, &ai);
+    traceTrace(" HHIR after code gen ", &ai);
+  } else {
+    JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this);
   }
 
   m_numHHIRTrans++;

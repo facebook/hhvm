@@ -101,7 +101,7 @@ void c_BlockableWaitHandle::killCycle() {
         "wait handle that is not blocked");
   }
 
-  std::vector<std::string> exception_msg_items;
+  smart::vector<std::string> exception_msg_items;
   exception_msg_items.push_back("Encountered dependency cycle:\n");
 
   c_BlockableWaitHandle* current = this;

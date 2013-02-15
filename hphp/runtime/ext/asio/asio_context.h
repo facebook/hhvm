@@ -30,10 +30,13 @@ FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
 
-class AsioContext : public Sweepable {
+class AsioContext {
   public:
     static AsioContext* Enter(AsioContext* parent);
     AsioContext* exit();
+
+    void* operator new(size_t size) { return smart_malloc(size); }
+    void operator delete(void* ptr) { smart_free(ptr); }
 
     inline uint16_t getContextDepth() { return m_contextDepth; }
     inline uint16_t getWaitHandleDepth() { return m_waitHandleDepth; }
@@ -59,7 +62,8 @@ class AsioContext : public Sweepable {
     static const uint32_t QUEUE_NO_PENDING_IO = 1;
 
   private:
-    typedef std::map<uint32_t, std::queue<c_RescheduleWaitHandle*>> reschedule_priority_queue_t;
+    typedef smart::map<uint32_t, smart::queue<c_RescheduleWaitHandle*>>
+      reschedule_priority_queue_t;
 
     AsioContext(AsioContext* parent);
 
@@ -71,7 +75,7 @@ class AsioContext : public Sweepable {
     c_ContinuationWaitHandle* m_current;
 
     // queue of ContinuationWaitHandles ready for immediate execution
-    std::queue<c_ContinuationWaitHandle*> m_queue_ready;
+    smart::queue<c_ContinuationWaitHandle*> m_queue_ready;
 
     // queue of RescheduleWaitHandles scheduled in default mode
     reschedule_priority_queue_t m_priority_queue_default;

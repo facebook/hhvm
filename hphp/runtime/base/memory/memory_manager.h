@@ -21,6 +21,11 @@
 #include <util/thread_local.h>
 #include <runtime/base/memory/memory_usage_stats.h>
 
+#include <vector>
+#include <deque>
+#include <queue>
+#include <map>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -396,6 +401,83 @@ void* smart_malloc(size_t nbytes);
 void* smart_calloc(size_t count, size_t bytes);
 void* smart_realloc(void* ptr, size_t nbytes);
 void  smart_free(void* ptr);
+
+template <class T>
+class SmartStlAlloc {
+ public:
+  typedef T              value_type;
+  typedef T*             pointer;
+  typedef const T*       const_pointer;
+  typedef T&             reference;
+  typedef const T&       const_reference;
+  typedef std::size_t    size_type;
+  typedef std::ptrdiff_t difference_type;
+
+  template <class U>
+  struct rebind {
+    typedef SmartStlAlloc<U> other;
+  };
+
+  pointer address (reference value) const {
+    return &value;
+  }
+  const_pointer address (const_reference value) const {
+    return &value;
+  }
+
+  SmartStlAlloc() throw() {}
+  SmartStlAlloc(const SmartStlAlloc&) {}
+  template <class U>
+  SmartStlAlloc (const SmartStlAlloc<U>&) {}
+  ~SmartStlAlloc() {}
+
+  size_type max_size () const {
+    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  }
+
+  pointer allocate (size_type num, const void* = 0) {
+    pointer ret = (pointer)smart_malloc(num * sizeof(T));
+    return ret;
+  }
+
+  void construct (pointer p, const T& value) {
+    new ((void*)p) T(value);
+  }
+
+  void destroy (pointer p) {
+    p->~T();
+  }
+
+  void deallocate (pointer p, size_type num) {
+    smart_free(p);
+  }
+};
+
+template <class T1, class T2>
+bool operator== (const SmartStlAlloc<T1>&,
+                 const SmartStlAlloc<T2>&) {
+  return true;
+}
+template <class T1, class T2>
+bool operator!= (const SmartStlAlloc<T1>&,
+                 const SmartStlAlloc<T2>&) {
+  return false;
+}
+
+namespace smart {
+template <class Key, class T, class Compare = std::less<Key>,
+          class Alloc = HPHP::SmartStlAlloc<std::pair<const Key, T> > >
+class map : public std::map<Key, T, Compare, Alloc> {};
+
+template <class T, class Alloc = HPHP::SmartStlAlloc<T> >
+class deque : public std::deque<T, Alloc> {};
+
+template <class T, class Alloc = HPHP::SmartStlAlloc<T> >
+class vector : public std::vector<T, Alloc> {};
+
+template <class T, class Container = deque<T> >
+class queue : public std::queue<T, Container> {};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

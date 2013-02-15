@@ -24,7 +24,7 @@ namespace HPHP {
 
 namespace {
   template<class TWaitHandle>
-  void exitContextQueue(AsioContext* ctx, std::queue<TWaitHandle*> &queue) {
+  void exitContextQueue(AsioContext* ctx, smart::queue<TWaitHandle*> &queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop();
@@ -57,8 +57,7 @@ AsioContext* AsioContext::exit() {
     exitContextQueue(this, it.second);
   }
 
-  // release memory explicitly and make sure we are not sweeped
-  unregister();
+  // release memory explicitly
   delete this;
 
   return parent;

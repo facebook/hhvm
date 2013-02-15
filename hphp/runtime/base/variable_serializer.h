@@ -108,12 +108,13 @@ public:
   void getResourceInfo(String &rsrcName, int &rsrcId);
   Type getType() const { return m_type; }
 private:
+  typedef smart::hash_map<void*, int, pointer_hash<void> > SmartPtrCtrMap;
   Type m_type;
   int m_option;                  // type specific extra options
   StringBuffer *m_buf;
   int m_indent;
-  PointerCounterMap m_counts;    // counting seen arrays for recursive levels
-  PointerCounterMap *m_arrayIds; // reference ids for objs/arrays
+  SmartPtrCtrMap m_counts;       // counting seen arrays for recursive levels
+  SmartPtrCtrMap *m_arrayIds;    // reference ids for objs/arrays
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
   int m_refCount;                // current variable's reference count
@@ -132,7 +133,7 @@ private:
     bool first_element; // whether this is first array element
     int  indent_delta;  // the extra indent to serialize this object
   };
-  std::vector<ArrayInfo> m_arrayInfos;
+  smart::vector<ArrayInfo> m_arrayInfos;
 
   void writePropertyKey(CStrRef prop);
 };

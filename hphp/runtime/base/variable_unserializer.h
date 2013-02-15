@@ -120,8 +120,8 @@ public:
   Type m_type;
   const char *m_buf;
   const char *m_end;
-  std::vector<RefInfo> m_refs;
-  std::list<Variant> m_vars;
+  smart::vector<RefInfo> m_refs;
+  smart::list<Variant> m_vars;
   bool m_unknownSerializable;
 
   void check() {

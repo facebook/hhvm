@@ -398,6 +398,22 @@ void* smart_calloc(size_t count, size_t bytes);
 void* smart_realloc(void* ptr, size_t nbytes);
 void  smart_free(void* ptr);
 
+namespace smart {
+namespace do_not_use_directly {
+/*
+ * We are deriving from the std::collection classes to get
+ * smart::collection classes that use smart allocation.
+ * To avoid the various issues involved with deriving
+ * from value types, we want to make sure that there are
+ * no references to std::collection<...,SmartStlAlloc<>>
+ * other than the ones below. That way we know that
+ * a pointer to a smart::collection can never decay
+ * to a pointer to a std::collection.
+ *
+ * The namespace do_not_use_directly should remind us
+ * of that.
+ *
+ */
 template <class T>
 class SmartStlAlloc {
  public:
@@ -460,21 +476,50 @@ bool operator!= (const SmartStlAlloc<T1>&,
   return false;
 }
 
-namespace smart {
-template <class Key, class T, class Compare = std::less<Key>,
-          class Alloc = HPHP::SmartStlAlloc<std::pair<const Key, T> > >
-class map : public std::map<Key, T, Compare, Alloc> {};
-
-template <class T, class Alloc = HPHP::SmartStlAlloc<T> >
-class deque : public std::deque<T, Alloc> {};
-
-template <class T, class Alloc = HPHP::SmartStlAlloc<T> >
-class vector : public std::vector<T, Alloc> {};
-
-template <class T, class Container = deque<T> >
-class queue : public std::queue<T, Container> {};
 }
+/*
+ * Derivation from value types is generally bad.
+ * Here, we derive from classes that do not exist anywhere
+ * else in the code base (see comments above).
+ *
+ * We also add no functionality to the derived class. Your
+ * code will not get past code review if you try to do so.
+ */
+template <class Key, class T, class Compare = std::less<Key> >
+class map : public std::map<
+  Key, T, Compare,
+  do_not_use_directly::SmartStlAlloc<std::pair<const Key, T> > > {};
 
+template <class T>
+class deque : public std::deque<T, do_not_use_directly::SmartStlAlloc<T> > {};
+
+template <class T>
+class vector : public std::vector<T, do_not_use_directly::SmartStlAlloc<T> > {};
+
+template <class T>
+class list : public std::list<T, do_not_use_directly::SmartStlAlloc<T> > {};
+
+template <class T>
+class queue : public std::queue<T, deque<T> > {};
+
+template <class _T, class _U,
+          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
+struct hash_map : std::tr1::unordered_map<
+  _T, _U, _V, _W, do_not_use_directly::SmartStlAlloc<std::pair<_T, _U> > > {
+  hash_map() : std::tr1::unordered_map<
+    _T, _U, _V, _W, do_not_use_directly::SmartStlAlloc<std::pair<_T, _U> >
+    >(0) {}
+};
+
+template <class _T,
+          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
+struct hash_set : std::tr1::unordered_set<
+  _T, _V, _W, do_not_use_directly::SmartStlAlloc<_T> > {
+  hash_set() : std::tr1::unordered_set<
+    _T, _V, _W, do_not_use_directly::SmartStlAlloc<_T> >(0) {}
+};
+
+}
 ///////////////////////////////////////////////////////////////////////////////
 }
 

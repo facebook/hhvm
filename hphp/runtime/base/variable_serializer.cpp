@@ -45,7 +45,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
     m_levelDebugger(0) {
   m_maxLevelDebugger = g_context->getDebuggerPrintLevel();
   if (type == Serialize || type == APCSerialize || type == DebuggerSerialize) {
-    m_arrayIds = new PointerCounterMap();
+    m_arrayIds = new SmartPtrCtrMap();
   } else {
     m_arrayIds = nullptr;
   }
@@ -477,7 +477,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
   case APCSerialize:
     {
       assert(m_arrayIds);
-      PointerCounterMap::const_iterator iter = m_arrayIds->find(ptr);
+      SmartPtrCtrMap::const_iterator iter = m_arrayIds->find(ptr);
       assert(iter != m_arrayIds->end());
       int id = iter->second;
       if (isObject) {

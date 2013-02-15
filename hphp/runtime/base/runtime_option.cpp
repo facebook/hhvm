@@ -163,6 +163,7 @@ int RuntimeOption::SSLPortFd = -1;
 std::string RuntimeOption::SSLCertificateFile;
 std::string RuntimeOption::SSLCertificateKeyFile;
 std::string RuntimeOption::SSLCertificateDir;
+bool RuntimeOption::TLSDisableTLS1_2;
 
 VirtualHostPtrVec RuntimeOption::VirtualHosts;
 IpBlockMapPtr RuntimeOption::IpBlocks;
@@ -730,6 +731,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     SSLCertificateFile = server["SSLCertificateFile"].getString();
     SSLCertificateKeyFile = server["SSLCertificateKeyFile"].getString();
     SSLCertificateDir = server["SSLCertificateDir"].getString();
+    TLSDisableTLS1_2 = server["TLSDisableTLS1_2"].getBool(false);
 
     string srcRoot = Util::normalizeDir(server["SourceRoot"].getString());
     if (!srcRoot.empty()) SourceRoot = srcRoot;

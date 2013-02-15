@@ -17,6 +17,7 @@
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
+#include <runtime/base/util/curl_tls_workarounds.h>
 #include <util/timer.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -122,6 +123,7 @@ int HttpClient::impl(const char *url, const char *data, int size,
   curl_easy_setopt(cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
   curl_easy_setopt(cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
   curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,    0);
+  curl_easy_setopt(cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
 
   curl_easy_setopt(cp, CURLOPT_TIMEOUT,           m_timeout);
   if (m_maxRedirect > 1) {

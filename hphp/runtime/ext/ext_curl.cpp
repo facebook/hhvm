@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/libevent_http_client.h>
+#include <runtime/base/util/curl_tls_workarounds.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/vm/translator/translator-inline.h>
@@ -122,6 +123,7 @@ public:
     curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
     curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
     curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
 
     curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
                      RuntimeOption::HttpDefaultTimeout);

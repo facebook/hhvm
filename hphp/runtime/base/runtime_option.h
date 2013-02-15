@@ -166,6 +166,7 @@ public:
   static std::string SSLCertificateFile;
   static std::string SSLCertificateKeyFile;
   static std::string SSLCertificateDir;
+  static bool TLSDisableTLS1_2;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;

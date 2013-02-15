@@ -213,8 +213,8 @@ O(LdClsCached,                  D(Cls), CStr,              C|E|  Refs|Er|Mem) \
 O(LdCachedClass,                D(Cls), CStr,                              C) \
 O(LdClsCns,                     DParam, CStr CStr,                         C) \
 O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
-O(LdClsMethodCache,         D(FuncCls), SUnk,                           C|Er) \
-O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx),     C|Er) \
+O(LdClsMethodCache,         D(FuncCls), SUnk,                C|E|Refs|Er|Mem) \
+O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx),   C|E|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Obj,Cls,Ctx) S(Func),            C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
@@ -226,12 +226,12 @@ O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFixedFunc,                 D(Func), CStr,                         C|E|Er) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr) C(Int),                  C) \
 O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                         C|Rm) \
-O(LdSSwitchDestFast,            D(TCA), S(Gen),                         N|Rm) \
-O(LdSSwitchDestSlow,            D(TCA), S(Gen),                 N|Rm|Refs|Er) \
+O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
+O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \
 O(NewObj,                    D(StkPtr), C(Int)                                \
                                           S(Str,Cls)                          \
                                           S(StkPtr)                           \
-                                          S(StkPtr),             E|Mem|N|PRc) \
+                                          S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
 O(NewArray,                     D(Arr), C(Int),                  E|Mem|N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
@@ -300,7 +300,7 @@ O(DefCns,                      D(Bool), SUnk,                      C|E|N|Mem) \
 O(Concat,                       D(Str), S(Gen) S(Gen),    N|Mem|CRc|PRc|Refs) \
 O(ArrayAdd,                     D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 O(DefCls,                           ND, SUnk,                          C|E|N) \
-O(DefFunc,                          ND, SUnk,                          C|E|N) \
+O(DefFunc,                          ND, SUnk,                       C|E|N|Er) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
 O(InterpOne,                 D(StkPtr), SUnk,                E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
@@ -327,15 +327,15 @@ O(ContStartedCheck,                 ND, S(Obj),                            E) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(StkPtr)                           \
                                           C(Int)                              \
-                                          C(Int),             N|Mem|Refs|CRc) \
+                                          C(Int),           E|N|Mem|Refs|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \
                                           S(StkPtr)                           \
                                           C(Int)                              \
                                           C(Int)                              \
-                                          C(Int),             N|Mem|Refs|CRc) \
-O(IterNext,                    D(Bool), S(StkPtr) C(Int) C(Int),  N|Mem|Refs) \
+                                          C(Int),           E|N|Mem|Refs|CRc) \
+O(IterNext,                    D(Bool), S(StkPtr) C(Int) C(Int),E|N|Mem|Refs) \
 O(IterNextK,                   D(Bool), S(StkPtr)                             \
-                                          C(Int) C(Int) C(Int),   N|Mem|Refs) \
+                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(PropX,                   D(PtrToGen), C(TCA)                                \
                                           C(Cls)                              \

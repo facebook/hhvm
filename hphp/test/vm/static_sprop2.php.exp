@@ -1,0 +1,4 @@
+Creating C
+string(1) "C"
+Creating D
+HipHop Fatal error: Invalid static property access: D::cls in /data/users/alia/hphp/hphp/test/vm/static_sprop2.php on line 5

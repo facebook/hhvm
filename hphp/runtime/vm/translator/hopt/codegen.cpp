@@ -1728,48 +1728,38 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
-  // Note: We may not need 2 opcodes for LdFixedFunc versus
-  // LdFunc. We can look whether methodName is a string constant
-  // and generate different code here.
   SSATmp* dst        = inst->getDst();
   SSATmp* methodName = inst->getSrc(0);
 
-  assert(methodName->isConst() && methodName->getType() == Type::StaticStr);
-  auto dstReg = dst->getReg();
-  if (dstReg == InvalidReg) {
-    // happens if LdFixedFunc and FCall not in same trace
-    dstReg = rScratch;
-    dst->setReg(dstReg, 0);
-  }
   using namespace TargetCache;
   const StringData* name = methodName->getValStr();
   CacheHandle ch = allocFixedFunction(name);
   size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
-  m_as.load_reg64_disp_reg64(rVmTl, funcCacheOff, dstReg);
-  m_as.test_reg64_reg64(dstReg, dstReg);
+
+  auto dstReg = dst->getReg();
+  if (dstReg == InvalidReg) {
+    // happens if LdFixedFunc and FCall not in same trace
+    m_as.   cmpq(0, rVmTl[funcCacheOff]);
+  } else {
+    m_as.   loadq (rVmTl[funcCacheOff], dstReg);
+    m_as.   testq (dstReg, dstReg);
+  }
   // jz off to the helper call in astubs
   unlikelyIfBlock(CC_Z, [&] {
     // this helper tries the autoload map, and fatals on failure
     cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupUnknownFunc,
-                 dst, kSyncPoint, ArgGroup().immPtr(name));
+                 dstReg, kSyncPoint, ArgGroup().immPtr(name));
   });
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
+  SSATmp*        dst = inst->getDst();
   SSATmp* methodName = inst->getSrc(0);
 
   TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
-  auto dstReg = dst->getReg();
-  if (dstReg == InvalidReg) {
-    // this happens if LdFixedFunc and FCall are not in the same trace
-    // TODO: try to get rax instead to avoid a move after the call
-    dstReg = rScratch;
-  }
   // raises an error if function not found
-  cgCallHelper(m_as, (TCA)FuncCache::lookup, dstReg, kSyncPoint,
-               ArgGroup().imm(ch)
-                         .ssa(methodName));
+  cgCallHelper(m_as, (TCA)FuncCache::lookup, dst->getReg(), kSyncPoint,
+               ArgGroup().imm(ch).ssa(methodName));
 }
 
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
@@ -3786,7 +3776,7 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   auto funcDestReg  = dst->getReg(0);
   auto classDestReg = dst->getReg(1);
 
-
+  assert(funcDestReg != InvalidReg && classDestReg != InvalidReg);
   // Attempt to retrieve the func* and class* from cache
   m_as.load_reg64_disp_reg64(rVmTl, ch, funcDestReg);
   m_as.test_reg64_reg64(funcDestReg, funcDestReg);
@@ -3910,6 +3900,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   CacheHandle              ch = StaticMethodFCache::alloc(clsName, methName,
                                               getContextName(getCurClass()));
 
+  assert(funcDestReg != InvalidReg && destCtxReg != InvalidReg);
   emitMovRegReg(m_as, srcCtxReg, destCtxReg);
   m_as.loadq(rVmTl[ch], funcDestReg);
   m_as.testq(funcDestReg, funcDestReg);
@@ -3977,8 +3968,12 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   // careful not to clobber it before the branch to slow path. So
   // use the scratch register as a temporary destination if cls is
   // assigned the same register as the dst register.
-  auto tmpReg = dstReg == cls->getReg() ? PhysReg(rScratch) : dstReg;
+  auto tmpReg = dstReg;
+  if (dstReg == InvalidReg || dstReg == cls->getReg()) {
+    tmpReg = PhysReg(rScratch);
+  }
 
+  // Could be optimized to cmp against zero when !label && dstReg == InvalidReg
   m_as.loadq(rVmTl[ch], tmpReg);
   m_as.testq(tmpReg, tmpReg);
   unlikelyIfBlock(CC_E, [&] {
@@ -3993,7 +3988,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
       emitFwdJcc(m_astubs, CC_Z, target);
     }
   });
-  if (tmpReg != dstReg) {
+  if (tmpReg != dstReg && dstReg != InvalidReg) {
     m_as.mov_reg64_reg64(tmpReg, dstReg);
   }
 }
@@ -4005,7 +4000,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   SSATmp* cxt   = inst->getSrc(2);
   Block* target = inst->getTaken();
   auto dstReg = dst->getReg();
-  if (dstReg == InvalidReg) {
+  if (dstReg == InvalidReg && target) {
     // result is unused but this instruction was not eliminated
     // because its essential
     dstReg = rScratch;
@@ -4018,7 +4013,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
                ArgGroup().ssa(cls).ssa(prop).ssa(cxt));
   if (target) {
     m_as.testq(dstReg, dstReg);
-    emitFwdJcc(m_as, CC_NZ, target);
+    emitFwdJcc(m_as, CC_Z, target);
   }
 }
 
@@ -4071,9 +4066,6 @@ void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   SSATmp* cnsName = inst->getSrc(0);
   SSATmp* cls     = inst->getSrc(1);
 
-  assert(cnsName->isConst() && cnsName->getType() == Type::StaticStr);
-  assert(cls->isConst() && cls->getType() == Type::StaticStr);
-
   StringData* fullName = fullConstName(cls, cnsName);
   TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
   // note that we bail from the trace if the target cache entry is empty
@@ -4097,10 +4089,10 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
   m_as.lea(rVmTl[ch], rTvPtr);
 
   ArgGroup args;
-  args.reg(rTvPtr).
-  immPtr(Unit::GetNamedEntity(cls->getValStr())).
-  immPtr(cls->getValStr()).
-  immPtr(cnsName->getValStr());
+  args.reg(rTvPtr)
+      .immPtr(Unit::GetNamedEntity(cls->getValStr()))
+      .immPtr(cls->getValStr())
+      .immPtr(cnsName->getValStr());
 
   cgCallHelper(m_as, TCA(TargetCache::lookupClassConstantTv),
                inst->getDst(), kSyncPoint, args);

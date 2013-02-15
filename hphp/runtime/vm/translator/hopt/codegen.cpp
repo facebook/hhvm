@@ -250,7 +250,7 @@ const char* getContextName(Class* ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
+ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1), m_zeroExtend(false) {
   if (tmp->getType() == Type::None) {
     assert(val);
     m_kind = None;
@@ -285,6 +285,9 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1) {
     // CodeGenerator know that the value might require some massaging
     // to be in the right format for the call.
     m_kind = val ? Reg : TypeReg;
+    // zero extend any boolean value that we pass to the helper in case
+    // the helper expects it (e.g., as TypedValue)
+    if (val && tmp->isA(Type::Bool)) m_zeroExtend = true;
     m_srcReg = reg;
     return;
   }
@@ -443,6 +446,17 @@ Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc, Block* target,
   return start;
 }
 
+static void zeroExtendIfBool(X64Assembler& as, const SSATmp* src) {
+  if (src->isA(Type::Bool)) {
+    auto reg = src->getReg();
+    if (reg != InvalidReg) {
+      // zero-extend the bool from a byte to a quad
+      // note: movzbl actually extends the value to 64 bits.
+      as.movzbl(rbyte(reg), r32(reg));
+    }
+  }
+}
+
 static void prepBinaryXmmOp(X64Assembler& a, const SSATmp* l, const SSATmp* r) {
   auto intoXmm = [&](const SSATmp* ssa, RegXMM xmm) {
     RegNumber src(ssa->getReg());
@@ -453,11 +467,8 @@ static void prepBinaryXmmOp(X64Assembler& a, const SSATmp* l, const SSATmp* r) {
     }
     if (ssa->isA(Type::Int | Type::Bool)) {
       // Expand non-const bools to 64-bit.
-      //   Note: movzbl actually extends the value to 64 bits.
-      // (Consts are already moved into src as 64-bit values above.)
-      if (!ssa->isConst() && ssa->isA(Type::Bool)) {
-        a.movzbl(rbyte(src), r32(src));
-      }
+      // Consts are already moved into src as 64-bit values above.
+      if (!ssa->isConst()) zeroExtendIfBool(a, ssa);
       // cvtsi2sd doesn't modify the high bits of its target, which can
       // cause false dependencies to prevent register renaming from kicking
       // in. Break the dependency chain by zeroing out the destination reg.
@@ -595,7 +606,11 @@ static void shuffleArgs(Asm& a, ArgGroup& args, IRInstruction* inst) {
         ArgDesc* argDesc = argDescs[int(howTo[i].m_reg2)];
         if (argDesc->getKind() == ArgDesc::Reg ||
             argDesc->getKind() == ArgDesc::TypeReg) {
-          a.    movq   (howTo[i].m_reg1, howTo[i].m_reg2);
+          if (argDesc->isZeroExtend()) {
+            a.    movzbl (rbyte(howTo[i].m_reg1), r32(howTo[i].m_reg2));
+          } else {
+            a.    movq   (howTo[i].m_reg1, howTo[i].m_reg2);
+          }
         } else {
           assert(argDesc->getKind() == ArgDesc::Addr);
           a.    lea    (howTo[i].m_reg1[argDesc->getImm().q()],
@@ -607,10 +622,14 @@ static void shuffleArgs(Asm& a, ArgGroup& args, IRInstruction* inst) {
       ArgDesc* argDesc2 = argDescs[int(howTo[i].m_reg2)];
       if (argDesc2->getKind() == ArgDesc::Addr) {
         a.  addq   (argDesc2->getImm(), howTo[i].m_reg2);
+      } else if (argDesc2->isZeroExtend()) {
+        a.  movzbl (rbyte(howTo[i].m_reg2), r32(howTo[i].m_reg2));
       }
       ArgDesc* argDesc1 = argDescs[int(howTo[i].m_reg1)];
       if (argDesc1->getKind() == ArgDesc::Addr) {
         a.  addq   (argDesc1->getImm(), howTo[i].m_reg1);
+      } else if (argDesc1->isZeroExtend()) {
+        a.  movzbl (rbyte(howTo[i].m_reg1), r32(howTo[i].m_reg1));
       }
     }
   }
@@ -807,9 +826,7 @@ void CodeGenerator::cgUnaryIntOp(SSATmp* dst,
   auto& a = m_as;
 
   // Integer operations require 64-bit representations
-  if (src->getType() == Type::Bool && !src->isConst()) {
-    a.    movzbl (rbyte(srcReg), r32(srcReg));
-  }
+  zeroExtendIfBool(a, src);
 
   if (srcReg != InvalidReg) {
     if (dstReg != srcReg) {
@@ -859,12 +876,8 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
 
   // Extend booleans: integer operations require 64-bit
   // representations.
-  if (src1->getType() == Type::Bool && src1Reg != InvalidReg) {
-    a.    movzbl (rbyte(src1Reg), r32(src1Reg));
-  }
-  if (src2->getType() == Type::Bool && src2Reg != InvalidReg) {
-    a.    movzbl (rbyte(src2Reg), r32(src2Reg));
-  }
+  zeroExtendIfBool(m_as, src1);
+  zeroExtendIfBool(m_as, src2);
 
   // Two registers.
   if (src1Reg != InvalidReg && src2Reg != InvalidReg) {
@@ -1281,6 +1294,8 @@ ConditionCode CodeGenerator::emitTypeTest(Type type,
                                           bool negate) {
   ConditionCode cc;
 
+  assert(!type.subtypeOf(Type::Cls));
+
   if (type.isString()) {
     m_as.testl(KindOfStringBit, src);
     cc = CC_NZ;
@@ -1297,7 +1312,6 @@ ConditionCode CodeGenerator::emitTypeTest(Type type,
     return CC_None; // nothing to check
   } else {
     DataType dataType = type.toDataType();
-    if (dataType == KindOfClass) return CC_None;
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfObject));
     m_as.cmpl(dataType, src);
@@ -1785,9 +1799,7 @@ void CodeGenerator::cgRetVal(IRInstruction* inst) {
     a.    storeq (val->getValRawInt(),
                   rFp[AROFF(m_r) + TVOFF(m_data)]);
   } else {
-    if (val->getType() == Type::Bool) {
-      a.  movzbl (rbyte(val->getReg()), r32(val->getReg()));
-    }
+    zeroExtendIfBool(m_as, val);
     a.    storeq (val->getReg(), rFp[AROFF(m_r) + TVOFF(m_data)]);
   }
 }
@@ -3451,10 +3463,7 @@ void CodeGenerator::cgStore(PhysReg base,
     }
     m_as.store_imm64_disp_reg64(val, off + TVOFF(m_data), base);
   } else {
-    if (type == Type::Bool) {
-      // zero-extend the bool from a byte to a quad
-      m_as.    movzbl  (rbyte(src->getReg()), r32(src->getReg()));
-    }
+    zeroExtendIfBool(m_as, src);
     m_as.store_reg64_disp_reg64(src->getReg(),
                                 off + TVOFF(m_data),
                                 base);
@@ -3556,11 +3565,6 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
-  if (inst->getSrc(0)->isA(Type::Cls)) {
-    // No need to generate guards for Cls; the IR instruction is just
-    // here as a type marker.
-    return;
-  }
   cgGuardTypeCell(inst->getSrc(0)->getReg(),
                   cellsToBytes(inst->getSrc(1)->getValInt()),
                   inst);

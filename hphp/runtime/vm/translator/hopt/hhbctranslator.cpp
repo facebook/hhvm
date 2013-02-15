@@ -1028,11 +1028,9 @@ void HhbcTranslator::emitIssetS(const StringData* propName) {
   if (!isSupportedClsProp()) {
     PUNT(IssetS);
   }
-  Trace* exit      = getExitSlowTrace();
+  Trace*      exit = getExitSlowTrace();
   SSATmp* propAddr = getClsPropAddr(exit, propName);
-  push(m_tb->gen(IsNTypeMem,
-                 Type::Null,
-                 m_unboxPtrs ? m_tb->genUnboxPtr(propAddr) : propAddr));
+  push(m_tb->gen(IsNTypeMem, Type::Null, m_tb->genUnboxPtr(propAddr)));
   decRefPropAddr(propAddr);
 }
 
@@ -1658,6 +1656,11 @@ void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type type) {
 Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
                                       Type type,
                                       Trace* nextTrace) {
+  if (type.subtypeOf(Type::Cls)) {
+    // Should not generate guards for class; instead assert their type
+    assertTypeStack(stackIndex, type);
+    return nextTrace;
+  }
   if (nextTrace == nullptr) {
     nextTrace = getGuardExit();
   }
@@ -1924,7 +1927,7 @@ void HhbcTranslator::emitAGetC(const StringData* clsName) {
   if (isSupportedAGet(topC())) {
     SSATmp* src = popC();
     if (clsName != nullptr) {
-      src = m_tb->genDefConst<const StringData*>(clsName);
+      src = m_tb->genDefConst(clsName);
     }
     emitAGet(src);
     m_tb->genDecRef(src);
@@ -1941,8 +1944,7 @@ void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
   if (isSupportedAGet(src)) {
     emitAGet(src);
   } else {
-    spillStack();
-    emitInterpOne(Type::Cls);
+    PUNT(AGetL);
   }
 }
 

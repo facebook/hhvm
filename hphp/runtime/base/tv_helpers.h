@@ -133,11 +133,12 @@ inline RefData* tvBoxHelper(DataType type, uint64_t datum) {
 }
 
 // Assumes 'tv' is live
-inline void tvBox(TypedValue* tv) {
+inline TypedValue* tvBox(TypedValue* tv) {
   assert(tvIsPlausible(tv));
   assert(tv->m_type != KindOfRef);
   tv->m_data.pref = tvBoxHelper(tv->m_type, tv->m_data.num);
   tv->m_type = KindOfRef;
+  return tv;
 }
 
 // Assumes 'tv' is live

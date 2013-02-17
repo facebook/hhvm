@@ -881,6 +881,7 @@ public:
    * function always returns one of the predefined types.
    */
   static Type unionOf(Type t1, Type t2) {
+    assert(t1 != None && t2 != None);
     assert(t1.subtypeOf(Gen) == t2.subtypeOf(Gen));
     assert(t1.subtypeOf(Gen) || t1 == t2); // can only union TypeValue types
     if (t1 == t2) return t1;
@@ -1804,6 +1805,18 @@ private:
  * Remove any instruction if live[iid] == false
  */
 void removeDeadInstructions(Trace* trace, const boost::dynamic_bitset<>& live);
+
+/*
+ * Compute the postorder number of each immediate dominator of each block,
+ * using the postorder numbers assigned by sortCfg().
+ */
+typedef std::vector<int> IdomVector;
+IdomVector findDominators(const BlockList& blocks);
+
+/*
+ * return true if b1 == b2 or if b1 dominates b2.
+ */
+bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
 
 /*
  * Compute a reverse postorder list of the basic blocks reachable from

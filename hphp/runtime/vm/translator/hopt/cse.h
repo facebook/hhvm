@@ -25,6 +25,11 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
+/*
+ * Hashtable used for common subexpression elimination.  The table maps
+ * keys (instructions) to values (ssatmps).  Instructions are compared
+ * by value (opcode and operands).
+ */
 struct CSEHash {
   SSATmp* lookup(IRInstruction* inst) {
     MapType::iterator it = map.find(inst);
@@ -42,6 +47,10 @@ struct CSEHash {
   void clear() {
     map.clear();
   }
+
+  // Remove entries that do not dominate block.
+  // TODO: t2135219 use scoped tables instead
+  void filter(Block* block, IdomVector& idoms);
 
   template<class... Args>
   static size_t instHash(Args&&... args) {

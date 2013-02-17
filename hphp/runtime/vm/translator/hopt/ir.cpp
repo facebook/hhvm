@@ -1085,7 +1085,7 @@ BlockList sortCfg(Trace* trace, const IRFactory& factory) {
  * Kennedy's "A Simple, Fast Dominance Algorithm", returned as a vector
  * of postorder ids, indexed by postorder id.
  */
-std::vector<int> findDominators(BlockList& blocks) {
+IdomVector findDominators(const BlockList& blocks) {
   // compute predecessors of each block
   int num_blocks = blocks.size();
   std::forward_list<int> preds[num_blocks];
@@ -1101,7 +1101,7 @@ std::vector<int> findDominators(BlockList& blocks) {
   // When it terminates, idom[post-id] will contain the post-id of the
   // immediate dominator of each block.  idom[start] will be -1.  This is
   // the general algorithm but it will only loop twice for loop-free graphs.
-  vector<int> idom(num_blocks, -1);
+  IdomVector idom(num_blocks, -1);
   auto start = blocks.begin();
   int start_id = (*start)->postId();
   idom[start_id] = start_id;
@@ -1136,6 +1136,15 @@ std::vector<int> findDominators(BlockList& blocks) {
   }
   idom[start_id] = -1; // start has no idom.
   return idom;
+}
+
+bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
+  int p1 = b1->postId();
+  int p2 = b2->postId();
+  for (int i = p2; i != -1; i = idoms[i]) {
+    if (i == p1) return true;
+  }
+  return false;
 }
 
 /*

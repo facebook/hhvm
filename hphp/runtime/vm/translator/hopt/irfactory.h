@@ -199,7 +199,10 @@ private:
  */
 template<class Key, class Info>
 struct StateVector {
-  static unsigned factoryId(const IRInstruction* inst) { return inst->getIId(); }
+  typedef typename std::vector<Info>::iterator iterator;
+  static unsigned factoryId(const IRInstruction* inst) {
+    return inst->getIId();
+  }
   static unsigned factoryId(const Block* block) { return block->getId(); }
   static unsigned factoryId(const SSATmp* tmp) { return tmp->getId(); }
   static unsigned count(const IRFactory* factory, IRInstruction*) {
@@ -234,6 +237,9 @@ struct StateVector {
     }
     grow();
   }
+
+  iterator begin() { return m_info.begin(); }
+  iterator end() { return m_info.end(); }
 
 private:
   void grow() {

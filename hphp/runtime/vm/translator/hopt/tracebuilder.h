@@ -36,7 +36,9 @@ public:
                uint32_t initialSpOffsetFromFp,
                IRFactory&,
                CSEHash& constants,
-               const Func* func = nullptr);
+               const Func* func);
+
+  ~TraceBuilder();
 
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
@@ -288,7 +290,7 @@ public:
   SSATmp* getSp() const { return m_spValue; }
   SSATmp* getFp() const { return m_fpValue; }
 
-  Type getLocalType(int id);
+  Type getLocalType(unsigned id) const;
 
   Block* getFirstBlock(Trace* trace) {
     return trace ? trace->front() : nullptr;
@@ -315,10 +317,10 @@ public:
     branch(taken_block);
     SSATmp* v1 = next();
     genJmp(done_block, v1);
-    m_trace->push_back(taken_block);
+    appendBlock(taken_block);
     SSATmp* v2 = taken();
     genJmp(done_block, v2);
-    m_trace->push_back(done_block);
+    appendBlock(done_block);
     SSATmp* result = done_block->getLabel()->getDst(0);
     result->setType(Type::unionOf(v1->getType(), v2->getType()));
     return result;
@@ -327,6 +329,7 @@ public:
 private:
   static void appendInstruction(IRInstruction* inst, Block* block);
   void      appendInstruction(IRInstruction* inst);
+  void      appendBlock(Block* block);
   enum      CloneInstMode { kCloneInst, kUseInst };
   SSATmp*   optimizeWork(IRInstruction* inst);
   SSATmp*   optimizeInst(IRInstruction* inst);
@@ -335,10 +338,10 @@ private:
   CSEHash*  getCSEHashTable(IRInstruction* inst);
   void      killCse();
   void      killLocals();
-  void      killLocalValue(int id);
-  void      setLocalValue(int id, SSATmp* value);
-  void      setLocalType(int id, Type type);
-  SSATmp*   getLocalValue(int id);
+  void      killLocalValue(unsigned id);
+  void      setLocalValue(unsigned id, SSATmp* value);
+  void      setLocalType(unsigned id, Type type);
+  SSATmp*   getLocalValue(unsigned id) const;
   bool      isValueAvailable(SSATmp* tmp) const;
   bool      anyLocalHasValue(SSATmp* tmp) const;
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
@@ -349,6 +352,18 @@ private:
     return new Trace(m_irFactory.defBlock(func), bcOff, isMain);
   }
   void genStLocAux(uint32 id, SSATmp* t0, bool genStoreType);
+
+  // saved state information associated with the start of a block
+  struct State {
+    SSATmp *spValue, *fpValue;
+    int32_t spOffset;
+    bool thisAvailable;
+    std::vector<SSATmp*> localValues;
+    std::vector<Type> localTypes;
+  };
+  void saveState(Block*);
+  void mergeState(State* s1);
+  void useState(Block*);
 
   /*
    * Fields
@@ -362,6 +377,9 @@ private:
   // Flags that enable optimizations
   bool       m_enableCse;
   bool       m_enableSimplification;
+
+  // Snapshots of state at the beginning of blocks we haven't reached yet.
+  StateVector<Block,State*> m_snapshots;
 
   /*
    * While building a trace one instruction at a time, a TraceBuilder
@@ -390,6 +408,12 @@ private:
    * The function updateTrackedState(IRInstruction* inst) updates this
    * state (called after an instruction is appended to the trace), and
    * the function clearTrackedState() clears it.
+   *
+   * After branch instructions, updateTrackedState() creates an instance
+   * of State holding snapshots of these fields (except m_curFunc and
+   * m_constTable), optionally merges with the State already saved at
+   * the branch target, and saves it.  Then, before generating code for
+   * the branch target, useState() restores the saved (and merged) state.
    */
   SSATmp*    m_spValue;      // current physical sp
   SSATmp*    m_fpValue;      // current physical fp

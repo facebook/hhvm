@@ -39,11 +39,14 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_trace(makeTrace(func, initialBcOffset, true))
   , m_enableCse(false)
   , m_enableSimplification(false)
+  , m_snapshots(&irFactory, nullptr)
   , m_spValue(nullptr)
   , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
   , m_constTable(constants)
   , m_thisIsAvailable(false)
+  , m_localValues(func->numLocals(), nullptr)
+  , m_localTypes(func->numLocals(), Type::None)
 {
   // put a function marker at the start of trace
   m_curFunc = genDefConst<const Func*>(func);
@@ -54,6 +57,10 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   genDefFP();
   genDefSP(initialSpOffsetFromFp);
   assert(m_spOffset >= 0);
+}
+
+TraceBuilder::~TraceBuilder() {
+  for (State* state : m_snapshots) delete state;
 }
 
 SSATmp* TraceBuilder::genDefCns(const StringData* cnsName, SSATmp* val) {
@@ -1255,6 +1262,82 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   if (m_enableCse && inst->canCSE()) {
     cseInsert(inst);
   }
+
+  // save a copy of the current state for each successor.
+  if (Block* target = inst->getTaken()) saveState(target);
+}
+
+/*
+ * Save current state for block.  If this is the first time saving state
+ * for block, create a new snapshot.  Otherwise merge the current state into
+ * the existing snapshot.
+ */
+void TraceBuilder::saveState(Block* block) {
+  if (State* state = m_snapshots[block]) {
+    mergeState(state);
+  } else {
+    State* state = new State;
+    state->spValue = m_spValue;
+    state->fpValue = m_fpValue;
+    state->spOffset = m_spOffset;
+    state->thisAvailable = m_thisIsAvailable;
+    state->localValues = m_localValues;
+    state->localTypes = m_localTypes;
+    m_snapshots[block] = state;
+  }
+}
+
+/*
+ * Merge current state into state.  Frame pointers and stack depth must match.
+ * If the stack pointer tmps are different, clear the tracked value (we can
+ * make a new one, given fp and spOffset).
+ *
+ * thisIsAvailable remains true if it's true in both states.
+ * local variable values are preserved if the match in both states.
+ * types are combined using Type::unionOf.
+ */
+void TraceBuilder::mergeState(State* state) {
+  // cannot merge fp or spOffset state, so assert they match
+  assert(state->fpValue == m_fpValue);
+  assert(state->spOffset == m_spOffset);
+  if (state->spValue != m_spValue) {
+    // we have two different sp definitions but we know they're equal
+    // because spOffset matched.
+    state->spValue = nullptr;
+  }
+  // this is available iff it's available in both states
+  state->thisAvailable &= m_thisIsAvailable;
+  for (unsigned i = 0, n = state->localValues.size(); i < n; ++i) {
+    // preserve local values if they're the same in both states,
+    // This would be the place to insert phi nodes (jmps+deflabels) if we want
+    // to avoid clearing state, which triggers a downstream reload.
+    if (state->localValues[i] != m_localValues[i]) {
+      state->localValues[i] = nullptr;
+    }
+  }
+  for (unsigned i = 0, n = state->localTypes.size(); i < n; ++i) {
+    // combine types using Type::unionOf(), but handle Type::None here (t2135185)
+    Type t1 = state->localTypes[i];
+    Type t2 = m_localTypes[i];
+    state->localTypes[i] = (t1 == Type::None || t2 == Type::None) ? Type::None :
+                           Type::unionOf(t1, t2);
+  }
+}
+
+void TraceBuilder::useState(Block* block) {
+  assert(m_snapshots[block]);
+  State* state = m_snapshots[block];
+  m_snapshots[block] = nullptr;
+  m_spValue = state->spValue;
+  m_fpValue = state->fpValue;
+  m_spOffset = state->spOffset;
+  m_thisIsAvailable = state->thisAvailable;
+  m_localValues = std::move(state->localValues);
+  m_localTypes = std::move(state->localTypes);
+  delete state;
+  // If spValue is null, we merged two different but equivalent values.
+  // Define a new sp using the known-good spOffset.
+  if (!m_spValue) genDefSP(m_spOffset);
 }
 
 void TraceBuilder::clearTrackedState() {
@@ -1268,6 +1351,10 @@ void TraceBuilder::clearTrackedState() {
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisIsAvailable = false;
+  for (auto i = m_snapshots.begin(), end = m_snapshots.end(); i != end; ++i) {
+    delete *i;
+    *i = nullptr;
+  }
 }
 
 void TraceBuilder::appendInstruction(IRInstruction* inst, Block* block) {
@@ -1292,6 +1379,15 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
   }
   appendInstruction(inst, block);
   updateTrackedState(inst);
+}
+
+void TraceBuilder::appendBlock(Block* block) {
+  if (!m_trace->back()->back()->isTerminal()) {
+    // previous instruction falls through; merge current state with block.
+    saveState(block);
+  }
+  m_trace->push_back(block);
+  useState(block);
 }
 
 CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
@@ -1355,36 +1451,44 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
   return nullptr;
 }
 
+void CSEHash::filter(Block* block, IdomVector& idoms) {
+  for (auto it = map.begin(), end = map.end(); it != end;) {
+    auto next = it; ++next;
+    if (!dominates(it->second->getInstruction()->getBlock(), block, idoms)) {
+      map.erase(it);
+    }
+    it = next;
+  }
+}
+
 /*
- * optimizeTrace runs another pass of simplification on an already-built
- * trace, like this:
+ * optimizeTrace runs another pass of CSE and simplification on an
+ * already-built trace, like this:
  *
- *   reset state
+ *   reset state.
  *   move all blocks to a temporary list.
- *   for each block in trace order
- *     move all instructions to a temporary list
- *     for each instruction
+ *   compute immediate dominators.
+ *   for each block in trace order:
+ *     if we have a snapshot state for this block:
+ *       clear cse entries that don't dominate this block.
+ *       use snapshot state.
+ *     move all instructions to a temporary list.
+ *     for each instruction:
  *       optimizeWork - do CSE and simplify again
- *       if not simplified
- *         append existing instruction and update state
- *       else
+ *       if not simplified:
+ *         append existing instruction and update state.
+ *       else:
  *         if the instruction has a result, insert a mov from the
- *         simplified tmp to the original tmp and discard the instruction
+ *         simplified tmp to the original tmp and discard the instruction.
  *     if the last conditional branch was turned into a jump, remove the
  *     fall-through edge to the next block.
- *     if the next block is not the fall-through block for this block,
- *     clear the optimizer state.
  */
 void TraceBuilder::optimizeTrace() {
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
-  if (hasInternalFlow(m_trace.get())) {
-    // We can't correctly process the trace until we're able
-    // to merge the tracked state.  Just resetting m_spOffset (at least)
-    // can cause asertions. #t2100776
-    return;
-  }
+  BlockList sortedBlocks = sortCfg(m_trace.get(), m_irFactory);
+  IdomVector idoms = findDominators(sortedBlocks);
   clearTrackedState();
   auto blocks = std::move(m_trace->getBlocks());
   assert(m_trace->getBlocks().empty());
@@ -1393,6 +1497,10 @@ void TraceBuilder::optimizeTrace() {
     blocks.pop_front();
     assert(block->getTrace() == m_trace.get());
     m_trace->push_back(block);
+    if (m_snapshots[block]) {
+      useState(block);
+      m_cseHash.filter(block, idoms);
+    }
     auto instructions = std::move(block->getInstrs());
     assert(block->empty());
     while (!instructions.empty()) {
@@ -1407,28 +1515,25 @@ void TraceBuilder::optimizeTrace() {
       }
       SSATmp* dst = inst->getDst();
       if (dst->getType() != Type::None && dst != tmp) {
-        // The result of optimization has a different destination register
-        // than the inst. Generate a move to get result into dst.
+        // The result of optimization has a different destination than the inst.
+        // Generate a mov(tmp->dst) to get result into dst. If we get here then
+        // assume the last instruction in the block isn't a guard. If it was,
+        // we would have to insert the mov on the fall-through edge.
+        assert(!block->back()->isBlockEnd());
         IRInstruction* mov = m_irFactory.mov(dst, tmp);
-        if (block->back()->isBlockEnd()) {
-          // Put the mov in the next (unprocessed) block
-          assert(!block->back()->isTerminal());
-          block->getNext()->prepend(mov);
-        } else {
-          appendInstruction(mov, block);
-          updateTrackedState(mov);
-        }
+        appendInstruction(mov, block);
+        updateTrackedState(mov);
       }
       // Not re-adding inst; remove the inst->taken edge
       if (inst->getTaken()) inst->setTaken(nullptr);
     }
-    if (block->getNext() && block->back()->isTerminal()) {
-      // Simplified a conditional jmp to an unconditional jump; clear next.
+    if (block->back()->isTerminal()) {
+      // Could have converted a conditional branch to Jmp; clear next.
       block->setNext(nullptr);
-    }
-    if (!blocks.empty() && blocks.front() != block->getNext()) {
-      // The next block to process is not the fall-through block. clear state.
-      clearTrackedState();
+    } else {
+      // if the last instruction was a branch, we already saved state for the
+      // target in updateTrackedState().  Now save state for the fall-through path.
+      saveState(block->getNext());
     }
   }
 }
@@ -1437,50 +1542,32 @@ void TraceBuilder::killCse() {
   m_cseHash.clear();
 }
 
-SSATmp* TraceBuilder::getLocalValue(int id) {
-  if (id == -1 || id >= (int)m_localValues.size()) {
-    return nullptr;
-  }
+SSATmp* TraceBuilder::getLocalValue(unsigned id) const {
+  assert(id < m_localValues.size());
   return m_localValues[id];
 }
 
-Type TraceBuilder::getLocalType(int id) {
-  if (id == -1 || id >= (int)m_localValues.size()) {
-    return Type::None;
-  }
+Type TraceBuilder::getLocalType(unsigned id) const {
+  assert(id < m_localTypes.size());
   return m_localTypes[id];
 }
 
-void TraceBuilder::setLocalValue(int id, SSATmp* value) {
-  if (id == -1) {
-    return;
-  }
-  if (id >= (int)m_localValues.size()) {
-    m_localValues.resize(id + 1);
-    m_localTypes.resize(id + 1, Type::None);
-  }
+void TraceBuilder::setLocalValue(unsigned id, SSATmp* value) {
+  assert(id < m_localValues.size() && id < m_localTypes.size());
   m_localValues[id] = value;
   m_localTypes[id] = value->getType();
 }
 
-void TraceBuilder::setLocalType(int id, Type type) {
-  if (id == -1) {
-    return;
-  }
-  if (id >= (int)m_localValues.size()) {
-    m_localValues.resize(id + 1);
-    m_localTypes.resize(id + 1, Type::None);
-  }
+void TraceBuilder::setLocalType(unsigned id, Type type) {
+  assert(id < m_localValues.size() && id < m_localTypes.size());
   m_localValues[id] = nullptr;
   m_localTypes[id] = type;
 }
 
 // Needs to be called if a local escapes as a by-ref or
 // otherwise set to an unknown value (e.g., by Iter[Init,Next][K])
-void TraceBuilder::killLocalValue(int id) {
-  if (id == -1 || id >= (int)m_localValues.size()) {
-    return;
-  }
+void TraceBuilder::killLocalValue(unsigned id) {
+  assert(id < m_localValues.size() && id < m_localTypes.size());
   m_localValues[id] = nullptr;
   m_localTypes[id] = Type::None;
 }

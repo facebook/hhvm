@@ -165,36 +165,32 @@ struct XboxWorker
       // If this job or the previous job that ran on this thread have
       // a custom initial document, make sure we do a reset
       string reqInitDoc = job->getHeader("ReqInitDoc");
-      bool needReset = !reqInitDoc.empty() ||
-                       !s_xbox_prev_req_init_doc->empty();
       *s_xbox_prev_req_init_doc = reqInitDoc;
 
       job->onRequestStart(job->getStartTimer());
-      createRequestHandler(needReset)->handleRequest(job);
+      createRequestHandler()->handleRequest(job);
+      destroyRequestHandler();
       job->decRefCount();
     } catch (...) {
       Logger::Error("RpcRequestHandler leaked exceptions");
     }
   }
 private:
-  RequestHandler *createRequestHandler(bool needReset = false) {
+  RequestHandler *createRequestHandler() {
     if (!*s_xbox_server_info) {
       *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
     }
     if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
     s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
-    if (needReset ||
-        s_xbox_request_handler->needReset() ||
-        s_xbox_request_handler->incRequest() >
-        (*s_xbox_server_info)->getMaxRequest()) {
-      Logger::Verbose("resetting xbox request handler");
-      s_xbox_request_handler.destroy();
-      s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
-      s_xbox_request_handler->setReturnEncodeType(RPCRequestHandler::Serialize);
-      s_xbox_request_handler->incRequest();
-    }
+    s_xbox_request_handler->incRequest();
     return s_xbox_request_handler.get();
+  }
+
+  void destroyRequestHandler() {
+    if (!s_xbox_request_handler.isNull()) {
+      s_xbox_request_handler.destroy();
+    }
   }
 
   virtual void onThreadExit() {

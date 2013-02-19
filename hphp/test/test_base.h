@@ -52,6 +52,35 @@ class TestBase {
   bool array_value_exists(CVarRef var, CVarRef value);
 
   static char error_buffer[];
+
+  template<class T>
+  bool runTestImpl(T test, const std::string& which, const std::string& name) {
+    bool ret = true;
+    auto pass = [&] { printf("%s passed\n", name.c_str()); };
+    auto fail = [&] { printf("%s failed\n", name.c_str()); ret = false; };
+
+    if (which.empty() || which == name) {
+      SCOPE_EXIT { fflush(nullptr); };
+      test_name = name;
+      try {
+        if (preTest() && test() && postTest()) {
+          if (!Test::s_quiet) {
+            pass();
+          }
+        } else {
+          fail();
+        }
+      } catch (const std::exception& e) {
+        fprintf(stderr, "%s threw %s: '%s'\n",
+                name.c_str(), typeid(e).name(), e.what());
+        fail();
+      } catch (...) {
+        fprintf(stderr, "%s threw unknown object\n", name.c_str());
+        fail();
+      }
+    }
+    return ret;
+  }
 };
 
 template <bool value>
@@ -73,20 +102,9 @@ typedef WithOption<false> WithNoOpt;
 ///////////////////////////////////////////////////////////////////////////////
 // macros
 
-#define RUN_TEST(test)                          \
-  if (!which.empty() && which != #test) {       \
-  } else {                                      \
-    test_name = #test;                          \
-    if (preTest() && test() && postTest()) {    \
-      if (!Test::s_quiet) {                     \
-        printf(#test " passed\n");              \
-      }                                         \
-    } else {                                    \
-      printf(#test " failed\n");                \
-      ret = false;                              \
-    }                                           \
-  }                                             \
-  fflush(0)
+#define RUN_TEST(test) do {                                             \
+    if (!runTestImpl([=] { return test(); }, which, #test)) ret = false; \
+  } while(false)
 
 #define LOG_TEST_ERROR(...)                                             \
   sprintf(TestBase::error_buffer, __VA_ARGS__);                         \

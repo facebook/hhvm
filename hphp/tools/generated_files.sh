@@ -9,7 +9,6 @@ check_err()
 }
 
 [ -z "$HPHP_HOME" ] && check_err 1 "HPHP_HOME environment variable not set"
-[ -z "$USE_HHVM" ] && check_err 1 "USE_HHVM must be set to generate HHVM files"
 
 VERBOSE=1
 

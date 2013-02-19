@@ -18,7 +18,4 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_base_fast.inc ${CMAKE_CURRENT_SO
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dummy_mysql_info.inc ${CMAKE_CURRENT_SOURCE_DIR}/test_mysql_info.inc COPYONLY)
 
 add_executable(test ${CXX_SOURCES})
-target_link_libraries(test hphp_analysis hphp_runtime_static)
-if (USE_HHVM)
-	target_link_libraries(test ext_hhvm_static)
-endif()
+target_link_libraries(test hphp_analysis hphp_runtime_static ext_hhvm_static)

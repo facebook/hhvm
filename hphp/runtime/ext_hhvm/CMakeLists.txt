@@ -1,6 +1,4 @@
 
-if (USE_HHVM)
-
 message("Including ext_hhvm files")
 
 set(files)
@@ -20,5 +18,3 @@ ADD_LIBRARY(ext_hhvm_static STATIC ${CXX_SOURCES})
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES OUTPUT_NAME "ext_hhvm")
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
-
-endif(USE_HHVM)

@@ -17,24 +17,10 @@
 
 include(HPHPSetup)
 
-if ("$ENV{USE_HHVM}" STREQUAL "1")
-	# HHVM Build
-	SET(USE_HHVM TRUE)
-	SET(ENV{HHVM} 1)
-	ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
-
-	if ("$ENV{USE_HPHPC}" STREQUAL "1")
-		message(FATAL_ERROR "Both USE_HHVM and USE_HPHPC are set, you may only select one")
-	endif()
-else()
-	# HPHPc Build
-	SET(USE_HHVM FALSE)
-	ADD_DEFINITIONS("-DHHVM_PATH=\"\"")
-
-	if (NOT "$ENV{USE_HPHPC}" STREQUAL "1")
-		message(FATAL_ERROR "You must select which version of HipHop to build by setting either USE_HHVM=1 or USE_HPHPC=1 in your environment")
-	endif()
-endif()
+# HHVM Build
+SET(USE_HHVM TRUE)
+SET(ENV{HHVM} 1)
+ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
 
 set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/vm system/gen system/lib util)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
@@ -70,13 +56,11 @@ foreach (file ${CXX_SOURCES})
 endforeach(file ${CXX_SOURCES})
 
 # remove ext/sep for hhvm
-if (USE_HHVM)
-	foreach (file ${CXX_SOURCES})
-		if (${file} MATCHES "ext/sep")
-			list(REMOVE_ITEM CXX_SOURCES ${file})
-		endif()
-	endforeach(file ${CXX_SOURCES})
-endif(USE_HHVM)
+foreach (file ${CXX_SOURCES})
+	if (${file} MATCHES "ext/sep")
+		list(REMOVE_ITEM CXX_SOURCES ${file})
+	endif()
+endforeach(file ${CXX_SOURCES})
 
 
 if (EXISTS "${hphp_SOURCE_DIR}/HPHP_EXCLUDE_FILES.txt")
@@ -184,11 +168,7 @@ SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 hphp_link(hphp_runtime_static)
 
 add_subdirectory(compiler)
-
-if (USE_HHVM)
-	add_subdirectory(runtime/ext_hhvm)
-endif()
-
+add_subdirectory(runtime/ext_hhvm)
 add_subdirectory(hhvm)
 
 if (NOT "$ENV{HPHP_NOTEST}" STREQUAL "1")

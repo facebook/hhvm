@@ -109,7 +109,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 // both, respectively.
 static KeyType getKeyType(const SSATmp* key, bool nonLitStr,
                           bool nonLitInt) {
-  assert(key->getType().isStaticallyKnown());
+  assert(key->getType().isKnownDataType());
 
   if (key->isBoxed()) {
     // Variants can change types at arbitrary times, so don't try to

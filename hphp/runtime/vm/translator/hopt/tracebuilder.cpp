@@ -1238,7 +1238,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       if (locInstr->getOpcode() == LdLocAddr) {
         UNUSED Type baseType = locInstr->getDst()->getType();
         assert(baseType.equals(base->getType()));
-        assert(baseType.isStaticallyKnown());
+        assert(baseType.isKnownDataType());
         int loc = locInstr->getExtra<LdLocAddr>()->locId;
 
         VectorEffects ve(inst);

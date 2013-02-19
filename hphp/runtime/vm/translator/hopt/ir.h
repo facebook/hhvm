@@ -768,7 +768,11 @@ public:
     return !maybeCounted();
   }
 
-  bool isStaticallyKnown() const {
+  /*
+   * Returns true if this value has a known constant DataType enum
+   * value, which allows us to avoid several checks.
+   */
+  bool isKnownDataType() const {
     // Str, Arr and Null are technically unions but are statically
     // known for all practical purposes. Same for a union that
     // consists of nothing but boxed types.
@@ -785,8 +789,20 @@ public:
     return (m_bits & (m_bits - 1)) == 0;
   }
 
-  bool isStaticallyKnownUnboxed() const {
-    return isStaticallyKnown() && notBoxed();
+  /*
+   * Similar to isKnownDataType, with the added restriction that the
+   * type not be Boxed.
+   */
+  bool isKnownUnboxedDataType() const {
+    return isKnownDataType() && notBoxed();
+  }
+
+  /*
+   * Returns true if we need to hold the value's type in a register.
+   * The opposite of isKnownDataType.
+   */
+  bool needsReg() const {
+    return !isKnownDataType();
   }
 
   bool needsStaticBitCheck() const {

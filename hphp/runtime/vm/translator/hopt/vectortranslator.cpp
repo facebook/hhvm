@@ -48,8 +48,8 @@ void VectorEffects::init(Opcode op, const Type origBase,
       not_implemented();
   }
   assert(op == SetProp || op == SetElem);
-  assert(key.isStaticallyKnown());
-  assert(origVal.isStaticallyKnown());
+  assert(key.isKnownDataType());
+  assert(origVal.isKnownDataType());
 
   if ((baseType & Type::Null) != Type::Bottom) {
     // stdClass or array promotion might happen

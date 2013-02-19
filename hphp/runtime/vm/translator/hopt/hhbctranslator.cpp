@@ -969,14 +969,14 @@ void HhbcTranslator::emitCGetProp(LocationCode locCode,
   SSATmp* val;
 
   if (isInferedType) {
-    assert(resultType.isStaticallyKnownUnboxed());
+    assert(resultType.isKnownUnboxedDataType());
     val = m_tb->genLdProp(obj, propOffset, resultType, nullptr);
   } else {
     if (resultType == Type::None) {
       // result type not predicted
       resultType = Type::Cell;
     } else {
-      assert(resultType.isStaticallyKnownUnboxed());
+      assert(resultType.isKnownUnboxedDataType());
     }
     // This code is currently correct, but once we enable type
     // prediction for CGetM, we should exit normally to a trace
@@ -2050,12 +2050,12 @@ void HhbcTranslator::emitSetS(const StringData* propName) {
 }
 
 static Type getResultType(Type resultType, bool isInferedType) {
-  assert(!isInferedType || resultType.isStaticallyKnownUnboxed());
+  assert(!isInferedType || resultType.isKnownUnboxedDataType());
   if (resultType.equals(Type::None)) {
     // result type neither predicted nor inferred
     return Type::Cell;
   }
-  assert(resultType.isStaticallyKnownUnboxed());
+  assert(resultType.isKnownUnboxedDataType());
   return resultType;
 }
 
@@ -2109,12 +2109,8 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
     if (isBitOp) {
       if (type1.isString() && type2.isString()) {
         type = Type::Str;
-      } else if ((!type1.isStaticallyKnown() &&
-                  (!type2.isStaticallyKnown()
-                   || type2.isString()))
-                 ||
-                 (!type2.isStaticallyKnown()
-                  && type1.isString())) {
+      } else if ((type1.needsReg() && (type2.needsReg() || type2.isString()))
+                 || (type2.needsReg() && type1.isString())) {
         // both types might be strings, but can't tell
         type = Type::Cell;
       } else {
@@ -2161,7 +2157,7 @@ void HhbcTranslator::emitBitNot() {
     Type resultType = Type::Int;
     if (srcType.isString()) {
       resultType = Type::Str;
-    } else if (!srcType.isStaticallyKnown()) {
+    } else if (srcType.needsReg()) {
       resultType = Type::Cell;
     }
     emitInterpOne(resultType, 1);

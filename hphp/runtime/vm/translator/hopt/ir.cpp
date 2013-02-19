@@ -787,14 +787,14 @@ int SSATmp::numNeededRegs() const {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
-  if (!type.isStaticallyKnown() || type.subtypeOf(Type::FuncCtx)) {
+  if (type.needsReg() || type.subtypeOf(Type::FuncCtx)) {
     // These need 2 registers, 1 for the value and 1 for the type, or
     // 1 for the Func* and 1 for the {Obj|Cctx}
     return 2;
   }
 
   // By default, all other types only need 1 register.
-  assert(type.isStaticallyKnown());
+  assert(!type.needsReg());
   return 1;
 }
 

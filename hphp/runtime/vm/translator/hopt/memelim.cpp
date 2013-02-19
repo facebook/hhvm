@@ -257,8 +257,8 @@ void MemMap::killRefInfo(IRInstruction* save) {
       auto saveType = save->getDst()->getType();
       if (it->second->value != nullptr &&
           it->second->value->getType() != saveType &&
-          it->second->value->getType().isStaticallyKnown() &&
-          saveType.isStaticallyKnown()) {
+          it->second->value->getType().isKnownDataType() &&
+          saveType.isKnownDataType()) {
         continue;
       }
     }
@@ -312,8 +312,8 @@ void MemMap::killPropInfo(IRInstruction* save) {
         if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem) &&
             copy->value != nullptr &&
             copy->value->getType() != save->getDst()->getType() &&
-            copy->value->getType().isStaticallyKnown() &&
-            save->getDst()->getType().isStaticallyKnown()) {
+            copy->value->getType().isKnownDataType() &&
+            save->getDst()->getType().isKnownDataType()) {
           continue;
         }
         // TODO consider doing the same with the type of the base ref pointer
@@ -714,7 +714,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   // check for loads that have a guard that will fail
   if (inst->getTaken() && valTy != instTy) {
     if (!(valTy.isString() && instTy.isString()) &&
-        valTy.isStaticallyKnown() && instTy.isStaticallyKnown()) {
+        valTy.isKnownDataType() && instTy.isKnownDataType()) {
       return inst->convertToJmp();
     }
   }

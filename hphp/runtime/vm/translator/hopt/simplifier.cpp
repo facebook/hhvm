@@ -926,7 +926,7 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.
-  assert(type.isStaticallyKnownUnboxed() && type != Type::StaticStr);
+  assert(type.isKnownUnboxedDataType() && type != Type::StaticStr);
   if (type != Type::Obj) {
     if (srcType.subtypeOf(type) || (type.isString() && srcType.isString())) {
       return genDefBool(trueSense);

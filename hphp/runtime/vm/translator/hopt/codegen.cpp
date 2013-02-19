@@ -1771,11 +1771,11 @@ void CodeGenerator::cgRetVal(IRInstruction* inst) {
 
   // Store return value at the top of the caller's eval stack
   // (a) Store the type
-  if (val->getType().isStaticallyKnown()) {
+  if (val->getType().needsReg()) {
+    a.    storel (r32(val->getReg(1)), rFp[AROFF(m_r) + TVOFF(m_type)]);
+  } else {
     a.    storel (val->getType().toDataType(),
                   rFp[AROFF(m_r) + TVOFF(m_type)]);
-  } else {
-    a.    storel (r32(val->getReg(1)), rFp[AROFF(m_r) + TVOFF(m_type)]);
   }
 
   // (b) Store the actual value (not necessary when storing Null)
@@ -2333,7 +2333,7 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
     }
   };
 
-  if (type.isStaticallyKnown()) {
+  if (type.isKnownDataType()) {
     assert(IS_REFCOUNTED_TYPE(type.toDataType()));
     increfMaybeStatic();
   } else {
@@ -2672,7 +2672,7 @@ void CodeGenerator::cgDecRefStaticType(Type type,
                                        Block* exit,
                                        bool genZeroCheck) {
   assert(type != Type::Cell && type != Type::Gen);
-  assert(type.isStaticallyKnown());
+  assert(type.isKnownDataType());
 
   if (type.notCounted()) return;
 
@@ -2811,7 +2811,7 @@ void CodeGenerator::cgDecRefMem(Type type,
   auto scratchReg = rScratch;
   assert(baseReg != scratchReg);
 
-  if (!type.isStaticallyKnown()) {
+  if (type.needsReg()) {
     // The type is dynamic, but we don't have two registers available
     // to load the type and the data.
     cgDecRefDynamicTypeMem(baseReg, offset, exit);
@@ -2834,7 +2834,7 @@ void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   if (!isRefCounted(src)) return;
   Block* exit = inst->getTaken();
   Type type = src->getType();
-  if (type.isStaticallyKnown()) {
+  if (type.isKnownDataType()) {
     cgDecRefStaticType(type, src->getReg(), exit, genZeroCheck);
   } else {
     cgDecRefDynamicType(src->getReg(1),
@@ -3306,7 +3306,7 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
   SSATmp* dst = inst->getDst();
 
   assert(type == dst->getType());
-  assert(!type.isStaticallyKnown());
+  assert(type.needsReg());
   auto valueDstReg = dst->getReg(0);
   auto typeDstReg = dst->getReg(1);
   if (valueDstReg == InvalidReg && typeDstReg == InvalidReg &&
@@ -3348,7 +3348,7 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
 void CodeGenerator::cgStoreTypedValue(PhysReg base,
                                       int64_t off,
                                       SSATmp* src) {
-  assert(!src->getType().isStaticallyKnown());
+  assert(src->getType().needsReg());
   m_as.store_reg64_disp_reg64(src->getReg(0),
                               off + TVOFF(m_data),
                               base);
@@ -3363,7 +3363,7 @@ void CodeGenerator::cgStore(PhysReg base,
                             SSATmp* src,
                             bool genStoreType) {
   Type type = src->getType();
-  if (!type.isStaticallyKnown()) {
+  if (type.needsReg()) {
     cgStoreTypedValue(base, off, src);
     return;
   }
@@ -3415,7 +3415,7 @@ void CodeGenerator::cgLoad(PhysReg base,
                            int64_t off,
                            IRInstruction* inst) {
   Type type = inst->getTypeParam();
-  if (!type.isStaticallyKnown()) {
+  if (type.needsReg()) {
     return cgLoadTypedValue(base, off, inst);
   }
   Block* label = inst->getTaken();
@@ -4139,7 +4139,7 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
       if (dst->numNeededRegs() == 2) {
         if (src->numNeededRegs() < 2) {
           // src has known data type, but dst doesn't - pass immediate type
-          assert(src->getType().isStaticallyKnown());
+          assert(src->getType().isKnownDataType());
           args.imm(src->getType().toDataType());
         } else {
           // pass src's second register
@@ -4281,8 +4281,8 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
                  ArgGroup().ssa(tl)
                            .ssa(tr));
   } else {
-    if (lType.subtypeOf(Type::Obj) || !lType.isStaticallyKnown() ||
-        rType.subtypeOf(Type::Obj) || !rType.isStaticallyKnown()) {
+    if (lType.subtypeOf(Type::Obj) || lType.needsReg() ||
+        rType.subtypeOf(Type::Obj) || rType.needsReg()) {
       CG_PUNT(cgConcat);
     }
     cgCallHelper(m_as, (TCA)concat_value, dst, kNoSyncPoint,

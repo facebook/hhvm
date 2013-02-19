@@ -55,22 +55,22 @@ TEST(Type, Null) {
   EXPECT_NE(Type::Null, Type::InitNull);
 }
 
-TEST(Type, StaticallyKnown) {
+TEST(Type, KnownDataType) {
   auto trueTypes = {
     Type::Int, Type::BoxedCell, Type::StaticStr, Type::Str,
     Type::Null, Type::Uninit, Type::InitNull
   };
   for (auto t : trueTypes) {
-    EXPECT_TRUE(t.isStaticallyKnown())
-      << t.toString() << ".isStaticallyKnown()";
+    EXPECT_TRUE(t.isKnownDataType())
+      << t.toString() << ".isKnownDataType()";
   }
   auto falseTypes = {
     Type::FuncCtx, Type::Cell, Type::Gen, Type::Ctx,
     Type::Int | Type::Dbl
   };
   for (auto t : falseTypes) {
-    EXPECT_FALSE(t.isStaticallyKnown())
-      << "!" << t.toString() << ".isStaticallyKnown()";
+    EXPECT_FALSE(t.isKnownDataType())
+      << "!" << t.toString() << ".isKnownDataType()";
   }
 }
 

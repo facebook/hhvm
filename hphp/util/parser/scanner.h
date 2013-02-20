@@ -170,7 +170,6 @@ public:
   enum Type {
     AllowShortTags   = 1, // allow <?
     AllowAspTags     = 2, // allow <% %>
-    PreprocessXHP    = 4, // enable XHP
     ReturnAllTokens  = 8, // return comments and whitespaces
   };
 

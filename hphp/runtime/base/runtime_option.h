@@ -367,7 +367,6 @@ public:
   static bool EnableEmitterStats;
   static bool EnableInstructionCounts;
   static bool CheckSymLink;
-  static bool NativeXHP;
   static int ScannerType;
   static int MaxUserFunctionId;
   static bool EnableFinallyStatement;

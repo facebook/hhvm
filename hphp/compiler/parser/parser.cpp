@@ -83,7 +83,6 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/analysis_result.h>
 
-#include <util/preprocess.h>
 #include <util/lock.h>
 #include <util/logger.h>
 

@@ -31,7 +31,6 @@
 #include <util/db_conn.h>
 #include <util/db_query.h>
 #include <util/exception.h>
-#include <util/preprocess.h>
 #include <util/job_queue.h>
 #include <runtime/base/execution_context.h>
 

@@ -216,7 +216,6 @@ bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = true;
 bool Option::EnableFinallyStatement = false;
-bool Option::NativeXHP = true;
 int Option::ScannerType = Scanner::AllowShortTags;
 int Option::ParserThreadCount = 0;
 
@@ -437,9 +436,6 @@ void Option::Load(Hdf &config) {
   else ScannerType &= ~Scanner::AllowAspTags;
 
   EnableXHP = config["EnableXHP"].getBool(true);
-  NativeXHP = config["NativeXHP"].getBool(true);
-  if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;
-  else ScannerType &= ~Scanner::PreprocessXHP;
 
   ParserThreadCount = config["ParserThreadCount"].getInt32(0);
   if (ParserThreadCount <= 0) {

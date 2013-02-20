@@ -362,7 +362,6 @@ bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableInstructionCounts = false;
 bool RuntimeOption::CheckSymLink = false;
-bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
@@ -1119,9 +1118,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
-    NativeXHP = eval["NativeXHP"].getBool(true);
-    if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;
-    else ScannerType &= ~Scanner::PreprocessXHP;
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
 

@@ -16,7 +16,6 @@
 
 #include "util/parser/scanner.h"
 #include "util/util.h"
-#include "util/preprocess.h"
 #include "util/logger.h"
 #include "util/zend/zend_string.h"
 #include "util/zend/zend_html.h"
@@ -87,14 +86,6 @@ Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
     throw FileOpenException(filename);
   }
   if (md5) computeMd5();
-  if (type & PreprocessXHP) {
-    std::istream *is = preprocessXHP(*m_stream, m_sstream, filename);
-    if (m_stream != is) {
-      delete m_stream;
-      m_stream = is;
-      m_streamOwner = false;
-    }
-  }
   init();
 }
 
@@ -107,12 +98,6 @@ Scanner::Scanner(std::istream &stream, int type,
   m_stream = &stream;
   m_streamOwner = false;
   if (md5) computeMd5();
-  if (type & PreprocessXHP) {
-    std::istream *is = preprocessXHP(*m_stream, m_sstream, fileName);
-    if (m_stream != is) {
-      m_stream = is;
-    }
-  }
   init();
 }
 
@@ -124,18 +109,10 @@ Scanner::Scanner(const char *source, int len, int type,
       m_lookaheadLtDepth(0) {
   assert(m_source);
   m_streamOwner = false;
-  if (md5 || type & PreprocessXHP) {
+  if (md5) {
     m_stream = new std::istringstream(string(source, len));
     m_streamOwner = true;
-    if (md5) computeMd5();
-    if (type & PreprocessXHP) {
-      std::istream *is = preprocessXHP(*m_stream, m_sstream, fileName);
-      if (m_stream != is) {
-        delete m_stream;
-        m_stream = is;
-        m_streamOwner = false;
-      }
-    }
+    computeMd5();
   }
 
   init();
@@ -300,7 +277,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
     if (pos->t != ')') return false;
     nextLookahead(pos);
     return true;
-  } 
+  }
   if (pos->t == T_NAMESPACE) {
     nextLookahead(pos);
     if (pos->t != T_NS_SEPARATOR) return false;
@@ -321,7 +298,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
         break;
       case T_XHP_LABEL:
         nextLookahead(pos);
-        return true; 
+        return true;
       default:
         return false;
     }
@@ -373,7 +350,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
   // is the start of a type list
   TokenStore::iterator pos = m_lookahead.begin();
   TokenStore::iterator ltPos = pos;
-  nextLookahead(pos); 
+  nextLookahead(pos);
   ++m_lookaheadLtDepth;
   bool isTypeList = tryParseTypeList(pos);
   --m_lookaheadLtDepth;

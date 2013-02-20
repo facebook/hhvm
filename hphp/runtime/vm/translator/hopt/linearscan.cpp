@@ -869,9 +869,10 @@ void LinearScan::rematerialize(Trace* trace) {
 
 void LinearScan::rematerializeAux() {
   std::vector<SSATmp*> localValues;
-  auto killLocal = [&](int loc) {
-    if (localValues.size() > loc) {
-      localValues[loc] = nullptr;
+  auto killLocal = [&](IRInstruction& inst, unsigned src) {
+    if (src < inst.getNumSrcs()) {
+      unsigned loc = inst.getSrc(src)->getValInt();
+      if (loc < localValues.size()) localValues[loc] = nullptr;
     }
   };
 
@@ -950,19 +951,15 @@ void LinearScan::rematerializeAux() {
       // Other instructions that may have side effects on locals must
       // kill the local variable values.
       else if (opc == IterInit) {
-        int valLocId = inst.getSrc(3)->getValInt();
-        killLocal(valLocId);
-        if (inst.getNumSrcs() == 5) {
-          int keyLocId = inst.getSrc(4)->getValInt();
-          killLocal(keyLocId);
-        }
+        killLocal(inst, 3);
+      } else if (opc == IterInitK) {
+        killLocal(inst, 3);
+        killLocal(inst, 4);
       } else if (opc == IterNext) {
-        int valLocId = inst.getSrc(2)->getValInt();
-        killLocal(valLocId);
-        if (inst.getNumSrcs() == 4) {
-          int keyLocId = inst.getSrc(3)->getValInt();
-          killLocal(keyLocId);
-        }
+        killLocal(inst, 2);
+      } else if (opc == IterNextK) {
+        killLocal(inst, 2);
+        killLocal(inst, 3);
       }
     }
   }

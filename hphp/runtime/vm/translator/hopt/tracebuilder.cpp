@@ -1201,13 +1201,23 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
                    inst->getTypeParam());
       break;
     }
-    case IterInitK:
-    case IterNextK: {
-      // kill the local to which this instruction stores iter's key
+    case IterInitK: {
+      // kill the locals to which this instruction stores iter's key and value
       killLocalValue(inst->getSrc(3)->getValInt());
-      // fall through to case below to handle value local
+      killLocalValue(inst->getSrc(4)->getValInt());
+      break;
     }
-    case IterInit:
+    case IterInit: {
+      // kill the local to which this instruction stores iter's value
+      killLocalValue(inst->getSrc(3)->getValInt());
+      break;
+    }
+    case IterNextK: {
+      // kill the locals to which this instruction stores iter's key and value
+      killLocalValue(inst->getSrc(2)->getValInt());
+      killLocalValue(inst->getSrc(3)->getValInt());
+      break;
+    }
     case IterNext: {
       // kill the local to which this instruction stores iter's value
       killLocalValue(inst->getSrc(2)->getValInt());

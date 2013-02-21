@@ -1,0 +1,5 @@
+string(3) "foo"
+string(7) "testing"
+string(3) "foo"
+NULL
+HipHop Fatal error: Call to undefined method foo::www from anonymous context in hphp/test/vm/zend_indirect_method_call_002.php on line 20

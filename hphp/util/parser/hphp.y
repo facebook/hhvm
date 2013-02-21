@@ -1758,6 +1758,7 @@ class_constant_declaration:
 new_expr:
   T_NEW class_name_reference
     ctor_arguments                     { _p->onNewObject($$, $2, $3);}
+  | '(' new_expr ')'                   { $$ = $2;}
 ;
 
 parenthesis_expr:
@@ -1777,6 +1778,7 @@ for_expr:
 expr:
     expr_no_variable                   { $$ = $1;}
   | variable                           { $$ = $1;}
+  | new_expr                           { $$ = $1;}
 
 expr_no_variable:
     T_LIST '(' assignment_list ')'
@@ -1835,7 +1837,6 @@ expr_no_variable:
   | expr T_INSTANCEOF
     class_name_reference               { BEXP($$,$1,$3,T_INSTANCEOF);}
   | '(' expr_no_variable ')'           { $$ = $2;}
-  | new_expr                           { $$ = $1;}
   | expr '?' expr ':' expr             { _p->onQOp($$, $1, &$3, $5);}
   | expr '?' ':' expr                  { _p->onQOp($$, $1,   0, $4);}
   | internal_functions                 { $$ = $1;}
@@ -2225,20 +2226,42 @@ optional_user_attributes:
     non_empty_user_attributes          { $$ = $1;}
   |                                    { $$.reset();}
 ;
+
+property_access:
+    property_access_without_variables  { $$ = $1;}
+  | T_OBJECT_OPERATOR
+    variable_without_objects           { $$ = $2;}
+;
+
+property_access_without_variables:
+    T_OBJECT_OPERATOR ident            { $$ = $2;}
+  | T_OBJECT_OPERATOR '{' expr '}'     { $$ = $3;}
+;
+
+array_access:
+    '[' dim_offset ']'                 { $$ = $2;}
+  | '{' expr '}'                       { $$ = $2;}
+;
+
+dimmable_variable_access:
+    dimmable_variable array_access     { _p->onRefDim($$, $1, $2);}
+  | '(' new_expr ')' array_access      { _p->onRefDim($$, $2, $4);}
+;
+
+dimmable_variable_no_calls_access:
+    dimmable_variable_no_calls
+    array_access                       { _p->onRefDim($$, $1, $2);}
+  | '(' new_expr ')' array_access      { _p->onRefDim($$, $2, $4);}
+;
+
 variable:
     variable_without_objects           { $$ = $1;}
   | simple_function_call               { $$ = $1;}
   | object_method_call                 { $$ = $1;}
   | class_method_call                  { $$ = $1;}
-  | dimmable_variable
-    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
-  | dimmable_variable '{' expr '}'     { _p->onRefDim($$, $1, $3);}
-  | variable T_OBJECT_OPERATOR
-    ident                              { _p->onObjectProperty($$,$1,$3);}
-  | variable T_OBJECT_OPERATOR
-    variable_without_objects           { _p->onObjectProperty($$,$1,$3);}
-  | variable T_OBJECT_OPERATOR
-    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | dimmable_variable_access           { $$ = $1;}
+  | variable property_access           { _p->onObjectProperty($$,$1,$2);}
+  | '(' new_expr ')' property_access   { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
@@ -2251,13 +2274,11 @@ dimmable_variable:
     simple_function_call               { $$ = $1;}
   | object_method_call                 { $$ = $1;}
   | class_method_call                  { $$ = $1;}
-  | dimmable_variable
-    '[' dim_offset ']'                 { _p->onRefDim($$,$1,$3);}
-  | dimmable_variable '{' expr '}'     { _p->onRefDim($$,$1,$3);}
-  | variable T_OBJECT_OPERATOR
-    ident                              { _p->onObjectProperty($$,$1,$3);}
-  | variable T_OBJECT_OPERATOR
-    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | dimmable_variable_access           { $$ = $1;}
+  | variable
+    property_access_without_variables  { _p->onObjectProperty($$,$1,$2);}
+  | '(' new_expr ')'
+    property_access_without_variables  { _p->onObjectProperty($$,$2,$4);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | '(' variable ')'                   { $$ = $2;}
@@ -2265,9 +2286,7 @@ dimmable_variable:
 
 callable_variable:
     variable_without_objects           { $$ = $1;}
-  | dimmable_variable
-    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
-  | dimmable_variable '{' expr '}'     { _p->onRefDim($$, $1, $3);}
+  | dimmable_variable_access           { $$ = $1;}
   | '(' variable ')'                   { $$ = $2;}
 ;
 
@@ -2281,6 +2300,15 @@ object_method_call:
   | variable T_OBJECT_OPERATOR
     '{' expr '}' '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$4,$7);}
+  | '(' new_expr ')' T_OBJECT_OPERATOR
+    ident sm_typeargs_opt '('
+    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$8);}
+  | '(' new_expr ')'  T_OBJECT_OPERATOR
+    variable_without_objects '('
+    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$7);}
+  | '(' new_expr ')'  T_OBJECT_OPERATOR
+    '{' expr '}' '('
+    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$6,$9);}
 ;
 
 class_method_call:
@@ -2322,16 +2350,9 @@ simple_indirect_reference:
 
 variable_no_calls:
     variable_without_objects           { $$ = $1;}
-  | dimmable_variable_no_calls
-    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
-  | dimmable_variable_no_calls
-    '{' expr '}'                       { _p->onRefDim($$, $1, $3);}
-  | variable_no_calls T_OBJECT_OPERATOR
-    ident                              { _p->onObjectProperty($$,$1,$3);}
-  | variable_no_calls T_OBJECT_OPERATOR
-    variable_without_objects           { _p->onObjectProperty($$,$1,$3);}
-  | variable_no_calls T_OBJECT_OPERATOR
-    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | dimmable_variable_no_calls_access  { $$ = $1;}
+  | variable_no_calls property_access  { _p->onObjectProperty($$,$1,$2);}
+  | '(' new_expr ')' property_access   { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
@@ -2339,14 +2360,11 @@ variable_no_calls:
 ;
 
 dimmable_variable_no_calls:
-    dimmable_variable_no_calls
-    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
-  | dimmable_variable_no_calls
-    '{' expr '}'                       { _p->onRefDim($$, $1, $3);}
-  | variable_no_calls T_OBJECT_OPERATOR
-    ident                              { _p->onObjectProperty($$,$1,$3);}
-  | variable_no_calls T_OBJECT_OPERATOR
-    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | dimmable_variable_no_calls_access  { $$ = $1;}
+  | variable_no_calls
+    property_access_without_variables  { _p->onObjectProperty($$,$1,$2);}
+  | '(' new_expr ')'
+    property_access_without_variables  { _p->onObjectProperty($$,$2,$4);}
   | '(' variable ')'                   { $$ = $2;}
 ;
 

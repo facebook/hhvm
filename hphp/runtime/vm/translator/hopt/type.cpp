@@ -47,6 +47,14 @@ Type builtinReturn(const IRInstruction* inst) {
   not_reached();
 }
 
+Type boxReturn(const IRInstruction* inst, int srcId) {
+  auto t = inst->getSrc(srcId)->getType();
+  // If t contains Uninit, replace it with InitNull. Otherwise, leave
+  // the type alone.
+  t = t.maybe(Type::Uninit) ? (t - Type::Uninit) | Type::InitNull : t;
+  return t.box();
+}
+
 }
 
 Type outputType(const IRInstruction* inst) {
@@ -54,7 +62,7 @@ Type outputType(const IRInstruction* inst) {
 #define D(type)   return Type::type;
 #define DofS(n)   return inst->getSrc(n)->getType();
 #define DUnbox(n) return inst->getSrc(n)->getType().unbox();
-#define DBox(n)   return inst->getSrc(n)->getType().box();
+#define DBox(n)   return boxReturn(inst, n);
 #define DParam    return inst->getTypeParam();
 #define DLabel    return Type::None;
 #define DVector   return vectorReturn(inst);

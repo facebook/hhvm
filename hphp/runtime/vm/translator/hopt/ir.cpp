@@ -339,10 +339,12 @@ bool IRInstruction::hasMemEffects() const {
 
 bool IRInstruction::canCSE() const {
   auto canCSE = opcodeHasFlags(getOpcode(), CanCSE);
-  // Make sure that instructions that are CSE'able can't produce a
-  // reference count or consume reference counts.
-  assert(!canCSE || !producesReference());
-  assert(!canCSE || !consumesReferences());
+  // Make sure that instructions that are CSE'able can't produce a reference
+  // count or consume reference counts. GuardType is special because it can
+  // refine a maybeCounted type to a notCounted type, so it logically consumes
+  // and produces a reference without doing any work.
+  assert(!canCSE || !producesReference() || m_op == GuardType);
+  assert(!canCSE || !consumesReferences() || m_op == GuardType);
   return canCSE && !mayReenterHelper();
 }
 
@@ -354,15 +356,26 @@ bool IRInstruction::consumesReference(int srcNo) const {
   if (!consumesReferences()) {
     return false;
   }
-  // Special case StMem, StMemNT, StProp, and StPropNT.
-  // These instructions only consume the value operand.
-  if ((m_op == StMem || m_op == StMemNT) && srcNo == 0) {
-    // StMem[NT] <pointer>, <value>
-    return false;
+  // GuardType consumes a reference if we're guarding from a maybeCounted type
+  // to a notCounted type.
+  if (m_op == GuardType) {
+    assert(srcNo == 0);
+    return getSrc(0)->getType().maybeCounted() && getTypeParam().notCounted();
   }
-  if ((m_op == StProp || m_op == StPropNT) && (srcNo == 0 || srcNo == 1)) {
-    // StProp[NT] <base>, <offset>, <value>
-    return false;
+  // SpillStack consumes inputs 2 and onward
+  if (m_op == SpillStack) return srcNo >= 2;
+  // Call consumes inputs 3 and onward
+  if (m_op == Call) return srcNo >= 3;
+  // RetVal only consumes input 1
+  if (m_op == RetVal) return srcNo == 1;
+
+  if (m_op == StLoc || m_op == StLocNT) {
+    // StLoc[NT] <stkptr>, <value>
+    return srcNo == 1;
+  }
+  if (m_op == StProp || m_op == StPropNT || m_op == StMem || m_op == StMemNT) {
+    // StProp[NT]|StMem[NT] <base>, <offset>, <value>
+    return srcNo == 2;
   }
   return true;
 }
@@ -992,6 +1005,12 @@ void SSATmp::print() const {
   std::cerr << std::endl;
 }
 
+std::string Trace::toString() const {
+  std::ostringstream out;
+  print(out, nullptr);
+  return out.str();
+}
+
 void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
   static const int kIndent = 4;
   Disasm disasm(kIndent + 4, RuntimeOption::EvalDumpIR > 5);
@@ -1014,7 +1033,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
       auto& inst = *it; ++it;
       if (inst.getOpcode() == Marker) {
         auto* marker = inst.getExtra<Marker>();
-        if (!m_isMain) {
+        if (!isMain()) {
           // Don't print bytecode, but print the label.
           os << std::string(kIndent, ' ');
           inst.print(os);

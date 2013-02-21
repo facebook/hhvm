@@ -842,7 +842,7 @@ StRef
 StRefNT
 StRaw
 
-D:StkPtr = SpillStack         S0:StkP, S1:StkP, S2:ConstInt, S3...
+D:StkPtr = SpillStack         S0:StkP S1:ConstInt, S2...
 
   SpillStack synchronizes the virtual execution stack with the
   physical stack by storing a variadic list of SSATmps to the physical
@@ -850,14 +850,13 @@ D:StkPtr = SpillStack         S0:StkP, S1:StkP, S2:ConstInt, S3...
 
   Operands:
 
-     S0      - current frame pointer
-     S1      - current stack pointer
+     S0      - current stack pointer
 
-     S2      - stack deficit; indicates the number of elements that
+     S1      - stack deficit; indicates the number of elements that
                need to be logically popped before the variadic list
                is pushed
 
-     S3...   - variadic list of elements to spill, with values
+     S2...   - variadic list of elements to spill, with values
                representing cells or ActRecs.  Each temp of type
                ActRec is followed by kSpillStackActRecExtraArgs for
                the contents of the ActRec.
@@ -965,10 +964,14 @@ RaiseUninitWarning<localId>
 
   Raise a warning for an uninitialized local variable.
 
+DefCns S0:ConstStr S0:Cell
+
+  Defines the constant with name S0 to be the value S1. If S0 has a refcounted
+  type, this instruction consumes its refcount.
+
 Print
 AddElem
 AddNewElem
-DefCns
 Concat
 ArrayAdd
 DefCls

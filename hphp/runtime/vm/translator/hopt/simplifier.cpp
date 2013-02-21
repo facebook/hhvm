@@ -287,9 +287,9 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
   Type type    = inst->getTypeParam();
-  SSATmp*   src     = inst->getSrc(0);
+  SSATmp* src  = inst->getSrc(0);
   Type srcType = src->getType();
-  if (srcType == type || srcType.strictSubtypeOf(type)) {
+  if (srcType.subtypeOf(type)) {
     /*
      * the type of the src is the same or more refined than type, so the
      * guard is unnecessary.
@@ -301,15 +301,24 @@ SSATmp* Simplifier::simplifyGuardType(IRInstruction* inst) {
       return src;
     }
   } else {
-    /*
-     * incompatible types!  We should just generate a jump here and
-     * return null.
-     *
-     * For now, this case should currently be impossible, but it may
-     * come up later due to other optimizations.  The assert is so
-     * we'll remember this spot ...
-     */
-    assert(0);
+    if (type.equals(Type::Str) && srcType.maybe(Type::Str)) {
+      // If we're guarding against Str and srcType has StaticStr or CountedStr
+      // in it, refine the output type. This can happen when we have a
+      // KindOfString guard from Translator but internally we know a more
+      // specific subtype of Str.
+      FTRACE(1, "Guarding {} to {}\n", srcType.toString(), type.toString());
+      inst->setTypeParam(type & srcType);
+    } else {
+      /*
+       * incompatible types!  We should just generate a jump here and
+       * return null.
+       *
+       * For now, this case should currently be impossible, but it may
+       * come up later due to other optimizations.  The assert is so
+       * we'll remember this spot ...
+       */
+      not_implemented();
+    }
   }
   return nullptr;
 }

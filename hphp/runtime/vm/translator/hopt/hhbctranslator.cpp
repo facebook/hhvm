@@ -194,9 +194,15 @@ void HhbcTranslator::emitPrint() {
 
 void HhbcTranslator::emitUnboxRAux() {
   Block* exit = getExitTrace()->front();
-  SSATmp* tmp = popR();
-  pushIncRef(m_tb->gen(Unbox, exit, tmp));
-  m_tb->genDecRef(tmp);
+  SSATmp* srcBox = popR();
+  SSATmp* unboxed = m_tb->gen(Unbox, exit, srcBox);
+  if (unboxed == srcBox) {
+    // If the Unbox ended up being a noop, don't bother refcounting
+    push(unboxed);
+  } else {
+    pushIncRef(unboxed);
+    m_tb->genDecRef(srcBox);
+  }
 }
 
 void HhbcTranslator::emitUnboxR() {

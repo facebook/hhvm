@@ -44,7 +44,7 @@ public:
 
   Trace* makeExitTrace(uint32_t bcOff) {
     return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
-                                           bcOff, false));
+                                           bcOff));
   }
   bool isThisAvailable() const {
     return m_thisIsAvailable;
@@ -343,8 +343,8 @@ private:
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
 
-  Trace* makeTrace(const Func* func, uint32_t bcOff, bool isMain) {
-    return new Trace(m_irFactory.defBlock(func), bcOff, isMain);
+  Trace* makeTrace(const Func* func, uint32_t bcOff) {
+    return new Trace(m_irFactory.defBlock(func), bcOff);
   }
   void genStLocAux(uint32_t id, SSATmp* t0, bool genStoreType);
 

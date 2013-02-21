@@ -92,7 +92,8 @@ TEST(Type, Boxes) {
   EXPECT_EQ(Type::Dbl, Type::BoxedDbl.unbox());
   EXPECT_FALSE(Type::Dbl.isBoxed());
   EXPECT_EQ(Type::Cell, Type::Gen.unbox());
-  EXPECT_EQ(Type::BoxedCell, Type::Cell.box());
+  EXPECT_EQ((Type::BoxedCell - Type::BoxedUninit),
+            (Type::Cell - Type::Uninit).box());
 
   EXPECT_EQ(Type::Bottom, Type::BoxedCell & Type::PtrToGen);
 
@@ -145,6 +146,7 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Gen);
   expectTrue(Type::Ctx);
   expectTrue(Type::Obj | Type::Func);
+  expectTrue(Type::Init);
 
   for (Type t : types) {
     EXPECT_FALSE(t.canRunDtor()) << t.toString() << ".canRunDtor == false";

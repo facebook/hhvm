@@ -142,7 +142,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  */
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(GuardType,                    DParam, S(Gen),                        C|E|P) \
+O(GuardType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
 O(GuardLoc,                         ND, S(StkPtr),                         E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(CastStk,                   D(StkPtr), S(StkPtr) C(Int),           Mem|N|Er) \
@@ -202,7 +202,7 @@ O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
-O(Box,                         DBox(0), S(Gen),              E|N|Mem|CRc|PRc) \
+O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \
 O(LdStack,                      DParam, S(StkPtr) C(Int),                 NF) \
@@ -315,7 +315,7 @@ O(AddElemIntKey,                D(Arr), S(Arr)                                \
                                           S(Cell),        N|Mem|CRc|PRc|Refs) \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(DefCns,                      D(Bool), SUnk,                      C|E|N|Mem) \
+O(DefCns,                      D(Bool), C(Str) S(Cell),          E|N|Mem|CRc) \
 O(Concat,                       D(Str), S(Gen) S(Gen),    N|Mem|CRc|PRc|Refs) \
 O(ArrayAdd,                     D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 O(DefCls,                           ND, SUnk,                          C|E|N) \
@@ -727,7 +727,9 @@ const char* opcodeName(Opcode opcode);
   IRT(Counted,      kCountedStr|kCountedArr|kObj|kBoxedCell)        \
   IRT(PtrToCounted, kCounted << kPtrShift)                          \
   IRT(Gen,          kCell|kBoxedCell)                               \
-  IRT(PtrToGen,     kGen << kPtrShift)
+  IRT(Init,         kGen & ~kUninit)                                \
+  IRT(PtrToGen,     kGen << kPtrShift)                              \
+  IRT(PtrToInit,    kInit << kPtrShift)
 
 // All types (including union types) that represent program values,
 // except Gen (which is special). Boxed*, PtrTo*, and PtrToBoxed* only
@@ -974,14 +976,10 @@ public:
   }
 
   Type box() const {
-    // XXX: Get php-specific logic that isn't a natural property of a
-    // sane type system out of this class (such as Uninit.box() ==
-    // BoxedNull). #2087268
-    assert(subtypeOf(Gen));
-    assert(notBoxed());
-    if (subtypeOf(Uninit)) {
-      return BoxedNull;
-    }
+    assert(subtypeOf(Cell));
+    // Boxing Uninit returns InitNull but that logic doesn't belong
+    // here.
+    assert(not(Uninit));
     return Type(m_bits << kBoxShift);
   }
 
@@ -1759,6 +1757,7 @@ typedef folly::Range<TCA> TcaRange;
  */
 struct Block : boost::noncopyable {
   typedef InstructionList::iterator iterator;
+  typedef InstructionList::const_iterator const_iterator;
 
   // Execution frequency hint; codegen will put Unlikely blocks in astubs.
   enum Hint { Neither, Likely, Unlikely };
@@ -1845,10 +1844,12 @@ struct Block : boost::noncopyable {
 
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
-  InstructionList& getInstrs() { return m_instrs; }
-  bool             empty()     { return m_instrs.empty(); }
-  iterator         begin()     { return m_instrs.begin(); }
-  iterator         end()       { return m_instrs.end(); }
+  InstructionList& getInstrs()   { return m_instrs; }
+  bool             empty()       { return m_instrs.empty(); }
+  iterator         begin()       { return m_instrs.begin(); }
+  iterator         end()         { return m_instrs.end(); }
+  const_iterator   begin() const { return m_instrs.begin(); }
+  const_iterator   end()   const { return m_instrs.end(); }
 
   iterator insert(iterator pos, IRInstruction* inst) {
     inst->setBlock(this);
@@ -1893,10 +1894,11 @@ inline Trace* IRInstruction::getTrace() const {
  */
 class Trace : boost::noncopyable {
 public:
-  explicit Trace(Block* first, uint32_t bcOff, bool isMain) {
+  explicit Trace(Block* first, uint32_t bcOff)
+    : m_bcOff(bcOff)
+    , m_main(nullptr)
+  {
     push_back(first);
-    m_bcOff = bcOff;
-    m_isMain = isMain;
   }
 
   ~Trace() {
@@ -1917,14 +1919,23 @@ public:
   uint32_t getBcOff() { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
+    exit->setMain(this);
     return exit;
   }
-  bool isMain() const { return m_isMain; }
+  bool isMain() const { return m_main == nullptr; }
+  void setMain(Trace* t) {
+    assert(m_main == nullptr);
+    m_main = t;
+  }
+  Trace* getMain() {
+    return m_main;
+  }
 
   typedef std::list<Trace*> ExitList;
   typedef std::list<Trace*>::iterator ExitIterator;
 
   ExitList& getExitTraces() { return m_exitTraces; }
+  std::string toString() const;
   void print(std::ostream& ostream, const AsmInfo* asmInfo = nullptr) const;
 
 private:
@@ -1933,7 +1944,7 @@ private:
   uint32_t m_bcOff;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
   ExitList m_exitTraces;      // traces to which this trace exits
-  bool m_isMain;
+  Trace* m_main;              // ptr to parent trace if this is an exit trace
 };
 
 /*

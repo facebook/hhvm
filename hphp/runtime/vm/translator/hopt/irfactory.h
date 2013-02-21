@@ -212,7 +212,11 @@ private:
  */
 template<class Key, class Info>
 struct StateVector {
-  typedef typename std::vector<Info>::iterator iterator;
+  typedef std::vector<Info> InfoVector;
+  typedef typename InfoVector::iterator iterator;
+  typedef typename InfoVector::reference reference;
+  typedef typename InfoVector::const_reference const_reference;
+
   static unsigned factoryId(const IRInstruction* inst) {
     return inst->getIId();
   }
@@ -232,15 +236,15 @@ struct StateVector {
     , m_info(count(factory, (Key*)nullptr), init)
     , m_init(init) {
   }
-  Info& operator[](const Key& k) { return (*this)[&k]; }
-  Info& operator[](const Key* k) {
+  reference operator[](const Key& k) { return (*this)[&k]; }
+  reference operator[](const Key* k) {
     auto id = factoryId(k);
     if (id >= m_info.size()) grow();
     assert(id < m_info.size());
     return m_info[id];
   }
-  const Info& operator[](const Key& k) const { return (*this)[&k]; }
-  const Info& operator[](const Key* k) const {
+  const_reference operator[](const Key& k) const { return (*this)[&k]; }
+  const_reference operator[](const Key* k) const {
     assert(factoryId(k) < m_info.size());
     return m_info[factoryId(k)];
   }
@@ -264,7 +268,7 @@ private:
 
 private:
   const IRFactory* m_factory;
-  std::vector<Info> m_info;
+  InfoVector m_info;
   Info m_init;
 };
 

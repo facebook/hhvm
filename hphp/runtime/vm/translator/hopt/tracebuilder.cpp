@@ -35,7 +35,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   : m_irFactory(irFactory)
   , m_simplifier(this)
   , m_initialBcOff(initialBcOffset)
-  , m_trace(makeTrace(func, initialBcOffset, true))
+  , m_trace(makeTrace(func, initialBcOffset))
   , m_enableCse(false)
   , m_enableSimplification(false)
   , m_snapshots(&irFactory, nullptr)
@@ -552,6 +552,10 @@ SSATmp* TraceBuilder::genBoxLoc(uint32_t id) {
   // The Box helper requires us to incref the values its boxing, but in
   // this case we don't need to incref prevValue because we are simply
   // transfering its refcount from the local to the box.
+  if (prevValue->isA(Type::Uninit)) {
+    // No box can ever contain Uninit, so promote it to InitNull here.
+    prevValue = genDefInitNull();
+  }
   SSATmp* newValue = gen(Box, prevValue);
   genStLocAux(id, newValue, true);
   return newValue;
@@ -669,7 +673,7 @@ void TraceBuilder::genBindLoc(uint32_t id,
       }
       return;
     }
-    if (!trackedType.notCounted() && !prevValue && doRefCount) {
+    if (trackedType.maybeCounted() && !prevValue && doRefCount) {
       prevValue = gen(LdLoc, trackedType, &locId, m_fpValue);
     }
   }
@@ -680,7 +684,7 @@ void TraceBuilder::genBindLoc(uint32_t id,
     genStoreType = false;
   }
   genStLocAux(id, newValue, genStoreType);
-  if (!trackedType.notCounted() && doRefCount) {
+  if (trackedType.maybeCounted() && doRefCount) {
     genDecRef(prevValue);
   }
 }

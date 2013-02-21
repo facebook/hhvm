@@ -1165,29 +1165,30 @@ inner_statement:
 ;
 statement:
     '{' inner_statement_list '}'       { _p->onBlock($$, $2);}
-  | T_IF '(' expr ')'
+  | T_IF parenthesis_expr
     statement
     elseif_list
-    else_single                        { _p->onIf($$,$3,$5,$6,$7);}
-  | T_IF '(' expr ')' ':'
+    else_single                        { _p->onIf($$,$2,$3,$4,$5);}
+  | T_IF parenthesis_expr ':'
     inner_statement_list
     new_elseif_list
     new_else_single
-    T_ENDIF ';'                        { _p->onIf($$,$3,$6,$7,$8);}
-  | T_WHILE '(' expr ')'               { _p->pushLabelScope();}
+    T_ENDIF ';'                        { _p->onIf($$,$2,$4,$5,$6);}
+  | T_WHILE parenthesis_expr           { _p->pushLabelScope();}
     while_statement                    { _p->popLabelScope();
-                                         _p->onWhile($$,$3,$6);}
+                                         _p->onWhile($$,$2,$4);}
 
   | T_DO                               { _p->pushLabelScope();}
-    statement T_WHILE '(' expr ')' ';' { _p->popLabelScope();
-                                         _p->onDo($$,$3,$6);}
+    statement T_WHILE parenthesis_expr
+    ';'                                { _p->popLabelScope();
+                                         _p->onDo($$,$3,$5);}
   | T_FOR '(' for_expr ';'
     for_expr ';' for_expr ')'          { _p->pushLabelScope();}
     for_statement                      { _p->popLabelScope();
                                          _p->onFor($$,$3,$5,$7,$10);}
-  | T_SWITCH '(' expr ')'              { _p->pushLabelScope();}
+  | T_SWITCH parenthesis_expr          { _p->pushLabelScope();}
     switch_case_list                   { _p->popLabelScope();
-                                         _p->onSwitch($$,$3,$6);}
+                                         _p->onSwitch($$,$2,$4);}
   | T_BREAK ';'                        { _p->onBreak($$, NULL);}
   | T_BREAK expr ';'                   { _p->onBreak($$, &$2);}
   | T_CONTINUE ';'                     { _p->onContinue($$, NULL);}
@@ -1459,14 +1460,14 @@ case_separator:
 ;
 
 elseif_list:
-    elseif_list T_ELSEIF '(' expr ')'
-    statement                          { _p->onElseIf($$,$1,$4,$6);}
+    elseif_list T_ELSEIF parenthesis_expr
+    statement                          { _p->onElseIf($$,$1,$3,$4);}
   |                                    { $$.reset();}
 ;
 new_elseif_list:
     new_elseif_list T_ELSEIF
-    '(' expr ')' ':'
-    inner_statement_list               { _p->onElseIf($$,$1,$4,$7);}
+    parenthesis_expr ':'
+    inner_statement_list               { _p->onElseIf($$,$1,$3,$5);}
   |                                    { $$.reset();}
 ;
 else_single:
@@ -1754,6 +1755,15 @@ class_constant_declaration:
   | T_CONST sm_name_with_type '=' static_scalar { _p->onClassConstant($$,0,$2,$4);}
 ;
 
+new_expr:
+  T_NEW class_name_reference
+    ctor_arguments                     { _p->onNewObject($$, $2, $3);}
+;
+
+parenthesis_expr:
+  '(' expr ')'                         { $$ = $2;}
+;
+
 expr_list:
     expr_list ',' expr                 { _p->onExprListElem($$, &$1, $3);}
   | expr                               { _p->onExprListElem($$, NULL, $1);}
@@ -1776,8 +1786,6 @@ expr_no_variable:
   | variable '=' '&' T_NEW
     class_name_reference
     ctor_arguments                     { _p->onAssignNew($$,$1,$5,$6);}
-  | T_NEW class_name_reference
-    ctor_arguments                     { _p->onNewObject($$, $2, $3);}
   | T_CLONE expr                       { UEXP($$,$2,T_CLONE,1);}
   | variable T_PLUS_EQUAL expr         { BEXP($$,$1,$3,T_PLUS_EQUAL);}
   | variable T_MINUS_EQUAL expr        { BEXP($$,$1,$3,T_MINUS_EQUAL);}
@@ -1827,6 +1835,7 @@ expr_no_variable:
   | expr T_INSTANCEOF
     class_name_reference               { BEXP($$,$1,$3,T_INSTANCEOF);}
   | '(' expr_no_variable ')'           { $$ = $2;}
+  | new_expr                           { $$ = $1;}
   | expr '?' expr ':' expr             { _p->onQOp($$, $1, &$3, $5);}
   | expr '?' ':' expr                  { _p->onQOp($$, $1,   0, $4);}
   | internal_functions                 { $$ = $1;}
@@ -2056,7 +2065,7 @@ class_name_reference:
 
 exit_expr:
     '(' ')'                            { $$.reset();}
-  | '(' expr ')'                       { $$ = $2;}
+  | parenthesis_expr                   { $$ = $1;}
   |                                    { $$.reset();}
 ;
 

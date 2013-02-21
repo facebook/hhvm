@@ -760,6 +760,7 @@ void HhbcTranslator::emitContDone() {
 }
 
 void HhbcTranslator::emitContNext() {
+  PUNT(ContNext);
   SSATmp* cont = m_tb->genLdThis(nullptr);
   m_tb->genContPreNext(cont, getExitTrace());
   m_tb->genSetPropCell(cont, CONTOFF(m_received), m_tb->genDefUninit());

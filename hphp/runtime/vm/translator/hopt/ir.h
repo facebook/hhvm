@@ -1008,7 +1008,8 @@ inline Type typeForConst(TCA)                { return Type::TCA; }
 inline Type typeForConst(double)             { return Type::Dbl; }
 inline Type typeForConst(const ArrayData* ad) {
   assert(ad->isStatic());
-  return Type::StaticArr;
+  // TODO: Task #2124292, Reintroduce StaticArr
+  return Type::Arr;
 }
 
 bool cmpOpTypesMayReenter(Opcode, Type t0, Type t1);

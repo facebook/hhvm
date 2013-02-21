@@ -848,7 +848,8 @@ const StringData* SSATmp::getValStr() const {
 
 const ArrayData* SSATmp::getValArr() const {
   assert(isConst());
-  assert(m_inst->getTypeParam().equals(Type::StaticArr));
+  // TODO: Task #2124292, Reintroduce StaticArr
+  assert(m_inst->getTypeParam().subtypeOf(Type::Arr));
   return m_inst->getExtra<ConstData>()->as<const ArrayData*>();
 }
 

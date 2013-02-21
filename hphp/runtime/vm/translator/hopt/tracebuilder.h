@@ -167,9 +167,8 @@ public:
   void    genJmp(Block* target, SSATmp* src);
   void    genExitWhenSurprised(Trace* target);
   void    genExitOnVarEnv(Trace* target);
-  void    genCheckInit(SSATmp* src, Block* target);
   void    genCheckInit(SSATmp* src, Trace* target) {
-    genCheckInit(src, getFirstBlock(target));
+    gen(CheckInit, getFirstBlock(target), src);
   }
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genCastStk(uint32_t id, Type type);

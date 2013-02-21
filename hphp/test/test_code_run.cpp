@@ -6622,6 +6622,31 @@ bool TestCodeRun::TestObjectProperty() {
        "}"
        "test();");
 
+  // Testing object property that can be inferred but is null at
+  // runtime
+  MVCR("<?php\n"
+       "function error_handler($errno, $errstr) { echo \"Error\\n\"; }\n"
+       "class f {\n"
+       "  public $bar = 'hi there';\n"
+       "}\n"
+       "class c {\n"
+       "  private $foo;\n"
+       "  function __construct($c) {\n"
+       "    if ($c) {\n"
+       "      $this->foo = new f;\n"
+       "    }\n"
+       "  }\n"
+       "  function get() {\n"
+       "    return $this->foo->bar;\n"
+       "  }\n"
+       "}\n"
+       "function main() {\n"
+       "  set_error_handler('error_handler');\n"
+       "  $c = new c(false);\n"
+       "  $c->get();\n"
+       "  echo \"Error\\n\";\n"
+       "}\n"
+       "main();\n");
      return true;
 }
 

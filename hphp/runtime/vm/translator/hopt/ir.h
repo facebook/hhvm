@@ -305,6 +305,9 @@ O(Marker,                           ND, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(RaiseUninitLoc,                   ND, S(Str),              E|N|Mem|Refs|Er) \
+O(WarnNonObjProp,                   ND, NA,                  E|N|Refs|Er|Mem) \
+O(ThrowNonObjProp,                  ND, NA,                T|E|N|Refs|Er|Mem) \
+O(RaiseUndefProp,                   ND, S(Obj) CStr,         E|N|Refs|Er|Mem) \
 O(PrintStr,                         ND, S(Str),                  E|N|Mem|CRc) \
 O(PrintInt,                         ND, S(Int),                  E|N|Mem|CRc) \
 O(PrintBool,                        ND, S(Bool),                 E|N|Mem|CRc) \
@@ -1197,6 +1200,7 @@ inline Type typeForConst(const StringData*)  { return Type::StaticStr; }
 inline Type typeForConst(const NamedEntity*) { return Type::NamedEntity; }
 inline Type typeForConst(const Func*)        { return Type::Func; }
 inline Type typeForConst(const Class*)       { return Type::Cls; }
+inline Type typeForConst(const TypedValue*)  { return Type::PtrToGen; }
 inline Type typeForConst(TCA)                { return Type::TCA; }
 inline Type typeForConst(double)             { return Type::Dbl; }
 inline Type typeForConst(const ArrayData* ad) {

@@ -409,6 +409,7 @@ private:
     void emitIntermediateOp();
     void emitProp();
     void emitPropGeneric();
+    void emitPropSpecialized(const MInstrAttr mia, int propOffset);
     void emitElem();
     void emitNewElem();
     void emitRatchetRefs();
@@ -433,6 +434,8 @@ private:
     void setNoMIState() { m_needMIS = false; }
     SSATmp* genMisPtr();
     SSATmp* getInput(unsigned i);
+    SSATmp* checkInitProp(SSATmp* baseAsObj, SSATmp* propAddr, int propOffset,
+                          bool warn, bool define);
 
     bool generateMVal() const;
     bool needFirstRatchet() const;

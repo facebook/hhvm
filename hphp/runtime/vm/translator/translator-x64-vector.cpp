@@ -918,14 +918,6 @@ int getPropertyOffset(const NormalizedInstruction& ni,
   return baseClass->declPropOffset(idx);
 }
 
-static void raiseUndefProp(ObjectData* base, const StringData* name) {
-  static_cast<Instance*>(base)->raiseUndefProp(name);
-}
-
-static void raisePropertyOnNonObject() {
-  raise_warning("Cannot access property on non-object");
-}
-
 void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
                                         const Class* baseClass,
                                         int propOffset,
@@ -991,7 +983,13 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
          */
         EMIT_RCALL(astubs, *m_curNI, throw_null_object_prop);
       } else {
-        emitImmReg(astubs, uintptr_t(&init_null_variant), r(rBase));
+        /*
+         * This case is supposed to evaluate to null and let the vector
+         * operation continue. However, the control flow to make that work
+         * properly would be quite messy and this never happens in practice, so
+         * throw a fatal instead of crashing.
+         */
+        EMIT_RCALL(astubs, *m_curNI, throw_null_get_object_prop);
       }
     }
   }

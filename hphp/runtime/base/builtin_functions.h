@@ -241,6 +241,7 @@ String get_source_filename(litstr path,bool dir_component = false);
 
 void NEVER_INLINE throw_invalid_property_name(CStrRef name) ATTRIBUTE_NORETURN;
 void NEVER_INLINE throw_null_object_prop();
+void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
 void throw_exception_unchecked(CObjRef e);
 void throw_exception(CObjRef e);

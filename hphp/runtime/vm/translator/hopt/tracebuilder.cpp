@@ -497,11 +497,6 @@ void TraceBuilder::genGuardRefs(SSATmp* funcPtr,
       vals64);
 }
 
-void TraceBuilder::genCheckInit(SSATmp* src, Block* target) {
-  assert(target);
-  gen(CheckInit, target, src);
-}
-
 SSATmp* TraceBuilder::genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset) {
   return gen(LdARFuncPtr, baseAddr, offset);
 }

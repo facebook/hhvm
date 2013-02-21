@@ -79,6 +79,10 @@ static CallMap s_callMap({
     {PrintInt,           (TCA)print_int, DNone, SNone, {{SSA, 0}}},
     {PrintBool,          (TCA)print_boolean, DNone, SNone, {{SSA, 0}}},
     {RaiseUninitLoc,     (TCA)raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
+    {WarnNonObjProp,     (TCA)raisePropertyOnNonObject, DNone, SSync, {}},
+    {ThrowNonObjProp,    (TCA)throw_null_object_prop, DNone, SSync, {}},
+    {RaiseUndefProp,     (TCA)raiseUndefProp, DNone, SSync,
+                           {{SSA, 0}, {SSA, 1}}},
 
     /* Switch helpers */
     {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,

@@ -544,7 +544,7 @@ void HhbcTranslator::VectorTranslator::emitProp() {
   if (propOffset == -1) {
     emitPropGeneric();
   } else {
-    PUNT(emitProp-KnownOffset);
+    emitPropSpecialized(m_mii.getAttr(m_ni.immVecM[m_mInd]), propOffset);
   }
 }
 
@@ -620,6 +620,123 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
                     objOrPtr(m_base), noLitInt(key), genMisPtr());
 }
 #undef HELPER_TABLE
+
+/*
+ * Helper for emitPropSpecialized to check if a property is Uninit. It
+ * returns a pointer to the property's address, or init_null_variant
+ * if the property was Uninit and doDefine is false.
+ */
+SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
+  SSATmp* baseAsObj, SSATmp* propAddr,
+  int propOffset, bool doWarn, bool doDefine) {
+  SSATmp* key = getInput(m_iInd);
+  assert(baseAsObj->isA(Type::Obj));
+  assert(propAddr->getType().isPtr());
+  // The m_mInd check is to avoid initializing a property to
+  // InitNull right before it's going to be set to something else.
+  if (doWarn || (doDefine && m_mInd < m_ni.immVecM.size() - 1)) {
+    return m_tb.cond(m_ht.getCurFunc(),
+      [&] (Block* taken) {
+        m_tb.gen(CheckInitMem, taken, propAddr, cns(0));
+      },
+      [&] { // Next: Property isn't Uninit. Do nothing.
+        return propAddr;
+      },
+      [&] { // Taken: Property is Uninit. Raise a warning and return
+            // a pointer to InitNull, either in the object or
+            // init_null_variant.
+        m_tb.hint(Block::Unlikely);
+        if (doWarn) {
+          m_tb.gen(RaiseUndefProp, baseAsObj, key);
+        }
+        if (doDefine) {
+          m_tb.gen(StProp, baseAsObj, cns(propOffset), m_tb.genDefInitNull());
+          return propAddr;
+        }
+        return cns((const TypedValue*)&init_null_variant);;
+      }
+    );
+  }
+  // No need to do the check
+  return propAddr;
+}
+
+void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
+                                                           int propOffset) {
+  assert(!(mia & MIA_warn) || !(mia & MIA_unset));
+  const bool doWarn   = mia & MIA_warn;
+  const bool doDefine = mia & MIA_define || mia & MIA_unset;
+
+  SSATmp* initNull = cns((const TypedValue*)&init_null_variant);
+  SSATmp* key = getInput(m_iInd);
+  assert(key->isA(Type::StaticStr));
+
+  /*
+   * Type-inference from hphpc only tells us that this is either an object of a
+   * given class type or null.  If it's not an object, it has to be a null type
+   * based on type inference.  (It could be KindOfRef with an object inside,
+   * except that this isn't inferred for object properties so we're fine not
+   * checking KindOfRef in that case.)
+   *
+   * On the other hand, if m_base->isA(Type::Obj), we're operating on the base
+   * which was already guarded by tracelet guards (and may have been KindOfRef,
+   * but the Base* op already handled this). So we only need to do a type
+   * check against null here in the intermediate cases.
+   */
+  if (m_base->isA(Type::Obj)) {
+    SSATmp* propAddr = m_tb.genLdPropAddr(m_base, cns(propOffset));
+    m_base = checkInitProp(m_base, propAddr, propOffset, doWarn, doDefine);
+  } else {
+    SSATmp* baseAsObj = nullptr;
+    m_base = m_tb.cond(m_ht.getCurFunc(),
+      [&] (Block* taken) {
+        // baseAsObj is only available in the Next branch
+        baseAsObj = m_tb.gen(LdMem, Type::Obj, taken, m_base, cns(0));
+      },
+      [&] { // Next: Base is an object. Load property address and
+            // check for uninit
+        return checkInitProp(baseAsObj,
+                             m_tb.genLdPropAddr(baseAsObj, cns(propOffset)),
+                             propOffset, doWarn, doDefine);
+      },
+      [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
+        m_tb.hint(Block::Unlikely);
+        if (doWarn) {
+          m_tb.gen(WarnNonObjProp);
+        }
+        if (doDefine) {
+          /*
+           * NOTE:
+           *
+           * This case logically is supposed to do a stdClass promotion.  It
+           * should ideally not be possible (since we have a known class type),
+           * except that the static compiler doesn't correctly infer object
+           * class types in some edge cases involving stdClass promotion.
+           *
+           * This is impossible to handle "correctly" if we're in the middle of
+           * a multi-dim property expression, because things further along may
+           * also have type inference telling them that object properties are
+           * at a given slot, but the object could actually be a stdClass
+           * instead of the knownCls type if we were to promote here.
+           *
+           * So, we throw a fatal error, which is what hphpc's generated C++
+           * would do in this case too.
+           *
+           * Relevant TODOs:
+           *   #1789661 (this can cause bugs if bytecode.cpp promotes)
+           *   #1124706 (we want to get rid of stdClass promotion in general)
+           */
+          m_tb.gen(ThrowNonObjProp);
+        }
+        return initNull;
+      }
+    );
+  }
+
+  // At this point m_base is either a pointer to init_null_variant or
+  // a property in the object that we've verified isn't uninit.
+  assert(m_base->getType().isPtr());
+}
 
 template <KeyType keyType, bool unboxKey, bool warn, bool define, bool reffy,
           bool unset>
@@ -821,7 +938,11 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
   const int propOffset  = getPropertyOffset(m_ni, knownCls,
                                             m_mii, m_mInd, m_iInd);
   if (propOffset != -1) {
-    PUNT(CGetProp-KnownOffset);
+    emitPropSpecialized(MIA_warn, propOffset);
+    SSATmp* cellPtr = m_tb.genUnboxPtr(m_base);
+    SSATmp* propVal = m_tb.gen(LdMem, Type::Cell, cellPtr, cns(0));
+    m_result = m_tb.genIncRef(propVal);
+    return;
   }
 
   typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
@@ -881,7 +1002,15 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   const int propOffset  = getPropertyOffset(m_ni, knownCls,
                                             m_mii, m_mInd, m_iInd);
   if (propOffset != -1) {
-    PUNT(emitSetProp-KnownOffset);
+    emitPropSpecialized(MIA_define, propOffset);
+    SSATmp* cellPtr = m_tb.genUnboxPtr(m_base);
+    SSATmp* oldVal = m_tb.gen(LdMem, Type::Cell, cellPtr, cns(0));
+    // The object owns a reference now
+    SSATmp* increffed = m_tb.genIncRef(value);
+    m_tb.gen(StMem, cellPtr, cns(0), value);
+    m_tb.genDecRef(oldVal);
+    m_result = increffed;
+    return;
   }
 
   // Emit the appropriate helper call.

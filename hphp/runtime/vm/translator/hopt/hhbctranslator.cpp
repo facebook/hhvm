@@ -1190,7 +1190,7 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId) {
     // TODO: 2068502 pick one of these two implementations and remove the other.
     Trace* exitTrace = getExitSlowTrace();
     SSATmp* cns = m_tb->gen(LdClsCns, Type::Cell, cnsNameTmp, clsNameTmp);
-    m_tb->genCheckInit(cns, exitTrace);
+    m_tb->gen(CheckInit, m_tb->getFirstBlock(exitTrace), cns);
     push(cns);
   } else {
     // if-then-else
@@ -1201,7 +1201,7 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId) {
     SSATmp* c1 = m_tb->gen(LdClsCns, cnsType, cnsNameTmp, clsNameTmp);
     SSATmp* result = m_tb->cond(getCurFunc(),
       [&] (Block* taken) { // branch
-        m_tb->genCheckInit(c1, taken);
+        m_tb->gen(CheckInit, taken, c1);
       },
       [&] { // Next: LdClsCns hit in TC
         return c1;

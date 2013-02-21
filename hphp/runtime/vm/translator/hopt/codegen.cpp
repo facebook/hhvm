@@ -335,6 +335,9 @@ CALL_OPCODE(LdSwitchDblIndex);
 CALL_OPCODE(LdSwitchStrIndex);
 CALL_OPCODE(LdSwitchObjIndex);
 CALL_OPCODE(RaiseUninitLoc)
+CALL_OPCODE(WarnNonObjProp)
+CALL_OPCODE(ThrowNonObjProp)
+CALL_OPCODE(RaiseUndefProp)
 
 // Vector instruction helpers
 CALL_OPCODE(BaseG)
@@ -3613,29 +3616,18 @@ void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgGuardType(IRInstruction* inst) {
-  Type      type  = inst->getTypeParam();
-  SSATmp*   dst   = inst->getDst();
-  SSATmp*   src   = inst->getSrc(0);
-  Block*    label = inst->getTaken();
-  auto dstReg = dst->getReg(0);
-  auto srcValueReg = src->getReg(0);
+  Type type       = inst->getTypeParam();
+  SSATmp* src     = inst->getSrc(0);
   auto srcTypeReg = src->getReg(1);
   assert(srcTypeReg != InvalidReg);
 
-  // compare srcTypeReg with type
-  DataType dataType = type.toDataType();
   ConditionCode cc;
-  if (IS_STRING_TYPE(dataType)) {
-    m_as.test_imm32_reg32(KindOfStringBit, srcTypeReg);
-    cc = CC_Z;
-  } else {
-    m_as.cmp_imm32_reg32(dataType, srcTypeReg);
-    cc = CC_NE;
-  }
-  emitFwdJcc(cc, label);
+  cc = emitTypeTest(type, r32(srcTypeReg), true);
+  emitFwdJcc(cc, inst->getTaken());
 
+  auto dstReg = inst->getDst()->getReg();
   if (dstReg != InvalidReg) {
-    emitMovRegReg(m_as, srcValueReg, dstReg);
+    emitMovRegReg(m_as, src->getReg(0), dstReg);
   }
 }
 

@@ -829,6 +829,7 @@ private:
   void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
 
+ public:
   static const size_t kJmpTargetAlign = 16;
   static const size_t kNonFallthroughAlign = 64;
   static const int kJmpLen = 5;
@@ -839,7 +840,6 @@ private:
   static const int kLeaRipLen = 7;
   static const int kTestRegRegLen = 3;
   static const int kTestImmRegLen = 5;  // only for rax -- special encoding
- public:
   // Cache alignment is required for mutable instructions to make sure
   // mutations don't "tear" on remote cpus.
   static const size_t kX64CacheLineSize = 64;

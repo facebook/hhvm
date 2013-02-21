@@ -44,4 +44,12 @@ HOT_FUNC_VM RefData* box_value(TypedValue tv) {
   return tvBoxHelper(tv.m_type, tv.m_data.num);
 }
 
+void raisePropertyOnNonObject() {
+  raise_warning("Cannot access property on non-object");
+}
+
+void raiseUndefProp(ObjectData* base, const StringData* name) {
+  static_cast<Instance*>(base)->raiseUndefProp(name);
+}
+
 } } }

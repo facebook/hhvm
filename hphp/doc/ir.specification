@@ -973,6 +973,18 @@ DefCns S0:ConstStr S0:Cell
   Defines the constant with name S0 to be the value S1. If S0 has a refcounted
   type, this instruction consumes its refcount.
 
+WarnNonObjProp
+
+  Raise a warning for property access on a non-object base.
+
+ThrowNonObjProp
+
+  Throws a fatal error for trying to set a property on a non-object base.
+
+RaiseUndefProp S0:Obj S1:ConstStr
+
+  Raise a notice for an undefined property named S1 on the class of S0.
+
 Print
 AddElem
 AddNewElem
@@ -1126,7 +1138,6 @@ SetProp/SetOpProp/IncDecProp:
 - If the base is not a subtype of Type::Obj, the operation will fail
   with a warning and the return value is null. Otherwise the return
   value is the same as the value input.
-
 
 D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
 

@@ -158,6 +158,9 @@ struct HhbcTranslator {
   void emitArrayAdd();
   void emitAddElemC();
   void emitAddNewElemC();
+  void emitNewCol(int type, int numElems);
+  void emitColAddElemC();
+  void emitColAddNewElemC();
   void emitDefCns(uint32 id);
   void emitCns(uint32 id);
   void emitConcat();
@@ -256,6 +259,7 @@ struct HhbcTranslator {
                            const StringData* methName);
   void emitFPushCtorD(int32 numParams, int32 classNameStrId);
   void emitFPushCtor(int32 numParams);
+  void emitFCallArray();
   void emitFCall(uint32_t numParams,
                   Offset returnBcOffset,
                   const Func* callee);

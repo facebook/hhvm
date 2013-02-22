@@ -366,7 +366,7 @@ TranslatorX64::irTranslateInt(const Tracelet& t,
 void
 TranslatorX64::irTranslateDouble(const Tracelet& t,
                                  const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(Double);
+  HHIR_EMIT(Double, i.imm[0].u_DA);
 }
 
 void
@@ -487,19 +487,19 @@ TranslatorX64::irTranslateCastInt(const Tracelet& t,
 void
 TranslatorX64::irTranslateCastArray(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(CastArray);
+  HHIR_EMIT(CastArray);
 }
 
 void
 TranslatorX64::irTranslateCastObject(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(CastObject);
+  HHIR_EMIT(CastObject);
 }
 
 void
 TranslatorX64::irTranslateCastDouble(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(CastDouble);
+  HHIR_EMIT(CastDouble);
 }
 
 void
@@ -597,9 +597,7 @@ void TranslatorX64::irTranslateDup(const Tracelet& t,
 
 void TranslatorX64::irTranslateCreateCont(const Tracelet& t,
                                           const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(CreateCont);
-  // Task #2036200: Fix and re-enable this
-  // HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
+  HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
 }
 
 void TranslatorX64::irTranslateContEnter(const Tracelet& t,
@@ -1297,7 +1295,7 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
 void
 TranslatorX64::irTranslateFCallArray(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(FCallArray);
+  HHIR_EMIT(FCallArray);
 }
 
 void
@@ -1310,19 +1308,19 @@ TranslatorX64::irTranslateNewTuple(const Tracelet& t,
 void
 TranslatorX64::irTranslateNewCol(const Tracelet& t,
                                  const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(NewCol);
+  HHIR_EMIT(NewCol, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
 void
 TranslatorX64::irTranslateColAddNewElemC(const Tracelet& t,
                                          const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(ColAddNewElemC);
+  HHIR_EMIT(ColAddNewElemC);
 }
 
 void
 TranslatorX64::irTranslateColAddElemC(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(ColAddElemC);
+  HHIR_EMIT(ColAddElemC);
 }
 
 void

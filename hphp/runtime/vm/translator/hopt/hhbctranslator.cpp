@@ -303,6 +303,18 @@ void HhbcTranslator::emitAddNewElemC() {
   push(m_tb->gen(AddNewElem, arr, val));
 }
 
+void HhbcTranslator::emitNewCol(int type, int numElems) {
+  emitInterpOneOrPunt(Type::Obj);
+}
+
+void HhbcTranslator::emitColAddElemC() {
+  emitInterpOneOrPunt(Type::Obj, 3);
+}
+
+void HhbcTranslator::emitColAddNewElemC() {
+  emitInterpOneOrPunt(Type::Obj, 2);
+}
+
 void HhbcTranslator::emitCns(uint32 id) {
   emitInterpOneOrPunt(Type::Cell);
 }
@@ -518,15 +530,18 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
   TRACE(3, "%u: SetOpL %d\n", m_bcOff, id);
   Trace* exitTrace = getExitTrace();
   SSATmp* loc = emitLdLocWarn(id, exitTrace);
-  SSATmp* val = popC();
   if (subOpc == Concat) {
     // The concat helpers decref their args, so don't decref pop'ed values
     // and don't decref the old value held in the local. The concat helpers
     // also incref their results, which will be consumed by the stloc. We
     // need an extra incref for the push onto the stack.
+    SSATmp* val = popC();
     SSATmp* result = m_tb->genConcat(loc, val);
     pushIncRef(m_tb->genStLoc(id, result, false, true, exitTrace));
-  } else if (isSupportedBinaryArith(subOpc, loc->getType(), val->getType())) {
+  } else if (isSupportedBinaryArith(subOpc,
+                                    loc->getType(),
+                                    topC()->getType())) {
+    SSATmp* val = popC();
     Type resultType = Type::binArithResultType(loc->getType(),
                                                val->getType());
     SSATmp* result = m_tb->gen(subOpc, resultType, loc, val);
@@ -621,6 +636,10 @@ void HhbcTranslator::emitIterFree(uint32 iterId) {
 
 void HhbcTranslator::emitCreateCont(bool getArgs,
                                     Id funNameStrId) {
+  emitInterpOneOrPunt(Type::Cell);
+  return;
+  // Task #2036200: Fix and re-enable this
+
   /* Runtime-determined slow path punts to TranslatorX64 for now */
   m_tb->genExitOnVarEnv(getExitSlowTrace());
 
@@ -732,7 +751,10 @@ void HhbcTranslator::emitContDone() {
 }
 
 void HhbcTranslator::emitContNext() {
-  PUNT(ContNext);
+  emitInterpOneOrPunt(Type::None);
+  return;
+  // Task #2140912: Fix and re-enable this
+
   SSATmp* cont = m_tb->genLdThis(nullptr);
   m_tb->genContPreNext(cont, getExitSlowTrace());
   m_tb->genSetPropCell(cont, CONTOFF(m_received), m_tb->genDefUninit());
@@ -1483,6 +1505,10 @@ void HhbcTranslator::emitFPushClsMethodF(int32             numParams,
   m_fpiStack.push(actRec);
 }
 
+void HhbcTranslator::emitFCallArray() {
+  PUNT(FCallArray); // can't interpret one because of control flow
+}
+
 void HhbcTranslator::emitFCall(uint32_t numParams,
                                Offset returnBcOffset,
                                const Func* callee) {
@@ -1944,9 +1970,7 @@ void HhbcTranslator::emitCastInt() {
 }
 
 void HhbcTranslator::emitCastDouble() {
-  SSATmp* src = popC();
-  push(m_tb->genConvToDbl(src));
-  m_tb->genDecRef(src);
+  emitInterpOneOrPunt(Type::Dbl, 1);
 }
 
 void HhbcTranslator::emitCastString() {
@@ -1966,15 +1990,11 @@ void HhbcTranslator::emitCastString() {
 }
 
 void HhbcTranslator::emitCastArray() {
-  SSATmp* src = popC();
-  pushIncRef(m_tb->genConvToArr(src));
-  m_tb->genDecRef(src);
+  emitInterpOneOrPunt(Type::Arr, 1);
 }
 
 void HhbcTranslator::emitCastObject() {
-  SSATmp* src = popC();
-  pushIncRef(m_tb->genConvToObj(src));
-  m_tb->genDecRef(src);
+  emitInterpOneOrPunt(Type::Obj, 1);
 }
 
 static

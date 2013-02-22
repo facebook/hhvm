@@ -52,40 +52,28 @@ void f_hphp_unpack_continuation(CObjRef continuation) {
 
 static StaticString s___cont__("__cont__");
 
-#define LABEL_INIT m_label(0ll)
-
 c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb),
-#ifndef HHVM
-    LABEL_INIT,
-#endif
     m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
     m_done(false), m_running(false), m_should_throw(false),
-    m_isMethod(false), m_callInfo(NULL)
-#ifdef HHVM
-    , LABEL_INIT
-#endif
-{
+    m_isMethod(false), m_vmFunc(nullptr), m_label(0ll) {
 }
-#undef LABEL_INIT
 
 c_Continuation::~c_Continuation() {
-  if (hhvm) {
-    VM::ActRec* ar = actRec();
+  VM::ActRec* ar = actRec();
 
-    // The first local is the object itself, and it wasn't increffed at creation
-    // time (see createContinuation()). Overwrite its type to exempt it from
-    // refcounting here.
-    TypedValue* contLocal = frame_local(ar, 0);
-    assert(contLocal->m_data.pobj == this);
-    contLocal->m_type = KindOfNull;
+  // The first local is the object itself, and it wasn't increffed at creation
+  // time (see createContinuation()). Overwrite its type to exempt it from
+  // refcounting here.
+  TypedValue* contLocal = frame_local(ar, 0);
+  assert(contLocal->m_data.pobj == this);
+  contLocal->m_type = KindOfNull;
 
-    if (ar->hasVarEnv()) {
-      VM::VarEnv::destroy(ar->getVarEnv());
-    } else {
-      frame_free_locals_inl(ar, m_vmFunc->numLocals());
-    }
+  if (ar->hasVarEnv()) {
+    VM::VarEnv::destroy(ar->getVarEnv());
+  } else {
+    frame_free_locals_inl(ar, m_vmFunc->numLocals());
   }
 }
 
@@ -93,13 +81,8 @@ void c_Continuation::t___construct(
     int64 func, int64 extra, bool isMethod,
     CStrRef origFuncName, CVarRef obj, CArrRef args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
-  if (hhvm) {
-    m_vmFunc       = (VM::Func*) extra;
-    assert(m_vmFunc);
-  } else {
-    m_callInfo     = (const CallInfo*) func;
-    assert(m_callInfo);
-  }
+  m_vmFunc       = (VM::Func*) extra;
+  assert(m_vmFunc);
   m_isMethod     = isMethod;
   m_origFuncName = origFuncName;
 
@@ -253,14 +236,10 @@ Variant c_Continuation::t_receive() {
 String c_Continuation::t_getorigfuncname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getorigfuncname);
   String called_class;
-  if (hhvm) {
-    if (actRec()->hasThis()) {
-      called_class = actRec()->getThis()->getVMClass()->name()->data();
-    } else if (actRec()->hasClass()) {
-      called_class = actRec()->getClass()->name()->data();
-    }
-  } else {
-    called_class = getCalledClass();
+  if (actRec()->hasThis()) {
+    called_class = actRec()->getThis()->getVMClass()->name()->data();
+  } else if (actRec()->hasClass()) {
+    called_class = actRec()->getClass()->name()->data();
   }
   if (called_class.size() == 0) {
     return m_origFuncName;
@@ -286,18 +265,12 @@ Variant c_Continuation::t___clone() {
 }
 
 HphpArray* c_Continuation::getStaticLocals() {
-  const_assert(hhvm);
-#ifdef HHVM
   if (m_VMStatics.get() == NULL) {
     m_VMStatics = NEW(HphpArray)(1);
   }
   return m_VMStatics.get();
-#else
-  return NULL;
-#endif
 }
 
-#ifdef HHVM
 namespace {
   StaticString s_send("send");
   StaticString s_raise("raise");
@@ -325,7 +298,6 @@ void c_Continuation::call_raise(ObjectData* e) {
 
   g_vmContext->invokeContFunc(func, this, &arg);
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

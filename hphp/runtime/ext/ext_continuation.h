@@ -36,9 +36,6 @@ void f_hphp_unpack_continuation(CObjRef continuation);
 
 class c_Continuation : public ExtObjectData {
  public:
-#ifndef HHVM
-  DECLARE_CLASS(Continuation, Continuation, ObjectData)
-#else
   DECLARE_CLASS_NO_ALLOCATION(Continuation, Continuation, ObjectData)
   virtual void sweep();
   void operator delete(void* p) {
@@ -46,7 +43,6 @@ class c_Continuation : public ExtObjectData {
     DELETEOBJSZ(sizeForLocalsAndIters(this_->m_vmFunc->numLocals(),
                                       this_->m_vmFunc->numIterators()))(this_);
   }
-#endif
 
   // need to implement
   public: c_Continuation(const ObjectStaticCallbacks *cb = &cw_Continuation);
@@ -106,24 +102,14 @@ class c_Continuation : public ExtObjectData {
     return cont;
   }
 
-  public: void setCalledClass(CStrRef cls) {
-    const_assert(!hhvm);
-    getCalledClass() = cls;
-  }
 protected: virtual bool php_sleep(Variant &ret);
 private:
   template<typename FI> void nextImpl(FI& fi);
 
 public:
-#ifdef HHVM
   void call_next();
   void call_send(TypedValue* v);
   void call_raise(ObjectData* e);
-#else
-  inline void call_next() { t_next(); }
-  inline void call_send(TypedValue* v) { t_send(tvAsCVarRef(v)); }
-  inline void call_raise(ObjectData* e) { t_raise(Variant(e)); }
-#endif
 
   inline void preNext() {
     if (m_done) {
@@ -146,50 +132,30 @@ public:
   }
 
 public:
-#define LABEL_DECL int64 m_label;
   Object m_obj;
   Array m_args;
-#ifndef HHVM
-  LABEL_DECL
-#endif
   int64 m_index;
   Variant m_value;
   Variant m_received;
   String m_origFuncName;
-#ifndef HHVM
-  String m_called_class;
-#endif
   bool m_done;
   bool m_running;
   bool m_should_throw;
   bool m_isMethod;
 
-  // This isn't used by HPHPc but there's 4 bytes of padding here anyway
   int m_localsOffset;
-
   union {
-    const CallInfo *m_callInfo; // only used by HPHPc
-    VM::Func *m_vmFunc; // only used by HHVM
-#ifdef HHVM
+    const CallInfo *m_callInfo;
+    VM::Func *m_vmFunc;
   };
-  LABEL_DECL
-#endif
-  // These fields are not used by HPHPc and are rolled up in the
-  // union for the HPHPc build so that they don't waste space
+  int64 m_label;
   VM::ActRec* m_arPtr;
-#ifndef HHVM
-  };
-#endif
 
   p_ContinuationWaitHandle m_waitHandle;
 
-#ifdef HHVM
   SmartPtr<HphpArray> m_VMStatics;
 
   String& getCalledClass() { not_reached(); }
-#else
-  String& getCalledClass() { return m_called_class; }
-#endif
 
   HphpArray* getStaticLocals();
   static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
@@ -202,7 +168,6 @@ public:
   TypedValue* locals() {
     return (TypedValue*)(uintptr_t(this) + m_localsOffset);
   }
-#undef LABEL_DECL
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1124,12 +1124,19 @@ TypedValue* Stack::frameStackBase(const ActRec* fp) {
 }
 
 TypedValue* Stack::generatorStackBase(const ActRec* fp) {
-  // We know generators are always called from a function with an empty stack.
-  // So we find the caller's FP, compensate for its locals, and then we've found
-  // the base of the generator's stack.
   assert(fp->m_func->isGenerator());
-  ActRec* callerFP = (ActRec*)fp->m_savedRbp;
-  return (TypedValue*)callerFP - callerFP->m_func->numSlotsInFrame();
+  VMExecutionContext* context = g_vmContext;
+  ActRec* sfp = context->arGetSfp(fp);
+  if (sfp == fp) {
+    // In the reentrant case, we can consult the savedVM state. We simply
+    // use the top of stack of the previous VM frame (since the ActRec,
+    // locals, and iters for this frame do not reside on the VM stack).
+    return context->m_nestedVMs.back().m_savedState.sp;
+  }
+  // In the non-reentrant case, we know generators are always called from a
+  // function with an empty stack. So we find the caller's FP, compensate
+  // for its locals, and then we've found the base of the generator's stack.
+  return (TypedValue*)sfp - sfp->m_func->numSlotsInFrame();
 }
 
 
@@ -2232,6 +2239,8 @@ void VMExecutionContext::invokeContFunc(const Func* f,
 
   TypedValue retval;
   reenterVM(&retval, ar, nullptr, savedSP);
+  // Codegen for generator functions guarantees that they will return null
+  assert(IS_NULL_TYPE(retval.m_type));
 }
 
 void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {

@@ -79,6 +79,15 @@ struct CodegenState {
   AsmInfo* asmInfo;
 };
 
+// Generate an if-then block into a.  thenBlock is executed if cc is true.
+template <class Then>
+void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+  Label done;
+  a.jcc8(ccNegate(cc), done);
+  thenBlock();
+  asm_label(a, done);
+}
+
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
@@ -148,7 +157,7 @@ private:
   void cgStMemWork(IRInstruction* inst, bool genStoreType);
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
   void cgStPropWork(IRInstruction* inst, bool genStoreType);
-  void cgIncRefWork(Type type, SSATmp* dst, SSATmp* src);
+  void cgIncRefWork(Type type, SSATmp* src);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class OpInstr, class Oper>
@@ -258,7 +267,6 @@ private:
   Address getDtorGeneric();
   Address getDtorTyped();
   int getIterOffset(SSATmp* tmp);
-  static void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
   /*
@@ -268,15 +276,31 @@ private:
    */
   template <class Block>
   void unlikelyIfBlock(ConditionCode cc, Block unlikely) {
-    if (&m_as == &m_astubs) cc = ccNegate(cc);
-    auto *patch = m_as.code.frontier;
-    m_as.jcc(cc, m_astubs.code.frontier);
-    unlikely();
     if (&m_as == &m_astubs) {
-      m_as.patchJcc(patch, m_as.code.frontier);
+      Label done;
+      m_as.jcc(ccNegate(cc), done);
+      unlikely();
+      asm_label(m_as, done);
     } else {
-      m_astubs.jmp(m_as.code.frontier);
+      Label unlikelyLabel, done;
+      m_as.jcc(cc, unlikelyLabel);
+      asm_label(m_astubs, unlikelyLabel);
+      unlikely();
+      m_astubs.jmp(done);
+      asm_label(m_as, done);
     }
+  }
+
+  // Generate an if-then-else block into m_as.
+  template <class Then, class Else>
+  void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock) {
+    Label elseLabel, done;
+    m_as.jcc8(ccNegate(cc), elseLabel);
+    thenBlock();
+    m_as.jmp8(done);
+    asm_label(m_as, elseLabel);
+    elseBlock();
+    asm_label(m_as, done);
   }
 
 private:

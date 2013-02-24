@@ -31,7 +31,6 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            uint32_t initialSpOffsetFromFp,
                            IRFactory& irFactory,
-                           CSEHash& constants,
                            const Func* func)
   : m_irFactory(irFactory)
   , m_simplifier(this)
@@ -43,7 +42,6 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_spValue(nullptr)
   , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
-  , m_constTable(constants)
   , m_thisIsAvailable(false)
   , m_localValues(func->numLocals(), nullptr)
   , m_localTypes(func->numLocals(), Type::None)
@@ -1391,7 +1389,8 @@ void TraceBuilder::appendBlock(Block* block) {
 }
 
 CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
-  return inst->getOpcode() == DefConst ? &m_constTable : &m_cseHash;
+  return inst->getOpcode() == DefConst ? &m_irFactory.getConstTable() :
+         &m_cseHash;
 }
 
 void TraceBuilder::cseInsert(IRInstruction* inst) {

@@ -45,4 +45,15 @@ IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src) {
   return inst;
 }
 
+SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
+  IRInstruction inst(DefConst);
+  inst.setExtra(&cdata);
+  inst.setTypeParam(ctype);
+  if (SSATmp* tmp = m_constTable.lookup(&inst)) {
+    assert(tmp->getType().equals(ctype));
+    return tmp;
+  }
+  return m_constTable.insert(cloneInstruction(&inst)->getDst());
+}
+
 }}}

@@ -93,8 +93,10 @@ static CallMap s_callMap({
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {SetElem,  {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {TV, 3}}},
-});
 
+    /* debug assert helpers */
+    {DbgAssertPtr, (TCA)assertTv, DNone, SNone, {{SSA, 0}}},
+});
 
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {

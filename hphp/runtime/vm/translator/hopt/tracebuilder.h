@@ -35,7 +35,6 @@ public:
   TraceBuilder(Offset initialBcOffset,
                uint32_t initialSpOffsetFromFp,
                IRFactory&,
-               CSEHash& constants,
                const Func* func);
 
   ~TraceBuilder();
@@ -395,8 +394,8 @@ private:
    *       tracebuilding but once we implement inlining it'll have to
    *       be updated to track the context of inlined functions.
    *
-   *   (4) m_cseHash & m_constTable are hashtables for common
-   *       sub-expression elimination. m_constTable holds only constants.
+   *   (4) m_cseHash is for common sub-expression elimination of non-constants.
+   *       constants are globally available and managed by IRFactory.
    *
    *   (5) m_thisIsAvailable tracks whether the current ActRec has a
    *       non-null this pointer.
@@ -419,7 +418,6 @@ private:
   SSATmp*    m_fpValue;      // current physical fp
   int32      m_spOffset;     // offset of physical sp from physical fp
   SSATmp*    m_curFunc;      // current function context
-  CSEHash&   m_constTable;
   CSEHash    m_cseHash;
   bool       m_thisIsAvailable; // true only if current ActRec has non-null this
 

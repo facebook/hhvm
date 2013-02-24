@@ -123,11 +123,9 @@ struct HhbcTranslator {
                  uint32_t initialSpOffsetFromFp,
                  const Func* func)
     : m_irFactory(irFactory)
-    , m_constantsHash(new CSEHash())
     , m_tb(new TraceBuilder(bcStartOffset,
                             initialSpOffsetFromFp,
                             m_irFactory,
-                            *m_constantsHash,
                             func))
     , m_curFunc(func)
     , m_bcOff(-1)
@@ -569,8 +567,6 @@ private:
 
 private:
   IRFactory&        m_irFactory;
-  std::unique_ptr<CSEHash>
-                    m_constantsHash;
   std::unique_ptr<TraceBuilder>
                     m_tb;
   const Func*       m_curFunc;

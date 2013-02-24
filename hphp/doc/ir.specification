@@ -117,9 +117,9 @@ StaticStr and CountedStr both appear as type String at the PHP level).
   Int             int64_t (64-bit twos compliment binary integer)
   Dbl             double (IEEE 754 64-bit binary floating point)
   StaticStr       StringData* where isStatic() == true
-  UncountedInit   TypedValue {Null|Bool|Int|Dbl|Sstr}
-  Uncounted       TypedValue {Unin|Null|Bool|Int|Dbl|Sstr}
   CountedStr      StringData* where isStatic() == false
+  UncountedInit   TypedValue {Null|Bool|Int|Dbl|StaticStr}
+  Uncounted       TypedValue {Unin|Null|Bool|Int|Dbl|StaticStr}
   Str             StringData* {CountedStr|StaticStr}
   StaticArr       ArrayData* where isStatic() == true
   CountedArr      ArrayData* where isStatic() == false
@@ -129,9 +129,17 @@ StaticStr and CountedStr both appear as type String at the PHP level).
   Cell            {Null|Bool|Int|Dbl|Str|Arr|Obj}
 
 A PHP reference is implemented as a container object (RefData) which contains
-one value. For every type T in the table above there is a corresponding type
-BoxedT, which is a pointer to a RefData struct containing a value of type
-T. There is one top-level type representing all possible PHP types:
+one value.  The contained value cannot be another PHP reference.  For every
+type T in the table above, there is a corresponding type BoxedT, which is a
+pointer to a RefData struct containing a value of type T.
+
+  Type            HHVM representation
+  ----            -------------------
+  BoxedInitNull   RefData* containing InitNull
+  ...             Everything from the first table above can be boxed
+  BoxedCell       RefData* containing Cell (topmost boxed type).
+
+Finally, there is one top-level type representing all possible PHP values:
 
   Gen             {Cell|BoxedCell}
 
@@ -156,6 +164,11 @@ above PHP-facing types.
   RetAddr         Return address
   StkPtr          Pointer into VM execution stack
   TCA             Machine code address
+
+In the instruction descriptions below, we also use a "Const" prefix on
+several types loosly, which means the operand must be the requested
+type and must be a compile-time constant.  The optimizer relies on
+accessing the value of those operands.
 
 
 Variables
@@ -367,8 +380,8 @@ D:Bool = ExtendsClass S0:Cls S1:Cls
   descendant of the class in S1, where S1 must be a unique class that
   is not an interface or a trait.
 
-D:Bool =  InstanceOfBitmask S0:Cls S1:ConstSstr
-D:Bool = NInstanceOfBitmask S0:Cls S1:ConstSstr
+D:Bool =  InstanceOfBitmask S0:Cls S1:ConstStr
+D:Bool = NInstanceOfBitmask S0:Cls S1:ConstStr
 
   A fast-path for instanceof checks.  Sets D based on whether S0 is a
   descendant of the class named by S1, where S1 must have a bit
@@ -380,8 +393,8 @@ D:Bool = IsNType<T> S0:Cell
   IsType (IsNType) sets D to true iff S0 holds a value that is (not)
   of type T.
 
-D:Bool =  IsTypeMem<T> S0:[Gen*|Cell*]
-D:Bool = IsNTypeMem<T> S0:[Gen*|Cell*]
+D:Bool =  IsTypeMem<T> S0:PtrToGen
+D:Bool = IsNTypeMem<T> S0:PtrToGen
 
   IsTypeMem (IsNTypeMem) sets D to true iff the value referenced by S0
   is (not) of type T.
@@ -439,8 +452,7 @@ Jmp_ [S:T ...] -> L
   sources of this Jmp_.
 
 DefLabel
-  L:
-  L(D:T ...):
+D:T ... = DefLabel
 
   Denote the position of a jump target.  Branch instructions, and
   instructions which implicitly guard, take a Label argument which refers
@@ -462,16 +474,16 @@ D:Cell = Unbox S0:Gen
 
   Unbox S0 if it is boxed, and put the resulting Cell in D.
 
-D:Cell& = Box S0:Gen
+D:BoxedCell = Box S0:Gen
 
-  Box S0 if it is unboxed, and put the resulting Cell& in D.
+  Box S0 if it is unboxed, and put the resulting BoxedCell in D.
 
-D:Cell* = UnboxPtr S0:Gen*
+D:PtrToCell = UnboxPtr S0:PtrToGen
 
   If S0 points to a cell that is KindOfRef, dereference the pointer in
   the TypedValue and return a pointer to the inner-cell in D.
 
-D:Cell&* = BoxPtr S0:Gen*
+D:PtrToBoxedCell = BoxPtr S0:PtrToGen
 
   Boxes the TypeValue that S0 points to if it is not boxed. The result
   D points to the same TypedValue as S0 but has a more refined type.
@@ -504,7 +516,7 @@ D:T = LdLoc<T,localId> S0:StkPtr
   Loads local number localId from the frame S0 and puts the value in D
   as type T.
 
-D:Gen* = LdStackAddr S0:StkPtr S1:ConstInt
+D:PtrToGen = LdStackAddr S0:StkPtr S1:ConstInt
 
   Loads the address of the stack slot given by the pointer in S0 and
   the index S1 (in cells).
@@ -513,7 +525,7 @@ D:T* = LdLocAddr<T, localId> S0:StkPtr
 
   Loads the address of the local slot localId from the frame S0 into D.
 
-D:T = LdMem<T> S0:{Gen*|Cell*} [ -> L ]
+D:T = LdMem<T> S0:PtrToGen [ -> L ]
 
   Loads from S0 and puts the value in D. If the optional label L is
   specified and the loaded value's type does not match T, this
@@ -568,17 +580,17 @@ D:Cls = LdCls S0:Str S1:Cls
   instruction by simplifying it to LdClsCached, which uses the target
   cache.
 
-D:Cls = LdClsCached S0:ConstSstr
+D:Cls = LdClsCached S0:ConstStr
 
   Loads the class named S0 via the target cache. Invokes autoload and
   may raise an error if the class is not defined.
 
-D:Cls = LdCachedClass S0:ConstSstr
+D:Cls = LdCachedClass S0:ConstStr
 
   Loads the class whose name is S0 out of the target cache. Returns
   null and has no side effects if the class is not defined.
 
-D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [ -> L ]
+D:T = LdClsCns<T> S0:ConstStr S1:ConstStr [ -> L ]
 
   Loads the class constant named S0 from a class named S1 via the
   target cache. This instruction should generally be followed by
@@ -589,7 +601,8 @@ D:T = LdClsCns<T> S0:ConstSstr S1:ConstSstr [ -> L ]
   Note that no decref of the result is necessary because class
   constants will always be static.
 
-D:FuncCtx = LdClsMethodFCache S0:ConstSstr S1:ConstSstr S2:{Obj|Cls|Ctx} L:Label
+D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
+                              S2:{Obj|Cls|Ctx} L:Label
 
   Loads from the MethodFCache a pointer to the callee function and the
   context (ActRec's m_this/m_cls slot) into D.  S0 and S1 hold the
@@ -607,18 +620,18 @@ LdClsMethodCache
 LdClsMethod
 LdPropAddr
 
-D:Gen* = LdGblAddr S0:Str -> L
+D:PtrToGen = LdGblAddr S0:Str -> L
 
   Loads a pointer to a global. S0 is the global's name. Branches to L
   if the global is not defined.
 
-D:Gen* = LdGblAddrDef S0:Str
+D:PtrToGen = LdGblAddrDef S0:Str
 
   Loads a pointer to a global. S0 is the global's name. Defines the
   global if it is not already defined. Decrements the reference count
   of S0.
 
-D:Gen* = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> L ]
+D:PtrToGen = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> L ]
 
   Loads a pointer to a static class property. S0 points to the class,
   S1 is the property name, and S2 is the class representing the
@@ -627,7 +640,8 @@ D:Gen* = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> L ]
   instruction will either (1) throw a fatal error if the optional
   label L is not present, or (2) jump to L if it is present.
 
-D:Gen* = LdClsPropAddrCached S0:Cls S1:ConstSstr S2:ConstSstr S3:ConstCls [ -> L ]
+D:PtrToGen = LdClsPropAddrCached S0:Cls S1:ConstStr S2:ConstStr
+                                 S3:ConstCls [ -> L ]
 
   Loads a pointer to a static class property via the target cache. S0
   points to the class, S1 is the property name, S2 is the class name,
@@ -664,7 +678,7 @@ D:Func& = LdARFuncPtr S0:StkPtr S1:ConstInt
 
 LdFuncCls
 
-D:Cell* = LdContLocalsPtr S0:Obj
+D:PtrToCell = LdContLocalsPtr S0:Obj
 
   Loads a pointer to the embedded local variables of S0 (a Continuation
   object) into D.
@@ -709,7 +723,11 @@ D:StkPtr = FreeActRec S0:StkPtr
   Load the saved frame pointer from the activation record pointed to
   by S0 into D.
 
-Call
+D:StkPtr = Call S0:ActRec S1:ConstInt S2:Func S3...
+
+  Invoke the function S2 with ActRec S0 and variadic arguments S3...
+  representing values to pass to the function.  S2 is the bytecode
+  offset of the next instruction to execute when the call returns.
 
 NativeImpl = S0:ConstFunc S1:StkPtr
 
@@ -720,7 +738,7 @@ D:RetAddr = LdRetAddr S0:StkPtr
   Load the return address off the activation record pointed to by S0
   in preparation for a RetCtrl.
 
-RetCtrl S0:{StkPtr|Gen*} S1:StkPtr S2:RetAddr
+RetCtrl S0:{StkPtr|PtrToGen} S1:StkPtr S2:RetAddr
 
   Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then
   execute a hardware procedure-return using the return address
@@ -761,8 +779,8 @@ D:StkPtr = GenericRetDecRefs S0:StkPtr S1:Gen S2:ConstInt
 
 10. Stores
 
-StMem S0:Gen* S1:ConstInt S2:Gen
-StMemNT S0:Gen* S1:ConstInt S2:Gen
+StMem S0:PtrToGen S1:ConstInt S2:Gen
+StMemNT S0:PtrToGen S1:ConstInt S2:Gen
 StProp S0:Obj S1:Int S2:Gen
 StPropNT S0:Obj S1:Int S2:Gen
 
@@ -779,7 +797,7 @@ StRef
 StRefNT
 StRaw
 
-d:StkP = SpillStack         s0:StkP, s1:StkP, s2:ConstInt, s3...sN
+D:StkPtr = SpillStack         S0:StkP, S1:StkP, S2:ConstInt, S3...
 
   SpillStack synchronizes the virtual execution stack with the
   physical stack by storing a variadic list of SSATmps to the physical
@@ -787,14 +805,14 @@ d:StkP = SpillStack         s0:StkP, s1:StkP, s2:ConstInt, s3...sN
 
   Operands:
 
-     s0      - current frame pointer
-     s1      - current stack pointer
+     S0      - current frame pointer
+     S1      - current stack pointer
 
-     s2      - stack deficit; indicates the number of elements that
+     S2      - stack deficit; indicates the number of elements that
                need to be logically popped before the variadic list
                is pushed
 
-     s3...sN - variadic list of elements to spill, with values
+     S3...   - variadic list of elements to spill, with values
                representing cells or ActRecs.  Each temp of type
                ActRec is followed by kSpillStackActRecExtraArgs for
                the contents of the ActRec.
@@ -865,7 +883,7 @@ DecRef S0:Gen
   Decrease the reference count of S0 by one, and call a destructor for
   types that require it if it goes to zero.
 
-DecRefMem S0:{PtrToCell,PtrToGen} S1:ConstInt
+DecRefMem S0:PtrToGen S1:ConstInt
 
   Decref the value pointed to by S0 at offset S1 (in bytes), calling
   any appropriate destructor if the refcount goes to zero.
@@ -921,6 +939,7 @@ D:StkPtr InterpOne S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
   running the interpreter function.  S4 is the VM DataType of the return
   type for the opcode.  Returns the updated VM stack pointer.
 
+
 15. Register allocation
 
 D:T = Spill S0:T
@@ -941,13 +960,14 @@ FreeSpill S0:ConstInt
 
   Deallocates S0 slots of spill space on the stack.
 
+
 16. Continuations
 
 CreateCont
 FillContLocals
 FillContThis
 
-ContEnter S0:StkP S1:TCA S2:ConstInt
+ContEnter S0:StkPtr S1:TCA S2:ConstInt
 
   Enters a generator body. S0 is the ActRec embedded in the Continuation
   object. S1 is the address to jump to. S2 is the bytecode offset in the
@@ -975,11 +995,18 @@ DbgAssertRefCount S0:{Counted|StaticStr|StaticArr}
   (counted or static) _count field.  If S0's count is implausible then
   execute a hardware trap instruction (int3 on x64).
 
+DbgAssertPtr S0:PtrToGen
+
+  Assert that S0 points to plausible TypedValue.  If the TypedValue is a
+  type with a _count field, check that the count field is plausible using
+  the same logic as DbgAssertRefCount.  Internally this uses always_assert();
+  failures cause an abort (whatever always_assert does).
+
 
 18. Iterators
 
-D:Bool = IterInit S0:{Arr|Obj} S1:StkP S2:ConstInt S3:ConstInt
-D:Bool = IterInitK S0:{Arr|Obj} S1:StkP S2:ConstInt S3:ConstInt S4:ConstInt
+D:Bool = IterInit S0:{Arr|Obj} S1:StkPtr S2:ConstInt S3:ConstInt
+D:Bool = IterInitK S0:{Arr|Obj} S1:StkPtr S2:ConstInt S3:ConstInt S4:ConstInt
 
   Initializes the iterator variable whose index is given by S2. This
   instruction creates the appropriate iterator for the array or object
@@ -998,8 +1025,8 @@ D:Bool = IterInitK S0:{Arr|Obj} S1:StkP S2:ConstInt S3:ConstInt S4:ConstInt
   decrements the reference count of s0 or stores a reference to S0
   into the new iterator.
 
-D:Bool = IterNext S0:StkP S1:ConstInt S2:ConstInt
-D:Bool = IterNextK S0:StkP S1:ConstInt S2:ConstInt S3:ConstInt
+D:Bool = IterNext S0:StkPtr S1:ConstInt S2:ConstInt
+D:Bool = IterNextK S0:StkPtr S1:ConstInt S2:ConstInt S3:ConstInt
 
   Advances the iterator variable whose index is given by S1. S2 and S3
   are local variable indices. S0 points to the stack frame containing
@@ -1011,7 +1038,7 @@ D:Bool = IterNextK S0:StkP S1:ConstInt S2:ConstInt S3:ConstInt
   the iterator's next value (and key) into the local variable S3 (and
   S4, respectively).
 
-IterFree S0:StkP S1:ConstInt
+IterFree S0:StkPtr S1:ConstInt
 
   Free the iterator variable whose index is given by S1 in the stack
   frame pointed to by S0.
@@ -1041,25 +1068,25 @@ SetProp/SetOpProp/IncDecProp:
 
 
 
-D:Gen* = PropX S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
+D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
 
   Lookup intermediate property in S2, with key S3. S4 should point to
   an MInstrState struct.
 
-D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell*
+D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
 
   Get property with key S3 from S2. S4 should point to an MInstrState
   struct.
 
-D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj,Gen*} S3:Gen S4:Cell
+D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
 
   Set property with key S3 in S2 to S4.
 
-D:Cell = CGetElem S0:ConstTCA S1:Gen* S2:Gen S3:Cell*
+D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Get element with key S2 from S1. S3 should point to an MInstrState
   struct.
 
-D:Vector = SetElem S0:ConstTCA S1:Gen* S2:Gen S3:Cell
+D:Vector = SetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 
   Set element with key S2 in S1 to S3.

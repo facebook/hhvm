@@ -21,6 +21,7 @@
 
 #include "util/arena.h"
 #include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/cse.h"
 
 #include <vector>
 
@@ -158,6 +159,10 @@ public:
 
   IRInstruction* defLabel();
   IRInstruction* defLabel(unsigned numDst);
+  template<typename T> SSATmp* defConst(T val) {
+    ConstData cdata(val);
+    return findConst(cdata, typeForConst(val));
+  }
   Block* defBlock(const Func* f, IRInstruction*);
   Block* defBlock(const Func* f) {
     return defBlock(f, defLabel());
@@ -177,14 +182,18 @@ public:
   uint32_t numTmps() const       { return m_nextOpndId; }
   uint32_t numBlocks() const     { return m_nextBlockId; }
   uint32_t numInsts() const      { return m_nextInstId; }
+  CSEHash& getConstTable()       { return m_constTable; }
 
 private:
+  SSATmp* findConst(ConstData& cdata, Type t);
   void newSSATmp(IRInstruction* inst) {
     if (!inst->hasDst()) return;
     SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);
     inst->setDst(tmp);
   }
 
+private:
+  CSEHash  m_constTable;
   uint32_t m_nextBlockId;
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;

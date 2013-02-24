@@ -218,11 +218,6 @@ private:
   void emitInstanceCheck(IRInstruction*);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceRet(CodeGenerator::Asm& as);
-  void emitCheckStack(CodeGenerator::Asm& as, SSATmp* sp, uint32 numElems,
-                      bool allocActRec);
-  void emitCheckCell(CodeGenerator::Asm& as,
-                     SSATmp* sp,
-                     uint32 index);
   Address cgCheckStaticBit(Type type,
                            PhysReg reg,
                            bool regIsCount);

@@ -355,6 +355,7 @@ CALL_OPCODE(CGetProp)
 CALL_OPCODE(SetProp)
 CALL_OPCODE(CGetElem)
 CALL_OPCODE(SetElem)
+CALL_OPCODE(DbgAssertPtr)
 
 #undef NOOP_OPCODE
 #undef PUNT_OPCODE
@@ -1837,51 +1838,6 @@ void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   m_as.loadq(fpReg[AROFF(m_savedRip)], dstReg);
 }
 
-void checkStack(Cell* sp, int numElems) {
-  Cell* firstSp = sp + numElems;
-  for (Cell* c=sp; c < firstSp; c++) {
-    TypedValue* tv = (TypedValue*)c;
-    assert(tvIsPlausible(tv));
-    DataType t = tv->m_type;
-    if (IS_REFCOUNTED_TYPE(t)) {
-      assert(tv->m_data.pstr->getCount() > 0);
-    }
-  }
-}
-
-void checkStackAR(Cell* sp, int numElems) {
-  checkStack(sp+3, numElems); // skip over the actrec
-}
-
-void CodeGenerator::emitCheckStack(CodeGenerator::Asm& as,
-                                      SSATmp* sp,
-                                      uint32 numElems,
-                                      bool allocActRec) {
-  if (allocActRec) {
-    cgCallHelper(as, (TCA)checkStackAR, InvalidReg, kNoSyncPoint,
-                 ArgGroup().ssa(sp).imm(numElems));
-  } else {
-    cgCallHelper(as, (TCA)checkStack, InvalidReg, kNoSyncPoint,
-                 ArgGroup().ssa(sp).imm(numElems));
-  }
-}
-
-void checkCell(Cell* base, uint32 index) {
-  TypedValue* tv = (TypedValue*)(base + index);
-  always_assert(tvIsPlausible(tv));
-  DataType t = tv->m_type;
-  if (IS_REFCOUNTED_TYPE(t)) {
-    always_assert(tv->m_data.pstr->getCount() > 0);
-  }
-}
-
-void CodeGenerator::emitCheckCell(CodeGenerator::Asm& as,
-                                  SSATmp* sp,
-                                  uint32 index) {
-  cgCallHelper(as, (TCA)checkCell, InvalidReg, kNoSyncPoint,
-               ArgGroup().ssa(sp).imm(index));
-}
-
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   const Func* func = fp->m_func;
   if (fp->hasVarEnv()) {
@@ -1897,12 +1853,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
       if (i >= numParams && func->isGenerator() && i < func->numNamedLocals()) {
         continue;
       }
-      TypedValue* tv = frame_local(fp, i);
-      assert(tvIsPlausible(tv));
-      DataType t = tv->m_type;
-      if (IS_REFCOUNTED_TYPE(t)) {
-        assert(tv->m_data.pstr->getCount() > 0);
-      }
+      assert(checkTv(frame_local(fp, i)));
     }
   }
   // We unfortunately can't do the same kind of check for the stack
@@ -1924,7 +1875,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
     return;
   }
   checkFrame(fp, sp, false);
-  checkStack(sp, 1); // check return value
+  assertTv(sp); // check return value
 }
 
 void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
@@ -3074,13 +3025,10 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_state.lastMarker->func, m_state.lastMarker->bcOff);
   bool isImmutable = (func->isConst() && !func->getType().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
+  assert(&m_as == &m_tx64->getAsm());
   int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
-  }
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitCheckStack(m_as, inst->getDst(), 1, false);
   }
 }
 
@@ -3116,20 +3064,6 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
     m_as.mov_reg64_reg64(spReg, dstReg);
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgSpillStack\n");
-    }
-  }
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    for (uint32 i = 0, offset = 0; i < numSpillSrcs; i++) {
-      auto t = spillVals[i]->getType();
-      if (t == Type::ActRec) {
-        offset += kNumActRecCells;
-        i += kSpillStackActRecExtraArgs;
-      } else {
-        if (t != Type::Gen) {
-          emitCheckCell(m_as, dst, offset);
-        }
-        ++offset;
-      }
     }
   }
 }

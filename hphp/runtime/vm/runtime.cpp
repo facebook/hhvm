@@ -456,5 +456,15 @@ void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
   tvRefcountedDecRef(value);
 }
 
+bool checkTv(const TypedValue* tv) {
+  return tv && tvIsPlausible(tv) &&
+         (!IS_REFCOUNTED_TYPE(tv->m_type) ||
+          is_refcount_realistic(tv->m_data.pstr->getCount()));
+}
+
+void assertTv(const TypedValue* tv) {
+  always_assert(checkTv(tv));
+}
+
 } } // HPHP::VM
 

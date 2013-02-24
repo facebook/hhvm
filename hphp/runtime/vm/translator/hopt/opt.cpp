@@ -22,30 +22,76 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
+// insert inst after the point dst is defined
+static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
+  assert(!definer->isBlockEnd());
+  Block* block = definer->getBlock();
+  auto pos = block->iteratorTo(definer); ++pos;
+  block->insert(pos, inst);
+}
+
 /*
  * Insert a DbgAssertRefCount instruction after each place we produce
  * a refcounted value.  The value must be something we can safely dereference
  * to check the _count field.
  */
-static void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
-  forEachTraceBlock(trace, [&](Block* block) {
-    for (auto it = block->begin(); it != block->end(); ) {
+static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
+  for (SSATmp& dst : inst.getDsts()) {
+    Type t = dst.getType();
+    if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
+      insertAfter(&inst, factory->gen(DbgAssertRefCount, &dst));
+    }
+  }
+}
+
+/*
+ * Insert a DbgAssertTv instruction for each stack location stored to by
+ * a SpillStack instruction
+ */
+static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
+  SSATmp* sp = inst.getDst();
+  auto const vals = inst.getSrcs().subpiece(2);
+  auto* block = inst.getBlock();
+  auto pos = block->iteratorTo(&inst); ++pos;
+  for (unsigned i = 0, offset = 0, n = vals.size(); i < n; ++i) {
+    Type t = vals[i]->getType();
+    if (t == Type::ActRec) {
+      offset += kNumActRecCells;
+      i += kSpillStackActRecExtraArgs;
+    } else {
+      if (t.subtypeOf(Type::Gen)) {
+        IRInstruction* addr = factory->gen(LdStackAddr, sp,
+                                           factory->defConst(offset));
+        block->insert(pos, addr);
+        IRInstruction* check = factory->gen(DbgAssertPtr, addr->getDst());
+        block->insert(pos, check);
+      }
+      ++offset;
+    }
+  }
+}
+
+/*
+ * Insert asserts at various points in the IR.
+ * TODO: t2137231 Insert DbgAssertPtr at points that use or produces a GenPtr
+ */
+static void insertAsserts(Trace* trace, IRFactory* factory) {
+  forEachTraceBlock(trace, [=](Block* block) {
+    for (auto it = block->begin(), end = block->end(); it != end; ) {
       IRInstruction& inst = *it;
       ++it;
-      for (SSATmp& dst : inst.getDsts()) {
-        Type t = dst.getType();
-        if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
-          auto* assertInst = factory->gen(DbgAssertRefCount, &dst);
-          if (inst.isBlockEnd()) {
-            // cannot insert after a branch.  A branch with a dest
-            // is a guard, and the guard's result is only valid on the
-            // fallthrough path.  so put the assert there.
-            block->getNext()->prepend(assertInst);
-          } else {
-            block->insert(it, factory->gen(DbgAssertRefCount, &dst));
-          }
-        }
+      if (inst.getOpcode() == SpillStack) {
+        insertSpillStackAsserts(inst, factory);
+        continue;
       }
+      if (inst.getOpcode() == Call) {
+        SSATmp* sp = inst.getDst();
+        IRInstruction* addr = factory->gen(LdStackAddr, sp, factory->defConst(0));
+        insertAfter(&inst, addr);
+        insertAfter(addr, factory->gen(DbgAssertPtr, addr->getDst()));
+        continue;
+      }
+      if (!inst.isBlockEnd()) insertRefCountAsserts(inst, factory);
     }
   });
 }
@@ -103,7 +149,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     assert(JIT::checkCfg(trace, *irFactory));
   }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    insertRefCountAsserts(trace, irFactory);
+    insertAsserts(trace, irFactory);
     if (RuntimeOption::EvalDumpIR > 5) {
       std::cout << "----- HHIR after inserting RefCnt asserts -----\n";
       trace->print(std::cout);

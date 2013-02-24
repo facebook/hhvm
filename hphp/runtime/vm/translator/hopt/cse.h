@@ -38,11 +38,11 @@ struct CSEHash {
     }
     return (*it).second;
   }
-  void insert(SSATmp* opnd) {
-    insert(opnd, opnd->getInstruction());
+  SSATmp* insert(SSATmp* opnd) {
+    return insert(opnd, opnd->getInstruction());
   }
-  void insert(SSATmp* opnd, IRInstruction* inst) {
-    map[inst] = opnd;
+  SSATmp* insert(SSATmp* opnd, IRInstruction* inst) {
+    return map[inst] = opnd;
   }
   void clear() {
     map.clear();

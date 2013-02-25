@@ -1,5 +1,4 @@
-
-message("Including ext_hhvm files")
+message(STATUS "Including ext_hhvm files")
 
 set(files)
 set(CXX_SOURCES)

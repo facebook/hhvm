@@ -5816,19 +5816,17 @@ void EmitterVisitor::emitPostponedClosureCtors() {
       // metadata doesn't matter.
 
       StringData* propertyName;
-      bool byRef;
+      bool byRef = false;
       if (i < useCount) {
         propertyName = useVars[i].first;
         byRef = useVars[i].second;
       } else if (i == useCount + 0) {
         propertyName = StringData::GetStaticString("className");
-        byRef = false;
       } else if (i == useCount + 1) {
         propertyName = StringData::GetStaticString("functionName");
-        byRef = false;
-      } else if (i == useCount + 2) {
+      } else {
+        assert(i == useCount + 2);
         propertyName = StringData::GetStaticString("this");
-        byRef = false;
       }
 
       std::ostringstream num;

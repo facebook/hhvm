@@ -149,7 +149,6 @@ public:
                        Trace*  exitTrace);
   void    genAssertLoc(uint32 id, Type type);
 
-  SSATmp* genUnbox(SSATmp* src, Trace* exit);
   SSATmp* genUnboxPtr(SSATmp* ptr);
   SSATmp* genLdRef(SSATmp* ref, Type type, Trace* exit);
   SSATmp* genAdd(SSATmp* src1, SSATmp* src2);

@@ -481,7 +481,7 @@ private:
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitIsset(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
 
-  void emitEmptyMem(SSATmp* ptr, Trace* exit);
+  void emitEmptyMem(SSATmp* ptr);
 
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitEmpty(const StringData* name,
@@ -496,18 +496,18 @@ private:
   bool checkSupportedGblName(const StringData* gblName,
                              HPHP::VM::JIT::Type resultType,
                              int stkIndex);
-  SSATmp* emitLdClsPropAddrOrExit(const StringData* propName, Trace* exit);
+  SSATmp* emitLdClsPropAddrOrExit(const StringData* propName, Block* block);
   SSATmp* emitLdClsPropAddr(const StringData* propName) {
     return emitLdClsPropAddrOrExit(propName, nullptr);
   }
   SSATmp* getStrName(const StringData* propName = nullptr);
   SSATmp* emitLdGblAddrDef(const StringData* gblName = nullptr);
-  SSATmp* emitLdGblAddr(const StringData* gblName, Trace* exitTrace);
+  SSATmp* emitLdGblAddr(const StringData* gblName, Block* block);
   SSATmp* unboxPtr(SSATmp* ptr);
 
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, const StringData* clsName);
-  void emitRet(SSATmp* retVal, Trace* exitTrace, bool freeInline);
+  void emitRet(Type type, bool freeInline);
   void emitIsTypeC(Type t);
   void emitIsTypeL(Type t, int id);
   void emitCmp(Opcode opc);

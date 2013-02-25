@@ -808,9 +808,7 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
       m_as.movq(src->getValRawInt(), r64(dstReg));
     }
   } else {
-    if (dstReg != srcReg) {
-      m_as.mov_reg64_reg64(srcReg, dstReg);
-    }
+    emitMovRegReg(m_as, srcReg, dstReg);
   }
 }
 
@@ -831,9 +829,7 @@ void CodeGenerator::cgUnaryIntOp(SSATmp* dst,
   zeroExtendIfBool(a, src);
 
   if (srcReg != InvalidReg) {
-    if (dstReg != srcReg) {
-      a.  movq   (srcReg, dstReg);
-    }
+    emitMovRegReg(a, srcReg, dstReg);
     (a.*instr)   (dstReg);
   } else {
     assert(src->isConst());
@@ -1635,8 +1631,8 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
         } else {
           m_as.mov_imm64_reg(1, dstReg);
         }
-      } else if (srcReg != dstReg) {
-        m_as.mov_reg64_reg64(srcReg, dstReg);
+      } else {
+        emitMovRegReg(m_as, srcReg, dstReg);
       }
     } else if (fromType == Type::Int) {
       // Int -> Bool
@@ -1712,49 +1708,42 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   assert(srcReg != InvalidReg);
   assert(dstReg != InvalidReg);
 
-  if (srcReg != dstReg) {
-    m_as.mov_reg64_reg64(srcReg, dstReg);
-  }
+  emitMovRegReg(m_as, srcReg, dstReg);
   emitDerefIfVariant(m_as, PhysReg(dstReg));
 }
 
 void CodeGenerator::cgUnbox(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* src   = inst->getSrc(0);
-  Block* typeFailLabel = inst->getTaken();
-  bool genIncRef = true;
+  SSATmp* dst     = inst->getDst();
+  SSATmp* src     = inst->getSrc(0);
+  auto dstValReg  = dst->getReg(0);
+  auto dstTypeReg = dst->getReg(1);
+  auto srcValReg  = src->getReg(0);
+  auto srcTypeReg = src->getReg(1);
 
-  if (typeFailLabel != nullptr) {
-    CG_PUNT(Unbox);
-  }
+  assert(src->getType().equals(Type::Gen));
+  assert(dst->getType().notBoxed());
 
-  Type dstType = dst->getType();
-  Type srcType = src->getType();
 
-  assert(!srcType.notBoxed());
-  assert(dstType.notBoxed());
-  if (dstType == Type::Cell) {
-    CG_PUNT(Unbox_Cell);
-  }
-  auto srcReg = src->getReg();
-  auto dstReg = dst->getReg();
-  if (srcType.isBoxed()) {
-    emitDeref(m_as, PhysReg(srcReg), PhysReg(dstReg));
-  } else if (srcType == Type::Gen) {
-    CG_PUNT(Unbox_Gen);
-    // XXX The following is wrong becuase it over-writes srcReg
-    emitDerefIfVariant(m_as, PhysReg(srcReg));
-    m_as.mov_reg64_reg64(srcReg, dstReg);
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgUnbox\n");
-    }
-  } else {
-    assert(false);
-    CG_PUNT(Unbox);
-  }
-  if (genIncRef && dstType.maybeCounted() && dst->getReg() != InvalidReg) {
-    cgIncRefWork(dstType, dst);
-  }
+  // cmpq   KindOfRef, srcTypeReg
+  // mov    srcTypeReg --> dstTypeReg
+  //
+  // -- srcTypeReg is now dead
+  // -- if srcValReg == dstTypeReg, then use scratch for dstTypeReg; otherwise,
+  // -- the next load will kill srcValReg
+  //
+  // cload.z [srcValReg + m_type] --> dstTypeReg
+  // mov    srcValReg --> dstValReg (potentially move up 1 instruction)
+  // cload.z [srcValReg + m_data] --> dstValReg
+
+  PhysReg tmpDstTypeReg = srcValReg == dstTypeReg ? PhysReg(rScratch)
+                                                  : dstTypeReg;
+
+  m_as.   cmpq(HPHP::KindOfRef, srcTypeReg);
+  emitMovRegReg(m_as, srcTypeReg, tmpDstTypeReg);
+  m_as.   cload_reg64_disp_reg64(CC_Z, srcValReg, TVOFF(m_type), tmpDstTypeReg);
+  emitMovRegReg(m_as, srcValReg, dstValReg);
+  m_as.   cload_reg64_disp_reg64(CC_Z, srcValReg, TVOFF(m_data), dstValReg);
+  emitMovRegReg(m_as, tmpDstTypeReg, dstTypeReg);
 }
 
 void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
@@ -1896,18 +1885,8 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   auto retReg     = retAddr->getReg();
 
   // Make sure rVmFp and rVmSp are set appropriately
-  if (sp->getReg() != rVmSp) {
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgRetCtrl\n");
-    }
-    m_as.mov_reg64_reg64(sp->getReg(), rVmSp);
-  }
-  if (fp->getReg() != rVmFp) {
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgRetCtrl\n");
-    }
-    m_as.mov_reg64_reg64(fp->getReg(), rVmFp);
-  }
+  emitMovRegReg(m_as, sp->getReg(), rVmSp);
+  emitMovRegReg(m_as, fp->getReg(), rVmFp);
 
   // Return control to caller
   m_as.push(retReg);
@@ -2101,16 +2080,11 @@ void CodeGenerator::cgStMemNT(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStRefWork(IRInstruction* inst, bool genStoreType) {
-  SSATmp* addr = inst->getSrc(0);
+  auto destReg = inst->getDst()->getReg();
+  auto addrReg = inst->getSrc(0)->getReg();
   SSATmp* src  = inst->getSrc(1);
-  SSATmp* dest = inst->getDst();
-  auto addrReg = addr->getReg();
   cgStore(addrReg, 0, src, genStoreType);
-  auto destReg = dest->getReg();
-  if (destReg != InvalidReg && destReg != addrReg) {
-    m_as.mov_reg64_reg64(addrReg, destReg);
-    TRACE(3, "[counter] 1 reg move in cgStRefWork\n");
-  }
+  if (destReg != InvalidReg)  emitMovRegReg(m_as, addrReg, destReg);
 }
 
 void CodeGenerator::cgStRef(IRInstruction* inst) {
@@ -3061,27 +3035,20 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
     } else {
       m_as.add_imm32_reg64(adjustment, dstReg);
     }
-  } else if (dstReg != spReg) {
-    m_as.mov_reg64_reg64(spReg, dstReg);
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgSpillStack\n");
-    }
+  } else {
+    emitMovRegReg(m_as, spReg, dstReg);
   }
 }
 
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   SSATmp* func  = inst->getSrc(0);
   SSATmp* fp    = inst->getSrc(1);
+
   assert(func->isConst());
   assert(func->getType() == Type::Func);
+
   BuiltinFunction builtinFuncPtr = func->getValFunc()->builtinFuncPtr();
-  auto fpReg = fp->getReg();
-  if (fpReg != argNumToRegName[0]) {
-    m_as.mov_reg64_reg64(fpReg, argNumToRegName[0]);
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgNativeImpl\n");
-    }
-  }
+  emitMovRegReg(m_as, fp->getReg(), argNumToRegName[0]);
   m_as.call((TCA)builtinFuncPtr);
   recordSyncPoint(m_as);
 }
@@ -3286,9 +3253,6 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
   if (useScratchReg) {
     // Save base to rScratch, because base will be overwritten.
     m_as.mov_reg64_reg64(base, reg::rScratch);
-    if (m_curTrace->isMain()) {
-      TRACE(3, "[counter] 1 reg move in cgLoadTypedValue\n");
-    }
   }
 
   // Load type if it's not dead
@@ -3495,8 +3459,8 @@ void CodeGenerator::cgGuardType(IRInstruction* inst) {
   }
   emitFwdJcc(cc, label);
 
-  if (srcValueReg != dstReg && dstReg != InvalidReg) {
-    m_as.mov_reg64_reg64(srcValueReg, dstReg);
+  if (dstReg != InvalidReg) {
+    emitMovRegReg(m_as, srcValueReg, dstReg);
   }
 }
 
@@ -3850,8 +3814,8 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
       emitFwdJcc(m_astubs, CC_Z, target);
     }
   });
-  if (tmpReg != dstReg && dstReg != InvalidReg) {
-    m_as.mov_reg64_reg64(tmpReg, dstReg);
+  if (dstReg != InvalidReg) {
+    emitMovRegReg(m_as, tmpReg, dstReg);
   }
 }
 

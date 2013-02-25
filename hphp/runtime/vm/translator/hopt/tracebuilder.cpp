@@ -136,7 +136,7 @@ SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
                                Type type,
                                Trace* target) {
   return gen(LdMem, type, getFirstBlock(target), addr,
-             genDefConst<int64>(offset));
+             genDefConst(offset));
 }
 
 SSATmp* TraceBuilder::genLdMem(SSATmp* addr,
@@ -153,10 +153,6 @@ SSATmp* TraceBuilder::genLdRef(SSATmp* ref, Type type, Trace* exit) {
 
 SSATmp* TraceBuilder::genUnboxPtr(SSATmp* ptr) {
   return gen(UnboxPtr, ptr);
-}
-
-SSATmp* TraceBuilder::genUnbox(SSATmp* src, Trace* exit) {
-  return gen(Unbox, getFirstBlock(exit), src);
 }
 
 /**
@@ -213,7 +209,7 @@ void TraceBuilder::genDecRef(SSATmp* tmp) {
 }
 
 void TraceBuilder::genDecRefMem(SSATmp* base, int64 offset, Type type) {
-  gen(DecRefMem, type, base, genDefConst<int64>(offset));
+  gen(DecRefMem, type, base, genDefConst(offset));
 }
 
 /*
@@ -237,7 +233,7 @@ Trace* TraceBuilder::genExitGuardFailure(uint32 bcOff) {
   marker.func     = m_curFunc->getValFunc();
   gen(Marker, &marker); // goes on main trace
 
-  SSATmp* pc = genDefConst<int64>((int64)bcOff);
+  SSATmp* pc = genDefConst((int64)bcOff);
   // TODO change exit trace to a control flow instruction that
   // takes sp, fp, and a Marker as the target label instruction
   trace->back()->push_back(
@@ -1429,7 +1425,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
       // Found a simpler instruction that can be used instead of inst
       FTRACE(1, "  {}simplification returned: {}\n",
              indent(), result->getInstruction()->toString());
-      assert(result->getInstruction()->hasDst());
+      assert(inst->hasDst());
       return result;
     }
   }

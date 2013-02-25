@@ -1083,25 +1083,18 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
-  auto* src           = inst->getSrc(0);
-  auto* typeFailBlock = inst->getTaken();
-  auto type           = outputType(inst);
-
-  assert(typeFailBlock);
-  assert(type.notBoxed());
+  auto* src = inst->getSrc(0);
+  auto type = outputType(inst);
 
   Type srcType = src->getType();
   if (srcType.notBoxed()) {
-    // TODO: generate a guardType if this assertion fails
-    assert(!type.strictSubtypeOf(srcType));
+    assert(type.equals(srcType));
     return src;
   }
   if (srcType.isBoxed()) {
     srcType = srcType.innerType();
-    if (srcType.strictSubtypeOf(type)) {
-      type = srcType;
-    }
-    return m_tb->genLdRef(src, type, typeFailBlock->getTrace());
+    assert(type.equals(srcType));
+    return m_tb->genLdRef(src, type, inst->getTaken()->getTrace());
   }
   return nullptr;
 }

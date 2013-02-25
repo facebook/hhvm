@@ -191,7 +191,7 @@ O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
-O(Unbox,                     DUnbox(0), S(Gen),                          PRc) \
+O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Gen),              E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \

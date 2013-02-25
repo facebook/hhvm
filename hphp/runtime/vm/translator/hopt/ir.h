@@ -151,12 +151,12 @@ O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \
                                                                               \
   /* TODO(#2058842): order currently matters for the 'query ops' here */      \
-O(OpGt,                        D(Bool), S(Gen) S(Gen),                     C) \
-O(OpGte,                       D(Bool), S(Gen) S(Gen),                     C) \
-O(OpLt,                        D(Bool), S(Gen) S(Gen),                     C) \
-O(OpLte,                       D(Bool), S(Gen) S(Gen),                     C) \
-O(OpEq,                        D(Bool), S(Gen) S(Gen),                     C) \
-O(OpNeq,                       D(Bool), S(Gen) S(Gen),                     C) \
+O(OpGt,                        D(Bool), S(Gen) S(Gen),                   C|N) \
+O(OpGte,                       D(Bool), S(Gen) S(Gen),                   C|N) \
+O(OpLt,                        D(Bool), S(Gen) S(Gen),                   C|N) \
+O(OpLte,                       D(Bool), S(Gen) S(Gen),                   C|N) \
+O(OpEq,                        D(Bool), S(Gen) S(Gen),                   C|N) \
+O(OpNeq,                       D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpSame,                      D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpNSame,                     D(Bool), S(Gen) S(Gen),                   C|N) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls) C(Bool),           C|N) \
@@ -189,7 +189,7 @@ O(Jmp_,                        D(None), SUnk,                            T|E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
-O(ReleaseVVOrExit,                  ND, S(StkPtr),                         E) \
+O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                          PRc) \
 O(Box,                         DBox(0), S(Gen),              E|N|Mem|CRc|PRc) \
@@ -209,23 +209,23 @@ O(LdRetAddr,                D(RetAddr), S(StkPtr),                        NF) \
 O(LdConst,                      DParam, NA,                             C|Rm) \
 O(DefConst,                     DParam, NA,                                C) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
-O(LdClsCached,                  D(Cls), CStr,              C|E|  Refs|Er|Mem) \
+O(LdClsCached,                  D(Cls), CStr,              C|E|N|Refs|Er|Mem) \
 O(LdCachedClass,                D(Cls), CStr,                              C) \
 O(LdClsCns,                     DParam, CStr CStr,                         C) \
 O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
-O(LdClsMethodCache,         D(FuncCls), SUnk,                C|E|Refs|Er|Mem) \
-O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx),   C|E|Er) \
+O(LdClsMethodCache,         D(FuncCls), SUnk,              N|C|E|Refs|Er|Mem) \
+O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx), N|C|E|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Obj,Cls,Ctx) S(Func),            C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
-O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|  Er) \
+O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
 O(LdObjMethod,                 D(Func), C(Int) CStr S(StkPtr), C|E|N|Refs|Er) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                        N    ) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
-O(LdFixedFunc,                 D(Func), CStr,                         C|E|Er) \
+O(LdFixedFunc,                 D(Func), CStr,                       N|C|E|Er) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr) C(Int),                  C) \
 O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                         C|Rm) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
@@ -273,14 +273,14 @@ O(SyncVMRegs,                       ND, S(StkPtr) S(StkPtr),               E) \
 O(Mov,                         DofS(0), SUnk,                              C) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                      Mem|PRc) \
-O(DecRefLoc,                        ND, S(StkPtr),                E|Mem|Refs) \
-O(DecRefStack,                      ND, S(StkPtr) C(Int),         E|Mem|Refs) \
-O(DecRefThis,                       ND, SUnk,                     E|Mem|Refs) \
+O(DecRefLoc,                        ND, S(StkPtr),              N|E|Mem|Refs) \
+O(DecRefStack,                      ND, S(StkPtr) C(Int),       N|E|Mem|Refs) \
+O(DecRefThis,                       ND, SUnk,                   N|E|Mem|Refs) \
 O(GenericRetDecRefs,         D(StkPtr), S(StkPtr)                             \
                                           S(Gen) C(Int),        E|N|Mem|Refs) \
-O(DecRef,                           ND, S(Gen),               E|Mem|CRc|Refs) \
+O(DecRef,                           ND, S(Gen),             N|E|Mem|CRc|Refs) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
-                                          C(Int),             E|Mem|CRc|Refs) \
+                                          C(Int),           N|E|Mem|CRc|Refs) \
 O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DLabel, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \

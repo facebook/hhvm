@@ -755,6 +755,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  SyncOptions sync,
                                  ArgGroup& args) {
   assert(int(args.size()) <= kNumRegisterArgs);
+  assert(m_curInst->isNative());
 
   // Save the register that are live at the point after this IR instruction.
   // However, don't save the destination registers that will be overwritten

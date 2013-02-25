@@ -153,7 +153,6 @@ extern void init_global_variables();
 extern void init_literal_varstrings();
 extern void free_global_variables();
 extern void free_global_variables_after_sweep();
-extern Array get_global_array_wrapper();
 extern Array get_global_state();
 
 /**

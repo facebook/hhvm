@@ -323,10 +323,6 @@ bool ArrayData::setFullPos(const FullPos &fp) {
   return false;
 }
 
-void ArrayData::nextForFullPos() {
-  next();
-}
-
 void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(nullptr);

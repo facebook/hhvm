@@ -355,13 +355,6 @@ class ArrayData : public Countable {
    * responsibility to ensure that fp.getResetFlag() is false.
    */
   virtual bool setFullPos(const FullPos &fp);
- 
-  /**
-   * TODO Task #2091628: nextForFullPos() is a temporary hack to keep
-   * GlobalArrayWrapper working. Once GlobalArrayWrapper is gone we can
-   * remove this hack.
-   */
-  virtual void nextForFullPos(); 
 
   virtual CVarRef currentRef();
   virtual CVarRef endRef();

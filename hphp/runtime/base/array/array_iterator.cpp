@@ -352,11 +352,7 @@ bool FullPos::advance() {
   if (!data->validFullPos(*this)) return false;
   // To match PHP-like semnatics, we need to set the internal cursor to
   // point to the next element.
-  // TODO Task #2091628: We call nextForFullPos() here instead of next()
-  // because we need to do something different for GlobalArrayWrapper to
-  // keep it working for now. Once GlobalArrayWrapper is gone we can get
-  // rid of this hack.
-  data->nextForFullPos();
+  data->next();
   return true;
 }
 

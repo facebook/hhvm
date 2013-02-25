@@ -23,7 +23,6 @@
 #include <util/lock.h>
 #include <runtime/base/hphp_system.h>
 #include <system/gen/php/globals/constants.h>
-#include <runtime/base/global_array_wrapper.h>
 #include <runtime/ext/extension.h>
 #include <util/compatibility.h>
 

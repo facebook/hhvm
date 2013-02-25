@@ -5532,8 +5532,13 @@ void EmitterVisitor::emitPostponedMeths() {
 
         }
 
-        e.UnboxR();
-        e.RetC();
+        if (p.m_meth->isRef()) {
+          e.BoxR();
+          e.RetV();
+        } else {
+          e.UnboxR();
+          e.RetC();
+        }
       }
 
       if (funcScope->isAbstract()) {

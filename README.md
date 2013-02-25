@@ -31,13 +31,17 @@ The latest information is available on the [wiki](http://wiki.github.com/faceboo
 * libexpat
 * libmemcached
 * google-glog (http://code.google.com/p/google-glog/)
+* libc-client2007
+* libdwarf
+* libelf
+* libunwind
 
 The following packages have had slight modifications added to them. Patches are provided and should be made against the current source copies.
 
 * [libcurl](http://curl.haxx.se/download.html)
-* src/third_party/libcurl.fb-changes.diff
+* hphp/third_party/libcurl.fb-changes.diff
 * [libevent 1.4](http://www.monkey.org/~provos/libevent/)
-* src/third_party/libevent-1.4.13.fb-changes.diff	OR src/third_party/libevent-1.4.14.fb-changes.diff
+* hphp/third_party/libevent-1.4.14.fb-changes.diff
 
 ## Installation
 

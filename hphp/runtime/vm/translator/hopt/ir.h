@@ -558,6 +558,17 @@ struct EdgeData : IRExtraData {
   EdgeData* next;             // next edge to same target
 };
 
+/*
+ * ExitData contains the address of a jmp instruction we can smash later
+ * if we start a new tracelet at this exit point.
+ */
+struct ExitData : IRExtraData {
+  explicit ExitData(IRInstruction* toSmash) : toSmash(toSmash) {}
+  IRInstruction* toSmash;
+
+  std::string show() const;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -581,6 +592,8 @@ X(StLocNT,            LocalId);
 X(DefConst,           ConstData);
 X(LdConst,            ConstData);
 X(Jmp_,               EdgeData);
+X(ExitTrace,          ExitData);
+X(ExitTraceCc,        ExitData);
 
 #undef X
 
@@ -1631,10 +1644,6 @@ public:
   void              print(std::ostream& ostream,
                           bool printLastUse = false) const;
   void              print() const;
-
-  // Used for Jcc to Jmp elimination
-  void              setTCA(TCA tca);
-  TCA               getTCA() const;
 
   // XXX: false for Null, etc.  Would rather it returns whether we
   // have a compile-time constant value.

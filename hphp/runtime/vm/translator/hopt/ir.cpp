@@ -973,11 +973,8 @@ TCA SSATmp::getValTCA() const {
   return m_inst->getExtra<ConstData>()->as<TCA>();
 }
 
-void SSATmp::setTCA(TCA tca) {
-  getInstruction()->setTCA(tca);
-}
-TCA SSATmp::getTCA() const {
-  return getInstruction()->getTCA();
+std::string ExitData::show() const {
+  return folly::to<std::string>(toSmash->getIId());
 }
 
 std::string SSATmp::toString() const {

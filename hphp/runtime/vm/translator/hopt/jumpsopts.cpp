@@ -111,7 +111,6 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
     }
   }
   if (exitInst) {
-    SSATmp* dst = jccInst.getDst();
     Block* targetBlock = jccInst.getTaken();
     auto targetInstIter = targetBlock->skipLabel();
 
@@ -131,11 +130,11 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
 
     if (exitCcInst) {
       // Found both exits, link them to Jcc for codegen
-      assert(dst);
-      exitCcInst->appendSrc(irFactory->arena(), dst);
-      exitInst->appendSrc(irFactory->arena(), dst);
+      ExitData* exitData = new (irFactory->arena()) ExitData(&jccInst);
+      exitCcInst->setExtra(exitData);
+      exitInst->setExtra(exitData);
       // Set flag so Jcc and exits know this is active
-      dst->setTCA(kIRDirectJccJmpActive);
+      jccInst.setTCA(kIRDirectJccJmpActive);
     }
   }
 }

@@ -868,20 +868,14 @@ D:StkPtr = SpillStack         S0:StkP S1:ConstInt, S2...
 
 11. Trace exits
 
-ExitTrace S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
-          [S4:TCA]
+ExitTrace<toSmash> S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
 
   Unconditional exit to bytecode offset S1 in function S0.  S2 and
   S3 are the VM stack and frame pointers, respectively.  If given,
-  S4 is the address of a jmp instruction to patch later.
+  toSmash points to a jump or branch instruction to patch later.
 
-  [Implementation note.  S4 refers to a branch instruction, but the
-  type is really None.  We access the branch instruction to find
-  the TCA to use, at compile time.  In effect, S4 is simply a
-  compile-time pointer to the IRInstruction to patch].
-
-ExitTraceCc S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
-            S4:ConstInt [S5:TCA]
+ExitTraceCc<toSmash> S0:ConstFunc S1:ConstInt S2:StkPtr S3:StkPtr
+                     S4:ConstInt
 
   Exit conditionally to bytecode offset S1 or S4 in function S0.
   S4 is bytecode address to exit to if the condition is false.

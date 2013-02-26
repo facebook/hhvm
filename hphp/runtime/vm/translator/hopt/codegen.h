@@ -268,12 +268,12 @@ private:
   Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   Address emitFwdJmp(Asm& as, Block* target);
   Address emitFwdJmp(Block* target);
-  Address emitSmashableFwdJmp(Block* target, SSATmp* toSmash);
+  Address emitSmashableFwdJmp(Block* target, IRInstruction* toSmash);
   Address emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
-                              SSATmp* toSmash);
+                                   IRInstruction* toSmash);
   void emitJccDirectExit(IRInstruction*, ConditionCode);
   Address emitSmashableFwdJcc(ConditionCode cc, Block* target,
-                              SSATmp* toSmash);
+                              IRInstruction* toSmash);
   void emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* getCurFunc() const;

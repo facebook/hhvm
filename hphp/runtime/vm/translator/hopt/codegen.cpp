@@ -393,7 +393,7 @@ Address CodeGenerator::emitFwdJmp(Block* target) {
 }
 
 // Patch with service request EMIT_BIND_JMP
-Address CodeGenerator::emitSmashableFwdJmp(Block* target, SSATmp* toSmash) {
+Address CodeGenerator::emitSmashableFwdJmp(Block* target, IRInstruction* toSmash) {
   Address start = m_as.code.frontier;
   if (toSmash) {
     m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen);
@@ -408,7 +408,7 @@ Address CodeGenerator::emitSmashableFwdJmp(Block* target, SSATmp* toSmash) {
 
 // Patch with service request REQ_BIND_JMPCC_FIRST/SECOND
 Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
-                                                SSATmp* toSmash) {
+                                                IRInstruction* toSmash) {
   Address start = m_as.code.frontier;
   if (toSmash) {
     m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen +
@@ -425,14 +425,13 @@ Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
 void CodeGenerator::emitJccDirectExit(IRInstruction* inst,
                                       ConditionCode cc) {
   if (cc == CC_None) return;
-  SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive
-    ? inst->getDst() : nullptr;
+  auto* toSmash = inst->getTCA() == kIRDirectJccJmpActive ? inst : nullptr;
   emitSmashableFwdJccAtEnd(cc, inst->getTaken(), toSmash);
 }
 
 // Patch with service request REQ_BIND_JCC
 Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc, Block* target,
-                                           SSATmp* toSmash) {
+                                           IRInstruction* toSmash) {
   Address start = m_as.code.frontier;
   assert(toSmash);
 
@@ -2250,20 +2249,20 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
   SSATmp* sp   = inst->getSrc(2);
   SSATmp* fp   = inst->getSrc(3);
   SSATmp* notTakenPC = nullptr;
-  SSATmp* toSmash = nullptr;
+  IRInstruction* toSmash = nullptr;
   assert(pc->isConst() && inst->getNumSrcs() <= 6);
 
   TraceExitType::ExitType exitType = getExitType(inst->getOpcode());
-  if (exitType == TraceExitType::Normal && inst->getNumSrcs() == 5) {
+  if (exitType == TraceExitType::Normal && inst->getExtra<ExitTrace>()) {
     // Unconditional trace exit
-    toSmash    = inst->getSrc(4);
+    toSmash = inst->getExtra<ExitTrace>()->toSmash;
     assert(toSmash);
   } else if (exitType == TraceExitType::NormalCc) {
     // Exit at trace end which is the target of a conditional branch
     notTakenPC = inst->getSrc(4);
     assert(notTakenPC->isConst());
-    if (inst->getNumSrcs() == 6) {
-      toSmash    = inst->getSrc(5);
+    if (inst->getExtra<ExitTraceCc>()) {
+      toSmash = inst->getExtra<ExitTraceCc>()->toSmash;
       assert(toSmash);
     }
   }
@@ -2288,7 +2287,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
           break;
         }
         // Patch the original jcc;jmp, don't emit another
-        IRInstruction* jcc = toSmash->getInstruction();
+        IRInstruction* jcc = toSmash;
         Opcode         opc = jcc->getOpcode();
         ConditionCode   cc = queryJmpToCC(opc);
         uint64_t     taken = pc->getValInt();

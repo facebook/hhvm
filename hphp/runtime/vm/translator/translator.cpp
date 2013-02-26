@@ -1624,7 +1624,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
                 "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii, m_useHHIR, (DataType)info.m_data);
+        DynLocation* dl = tas.recordRead(ii, false, KindOfInvalid);
         NormalizedInstruction* src = findInputSrc(tas.m_t->m_instrStream.last,
                                                   dl);
         if (src) {

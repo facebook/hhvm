@@ -31,7 +31,7 @@ checkEval(HPHP::Eval::PhpFile* efile) {
 }
 
 /*
- * reserve rbx within this translation unit
+ * reserve the VM stack pointer within this translation unit
  *
  * Note that for rbp we use a local register asm
  * variable. But for rbx, we need to update it, and
@@ -39,7 +39,12 @@ checkEval(HPHP::Eval::PhpFile* efile) {
  * like any other local. So I put this function in its own
  * file to avoid impacting the rest of translator-x64.cpp
  */
+#ifdef __x86_64__
 register Cell* sp asm("rbx");
+#else
+// TODO(#2056140): we have to decide regalloc conventions for ARM
+Cell* sp;
+#endif
 
 void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
   DECLARE_FRAME_POINTER(framePtr);
@@ -93,9 +98,7 @@ asm(
   ".align 16\n"
   ".globl __fcallHelperThunk\n"
 "__fcallHelperThunk:\n"
-  // This assembly code isn't PIC-friendly. HHVM doesn't care, but HPHP
-  // still builds a .so.
-#ifdef HHVM
+#if defined(__x86_64__)
   // fcallHelper may call doFCall. doFCall changes the return ip
   // pointed to by r15 so that it points to TranslatorX64::m_retHelper,
   // which does a REQ_POST_INTERP_RET service request. So we need to
@@ -107,8 +110,12 @@ asm(
   "call fcallHelper\n"
   "push 0x8(%r15)\n"
   "jmp *%rax\n"
-#endif
   "ud2\n"
+#elif defined(__AARCH64EL__)
+  "brk 0\n"
+#else
+# error You sure have your work cut out for you
+#endif
 );
 
 extern "C"
@@ -145,7 +152,7 @@ asm (
   ".align 16\n"
   ".globl __funcBodyHelperThunk\n"
 "__funcBodyHelperThunk:\n"
-#ifdef HHVM
+#if defined(__x86_64__)
   /*
    * when this helper is called, its as if by a jmp
    * direct from the tc (its actually called by smashing
@@ -155,8 +162,12 @@ asm (
   "mov %rbp, %rdi\n"
   "call funcBodyHelper\n"
   "jmp *%rax\n"
-#endif
   "ud2\n"
+#elif defined(__AARCH64EL__)
+  "brk 0\n"
+#else
+# error You sure have your work cut out for you
+#endif
 );
 
 asm (
@@ -164,7 +175,7 @@ asm (
   ".align 16\n"
   ".globl __contEnterHelperThunk\n"
 "__contEnterHelperThunk:\n"
-#ifdef HHVM
+#if defined(__x86_64__)
   // The generator body's AR is in rStashedAR. rVmFp still points to the frame
   // above the generator. The prologue is responsible for setting rVmFp. Even
   // if we can't get a prologue, funcBodyHelper syncs the new FP, and the
@@ -176,8 +187,12 @@ asm (
   "call funcBodyHelper\n"
   "push 0x8(%r15)\n"
   "jmp *%rax\n"
-#endif
   "ud2\n"
+#elif defined(__AARCH64EL__)
+  "brk 0\n"
+#else
+# error You sure have your work cut out for you
+#endif
 );
 
 /*

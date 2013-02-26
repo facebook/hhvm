@@ -58,7 +58,15 @@ static inline Class* curClass() {
 
 static inline uintptr_t tlsBase() {
   uintptr_t retval;
+#if defined(__x86_64__)
   asm ("movq %%fs:0, %0" : "=r" (retval));
+#elif defined(__AARCH64EL__)
+  // mrs == "move register <-- system"
+  // tpidr_el0 == "thread process id register for exception level 0"
+  asm ("mrs %0, tpidr_el0" : "=r" (retval));
+#else
+# error How do you access thread-local storage on this machine?
+#endif
   return retval;
 }
 
@@ -75,10 +83,9 @@ struct VMRegAnchor : private boost::noncopyable {
   VMRegState m_old;
   VMRegAnchor() {
     if (debug) {
-      uint64_t sp;
-      asm volatile("movq %%rsp, %0" : "=r"(sp) ::);
-      // rsp should be octoword-aligned.
-      assert((sp & 0xf) == 0);
+      DEBUG_ONLY DECLARE_STACK_POINTER(sp);
+      // native stack pointer should be octoword-aligned.
+      assert((uintptr_t(sp) & 0xf) == 0);
     }
     m_old = tl_regState;
     Translator::Get()->sync();

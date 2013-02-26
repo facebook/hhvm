@@ -130,7 +130,7 @@ static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
     }
   case KindOfArray:
     {
-      int size = 2;
+      int64_t size = 2;
       Array arr = thing.toArray();
       for (ArrayIter iter(arr); iter; ++iter) {
         Variant key = iter.first();
@@ -148,7 +148,8 @@ static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
         }
         size += additional_bytes;
       }
-      *bytes = size;
+      if (size > StringData::MaxSize) return 1;
+      *bytes = (int)size;
       break;
     }
   default:

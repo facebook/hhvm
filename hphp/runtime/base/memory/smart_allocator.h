@@ -150,7 +150,6 @@ public:
     RefData,
     StringData,
     SharedMap,
-    VectorArray,
     Variant,
     Bucket,
     ZendArray,

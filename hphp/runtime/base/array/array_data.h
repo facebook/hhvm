@@ -138,7 +138,6 @@ class ArrayData : public Countable {
   /*
    * Specific derived class type querying operators.
    */
-  virtual bool isVectorArray() const { return false; }
   virtual bool isSharedMap() const { return false; }
 
   /*

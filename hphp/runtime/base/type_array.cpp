@@ -18,7 +18,6 @@
 #include <runtime/base/types.h>
 #include <runtime/base/comparisons.h>
 #include <util/exception.h>
-#include <runtime/base/array/vector_array.h>
 #include <runtime/base/shared/shared_map.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/variable_unserializer.h>

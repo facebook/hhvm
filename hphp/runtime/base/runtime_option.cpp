@@ -310,7 +310,6 @@ bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::UseHphpArray = hhvm;
-bool RuntimeOption::UseVectorArray = true;
 bool RuntimeOption::StrictCollections = true;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
@@ -807,7 +806,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       MaxArrayChain *= 2;
     }
 
-    UseVectorArray = server["UseVectorArray"].getBool(true);
     StrictCollections = server["StrictCollections"].getBool(true);
     WarnOnCollectionToArray = server["WarnOnCollectionToArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);

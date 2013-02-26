@@ -147,14 +147,12 @@ void walk_smart_heap(const Visitor& visit) {
       // have references to other objects.
       break;
     case SmartAllocatorImpl::ZendArray:
-    case SmartAllocatorImpl::VectorArray:
       /*
        * Currently unimplemented.
        *
        * Note: ZendArray's sweep doesn't decref its Buckets (because
        * they might be sweeping), so we'd have to add that to the
-       * deallocation code.  VectorArray is unimplemented here simply
-       * because it's not tested, and unused in the vm anyway.
+       * deallocation code.
        */
       break;
     default:

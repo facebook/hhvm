@@ -49,18 +49,13 @@ typedef SmartPtr<ArrayData> ArrayBase;
 #endif
 
 /**
- * Array type wrapping around 2 types of ArrayData to implement reference
+ * Array type wrapping around ArrayData to implement reference
  * counting, copy-on-write and ArrayData escalation.
  *
  * "Escalation" happens when an underlying ArrayData cannot handle an operation
  * and instead it needs to "upgrade" itself to be a more general (but slower)
  * type of ArrayData to accomplish the task. This "upgrade" is called
- * escalation. This describes all possible escalation paths:
- *
- *   VectorArray --> ZendArray
- *
- * VectorArray escalates to ZendArray when the layout of keys is no longer
- * a dense 0-based range of ints.
+ * escalation.
  */
 class Array : protected ArrayBase {
  public:

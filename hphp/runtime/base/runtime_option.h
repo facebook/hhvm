@@ -308,7 +308,6 @@ public:
   static bool CheckMemory;
   static int MaxArrayChain;
   static bool UseHphpArray;
-  static bool UseVectorArray;
   static bool StrictCollections;
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;

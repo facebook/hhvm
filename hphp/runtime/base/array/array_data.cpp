@@ -22,7 +22,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/zend_array.h>
-#include <runtime/base/array/vector_array.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/macros.h>
 #include <util/exception.h>
@@ -78,20 +77,11 @@ bool ArrayData::IsValidKey(CVarRef k) {
 
 HOT_FUNC
 ArrayData *ArrayData::Create() {
-  if (enable_vector_array && RuntimeOption::UseVectorArray) {
-    return StaticEmptyVectorArray::Get();
-  }
   return ArrayInit((ssize_t)0).create();
 }
 
 HOT_FUNC
 ArrayData *ArrayData::Create(CVarRef value) {
-  if (enable_vector_array && RuntimeOption::UseVectorArray) {
-    VectorArray *va = NEW(VectorArray)(1);
-    va->VectorArray::append(value, false);
-    va->m_pos = 0;
-    return va;
-  }
   ArrayInit init(1);
   init.set(value);
   return init.create();
@@ -105,12 +95,6 @@ ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
 }
 
 ArrayData *ArrayData::CreateRef(CVarRef value) {
-  if (enable_vector_array && RuntimeOption::UseVectorArray) {
-    VectorArray *va = NEW(VectorArray)(1);
-    va->VectorArray::appendRef(value, false);
-    va->m_pos = 0;
-    return va;
-  }
   ArrayInit init(1);
   init.setRef(value);
   return init.create();
@@ -140,9 +124,7 @@ ArrayData *ArrayData::nonSmartCopy() const {
 // reads
 
 Object ArrayData::toObject() const {
-  return hhvm
-         ? VM::Instance::FromArray(const_cast<ArrayData *>(this))
-         : ObjectData::FromArray(const_cast<ArrayData *>(this));
+  return VM::Instance::FromArray(const_cast<ArrayData *>(this));
 }
 
 bool ArrayData::isVectorData() const {

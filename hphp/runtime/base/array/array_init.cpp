@@ -16,7 +16,6 @@
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/hphp_array.h>
-#include <runtime/base/array/vector_array.h>
 #include <runtime/base/runtime_option.h>
 
 namespace HPHP {
@@ -29,61 +28,28 @@ ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
     if (keepRef) {
       m_data = StaticEmptyZendArray::Get();
     } else {
-      if (enable_vector_array && RuntimeOption::UseVectorArray) {
-        m_data = StaticEmptyVectorArray::Get();
-      } else if (hhvm || // HHVM always uses HphpArray
-                (enable_hphp_array && RuntimeOption::UseHphpArray)) {
-        m_data = HphpArray::GetStaticEmptyArray();
-      } else {
-        m_data = StaticEmptyZendArray::Get();
-      }
+      m_data = HphpArray::GetStaticEmptyArray();
     }
   } else {
     if (keepRef) {
       m_data = NEW(ZendArray)(n);
     } else {
-      if (hhvm || // HHVM always uses HphpArray
-                 (enable_hphp_array && RuntimeOption::UseHphpArray)) {
-        m_data = NEW(HphpArray)(n);
-      } else {
-        m_data = NEW(ZendArray)(n);
-      }
+      m_data = NEW(HphpArray)(n);
     }
   }
 }
 
 HOT_FUNC
 ArrayData *ArrayInit::CreateVector(ssize_t n) {
-  if (enable_vector_array && RuntimeOption::UseVectorArray) {
-    return NEW(VectorArray)(n);
-  }
-  if (hhvm || // HHVM always uses HphpArray
-      (enable_hphp_array && RuntimeOption::UseHphpArray)) {
-    return NEW(HphpArray)(n);
-  }
-  return NEW(ZendArray)(n);
+  return NEW(HphpArray)(n);
 }
 
 HOT_FUNC
 ArrayData *ArrayInit::CreateMap(ssize_t n) {
-  if (hhvm || // HHVM always uses HphpArray
-      (enable_hphp_array && RuntimeOption::UseHphpArray)) {
-    return NEW(HphpArray)(n);
-  }
-  return NEW(ZendArray)(n);
+  return NEW(HphpArray)(n);
 }
 
 ArrayData *ArrayInit::CreateParams(int count, ...) {
-  if (enable_vector_array && RuntimeOption::UseVectorArray) {
-    va_list ap;
-    va_start(ap, count);
-    ArrayInit ai(count, vectorInit);
-    for (int i = 0; i < count; i++) {
-      ai.setRef(*va_arg(ap, const Variant *));
-    }
-    va_end(ap);
-    return ai.create();
-  }
   va_list ap;
   va_start(ap, count);
   ArrayInit ai(count);

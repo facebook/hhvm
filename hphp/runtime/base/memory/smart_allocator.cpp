@@ -68,7 +68,6 @@ static bool UNUSED is_iterable_type(SmartAllocatorImpl::Name type) {
          type == SmartAllocatorImpl::ObjectData ||
          type == SmartAllocatorImpl::StringData ||
          type == SmartAllocatorImpl::HphpArray ||
-         type == SmartAllocatorImpl::VectorArray ||
          type == SmartAllocatorImpl::ZendArray;
 }
 

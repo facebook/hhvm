@@ -35,7 +35,6 @@ class ZendArray : public ArrayData {
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 public:
   friend class ArrayInit;
-  friend class VectorArray;
 
   ZendArray() : m_nTableMask(MinSize - 1), m_arBuckets(m_inlineBuckets),
     m_pListHead(0), m_pListTail(0), m_nNextFreeElement(0) {

@@ -2874,7 +2874,6 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
   cg_printInclude("<runtime/base/array/zend_array.h>");
-  cg_printInclude("<runtime/base/array/vector_array.h>");
   cg_printInclude("<runtime/base/taint/taint_observer.h>");
   cg_printInclude("<runtime/base/taint/taint_data.h>");
   cg.printImplStarter();
@@ -2943,14 +2942,6 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     "ArrayData *array_createvi(int64 n, ...) {\n"
     "  va_list ap;\n"
     "  va_start(ap, n);\n"
-    "  if (enable_vector_array && RuntimeOption::UseVectorArray) {\n"
-    "    const Variant *p[%d], **pp = p;\n"
-    "    for (int64 k = 0; k < n; k++) {\n"
-    "      *pp++ = va_arg(ap, const Variant *);\n"
-    "    }\n"
-    "    va_end(ap);\n"
-    "    return NEW(VectorArray)(n, p);\n"
-    "  }\n"
     "  ZendArray::Bucket *p[%d], **pp = p;\n"
     "  SmartAllocator<HPHP::ZendArray::Bucket, SmartAllocatorImpl::Bucket> *a =\n"
     "      ZendArray::Bucket::AllocatorType::getNoCheck();\n"
@@ -3063,17 +3054,7 @@ void AnalysisResult::outputCPPDefaultInvokeFile(CodeGenerator &cg,
                                                 const char *file) {
   FileScopePtr fs = findFileScope(file);
   cg_printf("if (s.empty()) return ");
-  if (hhvm) {
-    cg_printf("vm_default_invoke_file(once);\n");
-  } else {
-    if (fs->canUseDummyPseudoMain(shared_from_this())) {
-      cg_printf("dummy_pm(once, variables, get_globals());\n");
-    } else {
-      cg_printf("%s%s(once, variables, get_globals());\n",
-                Option::PseudoMainPrefix,
-                Option::MangleFilename(file, true).c_str());
-    }
-  }
+  cg_printf("vm_default_invoke_file(once);\n");
 }
 
 void AnalysisResult::outputCPPHashTableInvokeFile(

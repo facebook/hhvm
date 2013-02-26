@@ -106,7 +106,6 @@ void Instance::invokeUserMethod(TypedValue* retval, const Func* method,
 }
 
 Object Instance::FromArray(ArrayData *properties) {
-  assert(hhvm);
   Instance* retval = Instance::newInstance(SystemLib::s_stdclassClass);
   retval->initDynProps();
   HphpArray* props = static_cast<HphpArray*>(retval->o_properties.get());
@@ -761,12 +760,6 @@ void Instance::o_getArray(Array& props, bool pubOnly /* = false */) const {
       props.addLval(key, true).setWithRef(value);
     }
   }
-}
-
-bool Instance::o_get_call_info_hook(const char *clsname,
-                                    MethodCallPackage &mcp,
-                                    strhash_t hash /* = -1 */) {
-  return false;
 }
 
 Variant Instance::t___destruct() {

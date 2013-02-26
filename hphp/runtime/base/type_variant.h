@@ -914,7 +914,6 @@ public:
                             INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
-  bool o_get_call_info(MethodCallPackage &info, int64 hash = -1);
 
   template <typename T>
   inline ALWAYS_INLINE static CVarRef SetImpl(

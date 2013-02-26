@@ -52,20 +52,6 @@ Variant invoke_file(CStrRef s,
   return throw_missing_file(s.c_str());
 }
 
-bool get_call_info(const CallInfo *&ci, void *&extra,
-                   const char *s, strhash_t hash) {
-  extra = nullptr;
-  const char *ss = get_renamed_function(s);
-  if (ss != s) { s = ss; hash = -1; }
-  return get_call_info_builtin(ci, extra, s, hash);
-}
-
-bool get_call_info_no_eval(const CallInfo *&ci, void *&extra,
-                           const char *s, strhash_t hash) {
-  extra = nullptr;
-  return get_call_info_builtin(ci, extra, s, hash);
-}
-
 Variant get_constant(CStrRef name, bool error) {
   return get_builtin_constant(name, error);
 }
@@ -85,17 +71,6 @@ Object create_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
   Object r = obj;
   obj->init();
   return r;
-}
-
-bool get_call_info_static_method(MethodCallPackage &mcp) {
-  StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);
-  const ObjectStaticCallbacks *cwo =
-    get_builtin_object_static_callbacks(s);
-  if (LIKELY(cwo != 0)) {
-    return ObjectStaticCallbacks::GetCallInfo(cwo,mcp,-1);
-  }
-  if (mcp.m_fatal) throw_missing_class(s->data());
-  return false;
 }
 
 Variant get_class_constant(CStrRef s,
@@ -121,20 +96,6 @@ void init_literal_varstrings() {
   extern void sys_init_literal_varstrings();
   sys_init_literal_varstrings();
 }
-
-#ifndef HHVM
-Variant get_static_property(CStrRef s, const char *prop) {
-  return null;
-}
-Variant *get_static_property_lv(CStrRef s, const char *prop) {
-  return nullptr;
-}
-Variant get_class_var_init(CStrRef s, const char *var) {
-  return null;
-}
-bool hphp_could_invoke_file(CStrRef s, void*) { return false; }
-Array get_global_state() { return Array(); }
-#endif
 
 //////////////////////////////////////////////////////////////////////
 

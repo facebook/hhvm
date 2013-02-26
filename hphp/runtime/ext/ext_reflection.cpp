@@ -921,11 +921,7 @@ Variant f_hphp_invoke(CStrRef name, CArrRef params) {
 Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name,
                              CArrRef params) {
   if (!obj.isObject()) {
-    if (hhvm) {
-      return invoke_static_method(cls, name, params);
-    } else {
-      return invoke_static_method_bind(cls, name, params);
-    }
+    return invoke_static_method(cls, name, params);
   }
   if (!hhvm) {
     FrameInjection::GetStackFrame(0)->setStaticClassName(cls);

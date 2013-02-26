@@ -2762,16 +2762,6 @@ Variant Variant::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
   }
 }
 
-bool Variant::o_get_call_info(MethodCallPackage &info, int64 hash /* = -1 */) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_get_call_info(info, hash);
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_get_call_info(info, hash);
-  } else {
-    throw_call_non_object();
-  }
-}
-
 Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
                          CStrRef context /* = null_string */) {
   if (m_type == KindOfObject) {

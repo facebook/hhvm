@@ -366,19 +366,6 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
 
 Variant vm_default_invoke_file(bool incOnce);
 
-/**
- * The MethodCallPackage does not hold the reference of the class name or
- * the method name. Therefore caller must provide the holders.
- */
-bool get_user_func_handler(CVarRef function, bool skip,
-                           MethodCallPackage& mcp,
-                           String &classname, String &methodname,
-                           bool &doBind, bool warn = true);
-bool get_callable_user_func_handler(CVarRef function,
-                                    MethodCallPackage& mcp,
-                                    String &classname, String &methodname,
-                                    bool &doBind);
-
 Variant invoke_func_few_handler(void *extra, CArrRef params,
                                 Variant (*few_args)(
                                   void *extra, int count,
@@ -394,20 +381,11 @@ inline Variant invoke_meth_few_handler(MethodCallPackage &mcp, CArrRef params,
                                    INVOKE_FEW_ARGS_IMPL_ARGS))few_args);
 }
 
-Variant invoke(CVarRef function, CArrRef params,
-               bool tryInterp = true, bool fatal = true);
-
 /**
  * Invoking an arbitrary static method.
  */
 Variant invoke_static_method(CStrRef s, CStrRef method,
                              CArrRef params, bool fatal = true);
-
-/**
- * For "static::" resolution
- */
-Variant invoke_static_method_bind(CStrRef s, CStrRef method,
-                                  CArrRef params, bool fatal = true);
 
 /**
  * Fallback when a dynamic function call fails to find a user function
@@ -424,12 +402,6 @@ Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
 Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
-
-bool get_call_info(const CallInfo *&ci, void *&extra, CVarRef func);
-bool get_call_info_no_eval(const CallInfo *&ci, void *&extra, CStrRef func);
-
-void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CVarRef func);
-void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name);
 
 /**
  * When fatal coding errors are transformed to this function call.
@@ -601,7 +573,6 @@ bool function_exists(CStrRef function_name);
 /**
  * For autoload support
  */
-class Globals;
 
 class AutoloadHandler : public RequestEventHandler {
   enum Result {
@@ -701,47 +672,8 @@ class MethodCallPackage {
 public:
   MethodCallPackage();
 
-  // e->n() style method call
-  bool methodCall(CObjRef self, CStrRef method, strhash_t prehash = -1) {
-    return methodCall(self.objectForCall(), method, prehash);
-  }
-  bool methodCall(ObjectData *self, CStrRef method, strhash_t prehash = -1);
-  bool methodCall(CVarRef self, CStrRef method, strhash_t prehash = -1);
-  // K::n() style call, where K is a parent and n is not static and in an
-  // instance method. Lookup is done outside since K is known.
-  void methodCallEx(CObjRef self, CStrRef method) {
-    isObj = true;
-    rootObj = self.objectForCall();
-    name = &method;
-  }
-  void methodCallEx(ObjectData *self, CStrRef method) {
-    isObj = true;
-    rootObj = self;
-    name = &method;
-  }
-  // K::n() style call where K::n() is a static method. Lookup is done outside
-  void staticMethodCall(CStrRef cname, CStrRef method) {
-    rootCls = cname.get();
-    name = &method;
-  }
-  // e::n() call. e could evaluate to be either a string or object.
-  bool dynamicNamedCall(CVarRef self, CStrRef method, strhash_t prehash = -1);
-  // e::n() call where e is definitely a string
-  bool dynamicNamedCall(CStrRef self, CStrRef method, strhash_t prehash = -1);
-  // function call
-  void functionNamedCall(CVarRef func);
-  void functionNamedCall(CStrRef func);
-  void functionNamedCall(ObjectData *func);
-  // Get constructor
-  void construct(CObjRef self);
-
   void noFatal() { m_fatal = false; }
   void fail();
-  void lateStaticBind(ThreadInfo *ti);
-  const CallInfo *bindClass(FrameInjection &fi);
-  const CallInfo *bindClass(FrameInjectionVM &fi) {
-    not_reached();
-  }
   String getClassName();
 
   // Data members
@@ -952,6 +884,8 @@ public:
   }
 };
 
+#define CALL_USER_FUNC_FEW_ARGS_COUNT 6
+
 class RedeclaredCallInfo {
 public:
   CallInfo ci;
@@ -959,65 +893,6 @@ public:
 };
 
 typedef const RedeclaredCallInfo RedeclaredCallInfoConst;
-
-#define CALL_USER_FUNC_FEW_ARGS_COUNT 6
-#if CALL_USER_FUNC_FEW_ARGS_COUNT == 6
-
-Variant call_user_func_few_args(CVarRef function, int count, ...);
-
-inline Variant call_user_func0(CVarRef function) {
-  return call_user_func_few_args(function, 0);
-}
-
-inline Variant call_user_func1(CVarRef function,
-                               CVarRef a0) {
-  return call_user_func_few_args(function, 1, &a0);
-}
-
-inline Variant call_user_func2(CVarRef function,
-                               CVarRef a0,
-                               CVarRef a1) {
-  return call_user_func_few_args(function, 2, &a0, &a1);
-}
-
-inline Variant call_user_func3(CVarRef function,
-                               CVarRef a0,
-                               CVarRef a1,
-                               CVarRef a2) {
-  return call_user_func_few_args(function, 3, &a0, &a1, &a2);
-}
-
-inline Variant call_user_func4(CVarRef function,
-                               CVarRef a0,
-                               CVarRef a1,
-                               CVarRef a2,
-                               CVarRef a3) {
-  return call_user_func_few_args(function, 4, &a0, &a1, &a2, &a3);
-}
-
-inline Variant call_user_func5(CVarRef function,
-                               CVarRef a0,
-                               CVarRef a1,
-                               CVarRef a2,
-                               CVarRef a3,
-                               CVarRef a4) {
-  return call_user_func_few_args(function, 5, &a0, &a1, &a2, &a3, &a4);
-}
-
-
-inline Variant call_user_func6(CVarRef function,
-                               CVarRef a0,
-                               CVarRef a1,
-                               CVarRef a2,
-                               CVarRef a3,
-                               CVarRef a4,
-                               CVarRef a5) {
-  return call_user_func_few_args(function, 6, &a0, &a1, &a2, &a3, &a4, &a5);
-}
-
-#else
-#error Bad CALL_USER_FUNC_FEW_ARGS_COUNT
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -28,49 +28,6 @@ namespace HPHP {
 
 
 // Class Invoke Tables
-extern const ObjectStaticCallbacks cw_ReflectionParameter;
-extern const ObjectStaticCallbacks cw_IteratorIterator;
-extern const ObjectStaticCallbacks cw_UnderflowException;
-extern const ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
-extern const ObjectStaticCallbacks cw_RuntimeException;
-extern const ObjectStaticCallbacks cw___PHP_Incomplete_Class;
-extern const ObjectStaticCallbacks cw_ErrorException;
-extern const ObjectStaticCallbacks cw_UnexpectedValueException;
-extern const ObjectStaticCallbacks cw_OutOfRangeException;
-extern const ObjectStaticCallbacks cw_RecursiveIteratorIterator;
-extern const ObjectStaticCallbacks cw_ReflectionFunction;
-extern const ObjectStaticCallbacks cw_XhprofFrame;
-extern const ObjectStaticCallbacks cw_ReflectionProperty;
-extern const ObjectStaticCallbacks cw_FB_MySQLLexer;
-extern const ObjectStaticCallbacks cw_ReflectionClass;
-extern const ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
-extern const ObjectStaticCallbacks cw_LogicException;
-extern const ObjectStaticCallbacks cw_ReflectionMethod;
-extern const ObjectStaticCallbacks cw_DirectoryIterator;
-extern const ObjectStaticCallbacks cw_SoapFault;
-extern const ObjectStaticCallbacks cw_RangeException;
-extern const ObjectStaticCallbacks cw_OverflowException;
-extern const ObjectStaticCallbacks cw_PDOException;
-extern const ObjectStaticCallbacks cw_stdClass;
-extern const ObjectStaticCallbacks cw_SplFileInfo;
-extern const ObjectStaticCallbacks cw_FilterIterator;
-extern const ObjectStaticCallbacks cw_InvalidArgumentException;
-extern const ObjectStaticCallbacks cw_LengthException;
-extern const ObjectStaticCallbacks cw_SplObjectStorage;
-extern const ObjectStaticCallbacks cw_ArrayIterator;
-extern const ObjectStaticCallbacks cw_BadFunctionCallException;
-extern const ObjectStaticCallbacks cw_DomainException;
-extern const ObjectStaticCallbacks cw_Directory;
-extern const ObjectStaticCallbacks cw_ReflectionExtension;
-extern const ObjectStaticCallbacks cw_Exception;
-extern const ObjectStaticCallbacks cw_DOMException;
-extern const ObjectStaticCallbacks cw_ReflectionObject;
-extern const ObjectStaticCallbacks cw_InvalidOperationException;
-extern const ObjectStaticCallbacks cw_AppendIterator;
-extern const ObjectStaticCallbacks cw_SplFileObject;
-extern const ObjectStaticCallbacks cw_ReflectionException;
-extern const ObjectStaticCallbacks cw_OutOfBoundsException;
-extern const ObjectStaticCallbacks cw_BadMethodCallException;
 ObjectData *coo_PDO() {
   return NEWOBJ(c_PDO)();
 }
@@ -13070,56 +13027,32 @@ struct hashNodeCTD {
   int64 ptv1;
 };
 static const hashNodeCTD ctdBuckets[] = {
-  {0x5D130102,1,0,"stdClass",(int64)&cw_stdClass },
-  {0x1C8FA305,1,0,"Exception",(int64)&cw_Exception },
   {0x61FB5809,0,0,"UConverter",(int64)&cw_UConverter },
   {0x2046E809,1,0,"SQLite3",(int64)&cw_SQLite3 },
   {0x5716BD0A,1,0,"XMLReader",(int64)&cw_XMLReader },
-  {0x19737A0B,0,0,"ErrorException",(int64)&cw_ErrorException },
-  {0x4315C10B,1,0,"BadMethodCallException",(int64)&cw_BadMethodCallException },
-  {0x60D3440F,0,0,"Normalizer",(int64)&cw_Normalizer },
-  {0x1283EF0F,1,0,"RuntimeException",(int64)&cw_RuntimeException },
-  {0x5AEC2B14,1,0,"OutOfRangeException",(int64)&cw_OutOfRangeException },
-  {0x0F774815,1,0,"AppendIterator",(int64)&cw_AppendIterator },
+  {0x60D3440F,1,0,"Normalizer",(int64)&cw_Normalizer },
   {0x71484417,1,0,"Memcached",(int64)&cw_Memcached },
-  {0x5857D01B,0,0,"ReflectionParameter",(int64)&cw_ReflectionParameter },
-  {0x3CD94E1B,1,0,"ReflectionException",(int64)&cw_ReflectionException },
   {0x3F3CE11D,1,0,"DateTimeZone",(int64)&cw_DateTimeZone },
-  {0x43063325,1,0,"UnderflowException",(int64)&cw_UnderflowException },
-  {0x2225C327,1,0,"SplFileObject",(int64)&cw_SplFileObject },
   {0x3533EF2A,1,0,"SoapParam",(int64)&cw_SoapParam },
   {0x26F31A2B,1,0,"StableMapIterator",(int64)&cw_StableMapIterator },
-  {0x0B88C52D,1,0,"ArrayIterator",(int64)&cw_ArrayIterator },
   {0x41F34F31,1,0,"DOMNode",(int64)&cw_DOMNode },
-  {0x4C092234,1,0,"__PHP_Incomplete_Class",(int64)&cw___PHP_Incomplete_Class },
   {0x4A25CF35,1,0,"ImageSprite",(int64)&cw_ImageSprite },
   {0x7EA02238,1,0,"Continuation",(int64)&cw_Continuation },
-  {0x2A32053A,0,0,"DOMDocumentFragment",(int64)&cw_DOMDocumentFragment },
-  {0x33B2A43A,1,0,"Directory",(int64)&cw_Directory },
-  {0x6959803B,1,0,"ReflectionProperty",(int64)&cw_ReflectionProperty },
-  {0x2AE4C33C,1,0,"RecursiveIteratorIterator",(int64)&cw_RecursiveIteratorIterator },
+  {0x2A32053A,1,0,"DOMDocumentFragment",(int64)&cw_DOMDocumentFragment },
   {0x4A9ECD3E,0,0,"WaitableWaitHandle",(int64)&cw_WaitableWaitHandle },
   {0x13B4043E,1,0,"DOMProcessingInstruction",(int64)&cw_DOMProcessingInstruction },
   {0x2442143F,1,0,"DOMNodeList",(int64)&cw_DOMNodeList },
   {0x3F89FD41,1,0,"SoapVar",(int64)&cw_SoapVar },
-  {0x7A0E9E43,0,0,"MapIterator",(int64)&cw_MapIterator },
-  {0x1C0B5243,1,0,"LengthException",(int64)&cw_LengthException },
-  {0x063BB944,1,0,"OutOfBoundsException",(int64)&cw_OutOfBoundsException },
+  {0x7A0E9E43,1,0,"MapIterator",(int64)&cw_MapIterator },
   {0x0FE47645,0,0,"DebuggerClient",(int64)&cw_DebuggerClient },
   {0x32FDD045,1,0,"Closure",(int64)&cw_Closure },
-  {0x35852B47,1,0,"XhprofFrame",(int64)&cw_XhprofFrame },
-  {0x26291C4A,0,0,"IteratorIterator",(int64)&cw_IteratorIterator },
-  {0x41521F4A,1,0,"ReflectionMethod",(int64)&cw_ReflectionMethod },
-  {0x384A9F53,1,0,"LogicException",(int64)&cw_LogicException },
   {0x5C25D455,1,0,"SQLite3Stmt",(int64)&cw_SQLite3Stmt },
   {0x68735857,0,0,"BlockableWaitHandle",(int64)&cw_BlockableWaitHandle },
   {0x2DB30A57,1,0,"SpoofChecker",(int64)&cw_SpoofChecker },
   {0x5C02C259,1,0,"Memcache",(int64)&cw_Memcache },
   {0x40727F5B,1,0,"DummyClosure",(int64)&cw_DummyClosure },
-  {0x21B81E5D,0,0,"DOMEntity",(int64)&cw_DOMEntity },
-  {0x44B6FD5D,1,0,"ReflectionFunctionAbstract",(int64)&cw_ReflectionFunctionAbstract },
-  {0x4023605E,0,0,"Vector",(int64)&cw_Vector },
-  {0x48BAD95E,1,0,"ReflectionObject",(int64)&cw_ReflectionObject },
+  {0x21B81E5D,1,0,"DOMEntity",(int64)&cw_DOMEntity },
+  {0x4023605E,1,0,"Vector",(int64)&cw_Vector },
   {0x264EFB5F,1,0,"DateInterval",(int64)&cw_DateInterval },
   {0x449C2762,1,0,"DateTime",(int64)&cw_DateTime },
   {0x1B578365,1,0,"DOMDocument",(int64)&cw_DOMDocument },
@@ -13128,14 +13061,8 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x14FBA069,1,0,"DummyContinuation",(int64)&cw_DummyContinuation },
   {0x2B3B9E6A,1,0,"DOMElement",(int64)&cw_DOMElement },
   {0x545B946B,1,0,"DOMNamedNodeMap",(int64)&cw_DOMNamedNodeMap },
-  {0x7167726D,1,0,"OverflowException",(int64)&cw_OverflowException },
   {0x6157696E,1,0,"RescheduleWaitHandle",(int64)&cw_RescheduleWaitHandle },
   {0x350B1572,1,0,"DOMNodeIterator",(int64)&cw_DOMNodeIterator },
-  {0x44177675,0,0,"ReflectionClass",(int64)&cw_ReflectionClass },
-  {0x55644175,1,0,"SplObjectStorage",(int64)&cw_SplObjectStorage },
-  {0x6AF55378,1,0,"ReflectionFunction",(int64)&cw_ReflectionFunction },
-  {0x4077587A,1,0,"FilterIterator",(int64)&cw_FilterIterator },
-  {0x4404337C,1,0,"InvalidArgumentException",(int64)&cw_InvalidArgumentException },
   {0x5697A87D,0,0,"SoapHeader",(int64)&cw_SoapHeader },
   {0x559EA07D,1,0,"SoapClient",(int64)&cw_SoapClient },
   {0x44A4B084,1,0,"SQLite3Result",(int64)&cw_SQLite3Result },
@@ -13143,81 +13070,68 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x3578748D,1,0,"DOMNotation",(int64)&cw_DOMNotation },
   {0x75D1A590,0,0,"PDOStatement",(int64)&cw_PDOStatement },
   {0x49CB5790,1,0,"SimpleXMLElement",(int64)&cw_SimpleXMLElement },
-  {0x1AF99E91,1,0,"DomainException",(int64)&cw_DomainException },
   {0x5BBD4693,1,0,"VectorIterator",(int64)&cw_VectorIterator },
-  {0x4B091E94,1,0,"RangeException",(int64)&cw_RangeException },
   {0x7F804197,1,0,"DOMCharacterData",(int64)&cw_DOMCharacterData },
   {0x76534699,1,0,"ContinuationWaitHandle",(int64)&cw_ContinuationWaitHandle },
   {0x1E3FDD9A,1,0,"SetResultToRefWaitHandle",(int64)&cw_SetResultToRefWaitHandle },
   {0x6D319E9B,1,0,"LibXMLError",(int64)&cw_LibXMLError },
   {0x709886A6,1,0,"DOMEntityReference",(int64)&cw_DOMEntityReference },
   {0x4BEC40A8,1,0,"DOMAttr",(int64)&cw_DOMAttr },
-  {0x30F664AA,1,0,"DOMException",(int64)&cw_DOMException },
   {0x08A981AB,1,0,"EncodingDetector",(int64)&cw_EncodingDetector },
   {0x60592AAE,0,0,"DOMText",(int64)&cw_DOMText },
   {0x116D18AE,1,0,"SoapServer",(int64)&cw_SoapServer },
   {0x5303C8B7,1,0,"MutableArrayIterator",(int64)&cw_MutableArrayIterator },
   {0x7B0C75BD,1,0,"Collator",(int64)&cw_Collator },
   {0x1DC920C0,1,0,"Map",(int64)&cw_Map },
-  {0x4682C3C3,1,0,"SplFileInfo",(int64)&cw_SplFileInfo },
-  {0x4F1BBAC8,1,0,"RecursiveDirectoryIterator",(int64)&cw_RecursiveDirectoryIterator },
   {0x0B624DC9,1,0,"DebuggerClientCmdUser",(int64)&cw_DebuggerClientCmdUser },
   {0x48AC08CA,1,0,"DebuggerProxyCmdUser",(int64)&cw_DebuggerProxyCmdUser },
   {0x04E023CB,1,0,"DOMXPath",(int64)&cw_DOMXPath },
   {0x53234ECE,1,0,"DOMImplementation",(int64)&cw_DOMImplementation },
   {0x66927AD4,1,0,"StableMap",(int64)&cw_StableMap },
-  {0x2D4C1AD6,1,0,"UnexpectedValueException",(int64)&cw_UnexpectedValueException },
-  {0x56F72CD9,1,0,"BadFunctionCallException",(int64)&cw_BadFunctionCallException },
-  {0x3925E9DB,1,0,"ReflectionExtension",(int64)&cw_ReflectionExtension },
   {0x1D8510DE,1,0,"GenArrayWaitHandle",(int64)&cw_GenArrayWaitHandle },
-  {0x2A1439E2,1,0,"InvalidOperationException",(int64)&cw_InvalidOperationException },
   {0x1892A0EB,1,0,"EncodingMatch",(int64)&cw_EncodingMatch },
   {0x1978E8EC,1,0,"XMLWriter",(int64)&cw_XMLWriter },
   {0x476284ED,0,0,"StaticWaitHandle",(int64)&cw_StaticWaitHandle },
   {0x579AE7ED,1,0,"WaitHandle",(int64)&cw_WaitHandle },
-  {0x26097BEF,0,0,"DOMCDATASection",(int64)&cw_DOMCDATASection },
-  {0x348A27EF,1,0,"PDOException",(int64)&cw_PDOException },
+  {0x26097BEF,1,0,"DOMCDATASection",(int64)&cw_DOMCDATASection },
   {0x03B104F1,1,0,"StaticExceptionWaitHandle",(int64)&cw_StaticExceptionWaitHandle },
-  {0x7CE365F2,1,0,"DirectoryIterator",(int64)&cw_DirectoryIterator },
   {0x5E0826F6,1,0,"Locale",(int64)&cw_Locale },
-  {0x6D4827F7,0,0,"StaticResultWaitHandle",(int64)&cw_StaticResultWaitHandle },
-  {0x1CEFE1F7,0,0,"FB_MySQLLexer",(int64)&cw_FB_MySQLLexer },
-  {0x5A7461F7,1,0,"SoapFault",(int64)&cw_SoapFault },
+  {0x6D4827F7,1,0,"StaticResultWaitHandle",(int64)&cw_StaticResultWaitHandle },
   {0x4BD3BBFD,1,0,"PDO",(int64)&cw_PDO },
 };
 static const int ctdMapTable[] = {
-  -1,-1,0,-1,-1,1,-1,-1,
-  -1,2,4,5,-1,-1,-1,7,
-  -1,-1,-1,-1,9,10,-1,11,
-  -1,-1,-1,12,-1,14,-1,-1,
-  -1,-1,-1,-1,-1,15,-1,16,
-  -1,-1,17,18,-1,19,-1,-1,
-  -1,20,-1,-1,21,22,-1,-1,
-  23,-1,24,26,27,-1,28,30,
-  -1,31,-1,32,34,35,-1,37,
-  -1,-1,38,-1,-1,-1,-1,-1,
-  -1,-1,-1,40,-1,41,-1,42,
-  -1,44,-1,45,-1,46,48,50,
-  -1,-1,51,-1,-1,52,-1,-1,
-  53,55,56,57,-1,58,59,-1,
-  -1,-1,60,-1,-1,61,-1,-1,
-  63,-1,64,-1,65,66,-1,-1,
-  -1,-1,-1,-1,68,69,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  -1,0,2,-1,-1,-1,-1,3,
+  -1,-1,-1,-1,-1,-1,-1,4,
+  -1,-1,-1,-1,-1,5,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,6,7,-1,-1,-1,-1,
+  -1,8,-1,-1,-1,9,-1,-1,
+  10,-1,11,-1,-1,-1,12,14,
+  -1,15,-1,16,-1,17,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,19,-1,20,
+  -1,22,-1,23,-1,24,25,26,
+  -1,-1,27,-1,-1,28,-1,-1,
+  29,31,32,33,-1,-1,34,-1,
+  -1,-1,35,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,36,-1,-1,
+  -1,-1,-1,-1,38,39,-1,-1,
+  -1,-1,-1,-1,-1,40,-1,-1,
+  41,-1,-1,43,-1,-1,-1,44,
+  -1,45,46,47,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,48,-1,
+  49,-1,-1,50,-1,-1,51,-1,
+  -1,-1,-1,-1,-1,-1,-1,53,
+  -1,-1,-1,-1,-1,54,-1,-1,
+  55,-1,-1,-1,-1,-1,-1,-1,
+  -1,56,57,58,-1,-1,59,-1,
+  -1,-1,-1,-1,60,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,61,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,62,63,64,-1,66,
+  -1,67,-1,-1,-1,-1,68,69,
   -1,-1,-1,-1,-1,70,-1,-1,
-  71,73,-1,74,75,-1,-1,76,
-  -1,77,78,79,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,80,-1,
-  81,-1,82,83,-1,-1,84,-1,
-  -1,-1,-1,-1,-1,-1,-1,86,
-  -1,-1,-1,-1,-1,87,-1,-1,
-  88,-1,-1,89,-1,-1,-1,-1,
-  90,91,92,93,-1,-1,94,-1,
-  -1,-1,-1,-1,95,-1,96,-1,
-  -1,97,-1,98,-1,-1,99,-1,
-  -1,-1,100,-1,-1,-1,-1,-1,
-  -1,-1,-1,101,102,103,-1,105,
-  -1,107,108,-1,-1,-1,109,110,
-  -1,-1,-1,-1,-1,113,-1,-1,
 
 };
 

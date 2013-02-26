@@ -18,19 +18,6 @@
 #ifndef __GENERATED_sys_system_globals_h70996b28__
 #define __GENERATED_sys_system_globals_h70996b28__
 
-#include <php/classes/arrayaccess.h>
-#include <php/classes/debugger.h>
-#include <php/classes/directory.h>
-#include <php/classes/directoryiterator.h>
-#include <php/classes/exception.h>
-#include <php/classes/fbmysqllexer.h>
-#include <php/classes/iterator.h>
-#include <php/classes/reflection.h>
-#include <php/classes/soapfault.h>
-#include <php/classes/splfile.h>
-#include <php/classes/splobjectstorage.h>
-#include <php/classes/stdclass.h>
-#include <php/classes/xhprof.h>
 #include <php/globals/constants.h>
 #include <php/globals/symbols.h>
 namespace hphp_impl_starter {}
@@ -78,7 +65,7 @@ public:
   static void initialize();
   static void initializeNamed();
 
-  static StaticArray ssa_[2];
+  static StaticArray ssa_[1];
 };
 
 extern const int64 k_CURLINFO_LOCAL_PORT;

@@ -56,10 +56,6 @@ extern const ObjectStaticCallbacks *
  * Getting a static property
  */
 extern Variant get_static_property(CStrRef s, const char *prop);
-extern Variant *get_static_property_lv(CStrRef s, const char *prop);
-
-// defined in builtin_functions.cpp
-Variant &get_static_property_lval(CStrRef s, const char *prop);
 
 /**
  * Getting the init value of a class variable
@@ -88,13 +84,8 @@ extern Variant get_class_constant(CStrRef s, const char *prop,
 /**
  * Getting function info
  */
-extern bool get_call_info(const CallInfo *&ci, void *&extra,
-                          const char *s, strhash_t hash = -1);
-extern bool get_call_info_no_eval(const CallInfo *&ci, void *&extra,
-                                  const char *s, strhash_t hash = -1);
 extern bool get_call_info_builtin(const CallInfo *&ci, void *&extra,
     const char *s, strhash_t hash = -1);
-extern bool get_call_info_static_method(MethodCallPackage &info);
 
 /**
  * Class/function meta info entirely encoded here as a const char * array.

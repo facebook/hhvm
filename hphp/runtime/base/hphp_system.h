@@ -39,7 +39,6 @@
 #include <runtime/base/file/plain_file.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/externals.h>
-#include <runtime/base/dynamic_object_data.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/util/string_buffer.h>

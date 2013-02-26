@@ -52,34 +52,17 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
   bool ret = true;
   if (LIKELY(!syntax)) {
-    if (hhvm) {
-      CallerFrame cf;
-      ObjectData* obj = NULL;
-      HPHP::VM::Class* cls = NULL;
-      StringData* invName = NULL;
-      const HPHP::VM::Func* f = vm_decode_function(v, cf(), false, obj, cls,
-                                                   invName, false);
-      if (f == NULL) {
-        ret = false;
-      }
-      if (invName != NULL) {
-        decRefStr(invName);
-      }
-    } else {
-      MethodCallPackage mcp;
-      String classname, methodname;
-      bool doBind;
-      ret = get_user_func_handler(v, true, mcp,
-                                  classname, methodname, doBind, false);
-      if (ret && mcp.ci->m_flags & (CallInfo::Protected|CallInfo::Private)) {
-        classname = mcp.getClassName();
-        if (!ClassInfo::HasAccess(classname, *mcp.name,
-                                  mcp.ci->m_flags & CallInfo::StaticMethod ||
-                                  !mcp.obj,
-                                  mcp.obj)) {
-          ret = false;
-        }
-      }
+    CallerFrame cf;
+    ObjectData* obj = NULL;
+    HPHP::VM::Class* cls = NULL;
+    StringData* invName = NULL;
+    const HPHP::VM::Func* f = vm_decode_function(v, cf(), false, obj, cls,
+                                                 invName, false);
+    if (f == NULL) {
+      ret = false;
+    }
+    if (invName != NULL) {
+      decRefStr(invName);
     }
     if (!name.isReferenced()) return ret;
   }

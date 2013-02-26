@@ -87,10 +87,8 @@ public:
   enum GetArrayKind {
     GetArrayNone = 0,
     GetArrayPrivate = 1,
-    GetArrayDynamic = 2,
-
-    GetArrayAll = GetArrayPrivate|GetArrayDynamic,
-    GetArrayPublic = GetArrayDynamic
+    GetArrayPublic = 2,
+    GetArrayAll = GetArrayPrivate|GetArrayPublic
   };
 
   class ConstantInfo {

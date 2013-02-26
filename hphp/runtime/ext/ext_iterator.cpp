@@ -195,12 +195,25 @@ Variant f_hphp_recursiveiteratoriterator_key(CObjRef obj) {
   throw NotImplementedException("this type of iterator");
 }
 
+// TODO Task #2140920: Find a way to avoid hard coding PHP class constants
+// here and elsewhere in the runtime.
+
+// Class constants that we use from RecursiveIteratorIterator
+static const int64 LEAVES_ONLY = 0L;
+static const int64 SELF_FIRST = 1L;
+static const int64 CHILD_FIRST = 2L;
+
+// Class constants that we use from RecursiveDirectoryIterator
+static const int64 CURRENT_AS_FILEINFO = 16L;
+static const int64 CURRENT_AS_PATHNAME = 32L;
+static const int64 KEY_AS_FILENAME = 256L;
+
 void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
   RecursiveIteratorIterator *rii = get_recursiveiteratoriterator(obj);
   unsigned int size = rii->m_iterators.size();
   if (!size) return;
   Object ci = rii->m_iterators[size-1].first;
-  if (rii->m_mode == HPHP::q_RecursiveIteratorIterator$$SELF_FIRST) {
+  if (rii->m_mode == SELF_FIRST) {
     if (!ci.is<RecursiveDirectoryIterator>()) {
       throw NotImplementedException("this type of iterator");
     }
@@ -222,8 +235,8 @@ void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
     decRefObj(rii->m_iterators.back().first);
     rii->m_iterators.pop_back();
     return f_hphp_recursiveiteratoriterator_next(obj);
-  } else if (rii->m_mode == HPHP::q_RecursiveIteratorIterator$$CHILD_FIRST ||
-             rii->m_mode == HPHP::q_RecursiveIteratorIterator$$LEAVES_ONLY) {
+  } else if (rii->m_mode == CHILD_FIRST ||
+             rii->m_mode == LEAVES_ONLY) {
     if (!ci.is<RecursiveDirectoryIterator>()) {
       throw NotImplementedException("this type of iterator");
     }
@@ -247,7 +260,7 @@ void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
       } else {
         // CHILD_FIRST: 0 - drill down; 1 - visit 2 - next
         // LEAVES_ONLY: 0 - drill down; 1 - next
-        if (rii->m_mode == HPHP::q_RecursiveIteratorIterator$$CHILD_FIRST &&
+        if (rii->m_mode == CHILD_FIRST &&
           rii->m_iterators[size-1].second == 1) {
           rii->m_iterators[size-1].second = 2;
           return;
@@ -296,12 +309,12 @@ bool f_hphp_recursiveiteratoriterator_valid(CObjRef obj) {
       firstIt.getTyped<RecursiveDirectoryIterator>();
     bool valid = rdi->valid();
     if (valid) {
-      if (rii->m_mode == HPHP::q_RecursiveIteratorIterator$$LEAVES_ONLY ||
-          rii->m_mode == HPHP::q_RecursiveIteratorIterator$$CHILD_FIRST) {
+      if (rii->m_mode == LEAVES_ONLY ||
+          rii->m_mode == CHILD_FIRST) {
         String pathName = rdi->getPathName();
         if (f_is_dir(pathName)) {
           if (rii->m_iterators[size-1].second > 0 &&
-              rii->m_mode == HPHP::q_RecursiveIteratorIterator$$CHILD_FIRST) {
+              rii->m_mode == CHILD_FIRST) {
             return true;
           }
           return false;
@@ -370,7 +383,7 @@ bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path,
 
 Variant f_hphp_recursivedirectoryiterator_key(CObjRef obj) {
   RecursiveDirectoryIterator *rdi = get_recursivedirectoryiterator(obj);
-  if (rdi->m_flags == HPHP::q_RecursiveDirectoryIterator$$KEY_AS_FILENAME) {
+  if (rdi->m_flags == KEY_AS_FILENAME) {
     return rdi->m_dirEntry;
   }
   return rdi->getPathName();
@@ -403,10 +416,10 @@ bool f_hphp_recursivedirectoryiterator_valid(CObjRef obj) {
 Variant f_hphp_recursivedirectoryiterator_current(CObjRef obj) {
   RecursiveDirectoryIterator *rdi = get_recursivedirectoryiterator(obj);
   String pathName = rdi->getPathName();
-  if (rdi->m_flags & HPHP::q_RecursiveDirectoryIterator$$CURRENT_AS_PATHNAME) {
+  if (rdi->m_flags & CURRENT_AS_PATHNAME) {
     return pathName;
   }
-  if (rdi->m_flags & HPHP::q_RecursiveDirectoryIterator$$CURRENT_AS_FILEINFO) {
+  if (rdi->m_flags & CURRENT_AS_FILEINFO) {
     ObjectData* c_splfi = SystemLib::AllocSplFileInfoObject();
     c_splfi->o_set("rsrc", NEWOBJ(SplFileInfo)(pathName), "SplFileInfo");
     return c_splfi;

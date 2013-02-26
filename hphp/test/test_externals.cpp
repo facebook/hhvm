@@ -295,7 +295,7 @@ Variant invokeImpl(void *extra, CArrRef params) {
     return f_strlen(params[0]);
   }
   if (strcasecmp(function, "fault") == 0) {
-    return Object((NEWOBJ(c_SoapFault)())->create("MyFault","My fault string"));
+    return null; // Object((NEWOBJ(c_SoapFault)())->create("MyFault","My fault string"));
   }
 
   // for TestExtServer
@@ -393,7 +393,7 @@ Variant *get_static_property_lv(CStrRef s, const char *prop) {
 bool get_call_info_static_method(MethodCallPackage &mcp) {
   StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);
   const ObjectStaticCallbacks *cwo = get_object_static_callbacks(s);
-  if (LIKELY(cwo != 0)) return ObjectStaticCallbacks::GetCallInfo(cwo, mcp, -1);
+  if (LIKELY(cwo != 0)) return false; // ObjectStaticCallbacks::GetCallInfo(cwo, mcp, -1);
   if (mcp.m_fatal) throw_missing_class(s->data());
   return false;
 }

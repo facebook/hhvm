@@ -2497,6 +2497,14 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     clusterByFileSizes(clusters, clusterCount);
   } else {
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
+      if (output == CodeGenerator::SystemCPP) {
+        // If we are generating the system files, suppress output of everything
+        // except for constants.php and symbols.php
+        if (f->getName() != "globals/constants.php" &&
+            f->getName() != "globals/symbols.php") {
+          continue;
+        }
+      }
       clusters[f->outputFilebase()].push_back(f);
     }
   }
@@ -2635,22 +2643,6 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
     cls->outputCPPDynamicClassImpl(cg, ar);
     if (extension) {
       cls->outputCPPSupportMethodsImpl(cg, ar);
-    }
-  }
-
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
-       iter != m_classDecs.end(); ++iter) {
-    if (iter->second.empty()) {
-      throw Exception("During code gen, class %s is undefined",
-                      iter->first.c_str());
-    }
-    for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
-         iter2 != iter->second.end(); ++iter2) {
-      ClassScopePtr cls = *iter2;
-      if (!cls->isInterface()) {
-        classes.push_back(cls->getOriginalName().c_str());
-        break;
-      }
     }
   }
 
@@ -3158,30 +3150,27 @@ void AnalysisResult::outputCPPDynamicClassTables(
   vector<const char*> classes;
   ClassScopePtr cls;
   StringToClassScopePtrVecMap classScopes;
-  for (StringToClassScopePtrVecMap::const_iterator iter =
-         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    if (iter->second.size()) {
-      for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
-           iter2 != iter->second.end(); ++iter2) {
-        cls = *iter2;
-        if (cls->isUserClass() &&
-            (!cls->isInterface() || cls->checkHasPropTable(ar))) {
-          classes.push_back(cls->getOriginalName().c_str());
-          classScopes[cls->getName()].push_back(cls);
-          if (!cls->isRedeclaring()) {
-            cls->outputCPPGlobalTableWrappersDecl(cg, ar);
+  if (!system) {
+    for (StringToClassScopePtrVecMap::const_iterator iter =
+           m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
+      if (iter->second.size()) {
+        for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
+             iter2 != iter->second.end(); ++iter2) {
+          cls = *iter2;
+          if (cls->isUserClass() &&
+              (!cls->isInterface() || cls->checkHasPropTable(ar))) {
+            classes.push_back(cls->getOriginalName().c_str());
+            classScopes[cls->getName()].push_back(cls);
+            if (!cls->isRedeclaring()) {
+              cls->outputCPPGlobalTableWrappersDecl(cg, ar);
+            }
+            break;
           }
-          break;
         }
       }
     }
   }
   if (system) {
-    BOOST_FOREACH(tie(n, cls), m_systemClasses) {
-      if (!cls->isInterface() && !cls->isSepExtension()) {
-        classes.push_back(cls->getOriginalName().c_str());
-      }
-    }
     outputCPPExtClassImpl(cg);
   } else {
     BOOST_FOREACH(tie(n, cls), m_systemClasses) {
@@ -3553,7 +3542,14 @@ void AnalysisResult::outputCPPSystem() {
   cg.setStream(CodeGenerator::ImplFile, &fSystemImpl);
 
   cg.headerBegin(filename);
+  
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+    // When we are generating the system files, suppress output of everything
+    // except for constants.php and symbols.php
+    if (fs->getName() != "globals/constants.php" &&
+        fs->getName() != "globals/symbols.php") {
+      continue;
+    }
     cg_printInclude(fs->outputFilebase());
   }
 
@@ -4572,6 +4568,14 @@ void AnalysisResult::preGenerateCPP(CodeGenerator::Output output,
 
   m_pregenerating = true;
   BOOST_FOREACH(FileScopePtr fs, files) {
+    if (output == CodeGenerator::SystemCPP) {
+      // If we are generating the system files, suppress output of everything
+      // except for constants.php and symbols.php
+      if (fs->getName() != "globals/constants.php" &&
+          fs->getName() != "globals/symbols.php") {
+        continue;
+      }
+    }
     PreGenerateCPPJob *job = new PreGenerateCPPJob(ar, output, fs);
     jobs.push_back(job);
     dispatcher.enqueue(job);

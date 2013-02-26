@@ -1507,57 +1507,20 @@ Array f_fb_call_user_func_safe(int _argc, CVarRef function,
   return f_fb_call_user_func_array_safe(function, _argv);
 }
 
-static Variant fb_call_user_func_safe(CVarRef function, CArrRef params,
-                                      bool &ok) {
-  MethodCallPackage mcp;
-  String classname, methodname;
-  bool doBind;
-  if (get_callable_user_func_handler(function,
-                                     mcp, classname, methodname, doBind)) {
-    ok = true;
-    if (doBind) {
-      FrameInjection::StaticClassNameHelper scn(
-        ThreadInfo::s_threadInfo.getNoCheck(), classname);
-      assert(!mcp.m_isFunc);
-      return mcp.ci->getMeth()(mcp, params);
-    } else {
-      if (mcp.m_isFunc) {
-        return mcp.ci->getFunc()(mcp.extra, params);
-      } else {
-        return mcp.ci->getMeth()(mcp, params);
-      }
-    }
-  }
-  ok = false;
-  return null;
-}
-
 Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
                                         CVarRef def,
                                         CArrRef _argv /* = null_array */) {
-  if (hhvm) {
-    if (f_is_callable(function)) {
-      return f_call_user_func_array(function, _argv);
-    }
-    return def;
-  } else {
-    bool ok;
-    Variant ret = fb_call_user_func_safe(function, _argv, ok);
-    return ok ? ret : def;
+  if (f_is_callable(function)) {
+    return f_call_user_func_array(function, _argv);
   }
+  return def;
 }
 
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
-  if (hhvm) {
-    if (f_is_callable(function)) {
-      return CREATE_VECTOR2(true, f_call_user_func_array(function, params));
-    }
-    return CREATE_VECTOR2(false, null);
-  } else {
-    bool ok;
-    Variant ret = fb_call_user_func_safe(function, params, ok);
-    return CREATE_VECTOR2(ok, ret);
+  if (f_is_callable(function)) {
+    return CREATE_VECTOR2(true, f_call_user_func_array(function, params));
   }
+  return CREATE_VECTOR2(false, null);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

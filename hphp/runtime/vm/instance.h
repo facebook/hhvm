@@ -62,7 +62,6 @@ class Instance : public ObjectData {
 
   // Call newInstance() to instantiate an Instance
   static Instance* newInstance(Class* cls) {
-    const_assert(hhvm);
     if (cls->m_InstanceCtor) {
       return cls->m_InstanceCtor(cls);
     }
@@ -180,10 +179,6 @@ class Instance : public ObjectData {
   virtual void o_setArray(CArrRef properties);
   virtual void o_getArray(Array& props, bool pubOnly=false) const;
 
-  virtual bool o_get_call_info_hook(const char *clsname,
-                                    MethodCallPackage &mcp,
-                                    strhash_t hash = -1);
-
   virtual Variant t___destruct();
   virtual Variant t___call(Variant v_name, Variant v_arguments);
   virtual Variant t___set(Variant v_name, Variant v_value);
@@ -289,7 +284,6 @@ inline Instance* instanceFromTv(TypedValue* tv) {
 
 namespace HPHP {
 
-#ifdef HHVM
 class ExtObjectData : public HPHP::VM::Instance {
  public:
   ExtObjectData(const ObjectStaticCallbacks *cb)
@@ -300,18 +294,6 @@ class ExtObjectData : public HPHP::VM::Instance {
   virtual ObjectData *getRoot() { return this; }
   ObjectData *getBuiltinRoot() { return this; }
 };
-#else
-class ExtObjectData : public ObjectData {
- public:
-  ExtObjectData(const ObjectStaticCallbacks *cb)
-    : ObjectData(cb, false), root(this) {}
-  virtual void setRoot(ObjectData *r) { root = r; }
-  virtual ObjectData *getRoot() { return root; }
-  ObjectData *getBuiltinRoot() { return root; }
- protected:
-  ObjectData *root;
-};
-#endif
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
  public:

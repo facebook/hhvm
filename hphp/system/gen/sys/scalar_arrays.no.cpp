@@ -23,13 +23,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticArray s_sys_sa00000000;
-VarNR s_sys_sva00000000;
-StaticArray s_sys_sa284d971a;
 
 void SystemScalarArrays::initializeNamed() {
   s_sys_sa00000000 = ssa_[0];
-  new (&s_sys_sva00000000) VarNR(s_sys_sa00000000);
-  s_sys_sa284d971a = ssa_[1];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -92,13 +92,7 @@ class ObjectData : public CountableNF {
 
   ObjectData(const ObjectStaticCallbacks *cb = nullptr, bool noId = false,
              VM::Class* type = nullptr)
-      : o_attribute(0)
-#ifdef HHVM
-        , m_cls(type)
-#else
-        , o_callbacks(cb)
-#endif
-        {
+      : o_attribute(0), m_cls(type) {
     assert(!hhvm || uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
       o_id = ++(*os_max_id);
@@ -110,12 +104,10 @@ class ObjectData : public CountableNF {
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
   HPHP::VM::Class* getVMClass() const {
-    const_assert(hhvm);
     return m_cls;
   }
   static size_t getVMClassOffset() {
     // For assembly linkage.
-    const_assert(hhvm);
     return offsetof(ObjectData, m_cls);
   }
   static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
@@ -163,17 +155,10 @@ class ObjectData : public CountableNF {
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
-#ifdef HHVM
-  virtual
-#endif
   CStrRef o_getClassName() const;
-#ifdef HHVM
-  virtual
-#endif
   CStrRef o_getParentName() const;
   virtual CStrRef o_getClassNameHook() const;
   static CStrRef GetParentName(CStrRef cls);
-  static CallInfo *GetCallHandler();
   virtual bool isResource() const { return false;}
   bool o_isClass(const char *s) const;
   int o_getId() const { return o_id;}
@@ -212,7 +197,6 @@ class ObjectData : public CountableNF {
 
   virtual void init() {}
   ObjectData *create() { CountableHelper h(this); init(); return this;}
-  virtual void getConstructor(MethodCallPackage &mcp);
   virtual void destruct();
 
   static Variant os_invoke(CStrRef c, CStrRef s,
@@ -297,19 +281,6 @@ class ObjectData : public CountableNF {
                             INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_root_invoke_few_args(CStrRef s, strhash_t hash, int count,
                                  INVOKE_FEW_ARGS_DECL_ARGS);
-  bool o_get_call_info(MethodCallPackage &mcp, strhash_t hash = -1);
-  const ObjectStaticCallbacks *o_get_callbacks() const {
-#ifndef HHVM
-    return o_callbacks;
-#else
-    NOT_REACHED();
-#endif
-  }
-  bool o_get_call_info_ex(const char *clsname,
-                          MethodCallPackage &mcp, strhash_t hash = -1);
-  virtual bool o_get_call_info_hook(const char *clsname,
-                                    MethodCallPackage &mcp,
-                                    strhash_t hash = -1);
 
   // misc
   Variant o_throw_fatal(const char *msg);
@@ -325,7 +296,6 @@ class ObjectData : public CountableNF {
    * Otherwise, it just throws if fatal else returns false.
    */
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
-  virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
 
   bool o_isset(CStrRef prop, CStrRef context = null_string);
   bool o_empty(CStrRef prop, CStrRef context = null_string);
@@ -350,9 +320,6 @@ class ObjectData : public CountableNF {
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
-  static Variant callHandler(MethodCallPackage &info, CArrRef params);
-  static Variant callHandlerFewArgs(MethodCallPackage &info, int count,
-      INVOKE_FEW_ARGS_IMPL_ARGS);
   static Variant NullConstructor(MethodCallPackage &info, CArrRef params);
   static Variant NullConstructorFewArgs(MethodCallPackage &info, int count,
       INVOKE_FEW_ARGS_IMPL_ARGS);
@@ -360,8 +327,6 @@ class ObjectData : public CountableNF {
  protected:
   virtual bool php_sleep(Variant &ret);
 public:
-  bool hasCall();
-  bool hasCallStatic();
   CArrRef getProperties() const { return o_properties; }
   void initProperties(int nProp);
  private:
@@ -393,16 +358,7 @@ public:
   } o_subclassData;
 
  protected:
-#ifdef HHVM
   HPHP::VM::Class* m_cls;
-#else
-  union {
-    const ObjectStaticCallbacks *o_callbacks;
-    // m_cls isn't used under hphpc, but we need declare it
-    // so that the compiler doesn't complain
-    HPHP::VM::Class* m_cls;
-  };
-#endif
 
  protected:
   ArrNR         o_properties;    // dynamic properties (VM and hphpc)
@@ -427,11 +383,7 @@ public:
     }
     delete this;
   }
-}
-#ifdef HHVM
-  __attribute__((aligned(16)))
-#endif
-;
+} __attribute__((aligned(16)));
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
@@ -461,17 +413,12 @@ struct ObjectStaticCallbacks {
   Object createOnly(ObjectData *root = nullptr) const;
   inline bool os_get_call_info(MethodCallPackage &info,
                                strhash_t hash = -1) const {
-    return GetCallInfo(this, info, hash);
+    NOT_REACHED();
   }
   Variant os_getInit(CStrRef s) const;
   Variant os_get(CStrRef s) const;
   Variant &os_lval(CStrRef s) const;
   Variant os_constant(const char *s) const;
-  static bool GetCallInfo(const ObjectStaticCallbacks *osc,
-                          MethodCallPackage &mcp, strhash_t hash);
-  static bool GetCallInfoEx(const char *cls,
-                            const ObjectStaticCallbacks *osc,
-                            MethodCallPackage &mcp, strhash_t hash);
 
   bool checkAttribute(int attrs) const;
   const ObjectStaticCallbacks* operator->() const { return this; }
@@ -602,11 +549,9 @@ template <typename T>
 void *ObjectAllocatorInitSetup() {
   ThreadLocalSingleton<ObjectAllocator<
     ObjectSizeClass<sizeof(T)>::value> > tls;
-  if (hhvm) {
-    int index = ObjectSizeClass<sizeof(T)>::index;
-    ObjectAllocatorCollector::getWrappers()[index] =
-      (ObjectAllocatorBaseGetter)tls.getCheck;
-  }
+  int index = ObjectSizeClass<sizeof(T)>::index;
+  ObjectAllocatorCollector::getWrappers()[index] =
+    (ObjectAllocatorBaseGetter)tls.getCheck;
   GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
   return (void*)tls.getNoCheck;
 }

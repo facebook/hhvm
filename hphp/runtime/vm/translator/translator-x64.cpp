@@ -1463,7 +1463,7 @@ TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
 
   TCA start = a.code.frontier;
   m_lastHHIRPunt.clear();
-  translateTracelet(sk);
+  translateTracelet(sk, m_useHHIR || RuntimeOption::EvalHHIRDisableTx64);
 
   SKTRACE(1, sk, "translate moved head from %p to %p\n",
           getTopTranslation(sk), start);

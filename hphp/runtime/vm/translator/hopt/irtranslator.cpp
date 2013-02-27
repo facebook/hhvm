@@ -1239,6 +1239,16 @@ TranslatorX64::irTranslateFPassCOp(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateFPassV(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  if (i.preppedByRef || i.noOp) {
+    TRACE(1, "HHIR: irTranslateFPassV: noOp\n");
+    return;
+  }
+  HHIR_EMIT(FPassV);
+}
+
+void
 TranslatorX64::irTranslateFPassM(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   assert(i.inputs.size() >= 1);
@@ -1513,6 +1523,9 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
     case OpBPassC:
     case OpBPassV:
       // OpBPass* instructions are no-ops
+      break;
+    case OpFPassV:
+      irTranslateFPassV(t, i);
       break;
     default:
       // GO: if you hit this, check opNames[op] and add support for it

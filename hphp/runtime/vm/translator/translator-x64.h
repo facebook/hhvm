@@ -1077,6 +1077,7 @@ PSEUDOINSTRS
   void irTranslateSetMProp(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateCGetMProp(const Tracelet &t, const NormalizedInstruction& i);
   void irTranslateLateBoundCls(const Tracelet&, const NormalizedInstruction&i);
+  void irTranslateFPassV(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateReqLit(const Tracelet& t,
                          const NormalizedInstruction& i,
                          InclOpFlags flags);

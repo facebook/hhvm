@@ -245,6 +245,7 @@ struct HhbcTranslator {
   void emitNSame() { emitCmp(OpNSame); }
   void emitFPassCOp();
   void emitFPassR();
+  void emitFPassV();
   void emitFPushFuncD(int32 numParams, int32 funcId);
   void emitFPushFunc(int32 numParams);
   void emitFPushClsMethodD(int32 numParams,

@@ -73,11 +73,12 @@ bool isUnguardedLoad(IRInstruction* inst) {
   Opcode opc = inst->getOpcode();
   SSATmp* dst = inst->getDst();
   Type type = dst->getType();
-  return (opc == LdStack && (type == Type::Gen || type == Type::Cell))
-          || (opc == LdLoc && type == Type::Gen)
-          || (opc == LdRef && type == Type::Cell)
-          || (opc == LdMem && type == Type::Cell &&
-              inst->getSrc(0)->getType() == Type::PtrToCell);
+  return ((opc == LdStack && (type == Type::Gen || type == Type::Cell)) ||
+          (opc == LdLoc && type == Type::Gen) ||
+          (opc == LdRef && type == Type::Cell) ||
+          (opc == LdMem && type == Type::Cell &&
+           inst->getSrc(0)->getType() == Type::PtrToCell) ||
+          (opc == Unbox && type == Type::Cell));
 }
 
 std::list<IRInstruction*> initInstructions(Trace* trace, DceState& state,

@@ -78,6 +78,21 @@ private:
     void update(IRInstruction* inst) {
       assert(inst != nullptr);
       access = inst;
+      value = findRefValue(inst);
+    }
+
+    IRInstruction* access;
+    SSATmp* value;
+  };
+
+  struct LocInfo : public Counted {
+    LocInfo(IRInstruction* inst) {
+      update(inst);
+    }
+
+    void update(IRInstruction* inst) {
+      assert(inst != nullptr);
+      access = inst;
       value = findValue(inst);
     }
 
@@ -133,7 +148,7 @@ private:
   typedef hphp_hash_map<SSATmp*, PropInfoList*> PropMap;
 
   // map local ids to information about the locals.
-  typedef hphp_hash_map<int32_t,RefInfo*> LocalsMap;
+  typedef hphp_hash_map<int32_t,LocInfo*> LocalsMap;
 
   // a mapping of stores to a vector of guarded instructions that follow them.
   // this is used to track where we need to sink partially dead stores.
@@ -216,6 +231,22 @@ private:
 
     // no support for extracting the value from this instruction, so return NULL
     return nullptr;
+  }
+
+  static SSATmp* findRefValue(IRInstruction* inst) {
+    assert(inst != nullptr);
+    switch (inst->getOpcode()) {
+      case LdRef:
+        return inst->getDst();
+      case StRef:
+      case StRefNT:
+        return inst->getSrc(1);
+      case Box:
+        return inst->getSrc(0);
+      default:
+        // no support for extracting the value from this instruction
+        return nullptr;
+    }
   }
 
   static bool isLoad(Opcode opc) {
@@ -369,10 +400,11 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       if (m_locs.count(id) > 0) {
         m_locs[id]->update(inst);
       } else {
-        m_locs[id] = new RefInfo(inst);
+        m_locs[id] = new LocInfo(inst);
       }
       break;
     }
+    case Unbox:
     case LdRef: {
       SSATmp* ref = inst->getSrc(0);
 
@@ -453,7 +485,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       if (m_locs.count(locId) > 0) {
         m_locs[locId]->update(inst);
       } else {
-        m_locs[locId] = new RefInfo(inst);
+        m_locs[locId] = new LocInfo(inst);
       }
       break;
     }
@@ -577,9 +609,9 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
   assert(offset >= -1);                                                       \
   /* check for property accesses */                                           \
   if (offset != -1) {                                                         \
-    PropMap::iterator it = m_props.find(ref);                                   \
-    if (it == m_props.end()) {                                                  \
-      return nullptr;                                                            \
+    PropMap::iterator it = m_props.find(ref);                                 \
+    if (it == m_props.end()) {                                                \
+      return nullptr;                                                         \
     }                                                                         \
     PropList& list = it->second->accesses;                                    \
     for (PropList::iterator i = list.begin(), e = list.end(); i != e; ++i) {  \
@@ -587,18 +619,19 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
         return i->FIELD;                                                      \
       }                                                                       \
     }                                                                         \
-    return nullptr;                                                              \
+    return nullptr;                                                           \
   }                                                                           \
   /* otherwise, check all of our ref maps */                                  \
   RefMap::iterator it = m_unescaped.find(ref);                                \
   if (it != m_unescaped.end()) {                                              \
     return it->second->FIELD;                                                 \
   }                                                                           \
-  it = m_unknown.find(ref);                                                     \
-  if (it != m_unknown.end()) {                                                  \
+  it = m_unknown.find(ref);                                                   \
+  if (it != m_unknown.end()) {                                                \
     return it->second->FIELD;                                                 \
   }                                                                           \
-  return nullptr;                                                                \
+  return nullptr;                                                             \
+
 
 IRInstruction* MemMap::getLastAccess(SSATmp* ref, int offset) {
   MEMMAP_GET(access)

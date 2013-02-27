@@ -1241,6 +1241,14 @@ void HhbcTranslator::emitFPassCOp() {
   TRACE(3, "%u: FPassCOp\n", m_bcOff);
 }
 
+void HhbcTranslator::emitFPassV() {
+  TRACE(3, "%u: FPassV\n", m_bcOff);
+  Block* exit = getExitTrace()->front();
+  SSATmp* tmp = popV();
+  pushIncRef(m_tb->gen(Unbox, exit, tmp));
+  m_tb->genDecRef(tmp);
+}
+
 void HhbcTranslator::emitNativeImpl() {
   TRACE(3, "%u: NativeImpl\n", m_bcOff);
   m_tb->genNativeImpl();

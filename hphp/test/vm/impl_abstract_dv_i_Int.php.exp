@@ -1,0 +1,1 @@
+HipHop Fatal error: Declaration of B::a() must be compatible with that of A::a() in hphp/test/vm/impl_abstract_dv_i_Int.php on line 3

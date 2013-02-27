@@ -24,36 +24,39 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+  const context_idx_t MAX_CONTEXT_DEPTH = std::numeric_limits<context_idx_t>::max();
+}
+
 void f_asio_enter_context() {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-  ctx = AsioContext::Enter(ctx);
-  AsioSession::SetCurrentContext(ctx);
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(session->getCurrentContextIdx() >= MAX_CONTEXT_DEPTH)) {
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
+      "Unable to enter asio context: too many contexts open"));
+    throw e;
+  }
+
+  session->enterContext();
 }
 
 void f_asio_exit_context() {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-  if (!ctx) {
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(!session->isInContext())) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Unable to exit asio context: not in a context"));
     throw e;
   }
-  if (ctx->getCurrent()) {
+  if (UNLIKELY(session->getCurrentContext()->isRunning())) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Unable to exit asio context: a continuation is running"));
     throw e;
   }
 
-  ctx = ctx->exit();
-  AsioSession::SetCurrentContext(ctx);
+  session->exitContext();
 }
 
 Object f_asio_get_current() {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-  if (!ctx) {
-    return nullptr;
-  }
-
-  return Object(ctx->getCurrent());
+  return AsioSession::Get()->getCurrentWaitHandle();
 }
 
 void f_asio_set_on_failed_callback(CObjRef on_failed_cb) {
@@ -63,7 +66,7 @@ void f_asio_set_on_failed_callback(CObjRef on_failed_cb) {
     throw e;
   }
 
-  AsioSession::SetOnFailedCallback(on_failed_cb);
+  AsioSession::Get()->setOnFailedCallback(on_failed_cb.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

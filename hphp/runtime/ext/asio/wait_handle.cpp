@@ -35,9 +35,14 @@ void c_WaitHandle::t___construct() {
 }
 
 void c_WaitHandle::t_import() {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-  if (ctx) {
-    enterContext(ctx);
+  if (isFinished()) {
+    return;
+  }
+
+  context_idx_t ctx_idx = AsioSession::Get()->getCurrentContextIdx();
+  if (ctx_idx) {
+    assert(dynamic_cast<c_WaitableWaitHandle*>(this));
+    static_cast<c_WaitableWaitHandle*>(this)->enterContext(ctx_idx);
   }
 }
 
@@ -70,10 +75,6 @@ Object c_WaitHandle::t_getexceptioniffailed() {
 }
 
 String c_WaitHandle::getName() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
-void c_WaitHandle::enterContext(AsioContext* ctx) {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 

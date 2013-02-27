@@ -87,7 +87,6 @@ Object c_SetResultToRefWaitHandle::ti_create(const char* cls, CObjRef wait_handl
 }
 
 void c_SetResultToRefWaitHandle::initialize(c_WaitableWaitHandle* child, RefData* ref) {
-  setContext(AsioSession::GetCurrentContext());
   m_child = child;
   m_ref = ref;
   m_ref->incRefCount();
@@ -146,24 +145,23 @@ String c_SetResultToRefWaitHandle::getName() {
   return s_setResultToRef;
 }
 
-void c_SetResultToRefWaitHandle::enterContext(AsioContext* ctx) {
+void c_SetResultToRefWaitHandle::enterContext(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
+
   // stop before corrupting unioned data
-  if (getState() == STATE_SUCCEEDED || getState() == STATE_FAILED) {
+  if (isFinished()) {
     return;
   }
 
   // already in the more specific context?
-  if (LIKELY(ctx->includes(getContext()))) {
+  if (LIKELY(getContextIdx() >= ctx_idx)) {
     return;
   }
 
-  if (getState() != STATE_BLOCKED) {
-    throw new FatalErrorException(
-        "Invariant violation: encountered unexpected state");
-  }
+  assert(getState() == STATE_BLOCKED);
 
-  setContext(ctx);
-  m_child->enterContext(ctx);
+  setContextIdx(ctx_idx);
+  m_child->enterContext(ctx_idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

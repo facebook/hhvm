@@ -100,7 +100,6 @@ Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
 }
 
 void c_GenArrayWaitHandle::initialize(CObjRef exception, CArrRef deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
-  setContext(AsioSession::GetCurrentContext());
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
@@ -173,28 +172,27 @@ String c_GenArrayWaitHandle::getName() {
   return s_genArray;
 }
 
-void c_GenArrayWaitHandle::enterContext(AsioContext* ctx) {
+void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
+
   // stop before corrupting unioned data
-  if (getState() == STATE_SUCCEEDED || getState() == STATE_FAILED) {
+  if (isFinished()) {
     return;
   }
 
   // already in the more specific context?
-  if (LIKELY(ctx->includes(getContext()))) {
+  if (LIKELY(getContextIdx() >= ctx_idx)) {
     return;
   }
 
-  if (getState() != STATE_BLOCKED) {
-    throw new FatalErrorException(
-        "Invariant violation: encountered unexpected state");
-  }
+  assert(getState() == STATE_BLOCKED);
 
-  setContext(ctx);
+  setContextIdx(ctx_idx);
 
   // TODO: enterContext() for all remaining dependencies
   c_WaitableWaitHandle* wait_handle = static_cast<c_WaitableWaitHandle*>(
       m_deps->nvGetValueRef(m_iterPos)->m_data.pobj);
-  wait_handle->enterContext(ctx);
+  wait_handle->enterContext(ctx_idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

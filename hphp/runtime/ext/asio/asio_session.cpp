@@ -15,37 +15,54 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/ext/ext_asio.h>
 #include <runtime/ext/asio/asio_session.h>
-#include <runtime/ext/ext_closure.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_PROXY(AsioContext, false, AsioSession::s_ctx);
-IMPLEMENT_THREAD_LOCAL_PROXY(ObjectData, false, AsioSession::s_on_failed_cb);
+IMPLEMENT_THREAD_LOCAL_PROXY(AsioSession, false, AsioSession::s_current);
 
 
 void AsioSession::Init() {
-  s_ctx.set(nullptr);
-  s_on_failed_cb.set(nullptr);
+  s_current.set(new AsioSession());
 }
 
-void AsioSession::SetOnFailedCallback(CObjRef on_failed_cb) {
-  if (!on_failed_cb.isNull()) {
-    on_failed_cb->incRefCount();
-  }
-
-  if (s_on_failed_cb.get()) {
-    decRefObj(s_on_failed_cb.get());
-  }
-
-  s_on_failed_cb.set(on_failed_cb.get());
+AsioSession::AsioSession() : m_contexts(), m_onFailedCallback(nullptr) {
 }
 
-void AsioSession::OnFailed(CObjRef exception) {
-  ObjectData* cb = s_on_failed_cb.get();
-  if (cb) {
-    f_call_user_func_array(cb, Array::Create(exception));
+uint16_t AsioSession::getCurrentWaitHandleDepth() {
+  // have context and it's running
+  if (!m_contexts.empty() && m_contexts.back()->isRunning()) {
+    return m_contexts.back()->getCurrent()->getDepth();
+  }
+
+  // the current context is not running, look at the upper context
+  // TODO: deprecate this once contexts are entered only by join()
+  if (m_contexts.size() >= 2) {
+    assert(m_contexts[m_contexts.size() - 2]->isRunning());
+    return m_contexts[m_contexts.size() - 2]->getCurrent()->getDepth();
+  }
+
+  // we are the root
+  return 0;
+}
+
+void AsioSession::setOnFailedCallback(ObjectData* on_failed_callback) {
+  if (on_failed_callback) {
+    on_failed_callback->incRefCount();
+  }
+
+  if (m_onFailedCallback) {
+    decRefObj(m_onFailedCallback);
+  }
+
+  m_onFailedCallback = on_failed_callback;
+}
+
+void AsioSession::onFailed(CObjRef exception) {
+  if (m_onFailedCallback) {
+    f_call_user_func_array(m_onFailedCallback, Array::Create(exception));
   }
 }
 

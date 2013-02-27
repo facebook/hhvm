@@ -50,7 +50,7 @@ void c_ContinuationWaitHandle::t___construct() {
 }
 
 Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation, int prio) {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
+  AsioSession* session = AsioSession::Get();
   if (UNLIKELY(!continuation.instanceof(s_continuation))) {
     STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::start);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -65,7 +65,7 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
     throw e;
   }
 
-  uint16_t depth = ctx ? ctx->getCurrentWaitHandleDepth() : 0;
+  uint16_t depth = session->getCurrentWaitHandleDepth();
   if (UNLIKELY(depth >= MAX_DEPTH)) {
     STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::start);
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -75,8 +75,8 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
 
   c_Continuation* cont = static_cast<c_Continuation*>(continuation.get());
   if (!cont->m_waitHandle.isNull()) {
-    if (ctx) {
-      cont->m_waitHandle->enterContext(ctx);
+    if (session->isInContext()) {
+      cont->m_waitHandle->enterContext(session->getCurrentContextIdx());
     }
     return cont->m_waitHandle;
   }
@@ -87,8 +87,7 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
 }
 
 void c_ContinuationWaitHandle::ti_markcurrentassucceeded(const char* cls, CVarRef result) {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-  c_ContinuationWaitHandle* wh = ctx ? ctx->getCurrent() : nullptr;
+  c_ContinuationWaitHandle* wh = AsioSession::Get()->getCurrentWaitHandle();
   if (!wh) {
     STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::markcurrentassucceeded);
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -100,8 +99,7 @@ void c_ContinuationWaitHandle::ti_markcurrentassucceeded(const char* cls, CVarRe
 }
 
 void c_ContinuationWaitHandle::ti_markcurrentastailcall(const char* cls) {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-  c_ContinuationWaitHandle* wh = ctx ? ctx->getCurrent() : nullptr;
+  c_ContinuationWaitHandle* wh = AsioSession::Get()->getCurrentWaitHandle();
   if (!wh) {
     STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::markcurrentastailcall);
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -121,9 +119,6 @@ void c_ContinuationWaitHandle::t_setprivdata(CObjRef data) {
 }
 
 void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint32_t prio, uint16_t depth) {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-
-  setContext(ctx);
   m_continuation = continuation;
   m_child = nullptr;
   m_privData = nullptr;
@@ -133,8 +128,8 @@ void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint32_t prio
 
   if (prio == 0) {
     setState(STATE_SCHEDULED);
-    if (ctx) {
-      ctx->schedule(this);
+    if (isInContext()) {
+      getContext()->schedule(this);
     }
   } else {
     // TODO: deprecate directly passed non-zero priorities
@@ -231,7 +226,7 @@ c_WaitableWaitHandle* c_ContinuationWaitHandle::getBlockedOn() {
 
 void c_ContinuationWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
-  if (getContext()) {
+  if (isInContext()) {
     getContext()->schedule(this);
   }
 }
@@ -250,7 +245,7 @@ void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
 }
 
 void c_ContinuationWaitHandle::markAsFailed(CObjRef exception) {
-  AsioSession::OnFailed(exception);
+  AsioSession::Get()->onFailed(exception);
   setException(exception.get());
 
   m_continuation = nullptr;
@@ -276,30 +271,31 @@ String c_ContinuationWaitHandle::getName() {
   }
 }
 
-void c_ContinuationWaitHandle::enterContext(AsioContext* ctx) {
-  assert(ctx);
+void c_ContinuationWaitHandle::enterContext(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
-  if (getState() == STATE_SUCCEEDED || getState() == STATE_FAILED) {
+  if (isFinished()) {
     return;
   }
 
   // already in the more specific context?
-  if (LIKELY(ctx->includes(getContext()))) {
+  if (LIKELY(getContextIdx() >= ctx_idx)) {
     return;
   }
 
   switch (getState()) {
     case STATE_BLOCKED:
       // enter child into new context recursively
-      setContext(ctx);
-      m_child->enterContext(ctx);
+      setContextIdx(ctx_idx);
+      assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
+      static_cast<c_WaitableWaitHandle*>(m_child.get())->enterContext(ctx_idx);
       break;
 
     case STATE_SCHEDULED:
       // reschedule so that we get run
-      setContext(ctx);
-      ctx->schedule(this);
+      setContextIdx(ctx_idx);
+      getContext()->schedule(this);
       break;
 
     case STATE_RUNNING: {
@@ -311,21 +307,21 @@ void c_ContinuationWaitHandle::enterContext(AsioContext* ctx) {
     }
 
     default:
-      throw new FatalErrorException(
-          "Invariant violation: encountered unexpected state");
+      assert(false);
   }
 }
 
-void c_ContinuationWaitHandle::exitContext(AsioContext* ctx) {
-  assert(ctx);
+void c_ContinuationWaitHandle::exitContext(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
-  if (getState() == STATE_SUCCEEDED || getState() == STATE_FAILED) {
+  if (isFinished()) {
     return;
   }
 
   // not in a context being exited
-  if (ctx != getContext()) {
+  assert(getContextIdx() <= ctx_idx);
+  if (getContextIdx() != ctx_idx) {
     return;
   }
 
@@ -336,25 +332,24 @@ void c_ContinuationWaitHandle::exitContext(AsioContext* ctx) {
       // recursively depend on
       break;
 
-    case STATE_SCHEDULED: {
+    case STATE_SCHEDULED:
       // move us to the parent context
-      AsioContext* pctx = ctx->getParent();
-      setContext(pctx);
-      if (pctx) {
-        pctx->schedule(this);
+      setContextIdx(getContextIdx() - 1);
+
+      // reschedule if still in a context
+      if (isInContext()) {
+        getContext()->schedule(this);
       }
 
       // recursively move all wait handles blocked by us
       for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-        pwh->exitContextBlocked(ctx);
+        pwh->exitContextBlocked(ctx_idx);
       }
 
       break;
-    }
 
     default:
-      throw new FatalErrorException(
-          "Invariant violation: encountered unexpected state");
+      assert(false);
   }
 }
 

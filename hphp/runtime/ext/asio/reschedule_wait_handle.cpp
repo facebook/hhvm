@@ -68,15 +68,12 @@ Object c_RescheduleWaitHandle::ti_create(const char* cls, int queue, int priorit
 }
 
 void c_RescheduleWaitHandle::initialize(uint32_t queue, uint32_t priority) {
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-
-  setContext(ctx);
   m_queue = queue;
   m_priority = priority;
 
   setState(STATE_SCHEDULED);
-  if (ctx) {
-    ctx->schedule(this, m_queue, m_priority);
+  if (isInContext()) {
+    getContext()->schedule(this, m_queue, m_priority);
   }
 }
 
@@ -93,8 +90,8 @@ String c_RescheduleWaitHandle::getName() {
   return s_reschedule;
 }
 
-void c_RescheduleWaitHandle::enterContext(AsioContext* ctx) {
-  assert(ctx);
+void c_RescheduleWaitHandle::enterContext(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -102,21 +99,18 @@ void c_RescheduleWaitHandle::enterContext(AsioContext* ctx) {
   }
 
   // already in the more specific context?
-  if (LIKELY(ctx->includes(getContext()))) {
+  if (LIKELY(getContextIdx() >= ctx_idx)) {
     return;
   }
 
-  if (UNLIKELY(getState() != STATE_SCHEDULED)) {
-    throw new FatalErrorException(
-        "Invariant violation: encountered unexpected state");
-  }
+  assert(getState() == STATE_SCHEDULED);
 
-  setContext(ctx);
-  ctx->schedule(this, m_queue, m_priority);
+  setContextIdx(ctx_idx);
+  getContext()->schedule(this, m_queue, m_priority);
 }
 
-void c_RescheduleWaitHandle::exitContext(AsioContext* ctx) {
-  assert(ctx);
+void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -124,7 +118,8 @@ void c_RescheduleWaitHandle::exitContext(AsioContext* ctx) {
   }
 
   // not in a context being exited
-  if (ctx != getContext()) {
+  assert(getContextIdx() <= ctx_idx);
+  if (getContextIdx() != ctx_idx) {
     return;
   }
 
@@ -133,15 +128,17 @@ void c_RescheduleWaitHandle::exitContext(AsioContext* ctx) {
         "Invariant violation: encountered unexpected state");
   }
 
-  AsioContext* pctx = ctx->getParent();
-  setContext(pctx);
-  if (pctx) {
-    pctx->schedule(this, m_queue, m_priority);
+  // move us to the parent context
+  setContextIdx(getContextIdx() - 1);
+
+  // reschedule if still in a context
+  if (isInContext()) {
+    getContext()->schedule(this, m_queue, m_priority);
   }
 
   // recursively move all wait handles blocked by us
   for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx);
+    pwh->exitContextBlocked(ctx_idx);
   }
 }
 

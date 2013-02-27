@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_asio.h>
 #include <runtime/ext/asio/asio_context.h>
+#include <runtime/ext/asio/asio_session.h>
 #include <system/lib/systemlib.h>
 
 namespace HPHP {
@@ -24,43 +25,29 @@ namespace HPHP {
 
 namespace {
   template<class TWaitHandle>
-  void exitContextQueue(AsioContext* ctx, smart::queue<TWaitHandle*> &queue) {
+  void exitContextQueue(context_idx_t ctx_idx, smart::queue<TWaitHandle*> &queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop();
-      wait_handle->exitContext(ctx);
+      wait_handle->exitContext(ctx_idx);
       decRefObj(wait_handle);
     }
   }
 }
 
-AsioContext::AsioContext(AsioContext* parent)
-    : m_contextDepth(parent ? parent->m_contextDepth + 1 : 0)
-    , m_waitHandleDepth(parent ? parent->getCurrentWaitHandleDepth() : 0)
-    , m_parent(parent), m_current(nullptr) {
-}
+void AsioContext::exit(context_idx_t ctx_idx) {
+  assert(AsioSession::Get()->getContext(ctx_idx) == this);
+  assert(!m_current);
 
-AsioContext* AsioContext::Enter(AsioContext* parent) {
-  return new AsioContext(parent);
-}
-
-AsioContext* AsioContext::exit() {
-  AsioContext* parent = m_parent;
-
-  exitContextQueue(this, m_queue_ready);
+  exitContextQueue(ctx_idx, m_queue_ready);
 
   for (auto it : m_priority_queue_default) {
-    exitContextQueue(this, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
 
   for (auto it : m_priority_queue_no_pending_io) {
-    exitContextQueue(this, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
-
-  // release memory explicitly
-  delete this;
-
-  return parent;
 }
 
 void AsioContext::schedule(c_ContinuationWaitHandle* wait_handle) {

@@ -21,7 +21,6 @@
 #include <functional>
 #include <queue>
 #include <runtime/base/base_includes.h>
-#include <runtime/ext/ext_asio.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,29 +29,18 @@ FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
 
+typedef uint8_t context_idx_t;
+
 class AsioContext {
   public:
-    static AsioContext* Enter(AsioContext* parent);
-    AsioContext* exit();
-
     void* operator new(size_t size) { return smart_malloc(size); }
     void operator delete(void* ptr) { smart_free(ptr); }
 
-    inline uint16_t getContextDepth() { return m_contextDepth; }
-    inline uint16_t getWaitHandleDepth() { return m_waitHandleDepth; }
-    inline uint16_t getCurrentWaitHandleDepth() {
-      return m_current ? m_current->getDepth() : m_waitHandleDepth;
-    }
+    inline AsioContext() : m_current(nullptr) {}
+    void exit(context_idx_t ctx_idx);
 
-    inline AsioContext* getParent() { return m_parent; }
+    inline bool isRunning() { return m_current; }
     inline c_ContinuationWaitHandle* getCurrent() { return m_current; }
-
-    static void RunUntil(c_WaitableWaitHandle* wait_handle);
-
-    inline bool includes(AsioContext* ctx) {
-      return
-        LIKELY(this == ctx) || (ctx && m_contextDepth < ctx->m_contextDepth);
-    }
 
     void schedule(c_ContinuationWaitHandle* wait_handle);
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
@@ -65,13 +53,8 @@ class AsioContext {
     typedef smart::map<uint32_t, smart::queue<c_RescheduleWaitHandle*>>
       reschedule_priority_queue_t;
 
-    AsioContext(AsioContext* parent);
-
     bool runSingle(reschedule_priority_queue_t& queue);
 
-    uint16_t m_contextDepth;
-    uint16_t m_waitHandleDepth;
-    AsioContext* m_parent;
     c_ContinuationWaitHandle* m_current;
 
     // queue of ContinuationWaitHandles ready for immediate execution

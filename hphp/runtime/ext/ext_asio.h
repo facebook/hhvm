@@ -19,6 +19,7 @@
 #define __EXT_ASIO_H__
 
 #include <runtime/base/base_includes.h>
+#include <runtime/ext/asio/asio_session.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,7 +53,6 @@ void f_asio_set_on_failed_callback(CObjRef on_failed_cb);
  * asynchronously (such as using yield mechanism of ContinuationWaitHandle or
  * passed as an array member of GenArrayWaitHandle).
  */
-class AsioContext;
 FORWARD_DECLARE_CLASS_BUILTIN(WaitHandle);
 class c_WaitHandle : public ExtObjectData {
  public:
@@ -96,7 +96,6 @@ class c_WaitHandle : public ExtObjectData {
   inline TypedValue* getResult() { assert(isSucceeded()); return &m_resultOrException; }
   inline ObjectData* getException() { assert(isFailed()); return m_resultOrException.m_data.pobj; }
   virtual String getName();
-  virtual void enterContext(AsioContext* ctx);
 
  protected:
   virtual const TypedValue* join();
@@ -119,7 +118,6 @@ class c_WaitHandle : public ExtObjectData {
  * of the operation is always available and waiting for the wait handle finishes
  * immediately.
  */
-class AsioContext;
 FORWARD_DECLARE_CLASS_BUILTIN(StaticWaitHandle);
 class c_StaticWaitHandle : public c_WaitHandle {
  public:
@@ -133,9 +131,6 @@ class c_StaticWaitHandle : public c_WaitHandle {
 
   // implemented by HPHP
   public: c_StaticWaitHandle *create();
-
- public:
-  void enterContext(AsioContext* ctx);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,25 +229,30 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: c_WaitableWaitHandle *create();
 
  public:
+  inline AsioContext* getContext() { assert(isInContext()); return AsioSession::Get()->getContext(getContextIdx()); }
+
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
   inline c_BlockableWaitHandle** getFirstParentPtr() { return &m_firstParent; }
-  inline AsioContext* getContext() { return m_context; }
+
+  virtual void enterContext(context_idx_t ctx_idx);
 
  protected:
   void setResult(const TypedValue* result);
   void setException(ObjectData* exception);
 
-  inline void setContext(AsioContext* context) { m_context = context; }
+  inline context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
+  inline void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
+
+  inline bool isInContext() { return getContextIdx(); }
 
   inline c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
-  c_BlockableWaitHandle* getParentInContext(AsioContext* ctx);
+  c_BlockableWaitHandle* getParentInContext(context_idx_t ctx_idx);
 
   const TypedValue* join();
 
   static const int8_t STATE_NEW       = 2;
 
  private:
-  AsioContext* m_context;
   c_BlockableWaitHandle* m_firstParent;
 };
 
@@ -264,7 +264,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
  * wait handle it is waiting for. Once a wait handle blocking this wait handle
  * is finished, a notification is received and the operation can be resumed.
  */
-class AsioContext;
 FORWARD_DECLARE_CLASS_BUILTIN(BlockableWaitHandle);
 class c_BlockableWaitHandle : public c_WaitableWaitHandle {
  public:
@@ -283,7 +282,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   c_BlockableWaitHandle* getNextParent();
   c_BlockableWaitHandle* unblock();
 
-  void exitContextBlocked(AsioContext* ctx);
+  void exitContextBlocked(context_idx_t ctx_idx);
   void killCycle();
 
  protected:
@@ -307,7 +306,6 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
  * continuations; a dependency on another wait handle is set up by yielding such
  * wait handle, giving control of the execution back to the asio framework.
  */
-class AsioContext;
 FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
@@ -346,8 +344,8 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   void run();
   inline uint16_t getDepth() { return m_depth; }
   String getName();
-  void enterContext(AsioContext* ctx);
-  void exitContext(AsioContext* ctx);
+  void enterContext(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
 
  protected:
   c_WaitableWaitHandle* getBlockedOn();
@@ -378,7 +376,6 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
  * preserves structure (order and keys) of the original array. If one of the
  * wait handles failed, the exception is propagated by failure.
  */
-class AsioContext;
 FORWARD_DECLARE_CLASS_BUILTIN(GenArrayWaitHandle);
 class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
  public:
@@ -400,7 +397,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
 
  public:
   String getName();
-  void enterContext(AsioContext* ctx);
+  void enterContext(context_idx_t ctx_idx);
 
  protected:
   c_WaitableWaitHandle* getBlockedOn();
@@ -422,7 +419,6 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
  * A wait handle that waits for a given dependency and sets its result to
  * a given reference once completed.
  */
-class AsioContext;
 FORWARD_DECLARE_CLASS_BUILTIN(SetResultToRefWaitHandle);
 class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
  public:
@@ -444,7 +440,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
 
  public:
   String getName();
-  void enterContext(AsioContext* ctx);
+  void enterContext(context_idx_t ctx_idx);
 
  protected:
   c_WaitableWaitHandle* getBlockedOn();
@@ -493,8 +489,8 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
  public:
   void run();
   String getName();
-  void enterContext(AsioContext* ctx);
-  void exitContext(AsioContext* ctx);
+  void enterContext(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
 
  private:
   void initialize(uint32_t queue, uint32_t priority);

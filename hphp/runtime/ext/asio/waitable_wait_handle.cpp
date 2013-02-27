@@ -24,9 +24,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_WaitableWaitHandle::c_WaitableWaitHandle(const ObjectStaticCallbacks *cb)
-    : c_WaitHandle(cb), m_context(),
-      m_firstParent(nullptr) {
+    : c_WaitHandle(cb), m_firstParent(nullptr) {
   setState(STATE_NEW);
+  setContextIdx(AsioSession::Get()->getCurrentContextIdx());
 }
 
 c_WaitableWaitHandle::~c_WaitableWaitHandle() {
@@ -79,13 +79,14 @@ Array c_WaitableWaitHandle::t_getstacktrace() {
    * where no such parent exists indicates a wait handle that was join()-ed
    * from the parent context.
    */
+  AsioSession* session = AsioSession::Get();
   Array result = Array::Create(this);
   c_WaitableWaitHandle* curr = this;
 
   while (true) {
     // find parent in the same context (context may be null)
-    AsioContext* ctx = curr->getContext();
-    curr = curr->getParentInContext(ctx);
+    context_idx_t ctx_idx = curr->getContextIdx();
+    curr = curr->getParentInContext(ctx_idx);
 
     // continue up the stack within the same context
     if (curr) {
@@ -94,18 +95,18 @@ Array c_WaitableWaitHandle::t_getstacktrace() {
     }
 
     // the whole dependency chain is outside of context
-    if (!ctx) {
+    if (!ctx_idx) {
       return result;
     }
 
     // cross the boundary; keep crossing until non-empty context is found
     do {
-      ctx = ctx->getParent();
+      --ctx_idx;
       result.append(null_variant);
-    } while (ctx && !(curr = ctx->getCurrent()));
+    } while (ctx_idx && !(curr = session->getContext(ctx_idx)->getCurrent()));
 
     // all contexts processed
-    if (!ctx) {
+    if (!ctx_idx) {
       return result;
     }
 
@@ -125,7 +126,6 @@ void c_WaitableWaitHandle::setResult(const TypedValue* result) {
 
   setState(STATE_SUCCEEDED);
   tvDupCell(result, &m_resultOrException);
-  m_context = nullptr;
 
   // unblock parents
   while (m_firstParent) {
@@ -139,7 +139,6 @@ void c_WaitableWaitHandle::setException(ObjectData* exception) {
 
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
-  m_context = nullptr;
 
   // unblock parents
   while (m_firstParent) {
@@ -147,10 +146,10 @@ void c_WaitableWaitHandle::setException(ObjectData* exception) {
   }
 }
 
-c_BlockableWaitHandle* c_WaitableWaitHandle::getParentInContext(AsioContext* context) {
+c_BlockableWaitHandle* c_WaitableWaitHandle::getParentInContext(context_idx_t ctx_idx) {
   c_BlockableWaitHandle* parent = m_firstParent;
 
-  while (parent && parent->getContext() != context) {
+  while (parent && parent->getContextIdx() != ctx_idx) {
     parent = parent->getNextParent();
   }
 
@@ -171,21 +170,21 @@ const TypedValue* c_WaitableWaitHandle::join() {
       throw e;
   }
 
-  AsioContext* ctx = AsioSession::GetCurrentContext();
-  if (!ctx) {
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(!session->isInContext())) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Unable to join wait handle: not in an asio context"));
     throw e;
   }
-  if (ctx->getCurrent()) {
+  if (UNLIKELY(session->getCurrentContext()->isRunning())) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Unable to join wait handle: context busy, another join in progress"));
     throw e;
   }
 
   // not finished, run queue
-  enterContext(ctx);
-  ctx->runUntil(this);
+  enterContext(session->getCurrentContextIdx());
+  session->getCurrentContext()->runUntil(this);
 
   switch (getState()) {
     case STATE_NEW:
@@ -200,6 +199,10 @@ const TypedValue* c_WaitableWaitHandle::join() {
 
   throw FatalErrorException(
       "Invariant violation: join succeeded, but wait handle not ready");
+}
+
+void c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
+  throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

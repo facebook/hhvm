@@ -41,8 +41,8 @@ void c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
 
   // make sure the child is going to do some work
-  if (getContext()) {
-    child->enterContext(getContext());
+  if (isInContext()) {
+    child->enterContext(getContextIdx());
   }
 
   // extend the linked list of parents
@@ -76,21 +76,22 @@ void c_BlockableWaitHandle::failBlock(CObjRef exception) {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
-void c_BlockableWaitHandle::exitContextBlocked(AsioContext* ctx) {
-  assert(ctx);
+void c_BlockableWaitHandle::exitContextBlocked(context_idx_t ctx_idx) {
   assert(getState() == STATE_BLOCKED);
+  assert(AsioSession::Get()->getContext(ctx_idx));
 
   // not in a context being exited
-  if (ctx != getContext()) {
+  assert(getContextIdx() <= ctx_idx);
+  if (getContextIdx() != ctx_idx) {
     return;
   }
 
   // move us to the parent context
-  setContext(ctx->getParent());
+  setContextIdx(getContextIdx() - 1);
 
   // recursively move all wait handles blocked by us
   for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx);
+    pwh->exitContextBlocked(ctx_idx);
   }
 }
 

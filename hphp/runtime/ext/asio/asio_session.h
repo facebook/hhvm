@@ -19,30 +19,70 @@
 #define __EXT_ASIO_SESSION_H__
 
 #include <runtime/base/base_includes.h>
+#include <runtime/ext/asio/asio_context.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class AsioContext;
-FORWARD_DECLARE_CLASS_BUILTIN(Closure);
-FORWARD_DECLARE_CLASS_BUILTIN(Exception);
+FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 
 class AsioSession {
   public:
     static void Init();
+    static inline AsioSession* Get() { return s_current.get(); }
+
+    void* operator new(size_t size) { return smart_malloc(size); }
+    void operator delete(void* ptr) { smart_free(ptr); }
 
     // context
-    static inline AsioContext* GetCurrentContext() { return s_ctx.get(); }
-    static inline void SetCurrentContext(AsioContext* ctx) { s_ctx.set(ctx); }
+    inline void enterContext() {
+      assert(!isInContext() || getCurrentContext()->isRunning());
+      m_contexts.push_back(new AsioContext());
+      assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+    }
+
+    inline void exitContext() {
+      assert(isInContext());
+      m_contexts.back()->exit(m_contexts.size());
+      delete m_contexts.back();
+      m_contexts.pop_back();
+    }
+
+    inline bool isInContext() {
+      return !m_contexts.empty();
+    }
+
+    inline AsioContext* getContext(context_idx_t ctx_idx) {
+      assert(ctx_idx <= m_contexts.size());
+      return ctx_idx ? m_contexts[ctx_idx - 1] : nullptr;
+    }
+
+    inline AsioContext* getCurrentContext() {
+      return m_contexts.empty() ? nullptr : m_contexts.back();
+    }
+
+    inline context_idx_t getCurrentContextIdx() {
+      assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+      return static_cast<context_idx_t>(m_contexts.size());
+    }
+
+    inline c_ContinuationWaitHandle* getCurrentWaitHandle() {
+      return m_contexts.empty() ? nullptr : m_contexts.back()->getCurrent();
+    }
+
+    uint16_t getCurrentWaitHandleDepth();
 
     // callback: on failed
-    static void SetOnFailedCallback(CObjRef on_failed_cb);
-    static void OnFailed(CObjRef exception);
-
+    void setOnFailedCallback(ObjectData* on_failed_callback);
+    void onFailed(CObjRef exception);
 
   private:
-    static DECLARE_THREAD_LOCAL_PROXY(AsioContext, false, s_ctx);
-    static DECLARE_THREAD_LOCAL_PROXY(ObjectData, false, s_on_failed_cb);
+    static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
+
+    AsioSession();
+
+    smart::vector<AsioContext*> m_contexts;
+    ObjectData* m_onFailedCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

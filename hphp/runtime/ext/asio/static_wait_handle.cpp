@@ -31,9 +31,5 @@ void c_StaticWaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
-void c_StaticWaitHandle::enterContext(AsioContext* ctx) {
-  // already in finished state, no context tracking needed
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

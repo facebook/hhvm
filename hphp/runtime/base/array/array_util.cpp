@@ -716,6 +716,9 @@ void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
       }
 
       Walk(directRef(v), walk_function, data, recursive, seen, userdata);
+      if (v.isReferenced()) {
+        seen->erase((void*)arr);
+      }
     } else {
       walk_function(directRef(v), k, userdata, data);
     }

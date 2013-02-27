@@ -21335,6 +21335,10 @@ bool TestCodeRun::TestExtArray() {
       "function fix(&$v, $k) { $v *= 2; }\n"
       "array_walk_recursive($a, 'fix');\n"
       "var_dump($a['foo']);\n");
+  MVCR("<?php\n"
+      "$a = array(array('one'),array('one'));\n"
+      "function test($v, $k) { }\n"
+      "array_walk_recursive($a);\n");
 
   MVCR("<?php "
        "function xsort(&$a) {"

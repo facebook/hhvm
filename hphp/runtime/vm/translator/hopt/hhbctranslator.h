@@ -231,7 +231,7 @@ struct HhbcTranslator {
   void emitUnboxR();
   void emitJmpZ(int32 offset);
   void emitJmpNZ(int32 offset);
-  void emitJmp(int32 offset, bool breakTracelet);
+  void emitJmp(int32 offset, bool breakTracelet, bool noSurprise);
   void emitGt()    { emitCmp(OpGt);    }
   void emitGte()   { emitCmp(OpGte);   }
   void emitLt()    { emitCmp(OpLt);    }

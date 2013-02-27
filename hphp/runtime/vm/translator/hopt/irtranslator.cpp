@@ -517,7 +517,7 @@ TranslatorX64::irTranslatePrint(const Tracelet& t,
 void
 TranslatorX64::irTranslateJmp(const Tracelet& t,
                               const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet);
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, i.noSurprise);
 }
 
 void

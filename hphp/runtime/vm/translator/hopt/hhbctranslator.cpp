@@ -1105,12 +1105,14 @@ void HhbcTranslator::emitDup() {
   pushIncRef(topC());
 }
 
-void HhbcTranslator::emitJmp(int32 offset, bool breakTracelet) {
+void HhbcTranslator::emitJmp(int32 offset,
+                             bool  breakTracelet,
+                             bool  noSurprise) {
   TRACE(3, "%u: Jmp %d\n", m_bcOff, offset);
   spillStack(); //  spill early since every path will need it
   // If surprise flags are set, exit trace and handle surprise
   bool backward = (offset - (int32)m_bcOff) < 0;
-  if (backward) {
+  if (backward && !noSurprise) {
     Trace* exit = getExitSlowTrace();
     m_tb->genExitWhenSurprised(exit);
   }

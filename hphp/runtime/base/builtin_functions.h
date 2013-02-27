@@ -32,7 +32,7 @@
 #include <runtime/base/util/request_local.h>
 #include <util/case_insensitive.h>
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__USE_BSD)
 /**
  * We don't actually use param.h in this file,
  * but other files which use us do, and we want

@@ -557,16 +557,28 @@ D:Obj = LdThis S0:StkPtr [ -> L ]
   in S0 is not, this instruction does not load it into D and transfers
   control to the exit label L.
 
-D:Ctx = LdCtx S0:StkPtr
+D:Ctx = LdCtx S0:StkPtr S1:Func
 
   Loads into D the value of the m_this/m_cls field out of the frame
-  pointer S0.
+  pointer S0 in the function given by S1. The result could be either
+  an object representing the this pointer or a class context.
 
-D:Cls = LdCtxCls S0:StkPtr
+D:Cctx = LdCctx S0:StkPtr
 
   Loads into D the value of the m_cls field out of the frame pointer
-  S0 as a Class pointer. The compiler should generate this only if it
-  can prove that the frame does not contain a $this pointer.
+  S0. The compiler should generate this only if it can prove that the
+  frame does not contain a $this pointer.
+
+D:Cls = LdClsCtx S0:Ctx
+
+  Loads into D the class representing the current context. Extracts
+  the class from the S0, which can be either the this pointer or the
+  context class.
+
+D:Cls = LdClsCctx S0:Cctx
+
+  Loads into D the class representing the current context. Extracts
+  the class from the S0, which is a context class.
 
 D:Home = LdHome S0:StkPtr S1:ConstInt
 

@@ -1772,11 +1772,17 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
                ArgGroup().imm(ch).ssa(methodName));
 }
 
+static void emitLdObjClass(CodeGenerator::Asm& a,
+                           PhysReg objReg,
+                           PhysReg dstReg) {
+  a.loadq  (objReg[ObjectData::getVMClassOffset()], dstReg);
+}
+
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
   auto dstReg = inst->getDst()->getReg();
   auto objReg = inst->getSrc(0)->getReg();
 
-  m_as.  loadq  (objReg[ObjectData::getVMClassOffset()], dstReg);
+  emitLdObjClass(m_as, objReg, dstReg);
 }
 
 void CodeGenerator::cgRetVal(IRInstruction* inst) {
@@ -3177,10 +3183,28 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
 #endif
 }
 
-void CodeGenerator::cgLdCtxCls(IRInstruction* inst) {
-  cgLdCtx(inst);
+static void emitLdClsCctx(CodeGenerator::Asm& a,
+                          PhysReg srcReg,
+                          PhysReg dstReg) {
+  emitMovRegReg(a, srcReg, dstReg);
+  a.    subq(1, dstReg);
+}
+
+void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
+  PhysReg srcReg = inst->getSrc(0)->getReg();
   PhysReg dstReg = inst->getDst()->getReg();
-  m_as.subq(1, dstReg);
+  // Context could be either a this object or a class ptr
+  m_as.   testb(1, rbyte(srcReg));
+  ifThenElse(CC_NZ,
+             [&] { emitLdClsCctx(m_as, srcReg, dstReg);  }, // ctx is a class
+             [&] { emitLdObjClass(m_as, srcReg, dstReg); }  // ctx is this ptr
+            );
+}
+
+void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {
+  PhysReg srcReg = inst->getSrc(0)->getReg();
+  PhysReg dstReg = inst->getDst()->getReg();
+  emitLdClsCctx(m_as, srcReg, dstReg);
 }
 
 void CodeGenerator::cgLdCtx(IRInstruction* inst) {
@@ -3189,6 +3213,10 @@ void CodeGenerator::cgLdCtx(IRInstruction* inst) {
   if (dstReg != InvalidReg) {
     m_as.loadq(srcReg[AROFF(m_this)], dstReg);
   }
+}
+
+void CodeGenerator::cgLdCctx(IRInstruction* inst) {
+  return cgLdCtx(inst);
 }
 
 void CodeGenerator::cgLdConst(IRInstruction* inst) {
@@ -3771,16 +3799,9 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   SSATmp*  srcCtxTmp = inst->getSrc(0);
   const Func* callee = inst->getSrc(1)->getValFunc();
   bool      withThis = srcCtxTmp->isA(Type::Obj);
-  bool        noThis = srcCtxTmp->isA(Type::Cls);
 
   // Eagerly move src into the dest reg
   emitMovRegReg(m_as, srcCtxTmp->getReg(0), destCtxReg);
-
-  // If we're in a static method or we're sure we don't have a This pointer,
-  // then we're done
-  if ((getCurFunc()->attrs() & AttrStatic) || noThis) {
-    return;
-  }
 
   Label End;
   // If we don't know whether we have a This, we need to check dynamically
@@ -3834,7 +3855,8 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   });
 
   auto t = srcCtxTmp->getType();
-  if (t == Type::Cls) {
+  assert(!t.equals(Type::Cls));
+  if (t.equals(Type::Cctx)) {
     return; // done: destCtxReg already has srcCtxReg
   } else if (t == Type::Obj) {
     // unconditionally run code produced by emitGetCtxFwdCallWithThisDyn below

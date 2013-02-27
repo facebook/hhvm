@@ -85,12 +85,11 @@ SSATmp* TraceBuilder::genLdThis(Trace* exitTrace) {
   }
 }
 
-SSATmp* TraceBuilder::genLdCtx() {
-  return gen(LdCtx, m_fpValue);
-}
-
-SSATmp* TraceBuilder::genLdCtxCls() {
-  return gen(LdCtxCls, m_fpValue);
+SSATmp* TraceBuilder::genLdCtx(const Func* func) {
+  if (isThisAvailable()) {
+    return genLdThis(nullptr);
+  }
+  return gen(LdCtx, m_fpValue, genDefConst(func));
 }
 
 SSATmp* TraceBuilder::genLdProp(SSATmp* obj,

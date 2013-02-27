@@ -72,6 +72,9 @@ private:
   SSATmp* simplifyGuardType(IRInstruction* inst);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
+  SSATmp* simplifyLdCtx(IRInstruction*);
+  SSATmp* simplifyLdClsCtx(IRInstruction*);
+  SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
 
 private:
   SSATmp* genDefInt(int64 val);

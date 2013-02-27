@@ -129,6 +129,11 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   case LdCls:        return simplifyLdCls(inst);
 
+  case LdCtx:        return simplifyLdCtx(inst);
+  case LdClsCtx:     return simplifyLdClsCtx(inst);
+  case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
+
+
   case Jmp_:
   case JmpInstanceOf:
   case JmpNInstanceOf:
@@ -143,7 +148,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case GuardLoc:
   case GuardStk:
   case LdThis:
-  case LdCtx:
   case LdLoc:
   case LdMem:
   case LdRef:
@@ -155,7 +159,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case FreeActRec:
   case LdClsMethodCache:
   case LdClsMethodFCache:
-  case GetCtxFwdCall:
   case LdClsMethod:
   case Call:
   case SpillStack:
@@ -227,6 +230,37 @@ static bool hoistGuardToLoad(SSATmp* tmp, Type type) {
       break;
   }
   return false;
+}
+
+SSATmp* Simplifier::simplifyLdCtx(IRInstruction* inst) {
+  const Func* func = inst->getSrc(1)->getValFunc();
+  if (func->isStatic()) {
+    // ActRec->m_cls of a static function is always a valid class pointer with
+    // the bottom bit set
+    return m_tb->gen(LdCctx, inst->getSrc(0));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdClsCtx(IRInstruction* inst) {
+  SSATmp*  ctx = inst->getSrc(0);
+  Type ctxType = ctx->getType();
+  if (ctxType.equals(Type::Obj)) {
+    // this pointer... load its class ptr
+    return m_tb->gen(LdObjClass, ctx);
+  }
+  if (ctxType.equals(Type::Cctx)) {
+    return m_tb->gen(LdClsCctx, ctx);
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyGetCtxFwdCall(IRInstruction* inst) {
+  SSATmp*  srcCtx = inst->getSrc(0);
+  if (srcCtx->isA(Type::Cctx)) {
+    return srcCtx;
+  }
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {

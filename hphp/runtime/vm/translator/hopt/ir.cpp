@@ -677,7 +677,7 @@ void IRInstruction::print(std::ostream& ostream) const {
     if (m_op == StRaw) {
       RawMemSlot& s =
         RawMemSlot::Get(RawMemSlot::Kind(offset->getValInt()));
-      int64 offset = s.getOffset() + getSrc(3)->getValInt();
+      int64 offset = s.getOffset();
       if (offset) {
         ostream << " + " << offset;
       }

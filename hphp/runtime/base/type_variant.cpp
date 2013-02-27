@@ -2502,7 +2502,7 @@ Variant &Variant::lvalInvalid() {
 }
 
 Variant &Variant::lvalBlackHole() {
-  Variant &bh = ((Globals*)get_global_variables())->__lvalProxy;
+  Variant &bh = get_system_globals()->__lvalProxy;
   bh.unset();
   return bh;
 }

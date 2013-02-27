@@ -44,14 +44,9 @@ class c_DebuggerProxyCmdUser : public ExtObjectData {
   public: c_DebuggerProxyCmdUser(const ObjectStaticCallbacks *cb = &cw_DebuggerProxyCmdUser);
   public: ~c_DebuggerProxyCmdUser();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_islocal();
-  DECLARE_METHOD_INVOKE_HELPERS(islocal);
   public: Variant t_send(CObjRef cmd);
-  DECLARE_METHOD_INVOKE_HELPERS(send);
 
-  // implemented by HPHP
-  public: c_DebuggerProxyCmdUser *create();
 
  public:
   Eval::DebuggerProxy *m_proxy;
@@ -79,66 +74,35 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   public: c_DebuggerClientCmdUser(const ObjectStaticCallbacks *cb = &cw_DebuggerClientCmdUser);
   public: ~c_DebuggerClientCmdUser();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_quit();
-  DECLARE_METHOD_INVOKE_HELPERS(quit);
   public: void t_print(int _argc, CStrRef format, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(print);
   public: void t_help(int _argc, CStrRef format, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(help);
   public: void t_info(int _argc, CStrRef format, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(info);
   public: void t_output(int _argc, CStrRef format, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(output);
   public: void t_error(int _argc, CStrRef format, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(error);
   public: void t_code(CStrRef source, int highlight_line = 0, int start_line_no = 0, int end_line_no = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(code);
   public: Variant t_ask(int _argc, CStrRef format, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(ask);
   public: String t_wrap(CStrRef str);
-  DECLARE_METHOD_INVOKE_HELPERS(wrap);
   public: void t_helptitle(CStrRef str);
-  DECLARE_METHOD_INVOKE_HELPERS(helptitle);
   public: void t_helpcmds(int _argc, CStrRef cmd, CStrRef desc, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(helpcmds);
   public: void t_helpbody(CStrRef str);
-  DECLARE_METHOD_INVOKE_HELPERS(helpbody);
   public: void t_helpsection(CStrRef str);
-  DECLARE_METHOD_INVOKE_HELPERS(helpsection);
   public: void t_tutorial(CStrRef str);
-  DECLARE_METHOD_INVOKE_HELPERS(tutorial);
   public: String t_getcode();
-  DECLARE_METHOD_INVOKE_HELPERS(getcode);
   public: String t_getcommand();
-  DECLARE_METHOD_INVOKE_HELPERS(getcommand);
   public: bool t_arg(int index, CStrRef str);
-  DECLARE_METHOD_INVOKE_HELPERS(arg);
   public: int64 t_argcount();
-  DECLARE_METHOD_INVOKE_HELPERS(argcount);
   public: String t_argvalue(int index);
-  DECLARE_METHOD_INVOKE_HELPERS(argvalue);
   public: String t_linerest(int index);
-  DECLARE_METHOD_INVOKE_HELPERS(linerest);
   public: Array t_args();
-  DECLARE_METHOD_INVOKE_HELPERS(args);
   public: Variant t_send(CObjRef cmd);
-  DECLARE_METHOD_INVOKE_HELPERS(send);
   public: Variant t_xend(CObjRef cmd);
-  DECLARE_METHOD_INVOKE_HELPERS(xend);
   public: Variant t_getcurrentlocation();
-  DECLARE_METHOD_INVOKE_HELPERS(getcurrentlocation);
   public: Variant t_getstacktrace();
-  DECLARE_METHOD_INVOKE_HELPERS(getstacktrace);
   public: int64 t_getframe();
-  DECLARE_METHOD_INVOKE_HELPERS(getframe);
   public: void t_printframe(int index);
-  DECLARE_METHOD_INVOKE_HELPERS(printframe);
   public: void t_addcompletion(CVarRef list);
-  DECLARE_METHOD_INVOKE_HELPERS(addcompletion);
 
-  // implemented by HPHP
-  public: c_DebuggerClientCmdUser *create();
   static const ClassPropTable os_prop_table;
 
  public:
@@ -163,16 +127,10 @@ class c_DebuggerClient : public ExtObjectData, public Sweepable {
   public: c_DebuggerClient(const ObjectStaticCallbacks *cb = &cw_DebuggerClient);
   public: ~c_DebuggerClient();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: int64 t_getstate();
-  DECLARE_METHOD_INVOKE_HELPERS(getstate);
   public: Variant t_init(CVarRef options);
-  DECLARE_METHOD_INVOKE_HELPERS(init);
   public: Variant t_processcmd(CVarRef cmdName, CVarRef args);
-  DECLARE_METHOD_INVOKE_HELPERS(processcmd);
 
-  // implemented by HPHP
-  public: c_DebuggerClient *create();
   static const ClassPropTable os_prop_table;
 
  public:

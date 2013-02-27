@@ -1460,36 +1460,6 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.done();
 }
 
-void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
-  string clsStr = getId();
-  const char *clsName = clsStr.c_str();
-  cg_printf("ObjectData *%s%s(%s) NEVER_INLINE;\n",
-            Option::CreateObjectOnlyPrefix, clsName,
-            isRedeclaring() && derivedByDynamic() ?
-            "ObjectData *root = NULL" : "");
-}
-
-void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
-  cg_printf("Object create_object_only("
-            "CStrRef s, ObjectData *root);\n");
-  cg_printf("ObjectData *create_object_only_no_init("
-            "CStrRef s, ObjectData *root);\n");
-}
-
-void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
-                                           AnalysisResultPtr ar) {
-  string clsStr = getId();
-  const char *clsName = clsStr.c_str();
-  cg_indentBegin("ObjectData *%s%s(%s) {\n",
-                 Option::CreateObjectOnlyPrefix, clsName,
-                 isRedeclaring() && derivedByDynamic() ?
-                 "ObjectData *root /* = NULL */" : "");
-  cg_printf("return NEWOBJ(%s%s)(%s);\n",
-            Option::ClassPrefix, clsName,
-            isRedeclaring() && derivedByDynamic() ? "root" : "");
-  cg_indentEnd("}\n");
-}
-
 void ClassScope::outputCPPHashTableClasses
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
@@ -1633,42 +1603,6 @@ void ClassScope::outputCPPClassVarInitImpl
             "return LIKELY(cwo != 0) ? "
             "cwo->os_getInit(var) : throw_missing_class(s);\n",
             !classes.size() ? "builtin_" : "");
-  cg_indentEnd("}\n");
-}
-
-void ClassScope::outputCPPDynamicClassCreateImpl
-(CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
- const vector<const char*> &classes) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool withEval = !system && Option::EnableEval == Option::FullEval;
-
-  // output create_object_only_no_init()
-  cg_indentBegin("ObjectData *create%s_object_only_no_init(CStrRef s, "
-                 "ObjectData* root /* = NULL*/) {\n",
-                 system ?  "_builtin" : "");
-  if (withEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("if (ObjectData * r = eval_create_object_only_hook(s, root)) "
-              "return r;\n");
-    cg_indentEnd("}\n");
-  }
-  cg_printf("const ObjectStaticCallbacks *cwo = "
-            "get_%sobject_static_callbacks(s);\n"
-            "if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);\n"
-            "return 0;\n",
-            system || !classes.size() ? "builtin_" : "");
-  cg_indentEnd("}\n");
-  // output create_object_only()
-  cg_indentBegin("Object create%s_object_only(CStrRef s, "
-                 "ObjectData* root /* = NULL*/) {\n",
-                 system ?  "_builtin" : "");
-  cg_printf("ObjectData *obj = create%s_object_only_no_init(s, root);\n",
-            system ? "_builtin" : "");
-  cg_printf("if (UNLIKELY(!obj)) throw_missing_class(s);\n");
-  cg_printf("Object r = obj;\n");
-  cg_printf("obj->init();\n");
-  cg_printf("return r;\n");
   cg_indentEnd("}\n");
 }
 
@@ -2540,7 +2474,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
 
   if (static_inits.size()) {
     ClassPropTableMap::const_iterator iter = tables.begin();
-    cg_printf("const Globals::StaticInits %sstatic_initializer("
+    cg_printf("//const Globals::StaticInits %sstatic_initializer("
               "&%s%s::%sprop_table, %shash_entries+%d);\n",
               Option::ClassPropTablePrefix,
               Option::ClassPrefix, iter->first.c_str(),
@@ -2828,159 +2762,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     }
   }
 
-  // instanceof
-  {
-    vector<string> bases;
-    getAllParents(ar, bases);
-    // Eliminate duplicates
-    sort(bases.begin(), bases.end());
-    bases.erase(unique(bases.begin(), bases.end()), bases.end());
-    vector<const char *> ancestors;
-    // Convert to char * and add self
-    ancestors.push_back(m_name.c_str());
-    for (unsigned int i = 0; i < bases.size(); i++) {
-      ancestors.push_back(bases[i].c_str());
-    }
-    cg_indentBegin("extern const InstanceOfInfo %s%s%sinstanceof_table[] = {\n",
-                   Option::ClassStaticsCallbackPrefix, clsName,
-                   Option::IdPrefix.c_str());
-    vector<int> offsets;
-    int n = 0;
-    JumpTable jt(cg, ancestors, true, false, true, true);
-    for (; jt.ready(); ++n, jt.next()) {
-      unsigned cur = jt.current();
-      if (offsets.size() <= cur) {
-        offsets.resize(cur, -1);
-        offsets.push_back(n);
-      }
-      const char *name = jt.key();
-      ClassScopePtr cls;
-      bool knownClass;
-      if (name == m_name) {
-        cls = static_pointer_cast<ClassScope>(shared_from_this());
-        knownClass = true;
-      } else {
-         cls = ar->findClass(name);
-         knownClass = !cls->isRedeclaring();
-      }
-      if (knownClass) {
-        name = cls->getOriginalName().c_str();
-      }
-      cg_printf("{" STRHASH_FMT ",%d,\"%s\",",
-                hash_string_i(name), jt.last(),
-                CodeGenerator::EscapeLabel(name).c_str());
-      if (knownClass) {
-        if (cls->isInterface()) {
-          cg_printf("(const ObjectStaticCallbacks*)2},\n");
-        } else {
-          cg_printf("&%s%s%s},\n",
-                    Option::ClassStaticsCallbackPrefix,
-                    cls->getId().c_str(),
-                    cls->isRedeclaring() ? ".oscb" : "");
-        }
-      } else {
-        cg_printf("(const ObjectStaticCallbacks*)"
-                  "(offsetof(GlobalVariables, %s%s)+1)},\n",
-                  Option::ClassStaticsCallbackPrefix,
-                  CodeGenerator::FormatLabel(Util::toLower(name)).c_str());
-      }
-    }
-    cg_indentEnd("};\n");
-    cg_indentBegin("const int %s%s%sinstanceof_index[] = {\n",
-                   Option::ClassStaticsCallbackPrefix, clsName,
-                   Option::IdPrefix.c_str());
-    cg_printf("%d,\n", jt.size() - 1);
-    for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
-      cg_printf("%d,", i < s ? offsets[i] : -1);
-      if ((i & 7) == 7) cg_printf("\n");
-    }
-    cg_printf("\n");
-    cg_indentEnd("};\n");
-  }
-
-  // doCall
-  if (getAttribute(ClassScope::HasUnknownMethodHandler)) {
-    cg_indentBegin("Variant %s%s::doCall(Variant v_name, Variant "
-                   "v_arguments, bool fatal) {\n",
-                   Option::ClassPrefix, clsName);
-    cg_printf("return t___call(v_name, !v_arguments.isNull() ? "
-              "v_arguments : Variant(Array::Create()));\n");
-    cg_indentEnd("}\n");
-  }
-
-  if (isRedeclaring() && !derivesFromRedeclaring() && derivedByDynamic()) {
-    cg_indentBegin("Variant %s%s::doRootCall(Variant v_name, Variant "
-                   "v_arguments, bool fatal) {\n",
-                   Option::ClassPrefix, clsName);
-    cg_printf("return root->doCall(v_name, v_arguments, fatal);\n");
-    cg_indentEnd("}\n");
-  }
-
-  // Invoke tables
-  if (Option::GenerateCPPMacros) {
-    bool hasRedec;
-    outputCPPCallInfoTableSupport(cg, ar, 0, hasRedec);
-    outputCPPHelperClassAllocSupport(cg, ar, 0);
-    vector<const char *> funcs;
-    findJumpTableMethods(cg, ar, funcs);
-    outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, false);
-    outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, true);
-    if (getAttribute(ClassScope::HasInvokeMethod)) {
-      // see above - closure does not need the bare object support,
-      // since we already have generated such a function (the
-      // closure function itself)
-      if (strcasecmp(clsName, "closure")) {
-        FunctionScopePtr func(findFunction(ar, "__invoke", false));
-        assert(func);
-        if (!func->isAbstract()) {
-          outputCPPMethodInvokeBareObjectSupport(cg, ar, func, false);
-          outputCPPMethodInvokeBareObjectSupport(cg, ar, func, true);
-        }
-      }
-    }
-    if (classNameCtor()) {
-      funcs.push_back("__construct");
-    }
-    if (funcs.size() || derivesFromRedeclaring()) {
-      outputCPPMethodInvokeTable(cg, ar, funcs, m_functions, false, true);
-    } else {
-      m_emptyJumpTables.insert(JumpTableCallInfo);
-    }
-  }
-
-  // __invoke
-  if (getAttribute(ClassScope::HasInvokeMethod)) {
-    FunctionScopePtr func = findFunction(ar, "__invoke", false);
-    assert(func);
-    if (!func->isAbstract()) {
-      // the closure class will generate its own version of
-      // t___invokeCallInfoHelper, which will avoid a level
-      // of indirection
-      if (strcasecmp(clsName, "closure")) {
-        cg_indentBegin("const CallInfo *"
-                       "%s%s::t___invokeCallInfoHelper(void *&extra) {\n",
-                       Option::ClassPrefix, clsName);
-        cg_printf("extra = (void*) this;\n");
-        cg_printf("return &%s%s%s__invoke;\n",
-                  Option::CallInfoWrapperPrefix,
-                  clsName,
-                  Option::IdPrefix.c_str());
-        cg_indentEnd("}\n");
-      }
-    }
-  }
-
-  // Create method
-  if (getAttribute(ClassScope::HasConstructor) ||
-      getAttribute(ClassScope::ClassNameConstructor)) {
-    FunctionScopePtr func = findConstructor(ar, false);
-    if (func && !func->isAbstract() && !isInterface()) {
-      // abstract methods are not generated, neither should the create method
-      // for an abstract constructor
-      func->outputCPPCreateImpl(cg, ar);
-    }
-  }
-
   outputCPPGlobalTableWrappersImpl(cg, ar);
 }
 
@@ -3028,70 +2809,15 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
   string prop = getClassPropTableId(ar);
-  string constructor = "0,";
-  if (!isInterface()) {
-    FunctionScopeRawPtr fs = findConstructor(ar, true);
-    if (fs && !fs->isAbstract()) {
-      constructor =
-        Option::CallInfoPrefix +
-        fs->getContainingClass()->getId() +
-        Option::IdPrefix +
-        CodeGenerator::FormatLabel(fs->getName());
 
-      if (fs->getContainingClass().get() != this) {
-        cg_printf("extern const CallInfo %s;\n", constructor.c_str());
-      }
-      constructor = "&" + constructor + ",";
-    }
-  }
-
-  bool hasCallInfo = hasJumpTableMethods(cg, ar);
-  if (hasCallInfo) {
-    cg_printf("extern const MethodCallInfoTable %s%s%scall_info_table[];\n",
-              Option::ClassStaticsCallbackPrefix, id.c_str(),
-              Option::IdPrefix.c_str());
-    cg_printf("extern const int %s%s%scall_info_index[];\n",
-              Option::ClassStaticsCallbackPrefix, id.c_str(),
-              Option::IdPrefix.c_str());
-  }
-  cg_printf("extern const InstanceOfInfo %s%s%sinstanceof_table[];\n",
-            Option::ClassStaticsCallbackPrefix, id.c_str(),
-            Option::IdPrefix.c_str());
-  cg_printf("extern const int %s%s%sinstanceof_index[];\n",
-            Option::ClassStaticsCallbackPrefix, id.c_str(),
-            Option::IdPrefix.c_str());
-
-  cg_indentBegin("const %sObjectStaticCallbacks %s%s = {\n",
-                 isRedeclaring() ? "Redeclared" : "",
+  always_assert(!isRedeclaring());
+  cg_indentBegin("const ObjectStaticCallbacks %s%s = {\n",
                  Option::ClassStaticsCallbackPrefix, id.c_str());
-  if (isRedeclaring()) {
-    cg_indentBegin("{\n");
-  }
 
   if (!isInterface()) {
-    cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
-              Option::CreateObjectOnlyPrefix, id.c_str());
-  } else {
-    cg_printf("0,");
-  }
-  if (hasCallInfo) {
-    cg_printf("%s%s%scall_info_table,%s%s%scall_info_index,\n",
-              Option::ClassStaticsCallbackPrefix, id.c_str(),
-              Option::IdPrefix.c_str(),
-              Option::ClassStaticsCallbackPrefix, id.c_str(),
-              Option::IdPrefix.c_str());
-  } else {
-    cg_printf("0,0,\n");
-  }
-  if (!isInterface()) {
-    cg_printf("%s%s%sinstanceof_table,%s%s%sinstanceof_index,\n",
-              Option::ClassStaticsCallbackPrefix, id.c_str(),
-              Option::IdPrefix.c_str(),
-              Option::ClassStaticsCallbackPrefix, id.c_str(),
-              Option::IdPrefix.c_str());
     cg_printf("&%s%s::s_class_name,\n", Option::ClassPrefix, id.c_str());
   } else {
-    cg_printf("0,0,0,\n");
+    cg_printf("0,\n");
   }
   if (prop.empty()) {
     cg_printf("0,");
@@ -3101,25 +2827,9 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
               Option::ObjectStaticPrefix);
   }
 
-  cg_printf("%s", constructor.c_str());
+  always_assert(derivesFromRedeclaring() == FromNormal);
 
-  ClassScopeRawPtr par;
-  if (derivesFromRedeclaring() != FromNormal) {
-    par = ClassScopeRawPtr(this);
-    do {
-      par = par->getParentScope(ar);
-    } while (par && !par->isRedeclaring());
-  }
-  if (par) {
-    cg_printf("offsetof(GlobalVariables, %s%s),",
-              Option::ClassStaticsCallbackPrefix,
-              CodeGenerator::FormatLabel(par->m_name).c_str());
-  } else {
-    cg_printf("0,");
-  }
-
-  if (derivesFromRedeclaring() != DirectFromRedeclared &&
-      (par = getParentScope(ar))) {
+  if (ClassScopePtr par = getParentScope(ar)) {
     cg_printf("&%s%s",
               Option::ClassStaticsCallbackPrefix, par->getId().c_str());
   } else {
@@ -3144,10 +2854,6 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
     cg_printf("&%s%s::s_cls\n", Option::ClassPrefix, id.c_str());
   }
 
-  if (isRedeclaring()) {
-    cg_indentEnd("},\n");
-    cg_printf("%d\n", m_redeclaring);
-  }
   cg_indentEnd("};\n");
 }
 
@@ -3339,73 +3045,6 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     }
     cg_indentEnd("}\n");
   }
-}
-
-void ClassScope::outputCPPMethodInvokeTable(
-  CodeGenerator &cg, AnalysisResultPtr ar,
-  const vector<const char*> &keys,
-  const StringToFunctionScopePtrMap &funcScopes,
-  bool fewArgs, bool staticOnly) {
-  ClassScopePtr self = dynamic_pointer_cast<ClassScope>(shared_from_this());
-
-  string clsid = self->getId();
-  JumpTable jt(cg, keys, true, true, true, true);
-  vector<int> offsets;
-  cg_indentBegin("extern const MethodCallInfoTable "
-                 "%s%s%scall_info_table[] = {\n",
-                 Option::ClassStaticsCallbackPrefix, clsid.c_str(),
-                 Option::IdPrefix.c_str());
-  for (int n = 0; jt.ready(); ++n, jt.next()) {
-    unsigned cur = jt.current();
-    if (offsets.size() <= cur) {
-      offsets.resize(cur, -1);
-      offsets.push_back(n);
-    }
-    const char *name = jt.key();
-    string lname = CodeGenerator::FormatLabel(name);
-    StringToFunctionScopePtrMap::const_iterator iterFuncs =
-      funcScopes.find(name);
-    FunctionScopePtr func;
-    string origName;
-    if (iterFuncs == funcScopes.end()) {
-      always_assert(classNameCtor() && !strcmp(name, "__construct"));
-      func = findConstructor(ar, false);
-      lname = CodeGenerator::FormatLabel(func->getName());
-      origName = name;
-    } else {
-      func = iterFuncs->second;
-      origName = func->getOriginalName();
-    }
-    if (fewArgs &&
-        func->getMinParamCount() > Option::InvokeFewArgsCount) {
-      continue;
-    }
-    string id = func->getContainingClass()->getId();
-    int index = -1;
-    cg.checkLiteralString(origName, index, ar, shared_from_this());
-    cg_printf("{ " STRHASH_FMT ", %d, %d, \"%s\", &%s%s%s%s },\n",
-              hash_string_i(origName.c_str()),
-              jt.last(),
-              (int)origName.size(),
-              CodeGenerator::EscapeLabel(origName).c_str(),
-              Option::CallInfoPrefix, id.c_str(),
-              Option::IdPrefix.c_str(), lname.c_str());
-  }
-  cg_indentEnd("};\n");
-  cg_indentBegin("extern const int %s%s%scall_info_index[] = {\n",
-                 Option::ClassStaticsCallbackPrefix, clsid.c_str(),
-                 Option::IdPrefix.c_str());
-  if (!jt.size()) {
-    cg_printf("0,-1");
-  } else {
-    cg_printf("%d,\n", jt.size() - 1);
-    for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
-      cg_printf("%d,", i < s ? offsets[i] : -1);
-      if ((i & 7) == 7) cg_printf("\n");
-    }
-  }
-  cg_printf("\n");
-  cg_indentEnd("};\n");
 }
 
 void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,

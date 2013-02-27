@@ -174,9 +174,7 @@ public:
                           std::string &text);
   int checkScalarArray(const std::string &text, int &index);
   int getScalarArrayId(const std::string &text);
-  void outputCPPNamedScalarArrays(const std::string &file);
 
-  std::string getScalarArrayCompressedText();
   std::string getScalarArrayName(int hash, int index);
   std::string getScalarVarArrayName(int hash, int index);
 
@@ -215,17 +213,9 @@ public:
 
   void outputCPPSystemImplementations(CodeGenerator &cg);
   void getCPPFileRunDecls(CodeGenerator &cg, Type2SymbolSetMap &type2names);
-  void getCPPRedeclaredFunctionDecl(CodeGenerator &cg,
-                                    Type2SymbolSetMap &type2names);
-  void getCPPRedeclaredClassDecl(CodeGenerator &cg,
-                                 Type2SymbolSetMap &type2names);
-  void outputCPPRedeclaredClassImpl(CodeGenerator &cg);
   void getCPPDynamicConstantDecl(CodeGenerator &cg,
                                  Type2SymbolSetMap &type2names);
   void outputCPPDynamicConstantImpl(CodeGenerator &cg);
-  void outputCPPScalarArrayDecl(CodeGenerator &cg);
-  void outputCPPScalarArrayImpl(CodeGenerator &cg);
-  void outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount, int part);
   void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index,
                               bool scalarVariant = false);
   void getCPPClassStaticInitializerFlags(CodeGenerator &cg,
@@ -352,11 +342,6 @@ public:
 
   std::vector<const char *> &getFuncTableBucket(FunctionScopePtr func);
 
-  /**
-   * Generate default implementation for separable extension classes.
-   */
-  void outputCPPSepExtensionImpl(const std::string &filename);
-
   void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
   void outputCPPFileImpl(CodeGenerator &cg, FileScopePtr fs);
 
@@ -448,7 +433,6 @@ public:
   void outputCPPUtilImpl(CodeGenerator::Output output);
   void outputCPPGlobalDeclarations();
   void outputCPPMain();
-  void outputCPPScalarArrays(bool system);
   void outputCPPGlobalVariablesMethods();
   void outputCPPGlobalState();
 
@@ -530,8 +514,6 @@ private:
    * cpp code for each toplevel function.
    */
   void createGlobalFuncTable();
-
-  void outputCPPScalarArrays(CodeGenerator &cg, int fileCount, int part);
 
   void collectCPPGlobalSymbols(StringPairSetVec &symbols,
                                CodeGenerator &cg);

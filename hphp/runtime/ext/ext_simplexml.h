@@ -51,52 +51,28 @@ class c_SimpleXMLElement :
   public: c_SimpleXMLElement(const ObjectStaticCallbacks *cb = &cw_SimpleXMLElement);
   public: ~c_SimpleXMLElement();
   public: void t___construct(CStrRef data, int64 options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_offsetexists(CVarRef index);
-  DECLARE_METHOD_INVOKE_HELPERS(offsetexists);
   public: Variant t_offsetget(CVarRef index);
-  DECLARE_METHOD_INVOKE_HELPERS(offsetget);
   public: void t_offsetset(CVarRef index, CVarRef newvalue);
-  DECLARE_METHOD_INVOKE_HELPERS(offsetset);
   public: void t_offsetunset(CVarRef index);
-  DECLARE_METHOD_INVOKE_HELPERS(offsetunset);
   public: Variant t_getiterator();
-  DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: int64 t_count();
-  DECLARE_METHOD_INVOKE_HELPERS(count);
   public: Variant t_xpath(CStrRef path);
-  DECLARE_METHOD_INVOKE_HELPERS(xpath);
   public: bool t_registerxpathnamespace(CStrRef prefix, CStrRef ns);
-  DECLARE_METHOD_INVOKE_HELPERS(registerxpathnamespace);
   public: Variant t_asxml(CStrRef filename = "");
-  DECLARE_METHOD_INVOKE_HELPERS(asxml);
   public: Array t_getnamespaces(bool recursive = false);
-  DECLARE_METHOD_INVOKE_HELPERS(getnamespaces);
   public: Array t_getdocnamespaces(bool recursive = false);
-  DECLARE_METHOD_INVOKE_HELPERS(getdocnamespaces);
   public: Object t_children(CStrRef ns = "", bool is_prefix = false);
-  DECLARE_METHOD_INVOKE_HELPERS(children);
   public: String t_getname();
-  DECLARE_METHOD_INVOKE_HELPERS(getname);
   public: Object t_attributes(CStrRef ns = "", bool is_prefix = false);
-  DECLARE_METHOD_INVOKE_HELPERS(attributes);
   public: Variant t_addchild(CStrRef qname, CStrRef value = null_string, CStrRef ns = null_string);
-  DECLARE_METHOD_INVOKE_HELPERS(addchild);
   public: void t_addattribute(CStrRef qname, CStrRef value = null_string, CStrRef ns = null_string);
-  DECLARE_METHOD_INVOKE_HELPERS(addattribute);
   public: String t___tostring();
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   public: Variant t___get(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
-  DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___unset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__unset);
 
-  // implemented by HPHP
-  public: c_SimpleXMLElement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
 
  public:
   Object m_doc;
@@ -129,10 +105,7 @@ class c_LibXMLError : public ExtObjectData {
   public: c_LibXMLError(const ObjectStaticCallbacks *cb = &cw_LibXMLError);
   public: ~c_LibXMLError();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
 
-  // implemented by HPHP
-  public: c_LibXMLError *create();
 
 };
 
@@ -148,20 +121,12 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
   public: c_SimpleXMLElementIterator(const ObjectStaticCallbacks *cb = &cw_SimpleXMLElementIterator);
   public: ~c_SimpleXMLElementIterator();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t_current();
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   public: Variant t_key();
-  DECLARE_METHOD_INVOKE_HELPERS(key);
   public: Variant t_next();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
   public: Variant t_rewind();
-  DECLARE_METHOD_INVOKE_HELPERS(rewind);
   public: Variant t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
 
-  // implemented by HPHP
-  public: c_SimpleXMLElementIterator *create();
 
 public:
   void set_parent(c_SimpleXMLElement* parent);

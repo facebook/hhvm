@@ -70,13 +70,13 @@ class SystemLib {
   static ObjectData* AllocInvalidOperationExceptionObject(CVarRef message);
   static ObjectData* AllocDOMExceptionObject(CVarRef message,
                                              CVarRef code);
+  static ObjectData* AllocDirectoryObject();
+  static ObjectData* AllocRecursiveDirectoryIteratorObject();
+  static ObjectData* AllocSplFileInfoObject(CVarRef filename);
   static ObjectData* AllocSplFileObjectObject(CVarRef filename,
                                               CVarRef open_mode,
                                               CVarRef use_include_path,
                                               CVarRef context);
-  static ObjectData* AllocDirectoryObject();
-  static ObjectData* AllocRecursiveDirectoryIteratorObject();
-  static ObjectData* AllocSplFileInfoObject();
   static ObjectData* AllocPDOExceptionObject();
   static ObjectData* AllocSoapFaultObject(CVarRef code,
                                           CVarRef message,

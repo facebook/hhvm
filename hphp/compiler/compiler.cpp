@@ -150,7 +150,6 @@ int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread);
 int buildTarget(const CompilerOptions &po);
 int runTarget(const CompilerOptions &po);
-int generateSepExtCpp(const CompilerOptions &po, AnalysisResultPtr ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -710,9 +709,6 @@ int process(const CompilerOptions &po) {
     ret = runTargetCheck(po, ar, fileCacheThread);
   } else if (po.target == "filecache") {
     // do nothing
-  } else if (po.target == "sep-ext-cpp") {
-    ar->setSepExtension();
-    ret = generateSepExtCpp(po, ar);
   } else {
     Logger::Error("Unknown target: %s", po.target.c_str());
     return 1;
@@ -1020,13 +1016,6 @@ int cppTarget(const CompilerOptions &po, AnalysisResultPtr ar,
   }
 
   return ret;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-int generateSepExtCpp(const CompilerOptions &po, AnalysisResultPtr ar) {
-  ar->outputCPPSepExtensionImpl(po.outputFile);
-  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

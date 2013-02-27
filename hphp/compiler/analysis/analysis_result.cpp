@@ -1724,68 +1724,6 @@ int AnalysisResult::getScalarArrayId(const string &text) {
   return iter->second;
 }
 
-void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
-  AnalysisResultPtr ar = shared_from_this();
-
-  string filename = file + ".no.cpp";
-  ofstream f(filename.c_str());
-  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
-
-  cg_printf("\n");
-  cg_printInclude("<runtime/base/hphp.h>");
-  if (Option::SystemGen) {
-    cg_printInclude("<system/gen/sys/scalar_arrays_remap.h>");
-  } else {
-    cg_printInclude("<sys/scalar_arrays_remap.h>");
-  }
-  if (Option::UseScalarVariant && !Option::SystemGen) {
-    cg_printInclude("<sys/scalar_integers_remap.h>");
-  }
-  if (!Option::SystemGen) {
-    cg_printInclude("<sys/global_variables.h>");
-  }
-  cg_printf("\n");
-  cg.namespaceBegin();
-  for (map<int, vector<string> >::const_iterator it =
-       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
-       it++) {
-    int hash = it->first;
-    const vector<string> &strings = it->second;
-    for (unsigned int i = 0; i < strings.size(); i++) {
-      string name = getScalarArrayName(hash, i);
-      cg_printf("StaticArray %s;\n", name.c_str());
-      if (m_namedScalarVarArrays.find(strings[i]) !=
-          m_namedScalarVarArrays.end()) {
-        cg_printf("VarNR %s;\n", getScalarVarArrayName(hash, i).c_str());
-      }
-    }
-  }
-  cg_printf("\n");
-  const char *clsname =
-    Option::SystemGen ? "SystemScalarArrays" : "ScalarArrays";
-  const char *prefix = Option::SystemGen ? Option::SystemScalarArrayName :
-    Option::ScalarArrayName;
-  cg_indentBegin("void %s::initializeNamed() {\n", clsname);
-  for (map<int, vector<string> >::const_iterator it =
-       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
-       it++) {
-    int hash = it->first;
-    const vector<string> &strings = it->second;
-    for (unsigned int i = 0; i < strings.size(); i++) {
-      string name = getScalarArrayName(hash, i);
-      int id = getScalarArrayId(strings[i]);
-      cg_printf("%s = %s[%d];\n", name.c_str(), prefix, id);
-      if (m_namedScalarVarArrays.find(strings[i]) !=
-          m_namedScalarVarArrays.end()) {
-        cg_printf("new (&%s) VarNR(%s);\n",
-                  getScalarVarArrayName(hash, i).c_str(), name.c_str());
-      }
-    }
-  }
-  cg_indentEnd("}\n");
-  cg.namespaceEnd();
-}
-
 void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
   if (m_namedScalarVarIntegers.size() == 0) return;
 
@@ -2437,7 +2375,6 @@ DECLARE_JOB(UtilDecl,     outputCPPUtilDecl(m_output));
 DECLARE_JOB(UtilImpl,     outputCPPUtilImpl(m_output));
 DECLARE_JOB(GlobalDecl,   outputCPPGlobalDeclarations());
 DECLARE_JOB(Main,         outputCPPMain());
-DECLARE_JOB(ScalarArrays, outputCPPScalarArrays(false));
 DECLARE_JOB(GlobalVarMeth,outputCPPGlobalVariablesMethods());
 DECLARE_JOB(GlobalState,  outputCPPGlobalState());
 
@@ -2499,9 +2436,8 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
       if (output == CodeGenerator::SystemCPP) {
         // If we are generating the system files, suppress output of everything
-        // except for constants.php and symbols.php
-        if (f->getName() != "globals/constants.php" &&
-            f->getName() != "globals/symbols.php") {
+        // except for constants.php
+        if (f->getName() != "globals/constants.php") {
           continue;
         }
       }
@@ -2585,7 +2521,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     if (output != CodeGenerator::SystemCPP && Option::GenerateCPPMain) {
       SCHEDULE_JOB(GlobalDecl);
       SCHEDULE_JOB(Main);
-      SCHEDULE_JOB(ScalarArrays);
       SCHEDULE_JOB(GlobalVarMeth);
       SCHEDULE_JOB(GlobalState);
     }
@@ -2610,11 +2545,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     string file = m_outputPath + "/" + Option::SystemFilePrefix +
       "literal_strings";
     outputCPPNamedLiteralStrings(false, file);
-    if (Option::UseNamedScalarArray) {
-      string file = m_outputPath + "/" + Option::SystemFilePrefix +
-        "scalar_arrays";
-      outputCPPNamedScalarArrays(file);
-    }
     if (Option::UseScalarVariant) {
       string file = m_outputPath + "/" + Option::SystemFilePrefix +
         "scalar_integers";
@@ -2635,20 +2565,17 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
   for (StringToClassScopePtrMap::const_iterator iter = m_systemClasses.begin();
        iter != m_systemClasses.end(); ++iter) {
     ClassScopePtr cls = iter->second;
-    bool extension = cls->getAttribute(ClassScope::Extension);
     if (cls->isInterface()) continue;
 
     classes.push_back(cls->getOriginalName().c_str());
     merged[cls->getName()].push_back(cls);
-    cls->outputCPPDynamicClassImpl(cg, ar);
-    if (extension) {
+    if (cls->getAttribute(ClassScope::Extension)) {
       cls->outputCPPSupportMethodsImpl(cg, ar);
     }
   }
 
   ClassScope::outputCPPHashTableClasses(cg, merged, classes);
   ClassScope::outputCPPClassVarInitImpl(cg, merged, classes);
-  ClassScope::outputCPPDynamicClassCreateImpl(cg, merged, classes);
   ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, merged, classes);
   ClassScope::outputCPPGetStaticPropertyImpl(cg, merged, classes);
   ClassScope::outputCPPGetClassConstantImpl(cg, merged);
@@ -3098,7 +3025,7 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
 
   const char text3[] =
     "pm_t ptr = findFile(s.c_str(), s->hash());\n"
-    "if (ptr) return ptr(once, variables, get_globals());\n";
+    "if (ptr) return ptr(once, variables, get_global_variables());\n";
 
   const char text4[] =
   "  return throw_missing_file(s.c_str());\n"
@@ -3135,7 +3062,6 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
 void AnalysisResult::outputCPPDynamicClassTables(
   CodeGenerator::Output output) {
   AnalysisResultPtr ar = shared_from_this();
-  bool system = output == CodeGenerator::SystemCPP;
   string n;
   string tablePath =
     m_outputPath + "/" + Option::SystemFilePrefix + "dynamic_table_class.cpp";
@@ -3146,47 +3072,7 @@ void AnalysisResult::outputCPPDynamicClassTables(
 
   outputCPPDynamicTablesHeader(cg, true, false);
   cg.printSection("Class Invoke Tables");
-  vector<const char*> classes;
-  ClassScopePtr cls;
-  StringToClassScopePtrVecMap classScopes;
-  if (!system) {
-    for (StringToClassScopePtrVecMap::const_iterator iter =
-           m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-      if (iter->second.size()) {
-        for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
-             iter2 != iter->second.end(); ++iter2) {
-          cls = *iter2;
-          if (cls->isUserClass() &&
-              (!cls->isInterface() || cls->checkHasPropTable(ar))) {
-            classes.push_back(cls->getOriginalName().c_str());
-            classScopes[cls->getName()].push_back(cls);
-            if (!cls->isRedeclaring()) {
-              cls->outputCPPGlobalTableWrappersDecl(cg, ar);
-            }
-            break;
-          }
-        }
-      }
-    }
-  }
-  if (system) {
-    outputCPPExtClassImpl(cg);
-  } else {
-    BOOST_FOREACH(tie(n, cls), m_systemClasses) {
-      if (!cls->isInterface() && cls->isSepExtension()) {
-        classes.push_back(cls->getOriginalName().c_str());
-        cls->outputCPPDynamicClassDecl(cg);
-        cls->outputCPPGlobalTableWrappersDecl(cg, ar);
-        classScopes[cls->getName()].push_back(cls);
-      }
-    }
-    ClassScope::outputCPPHashTableClasses(cg, classScopes, classes);
-    ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
-    ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
-    ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes, classes);
-    ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
-    ClassScope::outputCPPGetClassConstantImpl(cg, classScopes);
-  }
+  outputCPPExtClassImpl(cg);
   cg.namespaceEnd();
   fTable.close();
 }
@@ -3491,7 +3377,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     outputCPPDynamicTablesHeader(cg, false, false);
     cg_printf("typedef Variant (*pm_t)(bool incOnce, "
-              "LVariableTable* variables, Globals *globals);\n");
+              "LVariableTable* variables, GlobalVariables *globals);\n");
     cg.printSection("File Invoke Table");
     vector<const char*> entries;
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
@@ -3535,22 +3421,7 @@ void AnalysisResult::outputCPPSystem() {
   ofstream fSystem(headerPath.c_str());
   CodeGenerator cg(&fSystem, CodeGenerator::SystemCPP);
 
-  string implPath = m_outputPath + "/" + Option::SystemFilePrefix +
-    "system_globals.cpp";
-  ofstream fSystemImpl(implPath.c_str());
-  cg.setStream(CodeGenerator::ImplFile, &fSystemImpl);
-
   cg.headerBegin(filename);
-
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    // When we are generating the system files, suppress output of everything
-    // except for constants.php and symbols.php
-    if (fs->getName() != "globals/constants.php" &&
-        fs->getName() != "globals/symbols.php") {
-      continue;
-    }
-    cg_printInclude(fs->outputFilebase());
-  }
 
   cg.printImplStarter();
   cg.namespaceBegin();
@@ -3561,74 +3432,7 @@ void AnalysisResult::outputCPPSystem() {
 
   cg.headerEnd(filename);
 
-  cg.setContext(CodeGenerator::CppImplementation);
-  cg.useStream(CodeGenerator::ImplFile);
-  cg_printf("\n");
-  cg.printBasicIncludes();
-  cg_printInclude(filename.c_str());
-  cg.namespaceBegin();
-  outputCPPGlobalImplementations(cg);
-  cg.namespaceEnd();
-
-  fSystemImpl.close();
   fSystem.close();
-
-  outputCPPScalarArrays(true);
-}
-
-void AnalysisResult::getCPPRedeclaredFunctionDecl
-(CodeGenerator &cg, Type2SymbolSetMap &type2names) {
-  SymbolSet &symbols = type2names["RedeclaredCallInfoConst*"];
-  SymbolSet &bools = type2names["bool"];
-  for (StringToFunctionScopePtrMap::const_iterator iter =
-      m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    if (iter->second->isVolatile()) {
-      std::string fname = CodeGenerator::FormatLabel(iter->first);
-      const char *name = fname.c_str();
-      if (iter->second->isRedeclaring()) {
-        symbols.insert(string("cim_") + name);
-      }
-      if (strcmp(name, "__autoload")) {
-        bools.insert(string(FVF_PREFIX) + name);
-      }
-    }
-  }
-}
-
-void AnalysisResult::getCPPRedeclaredClassDecl
-(CodeGenerator &cg, Type2SymbolSetMap &type2names) {
-  SymbolSet &callbacks = type2names["RedeclaredObjectStaticCallbacksConst*"];
-  for (StringToClassScopePtrVecMap::const_iterator iter =
-         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    const string &name = CodeGenerator::FormatLabel(iter->first);
-    if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      callbacks.insert(string(Option::ClassStaticsCallbackPrefix) + name);
-    }
-  }
-}
-
-void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
-  for (StringToClassScopePtrVecMap::const_iterator iter =
-         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    if (iter->second.size() != 1) {
-      string s = CodeGenerator::EscapeLabel(iter->first);
-      string l = CodeGenerator::FormatLabel(iter->first);
-      const char *str = s.c_str();
-      const char *lab = l.c_str();
-      cg_printf("static StaticString s_%s = \"%s\";\n", lab, str);
-      cg_printf("static const RedeclaredObjectStaticCallbacks %s%s = {\n"
-                "  {\n"
-                "    coo_ObjectData,\n"
-                "    0,0,0,0,&s_%s,0,0,0,0,0\n"
-                "  },\n"
-                "  -1\n"
-                "};\n",
-                Option::ClassStaticsCallbackNullPrefix, lab, lab);
-      cg_printf("%s%s = &%s%s;\n",
-                Option::ClassStaticsCallbackPrefix, lab,
-                Option::ClassStaticsCallbackNullPrefix, lab);
-    }
-  }
 }
 
 void AnalysisResult::getCPPDynamicConstantDecl
@@ -3658,15 +3462,6 @@ void AnalysisResult::outputCPPDynamicConstantImpl(CodeGenerator &cg) {
   }
 }
 
-void AnalysisResult::outputCPPScalarArrayDecl(CodeGenerator &cg) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  const char *prefix = system ? Option::SystemScalarArrayName :
-    Option::ScalarArrayName;
-  if (m_scalarArrayIds.size() > 0) {
-    cg_printf("static StaticArray %s[%lu];\n", prefix, m_scalarArrayIds.size());
-  }
-}
-
 void AnalysisResult::outputHexBuffer(CodeGenerator &cg, const char *name,
                                      const char *buf, int len) {
   cg_printf("static const unsigned char %s[%d] = {\n", name, len);
@@ -3676,132 +3471,6 @@ void AnalysisResult::outputHexBuffer(CodeGenerator &cg, const char *name,
     if (i % 10 == 9) cg_printf("\n");
   }
   cg_printf("};\n\n");
-}
-
-string AnalysisResult::getScalarArrayCompressedText() {
-  Array arrs;
-  for (unsigned int i = 0; i < m_scalarArrayIds.size(); i++) {
-    ExpressionPtr exp = m_scalarArrayIds[i];
-    if (exp) {
-      Variant value;
-      bool ret = exp->getScalarValue(value);
-      if (!ret) assert(false);
-      if (!value.isArray()) assert(false);
-      arrs.append(value);
-    } else {
-      arrs.append(StaticArray(ArrayData::Create()));
-    }
-  }
-  String s = f_serialize(arrs);
-  int len = s.size();
-  char *zd = gzencode(s.data(), len, 9, CODING_GZIP);
-  m_scalarArrayCompressedTextSize = len;
-  return string(zd, len);
-}
-
-void AnalysisResult::outputCPPScalarArrayImpl(CodeGenerator &cg) {
-  if (m_scalarArrayIds.size() == 0) return;
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  AnalysisResultPtr ar = shared_from_this();
-  if (Option::ScalarArrayCompression && !system) {
-    string s = getScalarArrayCompressedText();
-    outputHexBuffer(cg, "sa_cdata", s.data(), s.size());
-  }
-  const char *clsname = system ? "SystemScalarArrays" : "ScalarArrays";
-  const char *prefix = system ? Option::SystemScalarArrayName :
-    Option::ScalarArrayName;
-
-  cg_printf("StaticArray %s::%s[%lu];\n",
-            clsname, prefix, m_scalarArrayIds.size());
-}
-
-static bool SortByExpressionLength(const AnalysisResult::ScalarArrayExp &p1,
-                                   const AnalysisResult::ScalarArrayExp &p2) {
-  return p1.len < p2.len;
-}
-
-void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
-                                              int part) {
-  if (part == 0) {
-    int sumLen = 0;
-    m_scalarArraySorted.clear();
-    if (m_scalarArrayIds.size() > 0) {
-      m_scalarArraySorted.resize(m_scalarArrayIds.size());
-      for (unsigned int i = 0; i < m_scalarArrayIds.size(); i++) {
-        ScalarArrayExp &exp = m_scalarArraySorted[i];
-        exp.id = i;
-        exp.len = m_scalarArrayIds[i] ?
-                  m_scalarArrayIds[i]->getText(true).size() : 0;
-        exp.exp = m_scalarArrayIds[i];
-        sumLen += exp.len;
-      }
-      sort(m_scalarArraySorted.begin(), m_scalarArraySorted.end(),
-           SortByExpressionLength);
-    }
-    m_scalarArraySortedAvgLen = sumLen / fileCount;
-  }
-
-  if (m_scalarArraySorted.empty()) return;
-  AnalysisResultPtr ar = shared_from_this();
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  const char *prefix = system ? Option::SystemScalarArrayName :
-    Option::ScalarArrayName;
-
-  bool nonEmpty = false;
-  while (m_scalarArraySortedIndex < (int)m_scalarArraySorted.size()) {
-    ScalarArrayExp &exp = m_scalarArraySorted[m_scalarArraySortedIndex++];
-    m_scalarArraySortedSumLen += exp.len;
-    // In case we hit a huge scalar array, leave it for the next file unless
-    // the current file is still empty.
-    if ((m_scalarArraySortedSumLen > (part + 1) * m_scalarArraySortedAvgLen)
-         && (part < fileCount - 1) && nonEmpty) {
-      m_scalarArraySortedIndex--;
-      break;
-    }
-    nonEmpty = true;
-    cg_printf("%s[%d] = StaticArray(", prefix, exp.id);
-    if (exp.exp) {
-      ExpressionListPtr expList =
-        dynamic_pointer_cast<ExpressionList>(exp.exp);
-      int numElems = expList->getCount();
-      if (numElems <= Option::ScalarArrayOverflowLimit) {
-        expList->outputCPP(cg, ar);
-        cg_printf(");\n");
-      } else {
-        ExpressionListPtr subExpList =
-          dynamic_pointer_cast<ExpressionList>(expList->clone());
-        for (int i = Option::ScalarArrayOverflowLimit; i < numElems; i++) {
-          subExpList->removeElement(Option::ScalarArrayOverflowLimit);
-        }
-        cg.setInsideScalarArray(true);
-        subExpList->outputCPP(cg, ar);
-        cg.setInsideScalarArray(false);
-        cg_printf(");\n");
-        for (int i = Option::ScalarArrayOverflowLimit; i < numElems; i++) {
-          ExpressionPtr elemExp = (*expList)[i];
-          ArrayPairExpressionPtr pair =
-            dynamic_pointer_cast<ArrayPairExpression>(elemExp);
-          ExpressionPtr name = pair->getName();
-          ExpressionPtr value = pair->getValue();
-          if (name) {
-            cg_printf("%s[%d].set(", prefix, exp.id);
-            name->outputCPP(cg, ar);
-            cg_printf(", ");
-            value->outputCPP(cg, ar);
-            cg_printf(");");
-          } else {
-            cg_printf("%s[%d].append(", prefix, exp.id);
-            value->outputCPP(cg, ar);
-            cg_printf(");");
-          }
-          cg_printf("\n");
-        }
-      }
-    } else {
-      cg_printf("ArrayData::Create());\n");
-    }
-    cg_printf("%s[%d].setEvalScalar();\n", prefix, exp.id);
-  }
 }
 
 string AnalysisResult::getHashedName(int64 hash, int index,
@@ -3884,7 +3553,7 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
 }
 
 void AnalysisResult::outputCPPSystemImplementations(CodeGenerator &cg) {
-  cg_printf("Globals *globals = get_globals();\n");
+  cg_printf("GlobalVariables *globals = get_global_variables();\n");
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
     if (!f->canUseDummyPseudoMain(shared_from_this())) {
       cg_printf("%s%s(false, ",
@@ -3921,100 +3590,6 @@ void AnalysisResult::getCPPClassStaticInitializerFlags
       }
     }
   }
-}
-
-void AnalysisResult::outputCPPScalarArrays(bool system) {
-  int fileCount = system ? 1 : Option::ScalarArrayFileCount;
-  if (system) {
-    fileCount = 1;
-  } else if ((m_scalarArrayIds.size() / Option::ScalarArrayFileCount) == 0) {
-    fileCount = 1;
-  } else {
-    fileCount = Option::ScalarArrayFileCount;
-  }
-  if (Option::ScalarArrayCompression && !system) fileCount = 1;
-  for (int i = 0; i < fileCount; i++) {
-    string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-      "scalar_arrays_" + lexical_cast<string>(i) + ".no.cpp";
-    Util::mkdir(filename);
-    ofstream f(filename.c_str());
-    CodeGenerator cg(&f, system ? CodeGenerator::SystemCPP :
-                     CodeGenerator::ClusterCPP);
-
-    cg.setInsideScalarArray(true);
-    cg_printf("\n");
-    cg_printInclude("<runtime/base/hphp.h>");
-    cg_printInclude(string(Option::SystemFilePrefix) +
-                    (system ? "system_globals.h" : "global_variables.h"));
-    if (system) {
-      cg_printInclude(string(Option::SystemFilePrefix) +
-                      "literal_strings.h");
-    }
-
-    cg_printf("\n");
-    cg.printImplStarter();
-    cg.namespaceBegin();
-
-    AnalysisResultPtr ar = shared_from_this();
-    CodeGenerator::Context con = cg.getContext();
-    cg.setContext(CodeGenerator::CppImplementation);
-    outputCPPScalarArrays(cg, fileCount, i);
-    cg.setContext(con);
-
-    cg.namespaceEnd();
-    f.close();
-  }
-}
-
-void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
-                                           int part) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  const char *clsname = system ? "SystemScalarArrays" : "ScalarArrays";
-  const char *prefix = system ? Option::SystemScalarArrayName :
-    Option::ScalarArrayName;
-
-  if (fileCount == 1) {
-    outputCPPScalarArrayImpl(cg);
-    cg_printf("\n");
-    cg_indentBegin("void %s::initialize() {\n", clsname);
-    if (!system) {
-      cg_printf("SystemScalarArrays::initialize();\n");
-    }
-    if (m_scalarArrayIds.size() > 0) {
-      if (Option::ScalarArrayCompression && !system) {
-        assert(m_scalarArrayCompressedTextSize > 0);
-        cg_printf("ArrayUtil::InitScalarArrays(%s, %lu, "
-                  "reinterpret_cast<const char*>(sa_cdata), %d);\n",
-                  prefix, m_scalarArrayIds.size(),
-                  m_scalarArrayCompressedTextSize);
-        cg_printf("%s::initializeNamed();\n", clsname);
-      } else {
-        outputCPPScalarArrayInit(cg, 1, 0);
-        cg_printf("%s::initializeNamed();\n", clsname);
-      }
-    }
-    cg_indentEnd("}\n");
-    return;
-  }
-
-  if (part == 0) {
-    assert(!(Option::ScalarArrayCompression && !system));
-    outputCPPScalarArrayImpl(cg);
-    cg_printf("\n");
-    cg_indentBegin("void %s::initialize() {\n", clsname);
-    if (!system) {
-      cg_printf("SystemScalarArrays::initialize();\n");
-    }
-    for (int i = 0; i < fileCount; i++) {
-      cg_printf("initialize_%d();\n", i);
-    }
-    cg_indentEnd("}\n");
-  }
-
-  cg_printf("\n");
-  cg_indentBegin("void %s::initialize_%d() {\n", clsname, part);
-  outputCPPScalarArrayInit(cg, fileCount, part);
-  cg_indentEnd("}\n");
 }
 
 void AnalysisResult::outputCPPGlobalVariablesMethods() {
@@ -4569,9 +4144,8 @@ void AnalysisResult::preGenerateCPP(CodeGenerator::Output output,
   BOOST_FOREACH(FileScopePtr fs, files) {
     if (output == CodeGenerator::SystemCPP) {
       // If we are generating the system files, suppress output of everything
-      // except for constants.php and symbols.php
-      if (fs->getName() != "globals/constants.php" &&
-          fs->getName() != "globals/symbols.php") {
+      // except for constants.php
+      if (fs->getName() != "globals/constants.php") {
         continue;
       }
     }
@@ -5335,39 +4909,3 @@ void AnalysisResult::outputCPPSepExtensionIncludes(CodeGenerator &cg) {
     }
   }
 }
-
-void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
-  AnalysisResultPtr ar = shared_from_this();
-
-  ofstream fTable(filename.c_str());
-  CodeGenerator cg(&fTable, CodeGenerator::SystemCPP);
-
-  outputCPPDynamicTablesHeader(cg, true, false, true);
-
-  for (unsigned int i = 0; i < Option::SepExtensions.size(); i++) {
-    Option::SepExtensionOptions &options = Option::SepExtensions[i];
-    cg_printf("#include \"ext_%s.h\"\n", options.name.c_str());
-  }
-  string litstrFile = filename + ".litstr";
-  cg_printf("#include \"%s\"\n", litstrFile.c_str());
-
-  cg_printf("\n");
-  cg.printImplStarter();
-  cg.namespaceBegin();
-
-  for (StringToClassScopePtrMap::const_iterator iter = m_systemClasses.begin();
-       iter != m_systemClasses.end(); ++iter) {
-    ClassScopePtr cls = iter->second;
-    if (cls->isSepExtension()) {
-      cls->outputCPPDynamicClassImpl(cg, ar);
-      cls->outputCPPSupportMethodsImpl(cg, ar);
-    }
-  }
-  ClassScope::outputCPPGetClassPropTableImpl(cg, shared_from_this(),
-                                             cg.getClasses());
-  cg.namespaceEnd();
-  fTable.close();
-  outputCPPNamedLiteralStrings(true, litstrFile);
-  always_assert(m_scalarArrays.size() == 0);
-}
-

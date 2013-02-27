@@ -1119,15 +1119,15 @@ static void php_session_reset_id() {
     PS(send_cookie) = 0;
   }
 
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
+  GlobalVariables *g = get_global_variables();
   if (PS(define_sid)) {
     StringBuffer var;
     var.append(String(PS(session_name)));
     var.append('=');
     var.append(PS(id));
-    g->declareConstant("SID", g->k_SID, var.detach());
+    g->k_SID = var.detach();
   } else {
-    g->declareConstant("SID", g->k_SID, String(""));
+    g->k_SID = empty_string;
   }
 
   // hzhao: not sure how to support this yet

@@ -286,10 +286,6 @@ Array ClassInfo::GetConstants() {
       res.merge(dyn);
     }
   }
-  dyn = get_globals()->getDynamicConstants();
-  if (!dyn.isNull()) {
-    res.merge(dyn);
-  }
   return res;
 }
 
@@ -482,7 +478,7 @@ const ClassInfo *ClassInfo::getDeclared() const {
   if (m_attribute & IsRedeclared) {
     return getCurrentOrNull();
   } else if (m_attribute & IsVolatile) {
-    return *(bool*)((char*)get_globals() + m_cdec_offset) ? this : 0;
+    return *(bool*)((char*)get_global_variables() + m_cdec_offset) ? this : 0;
   } else {
     return this;
   }
@@ -787,12 +783,12 @@ void ClassInfo::ReadUserAttributes(const char **&p,
 
 ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
   if (attribute & ClassInfo::IsRedeclared) {
-    RedeclaredCallInfo *ci = *(RedeclaredCallInfo**)((char*)get_globals() +
+    RedeclaredCallInfo *ci = *(RedeclaredCallInfo**)((char*)get_global_variables() +
                                                      volatile_redec_offset);
     if (!ci) return 0;
     return (ClassInfo::MethodInfo*)(void*)parameters[ci->redeclaredId];
   } else if (attribute & ClassInfo::IsVolatile) {
-    return *(bool*)((char*)get_globals() + volatile_redec_offset) ? this : 0;
+    return *(bool*)((char*)get_global_variables() + volatile_redec_offset) ? this : 0;
   }
   return this;
 }
@@ -1008,42 +1004,13 @@ void ClassInfoUnique::postInit() {
   m_parentInfo = ci;
 }
 
-ClassInfoRedeclared::ClassInfoRedeclared(const char **&p) {
-  m_attribute = (Attribute)(int64)(*p++);
-  m_name = makeStaticString(*p++);
-  m_redeclaredIdOffset = (int)(int64)*p++;
-  while (*p) {
-    ClassInfo *cls = new ClassInfoUnique(p);
-    m_redeclaredClasses.push_back(cls);
-  }
-  p++;
-}
-
-const ClassInfo *ClassInfoRedeclared::getCurrentOrNull() const {
-  const RedeclaredObjectStaticCallbacks *rosc =
-    *(const RedeclaredObjectStaticCallbacks**)((char*)get_globals() +
-                                               m_redeclaredIdOffset);
-  int id = rosc->getRedeclaringId();
-  if (LIKELY(id >= 0)) {
-    return m_redeclaredClasses[id];
-  }
-  return 0;
-}
-
-void ClassInfoRedeclared::postInit() {
-  for (int i = m_redeclaredClasses.size(); i--; ) {
-    m_redeclaredClasses[i]->postInit();
-  }
-}
-
 void ClassInfo::Load() {
   assert(!s_loaded);
   const char **p = g_class_map;
   while (*p) {
     Attribute attribute = (Attribute)(int64)*p;
-    ClassInfo *info = (attribute & IsRedeclared) ?
-      static_cast<ClassInfo*>(new ClassInfoRedeclared(p)) :
-      static_cast<ClassInfo*>(new ClassInfoUnique(p));
+    always_assert(!(attribute & IsRedeclared));
+    ClassInfo *info = new ClassInfoUnique(p);
 
     if (info->m_name.empty()) {
       if (attribute & IsSystem) {

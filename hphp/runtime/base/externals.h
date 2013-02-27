@@ -26,6 +26,7 @@
  */
 
 #include <runtime/base/types.h>
+#include <runtime/vm/name_value_table_wrapper.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,17 +104,6 @@ extern const char *g_paramrtti_map[];
 Object create_object(CStrRef s, const Array &params,
                      bool init = true, ObjectData *root = nullptr);
 extern Object create_object_only(CStrRef s, ObjectData *root = nullptr);
-extern ObjectData *create_object_only_no_init(CStrRef s,
-                                              ObjectData *root = nullptr);
-/**
- * Dynamically create a system object.
- */
-extern Object create_builtin_object(CStrRef s, const Array &params,
-                                    bool init = true, ObjectData *root = nullptr);
-extern Object create_builtin_object_only(CStrRef s,
-                                         ObjectData *root = nullptr);
-extern ObjectData *create_builtin_object_only_no_init(CStrRef s,
-                                                      ObjectData *root = nullptr);
 /**
  * Dynamically include a file.
  */
@@ -132,27 +122,22 @@ extern void init_static_variables();
  * Initializes the constant table.
  */
 extern void init_builtin_constant_table();
-extern void init_constant_table();
 
 /**
  * Returns a thread local global variable class pointer.
  */
-class GlobalVariables;
+typedef VM::GlobalNameValueTableWrapper GlobalVariables;
 extern GlobalVariables *get_global_variables();
-extern GlobalVariables *get_global_variables_check();
 extern void init_global_variables();
 extern void init_literal_varstrings();
 extern void free_global_variables();
 extern void free_global_variables_after_sweep();
 extern Array get_global_state();
-
 /**
  * Returns a thread local global variable table pointer.
  */
 extern LVariableTable *get_variable_table();
-class Globals;
-extern Globals *get_globals();
-class SystemGlobals;
+typedef VM::GlobalNameValueTableWrapper SystemGlobals;
 extern SystemGlobals *get_system_globals();
 
 /**

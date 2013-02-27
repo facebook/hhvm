@@ -212,7 +212,7 @@ public:
                       bool forInvoke = false);
 
   /**
-   * Whether or not we can directly call c_ObjectData::o_invoke() when lookup
+   * Whether or not we can directly call ObjectData::o_invoke() when lookup
    * in this class fails. If false, we need to call parent::o_invoke(), which
    * may be redeclared or may have private methods that need to check class
    * context.
@@ -393,12 +393,6 @@ public:
     CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
     const std::vector<const char *> &classes);
 
-  void outputCPPDynamicClassDecl(CodeGenerator &cg);
-  void outputCPPDynamicClassImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-  static void outputCPPDynamicClassCreateDecl(CodeGenerator &cg);
-  static void outputCPPDynamicClassCreateImpl
-  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes);
   static void outputCPPGetCallInfoStaticMethodImpl
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
    const std::vector<const char*> &classes);
@@ -668,11 +662,6 @@ private:
     CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func, bool fewArgs);
 
-  void outputCPPMethodInvokeTable
-    (CodeGenerator &cg, AnalysisResultPtr ar,
-     const std::vector <const char*> &keys,
-     const StringToFunctionScopePtrMap &funcScopes, bool fewArgs,
-     bool staticOnly);
   void outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       AnalysisResultPtr ar, const std::vector<const char*> &keys,
       const StringToFunctionScopePtrMap &funcScopes, bool fewArgs);

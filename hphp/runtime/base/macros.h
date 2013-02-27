@@ -40,7 +40,6 @@ namespace HPHP {
 
 #define FORWARD_DECLARE_CLASS_BUILTIN(cls)      \
   FORWARD_DECLARE_CLASS(cls)                    \
-  extern ObjectData *coo_##cls();               \
   extern const ObjectStaticCallbacks cw_##cls;
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
@@ -147,15 +146,8 @@ namespace HPHP {
   IMPLEMENT_CLASS_COMMON(cls)                                           \
   IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(c_##cls)                 \
 
-#define DECLARE_METHOD_INVOKE_HELPERS(methname)                         \
-  static Variant ifa_##methname(MethodCallPackage &mcp,                 \
-                                int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
-  static Variant i_##methname(MethodCallPackage &mcp, CArrRef params);  \
+#define DECLARE_METHOD_INVOKE_HELPERS(methname)
 
-#define DECLARE_METHOD_INVOKE_WRAPPER_HELPERS(methname)                 \
-  static Variant iwfa_##methname(void *self,                            \
-                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS); \
-  static Variant iw_##methname(void *self, CArrRef params);             \
 
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries
@@ -244,7 +236,7 @@ do { \
 
 // Get global variables from thread info.
 #define DECLARE_GLOBAL_VARIABLES_INJECTION(g)       \
-  GlobalVariables *g ATTRIBUTE_UNUSED =  \
+  SystemGlobals *g ATTRIBUTE_UNUSED =  \
     ThreadInfo::s_threadInfo->m_globals;
 #define DECLARE_SYSTEM_GLOBALS_INJECTION(g)         \
   SystemGlobals *g ATTRIBUTE_UNUSED =    \
@@ -379,7 +371,7 @@ do { \
 
 #define PSEUDOMAIN_INJECTION(n, esc)                                \
   DECLARE_THREAD_INFO_NOINIT                                        \
-  GlobalVariables *g = (GlobalVariables *)globals;                  \
+  SystemGlobals *g = (SystemGlboals *)globals;                      \
   CHECK_ONCE(esc)                                                   \
   FRAME_INJECTION_FUNCTION_FS(n, FrameInjection::PseudoMain)        \
   EXECUTION_PROFILER_INJECTION(false)                               \

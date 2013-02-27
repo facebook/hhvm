@@ -19,54 +19,11 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-/*
- * Global variables in HHVM are currently partially using a legacy
- * hphpc-style implementation, even though it's mostlly using a new
- * system (in VM::VarEnv).
- *
- * We need to remove GV()-style accesses to super globals from
- * extensions in order to fully remove this.  TODO(#1158383)
- */
-
-class GlobalVariables : public SystemGlobals {
-DECLARE_SMART_ALLOCATION(GlobalVariables);
-public:
-  GlobalVariables() {
-    memset(&tgv_bool, 0, sizeof(tgv_bool));
-    memset(&tgv_int, 0, sizeof(tgv_int));
-    memset(&tgv_int64, 0, sizeof(tgv_int64));
-    memset(&tgv_double, 0, sizeof(tgv_double));
-    memset(&tgv_RedeclaredCallInfoConstPtr, 0,
-      sizeof(tgv_RedeclaredCallInfoConstPtr));
-  }
-
-  RedeclaredCallInfoConst* tgv_RedeclaredCallInfoConstPtr[1];
-  RedeclaredObjectStaticCallbacksConst* tgv_RedeclaredObjectStaticCallbacksConstPtr[1];
-  Variant tgv_Variant[1];
-  bool tgv_bool[1];
-  #define run_pm_php$hhvm_php tgv_bool[0]
-  double tgv_double[1];
-  int tgv_int[1];
-  int64 tgv_int64[1];
-
-  // LVariableTable methods.  These are not actually called in the VM.
-  ssize_t staticSize() const { NOT_REACHED(); }
-  CVarRef getRefByIdx(ssize_t idx, Variant& k) { NOT_REACHED(); }
-  ssize_t getIndex(const char* s, strhash_t prehash) const { NOT_REACHED(); }
-  Variant& getImpl(CStrRef s) { NOT_REACHED(); }
-  bool exists(CStrRef s) const { NOT_REACHED(); }
-};
-
-IMPLEMENT_SMART_ALLOCATION(GlobalVariables)
-
-//////////////////////////////////////////////////////////////////////
 
 static __thread GlobalVariables* g_variables;
 
 void init_global_variables() {
-  GlobalVariables* g = get_global_variables_check();
-  ThreadInfo::s_threadInfo->m_globals = g;
-  g->initialize();
+  always_assert(false);
 }
 
 GlobalVariables* get_global_variables() {
@@ -74,13 +31,7 @@ GlobalVariables* get_global_variables() {
   return g_variables;
 }
 
-GlobalVariables* get_global_variables_check() {
-  if (!g_variables) g_variables = NEW(GlobalVariables)();
-  return g_variables;
-}
-
 void free_global_variables() {
-  if (g_variables) DELETE(GlobalVariables)(g_variables);
   g_variables = nullptr;
 }
 
@@ -88,9 +39,34 @@ void free_global_variables_after_sweep() {
   g_variables = nullptr;
 }
 
-Globals*        get_globals()        { return get_global_variables(); }
 SystemGlobals*  get_system_globals() { return get_global_variables(); }
 LVariableTable* get_variable_table() { return nullptr; }
+
+VM::GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
+  NameValueTable* tab) : NameValueTableWrapper(tab) {
+
+  VarNR arr(HphpArray::GetStaticEmptyArray());
+#define X(s,v)                                          \
+  tab->migrateSet(StringData::GetStaticString(#s),      \
+                  gvm_##s.asTypedValue());              \
+  gvm_##s.v;
+
+  X(argc,                 setNull());
+  X(argv,                 setNull());
+  X(_SERVER,              assignVal(arr));
+  X(_GET,                 assignVal(arr));
+  X(_POST,                assignVal(arr));
+  X(_COOKIE,              assignVal(arr));
+  X(_FILES,               assignVal(arr));
+  X(_ENV,                 assignVal(arr));
+  X(_REQUEST,             assignVal(arr));
+  X(_SESSION,             assignVal(arr));
+  X(HTTP_RAW_POST_DATA,   setNull());
+  X(http_response_header, setNull());
+#undef X
+
+  ThreadInfo::s_threadInfo->m_globals = g_variables = this;
+}
 
 //////////////////////////////////////////////////////////////////////
 

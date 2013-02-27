@@ -880,6 +880,8 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  always_assert(false);
+
   FunctionScopeRawPtr funcScope = getFunctionScope();
   ClassScopePtr scope = getClassScope();
 
@@ -954,10 +956,6 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
 
       if (context != CodeGenerator::CppTypedParamsWrapperDecl) {
-        if (funcScope->isConstructor(scope)
-            && !funcScope->isAbstract() && !scope->isInterface()) {
-          funcScope->outputCPPCreateDecl(cg, ar);
-        }
         if (Option::HardTypeHints && funcScope->needsTypeCheckWrapper()) {
           cg.setContext(CodeGenerator::CppTypedParamsWrapperDecl);
           outputCPPImpl(cg, ar);

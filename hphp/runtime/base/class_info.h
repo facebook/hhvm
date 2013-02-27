@@ -465,68 +465,6 @@ private:
 };
 
 /**
- * Stores info about a class that is redeclared.
- */
-class ClassInfoRedeclared : public ClassInfo {
-public:
-  /**
-   * Read one class's information from specified map pointer and move it.
-   */
-  ClassInfoRedeclared(const char **&p);
-
-  // implementing ClassInfo
-  virtual CStrRef getName() const { return current()->getName();}
-  CStrRef getParentClass() const { return current()->getParentClass();}
-
-  const InterfaceSet &getInterfaces() const {
-    return current()->getInterfaces();
-  }
-  const InterfaceVec &getInterfacesVec() const {
-    return current()->getInterfacesVec();
-  }
-  const TraitSet &getTraits() const {
-    return current()->getTraits();
-  }
-  const TraitVec &getTraitsVec() const {
-    return current()->getTraitsVec();
-  }
-  const TraitAliasVec &getTraitAliasesVec() const {
-    return current()->getTraitAliasesVec();
-  }
-  const MethodMap &getMethods() const {
-    return current()->getMethods();
-  }
-  const MethodVec &getMethodsVec() const {
-    return current()->getMethodsVec();
-  }
-  const PropertyMap &getProperties() const  {
-    return current()->getProperties();
-  }
-  const PropertyVec &getPropertiesVec() const  {
-    return current()->getPropertiesVec();
-  }
-  const ConstantMap &getConstants() const {
-    return current()->getConstants();
-  }
-  const ConstantVec &getConstantsVec() const {
-    return current()->getConstantsVec();
-  }
-  const UserAttributeVec &getUserAttributeVec() const {
-    return current()->getUserAttributeVec();
-  }
-
-  virtual void postInit();
-private:
-  std::vector<ClassInfo*> m_redeclaredClasses;
-  int m_redeclaredIdOffset;
-
-  const ClassInfo* getCurrentOrNull() const;
-  const ClassInfo* current() const {
-    not_reached();
-  }
-};
-
-/**
  * Interface for a hook into class info for eval. This way I can avoid
  * a dependency on eval.
  */

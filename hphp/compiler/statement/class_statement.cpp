@@ -342,6 +342,8 @@ void ClassStatement::getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit) {
 }
 
 void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  always_assert(false);
+
   if (cg.getContext() == CodeGenerator::NoContext) {
     InterfaceStatement::outputCPPImpl(cg, ar);
     return;
@@ -573,12 +575,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("void init();\n");
       }
 
-      // doCall
-      if (classScope->getAttribute(ClassScope::HasUnknownMethodHandler)) {
-        cg_printf("Variant doCall(Variant v_name, Variant v_arguments, "
-                  "bool fatal);\n");
-      }
-
       if (classScope->getAttribute(ClassScope::HasInvokeMethod)) {
         FunctionScopePtr func =
           classScope->findFunction(ar, "__invoke", false);
@@ -605,8 +601,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         classScope->outputCPPJumpTableDecl(cg, ar);
       }
       cg_indentEnd("};\n");
-
-      classScope->outputCPPDynamicClassDecl(cg);
 
       if (m_stmt) {
         cg.setContext(CodeGenerator::CppClassConstantsDecl);

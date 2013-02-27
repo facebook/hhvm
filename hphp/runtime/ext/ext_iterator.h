@@ -135,22 +135,13 @@ class c_MutableArrayIterator : public ExtObjectData, public Sweepable {
   public: c_MutableArrayIterator(const ObjectStaticCallbacks *cb = &cw_MutableArrayIterator);
   public: ~c_MutableArrayIterator();
   public: void t___construct(VRefParam array);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t_currentref();
-  DECLARE_METHOD_INVOKE_HELPERS(currentref);
   public: Variant t_current();
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   public: Variant t_key();
-  DECLARE_METHOD_INVOKE_HELPERS(key);
   public: void t_next();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
   public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
-  // implemented by HPHP
-  public: c_MutableArrayIterator *create(VRefParam array);
 
   public: union {
     char m_u[sizeof(MArrayIter)];

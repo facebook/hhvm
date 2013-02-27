@@ -89,33 +89,20 @@ class c_UConverter : public ExtObjectData {
   public: ~c_UConverter();
   public: void t___construct(CStrRef toEncoding = "utf-8",
                              CStrRef fromEncoding = "utf-8");
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   public: String t_getsourceencoding();
-  DECLARE_METHOD_INVOKE_HELPERS(getsourceencoding);
   public: void t_setsourceencoding(CStrRef encoding);
-  DECLARE_METHOD_INVOKE_HELPERS(setsourceencoding);
   public: String t_getdestinationencoding();
-  DECLARE_METHOD_INVOKE_HELPERS(getdestinationencoding);
   public: void t_setdestinationencoding(CStrRef encoding);
-  DECLARE_METHOD_INVOKE_HELPERS(setdestinationencoding);
   public: int64 t_getsourcetype();
-  DECLARE_METHOD_INVOKE_HELPERS(getsourcetype);
   public: int64 t_getdestinationtype();
-  DECLARE_METHOD_INVOKE_HELPERS(getdestinationtype);
   public: String t_getsubstchars();
-  DECLARE_METHOD_INVOKE_HELPERS(getsubstchars);
   public: bool t_setsubstchars(CStrRef chars);
-  DECLARE_METHOD_INVOKE_HELPERS(setsubstchars);
   public: Variant t_fromucallback(int64 reason, CArrRef source,
                                   int64 codepoint, VRefParam error);
-  DECLARE_METHOD_INVOKE_HELPERS(fromucallback);
   public: Variant t_toucallback(int64 reason, CStrRef source,
                                 CStrRef codeunits, VRefParam error);
-  DECLARE_METHOD_INVOKE_HELPERS(toucallback);
   public: Variant t_convert(CStrRef str, bool reverse = false);
-  DECLARE_METHOD_INVOKE_HELPERS(convert);
   public: static Variant ti_transcode(const char* cls , CStrRef str,
                                       CStrRef toEncoding, CStrRef fromEncoding,
                                       CArrRef options = null_variant);
@@ -124,35 +111,25 @@ class c_UConverter : public ExtObjectData {
                                      CArrRef options = null_variant) {
     return ti_transcode("uconverter", str, toEncoding, fromEncoding, options);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(transcode);
   public: int64 t_geterrorcode();
-  DECLARE_METHOD_INVOKE_HELPERS(geterrorcode);
   public: String t_geterrormessage();
-  DECLARE_METHOD_INVOKE_HELPERS(geterrormessage);
   public: static String ti_reasontext(const char* cls , int64 reason);
   public: static String t_reasontext(int64 reason) {
     return ti_reasontext("uconverter", reason);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(reasontext);
   public: static Array ti_getavailable(const char* cls );
   public: static Array t_getavailable() {
     return ti_getavailable("uconverter");
   }
-  DECLARE_METHOD_INVOKE_HELPERS(getavailable);
   public: static Array ti_getaliases(const char* cls , CStrRef encoding);
   public: static Array t_getaliases(CStrRef encoding) {
     return ti_getaliases("uconverter", encoding);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(getaliases);
   public: static Array ti_getstandards(const char* cls );
   public: static Array t_getstandards() {
     return ti_getstandards("uconverter");
   }
-  DECLARE_METHOD_INVOKE_HELPERS(getstandards);
 
-  // implemented by HPHP
-  public: c_UConverter *create(String toEncoding = "utf-8",
-                               String fromEncoding = "utf-8");
   public: static const ClassPropTable os_prop_table;
   private:
     static void throwFailure(UErrorCode error, const char *fname,

@@ -33,7 +33,6 @@ namespace HPHP {
 HphpBinary::Type getHphpBinaryType() { return HphpBinary::hhvm; }
 
 void init_static_variables() {
-  SystemScalarArrays::initialize();
   init_builtin_constant_table();
 }
 
@@ -56,17 +55,8 @@ Variant get_constant(CStrRef name, bool error) {
   return get_builtin_constant(name, error);
 }
 
-ObjectData *create_object_only_no_init(CStrRef s, ObjectData* root /* = NULL*/) {
-  {
-    if (ObjectData* r = eval_create_object_only_hook(s, root)) return r;
-  }
-  const ObjectStaticCallbacks *cwo = get_builtin_object_static_callbacks(s);
-  if (LIKELY(cwo != 0)) return cwo->createOnlyNoInit(root);
-  return 0;
-}
-
 Object create_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
-  ObjectData *obj = create_object_only_no_init(s, root);
+  ObjectData *obj = eval_create_object_only_hook(s, root);
   if (UNLIKELY(!obj)) throw_missing_class(s);
   Object r = obj;
   obj->init();

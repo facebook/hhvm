@@ -1046,7 +1046,7 @@ void rfc1867PostHandler(Transport *transport,
         s = tmp;
       }
 
-      Variant globals(((Globals*)get_global_variables())->getArrayData());
+      Variant globals(get_global_variables());
       if (!is_anonymous) {
         if (s && s > filename) {
           String val(s+1, strlen(s+1), CopyString);

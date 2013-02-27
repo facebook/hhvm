@@ -18,55 +18,10 @@
 #ifndef __GENERATED_sys_system_globals_h70996b28__
 #define __GENERATED_sys_system_globals_h70996b28__
 
-#include <php/globals/constants.h>
-#include <php/globals/symbols.h>
 namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-
-// Class Forward Declarations
-
-class SystemGlobals : public Globals {
-public:
-  SystemGlobals();
-  void initialize();
-
-  Array stgv_Array[1];
-  #define s_ReflectionClass$$fetched stgv_Array[0]
-  RedeclaredCallInfoConst* stgv_RedeclaredCallInfoConstPtr[1];
-  RedeclaredObjectStaticCallbacksConst* stgv_RedeclaredObjectStaticCallbacksConstPtr[1];
-  Variant stgv_Variant[14];
-  #define gvm_HTTP_RAW_POST_DATA stgv_Variant[0]
-  #define gvm__COOKIE stgv_Variant[1]
-  #define gvm__ENV stgv_Variant[2]
-  #define gvm__FILES stgv_Variant[3]
-  #define gvm__GET stgv_Variant[4]
-  #define gvm__POST stgv_Variant[5]
-  #define gvm__REQUEST stgv_Variant[6]
-  #define gvm__SERVER stgv_Variant[7]
-  #define gvm__SESSION stgv_Variant[8]
-  #define gvm_argc stgv_Variant[9]
-  #define gvm_argv stgv_Variant[10]
-  #define gvm_http_response_header stgv_Variant[11]
-  #define k_SID stgv_Variant[12]
-  #define s_Exception$$traceOpts stgv_Variant[13]
-  bool stgv_bool[1];
-  #define run_pm_php$globals$symbols_php stgv_bool[0]
-  double stgv_double[1];
-  int stgv_int[1];
-  int64 stgv_int64[1];
-};
-
-// Scalar Arrays
-class SystemScalarArrays {
-public:
-  static void initialize();
-  static void initializeNamed();
-
-  static StaticArray ssa_[1];
-};
 
 extern const int64 k_CURLINFO_LOCAL_PORT;
 extern const int64 k_CURLOPT_CONNECTTIMEOUT_MS;

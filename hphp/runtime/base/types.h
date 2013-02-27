@@ -414,11 +414,14 @@ public:
   void onSessionInit();
 };
 
+namespace VM {
+class GlobalNameValueTableWrapper;
+}
 class FrameInjection;
 class ObjectAllocatorBase;
 class Profiler;
-class GlobalVariables;
 class CodeCoverage;
+typedef VM::GlobalNameValueTableWrapper GlobalVariables;
 
 int object_alloc_size_to_index(size_t);
 size_t object_alloc_index_to_size(int);

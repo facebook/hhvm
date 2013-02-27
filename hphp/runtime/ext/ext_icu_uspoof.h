@@ -52,18 +52,11 @@ class c_SpoofChecker : public ExtObjectData {
   public: c_SpoofChecker(const ObjectStaticCallbacks *cb = &cw_SpoofChecker);
   public: ~c_SpoofChecker();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_issuspicious(CStrRef text, VRefParam issuesFound = null);
-  DECLARE_METHOD_INVOKE_HELPERS(issuspicious);
   public: bool t_areconfusable(CStrRef s1, CStrRef s2, VRefParam issuesFound = null);
-  DECLARE_METHOD_INVOKE_HELPERS(areconfusable);
   public: void t_setallowedlocales(CStrRef localesList);
-  DECLARE_METHOD_INVOKE_HELPERS(setallowedlocales);
   public: void t_setchecks(int checks);
-  DECLARE_METHOD_INVOKE_HELPERS(setchecks);
 
-  // implemented by HPHP
-  public: c_SpoofChecker *create();
   static const ClassPropTable os_prop_table;
 
 

@@ -1183,7 +1183,8 @@ void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
       cg_printf("Array args /* = Array() */");
     }
   } else if (m_pseudoMain) {
-    cg_printf("bool incOnce, LVariableTable* variables, Globals *globals");
+    cg_printf("bool incOnce, LVariableTable* variables, "
+              "GlobalVariables *globals");
   } else if (params) {
     if (m_name[0] == '0' && !m_method) {
       cg_printf("void *extra, ");
@@ -1896,56 +1897,6 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.add("callees", callees);
 
   ms.done();
-}
-
-void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
-                                        AnalysisResultPtr ar) {
-  ClassScopePtr scope = getContainingClass();
-  CodeGenerator::Context context = cg.getContext();
-  bool setWrapper = Option::HardTypeHints && needsTypeCheckWrapper();
-
-  cg_printf("public: %s%s *create(",
-            Option::ClassPrefix, scope->getId().c_str());
-  cg.setContext(setWrapper ?
-                CodeGenerator::CppTypedParamsWrapperDecl :
-                CodeGenerator::CppFunctionWrapperDecl);
-  outputCPPParamsDecl(cg, ar,
-                      dynamic_pointer_cast<MethodStatement>(getStmt())
-                      ->getParams(), true);
-  cg.setContext(context);
-  cg_printf(");\n");
-}
-
-void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
-                                        AnalysisResultPtr ar) {
-  ClassScopePtr scope = getContainingClass();
-  string clsNameStr = scope->getId();
-  const char *clsName = clsNameStr.c_str();
-  const string &funcNameStr = this->getName();
-  const char *consName = funcNameStr.c_str();
-  CodeGenerator::Context context = cg.getContext();
-  bool setWrapper = Option::HardTypeHints && needsTypeCheckWrapper();
-
-  cg_printf("%s%s *%s%s::create(",
-            Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
-
-  cg.setContext(setWrapper ?
-                CodeGenerator::CppTypedParamsWrapperImpl :
-                CodeGenerator::CppFunctionWrapperImpl);
-  outputCPPParamsImpl(cg, ar);
-  cg_indentBegin(") {\n");
-  cg_printf("CountableHelper h(this);\n");
-  cg_printf("init();\n");
-  cg_printf("%s%s(", Option::MethodPrefix, consName);
-  outputCPPParamsCall(cg, ar, false);
-  cg.setContext(context);
-  cg_printf(");\n");
-  if (scope->derivesFromRedeclaring() ||
-      scope->hasAttribute(ClassScope::HasDestructor, ar)) {
-    cg_printf("clearNoDestruct();\n");
-  }
-  cg_printf("return this;\n");
-  cg_indentEnd("}\n");
 }
 
 void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {

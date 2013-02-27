@@ -45,18 +45,11 @@ class c_EncodingDetector : public ExtObjectData {
   public: c_EncodingDetector(const ObjectStaticCallbacks *cb = &cw_EncodingDetector);
   public: ~c_EncodingDetector();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_settext(CStrRef text);
-  DECLARE_METHOD_INVOKE_HELPERS(settext);
   public: void t_setdeclaredencoding(CStrRef text);
-  DECLARE_METHOD_INVOKE_HELPERS(setdeclaredencoding);
   public: Object t_detect();
-  DECLARE_METHOD_INVOKE_HELPERS(detect);
   public: Array t_detectall();
-  DECLARE_METHOD_INVOKE_HELPERS(detectall);
 
-  // implemented by HPHP
-  public: c_EncodingDetector *create();
 
 
  private:
@@ -77,20 +70,12 @@ class c_EncodingMatch : public ExtObjectData {
   public: c_EncodingMatch(const ObjectStaticCallbacks *cb = &cw_EncodingMatch);
   public: ~c_EncodingMatch();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_isvalid();
-  DECLARE_METHOD_INVOKE_HELPERS(isvalid);
   public: String t_getencoding();
-  DECLARE_METHOD_INVOKE_HELPERS(getencoding);
   public: int64 t_getconfidence();
-  DECLARE_METHOD_INVOKE_HELPERS(getconfidence);
   public: String t_getlanguage();
-  DECLARE_METHOD_INVOKE_HELPERS(getlanguage);
   public: String t_getutf8();
-  DECLARE_METHOD_INVOKE_HELPERS(getutf8);
 
-  // implemented by HPHP
-  public: c_EncodingMatch *create();
 
 
   public: const UCharsetMatch *m_encoding_match;

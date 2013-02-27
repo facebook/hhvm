@@ -48,74 +48,46 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: ~c_Vector();
   public: void freeData();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   public: Object t_add(CVarRef val);
-  DECLARE_METHOD_INVOKE_HELPERS(add);
   public: Object t_append(CVarRef val);
-  DECLARE_METHOD_INVOKE_HELPERS(append);
   public: Variant t_pop();
-  DECLARE_METHOD_INVOKE_HELPERS(pop);
   public: void t_resize(CVarRef sz, CVarRef value);
-  DECLARE_METHOD_INVOKE_HELPERS(resize);
   public: Object t_clear();
-  DECLARE_METHOD_INVOKE_HELPERS(clear);
   public: bool t_isempty();
-  DECLARE_METHOD_INVOKE_HELPERS(isempty);
   public: int64 t_count();
-  DECLARE_METHOD_INVOKE_HELPERS(count);
   public: Variant t_at(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(at);
   public: Variant t_get(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(get);
   public: Object t_put(CVarRef key, CVarRef value);
-  DECLARE_METHOD_INVOKE_HELPERS(put);
   public: bool t_contains(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(contains);
   public: Array t_toarray();
-  DECLARE_METHOD_INVOKE_HELPERS(toarray);
   public: void t_sort(CVarRef col = null);
-  DECLARE_METHOD_INVOKE_HELPERS(sort);
   public: void t_reverse();
-  DECLARE_METHOD_INVOKE_HELPERS(reverse);
   public: void t_splice(CVarRef offset, CVarRef len = null,
                         CVarRef replacement = null);
-  DECLARE_METHOD_INVOKE_HELPERS(splice);
   public: int64 t_linearsearch(CVarRef search_value);
-  DECLARE_METHOD_INVOKE_HELPERS(linearsearch);
   public: void t_shuffle();
-  DECLARE_METHOD_INVOKE_HELPERS(shuffle);
   public: Object t_getiterator();
-  DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: String t___tostring();
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   public: Variant t___get(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
-  DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___unset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__unset);
   public: static Variant ti_fromarray(const char* cls, CVarRef arr);
   public: static Variant t_fromarray(CVarRef arr) {
     return ti_fromarray("vector", arr);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(fromarray);
   public: static Variant ti_fromvector(const char* cls, CVarRef vec);
   public: static Variant t_fromvector(CVarRef vec) {
     return ti_fromvector("vector", vec);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(fromvector);
   public: static Variant ti_slice(const char* cls, CVarRef vec, CVarRef offset,
                                   CVarRef len = null);
   public: static Variant t_slice(CVarRef vec, CVarRef offset,
                                  CVarRef len = null) {
     return ti_slice("vector", vec, offset, len);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(slice);
-  
+
   public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
 
   public: TypedValue* at(int64 key) {
@@ -186,8 +158,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
 
-  // implemented by HPHP
-  public: c_Vector *create();
 
  private:
   void grow();
@@ -212,20 +182,12 @@ class c_VectorIterator : public ExtObjectData {
   public: c_VectorIterator(const ObjectStaticCallbacks *cb = &cw_VectorIterator);
   public: ~c_VectorIterator();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t_current();
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   public: Variant t_key();
-  DECLARE_METHOD_INVOKE_HELPERS(key);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
   public: void t_next();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
   public: void t_rewind();
-  DECLARE_METHOD_INVOKE_HELPERS(rewind);
 
-  // implemented by HPHP
-  public: c_VectorIterator *create();
 
  private:
   SmartPtr<c_Vector> m_obj;
@@ -255,65 +217,38 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: ~c_Map();
   public: void freeData();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   public: Object t_clear();
-  DECLARE_METHOD_INVOKE_HELPERS(clear);
   public: bool t_isempty();
-  DECLARE_METHOD_INVOKE_HELPERS(isempty);
   public: int64 t_count();
-  DECLARE_METHOD_INVOKE_HELPERS(count);
   public: Variant t_at(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(at);
   public: Variant t_get(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(get);
   public: Object t_put(CVarRef key, CVarRef value);
-  DECLARE_METHOD_INVOKE_HELPERS(put);
   public: bool t_contains(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(contains);
   public: Object t_remove(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(remove);
   public: Object t_discard(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(discard);
   public: Array t_toarray();
-  DECLARE_METHOD_INVOKE_HELPERS(toarray);
   public: Array t_copyasarray();
-  DECLARE_METHOD_INVOKE_HELPERS(copyasarray);
   public: Array t_tokeysarray();
-  DECLARE_METHOD_INVOKE_HELPERS(tokeysarray);
   public: Object t_values();
-  DECLARE_METHOD_INVOKE_HELPERS(values);
   public: Array t_tovaluesarray();
-  DECLARE_METHOD_INVOKE_HELPERS(tovaluesarray);
   public: Object t_updatefromarray(CVarRef arr);
-  DECLARE_METHOD_INVOKE_HELPERS(updatefromarray);
   public: Object t_updatefromiterable(CVarRef it);
-  DECLARE_METHOD_INVOKE_HELPERS(updatefromiterable);
   public: Object t_differencebykey(CVarRef it);
-  DECLARE_METHOD_INVOKE_HELPERS(differencebykey);
   public: Object t_getiterator();
-  DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: String t___tostring();
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   public: Variant t___get(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
-  DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___unset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__unset);
   public: static Variant ti_fromarray(const char* cls, CVarRef arr);
   public: static Variant t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(fromarray);
   public: static Variant ti_fromiterable(const char* cls, CVarRef vec);
   public: static Variant t_fromiterable(CVarRef vec) {
     return ti_fromiterable("map", vec);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(fromiterable);
 
   public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
   public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
@@ -380,8 +315,6 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
 
-  // implemented by HPHP
-  public: c_Map *create();
 
 public:
   class Bucket {
@@ -532,20 +465,12 @@ class c_MapIterator : public ExtObjectData {
   public: c_MapIterator(const ObjectStaticCallbacks *cb = &cw_MapIterator);
   public: ~c_MapIterator();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t_current();
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   public: Variant t_key();
-  DECLARE_METHOD_INVOKE_HELPERS(key);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
   public: void t_next();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
   public: void t_rewind();
-  DECLARE_METHOD_INVOKE_HELPERS(rewind);
 
-  // implemented by HPHP
-  public: c_MapIterator *create();
 
  private:
   SmartPtr<c_Map> m_obj;
@@ -575,66 +500,39 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: ~c_StableMap();
   public: void freeData();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
   public: Object t_clear();
-  DECLARE_METHOD_INVOKE_HELPERS(clear);
   public: bool t_isempty();
-  DECLARE_METHOD_INVOKE_HELPERS(isempty);
   public: int64 t_count();
-  DECLARE_METHOD_INVOKE_HELPERS(count);
   public: Variant t_at(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(at);
   public: Variant t_get(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(get);
   public: Object t_put(CVarRef key, CVarRef value);
-  DECLARE_METHOD_INVOKE_HELPERS(put);
   public: bool t_contains(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(contains);
   public: Object t_remove(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(remove);
   public: Object t_discard(CVarRef key);
-  DECLARE_METHOD_INVOKE_HELPERS(discard);
   public: Array t_toarray();
-  DECLARE_METHOD_INVOKE_HELPERS(toarray);
   public: Array t_copyasarray();
-  DECLARE_METHOD_INVOKE_HELPERS(copyasarray);
   public: Array t_tokeysarray();
-  DECLARE_METHOD_INVOKE_HELPERS(tokeysarray);
   public: Object t_values();
-  DECLARE_METHOD_INVOKE_HELPERS(values);
   public: Array t_tovaluesarray();
-  DECLARE_METHOD_INVOKE_HELPERS(tovaluesarray);
   public: Object t_updatefromarray(CVarRef arr);
-  DECLARE_METHOD_INVOKE_HELPERS(updatefromarray);
   public: Object t_updatefromiterable(CVarRef it);
-  DECLARE_METHOD_INVOKE_HELPERS(updatefromiterable);
   public: Object t_differencebykey(CVarRef it);
-  DECLARE_METHOD_INVOKE_HELPERS(differencebykey);
   public: Object t_getiterator();
-  DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: String t___tostring();
-  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   public: Variant t___get(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
-  DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___unset(Variant name);
-  DECLARE_METHOD_INVOKE_HELPERS(__unset);
   public: static Variant ti_fromarray(const char* cls, CVarRef arr);
   public: static Variant t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(fromarray);
   public: static Variant ti_fromiterable(const char* cls, CVarRef vec);
   public: static Variant t_fromiterable(CVarRef vec) {
     return ti_fromiterable("map", vec);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(fromiterable);
-  
+
   public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
   public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
 
@@ -698,8 +596,6 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
 
-  // implemented by HPHP
-  public: c_StableMap *create();
 
 public:
   class Bucket {
@@ -812,20 +708,12 @@ class c_StableMapIterator : public ExtObjectData {
   public: c_StableMapIterator(const ObjectStaticCallbacks *cb = &cw_StableMapIterator);
   public: ~c_StableMapIterator();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t_current();
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   public: Variant t_key();
-  DECLARE_METHOD_INVOKE_HELPERS(key);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
   public: void t_next();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
   public: void t_rewind();
-  DECLARE_METHOD_INVOKE_HELPERS(rewind);
 
-  // implemented by HPHP
-  public: c_StableMapIterator *create();
 
  private:
   SmartPtr<c_StableMap> m_obj;

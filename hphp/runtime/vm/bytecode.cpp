@@ -197,35 +197,13 @@ VarEnv::VarEnv()
   , m_nvTable(boost::in_place<NameValueTable>(
       RuntimeOption::EvalVMInitialGlobalTableSize))
 {
-  // The global scope always contains certain special names.
-  {
-    TypedValue globalArray;
-    globalArray.m_type = KindOfArray;
-    globalArray.m_data.parr =
-      new (request_arena()) NameValueTableWrapper(&*m_nvTable);
-    globalArray.m_data.parr->incRefCount();
-    m_nvTable->set(StringData::GetStaticString("GLOBALS"), &globalArray);
-    tvRefcountedDecRef(&globalArray);
-  }
-
-  SystemGlobals* g = reinterpret_cast<SystemGlobals*>(
-    get_global_variables());
-#define X(s) \
-  m_nvTable->migrateSet(StringData::GetStaticString(#s), \
-                       g->gvm_##s.asTypedValue());
-  X(argc);
-  X(argv);
-  X(_SERVER);
-  X(_GET);
-  X(_POST);
-  X(_COOKIE);
-  X(_FILES);
-  X(_ENV);
-  X(_REQUEST);
-  X(_SESSION);
-  X(HTTP_RAW_POST_DATA);
-  X(http_response_header);
-#undef X
+  TypedValue globalArray;
+  globalArray.m_type = KindOfArray;
+  globalArray.m_data.parr =
+    new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
+  globalArray.m_data.parr->incRefCount();
+  m_nvTable->set(StringData::GetStaticString("GLOBALS"), &globalArray);
+  tvRefcountedDecRef(&globalArray);
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
@@ -2245,9 +2223,6 @@ void VMExecutionContext::invokeContFunc(const Func* f,
 
 void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   Func* func = unit->getMain();
-  if (!m_globalVarEnv) {
-    VarEnv::createGlobal();
-  }
   invokeFunc(retval, func, Array::Create(), nullptr, nullptr,
              m_globalVarEnv, nullptr, unit);
 }
@@ -3017,9 +2992,6 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   static Unit* s_debuggerDummy = nullptr;
   if (!s_debuggerDummy) {
     s_debuggerDummy = compile_string("<?php?>", 7);
-  }
-  if (!m_globalVarEnv) {
-    VarEnv::createGlobal();
   }
   VarEnv* varEnv = m_topVarEnv;
   if (!getFP()) {
@@ -6869,11 +6841,15 @@ VMExecutionContext::createContinuation(ActRec* fp,
   int nIters = genFunc->numIterators();
   Class* genClass = SystemLib::s_ContinuationClass;
   c_Continuation* cont = c_Continuation::alloc(genClass, nLocals, nIters);
-  cont->create((int64)0, (int64)genFunc, isMethod,
-               StrNR(const_cast<StringData*>(origName)), obj, args);
   cont->incRefCount();
   cont->setNoDestruct();
-
+  try {
+    cont->t___construct((int64)0, (int64)genFunc, isMethod,
+                        StrNR(const_cast<StringData*>(origName)), obj, args);
+  } catch (...) {
+    decRefObj(cont);
+    throw;
+  }
   // The ActRec corresponding to the generator body lives as long as the object
   // does. We set it up once, here, and then just change FP to point to it when
   // we enter the generator body.
@@ -7532,6 +7508,8 @@ void VMExecutionContext::requestInit() {
 
   new (&s_requestArenaStorage) RequestArena();
   new (&s_varEnvArenaStorage) VarEnvArena();
+
+  VM::VarEnv::createGlobal();
   m_stack.requestInit();
   tx64 = nextTx64;
   tx64->requestInit();

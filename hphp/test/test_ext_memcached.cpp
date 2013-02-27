@@ -40,7 +40,8 @@ bool TestExtMemcached::RunTests(const std::string &which) {
 
 #define EXPIRATION 60
 #define CREATE_MEMCACHED()                                              \
-  p_Memcached memc(p_Memcached(NEWOBJ(c_Memcached))->create());            \
+  p_Memcached memc(NEWOBJ(c_Memcached));                                \
+  memc->t___construct();                                                \
   memc->t_addserver(TEST_MEMCACHED_HOSTNAME, TEST_MEMCACHED_PORT);      \
   Variant memc_version = memc->t_getversion();                          \
   if (memc_version.same(false)) {                                       \
@@ -49,14 +50,17 @@ bool TestExtMemcached::RunTests(const std::string &which) {
   }
 
 bool TestExtMemcached::test_Memcached_construct_persistent() {
-  p_Memcached memc1(p_Memcached(NEWOBJ(c_Memcached))->create("test"));
+  p_Memcached memc1(p_Memcached(NEWOBJ(c_Memcached)));
+  memc1->t___construct("test");
   memc1->t_setoption(q_Memcached$$OPT_PREFIX_KEY, "php");
   VS(memc1->t_getoption(q_Memcached$$OPT_PREFIX_KEY), "php");
 
-  p_Memcached memc2(p_Memcached(NEWOBJ(c_Memcached))->create("test"));
+  p_Memcached memc2(p_Memcached(NEWOBJ(c_Memcached)));
+  memc2->t___construct("test");
   VS(memc2->t_getoption(q_Memcached$$OPT_PREFIX_KEY), "php");
 
-  p_Memcached memc3(p_Memcached(NEWOBJ(c_Memcached))->create());
+  p_Memcached memc3(p_Memcached(NEWOBJ(c_Memcached)));
+  memc3->t___construct();
   VS(memc3->t_getoption(q_Memcached$$OPT_PREFIX_KEY), "");
 
   return Count(true);

@@ -48,52 +48,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Globals : public LVariableTable {
-public:
-  Globals() : FVF(__autoload)(false) {}
-  void initialize();
-  bool declareConstant(CStrRef name, Variant &constant, CVarRef value);
-  bool defined(CStrRef name);
-  Variant getConstant(CStrRef name);
-  Array getDynamicConstants() const;
-
-  virtual Variant getByIdx(ssize_t pos, Variant& k);
-  virtual CVarRef getRefByIdx(ssize_t pos, Variant& k);
-  virtual ssize_t getIndex(const char* s, strhash_t prehash) const;
-  virtual ssize_t size() const;
-  virtual bool empty() const;
-  virtual ssize_t staticSize() const;
-
-  ssize_t iter_begin() const;
-  ssize_t iter_end() const;
-  ssize_t iter_advance(ssize_t prev) const;
-  ssize_t iter_rewind(ssize_t prev) const;
-
-  virtual void getFullPos(FullPos &pos);
-  virtual bool setFullPos(const FullPos &pos);
-
-  virtual Array getDefinedVars();
-
-public:
-  Variant __lvalProxy;
-  Variant __realPropProxy;
-  bool FVF(__autoload);
-
-  static struct StaticInits {
-    StaticInits(const ClassPropTable *t, const int *e) : table(t), entries(e) {
-      next = Globals::s_next_inits;
-      Globals::s_next_inits = this;
-    }
-    StaticInits          *next;
-    const ClassPropTable *table;
-    const int            *entries;
-  }                      *s_next_inits;
-private:
-  Array m_dynamicConstants;  // declared constants
-
-  ssize_t wrapIter(ssize_t it) const;
-};
-
 const char* getHphpCompilerVersion();
 const char* getHphpCompilerId();
 HphpBinary::Type getHphpBinaryType();
@@ -103,10 +57,10 @@ HphpBinary::Type getHphpBinaryType();
 
 #define DECLARE_SYSTEM_GLOBALS(sg)                      \
   SystemGlobals *sg ATTRIBUTE_UNUSED =       \
-    (SystemGlobals*)get_global_variables();
+    get_global_variables();
 
 #define DECLARE_GLOBAL_VARIABLES(g)                     \
-  GlobalVariables *g ATTRIBUTE_UNUSED =      \
+  SystemGlobals *g ATTRIBUTE_UNUSED =      \
     get_global_variables();
 
 // code generated file that defines all system global variables

@@ -383,9 +383,6 @@ private:
                           TypePtr type, bool coerce);
   virtual void dumpStats(std::map<std::string, int> &typeCounts);
 
-  void outputCPPGlobalVariablesHeader(CodeGenerator &cg,
-                                      AnalysisResultPtr ar);
-  void outputCPPGlobalVariablesImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPVariableTable(CodeGenerator &cg, AnalysisResultPtr ar,
                               const char *paramPrefix);

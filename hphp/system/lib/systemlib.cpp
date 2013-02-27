@@ -48,9 +48,10 @@ HPHP::VM::Class* SystemLib::s_InvalidOperationExceptionClass = nullptr;
 HPHP::VM::Class* SystemLib::s_pinitSentinelClass = nullptr;
 HPHP::VM::Class* SystemLib::s_resourceClass = nullptr;
 HPHP::VM::Class* SystemLib::s_DOMExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_SplFileObjectClass = nullptr;
 HPHP::VM::Class* SystemLib::s_SoapFaultClass = nullptr;
 HPHP::VM::Class* SystemLib::s_ContinuationClass = nullptr;
+HPHP::VM::Class* SystemLib::s_SplFileInfoClass = nullptr;
+HPHP::VM::Class* SystemLib::s_SplFileObjectClass = nullptr;
 
 ObjectData* SystemLib::AllocStdClassObject() {
   return HPHP::VM::Instance::newInstance(SystemLib::s_stdclassClass);
@@ -103,14 +104,6 @@ ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
   CREATE_AND_CONSTRUCT(DOMException, CREATE_VECTOR2(message, code));
 }
 
-ObjectData* SystemLib::AllocSplFileObjectObject(CVarRef filename,
-                                                CVarRef open_mode,
-                                                CVarRef use_include_path,
-                                                CVarRef context) {
-  CREATE_AND_CONSTRUCT(SplFileObject,
-    CREATE_VECTOR4(filename, open_mode, use_include_path, context));
-}
-
 ObjectData*
 SystemLib::AllocSoapFaultObject(CVarRef code,
                                 CVarRef message,
@@ -120,6 +113,20 @@ SystemLib::AllocSoapFaultObject(CVarRef code,
                                 CVarRef header /* = null_variant */) {
   CREATE_AND_CONSTRUCT(SoapFault, CREATE_VECTOR6(code, message, actor,
                                                  detail, name, header));
+}
+
+ObjectData* SystemLib::AllocSplFileObjectObject(CVarRef filename,
+                                                CVarRef open_mode,
+                                                CVarRef use_include_path,
+                                                CVarRef context) {
+  CREATE_AND_CONSTRUCT(SplFileObject, CREATE_VECTOR4(filename,
+                                                     open_mode,
+                                                     use_include_path,
+                                                     context));
+}
+
+ObjectData* SystemLib::AllocSplFileInfoObject(CVarRef filename) {
+  CREATE_AND_CONSTRUCT(SplFileInfo, CREATE_VECTOR1(filename));
 }
 
 #undef CREATE_AND_CONSTRUCT
@@ -133,7 +140,6 @@ SystemLib::GetNullFunction() {
 
 ALLOC_OBJECT_STUB(Directory);
 ALLOC_OBJECT_STUB(RecursiveDirectoryIterator);
-ALLOC_OBJECT_STUB(SplFileInfo);
 ALLOC_OBJECT_STUB(PDOException);
 
 ///////////////////////////////////////////////////////////////////////////////

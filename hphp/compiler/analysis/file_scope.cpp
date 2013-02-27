@@ -577,14 +577,6 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     outputCPPCallInfoTableSupport(cg, ar, m_redeclaredFunctions, hasRedec);
     outputCPPHelperClassAllocSupport(cg, ar, m_redeclaredFunctions);
-    for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
-         it != m_classes.end(); ++it) {
-      BOOST_FOREACH(ClassScopePtr cls, it->second) {
-        if (!cls->isInterface()) {
-          cls->outputCPPDynamicClassImpl(cg, ar);
-        }
-      }
-    }
   }
 }
 

@@ -59,7 +59,6 @@ void init_thread_locals(void *arg /* = NULL */) {
   MemoryManager::TlsWrapper::getCheck();
   InitAllocatorThreadLocal();
   RefData::AllocatorType::getCheck();
-  get_global_variables_check();
   ThreadInfo::s_threadInfo.getCheck();
   g_context.getCheck();
   AsioSession::Init();

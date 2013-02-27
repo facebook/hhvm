@@ -27,7 +27,6 @@
 #include <util/logger.h>
 #include <util/util.h>
 #include <system/gen/sys/system_globals.h>
-#include <system/gen/php/globals/symbols.h>
 #include <runtime/base/server/upload.h>
 #include <runtime/base/server/replay_transport.h>
 #include <runtime/base/server/virtual_host.h>
@@ -87,9 +86,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const SourceRootInfo &sri) {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
   const VirtualHost *vhost = VirtualHost::GetCurrent();
-
-  // reset global symbols to nulls or empty arrays
-  pm_php$globals$symbols_php(false, g, g);
 
   Variant &server = g->GV(_SERVER);
   server.set("REQUEST_START_TIME", time(nullptr));

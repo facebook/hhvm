@@ -341,15 +341,7 @@ static Variant xml_call_handler(XmlParser *parser, CVarRef handler,
     } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
                (handler[0].isString() || handler[0].isObject()) &&
                handler[1].isString()) {
-      if (handler[0].isString()) {
-        // static method
-        retval = ObjectData::os_invoke(handler[0].toString(),
-                                       handler[1].toString(), args, -1);
-      } else {
-        // instance method
-        retval = handler[0].toObject()->o_invoke(handler[1].toString(),
-                                                 args, -1);
-      }
+      f_call_user_func_array(handler, args);
     } else {
       raise_warning("Handler is invalid");
     }

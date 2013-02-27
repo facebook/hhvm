@@ -31,7 +31,7 @@
 // Usage example: const_assert(hhvm);
 #define const_assert(c) do {                                                  \
   if (!(c)) {                                                                 \
-    assert(false);                                                            \
+    always_assert(false);                                                     \
   }                                                                           \
 } while (0)
 

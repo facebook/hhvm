@@ -88,25 +88,14 @@ Variant f_constant(CStrRef name) {
       return null;
     }
   } else {
-    if (hhvm) {
-      TypedValue* cns = g_vmContext->getCns(name.get());
-      if (cns == NULL) {
-        if (AutoloadHandler::s_instance->autoloadConstant(name)) {
-          cns = g_vmContext->getCns(name.get());
-        }
+    TypedValue* cns = g_vmContext->getCns(name.get());
+    if (cns == NULL) {
+      if (AutoloadHandler::s_instance->autoloadConstant(name)) {
+        cns = g_vmContext->getCns(name.get());
       }
-      if (cns) return tvAsVariant(cns);
-      return null;
-    } else {
-      const ClassInfo::ConstantInfo *cinfo = ClassInfo::FindConstant(name);
-      // system/uniquely defined scalar constant (must be valid)
-      if (cinfo) return cinfo->getValue();
-      if (!((Globals*)get_global_variables())->defined(name)) {
-        AutoloadHandler::s_instance->autoloadConstant(name);
-      }
-      // dynamic/redeclared constant
-      return ((Globals*)get_global_variables())->getConstant(name.data());
     }
+    if (cns) return tvAsVariant(cns);
+    return null;
   }
 }
 
@@ -115,15 +104,9 @@ bool f_define(CStrRef name, CVarRef value,
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }
-  if (hhvm) {
-    // TODO: Once we're inlining constants from hphpc this should
-    // fatal or fail in some other way.
-    return g_vmContext->setCns(name.get(), value, true);
-  } else {
-    // define() should be turned into constant definition by HPHP
-    assert(false);
-    return false;
-  }
+  // TODO: Once we're inlining constants from hphpc this should
+  // fatal or fail in some other way.
+  return g_vmContext->setCns(name.get(), value, true);
 }
 
 bool f_defined(CStrRef name, bool autoload /* = true */) {
@@ -176,17 +159,13 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
   } else {
     // system/uniquely defined scalar constant
     if (ClassInfo::FindConstant(name)) return true;
-    if (hhvm ?
-        g_vmContext->defined(name) :
-        ((Globals*)get_global_variables())->defined(name)) {
+    if (g_vmContext->defined(name)) {
       return true;
     }
     if (!autoload || !AutoloadHandler::s_instance->autoloadConstant(name)) {
       return false;
     }
-    if (hhvm) return g_vmContext->defined(name);
-    if (ClassInfo::FindConstant(name)) return true;
-    return ((Globals*)get_global_variables())->defined(name);
+    return g_vmContext->defined(name);
   }
 }
 

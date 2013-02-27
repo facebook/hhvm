@@ -45,14 +45,9 @@ class c_Closure : public ExtObjectData {
   public: c_Closure(const ObjectStaticCallbacks *cb = &cw_Closure);
   public: ~c_Closure();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___invoke(int _argc, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(__invoke);
   public: Variant t___clone();
-  DECLARE_METHOD_INVOKE_HELPERS(__clone);
 
-  // implemented by HPHP
-  public: c_Closure *create();
   public: static const ClassPropTable os_prop_table;
 protected:
   virtual bool php_sleep(Variant &ret);
@@ -70,10 +65,7 @@ class c_DummyClosure : public ExtObjectData {
   public: c_DummyClosure(const ObjectStaticCallbacks *cb = &cw_DummyClosure);
   public: ~c_DummyClosure();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
 
-  // implemented by HPHP
-  public: c_DummyClosure *create();
 
 };
 

@@ -41,26 +41,15 @@ class c_SoapServer : public ExtObjectData {
   public: c_SoapServer(const ObjectStaticCallbacks *cb = &cw_SoapServer);
   public: ~c_SoapServer();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_setclass(int _argc, CStrRef name, CArrRef _argv = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(setclass);
   public: void t_setobject(CObjRef obj);
-  DECLARE_METHOD_INVOKE_HELPERS(setobject);
   public: void t_addfunction(CVarRef func);
-  DECLARE_METHOD_INVOKE_HELPERS(addfunction);
   public: Variant t_getfunctions();
-  DECLARE_METHOD_INVOKE_HELPERS(getfunctions);
   public: void t_handle(CStrRef request = null_string);
-  DECLARE_METHOD_INVOKE_HELPERS(handle);
   public: void t_setpersistence(int64 mode);
-  DECLARE_METHOD_INVOKE_HELPERS(setpersistence);
   public: void t_fault(CVarRef code, CStrRef fault, CStrRef actor = null_string, CVarRef detail = null, CStrRef name = null_string);
-  DECLARE_METHOD_INVOKE_HELPERS(fault);
   public: void t_addsoapheader(CObjRef fault);
-  DECLARE_METHOD_INVOKE_HELPERS(addsoapheader);
 
-  // implemented by HPHP
-  public: c_SoapServer *create(Variant wsdl, Array options = null_array);
 
 
   public: int                        m_type;
@@ -91,35 +80,19 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: c_SoapClient(const ObjectStaticCallbacks *cb = &cw_SoapClient);
   public: ~c_SoapClient();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___call(Variant name, Variant args);
-  DECLARE_METHOD_INVOKE_HELPERS(__call);
-  public: Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: Variant t___soapcall(CStrRef name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = null);
-  DECLARE_METHOD_INVOKE_HELPERS(__soapcall);
   public: Variant t___getlastrequest();
-  DECLARE_METHOD_INVOKE_HELPERS(__getlastrequest);
   public: Variant t___getlastresponse();
-  DECLARE_METHOD_INVOKE_HELPERS(__getlastresponse);
   public: Variant t___getlastrequestheaders();
-  DECLARE_METHOD_INVOKE_HELPERS(__getlastrequestheaders);
   public: Variant t___getlastresponseheaders();
-  DECLARE_METHOD_INVOKE_HELPERS(__getlastresponseheaders);
   public: Variant t___getfunctions();
-  DECLARE_METHOD_INVOKE_HELPERS(__getfunctions);
   public: Variant t___gettypes();
-  DECLARE_METHOD_INVOKE_HELPERS(__gettypes);
   public: Variant t___dorequest(CStrRef buf, CStrRef location, CStrRef action, int64 version, bool oneway = false);
-  DECLARE_METHOD_INVOKE_HELPERS(__dorequest);
   public: Variant t___setcookie(CStrRef name, CStrRef value = null_string);
-  DECLARE_METHOD_INVOKE_HELPERS(__setcookie);
   public: Variant t___setlocation(CStrRef new_location = null_string);
-  DECLARE_METHOD_INVOKE_HELPERS(__setlocation);
   public: bool t___setsoapheaders(CVarRef headers = null_variant);
-  DECLARE_METHOD_INVOKE_HELPERS(__setsoapheaders);
 
-  // implemented by HPHP
-  public: c_SoapClient *create(Variant wsdl, Array options = null_array);
 
 
   public: int                         m_soap_version;
@@ -170,10 +143,7 @@ class c_SoapVar : public ExtObjectData {
   public: c_SoapVar(const ObjectStaticCallbacks *cb = &cw_SoapVar);
   public: ~c_SoapVar();
   public: void t___construct(CVarRef data, CVarRef type, CStrRef type_name = null_string, CStrRef type_namespace = null_string, CStrRef node_name = null_string, CStrRef node_namespace = null_string);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
 
-  // implemented by HPHP
-  public: c_SoapVar *create(Variant data, Variant type, String type_name = null_string, String type_namespace = null_string, String node_name = null_string, String node_namespace = null_string);
 
 
   public: Variant m_value;
@@ -196,10 +166,7 @@ class c_SoapParam : public ExtObjectData {
   public: c_SoapParam(const ObjectStaticCallbacks *cb = &cw_SoapParam);
   public: ~c_SoapParam();
   public: void t___construct(CVarRef data, CStrRef name);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
 
-  // implemented by HPHP
-  public: c_SoapParam *create(Variant data, String name);
 
 
   public: String  m_name;
@@ -218,10 +185,7 @@ class c_SoapHeader : public ExtObjectData {
   public: c_SoapHeader(const ObjectStaticCallbacks *cb = &cw_SoapHeader);
   public: ~c_SoapHeader();
   public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = null, bool mustunderstand = false, CVarRef actor = null);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
 
-  // implemented by HPHP
-  public: c_SoapHeader *create(String ns, String name, Variant data = null, bool mustunderstand = false, Variant actor = null);
 
 
   public: String  m_namespace;

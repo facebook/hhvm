@@ -49,48 +49,29 @@ class c_DateTime : public ExtObjectData {
   public: c_DateTime(const ObjectStaticCallbacks *cb = &cw_DateTime);
   public: ~c_DateTime();
   public: Object t_add(CObjRef interval);
-  DECLARE_METHOD_INVOKE_HELPERS(add);
   public: void t___construct(CStrRef time = "now",
                              CObjRef timezone = null_object);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Object ti_createfromformat(const char* cls , CStrRef format, CStrRef time, CObjRef timezone = null_object);
   public: static Object t_createfromformat(CStrRef format, CStrRef time, CObjRef timezone = null_object) {
     return ti_createfromformat("datetime", format, time, timezone);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(createfromformat);
   public: Object t_diff(CObjRef datetime2, bool absolute = false);
-  DECLARE_METHOD_INVOKE_HELPERS(diff);
   public: String t_format(CStrRef format);
-  DECLARE_METHOD_INVOKE_HELPERS(format);
   public: static Array ti_getlasterrors(const char* cls );
   public: static Array t_getlasterrors() {
     return ti_getlasterrors("datetime");
   }
-  DECLARE_METHOD_INVOKE_HELPERS(getlasterrors);
   public: int64 t_getoffset();
-  DECLARE_METHOD_INVOKE_HELPERS(getoffset);
   public: int64 t_gettimestamp();
-  DECLARE_METHOD_INVOKE_HELPERS(gettimestamp);
   public: Variant t_gettimezone();
-  DECLARE_METHOD_INVOKE_HELPERS(gettimezone);
   public: Object t_modify(CStrRef modify);
-  DECLARE_METHOD_INVOKE_HELPERS(modify);
   public: Object t_setdate(int64 year, int64 month, int64 day);
-  DECLARE_METHOD_INVOKE_HELPERS(setdate);
   public: Object t_setisodate(int64 year, int64 week, int64 day = 1);
-  DECLARE_METHOD_INVOKE_HELPERS(setisodate);
   public: Object t_settime(int64 hour, int64 minute, int64 second = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(settime);
   public: Object t_settimestamp(int64 unixtimestamp);
-  DECLARE_METHOD_INVOKE_HELPERS(settimestamp);
   public: Object t_settimezone(CObjRef timezone);
-  DECLARE_METHOD_INVOKE_HELPERS(settimezone);
   public: Object t_sub(CObjRef interval);
-  DECLARE_METHOD_INVOKE_HELPERS(sub);
 
-  // implemented by HPHP
-  public: c_DateTime *create(String time = "now",
-                             Object timezone = null_object);
   public: static const ClassPropTable os_prop_table;
 
 
@@ -143,28 +124,19 @@ class c_DateTimeZone : public ExtObjectData {
   public: c_DateTimeZone(const ObjectStaticCallbacks *cb = &cw_DateTimeZone);
   public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Array t_getlocation();
-  DECLARE_METHOD_INVOKE_HELPERS(getlocation);
   public: String t_getname();
-  DECLARE_METHOD_INVOKE_HELPERS(getname);
   public: int64 t_getoffset(CObjRef datetime);
-  DECLARE_METHOD_INVOKE_HELPERS(getoffset);
   public: Array t_gettransitions();
-  DECLARE_METHOD_INVOKE_HELPERS(gettransitions);
   public: static Array ti_listabbreviations(const char* cls );
   public: static Array t_listabbreviations() {
     return ti_listabbreviations("datetimezone");
   }
-  DECLARE_METHOD_INVOKE_HELPERS(listabbreviations);
   public: static Array ti_listidentifiers(const char* cls );
   public: static Array t_listidentifiers() {
     return ti_listidentifiers("datetimezone");
   }
-  DECLARE_METHOD_INVOKE_HELPERS(listidentifiers);
 
-  // implemented by HPHP
-  public: c_DateTimeZone *create(String timezone);
   public: static const ClassPropTable os_prop_table;
 
 
@@ -202,21 +174,14 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::
   public: c_DateInterval(const ObjectStaticCallbacks *cb = &cw_DateInterval);
   public: ~c_DateInterval();
   public: void t___construct(CStrRef interval_spec);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___get(Variant member);
-  DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant member, Variant value);
-  DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: static Object ti_createfromdatestring(const char* cls , CStrRef time);
   public: static Object t_createfromdatestring(CStrRef time) {
     return ti_createfromdatestring("dateinterval", time);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(createfromdatestring);
   public: String t_format(CStrRef format);
-  DECLARE_METHOD_INVOKE_HELPERS(format);
 
-  // implemented by HPHP
-  public: c_DateInterval *create(String interval_spec);
 
   public: static Object wrap(SmartObject<DateInterval> di) {
     c_DateInterval *cdi = NEWOBJ(c_DateInterval)();

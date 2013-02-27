@@ -420,9 +420,7 @@ Variant f_hphp_recursivedirectoryiterator_current(CObjRef obj) {
     return pathName;
   }
   if (rdi->m_flags & CURRENT_AS_FILEINFO) {
-    ObjectData* c_splfi = SystemLib::AllocSplFileInfoObject();
-    c_splfi->o_set("rsrc", NEWOBJ(SplFileInfo)(pathName), "SplFileInfo");
-    return c_splfi;
+    return SystemLib::AllocSplFileInfoObject(pathName);
   }
   return obj;
 }

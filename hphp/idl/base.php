@@ -772,12 +772,6 @@ function generateMethodCPPHeader($method, $class, $f) {
   generateFuncCPPHeader($method, $f, true,
                         isset($MAGIC_METHODS[$method['name']]),
                         $method['flags'] & IsStatic, $class);
-  fprintf($f, "  DECLARE_METHOD_INVOKE_HELPERS(%s);\n",
-          strtolower($method['name']));
-  if ($method['name'] == "__call") {
-    fprintf($f, "  public: Variant doCall(Variant v_name, ");
-    fprintf($f, "Variant v_arguments, bool fatal);\n");
-  }
 }
 
 function generatePropertyCPPHeader($property, $f) {

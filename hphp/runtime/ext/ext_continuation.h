@@ -48,44 +48,24 @@ class c_Continuation : public ExtObjectData {
   public: c_Continuation(const ObjectStaticCallbacks *cb = &cw_Continuation);
   public: ~c_Continuation();
   public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CVarRef obj = null, CArrRef args = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_update(int64 label, CVarRef value);
-  DECLARE_METHOD_INVOKE_HELPERS(update);
   public: void t_done();
-  DECLARE_METHOD_INVOKE_HELPERS(done);
   public: int64 t_getlabel();
-  DECLARE_METHOD_INVOKE_HELPERS(getlabel);
   public: int64 t_num_args();
-  DECLARE_METHOD_INVOKE_HELPERS(num_args);
   public: Array t_get_args();
-  DECLARE_METHOD_INVOKE_HELPERS(get_args);
   public: Variant t_get_arg(int64 id);
-  DECLARE_METHOD_INVOKE_HELPERS(get_arg);
   public: Variant t_current();
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   public: int64 t_key();
-  DECLARE_METHOD_INVOKE_HELPERS(key);
   public: void t_next();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
   public: void t_rewind();
-  DECLARE_METHOD_INVOKE_HELPERS(rewind);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
   public: void t_send(CVarRef v);
-  DECLARE_METHOD_INVOKE_HELPERS(send);
   public: void t_raise(CVarRef v);
-  DECLARE_METHOD_INVOKE_HELPERS(raise);
   public: void t_raised();
-  DECLARE_METHOD_INVOKE_HELPERS(raised);
   public: Variant t_receive();
-  DECLARE_METHOD_INVOKE_HELPERS(receive);
   public: String t_getorigfuncname();
-  DECLARE_METHOD_INVOKE_HELPERS(getorigfuncname);
   public: Variant t___clone();
-  DECLARE_METHOD_INVOKE_HELPERS(__clone);
 
-  // implemented by HPHP
-  public: c_Continuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Variant obj = null, Array args = null_array);
   public: static const ClassPropTable os_prop_table;
 
   static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {
@@ -182,20 +162,12 @@ class c_DummyContinuation : public ExtObjectData {
   public: c_DummyContinuation(const ObjectStaticCallbacks *cb = &cw_DummyContinuation);
   public: ~c_DummyContinuation();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t_current();
-  DECLARE_METHOD_INVOKE_HELPERS(current);
   public: int64 t_key();
-  DECLARE_METHOD_INVOKE_HELPERS(key);
   public: void t_next();
-  DECLARE_METHOD_INVOKE_HELPERS(next);
   public: void t_rewind();
-  DECLARE_METHOD_INVOKE_HELPERS(rewind);
   public: bool t_valid();
-  DECLARE_METHOD_INVOKE_HELPERS(valid);
 
-  // implemented by HPHP
-  public: c_DummyContinuation *create();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

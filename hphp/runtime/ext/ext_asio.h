@@ -62,26 +62,15 @@ class c_WaitHandle : public ExtObjectData {
   public: c_WaitHandle(const ObjectStaticCallbacks *cb = &cw_WaitHandle);
   public: ~c_WaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_import();
-  DECLARE_METHOD_INVOKE_HELPERS(import);
   public: Variant t_join();
-  DECLARE_METHOD_INVOKE_HELPERS(join);
   public: bool t_isfinished();
-  DECLARE_METHOD_INVOKE_HELPERS(isfinished);
   public: bool t_issucceeded();
-  DECLARE_METHOD_INVOKE_HELPERS(issucceeded);
   public: bool t_isfailed();
-  DECLARE_METHOD_INVOKE_HELPERS(isfailed);
   public: int64 t_getid();
-  DECLARE_METHOD_INVOKE_HELPERS(getid);
   public: String t_getname();
-  DECLARE_METHOD_INVOKE_HELPERS(getname);
   public: Object t_getexceptioniffailed();
-  DECLARE_METHOD_INVOKE_HELPERS(getexceptioniffailed);
 
-  // implemented by HPHP
-  public: c_WaitHandle *create();
 
  public:
   static c_WaitHandle* fromTypedValue(TypedValue* tv) {
@@ -127,10 +116,7 @@ class c_StaticWaitHandle : public c_WaitHandle {
   public: c_StaticWaitHandle(const ObjectStaticCallbacks *cb = &cw_StaticWaitHandle);
   public: ~c_StaticWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
 
-  // implemented by HPHP
-  public: c_StaticWaitHandle *create();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,15 +134,11 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   public: c_StaticResultWaitHandle(const ObjectStaticCallbacks *cb = &cw_StaticResultWaitHandle);
   public: ~c_StaticResultWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Object ti_create(const char* cls , CVarRef result);
   public: static Object t_create(CVarRef result) {
     return ti_create("staticresultwaithandle", result);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(create);
 
-  // implemented by HPHP
-  public: c_StaticResultWaitHandle *create();
 
  public:
   String getName();
@@ -180,15 +162,11 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   public: c_StaticExceptionWaitHandle(const ObjectStaticCallbacks *cb = &cw_StaticExceptionWaitHandle);
   public: ~c_StaticExceptionWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Object ti_create(const char* cls , CObjRef exception);
   public: static Object t_create(CObjRef exception) {
     return ti_create("staticexceptionwaithandle", exception);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(create);
 
-  // implemented by HPHP
-  public: c_StaticExceptionWaitHandle *create();
 
  public:
   String getName();
@@ -219,14 +197,9 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: c_WaitableWaitHandle(const ObjectStaticCallbacks *cb = &cw_WaitableWaitHandle);
   public: ~c_WaitableWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Array t_getparents();
-  DECLARE_METHOD_INVOKE_HELPERS(getparents);
   public: Array t_getstacktrace();
-  DECLARE_METHOD_INVOKE_HELPERS(getstacktrace);
 
-  // implemented by HPHP
-  public: c_WaitableWaitHandle *create();
 
  public:
   AsioContext* getContext() { assert(isInContext()); return AsioSession::Get()->getContext(getContextIdx()); }
@@ -275,10 +248,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   public: c_BlockableWaitHandle(const ObjectStaticCallbacks *cb = &cw_BlockableWaitHandle);
   public: ~c_BlockableWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
 
-  // implemented by HPHP
-  public: c_BlockableWaitHandle *create();
 
  public:
   c_BlockableWaitHandle* getNextParent();
@@ -318,29 +288,21 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   public: c_ContinuationWaitHandle(const ObjectStaticCallbacks *cb = &cw_ContinuationWaitHandle);
   public: ~c_ContinuationWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Object ti_start(const char* cls , CObjRef continuation, int prio = 0);
   public: static Object t_start(CObjRef continuation, int prio = 0) {
     return ti_start("continuationwaithandle", continuation, prio);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(start);
   public: static void ti_markcurrentassucceeded(const char* cls , CVarRef result);
   public: static void t_markcurrentassucceeded(CVarRef result) {
     return ti_markcurrentassucceeded("continuationwaithandle", result);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(markcurrentassucceeded);
   public: static void ti_markcurrentastailcall(const char* cls );
   public: static void t_markcurrentastailcall() {
     return ti_markcurrentastailcall("continuationwaithandle");
   }
-  DECLARE_METHOD_INVOKE_HELPERS(markcurrentastailcall);
   public: Object t_getprivdata();
-  DECLARE_METHOD_INVOKE_HELPERS(getprivdata);
   public: void t_setprivdata(CObjRef data);
-  DECLARE_METHOD_INVOKE_HELPERS(setprivdata);
 
-  // implemented by HPHP
-  public: c_ContinuationWaitHandle *create();
 
  public:
   void run();
@@ -386,15 +348,11 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   public: c_GenArrayWaitHandle(const ObjectStaticCallbacks *cb = &cw_GenArrayWaitHandle);
   public: ~c_GenArrayWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Object ti_create(const char* cls , CArrRef dependencies);
   public: static Object t_create(CArrRef dependencies) {
     return ti_create("genarraywaithandle", dependencies);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(create);
 
-  // implemented by HPHP
-  public: c_GenArrayWaitHandle *create();
 
  public:
   String getName();
@@ -428,15 +386,11 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   public: c_SetResultToRefWaitHandle(const ObjectStaticCallbacks *cb = &cw_SetResultToRefWaitHandle);
   public: ~c_SetResultToRefWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Object ti_create(const char* cls , CObjRef wait_handle, VRefParam ref);
   public: static Object t_create(CObjRef wait_handle, VRefParam ref) {
     return ti_create("setresulttorefwaithandle", wait_handle, ref);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(create);
 
-  // implemented by HPHP
-  public: c_SetResultToRefWaitHandle *create();
 
  public:
   String getName();
@@ -476,15 +430,11 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   public: c_RescheduleWaitHandle(const ObjectStaticCallbacks *cb = &cw_RescheduleWaitHandle);
   public: ~c_RescheduleWaitHandle();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Object ti_create(const char* cls , int queue, int priority);
   public: static Object t_create(int queue, int priority) {
     return ti_create("reschedulewaithandle", queue, priority);
   }
-  DECLARE_METHOD_INVOKE_HELPERS(create);
 
-  // implemented by HPHP
-  public: c_RescheduleWaitHandle *create();
   public: static const ClassPropTable os_prop_table;
 
  public:

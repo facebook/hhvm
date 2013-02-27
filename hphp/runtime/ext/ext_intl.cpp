@@ -33,7 +33,7 @@
 
 #ifdef UIDNA_INFO_INITIALIZER
 #define HAVE_46_API 1 /* has UTS#46 API (introduced in ICU 4.6) */
-#endif  
+#endif
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(idn);
@@ -198,7 +198,9 @@ Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
 
 Variant c_Collator::ti_create(const char* cls, CStrRef locale) {
   STATIC_METHOD_INJECTION_BUILTIN(Collator, Collator::create);
-  return (NEWOBJ(c_Collator)())->create(locale);
+  p_Collator c(NEWOBJ(c_Collator)());
+  c.get()->t___construct(locale);
+  return c;
 }
 
 int64 c_Collator::t_getattribute(int64 attr) {
@@ -495,7 +497,7 @@ Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2) {
 }
 
 Variant f_collator_create(CStrRef locale) {
-  return (NEWOBJ(c_Collator)())->create(locale);
+  return c_Collator::ti_create(nullptr, locale);
 }
 
 Variant f_collator_get_attribute(CVarRef obj, int64 attr) {
@@ -756,7 +758,7 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64 options, IdnVariant idn_
   UIDNAInfo   info = UIDNA_INFO_INITIALIZER;
   UErrorCode  status;
 
-  // Get UIDNA instance which implements UTS #46. 
+  // Get UIDNA instance which implements UTS #46.
   uts46 = uidna_openUTS46(options, &status);
   SCOPE_EXIT { uidna_close(uts46); };
   if (U_FAILURE(status)) return false;
@@ -775,11 +777,11 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64 options, IdnVariant idn_
   }
   if (U_FAILURE(status) || converted_len > converted_capacity) return false;
   if (info.errors == 0) {
-    result.setSize(converted_len); 
+    result.setSize(converted_len);
   } else {
     result.setSize(0);
   }
-  
+
   // Set up the array returned in idna_info.
   Array arr;
   arr.set("result", result);
@@ -788,7 +790,7 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64 options, IdnVariant idn_
   idna_info = arr; // As in Zend, the previous value of idn_variant is overwritten, not modified.
 
   if (info.errors == 0) {
-    return result; 
+    return result;
   } else {
     return false;
   }
@@ -808,8 +810,8 @@ static Variant php_intl_idn_to(CStrRef domain, int64 options, IdnVariant idn_var
   if (idn_variant != INTL_IDN_VARIANT_2003) {
 #ifdef HAVE_46_API
     if (idn_variant == INTL_IDN_VARIANT_UTS46) {
-      return php_intl_idn_to_46(domain, options, idn_variant, ref(idna_info), mode); 
-    } 
+      return php_intl_idn_to_46(domain, options, idn_variant, ref(idna_info), mode);
+    }
 #endif
     return false;
   }

@@ -66,7 +66,6 @@ int main(int argc, char **argv) {
   }
 
   hphp_process_init();
-  init_global_variables();
   Test test;
   return test.RunTests(suite, which, set) ? 0 : -1;
 }

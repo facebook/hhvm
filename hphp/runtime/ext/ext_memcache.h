@@ -58,50 +58,27 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   public: c_Memcache(const ObjectStaticCallbacks *cb = &cw_Memcache);
   public: ~c_Memcache();
   public: void t___construct();
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_connect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(connect);
   public: bool t_pconnect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(pconnect);
   public: bool t_add(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(add);
   public: bool t_set(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(set);
   public: bool t_replace(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(replace);
   public: Variant t_get(CVarRef key, VRefParam flags = null);
-  DECLARE_METHOD_INVOKE_HELPERS(get);
   public: bool t_delete(CStrRef key, int expire = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(delete);
   public: int64 t_increment(CStrRef key, int offset = 1);
-  DECLARE_METHOD_INVOKE_HELPERS(increment);
   public: int64 t_decrement(CStrRef key, int offset = 1);
-  DECLARE_METHOD_INVOKE_HELPERS(decrement);
   public: Variant t_getversion();
-  DECLARE_METHOD_INVOKE_HELPERS(getversion);
   public: bool t_flush(int expire = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(flush);
   public: bool t_setoptimeout(int64 timeoutms);
-  DECLARE_METHOD_INVOKE_HELPERS(setoptimeout);
   public: bool t_close();
-  DECLARE_METHOD_INVOKE_HELPERS(close);
   public: int64 t_getserverstatus(CStrRef host, int port = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(getserverstatus);
   public: bool t_setcompressthreshold(int threshold, double min_savings = 0.2);
-  DECLARE_METHOD_INVOKE_HELPERS(setcompressthreshold);
   public: Array t_getstats(CStrRef type = null_string, int slabid = 0, int limit = 100);
-  DECLARE_METHOD_INVOKE_HELPERS(getstats);
   public: Array t_getextendedstats(CStrRef type = null_string, int slabid = 0, int limit = 100);
-  DECLARE_METHOD_INVOKE_HELPERS(getextendedstats);
   public: bool t_setserverparams(CStrRef host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant);
-  DECLARE_METHOD_INVOKE_HELPERS(setserverparams);
   public: bool t_addserver(CStrRef host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0);
-  DECLARE_METHOD_INVOKE_HELPERS(addserver);
   public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
-  // implemented by HPHP
-  public: c_Memcache *create();
 
 
  private:

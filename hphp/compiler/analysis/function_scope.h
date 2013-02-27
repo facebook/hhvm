@@ -416,13 +416,6 @@ public:
   void outputCPPDef(CodeGenerator &cg);
 
   /**
-   * ...so ClassStatement can call them for classes that don't have
-   * constructors defined
-   */
-  void outputCPPCreateDecl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPCreateImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  /**
    * output functions
    */
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);

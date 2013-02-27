@@ -25,7 +25,6 @@
 #include <runtime/base/compiler_id.h>
 #include <util/shared_memory_allocator.h>
 #include <system/gen/sys/system_globals.h>
-#include <system/gen/php/globals/symbols.h>
 #include <runtime/base/server/pagelet_server.h>
 #include <runtime/base/server/xbox_server.h>
 #include <runtime/base/server/http_server.h>
@@ -469,9 +468,6 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   context->obSetImplicitFlush(true);
 
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
-
-  // reset global symbols to nulls or empty arrays
-  pm_php$globals$symbols_php(false, g, g);
 
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
@@ -1295,7 +1291,6 @@ void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MemoryManager::TheMemoryManager()->resetStats();
-  init_global_variables();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1308,9 +1303,7 @@ void hphp_session_init() {
     StatCache::requestInit();
   }
 
-  if (hhvm) {
-    g_vmContext->requestInit();
-  }
+  g_vmContext->requestInit();
 }
 
 void hphp_thread_init() {

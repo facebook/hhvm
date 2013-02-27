@@ -148,6 +148,29 @@ private:
   NameValueTable* const m_tab;
 };
 
+class GlobalNameValueTableWrapper : public NameValueTableWrapper {
+ public:
+  GlobalNameValueTableWrapper(NameValueTable* tab);
+  Variant gvm_argc;
+  Variant gvm_argv;
+  Variant gvm__SERVER;
+  Variant gvm__GET;
+  Variant gvm__POST;
+  Variant gvm__COOKIE;
+  Variant gvm__FILES;
+  Variant gvm__ENV;
+  Variant gvm__REQUEST;
+  Variant gvm__SESSION;
+  Variant gvm_HTTP_RAW_POST_DATA;
+  Variant gvm_http_response_header;
+
+  Variant __realPropProxy;
+  Variant __lvalProxy;
+
+  Variant stgv_Variant[1];
+  #define k_SID stgv_Variant[0]
+};
+
 //////////////////////////////////////////////////////////////////////
 
 }}

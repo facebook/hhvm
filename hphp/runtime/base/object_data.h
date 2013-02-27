@@ -33,7 +33,6 @@ class ArrayIter;
 class MutableArrayIter;
 class ClassPropTable;
 struct ObjectStaticCallbacks;
-struct MethodCallInfoTable;
 
 class HphpArray;
 class TypedValue;
@@ -151,7 +150,6 @@ class ObjectData : public CountableNF {
    * false for classes that are descendents of ResourceData.
    */
   bool o_instanceof(CStrRef s) const;
-  virtual bool o_instanceof_hook(CStrRef s) const;
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
@@ -196,11 +194,7 @@ class ObjectData : public CountableNF {
                          ObjectData *(*coo)());
 
   virtual void init() {}
-  ObjectData *create() { CountableHelper h(this); init(); return this;}
   virtual void destruct();
-
-  static Variant os_invoke(CStrRef c, CStrRef s,
-                           CArrRef params, strhash_t hash, bool fatal = true);
 
   // properties
   virtual Array o_toArray() const;
@@ -211,8 +205,6 @@ class ObjectData : public CountableNF {
   void *o_realPropTyped(CStrRef s, int flags,
                         CStrRef context, DataType* type) const;
   Variant *o_realPropPublic(CStrRef s, int flags) const;
-  virtual Variant *o_realPropHook(CStrRef s, int flags,
-                                  CStrRef context = null_string) const;
   bool o_exists(CStrRef s, CStrRef context = null_string) const;
   Variant o_get(CStrRef s, bool error = true,
                 CStrRef context = null_string);
@@ -291,11 +283,6 @@ class ObjectData : public CountableNF {
   virtual ObjectData *clone();
   virtual void setRoot(ObjectData *root) {}
   virtual ObjectData *getRoot();
-  /**
-   * If __call is defined, then this gets overridden to call it.
-   * Otherwise, it just throws if fatal else returns false.
-   */
-  virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
 
   bool o_isset(CStrRef prop, CStrRef context = null_string);
   bool o_empty(CStrRef prop, CStrRef context = null_string);
@@ -320,9 +307,6 @@ class ObjectData : public CountableNF {
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
-  static Variant NullConstructor(MethodCallPackage &info, CArrRef params);
-  static Variant NullConstructorFewArgs(MethodCallPackage &info, int count,
-      INVOKE_FEW_ARGS_IMPL_ARGS);
   static int GetMaxId() ATTRIBUTE_COLD;
  protected:
   virtual bool php_sleep(Variant &ret);
@@ -339,10 +323,6 @@ public:
                            bool forInit, CStrRef context);
   template <typename T>
   inline Variant o_setPublicImpl(CStrRef propName, T v, bool forInit);
-
-  static Variant *RealPropPublicHelper(CStrRef propName, strhash_t hash,
-                                       int flags, const ObjectData *obj,
-                                       const ObjectStaticCallbacks *osc);
  public:
   static const bool IsResourceClass = false;
 
@@ -387,30 +367,10 @@ public:
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
-typedef ObjectData c_ObjectData; // purely for easier code generation
-
-struct MethodCallInfoTable {
-  strhash_t      hash;
-  int16_t        flags; // 0 or 1
-  int16_t        len; // length of name
-  const char     *name;
-  const CallInfo *ci;
-};
-
-struct InstanceOfInfo {
-  strhash_t                   hash;
-  int                         flags;
-  const char                  *name;
-  const ObjectStaticCallbacks *cb;
-};
-
-class GlobalVariables;
+typedef VM::GlobalNameValueTableWrapper GlobalVariables;
 
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
-  Object create(CArrRef params, bool init = true,
-                ObjectData* root = nullptr) const;
-  Object createOnly(ObjectData *root = nullptr) const;
   inline bool os_get_call_info(MethodCallPackage &info,
                                strhash_t hash = -1) const {
     NOT_REACHED();
@@ -420,20 +380,11 @@ struct ObjectStaticCallbacks {
   Variant &os_lval(CStrRef s) const;
   Variant os_constant(const char *s) const;
 
-  bool checkAttribute(int attrs) const;
   const ObjectStaticCallbacks* operator->() const { return this; }
   GlobalVariables *lazy_initializer(GlobalVariables *g) const;
 
-  ObjectData *(*createOnlyNoInit)(ObjectData* root);
-
-  const MethodCallInfoTable   *mcit;
-  const int                   *mcit_ix;
-  const InstanceOfInfo        *instanceof_table;
-  const int                   *instanceof_index;
   const StaticString          *cls;
   const ClassPropTable        *cpt;
-  const CallInfo              *constructor;
-  int64                       redeclaredParent;
   const ObjectStaticCallbacks *parent;
   int                         attributes;
   HPHP::VM::Class**           os_cls_ptr;
@@ -448,30 +399,6 @@ struct ObjectStaticCallbacks {
     return ((intptr_t)cb & (intptr_t)1);
   }
 };
-
-struct RedeclaredObjectStaticCallbacks {
-  ObjectStaticCallbacks oscb;
-  int id;
-
-  const RedeclaredObjectStaticCallbacks* operator->() const { return this; }
-  int getRedeclaringId() const { return id; }
-
-  Variant os_getInit(CStrRef s) const;
-  Variant os_get(CStrRef s) const;
-  Variant &os_lval(CStrRef s) const;
-  Variant os_constant(const char *s) const;
-  GlobalVariables *lazy_initializer(GlobalVariables *g) const {
-    return oscb.lazy_initializer(g);
-  }
-  bool os_get_call_info(MethodCallPackage &info, strhash_t hash = -1) const;
-  ObjectData *createOnlyNoInit(ObjectData* root = nullptr) const;
-  Object create(CArrRef params, bool init = true,
-                ObjectData* root = nullptr) const;
-  Object createOnly(ObjectData *root = nullptr) const;
-};
-
-typedef const RedeclaredObjectStaticCallbacks
-RedeclaredObjectStaticCallbacksConst;
 
 ObjectData *coo_ObjectData(ObjectData *);
 

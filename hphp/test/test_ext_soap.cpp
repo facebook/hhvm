@@ -56,7 +56,7 @@ bool TestExtSoap::RunTests(const std::string &which) {
 
 bool TestExtSoap::preTest() {
   m_server = p_SoapServer(NEWOBJ(c_SoapServer)());
-  m_server->create(null, CREATE_MAP1("uri", "http://testuri.org"));
+  m_server->t___construct(null, CREATE_MAP1("uri", "http://testuri.org"));
   return true;
 }
 
@@ -129,7 +129,8 @@ bool TestExtSoap::test_SoapServerArrayParam() {
 
 bool TestExtSoap::test_SoapServerWSDL() {
   m_server = p_SoapServer(NEWOBJ(c_SoapServer)());
-  m_server->create("test/test.wsdl", CREATE_MAP1("uri", "http://testuri.org"));
+  m_server->t___construct("test/test.wsdl",
+                          CREATE_MAP1("uri", "http://testuri.org"));
   m_server->t_addfunction("Add");
 
   VSOAPNS("<ns1:Add xmlns:ns1=\"http://testuri.org\">"
@@ -148,7 +149,11 @@ bool TestExtSoap::test_SoapServerFault() {
 
   VSOAPEX("<ns1:fault xmlns:ns1=\"http://testuri.org\"/>",
           "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-          "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>MyFault</faultcode><faultstring>My fault string</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>\n");
+          "<SOAP-ENV:Envelope xmlns:SOAP-ENV="
+          "\"http://schemas.xmlsoap.org/soap/envelope/\""
+          "><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>MyFault</faultcode>"
+          "<faultstring>My fault string</faultstring></SOAP-ENV:Fault>"
+          "</SOAP-ENV:Body></SOAP-ENV:Envelope>\n");
 
   return Count(true);
 }

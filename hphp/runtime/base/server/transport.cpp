@@ -746,7 +746,7 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
     // flush() triggers php's recursion guard
     // the recursion guard calls back into m_headerCallback
     m_headerCallbackDone = true;
-    call_user_func0(m_headerCallback);
+    f_call_user_func_array(m_headerCallback, null_array);
   }
 
   // compression handling

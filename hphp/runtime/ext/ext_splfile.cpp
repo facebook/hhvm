@@ -189,9 +189,8 @@ bool f_hphp_splfileinfo_iswritable(CObjRef obj) {
 
 Object f_hphp_splfileinfo_openfile(CObjRef obj, CStrRef open_mode, bool use_include_path, CVarRef context) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
-  return p_SplFileObject(p_SplFileObject(NEWOBJ(c_SplFileObject)())->
-           create(String(fileInfo->getFileName()),
-                  open_mode, use_include_path, context));
+  return SystemLib::AllocSplFileObjectObject(
+    String(fileInfo->getFileName()), open_mode, use_include_path, context);
 }
 
 void f_hphp_splfileinfo_setfileclass(CObjRef obj, CStrRef class_name) {

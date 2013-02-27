@@ -55,6 +55,7 @@ HPHP::VM::Class* SystemLib::s_InvalidOperationExceptionClass = nullptr;
 HPHP::VM::Class* SystemLib::s_pinitSentinelClass = nullptr;
 HPHP::VM::Class* SystemLib::s_resourceClass = nullptr;
 HPHP::VM::Class* SystemLib::s_DOMExceptionClass = nullptr;
+HPHP::VM::Class* SystemLib::s_SplFileObjectClass = nullptr;
 HPHP::VM::Class* SystemLib::s_SoapFaultClass = nullptr;
 HPHP::VM::Class* SystemLib::s_ContinuationClass = nullptr;
 
@@ -74,16 +75,17 @@ ObjectData* SystemLib::AllocPinitSentinel() {
 #define CREATE_AND_CONSTRUCT(clsname, params)                               \
   HPHP::VM::Instance* inst =                                                \
     HPHP::VM::Instance::newInstance(SystemLib::s_##clsname##Class);         \
-  TypedValue sink;                                                          \
-  /* Increment refcount across call to ctor, so the object doesn't get */   \
-  /* destroyed when ctor's frame is torn down */                            \
-  inst->incRefCount();                                                      \
-  inst->invokeUserMethod(&sink, SystemLib::s_##clsname##Class->getCtor(),   \
-                         params);                                           \
-  inst->decRefCount();                                                      \
-  assert(inst->getCount() == 0);                                            \
+  TypedValue ret;                                                           \
+  {                                                                         \
+    /* Increment refcount across call to ctor, so the object doesn't */     \
+    /* get destroyed when ctor's frame is torn down */                      \
+    CountableHelper cnt(inst);                                              \
+    inst->invokeUserMethod(&ret,                                            \
+                           SystemLib::s_##clsname##Class->getCtor(),        \
+                           params);                                         \
+  }                                                                         \
+  tvRefcountedDecRef(&ret);                                                 \
   return inst;
-
 
 ObjectData* SystemLib::AllocExceptionObject(CVarRef message) {
   if (hhvm) {
@@ -141,6 +143,19 @@ ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
   }
 }
 
+ObjectData* SystemLib::AllocSplFileObjectObject(CVarRef filename,
+                                                CVarRef open_mode,
+                                                CVarRef use_include_path,
+                                                CVarRef context) {
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(SplFileObject,
+      CREATE_VECTOR4(filename, open_mode, use_include_path, context));
+  } else {
+    return (NEWOBJ(c_SplFileObject)())->create(
+      filename, open_mode, use_include_path, context);
+  }
+}
+
 ObjectData*
 SystemLib::AllocSoapFaultObject(CVarRef code,
                                 CVarRef message,
@@ -169,7 +184,6 @@ SystemLib::GetNullFunction() {
 ALLOC_OBJECT_STUB(Directory);
 ALLOC_OBJECT_STUB(RecursiveDirectoryIterator);
 ALLOC_OBJECT_STUB(SplFileInfo);
-ALLOC_OBJECT_STUB(SplFileObject);
 ALLOC_OBJECT_STUB(PDOException);
 
 ///////////////////////////////////////////////////////////////////////////////

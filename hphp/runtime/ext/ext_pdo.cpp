@@ -566,21 +566,24 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
                          "constructor arguments must be passed as an array");
     return Object();
   }
-  return create_object_only(name);
+  VM::Class* cls = VM::Unit::loadClass(name.get());
+  if (!cls) {
+    return Object();
+  }
+  return HPHP::VM::Instance::newInstance(cls);
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                CStrRef clsname, CVarRef ctor_args) {
-  const ClassInfo *cls = ClassInfo::FindClass(clsname);
-  if (cls) {
-    const char *constructor = cls->getConstructor();
-    if (constructor) {
-      object->set("queryString", stmt->query_string);
-      MethodCallPackage mcp;
-      object->getConstructor(mcp);
-      mcp.ci->getMeth()(mcp, ctor_args);
-    }
+  VM::Class* cls = VM::Unit::loadClass(clsname.get());
+  if (!cls) {
+    return;
   }
+  object->set("queryString", stmt->query_string);
+  TypedValue ret;
+  VM::Instance* inst = static_cast<VM::Instance*>(object.get());
+  inst->invokeUserMethod(&ret, cls->getCtor(), ctor_args.toArray());
+  tvRefcountedDecRef(&ret);
 }
 
 static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,

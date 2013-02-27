@@ -1780,16 +1780,15 @@ FCallArray    [F]  ->  [R]
 
 BPassC <param id>    [C]  ->  [F]
 
-  Pass parameter to builtin call. This instruction pushes $1 onto the stack as
-  a cell regardless of whether parameter %1 is pass by value or pass by
-  reference.
+  Pass parameter to builtin call. This opcode is expected to be emitted
+  only when parameter %1 is pass by value. The instruction pushes $1
+  onto the stack as a cell.
 
 BPassV <param id>    [V]  ->  [F]
 
-  Pass parameter to builtin call. If parameter %1 is pass by value, this
-  instruction will unbox $1 and pussh it onto the stack as a cell. If
-  parameter %1 is pass by reference, this instruction will push $1 onto the
-  stack as a var.
+  Pass parameter to builtin call. This opcode is expected to be emitted
+  only when parameter %1 is pass by reference. The instruction pushes $1
+  onto the stack as a var.
 
 FCallBuiltin  <total params> <passed params> <litstr id> [F..F]  -> [R]
 

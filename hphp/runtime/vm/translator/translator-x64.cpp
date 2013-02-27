@@ -9936,15 +9936,6 @@ void TranslatorX64::translateFCallArray(const Tracelet& t,
   }
 }
 
-void TranslatorX64::analyzeBPassC(Tracelet& t,
-                                  NormalizedInstruction& i) {
-  i.m_txFlags = Interp;
-}
-
-void TranslatorX64::translateBPassC(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
-}
-
 // This is used to check that return types of builtins are not simple
 // types. This is different from IS_REFCOUNTED_TYPE because builtins
 // can return Variants, and we use KindOfUnknown to denote these

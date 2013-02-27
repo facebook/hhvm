@@ -1273,12 +1273,6 @@ TranslatorX64::irTranslateFPassR(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateBPassC(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  // BPassC desn't really do anything. No-op.
-}
-
-void
 TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
                               const NormalizedInstruction& i) {
   int numArgs = i.imm[0].u_IVA;
@@ -1517,6 +1511,10 @@ TranslatorX64::irTranslateInstrDefault(const Tracelet& t,
       break;
     case OpIterFree:
       irTranslateIterFree(t, i);
+      break;
+    case OpBPassC:
+    case OpBPassV:
+      // OpBPass* instructions are no-ops
       break;
     default:
       // GO: if you hit this, check opNames[op] and add support for it

@@ -232,7 +232,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   inline AsioContext* getContext() { assert(isInContext()); return AsioSession::Get()->getContext(getContextIdx()); }
 
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
-  inline c_BlockableWaitHandle** getFirstParentPtr() { return &m_firstParent; }
 
   virtual void enterContext(context_idx_t ctx_idx);
 
@@ -249,6 +248,9 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   c_BlockableWaitHandle* getParentInContext(context_idx_t ctx_idx);
 
   const TypedValue* join();
+
+  virtual c_WaitableWaitHandle* getChild();
+  bool hasCycle(c_WaitableWaitHandle* start);
 
   static const int8_t STATE_NEW       = 2;
 
@@ -283,17 +285,17 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   c_BlockableWaitHandle* unblock();
 
   void exitContextBlocked(context_idx_t ctx_idx);
-  void killCycle();
 
  protected:
-  virtual c_WaitableWaitHandle* getBlockedOn();
   void blockOn(c_WaitableWaitHandle* child);
   virtual void onUnblocked();
-  virtual void failBlock(CObjRef exception);
+  c_WaitableWaitHandle* getChild();
 
   static const int8_t STATE_BLOCKED = 3;
 
  private:
+  void reportCycle(c_WaitableWaitHandle* start);
+
   c_BlockableWaitHandle* m_nextParent;
 };
 
@@ -348,9 +350,8 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   void exitContext(context_idx_t ctx_idx);
 
  protected:
-  c_WaitableWaitHandle* getBlockedOn();
   void onUnblocked();
-  void failBlock(CObjRef exception);
+  c_WaitableWaitHandle* getChild();
 
  private:
   void start(c_Continuation* continuation, uint32_t prio, uint16_t depth);
@@ -400,9 +401,8 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   void enterContext(context_idx_t ctx_idx);
 
  protected:
-  c_WaitableWaitHandle* getBlockedOn();
   void onUnblocked();
-  void failBlock(CObjRef exception);
+  c_WaitableWaitHandle* getChild();
 
  private:
   void initialize(CObjRef exception, CArrRef deps, ssize_t iter_pos, c_WaitableWaitHandle* child);
@@ -443,12 +443,13 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   void enterContext(context_idx_t ctx_idx);
 
  protected:
-  c_WaitableWaitHandle* getBlockedOn();
   void onUnblocked();
-  void failBlock(CObjRef exception);
+  c_WaitableWaitHandle* getChild();
 
  private:
   void initialize(c_WaitableWaitHandle* wait_handle, RefData* ref);
+  void markAsSucceeded(const TypedValue* result);
+  void markAsFailed(CObjRef exception);
 
   p_WaitableWaitHandle m_child;
   RefData* m_ref;

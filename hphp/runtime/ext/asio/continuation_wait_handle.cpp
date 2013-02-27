@@ -134,7 +134,13 @@ void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint32_t prio
   } else {
     // TODO: deprecate directly passed non-zero priorities
     m_child = c_RescheduleWaitHandle::t_create(AsioContext::QUEUE_DEFAULT, prio);
-    blockOn(static_cast<c_WaitableWaitHandle*>(m_child.get()));
+    try {
+      blockOn(static_cast<c_WaitableWaitHandle*>(m_child.get()));
+    } catch (Object cycle_exception) {
+      // can't create cycle
+      assert(false);
+      throw;
+    }
   }
 }
 
@@ -214,14 +220,9 @@ void c_ContinuationWaitHandle::run() {
     assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
     blockOn(static_cast<c_WaitableWaitHandle*>(m_child.get()));
   } catch (Object exception) {
+    // process exception thrown by generator or blockOn cycle detection
     markAsFailed(exception);
   }
-}
-
-c_WaitableWaitHandle* c_ContinuationWaitHandle::getBlockedOn() {
-  assert(getState() == STATE_BLOCKED);
-  assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
-  return static_cast<c_WaitableWaitHandle*>(m_child.get());
 }
 
 void c_ContinuationWaitHandle::onUnblocked() {
@@ -229,11 +230,6 @@ void c_ContinuationWaitHandle::onUnblocked() {
   if (isInContext()) {
     getContext()->schedule(this);
   }
-}
-
-void c_ContinuationWaitHandle::failBlock(CObjRef exception) {
-  m_child = c_StaticExceptionWaitHandle::t_create(exception);
-  onUnblocked();
 }
 
 void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
@@ -268,6 +264,16 @@ String c_ContinuationWaitHandle::getName() {
     default:
       throw new FatalErrorException(
           "Invariant violation: encountered unexpected state");
+  }
+}
+
+c_WaitableWaitHandle* c_ContinuationWaitHandle::getChild() {
+  if (getState() == STATE_BLOCKED) {
+    assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
+    return static_cast<c_WaitableWaitHandle*>(m_child.get());
+  } else {
+    assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
+    return nullptr;
   }
 }
 

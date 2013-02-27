@@ -103,14 +103,12 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // or SCHEDULED state. So it must be BLOCKED on something. Apparently, the
     // same logic can be used recursively on the something, so there is an
     // infinite chain of blocked wait handles. But our memory is not infinite.
-    // What does it mean? We are in deep sh^H^Hcycle. Let's find and kill it.
-    auto blockable_wh = dynamic_cast<c_BlockableWaitHandle*>(wait_handle);
-    if (!blockable_wh) {
-      throw FatalErrorException(
-          "Invariant violation: queues are empty, but non-blockable wait "
-          "handle did not finish");
-    }
-    blockable_wh->killCycle();
+    // What could it possibly mean? I think we are in a deep sh^H^Hcycle.
+    // But we can't, the cycles are detected and avoided at blockOn() time.
+    // So, looks like it's not cycle, but the word I started typing first.
+    assert(false);
+    throw FatalErrorException(
+      "Invariant violation: queues are empty, but wait handle did not finish");
   }
 }
 

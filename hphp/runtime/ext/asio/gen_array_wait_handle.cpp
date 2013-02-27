@@ -103,13 +103,13 @@ void c_GenArrayWaitHandle::initialize(CObjRef exception, CArrRef deps, ssize_t i
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
-  blockOn(child);
-}
-
-c_WaitableWaitHandle* c_GenArrayWaitHandle::getBlockedOn() {
-  assert(getState() == STATE_BLOCKED);
-  return static_cast<c_WaitableWaitHandle*>(
-      m_deps->nvGetValueRef(m_iterPos)->m_data.pobj);
+  try {
+    blockOn(child);
+  } catch (Object cycle_exception) {
+    putException(m_exception, cycle_exception.get());
+    m_iterPos = m_deps->iter_advance(m_iterPos);
+    onUnblocked();
+  }
 }
 
 void c_GenArrayWaitHandle::onUnblocked() {
@@ -139,8 +139,12 @@ void c_GenArrayWaitHandle::onUnblocked() {
       c_WaitableWaitHandle* child_wh =
         static_cast<c_WaitableWaitHandle*>(child);
 
-      blockOn(child_wh);
-      return;
+      try {
+        blockOn(child_wh);
+        return;
+      } catch (Object cycle_exception) {
+        putException(m_exception, cycle_exception.get());
+      }
     }
   }
 
@@ -157,19 +161,14 @@ void c_GenArrayWaitHandle::onUnblocked() {
   }
 }
 
-void c_GenArrayWaitHandle::failBlock(CObjRef exception) {
-  Object wait_handle = c_StaticExceptionWaitHandle::t_create(exception);
-
-  // replace original wait handle with the static exception
-  TypedValue* current = m_deps->nvGetValueRef(m_iterPos);
-  tvSetObjectIgnoreRef(wait_handle.get(), current);
-
-  // continue processing
-  onUnblocked();
-}
-
 String c_GenArrayWaitHandle::getName() {
   return s_genArray;
+}
+
+c_WaitableWaitHandle* c_GenArrayWaitHandle::getChild() {
+  assert(getState() == STATE_BLOCKED);
+  return static_cast<c_WaitableWaitHandle*>(
+      m_deps->nvGetValueRef(m_iterPos)->m_data.pobj);
 }
 
 void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {

@@ -201,8 +201,25 @@ const TypedValue* c_WaitableWaitHandle::join() {
       "Invariant violation: join succeeded, but wait handle not ready");
 }
 
+c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
+  assert(!isFinished());
+
+  // waitable wait handle does not have any child
+  return nullptr;
+}
+
 void c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
+}
+
+bool c_WaitableWaitHandle::hasCycle(c_WaitableWaitHandle* start) {
+  assert(start);
+
+  while (start != this && start && !start->isFinished()) {
+    start = start->getChild();
+  }
+
+  return start == this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

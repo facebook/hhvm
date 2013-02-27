@@ -90,47 +90,39 @@ void c_SetResultToRefWaitHandle::initialize(c_WaitableWaitHandle* child, RefData
   m_child = child;
   m_ref = ref;
   m_ref->incRefCount();
-  blockOn(child);
-}
-
-c_WaitableWaitHandle* c_SetResultToRefWaitHandle::getBlockedOn() {
-  assert(getState() == STATE_BLOCKED);
-  return m_child.get();
+  try {
+    blockOn(child);
+  } catch (Object cycle_exception) {
+    markAsFailed(cycle_exception);
+  }
 }
 
 void c_SetResultToRefWaitHandle::onUnblocked() {
-  // succeeded
   if (m_child->isSucceeded()) {
-    TypedValue* result = m_child->getResult();
-    RefData* ref = m_ref;
-
-    m_ref = nullptr;
-    tvSetIgnoreRef(result, ref->tv());
-    decRefRef(ref);
-
-    setResult(result);
-    m_child = nullptr;
-    return;
+    // succeeded
+    markAsSucceeded(m_child->getResult());
+  } else if (m_child->isFailed()) {
+    // failed
+    markAsFailed(m_child->getException());
+  } else {
+    assert(false);
+    throw FatalErrorException(
+        "Invariant violation: child neither succeeded nor failed");
   }
-
-  // failed
-  if (m_child->isFailed()) {
-    RefData* ref = m_ref;
-
-    m_ref = nullptr;
-    tvSetNullIgnoreRef(ref->tv());
-    decRefRef(ref);
-
-    setException(m_child->getException());
-    m_child = nullptr;
-    return;
-  }
-
-  throw FatalErrorException(
-      "Invariant violation: child neither succeeded nor failed");
 }
 
-void c_SetResultToRefWaitHandle::failBlock(CObjRef exception) {
+void c_SetResultToRefWaitHandle::markAsSucceeded(const TypedValue* result) {
+  RefData* ref = m_ref;
+
+  m_ref = nullptr;
+  tvSetIgnoreRef(result, ref->tv());
+  decRefRef(ref);
+
+  setResult(result);
+  m_child = nullptr;
+}
+
+void c_SetResultToRefWaitHandle::markAsFailed(CObjRef exception) {
   RefData* ref = m_ref;
 
   m_ref = nullptr;
@@ -143,6 +135,11 @@ void c_SetResultToRefWaitHandle::failBlock(CObjRef exception) {
 
 String c_SetResultToRefWaitHandle::getName() {
   return s_setResultToRef;
+}
+
+c_WaitableWaitHandle* c_SetResultToRefWaitHandle::getChild() {
+  assert(getState() == STATE_BLOCKED);
+  return m_child.get();
 }
 
 void c_SetResultToRefWaitHandle::enterContext(context_idx_t ctx_idx) {

@@ -33,12 +33,15 @@ void c_BlockableWaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
-c_WaitableWaitHandle* c_BlockableWaitHandle::getBlockedOn() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
+// throws on cycle
 void c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
+  assert(getChild() == child);
+
+  if (UNLIKELY(hasCycle(child))) {
+    reportCycle(child);
+    assert(false);
+  }
 
   // make sure the child is going to do some work
   if (isInContext()) {
@@ -72,8 +75,8 @@ void c_BlockableWaitHandle::onUnblocked() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
-void c_BlockableWaitHandle::failBlock(CObjRef exception) {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
+c_WaitableWaitHandle* c_BlockableWaitHandle::getChild() {
+  throw NotImplementedException(__func__);
 }
 
 void c_BlockableWaitHandle::exitContextBlocked(context_idx_t ctx_idx) {
@@ -95,63 +98,35 @@ void c_BlockableWaitHandle::exitContextBlocked(context_idx_t ctx_idx) {
   }
 }
 
-void c_BlockableWaitHandle::killCycle() {
-  if (getState() != STATE_BLOCKED) {
-    throw FatalErrorException(
-        "Invariant violation: trying to kill non-existing cycle starting with "
-        "wait handle that is not blocked");
-  }
+// always throws
+void c_BlockableWaitHandle::reportCycle(c_WaitableWaitHandle* start) {
+  assert(getState() == STATE_BLOCKED);
+  assert(getChild() == start);
 
   smart::vector<std::string> exception_msg_items;
-  exception_msg_items.push_back("Encountered dependency cycle:\n");
+  exception_msg_items.push_back("Encountered dependency cycle.\n");
+  exception_msg_items.push_back("Existing stack:\n");
 
-  c_BlockableWaitHandle* current = this;
-  c_WaitableWaitHandle* next = current->getBlockedOn();
-  hphp_hash_set<void*> visited;
+  assert(dynamic_cast<c_BlockableWaitHandle*>(start));
+  auto current = static_cast<c_BlockableWaitHandle*>(start);
+  assert(current->getState() == STATE_BLOCKED);
 
-  visited.insert(current);
-  exception_msg_items.push_back(folly::stringPrintf(
-      "  %s (%" PRId64 ")\n", current->getName()->data(), current->t_getid()));
-
-  while (visited.find(next) == visited.end()) {
-    visited.insert(next);
+  do {
     exception_msg_items.push_back(folly::stringPrintf(
-        "  %s (%" PRId64 ")\n", next->getName()->data(), next->t_getid()));
+        "  %s (%" PRId64 ")\n", current->getName()->data(), current->t_getid()));
 
-    current = dynamic_cast<c_BlockableWaitHandle*>(next);
+    auto next = current->getChild();
+    assert(dynamic_cast<c_BlockableWaitHandle*>(next));
+    current = static_cast<c_BlockableWaitHandle*>(next);
+    assert(current->getState() == STATE_BLOCKED);
+  } while (current != start);
 
-    if (!current || current->getState() != STATE_BLOCKED) {
-      throw FatalErrorException(
-          "Invariant violation: trying to kill non-existing cycle containing "
-          "wait handle that is not blocked");
-    }
-
-    next = current->getBlockedOn();
-  }
-
-  // cycle found; let's kill current -> next edge
-
-  // generate the exception
+  exception_msg_items.push_back("Trying to introduce dependency on:\n");
   exception_msg_items.push_back(folly::stringPrintf(
-      "  %s (%" PRId64 ") (dupe)\n", next->getName()->data(), next->t_getid()));
+      "  %s (%" PRId64 ") (dupe)\n", start->getName()->data(), start->t_getid()));
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
       folly::join("", exception_msg_items)));
-
-  // find us in our child's list of parents
-  c_BlockableWaitHandle** next_parent_ptr = next->getFirstParentPtr();
-  while (*next_parent_ptr != current) {
-    assert(*next_parent_ptr);
-    next_parent_ptr = &((*next_parent_ptr)->m_nextParent);
-  }
-
-  // and remove us from that list
-  *next_parent_ptr = current->m_nextParent;
-
-  // replace block with an exception
-  current->failBlock(e.get());
-
-  // decrement ref count held by our child
-  decRefObj(current);
+  throw e;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

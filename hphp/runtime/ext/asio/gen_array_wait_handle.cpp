@@ -186,12 +186,11 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
 
   assert(getState() == STATE_BLOCKED);
 
-  setContextIdx(ctx_idx);
-
   // TODO: enterContext() for all remaining dependencies
   c_WaitableWaitHandle* wait_handle = static_cast<c_WaitableWaitHandle*>(
       m_deps->nvGetValueRef(m_iterPos)->m_data.pobj);
   wait_handle->enterContext(ctx_idx);
+  setContextIdx(ctx_idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

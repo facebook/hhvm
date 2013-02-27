@@ -38,12 +38,14 @@ void c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
   assert(getChild() == child);
 
+  // detect complete cycles
   if (UNLIKELY(hasCycle(child))) {
     reportCycle(child);
     assert(false);
   }
 
   // make sure the child is going to do some work
+  // throws if cross-context cycle found
   if (isInContext()) {
     child->enterContext(getContextIdx());
   }

@@ -76,6 +76,7 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
   c_Continuation* cont = static_cast<c_Continuation*>(continuation.get());
   if (!cont->m_waitHandle.isNull()) {
     if (session->isInContext()) {
+      // throws if cross-context cycle found
       cont->m_waitHandle->enterContext(session->getCurrentContextIdx());
     }
     return cont->m_waitHandle;
@@ -293,9 +294,9 @@ void c_ContinuationWaitHandle::enterContext(context_idx_t ctx_idx) {
   switch (getState()) {
     case STATE_BLOCKED:
       // enter child into new context recursively
-      setContextIdx(ctx_idx);
       assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
       static_cast<c_WaitableWaitHandle*>(m_child.get())->enterContext(ctx_idx);
+      setContextIdx(ctx_idx);
       break;
 
     case STATE_SCHEDULED:

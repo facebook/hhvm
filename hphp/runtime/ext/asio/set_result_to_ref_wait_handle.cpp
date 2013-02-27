@@ -157,8 +157,8 @@ void c_SetResultToRefWaitHandle::enterContext(context_idx_t ctx_idx) {
 
   assert(getState() == STATE_BLOCKED);
 
-  setContextIdx(ctx_idx);
   m_child->enterContext(ctx_idx);
+  setContextIdx(ctx_idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

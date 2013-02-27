@@ -182,8 +182,10 @@ const TypedValue* c_WaitableWaitHandle::join() {
     throw e;
   }
 
-  // not finished, run queue
+  // throws if cross-context cycle found
   enterContext(session->getCurrentContextIdx());
+
+  // not finished, run queue
   session->getCurrentContext()->runUntil(this);
 
   switch (getState()) {

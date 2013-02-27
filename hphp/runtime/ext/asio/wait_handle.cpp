@@ -34,6 +34,7 @@ void c_WaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
+// throws if cross-context cycle found
 void c_WaitHandle::t_import() {
   if (isFinished()) {
     return;

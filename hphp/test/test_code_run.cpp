@@ -21338,7 +21338,8 @@ bool TestCodeRun::TestExtArray() {
   MVCR("<?php\n"
       "$a = array(array('one'),array('one'));\n"
       "function test($v, $k) { }\n"
-      "array_walk_recursive($a);\n");
+      "array_walk_recursive($a, 'foo');\n"
+      "function foo($a) { var_dump($a); }\n");
 
   MVCR("<?php "
        "function xsort(&$a) {"

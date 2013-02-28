@@ -483,8 +483,6 @@ private:
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitSet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
 
-  void emitIssetMem(SSATmp* ptr);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitIsset(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
 

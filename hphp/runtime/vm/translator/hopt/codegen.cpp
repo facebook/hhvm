@@ -449,6 +449,31 @@ Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc, Block* target,
   return start;
 }
 
+void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg) {
+  as.emitImmReg(val, dstReg);
+}
+
+void emitMovRegReg(CodeGenerator::Asm& as, PhysReg srcReg, PhysReg dstReg) {
+  if (srcReg != dstReg) as.movq(srcReg, dstReg);
+}
+
+void shuffle2(CodeGenerator::Asm& a,
+              PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
+  assert(s0 != s1);
+  if (d0 == s1 && d1 != InvalidReg) {
+    assert(d0 != d1);
+    if (d1 == s0) {
+      a.    xchgq (s1, s0);
+    } else {
+      a.    movq (s1, d1); // save s1 first; d1 != s0
+      a.    movq (s0, d0);
+    }
+  } else {
+    if (d0 != InvalidReg) emitMovRegReg(a, s0, d0); // d0 != s1
+    if (d1 != InvalidReg) emitMovRegReg(a, s1, d1);
+  }
+}
+
 static void zeroExtendIfBool(X64Assembler& as, const SSATmp* src) {
   if (src->isA(Type::Bool)) {
     auto reg = src->getReg();
@@ -639,33 +664,13 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
   // Handle const-to-register moves and type shifting
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i].getKind() == ArgDesc::Imm) {
-      a.    movq   (args[i].getImm(), args[i].getDstReg());
+      emitLoadImm(a, args[i].getImm().q(), args[i].getDstReg());
     } else if (args[i].getKind() == ArgDesc::TypeReg) {
       a.    shlq   (kTypeShiftBits, args[i].getDstReg());
     } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
                args[i].getKind() == ArgDesc::None) {
-      a.    movq   (0xbadbadbadbadbad, args[i].getDstReg());
+      emitLoadImm(a, 0xbadbadbadbadbad, args[i].getDstReg());
     }
-  }
-}
-
-void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
-  if (srcReg != dstReg) as.movq(srcReg, dstReg);
-}
-
-void shuffle2(Asm& a, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
-  assert(s0 != s1);
-  if (d0 == s1 && d1 != InvalidReg) {
-    assert(d0 != d1);
-    if (d1 == s0) {
-      a.    xchgq (s1, s0);
-    } else {
-      a.    movq (s1, d1); // save s1 first; d1 != s0
-      a.    movq (s0, d0);
-    }
-  } else {
-    if (d0 != InvalidReg) emitMovRegReg(a, s0, d0); // d0 != s1
-    if (d1 != InvalidReg) emitMovRegReg(a, s1, d1);
   }
 }
 
@@ -791,15 +796,15 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* src   = inst->getSrc(0);
   auto dstReg = dst->getReg();
-  auto srcReg = src->getReg();
   if (!src->hasReg(0)) {
     assert(src->isConst());
     if (src->getType() == Type::Bool) {
-      m_as.movl(src->getValBool(), r32(dstReg));
+      emitLoadImm(m_as, (int64_t)src->getValBool(), dstReg);
     } else {
-      m_as.movq(src->getValRawInt(), r64(dstReg));
+      emitLoadImm(m_as, src->getValRawInt(), dstReg);
     }
   } else {
+    auto srcReg = src->getReg();
     emitMovRegReg(m_as, srcReg, dstReg);
   }
 }
@@ -825,7 +830,7 @@ void CodeGenerator::cgUnaryIntOp(SSATmp* dst,
     (a.*instr)   (dstReg);
   } else {
     assert(src->isConst());
-    a.    movq   (oper(src->getValRawInt()), dstReg);
+    emitLoadImm(a, oper(src->getValRawInt()), dstReg);
   }
 }
 
@@ -890,7 +895,7 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
     assert(src1->isConst() && src2->isConst());
     int64 value = oper(src1->getValRawInt(),
                        src2->getValRawInt());
-    a.  movq   (value, dstReg);
+    emitLoadImm(a, value, dstReg);
     return;
   }
 
@@ -903,7 +908,7 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
     if (srcReg == dstReg) {
       (a.*instrIR) (immed, dstReg);
     } else {
-      a.    movq   (immed, dstReg);
+      emitLoadImm(a, immed, dstReg);
       (a.*instrRR) (srcReg, dstReg);
     }
     return;
@@ -913,11 +918,11 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
 
   if (src1Reg == InvalidReg) {
     if (dstReg == src2Reg) {
-      a.    movq   (src1->getValRawInt(), rScratch);
+      emitLoadImm(a, src1->getValRawInt(), rScratch);
       (a.*instrRR) (src2Reg, rScratch);
       a.    movq   (rScratch, dstReg);
     } else {
-      a.    movq   (src1->getValRawInt(), dstReg);
+      emitLoadImm(a, src1->getValRawInt(), dstReg);
       (a.*instrRR) (src2Reg, dstReg);
     }
     return;
@@ -1527,7 +1532,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
 
   if (rTestClass == InvalidReg) { // TODO(#2031606)
     rTestClass = rScratch; // careful below about asm-x64 smashing this
-    a.  movq   (testClass, rTestClass);
+    emitLoadImm(a, (int64_t)testClass, rTestClass);
   }
 
   // Test if it is the exact same class.  TODO(#2044801): we should be
@@ -2325,14 +2330,14 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 
   // Load AR->m_this into rScratch
   m_as.loadq(fpReg[AROFF(m_this)], scratchReg);
-  // Currently we need to store zero back to m_this in case a local
-  // destructor does debug_backtrace.
-  m_as.storeq(0, fpReg[AROFF(m_this)]);
 
   auto decrefIfAvailable = [&] {
     // Check if this is available and we're not in a static context instead
-    m_as.testq(1, scratchReg);
+    m_as.testb(1, rbyte(scratchReg));
     ifThen(m_as, CC_Z, [&] {
+      // Currently we need to store zero back to m_this in case a local
+      // destructor does debug_backtrace.
+      m_as.storeq(0, fpReg[AROFF(m_this)]);
       cgDecRefStaticType(Type::Obj, scratchReg, exit, true);
     });
   };
@@ -3079,8 +3084,8 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   if (returnType.isReferenceType()) {
     m_as.   loadq (returnBase[returnOffset], dstReg);
-    m_as.   movl  (returnType.toDataType(), r32(dstType));
-    m_as.   movq  (KindOfNull, rScratch);
+    emitLoadImm(m_as, returnType.toDataType(), dstType);
+    emitLoadImm(m_as, KindOfNull, rScratch);
     m_as.   testq (dstReg, dstReg);
     m_as.   cmov_reg64_reg64 (CC_Z, rScratch, dstType);
     return;
@@ -3089,7 +3094,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
       || returnType.subtypeOf(Type::BoxedCell)) {
     m_as.   loadl (returnBase[returnOffset + TVOFF(m_type)], r32(dstType));
     m_as.   loadq (returnBase[returnOffset], dstReg);
-    m_as.   movq  (KindOfNull, rScratch);
+    emitLoadImm(m_as, KindOfNull, rScratch);
     static_assert(KindOfUninit == 0, "CallBuiltin needs update for KindOfUninit");
     m_as.   testq  (dstType, dstType);
     m_as.   cmov_reg64_reg64 (CC_Z, rScratch, dstType);
@@ -3160,28 +3165,14 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
     m_as.loadq(src->getReg()[AROFF(m_this)], dstReg);
   }
   if (label == NULL) return;  // no need to perform its checks
-
-  if (dstReg == InvalidReg) {
-    dstReg = reg::rScratch;
-    m_as.loadq(src->getReg()[AROFF(m_this)], dstReg);
+  if (dstReg != InvalidReg) {
+    // test 0x01, dst
+    m_as.testb(1, rbyte(dstReg));
+  } else {
+    m_as.testb(1, src->getReg()[AROFF(m_this)]);
   }
-  if (getCurClass() == NULL) {
-    // test dst, dst
-    // jz label
-    m_as.test_reg64_reg64(dstReg, dstReg);
-    emitFwdJcc(CC_Z, label);
-  }
-  // test dst, 0x01
   // jnz label
-  m_as.test_imm32_reg64(1, dstReg);
   emitFwdJcc(CC_NZ, label);
-#if 0
-  // TODO: Move this to be the code generated for a new instruction for
-  // raising fatal
-  m_as.jcc(CC_NZ, m_astubs.code.frontier);
-  m_astubs.call((TCA)fatalNullThis);
-  recordSyncPoint(m_astubs);
-#endif
 }
 
 static void emitLdClsCctx(CodeGenerator::Asm& a,
@@ -3224,11 +3215,7 @@ void CodeGenerator::cgLdConst(IRInstruction* inst) {
   auto const dstReg   = inst->getDst()->getReg();
   auto const val      = inst->getExtra<LdConst>()->as<uintptr_t>();
   if (dstReg == InvalidReg) return;
-  if (val == 0) {
-    m_as.xorq(dstReg, dstReg);
-  } else {
-    m_as.movq(val, dstReg);
-  }
+  emitLoadImm(m_as, val, dstReg);
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
@@ -3271,7 +3258,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 
   if (addr->isConst()) {
     addrReg = rScratch;
-    m_as.movq (addr->getValRawInt(), addrReg);
+    emitLoadImm(m_as, addr->getValRawInt(), addrReg);
   }
 
   if (offset->isConst()) {
@@ -3716,13 +3703,12 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   assert(funcDestReg != InvalidReg && classDestReg != InvalidReg);
   // Attempt to retrieve the func* and class* from cache
   m_as.load_reg64_disp_reg64(rVmTl, ch, funcDestReg);
-  m_as.test_reg64_reg64(funcDestReg, funcDestReg);
-  // May have retrieved a NULL from the cache
   m_as.load_reg64_disp_reg64(rVmTl,
                              ch + offsetof(TargetCache::StaticMethodCache,
                                            m_cls),
                              classDestReg);
-
+  m_as.test_reg64_reg64(funcDestReg, funcDestReg);
+  // May have retrieved a NULL from the cache
   // handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] {
     if (false) { // typecheck

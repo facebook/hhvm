@@ -689,6 +689,10 @@ void LinearScan::computePreColoringHint() {
     case LdSSwitchDestSlow:
       normalHint(1);
       break;
+    case LdGblAddr:
+    case LdGblAddrDef:
+      normalHint(1);
+      break;
     case LdClsPropAddr:
       normalHint(3);
       break;

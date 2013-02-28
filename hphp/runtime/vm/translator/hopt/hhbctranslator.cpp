@@ -206,11 +206,19 @@ void HhbcTranslator::emitUnboxR() {
 
 void HhbcTranslator::emitThis() {
   TRACE(3, "%u: This\n", m_bcOff);
+  if (!getCurClass()) {
+    emitInterpOne(Type::Obj, 0); // will throw a fatal
+    return;
+  }
   pushIncRef(m_tb->genLdThis(getExitSlowTrace()));
 }
 
 void HhbcTranslator::emitCheckThis() {
   TRACE(3, "%u: CheckThis\n", m_bcOff);
+  if (!getCurClass()) {
+    emitInterpOne(Type::None, 0); // will throw a fatal
+    return;
+  }
   m_tb->genLdThis(getExitSlowTrace());
 }
 
@@ -222,6 +230,10 @@ void HhbcTranslator::emitBareThis(int notice) {
   // $this is null, we can be sure in the rest of the trace that we
   // have the this object on top of the stack, and we can eliminate
   // further null checks of this.
+  if (!getCurClass()) {
+    emitInterpOne(Type::InitNull, 0); // will raise notice and push null
+    return;
+  }
   pushIncRef(m_tb->genLdThis(getExitSlowTrace()));
 }
 
@@ -413,6 +425,10 @@ void HhbcTranslator::emitUninitLoc(uint32 id) {
 
 void HhbcTranslator::emitInitThisLoc(int32 id) {
   TRACE(3, "%u: InitThisLoc %d\n", m_bcOff, id);
+  if (!getCurClass()) {
+    // Do nothing if this is null
+    return;
+  }
   SSATmp* tmpThis = m_tb->genLdThis(getExitSlowTrace());
   m_tb->genInitLoc(id, m_tb->genIncRef(tmpThis));
 }
@@ -682,6 +698,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
 void HhbcTranslator::emitContEnter(int32 returnBcOffset) {
   spillStack();
 
+  assert(getCurClass());
   SSATmp* cont = m_tb->genLdThis(nullptr);
   SSATmp* contAR = m_tb->genLdRaw(cont, RawMemSlot::ContARPtr, Type::StkPtr);
 
@@ -753,12 +770,14 @@ void HhbcTranslator::emitContNext() {
   return;
   // Task #2140912: Fix and re-enable this
 
+  assert(getCurClass());
   SSATmp* cont = m_tb->genLdThis(nullptr);
   m_tb->genContPreNext(cont, getExitSlowTrace());
   m_tb->genSetPropCell(cont, CONTOFF(m_received), m_tb->genDefUninit());
 }
 
 void HhbcTranslator::emitContSendImpl(bool raise) {
+  assert(getCurClass());
   SSATmp* cont = m_tb->genLdThis(nullptr);
   m_tb->genContStartedCheck(cont, getExitSlowTrace());
   m_tb->genContPreNext(cont, getExitSlowTrace());
@@ -781,12 +800,14 @@ void HhbcTranslator::emitContRaise() {
 }
 
 void HhbcTranslator::emitContValid() {
+  assert(getCurClass());
   SSATmp* cont = m_tb->genLdThis(nullptr);
   SSATmp* done = m_tb->genLdRaw(cont, RawMemSlot::ContDone, Type::Bool);
   push(m_tb->genNot(done));
 }
 
 void HhbcTranslator::emitContCurrent() {
+  assert(getCurClass());
   SSATmp* cont = m_tb->genLdThis(nullptr);
   m_tb->genContStartedCheck(cont, getExitSlowTrace());
   SSATmp* offset = m_tb->genDefConst<int64>(CONTOFF(m_value));
@@ -796,6 +817,7 @@ void HhbcTranslator::emitContCurrent() {
 }
 
 void HhbcTranslator::emitContStopped() {
+  assert(getCurClass());
   SSATmp* cont = m_tb->genLdThis(nullptr);
   m_tb->genStRaw(cont, RawMemSlot::ContRunning, m_tb->genDefConst(false));
 }
@@ -968,6 +990,7 @@ void HhbcTranslator::emitCGetProp(LocationCode locCode,
   SSATmp* obj;
   switch (locCode) {
     case LH:
+      assert(getCurClass());
       obj = m_tb->genLdThis(nullptr);
       break;
     case LC:
@@ -1123,7 +1146,6 @@ void HhbcTranslator::emitJmp(int32 offset,
                              bool  breakTracelet,
                              bool  noSurprise) {
   TRACE(3, "%u: Jmp %d\n", m_bcOff, offset);
-  spillStack(); //  spill early since every path will need it
   // If surprise flags are set, exit trace and handle surprise
   bool backward = (offset - (int32)m_bcOff) < 0;
   if (backward && !noSurprise) {
@@ -1431,6 +1453,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
       objOrCls = m_tb->genDefConst(baseClass);
     } else if (m_tb->isThisAvailable()) {
       // 'this' pointer is available, so use it.
+      assert(getCurClass());
       objOrCls = m_tb->genIncRef(m_tb->genLdThis(nullptr));
     } else {
       // might be a non-static call
@@ -2080,10 +2103,6 @@ void HhbcTranslator::emitVGet(const StringData* name,
                               EmitLdAddrFun emitLdAddr) {
   if (!(this->*checkSupported)(name, Type::BoxedCell, 0)) return;
   emitVGetMem((this->*emitLdAddr)(name));
-}
-
-void HhbcTranslator::emitIssetMem(SSATmp* ptr) {
-  push(m_tb->gen(IsNTypeMem, Type::Null, m_tb->genUnboxPtr(ptr)));
 }
 
 template<class CheckSupportedFun, class EmitLdAddrFun>

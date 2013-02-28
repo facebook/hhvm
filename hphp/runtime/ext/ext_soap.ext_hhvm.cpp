@@ -233,7 +233,7 @@ TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -261,7 +261,7 @@ TypedValue* tg_10SoapServer_setclass(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            ArrayInit ai(count-1, false);
+            ArrayInit ai(count-1);
             for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {

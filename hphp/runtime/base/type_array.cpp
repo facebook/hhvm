@@ -400,10 +400,8 @@ ArrayIter Array::begin(CStrRef context /* = null_string */) const {
   return m_px;
 }
 
-void Array::escalate(bool mutableIteration /* = false */) {
-  if (m_px) {
-    ArrayBase::operator=(m_px->escalate(mutableIteration));
-  }
+void Array::escalate() {
+  if (m_px) ArrayBase::operator=(m_px->escalate());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

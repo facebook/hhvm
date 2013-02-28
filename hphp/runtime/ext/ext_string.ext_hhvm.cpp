@@ -568,7 +568,7 @@ TypedValue * fg1_setlocale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   tvCastToInt64InPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-2, false);
+    ArrayInit ai(count-2);
     for (int64_t i = 2; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
@@ -592,7 +592,7 @@ TypedValue* fg_setlocale(HPHP::VM::ActRec *ar) {
       if ((args-0)->m_type == KindOfInt64) {
         Array extraArgs;
         {
-          ArrayInit ai(count-2, false);
+          ArrayInit ai(count-2);
           for (int64_t i = 2; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
@@ -689,7 +689,7 @@ TypedValue * fg1_sscanf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   }
   Array extraArgs;
   {
-    ArrayInit ai(count-2, false);
+    ArrayInit ai(count-2);
     for (int64_t i = 2; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
@@ -713,7 +713,7 @@ TypedValue* fg_sscanf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          ArrayInit ai(count-2, false);
+          ArrayInit ai(count-2);
           for (int64_t i = 2; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {

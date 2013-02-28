@@ -103,11 +103,18 @@ public:
     if (getIsVector()) return m_data.vec->m_size;
     return m_data.map->size();
   }
+
+  size_t arrCap() const {
+    assert(is(KindOfArray));
+    if (getIsVector()) return m_data.vec->m_size;
+    return m_data.map->capacity();
+  }
+
   int getIndex(int64 key);
   int getIndex(const StringData* key);
 
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
-                 bool keepRef = false, bool mapInit = false);
+                 bool mapInit = false);
 
   Variant getKey(ssize_t pos) const;
 

@@ -31,22 +31,30 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
   if (LIKELY(m_localCache != nullptr)) {
-    Variant *pv;
-    ArrayData *escalated DEBUG_ONLY =
-      m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
-    assert(!escalated);
-    if (pv) return *pv;
+    assert(unsigned(pos) < m_arr->arrCap());
+    TypedValue* tv = &m_localCache[pos];
+    if (tv->m_type != KindOfUninit) return tvAsCVarRef(tv);
   } else {
-    m_localCache = NEW(ZendArray)();
-    m_localCache->incRefCount();
+    static_assert(KindOfUninit == 0, "must be 0 since we use smart_calloc");
+    unsigned cap = m_arr->arrCap();
+    m_localCache = (TypedValue*) smart_calloc(cap, sizeof(TypedValue));
   }
-  Variant v = sv->toLocal();
-  Variant *r;
-  ArrayData *escalated DEBUG_ONLY =
-    m_localCache->ZendArray::addLval((int64)pos, r, false);
-  assert(!escalated);
-  *r = v;
-  return *r;
+  TypedValue* tv = &m_localCache[pos];
+  tvAsVariant(tv) = sv->toLocal();
+  assert(tv->m_type != KindOfUninit);
+  return tvAsCVarRef(tv);
+}
+
+HOT_FUNC
+SharedMap::~SharedMap() {
+  if (m_localCache) {
+    for (TypedValue* tv = m_localCache, *end = tv + m_arr->arrCap();
+         tv < end; ++tv) {
+      tvRefcountedDecRef(tv);
+    }
+    smart_free(m_localCache);
+  }
+  m_arr->decRef();
 }
 
 bool SharedMap::exists(const StringData* k) const {
@@ -227,9 +235,9 @@ ArrayData *SharedMap::prepend(CVarRef v, bool copy) {
   return escalated;
 }
 
-ArrayData *SharedMap::escalate(bool mutableIteration /* = false */) const {
+ArrayData *SharedMap::escalate() const {
   ArrayData *ret = nullptr;
-  m_arr->loadElems(ret, *this, mutableIteration);
+  m_arr->loadElems(ret, *this);
   assert(!ret->isStatic());
   return ret;
 }
@@ -273,9 +281,7 @@ TypedValue* SharedMap::nvGetCell(const StringData* key) const {
 
 ArrayData* SharedMap::escalateForSort() {
   ArrayData *ret = nullptr;
-  bool keepRef = false;
-  bool mapInit = true;
-  m_arr->loadElems(ret, *this, keepRef, mapInit);
+  m_arr->loadElems(ret, *this, true /* mapInit */);
   assert(!ret->isStatic());
   return ret;
 }

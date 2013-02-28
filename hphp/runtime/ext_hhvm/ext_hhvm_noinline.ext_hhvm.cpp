@@ -13810,7 +13810,7 @@ TypedValue * fg1_printf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -13834,7 +13834,7 @@ TypedValue* fg_printf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          ArrayInit ai(count-1, false);
+          ArrayInit ai(count-1);
           for (int64_t i = 1; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-1);
             if (tvIsStronglyBound(extraArg)) {
@@ -13946,7 +13946,7 @@ TypedValue * fg1_sprintf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -13970,7 +13970,7 @@ TypedValue* fg_sprintf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          ArrayInit ai(count-1, false);
+          ArrayInit ai(count-1);
           for (int64_t i = 1; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-1);
             if (tvIsStronglyBound(extraArg)) {

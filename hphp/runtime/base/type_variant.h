@@ -591,8 +591,8 @@ public:
   MutableArrayIter begin(Variant *key, Variant &val,
                          CStrRef context = null_string);
 
-  // Mutable iteration requires the most escalation.
-  void escalate(bool mutableIteration = false);
+  // Called before iteration to give array a chance to escalate.
+  void escalate();
 
   /**
    * Implicit type conversions. In general, we prefer explicit type conversion

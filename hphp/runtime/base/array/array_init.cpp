@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include <runtime/base/array/array_init.h>
-#include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/hphp_array.h>
 #include <runtime/base/runtime_option.h>
 
@@ -23,20 +22,8 @@ namespace HPHP {
 // ArrayInit
 
 HOT_FUNC
-ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
-  if (n == 0) {
-    if (keepRef) {
-      m_data = StaticEmptyZendArray::Get();
-    } else {
-      m_data = HphpArray::GetStaticEmptyArray();
-    }
-  } else {
-    if (keepRef) {
-      m_data = NEW(ZendArray)(n);
-    } else {
-      m_data = NEW(HphpArray)(n);
-    }
-  }
+ArrayInit::ArrayInit(ssize_t n) {
+  m_data = n == 0 ? HphpArray::GetStaticEmptyArray() : NEW(HphpArray)(n);
 }
 
 HOT_FUNC

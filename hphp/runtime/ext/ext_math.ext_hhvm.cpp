@@ -44,7 +44,7 @@ TypedValue* fg_min(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -94,7 +94,7 @@ TypedValue* fg_max(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {

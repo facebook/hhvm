@@ -146,15 +146,6 @@ void walk_smart_heap(const Visitor& visit) {
       // Unneccesary for the first level walk, because strings can't
       // have references to other objects.
       break;
-    case SmartAllocatorImpl::ZendArray:
-      /*
-       * Currently unimplemented.
-       *
-       * Note: ZendArray's sweep doesn't decref its Buckets (because
-       * they might be sweeping), so we'd have to add that to the
-       * deallocation code.
-       */
-      break;
     default:
       break;
     }

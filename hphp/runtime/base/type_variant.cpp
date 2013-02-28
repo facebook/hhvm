@@ -623,7 +623,7 @@ Variant Variant::array_iter_current() const {
 
 Variant Variant::array_iter_current_ref() {
   if (is(KindOfArray)) {
-    escalate(true);
+    escalate();
     ArrayData *arr = getArrayData();
     if (arr->getCount() > 1 && !arr->noCopyOnWrite()) {
       arr = arr->copy();
@@ -1446,11 +1446,11 @@ MutableArrayIter Variant::begin(Variant *key, Variant &val,
   return MutableArrayIter(this, key, val);
 }
 
-void Variant::escalate(bool mutableIteration /* = false */) {
+void Variant::escalate() {
   TypedValueAccessor tva = getTypedAccessor();
   if (GetAccessorType(tva) == KindOfArray) {
     ArrayData *arr = GetArrayData(tva);
-    ArrayData *esc = arr->escalate(mutableIteration);
+    ArrayData *esc = arr->escalate();
     if (arr != esc) set(esc);
   }
 }

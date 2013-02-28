@@ -172,7 +172,7 @@ class Array : protected ArrayBase {
    */
   ArrayIter begin(CStrRef context = null_string) const;
 
-  void escalate(bool mutableIteration = false);
+  void escalate();
 
   /**
    * Manipulations

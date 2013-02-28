@@ -28,7 +28,6 @@
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/eval/eval.h>
 #include <runtime/base/array/hphp_array.h>
-#include <runtime/base/array/zend_array.h>
 #include <util/logger.h>
 
 #define SORT_DESC               3

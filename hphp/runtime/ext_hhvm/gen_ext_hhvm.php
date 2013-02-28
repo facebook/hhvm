@@ -299,7 +299,7 @@ function emitBuildExtraArgs($obj, $ext_hhvm_cpp, $indent) {
   fwrite($ext_hhvm_cpp, $indent . "Array extraArgs;\n");
   fwrite($ext_hhvm_cpp, $indent . "{\n");
   fwrite($ext_hhvm_cpp, $indent . "  ArrayInit ai(count-" . $obj->maxNumParams .
-         ", false);\n");
+         ");\n");
   fwrite($ext_hhvm_cpp, $indent . "  for (int64_t i = " . $obj->maxNumParams .
          "; i < count; ++i) {\n");
   fwrite($ext_hhvm_cpp, $indent . '    TypedValue* extraArg = ar->getExtraArg(i-' .

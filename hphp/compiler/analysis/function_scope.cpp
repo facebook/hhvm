@@ -1616,7 +1616,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   if (!fewArgs && m_maxParam) {
     for (int i = 0; i < m_maxParam; i++) {
       if (isRefParam(i)) {
-        cg_printf("const_cast<Array&>(params).escalate(true);\n");
+        cg_printf("const_cast<Array&>(params).escalate();\n");
         break;
       }
     }

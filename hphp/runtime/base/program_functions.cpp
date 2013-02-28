@@ -1435,8 +1435,8 @@ void hphp_session_exit() {
     // to destroy g_context before calling rollback().
     g_context.destroy();
     // MemoryManager::rollback() will handle sweeping for all types that have
-    // dedicated allocators (ex. StringData, ZendArray, HphpArray, etc.) and
-    // it reset all of the allocators in preparation for the next request.
+    // dedicated allocators (ex. StringData, HphpArray, etc.) and it reset all
+    // of the allocators in preparation for the next request.
     mm->rollback();
     // Do any post-sweep cleanup necessary for global variables
     free_global_variables_after_sweep();

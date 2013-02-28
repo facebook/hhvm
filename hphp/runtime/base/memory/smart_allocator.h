@@ -152,7 +152,6 @@ public:
     SharedMap,
     Variant,
     Bucket,
-    ZendArray,
     HphpArray,
     ObjectData,
     GlobalVariables,

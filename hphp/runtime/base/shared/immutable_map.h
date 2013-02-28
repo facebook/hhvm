@@ -47,8 +47,12 @@ public:
     return buckets()[index].val;
   }
 
-  int size() {
+  unsigned size() const {
     return m.m_num;
+  }
+
+  unsigned capacity() const {
+    return m.m_capacity_mask + 1;
   }
 
   size_t getStructSize() {

@@ -21,7 +21,6 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
-#include <runtime/base/array/zend_array.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/macros.h>
 #include <util/exception.h>

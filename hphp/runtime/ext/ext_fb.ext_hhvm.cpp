@@ -860,7 +860,7 @@ TypedValue* fg_fb_call_user_func_safe(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfArray;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -911,7 +911,7 @@ TypedValue* fg_fb_call_user_func_safe_return(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {

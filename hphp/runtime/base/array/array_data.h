@@ -442,7 +442,7 @@ class ArrayData : public Countable {
 
   void setPosition(ssize_t p) { m_pos = p; }
 
-  virtual ArrayData *escalate(bool mutableIteration = false) const {
+  virtual ArrayData *escalate() const {
     return const_cast<ArrayData *>(this);
   }
 

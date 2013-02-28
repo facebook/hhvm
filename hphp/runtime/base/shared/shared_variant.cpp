@@ -275,15 +275,13 @@ SharedVariant* SharedVariant::getValue(ssize_t pos) const {
 
 void SharedVariant::loadElems(ArrayData *&elems,
                               const SharedMap &sharedMap,
-                              bool keepRef /* = false */,
                               bool mapInit /* = false */) {
   assert(is(KindOfArray));
   uint count = arrSize();
   bool isVector = getIsVector();
-  ArrayInit ai = keepRef ? ArrayInit(count, true) :
-                 mapInit ? ArrayInit(count, ArrayInit::mapInit) :
+  ArrayInit ai = mapInit ? ArrayInit(count, ArrayInit::mapInit) :
                  isVector ? ArrayInit(count, ArrayInit::vectorInit) :
-                 ArrayInit(count, false);
+                 ArrayInit(count);
   if (isVector) {
     for (uint i = 0; i < count; i++) {
       ai.set(sharedMap.getValueRef(i));

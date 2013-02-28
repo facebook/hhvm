@@ -3848,7 +3848,7 @@ Variant ifa_mb_convert_variables(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
 Variant i_mb_convert_variables(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 3)) return throw_missing_arguments("mb_convert_variables", count+1, 1);
-  const_cast<Array&>(params).escalate(true);
+  const_cast<Array&>(params).escalate();
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5183,7 +5183,7 @@ Variant ifa_msg_receive(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_msg_receive(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 5 || count > 8)) return throw_wrong_arguments("msg_receive", count, 5, 8, 1);
-  const_cast<Array&>(params).escalate(true);
+  const_cast<Array&>(params).escalate();
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -12682,7 +12682,7 @@ Variant ifa_call_user_method(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
 Variant i_call_user_method(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 2)) return throw_missing_arguments("call_user_method", count+1, 1);
-  const_cast<Array&>(params).escalate(true);
+  const_cast<Array&>(params).escalate();
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -13984,7 +13984,7 @@ Variant ifa_array_multisort(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_array_multisort(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 1)) return throw_missing_arguments("array_multisort", count+1, 1);
-  const_cast<Array&>(params).escalate(true);
+  const_cast<Array&>(params).escalate();
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -18236,7 +18236,7 @@ Variant ifa_array_push(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_array_push(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 2)) return throw_missing_arguments("array_push", count+1, 1);
-  const_cast<Array&>(params).escalate(true);
+  const_cast<Array&>(params).escalate();
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -18449,7 +18449,7 @@ Variant ifa_array_unshift(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_array_unshift(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
   if (UNLIKELY(count < 2)) return throw_missing_arguments("array_unshift", count+1, 1);
-  const_cast<Array&>(params).escalate(true);
+  const_cast<Array&>(params).escalate();
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;

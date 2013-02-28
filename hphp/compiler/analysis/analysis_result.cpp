@@ -2865,7 +2865,6 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
-  cg_printInclude("<runtime/base/array/zend_array.h>");
   cg_printInclude("<runtime/base/taint/taint_observer.h>");
   cg_printInclude("<runtime/base/taint/taint_data.h>");
   cg.printImplStarter();
@@ -3542,7 +3541,7 @@ void AnalysisResult::outputCPPSystem() {
   cg.setStream(CodeGenerator::ImplFile, &fSystemImpl);
 
   cg.headerBegin(filename);
-  
+
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
     // When we are generating the system files, suppress output of everything
     // except for constants.php and symbols.php

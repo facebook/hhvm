@@ -20,7 +20,6 @@
 #include <util/shared_memory_allocator.h>
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/array/array_data.h>
-#include <runtime/base/array/zend_array.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/builtin_functions.h>
 
@@ -36,10 +35,7 @@ public:
     source->incRef();
   }
 
-  ~SharedMap() {
-    if (m_localCache) m_localCache->release();
-    m_arr->decRef();
-  }
+  ~SharedMap();
 
   virtual bool isSharedMap() const { return true; }
 
@@ -126,13 +122,12 @@ public:
   // implements Sweepable.sweep()
   void sweep() { m_arr->decRef(); }
 
-  virtual ArrayData *escalate(bool mutableIteration = false) const;
-
+  virtual ArrayData *escalate() const;
   virtual ArrayData* escalateForSort();
 
 private:
   SharedVariant *m_arr;
-  mutable ZendArray *m_localCache;
+  mutable TypedValue* m_localCache;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

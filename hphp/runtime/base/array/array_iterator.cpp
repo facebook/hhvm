@@ -377,14 +377,14 @@ void FullPos::escalateCheck() {
   if (hasVar()) {
     data = getData();
     if (!data) return;
-    ArrayData* esc = data->escalate(true);
+    ArrayData* esc = data->escalate();
     if (data != esc) {
       *const_cast<Variant*>(getVar()) = esc;
     }
   } else {
     assert(hasAd());
     data = getAd();
-    ArrayData* esc = data->escalate(true);
+    ArrayData* esc = data->escalate();
     if (data != esc) {
       esc->incRefCount();
       decRefArr(data);

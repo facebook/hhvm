@@ -427,7 +427,7 @@ TypedValue* fg_array_map(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -477,7 +477,7 @@ TypedValue* fg_array_merge_recursive(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -527,7 +527,7 @@ TypedValue* fg_array_merge(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -577,7 +577,7 @@ TypedValue* fg_array_replace_recursive(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -627,7 +627,7 @@ TypedValue* fg_array_replace(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -678,7 +678,7 @@ TypedValue* fg_array_multisort(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfBoolean;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -816,7 +816,7 @@ TypedValue* fg_array_push(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -1268,7 +1268,7 @@ TypedValue* fg_array_unshift(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfInt64;
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -1428,7 +1428,7 @@ TypedValue* fg_compact(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfArray;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -1729,7 +1729,7 @@ TypedValue* fg_array_diff(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -1781,7 +1781,7 @@ TypedValue* fg_array_udiff(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
@@ -1832,7 +1832,7 @@ TypedValue* fg_array_diff_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -1884,7 +1884,7 @@ TypedValue* fg_array_diff_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
@@ -1936,7 +1936,7 @@ TypedValue* fg_array_udiff_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
@@ -1989,7 +1989,7 @@ TypedValue* fg_array_udiff_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 4LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-4, false);
+        ArrayInit ai(count-4);
         for (int64_t i = 4; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-4);
           if (tvIsStronglyBound(extraArg)) {
@@ -2040,7 +2040,7 @@ TypedValue* fg_array_diff_key(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -2092,7 +2092,7 @@ TypedValue* fg_array_diff_ukey(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
@@ -2143,7 +2143,7 @@ TypedValue* fg_array_intersect(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -2195,7 +2195,7 @@ TypedValue* fg_array_uintersect(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
@@ -2246,7 +2246,7 @@ TypedValue* fg_array_intersect_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -2298,7 +2298,7 @@ TypedValue* fg_array_intersect_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
@@ -2350,7 +2350,7 @@ TypedValue* fg_array_uintersect_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
@@ -2403,7 +2403,7 @@ TypedValue* fg_array_uintersect_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 4LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-4, false);
+        ArrayInit ai(count-4);
         for (int64_t i = 4; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-4);
           if (tvIsStronglyBound(extraArg)) {
@@ -2454,7 +2454,7 @@ TypedValue* fg_array_intersect_key(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-2, false);
+        ArrayInit ai(count-2);
         for (int64_t i = 2; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
@@ -2506,7 +2506,7 @@ TypedValue* fg_array_intersect_ukey(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-3, false);
+        ArrayInit ai(count-3);
         for (int64_t i = 3; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {

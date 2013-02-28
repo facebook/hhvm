@@ -36,7 +36,6 @@ $files_external_party = array(
 $files_zend = array(
   'util/zend/',
   'runtime/base/zend/',
-  'runtime/base/array/zend_array.cpp',
 );
 $files_php = array(
   'runtime/ext/',

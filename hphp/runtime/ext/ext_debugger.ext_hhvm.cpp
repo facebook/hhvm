@@ -527,7 +527,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* 
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -555,7 +555,7 @@ TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            ArrayInit ai(count-1, false);
+            ArrayInit ai(count-1);
             for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
@@ -612,7 +612,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* a
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -640,7 +640,7 @@ TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            ArrayInit ai(count-1, false);
+            ArrayInit ai(count-1);
             for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
@@ -697,7 +697,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* a
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -725,7 +725,7 @@ TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            ArrayInit ai(count-1, false);
+            ArrayInit ai(count-1);
             for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
@@ -782,7 +782,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec*
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -810,7 +810,7 @@ TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            ArrayInit ai(count-1, false);
+            ArrayInit ai(count-1);
             for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
@@ -867,7 +867,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* 
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -895,7 +895,7 @@ TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            ArrayInit ai(count-1, false);
+            ArrayInit ai(count-1);
             for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
@@ -1029,7 +1029,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, HPHP::VM::ActRec* ar
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-1, false);
+    ArrayInit ai(count-1);
     for (int64_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
@@ -1055,7 +1055,7 @@ TypedValue* tg_21DebuggerClientCmdUser_ask(HPHP::VM::ActRec *ar) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           Array extraArgs;
           {
-            ArrayInit ai(count-1, false);
+            ArrayInit ai(count-1);
             for (int64_t i = 1; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
@@ -1235,7 +1235,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRe
   }
   Array extraArgs;
   {
-    ArrayInit ai(count-2, false);
+    ArrayInit ai(count-2);
     for (int64_t i = 2; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
@@ -1263,7 +1263,7 @@ TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            ArrayInit ai(count-2, false);
+            ArrayInit ai(count-2);
             for (int64_t i = 2; i < count; ++i) {
               TypedValue* extraArg = ar->getExtraArg(i-2);
               if (tvIsStronglyBound(extraArg)) {

@@ -27,7 +27,6 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/code_coverage.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/array/zend_array.h>
 #include <runtime/base/intercept.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>

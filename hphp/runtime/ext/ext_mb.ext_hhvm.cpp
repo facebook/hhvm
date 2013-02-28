@@ -443,7 +443,7 @@ TypedValue * fg1_mb_convert_variables(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    ArrayInit ai(count-3, false);
+    ArrayInit ai(count-3);
     for (int64_t i = 3; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-3);
       if (tvIsStronglyBound(extraArg)) {
@@ -467,7 +467,7 @@ TypedValue* fg_mb_convert_variables(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          ArrayInit ai(count-3, false);
+          ArrayInit ai(count-3);
           for (int64_t i = 3; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-3);
             if (tvIsStronglyBound(extraArg)) {

@@ -92,7 +92,7 @@ TypedValue* tg_7Closure___invoke(HPHP::VM::ActRec *ar) {
     if (this_) {
       Array extraArgs;
       {
-        ArrayInit ai(count-0, false);
+        ArrayInit ai(count-0);
         for (int64_t i = 0; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-0);
           if (tvIsStronglyBound(extraArg)) {

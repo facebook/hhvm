@@ -69,7 +69,7 @@ class ArrayInit {
 public:
   enum VectorInit { vectorInit };
   enum MapInit { mapInit };
-  ArrayInit(ssize_t n, bool keepRef = false);
+  ArrayInit(ssize_t n);
   ArrayInit(ssize_t n, VectorInit) {
     m_data = CreateVector(n);
   }

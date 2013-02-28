@@ -199,7 +199,7 @@ TypedValue* fg_call_user_func(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -307,7 +307,7 @@ TypedValue* fg_call_user_func_async(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfObject;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -614,7 +614,7 @@ TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   }
   Array extraArgs;
   {
-    ArrayInit ai(count-5, false);
+    ArrayInit ai(count-5);
     for (int64_t i = 5; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-5);
       if (tvIsStronglyBound(extraArg)) {
@@ -638,7 +638,7 @@ TypedValue* fg_call_user_func_rpc(HPHP::VM::ActRec *ar) {
       if ((args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          ArrayInit ai(count-5, false);
+          ArrayInit ai(count-5);
           for (int64_t i = 5; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-5);
             if (tvIsStronglyBound(extraArg)) {
@@ -746,7 +746,7 @@ TypedValue* fg_forward_static_call(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -1013,7 +1013,7 @@ TypedValue* fg_register_postsend_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -1063,7 +1063,7 @@ TypedValue* fg_register_shutdown_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -1113,7 +1113,7 @@ TypedValue* fg_register_cleanup_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
@@ -1163,7 +1163,7 @@ TypedValue* fg_register_tick_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfBoolean;
       Array extraArgs;
       {
-        ArrayInit ai(count-1, false);
+        ArrayInit ai(count-1);
         for (int64_t i = 1; i < count; ++i) {
           TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {

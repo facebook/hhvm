@@ -788,7 +788,7 @@ TypedValue * fg1_fscanf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   }
   Array extraArgs;
   {
-    ArrayInit ai(count-2, false);
+    ArrayInit ai(count-2);
     for (int64_t i = 2; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
@@ -812,7 +812,7 @@ TypedValue* fg_fscanf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         Array extraArgs;
         {
-          ArrayInit ai(count-2, false);
+          ArrayInit ai(count-2);
           for (int64_t i = 2; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
@@ -1056,7 +1056,7 @@ TypedValue * fg1_fprintf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   }
   Array extraArgs;
   {
-    ArrayInit ai(count-2, false);
+    ArrayInit ai(count-2);
     for (int64_t i = 2; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
@@ -1080,7 +1080,7 @@ TypedValue* fg_fprintf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         Array extraArgs;
         {
-          ArrayInit ai(count-2, false);
+          ArrayInit ai(count-2);
           for (int64_t i = 2; i < count; ++i) {
             TypedValue* extraArg = ar->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {

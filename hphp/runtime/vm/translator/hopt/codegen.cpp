@@ -357,6 +357,9 @@ CALL_OPCODE(CGetElem)
 CALL_OPCODE(SetElem)
 CALL_OPCODE(BaseG)
 CALL_OPCODE(DbgAssertPtr)
+CALL_OPCODE(LdSwitchDblIndex);
+CALL_OPCODE(LdSwitchStrIndex);
+CALL_OPCODE(LdSwitchObjIndex);
 
 #undef NOOP_OPCODE
 #undef PUNT_OPCODE
@@ -1906,6 +1909,48 @@ void CodeGenerator::emitReqBindAddr(const Func* func,
                                 2ull,
                                 &dest,
                                 offset);
+}
+
+void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
+  JmpSwitchData* data = inst->getExtra<JmpSwitchDest>();
+  SSATmp* index       = inst->getSrc(0);
+  auto indexReg       = index->getReg();
+
+  if (!index->isConst()) {
+    if (data->bounded) {
+      if (data->base) {
+        m_as.  subq(data->base, indexReg);
+      }
+      m_as.    cmpq(data->cases - 2, indexReg);
+      m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
+      TCA def = m_tx64->emitServiceReq(REQ_BIND_JMPCC_SECOND, 3,
+                                   m_as.code.frontier, data->defaultOff, CC_AE);
+      m_as.    jae(def);
+    }
+
+    TCA* table = m_tx64->m_globalData.alloc<TCA>(sizeof(TCA), data->cases);
+    TCA afterLea = m_as.code.frontier + TranslatorX64::kLeaRipLen;
+    ptrdiff_t diff = (TCA)table - afterLea;
+    assert(deltaFits(diff, sz::dword));
+    m_as.   lea(rip[diff], rScratch);
+    assert(m_as.code.frontier == afterLea);
+    m_as.   jmp(rScratch[indexReg*8]);
+
+    for (int i = 0; i < data->cases; i++) {
+      emitReqBindAddr(data->func, table[i], data->targets[i]);
+    }
+  } else {
+    int64_t indexVal = index->getValInt();
+
+    if (data->bounded) {
+      indexVal -= data->base;
+      if (indexVal >= data->cases - 2 || indexVal < 0) {
+        m_tx64->emitBindJmp(m_as, SrcKey(data->func, data->defaultOff));
+        return;
+      }
+    }
+    m_tx64->emitBindJmp(m_as, SrcKey(data->func, data->targets[indexVal]));
+  }
 }
 
 typedef FixedStringMap<TCA,true> SSwitchMap;

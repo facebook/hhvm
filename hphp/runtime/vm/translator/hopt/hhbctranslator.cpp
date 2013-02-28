@@ -1691,7 +1691,80 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 void HhbcTranslator::emitSwitch(const ImmVector& iv,
                                 int64_t base,
                                 bool bounded) {
-  PUNT(Switch);
+  int nTargets = bounded ? iv.size() - 2 : iv.size();
+
+  SSATmp* const switchVal = popC();
+  Type type = switchVal->getType();
+  assert(IMPLIES(!type.equals(Type::Int), bounded));
+  assert(IMPLIES(bounded, iv.size() > 2));
+  SSATmp* index;
+  SSATmp* ssabase = m_tb->genDefConst(base);
+  SSATmp* ssatargets = m_tb->genDefConst(nTargets);
+
+  Offset defaultOff = m_bcOff + iv.vec32()[iv.size() - 1];
+  Offset zeroOff = 0;
+  if (base <= 0 && (base + nTargets) > 0) {
+    zeroOff = m_bcOff + iv.vec32()[0 - base];
+  } else {
+    zeroOff = defaultOff;
+  }
+
+  if (type.subtypeOf(Type::Null)) {
+    m_tb->genJmp(getExitTrace(zeroOff));
+    return;
+  } else if (type.subtypeOf(Type::Bool)) {
+    Offset nonZeroOff = m_bcOff + iv.vec32()[iv.size() - 2];
+    m_tb->genJmpCond(switchVal, getExitTrace(nonZeroOff), false);
+    m_tb->genJmp(getExitTrace(zeroOff));
+    return;
+  } else if (type.subtypeOf(Type::Int)) {
+    // No special treatment needed
+    index = switchVal;
+  } else if (type.subtypeOf(Type::Dbl)) {
+    // switch(Double|String|Obj)Helper do bounds-checking for us, so
+    // we need to make sure the default case is in the jump table,
+    // and don't emit our own bounds-checking code
+    bounded = false;
+    index = m_tb->gen(LdSwitchDblIndex,
+                      switchVal, ssabase, ssatargets);
+  } else if (type.subtypeOf(Type::Str)) {
+    bounded = false;
+    index = m_tb->gen(LdSwitchStrIndex,
+                      switchVal, ssabase, ssatargets);
+  } else if (type.subtypeOf(Type::Obj)) {
+    // switchObjHelper can throw exceptions and reenter the VM
+    if (type.subtypeOf(Type::Obj)) {
+      spillStack();
+    }
+    bounded = false;
+    index = m_tb->gen(LdSwitchObjIndex,
+                      switchVal, ssabase, ssatargets);
+  } else if (type.subtypeOf(Type::Arr)) {
+    m_tb->genDecRef(switchVal);
+    m_tb->genJmp(getExitTrace(defaultOff));
+    return;
+  } else {
+    PUNT(Switch-UnknownType);
+  }
+
+  std::vector<Offset> targets(iv.size());
+  for (int i = 0; i < iv.size(); i++) {
+    targets[i] = m_bcOff + iv.vec32()[i];
+  }
+
+  JmpSwitchData data;
+  data.func        = getCurFunc();
+  data.base        = base;
+  data.bounded     = bounded;
+  data.cases       = iv.size();
+  data.defaultOff  = defaultOff;
+  data.targets     = &targets[0];
+
+  SSATmp* stack = spillStack();
+  m_tb->gen(SyncVMRegs, m_tb->getFp(), stack);
+
+  m_tb->gen(JmpSwitchDest, &data, index);
+  m_hasExit = true;
 }
 
 void HhbcTranslator::emitSSwitch(const ImmVector& iv) {

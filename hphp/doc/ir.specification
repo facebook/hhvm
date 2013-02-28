@@ -433,6 +433,11 @@ D:None = JmpNZero S0:{Bool|Int} L:Label
 
   Conditionally jump to L based on S0.
 
+D:None JmpSwitchDest<JmpSwitchData> S0:Int
+
+  Jump to the target of a switch stamement using table metadata
+  <JmpSwitchData> and index S0.
+
 ExitWhenSurprised -> L
 
   Tests the surprise flags and if they are set, jumps to the
@@ -957,6 +962,16 @@ ArrayAdd
 DefCls
 DefFunc
 AKExists
+
+D:Int LdSwitchDblIndex S0:Dbl S1:Int S2:Int
+D:Int LdSwitchStrIndex S0:Str S1:Int S2:Int
+D:Int LdSwitchObjIndex S0:Obj S1:Int S2:Int
+
+  These instructions are used to determine the target of a switch
+  statement with target range [S1:S1 + S2), when invoked with the value S0.
+  They call helper functions to check whether S0 is an numeric integer
+  in the range [S1:S1 + S2), and if so return the value S1 - (Int)S0.
+  Else, they return the target of the default target, S2 + 1.
 
 D:StkPtr InterpOne S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
                      S4:ConstInt [ -> L ]

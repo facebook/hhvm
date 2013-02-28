@@ -75,6 +75,14 @@ static CallMap s_callMap({
     {PrintBool,          (TCA)print_boolean, DNone, SNone, {{SSA, 0}}},
     {RaiseUninitWarning, (TCA)raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
 
+    /* Switch helpers */
+    {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+    {LdSwitchStrIndex,   (TCA)switchStringHelper, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+    {LdSwitchObjIndex,   (TCA)switchObjHelper, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+
     /* Continuation support helpers */
     {CreateCont,         {FSSA, 0}, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},

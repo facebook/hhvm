@@ -235,6 +235,10 @@ O(LdARFuncPtr,                 D(Func), S(StkPtr) C(Int),                  C) \
 O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                         C|Rm) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \
+O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
+O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
+O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
+O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(NewObj,                    D(StkPtr), C(Int)                                \
                                           S(Str,Cls)                          \
                                           S(StkPtr)                           \
@@ -451,6 +455,27 @@ struct LdSSwitchData : IRExtraData {
   Offset      defaultOff;
 };
 
+struct JmpSwitchData : IRExtraData {
+  JmpSwitchData* clone(Arena& arena) const {
+    JmpSwitchData* sd = new (arena) JmpSwitchData;
+    sd->func       = func;
+    sd->base       = base;
+    sd->bounded    = bounded;
+    sd->cases      = cases;
+    sd->defaultOff = defaultOff;
+    sd->targets    = new (arena) Offset[cases];
+    std::copy(targets, targets + cases, const_cast<Offset*>(sd->targets));
+    return sd;
+  }
+
+  const Func* func;
+  int64_t base;        // base of switch case
+  bool    bounded;     // whether switch is bounded or not
+  int32_t cases;       // number of cases
+  Offset  defaultOff;  // offset of default case
+  Offset* targets;     // offsets for all targets
+};
+
 struct MarkerData : IRExtraData {
   uint32_t    bcOff;    // the bytecode offset in unit
   int32_t     stackOff; // stack off from start of trace
@@ -513,6 +538,7 @@ struct EdgeData : IRExtraData {
   static_assert(boost::has_trivial_destructor<data>::value,           \
                 "IR extra data type must be trivially destructible")
 
+X(JmpSwitchDest,      JmpSwitchData);
 X(LdSSwitchDestFast,  LdSSwitchData);
 X(LdSSwitchDestSlow,  LdSSwitchData);
 X(Marker,             MarkerData);

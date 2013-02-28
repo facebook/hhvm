@@ -21,37 +21,23 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-  const_assert(!hhvm);
-  throw_fatal("Cannot explicitly instantiate and/or subclass Closure");
-}
+c_Closure::c_Closure(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {}
 c_Closure::~c_Closure() {}
 
 void c_Closure::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__construct);
-  throw_fatal("Cannot explicitly instantiate and/or subclass Closure");
 }
 
 Variant c_Closure::t___invoke(int _argc, CArrRef _argv) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__invoke);
-  return (m_callInfo->getFunc())((void*)this, _argv);
+  always_assert(false);
+  return null;
 }
 
 Variant c_Closure::t___clone() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__clone);
   throw_fatal("Trying to clone an uncloneable object of class Closure");
   return null;
-}
-
-Variant c_Closure::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__destruct);
-  return null;
-}
-
-const CallInfo *c_Closure::t___invokeCallInfoHelper(void *&extra) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__invokeCallInfoHelper);
-  extra = (void*) this;
-  return m_callInfo;
 }
 
 bool c_Closure::php_sleep(Variant &ret) {
@@ -68,11 +54,6 @@ c_DummyClosure::c_DummyClosure(const ObjectStaticCallbacks *cb) :
 c_DummyClosure::~c_DummyClosure() {}
 
 void c_DummyClosure::t___construct() {
-}
-
-Variant c_DummyClosure::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DummyClosure, DummyClosure::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

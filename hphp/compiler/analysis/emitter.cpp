@@ -7285,6 +7285,27 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           cnsInfo->name.get(), (TypedValue*)(&val), empty_string.get());
       }
     }
+    {
+      ClassInfo::PropertyVec propVec = e.ci->getPropertiesVec();
+      for (unsigned i = 0; i < propVec.size(); ++i) {
+        const ClassInfo::PropertyInfo* propInfo = propVec[i];
+        assert(propInfo);
+        int attr = AttrNone;
+        if (propInfo->attribute & ClassInfo::IsProtected) attr |= AttrProtected;
+        else if (propInfo->attribute & ClassInfo::IsPrivate) attr |= AttrPrivate;
+        else attr |= AttrPublic;
+        if (propInfo->attribute & ClassInfo::IsStatic) attr |= AttrStatic;
+
+        TypedValue tvNull;
+        tvWriteNull(&tvNull);
+        pce->addProperty(
+          propInfo->name.get(),
+          Attr(attr),
+          propInfo->docComment ? StringData::GetStaticString(propInfo->docComment) : nullptr,
+          &tvNull
+        );
+      }
+    }
   }
 
   Peephole peephole(*ue, metaInfo);

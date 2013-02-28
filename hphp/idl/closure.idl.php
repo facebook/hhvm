@@ -87,34 +87,46 @@ CPP
 BeginClass(
   array(
     'name' => 'Closure',
+    'desc' => 'Used as the base class for all closures',
     'footer' => <<<EOT
-public:
-  /**
-   * Explicitly provide a t___invokeCallInfoHelper to
-   * allow __invoke() to sidestep an extra level of indirection
-   */
-  virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
-
-  String name() const { return String(m_name, CopyString); }
-
-  /**
-   * This is the constructor which is called internally-
-   * PHP code will never be able to call this constructor
-   */
-  c_Closure(const CallInfo *callInfo, const char *name,
-            const ObjectStaticCallbacks *cb = &cw_Closure) :
-    ExtObjectData(cb), m_callInfo(callInfo), m_name(name) {
-    assert(callInfo);
-  }
 protected:
   virtual bool php_sleep(Variant &ret);
-private:
-  const CallInfo *m_callInfo;
-  const char *m_name;
 EOT
 ,
   )
 );
+
+DefineProperty(
+  array(
+    'name'  => 'this',
+    'type'  => Object,
+    'flags' => IsProtected,
+    'desc'  => 'The bound $this for the closure. Could be null.',
+  ));
+
+DefineProperty(
+  array(
+    'name'  => 'className',
+    'type'  => String,
+    'flags' => IsProtected,
+    'desc'  => 'The context class for calling $functionName when $this is null',
+  ));
+
+DefineProperty(
+  array(
+    'name'  => 'functionName',
+    'type'  => String,
+    'flags' => IsProtected,
+    'desc'  => 'The function to call on $this (or $className)',
+  ));
+
+DefineProperty(
+  array(
+    'name'  => '__static_locals',
+    'type'  => String,
+    'flags' => IsProtected,
+    'desc'  => 'For storing the static locals from the closure body',
+  ));
 
 DefineFunction(
   array(

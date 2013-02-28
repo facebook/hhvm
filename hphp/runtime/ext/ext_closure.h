@@ -34,6 +34,13 @@ class c_Closure : public ExtObjectData {
  public:
   DECLARE_CLASS(Closure, Closure, ObjectData)
 
+  // These aren't actually used in the VM
+  // properties
+  public: Object m_this;
+  public: String m_className;
+  public: String m_functionName;
+  public: String m___static_locals;
+
   // need to implement
   public: c_Closure(const ObjectStaticCallbacks *cb = &cw_Closure);
   public: ~c_Closure();
@@ -43,34 +50,12 @@ class c_Closure : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__invoke);
   public: Variant t___clone();
   DECLARE_METHOD_INVOKE_HELPERS(__clone);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Closure *create();
-public:
-  /**
-   * Explicitly provide a t___invokeCallInfoHelper to
-   * allow __invoke() to sidestep an extra level of indirection
-   */
-  virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
-
-  String name() const { return String(m_name, CopyString); }
-
-  /**
-   * This is the constructor which is called internally-
-   * PHP code will never be able to call this constructor
-   */
-  c_Closure(const CallInfo *callInfo, const char *name,
-            const ObjectStaticCallbacks *cb = &cw_Closure) :
-      ExtObjectData(cb), m_callInfo(callInfo), m_name(name) {
-    assert(callInfo);
-  }
+  public: static const ClassPropTable os_prop_table;
 protected:
   virtual bool php_sleep(Variant &ret);
-private:
-  const CallInfo *m_callInfo;
-  const char *m_name;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,8 +71,6 @@ class c_DummyClosure : public ExtObjectData {
   public: ~c_DummyClosure();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DummyClosure *create();

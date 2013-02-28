@@ -29,44 +29,44 @@ FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 class AsioSession {
   public:
     static void Init();
-    static inline AsioSession* Get() { return s_current.get(); }
+    static AsioSession* Get() { return s_current.get(); }
 
     void* operator new(size_t size) { return smart_malloc(size); }
     void operator delete(void* ptr) { smart_free(ptr); }
 
     // context
-    inline void enterContext() {
+    void enterContext() {
       assert(!isInContext() || getCurrentContext()->isRunning());
       m_contexts.push_back(new AsioContext());
       assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
     }
 
-    inline void exitContext() {
+    void exitContext() {
       assert(isInContext());
       m_contexts.back()->exit(m_contexts.size());
       delete m_contexts.back();
       m_contexts.pop_back();
     }
 
-    inline bool isInContext() {
+    bool isInContext() {
       return !m_contexts.empty();
     }
 
-    inline AsioContext* getContext(context_idx_t ctx_idx) {
+    AsioContext* getContext(context_idx_t ctx_idx) {
       assert(ctx_idx <= m_contexts.size());
       return ctx_idx ? m_contexts[ctx_idx - 1] : nullptr;
     }
 
-    inline AsioContext* getCurrentContext() {
+    AsioContext* getCurrentContext() {
       return m_contexts.empty() ? nullptr : m_contexts.back();
     }
 
-    inline context_idx_t getCurrentContextIdx() {
+    context_idx_t getCurrentContextIdx() {
       assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
       return static_cast<context_idx_t>(m_contexts.size());
     }
 
-    inline c_ContinuationWaitHandle* getCurrentWaitHandle() {
+    c_ContinuationWaitHandle* getCurrentWaitHandle() {
       return m_contexts.empty() ? nullptr : m_contexts.back()->getCurrent();
     }
 

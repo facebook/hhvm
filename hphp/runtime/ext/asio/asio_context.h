@@ -36,11 +36,11 @@ class AsioContext {
     void* operator new(size_t size) { return smart_malloc(size); }
     void operator delete(void* ptr) { smart_free(ptr); }
 
-    inline AsioContext() : m_current(nullptr) {}
+    AsioContext() : m_current(nullptr) {}
     void exit(context_idx_t ctx_idx);
 
-    inline bool isRunning() { return m_current; }
-    inline c_ContinuationWaitHandle* getCurrent() { return m_current; }
+    bool isRunning() { return m_current; }
+    c_ContinuationWaitHandle* getCurrent() { return m_current; }
 
     void schedule(c_ContinuationWaitHandle* wait_handle);
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);

@@ -84,24 +84,24 @@ class c_WaitHandle : public ExtObjectData {
   public: c_WaitHandle *create();
 
  public:
-  static inline c_WaitHandle* fromTypedValue(TypedValue* tv) {
+  static c_WaitHandle* fromTypedValue(TypedValue* tv) {
     return (
         tv->m_type == KindOfObject &&
         tv->m_data.pobj->o_instanceof(q_ClassName)
       ) ? static_cast<c_WaitHandle*>(tv->m_data.pobj) : nullptr;
   }
-  inline bool isFinished() { return getState() <= STATE_FAILED; }
-  inline bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
-  inline bool isFailed() { return getState() == STATE_FAILED; }
-  inline TypedValue* getResult() { assert(isSucceeded()); return &m_resultOrException; }
-  inline ObjectData* getException() { assert(isFailed()); return m_resultOrException.m_data.pobj; }
+  bool isFinished() { return getState() <= STATE_FAILED; }
+  bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
+  bool isFailed() { return getState() == STATE_FAILED; }
+  TypedValue* getResult() { assert(isSucceeded()); return &m_resultOrException; }
+  ObjectData* getException() { assert(isFailed()); return m_resultOrException.m_data.pobj; }
   virtual String getName();
 
  protected:
   virtual const TypedValue* join();
 
-  inline uint8_t getState() { return o_subclassData.u8[0]; }
-  inline void setState(uint8_t state) { o_subclassData.u8[0] = state; }
+  uint8_t getState() { return o_subclassData.u8[0]; }
+  void setState(uint8_t state) { o_subclassData.u8[0] = state; }
 
   static const StaticString q_ClassName;
   static const int8_t STATE_SUCCEEDED = 0;
@@ -229,7 +229,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: c_WaitableWaitHandle *create();
 
  public:
-  inline AsioContext* getContext() { assert(isInContext()); return AsioSession::Get()->getContext(getContextIdx()); }
+  AsioContext* getContext() { assert(isInContext()); return AsioSession::Get()->getContext(getContextIdx()); }
 
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
 
@@ -239,12 +239,12 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   void setResult(const TypedValue* result);
   void setException(ObjectData* exception);
 
-  inline context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
-  inline void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
+  context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
+  void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
 
-  inline bool isInContext() { return getContextIdx(); }
+  bool isInContext() { return getContextIdx(); }
 
-  inline c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
+  c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
   c_BlockableWaitHandle* getParentInContext(context_idx_t ctx_idx);
 
   const TypedValue* join();
@@ -344,7 +344,7 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
 
  public:
   void run();
-  inline uint16_t getDepth() { return m_depth; }
+  uint16_t getDepth() { return m_depth; }
   String getName();
   void enterContext(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);

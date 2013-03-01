@@ -28,7 +28,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Includes and Functions
-Variant pm_php$globals$constants_php(bool incOnce, LVariableTable* variables, GlobalVariables *globals);
 
 // Constants
 extern const int64 k_ABDAY_1;

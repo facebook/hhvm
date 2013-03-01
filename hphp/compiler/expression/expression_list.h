@@ -85,19 +85,6 @@ public:
 
   virtual bool canonCompare(ExpressionPtr e) const;
 
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                      int state);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                    int state);
-  bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool hasNonArrayCreateValue(bool arrayElements = true,
-                              unsigned int start = 0) const;
-  void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
-                                    AnalysisResultPtr ar,
-                                    bool litstrKeys,
-                                    int64 max,
-                                    bool arrayElements = true,
-                                    unsigned int start = 0);
   /**
    * Checks whether the expression list contains only literal strings and
    * (recursive) arrays of literal strings. Also returns the list of strings
@@ -108,10 +95,6 @@ public:
 private:
   void optimize(AnalysisResultConstPtr ar);
   unsigned int checkLitstrKeys() const;
-  bool outputCPPArrayCreate(CodeGenerator &cg, AnalysisResultPtr ar,
-                            bool isVector, bool pre);
-  bool outputCPPInternal(CodeGenerator &cg,
-                         AnalysisResultPtr ar, bool needed, bool pre);
 
   ExpressionPtrVec m_exps;
   int m_outputCount;

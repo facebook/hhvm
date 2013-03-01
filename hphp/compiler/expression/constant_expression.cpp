@@ -286,8 +286,8 @@ void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("%s", m_name.c_str());
 }
 
-void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
-                                       AnalysisResultPtr ar) {
+void ConstantExpression::outputCPP(CodeGenerator &cg,
+                                   AnalysisResultPtr ar) {
   // special cases: STDIN, STDOUT, STDERR, INF, and NAN
   if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR") {
     cg_printf("%s%s", Option::ConstantPrefix, m_name.c_str());

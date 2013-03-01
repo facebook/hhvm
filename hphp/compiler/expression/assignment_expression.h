@@ -48,13 +48,6 @@ public:
   ExpressionPtr getValue() { return m_value;}
   void setValue(ExpressionPtr v) { m_value = v; }
   int getLocalEffects() const;
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-  static bool SpecialAssignment(CodeGenerator &cg,
-                                AnalysisResultPtr ar,
-                                ExpressionPtr lval,
-                                ExpressionPtr rval,
-                                const char *rvalStr, bool ref);
 
   // $GLOBALS[<literal-string>] = <scalar>;
   bool isSimpleGlobalAssign(StringData **name, TypedValue *tv) const;

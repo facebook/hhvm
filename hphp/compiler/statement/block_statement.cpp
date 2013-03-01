@@ -101,11 +101,3 @@ void BlockStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_stmts) m_stmts->outputPHP(cg, ar);
   cg_indentEnd("}\n");
 }
-
-void BlockStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_stmts) {
-    cg_indentBegin("{\n");
-    m_stmts->outputCPP(cg, ar);
-    cg_indentEnd("}\n");
-  }
-}

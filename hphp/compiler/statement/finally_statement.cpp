@@ -101,18 +101,3 @@ void FinallyStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentEnd("}");
   cg_printf("\n*/");
 }
-
-void FinallyStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_indentBegin("try {\n");
-  if (m_stmt) {
-    m_stmt->outputCPP(cg, ar);
-  }
-  cg_indentEnd("}");
-  cg_indentBegin(" catch (Object e) {\n");
-  cg_indentBegin("if (has_exception) {\n");
-  cg_printf("static_cast<c_Exception*>(e.get())->t_setpreviouschain(exception);\n");
-  cg_indentEnd("}\n");
-  cg_printf("exception = e;\n");
-  cg_printf("has_exception = true;\n");
-  cg_indentEnd("}\n");
-}

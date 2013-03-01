@@ -512,10 +512,6 @@ public:
   };
 
 private:
-  bool outputCPPArrayCreate(CodeGenerator &cg,
-                            AnalysisResultPtr ar,
-                            int m_maxParam);
-
   void outputCPPSubClassParam(CodeGenerator &cg,
                               AnalysisResultPtr ar,
                               ParameterExpressionPtr param);

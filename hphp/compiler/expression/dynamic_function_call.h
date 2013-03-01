@@ -32,7 +32,6 @@ public:
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

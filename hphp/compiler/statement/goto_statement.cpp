@@ -93,22 +93,3 @@ void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("goto %s;\n", m_label.c_str());
 }
 
-void GotoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (!m_error) {
-    cg_printf("goto %s%s;\n", Option::LabelPrefix, m_label.c_str());
-  } else {
-    switch (m_error) {
-    case ParserBase::UndefLabel:
-      cg_printf("throw_fatal(\"'goto' to undefined label '%s'\");\n",
-                m_label.c_str());
-      break;
-    case ParserBase::InvalidBlock:
-      cg_printf("throw_fatal(\"'goto' into loop or switch statement "
-                "is disallowed\");\n");
-      break;
-    default:
-      assert(false);
-      break;
-    }
-  }
-}

@@ -35,8 +35,6 @@ protected:
 public:
   void analyzeProgram(AnalysisResultPtr ar);
 
-  // overriding Expression::outputCPP to implement void wrapper
-  virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual bool isRefable(bool checkError = false) const { return true;}
   virtual bool isTemporary() const;
 
@@ -52,8 +50,6 @@ public:
   ExpressionPtr getNameExp() const { return m_nameExp; }
   const ExpressionListPtr& getParams() const { return m_params; }
   void setNoInline() { m_noInline = true; }
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                    int state);
   void deepCopy(FunctionCallPtr exp);
 
   FunctionScopeRawPtr getFuncScope() const { return m_funcScope; }
@@ -62,8 +58,6 @@ public:
   bool isValid() const { return m_valid; }
 
 protected:
-  void outputDynamicCall(CodeGenerator &cg,
-                         AnalysisResultPtr ar, bool method);
   ExpressionPtr m_nameExp;
   std::string m_name;
   std::string m_origName;

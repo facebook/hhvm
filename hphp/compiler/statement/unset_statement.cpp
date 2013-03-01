@@ -102,15 +102,3 @@ void UnsetStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf(");\n");
 }
-
-void UnsetStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_exp->getCount() > 1) cg_indentBegin("{\n");
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    ExpressionPtr exp = (*m_exp)[i];
-    exp->outputCPPBegin(cg, ar);
-    exp->outputCPPUnset(cg, ar);
-    cg_printf(";\n");
-    exp->outputCPPEnd(cg, ar);
-  }
-  if (m_exp->getCount() > 1) cg_indentEnd("}\n");
-}

@@ -49,7 +49,7 @@ StatementPtr TryStatement::clone() {
 
 int TryStatement::getRecursiveCount() const {
   return (m_tryStmt ? m_tryStmt->getRecursiveCount() : 0) +
-    (m_catches->getCount() ? m_catches->getRecursiveCount() : 0) + 
+    (m_catches->getCount() ? m_catches->getRecursiveCount() : 0) +
     (m_finallyStmt ? m_finallyStmt->getRecursiveCount() : 0);
 }
 
@@ -136,42 +136,4 @@ void TryStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_catches->getCount())
     m_catches->outputPHP(cg, ar);
   cg_printf("\n");
-}
-
-void TryStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  int c_count = m_catches->getCount();
-  bool has_finally = m_finallyStmt ? true : false;
-  
-  assert(c_count || has_finally);
-
-  if (has_finally) {
-    cg_indentBegin("{\n");
-    cg_printf("Object exception;\n");
-    cg_printf("bool has_exception = false;\n");
-    cg_indentBegin("try {\n");
-  }
-  if (c_count) cg_indentBegin("try {\n");
-  if (m_tryStmt) m_tryStmt->outputCPP(cg, ar);
-  if (c_count) cg_indentEnd("}");
-  if (c_count) {
-    cg_indentBegin(" catch (Object e) {\n");
-    for (int i = 0; i < c_count; i++) {
-      if (i > 0) cg_printf(" else ");
-      (*m_catches)[i]->outputCPP(cg, ar);
-    }
-    cg_printf(" else {\n");
-    cg_printf("  throw;\n");
-    cg_printf("}\n");
-    cg_indentEnd("}\n");
-  }
-  if (has_finally) {
-    cg_indentEnd("}");
-    cg_indentBegin(" catch (Object e) {\n");
-    cg_printf("exception = e;\n");
-    cg_printf("has_exception = true;\n");
-    cg_indentEnd("}\n");
-    m_finallyStmt->outputCPP(cg, ar);
-    cg_printf("if (has_exception) throw exception;\n");
-    cg_indentEnd("}\n");
-  }
 }

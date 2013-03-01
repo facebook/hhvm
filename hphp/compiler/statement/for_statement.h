@@ -38,7 +38,6 @@ public:
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
   virtual bool kidUnused(int i) const { return i == InitExpr || i == IncExpr; }
-  virtual void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar); 
 private:
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

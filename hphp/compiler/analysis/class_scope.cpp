@@ -2765,26 +2765,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   outputCPPGlobalTableWrappersImpl(cg, ar);
 }
 
-void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
-                                               AnalysisResultPtr ar,
-                                               std::set<string> &done,
-                                               const char *cls) {
-  for (FunctionScopePtrVec::const_iterator it = m_functionsVec.begin();
-       it != m_functionsVec.end(); ++it) {
-    const string &name = (*it)->getName();
-    if (done.find(name) != done.end()) continue;
-    MethodStatementPtr m =
-      dynamic_pointer_cast<MethodStatement>((*it)->getStmt());
-    if (!m) continue; // system classes
-    m->outputCPPStaticMethodWrapper(cg, ar, cls);
-    done.insert(name);
-  }
-  if (derivesFromRedeclaring() != DirectFromRedeclared) {
-    ClassScopePtr par = getParentScope(ar);
-    if (par) par->outputCPPStaticMethodWrappers(cg, ar, done, cls);
-  }
-}
-
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();

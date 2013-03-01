@@ -1232,42 +1232,6 @@ void FunctionScope::outputCPPParamsImpl(CodeGenerator &cg,
   }
 }
 
-bool FunctionScope::outputCPPArrayCreate(CodeGenerator &cg,
-                                         AnalysisResultPtr ar,
-                                         int m_maxParam) {
-  assert(m_maxParam >= 0);
-  assert(m_attribute & FileScope::VariableArgument);
-  if (!Option::GenArrayCreate ||
-      cg.getOutput() == CodeGenerator::SystemCPP ||
-      m_maxParam == 0) {
-    return false;
-  }
-  if (isUserFunction()) {
-    MethodStatementPtr stmt;
-    stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
-    if (stmt->hasRefParam()) return false;
-    cg_printf("Array(");
-    stmt->outputParamArrayCreate(cg, false);
-  } else if (hasRefParam(m_maxParam)) {
-    assert(false);
-    return false;
-  } else {
-    assert(false);
-    cg_printf("Array(");
-    for (int i = 0; i < m_maxParam; i++) {
-      cg_printf("%d, a%d", i, i);
-      if (i < m_maxParam - 1) {
-        cg_printf(", ");
-      } else {
-        cg_printf(")");
-      }
-    }
-  }
-  cg_printf(")");
-  cg_printf(isVariableArgument() ? ",args" : ",Array()");
-  return true;
-}
-
 void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
                                         AnalysisResultPtr ar,
                                         bool aggregateParams) {
@@ -1276,9 +1240,8 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
   } else if (aggregateParams) {
     cg_printf("%d, ", m_maxParam);
   }
-  if (aggregateParams && outputCPPArrayCreate(cg, ar, m_maxParam)) {
-    return;
-  }
+  always_assert(!aggregateParams);
+
   bool userFunc = isUserFunction();
   CodeGenerator::Context context = cg.getContext();
   bool isWrapper = !aggregateParams &&
@@ -1388,20 +1351,6 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       extra = true;
       if (!callUserFuncFewArgs) {
         // Parameter arrays are always vectors.
-        if (Option::GenArrayCreate &&
-            cg.getOutput() != CodeGenerator::SystemCPP) {
-          if (!params->hasNonArrayCreateValue(false, i)) {
-            always_assert(!callUserFuncFewArgs);
-            if (ar->m_arrayIntegerKeyMaxSize < paramCount - i) {
-              ar->m_arrayIntegerKeyMaxSize  = paramCount - i;
-            }
-            cg_printf("Array(");
-            params->outputCPPUniqLitKeyArrayInit(cg, ar, false,
-                                                 paramCount - i, false, i);
-            cg_printf(")");
-            return;
-          }
-        }
         cg_printf("Array(ArrayInit(%d, ArrayInit::vectorInit).",
                   paramCount - i);
       }

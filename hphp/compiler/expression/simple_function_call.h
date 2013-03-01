@@ -67,7 +67,6 @@ public:
   static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
     AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
     int firstParam, bool &error);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   void setupScopes(AnalysisResultConstPtr ar);
   bool readsLocals() const;
   bool writesLocals() const;
@@ -113,7 +112,6 @@ protected:
   ExpressionPtr m_safeDef;
   std::string m_lambda;
 
-  void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
   ExpressionPtr optimize(AnalysisResultConstPtr ar);
 private:
   int checkObjCall(AnalysisResultPtr ar);

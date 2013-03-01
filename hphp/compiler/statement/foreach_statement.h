@@ -32,7 +32,6 @@ public:
                    ExpressionPtr value, bool valueRef, StatementPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar); 
 
   virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
   virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }

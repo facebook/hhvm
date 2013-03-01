@@ -121,7 +121,3 @@ void TraitPrecStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   cg_printf(";\n");
 }
-
-void TraitPrecStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar)
-{
-}

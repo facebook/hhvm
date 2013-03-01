@@ -49,11 +49,6 @@ private:
   RHSKind m_rhsKind;
 
   void setLValue();
-  bool outputCPPAssignment(CodeGenerator &cg, AnalysisResultPtr ar,
-                           const std::string &arrTmp, bool subRef);
-
-  void preOutputVariables(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -51,13 +51,6 @@ public:
   virtual ExpressionPtr unneededHelper();
   virtual bool canonCompare(ExpressionPtr e) const;
 
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                      int state);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                    int state);
-
-  bool outputCPPImplOpEqual(CodeGenerator &cg, AnalysisResultPtr ar);
-
   static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
                            bool &hasVoid);
   bool isAssignmentOp() const { return m_assign; }

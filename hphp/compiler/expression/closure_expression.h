@@ -32,7 +32,6 @@ public:
                     FunctionStatementPtr func, ExpressionListPtr vars);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);

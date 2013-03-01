@@ -35,7 +35,6 @@ public:
   virtual bool hasDecl() const;
   virtual bool hasRetExp() const;
   virtual int getRecursiveCount() const;
-  virtual void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar); 
 
   StatementListPtr getIfBranches() const { return m_stmts; }
 private:

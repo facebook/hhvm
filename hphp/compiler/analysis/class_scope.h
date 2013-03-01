@@ -455,9 +455,6 @@ public:
     m_parent = "";
   }
 
-  void outputCPPStaticMethodWrappers(CodeGenerator &cg, AnalysisResultPtr ar,
-                                     std::set<std::string> &done,
-                                     const char *cls);
   /**
    * Override function container
    */

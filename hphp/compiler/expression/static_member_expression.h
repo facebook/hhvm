@@ -37,8 +37,6 @@ public:
 
   virtual unsigned getCanonHash() const;
   virtual bool canonCompare(ExpressionPtr e) const;
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                      int state);
 
   ExpressionPtr getExp() { return m_exp; }
 

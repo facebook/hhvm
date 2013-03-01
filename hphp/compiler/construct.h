@@ -246,7 +246,7 @@ public:
    * Called when generating code.
    */
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
-  virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
+  virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {}
 
   /**
    * Implements JSON::CodeError::ISerializable.

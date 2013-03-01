@@ -497,30 +497,3 @@ void StatementList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
 }
-
-void StatementList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  FunctionScopePtr func = getFunctionScope();
-
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr stmt = m_stmts[i];
-    stmt->outputCPP(cg, ar);
-    if (stmt->is(Statement::KindOfMethodStatement)) {
-      MethodStatementPtr methodStmt =
-        dynamic_pointer_cast<MethodStatement>(stmt);
-      std::string methodName = methodStmt->getName();
-      if (methodName == "offsetget") {
-        ClassScopePtr cls = getClassScope();
-        std::string arrayAccess("arrayaccess");
-        if (false && cls->derivesFrom(ar, arrayAccess, false, false)) {
-          FunctionScopePtr funcScope = methodStmt->getFunctionScope();
-          std::string name = funcScope->getName();
-          funcScope->setName("__offsetget_lval");
-          methodStmt->setName("__offsetget_lval");
-          methodStmt->outputCPP(cg, ar);
-          funcScope->setName(name);
-          methodStmt->setName("offsetget");
-        }
-      }
-    }
-  }
-}

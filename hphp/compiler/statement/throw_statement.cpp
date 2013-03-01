@@ -81,12 +81,3 @@ void ThrowStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf(";\n");
 }
-
-void ThrowStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  m_exp->outputCPPBegin(cg, ar);
-  cg_printf("throw_exception(");
-  m_exp->outputCPP(cg, ar);
-  cg_printf(");\n");
-  cg.setReferenceTempUsed(false);
-  m_exp->outputCPPEnd(cg, ar);
-}

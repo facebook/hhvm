@@ -42,11 +42,6 @@ void Statement::insertElement(StatementPtr stmt, int index /* = 0 */) {
   assert(false);
 }
 
-void Statement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  preOutputCPPImpl(cg, ar);
-  outputCPPImpl(cg, ar);
-}
-
 bool Statement::hasReachableLabel() const {
   if (FunctionWalker::SkipRecurse(this)) return false;
   switch (getKindOf()) {

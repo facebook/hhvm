@@ -65,8 +65,4 @@ void UserAttribute::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-void UserAttribute::outputCPPImpl(CodeGenerator &cg,
-                                  AnalysisResultPtr ar) {
-}
-
 }

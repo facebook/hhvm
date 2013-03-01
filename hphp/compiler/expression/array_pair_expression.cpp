@@ -126,13 +126,6 @@ bool ArrayPairExpression::canonCompare(ExpressionPtr e) const {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ArrayPairExpression::preOutputStash(CodeGenerator &cg,
-                                         AnalysisResultPtr ar,
-                                         int state) {
-  if (m_name) m_name->preOutputStash(cg, ar, state);
-  m_value->preOutputStash(cg, ar, state);
-}
-
 void ArrayPairExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_name) {
     m_name->outputPHP(cg, ar);
@@ -140,41 +133,4 @@ void ArrayPairExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   if (m_ref) cg_printf("&");
   m_value->outputPHP(cg, ar);
-}
-
-void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
-                                        AnalysisResultPtr ar) {
-  bool keyConverted = false;
-  if (m_name) {
-    keyConverted = outputCPPName(cg, ar);
-    cg_printf(", ");
-  }
-  m_value->outputCPP(cg, ar);
-  if (m_name && keyConverted && !m_collection) {
-    cg_printf(", true");
-  }
-}
-
-bool ArrayPairExpression::outputCPPName(CodeGenerator &cg,
-                                        AnalysisResultPtr ar) {
-  assert(m_name);
-  ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(m_name);
-  if (sc) {
-    if (sc->isLiteralString()) {
-      string s = sc->getLiteralString();
-      int64 res;
-      if (is_strictly_integer(s.c_str(), s.size(), res)) {
-        cg_printf("%sL", s.c_str());
-      } else {
-        m_name->outputCPP(cg, ar);
-      }
-      return true;
-    }
-    if (sc->isLiteralInteger()) {
-      m_name->outputCPP(cg, ar);
-      return true;
-    }
-  }
-  m_name->outputCPP(cg, ar);
-  return false;
 }

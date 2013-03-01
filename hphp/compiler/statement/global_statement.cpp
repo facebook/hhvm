@@ -147,35 +147,3 @@ void GlobalStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf(";\n");
 }
-
-void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  BlockScopePtr scope = getScope();
-  if (m_exp->getCount() > 1) cg_indentBegin("{\n");
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    ExpressionPtr exp = (*m_exp)[i];
-    if (exp->is(Expression::KindOfSimpleVariable)) {
-      SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(exp);
-      const string &name = var->getName();
-      VariableTablePtr variables = scope->getVariables();
-      if (variables->needLocalCopy(name)) {
-        assert(var->hasAssignableCPPVariable());
-        cg_printf("%s.assignRef(g->%s);\n",
-                  var->getAssignableCPPVariable(ar).c_str(),
-                  variables->getGlobalVariableName(ar, name).c_str());
-      }
-    } else if (exp->is(Expression::KindOfDynamicVariable)) {
-      DynamicVariablePtr var = dynamic_pointer_cast<DynamicVariable>(exp);
-      ExpressionPtr exp = var->getSubExpression();
-      exp->outputCPPBegin(cg, ar);
-      int id = cg.createNewLocalId(shared_from_this());
-      cg_printf("CStrRef dgv_%d((", id);
-      exp->outputCPP(cg, ar);
-      cg_printf("));\n");
-      cg_printf("variables->get(dgv_%d).assignRef(g->get(dgv_%d));\n", id, id);
-      exp->outputCPPEnd(cg, ar);
-    } else {
-      not_reached();
-    }
-  }
-  if (m_exp->getCount() > 1) cg_indentEnd("}\n");
-}

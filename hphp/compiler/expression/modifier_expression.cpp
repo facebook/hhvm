@@ -134,20 +134,3 @@ void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
 }
-
-void ModifierExpression::outputCPPImpl(CodeGenerator &cg,
-                                       AnalysisResultPtr ar) {
-  /**
-   * Not sure if we can bar access coding errors...
-  if (isPublic()) {
-    cg_printf("public: ");
-  } else if (isProtected()) {
-    cg_printf("protected: ");
-  } else {
-    cg_printf("private: ");
-  }
-  */
-  cg_printf("public: ");
-
-  if (isStatic()) cg_printf("static ");
-}

@@ -36,8 +36,7 @@
   virtual ExpressionPtr clone();                                        \
   virtual TypePtr inferTypes(AnalysisResultPtr ar, TypePtr type,        \
                              bool coerce);                              \
-  virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);      \
-  virtual void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar)
+  virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 #define DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS                            \
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;                            \
   virtual ConstructPtr getNthKid(int n) const;                          \
@@ -186,28 +185,9 @@ public:
   /**
    * Implementing Construct.
    */
-  virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  virtual void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
-  void outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar);
-  virtual void outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
-                                  int op);
-  virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
-  virtual void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                              int state);
-  virtual bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool outputCPPBegin(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool outputCPPEnd(CodeGenerator &cg, AnalysisResultPtr ar);
   void collectCPPTemps(ExpressionPtrVec &collection);
   void disableCSE();
   bool hasChainRoots();
-  bool preOutputCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar,
-                        bool emitTemps);
-  virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                            int state);
-  bool preOutputOffsetLHS(CodeGenerator &cg, AnalysisResultPtr ar,
-                          int state);
   bool hasCPPTemp() const { return !m_cppTemp.empty(); }
   const std::string &cppTemp() const { return m_cppTemp; }
   std::string genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar);

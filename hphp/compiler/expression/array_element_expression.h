@@ -56,11 +56,6 @@ public:
   bool appendClass(ExpressionPtr cls,
                    AnalysisResultConstPtr ar, FileScopePtr file);
 
-  virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
-                                  int op);
-  virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-
   virtual bool canonCompare(ExpressionPtr e) const;
 
 private:

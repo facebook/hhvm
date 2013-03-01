@@ -118,6 +118,3 @@ void TraitAliasStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_newMethodName->outputPHP(cg, ar);
   cg_printf(";\n");
 }
-
-void TraitAliasStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-}

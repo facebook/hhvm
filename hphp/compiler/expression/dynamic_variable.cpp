@@ -95,9 +95,3 @@ void DynamicVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf("}");
 }
-
-void DynamicVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("variables->get(");
-  m_exp->outputCPP(cg, ar);
-  cg_printf(")");
-}

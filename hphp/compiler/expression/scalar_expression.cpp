@@ -562,7 +562,7 @@ void ScalarExpression::outputCPPDouble(CodeGenerator &cg,
   }
 }
 
-void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ScalarExpression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:

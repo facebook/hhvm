@@ -31,8 +31,7 @@
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual StatementPtr clone();                                         \
   virtual void inferTypes(AnalysisResultPtr ar);                        \
-  virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);      \
-  virtual void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar);
+  virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 #define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;                             \
   virtual ConstructPtr getNthKid(int n) const;                          \
@@ -115,11 +114,6 @@ public:
   StatementPtr getNthStmt(int n) const {
     return boost::dynamic_pointer_cast<Statement>(getNthKid(n));
   }
-
-  virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  virtual void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
-
-  virtual void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {}
 
  /**
    * Called before type inference.

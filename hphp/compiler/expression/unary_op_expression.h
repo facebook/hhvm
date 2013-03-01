@@ -58,10 +58,6 @@ public:
 
   virtual bool canonCompare(ExpressionPtr e) const;
   virtual ExpressionPtr unneededHelper();
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                      int state);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                    int state);
   void setDefinedScope(BlockScopeRawPtr scope);
 protected:
   ExpressionPtr m_exp;
@@ -72,8 +68,6 @@ protected:
 private:
   bool preCompute(CVarRef value, Variant &result);
   void setExistContext();
-  bool outputCPPImplOpEqual(CodeGenerator &cg, AnalysisResultPtr ar);
-
   static void SetExpTypeForExistsContext(AnalysisResultPtr ar,
                                          ExpressionPtr e, bool allowPrimitives);
 };

@@ -71,6 +71,7 @@ public:
   void setComment(const std::string &comment) { m_comment = comment;}
   const std::string getComment() { return m_comment;}
 
+  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPString(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPInteger(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDouble(CodeGenerator &cg, AnalysisResultPtr ar);

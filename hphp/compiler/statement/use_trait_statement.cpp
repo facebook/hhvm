@@ -117,6 +117,3 @@ void UseTraitStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_stmt->outputPHP(cg, ar);
   cg_printf("}\n");
 }
-
-void UseTraitStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-}

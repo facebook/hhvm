@@ -38,9 +38,6 @@ public:
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
-  virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-      int state);
-
   ExpressionPtr getObject() const { return m_object; }
 private:
   ExpressionPtr m_object;
@@ -50,9 +47,6 @@ private:
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   bool m_bindClass;
-
-  void outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPObjectCall(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

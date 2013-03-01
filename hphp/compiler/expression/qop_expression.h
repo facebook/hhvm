@@ -36,17 +36,10 @@ public:
   virtual int getLocalEffects() const { return NoEffect; }
 
   virtual ExpressionPtr unneededHelper();
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                    int state);
-  bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
   ExpressionPtr getCondition() const { return m_condition; }
   ExpressionPtr getYes() const { return m_expYes; }
   ExpressionPtr getNo() const { return m_expNo; }
 private:
-  void wrapBoolean(CodeGenerator &cg,
-                   AnalysisResultPtr ar,
-                   ExpressionPtr exp);
-
   ExpressionPtr m_condition;
   ExpressionPtr m_expYes;
   ExpressionPtr m_expNo;

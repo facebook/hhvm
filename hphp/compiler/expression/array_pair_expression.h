@@ -40,9 +40,6 @@ public:
   virtual int getLocalEffects() const { return NoEffect; }
   bool isScalarArrayPair() const;
 
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                      int state);
-
   bool isRef() const { return m_ref; }
 
   bool canonCompare(ExpressionPtr e) const;

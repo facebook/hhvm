@@ -30,8 +30,6 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
-  virtual void preOutputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar); 
-
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
   StatementPtr postOptimize(AnalysisResultConstPtr ar);
   virtual int getLocalEffects() const { return NoEffect;}
@@ -43,7 +41,7 @@ public:
   virtual bool kidUnused(int i) const { return i == 0; }
 private:
   ExpressionPtr m_exp;
-  bool shouldEmitStatement() const; 
+  bool shouldEmitStatement() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

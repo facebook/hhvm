@@ -75,11 +75,6 @@ public:
     m_modifiers = newModifiers;
   }
 
-  void outputCPPStaticMethodWrapper(CodeGenerator &cg,
-                                    AnalysisResultPtr ar,
-                                    const char *cls);
-  void outputCPPTypeCheckWrapper(CodeGenerator &cg,
-                                 AnalysisResultPtr ar);
   bool hasRefParam();
   void outputParamArrayCreate(CodeGenerator &cg, bool checkRef);
   FunctionScopePtr onInitialParse(AnalysisResultConstPtr ar, FileScopePtr fs);
@@ -136,10 +131,6 @@ protected:
 
   void setSpecialMethod(ClassScopePtr classScope);
 
-  void outputCPPArgInjections(CodeGenerator &cg, AnalysisResultPtr ar,
-                              const char *name, ClassScopePtr cls,
-                              FunctionScopePtr funcScope);
-  void outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar);
   void addParamRTTI(AnalysisResultPtr ar);
 
   /**

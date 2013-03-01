@@ -89,15 +89,3 @@ void EchoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf(";\n");
 }
-
-void EchoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_exp->getCount() > 1) cg_indentBegin("{\n");
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    (*m_exp)[i]->outputCPPBegin(cg, ar);
-    cg_printf("echo(");
-    (*m_exp)[i]->outputCPP(cg, ar);
-    cg_printf(");\n");
-    (*m_exp)[i]->outputCPPEnd(cg, ar);
-  }
-  if (m_exp->getCount() > 1) cg_indentEnd("}\n");
-}

@@ -45,18 +45,9 @@ public:
   ExpressionPtr getObject() { return m_object;}
   ExpressionPtr getProperty() { return m_property;}
 
-  virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
-                                  int op);
-  virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool isTemporary() const;
   bool isNonPrivate(AnalysisResultPtr ar);
   bool isValid() const { return m_valid; }
-  void outputCPPProperty(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,
-                       bool noEvalOnError = false);
-  void outputCPPValidObject(CodeGenerator &cg, AnalysisResultPtr ar,
-                            bool guarded);
 private:
   ExpressionPtr m_object;
   ExpressionPtr m_property;

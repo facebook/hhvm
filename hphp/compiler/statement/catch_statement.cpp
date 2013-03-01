@@ -144,20 +144,3 @@ void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}");
 }
-
-void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_valid) {
-    cg_printf("if (e.instanceof(");
-    cg_printString(m_className, ar, shared_from_this());
-    cg_indentBegin(")) {\n");
-    VariableTablePtr variables = getScope()->getVariables();
-    assert(m_variable->hasAssignableCPPVariable());
-    const string &cppName =
-      m_variable->getAssignableCPPVariable(ar);
-    cg_printf("%s = e;\n", cppName.c_str());
-  } else {
-    cg_indentBegin("if (false) {\n");
-  }
-  if (m_stmt) m_stmt->outputCPP(cg, ar);
-  cg_indentEnd("}");
-}

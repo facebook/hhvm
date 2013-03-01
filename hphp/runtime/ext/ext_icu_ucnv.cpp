@@ -379,7 +379,7 @@ String c_UConverter::t_getsubstchars() {
   INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getsubstchars);
   UErrorCode error = U_ZERO_ERROR;
   char chars[127];
-  int8_t chars_len;
+  int8_t chars_len = sizeof(chars);
 
   ucnv_getSubstChars(m_src, chars, &chars_len, &error);
   if (U_FAILURE(error)) {

@@ -742,10 +742,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
       }
       try {
         g_context->setThrowAllErrors(true);
-        // TODO Task #2140913: Find a way to rework this so that we don't
-        // use the i_* and ifa_* helpers
-        Variant v = invoke_builtin(m_funcScope->getName().c_str(),
-                                   arr, -1, true);
+        Variant v = invoke(m_funcScope->getName().c_str(),
+                           arr, -1, true, true);
         g_context->setThrowAllErrors(false);
         return makeScalarExpression(ar, v);
       } catch (...) {

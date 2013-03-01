@@ -39,12 +39,6 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash = -1,
     bool tryInterp = true, bool fatal = true);
 
 /**
- * Invoking an arbitrary system function. This is the fallback for invoke.
- */
-Variant invoke_builtin(const char *s, const Array &params, strhash_t hash,
-    bool fatal);
-
-/**
  * Getting the object static callbacks for a given class
  */
 struct ObjectStaticCallbacks;

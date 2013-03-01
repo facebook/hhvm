@@ -111,15 +111,6 @@ public:
 static VMClassInfoHook vm_class_info_hook;
 
 void ProcessInit() {
-  g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
-  g_hphp_build_native_func_unit = &HPHP::Compiler::
-    hphp_build_native_func_unit;
-  g_hphp_build_native_class_unit = &HPHP::Compiler::
-    hphp_build_native_class_unit;
-
-  // Initialize compiler state
-  VM::compile_file(0, 0, MD5(), 0);
-
   // Install VM's ClassInfoHook
   ClassInfo::SetHook(&vm_class_info_hook);
 

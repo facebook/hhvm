@@ -46,6 +46,7 @@
 #include <runtime/base/rtti_info.h>
 #include <runtime/ext/ext_json.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <runtime/base/program_functions.h>
 #include <util/atomic.h>
 #include <util/logger.h>
 #include <util/util.h>
@@ -914,6 +915,12 @@ class OptWorker : public JobQueueWorker<BlockScope *, true, true> {
 public:
   OptWorker() {}
 
+  virtual void onThreadEnter() {
+  }
+
+  virtual void onThreadExit() {
+  }
+
   virtual void doJob(BlockScope *scope) {
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
     atomic_inc(AnalysisResult::s_NumDoJobCalls);
@@ -1084,6 +1091,16 @@ typedef   OptVisitor<InferTypes>   InferTypesVisitor;
 typedef   OptWorker<InferTypes>    InferTypesWorker;
 typedef   OptVisitor<Post>         PostOptVisitor;
 typedef   OptWorker<Post>          PostOptWorker;
+
+template<>
+void OptWorker<Pre>::onThreadEnter() {
+  if (!Option::SystemGen) hphp_session_init();
+}
+
+template<>
+void OptWorker<Pre>::onThreadExit() {
+  if (!Option::SystemGen) hphp_session_exit();
+}
 
 /**
  * Unfortunately we cannot template specialize on something like this w/o

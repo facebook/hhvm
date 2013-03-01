@@ -704,7 +704,7 @@ static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   int ret_code = -1;
   try {
-    if (hhvm) VM::initialize_repo();
+    VM::initialize_repo();
     init_thread_locals();
     ret_code = execute_program_impl(argc, argv);
   } catch (const Exception &e) {
@@ -988,6 +988,8 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   ShmCounters::initialize(true, Logger::Error);
+  // Initialize compiler state
+  VM::compile_file(0, 0, MD5(), 0);
 
   if (!po.lint.empty()) {
     if (po.isTempFile) {
@@ -1041,12 +1043,10 @@ static int execute_program_impl(int argc, char **argv) {
     char **new_argv;
     prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
-    if (hhvm) {
-      if (!po.file.empty()) {
-        VM::Repo::setCliFile(po.file);
-      } else if (new_argc >= 2) {
-        VM::Repo::setCliFile(new_argv[1]);
-      }
+    if (!po.file.empty()) {
+      VM::Repo::setCliFile(po.file);
+    } else if (new_argc >= 2) {
+      VM::Repo::setCliFile(new_argv[1]);
     }
 
     int ret = 0;
@@ -1207,9 +1207,7 @@ void hphp_process_init() {
   onig_init();
 
   init_literal_varstrings();
-  if (hhvm) {
-    g_vmProcessInit();
-  }
+  g_vmProcessInit();
 
   PageletServer::Restart();
   XboxServer::Restart();
@@ -1224,9 +1222,7 @@ void hphp_process_init() {
   RuntimeOption::SerializationSizeLimit = save;
   StaticString::FinishInit();
 
-  if (hhvm) {
-    VM::Transl::TargetCache::requestExit();
-  }
+  VM::Transl::TargetCache::requestExit();
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();
@@ -1383,10 +1379,8 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
       Eval::Debugger::InterruptPSPEnded(program);
     } catch (const Eval::DebuggerException &e) {}
   }
-  if (hhvm) {
-    static_cast<VMExecutionContext*>(
-      static_cast<BaseExecutionContext*>(context))->requestExit();
-  }
+  context->requestExit();
+
   if (shutdown) {
     context->onRequestShutdown();
   }

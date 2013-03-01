@@ -431,17 +431,6 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
   return invoke(funcName, params, hash, tryInterp, fatal);
 }
 
-Variant invoke_builtin(const char *s, CArrRef params, strhash_t hash,
-                       bool fatal) {
-  const CallInfo *ci;
-  void *extra;
-  if (LIKELY(get_call_info_builtin(ci, extra, s, hash))) {
-    return (ci->getFunc())(extra, params);
-  } else {
-    return invoke_failed(s, params, fatal);
-  }
-}
-
 Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
                              bool fatal /* = true */) {
   HPHP::VM::Class* class_ = VM::Unit::lookupClass(s.get());

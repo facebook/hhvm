@@ -18,6 +18,8 @@
 
 #include "util/base.h"
 #include "runtime/base/thread_init_fini.h"
+#include "runtime/vm/runtime.h"
+#include "compiler/analysis/emitter.h"
 
 namespace HPHP {
 
@@ -33,7 +35,12 @@ namespace VM {
  * This must be called before execute_program_impl in an hhvm build.
  */
 inline void register_process_init() {
-  if (hhvm) g_vmProcessInit = &VM::ProcessInit;
+  g_vmProcessInit = &VM::ProcessInit;
+  VM::g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
+  VM::g_hphp_build_native_func_unit = &HPHP::Compiler::
+    hphp_build_native_func_unit;
+  VM::g_hphp_build_native_class_unit = &HPHP::Compiler::
+    hphp_build_native_class_unit;
 }
 
 /*
@@ -43,10 +50,11 @@ inline void register_process_init() {
  */
 inline void init_for_unit_test() {
   register_process_init();
-  if (hhvm) VM::initialize_repo();
+  VM::initialize_repo();
   init_thread_locals();
   Hdf config;
   RuntimeOption::Load(config);
+  VM::compile_file(0, 0, MD5(), 0);
   hphp_process_init();
 }
 

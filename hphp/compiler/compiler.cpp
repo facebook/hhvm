@@ -38,6 +38,7 @@
 #include <util/timer.h>
 #include <util/hdf.h>
 #include <util/async_func.h>
+#include <runtime/base/program_functions.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/thread_init_fini.h>
@@ -48,6 +49,8 @@
 #include <dlfcn.h>
 #include <system/lib/systemlib.h>
 #include <compiler/compiler.h>
+
+#include "hhvm/process_init.h"
 
 using namespace boost::program_options;
 using std::cout;
@@ -596,6 +599,7 @@ int process(const CompilerOptions &po) {
     return lintTarget(po);
   }
 
+  register_process_init();
   init_thread_locals();
 
   Timer timer(Timer::WallTime);
@@ -620,7 +624,7 @@ int process(const CompilerOptions &po) {
   BuiltinSymbols::LoadSuperGlobals();
   ClassInfo::Load();
 
-  if (po.format == "sys") ar->setSystem();
+  if (Option::SystemGen) ar->setSystem();
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
@@ -634,6 +638,9 @@ int process(const CompilerOptions &po) {
       BuiltinSymbols::NoSuperGlobals = false;
     } else {
       ar->loadBuiltins();
+    }
+    if (!Option::SystemGen) {
+      hphp_process_init();
     }
   }
 

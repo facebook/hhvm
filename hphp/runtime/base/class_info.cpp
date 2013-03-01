@@ -1005,7 +1005,7 @@ void ClassInfoUnique::postInit() {
 }
 
 void ClassInfo::Load() {
-  assert(!s_loaded);
+  if (s_loaded) return;
   const char **p = g_class_map;
   while (*p) {
     Attribute attribute = (Attribute)(int64)*p;

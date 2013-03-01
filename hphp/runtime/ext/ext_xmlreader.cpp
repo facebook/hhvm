@@ -133,7 +133,6 @@ void c_XMLReader::t___construct() {
 }
 
 bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64 options /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::open);
   if (m_ptr) {
     t_close();
   }
@@ -161,7 +160,6 @@ bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64 
 }
 
 bool c_XMLReader::t_xml(CStrRef source, CStrRef encoding /*= null_string*/, int64 options /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::xml);
   xmlParserInputBufferPtr inputbfr = xmlParserInputBufferCreateMem(source.c_str(), source.size(), XML_CHAR_ENCODING_NONE);
 
   if (inputbfr != NULL) {
@@ -222,13 +220,11 @@ void c_XMLReader::close_impl() {
 }
 
 bool c_XMLReader::t_close() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::close);
   close_impl();
   return true;
 }
 
 bool c_XMLReader::t_read() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::read);
   if (m_ptr) {
     int ret = xmlTextReaderRead(m_ptr);
     if (ret == -1) {
@@ -243,7 +239,6 @@ bool c_XMLReader::t_read() {
 }
 
 bool c_XMLReader::t_next(CStrRef localname /*= null_string*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::next);
   if (m_ptr) {
     int ret = xmlTextReaderNext(m_ptr);
     while (!localname.empty() && ret == 1) {
@@ -278,17 +273,14 @@ String c_XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
 }
 
 String c_XMLReader::t_readstring() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::readstring);
   return read_string_func(xmlTextReaderReadString);
 }
 
 String c_XMLReader::t_readinnerxml() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::readinnerxml);
   return read_string_func(xmlTextReaderReadInnerXml);
 }
 
 String c_XMLReader::t_readouterxml() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::readouterxml);
   return read_string_func(xmlTextReaderReadString);
 }
 
@@ -324,12 +316,10 @@ Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_cha
 }
 
 Variant c_XMLReader::t_getattribute(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::getattribute);
   return string_func_string_arg(name, xmlTextReaderGetAttribute);
 }
 
 Variant c_XMLReader::t_getattributeno(int64 index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::getattributeno);
   char *retchar = NULL;
   if (m_ptr) {
     retchar = (char *)xmlTextReaderGetAttributeNo(m_ptr, index);
@@ -344,7 +334,6 @@ Variant c_XMLReader::t_getattributeno(int64 index) {
 }
 
 Variant c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::getattributens);
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
@@ -367,7 +356,6 @@ Variant c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
 }
 
 bool c_XMLReader::t_movetoattribute(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::movetoattribute);
   if (name.empty()) {
     raise_warning("Attribute Name is required");
     return false;
@@ -383,7 +371,6 @@ bool c_XMLReader::t_movetoattribute(CStrRef name) {
 }
 
 bool c_XMLReader::t_movetoattributeno(int64 index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::movetoattributeno);
   if (m_ptr) {
     int ret = xmlTextReaderMoveToAttributeNo(m_ptr, index);
     if (ret == 1) {
@@ -394,7 +381,6 @@ bool c_XMLReader::t_movetoattributeno(int64 index) {
 }
 
 bool c_XMLReader::t_movetoattributens(CStrRef name, CStrRef namespaceURI) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::movetoattributens);
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
@@ -411,32 +397,26 @@ bool c_XMLReader::t_movetoattributens(CStrRef name, CStrRef namespaceURI) {
 }
 
 bool c_XMLReader::t_movetoelement() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::movetoelement);
   return bool_func_no_arg(xmlTextReaderMoveToElement);
 }
 
 bool c_XMLReader::t_movetofirstattribute() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::movetofirstattribute);
   return bool_func_no_arg(xmlTextReaderMoveToFirstAttribute);
 }
 
 bool c_XMLReader::t_movetonextattribute() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::movetonextattribute);
   return bool_func_no_arg(xmlTextReaderMoveToNextAttribute);
 }
 
 bool c_XMLReader::t_isvalid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::isvalid);
   return bool_func_no_arg(xmlTextReaderIsValid);
 }
 
 bool c_XMLReader::t_expand() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::expand);
   throw NotImplementedException(__func__);
 }
 
 bool c_XMLReader::t_getparserproperty(int64 property) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::getparserproperty);
   int ret = 0;
   if (m_ptr) {
     ret = xmlTextReaderGetParserProp(m_ptr, property);
@@ -449,12 +429,10 @@ bool c_XMLReader::t_getparserproperty(int64 property) {
 }
 
 Variant c_XMLReader::t_lookupnamespace(CStrRef prefix) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::lookupnamespace);
   return string_func_string_arg(prefix, xmlTextReaderLookupNamespace);
 }
 
 bool c_XMLReader::t_setschema(CStrRef source) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::setschema);
   if (source.empty()) {
     raise_warning("Schema data source is required");
     return false;
@@ -471,7 +449,6 @@ bool c_XMLReader::t_setschema(CStrRef source) {
 }
 
 bool c_XMLReader::t_setparserproperty(int64 property, bool value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::setparserproperty);
   if (m_ptr) {
     int ret = xmlTextReaderSetParserProp(m_ptr, property, value);
     if (ret == -1) {
@@ -515,12 +492,10 @@ bool c_XMLReader::set_relaxng_schema(String source, int type) {
 }
 
 bool c_XMLReader::t_setrelaxngschema(CStrRef filename) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::setrelaxngschema);
   return set_relaxng_schema(filename, XMLREADER_LOAD_FILE);
 }
 
 bool c_XMLReader::t_setrelaxngschemasource(CStrRef source) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::setrelaxngschemasource);
   return set_relaxng_schema(source, XMLREADER_LOAD_STRING);
 }
 
@@ -578,7 +553,6 @@ static PropertyAccessorMap xmlreader_properties_map
 ((PropertyAccessor*)xmlreader_properties);
 
 Variant c_XMLReader::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::__get);
   const xmlChar *retchar = NULL;
 	int retint = 0;
 
@@ -611,7 +585,6 @@ Variant c_XMLReader::t___get(Variant name) {
 }
 
 Variant c_XMLReader::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLReader, XMLReader::__destruct);
   return null;
 }
 

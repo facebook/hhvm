@@ -1828,7 +1828,6 @@ c_SoapServer::~c_SoapServer() {
 
 void c_SoapServer::t___construct(CVarRef wsdl,
                                  CArrRef options /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::__construct);
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
 
@@ -1923,7 +1922,6 @@ void c_SoapServer::t___construct(CVarRef wsdl,
 
 void c_SoapServer::t_setclass(int _argc, CStrRef name,
                               CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::setclass);
   SoapServerScope ss(this);
   if (class_exists(name, true)) {
     m_type = SOAP_CLASS;
@@ -1936,14 +1934,12 @@ void c_SoapServer::t_setclass(int _argc, CStrRef name,
 }
 
 void c_SoapServer::t_setobject(CObjRef obj) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::setobject);
   SoapServerScope ss(this);
   m_type = SOAP_OBJECT;
   m_soap_object = obj;
 }
 
 void c_SoapServer::t_addfunction(CVarRef func) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::addfunction);
   SoapServerScope ss(this);
 
   Array funcs;
@@ -1981,7 +1977,6 @@ void c_SoapServer::t_addfunction(CVarRef func) {
 }
 
 Variant c_SoapServer::t_getfunctions() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::getfunctions);
   SoapServerScope ss(this);
 
   String class_name;
@@ -2029,7 +2024,6 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
 }
 
 void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::handle);
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
 
@@ -2238,7 +2232,6 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
 }
 
 void c_SoapServer::t_setpersistence(int64 mode) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::setpersistence);
   SoapServerScope ss(this);
   if (m_type == SOAP_CLASS) {
     if (mode == SOAP_PERSISTENCE_SESSION || mode == SOAP_PERSISTENCE_REQUEST) {
@@ -2257,14 +2250,12 @@ void c_SoapServer::t_fault(CVarRef code, CStrRef fault,
                            CStrRef actor /* = null_string */,
                            CVarRef detail /* = null */,
                            CStrRef name /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::fault);
   SoapServerScope ss(this);
   Object obj(SystemLib::AllocSoapFaultObject(code, fault, actor, detail, name));
   send_soap_server_fault(sdlFunctionPtr(), obj, NULL);
 }
 
 void c_SoapServer::t_addsoapheader(CObjRef fault) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::addsoapheader);
   SoapServerScope ss(this);
   soapHeader *p = NEWOBJ(soapHeader)();
   Object obj(p);
@@ -2302,7 +2293,6 @@ c_SoapClient::~c_SoapClient() {
 
 void c_SoapClient::t___construct(CVarRef wsdl,
                                  CArrRef options /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__construct);
   USE_SOAP_GLOBAL;
   SoapClientScope ss(this);
 
@@ -2421,7 +2411,6 @@ void c_SoapClient::t___construct(CVarRef wsdl,
 }
 
 Variant c_SoapClient::t___call(Variant name, Variant args) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__call);
   return t___soapcall(name, args);
 }
 
@@ -2429,7 +2418,6 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
                                    CArrRef options /* = null_array */,
                                    CVarRef input_headers /* = null_variant */,
                                    VRefParam output_headers /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__soapcall);
   SoapClientScope ss(this);
 
   String location, soap_action, uri;
@@ -2580,27 +2568,22 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
 }
 
 Variant c_SoapClient::t___getlastrequest() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__getlastrequest);
   return m_last_request;
 }
 
 Variant c_SoapClient::t___getlastresponse() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__getlastresponse);
   return m_last_response;
 }
 
 Variant c_SoapClient::t___getlastrequestheaders() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__getlastrequestheaders);
   return m_last_request_headers;
 }
 
 Variant c_SoapClient::t___getlastresponseheaders() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__getlastresponseheaders);
   return m_last_response_headers;
 }
 
 Variant c_SoapClient::t___getfunctions() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__getfunctions);
   SoapClientScope ss(this);
 
   if (m_sdl) {
@@ -2617,7 +2600,6 @@ Variant c_SoapClient::t___getfunctions() {
 }
 
 Variant c_SoapClient::t___gettypes() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__gettypes);
   SoapClientScope ss(this);
 
   if (m_sdl) {
@@ -2634,7 +2616,6 @@ Variant c_SoapClient::t___gettypes() {
 
 Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef action,
                                     int64 version, bool oneway /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__dorequest);
   if (location.empty()) {
     m_soap_fault =
       Object(SystemLib::AllocSoapFaultObject("HTTP", "Unable to parse URL"));
@@ -2729,7 +2710,6 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
 
 Variant c_SoapClient::t___setcookie(CStrRef name,
                                     CStrRef value /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__setcookie);
   if (!value.isNull()) {
     m_cookies.set(name, CREATE_VECTOR1(value));
   } else if (o_exists("_cookies")) {
@@ -2739,14 +2719,12 @@ Variant c_SoapClient::t___setcookie(CStrRef name,
 }
 
 Variant c_SoapClient::t___setlocation(CStrRef new_location /* = null_string */){
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__setlocation);
   Variant ret = m_location;
   m_location = new_location;
   return ret;
 }
 
 bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__setsoapheaders);
   if (headers.isNull()) {
     m_default_headers = null;
   } else if (headers.isArray()) {
@@ -2775,7 +2753,6 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
                               CStrRef type_namespace /* = null_string */,
                               CStrRef node_name /* = null_string */,
                               CStrRef node_namespace /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapVar, SoapVar::__construct);
   USE_SOAP_GLOBAL;
   if (type.isNull()) {
     m_type = UNKNOWN_TYPE;
@@ -2807,7 +2784,6 @@ c_SoapParam::~c_SoapParam() {
 }
 
 void c_SoapParam::t___construct(CVarRef data, CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapParam, SoapParam::__construct);
   if (name.empty()) {
     raise_warning("Invalid parameter name");
     return;
@@ -2830,7 +2806,6 @@ void c_SoapHeader::t___construct(CStrRef ns, CStrRef name,
                                  CVarRef data /* = null */,
                                  bool mustunderstand /* = false */,
                                  CVarRef actor /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapHeader, SoapHeader::__construct);
   if (ns.empty()) {
     raise_warning("Invalid namespace");
     return;

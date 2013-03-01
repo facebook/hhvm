@@ -175,18 +175,6 @@ Variant *get_intercept_handler(CStrRef name, char* flag) {
   return handler;
 }
 
-bool handle_intercept(CVarRef handler, CStrRef name, CArrRef params,
-                      Variant &ret) {
-  ObjectData *obj = FrameInjection::GetThis();
-
-  Variant done = true;
-  ret.setWithRef(
-    f_call_user_func_array(
-      handler[0],
-      CREATE_VECTOR5(name, obj, params, handler[1], ref(done))));
-  return !done.same(false);
-}
-
 void unregister_intercept_flag(CStrRef name, char *flag) {
   Lock lock(s_mutex);
   RegisteredFlagsMap::iterator iter =

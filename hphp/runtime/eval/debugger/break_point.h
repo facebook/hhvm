@@ -18,7 +18,6 @@
 #define __HPHP_EVAL_DEBUGGER_BREAK_POINT_H__
 
 #include <runtime/eval/debugger/debugger_thrift_buffer.h>
-#include <runtime/base/frame_injection.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,29 +76,6 @@ protected:
 
   // jump instruction
   bool m_jumping;
-};
-
-class InterruptSiteFI : public InterruptSite {
-public:
-  InterruptSiteFI(FrameInjection *frame, CVarRef e = null_variant,
-                  int char0 = 0, int line1 = 0, int char1 = 0)
-      : InterruptSite(e) {
-    m_frame = frame;
-    assert(m_frame);
-    m_line0 = m_frame->getLine();
-    m_char0 = char0;
-    m_line1 = line1;
-    m_char1 = char1;
-  }
-
-  FrameInjection *getFrame() const { return m_frame;}
-
-  virtual const char *getFile() const;
-  virtual const char *getClass() const;
-  virtual const char *getFunction() const;
-
-private:
-  FrameInjection *m_frame;
 };
 
 class InterruptSiteVM : public InterruptSite {

@@ -51,7 +51,7 @@
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/type_constraint.h>
 #include <runtime/vm/translator/translator-inline.h>
-#include <runtime/ext/profile/extprofile_string.h>
+#include <runtime/ext/ext_string.h>
 #include <runtime/ext/ext_error.h>
 #include <runtime/ext/ext_continuation.h>
 #include <runtime/ext/ext_function.h>

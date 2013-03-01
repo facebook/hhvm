@@ -29,7 +29,7 @@
 #include "runtime/vm/translator/translator-x64.h"
 
 #include "runtime/base/zend/zend_functions.h"
-#include "runtime/ext/profile/extprofile_string.h"
+#include "runtime/ext/ext_string.h"
 
 namespace HPHP {
 namespace VM {

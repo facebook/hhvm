@@ -106,29 +106,18 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
 
   if (Variant::GetAccessorType(tv_func) == KindOfObject) {
     ObjectData *d = Variant::GetObjectData(tv_func);
-    if (hhvm) {
-      static const StringData* sd__invoke
-        = StringData::GetStaticString("__invoke");
-      const VM::Func* invoke = d->getVMClass()->lookupMethod(sd__invoke);
-      if (name.isReferenced()) {
-        if (d->o_instanceof("closure")) {
-          // Hack to stop the mangled name from showing up
-          name = "Closure::__invoke";
-        } else {
-          name = d->o_getClassName() + "::__invoke";
-        }
-      }
-      return invoke != NULL;
-    } else {
-      void *extra;
-      if (d->t___invokeCallInfoHelper(extra)) {
+    static const StringData* sd__invoke
+      = StringData::GetStaticString("__invoke");
+    const VM::Func* invoke = d->getVMClass()->lookupMethod(sd__invoke);
+    if (name.isReferenced()) {
+      if (d->o_instanceof("closure")) {
+        // Hack to stop the mangled name from showing up
+        name = "Closure::__invoke";
+      } else {
         name = d->o_getClassName() + "::__invoke";
-        return ret;
-      }
-      if (name.isReferenced()) {
-        name = v.toString();
       }
     }
+    return invoke != NULL;
   }
 
   return false;
@@ -242,91 +231,67 @@ Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
 }
 
 Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  if (hhvm) {
-    // Setting the bound parameter to true tells f_call_user_func_array()
-    // propogate the current late bound class
-    return f_call_user_func_array(function, _argv, true);
-  } else {
-    CStrRef cls = FrameInjection::GetClassName();
-    if (cls.empty()) {
-      raise_error("Cannot call forward_static_call() "
-                  "when no class scope is active");
-      return null;
-    }
-    return f_call_user_func_array(function, _argv, true);
-  }
+  // Setting the bound parameter to true tells f_call_user_func_array()
+  // propogate the current late bound class
+  return f_call_user_func_array(function, _argv, true);
 }
 
 Variant f_get_called_class() {
-  if (hhvm) {
-    CallerFrame cf;
-    ActRec* ar = cf();
-    if (ar == NULL) {
-      return Variant(false);
-    }
-    if (ar->hasThis()) {
-      ObjectData* obj = ar->getThis();
-      return obj->o_getClassName();
-    } else if (ar->hasClass()) {
-      return ar->getClass()->preClass()->name()->data();
-    } else {
-      return Variant(false);
-    }
+  CallerFrame cf;
+  ActRec* ar = cf();
+  if (ar == NULL) {
+    return Variant(false);
+  }
+  if (ar->hasThis()) {
+    ObjectData* obj = ar->getThis();
+    return obj->o_getClassName();
+  } else if (ar->hasClass()) {
+    return ar->getClass()->preClass()->name()->data();
   } else {
-    CStrRef cls = FrameInjection::GetStaticClassName(
-      ThreadInfo::s_threadInfo.getNoCheck());
-    return cls.size() ? Variant(cls.get()) : Variant(false);
+    return Variant(false);
   }
 }
 
 String f_create_function(CStrRef args, CStrRef code) {
-  if (hhvm) {
-    return g_vmContext->createFunction(args, code);
-  } else {
-    throw NotSupportedException(__func__, "dynamic coding");
-  }
+  return g_vmContext->createFunction(args, code);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_func_get_arg(int arg_num) {
-  if (hhvm) {
-    CallerFrame cf;
-    ActRec* ar = cf();
+  CallerFrame cf;
+  ActRec* ar = cf();
 
-    if (ar == NULL || arg_num < 0 || arg_num >= ar->numArgs()) {
-      return false;
-    }
-    if (ar->m_func->isClosureBody()) {
-      ar = g_vmContext->getPrevVMState(ar);
-    }
-
-    const int numParams = ar->m_func->numParams();
-
-    if (arg_num < numParams) {
-      // Formal parameter. Value is on the stack.
-      TypedValue* loc =
-        (TypedValue*)(uintptr_t(ar) - (arg_num + 1) * sizeof(TypedValue));
-      return tvAsVariant(loc);
-    }
-
-    const int numArgs = ar->numArgs();
-    const int extraArgs = numArgs - numParams;
-
-    // Not a formal parameter.  Value is potentially in the
-    // ExtraArgs/VarEnv.
-    const int extraArgNum = arg_num - numParams;
-    if (extraArgNum < extraArgs) {
-      return tvAsVariant(ar->getExtraArg(extraArgNum));
-    }
-
+  if (ar == NULL || arg_num < 0 || arg_num >= ar->numArgs()) {
     return false;
-  } else {
-    throw FatalErrorException("bad HPHP code generation");
   }
+  if (ar->m_func->isClosureBody()) {
+    ar = g_vmContext->getPrevVMState(ar);
+  }
+
+  const int numParams = ar->m_func->numParams();
+
+  if (arg_num < numParams) {
+    // Formal parameter. Value is on the stack.
+    TypedValue* loc =
+      (TypedValue*)(uintptr_t(ar) - (arg_num + 1) * sizeof(TypedValue));
+    return tvAsVariant(loc);
+  }
+
+  const int numArgs = ar->numArgs();
+  const int extraArgs = numArgs - numParams;
+
+  // Not a formal parameter.  Value is potentially in the
+  // ExtraArgs/VarEnv.
+  const int extraArgNum = arg_num - numParams;
+  if (extraArgNum < extraArgs) {
+    return tvAsVariant(ar->getExtraArg(extraArgNum));
+  }
+
+  return false;
 }
+
 Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
-  FUNCTION_INJECTION_BUILTIN(func_get_arg);
   if (num_args <= params.size()) {
     if (pos >= 0 && pos < num_args) {
       return params.rvalAt(pos);
@@ -374,15 +339,11 @@ Array hhvm_get_frame_args(const ActRec* ar) {
 }
 
 Array f_func_get_args() {
-  if (hhvm) {
-    CallerFrame cf;
-    return hhvm_get_frame_args(cf());
-  } else {
-    throw FatalErrorException("bad HPHP code generation");
-  }
+  CallerFrame cf;
+  return hhvm_get_frame_args(cf());
 }
+
 Array func_get_args(int num_args, CArrRef params, CArrRef args) {
-  FUNCTION_INJECTION_BUILTIN(func_get_args);
   if (params.empty() && args.empty()) return Array::Create();
   if (args.empty()) {
     if (num_args < params.size()) {
@@ -403,21 +364,15 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
 }
 
 int64 f_func_num_args() {
-  if (hhvm) {
-    CallerFrame cf;
-    ActRec* ar = cf();
-    if (ar == NULL) {
-      return -1;
-    }
-    if (ar->m_func->isClosureBody()) {
-      return g_vmContext->getPrevVMState(ar)->numArgs();
-    }
-    return ar->numArgs();
-  } else {
-    // we shouldn't be here, since code generation will inline this function
-    assert(false);
+  CallerFrame cf;
+  ActRec* ar = cf();
+  if (ar == NULL) {
     return -1;
   }
+  if (ar->m_func->isClosureBody()) {
+    return g_vmContext->getPrevVMState(ar)->numArgs();
+  }
+  return ar->numArgs();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

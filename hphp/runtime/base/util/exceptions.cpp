@@ -15,7 +15,6 @@
 */
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/frame_injection.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/execution_context.h>
 
@@ -61,13 +60,7 @@ Array ExtendedException::getBackTrace() const {
  * If you wait too long, getFP() will be NULL.
  */
 void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
-  if (hhvm) {
-    m_btp = g_vmContext->debugBacktrace(skipFrame, true).get();
-  } else {
-    if (RuntimeOption::InjectedStackTrace) {
-      m_btp = FrameInjection::GetBacktrace(skipFrame, true).get();
-    }
-  }
+  m_btp = g_vmContext->debugBacktrace(skipFrame, true).get();
 }
 
 void throw_null_pointer_exception() {

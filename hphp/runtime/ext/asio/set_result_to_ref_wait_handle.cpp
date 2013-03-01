@@ -39,7 +39,6 @@ c_SetResultToRefWaitHandle::~c_SetResultToRefWaitHandle() {
 }
 
 void c_SetResultToRefWaitHandle::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SetResultToRefWaitHandle, SetResultToRefWaitHandle::__construct);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use SetResultToRefWaitHandle::create() instead of constructor"));
   throw e;
@@ -53,7 +52,6 @@ Object c_SetResultToRefWaitHandle::ti_create(const char* cls, CObjRef wait_handl
   }
 
   if (!wait_handle.get()->o_instanceof(c_WaitHandle::q_ClassName)) {
-    STATIC_METHOD_INJECTION_BUILTIN(SetResultToRefWaitHandle, SetResultToRefWaitHandle::create);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected wait_handle to be an instance of WaitHandle or null"));
     throw e;

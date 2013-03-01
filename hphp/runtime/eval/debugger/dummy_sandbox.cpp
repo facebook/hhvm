@@ -89,7 +89,6 @@ void DummySandbox::run() {
   while (!m_stopped) {
     try {
       CLISession hphpSession;
-      FUNCTION_INJECTION_FS("_", FrameInjection::PseudoMain);
 
       DSandboxInfo sandbox = m_proxy->getSandbox();
       string msg;

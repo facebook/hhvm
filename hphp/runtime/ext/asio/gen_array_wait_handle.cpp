@@ -36,7 +36,6 @@ namespace {
   }
 
   void putInvalidArgumentException(Object& exception_field) {
-    STATIC_METHOD_INJECTION_BUILTIN(GenArrayWaitHandle, GenArrayWaitHandle::create);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected dependencies to be an array of WaitHandle instances"));
     putException(exception_field, e.get());
@@ -51,7 +50,6 @@ c_GenArrayWaitHandle::~c_GenArrayWaitHandle() {
 }
 
 void c_GenArrayWaitHandle::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(GenArrayWaitHandle, GenArrayWaitHandle::__construct);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use GenArrayWaitHandle::create() instead of constructor"));
   throw e;

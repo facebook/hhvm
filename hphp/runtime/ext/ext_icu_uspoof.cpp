@@ -69,7 +69,6 @@ void c_SpoofChecker::t___construct() {
 }
 
 bool c_SpoofChecker::t_issuspicious(CStrRef text, VRefParam issuesFound) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SpoofChecker, SpoofChecker::issuspicious);
   UErrorCode status = U_ZERO_ERROR;
   int32_t ret = uspoof_checkUTF8(
     m_spoof_checker,
@@ -90,7 +89,6 @@ bool c_SpoofChecker::t_areconfusable(
   CStrRef s1,
   CStrRef s2,
   VRefParam issuesFound) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SpoofChecker, SpoofChecker::areconfusable);
   UErrorCode status = U_ZERO_ERROR;
   int32_t ret = uspoof_areConfusableUTF8(
     m_spoof_checker,
@@ -109,7 +107,6 @@ bool c_SpoofChecker::t_areconfusable(
 }
 
 void c_SpoofChecker::t_setallowedlocales(CStrRef localesList) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SpoofChecker, SpoofChecker::setallowedlocales);
   UErrorCode status = U_ZERO_ERROR;
   uspoof_setAllowedLocales(
     m_spoof_checker,
@@ -123,7 +120,6 @@ void c_SpoofChecker::t_setallowedlocales(CStrRef localesList) {
 }
 
 void c_SpoofChecker::t_setchecks(int checks) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SpoofChecker, SpoofChecker::setchecks);
   UErrorCode status = U_ZERO_ERROR;
   uspoof_setChecks(
     m_spoof_checker,

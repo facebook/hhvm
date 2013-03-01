@@ -21,7 +21,6 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/debug/backtrace.h>
-#include <runtime/base/frame_injection.h>
 #include <system/gen/php/globals/constants.h>
 #include <util/logger.h>
 
@@ -29,15 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_debug_backtrace(bool provide_object /* = true */) {
-  if (hhvm) {
-    return g_vmContext->debugBacktrace(true, false, provide_object);
-  } else {
-    if (RuntimeOption::InjectedStackTrace) {
-      return FrameInjection::GetBacktrace(true, false, provide_object);
-    }
-    StackTrace st;
-    return stackTraceToBackTrace(st);
-  }
+  return g_vmContext->debugBacktrace(true, false, provide_object);
 }
 
 /**
@@ -53,9 +44,7 @@ Array f_debug_backtrace(bool provide_object /* = true */) {
  */
 Array f_hphp_debug_caller_info() {
   if (RuntimeOption::InjectedStackTrace) {
-    return hhvm
-           ? g_vmContext->getCallerInfo()
-           : FrameInjection::GetCallerInfo(true);
+    return g_vmContext->getCallerInfo();
   }
   return Array::Create();
 }
@@ -74,9 +63,7 @@ String debug_string_backtrace(bool skip) {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt;
     StringBuffer buf;
-    bt = hhvm
-         ? g_vmContext->debugBacktrace(skip)
-         : FrameInjection::GetBacktrace(skip);
+    bt = g_vmContext->debugBacktrace(skip);
     int i = 0;
     for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
       Array frame = it.second().toArray();

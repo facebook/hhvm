@@ -44,14 +44,11 @@ $(EXT): $(EXT).idl.php idl.php base.php
 	$(V)$(PHP) idl.php test $< test_ext_$@.h test_ext_$@.cpp
 	@echo ' --> ../runtime/ext/ext_$@.h ../runtime/ext/ext_$@.cpp'
 	$(V)$(PHP) idl.php param $< ../runtime/ext/ext_$@.h ../runtime/ext/ext_$@.cpp
-	@echo ' --> ../runtime/ext/profile/extprofile_$@.h'
-	$(V)$(PHP) idl.php profile $< ../runtime/ext/profile/extprofile_$@.h
 
 # run this for a newly prepared idl file
 install: $(EXT) lists
 	$(V)cp ext_$<.h ext_$<.cpp ../runtime/ext/
 	$(REPO_ADD) ../runtime/ext/ext_$<.h ../runtime/ext/ext_$<.cpp
-	$(REPO_ADD) ../runtime/ext/profile/extprofile_$<.h
 	$(V)cp $<.inc ../system/
 	$(REPO_ADD) ../system/$<.inc
 	$(V)touch ../compiler/builtin_symbols.cpp
@@ -76,7 +73,7 @@ remove:
 		../test/test_ext.h
 	$(V)perl -p -i -n -e "s/RUN_TESTSUITE\(TestExt$(EXT)\);\n//i" \
 		../test/test_ext.inc
-	$(V)perl -p -i -n -e "s/#include .*extprofile_$(EXT).h>\n//" \
+	$(V)perl -p -i -n -e "s/#include .*\/ext_$(EXT).h>\n//" \
 		../runtime/ext/ext.h
 	@echo 'Removing source files...'
 	$(REPO_DEL) ../test/test_ext_$(EXT).h

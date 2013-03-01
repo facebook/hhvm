@@ -465,7 +465,6 @@ void c_ImageSprite::t___construct() {
 
 Object c_ImageSprite::t_addfile(CStrRef file,
                                 CArrRef options /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::addfile);
   m_current = false;
 
   ImageSprite::Image *entry = new ImageSprite::ImageFromFile(file, this);
@@ -480,7 +479,6 @@ Object c_ImageSprite::t_addfile(CStrRef file,
 
 Object c_ImageSprite::t_addstring(CStrRef id, CStrRef data,
                                   CArrRef options /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::addstring);
   m_current = false;
 
   ImageSprite::Image *entry = new ImageSprite::ImageFromString(id, data, this);
@@ -495,7 +493,6 @@ Object c_ImageSprite::t_addstring(CStrRef id, CStrRef data,
 
 Object c_ImageSprite::t_addurl(CStrRef url, int timeout_ms /* = 0 */,
                                CArrRef options /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::addurl);
   m_current = false;
 
   ImageSprite::Image *entry = new ImageSprite::ImageFromHTTP(
@@ -513,7 +510,6 @@ Object c_ImageSprite::t_addurl(CStrRef url, int timeout_ms /* = 0 */,
 }
 
 Object c_ImageSprite::t_clear(CVarRef files /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::clear);
   if (same(files, null)) {
     // Clear them all, might as well __destruct
     t___destruct();
@@ -539,7 +535,6 @@ Object c_ImageSprite::t_clear(CVarRef files /* = null */) {
 }
 
 Object c_ImageSprite::t_loaddims(bool block /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::loaddims);
   if (same(m_current, true)) {
     return this;
   }
@@ -568,7 +563,6 @@ Object c_ImageSprite::t_loaddims(bool block /* = false */) {
 }
 
 Object c_ImageSprite::t_loadimages(bool block /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::loadimages);
   if (same(m_current, true)) {
     return this;
   }
@@ -991,7 +985,6 @@ void c_ImageSprite::map() {
 String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
                                CStrRef format /* = "png" */,
                                int32 quality /* = 75 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::output);
   t_loadimages(true);
   map();
 
@@ -1069,7 +1062,6 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
                             CStrRef sprite_file /* = null_string */,
                             CStrRef output_file /* = null_string */,
                             bool verbose /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::css);
   t_loaddims(true);
   map();
 
@@ -1138,7 +1130,6 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
 }
 
 Array c_ImageSprite::t_geterrors() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::geterrors);
   Array ret = Array::Create();
   ret.set("images", m_img_errors);
   ret.set("sprite", m_sprite_errors);
@@ -1146,7 +1137,6 @@ Array c_ImageSprite::t_geterrors() {
 }
 
 Array c_ImageSprite::t_mapping() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::mapping);
   t_loaddims(true);
   map();
 
@@ -1154,7 +1144,6 @@ Array c_ImageSprite::t_mapping() {
 }
 
 Variant c_ImageSprite::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::__destruct);
   // Sic Trogdor on everything
   if (m_image != NULL) {
     delete m_image;

@@ -24,18 +24,14 @@ namespace HPHP {
 c_Closure::c_Closure(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {}
 c_Closure::~c_Closure() {}
 
-void c_Closure::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__construct);
-}
+void c_Closure::t___construct() {}
 
 Variant c_Closure::t___invoke(int _argc, CArrRef _argv) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__invoke);
   always_assert(false);
   return null;
 }
 
 Variant c_Closure::t___clone() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__clone);
   throw_fatal("Trying to clone an uncloneable object of class Closure");
   return null;
 }

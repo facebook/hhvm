@@ -107,14 +107,12 @@ c_Memcache::~c_Memcache() {
 }
 
 void c_Memcache::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::__construct);
   return;
 }
 
 bool c_Memcache::t_connect(CStrRef host, int port /*= 0*/,
                            int timeout /*= 0*/,
                            int timeoutms /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::connect);
   memcached_return_t ret;
 
   if (!host.empty() && host[0] == '/') {
@@ -129,7 +127,6 @@ bool c_Memcache::t_connect(CStrRef host, int port /*= 0*/,
 bool c_Memcache::t_pconnect(CStrRef host, int port /*= 0*/,
                             int timeout /*= 0*/,
                             int timeoutms /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::pconnect);
   return t_connect(host, port, timeout, timeoutms);
 }
 
@@ -166,7 +163,6 @@ Variant static memcache_fetch_from_storage(const char *payload,
 
 bool c_Memcache::t_add(CStrRef key, CVarRef var, int flag /*= 0*/,
                        int expire /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::add);
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -185,7 +181,6 @@ bool c_Memcache::t_add(CStrRef key, CVarRef var, int flag /*= 0*/,
 
 bool c_Memcache::t_set(CStrRef key, CVarRef var, int flag /*= 0*/,
                        int expire /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::set);
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -208,7 +203,6 @@ bool c_Memcache::t_set(CStrRef key, CVarRef var, int flag /*= 0*/,
 
 bool c_Memcache::t_replace(CStrRef key, CVarRef var, int flag /*= 0*/,
                            int expire /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::replace);
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -225,7 +219,6 @@ bool c_Memcache::t_replace(CStrRef key, CVarRef var, int flag /*= 0*/,
 }
 
 Variant c_Memcache::t_get(CVarRef key, VRefParam flags /*= null*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::get);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   if (key.is(KindOfArray)) {
     std::vector<const char *> real_keys;
@@ -307,7 +300,6 @@ Variant c_Memcache::t_get(CVarRef key, VRefParam flags /*= null*/) {
 }
 
 bool c_Memcache::t_delete(CStrRef key, int expire /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::delete);
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -320,7 +312,6 @@ bool c_Memcache::t_delete(CStrRef key, int expire /*= 0*/) {
 }
 
 int64 c_Memcache::t_increment(CStrRef key, int offset /*= 1*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::increment);
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -338,7 +329,6 @@ int64 c_Memcache::t_increment(CStrRef key, int offset /*= 1*/) {
 }
 
 int64 c_Memcache::t_decrement(CStrRef key, int offset /*= 1*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::decrement);
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -356,13 +346,11 @@ int64 c_Memcache::t_decrement(CStrRef key, int offset /*= 1*/) {
 }
 
 bool c_Memcache::t_close() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::close);
   memcached_quit(&m_memcache);
   return true;
 }
 
 Variant c_Memcache::t_getversion() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::getversion);
   int server_count = memcached_server_count(&m_memcache);
   char version[16];
   int version_len = 0;
@@ -389,12 +377,10 @@ Variant c_Memcache::t_getversion() {
 }
 
 bool c_Memcache::t_flush(int expire /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::flush);
   return memcached_flush(&m_memcache, expire) == MEMCACHED_SUCCESS;
 }
 
 bool c_Memcache::t_setoptimeout(int64 timeoutms) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::setoptimeout);
   if (timeoutms < 1) {
     timeoutms = 1000; // make default
   }
@@ -405,14 +391,12 @@ bool c_Memcache::t_setoptimeout(int64 timeoutms) {
 }
 
 int64 c_Memcache::t_getserverstatus(CStrRef host, int port /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::getserverstatus);
   /* intentionally doing nothing for now */
   return 1;
 }
 
 bool c_Memcache::t_setcompressthreshold(int threshold,
                                         double min_savings /* = 0.2 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::setcompressthreshold);
   if (threshold < 0) {
     raise_warning("threshold must be a positive integer");
     return false;
@@ -463,7 +447,6 @@ Array static memcache_build_stats(const memcached_st *ptr,
 
 Array c_Memcache::t_getstats(CStrRef type /* = null_string */,
                              int slabid /* = 0 */, int limit /* = 100 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::getstats);
   if (!memcached_server_count(&m_memcache)) {
     return NULL;
   }
@@ -493,7 +476,6 @@ Array c_Memcache::t_getstats(CStrRef type /* = null_string */,
 Array c_Memcache::t_getextendedstats(CStrRef type /* = null_string */,
                                      int slabid /* = 0 */,
                                      int limit /* = 100 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::getextendedstats);
   memcached_return_t ret;
   memcached_stat_st *stats;
 
@@ -535,7 +517,6 @@ bool c_Memcache::t_setserverparams(CStrRef host, int port /* = 11211 */,
                                    int retry_interval /* = 0 */,
                                    bool status /* = true */,
                                    CVarRef failure_callback /* = null_variant */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::setserverparams);
   /* intentionally doing nothing for now */
   return true;
 }
@@ -547,7 +528,6 @@ bool c_Memcache::t_addserver(CStrRef host, int port /* = 11211 */,
                              bool status /* = true */,
                              CVarRef failure_callback /* = null_variant */,
                              int timeoutms /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::addserver);
   memcached_return_t ret;
 
   if (!host.empty() && host[0] == '/') {
@@ -566,7 +546,6 @@ bool c_Memcache::t_addserver(CStrRef host, int port /* = 11211 */,
 }
 
 Variant c_Memcache::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::__destruct);
   t_close();
   return null;
 }

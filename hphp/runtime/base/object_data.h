@@ -166,13 +166,6 @@ class ObjectData : public CountableNF {
   virtual int64  o_toInt64() const;
   virtual double o_toDouble()  const { return o_toInt64();}
 
-  template<typename T>
-  T *bindClass(ThreadInfo *info) {
-    bindThis(info);
-    return static_cast<T*>(this);
-  }
-  void bindThis(ThreadInfo *info);
-
   void setDummy();
   static Variant ifa_dummy(MethodCallPackage &mcp, int count,
                            INVOKE_FEW_ARGS_IMPL_ARGS,

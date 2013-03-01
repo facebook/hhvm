@@ -311,12 +311,6 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
 }
 
 FrameInjection *CmdInterrupt::getFrame() {
-  if (m_site) {
-    InterruptSiteFI *site = dynamic_cast<InterruptSiteFI*>(m_site);
-    if (site) {
-      return site->getFrame();
-    }
-  }
   return nullptr;
 }
 

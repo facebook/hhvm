@@ -37,9 +37,7 @@ static String get_classname(CVarRef class_or_object) {
 }
 
 static inline CStrRef ctxClassName() {
-  return hhvm ?
-    g_vmContext->getContextClassName() :
-    FrameInjection::GetClassName(true);
+  return g_vmContext->getContextClassName();
 }
 
 static const VM::Class* get_cls(CVarRef class_or_object) {
@@ -68,89 +66,27 @@ Array f_get_declared_traits() {
 }
 
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
-  if (hhvm) {
-    return VM::Unit::classExists(class_name.get(), autoload, VM::AttrNone);
-  }
-  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(class_name);
-
-  if (info) {
-    ClassInfo::Attribute attr = info->getAttribute();
-    return !(attr & (ClassInfo::IsInterface|ClassInfo::IsTrait));
-  }
-
-  if (!autoload) return false;
-
-  AutoloadHandler::s_instance->invokeHandler(class_name);
-  return f_class_exists(class_name, false);
+  return VM::Unit::classExists(class_name.get(), autoload, VM::AttrNone);
 }
 
 bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
-  if (hhvm) {
-    return VM::Unit::classExists(interface_name.get(), autoload,
-                                 VM::AttrInterface);
-  }
-  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(interface_name);
-
-  if (info) {
-    return info->getAttribute() & ClassInfo::IsInterface;
-  }
-
-  if (!autoload) return false;
-
-  AutoloadHandler::s_instance->invokeHandler(interface_name);
-  return f_interface_exists(interface_name, false);
+  return VM::Unit::classExists(interface_name.get(), autoload,
+                               VM::AttrInterface);
 }
 
 bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
-  if (hhvm) {
-    return VM::Unit::classExists(trait_name.get(), autoload, VM::AttrTrait);
-  }
-  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(trait_name);
-
-  if (info) {
-    return info->getAttribute() & ClassInfo::IsTrait;
-  }
-
-  if (!autoload) return false;
-
-  AutoloadHandler::s_instance->invokeHandler(trait_name);
-  return f_trait_exists(trait_name, false);
+  return VM::Unit::classExists(trait_name.get(), autoload, VM::AttrTrait);
 }
 
 Array f_get_class_methods(CVarRef class_or_object) {
-  if (hhvm) {
-    const VM::Class* cls = get_cls(class_or_object);
-    if (!cls) return Array();
-    VMRegAnchor _;
+  const VM::Class* cls = get_cls(class_or_object);
+  if (!cls) return Array();
+  VMRegAnchor _;
 
-    HphpArray* retVal = NEW(HphpArray)(cls->numMethods());
-    cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
-                        retVal);
-    return Array(retVal).keys();
-  }
-
-  ClassInfo::MethodVec methods;
-  CStrRef class_name = get_classname(class_or_object);
-  const ClassInfo *classInfo = NULL;
-  for (int i = 0; ; ++i) {
-    classInfo = ClassInfo::FindClassInterfaceOrTrait(class_name);
-    if (classInfo) break;
-    if (i) return Array();
-    AutoloadHandler::s_instance->invokeHandler(class_name);
-  }
-
-  if (!ClassInfo::GetClassMethods(methods, classInfo)) return Array();
-
-  CStrRef klass = ctxClassName();
-  bool allowPrivate = !klass.empty() && klass->isame(class_name.get());
-
-  Array ret = Array::Create();
-  for (unsigned int i = 0; i < methods.size(); i++) {
-    if ((methods[i]->attribute & ClassInfo::IsPublic) || allowPrivate) {
-      ret.set(methods[i]->name, true);
-    }
-  }
-  return ret.keys();
+  HphpArray* retVal = NEW(HphpArray)(cls->numMethods());
+  cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
+                      retVal);
+  return Array(retVal).keys();
 }
 
 Array vm_get_class_constants(CStrRef className) {
@@ -176,23 +112,7 @@ Array vm_get_class_constants(CStrRef className) {
 }
 
 Array f_get_class_constants(CStrRef class_name) {
-  if (hhvm) {
-    return vm_get_class_constants(class_name.get());
-  }
-  const ClassInfo *cls = ClassInfo::FindClass(class_name);
-  if (!cls) {
-    AutoloadHandler::s_instance->invokeHandler(class_name);
-    cls = ClassInfo::FindClass(class_name);
-  }
-  Array ret = Array::Create();
-  if (cls) {
-    const ClassInfo::ConstantVec &constants = cls->getConstantsVec();
-    for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
-         iter != constants.end(); ++iter) {
-      ret.set((*iter)->name, (*iter)->getValue());
-    }
-  }
-  return ret;
+  return vm_get_class_constants(class_name.get());
 }
 
 Array vm_get_class_vars(CStrRef className) {
@@ -244,33 +164,7 @@ Array vm_get_class_vars(CStrRef className) {
 }
 
 Array f_get_class_vars(CStrRef class_name) {
-  if (hhvm) return vm_get_class_vars(class_name.get());
-
-  ClassInfo::PropertyVec properties;
-  ClassInfo::GetClassProperties(properties, class_name);
-  CStrRef context = FrameInjection::GetClassName(true);
-  const ClassInfo *cls = NULL;
-  if (!context.empty()) {
-    cls = ClassInfo::FindClass(context);
-  }
-
-  Array ret = Array::Create();
-  // PHP has instance variables appear before static variables...
-  for (unsigned int i = 0; i < properties.size(); i++) {
-    if (!(properties[i]->attribute & ClassInfo::IsStatic) &&
-        properties[i]->isVisible(cls)) {
-      ret.set(properties[i]->name,
-              get_class_var_init(class_name, properties[i]->name));
-    }
-  }
-  for (unsigned int i = 0; i < properties.size(); i++) {
-    if (properties[i]->attribute & ClassInfo::IsStatic &&
-        properties[i]->isVisible(cls)) {
-      ret.set(properties[i]->name,
-              get_static_property(class_name, properties[i]->name));
-    }
-  }
-  return ret;
+  return vm_get_class_vars(class_name.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -279,15 +173,12 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
   if (object.isNull()) {
     // No arg passed.
     String ret;
-    if (hhvm) {
-      CallerFrame cf;
-      HPHP::VM::Class* cls = HPHP::VM::arGetContextClassImpl<true>(cf());
-      if (cls) {
-        ret = CStrRef(cls->nameRef());
-      }
-    } else {
-      ret = FrameInjection::GetClassName(true);
+    CallerFrame cf;
+    HPHP::VM::Class* cls = HPHP::VM::arGetContextClassImpl<true>(cf());
+    if (cls) {
+      ret = CStrRef(cls->nameRef());
     }
+
     if (ret.empty()) {
       raise_warning("get_class() called without object from outside a class");
       return false;
@@ -299,16 +190,15 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
 }
 
 Variant f_get_parent_class(CVarRef object /* = null_variant */) {
-  if (hhvm) {
-    if (!object.isInitialized()) {
-      CallerFrame cf;
-      HPHP::VM::Class* cls = arGetContextClass(cf());
-      if (cls && cls->parent()) {
-        return CStrRef(cls->parentRef());
-      }
-      return false;
+  if (!object.isInitialized()) {
+    CallerFrame cf;
+    HPHP::VM::Class* cls = arGetContextClass(cf());
+    if (cls && cls->parent()) {
+      return CStrRef(cls->parentRef());
     }
+    return false;
   }
+
   Variant class_name;
   if (object.isObject()) {
     class_name = f_get_class(object);
@@ -333,45 +223,14 @@ static bool is_a_impl(CVarRef class_or_object, CStrRef class_name,
     return false;
   }
 
-  if (hhvm) {
-    const VM::Class* cls = get_cls(class_or_object);
-    if (!cls) return false;
-    if (cls->attrs() & VM::AttrTrait) return false;
-    const VM::Class* other = VM::Unit::lookupClass(class_name.get());
-    if (!other) return false;
-    if (other->attrs() & VM::AttrTrait) return false;
-    if (other == cls) return !subclass_only;
-    return cls->classof(other);
-  }
-
-  /* Resolve subject class, autoloading if needed */
-  CStrRef this_class = get_classname(class_or_object);
-  const ClassInfo *classInfo =
-        ClassInfo::FindClassInterfaceOrTrait(this_class);
-  if (!classInfo) {
-    AutoloadHandler::s_instance->invokeHandler(this_class);
-    classInfo = ClassInfo::FindClassInterfaceOrTrait(this_class);
-    if (!classInfo) return false;
-  }
-  if (classInfo->getAttribute() & ClassInfo::IsTrait) return false;
-
-  /* Resolve target class, don't bother to autoload as it
-   * couldn't be an ancestor of an already loaded class
-   */
-  const ClassInfo *otherInfo =
-        ClassInfo::FindClassInterfaceOrTrait(class_name);
-  if (!otherInfo) return false;
-  if (otherInfo->getAttribute() & ClassInfo::IsTrait) return false;
-
-  /* Derives from returns true for same classes
-   * override that by explicitly checking and
-   * returning false before dispatching to derivesFrom()
-   */
-  if (this_class->isame(class_name.get())) {
-    return !subclass_only;
-  }
-
-  return classInfo->derivesFrom(class_name, true);
+  const VM::Class* cls = get_cls(class_or_object);
+  if (!cls) return false;
+  if (cls->attrs() & VM::AttrTrait) return false;
+  const VM::Class* other = VM::Unit::lookupClass(class_name.get());
+  if (!other) return false;
+  if (other->attrs() & VM::AttrTrait) return false;
+  if (other == cls) return !subclass_only;
+  return cls->classof(other);
 }
 
 bool f_is_a(CVarRef class_or_object, CStrRef class_name, bool allow_string /* = false */) {
@@ -383,30 +242,16 @@ bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name, bool allow_st
 }
 
 bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
-  if (hhvm) {
-    const VM::Class* cls = get_cls(class_or_object);
-    if (!cls) return false;
-    if (cls->lookupMethod(method_name.get()) != NULL) return true;
-    if (cls->attrs() & VM::AttrAbstract) {
-      const VM::ClassSet& ifaces = cls->allInterfaces();
-      for (VM::ClassSet::const_iterator it = ifaces.begin();
-           it != ifaces.end();
-           ++it) {
-        if ((*it)->lookupMethod(method_name.get())) return true;
-      }
+  const VM::Class* cls = get_cls(class_or_object);
+  if (!cls) return false;
+  if (cls->lookupMethod(method_name.get()) != NULL) return true;
+  if (cls->attrs() & VM::AttrAbstract) {
+    const VM::ClassSet& ifaces = cls->allInterfaces();
+    for (VM::ClassSet::const_iterator it = ifaces.begin();
+         it != ifaces.end();
+         ++it) {
+      if ((*it)->lookupMethod(method_name.get())) return true;
     }
-    return false;
-  }
-  CStrRef class_name = get_classname(class_or_object);
-  for (int i = 0; ; ++i) {
-    const ClassInfo *classInfo =
-      ClassInfo::FindClassInterfaceOrTrait(class_name);
-    if (classInfo) {
-      ClassInfo *defClass;
-      return classInfo->hasMethod(method_name, defClass) != NULL;
-    }
-    if (i) break;
-    AutoloadHandler::s_instance->invokeHandler(class_name);
   }
   return false;
 }

@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP__EXT_STRING_H_
+#ifndef incl_HPHP_EXT_STRING_H_
 #define incl_HPHP_EXT_STRING_H_
 
 #include "util/zend/zend_html.h"

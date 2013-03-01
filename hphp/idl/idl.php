@@ -9,7 +9,6 @@ include_once 'base.php';
  *   inc:     generating .inc for system/builtin_symbols.cpp
  *   test:    generating .h and .cpp for unit tests
  *   param:   synchronize parameter types and names
- *   profile: generating extprofile_*.h
  *   extmap:  sep extension's prototype map
  */
 $format = $argv[1];

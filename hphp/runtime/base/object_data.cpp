@@ -127,10 +127,6 @@ int64 ObjectData::o_toInt64() const {
   return 1;
 }
 
-void ObjectData::bindThis(ThreadInfo *info) {
-  FrameInjection::SetStaticClassName(info, getRoot()->o_getClassName());
-}
-
 void ObjectData::setDummy() {
   int *pmax = os_max_id.getNoCheck();
   if (o_id == *pmax) --(*pmax);

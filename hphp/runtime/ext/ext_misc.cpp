@@ -62,9 +62,7 @@ Variant f_constant(CStrRef name) {
 
     // translate "self" or "parent"
     if (className == "self") {
-      String this_class = hhvm
-        ? g_vmContext->getContextClassName()
-        : FrameInjection::GetClassName(true);
+      String this_class = g_vmContext->getContextClassName();
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
                                   "when no class scope is active");
@@ -72,9 +70,7 @@ Variant f_constant(CStrRef name) {
         className = this_class;
       }
     } else if (className == "parent") {
-      String parent_class = hhvm
-        ? g_vmContext->getParentContextClassName()
-        : FrameInjection::GetParentClassName(true);
+      String parent_class =g_vmContext->getParentContextClassName();
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {
@@ -122,9 +118,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
 
     // translate "self" or "parent"
     if (className == "self") {
-      String this_class = hhvm
-                          ? g_vmContext->getContextClassName()
-                          : FrameInjection::GetClassName(true);
+      String this_class = g_vmContext->getContextClassName();
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
           "when no class scope is active");
@@ -132,9 +126,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
         className = this_class;
       }
     } else if (className == "parent") {
-      String parent_class = hhvm
-                            ? g_vmContext->getParentContextClassName()
-                            : FrameInjection::GetParentClassName(true);
+      String parent_class = g_vmContext->getParentContextClassName();
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {

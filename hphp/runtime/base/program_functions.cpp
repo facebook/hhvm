@@ -42,7 +42,6 @@
 #include <runtime/base/stat_cache.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/rtti_info.h>
-#include <runtime/base/frame_injection.h>
 #include <runtime/ext/extension.h>
 #include <runtime/ext/ext_fb.h>
 #include <runtime/ext/ext_json.h>

@@ -197,7 +197,6 @@ c_Memcached::Impl::~Impl() {
 }
 
 void c_Memcached::t___construct(CStrRef persistent_id /*= null_string*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::__construct);
   if (persistent_id.isNull()) {
     m_impl.reset(new Impl);
   } else {
@@ -209,7 +208,6 @@ void c_Memcached::t___construct(CStrRef persistent_id /*= null_string*/) {
 
 Variant c_Memcached::t_get(CStrRef key, CVarRef cache_cb /*= null_variant*/,
                            VRefParam cas_token /*= null_variant*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::get);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return t_getbykey(null_string, key, cache_cb, cas_token);
 }
@@ -217,7 +215,6 @@ Variant c_Memcached::t_get(CStrRef key, CVarRef cache_cb /*= null_variant*/,
 Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
                                 CVarRef cache_cb /*= null_variant*/,
                                 VRefParam cas_token /*= null_variant*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getbykey);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
@@ -262,7 +259,6 @@ Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
 Variant c_Memcached::t_getmulti(CArrRef keys,
                                 VRefParam cas_tokens /*= null_variant*/,
                                 int flags /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getmulti);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return t_getmultibykey(null_string, keys, cas_tokens, flags);
 }
@@ -270,7 +266,6 @@ Variant c_Memcached::t_getmulti(CArrRef keys,
 Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
                                      VRefParam cas_tokens /*= null_variant*/,
                                      int flags /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getmultibykey);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
@@ -306,14 +301,12 @@ Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
 
 bool c_Memcached::t_getdelayed(CArrRef keys, bool with_cas /*= false*/,
                                CVarRef value_cb /*= null_variant*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getdelayed);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return t_getdelayedbykey(null_string, keys, with_cas, value_cb);
 }
 
 bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
     bool with_cas /*= false*/, CVarRef value_cb /*= null_variant*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getdelayedbykey);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
@@ -331,7 +324,6 @@ bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
 }
 
 Variant c_Memcached::t_fetch() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::fetch);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
@@ -342,7 +334,6 @@ Variant c_Memcached::t_fetch() {
 }
 
 Variant c_Memcached::t_fetchall() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::fetchall);
   TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
@@ -408,25 +399,21 @@ bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
 }
 
 bool c_Memcached::t_set(CStrRef key, CVarRef value, int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::set);
   return t_setbykey(null_string, key, value, expiration);
 }
 
 bool c_Memcached::t_setbykey(CStrRef server_key, CStrRef key, CVarRef value,
                              int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::setbykey);
   return setOperationImpl(memcached_set_by_key, server_key, key, value,
                           expiration);
 }
 
 bool c_Memcached::t_setmulti(CArrRef items, int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::setmulti);
   return t_setmultibykey(null_string, items, expiration);
 }
 
 bool c_Memcached::t_setmultibykey(CStrRef server_key, CArrRef items,
                                   int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::setmultibykey);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   for (ArrayIter iter(items); iter; ++iter) {
@@ -440,25 +427,21 @@ bool c_Memcached::t_setmultibykey(CStrRef server_key, CArrRef items,
 }
 
 bool c_Memcached::t_add(CStrRef key, CVarRef value, int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::add);
   return t_addbykey(null_string, key, value, expiration);
 }
 
 bool c_Memcached::t_addbykey(CStrRef server_key, CStrRef key, CVarRef value,
                              int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::addbykey);
   return setOperationImpl(memcached_add_by_key, server_key, key, value,
                           expiration);
 }
 
 bool c_Memcached::t_append(CStrRef key, CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::append);
   return t_appendbykey(null_string, key, value);
 }
 
 bool c_Memcached::t_appendbykey(CStrRef server_key, CStrRef key,
                                 CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::appendbykey);
   if (m_impl->compression) {
     raise_warning("cannot append/prepend with compression turned on");
     return false;
@@ -467,13 +450,11 @@ bool c_Memcached::t_appendbykey(CStrRef server_key, CStrRef key,
 }
 
 bool c_Memcached::t_prepend(CStrRef key, CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::prepend);
   return t_prependbykey(null_string, key, value);
 }
 
 bool c_Memcached::t_prependbykey(CStrRef server_key, CStrRef key,
                                  CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::prependbykey);
   if (m_impl->compression) {
     raise_warning("cannot append/prepend with compression turned on");
     return false;
@@ -483,13 +464,11 @@ bool c_Memcached::t_prependbykey(CStrRef server_key, CStrRef key,
 
 bool c_Memcached::t_replace(CStrRef key, CVarRef value,
                             int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::replace);
   return t_replacebykey(null_string, key, value, expiration);
 }
 
 bool c_Memcached::t_replacebykey(CStrRef server_key, CStrRef key,
                                  CVarRef value, int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::replacebykey);
   return setOperationImpl(memcached_replace_by_key, server_key, key, value,
                           expiration);
 }
@@ -514,13 +493,11 @@ bool c_Memcached::setOperationImpl(SetOperation op, CStrRef server_key,
 
 bool c_Memcached::t_cas(double cas_token, CStrRef key, CVarRef value,
                         int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::cas);
   return t_casbykey(cas_token, null_string, key, value, expiration);
 }
 
 bool c_Memcached::t_casbykey(double cas_token, CStrRef server_key, CStrRef key,
                              CVarRef value, int expiration /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::casbykey);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
     m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
@@ -537,13 +514,11 @@ bool c_Memcached::t_casbykey(double cas_token, CStrRef server_key, CStrRef key,
 }
 
 bool c_Memcached::t_delete(CStrRef key, int time /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::delete);
   return t_deletebykey(null_string, key, time);
 }
 
 bool c_Memcached::t_deletebykey(CStrRef server_key, CStrRef key,
                                 int time /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::deletebykey);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
     m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
@@ -557,12 +532,10 @@ bool c_Memcached::t_deletebykey(CStrRef server_key, CStrRef key,
 }
 
 Variant c_Memcached::t_increment(CStrRef key, int64 offset /*= 1*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::increment);
   return incDecOperationImpl(memcached_increment, key, offset);
 }
 
 Variant c_Memcached::t_decrement(CStrRef key, int64 offset /*= 1*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::decrement);
   return incDecOperationImpl(memcached_decrement, key, offset);
 }
 
@@ -587,14 +560,12 @@ Variant c_Memcached::incDecOperationImpl(IncDecOperation op, CStrRef key,
 }
 
 bool c_Memcached::t_addserver(CStrRef host, int port, int weight /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::addserver);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
   return handleError(memcached_server_add_with_weight(&m_impl->memcached,
       host.c_str(), port, weight));
 }
 
 bool c_Memcached::t_addservers(CArrRef servers) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::addservers);
   int i = 1;
   for (ArrayIter iter(servers); iter; ++iter, ++i) {
     Variant entry = iter.second();
@@ -643,7 +614,6 @@ memcached_return_t doServerListCallback(const memcached_st *ptr,
 }
 
 Array c_Memcached::t_getserverlist() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getserverlist);
   Array returnValue;
   memcached_server_function callbacks[] = { doServerListCallback };
   memcached_server_cursor(&m_impl->memcached, callbacks, &returnValue, 1);
@@ -651,7 +621,6 @@ Array c_Memcached::t_getserverlist() {
 }
 
 Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getserverbykey);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (server_key.empty()) {
     m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
@@ -720,7 +689,6 @@ memcached_return_t doStatsCallback(const memcached_st *ptr,
 }
 
 Variant c_Memcached::t_getstats() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getstats);
   memcached_return_t error;
   memcached_stat_st *stats = memcached_stat(&m_impl->memcached, NULL, &error);
   if (!stats) {
@@ -750,7 +718,6 @@ memcached_return_t doVersionCallback(const memcached_st *ptr,
 }
 
 Variant c_Memcached::t_getversion() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getversion);
   memcached_return_t status = memcached_version(&m_impl->memcached);
   if (!handleError(status)) return false;
 
@@ -761,12 +728,10 @@ Variant c_Memcached::t_getversion() {
 }
 
 bool c_Memcached::t_flush(int delay /*= 0*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::flush);
   return handleError(memcached_flush(&m_impl->memcached, delay));
 }
 
 Variant c_Memcached::t_getoption(int option) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getoption);
   switch (option) {
   case q_Memcached$$OPT_COMPRESSION:
     return m_impl->compression;
@@ -799,7 +764,6 @@ Variant c_Memcached::t_getoption(int option) {
 }
 
 bool c_Memcached::t_setoption(int option, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::setoption);
   switch (option) {
   case q_Memcached$$OPT_COMPRESSION:
     m_impl->compression = value.toBoolean();
@@ -871,12 +835,10 @@ bool c_Memcached::t_setoption(int option, CVarRef value) {
 }
 
 int64 c_Memcached::t_getresultcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getresultcode);
   return m_impl->rescode;
 }
 
 String c_Memcached::t_getresultmessage() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::getresultmessage);
   if (m_impl->rescode == q_Memcached$$RES_PAYLOAD_FAILURE) {
     return "PAYLOAD FAILURE";
   } else {

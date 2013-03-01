@@ -468,8 +468,6 @@ Variant invoke_failed(CVarRef func, CArrRef params,
 
 Variant invoke_failed(const char *func, CArrRef params,
                       bool fatal /* = true */) {
-  INTERCEPT_INJECTION_ALWAYS("?", func, params, strongBind(r));
-
   if (fatal) {
     throw InvalidFunctionCallException(func);
   } else {
@@ -1668,26 +1666,6 @@ void throw_exception(CObjRef e) {
                 "Exception base class");
   }
   throw_exception_unchecked(e);
-}
-
-bool set_line(int line0, int char0 /* = 0 */, int line1 /* = 0 */,
-              int char1 /* = 0 */) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  FrameInjection *frame = ti->m_top;
-  if (frame) {
-    frame->setLine(line0);
-    if (RuntimeOption::EnableDebugger && ti->m_reqInjectionData.debugger) {
-      Eval::InterruptSiteFI site(frame, Object(), char0, line1, char1);
-      Eval::Debugger::InterruptFileLine(site);
-      if (site.isJumping()) {
-        return false;
-      }
-    }
-    if (ti->m_reqInjectionData.coverage) {
-      ti->m_coverage->Record(frame->getFileName().data(), line0, line1);
-    }
-  }
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

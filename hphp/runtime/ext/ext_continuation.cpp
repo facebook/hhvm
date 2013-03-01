@@ -80,7 +80,6 @@ c_Continuation::~c_Continuation() {
 void c_Continuation::t___construct(
     int64 func, int64 extra, bool isMethod,
     CStrRef origFuncName, CVarRef obj, CArrRef args) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
   m_vmFunc       = (VM::Func*) extra;
   assert(m_vmFunc);
   m_isMethod     = isMethod;
@@ -96,47 +95,38 @@ void c_Continuation::t___construct(
 }
 
 void c_Continuation::t_update(int64 label, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::update);
   m_label = label;
   m_value.assignVal(value);
 }
 
 void c_Continuation::t_done() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::done);
   m_done = true;
   m_value.setNull();
 }
 
 int64 c_Continuation::t_getlabel() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getlabel);
   return m_label;
 }
 
 int64 c_Continuation::t_num_args() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::num_args);
   return m_args.size();
 }
 
 Array c_Continuation::t_get_args() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::get_args);
   return m_args;
 }
 
 Variant c_Continuation::t_get_arg(int64 id) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::get_arg);
   if (id < 0LL || id >= m_args.size()) return false;
   return m_args.rvalAt(id, AccessFlags::Error);
 }
 
 Variant c_Continuation::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::current);
-  const_assert(!hhvm);
-  startedCheck();
+  const_assert(false);
   return m_value;
 }
 
 int64 c_Continuation::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::key);
   startedCheck();
   return m_index;
 }
@@ -146,78 +136,29 @@ bool c_Continuation::php_sleep(Variant &ret) {
   return true;
 }
 
-template<typename FI>
-inline void c_Continuation::nextImpl(FI& fi) {
-  const_assert(!hhvm);
-  assert(m_running);
-  try {
-    if (m_isMethod) {
-      MethodCallPackage mcp;
-      mcp.isObj = m_obj.get();
-      if (mcp.isObj) {
-        mcp.obj = mcp.rootObj = m_obj.get();
-      } else {
-        mcp.rootCls = getCalledClass().get();
-      }
-      fi.setStaticClassName(getCalledClass());
-      (m_callInfo->getMeth1Args())(mcp, 1, this);
-    } else {
-      (m_callInfo->getFunc1Args())(NULL, 1, this);
-    }
-  } catch (Object e) {
-    if (e.instanceof("exception")) {
-      m_running = false;
-      m_done = true;
-      m_value.setNull();
-      throw_exception(e);
-    } else {
-      throw;
-    }
-  }
-  m_running = false;
-}
-
 void c_Continuation::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::next);
-  const_assert(!hhvm);
-  preNext();
-  m_received.setNull();
-  nextImpl(fi);
+  const_assert(false);
 }
 
 static StaticString s_next("next");
 void c_Continuation::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::rewind);
   this->o_invoke(s_next, Array());
 }
 
 bool c_Continuation::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::valid);
-  const_assert(!hhvm);
+  const_assert(false);
   return !m_done;
 }
 
 void c_Continuation::t_send(CVarRef v) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::send);
-  const_assert(!hhvm);
-  startedCheck();
-  preNext();
-  m_received.assignVal(v);
-  nextImpl(fi);
+  const_assert(false);
 }
 
 void c_Continuation::t_raise(CVarRef v) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::raise);
-  const_assert(!hhvm);
-  startedCheck();
-  preNext();
-  m_received.assignVal(v);
-  m_should_throw = true;
-  nextImpl(fi);
+  const_assert(false);
 }
 
 void c_Continuation::t_raised() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::raised);
   if (m_should_throw) {
     m_should_throw = false;
     throw_exception(m_received);
@@ -225,7 +166,6 @@ void c_Continuation::t_raised() {
 }
 
 Variant c_Continuation::t_receive() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::receive);
   if (m_should_throw) {
     m_should_throw = false;
     throw_exception(m_received);
@@ -234,7 +174,6 @@ Variant c_Continuation::t_receive() {
 }
 
 String c_Continuation::t_getorigfuncname() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getorigfuncname);
   String called_class;
   if (actRec()->hasThis()) {
     called_class = actRec()->getThis()->getVMClass()->name()->data();
@@ -258,7 +197,6 @@ String c_Continuation::t_getorigfuncname() {
 }
 
 Variant c_Continuation::t___clone() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__clone);
   throw_fatal(
       "Trying to clone an uncloneable object of class Continuation");
   return null;
@@ -311,29 +249,24 @@ void c_DummyContinuation::t___construct() {
 }
 
 Variant c_DummyContinuation::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::current);
   throw_fatal("Tring to use a DummyContinuation");
   return null;
 }
 
 int64 c_DummyContinuation::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::key);
   throw_fatal("Tring to use a DummyContinuation");
   return 0;
 }
 
 void c_DummyContinuation::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::next);
   throw_fatal("Tring to use a DummyContinuation");
 }
 
 void c_DummyContinuation::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::rewind);
   throw_fatal("Tring to use a DummyContinuation");
 }
 
 bool c_DummyContinuation::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::valid);
   throw_fatal("Tring to use a DummyContinuation");
   return false;
 }

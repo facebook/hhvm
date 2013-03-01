@@ -100,7 +100,6 @@ c_Collator::~c_Collator() {
 }
 
 void c_Collator::t___construct(CStrRef locale) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::__construct);
   if (m_ucoll) {
     ucol_close(m_ucoll);
     m_ucoll = NULL;
@@ -144,7 +143,6 @@ void c_Collator::t___construct(CStrRef locale) {
 
 bool c_Collator::t_asort(VRefParam arr,
                          int64 sort_flag /* = q_Collator$$SORT_REGULAR */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::asort);
   if (!arr.isArray()) {
     throw_bad_array_exception();
     return false;
@@ -165,7 +163,6 @@ bool c_Collator::t_asort(VRefParam arr,
 }
 
 Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::compare);
   if (!m_ucoll) {
     raise_warning("compare called on uninitialized Collator object");
     return 0;
@@ -197,14 +194,12 @@ Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
 }
 
 Variant c_Collator::ti_create(const char* cls, CStrRef locale) {
-  STATIC_METHOD_INJECTION_BUILTIN(Collator, Collator::create);
   p_Collator c(NEWOBJ(c_Collator)());
   c.get()->t___construct(locale);
   return c;
 }
 
 int64 c_Collator::t_getattribute(int64 attr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::getattribute);
   if (!m_ucoll) {
     raise_warning("getattribute called on uninitialized Collator object");
     return 0;
@@ -223,17 +218,14 @@ int64 c_Collator::t_getattribute(int64 attr) {
 }
 
 int64 c_Collator::t_geterrorcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::geterrorcode);
   return m_errcode.code;
 }
 
 String c_Collator::t_geterrormessage() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::geterrormessage);
   return String(u_errorName(m_errcode.code), AttachLiteral);
 }
 
 String c_Collator::t_getlocale(int64 type /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::getlocale);
   if (!m_ucoll) {
     raise_warning("getlocale called on uninitialized Collator object");
     return "";
@@ -254,7 +246,6 @@ String c_Collator::t_getlocale(int64 type /* = 0 */) {
 }
 
 int64 c_Collator::t_getstrength() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::getstrength);
   if (!m_ucoll) {
     raise_warning("getstrength called on uninitialized Collator object");
     return 0;
@@ -263,7 +254,6 @@ int64 c_Collator::t_getstrength() {
 }
 
 bool c_Collator::t_setattribute(int64 attr, int64 val) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::setattribute);
   if (!m_ucoll) {
     raise_warning("setattribute called on uninitialized Collator object");
     return false;
@@ -282,7 +272,6 @@ bool c_Collator::t_setattribute(int64 attr, int64 val) {
 }
 
 bool c_Collator::t_setstrength(int64 strength) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::setstrength);
   if (!m_ucoll) {
     raise_warning("setstrength called on uninitialized Collator object");
     return false;
@@ -314,7 +303,6 @@ static int collator_cmp_sort_keys(const void* p1, const void* p2, const void*) {
 }
 
 bool c_Collator::t_sortwithsortkeys(VRefParam arr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::sortwithsortkeys);
   char*       sortKeyBuf = NULL; /* buffer to store sort keys */
   int32_t     sortKeyBufSize = DEF_SORT_KEYS_BUF_SIZE; /* buffer size */
   ptrdiff_t   sortKeyBufOffset = 0; /* pos in buffer to store sort key */
@@ -453,7 +441,6 @@ bool c_Collator::t_sortwithsortkeys(VRefParam arr) {
 
 bool c_Collator::t_sort(VRefParam arr,
                         int64 sort_flag /* = q_Collator$$SORT_REGULAR */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::sort);
   if (!arr.isArray()) {
     throw_bad_array_exception();
     return false;
@@ -589,7 +576,6 @@ void c_Normalizer::t___construct() {
 
 Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
                                       int64 form /* = q_Normalizer$$FORM_C */) {
-  STATIC_METHOD_INJECTION_BUILTIN(Normalizer, Normalizer::isnormalized);
   s_intl_error->m_error.clear();
 
   switch (form) {
@@ -637,7 +623,6 @@ Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
 
 Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
                                    int64 form /* = q_Normalizer$$FORM_C */) {
-  STATIC_METHOD_INJECTION_BUILTIN(Normalizer, Normalizer::normalize);
   s_intl_error->m_error.clear();
 
   int expansion_factor = 1;

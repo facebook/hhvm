@@ -218,18 +218,8 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       }
     }
 
-    Array variables;
-    if (hhvm) {
-      variables = g_vmContext->getLocalDefinedVariables(0);
-      variables += CmdVariable::GetGlobalVariables();
-    } else {
-      FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
-      bool global;
-      variables = CmdVariable::GetLocalVariables(frame, global);
-      if (!global) {
-        variables += CmdVariable::GetGlobalVariables();
-      }
-    }
+    Array variables = g_vmContext->getLocalDefinedVariables(0);
+    variables += CmdVariable::GetGlobalVariables();
     vector<std::string> &vars =
       (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];
     vars.reserve(variables.size());

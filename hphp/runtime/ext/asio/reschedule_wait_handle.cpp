@@ -39,7 +39,6 @@ c_RescheduleWaitHandle::~c_RescheduleWaitHandle() {
 }
 
 void c_RescheduleWaitHandle::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(RescheduleWaitHandle, RescheduleWaitHandle::__construct);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use RescheduleWaitHandle::create() instead of constructor"));
   throw e;
@@ -49,14 +48,12 @@ Object c_RescheduleWaitHandle::ti_create(const char* cls, int queue, int priorit
   if (UNLIKELY(
       queue != q_RescheduleWaitHandle$$QUEUE_DEFAULT &&
       queue != q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO)) {
-    STATIC_METHOD_INJECTION_BUILTIN(RescheduleWaitHandle, RescheduleWaitHandle::create);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected queue to be a value defined by one of the QUEUE_ constants"));
     throw e;
   }
 
   if (UNLIKELY(priority < 0)) {
-    STATIC_METHOD_INJECTION_BUILTIN(RescheduleWaitHandle, RescheduleWaitHandle::create);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected priority to be a non-negative integer"));
     throw e;

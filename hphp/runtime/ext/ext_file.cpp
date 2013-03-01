@@ -494,9 +494,7 @@ Variant f_parse_ini_file(CStrRef filename, bool process_sections /* = false */,
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
-      String cfd = hhvm
-                   ? g_vmContext->getContainingFileName()
-                   : FrameInjection::GetContainingFileName(true);
+      String cfd = g_vmContext->getContainingFileName();
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');
         if (npos >= 0) {
@@ -1000,7 +998,7 @@ bool f_copy(CStrRef source, CStrRef dest,
     if (same(dfile, false)) {
       return false;
     }
-    
+
     return f_stream_copy_to_stream(sfile, dfile).toBoolean();
   } else {
     int ret =

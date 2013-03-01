@@ -582,7 +582,6 @@ static void compact(T *variables, Array &ret, CVarRef var) {
 
 Array compact(RVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv /* = null_array */) {
-  FUNCTION_INJECTION_BUILTIN(compact);
   Array ret = Array::Create();
   compact(variables, ret, varname);
   compact(variables, ret, _argv);
@@ -591,7 +590,6 @@ Array compact(RVariableTable *variables, int _argc, CVarRef varname,
 
 Array compact(LVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv /* = null_array */) {
-  FUNCTION_INJECTION_BUILTIN(compact);
   Array ret = Array::Create();
   compact(variables, ret, varname);
   compact(variables, ret, _argv);
@@ -661,9 +659,7 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
                          CREATE_VECTOR1(iterable));
   }
   if (iterable.isObject()) {
-    CStrRef context = hhvm
-                      ? g_vmContext->getContextClassName()
-                      : FrameInjection::GetClassName(true);
+    CStrRef context = g_vmContext->getContextClassName();
 
     ObjectData *obj = iterable.getObjectData();
     Variant iterator;

@@ -295,7 +295,6 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
                                        bool data_is_url /* = false */,
                                        CStrRef ns /* = "" */,
                                        bool is_prefix /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__construct);
   String xml = data;
   if (data_is_url) {
     Variant ret = f_file_get_contents(data);
@@ -321,7 +320,6 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
 }
 
 Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::xpath);
   if (m_is_attribute || !m_node) {
     return null;
   }
@@ -390,7 +388,6 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
 }
 
 bool c_SimpleXMLElement::t_registerxpathnamespace(CStrRef prefix, CStrRef ns) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::registerxpathnamespace);
   if (m_node) {
     if (!m_xpath) {
       m_xpath = xmlXPathNewContext(m_node->doc);
@@ -402,7 +399,6 @@ bool c_SimpleXMLElement::t_registerxpathnamespace(CStrRef prefix, CStrRef ns) {
 }
 
 Variant c_SimpleXMLElement::t_asxml(CStrRef filename /* = "" */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::asxml);
   if (!m_node) return false;
 
   if (!filename.empty()) {
@@ -447,7 +443,6 @@ Variant c_SimpleXMLElement::t_asxml(CStrRef filename /* = "" */) {
 }
 
 Array c_SimpleXMLElement::t_getnamespaces(bool recursive /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getnamespaces);
   Array ret = Array::Create();
   if (m_node) {
     if (m_node->type == XML_ELEMENT_NODE) {
@@ -460,7 +455,6 @@ Array c_SimpleXMLElement::t_getnamespaces(bool recursive /* = false */) {
 }
 
 Array c_SimpleXMLElement::t_getdocnamespaces(bool recursive /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getdocnamespaces);
   Array ret = Array::Create();
   if (m_node) {
     add_registered_namespaces(ret, xmlDocGetRootElement(m_node->doc),
@@ -471,7 +465,6 @@ Array c_SimpleXMLElement::t_getdocnamespaces(bool recursive /* = false */) {
 
 Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
                                       bool is_prefix /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::children);
   if (m_is_attribute) {
     return Object();
   }
@@ -517,7 +510,6 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
 }
 
 String c_SimpleXMLElement::t_getname() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getname);
   if (m_is_children) {
     Variant first;
     ArrayIter iter(m_children);
@@ -533,7 +525,6 @@ String c_SimpleXMLElement::t_getname() {
 
 Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
                                         bool is_prefix /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::attributes);
   if (m_is_attribute) {
     return Object();
   }
@@ -556,7 +547,6 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
 Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
                                        CStrRef value /* = null_string */,
                                        CStrRef ns /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::addchild);
   if (qname.empty()) {
     raise_warning("Element name is required");
     return null;
@@ -619,7 +609,6 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
 void c_SimpleXMLElement::t_addattribute(CStrRef qname,
                                         CStrRef value /* = null_string */,
                                         CStrRef ns /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::addattribute);
   if (qname.empty()) {
     raise_warning("Attribute name is required");
     return;
@@ -667,7 +656,6 @@ void c_SimpleXMLElement::t_addattribute(CStrRef qname,
 }
 
 String c_SimpleXMLElement::t___tostring() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__tostring);
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {
@@ -691,7 +679,6 @@ Variant *c_SimpleXMLElement::___lval(Variant v_name) {
 }
 
 Variant c_SimpleXMLElement::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__get);
   Variant ret = m_children[name];
   if (ret.isArray()) {
     ret = ret[0];
@@ -714,7 +701,6 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
 }
 
 Variant c_SimpleXMLElement::t___unset(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__unset);
   if (m_node == NULL) return null;
 
   Variant node;
@@ -749,7 +735,6 @@ Variant c_SimpleXMLElement::t___unset(Variant name) {
 }
 
 bool c_SimpleXMLElement::t___isset(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__isset);
   if (m_node) {
     if (m_is_attribute) {
       return m_attributes.toArray().exists(name);
@@ -775,7 +760,6 @@ static void change_node_zval(xmlNodePtr node, CStrRef value) {
 }
 
 Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__set);
   if (m_node == NULL) return null;
 
   String svalue = value.toString();
@@ -870,14 +854,12 @@ Array c_SimpleXMLElement::o_toArray() const {
 }
 
 Variant c_SimpleXMLElement::t_getiterator() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getiterator);
   c_SimpleXMLElementIterator *iter = NEWOBJ(c_SimpleXMLElementIterator)();
   iter->set_parent(this);
   return Object(iter);
 }
 
 int64 c_SimpleXMLElement::t_count() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::count);
   if (m_is_attribute) {
     return m_attributes.toArray().size();
   }
@@ -895,7 +877,6 @@ int64 c_SimpleXMLElement::t_count() {
 // implementing ArrayAccess
 
 bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetexists);
   if (index.isInteger()) {
     int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
     for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
@@ -909,7 +890,6 @@ bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
 }
 
 Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetget);
   if (index.isInteger()) {
     if (m_is_property) {
       int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
@@ -926,7 +906,6 @@ Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
 }
 
 void c_SimpleXMLElement::t_offsetset(CVarRef index, CVarRef newvalue) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetset);
   if (index.isInteger()) {
     raise_error("unable to replace a SimpleXMLElement node");
     return;
@@ -954,7 +933,6 @@ void c_SimpleXMLElement::t_offsetset(CVarRef index, CVarRef newvalue) {
 }
 
 void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetunset);
   if (index.isInteger()) {
     raise_error("unable to remove a SimpleXMLElement node");
     return;
@@ -1046,7 +1024,6 @@ void c_SimpleXMLElementIterator::t___construct() {
 }
 
 Variant c_SimpleXMLElementIterator::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::current);
   if (m_iter1 == NULL) return null;
   if (m_parent->m_is_attribute) {
     return m_iter1->second();
@@ -1066,7 +1043,6 @@ Variant c_SimpleXMLElementIterator::t_current() {
 }
 
 Variant c_SimpleXMLElementIterator::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::key);
   if (m_iter1) {
     return m_iter1->first();
   }
@@ -1074,7 +1050,6 @@ Variant c_SimpleXMLElementIterator::t_key() {
 }
 
 Variant c_SimpleXMLElementIterator::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::next);
   if (m_iter1 == NULL) return null;
   if (m_parent->m_is_attribute) {
     m_iter1->next();
@@ -1103,13 +1078,11 @@ Variant c_SimpleXMLElementIterator::t_next() {
 }
 
 Variant c_SimpleXMLElementIterator::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::rewind);
   reset_iterator();
   return null;
 }
 
 Variant c_SimpleXMLElementIterator::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::valid);
   return m_iter1 && !m_iter1->end();
 }
 

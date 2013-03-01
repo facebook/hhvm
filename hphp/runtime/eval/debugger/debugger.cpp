@@ -175,18 +175,8 @@ bool Debugger::InterruptException(CVarRef e) {
   if (RuntimeOption::EnableDebugger) {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
     if (ti->m_reqInjectionData.debugger) {
-      if (hhvm) {
-        HPHP::VM::Transl::VMRegAnchor _;
-        InterruptVMHook(ExceptionThrown, e);
-      } else {
-        if (ti->m_top) {
-          Eval::InterruptSiteFI site(ti->m_top, e);
-          Eval::Debugger::Interrupt(ExceptionThrown, nullptr, &site);
-          if (site.isJumping()) {
-            return false;
-          }
-        }
-      }
+      HPHP::VM::Transl::VMRegAnchor _;
+      InterruptVMHook(ExceptionThrown, e);
     }
   }
   return true;
@@ -215,9 +205,6 @@ void Debugger::Interrupt(int type, const char *program,
       interrupts.pop();
     }
     rjdata.debuggerIntr = proxy->needInterruptForNonBreak();
-    if (!hhvm) {
-      rjdata.debuggerIdle = proxy->needInterrupt() ? 0 : 1000;
-    }
   } else {
     // debugger clients are disconnected abnormally
     if (type == SessionStarted || type == SessionEnded) {
@@ -230,7 +217,6 @@ void Debugger::Interrupt(int type, const char *program,
 
 void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
                                CVarRef e /* = null_variant */) {
-  const_assert(hhvm);
   InterruptSiteVM site(type == HardBreakPoint, e);
   if (!site.valid()) {
     return;
@@ -320,10 +306,8 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   DebuggerProxyPtr proxy = findProxy(sid);
   if (proxy) {
     ti->m_reqInjectionData.debugger = true;
-    if (hhvm) {
-      DebuggerProxyVM* proxyVM = (DebuggerProxyVM*)proxy.get();
-      proxyVM->writeInjTablesToThread();
-    }
+    DebuggerProxyVM* proxyVM = (DebuggerProxyVM*)proxy.get();
+    proxyVM->writeInjTablesToThread();
   }
 }
 
@@ -370,9 +354,7 @@ void Debugger::setDebuggerFlag(const StringData* sandboxId, bool flag) {
 DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
   // Creates a proxy and threads needed to handle it. At this point, there is
   // not enough information to attach a sandbox.
-  DebuggerProxyPtr proxy(hhvm
-                         ? (DebuggerProxy*) new DebuggerProxyVM(socket, local)
-                         : new DebuggerProxy(socket, local));
+  DebuggerProxyPtr proxy(new DebuggerProxyVM(socket, local));
   const StringData* sid =
     StringData::GetStaticString(proxy->getDummyInfo().id());
   {
@@ -503,15 +485,11 @@ void Debugger::updateProxySandbox(DebuggerProxyPtr proxy,
 }
 
 DebuggerDummyEnv::DebuggerDummyEnv() {
-  if (hhvm) {
-    g_vmContext->enterDebuggerDummyEnv();
-  }
+  g_vmContext->enterDebuggerDummyEnv();
 }
 
 DebuggerDummyEnv::~DebuggerDummyEnv() {
-  if (hhvm) {
-    g_vmContext->exitDebuggerDummyEnv();
-  }
+  g_vmContext->exitDebuggerDummyEnv();
 }
 
 EvalBreakControl::EvalBreakControl(bool noBreak) {

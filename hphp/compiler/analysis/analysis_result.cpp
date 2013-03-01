@@ -4829,17 +4829,4 @@ void AnalysisResult::outputCPPSepExtensionMake() {
 }
 
 void AnalysisResult::outputCPPSepExtensionIncludes(CodeGenerator &cg) {
-  for (unsigned int i = 0; i < Option::SepExtensions.size(); i++) {
-    Option::SepExtensionOptions &options = Option::SepExtensions[i];
-    string include = options.include_path;
-    if (!include.empty()) {
-      if (include[include.size() - 1] != '/') {
-        include += '/';
-      }
-      cg_printf("#include \"%sextprofile_%s.h\"\n",
-                include.c_str(), options.name.c_str());
-    } else {
-      cg_printf("#include <extprofile_%s.h>\n", options.name.c_str());
-    }
-  }
 }

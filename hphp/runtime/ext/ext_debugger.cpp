@@ -72,21 +72,12 @@ void f_hphpd_break(bool condition /* = true */) {
           condition, g_vmContext->m_dbgNoBreak);
     return;
   }
-  if (hhvm) {
-    CallerFrame cf;
-    Debugger::InterruptVMHook(HardBreakPoint);
-    if (RuntimeOption::EvalJit && !g_vmContext->m_interpreting &&
-        DEBUGGER_FORCE_INTR) {
-      TRACE(5, "switch mode\n");
-      throw VMSwitchModeException(true);
-    }
-  } else {
-    ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-    FrameInjection *frame = FrameInjection::GetStackFrame(1);
-    if (frame && ti->m_reqInjectionData.debugger) {
-      Eval::InterruptSiteFI site(frame);
-      Eval::Debugger::InterruptHard(site);
-    }
+  CallerFrame cf;
+  Debugger::InterruptVMHook(HardBreakPoint);
+  if (RuntimeOption::EvalJit && !g_vmContext->m_interpreting &&
+      DEBUGGER_FORCE_INTR) {
+    TRACE(5, "switch mode\n");
+    throw VMSwitchModeException(true);
   }
   TRACE(5, "out f_hphpd_break()\n");
 }
@@ -176,12 +167,10 @@ void c_DebuggerProxyCmdUser::t___construct() {
 }
 
 bool c_DebuggerProxyCmdUser::t_islocal() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerProxyCmdUser, DebuggerProxyCmdUser::islocal);
   return m_proxy->isLocal();
 }
 
 Variant c_DebuggerProxyCmdUser::t_send(CObjRef cmd) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerProxyCmdUser, DebuggerProxyCmdUser::send);
   CmdUser cmdUser(cmd);
   return m_proxy->send(&cmdUser);
 }
@@ -198,7 +187,6 @@ void c_DebuggerClientCmdUser::t___construct() {
 }
 
 void c_DebuggerClientCmdUser::t_quit() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::quit);
   m_client->quit();
 }
 
@@ -215,61 +203,51 @@ static String format_string(DebuggerClient *client,
 
 void c_DebuggerClientCmdUser::t_print(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::print);
   m_client->print(format_string(m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_help(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::help);
   m_client->help(format_string(m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_info(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::info);
   m_client->info(format_string(m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_output(int _argc, CStrRef format,
                                 CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::output);
   m_client->output(format_string(m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_error(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::error);
   m_client->error(format_string(m_client, _argc, format, _argv));
 }
 
 void c_DebuggerClientCmdUser::t_code(CStrRef source, int highlight_line /* = 0 */,
                               int start_line_no /* = 0 */,
                               int end_line_no /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::code);
   m_client->code(source, highlight_line, start_line_no, end_line_no);
 }
 
 Variant c_DebuggerClientCmdUser::t_ask(int _argc, CStrRef format,
                                 CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::ask);
   String ret = format_string(m_client, _argc, format, _argv);
   return String::FromChar(m_client->ask("%s", ret.data()));
 }
 
 String c_DebuggerClientCmdUser::t_wrap(CStrRef str) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::wrap);
   return m_client->wrap(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_helptitle(CStrRef str) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::helptitle);
   m_client->helpTitle(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_helpcmds(int _argc, CStrRef cmd, CStrRef desc,
                                   CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::helpcmds);
   std::vector<String> holders;
   std::vector<const char *> cmds;
   cmds.push_back(cmd.data());
@@ -283,52 +261,42 @@ void c_DebuggerClientCmdUser::t_helpcmds(int _argc, CStrRef cmd, CStrRef desc,
 }
 
 void c_DebuggerClientCmdUser::t_helpbody(CStrRef str) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::helpbody);
   m_client->helpBody(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_helpsection(CStrRef str) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::helpsection);
   m_client->helpSection(str.data());
 }
 
 void c_DebuggerClientCmdUser::t_tutorial(CStrRef str) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::tutorial);
   m_client->tutorial(str.data());
 }
 
 String c_DebuggerClientCmdUser::t_getcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::getcode);
   return m_client->getCode();
 }
 
 String c_DebuggerClientCmdUser::t_getcommand() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::getcommand);
   return m_client->getCommand();
 }
 
 bool c_DebuggerClientCmdUser::t_arg(int index, CStrRef str) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::arg);
   return m_client->arg(index + 1, str.data());
 }
 
 int64 c_DebuggerClientCmdUser::t_argcount() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::argcount);
   return m_client->argCount() - 1;
 }
 
 String c_DebuggerClientCmdUser::t_argvalue(int index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::argvalue);
   return m_client->argValue(index + 1);
 }
 
 String c_DebuggerClientCmdUser::t_linerest(int index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::linerest);
   return m_client->lineRest(index + 1);
 }
 
 Array c_DebuggerClientCmdUser::t_args() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::args);
   StringVec *args = m_client->args();
   Array ret(Array::Create());
   for (unsigned int i = 1; i < args->size(); i++) {
@@ -338,21 +306,18 @@ Array c_DebuggerClientCmdUser::t_args() {
 }
 
 Variant c_DebuggerClientCmdUser::t_send(CObjRef cmd) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::send);
   CmdUser cmdUser(cmd);
   m_client->send(&cmdUser);
   return true;
 }
 
 Variant c_DebuggerClientCmdUser::t_xend(CObjRef cmd) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::xend);
   CmdUser cmdUser(cmd);
   CmdUserPtr ret = m_client->xend<CmdUser>(&cmdUser);
   return ret->getUserCommand();
 }
 
 Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::getcurrentlocation);
   BreakPointInfoPtr bpi = m_client->getCurrentLocation();
   Array ret(Array::Create());
   if (bpi) {
@@ -367,22 +332,18 @@ Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
 }
 
 Variant c_DebuggerClientCmdUser::t_getstacktrace() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::getstacktrace);
   return m_client->getStackTrace();
 }
 
 int64 c_DebuggerClientCmdUser::t_getframe() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::getframe);
   return m_client->getFrame();
 }
 
 void c_DebuggerClientCmdUser::t_printframe(int index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::printframe);
   m_client->printFrame(index, m_client->getStackTrace()[index]);
 }
 
 void c_DebuggerClientCmdUser::t_addcompletion(CVarRef list) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::addcompletion);
   if (list.isInteger()) {
     m_client->addCompletion((DebuggerClient::AutoComplete)list.toInt64());
   } else {
@@ -419,7 +380,6 @@ void c_DebuggerClient::t___construct() {
 }
 
 int64 c_DebuggerClient::t_getstate() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::getstate);
   if (!m_client) {
     return q_DebuggerClient$$STATE_INVALID;
   }
@@ -427,7 +387,6 @@ int64 c_DebuggerClient::t_getstate() {
 }
 
 Variant c_DebuggerClient::t_init(CVarRef options) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::init);
   if (!m_client) {
     raise_warning("invalid client");
     return false;
@@ -517,7 +476,6 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
 }
 
 Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::processcmd);
   if (!m_client ||
       m_client->getClientState() < DebuggerClient::StateReadyForCommand) {
     raise_warning("client is not initialized");

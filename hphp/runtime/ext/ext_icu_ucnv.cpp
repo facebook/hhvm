@@ -92,7 +92,6 @@ void c_UConverter::throwFailure(UErrorCode error, const char *fname,
 }
 
 void c_UConverter::t___construct(CStrRef toEncoding, CStrRef fromEncoding) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::__construct);
   setEncoding(toEncoding,   &m_dest, m_error);
   setEncoding(fromEncoding, &m_src,  m_error);
   setCallback(m_dest);
@@ -100,7 +99,6 @@ void c_UConverter::t___construct(CStrRef toEncoding, CStrRef fromEncoding) {
 }
 
 Variant c_UConverter::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::__destruct);
   if (m_src) {
     ucnv_close(m_src);
   }
@@ -295,17 +293,14 @@ bool c_UConverter::setEncoding(CStrRef encoding, UConverter **pcnv,
 }
 
 void c_UConverter::t_setsourceencoding(CStrRef encoding) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::setsourceencoding);
   setEncoding(encoding, &m_src, m_error);
 }
 
 void c_UConverter::t_setdestinationencoding(CStrRef encoding) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::setdestinationencoding);
   setEncoding(encoding, &m_dest, m_error);
 }
 
 String c_UConverter::t_getsourceencoding() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getsourceencoding);
   if (!m_src) {
     return null;
   }
@@ -321,7 +316,6 @@ String c_UConverter::t_getsourceencoding() {
 }
 
 String c_UConverter::t_getdestinationencoding() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getdestinationencoding);
   if (!m_dest) {
     return null;
   }
@@ -339,7 +333,6 @@ String c_UConverter::t_getdestinationencoding() {
 /* Get algorithmic types */
 
 int64 c_UConverter::t_getsourcetype() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getsourcetype);
   if (!m_src) {
     return UCNV_UNSUPPORTED_CONVERTER;
   }
@@ -348,7 +341,6 @@ int64 c_UConverter::t_getsourcetype() {
 }
 
 int64 c_UConverter::t_getdestinationtype() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getdestinationtype);
   if (!m_dest) {
     return UCNV_UNSUPPORTED_CONVERTER;
   }
@@ -370,13 +362,11 @@ bool c_UConverter::setSubstChars(String chars, UConverter *cnv,
 }
 
 bool c_UConverter::t_setsubstchars(CStrRef chars) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::setsubstchars);
   return setSubstChars(chars, m_dest, m_error) &&
          setSubstChars(chars, m_src,  m_error);
 }
 
 String c_UConverter::t_getsubstchars() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getsubstchars);
   UErrorCode error = U_ZERO_ERROR;
   char chars[127];
   int8_t chars_len = sizeof(chars);
@@ -407,21 +397,18 @@ Variant c_UConverter::defaultCallback(int64 reason, VRefParam error) {
 Variant c_UConverter::t_fromucallback(int64 reason,
                                       CArrRef source, int64 codepoint,
                                       VRefParam error) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::fromucallback);
   return defaultCallback(reason, error);
 }
 
 Variant c_UConverter::t_toucallback(int64 reason,
                                     CStrRef source, CStrRef codeunits,
                                     VRefParam error) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::toucallback);
   return defaultCallback(reason, error);
 }
 
 /* Main workhorse functions */
 
 Variant c_UConverter::t_convert(CStrRef str, bool reverse) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::convert);
   SYNC_VM_REGS_SCOPED();
   return doConvert(str, reverse ? m_src : m_dest,
                         reverse ? m_dest : m_src, m_error);
@@ -483,7 +470,6 @@ String c_UConverter::doConvert(CStrRef str,
 Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
                                    CStrRef toEncoding, CStrRef fromEncoding,
                                    CArrRef options) {
-  STATIC_METHOD_INJECTION_BUILTIN(UConverter, UConverter::transcode);
   UConverter *fromCnv = NULL, *toCnv = NULL;
   if (!setEncoding(fromEncoding, &fromCnv, s_intl_error->m_error)) {
     return null;
@@ -510,12 +496,10 @@ Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
 /* ext/intl error handling */
 
 int64 c_UConverter::t_geterrorcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::geterrorcode);
   return m_error.code;
 }
 
 String c_UConverter::t_geterrormessage() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(UConverter, UConverter::geterrormessage);
   return m_error.custom_error_message;
 }
 
@@ -523,7 +507,6 @@ String c_UConverter::t_geterrormessage() {
 
 #define UCNV_REASON_CASE(v) case UCNV_ ## v : return String("REASON_" #v );
 String c_UConverter::ti_reasontext(const char* cls , int64 reason) {
-  STATIC_METHOD_INJECTION_BUILTIN(UConverter, UConverter::reasontext);
   switch (reason) {
     UCNV_REASON_CASE(UNASSIGNED)
     UCNV_REASON_CASE(ILLEGAL)
@@ -538,7 +521,6 @@ String c_UConverter::ti_reasontext(const char* cls , int64 reason) {
 }
 
 Array c_UConverter::ti_getavailable(const char* cls ) {
-  STATIC_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getavailable);
   int32_t i, count = ucnv_countAvailable();
   Array ret = Array::Create();
 
@@ -550,7 +532,6 @@ Array c_UConverter::ti_getavailable(const char* cls ) {
 }
 
 Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
-  STATIC_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getaliases);
   UErrorCode error = U_ZERO_ERROR;
   int16_t i, count = ucnv_countAliases(encoding.data(), &error);
 
@@ -573,7 +554,6 @@ Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
 }
 
 Array c_UConverter::ti_getstandards(const char* cls ) {
-  STATIC_METHOD_INJECTION_BUILTIN(UConverter, UConverter::getstandards);
   int16_t i, count = ucnv_countStandards();
   Array ret = Array::Create();
 

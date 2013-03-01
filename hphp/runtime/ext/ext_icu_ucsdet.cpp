@@ -43,7 +43,6 @@ void c_EncodingDetector::t___construct() {
 }
 
 void c_EncodingDetector::t_settext(CStrRef text) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingDetector, EncodingDetector::settext);
   UErrorCode status = U_ZERO_ERROR;
   m_text = text;
   ucsdet_setText(
@@ -59,7 +58,6 @@ void c_EncodingDetector::t_settext(CStrRef text) {
 }
 
 void c_EncodingDetector::t_setdeclaredencoding(CStrRef text) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingDetector, EncodingDetector::setdeclaredencoding);
   UErrorCode status = U_ZERO_ERROR;
   m_declaredencoding = text;
   ucsdet_setDeclaredEncoding(
@@ -75,7 +73,6 @@ void c_EncodingDetector::t_setdeclaredencoding(CStrRef text) {
 }
 
 Object c_EncodingDetector::t_detect() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingDetector, EncodingDetector::detect);
   UErrorCode status = U_ZERO_ERROR;
   const UCharsetMatch* match = ucsdet_detect(
     m_encoding_detector,
@@ -91,7 +88,6 @@ Object c_EncodingDetector::t_detect() {
 }
 
 Array c_EncodingDetector::t_detectall() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingDetector, EncodingDetector::detectall);
   int32_t matchesFound;
   UErrorCode status = U_ZERO_ERROR;
   const UCharsetMatch** matches = ucsdet_detectAll(
@@ -131,12 +127,10 @@ void c_EncodingMatch::validate() {
 }
 
 bool c_EncodingMatch::t_isvalid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::isvalid);
   return m_encoding_match != 0;
 }
 
 String c_EncodingMatch::t_getencoding() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::getencoding);
   validate();
 
   UErrorCode status = U_ZERO_ERROR;
@@ -152,7 +146,6 @@ String c_EncodingMatch::t_getencoding() {
 }
 
 int64 c_EncodingMatch::t_getconfidence() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::getconfidence);
   validate();
 
   UErrorCode status = U_ZERO_ERROR;
@@ -168,7 +161,6 @@ int64 c_EncodingMatch::t_getconfidence() {
 }
 
 String c_EncodingMatch::t_getlanguage() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::getlanguage);
   validate();
 
   UErrorCode status = U_ZERO_ERROR;
@@ -184,7 +176,6 @@ String c_EncodingMatch::t_getlanguage() {
 }
 
 String c_EncodingMatch::t_getutf8() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::getutf8);
   validate();
 
   UErrorCode status;

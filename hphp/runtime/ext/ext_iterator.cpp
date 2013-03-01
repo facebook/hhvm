@@ -465,7 +465,6 @@ void c_MutableArrayIterator::sweep() {
 }
 
 void c_MutableArrayIterator::t___construct(VRefParam array) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::__construct);
   if (m_valid) {
     MArrayIter& mi = marr();
     mi.~MArrayIter();
@@ -481,9 +480,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
     m_valid = mi.advance();
     if (!m_valid) mi.~MArrayIter();
   } else if (rtv->m_type == KindOfObject) {
-    CStrRef ctxStr = hhvm
-                     ? g_vmContext->getContextClassName()
-                     : FrameInjection::GetClassName(true);
+    CStrRef ctxStr = g_vmContext->getContextClassName();
     if (rtv->m_data.pobj->isCollection()) {
       raise_error("Collection elements cannot be taken by reference");
     }
@@ -504,12 +501,10 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
 }
 
 Variant c_MutableArrayIterator::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::__destruct);
   return null;
 }
 
 Variant c_MutableArrayIterator::t_currentref() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::currentref);
   if (!m_valid) return null;
   MArrayIter& mi = marr();
   if (mi.end()) return null;
@@ -517,7 +512,6 @@ Variant c_MutableArrayIterator::t_currentref() {
 }
 
 Variant c_MutableArrayIterator::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::current);
   if (!m_valid) return null;
   MArrayIter& mi = marr();
   if (mi.end()) return null;
@@ -525,7 +519,6 @@ Variant c_MutableArrayIterator::t_current() {
 }
 
 Variant c_MutableArrayIterator::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::key);
   if (!m_valid) return false;
   MArrayIter& mi = marr();
   if (mi.end()) return false;
@@ -533,7 +526,6 @@ Variant c_MutableArrayIterator::t_key() {
 }
 
 void c_MutableArrayIterator::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::next);
   if (!m_valid) return;
   MArrayIter &mi = marr();
   if (!mi.advance()) {
@@ -543,7 +535,6 @@ void c_MutableArrayIterator::t_next() {
 }
 
 bool c_MutableArrayIterator::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::valid);
   return m_valid;
 }
 

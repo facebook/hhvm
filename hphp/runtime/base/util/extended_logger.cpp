@@ -15,8 +15,8 @@
 */
 
 #include <runtime/base/util/extended_logger.h>
+#include <runtime/base/execution_context.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/frame_injection.h>
 #include <runtime/base/array/array_iterator.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = FrameInjection::GetBacktrace();                       \
+      Array bt = g_vmContext->debugBacktrace();                        \
       if (!bt.empty()) {                                               \
         va_list ap; va_start(ap, fmt);                                 \
         Logger::LogEscapeMore(Log ## LOGLEVEL, fmt, ap);               \
@@ -43,21 +43,21 @@
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = FrameInjection::GetBacktrace();                       \
+      Array bt = g_vmContext->debugBacktrace();                        \
       if (!bt.empty()) {                                               \
-        Logger::Log(Log ## LOGLEVEL, msg, nullptr, true, true);           \
+        Logger::Log(Log ## LOGLEVEL, msg, nullptr, true, true);        \
         Log(Log ## LOGLEVEL, bt);                                      \
         return;                                                        \
       }                                                                \
     }                                                                  \
-    Logger::Log(Log ## LOGLEVEL, msg, nullptr, true);                     \
+    Logger::Log(Log ## LOGLEVEL, msg, nullptr, true);                  \
   }                                                                    \
   void ExtendedLogger::Raw ## LOGLEVEL(const std::string &msg) {       \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Logger::Log(Log ## LOGLEVEL, msg, nullptr, false);                    \
+    Logger::Log(Log ## LOGLEVEL, msg, nullptr, false);                 \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Log(Log ## LOGLEVEL, FrameInjection::GetBacktrace());            \
+      Log(Log ## LOGLEVEL, g_vmContext->debugBacktrace());            \
     }                                                                  \
   }                                                                    \
 
@@ -95,7 +95,7 @@ void ExtendedLogger::log(LogLevelType level, const std::string &msg,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
   if (RuntimeOption::InjectedStackTrace) {
-    Array bt = FrameInjection::GetBacktrace();
+    Array bt = g_vmContext->debugBacktrace();
     if (!bt.empty()) {
       Logger::log(level, msg, stackTrace, escape, escape);
       Log(level, bt, escape, escapeMore);

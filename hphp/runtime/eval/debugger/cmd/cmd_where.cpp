@@ -154,15 +154,10 @@ void CmdWhere::processStackTrace() {
 }
 
 bool CmdWhere::onServer(DebuggerProxy *proxy) {
-  m_stacktrace = FrameInjection::GetBacktrace(false, true, false);
-  if (!m_stackArgs) {
-    processStackTrace();
-  }
-  return proxy->send(this);
+  const_assert(false);
 }
 
 bool CmdWhere::onServerVM(DebuggerProxy *proxy) {
-  const_assert(hhvm);
   m_stacktrace = g_vmContext->debugBacktrace(false, true, false);
   if (!m_stackArgs) {
     processStackTrace();

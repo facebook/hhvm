@@ -28,8 +28,6 @@ foreach ($files as $file) {
     fwrite($f, "RUN_TESTSUITE(TestExt$ucname);\n");
     break;
   case 'ext':
-    $path = $prefix ?: "runtime/ext/profile";
-    fwrite($f, "#include <$path/extprofile_$name.h>\n");
     break;
   }
 }

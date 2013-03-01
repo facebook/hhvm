@@ -157,8 +157,6 @@ c_BlockableWaitHandle* c_WaitableWaitHandle::getParentInContext(context_idx_t ct
 }
 
 const TypedValue* c_WaitableWaitHandle::join() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(WaitHandle, WaitHandle::join);
-
   switch (getState()) {
     case STATE_NEW:
       throw FatalErrorException(

@@ -72,35 +72,6 @@ std::string InterruptSite::desc() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *InterruptSiteFI::getFile() const {
-  if (m_file.empty()) {
-    m_file = m_frame->getFileName();
-  }
-  return m_file.data();
-}
-
-const char *InterruptSiteFI::getClass() const {
-  if (m_class) return m_class;
-  assert(m_frame);
-  return m_frame->getClassName();
-}
-
-const char *InterruptSiteFI::getFunction() const {
-  if (m_function == nullptr) {
-    m_function = m_frame->getFunction();
-    if (m_frame->getFlags() & FrameInjection::PseudoMain) {
-      m_function = "";
-    }
-    const char *name = strstr(m_function, "::");
-    if (name) {
-      m_function = name + 2;
-    }
-  }
-  return m_function;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
                                  CVarRef e /* = null_variant */)
   : InterruptSite(e), m_unit(nullptr), m_valid(false), m_funcEntry(false) {
@@ -373,15 +344,11 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
           Match(site.getFile(), site.getFileLen(), m_file, m_regex, false) &&
           checkLines(site.getLine0()) && checkStack(site) &&
           checkUrl(site.url()) && checkClause();
-        InterruptSiteFI *siteFI = dynamic_cast<InterruptSiteFI*>(&site);
-        if (siteFI) {
-          match = match && checkFrame(siteFI->getFrame());
-        } else {
-          InterruptSiteVM *siteVM = dynamic_cast<InterruptSiteVM*>(&site);
-          if (!getFuncName().empty()) {
-            // function entry breakpoint
-            match = match && siteVM->funcEntry();
-          }
+
+        InterruptSiteVM &siteVM = dynamic_cast<InterruptSiteVM&>(site);
+        if (!getFuncName().empty()) {
+          // function entry breakpoint
+          match = match && siteVM.funcEntry();
         }
         return match;
       }
@@ -842,35 +809,11 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
     return false;
   }
 
-  InterruptSiteFI *siteFI = dynamic_cast<InterruptSiteFI*>(&site);
-  if (siteFI) {
-    FrameInjection *f = siteFI->getFrame()->getPrev();
-    for (unsigned int i = 1; i < m_funcs.size(); i++) {
-      for (; f; f = f->getPrev()) {
-        InterruptSiteFI prevSite(f);
-        if (Match(prevSite.getNamespace(), 0,
-              m_funcs[i]->m_namespace, m_regex, true) &&
-            Match(prevSite.getFunction(), 0,
-              m_funcs[i]->m_function, m_regex, true) &&
-            MatchClass(prevSite.getClass(), m_funcs[i]->m_class, m_regex,
-              siteFI->getFunction())) {
-          break;
-        }
-      }
-      if (f == nullptr) {
-        return false;
-      }
-    }
-  }
   return true;
 }
 
 bool BreakPointInfo::checkFrame(FrameInjection *frame) {
-  // If we're not specifying a breakpoint's line number, we only break just
-  // once per frame.
-  if (!m_line1) {
-    return (frame->getFlags() & FrameInjection::BreakPointHit) == 0;
-  }
+  const_assert(false);
   return true;
 }
 

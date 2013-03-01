@@ -152,24 +152,6 @@ Array CmdVariable::GetGlobalVariables() {
   return ret;
 }
 
-Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
-  const_assert(!hhvm);
-  Array ret;
-  if (!frame || FrameInjection::IsGlobalScope(frame)) {
-    global = true;
-    ret = GetGlobalVariables();
-  } else {
-    global = false;
-  }
-  return ret;
-}
-
-bool CmdVariable::onServer(DebuggerProxy *proxy) {
-  FrameInjection *frame = FrameInjection::GetStackFrame(m_frame);
-  m_variables = GetLocalVariables(frame, m_global);
-  return proxy->send(this);
-}
-
 bool CmdVariable::onServerVM(DebuggerProxy *proxy) {
   const_assert(hhvm);
   m_variables = g_vmContext->getLocalDefinedVariables(m_frame);

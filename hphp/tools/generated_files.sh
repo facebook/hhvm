@@ -23,7 +23,6 @@ if [ "$1" = "help" ]; then
   echo "$0 hhvm       - Build hphp/system/runtime/ext/*.ext_hhvm.cpp"
   echo "$0 infotabs   - Build hphp/system/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
   echo "$0 systemlib  - Build bin/systemlib.php"
-  echo "$0 injection  - Add INJECTION macros to extensions"
   echo "$0 license    - Add license headers to all files"
   echo ""
   echo "$0 all  - All of the above in listed order"
@@ -83,13 +82,6 @@ if [ "$1" = "systemlib" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating bin/systemlib.php"
   $HHVM hphp/system/lib/gen_systemlib.php bin/
   check_err $? "Failed generating bin/systemlib.php"
-fi
-
-if [ "$1" = "injection" -o "$1" = "all" ]; then
-  cd $HPHP_HOME
-  [ $VERBOSE -eq 1 ] && echo "Adding INJECTION macros to extensions"
-  $HHVM $HPHP_TOOLS/ext_injection.php
-  check_err $? "Failed adding injection macros"
 fi
 
 if [ "$1" = "license" -o "$1" = "all" ]; then

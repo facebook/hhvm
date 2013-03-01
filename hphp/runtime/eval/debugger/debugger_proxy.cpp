@@ -21,7 +21,6 @@
 #include <runtime/eval/debugger/cmd/cmd_machine.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/frame_injection.h>
 #include <runtime/eval/eval.h>
 #include <runtime/vm/debugger_hook.h>
 #include <util/process.h>
@@ -476,9 +475,6 @@ bool DebuggerProxy::processJumpFlowBreak(CmdInterrupt &cmd) {
         break;
     }
   }
-  if (cmd.getFrame()) {
-    cmd.getFrame()->setBreakPointHit();
-  }
   if ((cmd.getInterruptType() == BreakPointReached ||
        cmd.getInterruptType() == HardBreakPoint) && m_flow) {
     if (m_flow->is(DebuggerCommand::KindOfContinue)) {
@@ -561,91 +557,11 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 }
 
 void DebuggerProxy::processFlowControl(CmdInterrupt &cmd) {
-  switch (m_flow->getType()) {
-    case DebuggerCommand::KindOfContinue:
-      if (!m_flow->decCount()) m_flow.reset();
-      break;
-    case DebuggerCommand::KindOfStep:
-      break;
-    case DebuggerCommand::KindOfNext:
-      if (cmd.getFrame()) {
-        m_flow->setFrame(cmd.getFrame());
-        m_flow->setFileLine(cmd.getFileLine());
-      }
-      break;
-    case DebuggerCommand::KindOfOut: {
-      FrameInjection *frame = cmd.getFrame();
-      if (frame) {
-        m_flow->setFrame(frame->getPrev());
-      }
-      break;
-    }
-    default:
-      assert(false);
-      break;
-  }
+  const_assert(false);
 }
 
 bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
-  switch (m_flow->getType()) {
-    case DebuggerCommand::KindOfStep:
-      if (!m_flow->decCount()) m_flow.reset();
-      return true;
-
-    case DebuggerCommand::KindOfNext: {
-      FrameInjection *last = m_flow->getFrame();
-      FrameInjection *frame = cmd.getFrame();
-      bool over = true;
-      if (last == frame) {
-        over = (m_flow->getFileLine() != cmd.getFileLine());
-      } else if (last == m_flow->getNegativeFrame()) {
-        over = false;
-      } else {
-        FrameInjection *prev;
-        while ((prev = frame->getPrev())) {
-          if (last == prev) {
-            over = false;
-            m_flow->setNegativeFrame(frame); // to avoid re-calculation
-            break;
-          }
-          frame = prev;
-        }
-      }
-      if (over) {
-        if (!m_flow->decCount()) {
-          m_flow.reset();
-        } else {
-          if (last != frame) {
-            m_flow->setFrame(frame);
-            m_flow->setNegativeFrame(nullptr);
-          }
-          m_flow->setFileLine(cmd.getFileLine());
-        }
-        return true;
-      }
-      break;
-    }
-    case DebuggerCommand::KindOfOut: {
-      FrameInjection *frame = cmd.getFrame();
-      if (m_flow->getFrame() == frame) {
-        if (!m_flow->decCount()) {
-          m_flow.reset();
-        } else {
-          if (frame) {
-            m_flow->setFrame(frame->getPrev());
-          } else {
-            m_flow.reset();
-          }
-        }
-        return true;
-      }
-      break;
-    }
-    default:
-      break;
-  }
-
-  return false;
+  const_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

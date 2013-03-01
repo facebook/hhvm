@@ -22,7 +22,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/binary_operations.h>
 #include <runtime/base/string_offset.h>
-#include <runtime/base/frame_injection.h>
 #include <runtime/base/intercept.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>

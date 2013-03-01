@@ -43,7 +43,6 @@ c_ContinuationWaitHandle::~c_ContinuationWaitHandle() {
 }
 
 void c_ContinuationWaitHandle::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::__construct);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use ContinuationWaitHandle::start() instead of constructor"));
   throw e;
@@ -52,14 +51,12 @@ void c_ContinuationWaitHandle::t___construct() {
 Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation, int prio) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(!continuation.instanceof(s_continuation))) {
-    STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::start);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected continuation to be an instance of Continuation"));
     throw e;
   }
 
   if (UNLIKELY(prio < 0)) {
-    STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::start);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected prio to be a non-negative integer"));
     throw e;
@@ -67,7 +64,6 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
 
   uint16_t depth = session->getCurrentWaitHandleDepth();
   if (UNLIKELY(depth >= MAX_DEPTH)) {
-    STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::start);
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Asio stack overflow"));
     throw e;
@@ -90,7 +86,6 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
 void c_ContinuationWaitHandle::ti_markcurrentassucceeded(const char* cls, CVarRef result) {
   c_ContinuationWaitHandle* wh = AsioSession::Get()->getCurrentWaitHandle();
   if (!wh) {
-    STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::markcurrentassucceeded);
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Unable to set result: no continuation running"));
     throw e;
@@ -102,7 +97,6 @@ void c_ContinuationWaitHandle::ti_markcurrentassucceeded(const char* cls, CVarRe
 void c_ContinuationWaitHandle::ti_markcurrentastailcall(const char* cls) {
   c_ContinuationWaitHandle* wh = AsioSession::Get()->getCurrentWaitHandle();
   if (!wh) {
-    STATIC_METHOD_INJECTION_BUILTIN(ContinuationWaitHandle, ContinuationWaitHandle::markcurrentastailcall);
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Unable to setup tail call: no continuation running"));
     throw e;
@@ -306,7 +300,6 @@ void c_ContinuationWaitHandle::enterContext(context_idx_t ctx_idx) {
       break;
 
     case STATE_RUNNING: {
-      INSTANCE_METHOD_INJECTION_BUILTIN(WaitHandle, WaitHandle::import);
       Object e(SystemLib::AllocInvalidOperationExceptionObject(
           "Detected cross-context dependency cycle. You are trying to depend "
           "on something that is running you serially."));

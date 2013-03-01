@@ -36,7 +36,6 @@ c_StaticResultWaitHandle::~c_StaticResultWaitHandle() {
 }
 
 void c_StaticResultWaitHandle::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StaticResultWaitHandle, StaticResultWaitHandle::__construct);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use StaticResultWaitHandle::create() instead of constructor"));
   throw e;

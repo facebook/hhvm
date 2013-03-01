@@ -36,7 +36,6 @@ c_StaticExceptionWaitHandle::~c_StaticExceptionWaitHandle() {
 }
 
 void c_StaticExceptionWaitHandle::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StaticExceptionWaitHandle, StaticExceptionWaitHandle::__construct);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use StaticExceptionWaitHandle::create() instead of constructor"));
   throw e;
@@ -44,7 +43,6 @@ void c_StaticExceptionWaitHandle::t___construct() {
 
 Object c_StaticExceptionWaitHandle::ti_create(const char* cls, CObjRef exception) {
   if (!exception.instanceof("Exception")) {
-    STATIC_METHOD_INJECTION_BUILTIN(StaticExceptionWaitHandle, StaticExceptionWaitHandle::create);
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected exception to be an instance of Exception"));
     throw e;

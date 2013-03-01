@@ -409,7 +409,7 @@ public:
  \
   F(bool, JitDisabledByHphpd,          false) \
   F(bool, ThreadingJit,                false) \
-  F(bool, JitTransCounters,            true) \
+  F(bool, JitTransCounters,            false) \
   F(bool, JitMGeneric,                 true) \
   F(bool, JitUseIR,                    false) \
   F(bool, JitCompareHHIR,              false) \

@@ -93,7 +93,7 @@ static CallMap s_callMap({
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {SetElem,  {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {TV, 3}}},
-
+    {BaseG,    {FSSA, 0}, DSSA, SSync, {{TV, 1}, {SSA, 2}}},
     /* debug assert helpers */
     {DbgAssertPtr, (TCA)assertTv, DNone, SNone, {{SSA, 0}}},
 });

@@ -311,8 +311,62 @@ void HhbcTranslator::VectorTranslator::emitBaseN() {
   PUNT(emitBaseN);
 }
 
+template <bool warn, bool define>
+static inline TypedValue* baseGImpl(TypedValue *key,
+                                    MInstrState* mis) {
+  TypedValue* base;
+  StringData* name = prepareKey(key);
+  VarEnv* varEnv = g_vmContext->m_globalVarEnv;
+  assert(varEnv != NULL);
+  base = varEnv->lookup(name);
+  if (base == NULL) {
+    if (warn) {
+      raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
+    }
+    if (define) {
+      TypedValue tv;
+      tvWriteNull(&tv);
+      varEnv->set(name, &tv);
+      base = varEnv->lookup(name);
+    } else {
+      tvWriteNull(&mis->tvScratch);
+      base = &mis->tvScratch;
+    }
+  }
+  decRefStr(name);
+  if (base->m_type == KindOfRef) {
+    base = base->m_data.pref->tv();
+  }
+  return base;
+}
+
+static TypedValue* baseG(TypedValue key, MInstrState* mis) {
+  return baseGImpl<false, false>(&key, mis);
+}
+
+static TypedValue* baseGW(TypedValue key, MInstrState* mis) {
+  return baseGImpl<true, false>(&key, mis);
+}
+
+static TypedValue* baseGD(TypedValue key, MInstrState* mis) {
+  return baseGImpl<false, true>(&key, mis);
+}
+
+static TypedValue* baseGWD(TypedValue key, MInstrState* mis) {
+  return baseGImpl<true, true>(&key, mis);
+}
+
 void HhbcTranslator::VectorTranslator::emitBaseG() {
-  PUNT(emitBaseG);
+  const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
+  typedef TypedValue* (*OpFunc)(TypedValue, MInstrState*);
+  static const OpFunc opFuncs[] = {baseG, baseGW, baseGD, baseGWD};
+  OpFunc opFunc = opFuncs[mia & MIA_base];
+  SSATmp* gblName = getInput(m_iInd);
+  m_ht.spillStack();
+  m_base = m_tb.gen(BaseG,
+                    m_tb.genDefConst((TCA)opFunc),
+                    noLitInt(gblName),
+                    genMisPtr());
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseS() {

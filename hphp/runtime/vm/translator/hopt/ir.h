@@ -369,6 +369,9 @@ O(SetElem,                     DVector, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(Cell),           E|N|Mem|Refs|Er) \
+O(BaseG,                   D(PtrToGen), C(TCA)                                \
+                                          S(Str)                              \
+                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(DbgAssertRefCount,                ND, SUnk,                            N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \

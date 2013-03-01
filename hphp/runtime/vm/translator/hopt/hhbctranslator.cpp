@@ -2080,7 +2080,11 @@ void HhbcTranslator::emitCastString() {
 }
 
 void HhbcTranslator::emitCastArray() {
-  emitInterpOneOrPunt(Type::Arr, 1);
+  SSATmp* src = popC();
+  pushIncRef(m_tb->genConvToArr(src));
+  // TODO: change genConvToArr so that the next line is not needed,
+  // but first do Task 2160031.
+  m_tb->genDecRef(src);
 }
 
 void HhbcTranslator::emitCastObject() {

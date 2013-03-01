@@ -896,6 +896,32 @@ uintptr_t SSATmp::getValBits() const {
   return m_inst->getExtra<ConstData>()->as<uintptr_t>();
 }
 
+Variant SSATmp::getValVariant() const {
+  switch (m_inst->getTypeParam().toDataType()) {
+  case KindOfUninit:
+  case KindOfNull:
+    return null;
+  case KindOfBoolean:
+    return m_inst->getExtra<ConstData>()->as<bool>();
+  case KindOfInt64:
+    return m_inst->getExtra<ConstData>()->as<int64_t>();
+  case KindOfDouble:
+    return m_inst->getExtra<ConstData>()->as<double>();
+  case KindOfString:
+  case KindOfStaticString:
+    return (litstr)m_inst->getExtra<ConstData>()
+        ->as<const StringData*>()->data();
+  case KindOfArray:
+    return StaticArray(ArrayData::GetScalarArray(m_inst->getExtra<ConstData>()
+      ->as<ArrayData*>()));
+  case KindOfObject:
+    return m_inst->getExtra<ConstData>()->as<const Object*>();
+  default:
+    assert(false);
+    return null;
+  }
+}
+
 TCA SSATmp::getValTCA() const {
   assert(isConst());
   assert(m_inst->getTypeParam().equals(Type::TCA));

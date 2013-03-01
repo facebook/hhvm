@@ -1562,6 +1562,7 @@ public:
   const Class*       getValClass() const;
   const NamedEntity* getValNamedEntity() const;
   uintptr_t          getValBits() const;
+  Variant            getValVariant() const;
   TCA                getValTCA() const;
 
   /*

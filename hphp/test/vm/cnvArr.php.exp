@@ -1,0 +1,66 @@
+array(0) {
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  float(1.1)
+}
+array(1) {
+  [0]=>
+  string(3) "abc"
+}
+array(1) {
+  [0]=>
+  int(123)
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  bool(false)
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  float(0)
+}
+array(1) {
+  [0]=>
+  float(1.1)
+}
+array(1) {
+  [0]=>
+  string(3) "abc"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  int(123)
+}

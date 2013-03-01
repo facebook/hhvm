@@ -1082,6 +1082,27 @@ SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
       }
     }
   }
+  if (toType == Type::Arr) {
+    if (type.isNull()) {
+      return m_tb->genDefConst(HphpArray::GetStaticEmptyArray());
+    }
+    // If the src is a constant, the result can be a constant array.
+    if (src->isConst()) {
+      switch (type.toDataType()) {
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfDouble:
+      case KindOfStaticString: {
+        auto arr = ArrayData::Create(src->getValVariant());
+        arr->incRefCount();
+        return m_tb->genDefConst(ArrayData::GetScalarArray(arr));
+      }
+      default:
+        assert(!type.isArray());
+        break;
+      }
+    }
+  }
   return nullptr;
 }
 

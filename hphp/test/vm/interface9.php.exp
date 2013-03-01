@@ -1,2 +1,2 @@
 Test begin
-HipHop Fatal error: Declaration of C::foo() must be compatible with that of I::foo() in hphp/test/vm/interface9.php on line 15
+HipHop Fatal error: Declaration of C::foo() must be compatible with that of I::foo() in hphp/test/vm/interface9.php on line 8

@@ -6291,9 +6291,17 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
   PreClassEmitter* pce = m_ue.newPreClassEmitter(className, hoistable);
   pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attr, parentName,
             classDoc);
+  LocationPtr loc(new Location(*sLoc));
+  loc->line1 = loc->line0;
+  loc->char1 = loc->char0;
+  e.setTempLocation(loc);
   if (hoistable != PreClass::AlwaysHoistable) {
     e.DefCls(pce->id());
+  } else {
+    // To atatch the line number to for error reporting...
+    e.Nop();
   }
+  e.setTempLocation(LocationPtr());
   for (int i = firstInterface; i < nInterfaces; ++i) {
     pce->addInterface(StringData::GetStaticString(bases[i]));
   }

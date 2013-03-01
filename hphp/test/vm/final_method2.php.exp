@@ -1,1 +1,1 @@
-HipHop Fatal error: Cannot override final method Foo::f() in hphp/test/vm/final_method2.php on line 16
+HipHop Fatal error: Cannot override final method Foo::f() in hphp/test/vm/final_method2.php on line 12

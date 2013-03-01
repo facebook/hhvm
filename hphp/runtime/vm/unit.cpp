@@ -376,6 +376,59 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
   return true;
 }
 
+class FrameRestore {
+ public:
+  FrameRestore(const PreClass* preClass) {
+    VMExecutionContext* ec = g_vmContext;
+    ActRec* fp = ec->getFP();
+    PC pc = ec->getPC();
+
+    if (ec->m_stack.top() &&
+        (!fp || fp->m_func->unit() != preClass->unit())) {
+      m_top = ec->m_stack.top();
+      m_fp = fp;
+      m_pc = pc;
+
+      /*
+        we can be called from Unit::merge, which hasnt yet setup
+        the frame (because often it doesnt need to).
+        Set up a fake frame here, in case of errors.
+        But note that mergeUnit is called for systemlib etc before the
+        stack has been setup. So dont do anything if m_stack.top()
+        is NULL
+      */
+      ActRec &tmp = *ec->m_stack.allocA();
+      tmp.m_savedRbp = (uint64_t)fp;
+      tmp.m_savedRip = 0;
+      tmp.m_func = preClass->unit()->getMain();
+      tmp.m_soff = !fp ? 0
+        : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
+      tmp.setThis(nullptr);
+      tmp.m_varEnv = 0;
+      tmp.initNumArgs(0);
+      ec->m_fp = &tmp;
+      ec->m_pc = preClass->unit()->at(preClass->getOffset());
+      ec->pushLocalsAndIterators(tmp.m_func);
+    } else {
+      m_top = nullptr;
+      m_fp = nullptr;
+      m_pc = nullptr;
+    }
+  }
+  ~FrameRestore() {
+    VMExecutionContext* ec = g_vmContext;
+    if (m_top) {
+      ec->m_stack.top() = m_top;
+      ec->m_fp = m_fp;
+      ec->m_pc = m_pc;
+    }
+  }
+ private:
+  Cell*   m_top;
+  ActRec* m_fp;
+  PC      m_pc;
+};
+
 Class* Unit::defClass(const PreClass* preClass,
                       bool failIsFatal /* = true */) {
   // TODO(#2054448): ARMv8
@@ -388,6 +441,7 @@ Class* Unit::defClass(const PreClass* preClass,
       // one this invocation would create.
       if (cls->preClass() != preClass) {
         if (failIsFatal) {
+          FrameRestore fr(preClass);
           raise_error("Class already declared: %s", preClass->name()->data());
         }
         return nullptr;
@@ -413,6 +467,7 @@ Class* Unit::defClass(const PreClass* preClass,
       }
       if (avail == Class::AvailFail) {
         if (failIsFatal) {
+          FrameRestore fr(preClass);
           raise_error("unknown class %s", parent->name()->data());
         }
         return nullptr;
@@ -425,56 +480,16 @@ Class* Unit::defClass(const PreClass* preClass,
       parent = Unit::getClass(preClass->parent(), failIsFatal);
       if (parent == nullptr) {
         if (failIsFatal) {
+          FrameRestore fr(preClass);
           raise_error("unknown class %s", preClass->parent()->data());
         }
         return nullptr;
       }
     }
 
-    VMExecutionContext* ec = g_vmContext;
-    ActRec* fp = ec->getFP();
-    PC pc = ec->getPC();
-
-    bool needsFrame = ec->m_stack.top() &&
-      (!fp || fp->m_func->unit() != preClass->unit());
-
-    if (needsFrame) {
-      /*
-        we can be called from Unit::merge, which hasnt yet setup
-        the frame (because often it doesnt need to).
-        Set up a fake frame here, in case of errors.
-        But note that mergeUnit is called for systemlib etc before the
-        stack has been setup. So dont do anything if m_stack.top()
-        is NULL
-      */
-      ActRec &tmp = *ec->m_stack.allocA();
-      tmp.m_savedRbp = (uint64_t)fp;
-      tmp.m_savedRip = 0;
-      tmp.m_func = preClass->unit()->getMain();
-      tmp.m_soff = !fp ? 0
-                       : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
-      tmp.setThis(nullptr);
-      tmp.m_varEnv = 0;
-      tmp.initNumArgs(0);
-      ec->m_fp = &tmp;
-      ec->m_pc = preClass->unit()->at(preClass->getOffset());
-      ec->pushLocalsAndIterators(tmp.m_func);
-    }
-
     ClassPtr newClass;
     {
-      // newClass can throw. We have to make sure we restore the
-      // original frame no matter what happens here.
-      SCOPE_EXIT {
-        if (needsFrame) {
-          ec->m_stack.top() = (Cell*)(ec->m_fp+1);
-          ec->m_fp = fp;
-          ec->m_pc = pc;
-        }
-      };
-
-      // The only reason the newClass param is not const is to increment its
-      // SmartPtr refcount, which is only modifying a mutable member anyway
+      FrameRestore fr(preClass);
       newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
     }
     Lock l(Unit::s_classesMutex);

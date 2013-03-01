@@ -1249,7 +1249,8 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
       }
     }
 
-    out << "  " << std::setw(4) << (it - m_bc) << ": ";
+    out << std::string(opts.indentSize, ' ')
+        << std::setw(4) << (it - m_bc) << ": ";
     out << instrToString((Opcode*)it, (Unit*)this);
     if (metaHand.findMeta(this, offsetOf(it))) {
       out << " #";

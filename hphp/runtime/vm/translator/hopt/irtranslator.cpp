@@ -1777,18 +1777,23 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 
   JIT::Trace* trace = m_hhbcTrans->getTrace();
 
+  auto traceTraceImpl = [&](std::ostream& out,
+                            const JIT::AsmInfo* asmInfo = nullptr) {
+    auto unitName = curUnit()->filepath()->empty()
+      ? "<systemlib>"
+      : curUnit()->filepath()->data();
+    out << folly::format("{}() @{} ({})\n",
+             curFunc()->fullName()->data(),
+             trace->getBcOff(),
+             unitName);
+    trace->print(out, asmInfo);
+  };
+
   auto traceTrace = [&] (const char* banner,
                          const JIT::AsmInfo* asmInfo = nullptr) {
     std::ostringstream str;
     str << folly::format("{:-^40}\n", banner);
-    auto unitName = curUnit()->filepath()->empty()
-      ? "<systemlib>"
-      : curUnit()->filepath()->data();
-    str << folly::format(" {}() @{} ({})\n",
-             curFunc()->fullName()->data(),
-             trace->getBcOff(),
-             unitName);
-    trace->print(str, asmInfo);
+    traceTraceImpl(str, asmInfo);
     str << folly::format("{:-^40}\n", "");
     if (Trace::moduleEnabled(TRACEMOD, 1)) {
       // If tracing is enabled, print using the trace facility so IR dumps
@@ -1819,10 +1824,16 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   assert(JIT::checkCfg(trace, *m_irFactory));
 
   auto* factory = m_irFactory.get();
-  if (RuntimeOption::EvalDumpIR) {
+  if (RuntimeOption::EvalDumpIR || RuntimeOption::EvalJitCompareHHIR) {
     JIT::AsmInfo ai(factory);
     JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this, &ai);
-    traceTrace(" HHIR after code gen ", &ai);
+    if (RuntimeOption::EvalJitCompareHHIR) {
+      std::ostringstream out;
+      traceTraceImpl(out, &ai);
+      m_lastHHIRDump = out.str();
+    } else {
+      traceTrace(" HHIR after code gen ", &ai);
+    }
   } else {
     JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this);
   }

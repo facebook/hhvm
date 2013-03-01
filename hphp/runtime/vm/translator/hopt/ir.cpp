@@ -777,6 +777,9 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
 
 void Block::printLabel(std::ostream& ostream) const {
   ostream << "L" << m_id;
+  if (getHint() == Unlikely) {
+    ostream << "<Unlikely>";
+  }
 }
 
 int SSATmp::numNeededRegs() const {
@@ -922,9 +925,21 @@ void SSATmp::print() const {
 }
 
 void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
-  Disasm disasm(14, RuntimeOption::EvalDumpIR > 5);
+  static const int kIndent = 4;
+  Disasm disasm(kIndent + 4, RuntimeOption::EvalDumpIR > 5);
 
+  // Print unlikely blocks at the end
+  BlockList blocks, unlikely;
   for (Block* block : m_blocks) {
+    if (block->getHint() == Block::Unlikely) {
+      unlikely.push_back(block);
+    } else {
+      blocks.push_back(block);
+    }
+  }
+  blocks.splice(blocks.end(), unlikely);
+
+  for (Block* block : blocks) {
     TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
                           TcaRange(nullptr, nullptr);
     for (auto it = block->begin(); it != block->end();) {
@@ -933,7 +948,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
         auto* marker = inst.getExtra<Marker>();
         if (!m_isMain) {
           // Don't print bytecode, but print the label.
-          os << std::string(6, ' ');
+          os << std::string(kIndent, ' ');
           inst.print(os);
           os << '\n';
           continue;
@@ -943,17 +958,20 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
           func->unit()->prettyPrint(
             os, Unit::PrintOpts()
                   .range(bcOffset, bcOffset+1)
-                  .noLineNumbers());
+                  .noLineNumbers()
+                  .indent(0));
           continue;
         }
       }
       if (inst.getOpcode() == DefLabel) {
-        os << std::string(6, ' ');
+        os << std::string(kIndent - 2, ' ');
         inst.getBlock()->printLabel(os);
         os << ":\n";
         // print phi pseudo-instructions
         for (unsigned i = 0, n = inst.getNumDsts(); i < n; ++i) {
-          os << std::string(13, ' ');
+          os << std::string(kIndent +
+                            folly::format("({}) ", inst.getIId()).str().size(),
+                            ' ');
           inst.getDst(i)->print(os, false);
           os << " = phi ";
           bool first = true;
@@ -967,13 +985,12 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
           os << '\n';
         }
       }
-      os << std::string(8, ' ');
+      os << std::string(kIndent, ' ');
       inst.print(os);
       os << '\n';
       if (asmInfo) {
         TcaRange instRange = asmInfo->instRanges[inst];
         if (!instRange.empty()) {
-          os << '\n';
           disasm.disasm(os, instRange.begin(), instRange.end());
           os << '\n';
           assert(instRange.end() >= blockRange.start() &&
@@ -987,13 +1004,16 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
       // instruction.  This includes code after the last isntruction (e.g.
       // jmp to next block), and AStubs code.
       if (!blockRange.empty()) {
-        os << std::string(8, ' ') << "A:\n";
+        os << std::string(kIndent, ' ') << "A:\n";
         disasm.disasm(os, blockRange.start(), blockRange.end());
       }
       auto astubRange = asmInfo->astubRanges[block];
       if (!astubRange.empty()) {
-        os << std::string(8, ' ') << "AStubs:\n";
+        os << std::string(kIndent, ' ') << "AStubs:\n";
         disasm.disasm(os, astubRange.start(), astubRange.end());
+      }
+      if (!blockRange.empty() || !astubRange.empty()) {
+        os << '\n';
       }
     }
   }

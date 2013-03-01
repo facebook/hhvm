@@ -619,6 +619,7 @@ public:
       : startOffset(kInvalidOffset)
       , stopOffset(kInvalidOffset)
       , showLines(true)
+      , indentSize(1)
     {}
 
     PrintOpts& range(Offset start, Offset stop) {
@@ -632,9 +633,15 @@ public:
       return *this;
     }
 
+    PrintOpts& indent(int i) {
+      indentSize = i;
+      return *this;
+    }
+
     Offset startOffset;
     Offset stopOffset;
     bool showLines;
+    int indentSize;
   };
 
   void prettyPrint(std::ostream&, PrintOpts = PrintOpts()) const;

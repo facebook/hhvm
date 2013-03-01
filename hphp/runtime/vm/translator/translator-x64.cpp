@@ -11486,30 +11486,39 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
 
     if (irSize > tx64Size) {
       std::ostringstream irOut, tx64Out, out;
-      out << folly::format("{:-^80}\n",
+      out << folly::format("{:-^140}\n",
                            folly::format(" New translation - hhir/tx64 = {}% ",
                                          100 * irSize / tx64Size));
       t.print(out);
       out << '\n';
-      out << folly::format("{:<50}    {:<50}\n",
-                           folly::format("Translation from hhir ({} bytes)",
-                                         irSize),
+#     define IRCOL "{:<90}"
+#     define TXCOL "{:<44}"
+      out << folly::format(TXCOL"  "TXCOL"\n",
                            folly::format("Translation from tx64 ({} bytes)",
-                                         tx64Size));
+                                         tx64Size),
+                           folly::format("Translation from hhir ({} bytes)",
+                                         irSize));
 
       disasm.disasm(irOut, start, irEnd);
       disasm.disasm(tx64Out, tx64Start, tx64End);
-      std::string irStr = irOut.str(), tx64Str = tx64Out.str();
-      std::istringstream irIn(irStr), tx64In(tx64Str);
-      std::string irLine, tx64Line;
+      std::string irAsm = irOut.str(), tx64Str = tx64Out.str();
+      std::istringstream irAsmIn(irAsm), irPrettyIn(m_lastHHIRDump),
+                         tx64In(tx64Str);
+      std::string irAsmLine, irPrettyLine, tx64Line;
 
       // || without short-circuiting
       auto or = [](bool a, bool b) { return a || b; };
-      while (or(std::getline(irIn, irLine), std::getline(tx64In, tx64Line))) {
-        out << folly::format("    {:<50}{:<50}\n", irLine, tx64Line);
-        irLine.clear();
+      while (or(std::getline(irAsmIn, irAsmLine),
+                or(std::getline(irPrettyIn, irPrettyLine),
+                   std::getline(tx64In, tx64Line)))) {
+        out << folly::format("  "TXCOL TXCOL IRCOL"\n",
+                             tx64Line, irAsmLine, irPrettyLine);
+        irAsmLine.clear();
+        irPrettyLine.clear();
         tx64Line.clear();
       }
+#     undef IRCOL
+#     undef TXCOL
       out << '\n';
 
       Trace::traceRelease("%s", out.str().c_str());

@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_mysql.h>
 #include <runtime/base/runtime_option.h>
 #include <hphp/test/test_mysql_info.h>
+#include <mysql/errmsg.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -51,6 +52,9 @@ bool TestExtMysql::RunTests(const std::string &which) {
   RUN_TEST(test_mysql_drop_db);
   RUN_TEST(test_mysql_affected_rows);
   RUN_TEST(test_mysql_set_timeout);
+#ifdef MYSQL_MILLISECOND_TIMEOUT
+  RUN_TEST(test_mysql_subsecond_timeout);
+#endif
   RUN_TEST(test_mysql_query);
   RUN_TEST(test_mysql_unbuffered_query);
   RUN_TEST(test_mysql_db_query);
@@ -270,6 +274,40 @@ bool TestExtMysql::test_mysql_set_timeout() {
   VERIFY(!same(conn, false));
   return Count(true);
 }
+
+#ifdef MYSQL_MILLISECOND_TIMEOUT
+
+// A random and hopefully unroutable and/or distant address.
+#define UNROUTABLE_DESTINATION "10.76.184.41:1"
+
+bool TestExtMysql::test_mysql_subsecond_timeout() {
+  struct timeval before;
+  gettimeofday(&before, NULL);
+  Variant conn = f_mysql_connect(UNROUTABLE_DESTINATION,
+                                 TEST_USERNAME, TEST_PASSWORD,
+                                 true, /* new_link */
+                                 0, /* client flags */
+                                 1, /* connect ms */
+                                 1 /* query ms */);
+
+  VS(conn, false);
+  // CR_CONN_HOST_ERROR which is a client-generated timeout and what
+  // libmysqlclient.so will generate.
+  VS(f_mysql_errno(), CR_CONN_HOST_ERROR);
+
+  // Verify our perceived timeout of 1ms wasn't turned into a 1s
+  // timeout by checking that the entire connect took less than 10ms.
+  struct timeval after;
+  gettimeofday(&after, NULL);
+  const size_t delta_usec = 1000 * 1000 * (after.tv_sec - before.tv_sec) +
+    (after.tv_usec - before.tv_usec);
+  if (delta_usec > 10 * 1000) {
+    LOG_TEST_ERROR("mysql timeout took too long: %.2f ms", delta_usec / 1000.0);
+    Count(false);
+  }
+  return Count(true);
+}
+#endif
 
 bool TestExtMysql::test_mysql_query() {
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);

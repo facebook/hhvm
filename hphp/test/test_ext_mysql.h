@@ -51,6 +51,9 @@ class TestExtMysql : public TestCppExt {
   bool test_mysql_drop_db();
   bool test_mysql_affected_rows();
   bool test_mysql_set_timeout();
+#ifdef MYSQL_MILLISECOND_TIMEOUT
+  bool test_mysql_subsecond_timeout();
+#endif
   bool test_mysql_query();
   bool test_mysql_unbuffered_query();
   bool test_mysql_db_query();

@@ -784,8 +784,12 @@ void Block::printLabel(std::ostream& ostream) const {
 
 int SSATmp::numNeededRegs() const {
   auto type = getType();
-  if (type.subtypeOf(Type::None | Type::Null | Type::ActRec)) {
+  if (type.subtypeOf(Type::None | Type::Null | Type::ActRec | Type::RetAddr)) {
     // These don't need a register because their values are static or unused.
+    //
+    // RetAddr doesn't take any register because currently we only target x86,
+    // which takes the return address from the stack.  This knowledge should be
+    // moved to a machine-specific section once we target other architectures.
     return 0;
   }
   if (type.subtypeOf(Type::Ctx) || type.isPtr()) {

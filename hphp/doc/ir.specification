@@ -748,8 +748,11 @@ D:T = CallBuiltin<T> S0:FuncPtr S1:ConstInt S2...SN
 
 D:RetAddr = LdRetAddr S0:StkPtr
 
-  Load the return address off the activation record pointed to by S0
-  in preparation for a RetCtrl.
+  Load the return address off of the activation record pointed to by
+  S0.  The return address D is normally provided to a RetCtrl.
+  Between a LdRetAddr and a RetCtrl, a FreeActRec is normally emitted
+  to free the activation record S0.  This is the reason why LdRetAddr
+  is a separate instruction from RetCtrl.
 
 RetCtrl S0:{StkPtr|PtrToGen} S1:StkPtr S2:RetAddr
 

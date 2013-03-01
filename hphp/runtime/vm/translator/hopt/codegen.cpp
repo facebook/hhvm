@@ -1813,10 +1813,8 @@ void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = inst->getSrc(0)->getReg(0);
-  auto dstReg = inst->getDst()->getReg();
   assert(fpReg != InvalidReg);
-  assert(inst->getDst() && inst->getDst()->hasReg(0));
-  m_as.loadq(fpReg[AROFF(m_savedRip)], dstReg);
+  m_as.push(fpReg[AROFF(m_savedRip)]);
 }
 
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
@@ -1870,17 +1868,14 @@ void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
 }
 
 void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
-  SSATmp* sp      = inst->getSrc(0);
-  SSATmp* fp      = inst->getSrc(1);
-  SSATmp* retAddr = inst->getSrc(2);
-  auto retReg     = retAddr->getReg();
+  SSATmp* sp = inst->getSrc(0);
+  SSATmp* fp = inst->getSrc(1);
 
   // Make sure rVmFp and rVmSp are set appropriately
   emitMovRegReg(m_as, sp->getReg(), rVmSp);
   emitMovRegReg(m_as, fp->getReg(), rVmFp);
 
   // Return control to caller
-  m_as.push(retReg);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitTraceRet(m_as);
   }

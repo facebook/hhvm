@@ -1252,8 +1252,8 @@ void HhbcTranslator::emitFPassV() {
 void HhbcTranslator::emitNativeImpl() {
   TRACE(3, "%u: NativeImpl\n", m_bcOff);
   m_tb->genNativeImpl();
-  SSATmp* retAddr = m_tb->genLdRetAddr();
   SSATmp* sp = m_tb->genRetAdjustStack();
+  SSATmp* retAddr = m_tb->genLdRetAddr();
   SSATmp* fp = m_tb->genFreeActRec();    // updates fp
   m_tb->genRetCtrl(sp, fp, retAddr);
 
@@ -1653,7 +1653,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   SSATmp* sp;
-  SSATmp* retAddr;
   if (freeInline) {
     for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
       /*
@@ -1662,16 +1661,15 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
        */
       m_tb->genDecRefLoc(id);
     }
-    retAddr = m_tb->genLdRetAddr();
     m_tb->genRetVal(retVal);
     sp = m_tb->genRetAdjustStack();
   } else {
     sp = m_tb->genGenericRetDecRefs(retVal, curFunc->numLocals());
-    retAddr = m_tb->genLdRetAddr();
     m_tb->genRetVal(retVal);
   }
 
   // Free ActRec, and return control to caller.
+  SSATmp* retAddr = m_tb->genLdRetAddr();
   SSATmp* fp = m_tb->genFreeActRec();
   m_tb->genRetCtrl(sp, fp, retAddr);
 

@@ -32,7 +32,7 @@
 using namespace HPHP;
 
 #define PORT_MIN 7300
-#define PORT_MAX 7320
+#define PORT_MAX 7400
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,6 +41,8 @@ TestServer::TestServer() {
 }
 
 static int s_server_port = 0;
+static int s_admin_port = 0;
+static int s_rpc_port = 0;
 static int inherit_fd = -1;
 
 bool TestServer::VerifyServerResponse(const char *input, const char *output,
@@ -128,12 +130,16 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
 
 void TestServer::RunServer() {
   string out, err;
-  string portConfig = "Server.Port=" + lexical_cast<string>(s_server_port);
+  string portConfig = "-vServer.Port=" + lexical_cast<string>(s_server_port);
+  string adminConfig = "-vAdminServer.Port=" +
+    lexical_cast<string>(s_admin_port);
+  string rpcConfig = "-vSatellites.rpc.Port=" +
+    lexical_cast<string>(s_rpc_port);
   string fd = lexical_cast<string>(inherit_fd);
 
   const char *argv[] = {
     "", "--mode=server", "--config=test/config-server.hdf",
-    "-v", portConfig.c_str(),
+    portConfig.c_str(), adminConfig.c_str(), rpcConfig.c_str(),
     "--port-fd", fd.c_str(),
     NULL
   };
@@ -153,7 +159,7 @@ void TestServer::StopServer() {
     Variant c = f_curl_init();
     String url = "http://";
     url += f_php_uname("n");
-    url += ":8088/stop";
+    url += ":" + lexical_cast<string>(s_admin_port) + "/stop";
     f_curl_setopt(c, k_CURLOPT_URL, url);
     f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
     Variant res = f_curl_exec(c);
@@ -166,6 +172,29 @@ void TestServer::StopServer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class TestRequestHandler : public RequestHandler {
+public:
+  // implementing RequestHandler
+  virtual void handleRequest(Transport *transport) {
+    // do nothing
+  }
+};
+
+static int find_server_port(int port_min, int port_max) {
+  for (int port = port_min; ; port++) {
+    try {
+      ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
+                       ("127.0.0.1", port, 50, -1));
+      server->start();
+      server->stop();
+      server->waitForEnd();
+      return port;
+    } catch (FailedToListenException e) {
+      if (port >= port_max) throw;
+    }
+  }
+}
+
 bool TestServer::RunTests(const std::string &which) {
   bool ret = true;
 
@@ -175,6 +204,8 @@ bool TestServer::RunTests(const std::string &which) {
     std::string which = "TestLibeventServer";
     RUN_TEST(TestLibeventServer);
   }
+  s_admin_port = find_server_port(s_server_port + 1, PORT_MAX);
+  s_rpc_port = find_server_port(s_admin_port + 1, PORT_MAX);
 
   RUN_TEST(TestInheritFdServer);
   RUN_TEST(TestSanity);
@@ -414,27 +445,8 @@ bool TestServer::TestRequestHandling() {
   return Count(true);
 }
 
-class TestRequestHandler : public RequestHandler {
-public:
-  // implementing RequestHandler
-  virtual void handleRequest(Transport *transport) {
-    // do nothing
-  }
-};
-
 bool TestServer::TestLibeventServer() {
-  for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
-    try {
-      ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
-                       ("127.0.0.1", s_server_port, 50, -1));
-      server->start();
-      server->stop();
-      server->waitForEnd();
-      break;
-    } catch (FailedToListenException e) {
-      if (s_server_port == PORT_MAX) throw;
-    }
-  }
+  s_server_port = find_server_port(PORT_MIN, PORT_MAX);
   return Count(true);
 }
 
@@ -618,28 +630,28 @@ bool TestServer::TestRPCServer() {
          "function f() { return 100; }\n",
          "100",
          "f?auth=test",
-         8083);
+         s_rpc_port);
 
   // array output
   VSGETP("<?php\n"
          "function f($a) { return array(1, 2, 3, $a); }\n",
          "[1,2,3,\"hello\"]",
          "f?auth=test&p=\"hello\"",
-         8083);
+         s_rpc_port);
 
   // associate arrays
   VSGETP("<?php\n"
          "function f($a, $b) { return array_merge($a, $b); }\n",
          "{\"a\":1,\"0\":2,\"1\":1,\"2\":2}",
          "f?auth=test&p={\"a\":1,\"1\":2}&p=[1,2]",
-         8083);
+         s_rpc_port);
 
   // builtin function and static method
   VSGETP("<?php\n"
          "class A { static function f($a) { return $a; } }\n",
          "100",
          "call_user_func?auth=test&p=\"A::f\"&p=100",
-         8083);
+         s_rpc_port);
 
   // invoking a file, with NO json encoding
   // "int(100)" is printed twice, one from warmup, and the other from include
@@ -648,14 +660,14 @@ bool TestServer::TestRPCServer() {
          "int(100)\n"
          "int(100)\n",
          "?include=string&output=1&auth=test",
-         8083);
+         s_rpc_port);
 
   VSGETP("<?php\n"
          "var_dump(isset($_ENV['HPHP_RPC']));\n",
          "bool(true)\n"
          "bool(true)\n",
          "?include=string&output=1&auth=test",
-         8083);
+         s_rpc_port);
 
   return true;
 }

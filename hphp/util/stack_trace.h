@@ -151,7 +151,7 @@ public:
   /**
    * Add extra information to log together with a crash stacktrace log.
    */
-  static void AddExtraLogging(const char *name, const char *value);
+  static void AddExtraLogging(const char *name, const std::string &value);
   static void ClearAllExtraLogging();
 
   class ExtraLoggingClearer {

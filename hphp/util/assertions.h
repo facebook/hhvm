@@ -17,8 +17,11 @@
 #define incl_HPHP_ASSERTIONS_H_
 
 #include <cassert>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
+#include <functional>
+#include <string>
 
 //////////////////////////////////////////////////////////////////////
 
@@ -89,12 +92,78 @@ inline void assert_fail(const char* e,
 #endif
 }
 
+void assert_fail_log(const char* title, const std::string& msg);
+typedef std::function<void(const char*, const std::string&)> AssertFailLogger;
+void register_assert_fail_logger(AssertFailLogger);
+
+class FailedAssertion : public std::exception {
+ public:
+  FailedAssertion(const char* msg, const char* file, unsigned line,
+                  const char* func)
+      : msg(msg)
+      , file(file)
+      , line(line)
+      , func(func)
+      , summary(makeSummary()) {}
+
+  ~FailedAssertion() throw() {}
+
+  const char* what() const throw() {
+    return summary.c_str();
+  }
+
+  void print() const {
+    fputs(summary.c_str(), stderr);
+    fputc('\n', stderr);
+  }
+
+  const char* const msg;
+  const char* const file;
+  unsigned const line;
+  const char* const func;
+  const std::string summary;
+
+ private:
+  std::string makeSummary() const {
+    char buf[4096];
+    if (snprintf(buf, sizeof(buf), "Failed assertion '%s' in %s at %s:%u",
+                 msg, func, file, line) >= sizeof(buf)) {
+      buf[sizeof(buf)-1] = '\0';
+    }
+    return std::string(buf);
+  }
+};
+
 }
 
-#define always_assert(e)                                                \
-  ((e) ? static_cast<void>(0)                                           \
-       : (::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__), \
-          static_cast<void>(0)))
+#define assert_impl(cond, fail)                   \
+  ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
+
+#define assert_log_impl(cond, fail, func) assert_impl(  \
+  cond,                                                 \
+  (::HPHP::assert_fail_log(#cond, func()), (fail)))     \
+
+#define assert_fail_impl(e)                                             \
+  ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
+#define always_assert(e) assert_impl(e, assert_fail_impl(e))
+#define always_assert_log(e, l) assert_log_impl(e, assert_fail_impl(e), l)
+
+#define assert_throw_fail_impl(e)                                       \
+  throw ::HPHP::FailedAssertion(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
+#define always_assert_throw(e)                  \
+  assert_impl(e, assert_throw_fail_impl(e))
+#define always_assert_throw_log(e, l)           \
+  assert_log_impl(e, assert_throw_fail_impl(e), l)
+
+#ifndef NDEBUG
+#define assert_log(e, l) always_assert_log(e, l)
+#define assert_throw(e) always_assert_throw(e)
+#define assert_throw_log(e, l) always_assert_throw_log(e, l)
+#else
+#define assert_log(e, l)
+#define assert_throw(e)
+#define assert_throw_log(e, l)
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

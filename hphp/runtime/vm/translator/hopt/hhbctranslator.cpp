@@ -24,6 +24,8 @@
 #include "runtime/vm/runtime.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 
+// Include last to localize effects to this file
+#include "util/assert_throw.h"
 
 namespace HPHP {
 namespace VM {

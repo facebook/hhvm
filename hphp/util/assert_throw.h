@@ -13,28 +13,41 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#ifndef incl_HPHP_ASSERT_THROW_H_
+#define incl_HPHP_ASSERT_THROW_H_
+
 #include "util/assertions.h"
 
-namespace HPHP {
+/*
+ * This file replaces assert and always_assert with assert_throw and
+ * always_assert_throw, respectively. You probably don't want to
+ * include it from a header.
+ */
 
-static AssertFailLogger s_logger;
+// This can make debugging in gdb a pain, so make it two levels of
+// opt-in for now. Uncomment the next line to enable it for files that
+// have included this header.
 
-// In builds without NDEBUG, we don't have __assert_fail from the GNU
-// library, so we implement it here for always_assert().
-void impl_assert_fail(const char* e, const char* file,
-                      unsigned int line, const char* func) {
-  fprintf(stderr, "%s:%d: %s: assertion `%s' failed.", file, line, func, e);
-  std::abort();
-}
+//#define DO_ASSERT_THROW
+#ifdef DO_ASSERT_THROW
 
-void assert_fail_log(const char* title, const std::string& msg) {
-  if (s_logger) {
-    s_logger(title, msg);
-  }
-}
+#undef assert
+#undef assert_log
+#undef always_assert
+#undef always_assert_log
 
-void register_assert_fail_logger(AssertFailLogger l) {
-  s_logger = l;
-}
+#ifndef NDEBUG
+#define assert(e) assert_throw(e)
+#define assert_log(e, l) assert_throw_log(e, l)
+#else
+#define assert(e)
+#define assert_log(e, l)
+#endif
 
-}
+#define always_assert(e) always_assert_throw(e)
+#define always_assert_log(e, l) always_assert_throw_log(e, l)
+
+#endif
+
+#endif

@@ -1627,6 +1627,7 @@ public:
   bool              isBoxed() const { return getType().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   bool              isArray() const { return isA(Type::Arr); }
+  std::string       toString() const;
   void              print(std::ostream& ostream,
                           bool printLastUse = false) const;
   void              print() const;
@@ -2012,6 +2013,7 @@ public:
   ExitList& getExitTraces() { return m_exitTraces; }
   std::string toString() const;
   void print(std::ostream& ostream, const AsmInfo* asmInfo = nullptr) const;
+  void print() const;
 
 private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't

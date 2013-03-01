@@ -18,6 +18,7 @@
 
 #include "folly/Format.h"
 #include "util/trace.h"
+#include "util/stack_trace.h"
 #include "util/util.h"
 
 #include "runtime/vm/bytecode.h"
@@ -35,6 +36,9 @@
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/hopt/codegen.h"
 #include "runtime/vm/translator/hopt/hhbctranslator.h"
+
+// Include last to localize effects to this file
+#include "util/assert_throw.h"
 
 namespace HPHP {
 namespace VM {
@@ -1706,6 +1710,13 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
           x.file, x.line, x.func);
   } catch (TranslationFailedExc& tfe) {
     not_reached();
+  } catch (const FailedAssertion& fa) {
+    fa.print();
+    StackTraceNoHeap::AddExtraLogging(
+      "Assertion failure",
+      folly::format("{}\n\nActive Trace:\n{}\n",
+                    fa.summary, m_hhbcTrans->getTrace()->toString()).str());
+    abort();
   } catch (const std::exception& e) {
     transResult = Failure;
     FTRACE(1, "HHIR: FAILED with exception: {}\n", e.what());

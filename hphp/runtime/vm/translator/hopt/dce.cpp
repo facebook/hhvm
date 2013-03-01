@@ -182,7 +182,12 @@ void optimizeRefCount(Trace* trace, DceState& state) {
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->getOpcode() == IncRef && !state[inst].countConsumedAny()) {
       auto& s = state[inst];
-      always_assert(s.decRefNZed());
+      always_assert_log(s.decRefNZed(), [&]{
+        Trace* mainTrace = trace->isMain() ? trace : trace->getMain();
+        return folly::format("\n{} has state {} in trace:\n{}{}\n",
+               inst->toString(), s.toString(), mainTrace->toString(),
+               trace == mainTrace ? "" : trace->toString()).str();
+      });
       inst->setOpcode(Mov);
       s.setDead();
     }

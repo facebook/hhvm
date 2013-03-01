@@ -97,6 +97,8 @@ void install_crash_reporter() {
   signal(SIGSEGV, bt_handler);
   signal(SIGBUS,  bt_handler);
   signal(SIGABRT, bt_handler);
+
+  register_assert_fail_logger(&StackTraceNoHeap::AddExtraLogging);
 }
 
 //////////////////////////////////////////////////////////////////////

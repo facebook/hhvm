@@ -21,6 +21,8 @@
 
 #include "folly/Hash.h"
 
+#include "runtime/vm/translator/hopt/ir.h"
+
 namespace HPHP {
 namespace VM {
 namespace JIT {

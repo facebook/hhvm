@@ -17,8 +17,8 @@
 #ifndef incl_HHVM_HHIR_SIMPLIFIER_H_
 #define incl_HHVM_HHIR_SIMPLIFIER_H_
 
-#include "ir.h"
-#include "cse.h"
+#include "runtime/vm/translator/hopt/cse.h"
+#include "runtime/vm/translator/hopt/ir.h"
 
 namespace HPHP {
 namespace VM {

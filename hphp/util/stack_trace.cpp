@@ -216,10 +216,9 @@ public:
 };
 IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
 
-void StackTraceNoHeap::AddExtraLogging(const char *name, const char *value) {
+void StackTraceNoHeap::AddExtraLogging(const char *name,
+                                       const std::string &value) {
   assert(name && *name);
-  assert(value);
-
   StackTraceLog::s_logData->data[name] = value;
 }
 

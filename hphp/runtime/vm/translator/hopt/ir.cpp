@@ -35,6 +35,9 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
 
+// Include last to localize effects to this file
+#include "util/assert_throw.h"
+
 namespace HPHP { namespace VM { namespace JIT {
 
 #define IRT(name, ...) const Type Type::name(Type::k##name);
@@ -977,6 +980,12 @@ TCA SSATmp::getTCA() const {
   return getInstruction()->getTCA();
 }
 
+std::string SSATmp::toString() const {
+  std::ostringstream out;
+  print(out);
+  return out.str();
+}
+
 void SSATmp::print(std::ostream& os, bool printLastUse) const {
   if (m_inst->getOpcode() == DefConst) {
     printConst(os, m_inst);
@@ -1013,6 +1022,10 @@ std::string Trace::toString() const {
   std::ostringstream out;
   print(out, nullptr);
   return out.str();
+}
+
+void Trace::print() const {
+  print(std::cout, nullptr);
 }
 
 void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
@@ -1278,6 +1291,7 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
     int idom_id = idom[block->postId()];
     if (idom_id != -1) children[idom_id].push_front(block);
   }
+
   // visit dom tree in preorder, checking all tmps
   boost::dynamic_bitset<> defined0(factory.numTmps());
   forPreorderDoms(blocks.front(), children, defined0,
@@ -1285,8 +1299,14 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
     for (IRInstruction& inst : *block) {
       for (SSATmp* UNUSED src : inst.getSrcs()) {
         assert(src->getInstruction() != &inst);
-        assert(src->getInstruction()->getOpcode() == DefConst ||
-               defined[src->getId()]);
+        assert_log(src->getInstruction()->getOpcode() == DefConst ||
+                   defined[src->getId()],
+                   [&]{ return folly::format(
+                       "src '{}' in '{}' came from '{}', which is not a "
+                       "DefConst and is not defined at this use site",
+                       src->toString(), inst.toString(),
+                       src->getInstruction()->toString()).str();
+                   });
       }
       for (SSATmp& dst : inst.getDsts()) {
         assert(dst.getInstruction() == &inst &&

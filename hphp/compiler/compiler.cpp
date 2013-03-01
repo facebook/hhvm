@@ -195,6 +195,10 @@ int compiler_main(int argc, char **argv) {
     return ret;
   } catch (Exception &e) {
     Logger::Error("Exception: %s\n", e.getMessage().c_str());
+  } catch (const FailedAssertion& fa) {
+    fa.print();
+    StackTraceNoHeap::AddExtraLogging("Assertion failure", fa.summary);
+    abort();
   } catch (std::exception &e) {
     Logger::Error("std::exception: %s\n", e.what());
   } catch (...) {

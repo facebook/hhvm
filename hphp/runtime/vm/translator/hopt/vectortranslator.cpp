@@ -20,7 +20,8 @@
 #include "runtime/vm/translator/hopt/hhbctranslator.h"
 #include "runtime/vm/translator/translator-x64.h"
 
-// This file does ugly things with macros so include it last
+// These files do ugly things with macros so include them last
+#include "util/assert_throw.h"
 #include "runtime/vm/translator/hopt/vectortranslator-internal.h"
 
 namespace HPHP { namespace VM { namespace JIT {

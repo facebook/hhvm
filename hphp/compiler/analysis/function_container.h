@@ -43,49 +43,20 @@ public:
   void countReturnTypes(std::map<std::string, int> &counts,
                         const StringToFunctionScopePtrVecMap *redec);
 
-  /**
-   * Code generation functions.
-   */
-  void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
-                          const StringToFunctionScopePtrVecMap *redec);
   const StringToFunctionScopePtrMap &getFunctions() const {
     return m_functions;
   }
   void getFunctionsFlattened(const StringToFunctionScopePtrVecMap *redec,
                              FunctionScopePtrVec &funcs,
                              bool excludePseudoMains = false) const;
-  void outputCPPCodeInfoTable(
-    CodeGenerator &cg, AnalysisResultPtr ar, bool useSwitch,
-    const StringToFunctionScopePtrMap &functions);
 
 protected:
   // name => functions. Order of declaration
   StringToFunctionScopePtrMap m_functions;
-  void outputCPPJumpTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
-                                 const StringToFunctionScopePtrVecMap *redec,
-                                 bool &hasRedeclared,
-                                 std::vector<const char *> *funcs = nullptr);
-  void outputCPPJumpTableEvalSupport(
-    CodeGenerator &cg, AnalysisResultPtr ar,
-    const StringToFunctionScopePtrVecMap *redec, bool &hasRedeclared);
-  void outputCPPCallInfoTableSupport(
-    CodeGenerator &cg, AnalysisResultPtr ar,
-    const StringToFunctionScopePtrVecMap *redec,
-    bool &hasRedeclared, std::vector<const char *> *funcs = nullptr);
-  void outputCPPJumpTableSupportMethod(CodeGenerator &cg, AnalysisResultPtr ar,
-                                       FunctionScopePtr func,
-                                       const char *funcPrefix);
   void outputCPPHelperClassAllocSupport(
     CodeGenerator &cg, AnalysisResultPtr ar,
     const StringToFunctionScopePtrVecMap *redec);
 private:
-  void outputGetCallInfoHeader(CodeGenerator &cg, const char *suffix,
-                               bool needGlobals);
-  void outputGetCallInfoTail(CodeGenerator &cg, bool system);
-  void outputCPPHashTableGetCallInfo(
-    CodeGenerator &cg, bool system, bool noEval,
-    const StringToFunctionScopePtrMap *functions,
-    const std::vector<const char *> &funcs);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

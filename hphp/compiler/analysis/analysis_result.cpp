@@ -3331,75 +3331,8 @@ void AnalysisResult::outputCPPDynamicConstantTable(
 }
 
 void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
-  AnalysisResultPtr ar = shared_from_this();
-  bool system = output == CodeGenerator::SystemCPP;
-  bool useSwitch = false;
-  {
-    string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      (!useSwitch ? "dynamic_table_func.cpp" : "dynamic_table_func.no.cpp");
-    Util::mkdir(tablePath);
-    ofstream fTable(tablePath.c_str());
-    CodeGenerator cg(&fTable, output);
-
-    outputCPPDynamicTablesHeader(cg, true, false);
-
-    cg.printSection("Function Invoke Table");
-    if (system) {
-      bool needGlobals;
-      outputCPPJumpTableSupport(cg, ar, 0, needGlobals);
-      outputCPPCodeInfoTable(cg, ar, useSwitch, m_functions);
-    } else {
-      // For functions declared in separable extensions, generate CallInfo and
-      // add to declaration list to be included it the table.
-      for (StringToFunctionScopePtrMap::const_iterator iter =
-             m_functions.begin(); iter != m_functions.end(); ++iter) {
-        FunctionScopePtr func = iter->second;
-        if (func->isSepExtension()) {
-          outputCPPJumpTableSupportMethod(cg, ar, func, Option::FunctionPrefix);
-          func->outputCPPCallInfo(cg, ar);
-          FunctionScopePtr &funcDec = m_functionDecs[iter->first];
-          assert(!funcDec);
-          funcDec = func;
-        }
-      }
-      outputCPPCodeInfoTable(cg, ar, useSwitch, m_functionDecs);
-    }
-    cg.namespaceEnd();
-    fTable.close();
-  }
   outputCPPDynamicClassTables(output);
   outputCPPDynamicConstantTable(output);
-  if (output != CodeGenerator::SystemCPP) {
-    string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      "dynamic_table_file.cpp";
-    Util::mkdir(tablePath);
-    ofstream fTable(tablePath.c_str());
-    CodeGenerator cg(&fTable, output);
-
-    outputCPPDynamicTablesHeader(cg, false, false);
-    cg_printf("typedef Variant (*pm_t)(bool incOnce, "
-              "LVariableTable* variables, GlobalVariables *globals);\n");
-    cg.printSection("File Invoke Table");
-    vector<const char*> entries;
-    BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-      if (!f->getPseudoMain()) continue;
-//      if (f->isPrivateInclude()) continue;
-      entries.push_back(f->getName().c_str());
-      if (!f->canUseDummyPseudoMain(shared_from_this())) {
-        cg_printf("Variant %s%s(bool incOnce, "
-                  "LVariableTable* variables, "
-                  "Globals *globals);\n",
-                  Option::PseudoMainPrefix,
-                  Option::MangleFilename(f->getName(), true).c_str());
-      }
-    }
-
-    cg_printf("\n");
-    bool needEvalHook = !system && Option::EnableEval == Option::FullEval;
-    outputCPPHashTableInvokeFile(cg, entries, needEvalHook);
-    cg.namespaceEnd();
-    fTable.close();
-  }
 }
 
 void AnalysisResult::getCPPClassDeclaredFlags

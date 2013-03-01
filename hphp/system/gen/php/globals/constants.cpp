@@ -2095,8 +2095,6 @@ const int64 k_XSD_UNSIGNEDSHORT = 141L;
 const int64 k_YESEXPR = 327680L;
 const bool k_ZEND_THREAD_SAFE = false;
 
-/* preface starts */
-/* preface finishes */
 
 ///////////////////////////////////////////////////////////////////////////////
 }

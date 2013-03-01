@@ -535,49 +535,6 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   cg.setContext(CodeGenerator::CppConstantsDecl);
   getConstants()->outputCPP(cg, ar);
-
-  cg.setContext(CodeGenerator::CppImplementation);
-  cg_printf("/* preface starts */\n");
-
-  for (StringToFunctionScopePtrMap::iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    FunctionScopePtr func = it->second;
-    if (func->isLocalRedeclaring()) {
-      BOOST_FOREACH(func, m_redeclaredFunctions->find(it->first)->second) {
-        func->outputCPPPreface(cg, ar);
-      }
-    } else {
-      func->outputCPPPreface(cg, ar);
-    }
-  }
-  BOOST_FOREACH(FunctionScopeRawPtr closure, m_usedClosures) {
-    closure->outputCPPPreface(cg, ar);
-  }
-
-  for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
-       it != m_classes.end(); ++it) {
-    BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      const FunctionScopePtrVec &funcs = cls->getFunctionsVec();
-      for (int i = 0, size = funcs.size(); i < size; ++i) {
-        FunctionScopePtr func = funcs[i];
-        func->outputCPPPreface(cg, ar);
-      }
-    }
-  }
-
-  cg_printf("/* preface finishes */\n");
-
-  outputCPPHelper(cg, ar);
-
-  if (Option::GenerateCPPMacros) {
-    bool hasRedec;
-    outputCPPJumpTableSupport(cg, ar, m_redeclaredFunctions, hasRedec);
-    if (Option::EnableEval >= Option::LimitedEval) {
-      outputCPPJumpTableEvalSupport(cg, ar, m_redeclaredFunctions, hasRedec);
-    }
-    outputCPPCallInfoTableSupport(cg, ar, m_redeclaredFunctions, hasRedec);
-    outputCPPHelperClassAllocSupport(cg, ar, m_redeclaredFunctions);
-  }
 }
 
 void FileScope::outputCPPPseudoMain(CodeGenerator &cg, AnalysisResultPtr ar) {

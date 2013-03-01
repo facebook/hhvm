@@ -77,12 +77,6 @@ extern Variant get_class_constant(CStrRef s, const char *prop,
                                   int fatal = true);
 
 /**
- * Getting function info
- */
-extern bool get_call_info_builtin(const CallInfo *&ci, void *&extra,
-    const char *s, strhash_t hash = -1);
-
-/**
  * Class/function meta info entirely encoded here as a const char * array.
  */
 extern const char *g_class_map[];

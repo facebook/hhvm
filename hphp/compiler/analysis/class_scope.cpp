@@ -356,7 +356,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
           setVolatile();
         }
       }
-    } else {
+    } else if (!Option::SystemGen) {
       Compiler::Error(Compiler::UnknownBaseClass, m_stmt, base);
       if (base == m_parent) {
         ar->declareUnknownClass(m_parent);

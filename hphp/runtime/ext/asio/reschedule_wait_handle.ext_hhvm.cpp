@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_RescheduleWaitHandle_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_RescheduleWaitHandle) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_RescheduleWaitHandle(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_RescheduleWaitHandle(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(RescheduleWaitHandle);
 /*
 void HPHP::c_RescheduleWaitHandle::t___construct()
 _ZN4HPHP22c_RescheduleWaitHandle13t___constructEv

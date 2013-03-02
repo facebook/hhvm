@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_SpoofChecker_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SpoofChecker) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SpoofChecker(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SpoofChecker(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SpoofChecker);
 /*
 void HPHP::c_SpoofChecker::t___construct()
 _ZN4HPHP14c_SpoofChecker13t___constructEv

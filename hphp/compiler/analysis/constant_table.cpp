@@ -415,9 +415,14 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
                 CodeGenerator::EscapeLabel(sym->getName()).c_str(),
                 len, output.c_str());
     } else if (cls) {
-      cg_printf("\"%s\", (const char *)&%s%s, NULL,\n",
+      DataType dt = sym->getFinalType()->getDataType();
+      always_assert(dt >= -1 && dt < 255);
+      cg_printf("\"%s\", (const char *)&%s%s%s%s, (const char*)%d,\n",
                 CodeGenerator::EscapeLabel(sym->getName()).c_str(),
-                Option::ClassStaticsCallbackPrefix, cls->getId().c_str());
+                Option::ClassConstantPrefix, cls->getId().c_str(),
+                Option::IdPrefix.c_str(),
+                CodeGenerator::FormatLabel(sym->getName()).c_str(),
+                (int)dt + 2);
     } else {
       cg_printf("\"%s\", (const char *)0, NULL,\n",
                 CodeGenerator::EscapeLabel(sym->getName()).c_str());

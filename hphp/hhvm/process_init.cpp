@@ -233,10 +233,7 @@ void ProcessInit() {
     const NamedEntity* ne = Unit::GetNamedEntity(name);
     Class* cls = Unit::lookupClass(ne);
     assert(cls);
-    const ObjectStaticCallbacks* osc =
-      get_builtin_object_static_callbacks(info->m_name);
-    assert(osc != nullptr);
-    *(osc->os_cls_ptr) = cls;
+    *(info->m_clsPtr) = cls;
   }
 
   Stack::ValidateStackSize();

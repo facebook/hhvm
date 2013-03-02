@@ -74,7 +74,7 @@ static StaticString s_fromUCallback("fromUCallback");
 
 #define THROW_UFAILURE(fname, uerr, ierr) throwFailure(uerr, #fname, ierr);
 
-c_UConverter::c_UConverter(const ObjectStaticCallbacks *cb)
+c_UConverter::c_UConverter(VM::Class* cb)
     : ExtObjectData(cb), m_src(NULL), m_dest(NULL) {
   m_error.code = U_ZERO_ERROR;
   m_error.custom_error_message = "";

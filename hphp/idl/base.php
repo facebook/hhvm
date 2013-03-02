@@ -744,7 +744,7 @@ EOT
     fprintf($f, "  // constructor must call setAttributes(%s)\n",
             implode('|', $flags));
   }
-  fprintf($f, "  public: c_%s(const ObjectStaticCallbacks *cb = &cw_%s);\n",
+  fprintf($f, "  public: c_%s(VM::Class* cls = c_%s::s_cls);\n",
           $class['name'], $class['name']);
   fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {

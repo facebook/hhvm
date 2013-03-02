@@ -91,7 +91,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(Memcached, Memcached, ObjectData)
 
   // need to implement
-  public: c_Memcached(const ObjectStaticCallbacks *cb = &cw_Memcached);
+  public: c_Memcached(VM::Class* cls = c_Memcached::s_cls);
   public: ~c_Memcached();
   public: void t___construct(CStrRef persistent_id = null_string);
   public: bool t_add(CStrRef key, CVarRef value, int expiration = 0);

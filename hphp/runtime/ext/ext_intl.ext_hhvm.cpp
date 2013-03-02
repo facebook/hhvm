@@ -989,10 +989,11 @@ HPHP::VM::Instance* new_Collator_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Collator) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Collator(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Collator(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Collator);
 /*
 void HPHP::c_Collator::t___construct(HPHP::String const&)
 _ZN4HPHP10c_Collator13t___constructERKNS_6StringE
@@ -1668,10 +1669,11 @@ HPHP::VM::Instance* new_Locale_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Locale) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Locale(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Locale(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Locale);
 /*
 void HPHP::c_Locale::t___construct()
 _ZN4HPHP8c_Locale13t___constructEv
@@ -1715,10 +1717,11 @@ HPHP::VM::Instance* new_Normalizer_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Normalizer) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Normalizer(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Normalizer(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Normalizer);
 /*
 void HPHP::c_Normalizer::t___construct()
 _ZN4HPHP12c_Normalizer13t___constructEv

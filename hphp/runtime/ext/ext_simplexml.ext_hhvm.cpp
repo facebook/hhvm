@@ -429,10 +429,11 @@ HPHP::VM::Instance* new_SimpleXMLElement_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SimpleXMLElement) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SimpleXMLElement(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SimpleXMLElement(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SimpleXMLElement);
 /*
 void HPHP::c_SimpleXMLElement::t___construct(HPHP::String const&, long, bool, HPHP::String const&, bool)
 _ZN4HPHP18c_SimpleXMLElement13t___constructERKNS_6StringElbS3_b
@@ -1567,10 +1568,11 @@ HPHP::VM::Instance* new_LibXMLError_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_LibXMLError) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_LibXMLError(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_LibXMLError(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(LibXMLError);
 /*
 void HPHP::c_LibXMLError::t___construct()
 _ZN4HPHP13c_LibXMLError13t___constructEv
@@ -1614,10 +1616,11 @@ HPHP::VM::Instance* new_SimpleXMLElementIterator_Instance(HPHP::VM::Class* cls) 
   size_t builtinPropSize = sizeof(c_SimpleXMLElementIterator) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SimpleXMLElementIterator(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SimpleXMLElementIterator(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SimpleXMLElementIterator);
 /*
 void HPHP::c_SimpleXMLElementIterator::t___construct()
 _ZN4HPHP26c_SimpleXMLElementIterator13t___constructEv

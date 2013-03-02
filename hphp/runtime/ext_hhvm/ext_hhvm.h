@@ -43,6 +43,7 @@ struct HhbcExtClassInfo {
   int m_sizeof;
   long long m_methodCount;
   const HhbcExtMethodInfo* m_methods;
+  HPHP::VM::Class** m_clsPtr;
 };
 
 extern const long long hhbc_ext_funcs_count;

@@ -38,7 +38,7 @@ class c_SoapServer : public ExtObjectData {
   DECLARE_CLASS(SoapServer, SoapServer, ObjectData)
 
   // need to implement
-  public: c_SoapServer(const ObjectStaticCallbacks *cb = &cw_SoapServer);
+  public: c_SoapServer(VM::Class* cls = c_SoapServer::s_cls);
   public: ~c_SoapServer();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   public: void t_setclass(int _argc, CStrRef name, CArrRef _argv = null_array);
@@ -77,7 +77,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   DECLARE_CLASS(SoapClient, SoapClient, ObjectData)
 
   // need to implement
-  public: c_SoapClient(const ObjectStaticCallbacks *cb = &cw_SoapClient);
+  public: c_SoapClient(VM::Class* cls = c_SoapClient::s_cls);
   public: ~c_SoapClient();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   public: Variant t___call(Variant name, Variant args);
@@ -140,7 +140,7 @@ class c_SoapVar : public ExtObjectData {
   DECLARE_CLASS(SoapVar, SoapVar, ObjectData)
 
   // need to implement
-  public: c_SoapVar(const ObjectStaticCallbacks *cb = &cw_SoapVar);
+  public: c_SoapVar(VM::Class* cls = c_SoapVar::s_cls);
   public: ~c_SoapVar();
   public: void t___construct(CVarRef data, CVarRef type, CStrRef type_name = null_string, CStrRef type_namespace = null_string, CStrRef node_name = null_string, CStrRef node_namespace = null_string);
 
@@ -163,7 +163,7 @@ class c_SoapParam : public ExtObjectData {
   DECLARE_CLASS(SoapParam, SoapParam, ObjectData)
 
   // need to implement
-  public: c_SoapParam(const ObjectStaticCallbacks *cb = &cw_SoapParam);
+  public: c_SoapParam(VM::Class* cls = c_SoapParam::s_cls);
   public: ~c_SoapParam();
   public: void t___construct(CVarRef data, CStrRef name);
 
@@ -182,7 +182,7 @@ class c_SoapHeader : public ExtObjectData {
   DECLARE_CLASS(SoapHeader, SoapHeader, ObjectData)
 
   // need to implement
-  public: c_SoapHeader(const ObjectStaticCallbacks *cb = &cw_SoapHeader);
+  public: c_SoapHeader(VM::Class* cls = c_SoapHeader::s_cls);
   public: ~c_SoapHeader();
   public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = null, bool mustunderstand = false, CVarRef actor = null);
 

@@ -20,7 +20,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_StaticWaitHandle::c_StaticWaitHandle(const ObjectStaticCallbacks *cb)
+c_StaticWaitHandle::c_StaticWaitHandle(VM::Class* cb)
     : c_WaitHandle(cb) {
 }
 

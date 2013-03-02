@@ -286,10 +286,11 @@ HPHP::VM::Instance* new_DebuggerProxyCmdUser_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DebuggerProxyCmdUser) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DebuggerProxyCmdUser(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DebuggerProxyCmdUser(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DebuggerProxyCmdUser);
 /*
 void HPHP::c_DebuggerProxyCmdUser::t___construct()
 _ZN4HPHP22c_DebuggerProxyCmdUser13t___constructEv
@@ -426,10 +427,11 @@ HPHP::VM::Instance* new_DebuggerClientCmdUser_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DebuggerClientCmdUser) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DebuggerClientCmdUser(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DebuggerClientCmdUser(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DebuggerClientCmdUser);
 /*
 void HPHP::c_DebuggerClientCmdUser::t___construct()
 _ZN4HPHP23c_DebuggerClientCmdUser13t___constructEv
@@ -2133,10 +2135,11 @@ HPHP::VM::Instance* new_DebuggerClient_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DebuggerClient) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DebuggerClient(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DebuggerClient(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DebuggerClient);
 /*
 void HPHP::c_DebuggerClient::t___construct()
 _ZN4HPHP16c_DebuggerClient13t___constructEv

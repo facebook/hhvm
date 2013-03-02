@@ -44,7 +44,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
-  public: c_Vector(const ObjectStaticCallbacks *cb = &cw_Vector);
+  public: c_Vector(VM::Class* cls = c_Vector::s_cls);
   public: ~c_Vector();
   public: void freeData();
   public: void t___construct();
@@ -179,7 +179,7 @@ class c_VectorIterator : public ExtObjectData {
   friend class c_Vector;
 
   // need to implement
-  public: c_VectorIterator(const ObjectStaticCallbacks *cb = &cw_VectorIterator);
+  public: c_VectorIterator(VM::Class* cls = c_VectorIterator::s_cls);
   public: ~c_VectorIterator();
   public: void t___construct();
   public: Variant t_current();
@@ -213,7 +213,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
 
   public: static const int32 KindOfTombstone = -1;
 
-  public: c_Map(const ObjectStaticCallbacks *cb = &cw_Map);
+  public: c_Map(VM::Class* cls = c_Map::s_cls);
   public: ~c_Map();
   public: void freeData();
   public: void t___construct();
@@ -462,7 +462,7 @@ class c_MapIterator : public ExtObjectData {
   friend class c_Map;
 
   // need to implement
-  public: c_MapIterator(const ObjectStaticCallbacks *cb = &cw_MapIterator);
+  public: c_MapIterator(VM::Class* cls = c_MapIterator::s_cls);
   public: ~c_MapIterator();
   public: void t___construct();
   public: Variant t_current();
@@ -496,7 +496,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
-  public: c_StableMap(const ObjectStaticCallbacks *cb = &cw_StableMap);
+  public: c_StableMap(VM::Class* cls = c_StableMap::s_cls);
   public: ~c_StableMap();
   public: void freeData();
   public: void t___construct();
@@ -705,7 +705,7 @@ class c_StableMapIterator : public ExtObjectData {
   friend class c_StableMap;
 
   // need to implement
-  public: c_StableMapIterator(const ObjectStaticCallbacks *cb = &cw_StableMapIterator);
+  public: c_StableMapIterator(VM::Class* cls = c_StableMapIterator::s_cls);
   public: ~c_StableMapIterator();
   public: void t___construct();
   public: Variant t_current();

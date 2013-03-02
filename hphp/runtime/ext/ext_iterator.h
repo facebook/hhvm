@@ -132,7 +132,7 @@ class c_MutableArrayIterator : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(MutableArrayIterator, MutableArrayIterator, ObjectData)
 
   // need to implement
-  public: c_MutableArrayIterator(const ObjectStaticCallbacks *cb = &cw_MutableArrayIterator);
+  public: c_MutableArrayIterator(VM::Class* cls = c_MutableArrayIterator::s_cls);
   public: ~c_MutableArrayIterator();
   public: void t___construct(VRefParam array);
   public: Variant t_currentref();

@@ -55,7 +55,7 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(Memcache, Memcache, ObjectData)
 
   // need to implement
-  public: c_Memcache(const ObjectStaticCallbacks *cb = &cw_Memcache);
+  public: c_Memcache(VM::Class* cls = c_Memcache::s_cls);
   public: ~c_Memcache();
   public: void t___construct();
   public: bool t_connect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);

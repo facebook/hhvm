@@ -448,7 +448,7 @@ String f_hphp_recursivedirectoryiterator_getsubpathname(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-c_MutableArrayIterator::c_MutableArrayIterator(const ObjectStaticCallbacks *cb /* = &cw_MutableArrayIterator */)
+c_MutableArrayIterator::c_MutableArrayIterator(VM::Class *cb)
     : ExtObjectData(cb), m_valid(false) {
 }
 

@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_EncodingDetector_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_EncodingDetector) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_EncodingDetector(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_EncodingDetector(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(EncodingDetector);
 /*
 void HPHP::c_EncodingDetector::t___construct()
 _ZN4HPHP18c_EncodingDetector13t___constructEv
@@ -270,10 +271,11 @@ HPHP::VM::Instance* new_EncodingMatch_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_EncodingMatch) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_EncodingMatch(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_EncodingMatch(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(EncodingMatch);
 /*
 void HPHP::c_EncodingMatch::t___construct()
 _ZN4HPHP15c_EncodingMatch13t___constructEv

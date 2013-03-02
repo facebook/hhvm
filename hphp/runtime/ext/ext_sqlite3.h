@@ -46,7 +46,7 @@ class c_SQLite3 : public ExtObjectData {
   DECLARE_CLASS(SQLite3, SQLite3, ObjectData)
 
   // need to implement
-  public: c_SQLite3(const ObjectStaticCallbacks *cb = &cw_SQLite3);
+  public: c_SQLite3(VM::Class* cls = c_SQLite3::s_cls);
   public: ~c_SQLite3();
   public: void t___construct(CStrRef filename, int64 flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
   public: void t_open(CStrRef filename, int64 flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
@@ -89,7 +89,7 @@ class c_SQLite3Stmt : public ExtObjectData {
   DECLARE_CLASS(SQLite3Stmt, SQLite3Stmt, ObjectData)
 
   // need to implement
-  public: c_SQLite3Stmt(const ObjectStaticCallbacks *cb = &cw_SQLite3Stmt);
+  public: c_SQLite3Stmt(VM::Class* cls = c_SQLite3Stmt::s_cls);
   public: ~c_SQLite3Stmt();
   public: void t___construct(CObjRef dbobject, CStrRef statement);
   public: int64 t_paramcount();
@@ -123,7 +123,7 @@ class c_SQLite3Result : public ExtObjectData {
   DECLARE_CLASS(SQLite3Result, SQLite3Result, ObjectData)
 
   // need to implement
-  public: c_SQLite3Result(const ObjectStaticCallbacks *cb = &cw_SQLite3Result);
+  public: c_SQLite3Result(VM::Class* cls = c_SQLite3Result::s_cls);
   public: ~c_SQLite3Result();
   public: void t___construct();
   public: int64 t_numcolumns();

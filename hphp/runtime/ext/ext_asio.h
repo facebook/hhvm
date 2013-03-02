@@ -59,7 +59,7 @@ class c_WaitHandle : public ExtObjectData {
   DECLARE_CLASS(WaitHandle, WaitHandle, ObjectData)
 
   // need to implement
-  public: c_WaitHandle(const ObjectStaticCallbacks *cb = &cw_WaitHandle);
+  public: c_WaitHandle(VM::Class* cls = c_WaitHandle::s_cls);
   public: ~c_WaitHandle();
   public: void t___construct();
   public: void t_import();
@@ -113,7 +113,7 @@ class c_StaticWaitHandle : public c_WaitHandle {
   DECLARE_CLASS(StaticWaitHandle, StaticWaitHandle, WaitHandle)
 
   // need to implement
-  public: c_StaticWaitHandle(const ObjectStaticCallbacks *cb = &cw_StaticWaitHandle);
+  public: c_StaticWaitHandle(VM::Class* cls = c_StaticWaitHandle::s_cls);
   public: ~c_StaticWaitHandle();
   public: void t___construct();
 
@@ -131,7 +131,7 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   DECLARE_CLASS(StaticResultWaitHandle, StaticResultWaitHandle, StaticWaitHandle)
 
   // need to implement
-  public: c_StaticResultWaitHandle(const ObjectStaticCallbacks *cb = &cw_StaticResultWaitHandle);
+  public: c_StaticResultWaitHandle(VM::Class* cls = c_StaticResultWaitHandle::s_cls);
   public: ~c_StaticResultWaitHandle();
   public: void t___construct();
   public: static Object ti_create(const char* cls , CVarRef result);
@@ -159,7 +159,7 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   DECLARE_CLASS(StaticExceptionWaitHandle, StaticExceptionWaitHandle, StaticWaitHandle)
 
   // need to implement
-  public: c_StaticExceptionWaitHandle(const ObjectStaticCallbacks *cb = &cw_StaticExceptionWaitHandle);
+  public: c_StaticExceptionWaitHandle(VM::Class* cls = c_StaticExceptionWaitHandle::s_cls);
   public: ~c_StaticExceptionWaitHandle();
   public: void t___construct();
   public: static Object ti_create(const char* cls , CObjRef exception);
@@ -194,7 +194,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   DECLARE_CLASS(WaitableWaitHandle, WaitableWaitHandle, WaitHandle)
 
   // need to implement
-  public: c_WaitableWaitHandle(const ObjectStaticCallbacks *cb = &cw_WaitableWaitHandle);
+  public: c_WaitableWaitHandle(VM::Class* cls = c_WaitableWaitHandle::s_cls);
   public: ~c_WaitableWaitHandle();
   public: void t___construct();
   public: Array t_getparents();
@@ -245,7 +245,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   DECLARE_CLASS(BlockableWaitHandle, BlockableWaitHandle, WaitableWaitHandle)
 
   // need to implement
-  public: c_BlockableWaitHandle(const ObjectStaticCallbacks *cb = &cw_BlockableWaitHandle);
+  public: c_BlockableWaitHandle(VM::Class* cls = c_BlockableWaitHandle::s_cls);
   public: ~c_BlockableWaitHandle();
   public: void t___construct();
 
@@ -285,7 +285,7 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(ContinuationWaitHandle, ContinuationWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_ContinuationWaitHandle(const ObjectStaticCallbacks *cb = &cw_ContinuationWaitHandle);
+  public: c_ContinuationWaitHandle(VM::Class* cls = c_ContinuationWaitHandle::s_cls);
   public: ~c_ContinuationWaitHandle();
   public: void t___construct();
   public: static Object ti_start(const char* cls , CObjRef continuation, int prio = 0);
@@ -345,7 +345,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(GenArrayWaitHandle, GenArrayWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_GenArrayWaitHandle(const ObjectStaticCallbacks *cb = &cw_GenArrayWaitHandle);
+  public: c_GenArrayWaitHandle(VM::Class* cls = c_GenArrayWaitHandle::s_cls);
   public: ~c_GenArrayWaitHandle();
   public: void t___construct();
   public: static Object ti_create(const char* cls , CArrRef dependencies);
@@ -383,7 +383,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   DECLARE_CLASS(SetResultToRefWaitHandle, SetResultToRefWaitHandle, BlockableWaitHandle)
 
   // need to implement
-  public: c_SetResultToRefWaitHandle(const ObjectStaticCallbacks *cb = &cw_SetResultToRefWaitHandle);
+  public: c_SetResultToRefWaitHandle(VM::Class* cls = c_SetResultToRefWaitHandle::s_cls);
   public: ~c_SetResultToRefWaitHandle();
   public: void t___construct();
   public: static Object ti_create(const char* cls , CObjRef wait_handle, VRefParam ref);
@@ -427,7 +427,7 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   DECLARE_CLASS(RescheduleWaitHandle, RescheduleWaitHandle, WaitableWaitHandle)
 
   // need to implement
-  public: c_RescheduleWaitHandle(const ObjectStaticCallbacks *cb = &cw_RescheduleWaitHandle);
+  public: c_RescheduleWaitHandle(VM::Class* cls = c_RescheduleWaitHandle::s_cls);
   public: ~c_RescheduleWaitHandle();
   public: void t___construct();
   public: static Object ti_create(const char* cls , int queue, int priority);

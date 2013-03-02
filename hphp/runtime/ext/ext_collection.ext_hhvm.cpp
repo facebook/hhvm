@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_Vector_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Vector) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Vector(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Vector(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Vector);
 /*
 void HPHP::c_Vector::t___construct()
 _ZN4HPHP8c_Vector13t___constructEv
@@ -1097,10 +1098,11 @@ HPHP::VM::Instance* new_VectorIterator_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_VectorIterator) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_VectorIterator(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_VectorIterator(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(VectorIterator);
 /*
 void HPHP::c_VectorIterator::t___construct()
 _ZN4HPHP16c_VectorIterator13t___constructEv
@@ -1334,10 +1336,11 @@ HPHP::VM::Instance* new_Map_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Map) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Map(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Map(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Map);
 /*
 void HPHP::c_Map::t___construct()
 _ZN4HPHP5c_Map13t___constructEv
@@ -2370,10 +2373,11 @@ HPHP::VM::Instance* new_MapIterator_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_MapIterator) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_MapIterator(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_MapIterator(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(MapIterator);
 /*
 void HPHP::c_MapIterator::t___construct()
 _ZN4HPHP13c_MapIterator13t___constructEv
@@ -2607,10 +2611,11 @@ HPHP::VM::Instance* new_StableMap_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_StableMap) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_StableMap(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_StableMap(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(StableMap);
 /*
 void HPHP::c_StableMap::t___construct()
 _ZN4HPHP11c_StableMap13t___constructEv
@@ -3643,10 +3648,11 @@ HPHP::VM::Instance* new_StableMapIterator_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_StableMapIterator) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_StableMapIterator(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_StableMapIterator(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(StableMapIterator);
 /*
 void HPHP::c_StableMapIterator::t___construct()
 _ZN4HPHP19c_StableMapIterator13t___constructEv

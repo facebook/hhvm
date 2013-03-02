@@ -282,7 +282,7 @@ static xmlChar *xmls(CStrRef s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_XMLWriter::c_XMLWriter(const ObjectStaticCallbacks *cb) :
+c_XMLWriter::c_XMLWriter(VM::Class* cb) :
     ExtObjectData(cb), m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
 }
 

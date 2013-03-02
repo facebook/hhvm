@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_SQLite3_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SQLite3) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SQLite3(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SQLite3(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SQLite3);
 /*
 void HPHP::c_SQLite3::t___construct(HPHP::String const&, long, HPHP::String const&)
 _ZN4HPHP9c_SQLite313t___constructERKNS_6StringElS3_
@@ -1031,10 +1032,11 @@ HPHP::VM::Instance* new_SQLite3Stmt_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SQLite3Stmt) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SQLite3Stmt(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SQLite3Stmt(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SQLite3Stmt);
 /*
 void HPHP::c_SQLite3Stmt::t___construct(HPHP::Object const&, HPHP::String const&)
 _ZN4HPHP13c_SQLite3Stmt13t___constructERKNS_6ObjectERKNS_6StringE
@@ -1409,10 +1411,11 @@ HPHP::VM::Instance* new_SQLite3Result_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SQLite3Result) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SQLite3Result(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SQLite3Result(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SQLite3Result);
 /*
 void HPHP::c_SQLite3Result::t___construct()
 _ZN4HPHP15c_SQLite3Result13t___constructEv

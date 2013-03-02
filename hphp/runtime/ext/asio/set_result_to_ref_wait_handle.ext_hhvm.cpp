@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_SetResultToRefWaitHandle_Instance(HPHP::VM::Class* cls) 
   size_t builtinPropSize = sizeof(c_SetResultToRefWaitHandle) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SetResultToRefWaitHandle(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SetResultToRefWaitHandle(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SetResultToRefWaitHandle);
 /*
 void HPHP::c_SetResultToRefWaitHandle::t___construct()
 _ZN4HPHP26c_SetResultToRefWaitHandle13t___constructEv

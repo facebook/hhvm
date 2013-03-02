@@ -681,8 +681,7 @@ function emit_ctor_helper($out, $cname) {
                         "builtinPropSize;\n");
   fwrite($out, "  HPHP::VM::Instance *inst = " .
                         "(HPHP::VM::Instance*)ALLOCOBJSZ(size);\n");
-  fwrite($out, "  new ((void *)inst) c_" . $cname .
-               "(ObjectStaticCallbacks::encodeVMClass(cls));\n");
+  fwrite($out, "  new ((void *)inst) c_" . $cname . "(cls);\n");
   fwrite($out, "  return inst;\n");
   fwrite($out, "}\n\n");
 }
@@ -821,8 +820,8 @@ function phase2() {
 
     // Extension classes; member functions and the actual instance
     // object.
-    foreach ($ext_class_info as $cname => $method_info) {
-      foreach ($method_info as $obj) {
+    foreach ($ext_class_info as $cname => $cls_info) {
+      foreach ($cls_info['methods'] as $obj) {
         if (!$obj->mangledName) continue;
 
         // Emit the instance definition only in in the file that
@@ -831,6 +830,12 @@ function phase2() {
         // spread among a few cpp files.
         if ($obj->name == "__construct") {
           emit_ctor_helper($ext_hhvm_cpp, $cname);
+          if ($cls_info['flags'] & NoDefaultSweep) {
+            fwrite($ext_hhvm_cpp,
+                   "IMPLEMENT_CLASS_NO_DEFAULT_SWEEP($cname);\n");
+          } else {
+            fwrite($ext_hhvm_cpp, "IMPLEMENT_CLASS($cname);\n");
+          }
         }
 
         $indent = '';

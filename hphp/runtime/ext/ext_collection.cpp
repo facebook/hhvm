@@ -62,7 +62,7 @@ static void throwStrOOB(StringData* key) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Vector::c_Vector(const ObjectStaticCallbacks *cb) :
+c_Vector::c_Vector(VM::Class* cb) :
     ExtObjectDataFlags<ObjectData::VectorAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -688,7 +688,7 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-c_VectorIterator::c_VectorIterator(const ObjectStaticCallbacks *cb) :
+c_VectorIterator::c_VectorIterator(VM::Class* cb) :
     ExtObjectData(cb) {
 }
 
@@ -735,7 +735,7 @@ void c_VectorIterator::t_rewind() {
 
 static const char emptyMapSlot[sizeof(c_Map::Bucket)] = { 0 };
 
-c_Map::c_Map(const ObjectStaticCallbacks *cb) :
+c_Map::c_Map(VM::Class* cb) :
     ExtObjectDataFlags<ObjectData::MapAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -1523,7 +1523,7 @@ void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throwBadKeyType();
 }
 
-c_MapIterator::c_MapIterator(const ObjectStaticCallbacks *cb) :
+c_MapIterator::c_MapIterator(VM::Class* cb) :
     ExtObjectData(cb) {
 }
 
@@ -1594,7 +1594,7 @@ do {                                                                    \
 
 static const char emptyStableMapSlot[sizeof(c_StableMap::Bucket*)] = { 0 };
 
-c_StableMap::c_StableMap(const ObjectStaticCallbacks *cb) :
+c_StableMap::c_StableMap(VM::Class* cb) :
     ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
@@ -2480,7 +2480,7 @@ void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
 
 #undef CONNECT_TO_GLOBAL_DLLIST
 
-c_StableMapIterator::c_StableMapIterator(const ObjectStaticCallbacks *cb) :
+c_StableMapIterator::c_StableMapIterator(VM::Class* cb) :
     ExtObjectData(cb) {
 }
 

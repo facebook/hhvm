@@ -25,8 +25,7 @@ namespace {
   StaticString s_staticException("<static-exception>");
 }
 
-c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(
-    const ObjectStaticCallbacks *cb)
+c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(VM::Class* cb)
     : c_StaticWaitHandle(cb) {
   setState(STATE_FAILED);
 }

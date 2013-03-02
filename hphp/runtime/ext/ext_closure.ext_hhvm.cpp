@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_Closure_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Closure) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Closure(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Closure(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Closure);
 /*
 void HPHP::c_Closure::t___construct()
 _ZN4HPHP9c_Closure13t___constructEv
@@ -163,10 +164,11 @@ HPHP::VM::Instance* new_DummyClosure_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DummyClosure) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DummyClosure(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DummyClosure(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DummyClosure);
 /*
 void HPHP::c_DummyClosure::t___construct()
 _ZN4HPHP14c_DummyClosure13t___constructEv

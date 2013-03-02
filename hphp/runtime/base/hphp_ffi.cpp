@@ -197,8 +197,7 @@ int hphp_ffi_get_constant(void **ret, const char *constant) {
 
 int hphp_ffi_get_class_constant(void **ret, const char *cls,
                                 const char *constant) {
-  Variant result = get_class_constant(cls, constant);
-  return hphp_ffi_exportVariant(result, ret);
+  const_assert(false);
 }
 
 void hphp_ffi_init() {

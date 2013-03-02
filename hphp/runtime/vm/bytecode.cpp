@@ -1155,6 +1155,11 @@ TypedValue* VMExecutionContext::lookupClsCns(const NamedEntity* ne,
   return clsCns;
 }
 
+TypedValue* VMExecutionContext::lookupClsCns(const StringData* cls,
+                                             const StringData* cns) {
+  return lookupClsCns(Unit::GetNamedEntity(cls), cls, cns);
+}
+
 // Look up the method specified by methodName from the class specified by cls
 // and enforce accessibility. Accessibility checks depend on the relationship
 // between the class that first declared the method (baseClass) and the context

@@ -1812,7 +1812,7 @@ int64 f__soap_active_version() {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
 
-c_SoapServer::c_SoapServer(const ObjectStaticCallbacks *cb) :
+c_SoapServer::c_SoapServer(VM::Class* cb) :
     ExtObjectData(cb),
     m_type(SOAP_FUNCTIONS),
     m_version(SOAP_1_1),
@@ -2269,7 +2269,7 @@ void c_SoapServer::t_addsoapheader(CObjRef fault) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
-c_SoapClient::c_SoapClient(const ObjectStaticCallbacks *cb) :
+c_SoapClient::c_SoapClient(VM::Class* cb) :
     ExtObjectDataFlags<ObjectData::HasCall>(cb),
     m_soap_version(SOAP_1_1),
     m_sdl(NULL),
@@ -2742,7 +2742,7 @@ bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
-c_SoapVar::c_SoapVar(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+c_SoapVar::c_SoapVar(VM::Class* cb) : ExtObjectData(cb) {
 }
 
 c_SoapVar::~c_SoapVar() {
@@ -2777,7 +2777,7 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
-c_SoapParam::c_SoapParam(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+c_SoapParam::c_SoapParam(VM::Class* cb) : ExtObjectData(cb) {
 }
 
 c_SoapParam::~c_SoapParam() {
@@ -2795,7 +2795,7 @@ void c_SoapParam::t___construct(CVarRef data, CStrRef name) {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapHeader
 
-c_SoapHeader::c_SoapHeader(const ObjectStaticCallbacks *cb) :
+c_SoapHeader::c_SoapHeader(VM::Class* cb) :
     ExtObjectData(cb) {
 }
 

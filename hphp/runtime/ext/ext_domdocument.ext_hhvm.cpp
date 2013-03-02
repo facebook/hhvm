@@ -3843,10 +3843,11 @@ HPHP::VM::Instance* new_DOMNode_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMNode) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMNode(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMNode(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMNode);
 /*
 void HPHP::c_DOMNode::t___construct()
 _ZN4HPHP9c_DOMNode13t___constructEv
@@ -4930,10 +4931,11 @@ HPHP::VM::Instance* new_DOMAttr_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMAttr) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMAttr(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMAttr(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMAttr);
 /*
 void HPHP::c_DOMAttr::t___construct(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP9c_DOMAttr13t___constructERKNS_6StringES3_
@@ -5163,10 +5165,11 @@ HPHP::VM::Instance* new_DOMCharacterData_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMCharacterData) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMCharacterData(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMCharacterData(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMCharacterData);
 /*
 void HPHP::c_DOMCharacterData::t___construct()
 _ZN4HPHP18c_DOMCharacterData13t___constructEv
@@ -5639,10 +5642,11 @@ HPHP::VM::Instance* new_DOMComment_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMComment) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMComment(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMComment(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMComment);
 /*
 void HPHP::c_DOMComment::t___construct(HPHP::String const&)
 _ZN4HPHP12c_DOMComment13t___constructERKNS_6StringE
@@ -5705,10 +5709,11 @@ HPHP::VM::Instance* new_DOMText_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMText) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMText(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMText(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMText);
 /*
 void HPHP::c_DOMText::t___construct(HPHP::String const&)
 _ZN4HPHP9c_DOMText13t___constructERKNS_6StringE
@@ -5982,10 +5987,11 @@ HPHP::VM::Instance* new_DOMCDATASection_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMCDATASection) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMCDATASection(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMCDATASection(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMCDATASection);
 /*
 void HPHP::c_DOMCDATASection::t___construct(HPHP::String const&)
 _ZN4HPHP17c_DOMCDATASection13t___constructERKNS_6StringE
@@ -6048,10 +6054,11 @@ HPHP::VM::Instance* new_DOMDocument_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMDocument) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMDocument(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMDocument(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMDocument);
 /*
 void HPHP::c_DOMDocument::t___construct(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP13c_DOMDocument13t___constructERKNS_6StringES3_
@@ -7942,10 +7949,11 @@ HPHP::VM::Instance* new_DOMDocumentFragment_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMDocumentFragment) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMDocumentFragment(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMDocumentFragment(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMDocumentFragment);
 /*
 void HPHP::c_DOMDocumentFragment::t___construct()
 _ZN4HPHP21c_DOMDocumentFragment13t___constructEv
@@ -8045,10 +8053,11 @@ HPHP::VM::Instance* new_DOMDocumentType_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMDocumentType) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMDocumentType(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMDocumentType(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMDocumentType);
 /*
 void HPHP::c_DOMDocumentType::t___construct()
 _ZN4HPHP17c_DOMDocumentType13t___constructEv
@@ -8210,10 +8219,11 @@ HPHP::VM::Instance* new_DOMElement_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMElement) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMElement(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMElement(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMElement);
 /*
 void HPHP::c_DOMElement::t___construct(HPHP::String const&, HPHP::String const&, HPHP::String const&)
 _ZN4HPHP12c_DOMElement13t___constructERKNS_6StringES3_S3_
@@ -9491,10 +9501,11 @@ HPHP::VM::Instance* new_DOMEntity_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMEntity) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMEntity(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMEntity(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMEntity);
 /*
 void HPHP::c_DOMEntity::t___construct()
 _ZN4HPHP11c_DOMEntity13t___constructEv
@@ -9656,10 +9667,11 @@ HPHP::VM::Instance* new_DOMEntityReference_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMEntityReference) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMEntityReference(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMEntityReference(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMEntityReference);
 /*
 void HPHP::c_DOMEntityReference::t___construct(HPHP::String const&)
 _ZN4HPHP20c_DOMEntityReference13t___constructERKNS_6StringE
@@ -9722,10 +9734,11 @@ HPHP::VM::Instance* new_DOMNotation_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMNotation) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMNotation(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMNotation(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMNotation);
 /*
 void HPHP::c_DOMNotation::t___construct()
 _ZN4HPHP13c_DOMNotation13t___constructEv
@@ -9887,10 +9900,11 @@ HPHP::VM::Instance* new_DOMProcessingInstruction_Instance(HPHP::VM::Class* cls) 
   size_t builtinPropSize = sizeof(c_DOMProcessingInstruction) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMProcessingInstruction(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMProcessingInstruction(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMProcessingInstruction);
 /*
 void HPHP::c_DOMProcessingInstruction::t___construct(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP26c_DOMProcessingInstruction13t___constructERKNS_6StringES3_
@@ -10082,10 +10096,11 @@ HPHP::VM::Instance* new_DOMNodeIterator_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMNodeIterator) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMNodeIterator(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMNodeIterator(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMNodeIterator);
 /*
 void HPHP::c_DOMNodeIterator::t___construct()
 _ZN4HPHP17c_DOMNodeIterator13t___constructEv
@@ -10319,10 +10334,11 @@ HPHP::VM::Instance* new_DOMNamedNodeMap_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMNamedNodeMap) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMNamedNodeMap(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMNamedNodeMap(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMNamedNodeMap);
 /*
 void HPHP::c_DOMNamedNodeMap::t___construct()
 _ZN4HPHP17c_DOMNamedNodeMap13t___constructEv
@@ -10693,10 +10709,11 @@ HPHP::VM::Instance* new_DOMNodeList_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMNodeList) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMNodeList(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMNodeList(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMNodeList);
 /*
 void HPHP::c_DOMNodeList::t___construct()
 _ZN4HPHP13c_DOMNodeList13t___constructEv
@@ -10951,10 +10968,11 @@ HPHP::VM::Instance* new_DOMImplementation_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMImplementation) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMImplementation(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMImplementation(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DOMImplementation);
 /*
 void HPHP::c_DOMImplementation::t___construct()
 _ZN4HPHP19c_DOMImplementation13t___constructEv
@@ -11204,10 +11222,11 @@ HPHP::VM::Instance* new_DOMXPath_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DOMXPath) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DOMXPath(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DOMXPath(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMXPath);
 /*
 void HPHP::c_DOMXPath::t___construct(HPHP::Variant const&)
 _ZN4HPHP10c_DOMXPath13t___constructERKNS_7VariantE

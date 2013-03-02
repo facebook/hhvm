@@ -23,7 +23,7 @@ namespace HPHP {
 
 const StaticString c_WaitHandle::q_ClassName("WaitHandle");
 
-c_WaitHandle::c_WaitHandle(const ObjectStaticCallbacks *cb)
+c_WaitHandle::c_WaitHandle(VM::Class* cb)
     : ExtObjectData(cb) {
 }
 

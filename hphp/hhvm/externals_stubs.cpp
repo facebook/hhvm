@@ -63,25 +63,6 @@ Object create_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
   return r;
 }
 
-Variant get_class_constant(CStrRef s,
-                           const char *constant,
-                           int fatal /* = true */) {
-  {
-    Variant r;
-    if (eval_get_class_constant_hook(r, s, constant)) return r;
-  }
-  {
-    const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
-    if (cwo) return cwo->os_constant(constant);
-  }
-  if (fatal > 0) {
-    raise_error("Couldn't find constant %s::%s", s.data(), constant);
-  } else if (!fatal) {
-    raise_warning("Couldn't find constant %s::%s", s.data(), constant);
-  }
-  return null;
-}
-
 void init_literal_varstrings() {
   extern void sys_init_literal_varstrings();
   sys_init_literal_varstrings();

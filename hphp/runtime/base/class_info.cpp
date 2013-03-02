@@ -934,7 +934,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     const char *len_or_cw = *p++;
     constant->valueText = *p++;
 
-    if (constant->valueText) {
+    if (uintptr_t(constant->valueText) > 0x100) {
       constant->valueLen = (int64)len_or_cw;
       VariableUnserializer vu(constant->valueText,
                               constant->valueLen,
@@ -945,13 +945,18 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
         assert(false);
       }
     } else {
+      DataType dt = DataType((int)uintptr_t(constant->valueText) - 2);
       constant->valueLen = 0;
+      constant->valueText = nullptr;
       if (!m_name.empty()) {
-        const ObjectStaticCallbacks *cwo =
-          (const ObjectStaticCallbacks*)len_or_cw;
+        Variant v;
+        if (dt == KindOfUnknown) {
+          v = *(Variant*)len_or_cw;
+        } else {
+          v = ClassPropTableEntry::GetVariant(dt, len_or_cw);
+        }
 
-        assert(cwo);
-        constant->callbacks = cwo;
+        constant->setStaticValue(v);
       }
     }
 

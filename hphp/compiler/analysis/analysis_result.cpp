@@ -2592,6 +2592,7 @@ void AnalysisResult::outputCPPClassMapFile(CodeGenerator::Output output) {
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
+  cg_printInclude("<runtime/ext/ext.h>");
   if (output != CodeGenerator::SystemCPP) {
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     if (Option::GenArrayCreate) {
@@ -3331,7 +3332,6 @@ void AnalysisResult::outputCPPDynamicConstantTable(
 }
 
 void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
-  outputCPPDynamicClassTables(output);
   outputCPPDynamicConstantTable(output);
 }
 
@@ -4750,7 +4750,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
   }
   if (Option::UseScalarVariant) {
     if (nstrings == 0) {
-      filename = file + ".cpp";
+      filename = file + "_0.no.cpp";
       f.open(filename.c_str());
       cg.namespaceBegin();
     }

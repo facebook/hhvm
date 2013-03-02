@@ -42,7 +42,7 @@ namespace {
   }
 }
 
-c_GenArrayWaitHandle::c_GenArrayWaitHandle(const ObjectStaticCallbacks *cb)
+c_GenArrayWaitHandle::c_GenArrayWaitHandle(VM::Class* cb)
     : c_BlockableWaitHandle(cb), m_exception() {
 }
 

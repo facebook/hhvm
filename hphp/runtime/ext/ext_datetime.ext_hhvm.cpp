@@ -88,10 +88,11 @@ HPHP::VM::Instance* new_DateTime_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DateTime) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DateTime(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DateTime(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DateTime);
 /*
 void HPHP::c_DateTime::t___construct(HPHP::String const&, HPHP::Object const&)
 _ZN4HPHP10c_DateTime13t___constructERKNS_6StringERKNS_6ObjectE
@@ -968,10 +969,11 @@ HPHP::VM::Instance* new_DateTimeZone_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DateTimeZone) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DateTimeZone(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DateTimeZone(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DateTimeZone);
 /*
 void HPHP::c_DateTimeZone::t___construct(HPHP::String const&)
 _ZN4HPHP14c_DateTimeZone13t___constructERKNS_6StringE
@@ -1280,10 +1282,11 @@ HPHP::VM::Instance* new_DateInterval_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DateInterval) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DateInterval(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DateInterval(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DateInterval);
 /*
 void HPHP::c_DateInterval::t___construct(HPHP::String const&)
 _ZN4HPHP14c_DateInterval13t___constructERKNS_6StringE

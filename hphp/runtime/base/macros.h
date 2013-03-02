@@ -40,7 +40,6 @@ namespace HPHP {
 
 #define FORWARD_DECLARE_CLASS_BUILTIN(cls)      \
   FORWARD_DECLARE_CLASS(cls)                    \
-  extern const ObjectStaticCallbacks cw_##cls;
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \
@@ -136,7 +135,7 @@ namespace HPHP {
 
 #define IMPLEMENT_CLASS_COMMON(cls)                                     \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
-  HPHP::VM::Class* c_##cls::s_cls = nullptr;                               \
+  HPHP::VM::Class* c_##cls::s_cls = nullptr;                            \
 
 #define IMPLEMENT_CLASS(cls)                                            \
   IMPLEMENT_CLASS_COMMON(cls)                                           \

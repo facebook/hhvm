@@ -42,7 +42,7 @@ class c_Closure : public ExtObjectData {
   public: String m___static_locals;
 
   // need to implement
-  public: c_Closure(const ObjectStaticCallbacks *cb = &cw_Closure);
+  public: c_Closure(VM::Class* cls = c_Closure::s_cls);
   public: ~c_Closure();
   public: void t___construct();
   public: Variant t___invoke(int _argc, CArrRef _argv = null_array);
@@ -62,7 +62,7 @@ class c_DummyClosure : public ExtObjectData {
   DECLARE_CLASS(DummyClosure, DummyClosure, ObjectData)
 
   // need to implement
-  public: c_DummyClosure(const ObjectStaticCallbacks *cb = &cw_DummyClosure);
+  public: c_DummyClosure(VM::Class* cls = c_DummyClosure::s_cls);
   public: ~c_DummyClosure();
   public: void t___construct();
 

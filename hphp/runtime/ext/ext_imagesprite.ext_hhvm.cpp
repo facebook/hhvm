@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_ImageSprite_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_ImageSprite) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_ImageSprite(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_ImageSprite(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(ImageSprite);
 /*
 void HPHP::c_ImageSprite::t___construct()
 _ZN4HPHP13c_ImageSprite13t___constructEv

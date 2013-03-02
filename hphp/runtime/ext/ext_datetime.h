@@ -46,7 +46,7 @@ class c_DateTime : public ExtObjectData {
   DECLARE_CLASS(DateTime, DateTime, ObjectData)
 
   // need to implement
-  public: c_DateTime(const ObjectStaticCallbacks *cb = &cw_DateTime);
+  public: c_DateTime(VM::Class* cls = c_DateTime::s_cls);
   public: ~c_DateTime();
   public: Object t_add(CObjRef interval);
   public: void t___construct(CStrRef time = "now",
@@ -121,7 +121,7 @@ class c_DateTimeZone : public ExtObjectData {
   DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
 
   // need to implement
-  public: c_DateTimeZone(const ObjectStaticCallbacks *cb = &cw_DateTimeZone);
+  public: c_DateTimeZone(VM::Class* cls = c_DateTimeZone::s_cls);
   public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
   public: Array t_getlocation();
@@ -171,7 +171,7 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::
   DECLARE_CLASS(DateInterval, DateInterval, ObjectData)
 
   // need to implement
-  public: c_DateInterval(const ObjectStaticCallbacks *cb = &cw_DateInterval);
+  public: c_DateInterval(VM::Class* cls = c_DateInterval::s_cls);
   public: ~c_DateInterval();
   public: void t___construct(CStrRef interval_spec);
   public: Variant t___get(Variant member);

@@ -1550,10 +1550,11 @@ HPHP::VM::Instance* new_MutableArrayIterator_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_MutableArrayIterator) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_MutableArrayIterator(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_MutableArrayIterator(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(MutableArrayIterator);
 /*
 void HPHP::c_MutableArrayIterator::t___construct(HPHP::VRefParamValue const&)
 _ZN4HPHP22c_MutableArrayIterator13t___constructERKNS_14VRefParamValueE

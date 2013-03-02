@@ -69,11 +69,11 @@ function main() {
       fwrite($outfile, "TypedValue* fg_" . $obj->name .
         "(VM::ActRec *ar);\n");
     }
-    foreach ($ext_class_info as $cname => $method_info) {
+    foreach ($ext_class_info as $cname => $cls_info) {
       fwrite($outfile,
         "VM::Instance* new_" . $cname . "_Instance(" .
         "VM::Class*);\n");
-      foreach ($method_info as $obj) {
+      foreach ($cls_info['methods'] as $obj) {
         fwrite($outfile, "TypedValue* tg_" . getUniqueFuncName($obj) .
           "(VM::ActRec *ar);\n");
       }
@@ -94,7 +94,8 @@ function main() {
     }
     fwrite($outfile, "\n};\n\n");
 
-    foreach ($ext_class_info as $cname => $method_info) {
+    foreach ($ext_class_info as $cname => $cls_info) {
+      $method_info = $cls_info['methods'];
       fwrite($outfile, "static const long long hhbc_ext_method_count_" .
              $cname . " = " . count($method_info) . ";\n");
       fwrite($outfile, "static const HhbcExtMethodInfo hhbc_ext_methods_" .
@@ -115,7 +116,7 @@ function main() {
            count($ext_class_info) . ";\n");
     fwrite($outfile, "const HhbcExtClassInfo hhbc_ext_classes[] = {\n  ");
     $firstParam = true;
-    foreach ($ext_class_info as $cname => $method_info) {
+    foreach ($ext_class_info as $cname => $cls_info) {
       if (!$firstParam) {
         fwrite($outfile, ",\n  ");
       }
@@ -123,7 +124,8 @@ function main() {
       fwrite($outfile, '{ "' . $cname . '", new_' . $cname . '_Instance'.
              ', sizeof(c_' . $cname . ')' .
              ', hhbc_ext_method_count_' . $cname .
-             ', hhbc_ext_methods_' . $cname . ' }');
+             ', hhbc_ext_methods_' . $cname .
+             ', &c_'.$cname.'::s_cls }');
     }
     fwrite($outfile, "\n};\n\n");
     fwrite($outfile, "\n} // !HPHP\n\n");

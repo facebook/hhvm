@@ -85,7 +85,7 @@ class c_UConverter : public ExtObjectData {
   DECLARE_CLASS(UConverter, UConverter, ObjectData)
 
   // need to implement
-  public: c_UConverter(const ObjectStaticCallbacks *cb = &cw_UConverter);
+  public: c_UConverter(VM::Class* cls = c_UConverter::s_cls);
   public: ~c_UConverter();
   public: void t___construct(CStrRef toEncoding = "utf-8",
                              CStrRef fromEncoding = "utf-8");

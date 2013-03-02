@@ -512,7 +512,10 @@ Array f_hphp_get_closure_info(CVarRef closure) {
 }
 
 Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name) {
-  return get_class_constant(cls, name.toString().data());
+  TypedValue *res = g_vmContext->lookupClsCns(cls.toString().get(),
+                                              name.toString().get());
+  if (res) return tvAsCVarRef(res);
+  return null;
 }
 
 static Array get_class_info(const ClassInfo *cls) {
@@ -623,11 +626,7 @@ static Array get_class_info(const ClassInfo *cls) {
     for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
          iter != constants.end(); ++iter) {
       ClassInfo::ConstantInfo *info = *iter;
-      if (info->valueText && *info->valueText) {
-        arr.set(info->name, info->getValue());
-      } else {
-        arr.set(info->name, get_class_constant(className, info->name));
-      }
+      arr.set(info->name, info->getValue());
     }
     ret.set(s_constants, VarNR(arr));
   }

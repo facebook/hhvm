@@ -48,7 +48,7 @@ class c_SimpleXMLElement :
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
 
   // need to implement
-  public: c_SimpleXMLElement(const ObjectStaticCallbacks *cb = &cw_SimpleXMLElement);
+  public: c_SimpleXMLElement(VM::Class* cls = c_SimpleXMLElement::s_cls);
   public: ~c_SimpleXMLElement();
   public: void t___construct(CStrRef data, int64 options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
   public: bool t_offsetexists(CVarRef index);
@@ -102,7 +102,7 @@ class c_LibXMLError : public ExtObjectData {
   DECLARE_CLASS(LibXMLError, LibXMLError, ObjectData)
 
   // need to implement
-  public: c_LibXMLError(const ObjectStaticCallbacks *cb = &cw_LibXMLError);
+  public: c_LibXMLError(VM::Class* cls = c_LibXMLError::s_cls);
   public: ~c_LibXMLError();
   public: void t___construct();
 
@@ -118,7 +118,7 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(SimpleXMLElementIterator, SimpleXMLElementIterator, ObjectData)
 
   // need to implement
-  public: c_SimpleXMLElementIterator(const ObjectStaticCallbacks *cb = &cw_SimpleXMLElementIterator);
+  public: c_SimpleXMLElementIterator(VM::Class* cls = c_SimpleXMLElementIterator::s_cls);
   public: ~c_SimpleXMLElementIterator();
   public: void t___construct();
   public: Variant t_current();

@@ -216,10 +216,11 @@ HPHP::VM::Instance* new_Continuation_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Continuation) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Continuation(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Continuation(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Continuation);
 /*
 void HPHP::c_Continuation::t___construct(long, long, bool, HPHP::String const&, HPHP::Variant const&, HPHP::Array const&)
 _ZN4HPHP14c_Continuation13t___constructEllbRKNS_6StringERKNS_7VariantERKNS_5ArrayE
@@ -998,10 +999,11 @@ HPHP::VM::Instance* new_DummyContinuation_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_DummyContinuation) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_DummyContinuation(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_DummyContinuation(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(DummyContinuation);
 /*
 void HPHP::c_DummyContinuation::t___construct()
 _ZN4HPHP19c_DummyContinuation13t___constructEv

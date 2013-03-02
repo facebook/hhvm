@@ -2524,10 +2524,11 @@ HPHP::VM::Instance* new_XMLWriter_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_XMLWriter) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_XMLWriter(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_XMLWriter(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(XMLWriter);
 /*
 void HPHP::c_XMLWriter::t___construct()
 _ZN4HPHP11c_XMLWriter13t___constructEv

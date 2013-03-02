@@ -29,20 +29,6 @@ ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root) {
   const StringData* className = StringData::GetStaticString(s.get());
   return g_vmContext->createObjectOnly((StringData*)className);
 }
-bool eval_get_class_constant_hook(Variant &res, CStrRef s,
-                                  const char* constant) {
-  String clsName(s, strlen(s), CopyString);
-  HPHP::VM::Class* cls = HPHP::VM::Unit::lookupClass(clsName.get());
-  if (cls && !cls->clsInfo()) {
-    String cnsName(constant, strlen(constant), CopyString);
-    TypedValue* tv = cls->clsCnsGet(cnsName.get());
-    if (tv) {
-      res = tvAsCVarRef(tv);
-      return true;
-    }
-  }
-  return false;
-}
 bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
                            LVariableTable* variables, const char *currentDir) {
   bool initial;

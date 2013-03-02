@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_UConverter_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_UConverter) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_UConverter(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_UConverter(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(UConverter);
 /*
 void HPHP::c_UConverter::t___construct(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP12c_UConverter13t___constructERKNS_6StringES3_

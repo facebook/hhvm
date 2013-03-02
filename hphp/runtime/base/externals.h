@@ -44,8 +44,6 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash = -1,
 struct ObjectStaticCallbacks;
 extern const ObjectStaticCallbacks *
   get_object_static_callbacks(CStrRef s);
-extern const ObjectStaticCallbacks *
-  get_builtin_object_static_callbacks(CStrRef s);
 
 /**
  * Getting a static property
@@ -69,12 +67,6 @@ enum ConstantType {
   NoneBuiltinConstant,
 };
 extern ConstantType check_constant(CStrRef name);
-
-/**
- * Getting a class constant
- */
-extern Variant get_class_constant(CStrRef s, const char *prop,
-                                  int fatal = true);
 
 /**
  * Class/function meta info entirely encoded here as a const char * array.

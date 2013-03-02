@@ -77,12 +77,16 @@ Variant f_constant(CStrRef name) {
         className = parent_class;
       }
     }
-    // taking care of volatile class
-    if (class_exists(className)) {
-      return get_class_constant(className, constantName, false);
-    } else {
-      return null;
+    VM::Class* cls = VM::Unit::loadClass(className.get());
+    if (cls) {
+      String cnsName(constantName, data + len - constantName, CopyString);
+      TypedValue* tv = cls->clsCnsGet(cnsName.get());
+      if (tv) {
+        return tvAsCVarRef(tv);
+      }
     }
+    raise_warning("Couldn't find constant %s", data);
+    return null;
   } else {
     TypedValue* cns = g_vmContext->getCns(name.get());
     if (cns == NULL) {

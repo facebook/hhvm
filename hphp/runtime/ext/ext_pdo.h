@@ -117,7 +117,7 @@ class c_PDO : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(PDO, PDO, ObjectData)
 
   // need to implement
-  public: c_PDO(const ObjectStaticCallbacks *cb = &cw_PDO);
+  public: c_PDO(VM::Class* cls = c_PDO::s_cls);
   public: ~c_PDO();
   public: void t___construct(CStrRef dsn, CStrRef username = null_string, CStrRef password = null_string, CArrRef options = null_array);
   public: Variant t_prepare(CStrRef statement, CArrRef options = null_array);
@@ -154,7 +154,7 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(PDOStatement, PDOStatement, ObjectData)
 
   // need to implement
-  public: c_PDOStatement(const ObjectStaticCallbacks *cb = &cw_PDOStatement);
+  public: c_PDOStatement(VM::Class* cls = c_PDOStatement::s_cls);
   public: ~c_PDOStatement();
   public: void t___construct();
   public: Variant t_execute(CArrRef params = null_array);

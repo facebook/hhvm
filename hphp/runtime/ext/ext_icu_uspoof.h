@@ -49,7 +49,7 @@ class c_SpoofChecker : public ExtObjectData {
   DECLARE_CLASS(SpoofChecker, SpoofChecker, ObjectData)
 
   // need to implement
-  public: c_SpoofChecker(const ObjectStaticCallbacks *cb = &cw_SpoofChecker);
+  public: c_SpoofChecker(VM::Class* cls = c_SpoofChecker::s_cls);
   public: ~c_SpoofChecker();
   public: void t___construct();
   public: bool t_issuspicious(CStrRef text, VRefParam issuesFound = null);

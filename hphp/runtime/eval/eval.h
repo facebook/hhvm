@@ -23,8 +23,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root);
-bool eval_get_class_constant_hook(Variant &res, CStrRef s,
-                                  const char* constant);
 bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
                            LVariableTable* variables, const char *currentDir);
 

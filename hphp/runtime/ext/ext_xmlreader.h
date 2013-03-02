@@ -65,7 +65,7 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   DECLARE_CLASS(XMLReader, XMLReader, ObjectData)
 
   // need to implement
-  public: c_XMLReader(const ObjectStaticCallbacks *cb = &cw_XMLReader);
+  public: c_XMLReader(VM::Class* cls = c_XMLReader::s_cls);
   public: ~c_XMLReader();
   public: void t___construct();
   public: bool t_open(CStrRef uri, CStrRef encoding = null_string, int64 options = 0);

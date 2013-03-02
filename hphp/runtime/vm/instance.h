@@ -46,14 +46,9 @@ class Instance : public ObjectData {
  public:
   // This constructor is used for all cppext classes (including resources)
   // and their descendents.
-  Instance(const ObjectStaticCallbacks *cb, bool isResource)
-    : ObjectData(nullptr, isResource) {
-    if (ObjectStaticCallbacks::isEncodedVMClass(cb)) {
-      m_cls = ObjectStaticCallbacks::decodeVMClass(cb);
-    } else {
-      m_cls = *cb->os_cls_ptr;
-    }
-    instanceInit(m_cls);
+  Instance(Class* cls, bool isResource)
+      : ObjectData(nullptr, isResource, cls) {
+    instanceInit(cls);
   }
 
   virtual ~Instance() {}
@@ -286,8 +281,8 @@ namespace HPHP {
 
 class ExtObjectData : public HPHP::VM::Instance {
  public:
-  ExtObjectData(const ObjectStaticCallbacks *cb)
-    : HPHP::VM::Instance(cb, false) {
+  ExtObjectData(HPHP::VM::Class* cls)
+    : HPHP::VM::Instance(cls, false) {
     assert(!m_cls->callsCustomInstanceInit());
   }
   virtual void setRoot(ObjectData *r) {}
@@ -297,7 +292,7 @@ class ExtObjectData : public HPHP::VM::Instance {
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
  public:
-  ExtObjectDataFlags(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  ExtObjectDataFlags(HPHP::VM::Class* cb) : ExtObjectData(cb) {
     ObjectData::setAttributes(flags);
   }
 };

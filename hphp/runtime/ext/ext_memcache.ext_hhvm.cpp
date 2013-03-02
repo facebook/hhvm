@@ -1401,10 +1401,11 @@ HPHP::VM::Instance* new_Memcache_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Memcache) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Memcache(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Memcache(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Memcache);
 /*
 void HPHP::c_Memcache::t___construct()
 _ZN4HPHP10c_Memcache13t___constructEv

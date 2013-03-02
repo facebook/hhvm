@@ -45,7 +45,7 @@ class c_Continuation : public ExtObjectData {
   }
 
   // need to implement
-  public: c_Continuation(const ObjectStaticCallbacks *cb = &cw_Continuation);
+  public: c_Continuation(VM::Class* cls = c_Continuation::s_cls);
   public: ~c_Continuation();
   public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CVarRef obj = null, CArrRef args = null_array);
   public: void t_update(int64 label, CVarRef value);
@@ -72,8 +72,7 @@ class c_Continuation : public ExtObjectData {
     const_assert(hhvm);
     c_Continuation* cont =
       (c_Continuation*)ALLOCOBJSZ(sizeForLocalsAndIters(nLocals, nIters));
-    new ((void *)cont) c_Continuation(
-      ObjectStaticCallbacks::encodeVMClass(cls));
+    new ((void *)cont) c_Continuation(cls);
     cont->m_localsOffset = sizeof(c_Continuation) + sizeof(VM::Iter) * nIters;
     cont->m_arPtr = (VM::ActRec*)(cont->locals() + nLocals);
 
@@ -159,7 +158,7 @@ class c_DummyContinuation : public ExtObjectData {
   DECLARE_CLASS(DummyContinuation, DummyContinuation, ObjectData)
 
   // need to implement
-  public: c_DummyContinuation(const ObjectStaticCallbacks *cb = &cw_DummyContinuation);
+  public: c_DummyContinuation(VM::Class* cls = c_DummyContinuation::s_cls);
   public: ~c_DummyContinuation();
   public: void t___construct();
   public: Variant t_current();

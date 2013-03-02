@@ -88,7 +88,7 @@ const int64 q_Collator$$UPPER_FIRST = UCOL_UPPER_FIRST;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Collator::c_Collator(const ObjectStaticCallbacks *cb) :
+c_Collator::c_Collator(VM::Class* cb) :
     ExtObjectData(cb), m_locale(), m_ucoll(NULL), m_errcode() {
 }
 
@@ -540,7 +540,7 @@ const int64 q_Locale$$VALID_LOCALE = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Locale::c_Locale(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+c_Locale::c_Locale(VM::Class* cb) : ExtObjectData(cb) {
 }
 
 c_Locale::~c_Locale() {
@@ -563,7 +563,7 @@ const int64 q_Normalizer$$NFKC     = UNORM_NFKC;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Normalizer::c_Normalizer(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+c_Normalizer::c_Normalizer(VM::Class* cb) : ExtObjectData(cb) {
 }
 
 c_Normalizer::~c_Normalizer() {

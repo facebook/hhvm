@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_StaticResultWaitHandle_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_StaticResultWaitHandle) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_StaticResultWaitHandle(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_StaticResultWaitHandle(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(StaticResultWaitHandle);
 /*
 void HPHP::c_StaticResultWaitHandle::t___construct()
 _ZN4HPHP24c_StaticResultWaitHandle13t___constructEv

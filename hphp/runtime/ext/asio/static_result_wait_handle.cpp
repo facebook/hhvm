@@ -25,8 +25,7 @@ namespace {
   StaticString s_staticResult("<static-result>");
 }
 
-c_StaticResultWaitHandle::c_StaticResultWaitHandle(
-    const ObjectStaticCallbacks *cb)
+c_StaticResultWaitHandle::c_StaticResultWaitHandle(VM::Class* cb)
     : c_StaticWaitHandle(cb) {
   setState(STATE_SUCCEEDED);
 }

@@ -52,7 +52,7 @@ void f_hphp_unpack_continuation(CObjRef continuation) {
 
 static StaticString s___cont__("__cont__");
 
-c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
+c_Continuation::c_Continuation(VM::Class* cb) :
     ExtObjectData(cb),
     m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
@@ -239,7 +239,7 @@ void c_Continuation::call_raise(ObjectData* e) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DummyContinuation::c_DummyContinuation(const ObjectStaticCallbacks *cb) :
+c_DummyContinuation::c_DummyContinuation(VM::Class* cb) :
   ExtObjectData(cb) {
 }
 

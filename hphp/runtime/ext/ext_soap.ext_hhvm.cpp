@@ -150,10 +150,11 @@ HPHP::VM::Instance* new_SoapServer_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SoapServer) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SoapServer(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SoapServer(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SoapServer);
 /*
 void HPHP::c_SoapServer::t___construct(HPHP::Variant const&, HPHP::Array const&)
 _ZN4HPHP12c_SoapServer13t___constructERKNS_7VariantERKNS_5ArrayE
@@ -685,10 +686,11 @@ HPHP::VM::Instance* new_SoapClient_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SoapClient) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SoapClient(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SoapClient(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SoapClient);
 /*
 void HPHP::c_SoapClient::t___construct(HPHP::Variant const&, HPHP::Array const&)
 _ZN4HPHP12c_SoapClient13t___constructERKNS_7VariantERKNS_5ArrayE
@@ -1334,10 +1336,11 @@ HPHP::VM::Instance* new_SoapVar_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SoapVar) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SoapVar(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SoapVar(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SoapVar);
 /*
 void HPHP::c_SoapVar::t___construct(HPHP::Variant const&, HPHP::Variant const&, HPHP::String const&, HPHP::String const&, HPHP::String const&, HPHP::String const&)
 _ZN4HPHP9c_SoapVar13t___constructERKNS_7VariantES3_RKNS_6StringES6_S6_S6_
@@ -1424,10 +1427,11 @@ HPHP::VM::Instance* new_SoapParam_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SoapParam) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SoapParam(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SoapParam(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SoapParam);
 /*
 void HPHP::c_SoapParam::t___construct(HPHP::Variant const&, HPHP::String const&)
 _ZN4HPHP11c_SoapParam13t___constructERKNS_7VariantERKNS_6StringE
@@ -1491,10 +1495,11 @@ HPHP::VM::Instance* new_SoapHeader_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_SoapHeader) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_SoapHeader(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_SoapHeader(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(SoapHeader);
 /*
 void HPHP::c_SoapHeader::t___construct(HPHP::String const&, HPHP::String const&, HPHP::Variant const&, bool, HPHP::Variant const&)
 _ZN4HPHP12c_SoapHeader13t___constructERKNS_6StringES3_RKNS_7VariantEbS6_

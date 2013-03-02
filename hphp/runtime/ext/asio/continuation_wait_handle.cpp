@@ -33,8 +33,7 @@ namespace {
   StaticString s_continuation("Continuation");
 }
 
-c_ContinuationWaitHandle::c_ContinuationWaitHandle(
-    const ObjectStaticCallbacks *cb)
+c_ContinuationWaitHandle::c_ContinuationWaitHandle(VM::Class* cb)
     : c_BlockableWaitHandle(cb), m_continuation(), m_child(), m_privData(),
       m_depth(0), m_tailCall(false) {
 }

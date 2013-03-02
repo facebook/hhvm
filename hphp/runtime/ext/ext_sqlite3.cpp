@@ -162,7 +162,7 @@ static void php_sqlite3_callback_final(sqlite3_context *context) {
 ///////////////////////////////////////////////////////////////////////////////
 // sqlite3
 
-c_SQLite3::c_SQLite3(const ObjectStaticCallbacks *cb) :
+c_SQLite3::c_SQLite3(VM::Class* cb) :
     ExtObjectData(cb), m_raw_db(NULL) {
 }
 
@@ -429,7 +429,7 @@ bool c_SQLite3::t_openblob(CStrRef table, CStrRef column, int64 rowid,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SQLite3Stmt::c_SQLite3Stmt(const ObjectStaticCallbacks *cb) :
+c_SQLite3Stmt::c_SQLite3Stmt(VM::Class* cb) :
     ExtObjectData(cb), m_raw_stmt(NULL) {
 }
 
@@ -597,7 +597,7 @@ Variant c_SQLite3Stmt::t_execute() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SQLite3Result::c_SQLite3Result(const ObjectStaticCallbacks *cb) :
+c_SQLite3Result::c_SQLite3Result(VM::Class* cb) :
     ExtObjectData(cb) {
 }
 

@@ -21,7 +21,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {}
+c_Closure::c_Closure(VM::Class* cb) : ExtObjectData(cb) {}
 c_Closure::~c_Closure() {}
 
 void c_Closure::t___construct() {}
@@ -43,7 +43,7 @@ bool c_Closure::php_sleep(Variant &ret) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DummyClosure::c_DummyClosure(const ObjectStaticCallbacks *cb) :
+c_DummyClosure::c_DummyClosure(VM::Class* cb) :
   ExtObjectData(cb) {
 }
 

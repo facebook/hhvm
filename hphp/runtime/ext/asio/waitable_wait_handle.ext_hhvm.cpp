@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_WaitableWaitHandle_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_WaitableWaitHandle) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_WaitableWaitHandle(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_WaitableWaitHandle(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(WaitableWaitHandle);
 /*
 void HPHP::c_WaitableWaitHandle::t___construct()
 _ZN4HPHP20c_WaitableWaitHandle13t___constructEv

@@ -65,10 +65,11 @@ HPHP::VM::Instance* new_PDO_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_PDO) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_PDO(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_PDO(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(PDO);
 /*
 void HPHP::c_PDO::t___construct(HPHP::String const&, HPHP::String const&, HPHP::String const&, HPHP::Array const&)
 _ZN4HPHP5c_PDO13t___constructERKNS_6StringES3_S3_RKNS_5ArrayE
@@ -864,10 +865,11 @@ HPHP::VM::Instance* new_PDOStatement_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_PDOStatement) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_PDOStatement(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_PDOStatement(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(PDOStatement);
 /*
 void HPHP::c_PDOStatement::t___construct()
 _ZN4HPHP14c_PDOStatement13t___constructEv

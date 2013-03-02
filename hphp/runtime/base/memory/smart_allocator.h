@@ -261,7 +261,7 @@ void *SmartAllocatorInitSetup() {
 
 #define DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                           \
   public:                                                               \
-  static void *ObjAllocatorInitSetup;                                   \
+  /* static void *ObjAllocatorInitSetup; */                             \
   inline ALWAYS_INLINE void operator delete(void *p) {                  \
     if (!hhvm || T::IsResourceClass) {                                  \
       RELEASEOBJ(NS, T, p);                                             \
@@ -287,8 +287,8 @@ void *SmartAllocatorInitSetup() {
   virtual void sweep();
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)          \
-  void *NS::T::ObjAllocatorInitSetup =                                  \
-    ObjectAllocatorInitSetup<NS::T>();
+  /* void *NS::T::ObjAllocatorInitSetup =                                \
+     ObjectAllocatorInitSetup<NS::T>(); */
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \
     IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(HPHP,T)

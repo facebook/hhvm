@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitableWaitHandle::c_WaitableWaitHandle(const ObjectStaticCallbacks *cb)
+c_WaitableWaitHandle::c_WaitableWaitHandle(VM::Class* cb)
     : c_WaitHandle(cb), m_firstParent(nullptr) {
   setState(STATE_NEW);
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());

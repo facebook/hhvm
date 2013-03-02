@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_XMLReader_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_XMLReader) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_XMLReader(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_XMLReader(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(XMLReader);
 /*
 void HPHP::c_XMLReader::t___construct()
 _ZN4HPHP11c_XMLReader13t___constructEv

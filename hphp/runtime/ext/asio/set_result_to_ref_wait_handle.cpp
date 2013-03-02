@@ -27,8 +27,7 @@ namespace {
   StaticString s_setResultToRef("<set-result-to-ref>");
 }
 
-c_SetResultToRefWaitHandle::c_SetResultToRefWaitHandle(
-    const ObjectStaticCallbacks *cb)
+c_SetResultToRefWaitHandle::c_SetResultToRefWaitHandle(VM::Class* cb)
     : c_BlockableWaitHandle(cb), m_child(), m_ref() {
 }
 

@@ -29,10 +29,11 @@ HPHP::VM::Instance* new_Memcached_Instance(HPHP::VM::Class* cls) {
   size_t builtinPropSize = sizeof(c_Memcached) - sizeof(ObjectData);
   size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
   HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_Memcached(ObjectStaticCallbacks::encodeVMClass(cls));
+  new ((void *)inst) c_Memcached(cls);
   return inst;
 }
 
+IMPLEMENT_CLASS(Memcached);
 /*
 void HPHP::c_Memcached::t___construct(HPHP::String const&)
 _ZN4HPHP11c_Memcached13t___constructERKNS_6StringE

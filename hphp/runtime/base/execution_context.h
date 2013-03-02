@@ -558,6 +558,9 @@ public:
                            const StringData* cls,
                            const StringData* cns);
 
+  TypedValue* lookupClsCns(const StringData* cls,
+                           const StringData* cns);
+
   HPHP::VM::ActRec* arGetSfp(const HPHP::VM::ActRec* ar);
 
   std::string prettyStack(const std::string& prefix) const;

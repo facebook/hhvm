@@ -187,7 +187,8 @@ function parseIDLForMethods(&$ext_class_info, $mangleMap, $idlDir) {
       foreach ($cls['methods'] as $method) {
         $method_info[] = parseIDLMethod($method, $mangleMap, $cname);
       }
-      $ext_class_info[$cname] = $method_info;
+      $ext_class_info[$cname]['methods'] = $method_info;
+      $ext_class_info[$cname]['flags'] = $cls['flags'];
     }
     ResetSchema();
   }

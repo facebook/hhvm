@@ -31,7 +31,6 @@ namespace HPHP {
 
 bool ClassInfo::s_loaded = false;
 ClassInfo *ClassInfo::s_systemFuncs = nullptr;
-ClassInfo *ClassInfo::s_userFuncs = nullptr;
 ClassInfo::ClassMap ClassInfo::s_class_like;
 ClassInfoHook *ClassInfo::s_hook = nullptr;
 
@@ -52,12 +51,6 @@ Array ClassInfo::GetUserFunctions() {
   assert(s_loaded);
 
   Array ret = Array::Create();
-  if (s_userFuncs) {
-    const MethodVec &methods = s_userFuncs->getMethodsVec();
-    for (unsigned i = 0; i < methods.size(); i++) {
-      ret.append(methods[i]->name);
-    }
-  }
   if (s_hook) {
     Array dyn = s_hook->getUserFunctions();
     if (!dyn.isNull()) {
@@ -84,9 +77,6 @@ const ClassInfo::MethodInfo *ClassInfo::FindFunction(CStrRef name) {
   const MethodInfo *ret = s_systemFuncs->getMethodInfo(name);
   if (ret == nullptr && s_hook) {
     ret = s_hook->findFunction(name);
-  }
-  if (ret == nullptr) {
-    ret = s_userFuncs->getMethodInfo(name);
   }
   return ret;
 }
@@ -213,19 +203,21 @@ const ClassInfo::ConstantInfo *ClassInfo::FindConstant(CStrRef name) {
     info = s_hook->findConstant(name);
     if (info) return info;
   }
-  info = s_userFuncs->getConstantInfo(name);
-  return info;
+  return nullptr;
 }
 
-ClassInfo::ConstantInfo::ConstantInfo() : callbacks(nullptr), deferred(true) {
+ClassInfo::ConstantInfo::ConstantInfo() :
+    valueLen(0), callback(nullptr), deferred(true) {
 }
 
 Variant ClassInfo::ConstantInfo::getValue() const {
   if (deferred) {
-    if (callbacks == nullptr) {
-      return get_constant(name);
+    if (callback) {
+      CVarRef (*f)()=(CVarRef(*)())callback;
+      return (*f)();
     }
-    return callbacks->os_constant(name);
+    SystemGlobals* g = get_global_variables();
+    return g->stgv_Variant[valueLen];
   }
   if (!svalue.empty()) {
     try {
@@ -272,12 +264,6 @@ Array ClassInfo::GetConstants() {
     const ConstantMap &scm = s_systemFuncs->getConstants();
     for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
       res.set(it->second->name, it->second->getValue());
-    }
-  }
-  {
-    const ConstantMap &ucm = s_userFuncs->getConstants();
-    for (ConstantMap::const_iterator it = ucm.begin(); it != ucm.end(); ++it) {
-      res.set(it->first, it->second->getValue());
     }
   }
   if (s_hook) {
@@ -944,20 +930,19 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       } catch (Exception &e) {
         assert(false);
       }
-    } else {
+    } else if (constant->valueText) {
       DataType dt = DataType((int)uintptr_t(constant->valueText) - 2);
       constant->valueLen = 0;
       constant->valueText = nullptr;
-      if (!m_name.empty()) {
-        Variant v;
-        if (dt == KindOfUnknown) {
-          v = *(Variant*)len_or_cw;
-        } else {
-          v = ClassPropTableEntry::GetVariant(dt, len_or_cw);
-        }
-
+      Variant v;
+      if (dt == KindOfUnknown) {
+        constant->valueLen = intptr_t(len_or_cw);
+      } else {
+        v = ClassPropTableEntry::GetVariant(dt, len_or_cw);
         constant->setStaticValue(v);
       }
+    } else {
+      constant->callback = (void*)len_or_cw;
     }
 
     assert(m_constants.find(constant->name) == m_constants.end());
@@ -1019,8 +1004,7 @@ void ClassInfo::Load() {
         assert(s_systemFuncs == nullptr);
         s_systemFuncs = info;
       } else {
-        assert(s_userFuncs == nullptr);
-        s_userFuncs = info;
+        always_assert(false);
       }
     } else {
       ClassInfo *&i = s_class_like[info->m_name];
@@ -1030,7 +1014,6 @@ void ClassInfo::Load() {
   }
 
   assert(s_systemFuncs);
-  assert(s_userFuncs);
   s_loaded = true;
 
   for (ClassMap::iterator it = s_class_like.begin(), end = s_class_like.end();

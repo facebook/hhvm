@@ -191,8 +191,7 @@ void hphp_ffi_set_global(const char *name, Variant *value) {
 }
 
 int hphp_ffi_get_constant(void **ret, const char *constant) {
-  Variant result = get_constant(constant);
-  return hphp_ffi_exportVariant(result, ret);
+  const_assert(false);
 }
 
 int hphp_ffi_get_class_constant(void **ret, const char *cls,
@@ -203,7 +202,6 @@ int hphp_ffi_get_class_constant(void **ret, const char *cls,
 void hphp_ffi_init() {
   RuntimeOption::SourceRoot = "/";
   init_thread_locals();
-  init_static_variables();
 }
 
 void hphp_ffi_init_globals() {

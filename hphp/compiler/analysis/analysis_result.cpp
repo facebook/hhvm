@@ -2531,30 +2531,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       delete jobs[i];
     }
   }
-
-  // 3rd round code generation
-  renameStaticNames(m_namedStringLiterals, "literal_strings_remap.h",
-                    Option::StaticStringProxyPrefix);
-  renameStaticNames(m_namedScalarArrays, "scalar_arrays_remap.h",
-                    Option::StaticArrayPrefix);
-  if (Option::UseScalarVariant && !Option::SystemGen) {
-    renameStaticNames(m_namedScalarVarIntegers, "scalar_integers_remap.h",
-                      Option::StaticVarIntPrefix);
-  }
-
-  {
-    string file = m_outputPath + "/" + Option::SystemFilePrefix +
-      "literal_strings";
-    outputCPPNamedLiteralStrings(false, file);
-    if (Option::UseScalarVariant) {
-      string file = m_outputPath + "/" + Option::SystemFilePrefix +
-        "scalar_integers";
-      outputCPPNamedScalarVarIntegers(file);
-      file = m_outputPath + "/" + Option::SystemFilePrefix +
-        "scalar_doubles";
-      outputCPPNamedScalarVarDoubles(file);
-    }
-  }
 }
 
 void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
@@ -2852,7 +2828,6 @@ void AnalysisResult::outputCPPDynamicTablesHeader
     cg_printInclude("<runtime/base/hphp_system.h>");
     cg_printInclude("<runtime/ext/ext.h>");
     cg_printInclude("<runtime/eval/eval.h>");
-    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
     cg_printf("\n");
   } else {
     cg_printf("\n");
@@ -3185,6 +3160,8 @@ void AnalysisResult::outputCPPHashTableGetConstant(
 
 void AnalysisResult::outputCPPDynamicConstantTable(
   CodeGenerator::Output output) {
+  return;
+
   AnalysisResultPtr ar = shared_from_this();
   bool system = output == CodeGenerator::SystemCPP;
   string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
@@ -3498,7 +3475,6 @@ void AnalysisResult::outputCPPGlobalVariablesMethods() {
   if (Option::GenArrayCreate) {
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   }
-  cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   getVariables()->outputCPPGlobalVariablesDtorIncludes(cg, ar);
   cg_printf("\n");
   cg.printImplStarter();
@@ -3871,42 +3847,7 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg,
     assert(!func->isUserFunction());
     func->outputCPPClassMap(cg, ar);
   }
-
-  cg_printf("NULL,\n"); // methods
-  cg_printf("NULL,\n"); // properties
-
-  // constants
-  int len;
-  string output = SymbolTable::getEscapedText(false, len);
-  cg_printf("\"false\", (const char *)%d, \"%s\",\n",
-            len, output.c_str());
-  output = SymbolTable::getEscapedText(true, len);
-  cg_printf("\"true\", (const char *)%d, \"%s\",\n",
-            len, output.c_str());
-  output = SymbolTable::getEscapedText(null, len);
-  cg_printf("\"null\", (const char *)%d, \"%s\",\n",
-            len, output.c_str());
-  if (cgOutput == CodeGenerator::SystemCPP) {
-    /*
-     * We need system constants to show up in g_class_map
-     * for use in the hhvm build, even though they aren't necessarily
-     * loaded in our m_constants.
-     *
-     * Use an empty AnalysisResult so that all constants get output
-     * regardless of the ar->isConstantRedeclared check.
-     */
-    AnalysisResultPtr emptyAr(new AnalysisResult());
-    BuiltinSymbols::LoadSystemConstants()->
-      outputCPPClassMap(cg, emptyAr, false /* last */);
-  }
-  m_constants->outputCPPClassMap(cg, ar);
-
-  cg_printf("NULL,\n"); // attributes
-
-  // user functions
-  cg_printf("(const char *)ClassInfo::IsNothing, NULL, \"\","
-            " \"\", NULL, NULL,\n");
-  cg_printf("NULL,\n"); // interfaces
+  // everything is system now...
   for (StringToFunctionScopePtrMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     FunctionScopePtr func = iter->second;
@@ -3927,15 +3868,28 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg,
       }
     }
   }
+
   cg_printf("NULL,\n"); // methods
   cg_printf("NULL,\n"); // properties
 
+  // constants
+  int len;
+  string output = SymbolTable::getEscapedText(false, len);
+  cg_printf("\"false\", (const char *)%d, \"%s\",\n",
+            len, output.c_str());
+  output = SymbolTable::getEscapedText(true, len);
+  cg_printf("\"true\", (const char *)%d, \"%s\",\n",
+            len, output.c_str());
+  output = SymbolTable::getEscapedText(null, len);
+  cg_printf("\"null\", (const char *)%d, \"%s\",\n",
+            len, output.c_str());
+  m_constants->outputCPPClassMap(cg, ar, false);
   // user defined constants
   for (int i = 0; i < (int)m_fileScopes.size(); i++) {
     ConstantTablePtr constants = m_fileScopes[i]->getConstants();
-    constants->outputCPPClassMap(cg, ar, (i == (int)m_fileScopes.size() - 1));
+    constants->outputCPPClassMap(cg, ar, false);
   }
-
+  cg_printf("NULL, // End of constants\n");
   cg_printf("NULL,\n"); // attributes
 
   // system classes
@@ -4490,20 +4444,7 @@ StringToClassScopePtrVecMap AnalysisResult::getExtensionClasses() {
 void AnalysisResult::outputInitLiteralVarStrings(CodeGenerator &cg,
   int fileIndex, vector<int> &litVarStrFileIndices,
   vector<pair<int, int> > &litVarStrs) {
-  if (litVarStrs.size() >  0) {
-    cg_indentBegin("void %sinit_literal_varstrings_%d() {\n",
-                   (Option::SystemGen ? Option::SysPrefix : ""),  fileIndex);
-    for (unsigned int i = 0; i < litVarStrs.size(); i++) {
-      int hash = litVarStrs[i].first;
-      int index = litVarStrs[i].second;
-      cg_printf("%s = %s;\n",
-                getLitVarStringName(hash, index).c_str(),
-                getLiteralStringName(hash, index).c_str());
-    }
-    cg_indentEnd("}\n");
-    litVarStrFileIndices.push_back(fileIndex);
-  }
-  litVarStrs.clear();
+  const_assert(false);
 }
 
 void AnalysisResult::outputStringProxyData(CodeGenerator &cg,
@@ -4547,204 +4488,7 @@ void AnalysisResult::outputVarStringProxyData(CodeGenerator &cg,
 
 void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
                                                   const string &file) {
-  AnalysisResultPtr ar = shared_from_this();
-  string filename = genStatic ? file : (file + ".h");
-  ofstream f(filename.c_str());
-  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
-
-  cg_printf("\n");
-  cg.headerBegin(filename);
-  if (!genStatic) {
-    cg_printInclude("<runtime/base/hphp.h>");
-    if (Option::SystemGen) {
-      cg_printInclude("<system/gen/sys/literal_strings_remap.h>");
-    } else {
-      cg_printInclude("<sys/literal_strings_remap.h>");
-    }
-    cg_printf("\n");
-  }
-  int nstrings = 0;
-  cg.printImplStarter();
-  cg.namespaceBegin();
-  for (map<int, vector<string> >::const_iterator it =
-       m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
-       it++) {
-    int hash = it->first;
-    const vector<string> &strings = it->second;
-    for (unsigned int i = 0; i < strings.size(); i++) {
-      string name = getLiteralStringName(hash, i);
-      if (genStatic) {
-        cg_printf("static StaticString %s(", name.c_str());
-        cg_printString(strings[i], ar, BlockScopePtr(), false);
-        cg_printf(");\n");
-      } else {
-        if (Option::UseStaticStringProxy) {
-          string proxyName = getLiteralStringName(hash, i, true);
-          cg_printf("extern StaticStringProxy %s;\n", proxyName.c_str());
-          cg_printf("#ifndef %s\n", name.c_str());
-          cg_printf("#define %s (*(StaticString *)(&%s))\n",
-                    name.c_str(), proxyName.c_str());
-          cg_printf("#endif\n");
-        } else {
-          cg_printf("extern StaticString %s;\n", name.c_str());
-        }
-      }
-      if (m_namedVarStringLiterals.find(name) !=
-          m_namedVarStringLiterals.end()) {
-        if (Option::UseStaticStringProxy) {
-          string name = getLitVarStringName(hash, i);
-          string proxyName = getLitVarStringName(hash, i, true);
-          cg_printf("extern VariantProxy %s;\n", proxyName.c_str());
-          cg_printf("#ifndef %s\n", name.c_str());
-          cg_printf("#define %s (*(Variant*)(&%s))\n",
-                    name.c_str(), proxyName.c_str());
-          cg_printf("#endif\n");
-        } else {
-          cg_printf(genStatic ? "static " : "extern ");
-          cg_printf("VarNR %s;\n", getLitVarStringName(hash, i).c_str());
-        }
-      }
-    }
-    nstrings += strings.size();
-  }
-  cg.namespaceEnd();
-  cg.headerEnd(filename);
-  f.close();
-
-  if (genStatic || (nstrings == 0 && !Option::UseScalarVariant)) return;
-
-  int chunkSize;
-  if (ar->isSystem()) {
-    // generate one single literal_strings file for system
-    chunkSize = nstrings;
-  } else {
-    chunkSize = (nstrings + Option::LiteralStringFileCount) /
-                Option::LiteralStringFileCount;
-  }
-  int count = 0;
-
-  vector<int> litVarStrFileIndices;
-  vector<pair<int, int> > litVarStrs;
-  vector<string> lStrings;
-  vector<pair<string, int> > bStrings;
-  int fileIndex = 0;
-  for (map<int, vector<string> >::const_iterator it =
-       m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
-       it++) {
-    int hash = it->first;
-    const vector<string> &strings = it->second;
-    for (unsigned int i = 0; i < strings.size(); i++) {
-      string name = getLiteralStringName(hash, i);
-      if (count % chunkSize == 0) {
-        if (count != 0) {
-          outputStringProxyData(cg, fileIndex, lStrings, bStrings);
-          if (Option::UseStaticStringProxy) {
-            outputVarStringProxyData(cg, fileIndex, litVarStrs);
-          } else {
-            outputInitLiteralVarStrings(cg, fileIndex, litVarStrFileIndices,
-                                        litVarStrs);
-          }
-          cg.namespaceEnd();
-          f.close();
-        }
-        fileIndex = count / chunkSize;
-        filename = file + "_" + lexical_cast<string>(fileIndex) + ".no.cpp";
-        f.open(filename.c_str());
-        cg_printf("\n");
-        cg_printInclude("<runtime/base/complex_types.h>");
-        if (Option::SystemGen) {
-          cg_printInclude("<system/gen/sys/literal_strings_remap.h>");
-        } else {
-          cg_printInclude("<sys/literal_strings_remap.h>");
-        }
-        if (Option::UseStaticStringProxy) {
-          cg_printInclude("<runtime/base/string_util.h>");
-        }
-        cg_printf("\n");
-        cg.namespaceBegin();
-      }
-      count++;
-      if (Option::UseStaticStringProxy) {
-        string proxyName = getLiteralStringName(hash, i, true);
-        cg_printf("StaticStringProxy %s;\n", proxyName.c_str());
-        cg_printf("#ifndef %s\n", name.c_str());
-        cg_printf("#define %s (*(StaticString *)(&%s))\n",
-                  name.c_str(), proxyName.c_str());
-        cg_printf("#endif\n");
-        bool isBinary = false;
-        string escaped = CodeGenerator::EscapeLabel(strings[i], &isBinary);
-        string out("(const char *)&");
-        out += proxyName;
-        out += ", (const char *)\"";
-        out += escaped;
-        out += "\"";
-        if (isBinary) {
-          bStrings.push_back(
-            pair<string, int>(out, (int)strings[i].size()));
-        } else {
-          lStrings.push_back(out);
-        }
-      } else {
-        cg_printf("StaticString %s(", name.c_str());
-        cg_printString(strings[i], ar, BlockScopePtr(), false);
-        cg_printf(");\n");
-      }
-      if (m_namedVarStringLiterals.find(name) !=
-          m_namedVarStringLiterals.end()) {
-        if (Option::UseStaticStringProxy) {
-          string name = getLitVarStringName(hash, i);
-          string proxyName = getLitVarStringName(hash, i, true);
-          cg_printf("VariantProxy %s;\n", proxyName.c_str());
-          cg_printf("#ifndef %s\n", name.c_str());
-          cg_printf("#define %s (*(Variant*)(&%s))\n",
-                    name.c_str(), proxyName.c_str());
-          cg_printf("#endif\n");
-        } else {
-          cg_printf("VarNR %s;\n", getLitVarStringName(hash, i).c_str());
-        }
-        litVarStrs.push_back(pair<int, int>(hash, i));
-      }
-    }
-  }
-  if (Option::UseScalarVariant) {
-    if (nstrings == 0) {
-      filename = file + "_0.no.cpp";
-      f.open(filename.c_str());
-      cg.namespaceBegin();
-    }
-    cg_printf("\n");
-    for (unsigned int i = 0; i < litVarStrFileIndices.size(); i++) {
-      cg_printf("extern void %sinit_literal_varstrings_%d();\n",
-                (Option::SystemGen ? Option::SysPrefix : ""),
-                litVarStrFileIndices[i]);
-    }
-    outputStringProxyData(cg, fileIndex, lStrings, bStrings);
-    if (Option::UseStaticStringProxy) {
-      outputVarStringProxyData(cg, fileIndex, litVarStrs);
-    } else {
-      outputInitLiteralVarStrings(cg, fileIndex, litVarStrFileIndices,
-                                  litVarStrs);
-    }
-    cg_indentBegin("void %sinit_literal_varstrings() {\n",
-                   Option::SystemGen ? Option::SysPrefix : "");
-    if (!Option::SystemGen) {
-      cg_printf("extern void %sinit_literal_varstrings();\n",
-                Option::SysPrefix);
-      cg_printf("%sinit_literal_varstrings();\n", Option::SysPrefix);
-    }
-    if (!Option::UseStaticStringProxy) {
-      for (unsigned int i = 0; i < litVarStrFileIndices.size(); i++) {
-        cg_printf("%sinit_literal_varstrings_%d();\n",
-                  (Option::SystemGen ? Option::SysPrefix : ""),
-                  litVarStrFileIndices[i]);
-      }
-    }
-    cg_indentEnd("}\n");
-  } else if (!Option::SystemGen) {
-    cg_printf("void init_literal_varstrings() {}\n");
-  }
-  cg.namespaceEnd();
-  f.close();
+  const_assert(false);
 }
 
 void AnalysisResult::outputCPPSepExtensionMake() {

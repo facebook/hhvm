@@ -403,29 +403,54 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
                                             AnalysisResultPtr ar,
                                             Symbol *sym) {
   ClassScopeRawPtr cls = getClassScope();
-  if (sym->valueSet() &&
+  if (true/* sym->valueSet() &&
       (cls || (!sym->isDynamic()  &&
-               !ar->isConstantRedeclared(sym->getName())))) {
+      !ar->isConstantRedeclared(sym->getName()))) */) {
     ExpressionPtr value = dynamic_pointer_cast<Expression>(sym->getValue());
     Variant v;
+    cg_printf("\"%s\", ", CodeGenerator::EscapeLabel(sym->getName()).c_str());
     if (value && value->getScalarValue(v)) {
       int len;
       string output = getEscapedText(v, len);
-      cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
-                CodeGenerator::EscapeLabel(sym->getName()).c_str(),
+      cg_printf("(const char *)%d, \"%s\",\n",
                 len, output.c_str());
     } else if (cls) {
       DataType dt = sym->getFinalType()->getDataType();
       always_assert(dt >= -1 && dt < 255);
-      cg_printf("\"%s\", (const char *)&%s%s%s%s, (const char*)%d,\n",
-                CodeGenerator::EscapeLabel(sym->getName()).c_str(),
+      cg_printf("(const char *)&%s%s%s%s, (const char*)%d,\n",
                 Option::ClassConstantPrefix, cls->getId().c_str(),
                 Option::IdPrefix.c_str(),
                 CodeGenerator::FormatLabel(sym->getName()).c_str(),
                 (int)dt + 2);
     } else {
-      cg_printf("\"%s\", (const char *)0, NULL,\n",
-                CodeGenerator::EscapeLabel(sym->getName()).c_str());
+      DataType dt = sym->getFinalType()->getDataType();
+      if (sym->isDynamic()) {
+        always_assert(dt == KindOfUnknown);
+        cg_printf("(const char *)"
+                  "((offsetof(SystemGlobals, %s%s) -"
+                  " offsetof(SystemGlobals, stgv_Variant)) / "
+                  "sizeof(Variant)), "
+                  "(const char *)%d,\n",
+                  Option::ConstantPrefix,
+                  CodeGenerator::FormatLabel(sym->getName()).c_str(),
+                  (int)dt + 2);
+      } else if (dt == KindOfObject) {
+        if (sym->getName() == "STDERR") {
+          cg_printf("(const char *)&BuiltinFiles::GetSTDERR, nullptr,\n");
+        } else if (sym->getName() == "STDIN") {
+          cg_printf("(const char *)&BuiltinFiles::GetSTDIN, nullptr,\n");
+        } else if (sym->getName() == "STDOUT") {
+          cg_printf("(const char *)&BuiltinFiles::GetSTDOUT, nullptr,\n");
+        } else {
+          not_reached();
+        }
+      } else {
+        always_assert(dt != KindOfUnknown);
+        cg_printf("(const char *)&%s%s, (const char*)%d,\n",
+                  Option::ConstantPrefix,
+                  CodeGenerator::FormatLabel(sym->getName()).c_str(),
+                  (int)dt + 2);
+      }
     }
   }
 }

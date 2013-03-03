@@ -32,10 +32,6 @@ namespace HPHP {
 
 HphpBinary::Type getHphpBinaryType() { return HphpBinary::hhvm; }
 
-void init_static_variables() {
-  init_builtin_constant_table();
-}
-
 Variant invoke_file(CStrRef s,
                     bool once,
                     LVariableTable* variables,
@@ -51,21 +47,12 @@ Variant invoke_file(CStrRef s,
   return throw_missing_file(s.c_str());
 }
 
-Variant get_constant(CStrRef name, bool error) {
-  return get_builtin_constant(name, error);
-}
-
 Object create_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
   ObjectData *obj = eval_create_object_only_hook(s, root);
   if (UNLIKELY(!obj)) throw_missing_class(s);
   Object r = obj;
   obj->init();
   return r;
-}
-
-void init_literal_varstrings() {
-  extern void sys_init_literal_varstrings();
-  sys_init_literal_varstrings();
 }
 
 //////////////////////////////////////////////////////////////////////

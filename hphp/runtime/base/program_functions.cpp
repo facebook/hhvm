@@ -1198,14 +1198,12 @@ void hphp_process_init() {
   init_thread_locals();
   ClassInfo::Load();
   Process::InitProcessStatics();
-  init_static_variables();
 
   // the liboniguruma docs say this isnt needed,
   // but the implementation of init is not
   // thread safe due to bugs
   onig_init();
 
-  init_literal_varstrings();
   g_vmProcessInit();
 
   PageletServer::Restart();

@@ -290,24 +290,12 @@ void CodeGenerator::printInclude(const std::string &file) {
 void CodeGenerator::printBasicIncludes() {
   if (Option::GenerateCPPMain) {
     printInclude("<runtime/base/hphp.h>");
-    printInclude(string(Option::SystemFilePrefix) +
-                 "literal_strings_remap.h");
-    printInclude(string(Option::SystemFilePrefix) +
-                 "scalar_arrays_remap.h");
-    if (Option::UseScalarVariant) {
-      printInclude(string(Option::SystemFilePrefix) +
-                   "scalar_integers_remap.h");
-    }
     printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     if (Option::GenArrayCreate) {
       printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
     }
   } else if (getOutput() == CodeGenerator::SystemCPP) {
     printInclude("<runtime/base/hphp_system.h>");
-    printInclude(string("system/gen/") + Option::SystemFilePrefix +
-                 "literal_strings_remap.h");
-    printInclude(string("system/gen/") + Option::SystemFilePrefix +
-                 "scalar_arrays_remap.h");
   }
 }
 

@@ -98,7 +98,7 @@ public:
     String name;
     unsigned int valueLen;
     const char *valueText;
-    const ObjectStaticCallbacks *callbacks;
+    const void* callback;
 
     Variant getValue() const;
     void setValue(CVarRef value);
@@ -395,7 +395,6 @@ public:
 protected:
   static bool s_loaded;            // whether class map is loaded
   static ClassInfo *s_systemFuncs; // all system functions
-  static ClassInfo *s_userFuncs;   // all user functions
 
   static ClassInfoHook *s_hook;
 

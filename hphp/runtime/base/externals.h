@@ -56,19 +56,6 @@ extern Variant get_static_property(CStrRef s, const char *prop);
 extern Variant get_class_var_init(CStrRef s, const char *var);
 
 /**
- * Getting a constant
- */
-extern Variant get_constant(CStrRef name, bool error = true);
-extern Variant get_builtin_constant(CStrRef name, bool error = true);
-enum ConstantType {
-  StaticBuiltinConstant = 0,
-  StdioBuiltinConstant,
-  DynamicBuiltinConstant,
-  NoneBuiltinConstant,
-};
-extern ConstantType check_constant(CStrRef name);
-
-/**
  * Class/function meta info entirely encoded here as a const char * array.
  */
 extern const char *g_class_map[];
@@ -94,22 +81,11 @@ extern Variant invoke_file(CStrRef file, bool once = false,
 extern bool hphp_could_invoke_file(CStrRef file, void*);
 
 /**
- * Initializes constant strings and scalar arrays.
- */
-extern void init_static_variables();
-
-/**
- * Initializes the constant table.
- */
-extern void init_builtin_constant_table();
-
-/**
  * Returns a thread local global variable class pointer.
  */
 typedef VM::GlobalNameValueTableWrapper GlobalVariables;
 extern GlobalVariables *get_global_variables();
 extern void init_global_variables();
-extern void init_literal_varstrings();
 extern void free_global_variables();
 extern void free_global_variables_after_sweep();
 extern Array get_global_state();

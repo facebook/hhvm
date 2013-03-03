@@ -19,8 +19,6 @@
 #define __GENERATED_php_globals_constants_h48683a1c__
 
 #include <runtime/base/hphp_system.h>
-#include <system/gen/sys/literal_strings_remap.h>
-#include <system/gen/sys/scalar_arrays_remap.h>
 
 // Declarations
 

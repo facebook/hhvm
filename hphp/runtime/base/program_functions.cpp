@@ -76,6 +76,14 @@ extern char **environ;
 
 namespace HPHP {
 
+const char* kCompilerId =
+#ifdef COMPILER_ID
+  COMPILER_ID
+#else
+  ""
+#endif
+  ;
+
 extern InitFiniNode *extra_process_init, *extra_process_exit;
 
 namespace VM { void initialize_repo(); }
@@ -787,9 +795,7 @@ static int execute_program_impl(int argc, char **argv) {
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
-#ifdef COMPILER_ID
     ("compiler-id", "display the git hash for the compiler id")
-#endif
     ("repo-schema", "display the repo schema id used by this app")
     ("taint-status", "check if the compiler was built with taint enabled")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
@@ -883,18 +889,14 @@ static int execute_program_impl(int argc, char **argv) {
     default: { cout << "Compiled by HipHop Compiler"; break; }
     }
     cout << " v" << version << " (" << (debug ? "dbg" : "rel") << ")\n";
-#ifdef COMPILER_ID
-    cout << "Compiler: " << COMPILER_ID << "\n";
-#endif
+    cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << VM::Repo::kSchemaId << "\n";
     return 0;
   }
-#ifdef COMPILER_ID
   if (vm.count("compiler-id")) {
-    cout << COMPILER_ID << "\n";
+    cout << kCompilerId << "\n";
     return 0;
   }
-#endif
 
   if (vm.count("repo-schema")) {
     cout << VM::Repo::kSchemaId << "\n";

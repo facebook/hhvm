@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include <runtime/base/hphp_system.h>
-#include <runtime/base/compiler_id.h>
+#include <runtime/base/program_functions.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,11 +29,7 @@ const char* getHphpCompilerVersion() {
 }
 
 const char* getHphpCompilerId() {
-#ifdef COMPILER_ID
-  return COMPILER_ID;
-#else
-  return "";
-#endif
+  return kCompilerId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

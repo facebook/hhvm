@@ -17,12 +17,12 @@
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/server/http_server.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/program_functions.h>
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/preg.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/array/array_init.h>
-#include <runtime/base/compiler_id.h>
 #include <util/json.h>
 #include <util/compatibility.h>
 #include <runtime/base/hardware_counter.h>
@@ -850,9 +850,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   w->writeEntry("id", (int64)Process::GetProcessId());
   w->writeEntry("build", RuntimeOption::BuildId);
 
-#ifdef COMPILER_ID
-  w->writeEntry("compiler", COMPILER_ID);
-#endif
+  w->writeEntry("compiler", kCompilerId);
 
 #ifdef DEBUG
   w->writeEntry("debug", "yes");

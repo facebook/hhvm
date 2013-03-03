@@ -88,14 +88,6 @@ foreach (CXX_FILE ${CXX_SOURCES})
 endforeach()
 
 add_custom_command(
-  OUTPUT runtime/base/compiler_id.h
-  COMMAND hphp/tools/generate_compiler_id.sh
-  DEPENDS ${CXX_SOURCES} ${C_SOURCES}
-  WORKING_DIRECTORY ${HPHP_HOME}
-  COMMENT "Generating Compiler ID"
-  VERBATIM)
-
-add_custom_command(
   OUTPUT runtime/vm/repo_schema.h
   COMMAND hphp/tools/generate_repo_schema.sh
   DEPENDS ${CXX_SOURCES} ${C_SOURCES}
@@ -103,7 +95,7 @@ add_custom_command(
   COMMENT "Generating Repo Schema ID"
   VERBATIM)
 
-ADD_LIBRARY(hphp_runtime_static STATIC runtime/vm/repo_schema.h runtime/base/compiler_id.h ${CXX_SOURCES} ${C_SOURCES})
+ADD_LIBRARY(hphp_runtime_static STATIC runtime/vm/repo_schema.h ${CXX_SOURCES} ${C_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)

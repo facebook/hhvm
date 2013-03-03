@@ -24,7 +24,6 @@
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/compiler_id.h>
 #include <runtime/base/preg.h>
 #include <util/process.h>
 #include <util/logger.h>
@@ -128,9 +127,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    bare          optional, whether to display frame ordinates\n"
         "/build-id:        returns build id that's passed in from command line"
         "\n"
-#ifdef COMPILER_ID
         "/compiler-id:     returns the compiler id that built this app\n"
-#endif
         "/repo-schema:     return the repo schema id used by this app\n"
         "/check-load:      how many threads are actively handling requests\n"
         "/check-queued:    how many http requests are queued waiting to be\n"
@@ -275,12 +272,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       transport->sendString(RuntimeOption::BuildId, 200);
       break;
     }
-#ifdef COMPILER_ID
     if (cmd == "compiler-id") {
-      transport->sendString(COMPILER_ID, 200);
+      transport->sendString(kCompilerId, 200);
       break;
     }
-#endif
     if (cmd == "repo-schema") {
       transport->sendString(VM::Repo::kSchemaId, 200);
       break;

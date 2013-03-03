@@ -42,7 +42,6 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/thread_init_fini.h>
-#include <runtime/base/compiler_id.h>
 #include <runtime/vm/repo.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -363,9 +362,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "files according to preprocessed file sizes, instead of original file "
      "sizes (default). Run bin/ppp.php to generate an HDF configuration file "
      "to specify here.")
-#ifdef COMPILER_ID
     ("compiler-id", "display the git hash for the compiler id")
-#endif
     ("repo-schema", "display the repo schema id used by this app")
     ("taint-status", "check if the compiler was built with taint enabled")
     ;
@@ -404,19 +401,15 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 #define HPHP_VERSION(v) cout << HPHP_COMPILER_STR #v << "\n";
 #include "../version"
 
-#ifdef COMPILER_ID
-cout << "Compiler: " << COMPILER_ID << "\n";
-#endif
+    cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << VM::Repo::kSchemaId << "\n";
     return 1;
   }
 
-#ifdef COMPILER_ID
   if (vm.count("compiler-id")) {
-    cout << COMPILER_ID << "\n";
+    cout << kCompilerId << "\n";
     return 1;
   }
-#endif
 
   if (vm.count("repo-schema")) {
     cout << VM::Repo::kSchemaId << "\n";

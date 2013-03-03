@@ -7,6 +7,7 @@ $inputs = 'find . -regex ".*\.cpp" -or -regex ".*\.c"   -or -regex ".*\.h"';
 
 // do not touch these files
 $excluded = array(
+  'runtime/base/compiler_id.h',
   'runtime/ext/bcmath/',
   'util/neo/',
   'util/cronoutils.h',

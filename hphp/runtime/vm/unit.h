@@ -608,8 +608,8 @@ public:
     m_cacheOffset = id >> 3;
     m_cacheMask = 1 << (id & 7);
   }
-  bool isMergeOnly() const { return m_mainReturn._count; }
-  void clearMergeOnly() { m_mainReturn._count = 0; }
+  bool isMergeOnly() const { return m_mergeOnly; }
+  void clearMergeOnly() { m_mergeOnly = false; }
   void* replaceUnit() const;
 public:
   static Mutex s_classesMutex;
@@ -651,11 +651,7 @@ public: // Translator field access
   static size_t bcOff() { return offsetof(Unit, m_bc); }
 
 private:
-  /*
-   * pseudoMain's return value, or KindOfUninit if
-   * its not known. Also use _count as a flag to
-   * indicate that this is a mergeOnly unit
-   */
+  // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
   int64 m_sn;
   uchar* m_bc;
@@ -673,6 +669,7 @@ private:
   int8 m_repoId;
   uint8 m_mergeState;
   uint8 m_cacheMask;
+  bool m_mergeOnly;
   LineTable m_lineTable;
   FuncTable m_funcTable;
   PreConstVec m_preConsts;
@@ -696,7 +693,7 @@ class UnitEmitter {
   const StringData* getFilepath() { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
-  void markNotMergeOnly() { m_mainReturn._count = 0; }
+  void setMergeOnly(bool b) { m_mergeOnly = b; }
   const MD5& md5() const { return m_md5; }
   Id addPreConst(const StringData* name, const TypedValue& value);
   Id mergeLitstr(const StringData* litstr);
@@ -811,6 +808,7 @@ class UnitEmitter {
   typedef std::vector<ArrayVecElm> ArrayVec;
   ArrayVec m_arrays;
   int m_nextFuncSn;
+  bool m_mergeOnly;
   typedef std::vector<FuncEmitter*> FeVec;
   FeVec m_fes;
   typedef hphp_hash_map<const StringData*, FuncEmitter*, string_data_hash,
@@ -880,7 +878,7 @@ class UnitRepoProxy : public RepoProxy {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64& unitSn, const MD5& md5, const uchar* bc,
                 size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
-                const TypedValue* mainReturn,
+                const TypedValue* mainReturn, bool mergeOnly,
                 const LineTable& lines);
   };
   class GetUnitStmt : public RepoProxy::Stmt {

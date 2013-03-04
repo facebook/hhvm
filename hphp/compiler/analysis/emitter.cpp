@@ -1725,10 +1725,8 @@ void EmitterVisitor::visit(FileScopePtr file) {
       tvWriteUninit(&mainReturn);
       tvAsVariant(&mainReturn) = 1;
     }
-    // Use _count as a flag for VMExecutionContext::evalUnit
-    // since its otherwise unused
-    mainReturn._count = !notMergeOnly;
     m_ue.setMainReturn(&mainReturn);
+    m_ue.setMergeOnly(!notMergeOnly);
     // If the exitHnd label was used, we need to emit some extra code
     // to handle stray breaks
     Label exit;
@@ -7206,9 +7204,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   TypedValue mainReturn;
   mainReturn.m_data.num = 1;
   mainReturn.m_type = KindOfBoolean;
-  // _count is the "Unit::isMergeOnly()" flag
-  mainReturn._count = 1;
   ue->setMainReturn(&mainReturn);
+  ue->setMergeOnly(true);
 
   MetaInfoBuilder metaInfo;
 

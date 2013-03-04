@@ -286,9 +286,9 @@ Unit::Unit()
       m_repoId(-1),
       m_mergeState(UnitMergeStateUnmerged),
       m_cacheMask(0),
+      m_mergeOnly(false),
       m_pseudoMainCache(nullptr) {
   tvWriteUninit(&m_mainReturn);
-  m_mainReturn._count = 0; // flag for whether or not the unit is mergeable
 }
 
 Unit::~Unit() {
@@ -1514,7 +1514,7 @@ void UnitRepoProxy::InsertUnitStmt
                   ::insert(RepoTxn& txn, int64& unitSn, const MD5& md5,
                            const uchar* bc, size_t bclen,
                            const uchar* bc_meta, size_t bc_meta_len,
-                           const TypedValue* mainReturn,
+                           const TypedValue* mainReturn, bool mergeOnly,
                            const LineTable& lines) {
   BlobEncoder linesBlob;
 
@@ -1532,7 +1532,7 @@ void UnitRepoProxy::InsertUnitStmt
                  bc_meta_len ? (const void*)bc_meta : (const void*)"",
                  bc_meta_len);
   query.bindTypedValue("@mainReturn", *mainReturn);
-  query.bindBool("@mergeable", mainReturn->_count);
+  query.bindBool("@mergeable", mergeOnly);
   query.bindBlob("@lines", linesBlob(lines), /* static */ true);
   query.exec();
   unitSn = query.getInsertedRowid();
@@ -1566,8 +1566,8 @@ bool UnitRepoProxy::GetUnitStmt
     ue.setSn(unitSn);
     ue.setBc((const uchar*)bc, bclen);
     ue.setBcMeta((const uchar*)bc_meta, bc_meta_len);
-    value._count = mergeable;
     ue.setMainReturn(&value);
+    ue.setMergeOnly(mergeable);
 
     LineTable lines;
     linesBlob(lines);
@@ -1758,7 +1758,7 @@ void UnitRepoProxy::GetUnitMergeablesStmt
          * deal with requires at merge time, so drop them
          * here, and clear the mergeOnly flag for the unit
          */
-        ue.markNotMergeOnly();
+        ue.setMergeOnly(false);
         break;
       }
       int mergeableIx;           /**/ query.getInt(0, mergeableIx);
@@ -1953,10 +1953,9 @@ bool UnitRepoProxy::GetBaseOffsetAfterPCLocStmt
 UnitEmitter::UnitEmitter(const MD5& md5)
   : m_repoId(-1), m_sn(-1), m_bcmax(BCMaxInit), m_bc((uchar*)malloc(BCMaxInit)),
     m_bclen(0), m_bc_meta(nullptr), m_bc_meta_len(0), m_filepath(nullptr),
-    m_md5(md5), m_nextFuncSn(0),
+    m_md5(md5), m_nextFuncSn(0), m_mergeOnly(false),
     m_allClassesHoistable(true), m_returnSeen(false) {
   tvWriteUninit(&m_mainReturn);
-  m_mainReturn._count = 0;
 }
 
 UnitEmitter::~UnitEmitter() {
@@ -2220,7 +2219,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       LineTable lines = createLineTable(m_sourceLocTab, m_bclen);
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
                                     m_bc_meta, m_bc_meta_len,
-                                    &m_mainReturn, lines);
+                                    &m_mainReturn, m_mergeOnly, lines);
     }
     int64 usn = m_sn;
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
@@ -2316,6 +2315,7 @@ Unit* UnitEmitter::create() {
   }
   u->m_filepath = m_filepath;
   u->m_mainReturn = m_mainReturn;
+  u->m_mergeOnly = m_mergeOnly;
   {
     const std::string& dirname = Util::safe_dirname(m_filepath->data(),
                                                     m_filepath->size());
@@ -2336,7 +2336,7 @@ Unit* UnitEmitter::create() {
     u->m_preClasses.push_back(PreClassPtr((*it)->create(*u)));
   }
   size_t ix = m_fes.size() + m_hoistablePceIdVec.size();
-  if (u->m_mainReturn._count && !m_allClassesHoistable) {
+  if (m_mergeOnly && !m_allClassesHoistable) {
     size_t extra = 0;
     for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
          it != m_mergeableStmts.end(); ++it) {
@@ -2344,7 +2344,7 @@ Unit* UnitEmitter::create() {
       if (!RuntimeOption::RepoAuthoritative) {
         if (it->first != UnitMergeKindClass) {
           extra = 0;
-          u->m_mainReturn._count = 0;
+          u->m_mergeOnly = false;
           break;
         }
       } else switch (it->first) {
@@ -2383,7 +2383,7 @@ Unit* UnitEmitter::create() {
     mi->mergeableObj(ix++) = u->m_preClasses[*it].get();
   }
   mi->m_firstMergeablePreClass = ix;
-  if (u->m_mainReturn._count && !m_allClassesHoistable) {
+  if (u->m_mergeOnly && !m_allClassesHoistable) {
     for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
          it != m_mergeableStmts.end(); ++it) {
       switch (it->first) {

@@ -25,7 +25,7 @@
 #include <test/test_ext_bzip2.h>
 #include <test/test_ext_class.h>
 #include <test/test_ext_closure.h>
-#include <test/test_ext_collection.h>
+#include <test/test_ext_collections.h>
 #include <test/test_ext_continuation.h>
 #include <test/test_ext_ctype.h>
 #include <test/test_ext_curl.h>

@@ -63,7 +63,7 @@
 #include <runtime/base/util/extended_logger.h>
 
 #include <system/lib/systemlib.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 
 #include "runtime/vm/name_value_table_wrapper.h"
 #include "runtime/vm/request_arena.h"

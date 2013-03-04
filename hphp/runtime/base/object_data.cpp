@@ -24,7 +24,7 @@
 #include <runtime/base/class_info.h>
 #include <runtime/ext/ext_closure.h>
 #include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 #include <runtime/vm/class.h>
 
 #include <system/lib/systemlib.h>

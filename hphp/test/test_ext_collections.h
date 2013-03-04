@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestExtCollection : public TestCppExt {
+class TestExtCollections : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 };

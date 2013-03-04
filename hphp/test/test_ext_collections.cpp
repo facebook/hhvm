@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test_ext_collection.h>
-#include <runtime/ext/ext_collection.h>
+#include <test/test_ext_collections.h>
+#include <runtime/ext/ext_collections.h>
 
 IMPLEMENT_SEP_EXTENSION_TEST(Collection);
 ///////////////////////////////////////////////////////////////////////////////
 
-bool TestExtCollection::RunTests(const std::string &which) {
+bool TestExtCollections::RunTests(const std::string &which) {
   bool ret = true;
 
   return ret;

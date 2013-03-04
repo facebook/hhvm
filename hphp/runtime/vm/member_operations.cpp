@@ -15,7 +15,7 @@
 */
 
 #include "runtime/vm/member_operations.h"
-#include "runtime/ext/ext_collection.h"
+#include "runtime/ext/ext_collections.h"
 
 namespace HPHP {
 namespace VM {

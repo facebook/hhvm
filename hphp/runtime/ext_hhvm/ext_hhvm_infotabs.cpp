@@ -2280,9 +2280,11 @@ TypedValue* tg_6Vector_isEmpty(VM::ActRec *ar);
 TypedValue* tg_6Vector_count(VM::ActRec *ar);
 TypedValue* tg_6Vector_at(VM::ActRec *ar);
 TypedValue* tg_6Vector_get(VM::ActRec *ar);
+TypedValue* tg_6Vector_set(VM::ActRec *ar);
 TypedValue* tg_6Vector_put(VM::ActRec *ar);
 TypedValue* tg_6Vector_clear(VM::ActRec *ar);
 TypedValue* tg_6Vector_contains(VM::ActRec *ar);
+TypedValue* tg_6Vector_removeAt(VM::ActRec *ar);
 TypedValue* tg_6Vector_append(VM::ActRec *ar);
 TypedValue* tg_6Vector_add(VM::ActRec *ar);
 TypedValue* tg_6Vector_pop(VM::ActRec *ar);
@@ -2315,10 +2317,12 @@ TypedValue* tg_3Map_isEmpty(VM::ActRec *ar);
 TypedValue* tg_3Map_count(VM::ActRec *ar);
 TypedValue* tg_3Map_at(VM::ActRec *ar);
 TypedValue* tg_3Map_get(VM::ActRec *ar);
+TypedValue* tg_3Map_set(VM::ActRec *ar);
 TypedValue* tg_3Map_put(VM::ActRec *ar);
 TypedValue* tg_3Map_clear(VM::ActRec *ar);
 TypedValue* tg_3Map_contains(VM::ActRec *ar);
 TypedValue* tg_3Map_remove(VM::ActRec *ar);
+TypedValue* tg_3Map_removeAt(VM::ActRec *ar);
 TypedValue* tg_3Map_discard(VM::ActRec *ar);
 TypedValue* tg_3Map_toArray(VM::ActRec *ar);
 TypedValue* tg_3Map_copyAsArray(VM::ActRec *ar);
@@ -2349,10 +2353,12 @@ TypedValue* tg_9StableMap_isEmpty(VM::ActRec *ar);
 TypedValue* tg_9StableMap_count(VM::ActRec *ar);
 TypedValue* tg_9StableMap_at(VM::ActRec *ar);
 TypedValue* tg_9StableMap_get(VM::ActRec *ar);
+TypedValue* tg_9StableMap_set(VM::ActRec *ar);
 TypedValue* tg_9StableMap_put(VM::ActRec *ar);
 TypedValue* tg_9StableMap_clear(VM::ActRec *ar);
 TypedValue* tg_9StableMap_contains(VM::ActRec *ar);
 TypedValue* tg_9StableMap_remove(VM::ActRec *ar);
+TypedValue* tg_9StableMap_removeAt(VM::ActRec *ar);
 TypedValue* tg_9StableMap_discard(VM::ActRec *ar);
 TypedValue* tg_9StableMap_toArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_copyAsArray(VM::ActRec *ar);
@@ -5294,16 +5300,18 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
 };
 
-static const long long hhbc_ext_method_count_Vector = 27;
+static const long long hhbc_ext_method_count_Vector = 29;
 static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "__construct", tg_6Vector___construct },
   { "isEmpty", tg_6Vector_isEmpty },
   { "count", tg_6Vector_count },
   { "at", tg_6Vector_at },
   { "get", tg_6Vector_get },
+  { "set", tg_6Vector_set },
   { "put", tg_6Vector_put },
   { "clear", tg_6Vector_clear },
   { "contains", tg_6Vector_contains },
+  { "removeAt", tg_6Vector_removeAt },
   { "append", tg_6Vector_append },
   { "add", tg_6Vector_add },
   { "pop", tg_6Vector_pop },
@@ -5335,17 +5343,19 @@ static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
   { "rewind", tg_14VectorIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Map = 26;
+static const long long hhbc_ext_method_count_Map = 28;
 static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__construct", tg_3Map___construct },
   { "isEmpty", tg_3Map_isEmpty },
   { "count", tg_3Map_count },
   { "at", tg_3Map_at },
   { "get", tg_3Map_get },
+  { "set", tg_3Map_set },
   { "put", tg_3Map_put },
   { "clear", tg_3Map_clear },
   { "contains", tg_3Map_contains },
   { "remove", tg_3Map_remove },
+  { "removeAt", tg_3Map_removeAt },
   { "discard", tg_3Map_discard },
   { "toArray", tg_3Map_toArray },
   { "copyAsArray", tg_3Map_copyAsArray },
@@ -5375,17 +5385,19 @@ static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
   { "rewind", tg_11MapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_StableMap = 26;
+static const long long hhbc_ext_method_count_StableMap = 28;
 static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__construct", tg_9StableMap___construct },
   { "isEmpty", tg_9StableMap_isEmpty },
   { "count", tg_9StableMap_count },
   { "at", tg_9StableMap_at },
   { "get", tg_9StableMap_get },
+  { "set", tg_9StableMap_set },
   { "put", tg_9StableMap_put },
   { "clear", tg_9StableMap_clear },
   { "contains", tg_9StableMap_contains },
   { "remove", tg_9StableMap_remove },
+  { "removeAt", tg_9StableMap_removeAt },
   { "discard", tg_9StableMap_discard },
   { "toArray", tg_9StableMap_toArray },
   { "copyAsArray", tg_9StableMap_copyAsArray },

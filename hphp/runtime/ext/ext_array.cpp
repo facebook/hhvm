@@ -19,7 +19,7 @@
 #include <runtime/ext/ext_iterator.h>
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_continuation.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
 #include <runtime/base/builtin_functions.h>

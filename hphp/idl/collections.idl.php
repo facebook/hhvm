@@ -88,8 +88,9 @@ CPP
 BeginClass(
   array(
     'name'   => "Vector",
-    'ifaces' => array('Iterable', 'Countable'),
-    'desc'   => "A stack-style container.",
+    'ifaces' => array('KeyedIterable', 'Countable'),
+    'desc'   => "An ordered collection where values are keyed using integers ".
+                "0 thru n-1 in order.",
     'flags'  =>  IsFinal | HasDocComment,
     'footer' => <<<EOT
 
@@ -106,6 +107,13 @@ DefineFunction(
     'name'   => "__construct",
     'return' => array(
       'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+        'value'  => "null",
+      ),
     ),
   ));
 
@@ -165,6 +173,29 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "set",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Stores a value into the Vector with the specified key, ".
+                "overwriting any previous value that was associated with ".
+                "the key. If the key is outside the bounds of the Vector, ".
+                "an exception is thrown.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "put",
     'flags'  =>  HasDocComment,
     'desc'   => "Stores a value into the Vector with the specified key, ".
@@ -205,6 +236,23 @@ DefineFunction(
                 "returns false otherwise.",
     'return' => array(
       'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "removeAt",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Removes the element with the specified key from this ".
+                "Vector and renumbers the keys of all subsequent elements.",
+    'return' => array(
+      'type'   => Object,
     ),
     'args'   => array(
       array(
@@ -513,7 +561,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "VectorIterator",
-    'ifaces' => array('Iterator'),
+    'ifaces' => array('KeyedIterator'),
     'desc'   => "An iterator implementation for iterating over a Vector.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
@@ -585,8 +633,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "Map",
-    'ifaces' => array('Iterable', 'Countable'),
-    'desc'   => "An unordered dictionary-style container.",
+    'ifaces' => array('KeyedIterable', 'Countable'),
+    'desc'   => "An unordered dictionary-style collection.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
 
@@ -595,6 +643,13 @@ DefineFunction(
     'name'   => "__construct",
     'return' => array(
       'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+        'value'  => "null",
+      ),
     ),
   ));
 
@@ -654,6 +709,28 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "set",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Stores a value into the Map with the specified key, ".
+                "overwriting any previous value that was associated with ".
+                "the key.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "put",
     'flags'  =>  HasDocComment,
     'desc'   => "Stores a value into the Map with the specified key, ".
@@ -704,6 +781,22 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "remove",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Removes the specified key from this Map.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "removeAt",
     'flags'  =>  HasDocComment,
     'desc'   => "Removes the specified key from this Map.",
     'return' => array(
@@ -961,7 +1054,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "MapIterator",
-    'ifaces' => array('Iterator'),
+    'ifaces' => array('KeyedIterator'),
     'desc'   => "An iterator implementation for iterating over a Map.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
@@ -1033,8 +1126,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "StableMap",
-    'ifaces' => array('Iterable', 'Countable'),
-    'desc'   => "An ordered dictionary-style container.",
+    'ifaces' => array('KeyedIterable', 'Countable'),
+    'desc'   => "An ordered dictionary-style collection.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
 
@@ -1043,6 +1136,13 @@ DefineFunction(
     'name'   => "__construct",
     'return' => array(
       'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+        'value'  => "null",
+      ),
     ),
   ));
 
@@ -1102,6 +1202,28 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "set",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Stores a value into the StableMap with the specified key, ".
+                "overwriting any previous value that was associated with ".
+                "the key.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "put",
     'flags'  =>  HasDocComment,
     'desc'   => "Stores a value into the StableMap with the specified key, ".
@@ -1152,6 +1274,22 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "remove",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Removes the specified key from this StableMap.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "removeAt",
     'flags'  =>  HasDocComment,
     'desc'   => "Removes the specified key from this StableMap.",
     'return' => array(
@@ -1410,7 +1548,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "StableMapIterator",
-    'ifaces' => array('Iterator'),
+    'ifaces' => array('KeyedIterator'),
     'desc'   => "An iterator implementation for iterating over a StableMap.",
     'flags'  =>  IsFinal | HasDocComment,
   ));

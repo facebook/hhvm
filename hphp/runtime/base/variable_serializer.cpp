@@ -27,7 +27,7 @@
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/ext/ext_json.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,13 +35,14 @@ HPHP::VM::Instance* new_Vector_Instance(HPHP::VM::Class* cls) {
 
 IMPLEMENT_CLASS(Vector);
 /*
-void HPHP::c_Vector::t___construct()
-_ZN4HPHP8c_Vector13t___constructEv
+void HPHP::c_Vector::t___construct(HPHP::Variant const&)
+_ZN4HPHP8c_Vector13t___constructERKNS_7VariantE
 
 this_ => rdi
+iterable => rsi
 */
 
-void th_6Vector___construct(ObjectData* this_) asm("_ZN4HPHP8c_Vector13t___constructEv");
+void th_6Vector___construct(ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP8c_Vector13t___constructERKNS_7VariantE");
 
 TypedValue* tg_6Vector___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
@@ -49,22 +50,23 @@ TypedValue* tg_6Vector___construct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
-      if (count == 0LL) {
+      if (count <= 1LL) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        th_6Vector___construct((this_));
-        frame_free_locals_inl(ar, 0);
+        Variant defVal0;
+        th_6Vector___construct((this_), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+        frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
-        throw_toomany_arguments_nr("Vector::__construct", 0, 1);
+        throw_toomany_arguments_nr("Vector::__construct", 1, 1);
       }
     } else {
       throw_instance_method_fatal("Vector::__construct");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
+    frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -219,6 +221,46 @@ TypedValue* tg_6Vector_get(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Vector::t_set(HPHP::Variant const&, HPHP::Variant const&)
+_ZN4HPHP8c_Vector5t_setERKNS_7VariantES3_
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+value => rcx
+*/
+
+Value* th_6Vector_set(Value* _rv, ObjectData* this_, TypedValue* key, TypedValue* value) asm("_ZN4HPHP8c_Vector5t_setERKNS_7VariantES3_");
+
+TypedValue* tg_6Vector_set(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 2LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_set((Value*)(&(rv)), (this_), (args-0), (args-1));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::set", count, 2, 2, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::set");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Vector::t_put(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP8c_Vector5t_putERKNS_7VariantES3_
 
@@ -324,6 +366,45 @@ TypedValue* tg_6Vector_contains(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Vector::contains");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_removeat(HPHP::Variant const&)
+_ZN4HPHP8c_Vector10t_removeatERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+*/
+
+Value* th_6Vector_removeAt(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP8c_Vector10t_removeatERKNS_7VariantE");
+
+TypedValue* tg_6Vector_removeAt(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_removeAt((Value*)(&(rv)), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::removeAt", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::removeAt");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1284,13 +1365,14 @@ HPHP::VM::Instance* new_Map_Instance(HPHP::VM::Class* cls) {
 
 IMPLEMENT_CLASS(Map);
 /*
-void HPHP::c_Map::t___construct()
-_ZN4HPHP5c_Map13t___constructEv
+void HPHP::c_Map::t___construct(HPHP::Variant const&)
+_ZN4HPHP5c_Map13t___constructERKNS_7VariantE
 
 this_ => rdi
+iterable => rsi
 */
 
-void th_3Map___construct(ObjectData* this_) asm("_ZN4HPHP5c_Map13t___constructEv");
+void th_3Map___construct(ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP5c_Map13t___constructERKNS_7VariantE");
 
 TypedValue* tg_3Map___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
@@ -1298,22 +1380,23 @@ TypedValue* tg_3Map___construct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
-      if (count == 0LL) {
+      if (count <= 1LL) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        th_3Map___construct((this_));
-        frame_free_locals_inl(ar, 0);
+        Variant defVal0;
+        th_3Map___construct((this_), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+        frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
-        throw_toomany_arguments_nr("Map::__construct", 0, 1);
+        throw_toomany_arguments_nr("Map::__construct", 1, 1);
       }
     } else {
       throw_instance_method_fatal("Map::__construct");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
+    frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -1468,6 +1551,46 @@ TypedValue* tg_3Map_get(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Map::t_set(HPHP::Variant const&, HPHP::Variant const&)
+_ZN4HPHP5c_Map5t_setERKNS_7VariantES3_
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+value => rcx
+*/
+
+Value* th_3Map_set(Value* _rv, ObjectData* this_, TypedValue* key, TypedValue* value) asm("_ZN4HPHP5c_Map5t_setERKNS_7VariantES3_");
+
+TypedValue* tg_3Map_set(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 2LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_set((Value*)(&(rv)), (this_), (args-0), (args-1));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::set", count, 2, 2, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::set");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Map::t_put(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP5c_Map5t_putERKNS_7VariantES3_
 
@@ -1612,6 +1735,45 @@ TypedValue* tg_3Map_remove(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Map::remove");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Map::t_removeat(HPHP::Variant const&)
+_ZN4HPHP5c_Map10t_removeatERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+*/
+
+Value* th_3Map_removeAt(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP5c_Map10t_removeatERKNS_7VariantE");
+
+TypedValue* tg_3Map_removeAt(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_removeAt((Value*)(&(rv)), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::removeAt", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::removeAt");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2502,13 +2664,14 @@ HPHP::VM::Instance* new_StableMap_Instance(HPHP::VM::Class* cls) {
 
 IMPLEMENT_CLASS(StableMap);
 /*
-void HPHP::c_StableMap::t___construct()
-_ZN4HPHP11c_StableMap13t___constructEv
+void HPHP::c_StableMap::t___construct(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap13t___constructERKNS_7VariantE
 
 this_ => rdi
+iterable => rsi
 */
 
-void th_9StableMap___construct(ObjectData* this_) asm("_ZN4HPHP11c_StableMap13t___constructEv");
+void th_9StableMap___construct(ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP11c_StableMap13t___constructERKNS_7VariantE");
 
 TypedValue* tg_9StableMap___construct(HPHP::VM::ActRec *ar) {
     TypedValue rv;
@@ -2516,22 +2679,23 @@ TypedValue* tg_9StableMap___construct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
-      if (count == 0LL) {
+      if (count <= 1LL) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        th_9StableMap___construct((this_));
-        frame_free_locals_inl(ar, 0);
+        Variant defVal0;
+        th_9StableMap___construct((this_), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+        frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
-        throw_toomany_arguments_nr("StableMap::__construct", 0, 1);
+        throw_toomany_arguments_nr("StableMap::__construct", 1, 1);
       }
     } else {
       throw_instance_method_fatal("StableMap::__construct");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
+    frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -2686,6 +2850,46 @@ TypedValue* tg_9StableMap_get(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_StableMap::t_set(HPHP::Variant const&, HPHP::Variant const&)
+_ZN4HPHP11c_StableMap5t_setERKNS_7VariantES3_
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+value => rcx
+*/
+
+Value* th_9StableMap_set(Value* _rv, ObjectData* this_, TypedValue* key, TypedValue* value) asm("_ZN4HPHP11c_StableMap5t_setERKNS_7VariantES3_");
+
+TypedValue* tg_9StableMap_set(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 2LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_set((Value*)(&(rv)), (this_), (args-0), (args-1));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::set", count, 2, 2, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::set");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_StableMap::t_put(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP11c_StableMap5t_putERKNS_7VariantES3_
 
@@ -2830,6 +3034,45 @@ TypedValue* tg_9StableMap_remove(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("StableMap::remove");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_removeat(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap10t_removeatERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+*/
+
+Value* th_9StableMap_removeAt(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP11c_StableMap10t_removeatERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_removeAt(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_removeAt((Value*)(&(rv)), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::removeAt", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::removeAt");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

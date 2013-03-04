@@ -43,10 +43,10 @@ function main() {
 
   class V {
     public $x = array('a' => 1);
-    public $y = Map { 'a' => 1 };
+    public $y = Map {'a' => 1};
   }
   class W extends V {
-    public $x = Map { 'a' => 1 };
+    public $x = Map {'a' => 1};
     public $y = array('a' => 1);
   }
   $obj1 = new W;
@@ -68,7 +68,7 @@ function main() {
   echo "=========\n";
 
   class X {
-    public $prop = array ( Map { 'a' => 1 } );
+    public $prop = array(Map {'a' => 1});
   }
   $obj1 = new X;
   $obj2 = new X;
@@ -76,7 +76,7 @@ function main() {
   var_dump($obj1->prop[0]['a']);
   var_dump($obj2->prop[0]['a']);
   class Y {
-    public $prop = Vector { array ( Map { 'a' => 1 } ) };
+    public $prop = Vector {array(Map {'a' => 1})};
   }
   $obj1 = new Y;
   $obj2 = new Y;
@@ -91,7 +91,7 @@ function main() {
   class Z {
     const FOO = 456;
     const BAR = "yo";
-    public $prop = StableMap { FOO => BAR, Z::FOO => Z::BAR };
+    public $prop = StableMap {FOO => BAR, Z::FOO => Z::BAR};
   }
   $obj1 = new Z;
   var_dump($obj1->prop[FOO], $obj1->prop[Z::FOO], count($obj1->prop));

@@ -81,8 +81,6 @@ class ArrayIter {
     m_pos = data->getIterBegin();
   }
   ArrayIter(CArrRef array);
-  void begin(CVarRef map, CStrRef);
-  void begin(CArrRef map, CStrRef);
   void reset();
 
  private:

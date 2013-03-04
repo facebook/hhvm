@@ -19,7 +19,7 @@
 #include <runtime/base/array/hphp_array.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/object_data.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,24 +74,6 @@ void ArrayIter::reset() {
   m_data = nullptr;
   assert(obj);
   decRefObj(obj);
-}
-
-void ArrayIter::begin(CVarRef map, CStrRef context) {
-  try {
-    new (this) ArrayIter(map.begin(context));
-  } catch (...) {
-    m_data = nullptr;
-    throw;
-  }
-}
-
-void ArrayIter::begin(CArrRef map, CStrRef context) {
-  try {
-    new (this) ArrayIter(map.get());
-  } catch (...) {
-    m_data = nullptr;
-    throw;
-  }
 }
 
 template <bool incRef>

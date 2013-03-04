@@ -45,7 +45,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: c_Vector(VM::Class* cls = c_Vector::s_cls);
   public: ~c_Vector();
   public: void freeData();
-  public: void t___construct();
+  public: void t___construct(CVarRef iterable = null_variant);
   public: Variant t___destruct();
   public: Object t_add(CVarRef val);
   public: Object t_append(CVarRef val);
@@ -56,8 +56,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: int64_t t_count();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
+  public: Object t_set(CVarRef key, CVarRef value);
   public: Object t_put(CVarRef key, CVarRef value);
   public: bool t_contains(CVarRef key);
+  public: Object t_removeat(CVarRef key);
   public: Array t_toarray();
   public: void t_sort(CVarRef col = null);
   public: void t_reverse();
@@ -216,16 +218,18 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: c_Map(VM::Class* cls = c_Map::s_cls);
   public: ~c_Map();
   public: void freeData();
-  public: void t___construct();
+  public: void t___construct(CVarRef iterable = null_variant);
   public: Variant t___destruct();
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
+  public: Object t_set(CVarRef key, CVarRef value);
   public: Object t_put(CVarRef key, CVarRef value);
   public: bool t_contains(CVarRef key);
   public: Object t_remove(CVarRef key);
+  public: Object t_removeat(CVarRef key);
   public: Object t_discard(CVarRef key);
   public: Array t_toarray();
   public: Array t_copyasarray();
@@ -399,20 +403,20 @@ private:
   uint             m_nLastSlot;
   int              m_versionNumber;
 
-  uintptr_t numSlots() {
+  size_t numSlots() const {
     return m_nLastSlot + 1;
   }
 
   // The maximum load factor is 75%.
-  uintptr_t computeMaxLoad() {
-    uintptr_t n = numSlots();
+  size_t computeMaxLoad() const {
+    size_t n = numSlots();
     return (n - (n >> 2));
   }
 
   // When the map is not empty, the minimum allowed ratio
   // of # elements / # slots is 18.75%.
-  uintptr_t computeMinElements() {
-    uintptr_t n = numSlots();
+  size_t computeMinElements() const {
+    size_t n = numSlots();
     return ((n >> 3) + ((n+8) >> 4));
   }
 
@@ -502,16 +506,18 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: c_StableMap(VM::Class* cls = c_StableMap::s_cls);
   public: ~c_StableMap();
   public: void freeData();
-  public: void t___construct();
+  public: void t___construct(CVarRef iterable = null_variant);
   public: Variant t___destruct();
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
+  public: Object t_set(CVarRef key, CVarRef value);
   public: Object t_put(CVarRef key, CVarRef value);
   public: bool t_contains(CVarRef key);
   public: Object t_remove(CVarRef key);
+  public: Object t_removeat(CVarRef key);
   public: Object t_discard(CVarRef key);
   public: Array t_toarray();
   public: Array t_copyasarray();

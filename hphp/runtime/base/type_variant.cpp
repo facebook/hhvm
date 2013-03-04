@@ -28,7 +28,7 @@
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/runtime.h>
 #include <system/lib/systemlib.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 
 #include <util/logger.h>
 

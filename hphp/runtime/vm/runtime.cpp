@@ -19,7 +19,7 @@
 #include "runtime/base/array/hphp_array.h"
 #include "runtime/base/builtin_functions.h"
 #include "runtime/ext/ext_continuation.h"
-#include "runtime/ext/ext_collection.h"
+#include "runtime/ext/ext_collections.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/repo.h"

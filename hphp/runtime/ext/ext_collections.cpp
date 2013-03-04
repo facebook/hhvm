@@ -17,7 +17,7 @@
 
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/sort_helpers.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 #include <runtime/ext/ext_array.h>
 #include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_intl.h>
@@ -60,6 +60,30 @@ static void throwStrOOB(StringData* key) {
   throw e;
 }
 
+static inline ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
+  if (v.isArray()) {
+    ArrayData* ad = v.getArrayData();
+    sz = ad->size();
+    return ArrayIter(ad);
+  }
+  if (v.isObject()) {
+    ObjectData* obj = v.getObjectData();
+    if (obj->isCollection()) {
+      sz = collectionSize(obj);
+      return ArrayIter(obj);
+    }
+    bool isIterable;
+    Object iterable = obj->iterableObject(isIterable);
+    if (isIterable) {
+      sz = 0;
+      return ArrayIter(iterable, ArrayIter::transferOwner);
+    }
+  }
+  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+    "Parameter must be an array or an instance of Traversable"));
+  throw e;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Vector::c_Vector(VM::Class* cb) :
@@ -85,8 +109,24 @@ void c_Vector::freeData() {
     m_data = NULL;
   }
 }
-
-void c_Vector::t___construct() {
+  
+void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
+  if (!iterable.isInitialized()) {
+    return;
+  }
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
+    add(tv);
+  }
 }
 
 Variant c_Vector::t___destruct() {
@@ -150,11 +190,11 @@ Array c_Vector::o_toArray() const {
 
 ObjectData* c_Vector::clone() {
   ObjectData* obj = ObjectData::clone();
-  auto vec = static_cast<c_Vector*>(obj);
+  auto target = static_cast<c_Vector*>(obj);
   uint sz = m_size;
   TypedValue* data;
-  vec->m_capacity = vec->m_size = sz;
-  vec->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+  target->m_capacity = target->m_size = sz;
+  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   for (int i = 0; i < sz; ++i) {
     tvDup(&m_data[i], &data[i]);
   }
@@ -260,6 +300,25 @@ bool c_Vector::t_contains(CVarRef key) {
   }
   throwBadKeyType();
   return false;
+}
+
+Object c_Vector::t_removeat(CVarRef key) {
+  if (!key.isInteger()) {
+    throwBadKeyType();
+  }
+  int64_t k = key.toInt64();
+  if (!contains(k)) {
+    return this;
+  }
+  uint64_t datum = m_data[k].m_data.num;
+  DataType t = m_data[k].m_type;
+  if (k+1 < m_size) {
+    memmove(&m_data[k], &m_data[k+1],
+            (m_size-(k+1)) * sizeof(TypedValue));
+  }
+  --m_size;
+  tvRefcountedDecRefHelper(t, datum);
+  return this;
 }
 
 Array c_Vector::t_toarray() {
@@ -401,7 +460,7 @@ Object c_Vector::t_getiterator() {
   return it;
 }
 
-Object c_Vector::t_put(CVarRef key, CVarRef value) {
+Object c_Vector::t_set(CVarRef key, CVarRef value) {
   if (key.isInteger()) {
     TypedValue* tv = (TypedValue*)(&value);
     if (UNLIKELY(tv->m_type == KindOfRef)) {
@@ -412,6 +471,10 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
   }
   throwBadKeyType();
   return this;
+}
+
+Object c_Vector::t_put(CVarRef key, CVarRef value) {
+  return t_set(key, value);
 }
 
 Object c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
@@ -793,7 +856,30 @@ void c_Map::deleteBuckets() {
   }
 }
 
-void c_Map::t___construct() {
+void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
+  if (!iterable.isInitialized()) {
+    return;
+  }
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
+    if (k.isInteger()) {
+      update(k.toInt64(), tv);
+    } else if (k.isString()) {
+      update(k.getStringData(), tv);
+    } else {
+      throwBadKeyType();
+    }
+  }
 }
 
 Variant c_Map::t___destruct() {
@@ -894,7 +980,7 @@ Variant c_Map::t_get(CVarRef key) {
   return null;
 }
 
-Object c_Map::t_put(CVarRef key, CVarRef value) {
+Object c_Map::t_set(CVarRef key, CVarRef value) {
   TypedValue* val = (TypedValue*)(&value);
   if (UNLIKELY(val->m_type == KindOfRef)) {
     val = val->m_data.pref->tv();
@@ -907,6 +993,10 @@ Object c_Map::t_put(CVarRef key, CVarRef value) {
     throwBadKeyType();
   }
   return this;
+}
+
+Object c_Map::t_put(CVarRef key, CVarRef value) {
+  return t_set(key, value);
 }
 
 bool c_Map::t_contains(CVarRef key) {
@@ -931,6 +1021,10 @@ Object c_Map::t_remove(CVarRef key) {
     throwBadKeyType();
   }
   return this;
+}
+
+Object c_Map::t_removeat(CVarRef key) {
+  return t_remove(key);
 }
 
 Object c_Map::t_discard(CVarRef key) {
@@ -1364,7 +1458,7 @@ void c_Map::reserve(int64_t sz) {
     m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
     return;
   }
-  uint oldNumSlots = numSlots();
+  size_t oldNumSlots = numSlots();
   m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
   m_load = m_size;
   Bucket* oldBuckets = m_data;
@@ -1672,7 +1766,30 @@ void c_StableMap::deleteBuckets() {
   }
 }
 
-void c_StableMap::t___construct() {
+void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
+  if (!iterable.isInitialized()) {
+    return;
+  }
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
+    if (k.isInteger()) {
+      update(k.toInt64(), tv);
+    } else if (k.isString()) {
+      update(k.getStringData(), tv);
+    } else {
+      throwBadKeyType();
+    }
+  }
 }
 
 Variant c_StableMap::t___destruct() {
@@ -1790,7 +1907,7 @@ Variant c_StableMap::t_get(CVarRef key) {
   return null;
 }
 
-Object c_StableMap::t_put(CVarRef key, CVarRef value) {
+Object c_StableMap::t_set(CVarRef key, CVarRef value) {
   TypedValue* val = (TypedValue*)(&value);
   if (UNLIKELY(val->m_type == KindOfRef)) {
     val = val->m_data.pref->tv();
@@ -1803,6 +1920,10 @@ Object c_StableMap::t_put(CVarRef key, CVarRef value) {
     throwBadKeyType();
   }
   return this;
+}
+
+Object c_StableMap::t_put(CVarRef key, CVarRef value) {
+  return t_set(key, value);
 }
 
 bool c_StableMap::t_contains(CVarRef key) {
@@ -1827,6 +1948,10 @@ Object c_StableMap::t_remove(CVarRef key) {
     throwBadKeyType();
   }
   return this;
+}
+
+Object c_StableMap::t_removeat(CVarRef key) {
+  return t_remove(key);
 }
 
 Object c_StableMap::t_discard(CVarRef key) {

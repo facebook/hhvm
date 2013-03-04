@@ -23,7 +23,7 @@
 #include "runtime/base/builtin_functions.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/runtime.h"
-#include "runtime/ext/ext_collection.h"
+#include "runtime/ext/ext_collections.h"
 
 namespace HPHP {
 namespace VM {

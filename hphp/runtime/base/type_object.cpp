@@ -20,7 +20,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/strings.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 
 #include <system/lib/systemlib.h>
 

@@ -26,7 +26,7 @@
 #include <runtime/ext/ext_bzip2.h>
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_closure.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 #include <runtime/ext/ext_continuation.h>
 #include <runtime/ext/ext_ctype.h>
 #include <runtime/ext/ext_curl.h>

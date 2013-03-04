@@ -29,7 +29,7 @@
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_file.h>
-#include <runtime/ext/ext_collection.h>
+#include <runtime/ext/ext_collections.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/process.h>

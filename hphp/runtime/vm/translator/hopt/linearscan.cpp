@@ -934,7 +934,7 @@ void LinearScan::rematerializeAux() {
       }
     } else {
       // snapshot state for use at target.
-      State* state = states[block] = new State;
+      state = states[block] = new State;
       state->sp = curSp;
       state->fp = curFp;
       state->values = localValues;

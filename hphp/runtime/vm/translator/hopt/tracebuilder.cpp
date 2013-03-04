@@ -1294,7 +1294,7 @@ void TraceBuilder::saveState(Block* block) {
   if (State* state = m_snapshots[block]) {
     mergeState(state);
   } else {
-    State* state = new State;
+    state = new State;
     state->spValue = m_spValue;
     state->fpValue = m_fpValue;
     state->spOffset = m_spOffset;

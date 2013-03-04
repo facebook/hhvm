@@ -11493,7 +11493,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
       out << '\n';
 #     define IRCOL "{:<90}"
 #     define TXCOL "{:<44}"
-      out << folly::format(TXCOL"  "TXCOL"\n",
+      out << folly::format(TXCOL "  " TXCOL "\n",
                            folly::format("Translation from tx64 ({} bytes)",
                                          tx64Size),
                            folly::format("Translation from hhir ({} bytes)",
@@ -11511,7 +11511,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
       while (or(std::getline(irAsmIn, irAsmLine),
                 or(std::getline(irPrettyIn, irPrettyLine),
                    std::getline(tx64In, tx64Line)))) {
-        out << folly::format("  "TXCOL TXCOL IRCOL"\n",
+        out << folly::format("  " TXCOL TXCOL IRCOL "\n",
                              tx64Line, irAsmLine, irPrettyLine);
         irAsmLine.clear();
         irPrettyLine.clear();

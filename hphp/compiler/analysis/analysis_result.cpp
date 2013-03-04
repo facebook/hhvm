@@ -2839,49 +2839,7 @@ void AnalysisResult::outputArrayCreateDecl(CodeGenerator &cg) {
 }
 
 void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
-  assert(cg.getCurrentIndentation() == 0);
-  const char text1[] =
-    "HOT_FUNC\n"
-    "ArrayData *array_createvs(int64 n, ...) {\n"
-    "  va_list ap;\n"
-    "  va_start(ap, n);\n"
-    "  ZendArray::Bucket *p[%d], **pp = p;\n"
-    "  SmartAllocator<HPHP::ZendArray::Bucket, SmartAllocatorImpl::Bucket> *a =\n"
-    "      ZendArray::Bucket::AllocatorType::getNoCheck();\n"
-    "  for (int64 kk = 0; kk < n; kk++) {\n"
-    "    const String *k = va_arg(ap, const String *);\n"
-    "    const Variant *v = va_arg(ap, const Variant *);\n"
-    "    *pp++ = new (a) ZendArray::Bucket(k->get(), *v);\n"
-    "  }\n"
-    "  *pp = NULL;\n"
-    "  va_end(ap);\n"
-    "  return NEW(ZendArray)(n, 0, p);\n"
-    "}\n";
-  const char text2[] =
-    "HOT_FUNC\n"
-    "ArrayData *array_createvi(int64 n, ...) {\n"
-    "  va_list ap;\n"
-    "  va_start(ap, n);\n"
-    "  ZendArray::Bucket *p[%d], **pp = p;\n"
-    "  SmartAllocator<HPHP::ZendArray::Bucket, SmartAllocatorImpl::Bucket> *a =\n"
-    "      ZendArray::Bucket::AllocatorType::getNoCheck();\n"
-    "  for (int64 k = 0; k < n; k++) {\n"
-    "    const Variant *v = va_arg(ap, const Variant *);\n"
-    "    *pp++ = new (a) ZendArray::Bucket(k, *v);\n"
-    "  }\n"
-    "  *pp = NULL;\n"
-    "  va_end(ap);\n"
-    "  return NEW(ZendArray)(n, n, p);\n"
-    "}\n";
-  if (m_arrayLitstrKeyMaxSize > 0) {
-    cg_printf(text1,
-              m_arrayLitstrKeyMaxSize + 1);
-  }
-  if (m_arrayIntegerKeyMaxSize > 0) {
-    cg_printf(text2,
-              m_arrayIntegerKeyMaxSize,
-              m_arrayIntegerKeyMaxSize + 1);
-  }
+  const_assert(false);
 }
 
 void AnalysisResult::outputCPPDynamicTablesHeader

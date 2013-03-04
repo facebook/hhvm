@@ -770,6 +770,8 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     os << folly::format("TCA: 0x{}", vp);
   } else if (t == Type::None) {
     os << "None:" << c->as<int64_t>();
+  } else if (t.isPtr()) {
+    os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
   } else {
     not_reached();
   }

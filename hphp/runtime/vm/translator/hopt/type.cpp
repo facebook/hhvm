@@ -89,7 +89,7 @@ namespace {
 // Returns a union type containing all the types in the
 // variable-length argument list
 Type buildUnion() {
-  return Type::None;
+  return Type::Bottom;
 }
 
 template<class... Args>

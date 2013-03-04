@@ -143,20 +143,47 @@ void HhbcTranslator::VectorTranslator::emit() {
 }
 
 // Returns a pointer to the base of the current MInstrState struct, or
-// an empty SSATmp if it's not needed
+// a null pointer if it's not needed.
 SSATmp* HhbcTranslator::VectorTranslator::genMisPtr() {
   if (m_needMIS) {
     return m_tb.genLdAddr(m_misBase, kReservedRSPSpillSpace);
   } else {
-    return m_tb.genDefVoid();
+    ConstData cdata(nullptr);
+    return m_tb.gen(DefConst, Type::PtrToCell, &cdata);
+  }
+}
+
+// Inspect the instruction we're about to translate and determine if
+// it can be executed without using an MInstrState struct.
+void HhbcTranslator::VectorTranslator::checkMIState() {
+  auto const& baseRtt = m_ni.inputs[m_mii.valCount()]->rtt;
+  const Type baseType = Type::fromRuntimeType(baseRtt).unbox();
+  const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
+  const bool isSetM = m_ni.mInstrOp() == OpSetM;
+
+  // CGetM or SetM with no unknown property offsets
+  const bool simpleProp = !mInstrHasUnknownOffsets(m_ni) && (isCGetM || isSetM);
+
+  // Array access with one element in the vector
+  const bool simpleElem = m_ni.immVecM.size() == 1 &&
+    mcodeMaybeArrayKey(m_ni.immVecM[0]);
+
+  // SetM on an array with one vector element
+  const bool simpleArraySet = isSetM && simpleElem;
+
+  // CGetM on an array with a base that won't use MInstrState. Str
+  // will use tvScratch and baseStrOff and Obj will fatal or use
+  // tvRef.
+  const bool simpleArrayGet = isCGetM && simpleElem &&
+    baseType.not(Type::Str | Type::Obj);
+
+  if (simpleProp || simpleArraySet || simpleArrayGet) {
+    setNoMIState();
   }
 }
 
 void HhbcTranslator::VectorTranslator::emitMPre() {
-  if (!mInstrHasUnknownOffsets(m_ni) &&
-      (m_ni.mInstrOp() == OpCGetM || m_ni.mInstrOp() == OpSetM)) {
-    setNoMIState();
-  }
+  checkMIState();
 
   if (m_needMIS) {
     m_misBase = m_tb.gen(DefMIStateBase);

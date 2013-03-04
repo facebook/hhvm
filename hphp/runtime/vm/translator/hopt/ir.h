@@ -843,6 +843,20 @@ public:
   }
 
   /*
+   * Returns true if any subtype of this is a subtype of t2.
+   */
+  bool maybe(Type t2) const {
+    return (*this & t2) != Bottom;
+  }
+
+  /*
+   * Returns true if no subtypes of this are subtypes of t2.
+   */
+  bool not(Type t2) const {
+    return !maybe(t2);
+  }
+
+  /*
    * Returns true if this is exactly equal to t2. Be careful: you
    * probably mean subtypeOf.
    */

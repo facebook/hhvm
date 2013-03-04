@@ -272,11 +272,6 @@ public:
     return gen(DefConst, typeForConst(val), &cdata);
   }
 
-  SSATmp* genDefVoid() {
-    ConstData cdata(0);
-    return gen(DefConst, Type::None, &cdata);
-  }
-
   template<typename T>
   SSATmp* genLdConst(T val) {
     ConstData cdata(val);

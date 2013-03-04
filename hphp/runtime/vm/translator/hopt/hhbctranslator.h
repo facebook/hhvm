@@ -396,6 +396,7 @@ private:
     void emit();
 
    private:
+    void checkMIState();
     void emitMPre();
     void emitFinalMOp();
     void emitMPost();

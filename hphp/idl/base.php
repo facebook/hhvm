@@ -127,6 +127,9 @@ define('IsProtected',                    1 <<  7);
 define('IsPrivate',                      1 <<  8);
 define('IgnoreRedefinition',             1 <<  8);
 define('IsStatic',                       1 <<  9);
+define('IsReference',                    1 << 11);
+define('IsConstructor',                  1 << 12);
+define('IsNothing',                      1 << 13);
 define('HasDocComment',                  1 << 14);
 define('HipHopSpecific',                 1 << 16);
 define('VariableArguments',              1 << 17);
@@ -140,6 +143,7 @@ define('AllowIntercept',                 1 << 24);
 define('NoProfile',                      1 << 25);
 define('ContextSensitive',               1 << 26);
 define('NoDefaultSweep',                 1 << 27);
+define('IsSystem',                       1 << 28);
 define('IsTrait',                        1 << 29);
 define('NeedsActRec',                    1 << 31);
 
@@ -934,6 +938,20 @@ function replaceParams($filename, $header) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
+
+function php_escape_val($val) {
+  if (is_string($val)) {
+    return '"'.escape_cpp($val).'"';
+  } else if ($val === true) {
+    return 'true';
+  } else if ($val === false) {
+    return 'false';
+  } else if ($val === null) {
+    return 'null';
+  } else {
+    return var_export($val, true);
+  }
+}
 
 function escape_php($val) {
   $val = preg_replace("/\\\\/", "\\\\\\\\", $val);

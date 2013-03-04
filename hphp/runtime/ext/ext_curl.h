@@ -55,6 +55,10 @@ Variant f_evhttp_async_get(CStrRef url, CArrRef headers = null_array, int timeou
 Variant f_evhttp_async_post(CStrRef url, CStrRef data, CArrRef headers = null_array, int timeout = 5);
 Variant f_evhttp_recv(CObjRef handle);
 
+extern const int64 k_CURLINFO_LOCAL_PORT;
+extern const int64 k_CURLOPT_TIMEOUT_MS;
+extern const int64 k_CURLOPT_CONNECTTIMEOUT_MS;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

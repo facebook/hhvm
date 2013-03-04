@@ -417,7 +417,7 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
     } else if (cls) {
       DataType dt = sym->getFinalType()->getDataType();
       always_assert(dt >= -1 && dt < 255);
-      cg_printf("(const char *)&%s%s%s%s, (const char*)%d,\n",
+      cg_printf("(const char *)&%s%s%s%s, (const char*)0x%x,\n",
                 Option::ClassConstantPrefix, cls->getId().c_str(),
                 Option::IdPrefix.c_str(),
                 CodeGenerator::FormatLabel(sym->getName()).c_str(),
@@ -446,7 +446,7 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
         }
       } else {
         always_assert(dt != KindOfUnknown);
-        cg_printf("(const char *)&%s%s, (const char*)%d,\n",
+        cg_printf("(const char *)&%s%s, (const char*)0x%x,\n",
                   Option::ConstantPrefix,
                   CodeGenerator::FormatLabel(sym->getName()).c_str(),
                   (int)dt + 2);

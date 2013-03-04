@@ -30,7 +30,6 @@
 #include <runtime/vm/translator/annotation.h>
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/translator/translator-inline.h>
-#include <system/gen/sys/system_globals.h>
 #include <runtime/vm/stats.h>
 
 using namespace HPHP::MethodLookup;

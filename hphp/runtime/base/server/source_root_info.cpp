@@ -20,7 +20,6 @@
 #include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/transport.h>
 #include <runtime/eval/debugger/debugger.h>
-#include <system/gen/sys/system_globals.h>
 
 using std::map;
 

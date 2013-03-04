@@ -22,10 +22,13 @@
 
 #include <util/lock.h>
 #include <runtime/base/hphp_system.h>
-#include <system/gen/php/globals/constants.h>
 #include <runtime/ext/extension.h>
 #include <util/compatibility.h>
-
+#ifdef HHVM_FBMAKE
+#include <hphp/system/constants.h>
+#else
+#include <system/constants.h>
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // __HPHP_BASE_INCLUDES_H__

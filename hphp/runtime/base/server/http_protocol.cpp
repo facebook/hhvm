@@ -26,7 +26,6 @@
 #include <runtime/base/server/transport.h>
 #include <util/logger.h>
 #include <util/util.h>
-#include <system/gen/sys/system_globals.h>
 #include <runtime/base/server/upload.h>
 #include <runtime/base/server/replay_transport.h>
 #include <runtime/base/server/virtual_host.h>

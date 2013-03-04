@@ -24,7 +24,6 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/compiler_id.h>
 #include <util/shared_memory_allocator.h>
-#include <system/gen/sys/system_globals.h>
 #include <runtime/base/server/pagelet_server.h>
 #include <runtime/base/server/xbox_server.h>
 #include <runtime/base/server/http_server.h>

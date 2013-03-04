@@ -3,7 +3,7 @@
 require_once 'base.php';
 
 $ext = $argv[1];
-if (preg_match('/\.idl\.php/', $ext)) {
+if (file_exists($ext) || preg_match('/\.idl\.php/', $ext)) {
   require_once $ext;
   $ext = preg_replace('/\.idl\.php/', '', $ext);
 } else {
@@ -342,7 +342,11 @@ function define_constants($consts) {
     begin_function('DefineConstant');
     begin_array();
     out_str('name', $constant['name'], true);
-    out_fmt('type', idx_type($constant, 'type'), true);
+    if (array_key_exists('value', $constant)) {
+      out_fmt('value', php_escape_val($constant['value'], true), false);
+    } else {
+      out_fmt('type', idx_type($constant, 'type'), true);
+    }
     out_str('note', idx_string($constant, 'note'));
     end_array(false);
     end_function();

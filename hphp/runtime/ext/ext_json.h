@@ -37,6 +37,8 @@ extern const int64 k_JSON_UNESCAPED_SLASHES;
 extern const int64 k_JSON_PRETTY_PRINT;
 extern const int64 k_JSON_FB_LOOSE;
 extern const int64 k_JSON_FB_LOOSE;
+extern const int64 k_JSON_FB_EXTRA_ESCAPES;
+extern const int64 k_JSON_FB_UNLIMITED;
 ///////////////////////////////////////////////////////////////////////////////
 }
 

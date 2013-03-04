@@ -29,7 +29,6 @@
 #include <util/process.h>
 #include <sys/utsname.h>
 #include <pwd.h>
-#include <system/gen/php/globals/constants.h>
 
 #include <runtime/vm/request_arena.h>
 

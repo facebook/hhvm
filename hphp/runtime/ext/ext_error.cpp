@@ -21,7 +21,6 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/debug/backtrace.h>
-#include <system/gen/php/globals/constants.h>
 #include <util/logger.h>
 
 namespace HPHP {

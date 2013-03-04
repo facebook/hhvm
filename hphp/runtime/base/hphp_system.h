@@ -63,9 +63,6 @@ HphpBinary::Type getHphpBinaryType();
   SystemGlobals *g ATTRIBUTE_UNUSED =      \
     get_global_variables();
 
-// code generated file that defines all system global variables
-#include <system/gen/sys/system_globals.h>
-
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // __CPP_BASE_HPHP_SYSTEM_H__

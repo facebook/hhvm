@@ -11492,7 +11492,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
       t.print(out);
       out << '\n';
 #     define IRCOL "{:<90}"
-#     define TXCOL "{:<44}"
+#     define TXCOL "{:<55}"
       out << folly::format(TXCOL "  " TXCOL "\n",
                            folly::format("Translation from tx64 ({} bytes)",
                                          tx64Size),

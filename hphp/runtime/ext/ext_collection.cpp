@@ -409,7 +409,7 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
   return this;
 }
 
-Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
+Object c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -436,7 +436,7 @@ Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   return ret;
 }
 
-Variant c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
+Object c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
   if (!vec.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
@@ -1078,7 +1078,7 @@ Object c_Map::t_getiterator() {
   return it;
 }
 
-Variant c_Map::ti_fromarray(const char* cls, CVarRef arr) {
+Object c_Map::ti_fromarray(const char* cls, CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -1104,7 +1104,7 @@ Variant c_Map::ti_fromarray(const char* cls, CVarRef arr) {
   return ret;
 }
 
-Variant c_Map::ti_fromiterable(const char* cls, CVarRef it) {
+Object c_Map::ti_fromiterable(const char* cls, CVarRef it) {
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -1942,7 +1942,7 @@ Object c_StableMap::t_getiterator() {
   return it;
 }
 
-Variant c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
+Object c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -1969,7 +1969,7 @@ Variant c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
   return ret;
 }
 
-Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
+Object c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));

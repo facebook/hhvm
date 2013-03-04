@@ -73,12 +73,12 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
-  public: static Variant ti_fromarray(const char* cls, CVarRef arr);
-  public: static Variant t_fromarray(CVarRef arr) {
+  public: static Object ti_fromarray(const char* cls, CVarRef arr);
+  public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("vector", arr);
   }
-  public: static Variant ti_fromvector(const char* cls, CVarRef vec);
-  public: static Variant t_fromvector(CVarRef vec) {
+  public: static Object ti_fromvector(const char* cls, CVarRef vec);
+  public: static Object t_fromvector(CVarRef vec) {
     return ti_fromvector("vector", vec);
   }
   public: static Variant ti_slice(const char* cls, CVarRef vec, CVarRef offset,
@@ -241,12 +241,12 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
-  public: static Variant ti_fromarray(const char* cls, CVarRef arr);
-  public: static Variant t_fromarray(CVarRef arr) {
+  public: static Object ti_fromarray(const char* cls, CVarRef arr);
+  public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
   }
-  public: static Variant ti_fromiterable(const char* cls, CVarRef vec);
-  public: static Variant t_fromiterable(CVarRef vec) {
+  public: static Object ti_fromiterable(const char* cls, CVarRef vec);
+  public: static Object t_fromiterable(CVarRef vec) {
     return ti_fromiterable("map", vec);
   }
 
@@ -524,12 +524,12 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
-  public: static Variant ti_fromarray(const char* cls, CVarRef arr);
-  public: static Variant t_fromarray(CVarRef arr) {
+  public: static Object ti_fromarray(const char* cls, CVarRef arr);
+  public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
   }
-  public: static Variant ti_fromiterable(const char* cls, CVarRef vec);
-  public: static Variant t_fromiterable(CVarRef vec) {
+  public: static Object ti_fromiterable(const char* cls, CVarRef vec);
+  public: static Object t_fromiterable(CVarRef vec) {
     return ti_fromiterable("map", vec);
   }
 

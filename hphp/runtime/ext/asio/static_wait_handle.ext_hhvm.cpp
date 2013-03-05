@@ -24,15 +24,6 @@
 
 namespace HPHP {
 
-HPHP::VM::Instance* new_StaticWaitHandle_Instance(HPHP::VM::Class* cls) {
-  size_t nProps = cls->numDeclProperties();
-  size_t builtinPropSize = sizeof(c_StaticWaitHandle) - sizeof(ObjectData);
-  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
-  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-  new ((void *)inst) c_StaticWaitHandle(cls);
-  return inst;
-}
-
 IMPLEMENT_CLASS(StaticWaitHandle);
 /*
 void HPHP::c_StaticWaitHandle::t___construct()

@@ -829,7 +829,9 @@ function phase2() {
         // avoid multiple definition issues when an extension class is
         // spread among a few cpp files.
         if ($obj->name == "__construct") {
-          emit_ctor_helper($ext_hhvm_cpp, $cname);
+          if (!($cls_info['flags'] & IsAbstract)) {
+            emit_ctor_helper($ext_hhvm_cpp, $cname);
+          }
           if ($cls_info['flags'] & NoDefaultSweep) {
             fwrite($ext_hhvm_cpp,
                    "IMPLEMENT_CLASS_NO_DEFAULT_SWEEP($cname);\n");

@@ -70,9 +70,11 @@ function main() {
         "(VM::ActRec *ar);\n");
     }
     foreach ($ext_class_info as $cname => $cls_info) {
-      fwrite($outfile,
-        "VM::Instance* new_" . $cname . "_Instance(" .
-        "VM::Class*);\n");
+      if (!($cls_info['flags'] & IsAbstract)) {
+        fwrite($outfile,
+          "VM::Instance* new_" . $cname . "_Instance(" .
+          "VM::Class*);\n");
+      }
       foreach ($cls_info['methods'] as $obj) {
         fwrite($outfile, "TypedValue* tg_" . getUniqueFuncName($obj) .
           "(VM::ActRec *ar);\n");
@@ -121,7 +123,9 @@ function main() {
         fwrite($outfile, ",\n  ");
       }
       $firstParam = false;
-      fwrite($outfile, '{ "' . $cname . '", new_' . $cname . '_Instance'.
+      $constructor = ($cls_info['flags'] & IsAbstract)
+        ? 'nullptr' : 'new_' . $cname . '_Instance';
+      fwrite($outfile, '{ "' . $cname . '", ' . $constructor .
              ', sizeof(c_' . $cname . ')' .
              ', hhbc_ext_method_count_' . $cname .
              ', hhbc_ext_methods_' . $cname .

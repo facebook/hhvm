@@ -2227,7 +2227,6 @@ TypedValue* fg_nzuncompress(VM::ActRec *ar);
 TypedValue* fg_lz4compress(VM::ActRec *ar);
 TypedValue* fg_lz4hccompress(VM::ActRec *ar);
 TypedValue* fg_lz4uncompress(VM::ActRec *ar);
-VM::Instance* new_WaitHandle_Instance(VM::Class*);
 TypedValue* tg_10WaitHandle___construct(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_import(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_join(VM::ActRec *ar);
@@ -2237,7 +2236,6 @@ TypedValue* tg_10WaitHandle_isFailed(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_getID(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_getName(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_getExceptionIfFailed(VM::ActRec *ar);
-VM::Instance* new_StaticWaitHandle_Instance(VM::Class*);
 TypedValue* tg_16StaticWaitHandle___construct(VM::ActRec *ar);
 VM::Instance* new_StaticResultWaitHandle_Instance(VM::Class*);
 TypedValue* tg_22StaticResultWaitHandle___construct(VM::ActRec *ar);
@@ -2245,11 +2243,9 @@ TypedValue* tg_22StaticResultWaitHandle_create(VM::ActRec *ar);
 VM::Instance* new_StaticExceptionWaitHandle_Instance(VM::Class*);
 TypedValue* tg_25StaticExceptionWaitHandle___construct(VM::ActRec *ar);
 TypedValue* tg_25StaticExceptionWaitHandle_create(VM::ActRec *ar);
-VM::Instance* new_WaitableWaitHandle_Instance(VM::Class*);
 TypedValue* tg_18WaitableWaitHandle___construct(VM::ActRec *ar);
 TypedValue* tg_18WaitableWaitHandle_getParents(VM::ActRec *ar);
 TypedValue* tg_18WaitableWaitHandle_getStackTrace(VM::ActRec *ar);
-VM::Instance* new_BlockableWaitHandle_Instance(VM::Class*);
 TypedValue* tg_19BlockableWaitHandle___construct(VM::ActRec *ar);
 VM::Instance* new_ContinuationWaitHandle_Instance(VM::Class*);
 TypedValue* tg_22ContinuationWaitHandle___construct(VM::ActRec *ar);
@@ -6191,12 +6187,12 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
 
 const long long hhbc_ext_class_count = 71;
 const HhbcExtClassInfo hhbc_ext_classes[] = {
-  { "WaitHandle", new_WaitHandle_Instance, sizeof(c_WaitHandle), hhbc_ext_method_count_WaitHandle, hhbc_ext_methods_WaitHandle, &c_WaitHandle::s_cls },
-  { "StaticWaitHandle", new_StaticWaitHandle_Instance, sizeof(c_StaticWaitHandle), hhbc_ext_method_count_StaticWaitHandle, hhbc_ext_methods_StaticWaitHandle, &c_StaticWaitHandle::s_cls },
+  { "WaitHandle", nullptr, sizeof(c_WaitHandle), hhbc_ext_method_count_WaitHandle, hhbc_ext_methods_WaitHandle, &c_WaitHandle::s_cls },
+  { "StaticWaitHandle", nullptr, sizeof(c_StaticWaitHandle), hhbc_ext_method_count_StaticWaitHandle, hhbc_ext_methods_StaticWaitHandle, &c_StaticWaitHandle::s_cls },
   { "StaticResultWaitHandle", new_StaticResultWaitHandle_Instance, sizeof(c_StaticResultWaitHandle), hhbc_ext_method_count_StaticResultWaitHandle, hhbc_ext_methods_StaticResultWaitHandle, &c_StaticResultWaitHandle::s_cls },
   { "StaticExceptionWaitHandle", new_StaticExceptionWaitHandle_Instance, sizeof(c_StaticExceptionWaitHandle), hhbc_ext_method_count_StaticExceptionWaitHandle, hhbc_ext_methods_StaticExceptionWaitHandle, &c_StaticExceptionWaitHandle::s_cls },
-  { "WaitableWaitHandle", new_WaitableWaitHandle_Instance, sizeof(c_WaitableWaitHandle), hhbc_ext_method_count_WaitableWaitHandle, hhbc_ext_methods_WaitableWaitHandle, &c_WaitableWaitHandle::s_cls },
-  { "BlockableWaitHandle", new_BlockableWaitHandle_Instance, sizeof(c_BlockableWaitHandle), hhbc_ext_method_count_BlockableWaitHandle, hhbc_ext_methods_BlockableWaitHandle, &c_BlockableWaitHandle::s_cls },
+  { "WaitableWaitHandle", nullptr, sizeof(c_WaitableWaitHandle), hhbc_ext_method_count_WaitableWaitHandle, hhbc_ext_methods_WaitableWaitHandle, &c_WaitableWaitHandle::s_cls },
+  { "BlockableWaitHandle", nullptr, sizeof(c_BlockableWaitHandle), hhbc_ext_method_count_BlockableWaitHandle, hhbc_ext_methods_BlockableWaitHandle, &c_BlockableWaitHandle::s_cls },
   { "ContinuationWaitHandle", new_ContinuationWaitHandle_Instance, sizeof(c_ContinuationWaitHandle), hhbc_ext_method_count_ContinuationWaitHandle, hhbc_ext_methods_ContinuationWaitHandle, &c_ContinuationWaitHandle::s_cls },
   { "GenArrayWaitHandle", new_GenArrayWaitHandle_Instance, sizeof(c_GenArrayWaitHandle), hhbc_ext_method_count_GenArrayWaitHandle, hhbc_ext_methods_GenArrayWaitHandle, &c_GenArrayWaitHandle::s_cls },
   { "SetResultToRefWaitHandle", new_SetResultToRefWaitHandle_Instance, sizeof(c_SetResultToRefWaitHandle), hhbc_ext_method_count_SetResultToRefWaitHandle, hhbc_ext_methods_SetResultToRefWaitHandle, &c_SetResultToRefWaitHandle::s_cls },

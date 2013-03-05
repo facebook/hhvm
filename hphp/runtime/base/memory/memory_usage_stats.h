@@ -27,7 +27,7 @@ namespace HPHP {
 struct MemoryUsageStats {
   int64 maxBytes;   // what's request's max bytes allowed
   int64 usage;      // how many bytes are currently being used
-#if defined(USE_JEMALLOC) && defined(HHVM)
+#if defined(USE_JEMALLOC)
   int64 jemallocDebt; // how many bytes of jemalloced memory have not
                       // been processed by MemoryManager::refreshStats
   int64 alloc;      // how many bytes are currently malloc-ed

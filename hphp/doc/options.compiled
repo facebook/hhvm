@@ -353,10 +353,6 @@ These are experimental LFU settings.
     LightProcessFilePrefix = ./lightprocess
     LightProcessCount = 0
 
-    # RTTI profiling settings. Experimental.
-    RTTIDirectory = /tmp/
-    EnableCliRTTI = false
-
     # Uploads
     Upload {
       UploadMaxFileSize = 100 # Size in MB

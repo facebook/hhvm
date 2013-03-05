@@ -655,10 +655,8 @@ int64 f_memory_get_allocation() {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
     int64 ret = stats.totalAlloc;
-#ifdef HHVM
     ret -= VM::request_arena().slackEstimate() +
            VM::varenv_arena().slackEstimate();
-#endif
     return ret;
   }
   return 0;
@@ -678,10 +676,8 @@ int64 f_memory_get_usage(bool real_usage /* = false */) {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
     int64 ret = real_usage ? stats.usage : stats.alloc;
-#ifdef HHVM
     ret -= VM::request_arena().slackEstimate() +
            VM::varenv_arena().slackEstimate();
-#endif
     return ret;
   }
   return (int64)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;

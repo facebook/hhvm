@@ -199,8 +199,6 @@ bool RuntimeOption::EnableStaticContentFromDisk = true;
 bool RuntimeOption::EnableOnDemandUncompress = true;
 bool RuntimeOption::EnableStaticContentMMap = true;
 
-std::string RuntimeOption::RTTIDirectory;
-bool RuntimeOption::EnableCliRTTI = false;
 bool RuntimeOption::Utf8izeReplace = true;
 
 std::string RuntimeOption::StartupDocument;
@@ -309,7 +307,6 @@ bool RuntimeOption::LockCodeMemory = false;
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
-bool RuntimeOption::UseHphpArray = hhvm;
 bool RuntimeOption::StrictCollections = true;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
@@ -372,11 +369,6 @@ int RuntimeOption::TaintTraceMaxStrlen = 127;
 
 // Initializers for Eval flags.
 static inline bool evalJitDefault() {
-  // Only use JIT for HHVM
-  if (!hhvm) {
-    return false;
-  }
-
   // --mode server or --mode daemon
   // run long enough to justify JIT
   if (RuntimeOption::serverExecutionMode()) {
@@ -761,9 +753,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     if (EnableStaticContentMMap) {
       EnableOnDemandUncompress = true;
     }
-    RTTIDirectory =
-      Util::normalizeDir(server["RTTIDirectory"].getString("/tmp/"));
-    EnableCliRTTI = server["EnableCliRTTI"].getBool();
     Utf8izeReplace = server["Utf8izeReplace"].getBool(true);
 
     StartupDocument = server["StartupDocument"].getString();
@@ -798,11 +787,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     }
     CheckMemory = server["CheckMemory"].getBool();
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
-    UseHphpArray = server["UseHphpArray"].getBool(hhvm);
-    if (hhvm && MaxArrayChain != INT_MAX) {
-      // Give HHVM a higher threshold to avoid false-positives.
-      // UseHphpArray would be a more precise guard but it's ignored
-      // in non-hhvm builds, even if set to true.
+    if (MaxArrayChain != INT_MAX) {
+      // HphpArray needs a higher threshold to avoid false-positives.
+      // (and we always use HphpArray)
       MaxArrayChain *= 2;
     }
 

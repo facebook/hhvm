@@ -99,9 +99,7 @@ struct CompilerOptions {
   int clusterCount;
   int optimizeLevel;
   string filecache;
-  string rttiDirectory;
   string javaRoot;
-  bool generateFFI;
   bool dump;
   string docjson;
   bool coredump;
@@ -319,14 +317,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("file-cache",
      value<string>(&po.filecache),
      "if specified, generate a static file cache with this file name")
-    ("rtti-directory", value<string>(&po.rttiDirectory)->default_value(""),
-     "the directory of rtti profiling data")
-    ("java-root",
-     value<string>(&po.javaRoot)->default_value("php"),
-     "the root package of generated Java FFI classes")
-    ("generate-ffi",
-     value<bool>(&po.generateFFI)->default_value(false),
-     "generate ffi stubs")
     ("dump",
      value<bool>(&po.dump)->default_value(false),
      "dump the program graph")
@@ -430,12 +420,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
-  // config and system
-  Option::GenerateCPPMain = true;
-  if (po.noMetaInfo) {
-    Option::GenerateCPPMetaInfo = false;
-    Option::GenerateCPPMacros = false;
-  }
   Option::FlAnnotate = po.fl_annotate;
 
   Hdf config;
@@ -536,11 +520,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     if (Option::OutputHHBC) {
       Option::ParseTimeOpts = false;
     }
-  }
-
-  if (po.generateFFI) {
-    Option::GenerateFFI = true;
-    Option::JavaFFIRootPackage = po.javaRoot;
   }
 
   return 0;
@@ -951,7 +930,6 @@ int buildTarget(const CompilerOptions &po) {
   if (getenv("SHOW_LINK"))    flags += "SHOW_LINK=1 ";
   if (getenv("SHOW_COMPILE")) flags += "SHOW_COMPILE=1 ";
   if (po.format == "lib")     flags += "HPHP_BUILD_LIBRARY=1 ";
-  if (Option::GenerateFFI)    flags += "HPHP_BUILD_FFI=1 ";
   const char *argv[] = {"", po.outputDir.c_str(),
                         po.program.c_str(), flags.c_str(), nullptr};
 

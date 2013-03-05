@@ -39,11 +39,6 @@ const char *TestCodeRun::Filter = 0;
 bool TestCodeRun::FastMode = true;
 
 TestCodeRun::TestCodeRun() : m_perfMode(false), m_test(0) {
-  Option::GenerateCPPMain = true;
-  Option::GenerateCPPMetaInfo = true;
-  Option::GenerateCPPMacros = true;
-  Option::GenerateCPPComments = true;
-  Option::GenerateCPPNameSpace = true;
   Option::KeepStatementsWithNoEffect = false;
   Option::ParserThreadCount = 4;
 }

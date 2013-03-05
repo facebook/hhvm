@@ -59,11 +59,13 @@ extern Variant get_class_var_init(CStrRef s, const char *var);
  * Class/function meta info entirely encoded here as a const char * array.
  */
 extern const char *g_class_map[];
+#if 0
 extern const char *g_source_root;
 extern const char *g_source_info[];
 extern const char *g_source_cls2file[];
 extern const char *g_source_func2file[];
 extern const char *g_paramrtti_map[];
+#endif
 
 /**
  * Dynamically create an object.
@@ -100,8 +102,6 @@ extern SystemGlobals *get_system_globals();
  * Precomputed literal strings
  */
 extern StaticString literalStrings[];
-
-extern unsigned int *getRTTICounter(int id);
 
 /**
  * Eval support

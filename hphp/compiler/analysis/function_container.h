@@ -18,7 +18,6 @@
 #define __FUNCTION_CONTAINER_H__
 
 #include <compiler/hphp.h>
-#include <compiler/util/jump_table.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

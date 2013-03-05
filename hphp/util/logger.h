@@ -89,10 +89,8 @@ public:
   static void RawWarning(const std::string &msg);
   static void RawInfo(const std::string &msg);
   static void RawVerbose(const std::string &msg);
-
   static void Log(LogLevelType level, const char *type, const Exception &e,
                   const char *file = nullptr, int line = 0);
-
   static void OnNewRequest();
   static void ResetRequestCount();
 

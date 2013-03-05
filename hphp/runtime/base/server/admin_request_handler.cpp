@@ -208,14 +208,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #ifdef EXECUTION_PROFILER
         "/prof-exe:        returns sampled execution profile\n"
 #endif
-#ifdef HHVM
         "/vm-tcspace:      show space used by translator caches\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-preconsts:    show information about preconsts\n"
         "/vm-tcreset:      throw away translations and start over\n"
-#endif
-      ;
+        ;
 #ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
           usage.append(

@@ -38,7 +38,6 @@ namespace HPHP {
 class Exception : public std::exception {
 public:
   Exception(const char *fmt, ...);
-  Exception(bool trace);
   Exception(const Exception &e);
   Exception();
 
@@ -72,13 +71,11 @@ public:
    * Error message without stacktrace.
    */
   const std::string &getMessage() const { return m_msg;}
-  const StackTrace &getStackTrace() const { return m_st;}
 
 protected:
   mutable bool m_handled;
   mutable std::string m_msg;
   mutable std::string m_what;
-  StackTrace m_st;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,8 +27,6 @@
 char TestBase::error_buffer[MAXPATHLEN];
 
 TestBase::TestBase() {
-  Option::GenerateCPPComments = false;
-  Option::GenerateCPPNameSpace = false;
   Option::KeepStatementsWithNoEffect = true;
 }
 

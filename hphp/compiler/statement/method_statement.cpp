@@ -515,7 +515,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
           lastIsReturn = true;
         }
       }
-      if (!lastIsReturn && (!pseudoMain || Option::GenerateCPPMain)) {
+      if (!lastIsReturn) {
         ExpressionPtr constant =
           makeConstant(ar, funcScope->inPseudoMain() ? "true" : "null");
         ReturnStatementPtr returnStmt =

@@ -28,12 +28,7 @@ namespace HPHP {
  * Base class of all resources used by extensions for opaquely passing object
  * pointers.
  */
-#ifdef HHVM
-#define RD_PARENT HPHP::VM::Instance
-#else
-#define RD_PARENT HPHP::ObjectData
-#endif
-class ResourceData : public RD_PARENT {
+class ResourceData : public VM::Instance {
 public:
   ResourceData();
   virtual ~ResourceData();
@@ -53,7 +48,6 @@ public:
 
   static const bool IsResourceClass = true;
 };
-#undef RD_PARENT
 
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes

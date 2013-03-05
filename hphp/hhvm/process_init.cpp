@@ -35,12 +35,6 @@
 #include <string>
 
 namespace HPHP {
-#ifndef HHVM
-const long long hhbc_ext_funcs_count = 0;
-const HhbcExtFuncInfo hhbc_ext_funcs[] = {};
-const long long hhbc_ext_class_count = 0;
-const HhbcExtClassInfo hhbc_ext_classes[] = {};
-#endif
 namespace VM {
 
 ///////////////////////////////////////////////////////////////////////////////

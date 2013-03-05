@@ -49,11 +49,7 @@ public:
   void Reset();
 
 private:
-#ifdef HHVM
   typedef hphp_const_char_map<std::vector<int> > CodeCoverageMap;
-#else
-  typedef hphp_string_map<std::vector<int> > CodeCoverageMap;
-#endif
   CodeCoverageMap m_hits;
 };
 

@@ -38,8 +38,6 @@ public:
 
   bool isRef() const { return m_ref;}
   bool isOptional() const { return m_defaultValue;}
-  bool hasRTTI() const { return m_hasRTTI;}
-  void setHasRTTI() { m_hasRTTI = true;}
   const std::string &getName() const { return m_name; }
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
@@ -65,7 +63,6 @@ private:
   std::string m_originalType;
   std::string m_name;
   bool m_ref;
-  bool m_hasRTTI;
   ExpressionPtr m_defaultValue;
   ExpressionPtr m_attributeList;
 };

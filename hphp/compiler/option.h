@@ -117,46 +117,14 @@ public:
    */
   static bool PreOptimization;
   static bool PostOptimization;
-  static bool ScalarArrayOptimization;
-  static bool ScalarArrayCompression;
-  static int ScalarArrayFileCount;
-  static int ScalarArrayOverflowLimit;
-  static int LiteralStringFileCount;
   static bool AnalyzePerfectVirtuals;
   static bool HardTypeHints;
-
-  /**
-   * RTTI profiling metadata output file
-   */
-  static std::string RTTIOutputFile;
-
-  /**
-   * Directory of RTTI profiling data, used for second pass compilation
-   */
-  static std::string RTTIDirectory;
-
-  static bool GenRTTIProfileData;
-  static bool UseRTTIProfileData;
-
-  /**
-   * Generate array_createN service routines
-   */
-  static bool GenArrayCreate;
-
-  static bool UseScalarVariant;
-
-  static bool UseStaticStringProxy;
-
-  static bool UseCallUserFuncFewArgs;
-
-  static bool GenGlobalState;
 
   /**
    * Separate compilation
    */
   static bool SeparateCompilation;
   static bool SeparateCompLib;
-  static bool UseNamedScalarArray;
 
   /**
    * CodeGenerator options for PHP.
@@ -277,13 +245,7 @@ public:
   /**
    * Turn it off for cleaner unit tests.
    */
-  static bool GenerateCPPMacros;    // all macros
-  static bool GenerateCPPMain;      // include and main()
-  static bool GenerateCPPComments;  // section comments
-  static bool GenerateCPPMetaInfo;  // class map
-  static bool GenerateCPPNameSpace; // namespace HPHP
   static bool KeepStatementsWithNoEffect;
-  static bool GenerateDummyPseudoMain;
 
   /**
    * When we have an include inside a function or a method, how many levels

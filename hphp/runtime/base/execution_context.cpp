@@ -30,8 +30,6 @@
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/memory/sweepable.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/debug/backtrace.h>
-#include <runtime/base/server/server_stats.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_warning.h>
@@ -45,6 +43,7 @@
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/debugger_hook.h>
+#include <runtime/base/server/server_stats.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,12 +54,8 @@ int64_t VMExecutionContext::s_threadIdxCounter = 0;
 Mutex VMExecutionContext::s_threadIdxLock;
 hphp_hash_map<pid_t, int64_t> VMExecutionContext::s_threadIdxMap;
 
-#define NEAR_FIELD_INIT m_fp(nullptr), m_pc(nullptr), m_isValid(1), m_eventHook(nullptr),
-
 BaseExecutionContext::BaseExecutionContext() :
-#ifdef HHVM
-    NEAR_FIELD_INIT
-#endif
+    m_fp(nullptr), m_pc(nullptr), m_isValid(1), m_eventHook(nullptr),
     m_transport(nullptr),
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
@@ -80,16 +75,12 @@ BaseExecutionContext::BaseExecutionContext() :
 
 VMExecutionContext::VMExecutionContext() :
     m_constants(RuntimeOption::EvalConstEstimate),
-#ifndef HHVM
-    NEAR_FIELD_INIT
-#endif
     m_lambdaCounter(0), m_nesting(0),
     m_injTables(nullptr), m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_interpreting(false), m_dbgNoBreak(false),
     m_coverPrevLine(-1), m_coverPrevUnit(nullptr),
     m_executingSetprofileCallback(false) {
 
-#ifdef HHVM
   // Make sure any fields accessed from the TC are within a byte of
   // ExecutionContext's beginning.
   static_assert(offsetof(ExecutionContext, m_stack) <= 0xff,
@@ -104,8 +95,6 @@ VMExecutionContext::VMExecutionContext() :
                 "m_eventHook offset too large");
   static_assert(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff,
                 "m_currentThreadIdx offset too large");
-#endif
-  const_assert(hhvm);
 
   {
     Lock lock(s_threadIdxLock);
@@ -117,7 +106,6 @@ VMExecutionContext::VMExecutionContext() :
   }
   m_eventHook = new HPHP::VM::EventHook();
 }
-#undef NEAR_FIELD_INIT
 
 BaseExecutionContext::~BaseExecutionContext() {
   obFlushAll();
@@ -697,9 +685,6 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
           errline = top.rvalAt("line").toInt64();
         }
       }
-    }
-    if (backtrace.isNull()) {
-      backtrace = stackTraceToBackTrace(e.getStackTrace());
     }
     try {
       ErrorStateHelper esh(this, ExecutingUserHandler);

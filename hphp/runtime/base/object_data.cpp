@@ -539,7 +539,6 @@ Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
   return o_getImpl(propName, 0, error, context);
 }
 
-HOT_FUNC_HPHP
 Variant ObjectData::o_getPublic(CStrRef propName, bool error /* = true */) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);

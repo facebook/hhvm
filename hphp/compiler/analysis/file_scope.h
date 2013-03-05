@@ -100,8 +100,6 @@ public:
    */
   ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
 
-  bool canUseDummyPseudoMain(AnalysisResultConstPtr ar) const;
-
   /**
    * Parser functions. Parser only deals with a FileScope object, and these
    * are the only functions a parser calls upon analysis results.

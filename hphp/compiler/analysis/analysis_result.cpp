@@ -43,7 +43,6 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/array_pair_expression.h>
-#include <runtime/base/rtti_info.h>
 #include <runtime/ext/ext_json.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/program_functions.h>
@@ -75,8 +74,7 @@ IMPLEMENT_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_arrayLitstrKeyMaxSize(0), m_arrayIntegerKeyMaxSize(0),
-    m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles),
-    m_scalarArraysCounter(0), m_paramRTTICounter(0) {
+    m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles) {
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 

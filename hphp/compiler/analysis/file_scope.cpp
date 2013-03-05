@@ -206,20 +206,6 @@ ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
   return ExpressionPtr();
 }
 
-bool FileScope::canUseDummyPseudoMain(AnalysisResultConstPtr ar) const {
-  if (!m_pseudoMain) {
-    return false;
-  }
-  assert(!m_pseudoMain->isVolatile());
-  if (!Option::GenerateDummyPseudoMain ||
-      Option::KeepStatementsWithNoEffect) {
-    return false;
-  }
-  ExpressionPtr exp = getEffectiveImpl(ar);
-  Variant val;
-  return (exp && exp->getScalarValue(val) && val.same(true));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {

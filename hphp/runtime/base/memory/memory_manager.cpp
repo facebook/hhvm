@@ -178,9 +178,7 @@ void MemoryManager::resetStats() {
   m_stats.totalAlloc = 0;
 #ifdef USE_JEMALLOC
   if (s_statsEnabled) {
-#ifdef HHVM
     m_stats.jemallocDebt = 0;
-#endif
     m_prevAllocated = int64(*m_allocated);
     m_delta = m_prevAllocated - int64(*m_deallocated);
   }

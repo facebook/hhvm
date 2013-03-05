@@ -111,8 +111,6 @@ const char *Option::HiddenVariablePrefix = "h_";
 const char *Option::GlobalVariablePrefix = "gv_";
 const char *Option::StaticVariablePrefix = "sv_";
 const char *Option::ClassPropTablePrefix = "cpt_";
-const char *Option::ScalarArrayName = "sa_";
-const char *Option::SystemScalarArrayName = "ssa_";
 const char *Option::ClassPrefix = "c_";
 const char *Option::ClassStaticsCallbackPrefix = "cw_";
 const char *Option::ClassStaticsCallbackNullPrefix = "cwn_";
@@ -165,34 +163,12 @@ const char *Option::FFIFilePrefix = "ffi/";
 
 bool Option::PreOptimization = false;
 bool Option::PostOptimization = false;
-bool Option::ScalarArrayOptimization = true;
-bool Option::ScalarArrayCompression = true;
-int Option::ScalarArrayFileCount = 1;
-int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
-bool Option::UseNamedScalarArray = true;
-int Option::LiteralStringFileCount = 2;
 bool Option::AnalyzePerfectVirtuals = true;
 bool Option::HardTypeHints = true;
 
-std::string Option::RTTIOutputFile;
-std::string Option::RTTIDirectory;
-bool Option::GenRTTIProfileData = false;
-bool Option::UseRTTIProfileData = false;
-
-bool Option::GenerateCPPMacros = true;
-bool Option::GenerateCPPMain = false;
-bool Option::GenerateCPPComments = true;
-bool Option::GenerateCPPMetaInfo = true;
-bool Option::GenerateCPPNameSpace = true;
-bool Option::GenArrayCreate = true;
-bool Option::UseScalarVariant = true;
-bool Option::UseStaticStringProxy = true;
-bool Option::UseCallUserFuncFewArgs = true;
-bool Option::GenGlobalState = false;
 bool Option::KeepStatementsWithNoEffect = false;
-bool Option::GenerateDummyPseudoMain = true;
 
 int Option::ConditionalIncludeExpandLevel = 1;
 
@@ -328,8 +304,6 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(HiddenVariablePrefix);
     READ_CG_OPTION(GlobalVariablePrefix);
     READ_CG_OPTION(StaticVariablePrefix);
-    READ_CG_OPTION(ScalarArrayName);
-    READ_CG_OPTION(SystemScalarArrayName);
     READ_CG_OPTION(ClassPrefix);
     READ_CG_OPTION(ClassStaticsCallbackPrefix);
     READ_CG_OPTION(ClassStaticsCallbackNullPrefix);
@@ -410,18 +384,7 @@ void Option::Load(Hdf &config) {
     AutoloadRoot = autoloadMap["root"].getString();
   }
 
-  ScalarArrayFileCount = config["ScalarArrayFileCount"].getByte(1);
-  if (ScalarArrayFileCount <= 0) ScalarArrayFileCount = 1;
-  LiteralStringFileCount = config["LiteralStringFileCount"].getInt32(2);
-  if (LiteralStringFileCount <= 0) LiteralStringFileCount = 2;
-  UseStaticStringProxy = config["UseStaticStringProxy"].getBool(true);
   HardTypeHints = config["HardTypeHints"].getBool(true);
-  ScalarArrayOverflowLimit = config["ScalarArrayOverflowLimit"].getInt32(2000);
-  if (ScalarArrayOverflowLimit <= 0) ScalarArrayOverflowLimit = 2000;
-  if (UseNamedScalarArray) {
-    ScalarArrayOptimization = true;
-    ScalarArrayCompression = true;
-  }
 
   EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
   JitEnableRenameFunction = config["JitEnableRenameFunction"].getBool();
@@ -444,7 +407,6 @@ void Option::Load(Hdf &config) {
 
   EnableFinallyStatement = config["EnableFinallyStatement"].getBool();
 
-  RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
   AllDynamic = config["AllDynamic"].getBool(true);
   AllVolatile = config["AllVolatile"].getBool();

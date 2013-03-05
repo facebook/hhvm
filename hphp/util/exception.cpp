@@ -26,17 +26,13 @@ Exception::Exception(const char *fmt, ...)
   va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
 }
 
-Exception::Exception(bool trace)
-  : m_handled(false), m_st(trace) {
-}
-
 Exception::Exception(const Exception &e)
-  : m_handled(true), m_msg(e.m_msg), m_what(e.m_what), m_st(e.m_st) {
+  : m_handled(true), m_msg(e.m_msg), m_what(e.m_what) {
   e.m_handled = true;
 }
 
 Exception::Exception()
-  : m_handled(true) {
+    : m_handled(true) {
 }
 
 void Exception::format(const char *fmt, va_list ap) {
@@ -50,14 +46,7 @@ Exception::~Exception() throw() {
 
 const char *Exception::what() const throw() {
   if (m_what.empty()) {
-    m_what = m_msg;
-    string st = m_st.toString();
-    if (!st.empty()) {
-      m_what += "\n\n";
-      m_what += st;
-    } else {
-      m_what += "\n";
-    }
+    m_what = m_msg + "\n";
   }
   return m_what.c_str();
 }

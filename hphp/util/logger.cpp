@@ -100,7 +100,7 @@ void Logger::log(LogLevelType level, const char *type, const Exception &e,
     os << " in " << file << " on line " << line;
     msg += os.str();
   }
-  Log(level, msg, &e.getStackTrace());
+  Log(level, msg, nullptr);
 }
 
 void Logger::OnNewRequest() {
@@ -146,7 +146,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
   }
 
   boost::shared_ptr<StackTrace> deleter;
-  if (stackTrace == nullptr) {
+  if (LogNativeStackTrace && stackTrace == nullptr) {
     deleter = boost::shared_ptr<StackTrace>(new StackTrace());
     stackTrace = deleter.get();
   }

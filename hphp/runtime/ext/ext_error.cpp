@@ -19,8 +19,6 @@
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/util/string_buffer.h>
-#include <runtime/base/source_info.h>
-#include <runtime/base/debug/backtrace.h>
 #include <util/logger.h>
 
 namespace HPHP {

@@ -174,28 +174,22 @@ struct VMParserFrame {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define NEAR_FIELD_DECL                                                        \
-  HPHP::VM::Stack m_stack;                                                     \
-  HPHP::VM::ActRec* m_fp;                                                      \
-  HPHP::VM::PC m_pc;                                                           \
-  uint32 m_isValid; /* Debug-only: non-zero iff m_fp/m_stack are trustworthy */\
-  HPHP::VM::EventHook* m_eventHook;                                            \
-  int64_t m_currentThreadIdx;
-
 /**
  * Put all global variables here so we can gather them into one thread-local
  * variable for easy access.
  */
 class BaseExecutionContext : public IDebuggable {
 public:
-#ifdef HHVM
   // These members are declared first for performance reasons: they
   // are accessed from within the TC and having their offset fit
   // within a single byte makes the generated code slightly smaller
   // and faster.
-  NEAR_FIELD_DECL
-#endif
-
+  HPHP::VM::Stack m_stack;
+  HPHP::VM::ActRec* m_fp;
+  HPHP::VM::PC m_pc;
+  uint32 m_isValid; /* Debug-only: non-zero iff m_fp/m_stack are trustworthy */
+  HPHP::VM::EventHook* m_eventHook;
+  int64_t m_currentThreadIdx;
 public:
   enum ShutdownType {
     ShutDown,
@@ -592,10 +586,6 @@ public:
   const VM::Stack&  getStack() const { checkRegState(); return m_stack; }
         VM::Stack&  getStack()       { checkRegState(); return m_stack; }
 
-#ifndef HHVM
-  NEAR_FIELD_DECL
-#endif
-#undef NEAR_FIELD_DECL
   HPHP::VM::ActRec* m_firstAR;
   std::vector<HPHP::VM::Fault> m_faults;
 
@@ -761,11 +751,7 @@ public:
 
 };
 
-#ifdef HHVM
 class ExecutionContext : public VMExecutionContext {};
-#else
-class ExecutionContext : public BaseExecutionContext {};
-#endif
 
 #if DEBUG
 #define g_vmContext (&dynamic_cast<VMExecutionContext&>( \

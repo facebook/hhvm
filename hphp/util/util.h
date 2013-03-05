@@ -49,13 +49,7 @@ namespace HPHP { namespace Util {
 #define DEBUG_ONLY UNUSED
 #endif
 
-#ifdef HHVM
 #define HOT_FUNC_VM HOT_FUNC
-#define HOT_FUNC_HPHP
-#else
-#define HOT_FUNC_VM
-#define HOT_FUNC_HPHP HOT_FUNC
-#endif
 
 /*
  * we need to keep some unreferenced functions from being removed by

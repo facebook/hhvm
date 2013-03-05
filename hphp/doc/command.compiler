@@ -211,13 +211,3 @@ encountered.
 = --filecache=FILE
 
 If this argument is given, a static file cache will be created with path FILE.
-
-= --rtti-directory=DIR (default: "")
-
-= --java-root=STRING (default: php)
-
-The root package of the generated Java FFI classes is set to STRING.
-
-= --generate-ffi=BOOL (default: false)
-
-If BOOL is true, then ffi stubs will be included in the generated code.

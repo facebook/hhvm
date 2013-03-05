@@ -185,12 +185,8 @@ public:
   }
 
 public:
-#define LABEL_DECL int64 m_label;
   Object m_obj;
   Array m_args;
-#ifndef HHVM
-  LABEL_DECL
-#endif
   int64 m_index;
   Variant m_value;
   Variant m_received;
@@ -205,10 +201,7 @@ public:
     void *m_extra;
     VM::Func *m_vmFunc;
   };
-#ifdef HHVM
-  LABEL_DECL
-#endif
-#undef LABEL_DECL
+  int64_t m_label
 EOT
 ,
   )

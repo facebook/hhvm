@@ -137,13 +137,8 @@ struct CallerFrame : public VMRegAnchor {
   }
 };
 
-#ifdef HHVM
 #define SYNC_VM_REGS_SCOPED() \
   HPHP::VM::Transl::VMRegAnchor _anchorUnused
-#else
-#define SYNC_VM_REGS_SCOPED() \
-  do {} while(0)
-#endif
 
 } } } // HPHP::VM::Transl
 

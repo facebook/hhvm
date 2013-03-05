@@ -283,18 +283,6 @@ public:
    * Profiling runtime parameter type
    */
   std::string getFuncId(ClassScopePtr cls, FunctionScopePtr func);
-  std::string getParamRTTIEntryKey(ClassScopePtr cls,
-                                   FunctionScopePtr func,
-                                   const std::string &paramName);
-  void addParamRTTIEntry(ClassScopePtr cls,
-                         FunctionScopePtr func,
-                         const std::string &paramName);
-  int getParamRTTIEntryId(ClassScopePtr cls,
-                          FunctionScopePtr func,
-                          const std::string &paramName);
-  void addRTTIFunction(const std::string &id);
-  void cloneRTTIFuncs(const char *RTTIDirectory);
-
   std::vector<const char *> &getFuncTableBucket(FunctionScopePtr func);
 
   std::set<std::string> m_variableTableFunctions;
@@ -333,26 +321,6 @@ private:
   StatementPtr m_stmt;
 
   std::string m_outputPath;
-
-  std::map<std::string, int> m_scalarArrays;
-  Mutex m_namedScalarArraysMutex;
-  std::map<int, std::vector<std::string> > m_namedScalarArrays;
-  std::set<std::string> m_namedScalarVarArrays;
-  int m_scalarArraysCounter;
-  std::vector<ExpressionPtr> m_scalarArrayIds;
-
-  Mutex m_namedScalarVarIntegersMutex;
-  std::map<int, std::vector<std::string> > m_namedScalarVarIntegers;
-  Mutex m_allIntegersMutex;
-  std::set<int64> m_allIntegers;
-
-  Mutex m_namedScalarVarDoublesMutex;
-  std::map<int, std::vector<std::string> > m_namedScalarVarDoubles;
-
-  std::map<std::string, int> m_paramRTTIs;
-  std::set<std::string> m_rttiFuncs;
-  int m_paramRTTICounter;
-
 public:
   AnalysisResultPtr shared_from_this() {
     return boost::static_pointer_cast<AnalysisResult>
@@ -432,7 +400,7 @@ private:
 class RescheduleException : public Exception {
 public:
   RescheduleException(BlockScopeRawPtr scope) :
-    Exception(false), m_scope(scope) {}
+    Exception(), m_scope(scope) {}
   BlockScopeRawPtr &getScope() { return m_scope; }
 #ifdef HPHP_INSTRUMENT_TYPE_INF
   static int s_NumReschedules;

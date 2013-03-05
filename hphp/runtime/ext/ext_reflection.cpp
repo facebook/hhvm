@@ -19,7 +19,6 @@
 #include <runtime/ext/ext_closure.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/class_info.h>
-#include <runtime/base/source_info.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/string_util.h>
 #include <runtime/vm/translator/translator-inline.h>
@@ -632,13 +631,8 @@ static Array get_class_info(const ClassInfo *cls) {
   }
 
   { // source info
-    if (!set_source_info(ret, cls->getFile(), cls->getLine1(),
-                         cls->getLine2())) {
-      int line = 0;
-      const char *file = SourceInfo::TheSourceInfo.
-        getClassDeclaringFile(className, &line);
-      set_source_info(ret, file, line, line);
-    }
+    set_source_info(ret, cls->getFile(), cls->getLine1(),
+                    cls->getLine2());
     set_doc_comment(ret, cls->getDocComment());
   }
 

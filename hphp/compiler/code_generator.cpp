@@ -61,7 +61,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
                              const std::string *filename /* = NULL */)
     : m_out(nullptr), m_output(output),
-      m_context(NoContext), m_insideScalarArray(false), m_itemIndex(-1) {
+      m_context(NoContext), m_itemIndex(-1) {
   for (int i = 0; i < StreamCount; i++) {
     m_streams[i] = nullptr;
     m_indentation[i] = 0;
@@ -247,20 +247,6 @@ bool CodeGenerator::ensureOutOfNamespace() {
   return true;
 }
 
-void CodeGenerator::headerBegin(const std::string &file) {
-  string formatted = getFormattedName(file);
-  printf("\n");
-  printf("#ifndef __GENERATED_%s__\n", formatted.c_str());
-  printf("#define __GENERATED_%s__\n", formatted.c_str());
-  printf("\n");
-}
-
-void CodeGenerator::headerEnd(const std::string &file) {
-  string formatted = getFormattedName(file);
-  printf("\n");
-  printf("#endif // __GENERATED_%s__\n", formatted.c_str());
-}
-
 void CodeGenerator::ifdefBegin(bool ifdef, const char *fmt, ...) {
   printf(ifdef ? "#ifdef " : "#ifndef ");
   va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
@@ -271,47 +257,6 @@ void CodeGenerator::ifdefEnd(const char *fmt, ...) {
   printf("#endif // ");
   va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
   printf("\n");
-}
-
-void CodeGenerator::printInclude(const std::string &file) {
-  assert(!file.empty());
-
-  string formatted = file;
-  if (file[0] != '"' && file[0] != '<') {
-    if (file.substr(file.length() - 2) != ".h") {
-      formatted += ".h";
-    }
-    formatted = string("<") + formatted + '>';
-  }
-  printf("%s %s\n", HASH_INCLUDE, formatted.c_str());
-}
-
-void CodeGenerator::printBasicIncludes() {
-  if (Option::GenerateCPPMain) {
-    printInclude("<runtime/base/hphp.h>");
-    printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-    if (Option::GenArrayCreate) {
-      printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-    }
-  } else if (getOutput() == CodeGenerator::SystemCPP) {
-    printInclude("<runtime/base/hphp_system.h>");
-  }
-}
-
-void CodeGenerator::printDeclareGlobals() {
-  if (getOutput() == SystemCPP) {
-    printf("DECLARE_SYSTEM_GLOBALS(g);\n");
-  } else {
-    printf("DECLARE_GLOBAL_VARIABLES(g);\n");
-  }
-}
-
-void CodeGenerator::printStartOfJumpTable(int tableSize) {
-  if (Util::isPowerOfTwo(tableSize)) {
-    indentBegin("switch (hash & %d) {\n", tableSize-1);
-  } else {
-    indentBegin("switch (hash %% %d) {\n", tableSize);
-  }
 }
 
 void CodeGenerator::printDocComment(const std::string comment) {
@@ -327,24 +272,6 @@ void CodeGenerator::printDocComment(const std::string comment) {
   }
   print(escaped.c_str(), false);
   printf("\n");
-}
-
-void CodeGenerator::printImplStarter() {
-  printf("%s\n", STARTER_MARKER);
-}
-
-void CodeGenerator::printImplSplitter() {
-  printf("%s\n", SPLITTER_MARKER);
-}
-
-const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {
-  if (m_context == CppParameterDefaultValueDecl ||
-      m_context == CppParameterDefaultValueImpl) {
-    return (m_output == CodeGenerator::SystemCPP) ?
-           "get_system_globals()" : "get_global_variables()";
-  }
-  if (m_output == CodeGenerator::SystemCPP) return "get_system_globals()";
-  return "g";
 }
 
 std::string CodeGenerator::FormatLabel(const std::string &name) {

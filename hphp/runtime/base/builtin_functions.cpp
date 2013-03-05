@@ -941,8 +941,7 @@ Variant unserialize_ex(const char* str, int len,
   try {
     v = vu.unserialize();
   } catch (Exception &e) {
-    raise_notice("Unable to unserialize: [%s]. [%s] %s.", str,
-                 e.getStackTrace().hexEncode().c_str(),
+    raise_notice("Unable to unserialize: [%s]. %s.", str,
                  e.getMessage().c_str());
     return false;
   }
@@ -1103,7 +1102,6 @@ bool isset(CArrRef v, CStrRef offset, bool isString /* = false */) {
 bool isset(CArrRef v, litstr offset, bool isString /* = false */) {
   return isset(v.rvalAtRef(offset, AccessFlags::IsKey(isString)));
 }
-HOT_FUNC_HPHP
 bool isset(CArrRef v, CVarRef offset) {
   return isset(v.rvalAtRef(offset));
 }
@@ -1139,7 +1137,6 @@ bool isset(CVarRef v, CArrRef offset) {
 bool isset(CVarRef v, CObjRef offset) {
   return isset(v, VarNR(offset));
 }
-HOT_FUNC_HPHP
 bool isset(CVarRef v, CVarRef offset) {
   Variant::TypedValueAccessor tva = v.getTypedAccessor();
   if (LIKELY(Variant::GetAccessorType(tva) == KindOfArray)) {
@@ -1173,7 +1170,6 @@ bool isset(CVarRef v, litstr offset, bool isString /* = false */) {
   return false;
 }
 
-HOT_FUNC_HPHP
 bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
   Variant::TypedValueAccessor tva = v.getTypedAccessor();
   if (LIKELY(Variant::GetAccessorType(tva) == KindOfArray)) {
@@ -1593,7 +1589,6 @@ bool function_exists(CStrRef function_name) {
   return HPHP::VM::Unit::lookupFunc(function_name.get()) != nullptr;
 }
 
-HOT_FUNC_HPHP
 MethodCallPackage::MethodCallPackage()
   : ci(nullptr), extra(nullptr), obj(nullptr),
     isObj(false), m_fatal(true), m_isFunc(false) {}

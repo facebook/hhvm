@@ -25,8 +25,6 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/static_content_cache.h>
 #include <runtime/base/class_info.h>
-#include <runtime/base/source_info.h>
-#include <runtime/base/rtti_info.h>
 #include <runtime/base/memory/memory_manager.h>
 #include <util/logger.h>
 #include <runtime/base/externals.h>
@@ -117,8 +115,6 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   if (RuntimeOption::EnableStaticContentCache) {
     StaticContentCache::TheCache.load();
   }
-  SourceInfo::TheSourceInfo.load();
-  RTTIInfo::TheRTTIInfo.init(true);
 
   hphp_process_init();
 

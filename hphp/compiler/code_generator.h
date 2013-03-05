@@ -183,17 +183,9 @@ public:
   void namespaceEnd();
   bool ensureInNamespace();
   bool ensureOutOfNamespace();
-  void headerBegin(const std::string &file);
-  void headerEnd(const std::string &file);
   void ifdefBegin(bool ifdef, const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
   void ifdefEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void printInclude(const std::string &file);
-  void printBasicIncludes();
-  void printDeclareGlobals();
-  void printStartOfJumpTable(int tableSize);
   void printDocComment(const std::string comment);
-  void printImplStarter(); // end of includes
-  void printImplSplitter(); // marker to split .cpp into smaller files
   const char *getGlobals(AnalysisResultPtr ar);
   static std::string FormatLabel(const std::string &name);
   static std::string EscapeLabel(const std::string &name, bool *binary = nullptr);
@@ -312,7 +304,6 @@ private:
   std::set<int> m_contLabelIds;  // continue labels referenced
   std::deque<int> m_callInfos;
   LoopStatementPtr m_loopStatement;
-  bool m_insideScalarArray;
   StringToClassScopePtrVecMap m_classes;
   std::set<const FunctionScope*> m_declaredClosures;
   FileScopeRawPtr m_literalScope;

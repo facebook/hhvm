@@ -1462,7 +1462,6 @@ void Variant::escalate() {
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
-HOT_FUNC_HPHP
 bool Variant::toBooleanHelper() const {
   assert(m_type > KindOfInt64);
   switch (m_type) {
@@ -1512,7 +1511,6 @@ double Variant::toDoubleHelper() const {
   return (double)toInt64();
 }
 
-HOT_FUNC_HPHP
 String Variant::toStringHelper() const {
   switch (m_type) {
   case KindOfUninit:
@@ -1658,7 +1656,6 @@ bool Variant::same(const StringData *v2) const {
   return isString() && HPHP::same(getStringData(), v2);
 }
 
-HOT_FUNC_HPHP
 bool Variant::same(CStrRef v2) const {
   return same(v2.get());
 }
@@ -2043,7 +2040,6 @@ Variant Variant::rvalAt(litstr offset, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-HOT_FUNC_HPHP
 Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     bool error = flags & AccessFlags::Error;
@@ -2085,7 +2081,6 @@ Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-HOT_FUNC_HPHP
 Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     // Fast path for KindOfArray
@@ -2231,7 +2226,6 @@ CVarRef Variant::rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   return rvalRefHelper(offset, tmp, flags);
 }
 
-HOT_FUNC_HPHP
 CVarRef Variant::rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     // Fast path for KindOfArray
@@ -2402,11 +2396,9 @@ Variant &Variant::lvalAt(litstr  ckey, ACCESSPARAMS_IMPL) {
   String key(ckey);
   return lvalAt(key, flags);
 }
-HOT_FUNC_HPHP
 Variant &Variant::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl<CStrRef>(key, flags);
 }
-HOT_FUNC_HPHP
 Variant &Variant::lvalAt(CVarRef k, ACCESSPARAMS_IMPL) {
   return lvalAtImpl<CVarRef>(k, flags);
 }
@@ -2588,7 +2580,6 @@ Variant Variant::o_get(CStrRef propName, bool error /* = true */,
   return null_variant;
 }
 
-HOT_FUNC_HPHP
 Variant Variant::o_getPublic(CStrRef propName, bool error /* = true */) const {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_getPublic(propName, error);
@@ -2945,17 +2936,14 @@ CVarRef Variant::set(double key, CVarRef v) {
   return SetImpl(this, key, v, false);
 }
 
-HOT_FUNC_HPHP
 CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   return SetImpl<CStrRef>(this, key, v, isString);
 }
 
-HOT_FUNC_HPHP
 CVarRef Variant::set(CVarRef key, CVarRef v) {
   return SetImpl<CVarRef>(this, key, v, false);
 }
 
-HOT_FUNC_HPHP
 CVarRef Variant::append(CVarRef v) {
   switch (m_type) {
   case KindOfUninit:
@@ -3658,9 +3646,7 @@ static void unserializeProp(VariableUnserializer *uns,
     // Dynamic property. If this is the first, and we're using HphpArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
-    if (hhvm || (enable_hphp_array && RuntimeOption::UseHphpArray)) {
-      obj->initProperties(nProp);
-    }
+    obj->initProperties(nProp);
 
     addr = obj->o_realProp(realKey, ObjectData::RealPropCreate, context);
     if (!addr) {
@@ -3988,7 +3974,6 @@ VarNR::VarNR(CStrRef v) {
   }
 }
 
-HOT_FUNC_HPHP
 VarNR::VarNR(CArrRef v) {
   init(KindOfArray);
   ArrayData *a = v.get();

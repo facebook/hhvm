@@ -39,8 +39,6 @@
 #include <util/stack_trace.h>
 #include <util/light_process.h>
 #include <runtime/base/stat_cache.h>
-#include <runtime/base/source_info.h>
-#include <runtime/base/rtti_info.h>
 #include <runtime/ext/extension.h>
 #include <runtime/ext/ext_fb.h>
 #include <runtime/ext/ext_json.h>
@@ -318,10 +316,6 @@ static void handle_exception_helper(bool& ret,
       errorMsg = e.getMessage();
       errorMsg += "\n";
       errorMsg += ExtendedLogger::StringOfStackTrace(e.getBackTrace());
-    } else {
-      errorMsg = e.getStackTrace().hexEncode();
-      errorMsg += " ";
-      errorMsg += e.getMessage();
     }
     Logger::Error("%s", errorMsg.c_str());
     if (richErrorMsg) {
@@ -337,13 +331,7 @@ static void handle_exception_helper(bool& ret,
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an exception: ";
     }
-    if (RuntimeOption::ServerStackTrace) {
-      errorMsg += e.what();
-    } else {
-      errorMsg += e.getStackTrace().hexEncode();
-      errorMsg += " ";
-      errorMsg += e.getMessage();
-    }
+    errorMsg += e.what();
     if (where == InvokeException) {
       bool handlerRet = context->onFatalError(e);
       if (handlerRet) {
@@ -437,13 +425,7 @@ void handle_destructor_exception(const char* situation) {
   } catch (Exception &e) {
     errorMsg = situation;
     errorMsg += " raised a fatal error: ";
-    if (RuntimeOption::ServerStackTrace) {
-      errorMsg += e.what();
-    } else {
-      errorMsg += e.getStackTrace().hexEncode();
-      errorMsg += " ";
-      errorMsg += e.getMessage();
-    }
+    errorMsg += e.what();
   } catch (...) {
     errorMsg = situation;
     errorMsg += " threw an unknown exception";
@@ -512,8 +494,6 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
         end = RuntimeOption::ServerVariables.end(); it != end; ++it) {
     server.set(String(it->first.c_str()), String(it->second.c_str()));
   }
-
-  if (RuntimeOption::EnableCliRTTI) RTTIInfo::TheRTTIInfo.init(true);
 
   if (xhprof) {
     f_xhprof_enable(xhprof, null);
@@ -679,16 +659,9 @@ string translate_stack(const char *hexencoded, bool with_frame_numbers) {
       out << "# " << (i < 10 ? " " : "") << i << ' ';
     }
     out << f->toString();
-    if (SourceInfo::TheSourceInfo.translate(f)) {
-      out << " [" << f->filename << ':' << f->lineno << ']';
-    }
     out << '\n';
   }
   return out.str();
-}
-
-void translate_rtti(const char *rttiDirectory) {
-  RTTIInfo::TheRTTIInfo.translate_rtti(rttiDirectory);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1129,11 +1102,7 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   if (po.mode == "translate" && !po.args.empty()) {
-    if (!access(po.args[0].c_str(), F_OK)) {
-      translate_rtti(po.args[0].c_str());
-    } else {
-      printf("%s", translate_stack(po.args[0].c_str()).c_str());
-    }
+    printf("%s", translate_stack(po.args[0].c_str()).c_str());
     return 0;
   }
 

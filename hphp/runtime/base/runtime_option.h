@@ -198,8 +198,6 @@ public:
   static bool EnableOnDemandUncompress;
   static bool EnableStaticContentMMap;
 
-  static std::string RTTIDirectory;
-  static bool EnableCliRTTI;
   static bool Utf8izeReplace;
 
   static std::string StartupDocument;
@@ -307,7 +305,6 @@ public:
   static bool EnableMemoryManager;
   static bool CheckMemory;
   static int MaxArrayChain;
-  static bool UseHphpArray;
   static bool StrictCollections;
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;

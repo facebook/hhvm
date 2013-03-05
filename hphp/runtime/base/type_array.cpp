@@ -476,7 +476,6 @@ Variant Array::rvalAt(litstr key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
-HOT_FUNC_HPHP
 CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
@@ -496,7 +495,6 @@ Variant Array::rvalAt(CStrRef key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
-HOT_FUNC_HPHP
 CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
@@ -540,7 +538,6 @@ Variant Array::rvalAt(CVarRef key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
-HOT_FUNC_HPHP
 Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
   if (create) {
     if (!m_px) {
@@ -560,7 +557,6 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
   return ret;
 }
 
-HOT_FUNC_HPHP
 Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
   if (create) {
     if (!m_px) {
@@ -603,7 +599,6 @@ Variant &Array::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   return lvalAtImpl(key.toKey(), flags);
 }
-HOT_FUNC_HPHP
 Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   VarNR k(key.toKey());
@@ -670,13 +665,11 @@ CVarRef Array::set(litstr  key, CVarRef v, bool isKey /* = false */) {
   return setImpl(String(key).toKey(), v);
 }
 
-HOT_FUNC_HPHP
 CVarRef Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
   return setImpl(key.toKey(), v);
 }
 
-HOT_FUNC_HPHP
 CVarRef Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) {
     return setImpl(key.getNumData(), v);
@@ -865,7 +858,6 @@ void Array::remove(CStrRef key, bool isString /* = false */) {
   }
 }
 
-HOT_FUNC_HPHP
 void Array::remove(CVarRef key) {
   switch(key.getType()) {
   case KindOfBoolean:
@@ -885,7 +877,6 @@ void Array::removeAll() {
   operator=(Create());
 }
 
-HOT_FUNC_HPHP
 CVarRef Array::append(CVarRef v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create(v));

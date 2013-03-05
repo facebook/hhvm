@@ -797,24 +797,20 @@ void TranslatorX64::irTranslateBindG(const Tracelet& t,
 void
 TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  using namespace TargetCache;
   assert(i.inputs.size() == 2 && i.outStack);
 
-  const DynLocation& prop = *i.inputs[1];
+  static const int kPropIdx = 1;
+  const DynLocation& prop = *i.inputs[kPropIdx];
   const Location& propLoc = prop.location;
   const int propOffset    = getNormalPropertyOffset(i,
                               getMInstrInfo(OpCGetM), 1, 0);
 
   LocationCode locCode = i.immVec.locationCode();
-  if (propOffset != -1 && (locCode == LC || locCode == LH)) {
-    // XXX Get rid of passing type because it's subsumed by
-    // irPassPredictedAndInferredTypes
-    HHIR_EMIT(CGetProp, locCode, propOffset, propLoc.isStack(),
-              getInferredOrPredictedType(i), isInferredType(i));
-    return;
-  }
-
-  m_hhbcTrans->emitMInstr(i);
+  assert(propOffset != -1 && (locCode == LC || locCode == LH));
+  // XXX Get rid of passing type because it's subsumed by
+  // irPassPredictedAndInferredTypes
+  HHIR_EMIT(CGetProp, locCode, propOffset, propLoc.isStack(),
+            getInferredOrPredictedType(i), isInferredType(i));
 }
 
 static bool
@@ -825,7 +821,9 @@ isSupportedCGetMProp(const NormalizedInstruction& i) {
           mcodeMaybePropName(i.immVecM[0]),
           i.inputs[0]->rtt.pretty().c_str(),
           i.inputs[1]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 1, 0) && i.immVec.locationCode() != LL;
+  return isNormalPropertyAccess(i, 1, 0) &&
+    (i.immVec.locationCode() == LC || i.immVec.locationCode() == LH) &&
+    getNormalPropertyOffset(i, getMInstrInfo(OpCGetM), 1, 0) != -1;
 }
 
 void

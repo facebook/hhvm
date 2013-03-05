@@ -132,7 +132,6 @@ struct HhbcTranslator {
     , m_startBcOff(bcStartOffset)
     , m_lastBcOff(false)
     , m_hasExit(false)
-    , m_unboxPtrs(true)
     , m_stackDeficit(0)
     , m_exitGuardFailureTrace(m_tb->genExitGuardFailure(bcStartOffset))
   {}
@@ -581,10 +580,6 @@ private:
   Offset            m_bcOffNextTrace;
   bool              m_lastBcOff;
   bool              m_hasExit;
-  // if set, then generate unbox instructions for memory accesses (Get
-  // and Set bytecodes). Otherwise, memory accesses will bail the trace
-  // on an access to a boxed value.
-  bool              m_unboxPtrs;
 
   /*
    * Tracking of the state of the virtual execution stack:

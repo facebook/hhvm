@@ -957,15 +957,9 @@ void HhbcTranslator::emitSetProp(int offset, bool isPropOnStack) {
     PUNT(SetProp_nonobj);
   }
   SSATmp* propOffset = m_tb->genDefConst<int64>(offset);
-  SSATmp* prevValue;
-  if (m_unboxPtrs) {
-    SSATmp* propPtr = m_tb->genUnboxPtr(m_tb->genLdPropAddr(obj, propOffset));
-    prevValue = m_tb->genLdMem(propPtr, Type::Cell, exitTrace);
-    m_tb->genStMem(propPtr, src, true);
-  } else {
-     prevValue = m_tb->genLdProp(obj, propOffset, Type::Cell, exitTrace);
-     m_tb->genStProp(obj, propOffset, src, true);
-  }
+  SSATmp* propPtr = m_tb->genUnboxPtr(m_tb->genLdPropAddr(obj, propOffset));
+  SSATmp* prevValue = m_tb->genLdMem(propPtr, Type::Cell, exitTrace);
+  m_tb->genStMem(propPtr, src, true);
   pushIncRef(src);
   m_tb->genDecRef(prevValue);
   m_tb->genDecRef(obj);
@@ -997,11 +991,9 @@ void HhbcTranslator::emitCGetProp(LocationCode locCode,
       obj = popC();
       break;
     default:
-      PUNT(CGetProp_unsupportedLocation);
+      not_reached();
   }
-  if (obj->getType() != Type::Obj) {
-    PUNT(CGetProp_nonobj);
-  }
+  assert(obj->isA(Type::Obj));
   SSATmp* propOffset = m_tb->genDefConst<int64>(offset);
   SSATmp* val;
 
@@ -1019,13 +1011,9 @@ void HhbcTranslator::emitCGetProp(LocationCode locCode,
     // prediction for CGetM, we should exit normally to a trace
     // executes the CGet as cell type (including the incref of the
     // result and decref of the obj) and exits to the next bytecode
-    if (m_unboxPtrs) {
-      SSATmp* propPtr = m_tb->genUnboxPtr(m_tb->genLdPropAddr(obj, propOffset));
-      val = m_tb->genLdMem(propPtr, resultType, exitTrace1);
-    } else {
-      val = m_tb->genLdProp(obj, propOffset, resultType, exitTrace1);
-    }
-    m_tb->genCheckInit(val, exitTrace2);
+    SSATmp* propPtr = m_tb->genUnboxPtr(m_tb->genLdPropAddr(obj, propOffset));
+    val = m_tb->genLdMem(propPtr, resultType, exitTrace1);
+    m_tb->gen(CheckInit, exitTrace2, val);
   }
   pushIncRef(val);
   if (locCode != LH) {
@@ -2057,7 +2045,7 @@ void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
 }
 
 SSATmp* HhbcTranslator::unboxPtr(SSATmp* ptr) {
-  return m_unboxPtrs ? m_tb->genUnboxPtr(ptr) : ptr;
+  return m_tb->genUnboxPtr(ptr);
 }
 
 void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {

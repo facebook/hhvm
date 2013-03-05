@@ -47,7 +47,7 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
   if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
-  int64 i;
+  int64_t i;
   switch (tv->m_type) {
   case KindOfUninit:
   case KindOfNull:

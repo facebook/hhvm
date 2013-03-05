@@ -77,7 +77,7 @@ private:
   int little_endian_int32_map[4];
 
   void pack(CVarRef val, int size, int *map, char *output);
-  int32 unpack(const char *data, int size, int issigned, int *map);
+  int32_t unpack(const char *data, int size, int issigned, int *map);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

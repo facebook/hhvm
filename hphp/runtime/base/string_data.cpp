@@ -700,7 +700,7 @@ void StringData::preCompute() const {
   StringSlice s = slice();
   m_hash = hash_string(s.ptr, s.len);
   assert(m_hash >= 0);
-  int64 lval; double dval;
+  int64_t lval; double dval;
   if (isNumericWithVal(lval, dval, 1) == KindOfNull) {
     m_hash |= STRHASH_MSB;
   }
@@ -714,7 +714,7 @@ void StringData::setStatic() const {
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
-DataType StringData::isNumericWithVal(int64 &lval, double &dval,
+DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
                                       int allow_errors) const {
   if (m_hash < 0) return KindOfNull;
   DataType ret = KindOfNull;
@@ -731,7 +731,7 @@ DataType StringData::isNumericWithVal(int64 &lval, double &dval,
 
 bool StringData::isNumeric() const {
   if (isStatic()) return (m_hash >= 0);
-  int64 lval; double dval;
+  int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {
   case KindOfNull:   return false;
@@ -746,7 +746,7 @@ bool StringData::isNumeric() const {
 
 bool StringData::isInteger() const {
   if (m_hash < 0) return false;
-  int64 lval; double dval;
+  int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {
   case KindOfNull:   return false;
@@ -765,8 +765,8 @@ bool StringData::isValidVariableName() const {
   return is_valid_var_name(s.ptr, s.len);
 }
 
-int64 StringData::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
-  int64 lval; double dval;
+int64_t StringData::hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
+  int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 1);
   switch (ret) {
   case KindOfNull:
@@ -783,15 +783,15 @@ int64 StringData::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
   return 0;
 }
 
-int64 StringData::hashForStringSwitch(
-    int64 firstTrueCaseHash,
-    int64 firstNullCaseHash,
-    int64 firstFalseCaseHash,
-    int64 firstZeroCaseHash,
-    int64 firstHash,
-    int64 noMatchHash,
+int64_t StringData::hashForStringSwitch(
+    int64_t firstTrueCaseHash,
+    int64_t firstNullCaseHash,
+    int64_t firstFalseCaseHash,
+    int64_t firstZeroCaseHash,
+    int64_t firstHash,
+    int64_t noMatchHash,
     bool &needsOrder) const {
-  int64 lval; double dval;
+  int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 1);
   needsOrder = false;
   switch (ret) {
@@ -800,7 +800,7 @@ int64 StringData::hashForStringSwitch(
   case KindOfInt64:
     return lval;
   case KindOfDouble:
-    return (int64) dval;
+    return (int64_t) dval;
   default:
     break;
   }
@@ -812,7 +812,7 @@ bool StringData::toBoolean() const {
   return !empty() && !isZero();
 }
 
-int64 StringData::toInt64(int base /* = 10 */) const {
+int64_t StringData::toInt64(int base /* = 10 */) const {
   // Taint absorbtion unnecessary; taint is recreated later for numerics
   return strtoll(rawdata(), nullptr, base);
 }
@@ -824,7 +824,7 @@ double StringData::toDouble() const {
   return 0;
 }
 
-DataType StringData::toNumeric(int64 &lval, double &dval) const {
+DataType StringData::toNumeric(int64_t &lval, double &dval) const {
   if (m_hash < 0) return KindOfString;
   DataType ret = isNumericWithVal(lval, dval, 0);
   if (ret == KindOfInt64 || ret == KindOfDouble) return ret;
@@ -838,7 +838,7 @@ HOT_FUNC
 int StringData::numericCompare(const StringData *v2) const {
   assert(v2);
 
-  int64 lval1, lval2;
+  int64_t lval1, lval2;
   double dval1, dval2;
   DataType ret1, ret2;
   if ((ret1 = isNumericWithVal(lval1, dval1, 0)) == KindOfNull ||

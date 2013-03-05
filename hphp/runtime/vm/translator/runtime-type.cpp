@@ -72,7 +72,7 @@ RuntimeType::RuntimeType(bool value)
   consistencyCheck();
 }
 
-RuntimeType::RuntimeType(int64 value)
+RuntimeType::RuntimeType(int64_t value)
   : m_kind(VALUE) {
   m_value.outerType = KindOfInt64;
   m_value.innerType = KindOfInvalid;
@@ -180,7 +180,7 @@ RuntimeType::valueBoolean() const {
   return m_value.boolValid ? m_value.boolean : -1;
 }
 
-int64
+int64_t
 RuntimeType::valueInt() const {
   consistencyCheck();
   assert(m_kind == VALUE);
@@ -189,7 +189,7 @@ RuntimeType::valueInt() const {
 }
 
 // Get the value as a blob. Use with care.
-int64
+int64_t
 RuntimeType::valueGeneric() const {
   consistencyCheck();
   assert(m_kind == VALUE);
@@ -320,8 +320,8 @@ RuntimeType& RuntimeType::operator=(const RuntimeType& r) {
 
 size_t
 RuntimeType::operator()(const RuntimeType& r) const {
-  uint64 p1 = HPHP::hash_int64(m_kind);
-  uint64 p2 = 0;
+  uint64_t p1 = HPHP::hash_int64(m_kind);
+  uint64_t p2 = 0;
   // We can't just hash the whole blob of memory, because
   // C++ will leave padding uninitialized. The shifts are to
   // make the final hash order-dependent, so that

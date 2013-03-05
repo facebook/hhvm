@@ -296,10 +296,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define DEC_MA std::vector<uchar>
 #define DEC_BLA std::vector<Label*>&
 #define DEC_SLA std::vector<StrOff>&
-#define DEC_IVA int32
-#define DEC_HA int32
-#define DEC_IA int32
-#define DEC_I64A int64
+#define DEC_IVA int32_t
+#define DEC_HA int32_t
+#define DEC_IA int32_t
+#define DEC_I64A int64_t
 #define DEC_DA double
 #define DEC_SA const StringData*
 #define DEC_AA ArrayData*
@@ -786,7 +786,7 @@ bool SymbolicStack::getNotRef() const {
   return se.notRef;
 }
 
-void SymbolicStack::setInt(int64 v) {
+void SymbolicStack::setInt(int64_t v) {
   assert(m_symStack.size());
   m_symStack.back().intval = v;
 }
@@ -932,7 +932,7 @@ int SymbolicStack::getLoc(int index) const {
   return m_symStack[index].intval;
 }
 
-int64 SymbolicStack::getInt(int index) const {
+int64_t SymbolicStack::getInt(int index) const {
   assert(m_symStack.size() > size_t(index));
   assert(StackSym::GetSymFlavor(m_symStack[index].sym) == StackSym::I);
   return m_symStack[index].intval;
@@ -1094,7 +1094,7 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
 
   vector<Offset> index1;
   vector<Offset> index2;
-  vector<uint8> data;
+  vector<uint8_t> data;
   index1.push_back(entries);
 
   size_t sz1 = (2 + entries) * sizeof(Offset);
@@ -1114,8 +1114,8 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
         data.push_back(mi.m_data << 1);
       } else {
         union {
-          uint32 val;
-          uint8  bytes[4];
+          uint32_t val;
+          uint8_t  bytes[4];
         } u;
         u.val = (mi.m_data << 1) | 1;
         for (int j = 0; j < 4; j++) {
@@ -1128,7 +1128,7 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
   index2.push_back(sz1 + sz2 + data.size());
 
   size_t size = sz1 + sz2 + data.size();
-  uint8* meta = (uint8*)malloc(size);
+  uint8_t* meta = (uint8_t*)malloc(size);
   memcpy(meta, &index1[0], sz1);
   memcpy(meta + sz1, &index2[0], sz2);
   memcpy(meta + sz1 + sz2, &data[0], data.size());
@@ -1953,7 +1953,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfContinueStatement:
       case Statement::KindOfBreakStatement: {
         BreakStatementPtr bs(static_pointer_cast<BreakStatement>(s));
-        int64 n = bs->getDepth();
+        int64_t n = bs->getDepth();
         if (n == 1) {
           // Plain old "break;" or "continue;"
           if (m_contTargets.empty()) {
@@ -1985,7 +1985,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitConvertToCell(e);
         } else {
           // Dynamic break/continue with statically known depth.
-          if (n > (int64)m_contTargets.size()) {
+          if (n > (int64_t)m_contTargets.size()) {
             std::ostringstream msg;
             msg << "Cannot break/continue " << n << " levels";
             e.String(StringData::GetStaticString(msg.str()));
@@ -3684,11 +3684,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               ScalarExpressionPtr sval(
                 static_pointer_cast<ScalarExpression>(key));
               const std::string* s;
-              int64 i;
+              int64_t i;
               double d;
               if (sval->getString(s)) {
                 StringData* sd = StringData::GetStaticString(*s);
-                int64 n = 0;
+                int64_t n = 0;
                 if (sd->isStrictlyInteger(n)) {
                   tvKey.m_data.num = n;
                   tvKey.m_type = KindOfInt64;
@@ -4101,9 +4101,9 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
       encodeIvaToVector(vectorImm, m_evalStack.getLoc(i));
     } else if (symFlavor == StackSym::T) {
       assert(strid != -1);
-      encodeToVector<int32>(vectorImm, strid);
+      encodeToVector<int32_t>(vectorImm, strid);
     } else if (symFlavor == StackSym::I) {
-      encodeToVector<int64>(vectorImm, m_evalStack.getInt(i));
+      encodeToVector<int64_t>(vectorImm, m_evalStack.getInt(i));
     }
 
     ++i;
@@ -4968,7 +4968,7 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
       } else {
         return KindOfInvalid;
       }
-      int64 n;
+      int64_t n;
       bool isNonZero;
       if (t == KindOfInt64) {
         n = cval.asInt64Val();
@@ -5002,8 +5002,8 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
   }
 
   if (t == KindOfInt64) {
-    int64 base = caseMap.begin()->first;
-    int64 nTargets = caseMap.rbegin()->first - base + 1;
+    int64_t base = caseMap.begin()->first;
+    int64_t nTargets = caseMap.rbegin()->first - base + 1;
     // Fail if the cases are too sparse
     if ((float)caseMap.size() / nTargets < 0.5) {
       return KindOfInvalid;
@@ -5021,8 +5021,8 @@ void EmitterVisitor::emitIntegerSwitch(Emitter& e, SwitchStatementPtr sw,
                                        std::vector<Label>& caseLabels,
                                        Label& done, const SwitchState& state) {
   auto& caseMap = state.cases;
-  int64 base = caseMap.begin()->first;
-  int64 nTargets = caseMap.rbegin()->first - base + 1;
+  int64_t base = caseMap.begin()->first;
+  int64_t nTargets = caseMap.rbegin()->first - base + 1;
 
   // It's on. Map case values to Labels, filling in the blanks as
   // appropriate.
@@ -6913,7 +6913,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
         tvVal.m_type = KindOfString;
         break;
       }
-      int64 i;
+      int64_t i;
       if (sval->getInt(i)) {
         tvVal.m_data.num = i;
         tvVal.m_type = KindOfInt64;
@@ -7388,7 +7388,7 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
       Logger::Error("Unable to open %s for write", fullPath.c_str());
     } else {
       CodeGenerator cg(&f, CodeGenerator::TextHHBC);
-      cg.printf("Hash: %llx%016llx\n", md5.q[0], md5.q[1]);
+      cg.printf("Hash: %" PRIx64 "%016" PRIx64 "\n", md5.q[0], md5.q[1]);
       cg.printRaw(unit->toString().c_str());
       f.close();
     }

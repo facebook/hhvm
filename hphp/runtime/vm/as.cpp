@@ -816,9 +816,9 @@ void read_immvector_immediate(AsmState& as, std::vector<uchar>& ret,
     }
     encodeIvaToVector(ret, as.getLocalId("$" + name));
   } else if (memberCodeImmIsString(mcode)) {
-    encodeToVector<int32>(ret, as.ue->mergeLitstr(read_litstr(as)));
+    encodeToVector<int32_t>(ret, as.ue->mergeLitstr(read_litstr(as)));
   } else if (memberCodeImmIsInt(mcode)) {
-    encodeToVector<int64>(ret, read_opcode_arg<int64>(as));
+    encodeToVector<int64_t>(ret, read_opcode_arg<int64_t>(as));
   } else {
     as.error(std::string("don't understand immediate for member code ") +
              memberCodeString(mcode));

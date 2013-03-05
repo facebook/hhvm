@@ -726,19 +726,19 @@ ArgUnion* getImmPtr(const Opcode* opcode, int idx);
 
 // Pass a pointer to the pointer to the immediate; this function will advance
 // the pointer past the immediate
-inline int32 decodeVariableSizeImm(const unsigned char** immPtr) {
+inline int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
   const unsigned char small = **immPtr;
   if (UNLIKELY(small & 0x1)) {
     const unsigned int large = *((const unsigned int*)*immPtr);
     *immPtr += sizeof(large);
-    return (int32)(large >> 1);
+    return (int32_t)(large >> 1);
   } else {
     *immPtr += sizeof(small);
-    return (int32)(small >> 1);
+    return (int32_t)(small >> 1);
   }
 }
 
-int64 decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode);
+int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode);
 
 // Encodes a variable sized immediate for `val' into `buf'.  Returns
 // the number of bytes used taken.  At most 4 bytes can be used.

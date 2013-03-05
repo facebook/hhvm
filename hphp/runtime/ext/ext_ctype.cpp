@@ -23,7 +23,7 @@ IMPLEMENT_DEFAULT_EXTENSION(ctype);
 
 static bool ctype(CVarRef v, int (*iswhat)(int)) {
   if (v.isInteger()) {
-    int64 n = v.toInt64();
+    int64_t n = v.toInt64();
     if (n <= 255 && n >= 0) {
       return iswhat(n);
     }

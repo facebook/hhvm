@@ -31,7 +31,7 @@ public:
   DECLARE_OBJECT_ALLOCATION(MemFile);
 
   MemFile();
-  MemFile(const char *data, int64 len);
+  MemFile(const char *data, int64_t len);
   virtual ~MemFile();
 
   static StaticString s_class_name;
@@ -40,12 +40,12 @@ public:
 
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();
-  virtual int64 readImpl(char *buffer, int64 length);
+  virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int getc();
-  virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool seekable() { return true;}
-  virtual bool seek(int64 offset, int whence = SEEK_SET);
-  virtual int64 tell();
+  virtual bool seek(int64_t offset, int whence = SEEK_SET);
+  virtual int64_t tell();
   virtual bool eof();
   virtual bool rewind();
   virtual bool flush();
@@ -55,8 +55,8 @@ public:
 protected:
   std::string m_name; // name of the memory file
   char *m_data;       // data of the memory file
-  int64 m_len;        // length of the memory file
-  int64 m_cursor;     // m_data's read position
+  int64_t m_len;        // length of the memory file
+  int64_t m_cursor;     // m_data's read position
   bool m_malloced;    // whether to free m_data on delete
 
   bool closeImpl();

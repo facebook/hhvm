@@ -1183,7 +1183,7 @@ void hphp_process_init() {
   for (InitFiniNode *in = extra_process_init; in; in = in->next) {
     in->func();
   }
-  int64 save = RuntimeOption::SerializationSizeLimit;
+  int64_t save = RuntimeOption::SerializationSizeLimit;
   RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
   apc_load(RuntimeOption::ApcLoadThread);
   RuntimeOption::SerializationSizeLimit = save;

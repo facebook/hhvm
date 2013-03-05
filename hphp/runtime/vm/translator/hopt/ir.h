@@ -1114,13 +1114,13 @@ class RawMemSlot {
     }
   }
 
-  int64 getOffset()   const { return m_offset; }
-  int32 getSize()     const { return m_size; }
+  int64_t getOffset()   const { return m_offset; }
+  int32_t getSize()     const { return m_size; }
   Type getType() const { return m_type; }
   bool allowExtra()   const { return m_allowExtra; }
 
  private:
-  RawMemSlot(int64 offset, int32 size, Type type, bool allowExtra = false)
+  RawMemSlot(int64_t offset, int32_t size, Type type, bool allowExtra = false)
     : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
@@ -1164,8 +1164,8 @@ class RawMemSlot {
     return m;
   }
 
-  int64 m_offset;
-  int32 m_size;
+  int64_t m_offset;
+  int32_t m_size;
   Type m_type;
   bool m_allowExtra; // Used as a flag to ensure that extra offets are
                      // only used with RawMemSlots that support it
@@ -1313,8 +1313,8 @@ struct IRInstruction {
     assert(i <= m_numSrcs);
     m_numSrcs = i;
   }
-  SSATmp*    getSrc(uint32 i) const;
-  void       setSrc(uint32 i, SSATmp* newSrc);
+  SSATmp*    getSrc(uint32_t i) const;
+  void       setSrc(uint32_t i, SSATmp* newSrc);
   void       appendSrc(Arena&, SSATmp*);
   SrcRange   getSrcs() const {
     return SrcRange(m_srcs, m_numSrcs);
@@ -1345,13 +1345,13 @@ struct IRInstruction {
    * An instruction's 'id' has different meanings depending on the
    * compilation phase.
    */
-  uint32     getId()       const       { return m_id; }
-  void       setId(uint32 newId)       { m_id = newId; }
+  uint32_t     getId()       const       { return m_id; }
+  void       setId(uint32_t newId)       { m_id = newId; }
 
   /*
    * Instruction id (iid) is stable and useful as an array index.
    */
-  uint32     getIId()      const       {
+  uint32_t     getIId()      const       {
     assert(m_iid != kTransient);
     return m_iid;
   }
@@ -1403,7 +1403,7 @@ struct IRInstruction {
   bool isTerminal() const;
 
   void printDst(std::ostream& ostream) const;
-  void printSrc(std::ostream& ostream, uint32 srcIndex) const;
+  void printSrc(std::ostream& ostream, uint32_t srcIndex) const;
   void printOpcode(std::ostream& ostream) const;
   void printSrcs(std::ostream& ostream) const;
 
@@ -1413,10 +1413,10 @@ private:
 private:
   Opcode            m_op;
   Type              m_typeParam;
-  uint16            m_numSrcs;
-  uint16            m_numDsts;
+  uint16_t            m_numSrcs;
+  uint16_t            m_numDsts;
   const IId         m_iid;
-  uint32            m_id;
+  uint32_t            m_id;
   SSATmp**          m_srcs;
   RegSet            m_liveOutRegs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
@@ -1481,17 +1481,17 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
 
 class SSATmp {
 public:
-  uint32            getId() const { return m_id; }
+  uint32_t            getId() const { return m_id; }
   IRInstruction*    getInstruction() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
   Type              getType() const { return m_type; }
   void              setType(Type t) { m_type = t; }
-  uint32            getLastUseId() const { return m_lastUseId; }
-  void              setLastUseId(uint32 newId) { m_lastUseId = newId; }
-  uint32            getUseCount() const { return m_useCount; }
-  void              setUseCount(uint32 count) { m_useCount = count; }
+  uint32_t            getLastUseId() const { return m_lastUseId; }
+  void              setLastUseId(uint32_t newId) { m_lastUseId = newId; }
+  uint32_t            getUseCount() const { return m_useCount; }
+  void              setUseCount(uint32_t count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
-  uint32            decUseCount() { return --m_useCount; }
+  uint32_t            decUseCount() { return --m_useCount; }
   bool              isBoxed() const { return getType().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   bool              isArray() const { return isA(Type::Arr); }
@@ -1519,8 +1519,8 @@ public:
    *    getInstruction()->getOpcode() == LdConst)
    */
   bool               getValBool() const;
-  int64              getValInt() const;
-  int64              getValRawInt() const;
+  int64_t              getValInt() const;
+  int64_t              getValRawInt() const;
   double             getValDbl() const;
   const StringData*  getValStr() const;
   const ArrayData*   getValArr() const;
@@ -1547,7 +1547,7 @@ public:
    * Right now, we only spill both at the same time and only Spill and
    * Reload instructions need to deal with SSATmps that are spilled.
    */
-  bool hasReg(uint32 i = 0) const {
+  bool hasReg(uint32_t i = 0) const {
     return !m_isSpilled && m_regs[i] != InvalidReg;
   }
 
@@ -1571,8 +1571,8 @@ public:
    * Returns InvalidReg for slots that aren't allocated.
    */
   PhysReg     getReg() const { assert(!m_isSpilled); return m_regs[0]; }
-  PhysReg     getReg(uint32 i) const { assert(!m_isSpilled); return m_regs[i]; }
-  void        setReg(PhysReg reg, uint32 i) { m_regs[i] = reg; }
+  PhysReg     getReg(uint32_t i) const { assert(!m_isSpilled); return m_regs[i]; }
+  void        setReg(PhysReg reg, uint32_t i) { m_regs[i] = reg; }
 
   /*
    * Returns information about how to spill/fill a SSATmp.
@@ -1606,7 +1606,7 @@ private:
 
   // May only be created via IRFactory.  Note that this class is never
   // destructed, so don't add complex members.
-  SSATmp(uint32 opndId, IRInstruction* i)
+  SSATmp(uint32_t opndId, IRInstruction* i)
     : m_inst(i)
     , m_id(opndId)
     , m_type(outputType(i))
@@ -1621,10 +1621,10 @@ private:
   SSATmp& operator=(const SSATmp&);
 
   IRInstruction*  m_inst;
-  const uint32    m_id;
+  const uint32_t    m_id;
   Type            m_type; // type when defined
-  uint32          m_lastUseId;
-  uint16          m_useCount;
+  uint32_t          m_lastUseId;
+  uint16_t          m_useCount;
   bool            m_isSpilled : 1;
   int32_t         m_spillSlot : 31;
 
@@ -1813,7 +1813,7 @@ inline Trace* IRInstruction::getTrace() const {
  */
 class Trace : boost::noncopyable {
 public:
-  explicit Trace(Block* first, uint32 bcOff, bool isMain) {
+  explicit Trace(Block* first, uint32_t bcOff, bool isMain) {
     push_back(first);
     m_bcOff = bcOff;
     m_isMain = isMain;
@@ -1834,7 +1834,7 @@ public:
     return b;
   }
 
-  uint32 getBcOff() { return m_bcOff; }
+  uint32_t getBcOff() { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
     return exit;
@@ -1850,7 +1850,7 @@ public:
 private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't
   // represent a bytecode boundary.
-  uint32 m_bcOff;
+  uint32_t m_bcOff;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
   ExitList m_exitTraces;      // traces to which this trace exits
   bool m_isMain;

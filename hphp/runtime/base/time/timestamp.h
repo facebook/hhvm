@@ -30,12 +30,12 @@ namespace HPHP {
  */
 class TimeStamp {
 public:
-  static int64 Current();
+  static int64_t Current();
   static double CurrentSecond();
   static Array CurrentTime();
   static String CurrentMicroTime();
 
-  static int64 Get(bool &error, int hour = INT_MAX, int minute = INT_MAX,
+  static int64_t Get(bool &error, int hour = INT_MAX, int minute = INT_MAX,
                  int second = INT_MAX, int month = INT_MAX, int day = INT_MAX,
                  int year = INT_MAX, bool gmt = false);
 };

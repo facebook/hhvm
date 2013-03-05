@@ -121,7 +121,7 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
   return true;
 }
 
-int64 f_error_reporting(CVarRef level /* = null */) {
+int64_t f_error_reporting(CVarRef level /* = null */) {
   int oldErrorReportingLevel = g_context->getErrorReportingLevel();
   if (!level.isNull()) {
     g_context->setErrorReportingLevel(level.toInt32());

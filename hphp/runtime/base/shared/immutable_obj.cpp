@@ -112,8 +112,8 @@ void ImmutableObj::getSizeStats(SharedVariantStats *stats) {
   }
 }
 
-int32 ImmutableObj::getSpaceUsage() {
-  int32 size = sizeof(ImmutableObj) + sizeof(Prop) * m_propCount;
+int32_t ImmutableObj::getSpaceUsage() {
+  int32_t size = sizeof(ImmutableObj) + sizeof(Prop) * m_propCount;
   if (!m_cls->isStatic()) {
     size += sizeof(StringData) + m_cls->size();
   }

@@ -66,7 +66,7 @@ bool SharedStore::erase(CStrRef key, bool expired /* = false */) {
   return success;
 }
 
-void StoreValue::set(SharedVariant *v, int64 ttl) {
+void StoreValue::set(SharedVariant *v, int64_t ttl) {
   var = v;
   expiry = ttl ? time(nullptr) + ttl : 0;
 }
@@ -119,7 +119,7 @@ void SharedStores::Create() {
 SharedStoreFileStorage s_apc_file_storage;
 
 void SharedStoreFileStorage::enable(const std::string& prefix,
-                                    int64 chunkSize, int64 maxSize) {
+                                    int64_t chunkSize, int64_t maxSize) {
   Lock lock(m_lock);
   m_prefix = prefix;
   m_chunkSize = chunkSize;
@@ -134,7 +134,7 @@ void SharedStoreFileStorage::enable(const std::string& prefix,
   m_state = StateOpen;
 }
 
-char *SharedStoreFileStorage::put(const char *data, int32 len) {
+char *SharedStoreFileStorage::put(const char *data, int32_t len) {
   Lock lock(m_lock);
   if (m_state != StateOpen ||
       len + PaddingSize > m_chunkSize - PaddingSize) {
@@ -149,7 +149,7 @@ char *SharedStoreFileStorage::put(const char *data, int32 len) {
   strhash_t h = hash_string_inline(data, len);
   *(strhash_t*)m_current = h;
   m_current += sizeof(h);
-  *(int32*)m_current = len;
+  *(int32_t*)m_current = len;
   m_current += sizeof(len);
   // should be no overlap
   memcpy(m_current, data, len);
@@ -199,24 +199,24 @@ bool SharedStoreFileStorage::hashCheck() {
         break;
       }
       current += sizeof(h);
-      int32 len = *(int32*)current;
+      int32_t len = *(int32_t*)current;
       current += sizeof(len);
       if (len < 0 ||
-          len + PaddingSize >= (int64)boundary - (int64)current) {
+          len + PaddingSize >= (int64_t)boundary - (int64_t)current) {
         Logger::Error("invalid len %d at chunk %d offset %lld", len, i,
-                      (int64)current - (int64)m_chunks[i]);
+                      (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
       strhash_t h_data = hash_string_inline(current, len);
       if (h_data != h) {
         Logger::Error("invalid hash at chunk %d offset %lld", i,
-                      (int64)current - (int64)m_chunks[i]);
+                      (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
       current += len;
       if (*current != '\0') {
         Logger::Error("missing \\0 at chunk %d offset %lld", i,
-                      (int64)current - (int64)m_chunks[i]);
+                      (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
       current++;
@@ -234,7 +234,7 @@ void SharedStoreFileStorage::cleanup() {
 }
 
 bool SharedStoreFileStorage::addFile() {
-  if ((int64)m_chunks.size() * m_chunkSize >= m_maxSize) {
+  if ((int64_t)m_chunks.size() * m_chunkSize >= m_maxSize) {
     m_state = StateFull;
     return false;
   }

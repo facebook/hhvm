@@ -65,7 +65,7 @@ Object f_hphp_splfileinfo___construct(CObjRef obj, CStrRef file_name) {
   return obj;
 }
 
-int64 f_hphp_splfileinfo_getatime(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getatime(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_fileatime(fileInfo->getFileName());
 }
@@ -75,7 +75,7 @@ String f_hphp_splfileinfo_getbasename(CObjRef obj, CStrRef suffix) {
   return f_basename(fileInfo->getFileName(), suffix);
 }
 
-int64 f_hphp_splfileinfo_getctime(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getctime(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_filectime(fileInfo->getFileName());
 }
@@ -89,12 +89,12 @@ String f_hphp_splfileinfo_getfilename(CObjRef obj) {
   return f_basename(fileInfo->getFileName());
 }
 
-int64 f_hphp_splfileinfo_getgroup(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getgroup(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_filegroup(fileInfo->getFileName());
 }
 
-int64 f_hphp_splfileinfo_getinode(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getinode(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_fileinode(fileInfo->getFileName());
 }
@@ -110,12 +110,12 @@ String f_hphp_splfileinfo_getlinktarget(CObjRef obj) {
   return ret;
 }
 
-int64 f_hphp_splfileinfo_getmtime(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getmtime(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_filemtime(fileInfo->getFileName());
 }
 
-int64 f_hphp_splfileinfo_getowner(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getowner(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_fileowner(fileInfo->getFileName());
 }
@@ -137,7 +137,7 @@ String f_hphp_splfileinfo_getpathname(CObjRef obj) {
   return fileInfo->getFileName();
 }
 
-int64 f_hphp_splfileinfo_getperms(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getperms(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_fileperms(fileInfo->getFileName());
 }
@@ -147,7 +147,7 @@ Variant f_hphp_splfileinfo_getrealpath(CObjRef obj) {
   return f_realpath(fileInfo->getFileName());
 }
 
-int64 f_hphp_splfileinfo_getsize(CObjRef obj) {
+int64_t f_hphp_splfileinfo_getsize(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   return f_filesize(fileInfo->getFileName());
 }
@@ -245,15 +245,15 @@ bool f_hphp_splfileobject_flock(CObjRef obj, VRefParam wouldblock) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_hphp_splfileobject_fpassthru(CObjRef obj) {
+int64_t f_hphp_splfileobject_fpassthru(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_hphp_splfileobject_fscanf(int64 _argc, CObjRef obj, CStrRef format, CVarRef _argv) {
+Variant f_hphp_splfileobject_fscanf(int64_t _argc, CObjRef obj, CStrRef format, CVarRef _argv) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_hphp_splfileobject_fseek(CObjRef obj, int64 offset, int64 whence) {
+int64_t f_hphp_splfileobject_fseek(CObjRef obj, int64_t offset, int64_t whence) {
   throw NotImplementedException(__func__);
 }
 
@@ -261,15 +261,15 @@ Variant f_hphp_splfileobject_fstat(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_hphp_splfileobject_ftell(CObjRef obj) {
+int64_t f_hphp_splfileobject_ftell(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-bool f_hphp_splfileobject_ftruncate(CObjRef obj, int64 size) {
+bool f_hphp_splfileobject_ftruncate(CObjRef obj, int64_t size) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_hphp_splfileobject_fwrite(CObjRef obj, CStrRef str, int64 length) {
+int64_t f_hphp_splfileobject_fwrite(CObjRef obj, CStrRef str, int64_t length) {
   SplFileObject *fileObject = get_splfileobject(obj);
   Object file = fileObject->getFile();
   if (!file.isNull()) {
@@ -283,11 +283,11 @@ Variant f_hphp_splfileobject_getcvscontrol(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_hphp_splfileobject_getflags(CObjRef obj) {
+int64_t f_hphp_splfileobject_getflags(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_hphp_splfileobject_getmaxlinelen(CObjRef obj) {
+int64_t f_hphp_splfileobject_getmaxlinelen(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
@@ -295,7 +295,7 @@ bool f_hphp_splfileobject_haschildren(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_hphp_splfileobject_key(CObjRef obj) {
+int64_t f_hphp_splfileobject_key(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
@@ -311,7 +311,7 @@ bool f_hphp_splfileobject_valid(CObjRef obj) {
   throw NotImplementedException(__func__);
 }
 
-void f_hphp_splfileobject_seek(CObjRef obj, int64 line_pos) {
+void f_hphp_splfileobject_seek(CObjRef obj, int64_t line_pos) {
   throw NotImplementedException(__func__);
 }
 
@@ -319,11 +319,11 @@ void f_hphp_splfileobject_setcsvcontrol(CObjRef obj, CStrRef delimiter, CStrRef 
   throw NotImplementedException(__func__);
 }
 
-void f_hphp_splfileobject_setflags(CObjRef obj, int64 flags) {
+void f_hphp_splfileobject_setflags(CObjRef obj, int64_t flags) {
   throw NotImplementedException(__func__);
 }
 
-void f_hphp_splfileobject_setmaxlinelen(CObjRef obj, int64 max_len) {
+void f_hphp_splfileobject_setmaxlinelen(CObjRef obj, int64_t max_len) {
   throw NotImplementedException(__func__);
 }
 

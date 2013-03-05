@@ -100,7 +100,7 @@ void throw_spl_exception(const char *fmt, ...) {
 }
 
 static bool s_inited = false;
-static int64 s_hash_mask_handle = 0;
+static int64_t s_hash_mask_handle = 0;
 static Mutex s_mutex;
 
 String f_spl_object_hash(CObjRef obj) {
@@ -118,7 +118,7 @@ String f_spl_object_hash(CObjRef obj) {
 
   char buf[33];
   snprintf(buf, sizeof(buf), "%032" PRIx64,
-           s_hash_mask_handle ^ (int64)obj.get());
+           s_hash_mask_handle ^ (int64_t)obj.get());
   return String(buf, CopyString);
 }
 
@@ -213,7 +213,7 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
   }
   Object pobj = obj.toObject();
   pobj->o_invoke("rewind", null_array, -1);
-  int64 count = 0;
+  int64_t count = 0;
   while (same(pobj->o_invoke("valid", null_array, -1), true)) {
     if (!same(f_call_user_func_array(func, params), true)) {
       break;
@@ -230,7 +230,7 @@ Variant f_iterator_count(CVarRef obj) {
   }
   Object pobj = obj.toObject();
   pobj->o_invoke("rewind", null_array, -1);
-  int64 count = 0;
+  int64_t count = 0;
   while (same(pobj->o_invoke("valid", null_array, -1), true)) {
     ++count;
     pobj->o_invoke("next", null_array, -1);

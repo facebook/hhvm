@@ -31,7 +31,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   char buf[32];
   snprintf(buf, sizeof(buf), "%u", Process::GetProcessId());
   hdf["pid"] = string(buf);
-  snprintf(buf, sizeof(buf), "%" PRIx64, (int64)Process::GetThreadId());
+  snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)Process::GetThreadId());
   hdf["tid"] = string(buf);
   snprintf(buf, sizeof(buf), "%u", Process::GetThreadPid());
   hdf["tpid"] = string(buf);
@@ -93,7 +93,7 @@ const char *ReplayTransport::getUrl() {
 const char *ReplayTransport::getRemoteHost() {
   return m_hdf["remote_host"].get("");
 }
-uint16 ReplayTransport::getRemotePort() {
+uint16_t ReplayTransport::getRemotePort() {
   return m_hdf["remote_port"].getUInt16(0);
 }
 

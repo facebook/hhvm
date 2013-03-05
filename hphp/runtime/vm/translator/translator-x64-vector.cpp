@@ -2929,7 +2929,7 @@ void TranslatorX64::translateIssetMFast(const Tracelet& t,
     SKTRACE(1, ni.source, "loaded variant\n");
   }
 
-  typedef uint64 (*HelperFunc)(const void* arr, StringData* sd);
+  typedef uint64_t (*HelperFunc)(const void* arr, StringData* sd);
   HelperFunc helper = nullptr;
   if (key.isInt()) {
     helper = (HelperFunc)array_issetm_i;

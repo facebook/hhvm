@@ -62,8 +62,8 @@ enum php_openssl_cipher_type {
 };
 
 // bitfields
-const int64 k_OPENSSL_RAW_DATA = 1;
-const int64 k_OPENSSL_ZERO_PADDING = 2;
+const int64_t k_OPENSSL_RAW_DATA = 1;
+const int64_t k_OPENSSL_ZERO_PADDING = 2;
 
 static char default_ssl_conf_filename[PATH_MAX];
 
@@ -474,7 +474,7 @@ static const char *read_string(CArrRef args, const char *key, const char *def,
   return def;
 }
 
-static int64 read_integer(CArrRef args, const char *key, int64 def) {
+static int64_t read_integer(CArrRef args, const char *key, int64_t def) {
   if (args.exists(key)) {
     return args[key].toInt64();
   }
@@ -2011,7 +2011,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain,
   return ret;
 }
 
-int64 f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
+int64_t f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
                                 CArrRef cainfo /* = null_array */,
                                 CStrRef untrustedfile /* = null_string */) {
   int ret = -1;

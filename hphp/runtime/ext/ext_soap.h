@@ -27,7 +27,7 @@ namespace HPHP {
 
 bool f_use_soap_error_handler(bool handler = true);
 bool f_is_soap_fault(CVarRef fault);
-int64 f__soap_active_version();
+int64_t f__soap_active_version();
 
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
@@ -46,7 +46,7 @@ class c_SoapServer : public ExtObjectData {
   public: void t_addfunction(CVarRef func);
   public: Variant t_getfunctions();
   public: void t_handle(CStrRef request = null_string);
-  public: void t_setpersistence(int64 mode);
+  public: void t_setpersistence(int64_t mode);
   public: void t_fault(CVarRef code, CStrRef fault, CStrRef actor = null_string, CVarRef detail = null, CStrRef name = null_string);
   public: void t_addsoapheader(CObjRef fault);
 
@@ -88,7 +88,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: Variant t___getlastresponseheaders();
   public: Variant t___getfunctions();
   public: Variant t___gettypes();
-  public: Variant t___dorequest(CStrRef buf, CStrRef location, CStrRef action, int64 version, bool oneway = false);
+  public: Variant t___dorequest(CStrRef buf, CStrRef location, CStrRef action, int64_t version, bool oneway = false);
   public: Variant t___setcookie(CStrRef name, CStrRef value = null_string);
   public: Variant t___setlocation(CStrRef new_location = null_string);
   public: bool t___setsoapheaders(CVarRef headers = null_variant);
@@ -147,7 +147,7 @@ class c_SoapVar : public ExtObjectData {
 
 
   public: Variant m_value;
-  public: int64   m_type;
+  public: int64_t   m_type;
   public: String  m_stype;
   public: String  m_ns;
   public: String  m_name;

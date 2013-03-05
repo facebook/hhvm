@@ -277,7 +277,7 @@ public:
   virtual bool preparer(CStrRef sql, sp_PDOStatement *stmt, CVarRef options);
 
   /* execute a statement (that does not return a result set) */
-  virtual int64 doer(CStrRef sql);
+  virtual int64_t doer(CStrRef sql);
 
   /* quote a string */
   virtual bool quoter(CStrRef input, String &quoted, PDOParamType paramtype);
@@ -288,7 +288,7 @@ public:
   virtual bool rollback();
 
   /* setting of attributes */
-  virtual bool setAttribute(int64 attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, CVarRef value);
 
   /* return last insert id.  NULL indicates error condition, otherwise,
      the return value MUST be an emalloc'd NULL terminated string. */
@@ -304,7 +304,7 @@ public:
   virtual bool fetchErr(PDOStatement *stmt, Array &info);
 
   /* fetching of attributes: -1: error, 0: unsupported attribute */
-  virtual int getAttribute(int64 attr, Variant &value);
+  virtual int getAttribute(int64_t attr, Variant &value);
 
   /* checking/pinging persistent connections; return SUCCESS if the connection
      is still alive and ready to be used, FAILURE otherwise.
@@ -417,11 +417,11 @@ public:
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
 public:
-  int64 paramno;           /* if -1, then it has a name, and we don't
+  int64_t paramno;           /* if -1, then it has a name, and we don't
                               know the index *yet* */
   String name;
 
-  int64 max_value_len;     /* as a hint for pre-allocation */
+  int64_t max_value_len;     /* as a hint for pre-allocation */
 
   Variant parameter;       /* the variable itself */
   PDOParamType param_type; /* desired or suggested type */
@@ -488,10 +488,10 @@ public:
   virtual bool paramHook(PDOBoundParam *param, PDOParamEvent event_type);
 
   /* setting of attributes */
-  virtual bool setAttribute(int64 attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, CVarRef value);
 
   /* fetching of attributes: -1: error, 0: unsupported attribute */
-  virtual int getAttribute(int64 attr, Variant &value);
+  virtual int getAttribute(int64_t attr, Variant &value);
 
   /* retrieves meta data for a numbered column.
    * Returns SUCCESS/FAILURE.
@@ -524,7 +524,7 @@ public:
    *   'flags' => array('not_null', 'mysql:some_flag'); // to add data to an
    *      existing key
    */
-  virtual bool getColumnMeta(int64 colno, Array &return_value);
+  virtual bool getColumnMeta(int64_t colno, Array &return_value);
 
   /* advances the statement to the next rowset of the batch.
    * If it returns 1, PDO will tear down its idea of columns

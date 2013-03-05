@@ -39,7 +39,7 @@ public:
   CStrRef o_getClassNameHook() const { return s_class_name; }
 
   virtual bool open(CStrRef filename, CStrRef mode);
-  virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool flush();
   virtual Array getWrapperMetaData() { return m_responseHeaders; }
   String getLastError();

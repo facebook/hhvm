@@ -246,12 +246,12 @@ bool Hdf::getBool(bool defValue /* = false */) const {
     strcasecmp(v, "false") && strcasecmp(v, "no") && strcasecmp(v, "off");
 }
 
-int64 Hdf::getInt(int64 defValue, const char *type, int64 maxValue) const {
+int64_t Hdf::getInt(int64_t defValue, const char *type, int64_t maxValue) const {
   const char *v = get();
   if (v == nullptr) return defValue;
 
   char *endptr = nullptr;
-  int64 n = strtoll(v, &endptr, 0);
+  int64_t n = strtoll(v, &endptr, 0);
   if ((!endptr && !*endptr) ||
       (maxValue && (n > maxValue || n < (- maxValue - 1)))) {
     throw HdfDataTypeException(this, type, v);
@@ -264,25 +264,25 @@ char Hdf::getByte(char defValue /* = 0 */) const {
   return getInt(defValue, "byte", 0x7FL);
 }
 
-int16 Hdf::getInt16(int16 defValue /* = 0 */) const {
+int16_t Hdf::getInt16(int16_t defValue /* = 0 */) const {
   return getInt(defValue, "int16", 0x7FFFL);
 }
 
-int32 Hdf::getInt32(int32 defValue /* = 0 */) const {
+int32_t Hdf::getInt32(int32_t defValue /* = 0 */) const {
   return getInt(defValue, "int32", 0x7FFFFFFFL);
 }
 
-int64 Hdf::getInt64(int64 defValue /* = 0 */) const {
+int64_t Hdf::getInt64(int64_t defValue /* = 0 */) const {
   return getInt(defValue, "int64", 0);
 }
 
-uint64 Hdf::getUInt(uint64 defValue, const char *type, uint64 mask) const {
+uint64_t Hdf::getUInt(uint64_t defValue, const char *type, uint64_t mask) const {
   const char *v = get();
   if (v == nullptr) return defValue;
 
   char *endptr = nullptr;
-  int64 n = strtoull(v, &endptr, 0);
-  if ((!endptr && !*endptr) || (mask && ((uint64)n & mask))) {
+  int64_t n = strtoull(v, &endptr, 0);
+  if ((!endptr && !*endptr) || (mask && ((uint64_t)n & mask))) {
     throw HdfDataTypeException(this, type, v);
   }
 
@@ -293,15 +293,15 @@ uchar Hdf::getUByte(uchar defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned byte", ~0xFFUL);
 }
 
-uint16 Hdf::getUInt16(uint16 defValue /* = 0 */) const {
+uint16_t Hdf::getUInt16(uint16_t defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned int16", ~0xFFFFUL);
 }
 
-uint32 Hdf::getUInt32(uint32 defValue /* = 0 */) const {
+uint32_t Hdf::getUInt32(uint32_t defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned int32", ~0xFFFFFFFFUL);
 }
 
-uint64 Hdf::getUInt64(uint64 defValue /* = 0 */) const {
+uint64_t Hdf::getUInt64(uint64_t defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned int64", 0);
 }
 
@@ -378,38 +378,38 @@ int Hdf::compare(uchar v2) const {
   return v1 > v2 ? 1 : -1;
 }
 
-int Hdf::compare(int16 v2) const {
-  int16 v1 = getInt16();
+int Hdf::compare(int16_t v2) const {
+  int16_t v1 = getInt16();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
-int Hdf::compare(uint16 v2) const {
-  uint16 v1 = getUInt16();
+int Hdf::compare(uint16_t v2) const {
+  uint16_t v1 = getUInt16();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
-int Hdf::compare(int32 v2) const {
-  int32 v1 = getInt32();
+int Hdf::compare(int32_t v2) const {
+  int32_t v1 = getInt32();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
-int Hdf::compare(uint32 v2) const {
-  uint32 v1 = getUInt32();
+int Hdf::compare(uint32_t v2) const {
+  uint32_t v1 = getUInt32();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
-int Hdf::compare(int64 v2) const {
-  int64 v1 = getInt64();
+int Hdf::compare(int64_t v2) const {
+  int64_t v1 = getInt64();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
 
-int Hdf::compare(uint64 v2) const {
-  uint64 v1 = getUInt64();
+int Hdf::compare(uint64_t v2) const {
+  uint64_t v1 = getUInt64();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }
@@ -451,13 +451,13 @@ void Hdf::set(const char *value) {
   CheckNeoError(hdf_set_value(getRaw(), nullptr, (char*)value));
 }
 
-void Hdf::set(int64 value) {
+void Hdf::set(int64_t value) {
   char buf[24];
   snprintf(buf, sizeof(buf), "%lld", (long long)value);
   set(buf);
 }
 
-void Hdf::set(uint64 value) {
+void Hdf::set(uint64_t value) {
   char buf[24];
   snprintf(buf, sizeof(buf), "%llu", (unsigned long long)value);
   set(buf);

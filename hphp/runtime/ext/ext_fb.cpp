@@ -49,21 +49,21 @@ static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
 #define FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE  0x0003
 #define FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE 0x0004
 
-const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE = FB_UNSERIALIZE_NONSTRING_VALUE;
-const int64 k_FB_UNSERIALIZE_UNEXPECTED_END = FB_UNSERIALIZE_UNEXPECTED_END;
-const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
+const int64_t k_FB_UNSERIALIZE_NONSTRING_VALUE = FB_UNSERIALIZE_NONSTRING_VALUE;
+const int64_t k_FB_UNSERIALIZE_UNEXPECTED_END = FB_UNSERIALIZE_UNEXPECTED_END;
+const int64_t k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
   FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
-const int64 k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
+const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
   FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
 
-const int64 k_TAINT_NONE = TAINT_BIT_NONE;
-const int64 k_TAINT_HTML = TAINT_BIT_HTML;
-const int64 k_TAINT_MUTATED = TAINT_BIT_MUTATED;
-const int64 k_TAINT_SQL = TAINT_BIT_SQL;
-const int64 k_TAINT_SHELL = TAINT_BIT_SHELL;
-const int64 k_TAINT_TRACE_HTML = TAINT_BIT_TRACE_HTML;
-const int64 k_TAINT_ALL = TAINT_BIT_ALL;
-const int64 k_TAINT_TRACE_SELF = TAINT_BIT_TRACE_SELF;
+const int64_t k_TAINT_NONE = TAINT_BIT_NONE;
+const int64_t k_TAINT_HTML = TAINT_BIT_HTML;
+const int64_t k_TAINT_MUTATED = TAINT_BIT_MUTATED;
+const int64_t k_TAINT_SQL = TAINT_BIT_SQL;
+const int64_t k_TAINT_SHELL = TAINT_BIT_SHELL;
+const int64_t k_TAINT_TRACE_HTML = TAINT_BIT_TRACE_HTML;
+const int64_t k_TAINT_ALL = TAINT_BIT_ALL;
+const int64_t k_TAINT_TRACE_SELF = TAINT_BIT_TRACE_SELF;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -134,7 +134,7 @@ static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
       for (ArrayIter iter(arr); iter; ++iter) {
         Variant key = iter.first();
         if (key.isNumeric()) {
-          int64 index = key.toInt64();
+          int64_t index = key.toInt64();
           size += 1 + INT_SIZE(index);
         } else {
           int len = key.toString().size();
@@ -157,7 +157,7 @@ static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
   return 0;
 }
 
-static void fb_serialize_long_into_buffer(int64 val, char *buff, int *pos) {
+static void fb_serialize_long_into_buffer(int64_t val, char *buff, int *pos) {
   switch (INT_SIZE(val)) {
   case 1:
     buff[(*pos)++] = T_BYTE;
@@ -228,7 +228,7 @@ static bool fb_serialize_into_buffer(CVarRef thing, char *buff, int *pos) {
       for (ArrayIter iter(arr); iter; ++iter) {
         Variant key = iter.first();
         if (key.isNumeric()) {
-          int64 index = key.toInt64();
+          int64_t index = key.toInt64();
           fb_serialize_long_into_buffer(index, buff, pos);
         } else {
           fb_serialize_string_into_buffer(key.toString(), buff, pos);
@@ -298,7 +298,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
       CHECK_ENOUGH(sizeof(int64_t), *pos, buff_len);
       int64_t ret = (int64_t)ntohll(*(int64_t *)(buff + (*pos)));
       (*pos) += 8;
-      res = (int64)ret;
+      res = (int64_t)ret;
       break;
     }
   case T_DOUBLE:
@@ -339,7 +339,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
       CHECK_ENOUGH(1, *pos, buff_len);
       while ((type = buff[(*pos)++]) != T_STOP) {
         String key;
-        int64 index = 0;
+        int64_t index = 0;
         switch(type) {
         case T_BYTE:
           CHECK_ENOUGH(sizeof(int8_t), *pos, buff_len);
@@ -681,7 +681,7 @@ static void fb_compact_serialize_array_as_list_map(
   StringData* sd, CArrRef arr, int64_t index_limit, int depth) {
 
   fb_compact_serialize_code(sd, FB_CS_LIST_MAP);
-  for (int64 i = 0; i < index_limit; ++i) {
+  for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
       fb_compact_serialize_variant(sd, arr[i], depth + 1);
     } else {
@@ -843,7 +843,7 @@ int fb_compact_unserialize_int64_from_buffer(
   } else if (first == (kCodePrefix | FB_CS_INT64)) {
     p += 1;
     CHECK_ENOUGH(8, p, n);
-    int64 val = (int64_t)ntohll(*reinterpret_cast<const int64_t*>(buf + p));
+    int64_t val = (int64_t)ntohll(*reinterpret_cast<const int64_t*>(buf + p));
     p += 8;
     out = val;
 
@@ -869,7 +869,7 @@ int fb_compact_unserialize_from_buffer(
     if (err) {
       return err;
     }
-    out = (int64)val;
+    out = (int64_t)val;
     return 0;
   }
   p += 1;
@@ -927,7 +927,7 @@ int fb_compact_unserialize_from_buffer(
       // There's no concept of vector in PHP (yet),
       // so return an array in both cases
       Array arr = Array::Create();
-      int64 i = 0;
+      int64_t i = 0;
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         if (buf[p] == (char)(kCodePrefix | FB_CS_SKIP)) {
           ++i;
@@ -1291,11 +1291,11 @@ static int f_fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
   return num_code_points;
 }
 
-int64 f_fb_utf8_strlen(CStrRef input) {
+int64_t f_fb_utf8_strlen(CStrRef input) {
   return f_fb_utf8_strlen_impl(input, /* deprecated */ false);
 }
 
-int64 f_fb_utf8_strlen_deprecated(CStrRef input) {
+int64_t f_fb_utf8_strlen_deprecated(CStrRef input) {
   return f_fb_utf8_strlen_impl(input, /* deprecated */ true);
 }
 
@@ -1651,7 +1651,7 @@ Array f_fb_get_flush_stat() {
 
     int total = transport->getResponseTotalSize();
     int sent = transport->getResponseSentSize();
-    int64 time = transport->getFlushTime();
+    int64_t time = transport->getFlushTime();
     return CREATE_MAP2(
         "flush_stats", CREATE_MAP3("total", total, "sent", sent, "time", time),
         "chunk_stats", chunkStats);
@@ -1659,7 +1659,7 @@ Array f_fb_get_flush_stat() {
   return NULL;
 }
 
-int64 f_fb_get_last_flush_size() {
+int64_t f_fb_get_last_flush_size() {
   Transport *transport = g_context->getTransport();
   return transport ? transport->getLastChunkSentSize() : 0;
 }

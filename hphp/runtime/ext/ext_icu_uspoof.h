@@ -32,13 +32,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64 q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE;
-extern const int64 q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE;
-extern const int64 q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE;
-extern const int64 q_SpoofChecker$$ANY_CASE;
-extern const int64 q_SpoofChecker$$SINGLE_SCRIPT;
-extern const int64 q_SpoofChecker$$INVISIBLE;
-extern const int64 q_SpoofChecker$$CHAR_LIMIT;
+extern const int64_t q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE;
+extern const int64_t q_SpoofChecker$$MIXED_SCRIPT_CONFUSABLE;
+extern const int64_t q_SpoofChecker$$WHOLE_SCRIPT_CONFUSABLE;
+extern const int64_t q_SpoofChecker$$ANY_CASE;
+extern const int64_t q_SpoofChecker$$SINGLE_SCRIPT;
+extern const int64_t q_SpoofChecker$$INVISIBLE;
+extern const int64_t q_SpoofChecker$$CHAR_LIMIT;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class SpoofChecker

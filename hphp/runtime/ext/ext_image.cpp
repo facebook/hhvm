@@ -1644,8 +1644,8 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
   f_fclose(stream);
 
   if (result) {
-    ret.set(0, (int64)result->width);
-    ret.set(1, (int64)result->height);
+    ret.set(0, (int64_t)result->width);
+    ret.set(1, (int64_t)result->height);
     ret.set(2, itype);
     char *temp;
     php_vspprintf(&temp, 0, "width=\"%d\" height=\"%d\"",
@@ -1653,10 +1653,10 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
     ret.set(3, String(temp, CopyString));
     if (temp) IM_FREE(temp);
     if (result->bits != 0) {
-      ret.set("bits", (int64)result->bits);
+      ret.set("bits", (int64_t)result->bits);
     }
     if (result->channels != 0) {
-      ret.set("channels", (int64)result->channels);
+      ret.set("channels", (int64_t)result->channels);
     }
     ret.set("mime", (char*)php_image_type_to_mime_type(itype));
     IM_FREE(result);
@@ -3335,7 +3335,7 @@ Variant f_imagecreate(int width, int height) {
   return Object(new Image(im));
 }
 
-int64 f_imagetypes() {
+int64_t f_imagetypes() {
   int ret=0;
 #ifdef HAVE_GD_GIF_CREATE
   ret = 1;
@@ -3901,11 +3901,11 @@ bool f_imagefilledpolygon(CObjRef image, CArrRef points, int num_points,
   return php_imagepolygon(image, points, num_points, color, 1);
 }
 
-int64 f_imagefontwidth(int font) {
+int64_t f_imagefontwidth(int font) {
   return php_imagefontsize(font, 0);
 }
 
-int64 f_imagefontheight(int font) {
+int64_t f_imagefontheight(int font) {
   return php_imagefontsize(font, 1);
 }
 
@@ -7959,8 +7959,8 @@ Variant f_exif_thumbnail(CStrRef filename, VRefParam width /* = null */,
   if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
     exif_scan_thumbnail(&ImageInfo);
   }
-  width = (int64)ImageInfo.Thumbnail.width;
-  height = (int64)ImageInfo.Thumbnail.height;
+  width = (int64_t)ImageInfo.Thumbnail.width;
+  height = (int64_t)ImageInfo.Thumbnail.height;
   imagetype = ImageInfo.Thumbnail.filetype;
   String str(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, CopyString);
   exif_discard_imageinfo(&ImageInfo);

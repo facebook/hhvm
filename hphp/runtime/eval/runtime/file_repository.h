@@ -82,10 +82,10 @@ private:
 };
 
 class PhpFileWrapper {
-  static int64 timespecCompare(const struct timespec& l,
+  static int64_t timespecCompare(const struct timespec& l,
                                const struct timespec& r) {
     if (l.tv_sec != r.tv_sec) return l.tv_sec - r.tv_sec;
-    int64 ret = l.tv_nsec - r.tv_nsec;
+    int64_t ret = l.tv_nsec - r.tv_nsec;
     return ret;
   }
 public:

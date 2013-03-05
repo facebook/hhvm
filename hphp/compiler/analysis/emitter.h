@@ -110,10 +110,10 @@ public:
 #define MA std::vector<uchar>
 #define BLA std::vector<Label*>&
 #define SLA std::vector<StrOff>&
-#define IVA int32
-#define HA int32
-#define IA int32
-#define I64A int64
+#define IVA int32_t
+#define HA int32_t
+#define IA int32_t
+#define I64A int64_t
 #define DA double
 #define SA const StringData*
 #define AA ArrayData*
@@ -200,7 +200,7 @@ private:
       DataType dt;              // META_DATA_TYPE
     }   metaData;
     const StringData* className;
-    int64 intval; // used for L and I symbolic flavors
+    int64_t intval; // used for L and I symbolic flavors
 
     // If intval is an unnamed local temporary, this offset is the start
     // of the region we are using it (which we will need to have a
@@ -237,7 +237,7 @@ public:
   std::string pretty() const;
 
   void push(char sym);
-  void setInt(int64 v);
+  void setInt(int64_t v);
   void setString(const StringData* s);
   void setKnownCls(const StringData* s, bool nonNull);
   void setNotRef();
@@ -274,7 +274,7 @@ public:
 
   ClassBaseType getClsBaseType(int index) const;
   int getLoc(int index) const;
-  int64 getInt(int index) const;
+  int64_t getInt(int index) const;
   Offset getUnnamedLocStart(int index) const;
 
   void pushFDesc();
@@ -502,7 +502,7 @@ private:
   typedef std::pair<Id, int> StrCase;
   struct SwitchState : private boost::noncopyable {
     SwitchState() : nonZeroI(-1), defI(-1) {}
-    std::map<int64, int> cases; // a map from int (or litstr id) to case index
+    std::map<int64_t, int> cases; // a map from int (or litstr id) to case index
     std::vector<StrCase> caseOrder; // for string switches, a list of the
                                     // <litstr id, case index> in the order
                                     // they appear in the source

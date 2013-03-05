@@ -53,7 +53,7 @@ public:
   static DebuggerProxyPtr GetProxy();
 
   static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
-  static bool IsThreadDebugging(int64 tid);
+  static bool IsThreadDebugging(int64_t tid);
 
   static void RetireDummySandboxThread(DummySandbox* toRetire);
   static void CleanupDummySandboxThreads();
@@ -115,13 +115,13 @@ private:
                                    StringDataHashCompare> SandboxThreadInfoMap;
   SandboxThreadInfoMap m_sandboxThreadInfoMap;
 
-  typedef tbb::concurrent_hash_map<int64, ThreadInfo*> ThreadInfoMap;
+  typedef tbb::concurrent_hash_map<int64_t, ThreadInfo*> ThreadInfoMap;
   ThreadInfoMap m_threadInfos; // tid => ThreadInfo*
 
   typedef tbb::concurrent_queue<DummySandbox*> DummySandboxQ;
   DummySandboxQ m_cleanupDummySandboxQ;
 
-  bool isThreadDebugging(int64 id);
+  bool isThreadDebugging(int64_t id);
   void registerThread();
   void updateSandbox(const DSandboxInfo &sandbox);
   DSandboxInfoPtr getSandbox(const StringData* sid);

@@ -152,7 +152,7 @@ void VariableSerializer::write(bool v) {
   }
 }
 
-void VariableSerializer::write(int64 v) {
+void VariableSerializer::write(int64_t v) {
   switch (m_type) {
   case PrintR:
   case VarExport:
@@ -309,7 +309,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     break;
   case JSON: {
     if (m_option & k_JSON_NUMERIC_CHECK) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       switch (is_numeric_string(v, len, &lval, &dval, 0)) {
         case KindOfInt64:
           write(lval);

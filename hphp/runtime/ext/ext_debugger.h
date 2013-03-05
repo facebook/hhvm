@@ -51,16 +51,16 @@ class c_DebuggerProxyCmdUser : public ExtObjectData {
  public:
   Eval::DebuggerProxy *m_proxy;
 };
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_VARIABLES;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CONSTANTS;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASSES;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_FUNCTIONS;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_METHODS;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_PROPERTIES;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_CONSTANTS;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_KEYWORDS;
-extern const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CODE;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_VARIABLES;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CONSTANTS;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASSES;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_FUNCTIONS;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_METHODS;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_PROPERTIES;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_CONSTANTS;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_KEYWORDS;
+extern const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CODE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerClientCmdUser
@@ -91,7 +91,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   public: String t_getcode();
   public: String t_getcommand();
   public: bool t_arg(int index, CStrRef str);
-  public: int64 t_argcount();
+  public: int64_t t_argcount();
   public: String t_argvalue(int index);
   public: String t_linerest(int index);
   public: Array t_args();
@@ -99,7 +99,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   public: Variant t_xend(CObjRef cmd);
   public: Variant t_getcurrentlocation();
   public: Variant t_getstacktrace();
-  public: int64 t_getframe();
+  public: int64_t t_getframe();
   public: void t_printframe(int index);
   public: void t_addcompletion(CVarRef list);
 
@@ -110,11 +110,11 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerClient
 
-extern const int64 q_DebuggerClient$$STATE_INVALID;
-extern const int64 q_DebuggerClient$$STATE_UNINIT;
-extern const int64 q_DebuggerClient$$STATE_INITIALIZING;
-extern const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND;
-extern const int64 q_DebuggerClient$$STATE_BUSY;
+extern const int64_t q_DebuggerClient$$STATE_INVALID;
+extern const int64_t q_DebuggerClient$$STATE_UNINIT;
+extern const int64_t q_DebuggerClient$$STATE_INITIALIZING;
+extern const int64_t q_DebuggerClient$$STATE_READY_FOR_COMMAND;
+extern const int64_t q_DebuggerClient$$STATE_BUSY;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClient);
 class c_DebuggerClient : public ExtObjectData, public Sweepable {
@@ -125,7 +125,7 @@ class c_DebuggerClient : public ExtObjectData, public Sweepable {
   public: c_DebuggerClient(VM::Class* cls = c_DebuggerClient::s_cls);
   public: ~c_DebuggerClient();
   public: void t___construct();
-  public: int64 t_getstate();
+  public: int64_t t_getstate();
   public: Variant t_init(CVarRef options);
   public: Variant t_processcmd(CVarRef cmdName, CVarRef args);
 

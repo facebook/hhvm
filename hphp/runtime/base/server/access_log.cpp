@@ -394,7 +394,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     break;
   case 'Y':
     {
-      int64 now = HardwareCounter::GetInstructionCount();
+      int64_t now = HardwareCounter::GetInstructionCount();
       out << now - transport->getInstructions();
     }
     break;

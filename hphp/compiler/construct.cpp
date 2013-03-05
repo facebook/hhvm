@@ -313,7 +313,7 @@ void Construct::dumpNode(int spc) {
   }
 
   std::cout << "-> 0x" << std::hex << std::setfill('0')
-            << std::setw(10) << (int64)this << std::dec;
+            << std::setw(10) << (int64_t)this << std::dec;
 
   std::cout << " " << name << "(" << type << ") ";
   if (id) {
@@ -322,12 +322,12 @@ void Construct::dumpNode(int spc) {
   if (idPtr) {
     std::cout << "idp=0x" <<
       std::hex << std::setfill('0') << std::setw(10) <<
-      (int64)idPtr.get() << " ";
+      (int64_t)idPtr.get() << " ";
   }
   if (idCsePtr) {
     std::cout << "idcsep=0x" <<
       std::hex << std::setfill('0') << std::setw(10) <<
-      (int64)idCsePtr.get() << " ";
+      (int64_t)idCsePtr.get() << " ";
   }
 
   if (value != "") {

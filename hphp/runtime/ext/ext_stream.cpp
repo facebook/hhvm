@@ -150,7 +150,7 @@ bool f_stream_set_timeout(CObjRef stream, int seconds,
   return false;
 }
 
-int64 f_stream_set_write_buffer(CObjRef stream, int buffer) {
+int64_t f_stream_set_write_buffer(CObjRef stream, int buffer) {
   PlainFile *file = stream.getTyped<PlainFile>(false, true);
   if (file) {
     switch (buffer) {
@@ -308,7 +308,7 @@ Variant f_stream_socket_accept(CObjRef server_socket,
   p.events = (POLLIN|POLLERR|POLLHUP);
   p.revents = 0;
   IOStatusHelper io("socket_accept");
-  n = poll(&p, 1, (uint64)(timeout * 1000.0));
+  n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {
     struct sockaddr sa;
     socklen_t salen = sizeof(sa);

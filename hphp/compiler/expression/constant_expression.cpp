@@ -100,7 +100,7 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 }
 
 unsigned ConstantExpression::getCanonHash() const {
-  int64 val = hash_string(Util::toLower(m_name).c_str(), m_name.size());
+  int64_t val = hash_string(Util::toLower(m_name).c_str(), m_name.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

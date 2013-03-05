@@ -90,13 +90,13 @@ public:
     close();
   }
 
-  int64 read() {
+  int64_t read() {
     if (!useCounters()) return 0;
 
-    int64 count = 0;
+    int64_t count = 0;
 
     if (m_fd > 0) {
-      int64 values[3];
+      int64_t values[3];
       int ret;
 
       /*
@@ -114,7 +114,7 @@ public:
          * values[2] = TIME_RUNNING
          */
         if (values[2]) {
-          count = (int64) ((double) values[0] * values[1] / values[2]);
+          count = (int64_t) ((double) values[0] * values[1] / values[2]);
         }
       }
     }
@@ -203,27 +203,27 @@ void HardwareCounter::reset(void) {
   }
 }
 
-int64 HardwareCounter::GetInstructionCount() {
+int64_t HardwareCounter::GetInstructionCount() {
   return s_counter->getInstructionCount();
 }
 
-int64 HardwareCounter::getInstructionCount() {
+int64_t HardwareCounter::getInstructionCount() {
   return m_instructionCounter->read();
 }
 
-int64 HardwareCounter::GetLoadCount() {
+int64_t HardwareCounter::GetLoadCount() {
   return s_counter->getLoadCount();
 }
 
-int64 HardwareCounter::getLoadCount() {
+int64_t HardwareCounter::getLoadCount() {
   return m_loadCounter->read();
 }
 
-int64 HardwareCounter::GetStoreCount() {
+int64_t HardwareCounter::GetStoreCount() {
   return s_counter->getStoreCount();
 }
 
-int64 HardwareCounter::getStoreCount() {
+int64_t HardwareCounter::getStoreCount() {
   return m_storeCounter->read();
 }
 

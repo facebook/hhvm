@@ -66,7 +66,7 @@ struct InjectionHashCompare {
   }
   size_t hash(const Injection *i) const {
     assert(i);
-    return i->m_desc->hash() ^ hash_int64((int64)i->m_unit);
+    return i->m_desc->hash() ^ hash_int64((int64_t)i->m_unit);
   }
 };
 
@@ -115,7 +115,7 @@ private:
   friend class InjectionCacheHolder;
 };
 
-typedef hphp_hash_map<int64, const Injection*, int64_hash> InjectionTableInt64;
+typedef hphp_hash_map<int64_t, const Injection*, int64_hash> InjectionTableInt64;
 typedef hphp_hash_map<const StringData*, const Injection*, string_data_hash,
                       string_data_same>  InjectionTableSD;
 

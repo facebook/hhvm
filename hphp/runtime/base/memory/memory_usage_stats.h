@@ -25,21 +25,21 @@ namespace HPHP {
  * Usage stats, all in bytes.
  */
 struct MemoryUsageStats {
-  int64 maxBytes;   // what's request's max bytes allowed
-  int64 usage;      // how many bytes are currently being used
+  int64_t maxBytes;   // what's request's max bytes allowed
+  int64_t usage;      // how many bytes are currently being used
 #if defined(USE_JEMALLOC)
-  int64 jemallocDebt; // how many bytes of jemalloced memory have not
+  int64_t jemallocDebt; // how many bytes of jemalloced memory have not
                       // been processed by MemoryManager::refreshStats
-  int64 alloc;      // how many bytes are currently malloc-ed
+  int64_t alloc;      // how many bytes are currently malloc-ed
 #else
   union {
-    int64 jemallocDebt; // unused
-    int64 alloc;    // how many bytes are currently malloc-ed
+    int64_t jemallocDebt; // unused
+    int64_t alloc;    // how many bytes are currently malloc-ed
   };
 #endif
-  int64 peakUsage;  // how many bytes have been dispensed at maximum
-  int64 peakAlloc;  // how many bytes malloc-ed at maximum
-  int64 totalAlloc; // how many bytes allocated, in total.
+  int64_t peakUsage;  // how many bytes have been dispensed at maximum
+  int64_t peakAlloc;  // how many bytes malloc-ed at maximum
+  int64_t totalAlloc; // how many bytes allocated, in total.
 };
 
 #define JEMALLOC_STATS_ADJUST(stats, amt) \

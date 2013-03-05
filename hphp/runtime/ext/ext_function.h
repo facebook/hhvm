@@ -60,7 +60,7 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args);
 /**
  * HPHP actually inlines this function, so this is degenerated.
  */
-int64 f_func_num_args();
+int64_t f_func_num_args();
 
 ///////////////////////////////////////////////////////////////////////////////
 

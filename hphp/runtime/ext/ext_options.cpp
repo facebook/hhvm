@@ -102,7 +102,7 @@ Variant f_assert(CVarRef assertion) {
   return null;
 }
 
-int64 f_dl(CStrRef library) {
+int64_t f_dl(CStrRef library) {
   return 0;
 }
 
@@ -168,11 +168,11 @@ Array f_inclued_get_data() {
   return Array::Create();
 }
 
-int64 f_get_magic_quotes_gpc() {
+int64_t f_get_magic_quotes_gpc() {
   return RuntimeOption::EnableMagicQuotesGpc ? 1 : 0;
 }
 
-int64 f_get_magic_quotes_runtime() {
+int64_t f_get_magic_quotes_runtime() {
   return 0;
 }
 
@@ -188,23 +188,23 @@ Variant f_getenv(CStrRef varname) {
   return false;
 }
 
-int64 f_getlastmod() {
+int64_t f_getlastmod() {
   throw NotSupportedException(__func__, "page modified time not supported");
 }
 
-int64 f_getmygid() {
+int64_t f_getmygid() {
   return getgid();
 }
 
-int64 f_getmyinode() {
+int64_t f_getmyinode() {
   throw NotSupportedException(__func__, "not exposing operating system info");
 }
 
-int64 f_getmypid() {
+int64_t f_getmypid() {
   return getpid();
 }
 
-int64 f_getmyuid() {
+int64_t f_getmyuid() {
   return getuid();
 }
 
@@ -565,7 +565,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define PHP_RUSAGE_PARA(a) #a, (int64)usg.a
+#define PHP_RUSAGE_PARA(a) #a, (int64_t)usg.a
 Array f_getrusage(int who /* = 0 */) {
   struct rusage usg;
   memset(&usg, 0, sizeof(struct rusage));
@@ -601,8 +601,8 @@ bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec) {
 #else
   struct timespec ts;
   int ret = clock_getres(clk_id, &ts);
-  sec = (int64)ts.tv_sec;
-  nsec = (int64)ts.tv_nsec;
+  sec = (int64_t)ts.tv_sec;
+  nsec = (int64_t)ts.tv_nsec;
   return ret == 0;
 #endif
 }
@@ -610,12 +610,12 @@ bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec) {
 bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec) {
   struct timespec ts;
   int ret = gettime(clk_id, &ts);
-  sec = (int64)ts.tv_sec;
-  nsec = (int64)ts.tv_nsec;
+  sec = (int64_t)ts.tv_sec;
+  nsec = (int64_t)ts.tv_nsec;
   return ret == 0;
 }
 
-bool f_clock_settime(int clk_id, int64 sec, int64 nsec) {
+bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec) {
 #if defined(__APPLE__)
   throw NotSupportedException(__func__, "feature not supported on OSX");
 #else
@@ -650,11 +650,11 @@ String f_ini_set(CStrRef varname, CStrRef newvalue) {
   return oldvalue;
 }
 
-int64 f_memory_get_allocation() {
+int64_t f_memory_get_allocation() {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
-    int64 ret = stats.totalAlloc;
+    int64_t ret = stats.totalAlloc;
     ret -= VM::request_arena().slackEstimate() +
            VM::varenv_arena().slackEstimate();
     return ret;
@@ -662,25 +662,25 @@ int64 f_memory_get_allocation() {
   return 0;
 }
 
-int64 f_memory_get_peak_usage(bool real_usage /* = false */) {
+int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
     return real_usage ? stats.peakUsage : stats.peakAlloc;
   }
-  return (int64)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+  return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
 }
 
-int64 f_memory_get_usage(bool real_usage /* = false */) {
+int64_t f_memory_get_usage(bool real_usage /* = false */) {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
-    int64 ret = real_usage ? stats.usage : stats.alloc;
+    int64_t ret = real_usage ? stats.usage : stats.alloc;
     ret -= VM::request_arena().slackEstimate() +
            VM::varenv_arena().slackEstimate();
     return ret;
   }
-  return (int64)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+  return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
 }
 
 String f_php_ini_scanned_files() {
@@ -771,7 +771,7 @@ String f_zend_logo_guid() {
   throw NotSupportedException(__func__, "not zend anymore");
 }
 
-int64 f_zend_thread_id() {
+int64_t f_zend_thread_id() {
   throw NotSupportedException(__func__, "not zend anymore");
 }
 
@@ -990,7 +990,7 @@ void f_gc_disable() {
                 "collection");
 }
 
-int64 f_gc_collect_cycles() {
+int64_t f_gc_collect_cycles() {
   raise_warning("HipHop currently does not support circular reference "
                 "collection");
   return 0;

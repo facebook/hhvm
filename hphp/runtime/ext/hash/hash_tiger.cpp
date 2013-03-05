@@ -32,8 +32,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-  uint64 state[3];
-  uint64 passed;
+  uint64_t state[3];
+  uint64_t passed;
   unsigned char passes:1;
   unsigned char length:7;
   unsigned char buffer[64];
@@ -115,7 +115,7 @@ hash_tiger::hash_tiger(bool tiger3, int digest)
 #	define split(str)                       \
   {                                             \
     int i;                                      \
-    uint64 tmp[8];                       \
+    uint64_t tmp[8];                       \
                                                 \
     for (i = 0; i < 64; ++i) {                                          \
       ((unsigned char *) tmp)[i^7] = ((unsigned char *) str)[i];        \
@@ -128,8 +128,8 @@ hash_tiger::hash_tiger(bool tiger3, int digest)
 
 #define tiger_compress(passes, str, state)                              \
   {                                                                     \
-    register uint64 a, b, c, tmpa, x0, x1, x2, x3, x4, x5, x6, x7; \
-    uint64 aa, bb, cc;                                           \
+    register uint64_t a, b, c, tmpa, x0, x1, x2, x3, x4, x5, x6, x7; \
+    uint64_t aa, bb, cc;                                           \
     int pass_no;                                                        \
                                                                         \
     a = state[0];                                                       \
@@ -146,7 +146,7 @@ hash_tiger::hash_tiger(bool tiger3, int digest)
   }
 
 static inline void TigerFinalize(PHP_TIGER_CTX *context) {
-  context->passed += (uint64) context->length << 3;
+  context->passed += (uint64_t) context->length << 3;
 
   context->buffer[context->length++] = 0x1;
   if (context->length % 8) {
@@ -156,7 +156,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context) {
 
   if (context->length > 56) {
     memset(&context->buffer[context->length], 0, 64 - context->length);
-    tiger_compress(context->passes, ((uint64 *) context->buffer),
+    tiger_compress(context->passes, ((uint64_t *) context->buffer),
                    context->state);
     memset(context->buffer, 0, 56);
   } else {
@@ -164,7 +164,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context) {
   }
 
 #ifndef WORDS_BIGENDIAN
-  memcpy(&context->buffer[56], &context->passed, sizeof(uint64));
+  memcpy(&context->buffer[56], &context->passed, sizeof(uint64_t));
 #else
   context->buffer[56] = (unsigned char) (context->passed & 0xff);
   context->buffer[57] = (unsigned char) ((context->passed >> 8) & 0xff);
@@ -175,7 +175,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context) {
   context->buffer[62] = (unsigned char) ((context->passed >> 48) & 0xff);
   context->buffer[63] = (unsigned char) ((context->passed >> 56) & 0xff);
 #endif
-  tiger_compress(context->passes, ((uint64 *) context->buffer),
+  tiger_compress(context->passes, ((uint64_t *) context->buffer),
                  context->state);
 }
 
@@ -204,7 +204,7 @@ void hash_tiger::hash_update(void *context_, const unsigned char *input,
       i = 64 - context->length;
       memcpy(&context->buffer[context->length], input, i);
       tiger_compress(context->passes,
-                     ((const uint64 *) context->buffer),
+                     ((const uint64_t *) context->buffer),
                      context->state);
       memset(context->buffer, 0, 64);
       context->passed += 512;
@@ -213,7 +213,7 @@ void hash_tiger::hash_update(void *context_, const unsigned char *input,
     for (; i + 64 <= len; i += 64) {
       memcpy(context->buffer, &input[i], 64);
       tiger_compress(context->passes,
-                     ((const uint64 *) context->buffer),
+                     ((const uint64_t *) context->buffer),
                      context->state);
       context->passed += 512;
     }

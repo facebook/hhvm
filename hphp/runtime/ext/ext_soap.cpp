@@ -121,7 +121,7 @@ private:
   xmlCharEncodingHandlerPtr m_old_encoding;
   Array m_old_classmap;
   encodeMap *m_old_typemap;
-  int64 m_old_features;
+  int64_t m_old_features;
   int m_old_soap_version;
 
   void save() {
@@ -415,7 +415,7 @@ static xmlDocPtr serialize_function_call
                        BAD_CAST(header->m_actor.toString().data()));
           }
         } else if (header->m_actor.isInteger()) {
-          int64 actor = header->m_actor.toInt64();
+          int64_t actor = header->m_actor.toInt64();
           if (client->m_soap_version == SOAP_1_1) {
             if (actor == SOAP_ACTOR_NEXT) {
               xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"),
@@ -1123,7 +1123,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunction *function,
       Variant data = iter.second();
       Variant key = iter.first();
       String param_name;
-      int64 param_index = i;
+      int64_t param_index = i;
       if (key.isString()) {
         param_name = key.toString();
       } else {
@@ -1804,7 +1804,7 @@ bool f_is_soap_fault(CVarRef fault) {
   return fault.isObject() && fault.toObject()->o_instanceof("SoapFault");
 }
 
-int64 f__soap_active_version() {
+int64_t f__soap_active_version() {
   USE_SOAP_GLOBAL;
   return SOAP_GLOBAL(soap_version);
 }
@@ -1839,13 +1839,13 @@ void c_SoapServer::t___construct(CVarRef wsdl,
 
   m_send_errors = 1;
 
-  int64 cache_wsdl = SOAP_GLOBAL(cache);
+  int64_t cache_wsdl = SOAP_GLOBAL(cache);
 
   int version = SOAP_1_1;
   Array typemap_ht;
   if (!options.empty()) {
     if (options["soap_version"].isInteger()) {
-      int64 tmp = options["soap_version"].toInt64();
+      int64_t tmp = options["soap_version"].toInt64();
       if (tmp == SOAP_1_1 || tmp == SOAP_1_2) {
         version = tmp;
       }
@@ -2231,7 +2231,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   }
 }
 
-void c_SoapServer::t_setpersistence(int64 mode) {
+void c_SoapServer::t_setpersistence(int64_t mode) {
   SoapServerScope ss(this);
   if (m_type == SOAP_CLASS) {
     if (mode == SOAP_PERSISTENCE_SESSION || mode == SOAP_PERSISTENCE_REQUEST) {
@@ -2302,7 +2302,7 @@ void c_SoapClient::t___construct(CVarRef wsdl,
     throw SoapException("wsdl must be string or null");
   }
 
-  int64 cache_wsdl = SOAP_GLOBAL(cache);
+  int64_t cache_wsdl = SOAP_GLOBAL(cache);
   if (!options.empty()) {
     m_location = options["location"];
 
@@ -2615,7 +2615,7 @@ Variant c_SoapClient::t___gettypes() {
 }
 
 Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef action,
-                                    int64 version, bool oneway /* = false */) {
+                                    int64_t version, bool oneway /* = false */) {
   if (location.empty()) {
     m_soap_fault =
       Object(SystemLib::AllocSoapFaultObject("HTTP", "Unable to parse URL"));
@@ -2758,7 +2758,7 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
     m_type = UNKNOWN_TYPE;
   } else {
     std::map<int, encodePtr> &defEncIndex = SOAP_GLOBAL(defEncIndex);
-    int64 ntype = type.toInt64();
+    int64_t ntype = type.toInt64();
     if (defEncIndex.find(ntype) != defEncIndex.end()) {
       m_type = ntype;
     } else {

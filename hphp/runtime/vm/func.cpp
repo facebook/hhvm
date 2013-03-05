@@ -328,7 +328,7 @@ bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
   return top() && (fromUnit == m_unit);
 }
 
-bool Func::byRef(int32 arg) const {
+bool Func::byRef(int32_t arg) const {
   // Super special case. A handful of builtins are varargs functions where the
   // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
   if (arg >= m_numParams && isBuiltin() &&
@@ -342,7 +342,7 @@ bool Func::byRef(int32 arg) const {
   return retval;
 }
 
-bool Func::mustBeRef(int32 arg) const {
+bool Func::mustBeRef(int32_t arg) const {
   // return true if the argument is required to be a reference
   // (and thus should be an lvalue)
   if (arg >= m_numParams && isBuiltin() &&
@@ -375,10 +375,10 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
     shared()->m_refBitVec[m_numParams / kBitsPerQword] =
       (m_attrs & AttrVariadicByRef) ? -1ull : 0;
   }
-  assert(!!(shared()->m_refBitVec[qword] & (uint64(1) << bit)) ==
+  assert(!!(shared()->m_refBitVec[qword] & (uint64_t(1) << bit)) ==
     !!(m_attrs & AttrVariadicByRef));
   shared()->m_refBitVec[qword] &= ~(1ull << bit);
-  shared()->m_refBitVec[qword] |= uint64(ref) << bit;
+  shared()->m_refBitVec[qword] |= uint64_t(ref) << bit;
   pBuilder.push_back(info);
 }
 
@@ -801,7 +801,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
   Repo& repo = Repo::get();
   FuncRepoProxy& frp = repo.frp();
   int repoId = m_ue.repoId();
-  int64 usn = m_ue.sn();
+  int64_t usn = m_ue.sn();
 
   frp.insertFunc(repoId)
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, m_name, m_top);
@@ -971,7 +971,7 @@ void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 void FuncRepoProxy::InsertFuncStmt
                   ::insert(const FuncEmitter& fe,
-                           RepoTxn& txn, int64 unitSn, int funcSn,
+                           RepoTxn& txn, int64_t unitSn, int funcSn,
                            Id preClassId, const StringData* name,
                            bool top) {
   if (!prepared()) {

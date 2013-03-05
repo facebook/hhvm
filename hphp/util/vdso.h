@@ -28,16 +28,16 @@ public:
   Vdso();
   ~Vdso();
   
-  static int64 ClockGetTimeNS(int clk_id);
+  static int64_t ClockGetTimeNS(int clk_id);
   static int ClockGetTime(int clk_id, timespec *ts);
 
   inline ALWAYS_INLINE int clockGetTime(int clk_id, timespec *ts);
-  inline ALWAYS_INLINE int64 clockGetTimeNS(int clk_id);
+  inline ALWAYS_INLINE int64_t clockGetTimeNS(int clk_id);
 
 private:
   void *m_handle;
   int (*m_clock_gettime)(clockid_t, timespec *ts);
-  int64 (*m_clock_gettime_ns)(clockid_t);
+  int64_t (*m_clock_gettime_ns)(clockid_t);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -463,7 +463,7 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
   return nullptr;
 }
 
-int64 FileCache::fileSize(const char *name, bool isRelative) const {
+int64_t FileCache::fileSize(const char *name, bool isRelative) const {
   if (!name || !*name) return -1;
   if (isRelative) {
     FileMap::const_iterator iter = m_files.find(name);

@@ -948,7 +948,7 @@ String f_socket_strerror(int errnum) {
   return String(Util::safe_strerror(errnum));
 }
 
-int64 f_socket_last_error(CObjRef socket /* = null_object */) {
+int64_t f_socket_last_error(CObjRef socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     return sock->getError();
@@ -1166,8 +1166,8 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
           a = (struct sockaddr_in6 *)res->ai_addr;
           sockinfo.set("address", buffer);
           sockinfo.set("port", ntohs(a->sin6_port));
-          sockinfo.set("flow_info", (int32)a->sin6_flowinfo);
-          sockinfo.set("scope_id", (int32)a->sin6_scope_id);
+          sockinfo.set("flow_info", (int32_t)a->sin6_flowinfo);
+          sockinfo.set("scope_id", (int32_t)a->sin6_scope_id);
         }
         break;
       }

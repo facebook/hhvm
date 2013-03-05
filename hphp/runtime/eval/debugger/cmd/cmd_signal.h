@@ -43,7 +43,7 @@ public:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
-  int32 m_signum;
+  int32_t m_signum;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

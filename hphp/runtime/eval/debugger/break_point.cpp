@@ -565,7 +565,7 @@ bool BreakPointInfo::parseLines(const std::string &token) {
       return true;
     }
     if (m_line2 < m_line1) {
-      int32 tmp = m_line1;
+      int32_t tmp = m_line1;
       m_line1 = m_line2;
       m_line2 = tmp;
     }
@@ -846,7 +846,7 @@ bool BreakPointInfo::checkClause() {
 
 void BreakPointInfo::SendImpl(const BreakPointInfoPtrVec &bps,
                               DebuggerThriftBuffer &thrift) {
-  int16 size = bps.size();
+  int16_t size = bps.size();
   thrift.write(size);
   for (int i = 0; i < size; i++) {
     bps[i]->sendImpl(thrift);
@@ -855,7 +855,7 @@ void BreakPointInfo::SendImpl(const BreakPointInfoPtrVec &bps,
 
 void BreakPointInfo::RecvImpl(BreakPointInfoPtrVec &bps,
                               DebuggerThriftBuffer &thrift) {
-  int16 size;
+  int16_t size;
   thrift.read(size);
   bps.resize(size);
   for (int i = 0; i < size; i++) {

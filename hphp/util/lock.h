@@ -29,7 +29,7 @@ namespace HPHP {
  */
 class LockProfiler {
 public:
-  typedef void (*PFUNC_PROFILE)(const std::string &stack, int64 elapsed_us);
+  typedef void (*PFUNC_PROFILE)(const std::string &stack, int64_t elapsed_us);
   static PFUNC_PROFILE s_pfunc_profile;
   static bool s_profile;
   static int s_profile_sampling;

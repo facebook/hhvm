@@ -90,7 +90,7 @@ private:
   std::string m_afdtFilename;
   int m_afdt_fd;
   int m_afdt_lfd;
-  std::map<int64, int64> m_popenMap;
+  std::map<int64_t, int64_t> m_popenMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

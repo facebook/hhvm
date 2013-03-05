@@ -300,7 +300,7 @@ protected:
   void refill() {
     assert(buffer_used == 0);
     String ret = t->o_invoke(s_read,
-                             CREATE_VECTOR1((int64)buffer_size), -1).toString();
+                             CREATE_VECTOR1((int64_t)buffer_size), -1).toString();
     buffer_used = ret.size();
     memcpy(buffer, ret.data(), buffer_used);
     buffer_ptr = buffer;

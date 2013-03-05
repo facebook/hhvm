@@ -175,38 +175,38 @@ class ArrayData : public Countable {
   /**
    * Testing whether a key exists.
    */
-  virtual bool exists(int64 k) const = 0;
+  virtual bool exists(int64_t k) const = 0;
   virtual bool exists(const StringData* k) const = 0;
 
   /**
    * Getting value at specified key.
    */
-  virtual CVarRef get(int64 k, bool error = false) const = 0;
+  virtual CVarRef get(int64_t k, bool error = false) const = 0;
   virtual CVarRef get(const StringData* k, bool error = false) const = 0;
 
   /**
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may do better.
    */
-  virtual TypedValue* nvGet(int64 k) const;
+  virtual TypedValue* nvGet(int64_t k) const;
   virtual TypedValue* nvGet(const StringData* k) const;
   virtual void nvGetKey(TypedValue* out, ssize_t pos);
   virtual TypedValue* nvGetValueRef(ssize_t pos);
-  virtual TypedValue* nvGetCell(int64 ki) const;
+  virtual TypedValue* nvGetCell(int64_t ki) const;
   virtual TypedValue* nvGetCell(const StringData* k) const;
 
   /**
    * Get the numeric index for a key. Only these need to be
    * in ArrayData.
    */
-  virtual ssize_t getIndex(int64 k) const = 0;
+  virtual ssize_t getIndex(int64_t k) const = 0;
   virtual ssize_t getIndex(const StringData* k) const = 0;
 
   /**
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
    * escalation is not needed, or an escalated array data.
    */
-  virtual ArrayData *lval(int64 k, Variant *&ret, bool copy,
+  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy,
                           bool checkExist = false) = 0;
   virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy,
                           bool checkExist = false) = 0;
@@ -225,7 +225,7 @@ class ArrayData : public Countable {
    * the dynamic property array in ObjectData or the local cache array
    * in ShardMap.
    */
-  virtual ArrayData *lvalPtr(int64 k, Variant *&ret, bool copy, bool create);
+  virtual ArrayData *lvalPtr(int64_t k, Variant *&ret, bool copy, bool create);
   virtual ArrayData *lvalPtr(StringData* k, Variant *&ret, bool copy,
                              bool create);
 
@@ -234,10 +234,10 @@ class ArrayData : public Countable {
    * then set the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *set(int64 k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(int64_t k, CVarRef v, bool copy) = 0;
   virtual ArrayData *set(StringData* k, CVarRef v, bool copy) = 0;
 
-  virtual ArrayData *setRef(int64 k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *setRef(int64_t k, CVarRef v, bool copy) = 0;
   virtual ArrayData *setRef(StringData* k, CVarRef v, bool copy) = 0;
 
   /**
@@ -245,14 +245,14 @@ class ArrayData : public Countable {
    * not already exist in this array.  (This is to allow more
    * efficient implementation of this case in some derived classes.)
    */
-  virtual ArrayData *add(int64 k, CVarRef v, bool copy);
+  virtual ArrayData *add(int64_t k, CVarRef v, bool copy);
   virtual ArrayData *add(StringData* k, CVarRef v, bool copy);
 
   /*
    * Same semantics as lval(), except with the precondition that the
    * key doesn't already exist in the array.
    */
-  virtual ArrayData *addLval(int64 k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(int64_t k, Variant *&ret, bool copy);
   virtual ArrayData *addLval(StringData* k, Variant *&ret, bool copy);
 
   /**
@@ -260,7 +260,7 @@ class ArrayData : public Countable {
    * then remove the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *remove(int64 k, bool copy) = 0;
+  virtual ArrayData *remove(int64_t k, bool copy) = 0;
   virtual ArrayData *remove(const StringData* k, bool copy) = 0;
 
   /**
@@ -297,7 +297,7 @@ class ArrayData : public Countable {
   /*
    * Inline wrappers that just use tvAsCVarRef on the value
    */
-  ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
+  ArrayData* nvSet(int64_t ki, const TypedValue* v, bool copy);
   ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
 
   virtual ssize_t iter_begin() const;
@@ -464,12 +464,12 @@ class ArrayData : public Countable {
     m_strongIterators = p;
   }
   // error-handling helpers
-  static CVarRef getNotFound(int64 k);
+  static CVarRef getNotFound(int64_t k);
   static CVarRef getNotFound(litstr k);
   static CVarRef getNotFound(const StringData* k);
   static CVarRef getNotFound(CStrRef k);
   static CVarRef getNotFound(CVarRef k);
-  static TypedValue* nvGetNotFound(int64 k);
+  static TypedValue* nvGetNotFound(int64_t k);
   static TypedValue* nvGetNotFound(const StringData* k);
 
   static bool IsValidKey(litstr k);

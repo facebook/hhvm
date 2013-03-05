@@ -33,7 +33,7 @@ public:
   Object getObject();
   ~ImmutableObj();
   void getSizeStats(SharedVariantStats *stats);
-  int32 getSpaceUsage();
+  int32_t getSpaceUsage();
 
   struct Prop {
     StringData *name;

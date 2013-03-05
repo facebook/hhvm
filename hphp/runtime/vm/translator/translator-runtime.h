@@ -51,7 +51,7 @@ static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
 
 /* Helper functions for translated code */
 
-ArrayData* addElemIntKeyHelper(ArrayData* ad, int64 key, TypedValue val);
+ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key, TypedValue val);
 RefData* box_value(TypedValue tv);
 

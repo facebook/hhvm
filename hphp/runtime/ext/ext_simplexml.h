@@ -25,8 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_simplexml_load_string(CStrRef data, CStrRef class_name = "SimpleXMLElement", int64 options = 0, CStrRef ns = "", bool is_prefix = false);
-Variant f_simplexml_load_file(CStrRef filename, CStrRef class_name = "SimpleXMLElement", int64 options = 0, CStrRef ns = "", bool is_prefix = false);
+Variant f_simplexml_load_string(CStrRef data, CStrRef class_name = "SimpleXMLElement", int64_t options = 0, CStrRef ns = "", bool is_prefix = false);
+Variant f_simplexml_load_file(CStrRef filename, CStrRef class_name = "SimpleXMLElement", int64_t options = 0, CStrRef ns = "", bool is_prefix = false);
 Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();
 void f_libxml_clear_errors();
@@ -50,13 +50,13 @@ class c_SimpleXMLElement :
   // need to implement
   public: c_SimpleXMLElement(VM::Class* cls = c_SimpleXMLElement::s_cls);
   public: ~c_SimpleXMLElement();
-  public: void t___construct(CStrRef data, int64 options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
+  public: void t___construct(CStrRef data, int64_t options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
   public: bool t_offsetexists(CVarRef index);
   public: Variant t_offsetget(CVarRef index);
   public: void t_offsetset(CVarRef index, CVarRef newvalue);
   public: void t_offsetunset(CVarRef index);
   public: Variant t_getiterator();
-  public: int64 t_count();
+  public: int64_t t_count();
   public: Variant t_xpath(CStrRef path);
   public: bool t_registerxpathnamespace(CStrRef prefix, CStrRef ns);
   public: Variant t_asxml(CStrRef filename = "");
@@ -85,7 +85,7 @@ class c_SimpleXMLElement :
   bool m_is_children;
   bool m_is_property;
   virtual bool o_toBoolean() const;
-  virtual int64 o_toInt64() const;
+  virtual int64_t o_toInt64() const;
   virtual double o_toDouble() const;
   virtual Array o_toArray() const;
   virtual Variant *___lval(Variant v_name);

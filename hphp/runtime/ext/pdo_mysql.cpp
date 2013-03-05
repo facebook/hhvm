@@ -54,15 +54,15 @@ public:
   virtual bool support(SupportedMethod method);
   virtual bool closer();
   virtual bool preparer(CStrRef sql, sp_PDOStatement *stmt, CVarRef options);
-  virtual int64 doer(CStrRef sql);
+  virtual int64_t doer(CStrRef sql);
   virtual bool quoter(CStrRef input, String &quoted, PDOParamType paramtype);
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
-  virtual bool setAttribute(int64 attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, CVarRef value);
   virtual String lastId(const char *name);
   virtual bool fetchErr(PDOStatement *stmt, Array &info);
-  virtual int getAttribute(int64 attr, Variant &value);
+  virtual int getAttribute(int64_t attr, Variant &value);
   virtual bool checkLiveness();
   virtual void persistentShutdown();
 
@@ -94,7 +94,7 @@ public:
   virtual bool describer(int colno);
   virtual bool getColumn(int colno, Variant &value);
   virtual bool paramHook(PDOBoundParam *param, PDOParamEvent event_type);
-  virtual bool getColumnMeta(int64 colno, Array &return_value);
+  virtual bool getColumnMeta(int64_t colno, Array &return_value);
   virtual bool nextRowset();
   virtual bool cursorCloser();
 
@@ -485,7 +485,7 @@ bool PDOMySqlConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
   return false;
 }
 
-int64 PDOMySqlConnection::doer(CStrRef sql) {
+int64_t PDOMySqlConnection::doer(CStrRef sql) {
   if (mysql_real_query(m_server, sql.data(), sql.size())) {
     handleError(__FILE__, __LINE__);
     return -1;
@@ -535,7 +535,7 @@ bool PDOMySqlConnection::rollback() {
   return mysql_rollback(m_server) >= 0;
 }
 
-bool PDOMySqlConnection::setAttribute(int64 attr, CVarRef value) {
+bool PDOMySqlConnection::setAttribute(int64_t attr, CVarRef value) {
   switch (attr) {
   case PDO_ATTR_AUTOCOMMIT:
     /* ignore if the new value equals the old one */
@@ -569,18 +569,18 @@ bool PDOMySqlConnection::setAttribute(int64 attr, CVarRef value) {
 }
 
 String PDOMySqlConnection::lastId(const char *name) {
-  return (int64)mysql_insert_id(m_server);
+  return (int64_t)mysql_insert_id(m_server);
 }
 
 bool PDOMySqlConnection::fetchErr(PDOStatement *stmt, Array &info) {
   if (m_einfo.errcode) {
-    info.append((int64)m_einfo.errcode);
+    info.append((int64_t)m_einfo.errcode);
     info.append(String(m_einfo.errmsg, CopyString));
   }
   return true;
 }
 
-int PDOMySqlConnection::getAttribute(int64 attr, Variant &value) {
+int PDOMySqlConnection::getAttribute(int64_t attr, Variant &value) {
   switch (attr) {
   case PDO_ATTR_CLIENT_VERSION:
     value = String((char *)mysql_get_client_info(), CopyString);
@@ -602,16 +602,16 @@ int PDOMySqlConnection::getAttribute(int64 attr, Variant &value) {
     break;
   }
   case PDO_ATTR_AUTOCOMMIT:
-    value = (int64)auto_commit;
+    value = (int64_t)auto_commit;
     break;
   case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
-    value = (int64)m_buffered;
+    value = (int64_t)m_buffered;
     break;
   case PDO_MYSQL_ATTR_DIRECT_QUERY:
-    value = (int64)m_emulate_prepare;
+    value = (int64_t)m_emulate_prepare;
     break;
   case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-    value = (int64)m_max_buffer_size;
+    value = (int64_t)m_max_buffer_size;
     break;
   default:
     return 0;
@@ -1147,7 +1147,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
-bool PDOMySqlStatement::getColumnMeta(int64 colno, Array &return_value) {
+bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &return_value) {
   if (!m_result) {
     return false;
   }

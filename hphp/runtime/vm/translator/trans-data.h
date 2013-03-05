@@ -35,11 +35,11 @@ class TransData {
 public:
   // Interface to be implemented by subclasses
   virtual ~TransData() {}
-  virtual uint32 getNumTrans() const = 0;
+  virtual uint32_t getNumTrans() const = 0;
 
   virtual const TransRec* getTransRec(TransID id) const = 0;
 
-  virtual uint64 getTransCounter(TransID id) const = 0;
+  virtual uint64_t getTransCounter(TransID id) const = 0;
 
   virtual const TransIDSet& getTransPreds(TransID transId) const = 0;
 

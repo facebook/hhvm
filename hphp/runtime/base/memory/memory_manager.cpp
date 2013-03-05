@@ -81,7 +81,7 @@ static void threadStatsInit() {
   }
 }
 
-static inline void threadStats(uint64*& allocated, uint64*& deallocated,
+static inline void threadStats(uint64_t*& allocated, uint64_t*& deallocated,
                                size_t*& cactive, size_t& cactiveLimit) {
   pthread_once(&threadStatsOnce, threadStatsInit);
   if (!MemoryManager::s_statsEnabled) return;
@@ -179,8 +179,8 @@ void MemoryManager::resetStats() {
 #ifdef USE_JEMALLOC
   if (s_statsEnabled) {
     m_stats.jemallocDebt = 0;
-    m_prevAllocated = int64(*m_allocated);
-    m_delta = m_prevAllocated - int64(*m_deallocated);
+    m_prevAllocated = int64_t(*m_allocated);
+    m_delta = m_prevAllocated - int64_t(*m_deallocated);
   }
 #endif
 }

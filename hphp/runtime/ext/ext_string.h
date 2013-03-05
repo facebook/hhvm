@@ -200,8 +200,8 @@ inline Variant f_convert_uuencode(CStrRef data) {
 inline String f_str_rot13(CStrRef str) {
   return StringUtil::ROT13(str);
 }
-inline int64 f_crc32(CStrRef str) {
-  return (uint32)StringUtil::CRC32(str);
+inline int64_t f_crc32(CStrRef str) {
+  return (uint32_t)StringUtil::CRC32(str);
 }
 inline String f_crypt(CStrRef str, CStrRef salt = "") {
   return StringUtil::Crypt(str, salt);
@@ -260,12 +260,12 @@ inline Variant f_vsprintf(CStrRef format, CArrRef args) {
 
 Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv = null_array);
 
-inline String f_chr(int64 ascii) {
+inline String f_chr(int64_t ascii) {
   char buf[2]; buf[0] = ascii; buf[1] = 0;
   return String(buf, 1, CopyString);
 }
-inline int64 f_ord(CStrRef str) {
-  return (int64)(unsigned char)(*((const char *)str));
+inline int64_t f_ord(CStrRef str) {
+  return (int64_t)(unsigned char)(*((const char *)str));
 }
 inline Variant f_money_format(CStrRef format, double number) {
   String s = StringUtil::MoneyFormat(format, number);
@@ -278,29 +278,29 @@ String f_number_format(double number, int decimals = 0, CStrRef dec_point = ".",
 ///////////////////////////////////////////////////////////////////////////////
 // analysis
 
-inline int64 f_strcmp(CStrRef str1, CStrRef str2) {
+inline int64_t f_strcmp(CStrRef str1, CStrRef str2) {
   return string_strcmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
-inline int64 f_strncmp(CStrRef str1, CStrRef str2, int len) {
+inline int64_t f_strncmp(CStrRef str1, CStrRef str2, int len) {
   return string_strncmp(str1.data(), str1.size(), str2.data(), str2.size(),
                         len);
 }
-inline int64 f_strnatcmp(CStrRef str1, CStrRef str2) {
+inline int64_t f_strnatcmp(CStrRef str1, CStrRef str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             false);
 }
-inline int64 f_strcasecmp(CStrRef str1, CStrRef str2) {
+inline int64_t f_strcasecmp(CStrRef str1, CStrRef str2) {
   return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
-inline int64 f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
+inline int64_t f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
   return string_strncasecmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             len);
 }
-inline int64 f_strnatcasecmp(CStrRef str1, CStrRef str2) {
+inline int64_t f_strnatcasecmp(CStrRef str1, CStrRef str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             true);
 }
-inline int64 f_strcoll(CStrRef str1, CStrRef str2) {
+inline int64_t f_strcoll(CStrRef str1, CStrRef str2) {
   return strcoll(str1, str2);
 }
 
@@ -348,16 +348,16 @@ inline Variant f_strlen(CVarRef vstr) {
   }
 }
 
-Variant f_count_chars(CStrRef str, int64 mode = 0);
+Variant f_count_chars(CStrRef str, int64_t mode = 0);
 
-Variant f_str_word_count(CStrRef str, int64 format = 0, CStrRef charlist = "");
+Variant f_str_word_count(CStrRef str, int64_t format = 0, CStrRef charlist = "");
 
-inline int64 f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1,
+inline int64_t f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1,
                          int cost_rep = 1, int cost_del = 1) {
   return string_levenshtein(str1, str1.size(), str2, str2.size(),
                             cost_ins, cost_rep, cost_del);
 }
-inline int64 f_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
+inline int64_t f_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
   float p;
   int ret = string_similar_text(first, first.size(), second, second.size(),
                                 &p);

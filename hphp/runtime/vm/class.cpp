@@ -300,7 +300,7 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   Repo& repo = Repo::get();
   PreClassRepoProxy& pcrp = repo.pcrp();
   int repoId = m_ue.repoId();
-  int64 usn = m_ue.sn();
+  int64_t usn = m_ue.sn();
   pcrp.insertPreClass(repoId)
       .insert(*this, txn, usn, m_id, m_name, m_hoistable);
 
@@ -428,7 +428,7 @@ void PreClassRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 void PreClassRepoProxy::InsertPreClassStmt
                       ::insert(const PreClassEmitter& pce, RepoTxn& txn,
-                               int64 unitSn, Id preClassId,
+                               int64_t unitSn, Id preClassId,
                                const StringData* name,
                                PreClass::Hoistable hoistable) {
   if (!prepared()) {
@@ -582,7 +582,7 @@ void Class::initInstanceBits() {
   // trying to profile instance checks.
   typedef std::pair<const StringData*, unsigned> Count;
   std::vector<Count> counts;
-  uint64 total = 0;
+  uint64_t total = 0;
   {
     // If you think of the read-write lock as a shared-exclusive lock instead,
     // the fact that we're grabbing a write lock to iterate over the table
@@ -602,7 +602,7 @@ void Class::initInstanceBits() {
   // Next, initialize s_instanceBits with the top 127 most checked classes. Bit
   // 0 is reserved as an 'initialized' flag
   unsigned i = 1;
-  uint64 accum = 0;
+  uint64_t accum = 0;
   for (auto& item : counts) {
     if (i >= kInstanceBits) break;
     s_instanceBits[item.first] = i;
@@ -670,7 +670,7 @@ bool Class::haveInstanceBit(const StringData* name) {
 }
 
 bool Class::getInstanceBitMask(const StringData* name,
-                               int& offset, uint8& mask) {
+                               int& offset, uint8_t& mask) {
   assert(Transl::Translator::WriteLease().amOwner());
   assert(s_instanceBitsInit.load(std::memory_order_acquire));
   const size_t bitWidth = sizeof(mask) * CHAR_BIT;

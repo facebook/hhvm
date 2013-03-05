@@ -32,27 +32,27 @@ ObjectData* newVectorHelper(int nElems);
 ObjectData* newMapHelper(int nElems);
 ObjectData* newStableMapHelper(int nElems);
 
-StringData* concat_is(int64 v1, StringData* v2);
-StringData* concat_si(StringData* v1, int64 v2);
+StringData* concat_is(int64_t v1, StringData* v2);
+StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
-StringData* concat(DataType t1, uint64 v1, DataType t2, uint64 v2);
+StringData* concat(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
 
-int64 tv_to_bool(TypedValue* tv);
+int64_t tv_to_bool(TypedValue* tv);
 
-int64 eq_null_str(StringData* v1);
-int64 eq_bool_str(int64 v1, StringData* v2);
-int64 eq_int_str(int64 v1, StringData* v2);
-int64 eq_str_str(StringData* v1, StringData* v2);
+int64_t eq_null_str(StringData* v1);
+int64_t eq_bool_str(int64_t v1, StringData* v2);
+int64_t eq_int_str(int64_t v1, StringData* v2);
+int64_t eq_str_str(StringData* v1, StringData* v2);
 
-int64 same_str_str(StringData* v1, StringData* v2);
+int64_t same_str_str(StringData* v1, StringData* v2);
 
-int64 str0_to_bool(StringData* sd);
-int64 str_to_bool(StringData* sd);
-int64 arr0_to_bool(ArrayData* ad);
-int64 arr_to_bool(ArrayData* ad);
+int64_t str0_to_bool(StringData* sd);
+int64_t str_to_bool(StringData* sd);
+int64_t arr0_to_bool(ArrayData* ad);
+int64_t arr_to_bool(ArrayData* ad);
 
 void print_string(StringData* s);
-void print_int(int64 i);
+void print_int(int64_t i);
 void print_boolean(bool val);
 
 inline Iter*
@@ -271,7 +271,7 @@ extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
 extern BuildNativeClassUnitFn g_hphp_build_native_class_unit;
 
 void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value);
-void collection_setm_ik1_v0(ObjectData* obj, int64 key, TypedValue* value);
+void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value);
 void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
                             TypedValue* value);
 

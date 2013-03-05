@@ -103,9 +103,9 @@ bool f_dangling_server_proxy_new_request(CStrRef host) {
 ///////////////////////////////////////////////////////////////////////////////
 // Pagelet Server
 
-const int64 k_PAGELET_NOT_READY = PAGELET_NOT_READY;
-const int64 k_PAGELET_READY     = PAGELET_READY;
-const int64 k_PAGELET_DONE      = PAGELET_DONE;
+const int64_t k_PAGELET_NOT_READY = PAGELET_NOT_READY;
+const int64_t k_PAGELET_READY     = PAGELET_READY;
+const int64_t k_PAGELET_DONE      = PAGELET_DONE;
 
 bool f_pagelet_server_is_enabled() {
   return PageletServer::Enabled();
@@ -128,12 +128,12 @@ Object f_pagelet_server_task_start(CStrRef url,
   return PageletServer::TaskStart(url, headers, remote_host, post_data);
 }
 
-int64 f_pagelet_server_task_status(CObjRef task) {
+int64_t f_pagelet_server_task_status(CObjRef task) {
   return PageletServer::TaskStatus(task);
 }
 
 String f_pagelet_server_task_result(CObjRef task, VRefParam headers,
-                                    VRefParam code, int64 timeout_ms /* = 0 */) {
+                                    VRefParam code, int64_t timeout_ms /* = 0 */) {
   Array rheaders;
   int rcode;
   String response = PageletServer::TaskResult(task, rheaders, rcode,
@@ -160,7 +160,7 @@ void f_pagelet_server_flush() {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64 timeout_ms,
+bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64_t timeout_ms,
                          CStrRef host /* = "localhost" */) {
   return XboxServer::SendMessage(msg, ret, timeout_ms, host);
 }
@@ -177,7 +177,7 @@ bool f_xbox_task_status(CObjRef task) {
   return XboxServer::TaskStatus(task);
 }
 
-int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret) {
+int64_t f_xbox_task_result(CObjRef task, int64_t timeout_ms, VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 
@@ -206,7 +206,7 @@ Variant f_xbox_process_call_message(CStrRef msg) {
   return f_call_user_func_array(fn, args.toArray());
 }
 
-int64 f_xbox_get_thread_timeout() {
+int64_t f_xbox_get_thread_timeout() {
   XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
   if (server_info) {
     return server_info->getMaxDuration();
@@ -236,7 +236,7 @@ void f_xbox_schedule_thread_reset() {
   }
 }
 
-int64 f_xbox_get_thread_time() {
+int64_t f_xbox_get_thread_time() {
   RPCRequestHandler *handler = XboxServer::GetRequestHandler();
   if (handler) {
     return time(NULL) - handler->getCreationTime();

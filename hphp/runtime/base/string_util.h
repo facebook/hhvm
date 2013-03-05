@@ -125,7 +125,7 @@ public:
    */
   static String Translate(CStrRef input, CStrRef from, CStrRef to);
   static String ROT13(CStrRef input);
-  static int64 CRC32(CStrRef input);
+  static int64_t CRC32(CStrRef input);
   static String Crypt(CStrRef input, const char *salt = "");
   static String MD5(CStrRef input, bool raw = false);
   static String SHA1(CStrRef input, bool raw = false);

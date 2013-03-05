@@ -23,28 +23,28 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(xmlreader);
 ///////////////////////////////////////////////////////////////////////////////
 // constants
-const int64 q_XMLReader$$NONE = XML_READER_TYPE_NONE;
-const int64 q_XMLReader$$ELEMENT = XML_READER_TYPE_ELEMENT;
-const int64 q_XMLReader$$ATTRIBUTE = XML_READER_TYPE_ATTRIBUTE;
-const int64 q_XMLReader$$TEXT = XML_READER_TYPE_TEXT;
-const int64 q_XMLReader$$CDATA = XML_READER_TYPE_CDATA;
-const int64 q_XMLReader$$ENTITY_REF = XML_READER_TYPE_ENTITY_REFERENCE;
-const int64 q_XMLReader$$ENTITY = XML_READER_TYPE_ENTITY;
-const int64 q_XMLReader$$PI = XML_READER_TYPE_PROCESSING_INSTRUCTION;
-const int64 q_XMLReader$$COMMENT = XML_READER_TYPE_COMMENT;
-const int64 q_XMLReader$$DOC = XML_READER_TYPE_DOCUMENT;
-const int64 q_XMLReader$$DOC_TYPE = XML_READER_TYPE_DOCUMENT_TYPE;
-const int64 q_XMLReader$$DOC_FRAGMENT = XML_READER_TYPE_DOCUMENT_FRAGMENT;
-const int64 q_XMLReader$$NOTATION = XML_READER_TYPE_NOTATION;
-const int64 q_XMLReader$$WHITESPACE = XML_READER_TYPE_WHITESPACE;
-const int64 q_XMLReader$$SIGNIFICANT_WHITESPACE = XML_READER_TYPE_SIGNIFICANT_WHITESPACE;
-const int64 q_XMLReader$$END_ELEMENT = XML_READER_TYPE_END_ELEMENT;
-const int64 q_XMLReader$$END_ENTITY = XML_READER_TYPE_END_ENTITY;
-const int64 q_XMLReader$$XML_DECLARATION = XML_READER_TYPE_XML_DECLARATION;
-const int64 q_XMLReader$$LOADDTD = XML_PARSER_LOADDTD;
-const int64 q_XMLReader$$DEFAULTATTRS = XML_PARSER_DEFAULTATTRS;
-const int64 q_XMLReader$$VALIDATE = XML_PARSER_VALIDATE;
-const int64 q_XMLReader$$SUBST_ENTITIES = XML_PARSER_SUBST_ENTITIES;
+const int64_t q_XMLReader$$NONE = XML_READER_TYPE_NONE;
+const int64_t q_XMLReader$$ELEMENT = XML_READER_TYPE_ELEMENT;
+const int64_t q_XMLReader$$ATTRIBUTE = XML_READER_TYPE_ATTRIBUTE;
+const int64_t q_XMLReader$$TEXT = XML_READER_TYPE_TEXT;
+const int64_t q_XMLReader$$CDATA = XML_READER_TYPE_CDATA;
+const int64_t q_XMLReader$$ENTITY_REF = XML_READER_TYPE_ENTITY_REFERENCE;
+const int64_t q_XMLReader$$ENTITY = XML_READER_TYPE_ENTITY;
+const int64_t q_XMLReader$$PI = XML_READER_TYPE_PROCESSING_INSTRUCTION;
+const int64_t q_XMLReader$$COMMENT = XML_READER_TYPE_COMMENT;
+const int64_t q_XMLReader$$DOC = XML_READER_TYPE_DOCUMENT;
+const int64_t q_XMLReader$$DOC_TYPE = XML_READER_TYPE_DOCUMENT_TYPE;
+const int64_t q_XMLReader$$DOC_FRAGMENT = XML_READER_TYPE_DOCUMENT_FRAGMENT;
+const int64_t q_XMLReader$$NOTATION = XML_READER_TYPE_NOTATION;
+const int64_t q_XMLReader$$WHITESPACE = XML_READER_TYPE_WHITESPACE;
+const int64_t q_XMLReader$$SIGNIFICANT_WHITESPACE = XML_READER_TYPE_SIGNIFICANT_WHITESPACE;
+const int64_t q_XMLReader$$END_ELEMENT = XML_READER_TYPE_END_ELEMENT;
+const int64_t q_XMLReader$$END_ENTITY = XML_READER_TYPE_END_ENTITY;
+const int64_t q_XMLReader$$XML_DECLARATION = XML_READER_TYPE_XML_DECLARATION;
+const int64_t q_XMLReader$$LOADDTD = XML_PARSER_LOADDTD;
+const int64_t q_XMLReader$$DEFAULTATTRS = XML_PARSER_DEFAULTATTRS;
+const int64_t q_XMLReader$$VALIDATE = XML_PARSER_VALIDATE;
+const int64_t q_XMLReader$$SUBST_ENTITIES = XML_PARSER_SUBST_ENTITIES;
 
 #define XMLREADER_LOAD_STRING 0
 #define XMLREADER_LOAD_FILE 1
@@ -132,7 +132,7 @@ c_XMLReader::~c_XMLReader() {
 void c_XMLReader::t___construct() {
 }
 
-bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64 options /*= 0*/) {
+bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64_t options /*= 0*/) {
   if (m_ptr) {
     t_close();
   }
@@ -159,7 +159,7 @@ bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64 
   return true;
 }
 
-bool c_XMLReader::t_xml(CStrRef source, CStrRef encoding /*= null_string*/, int64 options /*= 0*/) {
+bool c_XMLReader::t_xml(CStrRef source, CStrRef encoding /*= null_string*/, int64_t options /*= 0*/) {
   xmlParserInputBufferPtr inputbfr = xmlParserInputBufferCreateMem(source.c_str(), source.size(), XML_CHAR_ENCODING_NONE);
 
   if (inputbfr != NULL) {
@@ -319,7 +319,7 @@ Variant c_XMLReader::t_getattribute(CStrRef name) {
   return string_func_string_arg(name, xmlTextReaderGetAttribute);
 }
 
-Variant c_XMLReader::t_getattributeno(int64 index) {
+Variant c_XMLReader::t_getattributeno(int64_t index) {
   char *retchar = NULL;
   if (m_ptr) {
     retchar = (char *)xmlTextReaderGetAttributeNo(m_ptr, index);
@@ -370,7 +370,7 @@ bool c_XMLReader::t_movetoattribute(CStrRef name) {
   return false;
 }
 
-bool c_XMLReader::t_movetoattributeno(int64 index) {
+bool c_XMLReader::t_movetoattributeno(int64_t index) {
   if (m_ptr) {
     int ret = xmlTextReaderMoveToAttributeNo(m_ptr, index);
     if (ret == 1) {
@@ -416,7 +416,7 @@ bool c_XMLReader::t_expand() {
   throw NotImplementedException(__func__);
 }
 
-bool c_XMLReader::t_getparserproperty(int64 property) {
+bool c_XMLReader::t_getparserproperty(int64_t property) {
   int ret = 0;
   if (m_ptr) {
     ret = xmlTextReaderGetParserProp(m_ptr, property);
@@ -448,7 +448,7 @@ bool c_XMLReader::t_setschema(CStrRef source) {
   return false;
 }
 
-bool c_XMLReader::t_setparserproperty(int64 property, bool value) {
+bool c_XMLReader::t_setparserproperty(int64_t property, bool value) {
   if (m_ptr) {
     int ret = xmlTextReaderSetParserProp(m_ptr, property, value);
     if (ret == -1) {

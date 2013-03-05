@@ -70,9 +70,9 @@ static bool check_noTTL(const char *key) {
 
 // stats_on_update should be called before updating sval with new value
 static void stats_on_update(const StringData* key, const StoreValue* sval,
-                            const SharedVariant* svar, int64 ttl) {
+                            const SharedVariant* svar, int64_t ttl) {
   if (RuntimeOption::EnableAPCSizeStats && !check_skip(key->data())) {
-    int32 newSize = svar->getSpaceUsage();
+    int32_t newSize = svar->getSpaceUsage();
     SharedStoreStats::updateDirect(sval->size, newSize);
     sval->size = newSize;
   }
@@ -85,9 +85,9 @@ static void stats_on_update(const StringData* key, const StoreValue* sval,
 }
 // stats_on_add should be called after writing sval with the value
 static void stats_on_add(const StringData* key, const StoreValue* sval,
-                         int64 ttl, bool prime, bool file) {
+                         int64_t ttl, bool prime, bool file) {
   if (RuntimeOption::EnableAPCSizeStats && !check_skip(key->data())) {
-    int32 size = sval->var->getSpaceUsage();
+    int32_t size = sval->var->getSpaceUsage();
     SharedStoreStats::addDirect(key->size(), size, prime, file);
     sval->size = size;
   }
@@ -183,13 +183,13 @@ void ConcurrentTableSharedStore::purgeExpired() {
     ++i;
   }
   gettime(CLOCK_MONOTONIC, &tsEnd);
-  int64 elapsed = gettime_diff_us(tsBegin, tsEnd);
+  int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
   SharedStoreStats::addPurgingTime(elapsed);
   // Size could be inaccurate, but for stats reporting, it is good enough
   SharedStoreStats::setExpireQueueSize(m_expQueue.size());
 }
 
-void ConcurrentTableSharedStore::addToExpirationQueue(const char* key, int64 etime) {
+void ConcurrentTableSharedStore::addToExpirationQueue(const char* key, int64_t etime) {
   ExpMap::accessor acc;
   if (m_expMap.find(acc, key)) {
     acc->second++;
@@ -224,7 +224,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
     // sv may not be same as svar here because some other thread may have
     // updated it already, check before updating
     if (sv == svar && !sv->isUnserializedObj()) {
-      int64 ttl = sval->expiry ? sval->expiry - time(nullptr) : 0;
+      int64_t ttl = sval->expiry ? sval->expiry - time(nullptr) : 0;
       stats_on_update(key.get(), sval, converted, ttl);
       sval->var = converted;
       sv->decRef();
@@ -319,7 +319,7 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   return true;
 }
 
-static int64 get_int64_value(StoreValue* sval) {
+static int64_t get_int64_value(StoreValue* sval) {
   Variant v;
   if (sval->inMem()) {
     v = sval->var->toLocal();
@@ -331,9 +331,9 @@ static int64 get_int64_value(StoreValue* sval) {
   return v.toInt64();
 }
 
-int64 ConcurrentTableSharedStore::inc(CStrRef key, int64 step, bool &found) {
+int64_t ConcurrentTableSharedStore::inc(CStrRef key, int64_t step, bool &found) {
   found = false;
-  int64 ret = 0;
+  int64_t ret = 0;
   ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
                                 m_lockingFlag);
   StoreValue *sval;
@@ -354,7 +354,7 @@ int64 ConcurrentTableSharedStore::inc(CStrRef key, int64 step, bool &found) {
   return ret;
 }
 
-bool ConcurrentTableSharedStore::cas(CStrRef key, int64 old, int64 val) {
+bool ConcurrentTableSharedStore::cas(CStrRef key, int64_t old, int64_t val) {
   bool success = false;
   ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
                                 m_lockingFlag);
@@ -408,7 +408,7 @@ bool ConcurrentTableSharedStore::exists(CStrRef key) {
   return true;
 }
 
-static int64 adjust_ttl(int64 ttl, bool overwritePrime) {
+static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
   if (RuntimeOption::ApcTTLLimit > 0 && !overwritePrime) {
     if (ttl == 0 || ttl > RuntimeOption::ApcTTLLimit) {
       return RuntimeOption::ApcTTLLimit;
@@ -417,7 +417,7 @@ static int64 adjust_ttl(int64 ttl, bool overwritePrime) {
   return ttl;
 }
 
-bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64 ttl,
+bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
                                        bool overwrite /* = true */) {
   StoreValue *sval;
   SharedVariant* svar = construct(value);
@@ -452,7 +452,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64 ttl,
         return false;
       }
     }
-    int64 adjustedTtl = adjust_ttl(ttl, overwritePrime);
+    int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime);
     if (check_noTTL(key.data())) {
       adjustedTtl = 0;
     }

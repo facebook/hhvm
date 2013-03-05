@@ -46,7 +46,7 @@ namespace HPHP {
  */
 
 struct AsciiMap {
-  uint64 map[2];
+  uint64_t map[2];
 };
 
 enum StringHtmlEncoding {

@@ -31,13 +31,13 @@ using namespace U_ICU_NAMESPACE;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-const int64 k_UREGEX_CASE_INSENSITIVE = UREGEX_CASE_INSENSITIVE;
-const int64 k_UREGEX_COMMENTS         = UREGEX_COMMENTS;
-const int64 k_UREGEX_DOTALL           = UREGEX_DOTALL;
-const int64 k_UREGEX_MULTILINE        = UREGEX_MULTILINE;
-const int64 k_UREGEX_UWORD            = UREGEX_UWORD;
+const int64_t k_UREGEX_CASE_INSENSITIVE = UREGEX_CASE_INSENSITIVE;
+const int64_t k_UREGEX_COMMENTS         = UREGEX_COMMENTS;
+const int64_t k_UREGEX_DOTALL           = UREGEX_DOTALL;
+const int64_t k_UREGEX_MULTILINE        = UREGEX_MULTILINE;
+const int64_t k_UREGEX_UWORD            = UREGEX_UWORD;
 // Intentionally higher in case ICU adds more constants.
-const int64 k_UREGEX_OFFSET_CAPTURE   = 1LL<<32;
+const int64_t k_UREGEX_OFFSET_CAPTURE   = 1LL<<32;
 
 ///////////////////////////////////////////////////////////////////////////////
 typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
@@ -46,7 +46,7 @@ typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
 static PatternStringMap s_patternCacheMap;
 
 Variant f_icu_match(CStrRef pattern, CStrRef subject,
-                    VRefParam matches /* = null */, int64 flags /* = 0 */) {
+                    VRefParam matches /* = null */, int64_t flags /* = 0 */) {
   UErrorCode status = U_ZERO_ERROR;
 
   if (matches.isReferenced()) {

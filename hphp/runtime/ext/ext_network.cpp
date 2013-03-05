@@ -284,11 +284,11 @@ Variant f_ip2long(CStrRef ip_address) {
      * not -1 or ~0 because of 32/64bit issues.
      */
     if (ip_address == "255.255.255.255") {
-      return (int64)0xFFFFFFFF;
+      return (int64_t)0xFFFFFFFF;
     }
     return false;
   }
-  return (int64)ntohl(ip);
+  return (int64_t)ntohl(ip);
 }
 
 String f_long2ip(int proper_address) {
@@ -368,7 +368,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   Array &subarray) {
   unsigned short type, cls ATTRIBUTE_UNUSED, dlen;
   unsigned long ttl;
-  int64 n, i;
+  int64_t n, i;
   unsigned short s;
   unsigned char *tp, *p;
   char name[MAXHOSTNAMELEN];
@@ -969,7 +969,7 @@ int f_get_http_request_size() {
 }
 
 bool f_setcookie(CStrRef name, CStrRef value /* = null_string */,
-                 int64 expire /* = 0 */, CStrRef path /* = null_string */,
+                 int64_t expire /* = 0 */, CStrRef path /* = null_string */,
                  CStrRef domain /* = null_string */, bool secure /* = false */,
                  bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
@@ -981,7 +981,7 @@ bool f_setcookie(CStrRef name, CStrRef value /* = null_string */,
 }
 
 bool f_setrawcookie(CStrRef name, CStrRef value /* = null_string */,
-                    int64 expire /* = 0 */, CStrRef path /* = null_string */,
+                    int64_t expire /* = 0 */, CStrRef path /* = null_string */,
                     CStrRef domain /* = null_string */,
                     bool secure /* = false */,
                     bool httponly /* = false */) {

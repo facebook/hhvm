@@ -276,7 +276,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       return m_tb.genDefConst<const StringData*>(m_ht.lookupStringId(l.offset));
 
     case Location::Litint:
-      return m_tb.genDefConst<int64>(l.offset);
+      return m_tb.genDefConst<int64_t>(l.offset);
 
     case Location::This:
       return m_tb.genLdThis(nullptr);

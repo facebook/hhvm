@@ -48,7 +48,7 @@ namespace Transl {
 
 static const bool trustSigSegv = false;
 
-static const uint32 transCountersPerChunk = 1024 * 1024 / 8;
+static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
 class TranslatorX64;
 extern TranslatorX64* volatile nextTx64;
@@ -107,7 +107,7 @@ struct SrcKey {
   }
   // Hash function for both hash_map and tbb conventions.
   static size_t hash(const SrcKey &sk) {
-    return HPHP::hash_int64_pair(sk.m_funcId, uint64(sk.m_offset));
+    return HPHP::hash_int64_pair(sk.m_funcId, uint64_t(sk.m_offset));
   }
   size_t operator()(const SrcKey& sk) const {
     return hash(sk);
@@ -167,8 +167,8 @@ struct DynLocation {
 
   // Hash function
   size_t operator()(const DynLocation &dl) const {
-    uint64 rtthash = rtt(rtt);
-    uint64 locHash = location(location);
+    uint64_t rtthash = rtt(rtt);
+    uint64_t locHash = location(location);
     return rtthash ^ locHash;
   }
 
@@ -531,7 +531,7 @@ struct RefDeps {
       return out.str();
     }
   };
-  typedef hphp_hash_map<int64, Record, int64_hash> ArMap;
+  typedef hphp_hash_map<int64_t, Record, int64_hash> ArMap;
   ArMap m_arMap;
 
   RefDeps() {}
@@ -730,14 +730,14 @@ struct TransRec {
   TransKind               kind;
   SrcKey                  src;
   MD5                     md5;
-  uint32                  bcStopOffset;
+  uint32_t                  bcStopOffset;
   vector<DynLocation>     dependencies;
   TCA                     aStart;
-  uint32                  aLen;
+  uint32_t                  aLen;
   TCA                     astubsStart;
-  uint32                  astubsLen;
+  uint32_t                  astubsLen;
   TCA                     counterStart;
-  uint8                   counterLen;
+  uint8_t                   counterLen;
   vector<TransBCMapping>  bcMapping;
 
   static const TransID InvalidID = -1LL;
@@ -748,9 +748,9 @@ struct TransRec {
            MD5       _md5,
            TransKind _kind,
            TCA       _aStart = 0,
-           uint32    _aLen = 0,
+           uint32_t    _aLen = 0,
            TCA       _astubsStart = 0,
-           uint32    _astubsLen = 0) :
+           uint32_t    _astubsLen = 0) :
       id(0), kind(_kind), src(s), md5(_md5), bcStopOffset(0),
       aStart(_aStart), aLen(_aLen),
       astubsStart(_astubsStart), astubsLen(_astubsLen),
@@ -761,11 +761,11 @@ struct TransRec {
            TransKind                _kind,
            const Tracelet&          t,
            TCA                      _aStart = 0,
-           uint32                   _aLen = 0,
+           uint32_t                   _aLen = 0,
            TCA                      _astubsStart = 0,
-           uint32                   _astubsLen = 0,
+           uint32_t                   _astubsLen = 0,
            TCA                      _counterStart = 0,
-           uint8                    _counterLen = 0,
+           uint8_t                    _counterLen = 0,
            vector<TransBCMapping>   _bcMapping = vector<TransBCMapping>()) :
       id(0), kind(_kind), src(s), md5(_md5),
       bcStopOffset(t.m_nextSk.offset()), aStart(_aStart), aLen(_aLen),
@@ -780,7 +780,7 @@ struct TransRec {
   }
 
   void setID(TransID newID) { id = newID; }
-  string print(uint64 profCount) const;
+  string print(uint64_t profCount) const;
 };
 
 /*
@@ -848,11 +848,11 @@ protected:
   typedef std::map<TCA, TransID> TransDB;
   TransDB            m_transDB;
   vector<TransRec>   m_translations;
-  vector<uint64*>    m_transCounters;
+  vector<uint64_t*>    m_transCounters;
 
   bool               m_useHHIR; // Is HHIR in effect for current trace?
 
-  int64              m_createdTime;
+  int64_t              m_createdTime;
 
   static Lease s_writeLease;
   static volatile bool s_replaceInFlight;
@@ -929,13 +929,13 @@ public:
     return m_translations.size();
   }
 
-  uint64* getTransCounterAddr();
+  uint64_t* getTransCounterAddr();
 
-  uint64 getTransCounter(TransID transId) const;
+  uint64_t getTransCounter(TransID transId) const;
 
-  void setTransCounter(TransID transId, uint64 value);
+  void setTransCounter(TransID transId, uint64_t value);
 
-  uint32 addTranslation(const TransRec& transRec) {
+  uint32_t addTranslation(const TransRec& transRec) {
     if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
       // Log the translation's size, creation time, SrcKey, and size
       Trace::traceRelease("New translation: %lld %s %u %u %d\n",
@@ -945,7 +945,7 @@ public:
     }
 
     if (!isTransDBEnabled()) return -1u;
-    uint32 id = getCurrentTransID();
+    uint32_t id = getCurrentTransID();
     m_translations.push_back(transRec);
     m_translations[id].setID(id);
 

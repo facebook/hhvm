@@ -78,8 +78,8 @@ bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
 int RuntimeOption::NoticeFrequency = 1;
 int RuntimeOption::WarningFrequency = 1;
-int64 RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
-int64 RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
+int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
+int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
 std::string RuntimeOption::AccessLogDefaultFormat;
 std::vector<AccessLogFileData> RuntimeOption::AccessLogs;
@@ -114,8 +114,8 @@ bool RuntimeOption::PageletServerThreadDropStack = false;
 int RuntimeOption::FiberCount = 1;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 size_t RuntimeOption::ServerMemoryHeadRoom = 0;
-int64 RuntimeOption::RequestMemoryMaxBytes = INT64_MAX;
-int64 RuntimeOption::ImageMemoryMaxBytes = 0;
+int64_t RuntimeOption::RequestMemoryMaxBytes = INT64_MAX;
+int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ResponseQueueCount;
 int RuntimeOption::ServerGracefulShutdownWait;
 bool RuntimeOption::ServerHarshShutdown = true;
@@ -139,9 +139,9 @@ std::string RuntimeOption::OutputHandler;
 bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
-int64 RuntimeOption::MaxPostSize;
+int64_t RuntimeOption::MaxPostSize;
 bool RuntimeOption::AlwaysPopulateRawPostData = true;
-int64 RuntimeOption::UploadMaxFileSize;
+int64_t RuntimeOption::UploadMaxFileSize;
 std::string RuntimeOption::UploadTmpDir;
 bool RuntimeOption::EnableFileUploads;
 bool RuntimeOption::EnableUploadProgress;
@@ -297,11 +297,11 @@ bool RuntimeOption::EnableAPCSizeDetail = false;
 bool RuntimeOption::EnableAPCFetchStats = false;
 bool RuntimeOption::APCSizeCountPrime = false;
 
-int64 RuntimeOption::MaxRSS = 0;
-int64 RuntimeOption::MaxRSSPollingCycle = 0;
-int64 RuntimeOption::DropCacheCycle = 0;
-int64 RuntimeOption::MaxSQLRowCount = 10000;
-int64 RuntimeOption::MaxMemcacheKeyCount = 0;
+int64_t RuntimeOption::MaxRSS = 0;
+int64_t RuntimeOption::MaxRSSPollingCycle = 0;
+int64_t RuntimeOption::DropCacheCycle = 0;
+int64_t RuntimeOption::MaxSQLRowCount = 10000;
+int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
 bool RuntimeOption::EnableMemoryManager = true;
@@ -1118,11 +1118,13 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 #define get_string getString
 #define get_int16 getInt16
 #define get_int32 getInt32
+#define get_int32_t getInt32
 #define get_int64 getInt64
 #define get_uint16 getUInt16
 #define get_uint32 getUInt32
 #define get_uint32_t getUInt32
 #define get_uint64 getUInt64
+#define get_uint64_t getUInt64
 #define F(type, name, defaultVal) \
     Eval ## name = eval[#name].get_ ##type(defaultVal);
     EVALFLAGS()

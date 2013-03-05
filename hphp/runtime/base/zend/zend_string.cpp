@@ -1558,10 +1558,10 @@ char *string_hex2bin(const char *input, int &len) {
 }
 
 Variant string_base_to_numeric(const char *s, int len, int base) {
-  int64 num = 0;
+  int64_t num = 0;
   double fnum = 0;
   int mode = 0;
-  int64 cutoff;
+  int64_t cutoff;
   int cutlim;
 
   assert(string_validate_base(base));

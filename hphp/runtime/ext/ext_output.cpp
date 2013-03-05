@@ -54,7 +54,7 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   const timespec &tsQueue = transport->getQueueTime();
   const timespec &tsWall = transport->getWallTime();
   const timespec &tsCpu = transport->getCpuTime();
-  const int64 &instStart = transport->getInstructions();
+  const int64_t &instStart = transport->getInstructions();
 
   Array ret;
   if (get_as_float) {
@@ -79,7 +79,7 @@ Variant f_hphp_output_global_state(bool serialize /* = true */) {
   }
 }
 
-int64 f_hphp_instruction_counter(void) {
+int64_t f_hphp_instruction_counter(void) {
   return HardwareCounter::GetInstructionCount();
 }
 

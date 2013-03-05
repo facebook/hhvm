@@ -93,7 +93,7 @@ namespace HPHP {
 #define mixBits(u, v) (hiBit(u)|loBits(v)) // move hi bit of u to hi bit of v
 
 #define twist(m,u,v) \
-  (m ^ (mixBits(u,v)>>1) ^ ((uint32)(-(int32)(loBit(u))) & 0x9908b0dfU))
+  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
 class RandData {
 public:
@@ -105,12 +105,12 @@ public:
 
   bool seeded;
   int left;
-  uint32 state[N];
-  uint32 *next;
+  uint32_t state[N];
+  uint32_t *next;
 
   bool lcg_seeded;
-  int32 lcg_s1;
-  int32 lcg_s2;
+  int32_t lcg_s1;
+  int32_t lcg_s2;
 };
 static IMPLEMENT_THREAD_LOCAL_NO_CHECK(RandData, s_rand_data);
 
@@ -118,14 +118,14 @@ void zend_get_rand_data() {
   s_rand_data.getCheck();
 }
 
-static inline void php_mt_initialize(uint32 seed, uint32 *state) {
+static inline void php_mt_initialize(uint32_t seed, uint32_t *state) {
   /* Initialize generator state with seed
      See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
      In previous versions, most significant bits (MSBs) of the seed affect
      only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-  register uint32 *s = state;
-  register uint32 *r = state;
+  register uint32_t *s = state;
+  register uint32_t *r = state;
   register int i = 1;
 
   *s++ = seed & 0xffffffffU;
@@ -140,8 +140,8 @@ static inline void php_mt_reload() {
      Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
   RandData *data = s_rand_data.getNoCheck();
-  register uint32 *state = data->state;
-  register uint32 *p = state;
+  register uint32_t *state = data->state;
+  register uint32_t *p = state;
   register int i;
 
   for (i = N - M; i--; ++p)
@@ -153,7 +153,7 @@ static inline void php_mt_reload() {
   data->next = state;
 }
 
-void math_mt_srand(uint32 seed) {
+void math_mt_srand(uint32_t seed) {
   RandData *data = s_rand_data.getNoCheck();
 
   /* Seed the generator with a simple uint32 */
@@ -164,11 +164,11 @@ void math_mt_srand(uint32 seed) {
   data->seeded = true;
 }
 
-static inline uint32 php_mt_rand() {
+static inline uint32_t php_mt_rand() {
   // Pull a 32-bit integer from the generator state
   // Every other access function simply transforms the numbers extracted here
 
-  register uint32 s1;
+  register uint32_t s1;
 
   RandData *data = s_rand_data.getNoCheck();
   if (data->left == 0) {
@@ -184,7 +184,7 @@ static inline uint32 php_mt_rand() {
 }
 
 // Returns a random number from Mersenne Twister
-int64 math_mt_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
+int64_t math_mt_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
   if (!s_rand_data->seeded) {
     math_mt_srand(math_generate_seed());
   }
@@ -197,7 +197,7 @@ int64 math_mt_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
    * Update:
    * I talked with Cokus via email and it won't ruin the algorithm
    */
-  int64 number = (php_mt_rand() >> 1);
+  int64_t number = (php_mt_rand() >> 1);
   if (min != 0 || max != RAND_MAX) {
     RAND_RANGE(number, min, max, MT_RAND_MAX);
   }
@@ -234,8 +234,8 @@ static void lcg_seed() {
 }
 
 double math_combined_lcg() {
-  int32 q;
-  int32 z;
+  int32_t q;
+  int32_t z;
 
   RandData *data = s_rand_data.getNoCheck();
   if (!data->lcg_seeded) {
@@ -253,8 +253,8 @@ double math_combined_lcg() {
   return z * 4.656613e-10;
 }
 
-int64 math_generate_seed() {
-  int64 value;
+int64_t math_generate_seed() {
+  int64_t value;
   if (RAND_bytes((unsigned char *)&value, sizeof(value)) < 1) {
     return GENERATE_SEED();
   } else {

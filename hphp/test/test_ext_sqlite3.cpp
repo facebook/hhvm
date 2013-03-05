@@ -117,8 +117,8 @@ bool TestExtSqlite3::test_sqlite3() {
 
   // Since minor version can change frequently, just test the major version
   VS(db->t_version()["versionString"][0], "3");
-  VERIFY((HPHP::int64)db->t_version()["versionNumber"] >
-         (HPHP::int64)3000000);
+  VERIFY((int64_t)db->t_version()["versionNumber"] >
+         (int64_t)3000000);
   f_unlink(":memory:test");
   return Count(true);
 }

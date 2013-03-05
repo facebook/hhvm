@@ -30,7 +30,7 @@ int dprintf(int fd, const char *format, ...);
 #endif
 
 int gettime(clockid_t which_clock, struct timespec *tp);
-int64 gettime_diff_us(const timespec &start, const timespec &end);
+int64_t gettime_diff_us(const timespec &start, const timespec &end);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

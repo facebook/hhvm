@@ -223,7 +223,7 @@ public:
 public:
   // constructor
   DateTime();
-  DateTime(int64 timestamp, bool utc = false); // from a timestamp
+  DateTime(int64_t timestamp, bool utc = false); // from a timestamp
 
   static StaticString s_class_name;
   // overriding ResourceData
@@ -267,12 +267,12 @@ public:
 
   // conversions
   void toTm(struct tm &ta) const;
-  int64 toTimeStamp(bool &err) const;
-  int64 toInteger(char format) const;
+  int64_t toTimeStamp(bool &err) const;
+  int64_t toInteger(char format) const;
   String toString(CStrRef format, bool stdc = false) const;
   String toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
-  void fromTimeStamp(int64 timestamp, bool utc = false);
+  void fromTimeStamp(int64_t timestamp, bool utc = false);
   bool fromString(CStrRef input, SmartObject<TimeZone> tz, const char* format=nullptr);
 
   // comparison
@@ -344,7 +344,7 @@ private:
 
   TimePtr m_time;
   SmartObject<TimeZone> m_tz;
-  mutable int64 m_timestamp;
+  mutable int64_t m_timestamp;
   mutable bool m_timestampSet;
 
   // helpers

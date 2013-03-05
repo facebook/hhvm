@@ -99,7 +99,7 @@ void raise_strict_warning(const char *fmt, ...) {
                          "HipHop Strict Warning:  ");
 }
 
-static int64 g_warning_counter = 0;
+static int64_t g_warning_counter = 0;
 
 void raise_warning(const std::string &msg) {
   if (RuntimeOption::WarningFrequency <= 0 ||
@@ -151,7 +151,7 @@ void raise_debugging(const char *fmt, ...) {
   raise_debugging(msg);
 }
 
-static int64 g_notice_counter = 0;
+static int64_t g_notice_counter = 0;
 
 void raise_notice(const std::string &msg) {
   if (RuntimeOption::NoticeFrequency <= 0 ||

@@ -229,7 +229,7 @@ static StaticString s_SimpleXMLElement("SimpleXMLElement");
 
 Variant f_simplexml_load_string(CStrRef data,
                                 CStrRef class_name /* = "SimpleXMLElement" */,
-                                int64 options /* = 0 */,
+                                int64_t options /* = 0 */,
                                 CStrRef ns /* = "" */,
                                 bool is_prefix /* = false */) {
   if (!class_name->isame(s_SimpleXMLElement.get())) {
@@ -260,7 +260,7 @@ Variant f_simplexml_load_string(CStrRef data,
 
 Variant f_simplexml_load_file(CStrRef filename,
                               CStrRef class_name /* = "SimpleXMLElement" */,
-                              int64 options /* = 0 */, CStrRef ns /* = "" */,
+                              int64_t options /* = 0 */, CStrRef ns /* = "" */,
                               bool is_prefix /* = false */) {
   String str = f_file_get_contents(filename);
   return f_simplexml_load_string(str, class_name, options, ns, is_prefix);
@@ -291,7 +291,7 @@ void c_SimpleXMLElement::sweep() {
   }
 }
 
-void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
+void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
                                        bool data_is_url /* = false */,
                                        CStrRef ns /* = "" */,
                                        bool is_prefix /* = false */) {
@@ -825,7 +825,7 @@ bool c_SimpleXMLElement::o_toBoolean() const {
   return m_node != NULL || getProperties().size();
 }
 
-int64 c_SimpleXMLElement::o_toInt64() const {
+int64_t c_SimpleXMLElement::o_toInt64() const {
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {
@@ -859,12 +859,12 @@ Variant c_SimpleXMLElement::t_getiterator() {
   return Object(iter);
 }
 
-int64 c_SimpleXMLElement::t_count() {
+int64_t c_SimpleXMLElement::t_count() {
   if (m_is_attribute) {
     return m_attributes.toArray().size();
   }
   if (m_is_property) {
-    int64 n = 0; Variant var(this);
+    int64_t n = 0; Variant var(this);
     for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
       ++n;
     }
@@ -878,7 +878,7 @@ int64 c_SimpleXMLElement::t_count() {
 
 bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
   if (index.isInteger()) {
-    int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
+    int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
     for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
       if (n++ == nIndex) {
         return true;
@@ -892,7 +892,7 @@ bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
 Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
   if (index.isInteger()) {
     if (m_is_property) {
-      int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
+      int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
       for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
         if (n++ == nIndex) {
           return iter.second();

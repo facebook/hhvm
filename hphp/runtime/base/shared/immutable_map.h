@@ -35,7 +35,7 @@ class SharedVariant;
 class ImmutableMap {
 public:
   int indexOf(const StringData* key);
-  int indexOf(int64 key);
+  int indexOf(int64_t key);
 
   SharedVariant* getKeyIndex(int index) {
     assert(index < size());

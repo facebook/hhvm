@@ -207,9 +207,9 @@ static long collator_u_strtol(const UChar *nptr, UChar **endptr,
 }
 
 
-static DataType collator_is_numeric(UChar *str, int length, int64 *lval,
+static DataType collator_is_numeric(UChar *str, int length, int64_t *lval,
                                     double *dval, int allow_errors ) {
-  int64 local_lval;
+  int64_t local_lval;
   double local_dval;
   UChar *end_ptr_long, *end_ptr_double;
   int conv_base=10;
@@ -324,7 +324,7 @@ static Variant collator_convert_string_to_double(CVarRef str) {
 }
 
 static Variant collator_convert_string_to_number_if_possible(CVarRef str) {
-  int64 lval     = 0;
+  int64_t lval     = 0;
   double dval    = 0;
 
   if (!str.isString()) return false;

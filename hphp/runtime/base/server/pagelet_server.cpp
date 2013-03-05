@@ -84,7 +84,7 @@ public:
   virtual const char *getRemoteHost() {
     return m_remoteHost.c_str();
   }
-  virtual uint16 getRemotePort() {
+  virtual uint16_t getRemotePort() {
     return 0;
   }
   virtual const void *getPostData(int &size) {
@@ -158,7 +158,7 @@ public:
     return m_pipeline.empty();
   }
 
-  String getResults(Array &headers, int &code, int64 timeout_ms) {
+  String getResults(Array &headers, int &code, int64_t timeout_ms) {
     {
       Lock lock(this);
       while (!m_done && m_pipeline.empty()) {
@@ -327,7 +327,7 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
   return ret;
 }
 
-int64 PageletServer::TaskStatus(CObjRef task) {
+int64_t PageletServer::TaskStatus(CObjRef task) {
   PageletTask *ptask = task.getTyped<PageletTask>();
   PageletTransport *job = ptask->getJob();
   if (!job->isPipelineEmpty()) {
@@ -340,7 +340,7 @@ int64 PageletServer::TaskStatus(CObjRef task) {
 }
 
 String PageletServer::TaskResult(CObjRef task, Array &headers, int &code,
-                                 int64 timeout_ms) {
+                                 int64_t timeout_ms) {
   PageletTask *ptask = task.getTyped<PageletTask>();
   return ptask->getJob()->getResults(headers, code, timeout_ms);
 }

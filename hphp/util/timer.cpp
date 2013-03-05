@@ -50,28 +50,28 @@ Timer::~Timer() {
   }
 }
 
-int64 Timer::getMicroSeconds() const {
+int64_t Timer::getMicroSeconds() const {
   return measure() - m_start;
 }
 
 void Timer::report() const {
-  int64 ms = getMicroSeconds();
+  int64_t ms = getMicroSeconds();
   int seconds = ms / 1000000;
   PRINT_MSG("%s took %d'%02d\" (%" PRId64 " us) %s", m_name.c_str(),
             seconds / 60, seconds % 60, ms, getName());
 }
 
-static int64 to_usec(const timeval& tv) {
-  return (int64(tv.tv_sec) * 1000000) + tv.tv_usec;
+static int64_t to_usec(const timeval& tv) {
+  return (int64_t(tv.tv_sec) * 1000000) + tv.tv_usec;
 }
 
-int64 Timer::GetCurrentTimeMicros() {
+int64_t Timer::GetCurrentTimeMicros() {
   struct timeval tv;
   gettimeofday(&tv, 0);
   return to_usec(tv);
 }
 
-int64 Timer::measure() const {
+int64_t Timer::measure() const {
   if (m_type == WallTime) {
     return GetCurrentTimeMicros();
   }
@@ -102,21 +102,21 @@ const char *Timer::getName() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SlowTimer::SlowTimer(int64 msThreshold, const char *location, const char *info)
+SlowTimer::SlowTimer(int64_t msThreshold, const char *location, const char *info)
   : m_timer(Timer::WallTime), m_msThreshold(msThreshold) {
   if (location) m_location = location;
   if (info) m_info = info;
 }
 
 SlowTimer::~SlowTimer() {
-  int64 msec = getTime();
+  int64_t msec = getTime();
   if (msec >= m_msThreshold) {
     Logger::Error("SlowTimer [%dms] at %s: %s",
                   msec, m_location.c_str(), m_info.c_str());
   }
 }
 
-int64 SlowTimer::getTime() const {
+int64_t SlowTimer::getTime() const {
   return m_timer.getMicroSeconds() / 1000;
 }
 

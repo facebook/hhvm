@@ -33,11 +33,11 @@ String f_hash_final(CObjRef context, bool raw_output = false);
 Variant f_hash_hmac_file(CStrRef algo, CStrRef filename, CStrRef key, bool raw_output = false);
 Variant f_hash_hmac(CStrRef algo, CStrRef data, CStrRef key, bool raw_output = false);
 bool f_hash_update_file(CObjRef init_context, CStrRef filename, CObjRef stream_context = null);
-int64 f_hash_update_stream(CObjRef context, CObjRef handle, int length = -1);
+int64_t f_hash_update_stream(CObjRef context, CObjRef handle, int length = -1);
 bool f_hash_update(CObjRef context, CStrRef data);
-int64 f_furchash_hphp_ext(CStrRef key, int len, int nPart);
+int64_t f_furchash_hphp_ext(CStrRef key, int len, int nPart);
 bool f_furchash_hphp_ext_supported();
-int64 f_hphp_murmurhash(CStrRef key, int len, int seed);
+int64_t f_hphp_murmurhash(CStrRef key, int len, int seed);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

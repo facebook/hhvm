@@ -200,12 +200,12 @@ ArrayData *ArrayData::lvalPtr(StringData* k, Variant *&ret, bool copy,
   throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
 }
 
-ArrayData *ArrayData::lvalPtr(int64 k, Variant *&ret, bool copy,
+ArrayData *ArrayData::lvalPtr(int64_t k, Variant *&ret, bool copy,
                               bool create) {
   throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
 }
 
-ArrayData *ArrayData::add(int64 k, CVarRef v, bool copy) {
+ArrayData *ArrayData::add(int64_t k, CVarRef v, bool copy) {
   assert(!exists(k));
   return set(k, v, copy);
 }
@@ -215,7 +215,7 @@ ArrayData *ArrayData::add(StringData* k, CVarRef v, bool copy) {
   return set(k, v, copy);
 }
 
-ArrayData *ArrayData::addLval(int64 k, Variant *&ret, bool copy) {
+ArrayData *ArrayData::addLval(int64_t k, Variant *&ret, bool copy) {
   assert(!exists(k));
   return lval(k, ret, copy);
 }
@@ -501,7 +501,7 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
 // conflate no-key with have-key && value == null_varaint.  Subclasses
 // can easily do this with one key search.
 
-TypedValue* ArrayData::nvGet(int64 k) const {
+TypedValue* ArrayData::nvGet(int64_t k) const {
   return exists(k) ? (TypedValue*)&get(k, false) :
          nullptr;
 }
@@ -523,7 +523,7 @@ TypedValue* ArrayData::nvGetValueRef(ssize_t pos) {
   return const_cast<TypedValue*>(getValueRef(pos).asTypedValue());
 }
 
-TypedValue* ArrayData::nvGetCell(int64 k) const {
+TypedValue* ArrayData::nvGetCell(int64_t k) const {
   TypedValue* tv = (TypedValue*)&get(k, false);
   return LIKELY(tv != (TypedValue*)&null_variant) ? tvToCell(tv) :
          nvGetNotFound(k);
@@ -535,7 +535,7 @@ TypedValue* ArrayData::nvGetCell(const StringData* key) const {
          nvGetNotFound(key);
 }
 
-CVarRef ArrayData::getNotFound(int64 k) {
+CVarRef ArrayData::getNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
   return null_variant;
 }
@@ -560,7 +560,7 @@ CVarRef ArrayData::getNotFound(CVarRef k) {
   return null_variant;
 }
 
-TypedValue* ArrayData::nvGetNotFound(int64 k) {
+TypedValue* ArrayData::nvGetNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
   return (TypedValue*)&init_null_variant;
 }

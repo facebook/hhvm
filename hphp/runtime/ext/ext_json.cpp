@@ -23,23 +23,23 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(json);
 ///////////////////////////////////////////////////////////////////////////////
-const int64 k_JSON_HEX_TAG       = 1<<0;
-const int64 k_JSON_HEX_AMP       = 1<<1;
-const int64 k_JSON_HEX_APOS      = 1<<2;
-const int64 k_JSON_HEX_QUOT      = 1<<3;
-const int64 k_JSON_FORCE_OBJECT  = 1<<4;
-const int64 k_JSON_NUMERIC_CHECK = 1<<5;
-const int64 k_JSON_UNESCAPED_SLASHES = 1<<6;
-const int64 k_JSON_PRETTY_PRINT  = 1<<7;
+const int64_t k_JSON_HEX_TAG       = 1<<0;
+const int64_t k_JSON_HEX_AMP       = 1<<1;
+const int64_t k_JSON_HEX_APOS      = 1<<2;
+const int64_t k_JSON_HEX_QUOT      = 1<<3;
+const int64_t k_JSON_FORCE_OBJECT  = 1<<4;
+const int64_t k_JSON_NUMERIC_CHECK = 1<<5;
+const int64_t k_JSON_UNESCAPED_SLASHES = 1<<6;
+const int64_t k_JSON_PRETTY_PRINT  = 1<<7;
 // intentionally higher so when PHP adds more options we're fine
-const int64 k_JSON_FB_LOOSE      = 1<<20;
-const int64 k_JSON_FB_UNLIMITED  = 1<<21;
-const int64 k_JSON_FB_EXTRA_ESCAPES = 1<<22;
+const int64_t k_JSON_FB_LOOSE      = 1<<20;
+const int64_t k_JSON_FB_UNLIMITED  = 1<<21;
+const int64_t k_JSON_FB_EXTRA_ESCAPES = 1<<22;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
-  int64 json_options = options.toInt64();
+  int64_t json_options = options.toInt64();
   if (options.isBoolean() && options.toBooleanVal()) {
     json_options = k_JSON_FB_LOOSE;
   }
@@ -54,7 +54,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
     return null;
   }
 
-  int64 json_options = options.toInt64();
+  int64_t json_options = options.toInt64();
   if (options.isBoolean() && options.toBooleanVal()) {
     json_options = k_JSON_FB_LOOSE;
   }
@@ -72,7 +72,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
     return false;
   }
 
-  int64 p;
+  int64_t p;
   double d;
   DataType type = json->isNumericWithVal(p, d, 0);
   if (type == KindOfInt64) {

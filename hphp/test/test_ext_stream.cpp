@@ -306,7 +306,7 @@ bool TestExtStream::test_stream_wrapper_register() {
 }
 
 bool TestExtStream::test_stream_wrapper_restore() {
-  int64 count = f_count(f_stream_get_wrappers());
+  int64_t count = f_count(f_stream_get_wrappers());
 
   VS(f_stream_wrapper_unregister("http"), true);
   VS(f_count(f_stream_get_wrappers()), count - 1);

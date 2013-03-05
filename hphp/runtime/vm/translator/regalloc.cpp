@@ -74,7 +74,7 @@ RegAlloc::freeRegInfo(RegInfo *r) {
  */
 RegInfo*
 RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
-                bool needsFill, int64 immVal, PhysReg target) {
+                bool needsFill, int64_t immVal, PhysReg target) {
   RegInfo   *retval = nullptr;
   RegContent cont   = RegContent(loc, immVal);
 
@@ -180,7 +180,7 @@ RegAlloc::allocInputReg(const DynLocation& dl, PhysReg target) {
 
   const Location& loc = dl.location;
 
-  int64 litVal = 0;
+  int64_t litVal = 0;
   if (loc.isLiteral()) {
     litVal = rtt.valueGeneric();
   }
@@ -709,7 +709,7 @@ void RegAlloc::stateTransition(RegInfo* r, RegInfo::State to) {
 }
 
 PhysReg
-RegAlloc::getImmReg(int64 immVal, bool allowAllocate /* = true */) {
+RegAlloc::getImmReg(int64_t immVal, bool allowAllocate /* = true */) {
   DataType       type    = KindOfInt64;
   RegInfo::State state   = RegInfo::CLEAN;
   RegInfo       *freeReg = nullptr;

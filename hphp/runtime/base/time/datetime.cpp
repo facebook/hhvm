@@ -220,11 +220,11 @@ DateTime::DateTime() : m_timestamp(-1), m_timestampSet(false) {
   setTimezone(TimeZone::Current());
 }
 
-DateTime::DateTime(int64 timestamp, bool utc /* = false */) {
+DateTime::DateTime(int64_t timestamp, bool utc /* = false */) {
   fromTimeStamp(timestamp, utc);
 }
 
-void DateTime::fromTimeStamp(int64 timestamp, bool utc /* = false */) {
+void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   m_timestamp = timestamp;
   m_timestampSet = true;
 
@@ -443,7 +443,7 @@ void DateTime::toTm(struct tm &ta) const {
   }
 }
 
-int64 DateTime::toTimeStamp(bool &err) const {
+int64_t DateTime::toTimeStamp(bool &err) const {
   err = false;
   if (!m_timestampSet) {
     int error;
@@ -457,7 +457,7 @@ int64 DateTime::toTimeStamp(bool &err) const {
   return m_timestamp;
 }
 
-int64 DateTime::toInteger(char format) const {
+int64_t DateTime::toInteger(char format) const {
   bool error;
   switch (format) {
   case 'd':

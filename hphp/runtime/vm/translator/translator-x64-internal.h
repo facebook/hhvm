@@ -266,7 +266,7 @@ extern __thread JmpHitMap* tl_unlikelyHits;
 extern __thread JmpHitMap* tl_jccHits;
 
 template<Trace::Module mod>
-static void recordJmpProfile(litstr key, int64 take) {
+static void recordJmpProfile(litstr key, int64_t take) {
   JmpHitMap& map = mod == Trace::unlikely ? *tl_unlikelyHits : *tl_jccHits;
   JmpHitRate& r = map[key];
   r.key = key;

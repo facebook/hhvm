@@ -36,10 +36,10 @@ Variant VariableUnserializer::unserializeKey() {
   return v;
 }
 
-int64 VariableUnserializer::readInt() {
+int64_t VariableUnserializer::readInt() {
   check();
   char *newBuf;
-  int64 r = strtoll(m_buf, &newBuf, 10);
+  int64_t r = strtoll(m_buf, &newBuf, 10);
   m_buf = newBuf;
   return r;
 }

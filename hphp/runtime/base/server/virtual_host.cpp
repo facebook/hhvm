@@ -44,7 +44,7 @@ const VirtualHost *VirtualHost::GetCurrent() {
   return ret;
 }
 
-int64 VirtualHost::GetMaxPostSize() {
+int64_t VirtualHost::GetMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
   if (vh->m_runtimeOption.maxPostSize != -1) {
@@ -53,7 +53,7 @@ int64 VirtualHost::GetMaxPostSize() {
   return RuntimeOption::MaxPostSize;
 }
 
-int64 VirtualHost::GetUploadMaxFileSize() {
+int64_t VirtualHost::GetUploadMaxFileSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
   if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
@@ -108,10 +108,10 @@ void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
 void VirtualHost::initRuntimeOption(Hdf overwrite) {
   int requestTimeoutSeconds =
     overwrite["Server.RequestTimeoutSeconds"].getInt32(-1);
-  int64 maxPostSize =
+  int64_t maxPostSize =
     overwrite["Server.MaxPostSize"].getInt32(-1);
   if (maxPostSize != -1) maxPostSize *= (1LL << 20);
-  int64 uploadMaxFileSize =
+  int64_t uploadMaxFileSize =
     overwrite["Server.Upload.UploadMaxFileSize"].getInt32(-1);
   if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
   overwrite["Server.AllowedDirectories"].

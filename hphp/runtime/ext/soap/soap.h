@@ -85,10 +85,10 @@ private:
   typedef StringTosdlCacheBucketPtrMap sdlCache;
 
 public:
-  int64 m_cache;
+  int64_t m_cache;
 
 private:
-  int64 m_cache_ttl;
+  int64_t m_cache_ttl;
   sdlCache m_mem_cache; // URL => sdl
 
 public:

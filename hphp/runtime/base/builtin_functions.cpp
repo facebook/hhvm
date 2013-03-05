@@ -1003,7 +1003,7 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
 bool empty(CVarRef v, bool    offset) {
   return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, int64   offset) {
+bool empty(CVarRef v, int64_t   offset) {
   Variant::TypedValueAccessor tva = v.getTypedAccessor();
   if (LIKELY(Variant::GetAccessorType(tva) == KindOfArray)) {
     return empty(Variant::GetArrayData(tva)->get(offset));
@@ -1054,15 +1054,15 @@ bool empty(CVarRef v, CVarRef offset) {
       return empty(v.rvalAt(offset));
     }
   } else if (Variant::IsString(tva)) {
-    uint64 pos = offset.toInt64();
-    if (pos >= (uint64)Variant::GetStringData(tva)->size()) {
+    uint64_t pos = offset.toInt64();
+    if (pos >= (uint64_t)Variant::GetStringData(tva)->size()) {
       return true;
     }
   }
   return empty(v.rvalAt(offset));
 }
 
-bool isset(CArrRef v, int64 offset) {
+bool isset(CArrRef v, int64_t offset) {
   return isset(v.rvalAtRef(offset));
 }
 bool isset(CArrRef v, CArrRef offset) {
@@ -1084,7 +1084,7 @@ bool isset(CArrRef v, CVarRef offset) {
 bool isset(CVarRef v, bool    offset) {
   return isset(v, VarNR(offset));
 }
-bool isset(CVarRef v, int64   offset) {
+bool isset(CVarRef v, int64_t   offset) {
   Variant::TypedValueAccessor tva = v.getTypedAccessor();
   if (LIKELY(Variant::GetAccessorType(tva) == KindOfArray)) {
     return isset(Variant::GetArrayData(tva)->get(offset));
@@ -1099,7 +1099,7 @@ bool isset(CVarRef v, int64   offset) {
     }
   }
   if (Variant::IsString(tva)) {
-    return (uint64)offset < (uint64)Variant::GetStringData(tva)->size();
+    return (uint64_t)offset < (uint64_t)Variant::GetStringData(tva)->size();
   }
   return false;
 }
@@ -1127,8 +1127,8 @@ bool isset(CVarRef v, CVarRef offset) {
     }
   }
   if (Variant::IsString(tva)) {
-    uint64 pos = offset.toInt64();
-    return pos < (uint64)Variant::GetStringData(tva)->size();
+    uint64_t pos = offset.toInt64();
+    return pos < (uint64_t)Variant::GetStringData(tva)->size();
   }
   return false;
 }
@@ -1548,13 +1548,13 @@ String AutoloadHandler::getSignature(CVarRef handler) {
     Variant first = handler.getArrayData()->get(int64_t(0));
     if (first.isObject()) {
       // Add the object address as part of the signature
-      int64 data = (int64)first.getObjectData();
+      int64_t data = (int64_t)first.getObjectData();
       lName += String((const char *)&data, sizeof(data), CopyString);
     }
   } else if (handler.isObject()) {
     // "lName" will just be "classname::__invoke",
     // add object address to differentiate the signature
-    int64 data = (int64)handler.getObjectData();
+    int64_t data = (int64_t)handler.getObjectData();
     lName += String((const char*)&data, sizeof(data), CopyString);
   }
   return lName;

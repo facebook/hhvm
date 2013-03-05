@@ -45,103 +45,103 @@ IMPLEMENT_DEFAULT_EXTENSION(PDO);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO constants
 
-const int64 q_PDO$$PARAM_BOOL               = PDO_PARAM_BOOL;
-const int64 q_PDO$$PARAM_NULL               = PDO_PARAM_NULL;
-const int64 q_PDO$$PARAM_INT                = PDO_PARAM_INT;
-const int64 q_PDO$$PARAM_STR                = PDO_PARAM_STR;
-const int64 q_PDO$$PARAM_LOB                = PDO_PARAM_LOB;
-const int64 q_PDO$$PARAM_STMT               = PDO_PARAM_STMT;
-const int64 q_PDO$$PARAM_INPUT_OUTPUT       = PDO_PARAM_INPUT_OUTPUT;
+const int64_t q_PDO$$PARAM_BOOL               = PDO_PARAM_BOOL;
+const int64_t q_PDO$$PARAM_NULL               = PDO_PARAM_NULL;
+const int64_t q_PDO$$PARAM_INT                = PDO_PARAM_INT;
+const int64_t q_PDO$$PARAM_STR                = PDO_PARAM_STR;
+const int64_t q_PDO$$PARAM_LOB                = PDO_PARAM_LOB;
+const int64_t q_PDO$$PARAM_STMT               = PDO_PARAM_STMT;
+const int64_t q_PDO$$PARAM_INPUT_OUTPUT       = PDO_PARAM_INPUT_OUTPUT;
 
-const int64 q_PDO$$PARAM_EVT_ALLOC          = PDO_PARAM_EVT_ALLOC;
-const int64 q_PDO$$PARAM_EVT_FREE           = PDO_PARAM_EVT_FREE;
-const int64 q_PDO$$PARAM_EVT_EXEC_PRE       = PDO_PARAM_EVT_EXEC_PRE;
-const int64 q_PDO$$PARAM_EVT_EXEC_POST      = PDO_PARAM_EVT_EXEC_POST;
-const int64 q_PDO$$PARAM_EVT_FETCH_PRE      = PDO_PARAM_EVT_FETCH_PRE;
-const int64 q_PDO$$PARAM_EVT_FETCH_POST     = PDO_PARAM_EVT_FETCH_POST;
-const int64 q_PDO$$PARAM_EVT_NORMALIZE      = PDO_PARAM_EVT_NORMALIZE;
+const int64_t q_PDO$$PARAM_EVT_ALLOC          = PDO_PARAM_EVT_ALLOC;
+const int64_t q_PDO$$PARAM_EVT_FREE           = PDO_PARAM_EVT_FREE;
+const int64_t q_PDO$$PARAM_EVT_EXEC_PRE       = PDO_PARAM_EVT_EXEC_PRE;
+const int64_t q_PDO$$PARAM_EVT_EXEC_POST      = PDO_PARAM_EVT_EXEC_POST;
+const int64_t q_PDO$$PARAM_EVT_FETCH_PRE      = PDO_PARAM_EVT_FETCH_PRE;
+const int64_t q_PDO$$PARAM_EVT_FETCH_POST     = PDO_PARAM_EVT_FETCH_POST;
+const int64_t q_PDO$$PARAM_EVT_NORMALIZE      = PDO_PARAM_EVT_NORMALIZE;
 
-const int64 q_PDO$$FETCH_USE_DEFAULT        = PDO_FETCH_USE_DEFAULT;
-const int64 q_PDO$$FETCH_LAZY               = PDO_FETCH_LAZY;
-const int64 q_PDO$$FETCH_ASSOC              = PDO_FETCH_ASSOC;
-const int64 q_PDO$$FETCH_NUM                = PDO_FETCH_NUM;
-const int64 q_PDO$$FETCH_BOTH               = PDO_FETCH_BOTH;
-const int64 q_PDO$$FETCH_OBJ                = PDO_FETCH_OBJ;
-const int64 q_PDO$$FETCH_BOUND              = PDO_FETCH_BOUND;
-const int64 q_PDO$$FETCH_COLUMN             = PDO_FETCH_COLUMN;
-const int64 q_PDO$$FETCH_CLASS              = PDO_FETCH_CLASS;
-const int64 q_PDO$$FETCH_INTO               = PDO_FETCH_INTO;
-const int64 q_PDO$$FETCH_FUNC               = PDO_FETCH_FUNC;
-const int64 q_PDO$$FETCH_GROUP              = PDO_FETCH_GROUP;
-const int64 q_PDO$$FETCH_UNIQUE             = PDO_FETCH_UNIQUE;
-const int64 q_PDO$$FETCH_KEY_PAIR           = PDO_FETCH_KEY_PAIR;
-const int64 q_PDO$$FETCH_CLASSTYPE          = PDO_FETCH_CLASSTYPE;
-const int64 q_PDO$$FETCH_SERIALIZE          = PDO_FETCH_SERIALIZE;
-const int64 q_PDO$$FETCH_PROPS_LATE         = PDO_FETCH_PROPS_LATE;
-const int64 q_PDO$$FETCH_NAMED              = PDO_FETCH_NAMED;
+const int64_t q_PDO$$FETCH_USE_DEFAULT        = PDO_FETCH_USE_DEFAULT;
+const int64_t q_PDO$$FETCH_LAZY               = PDO_FETCH_LAZY;
+const int64_t q_PDO$$FETCH_ASSOC              = PDO_FETCH_ASSOC;
+const int64_t q_PDO$$FETCH_NUM                = PDO_FETCH_NUM;
+const int64_t q_PDO$$FETCH_BOTH               = PDO_FETCH_BOTH;
+const int64_t q_PDO$$FETCH_OBJ                = PDO_FETCH_OBJ;
+const int64_t q_PDO$$FETCH_BOUND              = PDO_FETCH_BOUND;
+const int64_t q_PDO$$FETCH_COLUMN             = PDO_FETCH_COLUMN;
+const int64_t q_PDO$$FETCH_CLASS              = PDO_FETCH_CLASS;
+const int64_t q_PDO$$FETCH_INTO               = PDO_FETCH_INTO;
+const int64_t q_PDO$$FETCH_FUNC               = PDO_FETCH_FUNC;
+const int64_t q_PDO$$FETCH_GROUP              = PDO_FETCH_GROUP;
+const int64_t q_PDO$$FETCH_UNIQUE             = PDO_FETCH_UNIQUE;
+const int64_t q_PDO$$FETCH_KEY_PAIR           = PDO_FETCH_KEY_PAIR;
+const int64_t q_PDO$$FETCH_CLASSTYPE          = PDO_FETCH_CLASSTYPE;
+const int64_t q_PDO$$FETCH_SERIALIZE          = PDO_FETCH_SERIALIZE;
+const int64_t q_PDO$$FETCH_PROPS_LATE         = PDO_FETCH_PROPS_LATE;
+const int64_t q_PDO$$FETCH_NAMED              = PDO_FETCH_NAMED;
 
-const int64 q_PDO$$ATTR_AUTOCOMMIT          = PDO_ATTR_AUTOCOMMIT;
-const int64 q_PDO$$ATTR_PREFETCH            = PDO_ATTR_PREFETCH;
-const int64 q_PDO$$ATTR_TIMEOUT             = PDO_ATTR_TIMEOUT;
-const int64 q_PDO$$ATTR_ERRMODE             = PDO_ATTR_ERRMODE;
-const int64 q_PDO$$ATTR_SERVER_VERSION      = PDO_ATTR_SERVER_VERSION;
-const int64 q_PDO$$ATTR_CLIENT_VERSION      = PDO_ATTR_CLIENT_VERSION;
-const int64 q_PDO$$ATTR_SERVER_INFO         = PDO_ATTR_SERVER_INFO;
-const int64 q_PDO$$ATTR_CONNECTION_STATUS   = PDO_ATTR_CONNECTION_STATUS;
-const int64 q_PDO$$ATTR_CASE                = PDO_ATTR_CASE;
-const int64 q_PDO$$ATTR_CURSOR_NAME         = PDO_ATTR_CURSOR_NAME;
-const int64 q_PDO$$ATTR_CURSOR              = PDO_ATTR_CURSOR;
-const int64 q_PDO$$ATTR_ORACLE_NULLS        = PDO_ATTR_ORACLE_NULLS;
-const int64 q_PDO$$ATTR_PERSISTENT          = PDO_ATTR_PERSISTENT;
-const int64 q_PDO$$ATTR_STATEMENT_CLASS     = PDO_ATTR_STATEMENT_CLASS;
-const int64 q_PDO$$ATTR_FETCH_TABLE_NAMES   = PDO_ATTR_FETCH_TABLE_NAMES;
-const int64 q_PDO$$ATTR_FETCH_CATALOG_NAMES = PDO_ATTR_FETCH_CATALOG_NAMES;
-const int64 q_PDO$$ATTR_DRIVER_NAME         = PDO_ATTR_DRIVER_NAME;
-const int64 q_PDO$$ATTR_STRINGIFY_FETCHES   = PDO_ATTR_STRINGIFY_FETCHES;
-const int64 q_PDO$$ATTR_MAX_COLUMN_LEN      = PDO_ATTR_MAX_COLUMN_LEN;
-const int64 q_PDO$$ATTR_EMULATE_PREPARES    = PDO_ATTR_EMULATE_PREPARES;
-const int64 q_PDO$$ATTR_DEFAULT_FETCH_MODE  = PDO_ATTR_DEFAULT_FETCH_MODE;
+const int64_t q_PDO$$ATTR_AUTOCOMMIT          = PDO_ATTR_AUTOCOMMIT;
+const int64_t q_PDO$$ATTR_PREFETCH            = PDO_ATTR_PREFETCH;
+const int64_t q_PDO$$ATTR_TIMEOUT             = PDO_ATTR_TIMEOUT;
+const int64_t q_PDO$$ATTR_ERRMODE             = PDO_ATTR_ERRMODE;
+const int64_t q_PDO$$ATTR_SERVER_VERSION      = PDO_ATTR_SERVER_VERSION;
+const int64_t q_PDO$$ATTR_CLIENT_VERSION      = PDO_ATTR_CLIENT_VERSION;
+const int64_t q_PDO$$ATTR_SERVER_INFO         = PDO_ATTR_SERVER_INFO;
+const int64_t q_PDO$$ATTR_CONNECTION_STATUS   = PDO_ATTR_CONNECTION_STATUS;
+const int64_t q_PDO$$ATTR_CASE                = PDO_ATTR_CASE;
+const int64_t q_PDO$$ATTR_CURSOR_NAME         = PDO_ATTR_CURSOR_NAME;
+const int64_t q_PDO$$ATTR_CURSOR              = PDO_ATTR_CURSOR;
+const int64_t q_PDO$$ATTR_ORACLE_NULLS        = PDO_ATTR_ORACLE_NULLS;
+const int64_t q_PDO$$ATTR_PERSISTENT          = PDO_ATTR_PERSISTENT;
+const int64_t q_PDO$$ATTR_STATEMENT_CLASS     = PDO_ATTR_STATEMENT_CLASS;
+const int64_t q_PDO$$ATTR_FETCH_TABLE_NAMES   = PDO_ATTR_FETCH_TABLE_NAMES;
+const int64_t q_PDO$$ATTR_FETCH_CATALOG_NAMES = PDO_ATTR_FETCH_CATALOG_NAMES;
+const int64_t q_PDO$$ATTR_DRIVER_NAME         = PDO_ATTR_DRIVER_NAME;
+const int64_t q_PDO$$ATTR_STRINGIFY_FETCHES   = PDO_ATTR_STRINGIFY_FETCHES;
+const int64_t q_PDO$$ATTR_MAX_COLUMN_LEN      = PDO_ATTR_MAX_COLUMN_LEN;
+const int64_t q_PDO$$ATTR_EMULATE_PREPARES    = PDO_ATTR_EMULATE_PREPARES;
+const int64_t q_PDO$$ATTR_DEFAULT_FETCH_MODE  = PDO_ATTR_DEFAULT_FETCH_MODE;
 
-const int64 q_PDO$$ERRMODE_SILENT           = PDO_ERRMODE_SILENT;
-const int64 q_PDO$$ERRMODE_WARNING          = PDO_ERRMODE_WARNING;
-const int64 q_PDO$$ERRMODE_EXCEPTION        = PDO_ERRMODE_EXCEPTION;
+const int64_t q_PDO$$ERRMODE_SILENT           = PDO_ERRMODE_SILENT;
+const int64_t q_PDO$$ERRMODE_WARNING          = PDO_ERRMODE_WARNING;
+const int64_t q_PDO$$ERRMODE_EXCEPTION        = PDO_ERRMODE_EXCEPTION;
 
-const int64 q_PDO$$CASE_NATURAL             = PDO_CASE_NATURAL;
-const int64 q_PDO$$CASE_LOWER               = PDO_CASE_LOWER;
-const int64 q_PDO$$CASE_UPPER               = PDO_CASE_UPPER;
+const int64_t q_PDO$$CASE_NATURAL             = PDO_CASE_NATURAL;
+const int64_t q_PDO$$CASE_LOWER               = PDO_CASE_LOWER;
+const int64_t q_PDO$$CASE_UPPER               = PDO_CASE_UPPER;
 
-const int64 q_PDO$$NULL_NATURAL             = PDO_NULL_NATURAL;
-const int64 q_PDO$$NULL_EMPTY_STRING        = PDO_NULL_EMPTY_STRING;
-const int64 q_PDO$$NULL_TO_STRING           = PDO_NULL_TO_STRING;
+const int64_t q_PDO$$NULL_NATURAL             = PDO_NULL_NATURAL;
+const int64_t q_PDO$$NULL_EMPTY_STRING        = PDO_NULL_EMPTY_STRING;
+const int64_t q_PDO$$NULL_TO_STRING           = PDO_NULL_TO_STRING;
 
 const StaticString q_PDO$$ERR_NONE(LITSTR_INIT(PDO_ERR_NONE));
 
-const int64 q_PDO$$FETCH_ORI_NEXT           = PDO_FETCH_ORI_NEXT;
-const int64 q_PDO$$FETCH_ORI_PRIOR          = PDO_FETCH_ORI_PRIOR;
-const int64 q_PDO$$FETCH_ORI_FIRST          = PDO_FETCH_ORI_FIRST;
-const int64 q_PDO$$FETCH_ORI_LAST           = PDO_FETCH_ORI_LAST;
-const int64 q_PDO$$FETCH_ORI_ABS            = PDO_FETCH_ORI_ABS;
-const int64 q_PDO$$FETCH_ORI_REL            = PDO_FETCH_ORI_REL;
+const int64_t q_PDO$$FETCH_ORI_NEXT           = PDO_FETCH_ORI_NEXT;
+const int64_t q_PDO$$FETCH_ORI_PRIOR          = PDO_FETCH_ORI_PRIOR;
+const int64_t q_PDO$$FETCH_ORI_FIRST          = PDO_FETCH_ORI_FIRST;
+const int64_t q_PDO$$FETCH_ORI_LAST           = PDO_FETCH_ORI_LAST;
+const int64_t q_PDO$$FETCH_ORI_ABS            = PDO_FETCH_ORI_ABS;
+const int64_t q_PDO$$FETCH_ORI_REL            = PDO_FETCH_ORI_REL;
 
-const int64 q_PDO$$CURSOR_FWDONLY           = PDO_CURSOR_FWDONLY;
-const int64 q_PDO$$CURSOR_SCROLL            = PDO_CURSOR_SCROLL;
+const int64_t q_PDO$$CURSOR_FWDONLY           = PDO_CURSOR_FWDONLY;
+const int64_t q_PDO$$CURSOR_SCROLL            = PDO_CURSOR_SCROLL;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_PDO$$MYSQL_ATTR_USE_BUFFERED_QUERY =
+const int64_t q_PDO$$MYSQL_ATTR_USE_BUFFERED_QUERY =
   PDO_MYSQL_ATTR_USE_BUFFERED_QUERY;
-const int64 q_PDO$$MYSQL_ATTR_LOCAL_INFILE = PDO_MYSQL_ATTR_LOCAL_INFILE;
-const int64 q_PDO$$MYSQL_ATTR_MAX_BUFFER_SIZE =
+const int64_t q_PDO$$MYSQL_ATTR_LOCAL_INFILE = PDO_MYSQL_ATTR_LOCAL_INFILE;
+const int64_t q_PDO$$MYSQL_ATTR_MAX_BUFFER_SIZE =
   PDO_MYSQL_ATTR_MAX_BUFFER_SIZE;
-const int64 q_PDO$$MYSQL_ATTR_INIT_COMMAND = PDO_MYSQL_ATTR_INIT_COMMAND;
-const int64 q_PDO$$MYSQL_ATTR_READ_DEFAULT_FILE =
+const int64_t q_PDO$$MYSQL_ATTR_INIT_COMMAND = PDO_MYSQL_ATTR_INIT_COMMAND;
+const int64_t q_PDO$$MYSQL_ATTR_READ_DEFAULT_FILE =
   PDO_MYSQL_ATTR_READ_DEFAULT_FILE;
-const int64 q_PDO$$MYSQL_ATTR_READ_DEFAULT_GROUP =
+const int64_t q_PDO$$MYSQL_ATTR_READ_DEFAULT_GROUP =
   PDO_MYSQL_ATTR_READ_DEFAULT_GROUP;
-const int64 q_PDO$$MYSQL_ATTR_COMPRESS     = PDO_MYSQL_ATTR_COMPRESS;
-const int64 q_PDO$$MYSQL_ATTR_DIRECT_QUERY = PDO_MYSQL_ATTR_DIRECT_QUERY;
-const int64 q_PDO$$MYSQL_ATTR_FOUND_ROWS   = PDO_MYSQL_ATTR_FOUND_ROWS;
-const int64 q_PDO$$MYSQL_ATTR_IGNORE_SPACE = PDO_MYSQL_ATTR_IGNORE_SPACE;
+const int64_t q_PDO$$MYSQL_ATTR_COMPRESS     = PDO_MYSQL_ATTR_COMPRESS;
+const int64_t q_PDO$$MYSQL_ATTR_DIRECT_QUERY = PDO_MYSQL_ATTR_DIRECT_QUERY;
+const int64_t q_PDO$$MYSQL_ATTR_FOUND_ROWS   = PDO_MYSQL_ATTR_FOUND_ROWS;
+const int64_t q_PDO$$MYSQL_ATTR_IGNORE_SPACE = PDO_MYSQL_ATTR_IGNORE_SPACE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension functions
@@ -507,7 +507,7 @@ static void pdo_handle_error(sp_PDOConnection dbh, sp_PDOStatement stmt) {
   /* hash sqlstate to error messages */
   const char *msg = s_err_hash.description(*pdo_err);
 
-  int64 native_code = 0;
+  int64_t native_code = 0;
   String supp;
   Array info;
   if (dbh->support(PDOConnection::MethodFetchErr)) {
@@ -539,8 +539,8 @@ static void pdo_handle_error(sp_PDOConnection dbh, sp_PDOStatement stmt) {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers for PDO class
 
-static inline int64 pdo_attr_lval(CArrRef options, PDOAttributeType name,
-                                  int64 defval) {
+static inline int64_t pdo_attr_lval(CArrRef options, PDOAttributeType name,
+                                  int64_t defval) {
   if (options.exists(name)) {
     return options[name].toInt64();
   }
@@ -666,7 +666,7 @@ static bool pdo_stmt_describe_columns(sp_PDOStatement stmt) {
   return true;
 }
 
-static bool pdo_stmt_verify_mode(sp_PDOStatement stmt, int64 mode,
+static bool pdo_stmt_verify_mode(sp_PDOStatement stmt, int64_t mode,
                                  bool fetch_all) {
   int flags = mode & PDO_FETCH_FLAGS;
   mode = mode & ~PDO_FETCH_FLAGS;
@@ -748,7 +748,7 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   return true; /* no ctor no args is also ok */
 }
 
-static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64 mode,
+static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mode,
                                     CArrRef _argv) {
   _argc = _argv.size() + 1;
 
@@ -1139,7 +1139,7 @@ bool c_PDO::t_rollback() {
   return false;
 }
 
-bool c_PDO::t_setattribute(int64 attribute, CVarRef value) {
+bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
   assert(m_dbh->driver);
 
 #define PDO_LONG_PARAM_CHECK                                           \
@@ -1254,7 +1254,7 @@ bool c_PDO::t_setattribute(int64 attribute, CVarRef value) {
   return false;
 }
 
-Variant c_PDO::t_getattribute(int64 attribute) {
+Variant c_PDO::t_getattribute(int64_t attribute) {
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1265,13 +1265,13 @@ Variant c_PDO::t_getattribute(int64 attribute) {
     return (bool)m_dbh->is_persistent;
 
   case PDO_ATTR_CASE:
-    return (int64)m_dbh->desired_case;
+    return (int64_t)m_dbh->desired_case;
 
   case PDO_ATTR_ORACLE_NULLS:
-    return (int64)m_dbh->oracle_nulls;
+    return (int64_t)m_dbh->oracle_nulls;
 
   case PDO_ATTR_ERRMODE:
-    return (int64)m_dbh->error_mode;
+    return (int64_t)m_dbh->error_mode;
 
   case PDO_ATTR_DRIVER_NAME:
     return String(m_dbh->driver->getName());
@@ -1285,7 +1285,7 @@ Variant c_PDO::t_getattribute(int64 attribute) {
     return ret;
   }
   case PDO_ATTR_DEFAULT_FETCH_MODE:
-    return (int64)m_dbh->default_fetch_type;
+    return (int64_t)m_dbh->default_fetch_type;
   }
 
   if (!m_dbh->support(PDOConnection::MethodGetAttribute)) {
@@ -1318,7 +1318,7 @@ Variant c_PDO::t_exec(CStrRef query) {
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
 
-  int64 ret = m_dbh->doer(query);
+  int64_t ret = m_dbh->doer(query);
   if (ret == -1) {
     PDO_HANDLE_DBH_ERR(m_dbh);
     return false;
@@ -1450,7 +1450,7 @@ Variant c_PDO::t_query(CStrRef sql) {
   return false;
 }
 
-Variant c_PDO::t_quote(CStrRef str, int64 paramtype /* = q_PDO$$PARAM_STR */) {
+Variant c_PDO::t_quote(CStrRef str, int64_t paramtype /* = q_PDO$$PARAM_STR */) {
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1996,8 +1996,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
   return true;
 }
 
-static int register_bound_param(CVarRef paramno, VRefParam param, int64 type,
-                                int64 max_value_len, CVarRef driver_params,
+static int register_bound_param(CVarRef paramno, VRefParam param, int64_t type,
+                                int64_t max_value_len, CVarRef driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
   SmartObject<PDOBoundParam> p(new PDOBoundParam);
   // need to make sure this is NULL, in case a fatal errors occurs before its set
@@ -2625,7 +2625,7 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
         param->name = iter.first();
         param->paramno = -1;
       } else {
-        int64 num_index = iter.first().toInt64();
+        int64_t num_index = iter.first().toInt64();
         /* we're okay to be zero based here */
         if (num_index < 0) {
           pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY093", NULL);
@@ -2682,9 +2682,9 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
   return false;
 }
 
-Variant c_PDOStatement::t_fetch(int64 how /* = 0 */,
-                                int64 orientation /* = q_PDO$$FETCH_ORI_NEXT */,
-                                int64 offset /* = 0 */) {
+Variant c_PDOStatement::t_fetch(int64_t how /* = 0 */,
+                                int64_t orientation /* = q_PDO$$FETCH_ORI_NEXT */,
+                                int64_t offset /* = 0 */) {
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, how, false)) {
     return false;
@@ -2743,7 +2743,7 @@ Variant c_PDOStatement::t_fetchobject(CStrRef class_name /* = null_string */,
   return ret;
 }
 
-Variant c_PDOStatement::t_fetchcolumn(int64 column_numner /* = 0 */) {
+Variant c_PDOStatement::t_fetchcolumn(int64_t column_numner /* = 0 */) {
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!do_fetch_common(m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
     PDO_HANDLE_STMT_ERR(m_stmt);
@@ -2754,7 +2754,7 @@ Variant c_PDOStatement::t_fetchcolumn(int64 column_numner /* = 0 */) {
   return ret;
 }
 
-Variant c_PDOStatement::t_fetchall(int64 how /* = 0 */,
+Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
                                    CVarRef class_name /* = null */,
                                    CVarRef ctor_args /* = null */) {
   if (!pdo_stmt_verify_mode(m_stmt, how, true)) {
@@ -2878,27 +2878,27 @@ Variant c_PDOStatement::t_fetchall(int64 how /* = 0 */,
 }
 
 bool c_PDOStatement::t_bindvalue(CVarRef paramno, CVarRef param,
-                                 int64 type /* = q_PDO$$PARAM_STR */) {
+                                 int64_t type /* = q_PDO$$PARAM_STR */) {
   return register_bound_param(paramno, param, type, 0, null, m_stmt, true);
 }
 
 bool c_PDOStatement::t_bindparam(CVarRef paramno, VRefParam param,
-                                 int64 type /* = q_PDO$$PARAM_STR */,
-                                 int64 max_value_len /* = 0 */,
+                                 int64_t type /* = q_PDO$$PARAM_STR */,
+                                 int64_t max_value_len /* = 0 */,
                                  CVarRef driver_params /*= null */) {
   return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, m_stmt, true);
 }
 
 bool c_PDOStatement::t_bindcolumn(CVarRef paramno, VRefParam param,
-                                  int64 type /* = q_PDO$$PARAM_STR */,
-                                  int64 max_value_len /* = 0 */,
+                                  int64_t type /* = q_PDO$$PARAM_STR */,
+                                  int64_t max_value_len /* = 0 */,
                                   CVarRef driver_params /* = null */) {
   return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, m_stmt, false);
 }
 
-int64 c_PDOStatement::t_rowcount() {
+int64_t c_PDOStatement::t_rowcount() {
   return m_stmt->row_count;
 }
 
@@ -2928,7 +2928,7 @@ Array c_PDOStatement::t_errorinfo() {
   return ret;
 }
 
-Variant c_PDOStatement::t_setattribute(int64 attribute, CVarRef value) {
+Variant c_PDOStatement::t_setattribute(int64_t attribute, CVarRef value) {
   if (!m_stmt->support(PDOStatement::MethodSetAttribute)) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
                          "This driver doesn't support setting attributes");
@@ -2943,7 +2943,7 @@ Variant c_PDOStatement::t_setattribute(int64 attribute, CVarRef value) {
   return false;
 }
 
-Variant c_PDOStatement::t_getattribute(int64 attribute) {
+Variant c_PDOStatement::t_getattribute(int64_t attribute) {
   Variant ret;
   if (!m_stmt->support(PDOStatement::MethodGetAttribute)) {
     if (!generic_stmt_attr_get(m_stmt, ret, attribute)) {
@@ -2973,11 +2973,11 @@ Variant c_PDOStatement::t_getattribute(int64 attribute) {
   return ret;
 }
 
-int64 c_PDOStatement::t_columncount() {
+int64_t c_PDOStatement::t_columncount() {
   return m_stmt->column_count;
 }
 
-Variant c_PDOStatement::t_getcolumnmeta(int64 column) {
+Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
   if (column < 0) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "42P10",
                          "column number must be non-negative");
@@ -3000,16 +3000,16 @@ Variant c_PDOStatement::t_getcolumnmeta(int64 column) {
   /* add stock items */
   PDOColumn *col = m_stmt->columns[column].toObject().getTyped<PDOColumn>();
   ret.set("name", col->name);
-  ret.set("len", (int64)col->maxlen); /* FIXME: unsigned ? */
-  ret.set("precision", (int64)col->precision);
+  ret.set("len", (int64_t)col->maxlen); /* FIXME: unsigned ? */
+  ret.set("precision", (int64_t)col->precision);
   if (col->param_type != PDO_PARAM_ZVAL) {
     // if param_type is PDO_PARAM_ZVAL the driver has to provide correct data
-    ret.set("pdo_type", (int64)col->param_type);
+    ret.set("pdo_type", (int64_t)col->param_type);
   }
   return ret;
 }
 
-bool c_PDOStatement::t_setfetchmode(int _argc, int64 mode,
+bool c_PDOStatement::t_setfetchmode(int _argc, int64_t mode,
                                     CArrRef _argv /* = null_array */) {
   return pdo_stmt_set_fetch_mode(m_stmt, _argc, mode, _argv);
 }

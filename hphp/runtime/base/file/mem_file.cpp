@@ -35,7 +35,7 @@ MemFile::MemFile()
   : File(false), m_data(nullptr), m_len(-1), m_cursor(0), m_malloced(false) {
 }
 
-MemFile::MemFile(const char *data, int64 len)
+MemFile::MemFile(const char *data, int64_t len)
   : File(false), m_data(nullptr), m_len(len), m_cursor(0), m_malloced(true) {
   m_data = (char*)malloc(len + 1);
   if (m_data && len) {
@@ -101,10 +101,10 @@ bool MemFile::closeImpl() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64 MemFile::readImpl(char *buffer, int64 length) {
+int64_t MemFile::readImpl(char *buffer, int64_t length) {
   assert(m_len != -1);
   assert(length > 0);
-  int64 remaining = m_len - m_cursor;
+  int64_t remaining = m_len - m_cursor;
   if (remaining < length) length = remaining;
   if (length > 0) {
     memcpy(buffer, (const void *)(m_data + m_cursor), length);
@@ -118,7 +118,7 @@ int MemFile::getc() {
   return File::getc();
 }
 
-bool MemFile::seek(int64 offset, int whence /* = SEEK_SET */) {
+bool MemFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(m_len != -1);
   if (whence == SEEK_CUR) {
     if (offset > 0 && offset < m_writepos - m_readpos) {
@@ -143,14 +143,14 @@ bool MemFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   return true;
 }
 
-int64 MemFile::tell() {
+int64_t MemFile::tell() {
   assert(m_len != -1);
   return m_position;
 }
 
 bool MemFile::eof() {
   assert(m_len != -1);
-  int64 avail = m_writepos - m_readpos;
+  int64_t avail = m_writepos - m_readpos;
   if (avail > 0) {
     return false;
   }
@@ -166,7 +166,7 @@ bool MemFile::rewind() {
   return true;
 }
 
-int64 MemFile::writeImpl(const char *buffer, int64 length) {
+int64_t MemFile::writeImpl(const char *buffer, int64_t length) {
   throw FatalErrorException((string("cannot write a mem stream: ") +
                              m_name).c_str());
 }

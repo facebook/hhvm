@@ -70,7 +70,7 @@ class LFUTable {
     V val;
     Node *prev;
     Node *next;
-    std::atomic<uint64> hits;
+    std::atomic<uint64_t> hits;
     uint heapIndex;
     bool immortal;
 

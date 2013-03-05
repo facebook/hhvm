@@ -38,7 +38,7 @@ Lease::amOwner() const {
  * DEBUG-only, folks.
  */
 static inline pthread_t gremlinize_threadid(pthread_t tid) {
-  return (pthread_t)(~((int64)tid));
+  return (pthread_t)(~((int64_t)tid));
 }
 
 void Lease::gremlinLock() {
@@ -66,8 +66,8 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   if (amOwner()) {
     return true;
   }
-  int64 expire = m_hintExpire;
-  int64 expireDiff = expire - Timer::GetCurrentTimeMicros();
+  int64_t expire = m_hintExpire;
+  int64_t expireDiff = expire - Timer::GetCurrentTimeMicros();
   if (!blocking && (m_held ||
                     (expireDiff > 0 && m_owner != pthread_self()))) {
     return false;
@@ -103,7 +103,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   return false;
 }
 
-void Lease::drop(int64 hintExpireDelay) {
+void Lease::drop(int64_t hintExpireDelay) {
   assert(amOwner());
   TRACE(4, "thr%lx: dropping lease, called by %p,%p\n",
         pthread_self(), __builtin_return_address(0),

@@ -48,7 +48,7 @@ Array f_magickgetversion() {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetversionnumber() {
+int64_t f_magickgetversionnumber() {
   throw NotImplementedException(__func__);
 }
 
@@ -176,7 +176,7 @@ String f_wandgetexceptionstring(CObjRef wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_wandgetexceptiontype(CObjRef wnd) {
+int64_t f_wandgetexceptiontype(CObjRef wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -224,11 +224,11 @@ String f_drawgetclippath(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetcliprule(CObjRef drw_wnd) {
+int64_t f_drawgetcliprule(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetclipunits(CObjRef drw_wnd) {
+int64_t f_drawgetclipunits(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -240,7 +240,7 @@ String f_drawgetexceptionstring(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetexceptiontype(CObjRef drw_wnd) {
+int64_t f_drawgetexceptiontype(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -256,7 +256,7 @@ double f_drawgetfillopacity(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetfillrule(CObjRef drw_wnd) {
+int64_t f_drawgetfillrule(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -272,11 +272,11 @@ double f_drawgetfontsize(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetfontstretch(CObjRef drw_wnd) {
+int64_t f_drawgetfontstretch(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetfontstyle(CObjRef drw_wnd) {
+int64_t f_drawgetfontstyle(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -284,7 +284,7 @@ double f_drawgetfontweight(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetgravity(CObjRef drw_wnd) {
+int64_t f_drawgetgravity(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -308,11 +308,11 @@ double f_drawgetstrokedashoffset(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetstrokelinecap(CObjRef drw_wnd) {
+int64_t f_drawgetstrokelinecap(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgetstrokelinejoin(CObjRef drw_wnd) {
+int64_t f_drawgetstrokelinejoin(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -328,7 +328,7 @@ double f_drawgetstrokewidth(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgettextalignment(CObjRef drw_wnd) {
+int64_t f_drawgettextalignment(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -336,7 +336,7 @@ bool f_drawgettextantialias(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_drawgettextdecoration(CObjRef drw_wnd) {
+int64_t f_drawgettextdecoration(CObjRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -844,7 +844,7 @@ String f_magickgetexceptionstring(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetexceptiontype(CObjRef mgck_wnd) {
+int64_t f_magickgetexceptiontype(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -888,15 +888,15 @@ double f_magickgetimagecolors(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagecolorspace(CObjRef mgck_wnd) {
+int64_t f_magickgetimagecolorspace(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagecompose(CObjRef mgck_wnd) {
+int64_t f_magickgetimagecompose(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagecompression(CObjRef mgck_wnd) {
+int64_t f_magickgetimagecompression(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -912,7 +912,7 @@ double f_magickgetimagedepth(CObjRef mgck_wnd, int channel_type /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagedispose(CObjRef mgck_wnd) {
+int64_t f_magickgetimagedispose(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -944,11 +944,11 @@ Array f_magickgetimagehistogram(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimageindex(CObjRef mgck_wnd) {
+int64_t f_magickgetimageindex(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimageinterlacescheme(CObjRef mgck_wnd) {
+int64_t f_magickgetimageinterlacescheme(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -976,7 +976,7 @@ Array f_magickgetimageredprimary(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagerenderingintent(CObjRef mgck_wnd) {
+int64_t f_magickgetimagerenderingintent(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -992,19 +992,19 @@ String f_magickgetimagesignature(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagesize(CObjRef mgck_wnd) {
+int64_t f_magickgetimagesize(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagetype(CObjRef mgck_wnd) {
+int64_t f_magickgetimagetype(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimageunits(CObjRef mgck_wnd) {
+int64_t f_magickgetimageunits(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetimagevirtualpixelmethod(CObjRef mgck_wnd) {
+int64_t f_magickgetimagevirtualpixelmethod(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -1020,7 +1020,7 @@ String f_magickgetimagesblob(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_magickgetinterlacescheme(CObjRef mgck_wnd) {
+int64_t f_magickgetinterlacescheme(CObjRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -1564,7 +1564,7 @@ String f_pixelgetexceptionstring(CObjRef pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_pixelgetexceptiontype(CObjRef pxl_wnd) {
+int64_t f_pixelgetexceptiontype(CObjRef pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -1712,7 +1712,7 @@ String f_pixelgetiteratorexceptionstring(CObjRef pxl_iter) {
   throw NotImplementedException(__func__);
 }
 
-int64 f_pixelgetiteratorexceptiontype(CObjRef pxl_iter) {
+int64_t f_pixelgetiteratorexceptiontype(CObjRef pxl_iter) {
   throw NotImplementedException(__func__);
 }
 

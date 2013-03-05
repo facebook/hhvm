@@ -111,7 +111,7 @@ Array CodeCoverage::Report() {
     Array tmp = Array::Create();
     for (int i = 1; i < (int)lines.size(); i++) {
       if (lines[i]) {
-        tmp.set(i, Variant((int64)lines[i]));
+        tmp.set(i, Variant((int64_t)lines[i]));
       }
     }
     ret.set(String(iter->first), Variant(tmp));

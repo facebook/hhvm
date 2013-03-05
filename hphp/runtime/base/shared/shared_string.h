@@ -74,7 +74,7 @@ struct shared_string_eq {
 struct shared_string_hash {
   size_t operator()(const SharedString &s) const {
     // Because pointers and strings are 1-1, can just hash the ptr.
-    return hash_int64((int64)s.get());
+    return hash_int64((int64_t)s.get());
   }
 };
 

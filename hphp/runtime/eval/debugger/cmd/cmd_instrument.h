@@ -49,7 +49,7 @@ private:
     ActionRead,
     ActionWrite,
   };
-  int8 m_type;
+  int8_t m_type;
   bool m_enabled;
 
   InstPointInfoPtrVec *m_instPoints;

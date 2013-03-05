@@ -33,28 +33,28 @@ typedef unsigned char *(*xmlreader_read_one_char_t)(xmlTextReaderPtr reader, con
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64 q_XMLReader$$NONE;
-extern const int64 q_XMLReader$$ELEMENT;
-extern const int64 q_XMLReader$$ATTRIBUTE;
-extern const int64 q_XMLReader$$TEXT;
-extern const int64 q_XMLReader$$CDATA;
-extern const int64 q_XMLReader$$ENTITY_REF;
-extern const int64 q_XMLReader$$ENTITY;
-extern const int64 q_XMLReader$$PI;
-extern const int64 q_XMLReader$$COMMENT;
-extern const int64 q_XMLReader$$DOC;
-extern const int64 q_XMLReader$$DOC_TYPE;
-extern const int64 q_XMLReader$$DOC_FRAGMENT;
-extern const int64 q_XMLReader$$NOTATION;
-extern const int64 q_XMLReader$$WHITESPACE;
-extern const int64 q_XMLReader$$SIGNIFICANT_WHITESPACE;
-extern const int64 q_XMLReader$$END_ELEMENT;
-extern const int64 q_XMLReader$$END_ENTITY;
-extern const int64 q_XMLReader$$XML_DECLARATION;
-extern const int64 q_XMLReader$$LOADDTD;
-extern const int64 q_XMLReader$$DEFAULTATTRS;
-extern const int64 q_XMLReader$$VALIDATE;
-extern const int64 q_XMLReader$$SUBST_ENTITIES;
+extern const int64_t q_XMLReader$$NONE;
+extern const int64_t q_XMLReader$$ELEMENT;
+extern const int64_t q_XMLReader$$ATTRIBUTE;
+extern const int64_t q_XMLReader$$TEXT;
+extern const int64_t q_XMLReader$$CDATA;
+extern const int64_t q_XMLReader$$ENTITY_REF;
+extern const int64_t q_XMLReader$$ENTITY;
+extern const int64_t q_XMLReader$$PI;
+extern const int64_t q_XMLReader$$COMMENT;
+extern const int64_t q_XMLReader$$DOC;
+extern const int64_t q_XMLReader$$DOC_TYPE;
+extern const int64_t q_XMLReader$$DOC_FRAGMENT;
+extern const int64_t q_XMLReader$$NOTATION;
+extern const int64_t q_XMLReader$$WHITESPACE;
+extern const int64_t q_XMLReader$$SIGNIFICANT_WHITESPACE;
+extern const int64_t q_XMLReader$$END_ELEMENT;
+extern const int64_t q_XMLReader$$END_ENTITY;
+extern const int64_t q_XMLReader$$XML_DECLARATION;
+extern const int64_t q_XMLReader$$LOADDTD;
+extern const int64_t q_XMLReader$$DEFAULTATTRS;
+extern const int64_t q_XMLReader$$VALIDATE;
+extern const int64_t q_XMLReader$$SUBST_ENTITIES;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLReader
@@ -68,8 +68,8 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   public: c_XMLReader(VM::Class* cls = c_XMLReader::s_cls);
   public: ~c_XMLReader();
   public: void t___construct();
-  public: bool t_open(CStrRef uri, CStrRef encoding = null_string, int64 options = 0);
-  public: bool t_xml(CStrRef source, CStrRef encoding = null_string, int64 options = 0);
+  public: bool t_open(CStrRef uri, CStrRef encoding = null_string, int64_t options = 0);
+  public: bool t_xml(CStrRef source, CStrRef encoding = null_string, int64_t options = 0);
   public: bool t_close();
   public: bool t_read();
   public: bool t_next(CStrRef localname = null_string);
@@ -78,20 +78,20 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   public: String t_readouterxml();
   public: bool t_movetonextattribute();
   public: Variant t_getattribute(CStrRef name);
-  public: Variant t_getattributeno(int64 index);
+  public: Variant t_getattributeno(int64_t index);
   public: Variant t_getattributens(CStrRef name, CStrRef namespaceURI);
   public: bool t_movetoattribute(CStrRef name);
-  public: bool t_movetoattributeno(int64 index);
+  public: bool t_movetoattributeno(int64_t index);
   public: bool t_movetoattributens(CStrRef name, CStrRef namespaceURI);
   public: bool t_movetoelement();
   public: bool t_movetofirstattribute();
   public: bool t_isvalid();
   public: bool t_expand();
   public: Variant t___get(Variant name);
-  public: bool t_getparserproperty(int64 property);
+  public: bool t_getparserproperty(int64_t property);
   public: Variant t_lookupnamespace(CStrRef prefix);
   public: bool t_setschema(CStrRef source);
-  public: bool t_setparserproperty(int64 property, bool value);
+  public: bool t_setparserproperty(int64_t property, bool value);
   public: bool t_setrelaxngschema(CStrRef filename);
   public: bool t_setrelaxngschemasource(CStrRef source);
   public: Variant t___destruct();

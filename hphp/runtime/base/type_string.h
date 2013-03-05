@@ -38,7 +38,7 @@ class VarNR;
 
 // helpers
 StringData* buildStringData(int     n);
-StringData* buildStringData(int64   n);
+StringData* buildStringData(int64_t   n);
 StringData* buildStringData(double  n);
 StringData* buildStringData(litstr  s);
 
@@ -54,7 +54,7 @@ typedef SmartPtr<StringData> StringBase;
  */
 class String : protected StringBase {
 public:
-  typedef hphp_hash_map<int64, const StringData *, int64_hash>
+  typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
     IntegerStringDataMap;
   static const int MinPrecomputedInteger = SCHAR_MIN;
   static const int MaxPrecomputedInteger = 4095 + SCHAR_MIN;
@@ -62,21 +62,21 @@ public:
   static StringData const **converted_integers;
   static IntegerStringDataMap integer_string_data_map;
 
-  static bool HasConverted(int64 n) {
+  static bool HasConverted(int64_t n) {
     return MinPrecomputedInteger <= n && n <= MaxPrecomputedInteger;
   }
   static bool HasConverted(int n) {
-    return HasConverted((int64)n);
+    return HasConverted((int64_t)n);
   }
-  static void PreConvertInteger(int64 n) ATTRIBUTE_COLD;
+  static void PreConvertInteger(int64_t n) ATTRIBUTE_COLD;
 
   // create a string from a character
   static String FromChar(char ch) {
     return StringData::GetStaticString(ch);
   }
 
-  static const StringData *ConvertInteger(int64 n) ATTRIBUTE_COLD;
-  static const StringData *GetIntegerStringData(int64 n) {
+  static const StringData *ConvertInteger(int64_t n) ATTRIBUTE_COLD;
+  static const StringData *GetIntegerStringData(int64_t n) {
     if (HasConverted(n)) {
       const StringData *sd = *(converted_integers + n);
       if (UNLIKELY(sd == nullptr)) {
@@ -90,15 +90,15 @@ public:
     return nullptr;
   }
   static const StringData *GetIntegerStringData(int n) {
-    return GetIntegerStringData((int64)n);
+    return GetIntegerStringData((int64_t)n);
   }
-  static const char *GetIntegerString(int64 n) {
+  static const char *GetIntegerString(int64_t n) {
     const StringData *sd = GetIntegerStringData(n);
     if (sd) return sd->data();
     return nullptr;
   }
   static const char *GetIntegerString(int n) {
-    return GetIntegerString((int64)n);
+    return GetIntegerString((int64_t)n);
   }
 
 public:
@@ -126,7 +126,7 @@ public:
    */
   String(StringData *data) : StringBase(data) { }
   String(int     n);
-  String(int64   n);
+  String(int64_t   n);
   String(double  n);
   String(litstr  s) {
     if (s) {
@@ -274,17 +274,17 @@ public:
     return m_px ? m_px->isLiteral() : true;
   }
 
-  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
     return m_px ? m_px->hashForIntSwitch(firstNonZero, noMatch) : 0;
   }
 
-  int64 hashForStringSwitch(
-      int64 firstTrueCaseHash,
-      int64 firstNullCaseHash,
-      int64 firstFalseCaseHash,
-      int64 firstZeroCaseHash,
-      int64 firstHash,
-      int64 noMatchHash,
+  int64_t hashForStringSwitch(
+      int64_t firstTrueCaseHash,
+      int64_t firstNullCaseHash,
+      int64_t firstFalseCaseHash,
+      int64_t firstZeroCaseHash,
+      int64_t firstHash,
+      int64_t noMatchHash,
       bool &needsOrder) const {
     if (!m_px) {
       needsOrder = false;
@@ -397,7 +397,7 @@ public:
   char   toByte   () const { return m_px ? m_px->toByte   () : 0;}
   short  toInt16  () const { return m_px ? m_px->toInt16  () : 0;}
   int    toInt32  () const { return m_px ? m_px->toInt32  () : 0;}
-  int64  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}
+  int64_t  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}
   double toDouble () const { return m_px ? m_px->toDouble () : 0;}
   VarNR  toKey   () const;
 
@@ -432,8 +432,8 @@ public:
   String rvalAt(char    key) const { return rvalAtImpl(key);}
   String rvalAt(short   key) const { return rvalAtImpl(key);}
   String rvalAt(int     key) const { return rvalAtImpl(key);}
-  String rvalAt(int64   key) const { return rvalAtImpl(key);}
-  String rvalAt(double  key) const { return rvalAtImpl((int64)key);}
+  String rvalAt(int64_t   key) const { return rvalAtImpl(key);}
+  String rvalAt(double  key) const { return rvalAtImpl((int64_t)key);}
   String rvalAt(litstr  key) const { return rvalAtImpl(String(key).toInt32());}
   String rvalAt(const StringData *key) const {
     not_reached();
@@ -448,8 +448,8 @@ public:
   StringOffset lvalAt(char    key) { return lvalAtImpl(key);}
   StringOffset lvalAt(short   key) { return lvalAtImpl(key);}
   StringOffset lvalAt(int     key) { return lvalAtImpl(key);}
-  StringOffset lvalAt(int64   key) { return lvalAtImpl(key);}
-  StringOffset lvalAt(double  key) { return lvalAtImpl((int64)key);}
+  StringOffset lvalAt(int64_t   key) { return lvalAtImpl(key);}
+  StringOffset lvalAt(double  key) { return lvalAtImpl((int64_t)key);}
   StringOffset lvalAt(litstr  key) { return lvalAtImpl(String(key).toInt32());}
   StringOffset lvalAt(const StringData *key) {
     not_reached();

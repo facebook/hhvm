@@ -30,24 +30,24 @@ IMPLEMENT_DEFAULT_EXTENSION(sqlite3);
 #define PHP_SQLITE3_NUM    1<<1
 #define PHP_SQLITE3_BOTH   (PHP_SQLITE3_ASSOC|PHP_SQLITE3_NUM)
 
-const int64 k_SQLITE3_ASSOC = PHP_SQLITE3_ASSOC;
-const int64 k_SQLITE3_NUM = PHP_SQLITE3_NUM;
-const int64 k_SQLITE3_BOTH = PHP_SQLITE3_BOTH;
-const int64 k_SQLITE3_INTEGER = SQLITE_INTEGER;
-const int64 k_SQLITE3_FLOAT = SQLITE_FLOAT;
-const int64 k_SQLITE3_TEXT = SQLITE3_TEXT;
-const int64 k_SQLITE3_BLOB = SQLITE_BLOB;
-const int64 k_SQLITE3_NULL = SQLITE_NULL;
-const int64 k_SQLITE3_OPEN_READONLY = SQLITE_OPEN_READONLY;
-const int64 k_SQLITE3_OPEN_READWRITE = SQLITE_OPEN_READWRITE;
-const int64 k_SQLITE3_OPEN_CREATE = SQLITE_OPEN_CREATE;
+const int64_t k_SQLITE3_ASSOC = PHP_SQLITE3_ASSOC;
+const int64_t k_SQLITE3_NUM = PHP_SQLITE3_NUM;
+const int64_t k_SQLITE3_BOTH = PHP_SQLITE3_BOTH;
+const int64_t k_SQLITE3_INTEGER = SQLITE_INTEGER;
+const int64_t k_SQLITE3_FLOAT = SQLITE_FLOAT;
+const int64_t k_SQLITE3_TEXT = SQLITE3_TEXT;
+const int64_t k_SQLITE3_BLOB = SQLITE_BLOB;
+const int64_t k_SQLITE3_NULL = SQLITE_NULL;
+const int64_t k_SQLITE3_OPEN_READONLY = SQLITE_OPEN_READONLY;
+const int64_t k_SQLITE3_OPEN_READWRITE = SQLITE_OPEN_READWRITE;
+const int64_t k_SQLITE3_OPEN_CREATE = SQLITE_OPEN_CREATE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
 struct php_sqlite3_agg_context {
   Variant context;
-  int64 row_count;
+  int64_t row_count;
 };
 
 static Variant get_column_value(sqlite3_stmt *stmt, int column) {
@@ -55,7 +55,7 @@ static Variant get_column_value(sqlite3_stmt *stmt, int column) {
   Variant data;
   switch (sqlite3_column_type(stmt, column)) {
   case SQLITE_INTEGER:
-    data = (int64)sqlite3_column_int64(stmt, column);
+    data = (int64_t)sqlite3_column_int64(stmt, column);
     break;
   case SQLITE_FLOAT:
     data = (double)sqlite3_column_double(stmt, column);
@@ -77,7 +77,7 @@ static Variant get_value(sqlite3_value *argv) {
   Variant value;
   switch (sqlite3_value_type(argv)) {
   case SQLITE_INTEGER:
-    value = (int64)sqlite3_value_int(argv);
+    value = (int64_t)sqlite3_value_int(argv);
     break;
   case SQLITE_FLOAT:
     value = (double)sqlite3_value_double(argv);
@@ -173,7 +173,7 @@ c_SQLite3::~c_SQLite3() {
 }
 
 void c_SQLite3::t___construct(CStrRef filename,
-                       int64 flags /* = k_SQLITE3_OPEN_READWRITE |
+                       int64_t flags /* = k_SQLITE3_OPEN_READWRITE |
                                       k_SQLITE3_OPEN_CREATE */,
                        CStrRef encryption_key /* = null_string */) {
   t_open(filename, flags, encryption_key);
@@ -186,7 +186,7 @@ void c_SQLite3::validate() const {
 }
 
 void c_SQLite3::t_open(CStrRef filename,
-                       int64 flags /* = k_SQLITE3_OPEN_READWRITE |
+                       int64_t flags /* = k_SQLITE3_OPEN_READWRITE |
                                       k_SQLITE3_OPEN_CREATE */,
                        CStrRef encryption_key /* = null_string */) {
   if (m_raw_db) {
@@ -213,7 +213,7 @@ void c_SQLite3::t_open(CStrRef filename,
 #endif
 }
 
-bool c_SQLite3::t_busytimeout(int64 msecs) {
+bool c_SQLite3::t_busytimeout(int64_t msecs) {
   validate();
   int errcode = sqlite3_busy_timeout(m_raw_db, msecs);
   if (errcode != SQLITE_OK) {
@@ -252,16 +252,16 @@ bool c_SQLite3::t_exec(CStrRef sql) {
 Array c_SQLite3::t_version() {
   Array ret;
   ret.set("versionString", String((char*)sqlite3_libversion(), CopyString));
-  ret.set("versionNumber", (int64)sqlite3_libversion_number());
+  ret.set("versionNumber", (int64_t)sqlite3_libversion_number());
   return ret;
 }
 
-int64 c_SQLite3::t_lastinsertrowid() {
+int64_t c_SQLite3::t_lastinsertrowid() {
   validate();
   return sqlite3_last_insert_rowid(m_raw_db);
 }
 
-int64 c_SQLite3::t_lasterrorcode() {
+int64_t c_SQLite3::t_lasterrorcode() {
   validate();
   return sqlite3_errcode(m_raw_db);
 }
@@ -293,7 +293,7 @@ bool c_SQLite3::t_loadextension(CStrRef extension) {
   return true;
 }
 
-int64 c_SQLite3::t_changes() {
+int64_t c_SQLite3::t_changes() {
   validate();
   return sqlite3_changes(m_raw_db);
 }
@@ -368,7 +368,7 @@ Variant c_SQLite3::t_querysingle(CStrRef sql, bool entire_row /* = false */) {
 }
 
 bool c_SQLite3::t_createfunction(CStrRef name, CVarRef callback,
-                                 int64 argcount /* = -1 */) {
+                                 int64_t argcount /* = -1 */) {
   validate();
   if (name.empty()) {
     return false;
@@ -392,7 +392,7 @@ bool c_SQLite3::t_createfunction(CStrRef name, CVarRef callback,
 }
 
 bool c_SQLite3::t_createaggregate(CStrRef name, CVarRef step, CVarRef final,
-                                  int64 argcount /* = -1 */) {
+                                  int64_t argcount /* = -1 */) {
   validate();
   if (name.empty()) {
     return false;
@@ -422,7 +422,7 @@ bool c_SQLite3::t_createaggregate(CStrRef name, CVarRef step, CVarRef final,
   return false;
 }
 
-bool c_SQLite3::t_openblob(CStrRef table, CStrRef column, int64 rowid,
+bool c_SQLite3::t_openblob(CStrRef table, CStrRef column, int64_t rowid,
                            CStrRef dbname /* = null_string */) {
   throw NotSupportedException(__func__, "sqlite3 stream");
 }
@@ -460,7 +460,7 @@ void c_SQLite3Stmt::validate() const {
   }
 }
 
-int64 c_SQLite3Stmt::t_paramcount() {
+int64_t c_SQLite3Stmt::t_paramcount() {
   validate();
   return sqlite3_bind_parameter_count(m_raw_stmt);
 }
@@ -495,7 +495,7 @@ bool c_SQLite3Stmt::t_clear() {
 }
 
 bool c_SQLite3Stmt::t_bindparam(CVarRef name, VRefParam parameter,
-                                int64 type /* = k_SQLITE3_TEXT */) {
+                                int64_t type /* = k_SQLITE3_TEXT */) {
   BoundParamPtr param(new BoundParam());
   param->type = type;
   param->value.assignRef(parameter);
@@ -519,7 +519,7 @@ bool c_SQLite3Stmt::t_bindparam(CVarRef name, VRefParam parameter,
 }
 
 bool c_SQLite3Stmt::t_bindvalue(CVarRef name, CVarRef parameter,
-                                int64 type /* = k_SQLITE3_TEXT */) {
+                                int64_t type /* = k_SQLITE3_TEXT */) {
   Variant v = parameter;
   return t_bindparam(name, v, type);
 }
@@ -614,23 +614,23 @@ void c_SQLite3Result::validate() const {
   m_stmt->validate();
 }
 
-int64 c_SQLite3Result::t_numcolumns() {
+int64_t c_SQLite3Result::t_numcolumns() {
   validate();
   return sqlite3_column_count(m_stmt->m_raw_stmt);
 }
 
-String c_SQLite3Result::t_columnname(int64 column) {
+String c_SQLite3Result::t_columnname(int64_t column) {
   validate();
   return String((char*)sqlite3_column_name(m_stmt->m_raw_stmt, column),
                 CopyString);
 }
 
-int64 c_SQLite3Result::t_columntype(int64 column) {
+int64_t c_SQLite3Result::t_columntype(int64_t column) {
   validate();
   return sqlite3_column_type(m_stmt->m_raw_stmt, column);
 }
 
-Variant c_SQLite3Result::t_fetcharray(int64 mode /* = k_SQLITE3_BOTH */) {
+Variant c_SQLite3Result::t_fetcharray(int64_t mode /* = k_SQLITE3_BOTH */) {
   validate();
 
   switch (sqlite3_step(m_stmt->m_raw_stmt)) {

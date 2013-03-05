@@ -29,7 +29,7 @@ namespace JIT {
 TRACE_SET_MOD(hhir);
 
 void Simplifier::copyProp(IRInstruction* inst) {
-  for (uint32 i = 0; i < inst->getNumSrcs(); i++) {
+  for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
     IRInstruction* srcInst = inst->getSrc(i)->getInstruction();
     if (srcInst->getOpcode() == Mov) {
       inst->setSrc(i, srcInst->getSrc(0));
@@ -467,7 +467,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
     }                                                                         \
     if (src1->getType() == Type::StaticStr) {                                 \
       const StringData* str = src1->getValStr();                       \
-      int64 strInt = 0;                                                       \
+      int64_t strInt = 0;                                                       \
       if (str->isInteger()) {                                                 \
         strInt = str->toInt64();                                              \
       }                                                                       \
@@ -505,13 +505,13 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   if (inst1->getOpcode() == Op##NAME && inst1->getSrc(1)->isConst()) {    \
     /* (X + C1) + C2 --> X + C3 */                                        \
     if (src2->isConst()) {                                                \
-      int64 right = inst1->getSrc(1)->getValInt();                 \
+      int64_t right = inst1->getSrc(1)->getValInt();                 \
       right OP##= src2->getValInt();                               \
       return m_tb->gen##NAME(inst1->getSrc(0), genDefInt(right));         \
     }                                                                     \
     /* (X + C1) + (Y + C2) --> X + Y + C3 */                              \
     if (inst2->getOpcode() == Op##NAME && inst2->getSrc(1)->isConst()) {  \
-      int64 right = inst1->getSrc(1)->getValInt();                 \
+      int64_t right = inst1->getSrc(1)->getValInt();                 \
       right OP##= inst2->getSrc(1)->getValInt();                   \
       SSATmp* left = m_tb->gen##NAME(inst1->getSrc(0), inst2->getSrc(0)); \
       return m_tb->gen##NAME(left, genDefInt(right));                     \
@@ -883,9 +883,9 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
       always_assert(opName == OpEq);
 
       if (src2->getValBool()) {
-        return m_tb->genCmp(OpNeq, src1, m_tb->genDefConst<int64>(0));
+        return m_tb->genCmp(OpNeq, src1, m_tb->genDefConst<int64_t>(0));
       } else {
-        return m_tb->genCmp(OpEq, src1, m_tb->genDefConst<int64>(0));
+        return m_tb->genCmp(OpEq, src1, m_tb->genDefConst<int64_t>(0));
       }
     }
 
@@ -917,7 +917,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   if (src1->getType().isString() && src1->isConst() &&
       src2->getType() == Type::Int) {
     auto str = src1->getValStr();
-    int64 si; double sd;
+    int64_t si; double sd;
     auto st = str->isNumericWithVal(si, sd, true /* allow errors */);
     if (st == KindOfDouble) {
       return m_tb->genCmp(opName, m_tb->genDefConst<double>(sd), src2);
@@ -925,7 +925,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     if (st == KindOfNull) {
       si = 0;
     }
-    return m_tb->genCmp(opName, m_tb->genDefConst<int64>(si), src2);
+    return m_tb->genCmp(opName, m_tb->genDefConst<int64_t>(si), src2);
   }
 
   // case 5: array cmp array. No juggling to do
@@ -1173,8 +1173,8 @@ SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::genDefInt(int64 val) {
-  return m_tb->genDefConst<int64>(val);
+SSATmp* Simplifier::genDefInt(int64_t val) {
+  return m_tb->genDefConst<int64_t>(val);
 }
 
 SSATmp* Simplifier::genDefBool(bool val) {

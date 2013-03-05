@@ -62,7 +62,7 @@ public:
   bool switchSandbox(const std::string &newId, bool force);
   void updateSandbox(DSandboxInfoPtr sandbox);
   bool switchThread(DThreadInfoPtr thread);
-  void switchThreadMode(ThreadMode mode, int64 threadId = 0);
+  void switchThreadMode(ThreadMode mode, int64_t threadId = 0);
 
   void startDummySandbox();
   void notifyDummySandbox();
@@ -100,9 +100,9 @@ protected:
   DSandboxInfo m_dummyInfo;
 
   ThreadMode m_threadMode;
-  int64 m_thread;
+  int64_t m_thread;
   DThreadInfoPtr m_newThread;
-  std::map<int64, DThreadInfoPtr> m_threads;
+  std::map<int64_t, DThreadInfoPtr> m_threads;
 
   typedef tbb::concurrent_hash_map<const StringData*, void*,
                                    StringDataHashCompare> StringDataMap;

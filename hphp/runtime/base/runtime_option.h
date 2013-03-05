@@ -76,8 +76,8 @@ public:
   static bool AssertWarning;
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int WarningFrequency;
-  static int64 SerializationSizeLimit;
-  static int64 StringOffsetLimit;
+  static int64_t SerializationSizeLimit;
+  static int64_t StringOffsetLimit;
 
   static std::string AccessLogDefaultFormat;
   static std::vector<AccessLogFileData> AccessLogs;
@@ -112,8 +112,8 @@ public:
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static size_t ServerMemoryHeadRoom;
-  static int64 RequestMemoryMaxBytes;
-  static int64 ImageMemoryMaxBytes;
+  static int64_t RequestMemoryMaxBytes;
+  static int64_t ImageMemoryMaxBytes;
   static int ResponseQueueCount;
   static int ServerGracefulShutdownWait;
   static int ServerDanglingWait;
@@ -137,9 +137,9 @@ public:
   static bool ImplicitFlush;
   static bool EnableEarlyFlush;
   static bool ForceChunkedEncoding;
-  static int64 MaxPostSize;
+  static int64_t MaxPostSize;
   static bool AlwaysPopulateRawPostData;
-  static int64 UploadMaxFileSize;
+  static int64_t UploadMaxFileSize;
   static std::string UploadTmpDir;
   static bool EnableFileUploads;
   static bool EnableUploadProgress;
@@ -291,15 +291,15 @@ public:
   static bool EnableAPCFetchStats;
   static bool APCSizeCountPrime;
   static bool EnableHotProfiler;
-  static int32 ProfilerTraceBuffer;
+  static int32_t ProfilerTraceBuffer;
   static double ProfilerTraceExpansion;
-  static int32 ProfilerMaxTraceBuffer;
+  static int32_t ProfilerMaxTraceBuffer;
 
-  static int64 MaxRSS;
-  static int64 MaxRSSPollingCycle;
-  static int64 DropCacheCycle;
-  static int64 MaxSQLRowCount;
-  static int64 MaxMemcacheKeyCount;
+  static int64_t MaxRSS;
+  static int64_t MaxRSSPollingCycle;
+  static int64_t DropCacheCycle;
+  static int64_t MaxSQLRowCount;
+  static int64_t MaxMemcacheKeyCount;
   static int  SocketDefaultTimeout;
   static bool LockCodeMemory;
   static bool EnableMemoryManager;
@@ -328,8 +328,8 @@ public:
   static bool ApcAllowObj;
   static int ApcTTLLimit;
   static bool ApcUseFileStorage;
-  static int64 ApcFileStorageChunkSize;
-  static int64 ApcFileStorageMaxSize;
+  static int64_t ApcFileStorageChunkSize;
+  static int64_t ApcFileStorageMaxSize;
   static std::string ApcFileStoragePrefix;
   static int ApcFileStorageAdviseOutPeriod;
   static std::string ApcFileStorageFlagKey;
@@ -379,7 +379,7 @@ public:
   /*
    * Maximum number of elements on the VM execution stack.
    */ \
-  F(uint64, VMStackElms, kEvalVMStackElmsDefault) \
+  F(uint64_t, VMStackElms, kEvalVMStackElmsDefault) \
   /*
    * Initial space reserved for the global variable environment (in
    * number of global variables).
@@ -390,16 +390,16 @@ public:
   F(bool, AllowHhas,                   false) \
   F(bool, JitNoGdb,                    true) \
   F(bool, PerfPidMap,                  true) \
-  F(uint32, JitTargetCacheSize,        64 << 20) \
+  F(uint32_t, JitTargetCacheSize,        64 << 20) \
   F(bool, ProfileBC,                   false) \
   F(bool, ProfileHWEnable,             true) \
   F(string, ProfileHWEvents,           string("")) \
   F(bool, JitTrampolines,              true) \
   F(string, JitProfilePath,            string("")) \
-  F(int32, JitStressTypePredPercent,   0) \
-  F(uint32, JitWarmupRequests,         kDefaultWarmupRequests) \
+  F(int32_t, JitStressTypePredPercent,   0) \
+  F(uint32_t, JitWarmupRequests,         kDefaultWarmupRequests) \
   F(bool, JitProfileRecord,            false) \
-  F(uint32, GdbSyncChunks,             128) \
+  F(uint32_t, GdbSyncChunks,             128) \
   F(bool, JitStressLease,              false) \
   F(bool, JitKeepDbgFiles,             false) \
   F(bool, JitEnableRenameFunction,     false) \
@@ -418,7 +418,7 @@ public:
   F(bool, HHIRJumpOpts,                true) \
   F(bool, HHIRExtraOptPass,            true) \
   F(bool, HHIRMemOpt,                  true) \
-  F(uint32, HHIRNumFreeRegs,           -1) \
+  F(uint32_t, HHIRNumFreeRegs,           -1) \
   F(bool, HHIREnableRematerialization, true) \
   F(bool, HHIREnableCalleeSavedOpt,    true) \
   F(bool, HHIREnablePreColoring,       true) \
@@ -429,14 +429,14 @@ public:
   F(bool, HHIRGenerateAsserts,         debug) \
   F(bool, HHIRDirectExit,              true) \
   F(bool, HHIRDisableTx64,             false) \
-  F(uint64, MaxHHIRTrans,              -1) \
+  F(uint64_t, MaxHHIRTrans,              -1) \
   F(bool, HHIRDeadCodeElim,            true) \
   F(bool, DumpBytecode,                false) \
-  F(uint32, DumpIR,                    0) \
+  F(uint32_t, DumpIR,                    0) \
   F(bool, DumpTC,                      false) \
   F(bool, DumpAst,                     false) \
   F(bool, MapTCHuge,                   true) \
-  F(uint32, ConstEstimate,             10000) \
+  F(uint32_t, ConstEstimate,             10000) \
 
 #define F(type, name, unused) \
   static type Eval ## name;

@@ -276,10 +276,10 @@ public:
     Format f = format();
     return f == IsLiteral || f == IsShared || isStatic();
   }
-  DataType isNumericWithVal(int64 &lval, double &dval, int allow_errors) const;
+  DataType isNumericWithVal(int64_t &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
   bool isInteger() const;
-  bool isStrictlyInteger(int64 &res) const {
+  bool isStrictlyInteger(int64_t &res) const {
     if (isStatic() && m_hash < 0) return false;
     StringSlice s = slice();
     return is_strictly_integer(s.ptr, s.len, res);
@@ -287,14 +287,14 @@ public:
   bool isZero() const { return size() == 1 && rawdata()[0] == '0'; }
   bool isValidVariableName() const;
 
-  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const;
-  int64 hashForStringSwitch(
-      int64 firstTrueCaseHash,
-      int64 firstNullCaseHash,
-      int64 firstFalseCaseHash,
-      int64 firstZeroCaseHash,
-      int64 firstHash,
-      int64 noMatchHash,
+  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const;
+  int64_t hashForStringSwitch(
+      int64_t firstTrueCaseHash,
+      int64_t firstNullCaseHash,
+      int64_t firstFalseCaseHash,
+      int64_t firstZeroCaseHash,
+      int64_t firstHash,
+      int64_t noMatchHash,
       bool &needsOrder) const;
 
 #ifdef TAINTED
@@ -314,8 +314,8 @@ public:
   void set(char    key, CStrRef v) { setChar(key, v); }
   void set(short   key, CStrRef v) { setChar(key, v); }
   void set(int     key, CStrRef v) { setChar(key, v); }
-  void set(int64   key, CStrRef v) { setChar(key, v); }
-  void set(double  key, CStrRef v) { setChar((int64)key, v); }
+  void set(int64_t   key, CStrRef v) { setChar(key, v); }
+  void set(double  key, CStrRef v) { setChar((int64_t)key, v); }
   void set(CStrRef key, CStrRef v);
   void set(CVarRef key, CStrRef v);
 
@@ -326,9 +326,9 @@ public:
   char   toByte   (int base = 10) const { return toInt64(base);}
   short  toInt16  (int base = 10) const { return toInt64(base);}
   int    toInt32  (int base = 10) const { return toInt64(base);}
-  int64  toInt64  (int base = 10) const;
+  int64_t  toInt64  (int base = 10) const;
   double toDouble () const;
-  DataType toNumeric(int64 &lval, double &dval) const;
+  DataType toNumeric(int64_t &lval, double &dval) const;
 
   strhash_t getPrecomputedHash() const {
     assert(!isShared());

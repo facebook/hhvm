@@ -48,13 +48,13 @@ struct RegContent {
     Loc,
     Int
   }        m_kind;
-  int64    m_int;
+  int64_t    m_int;
   Location m_loc;
 
-  RegContent(const Location &loc, int64 intval = 0)
+  RegContent(const Location &loc, int64_t intval = 0)
       : m_kind(Loc), m_int(intval), m_loc(loc) { }
 
-  RegContent(int64 _m_int) : m_kind(Int), m_int(_m_int), m_loc(Location()) { }
+  RegContent(int64_t _m_int) : m_kind(Int), m_int(_m_int), m_loc(Location()) { }
 
   RegContent() : m_kind(Invalid), m_int(0), m_loc(Location()) { }
 
@@ -132,7 +132,7 @@ struct RegInfo {
 #undef REGSTATE
   };
   RegContent m_cont;
-  uint64     m_epoch;
+  uint64_t     m_epoch;
   PhysReg    m_pReg;
   State      m_state;
   DataType   m_type;
@@ -145,7 +145,8 @@ struct RegInfo {
     };
     char buf[1024];
     sprintf(buf, "Reg:%02d:%s:%lld:Type:%d",
-            int(m_pReg), names[m_state], m_epoch, m_type);
+            int(m_pReg), names[m_state], static_cast<long long>(m_epoch),
+            m_type);
     return Trace::prettyNode(buf, m_cont);
   }
   RegInfo() : m_cont(), m_state(FREE) { }
@@ -165,7 +166,7 @@ class SpillFill {
                      bool writeType) = 0;
   virtual void fill(const Location& loc, PhysReg reg) = 0;
   virtual void fillByMov(PhysReg src, PhysReg dst) = 0;
-  virtual void loadImm(int64 immVal, PhysReg reg) = 0;
+  virtual void loadImm(int64_t immVal, PhysReg reg) = 0;
   virtual void poison(PhysReg reg) = 0;
 };
 
@@ -186,11 +187,11 @@ class RegAlloc {
   ContToRegMap    m_contToRegMap;     // Content -> PhysReg
   SpillFill*      m_spf;
   mutable int     m_freezeCount;      // support immutability
-  uint64          m_epoch;
+  uint64_t          m_epoch;
   bool            m_branchSynced;
 
   RegInfo* alloc(const Location& loc, DataType t, RegInfo::State state,
-                 bool needsFill, int64 immVal = 0, PhysReg target = InvalidReg);
+                 bool needsFill, int64_t immVal = 0, PhysReg target = InvalidReg);
   RegInfo* findFreeReg(const Location& loc);
   void assignRegInfo(RegInfo *regInfo, const RegContent &cont,
                      RegInfo::State state, DataType type);
@@ -309,7 +310,7 @@ class RegAlloc {
    *
    * Otherwise InvalidReg is returned.
    */
-  PhysReg getImmReg(int64 immVal, bool allowAllocate = true);
+  PhysReg getImmReg(int64_t immVal, bool allowAllocate = true);
 
   /*
    * Reset the register mapping to an empty state, epoch zero.

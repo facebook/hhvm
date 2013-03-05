@@ -40,7 +40,7 @@ public:
    * Query if a task is finished. This is non-blocking and can be called as
    * many times as desired.
    */
-  static int64 TaskStatus(CObjRef task);
+  static int64_t TaskStatus(CObjRef task);
 
   /**
    * Get results of a task. This is blocking until task is finished or times
@@ -49,7 +49,7 @@ public:
   static String TaskResult(CObjRef task,
                            Array &headers,
                            int &code,
-                           int64 timeout_ms);
+                           int64_t timeout_ms);
 
   /**
    * Add a piece of response to the pipeline.

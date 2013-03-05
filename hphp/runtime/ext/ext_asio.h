@@ -67,7 +67,7 @@ class c_WaitHandle : public ExtObjectData {
   public: bool t_isfinished();
   public: bool t_issucceeded();
   public: bool t_isfailed();
-  public: int64 t_getid();
+  public: int64_t t_getid();
   public: String t_getname();
   public: Object t_getexceptioniffailed();
 

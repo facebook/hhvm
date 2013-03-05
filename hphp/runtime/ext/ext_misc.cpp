@@ -37,15 +37,15 @@ const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64 f_connection_aborted() {
+int64_t f_connection_aborted() {
   return f_connection_status() == k_CONNECTION_ABORTED;
 }
 
-int64 f_connection_status() {
+int64_t f_connection_status() {
   return k_CONNECTION_NORMAL;
 }
 
-int64 f_connection_timeout() {
+int64_t f_connection_timeout() {
   return f_connection_status() == k_CONNECTION_TIMEOUT;
 }
 
@@ -210,7 +210,7 @@ Variant f_highlight_string(CStrRef str, bool ret /* = false */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
-int64 f_ignore_user_abort(bool setting /* = false */) {
+int64_t f_ignore_user_abort(bool setting /* = false */) {
   return 0;
 }
 
@@ -226,7 +226,7 @@ String f_php_strip_whitespace(CStrRef filename) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
-int64 f_sleep(int seconds) {
+int64_t f_sleep(int seconds) {
   IOStatusHelper io("sleep");
   sleep(seconds);
   return 0;
@@ -256,8 +256,8 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
     return true;
   }
   if (errno == EINTR) {
-    return CREATE_MAP2("seconds", (int64)rem.tv_sec,
-                       "nanoseconds", (int64)rem.tv_nsec);
+    return CREATE_MAP2("seconds", (int64_t)rem.tv_sec,
+                       "nanoseconds", (int64_t)rem.tv_nsec);
   }
   return false;
 }
@@ -340,7 +340,7 @@ Array f_token_get_all(CStrRef source) {
   return res;
 }
 
-String f_token_name(int64 token) {
+String f_token_name(int64_t token) {
 
 #undef YYTOKENTYPE
 #ifdef YYTOKEN_MAP

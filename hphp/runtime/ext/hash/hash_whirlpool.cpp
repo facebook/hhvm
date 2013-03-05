@@ -21,7 +21,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-  uint64 state[8];
+  uint64_t state[8];
   unsigned char bitlength[32];
   struct {
     int pos;
@@ -45,10 +45,10 @@ hash_whirlpool::hash_whirlpool() :
 
 static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context) {
   int i, r;
-  uint64 K[8];        /* the round key */
-  uint64 block[8];    /* mu(buffer) */
-  uint64 state[8];    /* the cipher state */
-  uint64 L[8];
+  uint64_t K[8];        /* the round key */
+  uint64_t block[8];    /* mu(buffer) */
+  uint64_t state[8];    /* the cipher state */
+  uint64_t L[8];
   unsigned char *buffer = context->buffer.data;
 
   /*
@@ -56,14 +56,14 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context) {
    */
   for (i = 0; i < 8; i++, buffer += 8) {
     block[i] =
-      (((uint64)buffer[0]        ) << 56) ^
-      (((uint64)buffer[1] & 0xffL) << 48) ^
-      (((uint64)buffer[2] & 0xffL) << 40) ^
-      (((uint64)buffer[3] & 0xffL) << 32) ^
-      (((uint64)buffer[4] & 0xffL) << 24) ^
-      (((uint64)buffer[5] & 0xffL) << 16) ^
-      (((uint64)buffer[6] & 0xffL) <<  8) ^
-      (((uint64)buffer[7] & 0xffL)      );
+      (((uint64_t)buffer[0]        ) << 56) ^
+      (((uint64_t)buffer[1] & 0xffL) << 48) ^
+      (((uint64_t)buffer[2] & 0xffL) << 40) ^
+      (((uint64_t)buffer[3] & 0xffL) << 32) ^
+      (((uint64_t)buffer[4] & 0xffL) << 24) ^
+      (((uint64_t)buffer[5] & 0xffL) << 16) ^
+      (((uint64_t)buffer[6] & 0xffL) <<  8) ^
+      (((uint64_t)buffer[7] & 0xffL)      );
   }
   /*
    * compute and apply K^0 to the cipher state:
@@ -280,7 +280,7 @@ void hash_whirlpool::hash_update(void *context_, const unsigned char *input,
                                  unsigned int len) {
   PHP_WHIRLPOOL_CTX *context = (PHP_WHIRLPOOL_CTX*)context_;
 
-  uint64 sourceBits = len * 8;
+  uint64_t sourceBits = len * 8;
   /* index of leftmost source unsigned char containing data (1 to 8 bits). */
   int sourcePos    = 0;
   /* space on source[sourcePos]. */
@@ -298,7 +298,7 @@ void hash_whirlpool::hash_update(void *context_, const unsigned char *input,
   /*
    * tally the length of the added data:
    */
-  uint64 value = sourceBits;
+  uint64_t value = sourceBits;
   for (i = 31, carry = 0; i >= 0 && (carry != 0 || value != L64(0)); i--) {
     carry += bitLength[i] + ((unsigned int)value & 0xff);
     bitLength[i] = (unsigned char)carry;

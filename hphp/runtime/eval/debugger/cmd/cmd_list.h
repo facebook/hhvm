@@ -41,8 +41,8 @@ public:
 
 private:
   std::string m_file;
-  int32 m_line1;
-  int32 m_line2;
+  int32_t m_line1;
+  int32_t m_line2;
   Variant m_code;
 
   bool listCurrent(DebuggerClient *client, int &line,

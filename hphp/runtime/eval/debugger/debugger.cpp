@@ -93,7 +93,7 @@ void Debugger::GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes) {
   s_debugger.getSandboxes(sandboxes);
 }
 
-bool Debugger::IsThreadDebugging(int64 id) {
+bool Debugger::IsThreadDebugging(int64_t id) {
   return s_debugger.isThreadDebugging(id);
 }
 
@@ -247,7 +247,7 @@ String Debugger::ColorStderr(CStrRef s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Debugger::isThreadDebugging(int64 tid) {
+bool Debugger::isThreadDebugging(int64_t tid) {
   ThreadInfoMap::const_accessor acc;
   if (m_threadInfos.find(acc, tid)) {
     ThreadInfo* ti = acc->second;
@@ -258,7 +258,7 @@ bool Debugger::isThreadDebugging(int64 tid) {
 
 void Debugger::registerThread() {
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
-  int64 tid = (int64)Process::GetThreadId();
+  int64_t tid = (int64_t)Process::GetThreadId();
   ThreadInfoMap::accessor acc;
   m_threadInfos.insert(acc, tid);
   acc->second = ti;

@@ -61,10 +61,10 @@ inline String f_ob_get_flush() {
   g_context->obFlush();
   return output;
 }
-inline int64 f_ob_get_length() {
+inline int64_t f_ob_get_length() {
   return g_context->obGetContentLength();
 }
-inline int64 f_ob_get_level() {
+inline int64_t f_ob_get_level() {
   return g_context->obGetLevel();
 }
 inline Array f_ob_get_status(bool full_status = false) {
@@ -88,10 +88,10 @@ inline bool f_output_reset_rewrite_vars() {
 
 void f_hphp_crash_log(CStrRef name, CStrRef value);
 
-inline void f_hphp_stats(CStrRef name, int64 value) {
+inline void f_hphp_stats(CStrRef name, int64_t value) {
   ServerStats::Log(name.data(), value);
 }
-inline int64 f_hphp_get_stats(CStrRef name) {
+inline int64_t f_hphp_get_stats(CStrRef name) {
   return ServerStats::Get(name.data());
 }
 Array f_hphp_get_status();
@@ -103,7 +103,7 @@ inline void f_hphp_set_iostatus_address(CStrRef name) {
 }
 Variant f_hphp_get_timers(bool get_as_float = true);
 Variant f_hphp_output_global_state(bool serialize = true);
-int64 f_hphp_instruction_counter(void);
+int64_t f_hphp_instruction_counter(void);
 Variant f_hphp_get_hardware_counters(void);
 bool f_hphp_set_hardware_events(CStrRef events);
 void f_hphp_clear_hardware_events(void);

@@ -218,7 +218,7 @@ Variant ArrayUtil::Pad(CArrRef input, CVarRef pad_value, int pad_size,
 }
 
 Variant ArrayUtil::Range(unsigned char low, unsigned char high,
-                         int64 step /* = 1 */) {
+                         int64_t step /* = 1 */) {
   if (step <= 0) {
     throw_invalid_argument("step exceeds the specified range");
     return false;
@@ -271,7 +271,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   return ret;
 }
 
-Variant ArrayUtil::Range(double low, double high, int64 step /* = 1 */) {
+Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
   Array ret;
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
@@ -279,7 +279,7 @@ Variant ArrayUtil::Range(double low, double high, int64 step /* = 1 */) {
       return false;
     }
     for (; low >= high; low -= step) {
-      ret.append((int64)low);
+      ret.append((int64_t)low);
     }
   } else if (high > low) { // Positive steps
     if (high - low < step || step <= 0) {
@@ -287,10 +287,10 @@ Variant ArrayUtil::Range(double low, double high, int64 step /* = 1 */) {
       return false;
     }
     for (; low <= high; low += step) {
-      ret.append((int64)low);
+      ret.append((int64_t)low);
     }
   } else {
-    ret.append((int64)low);
+    ret.append((int64_t)low);
   }
   return ret;
 }
@@ -322,7 +322,7 @@ Variant ArrayUtil::FromHdf(const Hdf &hdf) {
     return true;
   }
 
-  int64 lval; double dval;
+  int64_t lval; double dval;
   int len = strlen(value);
   DataType ret = is_numeric_string(value, len, &lval, &dval, 0);
   switch (ret) {
@@ -351,8 +351,8 @@ void ArrayUtil::ToHdf(const Array &arr, Hdf &hdf) {
 ///////////////////////////////////////////////////////////////////////////////
 // information and calculations
 
-DataType ArrayUtil::Sum(CArrRef input, int64 *isum, double *dsum) {
-  int64 i = 0;
+DataType ArrayUtil::Sum(CArrRef input, int64_t *isum, double *dsum) {
+  int64_t i = 0;
   ArrayIter iter(input);
   for (; iter; ++iter) {
     CVarRef entry(iter.secondRef());
@@ -362,7 +362,7 @@ DataType ArrayUtil::Sum(CArrRef input, int64 *isum, double *dsum) {
     }
     case KindOfStaticString:
     case KindOfString: {
-      int64 ti;
+      int64_t ti;
       double td;
       if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
           KindOfInt64) {
@@ -397,8 +397,8 @@ DOUBLE:
   return KindOfDouble;
 }
 
-DataType ArrayUtil::Product(CArrRef input, int64 *iprod, double *dprod) {
-  int64 i = 1;
+DataType ArrayUtil::Product(CArrRef input, int64_t *iprod, double *dprod) {
+  int64_t i = 1;
   ArrayIter iter(input);
   for (; iter; ++iter) {
     CVarRef entry(iter.secondRef());
@@ -408,7 +408,7 @@ DataType ArrayUtil::Product(CArrRef input, int64 *iprod, double *dprod) {
     }
     case KindOfStaticString:
     case KindOfString: {
-      int64 ti;
+      int64_t ti;
       double td;
       if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
           KindOfInt64) {

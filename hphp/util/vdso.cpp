@@ -32,7 +32,7 @@ Vdso::Vdso() : m_handle(nullptr), m_clock_gettime_ns(nullptr) {
   }
 
   m_clock_gettime_ns =
-    (int64 (*)(clockid_t))dlsym(m_handle, "__vdso_clock_gettime_ns");
+    (int64_t (*)(clockid_t))dlsym(m_handle, "__vdso_clock_gettime_ns");
   m_clock_gettime =
     (int (*)(clockid_t, timespec *))dlsym(m_handle, "__vdso_clock_gettime");
 }
@@ -43,7 +43,7 @@ Vdso::~Vdso() {
   }
 }
 
-int64 Vdso::ClockGetTimeNS(int clk_id) {
+int64_t Vdso::ClockGetTimeNS(int clk_id) {
   return s_vdso.clockGetTimeNS(clk_id);
 }
 
@@ -51,7 +51,7 @@ int Vdso::ClockGetTime(int clk_id, timespec *ts) {
   return s_vdso.clockGetTime(clk_id, ts);
 }
 
-inline ALWAYS_INLINE int64 Vdso::clockGetTimeNS(int clk_id) {
+inline ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
   if (m_clock_gettime_ns)
     return m_clock_gettime_ns(clk_id);
   return -1;

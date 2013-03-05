@@ -56,11 +56,11 @@ void f_hphp_thread_set_warmup_enabled() {
                 "config");
 }
 
-int64 f_hphp_get_thread_id() {
+int64_t f_hphp_get_thread_id() {
   return  (unsigned long)Process::GetThreadId();
 }
 
-int32 f_hphp_gettid() {
+int32_t f_hphp_gettid() {
     return (unsigned int)Process::GetThreadPid();
 }
 

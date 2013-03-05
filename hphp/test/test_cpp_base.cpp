@@ -58,7 +58,7 @@ public:
     gettimeofday(&m_start, 0);
   }
 
-  int64 getMicroSeconds() {
+  int64_t getMicroSeconds() {
     struct timeval end;
     gettimeofday(&end, 0);
     return (end.tv_sec - m_start.tv_sec) * 1000000 +
@@ -92,7 +92,7 @@ typedef SmartAllocator<SomeClass,
 
 bool TestCppBase::TestSmartAllocator() {
   int iMax = 1000000;
-  int64 time1, time2;
+  int64_t time1, time2;
   {
     static IMPLEMENT_THREAD_LOCAL(SomeClassAlloc, allocator);
 

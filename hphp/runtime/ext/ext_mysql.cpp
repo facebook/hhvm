@@ -293,7 +293,7 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
                             client_flags);
   if (ret && RuntimeOption::MySQLWaitTimeout > 0) {
     String query("set session wait_timeout=");
-    query += String((int64)(RuntimeOption::MySQLWaitTimeout / 1000));
+    query += String((int64_t)(RuntimeOption::MySQLWaitTimeout / 1000));
     if (mysql_real_query(m_conn, query.data(), query.size())) {
       raise_notice("MySQL::connect: failed setting session wait timeout: %s",
                    mysql_error(m_conn));
@@ -685,10 +685,10 @@ Variant f_mysql_errno(CVarRef link_identifier /* = null */) {
   }
   MYSQL *conn = mySQL->get();
   if (conn) {
-    return (int64)mysql_errno(conn);
+    return (int64_t)mysql_errno(conn);
   }
   if (mySQL->m_last_error_set) {
-    return (int64)mySQL->m_last_errno;
+    return (int64_t)mySQL->m_last_errno;
   }
   return false;
 }
@@ -717,7 +717,7 @@ Variant f_mysql_warning_count(CVarRef link_identifier /* = null */) {
   }
   MYSQL *conn = mySQL->get();
   if (conn) {
-    return (int64)mysql_warning_count(conn);
+    return (int64_t)mysql_warning_count(conn);
   }
   return false;
 }
@@ -765,7 +765,7 @@ static bool php_mysql_read_rows(MYSQL *mysql, CVarRef result) {
     return false;
   }
 
-  res->setFieldCount((int64)fields);
+  res->setFieldCount((int64_t)fields);
 
   // localizes all the rows
   while (*(cp = net->read_pos) != 254 || pkt_len >= 8) {
@@ -791,7 +791,7 @@ static bool php_mysql_read_rows(MYSQL *mysql, CVarRef result) {
 
   // localizes all the field info
   for (unsigned int i = 0; i < fields; i++) {
-    res->setFieldInfo((int64)i, mysql->fields + i);
+    res->setFieldInfo((int64_t)i, mysql->fields + i);
   }
 
   return true;
@@ -1689,23 +1689,23 @@ void MySQLResult::addField(Variant *value) {
   m_rows->back().push_back(value);
 }
 
-void MySQLResult::setFieldCount(int64 fields) {
+void MySQLResult::setFieldCount(int64_t fields) {
   m_field_count = fields;
   m_fields = new MySQLFieldInfo[fields];
 }
 
-void MySQLResult::setFieldInfo(int64 f, MYSQL_FIELD *field) {
+void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
   MySQLFieldInfo &info = m_fields[f];
   info.name = NEW(Variant)(String(field->name, CopyString));
   info.table = NEW(Variant)(String(field->table, CopyString));
   info.def = NEW(Variant)(String(field->def, CopyString));
-  info.max_length = (int64)field->max_length;
-  info.length = (int64)field->length;
+  info.max_length = (int64_t)field->max_length;
+  info.length = (int64_t)field->length;
   info.type = (int)field->type;
   info.flags = field->flags;
 }
 
-MySQLFieldInfo *MySQLResult::getFieldInfo(int64 field) {
+MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
   if (field < 0 || field >= getFieldCount()) {
     return NULL;
   }
@@ -1721,28 +1721,28 @@ MySQLFieldInfo *MySQLResult::getFieldInfo(int64 field) {
   return m_fields + field;
 }
 
-Variant MySQLResult::getField(int64 field) const {
-  if (!m_localized || field < 0 || field >= (int64)m_current_row->size()) {
+Variant MySQLResult::getField(int64_t field) const {
+  if (!m_localized || field < 0 || field >= (int64_t)m_current_row->size()) {
     return null;
   }
   return *(*m_current_row)[field];
 }
 
-int64 MySQLResult::getFieldCount() const {
+int64_t MySQLResult::getFieldCount() const {
   if (!m_localized) {
-    return (int64)mysql_num_fields(m_res);
+    return (int64_t)mysql_num_fields(m_res);
   }
   return m_field_count;
 }
 
-int64 MySQLResult::getRowCount() const {
+int64_t MySQLResult::getRowCount() const {
   if (!m_localized) {
-    return (int64)mysql_num_rows(m_res);
+    return (int64_t)mysql_num_rows(m_res);
   }
   return m_row_count;
 }
 
-bool MySQLResult::seekRow(int64 row) {
+bool MySQLResult::seekRow(int64_t row) {
   if (row < 0 || row >= getRowCount()) {
     raise_warning("Unable to jump to row %" PRId64 " on MySQL result index %d",
                     row, o_getId());
@@ -1768,7 +1768,7 @@ bool MySQLResult::fetchRow() {
   return false;
 }
 
-bool MySQLResult::seekField(int64 field) {
+bool MySQLResult::seekField(int64_t field) {
   if (field < 0 || field >= getFieldCount()) {
     raise_warning("Field %" PRId64 " is invalid for MySQL result index %d",
                     field, o_getId());

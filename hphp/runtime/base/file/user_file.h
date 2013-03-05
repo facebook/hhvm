@@ -35,7 +35,7 @@ public:
 
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();
-  virtual int64 readImpl(char *buffer, int64 length);
+  virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int getc() {
     char buf[1];
     if (readImpl(buf, 1) == 1) {
@@ -43,10 +43,10 @@ public:
     }
     return 0;
   }
-  virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool seekable() { return m_StreamSeek || m_Call; }
-  virtual bool seek(int64 offset, int whence = SEEK_SET);
-  virtual int64 tell();
+  virtual bool seek(int64_t offset, int whence = SEEK_SET);
+  virtual int64_t tell();
   virtual bool eof();
   virtual bool rewind() { return seek(0, SEEK_SET); }
   virtual bool flush();

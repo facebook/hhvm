@@ -38,9 +38,9 @@ const std::string DSandboxInfo::desc() const {
   return ret;
 }
 
-DSandboxInfo DSandboxInfo::CreateDummyInfo(uint64 unique) {
+DSandboxInfo DSandboxInfo::CreateDummyInfo(uint64_t unique) {
   char buf[64];
-  snprintf(buf, 64, "dummy\t0x%llu", unique);
+  snprintf(buf, 64, "dummy\t0x%" PRIu64, unique);
   return DSandboxInfo(std::string(buf));
 }
 

@@ -121,12 +121,12 @@ public:
   std::string getString(const std::string &defValue = "") const;
   char   getByte  (char   defValue = 0) const;
   uchar  getUByte (uchar  defValue = 0) const;
-  int16  getInt16 (int16  defValue = 0) const;
-  uint16 getUInt16(uint16 defValue = 0) const;
-  int32  getInt32 (int32  defValue = 0) const;
-  uint32 getUInt32(uint32 defValue = 0) const;
-  int64  getInt64 (int64  defValue = 0) const;
-  uint64 getUInt64(uint64 defValue = 0) const;
+  int16_t  getInt16 (int16_t  defValue = 0) const;
+  uint16_t getUInt16(uint16_t defValue = 0) const;
+  int32_t  getInt32 (int32_t  defValue = 0) const;
+  uint32_t getUInt32(uint32_t defValue = 0) const;
+  int64_t  getInt64 (int64_t  defValue = 0) const;
+  uint64_t getUInt64(uint64_t defValue = 0) const;
   double getDouble(double defValue = 0) const;
 
   void get(std::vector<std::string> &values) const;
@@ -140,12 +140,12 @@ public:
   operator bool   () const { return getBool()  ;}
   operator char   () const { return getByte()  ;}
   operator uchar  () const { return getUByte() ;}
-  operator int16  () const { return getInt16() ;}
-  operator uint16 () const { return getUInt16();}
-  operator int32  () const { return getInt32() ;}
-  operator uint32 () const { return getUInt32();}
-  operator int64  () const { return getInt64() ;}
-  operator uint64 () const { return getUInt64();}
+  operator int16_t  () const { return getInt16() ;}
+  operator uint16_t () const { return getUInt16();}
+  operator int32_t  () const { return getInt32() ;}
+  operator uint32_t () const { return getUInt32();}
+  operator int64_t  () const { return getInt64() ;}
+  operator uint64_t () const { return getUInt64();}
   operator double () const { return getDouble();}
 
   /**
@@ -154,14 +154,14 @@ public:
   void set(const char *value);
   void set(const std::string &value) { set(value.c_str());}
   void set(bool   value) { set(value ? "1" : "0");}
-  void set(char   value) { set((int64)value);}
-  void set(uchar  value) { set((uint64)value);}
-  void set(int16  value) { set((int64)value);}
-  void set(uint16 value) { set((uint64)value);}
-  void set(int32  value) { set((int64)value);}
-  void set(uint32 value) { set((uint64)value);}
-  void set(int64  value);
-  void set(uint64 value);
+  void set(char   value) { set((int64_t)value);}
+  void set(uchar  value) { set((uint64_t)value);}
+  void set(int16_t  value) { set((int64_t)value);}
+  void set(uint16_t value) { set((uint64_t)value);}
+  void set(int32_t  value) { set((int64_t)value);}
+  void set(uint32_t value) { set((uint64_t)value);}
+  void set(int64_t  value);
+  void set(uint64_t value);
   void set(double value);
 
   Hdf &operator=(const char *value) { set(value); return *this;}
@@ -169,12 +169,12 @@ public:
   Hdf &operator=(bool   value) { set(value); return *this;}
   Hdf &operator=(char   value) { set(value); return *this;}
   Hdf &operator=(uchar  value) { set(value); return *this;}
-  Hdf &operator=(int16  value) { set(value); return *this;}
-  Hdf &operator=(uint16 value) { set(value); return *this;}
-  Hdf &operator=(int32  value) { set(value); return *this;}
-  Hdf &operator=(uint32 value) { set(value); return *this;}
-  Hdf &operator=(int64  value) { set(value); return *this;}
-  Hdf &operator=(uint64 value) { set(value); return *this;}
+  Hdf &operator=(int16_t  value) { set(value); return *this;}
+  Hdf &operator=(uint16_t value) { set(value); return *this;}
+  Hdf &operator=(int32_t  value) { set(value); return *this;}
+  Hdf &operator=(uint32_t value) { set(value); return *this;}
+  Hdf &operator=(int64_t  value) { set(value); return *this;}
+  Hdf &operator=(uint64_t value) { set(value); return *this;}
   Hdf &operator=(double value) { set(value); return *this;}
   Hdf &operator=(const Hdf &hdf);
 
@@ -240,12 +240,12 @@ public:
   int compare(const std::string &v) const;
   int compare(char   v) const;
   int compare(uchar  v) const;
-  int compare(int16  v) const;
-  int compare(uint16 v) const;
-  int compare(int32  v) const;
-  int compare(uint32 v) const;
-  int compare(int64  v) const;
-  int compare(uint64 v) const;
+  int compare(int16_t  v) const;
+  int compare(uint16_t v) const;
+  int compare(int32_t  v) const;
+  int compare(uint32_t v) const;
+  int compare(int64_t  v) const;
+  int compare(uint64_t v) const;
   int compare(double v) const;
 
   bool operator==(const char *v) const { return compare(v) == 0;}
@@ -276,47 +276,47 @@ public:
   bool operator> (uchar v) const { return compare(v) >  0;}
   bool operator< (uchar v) const { return compare(v) <  0;}
 
-  bool operator==(int16 v) const { return compare(v) == 0;}
-  bool operator!=(int16 v) const { return compare(v) != 0;}
-  bool operator>=(int16 v) const { return compare(v) >= 0;}
-  bool operator<=(int16 v) const { return compare(v) <= 0;}
-  bool operator> (int16 v) const { return compare(v) >  0;}
-  bool operator< (int16 v) const { return compare(v) <  0;}
+  bool operator==(int16_t v) const { return compare(v) == 0;}
+  bool operator!=(int16_t v) const { return compare(v) != 0;}
+  bool operator>=(int16_t v) const { return compare(v) >= 0;}
+  bool operator<=(int16_t v) const { return compare(v) <= 0;}
+  bool operator> (int16_t v) const { return compare(v) >  0;}
+  bool operator< (int16_t v) const { return compare(v) <  0;}
 
-  bool operator==(uint16 v) const { return compare(v) == 0;}
-  bool operator!=(uint16 v) const { return compare(v) != 0;}
-  bool operator>=(uint16 v) const { return compare(v) >= 0;}
-  bool operator<=(uint16 v) const { return compare(v) <= 0;}
-  bool operator> (uint16 v) const { return compare(v) >  0;}
-  bool operator< (uint16 v) const { return compare(v) <  0;}
+  bool operator==(uint16_t v) const { return compare(v) == 0;}
+  bool operator!=(uint16_t v) const { return compare(v) != 0;}
+  bool operator>=(uint16_t v) const { return compare(v) >= 0;}
+  bool operator<=(uint16_t v) const { return compare(v) <= 0;}
+  bool operator> (uint16_t v) const { return compare(v) >  0;}
+  bool operator< (uint16_t v) const { return compare(v) <  0;}
 
-  bool operator==(int32 v) const { return compare(v) == 0;}
-  bool operator!=(int32 v) const { return compare(v) != 0;}
-  bool operator>=(int32 v) const { return compare(v) >= 0;}
-  bool operator<=(int32 v) const { return compare(v) <= 0;}
-  bool operator> (int32 v) const { return compare(v) >  0;}
-  bool operator< (int32 v) const { return compare(v) <  0;}
+  bool operator==(int32_t v) const { return compare(v) == 0;}
+  bool operator!=(int32_t v) const { return compare(v) != 0;}
+  bool operator>=(int32_t v) const { return compare(v) >= 0;}
+  bool operator<=(int32_t v) const { return compare(v) <= 0;}
+  bool operator> (int32_t v) const { return compare(v) >  0;}
+  bool operator< (int32_t v) const { return compare(v) <  0;}
 
-  bool operator==(uint32 v) const { return compare(v) == 0;}
-  bool operator!=(uint32 v) const { return compare(v) != 0;}
-  bool operator>=(uint32 v) const { return compare(v) >= 0;}
-  bool operator<=(uint32 v) const { return compare(v) <= 0;}
-  bool operator> (uint32 v) const { return compare(v) >  0;}
-  bool operator< (uint32 v) const { return compare(v) <  0;}
+  bool operator==(uint32_t v) const { return compare(v) == 0;}
+  bool operator!=(uint32_t v) const { return compare(v) != 0;}
+  bool operator>=(uint32_t v) const { return compare(v) >= 0;}
+  bool operator<=(uint32_t v) const { return compare(v) <= 0;}
+  bool operator> (uint32_t v) const { return compare(v) >  0;}
+  bool operator< (uint32_t v) const { return compare(v) <  0;}
 
-  bool operator==(int64 v) const { return compare(v) == 0;}
-  bool operator!=(int64 v) const { return compare(v) != 0;}
-  bool operator>=(int64 v) const { return compare(v) >= 0;}
-  bool operator<=(int64 v) const { return compare(v) <= 0;}
-  bool operator> (int64 v) const { return compare(v) >  0;}
-  bool operator< (int64 v) const { return compare(v) <  0;}
+  bool operator==(int64_t v) const { return compare(v) == 0;}
+  bool operator!=(int64_t v) const { return compare(v) != 0;}
+  bool operator>=(int64_t v) const { return compare(v) >= 0;}
+  bool operator<=(int64_t v) const { return compare(v) <= 0;}
+  bool operator> (int64_t v) const { return compare(v) >  0;}
+  bool operator< (int64_t v) const { return compare(v) <  0;}
 
-  bool operator==(uint64 v) const { return compare(v) == 0;}
-  bool operator!=(uint64 v) const { return compare(v) != 0;}
-  bool operator>=(uint64 v) const { return compare(v) >= 0;}
-  bool operator<=(uint64 v) const { return compare(v) <= 0;}
-  bool operator> (uint64 v) const { return compare(v) >  0;}
-  bool operator< (uint64 v) const { return compare(v) <  0;}
+  bool operator==(uint64_t v) const { return compare(v) == 0;}
+  bool operator!=(uint64_t v) const { return compare(v) != 0;}
+  bool operator>=(uint64_t v) const { return compare(v) >= 0;}
+  bool operator<=(uint64_t v) const { return compare(v) <= 0;}
+  bool operator> (uint64_t v) const { return compare(v) >  0;}
+  bool operator< (uint64_t v) const { return compare(v) <  0;}
 
   bool operator==(double v) const { return compare(v) == 0;}
   bool operator!=(double v) const { return compare(v) != 0;}
@@ -350,14 +350,14 @@ private:
    * [-maxValue-1, maxValue]. If not, throw an HdfDataTypeException
    * with specified type string. If node is absent, return default value.
    */
-  int64 getInt(int64 defValue, const char *type, int64 maxValue) const;
+  int64_t getInt(int64_t defValue, const char *type, int64_t maxValue) const;
 
   /**
    * Parse value as a unsigned integer and check against mask to make sure
    * it's in the specified range. If not, throw an HdfDataTypeException
    * with specified type string. If node is absent, return default value.
    */
-  uint64 getUInt(uint64 defValue, const char *type, uint64 mask) const;
+  uint64_t getUInt(uint64_t defValue, const char *type, uint64_t mask) const;
 
   /**
    * Implementation of parent() calls.

@@ -415,9 +415,9 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
   }
 
   size_t size = QuickLZ1::qlz_size_decompressed(data.data());
-  if ((int64)size < 0 ||
+  if ((int64_t)size < 0 ||
       (RuntimeOption::SerializationSizeLimit > 0 &&
-       (int64)size > RuntimeOption::SerializationSizeLimit)) {
+       (int64_t)size > RuntimeOption::SerializationSizeLimit)) {
     raise_notice("invalid size in compressed header: %zd", size);
     return false;
   }

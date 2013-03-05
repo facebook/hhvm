@@ -186,7 +186,7 @@ void StringBuffer::append(int n) {
   append(p, len);
 }
 
-void StringBuffer::append(int64 n) {
+void StringBuffer::append(int64_t n) {
   char buf[21];
   int is_negative;
   int len;
@@ -398,7 +398,7 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
       growBy(page_size);
       buffer_size = m_cap - m_len;
     }
-    int64 len = in->readImpl(m_buffer + m_len, buffer_size);
+    int64_t len = in->readImpl(m_buffer + m_len, buffer_size);
     assert(len >= 0);
     if (len == 0) break;
     m_len += len;

@@ -176,7 +176,7 @@ bool UserFile::close() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64 UserFile::readImpl(char *buffer, int64 length) {
+int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool success = false;
   String str = invoke(m_StreamRead, s_stream_read,
@@ -187,7 +187,7 @@ int64 UserFile::readImpl(char *buffer, int64 length) {
     return 0;
   }
 
-  int64 didread = str.size();
+  int64_t didread = str.size();
   if (didread > length) {
     raise_warning("%s::stream_read - read %ld bytes more data than requested "
                   "(%ld read, %ld max) - excess data will be lost",
@@ -200,10 +200,10 @@ int64 UserFile::readImpl(char *buffer, int64 length) {
   return didread;
 }
 
-int64 UserFile::writeImpl(const char *buffer, int64 length) {
+int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
   // stream_write($data)
   bool success = false;
-  int64 didWrite = invoke(m_StreamWrite, s_stream_write,
+  int64_t didWrite = invoke(m_StreamWrite, s_stream_write,
                           CREATE_VECTOR1(String(buffer, length, CopyString)),
                           success);
   if (!success) {
@@ -225,7 +225,7 @@ int64 UserFile::writeImpl(const char *buffer, int64 length) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool UserFile::seek(int64 offset, int whence /* = SEEK_SET */) {
+bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // bool stream_seek($offset, $whence)
   bool success = false;
   bool sought  = invoke(m_StreamSeek, s_stream_seek,
@@ -233,7 +233,7 @@ bool UserFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   return success ? sought : false;
 }
 
-int64 UserFile::tell() {
+int64_t UserFile::tell() {
   // int stream_tell()
   bool success = false;
   Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), success);
@@ -271,7 +271,7 @@ bool UserFile::flush() {
 }
 
 bool UserFile::lock(int operation, bool &wouldBlock) {
-  int64 op = 0;
+  int64_t op = 0;
   if (operation & LOCK_NB) {
     op |= k_LOCK_NB;
   }

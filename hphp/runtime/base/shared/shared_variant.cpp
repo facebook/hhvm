@@ -245,7 +245,7 @@ int SharedVariant::getIndex(const StringData* key) {
   return m_data.map->indexOf(key);
 }
 
-int SharedVariant::getIndex(int64 key) {
+int SharedVariant::getIndex(int64_t key) {
   assert(is(KindOfArray));
   if (getIsVector()) {
     if (key < 0 || (size_t) key >= m_data.vec->m_size) return -1;
@@ -342,8 +342,8 @@ SharedVariant* SharedVariant::convertObj(CVarRef var) {
   return tmp;
 }
 
-int32 SharedVariant::getSpaceUsage() const {
-  int32 size = sizeof(SharedVariant);
+int32_t SharedVariant::getSpaceUsage() const {
+  int32_t size = sizeof(SharedVariant);
   if (!IS_REFCOUNTED_TYPE(m_type)) return size;
   switch (m_type) {
   case KindOfObject:

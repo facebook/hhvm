@@ -36,32 +36,32 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 k_UCOL_DEFAULT = UCOL_DEFAULT;
+const int64_t k_UCOL_DEFAULT = UCOL_DEFAULT;
 
-const int64 k_UCOL_PRIMARY = UCOL_PRIMARY;
-const int64 k_UCOL_SECONDARY = UCOL_SECONDARY;
-const int64 k_UCOL_TERTIARY = UCOL_TERTIARY;
-const int64 k_UCOL_DEFAULT_STRENGTH = UCOL_DEFAULT_STRENGTH;
-const int64 k_UCOL_QUATERNARY = UCOL_QUATERNARY;
-const int64 k_UCOL_IDENTICAL = UCOL_IDENTICAL;
+const int64_t k_UCOL_PRIMARY = UCOL_PRIMARY;
+const int64_t k_UCOL_SECONDARY = UCOL_SECONDARY;
+const int64_t k_UCOL_TERTIARY = UCOL_TERTIARY;
+const int64_t k_UCOL_DEFAULT_STRENGTH = UCOL_DEFAULT_STRENGTH;
+const int64_t k_UCOL_QUATERNARY = UCOL_QUATERNARY;
+const int64_t k_UCOL_IDENTICAL = UCOL_IDENTICAL;
 
-const int64 k_UCOL_OFF = UCOL_OFF;
-const int64 k_UCOL_ON = UCOL_ON;
+const int64_t k_UCOL_OFF = UCOL_OFF;
+const int64_t k_UCOL_ON = UCOL_ON;
 
-const int64 k_UCOL_SHIFTED = UCOL_SHIFTED;
-const int64 k_UCOL_NON_IGNORABLE = UCOL_NON_IGNORABLE;
+const int64_t k_UCOL_SHIFTED = UCOL_SHIFTED;
+const int64_t k_UCOL_NON_IGNORABLE = UCOL_NON_IGNORABLE;
 
-const int64 k_UCOL_LOWER_FIRST = UCOL_LOWER_FIRST;
-const int64 k_UCOL_UPPER_FIRST = UCOL_UPPER_FIRST;
+const int64_t k_UCOL_LOWER_FIRST = UCOL_LOWER_FIRST;
+const int64_t k_UCOL_UPPER_FIRST = UCOL_UPPER_FIRST;
 
-const int64 k_UCOL_FRENCH_COLLATION = UCOL_FRENCH_COLLATION;
-const int64 k_UCOL_ALTERNATE_HANDLING = UCOL_ALTERNATE_HANDLING;
-const int64 k_UCOL_CASE_FIRST = UCOL_CASE_FIRST;
-const int64 k_UCOL_CASE_LEVEL = UCOL_CASE_LEVEL;
-const int64 k_UCOL_NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
-const int64 k_UCOL_STRENGTH = UCOL_STRENGTH;
-const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
-const int64 k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
+const int64_t k_UCOL_FRENCH_COLLATION = UCOL_FRENCH_COLLATION;
+const int64_t k_UCOL_ALTERNATE_HANDLING = UCOL_ALTERNATE_HANDLING;
+const int64_t k_UCOL_CASE_FIRST = UCOL_CASE_FIRST;
+const int64_t k_UCOL_CASE_LEVEL = UCOL_CASE_LEVEL;
+const int64_t k_UCOL_NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
+const int64_t k_UCOL_STRENGTH = UCOL_STRENGTH;
+const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
+const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
 using HPHP::VM::Transl::CallerFrame;
 
@@ -147,7 +147,7 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   switch (Variant::GetAccessorType(kacc)) {
   case KindOfString:
   case KindOfStaticString: {
-    int64 n = 0;
+    int64_t n = 0;
     StringData *sd = Variant::GetStringData(kacc);
     if (sd->isStrictlyInteger(n)) {
       return ad->exists(n);
@@ -368,7 +368,7 @@ Variant f_array_product(CVarRef array) {
   if (arr_array.empty()) {
     return 0; // to be consistent with PHP
   }
-  int64 i;
+  int64_t i;
   double d;
   if (ArrayUtil::Product(arr_array, &i, &d) == KindOfInt64) {
     return i;
@@ -427,7 +427,7 @@ Variant f_array_slice(CVarRef array, int offset,
                       CVarRef length /* = null_variant */,
                       bool preserve_keys /* = false */) {
   getCheckedArray(array);
-  int64 len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
+  int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
   return ArrayUtil::Slice(arr_array, offset, len, preserve_keys);
 }
 Variant f_array_splice(VRefParam input, int offset,
@@ -435,13 +435,13 @@ Variant f_array_splice(VRefParam input, int offset,
                        CVarRef replacement /* = null_variant */) {
   getCheckedArray(input);
   Array ret(Array::Create());
-  int64 len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
+  int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
   input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
 }
 Variant f_array_sum(CVarRef array) {
   getCheckedArray(array);
-  int64 i;
+  int64_t i;
   double d;
   if (ArrayUtil::Sum(arr_array, &i, &d) == KindOfInt64) {
     return i;
@@ -450,7 +450,7 @@ Variant f_array_sum(CVarRef array) {
   }
 }
 
-int64 f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
+int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
   if (array.toArray()->isVectorData()) {
     if (!_argv.empty()) {
       for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
@@ -617,7 +617,7 @@ bool f_shuffle(VRefParam array) {
   return true;
 }
 
-int64 f_count(CVarRef var, bool recursive /* = false */) {
+int64_t f_count(CVarRef var, bool recursive /* = false */) {
   switch (var.getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -713,7 +713,7 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
     dstep = step.toDouble();
     is_step_double = true;
   } else if (step.isString()) {
-    int64 sn;
+    int64_t sn;
     double sd;
     DataType stype = step.toString()->isNumericWithVal(sn, sd, 0);
     if (stype == KindOfDouble) {
@@ -733,7 +733,7 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
     String slow = low.toString();
     String shigh = high.toString();
     if (slow.size() >= 1 && shigh.size() >=1) {
-      int64 n1, n2;
+      int64_t n1, n2;
       double d1, d2;
       DataType type1 = slow->isNumericWithVal(n1, d1, 0);
       DataType type2 = shigh->isNumericWithVal(n2, d2, 0);
@@ -743,7 +743,7 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
         return ArrayUtil::Range(d1, d2, dstep);
       }
 
-      int64 lstep = (int64) dstep;
+      int64_t lstep = (int64_t) dstep;
       if (type1 == KindOfInt64 || type2 == KindOfInt64) {
         if (type1 != KindOfInt64) n1 = slow.toInt64();
         if (type2 != KindOfInt64) n2 = shigh.toInt64();
@@ -759,7 +759,7 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
     return ArrayUtil::Range(low.toDouble(), high.toDouble(), dstep);
   }
 
-  int64 lstep = (int64) dstep;
+  int64_t lstep = (int64_t) dstep;
   return ArrayUtil::Range(low.toDouble(), high.toDouble(), lstep);
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -990,7 +990,7 @@ public:
     return m_ucoll;
   }
 
-  bool setAttribute(int64 attr, int64 val) {
+  bool setAttribute(int64_t attr, int64_t val) {
     if (!m_ucoll) {
       Logger::Verbose("m_ucoll is NULL");
       return false;
@@ -1005,7 +1005,7 @@ public:
     return true;
   }
 
-  bool setStrength(int64 strength) {
+  bool setStrength(int64_t strength) {
     if (!m_ucoll) {
       Logger::Verbose("m_ucoll is NULL");
       return false;
@@ -1323,11 +1323,11 @@ bool f_i18n_loc_set_default(CStrRef locale) {
   return s_collator->setLocale(locale);
 }
 
-bool f_i18n_loc_set_attribute(int64 attr, int64 val) {
+bool f_i18n_loc_set_attribute(int64_t attr, int64_t val) {
   return s_collator->setAttribute(attr, val);
 }
 
-bool f_i18n_loc_set_strength(int64 strength) {
+bool f_i18n_loc_set_strength(int64_t strength) {
   return s_collator->setStrength(strength);
 }
 

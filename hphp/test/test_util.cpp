@@ -222,7 +222,7 @@ bool TestUtil::TestSharedString() {
     VERIFY(foo->getString() == "foo");
   }
   {
-    hphp_shared_string_map<int64> map;
+    hphp_shared_string_map<int64_t> map;
     for (int i = 0; i < 100; i++) {
       string k("key");
       k += i;
@@ -231,7 +231,7 @@ bool TestUtil::TestSharedString() {
     for (int i = 0; i < 100; i++) {
       string k("key");
       k += i;
-      hphp_shared_string_map<int64>::const_iterator it = map.find(k);
+      hphp_shared_string_map<int64_t>::const_iterator it = map.find(k);
       VERIFY(it != map.end());
       VERIFY(it->second == i);
     }

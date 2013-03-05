@@ -45,9 +45,9 @@ IMPLEMENT_THREAD_LOCAL(c_Memcached::ImplMap, c_Memcached::s_persistentMap);
 #define MEMC_COMPRESS_THRESHOLD 100
 
 // Class options
-const int64 q_Memcached$$OPT_COMPRESSION = -1001;
-const int64 q_Memcached$$OPT_PREFIX_KEY  = -1002;
-const int64 q_Memcached$$OPT_SERIALIZER  = -1003;
+const int64_t q_Memcached$$OPT_COMPRESSION = -1001;
+const int64_t q_Memcached$$OPT_PREFIX_KEY  = -1002;
+const int64_t q_Memcached$$OPT_SERIALIZER  = -1003;
 
 // Indicate whether igbinary serializer is available
 const bool q_Memcached$$HAVE_IGBINARY = false;
@@ -56,113 +56,113 @@ const bool q_Memcached$$HAVE_IGBINARY = false;
 const bool q_Memcached$$HAVE_JSON = true;
 
 // libmemcached behavior options
-const int64 q_Memcached$$OPT_HASH
+const int64_t q_Memcached$$OPT_HASH
           = MEMCACHED_BEHAVIOR_HASH;
-const int64 q_Memcached$$HASH_DEFAULT
+const int64_t q_Memcached$$HASH_DEFAULT
           = MEMCACHED_HASH_DEFAULT;
-const int64 q_Memcached$$HASH_MD5
+const int64_t q_Memcached$$HASH_MD5
           = MEMCACHED_HASH_MD5;
-const int64 q_Memcached$$HASH_CRC
+const int64_t q_Memcached$$HASH_CRC
           = MEMCACHED_HASH_CRC;
-const int64 q_Memcached$$HASH_FNV1_64
+const int64_t q_Memcached$$HASH_FNV1_64
           = MEMCACHED_HASH_FNV1_64;
-const int64 q_Memcached$$HASH_FNV1A_64
+const int64_t q_Memcached$$HASH_FNV1A_64
           = MEMCACHED_HASH_FNV1A_64;
-const int64 q_Memcached$$HASH_FNV1_32
+const int64_t q_Memcached$$HASH_FNV1_32
           = MEMCACHED_HASH_FNV1_32;
-const int64 q_Memcached$$HASH_FNV1A_32
+const int64_t q_Memcached$$HASH_FNV1A_32
           = MEMCACHED_HASH_FNV1A_32;
-const int64 q_Memcached$$HASH_HSIEH
+const int64_t q_Memcached$$HASH_HSIEH
           = MEMCACHED_HASH_HSIEH;
-const int64 q_Memcached$$HASH_MURMUR
+const int64_t q_Memcached$$HASH_MURMUR
           = MEMCACHED_HASH_MURMUR;
-const int64 q_Memcached$$OPT_DISTRIBUTION
+const int64_t q_Memcached$$OPT_DISTRIBUTION
           = MEMCACHED_BEHAVIOR_DISTRIBUTION;
-const int64 q_Memcached$$DISTRIBUTION_MODULA
+const int64_t q_Memcached$$DISTRIBUTION_MODULA
           = MEMCACHED_DISTRIBUTION_MODULA;
-const int64 q_Memcached$$DISTRIBUTION_CONSISTENT
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT
           = MEMCACHED_DISTRIBUTION_CONSISTENT;
-const int64 q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
+const int64_t q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
           = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
-const int64 q_Memcached$$OPT_BUFFER_WRITES
+const int64_t q_Memcached$$OPT_BUFFER_WRITES
           = MEMCACHED_BEHAVIOR_BUFFER_REQUESTS;
-const int64 q_Memcached$$OPT_BINARY_PROTOCOL
+const int64_t q_Memcached$$OPT_BINARY_PROTOCOL
           = MEMCACHED_BEHAVIOR_BINARY_PROTOCOL;
-const int64 q_Memcached$$OPT_NO_BLOCK
+const int64_t q_Memcached$$OPT_NO_BLOCK
           = MEMCACHED_BEHAVIOR_NO_BLOCK;
-const int64 q_Memcached$$OPT_TCP_NODELAY
+const int64_t q_Memcached$$OPT_TCP_NODELAY
           = MEMCACHED_BEHAVIOR_TCP_NODELAY;
-const int64 q_Memcached$$OPT_SOCKET_SEND_SIZE
+const int64_t q_Memcached$$OPT_SOCKET_SEND_SIZE
           = MEMCACHED_BEHAVIOR_SOCKET_SEND_SIZE;
-const int64 q_Memcached$$OPT_SOCKET_RECV_SIZE
+const int64_t q_Memcached$$OPT_SOCKET_RECV_SIZE
           = MEMCACHED_BEHAVIOR_SOCKET_RECV_SIZE;
-const int64 q_Memcached$$OPT_CONNECT_TIMEOUT
+const int64_t q_Memcached$$OPT_CONNECT_TIMEOUT
           = MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT;
-const int64 q_Memcached$$OPT_RETRY_TIMEOUT
+const int64_t q_Memcached$$OPT_RETRY_TIMEOUT
           = MEMCACHED_BEHAVIOR_RETRY_TIMEOUT;
-const int64 q_Memcached$$OPT_SEND_TIMEOUT
+const int64_t q_Memcached$$OPT_SEND_TIMEOUT
           = MEMCACHED_BEHAVIOR_SND_TIMEOUT;
-const int64 q_Memcached$$OPT_RECV_TIMEOUT
+const int64_t q_Memcached$$OPT_RECV_TIMEOUT
           = MEMCACHED_BEHAVIOR_RCV_TIMEOUT;
-const int64 q_Memcached$$OPT_POLL_TIMEOUT
+const int64_t q_Memcached$$OPT_POLL_TIMEOUT
           = MEMCACHED_BEHAVIOR_POLL_TIMEOUT;
-const int64 q_Memcached$$OPT_CACHE_LOOKUPS
+const int64_t q_Memcached$$OPT_CACHE_LOOKUPS
           = MEMCACHED_BEHAVIOR_CACHE_LOOKUPS;
-const int64 q_Memcached$$OPT_SERVER_FAILURE_LIMIT
+const int64_t q_Memcached$$OPT_SERVER_FAILURE_LIMIT
           = MEMCACHED_BEHAVIOR_SERVER_FAILURE_LIMIT;
 
 // libmemcached result codes
-const int64 q_Memcached$$RES_SUCCESS
+const int64_t q_Memcached$$RES_SUCCESS
           = MEMCACHED_SUCCESS;
-const int64 q_Memcached$$RES_FAILURE
+const int64_t q_Memcached$$RES_FAILURE
           = MEMCACHED_FAILURE;
-const int64 q_Memcached$$RES_HOST_LOOKUP_FAILURE
+const int64_t q_Memcached$$RES_HOST_LOOKUP_FAILURE
           = MEMCACHED_HOST_LOOKUP_FAILURE;
-const int64 q_Memcached$$RES_UNKNOWN_READ_FAILURE
+const int64_t q_Memcached$$RES_UNKNOWN_READ_FAILURE
           = MEMCACHED_UNKNOWN_READ_FAILURE;
-const int64 q_Memcached$$RES_PROTOCOL_ERROR
+const int64_t q_Memcached$$RES_PROTOCOL_ERROR
           = MEMCACHED_PROTOCOL_ERROR;
-const int64 q_Memcached$$RES_CLIENT_ERROR
+const int64_t q_Memcached$$RES_CLIENT_ERROR
           = MEMCACHED_CLIENT_ERROR;
-const int64 q_Memcached$$RES_SERVER_ERROR
+const int64_t q_Memcached$$RES_SERVER_ERROR
           = MEMCACHED_SERVER_ERROR;
-const int64 q_Memcached$$RES_WRITE_FAILURE
+const int64_t q_Memcached$$RES_WRITE_FAILURE
           = MEMCACHED_WRITE_FAILURE;
-const int64 q_Memcached$$RES_DATA_EXISTS
+const int64_t q_Memcached$$RES_DATA_EXISTS
           = MEMCACHED_DATA_EXISTS;
-const int64 q_Memcached$$RES_NOTSTORED
+const int64_t q_Memcached$$RES_NOTSTORED
           = MEMCACHED_NOTSTORED;
-const int64 q_Memcached$$RES_NOTFOUND
+const int64_t q_Memcached$$RES_NOTFOUND
           = MEMCACHED_NOTFOUND;
-const int64 q_Memcached$$RES_PARTIAL_READ
+const int64_t q_Memcached$$RES_PARTIAL_READ
           = MEMCACHED_PARTIAL_READ;
-const int64 q_Memcached$$RES_SOME_ERRORS
+const int64_t q_Memcached$$RES_SOME_ERRORS
           = MEMCACHED_SOME_ERRORS;
-const int64 q_Memcached$$RES_NO_SERVERS
+const int64_t q_Memcached$$RES_NO_SERVERS
           = MEMCACHED_NO_SERVERS;
-const int64 q_Memcached$$RES_END
+const int64_t q_Memcached$$RES_END
           = MEMCACHED_END;
-const int64 q_Memcached$$RES_ERRNO
+const int64_t q_Memcached$$RES_ERRNO
           = MEMCACHED_ERRNO;
-const int64 q_Memcached$$RES_BUFFERED
+const int64_t q_Memcached$$RES_BUFFERED
           = MEMCACHED_BUFFERED;
-const int64 q_Memcached$$RES_TIMEOUT
+const int64_t q_Memcached$$RES_TIMEOUT
           = MEMCACHED_TIMEOUT;
-const int64 q_Memcached$$RES_BAD_KEY_PROVIDED
+const int64_t q_Memcached$$RES_BAD_KEY_PROVIDED
           = MEMCACHED_BAD_KEY_PROVIDED;
-const int64 q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
+const int64_t q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
           = MEMCACHED_CONNECTION_SOCKET_CREATE_FAILURE;
 
 // Our result codes
-const int64 q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
+const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
 
 // Serializer types
-const int64 q_Memcached$$SERIALIZER_PHP      = 1;
-const int64 q_Memcached$$SERIALIZER_IGBINARY = 2;
-const int64 q_Memcached$$SERIALIZER_JSON     = 3;
+const int64_t q_Memcached$$SERIALIZER_PHP      = 1;
+const int64_t q_Memcached$$SERIALIZER_IGBINARY = 2;
+const int64_t q_Memcached$$SERIALIZER_JSON     = 3;
 
 // Flags
-const int64 q_Memcached$$GET_PRESERVE_ORDER = 1;
+const int64_t q_Memcached$$GET_PRESERVE_ORDER = 1;
 
 
 namespace {
@@ -482,7 +482,7 @@ bool c_Memcached::setOperationImpl(SetOperation op, CStrRef server_key,
     return false;
   }
 
-  vector<char> payload; uint32 flags;
+  vector<char> payload; uint32_t flags;
   toPayload(value, payload, flags);
 
   CStrRef myServerKey = server_key.empty() ? key : server_key;
@@ -504,13 +504,13 @@ bool c_Memcached::t_casbykey(double cas_token, CStrRef server_key, CStrRef key,
     return false;
   }
 
-  vector<char> payload; uint32 flags;
+  vector<char> payload; uint32_t flags;
   toPayload(value, payload, flags);
 
   CStrRef myServerKey = server_key.empty() ? key : server_key;
   return handleError(memcached_cas_by_key(&m_impl->memcached,
       myServerKey.c_str(), myServerKey.length(), key.c_str(), key.length(),
-      payload.data(), payload.size(), expiration, flags, (uint64)cas_token));
+      payload.data(), payload.size(), expiration, flags, (uint64_t)cas_token));
 }
 
 bool c_Memcached::t_delete(CStrRef key, int time /*= 0*/) {
@@ -531,16 +531,16 @@ bool c_Memcached::t_deletebykey(CStrRef server_key, CStrRef key,
                      key.c_str(), key.length(), time));
 }
 
-Variant c_Memcached::t_increment(CStrRef key, int64 offset /*= 1*/) {
+Variant c_Memcached::t_increment(CStrRef key, int64_t offset /*= 1*/) {
   return incDecOperationImpl(memcached_increment, key, offset);
 }
 
-Variant c_Memcached::t_decrement(CStrRef key, int64 offset /*= 1*/) {
+Variant c_Memcached::t_decrement(CStrRef key, int64_t offset /*= 1*/) {
   return incDecOperationImpl(memcached_decrement, key, offset);
 }
 
 Variant c_Memcached::incDecOperationImpl(IncDecOperation op, CStrRef key,
-                                         int64 offset) {
+                                         int64_t offset) {
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
     m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
@@ -553,10 +553,10 @@ Variant c_Memcached::incDecOperationImpl(IncDecOperation op, CStrRef key,
 
   uint64_t value;
   if (!handleError(op(&m_impl->memcached, key.c_str(), key.length(),
-                      (uint32)offset, &value))) {
+                      (uint32_t)offset, &value))) {
     return false;
   }
-  return (int64)value;
+  return (int64_t)value;
 }
 
 bool c_Memcached::t_addserver(CStrRef host, int port, int weight /*= 0*/) {
@@ -607,8 +607,8 @@ memcached_return_t doServerListCallback(const memcached_st *ptr,
     memcached_server_instance_st server, void *context) {
   Array *returnValue = (Array*) context;
   returnValue->append(CREATE_MAP3("host", String(server->hostname, CopyString),
-                                  "port", (int32)server->port,
-                                  "weight", (int32)server->weight));
+                                  "port", (int32_t)server->port,
+                                  "weight", (int32_t)server->weight));
   return MEMCACHED_SUCCESS;
 }
 }
@@ -636,8 +636,8 @@ Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
   }
 
   Array returnValue = CREATE_MAP3("host", String(server->hostname, CopyString),
-                                  "port", (int32)server->port,
-                                  "weight", (int32)server->weight);
+                                  "port", (int32_t)server->port,
+                                  "weight", (int32_t)server->weight);
   return returnValue;
 }
 
@@ -656,31 +656,31 @@ memcached_return_t doStatsCallback(const memcached_st *ptr,
   ssize_t i = context->returnValue.size();
 
   context->returnValue.set(String(key, CopyString), Array(ArrayInit(24)
-      .set("pid",                        (int64)stats[i].pid)
-      .set("uptime",                     (int64)stats[i].uptime)
-      .set("threads",                    (int64)stats[i].threads)
-      .set("time",                       (int64)stats[i].time)
-      .set("pointer_size",               (int64)stats[i].pointer_size)
-      .set("rusage_user_seconds",        (int64)stats[i].rusage_user_seconds)
-      .set("rusage_user_microseconds",   (int64)stats[i]
+      .set("pid",                        (int64_t)stats[i].pid)
+      .set("uptime",                     (int64_t)stats[i].uptime)
+      .set("threads",                    (int64_t)stats[i].threads)
+      .set("time",                       (int64_t)stats[i].time)
+      .set("pointer_size",               (int64_t)stats[i].pointer_size)
+      .set("rusage_user_seconds",        (int64_t)stats[i].rusage_user_seconds)
+      .set("rusage_user_microseconds",   (int64_t)stats[i]
                                                 .rusage_user_microseconds)
-      .set("rusage_system_seconds",      (int64)stats[i].rusage_system_seconds)
-      .set("rusage_system_microseconds", (int64)stats[i]
+      .set("rusage_system_seconds",      (int64_t)stats[i].rusage_system_seconds)
+      .set("rusage_system_microseconds", (int64_t)stats[i]
                                                 .rusage_system_microseconds)
-      .set("curr_items",                 (int64)stats[i].curr_items)
-      .set("total_items",                (int64)stats[i].total_items)
-      .set("limit_maxbytes",             (int64)stats[i].limit_maxbytes)
-      .set("curr_connections",           (int64)stats[i].curr_connections)
-      .set("total_connections",          (int64)stats[i].total_connections)
-      .set("connection_structures",      (int64)stats[i].connection_structures)
-      .set("bytes",                      (int64)stats[i].bytes)
-      .set("cmd_get",                    (int64)stats[i].cmd_get)
-      .set("cmd_set",                    (int64)stats[i].cmd_set)
-      .set("get_hits",                   (int64)stats[i].get_hits)
-      .set("get_misses",                 (int64)stats[i].get_misses)
-      .set("evictions",                  (int64)stats[i].evictions)
-      .set("bytes_read",                 (int64)stats[i].bytes_read)
-      .set("bytes_written",              (int64)stats[i].bytes_written)
+      .set("curr_items",                 (int64_t)stats[i].curr_items)
+      .set("total_items",                (int64_t)stats[i].total_items)
+      .set("limit_maxbytes",             (int64_t)stats[i].limit_maxbytes)
+      .set("curr_connections",           (int64_t)stats[i].curr_connections)
+      .set("total_connections",          (int64_t)stats[i].total_connections)
+      .set("connection_structures",      (int64_t)stats[i].connection_structures)
+      .set("bytes",                      (int64_t)stats[i].bytes)
+      .set("cmd_get",                    (int64_t)stats[i].cmd_get)
+      .set("cmd_set",                    (int64_t)stats[i].cmd_set)
+      .set("get_hits",                   (int64_t)stats[i].get_hits)
+      .set("get_misses",                 (int64_t)stats[i].get_misses)
+      .set("evictions",                  (int64_t)stats[i].evictions)
+      .set("bytes_read",                 (int64_t)stats[i].bytes_read)
+      .set("bytes_written",              (int64_t)stats[i].bytes_written)
       .set("version",                    String(stats[i].version, CopyString))
       .create()));
 
@@ -758,7 +758,7 @@ Variant c_Memcached::t_getoption(int option) {
 
   default:
     // Assume that it's a libmemcached behavior option
-    return (int64) memcached_behavior_get(&m_impl->memcached,
+    return (int64_t) memcached_behavior_get(&m_impl->memcached,
                                           (memcached_behavior_t)option);
   }
 }
@@ -783,7 +783,7 @@ bool c_Memcached::t_setoption(int option, CVarRef value) {
 
   case MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED:
     {
-      uint64 lValue = value.toInt64();
+      uint64_t lValue = value.toInt64();
       if (memcached_behavior_set(&m_impl->memcached,
           MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED, lValue) == MEMCACHED_FAILURE) {
         raise_warning("error setting memcached option");
@@ -822,7 +822,7 @@ bool c_Memcached::t_setoption(int option, CVarRef value) {
   default:
     {
       // Assume that it's a libmemcached behavior option
-      uint64 lValue = value.toInt64();
+      uint64_t lValue = value.toInt64();
       if (memcached_behavior_set(&m_impl->memcached,
           (memcached_behavior_t)option, lValue) == MEMCACHED_FAILURE) {
         raise_warning("error setting memcached option");
@@ -834,7 +834,7 @@ bool c_Memcached::t_setoption(int option, CVarRef value) {
   return true;
 }
 
-int64 c_Memcached::t_getresultcode() {
+int64_t c_Memcached::t_getresultcode() {
   return m_impl->rescode;
 }
 
@@ -865,7 +865,7 @@ bool c_Memcached::handleError(memcached_return status) {
 }
 
 void c_Memcached::toPayload(CVarRef value, vector<char> &payload,
-                            uint32 &flags) {
+                            uint32_t &flags) {
   String encoded;
   if (value.isString() || value.isNumeric()) {
     encoded = value.toString();
@@ -907,7 +907,7 @@ void c_Memcached::toPayload(CVarRef value, vector<char> &payload,
 bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
   const char *payload  = memcached_result_value(&result);
   size_t payloadLength = memcached_result_length(&result);
-  uint32 flags         = memcached_result_flags(&result);
+  uint32_t flags         = memcached_result_flags(&result);
 
   String decompPayload;
   if (flags & MEMC_VAL_COMPRESSED) {
@@ -969,7 +969,7 @@ memcached_return c_Memcached::doCacheCallback(CVarRef callback, CStrRef key,
     return MEMCACHED_NOTFOUND;
   }
 
-  vector<char> payload; uint32 flags;
+  vector<char> payload; uint32_t flags;
   toPayload(value, payload, flags);
   return memcached_set(&m_impl->memcached, key.c_str(), key.length(),
                        payload.data(), payload.size(), 0, flags);

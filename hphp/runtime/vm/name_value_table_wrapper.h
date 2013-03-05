@@ -81,30 +81,30 @@ public: // ArrayData implementation
   virtual CVarRef getValueRef(ssize_t pos) const;
   virtual bool noCopyOnWrite() const;
 
-  virtual bool exists(int64 k) const;
+  virtual bool exists(int64_t k) const;
   virtual bool exists(const StringData* k) const;
   virtual bool idxExists(ssize_t idx) const;
 
-  virtual CVarRef get(int64 k, bool error = false) const;
+  virtual CVarRef get(int64_t k, bool error = false) const;
   virtual CVarRef get(const StringData* k, bool error = false) const;
 
-  virtual TypedValue* nvGet(int64 k) const;
+  virtual TypedValue* nvGet(int64_t k) const;
   virtual TypedValue* nvGet(const StringData* k) const;
 
-  virtual ssize_t getIndex(int64 k) const;
+  virtual ssize_t getIndex(int64_t k) const;
   virtual ssize_t getIndex(const StringData* k) const;
 
-  virtual ArrayData* lval(int64 k, Variant*& ret, bool copy,
+  virtual ArrayData* lval(int64_t k, Variant*& ret, bool copy,
                           bool checkExist = false);
   virtual ArrayData* lval(StringData* k, Variant*& ret,
                           bool copy, bool checkExist = false);
   virtual ArrayData* lvalNew(Variant*& ret, bool copy);
 
-  virtual ArrayData* set(int64 k, CVarRef v, bool copy);
+  virtual ArrayData* set(int64_t k, CVarRef v, bool copy);
   virtual ArrayData* set(StringData* k, CVarRef v, bool copy);
-  virtual ArrayData* setRef(int64 k, CVarRef v, bool copy);
+  virtual ArrayData* setRef(int64_t k, CVarRef v, bool copy);
   virtual ArrayData* setRef(StringData* k, CVarRef v, bool copy);
-  virtual ArrayData* remove(int64 k, bool copy);
+  virtual ArrayData* remove(int64_t k, bool copy);
   virtual ArrayData* remove(const StringData* k, bool copy);
 
   virtual ArrayData* copy() const { return 0; }

@@ -39,12 +39,12 @@ public:
 
   bool open(CStrRef filename, CStrRef mode);
   bool close();
-  int64 errnu();
+  int64_t errnu();
   String errstr();
   Variant error();
   virtual bool flush();
-  virtual int64 readImpl(char * buf, int64 length);
-  virtual int64 writeImpl(const char * buf, int64 length);
+  virtual int64_t readImpl(char * buf, int64_t length);
+  virtual int64_t writeImpl(const char * buf, int64_t length);
   virtual bool eof();
 
 private:

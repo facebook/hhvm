@@ -275,8 +275,8 @@ public:
   /**
    * Literal string to String precomputation
    */
-  std::string getLiteralStringName(int64 hash, int index, bool iproxy = false);
-  std::string getLitVarStringName(int64 hash, int index, bool iproxy = false);
+  std::string getLiteralStringName(int64_t hash, int index, bool iproxy = false);
+  std::string getLitVarStringName(int64_t hash, int index, bool iproxy = false);
   int getLiteralStringId(const std::string &s, int &index);
 
   /**
@@ -290,12 +290,12 @@ public:
   int m_arrayLitstrKeyMaxSize;
   int m_arrayIntegerKeyMaxSize;
 
-  std::string getHashedName(int64 hash, int index, const char *prefix,
+  std::string getHashedName(int64_t hash, int index, const char *prefix,
                             bool longName = false);
   void addNamedLiteralVarString(const std::string &s);
   void addNamedScalarVarArray(const std::string &s);
   StringToClassScopePtrVecMap getExtensionClasses();
-  void addInteger(int64 n);
+  void addInteger(int64_t n);
 private:
   Package *m_package;
   bool m_parseOnDemand;

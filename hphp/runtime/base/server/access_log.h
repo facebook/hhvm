@@ -42,7 +42,7 @@ public:
   public:
     ThreadData() : log(nullptr), bytesWritten(0), prevBytesWritten(0) {}
     FILE *log;
-    int64 startTime;
+    int64_t startTime;
     int bytesWritten;
     int prevBytesWritten;
   };

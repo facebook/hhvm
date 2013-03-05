@@ -135,7 +135,7 @@ public:
 
   const std::string &id() const;
   const std::string desc() const;
-  static DSandboxInfo CreateDummyInfo(uint64 unique);
+  static DSandboxInfo CreateDummyInfo(uint64_t unique);
 
   bool valid() const { return !m_user.empty(); }
   void set(const std::string &id);
@@ -153,7 +153,7 @@ private:
 DECLARE_BOOST_TYPES(DThreadInfo);
 class DThreadInfo {
 public:
-  int64 m_id;
+  int64_t m_id;
   std::string m_desc;
   std::string m_type;
   std::string m_url;

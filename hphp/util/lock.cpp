@@ -45,7 +45,7 @@ LockProfiler::~LockProfiler() {
     gettimeofday(&unlockTime, nullptr);
     time_t dsec = unlockTime.tv_sec - m_lockTime.tv_sec;
     long dnsec = unlockTime.tv_usec - m_lockTime.tv_usec;
-    int64 dusec = dsec * 1000000 + dnsec;
+    int64_t dusec = dsec * 1000000 + dnsec;
 #else
     timespec unlockTime;
     unlockTime.tv_sec = 0;
@@ -53,7 +53,7 @@ LockProfiler::~LockProfiler() {
     clock_gettime(CLOCK_MONOTONIC, &unlockTime);
     time_t dsec = unlockTime.tv_sec - m_lockTime.tv_sec;
     long dnsec = unlockTime.tv_nsec - m_lockTime.tv_nsec;
-    int64 dusec = dsec * 1000000 + dnsec / 1000;
+    int64_t dusec = dsec * 1000000 + dnsec / 1000;
 #endif
 
     StackTrace st;

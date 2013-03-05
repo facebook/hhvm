@@ -525,12 +525,12 @@ IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
 
-SSATmp* IRInstruction::getSrc(uint32 i) const {
+SSATmp* IRInstruction::getSrc(uint32_t i) const {
   if (i >= getNumSrcs()) return nullptr;
   return m_srcs[i];
 }
 
-void IRInstruction::setSrc(uint32 i, SSATmp* newSrc) {
+void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   assert(i < getNumSrcs());
   m_srcs[i] = newSrc;
 }
@@ -575,7 +575,7 @@ bool IRInstruction::equals(IRInstruction* inst) const {
       m_numSrcs != inst->m_numSrcs) {
     return false;
   }
-  for (uint32 i = 0; i < getNumSrcs(); i++) {
+  for (uint32_t i = 0; i < getNumSrcs(); i++) {
     if (getSrc(i) != inst->getSrc(i)) {
       return false;
     }
@@ -625,7 +625,7 @@ void IRInstruction::printDst(std::ostream& ostream) const {
   }
 }
 
-void IRInstruction::printSrc(std::ostream& ostream, uint32 i) const {
+void IRInstruction::printSrc(std::ostream& ostream, uint32_t i) const {
   SSATmp* src = getSrc(i);
   if (src != nullptr) {
     if (m_id != 0 && !src->isConst() && src->getLastUseId() == m_id) {
@@ -644,7 +644,7 @@ void IRInstruction::printSrcs(std::ostream& ostream) const {
                ", " << getSrc(1)->getValInt();
     return;
   }
-  for (uint32 i = 0; i < m_numSrcs; i++) {
+  for (uint32_t i = 0; i < m_numSrcs; i++) {
     if (!first) {
       ostream << ", ";
     } else {
@@ -677,7 +677,7 @@ void IRInstruction::print(std::ostream& ostream) const {
     if (m_op == StRaw) {
       RawMemSlot& s =
         RawMemSlot::Get(RawMemSlot::Kind(offset->getValInt()));
-      int64 offset = s.getOffset();
+      int64_t offset = s.getOffset();
       if (offset) {
         ostream << " + " << offset;
       }
@@ -832,13 +832,13 @@ bool SSATmp::getValBool() const {
   return m_inst->getExtra<ConstData>()->as<bool>();
 }
 
-int64 SSATmp::getValInt() const {
+int64_t SSATmp::getValInt() const {
   assert(isConst());
   assert(m_inst->getTypeParam().equals(Type::Int));
   return m_inst->getExtra<ConstData>()->as<int64_t>();
 }
 
-int64 SSATmp::getValRawInt() const {
+int64_t SSATmp::getValRawInt() const {
   assert(isConst());
   return m_inst->getExtra<ConstData>()->as<int64_t>();
 }
@@ -959,7 +959,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
           os << '\n';
           continue;
         }
-        uint32 bcOffset = marker->bcOff;
+        uint32_t bcOffset = marker->bcOff;
         if (const auto* func = marker->func) {
           func->unit()->prettyPrint(
             os, Unit::PrintOpts()

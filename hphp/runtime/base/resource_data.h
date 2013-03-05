@@ -38,7 +38,7 @@ public:
   virtual bool o_instanceof(CStrRef s) const { return false;}
   virtual bool isResource() const { return true;}
   virtual String t___tostring();
-  virtual int64 o_toInt64() const { return o_getId();}
+  virtual int64_t o_toInt64() const { return o_getId();}
   void o_setId(int id); // only for BuiltinFiles
   virtual void serializeImpl(VariableSerializer *serializer) const;
   virtual CStrRef o_getResourceName() const;

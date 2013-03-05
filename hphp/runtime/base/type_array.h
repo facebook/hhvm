@@ -34,8 +34,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int64 ToKey(double d) {
-  return d > std::numeric_limits<uint64>::max() ? 0u : (uint64)d;
+inline int64_t ToKey(double d) {
+  return d > std::numeric_limits<uint64_t>::max() ? 0u : (uint64_t)d;
 }
 
 // forward declaration
@@ -118,17 +118,17 @@ class Array : protected ArrayBase {
   Array keys(CVarRef search_value = null_variant, bool strict = false) const;
   Array values() const;
 
-  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
     return m_px ? noMatch : 0;
   }
 
-  int64 hashForStringSwitch(
-      int64 firstTrueCaseHash,
-      int64 firstNullCaseHash,
-      int64 firstFalseCaseHash,
-      int64 firstZeroCaseHash,
-      int64 firstHash,
-      int64 noMatchHash,
+  int64_t hashForStringSwitch(
+      int64_t firstTrueCaseHash,
+      int64_t firstNullCaseHash,
+      int64_t firstFalseCaseHash,
+      int64_t firstZeroCaseHash,
+      int64_t firstHash,
+      int64_t noMatchHash,
       bool &needsOrder) const {
     needsOrder = false;
     return m_px ? noMatchHash : firstNullCaseHash;
@@ -248,7 +248,7 @@ class Array : protected ArrayBase {
   char   toByte   () const { return (m_px && !m_px->empty()) ? 1 : 0;}
   short  toInt16  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
   int    toInt32  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
-  int64  toInt64  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
+  int64_t  toInt64  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
   double toDouble () const { return (m_px && !m_px->empty()) ? 1.0 : 0.0;}
   String toString () const { return m_px ? "Array" : "";}
   Object toObject () const;
@@ -272,7 +272,7 @@ class Array : protected ArrayBase {
    */
   Variant rvalAt(bool    key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(int64   key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(int64_t   key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(double  key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(litstr  key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CStrRef key, ACCESSPARAMS_DECL) const;
@@ -283,7 +283,7 @@ class Array : protected ArrayBase {
    */
   CVarRef rvalAtRef(bool    key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(int64   key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(int64_t   key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(litstr  key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
@@ -291,13 +291,13 @@ class Array : protected ArrayBase {
 
   const Variant operator[](bool    key) const;
   const Variant operator[](int     key) const;
-  const Variant operator[](int64   key) const;
+  const Variant operator[](int64_t   key) const;
   const Variant operator[](double  key) const;
   const Variant operator[](litstr  key) const;
   const Variant operator[](CStrRef key) const;
   const Variant operator[](CVarRef key) const;
 
-  Variant &lval(int64 key) {
+  Variant &lval(int64_t key) {
     if (!m_px) {
       ArrayBase::operator=(ArrayData::Create());
     }
@@ -324,7 +324,7 @@ class Array : protected ArrayBase {
   }
 
   Variant *lvalPtr(CStrRef key, bool forWrite, bool create);
-  Variant *lvalPtr(int64   key, bool forWrite, bool create);
+  Variant *lvalPtr(int64_t   key, bool forWrite, bool create);
 
   Variant &lvalAt();
 
@@ -334,7 +334,7 @@ class Array : protected ArrayBase {
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL) {
     return lvalAtImpl(key, flags);
   }
-  Variant &lvalAt(int64   key, ACCESSPARAMS_DECL) {
+  Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL) {
     return lvalAtImpl(key, flags);
   }
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL) {
@@ -354,9 +354,9 @@ class Array : protected ArrayBase {
     return set(int64_t(key ? 1 : 0), v);
   }
   CVarRef set(int     key, CVarRef v) {
-    return set((int64)key, v);
+    return set((int64_t)key, v);
   }
-  CVarRef set(int64   key, CVarRef v);
+  CVarRef set(int64_t   key, CVarRef v);
   CVarRef set(double  key, CVarRef v) {
     return set(ToKey(key), v);
   }
@@ -369,7 +369,7 @@ class Array : protected ArrayBase {
   CVarRef set(char    key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(short   key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(int     key, RefResult v) { return setRef(key,variant(v)); }
-  CVarRef set(int64   key, RefResult v) { return setRef(key,variant(v)); }
+  CVarRef set(int64_t   key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(double  key, RefResult v) { return setRef(key,variant(v)); }
 
   CVarRef set(litstr  key, RefResult v, bool isKey = false) {
@@ -383,12 +383,12 @@ class Array : protected ArrayBase {
   }
 
   CVarRef setRef(bool    key, CVarRef v) {
-    return setRef((int64)key, v);
+    return setRef((int64_t)key, v);
   }
   CVarRef setRef(int     key, CVarRef v) {
-    return setRef((int64)key, v);
+    return setRef((int64_t)key, v);
   }
-  CVarRef setRef(int64   key, CVarRef v);
+  CVarRef setRef(int64_t   key, CVarRef v);
   CVarRef setRef(double  key, CVarRef v) {
     return setRef(ToKey(key), v);
   }
@@ -402,12 +402,12 @@ class Array : protected ArrayBase {
   CVarRef addImpl(const T &key, CVarRef v);
 
   CVarRef add(bool    key, CVarRef v) {
-    return add((int64)key, v);
+    return add((int64_t)key, v);
   }
   CVarRef add(int     key, CVarRef v) {
-    return add((int64)key, v);
+    return add((int64_t)key, v);
   }
-  CVarRef add(int64   key, CVarRef v);
+  CVarRef add(int64_t   key, CVarRef v);
   CVarRef add(double  key, CVarRef v) {
     return add(ToKey(key), v);
   }
@@ -435,9 +435,9 @@ class Array : protected ArrayBase {
     return addLvalImpl(key ? 1LL : 0LL);
   }
   Variant &addLval(int     key) {
-    return addLvalImpl((int64)key);
+    return addLvalImpl((int64_t)key);
   }
-  Variant &addLval(int64   key) {
+  Variant &addLval(int64_t   key) {
     return addLvalImpl(key);
   }
   Variant &addLval(double  key) {
@@ -460,15 +460,15 @@ class Array : protected ArrayBase {
     return existsImpl(key ? 1LL : 0LL);
   }
   bool exists(char    key) const {
-    return existsImpl((int64)key);
+    return existsImpl((int64_t)key);
   }
   bool exists(short   key) const {
-    return existsImpl((int64)key);
+    return existsImpl((int64_t)key);
   }
   bool exists(int     key) const {
-    return existsImpl((int64)key);
+    return existsImpl((int64_t)key);
   }
-  bool exists(int64   key) const {
+  bool exists(int64_t   key) const {
     return existsImpl(key);
   }
   bool exists(double  key) const {
@@ -492,15 +492,15 @@ class Array : protected ArrayBase {
     removeImpl(key ? 1LL : 0LL);
   }
   void remove(char    key) {
-    removeImpl((int64)key);
+    removeImpl((int64_t)key);
   }
   void remove(short   key) {
-    removeImpl((int64)key);
+    removeImpl((int64_t)key);
   }
   void remove(int     key) {
-    removeImpl((int64)key);
+    removeImpl((int64_t)key);
   }
-  void remove(int64   key) {
+  void remove(int64_t   key) {
     removeImpl(key);
   }
   void remove(double  key) {

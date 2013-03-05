@@ -104,7 +104,7 @@ bool CmdList::listFileRange(DebuggerClient *client, int line,
   if (m_line1 <= 0) m_line1 = 1;
   if (m_line2 <= 0) m_line2 = 1;
   if (m_line1 > m_line2) {
-    int32 tmp = m_line1;
+    int32_t tmp = m_line1;
     m_line1 = m_line2;
     m_line2 = tmp;
   }

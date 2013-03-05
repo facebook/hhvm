@@ -373,7 +373,7 @@ struct Unit {
      * other stack arguments.)
      */
     Kind  m_kind;
-    uint8 m_arg;
+    uint8_t m_arg;
     Id    m_data;
   };
 
@@ -407,7 +407,7 @@ struct Unit {
    private:
     const Offset* index;
     unsigned cur;
-    const uint8 *ptr;
+    const uint8_t *ptr;
   };
 
   Unit();
@@ -416,7 +416,7 @@ struct Unit {
   void operator delete(void* p, size_t sz);
 
   int repoId() const { return m_repoId; }
-  int64 sn() const { return m_sn; }
+  int64_t sn() const { return m_sn; }
 
   PC entry() const { return m_bc; }
   Offset bclen() const { return m_bclen; }
@@ -653,7 +653,7 @@ public: // Translator field access
 private:
   // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
-  int64 m_sn;
+  int64_t m_sn;
   uchar* m_bc;
   size_t m_bclen;
   uchar* m_bc_meta;
@@ -666,9 +666,9 @@ private:
   PreClassPtrVec m_preClasses;
   UnitMergeInfo* m_mergeInfo;
   unsigned m_cacheOffset;
-  int8 m_repoId;
-  uint8 m_mergeState;
-  uint8 m_cacheMask;
+  int8_t m_repoId;
+  uint8_t m_mergeState;
+  uint8_t m_cacheMask;
   bool m_mergeOnly;
   LineTable m_lineTable;
   FuncTable m_funcTable;
@@ -685,8 +685,8 @@ class UnitEmitter {
 
   int repoId() const { return m_repoId; }
   void setRepoId(int repoId) { m_repoId = repoId; }
-  int64 sn() const { return m_sn; }
-  void setSn(int64 sn) { m_sn = sn; }
+  int64_t sn() const { return m_sn; }
+  void setSn(int64_t sn) { m_sn = sn; }
   Offset bcPos() const { return (Offset)m_bclen; }
   void setBc(const uchar* bc, size_t bclen);
   void setBcMeta(const uchar* bc_meta, size_t bc_meta_len);
@@ -725,7 +725,7 @@ class UnitEmitter {
 
  private:
   template<class T>
-  void emitImpl(T n, int64 pos) {
+  void emitImpl(T n, int64_t pos) {
     uchar *c = (uchar*)&n;
     if (pos == -1) {
       // Make sure m_bc is large enough.
@@ -743,11 +743,11 @@ class UnitEmitter {
     }
   }
  public:
-  void emitOp(Op op, int64 pos = -1) {
+  void emitOp(Op op, int64_t pos = -1) {
     emitByte((uchar)op, pos);
   }
-  void emitByte(uchar n, int64 pos = -1) { emitImpl(n, pos); }
-  void emitInt32(int n, int64 pos = -1) { emitImpl(n, pos); }
+  void emitByte(uchar n, int64_t pos = -1) { emitImpl(n, pos); }
+  void emitInt32(int n, int64_t pos = -1) { emitImpl(n, pos); }
   template<typename T> void emitIVA(T n) {
     if (LIKELY((n & 0x7f) == n)) {
       emitByte((unsigned char)n << 1);
@@ -756,8 +756,8 @@ class UnitEmitter {
       emitInt32((n << 1) | 0x1);
     }
   }
-  void emitInt64(int64 n, int64 pos = -1) { emitImpl(n, pos); }
-  void emitDouble(double n, int64 pos = -1) { emitImpl(n, pos); }
+  void emitInt64(int64_t n, int64_t pos = -1) { emitImpl(n, pos); }
+  void emitDouble(double n, int64_t pos = -1) { emitImpl(n, pos); }
   bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
   void commit(UnitOrigin unitOrigin);
   Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1, int line2,
@@ -784,7 +784,7 @@ class UnitEmitter {
 
  private:
   int m_repoId;
-  int64 m_sn;
+  int64_t m_sn;
   static const size_t BCMaxInit = 4096; // Initial bytecode size.
   size_t m_bcmax;
   uchar* m_bc;
@@ -876,7 +876,7 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitStmt : public RepoProxy::Stmt {
    public:
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64& unitSn, const MD5& md5, const uchar* bc,
+    void insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5, const uchar* bc,
                 size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
                 const TypedValue* mainReturn, bool mergeOnly,
                 const LineTable& lines);
@@ -889,7 +889,7 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitLitstrStmt : public RepoProxy::Stmt {
    public:
     InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id litstrId,
+    void insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
                 const StringData* litstr);
   };
   class GetUnitLitstrsStmt : public RepoProxy::Stmt {
@@ -900,7 +900,7 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitArrayStmt : public RepoProxy::Stmt {
    public:
     InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id arrayId,
+    void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
                 const StringData* array);
   };
   class GetUnitArraysStmt : public RepoProxy::Stmt {
@@ -911,7 +911,7 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitPreConstStmt : public RepoProxy::Stmt {
   public:
     InsertUnitPreConstStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, const PreConst& pc,
+    void insert(RepoTxn& txn, int64_t unitSn, const PreConst& pc,
                 Id id);
   };
   class GetUnitPreConstsStmt : public RepoProxy::Stmt {
@@ -922,7 +922,7 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitMergeableStmt : public RepoProxy::Stmt {
    public:
     InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn,
+    void insert(RepoTxn& txn, int64_t unitSn,
                 int ix, UnitMergeKind kind,
                 Id id, TypedValue *value);
   };
@@ -934,33 +934,33 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitSourceLocStmt : public RepoProxy::Stmt {
    public:
     InsertUnitSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Offset pastOffset, int line0,
+    void insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset, int line0,
                 int char0, int line1, int char1);
   };
   class GetSourceLocStmt : public RepoProxy::Stmt {
    public:
     GetSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64 unitSn, Offset pc, SourceLoc& sLoc);
+    bool get(int64_t unitSn, Offset pc, SourceLoc& sLoc);
   };
   class GetSourceLocPastOffsetsStmt : public RepoProxy::Stmt {
    public:
     GetSourceLocPastOffsetsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64 unitSn, int line, OffsetRangeVec& ranges);
+    bool get(int64_t unitSn, int line, OffsetRangeVec& ranges);
   };
   class GetSourceLocBaseOffsetStmt : public RepoProxy::Stmt {
    public:
     GetSourceLocBaseOffsetStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64 unitSn, OffsetRange& range);
+    bool get(int64_t unitSn, OffsetRange& range);
   };
   class GetBaseOffsetAtPCLocStmt : public RepoProxy::Stmt {
    public:
     GetBaseOffsetAtPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64 unitSn, Offset pc, Offset& offset);
+    bool get(int64_t unitSn, Offset pc, Offset& offset);
   };
   class GetBaseOffsetAfterPCLocStmt : public RepoProxy::Stmt {
    public:
     GetBaseOffsetAfterPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64 unitSn, Offset pc, Offset& offset);
+    bool get(int64_t unitSn, Offset pc, Offset& offset);
   };
 #define URP_OP(c, o) \
  public: \

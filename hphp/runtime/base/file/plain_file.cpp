@@ -122,7 +122,7 @@ bool PlainFile::closeImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 // virtual functions
 
-int64 PlainFile::readImpl(char *buffer, int64 length) {
+int64_t PlainFile::readImpl(char *buffer, int64_t length) {
   assert(valid());
   assert(length > 0);
   // use read instead of fread to handle EOL in stdin
@@ -140,22 +140,22 @@ int PlainFile::getc() {
   return File::getc();
 }
 
-String PlainFile::read(int64 length) {
+String PlainFile::read(int64_t length) {
   if (length) m_eof = false;
   return File::read(length);
 }
 
-int64 PlainFile::writeImpl(const char *buffer, int64 length) {
+int64_t PlainFile::writeImpl(const char *buffer, int64_t length) {
   assert(valid());
   assert(length > 0);
 
   // use write instead of fwrite to be consistent with read
   // o.w., read-and-write files would not work
-  int64 written = ::write(m_fd, buffer, length);
+  int64_t written = ::write(m_fd, buffer, length);
   return written < 0 ? 0 : written;
 }
 
-bool PlainFile::seek(int64 offset, int whence /* = SEEK_SET */) {
+bool PlainFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(valid());
 
   if (whence == SEEK_CUR) {
@@ -184,14 +184,14 @@ bool PlainFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   return result != (off_t)-1;
 }
 
-int64 PlainFile::tell() {
+int64_t PlainFile::tell() {
   assert(valid());
   return m_position;
 }
 
 bool PlainFile::eof() {
   assert(valid());
-  int64 avail = m_writepos - m_readpos;
+  int64_t avail = m_writepos - m_readpos;
   if (avail > 0) {
     return false;
   }
@@ -216,7 +216,7 @@ bool PlainFile::flush() {
   return true;
 }
 
-bool PlainFile::truncate(int64 size) {
+bool PlainFile::truncate(int64_t size) {
   assert(valid());
   return ftruncate(m_fd, size) == 0;
 }

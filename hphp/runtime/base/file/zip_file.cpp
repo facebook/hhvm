@@ -77,24 +77,24 @@ bool ZipFile::closeImpl() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64 ZipFile::readImpl(char *buffer, int64 length) {
+int64_t ZipFile::readImpl(char *buffer, int64_t length) {
   assert(m_gzFile);
-  int64 nread = gzread(m_gzFile, buffer, length);
+  int64_t nread = gzread(m_gzFile, buffer, length);
   return (nread < 0) ? 0 : nread;
 }
 
-int64 ZipFile::writeImpl(const char *buffer, int64 length) {
+int64_t ZipFile::writeImpl(const char *buffer, int64_t length) {
   assert(m_gzFile);
   return gzwrite(m_gzFile, buffer, length);
 }
 
-bool ZipFile::seek(int64 offset, int whence /* = SEEK_SET */) {
+bool ZipFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(m_gzFile);
-  int64 newoffset = gzseek(m_gzFile, offset, whence);
+  int64_t newoffset = gzseek(m_gzFile, offset, whence);
   return (newoffset < 0) ? -1 : 0;
 }
 
-int64 ZipFile::tell() {
+int64_t ZipFile::tell() {
   assert(m_gzFile);
   return gztell(m_gzFile);
 }

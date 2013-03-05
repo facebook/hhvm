@@ -324,7 +324,7 @@ public:
       case KindOfBoolean:
         return *(bool*)addr;
       case KindOfInt64:
-        return *(int64*)addr;
+        return *(int64_t*)addr;
       case KindOfDouble:
         return *(double*)addr;
       case KindOfString:

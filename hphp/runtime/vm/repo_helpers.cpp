@@ -228,7 +228,7 @@ void RepoQuery::bindBool(const char* paramName, bool b) {
   bindInt(paramName, int(b));
 }
 
-void RepoQuery::bindInt64(const char* paramName, int64 val) {
+void RepoQuery::bindInt64(const char* paramName, int64_t val) {
   sqlite3_stmt* stmt = m_stmt.get();
   int rc UNUSED =
     sqlite3_bind_int64(stmt,
@@ -280,7 +280,7 @@ void RepoQuery::exec() {
   reset();
 }
 
-int64 RepoQuery::getInsertedRowid() {
+int64_t RepoQuery::getInsertedRowid() {
   return sqlite3_last_insert_rowid(m_stmt.repo().dbc());
 }
 
@@ -427,7 +427,7 @@ void RepoQuery::getBool(int iCol, bool& b) {
   b = bool(val);
 }
 
-void RepoQuery::getInt64(int iCol, int64& val) {
+void RepoQuery::getInt64(int iCol, int64_t& val) {
   if (!isInt(iCol)) {
     throw RepoExc(
       "RepoQuery::%s(repo=%p) error: Column %d is not an integer in '%s'",

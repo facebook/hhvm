@@ -50,7 +50,7 @@ void print_string(StringData* s) {
   decRefStr(s);
 }
 
-void print_int(int64 i) {
+void print_int(int64_t i) {
   char buf[256];
   snprintf(buf, 256, "%" PRId64, i);
   echo(buf);
@@ -145,7 +145,7 @@ concat_ss(StringData* v1, StringData* v2) {
  * incRef the output string
  */
 StringData*
-concat_is(int64 v1, StringData* v2) {
+concat_is(int64_t v1, StringData* v2) {
   int len1;
   char intbuf[21];
   char* intstart;
@@ -167,7 +167,7 @@ concat_is(int64 v1, StringData* v2) {
  * incRef the output string
  */
 StringData*
-concat_si(StringData* v1, int64 v2) {
+concat_si(StringData* v1, int64_t v2) {
   int len2;
   char intbuf[21];
   char* intstart;
@@ -189,7 +189,7 @@ concat_si(StringData* v1, int64 v2) {
  * incRef the output string
  */
 StringData*
-concat(DataType t1, uint64 v1, DataType t2, uint64 v2) {
+concat(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
   const char *s1, *s2;
   size_t s1len, s2len;
   bool free1, free2;
@@ -209,13 +209,13 @@ concat(DataType t1, uint64 v1, DataType t2, uint64 v2) {
   return retval;
 }
 
-int64 eq_null_str(StringData* v1) {
-  int64 retval = v1->empty();
+int64_t eq_null_str(StringData* v1) {
+  int64_t retval = v1->empty();
   decRefStr(v1);
   return retval;
 }
 
-int64 eq_bool_str(int64 v1, StringData* v2) {
+int64_t eq_bool_str(int64_t v1, StringData* v2) {
   // The truth table for v2->toBoolean() ? v1 : !v1
   //   looks like:
   //      \ v2:0 | v2:1
@@ -223,17 +223,17 @@ int64 eq_bool_str(int64 v1, StringData* v2) {
   // v1:1 |   0  |   1
   //
   // which is nothing but nxor.
-  int64 v2i = int64(v2->toBoolean());
+  int64_t v2i = int64_t(v2->toBoolean());
   assert(v2i == 0ll || v2i == 1ll);
   assert(v1  == 0ll || v1  == 1ll);
-  int64 retval = (v2i ^ v1) ^ 1;
+  int64_t retval = (v2i ^ v1) ^ 1;
   assert(retval == 0ll || retval == 1ll);
   decRefStr(v2);
   return retval;
 }
 
-int64 eq_int_str(int64 v1, StringData* v2) {
-  int64 lval; double dval;
+int64_t eq_int_str(int64_t v1, StringData* v2) {
+  int64_t lval; double dval;
   DataType ret = is_numeric_string(v2->data(), v2->size(), &lval, &dval, 1);
   decRefStr(v2);
   if (ret == KindOfInt64) {
@@ -245,38 +245,38 @@ int64 eq_int_str(int64 v1, StringData* v2) {
   }
 }
 
-int64 eq_str_str(StringData* v1, StringData* v2) {
-  int64 retval = v1->equal(v2);
+int64_t eq_str_str(StringData* v1, StringData* v2) {
+  int64_t retval = v1->equal(v2);
   decRefStr(v2);
   decRefStr(v1);
   return retval;
 }
 
-int64 same_str_str(StringData* v1, StringData* v2) {
-  int64 retval = v1 == v2 || v1->same(v2);
+int64_t same_str_str(StringData* v1, StringData* v2) {
+  int64_t retval = v1 == v2 || v1->same(v2);
   decRefStr(v2);
   decRefStr(v1);
   return retval;
 }
 
-int64 str0_to_bool(StringData* sd) {
-  int64 retval = sd->toBoolean();
+int64_t str0_to_bool(StringData* sd) {
+  int64_t retval = sd->toBoolean();
   return retval;
 }
 
-int64 str_to_bool(StringData* sd) {
-  int64 retval = str0_to_bool(sd);
+int64_t str_to_bool(StringData* sd) {
+  int64_t retval = str0_to_bool(sd);
   decRefStr(sd);
   return retval;
 }
 
-int64 arr0_to_bool(ArrayData* ad) {
+int64_t arr0_to_bool(ArrayData* ad) {
   return ad->size() != 0;
 }
 
-int64 arr_to_bool(ArrayData* ad) {
+int64_t arr_to_bool(ArrayData* ad) {
   assert(Transl::tx64->stateIsDirty());
-  int64 retval = arr0_to_bool(ad);
+  int64_t retval = arr0_to_bool(ad);
   decRefArr(ad);
   return retval;
 }
@@ -284,7 +284,7 @@ int64 arr_to_bool(ArrayData* ad) {
 /**
  * tv_to_bool will decrement tv's refcount if tv is a refcounted type
  */
-int64
+int64_t
 tv_to_bool(TypedValue* tv) {
   using std::string;
   bool retval;
@@ -300,7 +300,7 @@ tv_to_bool(TypedValue* tv) {
   TRACE(2, Trace::prettyNode("TvToBool", *tv) + string(" -> ") +
         string(retval ? "t" : "f") + string("\n"));
   tvRefcountedDecRef(tv);
-  return int64(retval);
+  return int64_t(retval);
 }
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
@@ -419,7 +419,7 @@ void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
   tvRefcountedDecRef(value);
 }
 
-void collection_setm_ik1_v0(ObjectData* obj, int64 key, TypedValue* value) {
+void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value) {
   assert(obj);
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {

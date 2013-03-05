@@ -428,21 +428,21 @@ CVarRef Array::rvalAtRef(bool key, ACCESSPARAMS_IMPL) const {
 }
 
 Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
+  if (m_px) return m_px->get((int64_t)key, flags & AccessFlags::Error);
   return null_variant;
 }
 
 CVarRef Array::rvalAtRef(int key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
+  if (m_px) return m_px->get((int64_t)key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-Variant Array::rvalAt(int64 key, ACCESSPARAMS_IMPL) const {
+Variant Array::rvalAt(int64_t key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get(key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(int64 key, ACCESSPARAMS_IMPL) const {
+CVarRef Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get(key, flags & AccessFlags::Error);
   return null_variant;
 }
@@ -461,7 +461,7 @@ CVarRef Array::rvalAtRef(litstr key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_px->get(key, error);
-    int64 n;
+    int64_t n;
     int len = strlen(key);
     if (!is_strictly_integer(key, len, n)) {
       return m_px->get(key, error);
@@ -481,7 +481,7 @@ CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_px->get(key, error);
     if (key.isNull()) return m_px->get(empty_string, error);
-    int64 n;
+    int64_t n;
     if (!key->isStrictlyInteger(n)) {
       return m_px->get(key, error);
     } else {
@@ -505,10 +505,10 @@ CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   case KindOfInt64:
     return m_px->get(key.m_data.num, flags & AccessFlags::Error);
   case KindOfDouble:
-    return m_px->get((int64)key.m_data.dbl, flags & AccessFlags::Error);
+    return m_px->get((int64_t)key.m_data.dbl, flags & AccessFlags::Error);
   case KindOfStaticString:
   case KindOfString: {
-    int64 n;
+    int64_t n;
     if (!(flags & AccessFlags::Key) &&
         key.m_data.pstr->isStrictlyInteger(n)) {
       return m_px->get(n, flags & AccessFlags::Error);
@@ -557,7 +557,7 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
   return ret;
 }
 
-Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
+Variant *Array::lvalPtr(int64_t key, bool forWrite, bool create) {
   if (create) {
     if (!m_px) {
       ArrayBase::operator=(ArrayData::Create());
@@ -656,7 +656,7 @@ CVarRef Array::addImpl(const T &key, CVarRef v) {
   return v;
 }
 
-CVarRef Array::set(int64   key, CVarRef v) {
+CVarRef Array::set(int64_t   key, CVarRef v) {
   return setImpl(key, v);
 }
 
@@ -682,7 +682,7 @@ CVarRef Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
   return Variant::lvalBlackHole();
 }
 
-CVarRef Array::setRef(int64   key, CVarRef v) {
+CVarRef Array::setRef(int64_t   key, CVarRef v) {
   return setRefImpl(key, v);
 }
 CVarRef Array::setRef(litstr  key, CVarRef v, bool isKey /* = false */) {
@@ -706,7 +706,7 @@ CVarRef Array::setRef(CVarRef key, CVarRef v, bool isKey /* = false */) {
   return Variant::lvalBlackHole();
 }
 
-CVarRef Array::add(int64   key, CVarRef v) {
+CVarRef Array::add(int64_t   key, CVarRef v) {
   return addImpl(key, v);
 }
 CVarRef Array::add(litstr  key, CVarRef v, bool isKey /* = false */) {
@@ -974,7 +974,7 @@ void Array::serialize(VariableSerializer *serializer,
 }
 
 void Array::unserialize(VariableUnserializer *uns) {
-  int64 size = uns->readInt();
+  int64_t size = uns->readInt();
   char sep = uns->readChar();
   if (sep != ':') {
     throw Exception("Expected ':' but got '%c'", sep);
@@ -991,7 +991,7 @@ void Array::unserialize(VariableUnserializer *uns) {
     // the middle, which breaks references.
     operator=(ArrayInit(size).create());
     bool isAPC = (uns->getType() == VariableUnserializer::APCSerialize);
-    for (int64 i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
       if (!key.isString() && !key.isInteger()) {
         throw Exception("Invalid key");

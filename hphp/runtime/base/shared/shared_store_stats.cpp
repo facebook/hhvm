@@ -29,7 +29,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 // Helpers to write JSON entry
 
-static void writeEntryInt(ostream& out, const char *name, int64 value,
+static void writeEntryInt(ostream& out, const char *name, int64_t value,
                           bool last = false, int indent = 0,
                           bool newline = false) {
   for (int i = 0; i < indent ; i++) {
@@ -337,7 +337,7 @@ bool SharedStoreStats::snapshot(const char *filename, std::string& keySample) {
     out << "{";
     writeEntryStr(out, "KeyName", iter->first);
     writeEntryInt(out, "TotalSize", iter->second->totalSize);
-    writeEntryInt(out, "Prime", (int64)iter->second->isPrime);
+    writeEntryInt(out, "Prime", (int64_t)iter->second->isPrime);
     writeEntryInt(out, "TTL", iter->second->ttl);
     writeEntryInt(out, "KeySize", iter->second->keySize);
     writeEntryInt(out, "DataSize", iter->second->var.dataTotalSize);
@@ -384,11 +384,11 @@ void SharedStoreStats::add(SharedValueProfile *svp) {
 //////////////////////////////////////////////////////////////////////////////
 // Hooks
 
-void SharedStoreStats::addDirect(int32 keySize, int32 dataTotal, bool prime,
+void SharedStoreStats::addDirect(int32_t keySize, int32_t dataTotal, bool prime,
                                  bool file) {
   s_keyCount.fetch_add(1, std::memory_order_relaxed);
   s_keySize.fetch_add(keySize, std::memory_order_relaxed);
-  s_dataTotalSize.fetch_add((int64)dataTotal, std::memory_order_relaxed);
+  s_dataTotalSize.fetch_add((int64_t)dataTotal, std::memory_order_relaxed);
   s_addCount.fetch_add(1, std::memory_order_relaxed);
   if (prime) {
     s_primeCount.fetch_add(1, std::memory_order_relaxed);
@@ -398,10 +398,10 @@ void SharedStoreStats::addDirect(int32 keySize, int32 dataTotal, bool prime,
   }
 }
 
-void SharedStoreStats::removeDirect(int32 keySize, int32 dataTotal, bool exp) {
+void SharedStoreStats::removeDirect(int32_t keySize, int32_t dataTotal, bool exp) {
   s_keyCount.fetch_sub(1, std::memory_order_relaxed);
   s_keySize.fetch_sub(keySize, std::memory_order_relaxed);
-  s_dataTotalSize.fetch_sub((int64)dataTotal, std::memory_order_relaxed);
+  s_dataTotalSize.fetch_sub((int64_t)dataTotal, std::memory_order_relaxed);
   if (exp) {
     s_expireCount.fetch_add(1, std::memory_order_relaxed);
   } else {
@@ -409,13 +409,13 @@ void SharedStoreStats::removeDirect(int32 keySize, int32 dataTotal, bool exp) {
   }
 }
 
-void SharedStoreStats::updateDirect(int32 dataTotalOld, int32 dataTotalNew) {
-  s_dataTotalSize.fetch_sub((int64)dataTotalOld, std::memory_order_relaxed);
-  s_dataTotalSize.fetch_add((int64)dataTotalNew, std::memory_order_relaxed);
+void SharedStoreStats::updateDirect(int32_t dataTotalOld, int32_t dataTotalNew) {
+  s_dataTotalSize.fetch_sub((int64_t)dataTotalOld, std::memory_order_relaxed);
+  s_dataTotalSize.fetch_add((int64_t)dataTotalNew, std::memory_order_relaxed);
   s_updateCount.fetch_add(1, std::memory_order_relaxed);
 }
 
-void SharedStoreStats::addPurgingTime(int64 purgingTime) {
+void SharedStoreStats::addPurgingTime(int64_t purgingTime) {
   s_purgingTime.fetch_add(purgingTime, std::memory_order_relaxed);
 }
 
@@ -468,7 +468,7 @@ void SharedStoreStats::onGet(const StringData *key, const SharedVariant *var) {
 }
 
 void SharedStoreStats::onStore(const StringData *key, const SharedVariant *var,
-                               int64 ttl, bool prime) {
+                               int64_t ttl, bool prime) {
   char normalizedKey[MAX_KEY_LEN + 1];
 
   SharedValueProfile *svpInd;

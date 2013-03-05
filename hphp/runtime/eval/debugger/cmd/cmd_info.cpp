@@ -30,7 +30,7 @@ void CmdInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_info);
   if (m_acLiveLists) {
     thrift.write(true);
-    thrift.write((int8)DebuggerClient::AutoCompleteCount);
+    thrift.write((int8_t)DebuggerClient::AutoCompleteCount);
     for (int i = 0; i < DebuggerClient::AutoCompleteCount; i++) {
       thrift.write((*m_acLiveLists)[i]);
     }
@@ -48,7 +48,7 @@ void CmdInfo::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(hasLists);
   if (hasLists) {
     m_acLiveLists = DebuggerClient::CreateNewLiveLists();
-    int8 count;
+    int8_t count;
     thrift.read(count);
     for (int i = 0; i < count; i++) {
       if (i < DebuggerClient::AutoCompleteCount) {

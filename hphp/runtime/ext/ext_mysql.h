@@ -139,8 +139,8 @@ public:
   Variant *name;
   Variant *table;
   Variant *def;
-  int64 max_length;
-  int64 length;
+  int64_t max_length;
+  int64_t length;
   int type;
   unsigned int flags;
 };
@@ -175,20 +175,20 @@ public:
 
   void addField(Variant *value);
 
-  void setFieldCount(int64 fields);
-  void setFieldInfo(int64 f, MYSQL_FIELD *field);
-  MySQLFieldInfo *getFieldInfo(int64 field);
+  void setFieldCount(int64_t fields);
+  void setFieldInfo(int64_t f, MYSQL_FIELD *field);
+  MySQLFieldInfo *getFieldInfo(int64_t field);
 
   /**
    * Gets the field content. Only for localized result.
    */
-  Variant getField(int64 field) const;
+  Variant getField(int64_t field) const;
 
-  int64 getFieldCount() const;
+  int64_t getFieldCount() const;
 
-  int64 getRowCount() const;
+  int64_t getRowCount() const;
 
-  bool seekRow(int64 row);
+  bool seekRow(int64_t row);
 
   bool fetchRow();
 
@@ -196,7 +196,7 @@ public:
     return m_row_ready;
   }
 
-  bool seekField(int64 field);
+  bool seekField(int64_t field);
 
   MySQLFieldInfo *fetchFieldInfo();
 
@@ -212,10 +212,10 @@ protected:
   MySQLFieldInfo *m_fields;
   std::list<std::vector<Variant *> > *m_rows;
   std::list<std::vector<Variant *> >::const_iterator m_current_row;
-  int64 m_current_field;
+  int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow
-  int64 m_field_count;
-  int64 m_row_count;
+  int64_t m_field_count;
+  int64_t m_row_count;
   MySQL* m_conn;  // only set for async for refcounting underlying buffers
 };
 
@@ -305,7 +305,7 @@ inline Variant f_mysql_get_host_info(CVarRef link_identifier = null) {
 inline Variant f_mysql_get_proto_info(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return (int64)mysql_get_proto_info(conn);
+  return (int64_t)mysql_get_proto_info(conn);
 }
 inline Variant f_mysql_get_server_info(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
@@ -320,7 +320,7 @@ inline Variant f_mysql_info(CVarRef link_identifier = null) {
 inline Variant f_mysql_insert_id(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return mysql_insert_id(conn);
+  return static_cast<int64_t>(mysql_insert_id(conn));
 }
 inline Variant f_mysql_stat(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
@@ -330,7 +330,7 @@ inline Variant f_mysql_stat(CVarRef link_identifier = null) {
 inline Variant f_mysql_thread_id(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return (int64)mysql_thread_id(conn);
+  return (int64_t)mysql_thread_id(conn);
 }
 inline Variant f_mysql_create_db(CStrRef db,
                                  CVarRef link_identifier = null) {
@@ -351,7 +351,7 @@ inline Variant f_mysql_drop_db(CStrRef db,
 inline Variant f_mysql_affected_rows(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  return mysql_affected_rows(conn);
+  return static_cast<int64_t>(mysql_affected_rows(conn));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

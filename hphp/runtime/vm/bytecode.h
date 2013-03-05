@@ -376,15 +376,15 @@ struct ActRec {
   }
 };
 
-inline int32 arOffset(const ActRec* ar, const ActRec* other) {
+inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
   return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
 }
 
-inline ActRec* arAtOffset(const ActRec* ar, int32 offset) {
+inline ActRec* arAtOffset(const ActRec* ar, int32_t offset) {
   return (ActRec*)(intptr_t(ar) + intptr_t(offset * sizeof(TypedValue)));
 }
 
-inline ActRec* arFromSpOffset(const ActRec *sp, int32 offset) {
+inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
   return arAtOffset(sp, offset);
 }
 
@@ -464,7 +464,7 @@ public:
   void toStringElm(std::ostream& os, TypedValue* vv, const ActRec* fp)
     const;
   void toStringIter(std::ostream& os, Iter* it, bool itRef) const;
-  void clearEvalStack(ActRec* fp, int32 numLocals);
+  void clearEvalStack(ActRec* fp, int32_t numLocals);
   void protect();
   void unprotect();
   void requestInit();
@@ -658,7 +658,7 @@ public:
     m_top->_count = 0;                                                        \
     m_top->m_type = type;                                                     \
   }
-  PUSH_METHOD_ARG(Int, KindOfInt64, num, int64, i)
+  PUSH_METHOD_ARG(Int, KindOfInt64, num, int64_t, i)
   PUSH_METHOD_ARG(Double, KindOfDouble, dbl, double, d)
 
   // This should only be called directly when the caller has

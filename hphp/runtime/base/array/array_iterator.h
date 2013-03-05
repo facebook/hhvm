@@ -470,14 +470,14 @@ namespace VM {
   bool interp_iter_next(Iter* it);
   bool interp_iter_next_m(Iter* it);
 
-  int64 new_iter_array(HPHP::VM::Iter* dest, ArrayData* arr,
+  int64_t new_iter_array(HPHP::VM::Iter* dest, ArrayData* arr,
                        TypedValue* val);
-  int64 new_iter_array_key(HPHP::VM::Iter* dest, ArrayData* arr,
+  int64_t new_iter_array_key(HPHP::VM::Iter* dest, ArrayData* arr,
                            TypedValue* val, TypedValue* key);
-  int64 new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx,
+  int64_t new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
-  int64 iter_next(HPHP::VM::Iter* dest, TypedValue* val);
-  int64 iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
+  int64_t iter_next(HPHP::VM::Iter* dest, TypedValue* val);
+  int64_t iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

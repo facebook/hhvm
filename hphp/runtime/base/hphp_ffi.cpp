@@ -90,7 +90,7 @@ Variant *hphp_ffi_buildVariant(int t, void* v, int len) {
   switch (t) {
   case 0: return NEW(Variant)();
   case 1: return NEW(Variant)((bool)v);
-  case 2: return NEW(Variant)((int64)v);
+  case 2: return NEW(Variant)((int64_t)v);
   case 3: {
     union {
       double d;

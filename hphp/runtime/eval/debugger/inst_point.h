@@ -53,7 +53,7 @@ public:
   int m_locType;
   bool m_valid;
   std::string m_file;
-  int32 m_line;
+  int32_t m_line;
   std::string m_func;
   // TODO: add more info
 

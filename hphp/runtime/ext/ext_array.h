@@ -26,27 +26,27 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64 k_UCOL_DEFAULT;
-extern const int64 k_UCOL_PRIMARY;
-extern const int64 k_UCOL_SECONDARY;
-extern const int64 k_UCOL_TERTIARY;
-extern const int64 k_UCOL_DEFAULT_STRENGTH;
-extern const int64 k_UCOL_QUATERNARY;
-extern const int64 k_UCOL_IDENTICAL;
-extern const int64 k_UCOL_OFF;
-extern const int64 k_UCOL_ON;
-extern const int64 k_UCOL_SHIFTED;
-extern const int64 k_UCOL_NON_IGNORABLE;
-extern const int64 k_UCOL_LOWER_FIRST;
-extern const int64 k_UCOL_UPPER_FIRST;
-extern const int64 k_UCOL_FRENCH_COLLATION;
-extern const int64 k_UCOL_ALTERNATE_HANDLING;
-extern const int64 k_UCOL_CASE_FIRST;
-extern const int64 k_UCOL_CASE_LEVEL;
-extern const int64 k_UCOL_NORMALIZATION_MODE;
-extern const int64 k_UCOL_STRENGTH;
-extern const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE;
-extern const int64 k_UCOL_NUMERIC_COLLATION;
+extern const int64_t k_UCOL_DEFAULT;
+extern const int64_t k_UCOL_PRIMARY;
+extern const int64_t k_UCOL_SECONDARY;
+extern const int64_t k_UCOL_TERTIARY;
+extern const int64_t k_UCOL_DEFAULT_STRENGTH;
+extern const int64_t k_UCOL_QUATERNARY;
+extern const int64_t k_UCOL_IDENTICAL;
+extern const int64_t k_UCOL_OFF;
+extern const int64_t k_UCOL_ON;
+extern const int64_t k_UCOL_SHIFTED;
+extern const int64_t k_UCOL_NON_IGNORABLE;
+extern const int64_t k_UCOL_LOWER_FIRST;
+extern const int64_t k_UCOL_UPPER_FIRST;
+extern const int64_t k_UCOL_FRENCH_COLLATION;
+extern const int64_t k_UCOL_ALTERNATE_HANDLING;
+extern const int64_t k_UCOL_CASE_FIRST;
+extern const int64_t k_UCOL_CASE_LEVEL;
+extern const int64_t k_UCOL_NORMALIZATION_MODE;
+extern const int64_t k_UCOL_STRENGTH;
+extern const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE;
+extern const int64_t k_UCOL_NUMERIC_COLLATION;
 
 Variant f_array_change_key_case(CVarRef input, bool upper = false);
 Variant f_array_chunk(CVarRef input, int size,
@@ -102,7 +102,7 @@ Variant f_array_splice(VRefParam input, int offset,
 Variant f_array_sum(CVarRef array);
 Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
-int64 f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
 Variant f_array_values(CVarRef input);
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
@@ -121,9 +121,9 @@ Array compact(LVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv = null_array);
 
 bool f_shuffle(VRefParam array);
-int64 f_count(CVarRef var, bool recursive = false);
+int64_t f_count(CVarRef var, bool recursive = false);
 
-inline int64 f_sizeof(CVarRef var, bool recursive = false) {
+inline int64_t f_sizeof(CVarRef var, bool recursive = false) {
   return f_count(var, recursive);
 }
 inline Variant f_each(VRefParam array) {
@@ -210,8 +210,8 @@ bool f_array_multisort(int _argc, VRefParam ar1, CArrRef _argv = null_array);
 
 String f_i18n_loc_get_default();
 bool f_i18n_loc_set_default(CStrRef locale);
-bool f_i18n_loc_set_attribute(int64 attr, int64 val);
-bool f_i18n_loc_set_strength(int64 strength);
+bool f_i18n_loc_set_attribute(int64_t attr, int64_t val);
+bool f_i18n_loc_set_strength(int64_t strength);
 Variant f_i18n_loc_get_error_code();
 
 ///////////////////////////////////////////////////////////////////////////////

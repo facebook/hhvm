@@ -152,7 +152,7 @@ void RecursiveIteratorIterator::sweep() {
   m_iterators.clear();
 }
 
-Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64 mode, int64 flags) {
+Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64_t mode, int64_t flags) {
   if (iterator->o_instanceof("RecursiveDirectoryIterator")) {
     CVarRef rsrc = iterator->o_get("rsrc", true, "SplFileInfo");
     obj->o_set("rsrc", NEWOBJ(RecursiveIteratorIterator)(rsrc, mode, flags),
@@ -199,14 +199,14 @@ Variant f_hphp_recursiveiteratoriterator_key(CObjRef obj) {
 // here and elsewhere in the runtime.
 
 // Class constants that we use from RecursiveIteratorIterator
-static const int64 LEAVES_ONLY = 0L;
-static const int64 SELF_FIRST = 1L;
-static const int64 CHILD_FIRST = 2L;
+static const int64_t LEAVES_ONLY = 0L;
+static const int64_t SELF_FIRST = 1L;
+static const int64_t CHILD_FIRST = 2L;
 
 // Class constants that we use from RecursiveDirectoryIterator
-static const int64 CURRENT_AS_FILEINFO = 16L;
-static const int64 CURRENT_AS_PATHNAME = 32L;
-static const int64 KEY_AS_FILENAME = 256L;
+static const int64_t CURRENT_AS_FILEINFO = 16L;
+static const int64_t CURRENT_AS_PATHNAME = 32L;
+static const int64_t KEY_AS_FILENAME = 256L;
 
 void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
   RecursiveIteratorIterator *rii = get_recursiveiteratoriterator(obj);
@@ -347,7 +347,7 @@ void f_hphp_directoryiterator_rewind(CObjRef obj) {
   di->rewind();
 }
 
-void f_hphp_directoryiterator_seek(CObjRef obj, int64 position) {
+void f_hphp_directoryiterator_seek(CObjRef obj, int64_t position) {
   DirectoryIterator *di = get_directoryiterator(obj);
   for (int i = 0; i < position - di->m_index; i++) {
     f_hphp_directoryiterator_next(obj);
@@ -374,7 +374,7 @@ bool f_hphp_directoryiterator_isdot(CObjRef obj) {
 }
 
 bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path,
-    int64 flags) {
+    int64_t flags) {
   SmartObject<RecursiveDirectoryIterator> rsrc =
     NEWOBJ(RecursiveDirectoryIterator)(path, flags);
   obj->o_set("rsrc", rsrc, "SplFileInfo");
@@ -401,7 +401,7 @@ void f_hphp_recursivedirectoryiterator_rewind(CObjRef obj) {
   }
 }
 
-void f_hphp_recursivedirectoryiterator_seek(CObjRef obj, int64 position) {
+void f_hphp_recursivedirectoryiterator_seek(CObjRef obj, int64_t position) {
   f_hphp_directoryiterator_seek(obj, position);
 }
 

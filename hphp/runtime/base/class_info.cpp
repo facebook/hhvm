@@ -738,7 +738,7 @@ void ClassInfo::ReadUserAttributes(const char **&p,
 
     const char *len = *p++;
     const char *valueText = *p++;
-    int64 valueLen = (int64)len;
+    int64_t valueLen = (int64_t)len;
     VariableUnserializer vu(valueText,
                             valueLen,
                             VariableUnserializer::Serialize);
@@ -755,21 +755,21 @@ ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
 }
 
 ClassInfo::MethodInfo::MethodInfo(const char **&p) {
-  attribute = (Attribute)(int64)(*p++);
+  attribute = (Attribute)(int64_t)(*p++);
   name = makeStaticString(*p++);
   docComment = 0;
   if (attribute & ClassInfo::IsRedeclared) {
-    volatile_redec_offset = (int)(int64)(*p++);
+    volatile_redec_offset = (int)(int64_t)(*p++);
     while (*p) {
       MethodInfo *m = new MethodInfo(p);
       parameters.push_back((ParameterInfo*)(void*)m);
     }
   } else {
     file = *p++;
-    line1 = (int)(int64)(*p++);
-    line2 = (int)(int64)(*p++);
+    line1 = (int)(int64_t)(*p++);
+    line2 = (int)(int64_t)(*p++);
     if (attribute & IsVolatile) {
-      volatile_redec_offset = (int)(int64)(*p++);
+      volatile_redec_offset = (int)(int64_t)(*p++);
     }
 
     if (attribute & HasDocComment) {
@@ -777,15 +777,15 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
     }
 
     if (attribute & IsSystem) {
-      returnType = (DataType)(int64)(*p++);
+      returnType = (DataType)(int64_t)(*p++);
     }
     while (*p) {
       ParameterInfo *parameter = new ParameterInfo();
-      parameter->attribute = (Attribute)(int64)(*p++);
+      parameter->attribute = (Attribute)(int64_t)(*p++);
       parameter->name = *p++;
       parameter->type = *p++;
       if (attribute & IsSystem) {
-        parameter->argType = (DataType)(int64)(*p++);
+        parameter->argType = (DataType)(int64_t)(*p++);
       }
       parameter->value = *p++;
       parameter->valueText = *p++;
@@ -800,7 +800,7 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
     while (*p) {
       ConstantInfo *staticVariable = new ConstantInfo();
       staticVariable->name = makeStaticString(*p++);
-      staticVariable->valueLen = (int64)(*p++);
+      staticVariable->valueLen = (int64_t)(*p++);
       staticVariable->valueText = *p++;
       VariableUnserializer vu(staticVariable->valueText,
                               staticVariable->valueLen,
@@ -821,7 +821,7 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
 }
 
 ClassInfoUnique::ClassInfoUnique(const char **&p) {
-  m_attribute = (Attribute)(int64)(*p++);
+  m_attribute = (Attribute)(int64_t)(*p++);
   assert(!(m_attribute & IsRedeclared));
 
   // ClassInfoUnique is only created by ClassInfo::Load(), which is called
@@ -833,11 +833,11 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   m_parentInfo = 0;
 
   m_file = *p++;
-  m_line1 = (int)(int64)(*p++);
-  m_line2 = (int)(int64)(*p++);
+  m_line1 = (int)(int64_t)(*p++);
+  m_line2 = (int)(int64_t)(*p++);
 
   if (m_attribute & IsVolatile) {
-    m_cdec_offset = (int)(int64)(*p++);
+    m_cdec_offset = (int)(int64_t)(*p++);
   }
 
   if (m_attribute & HasDocComment) {
@@ -883,7 +883,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
   while (*p) {
     PropertyInfo *property = new PropertyInfo();
-    property->attribute = (Attribute)(int64)(*p++);
+    property->attribute = (Attribute)(int64_t)(*p++);
     property->name = makeStaticString(*p++);
     property->owner = this;
     assert(m_properties.find(property->name) == m_properties.end());
@@ -899,7 +899,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     constant->valueText = *p++;
 
     if (uintptr_t(constant->valueText) > 0x100) {
-      constant->valueLen = (int64)len_or_cw;
+      constant->valueLen = (int64_t)len_or_cw;
       VariableUnserializer vu(constant->valueText,
                               constant->valueLen,
                               VariableUnserializer::Serialize);
@@ -935,7 +935,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
     const char *len = *p++;
     const char *valueText = *p++;
-    int64 valueLen = (int64)len;
+    int64_t valueLen = (int64_t)len;
     VariableUnserializer vu(valueText,
                             valueLen,
                             VariableUnserializer::Serialize);
@@ -973,7 +973,7 @@ void ClassInfo::Load() {
   if (s_loaded) return;
   const char **p = g_class_map;
   while (*p) {
-    Attribute attribute = (Attribute)(int64)*p;
+    Attribute attribute = (Attribute)(int64_t)*p;
     always_assert(!(attribute & IsRedeclared));
     ClassInfo *info = new ClassInfoUnique(p);
 

@@ -61,22 +61,22 @@ private:
 };
 
 Object f_hphp_splfileinfo___construct(CObjRef obj, CStrRef file_name);
-int64 f_hphp_splfileinfo_getatime(CObjRef obj);
+int64_t f_hphp_splfileinfo_getatime(CObjRef obj);
 String f_hphp_splfileinfo_getbasename(CObjRef obj, CStrRef suffix);
-int64 f_hphp_splfileinfo_getctime(CObjRef obj);
+int64_t f_hphp_splfileinfo_getctime(CObjRef obj);
 Object f_hphp_splfileinfo_getfileinfo(CObjRef obj, CStrRef class_name);
 String f_hphp_splfileinfo_getfilename(CObjRef obj);
-int64 f_hphp_splfileinfo_getgroup(CObjRef obj);
-int64 f_hphp_splfileinfo_getinode(CObjRef obj);
+int64_t f_hphp_splfileinfo_getgroup(CObjRef obj);
+int64_t f_hphp_splfileinfo_getinode(CObjRef obj);
 String f_hphp_splfileinfo_getlinktarget(CObjRef obj);
-int64 f_hphp_splfileinfo_getmtime(CObjRef obj);
-int64 f_hphp_splfileinfo_getowner(CObjRef obj);
+int64_t f_hphp_splfileinfo_getmtime(CObjRef obj);
+int64_t f_hphp_splfileinfo_getowner(CObjRef obj);
 String f_hphp_splfileinfo_getpath(CObjRef obj);
 Object f_hphp_splfileinfo_getpathinfo(CObjRef obj, CStrRef class_name);
 String f_hphp_splfileinfo_getpathname(CObjRef obj);
-int64 f_hphp_splfileinfo_getperms(CObjRef obj);
+int64_t f_hphp_splfileinfo_getperms(CObjRef obj);
 Variant f_hphp_splfileinfo_getrealpath(CObjRef obj);
-int64 f_hphp_splfileinfo_getsize(CObjRef obj);
+int64_t f_hphp_splfileinfo_getsize(CObjRef obj);
 String f_hphp_splfileinfo_gettype(CObjRef obj);
 bool f_hphp_splfileinfo_isdir(CObjRef obj);
 bool f_hphp_splfileinfo_isexecutable(CObjRef obj);
@@ -97,24 +97,24 @@ Variant f_hphp_splfileobject_fgetcsv(CObjRef obj, CStrRef delimiter, CStrRef enc
 String f_hphp_splfileobject_fgets(CObjRef obj);
 String f_hphp_splfileobject_fgetss(CObjRef obj, CStrRef allowable_tags);
 bool f_hphp_splfileobject_flock(CObjRef obj, VRefParam wouldblock);
-int64 f_hphp_splfileobject_fpassthru(CObjRef obj);
-Variant f_hphp_splfileobject_fscanf(int64 _argc, CObjRef obj, CStrRef format, CVarRef _argv);
-int64 f_hphp_splfileobject_fseek(CObjRef obj, int64 offset, int64 whence);
+int64_t f_hphp_splfileobject_fpassthru(CObjRef obj);
+Variant f_hphp_splfileobject_fscanf(int64_t _argc, CObjRef obj, CStrRef format, CVarRef _argv);
+int64_t f_hphp_splfileobject_fseek(CObjRef obj, int64_t offset, int64_t whence);
 Variant f_hphp_splfileobject_fstat(CObjRef obj);
-int64 f_hphp_splfileobject_ftell(CObjRef obj);
-bool f_hphp_splfileobject_ftruncate(CObjRef obj, int64 size);
-int64 f_hphp_splfileobject_fwrite(CObjRef obj, CStrRef str, int64 length);
+int64_t f_hphp_splfileobject_ftell(CObjRef obj);
+bool f_hphp_splfileobject_ftruncate(CObjRef obj, int64_t size);
+int64_t f_hphp_splfileobject_fwrite(CObjRef obj, CStrRef str, int64_t length);
 Variant f_hphp_splfileobject_getcvscontrol(CObjRef obj);
-int64 f_hphp_splfileobject_getflags(CObjRef obj);
-int64 f_hphp_splfileobject_getmaxlinelen(CObjRef obj);
-int64 f_hphp_splfileobject_key(CObjRef obj);
+int64_t f_hphp_splfileobject_getflags(CObjRef obj);
+int64_t f_hphp_splfileobject_getmaxlinelen(CObjRef obj);
+int64_t f_hphp_splfileobject_key(CObjRef obj);
 void f_hphp_splfileobject_next(CObjRef obj);
 void f_hphp_splfileobject_rewind(CObjRef obj);
 bool f_hphp_splfileobject_valid(CObjRef obj);
-void f_hphp_splfileobject_seek(CObjRef obj, int64 line_pos);
+void f_hphp_splfileobject_seek(CObjRef obj, int64_t line_pos);
 void f_hphp_splfileobject_setcsvcontrol(CObjRef obj, CStrRef delimiter, CStrRef enclosure, CStrRef escape);
-void f_hphp_splfileobject_setflags(CObjRef obj, int64 flags);
-void f_hphp_splfileobject_setmaxlinelen(CObjRef obj, int64 max_len);
+void f_hphp_splfileobject_setflags(CObjRef obj, int64_t flags);
+void f_hphp_splfileobject_setmaxlinelen(CObjRef obj, int64_t max_len);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

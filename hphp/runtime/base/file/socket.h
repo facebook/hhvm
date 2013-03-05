@@ -48,11 +48,11 @@ public:
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();
-  virtual int64 readImpl(char *buffer, int64 length);
-  virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual int64_t readImpl(char *buffer, int64_t length);
+  virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool eof();
   virtual Array getMetaData();
-  virtual int64 tell();
+  virtual int64_t tell();
 
   // check if the socket is still open
   virtual bool checkLiveness();
@@ -81,7 +81,7 @@ protected:
   int m_timeout; // in micro-seconds;
   bool m_timedOut;
 
-  int64 m_bytesSent;
+  int64_t m_bytesSent;
 
   bool closeImpl();
   bool waitForData();

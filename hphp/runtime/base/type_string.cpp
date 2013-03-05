@@ -41,7 +41,7 @@ StringData const **String::converted_integers;
 
 String::IntegerStringDataMap String::integer_string_data_map;
 
-static const StringData *convert_integer_helper(int64 n) {
+static const StringData *convert_integer_helper(int64_t n) {
   char tmpbuf[21];
   char *p;
   int is_negative;
@@ -52,14 +52,14 @@ static const StringData *convert_integer_helper(int64 n) {
   return StringData::GetStaticString(p);
 }
 
-void String::PreConvertInteger(int64 n) {
+void String::PreConvertInteger(int64_t n) {
   IntegerStringDataMap::const_iterator it =
     integer_string_data_map.find(n);
   if (it != integer_string_data_map.end()) return;
   integer_string_data_map[n] = convert_integer_helper(n);
 }
 
-const StringData *String::ConvertInteger(int64 n) {
+const StringData *String::ConvertInteger(int64_t n) {
   StringData const **psd = converted_integers + n;
   const StringData *sd = convert_integer_helper(n);
   *psd = sd;
@@ -114,7 +114,7 @@ String::String(int n) {
   m_px->setRefCount(1);
 }
 
-StringData* buildStringData(int64 n) {
+StringData* buildStringData(int64_t n) {
   char tmpbuf[21];
   char* p;
   int is_negative;
@@ -128,7 +128,7 @@ StringData* buildStringData(int64 n) {
 }
 
 HOT_FUNC
-String::String(int64 n) {
+String::String(int64_t n) {
   const StringData *sd = GetIntegerStringData(n);
   if (sd) {
     assert(sd->isStatic());
@@ -522,7 +522,7 @@ String &String::operator^=(CStrRef v) {
 HOT_FUNC
 VarNR String::toKey() const {
   if (!m_px) return VarNR(empty_string);
-  int64 n = 0;
+  int64_t n = 0;
   if (m_px->isStrictlyInteger(n)) {
     return VarNR(n);
   } else {
@@ -702,7 +702,7 @@ void String::serialize(VariableSerializer *serializer) const {
 void String::unserialize(VariableUnserializer *uns,
                          char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
-  int64 size = uns->readInt();
+  int64_t size = uns->readInt();
   if (size >= RuntimeOption::MaxSerializedStringSize) {
     throw Exception("Size of serialized string (%d) exceeds max", int(size));
   }

@@ -242,9 +242,9 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     if (isSwitch(*pc) ||
         instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
       if (*pc == OpSwitch) {
-        int64 switchBase = getImm(pc, 1).u_I64A;
+        int64_t switchBase = getImm(pc, 1).u_I64A;
         int32_t len = getImmVector(pc).size();
-        int64 limit = base + len - 2;
+        int64_t limit = base + len - 2;
         if (limit < switchBase) {
           verify_error("Overflow in Switch bounds [%d:%d]\n",
                        base, past);
@@ -424,13 +424,13 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
     }
     case HA: { // home address (id of local variable)
       PC ha_pc = pc;
-      int32 k = decodeVariableSizeImm(&ha_pc);
+      int32_t k = decodeVariableSizeImm(&ha_pc);
       ok &= checkLocal(pc, k);
       break;
     }
     case IA: { // iterator address (id of iterator variable)
       PC ia_pc = pc;
-      int32 k = decodeVariableSizeImm(&ia_pc);
+      int32_t k = decodeVariableSizeImm(&ia_pc);
       if (k >= numIters()) {
         verify_error("invalid iterator variable id %d at %d\n",
                k, offset((PC)instr));
@@ -440,7 +440,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
     }
     case IVA: { // variable size int
       PC iva_pc = pc;
-      int32 k = decodeVariableSizeImm(&iva_pc);
+      int32_t k = decodeVariableSizeImm(&iva_pc);
       switch (*instr) {
       case OpStaticLoc:
       case OpStaticLocInit:

@@ -419,12 +419,12 @@ operator|(const Operands& l, const Operands& r) {
   return Operands(int(r) | int(l));
 }
 
-static int64 typeToMask(DataType t) {
+static int64_t typeToMask(DataType t) {
   return (t == KindOfInvalid) ? 1 : (1 << (1 + getDataTypeIndex(t)));
 }
 
 struct InferenceRule {
-  int64 mask;
+  int64_t mask;
   DataType result;
 };
 
@@ -454,14 +454,14 @@ static DataType inferType(const InferenceRule* rules,
  */
 
 #define TYPE_MASK(name) \
-  static const int64 name ## Mask = typeToMask(KindOf ## name);
+  static const int64_t name ## Mask = typeToMask(KindOf ## name);
 TYPE_MASK(Invalid);
 TYPE_MASK(Uninit);
 TYPE_MASK(Null);
 TYPE_MASK(Boolean);
-static const int64 IntMask = typeToMask(KindOfInt64);
+static const int64_t IntMask = typeToMask(KindOfInt64);
 TYPE_MASK(Double);
-static const int64 StringMask = typeToMask(KindOfString) |
+static const int64_t StringMask = typeToMask(KindOfString) |
                                 typeToMask(KindOfStaticString);
 TYPE_MASK(Array);
 TYPE_MASK(Object);
@@ -498,10 +498,10 @@ static RuntimeType bitOpType(DynLocation* a, DynLocation* b) {
   return inferType(BitOpRules, ins);
 }
 
-static uint32 m_w = 1;    /* must not be zero */
-static uint32 m_z = 1;    /* must not be zero */
+static uint32_t m_w = 1;    /* must not be zero */
+static uint32_t m_z = 1;    /* must not be zero */
 
-static uint32 get_random()
+static uint32_t get_random()
 {
     m_z = 36969 * (m_z & 65535) + (m_z >> 16);
     m_w = 18000 * (m_w & 65535) + (m_w >> 16);
@@ -1849,7 +1849,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     if (mcode == MW) {
       // No stack and no locals.
     } else if (memberCodeHasImm(mcode)) {
-      int64 imm = decodeMemberCodeImm(&vec, mcode);
+      int64_t imm = decodeMemberCodeImm(&vec, mcode);
       if (memberCodeImmIsLoc(mcode)) {
         push_local(imm);
       } else if (memberCodeImmIsString(mcode)) {
@@ -2449,7 +2449,7 @@ Translator::findImmable(ImmStack &stack,
        * integer, we can call into array-access helper functions that
        * don't bother with the integer check.
        */
-      int64 lval;
+      int64_t lval;
       if (LIKELY(!str->isStrictlyInteger(lval))) {
         ni->hasConstImm = true;
         ni->constImm.u_SA = strId;
@@ -3346,15 +3346,15 @@ Translator::addDbgBLPC(PC pc) {
   return true;
 }
 
-uint64* Translator::getTransCounterAddr() {
+uint64_t* Translator::getTransCounterAddr() {
   if (!isTransDBEnabled()) return nullptr;
 
   TransID id = m_translations.size();
 
   // allocate a new chunk of counters if necessary
   if (id >= m_transCounters.size() * transCountersPerChunk) {
-    uint32   size = sizeof(uint64) * transCountersPerChunk;
-    uint64 *chunk = (uint64*)malloc(size);
+    uint32_t   size = sizeof(uint64_t) * transCountersPerChunk;
+    auto *chunk = (uint64_t*)malloc(size);
     bzero(chunk, size);
     m_transCounters.push_back(chunk);
   }
@@ -3364,11 +3364,11 @@ uint64* Translator::getTransCounterAddr() {
 }
 
 
-uint64 Translator::getTransCounter(TransID transId) const {
+uint64_t Translator::getTransCounter(TransID transId) const {
   if (!isTransDBEnabled()) return -1ul;
   assert(transId < m_translations.size());
 
-  uint64 counter;
+  uint64_t counter;
 
   if (transId / transCountersPerChunk >= m_transCounters.size()) {
     counter = 0;
@@ -3379,7 +3379,7 @@ uint64 Translator::getTransCounter(TransID transId) const {
   return counter;
 }
 
-void Translator::setTransCounter(TransID transId, uint64 value) {
+void Translator::setTransCounter(TransID transId, uint64_t value) {
   assert(transId < m_translations.size());
   assert(transId / transCountersPerChunk < m_transCounters.size());
 
@@ -3400,7 +3400,7 @@ const char *getTransKindName(TransKind kind) {
 }
 
 string
-TransRec::print(uint64 profCount) const {
+TransRec::print(uint64_t profCount) const {
   const size_t kBufSize = 1000;
   static char formatBuf[kBufSize];
 
@@ -3415,7 +3415,7 @@ TransRec::print(uint64 profCount) const {
            "  aLen = 0x%x\n"
            "  stubStart = %p\n"
            "  stubLen = 0x%x\n"
-           "  profCount = %llu\n"
+           "  profCount = %" PRIu64 "\n"
            "  bcMapping = %lu\n",
            id, md5.toString().c_str(), src.m_funcId, src.offset(),
            bcStopOffset, kind, getTransKindName(kind), aStart, aLen,

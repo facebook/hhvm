@@ -319,7 +319,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
 }
 
 unsigned StaticMemberExpression::getCanonHash() const {
-  int64 val = Expression::getCanonHash() +
+  int64_t val = Expression::getCanonHash() +
     hash_string(Util::toLower(m_className).c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }

@@ -22,9 +22,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define UCNV_REASON_CONST(v) \
-        const int64 q_UConverter$$REASON_ ## v = UCNV_ ## v ;
+        const int64_t q_UConverter$$REASON_ ## v = UCNV_ ## v ;
 #define UCNV_TYPE_CONST(v) \
-        const int64 q_UConverter$$ ## v        = UCNV_ ## v ;
+        const int64_t q_UConverter$$ ## v        = UCNV_ ## v ;
 
 UCNV_REASON_CONST(UNASSIGNED);
 UCNV_REASON_CONST(ILLEGAL);
@@ -332,7 +332,7 @@ String c_UConverter::t_getdestinationencoding() {
 
 /* Get algorithmic types */
 
-int64 c_UConverter::t_getsourcetype() {
+int64_t c_UConverter::t_getsourcetype() {
   if (!m_src) {
     return UCNV_UNSUPPORTED_CONVERTER;
   }
@@ -340,7 +340,7 @@ int64 c_UConverter::t_getsourcetype() {
   return ucnv_getType(m_src);
 }
 
-int64 c_UConverter::t_getdestinationtype() {
+int64_t c_UConverter::t_getdestinationtype() {
   if (!m_dest) {
     return UCNV_UNSUPPORTED_CONVERTER;
   }
@@ -382,7 +382,7 @@ String c_UConverter::t_getsubstchars() {
 
 /* Callbacks */
 
-Variant c_UConverter::defaultCallback(int64 reason, VRefParam error) {
+Variant c_UConverter::defaultCallback(int64_t reason, VRefParam error) {
   switch(reason) {
     case UCNV_UNASSIGNED:
     case UCNV_ILLEGAL:
@@ -394,13 +394,13 @@ Variant c_UConverter::defaultCallback(int64 reason, VRefParam error) {
   return null;
 }
 
-Variant c_UConverter::t_fromucallback(int64 reason,
-                                      CArrRef source, int64 codepoint,
+Variant c_UConverter::t_fromucallback(int64_t reason,
+                                      CArrRef source, int64_t codepoint,
                                       VRefParam error) {
   return defaultCallback(reason, error);
 }
 
-Variant c_UConverter::t_toucallback(int64 reason,
+Variant c_UConverter::t_toucallback(int64_t reason,
                                     CStrRef source, CStrRef codeunits,
                                     VRefParam error) {
   return defaultCallback(reason, error);
@@ -495,7 +495,7 @@ Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
 
 /* ext/intl error handling */
 
-int64 c_UConverter::t_geterrorcode() {
+int64_t c_UConverter::t_geterrorcode() {
   return m_error.code;
 }
 
@@ -506,7 +506,7 @@ String c_UConverter::t_geterrormessage() {
 /* Ennumerators and lookups */
 
 #define UCNV_REASON_CASE(v) case UCNV_ ## v : return String("REASON_" #v );
-String c_UConverter::ti_reasontext(const char* cls , int64 reason) {
+String c_UConverter::ti_reasontext(const char* cls , int64_t reason) {
   switch (reason) {
     UCNV_REASON_CASE(UNASSIGNED)
     UCNV_REASON_CASE(ILLEGAL)

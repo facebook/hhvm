@@ -187,7 +187,7 @@ public:
   HPHP::VM::Stack m_stack;
   HPHP::VM::ActRec* m_fp;
   HPHP::VM::PC m_pc;
-  uint32 m_isValid; /* Debug-only: non-zero iff m_fp/m_stack are trustworthy */
+  uint32_t m_isValid; /* Debug-only: non-zero iff m_fp/m_stack are trustworthy */
   HPHP::VM::EventHook* m_eventHook;
   int64_t m_currentThreadIdx;
 public:
@@ -231,10 +231,10 @@ public:
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(CStrRef mimetype, CStrRef charset);
-  int64 getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(int64 max);
-  int64 getRequestTimeLimit() const { return m_maxTime; }
-  void setRequestTimeLimit(int64 limit) { m_maxTime = limit;}
+  int64_t getRequestMemoryMaxBytes() const { return m_maxMemory; }
+  void setRequestMemoryMaxBytes(int64_t max);
+  int64_t getRequestTimeLimit() const { return m_maxTime; }
+  void setRequestTimeLimit(int64_t limit) { m_maxTime = limit;}
   String getCwd() const { return m_cwd;}
   void setCwd(CStrRef cwd) { m_cwd = cwd;}
 
@@ -357,8 +357,8 @@ private:
 private:
   // system settings
   Transport *m_transport;
-  int64 m_maxMemory;
-  int64 m_maxTime;
+  int64_t m_maxMemory;
+  int64_t m_maxTime;
   String m_cwd;
 
   // output buffering

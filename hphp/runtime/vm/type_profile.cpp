@@ -157,7 +157,7 @@ profileInit() {
  * the EvalJitWarmupRequests'th req.
  */
 bool __thread profileOn = false;
-static int64 numRequests;
+static int64_t numRequests;
 
 static inline bool warmedUp() {
   return (numRequests >= RuntimeOption::EvalJitWarmupRequests) ||

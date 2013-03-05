@@ -77,7 +77,7 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
 
 private:
-  SSATmp* genDefInt(int64 val);
+  SSATmp* genDefInt(int64_t val);
   SSATmp* genDefBool(bool val);
   SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);

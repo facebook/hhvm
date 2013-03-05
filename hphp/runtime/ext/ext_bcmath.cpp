@@ -48,12 +48,12 @@ static void php_str2num(bc_num *num, const char *str) {
   }
 }
 
-bool f_bcscale(int64 scale) {
+bool f_bcscale(int64_t scale) {
   BCG(bc_precision) = scale < 0 ? 0 : scale;
   return true;
 }
 
-String f_bcadd(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
+String f_bcadd(CStrRef left, CStrRef right, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -72,7 +72,7 @@ String f_bcadd(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
   return ret;
 }
 
-String f_bcsub(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
+String f_bcsub(CStrRef left, CStrRef right, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -91,20 +91,20 @@ String f_bcsub(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
   return ret;
 }
 
-int64 f_bccomp(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
+int64_t f_bccomp(CStrRef left, CStrRef right, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second;
   bc_init_num(&first);
   bc_init_num(&second);
   bc_str2num(&first, (char*)left.data(), scale);
   bc_str2num(&second, (char*)right.data(), scale);
-  int64 ret = bc_compare(first, second);
+  int64_t ret = bc_compare(first, second);
   bc_free_num(&first);
   bc_free_num(&second);
   return ret;
 }
 
-String f_bcmul(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
+String f_bcmul(CStrRef left, CStrRef right, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -123,7 +123,7 @@ String f_bcmul(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
   return ret;
 }
 
-String f_bcdiv(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
+String f_bcdiv(CStrRef left, CStrRef right, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -160,7 +160,7 @@ String f_bcmod(CStrRef left, CStrRef right) {
   return ret;
 }
 
-String f_bcpow(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
+String f_bcpow(CStrRef left, CStrRef right, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -180,7 +180,7 @@ String f_bcpow(CStrRef left, CStrRef right, int64 scale /* = -1 */) {
 }
 
 Variant f_bcpowmod(CStrRef left, CStrRef right, CStrRef modulus,
-                  int64 scale /* = -1 */) {
+                  int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, mod, result;
   bc_init_num(&first);
@@ -204,7 +204,7 @@ Variant f_bcpowmod(CStrRef left, CStrRef right, CStrRef modulus,
   return ret;
 }
 
-Variant f_bcsqrt(CStrRef operand, int64 scale /* = -1 */) {
+Variant f_bcsqrt(CStrRef operand, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num result;
   bc_init_num(&result);

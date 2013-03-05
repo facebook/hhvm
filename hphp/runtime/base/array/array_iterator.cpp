@@ -757,7 +757,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
  * iterator, it decRefs the array.
  */
 static NEVER_INLINE
-int64 new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
+int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
                           TypedValue* keyOut) {
   TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
   if (!arr->empty()) {
@@ -787,7 +787,7 @@ static inline void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
 }
 
 HOT_FUNC
-int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
+int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   valOut = tvToCell(valOut);
   if (UNLIKELY(!IsHphpArray(ad))) {
@@ -821,7 +821,7 @@ cold:
 }
 
 HOT_FUNC
-int64 new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
+int64_t new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
                          TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   valOut = tvToCell(valOut);
@@ -876,7 +876,7 @@ class FreeObj {
  * If exceptions are thrown, new_iter_object takes care of decRefing the object.
  */
 HOT_FUNC
-int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
+int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                       TypedValue* valOut, TypedValue* keyOut) {
   valOut = tvToCell(valOut);
   if (keyOut) {
@@ -966,7 +966,7 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
  * you're likely to get a performance regression.
  */
 static NEVER_INLINE
-int64 iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_cold: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
          iter->arr().getIterType() == ArrayIter::TypeIterator);
@@ -992,7 +992,7 @@ int64 iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 }
 
 HOT_FUNC
-int64 iter_next(Iter* iter, TypedValue* valOut) {
+int64_t iter_next(Iter* iter, TypedValue* valOut) {
   TRACE(2, "iter_next: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
          iter->arr().getIterType() == ArrayIter::TypeIterator);
@@ -1036,7 +1036,7 @@ cold:
 }
 
 HOT_FUNC
-int64 iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
          iter->arr().getIterType() == ArrayIter::TypeIterator);

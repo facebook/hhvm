@@ -183,7 +183,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
       if (sep) {
         fs->setSepExtension();
       }
-      int flags = (int)(int64)(*p++);
+      int flags = (int)(int64_t)(*p++);
       if (flags & ClassInfo::IsAbstract) {
         fs->addModifier(T_ABSTRACT);
       }
@@ -209,7 +209,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     p++;
     // Parse properties
     while (*p) {
-      int flags = (int)(int64)(*p++);
+      int flags = (int)(int64_t)(*p++);
       ModifierExpressionPtr modifiers(
         new ModifierExpression(BlockScopePtr(), LocationPtr()));
       if (flags & ClassInfo::IsProtected) {
@@ -233,7 +233,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     }
     p++;
 
-    int flags = (int)(int64)(*p++);
+    int flags = (int)(int64_t)(*p++);
     cl->setClassInfoAttribute(flags);
     if (flags & ClassInfo::HasDocComment) {
       cl->setDocComment(*p++);
@@ -295,7 +295,7 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
     index++;
   }
 
-  int flags = (int)(int64)(*p++);
+  int flags = (int)(int64_t)(*p++);
   f->setClassInfoAttribute(flags);
   if (flags & ClassInfo::HasDocComment) {
     f->setDocComment(*p++);

@@ -36,7 +36,7 @@ struct TypedValue;
 
 struct Value {
   mutable union {
-    int64       num;  // KindOfInt64, KindOfBool
+    int64_t       num;  // KindOfInt64, KindOfBool
     double      dbl;  // KindOfDouble
     StringData *pstr; // KindOfString, KindOfStaticString
     ArrayData  *parr; // KindOfArray

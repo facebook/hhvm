@@ -493,7 +493,7 @@ Variant f_strcspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
   return length;
 }
 
-Variant f_count_chars(CStrRef str, int64 mode /* = 0 */) {
+Variant f_count_chars(CStrRef str, int64_t mode /* = 0 */) {
   int chars[256];
   memset((void*)chars, 0, sizeof(chars));
   const unsigned char *buf = (const unsigned char *)(const char *)str;
@@ -555,7 +555,7 @@ Variant f_count_chars(CStrRef str, int64 mode /* = 0 */) {
  * string containing alphabetic characters, which also may contain, but not
  * start with "'" and "-" characters.
  */
-Variant f_str_word_count(CStrRef str, int64 format /* = 0 */,
+Variant f_str_word_count(CStrRef str, int64_t format /* = 0 */,
                          CStrRef charlist /* = "" */) {
   int str_len = str.size();
   switch (format) {

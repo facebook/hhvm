@@ -75,7 +75,7 @@ HphpArray HphpArray::s_theEmptyArray(StaticEmptyArray);
 //=============================================================================
 // Helpers.
 
-static inline size_t computeMaskFromNumElms(uint32 numElms) {
+static inline size_t computeMaskFromNumElms(uint32_t numElms) {
   assert(numElms <= 0x7fffffffU);
   size_t lgSize = HphpArray::MinLgTableSize;
   size_t maxElms = (size_t(3U)) << (lgSize-2);
@@ -317,7 +317,7 @@ bool HphpArray::isVectorData() const {
     return true;
   }
   Elm* elms = m_data;
-  int64 i = 0;
+  int64_t i = 0;
   for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
     Elm* e = &elms[pos];
     if (e->data.m_type == KindOfTombstone) {
@@ -417,9 +417,9 @@ Variant HphpArray::each() {
     ArrayInit init(4);
     Variant key = HphpArray::getKey(m_pos);
     Variant value = HphpArray::getValue(m_pos);
-    init.set(int64(1), value);
+    init.set(int64_t(1), value);
     init.set(s_value, value, true);
-    init.set(int64(0), key);
+    init.set(int64_t(0), key);
     init.set(s_key, key, true);
     m_pos = nextElm(m_data, m_pos);
     return Array(init.create());
@@ -454,7 +454,7 @@ static bool hitStringKey(const HphpArray::Elm* e, const StringData* s,
                           && (memcmp(data, sdata, slen) == 0));
 }
 
-static bool hitIntKey(const HphpArray::Elm* e, int64 ki) {
+static bool hitIntKey(const HphpArray::Elm* e, int64_t ki) {
   // hitIntKey() should only be called on an Elm that is referenced by a
   // hash table entry. HphpArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
@@ -492,7 +492,7 @@ static bool hitIntKey(const HphpArray::Elm* e, int64 ki) {
   }
 
 NEVER_INLINE
-ssize_t /*ElmInd*/ HphpArray::find(int64 ki) const {
+ssize_t /*ElmInd*/ HphpArray::find(int64_t ki) const {
   if (uint64_t(ki) < m_size) {
     // Try to get at it without dirtying a data cache line.
     Elm* e = m_data + uint64_t(ki);
@@ -558,7 +558,7 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
   }
 
 NEVER_INLINE
-HphpArray::ElmInd* HphpArray::findForInsert(int64 ki) const {
+HphpArray::ElmInd* HphpArray::findForInsert(int64_t ki) const {
   FIND_FOR_INSERT_BODY(ki, hitIntKey(&elms[pos], ki));
 }
 
@@ -586,7 +586,7 @@ HphpArray::findForNewInsertLoop(size_t tableMask, size_t h0) const {
   }
 }
 
-bool HphpArray::exists(int64 k) const {
+bool HphpArray::exists(int64_t k) const {
   return find(k) != (ssize_t)ElmIndEmpty;
 }
 
@@ -595,7 +595,7 @@ bool HphpArray::exists(const StringData* k) const {
   return pos != ssize_t(ElmIndEmpty);
 }
 
-CVarRef HphpArray::get(int64 k, bool error /* = false */) const {
+CVarRef HphpArray::get(int64_t k, bool error /* = false */) const {
   ElmInd pos = find(k);
   if (pos != ElmIndEmpty) {
     Elm* e = &m_data[pos];
@@ -613,7 +613,7 @@ CVarRef HphpArray::get(const StringData* key, bool error /* = false */) const {
   return error ? getNotFound(key) : null_variant;
 }
 
-ssize_t HphpArray::getIndex(int64 k) const {
+ssize_t HphpArray::getIndex(int64_t k) const {
   return ssize_t(find(k));
 }
 
@@ -625,10 +625,10 @@ ssize_t HphpArray::getIndex(const StringData* k) const {
 // Append/insert/update.
 
 inline ALWAYS_INLINE bool HphpArray::isFull() const {
-  uint32 maxElms = computeMaxElms(m_tableMask);
-  assert(m_lastE == ElmIndEmpty || uint32(m_lastE) + 1 <= maxElms);
+  uint32_t maxElms = computeMaxElms(m_tableMask);
+  assert(m_lastE == ElmIndEmpty || uint32_t(m_lastE) + 1 <= maxElms);
   assert(m_hLoad <= maxElms);
-  return uint32(m_lastE) + 1 == maxElms || m_hLoad == maxElms;
+  return uint32_t(m_lastE) + 1 == maxElms || m_hLoad == maxElms;
 }
 
 inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
@@ -757,8 +757,8 @@ inline ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
 }
 
 NEVER_INLINE void HphpArray::resize() {
-  uint32 maxElms = computeMaxElms(m_tableMask);
-  assert(m_lastE == ElmIndEmpty || uint32(m_lastE)+1 <= maxElms);
+  uint32_t maxElms = computeMaxElms(m_tableMask);
+  assert(m_lastE == ElmIndEmpty || uint32_t(m_lastE)+1 <= maxElms);
   assert(m_hLoad <= maxElms);
   // At a minimum, compaction is required.  If the load factor would be >0.5
   // even after compaction, grow instead, in order to avoid the possibility
@@ -785,7 +785,7 @@ NEVER_INLINE void HphpArray::resize() {
 
 void HphpArray::grow() {
   assert(m_tableMask <= 0x7fffffffU);
-  uint32 oldMask = m_tableMask;
+  uint32_t oldMask = m_tableMask;
   m_tableMask = (uint)(size_t(m_tableMask) + size_t(m_tableMask) + size_t(1));
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
@@ -910,7 +910,7 @@ bool HphpArray::nextInsert(CVarRef data) {
     return false;
   }
   resizeIfNeeded();
-  int64 ki = m_nextKI;
+  int64_t ki = m_nextKI;
   // The check above enforces an invariant that allows us to always
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
@@ -930,7 +930,7 @@ void HphpArray::nextInsertRef(CVarRef data) {
     return;
   }
   resizeIfNeeded();
-  int64 ki = m_nextKI;
+  int64_t ki = m_nextKI;
   // The check above enforces an invariant that allows us to always
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
@@ -942,7 +942,7 @@ void HphpArray::nextInsertRef(CVarRef data) {
 
 void HphpArray::nextInsertWithRef(CVarRef data) {
   resizeIfNeeded();
-  int64 ki = m_nextKI;
+  int64_t ki = m_nextKI;
   ElmInd* ei = findForInsert(ki);
   assert(!validElmInd(*ei));
 
@@ -956,7 +956,7 @@ void HphpArray::nextInsertWithRef(CVarRef data) {
   ++m_nextKI;
 }
 
-void HphpArray::addLvalImpl(int64 ki, Variant** pDest) {
+void HphpArray::addLvalImpl(int64_t ki, Variant** pDest) {
   assert(pDest != nullptr);
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
@@ -992,7 +992,7 @@ void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
   *pDest = &(tvAsVariant(&e->data));
 }
 
-inline void HphpArray::addVal(int64 ki, CVarRef data) {
+inline void HphpArray::addVal(int64_t ki, CVarRef data) {
   assert(!exists(ki));
   resizeIfNeeded();
   ElmInd* ei = findForNewInsert(ki);
@@ -1021,7 +1021,7 @@ inline void HphpArray::addVal(StringData* key, CVarRef data) {
   e->key->incRefCount();
 }
 
-inline void HphpArray::addValWithRef(int64 ki, CVarRef data) {
+inline void HphpArray::addValWithRef(int64_t ki, CVarRef data) {
   resizeIfNeeded();
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
@@ -1051,7 +1051,7 @@ inline void HphpArray::addValWithRef(StringData* key, CVarRef data) {
 }
 
 inline INLINE_SINGLE_CALLER
-void HphpArray::update(int64 ki, CVarRef data) {
+void HphpArray::update(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
@@ -1076,7 +1076,7 @@ void HphpArray::update(StringData* key, CVarRef data) {
   newElmStr(ei, h, key, data);
 }
 
-void HphpArray::updateRef(int64 ki, CVarRef data) {
+void HphpArray::updateRef(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
@@ -1100,7 +1100,7 @@ void HphpArray::updateRef(StringData* key, CVarRef data) {
   newElmStr(ei, h, key, data, true /*byRef*/);
 }
 
-ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
+ArrayData* HphpArray::lval(int64_t k, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
   if (!copy) {
     addLvalImpl(k, &ret);
@@ -1174,7 +1174,7 @@ ArrayData *HphpArray::lvalPtr(StringData* key, Variant*& ret, bool copy,
   return a;
 }
 
-ArrayData *HphpArray::lvalPtr(int64 k, Variant*& ret, bool copy,
+ArrayData *HphpArray::lvalPtr(int64_t k, Variant*& ret, bool copy,
                               bool create) {
   HphpArray* a = 0;
   HphpArray* t = this;
@@ -1207,7 +1207,7 @@ ArrayData* HphpArray::lvalNew(Variant*& ret, bool copy) {
   return a;
 }
 
-ArrayData* HphpArray::set(int64 k, CVarRef v, bool copy) {
+ArrayData* HphpArray::set(int64_t k, CVarRef v, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
   a->update(k, v);
@@ -1221,7 +1221,7 @@ ArrayData* HphpArray::set(StringData* k, CVarRef v, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::setRef(int64 k, CVarRef v, bool copy) {
+ArrayData* HphpArray::setRef(int64_t k, CVarRef v, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
   a->updateRef(k, v);
@@ -1235,7 +1235,7 @@ ArrayData* HphpArray::setRef(StringData* k, CVarRef v, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::add(int64 k, CVarRef v, bool copy) {
+ArrayData* HphpArray::add(int64_t k, CVarRef v, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
   a->addVal(k, v);
@@ -1250,7 +1250,7 @@ ArrayData* HphpArray::add(StringData* k, CVarRef v, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::addLval(int64 k, Variant*& ret, bool copy) {
+ArrayData* HphpArray::addLval(int64_t k, Variant*& ret, bool copy) {
   assert(!exists(k));
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
@@ -1333,7 +1333,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   // Mark the hash entry as "deleted".
   *ei = ElmIndTombstone;
   assert(m_lastE == ElmIndEmpty ||
-         uint32(m_lastE)+1 <= computeMaxElms(m_tableMask));
+         uint32_t(m_lastE)+1 <= computeMaxElms(m_tableMask));
   assert(m_hLoad <= computeMaxElms(m_tableMask));
 
   // Finally, decref the old value
@@ -1345,7 +1345,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   }
 }
 
-ArrayData* HphpArray::remove(int64 k, bool copy) {
+ArrayData* HphpArray::remove(int64_t k, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
   a->erase(a->findForInsert(k));
@@ -1372,7 +1372,7 @@ ArrayData* HphpArray::copyWithStrongIterators() const {
 //=============================================================================
 // non-variant interface
 
-TypedValue* HphpArray::nvGetCell(int64 k) const {
+TypedValue* HphpArray::nvGetCell(int64_t k) const {
   ElmInd pos = find(k);
   return LIKELY(pos != ElmIndEmpty) ? tvToCell(&m_data[pos].data) :
          nvGetNotFound(k);
@@ -1384,7 +1384,7 @@ TypedValue* HphpArray::nvGetCell(const StringData* k) const {
          nvGetNotFound(k);
 }
 
-TypedValue* HphpArray::nvGet(int64 ki) const {
+TypedValue* HphpArray::nvGet(int64_t ki) const {
   ElmInd pos = find(ki);
   if (LIKELY(pos != ElmIndEmpty)) {
     Elm* e = &m_data[pos];
@@ -1534,7 +1534,7 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
   assert(a->getCount() <= 1 && value.m_type != KindOfRef);
   HphpArray* h;
   ElmInd* ei;
-  int64 k;
+  int64_t k;
   if (LIKELY(IsHphpArray(a)) &&
       ((h = (HphpArray*)a), LIKELY(h->m_pos >= 0)) &&
       LIKELY(!h->isFull()) &&
@@ -1755,16 +1755,16 @@ namespace VM {
 // Helpers for array_setm.
 ArrayData* nvCheckedSet(ArrayData* a, StringData* key, TypedValue* value,
            bool copy) {
-  int64 i;
+  int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvSet(i, value, copy) :
          a->nvSet(key, value, copy);
 }
 
-ArrayData* nvCheckedSet(ArrayData* a, int64 key, TypedValue* value, bool copy) {
+ArrayData* nvCheckedSet(ArrayData* a, int64_t key, TypedValue* value, bool copy) {
   return a->nvSet(key, value, copy);
 }
 
-void setmDecRef(int64 i) { /* nop */ }
+void setmDecRef(int64_t i) { /* nop */ }
 void setmDecRef(StringData* sd) { decRefStr(sd); }
 
 static inline ArrayData*
@@ -1804,14 +1804,14 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, TypedValue* value) {
  *    array_setm_ik1_v0 --
  *       Don't count the array's reference to the polymorphic value.
  */
-ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
+ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64_t key,
                             TypedValue* value) {
-  return array_setm<int64, false, false, false>(cell, ad, key, value);
+  return array_setm<int64_t, false, false, false>(cell, ad, key, value);
 }
 
-ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
+ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64_t key,
                              TypedValue* value) {
-  return array_setm<int64, true, false, false>(cell, ad, key, value);
+  return array_setm<int64_t, true, false, false>(cell, ad, key, value);
 }
 
 /**
@@ -1884,7 +1884,7 @@ ArrayData* array_setm_wk1_v0(ArrayData* ad, TypedValue* value) {
  */
 
 ArrayData*
-array_getm_i(void* dptr, int64 key, TypedValue* out) {
+array_getm_i(void* dptr, int64_t key, TypedValue* out) {
   assert(dptr);
   ArrayData* ad = (ArrayData*)dptr;
   TRACE(2, "array_getm_ik1: (%p) <- %p[%" PRId64 "]\n", out, dptr, key);
@@ -1900,7 +1900,7 @@ ArrayData* array_getm_s(ArrayData* ad, StringData* sd, TypedValue* out,
                            int flags) {
   bool drKey = flags & DecRefKey;
   bool checkInts = flags & CheckInts;
-  int64 ikey;
+  int64_t ikey;
   TypedValue* ret = checkInts && UNLIKELY(sd->isStrictlyInteger(ikey)) ?
                     ad->nvGetCell(ikey) :
                     ad->nvGetCell(sd);
@@ -1916,7 +1916,7 @@ static bool
 issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {
   const ArrayData* ad = (const ArrayData*)dptr;
   bool retval;
-  int64 keyAsInt;
+  int64_t keyAsInt;
 
   TypedValue* c;
   if (checkInt && sd->isStrictlyInteger(keyAsInt)) {
@@ -1934,16 +1934,16 @@ issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {
   return retval;
 }
 
-uint64 array_issetm_s(const void* dptr, StringData* sd)
+uint64_t array_issetm_s(const void* dptr, StringData* sd)
 { return issetMUnary(dptr, sd, true  /*decRefKey*/, true  /*checkInt*/); }
-uint64 array_issetm_s0(const void* dptr, StringData* sd)
+uint64_t array_issetm_s0(const void* dptr, StringData* sd)
 { return issetMUnary(dptr, sd, false /*decRefKey*/, true  /*checkInt*/); }
-uint64 array_issetm_s_fast(const void* dptr, StringData* sd)
+uint64_t array_issetm_s_fast(const void* dptr, StringData* sd)
 { return issetMUnary(dptr, sd, true  /*decRefKey*/, false /*checkInt*/); }
-uint64 array_issetm_s0_fast(const void* dptr, StringData* sd)
+uint64_t array_issetm_s0_fast(const void* dptr, StringData* sd)
 { return issetMUnary(dptr, sd, false /*decRefKey*/, false /*checkInt*/); }
 
-uint64 array_issetm_i(const void* dptr, int64_t key) {
+uint64_t array_issetm_i(const void* dptr, int64_t key) {
   ArrayData* ad = (ArrayData*)dptr;
   TypedValue* ret = ad->nvGet(key);
   // Variant.isNull unboxes ret if its KindOfRef.

@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_session_set_cookie_params(int64 lifetime, CStrRef path = null_string, CStrRef domain = null_string, CVarRef secure = null, CVarRef httponly = null);
+void f_session_set_cookie_params(int64_t lifetime, CStrRef path = null_string, CStrRef domain = null_string, CVarRef secure = null, CVarRef httponly = null);
 Array f_session_get_cookie_params();
 String f_session_name(CStrRef newname = null_string);
 Variant f_session_module_name(CStrRef newname = null_string);
@@ -34,7 +34,7 @@ String f_session_save_path(CStrRef newname = null_string);
 String f_session_id(CStrRef newid = null_string);
 bool f_session_regenerate_id(bool delete_old_session = false);
 String f_session_cache_limiter(CStrRef new_cache_limiter = null_string);
-int64 f_session_cache_expire(CStrRef new_cache_expire = null_string);
+int64_t f_session_cache_expire(CStrRef new_cache_expire = null_string);
 Variant f_session_encode();
 bool f_session_decode(CStrRef data);
 bool f_session_start();

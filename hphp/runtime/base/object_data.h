@@ -160,7 +160,7 @@ class ObjectData : public CountableNF {
 
   // overridable casting
   virtual bool   o_toBoolean() const { return true;}
-  virtual int64  o_toInt64() const;
+  virtual int64_t  o_toInt64() const;
   virtual double o_toDouble()  const { return o_toInt64();}
 
   void setDummy();
@@ -292,7 +292,7 @@ public:
 
   // this will be hopefully packed together with _count from parent class
  private:
-  mutable int16 o_attribute;     // various flags
+  mutable int16_t o_attribute;     // various flags
  protected:
   // 16 bits of unused memory that can be reused by subclasses
   union {

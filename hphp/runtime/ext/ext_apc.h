@@ -25,29 +25,29 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_apc_add(CStrRef key, CVarRef var, int64 ttl = 0, int64 cache_id = 0);
-bool f_apc_store(CStrRef key, CVarRef var, int64 ttl = 0, int64 cache_id = 0);
-Variant f_apc_fetch(CVarRef key, VRefParam success = null, int64 cache_id = 0);
-Variant f_apc_delete(CVarRef key, int64 cache_id = 0);
-bool f_apc_clear_cache(int64 cache_id = 0);
-Variant f_apc_inc(CStrRef key, int64 step = 1, VRefParam success = null, int64 cache_id = 0);
-Variant f_apc_dec(CStrRef key, int64 step = 1, VRefParam success = null, int64 cache_id = 0);
-bool f_apc_cas(CStrRef key, int64 old_cas, int64 new_cas, int64 cache_id = 0);
-Variant f_apc_exists(CVarRef key, int64 cache_id = 0);
+bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl = 0, int64_t cache_id = 0);
+bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl = 0, int64_t cache_id = 0);
+Variant f_apc_fetch(CVarRef key, VRefParam success = null, int64_t cache_id = 0);
+Variant f_apc_delete(CVarRef key, int64_t cache_id = 0);
+bool f_apc_clear_cache(int64_t cache_id = 0);
+Variant f_apc_inc(CStrRef key, int64_t step = 1, VRefParam success = null, int64_t cache_id = 0);
+Variant f_apc_dec(CStrRef key, int64_t step = 1, VRefParam success = null, int64_t cache_id = 0);
+bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas, int64_t cache_id = 0);
+Variant f_apc_exists(CVarRef key, int64_t cache_id = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_apc_cache_info(int64 cache_id = 0, bool limited = false);
+Variant f_apc_cache_info(int64_t cache_id = 0, bool limited = false);
 inline Array f_apc_sma_info(bool limited = false) {
   return Array::Create();
 }
 inline bool f_apc_define_constants(CStrRef key, CStrRef constants,
                                    bool case_sensitive = true,
-                                   int64 cache_id = 0) {
+                                   int64_t cache_id = 0) {
   throw NotSupportedException(__func__, "dynamic coding");
 }
 inline bool f_apc_load_constants(CStrRef key, bool case_sensitive = true,
-                                 int64 cache_id = 0) {
+                                 int64_t cache_id = 0) {
   throw NotSupportedException(__func__, "dynamic coding");
 }
 inline bool f_apc_compile_file(CStrRef filename, bool atomic = true,
@@ -57,22 +57,22 @@ inline bool f_apc_compile_file(CStrRef filename, bool atomic = true,
 inline Array f_apc_filehits() {
   throw NotSupportedException(__func__, "feature not supported");
 }
-inline Variant f_apc_delete_file(CVarRef keys, int64 cache_id = 0) {
+inline Variant f_apc_delete_file(CVarRef keys, int64_t cache_id = 0) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-inline Variant f_apc_bin_dump(int64 cache_id = 0, CVarRef filter = null_variant) {
+inline Variant f_apc_bin_dump(int64_t cache_id = 0, CVarRef filter = null_variant) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-inline bool f_apc_bin_load(CStrRef data, int64 flags = 0, int64 cache_id = 0) {
+inline bool f_apc_bin_load(CStrRef data, int64_t flags = 0, int64_t cache_id = 0) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-inline Variant f_apc_bin_dumpfile(int64 cache_id, CVarRef filter,
-                                  CStrRef filename, int64 flags = 0,
+inline Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
+                                  CStrRef filename, int64_t flags = 0,
                                   CObjRef context = null) {
   throw NotSupportedException(__func__, "feature not supported");
 }
 inline bool f_apc_bin_loadfile(CStrRef filename, CObjRef context = null,
-                               int64 flags = 0, int64 cache_id = 0) {
+                               int64_t flags = 0, int64_t cache_id = 0) {
   throw NotSupportedException(__func__, "feature not supported");
 }
 
@@ -99,14 +99,14 @@ void apc_load_impl_compressed(
 class apc_rfc1867_data {
 public:
   std::string tracking_key;
-  int64 content_length;
+  int64_t content_length;
   std::string filename;
   std::string name;
   char *temp_filename;
   int cancel_upload;
   double start_time;
-  int64 bytes_processed;
-  int64 prev_bytes_processed;
+  int64_t bytes_processed;
+  int64_t prev_bytes_processed;
   int update_freq;
   double rate;
 };
@@ -130,7 +130,7 @@ void const_load_impl_compressed(
   int *thrift_lens, const char *thrifts,
   int *other_lens, const char *others);
 
-static_assert(sizeof(int64) == sizeof(long long),
+static_assert(sizeof(int64_t) == sizeof(long long),
               "Must be able to cast an int64* to a long long*");
 
 ///////////////////////////////////////////////////////////////////////////////

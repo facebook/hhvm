@@ -31,8 +31,8 @@ public:
 
   static void SetCurrent(VirtualHost *vhost);
   static const VirtualHost *GetCurrent();
-  static int64 GetMaxPostSize();
-  static int64 GetUploadMaxFileSize();
+  static int64_t GetMaxPostSize();
+  static int64_t GetUploadMaxFileSize();
   static const std::vector<std::string> &GetAllowedDirectories();
   static void SortAllowedDirectories(std::vector<std::string>& dirs);
 public:
@@ -94,8 +94,8 @@ private:
   struct VhostRuntimeOption {
   public:
     int requestTimeoutSeconds;
-    int64 maxPostSize;
-    int64 uploadMaxFileSize;
+    int64_t maxPostSize;
+    int64_t uploadMaxFileSize;
     std::vector<std::string> allowedDirectories;
   };
 

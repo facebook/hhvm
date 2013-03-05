@@ -703,7 +703,7 @@ bool f_ldap_get_option(CObjRef link, int option, VRefParam retval) {
       if (ldap_get_option(ld->link, option, &val)) {
         return false;
       }
-      retval = (int64)val;
+      retval = (int64_t)val;
     } break;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   case LDAP_OPT_NETWORK_TIMEOUT:
@@ -716,7 +716,7 @@ bool f_ldap_get_option(CObjRef link, int option, VRefParam retval) {
         }
         return false;
       }
-      retval = (int64)timeout->tv_sec;
+      retval = (int64_t)timeout->tv_sec;
       ldap_memfree(timeout);
     } break;
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
@@ -726,7 +726,7 @@ bool f_ldap_get_option(CObjRef link, int option, VRefParam retval) {
       if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
         return false;
       }
-      retval = (int64)(timeout / 1000);
+      retval = (int64_t)(timeout / 1000);
     } break;
 #endif
   /* options with string value */
@@ -972,7 +972,7 @@ Variant f_ldap_compare(CObjRef link, CStrRef dn, CStrRef attribute,
   return -1LL;
 }
 
-int64 f_ldap_errno(CObjRef link) {
+int64_t f_ldap_errno(CObjRef link) {
   LdapLink *ld = link.getTyped<LdapLink>();
   return _get_lderrno(ld->link);
 }
@@ -996,7 +996,7 @@ Variant f_ldap_get_dn(CObjRef link, CObjRef result_entry) {
   return false;
 }
 
-int64 f_ldap_count_entries(CObjRef link, CObjRef result) {
+int64_t f_ldap_count_entries(CObjRef link, CObjRef result) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
   return ldap_count_entries(ld->link, res->data);

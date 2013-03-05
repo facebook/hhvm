@@ -199,7 +199,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
 }
 
 unsigned ClassConstantExpression::getCanonHash() const {
-  int64 val =
+  int64_t val =
     hash_string(Util::toLower(m_varName).c_str(), m_varName.size()) -
     hash_string(Util::toLower(m_className).c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);

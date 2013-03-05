@@ -66,7 +66,7 @@ ZendPack::ZendPack() {
     little_endian_int32_map[2] = 2;
     little_endian_int32_map[3] = 3;
   } else {
-    int size = sizeof(int32);
+    int size = sizeof(int32_t);
 
     /* Where to get hi to lo bytes from */
     byte_map[0] = size - 1;
@@ -98,7 +98,7 @@ ZendPack::ZendPack() {
 }
 
 void ZendPack::pack(CVarRef val, int size, int *map, char *output) {
-  int32 n = val.toInt32();
+  int32_t n = val.toInt32();
   char *v = (char*)&n;
   for (int i = 0; i < size; i++) {
     *output++ = v[map[i]];
@@ -439,8 +439,8 @@ Variant ZendPack::pack(CStrRef fmt, CArrRef argv) {
   return s.setSize(outputpos);
 }
 
-int32 ZendPack::unpack(const char *data, int size, int issigned, int *map) {
-  int32 result;
+int32_t ZendPack::unpack(const char *data, int size, int issigned, int *map) {
+  int32_t result;
   char *cresult = (char *) &result;
   int i;
 
@@ -684,13 +684,13 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
 
         case 'i':
         case 'I': {
-          int32 v = 0;
+          int32_t v = 0;
           int issigned = 0;
 
           if (type == 'i') {
             issigned = input[inputpos + (machine_little_endian ?
                                          (sizeof(int) - 1) : 0)] & 0x80;
-          } else if (sizeof(int32) > 4 &&
+          } else if (sizeof(int32_t) > 4 &&
                      (input[inputpos + machine_endian_int32_map[3]]
                       & 0x80) == 0x80) {
             v = ~INT_MAX;
@@ -707,7 +707,7 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
         case 'V': {
           int issigned = 0;
           int *map = machine_endian_int32_map;
-          int32 v = 0;
+          int32_t v = 0;
 
           if (type == 'l' || type == 'L') {
             issigned = input[inputpos + (machine_little_endian ? 3 : 0)]
@@ -720,7 +720,7 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
             map = little_endian_int32_map;
           }
 
-          if (sizeof(int32) > 4 && issigned) {
+          if (sizeof(int32_t) > 4 && issigned) {
             v = ~INT_MAX;
           }
 
@@ -728,7 +728,7 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
           if (type == 'l') {
             ret.set(String(n, CopyString), v);
           } else {
-            uint64 u64 = uint32_t(v);
+            uint64_t u64 = uint32_t(v);
             ret.set(String(n, CopyString), u64);
           }
           break;

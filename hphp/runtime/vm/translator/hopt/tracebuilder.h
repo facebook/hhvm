@@ -42,7 +42,7 @@ public:
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
-  Trace* makeExitTrace(uint32 bcOff) {
+  Trace* makeExitTrace(uint32_t bcOff) {
     return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
                                            bcOff, false));
   }
@@ -84,9 +84,9 @@ public:
   SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type type);
   void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
 
-  SSATmp* genLdLoc(uint32 id);
-  SSATmp* genLdLocAddr(uint32 id);
-  void genRaiseUninitWarning(uint32 id);
+  SSATmp* genLdLoc(uint32_t id);
+  SSATmp* genLdLocAddr(uint32_t id);
+  void genRaiseUninitWarning(uint32_t id);
 
   /*
    * Returns an SSATmp containing the (inner) value of the given local.
@@ -97,15 +97,15 @@ public:
    *       the tracked type for this local.  This check may be optimized away
    *       if we can determine that the inner type must match the tracked type.
    */
-  SSATmp* genLdLocAsCell(uint32 id, Trace* exitTrace);
+  SSATmp* genLdLocAsCell(uint32_t id, Trace* exitTrace);
 
   /*
    * Asserts that local 'id' has type 'type' and loads it into the
    * returned SSATmp.
    */
-  SSATmp* genLdAssertedLoc(uint32 id, Type type);
+  SSATmp* genLdAssertedLoc(uint32_t id, Type type);
 
-  SSATmp* genStLoc(uint32 id,
+  SSATmp* genStLoc(uint32_t id,
                    SSATmp* src,
                    bool doRefCount,
                    bool genStoreType,
@@ -114,28 +114,28 @@ public:
   SSATmp* genLdMem(SSATmp* addr, int64_t offset,
                    Type type, Trace* target);
   void    genStMem(SSATmp* addr, SSATmp* src, bool genStoreType);
-  void    genStMem(SSATmp* addr, int64 offset, SSATmp* src, bool stType);
+  void    genStMem(SSATmp* addr, int64_t offset, SSATmp* src, bool stType);
   SSATmp* genLdProp(SSATmp* obj, SSATmp* prop, Type type, Trace* exit);
   void    genStProp(SSATmp* obj, SSATmp* prop, SSATmp* src, bool genStoreType);
-  void    genSetPropCell(SSATmp* base, int64 offset, SSATmp* value);
+  void    genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value);
 
-  SSATmp* genBoxLoc(uint32 id);
-  void    genBindLoc(uint32 id, SSATmp* ref, bool doRefCount = true);
-  void    genInitLoc(uint32 id, SSATmp* t);
+  SSATmp* genBoxLoc(uint32_t id);
+  void    genBindLoc(uint32_t id, SSATmp* ref, bool doRefCount = true);
+  void    genInitLoc(uint32_t id, SSATmp* t);
 
   void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
   SSATmp* genLdCurFuncPtr();
   SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
   SSATmp* genLdFuncCls(SSATmp* func);
-  SSATmp* genNewObj(int32 numParams, const StringData* clsName);
-  SSATmp* genNewObj(int32 numParams, SSATmp* cls);
-  SSATmp* genNewArray(int32 capacity);
-  SSATmp* genNewTuple(int32 numArgs, SSATmp* sp);
+  SSATmp* genNewObj(int32_t numParams, const StringData* clsName);
+  SSATmp* genNewObj(int32_t numParams, SSATmp* cls);
+  SSATmp* genNewArray(int32_t capacity);
+  SSATmp* genNewTuple(int32_t numArgs, SSATmp* sp);
   SSATmp* genDefActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName);
   SSATmp* genFreeActRec();
-  void    genGuardLoc(uint32 id, Type type, Trace* exitTrace);
-  void    genGuardStk(uint32 id, Type type, Trace* exitTrace);
+  void    genGuardLoc(uint32_t id, Type type, Trace* exitTrace);
+  void    genGuardStk(uint32_t id, Type type, Trace* exitTrace);
   void    genAssertStk(uint32_t id, Type type);
   SSATmp* genGuardType(SSATmp* src, Type type, Trace* nextTrace);
   void    genGuardRefs(SSATmp* funcPtr,
@@ -145,12 +145,12 @@ public:
                        SSATmp* mask64,
                        SSATmp* vals64,
                        Trace*  exitTrace);
-  void    genAssertLoc(uint32 id, Type type);
+  void    genAssertLoc(uint32_t id, Type type);
 
   SSATmp* genUnboxPtr(SSATmp* ptr);
   SSATmp* genLdRef(SSATmp* ref, Type type, Trace* exit);
   SSATmp* genAdd(SSATmp* src1, SSATmp* src2);
-  SSATmp* genLdAddr(SSATmp* base, int64 offset);
+  SSATmp* genLdAddr(SSATmp* base, int64_t offset);
 
   SSATmp* genSub(SSATmp* src1, SSATmp* src2);
   SSATmp* genMul(SSATmp* src1, SSATmp* src2);
@@ -180,38 +180,38 @@ public:
   SSATmp* genConvToArr(SSATmp* src);
   SSATmp* genConvToObj(SSATmp* src);
   SSATmp* genLdPropAddr(SSATmp* obj, SSATmp* prop);
-  SSATmp* genLdClsMethod(SSATmp* cls, uint32 methodSlot);
+  SSATmp* genLdClsMethod(SSATmp* cls, uint32_t methodSlot);
   SSATmp* genLdClsMethodCache(SSATmp* className,
                               SSATmp* methodName,
                               SSATmp* baseClass,
                               Trace* slowPathExit);
   SSATmp* genLdObjMethod(const StringData* methodName, SSATmp* obj);
   SSATmp* genCall(SSATmp* actRec,
-                  uint32 returnBcOffset,
+                  uint32_t returnBcOffset,
                   SSATmp* func,
-                  uint32 numParams,
+                  uint32_t numParams,
                   SSATmp** params);
   SSATmp* genCallBuiltin(SSATmp* func, Type type,
-                         uint32 numArgs, SSATmp** args);
+                         uint32_t numArgs, SSATmp** args);
   void    genReleaseVVOrExit(Trace* exit);
   SSATmp* genGenericRetDecRefs(SSATmp* retVal, int numLocals);
   void    genRetVal(SSATmp* val);
   SSATmp* genRetAdjustStack();
   void    genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
   void    genDecRef(SSATmp* tmp);
-  void    genDecRefMem(SSATmp* base, int64 offset, Type type);
-  void    genDecRefStack(Type type, uint32 stackOff);
+  void    genDecRefMem(SSATmp* base, int64_t offset, Type type);
+  void    genDecRefStack(Type type, uint32_t stackOff);
   void    genDecRefLoc(int id);
   void    genDecRefThis();
-  void    genIncStat(int32 counter, int32 value, bool force = false);
+  void    genIncStat(int32_t counter, int32_t value, bool force = false);
   SSATmp* genIncRef(SSATmp* src);
-  SSATmp* genSpillStack(uint32 stackAdjustment,
-                        uint32 numOpnds,
+  SSATmp* genSpillStack(uint32_t stackAdjustment,
+                        uint32_t numOpnds,
                         SSATmp** opnds);
-  SSATmp* genLdStack(int32 stackOff, Type type);
+  SSATmp* genLdStack(int32_t stackOff, Type type);
   SSATmp* genDefFP();
-  SSATmp* genDefSP(int32 spOffset);
-  SSATmp* genLdStackAddr(int64 offset);
+  SSATmp* genDefSP(int32_t spOffset);
+  SSATmp* genLdStackAddr(int64_t offset);
   void    genVerifyParamType(SSATmp* objClass, SSATmp* className,
                              const Class* constraint, Trace* exitTrace);
 
@@ -219,25 +219,25 @@ public:
 
   void    genUnlinkContVarEnv();
   void    genLinkContVarEnv();
-  void    genContEnter(SSATmp* contAR, SSATmp* addr, int64 returnBcOffset);
+  void    genContEnter(SSATmp* contAR, SSATmp* addr, int64_t returnBcOffset);
   Trace*  genContRaiseCheck(SSATmp* cont, Trace* target);
   Trace*  genContPreNext(SSATmp* cont, Trace* target);
   Trace*  genContStartedCheck(SSATmp* cont, Trace* target);
 
-  SSATmp* genIterInit(SSATmp* src, uint32 iterId, uint32 valLocalId);
+  SSATmp* genIterInit(SSATmp* src, uint32_t iterId, uint32_t valLocalId);
   SSATmp* genIterInitK(SSATmp* src,
-                       uint32 iterId,
-                       uint32 valLocalId,
-                       uint32 keyLocalId);
-  SSATmp* genIterNext(uint32 iterId, uint32 valLocalId);
-  SSATmp* genIterNextK(uint32 iterId, uint32 valLocalId, uint32 keyLocalId);
-  SSATmp* genIterFree(uint32 iterId);
+                       uint32_t iterId,
+                       uint32_t valLocalId,
+                       uint32_t keyLocalId);
+  SSATmp* genIterNext(uint32_t iterId, uint32_t valLocalId);
+  SSATmp* genIterNextK(uint32_t iterId, uint32_t valLocalId, uint32_t keyLocalId);
+  SSATmp* genIterFree(uint32_t iterId);
 
-  SSATmp* genInterpOne(uint32 pcOff, uint32 stackAdjustment,
+  SSATmp* genInterpOne(uint32_t pcOff, uint32_t stackAdjustment,
                        Type resultType, Trace* target);
-  Trace* getExitSlowTrace(uint32 bcOff,
-                          int32 stackDeficit,
-                          uint32 numOpnds,
+  Trace* getExitSlowTrace(uint32_t bcOff,
+                          int32_t stackDeficit,
+                          uint32_t numOpnds,
                           SSATmp** opnds);
 
   /*
@@ -247,12 +247,12 @@ public:
    * Lifetime of the returned pointer is managed by the trace this
    * TraceBuilder is generating.
    */
-  Trace* genExitTrace(uint32 bcOff,
-                      int32  stackDeficit,
-                      uint32 numOpnds,
+  Trace* genExitTrace(uint32_t bcOff,
+                      int32_t  stackDeficit,
+                      uint32_t numOpnds,
                       SSATmp** opnds,
                       TraceExitType::ExitType,
-                      uint32 notTakenBcOff = 0);
+                      uint32_t notTakenBcOff = 0);
 
   /*
    * Generates a target exit trace for GuardFailure exits.
@@ -260,10 +260,10 @@ public:
    * Lifetime of the returned pointer is managed by the trace this
    * TraceBuilder is generating.
    */
-  Trace* genExitGuardFailure(uint32 off);
+  Trace* genExitGuardFailure(uint32_t off);
 
   // generates the ExitTrace instruction at the end of a trace
-  void genTraceEnd(uint32 nextPc,
+  void genTraceEnd(uint32_t nextPc,
                    TraceExitType::ExitType exitType = TraceExitType::Normal);
 
   template<typename T>
@@ -280,7 +280,7 @@ public:
 
   Trace* getTrace() const { return m_trace.get(); }
   IRFactory* getIrFactory() { return &m_irFactory; }
-  int32 getSpOffset() { return m_spOffset; }
+  int32_t getSpOffset() { return m_spOffset; }
   SSATmp* getSp() const { return m_spValue; }
   SSATmp* getFp() const { return m_fpValue; }
 
@@ -342,10 +342,10 @@ private:
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
 
-  Trace* makeTrace(const Func* func, uint32 bcOff, bool isMain) {
+  Trace* makeTrace(const Func* func, uint32_t bcOff, bool isMain) {
     return new Trace(m_irFactory.defBlock(func), bcOff, isMain);
   }
-  void genStLocAux(uint32 id, SSATmp* t0, bool genStoreType);
+  void genStLocAux(uint32_t id, SSATmp* t0, bool genStoreType);
 
   // saved state information associated with the start of a block
   struct State {
@@ -411,7 +411,7 @@ private:
    */
   SSATmp*    m_spValue;      // current physical sp
   SSATmp*    m_fpValue;      // current physical fp
-  int32      m_spOffset;     // offset of physical sp from physical fp
+  int32_t      m_spOffset;     // offset of physical sp from physical fp
   SSATmp*    m_curFunc;      // current function context
   CSEHash    m_cseHash;
   bool       m_thisIsAvailable; // true only if current ActRec has non-null this

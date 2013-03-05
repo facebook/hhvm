@@ -53,7 +53,7 @@ Variant f_bzerror(CObjRef bz) {
   return f->error();
 }
 
-int64 f_bzerrno(CObjRef bz) {
+int64_t f_bzerrno(CObjRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errnu();
 }
@@ -89,7 +89,7 @@ Variant f_bzdecompress(CStrRef source, int small /* = 0 */) {
   char *dest;
   int source_len = source.length();
   int error;
-  uint64 size = 0;
+  uint64_t size = 0;
   bz_stream bzs;
 
   bzs.bzalloc = NULL;

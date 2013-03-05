@@ -93,27 +93,27 @@ public:
   /**
    * Read one chunk of input. Returns a null string on failure or eof.
    */
-  virtual int64 readImpl(char *buffer, int64 length) = 0;
+  virtual int64_t readImpl(char *buffer, int64_t length) = 0;
   virtual int getc();
-  virtual String read(int64 length = 0);
+  virtual String read(int64_t length = 0);
 
   /**
    * Write one chunk of output. Returns bytes written.
    */
-  virtual int64 writeImpl(const char *buffer, int64 length) = 0;
-  virtual int64 write(CStrRef str, int64 length = 0);
+  virtual int64_t writeImpl(const char *buffer, int64_t length) = 0;
+  virtual int64_t write(CStrRef str, int64_t length = 0);
   int putc(char c);
 
   /**
    * Optional virtual functions to implement.
    */
   virtual bool seekable() { return false;}
-  virtual bool seek(int64 offset, int whence = SEEK_SET);
-  virtual int64 tell();
+  virtual bool seek(int64_t offset, int whence = SEEK_SET);
+  virtual int64_t tell();
   virtual bool eof();
   virtual bool rewind();
   virtual bool flush();
-  virtual bool truncate(int64 size);
+  virtual bool truncate(int64_t size);
   virtual bool lock(int operation);
   virtual bool lock(int operation, bool &wouldblock);
 
@@ -124,32 +124,32 @@ public:
   /**
    * Read one line a time. Returns a null string on failure or eof.
    */
-  String readLine(int64 maxlen = 0);
+  String readLine(int64_t maxlen = 0);
 
   /**
    * Read one record a time. Returns a null string on failure or eof.
    */
-  String readRecord(CStrRef delimiter, int64 maxlen = 0);
+  String readRecord(CStrRef delimiter, int64_t maxlen = 0);
 
   /**
    * Read entire file and print it out.
    */
-  int64 print();
+  int64_t print();
 
   /**
    * Write to file with specified format and arguments.
    */
-  int64 printf(CStrRef format, CArrRef args);
+  int64_t printf(CStrRef format, CArrRef args);
 
   /**
    * Write one line of csv record.
    */
-  int64 writeCSV(CArrRef fields, char delimiter = ',', char enclosure = '"');
+  int64_t writeCSV(CArrRef fields, char delimiter = ',', char enclosure = '"');
 
   /**
    * Read one line of csv record.
    */
-  Array readCSV(int64 length = 0, char delimiter = ',', char enclosure = '"');
+  Array readCSV(int64_t length = 0, char delimiter = ',', char enclosure = '"');
 
   /**
    * Return the last error we know about
@@ -162,11 +162,11 @@ protected:
   bool m_nonblocking;
 
   // fields only useful for buffered reads
-  int64 m_writepos; // where we have read from lower level
-  int64 m_readpos;  // where we have given to upper level
+  int64_t m_writepos; // where we have read from lower level
+  int64_t m_readpos;  // where we have given to upper level
 
   // fields useful for both reads and writes
-  int64 m_position; // the current cursor position
+  int64_t m_position; // the current cursor position
 
   std::string m_name;
   std::string m_mode;

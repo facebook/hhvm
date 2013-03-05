@@ -124,7 +124,7 @@ public:
 
     struct stat sb;
     stat(m_name, &sb);
-    Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024), m_name);
+    Logger::Info("%dMB %s saved", (int64_t)sb.st_size/(1024*1024), m_name);
   }
 
 private:

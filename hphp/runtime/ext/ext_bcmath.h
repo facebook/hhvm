@@ -25,17 +25,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_bcscale(int64 scale);
-String f_bcadd(CStrRef left, CStrRef right, int64 scale = -1);
-String f_bcsub(CStrRef left, CStrRef right, int64 scale = -1);
-int64 f_bccomp(CStrRef left, CStrRef right, int64 scale = -1);
-String f_bcmul(CStrRef left, CStrRef right, int64 scale = -1);
-String f_bcdiv(CStrRef left, CStrRef right, int64 scale = -1);
+bool f_bcscale(int64_t scale);
+String f_bcadd(CStrRef left, CStrRef right, int64_t scale = -1);
+String f_bcsub(CStrRef left, CStrRef right, int64_t scale = -1);
+int64_t f_bccomp(CStrRef left, CStrRef right, int64_t scale = -1);
+String f_bcmul(CStrRef left, CStrRef right, int64_t scale = -1);
+String f_bcdiv(CStrRef left, CStrRef right, int64_t scale = -1);
 String f_bcmod(CStrRef left, CStrRef right);
-String f_bcpow(CStrRef left, CStrRef right, int64 scale = -1);
+String f_bcpow(CStrRef left, CStrRef right, int64_t scale = -1);
 Variant f_bcpowmod(CStrRef left, CStrRef right, CStrRef modulus,
-                  int64 scale = -1);
-Variant f_bcsqrt(CStrRef operand, int64 scale = -1);
+                  int64_t scale = -1);
+Variant f_bcsqrt(CStrRef operand, int64_t scale = -1);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

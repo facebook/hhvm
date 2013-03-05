@@ -42,7 +42,7 @@ public:
    */
   bool isLiteralInteger() const;
   bool isLiteralString() const;
-  int64 getLiteralInteger() const;
+  int64_t getLiteralInteger() const;
   std::string getLiteralString() const;
 
   bool getScalarConditionValue(Variant &v) const {

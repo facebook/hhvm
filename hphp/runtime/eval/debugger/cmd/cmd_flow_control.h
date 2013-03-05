@@ -50,7 +50,7 @@ public:
   int getVMDepth() const { return m_vmDepth; }
 
 private:
-  int16 m_count;
+  int16_t m_count;
   FrameInjection *m_frame;  // which frame to break next time
   FrameInjection *m_nframe; // definitely not to break with this frame
   std::string m_loc; // last break's source location

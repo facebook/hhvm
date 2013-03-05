@@ -61,8 +61,8 @@ public:
 
   // overriding Socket
   virtual bool close();
-  virtual int64 readImpl(char *buffer, int64 length);
-  virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual int64_t readImpl(char *buffer, int64_t length);
+  virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool checkLiveness();
 
   Array &getContext() { return m_context;}
@@ -81,7 +81,7 @@ private:
   bool m_is_blocked;
 
   bool closeImpl();
-  bool handleError(int64 nr_bytes, bool is_init);
+  bool handleError(int64_t nr_bytes, bool is_init);
 
   bool setupCrypto(SSLSocket *session = nullptr);
   bool enableCrypto(bool activate = true);

@@ -2068,7 +2068,7 @@ public:
   }                                                                     \
   /* opq imm, disp(rdest, rindex, scale) */                             \
   inline void name ## _imm64_index_scale_disp_reg64(                    \
-    int64 imm, RegNumber rindex, int scale, int disp,             \
+    int64_t imm, RegNumber rindex, int scale, int disp,             \
     RegNumber rdest) {                                            \
     emitIM(instr_ ## name, rdest, rindex, scale, disp, imm);             \
   }

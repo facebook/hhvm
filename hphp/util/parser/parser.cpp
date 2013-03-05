@@ -21,7 +21,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Mutex ParserBase::s_mutex;
-std::map<int64, int> ParserBase::s_closureIds;
+std::map<int64_t, int> ParserBase::s_closureIds;
 
 char ParserBase::GetAnonPrefix(AnonFuncKind kind) {
   static_assert(Closure == 0 && Continuation <= 9,
@@ -145,7 +145,7 @@ void ParserBase::popClass() {
 }
 
 std::string ParserBase::getAnonFuncName(AnonFuncKind kind) {
-  int64 h = hash_string_cs(m_fileName, strlen(m_fileName));
+  int64_t h = hash_string_cs(m_fileName, strlen(m_fileName));
   int closureId;
   {
     Lock lock(s_mutex);

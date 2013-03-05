@@ -160,7 +160,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 unsigned ScalarExpression::getCanonHash() const {
-  int64 val = getHash();
+  int64_t val = getHash();
   if (val == -1) {
     val = hash_string(m_value.c_str(), m_value.size());
   }
@@ -284,7 +284,7 @@ bool ScalarExpression::isLiteralInteger() const {
   return false;
 }
 
-int64 ScalarExpression::getLiteralInteger() const {
+int64_t ScalarExpression::getLiteralInteger() const {
   assert(isLiteralInteger());
   return strtoll(m_value.c_str(), nullptr, 0);
 }
@@ -401,13 +401,13 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-int64 ScalarExpression::getHash() const {
-  int64 hash = -1;
+int64_t ScalarExpression::getHash() const {
+  int64_t hash = -1;
   if (isLiteralInteger()) {
     hash = hash_int64(getLiteralInteger());
   } else if (isLiteralString()) {
     string scs = getLiteralString();
-    int64 res;
+    int64_t res;
     if (is_strictly_integer(scs.c_str(), scs.size(), res)) {
       hash = hash_int64(res);
     } else {
@@ -471,7 +471,7 @@ bool ScalarExpression::getString(const std::string *&s) const {
   }
 }
 
-bool ScalarExpression::getInt(int64 &i) const {
+bool ScalarExpression::getInt(int64_t &i) const {
   if (m_type == T_LNUMBER) {
     i = strtoll(m_value.c_str(), nullptr, 0);
     return true;

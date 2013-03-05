@@ -29,7 +29,7 @@ namespace HPHP {
 /**
  * Testing whether a string is numeric or not.
  */
-DataType is_numeric_string(const char *str, int length, int64 *lval,
+DataType is_numeric_string(const char *str, int length, int64_t *lval,
                            double *dval, int allow_errors = 0);
 
 /**
@@ -43,7 +43,7 @@ bool is_valid_var_name(const char *var_name, int len);
  * Adapted from ap_php_conv_10 for fast signed integer to string conversion.
  */
 char *
-conv_10(register int64 num, register int *is_negative, char *buf_end,
+conv_10(register int64_t num, register int *is_negative, char *buf_end,
         register int *len);
 
 ///////////////////////////////////////////////////////////////////////////////

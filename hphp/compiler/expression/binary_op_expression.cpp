@@ -284,7 +284,7 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
   Variant v2;
   if (m_exp1->getScalarValue(v1)) {
     if (v1.isInteger()) {
-      int64 ival1 = v1.toInt64();
+      int64_t ival1 = v1.toInt64();
       // 1 * $a => $a, 0 + $a => $a
       if ((ival1 == 1 && m_op == '*') || (ival1 == 0 && m_op == '+')) {
         TypePtr actType2 = m_exp2->getActualType();
@@ -317,7 +317,7 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
   }
   if (m_exp2->getScalarValue(v2)) {
     if (v2.isInteger()) {
-      int64 ival2 = v2.toInt64();
+      int64_t ival2 = v2.toInt64();
       // $a * 1 => $a, $a + 0 => $a
       if ((ival2 == 1 && m_op == '*') || (ival2 == 0 && m_op == '+')) {
         TypePtr actType1 = m_exp1->getActualType();

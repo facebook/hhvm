@@ -92,7 +92,7 @@ public:
   int m_flags;
 };
 
-Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64 mode, int64 flags);
+Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64_t mode, int64_t flags);
 Object f_hphp_recursiveiteratoriterator_getinneriterator(CObjRef obj);
 Variant f_hphp_recursiveiteratoriterator_current(CObjRef obj);
 Variant f_hphp_recursiveiteratoriterator_key(CObjRef obj);
@@ -104,17 +104,17 @@ bool f_hphp_directoryiterator___construct(CObjRef obj, CStrRef path);
 Variant f_hphp_directoryiterator_key(CObjRef obj);
 void f_hphp_directoryiterator_next(CObjRef obj);
 void f_hphp_directoryiterator_rewind(CObjRef obj);
-void f_hphp_directoryiterator_seek(CObjRef obj, int64 position);
+void f_hphp_directoryiterator_seek(CObjRef obj, int64_t position);
 Variant f_hphp_directoryiterator_current(CObjRef obj);
 String f_hphp_directoryiterator___tostring(CObjRef obj);
 bool f_hphp_directoryiterator_valid(CObjRef obj);
 bool f_hphp_directoryiterator_isdot(CObjRef obj);
 
-bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path, int64 flags);
+bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path, int64_t flags);
 Variant f_hphp_recursivedirectoryiterator_key(CObjRef obj);
 void f_hphp_recursivedirectoryiterator_next(CObjRef obj);
 void f_hphp_recursivedirectoryiterator_rewind(CObjRef obj);
-void f_hphp_recursivedirectoryiterator_seek(CObjRef obj, int64 position);
+void f_hphp_recursivedirectoryiterator_seek(CObjRef obj, int64_t position);
 Variant f_hphp_recursivedirectoryiterator_current(CObjRef obj);
 String f_hphp_recursivedirectoryiterator___tostring(CObjRef obj);
 bool f_hphp_recursivedirectoryiterator_valid(CObjRef obj);

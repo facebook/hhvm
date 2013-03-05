@@ -28,7 +28,7 @@ struct KeyAccessor {
   typedef const HphpArray::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.hasIntKey(); }
   bool isStr(ElmT elm) const { return elm.hasStrKey(); }
-  int64 getInt(ElmT elm) const { return elm.ikey; }
+  int64_t getInt(ElmT elm) const { return elm.ikey; }
   StringData* getStr(ElmT elm) const { return elm.key; }
   Variant getValue(ElmT elm) const {
     if (isInt(elm)) {
@@ -43,7 +43,7 @@ struct ValAccessor {
   typedef const HphpArray::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.data.m_type == KindOfInt64; }
   bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.data.m_type); }
-  int64 getInt(ElmT elm) const { return elm.data.m_data.num; }
+  int64_t getInt(ElmT elm) const { return elm.data.m_data.num; }
   StringData* getStr(ElmT elm) const { return elm.data.m_data.pstr; }
   Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm.data); }
 };

@@ -265,7 +265,7 @@ bool Unit::MetaHandle::findMeta(const Unit* unit, Offset offset) {
 
 bool Unit::MetaHandle::nextArg(MetaInfo& info) {
   assert(index && cur && ptr);
-  uint8* end = (uint8*)index + index[*index + cur + 2];
+  uint8_t* end = (uint8_t*)index + index[*index + cur + 2];
   assert(ptr <= end);
   if (ptr == end) return false;
   info.m_kind = (Unit::MetaInfo::Kind)*ptr++;
@@ -1488,7 +1488,7 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
     }
   }
   if (repoId < 0) {
-    TRACE(3, "No repo contains '%s' (0x%016llx%016llx)\n",
+    TRACE(3, "No repo contains '%s' (0x%016" PRIx64  "%016" PRIx64 ")\n",
              name.c_str(), md5.q[0], md5.q[1]);
     return nullptr;
   }
@@ -1500,18 +1500,20 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
     getUnitMergeables(repoId).get(ue);
     m_repo.frp().getFuncs(repoId).get(ue);
   } catch (RepoExc& re) {
-    TRACE(0, "Repo error loading '%s' (0x%016llx%016llx) from '%s': %s\n",
-             name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
-             re.msg().c_str());
+    TRACE(0,
+          "Repo error loading '%s' (0x%016" PRIx64 "%016"
+          PRIx64 ") from '%s': %s\n",
+          name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
+          re.msg().c_str());
     return nullptr;
   }
-  TRACE(3, "Repo loaded '%s' (0x%016llx%016llx) from '%s'\n",
+  TRACE(3, "Repo loaded '%s' (0x%016" PRIx64 "%016" PRIx64 ") from '%s'\n",
            name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str());
   return ue.create();
 }
 
 void UnitRepoProxy::InsertUnitStmt
-                  ::insert(RepoTxn& txn, int64& unitSn, const MD5& md5,
+                  ::insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
                            const uchar* bc, size_t bclen,
                            const uchar* bc_meta, size_t bc_meta_len,
                            const TypedValue* mainReturn, bool mergeOnly,
@@ -1555,7 +1557,7 @@ bool UnitRepoProxy::GetUnitStmt
     if (!query.row()) {
       return true;
     }
-    int64 unitSn;                            /**/ query.getInt64(0, unitSn);
+    int64_t unitSn;                            /**/ query.getInt64(0, unitSn);
     const void* bc; size_t bclen;            /**/ query.getBlob(1, bc, bclen);
     const void* bc_meta; size_t bc_meta_len; /**/ query.getBlob(2, bc_meta,
                                                                 bc_meta_len);
@@ -1581,7 +1583,7 @@ bool UnitRepoProxy::GetUnitStmt
 }
 
 void UnitRepoProxy::InsertUnitLitstrStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, Id litstrId,
+                  ::insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
                            const StringData* litstr) {
   if (!prepared()) {
     std::stringstream ssInsert;
@@ -1621,7 +1623,7 @@ void UnitRepoProxy::GetUnitLitstrsStmt
 }
 
 void UnitRepoProxy::InsertUnitArrayStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, Id arrayId,
+                  ::insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
                            const StringData* array) {
   if (!prepared()) {
     std::stringstream ssInsert;
@@ -1663,7 +1665,7 @@ void UnitRepoProxy::GetUnitArraysStmt
 }
 
 void UnitRepoProxy::InsertUnitPreConstStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, const PreConst& pc,
+                  ::insert(RepoTxn& txn, int64_t unitSn, const PreConst& pc,
                            Id id) {
   if (!prepared()) {
     std::stringstream ssInsert;
@@ -1705,7 +1707,7 @@ void UnitRepoProxy::GetUnitPreConstsStmt
 }
 
 void UnitRepoProxy::InsertUnitMergeableStmt
-                  ::insert(RepoTxn& txn, int64 unitSn,
+                  ::insert(RepoTxn& txn, int64_t unitSn,
                            int ix, UnitMergeKind kind, Id id,
                            TypedValue* value) {
   if (!prepared()) {
@@ -1786,7 +1788,7 @@ void UnitRepoProxy::GetUnitMergeablesStmt
 }
 
 void UnitRepoProxy::InsertUnitSourceLocStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, Offset pastOffset,
+                  ::insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset,
                            int line0, int char0, int line1, int char1) {
   if (!prepared()) {
     std::stringstream ssInsert;
@@ -1806,7 +1808,7 @@ void UnitRepoProxy::InsertUnitSourceLocStmt
 }
 
 bool UnitRepoProxy::GetSourceLocStmt
-                  ::get(int64 unitSn, Offset pc, SourceLoc& sLoc) {
+                  ::get(int64_t unitSn, Offset pc, SourceLoc& sLoc) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -1836,7 +1838,7 @@ bool UnitRepoProxy::GetSourceLocStmt
 }
 
 bool UnitRepoProxy::GetSourceLocPastOffsetsStmt
-                  ::get(int64 unitSn, int line, OffsetRangeVec& ranges) {
+                  ::get(int64_t unitSn, int line, OffsetRangeVec& ranges) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -1865,7 +1867,7 @@ bool UnitRepoProxy::GetSourceLocPastOffsetsStmt
 }
 
 bool UnitRepoProxy::GetSourceLocBaseOffsetStmt
-                  ::get(int64 unitSn, OffsetRange& range) {
+                  ::get(int64_t unitSn, OffsetRange& range) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -1894,7 +1896,7 @@ bool UnitRepoProxy::GetSourceLocBaseOffsetStmt
 }
 
 bool UnitRepoProxy::GetBaseOffsetAtPCLocStmt
-                  ::get(int64 unitSn, Offset pc, Offset& offset) {
+                  ::get(int64_t unitSn, Offset pc, Offset& offset) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -1921,7 +1923,7 @@ bool UnitRepoProxy::GetBaseOffsetAtPCLocStmt
 }
 
 bool UnitRepoProxy::GetBaseOffsetAfterPCLocStmt
-                  ::get(int64 unitSn, Offset pc, Offset& offset) {
+                  ::get(int64_t unitSn, Offset pc, Offset& offset) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -2221,7 +2223,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
                                     m_bc_meta, m_bc_meta_len,
                                     &m_mainReturn, m_mergeOnly, lines);
     }
-    int64 usn = m_sn;
+    int64_t usn = m_sn;
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
       urp.insertUnitLitstr(repoId).insert(txn, usn, i, m_litstrs[i]);
     }
@@ -2276,7 +2278,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     }
     return false;
   } catch (RepoExc& re) {
-    TRACE(3, "Failed to commit '%s' (0x%016llx%016llx) to '%s': %s\n",
+    TRACE(3, "Failed to commit '%s' (0x%016" PRIx64 "%016" PRIx64 ") to '%s': %s\n",
              m_filepath->data(), m_md5.q[0], m_md5.q[1],
              repo.repoName(repoId).c_str(), re.msg().c_str());
     return true;
@@ -2294,7 +2296,7 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   } catch (RepoExc& re) {
     int repoId = repo.repoIdForNewUnit(unitOrigin);
     if (repoId != RepoIdInvalid) {
-      TRACE(3, "Failed to commit '%s' (0x%016llx%016llx) to '%s': %s\n",
+      TRACE(3, "Failed to commit '%s' (0x%016" PRIx64 "%016" PRIx64 ") to '%s': %s\n",
                m_filepath->data(), m_md5.q[0], m_md5.q[1],
                repo.repoName(repoId).c_str(), re.msg().c_str());
     }

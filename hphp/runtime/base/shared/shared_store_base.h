@@ -36,7 +36,7 @@ public:
   StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
                                     expiry(v.expiry), size(v.size),
                                     sSize(v.sSize) {}
-  void set(SharedVariant *v, int64 ttl);
+  void set(SharedVariant *v, int64_t ttl);
   bool expired() const;
 
   // Mutable fields here are so that we can deserialize the object from disk
@@ -44,9 +44,9 @@ public:
   // for how we use TBB
   mutable SharedVariant *var;
   char *sAddr; // For file storage
-  int64 expiry;
-  mutable int32 size;
-  int32 sSize; // For file storage, negative means serailized object
+  int64_t expiry;
+  mutable int32_t size;
+  int32_t sSize; // For file storage, negative means serailized object
   mutable SmallLock lock;
 
   bool inMem() const {
@@ -56,7 +56,7 @@ public:
     return sAddr != nullptr;
   }
 
-  int32 getSerializedSize() const {
+  int32_t getSerializedSize() const {
     return abs(sSize);
   }
   bool isSerializedObj() const {
@@ -74,11 +74,11 @@ public:
   virtual int size() = 0;
 
   virtual bool get(CStrRef key, Variant &value) = 0;
-  virtual bool store(CStrRef key, CVarRef val, int64 ttl,
+  virtual bool store(CStrRef key, CVarRef val, int64_t ttl,
                      bool overwrite = true) = 0;
   bool erase(CStrRef key, bool expired = false);
-  virtual int64 inc(CStrRef key, int64 step, bool &found) = 0;
-  virtual bool cas(CStrRef key, int64 old, int64 val) = 0;
+  virtual int64_t inc(CStrRef key, int64_t step, bool &found) = 0;
+  virtual bool cas(CStrRef key, int64_t old, int64_t val) = 0;
   virtual bool exists(CStrRef key) {
     // Default implementation does a copy
     Variant tmp;
@@ -92,7 +92,7 @@ public:
     int len;
     SharedVariant *value;
     char *sAddr;
-    int32 sSize;
+    int32_t sSize;
 
     bool inMem() const {
       return value != nullptr;
@@ -159,8 +159,8 @@ public:
 
   SharedStoreFileStorage()
   : m_state(StateInvalid), m_current(nullptr), m_chunkRemain(0) {}
-  void enable(const std::string& prefix, int64 chunkSize, int64 maxSize);
-  char *put(const char *data, int32 len);
+  void enable(const std::string& prefix, int64_t chunkSize, int64_t maxSize);
+  char *put(const char *data, int32_t len);
   void seal();
   void adviseOut();
   bool hashCheck();
@@ -173,17 +173,17 @@ private:
 private:
   std::vector<void*> m_chunks;
   std::string m_prefix;
-  int64 m_chunkSize;
-  int64 m_maxSize;
+  int64_t m_chunkSize;
+  int64_t m_maxSize;
   StorageState m_state;
   char *m_current;
-  int32 m_chunkRemain;
+  int32_t m_chunkRemain;
   std::vector<std::string> m_fileNames;
 
   Mutex m_lock;
   static const strhash_t TombHash = 0xdeadbeef;
   static const int PaddingSize = sizeof(strhash_t) + // hash
-                                 sizeof(int32) + // len
+                                 sizeof(int32_t) + // len
                                  sizeof(char); // '\0'
 };
 

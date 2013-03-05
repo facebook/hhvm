@@ -264,8 +264,8 @@ public:
     // double-counting the malloced memory. Thus musage in the example
     // code may well substantially exceed m_stats.usage.
     if (s_statsEnabled) {
-      int64 delta = int64(*m_allocated) - int64(*m_deallocated);
-      int64 deltaAllocated = int64(*m_allocated) - m_prevAllocated;
+      int64_t delta = int64_t(*m_allocated) - int64_t(*m_deallocated);
+      int64_t deltaAllocated = int64_t(*m_allocated) - m_prevAllocated;
       if (hhvm) {
         stats.usage += delta - m_delta - stats.jemallocDebt;
         stats.jemallocDebt = 0;
@@ -275,7 +275,7 @@ public:
       stats.totalAlloc += deltaAllocated;
       if (live) {
         m_delta = delta;
-        m_prevAllocated = int64(*m_allocated);
+        m_prevAllocated = int64_t(*m_allocated);
       }
     }
 #endif
@@ -319,8 +319,8 @@ public:
 #ifdef USE_JEMALLOC
       // exclude mallocs and frees since construction
       if (s_statsEnabled) {
-        m_mm->m_prevAllocated = int64(*m_mm->m_allocated);
-        m_mm->m_delta = int64(*m_mm->m_allocated) - int64(*m_mm->m_deallocated);
+        m_mm->m_prevAllocated = int64_t(*m_mm->m_allocated);
+        m_mm->m_delta = int64_t(*m_mm->m_allocated) - int64_t(*m_mm->m_deallocated);
       }
 #endif
     }
@@ -363,10 +363,10 @@ private:
   std::vector<char*> m_slabs;
 
 #ifdef USE_JEMALLOC
-  uint64* m_allocated;
-  uint64* m_deallocated;
-  int64  m_delta;
-  int64  m_prevAllocated;
+  uint64_t* m_allocated;
+  uint64_t* m_deallocated;
+  int64_t  m_delta;
+  int64_t  m_prevAllocated;
   size_t* m_cactive;
   size_t m_cactiveLimit;
 

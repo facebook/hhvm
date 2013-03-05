@@ -512,7 +512,7 @@ String Transport::getMimeType() {
 ///////////////////////////////////////////////////////////////////////////////
 // cookies
 
-bool Transport::setCookie(CStrRef name, CStrRef value, int64 expire /* = 0 */,
+bool Transport::setCookie(CStrRef name, CStrRef value, int64_t expire /* = 0 */,
                           CStrRef path /* = "" */, CStrRef domain /* = "" */,
                           bool secure /* = false */,
                           bool httponly /* = false */,
@@ -796,7 +796,7 @@ void Transport::redirect(const char *location, int code /* = 302 */,
   sendStringLocked(location, code);
 }
 
-void Transport::onFlushProgress(int writtenSize, int64 delayUs) {
+void Transport::onFlushProgress(int writtenSize, int64_t delayUs) {
   m_responseSentSize += writtenSize;
   m_flushTimeUs += delayUs;
   m_chunksSentSizes.push_back(writtenSize);

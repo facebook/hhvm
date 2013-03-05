@@ -105,7 +105,7 @@ class RepoQuery {
   void bindOffset(const char* paramName, Offset offset);
   void bindAttr(const char* paramName, Attr attrs);
   void bindBool(const char* paramName, bool b);
-  void bindInt64(const char* paramName, int64 val);
+  void bindInt64(const char* paramName, int64_t val);
   void bindNull(const char* paramName);
 
   void step();
@@ -116,7 +116,7 @@ class RepoQuery {
 
   // rowid() returns the row id associated with the most recent successful
   // insert.  Thus the rowid is irrelevant for non-insert queries.
-  int64 getInsertedRowid();
+  int64_t getInsertedRowid();
   bool isBlob(int iCol);
   bool isText(int iCol);
   bool isDouble(int iCol);
@@ -135,7 +135,7 @@ class RepoQuery {
   void getOffset(int iCol, Offset& offset);
   void getAttr(int iCol, Attr& attrs);
   void getBool(int iCol, bool& b);
-  void getInt64(int iCol, int64& val);
+  void getInt64(int iCol, int64_t& val);
 
  protected:
   RepoStmt& m_stmt;

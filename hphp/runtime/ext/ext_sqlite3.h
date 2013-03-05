@@ -25,17 +25,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64 k_SQLITE3_ASSOC;
-extern const int64 k_SQLITE3_NUM;
-extern const int64 k_SQLITE3_BOTH;
-extern const int64 k_SQLITE3_INTEGER;
-extern const int64 k_SQLITE3_FLOAT;
-extern const int64 k_SQLITE3_TEXT;
-extern const int64 k_SQLITE3_BLOB;
-extern const int64 k_SQLITE3_NULL;
-extern const int64 k_SQLITE3_OPEN_READONLY;
-extern const int64 k_SQLITE3_OPEN_READWRITE;
-extern const int64 k_SQLITE3_OPEN_CREATE;
+extern const int64_t k_SQLITE3_ASSOC;
+extern const int64_t k_SQLITE3_NUM;
+extern const int64_t k_SQLITE3_BOTH;
+extern const int64_t k_SQLITE3_INTEGER;
+extern const int64_t k_SQLITE3_FLOAT;
+extern const int64_t k_SQLITE3_TEXT;
+extern const int64_t k_SQLITE3_BLOB;
+extern const int64_t k_SQLITE3_NULL;
+extern const int64_t k_SQLITE3_OPEN_READONLY;
+extern const int64_t k_SQLITE3_OPEN_READWRITE;
+extern const int64_t k_SQLITE3_OPEN_CREATE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class SQLite3
@@ -48,24 +48,24 @@ class c_SQLite3 : public ExtObjectData {
   // need to implement
   public: c_SQLite3(VM::Class* cls = c_SQLite3::s_cls);
   public: ~c_SQLite3();
-  public: void t___construct(CStrRef filename, int64 flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
-  public: void t_open(CStrRef filename, int64 flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
-  public: bool t_busytimeout(int64 msecs);
+  public: void t___construct(CStrRef filename, int64_t flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
+  public: void t_open(CStrRef filename, int64_t flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
+  public: bool t_busytimeout(int64_t msecs);
   public: bool t_close();
   public: bool t_exec(CStrRef sql);
   public: Array t_version();
-  public: int64 t_lastinsertrowid();
-  public: int64 t_lasterrorcode();
+  public: int64_t t_lastinsertrowid();
+  public: int64_t t_lasterrorcode();
   public: String t_lasterrormsg();
   public: bool t_loadextension(CStrRef extension);
-  public: int64 t_changes();
+  public: int64_t t_changes();
   public: String t_escapestring(CStrRef sql);
   public: Variant t_prepare(CStrRef sql);
   public: Variant t_query(CStrRef sql);
   public: Variant t_querysingle(CStrRef sql, bool entire_row = false);
-  public: bool t_createfunction(CStrRef name, CVarRef callback, int64 argcount = -1);
-  public: bool t_createaggregate(CStrRef name, CVarRef step, CVarRef final, int64 argcount = -1);
-  public: bool t_openblob(CStrRef table, CStrRef column, int64 rowid, CStrRef dbname = null_string);
+  public: bool t_createfunction(CStrRef name, CVarRef callback, int64_t argcount = -1);
+  public: bool t_createaggregate(CStrRef name, CVarRef step, CVarRef final, int64_t argcount = -1);
+  public: bool t_openblob(CStrRef table, CStrRef column, int64_t rowid, CStrRef dbname = null_string);
 
 
   public: void validate() const;
@@ -92,12 +92,12 @@ class c_SQLite3Stmt : public ExtObjectData {
   public: c_SQLite3Stmt(VM::Class* cls = c_SQLite3Stmt::s_cls);
   public: ~c_SQLite3Stmt();
   public: void t___construct(CObjRef dbobject, CStrRef statement);
-  public: int64 t_paramcount();
+  public: int64_t t_paramcount();
   public: bool t_close();
   public: bool t_reset();
   public: bool t_clear();
-  public: bool t_bindparam(CVarRef name, VRefParam parameter, int64 type = k_SQLITE3_TEXT);
-  public: bool t_bindvalue(CVarRef name, CVarRef parameter, int64 type = k_SQLITE3_TEXT);
+  public: bool t_bindparam(CVarRef name, VRefParam parameter, int64_t type = k_SQLITE3_TEXT);
+  public: bool t_bindvalue(CVarRef name, CVarRef parameter, int64_t type = k_SQLITE3_TEXT);
   public: Variant t_execute();
 
 
@@ -126,10 +126,10 @@ class c_SQLite3Result : public ExtObjectData {
   public: c_SQLite3Result(VM::Class* cls = c_SQLite3Result::s_cls);
   public: ~c_SQLite3Result();
   public: void t___construct();
-  public: int64 t_numcolumns();
-  public: String t_columnname(int64 column);
-  public: int64 t_columntype(int64 column);
-  public: Variant t_fetcharray(int64 mode = k_SQLITE3_BOTH);
+  public: int64_t t_numcolumns();
+  public: String t_columnname(int64_t column);
+  public: int64_t t_columntype(int64_t column);
+  public: Variant t_fetcharray(int64_t mode = k_SQLITE3_BOTH);
   public: bool t_reset();
   public: bool t_finalize();
 

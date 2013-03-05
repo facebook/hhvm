@@ -109,12 +109,12 @@ void BreakStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-int64 BreakStatement::getDepth() {
+int64_t BreakStatement::getDepth() {
   if (!m_exp) return 1;
   Variant v;
   if (m_exp->getScalarValue(v) &&
       v.isInteger()) {
-    int64 depth = v.toInt64();
+    int64_t depth = v.toInt64();
     return depth >= 1 ? depth : 1;
   }
   return 0;

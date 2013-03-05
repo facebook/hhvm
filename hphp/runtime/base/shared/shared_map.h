@@ -70,27 +70,27 @@ public:
   Variant getValue(ssize_t pos) const { return getValueRef(pos); }
   CVarRef getValueRef(ssize_t pos) const;
 
-  bool exists(int64 k) const;
+  bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
 
-  CVarRef get(int64 k, bool error = false) const;
+  CVarRef get(int64_t k, bool error = false) const;
   CVarRef get(const StringData* k, bool error = false) const;
 
-  ssize_t getIndex(int64 k) const;
+  ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
 
-  virtual ArrayData *lval(int64 k, Variant *&ret, bool copy,
+  virtual ArrayData *lval(int64_t k, Variant *&ret, bool copy,
                           bool checkExist = false);
   virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy,
                           bool checkExist = false);
   ArrayData *lvalNew(Variant *&ret, bool copy);
 
-  ArrayData *set(int64 k, CVarRef v, bool copy);
+  ArrayData *set(int64_t k, CVarRef v, bool copy);
   ArrayData *set(StringData* k, CVarRef v, bool copy);
-  ArrayData *setRef(int64 k, CVarRef v, bool copy);
+  ArrayData *setRef(int64_t k, CVarRef v, bool copy);
   ArrayData *setRef(StringData* k, CVarRef v, bool copy);
 
-  ArrayData *remove(int64 k, bool copy);
+  ArrayData *remove(int64_t k, bool copy);
   ArrayData *remove(const StringData* k, bool copy);
 
   ArrayData *copy() const;
@@ -107,11 +107,11 @@ public:
   /**
    * Non-Variant virtual methods that override ArrayData
    */
-  TypedValue* nvGet(int64 k) const;
+  TypedValue* nvGet(int64_t k) const;
   TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos);
   TypedValue* nvGetValueRef(ssize_t pos);
-  TypedValue* nvGetCell(int64 ki) const;
+  TypedValue* nvGetCell(int64_t ki) const;
   TypedValue* nvGetCell(const StringData* k) const;
 
   /**

@@ -58,7 +58,7 @@ void LibEventJob::stopTimer() {
     gettime(CLOCK_MONOTONIC, &end);
     time_t dsec = end.tv_sec - start.tv_sec;
     long dnsec = end.tv_nsec - start.tv_nsec;
-    int64 dusec = dsec * 1000000 + dnsec / 1000;
+    int64_t dusec = dsec * 1000000 + dnsec / 1000;
     ServerStats::Log("page.wall.queuing", dusec);
 
 #ifdef EVHTTP_CONNECTION_GET_START
@@ -421,7 +421,7 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
     nwritten = evhttp_send_reply_sync_begin(request, code, reason, nullptr);
 #endif
     gettime(CLOCK_MONOTONIC, &end);
-    int64 delay = gettime_diff_us(begin, end);
+    int64_t delay = gettime_diff_us(begin, end);
     transport->onFlushBegin(totalSize);
     transport->onFlushProgress(nwritten, delay);
   }

@@ -4146,9 +4146,9 @@ void AliasManager::stringOptsRecur(StatementPtr s) {
   case Statement::KindOfBreakStatement:
     {
       BreakStatementPtr b = spc(BreakStatement, s);
-      int64 depth = b->getDepth();
+      int64_t depth = b->getDepth();
       if (depth != 1) {
-        int64 s = m_loopInfo.size() - 1;
+        int64_t s = m_loopInfo.size() - 1;
         if (s >= 0) {
           if (!depth || depth > s) depth = s;
           while (depth--) {

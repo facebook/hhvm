@@ -1752,7 +1752,7 @@ Variant f_iconv_strlen(CStrRef str, CStrRef charset /* = null_string */) {
                                           enc.data());
   _php_iconv_show_error(err, GENERIC_SUPERSET_NAME, enc.data());
   if (err == PHP_ICONV_ERR_SUCCESS) {
-    return (int64)retval;
+    return (int64_t)retval;
   }
   return false;
 }

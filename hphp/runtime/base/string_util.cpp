@@ -571,7 +571,7 @@ String StringUtil::ROT13(CStrRef input) {
   return String(string_rot13(input, input.size()), input.size(), AttachString);
 }
 
-int64 StringUtil::CRC32(CStrRef input) {
+int64_t StringUtil::CRC32(CStrRef input) {
   return string_crc32(input, input.size());
 }
 

@@ -78,7 +78,7 @@ public:
 
   Variant toLocal();
 
-  int64 intData() const {
+  int64_t intData() const {
     assert(is(KindOfInt64));
     return m_data.num;
   }
@@ -110,7 +110,7 @@ public:
     return m_data.map->capacity();
   }
 
-  int getIndex(int64 key);
+  int getIndex(int64_t key);
   int getIndex(const StringData* key);
 
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
@@ -124,7 +124,7 @@ public:
   void dump(std::string &out);
 
   void getStats(SharedVariantStats *stats) const;
-  int32 getSpaceUsage() const;
+  int32_t getSpaceUsage() const;
 
   StringData *getStringData() const {
     assert(is(KindOfString) || is(KindOfStaticString));
@@ -171,7 +171,7 @@ private:
 #ifdef WORDS_BIGENDIAN
  #define SharedVarData \
   union {\
-    int64 num;\
+    int64_t num;\
     double dbl;\
     StringData *str;\
     ImmutableMap* map;\
@@ -180,13 +180,13 @@ private:
   } m_data;\
   int m_count;\
   bool m_shouldCache;\
-  uint8 m_flags;\
-  uint16 m_type
+  uint8_t m_flags;\
+  uint16_t m_type
 
 #else
  #define SharedVarData \
   union {\
-    int64 num;\
+    int64_t num;\
     double dbl;\
     StringData *str;\
     ImmutableMap* map;\
@@ -194,9 +194,9 @@ private:
     ImmutableObj* obj;\
   } m_data;\
   int m_count;\
-  uint16 m_type;\
+  uint16_t m_type;\
   bool m_shouldCache;\
-  uint8 m_flags
+  uint8_t m_flags
 
 #endif
 
@@ -212,10 +212,10 @@ private:
   };
 #undef SharedVarData
 
-  const static uint8 SerializedArray = (1<<0);
-  const static uint8 IsVector = (1<<1);
-  const static uint8 IsObj = (1<<2);
-  const static uint8 ObjAttempted = (1<<3);
+  const static uint8_t SerializedArray = (1<<0);
+  const static uint8_t IsVector = (1<<1);
+  const static uint8_t IsObj = (1<<2);
+  const static uint8_t ObjAttempted = (1<<3);
 
   static void compileTimeAssertions() {
     static_assert(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data),
@@ -245,9 +245,9 @@ private:
 
 class SharedVariantStats {
  public:
-  int32 dataSize;
-  int32 dataTotalSize;
-  int32 variantCount;
+  int32_t dataSize;
+  int32_t dataTotalSize;
+  int32_t variantCount;
 
   void initStats() {
     variantCount = 0;

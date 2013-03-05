@@ -219,7 +219,7 @@ public:
    */
   void updateThreads(DThreadInfoPtrVec threads);
   DThreadInfoPtr getThread(int index) const;
-  int64 getCurrentThreadId() const { return m_threadId;}
+  int64_t getCurrentThreadId() const { return m_threadId;}
 
   /**
    * Current source location and breakpoints.
@@ -229,7 +229,7 @@ public:
   InstPointInfoPtrVec *getInstPoints() { return &m_instPoints;}
   void setInstPoints(InstPointInfoPtrVec &ips) { m_instPoints = ips;}
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
-  void setCurrentLocation(int64 threadId, BreakPointInfoPtr breakpoint);
+  void setCurrentLocation(int64_t threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
   void getListLocation(std::string &file, int &line, int &lineFocus0,
                        int &charFocus0, int &lineFocus1, int &charFocus1);
@@ -400,8 +400,8 @@ private:
 
   DSandboxInfoPtrVec m_sandboxes;
   DThreadInfoPtrVec m_threads;
-  int64 m_threadId;
-  std::map<int64, int> m_threadIdMap; // maps threadId to index
+  int64_t m_threadId;
+  std::map<int64_t, int> m_threadIdMap; // maps threadId to index
 
   BreakPointInfoPtrVec m_breakpoints;
   BreakPointInfoPtr m_breakpoint;

@@ -58,7 +58,7 @@ bool CaseStatement::isLiteralString() const {
   return exp->isLiteralString();
 }
 
-int64 CaseStatement::getLiteralInteger() const {
+int64_t CaseStatement::getLiteralInteger() const {
   assert(m_condition->is(Expression::KindOfScalarExpression));
   ScalarExpressionPtr exp =
     dynamic_pointer_cast<ScalarExpression>(m_condition);

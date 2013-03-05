@@ -45,10 +45,10 @@ public:
     return m_vars.size();
   }
   virtual bool get(CStrRef key, Variant &value);
-  virtual bool store(CStrRef key, CVarRef val, int64 ttl,
+  virtual bool store(CStrRef key, CVarRef val, int64_t ttl,
                      bool overwrite = true);
-  virtual int64 inc(CStrRef key, int64 step, bool &found);
-  virtual bool cas(CStrRef key, int64 old, int64 val);
+  virtual int64_t inc(CStrRef key, int64_t step, bool &found);
+  virtual bool cas(CStrRef key, int64_t old, int64_t val);
   virtual bool exists(CStrRef key);
 
   virtual void prime(const std::vector<SharedStore::KeyValuePair> &vars);
@@ -109,12 +109,12 @@ protected:
     ExpMap;
   ExpMap m_expMap;
 
-  std::atomic<uint64> m_purgeCounter;
+  std::atomic<uint64_t> m_purgeCounter;
 
   // Should be called outside m_lock
   void purgeExpired();
 
-  void addToExpirationQueue(const char* key, int64 etime);
+  void addToExpirationQueue(const char* key, int64_t etime);
 
   bool handleUpdate(CStrRef key, SharedVariant* svar);
   bool handlePromoteObj(CStrRef key, SharedVariant* svar, CVarRef valye);

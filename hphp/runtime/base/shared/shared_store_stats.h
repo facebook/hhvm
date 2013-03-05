@@ -48,21 +48,21 @@ private:
 public:
   char *key;
   SharedVariantStats var;
-  int32 totalSize;
-  int32 keySize;
+  int32_t totalSize;
+  int32_t keySize;
   bool isGroup;
   bool isPrime;
   bool isValid;
-  int32 keyCount; // valid only for group
-  int32 sizeNoTTL; // valid only for group
-  int32 ttl; // valid for both, for group key stats, it's average
+  int32_t keyCount; // valid only for group
+  int32_t sizeNoTTL; // valid only for group
+  int32_t ttl; // valid for both, for group key stats, it's average
   // Also treat no ttl as 48-hrs.
 
   // fetchCount and lastGetTime only valid for individual (so that we don't need
   // normalize the key for every get)
-  int32 fetchCount;
-  int32 storeCount;
-  int32 deleteCount;
+  int32_t fetchCount;
+  int32_t storeCount;
+  int32_t deleteCount;
   time_t lastFetchTime;
   time_t lastStoreTime;
   time_t lastDeleteTime;
@@ -91,7 +91,7 @@ public:
 class SharedStoreStats {
 public:
   static void onStore(const StringData *key, const SharedVariant *var,
-                      int64 ttl, bool prime);
+                      int64_t ttl, bool prime);
   static void onDelete(const StringData *key, const SharedVariant *var,
                        bool replace, bool noTTL);
   static void onGet(const StringData *key, const SharedVariant *var);
@@ -101,14 +101,14 @@ public:
   static std::string report_keys();
   static bool snapshot(const char *filename, std::string& keySample);
 
-  static void addDirect(int32 keySize, int32 dataTotal, bool prime, bool file);
-  static void removeDirect(int32 keySize, int32 dataTotal, bool exp);
-  static void updateDirect(int32 dataTotalOld, int32 dataTotalNew);
+  static void addDirect(int32_t keySize, int32_t dataTotal, bool prime, bool file);
+  static void removeDirect(int32_t keySize, int32_t dataTotal, bool exp);
+  static void updateDirect(int32_t dataTotalOld, int32_t dataTotalNew);
 
-  static void setExpireQueueSize(int32 size) {
+  static void setExpireQueueSize(int32_t size) {
     s_expireQueueSize = size;
   }
-  static void addPurgingTime(int64 purgingTime);
+  static void addPurgingTime(int64_t purgingTime);
 
 protected:
   static ReadWriteMutex s_rwlock;

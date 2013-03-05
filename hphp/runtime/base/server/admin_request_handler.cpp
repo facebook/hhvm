@@ -526,8 +526,8 @@ static bool toggle_switch(Transport *transport, bool &setting) {
 
 static bool send_report(Transport *transport, ServerStats::Format format,
                         const char *mime) {
-  int64  from   = transport->getInt64Param ("from");
-  int64  to     = transport->getInt64Param ("to");
+  int64_t  from   = transport->getInt64Param ("from");
+  int64_t  to     = transport->getInt64Param ("to");
   string agg    = transport->getParam      ("agg");
   string keys   = transport->getParam      ("keys");
   string url    = transport->getParam      ("url");
@@ -574,7 +574,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     std::stringstream out;
     bool first = true;
     out << "{" << endl;
-    auto appendStat = [&](const char* name, int64 value) {
+    auto appendStat = [&](const char* name, int64_t value) {
        out << (!first ? "," : "") << "  \"" << name << "\":" << value << endl;
        first = false;
     };
@@ -681,8 +681,8 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   }
 
   if (cmd == "stats.keys") {
-    int64 from = transport->getInt64Param("from");
-    int64 to = transport->getInt64Param("to");
+    int64_t from = transport->getInt64Param("from");
+    int64_t to = transport->getInt64Param("to");
     string out;
     ServerStats::GetKeys(out, from, to);
     transport->sendString(out);
@@ -997,7 +997,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-tcreset") {
-    int64 start = Timer::GetCurrentTimeMicros();
+    int64_t start = Timer::GetCurrentTimeMicros();
     if (HPHP::VM::Transl::tx64->replace()) {
       string msg;
       Util::string_printf(msg, "Done %ld ms",

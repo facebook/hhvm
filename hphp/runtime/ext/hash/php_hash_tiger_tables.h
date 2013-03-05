@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-static const uint64 table[4*256] = {
+static const uint64_t table[4*256] = {
 	L64(0x02AAB17CF7E90C5E)   /*    0 */,    L64(0xAC424B03E243A8EC)   /*    1 */,
 	L64(0x72CD5BE30DD5FCD3)   /*    2 */,    L64(0x6D019B93F6F97F3A)   /*    3 */,
 	L64(0xCD9978FFD21F9193)   /*    4 */,    L64(0x7573A1C9708029E2)   /*    5 */,

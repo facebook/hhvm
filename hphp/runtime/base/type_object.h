@@ -96,16 +96,16 @@ public:
   bool instanceof(CStrRef s) const {
     return m_px && m_px->o_instanceof(s);
   }
-  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
     return m_px ? m_px->o_toInt64() : 0;
   }
-  int64 hashForStringSwitch(
-      int64 firstTrueCaseHash,
-      int64 firstNullCaseHash,
-      int64 firstFalseCaseHash,
-      int64 firstZeroCaseHash,
-      int64 firstHash,
-      int64 noMatchHash,
+  int64_t hashForStringSwitch(
+      int64_t firstTrueCaseHash,
+      int64_t firstNullCaseHash,
+      int64_t firstFalseCaseHash,
+      int64_t firstZeroCaseHash,
+      int64_t firstHash,
+      int64_t noMatchHash,
       bool &needsOrder) const {
     if (!m_px) {
       needsOrder = false;
@@ -179,13 +179,13 @@ public:
   char   toByte   () const { return m_px ? m_px->o_toInt64() : 0;}
   short  toInt16  () const { return m_px ? m_px->o_toInt64() : 0;}
   int    toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
-  int64  toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
+  int64_t  toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
   double toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
   String toString () const { return m_px ? m_px->t___tostring() : String();}
   Array  toArray  () const;
   Variant toKey   () const;
 
-  int64 toInt64ForCompare() const;
+  int64_t toInt64ForCompare() const;
   double toDoubleForCompare() const;
 
   /**

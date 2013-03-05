@@ -125,44 +125,44 @@ public:
   Variant each();
 
   // implements ArrayData
-  bool exists(int64 k) const;
+  bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
 
   // implements ArrayData
-  CVarRef get(int64 k, bool error=false) const FLATTEN;
+  CVarRef get(int64_t k, bool error=false) const FLATTEN;
   CVarRef get(const StringData* k, bool error=false) const FLATTEN;
 
   // implements ArrayData
-  ssize_t getIndex(int64 k) const;
+  ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
 
   // implements ArrayData
-  ArrayData* lval(int64 k, Variant*& ret, bool copy, bool checkExist=false);
+  ArrayData* lval(int64_t k, Variant*& ret, bool copy, bool checkExist=false);
   ArrayData* lval(StringData* k, Variant*& ret, bool copy,
                   bool checkExist=false);
   ArrayData* lvalNew(Variant*& ret, bool copy);
 
   // overrides ArrayData
-  ArrayData* lvalPtr(int64 k, Variant*& ret, bool copy, bool create);
+  ArrayData* lvalPtr(int64_t k, Variant*& ret, bool copy, bool create);
   ArrayData* lvalPtr(StringData* k, Variant*& ret, bool copy,
                      bool create);
 
   // implements ArrayData
-  ArrayData* set(int64 k, CVarRef v, bool copy);
+  ArrayData* set(int64_t k, CVarRef v, bool copy);
   ArrayData* set(StringData* k, CVarRef v, bool copy);
 
   // implements ArrayData
-  ArrayData* setRef(int64 k, CVarRef v, bool copy);
+  ArrayData* setRef(int64_t k, CVarRef v, bool copy);
   ArrayData* setRef(StringData* k, CVarRef v, bool copy);
 
   // overrides ArrayData
-  ArrayData *add(int64 k, CVarRef v, bool copy);
+  ArrayData *add(int64_t k, CVarRef v, bool copy);
   ArrayData *add(StringData* k, CVarRef v, bool copy);
-  ArrayData *addLval(int64 k, Variant*& ret, bool copy);
+  ArrayData *addLval(int64_t k, Variant*& ret, bool copy);
   ArrayData *addLval(StringData* k, Variant*& ret, bool copy);
 
   // implements ArrayData
-  ArrayData* remove(int64 k, bool copy);
+  ArrayData* remove(int64_t k, bool copy);
   ArrayData* remove(const StringData* k, bool copy);
 
   // overrides/implements ArrayData
@@ -195,15 +195,15 @@ public:
 
   // nvGet returns a pointer to the value if the specified key is in the
   // array, NULL otherwise.
-  TypedValue* nvGet(int64 ki) const;
+  TypedValue* nvGet(int64_t ki) const;
   TypedValue* nvGet(const StringData* k) const;
 
   // nvGetCell is a variation of get, however it unwraps a KindOfRef,
   // returns KindOfNull if the key doesn't exist, and always warns.
-  TypedValue* nvGetCell(int64 ki) const;
+  TypedValue* nvGetCell(int64_t ki) const;
   TypedValue* nvGetCell(const StringData* k) const;
 
-  void nvBind(int64 ki, const TypedValue* v) {
+  void nvBind(int64_t ki, const TypedValue* v) {
     updateRef(ki, tvAsCVarRef(v));
   }
   void nvBind(StringData* k, const TypedValue* v) {
@@ -283,7 +283,7 @@ public:
      * It is critical that when we return &data to clients, that they not
      * read or write the _count field! */
     union {
-      int64       ikey;
+      int64_t       ikey;
       StringData* key;
     };
     union {
@@ -304,7 +304,7 @@ public:
       key = k;
       hash = int32_t(h) | 0x80000000;
     }
-    void setIntKey(int64 k) {
+    void setIntKey(int64_t k) {
       ikey = k;
       hash = 0;
     }
@@ -312,14 +312,14 @@ public:
 
   struct ElmKey {
     ElmKey() {}
-    ElmKey(int32 hash, StringData* key) {
+    ElmKey(int32_t hash, StringData* key) {
       this->hash = hash;
       this->key = key;
     }
-    int32       hash;
+    int32_t       hash;
     union {
       StringData* key;
-      int64 ikey;
+      int64_t ikey;
     };
   };
 
@@ -328,14 +328,14 @@ public:
   // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
   // chosen to use ssize_t in some places where ideally we *should* have used
   // ElmInd.
-  typedef int32 ElmInd;
+  typedef int32_t ElmInd;
   static const ElmInd ElmIndEmpty      = -1; // == ArrayData::invalid_index
   static const ElmInd ElmIndTombstone  = -2;
 
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
-  static const uint32 MinLgTableSize = 2;
-  static const uint32 SmallHashSize = 1 << MinLgTableSize;
-  static const uint32 SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+  static const uint32_t MinLgTableSize = 2;
+  static const uint32_t SmallHashSize = 1 << MinLgTableSize;
+  static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
 
   struct InlineSlots {
     Elm slots[SmallSize];
@@ -398,9 +398,9 @@ private:
   ElmInd  m_lastE;       // Index of last used element.
   Elm*    m_data;        // Contains elements and hash table.
   ElmInd* m_hash;        // Hash table.
-  int64   m_nextKI;      // Next integer key to use for append.
-  uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
-  uint32  m_hLoad;       // Hash table load (# of non-empty slots).
+  int64_t   m_nextKI;      // Next integer key to use for append.
+  uint32_t  m_tableMask;   // Bitmask used when indexing into the hash table.
+  uint32_t  m_hLoad;       // Hash table load (# of non-empty slots).
   union {
     InlineSlots m_inline_data;
     ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
@@ -419,9 +419,9 @@ private:
   }
   ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
 
-  ssize_t /*ElmInd*/ find(int64 ki) const;
+  ssize_t /*ElmInd*/ find(int64_t ki) const;
   ssize_t /*ElmInd*/ find(const StringData* s, strhash_t prehash) const;
-  ElmInd* findForInsert(int64 ki) const;
+  ElmInd* findForInsert(int64_t ki) const;
   ElmInd* findForInsert(const StringData* k, strhash_t prehash) const;
 
   ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
@@ -445,16 +445,16 @@ private:
   bool nextInsert(CVarRef data);
   void nextInsertRef(CVarRef data);
   void nextInsertWithRef(CVarRef data);
-  void addLvalImpl(int64 ki, Variant** pDest);
+  void addLvalImpl(int64_t ki, Variant** pDest);
   void addLvalImpl(StringData* key, strhash_t h, Variant** pDest);
-  void addVal(int64 ki, CVarRef data);
+  void addVal(int64_t ki, CVarRef data);
   void addVal(StringData* key, CVarRef data);
-  void addValWithRef(int64 ki, CVarRef data);
+  void addValWithRef(int64_t ki, CVarRef data);
   void addValWithRef(StringData* key, CVarRef data);
 
-  void update(int64 ki, CVarRef data);
+  void update(int64_t ki, CVarRef data);
   void update(StringData* key, CVarRef data);
-  void updateRef(int64 ki, CVarRef data);
+  void updateRef(int64_t ki, CVarRef data);
   void updateRef(StringData* key, CVarRef data);
 
   void erase(ElmInd* ei, bool updateNext = false);
@@ -529,15 +529,15 @@ public:
     return (ei > ssize_t(HphpArray::ElmIndEmpty));
   }
 
-  static size_t computeTableSize(uint32 tableMask) {
+  static size_t computeTableSize(uint32_t tableMask) {
     return size_t(tableMask) + size_t(1U);
   }
 
-  static size_t computeMaxElms(uint32 tableMask) {
+  static size_t computeMaxElms(uint32_t tableMask) {
     return size_t(tableMask) - size_t(tableMask) / HphpArray::LoadScale;
   }
 
-  static size_t computeDataSize(uint32 tableMask) {
+  static size_t computeDataSize(uint32_t tableMask) {
     return computeTableSize(tableMask) * sizeof(HphpArray::ElmInd) +
       computeMaxElms(tableMask) * sizeof(HphpArray::Elm);
   }
@@ -556,9 +556,9 @@ enum ArrayGetFlags {
   CheckInts = 2
 };
 
-ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
+ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64_t key,
                             TypedValue* value);
-ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
+ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64_t key,
                              TypedValue* value);
 ArrayData* array_setm_sk1_v(TypedValue* cell, ArrayData* ad, StringData* key,
                             TypedValue* value);
@@ -573,19 +573,19 @@ ArrayData* array_setm_s0k1nc_v(TypedValue* cell, ArrayData* ad, StringData* key,
 ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
                                 StringData* key, TypedValue* value);
 ArrayData* array_setm_wk1_v0(ArrayData* ad, TypedValue* value);
-ArrayData* array_getm_i(void* hphpArray, int64 key, TypedValue* out);
+ArrayData* array_getm_i(void* hphpArray, int64_t key, TypedValue* out);
 
 ArrayData* array_getm_s(ArrayData* a, StringData* key, TypedValue* out,
                         int flags);
-uint64 array_issetm_s(const void* hphpArray, StringData* sd)
+uint64_t array_issetm_s(const void* hphpArray, StringData* sd)
   FLATTEN;
-uint64 array_issetm_s0(const void* hphpArray, StringData* sd)
+uint64_t array_issetm_s0(const void* hphpArray, StringData* sd)
   FLATTEN;
-uint64 array_issetm_s_fast(const void* hphpArray, StringData* sd)
+uint64_t array_issetm_s_fast(const void* hphpArray, StringData* sd)
   FLATTEN;
-uint64 array_issetm_s0_fast(const void* hphpArray, StringData* sd)
+uint64_t array_issetm_s0_fast(const void* hphpArray, StringData* sd)
   FLATTEN;
-uint64 array_issetm_i(const void* hphpArray, int64_t key)
+uint64_t array_issetm_i(const void* hphpArray, int64_t key)
   FLATTEN;
 ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 

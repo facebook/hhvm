@@ -445,11 +445,11 @@ static encodePtr find_encoder_by_type_name(sdl *sdl, const char *type) {
 
 static bool soap_check_zval_ref(CVarRef data, xmlNodePtr node) {
   USE_SOAP_GLOBAL;
-  int64 hash = 0;
+  int64_t hash = 0;
   if (data.isObject()) {
-    hash = (int64)data.getObjectData();
+    hash = (int64_t)data.getObjectData();
   } else if (data.isReferenced()) {
-    hash = (int64)data.getRefData();
+    hash = (int64_t)data.getRefData();
   }
   if (hash) {
     Array &ref_map = SOAP_GLOBAL(ref_map);
@@ -500,7 +500,7 @@ static bool soap_check_zval_ref(CVarRef data, xmlNodePtr node) {
       }
       return true;
     }
-    ref_map.set(hash, (int64)node);
+    ref_map.set(hash, (int64_t)node);
   }
   return false;
 }
@@ -508,8 +508,8 @@ static bool soap_check_zval_ref(CVarRef data, xmlNodePtr node) {
 static bool soap_check_xml_ref(Variant &data, xmlNodePtr node) {
   USE_SOAP_GLOBAL;
   Array &ref_map = SOAP_GLOBAL(ref_map);
-  if (ref_map.exists((int64)node)) {
-    Variant &data2 = ref_map.lvalAt((int64)node);
+  if (ref_map.exists((int64_t)node)) {
+    Variant &data2 = ref_map.lvalAt((int64_t)node);
     if (!(data.isObject() && data2.isObject() &&
           data.getObjectData() == data2.getObjectData()) &&
         !(data.isReferenced() && data2.isReferenced() &&
@@ -518,7 +518,7 @@ static bool soap_check_xml_ref(Variant &data, xmlNodePtr node) {
       return true;
     }
   } else {
-    ref_map.set((int64)node, ref(data));
+    ref_map.set((int64_t)node, ref(data));
   }
   return false;
 }
@@ -993,7 +993,7 @@ static Variant to_zval_double(encodeTypePtr type, xmlNodePtr data) {
   if (data && data->children) {
     if (data->children->type == XML_TEXT_NODE &&
         data->children->next == NULL) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       whiteSpace_collapse(data->children->content);
       String content((char*)data->children->content, CopyString);
       switch (is_numeric_string((const char *)data->children->content,
@@ -1029,13 +1029,13 @@ static Variant to_zval_long(encodeTypePtr type, xmlNodePtr data) {
   if (data && data->children) {
     if (data->children->type == XML_TEXT_NODE &&
         data->children->next == NULL) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       whiteSpace_collapse(data->children->content);
       switch (is_numeric_string((const char *)data->children->content,
                                 data->children->content ?
                                 strlen((char*)data->children->content) : 0,
                                 &lval, &dval, 0)) {
-      case KindOfInt64:  ret = (int64)lval; break;
+      case KindOfInt64:  ret = (int64_t)lval; break;
       case KindOfDouble: ret = dval; break;
       default:
         throw SoapException("Encoding: Violation of encoding rules");

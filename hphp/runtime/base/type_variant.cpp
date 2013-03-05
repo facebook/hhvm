@@ -67,8 +67,8 @@ static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 ///////////////////////////////////////////////////////////////////////////////
 // local helpers
 
-static int64 ToKey(bool i) { return (int64)i; }
-static int64 ToKey(int64 i) { return i; }
+static int64_t ToKey(bool i) { return (int64_t)i; }
+static int64_t ToKey(int64_t i) { return i; }
 static VarNR ToKey(CStrRef s) { return s.toKey(); }
 static VarNR ToKey(CVarRef v) { return v.toKey(); }
 
@@ -287,7 +287,7 @@ Variant &Variant::setWithRef(CVarRef v, const ArrayData *arr /* = NULL */) {
 IMPLEMENT_VOID_SET(setNull, m_type = KindOfNull)
 HOT_FUNC IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
 IMPLEMENT_SET(int, m_type = KindOfInt64; m_data.num = v)
-HOT_FUNC IMPLEMENT_SET(int64, m_type = KindOfInt64; m_data.num = v)
+HOT_FUNC IMPLEMENT_SET(int64_t, m_type = KindOfInt64; m_data.num = v)
 IMPLEMENT_SET(double, m_type = KindOfDouble; m_data.dbl = v)
 IMPLEMENT_SET(litstr,
               m_type = KindOfString;
@@ -352,7 +352,7 @@ void Variant::split() {
   }
 }
 
-int64 Variant::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
+int64_t Variant::hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
   switch (m_type) {
   case KindOfInt64:
     return m_data.num;
@@ -381,21 +381,21 @@ int64 Variant::hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
   return 0;
 }
 
-int64 Variant::DoubleHashForIntSwitch(double dbl, int64 noMatch) {
+int64_t Variant::DoubleHashForIntSwitch(double dbl, int64_t noMatch) {
   // only matches an int if it is integral, ie
   // "50.00" -> 50
   // "50.12" -> no match
-  int64 t = (int64) dbl;
+  int64_t t = (int64_t) dbl;
   return t == dbl ? t : noMatch;
 }
 
-int64 Variant::hashForStringSwitch(
-    int64 firstTrueCaseHash,
-    int64 firstNullCaseHash,
-    int64 firstFalseCaseHash,
-    int64 firstZeroCaseHash,
-    int64 firstHash,
-    int64 noMatchHash,
+int64_t Variant::hashForStringSwitch(
+    int64_t firstTrueCaseHash,
+    int64_t firstNullCaseHash,
+    int64_t firstFalseCaseHash,
+    int64_t firstZeroCaseHash,
+    int64_t firstHash,
+    int64_t noMatchHash,
     bool &needsOrder) const {
   switch (m_type) {
   case KindOfInt64:
@@ -464,13 +464,13 @@ bool Variant::isInteger() const {
 
 HOT_FUNC
 bool Variant::isNumeric(bool checkString /* = false */) const {
-  int64 ival;
+  int64_t ival;
   double dval;
   DataType t = toNumeric(ival, dval, checkString);
   return t == KindOfInt64 || t == KindOfDouble;
 }
 
-DataType Variant::toNumeric(int64 &ival, double &dval,
+DataType Variant::toNumeric(int64_t &ival, double &dval,
     bool checkString /* = false */) const {
   switch (m_type) {
   case KindOfInt64:
@@ -689,7 +689,7 @@ Variant Variant::array_iter_each() {
   return null_variant;
 }
 
-inline DataType Variant::convertToNumeric(int64 *lval, double *dval) const {
+inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
   StringData *s = getStringData();
   assert(s);
   return s->isNumericWithVal(*lval, *dval, 1);
@@ -708,7 +708,7 @@ Variant Variant::operator+() const {
     return toInt64();
   }
   if (isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return dval;
@@ -743,13 +743,13 @@ Variant operator+(const Variant & lhs, const Variant & rhs) {
     return lhs.toDouble() + rhs.toDouble();
   }
   if (lhs.isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     if (lhs.convertToNumeric(&lval, &dval) == KindOfDouble) {
       return dval + rhs.toDouble();
     }
   }
   if (rhs.isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     if (rhs.convertToNumeric(&lval, &dval) == KindOfDouble) {
       return lhs.toDouble() + dval;
     }
@@ -796,7 +796,7 @@ Variant &Variant::operator+=(CVarRef var) {
     return *this;
   }
   if (isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       set(dval + var.toDouble());
@@ -804,7 +804,7 @@ Variant &Variant::operator+=(CVarRef var) {
     }
   }
   if (var.isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = var.convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       set(toDouble() + dval);
@@ -815,7 +815,7 @@ Variant &Variant::operator+=(CVarRef var) {
   return *this;
 }
 
-Variant &Variant::operator+=(int64 n) {
+Variant &Variant::operator+=(int64_t n) {
   if (m_type == KindOfInt64) {
     m_data.num += n;
     return *this;
@@ -832,7 +832,7 @@ Variant &Variant::operator+=(int64 n) {
     throw BadArrayMergeException();
   }
   if (isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       set(dval + n);
@@ -866,7 +866,7 @@ Variant Variant::operator-() const {
     return -toInt64();
   } else {
     if (isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         return -dval;
@@ -893,14 +893,14 @@ Variant Variant::operator-(CVarRef var) const {
     return toInt64() - var.toInt64();
   }
   if (isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return dval - var.toDouble();
     }
   }
   if (var.isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = var.convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return toDouble() - dval;
@@ -919,7 +919,7 @@ Variant &Variant::operator-=(CVarRef var) {
     set(toInt64() - var.toInt64());
   } else {
     if (isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval - var.toDouble());
@@ -927,7 +927,7 @@ Variant &Variant::operator-=(CVarRef var) {
       }
     }
     if (var.isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = var.convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(toDouble() - dval);
@@ -939,7 +939,7 @@ Variant &Variant::operator-=(CVarRef var) {
   return *this;
 }
 
-Variant &Variant::operator-=(int64 n) {
+Variant &Variant::operator-=(int64_t n) {
   if (is(KindOfArray)) {
     throw BadArrayOperandException();
   }
@@ -949,7 +949,7 @@ Variant &Variant::operator-=(int64 n) {
     set(toInt64() - n);
   } else {
     if (isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval - n);
@@ -985,14 +985,14 @@ Variant Variant::operator*(CVarRef var) const {
     return toInt64() * var.toInt64();
   }
   if (isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return dval * var.toDouble();
     }
   }
   if (var.isString()) {
-    int64 lval; double dval;
+    int64_t lval; double dval;
     DataType ret = var.convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return toDouble() * dval;
@@ -1011,7 +1011,7 @@ Variant &Variant::operator*=(CVarRef var) {
     set(toInt64() * var.toInt64());
   } else {
     if (isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval * var.toDouble());
@@ -1019,7 +1019,7 @@ Variant &Variant::operator*=(CVarRef var) {
       }
     }
     if (var.isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = var.convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(toDouble() * dval);
@@ -1031,7 +1031,7 @@ Variant &Variant::operator*=(CVarRef var) {
   return *this;
 }
 
-Variant &Variant::operator*=(int64 n) {
+Variant &Variant::operator*=(int64_t n) {
   if (is(KindOfArray)) {
     throw BadArrayOperandException();
   }
@@ -1041,7 +1041,7 @@ Variant &Variant::operator*=(int64 n) {
     set(toInt64() * n);
   } else {
     if (isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval * n);
@@ -1070,8 +1070,8 @@ Variant Variant::operator/(CVarRef var) const {
   if (is(KindOfArray) || var.is(KindOfArray)) {
     throw BadArrayOperandException();
   }
-  int64 lval; double dval; bool int1 = true;
-  int64 lval2; double dval2; bool int2 = true;
+  int64_t lval; double dval; bool int1 = true;
+  int64_t lval2; double dval2; bool int2 = true;
 
   if (isDouble()) {
     dval = toDouble();
@@ -1128,8 +1128,8 @@ Variant &Variant::operator/=(CVarRef var) {
   if (is(KindOfArray) || var.is(KindOfArray)) {
     throw BadArrayOperandException();
   }
-  int64 lval; double dval; bool int1 = true;
-  int64 lval2; double dval2; bool int2 = true;
+  int64_t lval; double dval; bool int1 = true;
+  int64_t lval2; double dval2; bool int2 = true;
 
   if (isDouble()) {
     dval = toDouble();
@@ -1184,7 +1184,7 @@ Variant &Variant::operator/=(CVarRef var) {
   return *this;
 }
 
-Variant &Variant::operator/=(int64 n) {
+Variant &Variant::operator/=(int64_t n) {
   if (is(KindOfArray)) {
     throw BadArrayOperandException();
   }
@@ -1200,7 +1200,7 @@ Variant &Variant::operator/=(int64 n) {
     set(toDouble() / n);
   } else {
     if (isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfInt64 && lval % n == 0) {
         set(lval / n);
@@ -1228,9 +1228,9 @@ Variant &Variant::operator/=(double n) {
 ///////////////////////////////////////////////////////////////////////////////
 // modulus
 
-int64 Variant::operator%(CVarRef var) const {
-  int64 lval = toInt64();
-  int64 lval2 = var.toInt64();
+int64_t Variant::operator%(CVarRef var) const {
+  int64_t lval = toInt64();
+  int64_t lval2 = var.toInt64();
   if (lval2 == 0) {
     raise_warning("Division by zero");
     return false;
@@ -1239,8 +1239,8 @@ int64 Variant::operator%(CVarRef var) const {
 }
 
 Variant &Variant::operator%=(CVarRef var) {
-  int64 lval = toInt64();
-  int64 lval2 = var.toInt64();
+  int64_t lval = toInt64();
+  int64_t lval2 = var.toInt64();
   if (lval2 == 0) {
     raise_warning("Division by zero");
     set(false);
@@ -1250,7 +1250,7 @@ Variant &Variant::operator%=(CVarRef var) {
   return *this;
 }
 
-Variant &Variant::operator%=(int64 n) {
+Variant &Variant::operator%=(int64_t n) {
   if (n == 0) {
     raise_warning("Division by zero");
     set(false);
@@ -1261,12 +1261,12 @@ Variant &Variant::operator%=(int64 n) {
 }
 
 Variant &Variant::operator%=(double n) {
-  if ((int64)n == 0) {
+  if ((int64_t)n == 0) {
     raise_warning("Division by zero");
     set(false);
     return *this;
   }
-  set(toInt64() % (int64)n);
+  set(toInt64() % (int64_t)n);
   return *this;
 }
 
@@ -1337,12 +1337,12 @@ Variant &Variant::operator^=(CVarRef v) {
   return *this;
 }
 
-Variant &Variant::operator<<=(int64 n) {
+Variant &Variant::operator<<=(int64_t n) {
   set(toInt64() << n);
   return *this;
 }
 
-Variant &Variant::operator>>=(int64 n) {
+Variant &Variant::operator>>=(int64_t n) {
   set(toInt64() >> n);
   return *this;
 }
@@ -1362,7 +1362,7 @@ Variant &Variant::operator++() {
       if (getStringData()->empty()) {
         set("1");
       } else {
-        int64 lval; double dval;
+        int64_t lval; double dval;
         DataType ret = convertToNumeric(&lval, &dval);
         switch (ret) {
         case KindOfInt64:  set(lval + 1); break;
@@ -1400,7 +1400,7 @@ Variant &Variant::operator--() {
       if (getStringData()->empty()) {
         set(int64_t(-1LL));
       } else {
-        int64 lval; double dval;
+        int64_t lval; double dval;
         DataType ret = convertToNumeric(&lval, &dval);
         switch (ret) {
         case KindOfInt64:  set(lval - 1);   break;
@@ -1478,7 +1478,7 @@ bool Variant::toBooleanHelper() const {
   return m_data.num;
 }
 
-int64 Variant::toInt64Helper(int base /* = 10 */) const {
+int64_t Variant::toInt64Helper(int base /* = 10 */) const {
   assert(m_type > KindOfInt64);
   switch (m_type) {
   case KindOfDouble:  {
@@ -1575,7 +1575,7 @@ Object Variant::toObjectHelper() const {
 HOT_FUNC
 VarNR Variant::toKey() const {
   if (m_type == KindOfString || m_type == KindOfStaticString) {
-    int64 n;
+    int64_t n;
     if (m_data.pstr->isStrictlyInteger(n)) {
       return VarNR(n);
     } else {
@@ -1625,10 +1625,10 @@ bool Variant::same(bool v2) const {
 }
 
 bool Variant::same(int v2) const {
-  return same((int64)v2);
+  return same((int64_t)v2);
 }
 
-bool Variant::same(int64 v2) const {
+bool Variant::same(int64_t v2) const {
   TypedValueAccessor acc = getTypedAccessor();
   switch (GetAccessorType(acc)) {
   case KindOfInt64:
@@ -1827,7 +1827,7 @@ bool Variant::same(CVarRef v2) const {
 bool Variant::equal(bool    v2) const { UNWRAP(equal);}
 bool Variant::equal(int     v2) const { UNWRAP(equal);}
 HOT_FUNC
-bool Variant::equal(int64   v2) const { UNWRAP(equal);}
+bool Variant::equal(int64_t   v2) const { UNWRAP(equal);}
 bool Variant::equal(double  v2) const { UNWRAP(equal);}
 bool Variant::equal(litstr  v2) const { UNWRAP_STR(equal);}
 bool Variant::equal(const StringData *v2) const { UNWRAP_STR(equal);}
@@ -1840,7 +1840,7 @@ bool Variant::equal(CVarRef v2) const { UNWRAP_VAR(equal,equal);}
 
 bool Variant::equalAsStr(bool    v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(int     v2) const { UNWRAP_STRING(equalAsStr);}
-bool Variant::equalAsStr(int64   v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(int64_t   v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(double  v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(litstr  v2) const { UNWRAP_STRING(equalAsStr);}
 bool Variant::equalAsStr(const StringData *v2) const {
@@ -1853,7 +1853,7 @@ bool Variant::equalAsStr(CVarRef  v2) const { UNWRAP_STRING(equalAsStr);}
 
 bool Variant::less(bool    v2) const { UNWRAP(more);}
 bool Variant::less(int     v2) const { UNWRAP(more);}
-bool Variant::less(int64   v2) const { UNWRAP(more);}
+bool Variant::less(int64_t   v2) const { UNWRAP(more);}
 bool Variant::less(double  v2) const { UNWRAP(more);}
 bool Variant::less(litstr  v2) const { UNWRAP_STR(more);}
 bool Variant::less(const StringData *v2) const { UNWRAP_STR(more);}
@@ -1866,7 +1866,7 @@ bool Variant::less(CVarRef v2) const { UNWRAP_VAR(less,more);}
 bool Variant::more(bool    v2) const { UNWRAP(less);}
 bool Variant::more(int     v2) const { UNWRAP(less);}
 HOT_FUNC
-bool Variant::more(int64   v2) const { UNWRAP(less);}
+bool Variant::more(int64_t   v2) const { UNWRAP(less);}
 bool Variant::more(double  v2) const { UNWRAP(less);}
 bool Variant::more(litstr  v2) const { UNWRAP_STR(less);}
 bool Variant::more(const StringData *v2) const { UNWRAP_STR(less);}
@@ -1970,7 +1970,7 @@ Variant Variant::rvalAt(double offset, ACCESSPARAMS_IMPL) const {
   IMPLEMENT_RVAL_INTEGRAL
 }
 
-Variant Variant::rvalAtHelper(int64 offset, ACCESSPARAMS_IMPL) const {
+Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
   switch (m_type) {
   case KindOfStaticString:
   case KindOfString:
@@ -2004,7 +2004,7 @@ Variant Variant::rvalAt(litstr offset, ACCESSPARAMS_IMPL) const {
     if (flags & AccessFlags::Key) {
       return m_data.parr->get(offset, error);
     }
-    int64 n;
+    int64_t n;
     int len = strlen(offset);
     if (!is_strictly_integer(offset, len, n)) {
       return m_data.parr->get(offset, error);
@@ -2047,7 +2047,7 @@ Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
       return m_data.parr->get(offset, error);
     }
     if (offset.isNull()) return m_data.parr->get(empty_string, error);
-    int64 n;
+    int64_t n;
     if (!offset->isStrictlyInteger(n)) {
       return m_data.parr->get(offset, error);
     } else {
@@ -2092,11 +2092,11 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
     case KindOfInt64:
       return m_data.parr->get(offset.m_data.num, flags & AccessFlags::Error);
     case KindOfDouble:
-      return m_data.parr->get((int64)offset.m_data.dbl,
+      return m_data.parr->get((int64_t)offset.m_data.dbl,
                               flags & AccessFlags::Error);
     case KindOfStaticString:
     case KindOfString: {
-      int64 n;
+      int64_t n;
       if (offset.m_data.pstr->isStrictlyInteger(n)) {
         return m_data.parr->get(n, flags & AccessFlags::Error);
       } else {
@@ -2180,7 +2180,7 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
 }
 
 template CVarRef
-Variant::rvalRefHelper(int64 offset, CVarRef tmp, ACCESSPARAMS_IMPL) const;
+Variant::rvalRefHelper(int64_t offset, CVarRef tmp, ACCESSPARAMS_IMPL) const;
 
 CVarRef Variant::rvalRef(bool offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
@@ -2200,7 +2200,7 @@ CVarRef Variant::rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_data.parr->get(offset, error);
-    int64 n;
+    int64_t n;
     int len = strlen(offset);
     if (!is_strictly_integer(offset, len, n)) {
       return m_data.parr->get(offset, error);
@@ -2216,7 +2216,7 @@ CVarRef Variant::rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_data.parr->get(offset, error);
     if (offset.isNull()) return m_data.parr->get(empty_string, error);
-    int64 n;
+    int64_t n;
     if (!offset->isStrictlyInteger(n)) {
       return m_data.parr->get(offset, error);
     } else {
@@ -2237,11 +2237,11 @@ CVarRef Variant::rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
     case KindOfInt64:
       return m_data.parr->get(offset.m_data.num, flags & AccessFlags::Error);
     case KindOfDouble:
-      return m_data.parr->get((int64)offset.m_data.dbl,
+      return m_data.parr->get((int64_t)offset.m_data.dbl,
                               flags & AccessFlags::Error);
     case KindOfStaticString:
     case KindOfString: {
-      int64 n;
+      int64_t n;
       if (offset.m_data.pstr->isStrictlyInteger(n)) {
         return m_data.parr->get(n, flags & AccessFlags::Error);
       } else {
@@ -2280,7 +2280,7 @@ CVarRef Variant::rvalAtRefHelper(T offset, ACCESSPARAMS_IMPL) const {
 }
 
 template
-CVarRef Variant::rvalAtRefHelper<int64>(int64 offset, ACCESSPARAMS_IMPL) const;
+CVarRef Variant::rvalAtRefHelper<int64_t>(int64_t offset, ACCESSPARAMS_IMPL) const;
 template
 CVarRef Variant::rvalAtRefHelper<CStrRef>(CStrRef offset,
                                           ACCESSPARAMS_IMPL) const;
@@ -2295,18 +2295,18 @@ template <typename T>
 class LvalHelper {};
 
 template<>
-class LvalHelper<int64> {
+class LvalHelper<int64_t> {
 public:
-  typedef int64 KeyType;
+  typedef int64_t KeyType;
   static bool CheckKey(KeyType k) { return true; };
   static const bool CheckParams = false;
 };
 
 template<>
-class LvalHelper<bool> : public LvalHelper<int64> {};
+class LvalHelper<bool> : public LvalHelper<int64_t> {};
 
 template<>
-class LvalHelper<double> : public LvalHelper<int64> {};
+class LvalHelper<double> : public LvalHelper<int64_t> {};
 
 template<>
 class LvalHelper<CStrRef> {
@@ -2384,9 +2384,9 @@ Variant &Variant::lvalAt(bool    key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl(key, flags);
 }
 Variant &Variant::lvalAt(int     key, ACCESSPARAMS_IMPL) {
-  return lvalAt((int64)key, flags);
+  return lvalAt((int64_t)key, flags);
 }
-Variant &Variant::lvalAt(int64   key, ACCESSPARAMS_IMPL) {
+Variant &Variant::lvalAt(int64_t   key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl(key, flags);
 }
 Variant &Variant::lvalAt(double  key, ACCESSPARAMS_IMPL) {
@@ -2407,9 +2407,9 @@ Variant &Variant::lvalRef(bool    key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return LvalAtImpl0(this, key, &tmp, false, flags);
 }
 Variant &Variant::lvalRef(int     key, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return lvalRef((int64)key, tmp, flags);
+  return lvalRef((int64_t)key, tmp, flags);
 }
-Variant &Variant::lvalRef(int64   key, Variant& tmp, ACCESSPARAMS_IMPL) {
+Variant &Variant::lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return LvalAtImpl0(this, key, &tmp, false, flags);
 }
 Variant &Variant::lvalRef(double  key, Variant& tmp, ACCESSPARAMS_IMPL) {
@@ -2631,7 +2631,7 @@ Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
   return m_data.pobj->o_setPublicRef(propName, val);
 }
 
-Variant Variant::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */) {
+Variant Variant::o_invoke(CStrRef s, CArrRef params, int64_t hash /* = -1 */) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_invoke(s, params, hash);
   } else if (m_type == KindOfRef) {
@@ -2642,7 +2642,7 @@ Variant Variant::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */) {
 }
 
 Variant Variant::o_root_invoke(CStrRef s, CArrRef params,
-                               int64 hash /* = -1 */) {
+                               int64_t hash /* = -1 */) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_invoke(s, params, hash);
   } else if (m_type == KindOfRef) {
@@ -2662,7 +2662,7 @@ Variant Variant::o_invoke_ex(CStrRef clsname, CStrRef s, CArrRef params) {
   }
 }
 
-Variant Variant::o_invoke_few_args(CStrRef s, int64 hash, int count,
+Variant Variant::o_invoke_few_args(CStrRef s, int64_t hash, int count,
                                    INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_invoke_few_args(s, hash, count,
@@ -2846,7 +2846,7 @@ CVarRef Variant::set(bool key, CVarRef v) {
   return SetImpl(this, key, v, false);
 }
 
-CVarRef Variant::set(int64 key, CVarRef v) {
+CVarRef Variant::set(int64_t key, CVarRef v) {
   return SetImpl(this, key, v, false);
 }
 
@@ -2975,7 +2975,7 @@ CVarRef Variant::setRef(bool key, CVarRef v) {
   return SetRefImpl(this, key, v, false);
 }
 
-CVarRef Variant::setRef(int64 key, CVarRef v) {
+CVarRef Variant::setRef(int64_t key, CVarRef v) {
   return SetRefImpl(this, key, v, false);
 }
 
@@ -3041,7 +3041,7 @@ CVarRef Variant::setOpEqual(int op, bool key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
-CVarRef Variant::setOpEqual(int op, int64 key, CVarRef v) {
+CVarRef Variant::setOpEqual(int op, int64_t key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
@@ -3291,7 +3291,7 @@ void Variant::removeImpl(double key) {
   }
 }
 
-void Variant::removeImpl(int64 key) {
+void Variant::removeImpl(int64_t key) {
   switch (getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -3517,7 +3517,7 @@ static void setValue(void *addr, DataType type,
   value.unserialize(uns);
   switch (type) {
     case KindOfBoolean: *(bool*)addr = value;   break;
-    case KindOfInt64:   *(int64*)addr = value;  break;
+    case KindOfInt64:   *(int64_t*)addr = value;  break;
     case KindOfDouble:  *(double*)addr = value; break;
     case KindOfString:
       *(String*)addr = value.isString() ? value.getStringData() : nullptr;
@@ -3597,7 +3597,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
   switch (type) {
   case 'r':
     {
-      int64 id = uns->readInt();
+      int64_t id = uns->readInt();
       Variant *v = uns->get(id);
       if (v == nullptr) {
         throw Exception("Id %ld out of range", id);
@@ -3607,7 +3607,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
     break;
   case 'R':
     {
-      int64 id = uns->readInt();
+      int64_t id = uns->readInt();
       Variant *v = uns->get(id);
       if (v == nullptr) {
         throw Exception("Id %ld out of range", id);
@@ -3615,8 +3615,8 @@ void Variant::unserialize(VariableUnserializer *uns) {
       assignRef(*v);
     }
     break;
-  case 'b': { int64 v = uns->readInt(); operator=((bool)v); } break;
-  case 'i': { int64 v = uns->readInt(); operator=(v);       } break;
+  case 'b': { int64_t v = uns->readInt(); operator=((bool)v); } break;
+  case 'i': { int64_t v = uns->readInt(); operator=(v);       } break;
   case 'd':
     {
       double v;
@@ -3694,7 +3694,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
         obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
       }
       operator=(obj);
-      int64 size = uns->readInt();
+      int64_t size = uns->readInt();
       char sep = uns->readChar();
       if (sep != ':') {
         throw Exception("Expected ':' but got '%c'", sep);
@@ -3722,7 +3722,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
             of dynamic properties when we see the first dynamic prop).
             see getVariantPtr
           */
-          for (int64 i = size; i--; ) {
+          for (int64_t i = size; i--; ) {
             String key = uns->unserializeKey().toString();
             int ksize = key.size();
             const char *kdata = key.data();

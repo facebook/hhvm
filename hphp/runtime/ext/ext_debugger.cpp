@@ -31,25 +31,25 @@ namespace HPHP {
 using namespace Eval;
 using HPHP::VM::Transl::CallerFrame;
 
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES =
   DebuggerClient::AutoCompleteFileNames;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_VARIABLES =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_VARIABLES =
   DebuggerClient::AutoCompleteVariables;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CONSTANTS =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CONSTANTS =
   DebuggerClient::AutoCompleteConstants;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASSES   =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASSES   =
   DebuggerClient::AutoCompleteClasses;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_FUNCTIONS =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_FUNCTIONS =
   DebuggerClient::AutoCompleteFunctions;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_METHODS =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_METHODS =
   DebuggerClient::AutoCompleteClassMethods;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_PROPERTIES =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_PROPERTIES =
   DebuggerClient::AutoCompleteClassProperties;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_CONSTANTS =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CLASS_CONSTANTS =
   DebuggerClient::AutoCompleteClassConstants;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_KEYWORDS =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_KEYWORDS =
   DebuggerClient::AutoCompleteKeyword;
-const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_CODE =
+const int64_t q_DebuggerClientCmdUser$$AUTO_COMPLETE_CODE =
   DebuggerClient::AutoCompleteCode;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ bool c_DebuggerClientCmdUser::t_arg(int index, CStrRef str) {
   return m_client->arg(index + 1, str.data());
 }
 
-int64 c_DebuggerClientCmdUser::t_argcount() {
+int64_t c_DebuggerClientCmdUser::t_argcount() {
   return m_client->argCount() - 1;
 }
 
@@ -322,7 +322,7 @@ Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
   Array ret(Array::Create());
   if (bpi) {
     ret.set("file",      String(bpi->m_file));
-    ret.set("line",      (int64)bpi->m_line1);
+    ret.set("line",      (int64_t)bpi->m_line1);
     ret.set("namespace", String(bpi->getNamespace()));
     ret.set("class",     String(bpi->getClass()));
     ret.set("function",  String(bpi->getFunction()));
@@ -335,7 +335,7 @@ Variant c_DebuggerClientCmdUser::t_getstacktrace() {
   return m_client->getStackTrace();
 }
 
-int64 c_DebuggerClientCmdUser::t_getframe() {
+int64_t c_DebuggerClientCmdUser::t_getframe() {
   return m_client->getFrame();
 }
 
@@ -358,14 +358,14 @@ void c_DebuggerClientCmdUser::t_addcompletion(CVarRef list) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_DebuggerClient$$STATE_INVALID = -1;
-const int64 q_DebuggerClient$$STATE_UNINIT
+const int64_t q_DebuggerClient$$STATE_INVALID = -1;
+const int64_t q_DebuggerClient$$STATE_UNINIT
   = DebuggerClient::StateUninit;
-const int64 q_DebuggerClient$$STATE_INITIALIZING
+const int64_t q_DebuggerClient$$STATE_INITIALIZING
   = DebuggerClient::StateInitializing;
-const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND
+const int64_t q_DebuggerClient$$STATE_READY_FOR_COMMAND
   = DebuggerClient::StateReadyForCommand;
-const int64 q_DebuggerClient$$STATE_BUSY
+const int64_t q_DebuggerClient$$STATE_BUSY
   = DebuggerClient::StateBusy;
 
 c_DebuggerClient::c_DebuggerClient(VM::Class* cb) : ExtObjectData(cb) {
@@ -379,7 +379,7 @@ c_DebuggerClient::~c_DebuggerClient() {
 void c_DebuggerClient::t___construct() {
 }
 
-int64 c_DebuggerClient::t_getstate() {
+int64_t c_DebuggerClient::t_getstate() {
   if (!m_client) {
     return q_DebuggerClient$$STATE_INVALID;
   }

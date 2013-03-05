@@ -46,7 +46,7 @@ Variant f_preg_split(CVarRef pattern, CVarRef subject, int limit = -1,
 
 String f_preg_quote(CStrRef str, CStrRef delimiter = null_string);
 
-int64 f_preg_last_error();
+int64_t f_preg_last_error();
 
 ///////////////////////////////////////////////////////////////////////////////
 // deprecating these

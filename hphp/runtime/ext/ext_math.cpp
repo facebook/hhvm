@@ -22,10 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 k_PHP_ROUND_HALF_UP =   PHP_ROUND_HALF_UP;
-const int64 k_PHP_ROUND_HALF_DOWN = PHP_ROUND_HALF_DOWN;
-const int64 k_PHP_ROUND_HALF_EVEN = PHP_ROUND_HALF_EVEN;
-const int64 k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
+const int64_t k_PHP_ROUND_HALF_UP =   PHP_ROUND_HALF_UP;
+const int64_t k_PHP_ROUND_HALF_DOWN = PHP_ROUND_HALF_DOWN;
+const int64_t k_PHP_ROUND_HALF_EVEN = PHP_ROUND_HALF_EVEN;
+const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 
 Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
   Variant ret;
@@ -94,7 +94,7 @@ Variant f_max(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
 }
 
 Variant f_abs(CVarRef number) {
-  int64 ival;
+  int64_t ival;
   double dval;
   DataType k = number.toNumeric(ival, dval, true);
   if (k == KindOfDouble) {
@@ -106,9 +106,9 @@ Variant f_abs(CVarRef number) {
   }
 }
 
-double f_round(CVarRef val, int64 precision /* = 0 */,
-               int64 mode /* = PHP_ROUND_HALF_UP */) {
-  int64 ival;
+double f_round(CVarRef val, int64_t precision /* = 0 */,
+               int64_t mode /* = PHP_ROUND_HALF_UP */) {
+  int64_t ival;
   double dval;
   DataType k = val.toNumeric(ival, dval, true);
   if (k == KindOfInt64) {
@@ -124,7 +124,7 @@ double f_round(CVarRef val, int64 precision /* = 0 */,
   return dval;
 }
 
-Variant f_base_convert(CStrRef number, int64 frombase, int64 tobase) {
+Variant f_base_convert(CStrRef number, int64_t frombase, int64_t tobase) {
   if (!string_validate_base(frombase)) {
     throw_invalid_argument("Invalid frombase: %d", frombase);
     return false;
@@ -138,7 +138,7 @@ Variant f_base_convert(CStrRef number, int64 frombase, int64 tobase) {
 }
 
 Numeric f_pow(CVarRef base, CVarRef exp) {
-  int64 bint, eint;
+  int64_t bint, eint;
   double bdbl, edbl;
   DataType bt = base.toNumeric(bint, bdbl, true);
   DataType et = exp.toNumeric(eint, edbl, true);
@@ -147,7 +147,7 @@ Numeric f_pow(CVarRef base, CVarRef exp) {
     if (bint == 0) return 0LL;
 
     // calculate pow(long,long) in O(log exp) operations, bail if overflow
-    int64 l1 = 1;
+    int64_t l1 = 1;
     while (eint >= 1) {
       int overflow;
       double dval = 0.0;
@@ -190,13 +190,13 @@ void f_srand(CVarRef seed /* = null_variant */) {
   }
 }
 
-int64 f_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
+int64_t f_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
   if (!s_rand_is_seeded) {
     s_rand_is_seeded = true;
     srand(math_generate_seed());
   }
 
-  int64 number = rand();
+  int64_t number = rand();
   if (min != 0 || max != RAND_MAX) {
     RAND_RANGE(number, min, max, RAND_MAX);
   }

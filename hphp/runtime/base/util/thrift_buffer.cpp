@@ -31,7 +31,7 @@ ThriftBuffer::ThriftBuffer(int size,
   m_buf = (char *)malloc(m_size + 1);
   if (!m_buf) throwOutOfMemory();
   m_pEnd = m_buf + m_size;
-  m_pSafe = m_pEnd - sizeof(int64) - 1;
+  m_pSafe = m_pEnd - sizeof(int64_t) - 1;
   m_p = m_buf;
 }
 
@@ -46,14 +46,14 @@ void ThriftBuffer::reset(bool read) {
   } else {
     m_pEnd = m_buf + m_size;
   }
-  m_pSafe = m_pEnd - sizeof(int64) - 1;
+  m_pSafe = m_pEnd - sizeof(int64_t) - 1;
   m_p = m_buf;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void ThriftBuffer::write(CStrRef data) {
-  int32 len = data.size();
+  int32_t len = data.size();
   write(len);
 
   if (m_p + len > m_pEnd) {
@@ -108,7 +108,7 @@ void ThriftBuffer::read(char *data, int len) {
       } else {
         m_pEnd = m_buf;
       }
-      m_pSafe = m_pEnd - sizeof(int64) - 1;
+      m_pSafe = m_pEnd - sizeof(int64_t) - 1;
       m_p = m_buf;
       if (m_p > m_pSafe) m_safe = false;
       return; // done
@@ -120,14 +120,14 @@ void ThriftBuffer::read(char *data, int len) {
   }
 }
 
-void ThriftBuffer::skip(int8 type) {
+void ThriftBuffer::skip(int8_t type) {
   switch (type) {
     case T_STOP:
     case T_VOID:
       return;
     case T_STRUCT:
       while (true) {
-        int8 ttype; read(ttype); // get field type
+        int8_t ttype; read(ttype); // get field type
         if (ttype == T_STOP) break;
         read(nullptr, 2); // skip field number, I16
         skip(ttype); // skip field payload
@@ -152,23 +152,23 @@ void ThriftBuffer::skip(int8 type) {
     case T_UTF8:
     case T_UTF16:
     case T_STRING: {
-      int32 len; read(len);
+      int32_t len; read(len);
       read(nullptr, len);
       } return;
     case T_MAP: {
-      int8 keytype; read(keytype);
-      int8 valtype; read(valtype);
-      int32 size; read(size);
-      for (int32 i = 0; i < size; ++i) {
+      int8_t keytype; read(keytype);
+      int8_t valtype; read(valtype);
+      int32_t size; read(size);
+      for (int32_t i = 0; i < size; ++i) {
         skip(keytype);
         skip(valtype);
       }
     } return;
     case T_LIST:
     case T_SET: {
-      int8 valtype; read(valtype);
-      int32 size; read(size);
-      for (int32 i = 0; i < size; ++i) {
+      int8_t valtype; read(valtype);
+      int32_t size; read(size);
+      for (int32_t i = 0; i < size; ++i) {
         skip(valtype);
       }
     } return;
@@ -214,7 +214,7 @@ void ThriftBuffer::write(const std::string &data) {
 }
 
 void ThriftBuffer::read(std::vector<std::string> &data) {
-  int32 size;
+  int32_t size;
   read(size);
   data.resize(size);
   for (int i = 0; i < size; i++) {
@@ -223,7 +223,7 @@ void ThriftBuffer::read(std::vector<std::string> &data) {
 }
 
 void ThriftBuffer::write(const std::vector<std::string> &data) {
-  int32 size = data.size();
+  int32_t size = data.size();
   write(size);
   for (int i = 0; i < size; i++) {
     write(data[i]);

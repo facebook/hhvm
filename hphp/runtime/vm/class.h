@@ -495,7 +495,7 @@ class PreClassRepoProxy : public RepoProxy {
   class InsertPreClassStmt : public RepoProxy::Stmt {
    public:
     InsertPreClassStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(const PreClassEmitter& pce, RepoTxn& txn, int64 unitSn,
+    void insert(const PreClassEmitter& pce, RepoTxn& txn, int64_t unitSn,
                 Id preClassId, const StringData* name,
                 PreClass::Hoistable hoistable);
   };
@@ -793,11 +793,11 @@ public:
   static void initInstanceBits();
   static bool haveInstanceBit(const StringData* name);
   static bool getInstanceBitMask(const StringData* name,
-                                 int& offset, uint8& mask);
+                                 int& offset, uint8_t& mask);
 
 private:
   typedef tbb::concurrent_hash_map<
-    const StringData*, uint64, pointer_hash<StringData>> InstanceCounts;
+    const StringData*, uint64_t, pointer_hash<StringData>> InstanceCounts;
   typedef hphp_hash_map<const StringData*, unsigned,
                         pointer_hash<StringData>> InstanceBitsMap;
   typedef std::bitset<128> InstanceBits;

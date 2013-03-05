@@ -62,7 +62,7 @@ Variant Object::toKey() const {
     : String();
 }
 
-int64 Object::toInt64ForCompare() const {
+int64_t Object::toInt64ForCompare() const {
   check_collection_compare(m_px);
   return toInt64();
 }

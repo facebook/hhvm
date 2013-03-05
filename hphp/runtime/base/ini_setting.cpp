@@ -52,18 +52,18 @@ bool ini_on_update_bool(CStrRef value, void *p) {
 
 bool ini_on_update_long(CStrRef value, void *p) {
   if (p) {
-    *((int64*)p) = value.toInt64();
+    *((int64_t*)p) = value.toInt64();
   }
   return true;
 }
 
 bool ini_on_update_non_negative(CStrRef value, void *p) {
-  int64 v = value.toInt64();
+  int64_t v = value.toInt64();
   if (v < 0) {
     return false;
   }
   if (p) {
-    *((int64*)p) = v;
+    *((int64_t*)p) = v;
   }
   return true;
 }
@@ -210,17 +210,17 @@ void IniSetting::Unbind(const char *name) {
 
 bool IniSetting::Get(CStrRef name, String &value) {
   if (name == "error_reporting") {
-    value = String((int64)g_context->getErrorReportingLevel());
+    value = String((int64_t)g_context->getErrorReportingLevel());
     return true;
   }
   if (name == "memory_limit") {
-    int64 v = g_context->getRequestMemoryMaxBytes();
+    int64_t v = g_context->getRequestMemoryMaxBytes();
     if (v == INT64_MAX) v = -1;
     value = String(v);
     return true;
   }
   if (name == "max_execution_time" || name == "maximum_execution_time") {
-    value = String((int64)g_context->getRequestTimeLimit());
+    value = String((int64_t)g_context->getRequestTimeLimit());
     return true;
   }
   if (name == "hphp.build_id") {
@@ -258,11 +258,11 @@ bool IniSetting::Get(CStrRef name, String &value) {
     return true;
   }
   if (name == "notice_frequency") {
-    value = String((int64)RuntimeOption::NoticeFrequency);
+    value = String((int64_t)RuntimeOption::NoticeFrequency);
     return true;
   }
   if (name == "warning_frequency") {
-    value = String((int64)RuntimeOption::WarningFrequency);
+    value = String((int64_t)RuntimeOption::WarningFrequency);
     return true;
   }
   if (name == "include_path") {
@@ -286,7 +286,7 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
   }
   if (name == "memory_limit") {
     if (!value.empty()) {
-      int64 newInt = value.toInt64();
+      int64_t newInt = value.toInt64();
       char lastChar = value.charAt(value.size() - 1);
       if (lastChar == 'K' || lastChar == 'k') {
         newInt <<= 10;
@@ -299,7 +299,7 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
       return true;
     }
   } else if (name == "max_execution_time" || name == "maximum_execution_time"){
-    int64 limit = value.toInt64();
+    int64_t limit = value.toInt64();
     TimeoutThread::DeferTimeout(limit);
     // Just for ini_get
     g_context->setRequestTimeLimit(limit);

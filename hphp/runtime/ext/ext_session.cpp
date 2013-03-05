@@ -61,9 +61,9 @@ public:
   std::string m_session_name;
   std::string m_extern_referer_chk;
   std::string m_entropy_file;
-  int64       m_entropy_length;
+  int64_t       m_entropy_length;
   std::string m_cache_limiter;
-  int64       m_cookie_lifetime;
+  int64_t       m_cookie_lifetime;
   std::string m_cookie_path;
   std::string m_cookie_domain;
   bool        m_cookie_secure;
@@ -72,11 +72,11 @@ public:
   SessionModule *m_mod;
 
   Status m_session_status;
-  int64  m_gc_probability;
-  int64  m_gc_divisor;
-  int64  m_gc_maxlifetime;
+  int64_t  m_gc_probability;
+  int64_t  m_gc_divisor;
+  int64_t  m_gc_maxlifetime;
   int    m_module_number;
-  int64  m_cache_expire;
+  int64_t  m_cache_expire;
 
   std::string m_ps_open;
   std::string m_ps_close;
@@ -94,7 +94,7 @@ public:
   bool m_apply_trans_sid; // whether to enable trans-sid for current request
 
   std::string m_hash_func;
-  int64 m_hash_bits_per_character;
+  int64_t m_hash_bits_per_character;
 
   int  m_send_cookie;
   int  m_define_sid;
@@ -747,7 +747,7 @@ public:
   virtual bool gc(int maxlifetime, int *nrdels) {
     return f_call_user_func_array
       (String(PS(ps_gc)),
-       CREATE_VECTOR1((int64)maxlifetime));
+       CREATE_VECTOR1((int64_t)maxlifetime));
   }
 };
 static UserSessionModule s_user_session_module;
@@ -1281,7 +1281,7 @@ static int php_session_cache_limiter() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_session_set_cookie_params(int64 lifetime,
+void f_session_set_cookie_params(int64_t lifetime,
                                  CStrRef path /* = null_string */,
                                  CStrRef domain /* = null_string */,
                                  CVarRef secure /* = null */,
@@ -1421,8 +1421,8 @@ String f_session_cache_limiter(CStrRef new_cache_limiter /* = null_string */) {
   return ret;
 }
 
-int64 f_session_cache_expire(CStrRef new_cache_expire /* = null_string */) {
-  int64 ret = PS(cache_expire);
+int64_t f_session_cache_expire(CStrRef new_cache_expire /* = null_string */) {
+  int64_t ret = PS(cache_expire);
   if (!new_cache_expire.isNull()) {
     IniSetting::Set("session.cache_expire", new_cache_expire.toInt64());
   }

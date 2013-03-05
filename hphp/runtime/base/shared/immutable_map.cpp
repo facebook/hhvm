@@ -97,7 +97,7 @@ int ImmutableMap::indexOf(const StringData* key) {
 }
 
 HOT_FUNC
-int ImmutableMap::indexOf(int64 key) {
+int ImmutableMap::indexOf(int64_t key) {
   int bucket = hash()[key & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {

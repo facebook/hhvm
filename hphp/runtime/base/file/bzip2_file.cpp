@@ -46,7 +46,7 @@ bool BZ2File::close() {
   return closeImpl();
 }
 
-int64 BZ2File::errnu() {
+int64_t BZ2File::errnu() {
   assert(m_bzFile);
   int errnum = 0;
   BZ2_bzerror(m_bzFile, &errnum);
@@ -72,7 +72,7 @@ bool BZ2File::flush() {
   return BZ2_bzflush(m_bzFile);
 }
 
-int64 BZ2File::readImpl(char * buf, int64 length) {
+int64_t BZ2File::readImpl(char * buf, int64_t length) {
   assert(m_bzFile);
   int len = BZ2_bzread(m_bzFile, buf, length);
   if (len < length)
@@ -80,7 +80,7 @@ int64 BZ2File::readImpl(char * buf, int64 length) {
   return len;
 }
 
-int64 BZ2File::writeImpl(const char * buf, int64 length) {
+int64_t BZ2File::writeImpl(const char * buf, int64_t length) {
   assert(m_bzFile);
   return BZ2_bzwrite(m_bzFile, (char *)buf, length);
 }

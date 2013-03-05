@@ -97,7 +97,7 @@ const char *LibEventTransport::getRemoteHost() {
   return m_remote_host.c_str();
 }
 
-uint16 LibEventTransport::getRemotePort() {
+uint16_t LibEventTransport::getRemotePort() {
   return m_remote_port;
 }
 

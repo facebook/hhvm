@@ -211,7 +211,7 @@ void CmdInstrument::validateAndWriteToTable(DebuggerProxyVM *proxy) {
         tablePC = new VM::InjectionTableInt64();
       }
       ipi->m_valid = true;
-      (*tablePC)[(int64)pc] = inj;
+      (*tablePC)[(int64_t)pc] = inj;
     }
     if (ipi->m_locType == InstPointInfo::LocFuncEntry) {
       StackStringData sd(ipi->m_func.c_str(), ipi->m_func.size(), AttachLiteral);

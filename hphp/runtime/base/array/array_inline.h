@@ -30,7 +30,7 @@ inline static bool isIntKey(TypedValueAccessor tva) {
     return Variant::GetAccessorType(tva) <= KindOfInt64;
 }
 
-inline static int64 getIntKey(TypedValueAccessor tva) {
+inline static int64_t getIntKey(TypedValueAccessor tva) {
     return Variant::GetInt64(tva);
 }
 
@@ -138,7 +138,7 @@ inline ArrayData* ArrayData::set(CVarRef k, CVarRef v, bool copy) {
          set(getStringKey(tvk), v, copy);
 }
 
-inline ArrayData* ArrayData::nvSet(int64 ki, const TypedValue* v, bool copy) {
+inline ArrayData* ArrayData::nvSet(int64_t ki, const TypedValue* v, bool copy) {
   return set(ki, tvAsCVarRef(v), copy);
 }
 

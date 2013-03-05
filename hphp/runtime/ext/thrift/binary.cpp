@@ -108,23 +108,23 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
     case T_BYTE: {
       uint8_t c;
       transport.readBytes(&c, 1);
-      return Variant((int8)c);
+      return Variant((int8_t)c);
     }
     case T_I16: {
       uint16_t c;
       transport.readBytes(&c, 2);
-      return Variant((int16)ntohs(c));
+      return Variant((int16_t)ntohs(c));
     }
     case T_I32: {
       uint32_t c;
       transport.readBytes(&c, 4);
-      return Variant((int32)ntohl(c));
+      return Variant((int32_t)ntohl(c));
     }
     case T_U64:
     case T_I64: {
       uint64_t c;
       transport.readBytes(&c, 8);
-      return Variant((int64)ntohll(c));
+      return Variant((int64_t)ntohll(c));
     }
     case T_DOUBLE: {
       union {
@@ -452,7 +452,7 @@ void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
 }
 
 void f_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name,
-                                    int64 msgtype, CObjRef request_struct,
+                                    int64_t msgtype, CObjRef request_struct,
                                     int seqid, bool strict_write) {
 
   PHPOutputTransport transport(transportobj);

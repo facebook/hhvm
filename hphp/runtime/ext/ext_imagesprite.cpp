@@ -244,7 +244,7 @@ void Image::load_data_to_gd(int size, const void* data) {
 
 void Image::setOptions(Array options) {
   if (options.exists("padding_top")) {
-    int32 v = options["padding_top"].toInt32();
+    int32_t v = options["padding_top"].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_TOP] = 0;
     } else {
@@ -253,7 +253,7 @@ void Image::setOptions(Array options) {
   }
 
   if (options.exists("padding_right")) {
-    int32 v = options["padding_right"].toInt32();
+    int32_t v = options["padding_right"].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_RIGHT] = 0;
     } else {
@@ -262,7 +262,7 @@ void Image::setOptions(Array options) {
   }
 
   if (options.exists("padding_bottom")) {
-    int32 v = options["padding_bottom"].toInt32();
+    int32_t v = options["padding_bottom"].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_BOTTOM] = 0;
     } else {
@@ -271,7 +271,7 @@ void Image::setOptions(Array options) {
   }
 
   if (options.exists("padding_left")) {
-    int32 v = options["padding_left"].toInt32();
+    int32_t v = options["padding_left"].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_LEFT] = 0;
     } else {
@@ -433,7 +433,7 @@ void ImageFromHTTP::completed() {
       EVBUFFER_LENGTH(m_request->input_buffer),
       EVBUFFER_DATA(m_request->input_buffer));
   } else {
-    setError(String("Invalid Response code: ") + String((int64)code));
+    setError(String("Invalid Response code: ") + String((int64_t)code));
   }
   m_ev_group->complete(m_conn);
   evhttp_connection_free(m_conn);
@@ -984,7 +984,7 @@ void c_ImageSprite::map() {
 
 String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
                                CStrRef format /* = "png" */,
-                               int32 quality /* = 75 */) {
+                               int32_t quality /* = 75 */) {
   t_loadimages(true);
   map();
 

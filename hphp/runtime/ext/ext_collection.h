@@ -55,7 +55,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: void t_resize(CVarRef sz, CVarRef value);
   public: Object t_clear();
   public: bool t_isempty();
-  public: int64 t_count();
+  public: int64_t t_count();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_put(CVarRef key, CVarRef value);
@@ -65,7 +65,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: void t_reverse();
   public: void t_splice(CVarRef offset, CVarRef len = null,
                         CVarRef replacement = null);
-  public: int64 t_linearsearch(CVarRef search_value);
+  public: int64_t t_linearsearch(CVarRef search_value);
   public: void t_shuffle();
   public: Object t_getiterator();
   public: String t___tostring();
@@ -88,22 +88,22 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return ti_slice("vector", vec, offset, len);
   }
 
-  public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
+  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
 
-  public: TypedValue* at(int64 key) {
+  public: TypedValue* at(int64_t key) {
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
       return NULL;
     }
     return &m_data[key];
   }
-  public: TypedValue* get(int64 key) {
+  public: TypedValue* get(int64_t key) {
     if ((uint64_t)key >= (uint64_t)m_size) {
       return NULL;
     }
     return &m_data[key];
   }
-  public: void put(int64 key, TypedValue* val) {
+  public: void put(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
@@ -128,11 +128,11 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     tv->_count = 0;
     ++m_size;
   }
-  public: void resize(int64 sz, TypedValue* val);
-  public: bool contains(int64 key) {
+  public: void resize(int64_t sz, TypedValue* val);
+  public: bool contains(int64_t key) {
     return ((uint64_t)key < (uint64_t)m_size);
   }
-  public: void reserve(int64 sz);
+  public: void reserve(int64_t sz);
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -214,7 +214,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   friend class c_StableMap;
   friend class ArrayIter;
 
-  public: static const int32 KindOfTombstone = -1;
+  public: static const int32_t KindOfTombstone = -1;
 
   public: c_Map(VM::Class* cls = c_Map::s_cls);
   public: ~c_Map();
@@ -223,7 +223,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: Variant t___destruct();
   public: Object t_clear();
   public: bool t_isempty();
-  public: int64 t_count();
+  public: int64_t t_count();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_put(CVarRef key, CVarRef value);
@@ -253,16 +253,16 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     return ti_fromiterable("map", vec);
   }
 
-  public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
+  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
   public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
 
-  public: TypedValue* at(int64 key) {
+  public: TypedValue* at(int64_t key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  public: TypedValue* get(int64 key) {
+  public: TypedValue* get(int64_t key) {
     Bucket* p = find(key);
     if (p) return &p->data;
     return NULL;
@@ -278,7 +278,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     if (p) return &p->data;
     return NULL;
   }
-  public: void put(int64 key, TypedValue* val) {
+  public: void put(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
@@ -286,7 +286,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
-  public: void remove(int64 key) {
+  public: void remove(int64_t key) {
     ++m_versionNumber;
     erase(find(key));
   }
@@ -294,13 +294,13 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     ++m_versionNumber;
     erase(find(key->data(), key->size(), key->hash()));
   }
-  public: bool contains(int64 key) {
+  public: bool contains(int64_t key) {
     return find(key);
   }
   public: bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
-  public: void reserve(int64 sz);
+  public: void reserve(int64_t sz);
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -339,7 +339,7 @@ public:
      */
     TypedValue   data;
     union {
-      int64      ikey;
+      int64_t      ikey;
       StringData *skey;
     };
     inline bool hasStrKey() const { return data._count != 0; }
@@ -349,11 +349,11 @@ public:
       skey->incRefCount();
       data._count = int32_t(h) | 0x80000000;
     }
-    inline void setIntKey(int64 k) {
+    inline void setIntKey(int64_t k) {
       ikey = k;
       data._count = 0;
     }
-    inline int64 hashKey() const {
+    inline int64_t hashKey() const {
       return data._count == 0 ? ikey : data._count;
     }
     inline int32_t hash() const {
@@ -423,7 +423,7 @@ private:
   // instructions instead of imul when indexing into m_data
   Bucket* fetchBucket(Bucket* data, intptr_t slot) const {
     assert(sizeof(Bucket) == 24);
-    assert(sizeof(int64) == 8);
+    assert(sizeof(int64_t) == 8);
     assert(slot >= 0 && slot <= m_nLastSlot);
     intptr_t index = slot + (slot<<1);
     int64_t* ptr = (int64_t*)data;
@@ -434,13 +434,13 @@ private:
     return fetchBucket(m_data, slot);
   }
 
-  Bucket* find(int64 h) const;
+  Bucket* find(int64_t h) const;
   Bucket* find(const char* k, int len, strhash_t prehash) const;
-  Bucket* findForInsert(int64 h) const;
+  Bucket* findForInsert(int64_t h) const;
   Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
   Bucket* findForNewInsert(size_t h0) const;
 
-  bool update(int64 h, TypedValue* data);
+  bool update(int64_t h, TypedValue* data);
   bool update(StringData* key, TypedValue* data);
   void erase(Bucket* prev);
 
@@ -509,7 +509,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: Variant t___destruct();
   public: Object t_clear();
   public: bool t_isempty();
-  public: int64 t_count();
+  public: int64_t t_count();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_put(CVarRef key, CVarRef value);
@@ -539,10 +539,10 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     return ti_fromiterable("map", vec);
   }
 
-  public: static void throwOOB(int64 key) ATTRIBUTE_COLD;
+  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
   public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
 
-  public: TypedValue* at(int64 key) {
+  public: TypedValue* at(int64_t key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
@@ -554,7 +554,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     throwOOB(key);
     return NULL;
   }
-  public: TypedValue* get(int64 key) {
+  public: TypedValue* get(int64_t key) {
     Bucket* p = find(key);
     if (p != NULL) return &p->data;
     return NULL;
@@ -564,13 +564,13 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     if (p != NULL) return &p->data;
     return NULL;
   }
-  public: void put(int64 key, TypedValue* val) {
+  public: void put(int64_t key, TypedValue* val) {
     update(key, val);
   }
   public: void put(StringData* key, TypedValue* val) {
     update(key, val);
   }
-  public: void remove(int64 key) {
+  public: void remove(int64_t key) {
     ++m_versionNumber;
     erase(findForErase(key));
   }
@@ -578,13 +578,13 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     ++m_versionNumber;
     erase(findForErase(key->data(), key->size(), key->hash()));
   }
-  public: bool contains(int64 key) {
+  public: bool contains(int64_t key) {
     return find(key);
   }
   public: bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
-  public: void reserve(int64 sz);
+  public: void reserve(int64_t sz);
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -629,7 +629,7 @@ public:
      * read or write the _count field! */
     TypedValue data;
     union {
-      int64 ikey;
+      int64_t ikey;
       StringData* skey;
     };
     Bucket* pListNext;
@@ -643,11 +643,11 @@ public:
       skey->incRefCount();
       data._count = encodeHash(h);
     }
-    inline void setIntKey(int64 k) {
+    inline void setIntKey(int64_t k) {
       ikey = k;
       data._count = 0;
     }
-    inline int64 hashKey() const {
+    inline int64_t hashKey() const {
       return data._count == 0 ? ikey : data._count;
     }
     inline int32_t hash() const {
@@ -681,12 +681,12 @@ private:
   Bucket*          m_pListTail;
   Bucket**         m_arBuckets;
 
-  Bucket* find(int64 h) const;
+  Bucket* find(int64_t h) const;
   Bucket* find(const char* k, int len, strhash_t prehash) const;
-  Bucket** findForErase(int64 h) const;
+  Bucket** findForErase(int64_t h) const;
   Bucket** findForErase(const char* k, int len, strhash_t prehash) const;
 
-  bool update(int64 h, TypedValue* data);
+  bool update(int64_t h, TypedValue* data);
   bool update(StringData* key, TypedValue* data);
   void erase(Bucket** prev);
 
@@ -826,7 +826,7 @@ inline void collectionAppend(ObjectData* obj, TypedValue* val) {
 
 // Helpers for hphpc
 
-inline Variant& collectionOffsetGet(ObjectData* obj, int64 offset) {
+inline Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     c_Vector* vec = static_cast<c_Vector*>(obj);
@@ -893,7 +893,7 @@ inline Variant& collectionOffsetGet(ObjectData* obj, litstr offset) {
   return collectionOffsetGet(obj, Variant(offset));
 }
 
-inline void collectionOffsetSet(ObjectData* obj, int64 offset, CVarRef val) {
+inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
     tv = tv->m_data.pref->tv();
@@ -1050,7 +1050,7 @@ inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
   collectionAppend(obj, tv);
 }
 
-inline int64 collectionSize(ObjectData* obj) {
+inline int64_t collectionSize(ObjectData* obj) {
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     return static_cast<c_Vector*>(obj)->t_count();
@@ -1064,7 +1064,7 @@ inline int64 collectionSize(ObjectData* obj) {
   }
 }
 
-inline void collectionReserve(ObjectData* obj, int64 sz) {
+inline void collectionReserve(ObjectData* obj, int64_t sz) {
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
     static_cast<c_Vector*>(obj)->reserve(sz);
@@ -1080,7 +1080,7 @@ inline void collectionReserve(ObjectData* obj, int64 sz) {
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 void collectionUnserialize(ObjectData* obj,
                            VariableUnserializer* uns,
-                           int64 sz,
+                           int64_t sz,
                            char type);
 
 inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
@@ -1122,7 +1122,7 @@ public:
     collectionOffsetAppend(m_data, variant(v));
     return *this;
   }
-  CollectionInit &set(int64 name, CVarRef v) {
+  CollectionInit &set(int64_t name, CVarRef v) {
     collectionOffsetSet(m_data, name, v);
     return *this;
   }

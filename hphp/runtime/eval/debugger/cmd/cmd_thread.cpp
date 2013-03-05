@@ -172,7 +172,7 @@ void CmdThread::debuggerInfo(InfoVec &info) {
   Add(info, "Binary",     Process::GetAppName());
   Add(info, "Version",    Process::GetAppVersion());
   Add(info, "Process ID", FormatNumber("%lld", Process::GetProcessId()));
-  Add(info, "Thread ID",  FormatNumber("0x%llx", (int64)Process::GetThreadId()));
+  Add(info, "Thread ID",  FormatNumber("0x%llx", (int64_t)Process::GetThreadId()));
 }
 
 bool CmdThread::onServer(DebuggerProxy *proxy) {

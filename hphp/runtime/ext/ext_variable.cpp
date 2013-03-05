@@ -160,7 +160,7 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
                               "this function is called.");
 }
 
-int64 f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
+int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
                 CStrRef prefix /* = "" */) {
   if (hhvm) {
     bool reference = extract_type & EXTR_REFS;

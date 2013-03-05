@@ -851,15 +851,15 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
 
   for (; m_acIndex < (int)m_acLists.size(); m_acIndex++) {
     const char **list = m_acLists[m_acIndex];
-    if ((int64)list == AutoCompleteFileNames) {
+    if ((int64_t)list == AutoCompleteFileNames) {
       char *p = rl_filename_completion_function(text, ++m_acPos);
       if (p) return p;
-    } else if ((int64)list >= 0 && (int64)list < AutoCompleteCount) {
+    } else if ((int64_t)list >= 0 && (int64_t)list < AutoCompleteCount) {
       if (m_acLiveListsDirty) {
         updateLiveLists();
         assert(!m_acLiveListsDirty);
       }
-      char *p = getCompletion((*m_acLiveLists)[(int64)list], text);
+      char *p = getCompletion((*m_acLiveLists)[(int64_t)list], text);
       if (p) return p;
     } else {
       for (const char *p = list[++m_acPos]; p; p = list[++m_acPos]) {
@@ -1853,7 +1853,7 @@ void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
   m_threads = threads;
   for (unsigned int i = 0; i < m_threads.size(); i++) {
     DThreadInfoPtr thread = m_threads[i];
-    std::map<int64, int>::const_iterator iter =
+    std::map<int64_t, int>::const_iterator iter =
       m_threadIdMap.find(thread->m_id);
     if (iter != m_threadIdMap.end()) {
       m_threads[i]->m_index = iter->second;
@@ -1923,7 +1923,7 @@ void DebuggerClient::setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints) {
   m_matched = breakpoints;
 }
 
-void DebuggerClient::setCurrentLocation(int64 threadId,
+void DebuggerClient::setCurrentLocation(int64_t threadId,
                                         BreakPointInfoPtr breakpoint) {
   m_threadId = threadId;
   m_breakpoint = breakpoint;
@@ -2149,7 +2149,7 @@ void DebuggerClient::usageLog(const std::string& cmd, const std::string& line) {
   char buf[MAX_LINE];
   int len = snprintf(buf, MAX_LINE, "%s %" PRId64 " %" PRId64 " %s #### %s",
                      m_usageLogHeader.c_str(),
-                     (int64)tp.tv_sec, (int64)tp.tv_nsec,
+                     (int64_t)tp.tv_sec, (int64_t)tp.tv_nsec,
                      cmd.c_str(), line.c_str());
   len = len >= MAX_LINE ? MAX_LINE - 1: len;
   buf[len] = '\n';

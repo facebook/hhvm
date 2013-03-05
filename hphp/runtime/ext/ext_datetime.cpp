@@ -36,20 +36,20 @@ const StaticString q_DateTime$$RFC3339(LITSTR_INIT("Y-m-d\\TH:i:sP"));
 const StaticString q_DateTime$$RSS(LITSTR_INIT("D, d M Y H:i:s O"));
 const StaticString q_DateTime$$W3C(LITSTR_INIT("Y-m-d\\TH:i:sP"));
 
-const int64 q_DateTimeZone$$AFRICA = 1;
-const int64 q_DateTimeZone$$AMERICA = 2;
-const int64 q_DateTimeZone$$ANTARCTICA = 4;
-const int64 q_DateTimeZone$$ARCTIC = 8;
-const int64 q_DateTimeZone$$ASIA = 16;
-const int64 q_DateTimeZone$$ATLANTIC = 32;
-const int64 q_DateTimeZone$$AUSTRALIA = 64;
-const int64 q_DateTimeZone$$EUROPE = 128;
-const int64 q_DateTimeZone$$INDIAN = 256;
-const int64 q_DateTimeZone$$PACIFIC = 512;
-const int64 q_DateTimeZone$$UTC = 1024;
-const int64 q_DateTimeZone$$ALL = 2047;
-const int64 q_DateTimeZone$$ALL_WITH_BC = 4095;
-const int64 q_DateTimeZone$$PER_COUNTRY = 4096;
+const int64_t q_DateTimeZone$$AFRICA = 1;
+const int64_t q_DateTimeZone$$AMERICA = 2;
+const int64_t q_DateTimeZone$$ANTARCTICA = 4;
+const int64_t q_DateTimeZone$$ARCTIC = 8;
+const int64_t q_DateTimeZone$$ASIA = 16;
+const int64_t q_DateTimeZone$$ATLANTIC = 32;
+const int64_t q_DateTimeZone$$AUSTRALIA = 64;
+const int64_t q_DateTimeZone$$EUROPE = 128;
+const int64_t q_DateTimeZone$$INDIAN = 256;
+const int64_t q_DateTimeZone$$PACIFIC = 512;
+const int64_t q_DateTimeZone$$UTC = 1024;
+const int64_t q_DateTimeZone$$ALL = 2047;
+const int64_t q_DateTimeZone$$ALL_WITH_BC = 4095;
+const int64_t q_DateTimeZone$$PER_COUNTRY = 4096;
 
 ///////////////////////////////////////////////////////////////////////////////
 // methods
@@ -102,11 +102,11 @@ Array c_DateTime::ti_getlasterrors(const char* cls ) {
   return ret;
 }
 
-int64 c_DateTime::t_getoffset() {
+int64_t c_DateTime::t_getoffset() {
   return m_dt->offset();
 }
 
-int64 c_DateTime::t_gettimestamp() {
+int64_t c_DateTime::t_gettimestamp() {
   bool err = false;
   return m_dt->toTimeStamp(err);
 }
@@ -124,22 +124,22 @@ Object c_DateTime::t_modify(CStrRef modify) {
   return this;
 }
 
-Object c_DateTime::t_setdate(int64 year, int64 month, int64 day) {
+Object c_DateTime::t_setdate(int64_t year, int64_t month, int64_t day) {
   m_dt->setDate(year, month, day);
   return this;
 }
 
-Object c_DateTime::t_setisodate(int64 year, int64 week, int64 day /*= 1*/) {
+Object c_DateTime::t_setisodate(int64_t year, int64_t week, int64_t day /*= 1*/) {
   m_dt->setISODate(year, week, day);
   return this;
 }
 
-Object c_DateTime::t_settime(int64 hour, int64 minute, int64 second /*= 0*/) {
+Object c_DateTime::t_settime(int64_t hour, int64_t minute, int64_t second /*= 0*/) {
   m_dt->setTime(hour, minute, second);
   return this;
 }
 
-Object c_DateTime::t_settimestamp(int64 unixtimestamp) {
+Object c_DateTime::t_settimestamp(int64_t unixtimestamp) {
   m_dt->fromTimeStamp(unixtimestamp, false);
   return this;
 }
@@ -186,9 +186,9 @@ String c_DateTimeZone::t_getname() {
   return m_tz->name();
 }
 
-int64 c_DateTimeZone::t_getoffset(CObjRef datetime) {
+int64_t c_DateTimeZone::t_getoffset(CObjRef datetime) {
   bool error;
-  int64 ts = c_DateTime::unwrap(datetime)->toTimeStamp(error);
+  int64_t ts = c_DateTime::unwrap(datetime)->toTimeStamp(error);
   return m_tz->offset(ts);
 }
 

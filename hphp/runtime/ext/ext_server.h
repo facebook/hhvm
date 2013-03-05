@@ -25,9 +25,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64 k_PAGELET_NOT_READY;
-extern const int64 k_PAGELET_READY;
-extern const int64 k_PAGELET_DONE;
+extern const int64_t k_PAGELET_NOT_READY;
+extern const int64_t k_PAGELET_READY;
+extern const int64_t k_PAGELET_DONE;
 
 enum PageletStatusType {
   PAGELET_NOT_READY,
@@ -41,19 +41,19 @@ bool f_dangling_server_proxy_old_request();
 bool f_dangling_server_proxy_new_request(CStrRef host);
 bool f_pagelet_server_is_enabled();
 Object f_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string, CArrRef files = null_array);
-int64 f_pagelet_server_task_status(CObjRef task);
-String f_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code, int64 timeout_ms);
+int64_t f_pagelet_server_task_status(CObjRef task);
+String f_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code, int64_t timeout_ms);
 void f_pagelet_server_flush();
-bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64 timeout_ms, CStrRef host = "localhost");
+bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64_t timeout_ms, CStrRef host = "localhost");
 bool f_xbox_post_message(CStrRef msg, CStrRef host = "localhost");
 Object f_xbox_task_start(CStrRef message);
 bool f_xbox_task_status(CObjRef task);
-int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret);
+int64_t f_xbox_task_result(CObjRef task, int64_t timeout_ms, VRefParam ret);
 Variant f_xbox_process_call_message(CStrRef msg);
-int64 f_xbox_get_thread_timeout();
+int64_t f_xbox_get_thread_timeout();
 void f_xbox_set_thread_timeout(int timeout);
 void f_xbox_schedule_thread_reset();
-int64 f_xbox_get_thread_time();
+int64_t f_xbox_get_thread_time();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

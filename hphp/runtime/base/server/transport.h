@@ -87,7 +87,7 @@ public:
   const timespec &getQueueTime() const { return m_queueTime;}
   const timespec &getWallTime() const { return m_wallTime;}
   const timespec &getCpuTime() const { return m_cpuTime;}
-  const int64 &getInstructions() const { return m_instructions;}
+  const int64_t &getInstructions() const { return m_instructions;}
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -97,7 +97,7 @@ public:
    */
   virtual const char *getUrl() = 0;
   virtual const char *getRemoteHost() = 0;
-  virtual uint16 getRemotePort() = 0;
+  virtual uint16_t getRemotePort() = 0;
 
   /**
    * POST request's data.
@@ -165,7 +165,7 @@ public:
   /**
    * Set cookie response header.
    */
-  bool setCookie(CStrRef name, CStrRef value, int64 expire = 0,
+  bool setCookie(CStrRef name, CStrRef value, int64_t expire = 0,
                  CStrRef path = "", CStrRef domain = "", bool secure = false,
                  bool httponly = false, bool encode_url = true);
 
@@ -332,11 +332,11 @@ public:
 
   int getResponseTotalSize() const { return m_responseTotalSize; }
   int getResponseSentSize() const { return m_responseSentSize; }
-  int64 getFlushTime() const { return m_flushTimeUs; }
+  int64_t getFlushTime() const { return m_flushTimeUs; }
   int getLastChunkSentSize();
   void getChunkSentSizes(Array &ret);
   void onFlushBegin(int totalSize) { m_responseTotalSize = totalSize; }
-  void onFlushProgress(int writtenSize, int64 delayUs);
+  void onFlushProgress(int writtenSize, int64_t delayUs);
   void onChunkedProgress(int writtenSize);
 
   void setThreadType(ThreadType type) { m_threadType = type;}
@@ -365,7 +365,7 @@ protected:
   timespec m_wallTime;
   timespec m_cpuTime;
 
-  int64 m_instructions;
+  int64_t m_instructions;
 
   // input
   char *m_url;
@@ -389,7 +389,7 @@ protected:
   int m_responseSize;
   int m_responseTotalSize; // including added headers
   int m_responseSentSize;
-  int64 m_flushTimeUs;
+  int64_t m_flushTimeUs;
 
   std::vector<int> m_chunksSentSizes;
 

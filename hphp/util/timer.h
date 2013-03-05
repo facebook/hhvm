@@ -43,30 +43,30 @@ public:
   Timer(Type type, const char *name = nullptr, ReportType r = Log);
   ~Timer();
 
-  static int64 GetCurrentTimeMicros();
+  static int64_t GetCurrentTimeMicros();
   const char *getName() const;
-  int64 getMicroSeconds() const;
+  int64_t getMicroSeconds() const;
   void report() const;
 
 private:
   Type m_type;
   ReportType m_report;
   std::string m_name;
-  int64 m_start;
+  int64_t m_start;
 
-  int64 measure() const;
+  int64_t measure() const;
 };
 
 class SlowTimer {
 public:
-  SlowTimer(int64 msThreshold, const char *location, const char *info);
+  SlowTimer(int64_t msThreshold, const char *location, const char *info);
   ~SlowTimer();
 
-  int64 getTime() const;
+  int64_t getTime() const;
 
 private:
   Timer m_timer;
-  int64 m_msThreshold;
+  int64_t m_msThreshold;
   std::string m_location;
   std::string m_info;
 };

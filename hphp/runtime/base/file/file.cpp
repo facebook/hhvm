@@ -159,7 +159,7 @@ int File::getc() {
   }
 
   char buffer[1];
-  int64 len = readImpl(buffer, 1);
+  int64_t len = readImpl(buffer, 1);
   if (len != 1) {
     return EOF;
   }
@@ -167,7 +167,7 @@ int File::getc() {
   return (int)(unsigned char)buffer[0];
 }
 
-String File::read(int64 length) {
+String File::read(int64_t length) {
   if (length <= 0) {
     raise_notice("Invalid length %" PRId64, length);
     return "";
@@ -175,8 +175,8 @@ String File::read(int64 length) {
 
   String s = String(length, ReserveString);
   char *ret = s.mutableSlice().ptr;
-  int64 copied = 0;
-  int64 avail = m_writepos - m_readpos;
+  int64_t copied = 0;
+  int64_t avail = m_writepos - m_readpos;
 
   while (avail < length && !eof()) {
     if (m_buffer == nullptr) {
@@ -201,7 +201,7 @@ String File::read(int64 length) {
 
   avail = m_writepos - m_readpos;
   if (avail > 0) {
-    int64 n = length < avail ? length : avail;
+    int64_t n = length < avail ? length : avail;
     memcpy(ret + copied, m_buffer + m_readpos, n);
     m_readpos += n;
     copied += n;
@@ -211,9 +211,9 @@ String File::read(int64 length) {
   return s.setSize(copied);
 }
 
-int64 File::write(CStrRef data, int64 length /* = 0 */) {
+int64_t File::write(CStrRef data, int64_t length /* = 0 */) {
   if (seekable()) {
-    int64 offset = m_readpos - m_writepos;
+    int64_t offset = m_readpos - m_writepos;
     m_readpos = m_writepos = 0; // invalidating read buffer
     seek(offset, SEEK_CUR);
   }
@@ -221,7 +221,7 @@ int64 File::write(CStrRef data, int64 length /* = 0 */) {
     length = data.size();
   }
   if (length) {
-    int64 written = writeImpl(data.data(), length);
+    int64_t written = writeImpl(data.data(), length);
     m_position += written;
     return written;
   }
@@ -236,7 +236,7 @@ int File::putc(char c) {
   return ret;
 }
 
-bool File::seek(int64 offset, int whence /* = SEEK_SET */) {
+bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
   if (whence != SEEK_CUR) {
     throw NotSupportedException(__func__, "cannot seek other than SEEK_CUR");
   }
@@ -244,7 +244,7 @@ bool File::seek(int64 offset, int whence /* = SEEK_SET */) {
     throw NotSupportedException(__func__, "cannot seek backwards");
   }
   if (offset > 0) {
-    int64 avail = m_writepos - m_readpos;
+    int64_t avail = m_writepos - m_readpos;
     assert(avail >= 0);
     if (avail >= offset) {
       m_readpos += offset;
@@ -257,7 +257,7 @@ bool File::seek(int64 offset, int whence /* = SEEK_SET */) {
 
     while (offset) {
       char tmp[1024];
-      int64 nread = offset > (int64)sizeof(tmp) ? (int64)sizeof(tmp) : offset;
+      int64_t nread = offset > (int64_t)sizeof(tmp) ? (int64_t)sizeof(tmp) : offset;
       nread = readImpl(tmp, nread);
       if (nread <= 0) {
         return false;
@@ -268,7 +268,7 @@ bool File::seek(int64 offset, int whence /* = SEEK_SET */) {
   return true;
 }
 
-int64 File::tell() {
+int64_t File::tell() {
   throw NotSupportedException(__func__, "cannot tell");
 }
 
@@ -284,7 +284,7 @@ bool File::flush() {
   return true;
 }
 
-bool File::truncate(int64 size) {
+bool File::truncate(int64_t size) {
   throw NotSupportedException(__func__, "cannot truncate");
 }
 
@@ -324,14 +324,14 @@ Array File::getMetaData() {
 ///////////////////////////////////////////////////////////////////////////////
 // utility functions
 
-String File::readLine(int64 maxlen /* = 0 */) {
+String File::readLine(int64_t maxlen /* = 0 */) {
   size_t current_buf_size = 0;
   size_t total_copied = 0;
   char *ret = nullptr;
   for (;;) {
-    int64 avail = m_writepos - m_readpos;
+    int64_t avail = m_writepos - m_readpos;
     if (avail > 0) {
-      int64 cpysz = 0;
+      int64_t cpysz = 0;
       bool done = false;
 
       char *readptr = m_buffer + m_readpos;
@@ -400,7 +400,7 @@ String File::readLine(int64 maxlen /* = 0 */) {
   return String(ret, total_copied, AttachString);
 }
 
-String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
+String File::readRecord(CStrRef delimiter, int64_t maxlen /* = 0 */) {
   if (eof() && m_writepos == m_readpos) {
     return empty_string;
   }
@@ -409,7 +409,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
     maxlen = CHUNK_SIZE;
   }
 
-  int64 avail = m_writepos - m_readpos;
+  int64_t avail = m_writepos - m_readpos;
   if (m_buffer == nullptr) {
     m_buffer = (char *)malloc(CHUNK_SIZE * 3);
   }
@@ -424,7 +424,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
     m_readpos = 0;
   }
 
-  int64 toread;
+  int64_t toread;
   const char *e;
   bool skip = false;
   if (delimiter.empty()) {
@@ -434,7 +434,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
       e = (const char *)memchr(m_buffer + m_readpos, delimiter.charAt(0),
                                m_writepos - m_readpos);
     } else {
-      int64 pos = string_find(m_buffer + m_readpos, m_writepos - m_readpos,
+      int64_t pos = string_find(m_buffer + m_readpos, m_writepos - m_readpos,
                               delimiter.data(), delimiter.size(), 0, true);
       if (pos >= 0) {
         e = m_buffer + m_readpos + pos;
@@ -473,11 +473,11 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
   return empty_string;
 }
 
-int64 File::print() {
-  int64 total = 0;
+int64_t File::print() {
+  int64_t total = 0;
   while (true) {
     char buffer[1024];
-    int64 len = readImpl(buffer, 1024);
+    int64_t len = readImpl(buffer, 1024);
     if (len == 0) break;
     total += len;
     g_context->write(buffer, len);
@@ -485,7 +485,7 @@ int64 File::print() {
   return total;
 }
 
-int64 File::printf(CStrRef format, CArrRef args) {
+int64_t File::printf(CStrRef format, CArrRef args) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), args, &len);
   return write(String(output, len, AttachString));
@@ -494,7 +494,7 @@ int64 File::printf(CStrRef format, CArrRef args) {
 ///////////////////////////////////////////////////////////////////////////////
 // csv functions
 
-int64 File::writeCSV(CArrRef fields, char delimiter_char /* = ',' */,
+int64_t File::writeCSV(CArrRef fields, char delimiter_char /* = ',' */,
                      char enclosure_char /* = '"' */) {
   int line = 0;
   int count = fields.size();
@@ -558,7 +558,7 @@ static const char *lookup_trailing_spaces(const char *ptr, int len) {
   return ptr;
 }
 
-Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
+Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
                     char enclosure_char /* = '"' */) {
   String line = readLine(length);
   if (line.empty()) {
@@ -567,13 +567,13 @@ Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
 
   String new_line;
   const char *buf = line.data();
-  int64 buf_len = line.size();
+  int64_t buf_len = line.size();
 
   char *temp, *tptr, *line_end, *limit;
   const char *bptr;
   const char escape_char = '\\';
 
-  int64 temp_len, line_end_len;
+  int64_t temp_len, line_end_len;
   bool first_field = true;
 
   /* Now into new section that parses buf for delimiter/enclosure fields */
@@ -651,7 +651,7 @@ Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
 
               new_line = readLine(length);
               const char *new_buf = new_line.data();
-              int64 new_len = new_line.size();
+              int64_t new_len = new_line.size();
               if (new_len == 0) {
                 /* we've got an unterminated enclosure,
                  * assign all the data from the start of

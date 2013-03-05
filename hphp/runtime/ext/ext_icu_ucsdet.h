@@ -72,7 +72,7 @@ class c_EncodingMatch : public ExtObjectData {
   public: void t___construct();
   public: bool t_isvalid();
   public: String t_getencoding();
-  public: int64 t_getconfidence();
+  public: int64_t t_getconfidence();
   public: String t_getlanguage();
   public: String t_getutf8();
 

@@ -43,7 +43,7 @@ private:
   typedef std::vector<StatementPtrWithPos> StatementPtrWithPosVec;
   typedef boost::shared_ptr<StatementPtrWithPosVec> 
     StatementPtrWithPosVecPtr;
-	typedef std::map<uint64, StatementPtrWithPosVecPtr> 
+	typedef std::map<uint64_t, StatementPtrWithPosVecPtr> 
     MapIntToStatementPtrWithPosVec; 
   ExpressionPtr m_exp;
   StatementListPtr m_cases;

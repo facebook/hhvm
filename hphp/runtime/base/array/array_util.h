@@ -80,9 +80,9 @@ public:
    * Create an array containing the range of integers or characters from low
    * to high (inclusive).
    */
-  static Variant Range(unsigned char low, unsigned char high, int64 step = 1);
+  static Variant Range(unsigned char low, unsigned char high, int64_t step = 1);
   static Variant Range(double low, double high, double step = 1.0);
-  static Variant Range(double low, double high, int64 step = 1);
+  static Variant Range(double low, double high, int64_t step = 1);
 
   /**
    * Conversion between HDF and array.
@@ -96,12 +96,12 @@ public:
   /**
    * Computes the sum of the array entries as int64 or double.
    */
-  static DataType Sum(CArrRef input, int64 *isum, double *dsum);
+  static DataType Sum(CArrRef input, int64_t *isum, double *dsum);
 
   /**
    * Computes the product of the array entries as int64 or double.
    */
-  static DataType Product(CArrRef input, int64 *iprod, double *dprod);
+  static DataType Product(CArrRef input, int64_t *iprod, double *dprod);
 
   /**
    * Return the value as key and the frequency of that value in input

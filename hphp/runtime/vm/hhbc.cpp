@@ -215,7 +215,7 @@ T decodeImm(const unsigned char** immPtr) {
   return val;
 }
 
-int64 decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode) {
+int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode) {
   switch (mcode) {
     case MEL:
     case MPL:
@@ -223,10 +223,10 @@ int64 decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode) {
 
     case MET:
     case MPT:
-      return decodeImm<int32>(immPtr);
+      return decodeImm<int32_t>(immPtr);
 
     case MEI:
-      return decodeImm<int64>(immPtr);
+      return decodeImm<int64_t>(immPtr);
 
     default:
       not_reached();
@@ -736,7 +736,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
                      memberCodeString(MemberCode(immVal)) : "?");       \
       it += sizeof(uchar);                                              \
       if (memberCodeHasImm(MemberCode(immVal))) {                       \
-        int64 imm = decodeMemberCodeImm(&it, MemberCode(immVal));       \
+        int64_t imm = decodeMemberCodeImm(&it, MemberCode(immVal));       \
         out << ':';                                                     \
         if (memberCodeImmIsString(MemberCode(immVal)) && u) {           \
           const StringData* str = u->lookupLitstrId(imm);               \
@@ -798,7 +798,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
 #define H_IVA READIVA()
-#define H_I64A READ(int64)
+#define H_I64A READ(int64_t)
 #define H_HA READV()
 #define H_IA READV()
 #define H_DA READ(double)

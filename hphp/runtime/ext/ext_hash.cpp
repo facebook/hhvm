@@ -336,7 +336,7 @@ bool f_hash_update_file(CObjRef init_context, CStrRef filename,
   return true;
 }
 
-int64 f_hash_update_stream(CObjRef context, CObjRef handle,
+int64_t f_hash_update_stream(CObjRef context, CObjRef handle,
                          int length /* = -1 */) {
   HashContext *hash = context.getTyped<HashContext>();
   int didread = 0;
@@ -374,7 +374,7 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
   return StringUtil::HexEncode(raw);
 }
 
-int64 f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
+int64_t f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
   len = std::max(std::min(len, key.size()), 0);
   return furc_hash(key, len, nPart);
 }
@@ -383,7 +383,7 @@ bool f_furchash_hphp_ext_supported() {
   return true;
 }
 
-int64 f_hphp_murmurhash(CStrRef key, int len, int seed) {
+int64_t f_hphp_murmurhash(CStrRef key, int len, int seed) {
   len = std::max(std::min(len, key.size()), 0);
   return murmur_hash_64A(key, len, seed);
 }

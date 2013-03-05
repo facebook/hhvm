@@ -48,7 +48,7 @@ template<KeyType kt>
 struct KeyTypeTraits {};
 template<> struct KeyTypeTraits<AnyKey> {
   typedef CVarRef valType;
-  typedef int64 rawType; // This is never actually used but it's
+  typedef int64_t rawType; // This is never actually used but it's
                          // needed to keep the compiler happy
 };
 template<> struct KeyTypeTraits<StrKey> {
@@ -56,8 +56,8 @@ template<> struct KeyTypeTraits<StrKey> {
   typedef StringData* rawType;
 };
 template<> struct KeyTypeTraits<IntKey> {
-  typedef int64 valType;
-  typedef int64 rawType;
+  typedef int64_t valType;
+  typedef int64_t rawType;
 };
 
 static inline DataType keyDataType(KeyType t) {
@@ -73,8 +73,8 @@ static inline DataType keyDataType(KeyType t) {
 template<KeyType kt>
 inline typename KeyTypeTraits<kt>::valType keyAsValue(TypedValue* key);
 template<>
-inline int64 keyAsValue<IntKey>(TypedValue* key) {
-  return reinterpret_cast<int64>(key);
+inline int64_t keyAsValue<IntKey>(TypedValue* key) {
+  return reinterpret_cast<int64_t>(key);
 }
 template<>
 inline CVarRef keyAsValue<AnyKey>(TypedValue* key) {
@@ -99,7 +99,7 @@ template<KeyType kt>
 inline void initScratchKey(TypedValue& tv, TypedValue*& key) {
   if (kt != AnyKey) {
     tv.m_type = keyDataType(kt);
-    tv.m_data.num = reinterpret_cast<int64>(key);
+    tv.m_data.num = reinterpret_cast<int64_t>(key);
     key = &tv;
   }
 }
@@ -148,14 +148,14 @@ static inline void opPre(TypedValue*& base, DataType& type) {
 }
 
 static inline TypedValue* ElemArrayRawKey(ArrayData* base,
-                                          int64 key) {
+                                          int64_t key) {
   TypedValue* result = base->nvGet(key);
   return result ? result : (TypedValue*)&null_variant;
 }
 
 static inline TypedValue* ElemArrayRawKey(ArrayData* base,
                                           StringData* key) {
-  int64 n;
+  int64_t n;
   TypedValue* result = !key->isStrictlyInteger(n) ? base->nvGet(key) :
                        base->nvGet(n);
   return result ? result : (TypedValue*)&null_variant;
@@ -223,14 +223,14 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     if (baseStrOff) {
       raise_error("Cannot use string offset as an array");
     }
-    int64 x;
+    int64_t x;
     if (keyType == IntKey) {
-      x = reinterpret_cast<int64>(key);
+      x = reinterpret_cast<int64_t>(key);
     } else if (keyType == StrKey) {
       x = reinterpret_cast<StringData*>(key)->toInt64(10);
     } else {
       x = IS_INT_TYPE(key->m_type) ? key->m_data.num
-        : int64(tvCellAsCVarRef(key));
+        : int64_t(tvCellAsCVarRef(key));
     }
     if (x < 0 || x >= base->m_data.pstr->size()) {
       if (warn) {
@@ -525,7 +525,7 @@ static inline void SetElemNumberish(Cell* value) {
 }
 
 static inline ArrayData* SetElemArrayRawKey(ArrayData* a,
-                                            int64 key,
+                                            int64_t key,
                                             Cell* value,
                                             bool copy) {
   return a->set(key, tvCellAsCVarRef(value), copy);
@@ -535,7 +535,7 @@ static inline ArrayData* SetElemArrayRawKey(ArrayData* a,
                                             StringData* key,
                                             Cell* value,
                                             bool copy) {
-  int64 n;
+  int64_t n;
   if (key->isStrictlyInteger(n)) {
     return a->set(n, tvCellAsCVarRef(value), copy);
   } else {
@@ -613,7 +613,7 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
       SetElemEmptyish(base, key, value);
     } else {
       // Convert key to string offset.
-      int64 x;
+      int64_t x;
       {
         TypedValue tv;
         tvDup(key, &tv);
@@ -628,7 +628,7 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
       }
       // Compute how long the resulting string will be. Type needs
       // to agree with x.
-      int64 slen;
+      int64_t slen;
       if (x >= baseLen) {
         slen = x + 1;
       } else {
@@ -1143,14 +1143,14 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
 }
 
-static inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, int64 key,
+static inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, int64_t key,
                                               bool copy) {
   return a->remove(key, copy);
 }
 
 static inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
                                               bool copy) {
-  int64 n;
+  int64_t n;
   if (!key->isStrictlyInteger(n)) {
     return a->remove(StrNR(key), copy);
   } else {
@@ -1361,7 +1361,7 @@ static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
     initScratchKey<keyType>(scratch, key);
     tvDup(key, &tv);
     tvCastToInt64InPlace(&tv);
-    int64 x = tv.m_data.num;
+    int64_t x = tv.m_data.num;
     if (x < 0 || x >= base->m_data.pstr->size()) {
       return useEmpty;
     }

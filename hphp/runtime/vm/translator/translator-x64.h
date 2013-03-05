@@ -202,7 +202,7 @@ public:
   int m_curLine;
   litstr m_curFunc;
 private:
-  int64 m_createdTime;
+  int64_t m_createdTime;
 
   struct PendingFixup {
     TCA m_tca;
@@ -756,7 +756,7 @@ private:
              bool writeType);
   void fill(const Location& loc, PhysReg reg);
   void fillByMov(PhysReg src, PhysReg dst);
-  void loadImm(int64 immVal, PhysReg reg);
+  void loadImm(int64_t immVal, PhysReg reg);
   void poison(PhysReg dest);
 
 public:

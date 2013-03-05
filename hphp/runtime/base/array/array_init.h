@@ -103,7 +103,7 @@ public:
     return *this;
   }
 
-  ArrayInit &set(int64 name, CVarRef v, bool keyConverted = false) {
+  ArrayInit &set(int64_t name, CVarRef v, bool keyConverted = false) {
     m_data->set(name, v, false);
     return *this;
   }
@@ -194,7 +194,7 @@ public:
     return *this;
   }
 
-  ArrayInit &add(int64 name, CVarRef v, bool keyConverted = false) {
+  ArrayInit &add(int64_t name, CVarRef v, bool keyConverted = false) {
     m_data->add(name, v, false);
     return *this;
   }
@@ -237,7 +237,7 @@ public:
     return *this;
   }
 
-  ArrayInit &setRef(int64 name, CVarRef v, bool keyConverted = false) {
+  ArrayInit &setRef(int64_t name, CVarRef v, bool keyConverted = false) {
     m_data->setRef(name, v, false);
     return *this;
   }

@@ -61,14 +61,14 @@ class c_DateTime : public ExtObjectData {
   public: static Array t_getlasterrors() {
     return ti_getlasterrors("datetime");
   }
-  public: int64 t_getoffset();
-  public: int64 t_gettimestamp();
+  public: int64_t t_getoffset();
+  public: int64_t t_gettimestamp();
   public: Variant t_gettimezone();
   public: Object t_modify(CStrRef modify);
-  public: Object t_setdate(int64 year, int64 month, int64 day);
-  public: Object t_setisodate(int64 year, int64 week, int64 day = 1);
-  public: Object t_settime(int64 hour, int64 minute, int64 second = 0);
-  public: Object t_settimestamp(int64 unixtimestamp);
+  public: Object t_setdate(int64_t year, int64_t month, int64_t day);
+  public: Object t_setisodate(int64_t year, int64_t week, int64_t day = 1);
+  public: Object t_settime(int64_t hour, int64_t minute, int64_t second = 0);
+  public: Object t_settimestamp(int64_t unixtimestamp);
   public: Object t_settimezone(CObjRef timezone);
   public: Object t_sub(CObjRef interval);
 
@@ -97,20 +97,20 @@ class c_DateTime : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
-extern const int64 q_DateTimeZone$$AFRICA;
-extern const int64 q_DateTimeZone$$AMERICA;
-extern const int64 q_DateTimeZone$$ANTARCTICA;
-extern const int64 q_DateTimeZone$$ARCTIC;
-extern const int64 q_DateTimeZone$$ASIA;
-extern const int64 q_DateTimeZone$$ATLANTIC;
-extern const int64 q_DateTimeZone$$AUSTRALIA;
-extern const int64 q_DateTimeZone$$EUROPE;
-extern const int64 q_DateTimeZone$$INDIAN;
-extern const int64 q_DateTimeZone$$PACIFIC;
-extern const int64 q_DateTimeZone$$UTC;
-extern const int64 q_DateTimeZone$$ALL;
-extern const int64 q_DateTimeZone$$ALL_WITH_BC;
-extern const int64 q_DateTimeZone$$PER_COUNTRY;
+extern const int64_t q_DateTimeZone$$AFRICA;
+extern const int64_t q_DateTimeZone$$AMERICA;
+extern const int64_t q_DateTimeZone$$ANTARCTICA;
+extern const int64_t q_DateTimeZone$$ARCTIC;
+extern const int64_t q_DateTimeZone$$ASIA;
+extern const int64_t q_DateTimeZone$$ATLANTIC;
+extern const int64_t q_DateTimeZone$$AUSTRALIA;
+extern const int64_t q_DateTimeZone$$EUROPE;
+extern const int64_t q_DateTimeZone$$INDIAN;
+extern const int64_t q_DateTimeZone$$PACIFIC;
+extern const int64_t q_DateTimeZone$$UTC;
+extern const int64_t q_DateTimeZone$$ALL;
+extern const int64_t q_DateTimeZone$$ALL_WITH_BC;
+extern const int64_t q_DateTimeZone$$PER_COUNTRY;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DateTimeZone);
 class c_DateTimeZone : public ExtObjectData {
@@ -123,7 +123,7 @@ class c_DateTimeZone : public ExtObjectData {
   public: void t___construct(CStrRef timezone);
   public: Array t_getlocation();
   public: String t_getname();
-  public: int64 t_getoffset(CObjRef datetime);
+  public: int64_t t_getoffset(CObjRef datetime);
   public: Array t_gettransitions();
   public: static Array ti_listabbreviations(const char* cls );
   public: static Array t_listabbreviations() {
@@ -216,7 +216,7 @@ inline Variant f_microtime(bool get_as_float = false) {
   return TimeStamp::CurrentMicroTime();
 }
 
-inline int64 f_time() {
+inline int64_t f_time() {
   return time(0);
 }
 
@@ -224,7 +224,7 @@ inline Variant f_mktime(int hour = INT_MAX, int minute = INT_MAX,
                         int second = INT_MAX, int month = INT_MAX,
                         int day = INT_MAX, int year = INT_MAX) {
   bool error;
-  int64 ts = TimeStamp::Get(error, hour, minute, second, month, day, year,
+  int64_t ts = TimeStamp::Get(error, hour, minute, second, month, day, year,
                             false);
   if (error) return false;
   return ts;
@@ -235,23 +235,23 @@ inline Variant f_gmmktime(int hour = INT_MAX, int minute = INT_MAX,
                           int month = INT_MAX, int day = INT_MAX,
                           int year = INT_MAX) {
   bool error;
-  int64 ts = TimeStamp::Get(error, hour, minute, second, month, day, year,
+  int64_t ts = TimeStamp::Get(error, hour, minute, second, month, day, year,
                             true);
   if (error) return false;
   return ts;
 }
 
-inline Variant f_idate(CStrRef format, int64 timestamp = TimeStamp::Current()) {
+inline Variant f_idate(CStrRef format, int64_t timestamp = TimeStamp::Current()) {
   if (format.size() != 1) {
     throw_invalid_argument("format: %s", format.data());
     return false;
   }
-  int64 ret = DateTime(timestamp, false).toInteger(*format.data());
+  int64_t ret = DateTime(timestamp, false).toInteger(*format.data());
   if (ret == -1) return false;
   return ret;
 }
 
-inline Variant f_date(CStrRef format, int64 timestamp = TimeStamp::Current()) {
+inline Variant f_date(CStrRef format, int64_t timestamp = TimeStamp::Current()) {
   if (format.empty()) return "";
   String ret = DateTime(timestamp, false).toString(format, false);
   if (ret.isNull()) return false;
@@ -259,31 +259,31 @@ inline Variant f_date(CStrRef format, int64 timestamp = TimeStamp::Current()) {
 }
 
 inline Variant f_gmdate(CStrRef format,
-                       int64 timestamp = TimeStamp::Current()) {
+                       int64_t timestamp = TimeStamp::Current()) {
   String ret = DateTime(timestamp, true).toString(format, false);
   if (ret.isNull()) return false;
   return ret;
 }
 
 inline Variant f_strftime(CStrRef format,
-                         int64 timestamp = TimeStamp::Current()) {
+                         int64_t timestamp = TimeStamp::Current()) {
   String ret = DateTime(timestamp, false).toString(format, true);
   if (ret.isNull()) return false;
   return ret;
 }
 
 inline String f_gmstrftime(CStrRef format,
-                           int64 timestamp = TimeStamp::Current()) {
+                           int64_t timestamp = TimeStamp::Current()) {
   String ret = DateTime(timestamp, true).toString(format, true);
   if (ret.isNull()) return false;
   return ret;
 }
 
-inline Array f_getdate(int64 timestamp = TimeStamp::Current()) {
+inline Array f_getdate(int64_t timestamp = TimeStamp::Current()) {
   return DateTime(timestamp, false).toArray(DateTime::TimeMap);
 }
 
-inline Array f_localtime(int64 timestamp = TimeStamp::Current(),
+inline Array f_localtime(int64_t timestamp = TimeStamp::Current(),
                          bool is_associative = false) {
   DateTime::ArrayFormat format =
     is_associative ? DateTime::TmMap : DateTime::TmVector;
@@ -299,7 +299,7 @@ inline Variant f_strptime(CStrRef date, CStrRef format) {
 }
 
 inline Variant f_strtotime(CStrRef input,
-                           int64 timestamp = TimeStamp::Current()) {
+                           int64_t timestamp = TimeStamp::Current()) {
   if (input.empty()) {
     return false;
   }
@@ -355,7 +355,7 @@ inline String f_timezone_name_get(CObjRef object) {
   return object.getTyped<c_DateTimeZone>()->t_getname();
 }
 
-inline int64 f_timezone_offset_get(CObjRef object, CObjRef dt) {
+inline int64_t f_timezone_offset_get(CObjRef object, CObjRef dt) {
   return object.getTyped<c_DateTimeZone>()->t_getoffset(dt);
 }
 
@@ -429,7 +429,7 @@ inline void f_date_modify(CObjRef object, CStrRef modify) {
   object.getTyped<c_DateTime>()->t_modify(modify);
 }
 
-inline int64 f_date_offset_get(CObjRef object) {
+inline int64_t f_date_offset_get(CObjRef object) {
   return object.getTyped<c_DateTime>()->t_getoffset();
 }
 
@@ -442,11 +442,11 @@ inline void f_date_time_set(CObjRef object, int hour, int minute,
   object.getTyped<c_DateTime>()->t_settime(hour, minute, second);
 }
 
-inline int64 f_date_timestamp_get(CObjRef datetime) {
+inline int64_t f_date_timestamp_get(CObjRef datetime) {
   return datetime.getTyped<c_DateTime>()->t_gettimestamp();
 }
 
-inline Object f_date_timestamp_set(CObjRef datetime, int64 timestamp) {
+inline Object f_date_timestamp_set(CObjRef datetime, int64_t timestamp) {
   return datetime.getTyped<c_DateTime>()->
            t_settimestamp(timestamp);
 }
@@ -467,11 +467,11 @@ inline Object f_date_sub(CObjRef datetime, CObjRef interval) {
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 
-inline Array f_date_sun_info(int64 ts, double latitude, double longitude) {
+inline Array f_date_sun_info(int64_t ts, double latitude, double longitude) {
   return DateTime(ts, false).getSunInfo(latitude, longitude);
 }
 
-inline Variant f_date_sunrise(int64 timestamp, int format = 0,
+inline Variant f_date_sunrise(int64_t timestamp, int format = 0,
                               double latitude = 0.0, double longitude = 0.0,
                               double zenith = 0.0,
                               double gmt_offset = 99999.0) {
@@ -480,7 +480,7 @@ inline Variant f_date_sunrise(int64 timestamp, int format = 0,
      zenith, gmt_offset, false);
 }
 
-inline Variant f_date_sunset(int64 timestamp, int format = 0,
+inline Variant f_date_sunset(int64_t timestamp, int format = 0,
                              double latitude = 0.0, double longitude = 0.0,
                              double zenith = 0.0,
                              double gmt_offset = 99999.0) {

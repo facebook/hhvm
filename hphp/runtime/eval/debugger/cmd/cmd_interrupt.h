@@ -35,11 +35,11 @@ public:
       : DebuggerCommand(KindOfInterrupt),
         m_interrupt(interrupt), m_program(program ? program : ""),
         m_site(site), m_pendingJump(false) {
-    m_threadId = (int64)Process::GetThreadId();
+    m_threadId = (int64_t)Process::GetThreadId();
     if (error) m_errorMsg = error;
   }
 
-  int64 getThreadId() const { return m_threadId;}
+  int64_t getThreadId() const { return m_threadId;}
   InterruptType getInterruptType() const { return (InterruptType)m_interrupt;}
   std::string desc() const;
   std::string error() const { return m_errorMsg;}
@@ -60,10 +60,10 @@ public:
   void setPendingJump() { m_pendingJump = true;}
 
 private:
-  int16 m_interrupt;
+  int16_t m_interrupt;
   std::string m_program;   // informational only
   std::string m_errorMsg;  // informational only
-  int64 m_threadId;
+  int64_t m_threadId;
   InterruptSite *m_site;   // server side
   BreakPointInfoPtr m_bpi; // client side
   BreakPointInfoPtrVec m_matched;

@@ -28,7 +28,7 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
-void f_hphp_pack_continuation(CObjRef continuation, int64 label, CVarRef value);
+void f_hphp_pack_continuation(CObjRef continuation, int64_t label, CVarRef value);
 void f_hphp_unpack_continuation(CObjRef continuation);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,15 +47,15 @@ class c_Continuation : public ExtObjectData {
   // need to implement
   public: c_Continuation(VM::Class* cls = c_Continuation::s_cls);
   public: ~c_Continuation();
-  public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CVarRef obj = null, CArrRef args = null_array);
-  public: void t_update(int64 label, CVarRef value);
+  public: void t___construct(int64_t func, int64_t extra, bool isMethod, CStrRef origFuncName, CVarRef obj = null, CArrRef args = null_array);
+  public: void t_update(int64_t label, CVarRef value);
   public: void t_done();
-  public: int64 t_getlabel();
-  public: int64 t_num_args();
+  public: int64_t t_getlabel();
+  public: int64_t t_num_args();
   public: Array t_get_args();
-  public: Variant t_get_arg(int64 id);
+  public: Variant t_get_arg(int64_t id);
   public: Variant t_current();
-  public: int64 t_key();
+  public: int64_t t_key();
   public: void t_next();
   public: void t_rewind();
   public: bool t_valid();
@@ -111,7 +111,7 @@ public:
 public:
   Object m_obj;
   Array m_args;
-  int64 m_index;
+  int64_t m_index;
   Variant m_value;
   Variant m_received;
   String m_origFuncName;
@@ -122,7 +122,7 @@ public:
 
   int m_localsOffset;
   VM::Func *m_vmFunc;
-  int64 m_label;
+  int64_t m_label;
   VM::ActRec* m_arPtr;
 
   p_ContinuationWaitHandle m_waitHandle;
@@ -157,7 +157,7 @@ class c_DummyContinuation : public ExtObjectData {
   public: ~c_DummyContinuation();
   public: void t___construct();
   public: Variant t_current();
-  public: int64 t_key();
+  public: int64_t t_key();
   public: void t_next();
   public: void t_rewind();
   public: bool t_valid();

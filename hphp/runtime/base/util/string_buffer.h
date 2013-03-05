@@ -95,7 +95,7 @@ public:
    * Append strings.
    */
   void append(int n);
-  void append(int64 n);
+  void append(int64_t n);
   void append(char c) {
     if (m_buffer && m_len < m_cap) {
       m_buffer[m_len++] = c;

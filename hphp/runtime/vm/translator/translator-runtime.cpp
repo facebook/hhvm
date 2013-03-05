@@ -19,7 +19,7 @@
 namespace HPHP { namespace VM { namespace Transl {
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
-                               int64 key,
+                               int64_t key,
                                TypedValue value) {
   // this does not re-enter
   return array_setm_ik1_v0(0, ad, key, &value);

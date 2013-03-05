@@ -93,10 +93,10 @@ CacheHandle namedAlloc(const StringData* name, int numBytes, int align) {
 
 size_t allocBit();
 size_t allocCnsBit(const StringData* name);
-CacheHandle bitOffToHandleAndMask(size_t bit, uint8 &mask);
-bool testBit(CacheHandle handle, uint32 mask);
+CacheHandle bitOffToHandleAndMask(size_t bit, uint8_t &mask);
+bool testBit(CacheHandle handle, uint32_t mask);
 bool testBit(size_t bit);
-bool testAndSetBit(CacheHandle handle, uint32 mask);
+bool testAndSetBit(CacheHandle handle, uint32_t mask);
 bool testAndSetBit(size_t bit);
 bool isPersistentHandle(CacheHandle handle);
 

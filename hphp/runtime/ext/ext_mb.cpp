@@ -2781,7 +2781,7 @@ Variant f_mb_substitute_character(CVarRef substrchar /* = null_variant */) {
     }
   }
 
-  int64 n = substrchar.toInt64();
+  int64_t n = substrchar.toInt64();
   if (n < 0xffff && n > 0) {
     MBSTRG(current_filter_illegal_mode) =
       MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
@@ -3338,7 +3338,7 @@ Variant f_mb_eregi_replace(CVarRef pattern, CStrRef replacement, CStrRef str,
                                          str, option, ONIG_OPTION_IGNORECASE);
 }
 
-int64 f_mb_ereg_search_getpos() {
+int64_t f_mb_ereg_search_getpos() {
   return MBSTRG(search_pos);
 }
 

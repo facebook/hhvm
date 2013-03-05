@@ -34,7 +34,7 @@ public:
    */
   virtual const char *getUrl();
   virtual const char *getRemoteHost();
-  virtual uint16 getRemotePort();
+  virtual uint16_t getRemotePort();
   virtual const void *getPostData(int &size);
   virtual bool hasMorePostData();
   virtual const void *getMorePostData(int &size);
@@ -60,7 +60,7 @@ private:
   int m_workerId;
   std::string m_url;
   std::string m_remote_host;
-  uint16 m_remote_port;
+  uint16_t m_remote_port;
   std::string m_http_version;
   Method m_method;
   const char *m_extended_method;

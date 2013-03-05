@@ -63,17 +63,17 @@ public:
   void appendEncapString(const std::string &value);
   bool isLiteralInteger() const;
 
-  int64 getLiteralInteger() const;
+  int64_t getLiteralInteger() const;
   std::string getIdentifier() const;
   Variant getVariant() const;
-  int64 getHash() const;
+  int64_t getHash() const;
 
   void setComment(const std::string &comment) { m_comment = comment;}
   const std::string getComment() { return m_comment;}
 
 
   bool getString(const std::string *&s) const;
-  bool getInt(int64 &i) const;
+  bool getInt(int64_t &i) const;
   bool getDouble(double &d) const;
 private:
   int m_type;

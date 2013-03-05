@@ -24,21 +24,21 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int64 f_pcntl_alarm(int seconds) {
+inline int64_t f_pcntl_alarm(int seconds) {
   return alarm(seconds);
 }
 void f_pcntl_exec(CStrRef path, CArrRef args = null_array, CArrRef envs = null_array);
 
-int64 f_pcntl_fork();
+int64_t f_pcntl_fork();
 Variant f_pcntl_getpriority(int pid = 0, int process_identifier = 0);
 bool f_pcntl_setpriority(int priority, int pid = 0,
                          int process_identifier = 0);
 
 bool f_pcntl_signal(int signo, CVarRef handler, bool restart_syscalls = true);
-int64 f_pcntl_wait(VRefParam status, int options = 0);
-int64 f_pcntl_waitpid(int pid, VRefParam status, int options = 0);
+int64_t f_pcntl_wait(VRefParam status, int options = 0);
+int64_t f_pcntl_waitpid(int pid, VRefParam status, int options = 0);
 
-inline int64 f_pcntl_wexitstatus(int status) {
+inline int64_t f_pcntl_wexitstatus(int status) {
   return WEXITSTATUS(status);
 }
 
@@ -51,8 +51,8 @@ bool f_pcntl_signal_dispatch();
 inline bool f_pcntl_wifexited(int status) { return WIFEXITED(status);}
 inline bool f_pcntl_wifsignaled(int status) { return WIFSIGNALED(status);}
 inline bool f_pcntl_wifstopped(int status) { return WIFSTOPPED(status);}
-inline int64 f_pcntl_wstopsig(int status) { return WSTOPSIG(status);}
-inline int64 f_pcntl_wtermsig(int status) { return WTERMSIG(status);}
+inline int64_t f_pcntl_wstopsig(int status) { return WSTOPSIG(status);}
+inline int64_t f_pcntl_wtermsig(int status) { return WTERMSIG(status);}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -68,7 +68,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
                     CStrRef cwd = null_string, CVarRef env = null_variant,
                     CVarRef other_options = null_variant);
 bool f_proc_terminate(CObjRef process, int signal = 0);
-int64 f_proc_close(CObjRef process);
+int64_t f_proc_close(CObjRef process);
 Array f_proc_get_status(CObjRef process);
 bool f_proc_nice(int increment);
 

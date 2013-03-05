@@ -196,12 +196,12 @@ private:
   void cgOpCmpHelper(
             IRInstruction* inst,
             void (Asm::*setter)(Reg8),
-            int64 (*str_cmp_str)(StringData*, StringData*),
-            int64 (*str_cmp_int)(StringData*, int64),
-            int64 (*str_cmp_obj)(StringData*, ObjectData*),
-            int64 (*obj_cmp_obj)(ObjectData*, ObjectData*),
-            int64 (*obj_cmp_int)(ObjectData*, int64),
-            int64 (*arr_cmp_arr)(ArrayData*, ArrayData*));
+            int64_t (*str_cmp_str)(StringData*, StringData*),
+            int64_t (*str_cmp_int)(StringData*, int64_t),
+            int64_t (*str_cmp_obj)(StringData*, ObjectData*),
+            int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
+            int64_t (*obj_cmp_int)(ObjectData*, int64_t),
+            int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
   void cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
   bool emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
                         void(Asm::*emitFunc)(Reg64));
@@ -226,7 +226,7 @@ private:
                                     Block* exit);
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
-                                int64 offset);
+                                int64_t offset);
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
                           Block* exit,
@@ -236,11 +236,11 @@ private:
                            Block* exit,
                            bool genZeroCheck);
   void cgDecRefDynamicTypeMem(PhysReg baseReg,
-                              int64 offset,
+                              int64_t offset,
                               Block* exit);
   void cgDecRefMem(Type type,
                    PhysReg baseReg,
-                   int64 offset,
+                   int64_t offset,
                    Block* exit);
   void emitSpillActRec(SSATmp* sp,
                        int64_t spOffset,

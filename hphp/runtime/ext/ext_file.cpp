@@ -97,33 +97,33 @@ static bool check_error(const char *function, int line, bool ret) {
 Array stat_impl(struct stat *stat_sb) {
   Array ret;
 
-  ret.append((int64)stat_sb->st_dev);
-  ret.append((int64)stat_sb->st_ino);
-  ret.append((int64)stat_sb->st_mode);
-  ret.append((int64)stat_sb->st_nlink);
-  ret.append((int64)stat_sb->st_uid);
-  ret.append((int64)stat_sb->st_gid);
-  ret.append((int64)stat_sb->st_rdev);
-  ret.append((int64)stat_sb->st_size);
-  ret.append((int64)stat_sb->st_atime);
-  ret.append((int64)stat_sb->st_mtime);
-  ret.append((int64)stat_sb->st_ctime);
-  ret.append((int64)stat_sb->st_blksize);
-  ret.append((int64)stat_sb->st_blocks);
+  ret.append((int64_t)stat_sb->st_dev);
+  ret.append((int64_t)stat_sb->st_ino);
+  ret.append((int64_t)stat_sb->st_mode);
+  ret.append((int64_t)stat_sb->st_nlink);
+  ret.append((int64_t)stat_sb->st_uid);
+  ret.append((int64_t)stat_sb->st_gid);
+  ret.append((int64_t)stat_sb->st_rdev);
+  ret.append((int64_t)stat_sb->st_size);
+  ret.append((int64_t)stat_sb->st_atime);
+  ret.append((int64_t)stat_sb->st_mtime);
+  ret.append((int64_t)stat_sb->st_ctime);
+  ret.append((int64_t)stat_sb->st_blksize);
+  ret.append((int64_t)stat_sb->st_blocks);
 
-  ret.set("dev",     (int64)stat_sb->st_dev);
-  ret.set("ino",     (int64)stat_sb->st_ino);
-  ret.set("mode",    (int64)stat_sb->st_mode);
-  ret.set("nlink",   (int64)stat_sb->st_nlink);
-  ret.set("uid",     (int64)stat_sb->st_uid);
-  ret.set("gid",     (int64)stat_sb->st_gid);
-  ret.set("rdev",    (int64)stat_sb->st_rdev);
-  ret.set("size",    (int64)stat_sb->st_size);
-  ret.set("atime",   (int64)stat_sb->st_atime);
-  ret.set("mtime",   (int64)stat_sb->st_mtime);
-  ret.set("ctime",   (int64)stat_sb->st_ctime);
-  ret.set("blksize", (int64)stat_sb->st_blksize);
-  ret.set("blocks",  (int64)stat_sb->st_blocks);
+  ret.set("dev",     (int64_t)stat_sb->st_dev);
+  ret.set("ino",     (int64_t)stat_sb->st_ino);
+  ret.set("mode",    (int64_t)stat_sb->st_mode);
+  ret.set("nlink",   (int64_t)stat_sb->st_nlink);
+  ret.set("uid",     (int64_t)stat_sb->st_uid);
+  ret.set("gid",     (int64_t)stat_sb->st_gid);
+  ret.set("rdev",    (int64_t)stat_sb->st_rdev);
+  ret.set("size",    (int64_t)stat_sb->st_size);
+  ret.set("atime",   (int64_t)stat_sb->st_atime);
+  ret.set("mtime",   (int64_t)stat_sb->st_mtime);
+  ret.set("ctime",   (int64_t)stat_sb->st_ctime);
+  ret.set("blksize", (int64_t)stat_sb->st_blksize);
+  ret.set("blocks",  (int64_t)stat_sb->st_blocks);
 
   return ret;
 }
@@ -165,8 +165,8 @@ Variant f_pclose(CObjRef handle) {
   return s_file_data->m_pcloseRet;
 }
 
-Variant f_fseek(CObjRef handle, int64 offset,
-                int64 whence /* = k_SEEK_SET */) {
+Variant f_fseek(CObjRef handle, int64_t offset,
+                int64_t whence /* = k_SEEK_SET */) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->seek(offset, whence)) ? 0 : -1;
 }
@@ -178,7 +178,7 @@ bool f_rewind(CObjRef handle) {
 
 Variant f_ftell(CObjRef handle) {
   CHECK_HANDLE(handle, f);
-  int64 ret = f->tell();
+  int64_t ret = f->tell();
   if (!CHECK_ERROR(ret != -1)) {
     return false;
   }
@@ -201,7 +201,7 @@ Variant f_fstat(CObjRef handle) {
   return stat_impl(&sb);
 }
 
-Variant f_fread(CObjRef handle, int64 length) {
+Variant f_fread(CObjRef handle, int64_t length) {
   CHECK_HANDLE(handle, f);
   return f->read(length);
 }
@@ -215,7 +215,7 @@ Variant f_fgetc(CObjRef handle) {
   return String::FromChar(result);
 }
 
-Variant f_fgets(CObjRef handle, int64 length /* = 0 */) {
+Variant f_fgets(CObjRef handle, int64_t length /* = 0 */) {
   if (length < 0) {
     throw_invalid_argument("length (negative): %d", length);
     return false;
@@ -228,7 +228,7 @@ Variant f_fgets(CObjRef handle, int64 length /* = 0 */) {
   return false;
 }
 
-Variant f_fgetss(CObjRef handle, int64 length /* = 0 */,
+Variant f_fgetss(CObjRef handle, int64_t length /* = 0 */,
                  CStrRef allowable_tags /* = null_string */) {
   Variant ret = f_fgets(handle, length);
   if (!same(ret, false)) {
@@ -247,16 +247,16 @@ Variant f_fpassthru(CObjRef handle) {
   return f->print();
 }
 
-Variant f_fwrite(CObjRef handle, CStrRef data, int64 length /* = 0 */) {
+Variant f_fwrite(CObjRef handle, CStrRef data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
-  int64 ret = f->write(data, length);
+  int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-Variant f_fputs(CObjRef handle, CStrRef data, int64 length /* = 0 */) {
+Variant f_fputs(CObjRef handle, CStrRef data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
-  int64 ret = f->write(data, length);
+  int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
@@ -276,7 +276,7 @@ bool f_fflush(CObjRef handle) {
   return CHECK_ERROR(f->flush());
 }
 
-bool f_ftruncate(CObjRef handle, int64 size) {
+bool f_ftruncate(CObjRef handle, int64_t size) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->truncate(size));
 }
@@ -311,7 +311,7 @@ Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
   return f->writeCSV(fields, delimiter.charAt(0), enclosure.charAt(0));
 }
 
-Variant f_fgetcsv(CObjRef handle, int64 length /* = 0 */,
+Variant f_fgetcsv(CObjRef handle, int64_t length /* = 0 */,
                   CStrRef delimiter /* = "," */,
                   CStrRef enclosure /* = "\"" */) {
   if (delimiter.size() != 1) {
@@ -333,8 +333,8 @@ Variant f_fgetcsv(CObjRef handle, int64 length /* = 0 */,
 Variant f_file_get_contents(CStrRef filename,
                             bool use_include_path /* = false */,
                             CVarRef context /* = null */,
-                            int64 offset /* = 0 */,
-                            int64 maxlen /* = 0 */) {
+                            int64_t offset /* = 0 */,
+                            int64_t maxlen /* = 0 */) {
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
   if (same(stream, false)) return false;
   return f_stream_get_contents(stream, maxlen, offset);
@@ -557,55 +557,55 @@ Variant f_sha1_file(CStrRef filename, bool raw_output /* = false */) {
 Variant f_fileperms(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  return (int64)sb.st_mode;
+  return (int64_t)sb.st_mode;
 }
 
 Variant f_fileinode(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
-  return (int64)sb.st_ino;
+  return (int64_t)sb.st_ino;
 }
 
 Variant f_filesize(CStrRef filename) {
   if (StaticContentCache::TheFileCache) {
-    int64 size =
+    int64_t size =
       StaticContentCache::TheFileCache->fileSize(filename.data(),
         filename.data()[0] != '/');
     if (size >= 0) return size;
   }
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  return (int64)sb.st_size;
+  return (int64_t)sb.st_size;
 }
 
 Variant f_fileowner(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  return (int64)sb.st_uid;
+  return (int64_t)sb.st_uid;
 }
 
 Variant f_filegroup(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  return (int64)sb.st_gid;
+  return (int64_t)sb.st_gid;
 }
 
 Variant f_fileatime(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  return (int64)sb.st_atime;
+  return (int64_t)sb.st_atime;
 }
 
 Variant f_filemtime(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  return (int64)sb.st_mtime;
+  return (int64_t)sb.st_mtime;
 }
 
 Variant f_filectime(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  return (int64)sb.st_ctime;
+  return (int64_t)sb.st_ctime;
 }
 
 Variant f_filetype(CStrRef filename) {
@@ -627,7 +627,7 @@ Variant f_filetype(CStrRef filename) {
 Variant f_linkinfo(CStrRef filename) {
   struct stat sb;
   CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
-  return (int64)sb.st_dev;
+  return (int64_t)sb.st_dev;
 }
 
 bool f_is_writable(CStrRef filename) {
@@ -892,7 +892,7 @@ Variant f_disk_total_space(CStrRef directory) {
 ///////////////////////////////////////////////////////////////////////////////
 // system wrappers
 
-bool f_chmod(CStrRef filename, int64 mode) {
+bool f_chmod(CStrRef filename, int64_t mode) {
   CHECK_SYSTEM(chmod(File::TranslatePath(filename).data(), mode));
   return true;
 }
@@ -959,7 +959,7 @@ bool f_lchgrp(CStrRef filename, CVarRef group) {
   return true;
 }
 
-bool f_touch(CStrRef filename, int64 mtime /* = 0 */, int64 atime /* = 0 */) {
+bool f_touch(CStrRef filename, int64_t mtime /* = 0 */, int64_t atime /* = 0 */) {
   String translated = File::TranslatePath(filename);
 
   /* create the file if it doesn't exist already */
@@ -1024,7 +1024,7 @@ bool f_rename(CStrRef oldname, CStrRef newname,
   return (ret == 0);
 }
 
-int64 f_umask(CVarRef mask /* = null_variant */) {
+int64_t f_umask(CVarRef mask /* = null_variant */) {
   int oldumask = umask(077);
   if (mask.isNull()) {
     umask(oldumask);
@@ -1200,7 +1200,7 @@ Variant f_tmpfile() {
 ///////////////////////////////////////////////////////////////////////////////
 // directory functions
 
-bool f_mkdir(CStrRef pathname, int64 mode /* = 0777 */,
+bool f_mkdir(CStrRef pathname, int64_t mode /* = 0777 */,
              bool recursive /* = false */, CVarRef context /* = null */) {
   if (recursive) {
     String path = File::TranslatePath(pathname);

@@ -56,7 +56,7 @@ public:
     if (id <= 0  || id > (int)m_refs.size()) return nullptr;
     return m_refs[id-1];
   }
-  int64 readInt();
+  int64_t readInt();
   double readDouble();
   char readChar() {
     check();

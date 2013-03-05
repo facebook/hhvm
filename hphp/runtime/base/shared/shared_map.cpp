@@ -61,11 +61,11 @@ bool SharedMap::exists(const StringData* k) const {
   return m_arr->getIndex(k) != -1;
 }
 
-bool SharedMap::exists(int64 k) const {
+bool SharedMap::exists(int64_t k) const {
   return m_arr->getIndex(k) != -1;
 }
 
-ssize_t SharedMap::getIndex(int64 k) const {
+ssize_t SharedMap::getIndex(int64_t k) const {
   return m_arr->getIndex(k);
 }
 
@@ -81,7 +81,7 @@ CVarRef SharedMap::get(const StringData* k, bool error /* = false */) const {
   return getValueRef(index);
 }
 
-CVarRef SharedMap::get(int64 k, bool error /* = false */) const {
+CVarRef SharedMap::get(int64_t k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
     return error ? getNotFound(k) : null_variant;
@@ -89,7 +89,7 @@ CVarRef SharedMap::get(int64 k, bool error /* = false */) const {
   return getValueRef(index);
 }
 
-ArrayData *SharedMap::lval(int64 k, Variant *&ret, bool copy,
+ArrayData *SharedMap::lval(int64_t k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->lval(k, ret, false);
@@ -121,7 +121,7 @@ ArrayData *SharedMap::lvalNew(Variant *&ret, bool copy) {
   return escalated;
 }
 
-ArrayData *SharedMap::set(int64 k, CVarRef v, bool copy) {
+ArrayData *SharedMap::set(int64_t k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->set(k, v, false);
   if (ee) {
@@ -141,7 +141,7 @@ ArrayData *SharedMap::set(StringData* k, CVarRef v, bool copy) {
   return escalated;
 }
 
-ArrayData *SharedMap::setRef(int64 k, CVarRef v, bool copy) {
+ArrayData *SharedMap::setRef(int64_t k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->setRef(k, v, false);
   if (ee) {
@@ -161,7 +161,7 @@ ArrayData *SharedMap::setRef(StringData* k, CVarRef v, bool copy) {
   return escalated;
 }
 
-ArrayData *SharedMap::remove(int64 k, bool copy) {
+ArrayData *SharedMap::remove(int64_t k, bool copy) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->remove(k, false);
   if (ee) {
@@ -242,7 +242,7 @@ ArrayData *SharedMap::escalate() const {
   return ret;
 }
 
-TypedValue* SharedMap::nvGet(int64 k) const {
+TypedValue* SharedMap::nvGet(int64_t k) const {
   int index = m_arr->getIndex(k);
   if (index == -1) return nullptr;
   return (TypedValue*)&getValueRef(index);
@@ -267,7 +267,7 @@ TypedValue* SharedMap::nvGetValueRef(ssize_t pos) {
   return const_cast<TypedValue*>(SharedMap::getValueRef(pos).asTypedValue());
 }
 
-TypedValue* SharedMap::nvGetCell(int64 k) const {
+TypedValue* SharedMap::nvGetCell(int64_t k) const {
   int index = m_arr->getIndex(k);
   return index != -1 ? getValueRef(index).getTypedAccessor() :
          nvGetNotFound(k);

@@ -917,7 +917,7 @@ int f_thrift_protocol_set_compact_version(int version) {
 
 void f_thrift_protocol_write_compact(CObjRef transportobj,
                                      CStrRef method_name,
-                                     int64 msgtype,
+                                     int64_t msgtype,
                                      CObjRef request_struct,
                                      int seqid) {
   CompactWriter writer(transportobj);

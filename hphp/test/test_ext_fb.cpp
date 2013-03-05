@@ -94,12 +94,12 @@ bool TestExtFb::test_fb_compact_serialize() {
   fb_cs_test(CREATE_MAP3(0, "a", 2, "b", 3, "c"));
   fb_cs_test(CREATE_MAP1(3, "a"));
   // Test for overflow
-  fb_cs_test(CREATE_MAP1((int64)((1ULL << 63) - 1), "a"));
+  fb_cs_test(CREATE_MAP1((int64_t)((1ULL << 63) - 1), "a"));
 
   // Test each power of two, +/- 1 and the negatives of them
   // Test a single number and packed inside an array
   for (int i = 0; i < 64; ++i) {
-    int64 n = (1ULL << i);
+    int64_t n = (1ULL << i);
     fb_cs_test(n);    fb_cs_test(CREATE_VECTOR1(n));
     fb_cs_test(n-1);  fb_cs_test(CREATE_VECTOR1(n-1));
     fb_cs_test(n+1);  fb_cs_test(CREATE_VECTOR1(n+1));

@@ -39,7 +39,7 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(idn);
 ///////////////////////////////////////////////////////////////////////////////
 
-int64 f_intl_get_error_code() {
+int64_t f_intl_get_error_code() {
   return s_intl_error->m_error.code;
 }
 
@@ -50,41 +50,41 @@ String f_intl_get_error_message() {
   return String(u_errorName(s_intl_error->m_error.code), AttachLiteral);
 }
 
-String f_intl_error_name(int64 error_code) {
+String f_intl_error_name(int64_t error_code) {
   return String(u_errorName((UErrorCode)error_code), AttachLiteral);
 }
 
-bool f_intl_is_failure(int64 error_code) {
+bool f_intl_is_failure(int64_t error_code) {
   if (U_FAILURE((UErrorCode)error_code)) return true;
   return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_Collator$$SORT_REGULAR = 0;
-const int64 q_Collator$$SORT_STRING = 1;
-const int64 q_Collator$$SORT_NUMERIC = 2;
-const int64 q_Collator$$FRENCH_COLLATION = UCOL_FRENCH_COLLATION;
-const int64 q_Collator$$ALTERNATE_HANDLING = UCOL_ALTERNATE_HANDLING;
-const int64 q_Collator$$CASE_FIRST = UCOL_CASE_FIRST;
-const int64 q_Collator$$CASE_LEVEL = UCOL_CASE_LEVEL;
-const int64 q_Collator$$NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
-const int64 q_Collator$$STRENGTH = UCOL_STRENGTH;
-const int64 q_Collator$$HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
-const int64 q_Collator$$NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
-const int64 q_Collator$$DEFAULT_VALUE = UCOL_DEFAULT;
-const int64 q_Collator$$PRIMARY = UCOL_PRIMARY;
-const int64 q_Collator$$SECONDARY = UCOL_SECONDARY;
-const int64 q_Collator$$TERTIARY = UCOL_TERTIARY;
-const int64 q_Collator$$DEFAULT_STRENGTH = UCOL_DEFAULT_STRENGTH;
-const int64 q_Collator$$QUATERNARY = UCOL_QUATERNARY;
-const int64 q_Collator$$IDENTICAL = UCOL_IDENTICAL;
-const int64 q_Collator$$OFF = UCOL_OFF;
-const int64 q_Collator$$ON = UCOL_ON;
-const int64 q_Collator$$SHIFTED = UCOL_SHIFTED;
-const int64 q_Collator$$NON_IGNORABLE = UCOL_NON_IGNORABLE;
-const int64 q_Collator$$LOWER_FIRST = UCOL_LOWER_FIRST;
-const int64 q_Collator$$UPPER_FIRST = UCOL_UPPER_FIRST;
+const int64_t q_Collator$$SORT_REGULAR = 0;
+const int64_t q_Collator$$SORT_STRING = 1;
+const int64_t q_Collator$$SORT_NUMERIC = 2;
+const int64_t q_Collator$$FRENCH_COLLATION = UCOL_FRENCH_COLLATION;
+const int64_t q_Collator$$ALTERNATE_HANDLING = UCOL_ALTERNATE_HANDLING;
+const int64_t q_Collator$$CASE_FIRST = UCOL_CASE_FIRST;
+const int64_t q_Collator$$CASE_LEVEL = UCOL_CASE_LEVEL;
+const int64_t q_Collator$$NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
+const int64_t q_Collator$$STRENGTH = UCOL_STRENGTH;
+const int64_t q_Collator$$HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
+const int64_t q_Collator$$NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
+const int64_t q_Collator$$DEFAULT_VALUE = UCOL_DEFAULT;
+const int64_t q_Collator$$PRIMARY = UCOL_PRIMARY;
+const int64_t q_Collator$$SECONDARY = UCOL_SECONDARY;
+const int64_t q_Collator$$TERTIARY = UCOL_TERTIARY;
+const int64_t q_Collator$$DEFAULT_STRENGTH = UCOL_DEFAULT_STRENGTH;
+const int64_t q_Collator$$QUATERNARY = UCOL_QUATERNARY;
+const int64_t q_Collator$$IDENTICAL = UCOL_IDENTICAL;
+const int64_t q_Collator$$OFF = UCOL_OFF;
+const int64_t q_Collator$$ON = UCOL_ON;
+const int64_t q_Collator$$SHIFTED = UCOL_SHIFTED;
+const int64_t q_Collator$$NON_IGNORABLE = UCOL_NON_IGNORABLE;
+const int64_t q_Collator$$LOWER_FIRST = UCOL_LOWER_FIRST;
+const int64_t q_Collator$$UPPER_FIRST = UCOL_UPPER_FIRST;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -142,7 +142,7 @@ void c_Collator::t___construct(CStrRef locale) {
 }
 
 bool c_Collator::t_asort(VRefParam arr,
-                         int64 sort_flag /* = q_Collator$$SORT_REGULAR */) {
+                         int64_t sort_flag /* = q_Collator$$SORT_REGULAR */) {
   if (!arr.isArray()) {
     throw_bad_array_exception();
     return false;
@@ -187,7 +187,7 @@ Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
     free(ustr2);
     return false;
   }
-  int64 ret = ucol_strcoll(m_ucoll, ustr1, ustr1_len, ustr2, ustr2_len);
+  int64_t ret = ucol_strcoll(m_ucoll, ustr1, ustr1_len, ustr2, ustr2_len);
   free(ustr1);
   free(ustr2);
   return ret;
@@ -199,13 +199,13 @@ Variant c_Collator::ti_create(const char* cls, CStrRef locale) {
   return c;
 }
 
-int64 c_Collator::t_getattribute(int64 attr) {
+int64_t c_Collator::t_getattribute(int64_t attr) {
   if (!m_ucoll) {
     raise_warning("getattribute called on uninitialized Collator object");
     return 0;
   }
   m_errcode.clear();
-  int64 ret = (int64)ucol_getAttribute(m_ucoll, (UColAttribute)attr,
+  int64_t ret = (int64_t)ucol_getAttribute(m_ucoll, (UColAttribute)attr,
                                        &(m_errcode.code));
   s_intl_error->m_error.clear();
   s_intl_error->m_error.code = m_errcode.code;
@@ -217,7 +217,7 @@ int64 c_Collator::t_getattribute(int64 attr) {
   return ret;
 }
 
-int64 c_Collator::t_geterrorcode() {
+int64_t c_Collator::t_geterrorcode() {
   return m_errcode.code;
 }
 
@@ -225,7 +225,7 @@ String c_Collator::t_geterrormessage() {
   return String(u_errorName(m_errcode.code), AttachLiteral);
 }
 
-String c_Collator::t_getlocale(int64 type /* = 0 */) {
+String c_Collator::t_getlocale(int64_t type /* = 0 */) {
   if (!m_ucoll) {
     raise_warning("getlocale called on uninitialized Collator object");
     return "";
@@ -245,7 +245,7 @@ String c_Collator::t_getlocale(int64 type /* = 0 */) {
   return ret;
 }
 
-int64 c_Collator::t_getstrength() {
+int64_t c_Collator::t_getstrength() {
   if (!m_ucoll) {
     raise_warning("getstrength called on uninitialized Collator object");
     return 0;
@@ -253,7 +253,7 @@ int64 c_Collator::t_getstrength() {
   return ucol_getStrength(m_ucoll);
 }
 
-bool c_Collator::t_setattribute(int64 attr, int64 val) {
+bool c_Collator::t_setattribute(int64_t attr, int64_t val) {
   if (!m_ucoll) {
     raise_warning("setattribute called on uninitialized Collator object");
     return false;
@@ -271,7 +271,7 @@ bool c_Collator::t_setattribute(int64 attr, int64 val) {
   return true;
 }
 
-bool c_Collator::t_setstrength(int64 strength) {
+bool c_Collator::t_setstrength(int64_t strength) {
   if (!m_ucoll) {
     raise_warning("setstrength called on uninitialized Collator object");
     return false;
@@ -440,7 +440,7 @@ bool c_Collator::t_sortwithsortkeys(VRefParam arr) {
 }
 
 bool c_Collator::t_sort(VRefParam arr,
-                        int64 sort_flag /* = q_Collator$$SORT_REGULAR */) {
+                        int64_t sort_flag /* = q_Collator$$SORT_REGULAR */) {
   if (!arr.isArray()) {
     throw_bad_array_exception();
     return false;
@@ -473,7 +473,7 @@ bool c_Collator::t_sort(VRefParam arr,
   }                                                        \
 
 Variant f_collator_asort(CVarRef obj, VRefParam arr,
-                         int64 sort_flag /* = q_Collator$$SORT_REGULAR */) {
+                         int64_t sort_flag /* = q_Collator$$SORT_REGULAR */) {
   CHECK_COLL(obj);
   return coll->t_asort(ref(arr), sort_flag);
 }
@@ -487,7 +487,7 @@ Variant f_collator_create(CStrRef locale) {
   return c_Collator::ti_create(nullptr, locale);
 }
 
-Variant f_collator_get_attribute(CVarRef obj, int64 attr) {
+Variant f_collator_get_attribute(CVarRef obj, int64_t attr) {
   CHECK_COLL(obj);
   return coll->t_getattribute(attr);
 }
@@ -502,7 +502,7 @@ Variant f_collator_get_error_message(CVarRef obj) {
   return coll->t_geterrormessage();
 }
 
-Variant f_collator_get_locale(CVarRef obj, int64 type /* = 0 */) {
+Variant f_collator_get_locale(CVarRef obj, int64_t type /* = 0 */) {
   CHECK_COLL(obj);
   return coll->t_getlocale(type);
 }
@@ -512,12 +512,12 @@ Variant f_collator_get_strength(CVarRef obj) {
   return coll->t_getstrength();
 }
 
-Variant f_collator_set_attribute(CVarRef obj, int64 attr, int64 val) {
+Variant f_collator_set_attribute(CVarRef obj, int64_t attr, int64_t val) {
   CHECK_COLL(obj);
   return coll->t_setattribute(attr, val);
 }
 
-Variant f_collator_set_strength(CVarRef obj, int64 strength) {
+Variant f_collator_set_strength(CVarRef obj, int64_t strength) {
   CHECK_COLL(obj);
   return coll->t_setstrength(strength);
 }
@@ -528,15 +528,15 @@ Variant f_collator_sort_with_sort_keys(CVarRef obj, VRefParam arr) {
 }
 
 Variant f_collator_sort(CVarRef obj, VRefParam arr,
-                        int64 sort_flag /* = q_Collator$$SORT_REGULAR */) {
+                        int64_t sort_flag /* = q_Collator$$SORT_REGULAR */) {
   CHECK_COLL(obj);
   return coll->t_sort(ref(arr), sort_flag);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_Locale$$ACTUAL_LOCALE = 0;
-const int64 q_Locale$$VALID_LOCALE = 1;
+const int64_t q_Locale$$ACTUAL_LOCALE = 0;
+const int64_t q_Locale$$VALID_LOCALE = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -551,15 +551,15 @@ void c_Locale::t___construct() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_Normalizer$$NONE     = UNORM_NONE;
-const int64 q_Normalizer$$FORM_D   = UNORM_NFD;
-const int64 q_Normalizer$$NFD      = UNORM_NFD;
-const int64 q_Normalizer$$FORM_KD  = UNORM_NFKD;
-const int64 q_Normalizer$$NFKD     = UNORM_NFKD;
-const int64 q_Normalizer$$FORM_C   = UNORM_NFC;
-const int64 q_Normalizer$$NFC      = UNORM_NFC;
-const int64 q_Normalizer$$FORM_KC  = UNORM_NFKC;
-const int64 q_Normalizer$$NFKC     = UNORM_NFKC;
+const int64_t q_Normalizer$$NONE     = UNORM_NONE;
+const int64_t q_Normalizer$$FORM_D   = UNORM_NFD;
+const int64_t q_Normalizer$$NFD      = UNORM_NFD;
+const int64_t q_Normalizer$$FORM_KD  = UNORM_NFKD;
+const int64_t q_Normalizer$$NFKD     = UNORM_NFKD;
+const int64_t q_Normalizer$$FORM_C   = UNORM_NFC;
+const int64_t q_Normalizer$$NFC      = UNORM_NFC;
+const int64_t q_Normalizer$$FORM_KC  = UNORM_NFKC;
+const int64_t q_Normalizer$$NFKC     = UNORM_NFKC;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -575,7 +575,7 @@ void c_Normalizer::t___construct() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
-                                      int64 form /* = q_Normalizer$$FORM_C */) {
+                                      int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 
   switch (form) {
@@ -622,7 +622,7 @@ Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
 }
 
 Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
-                                   int64 form /* = q_Normalizer$$FORM_C */) {
+                                   int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 
   int expansion_factor = 1;
@@ -735,7 +735,7 @@ enum {
 };
 
 #ifdef HAVE_46_API
-static Variant php_intl_idn_to_46(CStrRef domain, int64 options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
+static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
   int32_t     converted_capacity;
   char        *converted = NULL;
   int32_t     converted_len;
@@ -783,7 +783,7 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64 options, IdnVariant idn_
 
 #endif
 
-static Variant php_intl_idn_to(CStrRef domain, int64 options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
+static Variant php_intl_idn_to(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
   UChar* ustring = NULL;
   int ustring_len = 0;
   UErrorCode status;
@@ -857,15 +857,15 @@ static Variant php_intl_idn_to(CStrRef domain, int64 options, IdnVariant idn_var
   return String(converted_utf8, converted_utf8_len, AttachString);
 }
 
-Variant f_idn_to_ascii(CStrRef domain, int64 options /* = 0 */, int64 variant /* = 0 */, VRefParam idna_info /* = null */) {
+Variant f_idn_to_ascii(CStrRef domain, int64_t options /* = 0 */, int64_t variant /* = 0 */, VRefParam idna_info /* = null */) {
   return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_ASCII);
 }
 
-Variant f_idn_to_unicode(CStrRef domain, int64 options /* = 0 */, int64 variant /* = 0 */, VRefParam idna_info /* = null */) {
+Variant f_idn_to_unicode(CStrRef domain, int64_t options /* = 0 */, int64_t variant /* = 0 */, VRefParam idna_info /* = null */) {
   return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_UTF8);
 }
 
-Variant f_idn_to_utf8(CStrRef domain, int64 options /* = 0 */, int64 variant /* = 0 */, VRefParam idna_info /* = null */) {
+Variant f_idn_to_utf8(CStrRef domain, int64_t options /* = 0 */, int64_t variant /* = 0 */, VRefParam idna_info /* = null */) {
   return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_UTF8);
 }
 

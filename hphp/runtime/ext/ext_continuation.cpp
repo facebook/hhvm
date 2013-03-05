@@ -40,7 +40,7 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
 }
 
 void f_hphp_pack_continuation(CObjRef continuation,
-                              int64 label, CVarRef value) {
+                              int64_t label, CVarRef value) {
   throw_fatal("Invalid call hphp_pack_continuation");
 }
 
@@ -78,7 +78,7 @@ c_Continuation::~c_Continuation() {
 }
 
 void c_Continuation::t___construct(
-    int64 func, int64 extra, bool isMethod,
+    int64_t func, int64_t extra, bool isMethod,
     CStrRef origFuncName, CVarRef obj, CArrRef args) {
   m_vmFunc       = (VM::Func*) extra;
   assert(m_vmFunc);
@@ -94,7 +94,7 @@ void c_Continuation::t___construct(
   m_args = args;
 }
 
-void c_Continuation::t_update(int64 label, CVarRef value) {
+void c_Continuation::t_update(int64_t label, CVarRef value) {
   m_label = label;
   m_value.assignVal(value);
 }
@@ -104,11 +104,11 @@ void c_Continuation::t_done() {
   m_value.setNull();
 }
 
-int64 c_Continuation::t_getlabel() {
+int64_t c_Continuation::t_getlabel() {
   return m_label;
 }
 
-int64 c_Continuation::t_num_args() {
+int64_t c_Continuation::t_num_args() {
   return m_args.size();
 }
 
@@ -116,7 +116,7 @@ Array c_Continuation::t_get_args() {
   return m_args;
 }
 
-Variant c_Continuation::t_get_arg(int64 id) {
+Variant c_Continuation::t_get_arg(int64_t id) {
   if (id < 0LL || id >= m_args.size()) return false;
   return m_args.rvalAt(id, AccessFlags::Error);
 }
@@ -126,7 +126,7 @@ Variant c_Continuation::t_current() {
   return m_value;
 }
 
-int64 c_Continuation::t_key() {
+int64_t c_Continuation::t_key() {
   startedCheck();
   return m_index;
 }
@@ -253,7 +253,7 @@ Variant c_DummyContinuation::t_current() {
   return null;
 }
 
-int64 c_DummyContinuation::t_key() {
+int64_t c_DummyContinuation::t_key() {
   throw_fatal("Tring to use a DummyContinuation");
   return 0;
 }

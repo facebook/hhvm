@@ -54,11 +54,11 @@ bool more_or_equal(CVarRef v1, CVarRef v2) {
 }
 
 bool equal(int v1, const StringData *v2) {
-  return equal((int64)v1, v2);
+  return equal((int64_t)v1, v2);
 }
 
-bool equal(int64 v1, const StringData *v2) {
-  int64 lval; double dval;
+bool equal(int64_t v1, const StringData *v2) {
+  int64_t lval; double dval;
   DataType ret = v2->isNumericWithVal(lval, dval, 1);
   if (ret == KindOfInt64) {
     return v1 == lval;
@@ -91,7 +91,7 @@ bool equalAsStr(int v1, const StringData *v2) {
   return memcmp(p, v2->data(), len) == 0;
 }
 
-bool equalAsStr(int64 v1, const StringData *v2) {
+bool equalAsStr(int64_t v1, const StringData *v2) {
   char tmpbuf[21];
   char *p;
   int is_negative;
@@ -109,7 +109,7 @@ bool equalAsStr(int64 v1, const StringData *v2) {
   return memcmp(p, v2->data(), len) == 0;
 }
 
-bool equalAsStr(int64 v1, litstr  v2) {
+bool equalAsStr(int64_t v1, litstr  v2) {
   char tmpbuf[21];
   char *p;
   int is_negative;
@@ -134,11 +134,11 @@ bool equalAsStr(double v1, litstr  v2) {
 }
 
 bool less(int v1, const StringData *v2) {
-  return less((int64)v1, v2);
+  return less((int64_t)v1, v2);
 }
 
-bool less(int64 v1, const StringData *v2) {
-  int64 lval; double dval;
+bool less(int64_t v1, const StringData *v2) {
+  int64_t lval; double dval;
   DataType ret = v2->isNumericWithVal(lval, dval, 1);
   if (ret == KindOfInt64) {
     return v1 < lval;
@@ -150,11 +150,11 @@ bool less(int64 v1, const StringData *v2) {
 }
 
 bool more(int v1, const StringData *v2) {
-  return more((int64)v1, v2);
+  return more((int64_t)v1, v2);
 }
 
-bool more(int64 v1, const StringData *v2) {
-  int64 lval; double dval;
+bool more(int64_t v1, const StringData *v2) {
+  int64_t lval; double dval;
   DataType ret = v2->isNumericWithVal(lval, dval, 1);
   if (ret == KindOfInt64) {
     return v1 > lval;

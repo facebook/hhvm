@@ -547,11 +547,11 @@ void Expression::CheckPassByReference(AnalysisResultPtr ar,
 }
 
 unsigned Expression::getCanonHash() const {
-  int64 val = hash_int64(getKindOf());
+  int64_t val = hash_int64(getKindOf());
   for (int i = getKidCount(); i--; ) {
     ExpressionPtr k = getNthExpr(i);
     if (k) {
-      val = hash_int64(val ^ (((int64)k->getKindOf()<<32)+k->getCanonID()));
+      val = hash_int64(val ^ (((int64_t)k->getKindOf()<<32)+k->getCanonID()));
     }
   }
 

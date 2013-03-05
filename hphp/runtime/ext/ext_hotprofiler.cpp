@@ -78,10 +78,10 @@ IMPLEMENT_DEFAULT_EXTENSION(xhprof);
  *
  * @author cjiang
  */
-static inline uint8 hprof_inline_hash(const char * str) {
+static inline uint8_t hprof_inline_hash(const char * str) {
   unsigned long h = 5381;
   uint i = 0;
-  uint8 res = 0;
+  uint8_t res = 0;
 
   while (*str) {
     h += (h << 5);
@@ -89,7 +89,7 @@ static inline uint8 hprof_inline_hash(const char * str) {
   }
 
   for (i = 0; i < sizeof(unsigned long); i++) {
-    res += ((uint8 *)&h)[i];
+    res += ((uint8_t *)&h)[i];
   }
   return res;
 }
@@ -105,7 +105,7 @@ static long get_us_interval(struct timeval *start, struct timeval *end) {
 /**
  * Incr time with the given microseconds.
  */
-static void incr_us_interval(struct timeval *start, uint64 incr) {
+static void incr_us_interval(struct timeval *start, uint64_t incr) {
   incr += (start->tv_sec * 1000000 + start->tv_usec);
   start->tv_sec  = incr/1000000;
   start->tv_usec = incr%1000000;
@@ -121,8 +121,8 @@ static void incr_us_interval(struct timeval *start, uint64 incr) {
  * @return void
  * @author veeve
  */
-static void hp_trunc_time(struct timeval *tv, uint64 intr) {
-  uint64 time_in_micro;
+static void hp_trunc_time(struct timeval *tv, uint64_t intr) {
+  uint64_t time_in_micro;
 
   // Convert to microsecs and trunc that first
   time_in_micro = (tv->tv_sec * 1000000) + tv->tv_usec;
@@ -143,11 +143,11 @@ static void hp_trunc_time(struct timeval *tv, uint64 intr) {
  * @return 64 bit unsigned integer
  * @author cjiang
  */
-inline uint64 tsc() {
-  uint32 __a,__d;
-  uint64 val;
+inline uint64_t tsc() {
+  uint32_t __a,__d;
+  uint64_t val;
   asm volatile("rdtsc" : "=a" (__a), "=d" (__d));
-  (val) = ((uint64)__a) | (((uint64)__d)<<32);
+  (val) = ((uint64_t)__a) | (((uint64_t)__d)<<32);
   return val;
 }
 
@@ -158,7 +158,7 @@ inline uint64 tsc() {
  * @return int64.
  * @author cjiang
  */
-static int64 get_cpu_frequency() {
+static int64_t get_cpu_frequency() {
   struct timeval start;
   struct timeval end;
 
@@ -166,7 +166,7 @@ static int64 get_cpu_frequency() {
     perror("gettimeofday");
     return 0.0;
   }
-  uint64 tsc_start = tsc();
+  uint64_t tsc_start = tsc();
   // Sleep for 5 miliseconds. Comparaing with gettimeofday's  few microseconds
   // execution time, this should be enough.
   usleep(5000);
@@ -174,21 +174,21 @@ static int64 get_cpu_frequency() {
     perror("gettimeofday");
     return 0.0;
   }
-  uint64 tsc_end = tsc();
+  uint64_t tsc_end = tsc();
   return nearbyint((tsc_end - tsc_start) * 1.0
                                    / (get_us_interval(&start, &end)));
 }
 
 #define MAX_LINELENGTH 1024
 
-static int64* get_cpu_frequency_from_file(const char *file, int ncpus)
+static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
 {
   std::ifstream cpuinfo(file);
   if (cpuinfo.fail()) {
     return NULL;
   }
   char line[MAX_LINELENGTH];
-  int64* freqs = new int64[ncpus];
+  int64_t* freqs = new int64_t[ncpus];
   for (int i = 0; i < ncpus; ++i) {
     freqs[i] = 0;
   }
@@ -259,7 +259,7 @@ public:
    *
    * @author cjiang
    */
-  static void BindToCPU(uint32 cpu_id) {
+  static void BindToCPU(uint32_t cpu_id) {
     cpu_set_t new_mask;
     CPU_ZERO(&new_mask);
     CPU_SET(cpu_id, &new_mask);
@@ -270,7 +270,7 @@ public:
   // The number of logical CPUs this machine has.
   int m_cpu_num;
   // Store the cpu frequency.  Get it from /proc/cpuinfo if we can.
-  int64* m_cpu_frequencies;
+  int64_t* m_cpu_frequencies;
 
   MachineInfo() {
     m_cpu_num = sysconf(_SC_NPROCESSORS_CONF);
@@ -279,7 +279,7 @@ public:
     if (m_cpu_frequencies)
       return;
 
-    m_cpu_frequencies = new int64[m_cpu_num];
+    m_cpu_frequencies = new int64_t[m_cpu_num];
     for (int i = 0; i < m_cpu_num; i++) {
       cpu_set_t prev_mask;
       GET_AFFINITY(0, sizeof(cpu_set_t), &prev_mask);
@@ -298,16 +298,16 @@ public:
 };
 static MachineInfo s_machine;
 
-static inline uint64
-tv_to_cycles(const struct timeval& tv, int64 MHz)
+static inline uint64_t
+tv_to_cycles(const struct timeval& tv, int64_t MHz)
 {
-  return (((uint64)tv.tv_sec * 1000000) + tv.tv_usec) * MHz;
+  return (((uint64_t)tv.tv_sec * 1000000) + tv.tv_usec) * MHz;
 }
 
-static inline uint64
-to_usec(int64 cycles, int64 MHz, bool cpu_time = false)
+static inline uint64_t
+to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 {
-  static int64 vdso_usable =
+  static int64_t vdso_usable =
     Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
 
   if (cpu_time && vdso_usable >= 0)
@@ -317,8 +317,8 @@ to_usec(int64 cycles, int64 MHz, bool cpu_time = false)
 
 static esyscall vtsc_syscall("vtsc");
 
-static inline uint64 vtsc(int64 MHz) {
-  int64 rval = Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+static inline uint64_t vtsc(int64_t MHz) {
+  int64_t rval = Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (rval >= 0) {
     return rval;
   }
@@ -362,7 +362,7 @@ mallctl_mib_init()
 }
 #endif
 
-uint64
+uint64_t
 get_allocs()
 {
 #ifdef USE_JEMALLOC
@@ -372,7 +372,7 @@ get_allocs()
         return 0;
       }
     }
-    uint64 stat;
+    uint64_t stat;
     size_t size = sizeof(stat);
     if (mallctlbymib(mallctl_alloc_mib, mallctl_mib_len, &stat, &size, NULL, 0))
     {
@@ -392,7 +392,7 @@ get_allocs()
   return 0;
 }
 
-uint64
+uint64_t
 get_frees()
 {
 #ifdef USE_JEMALLOC
@@ -402,7 +402,7 @@ get_frees()
         return 0;
       }
     }
-    uint64 stat;
+    uint64_t stat;
     size_t size = sizeof(stat);
     if (mallctlbymib(mallctl_free_mib, mallctl_mib_len, &stat, &size, NULL, 0))
     {
@@ -432,13 +432,13 @@ class Frame {
 public:
   Frame          *m_parent;      // ptr to parent frame
   const char     *m_name;        // function name
-  uint8           m_hash_code;   // hash_code for the function name
+  uint8_t           m_hash_code;   // hash_code for the function name
   int             m_recursion;   // recursion level for function
 
-  uint64          m_tsc_start;   // start value for TSC counter
-  int64           m_mu_start;    // memory usage
-  int64           m_pmu_start;   // peak memory usage
-  int64           m_vtsc_start;    // user/sys time start
+  uint64_t          m_tsc_start;   // start value for TSC counter
+  int64_t           m_mu_start;    // memory usage
+  int64_t           m_pmu_start;   // peak memory usage
+  int64_t           m_vtsc_start;    // user/sys time start
 
   /**
    * Returns formatted function name
@@ -573,7 +573,7 @@ public:
 
   template<class phpret, class Name, class Counts>
   static void returnVals(phpret& ret, const Name& name, const Counts& counts,
-                  int flags, int64 MHz)
+                  int flags, int64_t MHz)
   {
     Array arr;
     arr.set("ct",  counts.count);
@@ -592,7 +592,7 @@ public:
   }
 
   template<class phpret, class StatsMap>
-  static bool extractStats(phpret& ret, StatsMap& stats, int flags, int64 MHz)
+  static bool extractStats(phpret& ret, StatsMap& stats, int flags, int64_t MHz)
   {
     for (typename StatsMap::const_iterator iter = stats.begin();
          iter != stats.end(); ++iter) {
@@ -603,14 +603,14 @@ public:
 
   bool m_successful;
 
-  int64    m_MHz; // cpu freq for either the local cpu or the saved trace
+  int64_t    m_MHz; // cpu freq for either the local cpu or the saved trace
   Frame    *m_stack;      // top of the profile stack
 
   static bool s_rand_initialized;
 
   cpu_set_t m_prev_mask;               // saved cpu affinity
   Frame    *m_frame_free_list;         // freelist of Frame
-  uint8     m_func_hash_counters[256]; // counter table by hash code;
+  uint8_t     m_func_hash_counters[256]; // counter table by hash code;
 
   /**
    * Fast allocate a Frame structure. Picks one from the
@@ -713,9 +713,9 @@ private:
   public:
     CountMap() : count(0), tsc(0), vtsc(0) {}
 
-    int64 count;
-    int64 tsc;
-    int64 vtsc;
+    int64_t count;
+    int64_t tsc;
+    int64_t vtsc;
   };
   typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
@@ -780,11 +780,11 @@ private:
   public:
     CountMap() : count(0), wall_time(0), cpu(0), memory(0), peak_memory(0) {}
 
-    int64 count;
-    int64 wall_time;
-    int64 cpu;
-    int64 memory;
-    int64 peak_memory;
+    int64_t count;
+    int64_t wall_time;
+    int64_t cpu;
+    int64_t memory;
+    int64_t peak_memory;
   };
   typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
@@ -827,8 +827,8 @@ public:
     if (m_flags & TrackMemory) {
       MemoryManager *mm = MemoryManager::TheMemoryManager();
       const MemoryUsageStats &stats = mm->getStats(true);
-      int64 mu_end = stats.usage;
-      int64 pmu_end = stats.peakUsage;
+      int64_t mu_end = stats.usage;
+      int64_t pmu_end = stats.peakUsage;
       counts.memory += mu_end - m_stack->m_mu_start;
       counts.peak_memory += pmu_end - m_stack->m_pmu_start;
     } else if (m_flags & TrackMalloc) {
@@ -842,7 +842,7 @@ public:
   }
 
 private:
-  uint32 m_flags;
+  uint32_t m_flags;
 };
 
 template <class TraceIt, class Stats>
@@ -973,15 +973,15 @@ walkTrace(TraceIt begin, TraceIt end,
 }
 
 struct TraceData {
-  int64 wall_time;
-  int64 cpu;
-  int64 memory;
-  int64 peak_memory;
+  int64_t wall_time;
+  int64_t cpu;
+  int64_t memory;
+  int64_t peak_memory;
 
   void clear() {
     wall_time = cpu = memory = peak_memory = 0;
   }
-  void set(int64 w, int64 c, int64 m, int64 p) {
+  void set(int64_t w, int64_t c, int64_t m, int64_t p) {
     wall_time = w;
     cpu = c;
     memory = m;
@@ -991,7 +991,7 @@ struct TraceData {
 
 struct TraceEntry : TraceData {
   union {
-    int64 index;
+    int64_t index;
     const char *ptr;
   }  symbol;
 
@@ -1016,8 +1016,8 @@ public:
   static int s_n_backing;
   int nTrace;
   bool full;
-  int64 maxTraceBuffer;
-  int64 overflowCalls;
+  int64_t maxTraceBuffer;
+  int64_t overflowCalls;
 
   bool trace_space_available() {
     // the two slots are reserved for internal use
@@ -1076,7 +1076,7 @@ public:
 
   class CountMap : public TraceData {
   public:
-    int64 count;
+    int64_t count;
     CountMap() : count(0)  { clear(); }
   };
   typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
@@ -1294,7 +1294,7 @@ public:
   static String
   unpackTraceData(CStrRef packedTrace) {
     const char *input = packedTrace.c_str();
-    int64 input_length = packedTrace.size();
+    int64_t input_length = packedTrace.size();
 
     int output_length;
     char *output = 0;
@@ -1351,7 +1351,7 @@ public:
 
 
 private:
-  uint32 m_flags;
+  uint32_t m_flags;
 };
 
 TraceEntry *TraceProfiler::s_trace = NULL;
@@ -1366,15 +1366,15 @@ pthread_mutex_t TraceProfiler::s_in_use = PTHREAD_MUTEX_INITIALIZER;
  */
 class SampleProfiler : public Profiler {
 private:
-  typedef hphp_hash_map<std::string, int64, string_hash> CountMap;
+  typedef hphp_hash_map<std::string, int64_t, string_hash> CountMap;
   typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
 public:
   SampleProfiler() {
     struct timeval  now;
-    uint64 truncated_us;
-    uint64 truncated_tsc;
+    uint64_t truncated_us;
+    uint64_t truncated_tsc;
 
     // Init the last_sample in tsc
     m_last_sample_tsc = tsc();
@@ -1421,8 +1421,8 @@ private:
   static const int SAMPLING_INTERVAL = 100000; // microsecs
 
   struct timeval m_last_sample_time;
-  uint64 m_last_sample_tsc;
-  uint64 m_sampling_interval_tsc;
+  uint64_t m_last_sample_tsc;
+  uint64_t m_sampling_interval_tsc;
 
   /**
    * Sample the stack. Add it to the stats_count global.
@@ -1719,7 +1719,7 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
 
   for (TraceEntry *toup = begin; toup != end; ++toup) {
     int symIndex = toup->symbol.index;
-    if (symIndex >= 0 && (uint64)symIndex < symbols.size()) {
+    if (symIndex >= 0 && (uint64_t)symIndex < symbols.size()) {
       toup->symbol.ptr = symbols[toup->symbol.index];
     } else if (symIndex == -1) {
       toup->symbol.ptr = NULL;
@@ -1742,14 +1742,14 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // constants
-const int64 k_XHPROF_FLAGS_NO_BUILTINS = TrackBuiltins;
-const int64 k_XHPROF_FLAGS_CPU = TrackCPU;
-const int64 k_XHPROF_FLAGS_MEMORY = TrackMemory;
-const int64 k_XHPROF_FLAGS_VTSC = TrackVtsc;
-const int64 k_XHPROF_FLAGS_TRACE = XhpTrace;
-const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE = MeasureXhprofDisable;
-const int64 k_XHPROF_FLAGS_GET_TRACE = GetTrace;
-const int64 k_XHPROF_FLAGS_MALLOC = TrackMalloc;
+const int64_t k_XHPROF_FLAGS_NO_BUILTINS = TrackBuiltins;
+const int64_t k_XHPROF_FLAGS_CPU = TrackCPU;
+const int64_t k_XHPROF_FLAGS_MEMORY = TrackMemory;
+const int64_t k_XHPROF_FLAGS_VTSC = TrackVtsc;
+const int64_t k_XHPROF_FLAGS_TRACE = XhpTrace;
+const int64_t k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE = MeasureXhprofDisable;
+const int64_t k_XHPROF_FLAGS_GET_TRACE = GetTrace;
+const int64_t k_XHPROF_FLAGS_MALLOC = TrackMalloc;
 
 ///////////////////////////////////////////////////////////////////////////////
 // injected code

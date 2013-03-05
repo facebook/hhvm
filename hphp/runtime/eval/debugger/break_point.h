@@ -48,10 +48,10 @@ public:
   virtual const char *getNamespace() const { return nullptr; }
   int getFileLen() const;
 
-  int32 getLine0() const { return m_line0;}
-  int32 getChar0() const { return m_char0;}
-  int32 getLine1() const { return m_line1;}
-  int32 getChar1() const { return m_char1;}
+  int32_t getLine0() const { return m_line0;}
+  int32_t getChar0() const { return m_char0;}
+  int32_t getLine1() const { return m_line1;}
+  int32_t getChar1() const { return m_char1;}
   CVarRef getException() { return m_exception;}
 
   std::string &url() const { return m_url;}
@@ -69,10 +69,10 @@ protected:
   mutable String m_file;
   mutable std::string m_url;
 
-  int32 m_line0;
-  int32 m_char0;
-  int32 m_line1;
-  int32 m_char1;
+  int32_t m_line0;
+  int32_t m_char0;
+  int32_t m_line1;
+  int32_t m_char1;
 
   // jump instruction
   bool m_jumping;
@@ -159,18 +159,18 @@ public:
   void setBreakable(int stackDepth);
   void changeBreakPointDepth(int stackDepth);
 
-  int16 m_index; // client side index number
+  int16_t m_index; // client side index number
 
-  int8 m_state;
+  int8_t m_state;
   bool m_valid;
-  int8 m_interrupt;
+  int8_t m_interrupt;
 
   // file::line1-line2
   std::string m_file;
-  int32 m_line1;
-  int32 m_line2;
-  int32 m_char1;
-  int32 m_char2;
+  int32_t m_line1;
+  int32_t m_line2;
+  int32_t m_char1;
+  int32_t m_char2;
 
   // class::func()
   DFunctionInfoPtrVec m_funcs;

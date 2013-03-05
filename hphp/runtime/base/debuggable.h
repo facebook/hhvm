@@ -43,9 +43,9 @@ public:
   static void AddServerStats(InfoVec &out, const char *name,
                              const char *statsName = nullptr);
 
-  static std::string FormatNumber(const char *fmt, int64 n);
-  static std::string FormatSize(int64 size);
-  static std::string FormatTime(int64 milliSeconds);
+  static std::string FormatNumber(const char *fmt, int64_t n);
+  static std::string FormatSize(int64_t size);
+  static std::string FormatTime(int64_t milliSeconds);
 
 public:
   virtual ~IDebuggable() {}

@@ -60,8 +60,8 @@ public:
   }
 } s_apc_extension;
 
-bool f_apc_store(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
-                 int64 cache_id /* = 0 */) {
+bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
+                 int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -75,8 +75,8 @@ bool f_apc_store(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
   return s_apc_store[cache_id].store(key, var, ttl);
 }
 
-bool f_apc_add(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
-               int64 cache_id /* = 0 */) {
+bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
+               int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -91,7 +91,7 @@ bool f_apc_add(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
 }
 
 Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
-                    int64 cache_id /* = 0 */) {
+                    int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -133,7 +133,7 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
   return v;
 }
 
-Variant f_apc_delete(CVarRef key, int64 cache_id /* = 0 */) {
+Variant f_apc_delete(CVarRef key, int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -159,7 +159,7 @@ Variant f_apc_delete(CVarRef key, int64 cache_id /* = 0 */) {
   return s_apc_store[cache_id].erase(key.toString());
 }
 
-bool f_apc_clear_cache(int64 cache_id /* = 0 */) {
+bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -169,8 +169,8 @@ bool f_apc_clear_cache(int64 cache_id /* = 0 */) {
   return s_apc_store[cache_id].clear();
 }
 
-Variant f_apc_inc(CStrRef key, int64 step /* = 1 */,
-                  VRefParam success /* = null */, int64 cache_id /* = 0 */) {
+Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
+                  VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -178,13 +178,13 @@ Variant f_apc_inc(CStrRef key, int64 step /* = 1 */,
     return false;
   }
   bool found = false;
-  int64 newValue = s_apc_store[cache_id].inc(key, step, found);
+  int64_t newValue = s_apc_store[cache_id].inc(key, step, found);
   success = found;
   return newValue;
 }
 
-Variant f_apc_dec(CStrRef key, int64 step /* = 1 */,
-                  VRefParam success /* = null */, int64 cache_id /* = 0 */) {
+Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
+                  VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -192,13 +192,13 @@ Variant f_apc_dec(CStrRef key, int64 step /* = 1 */,
     return false;
   }
   bool found = false;
-  int64 newValue = s_apc_store[cache_id].inc(key, -step, found);
+  int64_t newValue = s_apc_store[cache_id].inc(key, -step, found);
   success = found;
   return newValue;
 }
 
-bool f_apc_cas(CStrRef key, int64 old_cas, int64 new_cas,
-               int64 cache_id /* = 0 */) {
+bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas,
+               int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -208,7 +208,7 @@ bool f_apc_cas(CStrRef key, int64 old_cas, int64 new_cas,
   return s_apc_store[cache_id].cas(key, old_cas, new_cas);
 }
 
-Variant f_apc_exists(CVarRef key, int64 cache_id /* = 0 */) {
+Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
   if (!RuntimeOption::EnableApc) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -236,7 +236,7 @@ Variant f_apc_exists(CVarRef key, int64 cache_id /* = 0 */) {
   return s_apc_store[cache_id].exists(key.toString());
 }
 
-Variant f_apc_cache_info(int64 cache_id /* = 0 */, bool limited /* = false */) {
+Variant f_apc_cache_info(int64_t cache_id /* = 0 */, bool limited /* = false */) {
   return CREATE_MAP1("start_time", start_time());
 }
 
@@ -405,8 +405,8 @@ void const_load_impl(struct cache_info *info,
       const char **k = int_keys;
       long long* v = int_values;
       for (int i = 0; i < count; i++, k += 2) {
-        String key(*k, (int)(int64)*(k+1), CopyString);
-        int64 value = *v++;
+        String key(*k, (int)(int64_t)*(k+1), CopyString);
+        int64_t value = *v++;
         const_load_set(key, value);
       }
     }
@@ -417,7 +417,7 @@ void const_load_impl(struct cache_info *info,
       const char **k = char_keys;
       char *v = char_values;
       for (int i = 0; i < count; i++, k += 2) {
-        String key(*k, (int)(int64)*(k+1), CopyString);
+        String key(*k, (int)(int64_t)*(k+1), CopyString);
         Variant value;
         switch (*v++) {
         case 0: value = false; break;
@@ -435,8 +435,8 @@ void const_load_impl(struct cache_info *info,
     if (count) {
       const char **p = strings;
       for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        String key(*p, (int)(int64_t)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         const_load_set(key, value);
       }
     }
@@ -448,8 +448,8 @@ void const_load_impl(struct cache_info *info,
     if (count) {
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        String key(*p, (int)(int64_t)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
         const_load_set(key, f_unserialize(value));
       }
     }
@@ -460,8 +460,8 @@ void const_load_impl(struct cache_info *info,
       vector<SharedStore::KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        String key(*p, (int)(int64_t)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {
@@ -476,8 +476,8 @@ void const_load_impl(struct cache_info *info,
     if (count) {
       const char **p = others;
       for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        String key(*p, (int)(int64_t)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
         Variant v = f_unserialize(value);
         if (same(v, false)) {
           throw Exception("bad apc archive, f_unserialize failed");
@@ -507,7 +507,7 @@ void apc_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, k += 2) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *k;
-        item.len = (int)(int64)*(k+1);
+        item.len = (int)(int64_t)*(k+1);
         s.constructPrime(*v++, item);
       }
       s.prime(vars);
@@ -522,7 +522,7 @@ void apc_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, k += 2) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *k;
-        item.len = (int)(int64)*(k+1);
+        item.len = (int)(int64_t)*(k+1);
         switch (*v++) {
         case 0: s.constructPrime(false, item); break;
         case 1: s.constructPrime(true , item); break;
@@ -542,9 +542,9 @@ void apc_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, p += 4) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
-        item.len = (int)(int64)*(p+1);
+        item.len = (int)(int64_t)*(p+1);
         // Strings would be copied into APC anyway.
-        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
         value.checkStatic();
         s.constructPrime(value, item, false);
       }
@@ -559,8 +559,8 @@ void apc_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, p += 4) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
-        item.len = (int)(int64)*(p+1);
-        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        item.len = (int)(int64_t)*(p+1);
+        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
         s.constructPrime(value, item, true);
       }
       s.prime(vars);
@@ -574,8 +574,8 @@ void apc_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, p += 4) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
-        item.len = (int)(int64)*(p+1);
-        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        item.len = (int)(int64_t)*(p+1);
+        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {
@@ -594,9 +594,9 @@ void apc_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, p += 4) {
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
-        item.len = (int)(int64)*(p+1);
+        item.len = (int)(int64_t)*(p+1);
 
-        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
         Variant v = f_unserialize(value);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
@@ -634,7 +634,7 @@ void const_load_impl_compressed
       long long* v = int_values;
       for (int i = 0; i < count; i++) {
         String key(k, int_lens[i + 2], CopyString);
-        int64 value = *v++;
+        int64_t value = *v++;
         const_load_set(key, value);
         k += int_lens[i + 2] + 1;
       }
@@ -1170,13 +1170,13 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
   case 'a':
     {
       buf.append("a:");
-      int64 size = uns->readInt();
+      int64_t size = uns->readInt();
       char sep2 = uns->readChar();
       buf.append(size);
       buf.append(sep2);
       sep2 = uns->readChar();
       buf.append(sep2);
-      for (int64 i = 0; i < size; i++) {
+      for (int64_t i = 0; i < size; i++) {
         reserialize(uns, buf); // key
         reserialize(uns, buf); // value
       }
@@ -1199,14 +1199,14 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       buf.append("\":");
 
       uns->readChar();
-      int64 size = uns->readInt();
+      int64_t size = uns->readInt();
       char sep2 = uns->readChar();
 
       buf.append(size);
       buf.append(sep2);
       sep2 = uns->readChar(); // '{'
       buf.append(sep2);
-      for (int64 i = 0; i < size; i++) {
+      for (int64_t i = 0; i < size; i++) {
         reserialize(uns, buf); // property name
         reserialize(uns, buf); // property value
       }

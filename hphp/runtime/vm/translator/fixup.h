@@ -105,8 +105,8 @@ namespace VM { namespace Transl {
  */
 
 struct Fixup {
-  int32 m_pcOffset;
-  int32 m_spOffset;
+  int32_t m_pcOffset;
+  int32_t m_spOffset;
 
   Fixup(int32_t pcOff, int32_t spOff) : m_pcOffset(pcOff), m_spOffset(spOff)
   {

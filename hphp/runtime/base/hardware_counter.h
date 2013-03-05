@@ -43,17 +43,17 @@ public:
   ~HardwareCounter();
 
   static void  Reset(void);
-  static int64 GetInstructionCount(void);
-  static int64 GetLoadCount(void);
-  static int64 GetStoreCount(void);
+  static int64_t GetInstructionCount(void);
+  static int64_t GetLoadCount(void);
+  static int64_t GetStoreCount(void);
   static bool SetPerfEvents(CStrRef events);
   static void GetPerfEvents(Array& ret);
   static void ClearPerfEvents();
 
   void  reset(void);
-  int64 getInstructionCount(void);
-  int64 getLoadCount(void);
-  int64 getStoreCount(void);
+  int64_t getInstructionCount(void);
+  int64_t getLoadCount(void);
+  int64_t getStoreCount(void);
   bool eventExists(char *event);
   bool addPerfEvent(char* event);
   bool setPerfEvents(CStrRef events);
@@ -84,11 +84,11 @@ public:
 
   static void  Reset(void)
          { s_counter.reset(); }
-  static int64 GetInstructionCount(void)
+  static int64_t GetInstructionCount(void)
          { return s_counter.getInstructionCount(); }
-  static int64 GetLoadCount(void)
+  static int64_t GetLoadCount(void)
          { return s_counter.getLoadCount(); }
-  static int64 GetStoreCount(void)
+  static int64_t GetStoreCount(void)
          { return s_counter.getStoreCount(); }
   static bool SetPerfEvents(CStrRef events)
          { return s_counter.setPerfEvents(events); }
@@ -98,11 +98,11 @@ public:
          { s_counter.clearPerfEvents(); }
 
   void  reset(void) { }
-  int64 getInstructionCount(void)
+  int64_t getInstructionCount(void)
         { return 0; }
-  int64 getLoadCount(void)
+  int64_t getLoadCount(void)
         { return 0; }
-  int64 getStoreCount(void)
+  int64_t getStoreCount(void)
         { return 0; }
   bool  eventExists(char *event)
         { return false; }

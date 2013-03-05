@@ -40,7 +40,7 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
   if (strcmp(format, "dec") == 0 ||
       strcmp(format, "unsigned") == 0 ||
       ret.isInteger()) {
-    int64 nret = ret.toInt64();
+    int64_t nret = ret.toInt64();
     char buf[64];
     if (strcmp(format, "hex") == 0 || strcmp(format, "x") == 0) {
       snprintf(buf, sizeof(buf), "%" PRIx64, nret);
@@ -107,7 +107,7 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
   }
   if (strcmp(format, "time") == 0) {
     DateTime dt;
-    int64 ts = -1;
+    int64_t ts = -1;
     if (dt.fromString(ret.toString(), SmartObject<TimeZone>())) {
       bool err;
       ts = dt.toTimeStamp(err);

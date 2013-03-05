@@ -81,7 +81,7 @@ void InstPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
 
 void InstPointInfo::SendImpl(const InstPointInfoPtrVec& ips,
                              DebuggerThriftBuffer &thrift) {
-  int16 size = ips.size();
+  int16_t size = ips.size();
   thrift.write(size);
   for (int i = 0; i < size; i++) {
     ips[i]->sendImpl(thrift);
@@ -90,7 +90,7 @@ void InstPointInfo::SendImpl(const InstPointInfoPtrVec& ips,
 
 void InstPointInfo::RecvImpl(InstPointInfoPtrVec& ips,
                              DebuggerThriftBuffer &thrift) {
-  int16 size;
+  int16_t size;
   thrift.read(size);
   ips.resize(size);
   for (int i = 0; i < size; i++) {

@@ -63,7 +63,7 @@ bool c_WaitHandle::t_isfailed() {
   return isFailed();
 }
 
-int64 c_WaitHandle::t_getid() {
+int64_t c_WaitHandle::t_getid() {
   return ((long) this) / sizeof(void*);
 }
 

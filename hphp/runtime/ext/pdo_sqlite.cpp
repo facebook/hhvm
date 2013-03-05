@@ -41,15 +41,15 @@ public:
   virtual bool support(SupportedMethod method);
   virtual bool closer();
   virtual bool preparer(CStrRef sql, sp_PDOStatement *stmt, CVarRef options);
-  virtual int64 doer(CStrRef sql);
+  virtual int64_t doer(CStrRef sql);
   virtual bool quoter(CStrRef input, String &quoted, PDOParamType paramtype);
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
-  virtual bool setAttribute(int64 attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, CVarRef value);
   virtual String lastId(const char *name);
   virtual bool fetchErr(PDOStatement *stmt, Array &info);
-  virtual int getAttribute(int64 attr, Variant &value);
+  virtual int getAttribute(int64_t attr, Variant &value);
   virtual void persistentShutdown();
 
 private:
@@ -68,7 +68,7 @@ public:
   virtual bool describer(int colno);
   virtual bool getColumn(int colno, Variant &value);
   virtual bool paramHook(PDOBoundParam *param, PDOParamEvent event_type);
-  virtual bool getColumnMeta(int64 colno, Array &return_value);
+  virtual bool getColumnMeta(int64_t colno, Array &return_value);
   virtual bool cursorCloser();
 
 private:
@@ -217,7 +217,7 @@ bool PDOSqliteConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
   return false;
 }
 
-int64 PDOSqliteConnection::doer(CStrRef sql) {
+int64_t PDOSqliteConnection::doer(CStrRef sql) {
   char *errmsg = NULL;
   if (sqlite3_exec(m_db, sql.data(), NULL, NULL, &errmsg) != SQLITE_OK) {
     handleError(__FILE__, __LINE__);
@@ -267,7 +267,7 @@ bool PDOSqliteConnection::rollback() {
   return true;
 }
 
-bool PDOSqliteConnection::setAttribute(int64 attr, CVarRef value) {
+bool PDOSqliteConnection::setAttribute(int64_t attr, CVarRef value) {
   switch (attr) {
   case PDO_ATTR_TIMEOUT:
     sqlite3_busy_timeout(m_db, value.toInt64() * 1000);
@@ -277,18 +277,18 @@ bool PDOSqliteConnection::setAttribute(int64 attr, CVarRef value) {
 }
 
 String PDOSqliteConnection::lastId(const char *name) {
-  return (int64)sqlite3_last_insert_rowid(m_db);
+  return (int64_t)sqlite3_last_insert_rowid(m_db);
 }
 
 bool PDOSqliteConnection::fetchErr(PDOStatement *stmt, Array &info) {
   if (m_einfo.errcode) {
-    info.append((int64)m_einfo.errcode);
+    info.append((int64_t)m_einfo.errcode);
     info.append(String(m_einfo.errmsg, CopyString));
   }
   return true;
 }
 
-int PDOSqliteConnection::getAttribute(int64 attr, Variant &value) {
+int PDOSqliteConnection::getAttribute(int64_t attr, Variant &value) {
   switch (attr) {
   case PDO_ATTR_CLIENT_VERSION:
   case PDO_ATTR_SERVER_VERSION:
@@ -550,7 +550,7 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
-bool PDOSqliteStatement::getColumnMeta(int64 colno, Array &ret) {
+bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_stmt) {
     return false;
   }

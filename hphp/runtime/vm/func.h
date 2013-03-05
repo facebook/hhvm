@@ -188,8 +188,8 @@ struct Func {
     return m_maxStackCells;
   }
 
-  bool byRef(int32 arg) const;
-  bool mustBeRef(int32 arg) const;
+  bool byRef(int32_t arg) const;
+  bool mustBeRef(int32_t arg) const;
   void prettyPrint(std::ostream& out) const;
 
   bool isPseudoMain() const { return m_name->empty(); }
@@ -667,7 +667,7 @@ public:
   public:
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
-                RepoTxn& txn, int64 unitSn, int funcSn, Id preClassId,
+                RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
                 const StringData* name, bool top);
   };
   class GetFuncsStmt : public RepoProxy::Stmt {

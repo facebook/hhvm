@@ -50,7 +50,7 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
 }
 
 void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
-  thrift.write((int32)m_type);
+  thrift.write((int32_t)m_type);
   thrift.write(m_class);
   thrift.write(m_body);
   thrift.write(m_version);
@@ -76,7 +76,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     return errno != EINTR; // treat signals as timeouts
   }
 
-  int32 type;
+  int32_t type;
   string clsname;
   try {
     thrift.reset(true);

@@ -31,10 +31,10 @@ static const char long_min_digits[] = "9223372036854775808";
 
 HOT_FUNC
 char *
-conv_10(register int64 num, register int *is_negative, char *buf_end,
+conv_10(register int64_t num, register int *is_negative, char *buf_end,
         register int *len) {
   register char *p = buf_end;
-  register uint64 magnitude;
+  register uint64_t magnitude;
 
   *is_negative = (num < 0);
 
@@ -48,17 +48,17 @@ conv_10(register int64 num, register int *is_negative, char *buf_end,
    *      d. add 1
    */
   if (*is_negative) {
-    int64 t = num + 1;
-    magnitude = ((uint64) - t) + 1;
+    int64_t t = num + 1;
+    magnitude = ((uint64_t) - t) + 1;
   } else {
-    magnitude = (uint64) num;
+    magnitude = (uint64_t) num;
   }
 
   /*
    * We use a do-while loop so that we write at least 1 digit
    */
   do {
-    uint64 new_magnitude = magnitude / 10;
+    uint64_t new_magnitude = magnitude / 10;
 
     *--p = (char)(magnitude - new_magnitude * 10 + '0');
     magnitude = new_magnitude;
@@ -73,7 +73,7 @@ conv_10(register int64 num, register int *is_negative, char *buf_end,
   return (p);
 }
 
-DataType is_numeric_string(const char *str, int length, int64 *lval,
+DataType is_numeric_string(const char *str, int length, int64_t *lval,
                            double *dval, int allow_errors /* = 1 */) {
   DataType type;
   const char *ptr;

@@ -166,7 +166,7 @@ static void zend_ini_do_op(char type, String &result,
   case '!': i_result = !i_op1;        break;
   }
 
-  result = String((int64)i_result);
+  result = String((int64_t)i_result);
 }
 
 static void zend_ini_get_constant(String &result, CStrRef name) {

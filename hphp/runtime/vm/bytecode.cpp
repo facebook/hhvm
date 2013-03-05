@@ -157,7 +157,7 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
   DECODE_JMP(type, var);                                                      \
   pc += sizeof(type)
 #define DECODE_IVA(var)                                                       \
-  int32 var UNUSED = decodeVariableSizeImm(&pc);                              \
+  int32_t var UNUSED = decodeVariableSizeImm(&pc);                              \
   ONTRACE(2,                                                                  \
           Trace::trace("decode:     Immediate int32 %" PRIi64"\n",            \
                        (int64_t)var));
@@ -893,7 +893,7 @@ string Stack::toString(const ActRec* fp, int offset,
   return os.str();
 }
 
-void Stack::clearEvalStack(ActRec *fp, int32 numLocals) {
+void Stack::clearEvalStack(ActRec *fp, int32_t numLocals) {
 }
 
 UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
@@ -3338,7 +3338,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
   while (vec < pc) {
     mcode = MemberCode(*vec++);
     if (memberCodeHasImm(mcode)) {
-      int64 memberImm = decodeMemberCodeImm(&vec, mcode);
+      int64_t memberImm = decodeMemberCodeImm(&vec, mcode);
       if (memberCodeImmIsString(mcode)) {
         tvAsVariant(&tvLiteral) =
           m_fp->m_func->unit()->lookupLitstrId(memberImm);
@@ -3645,7 +3645,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
   while (vec < pc) {
     mcode = MemberCode(*vec++);
     if (memberCodeHasImm(mcode)) {
-      int64 memberImm = decodeMemberCodeImm(&vec, mcode);
+      int64_t memberImm = decodeMemberCodeImm(&vec, mcode);
       if (memberCodeImmIsString(mcode)) {
         tvAsVariant(&tvLiteral) =
           m_fp->m_func->unit()->lookupLitstrId(memberImm);
@@ -3843,7 +3843,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDir(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopInt(PC& pc) {
   NEXT();
-  DECODE(int64, i);
+  DECODE(int64_t, i);
   m_stack.pushInt(i);
 }
 
@@ -4060,8 +4060,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
   Cell* c1 = m_stack.topC();                                                  \
   Cell* c2 = m_stack.indC(1);                                                 \
   if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {               \
-    int64 a = c2->m_data.num;                                                 \
-    int64 b = c1->m_data.num;                                                 \
+    int64_t a = c2->m_data.num;                                                 \
+    int64_t b = c1->m_data.num;                                                 \
     MATHOP_DIVCHECK(0)                                                        \
     c2->m_data.num = a OP b;                                                  \
     m_stack.popX();                                                           \
@@ -4108,7 +4108,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDiv(PC& pc) {
   // Special handling for evenly divisible ints
   if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64
       && c1->m_data.num != 0 && c2->m_data.num % c1->m_data.num == 0) {
-    int64 b = c1->m_data.num;
+    int64_t b = c1->m_data.num;
     MATHOP_DIVCHECK(0)
     c2->m_data.num /= b;
     m_stack.popX();
@@ -4155,13 +4155,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
   Cell* c1 = m_stack.topC();                                                  \
   Cell* c2 = m_stack.indC(1);                                                 \
   if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {               \
-    int64 a = c2->m_data.num;                                                 \
-    int64 b = c1->m_data.num;                                                 \
+    int64_t a = c2->m_data.num;                                                 \
+    int64_t b = c1->m_data.num;                                                 \
     c2->m_data.num = (a OP b);                                                \
     c2->m_type = KindOfBoolean;                                               \
     m_stack.popX();                                                           \
   } else {                                                                    \
-    int64 result = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1));             \
+    int64_t result = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1));             \
     tvRefcountedDecRefCell(c2);                                               \
     c2->m_data.num = result;                                                  \
     c2->m_type = KindOfBoolean;                                               \
@@ -4225,7 +4225,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
     c1->m_data.num = ~c1->m_data.num;
   } else if (c1->m_type == KindOfDouble) {
     c1->m_type = KindOfInt64;
-    c1->m_data.num = ~int64(c1->m_data.dbl);
+    c1->m_data.num = ~int64_t(c1->m_data.dbl);
   } else if (IS_STRING_TYPE(c1->m_type)) {
     tvCellAsVariant(c1) = ~tvCellAsVariant(c1);
   } else {
@@ -4238,8 +4238,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
   Cell* c1 = m_stack.topC();                                                  \
   Cell* c2 = m_stack.indC(1);                                                 \
   if (c2->m_type == KindOfInt64 && c1->m_type == KindOfInt64) {               \
-    int64 a = c2->m_data.num;                                                 \
-    int64 b = c1->m_data.num;                                                 \
+    int64_t a = c2->m_data.num;                                                 \
+    int64_t b = c1->m_data.num;                                                 \
     c2->m_data.num = a OP b;                                                  \
     m_stack.popX();                                                           \
   } else {                                                                    \
@@ -4427,7 +4427,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopJmp(PC& pc) {
 #define JMPOP(OP, VOP) do {                                                   \
   Cell* c1 = m_stack.topC();                                                  \
   if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) {             \
-    int64 n = c1->m_data.num;                                                 \
+    int64_t n = c1->m_data.num;                                                 \
     if (n OP 0) {                                                             \
       NEXT();                                                                 \
       DECODE_JMP(Offset, offset);                                             \
@@ -4467,8 +4467,8 @@ enum SwitchMatch {
   MATCH_DEFAULT, // can't be converted to an int: match default case
 };
 
-static SwitchMatch doubleCheck(double d, int64& out) {
-  if (int64(d) == d) {
+static SwitchMatch doubleCheck(double d, int64_t& out) {
+  if (int64_t(d) == d) {
     out = d;
     return MATCH_NORMAL;
   } else {
@@ -4483,20 +4483,20 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
   assert(veclen > 0);
   Offset* jmptab = (Offset*)pc;
   pc += veclen * sizeof(*jmptab);
-  DECODE(int64, base);
+  DECODE(int64_t, base);
   DECODE_IVA(bounded);
 
   TypedValue* val = m_stack.topTV();
   if (!bounded) {
     assert(val->m_type == KindOfInt64);
     // Continuation switch: no bounds checking needed
-    int64 label = val->m_data.num;
+    int64_t label = val->m_data.num;
     m_stack.popX();
     assert(label >= 0 && label < veclen);
     pc = origPC + jmptab[label];
   } else {
     // Generic integer switch
-    int64 intval;
+    int64_t intval;
     SwitchMatch match = MATCH_NORMAL;
 
     switch (val->m_type) {
@@ -4582,7 +4582,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopSSwitch(PC& pc) {
   PC origPC = pc;
   NEXT();
-  DECODE(int32, veclen);
+  DECODE(int32_t, veclen);
   assert(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
   StrVecItem* jmptab = (StrVecItem*)pc;
@@ -6849,7 +6849,7 @@ VMExecutionContext::createContinuation(ActRec* fp,
   cont->incRefCount();
   cont->setNoDestruct();
   try {
-    cont->t___construct((int64)0, (int64)genFunc, isMethod,
+    cont->t___construct((int64_t)0, (int64_t)genFunc, isMethod,
                         StrNR(const_cast<StringData*>(origName)), obj, args);
   } catch (...) {
     decRefObj(cont);
@@ -7138,7 +7138,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStrlen(PC& pc) {
   NEXT();
   TypedValue* subj = m_stack.topTV();
   if (LIKELY(IS_STRING_TYPE(subj->m_type))) {
-    int64 ans = subj->m_data.pstr->size();
+    int64_t ans = subj->m_data.pstr->size();
     tvRefcountedDecRef(subj);
     subj->m_type = KindOfInt64;
     subj->m_data.num = ans;

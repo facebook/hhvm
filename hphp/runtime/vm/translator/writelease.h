@@ -31,15 +31,15 @@ namespace HPHP { namespace VM { namespace Transl {
  */
 
 struct Lease {
-  static const int64 kStandardHintExpireInterval = 750;
+  static const int64_t kStandardHintExpireInterval = 750;
   pthread_t       m_owner;
   pthread_mutex_t m_lock;
   // m_held: since there's no portable, universally invalid pthread_t,
   // explicitly represent the held <-> unheld state machine.
   volatile bool   m_held;
-  int64           m_hintExpire;
-  int64           m_hintKept;
-  int64           m_hintGrabbed;
+  int64_t           m_hintExpire;
+  int64_t           m_hintKept;
+  int64_t           m_hintGrabbed;
 
   Lease() : m_held(false), m_hintExpire(0), m_hintKept(0), m_hintGrabbed(0) {
     pthread_mutex_init(&m_lock, nullptr);
@@ -54,7 +54,7 @@ struct Lease {
   bool amOwner() const;
   // acquire: also returns true if we are already the writer.
   bool acquire(bool blocking = false);
-  void drop(int64 hintExpireDelay = 0);
+  void drop(int64_t hintExpireDelay = 0);
 
   /*
    * A malevolent entity sometimes takes the write lease out from under us

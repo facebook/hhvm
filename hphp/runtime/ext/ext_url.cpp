@@ -254,7 +254,7 @@ Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   SET_COMPONENT(query);
   SET_COMPONENT(fragment);
   if (resource.port) {
-    ret.set("port", (int64)resource.port);
+    ret.set("port", (int64_t)resource.port);
   }
   return ret;
 }

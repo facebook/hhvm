@@ -55,10 +55,10 @@ Object f_gzopen(CStrRef filename, CStrRef mode, bool use_include_path = false);
 inline bool f_gzclose(CObjRef zp) {
   return f_fclose(zp);
 }
-inline Variant f_gzread(CObjRef zp, int64 length = 0) {
+inline Variant f_gzread(CObjRef zp, int64_t length = 0) {
   return f_fread(zp, length);
 }
-inline Variant f_gzseek(CObjRef zp, int64 offset, int64 whence = k_SEEK_SET) {
+inline Variant f_gzseek(CObjRef zp, int64_t offset, int64_t whence = k_SEEK_SET) {
   return f_fseek(zp, offset, whence);
 }
 inline Variant f_gztell(CObjRef zp) {
@@ -73,20 +73,20 @@ inline bool f_gzrewind(CObjRef zp) {
 inline Variant f_gzgetc(CObjRef zp) {
   return f_fgetc(zp);
 }
-inline Variant f_gzgets(CObjRef zp, int64 length = 1024) {
+inline Variant f_gzgets(CObjRef zp, int64_t length = 1024) {
   return f_fgets(zp, length);
 }
-inline Variant f_gzgetss(CObjRef zp, int64 length = 0,
+inline Variant f_gzgetss(CObjRef zp, int64_t length = 0,
                         CStrRef allowable_tags = null_string) {
   return f_fgetss(zp, length, allowable_tags);
 }
 inline Variant f_gzpassthru(CObjRef zp) {
   return f_fpassthru(zp);
 }
-inline Variant f_gzputs(CObjRef zp, CStrRef str, int64 length = 0) {
+inline Variant f_gzputs(CObjRef zp, CStrRef str, int64_t length = 0) {
   return f_fwrite(zp, str, length);
 }
-inline Variant f_gzwrite(CObjRef zp, CStrRef str, int64 length = 0) {
+inline Variant f_gzwrite(CObjRef zp, CStrRef str, int64_t length = 0) {
   return f_fwrite(zp, str, length);
 }
 

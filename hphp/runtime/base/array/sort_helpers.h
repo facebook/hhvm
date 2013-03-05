@@ -32,8 +32,8 @@ struct IntElmCompare {
   typedef typename AccessorT::ElmT ElmT;
   AccessorT acc;
   bool operator()(ElmT left, ElmT right) const {
-    int64 iLeft = acc.getInt(left);
-    int64 iRight = acc.getInt(right);
+    int64_t iLeft = acc.getInt(left);
+    int64_t iRight = acc.getInt(right);
     if (sort_flags == SORT_REGULAR || sort_flags == SORT_NUMERIC) {
       return ascending ? (iLeft < iRight) : (iLeft > iRight);
     }
@@ -145,8 +145,8 @@ struct ElmCompare {
         }
       } else if (acc.isInt(left)) {
         if (LIKELY(acc.isInt(right))) {
-          int64 iLeft = acc.getInt(left);
-          int64 iRight = acc.getInt(right);
+          int64_t iLeft = acc.getInt(left);
+          int64_t iRight = acc.getInt(right);
           return ascending ? (iLeft < iRight) : (iLeft > iRight);
         }
       }
@@ -154,8 +154,8 @@ struct ElmCompare {
     if (sort_flags == SORT_NUMERIC) {
       if (acc.isInt(left)) {
         if (LIKELY(acc.isInt(right))) {
-          int64 iLeft = acc.getInt(left);
-          int64 iRight = acc.getInt(right);
+          int64_t iLeft = acc.getInt(left);
+          int64_t iRight = acc.getInt(right);
           return ascending ? (iLeft < iRight) : (iLeft > iRight);
         }
       }
@@ -252,7 +252,7 @@ struct ElmUCompare {
       return ret.toDouble() < 0.0;
     }
     if (ret.isString()) {
-      int64 lval; double dval;
+      int64_t lval; double dval;
       switch (ret.getStringData()->isNumericWithVal(lval, dval, 0)) {
         case KindOfInt64: return lval < 0;
         case KindOfDouble: return dval < 0;

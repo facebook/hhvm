@@ -104,8 +104,8 @@ typedef enum {
     }                                                   \
 } while (0)
 
-typedef int64 wide_int;
-typedef uint64 u_wide_int;
+typedef int64_t wide_int;
+typedef uint64_t u_wide_int;
 
 #define FALSE           0
 #define TRUE            1
@@ -377,7 +377,7 @@ static char *php_gcvt(double value, int ndigit, char dec_point,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_p2(register uint64 num, register int nbits,
+char * ap_php_conv_p2(register uint64_t num, register int nbits,
                       char format, char *buf_end, register int *len)
 {
   register int mask = (1 << nbits) - 1;
@@ -408,14 +408,14 @@ char * ap_php_conv_p2(register uint64 num, register int nbits,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_10(register int64 num, register bool is_unsigned,
+char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
                       register int * is_negative, char *buf_end,
                       register int *len) {
   register char *p = buf_end;
-  register uint64 magnitude;
+  register uint64_t magnitude;
 
   if (is_unsigned) {
-    magnitude = (uint64) num;
+    magnitude = (uint64_t) num;
     *is_negative = 0;
   } else {
     *is_negative = (num < 0);
@@ -430,10 +430,10 @@ char * ap_php_conv_10(register int64 num, register bool is_unsigned,
      *      d. add 1
      */
     if (*is_negative) {
-      int64 t = num + 1;
-      magnitude = ((uint64) - t) + 1;
+      int64_t t = num + 1;
+      magnitude = ((uint64_t) - t) + 1;
     } else {
-      magnitude = (uint64) num;
+      magnitude = (uint64_t) num;
     }
   }
 
@@ -441,7 +441,7 @@ char * ap_php_conv_10(register int64 num, register bool is_unsigned,
    * We use a do-while loop so that we write at least 1 digit
    */
   do {
-    register uint64 new_magnitude = magnitude / 10;
+    register uint64_t new_magnitude = magnitude / 10;
 
     *--p = (char)(magnitude - new_magnitude * 10 + '0');
     magnitude = new_magnitude;
@@ -530,7 +530,7 @@ char * php_conv_fp(register char format, register double num,
     *s++ = format; // either e or E
     decimal_point--;
     if (decimal_point != 0) {
-      p = ap_php_conv_10((int64) decimal_point, false,
+      p = ap_php_conv_10((int64_t) decimal_point, false,
                          &exponent_is_negative, &temp[EXPONENT_LENGTH],
                          &t_len);
       *s++ = exponent_is_negative ? '-' : '+';

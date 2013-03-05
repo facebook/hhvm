@@ -147,7 +147,7 @@ class Variant : VariantBase {
   // implemented as long or long long.
   Variant(long   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(long long v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
-  Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  Variant(uint64_t  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
 
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
 
@@ -304,12 +304,12 @@ class Variant : VariantBase {
 ///////////////////////////////////////////////////////////////////////////////
 // int64
 
-  inline ALWAYS_INLINE int64 asInt64Val() const {
+  inline ALWAYS_INLINE int64_t asInt64Val() const {
     assert(m_type == KindOfInt64);
     return m_data.num;
   }
 
-  inline ALWAYS_INLINE int64 toInt64Val() const {
+  inline ALWAYS_INLINE int64_t toInt64Val() const {
     assert(is(KindOfInt64));
     return
         LIKELY(m_type == KindOfInt64) ?
@@ -479,7 +479,7 @@ class Variant : VariantBase {
   }
   bool isInteger() const;
   bool isNumeric(bool checkString = false) const;
-  DataType toNumeric(int64 &ival, double &dval, bool checkString = false)
+  DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)
     const;
   bool isScalar() const;
   bool isObject() const {
@@ -516,17 +516,17 @@ class Variant : VariantBase {
    * first non zero case in the statements. noMatch refers to a case
    * statement which does NOT exist in the statements.
    */
-  int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const;
+  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const;
 
-  static int64 DoubleHashForIntSwitch(double dbl, int64 noMatch);
+  static int64_t DoubleHashForIntSwitch(double dbl, int64_t noMatch);
 
-  int64 hashForStringSwitch(
-      int64 firstTrueCaseHash,
-      int64 firstNullCaseHash,
-      int64 firstFalseCaseHash,
-      int64 firstZeroCaseHash,
-      int64 firstHash,
-      int64 noMatchHash,
+  int64_t hashForStringSwitch(
+      int64_t firstTrueCaseHash,
+      int64_t firstNullCaseHash,
+      int64_t firstFalseCaseHash,
+      int64_t firstZeroCaseHash,
+      int64_t firstHash,
+      int64_t noMatchHash,
       bool &needsOrder) const;
 
   /**
@@ -546,7 +546,7 @@ class Variant : VariantBase {
     bool val = m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
     return val;
   }
-  int64 getInt64() const {
+  int64_t getInt64() const {
     assert(getType() == KindOfInt64);
     return m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
   }
@@ -594,34 +594,34 @@ class Variant : VariantBase {
   Variant unary_plus() const { return Variant(*this).operator+();}
   friend Variant  operator +  (const Variant & lhs, const Variant & rhs);
   Variant &operator += (CVarRef v);
-  Variant &operator += (int     n) { return operator+=((int64)n);}
-  Variant &operator += (int64   n);
+  Variant &operator += (int     n) { return operator+=((int64_t)n);}
+  Variant &operator += (int64_t   n);
   Variant &operator += (double  n);
 
   Variant negate() const { return Variant(*this).operator-();}
   Variant  operator -  () const;
   Variant  operator -  (CVarRef v) const;
   Variant &operator -= (CVarRef v);
-  Variant &operator -= (int     n) { return operator-=((int64)n);}
-  Variant &operator -= (int64   n);
+  Variant &operator -= (int     n) { return operator-=((int64_t)n);}
+  Variant &operator -= (int64_t   n);
   Variant &operator -= (double  n);
 
   Variant  operator *  (CVarRef v) const;
   Variant &operator *= (CVarRef v);
-  Variant &operator *= (int     n) { return operator*=((int64)n);}
-  Variant &operator *= (int64   n);
+  Variant &operator *= (int     n) { return operator*=((int64_t)n);}
+  Variant &operator *= (int64_t   n);
   Variant &operator *= (double  n);
 
   Variant  operator /  (CVarRef v) const;
   Variant &operator /= (CVarRef v);
-  Variant &operator /= (int     n) { return operator/=((int64)n);}
-  Variant &operator /= (int64   n);
+  Variant &operator /= (int     n) { return operator/=((int64_t)n);}
+  Variant &operator /= (int64_t   n);
   Variant &operator /= (double  n);
 
-  int64    operator %  (CVarRef v) const;
+  int64_t    operator %  (CVarRef v) const;
   Variant &operator %= (CVarRef v);
-  Variant &operator %= (int     n) { return operator%=((int64)n);}
-  Variant &operator %= (int64   n);
+  Variant &operator %= (int     n) { return operator%=((int64_t)n);}
+  Variant &operator %= (int64_t   n);
   Variant &operator %= (double  n);
 
   Variant  operator ~  () const;
@@ -631,8 +631,8 @@ class Variant : VariantBase {
   Variant &operator &= (CVarRef v);
   Variant  operator ^  (CVarRef v) const;
   Variant &operator ^= (CVarRef v);
-  Variant &operator <<=(int64 n);
-  Variant &operator >>=(int64 n);
+  Variant &operator <<=(int64_t n);
+  Variant &operator >>=(int64_t n);
 
   Variant &operator ++ ();
   Variant  operator ++ (int);
@@ -673,7 +673,7 @@ class Variant : VariantBase {
   operator char   () const { return toByte();}
   operator short  () const { return toInt16();}
   operator int    () const { return toInt32();}
-  operator int64  () const { return toInt64();}
+  operator int64_t  () const { return toInt64();}
   operator double () const { return toDouble();}
   operator String () const;
   operator Array  () const;
@@ -691,12 +691,12 @@ class Variant : VariantBase {
   char   toByte   () const { return (char)toInt64();}
   short  toInt16  (int base = 10) const { return (short)toInt64(base);}
   int    toInt32  (int base = 10) const { return (int)toInt64(base);}
-  int64  toInt64  () const {
+  int64_t  toInt64  () const {
     if (IS_NULL_TYPE(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(10);
   }
-  int64  toInt64  (int base) const {
+  int64_t  toInt64  (int base) const {
     if (IS_NULL_TYPE(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(base);
@@ -750,7 +750,7 @@ class Variant : VariantBase {
    */
   bool same(bool    v2) const;
   bool same(int     v2) const;
-  bool same(int64   v2) const;
+  bool same(int64_t   v2) const;
   bool same(double  v2) const;
   bool same(litstr  v2) const;
   bool same(const StringData *v2) const;
@@ -761,7 +761,7 @@ class Variant : VariantBase {
 
   bool equal(bool    v2) const;
   bool equal(int     v2) const;
-  bool equal(int64   v2) const;
+  bool equal(int64_t   v2) const;
   bool equal(double  v2) const;
   bool equal(litstr  v2) const;
   bool equal(const StringData *v2) const;
@@ -772,7 +772,7 @@ class Variant : VariantBase {
 
   bool equalAsStr(bool    v2) const;
   bool equalAsStr(int     v2) const;
-  bool equalAsStr(int64   v2) const;
+  bool equalAsStr(int64_t   v2) const;
   bool equalAsStr(double  v2) const;
   bool equalAsStr(litstr v2) const;
   bool equalAsStr(const StringData *v2) const;
@@ -783,7 +783,7 @@ class Variant : VariantBase {
 
   bool less(bool    v2) const;
   bool less(int     v2) const;
-  bool less(int64   v2) const;
+  bool less(int64_t   v2) const;
   bool less(double  v2) const;
   bool less(litstr  v2) const;
   bool less(const StringData *v2) const;
@@ -794,7 +794,7 @@ class Variant : VariantBase {
 
   bool more(bool    v2) const;
   bool more(int     v2) const;
-  bool more(int64   v2) const;
+  bool more(int64_t   v2) const;
   bool more(double  v2) const;
   bool more(litstr  v2) const;
   bool more(const StringData *v2) const;
@@ -831,12 +831,12 @@ class Variant : VariantBase {
   /**
    * Offset functions
    */
-  Variant rvalAtHelper(int64 offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAtHelper(int64_t offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(bool offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int offset, ACCESSPARAMS_DECL) const {
-    return rvalAt((int64)offset, flags);
+    return rvalAt((int64_t)offset, flags);
   }
-  Variant rvalAt(int64 offset, ACCESSPARAMS_DECL) const {
+  Variant rvalAt(int64_t offset, ACCESSPARAMS_DECL) const {
     if (m_type == KindOfArray) {
       return m_data.parr->get(offset, flags & AccessFlags::Error);
     }
@@ -850,10 +850,10 @@ class Variant : VariantBase {
   template <typename T>
   CVarRef rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(int offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
-    return rvalRef((int64)offset, tmp, flags);
+    return rvalRef((int64_t)offset, tmp, flags);
   }
 
-  CVarRef rvalRef(int64 offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
+  CVarRef rvalRef(int64_t offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
     if (m_type == KindOfArray) {
       return m_data.parr->get(offset, flags & AccessFlags::Error);
     }
@@ -869,13 +869,13 @@ class Variant : VariantBase {
   template <typename T>
   CVarRef rvalAtRefHelper(T offset, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(bool offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper((int64)offset, flags);
+    return rvalAtRefHelper((int64_t)offset, flags);
   }
   CVarRef rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper((int64)offset, flags);
+    return rvalAtRefHelper((int64_t)offset, flags);
   }
   CVarRef rvalAtRef(double offset, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(int64 offset, ACCESSPARAMS_DECL) const {
+  CVarRef rvalAtRef(int64_t offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper(offset, flags);
   }
   CVarRef rvalAtRef(CStrRef offset, ACCESSPARAMS_DECL) const {
@@ -886,7 +886,7 @@ class Variant : VariantBase {
   }
   const Variant operator[](bool    key) const { return rvalAt(key);}
   const Variant operator[](int     key) const { return rvalAt(key);}
-  const Variant operator[](int64   key) const { return rvalAt(key);}
+  const Variant operator[](int64_t   key) const { return rvalAt(key);}
   const Variant operator[](double  key) const { return rvalAt(key);}
   const Variant operator[](litstr  key) const { return rvalAt(key);}
   const Variant operator[](CStrRef key) const { return rvalAt(key);}
@@ -920,7 +920,7 @@ class Variant : VariantBase {
 
   Variant &lvalAt(bool    key, ACCESSPARAMS_DECL);
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(int64   key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL);
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL);
   Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
@@ -928,7 +928,7 @@ class Variant : VariantBase {
 
   Variant &lvalRef(bool    key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(int64   key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_DECL);
@@ -957,12 +957,12 @@ class Variant : VariantBase {
   bool o_isset(CStrRef propName, CStrRef context = null_string) const;
   void o_unset(CStrRef propName, CStrRef context = null_string);
 
-  Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
-  Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);
+  Variant o_invoke(CStrRef s, CArrRef params, int64_t hash = -1);
+  Variant o_root_invoke(CStrRef s, CArrRef params, int64_t hash = -1);
   Variant o_invoke_ex(CStrRef clsname, CStrRef s, CArrRef params);
-  Variant o_invoke_few_args(CStrRef s, int64 hash, int count,
+  Variant o_invoke_few_args(CStrRef s, int64_t hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
-  Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
+  Variant o_root_invoke_few_args(CStrRef s, int64_t hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   template <typename T>
@@ -974,8 +974,8 @@ class Variant : VariantBase {
     Variant *self, T key, CVarRef v, bool isKey);
 
   CVarRef set(bool    key, CVarRef v);
-  CVarRef set(int     key, CVarRef v) { return set((int64)key, v); }
-  CVarRef set(int64   key, CVarRef v);
+  CVarRef set(int     key, CVarRef v) { return set((int64_t)key, v); }
+  CVarRef set(int64_t   key, CVarRef v);
   CVarRef set(double  key, CVarRef v);
   CVarRef set(litstr  key, CVarRef v, bool isString = false) {
     return set(String(key), v, isString);
@@ -986,8 +986,8 @@ class Variant : VariantBase {
   CVarRef append(CVarRef v);
 
   CVarRef setRef(bool    key, CVarRef v);
-  CVarRef setRef(int     key, CVarRef v) { return setRef((int64)key, v); }
-  CVarRef setRef(int64   key, CVarRef v);
+  CVarRef setRef(int     key, CVarRef v) { return setRef((int64_t)key, v); }
+  CVarRef setRef(int64_t   key, CVarRef v);
   CVarRef setRef(double  key, CVarRef v);
   CVarRef setRef(litstr  key, CVarRef v, bool isString = false) {
     return setRef(String(key), v, isString);
@@ -997,7 +997,7 @@ class Variant : VariantBase {
 
   CVarRef set(bool    key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(int     key, RefResult v) { return setRef(key, variant(v)); }
-  CVarRef set(int64   key, RefResult v) { return setRef(key, variant(v)); }
+  CVarRef set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(double  key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(litstr  key, RefResult v, bool isString = false) {
     return setRef(key, variant(v), isString);
@@ -1012,9 +1012,9 @@ class Variant : VariantBase {
 
   CVarRef setOpEqual(int op, bool key, CVarRef v);
   CVarRef setOpEqual(int op, int key, CVarRef v) {
-    return setOpEqual(op, (int64)key, v);
+    return setOpEqual(op, (int64_t)key, v);
   }
-  CVarRef setOpEqual(int op, int64 key, CVarRef v);
+  CVarRef setOpEqual(int op, int64_t key, CVarRef v);
   CVarRef setOpEqual(int op, double key, CVarRef v);
   CVarRef setOpEqual(int op, litstr  key, CVarRef v, bool isString = false) {
     return setOpEqual(op, String(key), v, isString);
@@ -1027,8 +1027,8 @@ class Variant : VariantBase {
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
   void remove(bool    key) { removeImpl(key);}
-  void remove(int     key) { removeImpl((int64)key);}
-  void remove(int64   key) { removeImpl(key);}
+  void remove(int     key) { removeImpl((int64_t)key);}
+  void remove(int64_t   key) { removeImpl(key);}
   void remove(double  key) { removeImpl(key);}
   void remove(litstr  key, bool isString = false) {
     remove(String(key), isString);
@@ -1105,7 +1105,7 @@ class Variant : VariantBase {
   /**
    * Low level access that should be restricted to internal use.
    */
-  int64 *getInt64Data() const {
+  int64_t *getInt64Data() const {
     assert(getType() == KindOfInt64);
     return m_type == KindOfRef ? &m_data.pref->var()->m_data.num : &m_data.num;
   }
@@ -1159,7 +1159,7 @@ class Variant : VariantBase {
 
   ObjectData *getArrayAccess() const;
   void callOffsetUnset(CVarRef key);
-  int64 getNumData() const { return m_data.num; }
+  int64_t getNumData() const { return m_data.num; }
   bool isStatic() const { return _count == RefCountStaticValue; }
   void setEvalScalar() const;
 
@@ -1194,7 +1194,7 @@ class Variant : VariantBase {
     assert(acc && acc->m_type == KindOfBoolean);
     return acc->m_data.num;
   }
-  static int64 GetInt64(TypedValueAccessor acc) {
+  static int64_t GetInt64(TypedValueAccessor acc) {
     assert(acc);
     assert(acc->m_type == KindOfInt64);
     return acc->m_data.num;
@@ -1243,7 +1243,7 @@ class Variant : VariantBase {
    */
  protected:
   mutable union Data {
-    int64        num;
+    int64_t        num;
     double       dbl;
     StringData  *pstr;
     ArrayData   *parr;
@@ -1257,7 +1257,7 @@ class Variant : VariantBase {
       mutable int32_t _count;
       mutable DataType m_type;
     };
-    uint64 m_countAndTypeUnion;
+    uint64_t m_countAndTypeUnion;
   };
 
  private:
@@ -1271,14 +1271,14 @@ class Variant : VariantBase {
   }
 
   void removeImpl(double key);
-  void removeImpl(int64 key);
+  void removeImpl(int64_t key);
   void removeImpl(bool key);
   void removeImpl(CVarRef key, bool isString = false);
   void removeImpl(CStrRef key, bool isString = false);
 
   CVarRef set(bool    v);
   CVarRef set(int     v);
-  CVarRef set(int64   v);
+  CVarRef set(int64_t   v);
   CVarRef set(double  v);
   CVarRef set(litstr  v);
   CVarRef set(const std::string & v) {
@@ -1446,7 +1446,7 @@ private:
   }
 
   bool   toBooleanHelper() const;
-  int64  toInt64Helper(int base = 10) const;
+  int64_t  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
   String toStringHelper() const;
   Array  toArrayHelper() const;
@@ -1462,7 +1462,7 @@ private:
     static_assert(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET,
                   "Offset of _count in Variant must be FAST_REFCOUNT_OFFSET");
   }
-  DataType convertToNumeric(int64 *lval, double *dval) const;
+  DataType convertToNumeric(int64_t *lval, double *dval) const;
 };
 
 class VariantVectorBase {
@@ -1519,7 +1519,7 @@ public:
 
   operator bool   () const { return m_var.toBoolean();}
   operator int    () const { return m_var.toInt32();}
-  operator int64  () const { return m_var.toInt64();}
+  operator int64_t  () const { return m_var.toInt64();}
   operator double () const { return m_var.toDouble();}
   operator String () const { return m_var.toString();}
   operator Array  () const { return m_var.toArray();}
@@ -1532,7 +1532,7 @@ public:
   bool isNull() const { return m_var.isNull(); }
 
   bool toBoolean() const { return m_var.toBoolean(); }
-  int64 toInt64() const { return m_var.toInt64(); }
+  int64_t toInt64() const { return m_var.toInt64(); }
   double toDouble() const { return m_var.toDouble(); }
   String toString() const { return m_var.toString(); }
   StringData *getStringData() const { return m_var.getStringData(); }
@@ -1599,7 +1599,7 @@ public:
   // implemented as long or long long.
   explicit VarNR(long    v) { init(KindOfInt64  ); m_data.num = v;}
   explicit VarNR(long long v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(uint64  v) { init(KindOfInt64  ); m_data.num = v;}
+  explicit VarNR(uint64_t  v) { init(KindOfInt64  ); m_data.num = v;}
   explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {
@@ -1678,7 +1678,7 @@ inline const Variant Array::operator[](int     key) const {
   return rvalAt(key);
 }
 
-inline const Variant Array::operator[](int64   key) const {
+inline const Variant Array::operator[](int64_t   key) const {
   return rvalAt(key);
 }
 

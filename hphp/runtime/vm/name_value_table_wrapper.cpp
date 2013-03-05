@@ -56,7 +56,7 @@ bool NameValueTableWrapper::noCopyOnWrite() const {
   return true;
 }
 
-bool NameValueTableWrapper::exists(int64 k) const {
+bool NameValueTableWrapper::exists(int64_t k) const {
   return exists(String(k));
 }
 
@@ -68,7 +68,7 @@ bool NameValueTableWrapper::idxExists(ssize_t idx) const {
   return false;
 }
 
-CVarRef NameValueTableWrapper::get(int64 k, bool error) const {
+CVarRef NameValueTableWrapper::get(int64_t k, bool error) const {
   return get(String(k), error);
 }
 
@@ -89,11 +89,11 @@ TypedValue* NameValueTableWrapper::nvGet(const StringData* k) const {
   return m_tab->lookup(k);
 }
 
-TypedValue* NameValueTableWrapper::nvGet(int64 k) const {
+TypedValue* NameValueTableWrapper::nvGet(int64_t k) const {
   return m_tab->lookup(String(k).get());
 }
 
-ssize_t NameValueTableWrapper::getIndex(int64 k) const {
+ssize_t NameValueTableWrapper::getIndex(int64_t k) const {
   return getIndex(String(k));
 }
 
@@ -102,7 +102,7 @@ ssize_t NameValueTableWrapper::getIndex(const StringData* k) const {
   return iter.toInteger();
 }
 
-ArrayData* NameValueTableWrapper::lval(int64 k, Variant*& ret, bool copy,
+ArrayData* NameValueTableWrapper::lval(int64_t k, Variant*& ret, bool copy,
                                        bool checkExist) {
   return lval(String(k), ret, copy, checkExist);
 }
@@ -124,7 +124,7 @@ ArrayData* NameValueTableWrapper::lvalNew(Variant*& ret, bool copy) {
   return 0;
 }
 
-ArrayData* NameValueTableWrapper::set(int64 k, CVarRef v, bool copy) {
+ArrayData* NameValueTableWrapper::set(int64_t k, CVarRef v, bool copy) {
   return set(String(k), v, copy);
 }
 
@@ -134,7 +134,7 @@ ArrayData* NameValueTableWrapper::set(StringData* k, CVarRef v,
   return 0;
 }
 
-ArrayData* NameValueTableWrapper::setRef(int64 k, CVarRef v, bool copy) {
+ArrayData* NameValueTableWrapper::setRef(int64_t k, CVarRef v, bool copy) {
   return setRef(String(k), v, copy);
 }
 
@@ -143,7 +143,7 @@ ArrayData* NameValueTableWrapper::setRef(StringData* k, CVarRef v, bool copy) {
   return 0;
 }
 
-ArrayData* NameValueTableWrapper::remove(int64 k, bool copy) {
+ArrayData* NameValueTableWrapper::remove(int64_t k, bool copy) {
   return remove(String(k), copy);
 }
 

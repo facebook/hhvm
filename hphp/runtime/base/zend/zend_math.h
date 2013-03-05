@@ -159,7 +159,7 @@ static inline double php_math_round(double value, int places,
  * -RL
  */
 #define RAND_RANGE(__n, __min, __max, __tmax) \
-  (__n) = (__min) + (int64) ((double) ((double)(__max) - (__min) + 1.0) * \
+  (__n) = (__min) + (int64_t) ((double) ((double)(__max) - (__min) + 1.0) * \
                             ((__n) / ((__tmax) + 1.0)))
 
 #define GENERATE_SEED() \
@@ -168,10 +168,10 @@ static inline double php_math_round(double value, int places,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void math_mt_srand(uint32 seed);
-int64 math_mt_rand(int64 min = 0, int64 max = RAND_MAX);
+void math_mt_srand(uint32_t seed);
+int64_t math_mt_rand(int64_t min = 0, int64_t max = RAND_MAX);
 double math_combined_lcg();
-int64 math_generate_seed();
+int64_t math_generate_seed();
 void zend_get_rand_data() ATTRIBUTE_COLD;
 
 ///////////////////////////////////////////////////////////////////////////////

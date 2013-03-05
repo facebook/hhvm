@@ -691,7 +691,7 @@ bool f_xml_parser_free(CObjRef parser) {
   return true;
 }
 
-int64 f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
+int64_t f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
   // XML_Parse can reenter the VM, and it will do so after we've lost
   // the frame pointer by calling through the system's copy of XML_Parse
   // in libexpat.so.
@@ -706,7 +706,7 @@ int64 f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
   return ret;
 }
 
-int64 f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values,
+int64_t f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values,
                             VRefParam index /* = null */) {
   int ret;
   XmlParser * p = parser.getTyped<XmlParser>();
@@ -846,22 +846,22 @@ bool f_xml_set_object(CObjRef parser, VRefParam object) {
   return true;
 }
 
-int64 f_xml_get_current_byte_index(CObjRef parser) {
+int64_t f_xml_get_current_byte_index(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentByteIndex(p->parser);
 }
 
-int64 f_xml_get_current_column_number(CObjRef parser) {
+int64_t f_xml_get_current_column_number(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentColumnNumber(p->parser);
 }
 
-int64 f_xml_get_current_line_number(CObjRef parser) {
+int64_t f_xml_get_current_line_number(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentLineNumber(p->parser);
 }
 
-int64 f_xml_get_error_code(CObjRef parser) {
+int64_t f_xml_get_error_code(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetErrorCode(p->parser);
 }

@@ -211,7 +211,7 @@ void BaseExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
   }
 }
 
-void BaseExecutionContext::setRequestMemoryMaxBytes(int64 max) {
+void BaseExecutionContext::setRequestMemoryMaxBytes(int64_t max) {
   if (max <= 0) {
     max = INT64_MAX;
   }

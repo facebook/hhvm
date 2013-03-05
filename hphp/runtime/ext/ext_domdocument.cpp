@@ -2022,7 +2022,7 @@ Variant c_DOMNode::t_clonenode(bool deep /* = false */) {
   return create_node_object(node, doc(), true);
 }
 
-int64 c_DOMNode::t_getlineno() {
+int64_t c_DOMNode::t_getlineno() {
   xmlNodePtr nodep = m_node;
   return xmlGetLineNo(nodep);
 }
@@ -2499,7 +2499,7 @@ static void dom_characterdata_data_write(CObjRef obj, CVarRef value) {
 
 static Variant dom_characterdata_length_read(CObjRef obj) {
   CHECK_NODE(nodep);
-  int64 length = 0;
+  int64_t length = 0;
   xmlChar *content = xmlNodeGetContent(nodep);
   if (content) {
     length = xmlUTF8Strlen(content);
@@ -2558,7 +2558,7 @@ bool c_DOMCharacterData::t_appenddata(CStrRef arg) {
   return true;
 }
 
-bool c_DOMCharacterData::t_deletedata(int64 offset, int64 count) {
+bool c_DOMCharacterData::t_deletedata(int64_t offset, int64_t count) {
   xmlNodePtr node = m_node;
   xmlChar *cur, *substring, *second;
   cur = xmlNodeGetContent(node);
@@ -2588,7 +2588,7 @@ bool c_DOMCharacterData::t_deletedata(int64 offset, int64 count) {
   return true;
 }
 
-bool c_DOMCharacterData::t_insertdata(int64 offset, CStrRef data) {
+bool c_DOMCharacterData::t_insertdata(int64_t offset, CStrRef data) {
   xmlNodePtr node = m_node;
   xmlChar *cur, *first, *second;
   cur = xmlNodeGetContent(node);
@@ -2612,7 +2612,7 @@ bool c_DOMCharacterData::t_insertdata(int64 offset, CStrRef data) {
   return true;
 }
 
-bool c_DOMCharacterData::t_replacedata(int64 offset, int64 count,
+bool c_DOMCharacterData::t_replacedata(int64_t offset, int64_t count,
                                        CStrRef data) {
   xmlNodePtr node = m_node;
   xmlChar *cur, *substring, *second = NULL;
@@ -2648,7 +2648,7 @@ bool c_DOMCharacterData::t_replacedata(int64 offset, int64 count,
   return true;
 }
 
-String c_DOMCharacterData::t_substringdata(int64 offset, int64 count) {
+String c_DOMCharacterData::t_substringdata(int64_t offset, int64_t count) {
   xmlNodePtr node = m_node;
   xmlChar *cur, *substring;
   cur = xmlNodeGetContent(node);
@@ -2756,7 +2756,7 @@ bool c_DOMText::t_iswhitespaceinelementcontent() {
   return xmlIsBlankNode(m_node);
 }
 
-Variant c_DOMText::t_splittext(int64 offset) {
+Variant c_DOMText::t_splittext(int64_t offset) {
   xmlNodePtr node = m_node;
   xmlChar *cur, *first, *second;
   xmlNodePtr nnode;
@@ -2876,7 +2876,7 @@ static Variant dom_document_standalone_read(CObjRef obj) {
 
 static void dom_document_standalone_write(CObjRef obj, CVarRef value) {
   CHECK_WRITE_DOC(docp);
-  int64 standalone = value.toInt64();
+  int64_t standalone = value.toInt64();
   if (standalone > 0) {
     docp->standalone = 1;
   } else if (standalone < 0) {
@@ -3339,7 +3339,7 @@ Variant c_DOMDocument::t_importnode(CObjRef importednode,
   return create_node_object(retnodep, doc(), owner);
 }
 
-Variant c_DOMDocument::t_load(CStrRef filename, int64 options /* = 0 */) {
+Variant c_DOMDocument::t_load(CStrRef filename, int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
   String translated = File::TranslatePath(filename);
   if (translated.empty()) {
@@ -3364,7 +3364,7 @@ Variant c_DOMDocument::t_loadhtmlfile(CStrRef filename) {
   return dom_load_html(this, translated, DOM_LOAD_FILE);
 }
 
-Variant c_DOMDocument::t_loadxml(CStrRef source, int64 options /* = 0 */) {
+Variant c_DOMDocument::t_loadxml(CStrRef source, int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
   return dom_parse_document(this, source, options, DOM_LOAD_STRING);
 }
@@ -3406,7 +3406,7 @@ bool c_DOMDocument::t_relaxngvalidatesource(CStrRef source) {
   return _dom_document_relaxNG_validate(this, source, DOM_LOAD_STRING);
 }
 
-Variant c_DOMDocument::t_save(CStrRef file, int64 options /* = 0 */) {
+Variant c_DOMDocument::t_save(CStrRef file, int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
 
@@ -3465,7 +3465,7 @@ Variant c_DOMDocument::t_savehtmlfile(CStrRef file) {
 }
 
 Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
-                                 int64 options /* = 0 */) {
+                                 int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlBufferPtr buf;
   xmlChar *mem;
@@ -3547,7 +3547,7 @@ bool c_DOMDocument::t_validate() {
   return ret;
 }
 
-Variant c_DOMDocument::t_xinclude(int64 options /* = 0 */) {
+Variant c_DOMDocument::t_xinclude(int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int err = xmlXIncludeProcessFlags(docp, options);
   /* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
@@ -4695,7 +4695,7 @@ Variant c_DOMNamedNodeMap::t_getnameditemns(CStrRef namespaceuri,
   return null;
 }
 
-Variant c_DOMNamedNodeMap::t_item(int64 index) {
+Variant c_DOMNamedNodeMap::t_item(int64_t index) {
   if (index >= 0) {
     xmlNodePtr itemnode = NULL;
     bool owner = false;
@@ -4827,7 +4827,7 @@ bool c_DOMNodeList::t___isset(Variant name) {
   return domnodelist_properties_map.isset(this, name);
 }
 
-Variant c_DOMNodeList::t_item(int64 index) {
+Variant c_DOMNodeList::t_item(int64_t index) {
   xmlNodePtr itemnode = NULL;
   xmlNodePtr nodep, curnode;
   int count = 0;
@@ -5507,13 +5507,13 @@ Variant f_dom_document_normalize_document(CVarRef obj) {
 }
 
 Variant f_dom_document_save(CVarRef obj, CStrRef file,
-                            int64 options /* = 0 */) {
+                            int64_t options /* = 0 */) {
   DOM_GET_OBJ(Document);
   return pobj->t_save(file, options);
 }
 
 Variant f_dom_document_savexml(CVarRef obj, CObjRef node /* = null_object */,
-                               int64 options /* = 0 */) {
+                               int64_t options /* = 0 */) {
   DOM_GET_OBJ(Document);
   return pobj->t_savexml(node, options);
 }
@@ -5523,7 +5523,7 @@ Variant f_dom_document_validate(CVarRef obj) {
   return pobj->t_validate();
 }
 
-Variant f_dom_document_xinclude(CVarRef obj, int64 options /* = 0 */) {
+Variant f_dom_document_xinclude(CVarRef obj, int64_t options /* = 0 */) {
   DOM_GET_OBJ(Document);
   return pobj->t_xinclude(options);
 }
@@ -5627,7 +5627,7 @@ Variant f_dom_node_lookup_namespace_uri(CVarRef obj, CStrRef namespaceuri) {
   return pobj->t_lookupnamespaceuri(namespaceuri);
 }
 
-Variant f_dom_nodelist_item(CVarRef obj, int64 index) {
+Variant f_dom_nodelist_item(CVarRef obj, int64_t index) {
   DOM_GET_OBJ(NodeList);
   return pobj->t_item(index);
 }
@@ -5637,7 +5637,7 @@ Variant f_dom_namednodemap_get_named_item(CVarRef obj, CStrRef name) {
   return pobj->t_getnameditem(name);
 }
 
-Variant f_dom_namednodemap_item(CVarRef obj, int64 index) {
+Variant f_dom_namednodemap_item(CVarRef obj, int64_t index) {
   DOM_GET_OBJ(NamedNodeMap);
   return pobj->t_item(index);
 }
@@ -5648,8 +5648,8 @@ Variant f_dom_namednodemap_get_named_item_ns(CVarRef obj, CStrRef namespaceuri,
   return pobj->t_getnameditemns(namespaceuri, localname);
 }
 
-Variant f_dom_characterdata_substring_data(CVarRef obj, int64 offset,
-                                           int64 count) {
+Variant f_dom_characterdata_substring_data(CVarRef obj, int64_t offset,
+                                           int64_t count) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_substringdata(offset, count);
 }
@@ -5659,20 +5659,20 @@ Variant f_dom_characterdata_append_data(CVarRef obj, CStrRef arg) {
   return pobj->t_appenddata(arg);
 }
 
-Variant f_dom_characterdata_insert_data(CVarRef obj, int64 offset,
+Variant f_dom_characterdata_insert_data(CVarRef obj, int64_t offset,
                                         CStrRef data) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_insertdata(offset, data);
 }
 
-Variant f_dom_characterdata_delete_data(CVarRef obj, int64 offset,
-                                        int64 count) {
+Variant f_dom_characterdata_delete_data(CVarRef obj, int64_t offset,
+                                        int64_t count) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_deletedata(offset, count);
 }
 
-Variant f_dom_characterdata_replace_data(CVarRef obj, int64 offset,
-                                         int64 count, CStrRef data) {
+Variant f_dom_characterdata_replace_data(CVarRef obj, int64_t offset,
+                                         int64_t count, CStrRef data) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_replacedata(offset, count, data);
 }
@@ -5781,7 +5781,7 @@ Variant f_dom_element_set_id_attribute_node(CVarRef obj, CObjRef idattr,
   return pobj->t_setidattributenode(idattr, isid);
 }
 
-Variant f_dom_text_split_text(CVarRef obj, int64 offset) {
+Variant f_dom_text_split_text(CVarRef obj, int64_t offset) {
   DOM_GET_OBJ(Text);
   return pobj->t_splittext(offset);
 }

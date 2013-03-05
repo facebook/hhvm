@@ -20,13 +20,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string IDebuggable::FormatNumber(const char *fmt, int64 n) {
+std::string IDebuggable::FormatNumber(const char *fmt, int64_t n) {
   char buf[64];
   snprintf(buf, sizeof(buf), fmt, n);
   return buf;
 }
 
-std::string IDebuggable::FormatSize(int64 size) {
+std::string IDebuggable::FormatSize(int64_t size) {
   char buf[64];
   double n = size;
   if (n >= 1024) {
@@ -48,7 +48,7 @@ std::string IDebuggable::FormatSize(int64 size) {
   return buf;
 }
 
-std::string IDebuggable::FormatTime(int64 milliSeconds) {
+std::string IDebuggable::FormatTime(int64_t milliSeconds) {
   char buf[64];
   double n = milliSeconds;
   if (n >= 1000) {

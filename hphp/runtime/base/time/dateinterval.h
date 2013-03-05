@@ -73,26 +73,26 @@ public:
   DateInterval(CStrRef date_interval, bool date_string = false);
   DateInterval(timelib_rel_time *di);
 
-  int64 getYears()      const    { return m_di->y;                      }
-  int64 getMonths()     const    { return m_di->m;                      }
-  int64 getDays()       const    { return m_di->d;                      }
-  int64 getHours()      const    { return m_di->h;                      }
-  int64 getMinutes()    const    { return m_di->i;                      }
-  int64 getSeconds()    const    { return m_di->s;                      }
+  int64_t getYears()      const    { return m_di->y;                      }
+  int64_t getMonths()     const    { return m_di->m;                      }
+  int64_t getDays()       const    { return m_di->d;                      }
+  int64_t getHours()      const    { return m_di->h;                      }
+  int64_t getMinutes()    const    { return m_di->i;                      }
+  int64_t getSeconds()    const    { return m_di->s;                      }
   bool  isInverted()    const    { return TIMELIB_REL_INVERT(m_di);     }
   bool  haveTotalDays() const    { return TIMELIB_REL_DAYS(m_di) != -99999; }
-  int64 getTotalDays()  const    { return TIMELIB_REL_DAYS(m_di);       }
+  int64_t getTotalDays()  const    { return TIMELIB_REL_DAYS(m_di);       }
 
-  void setYears(int64 value)     { if (isValid()) m_di->y      = value; }
-  void setMonths(int64 value)    { if (isValid()) m_di->m      = value; }
-  void setDays(int64 value)      { if (isValid()) m_di->d      = value; }
-  void setHours(int64 value)     { if (isValid()) m_di->h      = value; }
-  void setMinutes(int64 value)   { if (isValid()) m_di->i      = value; }
-  void setSeconds(int64 value)   { if (isValid()) m_di->s      = value; }
+  void setYears(int64_t value)     { if (isValid()) m_di->y      = value; }
+  void setMonths(int64_t value)    { if (isValid()) m_di->m      = value; }
+  void setDays(int64_t value)      { if (isValid()) m_di->d      = value; }
+  void setHours(int64_t value)     { if (isValid()) m_di->h      = value; }
+  void setMinutes(int64_t value)   { if (isValid()) m_di->i      = value; }
+  void setSeconds(int64_t value)   { if (isValid()) m_di->s      = value; }
   void setInverted(bool value)   {
     if (isValid()) TIMELIB_REL_INVERT_SET(m_di, value);
   }
-  void setTotalDays(int64 value) {
+  void setTotalDays(int64_t value) {
     if (isValid()) TIMELIB_REL_DAYS_SET(m_di, value);
   }
 

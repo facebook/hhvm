@@ -58,7 +58,7 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys, 
 bool f_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1);
 Variant f_openssl_verify(CStrRef data, CStrRef signature, CVarRef pub_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1);
 bool f_openssl_x509_check_private_key(CVarRef cert, CVarRef key);
-int64 f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, CStrRef untrustedfile = null_string);
+int64_t f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, CStrRef untrustedfile = null_string);
 bool f_openssl_x509_export_to_file(CVarRef x509, CStrRef outfilename, bool notext = true);
 bool f_openssl_x509_export(CVarRef x509, VRefParam output, bool notext = true);
 void f_openssl_x509_free(CObjRef x509cert);
@@ -71,8 +71,8 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, int op
 Variant f_openssl_digest(CStrRef data, CStrRef method, bool raw_output = false);
 Array f_openssl_get_cipher_methods(bool aliases = false);
 Array f_openssl_get_md_methods(bool aliases = false);
-extern const int64 k_OPENSSL_RAW_DATA;
-extern const int64 k_OPENSSL_ZERO_PADDING;
+extern const int64_t k_OPENSSL_RAW_DATA;
+extern const int64_t k_OPENSSL_ZERO_PADDING;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

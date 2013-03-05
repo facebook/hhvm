@@ -101,7 +101,7 @@ public:
   void reset(bool read); // get ready for reads or writes
 
   // input has been called with htons() call
-  void nwrite(int16 data) {
+  void nwrite(int16_t data) {
     memcpy(m_p, &data, sizeof(data));
     if ((m_p += sizeof(data)) > m_pSafe) flush();
   }
@@ -111,27 +111,27 @@ public:
     *m_p = (data ? 1 : 0);
     if (++m_p > m_pSafe) flush();
   }
-  void write(int8 data) {
+  void write(int8_t data) {
     *m_p = data;
     if (++m_p > m_pSafe) flush();
   }
-  void write(int16 data) {
+  void write(int16_t data) {
     data = htons(data);
     memcpy(m_p, &data, sizeof(data));
     if ((m_p += sizeof(data)) > m_pSafe) flush();
   }
-  void write(int32 data) {
+  void write(int32_t data) {
     data = htonl(data);
     memcpy(m_p, &data, sizeof(data));
     if ((m_p += sizeof(data)) > m_pSafe) flush();
   }
-  void write(int64 data) {
+  void write(int64_t data) {
     data = htonll(data);
     memcpy(m_p, &data, sizeof(data));
     if ((m_p += sizeof(data)) > m_pSafe) flush();
   }
   void write(double data) {
-    union { int64 c; double d;} a;
+    union { int64_t c; double d;} a;
     a.d = data;
     write(a.c);
   }
@@ -146,7 +146,7 @@ public:
       read((char*)&data, (int)sizeof(data));
     }
   }
-  void read(int8 &data) {
+  void read(int8_t &data) {
     if (m_safe) {
       data = *m_p;
       if (++m_p > m_pSafe) m_safe = false;
@@ -154,7 +154,7 @@ public:
       read((char*)&data, (int)sizeof(data));
     }
   }
-  void read(int16 &data) {
+  void read(int16_t &data) {
     if (m_safe) {
       memcpy(&data, m_p, sizeof(data));
       if ((m_p += sizeof(data)) > m_pSafe) m_safe = false;
@@ -163,7 +163,7 @@ public:
     }
     data = ntohs(data);
   }
-  void read(int32 &data) {
+  void read(int32_t &data) {
     if (m_safe) {
       memcpy(&data, m_p, sizeof(data));
       if ((m_p += sizeof(data)) > m_pSafe) m_safe = false;
@@ -172,7 +172,7 @@ public:
     }
     data = ntohl(data);
   }
-  void read(int64 &data) {
+  void read(int64_t &data) {
     if (m_safe) {
       memcpy(&data, m_p, sizeof(data));
       if ((m_p += sizeof(data)) > m_pSafe) m_safe = false;
@@ -182,12 +182,12 @@ public:
     data = ntohll(data);
   }
   void read(double &data) {
-    union { int64 c; double d;} a; a.d = data;
+    union { int64_t c; double d;} a; a.d = data;
     read(a.c);
     data = a.d;
   }
   void read(String &data) {
-    int32 size;
+    int32_t size;
     read(size);
     if (size > 0 && size + 1 > 0) {
       data = String(size, ReserveString);
@@ -208,7 +208,7 @@ public:
 
   template<typename T>
   void read(std::vector<T> &data) {
-    int32 size;
+    int32_t size;
     read(size);
     data.resize(size);
     for (int i = 0; i < size; i++) {
@@ -217,7 +217,7 @@ public:
   }
   template<typename T>
   void write(const std::vector<T> &data) {
-    int32 size = data.size();
+    int32_t size = data.size();
     write(size);
     for (int i = 0; i < size; i++) {
       write(data[i]);
@@ -247,7 +247,7 @@ public:
   void write(CObjRef data);
   void write(CVarRef data);
 
-  void skip(int8 type);
+  void skip(int8_t type);
 
 protected:
   virtual String readImpl() = 0;

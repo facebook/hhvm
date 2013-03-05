@@ -565,7 +565,7 @@ public:
       break;
     }
 
-    m_opts.set(int64(option), value);
+    m_opts.set(int64_t(option), value);
 
     return m_error_no == CURLE_OK;
   }
@@ -573,10 +573,10 @@ public:
   Variant getOption(long option) {
 
     if (option != 0) {
-      if (!m_opts.exists(int64(option))) {
+      if (!m_opts.exists(int64_t(option))) {
         return false;
       }
-      return m_opts[int64(option)];
+      return m_opts[int64_t(option)];
     }
 
     return m_opts;
@@ -1411,17 +1411,17 @@ Variant f_evhttp_recv(CObjRef handle) {
 }
 
 #if LIBCURL_VERSION_NUM >= 0x071500
-const int64 k_CURLINFO_LOCAL_PORT = CURLINFO_LOCAL_PORT;
+const int64_t k_CURLINFO_LOCAL_PORT = CURLINFO_LOCAL_PORT;
 #else
-const int64 k_CURLINFO_LOCAL_PORT = CURLINFO_NONE;
+const int64_t k_CURLINFO_LOCAL_PORT = CURLINFO_NONE;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071002
-const int64 k_CURLOPT_TIMEOUT_MS = CURLOPT_TIMEOUT_MS;
-const int64 k_CURLOPT_CONNECTTIMEOUT_MS = CURLOPT_CONNECTTIMEOUT_MS;
+const int64_t k_CURLOPT_TIMEOUT_MS = CURLOPT_TIMEOUT_MS;
+const int64_t k_CURLOPT_CONNECTTIMEOUT_MS = CURLOPT_CONNECTTIMEOUT_MS;
 #else
-const int64 k_CURLOPT_TIMEOUT_MS = CURLOPT_LASTENTRY;
-const int64 k_CURLOPT_CONNECTTIMEOUT_MS = CURLOPT_LASTENTRY;
+const int64_t k_CURLOPT_TIMEOUT_MS = CURLOPT_LASTENTRY;
+const int64_t k_CURLOPT_CONNECTTIMEOUT_MS = CURLOPT_LASTENTRY;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

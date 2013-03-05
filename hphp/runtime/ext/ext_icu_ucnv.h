@@ -34,47 +34,47 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64 q_UConverter$$REASON_UNASSIGNED;
-extern const int64 q_UConverter$$REASON_ILLEGAL;
-extern const int64 q_UConverter$$REASON_IRREGULAR;
-extern const int64 q_UConverter$$REASON_RESET;
-extern const int64 q_UConverter$$REASON_CLOSE;
-extern const int64 q_UConverter$$REASON_CLONE;
-extern const int64 q_UConverter$$UNSUPPORTED_CONVERTER;
-extern const int64 q_UConverter$$SBCS;
-extern const int64 q_UConverter$$DBCS;
-extern const int64 q_UConverter$$MBCS;
-extern const int64 q_UConverter$$LATIN_1;
-extern const int64 q_UConverter$$UTF8;
-extern const int64 q_UConverter$$UTF16_BigEndian;
-extern const int64 q_UConverter$$UTF16_LittleEndian;
-extern const int64 q_UConverter$$UTF32_BigEndian;
-extern const int64 q_UConverter$$UTF32_LittleEndian;
-extern const int64 q_UConverter$$EBCDIC_STATEFUL;
-extern const int64 q_UConverter$$ISO_2022;
-extern const int64 q_UConverter$$LMBCS_1;
-extern const int64 q_UConverter$$LMBCS_2;
-extern const int64 q_UConverter$$LMBCS_3;
-extern const int64 q_UConverter$$LMBCS_4;
-extern const int64 q_UConverter$$LMBCS_5;
-extern const int64 q_UConverter$$LMBCS_6;
-extern const int64 q_UConverter$$LMBCS_8;
-extern const int64 q_UConverter$$LMBCS_11;
-extern const int64 q_UConverter$$LMBCS_16;
-extern const int64 q_UConverter$$LMBCS_17;
-extern const int64 q_UConverter$$LMBCS_18;
-extern const int64 q_UConverter$$LMBCS_19;
-extern const int64 q_UConverter$$LMBCS_LAST;
-extern const int64 q_UConverter$$HZ;
-extern const int64 q_UConverter$$SCSU;
-extern const int64 q_UConverter$$ISCII;
-extern const int64 q_UConverter$$US_ASCII;
-extern const int64 q_UConverter$$UTF7;
-extern const int64 q_UConverter$$BOCU1;
-extern const int64 q_UConverter$$UTF16;
-extern const int64 q_UConverter$$UTF32;
-extern const int64 q_UConverter$$CESU8;
-extern const int64 q_UConverter$$IMAP_MAILBOX;
+extern const int64_t q_UConverter$$REASON_UNASSIGNED;
+extern const int64_t q_UConverter$$REASON_ILLEGAL;
+extern const int64_t q_UConverter$$REASON_IRREGULAR;
+extern const int64_t q_UConverter$$REASON_RESET;
+extern const int64_t q_UConverter$$REASON_CLOSE;
+extern const int64_t q_UConverter$$REASON_CLONE;
+extern const int64_t q_UConverter$$UNSUPPORTED_CONVERTER;
+extern const int64_t q_UConverter$$SBCS;
+extern const int64_t q_UConverter$$DBCS;
+extern const int64_t q_UConverter$$MBCS;
+extern const int64_t q_UConverter$$LATIN_1;
+extern const int64_t q_UConverter$$UTF8;
+extern const int64_t q_UConverter$$UTF16_BigEndian;
+extern const int64_t q_UConverter$$UTF16_LittleEndian;
+extern const int64_t q_UConverter$$UTF32_BigEndian;
+extern const int64_t q_UConverter$$UTF32_LittleEndian;
+extern const int64_t q_UConverter$$EBCDIC_STATEFUL;
+extern const int64_t q_UConverter$$ISO_2022;
+extern const int64_t q_UConverter$$LMBCS_1;
+extern const int64_t q_UConverter$$LMBCS_2;
+extern const int64_t q_UConverter$$LMBCS_3;
+extern const int64_t q_UConverter$$LMBCS_4;
+extern const int64_t q_UConverter$$LMBCS_5;
+extern const int64_t q_UConverter$$LMBCS_6;
+extern const int64_t q_UConverter$$LMBCS_8;
+extern const int64_t q_UConverter$$LMBCS_11;
+extern const int64_t q_UConverter$$LMBCS_16;
+extern const int64_t q_UConverter$$LMBCS_17;
+extern const int64_t q_UConverter$$LMBCS_18;
+extern const int64_t q_UConverter$$LMBCS_19;
+extern const int64_t q_UConverter$$LMBCS_LAST;
+extern const int64_t q_UConverter$$HZ;
+extern const int64_t q_UConverter$$SCSU;
+extern const int64_t q_UConverter$$ISCII;
+extern const int64_t q_UConverter$$US_ASCII;
+extern const int64_t q_UConverter$$UTF7;
+extern const int64_t q_UConverter$$BOCU1;
+extern const int64_t q_UConverter$$UTF16;
+extern const int64_t q_UConverter$$UTF32;
+extern const int64_t q_UConverter$$CESU8;
+extern const int64_t q_UConverter$$IMAP_MAILBOX;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class UConverter
@@ -94,13 +94,13 @@ class c_UConverter : public ExtObjectData {
   public: void t_setsourceencoding(CStrRef encoding);
   public: String t_getdestinationencoding();
   public: void t_setdestinationencoding(CStrRef encoding);
-  public: int64 t_getsourcetype();
-  public: int64 t_getdestinationtype();
+  public: int64_t t_getsourcetype();
+  public: int64_t t_getdestinationtype();
   public: String t_getsubstchars();
   public: bool t_setsubstchars(CStrRef chars);
-  public: Variant t_fromucallback(int64 reason, CArrRef source,
-                                  int64 codepoint, VRefParam error);
-  public: Variant t_toucallback(int64 reason, CStrRef source,
+  public: Variant t_fromucallback(int64_t reason, CArrRef source,
+                                  int64_t codepoint, VRefParam error);
+  public: Variant t_toucallback(int64_t reason, CStrRef source,
                                 CStrRef codeunits, VRefParam error);
   public: Variant t_convert(CStrRef str, bool reverse = false);
   public: static Variant ti_transcode(const char* cls , CStrRef str,
@@ -111,10 +111,10 @@ class c_UConverter : public ExtObjectData {
                                      CArrRef options = null_variant) {
     return ti_transcode("uconverter", str, toEncoding, fromEncoding, options);
   }
-  public: int64 t_geterrorcode();
+  public: int64_t t_geterrorcode();
   public: String t_geterrormessage();
-  public: static String ti_reasontext(const char* cls , int64 reason);
-  public: static String t_reasontext(int64 reason) {
+  public: static String ti_reasontext(const char* cls , int64_t reason);
+  public: static String t_reasontext(int64_t reason) {
     return ti_reasontext("uconverter", reason);
   }
   public: static Array ti_getavailable(const char* cls );
@@ -151,7 +151,7 @@ class c_UConverter : public ExtObjectData {
                             intl_error &err);
     static bool setSubstChars(String chars, UConverter *cnv, intl_error &err);
     bool setCallback(UConverter *cnv);
-    Variant defaultCallback(int64 reason, VRefParam error);
+    Variant defaultCallback(int64_t reason, VRefParam error);
     static String doConvert(CStrRef str, UConverter *toCnv,
                             UConverter *fromCnv, intl_error &err);
   public:

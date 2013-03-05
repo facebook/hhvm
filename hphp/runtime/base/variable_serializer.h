@@ -72,10 +72,10 @@ public:
    * Type specialized output functions.
    */
   void write(bool    v);
-  void write(char    v) { write((int64)v);}
-  void write(short   v) { write((int64)v);}
-  void write(int     v) { write((int64)v);}
-  void write(int64   v);
+  void write(char    v) { write((int64_t)v);}
+  void write(short   v) { write((int64_t)v);}
+  void write(int     v) { write((int64_t)v);}
+  void write(int64_t   v);
   void write(double  v);
   void write(const char *v, int len = -1, bool isArrayKey = false);
   void write(CStrRef v);

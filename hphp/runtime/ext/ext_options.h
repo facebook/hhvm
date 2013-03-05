@@ -26,7 +26,7 @@ namespace HPHP {
 
 Variant f_assert_options(int what, CVarRef value = null_variant);
 Variant f_assert(CVarRef assertion);
-int64 f_dl(CStrRef library);
+int64_t f_dl(CStrRef library);
 bool f_extension_loaded(CStrRef name);
 Array f_get_loaded_extensions(bool zend_extensions = false);
 Array f_get_extension_funcs(CStrRef module_name);
@@ -38,30 +38,30 @@ void f_restore_include_path();
 String f_set_include_path(CStrRef new_include_path);
 Array f_get_included_files();
 Array f_inclued_get_data();
-int64 f_get_magic_quotes_gpc();
-int64 f_get_magic_quotes_runtime();
+int64_t f_get_magic_quotes_gpc();
+int64_t f_get_magic_quotes_runtime();
 Array f_get_required_files();
 Variant f_getenv(CStrRef varname);
-int64 f_getlastmod();
-int64 f_getmygid();
-int64 f_getmyinode();
-int64 f_getmypid();
-int64 f_getmyuid();
+int64_t f_getlastmod();
+int64_t f_getmygid();
+int64_t f_getmyinode();
+int64_t f_getmypid();
+int64_t f_getmyuid();
 Array f_getopt(CStrRef options, CVarRef longopts = null_variant);
 Array f_getrusage(int who = 0);
 bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec);
 bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec);
-bool f_clock_settime(int clk_id, int64 sec, int64 nsec);
-inline int64 f_cpu_get_count() { return Process::GetCPUCount();}
+bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec);
+inline int64_t f_cpu_get_count() { return Process::GetCPUCount();}
 inline String f_cpu_get_model() { return Process::GetCPUModel();}
 String f_ini_alter(CStrRef varname, CStrRef newvalue);
 Array f_ini_get_all(CStrRef extension = null_string);
 String f_ini_get(CStrRef varname);
 void f_ini_restore(CStrRef varname);
 String f_ini_set(CStrRef varname, CStrRef newvalue);
-int64 f_memory_get_allocation();
-int64 f_memory_get_peak_usage(bool real_usage = false);
-int64 f_memory_get_usage(bool real_usage = false);
+int64_t f_memory_get_allocation();
+int64_t f_memory_get_peak_usage(bool real_usage = false);
+int64_t f_memory_get_usage(bool real_usage = false);
 String f_php_ini_scanned_files();
 String f_php_logo_guid();
 String f_php_sapi_name();
@@ -77,9 +77,9 @@ Variant f_version_compare(CStrRef version1, CStrRef version2, CStrRef sop = null
 bool f_gc_enabled();
 void f_gc_enable();
 void f_gc_disable();
-int64 f_gc_collect_cycles();
+int64_t f_gc_collect_cycles();
 String f_zend_logo_guid();
-int64 f_zend_thread_id();
+int64_t f_zend_thread_id();
 String f_zend_version();
 
 ///////////////////////////////////////////////////////////////////////////////

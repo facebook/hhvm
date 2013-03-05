@@ -42,7 +42,7 @@ struct Location {
   , offset(0)
   { assert(spc == This); }
 
-  Location(Space spc, int64 off)
+  Location(Space spc, int64_t off)
     : space(spc)
     , offset(off)
   {}
@@ -121,7 +121,7 @@ struct Location {
 
 public:
   Space space;
-  int64 offset;
+  int64_t offset;
 };
 
 struct InputInfo {
@@ -195,7 +195,7 @@ class RuntimeType {
                                   // KindOfClass: An instance of the current
                                   //   instantiation of the preClass.  The
                                   //   exact class may differ across executions
-        int64 intval;             // KindOfInt64: A literal int
+        int64_t intval;             // KindOfInt64: A literal int
         struct {
           bool boolean;           // KindOfBoolean: A literal bool
                                   // from True or False.
@@ -234,7 +234,7 @@ class RuntimeType {
   RuntimeType(const ArrayData*);
   RuntimeType(const Class*);
   explicit RuntimeType(bool value);
-  explicit RuntimeType(int64 value);
+  explicit RuntimeType(int64_t value);
   RuntimeType(const RuntimeType& copy);
   RuntimeType();
   RuntimeType(const Iter* iter);
@@ -256,8 +256,8 @@ class RuntimeType {
   const StringData* valueStringOrNull() const;
   const ArrayData* valueArray() const;
   int valueBoolean() const;
-  int64 valueInt() const;
-  int64 valueGeneric() const;
+  int64_t valueInt() const;
+  int64_t valueGeneric() const;
 
   // Helpers for typechecking
   DataType typeCheckValue() const;

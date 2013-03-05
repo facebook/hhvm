@@ -43,7 +43,7 @@ public:
 private:
   std::string m_label;
   std::string m_file;
-  int32 m_line;
+  int32_t m_line;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

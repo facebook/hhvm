@@ -56,7 +56,7 @@ bool TestExtIpc::test_message_queue() {
   strcpy(filename, "/tmp/XXXXXX");
   close(mkstemp(filename));
 
-  int64 token = f_ftok(filename, "a");
+  int64_t token = f_ftok(filename, "a");
   VERIFY(!f_msg_queue_exists(token));
   Object queue = f_msg_get_queue(token);
   VERIFY(queue.get());
@@ -144,7 +144,7 @@ bool TestExtIpc::test_sem_remove()  { return test_semaphore();}
 bool TestExtIpc::test_shared_memory() {
   Variant ret = f_shm_attach(0xDEADBEEF);
   VERIFY(!same(ret, false));
-  int64 index = ret.toInt64();
+  int64_t index = ret.toInt64();
   VERIFY(!f_shm_has_var(index, 1234));
   VERIFY(f_shm_put_var(index, 1234, "test"));
   VERIFY(f_shm_has_var(index, 1234));

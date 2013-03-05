@@ -199,9 +199,9 @@ size_t allocCnsBit(const StringData* name) {
   return allocBitImpl(name, NSCnsBits);
 }
 
-Handle bitOffToHandleAndMask(size_t bit, uint8 &mask) {
+Handle bitOffToHandleAndMask(size_t bit, uint8_t &mask) {
   static_assert(!(8 % CHAR_BIT), "Unexpected size of char");
-  mask = (uint8)1 << (bit % 8);
+  mask = (uint8_t)1 << (bit % 8);
   size_t off = bit / CHAR_BIT;
   off -= off % (8 / CHAR_BIT);
   return off;
@@ -213,9 +213,9 @@ bool testBit(size_t bit) {
   return *(unsigned char*)handleToPtr(handle) & mask;
 }
 
-bool testBit(Handle handle, uint32 mask) {
+bool testBit(Handle handle, uint32_t mask) {
   assert(!(mask & (mask - 1)));
-  return *(uint32*)handleToPtr(handle) & mask;
+  return *(uint32_t*)handleToPtr(handle) & mask;
 }
 
 bool testAndSetBit(size_t bit) {
@@ -226,10 +226,10 @@ bool testAndSetBit(size_t bit) {
   return ret;
 }
 
-bool testAndSetBit(Handle handle, uint32 mask) {
+bool testAndSetBit(Handle handle, uint32_t mask) {
   assert(!(mask & (mask - 1)));
-  bool ret = *(uint32*)handleToPtr(handle) & mask;
-  *(uint32*)handleToPtr(handle) |= mask;
+  bool ret = *(uint32_t*)handleToPtr(handle) & mask;
+  *(uint32_t*)handleToPtr(handle) |= mask;
   return ret;
 }
 

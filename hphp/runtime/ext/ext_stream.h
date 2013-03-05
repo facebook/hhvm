@@ -153,9 +153,9 @@ bool f_stream_set_blocking(CObjRef stream, int mode);
 
 bool f_stream_set_timeout(CObjRef stream, int seconds, int microseconds = 0);
 
-int64 f_stream_set_write_buffer(CObjRef stream, int buffer);
+int64_t f_stream_set_write_buffer(CObjRef stream, int buffer);
 
-inline int64 f_set_file_buffer(CObjRef stream, int buffer) {
+inline int64_t f_set_file_buffer(CObjRef stream, int buffer) {
   return f_stream_set_write_buffer(stream, buffer);
 }
 

@@ -383,7 +383,7 @@ bool TestExtMath::test_rand() {
   VERIFY(f_rand(5, 15) >= 5);
   VERIFY(f_rand(5, 15) <= 15);
 
-  int64 n = f_rand(10000000000LL, 19999999999LL);
+  int64_t n = f_rand(10000000000LL, 19999999999LL);
   VERIFY(n >= 10000000000LL);
   VERIFY(n <= 19999999999LL);
 

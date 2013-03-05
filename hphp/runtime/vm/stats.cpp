@@ -72,7 +72,7 @@ void emitIncTranslOp(X64Assembler& a, Opcode opc, bool force) {
           Transl::CC_None, force);
 }
 
-static __thread int64 epoch;
+static __thread int64_t epoch;
 void dump() {
   if (!enabled()) return;
   TRACE(1, "STATS %ld %s\n", epoch, g_context->getRequestUrl(50).c_str());

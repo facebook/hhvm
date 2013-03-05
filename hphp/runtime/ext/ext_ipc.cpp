@@ -50,7 +50,7 @@ IMPLEMENT_DEFAULT_EXTENSION(sysvsem);
 IMPLEMENT_DEFAULT_EXTENSION(sysvshm);
 ///////////////////////////////////////////////////////////////////////////////
 
-int64 f_ftok(CStrRef pathname, CStrRef proj) {
+int64_t f_ftok(CStrRef pathname, CStrRef proj) {
   if (pathname.empty()) {
     raise_warning("Pathname is empty");
     return -1;
@@ -70,7 +70,7 @@ class MessageQueue : public ResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(MessageQueue)
 
-  int64 key;
+  int64_t key;
   int id;
 
   static StaticString s_class_name;
@@ -81,7 +81,7 @@ IMPLEMENT_OBJECT_ALLOCATION(MessageQueue)
 
 StaticString MessageQueue::s_class_name("MessageQueue");
 
-Variant f_msg_get_queue(int64 key, int64 perms /* = 0666 */) {
+Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
   int id = msgget(key, 0);
   if (id < 0) {
     id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
@@ -97,7 +97,7 @@ Variant f_msg_get_queue(int64 key, int64 perms /* = 0666 */) {
   return Object(q);
 }
 
-bool f_msg_queue_exists(int64 key) {
+bool f_msg_queue_exists(int64_t key) {
   return msgget(key, 0) >= 0;
 }
 
@@ -122,13 +122,13 @@ bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
     Variant value;
     value = data["msg_perm.uid"];
-    if (!value.isNull()) stat.msg_perm.uid = (int64)value;
+    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
     value = data["msg_perm.gid"];
-    if (!value.isNull()) stat.msg_perm.uid = (int64)value;
+    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
     value = data["msg_perm.mode"];
-    if (!value.isNull()) stat.msg_perm.uid = (int64)value;
+    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
     value = data["msg_qbytes"];
-    if (!value.isNull()) stat.msg_perm.uid = (int64)value;
+    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
 
     return msgctl(q->id, IPC_SET, &stat) == 0;
   }
@@ -146,14 +146,14 @@ Array f_msg_stat_queue(CObjRef queue) {
   struct msqid_ds stat;
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
     Array data;
-    data.set("msg_perm.uid",  (int64)stat.msg_perm.uid);
-    data.set("msg_perm.gid",  (int64)stat.msg_perm.gid);
+    data.set("msg_perm.uid",  (int64_t)stat.msg_perm.uid);
+    data.set("msg_perm.gid",  (int64_t)stat.msg_perm.gid);
     data.set("msg_perm.mode", stat.msg_perm.mode);
-    data.set("msg_stime",     (int64)stat.msg_stime);
-    data.set("msg_rtime",     (int64)stat.msg_rtime);
-    data.set("msg_ctime",     (int64)stat.msg_ctime);
-    data.set("msg_qnum",      (int64)stat.msg_qnum);
-    data.set("msg_qbytes",    (int64)stat.msg_qbytes);
+    data.set("msg_stime",     (int64_t)stat.msg_stime);
+    data.set("msg_rtime",     (int64_t)stat.msg_rtime);
+    data.set("msg_ctime",     (int64_t)stat.msg_ctime);
+    data.set("msg_qnum",      (int64_t)stat.msg_qnum);
+    data.set("msg_qbytes",    (int64_t)stat.msg_qbytes);
     data.set("msg_lspid",     stat.msg_lspid);
     data.set("msg_lrpid",     stat.msg_lrpid);
     return data;
@@ -162,7 +162,7 @@ Array f_msg_stat_queue(CObjRef queue) {
   return Array();
 }
 
-bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
+bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
                 bool serialize /* = true */, bool blocking /* = true */,
                 VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
@@ -197,10 +197,10 @@ bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
   return true;
 }
 
-bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, VRefParam msgtype,
-                   int64 maxsize, VRefParam message,
+bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
+                   int64_t maxsize, VRefParam message,
                    bool unserialize /* = true */,
-                   int64 flags /* = 0 */, VRefParam errorcode /* = null */) {
+                   int64_t flags /* = 0 */, VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -212,7 +212,7 @@ bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, VRefParam msgtype,
     return false;
   }
 
-  int64 realflags = 0;
+  int64_t realflags = 0;
   if (flags != 0) {
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
     if (flags & k_MSG_EXCEPT) realflags |= MSG_EXCEPT;
@@ -364,8 +364,8 @@ bool f_sem_release(CObjRef sem_identifier) {
  * Return an id for the semaphore with the given key, and allow max_acquire
  * (default 1) processes to acquire it simultaneously.
  */
-Variant f_sem_get(int64 key, int64 max_acquire /* = 1 */,
-                  int64 perm /* = 0666 */, bool auto_release /* = true */) {
+Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
+                  int64_t perm /* = 0666 */, bool auto_release /* = true */) {
   /* Get/create the semaphore.  Note that we rely on the semaphores
    * being zeroed when they are created.  Despite the fact that
    * the(?)  Linux semget() man page says they are not initialized,
@@ -587,8 +587,8 @@ static int put_shm_data(sysvshm_chunk_head *ptr, long key, char *data,
   return 0;
 }
 
-Variant f_shm_attach(int64 shm_key, int64 shm_size /* = 10000 */,
-                     int64 shm_flag /* = 0666 */) {
+Variant f_shm_attach(int64_t shm_key, int64_t shm_size /* = 10000 */,
+                     int64_t shm_flag /* = 0666 */) {
   char *shm_ptr;
   long shm_id;
 
@@ -633,12 +633,12 @@ Variant f_shm_attach(int64 shm_key, int64 shm_size /* = 10000 */,
   shm_list_ptr->id = shm_id;
   shm_list_ptr->ptr = chunk_ptr;
   Lock lock(g_shm_mutex);
-  int64 ret = (int64)shm_list_ptr.get();
+  int64_t ret = (int64_t)shm_list_ptr.get();
   g_shms.insert(shm_list_ptr.release());
   return ret;
 }
 
-bool f_shm_detach(int64 shm_identifier) {
+bool f_shm_detach(int64_t shm_identifier) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -652,7 +652,7 @@ bool f_shm_detach(int64 shm_identifier) {
   return true;
 }
 
-bool f_shm_remove(int64 shm_identifier) {
+bool f_shm_remove(int64_t shm_identifier) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -670,7 +670,7 @@ bool f_shm_remove(int64 shm_identifier) {
   return true;
 }
 
-Variant f_shm_get_var(int64 shm_identifier, int64 variable_key) {
+Variant f_shm_get_var(int64_t shm_identifier, int64_t variable_key) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -691,7 +691,7 @@ Variant f_shm_get_var(int64 shm_identifier, int64 variable_key) {
   return f_unserialize(String(&shm_var->mem, shm_var->length, AttachLiteral));
 }
 
-bool f_shm_has_var(int64 shm_identifier, int64 variable_key) {
+bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -706,7 +706,7 @@ bool f_shm_has_var(int64 shm_identifier, int64 variable_key) {
   return shm_varpos >= 0;
 }
 
-bool f_shm_put_var(int64 shm_identifier, int64 variable_key,
+bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key,
                    CVarRef variable) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
@@ -731,7 +731,7 @@ bool f_shm_put_var(int64 shm_identifier, int64 variable_key,
   return true;
 }
 
-bool f_shm_remove_var(int64 shm_identifier, int64 variable_key) {
+bool f_shm_remove_var(int64_t shm_identifier, int64_t variable_key) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);

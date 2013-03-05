@@ -28,7 +28,7 @@ namespace HPHP {
 
 static const char* kDefaultMD5 = "00000000000000000000000000000000";
 struct MD5 {
-  uint64 q[2];
+  uint64_t q[2];
   MD5(const char* str = kDefaultMD5) {
     if (str == kDefaultMD5) {
       q[0] = q[1] = 0;
@@ -57,8 +57,8 @@ struct MD5 {
 
   // blob is assumed to be in network byte order.
   MD5(const void* blob) {
-    q[0] = ntohq(((const uint64*)blob)[0]);
-    q[1] = ntohq(((const uint64*)blob)[1]);
+    q[0] = ntohq(((const uint64_t*)blob)[0]);
+    q[1] = ntohq(((const uint64_t*)blob)[1]);
   }
 
   // Copy out in network byte order.
@@ -89,7 +89,7 @@ struct MD5 {
     return !operator==(r);
   }
 
-  uint64 hash() const {
+  uint64_t hash() const {
     // hash_int64_pair does way more work than necessary; all the bits here
     // are fantastically good.
     return q[0];

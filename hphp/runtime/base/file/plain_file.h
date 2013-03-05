@@ -41,17 +41,17 @@ public:
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();
-  virtual int64 readImpl(char *buffer, int64 length);
+  virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int getc();
-  virtual String read(int64 length = 0);
-  virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual String read(int64_t length = 0);
+  virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool seekable() { return true;}
-  virtual bool seek(int64 offset, int whence = SEEK_SET);
-  virtual int64 tell();
+  virtual bool seek(int64_t offset, int whence = SEEK_SET);
+  virtual int64_t tell();
   virtual bool eof();
   virtual bool rewind();
   virtual bool flush();
-  virtual bool truncate(int64 size);
+  virtual bool truncate(int64_t size);
 
   FILE *getStream() { return m_stream;}
   virtual const char *getStreamType() const { return "STDIO";}

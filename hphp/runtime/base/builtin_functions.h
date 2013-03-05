@@ -71,7 +71,7 @@ inline bool empty(bool    v) { return !v;}
 inline bool empty(char    v) { return !v;}
 inline bool empty(short   v) { return !v;}
 inline bool empty(int     v) { return !v;}
-inline bool empty(int64   v) { return !v;}
+inline bool empty(int64_t   v) { return !v;}
 inline bool empty(double  v) { return !v;}
 inline bool empty(litstr  v) { return !v || !*v;}
 inline bool empty(const StringData *v) { return v ? v->toBoolean() : false;}
@@ -81,8 +81,8 @@ inline bool empty(CObjRef v) { return !v.toBoolean();}
 inline bool empty(CVarRef v) { return !v.toBoolean();}
 
 bool empty(CVarRef v, bool    offset);
-bool empty(CVarRef v, int64   offset);
-inline bool empty(CVarRef v, int  offset) { return empty(v, (int64)offset); }
+bool empty(CVarRef v, int64_t   offset);
+inline bool empty(CVarRef v, int  offset) { return empty(v, (int64_t)offset); }
 bool empty(CVarRef v, double  offset);
 bool empty(CVarRef v, CArrRef offset);
 bool empty(CVarRef v, CObjRef offset);
@@ -106,23 +106,23 @@ inline Numeric multiply(CVarRef v1, CVarRef v2)    { return v1 * v2;}
 inline Variant plus(CVarRef v1, CVarRef v2)        { return v1 + v2;}
 inline Numeric minus(CVarRef v1, CVarRef v2)       { return v1 - v2;}
 inline Numeric divide(CVarRef v1, CVarRef v2)      { return v1 / v2; }
-inline Numeric modulo(int64 v1, int64 v2) {
+inline Numeric modulo(int64_t v1, int64_t v2) {
   if (UNLIKELY(v2 == 0)) {
     raise_warning("Division by zero");
     return false;
   }
-  if (UNLIKELY(uint64(v2+1) <= 2u)) {
+  if (UNLIKELY(uint64_t(v2+1) <= 2u)) {
     return 0;
   }
   return v1 % v2;
 }
-inline int64 shift_left(int64 v1, int64 v2)        { return v1 << v2; }
-inline int64 shift_right(int64 v1, int64 v2)       { return v1 >> v2; }
+inline int64_t shift_left(int64_t v1, int64_t v2)        { return v1 << v2; }
+inline int64_t shift_right(int64_t v1, int64_t v2)       { return v1 >> v2; }
 
 inline char    negate(char v)    { return -v; }
 inline short   negate(short v)   { return -v; }
 inline int     negate(int v)     { return -v; }
-inline int64   negate(int64 v)   { return -v; }
+inline int64_t   negate(int64_t v)   { return -v; }
 inline double  negate(double v)  { return -v; }
 inline Variant negate(CVarRef v) { return -(Variant)v; }
 
@@ -195,7 +195,7 @@ inline bool instanceOf(bool    v, CStrRef s) { return false;}
 inline bool instanceOf(char    v, CStrRef s) { return false;}
 inline bool instanceOf(short   v, CStrRef s) { return false;}
 inline bool instanceOf(int     v, CStrRef s) { return false;}
-inline bool instanceOf(int64   v, CStrRef s) { return false;}
+inline bool instanceOf(int64_t   v, CStrRef s) { return false;}
 inline bool instanceOf(double  v, CStrRef s) { return false;}
 inline bool instanceOf(litstr  v, CStrRef s) { return false;}
 inline bool instanceOf(CStrRef v, CStrRef s) { return false;}
@@ -257,7 +257,7 @@ inline bool isset(bool v)    { return true; }
 inline bool isset(char v)    { return true; }
 inline bool isset(short v)   { return true; }
 inline bool isset(int v)     { return true; }
-inline bool isset(int64 v)   { return true; }
+inline bool isset(int64_t v)   { return true; }
 inline bool isset(double v)  { return true; }
 inline bool isset(CVarRef v) { return !v.isNull();}
 inline bool isset(CObjRef v) { return !v.isNull();}
@@ -265,8 +265,8 @@ inline bool isset(CStrRef v) { return !v.isNull();}
 inline bool isset(CArrRef v) { return !v.isNull();}
 
 bool isset(CVarRef v, bool    offset);
-bool isset(CVarRef v, int64   offset);
-inline bool isset(CVarRef v, int  offset) { return isset(v, (int64)offset); }
+bool isset(CVarRef v, int64_t   offset);
+inline bool isset(CVarRef v, int  offset) { return isset(v, (int64_t)offset); }
 bool isset(CVarRef v, double  offset);
 bool isset(CVarRef v, CArrRef offset);
 bool isset(CVarRef v, CObjRef offset);
@@ -274,10 +274,10 @@ bool isset(CVarRef v, CVarRef offset);
 bool isset(CVarRef v, litstr  offset, bool isString = false);
 bool isset(CVarRef v, CStrRef offset, bool isString = false);
 
-bool isset(CArrRef v, int64   offset);
-inline bool isset(CArrRef v, bool   offset) { return isset(v, (int64)offset); }
-inline bool isset(CArrRef v, int    offset) { return isset(v, (int64)offset); }
-inline bool isset(CArrRef v, double offset) { return isset(v, (int64)offset); }
+bool isset(CArrRef v, int64_t   offset);
+inline bool isset(CArrRef v, bool   offset) { return isset(v, (int64_t)offset); }
+inline bool isset(CArrRef v, int    offset) { return isset(v, (int64_t)offset); }
+inline bool isset(CArrRef v, double offset) { return isset(v, (int64_t)offset); }
 bool isset(CArrRef v, CArrRef offset);
 bool isset(CArrRef v, CObjRef offset);
 bool isset(CArrRef v, CVarRef offset);
@@ -528,8 +528,8 @@ inline bool    id(bool    v) { return v; }
 inline char    id(char    v) { return v; }
 inline short   id(short   v) { return v; }
 inline int     id(int     v) { return v; }
-inline int64   id(int64   v) { return v; }
-inline uint64  id(uint64  v) { return v; }
+inline int64_t   id(int64_t   v) { return v; }
+inline uint64_t  id(uint64_t  v) { return v; }
 inline double  id(double  v) { return v; }
 inline litstr  id(litstr  v) { return v; }
 inline CStrRef id(CStrRef v) { return v; }

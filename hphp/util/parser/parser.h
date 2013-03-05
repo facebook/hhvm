@@ -241,7 +241,7 @@ protected:
 
   // for closure hidden name
   static Mutex s_mutex;
-  static std::map<int64, int> s_closureIds;
+  static std::map<int64_t, int> s_closureIds;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

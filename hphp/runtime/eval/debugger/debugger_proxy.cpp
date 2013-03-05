@@ -35,7 +35,7 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
       m_signalThread(this, &DebuggerProxy::pollSignal),
       m_signum(CmdSignal::SignalNone) {
   m_thrift.create(socket);
-  m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64)this);
+  m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);
 }
 
 DebuggerProxy::~DebuggerProxy() {
@@ -73,7 +73,7 @@ void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
       threads.push_back(createThreadInfo(tint->desc()));
     }
   }
-  for (std::map<int64, DThreadInfoPtr>::const_iterator iter =
+  for (std::map<int64_t, DThreadInfoPtr>::const_iterator iter =
          m_threads.begin(); iter != m_threads.end(); ++iter) {
     DThreadInfoPtr thread(new DThreadInfo());
     *thread = *iter->second;
@@ -106,7 +106,7 @@ bool DebuggerProxy::switchThread(DThreadInfoPtr thread) {
 }
 
 void DebuggerProxy::switchThreadMode(ThreadMode mode,
-                                     int64 threadId /* = 0 */) {
+                                     int64_t threadId /* = 0 */) {
   Lock lock(this);
   m_threadMode = mode;
   if (threadId) {
@@ -117,7 +117,7 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
     m_thread = 0;
     notify();
   } else {
-    m_thread = (int64)Process::GetThreadId();
+    m_thread = (int64_t)Process::GetThreadId();
   }
   if (mode == Normal) {
     m_jump.reset();
@@ -360,7 +360,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
 
 DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
   DThreadInfoPtr info(new DThreadInfo());
-  info->m_id = (int64)Process::GetThreadId();
+  info->m_id = (int64_t)Process::GetThreadId();
   info->m_desc = desc;
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -373,7 +373,7 @@ DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
 }
 
 bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
-  int64 self = cmd.getThreadId();
+  int64_t self = cmd.getThreadId();
 
   Lock lock(this);
   if (m_thread && m_thread != self) {

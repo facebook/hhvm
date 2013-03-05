@@ -55,7 +55,7 @@ private:
     KindOfLiveLists, // for auto-complete
   };
 
-  int8   m_type;
+  int8_t   m_type;
   String m_symbol;
   Array  m_info;
   DebuggerClient::LiveListsPtr m_acLiveLists;

@@ -120,7 +120,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
     // tx64LocPhysicalOffset returns:
     // negative offsets for locals accessed via rVmFp
     // positive offsets for stack values, relative to rVmSp
-    uint32 stackOffset = tx64LocPhysicalOffset(l);
+    uint32_t stackOffset = tx64LocPhysicalOffset(l);
     m_hhbcTrans->guardTypeStack(stackOffset, JIT::Type::fromRuntimeType(rtt));
   } else if (l.space == Location::Local){
     // Convert negative offset to a positive offset for convenience
@@ -604,7 +604,7 @@ void TranslatorX64::irTranslateContEnter(const Tracelet& t,
                                          const NormalizedInstruction& i) {
   int after = nextSrcKey(t, i).offset();
   const Func* srcFunc = curFunc();
-  int32 callOffsetInUnit = after - srcFunc->base();
+  int32_t callOffsetInUnit = after - srcFunc->base();
 
   HHIR_EMIT(ContEnter, callOffsetInUnit);
 }
@@ -1600,7 +1600,7 @@ void TranslatorX64::irAssertType(const Location& l,
     case Location::Stack: {
       // tx64LocPhysicalOffset returns positive offsets for stack values,
       // relative to rVmSp
-      uint32 stackOffset = tx64LocPhysicalOffset(l);
+      uint32_t stackOffset = tx64LocPhysicalOffset(l);
       m_hhbcTrans->assertTypeStack(stackOffset,
                                    JIT::Type::fromRuntimeType(rtt));
       break;

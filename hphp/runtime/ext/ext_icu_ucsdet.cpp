@@ -145,7 +145,7 @@ String c_EncodingMatch::t_getencoding() {
   return String(encoding);
 }
 
-int64 c_EncodingMatch::t_getconfidence() {
+int64_t c_EncodingMatch::t_getconfidence() {
   validate();
 
   UErrorCode status = U_ZERO_ERROR;

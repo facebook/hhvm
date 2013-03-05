@@ -331,7 +331,7 @@ void HttpServer::createPid() {
     if (f) {
       pid_t pid = Process::GetProcessId();
       char buf[64];
-      snprintf(buf, sizeof(buf), "%" PRId64, (int64)pid);
+      snprintf(buf, sizeof(buf), "%" PRId64, (int64_t)pid);
       fwrite(buf, strlen(buf), 1, f);
       fclose(f);
     } else {
@@ -351,7 +351,7 @@ void HttpServer::killPid() {
   if (!RuntimeOption::PidFile.empty()) {
     CstrBuffer sb(RuntimeOption::PidFile.c_str());
     if (sb.size()) {
-      int64 pid = sb.detach().toInt64();
+      int64_t pid = sb.detach().toInt64();
       if (pid) {
         kill((pid_t)pid, SIGKILL);
         return;

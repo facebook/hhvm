@@ -24,16 +24,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
-int64 f_ftok(CStrRef pathname, CStrRef proj);
+int64_t f_ftok(CStrRef pathname, CStrRef proj);
 
-Variant f_msg_get_queue(int64 key, int64 perms = 0666);
-bool f_msg_queue_exists(int64 key);
-bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
+Variant f_msg_get_queue(int64_t key, int64_t perms = 0666);
+bool f_msg_queue_exists(int64_t key);
+bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
                 bool serialize = true, bool blocking = true,
                 VRefParam errorcode = null);
-bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, VRefParam msgtype,
-                   int64 maxsize, VRefParam message, bool unserialize = true,
-                   int64 flags = 0, VRefParam errorcode = null);
+bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
+                   int64_t maxsize, VRefParam message, bool unserialize = true,
+                   int64_t flags = 0, VRefParam errorcode = null);
 bool f_msg_remove_queue(CObjRef queue);
 bool f_msg_set_queue(CObjRef queue, CArrRef data);
 Array f_msg_stat_queue(CObjRef queue);
@@ -42,7 +42,7 @@ Array f_msg_stat_queue(CObjRef queue);
 // semaphore
 
 bool f_sem_acquire(CObjRef sem_identifier);
-Variant f_sem_get(int64 key, int64 max_acquire = 1, int64 perm = 0666,
+Variant f_sem_get(int64_t key, int64_t max_acquire = 1, int64_t perm = 0666,
                   bool auto_release = true);
 bool f_sem_release(CObjRef sem_identifier);
 bool f_sem_remove(CObjRef sem_identifier);
@@ -50,13 +50,13 @@ bool f_sem_remove(CObjRef sem_identifier);
 ///////////////////////////////////////////////////////////////////////////////
 // shared memory
 
-Variant f_shm_attach(int64 shm_key, int64 shm_size = 10000, int64 shm_flag = 0666);
-bool f_shm_detach(int64 shm_identifier);
-bool f_shm_remove(int64 shm_identifier);
-Variant f_shm_get_var(int64 shm_identifier, int64 variable_key);
-bool f_shm_has_var(int64 shm_identifier, int64 variable_key);
-bool f_shm_put_var(int64 shm_identifier, int64 variable_key, CVarRef variable);
-bool f_shm_remove_var(int64 shm_identifier, int64 variable_key);
+Variant f_shm_attach(int64_t shm_key, int64_t shm_size = 10000, int64_t shm_flag = 0666);
+bool f_shm_detach(int64_t shm_identifier);
+bool f_shm_remove(int64_t shm_identifier);
+Variant f_shm_get_var(int64_t shm_identifier, int64_t variable_key);
+bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key);
+bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key, CVarRef variable);
+bool f_shm_remove_var(int64_t shm_identifier, int64_t variable_key);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

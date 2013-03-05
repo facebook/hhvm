@@ -107,7 +107,7 @@ bool PDOConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
   return false;
 }
 
-int64 PDOConnection::doer(CStrRef sql) {
+int64_t PDOConnection::doer(CStrRef sql) {
   throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
   return 0;
 }
@@ -133,7 +133,7 @@ bool PDOConnection::rollback() {
   return false;
 }
 
-bool PDOConnection::setAttribute(int64 attr, CVarRef value) {
+bool PDOConnection::setAttribute(int64_t attr, CVarRef value) {
   throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
   return false;
 }
@@ -148,7 +148,7 @@ bool PDOConnection::fetchErr(PDOStatement *stmt, Array &info) {
   return false;
 }
 
-int PDOConnection::getAttribute(int64 attr, Variant &value) {
+int PDOConnection::getAttribute(int64_t attr, Variant &value) {
   throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
   return -1;
 }
@@ -234,17 +234,17 @@ bool PDOStatement::paramHook(PDOBoundParam *param, PDOParamEvent event_type) {
   return false;
 }
 
-bool PDOStatement::setAttribute(int64 attr, CVarRef value) {
+bool PDOStatement::setAttribute(int64_t attr, CVarRef value) {
   throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
   return false;
 }
 
-int PDOStatement::getAttribute(int64 attr, Variant &value) {
+int PDOStatement::getAttribute(int64_t attr, Variant &value) {
   throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
   return -1;
 }
 
-bool PDOStatement::getColumnMeta(int64 colno, Array &return_value) {
+bool PDOStatement::getColumnMeta(int64_t colno, Array &return_value) {
   throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
   return false;
 }

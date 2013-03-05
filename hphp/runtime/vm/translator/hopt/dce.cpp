@@ -192,7 +192,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
     }
     forEachInst(exit, [&](IRInstruction* inst) {
       // Replace the original tmps with the sunk tmps.
-      for (uint32 i = 0; i < inst->getNumSrcs(); ++i) {
+      for (uint32_t i = 0; i < inst->getNumSrcs(); ++i) {
         SSATmp* src = inst->getSrc(i);
         if (SSATmp* sunkTmp = sunkTmps[src->getId()]) {
           inst->setSrc(i, sunkTmp);
@@ -256,7 +256,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   while (!wl.empty()) {
     IRInstruction* inst = wl.front();
     wl.pop_front();
-    for (uint32 i = 0; i < inst->getNumSrcs(); i++) {
+    for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
       SSATmp* src = inst->getSrc(i);
       if (src->getInstruction()->getOpcode() == DefConst) {
         continue;

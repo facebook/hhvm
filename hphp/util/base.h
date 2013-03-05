@@ -167,14 +167,6 @@ static const bool hphpiCompat = true;
 #endif
 
 typedef unsigned char uchar;
-typedef signed char int8;
-typedef unsigned char uint8;
-typedef short int16;
-typedef unsigned short uint16;
-typedef int int32;
-typedef unsigned int uint32;
-typedef int64_t int64;
-typedef unsigned long long uint64;
 
 #ifndef ULLONG_MAX
 #define ULLONG_MAX 0xffffffffffffffffULL
@@ -230,13 +222,13 @@ template<class type, class T> struct hphp_string_hash_map :
 };
 
 struct int64_hash {
-  size_t operator() (const int64 v) const {
+  size_t operator() (const int64_t v) const {
     return (size_t)hash_int64(v);
   }
-  size_t hash(const int64 v) const {
+  size_t hash(const int64_t v) const {
     return operator()(v);
   }
-  bool equal(const int64 lhs, const int64 rhs) const {
+  bool equal(const int64_t lhs, const int64_t rhs) const {
     return lhs == rhs;
   }
 };

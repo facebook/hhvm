@@ -143,7 +143,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   free(argv);
 }
 
-int64 f_pcntl_fork() {
+int64_t f_pcntl_fork() {
   if (RuntimeOption::serverExecutionMode()) {
     raise_error("forking is disallowed in server mode");
     return -1;
@@ -313,7 +313,7 @@ bool f_pcntl_signal(int signo, CVarRef handler,
                     bool restart_syscalls /* = true */) {
   /* Special long value case for SIG_DFL and SIG_IGN */
   if (handler.isInteger()) {
-    int64 handle = handler.toInt64();
+    int64_t handle = handler.toInt64();
     if (handle != (long)SIG_DFL && handle != (long)SIG_IGN) {
       raise_warning("Invalid value for handle argument specified");
     }
@@ -339,7 +339,7 @@ bool f_pcntl_signal(int signo, CVarRef handler,
   return true;
 }
 
-int64 f_pcntl_wait(VRefParam status, int options /* = 0 */) {
+int64_t f_pcntl_wait(VRefParam status, int options /* = 0 */) {
   int child_id;
   int nstatus = 0;
   child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
@@ -352,7 +352,7 @@ int64 f_pcntl_wait(VRefParam status, int options /* = 0 */) {
   return child_id;
 }
 
-int64 f_pcntl_waitpid(int pid, VRefParam status, int options /* = 0 */) {
+int64_t f_pcntl_waitpid(int pid, VRefParam status, int options /* = 0 */) {
   int nstatus = status;
   pid_t child_id = LightProcess::pcntl_waitpid((pid_t)pid, &nstatus, options);
   status = nstatus;
@@ -813,7 +813,7 @@ bool f_proc_terminate(CObjRef process, int signal /* = 0 */) {
   return kill(proc->child, signal <= 0 ? SIGTERM : signal) == 0;
 }
 
-int64 f_proc_close(CObjRef process) {
+int64_t f_proc_close(CObjRef process) {
   return process.getTyped<ChildProcess>()->close();
 }
 

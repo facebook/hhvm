@@ -88,7 +88,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   }
 }
 
-int64 UrlFile::writeImpl(const char *buffer, int64 length) {
+int64_t UrlFile::writeImpl(const char *buffer, int64_t length) {
   assert(m_len != -1);
   throw FatalErrorException((string("cannot write a url stream: ") +
                              m_name).c_str());

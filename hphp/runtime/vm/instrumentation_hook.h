@@ -23,14 +23,14 @@
 namespace HPHP {
 namespace VM {
 
-static inline void instHookInt64Impl(InjectionTableInt64* table, int64 val) {
+static inline void instHookInt64Impl(InjectionTableInt64* table, int64_t val) {
   if (!table) return;
   InjectionTableInt64::const_iterator it = table->find(val);
   if (LIKELY(it == table->end())) return;
   it->second->execute();
 }
 
-static inline void instHookInt64(int type, int64 val) {
+static inline void instHookInt64(int type, int64_t val) {
   assert(type < InstHookTypeInt64Count);
   InjectionTableInt64* injTable = g_vmContext->m_injTables ?
     g_vmContext->m_injTables->getInt64Table(type) : nullptr;
@@ -52,7 +52,7 @@ static inline void instHookStr(int type, const char* str) {
   instHookSD(type, &sd);
 }
 
-#define INST_HOOK_PC(table, pc) instHookInt64Impl(table, (int64)pc)
+#define INST_HOOK_PC(table, pc) instHookInt64Impl(table, (int64_t)pc)
 
 #define INST_HOOK_EVT_STR(str)  instHookStr(InstHookTypeCustomEvt, str)
 #define INST_HOOK_EVT_SD(sd)    instHookSD(InstHookTypeCustomEvt, sd)

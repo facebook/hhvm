@@ -103,7 +103,7 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
       }
     }
 
-    int64 depth = m_context["verify_depth"].toInt64();
+    int64_t depth = m_context["verify_depth"].toInt64();
     if (depth) {
       SSL_CTX_set_verify_depth(ctx, depth);
     }
@@ -214,7 +214,7 @@ bool SSLSocket::onAccept() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool SSLSocket::handleError(int64 nr_bytes, bool is_init) {
+bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
   char esbuf[512];
   string ebuf;
   unsigned long ecode;
@@ -330,8 +330,8 @@ bool SSLSocket::closeImpl() {
   return Socket::closeImpl();
 }
 
-int64 SSLSocket::readImpl(char *buffer, int64 length) {
-  int64 nr_bytes = 0;
+int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
+  int64_t nr_bytes = 0;
   if (m_ssl_active) {
     bool retry = true;
     do {
@@ -353,7 +353,7 @@ int64 SSLSocket::readImpl(char *buffer, int64 length) {
   return nr_bytes < 0 ? 0 : nr_bytes;
 }
 
-int64 SSLSocket::writeImpl(const char *buffer, int64 length) {
+int64_t SSLSocket::writeImpl(const char *buffer, int64_t length) {
   int didwrite;
   if (m_ssl_active) {
     bool retry = true;

@@ -153,10 +153,10 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
   xed_decoded_inst_t xedd;
-  uint64 ip;
+  uint64_t ip;
 
   // Decode and print each instruction
-  for (frontier = codeStartAddr, ip = (uint64)codeStartAddr;
+  for (frontier = codeStartAddr, ip = (uint64_t)codeStartAddr;
        frontier < codeEndAddr; ) {
     xed_decoded_inst_zero_set_mode(&xedd, &m_xedState);
     xed_decoded_inst_set_input_chip(&xedd, XED_CHIP_INVALID);
@@ -174,7 +174,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     }
     out << folly::format("{:#10x}: ", ip);
 
-    uint32 instrLen = xed_decoded_inst_get_length(&xedd);
+    uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
     if (m_printEncoding) {
       // print encoding, like in objdump
       unsigned posi = 0;

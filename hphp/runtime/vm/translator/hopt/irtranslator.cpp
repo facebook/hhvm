@@ -1107,33 +1107,10 @@ TranslatorX64::irTranslateFPushFunc(const Tracelet& t,
 void
 TranslatorX64::irTranslateFPushClsMethodD(const Tracelet& t,
                                           const NormalizedInstruction& i) {
-  using namespace TargetCache;
-  const StringData* meth = curUnit()->lookupLitstrId(i.imm[1].u_SA);
-  const NamedEntityPair& np = curUnit()->lookupNamedEntityPairId(i.imm[2].u_SA);
-  DEBUG_ONLY const StringData* cls = np.first;
-  assert(meth && meth->isStatic() &&
-         cls && cls->isStatic());
-  assert(i.inputs.size() == 0);
-
-  const Class* baseClass = Unit::lookupClass(np.second);
-  bool magicCall = false;
-  const Func* func = lookupImmutableMethod(baseClass, meth, magicCall,
-                                           true /* staticLookup */);
-
-  bool mightNotBeStatic = false;
-  if (func &&
-      !(func->attrs() & AttrStatic) &&
-      !(curFunc()->attrs() & AttrStatic) &&
-      curFunc()->cls() &&
-      curFunc()->cls()->classof(baseClass)) {
-    mightNotBeStatic = true;
-  }
-
   HHIR_EMIT(FPushClsMethodD,
              (i.imm[0].u_IVA),
              (i.imm[1].u_SA),
-             (i.imm[2].u_SA),
-             (mightNotBeStatic));
+             (i.imm[2].u_SA));
 }
 
 void

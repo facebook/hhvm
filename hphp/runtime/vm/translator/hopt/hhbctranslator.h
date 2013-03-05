@@ -249,8 +249,7 @@ struct HhbcTranslator {
   void emitFPushFunc(int32 numParams);
   void emitFPushClsMethodD(int32 numParams,
                            int32 methodNameStrId,
-                           int32 clssNamedEntityPairId,
-                           bool mightNotBeStatic);
+                           int32 clssNamedEntityPairId);
   void emitFPushObjMethodD(int32 numParams,
                            int32 methodNameStrId,
                            const Class* baseClass);

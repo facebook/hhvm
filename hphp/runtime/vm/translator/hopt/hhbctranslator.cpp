@@ -1418,8 +1418,7 @@ void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
 
 void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
                                          int32 methodNameStrId,
-                                         int32 clssNamedEntityPairId,
-                                         bool mightNotBeStatic) {
+                                         int32 clssNamedEntityPairId) {
 
   const StringData* methodName = lookupStringId(methodNameStrId);
   const NamedEntityPair& np = lookupNamedEntityPairId(clssNamedEntityPairId);
@@ -1433,6 +1432,15 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
                                                              magicCall,
                                                          /* staticLookup: */
                                                              true);
+  bool mightNotBeStatic = false;
+  if (func &&
+      !(func->attrs() & AttrStatic) &&
+      !(getCurFunc()->attrs() & AttrStatic) &&
+      getCurClass() &&
+      getCurClass()->classof(baseClass)) {
+    mightNotBeStatic = true;
+  }
+
   SSATmp* actRec;
   if (func) {
     SSATmp* objOrCls;

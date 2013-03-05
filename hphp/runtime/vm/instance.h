@@ -38,18 +38,18 @@ class Instance : public ObjectData {
  private:
   // This constructor is used for all pure classes that are not
   // descendents of cppext classes
-  explicit Instance(Class* cls) : ObjectData(nullptr, false, cls) {
+  explicit Instance(Class* cls) : ObjectData(false, cls) {
     instanceInit(cls);
   }
 
   enum NoInit { noinit };
-  explicit Instance(Class* cls, NoInit) : ObjectData(nullptr, false, cls) {}
+  explicit Instance(Class* cls, NoInit) : ObjectData(false, cls) {}
 
  public:
   // This constructor is used for all cppext classes (including resources)
   // and their descendents.
   Instance(Class* cls, bool isResource)
-      : ObjectData(nullptr, isResource, cls) {
+      : ObjectData(isResource, cls) {
     instanceInit(cls);
   }
 

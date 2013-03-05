@@ -115,9 +115,6 @@ public:
     return firstHash;
   }
 
-  static Object CreateDummy(ObjectData*(*cooFunc)());
-  static Object CreateDummy(ObjectData*(*cooFunc)(ObjectData*));
-
   template <class T> T& cast() { return *static_cast<T*>(this); }
   template <class T> const T& cast() const {
     return *static_cast<const T*>(this);

@@ -96,9 +96,6 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   public: bool t_setrelaxngschemasource(CStrRef source);
   public: Variant t___destruct();
 
-  static const ClassPropTable os_prop_table;
-
-
   private: String read_string_func(xmlreader_read_char_t internal_function);
   private: bool bool_func_no_arg(xmlreader_read_int_t internal_function);
   private: Variant string_func_string_arg(String value, xmlreader_read_one_char_t internal_function);

@@ -131,10 +131,6 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   public: bool t_setmulti(CArrRef items, int expiration = 0);
   public: bool t_setmultibykey(CStrRef server_key, CArrRef items, int expiration = 0);
   public: bool t_setoption(int option, CVarRef value);
-
-  static const ClassPropTable os_prop_table;
-
-
  private:
   class Impl {
   public:

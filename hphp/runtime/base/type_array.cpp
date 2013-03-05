@@ -751,20 +751,6 @@ Variant &Array::addLval(CVarRef key, bool isKey /* = false */) {
   return Variant::lvalBlackHole();
 }
 
-Variant Array::refvalAt(CStrRef key, bool isString /* = false */) {
-  return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
-}
-
-Variant Array::argvalAt(bool byRef, CStrRef key,
-                        bool isString /* = false */) const {
-  if (byRef) {
-    return strongBind(
-      const_cast<Array*>(this)->lvalAt(key, AccessFlags::IsKey(isString)));
-  } else {
-    return rvalAtRef(key);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // membership functions
 

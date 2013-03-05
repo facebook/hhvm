@@ -130,7 +130,6 @@ class c_UConverter : public ExtObjectData {
     return ti_getstandards("uconverter");
   }
 
-  public: static const ClassPropTable os_prop_table;
   private:
     static void throwFailure(UErrorCode error, const char *fname,
                              intl_error &merror);

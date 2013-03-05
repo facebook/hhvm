@@ -727,23 +727,7 @@ static String makeStaticString(const char *s) {
   if (!s) {
     return null_string;
   }
-  if (has_eval_support) {
-    // hhvm uses GetStaticString
-    return StringData::GetStaticString(s);
-  }
-  // binaries compiled with hphpc don't use GetStaticString(), and
-  // instead they use TheStaticStringSet; see "type_string.cpp" for
-  // details
-  StringData* sd = new StringData(s, AttachLiteral);
-  sd->setStatic();
-  StringDataSet& set = StaticString::TheStaticStringSet();
-  StringDataSet::iterator it = set.find(sd);
-  if (it != set.end()) {
-    delete sd;
-    return *it;
-  }
-  set.insert(sd);
-  return sd;
+  return StringData::GetStaticString(s);
 }
 
 void ClassInfo::ReadUserAttributes(const char **&p,
@@ -765,14 +749,8 @@ void ClassInfo::ReadUserAttributes(const char **&p,
 }
 
 ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
-  if (attribute & ClassInfo::IsRedeclared) {
-    RedeclaredCallInfo *ci = *(RedeclaredCallInfo**)((char*)get_global_variables() +
-                                                     volatile_redec_offset);
-    if (!ci) return 0;
-    return (ClassInfo::MethodInfo*)(void*)parameters[ci->redeclaredId];
-  } else if (attribute & ClassInfo::IsVolatile) {
-    return *(bool*)((char*)get_global_variables() + volatile_redec_offset) ? this : 0;
-  }
+  assert(!(attribute & ClassInfo::IsRedeclared));
+  assert(!(attribute & ClassInfo::IsVolatile));
   return this;
 }
 
@@ -938,7 +916,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       if (dt == KindOfUnknown) {
         constant->valueLen = intptr_t(len_or_cw);
       } else {
-        v = ClassPropTableEntry::GetVariant(dt, len_or_cw);
+        v = ClassInfo::GetVariant(dt, len_or_cw);
         constant->setStaticValue(v);
       }
     } else {
@@ -1051,71 +1029,14 @@ ClassInfo::MethodInfo::~MethodInfo() {
   }
 }
 
-Variant ClassPropTable::getInitVal(const ClassPropTableEntry *prop) const {
-  int64 id = m_static_inits[prop->init_offset];
-  if (LIKELY(!(id & 7))) {
-    return *(Variant*)id;
-  }
-  switch (id & 7) {
-    case 1: {
-      int off = id >> 32;
-      CStrRef s = getInitS((id>>4) & 0xfffffff);
-      if (off) {
-        char *addr = (char*)get_global_variables() + off;
-        return getDynamicConstant(*(Variant*)addr, s);
-      } else {
-        return getUndefinedConstant(s);
-      }
-    }
-    case 2: {
-      const ObjectStaticCallbacks *osc =
-        (const ObjectStaticCallbacks *)getInitP((id >> 4) & 0xfffffff);
-      const char *addr =
-        (const char *)osc->lazy_initializer(get_global_variables()) +
-        (id >> 32);
-      return *(Variant*)addr;
-    }
-    case 3: {
-      char *addr = (char*)get_global_variables() + (id & 0x7ffffff8);
-      ObjectStaticCallbacks *osc = *(ObjectStaticCallbacks**)addr;
-      return osc->os_constant(getInitS(id>>32).c_str());
-    }
-    case 4: {
-      ObjectStaticCallbacks *osc =
-        (ObjectStaticCallbacks*)getInitP((id & 0x7fffffff)>>4);
-      return osc->os_constant(getInitS(id>>32).c_str());
-    }
-    case 5:
-      throw FatalErrorException(0, "unknown class constant %s::%s",
-                                getInitS((id & 0x7fffffff)>>4).c_str(),
-                                getInitS(id>>32).c_str());
-
-    case 6: {
-      void *func = getInitP((id >> 4) & 0x7ffffff);
-      if (id >> 32) {
-        return ((CVarRef (*)())func)();
-      } else {
-        return ((Variant (*)())func)();
-      }
-    }
-
-    case 7:
-      return
-        ClassPropTableEntry::GetVariant(DataType((id >> 4) & kDataTypeMask),
-                                        getInitP(id >> 32));
-  }
-  throw FatalErrorException("Failed to get init val");
-}
-
-void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
+void ClassInfo::GetArray(const ObjectData *obj,
                          Array &props, GetArrayKind kind) {
   HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(
     const_cast<ObjectData*>(obj));
   inst->HPHP::VM::Instance::o_getArray(props, !(kind & GetArrayPrivate));
 }
 
-void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
-                         CArrRef props) {
+void ClassInfo::SetArray(ObjectData *obj, CArrRef props) {
   HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(obj);
   inst->HPHP::VM::Instance::o_setArray(props);
 }

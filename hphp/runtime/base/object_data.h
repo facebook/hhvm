@@ -31,8 +31,6 @@ namespace HPHP {
 
 class ArrayIter;
 class MutableArrayIter;
-class ClassPropTable;
-struct ObjectStaticCallbacks;
 
 class HphpArray;
 class TypedValue;
@@ -89,8 +87,7 @@ class ObjectData : public CountableNF {
     RealPropExist = 16,   // For property_exists
   };
 
-  ObjectData(const ObjectStaticCallbacks *cb = nullptr, bool noId = false,
-             VM::Class* type = nullptr)
+  ObjectData(bool noId, VM::Class* type)
       : o_attribute(0), m_cls(type) {
     assert(!hhvm || uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
@@ -167,24 +164,6 @@ class ObjectData : public CountableNF {
   virtual double o_toDouble()  const { return o_toInt64();}
 
   void setDummy();
-  static Variant ifa_dummy(MethodCallPackage &mcp, int count,
-                           INVOKE_FEW_ARGS_IMPL_ARGS,
-                           Variant (*ifa)(MethodCallPackage &mcp, int count,
-                                          INVOKE_FEW_ARGS_IMPL_ARGS),
-                           ObjectData *(*coo)(ObjectData*));
-  static Variant i_dummy(MethodCallPackage &mcp, CArrRef params,
-                         Variant (*i)(MethodCallPackage &mcp,
-                                      CArrRef params),
-                         ObjectData *(*coo)(ObjectData*));
-  static Variant ifa_dummy(MethodCallPackage &mcp, int count,
-                           INVOKE_FEW_ARGS_IMPL_ARGS,
-                           Variant (*ifa)(MethodCallPackage &mcp, int count,
-                                          INVOKE_FEW_ARGS_IMPL_ARGS),
-                           ObjectData *(*coo)());
-  static Variant i_dummy(MethodCallPackage &mcp, CArrRef params,
-                         Variant (*i)(MethodCallPackage &mcp,
-                                      CArrRef params),
-                         ObjectData *(*coo)());
 
   virtual void init() {}
   virtual void destruct();
@@ -229,7 +208,6 @@ class ObjectData : public CountableNF {
   virtual void o_setArray(CArrRef properties);
 
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
-  const ClassPropTable *o_getClassPropTable() const;
   void o_set(const Array properties);
   Variant o_argval(bool byRef, CStrRef s, bool error = true,
       CStrRef context = null_string);
@@ -260,12 +238,8 @@ class ObjectData : public CountableNF {
   // method invocation with CStrRef
   Variant o_invoke(CStrRef s, CArrRef params, strhash_t hash = -1,
                    bool fatal = true);
-  Variant o_root_invoke(CStrRef s, CArrRef params, strhash_t hash = -1,
-                        bool fatal = false);
   Variant o_invoke_few_args(CStrRef s, strhash_t hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
-  Variant o_root_invoke_few_args(CStrRef s, strhash_t hash, int count,
-                                 INVOKE_FEW_ARGS_DECL_ARGS);
 
   // misc
   Variant o_throw_fatal(const char *msg);
@@ -274,8 +248,6 @@ class ObjectData : public CountableNF {
   bool hasInternalReference(PointerSet &vars, bool ds = false) const;
   virtual void dump() const;
   virtual ObjectData *clone();
-  virtual void setRoot(ObjectData *root) {}
-  virtual ObjectData *getRoot();
 
   bool o_isset(CStrRef prop, CStrRef context = null_string);
   bool o_empty(CStrRef prop, CStrRef context = null_string);
@@ -295,7 +267,6 @@ class ObjectData : public CountableNF {
   virtual Variant t___wakeup();
   virtual String t___tostring();
   virtual Variant t___clone();
-  virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
 
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
@@ -361,39 +332,6 @@ public:
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
 typedef VM::GlobalNameValueTableWrapper GlobalVariables;
-
-// Callback structure for functions related to static methods
-struct ObjectStaticCallbacks {
-  inline bool os_get_call_info(MethodCallPackage &info,
-                               strhash_t hash = -1) const {
-    NOT_REACHED();
-  }
-  Variant os_getInit(CStrRef s) const;
-  Variant os_get(CStrRef s) const;
-  Variant &os_lval(CStrRef s) const;
-  Variant os_constant(const char *s) const;
-
-  const ObjectStaticCallbacks* operator->() const { return this; }
-  GlobalVariables *lazy_initializer(GlobalVariables *g) const;
-
-  const StaticString          *cls;
-  const ClassPropTable        *cpt;
-  const ObjectStaticCallbacks *parent;
-  int                         attributes;
-  HPHP::VM::Class**           os_cls_ptr;
-
-  static ObjectStaticCallbacks* encodeVMClass(const HPHP::VM::Class* vmClass) {
-    return (ObjectStaticCallbacks*)((intptr_t)vmClass | (intptr_t)1);
-  }
-  static HPHP::VM::Class* decodeVMClass(const ObjectStaticCallbacks* cb) {
-    return (HPHP::VM::Class*)((intptr_t)cb & ~(intptr_t)1);
-  }
-  static bool isEncodedVMClass(const ObjectStaticCallbacks* cb) {
-    return ((intptr_t)cb & (intptr_t)1);
-  }
-};
-
-ObjectData *coo_ObjectData(ObjectData *);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calculate item sizes for object allocators

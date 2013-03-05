@@ -72,9 +72,6 @@ class c_DateTime : public ExtObjectData {
   public: Object t_settimezone(CObjRef timezone);
   public: Object t_sub(CObjRef interval);
 
-  public: static const ClassPropTable os_prop_table;
-
-
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartObject<DateTime> dt) {
     c_DateTime *cdt = NEWOBJ(c_DateTime)();
@@ -136,9 +133,6 @@ class c_DateTimeZone : public ExtObjectData {
   public: static Array t_listidentifiers() {
     return ti_listidentifiers("datetimezone");
   }
-
-  public: static const ClassPropTable os_prop_table;
-
 
   // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartObject<TimeZone> tz) {

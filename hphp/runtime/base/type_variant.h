@@ -934,24 +934,6 @@ class Variant : VariantBase {
   Variant &lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(CVarRef key, Variant& tmp, ACCESSPARAMS_DECL);
 
-  Variant refvalAt(bool    key);
-  Variant refvalAt(int     key);
-  Variant refvalAt(int64   key);
-  Variant refvalAt(double  key);
-  Variant refvalAt(litstr  key, bool isString = false);
-  Variant refvalAt(CStrRef key, bool isString = false);
-  Variant refvalAt(CVarRef key);
-
-  Variant argvalAt(bool byRef, bool    key) const;
-  Variant argvalAt(bool byRef, int     key) const;
-  Variant argvalAt(bool byRef, int64   key) const;
-  Variant argvalAt(bool byRef, double  key) const;
-  Variant argvalAt(bool byRef, litstr  key,
-      bool isString = false) const;
-  Variant argvalAt(bool byRef, CStrRef key,
-      bool isString = false) const;
-  Variant argvalAt(bool byRef, CVarRef key) const;
-
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
   Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
@@ -1434,34 +1416,6 @@ private:
   template<typename T>
   inline ALWAYS_INLINE Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
 
-  template<typename T>
-  Variant refvalAtImpl(const T &key) {
-    if (m_type == KindOfRef) {
-      return m_data.pref->var()->refvalAtImpl(key);
-    }
-    if (is(KindOfArray) || isObjectConvertable()) {
-      return strongBind(lvalAt(key));
-    } else {
-      return rvalAt(key);
-    }
-  }
-
-  Variant refvalAtImpl(CStrRef key, bool isString = false);
-
-  template<class T>
-  Variant argvalAtImpl(bool byRef, const T &key) {
-    if (m_type == KindOfRef) {
-      return m_data.pref->var()->argvalAtImpl(byRef, key);
-    }
-    if (byRef && (m_type == KindOfArray ||
-                  isObjectConvertable())) {
-      return strongBind(lvalAt(key));
-    } else {
-      return rvalAt(key);
-    }
-  }
-  Variant argvalAtImpl(bool byRef, CStrRef key, bool isString = false);
-
  private:
   /**
    * Checks whether the LHS array needs to be copied for a *one-level*
@@ -1713,30 +1667,8 @@ private:
   }
 };
 
-typedef struct VariantProxy {
-  union {
-    char m_data[sizeof(Variant)];
-    void *m_dummyp;
-    int64 m_dummyi;
-  };
-} VariantProxy;
-
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies
-
-template<typename T>
-Variant Array::refvalAt(const T &key) {
-  return strongBind(lvalAt(key));
-}
-
-template<typename T>
-Variant Array::argvalAt(bool byRef, const T &key) const {
-  if (byRef) {
-    return strongBind(const_cast<Array*>(this)->lvalAt(key));
-  } else {
-    return rvalAtRef(key);
-  }
-}
 
 inline const Variant Array::operator[](bool    key) const {
   return rvalAt(key);

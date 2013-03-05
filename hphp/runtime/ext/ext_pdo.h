@@ -139,9 +139,6 @@ class c_PDO : public ExtObjectData, public Sweepable {
     return ti_getavailabledrivers("pdo");
   }
 
-  static const ClassPropTable os_prop_table;
-
-
   public: sp_PDOConnection m_dbh;
 };
 

@@ -110,7 +110,6 @@ const char *Option::LabelPrefix = "l_";
 const char *Option::HiddenVariablePrefix = "h_";
 const char *Option::GlobalVariablePrefix = "gv_";
 const char *Option::StaticVariablePrefix = "sv_";
-const char *Option::ClassPropTablePrefix = "cpt_";
 const char *Option::ClassPrefix = "c_";
 const char *Option::ClassStaticsCallbackPrefix = "cw_";
 const char *Option::ClassStaticsCallbackNullPrefix = "cwn_";

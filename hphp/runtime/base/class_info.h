@@ -26,7 +26,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ClassInfoHook;
-struct ClassPropTableEntry;
 
 /**
  * Though called "ClassInfo", we consider global scope as a virtual "class".
@@ -311,15 +310,34 @@ public:
                              std::vector<String> *clsProperties,
                              std::vector<String> *clsConstants);
 
-  static void GetArray(const ObjectData *obj, const ClassPropTable *ct,
+  static void GetArray(const ObjectData *obj,
                        Array &props, GetArrayKind kind);
-  static void GetArray(const ObjectData *obj, const ClassPropTable *ct,
+  static void GetArray(const ObjectData *obj,
                        Array &props, bool pubOnly) {
-    GetArray(obj, ct, props, pubOnly ? GetArrayPublic : GetArrayAll);
+    GetArray(obj, props, pubOnly ? GetArrayPublic : GetArrayAll);
   }
-  static void SetArray(ObjectData *obj, const ClassPropTable *ct,
-                       CArrRef props);
+  static void SetArray(ObjectData *obj, CArrRef props);
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
+
+  static Variant GetVariant(DataType type, const void *addr) {
+    switch (type) {
+      case KindOfBoolean:
+        return *(bool*)addr;
+      case KindOfInt64:
+        return *(int64*)addr;
+      case KindOfDouble:
+        return *(double*)addr;
+      case KindOfString:
+        return *(String*)addr;
+      case KindOfArray:
+        return *(Array*)addr;
+      case KindOfObject:
+        return *(Object*)addr;
+      default:
+        assert(false);
+        return null;
+    }
+  }
 
 public:
   ClassInfo() : m_cdec_offset(0), m_docComment(nullptr) {}
@@ -479,99 +497,6 @@ public:
   virtual const ClassInfo *findClassLike(CStrRef name) const = 0;
   virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const = 0;
 };
-
-struct ClassPropTableEntry {
-  enum PropFlags {
-    Private = 1,
-    Protected = 2,
-    Public = 4,
-    Static = 8,
-    Override = 16,
-    Constant = 32,
-    Last = 64,
-    FastInit = 128
-  };
-
-  strhash_t     hash;
-  int16_t       next;
-  uint16_t      init_offset; // change to uint32 if we overflow
-  uint16_t      prop_offset;
-  uint8_t       flags; // PropFlags
-  int8_t        type;  // DataType
-  int32_t       offset;
-  StaticString *keyName;
-  bool isPublic() const { return flags & Public; }
-  bool isPrivate() const { return flags & Private; }
-  bool isOverride() const { return flags & Override; }
-  bool isStatic() const { return flags & Static; }
-  bool isConstant() const { return flags & Constant; }
-  bool isLast() const { return flags & Last; }
-  bool isFastInit() const { return flags & FastInit; }
-
-  static Variant GetVariant(DataType type, const void *addr) {
-    switch (type) {
-      case KindOfBoolean:
-        return *(bool*)addr;
-      case KindOfInt64:
-        return *(int64*)addr;
-      case KindOfDouble:
-        return *(double*)addr;
-      case KindOfString:
-        return *(String*)addr;
-      case KindOfArray:
-        return *(Array*)addr;
-      case KindOfObject:
-        return *(Object*)addr;
-      default:
-        assert(false);
-        return null;
-    }
-  }
-
-  Variant getVariant(const void *addr) const {
-    return GetVariant(DataType(type), addr);
-  }
-};
-
-class ClassPropTable {
-public:
-  int m_size_mask;
-  int m_offset;
-  int m_static_size_mask;
-  int m_static_offset;
-  int m_const_size_mask;
-  int m_const_offset;
-
-  int m_lazy_inits_list;
-  int m_lazy_init_offset;
-
-  const int *m_hash_entries;
-  const ClassPropTable *m_parent;
-  const ClassPropTableEntry *m_entries;
-  const int64 *m_static_inits;
-
-  Variant getInitVal(const ClassPropTableEntry *prop) const;
-  CVarRef getInitV(int id) const {
-    return *(Variant*)m_static_inits[id];
-  }
-  CStrRef getInitS(int id) const {
-    return getInitV(id).asCStrRef();
-  }
-  void *getInitP(int id) const {
-    return (void*)m_static_inits[id];
-  }
-
-  const int *privates() const {
-    return m_hash_entries + m_size_mask + 1;
-  }
-
-  const int *lazy_inits() const {
-    return m_hash_entries + m_lazy_inits_list;
-  }
-};
-
-#define GET_PROPERTY_OFFSET(c, n) \
-((offsetof(c, n) - (int64)static_cast<ObjectData *>((c*)0)))
 
 ///////////////////////////////////////////////////////////////////////////////
 }

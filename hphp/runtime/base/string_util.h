@@ -129,22 +129,6 @@ public:
   static String Crypt(CStrRef input, const char *salt = "");
   static String MD5(CStrRef input, bool raw = false);
   static String SHA1(CStrRef input, bool raw = false);
-
-  /**
-   * Construct literal strings from input data.
-   */
-  static void InitLiteralStrings(StaticString literalStrings[],
-                                 int nliteralStrings,
-                                 const char *literalStringBuf,
-                                 int literalStringBufSize,
-                                 const char *literalStringLen,
-                                 int literalStringLenSize);
-
-  static int InitLiteralStrings(const char *input[], int nls, int nbs)
-    ATTRIBUTE_COLD;
-  static int InitLiteralVarStrings(const char *input[], int count)
-    ATTRIBUTE_COLD;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -448,17 +448,6 @@ class Array : protected ArrayBase {
   Variant &addLval(CStrRef key, bool isKey = false);
   Variant &addLval(CVarRef key, bool isKey = false);
 
-  // defined in type_variant.h
-  template<typename T>
-  Variant refvalAt(const T &key);
-
-  Variant refvalAt(CStrRef key, bool isString = false);
-
-  // defined in type_variant.h
-  template<typename T>
-  Variant argvalAt(bool byRef, const T &key) const;
-  Variant argvalAt(bool byRef, CStrRef key, bool isString = false) const;
-
   /**
    * Membership functions.
    */

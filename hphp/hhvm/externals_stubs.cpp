@@ -57,16 +57,4 @@ Object create_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
 
 //////////////////////////////////////////////////////////////////////
 
-#if 0
-const char *g_source_cls2file[] = {};
-const char *g_source_func2file[] = {};
-const char *g_paramrtti_map[] = {};
-const char *g_source_root = "";
-const char *g_source_info[] = {};
-#endif
-
-bool has_eval_support = true;
-
-//////////////////////////////////////////////////////////////////////
-
 }

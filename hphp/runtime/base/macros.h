@@ -25,14 +25,8 @@ namespace HPHP {
 // class macros
 
 #define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
-#define LITSTR(index, str)  (literalStrings[index])
 #define NAMSTR(nam, str)    (nam)
 #define NAMVAR(nam, str)    (nam)
-
-#define GET_THIS()         fi.getThis()
-#define GET_THIS_TYPED(T)  p_##T(fi.getThis())
-#define GET_THIS_VALID()   fi.getThisForArrow()
-#define GET_THIS_ARROW()   fi.getThisForArrow()->
 
 #define FORWARD_DECLARE_CLASS(cls)              \
   class c_##cls;                                \

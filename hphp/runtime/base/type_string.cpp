@@ -27,8 +27,6 @@
 
 namespace HPHP {
 
-extern bool has_eval_support;
-
 const String null_string = String();
 const StaticString empty_string("");
 
@@ -734,22 +732,6 @@ void String::unserialize(VariableUnserializer *uns,
   if (ch != delimiter1) {
     throw Exception("Expected '%c' but got '%c'", delimiter1, ch);
   }
-
-  checkStatic();
-}
-
-bool String::checkStatic() {
-  assert(m_px);
-  StringDataSet &set = StaticString::TheStaticStringSet();
-  if (!set.empty()) {
-    // no need to upgrade when the initialization is done.
-    StringDataSet::iterator it = set.find(m_px);
-    if (it != set.end()) {
-      StringBase::operator=(*it);
-      return true;
-    }
-  }
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -766,55 +748,24 @@ void String::dump() const {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticString
 
-StaticString::StaticString(litstr s) : m_data(s) {
-  m_px = &m_data;
-  if (has_eval_support) {
-    m_px = StringData::GetStaticString(m_px);
-    return;
-  }
-  m_px->setStatic();
-  if (!checkStatic()) {
-    s_stringSet->insert(m_px);
-  }
+StaticString::StaticString(litstr s) {
+  StackStringData sd(s);
+  m_px = StringData::GetStaticString(&sd);
 }
 
-StaticString::StaticString(litstr s, int length)
-  : m_data(s, length, AttachLiteral) {
-  m_px = &m_data;
-  if (has_eval_support) {
-    m_px = StringData::GetStaticString(m_px);
-    return;
-  }
-  m_px->setStatic();
-  if (!checkStatic()) {
-    s_stringSet->insert(m_px);
-  }
+StaticString::StaticString(litstr s, int length) {
+  StackStringData sd(s, length, AttachLiteral);
+  m_px = StringData::GetStaticString(&sd);
 }
 
-StaticString::StaticString(std::string s)
-  : m_data(s.c_str(), s.size(), CopyString) {
-  String::operator=(&m_data);
-  if (has_eval_support) {
-    m_px = StringData::GetStaticString(m_px);
-    return;
-  }
-  m_px->setStatic();
-  if (!checkStatic()) {
-    s_stringSet->insert(m_px);
-  }
+StaticString::StaticString(std::string s) {
+  StackStringData sd(s.c_str(), s.size(), CopyString);
+  m_px = StringData::GetStaticString(&sd);
 }
 
-StaticString::StaticString(const StaticString &str)
-  : m_data(str.m_data.data(), str.m_data.size(), AttachLiteral) {
-  String::operator=(&m_data);
-  if (has_eval_support) {
-    m_px = StringData::GetStaticString(m_px);
-    return;
-  }
-  m_px->setStatic();
-  if (!checkStatic()) {
-    s_stringSet->insert(m_px);
-  }
+StaticString::StaticString(const StaticString &str) {
+  assert(m_px->isStatic());
+  m_px = str.m_px;
 }
 
 StaticString& StaticString::operator=(const StaticString &str) {
@@ -822,56 +773,22 @@ StaticString& StaticString::operator=(const StaticString &str) {
   // should never use a StaticString on the left-hand side of
   // assignment. A StaticString can only be initialized by a
   // StaticString constructor or StaticString::init().
-  assert(false);
+  always_assert(false);
   return *this;
 }
-
-void StaticString::init(litstr s, int length) {
-  new(&m_data) StringData(s, length, AttachLiteral);
-  assert(!m_px);
-  String::operator=(&m_data);
-  m_px->setStatic();
-  if (has_eval_support) {
-    m_px = StringData::GetStaticString(m_px);
-    return;
-  }
-  if (!checkStatic()) {
-    s_stringSet->insert(m_px);
-  }
-}
-
-StringDataSet &StaticString::TheStaticStringSet() {
-  if (s_stringSet == nullptr) {
-    s_stringSet = new StringDataSet();
-  }
-  return *s_stringSet;
-}
-
-void StaticString::FinishInit() {
-  // release the memory
-  StringDataSet empty;
-  s_stringSet->swap(empty);
-}
-
-void StaticString::ResetAll() {
-  delete s_stringSet;
-}
-
-StringDataSet *StaticString::s_stringSet = nullptr;
-
-class StaticStringUninitializer {
-public:
-  ~StaticStringUninitializer() {
-    StaticString::ResetAll();
-  }
-};
-static StaticStringUninitializer s_static_string_uninitializer;
 
 String::String(Variant&& src) : StringBase(src.toString()) {
 }
 
 String& String::operator=(Variant&& src) {
   return *this = src.toString();
+}
+
+void String::checkStaticHelper() {
+  if (StringData* t = StringData::FindStaticString(m_px)) {
+    decRefStr(m_px);
+    m_px = t;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////

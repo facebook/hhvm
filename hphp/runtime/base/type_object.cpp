@@ -72,18 +72,6 @@ double Object::toDoubleForCompare() const {
   return toDouble();
 }
 
-Object Object::CreateDummy(ObjectData*(*cooFunc)()) {
-  Object r(cooFunc());
-  r.get()->setDummy();
-  return r;
-}
-
-Object Object::CreateDummy(ObjectData*(*cooFunc)(ObjectData *)) {
-  Object r(cooFunc(nullptr));
-  r.get()->setDummy();
-  return r;
-}
-
 bool Object::equal(CObjRef v2) const {
   if (m_px == v2.get()) {
     return true;
@@ -224,7 +212,7 @@ void Object::serialize(VariableSerializer *serializer) const {
 bool Object::unserialize(std::istream &in) {
   throw NotImplementedException(__func__);
 }
-    
+
 void Object::setToDefaultObject() {
   raise_warning(Strings::CREATING_DEFAULT_OBJECT);
   operator=(SystemLib::AllocStdClassObject());

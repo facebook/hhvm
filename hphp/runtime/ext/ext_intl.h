@@ -101,8 +101,6 @@ class c_Collator : public ExtObjectData, public Sweepable {
   public: bool t_sortwithsortkeys(VRefParam arr);
   public: bool t_sort(VRefParam arr, int64 sort_flag = q_Collator$$SORT_REGULAR);
 
-  static const ClassPropTable os_prop_table;
-
  private:
   String     m_locale;
   UCollator *m_ucoll;
@@ -123,10 +121,6 @@ class c_Locale : public ExtObjectData {
   public: c_Locale(VM::Class* cls = c_Locale::s_cls);
   public: ~c_Locale();
   public: void t___construct();
-
-  static const ClassPropTable os_prop_table;
-
-
 };
 extern const int64 q_Normalizer$$NONE;
 extern const int64 q_Normalizer$$FORM_D;
@@ -158,10 +152,6 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   public: static Variant t_normalize(CStrRef input, int64 form = q_Normalizer$$FORM_C) {
     return ti_normalize("normalizer", input, form);
   }
-
-  static const ClassPropTable os_prop_table;
-
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

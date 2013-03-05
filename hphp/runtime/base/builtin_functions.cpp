@@ -396,24 +396,6 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
   return vm_call_user_func(function, params, bound);
 }
 
-Variant invoke_func_few_handler(void *extra, CArrRef params,
-                                Variant (*few_args)(
-                                  void *extra, int count,
-                                  INVOKE_FEW_ARGS_IMPL_ARGS)) {
-  VariantVector<INVOKE_FEW_ARGS_COUNT> args;
-  int s = params.size();
-  if (LIKELY(s != 0)) {
-    int i = s > INVOKE_FEW_ARGS_COUNT ? INVOKE_FEW_ARGS_COUNT : s;
-    ArrayData *ad(params.get());
-    ssize_t pos = ad->iter_begin();
-    do {
-      args.pushWithRef(ad->getValueRef(pos));
-      pos = ad->iter_advance(pos);
-    } while (--i);
-  }
-  return few_args(extra, s, INVOKE_FEW_ARGS_PASS_ARR_ARGS);
-}
-
 Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   VM::Func* func = VM::Unit::loadFunc(function.get());
@@ -446,13 +428,6 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
   return ret;
-}
-
-const CallInfo *invoke_check(CStrRef func, const CallInfo**hci, bool safe) {
-  AutoloadHandler::s_instance->autoloadFunc(func);
-  if (safe || *hci) return *hci;
-  invoke_failed(func.c_str(), null_array);
-  return nullptr;
 }
 
 Variant invoke_failed(CVarRef func, CArrRef params,
@@ -1587,24 +1562,6 @@ String AutoloadHandler::getSignature(CVarRef handler) {
 
 bool function_exists(CStrRef function_name) {
   return HPHP::VM::Unit::lookupFunc(function_name.get()) != nullptr;
-}
-
-MethodCallPackage::MethodCallPackage()
-  : ci(nullptr), extra(nullptr), obj(nullptr),
-    isObj(false), m_fatal(true), m_isFunc(false) {}
-
-void MethodCallPackage::fail() {
-  if (m_fatal) {
-    o_invoke_failed(isObj ? rootObj->o_getClassName() : String(rootCls),
-                    *name, true);
-  }
-}
-String MethodCallPackage::getClassName() {
-  if (isObj) {
-    return rootObj->o_getClassName();
-  } else {
-    return rootCls;
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

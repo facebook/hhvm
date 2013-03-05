@@ -1187,7 +1187,6 @@ void hphp_process_init() {
   RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
   apc_load(RuntimeOption::ApcLoadThread);
   RuntimeOption::SerializationSizeLimit = save;
-  StaticString::FinishInit();
 
   VM::Transl::TargetCache::requestExit();
   // Reset the preloaded g_context
@@ -1260,11 +1259,9 @@ void hphp_session_init() {
   StackTrace::Enabled = true;
 #endif
 
-  if (has_eval_support) {
-    // Ordering is sensitive; StatCache::requestInit produces work that
-    // must be done in VMExecutionContext::requestInit.
-    StatCache::requestInit();
-  }
+  // Ordering is sensitive; StatCache::requestInit produces work that
+  // must be done in VMExecutionContext::requestInit.
+  StatCache::requestInit();
 
   g_vmContext->requestInit();
 }

@@ -66,8 +66,6 @@ class c_Continuation : public ExtObjectData {
   public: String t_getorigfuncname();
   public: Variant t___clone();
 
-  public: static const ClassPropTable os_prop_table;
-
   static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {
     const_assert(hhvm);
     c_Continuation* cont =
@@ -123,10 +121,7 @@ public:
   bool m_isMethod;
 
   int m_localsOffset;
-  union {
-    const CallInfo *m_callInfo;
-    VM::Func *m_vmFunc;
-  };
+  VM::Func *m_vmFunc;
   int64 m_label;
   VM::ActRec* m_arPtr;
 

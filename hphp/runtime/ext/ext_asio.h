@@ -435,8 +435,6 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
     return ti_create("reschedulewaithandle", queue, priority);
   }
 
-  public: static const ClassPropTable os_prop_table;
-
  public:
   void run();
   String getName();

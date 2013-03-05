@@ -103,8 +103,6 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   public: void t_printframe(int index);
   public: void t_addcompletion(CVarRef list);
 
-  static const ClassPropTable os_prop_table;
-
  public:
   Eval::DebuggerClient *m_client;
 };
@@ -130,8 +128,6 @@ class c_DebuggerClient : public ExtObjectData, public Sweepable {
   public: int64 t_getstate();
   public: Variant t_init(CVarRef options);
   public: Variant t_processcmd(CVarRef cmdName, CVarRef args);
-
-  static const ClassPropTable os_prop_table;
 
  public:
   Eval::DebuggerClient *m_client;

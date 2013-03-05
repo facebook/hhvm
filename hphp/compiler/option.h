@@ -226,7 +226,6 @@ public:
   static const char *StaticVarStrPrefix;
   static const char *StaticVarStrProxyPrefix;
   static const char *StaticVarArrPrefix;
-  static const char *ClassPropTablePrefix;
 
   static const char *TempPrefix;
   static const char *MapPrefix;

@@ -760,10 +760,6 @@ EOT
   foreach ($class['methods'] as $m) {
     generatePreImplemented($m, $class, $f);
   }
-  if (!empty($class['properties']) ||
-      !empty($class['consts'])) {
-    fprintf($f, "  public: static const ClassPropTable os_prop_table;\n");
-  }
   if (!empty($class['footer'])) {
     fprintf($f, $class['footer']);
   }

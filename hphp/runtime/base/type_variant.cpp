@@ -2499,75 +2499,6 @@ Variant &Variant::lvalBlackHole() {
   return bh;
 }
 
-Variant Variant::refvalAt(bool    key) {
-  return refvalAtImpl(key);
-}
-Variant Variant::refvalAt(int     key) {
-  return refvalAtImpl(key);
-}
-Variant Variant::refvalAt(int64   key) {
-  return refvalAtImpl(key);
-}
-Variant Variant::refvalAt(double  key) {
-  return refvalAtImpl(key);
-}
-Variant Variant::refvalAt(litstr  key, bool isString /* = false */) {
-  return refvalAtImpl(key, isString);
-}
-Variant Variant::refvalAt(CStrRef key, bool isString /* = false */) {
-  return refvalAtImpl(key, isString);
-}
-Variant Variant::refvalAt(CVarRef key) {
-  return refvalAtImpl(key);
-}
-
-Variant Variant::refvalAtImpl(CStrRef key, bool isString /* = false */) {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->refvalAtImpl(key, isString);
-  }
-  if (is(KindOfArray) || isObjectConvertable()) {
-    return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
-  } else {
-    return rvalAt(key, AccessFlags::IsKey(isString));
-  }
-}
-
-Variant Variant::argvalAt(bool byRef, bool key) const {
-  return const_cast<Variant*>(this)->argvalAtImpl(byRef, key);
-}
-Variant Variant::argvalAt(bool byRef, int key) const {
-  return const_cast<Variant*>(this)->argvalAtImpl(byRef, key);
-}
-Variant Variant::argvalAt(bool byRef, int64 key) const {
-  return const_cast<Variant*>(this)->argvalAtImpl(byRef, key);
-}
-Variant Variant::argvalAt(bool byRef, double key) const {
-  return const_cast<Variant*>(this)->argvalAtImpl(byRef, key);
-}
-Variant Variant::argvalAt(bool byRef, litstr key,
-    bool isString /* = false */) const {
-  return const_cast<Variant*>(this)->argvalAtImpl(byRef, key, isString);
-}
-Variant Variant::argvalAt(bool byRef, CStrRef key,
-    bool isString /* = false */) const {
-  return const_cast<Variant*>(this)->argvalAtImpl(byRef, key, isString);
-}
-Variant Variant::argvalAt(bool byRef, CVarRef key) const {
-  return const_cast<Variant*>(this)->argvalAtImpl(byRef, key);
-}
-
-Variant Variant::argvalAtImpl(bool byRef, CStrRef key,
-    bool isString /* = false */) {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->argvalAtImpl(byRef, key, isString);
-  }
-  if (byRef && (is(KindOfArray) || isObjectConvertable())) {
-    return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
-  } else {
-    return rvalAt(key, AccessFlags::IsKey(isString));
-  }
-}
-
 Variant Variant::o_get(CStrRef propName, bool error /* = true */,
                        CStrRef context /* = null_string */) const {
   if (m_type == KindOfObject) {
@@ -2713,7 +2644,7 @@ Variant Variant::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */) {
 Variant Variant::o_root_invoke(CStrRef s, CArrRef params,
                                int64 hash /* = -1 */) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke(s, params, hash);
+    return m_data.pobj->o_invoke(s, params, hash);
   } else if (m_type == KindOfRef) {
     return m_data.pref->var()->o_root_invoke(s, params, hash);
   } else {
@@ -2739,19 +2670,6 @@ Variant Variant::o_invoke_few_args(CStrRef s, int64 hash, int count,
   } else if (m_type == KindOfRef) {
     return m_data.pref->var()->o_invoke_few_args(s, hash, count,
                                                  INVOKE_FEW_ARGS_PASS_ARGS);
-  } else {
-    throw_call_non_object(s);
-  }
-}
-
-Variant Variant::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
-                                        INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke_few_args(s, hash, count,
-                                               INVOKE_FEW_ARGS_PASS_ARGS);
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_root_invoke_few_args(s, hash, count,
-                                                     INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw_call_non_object(s);
   }

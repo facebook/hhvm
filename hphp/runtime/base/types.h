@@ -571,9 +571,6 @@ private:
   ThreadInfo::Executing m_executing;
 };
 
-class CallInfo;
-class MethodCallPackage;
-
 class AccessFlags {
 public:
   enum Type {

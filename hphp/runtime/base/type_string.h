@@ -201,6 +201,9 @@ public:
     m_px->setRefCount(1);
   }
 
+  void checkStaticHelper();
+  void checkStatic() {}
+
   void clear() { reset();}
   /**
    * Informational
@@ -460,11 +463,6 @@ public:
   template <class K, class V>
   inline const V &set(K key, const V &value);
 
-  template<class T>
-  String refvalAt(T key) {
-    return rvalAt(key);
-  }
-
   /**
    * Returns one character at specified position.
    */
@@ -477,11 +475,6 @@ public:
   void serialize(VariableSerializer *serializer) const;
   void unserialize(VariableUnserializer *uns, char delimiter0 = '"',
                    char delimiter1 = '"');
-
-  /**
-   * Check TheStaticStringSet, and upgrade itself to an existing StaticString.
-   */
-  bool checkStatic();
 
   /**
    * Debugging
@@ -548,8 +541,6 @@ struct string_data_lt {
   }
 };
 
-typedef hphp_hash_set<StringData *, string_data_hash, string_data_same>
-  StringDataSet;
 typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
   ConstStringDataSet;
 
@@ -648,11 +639,6 @@ protected:
  */
 class StaticString : public String {
 public:
-  static StringDataSet &TheStaticStringSet();
-  static void FinishInit();
-  static void ResetAll(); // only supposed to be called during program shutdown
-
-public:
   friend class StringUtil;
 
   StaticString(litstr s);
@@ -666,20 +652,8 @@ public:
   StaticString& operator=(const StaticString &str);
 
 private:
-  void init(litstr s, int length);
   void insert();
-
-  StringData m_data;
-  static StringDataSet *s_stringSet;
 };
-
-typedef struct StaticStringProxy {
-  union {
-    char m_data[sizeof(StaticString)];
-    void *p_dummy;
-    int64 i_dummy;
-  };
-} StaticStringProxy;
 
 extern const StaticString empty_string;
 

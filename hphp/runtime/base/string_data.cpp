@@ -64,6 +64,15 @@ StringData *StringData::GetStaticString(const StringData *str) {
   return const_cast<StringData*>(acc->first);
 }
 
+StringData* StringData::FindStaticString(const StringData* str) {
+  StringDataMap::const_accessor acc;
+  if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
+  if (s_stringDataMap->find(acc, str)) {
+    return const_cast<StringData*>(acc->first);
+  }
+  return nullptr;
+}
+
 StringData *StringData::GetStaticString(const std::string &str) {
   StackStringData sd(str.c_str(), str.size(), AttachLiteral);
   return GetStaticString(&sd);

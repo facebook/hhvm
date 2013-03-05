@@ -39,13 +39,6 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash = -1,
     bool tryInterp = true, bool fatal = true);
 
 /**
- * Getting the object static callbacks for a given class
- */
-struct ObjectStaticCallbacks;
-extern const ObjectStaticCallbacks *
-  get_object_static_callbacks(CStrRef s);
-
-/**
  * Getting a static property
  */
 extern Variant get_static_property(CStrRef s, const char *prop);
@@ -102,11 +95,6 @@ extern SystemGlobals *get_system_globals();
  * Precomputed literal strings
  */
 extern StaticString literalStrings[];
-
-/**
- * Eval support
- */
-extern bool has_eval_support;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

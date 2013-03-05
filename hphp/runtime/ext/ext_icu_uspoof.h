@@ -57,9 +57,6 @@ class c_SpoofChecker : public ExtObjectData {
   public: void t_setallowedlocales(CStrRef localesList);
   public: void t_setchecks(int checks);
 
-  static const ClassPropTable os_prop_table;
-
-
   private: USpoofChecker *m_spoof_checker;
 };
 

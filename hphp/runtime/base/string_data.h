@@ -381,6 +381,7 @@ public:
   std::string toCPPString() const;
   static void sweepAll();
 
+  static StringData *FindStaticString(const StringData *str);
   static StringData *GetStaticString(const StringData *str);
   static StringData *GetStaticString(const std::string &str);
   static StringData *GetStaticString(const char *str);

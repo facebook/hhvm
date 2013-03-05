@@ -17,12 +17,16 @@
 
 #include <runtime/ext/ext_asio.h>
 #include <runtime/ext/asio/asio_session.h>
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL_PROXY(AsioSession, false, AsioSession::s_current);
 
+namespace {
+  const context_idx_t MAX_CONTEXT_DEPTH = std::numeric_limits<context_idx_t>::max();
+}
 
 void AsioSession::Init() {
   s_current.set(new AsioSession());
@@ -31,21 +35,36 @@ void AsioSession::Init() {
 AsioSession::AsioSession() : m_contexts(), m_onFailedCallback(nullptr) {
 }
 
+void AsioSession::enterContext() {
+  assert(!isInContext() || getCurrentContext()->isRunning());
+
+  if (UNLIKELY(getCurrentContextIdx() >= MAX_CONTEXT_DEPTH)) {
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
+      "Unable to enter asio context: too many contexts open"));
+    throw e;
+  }
+
+  m_contexts.push_back(new AsioContext());
+
+  assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+  assert(isInContext());
+  assert(!getCurrentContext()->isRunning());
+}
+
+void AsioSession::exitContext() {
+  assert(isInContext());
+  assert(!getCurrentContext()->isRunning());
+
+  m_contexts.back()->exit(m_contexts.size());
+  delete m_contexts.back();
+  m_contexts.pop_back();
+
+  assert(!isInContext() || getCurrentContext()->isRunning());
+}
+
 uint16_t AsioSession::getCurrentWaitHandleDepth() {
-  // have context and it's running
-  if (!m_contexts.empty() && m_contexts.back()->isRunning()) {
-    return m_contexts.back()->getCurrent()->getDepth();
-  }
-
-  // the current context is not running, look at the upper context
-  // TODO: deprecate this once contexts are entered only by join()
-  if (m_contexts.size() >= 2) {
-    assert(m_contexts[m_contexts.size() - 2]->isRunning());
-    return m_contexts[m_contexts.size() - 2]->getCurrent()->getDepth();
-  }
-
-  // we are the root
-  return 0;
+  assert(!isInContext() || getCurrentContext()->isRunning());
+  return isInContext() ? getCurrentWaitHandle()->getDepth() : 0;
 }
 
 void AsioSession::setOnFailedCallback(ObjectData* on_failed_callback) {

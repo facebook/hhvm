@@ -52,11 +52,6 @@ Object c_StaticExceptionWaitHandle::ti_create(const char* cls, CObjRef exception
   return wh;
 }
 
-const TypedValue* c_StaticExceptionWaitHandle::join() {
-  Object e(m_resultOrException.m_data.pobj);
-  throw e;
-}
-
 String c_StaticExceptionWaitHandle::getName() {
   return s_staticException;
 }

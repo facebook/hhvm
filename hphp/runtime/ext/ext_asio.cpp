@@ -24,35 +24,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-  const context_idx_t MAX_CONTEXT_DEPTH = std::numeric_limits<context_idx_t>::max();
-}
-
 void f_asio_enter_context() {
-  AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->getCurrentContextIdx() >= MAX_CONTEXT_DEPTH)) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Unable to enter asio context: too many contexts open"));
-    throw e;
-  }
-
-  session->enterContext();
+  // TODO: remove from API
 }
 
 void f_asio_exit_context() {
-  AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(!session->isInContext())) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Unable to exit asio context: not in a context"));
-    throw e;
-  }
-  if (UNLIKELY(session->getCurrentContext()->isRunning())) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Unable to exit asio context: a continuation is running"));
-    throw e;
-  }
-
-  session->exitContext();
+  // TODO: remove from API
 }
 
 Object f_asio_get_current() {

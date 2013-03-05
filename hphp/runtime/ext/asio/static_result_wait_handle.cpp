@@ -46,10 +46,6 @@ Object c_StaticResultWaitHandle::ti_create(const char* cls, CVarRef result) {
   return wh;
 }
 
-const TypedValue* c_StaticResultWaitHandle::join() {
-  return &m_resultOrException;
-}
-
 String c_StaticResultWaitHandle::getName() {
   return s_staticResult;
 }

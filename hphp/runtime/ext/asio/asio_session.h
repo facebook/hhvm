@@ -35,18 +35,8 @@ class AsioSession {
     void operator delete(void* ptr) { smart_free(ptr); }
 
     // context
-    void enterContext() {
-      assert(!isInContext() || getCurrentContext()->isRunning());
-      m_contexts.push_back(new AsioContext());
-      assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
-    }
-
-    void exitContext() {
-      assert(isInContext());
-      m_contexts.back()->exit(m_contexts.size());
-      delete m_contexts.back();
-      m_contexts.pop_back();
-    }
+    void enterContext();
+    void exitContext();
 
     bool isInContext() {
       return !m_contexts.empty();
@@ -58,7 +48,8 @@ class AsioSession {
     }
 
     AsioContext* getCurrentContext() {
-      return m_contexts.empty() ? nullptr : m_contexts.back();
+      assert(isInContext());
+      return m_contexts.back();
     }
 
     context_idx_t getCurrentContextIdx() {
@@ -67,7 +58,8 @@ class AsioSession {
     }
 
     c_ContinuationWaitHandle* getCurrentWaitHandle() {
-      return m_contexts.empty() ? nullptr : m_contexts.back()->getCurrent();
+      assert(!isInContext() || getCurrentContext()->isRunning());
+      return isInContext() ? getCurrentContext()->getCurrent() : nullptr;
     }
 
     uint16_t getCurrentWaitHandleDepth();

@@ -156,49 +156,35 @@ c_BlockableWaitHandle* c_WaitableWaitHandle::getParentInContext(context_idx_t ct
   return parent;
 }
 
-const TypedValue* c_WaitableWaitHandle::join() {
-  switch (getState()) {
-    case STATE_NEW:
-      throw FatalErrorException(
-          "Invariant violation: uninitialized wait handle");
-    case STATE_SUCCEEDED:
-      return &m_resultOrException;
-    case STATE_FAILED:
-      Object e(m_resultOrException.m_data.pobj);
-      throw e;
-  }
-
+// throws on context depth level overflows and cross-context cycles
+void c_WaitableWaitHandle::join() {
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(!session->isInContext())) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Unable to join wait handle: not in an asio context"));
-    throw e;
+
+  assert(!isFinished());
+  assert(!session->isInContext() || session->getCurrentContext()->isRunning());
+
+  // enter new asio context and set up guard that will exit once we are done
+  session->enterContext();
+
+  assert(session->isInContext());
+  assert(!session->getCurrentContext()->isRunning());
+
+  try {
+    // import this wait handle to the newly created context
+    // throws if cross-context cycle found
+    enterContext(session->getCurrentContextIdx());
+
+    // run queues until we are finished
+    session->getCurrentContext()->runUntil(this);
+  } catch (Object exception) {
+    // recover from PHP exceptions; HPHP internal exceptions are deliberately
+    // ignored as there is no easy way to recover from them
+    session->exitContext();
+    throw;
   }
-  if (UNLIKELY(session->getCurrentContext()->isRunning())) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Unable to join wait handle: context busy, another join in progress"));
-    throw e;
-  }
+  session->exitContext();
 
-  // throws if cross-context cycle found
-  enterContext(session->getCurrentContextIdx());
-
-  // not finished, run queue
-  session->getCurrentContext()->runUntil(this);
-
-  switch (getState()) {
-    case STATE_NEW:
-      throw FatalErrorException(
-          "Invariant violation: uninitialized wait handle");
-    case STATE_SUCCEEDED:
-      return &m_resultOrException;
-    case STATE_FAILED:
-      Object e(m_resultOrException.m_data.pobj);
-      throw e;
-  }
-
-  throw FatalErrorException(
-      "Invariant violation: join succeeded, but wait handle not ready");
+  assert(isFinished());
 }
 
 c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {

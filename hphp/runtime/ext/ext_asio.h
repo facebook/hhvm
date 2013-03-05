@@ -87,8 +87,6 @@ class c_WaitHandle : public ExtObjectData {
   virtual String getName() = 0;
 
  protected:
-  virtual const TypedValue* join() = 0;
-
   uint8_t getState() { return o_subclassData.u8[0]; }
   void setState(uint8_t state) { o_subclassData.u8[0] = state; }
 
@@ -142,9 +140,6 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
 
  public:
   String getName();
-
- protected:
-  const TypedValue* join();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -170,12 +165,6 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
 
  public:
   String getName();
-
- protected:
-  const TypedValue* join();
-
- private:
-  Object m_exception;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,6 +196,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
 
   virtual void enterContext(context_idx_t ctx_idx) = 0;
+  void join();
 
  protected:
   void setResult(const TypedValue* result);
@@ -219,8 +209,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
   c_BlockableWaitHandle* getParentInContext(context_idx_t ctx_idx);
-
-  const TypedValue* join();
 
   virtual c_WaitableWaitHandle* getChild();
   bool hasCycle(c_WaitableWaitHandle* start);

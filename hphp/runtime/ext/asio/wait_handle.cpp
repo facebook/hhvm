@@ -48,7 +48,22 @@ void c_WaitHandle::t_import() {
 }
 
 Variant c_WaitHandle::t_join() {
-  return tvAsCVarRef(join());
+  if (!isFinished()) {
+    // run the full blown machinery
+    assert(dynamic_cast<c_WaitableWaitHandle*>(this));
+    static_cast<c_WaitableWaitHandle*>(this)->join();
+  }
+
+  assert(isFinished());
+
+  if (LIKELY(isSucceeded())) {
+    // succeeded? return result
+    return tvAsCVarRef(getResult());
+  } else {
+    // failed? throw exception
+    Object e(getException());
+    throw e;
+  }
 }
 
 bool c_WaitHandle::t_isfinished() {

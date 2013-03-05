@@ -251,9 +251,11 @@ void Instance::propImpl(TypedValue*& retval, TypedValue& tvRef,
       } else {
         // No need to check hasProp since visible is true
         // Visibility is either protected or private since accessible is false
-        const PreClass::Prop *prop = m_cls->preClass()->lookupProp(key);
+        Slot propInd = m_cls->lookupDeclProp(key);
+        bool priv = m_cls->declProperties()[propInd].m_attrs & AttrPrivate;
+
         raise_error("Cannot access %s property %s::$%s",
-                    (prop->attrs() & AttrPrivate) ? "private" : "protected",
+                    priv ? "private" : "protected",
                     m_cls->m_preClass->name()->data(),
                     key->data());
       }

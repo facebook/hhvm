@@ -75,13 +75,5 @@ Object c_WaitHandle::t_getexceptioniffailed() {
   return isFailed() ? getException() : nullptr;
 }
 
-String c_WaitHandle::getName() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
-const TypedValue* c_WaitHandle::join() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

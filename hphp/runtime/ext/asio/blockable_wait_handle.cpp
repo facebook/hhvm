@@ -73,14 +73,6 @@ c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
   return next;
 }
 
-void c_BlockableWaitHandle::onUnblocked() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
-c_WaitableWaitHandle* c_BlockableWaitHandle::getChild() {
-  throw NotImplementedException(__func__);
-}
-
 void c_BlockableWaitHandle::exitContextBlocked(context_idx_t ctx_idx) {
   assert(getState() == STATE_BLOCKED);
   assert(AsioSession::Get()->getContext(ctx_idx));

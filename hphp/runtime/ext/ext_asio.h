@@ -84,10 +84,10 @@ class c_WaitHandle : public ExtObjectData {
   bool isFailed() { return getState() == STATE_FAILED; }
   TypedValue* getResult() { assert(isSucceeded()); return &m_resultOrException; }
   ObjectData* getException() { assert(isFailed()); return m_resultOrException.m_data.pobj; }
-  virtual String getName();
+  virtual String getName() = 0;
 
  protected:
-  virtual const TypedValue* join();
+  virtual const TypedValue* join() = 0;
 
   uint8_t getState() { return o_subclassData.u8[0]; }
   void setState(uint8_t state) { o_subclassData.u8[0] = state; }
@@ -206,7 +206,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
 
-  virtual void enterContext(context_idx_t ctx_idx);
+  virtual void enterContext(context_idx_t ctx_idx) = 0;
 
  protected:
   void setResult(const TypedValue* result);
@@ -258,8 +258,8 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
 
  protected:
   void blockOn(c_WaitableWaitHandle* child);
-  virtual void onUnblocked();
-  c_WaitableWaitHandle* getChild();
+  virtual void onUnblocked() = 0;
+  c_WaitableWaitHandle* getChild() = 0;
 
   static const int8_t STATE_BLOCKED = 3;
 

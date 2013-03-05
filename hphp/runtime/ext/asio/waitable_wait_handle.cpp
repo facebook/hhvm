@@ -208,10 +208,6 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
   return nullptr;
 }
 
-void c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
-
 bool c_WaitableWaitHandle::hasCycle(c_WaitableWaitHandle* start) {
   assert(start);
 

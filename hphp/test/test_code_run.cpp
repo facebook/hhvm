@@ -55,7 +55,6 @@ bool TestCodeRun::preTest() {
 }
 
 bool TestCodeRun::postTest() {
-  if (!MultiVerifyCodeRun()) return false;
   return true;
 }
 
@@ -88,113 +87,6 @@ static bool GenerateMainPHP(const std::string &fullPath,
     f << input;
   }
   f.close();
-  return true;
-}
-
-bool TestCodeRun::GenerateFiles(const char *input,
-                                const char *subdir) {
-  assert(subdir && subdir[0]);
-
-  // generate main.php early, so if we fail, we have a PHP file to debug with
-  string fullPath = "runtime/tmp";
-  if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
-  fullPath += "/main.php";
-  if (!GenerateMainPHP(fullPath, 0, 0, input)) return false;
-
-  // load the type hints
-  Type::ResetTypeHintTypes();
-  Type::InitTypeHintMap();
-  BuiltinSymbols::LoadSuperGlobals();
-
-  AnalysisResultPtr ar(new AnalysisResult());
-  string path = string("runtime/tmp/") + subdir;
-  ar->setOutputPath(path.c_str());
-  Compiler::Parser::ParseString(input, ar);
-  BuiltinSymbols::Load(ar);
-  ar->loadBuiltins();
-  ar->analyzeProgram();
-  ar->preOptimize();
-  ar->analyzeIncludes();
-  ar->inferTypes();
-  ar->postOptimize();
-  ar->analyzeProgramFinal();
-  ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, nullptr);
-
-  string target = path + "/Makefile";
-  const char *argv1[] = {"", "runtime/tmp/single.mk", target.c_str(), nullptr};
-  string out, err;
-  Process::Exec("cp", argv1, nullptr, out, &err);
-  if (!err.empty()) {
-    printf("Failed to copy runtime/tmp/single.mk: %s\n", err.c_str());
-    return false;
-  }
-
-  if (FastMode) {
-    string sys = string(subdir) + "/sys";
-    const char *argv2[] = {"", sys.c_str(), nullptr};
-    Process::Exec("runtime/tmp/mergecpp.sh", argv2, nullptr, out, &err);
-    if (!err.empty()) {
-      printf("Failed to merge runtime/tmp/%s/*.cpp: %s\n",
-             sys.c_str(), err.c_str());
-      return false;
-    }
-  }
-
-  return true;
-}
-
-static string filter_distcc(string &msg) {
-  istringstream is(msg);
-  ostringstream os;
-  string line;
-  while (getline(is, line)) {
-    if (line.compare(0, 6, "distcc")) {
-      os << line << '\n';
-    }
-  }
-  return os.str();
-}
-
-bool TestCodeRun::CompileFiles() {
-  string out, err;
-  const char *argv[] = {"", FastMode ? "SHARED" : "LINK", nullptr};
-  Process::Exec("runtime/makeall.sh", argv, nullptr, out, &err);
-  err = filter_distcc(err);
-  if (!err.empty()) {
-    printf("Failed to compile files:\n");
-
-    istringstream is(err);
-    string line;
-    string buffer;
-    while (getline(is, line)) {
-      buffer += line + "\n";
-      if (!line.compare(0, 4, "make")) {
-        unsigned int start = 0;
-        while (start < line.length() && line.compare(start, 4, "Test")) {
-          start++;
-        }
-        if (start < line.length()) {
-          istringstream isl(line.substr(start + 4));
-          int seqno;
-          if (isl >> seqno) {
-            printf("======================================\n"
-                   "runtime/tmp/Test%d/main.php:\n"
-                   "======================================\n",
-                  seqno);
-            printf("\n%s:%d\nParsing: [%s]\n%s\n", m_infos[seqno].file,
-                   m_infos[seqno].line, m_infos[seqno].input, buffer.c_str());
-            buffer = "";
-          }
-        }
-      }
-    }
-    if (!buffer.empty()) {
-      // leftover error messages, if any
-      printf("\n%s\n", buffer.c_str());
-    }
-
-    return false;
-  }
   return true;
 }
 
@@ -409,28 +301,6 @@ bool TestCodeRun::RecordMulti(const char *input, const char *output,
   return true;
 }
 
-bool TestCodeRun::MultiVerifyCodeRun() {
-  return true;
-  if (Option::EnableEval < Option::FullEval) {
-    CompileFiles();
-  }
-
-  bool ret = true;
-  for (unsigned i = 0; i < m_infos.size(); i++) {
-    assert(m_infos[i].input);
-    ostringstream os;
-    os << "Test" << i;
-    if (!Count(verify_result(m_infos[i].input, m_infos[i].output, m_perfMode,
-                             m_infos[i].file, m_infos[i].line,
-                             m_infos[i].nowarnings,
-                             m_infos[i].fileoutput, os.str().c_str(),
-                             FastMode))) {
-      ret = false;
-    }
-  }
-  return ret;
-}
-
 bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
                                 const char *file /* = "" */,
                                 int line /* = 0 */,
@@ -438,11 +308,6 @@ bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
                                 bool fileoutput /* = false */) {
   assert(input);
   if (!CleanUp()) return false;
-  if (Option::EnableEval < Option::FullEval) {
-    if (!GenerateFiles(input, "Test0") || !CompileFiles()) {
-      return false;
-    }
-  }
 
   return verify_result(input, output, m_perfMode,
                        file, line, nowarnings, fileoutput, "Test0", FastMode);

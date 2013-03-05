@@ -353,85 +353,6 @@ public:
    * Override BlockScope::outputPHP() to generate return type.
    */
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  /**
-   * Override to preface with call temps.
-   */
-  virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  /**
-   * Generate parameter declaration.
-   */
-  void outputCPPParamsDecl(CodeGenerator &cg, AnalysisResultPtr ar,
-                           ExpressionListPtr params, bool showDefault);
-  /**
-   * This one is a special version that doesn't require a params expression.
-   * It's for use with extension functions. It only works for the
-   * implementation since it ignores optional arguments.
-   */
-  void outputCPPParamsImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-  /**
-   * If inside this function, we have to make a call to an implementation
-   * function that has the same signature, how does the parameter list
-   * look like?
-   */
-  void outputCPPParamsCall(CodeGenerator &cg, AnalysisResultPtr ar,
-                           bool aggregateParams);
-
-  /**
-   * How does a caller prepare parameters.
-   */
-  static void OutputCPPArguments(ExpressionListPtr params,
-                                 FunctionScopePtr func,
-                                 CodeGenerator &cg, AnalysisResultPtr ar,
-                                 int extraArg, bool variableArgument,
-                                 int extraArgArrayId = -1,
-                                 int extraArgArrayHash = -1,
-                                 int extraArgArrayIndex = -1,
-                                 bool ignoreFuncParamTypes = false);
-
-  /**
-   * Only generate arguments that have effects. This is for keeping those
-   * parameters around when generating a error-raising function call, so to
-   * avoid "unused" variable compiler warnings.
-   */
-  static void OutputCPPEffectiveArguments(ExpressionListPtr params,
-                                          CodeGenerator &cg,
-                                          AnalysisResultPtr ar);
-
-  /**
-   * Generate invoke proxy.
-   */
-  static void OutputCPPDynamicInvokeCount(CodeGenerator &cg);
-  void outputCPPDynamicInvoke(CodeGenerator &cg, AnalysisResultPtr ar,
-                              const char *funcPrefix,
-                              const char *name,
-                              bool voidWrapperOff = false,
-                              bool fewArgs = false,
-                              bool ret = true,
-                              const char *extraArg = nullptr,
-                              bool constructor = false,
-                              const char *instance = nullptr,
-                              const char *class_name = "");
-
-  void outputCPPDef(CodeGenerator &cg);
-
-  /**
-   * output functions
-   */
-  void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputMethodWrapper(CodeGenerator &cg, AnalysisResultPtr ar,
-                           const char *clsToConstruct);
-
-  /**
-   * Output CallInfo instance for this function.
-   */
-  void outputCPPCallInfo(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  void outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  void outputCPPHelperClassAlloc(CodeGenerator &cg,
-                                 AnalysisResultPtr ar);
-
   /**
    * Serialize the iface, not everything.
    */
@@ -512,10 +433,6 @@ public:
   };
 
 private:
-  void outputCPPSubClassParam(CodeGenerator &cg,
-                              AnalysisResultPtr ar,
-                              ParameterExpressionPtr param);
-
   void init(AnalysisResultConstPtr ar);
 
   static StringToFunctionInfoPtrMap s_refParamInfo;
@@ -572,8 +489,6 @@ private:
   StatementPtr m_stmtCloned; // cloned method body stmt
   int m_inlineIndex;
   FunctionOptPtr m_optFunction;
-  int outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
-                                    bool ret, bool constructor, int maxCount);
   ExpressionPtrVec m_retExprsToFix;
   ExpressionListPtr m_closureVars;
   ExpressionListPtr m_closureValues;

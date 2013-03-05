@@ -160,7 +160,6 @@ void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
   checkVolatile(ar);
 
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-  ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
   vector<string> bases;
   if (m_base) m_base->getStrings(bases);
   for (unsigned int i = 0; i < bases.size(); i++) {

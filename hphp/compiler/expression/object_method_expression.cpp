@@ -73,7 +73,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
         if (func &&
             !cls->isInterface() &&
             !(func->isVirtual() &&
-              (ar->isSystem() || func->isAbstract() ||
+              (func->isAbstract() ||
                (func->hasOverride() &&
                 cls->getAttribute(ClassScope::NotFinal))) &&
               !func->isPerfectVirtual())) {
@@ -156,7 +156,7 @@ ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
 
   if (m_classScope && m_funcScope &&
       (!m_funcScope->isVirtual() ||
-       (!ar->isSystem() && !m_funcScope->hasOverride()))) {
+       (Option::WholeProgram && !m_funcScope->hasOverride()))) {
 
     if (Option::DynamicInvokeFunctions.size()) {
       if (Option::DynamicInvokeFunctions.find(
@@ -257,7 +257,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   // invoke() will return Variant
   if (cls->isInterface() ||
       (func->isVirtual() &&
-       (ar->isSystem() || func->isAbstract() ||
+       (!Option::WholeProgram || func->isAbstract() ||
         (func->hasOverride() && cls->getAttribute(ClassScope::NotFinal))) &&
        !func->isPerfectVirtual())) {
     valid = false;
@@ -283,8 +283,6 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 
 void ObjectMethodExpression::outputPHP(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  outputLineMap(cg, ar);
-
   m_object->outputPHP(cg, ar);
   cg_printf("->");
   if (m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {

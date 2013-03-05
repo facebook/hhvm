@@ -56,22 +56,16 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
   if (port == 0) port = s_server_port;
 
   if (!CleanUp()) return false;
-  if (Option::EnableEval < Option::FullEval) {
-    if (!GenerateFiles(input, "TestServer") || !CompileFiles()) {
-      return false;
-    }
-  } else {
-    string fullPath = "runtime/tmp/string";
-    std::ofstream f(fullPath.c_str());
-    if (!f) {
-      printf("Unable to open %s for write. Run this test from hphp/.\n",
-             fullPath.c_str());
-      return false;
-    }
-
-    f << input;
-    f.close();
+  string fullPath = "runtime/tmp/string";
+  std::ofstream f(fullPath.c_str());
+  if (!f) {
+    printf("Unable to open %s for write. Run this test from hphp/.\n",
+           fullPath.c_str());
+    return false;
   }
+
+  f << input;
+  f.close();
 
   AsyncFunc<TestServer> func(this, &TestServer::RunServer);
   func.start();

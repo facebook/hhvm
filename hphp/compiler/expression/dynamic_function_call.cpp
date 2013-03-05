@@ -120,8 +120,6 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  outputLineMap(cg, ar);
-
   if (m_class || !m_className.empty()) {
     StaticClassName::outputPHP(cg, ar);
     cg_printf("::");

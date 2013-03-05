@@ -71,19 +71,10 @@ public:
   void setComment(const std::string &comment) { m_comment = comment;}
   const std::string getComment() { return m_comment;}
 
-  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPString(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPInteger(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPDouble(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  std::string getCPPLiteralString(bool *binary = nullptr);
 
   bool getString(const std::string *&s) const;
   bool getInt(int64 &i) const;
   bool getDouble(double &d) const;
-  static void OutputCPPString(const std::string &str, CodeGenerator &cg,
-                              AnalysisResultPtr ar, BlockScopeRawPtr scope,
-                              bool constant);
 private:
   int m_type;
   std::string m_serializedValue;
@@ -93,8 +84,6 @@ private:
   std::string m_translated;
   bool m_quoted;
   std::string m_comment; // for inlined constant name
-  void outputCPPNamedInteger(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPNamedDouble(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

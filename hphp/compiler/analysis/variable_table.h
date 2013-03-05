@@ -289,33 +289,6 @@ public:
    * Generate all variable declarations for this symbol table.
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool outputCPPPropertyDecl(CodeGenerator &cg, AnalysisResultPtr ar,
-      bool dynamicObject = false);
-  void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPStaticLocals(CodeGenerator &cg, AnalysisResultPtr ar,
-                             bool forInitList);
-
-  void outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
-                                            AnalysisResultPtr ar);
-  void outputCPPGlobalVariablesDtor(CodeGenerator &cg);
-  void outputCPPGVHashTableGetImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
-                                       AnalysisResultPtr ar);
-  void outputCPPGVHashTableExists(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPGlobalVariablesExists(CodeGenerator &cg,
-                                      AnalysisResultPtr ar);
-  void outputCPPGVHashTableGetIndex(CodeGenerator &cg,
-                                    AnalysisResultPtr ar);
-  void outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
-                                        AnalysisResultPtr ar);
-  void outputCPPGlobalVariablesMethods(CodeGenerator &cg,
-                                       AnalysisResultPtr ar);
-
-  void collectCPPGlobalSymbols(StringPairSetVec &symbols, CodeGenerator &cg,
-                               AnalysisResultPtr ar);
-
   /**
    * Whether or not the specified jump table is empty.
    */
@@ -383,19 +356,6 @@ private:
                           TypePtr type, bool coerce);
   virtual void dumpStats(std::map<std::string, int> &typeCounts);
 
-  void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPVariableTable(CodeGenerator &cg, AnalysisResultPtr ar,
-                              const char *paramPrefix);
-  bool outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
-                          const char *prefix, bool defineHash,
-                          bool variantOnly, StaticSelection staticVar,
-                          JumpTableType type = JumpReturn,
-                          PrivateSelection privateVar = NonPrivate,
-                          bool *declaredGlobals = nullptr);
-  bool outputCPPPrivateSelector(CodeGenerator &cg, AnalysisResultPtr ar,
-                                const char *op, const char *args);
-  void outputCPPVariableInit(CodeGenerator &cg, AnalysisResultPtr ar,
-                             bool inPseudoMain, const std::string &name);
   void checkSystemGVOrder(SymbolSet &variants, unsigned int max);
 };
 

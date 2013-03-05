@@ -1173,7 +1173,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   // this is ok un-guarded b/c this value never gets un-set (once its
   // true its always true) and the value itself doesn't get read
-  // until outputCPP time
+  // until later phases
   if (m_arrayParams && func && !m_builtinFunction) func->setDirectInvoke();
 
   if (m_safe) {
@@ -1209,8 +1209,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  outputLineMap(cg, ar);
-
   if (m_class || !m_className.empty()) {
     StaticClassName::outputPHP(cg, ar);
     cg_printf("::%s(", m_origName.c_str());
@@ -1467,7 +1465,7 @@ ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
                                       AnalysisResultConstPtr ar,
                                       SimpleFunctionCallPtr call, int mode) {
   bool error = false;
-  if (!cg && mode <= 1 && !ar->isSystem()) {
+  if (!cg && mode <= 1 && Option::WholeProgram) {
     const std::string &name = call->getName();
     bool isArray = name == "call_user_func_array";
     if (name == "call_user_func" || isArray) {
@@ -1498,7 +1496,7 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
                                          AnalysisResultConstPtr ar,
                                          SimpleFunctionCallPtr call, int mode) {
   bool error = false;
-  if (!cg && mode <= 1 && !ar->isSystem()) {
+  if (!cg && mode <= 1 && Option::WholeProgram) {
     const std::string &name = call->getName();
     bool isArray = name == "fb_call_user_func_array_safe";
     bool safe_ret = name == "fb_call_user_func_safe_return";
@@ -1537,7 +1535,7 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
 ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
                                    AnalysisResultConstPtr ar,
                                    SimpleFunctionCallPtr call, int mode) {
-  if (!cg && mode <= 1 && !ar->isSystem()) {
+  if (!cg && mode <= 1 && Option::WholeProgram) {
     bool error = false;
     SimpleFunctionCallPtr rep(
       SimpleFunctionCall::GetFunctionCallForCallUserFunc(

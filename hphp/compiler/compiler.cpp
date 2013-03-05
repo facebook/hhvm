@@ -146,8 +146,6 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
                AsyncFileCacheSaver &fcThread);
-int cppTarget(const CompilerOptions &po, AnalysisResultPtr ar,
-              AsyncFileCacheSaver &fcThread, bool allowSys = true);
 int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread);
 int buildTarget(const CompilerOptions &po);
@@ -187,11 +185,7 @@ int compiler_main(int argc, char **argv) {
       }
     }
     if (ret == 0) {
-      if (po.target == "cpp") {
-        if (po.format == "exe" || po.format == "lib") {
-          ret = buildTarget(po);
-        }
-      } else if (po.target == "run") {
+      if (po.target == "run") {
         ret = runTarget(po);
       }
     }
@@ -225,8 +219,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "analyze | "
      "php | "
      "hhbc | "
-     "cpp | "
-     "sep-ext-cpp | "
      "filecache | "
      "run (default)")
     ("format,f", value<string>(&po.format),
@@ -235,7 +227,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "php: trimmed (default) | inlined | pickled | typeinfo |"
      " <any combination of them by any separator>; \n"
      "hhbc: binary (default) | text; \n"
-     "cpp: cluster (default) | file | sys | exe | lib; \n"
      "run: cluster (default) | file")
     ("cluster-count", value<int>(&po.clusterCount)->default_value(0),
      "Cluster by file sizes and output roughly these many number of files. "
@@ -423,8 +414,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
 
-  if (hhvm &&
-      (po.target == "hhbc" || po.target == "run") &&
+  if ((po.target == "hhbc" || po.target == "run") &&
       po.format.find("exe") == string::npos) {
     if (po.program == "program") {
       po.program = "hhvm.hhbc";
@@ -499,13 +489,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
       (Util::format_pattern(po.excludeStaticPatterns[i], true));
   }
 
-  if (po.target == "cpp" && po.format == "sys") {
-    BuiltinSymbols::NoSuperGlobals = true; // so to generate super globals
-    Option::AnalyzePerfectVirtuals = false;
-  }
-  Option::SystemGen = (po.target == "cpp" && po.format == "sys") ;
-
-  if (hhvm && (po.target == "hhbc" || po.target == "run")) {
+  if (po.target == "hhbc" || po.target == "run") {
     Option::OutputHHBC = true;
     Option::AnalyzePerfectVirtuals = false;
   }
@@ -514,24 +498,22 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Option::PreprocessedPartitionConfig = po.ppp;
 
   if (po.format.empty()) {
-    if (po.target == "cpp") {
-      po.format = "cluster";
-    } else if (po.target == "php") {
+    if (po.target == "php") {
       po.format = "trimmed";
     } else if (po.target == "run") {
-      po.format = hhvm ? "binary" : "cluster";
-    } else if (hhvm && po.target == "hhbc") {
+      po.format = "binary";
+    } else if (po.target == "hhbc") {
       po.format = "binary";
     }
   }
 
   if (!po.docjson.empty()) {
-    if (po.target != "cpp" &&
-        po.target != "run" &&
+    if (po.target != "run" &&
+        po.target != "hhbc" &&
         po.target != "analyze") {
       Logger::Error(
         "Cannot generate doc JSON file unless target is "
-        "'cpp', 'run', or 'analyze'");
+        "'hhbc', 'run', or 'analyze'");
     } else {
       Option::DocJson = po.docjson;
     }
@@ -602,7 +584,7 @@ int process(const CompilerOptions &po) {
   Package package(po.inputDir.c_str());
   ar = package.getAnalysisResult();
 
-  if (hhvm && (po.target == "hhbc" || po.target == "run")) {
+  if (po.target == "hhbc" || po.target == "run") {
     hhbcTargetInit(po, ar);
   }
 
@@ -617,14 +599,10 @@ int process(const CompilerOptions &po) {
   BuiltinSymbols::LoadSuperGlobals();
   ClassInfo::Load();
 
-  if (Option::SystemGen) ar->setSystem();
-
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
     if (!BuiltinSymbols::Load(ar,
-                              (po.target == "cpp" && po.format == "sys")
-                              || (po.target == "hhbc" && !Option::WholeProgram)
-                              )) {
+                              po.target == "hhbc" && !Option::WholeProgram)) {
       return false;
     }
     if (po.target == "hhbc" && !Option::WholeProgram) {
@@ -701,10 +679,8 @@ int process(const CompilerOptions &po) {
     ret = analyzeTarget(po, ar);
   } else if (po.target == "php") {
     ret = phpTarget(po, ar);
-  } else if (hhvm && po.target == "hhbc") {
+  } else if (po.target == "hhbc") {
     ret = hhbcTarget(po, ar, fileCacheThread);
-  } else if (po.target == "cpp") {
-    ret = cppTarget(po, ar, fileCacheThread);
   } else if (po.target == "run") {
     ret = runTargetCheck(po, ar, fileCacheThread);
   } else if (po.target == "filecache") {
@@ -964,62 +940,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int cppTarget(const CompilerOptions &po, AnalysisResultPtr ar,
-              AsyncFileCacheSaver &fcThread, bool allowSys /* = true */) {
-  int ret = 0;
-  int clusterCount = po.clusterCount;
-  // format
-  CodeGenerator::Output format = CodeGenerator::InvalidOutput;
-  if (po.format == "file") {
-    clusterCount = 0;
-    format = CodeGenerator::FileCPP;
-  } else if (po.format == "cluster") {
-    format = CodeGenerator::ClusterCPP;
-  } else if (po.format == "sys" && allowSys) {
-    clusterCount = 0;
-    format = CodeGenerator::SystemCPP;
-    ar->setSystem();
-  } else if (po.format == "exe" || po.format == "lib") {
-    format = CodeGenerator::ClusterCPP;
-  }
-
-  if (format == CodeGenerator::InvalidOutput) {
-    Logger::Error("Unknown format for CPP target: %s", po.format.c_str());
-    return 1;
-  }
-
-  if (!Option::RTTIOutputFile.empty()) {
-    if (!po.rttiDirectory.empty()) {
-      Option::UseRTTIProfileData = true;
-      ar->cloneRTTIFuncs(po.rttiDirectory.c_str());
-    } else {
-      Option::GenRTTIProfileData = true;
-    }
-  }
-
-  ret = analyzeTarget(po, ar);
-
-  {
-    Timer timer(Timer::WallTime, "creating CPP files");
-    if (po.syncDir.empty()) {
-      ar->setOutputPath(po.outputDir);
-      ar->outputAllCPP(format, clusterCount, nullptr);
-    } else {
-      ar->setOutputPath(po.syncDir);
-      ar->outputAllCPP(format, clusterCount, &po.outputDir);
-      if (!po.filecache.empty()) {
-        fcThread.waitForEnd();
-      }
-      Util::syncdir(po.outputDir, po.syncDir);
-      boost::filesystem::remove_all(po.syncDir);
-    }
-  }
-
-  return ret;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 int buildTarget(const CompilerOptions &po) {
   const char *HPHP_HOME = getenv("HPHP_HOME");
   if (!HPHP_HOME || !*HPHP_HOME) {
@@ -1060,11 +980,7 @@ int buildTarget(const CompilerOptions &po) {
 int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread) {
   // generate code
-  if (po.format == "sep") return 1;
-
-  if (hhvm ?
-      hhbcTarget(po, ar, fcThread) :
-      cppTarget(po, ar, fcThread, false)) {
+  if (hhbcTarget(po, ar, fcThread)) {
     return 1;
   }
 
@@ -1078,10 +994,7 @@ int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
 }
 
 int runTarget(const CompilerOptions &po) {
-  int ret = hhvm ? 0 : buildTarget(po);
-  if (ret) {
-    return ret;
-  }
+  int ret = 0;
 
   // If there are more than one input files, we need one extra arg to run.
   // If it's missing, we will stop right here, with compiled code.
@@ -1092,7 +1005,7 @@ int runTarget(const CompilerOptions &po) {
 
   // run the executable
   string cmd;
-  if (hhvm && po.format.find("exe") == string::npos) {
+  if (po.format.find("exe") == string::npos) {
     char buf[PATH_MAX];
     if (!realpath("/proc/self/exe", buf)) return -1;
 

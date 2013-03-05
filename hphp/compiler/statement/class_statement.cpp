@@ -189,7 +189,6 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
 
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
 
-  ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
   for (unsigned int i = 0; i < bases.size(); i++) {
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
@@ -276,98 +275,4 @@ bool ClassStatement::hasImpl() const {
   return cls->isVolatile() ||
     cls->getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
     (hhvm && Option::OutputHHBC);
-}
-
-void ClassStatement::outputJavaFFIConstructor(CodeGenerator &cg,
-                                              AnalysisResultPtr ar,
-                                              FunctionScopePtr cons) {
-  int ac = cons ? cons->getMaxParamCount() : 0;
-  bool varArgs = cons && cons->isVariableArgument();
-
-  // generates the constructor
-  cg_printf("public %s(", getOriginalName().c_str());
-  std::ostringstream args;
-  std::ostringstream params;
-  bool first = true;
-  for (int i = 0; i < ac; i++) {
-    if (first) {
-      first = false;
-    }
-    else {
-      cg_printf(", ");
-      args << ", ";
-      params << ", ";
-    }
-    cg_printf("HphpVariant a%d", i);
-    args << "a" << i << ".getVariantPtr()";
-    params << "long a" << i;
-  }
-  if (varArgs) {
-    if (!first) {
-      cg_printf(", ");
-      args << ", ";
-      params << ", ";
-    }
-    cg_printf("HphpVariant va");
-    args << "va.getVariantPtr()";
-    params << "long va";
-  }
-  cg_indentBegin(") {\n");
-  cg_printf("this(create(%s));\n", args.str().c_str());
-  cg_indentEnd("}\n\n");
-
-  // generates the native method stub for creating the object
-  cg_printf("private static native long create(%s);\n\n",
-            params.str().c_str());
-}
-
-void ClassStatement::outputJavaFFICPPCreator(CodeGenerator &cg,
-                                             AnalysisResultPtr ar,
-                                             FunctionScopePtr cons) {
-  ClassScopeRawPtr cls = getClassScope();
-  string packageName = Option::JavaFFIRootPackage;
-  int ac = cons ? cons->getMaxParamCount() : 0;
-  bool varArgs = cons && cons->isVariableArgument();
-  const char *clsName = getOriginalName().c_str();
-
-  string mangledName = "Java_" + packageName + "_" + clsName + "_create";
-  Util::replaceAll(mangledName, ".", "_");
-
-  cg_printf("JNIEXPORT jlong JNICALL\n");
-  cg_printf("%s(JNIEnv *env, jclass cls", mangledName.c_str());
-
-  std::ostringstream args;
-  bool first = true;
-  if (varArgs) {
-    args << ac << " + (((Variant *)va)->isNull() ? 0"
-               << " : ((Variant *)va)->getArrayData()->size())";
-    first = false;
-  }
-  for (int i = 0; i < ac; i++) {
-    if (first) first = false;
-    else {
-      args << ", ";
-    }
-    cg_printf(", jlong a%d", i);
-    args << "*(Variant *)a" << i;
-  }
-  if (varArgs) {
-    if (!first) {
-      args << ", ";
-    }
-    cg_printf(", jlong va");
-    args << "((Variant *)va)->toArray()";
-  }
-
-  if (cg.getContext() == CodeGenerator::JavaFFICppDecl) {
-    // java_stubs.h
-    cg_printf(");\n\n");
-    return;
-  }
-
-  cg_indentBegin(") {\n");
-  cg_printf("ObjectData *obj = (NEWOBJ(%s%s)())->create(%s);\n",
-            Option::ClassPrefix, cls->getId().c_str(), args.str().c_str());
-  cg_printf("return (jlong)(NEW(Variant)(obj));\n");
-  cg_indentEnd("}\n\n");
 }

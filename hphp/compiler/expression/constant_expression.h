@@ -53,7 +53,6 @@ public:
   const std::string &getDocComment() const {
     return m_docComment;
   }
-  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
 
   bool isNull() const;
   bool isBoolean() const;

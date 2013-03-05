@@ -225,34 +225,8 @@ public:
   ClassScopePtr getClass(AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) const;
 
-  /**
-   * Generate type specifier in C++.
-   */
-  std::string getCPPDecl(AnalysisResultConstPtr ar,
-                         BlockScopeRawPtr scope,
-                         CodeGenerator *cg = 0);
   DataType getDataType() const;
   DataType getHhvmDataType() const;
-
-  void outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
-                     BlockScopeRawPtr scope);
-
-  /**
-   * Generate type conversion in C++.
-   */
-
-  void outputCPPFastObjectCast(CodeGenerator &cg,
-      AnalysisResultConstPtr ar,
-      BlockScopeRawPtr scope,
-      bool isConst);
-
-  void outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
-                     BlockScopeRawPtr scope);
-
-  /**
-   * Generate variable initialization code.
-   */
-  const char *getCPPInitializer();
 
   /**
    * Type hint names in PHP.

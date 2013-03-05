@@ -167,26 +167,6 @@ public:
   void postOptimize();
 
   /**
-   * Scalar array handling.
-   */
-  int registerScalarArray(bool insideScalarArray, FileScopePtr scope,
-                          ExpressionPtr pairs, int &hash, int &index,
-                          std::string &text);
-  int checkScalarArray(const std::string &text, int &index);
-  int getScalarArrayId(const std::string &text);
-
-  std::string getScalarArrayName(int hash, int index);
-  std::string getScalarVarArrayName(int hash, int index);
-
-  int checkScalarVarInteger(int64 val, int &index);
-  std::string getScalarVarIntegerName(int hash, int index);
-  void outputCPPNamedScalarVarIntegers(const std::string &file);
-
-  int checkScalarVarDouble(double dval, int &index);
-  std::string getScalarVarDoubleName(int hash, int index);
-  void outputCPPNamedScalarVarDoubles(const std::string &file);
-
-  /**
    * Force all class variables to be variants, since l-val or reference
    * of dynamic properties are used.
    */
@@ -208,22 +188,6 @@ public:
    * Code generation functions.
    */
   bool outputAllPHP(CodeGenerator::Output output);
-  void outputAllCPP(CodeGenerator::Output output, int clusterCount,
-                    const std::string *compileDir);
-
-  void outputCPPSystemImplementations(CodeGenerator &cg);
-  void getCPPFileRunDecls(CodeGenerator &cg, Type2SymbolSetMap &type2names);
-  void getCPPDynamicConstantDecl(CodeGenerator &cg,
-                                 Type2SymbolSetMap &type2names);
-  void outputCPPDynamicConstantImpl(CodeGenerator &cg);
-  void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index,
-                              bool scalarVariant = false);
-  void getCPPClassStaticInitializerFlags(CodeGenerator &cg,
-                                         Type2SymbolSetMap &type2names);
-  void getCPPClassDeclaredFlags(CodeGenerator &cg,
-                                Type2SymbolSetMap &type2names);
-
-  void outputCPPFiniteDouble(CodeGenerator &cg, double dval);
 
   /**
    * Parser creates a FileScope upon parsing a new file.
@@ -309,15 +273,6 @@ public:
   }
 
   /**
-   * PHP source info functions.
-   */
-  void recordSourceInfo(const std::string &file, int line, LocationPtr loc);
-  void recordClassSource(const std::string &clsname, LocationPtr loc,
-                         const std::string &filename);
-  void recordFunctionSource(const std::string &funcname, LocationPtr loc,
-                            const std::string &filename);
-
-  /**
    * Literal string to String precomputation
    */
   std::string getLiteralStringName(int64 hash, int index, bool iproxy = false);
@@ -342,22 +297,10 @@ public:
 
   std::vector<const char *> &getFuncTableBucket(FunctionScopePtr func);
 
-  void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
-  void outputCPPFileImpl(CodeGenerator &cg, FileScopePtr fs);
-
-  void addPregeneratedCPP(const std::string &name, std::string &code);
-  const std::string &getPregeneratedCPP(const std::string &name);
-
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
   int m_arrayLitstrKeyMaxSize;
   int m_arrayIntegerKeyMaxSize;
-
-  void setSystem() { m_system = true; }
-  bool isSystem() const { return m_system; }
-
-  void setSepExtension() { m_sepExtension = true; }
-  bool isSepExtension() { return m_sepExtension; }
 
   std::string getHashedName(int64 hash, int index, const char *prefix,
                             bool longName = false);
@@ -411,31 +354,6 @@ private:
   int m_paramRTTICounter;
 
 public:
-  struct ScalarArrayExp {
-    int id;
-    int len;
-    ExpressionPtr exp;
-  };
-
-  void outputCPPDynamicTables(CodeGenerator::Output output);
-  void outputCPPClassMapFile(CodeGenerator::Output output);
-  void outputCPPSourceInfos();
-  void outputCPPNameMaps();
-  void outputRTTIMetaData(const char *filename);
-  void outputCPPClassMap(CodeGenerator &cg, CodeGenerator::Output);
-  void outputCPPSystem();
-  void outputCPPSepExtensionMake();
-  void outputFFI(std::vector<std::string> &additionalCPPs);
-  void repartitionLargeCPP(const std::vector<std::string> &filenames,
-                           const std::vector<std::string> &additionals);
-
-  void outputCPPUtilDecl(CodeGenerator::Output output);
-  void outputCPPUtilImpl(CodeGenerator::Output output);
-  void outputCPPGlobalDeclarations();
-  void outputCPPMain();
-  void outputCPPGlobalVariablesMethods();
-  void outputCPPGlobalState();
-
   AnalysisResultPtr shared_from_this() {
     return boost::static_pointer_cast<AnalysisResult>
       (BlockScope::shared_from_this());
@@ -447,12 +365,6 @@ public:
   }
 
 private:
-  int m_scalarArraySortedAvgLen;
-  int m_scalarArraySortedIndex;
-  int m_scalarArraySortedSumLen;
-  std::vector<ScalarArrayExp> m_scalarArraySorted;
-  int m_scalarArrayCompressedTextSize;
-  bool m_pregenerating, m_pregenerated;
   BlockScopePtrVec m_ignoredScopes;
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
@@ -462,33 +374,6 @@ private:
   Graph m_depGraph;
   typedef std::map<vertex_descriptor, FileScopePtr> VertexToFileScopePtrMap;
   VertexToFileScopePtrMap m_fileVertMap;
-  void getTrueDeps(FileScopePtr f,
-                   std::map<std::string, FileScopePtr> &trueDeps);
-  void clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
-                          int clusterCount);
-  void renameStaticNames(std::map<int, std::vector<std::string> > &names,
-                         const char *file, const char *prefix);
-
-  typedef std::map<std::string, std::string> StringMap;
-  Mutex m_pregenMapMutex;
-  StringMap m_pregenMap;
-
-  typedef std::map<int, LocationPtr> SourceLocationMap;
-  typedef std::map<std::string, SourceLocationMap> SourceInfo;
-  Mutex m_sourceInfoMutex;
-  SourceInfo m_sourceInfos;
-  SourceInfo m_sourceInfoPregen;
-  std::map<std::string, std::set<std::pair<std::string, int> > > m_clsNameMap;
-  std::map<std::string, std::set<std::pair<std::string, int> > > m_funcNameMap;
-
-  Mutex m_namedStringLiteralsMutex;
-  std::map<int, std::vector<std::string> > m_namedStringLiterals;
-  std::set<std::string> m_namedVarStringLiterals;
-
-  int m_funcTableSize;
-  CodeGenerator::MapIntToStringVec m_funcTable;
-  bool m_system;
-  bool m_sepExtension;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.
@@ -509,97 +394,7 @@ private:
    */
   void checkClassDerivations();
 
-  /**
-   * Creates the global function table. Needs to be called before generating
-   * cpp code for each toplevel function.
-   */
-  void createGlobalFuncTable();
-
-  void collectCPPGlobalSymbols(StringPairSetVec &symbols,
-                               CodeGenerator &cg);
-  void outputCPPGlobalStateFileHeader(CodeGenerator &cg);
-  void outputCPPGlobalStateBegin(CodeGenerator &cg, const char *section);
-  void outputCPPGlobalStateEnd(CodeGenerator &cg, const char *section);
-  void outputCPPGlobalStateSection(CodeGenerator &cg,
-                                   const StringPairSet &names,
-                                   const char *section,
-                                   const char *prefix = "g->",
-                                   const char *name_prefix = "");
-
-  void outputCPPClassIncludes(CodeGenerator &cg);
-  void outputCPPExtClassImpl(CodeGenerator &cg);
-  void outputCPPDynamicTablesHeader(CodeGenerator &cg,
-                                    bool includeGlobalVars = true,
-                                    bool includes = true,
-                                    bool noNamespace = false);
-  void outputCPPGlobalImplementations(CodeGenerator &cg);
-
-  void preGenerateCPP(CodeGenerator::Output output,
-                      const FileScopePtrVec &files, int threadCount);
-  void movePregeneratedSourceInfo(const std::string &source,
-                                  const std::string &target, int offset);
   int getFileSize(FileScopePtr fs);
-
-  void repartitionCPP(const std::string &filename, int64 targetSize,
-                      bool insideHPHP, bool force);
-
-  void outputCPPFFIStubs();
-  void outputHSFFIStubs();
-
-  /**
-   * Outputs Java stubs.
-   *
-   * Each PHP file becomes a Java package, in which the HphpMain class
-   * contains all the toplevel function definitions, and the rest of the
-   * classes are one-to-one corresponding to the php classes declared in
-   * that file.
-   */
-  void outputJavaFFIStubs();
-  /**
-   * Outputs one .h file that declares all the Java native method stubs,
-   * avoiding javah for performance reason.
-   */
-  void outputJavaFFICppDecl();
-  /**
-   * Outputs one .cpp file that implements all the native methods declared
-   * in the Java classes generated by outputJavaFFIStubs().
-   */
-  void outputJavaFFICppImpl();
-
-  void outputSwigFFIStubs();
-
-  void outputHexBuffer(CodeGenerator &cg, const char *name,
-                       const char *buf, int len);
-  void outputCPPNamedLiteralStrings(bool genStatic, const std::string &file);
-  void outputCPPSepExtensionIncludes(CodeGenerator &cg);
-
-  void outputCPPInvokeFileHeader(CodeGenerator &cg);
-  void outputCPPEvalHook(CodeGenerator &cg);
-  void outputCPPDefaultInvokeFile(CodeGenerator &cg, const char *file);
-
-  void outputArrayCreateDecl(CodeGenerator &cg);
-  void outputArrayCreateImpl(CodeGenerator &cg);
-  void outputCPPHashTableInvokeFile(CodeGenerator &cg,
-                                    const std::vector<const char*> &entries,
-                                    bool needEvalHook);
-  void outputCPPDynamicClassTables(CodeGenerator::Output output);
-  void outputCPPDynamicConstantTable(CodeGenerator::Output output);
-  void outputCPPHashTableGetConstant(CodeGenerator &cg, bool system,
-         const std::map<std::string, TypePtr> &constMap,
-         const hphp_string_map<bool> &dyns);
-  void cloneRTTIFuncs(const StringToFunctionScopePtrMap &functions,
-                      const StringToFunctionScopePtrVecMap *redecFunctions);
-  void outputInitLiteralVarStrings(CodeGenerator &cg, int fileIndex,
-         std::vector<int> &litVarStrFileIndices,
-         std::vector<std::pair<int, int> > &litVarStrs);
-
-  void outputInitLiteralVarStrings();
-  void outputStringProxyData(CodeGenerator &cg,
-    int fileIndex, std::vector<std::string> &lStrings,
-    std::vector<std::pair<std::string, int> > &bStrings);
-  void outputVarStringProxyData(CodeGenerator &cg,
-    int fileIndex, std::vector<std::pair<int, int> > &litVarStrs);
-
 
 public:
   static DECLARE_THREAD_LOCAL(BlockScopeRawPtr, s_currentScopeThreadLocal);

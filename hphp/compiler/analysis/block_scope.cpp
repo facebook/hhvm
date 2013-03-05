@@ -241,11 +241,6 @@ void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_variables->outputPHP(cg, ar);
 }
 
-void BlockScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  m_constants->outputCPP(cg, ar);
-  m_variables->outputCPP(cg, ar);
-}
-
 int BlockScope::ScopeCompare::cmp(const BlockScopeRawPtr &p1,
                                   const BlockScopeRawPtr &p2) const {
   int d1 = p1->m_kind - p2->m_kind;

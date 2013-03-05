@@ -222,12 +222,9 @@ class TestCodeRun : public TestBase {
 
  protected:
   bool CleanUp();
-  bool GenerateFiles(const char *input, const char *subdir = "");
-  bool CompileFiles();
   bool RecordMulti(const char *input, const char *output, const char *file,
                    int line, bool nowarnings, bool fileoutput);
 
-  bool MultiVerifyCodeRun();
   bool VerifyCodeRun(const char *input, const char *output,
                      const char *file = "", int line = 0,
                      bool nowarnings = false, bool fileoutput = false);

@@ -38,8 +38,6 @@ public:
   ExpressionPtr getCondition() { return m_condition; }
   StatementPtr getStmt() { return m_stmt; }
   void clearStmt() { m_stmt.reset(); }
-
-  int outputCPPIfBranch(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
   ExpressionPtr m_condition;
   StatementPtr m_stmt;

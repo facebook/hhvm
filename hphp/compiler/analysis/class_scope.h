@@ -124,7 +124,6 @@ public:
 
   void checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen);
   const std::string &getOriginalParent() const { return m_parent; }
-  std::string getHeaderFilename();
 
   /**
    * Returns topmost parent class that has the method.
@@ -292,62 +291,6 @@ public:
 
   ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const;
 
-  void addUsedLiteralStringHeader(const std::string &s) {
-    m_usedLiteralStringsHeader.insert(s);
-  }
-
-  void addUsedLitVarStringHeader(const std::string &s) {
-    m_usedLitVarStringsHeader.insert(s);
-  }
-
-  void addUsedScalarVarInteger(int64 i) {
-    m_usedScalarVarIntegers.insert(i);
-  }
-
-  std::set<int64> &getUsedScalarVarIntegers() {
-    return m_usedScalarVarIntegers;
-  }
-
-  void addUsedScalarVarIntegerHeader(int64 i) {
-    m_usedScalarVarIntegersHeader.insert(i);
-  }
-
-  void addUsedScalarVarDouble(double d) {
-    m_usedScalarVarDoubles.insert(d);
-  }
-
-  std::set<double> &getUsedScalarVarDoubles() {
-    return m_usedScalarVarDoubles;
-  }
-
-  void addUsedScalarVarDoubleHeader(double d) {
-    m_usedScalarVarDoublesHeader.insert(d);
-  }
-
-  void addUsedDefaultValueScalarArray(const std::string &s) {
-    m_usedDefaultValueScalarArrays.insert(s);
-  }
-
-  void addUsedDefaultValueScalarVarArray(const std::string &s) {
-    m_usedDefaultValueScalarVarArrays.insert(s);
-  }
-
-  void addUsedConstHeader(const std::string &s) {
-    m_usedConstsHeader.insert(s);
-  }
-
-  void addUsedClassConstHeader(ClassScopeRawPtr cls, const std::string &s) {
-    m_usedClassConstsHeader.insert(CodeGenerator::UsedClassConst(cls, s));
-  }
-
-  void addUsedClassHeader(ClassScopeRawPtr s) {
-    m_usedClassesHeader.insert(s);
-  }
-
-  void addUsedClassFullHeader(ClassScopeRawPtr s) {
-    m_usedClassesFullHeader.insert(s);
-  }
-
   void addUsedTrait(const std::string &s) {
     if (!usesTrait(s)) {
       m_usedTraitNames.push_back(s);
@@ -376,35 +319,11 @@ public:
   void importUsedTraits(AnalysisResultPtr ar);
 
   /**
-   * Output class meta info for g_class_map.
-   */
-  void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  /**
    * Serialize the iface, not everything.
    */
   void serialize(JSON::CodeError::OutputStream &out) const;
   void serialize(JSON::DocTarget::OutputStream &out) const;
 
-  static void outputCPPHashTableClasses
-    (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-     const std::vector<const char*> &classes);
-  static void outputCPPClassVarInitImpl(
-    CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-    const std::vector<const char *> &classes);
-
-  static void outputCPPGetCallInfoStaticMethodImpl
-  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes);
-  static void outputCPPGetStaticPropertyImpl
-  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes);
-  static void outputCPPGetClassConstantImpl
-  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes);
-  static void outputCPPGetClassPropTableImpl
-  (CodeGenerator &cg, AnalysisResultPtr ar,
-   const StringToClassScopePtrVecMap &classScopes,
-   bool extension = false);
   bool isInterface() const { return m_kindOf == KindOfInterface; }
   bool isFinal() const { return m_kindOf == KindOfFinalClass ||
                                 m_kindOf == KindOfTrait; }
@@ -413,32 +332,6 @@ public:
   bool isTrait() const { return m_kindOf == KindOfTrait; }
   bool hasProperty(const std::string &name) const;
   bool hasConst(const std::string &name) const;
-  void outputCPPDef(CodeGenerator &cg);
-  void outputCPPHeader(AnalysisResultPtr ar,
-                       CodeGenerator::Output output);
-  void outputCPPForwardHeader(CodeGenerator &cg,AnalysisResultPtr ar);
-  void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  void outputMethodWrappers(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  /**
-   * This prints out all the support methods (invoke, create, destructor,
-   * etc.)
-   * This is here instead of ClassStatement because I want to be able to call
-   * these for extension classes that don't have a statement.
-   */
-  void outputCPPSupportMethodsImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  std::string getClassPropTableId(AnalysisResultPtr ar);
-
-  /**
-   * These output wrappers for class methods so that class definitions don't
-   * have to be used in generating global jump tables.
-   */
-  void outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
-                                        AnalysisResultPtr ar);
-  void outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
-                                        AnalysisResultPtr ar);
 
   static bool NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func);
   void inheritedMagicMethods(ClassScopePtr super);
@@ -461,31 +354,6 @@ public:
   bool addFunction(AnalysisResultConstPtr ar,
                    FunctionScopePtr funcScope);
 
-  void outputVolatileCheckBegin(CodeGenerator &cg,
-                                AnalysisResultPtr ar,
-                                BlockScopePtr bs,
-                                const std::string &name);
-  void outputVolatileCheckEnd(CodeGenerator &cg);
-  static void OutputVolatileCheckBegin(CodeGenerator &cg,
-                                       AnalysisResultPtr ar,
-                                       BlockScopePtr bs,
-                                       const std::string &origName);
-  static void OutputVolatileCheckEnd(CodeGenerator &cg);
-  static void OutputVolatileCheck(CodeGenerator &cg, AnalysisResultPtr ar,
-                                  BlockScopePtr bs,
-                                  const std::string &origName, bool noThrow);
-
-
-  /**
-   * Whether or not the specified jump table is empty.
-   */
-  bool hasAllJumpTables() const {
-    return m_emptyJumpTables.empty();
-  }
-  bool hasJumpTable(JumpTableName name) const {
-    return m_emptyJumpTables.find(name) == m_emptyJumpTables.end();
-  }
-
   void setNeedsCppCtor(bool needsCppCtor) {
     m_needsCppCtor = needsCppCtor;
   }
@@ -506,29 +374,6 @@ public:
   bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
   bool checkHasPropTable(AnalysisResultConstPtr ar);
 
-  struct IndexedSym {
-    IndexedSym(int i, int p, const Symbol *s) :
-        origIndex(i), privIndex(p), sym(s) {}
-
-    int                 origIndex;
-    int                 privIndex;
-    const Symbol        *sym;
-  };
-
-  struct ClassPropTableInfo {
-    ClassScopeRawPtr            cls;
-    std::vector<int>            actualIndex[3];
-    std::vector<int>            privateIndex[3];
-    std::map<int, std::vector<IndexedSym> > syms[3];
-  };
-
-  typedef std::map<std::string, ClassPropTableInfo>
-    ClassPropTableMap;
-
-protected:
-  void findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
-                            std::vector<const char *> &funcs);
-  bool hasJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
   // need to maintain declaration order for ClassInfo map
   FunctionScopePtrVec m_functionsVec;
@@ -537,19 +382,6 @@ private:
   mutable std::vector<std::string> m_bases;
   UserAttributeMap m_userAttributes;
 
-  std::set<JumpTableName> m_emptyJumpTables;
-  std::set<std::string> m_usedLiteralStringsHeader;
-  std::set<std::string> m_usedLitVarStringsHeader;
-  std::set<int64> m_usedScalarVarIntegers;
-  std::set<int64> m_usedScalarVarIntegersHeader;
-  std::set<double> m_usedScalarVarDoubles;
-  std::set<double> m_usedScalarVarDoublesHeader;
-  std::set<std::string> m_usedDefaultValueScalarArrays;
-  std::set<std::string> m_usedDefaultValueScalarVarArrays;
-  std::set<std::string> m_usedConstsHeader;
-  CodeGenerator::UsedClassConstSet m_usedClassConstsHeader;
-  CodeGenerator::ClassScopeSet m_usedClassesHeader;
-  CodeGenerator::ClassScopeSet m_usedClassesFullHeader;
   std::vector<std::string> m_usedTraitNames;
   // m_traitAliases is used to support ReflectionClass::getTraitAliases
   std::vector<std::pair<std::string, std::string> > m_traitAliases;
@@ -653,18 +485,6 @@ private:
   void renameCreateContinuationCalls(AnalysisResultPtr ar, ConstructPtr c,
                                      ImportedMethodMap &importedMethods);
 
-  std::string getBaseHeaderFilename();
-
-  void outputCPPMethodInvokeBareObjectSupport(
-    CodeGenerator &cg, AnalysisResultPtr ar,
-    FunctionScopePtr func, bool fewArgs);
-
-  void outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
-      AnalysisResultPtr ar, const std::vector<const char*> &keys,
-      const StringToFunctionScopePtrMap &funcScopes, bool fewArgs);
-  hphp_const_char_imap<int> m_implemented;
-
-  ClassScopePtr getNextParentWithProp(AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

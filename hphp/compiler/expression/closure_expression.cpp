@@ -156,9 +156,6 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
       return;
     }
     if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-      if (m_func->getFileScope() != getFileScope()) {
-        getFileScope()->addUsedClosure(m_func->getFunctionScope());
-      }
       // closure function's variable table (not containing function's)
       VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
       for (int i = 0; i < m_vars->getCount(); i++) {

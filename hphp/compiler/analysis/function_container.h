@@ -53,10 +53,6 @@ public:
 protected:
   // name => functions. Order of declaration
   StringToFunctionScopePtrMap m_functions;
-  void outputCPPHelperClassAllocSupport(
-    CodeGenerator &cg, AnalysisResultPtr ar,
-    const StringToFunctionScopePtrVecMap *redec);
-private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////

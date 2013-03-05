@@ -268,31 +268,13 @@ public:
     m_loopStatement = loop;
   }
 
-  void setInsideScalarArray(bool flag);
-  bool getInsideScalarArray();
-
   void setFileOrClassHeader(bool value) { m_inFileOrClassHeader = value; }
   bool isFileOrClassHeader() { return m_inFileOrClassHeader; }
-
-  void beginHoistedClasses();
-  void endHoistedClasses();
-  void collectHoistedClasses(bool flag);
-  void addHoistedClass(const std::string &cls);
-  bool checkHoistedClass(const std::string &cls);
-
-  void setScalarVariant() { m_scalarVariant = true; }
-  bool hasScalarVariant() { return m_scalarVariant; }
-  void clearScalarVariant() { m_scalarVariant = false; }
 
   void setInitListFirstElem() { m_initListFirstElem = true; }
   bool hasInitListFirstElem() { return m_initListFirstElem; }
   void clearInitListFirstElem() { m_initListFirstElem = false; }
 
-  const StringToClassScopePtrVecMap &getClasses() const { return m_classes; }
-  void addClass(const std::string &name, ClassScopePtr cls) {
-    m_classes[name].push_back(cls);
-  }
-  void clearClasses() { m_classes.clear(); }
   bool insertDeclaredClosure(const FunctionScope *f) {
     return m_declaredClosures.insert(f).second;
   }
@@ -321,8 +303,6 @@ private:
   bool m_inFileOrClassHeader;
   bool m_inNamespace;
   int m_localId[StreamCount];
-  std::set<std::string, stdltistr> *m_hoistedClasses;
-  bool m_collectHoistedClasses;
 
   static int s_idLambda;
   std::map<std::string, int> m_idCounters;

@@ -81,22 +81,6 @@ public:
    * Generate all constant declarations for this symbol table.
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                 bool newline = true) const;
-  void getCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar,
-                         Type2SymbolSetMap &type2names);
-  void outputCPPDynamicImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-  bool outputSingleConstant(CodeGenerator &cg, AnalysisResultPtr ar,
-                            const std::string &name) const;
-
-  void collectCPPGlobalSymbols(StringPairSet &symbols, CodeGenerator &cg,
-                               AnalysisResultPtr ar);
-
-  /**
-   * Generate all class constants in class info map.
-   */
-  void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar,
-                         bool last = true);
 
   bool isRecursivelyDeclared(AnalysisResultConstPtr ar,
                              const std::string &name) const;
@@ -115,10 +99,6 @@ private:
   ClassScopeRawPtr findBase(AnalysisResultConstPtr ar,
                             const std::string &name,
                             const std::vector<std::string> &bases) const;
-  bool outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                 const Symbol *sym) const;
-  void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
-                               Symbol *sym);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

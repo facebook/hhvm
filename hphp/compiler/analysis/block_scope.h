@@ -219,9 +219,7 @@ public:
   /**
    * Code gen
    */
-  virtual void outputCPPDef(CodeGenerator &cg) {}
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
-  virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
 
   virtual bool inPseudoMain() const {
     return false;

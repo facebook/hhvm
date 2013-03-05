@@ -48,8 +48,6 @@ private:
   ExpressionPtr m_value;
   bool m_ref;
   bool m_collection;
-
-  bool outputCPPName(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

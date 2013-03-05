@@ -157,8 +157,6 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void NewObjectExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  outputLineMap(cg, ar);
-
   cg_printf("new ");
   m_nameExp->outputPHP(cg, ar);
   cg_printf("(");

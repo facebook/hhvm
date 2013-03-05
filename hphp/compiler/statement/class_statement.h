@@ -55,13 +55,6 @@ private:
 
   static void GetCtorAndInitInfo(
       StatementPtr s, bool &needsCppCtor, bool &needsInit);
-  void outputCPPClassDecl(CodeGenerator &cg, AnalysisResultPtr ar,
-                          const char *clsName, const char *originalName,
-                          const char *parent);
-  void outputJavaFFIConstructor(CodeGenerator &cg, AnalysisResultPtr ar,
-                                FunctionScopePtr cons);
-  void outputJavaFFICPPCreator(CodeGenerator &cg, AnalysisResultPtr ar,
-                               FunctionScopePtr cons);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

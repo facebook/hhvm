@@ -55,19 +55,6 @@ public:
    */
   ExpressionPtr getCondition() { return m_condition;}
   StatementPtr getStatement() { return m_stmt; }
-  /**
-   * Generate an "if" statement that sets caseVar to caseNum if m_condition
-   * evaluates true.
-   */
-  void outputCPPAsIf(CodeGenerator &cg, AnalysisResultPtr ar,
-                     int varId, const char *var, int caseNum);
-
-  /**
-   * Generate a case statement that cases by caseNum.
-   */
-  void outputCPPByNumber(CodeGenerator &cg, AnalysisResultPtr ar,
-                         int varId, int caseNum);
-
 private:
   ExpressionPtr m_condition;
   StatementPtr m_stmt;

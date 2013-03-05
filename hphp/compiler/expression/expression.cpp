@@ -726,44 +726,6 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
-                               bool force /* = false */) {
-  switch (cg.getOutput()) {
-  case CodeGenerator::TrimmedPHP:
-    if (cg.getStream(CodeGenerator::MapFile) &&
-        cg.usingStream(CodeGenerator::PrimaryStream)) {
-      cg.useStream(CodeGenerator::MapFile);
-      cg_printf("%d => '%s:%d',", cg.getLineNo(CodeGenerator::PrimaryStream),
-                getLocation()->file, getLocation()->line1);
-      cg.useStream(CodeGenerator::PrimaryStream);
-    }
-    break;
-  case CodeGenerator::ClusterCPP:
-    {
-      if (!force &&
-          !(getLocalEffects() & (Construct::CanThrow|
-                                 Construct::AccessorEffect|
-                                 Construct::DiagnosticEffect))) {
-        return false;
-      }
-      int line = cg.getLineNo(CodeGenerator::PrimaryStream);
-      LocationPtr loc = getLocation();
-      if (loc) {
-        ar->recordSourceInfo(cg.getFileName(), line, loc);
-        if (cg.getPHPLineNo() != loc->line1) {
-          cg.setPHPLineNo(loc->line1);
-          cg_printf("LINE(%d,", loc->line1);
-          return true;
-        }
-      }
-    }
-    break;
-  default:
-    break;
-  }
-  return false;
-}
-
 void Expression::collectCPPTemps(ExpressionPtrVec &collection) {
   if (isChainRoot()) {
     collection.push_back(static_pointer_cast<Expression>(shared_from_this()));

@@ -130,19 +130,6 @@ protected:
   ExpressionListPtr m_attrList;
 
   void setSpecialMethod(ClassScopePtr classScope);
-
-  void addParamRTTI(AnalysisResultPtr ar);
-
-  /**
-   * The one FFI generation master that rules them all!
-   */
-  bool outputFFI(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  void outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPFFIStub(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputJavaFFIStub(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputJavaFFICPPStub(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputSwigFFIStub(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

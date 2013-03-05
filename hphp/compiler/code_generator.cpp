@@ -61,7 +61,6 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
                              const std::string *filename /* = NULL */)
     : m_out(nullptr), m_output(output),
-      m_hoistedClasses(0), m_collectHoistedClasses(false),
       m_context(NoContext), m_insideScalarArray(false), m_itemIndex(-1) {
   for (int i = 0; i < StreamCount; i++) {
     m_streams[i] = nullptr;
@@ -511,14 +510,6 @@ int CodeGenerator::callInfoTop() {
   return m_callInfos.back();
 }
 
-bool CodeGenerator::getInsideScalarArray() {
-  return m_insideScalarArray;
-}
-
-void CodeGenerator::setInsideScalarArray(bool flag) {
-  m_insideScalarArray = flag;
-}
-
 void CodeGenerator::addLabelId(const char *name, int labelId) {
   if (!strcmp(name, "break")) {
     m_breakLabelIds.insert(labelId);
@@ -536,107 +527,6 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
     return m_contLabelIds.find(labelId) != m_contLabelIds.end();
   } else {
     assert(false);
-  }
-  return false;
-}
-
-int CodeGenerator::checkLiteralString(const std::string &str, int &index,
-                                      AnalysisResultPtr ar, BlockScopePtr bs,
-                                      bool scalarVariant /* = false */) {
-  always_assert(getContext() != CodeGenerator::CppConstantsDecl &&
-         getContext() != CodeGenerator::CppClassConstantsImpl);
-  int stringId = ar->getLiteralStringId(str, index);
-  if (m_literalScope) {
-    bs = m_literalScope;
-  }
-  if (bs && bs != ar) {
-    FileScopePtr fs = bs->getContainingFile();
-    if (fs) {
-      fs->addUsedLiteralString(str);
-      if (scalarVariant) fs->addUsedLitVarString(str);
-      if (isFileOrClassHeader()) {
-        ClassScopePtr cs = bs->getContainingClass();
-        if (cs) {
-          cs->addUsedLiteralStringHeader(str);
-          if (scalarVariant) cs->addUsedLitVarStringHeader(str);
-        } else {
-          fs->addUsedLiteralStringHeader(str);
-          if (scalarVariant) fs->addUsedLitVarStringHeader(str);
-        }
-      }
-    }
-  }
-
-  return stringId;
-}
-
-string CodeGenerator::printNamedString(const string &str,
-  const string &escaped, AnalysisResultPtr ar, BlockScopeRawPtr bs,
-  bool print) {
-  int index = -1;
-  bool scalarVariant = !print;
-  int stringId = checkLiteralString(str, index, ar, bs, scalarVariant);
-  always_assert(index >= 0);
-  string lisnam = ar->getLiteralStringName(stringId, index);
-  if (print) {
-    printf("NAMSTR(%s, \"%s\")", lisnam.c_str(), escaped.c_str());
-  }
-  return lisnam;
-}
-
-string CodeGenerator::printString(const string &str, AnalysisResultPtr ar,
-                                  BlockScopeRawPtr bs,
-                                  bool stringWrapper /* = true */) {
-  bool isBinary = false;
-  string escaped = EscapeLabel(str, &isBinary);
-  if (bs) {
-    return printNamedString(str, escaped, ar, bs, true);
-  }
-  if (isBinary) {
-    if (stringWrapper) {
-      printf("String(\"%s\", %d, AttachLiteral)",
-             escaped.c_str(), (int)str.length());
-    } else {
-      printf("\"%s\", %d", escaped.c_str(), (int)str.length());
-    }
-  } else {
-    printf("\"%s\"", escaped.c_str());
-  }
-  return "";
-}
-
-string CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
-                                  ConstructPtr cs,
-                                  bool stringWrapper /* = true */) {
-  return printString(str, ar, (BlockScopePtr)cs->getScope(), stringWrapper);
-}
-
-void CodeGenerator::beginHoistedClasses() {
-  m_hoistedClasses = new std::set<string,stdltistr>();
-  m_collectHoistedClasses = true;
-}
-
-void CodeGenerator::endHoistedClasses() {
-  delete m_hoistedClasses;
-  m_hoistedClasses = 0;
-}
-
-void CodeGenerator::collectHoistedClasses(bool flag) {
-  m_collectHoistedClasses = flag;
-}
-
-void CodeGenerator::addHoistedClass(const string &cls) {
-  if (m_hoistedClasses && m_collectHoistedClasses) {
-    m_hoistedClasses->insert(cls);
-  }
-}
-
-bool CodeGenerator::checkHoistedClass(const string &cls) {
-  if (m_hoistedClasses) {
-    if (m_hoistedClasses->find(cls) != m_hoistedClasses->end()) {
-      return true;
-    }
-    addHoistedClass(cls);
   }
   return false;
 }

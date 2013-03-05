@@ -589,37 +589,6 @@ ClassScopePtr Type::getClass(AnalysisResultConstPtr ar,
   return cls;
 }
 
-string Type::getCPPDecl(AnalysisResultConstPtr ar,
-                        BlockScopeRawPtr scope,
-                        CodeGenerator *cg /* = 0 */) {
-  switch (m_kindOf) {
-    case KindOfBoolean:     return "bool";
-    case KindOfInt32:       return "int";
-    case KindOfInt64:       return "int64";
-    case KindOfDouble:      return "double";
-    case KindOfString:      return "String";
-    case KindOfArray:       return "Array";
-    case KindOfObject:{
-      ClassScopePtr cls(getClass(ar, scope));
-      if (!cls) return "Object";
-      if (cg && cg->isFileOrClassHeader() && scope) {
-        if (scope->getContainingClass()) {
-          scope->getContainingClass()->addUsedClassHeader(cls);
-        } else if (scope->getContainingFile()) {
-          scope->getContainingFile()->addUsedClassHeader(cls);
-        }
-      }
-      return Option::SmartPtrPrefix + cls->getId();
-    }
-    case KindOfNumeric:     return "Numeric";
-    case KindOfPrimitive:   return "Primitive";
-    case KindOfPlusOperand: return "PlusOperand";
-    case KindOfSequence:    return "Sequence";
-    default:
-      return "Variant";
-  }
-}
-
 DataType Type::getDataType() const {
   switch (m_kindOf) {
     case KindOfBoolean:     return HPHP::KindOfBoolean;
@@ -643,66 +612,6 @@ DataType Type::getHhvmDataType() const {
   switch (m_kindOf) {
     case KindOfVoid:        return HPHP::KindOfNull;
     default:                return getDataType();
-  }
-}
-
-void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
-                         BlockScopeRawPtr scope) {
-  cg_print(getCPPDecl(ar, scope, &cg).c_str());
-}
-
-void Type::outputCPPFastObjectCast(CodeGenerator &cg,
-    AnalysisResultConstPtr ar,
-    BlockScopeRawPtr scope,
-    bool isConst) {
-  assert(isSpecificObject());
-  ClassScopePtr cls(getClass(ar, scope));
-  assert(cls);
-  const string &cppClsName = cls->getId();
-  cg_printf("(%s%s%s&)",
-            isConst ? "const " : "",
-            Option::SmartPtrPrefix,
-            cppClsName.c_str());
-}
-
-void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
-                         BlockScopeRawPtr scope) {
-  switch (m_kindOf) {
-    case KindOfBoolean:     cg_printf("toBoolean");   break;
-    case KindOfInt32:       cg_printf("toInt32");     break;
-    case KindOfInt64:       cg_printf("toInt64");     break;
-    case KindOfDouble:      cg_printf("toDouble");    break;
-    case KindOfString:      cg_printf("toString");    break;
-    case KindOfArray:       cg_printf("toArray");     break;
-    case KindOfNumeric:     cg_printf("Numeric");     break;
-    case KindOfPrimitive:   cg_printf("Primitive");   break;
-    case KindOfPlusOperand: cg_printf("PlusOperand"); break;
-    case KindOfSequence:    cg_printf("Sequence");    break;
-    case KindOfObject: {
-      ClassScopePtr cls(getClass(ar, scope));
-      if (!cls) {
-        cg_printf("toObject");
-      } else {
-        cg_printf("%s%s", Option::SmartPtrPrefix, cls->getId().c_str());
-      }
-      break;
-    }
-    default:
-      cg_printf("Variant");
-      break;
-  }
-}
-
-const char *Type::getCPPInitializer() {
-  switch (m_kindOf) {
-  case KindOfBoolean:     return "false";
-  case KindOfInt32:
-  case KindOfInt64:       return "0";
-  case KindOfNumeric:
-  case KindOfPrimitive:
-  case KindOfPlusOperand: return "0";
-  case KindOfDouble:      return "0.0";
-  default:                return nullptr;
   }
 }
 

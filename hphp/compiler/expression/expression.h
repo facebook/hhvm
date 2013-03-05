@@ -370,7 +370,6 @@ public:
   static bool GetCseTempInfo(
       AnalysisResultPtr ar, ExpressionPtr p, TypePtr &t);
 
-  bool outputCPPArithArg(CodeGenerator &cg, AnalysisResultPtr ar, bool arrayOk);
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
   ExpressionPtr fetchReplacement();
@@ -380,8 +379,6 @@ public:
    * Correctly compute the local expression altered bit
    */
   void computeLocalExprAltered();
-
-  bool outputCPPGuardedObjectPtr(CodeGenerator &cg);
 protected:
   static bool IsIdentifier(const std::string &value);
 
@@ -412,13 +409,9 @@ protected:
                 TypePtr expectedType);
   void setDynamicByIdentifier(AnalysisResultPtr ar,
                               const std::string &value);
-  bool outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
-                     bool force = false);
-
   void resetTypes();
  private:
   static ExprClass Classes[];
-  void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);
 
   /**
    * Returns true if a type cast is needed, and sets src/dst type

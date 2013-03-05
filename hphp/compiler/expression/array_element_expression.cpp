@@ -79,8 +79,7 @@ void ArrayElementExpression::setContext(Context context) {
       if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
         m_variable->clearContext(Expression::NoLValueWrapper);
       }
-      // special case for $GLOBALS[], see the if (m_global) check in
-      // ArrayElementExpression::outputCPPImpl, we do not need lvalue wrapper
+      // special case for $GLOBALS[], we do not need lvalue wrapper
       if (m_variable->is(Expression::KindOfSimpleVariable)) {
         SimpleVariablePtr var =
           dynamic_pointer_cast<SimpleVariable>(m_variable);

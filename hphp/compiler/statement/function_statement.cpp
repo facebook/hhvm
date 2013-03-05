@@ -97,12 +97,6 @@ void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
       func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
     }
   }
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    const std::string &name = fs->inPseudoMain() ?
-      m_name : fs->getInjectionId();
-    ar->recordFunctionSource(name, m_loc,
-                             getFileScope()->getName());
-  }
   MethodStatement::analyzeProgram(ar);
 }
 

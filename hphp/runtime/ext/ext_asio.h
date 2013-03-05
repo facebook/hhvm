@@ -216,6 +216,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   static const int8_t STATE_NEW       = 2;
 
  private:
+  c_ContinuationWaitHandle* m_creator;
   c_BlockableWaitHandle* m_firstParent;
 };
 

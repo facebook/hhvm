@@ -24,9 +24,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_WaitableWaitHandle::c_WaitableWaitHandle(VM::Class* cb)
-    : c_WaitHandle(cb), m_firstParent(nullptr) {
+    : c_WaitHandle(cb)
+    , m_creator(AsioSession::Get()->getCurrentWaitHandle())
+    , m_firstParent(nullptr) {
   setState(STATE_NEW);
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
+
+  // ref creator
+  if (m_creator) {
+    m_creator->incRefCount();
+  }
 }
 
 c_WaitableWaitHandle::~c_WaitableWaitHandle() {
@@ -38,6 +45,12 @@ c_WaitableWaitHandle::~c_WaitableWaitHandle() {
     case STATE_FAILED:
       tvDecRefObj(&m_resultOrException);
       break;
+  }
+
+  // unref creator
+  if (m_creator) {
+    decRefObj(m_creator);
+    m_creator = nullptr;
   }
 }
 
@@ -127,6 +140,12 @@ void c_WaitableWaitHandle::setResult(const TypedValue* result) {
   setState(STATE_SUCCEEDED);
   tvDupCell(result, &m_resultOrException);
 
+  // unref creator
+  if (m_creator) {
+    decRefObj(m_creator);
+    m_creator = nullptr;
+  }
+
   // unblock parents
   while (m_firstParent) {
     m_firstParent = m_firstParent->unblock();
@@ -139,6 +158,12 @@ void c_WaitableWaitHandle::setException(ObjectData* exception) {
 
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
+
+  // unref creator
+  if (m_creator) {
+    decRefObj(m_creator);
+    m_creator = nullptr;
+  }
 
   // unblock parents
   while (m_firstParent) {

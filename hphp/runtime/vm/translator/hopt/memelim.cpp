@@ -71,14 +71,14 @@ private:
   // it can also track the reference count of the box for better availability
   // analysis. and when the object gets to a ref count of 0 it will be destroyed
   struct RefInfo : public Counted {
-    RefInfo(IRInstruction* inst) {
-      update(inst);
+    RefInfo(IRInstruction* inst, bool killValue = false) {
+      update(inst, killValue);
     }
 
-    void update(IRInstruction* inst) {
+    void update(IRInstruction* inst, bool killValue = false) {
       assert(inst != nullptr);
       access = inst;
-      value = findRefValue(inst);
+      value = killValue ? nullptr : findRefValue(inst);
     }
 
     IRInstruction* access;
@@ -86,14 +86,14 @@ private:
   };
 
   struct LocInfo : public Counted {
-    LocInfo(IRInstruction* inst) {
-      update(inst);
+    LocInfo(IRInstruction* inst, bool killValue = false) {
+      update(inst, killValue);
     }
 
-    void update(IRInstruction* inst) {
+    void update(IRInstruction* inst, bool killValue = false) {
       assert(inst != nullptr);
       access = inst;
-      value = findValue(inst);
+      value = killValue ? nullptr : findValue(inst);
     }
 
     IRInstruction* access;
@@ -225,6 +225,11 @@ private:
       }
       return inst->getSrc(1);
     }
+    if (isVectorOp(op)) {
+      // Vector instructions may change boxes such that the new value
+      // only exists in memory, so there's no SSATmp for it.
+      return nullptr;
+    }
     if (op == Box) {
       return inst->getSrc(0);
     }
@@ -256,6 +261,15 @@ private:
   static bool isStore(Opcode opc) {
     return opc == StRef || opc == StRefNT || opc == StLoc || opc == StLocNT ||
            opc == StProp || opc == StPropNT;
+  }
+
+  static bool isVectorOp(Opcode opc) {
+    switch (opc) {
+      case SetProp:
+      case SetElem:
+      case ElemDX:      return true;
+      default:          return false;
+    }
   }
 
   bool isLive(IRInstruction* inst) const {
@@ -380,6 +394,23 @@ void MemMap::escapeRef(SSATmp* ref) {
 }
 
 void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
+  auto storeLocal = [&](uint32_t locId, SSATmp* val) {
+    // if 'val' is an unescaped ref, then we need to escape all refs that
+    // alias 'val'
+    if (m_unescaped.count(val) > 0) {
+      escapeRef(val);
+    }
+
+    // storing into a local does not affect the info of any other ref
+    auto& info = m_locs[locId];
+    const bool killValue = val == nullptr;
+    if (info == nullptr) {
+      info = new LocInfo(inst, killValue);
+    } else {
+      info->update(inst, killValue);
+    }
+  };
+
   assert(inst != nullptr);
 
   Opcode op = inst->getOpcode();
@@ -472,21 +503,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
     case StLoc:
     case StLocNT: {
-      auto locId = inst->getExtra<LocalId>()->locId;
-      SSATmp* val = inst->getSrc(1);
-
-      // if 'val' is an unescaped ref, then we need to escape all refs that
-      // alias 'val'
-      if (m_unescaped.count(val) > 0) {
-        escapeRef(val);
-      }
-
-      // storing into a local does not affect the info of any other ref
-      if (m_locs.count(locId) > 0) {
-        m_locs[locId]->update(inst);
-      } else {
-        m_locs[locId] = new LocInfo(inst);
-      }
+      storeLocal(inst->getExtra<LocalId>()->locId, inst->getSrc(1));
       break;
     }
     case StRef:
@@ -549,6 +566,16 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       }
 
       killPropInfo(inst);
+      break;
+    }
+    case SetProp:
+    case SetElem:
+    case ElemDX: {
+      VectorEffects::get(inst,
+                         /* storeLocValue callback */
+                         storeLocal,
+                         /* setLocType callback. Erases the value for now. */
+                         [&](uint32_t id, Type t) { storeLocal(id, nullptr); });
       break;
     }
     case DecRef:
@@ -744,12 +771,9 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   Type instTy = inst->getDst()->getType();
   Type valTy = value->getType();
 
-  // check for loads that have a guard that will fail
-  if (inst->getTaken() && valTy != instTy) {
-    if (!(valTy.isString() && instTy.isString()) &&
-        valTy.isKnownDataType() && instTy.isKnownDataType()) {
-      return inst->convertToJmp();
-    }
+  // check for loads that have a guard that will definitely fail
+  if (inst->getTaken() && instTy.not(valTy)) {
+    return inst->convertToJmp();
   }
 
   Opcode op = inst->getOpcode();
@@ -765,7 +789,7 @@ void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   inst->setTaken(nullptr);
 
   // convert the instruction into a Mov with the known value
-  inst->setOpcode(Mov);
+  inst->convertToMov();
 }
 
 void MemMap::sinkStores(StoreList& stores) {

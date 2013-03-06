@@ -333,9 +333,9 @@ private:
   CSEHash*  getCSEHashTable(IRInstruction* inst);
   void      killCse();
   void      killLocals();
-  void      killLocalValue(unsigned id);
+  void      killLocalValue(uint32_t id);
   void      setLocalValue(unsigned id, SSATmp* value);
-  void      setLocalType(unsigned id, Type type);
+  void      setLocalType(uint32_t id, Type type);
   SSATmp*   getLocalValue(unsigned id) const;
   bool      isValueAvailable(SSATmp* tmp) const;
   bool      anyLocalHasValue(SSATmp* tmp) const;

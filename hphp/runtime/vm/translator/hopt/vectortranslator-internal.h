@@ -85,12 +85,13 @@ inline unsigned buildBitmask(T c, Args... args) {
     assert(*dest == nullptr);                           \
     *dest = nm;                                         \
   } while (false);
-#define FILL_ROWH(nm, hot, ...) FILL_ROW(nm, __VA_ARGS__)
+#define FILL_ROW_HOT(nm, hot, ...) FILL_ROW(nm, __VA_ARGS__)
 
 #define BUILD_OPTAB(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW), __VA_ARGS__)
-#define BUILD_OPTABH(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROWH), __VA_ARGS__)
+#define BUILD_OPTAB_HOT(...)                            \
+  BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW_HOT), __VA_ARGS__)
 #define BUILD_OPTAB_ARG(FILL_TABLE, ...)                                \
-  static OpFunc* optab = nullptr;                                          \
+  static OpFunc* optab = nullptr;                                       \
   if (!optab) {                                                         \
     optab = (OpFunc*)calloc(1 << multiBitWidth(__VA_ARGS__), sizeof(OpFunc)); \
     FILL_TABLE                                                          \
@@ -149,7 +150,9 @@ inline static SSATmp* noLitInt(SSATmp* t) {
 
 // keyPtr is used by helper function implementations to convert a
 // TypedValue passed by value into a TypedValue* suitable for passing
-// to helpers from member_operations.h
+// to helpers from member_operations.h, which are prepared to handle
+// int64 and StringData* keys in their key argument. This should be
+// cleaned up to use the right types: #2174037
 template<KeyType kt>
 static inline TypedValue* keyPtr(TypedValue& key) {
   if (kt == AnyKey) {

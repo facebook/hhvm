@@ -372,6 +372,14 @@ O(SetProp,                     DVector, C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(Cell),           E|N|Mem|Refs|Er) \
+O(ElemX,                   D(PtrToGen), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
+O(ElemDX,                  D(PtrToGen), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
@@ -779,6 +787,10 @@ public:
     return Type(m_bits & other.m_bits);
   }
 
+  Type operator-(Type other) const {
+    return Type(m_bits & ~other.m_bits);
+  }
+
   std::string toString() const;
   static std::string debugString(Type t);
   static Type fromString(const std::string& str);
@@ -797,6 +809,10 @@ public:
 
   bool isPtr() const {
     return subtypeOf(PtrToGen);
+  }
+
+  bool notPtr() const {
+    return (*this & PtrToGen) == Bottom;
   }
 
   bool isCounted() const {
@@ -1332,6 +1348,12 @@ struct IRInstruction {
   void convertToJmp();
 
   /*
+   * Replace an instruction in place with a Mov. Used when we have
+   * proven that the instruction's side effects are not needed.
+   */
+  void convertToMov();
+
+  /*
    * Deep-copy an IRInstruction, using factory to allocate memory for
    * the IRInstruction itself, and its srcs/dests.
    */
@@ -1684,11 +1706,31 @@ int vectorKeyIdx(const IRInstruction* inst);
 int vectorValIdx(const IRInstruction* inst);
 
 struct VectorEffects {
+  static bool supported(const IRInstruction* inst);
+
+  /*
+   * VectorEffects::get is used to allow multiple different consumers to deal
+   * with the side effects of vector instructions. It takes an instruction and
+   * a series of callbacks, each of which will be called when the instruction
+   * has a certain effect:
+   *
+   * storeLocValue: This will be called when a local's value is changed.
+   * setLocType: This will be called when a local's type changes and the
+   *             new value is not known.
+   */
+  typedef std::function<void(uint32_t, SSATmp*)> StoreLocFunc;
+  typedef std::function<void(uint32_t, Type)> SetLocTypeFunc;
+  static void get(const IRInstruction*,
+                  StoreLocFunc storeLocValue,
+                  SetLocTypeFunc setLocType);
+
   VectorEffects(const IRInstruction* inst) {
+    int keyIdx = vectorKeyIdx(inst);
+    int valIdx = vectorValIdx(inst);
     init(inst->getOpcode(),
          inst->getSrc(vectorBaseIdx(inst))->getType(),
-         inst->getSrc(vectorKeyIdx(inst))->getType(),
-         inst->getSrc(vectorValIdx(inst))->getType());
+         keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->getType(),
+         valIdx == -1 ? Type::None : inst->getSrc(valIdx)->getType());
   }
   VectorEffects(Opcode op, Type base, Type key, Type val) {
     init(op, base, key, val);

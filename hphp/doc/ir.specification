@@ -1137,6 +1137,16 @@ D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
 
   Set property with key S3 in S2 to S4.
 
+D:PtrToGen = ElemX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+
+  Get intermediate element with key S2 from base S1. The base will not be
+  modified. S3 should point to an MInstrState struct.
+
+D:PtrToGen = ElemDX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+
+  Like ElemX, but used for intermediate element lookups that may
+  modify the base.
+
 D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Get element with key S2 from S1. S3 should point to an MInstrState

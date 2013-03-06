@@ -549,6 +549,14 @@ void IRInstruction::convertToJmp() {
   getBlock()->setNext(nullptr);
 }
 
+void IRInstruction::convertToMov() {
+  assert(!isControlFlowInstruction());
+  m_op = Mov;
+  m_typeParam = Type::None;
+  assert(m_numSrcs == 1);
+  assert(m_numDsts == 1);
+}
+
 IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }

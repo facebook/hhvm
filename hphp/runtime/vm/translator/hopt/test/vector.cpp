@@ -44,8 +44,8 @@ TEST(VectorEffects, Basic) {
 }
 
 TEST(VectorEffects, BadArrayKey) {
-  VectorEffects ve(SetElem, Type::Arr, Type::Arr, Type::Int);
-  EXPECT_TEQ(Type::Arr, ve.baseType);
+  VectorEffects ve(SetElem, Type::PtrToArr, Type::Arr, Type::Int);
+  EXPECT_TEQ(Type::PtrToArr, ve.baseType);
   EXPECT_TEQ(Type::InitNull, ve.valType);
   EXPECT_FALSE(ve.baseTypeChanged);
   EXPECT_TRUE(ve.baseValChanged);
@@ -53,8 +53,8 @@ TEST(VectorEffects, BadArrayKey) {
 }
 
 TEST(VectorEffects, NonObjProp) {
-  VectorEffects ve(SetProp, Type::Int, Type::Str, Type::Dbl);
-  EXPECT_TEQ(Type::Int, ve.baseType);
+  VectorEffects ve(SetProp, Type::PtrToInt, Type::Str, Type::Dbl);
+  EXPECT_TEQ(Type::PtrToInt, ve.baseType);
   EXPECT_TEQ(Type::InitNull, ve.valType);
   EXPECT_FALSE(ve.baseTypeChanged);
   EXPECT_FALSE(ve.baseValChanged);
@@ -62,8 +62,8 @@ TEST(VectorEffects, NonObjProp) {
 }
 
 TEST(VectorEffects, NonArrElem) {
-  VectorEffects ve(SetElem, Type::Dbl, Type::Int, Type::Obj);
-  EXPECT_TEQ(Type::Dbl, ve.baseType);
+  VectorEffects ve(SetElem, Type::PtrToDbl, Type::Int, Type::Obj);
+  EXPECT_TEQ(Type::PtrToDbl, ve.baseType);
   EXPECT_TEQ(Type::InitNull, ve.valType);
   EXPECT_FALSE(ve.baseTypeChanged);
   EXPECT_FALSE(ve.baseValChanged);
@@ -78,8 +78,8 @@ TEST(VectorEffects, PromoteNull) {
   EXPECT_TRUE(elem.baseValChanged);
   EXPECT_FALSE(elem.valTypeChanged);
 
-  VectorEffects prop(SetProp, Type::Uninit, Type::StaticStr, Type::Str);
-  EXPECT_TEQ(Type::Obj, prop.baseType);
+  VectorEffects prop(SetProp, Type::PtrToUninit, Type::StaticStr, Type::Str);
+  EXPECT_TEQ(Type::PtrToObj, prop.baseType);
   EXPECT_TEQ(Type::Str, prop.valType);
   EXPECT_TRUE(prop.baseTypeChanged);
   EXPECT_TRUE(prop.baseValChanged);
@@ -88,9 +88,9 @@ TEST(VectorEffects, PromoteNull) {
 
 TEST(VectorEffects, UnknownBase) {
   VectorEffects ve(SetElem, Type::PtrToCell, Type::Int, Type::Obj);
-  EXPECT_TEQ(Type::PtrToCell, ve.baseType);
+  EXPECT_TEQ(Type::PtrToCell - Type::PtrToNull, ve.baseType);
   EXPECT_TEQ(Type::Obj|Type::InitNull, ve.valType);
-  EXPECT_FALSE(ve.baseTypeChanged);
+  EXPECT_TRUE(ve.baseTypeChanged);
   EXPECT_TRUE(ve.baseValChanged);
   EXPECT_TRUE(ve.valTypeChanged);
 }

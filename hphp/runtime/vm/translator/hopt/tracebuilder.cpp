@@ -1252,30 +1252,21 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       m_thisIsAvailable = true;
       break;
     }
-    case SetProp:
-    case SetElem: {
-      // XXX: Handle stack cells at some point. t1961007
-
-      // If the base for this instruction is a local address, the
-      // helper call might have side effects on the local's value
-      SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
-      IRInstruction* locInstr =base->getInstruction();
-      if (locInstr->getOpcode() == LdLocAddr) {
-        UNUSED Type baseType = locInstr->getDst()->getType();
-        assert(baseType.equals(base->getType()));
-        assert(baseType.isKnownDataType());
-        int loc = locInstr->getExtra<LdLocAddr>()->locId;
-
-        VectorEffects ve(inst);
-        if (ve.baseTypeChanged || ve.baseValChanged) {
-          killLocalValue(loc);
-          setLocalType(loc, ve.baseType.derefIfPtr());
-        }
-      }
-    }
     default:
       break;
   }
+
+  if (VectorEffects::supported(inst)) {
+    // TODO: Handle stack cells at some point. t1961007
+    VectorEffects::get(inst,
+                       [&](uint32_t id, SSATmp* val) { // storeLocalValue
+                         setLocalValue(id, val);
+                       },
+                       [&](uint32_t id, Type t) { // setLocalType
+                         setLocalType(id, t);
+                       });
+  }
+
   // update the CSE table
   if (m_enableCse && inst->canCSE()) {
     cseInsert(inst);
@@ -1588,10 +1579,10 @@ Type TraceBuilder::getLocalType(unsigned id) const {
 void TraceBuilder::setLocalValue(unsigned id, SSATmp* value) {
   assert(id < m_localValues.size() && id < m_localTypes.size());
   m_localValues[id] = value;
-  m_localTypes[id] = value->getType();
+  m_localTypes[id] = value ? value->getType() : Type::None;
 }
 
-void TraceBuilder::setLocalType(unsigned id, Type type) {
+void TraceBuilder::setLocalType(uint32_t id, Type type) {
   assert(id < m_localValues.size() && id < m_localTypes.size());
   m_localValues[id] = nullptr;
   m_localTypes[id] = type;
@@ -1599,7 +1590,7 @@ void TraceBuilder::setLocalType(unsigned id, Type type) {
 
 // Needs to be called if a local escapes as a by-ref or
 // otherwise set to an unknown value (e.g., by Iter[Init,Next][K])
-void TraceBuilder::killLocalValue(unsigned id) {
+void TraceBuilder::killLocalValue(uint32_t id) {
   assert(id < m_localValues.size() && id < m_localTypes.size());
   m_localValues[id] = nullptr;
   m_localTypes[id] = Type::None;

@@ -30,60 +30,134 @@ TRACE_SET_MOD(hhir);
 using Transl::MInstrState;
 using Transl::mInstrHasUnknownOffsets;
 
+namespace {
+
+// Reduce baseType to a canonical unboxed, non-pointer form, returning (in
+// basePtr and baseBoxed) whether the original type was a pointer or boxed,
+// respectively. Whether or not the type is a pointer and/or boxed must be
+// statically known, unless it's exactly equal to Gen.
+void stripBase(Type& baseType, bool& basePtr, bool& baseBoxed) {
+  assert_not_implemented(baseType.isPtr() || baseType.notPtr());
+  basePtr = baseType.isPtr();
+  baseType = basePtr ? baseType.deref() : baseType;
+  assert_not_implemented(
+    baseType.equals(Type::Gen) || baseType.isBoxed() || baseType.notBoxed());
+  baseBoxed = baseType.isBoxed();
+  baseType = baseBoxed ? baseType.innerType() : baseType;
+}
+
+}
+
+bool VectorEffects::supported(const IRInstruction* inst) {
+  switch (inst->getOpcode()) {
+    case SetProp:
+    case SetElem:
+    case ElemDX:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+void VectorEffects::get(const IRInstruction* inst,
+                        StoreLocFunc storeLocalValue,
+                        SetLocTypeFunc setLocalType) {
+  // If the base for this instruction is a local address, the
+  // helper call might have side effects on the local's value
+  SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
+  IRInstruction* locInstr = base->getInstruction();
+  if (locInstr->getOpcode() == LdLocAddr) {
+    UNUSED Type baseType = locInstr->getDst()->getType();
+    assert(baseType.equals(base->getType()));
+    assert(baseType.isPtr() || baseType.isKnownDataType());
+    int loc = locInstr->getExtra<LdLocAddr>()->locId;
+
+    VectorEffects ve(inst);
+    if (ve.baseTypeChanged || ve.baseValChanged) {
+      storeLocalValue(loc, nullptr);
+      setLocalType(loc, ve.baseType.derefIfPtr());
+    }
+  }
+}
+
 void VectorEffects::init(Opcode op, const Type origBase,
                          const Type key, const Type origVal) {
-  // In reality the base can be a pointer but we can ignore "pointerness" in
-  // here for the type logic
-  baseType = origBase.derefIfPtr();
+  baseType = origBase;
+  bool basePtr, baseBoxed;
+  stripBase(baseType, basePtr, baseBoxed);
+  // Every base coming through here should be a pointer or object for now, but
+  // may not be in the future.
+  assert_not_implemented(basePtr || baseType.subtypeOf(Type::Obj));
+
   valType = origVal;
   baseTypeChanged = baseValChanged = valTypeChanged = false;
 
   // Canonicalize the op to SetProp or SetElem
   switch (op) {
     case SetProp:
+      break;
+
     case SetElem:
+    case ElemDX:
+      op = SetElem;
       break;
 
     default:
       not_implemented();
   }
   assert(op == SetProp || op == SetElem);
-  assert(key.isKnownDataType());
-  assert(origVal.isKnownDataType());
+  assert(key.equals(Type::None) || key.isKnownDataType());
+  assert(origVal.equals(Type::None) || origVal.isKnownDataType());
 
-  if ((baseType & Type::Null) != Type::Bottom) {
+  if (baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
     // stdClass or array promotion might happen
     auto newBase = op == SetElem ? Type::Arr : Type::Obj;
-    // if the base is known to be null, promotion will happen
-    baseType = baseType.isNull() ? newBase : (baseType | newBase);
+    // if the base is known to be null, promotion will happen. If we can ever
+    // prove that the base is false or the empty string, promotion will
+    // definitely happen but those cases aren't handled yet.
+    baseType = baseType.isNull() ?
+      newBase : ((baseType - Type::Null - Type::BoxedNull) | newBase);
     baseValChanged = true;
   }
-  if (op == SetElem && (baseType & Type::Arr) != Type::Bottom) {
+  if (op == SetElem && baseType.maybe(Type::Arr)) {
     // possible COW when modifying an array
     baseValChanged = true;
   }
+  if (op == SetElem && baseType.maybe(Type::StaticArr)) {
+    // the base might get promoted to a CountedArr
+    baseType = baseType | Type::CountedArr;
+    baseValChanged = true;
+  }
 
-  const bool baseArr = baseType.subtypeOf(Type::Arr);
-  const bool baseObj = baseType.subtypeOf(Type::Obj);
-  const bool maybeBadArrKey = (key & (Type::Arr | Type::Obj)) != Type::Bottom;
-  if ((op == SetElem && (!(baseArr || baseObj) || maybeBadArrKey)) ||
-      (op == SetProp && !baseObj)) {
+  // Setting an element with a base of one of these types will either succeed
+  // (with possible promotion) or fatal
+  const Type okBase = Type::Str | Type::Arr | Type::Obj;
+
+  // Setting an element with one of these types as the key will fail, issue a
+  // warning, and evaulate to null.
+  const Type badArrKey = Type::Arr | Type::Obj;
+
+  const bool maybeBadArrKey = key.maybe(badArrKey);
+  if ((op == SetElem && (!baseType.subtypeOf(okBase) || maybeBadArrKey)) ||
+      (op == SetProp && !baseType.subtypeOf(Type::Obj))) {
     // The set operation might fail, issue a warning, and evaluate to null. Any
     // other invalid combinations of base/key will throw an exception/fatal.
 
     const bool definitelyFail =
-      // SetElem and the base is known to not be an array or object
-      (op == SetElem && (baseType & (Type::Arr | Type::Obj)) == Type::Bottom) ||
+      // SetElem and the base is known to not be a good type
+      (op == SetElem && baseType.not(okBase)) ||
       // SetElem and the array key is known to be bad
-      (op == SetElem && (key.subtypeOf(Type::Arr | Type::Obj))) ||
+      (op == SetElem && key.subtypeOf(badArrKey)) ||
       // SetProp and the base is known to not be an object
-      (op == SetProp && (baseType & Type::Obj) == Type::Bottom);
+      (op == SetProp && baseType.not(Type::Obj));
 
     valType = definitelyFail ? Type::InitNull : (valType | Type::InitNull);
   }
 
-  // The final baseType should be a pointer iff the input was
-  baseType = origBase.isPtr() ? baseType.ptr() : baseType;
+  // The final baseType should be a pointer/box iff the input was
+  baseType = baseBoxed ? baseType.box() : baseType;
+  baseType = basePtr   ? baseType.ptr() : baseType;
 
   baseTypeChanged = baseTypeChanged || baseType != origBase;
   baseValChanged = baseValChanged || baseTypeChanged;
@@ -95,6 +169,7 @@ int vectorBaseIdx(const IRInstruction* inst) {
   switch (inst->getOpcode()) {
     case SetProp: return 2;
     case SetElem: return 1;
+    case ElemDX:  return 1;
     default:      not_reached();
   }
 }
@@ -104,6 +179,7 @@ int vectorKeyIdx(const IRInstruction* inst) {
   switch (inst->getOpcode()) {
     case SetProp: return 3;
     case SetElem: return 2;
+    case ElemDX:  return 2;
     default:      not_reached();
   }
 }
@@ -113,6 +189,7 @@ int vectorValIdx(const IRInstruction* inst) {
   switch (inst->getOpcode()) {
     case SetProp: return 4;
     case SetElem: return 3;
+    case ElemDX:  return -1;
     default:      not_reached();
   }
 }
@@ -190,17 +267,12 @@ void HhbcTranslator::VectorTranslator::emitMPre() {
     m_misBase = m_tb.gen(DefMIStateBase);
     SSATmp* uninit = m_tb.genDefUninit();
 
-    SKTRACE(2, m_ni.source, "%s nLogicalRatchets=%u\n",
-            __func__, nLogicalRatchets());
     if (nLogicalRatchets() > 0) {
       m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef), uninit, true);
       m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef2), uninit, true);
     }
-    m_tb.genStRaw(m_misBase, RawMemSlot::MisBaseStrOff,
-                  m_tb.genDefConst(false));
+    m_tb.genStRaw(m_misBase, RawMemSlot::MisBaseStrOff, cns(false));
   }
-
-  SKTRACE(2, m_ni.source, "%s\n", __func__);
 
   // The base location is input 0 or 1, and the location code is stored
   // separately from m_ni.immVecM, so input indices (iInd) and member indices
@@ -274,10 +346,10 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       return m_tb.genLdLoc(l.offset);
 
     case Location::Litstr:
-      return m_tb.genDefConst<const StringData*>(m_ht.lookupStringId(l.offset));
+      return cns(m_ht.lookupStringId(l.offset));
 
     case Location::Litint:
-      return m_tb.genDefConst<int64_t>(l.offset);
+      return cns(l.offset);
 
     case Location::This:
       return m_tb.genLdThis(nullptr);
@@ -523,9 +595,87 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitElem() {
-  PUNT(emitElem);
+template <KeyType keyType, bool unboxKey, bool warn, bool define, bool reffy,
+          bool unset>
+static inline TypedValue* elemImpl(TypedValue* base, TypedValue keyVal,
+                                   MInstrState* mis) {
+  TypedValue* key = keyPtr<keyType>(keyVal);
+  key = unbox<keyType, unboxKey>(key);
+  if (unset) {
+    return ElemU<keyType>(mis->tvScratch, mis->tvRef, base, key);
+  } else if (define) {
+    return ElemD<warn, reffy, keyType>(mis->tvScratch, mis->tvRef, base, key);
+  } else {
+    return Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base,
+                               mis->baseStrOff, key);
+  }
 }
+
+#define HELPER_TABLE(m)                                               \
+  /* name        hot        key     unboxKey  attrs  */               \
+  m(elemC,     ,            AnyKey,  false,   None)                   \
+  m(elemCD,    ,            AnyKey,  false,   Define)                 \
+  m(elemCDR,   ,            AnyKey,  false,   DefineReffy)            \
+  m(elemCU,    ,            AnyKey,  false,   Unset)                  \
+  m(elemCW,    ,            AnyKey,  false,   Warn)                   \
+  m(elemCWD,   ,            AnyKey,  false,   WarnDefine)             \
+  m(elemCWDR,  ,            AnyKey,  false,   WarnDefineReffy)        \
+  m(elemI,     ,            IntKey,  false,   None)                   \
+  m(elemID,    HOT_FUNC_VM, IntKey,  false,   Define)                 \
+  m(elemIDR,   ,            IntKey,  false,   DefineReffy)            \
+  m(elemIU,    ,            IntKey,  false,   Unset)                  \
+  m(elemIW,    ,            IntKey,  false,   Warn)                   \
+  m(elemIWD,   ,            IntKey,  false,   WarnDefine)             \
+  m(elemIWDR,  ,            IntKey,  false,   WarnDefineReffy)        \
+  m(elemL,     ,            AnyKey,  true,    None)                   \
+  m(elemLD,    ,            AnyKey,  true,    Define)                 \
+  m(elemLDR,   ,            AnyKey,  true,    DefineReffy)            \
+  m(elemLU,    ,            AnyKey,  true,    Unset)                  \
+  m(elemLW,    ,            AnyKey,  true,    Warn)                   \
+  m(elemLWD,   ,            AnyKey,  true,    WarnDefine)             \
+  m(elemLWDR,  ,            AnyKey,  true,    WarnDefineReffy)        \
+  m(elemLI,    ,            IntKey,  true,    None)                   \
+  m(elemLID,   ,            IntKey,  true,    Define)                 \
+  m(elemLIDR,  ,            IntKey,  true,    DefineReffy)            \
+  m(elemLIU,   ,            IntKey,  true,    Unset)                  \
+  m(elemLIW,   ,            IntKey,  true,    Warn)                   \
+  m(elemLIWD,  ,            IntKey,  true,    WarnDefine)             \
+  m(elemLIWDR, ,            IntKey,  true,    WarnDefineReffy)        \
+  m(elemLS,    ,            StrKey,  true,    None)                   \
+  m(elemLSD,   ,            StrKey,  true,    Define)                 \
+  m(elemLSDR,  ,            StrKey,  true,    DefineReffy)            \
+  m(elemLSU,   ,            StrKey,  true,    Unset)                  \
+  m(elemLSW,   ,            StrKey,  true,    Warn)                   \
+  m(elemLSWD,  ,            StrKey,  true,    WarnDefine)             \
+  m(elemLSWDR, ,            StrKey,  true,    WarnDefineReffy)        \
+  m(elemS,     HOT_FUNC_VM, StrKey,  false,   None)                   \
+  m(elemSD,    HOT_FUNC_VM, StrKey,  false,   Define)                 \
+  m(elemSDR,   ,            StrKey,  false,   DefineReffy)            \
+  m(elemSU,    ,            StrKey,  false,   Unset)                  \
+  m(elemSW,    HOT_FUNC_VM, StrKey,  false,   Warn)                   \
+  m(elemSWD,   ,            StrKey,  false,   WarnDefine)             \
+  m(elemSWDR,  ,            StrKey,  false,   WarnDefineReffy)
+
+#define ELEM(nm, hot, keyType, unboxKey, attrs)                         \
+hot                                                                     \
+static TypedValue* nm(TypedValue* base, TypedValue key, MInstrState* mis) { \
+  return elemImpl<keyType, unboxKey, WDRU(attrs)>(base, key, mis);      \
+}
+HELPER_TABLE(ELEM)
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitElem() {
+  MemberCode mCode = m_ni.immVecM[m_mInd];
+  MInstrAttr mia = MInstrAttr(m_mii.getAttr(mCode) & MIA_intermediate);
+  SSATmp* key = getInput(m_iInd);
+
+  typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
+  BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed(), mia);
+  m_ht.spillStack();
+  m_base = m_tb.gen(mia & Define ? ElemDX : ElemX,
+                    cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+}
+#undef HELPER_TABLE
 
 void HhbcTranslator::VectorTranslator::emitNewElem() {
   PUNT(emitNewElem);
@@ -645,9 +795,9 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
 
   typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getInput(m_iInd);
-  BUILD_OPTABH(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
+  BUILD_OPTAB_HOT(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
   m_ht.spillStack();
-  m_result = m_tb.gen(CGetProp, m_tb.genDefConst((TCA)opFunc), CTX(),
+  m_result = m_tb.gen(CGetProp, cns((TCA)opFunc), CTX(),
                       objOrPtr(m_base), noLitInt(key), genMisPtr());
 }
 #undef HELPER_TABLE
@@ -709,7 +859,7 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
   m_ht.spillStack();
   SSATmp* result =
-    m_tb.gen(SetProp, m_tb.genDefConst((TCA)opFunc), CTX(),
+    m_tb.gen(SetProp, cns((TCA)opFunc), CTX(),
              objOrPtr(m_base), noLitInt(key), value);
   VectorEffects ve(result->getInstruction());
   m_result = ve.valTypeChanged ? result : value;
@@ -769,9 +919,9 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitCGetElem() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getInput(m_iInd);
-  BUILD_OPTABH(getKeyTypeIS(key), key->isBoxed());
+  BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
-  m_result = m_tb.gen(CGetElem, m_tb.genDefConst((TCA)opFunc),
+  m_result = m_tb.gen(CGetElem, cns((TCA)opFunc),
                       ptr(m_base), key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -821,10 +971,9 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   // Emit the appropriate helper call.
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell);
   SSATmp* key = getInput(m_iInd);
-  BUILD_OPTABH(getKeyTypeIS(key), key->isBoxed());
+  BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
-  SSATmp* result = m_tb.gen(SetElem, m_tb.genDefConst((TCA)opFunc),
-                            ptr(m_base), key, value);
+  SSATmp* result = m_tb.gen(SetElem, cns((TCA)opFunc), ptr(m_base), key, value);
   VectorEffects ve(result->getInstruction());
   m_result = ve.valTypeChanged ? result : value;
 }
@@ -847,7 +996,7 @@ void HhbcTranslator::VectorTranslator::emitUnsetElem() {
 }
 
 void HhbcTranslator::VectorTranslator::emitNotSuppNewElem() {
-  SPUNT(__func__);
+  not_reached();
 }
 
 void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
@@ -906,11 +1055,9 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
 
   // Clean up tvRef(2)
   if (nLogicalRatchets() > 1) {
-    SKTRACE(2, m_ni.source, "%s decref tvRef2\n", __func__);
     m_tb.genDecRefMem(m_misBase, HHIR_MISOFF(tvRef2), Type::Gen);
   }
   if (nLogicalRatchets() > 0) {
-    SKTRACE(2, m_ni.source, "%s decref tvRef\n", __func__);
     m_tb.genDecRefMem(m_misBase, HHIR_MISOFF(tvRef), Type::Gen);
   }
 }

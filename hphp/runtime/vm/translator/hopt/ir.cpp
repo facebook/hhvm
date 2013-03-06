@@ -816,7 +816,7 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     os << "NamedEntity(" << ne << ")";
   } else if (t == Type::TCA) {
     void* vp = c->as<TCA>();
-    os << folly::format("TCA: 0x{}", vp);
+    os << folly::format("TCA: {}", vp);
   } else if (t == Type::None) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {

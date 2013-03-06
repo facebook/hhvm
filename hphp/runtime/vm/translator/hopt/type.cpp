@@ -30,7 +30,9 @@ TRACE_SET_MOD(hhir);
 namespace {
 
 Type vectorReturn(const IRInstruction* inst) {
-  assert(inst->getOpcode() == SetProp || inst->getOpcode() == SetElem);
+  assert(inst->getOpcode() == SetProp ||
+         inst->getOpcode() == SetElem ||
+         inst->getOpcode() == SetNewElem);
   return VectorEffects(inst).valType;
 }
 

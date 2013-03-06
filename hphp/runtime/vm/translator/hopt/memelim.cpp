@@ -267,6 +267,7 @@ private:
     switch (opc) {
       case SetProp:
       case SetElem:
+      case SetNewElem:
       case ElemDX:      return true;
       default:          return false;
     }
@@ -570,6 +571,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     }
     case SetProp:
     case SetElem:
+    case SetNewElem:
     case ElemDX: {
       VectorEffects::get(inst,
                          /* storeLocValue callback */

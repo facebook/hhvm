@@ -421,6 +421,8 @@ private:
     void emit##instr##Prop();
     MINSTRS
 #   undef MII
+    void emitIssetEmptyElem(bool isEmpty);
+    void emitIssetEmptyProp(bool isEmpty);
     void emitNotSuppNewElem();
     void emitVGetNewElem();
     void emitSetNewElem();

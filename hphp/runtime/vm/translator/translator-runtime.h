@@ -52,7 +52,9 @@ static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
 /* Helper functions for translated code */
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
-ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key, TypedValue val);
+ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
+                                  TypedValue val);
+TypedValue setNewElem(TypedValue* base, Cell val);
 RefData* box_value(TypedValue tv);
 
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);

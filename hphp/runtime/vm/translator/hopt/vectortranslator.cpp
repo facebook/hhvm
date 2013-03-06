@@ -52,6 +52,7 @@ bool VectorEffects::supported(const IRInstruction* inst) {
   switch (inst->getOpcode()) {
     case SetProp:
     case SetElem:
+    case SetNewElem:
     case ElemDX:
       return true;
 
@@ -99,6 +100,7 @@ void VectorEffects::init(Opcode op, const Type origBase,
       break;
 
     case SetElem:
+    case SetNewElem:
     case ElemDX:
       op = SetElem;
       break;
@@ -171,6 +173,7 @@ int vectorBaseIdx(const IRInstruction* inst) {
     case SetProp: return 2;
     case SetElem: return 1;
     case ElemDX:  return 1;
+    case SetNewElem: return 0;
     default:      not_reached();
   }
 }
@@ -181,6 +184,7 @@ int vectorKeyIdx(const IRInstruction* inst) {
     case SetProp: return 3;
     case SetElem: return 2;
     case ElemDX:  return 2;
+    case SetNewElem: return -1;
     default:      not_reached();
   }
 }
@@ -191,6 +195,7 @@ int vectorValIdx(const IRInstruction* inst) {
     case SetProp: return 4;
     case SetElem: return 3;
     case ElemDX:  return -1;
+    case SetNewElem: return 1;
     default:      not_reached();
   }
 }
@@ -956,12 +961,55 @@ void HhbcTranslator::VectorTranslator::emitVGetElem() {
   SPUNT(__func__);
 }
 
+template <KeyType keyType, bool unboxKey, bool isEmpty>
+static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
+                                      MInstrState* mis) {
+  TypedValue* key = keyPtr<keyType>(keyVal);
+  key = unbox<keyType, unboxKey>(key);
+  return HPHP::VM::IssetEmptyElem<isEmpty, false, keyType>(
+    mis->tvScratch, mis->tvRef, base, mis->baseStrOff, key);
+}
+
+#define HELPER_TABLE(m)                                      \
+  /* name          hot        keyType unboxKey isEmpty */    \
+  m(issetElemC,   ,            AnyKey, false,  false)        \
+  m(issetElemCE,  ,            AnyKey, false,   true)        \
+  m(issetElemI,   HOT_FUNC_VM, IntKey, false,  false)        \
+  m(issetElemIE,  ,            IntKey, false,   true)        \
+  m(issetElemL,   ,            AnyKey,  true,  false)        \
+  m(issetElemLE,  ,            AnyKey,  true,   true)        \
+  m(issetElemLI,  ,            IntKey,  true,  false)        \
+  m(issetElemLIE, ,            IntKey,  true,   true)        \
+  m(issetElemLS,  ,            StrKey,  true,  false)        \
+  m(issetElemLSE, ,            StrKey,  true,   true)        \
+  m(issetElemS,   HOT_FUNC_VM, StrKey, false,  false)        \
+  m(issetElemSE,  HOT_FUNC_VM, StrKey, false,   true)
+
+#define ISSET(nm, hot, ...)                                             \
+hot                                                                     \
+static uint64_t nm(TypedValue* base, TypedValue key, MInstrState* mis) { \
+  return issetEmptyElemImpl<__VA_ARGS__>(base, key, mis);               \
+}
+HELPER_TABLE(ISSET)
+#undef ISSET
+
+void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
+  SSATmp* key = getInput(m_iInd);
+
+  typedef uint64_t (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
+  BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed(), isEmpty);
+  m_ht.spillStack();
+  m_result = m_tb.gen(isEmpty ? EmptyElem : IssetElem,
+                      cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+}
+#undef HELPER_TABLE
+
 void HhbcTranslator::VectorTranslator::emitIssetElem() {
-  SPUNT(__func__);
+  emitIssetEmptyElem(false);
 }
 
 void HhbcTranslator::VectorTranslator::emitEmptyElem() {
-  SPUNT(__func__);
+  emitIssetEmptyElem(true);
 }
 
 template <KeyType keyType, bool unboxKey>
@@ -1030,7 +1078,13 @@ void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
 }
 
 void HhbcTranslator::VectorTranslator::emitSetNewElem() {
-  SPUNT(__func__);
+  const int kValIdx = 0;
+  SSATmp* value = getInput(kValIdx);
+
+  m_ht.spillStack();
+  SSATmp* result = m_tb.gen(SetNewElem, ptr(m_base), value);
+  VectorEffects ve(result->getInstruction());
+  m_result = ve.valTypeChanged ? result : value;
 }
 
 void HhbcTranslator::VectorTranslator::emitSetOpNewElem() {

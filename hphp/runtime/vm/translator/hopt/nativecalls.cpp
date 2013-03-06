@@ -91,6 +91,7 @@ static CallMap s_callMap({
               DNone, SNone, {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
 
     /* VectorTranslator helpers */
+    {BaseG,    {FSSA, 0}, DSSA, SSync, {{TV, 1}, {SSA, 2}}},
     {PropX,    {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
     {CGetProp, {FSSA, 0}, DSSA, SSync,
@@ -105,7 +106,12 @@ static CallMap s_callMap({
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {SetElem,  {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {TV, 3}}},
-    {BaseG,    {FSSA, 0}, DSSA, SSync, {{TV, 1}, {SSA, 2}}},
+    {SetNewElem, (TCA)setNewElem, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+    {IssetElem,{FSSA, 0}, DSSA, SSync,
+                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+    {EmptyElem,{FSSA, 0}, DSSA, SSync,
+                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+
     /* debug assert helpers */
     {DbgAssertPtr, (TCA)assertTv, DNone, SNone, {{SSA, 0}}},
 });

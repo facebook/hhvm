@@ -2229,7 +2229,7 @@ static void setNewElemR(TypedValue* base, Cell* val) {
 }
 
 HOT_FUNC_VM
-static void setNewElem(TypedValue* base, Cell* val) {
+static void setNewElemNR(TypedValue* base, Cell* val) {
   SetNewElem<false>(base, val);
 }
 
@@ -2246,7 +2246,7 @@ void TranslatorX64::emitSetNewElem(const Tracelet& t,
   m_regMap.cleanSmashLoc(val.location);
   // Emit the appropriate helper call.
   void (*setNewElemOp)(TypedValue*, Cell*) =
-    setResult ? setNewElemR : setNewElem;
+    setResult ? setNewElemR : setNewElemNR;
   bool useRVal = val.isVariant();
   PREP_VAL(useRVal, argNumToRegName[1]);
   EMIT_RCALL(a, ni, setNewElemOp,

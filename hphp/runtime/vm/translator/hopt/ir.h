@@ -358,6 +358,9 @@ O(IterNextK,                   D(Bool), S(StkPtr)                             \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
 O(IterFree,                         ND, S(StkPtr) C(Int),       E|N|Mem|Refs) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
+O(BaseG,                   D(PtrToGen), C(TCA)                                \
+                                          S(Str)                              \
+                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(PropX,                   D(PtrToGen), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
@@ -389,8 +392,14 @@ O(SetElem,                     DVector, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(Cell),           E|N|Mem|Refs|Er) \
-O(BaseG,                   D(PtrToGen), C(TCA)                                \
-                                          S(Str)                              \
+O(SetNewElem,                  DVector, S(PtrToGen) S(Gen),  E|N|Mem|Refs|Er) \
+O(IssetElem,                   D(Bool), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
+O(EmptyElem,                   D(Bool), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(DbgAssertRefCount,                ND, SUnk,                            N|E) \

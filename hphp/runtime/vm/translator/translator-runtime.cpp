@@ -16,6 +16,8 @@
 
 #include "runtime/vm/translator/translator-runtime.h"
 
+#include "runtime/vm/member_operations.h"
+
 namespace HPHP { namespace VM { namespace Transl {
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
@@ -30,6 +32,11 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   TypedValue value) {
   // this does not re-enter
   return array_setm_s0k1_v0(0, ad, key, &value);
+}
+
+HOT_FUNC_VM TypedValue setNewElem(TypedValue* base, Cell val) {
+  SetNewElem<true>(base, &val);
+  return val;
 }
 
 // TODO: Kill this #2031980

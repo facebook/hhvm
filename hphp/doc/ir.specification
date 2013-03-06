@@ -344,7 +344,7 @@ CheckInit S0:Gen -> L
 
   If S0's type is Uninit, branch to label L.
 
-CheckInitMem S0:Gen* S1:ConstInt -> L
+CheckInitMem S0:PtrToGen S1:ConstInt -> L
 
   If the value at S0 + S1 has type Uninit, branch to L.
 
@@ -1120,14 +1120,12 @@ opcode depends on the input types:
 SetElem/SetOpElem/IncDecElem:
 - If the base is not a subtype of Type::Arr or Type::Obj, the
   operation will fail with a warning and the return value is
-  null. Otherwise the return value has the same type as the rhs of the
-  set expression.
+  null. Otherwise the return value is the same as the value input.
 
 SetProp/SetOpProp/IncDecProp:
 - If the base is not a subtype of Type::Obj, the operation will fail
   with a warning and the return value is null. Otherwise the return
-  value has the type as the rhs of the set expression.
-
+  value is the same as the value input.
 
 
 D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
@@ -1162,3 +1160,16 @@ D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 D:Vector = SetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 
   Set element with key S2 in S1 to S3.
+
+D:Vector = SetNewElem S0:GenPtr S1:Cell
+
+  Append the value in S1 to S0.
+
+D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+
+  Returns true iff the element at key S2 in S1 is set.
+
+D:Bool = EmptyElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+
+  Returns true iff the element at key S2 in S1 is set and not equal
+  (as defined by the hhbc Eq instruction) to false.

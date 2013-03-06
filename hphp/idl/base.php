@@ -127,6 +127,8 @@ define('IsProtected',                    1 <<  7);
 define('IsPrivate',                      1 <<  8);
 define('IgnoreRedefinition',             1 <<  8);
 define('IsStatic',                       1 <<  9);
+// FIXME (#2163116): IsInherited = (1 << 10) in base_class.h
+define('IsCppAbstract',                  1 << 10);
 define('IsReference',                    1 << 11);
 define('IsConstructor',                  1 << 12);
 define('IsNothing',                      1 << 13);

@@ -70,7 +70,7 @@ function main() {
         "(VM::ActRec *ar);\n");
     }
     foreach ($ext_class_info as $cname => $cls_info) {
-      if (!($cls_info['flags'] & IsAbstract)) {
+      if (!($cls_info['flags'] & IsCppAbstract)) {
         fwrite($outfile,
           "VM::Instance* new_" . $cname . "_Instance(" .
           "VM::Class*);\n");
@@ -123,7 +123,7 @@ function main() {
         fwrite($outfile, ",\n  ");
       }
       $firstParam = false;
-      $constructor = ($cls_info['flags'] & IsAbstract)
+      $constructor = ($cls_info['flags'] & IsCppAbstract)
         ? 'nullptr' : 'new_' . $cname . '_Instance';
       fwrite($outfile, '{ "' . $cname . '", ' . $constructor .
              ', sizeof(c_' . $cname . ')' .

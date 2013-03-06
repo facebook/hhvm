@@ -186,7 +186,7 @@ BeginClass(
   array(
     'name'   => "WaitHandle",
     'desc'   => "A wait handle representing asynchronous operation",
-    'flags'  => HasDocComment | IsAbstract,
+    'flags'  => HasDocComment | IsAbstract | IsCppAbstract,
   ));
 
 DefineFunction(
@@ -292,7 +292,7 @@ BeginClass(
     'name'   => "StaticWaitHandle",
     'parent' => "WaitHandle",
     'desc'   => "A wait handle that is always finished",
-    'flags'  => HasDocComment | IsAbstract,
+    'flags'  => HasDocComment | IsAbstract | IsCppAbstract,
   ));
 
 DefineFunction(
@@ -385,7 +385,7 @@ BeginClass(
     'name'   => "WaitableWaitHandle",
     'parent' => "WaitHandle",
     'desc'   => "A wait handle that can be waited upon",
-    'flags'  => HasDocComment | IsAbstract,
+    'flags'  => HasDocComment | IsAbstract | IsCppAbstract,
   ));
 
 DefineFunction(
@@ -448,7 +448,7 @@ BeginClass(
     'name'   => "BlockableWaitHandle",
     'parent' => "WaitableWaitHandle",
     'desc'   => "A wait handle that can be blocked on a dependency",
-    'flags'  => HasDocComment | IsAbstract,
+    'flags'  => HasDocComment | IsAbstract | IsCppAbstract,
   ));
 
 DefineFunction(

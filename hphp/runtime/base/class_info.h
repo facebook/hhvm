@@ -48,6 +48,7 @@ public:
     IsProtected            = (1 <<  7), //           x             x
     IsPrivate              = (1 <<  8), //           x             x
     IsStatic               = (1 <<  9), //           x             x
+    // FIXME (#2163116): IsCppAbstract = (1 << 10) in idl/base.php
     IsInherited            = (1 << 10), //                         x
     HasCall                = IsPublic,  //    x
     HasCallStatic          = IsProtected,//   x

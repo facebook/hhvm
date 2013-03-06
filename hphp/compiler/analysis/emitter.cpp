@@ -6974,14 +6974,16 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
       if (u->getOp() == T_ARRAY) {
         ExpressionListPtr el =
           static_pointer_cast<ExpressionList>(u->getExpression());
-        int n = el->getCount();
-        for (int i = 0; i < n; i++) {
-          ArrayPairExpressionPtr ap =
-            static_pointer_cast<ArrayPairExpression>((*el)[i]);
-          ExpressionPtr key = ap->getName();
-          if (requiresDeepInit(ap->getValue()) ||
-              (key && requiresDeepInit(key))) {
-            return true;
+        if (el) {
+          int n = el->getCount();
+          for (int i = 0; i < n; i++) {
+            ArrayPairExpressionPtr ap =
+              static_pointer_cast<ArrayPairExpression>((*el)[i]);
+            ExpressionPtr key = ap->getName();
+            if (requiresDeepInit(ap->getValue()) ||
+                (key && requiresDeepInit(key))) {
+              return true;
+            }
           }
         }
         return false;

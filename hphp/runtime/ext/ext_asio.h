@@ -26,6 +26,9 @@ namespace HPHP {
 
 void f_asio_enter_context();
 void f_asio_exit_context();
+int f_asio_get_current_context_idx();
+Object f_asio_get_running_in_context(int ctx_idx);
+Object f_asio_get_running();
 Object f_asio_get_current();
 void f_asio_set_on_failed_callback(CObjRef on_failed_cb);
 
@@ -186,6 +189,8 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: c_WaitableWaitHandle(VM::Class* cls = c_WaitableWaitHandle::s_cls);
   public: ~c_WaitableWaitHandle();
   public: void t___construct();
+  public: int t_getcontextidx();
+  public: Object t_getcreator();
   public: Array t_getparents();
   public: Array t_getstacktrace();
 

@@ -58,6 +58,14 @@ void c_WaitableWaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
+int c_WaitableWaitHandle::t_getcontextidx() {
+  return getContextIdx();
+}
+
+Object c_WaitableWaitHandle::t_getcreator() {
+  return m_creator;
+}
+
 Array c_WaitableWaitHandle::t_getparents() {
   // no parent data available if finished
   if (isFinished()) {

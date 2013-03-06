@@ -60,7 +60,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "asio_enter_context",
-    'desc'   => "Enter new scheduler context",
+    'desc'   => "DEPRECATED: does nothing",
     'flags'  => HasDocComment,
     'return' => array(
       'type'   => null,
@@ -70,7 +70,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "asio_exit_context",
-    'desc'   => "Exit last opened scheduler context",
+    'desc'   => "DEPRECATED: does nothing",
     'flags'  => HasDocComment,
     'return' => array(
       'type'   => null,
@@ -79,12 +79,52 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "asio_get_current",
+    'name'   => "asio_get_current_context_idx",
+    'desc'   => "Get index of the current scheduler context, or 0 if there is none",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "An index of the current scheduler context",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "asio_get_running_in_context",
+    'desc'   => "Get currently running wait handle in a context specified by its index",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "A ContinuationWaitHandle that is running in a specified context",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "ctx_idx",
+        'type'   => Int32,
+        'desc'   => "An index of a specified context",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "asio_get_running",
     'desc'   => "Get currently running wait handle, or null if there is none",
     'flags'  => HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "A runnable WaitHandle that is currently running",
+      'desc'   => "A ContinuationWaitHandle that is running in the current context",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "asio_get_current",
+    'desc'   => "DEPRECATED: use asio_get_running",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "A ContinuationWaitHandle that is running in the current context",
     ),
   ));
 
@@ -171,7 +211,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "join",
-    'desc'   => "Wait until this wait handle is finished and return its result",
+    'desc'   => "Wait until this wait handle is finished and return its result (operates in a new scheduler context)",
     'flags'  => HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -354,6 +394,28 @@ DefineFunction(
     'flags'  => HasDocComment | IsPrivate,
     'return' => array(
       'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "getContextIdx",
+    'desc'   => "Get index of the scheduler context this wait handle operates in",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "An index of scheduler context this wait handle operates in",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "getCreator",
+    'desc'   => "Get wait handle that created this wait handle",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "A ContinuationWaitHandle that was being executed when this wait handle was constructed",
     ),
   ));
 

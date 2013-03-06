@@ -32,6 +32,33 @@ void f_asio_exit_context() {
   // TODO: remove from API
 }
 
+int f_asio_get_current_context_idx() {
+  return AsioSession::Get()->getCurrentContextIdx();
+}
+
+Object f_asio_get_running_in_context(int ctx_idx) {
+  auto session = AsioSession::Get();
+
+  if (ctx_idx <= 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Expected ctx_idx to be a positive integer"));
+    throw e;
+  }
+  if (ctx_idx > session->getCurrentContextIdx()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Expected ctx_idx to be less than or equal to the current context index"));
+    throw e;
+  }
+
+  assert(session->getContext(ctx_idx));
+  assert(session->getContext(ctx_idx)->isRunning());
+  return session->getContext(ctx_idx)->getCurrent();
+}
+
+Object f_asio_get_running() {
+  return AsioSession::Get()->getCurrentWaitHandle();
+}
+
 Object f_asio_get_current() {
   return AsioSession::Get()->getCurrentWaitHandle();
 }

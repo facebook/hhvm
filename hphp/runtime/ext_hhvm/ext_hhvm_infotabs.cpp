@@ -146,6 +146,9 @@ TypedValue* fg_i18n_loc_set_strength(VM::ActRec *ar);
 TypedValue* fg_i18n_loc_get_error_code(VM::ActRec *ar);
 TypedValue* fg_asio_enter_context(VM::ActRec *ar);
 TypedValue* fg_asio_exit_context(VM::ActRec *ar);
+TypedValue* fg_asio_get_current_context_idx(VM::ActRec *ar);
+TypedValue* fg_asio_get_running_in_context(VM::ActRec *ar);
+TypedValue* fg_asio_get_running(VM::ActRec *ar);
 TypedValue* fg_asio_get_current(VM::ActRec *ar);
 TypedValue* fg_asio_set_on_failed_callback(VM::ActRec *ar);
 TypedValue* fg_bcscale(VM::ActRec *ar);
@@ -2244,6 +2247,8 @@ VM::Instance* new_StaticExceptionWaitHandle_Instance(VM::Class*);
 TypedValue* tg_25StaticExceptionWaitHandle___construct(VM::ActRec *ar);
 TypedValue* tg_25StaticExceptionWaitHandle_create(VM::ActRec *ar);
 TypedValue* tg_18WaitableWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_18WaitableWaitHandle_getContextIdx(VM::ActRec *ar);
+TypedValue* tg_18WaitableWaitHandle_getCreator(VM::ActRec *ar);
 TypedValue* tg_18WaitableWaitHandle_getParents(VM::ActRec *ar);
 TypedValue* tg_18WaitableWaitHandle_getStackTrace(VM::ActRec *ar);
 TypedValue* tg_19BlockableWaitHandle___construct(VM::ActRec *ar);
@@ -2994,7 +2999,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2204;
+const long long hhbc_ext_funcs_count = 2207;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3119,6 +3124,9 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "i18n_loc_get_error_code", fg_i18n_loc_get_error_code, (void *)&fh_i18n_loc_get_error_code },
   { "asio_enter_context", fg_asio_enter_context, (void *)&fh_asio_enter_context },
   { "asio_exit_context", fg_asio_exit_context, (void *)&fh_asio_exit_context },
+  { "asio_get_current_context_idx", fg_asio_get_current_context_idx, (void *)&fh_asio_get_current_context_idx },
+  { "asio_get_running_in_context", fg_asio_get_running_in_context, (void *)&fh_asio_get_running_in_context },
+  { "asio_get_running", fg_asio_get_running, (void *)&fh_asio_get_running },
   { "asio_get_current", fg_asio_get_current, (void *)&fh_asio_get_current },
   { "asio_set_on_failed_callback", fg_asio_set_on_failed_callback, (void *)&fh_asio_set_on_failed_callback },
   { "bcscale", fg_bcscale, (void *)&fh_bcscale },
@@ -5232,9 +5240,11 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StaticExceptionWaitHandle[] = {
   { "create", tg_25StaticExceptionWaitHandle_create }
 };
 
-static const long long hhbc_ext_method_count_WaitableWaitHandle = 3;
+static const long long hhbc_ext_method_count_WaitableWaitHandle = 5;
 static const HhbcExtMethodInfo hhbc_ext_methods_WaitableWaitHandle[] = {
   { "__construct", tg_18WaitableWaitHandle___construct },
+  { "getContextIdx", tg_18WaitableWaitHandle_getContextIdx },
+  { "getCreator", tg_18WaitableWaitHandle_getCreator },
   { "getParents", tg_18WaitableWaitHandle_getParents },
   { "getStackTrace", tg_18WaitableWaitHandle_getStackTrace }
 };

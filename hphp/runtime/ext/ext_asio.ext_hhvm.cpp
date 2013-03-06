@@ -93,6 +93,131 @@ TypedValue* fg_asio_exit_context(HPHP::VM::ActRec *ar) {
 
 
 /*
+int HPHP::f_asio_get_current_context_idx()
+_ZN4HPHP30f_asio_get_current_context_idxEv
+
+(return value) => rax
+*/
+
+int fh_asio_get_current_context_idx() asm("_ZN4HPHP30f_asio_get_current_context_idxEv");
+
+TypedValue* fg_asio_get_current_context_idx(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfInt64;
+      rv.m_data.num = (int64_t)fh_asio_get_current_context_idx();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("asio_get_current_context_idx", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Object HPHP::f_asio_get_running_in_context(int)
+_ZN4HPHP29f_asio_get_running_in_contextEi
+
+(return value) => rax
+_rv => rdi
+ctx_idx => rsi
+*/
+
+Value* fh_asio_get_running_in_context(Value* _rv, int ctx_idx) asm("_ZN4HPHP29f_asio_get_running_in_contextEi");
+
+TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfObject;
+  tvCastToInt64InPlace(args-0);
+  fh_asio_get_running_in_context((Value*)(rv), (int)(args[-0].m_data.num));
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_asio_get_running_in_context(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv._count = 0;
+        rv.m_type = KindOfObject;
+        fh_asio_get_running_in_context((Value*)(&(rv)), (int)(args[-0].m_data.num));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_asio_get_running_in_context(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("asio_get_running_in_context", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Object HPHP::f_asio_get_running()
+_ZN4HPHP18f_asio_get_runningEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_asio_get_running(Value* _rv) asm("_ZN4HPHP18f_asio_get_runningEv");
+
+TypedValue* fg_asio_get_running(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfObject;
+      fh_asio_get_running((Value*)(&(rv)));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("asio_get_running", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Object HPHP::f_asio_get_current()
 _ZN4HPHP18f_asio_get_currentEv
 

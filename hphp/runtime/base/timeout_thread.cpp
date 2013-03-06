@@ -187,14 +187,10 @@ void TimeoutThread::onTimer(int index) {
     int delta = now - data->started;
     if (delta >= m_timeoutSeconds) {
       timeout.tv_sec = m_timeoutSeconds + 2;
-      if (hhvm) {
-        Lock l(data->surpriseLock);
-        data->setTimedOutFlag();
-        if (data->surprisePage) {
-          mprotect(data->surprisePage, sizeof(void*), PROT_NONE);
-        }
-      } else {
-        data->setTimedOutFlag();
+      Lock l(data->surpriseLock);
+      data->setTimedOutFlag();
+      if (data->surprisePage) {
+        mprotect(data->surprisePage, sizeof(void*), PROT_NONE);
       }
     } else {
       // Negative delta means start time was adjusted forward to give more time

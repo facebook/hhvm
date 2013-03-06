@@ -20,6 +20,7 @@
 #include <runtime/base/util/exceptions.h>
 #include <util/parser/parser.h>
 #include <compiler/construct.h>
+#include <compiler/option.h>
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -31,7 +32,7 @@
 #endif
 #define HPHP_PARSER_ERROR(fmt, p, args...)                              \
   do {                                                                  \
-    if (!HPHP::hhvm) {                                                  \
+    if (HPHP::Option::WholeProgram) {                                   \
       HPHP::Logger::Error(fmt " %s", ##args, (p)->getMessage(true).c_str()); \
     }                                                                   \
     throw HPHP::ParseTimeFatalException((p)->file(), (p)->line1(),      \

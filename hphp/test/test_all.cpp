@@ -44,32 +44,30 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestDebugger);
     return;
   }
-  if (hhvm) {
-    const char *vmFilter = 0;
+  const char *vmFilter = 0;
 
-    if (suite == "TestCodeRunVM" || suite == "TestCodeRunRepo") {
-      suite = "TestCodeRun";
-      Option::EnableEval = Option::FullEval;
-      RuntimeOption::EvalJit = false;
-      TestCodeRun::Filter = vmFilter;
-      RUN_TESTSUITE(TestCodeRun);
-      return;
+  if (suite == "TestCodeRunVM" || suite == "TestCodeRunRepo") {
+    suite = "TestCodeRun";
+    Option::EnableEval = Option::FullEval;
+    RuntimeOption::EvalJit = false;
+    TestCodeRun::Filter = vmFilter;
+    RUN_TESTSUITE(TestCodeRun);
+    return;
+  }
+  if (suite == "TestCodeRunJit" || suite == "TestCodeRunRepoJit" ||
+      suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
+    suite = "TestCodeRun";
+    Option::EnableEval = Option::FullEval;
+    RuntimeOption::EvalJit = true;
+    if (suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
+      RuntimeOption::EvalJitUseIR = true;
     }
-    if (suite == "TestCodeRunJit" || suite == "TestCodeRunRepoJit" ||
-        suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
-      suite = "TestCodeRun";
-      Option::EnableEval = Option::FullEval;
-      RuntimeOption::EvalJit = true;
-      if (suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
-        RuntimeOption::EvalJitUseIR = true;
-      }
-      TestCodeRun::Filter = vmFilter;
-      RUN_TESTSUITE(TestCodeRun);
-      return;
-    }
+    TestCodeRun::Filter = vmFilter;
+    RUN_TESTSUITE(TestCodeRun);
+    return;
   }
   if (suite == "TestServer") {
-    if (hhvm) Option::EnableEval = Option::FullEval;
+    Option::EnableEval = Option::FullEval;
     RUN_TESTSUITE(TestServer);
     return;
   }
@@ -82,10 +80,8 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
   }
 
   if (suite == "TestPerformance") {
-    if (hhvm) {
-      fprintf(stderr, "%s is not supported with USE_HHVM=1\n", suite.c_str());
-      exit(-1);
-    }
+    fprintf(stderr, "%s is not yet supported\n", suite.c_str());
+    exit(-1);
     RUN_TESTSUITE(TestPerformance);
     return;
   }

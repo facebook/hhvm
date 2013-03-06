@@ -137,15 +137,6 @@ public:
 
   virtual bool isInherited(const std::string &name) const;
 
-  const char *getVariablePrefix(const std::string &name) const;
-  const char *getVariablePrefix(const Symbol *sym) const;
-  std::string getVariableName(AnalysisResultConstPtr ar,
-                              const std::string &name) const;
-  std::string getVariableName(AnalysisResultConstPtr ar,
-                              const Symbol *sym) const;
-  std::string getGlobalVariableName(AnalysisResultConstPtr ar,
-                                    const std::string &name) const;
-
   void getLocalVariableNames(std::vector<std::string> &syms) const;
 
   /**

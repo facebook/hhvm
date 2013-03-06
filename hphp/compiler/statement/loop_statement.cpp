@@ -37,44 +37,6 @@ void LoopStatement::clearStringBufs() {
   m_string_bufs.clear();
 }
 
-void LoopStatement::cppDeclareBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (numStringBufs()) {
-    cg_indentBegin("{\n");
-    for (std::set<std::string>::iterator it = m_string_bufs.begin(),
-           end = m_string_bufs.end(); it != end; ++it) {
-      const char *prefix =
-        getScope()->getVariables()->getVariablePrefix(*it);
-      cg_printf("StringBuffer %s_sbuf_%s%s(512);\n",
-                Option::TempPrefix, prefix, it->c_str());
-    }
-    m_outer = cg.getLoopStatement();
-    cg.setLoopStatement(boost::static_pointer_cast<LoopStatement>
-                        (shared_from_this()));
-  }
-}
-
-void LoopStatement::cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (numStringBufs()) {
-    cg.setLoopStatement(m_outer.lock());
-    m_outer.reset();
-    for (std::set<std::string>::iterator it = m_string_bufs.begin(),
-           end = m_string_bufs.end(); it != end; ++it) {
-
-      const char *prefix0 = getFunctionScope()->isGenerator() ?
-        TYPED_CONTINUATION_OBJECT_NAME "->" : "";
-
-      const char *prefix =
-        getScope()->getVariables()->getVariablePrefix(*it);
-
-      cg_printf("concat_assign(%s%s%s, %s_sbuf_%s%s.detachWithTaint());\n",
-                prefix0, prefix, it->c_str(),
-                Option::Option::TempPrefix,
-                prefix, it->c_str());
-    }
-    cg_indentEnd("}\n");
-  }
-}
-
 bool LoopStatement::checkStringBuf(const std::string &name) {
   if (m_string_bufs.find(name) != m_string_bufs.end()) {
     return true;

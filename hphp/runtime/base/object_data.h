@@ -89,7 +89,7 @@ class ObjectData : public CountableNF {
 
   ObjectData(bool noId, VM::Class* type)
       : o_attribute(0), m_cls(type) {
-    assert(!hhvm || uintptr_t(this) % sizeof(TypedValue) == 0);
+    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
       o_id = ++(*os_max_id);
     }

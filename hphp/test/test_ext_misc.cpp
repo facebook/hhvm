@@ -101,9 +101,9 @@ bool TestExtMisc::test_eval() {
   try {
     f_eval("sleep(5);");
   } catch (NotSupportedException e) {
-    return Count(!hhvm);
+    return Count(false);
   }
-  return Count(hhvm);
+  return Count(true);
 }
 
 bool TestExtMisc::test_get_browser() {

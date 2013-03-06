@@ -138,12 +138,8 @@ bool f_stream_wrapper_unregister(CStrRef protocol);
 
 inline String f_stream_resolve_include_path(CStrRef filename,
                                             CObjRef context = null_object) {
-  if (hhvm) {
-    struct stat s;
-    return Eval::resolveVmInclude(filename.get(), "", &s);
-  } else {
-    return resolve_include(filename, "", hphp_could_invoke_file, NULL);
-  }
+  struct stat s;
+  return Eval::resolveVmInclude(filename.get(), "", &s);
 }
 
 Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,

@@ -145,7 +145,7 @@ StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
   if (!fileName || !*fileName) fileName = "string";
 
   int len = input.size();
-  Scanner scanner(input.data(), len, Option::ScannerType, fileName, hhvm);
+  Scanner scanner(input.data(), len, Option::ScannerType, fileName, true);
   Parser parser(scanner, fileName, ar, len);
   parser.m_lambdaMode = lambdaMode;
   if (parser.parse()) {
@@ -162,11 +162,8 @@ Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false) {
-  MD5 md5;
-  if (hhvm) {
-    string md5str = Eval::FileRepository::unitMd5(scanner.getMd5());
-    md5 = MD5(md5str.c_str());
-  }
+  string md5str = Eval::FileRepository::unitMd5(scanner.getMd5());
+  MD5 md5 = MD5(md5str.c_str());
 
   m_file = FileScopePtr(new FileScope(m_fileName, fileSize, md5));
 
@@ -857,7 +854,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       Token origGenFunc;
       create_generator(this, out, params, name, closureName, nullptr, nullptr,
                        hasCallToGetArgs, origGenFunc,
-                       hhvm && Option::OutputHHBC &&
+                       Option::OutputHHBC &&
                        (!Option::WholeProgram || !Option::ParseTimeOpts),
                        attr);
       m_closureGenerator = false;
@@ -1153,7 +1150,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
                      &modifiers, hasCallToGetArgs, origGenFunc,
-                     hhvm && Option::OutputHHBC &&
+                     Option::OutputHHBC &&
                      (!Option::WholeProgram || !Option::ParseTimeOpts),
                      attr);
     MethodStatementPtr origStmt =

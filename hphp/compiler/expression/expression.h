@@ -196,7 +196,6 @@ public:
   void setOriginalScope(BlockScopeRawPtr scope);
   ClassScopeRawPtr getOriginalClass();
   FunctionScopeRawPtr getOriginalFunction();
-  std::string originalClassName(CodeGenerator &cg, bool withComma);
 
   /**
     * For generic walks

@@ -33,16 +33,12 @@ public:
 };
 
 #define DECLARE_TEST_FUNCTIONS(s)                                       \
-  if (hhvm) {                                                           \
-    char *argv[] = { const_cast<char*>(which.c_str()), nullptr };       \
-    execute_command_line_begin(1, argv, false);                         \
-    f_eval(s);                                                          \
-  }                                                                     \
+  char *argv[] = { const_cast<char*>(which.c_str()), nullptr };         \
+  execute_command_line_begin(1, argv, false);                           \
+  f_eval(s);                                                            \
                                                                         \
   SCOPE_EXIT {                                                          \
-    if (hhvm) {                                                         \
-      execute_command_line_end(0, false, which.c_str());                \
-    }                                                                   \
+    execute_command_line_end(0, false, which.c_str());                  \
   }
 
 ///////////////////////////////////////////////////////////////////////////////

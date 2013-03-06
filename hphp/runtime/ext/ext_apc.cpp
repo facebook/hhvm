@@ -44,7 +44,7 @@ public:
   virtual void moduleInit() {
     IniSetting::SetGlobalDefault("apc.enabled","1");
     IniSetting::SetGlobalDefault("apc.stat",
-                                 (RuntimeOption::RepoAuthoritative || !hhvm)
+                                 RuntimeOption::RepoAuthoritative
                                  ? "0" : "1");
     IniSetting::SetGlobalDefault("apc.enable_cli", "1");
     if (RuntimeOption::ApcUseFileStorage) {

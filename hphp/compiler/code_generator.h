@@ -163,17 +163,6 @@ public:
   void indentEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   void indentEnd();
   void printRaw(const char *msg) { print(msg, false);}
-  bool wrapExpressionBegin();
-  bool wrapExpressionEnd();
-  void genReferenceTemp(ConstructPtr scope);
-  void clearRefereceTemp() { m_referenceTemps[m_curStream].clear(); }
-  const std::string &getReferenceTemp();
-  bool hasReferenceTemp() const {
-    return !m_referenceTemps[m_curStream].empty();
-  }
-  void setReferenceTempUsed(bool flag) {
-    m_referenceTempsUsed[m_curStream] = flag;
-  }
   /**
    * Pre-formatted outputs.
    */

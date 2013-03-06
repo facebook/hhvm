@@ -461,7 +461,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   GEN_TEST(TestTernaryShortcut);
   GEN_TEST(TestGoto);
   GEN_TEST(TestClosure);
-  if (!hhvm) {
+  if (false) {
     GEN_TEST(TestNamespace);
   }
 
@@ -766,7 +766,7 @@ bool TestCodeRun::TestVariableArgument() {
        "var_dump($x->buz);"
        "unset($x);");
 
-  if (!hhvm) {
+  if (false) {
     MVCR("<?php "
        "function foo($a, $b, $c = 5) {"
        "  if ($a) $b++;"
@@ -1277,7 +1277,7 @@ bool TestCodeRun::TestExceptions() {
         "}\n"
         );
 
-  if (!hhvm) {
+  if (false) {
     FinallyStatement w(this);
 
     MVCRO("<?php\n"
@@ -10104,21 +10104,6 @@ bool TestCodeRun::TestReference() {
       "$b[0] = 1;"
       "var_dump($a,$b);"
       );
-
-  if (!hhvm) {
-    // call-time pass by reference -- not supported in the VM
-    MVCRNW("<?php "
-           "function foo($u, $v, $w) {"
-           "  $u = 10;"
-           "  $v = 20;"
-           "  $w = 20;"
-           "}"
-           "$u = 1;"
-           "$v = 2;"
-           "$w = 3;"
-           "foo(&$u, &$v, $w);"
-           "var_dump($u, $v, $w);");
-  }
 
   // reference self assignment
   MVCR("<?php "
@@ -20055,11 +20040,6 @@ bool TestCodeRun::TestFile() {
 }
 
 bool TestCodeRun::TestUserWrappers() {
-  if (!hhvm) {
-    // User-defined wrappers are only supported under hhvm
-    return true;
-  }
-
   // Verify constructor is called
   MVCR("<?php "
        "class MyWrapper {"
@@ -22987,20 +22967,6 @@ bool TestCodeRun::TestInlining() {
        "$y++;"
        "var_dump($x, $y);");
 
-  if (!hhvm) {
-    MVCRNW("<?php "
-        "function foo($u, $v, $w) {"
-        "  $u = 10;"
-        "  $v = 20;"
-        "  $w = 20;"
-        "}"
-        "$u = 1;"
-        "$v = 2;"
-        "$w = 3;"
-        "foo(&$u, &$v, $w);"
-        "var_dump($u, $v, $w);");
-  }
-
   MVCR("<?php "
        "function foo() { return $GLOBALS['g']; }"
        "$g = 0;"
@@ -23449,7 +23415,7 @@ bool TestCodeRun::TestLateStaticBinding() {
        "call_user_func(array('B', 'foo'));\n"
        "A::bar();\n");
 
-  if (!hhvm) {
+  if (false) {
     MVCR("<?php "
          "class X {"
          "  function foo() { var_dump(__METHOD__, get_called_class()); }"
@@ -30655,7 +30621,7 @@ bool TestCodeRun::TestTraits() {
         "bool(false)\n"
        );
 
-  if (!hhvm) {
+  if (false) {
     MVCRO(
         "<?php\n"
         "namespace test {\n"
@@ -30710,7 +30676,7 @@ bool TestCodeRun::TestTraits() {
         "bool(false)\n"
        );
 
-  if (!hhvm) {
+  if (false) {
     MVCRO(
         "<?php\n"
         "namespace foo;\n"
@@ -30775,7 +30741,7 @@ bool TestCodeRun::TestTraits() {
         "bool(false)\n"
        );
 
-  if (!hhvm) {
+  if (false) {
     MVCRO(
         "<?php\n"
         "namespace N1 {\n"

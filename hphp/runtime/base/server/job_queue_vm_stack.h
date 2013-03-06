@@ -24,7 +24,7 @@ namespace HPHP {
 namespace VM { void flush_evaluation_stack(); }
 
 struct JobQueueDropVMStack {
-  static void dropCache() { if (hhvm) VM::flush_evaluation_stack(); }
+  static void dropCache() { VM::flush_evaluation_stack(); }
 };
 
 //////////////////////////////////////////////////////////////////////

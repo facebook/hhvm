@@ -593,37 +593,6 @@ bool FunctionScope::needsClassParam() {
   return getVariables()->hasStatic();
 }
 
-const char *FunctionScope::getPrefix(AnalysisResultPtr ar, ExpressionListPtr params) {
-  bool isMethod = getContainingClass();
-  bool callInner = false;
-  if (Option::HardTypeHints && !Option::SystemGen &&
-      !m_system && !m_sep && params) {
-    int count = params->getCount();
-    if (count >= m_minParam) {
-      for (int i = 0; i < count; i++) {
-        if (i == m_maxParam) break;
-        if (isRefParam(i)) continue;
-        if (TypePtr spec = m_paramTypeSpecs[i]) {
-          if (Type::SameType(spec, m_paramTypes[i])) {
-            ExpressionPtr p = (*params)[i];
-            TypePtr at = p->getActualType();
-            if (!Type::SubType(ar, at, spec)) {
-              callInner = false;
-              break;
-            }
-            callInner = true;
-          }
-        }
-      }
-    }
-  }
-  if (callInner) {
-    return isMethod ? Option::TypedMethodPrefix : Option::TypedFunctionPrefix;
-  }
-
-  return isMethod ? Option::MethodPrefix : Option::FunctionPrefix;
-}
-
 int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
                                    ExpressionListPtr params, bool &valid) {
   if (!params) {

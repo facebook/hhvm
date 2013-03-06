@@ -1504,9 +1504,7 @@ public:
     if (!RuntimeOption::EnableHotProfiler) {
       return;
     }
-    if (hhvm) {
-      HPHP::VM::EventHook::Enable();
-    }
+    HPHP::VM::EventHook::Enable();
     if (m_profiler == NULL) {
       switch (level) {
       case Simple:
@@ -1608,9 +1606,6 @@ Variant f_phprof_disable() {
 }
 
 void f_fb_setprofile(CVarRef callback) {
-  if (!hhvm) {
-    return;
-  }
 #ifdef HOTPROFILER
   if (ThreadInfo::s_threadInfo->m_profiler != NULL) {
     // phpprof is enabled, don't let PHP code override it

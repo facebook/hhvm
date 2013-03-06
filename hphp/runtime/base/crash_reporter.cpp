@@ -78,7 +78,7 @@ static void bt_handler(int sig) {
 
   Logger::Error("Core dumped: %s", strsignal(sig));
 
-  if (hhvm && !g_context.isNull()) {
+  if (!g_context.isNull()) {
     // sync up gdb Dwarf info so that gdb can do a full backtrace
     // from the core file. Do this at the very end as syncing needs
     // to allocate memory for the ELF file.

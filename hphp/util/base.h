@@ -128,8 +128,6 @@ static const bool debug =
 #endif
   ;
 
-static const bool hhvm = true;
-
 const bool hhvm_gc =
 #ifdef HHVM_GC
   true

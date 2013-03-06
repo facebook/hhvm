@@ -129,13 +129,9 @@ void f_debug_zval_dump(CVarRef variable) {
 // variable table
 
 Array f_get_defined_vars() {
-  if (hhvm) {
-    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
-    if (v) {
-      return v->getDefinedVariables();
-    } else {
-      return Array::Create();
-    }
+  HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+  if (v) {
+    return v->getDefinedVariables();
   } else {
     return Array::Create();
   }
@@ -162,61 +158,57 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
 
 int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
                 CStrRef prefix /* = "" */) {
-  if (hhvm) {
-    bool reference = extract_type & EXTR_REFS;
-    extract_type &= ~EXTR_REFS;
+  bool reference = extract_type & EXTR_REFS;
+  extract_type &= ~EXTR_REFS;
 
-    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
-    if (!v) return 0;
-    int count = 0;
-    for (ArrayIter iter(var_array); iter; ++iter) {
-      String name = iter.first();
-      StringData* nameData = name.get();
-      switch (extract_type) {
-        case EXTR_SKIP:
-          if (v->lookup(nameData) != NULL) {
-            continue;
-          }
-          break;
-        case EXTR_IF_EXISTS:
-          if (v->lookup(nameData) == NULL) {
-            continue;
-          }
-          break;
-        case EXTR_PREFIX_SAME:
-          if (v->lookup(nameData) != NULL) {
-            name = prefix + "_" + name;
-          }
-          break;
-        case EXTR_PREFIX_ALL:
+  HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+  if (!v) return 0;
+  int count = 0;
+  for (ArrayIter iter(var_array); iter; ++iter) {
+    String name = iter.first();
+    StringData* nameData = name.get();
+    switch (extract_type) {
+      case EXTR_SKIP:
+        if (v->lookup(nameData) != NULL) {
+          continue;
+        }
+        break;
+      case EXTR_IF_EXISTS:
+        if (v->lookup(nameData) == NULL) {
+          continue;
+        }
+        break;
+      case EXTR_PREFIX_SAME:
+        if (v->lookup(nameData) != NULL) {
           name = prefix + "_" + name;
-          break;
-        case EXTR_PREFIX_INVALID:
-          if (!nameData->isValidVariableName()) {
-            name = prefix + "_" + name;
-          }
-          break;
-        case EXTR_PREFIX_IF_EXISTS:
-          if (v->lookup(nameData) == NULL) {
-            continue;
-          }
+        }
+        break;
+      case EXTR_PREFIX_ALL:
+        name = prefix + "_" + name;
+        break;
+      case EXTR_PREFIX_INVALID:
+        if (!nameData->isValidVariableName()) {
           name = prefix + "_" + name;
-          break;
-        default:
-          break;
-      }
-      nameData = name.get();
-      // skip invalid variable names, as in PHP
-      if (!nameData->isValidVariableName()) {
-        continue;
-      }
-      g_vmContext->setVar(nameData, iter.nvSecond(), reference);
-      count++;
+        }
+        break;
+      case EXTR_PREFIX_IF_EXISTS:
+        if (v->lookup(nameData) == NULL) {
+          continue;
+        }
+        name = prefix + "_" + name;
+        break;
+      default:
+        break;
     }
-    return count;
-  } else {
-    throw FatalErrorException("bad HPHP code generation");
+    nameData = name.get();
+    // skip invalid variable names, as in PHP
+    if (!nameData->isValidVariableName()) {
+      continue;
+    }
+    g_vmContext->setVar(nameData, iter.nvSecond(), reference);
+    count++;
   }
+  return count;
 }
 
 int extract(LVariableTable *variables, CArrRef var_array,

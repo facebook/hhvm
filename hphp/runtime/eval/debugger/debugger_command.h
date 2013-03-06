@@ -99,11 +99,7 @@ public:
   virtual bool onServer(DebuggerProxy *proxy);
   virtual bool onServerVM(DebuggerProxy *proxy) { return onServer(proxy); }
   bool onServerD(DebuggerProxy *proxy) {
-    if (hhvm) {
-      return onServerVM(proxy);
-    } else {
-      return onServer(proxy);
-    }
+    return onServerVM(proxy);
   }
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);

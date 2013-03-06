@@ -19,18 +19,8 @@
 #include "runtime/vm/embedded_repo.h"
 #include "compiler/compiler.h"
 
-#ifdef HPHP_OSS
-# define ARGV0_IS_HPHP(av0, av0len) 0
-#else
-# define ARGV0_IS_HPHP(av0, av0len) (av0len >= 4 && !strcmp(av0 + av0len - 4, "hphp"))
-#endif
-
 int main(int argc, char** argv) {
   if (!argc) return 0;
-  int len = strlen(argv[0]);
-  if (!HPHP::hhvm || ARGV0_IS_HPHP(argv[0], len)) {
-    return HPHP::compiler_main(argc, argv);
-  }
   if (argc > 1 && !strcmp(argv[1], "--hphp")) {
     argv[1] = argv[0];
     return HPHP::compiler_main(argc - 1, argv + 1);

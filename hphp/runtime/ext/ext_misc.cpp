@@ -178,15 +178,11 @@ Variant f_exit(CVarRef status /* = null_variant */) {
 }
 
 Variant f_eval(CStrRef code_str) {
-  if (hhvm) {
-    String prefixedCode = concat("<?php ", code_str);
-    VM::Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
-    TypedValue retVal;
-    g_vmContext->invokeUnit(&retVal, unit);
-    return tvAsVariant(&retVal);
-  } else {
-    throw NotSupportedException(__func__, "rebuild with eval mode");
-  }
+  String prefixedCode = concat("<?php ", code_str);
+  VM::Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
+  TypedValue retVal;
+  g_vmContext->invokeUnit(&retVal, unit);
+  return tvAsVariant(&retVal);
 }
 
 Variant f_get_browser(CStrRef user_agent /* = null_string */,

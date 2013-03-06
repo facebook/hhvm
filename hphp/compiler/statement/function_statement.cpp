@@ -136,5 +136,5 @@ void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 bool FunctionStatement::hasImpl() const {
-  return getFunctionScope()->isVolatile() || (hhvm && Option::OutputHHBC);
+  return getFunctionScope()->isVolatile() || Option::OutputHHBC;
 }

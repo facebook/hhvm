@@ -132,7 +132,7 @@ ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
         omit the pseudomain if we manage to merge all the classes
         successfully).
       */
-      if (hhvm && Option::OutputHHBC) break;
+      if (Option::OutputHHBC) break;
       if (s->is(KindOfClassStatement) ||
           s->is(KindOfInterfaceStatement)) {
         ClassScopePtr cls(

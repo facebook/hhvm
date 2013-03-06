@@ -32,8 +32,6 @@ public:
   void addStringBuf(const std::string &name);
   void removeStringBuf(const std::string &name);
   int numStringBufs() const { return m_string_bufs.size(); }
-  void cppDeclareBufs(CodeGenerator &cg, AnalysisResultPtr ar);
-  void cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar);
   bool checkStringBuf(const std::string &name);
 private:
   std::set<std::string>  m_string_bufs;

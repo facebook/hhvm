@@ -63,7 +63,7 @@ bool TestExtApc::RunTests(const std::string &which) {
 bool TestExtApc::test_apc() {
   VS(f_ini_get("apc.enabled"), "1");
   VS(f_ini_get("apc.enable_cli"), "1");
-  VS(f_ini_get("apc.stat"), (RuntimeOption::RepoAuthoritative || !hhvm)
+  VS(f_ini_get("apc.stat"), (RuntimeOption::RepoAuthoritative)
                             ? "0" : "1");
   return Count(true);
 }

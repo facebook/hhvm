@@ -551,18 +551,13 @@ static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
 }
 
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
-  if (hhvm) {
-    Array ret = Array::Create();
-    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
-    if (v) {
-      compact(v, ret, varname);
-      compact(v, ret, _argv);
-    }
-    return ret;
-  } else {
-    raise_error("Invalid call to f_compact");
-    return Array::Create();
+  Array ret = Array::Create();
+  HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+  if (v) {
+    compact(v, ret, varname);
+    compact(v, ret, _argv);
   }
+  return ret;
 }
 
 template<typename T>

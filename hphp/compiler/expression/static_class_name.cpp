@@ -97,11 +97,7 @@ ClassScopePtr StaticClassName::resolveClass() {
         m_origClassName = self->getOriginalParent();
         m_present = true;
       }
-    } else if (!hhvm) {
-      // When generating hhvm bytecodes, the following statement
-      // causes EmitterVisitor::emitFuncCall to not generate a Parent
-      // byte code. It's unclear whether removing it would break hphpc
-      // so this code is left here under a hhvm flag check for now.
+    } else {
       m_parent = false;
     }
   }

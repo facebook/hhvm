@@ -42,12 +42,8 @@ struct MemoryUsageStats {
   int64_t totalAlloc; // how many bytes allocated, in total.
 };
 
-#define JEMALLOC_STATS_ADJUST(stats, amt) \
-  if (hhvm && use_jemalloc) {             \
-    (stats)->jemallocDebt += (amt);       \
-  } else if (use_jemalloc) {              \
-    (stats)->usage -= (amt);              \
-  }
+#define JEMALLOC_STATS_ADJUST(stats, amt)       \
+  ((void)(use_jemalloc && ((stats)->jemallocDebt += (amt))))
 
 //////////////////////////////////////////////////////////////////////
 

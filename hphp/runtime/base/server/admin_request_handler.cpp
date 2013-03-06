@@ -581,13 +581,11 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     ServerPtr server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    if (hhvm) {
-      VM::Transl::Translator* tx = VM::Transl::Translator::Get();
-      appendStat("tc-size", tx->getCodeSize());
-      appendStat("tc-stubsize", tx->getStubSize());
-      appendStat("targetcache", tx->getTargetCacheSize());
-      appendStat("units", Eval::FileRepository::getLoadedFiles());
-    }
+    VM::Transl::Translator* tx = VM::Transl::Translator::Get();
+    appendStat("tc-size", tx->getCodeSize());
+    appendStat("tc-stubsize", tx->getStubSize());
+    appendStat("targetcache", tx->getTargetCacheSize());
+    appendStat("units", Eval::FileRepository::getLoadedFiles());
     out << "}" << endl;
     transport->sendString(out.str());
     return true;
@@ -954,8 +952,6 @@ typedef std::map<int, PCInfo> InfoMap;
 
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
-  if (!hhvm) return false;
-
   if (cmd == "vm-tcspace") {
     transport->sendString(VM::Transl::Translator::Get()->getUsage());
     return true;

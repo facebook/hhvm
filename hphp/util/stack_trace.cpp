@@ -238,7 +238,7 @@ void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
   dprintf(fd, "ThreadPID: %u\n", Process::GetThreadPid());
   dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
   dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");
-  dprintf(fd, "Runtime: %s\n", hhvm ? "hhvm" : "hphp");
+  dprintf(fd, "Runtime: hhvm\n");
   dprintf(fd, "Version: %s\n", buildId);
   dprintf(fd, "\n");
 

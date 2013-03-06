@@ -1332,7 +1332,6 @@ class Variant : VariantBase {
 public:
 #endif
   static inline ALWAYS_INLINE void PromoteToRef(CVarRef v) {
-    assert(hhvm || !v.isVarNR());
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
       RefData *ref = NEW(RefData)(v.m_type, v.m_data.num);

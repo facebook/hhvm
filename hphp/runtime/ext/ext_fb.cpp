@@ -1395,11 +1395,8 @@ Variant f_fb_utf8_substr(CStrRef str, int start, int length /* = INT_MAX */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_fb_could_include(CStrRef file) {
-  if (hhvm) {
-    struct stat s;
-    return !Eval::resolveVmInclude(file.get(), "", &s).isNull();
-  }
-  return !resolve_include(file, "", hphp_could_invoke_file, NULL).isNull();
+  struct stat s;
+  return !Eval::resolveVmInclude(file.get(), "", &s).isNull();
 }
 
 bool f_fb_intercept(CStrRef name, CVarRef handler,
@@ -1540,13 +1537,11 @@ void f_fb_enable_code_coverage() {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_coverage->Reset();
   ti->m_reqInjectionData.coverage = true;
-  if (hhvm) {
-    if (g_vmContext->isNested()) {
-      raise_notice("Calling fb_enable_code_coverage from a nested "
-                   "VM instance may cause unpredicable results");
-    }
-    throw VMSwitchModeException(true);
+  if (g_vmContext->isNested()) {
+    raise_notice("Calling fb_enable_code_coverage from a nested "
+                 "VM instance may cause unpredicable results");
   }
+  throw VMSwitchModeException(true);
 }
 
 Variant f_fb_disable_code_coverage() {

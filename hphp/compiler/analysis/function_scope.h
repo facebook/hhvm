@@ -271,7 +271,6 @@ public:
   void fixRetExprs();
 
   bool needsTypeCheckWrapper() const;
-  const char *getPrefix(AnalysisResultPtr ar, ExpressionListPtr params);
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }

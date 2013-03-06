@@ -93,9 +93,9 @@ bool TestExtFunction::test_create_function() {
   try {
     f_create_function("$a", "");
   } catch (NotSupportedException e) {
-    return Count(!hhvm);
+    return Count(false);
   }
-  return Count(hhvm);
+  return Count(true);
 }
 
 bool TestExtFunction::test_func_get_arg() {

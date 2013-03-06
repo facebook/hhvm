@@ -372,12 +372,8 @@ public:
   }
 
   inline volatile ssize_t* getConditionFlags() {
-    if (hhvm) {
-      assert(cflagsPtr);
-      return cflagsPtr;
-    } else {
-      return &conditionFlags;
-    }
+    assert(cflagsPtr);
+    return cflagsPtr;
   }
 
   union {
@@ -483,14 +479,12 @@ public:
   void onSessionExit();
   void clearPendingException();
   ObjectAllocatorBase* instanceSizeAllocator(size_t size) {
-    const_assert(hhvm);
     int index = object_alloc_size_to_index(size);
     ASSERT_NOT_IMPLEMENTED(index != -1);
     return m_allocators[index];
   }
 
   ObjectAllocatorBase* instanceIdxAllocator(int index) {
-    const_assert(hhvm);
     return m_allocators[index];
   }
 
@@ -527,14 +521,12 @@ extern void check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 extern bool SegFaulting;
 
 inline void check_request_timeout(ThreadInfo *info) {
-  const_assert(!hhvm);
   if (SegFaulting) pause_forever();
   info->m_mm->refreshStats();
   if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }
 
 inline void check_request_timeout_nomemcheck(ThreadInfo *info) {
-  const_assert(!hhvm);
   if (SegFaulting) pause_forever();
   if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }

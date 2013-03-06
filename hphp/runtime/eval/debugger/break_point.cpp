@@ -75,7 +75,6 @@ std::string InterruptSite::desc() const {
 InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
                                  CVarRef e /* = null_variant */)
   : InterruptSite(e), m_unit(nullptr), m_valid(false), m_funcEntry(false) {
-  const_assert(hhvm);
   VM::Transl::VMRegAnchor _;
 #define bail_on(c) if (c) { return; }
   VMExecutionContext* context = g_vmContext;
@@ -296,19 +295,17 @@ bool BreakPointInfo::valid() {
   if (m_valid) {
     switch (m_interrupt) {
       case BreakPointReached:
-        if (hhvm) {
-          if (!getFuncName().empty()) {
-            if (!m_file.empty() || m_line1 != 0) {
-              return false;
-            }
-          } else {
-            if (m_file.empty() || m_line1 == 0) {
-              return false;
-            }
-          }
-          if (m_regex || m_funcs.size() > 1) {
+        if (!getFuncName().empty()) {
+          if (!m_file.empty() || m_line1 != 0) {
             return false;
           }
+        } else {
+          if (m_file.empty() || m_line1 == 0) {
+            return false;
+          }
+        }
+        if (m_regex || m_funcs.size() > 1) {
+          return false;
         }
         return (m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty();
       case ExceptionThrown:
@@ -829,9 +826,7 @@ bool BreakPointInfo::checkClause() {
     String output;
     {
       EvalBreakControl eval(false);
-      Variant ret = hhvm
-                    ? DebuggerProxyVM::ExecutePHP(m_php, output, false, 0)
-                    : DebuggerProxy::ExecutePHP(m_php, output, false, 0);
+      Variant ret = DebuggerProxyVM::ExecutePHP(m_php, output, false, 0);
       if (m_check) {
         return ret.toBoolean();
       }

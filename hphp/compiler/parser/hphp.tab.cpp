@@ -24,7 +24,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -219,18 +219,9 @@ static void on_constant(Parser *_p, Token &out, Token *stmts,
 // continuation transformations
 
 static void prepare_continuation_call(Parser* _p, Token& rhs, const char* cname) {
-  if (HPHP::hhvm) {
-    Token fname;  fname.setText(std::string("hphp_continuation_") + cname);
-    Token empty;
-    _p->onCall(rhs, false, fname, empty, NULL, true);
-  } else {
-    Token name;   name.setText(CONTINUATION_OBJECT_NAME);
-    Token var;    _p->onSynthesizedVariable(var, name);
-    Token pn;     pn.setText(cname);
-    Token pname;  _p->onName(pname, pn, Parser::VarName);
-    Token empty;  empty = 1;
-                  _p->onObjectMethodCall(rhs, var, pname, empty);
-  }
+  Token fname;  fname.setText(std::string("hphp_continuation_") + cname);
+  Token empty;
+  _p->onCall(rhs, false, fname, empty, NULL, true);
 }
 
 static void on_yield_assign(Parser *_p, Token &out, Token &var, Token *expr) {
@@ -274,19 +265,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
       Token cname;   cname.setText("hphp_unpack_continuation");
       Token call;    _p->onCall(call, false, cname, param1, NULL, true);
 
-      if (HPHP::hhvm) {
-        switchExp = call;
-      } else {
-        _p->onExpStatement(scall, call);
-        Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-        Token var;     _p->onSynthesizedVariable(var, name);
-        Token pn;      pn.setText("getLabel");
-        Token pname;   _p->onName(pname, pn, Parser::VarName);
-        Token mcall;
-        Token empty;   empty = 1;
-                       _p->onObjectMethodCall(mcall, var, pname, empty);
-        switchExp = mcall;
-      }
+      switchExp = call;
     }
     Token sswitch;
     {
@@ -335,9 +314,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     Token type;    type.setText("Continuation");
     Token var;     var.setText(CONTINUATION_OBJECT_NAME);
     params.reset();
-    if (HPHP::hhvm) {
-      type.reset();
-    }
+    type.reset();
     _p->onParam(params, NULL, type, var, false, NULL, NULL);
   }
 }

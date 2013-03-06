@@ -274,5 +274,5 @@ bool ClassStatement::hasImpl() const {
   ClassScopeRawPtr cls = getClassScope();
   return cls->isVolatile() ||
     cls->getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
-    (hhvm && Option::OutputHHBC);
+    Option::OutputHHBC;
 }

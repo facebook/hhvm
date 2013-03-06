@@ -70,7 +70,6 @@ bool CmdEval::onServer(DebuggerProxy *proxy) {
 }
 
 bool CmdEval::onServerVM(DebuggerProxy *proxy) {
-  const_assert(hhvm);
   VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = new VM::PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);

@@ -297,7 +297,7 @@ bool Package::parseImpl(const char *fileName) {
   int lines = 0;
   try {
     Logger::Verbose("parsing %s ...", fullPath.c_str());
-    Scanner scanner(fullPath.c_str(), Option::ScannerType, hhvm);
+    Scanner scanner(fullPath.c_str(), Option::ScannerType, true);
     Compiler::Parser parser(scanner, fileName, m_ar, sb.st_size);
     parser.parse();
     lines = parser.line1();

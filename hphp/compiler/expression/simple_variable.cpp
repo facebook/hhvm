@@ -142,8 +142,8 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
     m_globals = true;
   } else {
     m_sym = variables->addDeclaredSymbol(
-      m_name, hhvm && Option::OutputHHBC ?
-      shared_from_this() : ConstructPtr());
+      m_name,
+      Option::OutputHHBC ? shared_from_this() : ConstructPtr());
   }
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
@@ -323,37 +323,4 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
 void SimpleVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("$%s", m_name.c_str());
-}
-
-bool SimpleVariable::hasAssignableCPPVariable() const {
-  if (!m_this) return true;
-  if (hasAnyContext(OprLValue | AssignmentLHS)) return false;
-  VariableTablePtr variables = getScope()->getVariables();
-  return variables->getAttribute(VariableTable::ContainsLDynamicVariable);
-}
-
-std::string SimpleVariable::getAssignableCPPVariable(AnalysisResultPtr ar)
-  const {
-  VariableTablePtr variables = getScope()->getVariables();
-  if (m_this) {
-    if (!hasAnyContext(OprLValue | AssignmentLHS) &&
-        variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
-      assert(m_sym);
-      const string &namePrefix = getNamePrefix();
-      return namePrefix + variables->getVariablePrefix(m_sym) + "this";
-    }
-    return "";
-  } else if (m_superGlobal) {
-    const string &name = variables->getGlobalVariableName(ar, m_name);
-    return string("g->") + name.c_str();
-  } else if (m_globals) {
-    return "get_global_array_wrapper()";
-  } else {
-    assert(m_sym);
-    const string &prefix0 = getNamePrefix();
-    const char *prefix1 =
-      getScope()->getVariables()->getVariablePrefix(m_sym);
-    return prefix0 + prefix1 +
-           CodeGenerator::FormatLabel(m_name);
-  }
 }

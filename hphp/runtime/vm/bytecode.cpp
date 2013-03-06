@@ -7505,8 +7505,6 @@ void VMExecutionContext::popVMState() {
 }
 
 void VMExecutionContext::requestInit() {
-  const_assert(hhvm);
-
   assert(SystemLib::s_unit);
   assert(SystemLib::s_nativeFuncUnit);
   assert(SystemLib::s_nativeClassUnit);
@@ -7533,8 +7531,6 @@ void VMExecutionContext::requestInit() {
 }
 
 void VMExecutionContext::requestExit() {
-  const_assert(hhvm);
-
   destructObjects();
   syncGdbState();
   tx64->requestExit();

@@ -657,7 +657,6 @@ bool TestParserStmt::TestYieldStatement() {
   WithOpt w1(Option::EnableHipHopSyntax);
 
   V("<?php function foo() { yield break;}",
-    hhvm ?
     "function ($" CONTINUATION_OBJECT_NAME ") {\n"
     "switch (hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ")) {\n"
     "}\n"
@@ -668,22 +667,9 @@ bool TestParserStmt::TestYieldStatement() {
     "function foo() {\n"
     "return hphp_create_continuation"
     "('', '3990978909_1', __FUNCTION__);\n"
-    "}\n" :
-    "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
-    "hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ");\n"
-    "switch ($" CONTINUATION_OBJECT_NAME "->getLabel()) {\n"
-    "}\n"
-    "$" CONTINUATION_OBJECT_NAME "->done();\n"
-    "return;\n"
-    "$" CONTINUATION_OBJECT_NAME "->done();\n"
-    "}\n"
-    "function foo() {\n"
-    "return hphp_create_continuation"
-    "('', '3990978909_1', __FUNCTION__);\n"
     "}\n");
 
   V("<?php function foo() { yield 123;}",
-    hhvm ?
     "function ($" CONTINUATION_OBJECT_NAME ") {\n"
     "switch (hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ")) {\n"
     "case 1:\n"
@@ -698,26 +684,9 @@ bool TestParserStmt::TestYieldStatement() {
     "function foo() {\n"
     "return hphp_create_continuation"
     "('', '3990978909_1', __FUNCTION__);\n"
-    "}\n" :
-    "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
-    "hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ");\n"
-    "switch ($" CONTINUATION_OBJECT_NAME "->getLabel()) {\n"
-    "case 1:\n"
-    "goto " YIELD_LABEL_PREFIX "1;\n"
-    "}\n"
-    "hphp_pack_continuation($" CONTINUATION_OBJECT_NAME ", 1, 123);\n"
-    "return;\n"
-    YIELD_LABEL_PREFIX "1:\n"
-    "$" CONTINUATION_OBJECT_NAME "->raised();\n"
-    "$" CONTINUATION_OBJECT_NAME "->done();\n"
-    "}\n"
-    "function foo() {\n"
-    "return hphp_create_continuation"
-    "('', '3990978909_1', __FUNCTION__);\n"
     "}\n");
 
   V("<?php class bar { function foo() { yield 123; yield 456;} }",
-    hhvm ?
     "class bar {\n"
     "public function foo() {\n"
     "return hphp_create_continuation"
@@ -741,31 +710,6 @@ bool TestParserStmt::TestYieldStatement() {
     "hphp_continuation_raised();\n"
     "hphp_continuation_done();\n"
     "}\n"
-    "}\n" :
-    "class bar {\n"
-    "public function foo() {\n"
-    "return hphp_create_continuation"
-    "('bar', '3990978909_1', __METHOD__);\n"
-    "}\n"
-    "public function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
-    "hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ");\n"
-    "switch ($" CONTINUATION_OBJECT_NAME "->getLabel()) {\n"
-    "case 2:\n"
-    "goto " YIELD_LABEL_PREFIX "2;\n"
-    "\n"
-    "case 1:\n"
-    "goto " YIELD_LABEL_PREFIX "1;\n"
-    "}\n"
-    "hphp_pack_continuation($" CONTINUATION_OBJECT_NAME ", 1, 123);\n"
-    "return;\n"
-    YIELD_LABEL_PREFIX "1:\n"
-    "$" CONTINUATION_OBJECT_NAME "->raised();\n"
-    "hphp_pack_continuation($" CONTINUATION_OBJECT_NAME ", 2, 456);\n"
-    "return;\n"
-    YIELD_LABEL_PREFIX "2:\n"
-    "$" CONTINUATION_OBJECT_NAME "->raised();\n"
-    "$" CONTINUATION_OBJECT_NAME "->done();\n"
-    "}\n"
     "}\n");
 
   return true;
@@ -782,3 +726,4 @@ bool TestParserStmt::TestUseTraitStatement() {
 
   return true;
 }
+

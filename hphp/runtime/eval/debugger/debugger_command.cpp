@@ -161,12 +161,7 @@ void DebuggerCommand::setClientOutput(DebuggerClient *client) {
 }
 
 bool DebuggerCommand::onClientD(DebuggerClient *client) {
-  bool ret;
-  if (hhvm) {
-    ret = onClientVM(client);
-  } else {
-    ret = onClient(client);
-  }
+  bool ret = onClientVM(client);
   if (client->isApiMode() && !m_incomplete) {
     setClientOutput(client);
   }

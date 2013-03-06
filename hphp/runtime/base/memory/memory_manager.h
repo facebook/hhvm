@@ -266,12 +266,8 @@ public:
     if (s_statsEnabled) {
       int64_t delta = int64_t(*m_allocated) - int64_t(*m_deallocated);
       int64_t deltaAllocated = int64_t(*m_allocated) - m_prevAllocated;
-      if (hhvm) {
-        stats.usage += delta - m_delta - stats.jemallocDebt;
-        stats.jemallocDebt = 0;
-      } else {
-        stats.usage += delta - m_delta;
-      }
+      stats.usage += delta - m_delta - stats.jemallocDebt;
+      stats.jemallocDebt = 0;
       stats.totalAlloc += deltaAllocated;
       if (live) {
         m_delta = delta;

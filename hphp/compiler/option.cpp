@@ -59,7 +59,6 @@ map<string, int> Option::DynamicFunctionCalls;
 bool Option::GeneratePickledPHP = false;
 bool Option::GenerateInlinedPHP = false;
 bool Option::GenerateTrimmedPHP = false;
-bool Option::GenerateInlineComments = true;
 bool Option::GenerateInferredTypes = false;
 bool Option::ConvertSuperGlobals = false;
 bool Option::ConvertQOpExpressions = false;
@@ -91,74 +90,8 @@ string Option::LabelEscape = "$";
 string Option::LambdaPrefix = "df_";
 string Option::Tab = "  ";
 
-/**
- * They all have to be something different. Otherwise, there is always a chance
- * of name collision or incorrect code transformation.
- */
-const char *Option::FunctionPrefix = "f_";
-const char *Option::TypedFunctionPrefix = "ft_";
-const char *Option::BuiltinFunctionPrefix = "x_";
-const char *Option::InvokePrefix = "i_";
-const char *Option::InvokeFewArgsPrefix = "ifa_";
-const char *Option::InvokeWrapperPrefix = "iw_";
-const char *Option::InvokeWrapperFewArgsPrefix = "iwfa_";
-const char *Option::InvokeSinglePrefix = "is_";
-const char *Option::CreateObjectOnlyPrefix = "coo_";
-const char *Option::PseudoMainPrefix = "pm_";
-const char *Option::VariablePrefix = "v_";
-const char *Option::LabelPrefix = "l_";
-const char *Option::HiddenVariablePrefix = "h_";
-const char *Option::GlobalVariablePrefix = "gv_";
-const char *Option::StaticVariablePrefix = "sv_";
-const char *Option::ClassPrefix = "c_";
-const char *Option::ClassStaticsCallbackPrefix = "cw_";
-const char *Option::ClassStaticsCallbackNullPrefix = "cwn_";
-const char *Option::ClassStaticInitializerFlagPrefix = "csf_";
-const char *Option::ObjectPrefix = "o_";
-const char *Option::ObjectStaticPrefix = "os_";
-const char *Option::SmartPtrPrefix = "p_";
-const char *Option::MethodPrefix = "t_";
-const char *Option::TypedMethodPrefix = "tt_";
-const char *Option::MethodWrapperPrefix = "mf_";
-const char *Option::MethodImplPrefix = "ti_";
-const char *Option::TypedMethodImplPrefix = "tti_";
-const char *Option::PropertyPrefix = "m_";
-const char *Option::StaticPropertyPrefix = "s_";
-const char *Option::ConstantPrefix = "k_";
-const char *Option::ClassConstantPrefix = "q_";
-const char *Option::ExceptionPrefix = "e_";
-const char *Option::TempVariablePrefix = "r_";
-const char *Option::CseTempVariablePrefix = "cse_";
-const char *Option::CseTempStoragePrefix = "cses_";
-const char *Option::EvalOrderTempPrefix = "eo_";
-const char *Option::CallInfoPrefix = "ci_";
-const char *Option::CallInfoWrapperPrefix = "ciw_";
-const char *Option::SilencerPrefix = "sil_";
-
-const char *Option::ScalarPrefix = "s_";
-const char *Option::SysPrefix = "sys_";
-const char *Option::StaticStringPrefix = "ss";
-const char *Option::StaticStringProxyPrefix = "ssp";
-const char *Option::StaticArrayPrefix = "sa";
-const char *Option::StaticVarIntPrefix = "svi";
-const char *Option::StaticVarDblPrefix = "svd";
-const char *Option::StaticVarStrPrefix = "svs";
-const char *Option::StaticVarStrProxyPrefix = "svsp";
-const char *Option::StaticVarArrPrefix = "sva";
-
-const char *Option::FFIFnPrefix = "ffi_";
-
-const char *Option::TempPrefix = "tmp";
-const char *Option::MapPrefix = "map";
-const char *Option::IterPrefix = "iter";
-const char *Option::InitPrefix = "inited_";
-const char *Option::SwitchPrefix = "switch";
-
-const char *Option::SystemFilePrefix = "sys/";
 const char *Option::UserFilePrefix = "php/";
 const char *Option::ClassHeaderPrefix = "cls/";
-const char *Option::ClusterPrefix = "cpp/";
-const char *Option::FFIFilePrefix = "ffi/";
 
 bool Option::PreOptimization = false;
 bool Option::PostOptimization = false;
@@ -174,10 +107,7 @@ int Option::ConditionalIncludeExpandLevel = 1;
 int Option::DependencyMaxProgram = 1;
 int Option::CodeErrorMaxProgram = 1;
 
-bool Option::GenerateFFI = false;
 Option::EvalLevel Option::EnableEval = NoEval;
-
-std::string Option::JavaFFIRootPackage;
 
 std::string Option::ProgramName;
 std::string Option::PreprocessedPartitionConfig;
@@ -222,10 +152,6 @@ bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
 bool Option::FlAnnotate = false;
 bool Option::SystemGen = false;
-bool Option::PregenerateCPP = false;
-bool Option::GenerateFFIStaticBinding = true;
-
-int Option::GCCOptimization[] = {0, 0, 0};
 
 void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
@@ -294,44 +220,6 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(IdPrefix);
     READ_CG_OPTION(LabelEscape);
     READ_CG_OPTION(LambdaPrefix);
-    READ_CG_OPTION(FunctionPrefix);
-    READ_CG_OPTION(BuiltinFunctionPrefix);
-    READ_CG_OPTION(InvokePrefix);
-    READ_CG_OPTION(PseudoMainPrefix);
-    READ_CG_OPTION(VariablePrefix);
-    READ_CG_OPTION(LabelPrefix);
-    READ_CG_OPTION(HiddenVariablePrefix);
-    READ_CG_OPTION(GlobalVariablePrefix);
-    READ_CG_OPTION(StaticVariablePrefix);
-    READ_CG_OPTION(ClassPrefix);
-    READ_CG_OPTION(ClassStaticsCallbackPrefix);
-    READ_CG_OPTION(ClassStaticsCallbackNullPrefix);
-    READ_CG_OPTION(ClassStaticInitializerFlagPrefix);
-    READ_CG_OPTION(ObjectPrefix);
-    READ_CG_OPTION(ObjectStaticPrefix);
-    READ_CG_OPTION(SmartPtrPrefix);
-    READ_CG_OPTION(MethodPrefix);
-    READ_CG_OPTION(MethodWrapperPrefix);
-    READ_CG_OPTION(MethodImplPrefix);
-    READ_CG_OPTION(PropertyPrefix);
-    READ_CG_OPTION(StaticPropertyPrefix);
-    READ_CG_OPTION(ConstantPrefix);
-    READ_CG_OPTION(ClassConstantPrefix);
-    READ_CG_OPTION(ExceptionPrefix);
-    READ_CG_OPTION(TempVariablePrefix);
-    READ_CG_OPTION(EvalOrderTempPrefix);
-    READ_CG_OPTION(SilencerPrefix);
-    READ_CG_OPTION(TempPrefix);
-    READ_CG_OPTION(MapPrefix);
-    READ_CG_OPTION(IterPrefix);
-    READ_CG_OPTION(InitPrefix);
-    READ_CG_OPTION(SwitchPrefix);
-    READ_CG_OPTION(FFIFnPrefix);
-    READ_CG_OPTION(SystemFilePrefix);
-    READ_CG_OPTION(UserFilePrefix);
-    READ_CG_OPTION(ClassHeaderPrefix);
-    READ_CG_OPTION(ClusterPrefix);
-    READ_CG_OPTION(FFIFilePrefix);
   }
 
   int count = 0;
@@ -424,28 +312,10 @@ void Option::Load(Hdf &config) {
   ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);
   DumpAst                  = config["DumpAst"].getBool(false);
   WholeProgram             = config["WholeProgram"].getBool(true);
-  PregenerateCPP           = config["PregenerateCPP"].getBool(false);
-  GenerateFFIStaticBinding = config["GenerateFFIStaticBinding"].getBool(true);
-
-  {
-    Hdf gccOptimization = config["GCCOptimization"];
-    GCCOptimization[0] = gccOptimization["O0"].getInt32(0);
-    GCCOptimization[1] = gccOptimization["O1"].getInt32(GCCOptimization[0]);
-    GCCOptimization[2] = gccOptimization["O2"].getInt32(GCCOptimization[1]);
-  }
 
   if (m_hookHandler) m_hookHandler(config);
 
   OnLoad();
-}
-
-int Option::GetOptimizationLevel(int length) {
-  if (length <= 0) return 3;
-  for (int i = 2; i >= 0; --i) {
-    int min = GCCOptimization[i];
-    if (length < min || min == 0) return i + 1;
-  }
-  return 0;
 }
 
 void Option::Load() {
@@ -513,12 +383,6 @@ std::string Option::MangleFilename(const std::string &name, bool id) {
     Util::replaceAll(ret, ".", "_");
   }
   return ret;
-}
-
-std::string Option::FormatClusterFile(int index) {
-  char buf[PATH_MAX];
-  snprintf(buf, sizeof(buf), "%s%03d", ClusterPrefix, index);
-  return buf;
 }
 
 bool Option::IsFileExcluded(const std::string &file,

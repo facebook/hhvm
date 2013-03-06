@@ -38,25 +38,22 @@ ThreadInfo::ThreadInfo()
   assert(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
-  if (hhvm) {
-    map<int, ObjectAllocatorBaseGetter> &wrappers =
-      ObjectAllocatorCollector::getWrappers();
-    m_allocators.resize(wrappers.rbegin()->first + 1);
-    for (map<int, ObjectAllocatorBaseGetter>::iterator it = wrappers.begin();
-         it != wrappers.end(); it++) {
-      m_allocators[it->first] = it->second();
-      assert(it->second() != nullptr);
-    }
+  map<int, ObjectAllocatorBaseGetter> &wrappers =
+    ObjectAllocatorCollector::getWrappers();
+  m_allocators.resize(wrappers.rbegin()->first + 1);
+  for (map<int, ObjectAllocatorBaseGetter>::iterator it = wrappers.begin();
+       it != wrappers.end(); it++) {
+    m_allocators[it->first] = it->second();
+    assert(it->second() != nullptr);
   }
+
   m_mm = MemoryManager::TheMemoryManager();
 
   m_profiler = nullptr;
   m_pendingException = false;
   m_coverage = new CodeCoverage();
 
-  if (hhvm) {
-    VM::Transl::TargetCache::threadInit();
-  }
+  VM::Transl::TargetCache::threadInit();
   onSessionInit();
 
   Lock lock(s_thread_info_mutex);
@@ -69,9 +66,7 @@ ThreadInfo::~ThreadInfo() {
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;
-  if (hhvm) {
-    VM::Transl::TargetCache::threadExit();
-  }
+  VM::Transl::TargetCache::threadExit();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -118,16 +113,12 @@ void ThreadInfo::clearPendingException() {
 
 void ThreadInfo::onSessionExit() {
   m_reqInjectionData.reset();
-  if (hhvm) {
-    VM::Transl::TargetCache::requestExit();
-  }
+  VM::Transl::TargetCache::requestExit();
 }
 
 void RequestInjectionData::onSessionInit() {
-  if (hhvm) {
-    VM::Transl::TargetCache::requestInit();
-    cflagsPtr = VM::Transl::TargetCache::conditionFlagsPtr();
-  }
+  VM::Transl::TargetCache::requestInit();
+  cflagsPtr = VM::Transl::TargetCache::conditionFlagsPtr();
   reset();
   started = time(0);
 }
@@ -170,7 +161,7 @@ ssize_t RequestInjectionData::fetchAndClearFlags() {
   for (;;) {
     flags = atomic_acquire_load(getConditionFlags());
     const ssize_t newFlags =
-      hhvm ? (flags & RequestInjectionData::EventHookFlag) : 0;
+      flags & RequestInjectionData::EventHookFlag;
     if (__sync_bool_compare_and_swap(getConditionFlags(), flags, newFlags)) {
       break;
     }

@@ -71,7 +71,6 @@ static bool UNUSED is_iterable_type(SmartAllocatorImpl::Name type) {
 }
 
 SmartAllocatorImpl::Iterator::Iterator(const SmartAllocatorImpl* sa) {
-  assert(hhvm);
   assert(is_iterable_type(sa->getAllocatorType()));
   next();
 }

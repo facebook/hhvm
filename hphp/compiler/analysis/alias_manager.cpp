@@ -1562,9 +1562,9 @@ ExpressionPtr AliasManager::canonicalizeNode(
               }
               cur = next;
             }
-            if ((!m_inCall || (!hhvm && !ae->getValue()->hasEffect())) &&
+            if (!m_inCall &&
                 ae->isUnused() && m_accessList.isLast(ae) &&
-                !(hhvm && Option::OutputHHBC &&
+                !(Option::OutputHHBC &&
                   e->hasAnyContext(Expression::AccessContext |
                                    Expression::ObjectContext |
                                    Expression::ExistContext |
@@ -1835,7 +1835,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
       break;
 
     case Expression::KindOfSimpleFunctionCall:
-      if (!hhvm || !Option::OutputHHBC) {
+      if (!Option::OutputHHBC) {
         SimpleFunctionCallPtr f(spc(SimpleFunctionCall, e));
         if (!f->getClass()) {
           if (f->getClassName().empty()) {
@@ -3324,7 +3324,7 @@ public:
         b->setBit(DataFlow::PRefIn, it->second);
         b->setBit(DataFlow::PInitIn, it->second);
       }
-      updateParamInfo(m->getParams(), hhvm && Option::HardTypeHints);
+      updateParamInfo(m->getParams(), Option::HardTypeHints);
       updateParamInfo(m->getFunctionScope()->getClosureVars(), false);
     }
   }

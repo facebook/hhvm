@@ -121,7 +121,7 @@ static inline void threadStats(uint64_t*& allocated, uint64_t*& deallocated,
 static void* MemoryManagerInit() {
   // We store the free list pointers right at the start of each object,
   // overlapping SmartHeader.data, and we also clobber _count as a
-  // free-object flag when the object is deallocated (if hhvm).
+  // free-object flag when the object is deallocated.
   // This assert just makes sure they don't overflow.
   static_assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
                 SmartAllocatorImpl::MinItemSize,
@@ -338,7 +338,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   if (n2 != n) {
     // block moved; must re-link to sweeplist
     next->prev = prev->next = n2;
-    if (hhvm && UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+    if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
       refreshStatsHelper();
     }
   }
@@ -350,7 +350,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
  * slab list.  Return the newly allocated nbytes-sized block.
  */
 NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
-  if (hhvm && UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
   char* slab = (char*) Util::safe_malloc(SLAB_SIZE);
@@ -373,7 +373,7 @@ void* MemoryManager::smartMallocSlab(size_t padbytes) {
 }
 
 inline void* MemoryManager::smartEnlist(SweepNode* n) {
-  if (hhvm && UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
   // link after m_sweep

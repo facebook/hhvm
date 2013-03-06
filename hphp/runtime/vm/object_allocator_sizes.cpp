@@ -42,12 +42,8 @@ template<> struct AllocIniter<NumObjectSizeClasses> {
 }
 
 int InitializeAllocators() {
-  if (hhvm) {
-    AllocIniter<0>::run();
-    return NumObjectSizeClasses;
-  }
-
-  return 0;
+  AllocIniter<0>::run();
+  return NumObjectSizeClasses;
 }
 
 

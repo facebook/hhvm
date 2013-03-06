@@ -106,19 +106,17 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
   }
 
   Lock lock(s_mutex);
-  if (hhvm) {
-    VM::Func::enableIntercept();
-    TranslatorX64* tx64 = TranslatorX64::Get();
+  VM::Func::enableIntercept();
+  TranslatorX64* tx64 = TranslatorX64::Get();
+  if (!tx64->interceptsEnabled()) {
+    tx64->acquireWriteLease(true);
     if (!tx64->interceptsEnabled()) {
-      tx64->acquireWriteLease(true);
-      if (!tx64->interceptsEnabled()) {
-        tx64->enableIntercepts();
-        // redirect all existing generated prologues so that they first
-        // call the intercept helper
-        Eval::FileRepository::enableIntercepts();
-      }
-      tx64->dropWriteLease();
+      tx64->enableIntercepts();
+      // redirect all existing generated prologues so that they first
+      // call the intercept helper
+      Eval::FileRepository::enableIntercepts();
     }
+    tx64->dropWriteLease();
   }
   if (name.empty()) {
     for (RegisteredFlagsMap::iterator iter =
@@ -194,78 +192,21 @@ void unregister_intercept_flag(CStrRef name, char *flag) {
 // fb_rename_function()
 
 void check_renamed_functions(CArrRef names) {
-  if (hhvm) {
-    g_vmContext->addRenameableFunctions(names.get());
-  } else {
-    s_intercept_data->m_use_allowed_functions = true;
-    StringISet &allowed = s_intercept_data->m_allowed_functions;
-    for (ArrayIter iter(names); iter; ++iter) {
-      String name = iter.second().toString();
-      if (!name.empty()) {
-        allowed.insert(name);
-      }
-    }
-  }
+  g_vmContext->addRenameableFunctions(names.get());
 }
 
 bool check_renamed_function(CStrRef name) {
-  if (hhvm) {
-    return g_vmContext->isFunctionRenameable(name.get());
-  } else {
-    if (s_intercept_data->m_use_allowed_functions) {
-      StringISet &allowed = s_intercept_data->m_allowed_functions;
-      return allowed.find(name) != allowed.end();
-    }
-    return true;
-  }
+  return g_vmContext->isFunctionRenameable(name.get());
 }
 
 void rename_function(CStrRef old_name, CStrRef new_name) {
-  if (hhvm) {
-    g_vmContext->renameFunction(old_name.get(), new_name.get());
-  } else {
-    StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
-
-    String orig_name = old_name;
-    /*
-      Name beginning with '1' is from create_function.
-      We allow such functions to be renamed to multiple
-      different names. They also report that they exist,
-      even after renaming
-    */
-    if (old_name.data()[0] != ParserBase::CharCreateFunction) {
-      StringIMap<String>::iterator iter = funcs.find(old_name);
-      if (iter != funcs.end()) {
-        if (!iter->second.empty()) {
-          orig_name = iter->second;
-          iter->second = empty_string;
-        }
-      } else {
-        funcs[old_name] = empty_string;
-      }
-    }
-
-    if (new_name.data()[0] != ParserBase::CharCreateFunction) {
-      funcs[new_name] = std::move(orig_name);
-    }
-    *s_hasRenamedFunction = true;
-  }
+  g_vmContext->renameFunction(old_name.get(), new_name.get());
 }
 
 String get_renamed_function(CStrRef name) {
-  if (hhvm) {
-    HPHP::VM::Func* f = HPHP::VM::Unit::lookupFunc(name.get());
-    if (f) {
-      return f->nameRef();
-    }
-  } else {
-    if (*s_hasRenamedFunction) {
-      StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
-      StringIMap<String>::const_iterator iter = funcs.find(name);
-      if (iter != funcs.end()) {
-        return iter->second;
-      }
-    }
+  HPHP::VM::Func* f = HPHP::VM::Unit::lookupFunc(name.get());
+  if (f) {
+    return f->nameRef();
   }
   return name;
 }

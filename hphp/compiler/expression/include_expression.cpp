@@ -286,7 +286,7 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultConstPtr ar) {
           return replaceValue(rep->clone());
         }
       }
-      if (!hhvm || !Option::OutputHHBC) {
+      if (!Option::OutputHHBC) {
         m_exp.reset();
       }
     } else {

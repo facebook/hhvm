@@ -58,10 +58,6 @@ public:
   void setAlwaysStash() { m_alwaysStash = true; }
   void updateSymbol(SimpleVariablePtr src);
   void coalesce(SimpleVariablePtr other);
-
-  bool hasAssignableCPPVariable() const;
-  std::string getAssignableCPPVariable(AnalysisResultPtr ar) const;
-
 private:
   std::string getNamePrefix() const;
 

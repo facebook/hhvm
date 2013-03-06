@@ -376,7 +376,6 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
 }
 
 Variant vm_default_invoke_file(bool incOnce) {
-  assert(hhvm);
   SystemGlobals* g = (SystemGlobals*)get_global_variables();
   Variant& v_argc = g->GV(argc);
   Variant& v_argv = g->GV(argv);

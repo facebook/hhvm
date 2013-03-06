@@ -263,7 +263,7 @@ void *SmartAllocatorInitSetup() {
   public:                                                               \
   /* static void *ObjAllocatorInitSetup; */                             \
   inline ALWAYS_INLINE void operator delete(void *p) {                  \
-    if (!hhvm || T::IsResourceClass) {                                  \
+    if (T::IsResourceClass) {                                  \
       RELEASEOBJ(NS, T, p);                                             \
       return;                                                           \
     }                                                                   \

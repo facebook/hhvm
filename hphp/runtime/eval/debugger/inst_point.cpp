@@ -23,7 +23,6 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 const uchar* InstPointInfo::lookupPC() {
-  const_assert(hhvm);
   VMExecutionContext* context = g_vmContext;
   if (m_locType == LocHere) {
     // Instrument to current location

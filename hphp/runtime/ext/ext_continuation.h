@@ -67,7 +67,6 @@ class c_Continuation : public ExtObjectData {
   public: Variant t___clone();
 
   static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {
-    const_assert(hhvm);
     c_Continuation* cont =
       (c_Continuation*)ALLOCOBJSZ(sizeForLocalsAndIters(nLocals, nIters));
     new ((void *)cont) c_Continuation(cls);

@@ -308,22 +308,6 @@ FunctionScopeRawPtr Expression::getOriginalFunction() {
   return scope ? scope->getContainingFunction() : FunctionScopeRawPtr();
 }
 
-string Expression::originalClassName(CodeGenerator &cg, bool withComma) {
-  ClassScopeRawPtr cls = getOriginalClass();
-  string ret = withComma ? ", " : "";
-  if (cls) {
-    if (cls == getClassScope()) {
-      return ret + "s_class_name";
-    }
-    return ret + Option::ClassPrefix + cls->getId() + "::s_class_name";
-  } else if (FunctionScopePtr funcScope = getOriginalFunction()) {
-    if (!funcScope->inPseudoMain()) {
-      return ret + "empty_string";
-    }
-  }
-  return withComma ? "" : "null_string";
-}
-
 void Expression::resetTypes() {
   m_actualType     .reset();
   m_expectedType   .reset();

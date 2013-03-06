@@ -57,6 +57,7 @@
 #include <boost/program_options/parsers.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
+#include <libxml/parser.h>
 
 #include <runtime/eval/runtime/file_repository.h>
 
@@ -1173,6 +1174,9 @@ void hphp_process_init() {
   // but the implementation of init is not
   // thread safe due to bugs
   onig_init();
+
+  // simple xml also needs one time init
+  xmlInitParser();
 
   g_vmProcessInit();
 

@@ -103,7 +103,11 @@ Array vm_get_class_constants(CStrRef className) {
     // get_class_constants(), so mimic that behavior
     if (consts[i].m_class == cls) {
       StringData* name  = const_cast<StringData*>(consts[i].m_name);
-      TypedValue* value = cls->clsCnsGet(consts[i].m_name);
+      const TypedValue* value = &consts[i].m_val;
+      // Handle dynamically set constants
+      if (value->m_type == KindOfUninit) {
+        value = cls->clsCnsGet(consts[i].m_name);
+      }
       retVal->nvSet(name, value, false);
     }
   }

@@ -33,6 +33,7 @@ fi
 if [ "$1" = "gen" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/gen/* files using hphpc"
   cd $HPHP_HOME/hphp/system
+  rm -rf gen
   $HHVM --hphp \
         --opts=none -t cpp -f sys -o gen \
         --input-dir . -i `find classes globals -name '*.php'`

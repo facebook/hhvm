@@ -1010,7 +1010,8 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
 
   if (emitDec(dst, src1, src2)) return;
 
-  if (src1->isConst() && src1->getValInt() == 0 && !src2->isA(Type::Dbl)) {
+  if (src1->isConst() && src1->isA(Type::Int) && src1->getValInt() == 0 &&
+      !src2->isA(Type::Dbl)) {
     return cgNegateWork(dst, src2);
   }
 

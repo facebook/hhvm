@@ -79,9 +79,13 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       auto current = m_queue_ready.front();
       m_queue_ready.pop();
       m_current = current;
+
+      auto run_finished_guard = folly::makeGuard([&] {
+        m_current = nullptr;
+        decRefObj(current);
+      });
+
       m_current->run();
-      m_current = nullptr;
-      decRefObj(current);
 
       if (wait_handle->isFinished()) {
         return;

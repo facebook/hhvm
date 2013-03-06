@@ -199,9 +199,6 @@ void c_ContinuationWaitHandle::run() {
       if (IS_NULL_TYPE(value->m_type)) {
         // null dependency
         m_child = nullptr;
-      } else if (value->m_type == KindOfArray) {
-        // array of dependencies; TODO: deprecate this
-        m_child = c_GenArrayWaitHandle::t_create(value->m_data.parr);
       } else {
         c_WaitHandle* child = c_WaitHandle::fromTypedValue(value);
         if (UNLIKELY(!child)) {

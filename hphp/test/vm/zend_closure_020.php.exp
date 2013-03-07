@@ -1,0 +1,14 @@
+object(foo)#1 (2) {
+  ["test":"foo":private]=>
+  int(3)
+  ["a"]=>
+  object(Closure$)#2 (2) {
+    ["a":"Closure$":private]=>
+    *RECURSION*
+    ["__static_locals":protected]=>
+    NULL
+  }
+}
+bool(true)
+bool(true)
+HipHop Fatal error: Cannot access private property foo::$test in hphp/test/vm/zend_closure_020.php on line 19

@@ -349,7 +349,14 @@ CALL_OPCODE(NewTuple)
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
 CALL_OPCODE(PrintBool)
-CALL_OPCODE(RaiseUninitWarning)
+CALL_OPCODE(DbgAssertPtr)
+CALL_OPCODE(LdSwitchDblIndex);
+CALL_OPCODE(LdSwitchStrIndex);
+CALL_OPCODE(LdSwitchObjIndex);
+CALL_OPCODE(RaiseUninitLoc)
+
+// Vector instruction helpers
+CALL_OPCODE(BaseG)
 CALL_OPCODE(PropX)
 CALL_OPCODE(CGetProp)
 CALL_OPCODE(SetProp)
@@ -357,11 +364,6 @@ CALL_OPCODE(ElemX)
 CALL_OPCODE(ElemDX)
 CALL_OPCODE(CGetElem)
 CALL_OPCODE(SetElem)
-CALL_OPCODE(BaseG)
-CALL_OPCODE(DbgAssertPtr)
-CALL_OPCODE(LdSwitchDblIndex);
-CALL_OPCODE(LdSwitchStrIndex);
-CALL_OPCODE(LdSwitchObjIndex);
 
 #undef NOOP_OPCODE
 #undef PUNT_OPCODE
@@ -1335,16 +1337,16 @@ ConditionCode CodeGenerator::emitTypeTest(Type type, OpndType src,
   if (type.isString()) {
     m_as.testl(KindOfStringBit, src);
     cc = CC_NZ;
-  } else if (type == Type::UncountedInit) {
+  } else if (type.equals(Type::UncountedInit)) {
     m_as.testl(KindOfUncountedInitBit, src);
     cc = CC_NZ;
-  } else if (type == Type::Uncounted) {
+  } else if (type.equals(Type::Uncounted)) {
     m_as.cmpl(KindOfRefCountThreshold, src);
     cc = CC_LE;
-  } else if (type == Type::Cell) {
+  } else if (type.equals(Type::Cell)) {
     m_as.cmpl(KindOfRef, src);
     cc = CC_L;
-  } else if (type == Type::Gen) {
+  } else if (type.equals(Type::Gen)) {
     return CC_None; // nothing to check
   } else {
     DataType dataType = type.toDataType();

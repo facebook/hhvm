@@ -65,8 +65,7 @@ TEST(Type, KnownDataType) {
       << t.toString() << ".isKnownDataType()";
   }
   auto falseTypes = {
-    Type::FuncCtx, Type::Cell, Type::Gen, Type::Ctx,
-    Type::Int | Type::Dbl
+    Type::Cell, Type::Gen, Type::Int | Type::Dbl
   };
   for (auto t : falseTypes) {
     EXPECT_FALSE(t.isKnownDataType())

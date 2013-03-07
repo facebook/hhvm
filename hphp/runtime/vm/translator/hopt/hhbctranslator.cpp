@@ -2541,7 +2541,7 @@ SSATmp* HhbcTranslator::loadStackAddr(int32_t offset) {
 
 //
 // This is a wrapper to TraceBuilder::genLdLoc() that also emits the
-// RaiseUninitWarning if the local is uninitialized
+// RaiseUninitLoc if the local is uninitialized
 //
 SSATmp* HhbcTranslator::emitLdLocWarn(uint32_t id,
                                       Trace* target) {
@@ -2549,7 +2549,7 @@ SSATmp* HhbcTranslator::emitLdLocWarn(uint32_t id,
 
   if (locVal->getType().subtypeOf(Type::Uninit)) {
     spillStack();
-    m_tb->genRaiseUninitWarning(id);
+    m_tb->genRaiseUninitLoc(id);
     return m_tb->genDefInitNull();
   }
 

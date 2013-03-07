@@ -144,7 +144,9 @@ enum DataType {
    * in unwind-x64.h.)
    */
   KindOfUninit           = 0,
-
+  // Any code that static_asserts about the value of KindOfNull may
+  // also depend on there not being any values between KindOfUninit
+  // and KindOfNull.
   KindOfNull             = 8,     //   0001000    0x08
   KindOfBoolean          = 9,     //   0001001    0x09
   KindOfInt64            = 10,    //   0001010    0x0a

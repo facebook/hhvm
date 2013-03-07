@@ -113,11 +113,12 @@ void VectorEffects::init(Opcode op, const Type origBase,
   if (baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
     // stdClass or array promotion might happen
     auto newBase = op == SetElem ? Type::Arr : Type::Obj;
-    // if the base is known to be null, promotion will happen. If we can ever
+    // If the base is known to be null, promotion will happen. If we can ever
     // prove that the base is false or the empty string, promotion will
-    // definitely happen but those cases aren't handled yet.
-    baseType = baseType.isNull() ?
-      newBase : ((baseType - Type::Null - Type::BoxedNull) | newBase);
+    // definitely happen but those cases aren't handled yet. In a perfect world
+    // we would remove Type::Null from baseType here but that can produce types
+    // that are tricky to guard against and doesn't buy us much right now.
+    baseType = baseType.isNull() ? newBase : (baseType | newBase);
     baseValChanged = true;
   }
   if (op == SetElem && baseType.maybe(Type::Arr)) {
@@ -235,9 +236,12 @@ SSATmp* HhbcTranslator::VectorTranslator::genMisPtr() {
 // it can be executed without using an MInstrState struct.
 void HhbcTranslator::VectorTranslator::checkMIState() {
   auto const& baseRtt = m_ni.inputs[m_mii.valCount()]->rtt;
-  const Type baseType = Type::fromRuntimeType(baseRtt).unbox();
+  Type baseType = Type::fromRuntimeType(baseRtt);
   const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
   const bool isSetM = m_ni.mInstrOp() == OpSetM;
+
+  assert(baseType.isBoxed() || baseType.notBoxed());
+  baseType = baseType.unbox();
 
   // CGetM or SetM with no unknown property offsets
   const bool simpleProp = !mInstrHasUnknownOffsets(m_ni) && (isCGetM || isSetM);
@@ -365,41 +369,58 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
     if (base.rtt.isUninit()) {
       m_ht.spillStack();
       LocalId data(base.location.offset);
-      m_tb.gen(RaiseUninitWarning, &data);
+      m_tb.gen(RaiseUninitLoc, &data);
     }
   }
 
-  if (base.isVariant()) {
-    PUNT(emitBaseLCR-Variant);
-  }
-
-  bool promoteUninit = (mia & MIA_define) && base.rtt.isUninit();
   if (base.location.isLocal()) {
     uint32_t loc = base.location.offset;
-    if (promoteUninit) {
+    auto baseType = m_tb.getLocalType(loc);
+
+    if ((mia & MIA_define) && baseType.subtypeOf(Type::Uninit)) {
+      // Promote Uninit to InitNull before doing anything else
       m_tb.genStLoc(loc, m_tb.genDefInitNull(), false, true, nullptr);
+      baseType = Type::InitNull;
     }
-    if (base.rtt.isNull()) {
+    if (baseType.unbox().isNull()) {
       // The base local might get promoted to an Array or stdClass for set
       // operations. Punt for now.
       PUNT(emitBaseLCR-NullBase);
     }
 
-    if (base.rtt.isObject() && mcodeMaybePropName(m_ni.immVecM[0])) {
+    // We should never have a union type for the base with mixed boxes
+    assert(baseType.isBoxed() || baseType.notBoxed());
+
+    // If the base is a box with a type that's changed, we need to bail out of
+    // the tracelet and retranslate. Doing an exit here is a little sketchy
+    // since we may have already emitted instructions with memory effects to
+    // initialize the MInstrState. These particular stores are harmless though,
+    // and the worst outcome here is that we'll ending up doing the stores
+    // twice, once for this instruction and once at the beginning of the
+    // retranslation.
+    Trace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
+    if (baseType.unbox().subtypeOf(Type::Obj) &&
+        mcodeMaybePropName(m_ni.immVecM[0])) {
       // We can pass the base to helpers by value in this case
       m_base = m_tb.genLdLoc(loc);
+      if (baseType.isBoxed()) {
+        assert(m_base->isA(Type::BoxedObj));
+        m_base = m_tb.gen(LdRef, Type::Obj, failedRef, m_base);
+      }
       assert(m_base->isA(Type::Obj));
     } else {
-      // Everything else is passed by reference
-      m_base = m_tb.genLdLocAddr(loc);
+      // Everything else is passed by reference. We don't have to worry about
+      // unboxing here, since all the generic helpers understand boxed bases.
+      m_base = m_tb.genLdLocAddr(loc, failedRef);
+      assert(m_base->getType().isPtr());
     }
   } else {
-    // Only locals can be KindOfUninit
-    assert(!promoteUninit);
-
     // Stack bases require a little more stack magic than we have right
     // now. Refcounting correctly is tricky too.
     PUNT(emitBaseLCR-CellBase);
+    if (base.isVariant()) {
+      PUNT(emitBaseLCR-R);
+    }
   }
 }
 

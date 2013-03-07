@@ -1164,7 +1164,8 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
-  if (inst->getSrc(0)->getType() == Type::PtrToCell) {
+  if (inst->getSrc(0)->isA(Type::PtrToCell)) {
+    // Nothing to unbox
     return inst->getSrc(0);
   }
   return nullptr;

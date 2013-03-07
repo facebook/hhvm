@@ -835,7 +835,7 @@ void Block::printLabel(std::ostream& ostream) const {
 
 int SSATmp::numNeededRegs() const {
   auto type = getType();
-  if (type.subtypeOf(Type::None | Type::Null | Type::ActRec | Type::RetAddr)) {
+  if (type.subtypeOfAny(Type::None, Type::Null, Type::ActRec, Type::RetAddr)) {
     // These don't need a register because their values are static or unused.
     //
     // RetAddr doesn't take any register because currently we only target x86,
@@ -847,15 +847,19 @@ int SSATmp::numNeededRegs() const {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
-  if (type.needsReg() || type.subtypeOf(Type::FuncCtx)) {
-    // These need 2 registers, 1 for the value and 1 for the type, or
-    // 1 for the Func* and 1 for the {Obj|Cctx}
+  if (type.subtypeOf(Type::FuncCtx)) {
+    // 2 registers regardless of union status: 1 for the Func* and 1
+    // for the {Obj|Cctx}, differentiated by the low bit.
     return 2;
   }
+  if (!type.isUnion()) {
+    // Not a union type and not a special case: 1 register.
+    assert(IMPLIES(type.subtypeOf(Type::Gen), type.isKnownDataType()));
+    return 1;
+  }
 
-  // By default, all other types only need 1 register.
-  assert(!type.needsReg());
-  return 1;
+  assert(type.subtypeOf(Type::Gen));
+  return type.needsReg() ? 2 : 1;
 }
 
 int SSATmp::numAllocatedRegs() const {

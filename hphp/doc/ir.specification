@@ -960,9 +960,9 @@ Nop
 
 14. Runtime helpers
 
-RaiseUninitWarning<localId>
+RaiseUninitLoc<localId>
 
-  Raise a warning for an uninitialized local variable.
+  Raise a notice for an uninitialized local variable.
 
 DefCns S0:ConstStr S0:Cell
 

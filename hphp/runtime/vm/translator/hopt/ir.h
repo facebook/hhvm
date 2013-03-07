@@ -303,7 +303,7 @@ O(DefLabel,                     DLabel, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
-O(RaiseUninitWarning,               ND, S(Str),              E|N|Mem|Refs|Er) \
+O(RaiseUninitLoc,                   ND, S(Str),              E|N|Mem|Refs|Er) \
 O(PrintStr,                         ND, S(Str),                  E|N|Mem|CRc) \
 O(PrintInt,                         ND, S(Int),                  E|N|Mem|CRc) \
 O(PrintBool,                        ND, S(Bool),                 E|N|Mem|CRc) \
@@ -557,7 +557,7 @@ X(JmpSwitchDest,      JmpSwitchData);
 X(LdSSwitchDestFast,  LdSSwitchData);
 X(LdSSwitchDestSlow,  LdSSwitchData);
 X(Marker,             MarkerData);
-X(RaiseUninitWarning, LocalId);
+X(RaiseUninitLoc,     LocalId);
 X(GuardLoc,           LocalId);
 X(AssertLoc,          LocalId);
 X(LdLocAddr,          LocalId);
@@ -830,24 +830,31 @@ public:
   }
 
   /*
+   * Returns true iff this is a union type. Note that this is the
+   * plain old set definition of union, so Type::Str, Type::Arr, and
+   * Type::Null will all return true.
+   */
+  bool isUnion() const {
+    // This will return true iff more than 1 bit is set in
+    // m_bits.
+    return (m_bits & (m_bits - 1)) != 0;
+  }
+
+  /*
    * Returns true if this value has a known constant DataType enum
    * value, which allows us to avoid several checks.
    */
   bool isKnownDataType() const {
-    // Str, Arr and Null are technically unions but are statically
-    // known for all practical purposes. Same for a union that
-    // consists of nothing but boxed types.
-    if (isString() || isArray() || isNull() ||
-        (isPtr() &&
-         (deref().isString() || deref().isArray() || deref().isNull())) ||
-        isBoxed()) {
+    // Calling this function with a non-php type isn't meaningful
+    assert(subtypeOf(Gen));
+    // Str, Arr and Null are technically unions but can each be
+    // represented by one data type. Same for a union that consists of
+    // nothing but boxed types.
+    if (isString() || isArray() || isNull() || isBoxed()) {
       return true;
     }
 
-    // This will return true iff no more than 1 bit is set in
-    // m_bits. If 0 bits are set, then *this == Bottom, which is
-    // statically known.
-    return (m_bits & (m_bits - 1)) == 0;
+    return !isUnion();
   }
 
   /*
@@ -859,11 +866,11 @@ public:
   }
 
   /*
-   * Returns true if we need to hold the value's type in a register.
-   * The opposite of isKnownDataType.
+   * Returns true if this requires a register to hold a DataType at
+   * runtime.
    */
   bool needsReg() const {
-    return !isKnownDataType();
+    return subtypeOf(Gen) && !isKnownDataType();
   }
 
   bool needsStaticBitCheck() const {
@@ -887,10 +894,22 @@ public:
   }
 
   /*
-   * Returns true if this is a non-strict subtype of t2.
+   * Returns true if this is a non-strict subtype of any of the arguments.
    */
   bool subtypeOf(Type t2) const {
     return (m_bits & t2.m_bits) == m_bits;
+  }
+
+  /*
+   * Returns true if this is a non-strict subtype of any of the arguments.
+   */
+  template<typename... Types>
+  bool subtypeOfAny(Type t2, Types... ts) const {
+    return subtypeOf(t2) || subtypeOfAny(ts...);
+  }
+
+  bool subtypeOfAny() const {
+    return false;
   }
 
   /*
@@ -979,7 +998,7 @@ public:
     assert(subtypeOf(Cell));
     // Boxing Uninit returns InitNull but that logic doesn't belong
     // here.
-    assert(not(Uninit));
+    assert(not(Uninit) || equals(Cell));
     return Type(m_bits << kBoxShift);
   }
 

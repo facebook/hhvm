@@ -561,8 +561,8 @@ SSATmp* TraceBuilder::genBoxLoc(uint32_t id) {
   return newValue;
 }
 
-void TraceBuilder::genRaiseUninitWarning(uint32_t id) {
-  gen(RaiseUninitWarning,
+void TraceBuilder::genRaiseUninitLoc(uint32_t id) {
+  gen(RaiseUninitLoc,
       genDefConst(m_curFunc->getValFunc()->localVarName(id)));
 }
 
@@ -605,9 +605,16 @@ SSATmp* TraceBuilder::genLdLocAsCell(uint32_t id, Trace* exitTrace) {
   return genLdRef(tmp, type.innerType(), exitTrace);
 }
 
-SSATmp* TraceBuilder::genLdLocAddr(uint32_t id) {
+SSATmp* TraceBuilder::genLdLocAddr(uint32_t id, Trace* exitTrace) {
   LocalId baseLocalId(id);
-  return gen(LdLocAddr, getLocalType(id).ptr(), &baseLocalId, getFp());
+  Type t = getLocalType(id);
+  if (exitTrace) {
+    // If we have an exitTrace, emit a LdRef for its guard side-effect.
+    assert(t.isBoxed());
+    SSATmp* locVal = genLdLoc(id);
+    gen(LdRef, t.unbox(), exitTrace, locVal);
+  }
+  return gen(LdLocAddr, t.ptr(), &baseLocalId, getFp());
 }
 
 void TraceBuilder::genStLocAux(uint32_t id, SSATmp* newValue, bool storeType) {

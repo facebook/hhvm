@@ -85,8 +85,8 @@ public:
   void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
 
   SSATmp* genLdLoc(uint32_t id);
-  SSATmp* genLdLocAddr(uint32_t id);
-  void genRaiseUninitWarning(uint32_t id);
+  SSATmp* genLdLocAddr(uint32_t id, Trace* exitTrace = nullptr);
+  void genRaiseUninitLoc(uint32_t id);
 
   /*
    * Returns an SSATmp containing the (inner) value of the given local.

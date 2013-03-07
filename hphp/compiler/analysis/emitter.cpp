@@ -3783,7 +3783,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         StringData* className = newClosureName();
         const static StringData* parentName =
-          StringData::GetStaticString("closure");
+          StringData::GetStaticString("Closure");
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
           className, PreClass::AlwaysHoistable);

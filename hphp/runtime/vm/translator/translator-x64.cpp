@@ -2307,7 +2307,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
         + TVOFF(m_type);
 
       emitImmReg(a, loopStart, loopReg);
-      emitImmReg(a, 0, rdx);
+      emitImmReg(a, KindOfUninit, rdx);
 
       TCA topOfLoop = a.code.frontier;
       // do {

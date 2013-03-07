@@ -285,6 +285,13 @@ Terminal
   The instruction has no next instruction; it either jumps, returns,
   or throws.
 
+Passthrough
+
+  The value of the instruction's dest is the same as one of its inputs; it
+  differs only in the refcount of the underlying object, the type of the
+  variable, or some other property that doesn't affect the value of the
+  variable itself.
+
 
 Instruction set
 ---------------

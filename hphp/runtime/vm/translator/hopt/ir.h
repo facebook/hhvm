@@ -132,10 +132,11 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *      Er    mayRaiseError
  *      Mem   hasMemEffects
  *      T     isTerminal
+ *      P     passthrough
  */
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(GuardType,                    DParam, S(Gen),                          C|E) \
+O(GuardType,                    DParam, S(Gen),                        C|E|P) \
 O(GuardLoc,                         ND, S(StkPtr),                         E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(CastStk,                   D(StkPtr), S(StkPtr) C(Int),           Mem|N|Er) \
@@ -280,9 +281,9 @@ O(ExitSlow,                         ND, SUnk,                            T|E) \
 O(ExitSlowNoProgress,               ND, SUnk,                            T|E) \
 O(ExitGuardFailure,                 ND, SUnk,                            T|E) \
 O(SyncVMRegs,                       ND, S(StkPtr) S(StkPtr),               E) \
-O(Mov,                         DofS(0), SUnk,                              C) \
+O(Mov,                         DofS(0), SUnk,                            C|P) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
-O(IncRef,                      DofS(0), S(Gen),                      Mem|PRc) \
+O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
 O(DecRefLoc,                        ND, S(StkPtr),              N|E|Mem|Refs) \
 O(DecRefStack,                      ND, S(StkPtr) C(Int),       N|E|Mem|Refs) \
 O(DecRefThis,                       ND, SUnk,                   N|E|Mem|Refs) \
@@ -1427,6 +1428,8 @@ struct IRInstruction {
   bool mayRaiseError() const;
   bool isEssential() const;
   bool isTerminal() const;
+  bool isPassthrough() const;
+  SSATmp* getPassthroughValue() const;
 
   void printDst(std::ostream& ostream) const;
   void printSrc(std::ostream& ostream, uint32_t srcIndex) const;

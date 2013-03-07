@@ -3152,23 +3152,36 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   SSATmp* dst             = inst->getDst();
   SSATmp* sp              = inst->getSrc(0);
-  SSATmp* spAdjustment    = inst->getSrc(1);
+  auto const spDeficit    = inst->getSrc(1)->getValInt();
   auto const spillVals    = inst->getSrcs().subpiece(2);
   auto const numSpillSrcs = spillVals.size();
   auto const dstReg       = dst->getReg();
   auto const spReg        = sp->getReg();
   auto const spillCells   = spillValueCells(inst);
 
-  int64_t adjustment =
-    (spAdjustment->getValInt() - spillCells) * sizeof(Cell);
-  for (uint32_t i = 0, offset = 0; i < numSpillSrcs; ++i) {
+  int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
+  for (uint32_t i = 0, cellOff = 0; i < numSpillSrcs; ++i) {
+    const int64_t offset = cellOff * sizeof(Cell) + adjustment;
     if (spillVals[i]->getType() == Type::ActRec) {
-      emitSpillActRec(sp, offset * sizeof(Cell) + adjustment, spillVals[i]);
-      offset += kNumActRecCells;
+      emitSpillActRec(sp, offset, spillVals[i]);
+      cellOff += kNumActRecCells;
       i += kSpillStackActRecExtraArgs;
     } else {
-      cgStore(spReg, offset * sizeof(Cell) + adjustment, spillVals[i]);
-      ++offset;
+      auto* val = spillVals[i];
+      auto* inst = val->getInstruction();
+      while (inst->isPassthrough()) {
+        inst = inst->getPassthroughValue()->getInstruction();
+      }
+      // If our value came from a LdStack on the same sp and offset,
+      // we don't need to spill it.
+      if (inst->getOpcode() == LdStack && inst->getSrc(0) == sp &&
+          inst->getSrc(1)->getValInt() * sizeof(Cell) == offset) {
+        FTRACE(1, "{}: Not spilling spill value {} from {}\n",
+               __func__, i, inst->toString());
+      } else {
+        cgStore(spReg, offset, val);
+      }
+      ++cellOff;
     }
   }
   if (adjustment != 0) {

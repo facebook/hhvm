@@ -90,6 +90,7 @@ enum OpcodeFlag : uint64_t {
   Terminal         = 0x0400, // has no next instruction
   NaryDest         = 0x0800, // has 0 or more destinations
   HasExtra         = 0x1000,
+  Passthrough      = 0x2000,
 };
 
 #define NF     0
@@ -103,6 +104,7 @@ enum OpcodeFlag : uint64_t {
 #define Er     MayRaiseError
 #define Mem    MemEffects
 #define T      Terminal
+#define P      Passthrough
 
 #define ND        0
 #define D(n)      HasDest
@@ -304,7 +306,7 @@ static bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
 }
 
 bool IRInstruction::hasExtra() const {
-  return opcodeHasFlags(getOpcode(), HasExtra);
+  return opcodeHasFlags(getOpcode(), HasExtra) && m_extra;
 }
 
 bool IRInstruction::hasDst() const {
@@ -405,6 +407,15 @@ bool IRInstruction::isTerminal() const {
   return opcodeHasFlags(getOpcode(), Terminal);
 }
 
+bool IRInstruction::isPassthrough() const {
+  return opcodeHasFlags(getOpcode(), Passthrough);
+}
+
+SSATmp* IRInstruction::getPassthroughValue() const {
+  assert(isPassthrough());
+  assert(m_op == IncRef || m_op == GuardType || m_op == Mov);
+  return getSrc(0);
+}
 bool IRInstruction::mayReenterHelper() const {
   if (isCmpOp(getOpcode())) {
     return cmpOpTypesMayReenter(getOpcode(),

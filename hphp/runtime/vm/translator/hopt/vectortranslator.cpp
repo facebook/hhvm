@@ -545,8 +545,8 @@ void HhbcTranslator::VectorTranslator::emitProp() {
 
 template <KeyType keyType, bool unboxKey, MInstrAttr attrs, bool isObj>
 static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
-                                   TypedValue* key,
-                                   MInstrState* mis) {
+                                   TypedValue keyVal, MInstrState* mis) {
+  TypedValue* key = keyPtr<keyType>(keyVal);
   key = unbox<keyType, unboxKey>(key);
   return Prop<WDU(attrs), isObj, keyType>(
     mis->tvScratch, mis->tvRef, ctx, base, key);
@@ -598,7 +598,7 @@ static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
 #define PROP(nm, ...)                                                   \
 static TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,     \
                       MInstrState* mis) {                               \
-  return propImpl<__VA_ARGS__>(ctx, base, &key, mis);                   \
+  return propImpl<__VA_ARGS__>(ctx, base, key, mis);                    \
 }
 HELPER_TABLE(PROP)
 #undef PROP
@@ -611,7 +611,7 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
   SSATmp* key = getInput(m_iInd);
   BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), mia, m_base->isA(Type::Obj));
   m_ht.spillStack();
-  m_base = m_tb.gen(PropX, m_tb.genDefConst((TCA)opFunc), CTX(),
+  m_base = m_tb.gen(PropX, cns((TCA)opFunc), CTX(),
                     objOrPtr(m_base), noLitInt(key), genMisPtr());
 }
 #undef HELPER_TABLE
@@ -707,26 +707,31 @@ void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
     return;
   }
 
-  {
-    // XXX Check for uninit here and don't punt once we have control
-    // flow (#2020251)
-    PUNT(emitRatchetRefs);
+  m_base = m_tb.cond(m_ht.getCurFunc(),
+    [&] (Block* taken) {
+      m_tb.gen(CheckInitMem, taken, m_misBase, cns(HHIR_MISOFF(tvRef)));
+    },
+    [&] { // Next: tvRef isn't Uninit. Ratchet the refs
+      // Clean up tvRef2 before overwriting it.
+      if (ratchetInd() > 0) {
+        m_tb.genDecRefMem(m_misBase, HHIR_MISOFF(tvRef2), Type::Gen);
+      }
+      // Copy tvRef to tvRef2. Use mmx at some point
+      SSATmp* tvRef = m_tb.genLdMem(m_misBase, HHIR_MISOFF(tvRef), Type::Gen,
+                                    nullptr);
+      m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef2), tvRef, true);
 
-    // Clean up tvRef2 before overwriting it.
-    if (ratchetInd() > 0) {
-      m_tb.genDecRefMem(m_misBase, HHIR_MISOFF(tvRef2), Type::Gen);
+      // Reset tvRef.
+      m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef), m_tb.genDefUninit(), true);
+
+      // Adjust base pointer.
+      assert(m_base->getType().isPtr());
+      return m_tb.genLdAddr(m_misBase, HHIR_MISOFF(tvRef2));
+    },
+    [&] { // Taken: tvRef is Uninit. Do nothing.
+      return m_base;
     }
-    // Copy tvRef to tvRef2. Use mmx at some point
-    SSATmp* tvRef = m_tb.genLdMem(m_misBase, HHIR_MISOFF(tvRef), Type::Gen, nullptr);
-    m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef2), tvRef, true);
-
-    // Reset tvRef.
-    m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef), m_tb.genDefUninit(), true);
-
-    // Adjust base pointer.
-    assert(m_base->getType().isPtr());
-    m_base = m_tb.genLdAddr(m_misBase, HHIR_MISOFF(tvRef2));
-  }
+  );
 }
 
 void HhbcTranslator::VectorTranslator::emitFinalMOp() {

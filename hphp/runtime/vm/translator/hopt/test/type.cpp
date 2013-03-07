@@ -152,4 +152,11 @@ TEST(Type, CanRunDtor) {
   }
 }
 
+TEST(Type, UnionOf) {
+  EXPECT_EQ(Type::PtrToGen, Type::unionOf(Type::PtrToCell, Type::PtrToGen));
+  EXPECT_EQ(Type::UncountedInit, Type::unionOf(Type::Int, Type::Dbl));
+  EXPECT_EQ(Type::Str, Type::unionOf(Type::StaticStr, Type::Str));
+  EXPECT_EQ(Type::Gen, Type::unionOf(Type::Cell, Type::BoxedInt));
+}
+
 } } }

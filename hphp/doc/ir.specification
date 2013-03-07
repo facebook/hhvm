@@ -344,6 +344,10 @@ CheckInit S0:Gen -> L
 
   If S0's type is Uninit, branch to label L.
 
+CheckInitMem S0:Gen* S1:ConstInt -> L
+
+  If the value at S0 + S1 has type Uninit, branch to L.
+
 GuardRefs
 
 

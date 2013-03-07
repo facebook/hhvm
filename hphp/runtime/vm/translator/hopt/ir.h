@@ -201,6 +201,7 @@ O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
+O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
@@ -976,16 +977,15 @@ public:
    */
   static Type unionOf(Type t1, Type t2) {
     assert(t1 != None && t2 != None);
-    assert(t1.subtypeOf(Gen) == t2.subtypeOf(Gen));
-    assert(t1.subtypeOf(Gen) || t1 == t2); // can only union TypeValue types
     if (t1 == t2) return t1;
     if (t1.subtypeOf(t2)) return t2;
     if (t2.subtypeOf(t1)) return t1;
     static const Type union_types[] = {
-#   define IRT(name, ...) name, Boxed##name,
-    IRT_PHP_UNIONS(IRT)
+#   define IRT(name, ...) name,
+      IRT_PHP_UNIONS(IRT_BOXES)
 #   undef IRT
       Gen,
+      PtrToGen,
     };
     Type t12 = t1 | t2;
     for (auto u : union_types) {

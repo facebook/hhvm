@@ -4275,28 +4275,28 @@ void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {
   Block* label = inst->getTaken();
-  if (!label) {
-    return;
-  }
+  assert(label);
   SSATmp* src = inst->getSrc(0);
 
-  // TODO: This optimization is redundant wrt simplifier. Remove it once we can
-  // simplifier as a separate pass.
-  Type type = src->getType();
-  if (type.isInit()) {
-    // Unnecessary CheckInit
-    return;
-  }
+  if (src->getType().isInit()) return;
 
   auto typeReg = src->getReg(1);
-  assert(label);
   assert(typeReg != InvalidReg);
 
-  if (HPHP::KindOfUninit == 0) {
-    m_as.test_reg32_reg32(typeReg, typeReg);
-  } else {
-    m_as.cmp_imm32_reg32(HPHP::KindOfUninit, typeReg);
-  }
+  static_assert(KindOfUninit == 0, "cgCheckInit assumes KindOfUninit == 0");
+  m_as.testl (r32(typeReg), r32(typeReg));
+  emitFwdJcc(CC_Z, label);
+}
+
+void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
+  Block* label = inst->getTaken();
+  assert(label);
+  SSATmp* base = inst->getSrc(0);
+  int64_t offset = inst->getSrc(1)->getValInt();
+  Type t = base->getType().deref();
+  if (t.isInit()) return;
+
+  m_as.cmpl (KindOfUninit, base->getReg()[offset + TVOFF(m_type)]);
   emitFwdJcc(CC_Z, label);
 }
 

@@ -1213,7 +1213,7 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId) {
     spillStack(); // do this on main trace so we update stack tracking once.
     Type cnsType = Type::Cell;
     SSATmp* c1 = m_tb->gen(LdClsCns, cnsType, cnsNameTmp, clsNameTmp);
-    SSATmp* result = m_tb->ifelse(getCurFunc(),
+    SSATmp* result = m_tb->cond(getCurFunc(),
       [&] (Block* taken) { // branch
         m_tb->genCheckInit(c1, taken);
       },
@@ -2190,7 +2190,7 @@ void HhbcTranslator::emitIsset(const StringData* name,
                                EmitLdAddrFun emitLdAddr) {
   if (!(this->*checkSupported)(name, Type::Bool, 0)) return;
   SSATmp* ptr = nullptr;
-  SSATmp* result = m_tb->ifelse(getCurFunc(),
+  SSATmp* result = m_tb->cond(getCurFunc(),
                         [&] (Block* taken) { // branch
                           ptr = (this->*emitLdAddr)(name, taken);
                         },
@@ -2216,7 +2216,7 @@ void HhbcTranslator::emitEmpty(const StringData* name,
                                EmitLdAddrFun emitLdAddr) {
   if (!(this->*checkSupported)(name, Type::Bool, 0)) return;
   SSATmp* ptr = nullptr;
-  SSATmp* result = m_tb->ifelse(getCurFunc(),
+  SSATmp* result = m_tb->cond(getCurFunc(),
                         [&] (Block* taken) {
                           ptr = (this->*emitLdAddr)(name, taken);
                         },

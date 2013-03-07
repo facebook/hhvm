@@ -99,7 +99,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
   case IsNType:       return simplifyIsType(inst);
-  case CheckInit:     return simplifyCheckInit(inst);
+  case CheckInit:
+  case CheckInitMem:  return simplifyCheckInit(inst);
 
   case JmpZero:
   case JmpNZero:
@@ -1172,12 +1173,12 @@ SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
-  if (inst->getTaken() != nullptr) {
-    Type type = inst->getSrc(0)->getType();
-    if (type.isInit()) {
-      // Unnecessary CheckInit!
-      inst->convertToNop();
-    }
+  Type srcType = inst->getSrc(0)->getType();
+  srcType = inst->getOpcode() == CheckInitMem ? srcType.deref() : srcType;
+  assert(srcType.notPtr());
+  assert(inst->getTaken());
+  if (srcType.isInit()) {
+    inst->convertToNop();
   }
   return nullptr;
 }

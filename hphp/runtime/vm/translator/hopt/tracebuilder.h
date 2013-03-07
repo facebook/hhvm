@@ -296,13 +296,13 @@ public:
   }
 
   /*
-   * ifelse() generates if-then-else blocks within a trace.  The caller
+   * cond() generates if-then-else blocks within a trace.  The caller
    * supplies lambdas to create the branch, next-body, and taken-body.
-   * The next and taken lambdas must return one SSATmp* value; ifelse() returns
+   * The next and taken lambdas must return one SSATmp* value; cond() returns
    * the SSATmp for the merged value.
    */
   template <class Branch, class Next, class Taken>
-  SSATmp* ifelse(const Func* func, Branch branch, Next next, Taken taken) {
+  SSATmp* cond(const Func* func, Branch branch, Next next, Taken taken) {
     Block* taken_block = m_irFactory.defBlock(func);
     Block* done_block = m_irFactory.defBlock(func, 1);
     bool oldEnableCse = m_enableCse;

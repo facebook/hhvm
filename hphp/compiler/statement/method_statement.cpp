@@ -377,6 +377,10 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
       cont->setHidden();
       getOrigGeneratorFunc()->getFunctionScope()->addUse(
         funcScope, BlockScope::UseKindClosure);
+      getOrigGeneratorFunc()->getFunctionScope()->setContainsBareThis(
+        funcScope->containsBareThis(), funcScope->containsRefThis());
+      getOrigGeneratorFunc()->getFunctionScope()->setContainsThis(
+        funcScope->containsThis());
     }
     if (funcScope->isSepExtension() ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {

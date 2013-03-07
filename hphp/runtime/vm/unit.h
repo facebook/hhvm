@@ -557,11 +557,6 @@ public:
   MutableFuncRange hoistableFuncs() const {
     return m_mergeInfo->hoistableFuncs();
   }
-  Func* getLambda() const {
-    assert(m_mergeInfo->m_firstHoistableFunc == 1);
-    assert(m_mergeInfo->m_firstHoistablePreClass == 2);
-    return m_mergeInfo->funcBegin()[1];
-  }
   void renameFunc(const StringData* oldName, const StringData* newName);
   void mergeFuncs() const;
   static void loadFunc(const Func *func);

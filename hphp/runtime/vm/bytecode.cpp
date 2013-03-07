@@ -2849,6 +2849,7 @@ Unit* VMExecutionContext::compileEvalString(StringData* code) {
 }
 
 CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
+  VMRegAnchor _;
   // It doesn't matter if there's a user function named __lambda_func; we only
   // use this name during parsing, and then change it to an impossible name
   // with a NUL byte before we merge it into the request's func map.  This also
@@ -2881,7 +2882,10 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
   TypedValue retval;
   invokeFunc(&retval, unit->getMain(), Array::Create());
 
-  return unit->getLambda()->nameRef();
+  // __lambda_func will be the only hoistable function.
+  // Any functions or closures defined in it will not be hoistable.
+  Func* lambda = unit->firstHoistable();
+  return lambda->nameRef();
 }
 
 void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,

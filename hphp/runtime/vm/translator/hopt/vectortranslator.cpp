@@ -132,6 +132,7 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
 }
 
 void HhbcTranslator::VectorTranslator::emit() {
+  PUNT_WITH_TX64(VectorTranslator);
   // Assign stack slots to our stack inputs
   numberStackInputs();
   // Emit the base and every intermediate op

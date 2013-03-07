@@ -74,6 +74,11 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
   throw FailedIRGen(__FILE__, __LINE__, instr);     \
 } while(0)
 #define PUNT(instr) SPUNT(#instr)
+#define PUNT_WITH_TX64(instr) do {              \
+    if (!RuntimeOption::EvalHHIRDisableTx64) {  \
+      PUNT(inst);                               \
+    }                                           \
+  } while (false)
 
 //////////////////////////////////////////////////////////////////////
 

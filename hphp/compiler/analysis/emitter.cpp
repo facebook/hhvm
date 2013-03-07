@@ -650,7 +650,11 @@ static void checkJmpTargetEvalStack(const SymbolicStack& source,
   if (source.size() != dest.size()) {
     Logger::Warning("Emitter detected a point in the bytecode where the "
                     "depth of the stack is not the same for all possible "
-                    "control flow paths");
+                    "control flow paths. source size: %d. dest size: %d",
+                    source.size(),
+                    dest.size());
+    Logger::Warning("src stack : %s", source.pretty().c_str());
+    Logger::Warning("dest stack: %s", dest.pretty().c_str());
     assert(false);
     return;
   }

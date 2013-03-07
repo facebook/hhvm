@@ -4257,7 +4257,9 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
     }
     shuffleArgs(m_as, args);
   }
-  emitFwdJmp(inst->getTaken());
+  if (!m_state.noTerminalJmp_) {
+    emitFwdJmp(inst->getTaken());
+  }
 }
 
 void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
@@ -4715,6 +4717,19 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
     TCA asmStart = as->code.frontier;
     TCA astubsStart = astubs.code.frontier;
     patchJumps(*as, state, block);
+
+    // If the block ends with a Jmp_ to the next block we're translating into
+    // the same assembler, it doesn't need to actually emit a jmp.
+    state.noTerminalJmp_ = false;
+    IRInstruction* last = block->back();
+    if (last->getOpcode() == Jmp_) {
+      for (auto next = it; next != end; ++next) {
+        if (chooseAs(*next) == as) {
+          state.noTerminalJmp_ = last->getTaken() == *next;
+          break;
+        }
+      }
+    }
     CodeGenerator cg(trace, *as, astubs, tx64, state);
     cg.cgBlock(block, bcMap);
     if (Block* next = block->getNext()) {

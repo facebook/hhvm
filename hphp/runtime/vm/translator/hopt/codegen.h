@@ -76,6 +76,10 @@ struct CodegenState {
   const MarkerData* lastMarker;
   bool firstMarkerSeen;
 
+  // True if this block's terminal Jmp_ has a desination equal to the
+  // next block in the same assmbler.
+  bool noTerminalJmp_;
+
   AsmInfo* asmInfo;
 };
 
